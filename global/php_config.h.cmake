@@ -1808,6 +1808,9 @@
 /* Size of ssize_t */
 #cmakedefine SIZEOF_SSIZE_T @SIZEOF_SSIZE_T@
 
+/* Size of void pointer */
+#cmakedefine SIZEOF_VOID_P @SIZEOF_VOID_P@
+
 /* */
 #cmakedefine SOLARIS
 

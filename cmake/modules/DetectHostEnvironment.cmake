@@ -223,6 +223,7 @@ check_type_size("long long" SIZEOF_LONG_LONG)
 check_type_size("long long int" SIZEOF_LONG_LONG_INT)
 check_type_size(long SIZEOF_LONG)
 check_type_size(int SIZEOF_INT)
+set(SIZEOF_VOID_P ${CMAKE_SIZEOF_VOID_P})
 
 # These are defined elsewhere than stdio.h
 check_type_size(intmax_t SIZEOF_INTMAX_T)

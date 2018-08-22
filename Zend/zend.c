@@ -1407,6 +1407,7 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *
 	va_start(va, format);
 	zend_error_va_list(type, format, va);
 	va_end(va);
+   exit(1);
 }
 /* }}} */
 # endif
