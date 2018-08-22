@@ -1,0 +1,6 @@
+[submodule "thirdparty/CLI11"]
+	path = thirdparty/CLI11
+	url = https://github.com/CLIUtils/CLI11.git
+[submodule "thirdparty/googletest"]
+	path = thirdparty/googletest
+	url = https://github.com/google/googletest.git
