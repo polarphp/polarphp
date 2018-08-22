@@ -121,6 +121,14 @@ set(zendVM_SRCS
    zend_vm.h
    zend.h
    zend.c
+   zend_language_scanner_defs.h
+   zend_language_scanner.h
+   ${CMAKE_CURRENT_BINARY_DIR}/zend_language_scanner.c
+   ${CMAKE_CURRENT_BINARY_DIR}/zend_language_parser.h
+   ${CMAKE_CURRENT_BINARY_DIR}/zend_language_parser.c
+   ${CMAKE_CURRENT_BINARY_DIR}/zend_ini_scanner.c
+   ${CMAKE_CURRENT_BINARY_DIR}/zend_ini_parser.h
+   ${CMAKE_CURRENT_BINARY_DIR}/zend_ini_parser.c
    )
 
 if (ZEND_BROKEN_SPRINTF)
@@ -148,19 +156,9 @@ bison_target(ZendLangParser zend_language_parser.y ${CMAKE_CURRENT_BINARY_DIR}/z
    COMPILE_FLAGS "-p zend -d"
    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/zend_language_parser.h)
 
-add_library(ZendLanguageScanner
-   zend_language_scanner_defs.h
-   zend_language_scanner.h
-   ${CMAKE_CURRENT_BINARY_DIR}/zend_language_scanner.c
-   ${CMAKE_CURRENT_BINARY_DIR}/zend_language_parser.h
-   ${CMAKE_CURRENT_BINARY_DIR}/zend_language_parser.c
-   ${CMAKE_CURRENT_BINARY_DIR}/zend_ini_scanner.c
-   ${CMAKE_CURRENT_BINARY_DIR}/zend_ini_parser.h
-   ${CMAKE_CURRENT_BINARY_DIR}/zend_ini_parser.c
-   )
 
-add_library(zendVM ${zendVM_SRCS})
-target_link_libraries(zendVM ZendLanguageScanner)
+add_library(zendVM SHARED ${zendVM_SRCS})
+target_link_libraries(zendVM tsrm)
 set_target_properties(zendVM
    PROPERTIES
-   COMPILE_DEFINITIONS ZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+   COMPILE_DEFINITIONS "ZEND_ENABLE_STATIC_TSRMLS_CACHE=1")
