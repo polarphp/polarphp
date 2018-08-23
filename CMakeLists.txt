@@ -11,12 +11,17 @@
 
 cmake_minimum_required(VERSION 3.10.2)
 
+if(POLICY CMP0068)
+   cmake_policy(SET CMP0068 NEW)
+   set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
+endif()
+
 project(polarphp C CXX)
 
-# Don't allow in-source builds
-if(PROJECT_BINARY_DIR STREQUAL PROJECT_SOURCE_DIR)
-   message(FATAL_ERROR "Please set your build dir outside your source dir and try again.")
-endif(PROJECT_BINARY_DIR STREQUAL PROJECT_SOURCE_DIR)
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "No build type selected, default to Debug")
+  set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (default Debug)" FORCE)
+endif()
 
 # setup some important path
 
@@ -32,14 +37,14 @@ set(POLAR_TEST_DIR "${POLAR_SOURCE_DIR}/tests")
 set(POLAR_CMAKE_TEST_CODE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake/codes)
 set(POLAR_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_NAME})
 string(TOLOWER ${POLAR_SYSTEM_NAME} POLAR_SYSTEM_NORMAL_NAME)
-set(POLAR_BUILD_TOOL_DIR ${POLAR_SOURCE_DIR}/build)
 set(POLAR_CONFIGURE_TEMP_DIR ${POLAR_BINARY_DIR}/conf_temp)
 
-set(POLAR_RUNTIME_OUTPUT_INTDIR "${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/bin")
-set(POLAR_LIBRARY_OUTPUT_INTDIR "${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/lib")
-
-# add third party library install dir into find paths
-set(CMAKE_FIND_ROOT_PATH "${POLAR_DEPS_INSTALL_DIR} ${CMAKE_FIND_ROOT_PATH}")
+# Each of them corresponds to polar-config's.
+set(POLAR_TOOLS_BINARY_DIR ${LLVM_RUNTIME_OUTPUT_INTDIR}) # --bindir
+set(POLAR_LIBRARY_DIR      ${LLVM_LIBRARY_OUTPUT_INTDIR}) # --libdir
+set(POLAR_MAIN_SRC_DIR     ${CMAKE_CURRENT_SOURCE_DIR}  ) # --src-root
+set(POLAR_MAIN_INCLUDE_DIR ${LLVM_MAIN_SRC_DIR}/include ) # --includedir
+set(POLAR_BINARY_DIR       ${CMAKE_CURRENT_BINARY_DIR}  ) # --prefix
 
 # Add path for custom CMake modules.
 list(APPEND CMAKE_MODULE_PATH
@@ -53,6 +58,73 @@ set_property(GLOBAL PROPERTY JOB_POOLS local_jobs=${localhost_logical_cores})
 # Put linking in that category
 set_property(GLOBAL PROPERTY JOB_POOL_LINK local_jobs)
 
+# This should only apply if you are both on an Apple host, and targeting Apple.
+if(CMAKE_HOST_APPLE AND APPLE)
+   # if CMAKE_LIBTOOL is not set, try and find it with xcrun or find_program
+   if(NOT CMAKE_LIBTOOL)
+      if(NOT CMAKE_XCRUN)
+         find_program(CMAKE_XCRUN NAMES xcrun)
+      endif()
+      if(CMAKE_XCRUN)
+         execute_process(COMMAND ${CMAKE_XCRUN} -find libtool
+            OUTPUT_VARIABLE CMAKE_LIBTOOL
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+      endif()
+
+      if(NOT CMAKE_LIBTOOL OR NOT EXISTS CMAKE_LIBTOOL)
+         find_program(CMAKE_LIBTOOL NAMES libtool)
+      endif()
+   endif()
+
+   get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+   if(CMAKE_LIBTOOL)
+      set(CMAKE_LIBTOOL ${CMAKE_LIBTOOL} CACHE PATH "libtool executable")
+      message(STATUS "Found libtool - ${CMAKE_LIBTOOL}")
+
+      execute_process(COMMAND ${CMAKE_LIBTOOL} -V
+         OUTPUT_VARIABLE LIBTOOL_V_OUTPUT
+         OUTPUT_STRIP_TRAILING_WHITESPACE)
+      if("${LIBTOOL_V_OUTPUT}" MATCHES ".*cctools-([0-9.]+).*")
+         string(REGEX REPLACE ".*cctools-([0-9.]+).*" "\\1" LIBTOOL_VERSION
+            ${LIBTOOL_V_OUTPUT})
+         if(NOT LIBTOOL_VERSION VERSION_LESS "862")
+            set(LIBTOOL_NO_WARNING_FLAG "-no_warning_for_no_symbols")
+         endif()
+      endif()
+
+      foreach(lang ${languages})
+         set(CMAKE_${lang}_CREATE_STATIC_LIBRARY
+            "\"${CMAKE_LIBTOOL}\" -static ${LIBTOOL_NO_WARNING_FLAG} -o <TARGET> \
+            <LINK_FLAGS> <OBJECTS> ")
+      endforeach()
+   endif()
+
+   # If DYLD_LIBRARY_PATH is set we need to set it on archiver commands
+   if(DYLD_LIBRARY_PATH)
+      set(dyld_envar "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}")
+      foreach(lang ${languages})
+         foreach(cmd ${CMAKE_${lang}_CREATE_STATIC_LIBRARY})
+            list(APPEND CMAKE_${lang}_CREATE_STATIC_LIBRARY_NEW
+               "${dyld_envar} ${cmd}")
+         endforeach()
+         set(CMAKE_${lang}_CREATE_STATIC_LIBRARY
+            ${CMAKE_${lang}_CREATE_STATIC_LIBRARY_NEW})
+      endforeach()
+   endif()
+endif()
+
+if (NOT CMAKE_BUILD_TYPE)
+   set(CMAKE_BUILD_TYPE "Debug")
+endif()
+
+string(TOLOWER ${CMAKE_BUILD_TYPE} POLAR_BUILD_TYPE)
+string(TOUPPER ${CMAKE_BUILD_TYPE} POLAR_BUILD_CONFIG)
+
+if (CMAKE_BUILD_TYPE AND
+    NOT POLAR_BUILD_TYPE MATCHES "^(debug|release|relwithdebinfo|minsizerel)$")
+  message(FATAL_ERROR "Invalid value for CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+endif()
+
 # First include general CMake utilities.
 include(PolarUtils)
 include(SummaryOutput)
@@ -65,6 +137,9 @@ include(GetHostTriple)
 include(TargetUtils)
 
 set(CMAKE_C_STANDARD 11)
+
+option(BUILD_SHARED_LIBS
+  "Build all libraries as shared libraries instead of static" ON)
 
 # setup options
 option(POLAR_ENABLE_RE2C_CGOTO
@@ -132,7 +207,82 @@ option(POLAR_DISABLE_GCC_GLOABL_REGS
    "whether to enable GCC global register variables"
    OFF)
 
+option(POLAR_USE_FOLDERS "Enable solution folders in Visual Studio. Disable for Express versions." ON)
+if (POLAR_USE_FOLDERS)
+   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+endif()
+
 set(POLAR_WITH_TSRM_PTH_CONFIG "pth-config" CACHE FILEPATH "Use GNU Pth")
+
+set(POLAR_LIBDIR_SUFFIX "" CACHE STRING "Define suffix of library directory name (32/64)" )
+
+set(POLAR_TOOLS_INSTALL_DIR "bin" CACHE STRING "Path for binary subdirectory (defaults to 'bin')")
+mark_as_advanced(LLVM_TOOLS_INSTALL_DIR)
+
+option(POLAR_ENABLE_FFI "Use libffi to call external functions from the interpreter" OFF)
+set(FFI_LIBRARY_DIR "" CACHE PATH "Additional directory, where CMake should search for libffi.so")
+set(FFI_INCLUDE_DIR "" CACHE PATH "Additional directory, where CMake should search for ffi.h or ffi/ffi.h")
+
+option(POLAR_ENABLE_TERMINFO "Use terminfo database if available." ON)
+
+option(POLAR_ENABLE_PIC "Build Position-Independent Code" ON)
+option(POLAR_ENABLE_WARNINGS "Enable compiler warnings." ON)
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  option(POLAR_ENABLE_MODULE_DEBUGGING "Compile with -gmodules." ON)
+  option(POLAR_ENABLE_LOCAL_SUBMODULE_VISIBILITY "Compile with -fmodules-local-submodule-visibility." OFF)
+else()
+  option(POLAR_ENABLE_MODULE_DEBUGGING "Compile with -gmodules." OFF)
+  option(POLAR_ENABLE_LOCAL_SUBMODULE_VISIBILITY "Compile with -fmodules-local-submodule-visibility." ON)
+endif()
+
+option(POLAR_ENABLE_LLD "Use lld as C and C++ linker." OFF)
+option(POLAR_ENABLE_PEDANTIC "Compile with pedantic enabled." ON)
+option(POLAR_ENABLE_WERROR "Fail and stop if a warning is triggered." OFF)
+
+if(NOT POLAR_BUILD_TYPE STREQUAL "debug" )
+  option(POLAR_ENABLE_ASSERTIONS "Enable assertions" OFF)
+else()
+  option(POLAR_ENABLE_ASSERTIONS "Enable assertions" ON)
+endif()
+
+option(POLAR_EXTERNALIZE_DEBUGINFO
+  "Generate dSYM files and strip executables and libraries (Darwin Only)" OFF)
+
+option(POLAR_BUILD_TESTS
+  "Build LLVM unit tests. If OFF, just generate build targets." OFF)
+option(POLAR_INCLUDE_TESTS "Generate build targets for the LLVM unit tests." ON)
+
+if (POLAR_BUILD_STATIC)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+endif()
+
+# add third party library install dir into find paths
+set(CMAKE_FIND_ROOT_PATH "${POLAR_DEPS_INSTALL_DIR} ${CMAKE_FIND_ROOT_PATH}")
+
+# They are used as destination of target generators.
+set(POLAR_RUNTIME_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/bin)
+set(POLAR_LIBRARY_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/lib${POLAR_LIBDIR_SUFFIX})
+
+if(WIN32 OR CYGWIN)
+  # DLL platform -- put DLLs into bin.
+  set(POLAR_SHLIB_OUTPUT_INTDIR ${POLAR_RUNTIME_OUTPUT_INTDIR})
+else()
+  set(POLAR_SHLIB_OUTPUT_INTDIR ${POLAR_LIBRARY_OUTPUT_INTDIR})
+endif()
+
+# Sanity check our source directory to make sure that we are not trying to
+# generate an in-source build (unless on MSVC_IDE, where it is ok), and to make
+# sure that we don't have any stray generated files lying around in the tree
+# (which would end up getting picked up by header search, instead of the correct
+# versions).
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR AND NOT MSVC_IDE)
+   message(FATAL_ERROR "In-source builds are not allowed.
+      Please create a directory and run cmake from there, passing the path
+      to this source directory as the last argument.
+      This process created the file `CMakeCache.txt' and the directory `CMakeFiles'.
+      Please delete them.")
+endif()
 
 set(POLAR_COMPILE_DEFINITIONS "")
 set(POLAR_COMPILE_FLAGS "")
@@ -151,16 +301,6 @@ set(PACKAGE_NAME ${POLAR_PACKAGE_NAME})
 set(PACKAGE_STRING ${POLAR_PACKAGE_STRING})
 set(PACKAGE_BUGREPORT ${POLAR_BUG_REPORT_URL})
 set(PACKAGE_VERSION ${POLAR_PACKAGE_VERSION})
-
-# setup php build sh tool path
-set(POLAR_SHTOOL ${POLAR_BUILD_TOOL_DIR}/shtool)
-
-if (NOT CMAKE_BUILD_TYPE)
-   set(CMAKE_BUILD_TYPE "Debug")
-endif()
-
-string(TOLOWER ${CMAKE_BUILD_TYPE} POLAR_BUILD_TYPE)
-string(TOUPPER ${CMAKE_BUILD_TYPE} POLAR_BUILD_CONFIG)
 
 # add /usr/local/bin to PATH Env var
 set(ENV{PATH} "/usr/local/bin:$ENV{PATH}")

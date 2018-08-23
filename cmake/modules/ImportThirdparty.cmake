@@ -28,5 +28,7 @@ ExternalProject_Add(thirdparty_cli11
    -DCMAKE_INSTALL_PREFIX:PATH=${POLAR_DEPS_INSTALL_DIR}
    )
 
+find_package(CLI11 1.6.1 REQUIRED
+   CONFIG PATHS ${POLAR_DEPS_INSTALL_DIR}/lib/cmake/CLI11)
 
-
+message("found CLI11 version: ${CLI11_VERSION}")

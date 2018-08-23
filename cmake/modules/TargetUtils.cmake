@@ -706,7 +706,6 @@ function(polar_add_tool_symlink link_name target)
       set(target_name ${link_name}-link)
    endif()
 
-
    if(ARG_ALWAYS_GENERATE)
       set_property(DIRECTORY APPEND PROPERTY
          ADDITIONAL_MAKE_CLEAN_FILES ${dest_binary})
