@@ -28,7 +28,26 @@ ExternalProject_Add(thirdparty_cli11
    -DCMAKE_INSTALL_PREFIX:PATH=${POLAR_DEPS_INSTALL_DIR}
    )
 
-find_package(CLI11 1.6.1 REQUIRED
-   CONFIG PATHS ${POLAR_DEPS_INSTALL_DIR}/lib/cmake/CLI11)
+add_library(CLI11::CLI11 INTERFACE IMPORTED)
 
-message("found CLI11 version: ${CLI11_VERSION}")
+set_target_properties(CLI11::CLI11 PROPERTIES
+  INTERFACE_INCLUDE_DIRECTORIES "${POLAR_DEPS_INSTALL_DIR}/include"
+)
+
+if(POLAR_INCLUDE_TESTS)
+   ExternalProject_Add(thirdparty_gtest
+      PREFIX thirdparty
+      SOURCE_DIR "${POLAR_THIRDPARTY_DIR}/googletest"
+      INSTALL_DIR "${POLAR_DEPS_INSTALL_DIR}"
+      CMAKE_CACHE_ARGS
+      -DCMAKE_MACOSX_RPATH:BOOL=ON
+      -DBUILD_GTEST:BOOL=ON
+      -DCMAKE_BUILD_TYPE:BOOL=${CMAKE_BUILD_TYPE}
+      -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
+      -DBUILD_STATIC_LIBS:BOOL=${BUILD_STATIC_LIBS}
+      -DCMAKE_INSTALL_PREFIX:PATH=${POLAR_DEPS_INSTALL_DIR})
+
+# setup googletest targets
+find_package(googletest CONFIG
+   PATHS ${POLAR_CMAKE_MODULES_DIR}/googletest)
+endif()

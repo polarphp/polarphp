@@ -29,7 +29,6 @@ set(POLAR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(POLAR_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 set(POLAR_THIRDPARTY_DIR "${POLAR_SOURCE_DIR}/thirdparty")
 set(POLAR_DEPS_INSTALL_DIR "${POLAR_BINARY_DIR}/depslibs")
-set(POLAR_DEPS_CMAKE_FIND_PATH "${POLAR_DEPS_INSTALL_DIR}/lib/cmake")
 set(POLAR_CMAKE_MODULES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 set(POLAR_MAIN_INCLUDE_DIR "${POLAR_SOURCE_DIR}/include")
 set(POLAR_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include")
@@ -250,8 +249,8 @@ option(POLAR_EXTERNALIZE_DEBUGINFO
   "Generate dSYM files and strip executables and libraries (Darwin Only)" OFF)
 
 option(POLAR_BUILD_TESTS
-  "Build LLVM unit tests. If OFF, just generate build targets." OFF)
-option(POLAR_INCLUDE_TESTS "Generate build targets for the LLVM unit tests." ON)
+  "Build polarphp unit tests. If OFF, just generate build targets." OFF)
+option(POLAR_INCLUDE_TESTS "Generate build targets for the polarphp unit tests." ON)
 
 if (POLAR_BUILD_STATIC)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
@@ -337,11 +336,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include(ImportThirdparty)
 
-add_subdirectory(Zend)
-add_subdirectory(polarmain)
-add_subdirectory(TSRM)
-add_subdirectory(polarapi)
-
 # configure header
 configure_file(${POLAR_SOURCE_DIR}/global/php_config.h.cmake ${POLAR_BINARY_DIR}/global/php_config.h
    @ONLY)
@@ -350,4 +344,15 @@ configure_file(${POLAR_SOURCE_DIR}/TSRM/tsrm_config.h.cmake ${POLAR_BINARY_DIR}/
 configure_file(${POLAR_SOURCE_DIR}/Zend/zend_config.h.cmake ${POLAR_BINARY_DIR}/Zend/zend_config.h
    @ONLY)
 
+add_subdirectory(Zend)
+add_subdirectory(polarmain)
+add_subdirectory(TSRM)
+add_subdirectory(polarapi)
+
+if (POLAR_INCLUDE_TESTS)
+   add_subdirectory(unittests)
+   add_subdirectory(tests)
+endif()
+
 polar_compile_env_summary_output()
+

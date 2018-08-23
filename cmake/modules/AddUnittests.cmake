@@ -14,7 +14,7 @@ set_target_properties(PolarPHPUnitTests PROPERTIES FOLDER "Tests")
 
 # Generic support for adding a unittest.
 function(polar_add_unittest test_suite test_name)
-   if(NOT POLAR_INCLUDE_TESTS)
+   if(NOT POLAR_BUILD_TESTS)
       set(EXCLUDE_FROM_ALL ON)
    endif()
    # Our current version of gtest does not properly recognize C++11 support
