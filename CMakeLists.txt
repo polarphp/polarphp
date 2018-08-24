@@ -345,11 +345,13 @@ configure_file(${POLAR_SOURCE_DIR}/Zend/zend_config.h.cmake ${POLAR_BINARY_DIR}/
    @ONLY)
 
 add_subdirectory(Zend)
-add_subdirectory(polarmain)
+add_subdirectory(main)
 add_subdirectory(TSRM)
-add_subdirectory(polarapi)
+add_subdirectory(include)
+add_subdirectory(tools)
 
 if (POLAR_INCLUDE_TESTS)
+   add_subdirectory(devtools)
    add_subdirectory(unittests)
    add_subdirectory(tests)
 endif()
