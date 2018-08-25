@@ -25,25 +25,19 @@ endif()
 
 # setup some important path
 
-set(POLAR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
-set(POLAR_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+set(POLAR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}") # --src-root
+set(POLAR_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}") # --prefix
 set(POLAR_THIRDPARTY_DIR "${POLAR_SOURCE_DIR}/thirdparty")
 set(POLAR_DEPS_INSTALL_DIR "${POLAR_BINARY_DIR}/depslibs")
 set(POLAR_CMAKE_MODULES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 set(POLAR_MAIN_INCLUDE_DIR "${POLAR_SOURCE_DIR}/include")
-set(POLAR_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include")
+set(POLAR_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include") # --includedir
+set(POLAR_MAIN_INCLUDE_DIR "${POLAR_SOURCE_DIR}/include")
 set(POLAR_TEST_DIR "${POLAR_SOURCE_DIR}/tests")
 set(POLAR_CMAKE_TEST_CODE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake/codes)
 set(POLAR_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_NAME})
 string(TOLOWER ${POLAR_SYSTEM_NAME} POLAR_SYSTEM_NORMAL_NAME)
 set(POLAR_CONFIGURE_TEMP_DIR ${POLAR_BINARY_DIR}/conf_temp)
-
-# Each of them corresponds to polar-config's.
-set(POLAR_TOOLS_BINARY_DIR ${LLVM_RUNTIME_OUTPUT_INTDIR}) # --bindir
-set(POLAR_LIBRARY_DIR      ${LLVM_LIBRARY_OUTPUT_INTDIR}) # --libdir
-set(POLAR_MAIN_SRC_DIR     ${CMAKE_CURRENT_SOURCE_DIR}  ) # --src-root
-set(POLAR_MAIN_INCLUDE_DIR ${LLVM_MAIN_SRC_DIR}/include ) # --includedir
-set(POLAR_BINARY_DIR       ${CMAKE_CURRENT_BINARY_DIR}  ) # --prefix
 
 # Add path for custom CMake modules.
 list(APPEND CMAKE_MODULE_PATH
@@ -252,16 +246,18 @@ option(POLAR_BUILD_TESTS
   "Build polarphp unit tests. If OFF, just generate build targets." OFF)
 option(POLAR_INCLUDE_TESTS "Generate build targets for the polarphp unit tests." ON)
 
+# They are used as destination of target generators.
+set(POLAR_RUNTIME_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/bin)
+set(POLAR_LIBRARY_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/lib${POLAR_LIBDIR_SUFFIX})
+set(POLAR_TOOLS_BINARY_DIR ${POLAR_RUNTIME_OUTPUT_INTDIR}) # --bindir
+set(POLAR_LIBRARY_DIR      ${POLAR_LIBRARY_OUTPUT_INTDIR}) # --libdir
+
 if (POLAR_BUILD_STATIC)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 endif()
 
 # add third party library install dir into find paths
 set(CMAKE_FIND_ROOT_PATH "${POLAR_DEPS_INSTALL_DIR} ${CMAKE_FIND_ROOT_PATH}")
-
-# They are used as destination of target generators.
-set(POLAR_RUNTIME_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/bin)
-set(POLAR_LIBRARY_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/lib${POLAR_LIBDIR_SUFFIX})
 
 if(WIN32 OR CYGWIN)
   # DLL platform -- put DLLs into bin.
@@ -325,28 +321,32 @@ string(TIMESTAMP PHP_BUILD_DATE "%Y-%m-%d %H:%M")
 set(PHP_OS ${POLAR_SYSTEM_NAME})
 
 include_directories(${POLAR_SOURCE_DIR}
-   ${POLAR_SOURCE_DIR}/global
-   ${POLAR_SOURCE_DIR}/Zend
-   ${POLAR_SOURCE_DIR}/TSRM
-   ${POLAR_BINARY_DIR}
-   ${POLAR_BINARY_DIR}/global
-   ${POLAR_BINARY_DIR}/Zend
-   ${POLAR_BINARY_DIR}/TSRM)
+   ${POLAR_MAIN_INCLUDE_DIR}
+   ${POLAR_MAIN_INCLUDE_DIR}/php
+   ${POLAR_MAIN_INCLUDE_DIR}/php/global
+   ${POLAR_MAIN_INCLUDE_DIR}/php/zend
+   ${POLAR_MAIN_INCLUDE_DIR}/php/tsrm
+   ${POLAR_SOURCE_DIR}/src/Zend
+   ${POLAR_SOURCE_DIR}/src/TSRM
+   ${POLAR_INCLUDE_DIR}
+   ${POLAR_INCLUDE_DIR}/php
+   ${POLAR_INCLUDE_DIR}/php/global
+   ${POLAR_INCLUDE_DIR}/php/vm/zend
+   ${POLAR_INCLUDE_DIR}/php/vm/tsrm)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include(ImportThirdparty)
 
 # configure header
-configure_file(${POLAR_SOURCE_DIR}/global/php_config.h.cmake ${POLAR_BINARY_DIR}/global/php_config.h
+configure_file(${POLAR_MAIN_INCLUDE_DIR}/php/global/php_config.h.cmake ${POLAR_INCLUDE_DIR}/php/global/php_config.h
    @ONLY)
-configure_file(${POLAR_SOURCE_DIR}/TSRM/tsrm_config.h.cmake ${POLAR_BINARY_DIR}/TSRM/tsrm_config.h
+configure_file(${POLAR_MAIN_INCLUDE_DIR}/php/vm/TSRM/tsrm_config.h.cmake ${POLAR_INCLUDE_DIR}/php/vm/TSRM/tsrm_config.h
    @ONLY)
-configure_file(${POLAR_SOURCE_DIR}/Zend/zend_config.h.cmake ${POLAR_BINARY_DIR}/Zend/zend_config.h
+configure_file(${POLAR_MAIN_INCLUDE_DIR}/php/vm/Zend/zend_config.h.cmake ${POLAR_INCLUDE_DIR}/php/vm/Zend/zend_config.h
    @ONLY)
 
-add_subdirectory(Zend)
 add_subdirectory(main)
-add_subdirectory(TSRM)
+add_subdirectory(src)
 add_subdirectory(include)
 add_subdirectory(tools)
 

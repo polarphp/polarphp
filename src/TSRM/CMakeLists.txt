@@ -19,12 +19,10 @@ polar_check_headers(
    limits.h)
 
 set(TSRM_SRCS
-   TSRM.h
    TSRM.c
-   readdir.h
-   tsrm_config_common.h
    tsrm_strtok_r.h
-   tsrm_strtok_r.c)
+   tsrm_strtok_r.c
+   $<TARGET_OBJECTS:TsrmHeaders>)
 
 set_source_files_properties(TSRM.c
    tsrm_strtok_r.c
