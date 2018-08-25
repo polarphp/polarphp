@@ -62,7 +62,6 @@ conftest.c
 debug.log
 diff
 generated_lists
-include
 install-sh
 internal_functions.c
 lcov_data
@@ -75,7 +74,6 @@ missing
 mkinstalldirs
 modules
 !cmake/modules
-php
 php7.spec
 php_lcov.info
 php_test_results_*.txt
