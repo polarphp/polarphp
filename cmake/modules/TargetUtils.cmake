@@ -125,7 +125,7 @@ endfunction(polar_add_symbol_exports)
 function(polar_add_link_opts)
    # Don't use linker optimizations in debug builds since it slows down the
    # linker in a context where the optimizations are not important.
-   if (NOT uppercase_CMAKE_BUILD_TYPE STREQUAL "DEBUG")
+   if (NOT POLAR_BUILD_TYPE STREQUAL "debug")
 
       # Pass -O3 to the linker. This enabled different optimizations on different
       # linkers.

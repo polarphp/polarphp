@@ -88,7 +88,7 @@ bison_target(ZendLangParser zend_language_parser.y ${CMAKE_CURRENT_BINARY_DIR}/z
    COMPILE_FLAGS "-p zend -d"
    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/zend_language_parser.h)
 
-add_library(zendVM SHARED ${zendVM_SRCS} $<TARGET_OBJECTS:ZendHeaders>)
+polar_add_library(zendVM SHARED ${zendVM_SRCS} $<TARGET_OBJECTS:ZendHeaders>)
 target_link_libraries(zendVM tsrm)
 set_target_properties(zendVM
    PROPERTIES

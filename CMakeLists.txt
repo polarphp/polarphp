@@ -129,6 +129,7 @@ include(AddDefinitions)
 include(AddUnittests)
 include(GetHostTriple)
 include(TargetUtils)
+include(ProcessSources)
 
 set(CMAKE_C_STANDARD 11)
 
