@@ -8,3 +8,6 @@
 // See http://polarphp.org/CONTRIBUTORS.txt for the list of polarPHP project authors
 //
 // Created by polarboy on 2018/08/25.
+
+#include "../../../../src/Zend/zend_globals_macros.h"
+
