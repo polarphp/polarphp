@@ -8,3 +8,15 @@
 # See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
 # Created by polarboy on 2018/08/27.
+
+polar_collect_files(
+   TYPE_BOTH
+   DIR lib
+   OUTPUT_VAR POLAR_DEVTOOLS_LIT_LIB_SOURCES)
+
+polar_add_library(litkernel SHARED BUILDTREE_ONLY
+   ${POLAR_DEVTOOLS_LIT_LIB_SOURCES})
+
+polar_add_executable(lit main.cpp)
+
+target_link_libraries(lit PRIVATE litkernel CLI11::CLI11)
