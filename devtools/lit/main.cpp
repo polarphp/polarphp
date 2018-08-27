@@ -48,7 +48,52 @@ int main(int argc, char *argv[])
    /// Test Execution
    std::vector<std::string> paths;
    bool useValgrind;
-   litApp.add_option("--path", paths, "Additional paths to add to testing environment")->group("Test Execution");
+   bool valgrindLeakCheck;
+   std::vector<std::string> valgrindArgs;
+   bool timeTests;
+   bool noExecute;
+   std::string xunitOutputFile;
+   int maxIndividualTestTime;
+   int maxFailures;
+   litApp.add_option("--path", paths, "Additional paths to add to testing environment", false)->group("Test Execution");
+   litApp.add_option("--vg", useValgrind, "Run tests under valgrind", false)->group("Test Execution");
+   litApp.add_option("--vg-leak", valgrindLeakCheck, "Check for memory leaks under valgrind", false)->group("Test Execution");
+   litApp.add_option("--vg-arg", valgrindArgs, "Check for memory leaks under valgrind")->group("Test Execution");
+   litApp.add_option("--time-tests", timeTests, "Track elapsed wall time for each test", false)->group("Test Execution");
+   litApp.add_option("--no-execute", noExecute, "Don't execute any tests (assume PASS)", false)->group("Test Execution");
+   litApp.add_option("--xunit-xml-output", xunitOutputFile, "Write XUnit-compatible XML test reports to the  specified file")->group("Test Execution");
+   litApp.add_option("--timeout", maxIndividualTestTime, "Maximum time to spend running a single test (in seconds)."
+                                                         "0 means no time limit. [Default: 0]", 0)->group("Test Execution");
+   litApp.add_option("--max-failures", maxFailures, "Stop execution after the given number of failures.", 0)->group("Test Execution");
+
+   /// Test Selection
+   int maxTests;
+   float maxTime;
+   bool shuffle;
+   bool incremental;
+   std::string filter;
+   int numShards;
+   int runShard;
+   litApp.add_option("--max-tests", maxTests, "Maximum number of tests to run")->group("Test Selection");
+   litApp.add_option("--max-time", maxTime, "Maximum time to spend testing (in seconds)")->group("Test Selection");
+   litApp.add_option("--shuffle", shuffle, "Run tests in random order", false)->group("Test Selection");
+   litApp.add_option("-i, --incremental", incremental, "Run modified and failing tests first (updates "
+                                                       "mtimes)", false)->group("Test Selection");
+   litApp.add_option("--filter", filter, "Only run tests with paths matching the given "
+                                         "regular expression")->envname("LIT_FILTER")->group("Test Selection");
+   litApp.add_option("--num-shards", numShards, "Split testsuite into M pieces and only run one")->envname("LIT_NUM_SHARDS")->group("Test Selection");
+   litApp.add_option("--run-shard", runShard, "Run shard #N of the testsuite")->envname("LIT_RUN_SHARD")->group("Test Selection");
+
+   /// debug
+   bool debug;
+   bool showSuites;
+   bool showTests;
+   bool singleProcess;
+   litApp.add_option("--debug", debug, "Enable debugging (for 'lit' development)", false)->group("Debug and Experimental Options");
+   litApp.add_option("--show-suites", showSuites, "Show discovered test suites", false)->group("Debug and Experimental Options");
+   litApp.add_option("--show-tests", showTests, "Show all discovered tests", false)->group("Debug and Experimental Options");
+   litApp.add_option("--single-process", singleProcess, "Don't run tests in parallel.  Intended for debugging "
+                                                "single test failures", false)->group("Debug and Experimental Options");
 
    CLI11_PARSE(litApp, argc, argv);
    return 0;
