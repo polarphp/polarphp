@@ -17,6 +17,27 @@
 ## 开发计划
 
 ## 社区
+目前我们暂时只针对中国的用户，所以采用了微信和`QQ`群的交流方式，下面是二维码，有兴趣的同学可以扫码加入：
+
+> PS：扫码请注明来意，比如：学习`polarphp`或者`PHP`爱好者
+
+</div>
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://www.oschina.net/" target="_blank">
+         <img width = "200" src="https://raw.githubusercontent.com/qcoreteam/zendapi/master/assets/images/qq.png"/>
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://gitee.com/?from=polarphp.org" target="_blank">
+          <img width = "200" src="https://raw.githubusercontent.com/qcoreteam/zendapi/master/assets/images/wechat.png"/></div>
+        </a>
+      </td>
+    </tr><tr></tr>
+  </tbody>
+</table>
 
 ## 授权协议
 
