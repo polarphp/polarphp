@@ -17,6 +17,10 @@ polar_collect_files(
 polar_add_library(litkernel SHARED BUILDTREE_ONLY
    ${POLAR_DEVTOOLS_LIT_LIB_SOURCES})
 
+configure_file(Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/Config.h @ONLY)
+
+list(APPEND POLAR_DEVTOOLS_LIT_LIB_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+
 polar_add_executable(lit main.cpp)
 
 target_link_libraries(lit PRIVATE litkernel CLI11::CLI11)
