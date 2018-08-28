@@ -131,7 +131,8 @@ include(GetHostTriple)
 include(TargetUtils)
 include(ProcessSources)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED 11)
+set(CMAKE_CXX_STANDARD_REQUIRED 17)
 
 option(BUILD_SHARED_LIBS
   "Build all libraries as shared libraries instead of static" ON)
