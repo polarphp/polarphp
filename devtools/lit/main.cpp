@@ -10,6 +10,7 @@
 // Created by polarboy on 2018/08/27.
 
 #include "CLI/CLI.hpp"
+#include "Config.h"
 
 int main(int argc, char *argv[])
 {

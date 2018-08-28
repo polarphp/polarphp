@@ -30,9 +30,10 @@ function(polar_get_host_triple var)
       execute_process(COMMAND sh ${config_guess}
          RESULT_VARIABLE TT_RV
          OUTPUT_VARIABLE TT_OUT
+         ERROR_VARIABLE ERROR_MGS
          OUTPUT_STRIP_TRAILING_WHITESPACE)
       if(NOT TT_RV EQUAL 0)
-         message(FATAL_ERROR "Failed to execute ${config_guess}")
+         message(FATAL_ERROR "Failed to execute ${config_guess}, error: ${ERROR_MGS}")
       endif(NOT TT_RV EQUAL 0)
       set(value ${TT_OUT})
    endif(MSVC)

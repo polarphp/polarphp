@@ -30,3 +30,10 @@ polar_collect_files(
 
 add_library(ZendHeaders OBJECT ${POLAR_ZRNDVM_ZEND_HEADERS})
 target_link_libraries(ZendHeaders GlobalHeaders)
+
+configure_file(php/global/php_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/php/global/php_config.h
+   @ONLY)
+configure_file(php/vm/TSRM/tsrm_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/php/vm/TSRM/tsrm_config.h
+   @ONLY)
+configure_file(php/vm/Zend/zend_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/php/vm/Zend/zend_config.h
+   @ONLY)

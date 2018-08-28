@@ -19,8 +19,8 @@ endif()
 project(polarphp C CXX)
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "No build type selected, default to Debug")
-  set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (default Debug)" FORCE)
+   message(STATUS "No build type selected, default to Debug")
+   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (default Debug)" FORCE)
 endif()
 
 # setup some important path
@@ -115,14 +115,14 @@ string(TOLOWER ${CMAKE_BUILD_TYPE} POLAR_BUILD_TYPE)
 string(TOUPPER ${CMAKE_BUILD_TYPE} POLAR_BUILD_CONFIG)
 
 if (CMAKE_BUILD_TYPE AND
-    NOT POLAR_BUILD_TYPE MATCHES "^(debug|release|relwithdebinfo|minsizerel)$")
-  message(FATAL_ERROR "Invalid value for CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+      NOT POLAR_BUILD_TYPE MATCHES "^(debug|release|relwithdebinfo|minsizerel)$")
+   message(FATAL_ERROR "Invalid value for CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 endif()
 
 # First include general CMake utilities.
 include(PolarUtils)
 include(SummaryOutput)
-include(ProcessVersion)
+include(ProcessPhpVersion)
 include(ThreadUtils)
 include(CheckUtils)
 include(AddDefinitions)
@@ -130,12 +130,13 @@ include(AddUnittests)
 include(GetHostTriple)
 include(TargetUtils)
 include(ProcessSources)
+include(GetHostTriple)
 
 set(CMAKE_C_STANDARD_REQUIRED 11)
 set(CMAKE_CXX_STANDARD_REQUIRED 17)
 
 option(BUILD_SHARED_LIBS
-  "Build all libraries as shared libraries instead of static" ON)
+   "Build all libraries as shared libraries instead of static" ON)
 
 # setup options
 option(POLAR_ENABLE_RE2C_CGOTO
@@ -225,11 +226,11 @@ option(POLAR_ENABLE_PIC "Build Position-Independent Code" ON)
 option(POLAR_ENABLE_WARNINGS "Enable compiler warnings." ON)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  option(POLAR_ENABLE_MODULE_DEBUGGING "Compile with -gmodules." ON)
-  option(POLAR_ENABLE_LOCAL_SUBMODULE_VISIBILITY "Compile with -fmodules-local-submodule-visibility." OFF)
+   option(POLAR_ENABLE_MODULE_DEBUGGING "Compile with -gmodules." ON)
+   option(POLAR_ENABLE_LOCAL_SUBMODULE_VISIBILITY "Compile with -fmodules-local-submodule-visibility." OFF)
 else()
-  option(POLAR_ENABLE_MODULE_DEBUGGING "Compile with -gmodules." OFF)
-  option(POLAR_ENABLE_LOCAL_SUBMODULE_VISIBILITY "Compile with -fmodules-local-submodule-visibility." ON)
+   option(POLAR_ENABLE_MODULE_DEBUGGING "Compile with -gmodules." OFF)
+   option(POLAR_ENABLE_LOCAL_SUBMODULE_VISIBILITY "Compile with -fmodules-local-submodule-visibility." ON)
 endif()
 
 option(POLAR_ENABLE_LLD "Use lld as C and C++ linker." OFF)
@@ -237,16 +238,16 @@ option(POLAR_ENABLE_PEDANTIC "Compile with pedantic enabled." ON)
 option(POLAR_ENABLE_WERROR "Fail and stop if a warning is triggered." OFF)
 
 if(NOT POLAR_BUILD_TYPE STREQUAL "debug" )
-  option(POLAR_ENABLE_ASSERTIONS "Enable assertions" OFF)
+   option(POLAR_ENABLE_ASSERTIONS "Enable assertions" OFF)
 else()
-  option(POLAR_ENABLE_ASSERTIONS "Enable assertions" ON)
+   option(POLAR_ENABLE_ASSERTIONS "Enable assertions" ON)
 endif()
 
 option(POLAR_EXTERNALIZE_DEBUGINFO
-  "Generate dSYM files and strip executables and libraries (Darwin Only)" OFF)
+   "Generate dSYM files and strip executables and libraries (Darwin Only)" OFF)
 
 option(POLAR_BUILD_TESTS
-  "Build polarphp unit tests. If OFF, just generate build targets." OFF)
+   "Build polarphp unit tests. If OFF, just generate build targets." OFF)
 option(POLAR_INCLUDE_TESTS "Generate build targets for the polarphp unit tests." ON)
 
 # They are used as destination of target generators.
@@ -256,17 +257,17 @@ set(POLAR_TOOLS_BINARY_DIR ${POLAR_RUNTIME_OUTPUT_INTDIR}) # --bindir
 set(POLAR_LIBRARY_DIR      ${POLAR_LIBRARY_OUTPUT_INTDIR}) # --libdir
 
 if (POLAR_BUILD_STATIC)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 endif()
 
 # add third party library install dir into find paths
 set(CMAKE_FIND_ROOT_PATH "${POLAR_DEPS_INSTALL_DIR} ${CMAKE_FIND_ROOT_PATH}")
 
 if(WIN32 OR CYGWIN)
-  # DLL platform -- put DLLs into bin.
-  set(POLAR_SHLIB_OUTPUT_INTDIR ${POLAR_RUNTIME_OUTPUT_INTDIR})
+   # DLL platform -- put DLLs into bin.
+   set(POLAR_SHLIB_OUTPUT_INTDIR ${POLAR_RUNTIME_OUTPUT_INTDIR})
 else()
-  set(POLAR_SHLIB_OUTPUT_INTDIR ${POLAR_LIBRARY_OUTPUT_INTDIR})
+   set(POLAR_SHLIB_OUTPUT_INTDIR ${POLAR_LIBRARY_OUTPUT_INTDIR})
 endif()
 
 # Sanity check our source directory to make sure that we are not trying to
@@ -320,7 +321,17 @@ include(CheckZend)
 message("${POLAR_COMPILE_DEFINITIONS}")
 #add_compile_definitions(${POLAR_COMPILE_DEFINITIONS})
 
-string(TIMESTAMP PHP_BUILD_DATE "%Y-%m-%d %H:%M")
+string(TIMESTAMP _buildDate "%Y-%m-%d %H:%M")
+
+if (POLAR_BUILD_TYPE STREQUAL "debug")
+   if (NOT PHP_BUILD_DATE)
+      set(PHP_BUILD_DATE "${_buildDate}" CACHE STRING "polarphp build date")
+      mark_as_advanced(PHP_BUILD_DATE)
+   endif()
+else()
+   set(PHP_BUILD_DATE ${_buildDate})
+endif()
+
 set(PHP_OS ${POLAR_SYSTEM_NAME})
 set(POLAR_OS ${POLAR_SYSTEM_NAME})
 
@@ -340,14 +351,6 @@ include_directories(${POLAR_SOURCE_DIR}
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include(ImportThirdparty)
-
-# configure header
-configure_file(${POLAR_MAIN_INCLUDE_DIR}/php/global/php_config.h.cmake ${POLAR_INCLUDE_DIR}/php/global/php_config.h
-   @ONLY)
-configure_file(${POLAR_MAIN_INCLUDE_DIR}/php/vm/TSRM/tsrm_config.h.cmake ${POLAR_INCLUDE_DIR}/php/vm/TSRM/tsrm_config.h
-   @ONLY)
-configure_file(${POLAR_MAIN_INCLUDE_DIR}/php/vm/Zend/zend_config.h.cmake ${POLAR_INCLUDE_DIR}/php/vm/Zend/zend_config.h
-   @ONLY)
 
 add_subdirectory(main)
 add_subdirectory(src)
