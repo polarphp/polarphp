@@ -28,3 +28,5 @@ list(APPEND POLAR_DEVTOOLS_LIT_LIB_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 polar_add_executable(lit main.cpp)
 
 target_link_libraries(lit PRIVATE litkernel CLI11::CLI11)
+
+add_subdirectory(unittests)

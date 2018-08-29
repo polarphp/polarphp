@@ -50,4 +50,8 @@ if(POLAR_INCLUDE_TESTS)
 # setup googletest targets
 find_package(googletest CONFIG
    PATHS ${POLAR_CMAKE_MODULES_DIR}/googletest)
+if (googletest_FOUND)
+   set(POLAR_FOUND_NATIVE_GTEST ON)
+endif()
+
 endif()

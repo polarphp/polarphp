@@ -11,6 +11,7 @@
 
 #include "../ProcessUtils.h"
 #include "../Utils.h"
+#include <cstdio>
 #include <list>
 #include <cstdlib>
 
@@ -47,6 +48,11 @@ std::optional<std::string> look_path(const std::string &file) noexcept
       }
    }
    return std::nullopt;
+}
+
+std::tuple<std::list<int32_t>, bool> call_pgrep_command(int32_t pid) noexcept
+{
+
 }
 
 } // lit

@@ -24,12 +24,12 @@ function(polar_add_unittest test_suite test_name)
    add_definitions(-DGTEST_LANG_CXX11=1)
    add_definitions(-DGTEST_HAS_TR1_TUPLE=0)
    if(POLAR_FOUND_NATIVE_GTEST)
-       include_directories(${GTEST_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS})
-       set(POLAR_TEMP_GTEST_LIBS ${GTEST_BOTH_LIBRARIES} ${GMOCK_BOTH_LIBRARIES})
+      set(POLAR_TEMP_GTEST_LIBS googletest::gtest googletest::gtest_main
+         googletest::gmock googletest::gmock_main)
    else()
-       include_directories(${POLAR_THIRDPARTY_DIR}/unittest/googletest/include)
-       include_directories(${POLAR_THIRDPARTY_DIR}/unittest/googlemock/include)
-       set(POLAR_TEMP_GTEST_LIBS gtest_main gtest gmock gmock_main)
+      include_directories(${POLAR_THIRDPARTY_DIR}/unittest/googletest/include)
+      include_directories(${POLAR_THIRDPARTY_DIR}/unittest/googlemock/include)
+      set(POLAR_TEMP_GTEST_LIBS gtest_main gtest gmock gmock_main)
    endif()
    if (NOT POLAR_ENABLE_THREADS)
       list(APPEND POLAR_COMPILE_DEFINITIONS GTEST_HAS_PTHREAD=0)
@@ -52,7 +52,7 @@ function(polar_add_unittest test_suite test_name)
    # libpthreads overrides some standard library symbols, so main
    # executable must be linked with it in order to provide consistent
    # API for all shared libaries loaded by this executable.
-   target_link_libraries(${test_name} PRIVATE ${POLAR_TEMP_GTEST_LIBS} PolarUtils ${POLAR_PTHREAD_LIB})
+   target_link_libraries(${test_name} PRIVATE ${POLAR_TEMP_GTEST_LIBS} ${POLAR_PTHREAD_LIB})
 
    add_dependencies(${test_suite} ${test_name})
    get_target_property(test_suite_folder ${test_suite} FOLDER)
