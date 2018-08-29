@@ -39,8 +39,6 @@ inline void mkdir_p()
 
 }
 
-void show_version();
-
 void listdir_files();
 void which(const std::string &command, std::optional<std::string> paths = std::nullopt);
 bool check_tools_path(const std::string &dir, const std::list<std::string> &paths);

@@ -21,11 +21,6 @@
 namespace polar {
 namespace lit {
 
-inline bool find_executable(const std::string &file) noexcept
-{
-   return find_executable(fs::path(file));
-}
-
 bool find_executable(const fs::path &filepath) noexcept;
 std::optional<std::string> look_path(const std::string &file) noexcept;
 

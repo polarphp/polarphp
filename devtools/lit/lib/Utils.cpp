@@ -32,10 +32,5 @@ std::list<std::string> split_string(const std::string &str, char separator)
    return parts;
 }
 
-void show_version()
-{
-
-}
-
 } // lit
 } // polar

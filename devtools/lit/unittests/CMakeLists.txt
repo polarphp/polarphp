@@ -21,3 +21,15 @@ polar_add_files(DEVL_TOOLS_LIT_TEST_SRCS
 polar_add_unittest(DevToolLitUnittests LitlibTest ${DEVL_TOOLS_LIT_TEST_SRCS})
 
 target_link_libraries(LitlibTest PRIVATE litkernel)
+
+set(LIT_LIB_TEST_DEFS
+   "UNITTEST_TEMP_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/temp\"")
+list(APPEND LIT_LIB_TEST_DEFS "POLAR_BUILD_BINARY_DIR=\"${POLAR_RUNTIME_OUTPUT_INTDIR}\"")
+list(APPEND LIT_LIB_TEST_DEFS "UNITTEST_CURRENT_BUILD_DIR=\"${CMAKE_CURRENT_BINARY_DIR}\"")
+
+set_target_properties(
+   LitlibTest
+   PROPERTIES
+   COMPILE_DEFINITIONS "${LIT_LIB_TEST_DEFS}"
+   )
+
