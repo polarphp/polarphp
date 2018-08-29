@@ -11,6 +11,7 @@
 
 #include "CLI/CLI.hpp"
 #include "Config.h"
+#include "lib/Utils.h"
 
 int main(int argc, char *argv[])
 {

@@ -39,6 +39,8 @@ inline void mkdir_p()
 
 }
 
+void show_version();
+
 void listdir_files();
 void which(const std::string &command, std::optional<std::string> paths = std::nullopt);
 bool check_tools_path(const std::string &dir, const std::list<std::string> &paths);
@@ -74,7 +76,7 @@ execute_command(const std::string &command, std::optional<std::string> cwd = std
 void use_platform_sdk_on_darwin();
 std::optional<std::string> find_platform_sdk_version_on_macos();
 
-std::list<std::string> split_string(const std::string &str, const char separator);
+std::list<std::string> split_string(const std::string &str, char separator);
 
 } // lit
 } // polar

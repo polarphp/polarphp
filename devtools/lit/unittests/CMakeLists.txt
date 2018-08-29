@@ -19,3 +19,5 @@ polar_add_files(DEVL_TOOLS_LIT_TEST_SRCS
    )
 
 polar_add_unittest(DevToolLitUnittests LitlibTest ${DEVL_TOOLS_LIT_TEST_SRCS})
+
+target_link_libraries(LitlibTest PRIVATE litkernel)

@@ -45,7 +45,9 @@ endif()
 
 # Mark symbols hidden by default if the compiler (for example, gcc >= 4)
 # supports it. This can help reduce the binary size and startup time.
-polar_add_flag_if_supported(-fvisibility=hidden VISIBILITY_HIDDEN)
+# use it just for compile zendVM
+check_c_compiler_flag("-Werror -fvisibility=hidden" "C_SUPPORTS_VISIBILITY_HIDDEN")
+polar_append_flag_if("C_SUPPORTS_VISIBILITY_HIDDEN" "-fvisibility=hidden" CMAKE_C_FLAGS)
 
 if (CMAKE_HOST_SOLARIS)
    set(_POSIX_PTHREAD_SEMANTICS ON)

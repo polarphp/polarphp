@@ -14,7 +14,7 @@
 namespace polar {
 namespace lit {
 
-std::list<std::string> split_string(const std::string &str, const char separator)
+std::list<std::string> split_string(const std::string &str, char separator)
 {
    std::string buff;
    std::list<std::string> parts;
@@ -30,6 +30,11 @@ std::list<std::string> split_string(const std::string &str, const char separator
       parts.push_back(buff);
    }
    return parts;
+}
+
+void show_version()
+{
+
 }
 
 } // lit

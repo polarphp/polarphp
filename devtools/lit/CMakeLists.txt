@@ -20,10 +20,15 @@ endif()
 
 polar_add_library(litkernel SHARED BUILDTREE_ONLY
    ${POLAR_DEVTOOLS_LIT_LIB_SOURCES})
+set_target_properties(
+   litkernel
+   PROPERTIES
+   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib;${CMAKE_CURRENT_BINARY_DIR}"
+   )
 
 configure_file(Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/Config.h @ONLY)
 
-list(APPEND POLAR_DEVTOOLS_LIT_LIB_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+list(APPEND POLAR_DEVTOOLS_LIT_LIB_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/Config.h)
 
 polar_add_executable(lit main.cpp)
 
