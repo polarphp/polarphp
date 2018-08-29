@@ -318,9 +318,6 @@ include(DetectHostEnvironment)
 include(CheckTsrm)
 include(CheckZend)
 
-message("${POLAR_COMPILE_DEFINITIONS}")
-#add_compile_definitions(${POLAR_COMPILE_DEFINITIONS})
-
 string(TIMESTAMP _buildDate "%Y-%m-%d %H:%M")
 
 if (POLAR_BUILD_TYPE STREQUAL "debug")
@@ -334,6 +331,9 @@ endif()
 
 set(PHP_OS ${POLAR_SYSTEM_NAME})
 set(POLAR_OS ${POLAR_SYSTEM_NAME})
+
+# setup default build rpath
+set(CMAKE_BUILD_RPATH "${POLAR_DEPS_INSTALL_DIR}/lib")
 
 include_directories(${POLAR_SOURCE_DIR}
    ${POLAR_MAIN_INCLUDE_DIR}

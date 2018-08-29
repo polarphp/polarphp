@@ -4,7 +4,6 @@
 
 # Commands may need to know the format version.
 set(CMAKE_IMPORT_FILE_VERSION 1)
-
 # Import target "googletest_gtest_main" for configuration "Debug"
 set_property(TARGET googletest_gtest_main APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
 set_target_properties(googletest_gtest_main PROPERTIES

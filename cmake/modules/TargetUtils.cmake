@@ -771,7 +771,7 @@ function(polar_setup_rpath name)
    if(POLAR_INSTALL_PREFIX AND NOT (POLAR_INSTALL_PREFIX STREQUAL CMAKE_INSTALL_PREFIX))
       set(extra_libdir ${POLAR_LIBRARY_DIR})
    elseif(POLAR_BUILD_LIBRARY_DIR)
-      set(extra_libdir ${POLAR_LIBRARY_DIR})
+      set(extra_libdir ${POLAR_BUILD_LIBRARY_DIR})
    endif()
 
    if (APPLE)
@@ -792,7 +792,7 @@ function(polar_setup_rpath name)
    endif()
 
    set_target_properties(${name} PROPERTIES
-      BUILD_WITH_INSTALL_RPATH On
+      BUILD_WITH_INSTALL_RPATH ON
       INSTALL_RPATH "${_install_rpath}"
       ${_install_name_dir})
 
