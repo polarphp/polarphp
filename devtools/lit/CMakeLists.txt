@@ -14,6 +14,10 @@ polar_collect_files(
    DIR lib
    OUTPUT_VAR POLAR_DEVTOOLS_LIT_LIB_SOURCES)
 
+if (UNIX)
+   list(APPEND POLAR_DEVTOOLS_LIT_LIB_SOURCES lib/_platform/ProcessUtilsUnix.cpp)
+endif()
+
 polar_add_library(litkernel SHARED BUILDTREE_ONLY
    ${POLAR_DEVTOOLS_LIT_LIB_SOURCES})
 

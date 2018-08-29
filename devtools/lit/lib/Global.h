@@ -7,30 +7,20 @@
 // See http://polarphp.org/LICENSE.txt for license information
 // See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2018/08/28.
+// Created by polarboy on 2018/08/29.
 
-#include "Utils.h"
+#ifndef POLAR_DEVLTOOLS_LIT_GLOBAL_H
+#define POLAR_DEVLTOOLS_LIT_GLOBAL_H
+
+#include "Config.h"
+#include <experimental/filesystem>
 
 namespace polar {
 namespace lit {
 
-std::list<std::string> split_string(const std::string &str, const char separator)
-{
-   std::string buff;
-   std::list<std::string> parts;
-   for(auto n : str) {
-      if(n != separator) {
-         buff+=n;
-      } else if(n == separator && buff != "") {
-         parts.push_back(buff);
-         buff = "";
-      }
-   }
-   if(buff != "") {
-      parts.push_back(buff);
-   }
-   return parts;
-}
+namespace fs = std::experimental::filesystem;
 
 } // lit
 } // polar
+
+#endif // POLAR_DEVLTOOLS_LIT_GLOBAL_H
