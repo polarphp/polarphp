@@ -10,6 +10,7 @@
 // Created by polarboy on 2018/08/29.
 
 #include "ProcessUtils.h"
+#include "Utils.h"
 #include <stack>
 
 namespace polar {
@@ -43,6 +44,19 @@ std::tuple<std::list<pid_t>, bool> retrieve_children_pids(pid_t pid, bool recurs
       return selfPids;
    }
    return std::make_tuple(resultList, true);
+}
+
+std::tuple<std::list<pid_t>, bool> call_pgrep_command(pid_t pid) noexcept
+{
+   RunCmdResponse result = run_program("pgrep", "-P " + std::to_string(pid));
+   if (!std::get<0>(result)) {
+      return std::make_tuple(std::list<pid_t>{}, false);
+   }
+   std::list<int32_t> pids;
+   for (const std::string &item : split_string(std::get<1>(result), '\n')) {
+      pids.push_back(std::stoi(item));
+   }
+   return std::make_tuple(pids, true);
 }
 
 } // lit
