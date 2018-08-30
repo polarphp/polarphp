@@ -24,8 +24,8 @@ namespace lit {
 bool find_executable(const fs::path &filepath) noexcept;
 std::optional<std::string> look_path(const std::string &file) noexcept;
 
-std::list<int32_t> retrieve_children_pids(int32_t pid, bool recursive = false);
-std::tuple<std::list<int32_t>, bool> call_pgrep_command(int32_t pid) noexcept;
+std::tuple<std::list<pid_t>, bool> retrieve_children_pids(pid_t pid, bool recursive = false) noexcept;
+std::tuple<std::list<pid_t>, bool> call_pgrep_command(pid_t pid) noexcept;
 
 } // lit
 } // polar

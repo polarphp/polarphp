@@ -9,3 +9,41 @@
 //
 // Created by polarboy on 2018/08/29.
 
+#include "ProcessUtils.h"
+#include <stack>
+
+namespace polar {
+namespace lit {
+
+std::tuple<std::list<pid_t>, bool> retrieve_children_pids(pid_t pid, bool recursive) noexcept
+{
+   if (!recursive) {
+      return call_pgrep_command(pid);
+   }
+   std::list<pid_t> resultList;
+   std::stack<pid_t> workList;
+   std::tuple<std::list<pid_t>, bool> selfPids = call_pgrep_command(pid);
+   if (std::get<1>(selfPids)) {
+      // init pids
+      for (pid_t curpid : std::get<0>(selfPids)) {
+         workList.push(curpid);
+      }
+      while (!workList.empty()) {
+         pid_t topPid = workList.top();
+         resultList.push_back(topPid);
+         workList.pop();
+         std::tuple<std::list<pid_t>, bool> selfPids = call_pgrep_command(topPid);
+         if (std::get<1>(selfPids)) {
+            for (pid_t curpid : std::get<0>(selfPids)) {
+               workList.push(curpid);
+            }
+         }
+      }
+   } else {
+      return selfPids;
+   }
+   return std::make_tuple(resultList, true);
+}
+
+} // lit
+} // polar

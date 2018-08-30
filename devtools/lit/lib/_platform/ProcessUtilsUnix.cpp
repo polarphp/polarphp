@@ -94,7 +94,6 @@ std::tuple<std::list<pid_t>, bool> call_pgrep_command(pid_t pid) noexcept
          return std::make_tuple(std::list<pid_t>{}, false);
       }
    }
-
    int exitCode;
    // @TODO maybe something wrong
    while(-1 != waitpid(cpid, &exitCode, 0) || errno == EAGAIN) {}
@@ -123,7 +122,10 @@ std::tuple<std::list<pid_t>, bool> call_pgrep_command(pid_t pid) noexcept
    }
    std::list<int32_t> pids;
    for (const std::string &item : split_string(output, '\n')) {
-      pids.push_back(std::stoi(item));
+      int target = std::stoi(item);
+      if (target != cpid) {
+         pids.push_back(std::stoi(item));
+      }
    }
    return std::make_tuple(pids, true);
 }

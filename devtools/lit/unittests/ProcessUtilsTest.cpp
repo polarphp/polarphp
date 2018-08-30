@@ -126,4 +126,67 @@ TEST_F(ProcessUtilsTest, testCallPgrepCommand)
    ASSERT_EQ(processes, expectedPids);
 }
 
+TEST_F(ProcessUtilsTest, testRetrieveChildrenPids)
+{
+   // here we need create a channel, let children write it self child pids to it parent process
+   std::set<pid_t> processes;
+   for (int i = 0; i < 3; i++) {
+      // child process
+      int channel[2];
+      if (-1 == pipe(channel)) {
+         FAIL() << "create channel failt";
+      }
+      pid_t pid = fork();
+      if (pid == 0) {
+         // close read fd
+         if (-1 == close(channel[0])) {
+            perror("close channel read fd error");
+            exit(1);
+         }
+         // io redirection
+         if (-1 == close(STDOUT_FILENO)) {
+            perror("close stdout fd of child process error");
+            exit(1);
+         }
+         if (-1 == dup2(channel[1], STDOUT_FILENO)) {
+            perror("dup stdout fd of child process error");
+            exit(1);
+         }
+         pid_t cpid = fork();
+         if (0 == cpid) {
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            exit(0);
+         } else if (cpid == -1) {
+            FAIL() << "fork error";
+         }
+
+         std::cout << cpid << std::endl;
+         std::this_thread::sleep_for(std::chrono::seconds(2));
+      } else if (pid == -1) {
+         FAIL() << "fork error";
+      } else {
+         processes.insert(pid);
+         std::this_thread::sleep_for(std::chrono::milliseconds(300));
+         char readBuffer[64];
+         // just read once
+         ssize_t count = read(channel[0], readBuffer, 64);
+         if (count == -1) {
+            FAIL() << "read child process id error";
+         }
+         processes.insert(std::atoi(readBuffer));
+      }
+   }
+   std::set<pid_t> expectedPids;
+   int status = 0;
+   std::tuple<std::list<pid_t>, bool> result = polar::lit::retrieve_children_pids(getpid(), true);
+   if (std::get<1>(result)) {
+      for (int cpid : std::get<0>(result)) {
+         expectedPids.insert(cpid);
+      }
+   }
+   while (-1 != wait(&status) || errno == EINTR || errno == EAGAIN)
+   {}
+   ASSERT_EQ(processes, expectedPids);
+}
+
 } // anonymous namespace
