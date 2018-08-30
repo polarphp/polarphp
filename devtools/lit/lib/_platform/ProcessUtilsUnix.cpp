@@ -16,8 +16,8 @@
 #include <list>
 #include <cstdlib>
 #include <sys/wait.h>
-
 #include <iostream>
+
 namespace polar {
 namespace lit {
 

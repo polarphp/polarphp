@@ -72,7 +72,7 @@ execute_command(const std::string &command, std::optional<std::string> cwd = std
                 int timeout = 0);
 
 void use_platform_sdk_on_darwin();
-std::optional<std::string> find_platform_sdk_version_on_macos();
+std::optional<std::string> find_platform_sdk_version_on_macos() noexcept;
 
 std::list<std::string> split_string(const std::string &str, char separator);
 void kill_process_and_children(pid_t pid) noexcept;

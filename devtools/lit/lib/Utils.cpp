@@ -10,6 +10,8 @@
 // Created by polarboy on 2018/08/28.
 
 #include "Utils.h"
+#include "ProcessUtils.h"
+#include "Config.h"
 
 namespace polar {
 namespace lit {
@@ -30,6 +32,18 @@ std::list<std::string> split_string(const std::string &str, char separator)
       parts.push_back(buff);
    }
    return parts;
+}
+
+std::optional<std::string> find_platform_sdk_version_on_macos() noexcept
+{
+   if (std::strcmp(POLAR_OS, "Darwin") != 0) {
+      return std::nullopt;
+   }
+   RunCmdResponse result = run_program("xcrun", "--show-sdk-version", "--sdk", "macosx");
+   if (std::get<0>(result)) {
+      return std::get<1>(result);
+   }
+   return std::nullopt;
 }
 
 } // lit
