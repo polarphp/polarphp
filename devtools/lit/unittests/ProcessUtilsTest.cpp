@@ -13,7 +13,11 @@
 #include <cstdlib>
 #include <iostream>
 #include <filesystem>
+#include <thread>
 #include "ProcessUtils.h"
+#include <sys/types.h>
+#include <signal.h>
+#include <set>
 
 namespace {
 
@@ -36,7 +40,7 @@ public:
       sm_oldPath = path;
       path += ":";
       path += POLAR_BUILD_BINARY_DIR;
-      if(setenv("PATH", path.c_str(), true)) {
+      if(-1 == setenv("PATH", path.c_str(), true)) {
          FAIL() << "setup PATH env var fail";
       }
    }
@@ -49,16 +53,18 @@ public:
             FAIL() << errcode.message();
          }
       }
-      if(setenv("PATH", sm_oldPath.c_str(), true)) {
+      if(-1 == setenv("PATH", sm_oldPath.c_str(), true)) {
          FAIL() << "restore PATH env var fail";
       }
    }
 
    virtual void SetUp() override
    {
-      std::error_code errcode;
-      if (!fs::remove_all(sm_tempDir, errcode)) {
-         FAIL() << errcode.message();
+      if (fs::exists(sm_tempDir)) {
+         std::error_code errcode;
+         if (!fs::remove_all(sm_tempDir, errcode)) {
+            FAIL() << errcode.message();
+         }
       }
    }
 
@@ -75,4 +81,49 @@ TEST_F(ProcessUtilsTest, testFindExecutable)
    ASSERT_TRUE(polar::lit::find_executable(std::string(UNITTEST_CURRENT_BUILD_DIR)+"/LitlibTest"));
 }
 
+TEST_F(ProcessUtilsTest, testLookPath)
+{
+   {
+      std::optional<std::string> file = polar::lit::look_path("ls");
+      ASSERT_TRUE(file.has_value());
+   }
+   {
+      std::optional<std::string> file = polar::lit::look_path("not_exist_cmd");
+      ASSERT_FALSE(file.has_value());
+   }
+   {
+      std::optional<std::string> file = polar::lit::look_path("lit");
+      ASSERT_TRUE(file.has_value());
+      ASSERT_EQ(file.value(), std::string(POLAR_BUILD_BINARY_DIR)+"/lit");
+   }
 }
+
+TEST_F(ProcessUtilsTest, testCallPgrepCommand)
+{
+   std::set<pid_t> processes;
+   for (int i = 0; i < 3; i++) {
+      pid_t pid = fork();
+      if (pid == 0) {
+         // child process
+         std::this_thread::sleep_for(std::chrono::milliseconds(800));
+         exit(0);
+      } else if (pid == -1) {
+         FAIL() << "fork error";
+      } else {
+         processes.insert(pid);
+      }
+   }
+   std::set<pid_t> expectedPids;
+   int status = 0;
+   std::tuple<std::list<pid_t>, bool> result = polar::lit::call_pgrep_command(getpid());
+   if (std::get<1>(result)) {
+      for (int cpid : std::get<0>(result)) {
+         expectedPids.insert(cpid);
+      }
+   }
+   while (-1 != wait(&status) || errno == EINTR || errno == EAGAIN)
+   {}
+   ASSERT_EQ(processes, expectedPids);
+}
+
+} // anonymous namespace
