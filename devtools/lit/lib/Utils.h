@@ -23,6 +23,7 @@
 namespace polar {
 namespace lit {
 
+std::string center_string(const std::string &text, int width, char fillChar = ' ');
 std::string normal_path(const std::string &path);
 inline std::string make_word_regex(const std::string &word)
 {
@@ -40,10 +41,10 @@ inline void mkdir_p()
 }
 
 void listdir_files();
-std::optional<std::string> which(const std::string &command, const std::optional<std::string> &paths = std::nullopt);
-bool check_tools_path(const std::string &dir, const std::list<std::string> &tools);
-std::optional<std::string> which_tools(const std::list<std::string> &list, const std::string &paths);
-void print_histogram(const std::list<std::string> &items, const std::string &title = "Items");
+std::optional<std::string> which(const std::string &command, const std::optional<std::string> &paths = std::nullopt) noexcept;
+bool check_tools_path(const std::string &dir, const std::list<std::string> &tools) noexcept;
+std::optional<std::string> which_tools(const std::list<std::string> &tools, const std::string &paths) noexcept;
+void print_histogram(std::list<std::tuple<std::string, int>> items, const std::string &title = "Items");
 
 class ExecuteCommandTimeoutException : public std::runtime_error
 {

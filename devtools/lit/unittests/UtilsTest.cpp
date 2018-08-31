@@ -37,3 +37,13 @@ TEST(UtilsTest, testSplitString)
       ASSERT_EQ(result, expected);
    }
 }
+
+
+TEST(UtilsTest, testCenterString)
+{
+   std::string test = "polarphp";
+   ASSERT_EQ(polar::lit::center_string(test, 0), "polarphp");
+   ASSERT_EQ(polar::lit::center_string(test, 10), " polarphp ");
+   ASSERT_EQ(polar::lit::center_string(test, 10, '-'), "-polarphp-");
+   ASSERT_EQ(polar::lit::center_string(test, 13, '-'), "--polarphp--");
+}
