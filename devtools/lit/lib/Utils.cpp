@@ -73,5 +73,17 @@ std::optional<std::string> which(const std::string &command, const std::optional
    return std::nullopt;
 }
 
+bool check_tools_path(const std::string &dir, const std::list<std::string> &tools)
+{
+   fs::path basePath(dir);
+   for (const std::string &tool : tools) {
+      fs::path toolPath = basePath / tool;
+      if (!fs::exists(toolPath)) {
+         return false;
+      }
+   }
+   return true;
+}
+
 } // lit
 } // polar
