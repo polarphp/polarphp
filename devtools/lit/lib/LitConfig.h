@@ -22,12 +22,29 @@ namespace lit {
 
 class LitConfig
 {
+public:
+   LitConfig(const std::string &progName, const std::list<std::string> &path,
+             bool quiet, bool useValgrind,
+             bool valgrindLeakCheck, const std::list<std::string> &valgrindArgs,
+             bool noExecute, bool debug, bool singleProcess, bool isWindows,
+             const std::map<std::string, std::string> &params, const std::optional<std::string> &configPrefix = std::nullopt,
+             int maxIndividualTestTime = 0, const std::optional<int> &maxFailures = std::nullopt,
+             const std::map<std::string, std::string> &parallelismGroups = std::map<std::string, std::string>{},
+             bool echoAllCommands = false);
+
+   int getMaxIndividualTestTime()
+   {
+      return m_maxIndividualTestTime;
+   }
+
+   LitConfig &setMaxIndividualTestTime(int value);
+
 protected:
    std::string m_progName;
    std::list<std::string> m_path;
    bool m_quiet;
    bool m_useValgrind;
-   bool m_useValgrindLeakCheck;
+   bool m_valgrindLeakCheck;
    std::list<std::string> m_valgrindUserArgs;
    bool m_noExecute;
    bool m_debug;
@@ -44,7 +61,7 @@ protected:
    int m_numWarnings;
    std::list<std::string> m_valgrindArgs;
    int m_maxIndividualTestTime;
-   int m_maxFailures;
+   std::optional<int> m_maxFailures;
    std::map<std::string, std::string> m_parallelismGroups;
    bool m_echoAllCommands;
 };
