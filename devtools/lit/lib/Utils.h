@@ -82,6 +82,9 @@ std::list<std::string> split_string(const std::string &str, char separator);
 void kill_process_and_children(pid_t pid) noexcept;
 bool string_startswith(const std::string &str, const std::string &searchStr) noexcept;
 bool string_endswith(const std::string &str, const std::string &searchStr) noexcept;
+
+std::string join_string_list(const std::list<std::string> &list, const std::string &glue) noexcept;
+
 } // lit
 } // polar
 

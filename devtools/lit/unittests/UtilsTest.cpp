@@ -161,3 +161,25 @@ TEST_F(UtilsTest, testListdirFiles)
       ASSERT_EQ(files, expected);
    }
 }
+
+TEST_F(UtilsTest, testJoinStringList)
+{
+   {
+      std::list<std::string> paths{
+         "aaa",
+         "bbb",
+         "ccc"
+      };
+      ASSERT_EQ(polar::lit::join_string_list(paths, ""), "aaabbbccc");
+      ASSERT_EQ(polar::lit::join_string_list(paths, "-"), "aaa-bbb-ccc");
+      ASSERT_EQ(polar::lit::join_string_list(paths, "xxx"), "aaaxxxbbbxxxccc");
+   }
+   {
+      std::list<std::string> paths{
+         "aaa"
+      };
+      ASSERT_EQ(polar::lit::join_string_list(paths, ""), "aaa");
+      ASSERT_EQ(polar::lit::join_string_list(paths, "-"), "aaa");
+      ASSERT_EQ(polar::lit::join_string_list(paths, "xxx"), "aaa");
+   }
+}

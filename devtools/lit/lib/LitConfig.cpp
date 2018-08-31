@@ -70,5 +70,18 @@ void LitConfig::writeMessage(const std::string &kind, const std::string &message
              << std::endl;
 }
 
+std::string LitConfig::getBashPath()
+{
+   if (m_bashPath.has_value()){
+      return m_bashPath.value();
+   }
+
+}
+
+std::string LitConfig::getToolsPath()
+{
+
+}
+
 } // lit
 } // polar

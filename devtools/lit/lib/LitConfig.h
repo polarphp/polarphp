@@ -64,7 +64,7 @@ public:
       exit(2);
    }
 
-   std::optional<std::string> getBashPath();
+   std::string getBashPath();
    std::string getToolsPath();
 private:
    void writeMessage(const std::string &kind, const std::string &message,
