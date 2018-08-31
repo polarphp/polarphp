@@ -12,8 +12,52 @@
 #include <gtest/gtest.h>
 #include "Utils.h"
 #include <string>
+#include <filesystem>
 
-TEST(UtilsTest, testSplitString)
+namespace fs = std::filesystem;
+static fs::path sg_dataDir;
+
+class UtilsTest : public ::testing::Test
+{
+public:
+
+   static void SetUpTestCase()
+   {
+      if (!fs::exists(sm_tempDir)) {
+         std::error_code errcode;
+         if (!fs::create_directory(sm_tempDir, errcode)) {
+            FAIL() << errcode.message();
+         }
+      }
+      sg_dataDir = UNITTEST_LIT_DATA_DIR;
+   }
+
+   static void TearDownTestCase()
+   {
+      if (fs::exists(sm_tempDir)) {
+         std::error_code errcode;
+         if (!fs::remove_all(sm_tempDir, errcode)) {
+            FAIL() << errcode.message();
+         }
+      }
+   }
+
+   virtual void SetUp() override
+   {
+      if (fs::exists(sm_tempDir)) {
+         std::error_code errcode;
+         if (!fs::remove_all(sm_tempDir, errcode)) {
+            FAIL() << errcode.message();
+         }
+      }
+   }
+
+   static fs::path sm_tempDir;
+};
+
+fs::path UtilsTest::sm_tempDir{UNITTEST_TEMP_DIR};
+
+TEST_F(UtilsTest, testSplitString)
 {
    {
       std::string str{"aaa"};
@@ -38,7 +82,7 @@ TEST(UtilsTest, testSplitString)
    }
 }
 
-TEST(UtilsTest, testCenterString)
+TEST_F(UtilsTest, testCenterString)
 {
    std::string test = "polarphp";
    ASSERT_EQ(polar::lit::center_string(test, 0), "polarphp");
@@ -47,7 +91,7 @@ TEST(UtilsTest, testCenterString)
    ASSERT_EQ(polar::lit::center_string(test, 13, '-'), "--polarphp--");
 }
 
-TEST(UtilsTest, testStartswithAndEndswidth)
+TEST_F(UtilsTest, testStartswithAndEndswidth)
 {
    std::string str = "I am a programmer, I love php";
    {
@@ -62,5 +106,58 @@ TEST(UtilsTest, testStartswithAndEndswidth)
       ASSERT_TRUE(polar::lit::string_endswith(str, "php"));
       ASSERT_FALSE(polar::lit::string_startswith(str, "Php"));
       ASSERT_FALSE(polar::lit::string_startswith(str, "xphp"));
+   }
+}
+
+TEST_F(UtilsTest, testListdirFiles)
+{
+   try {
+      fs::create_directories(sm_tempDir / "aaa" / "bbb" / "ccc");
+      fs::create_directories(sm_tempDir / "aaa" / "ddd");
+      fs::create_directories(sm_tempDir / "eee");
+      fs::copy_file(sg_dataDir/"Empty", sm_tempDir / "aaa"/ "a.txt");
+      fs::copy_file(sg_dataDir/"Empty", sm_tempDir / "aaa"/ "b.txt");
+      fs::copy_file(sg_dataDir/"Empty", sm_tempDir / "eee"/ "empty");
+      fs::copy_file(sg_dataDir/"Empty", sm_tempDir / "eee"/ "polarphp");
+      fs::copy_file(sg_dataDir/"Empty", sm_tempDir / "aaa" / "bbb" / "ccc" / "polarphp.dynamic");
+      fs::copy_file(sg_dataDir/"Empty", sm_tempDir / "aaa" / "bbb" / "polarphp.exe");
+   } catch(...) {
+      FAIL() << "testListdirFiles prepare directory error";
+   }
+   {
+      std::list<std::string> expected{
+         sm_tempDir / "aaa"/ "a.txt",
+               sm_tempDir / "aaa"/ "b.txt",
+               sm_tempDir / "aaa" / "bbb" / "ccc" / "polarphp.dynamic",
+               sm_tempDir / "aaa" / "bbb" / "polarphp.exe"
+      };
+      std::list<std::string> files = polar::lit::listdir_files((sm_tempDir / "aaa").string());
+      ASSERT_EQ(files, expected);
+   }
+   {
+      std::list<std::string> expected{
+               sm_tempDir / "aaa" / "bbb" / "ccc" / "polarphp.dynamic"
+      };
+      std::list<std::string> files = polar::lit::listdir_files(( sm_tempDir / "aaa" / "bbb" / "ccc").string());
+      ASSERT_EQ(files, expected);
+   }
+   {
+      std::list<std::string> expected{
+         sm_tempDir / "aaa"/ "a.txt",
+               sm_tempDir / "aaa"/ "b.txt"
+      };
+      std::list<std::string> files = polar::lit::listdir_files((sm_tempDir / "aaa").string(), {"txt"});
+      ASSERT_EQ(files, expected);
+   }
+   {
+      std::list<std::string> expected{
+         sm_tempDir / "aaa"/ "a.txt",
+               sm_tempDir / "aaa"/ "b.txt",
+               sm_tempDir / "aaa" / "bbb" / "polarphp.exe"
+      };
+      std::list<std::string> files = polar::lit::listdir_files((sm_tempDir / "aaa").string(), {""}, {
+                                                                  sm_tempDir / "aaa" / "bbb" / "ccc" / "polarphp.dynamic"
+                                                               });
+      ASSERT_EQ(files, expected);
    }
 }

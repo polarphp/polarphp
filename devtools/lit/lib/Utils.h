@@ -42,8 +42,8 @@ inline bool mkdir_p(const std::string &path, std::error_code& ec)
 }
 
 std::list<std::string> listdir_files(const std::string &dirname,
-                                     const std::set<std::string> &suffixes = {},
-                                     const std::set<std::string> &excludeFilenames = {""});
+                                     const std::set<std::string> &suffixes = {""},
+                                     const std::set<std::string> &excludeFilenames = {});
 std::optional<std::string> which(const std::string &command, const std::optional<std::string> &paths = std::nullopt) noexcept;
 bool check_tools_path(const std::string &dir, const std::list<std::string> &tools) noexcept;
 std::optional<std::string> which_tools(const std::list<std::string> &tools, const std::string &paths) noexcept;

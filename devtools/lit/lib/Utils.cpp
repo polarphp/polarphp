@@ -49,6 +49,20 @@ std::optional<std::string> find_platform_sdk_version_on_macos() noexcept
    return std::nullopt;
 }
 
+namespace {
+
+bool check_file_have_ext(const std::string &filename, const std::set<std::string> &suffixes)
+{
+   for (const std::string &suffix : suffixes) {
+      if (string_endswith(filename, suffix)) {
+         return true;
+      }
+   }
+   return false;
+}
+
+} // anonymous namespace
+
 std::list<std::string> listdir_files(const std::string &dirname,
                                      const std::set<std::string> &suffixes,
                                      const std::set<std::string> &excludeFilenames)
@@ -57,13 +71,17 @@ std::list<std::string> listdir_files(const std::string &dirname,
    if (!fs::exists(dir)) {
       return {};
    }
+   std::list<std::string> files;
    for (const fs::directory_entry &entry: fs::recursive_directory_iterator(dir)) {
       std::string filename = entry.path().string();
       if (entry.is_directory() || filename[0] == '.' ||
-          excludeFilenames.find(filename) != excludeFilenames.end()
-          ) {
+          excludeFilenames.find(filename) != excludeFilenames.end() ||
+          !check_file_have_ext(filename, suffixes)) {
+         continue;
       }
+      files.push_back(filename);
    }
+   return files;
 }
 
 std::optional<std::string> which(const std::string &command, const std::optional<std::string> &paths) noexcept
