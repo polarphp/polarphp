@@ -115,10 +115,11 @@ void print_histogram(std::list<std::tuple<std::string, int>> items, const std::s
    }
    int power = (int)std::ceil(std::log10(maxValue));
    int N = 0;
+   double barH = 0;
    while (true) {
       std::list<float> cycle{5, 2, 2.5, 1};
       for (float inc : cycle) {
-         double barH = inc * std::pow(10, power);
+         barH = inc * std::pow(10, power);
          N = (int)std::ceil(maxValue / barH);
          if (N > 10) {
             goto end_iterator;
@@ -145,12 +146,21 @@ end_iterator:
    int pfDigits = std::max(0, 3 - pDigits);
    if (pfDigits) {
       pDigits += pfDigits + 1;
-      int cDigits = (int)std::ceil(std::log10(items.size()));
-      //       std::printf('[%s] :: [%s] :: [%s]', ('Range'.center((pDigits + 1) * 2 + 3),
-      //                                       'Percentage'.center(barW),
-      //                                       'Count'.center(cDigits * 2 + 1)))
    }
-
+   int cDigits = (int)std::ceil(std::log10(items.size()));
+   std::printf("[%s] :: [%s] :: [%s]", center_string("Range", (pDigits + 1) * 2 + 3).c_str(),
+               center_string("Percentage", barW).c_str(),
+               center_string("Count", cDigits * 2 + 1).c_str());
+   std::cout << hr << std::endl;
+   for (int i = 0; i < N; ++i){
+      const std::set<std::string> &row = histo[i];
+      float pct = float(row.size()) / items.size();
+      int w = int(barW * pct);
+      std::printf("[%*.*fs,%*.*fs) :: [%s%s] :: [%*d/%*d]",
+                     pDigits, pfDigits, i * barH, pDigits, pfDigits, (i + 1) * barH,
+                     std::string(w, '*').c_str(), std::string(barW - w, ' ').c_str(),
+                  cDigits, row.size(), cDigits, items.size());
+   }
 }
 
 std::string center_string(const std::string &text, int width, char fillChar)
