@@ -17,8 +17,9 @@
 #include <optional>
 #include <list>
 #include <map>
+#include <set>
 #include <cstring>
-#include "Config.h"
+#include "Global.h"
 
 namespace polar {
 namespace lit {
@@ -35,12 +36,14 @@ inline unsigned detect_cpus()
    return std::thread::hardware_concurrency();
 }
 
-inline void mkdir_p()
+inline bool mkdir_p(const std::string &path, std::error_code& ec)
 {
-
+   return fs::create_directories(path, ec);
 }
 
-void listdir_files();
+std::list<std::string> listdir_files(const std::string &dirname,
+                                     const std::set<std::string> &suffixes = {},
+                                     const std::set<std::string> &excludeFilenames = {""});
 std::optional<std::string> which(const std::string &command, const std::optional<std::string> &paths = std::nullopt) noexcept;
 bool check_tools_path(const std::string &dir, const std::list<std::string> &tools) noexcept;
 std::optional<std::string> which_tools(const std::list<std::string> &tools, const std::string &paths) noexcept;
@@ -77,7 +80,8 @@ std::optional<std::string> find_platform_sdk_version_on_macos() noexcept;
 
 std::list<std::string> split_string(const std::string &str, char separator);
 void kill_process_and_children(pid_t pid) noexcept;
-
+bool string_startswith(const std::string &str, const std::string &searchStr) noexcept;
+bool string_endswith(const std::string &str, const std::string &searchStr) noexcept;
 } // lit
 } // polar
 

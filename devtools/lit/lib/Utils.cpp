@@ -49,6 +49,23 @@ std::optional<std::string> find_platform_sdk_version_on_macos() noexcept
    return std::nullopt;
 }
 
+std::list<std::string> listdir_files(const std::string &dirname,
+                                     const std::set<std::string> &suffixes,
+                                     const std::set<std::string> &excludeFilenames)
+{
+   fs::path dir(dirname);
+   if (!fs::exists(dir)) {
+      return {};
+   }
+   for (const fs::directory_entry &entry: fs::recursive_directory_iterator(dir)) {
+      std::string filename = entry.path().string();
+      if (entry.is_directory() || filename[0] == '.' ||
+          excludeFilenames.find(filename) != excludeFilenames.end()
+          ) {
+      }
+   }
+}
+
 std::optional<std::string> which(const std::string &command, const std::optional<std::string> &paths) noexcept
 {
    fs::path commandPath(command);
@@ -157,8 +174,8 @@ end_iterator:
       float pct = float(row.size()) / items.size();
       int w = int(barW * pct);
       std::printf("[%*.*fs,%*.*fs) :: [%s%s] :: [%*d/%*d]",
-                     pDigits, pfDigits, i * barH, pDigits, pfDigits, (i + 1) * barH,
-                     std::string(w, '*').c_str(), std::string(barW - w, ' ').c_str(),
+                  pDigits, pfDigits, i * barH, pDigits, pfDigits, (i + 1) * barH,
+                  std::string(w, '*').c_str(), std::string(barW - w, ' ').c_str(),
                   cDigits, row.size(), cDigits, items.size());
    }
 }
@@ -171,6 +188,28 @@ std::string center_string(const std::string &text, int width, char fillChar)
    }
    size_t halfWidth = (width - textSize) / 2;
    return std::string(halfWidth, fillChar) + text + std::string(halfWidth, fillChar);
+}
+
+bool string_startswith(const std::string &str, const std::string &searchStr) noexcept
+{
+   if (str.size() < searchStr.size()) {
+      return false;
+   } else if (searchStr.empty()) {
+      return true;
+   }
+   return 0 == str.find(searchStr);
+}
+
+bool string_endswith(const std::string &str, const std::string &searchStr) noexcept
+{
+   size_t strSize = str.size();
+   size_t searchStrSize = searchStr.size();
+   if (strSize < searchStrSize) {
+      return false;
+   } else if (searchStr.empty()) {
+      return true;
+   }
+   return (strSize - searchStrSize) == str.find(searchStr);
 }
 
 } // lit

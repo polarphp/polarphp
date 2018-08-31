@@ -38,7 +38,6 @@ TEST(UtilsTest, testSplitString)
    }
 }
 
-
 TEST(UtilsTest, testCenterString)
 {
    std::string test = "polarphp";
@@ -46,4 +45,22 @@ TEST(UtilsTest, testCenterString)
    ASSERT_EQ(polar::lit::center_string(test, 10), " polarphp ");
    ASSERT_EQ(polar::lit::center_string(test, 10, '-'), "-polarphp-");
    ASSERT_EQ(polar::lit::center_string(test, 13, '-'), "--polarphp--");
+}
+
+TEST(UtilsTest, testStartswithAndEndswidth)
+{
+   std::string str = "I am a programmer, I love php";
+   {
+      ASSERT_TRUE(polar::lit::string_startswith("abc", ""));
+      ASSERT_TRUE(polar::lit::string_endswith("abc", ""));
+      ASSERT_FALSE(polar::lit::string_startswith("abc", "abcd"));
+      ASSERT_FALSE(polar::lit::string_endswith("abc", "abcd"));
+   }
+   {
+      ASSERT_TRUE(polar::lit::string_startswith(str, "I am"));
+      ASSERT_FALSE(polar::lit::string_startswith(str, "I amx"));
+      ASSERT_TRUE(polar::lit::string_endswith(str, "php"));
+      ASSERT_FALSE(polar::lit::string_startswith(str, "Php"));
+      ASSERT_FALSE(polar::lit::string_startswith(str, "xphp"));
+   }
 }

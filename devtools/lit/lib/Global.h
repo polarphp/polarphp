@@ -13,12 +13,12 @@
 #define POLAR_DEVLTOOLS_LIT_GLOBAL_H
 
 #include "Config.h"
-#include <experimental/filesystem>
+#include <filesystem>
 
 namespace polar {
 namespace lit {
 
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 } // lit
 } // polar
