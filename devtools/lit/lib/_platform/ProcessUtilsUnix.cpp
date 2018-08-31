@@ -24,7 +24,7 @@ namespace lit {
 bool find_executable(const fs::path &filepath) noexcept
 {
    std::error_code errCode;
-   if (fs::exists(filepath, errCode)) {
+   if (fs::exists(filepath, errCode) && fs::is_regular_file(filepath)) {
       return true;
    }
    return false;

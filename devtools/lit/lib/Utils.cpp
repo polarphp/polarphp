@@ -46,5 +46,32 @@ std::optional<std::string> find_platform_sdk_version_on_macos() noexcept
    return std::nullopt;
 }
 
+std::optional<std::string> which(const std::string &command, const std::optional<std::string> &paths)
+{
+   fs::path commandPath(command);
+   if (commandPath.is_absolute() && fs::exists(commandPath)) {
+      return fs::canonical(commandPath).string();
+   }
+   std::string cmdStrPaths;
+   // current only support posix os
+   if (!paths.has_value()) {
+      cmdStrPaths = std::getenv("PATH");
+   } else {
+      cmdStrPaths = paths.value();
+   }
+   std::list<std::string> dirs(split_string(cmdStrPaths, ':'));
+   for (std::string dir : dirs) {
+      if (dir == "") {
+         dir = ".";
+      }
+      fs::path path(dir);
+      path /= command;
+      if (find_executable(path)) {
+         return path.string();
+      }
+   }
+   return std::nullopt;
+}
+
 } // lit
 } // polar

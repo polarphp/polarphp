@@ -10,6 +10,8 @@
 // Created by polarboy on 2018/08/30.
 
 #include "LitConfig.h"
+#include <cassert>
+#include <iostream>
 
 namespace polar {
 namespace lit {
@@ -28,10 +30,10 @@ LitConfig::LitConfig(const std::string &progName, const std::list<std::string> &
      m_debug(debug), m_singleProcess(singleProcess),
      m_isWindows(isWindows), m_params(params), m_bashPath(std::nullopt),
      m_configPrefix(configPrefix.has_value() ? configPrefix.value() : "lit"),
-     m_suffixes({"cfg", "cfg.json"}), m_maxIndividualTestTime(maxIndividualTestTime),
-     m_maxFailures(maxFailures), m_parallelismGroups(parallelismGroups),
-     m_echoAllCommands(echoAllCommands)
+     m_suffixes({"cfg", "cfg.json"}), m_maxFailures(maxFailures),
+     m_parallelismGroups(parallelismGroups), m_echoAllCommands(echoAllCommands)
 {
+   setMaxIndividualTestTime(maxIndividualTestTime);
    for (const std::string &suffix : m_suffixes) {
       m_configNames.push_back(m_configPrefix + "." + suffix);
       m_siteConfigNames.push_back(m_configPrefix + ".site." + suffix);
@@ -53,6 +55,19 @@ LitConfig::LitConfig(const std::string &progName, const std::list<std::string> &
          m_valgrindArgs.push_back(userArg);
       }
    }
+}
+
+LitConfig &LitConfig::setMaxIndividualTestTime(int value)
+{
+   assert(value >= 0);
+   m_maxIndividualTestTime = value;
+}
+
+void LitConfig::writeMessage(const std::string &kind, const std::string &message,
+                             const std::string &file, const std::string &line)
+{
+   std::cerr << m_progName << ": " << file << ":" << line << " :" << kind << " :" << message
+             << std::endl;
 }
 
 } // lit

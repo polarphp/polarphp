@@ -39,6 +39,36 @@ public:
 
    LitConfig &setMaxIndividualTestTime(int value);
 
+   void note(const std::string &message,
+             const std::string &file = "", const std::string &line = "")
+   {
+      writeMessage("note", message, file, line);
+   }
+   void warning(const std::string &message,
+                const std::string &file = "", const std::string &line = "")
+   {
+      writeMessage("warning", message, file, line);
+      m_numWarnings += 1;
+   }
+   void error(const std::string &message,
+              const std::string &file = "", const std::string &line = "")
+   {
+      writeMessage("error", message, file, line);
+      m_numErrors += 1;
+   }
+
+   void fatal(const std::string &message,
+              const std::string &file = "", const std::string &line = "")
+   {
+      writeMessage("fatal", message, file, line);
+      exit(2);
+   }
+
+   std::optional<std::string> getBashPath();
+   std::string getToolsPath();
+private:
+   void writeMessage(const std::string &kind, const std::string &message,
+                     const std::string &file = "", const std::string &line = "");
 protected:
    std::string m_progName;
    std::list<std::string> m_path;
