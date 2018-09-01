@@ -84,11 +84,10 @@ std::list<std::string> listdir_files(const std::string &dirname,
    return files;
 }
 
-std::optional<std::string> which(const std::string &command, const std::optional<std::string> &paths) noexcept
+std::optional<std::string> which(const fs::path &command, const std::optional<std::string> &paths) noexcept
 {
-   fs::path commandPath(command);
-   if (commandPath.is_absolute() && fs::exists(commandPath)) {
-      return fs::canonical(commandPath).string();
+   if (command.is_absolute() && fs::exists(command)) {
+      return fs::canonical(command).string();
    }
    std::string cmdStrPaths;
    // current only support posix os
@@ -111,11 +110,10 @@ std::optional<std::string> which(const std::string &command, const std::optional
    return std::nullopt;
 }
 
-bool check_tools_path(const std::string &dir, const std::list<std::string> &tools) noexcept
+bool check_tools_path(const fs::path &dir, const std::list<std::string> &tools) noexcept
 {
-   fs::path basePath(dir);
    for (const std::string &tool : tools) {
-      fs::path toolPath = basePath / tool;
+      fs::path toolPath = dir / tool;
       if (!fs::exists(toolPath)) {
          return false;
       }

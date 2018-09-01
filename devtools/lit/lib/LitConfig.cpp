@@ -10,6 +10,7 @@
 // Created by polarboy on 2018/08/30.
 
 #include "LitConfig.h"
+#include "Utils.h"
 #include <cassert>
 #include <iostream>
 
@@ -75,12 +76,31 @@ std::string LitConfig::getBashPath()
    if (m_bashPath.has_value()){
       return m_bashPath.value();
    }
-
+   m_bashPath = which("bash", join_string_list(m_path, ":"));
+   if (!m_bashPath.has_value()) {
+      m_bashPath = which("bash");
+   }
+   if (!m_bashPath.has_value()) {
+      m_bashPath = "";
+   }
+   return m_bashPath.value();
 }
 
-std::string LitConfig::getToolsPath()
+std::optional<std::string> LitConfig::getToolsPath(std::optional<std::string> dir, const std::string &paths,
+                                                   const std::list<std::string> &tools)
 {
-
+   if (dir.has_value() && fs::path(dir.value()).is_absolute() && fs::is_directory(dir.value())) {
+      if (!check_tools_path(dir.value(), tools)) {
+         return std::nullopt;
+      }
+   } else {
+      dir = which_tools(tools, paths);
+   }
+   m_bashPath = which("bash", dir);
+   if (!m_bashPath.has_value()) {
+      m_bashPath = "";
+   }
+   return dir;
 }
 
 } // lit

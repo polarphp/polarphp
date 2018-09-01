@@ -65,7 +65,8 @@ public:
    }
 
    std::string getBashPath();
-   std::string getToolsPath();
+   std::optional<std::string> getToolsPath(std::optional<std::string> dir, const std::string &paths,
+                            const std::list<std::string> &tools);
 private:
    void writeMessage(const std::string &kind, const std::string &message,
                      const std::string &file = "", const std::string &line = "");
