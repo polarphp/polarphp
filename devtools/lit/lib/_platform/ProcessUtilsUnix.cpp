@@ -54,11 +54,15 @@ std::optional<std::string> look_path(const std::string &file) noexcept
 }
 
 namespace internal {
-void do_run_program(const std::string &cmd, int &exitCode, std::string &output, std::string &errMsg, const int count, ...)
+void do_run_program(const std::string &cmd, int &exitCode,
+                    const std::string &input,
+                    std::string &output, std::string &errMsg,
+                    const int count, ...)
 {
+   int stdinChannel[2];
    int stdoutChannel[2];
    int stderrChannel[2];
-   if (-1 == pipe(stdoutChannel) || -1 == pipe(stderrChannel)) {
+   if (-1 == pipe(stdinChannel) || -1 == pipe(stdoutChannel) || -1 == pipe(stderrChannel)) {
       exitCode = -1;
       errMsg = strerror(errno);
    }
@@ -79,12 +83,16 @@ void do_run_program(const std::string &cmd, int &exitCode, std::string &output, 
          perror("close stdoutChannel or stderrChannel read fd error");
          exit(1);
       }
+      if (-1 == close(stdinChannel[1])) {
+         perror("clse stdinChannel write fd error");
+      }
       // io redirection
-      if (-1 == close(STDOUT_FILENO) || -1 == close(STDERR_FILENO)) {
-         perror("close stdout or stderr fd of child process error");
+      if (-1 == close(STDIN_FILENO) || -1 == close(STDOUT_FILENO) || -1 == close(STDERR_FILENO)) {
+         perror("close stdin or stdout or stderr fd of child process error");
          exit(1);
       }
-      if (-1 == dup2(stdoutChannel[1], STDOUT_FILENO) ||
+      if (-1 == dup2(stdinChannel[0], STDIN_FILENO) ||
+          -1 == dup2(stdoutChannel[1], STDOUT_FILENO) ||
           -1 == dup2(stderrChannel[1], STDERR_FILENO)) {
          std::cerr << strerror(errno) << std::endl;
          exit(1);
@@ -108,6 +116,25 @@ void do_run_program(const std::string &cmd, int &exitCode, std::string &output, 
          exitCode = -1;
          errMsg = strerror(errno);
          return;
+      }
+      if (-1 == close(stdinChannel[0])) {
+         exitCode = -1;
+         errMsg = strerror(errno);
+         return;
+      }
+      // write input to child process
+      size_t tobeSize = input.size();
+      if (tobeSize > 0) {
+         int written = 0;
+         const char *data = input.data();
+         while (int n = write(stdinChannel[1], data, 256) != 0 && written < tobeSize) {
+            if (n == -1) {
+               exitCode = -1;
+               errMsg = strerror(errno);
+            } else if (n > 0) {
+               written += n;
+            }
+         }
       }
    }
    while(-1 != waitpid(cpid, &exitCode, 0) || errno == EAGAIN) {}
