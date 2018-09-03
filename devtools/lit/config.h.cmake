@@ -17,5 +17,9 @@
 #cmakedefine POLAR_OS "@POLAR_OS@"
 #cmakedefine POLAR_NATIVE_ARCH "@POLAR_NATIVE_ARCH@"
 #cmakedefine POLAR_HOST_TRIPLE "@POLAR_HOST_TRIPLE@"
+#cmakedefine POLAR_OS_MACOS
+#cmakedefine POLAR_OS_DARWIN
+#cmakedefine POLAR_OS_UNIX
+#cmakedefine POLAR_OS_WIN32
 
 #endif // POLAR_DEVLTOOLS_LIT_CONFIG_H

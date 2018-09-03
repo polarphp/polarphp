@@ -27,6 +27,15 @@ set_target_properties(
    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib;${CMAKE_CURRENT_BINARY_DIR}"
    )
 
+if (APPLE)
+   set(POLAR_OS_DARWIN ON)
+   set(POLAR_OS_MACOS ON)
+elseif(WIN32)
+   set(POLAR_OS_WIN32 ON)
+elseif(UNIX)
+   set(POLAR_OS_UNIX)
+endif()
+
 configure_file(Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/Config.h @ONLY)
 
 list(APPEND POLAR_DEVTOOLS_LIT_LIB_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/Config.h)

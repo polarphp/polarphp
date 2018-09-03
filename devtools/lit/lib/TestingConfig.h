@@ -20,35 +20,47 @@
 namespace polar {
 namespace lit {
 
+class LitConfig;
+
 class TestingConfig {
 public:
-   TestingConfig(TestingConfig *parent, const std::string name,
-                 const std::set<std::string> &suffixes, const std::string &testFormat,
+   TestingConfig(TestingConfig *parent, const std::string &name,
+                 const std::set<std::string> &suffixes, const std::optional<std::string> &testFormat,
                  const std::map<std::string, std::string> &environment, const std::list<std::string> &substitutions,
-                 bool unsupported, const std::string &testExecRoot,
-                 const std::string &testSourceRoot, const std::set<std::string> &excludes,
+                 bool unsupported, const std::optional<std::string> &testExecRoot,
+                 const std::optional<std::string> &testSourceRoot, const std::set<std::string> &excludes,
                  const std::set<std::string> &availableFeatures, bool pipefai,
                  const std::set<std::string> &limitToFeatures = {}, bool isEarly = false,
                  const std::string &parallelismGroup = "")
-      : m_parent(parent), m_name(name), m_suffixes(suffixes),
-        m_testFormat(testFormat), m_environment(environment),
-        m_substitutions(substitutions), m_unsupported(unsupported),
-        m_testExecRoot(testExecRoot), m_testSourceRoot(testSourceRoot),
-        m_excludes(excludes), m_availableFeatures(availableFeatures),
-        m_pipefail(pipefai), m_limitToFeatures(limitToFeatures),
-        m_isEarly(isEarly), m_parallelismGroup(parallelismGroup)
+      : m_parent(parent),
+        m_name(name),
+        m_suffixes(suffixes),
+        m_testFormat(testFormat),
+        m_environment(environment),
+        m_substitutions(substitutions),
+        m_unsupported(unsupported),
+        m_testExecRoot(testExecRoot),
+        m_testSourceRoot(testSourceRoot),
+        m_excludes(excludes),
+        m_availableFeatures(availableFeatures),
+        m_pipefail(pipefai),
+        m_limitToFeatures(limitToFeatures),
+        m_isEarly(isEarly),
+        m_parallelismGroup(parallelismGroup)
    {}
+public:
+   TestingConfig fromDefaults(const LitConfig &litConfig);
 
 protected:
    TestingConfig *m_parent;
    std::string m_name;
    std::set<std::string> m_suffixes;
-   std::string m_testFormat;
+   std::optional<std::string> m_testFormat;
    std::map<std::string, std::string> m_environment;
    std::list<std::string> m_substitutions;
    bool m_unsupported;
-   std::string m_testExecRoot;
-   std::string m_testSourceRoot;
+   std::optional<std::string> m_testExecRoot;
+   std::optional<std::string> m_testSourceRoot;
    std::set<std::string> m_excludes;
    std::set<std::string> m_availableFeatures;
    bool m_pipefail;
