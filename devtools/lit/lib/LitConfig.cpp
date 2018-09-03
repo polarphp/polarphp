@@ -10,6 +10,7 @@
 // Created by polarboy on 2018/08/30.
 
 #include "LitConfig.h"
+#include "TestingConfig.h"
 #include "Utils.h"
 #include <cassert>
 #include <iostream>
@@ -69,6 +70,15 @@ void LitConfig::writeMessage(const std::string &kind, const std::string &message
 {
    std::cerr << m_progName << ": " << file << ":" << line << " :" << kind << " :" << message
              << std::endl;
+}
+
+TestingConfig &LitConfig::loadConfig(TestingConfig &config, const std::string &path)
+{
+   if (m_debug) {
+      note(std::string("loadConfig from ") + path);
+   }
+   config.loadFromPath(path, *this);
+   return config;
 }
 
 std::string LitConfig::getBashPath()

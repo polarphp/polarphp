@@ -20,8 +20,9 @@ TestingConfig TestingConfig::fromDefaults(const LitConfig &litConfig)
 {
    std::list<std::string> paths = litConfig.getPaths();
    paths.push_back(std::getenv("PATH"));
-   m_environment["PATH"] = join_string_list(paths, ":");
-   m_environment["POLARPHP_DISABLE_CRASH_REPORT"] = "1";
+   std::map<std::string, std::string> environment;
+   environment["PATH"] = join_string_list(paths, ":");
+   environment["POLARPHP_DISABLE_CRASH_REPORT"] = "1";
    std::list<std::string> passVars = {
       "LIBRARY_PATH", "LD_LIBRARY_PATH", "SYSTEMROOT", "TERM",
       "CLANG", "LD_PRELOAD", "ASAN_OPTIONS", "UBSAN_OPTIONS",
@@ -33,7 +34,7 @@ TestingConfig TestingConfig::fromDefaults(const LitConfig &litConfig)
    for (const std::string &envVarName : passVars) {
       std::string envVal = std::getenv(envVarName.c_str());
       if (!envVal.empty()) {
-         m_environment[envVarName] = envVal;
+         environment[envVarName] = envVal;
       }
    }
 #ifdef POLAR_OS_WIN32
@@ -55,7 +56,7 @@ TestingConfig TestingConfig::fromDefaults(const LitConfig &litConfig)
                         "<unnamed>",
                         std::set<std::string>{},
                         std::nullopt,
-                        m_environment,
+                        environment,
                         std::list<std::string>{},
                         false,
                         std::nullopt,
@@ -63,6 +64,21 @@ TestingConfig TestingConfig::fromDefaults(const LitConfig &litConfig)
                         std::set<std::string>{},
                         availableFeatures,
                         true);
+
+}
+
+TestingConfig *TestingConfig::getParent()
+{
+   if (nullptr != m_parent) {
+      return m_parent->getParent();
+   } else {
+      return this;
+   }
+}
+
+void TestingConfig::loadFromPath(const std::string &path, const LitConfig &litConfig)
+{
+
 }
 
 } // lit

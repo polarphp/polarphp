@@ -20,6 +20,8 @@
 namespace polar {
 namespace lit {
 
+class TestingConfig;
+
 class LitConfig
 {
 public:
@@ -64,6 +66,7 @@ public:
       exit(2);
    }
 
+   TestingConfig &loadConfig(TestingConfig &config, const std::string &path);
    std::string getBashPath();
    std::optional<std::string> getToolsPath(std::optional<std::string> dir, const std::string &paths,
                             const std::list<std::string> &tools);
@@ -81,6 +84,7 @@ public:
    {
       return m_valgrindLeakCheck;
    }
+
 private:
    void writeMessage(const std::string &kind, const std::string &message,
                      const std::string &file = "", const std::string &line = "");

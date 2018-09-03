@@ -49,8 +49,9 @@ public:
         m_parallelismGroup(parallelismGroup)
    {}
 public:
-   TestingConfig fromDefaults(const LitConfig &litConfig);
-
+   static TestingConfig fromDefaults(const LitConfig &litConfig);
+   TestingConfig *getParent();
+   void loadFromPath(const std::string &path, const LitConfig &litConfig);
 protected:
    TestingConfig *m_parent;
    std::string m_name;
