@@ -43,7 +43,7 @@ namespace lit {
 class BooleanExpression
 {
 public:
-   BooleanExpression(const std::string &str, const std::set<std::list> &variables,
+   BooleanExpression(const std::string &str, const std::set<std::string> &variables,
                      const std::string &triple = "")
       : m_variables(variables),
         m_triple (triple),
@@ -63,8 +63,9 @@ public:
    BooleanExpression &parseOR(const std::string &token);
    std::optional<bool> parseAll();
 public:
-   static void evaluate(const std::set<std::string> variables, const std::string &triple = "");
-   static std::list<std::string> tokenize(const std::string &str);
+   static std::optional<bool> evaluate(const std::string &str, const std::set<std::string> variables,
+                                       const std::string &triple = "");
+   static std::list<std::string> tokenize(std::string str);
 
 protected:
    static std::regex sm_pattern;
@@ -73,6 +74,11 @@ protected:
    std::string m_triple;
    std::optional<std::string> m_token;
    std::optional<std::string> m_value;
+};
+
+class ValueError : public std::runtime_error
+{
+   using std::runtime_error::runtime_error;
 };
 
 } // lit
