@@ -16,28 +16,43 @@
 #include <set>
 #include <iostream>
 #include <thread>
+#include <atomic>
 
 namespace polar {
 namespace lit {
 
-std::tuple<std::string, std::string, int>
+std::tuple<int, std::string, std::string>
 execute_command(const std::string &command, std::optional<std::string> cwd,
                 std::optional<EnvVarType> env, std::optional<std::string> input,
                 int timeout)
 {
    std::thread thread;
+   std::atomic<bool> hitTimeout = false;
    try {
       if (timeout > 0) {
-         thread = std::thread([](int timeout){
-
+         thread = std::thread([&hitTimeout](int timeout){
+            std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
+            hitTimeout.store(true);
          }, timeout);
       }
-//      run_program(command, );
    } catch (...) {
       if (timeout > 0) {
          thread.join();
       }
    }
+   RunCmdResponse response = run_program(command, cwd, env, input);
+   thread.join();
+   const std::string &out = std::get<1>(response);
+   const std::string &err = std::get<2>(response);
+   int exitCode = std::get<0>(response);
+   if (hitTimeout.load()) {
+      throw ExecuteCommandTimeoutException(std::string("Reached timeout of ") +std::to_string(timeout)+ " seconds",
+                                           out, err, exitCode);
+   }
+   if (exitCode == SIGINT) {
+      throw std::runtime_error("Interrupt by SIGINT signal");
+   }
+   return std::make_tuple(exitCode, out, err);
 }
 
 std::list<std::string> split_string(const std::string &str, char separator)

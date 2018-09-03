@@ -48,7 +48,7 @@ inline const char *run_program_arg_filter(const std::string &arg)
 
 } // internal
 
-using RunCmdResponse = std::tuple<bool, std::string, std::string>;
+using RunCmdResponse = std::tuple<int, std::string, std::string>;
 bool find_executable(const fs::path &filepath) noexcept;
 std::optional<std::string> look_path(const std::string &file) noexcept;
 
@@ -67,8 +67,7 @@ RunCmdResponse run_program(const std::string &cmd,
    internal::do_run_program(cmd, exitCode, cwd,
                             env, input, output, errMsg,
                             sizeof...(args) + 2, internal::run_program_arg_filter(std::forward<ArgTypes>(args))...);
-   bool status = 0 == exitCode ? true : false;
-   return std::make_tuple(status, output, errMsg);
+   return std::make_tuple(exitCode, output, errMsg);
 }
 
 } // lit
