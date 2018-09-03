@@ -16,6 +16,7 @@
 #include <optional>
 #include <tuple>
 #include <list>
+#include <map>
 #include "Global.h"
 
 namespace polar {
@@ -24,7 +25,10 @@ namespace lit {
 namespace internal {
 
 void do_run_program(const std::string &cmd, int &exitCode,
-                    const std::string &input, std::string &output, std::string &errMsg,
+                    const std::optional<std::string> &cwd,
+                    const std::optional<std::map<std::string, std::string>> &env,
+                    const std::optional<std::string> &input,
+                    std::string &output, std::string &errMsg,
                     const int count, ...);
 
 inline char *run_program_arg_filter(char *arg)
@@ -51,13 +55,18 @@ std::optional<std::string> look_path(const std::string &file) noexcept;
 std::tuple<std::list<pid_t>, bool> retrieve_children_pids(pid_t pid, bool recursive = false) noexcept;
 std::tuple<std::list<pid_t>, bool> call_pgrep_command(pid_t pid) noexcept;
 template <typename... ArgTypes>
-RunCmdResponse run_program(const std::string &cmd, std::optional<std::string> input = std::nullopt, ArgTypes&&... args) noexcept
+RunCmdResponse run_program(const std::string &cmd,
+                           const std::optional<std::string> &cwd = std::nullopt,
+                           const std::optional<std::map<std::string, std::string>> &env = std::nullopt,
+                           const std::optional<std::string> &input = std::nullopt,
+                           ArgTypes&&... args) noexcept
 {
    std::string output;
    std::string errMsg;
-   const std::string inputStr = input.has_value() ? input.value() : "";
    int exitCode;
-   internal::do_run_program(cmd, exitCode, inputStr, output, errMsg, sizeof...(args) + 2, internal::run_program_arg_filter(std::forward<ArgTypes>(args))...);
+   internal::do_run_program(cmd, exitCode, cwd,
+                            env, input, output, errMsg,
+                            sizeof...(args) + 2, internal::run_program_arg_filter(std::forward<ArgTypes>(args))...);
    bool status = 0 == exitCode ? true : false;
    return std::make_tuple(status, output, errMsg);
 }

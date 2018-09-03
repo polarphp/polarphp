@@ -11,12 +11,13 @@
 
 #include "../ProcessUtils.h"
 #include "../Utils.h"
-#include "unistd.h"
+#include <unistd.h>
 #include <cstdio>
 #include <list>
 #include <cstdlib>
 #include <sys/wait.h>
 #include <iostream>
+#include <memory>
 
 namespace polar {
 namespace lit {
@@ -55,7 +56,9 @@ std::optional<std::string> look_path(const std::string &file) noexcept
 
 namespace internal {
 void do_run_program(const std::string &cmd, int &exitCode,
-                    const std::string &input,
+                    const std::optional<std::string> &cwd,
+                    const std::optional<std::map<std::string, std::string>> &env,
+                    const std::optional<std::string> &input,
                     std::string &output, std::string &errMsg,
                     const int count, ...)
 {
@@ -103,7 +106,37 @@ void do_run_program(const std::string &cmd, int &exitCode,
          std::cerr << "command is not found" << std::endl;
          exit(1);
       }
-      if (-1 == execvp(cmdpath.value().c_str(), targetArgs)) {
+      // if we chdir, wether need detect target directory exists?
+      if (cwd.has_value()) {
+         const std::string &cwdStr = cwd.value();
+         if (!fs::exists(cwdStr)) {
+            std::cerr << "chdir error: target directory is not exist" << std::endl;
+            exit(1);
+         }
+         if (-1 == chdir(cwdStr.c_str())) {
+            std::cerr << strerror(errno);
+            exit(1);
+         }
+      }
+      std::unique_ptr<char *[]> envArray = nullptr;
+      if (env.has_value()) {
+         const std::map<std::string, std::string> envMap = env.value();
+         envArray.reset(new char *[envMap.size() + 1]);
+         envArray[envMap.size()] = nullptr;
+         char lineBuffer[256];
+         int i = 0;
+         for (auto &envItem : envMap) {
+            if (-1 == sprintf(lineBuffer, "%s=%s", envItem.first.c_str(), envItem.second.c_str())) {
+               std::cerr << strerror(errno);
+               exit(1);
+            }
+            // @TODO wether need release?
+            envArray[i] = new char[std::strlen(lineBuffer)];
+            std::strcpy(envArray[i], lineBuffer);
+            ++i;
+         }
+      }
+      if (-1 == execve(cmdpath.value().c_str(), targetArgs, envArray.get())) {
          std::cerr << "execlp error: " << strerror(errno) << std::endl;
          exit(1);
       }
@@ -123,16 +156,19 @@ void do_run_program(const std::string &cmd, int &exitCode,
          return;
       }
       // write input to child process
-      size_t tobeSize = input.size();
-      if (tobeSize > 0) {
-         int written = 0;
-         const char *data = input.data();
-         while (int n = write(stdinChannel[1], data, 256) != 0 && written < tobeSize) {
-            if (n == -1) {
-               exitCode = -1;
-               errMsg = strerror(errno);
-            } else if (n > 0) {
-               written += n;
+      if (input.has_value()) {
+         const std::string &inputStr = input.value();
+         size_t tobeSize = inputStr.size();
+         if (tobeSize > 0) {
+            int written = 0;
+            const char *data = inputStr.data();
+            while (int n = write(stdinChannel[1], data, 256) != 0 && written < tobeSize) {
+               if (n == -1) {
+                  exitCode = -1;
+                  errMsg = strerror(errno);
+               } else if (n > 0) {
+                  written += n;
+               }
             }
          }
       }

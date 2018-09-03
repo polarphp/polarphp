@@ -15,9 +15,30 @@
 #include <cmath>
 #include <set>
 #include <iostream>
+#include <thread>
 
 namespace polar {
 namespace lit {
+
+std::tuple<std::string, std::string, int>
+execute_command(const std::string &command, std::optional<std::string> cwd,
+                std::optional<EnvVarType> env, std::optional<std::string> input,
+                int timeout)
+{
+   std::thread thread;
+   try {
+      if (timeout > 0) {
+         thread = std::thread([](int timeout){
+
+         }, timeout);
+      }
+//      run_program(command, );
+   } catch (...) {
+      if (timeout > 0) {
+         thread.join();
+      }
+   }
+}
 
 std::list<std::string> split_string(const std::string &str, char separator)
 {
@@ -42,7 +63,8 @@ std::optional<std::string> find_platform_sdk_version_on_macos() noexcept
    if (std::strcmp(POLAR_OS, "Darwin") != 0) {
       return std::nullopt;
    }
-   RunCmdResponse result = run_program("xcrun", "--show-sdk-version", "--sdk", "macosx");
+   RunCmdResponse result = run_program("xcrun", std::nullopt, std::nullopt, std::nullopt,
+                                       "--show-sdk-version", "--sdk", "macosx");
    if (std::get<0>(result)) {
       return std::get<1>(result);
    }

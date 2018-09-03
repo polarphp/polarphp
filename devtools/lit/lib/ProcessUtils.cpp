@@ -48,7 +48,8 @@ std::tuple<std::list<pid_t>, bool> retrieve_children_pids(pid_t pid, bool recurs
 
 std::tuple<std::list<pid_t>, bool> call_pgrep_command(pid_t pid) noexcept
 {
-   RunCmdResponse result = run_program("pgrep", "-P " + std::to_string(pid));
+   RunCmdResponse result = run_program("pgrep", std::nullopt, std::nullopt, std::nullopt,
+                                       "-P " + std::to_string(pid));
    if (!std::get<0>(result)) {
       return std::make_tuple(std::list<pid_t>{}, false);
    }
