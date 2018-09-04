@@ -35,5 +35,39 @@ TEST(BooleanExpressionTest, testVariables)
    ASSERT_FALSE(BooleanExpression::evaluate("tru", variables).value());
 }
 
+TEST(BooleanExpressionTest, testTriple)
+{
+   std::string triple = "arch-vendor-os";
+   ASSERT_TRUE(BooleanExpression::evaluate("arch-", {}, triple).value());
+   ASSERT_TRUE(BooleanExpression::evaluate("ar", {}, triple).value());
+   ASSERT_TRUE(BooleanExpression::evaluate("ch-vend", {}, triple).value());
+   ASSERT_TRUE(BooleanExpression::evaluate("-vendor-", {}, triple).value());
+   ASSERT_TRUE(BooleanExpression::evaluate("-os", {}, triple).value());
+   ASSERT_FALSE(BooleanExpression::evaluate("arch-os", {}, triple).value());
+}
+
+TEST(BooleanExpressionTest, testOperators)
+{
+   ASSERT_TRUE(BooleanExpression::evaluate("true || true", {}).value());
+   ASSERT_TRUE(BooleanExpression::evaluate("true || false", {}).value());
+   ASSERT_TRUE(BooleanExpression::evaluate("false || true", {}).value());
+   ASSERT_FALSE(BooleanExpression::evaluate("false || false", {}).value());
+
+   ASSERT_TRUE(BooleanExpression::evaluate("true && true", {}).value());
+   ASSERT_FALSE(BooleanExpression::evaluate("true && false", {}).value());
+   ASSERT_FALSE(BooleanExpression::evaluate("false && true", {}).value());
+   ASSERT_FALSE(BooleanExpression::evaluate("false && false", {}).value());
+
+   ASSERT_FALSE(BooleanExpression::evaluate("!true", {}).value());
+   ASSERT_TRUE(BooleanExpression::evaluate("!false", {}).value());
+
+   ASSERT_TRUE(BooleanExpression::evaluate("   ((!((false) ))   ) ", {}).value());
+   ASSERT_TRUE(BooleanExpression::evaluate("true && (true && (true))", {}).value());
+   ASSERT_TRUE(BooleanExpression::evaluate("!false && !false && !! !false", {}).value());
+   ASSERT_TRUE(BooleanExpression::evaluate("false && false || true", {}).value());
+   ASSERT_TRUE(BooleanExpression::evaluate("(false && false) || true", {}).value());
+   ASSERT_FALSE(BooleanExpression::evaluate("false && (false || true)", {}).value());
+}
+
 } // anonymous namespace
 

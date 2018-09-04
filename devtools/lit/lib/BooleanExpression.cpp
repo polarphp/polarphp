@@ -32,7 +32,7 @@ bool BooleanExpression::accept(const std::string &token)
 {
    if (m_token == token) {
       if (m_tokenIterator != m_tokens.end()) {
-         m_token = *(++m_tokenIterator);
+         m_token = *m_tokenIterator++;
       }
       return true;
    }
@@ -44,7 +44,7 @@ void BooleanExpression::expect(const std::string &token)
    if (m_token == token) {
       if (m_token != LIT_BOOL_PARSE_END_MARK) {
          if (m_tokenIterator != m_tokens.end()) {
-            m_token = *(++m_tokenIterator);
+            m_token = *m_tokenIterator++;
          }
       }
    } else {
@@ -87,11 +87,11 @@ BooleanExpression &BooleanExpression::parseAND()
    parseNOT();
    while (accept("&&")) {
       bool left = getParsedValue();
-      parseAND();
+      parseNOT();
       bool right = getParsedValue();
       // this is technically the wrong associativity, but it
       // doesn't matter for this limited expression grammar
-      m_value = left || right;
+      m_value = left && right;
    }
 }
 
