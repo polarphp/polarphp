@@ -10,13 +10,14 @@
 // Created by polarboy on 2018/09/03.
 
 #include "BooleanExpression.h"
+#include <iostream>
 
 namespace polar {
 namespace lit {
 
 #define LIT_BOOL_PARSE_END_MARK "END_PARSE_MARK"
 
-std::regex BooleanExpression::sm_pattern(R"(\A\s*([()]|[-+=._a-zA-Z0-9]+|&&|\|\||!)\s*(.*)\Z)");
+std::regex BooleanExpression::sm_pattern(R"(^\s*([()]|[-+=._a-zA-Z0-9]+|&&|\|\||!)\s*(.*)$)");
 
 std::string BooleanExpression::quote(std::string &token)
 {
@@ -73,13 +74,17 @@ BooleanExpression &BooleanExpression::parseNOT()
    } else {
       m_value = (m_variables.find(m_token.value()) != m_variables.end()
             || m_triple.find(m_token.value()) != std::string::npos);
-      m_token = *(++m_tokenIterator);
+      if (m_tokenIterator == m_tokens.end()) {
+         m_token = std::nullopt;
+      } else {
+         m_token = *m_tokenIterator++;
+      }
    }
 }
 
 BooleanExpression &BooleanExpression::parseAND()
 {
-   parseAND();
+   parseNOT();
    while (accept("&&")) {
       bool left = getParsedValue();
       parseAND();
@@ -128,22 +133,20 @@ std::optional<bool> BooleanExpression::parseAll()
 
 std::list<std::string> BooleanExpression::tokenize(std::string str)
 {
-
    std::list<std::string> tokens;
    while (true) {
       std::smatch match;
       if (std::regex_match(str, match, sm_pattern)) {
-         if (match.empty()) {
-            if (str.empty()) {
-               tokens.push_back(LIT_BOOL_PARSE_END_MARK);
-               break;
-            } else {
-               throw ValueError(std::string("couldn't parse text: ") + str);
-            }
-         }
          std::string token = match[1];
          str = match[2];
          tokens.push_back(token);
+      } else {
+         if (str.empty()) {
+            tokens.push_back(LIT_BOOL_PARSE_END_MARK);
+            break;
+         } else {
+            throw ValueError(std::string("couldn't parse text: ") + str);
+         }
       }
    }
    return tokens;

@@ -15,6 +15,7 @@ set_target_properties(DevToolLitUnittests PROPERTIES FOLDER "DevToolLitUnittests
 set(DEVL_TOOLS_LIT_TEST_SRCS)
 polar_add_files(DEVL_TOOLS_LIT_TEST_SRCS
    ProcessUtilsTest.cpp
+   BooleanExpressionTest.cpp
    UtilsTest.cpp
    )
 
