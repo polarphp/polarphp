@@ -14,6 +14,95 @@
 namespace polar {
 namespace lit {
 
+#define LIT_BOOL_PARSE_END_MARK "END_PARSE_MARK"
+
+std::regex BooleanExpression::sm_pattern(R"(\A\s*([()]|[-+=._a-zA-Z0-9]+|&&|\|\||!)\s*(.*)\Z)");
+
+std::string BooleanExpression::quote(std::string &token)
+{
+   if (token == LIT_BOOL_PARSE_END_MARK) {
+      return "<end of expression>";
+   } else {
+      return token;
+   }
+}
+
+bool BooleanExpression::accept(const std::string &token)
+{
+   if (m_token == token) {
+      if (m_tokenIterator != m_tokens.end()) {
+         m_token = *(++m_tokenIterator);
+      }
+      return true;
+   }
+   return false;
+}
+
+void BooleanExpression::expect(const std::string &token)
+{
+   if (m_token == token) {
+      if (m_token != LIT_BOOL_PARSE_END_MARK) {
+         if (m_tokenIterator != m_tokens.end()) {
+            m_token = *(++m_tokenIterator);
+         }
+      }
+   } else {
+      throw ValueError(std::string("expected: ") + token + " \nhave: "+ m_token.value());
+   }
+}
+
+bool BooleanExpression::isIdentifier(const std::string &token)
+{
+   if (token == LIT_BOOL_PARSE_END_MARK || token == "&&" || token == "||" ||
+       token == "!" || token == "(" || token == ")") {
+      return false;
+   }
+   return true;
+}
+
+BooleanExpression &BooleanExpression::parseNOT()
+{
+   if (accept("!")) {
+      parseNOT();
+      m_value = !getParsedValue();
+   } else if (accept("(")) {
+      parseOR();
+      expect(")");
+   } else if (!isIdentifier(m_token.value())) {
+      throw ValueError(std::string("expected: '!' or '(' or identifier\nhave: "+ quote(m_token.value())));
+   } else {
+      m_value = (m_variables.find(m_token.value()) != m_variables.end()
+            || m_triple.find(m_token.value()) != std::string::npos);
+      m_token = *(++m_tokenIterator);
+   }
+}
+
+BooleanExpression &BooleanExpression::parseAND()
+{
+   parseAND();
+   while (accept("&&")) {
+      bool left = getParsedValue();
+      parseAND();
+      bool right = getParsedValue();
+      // this is technically the wrong associativity, but it
+      // doesn't matter for this limited expression grammar
+      m_value = left || right;
+   }
+}
+
+BooleanExpression &BooleanExpression::parseOR()
+{
+   parseAND();
+   while (accept("||")) {
+      bool left = getParsedValue();
+      parseAND();
+      bool right = getParsedValue();
+      // this is technically the wrong associativity, but it
+      // doesn't matter for this limited expression grammar
+      m_value = left || right;
+   }
+}
+
 std::optional<bool> BooleanExpression::evaluate(const std::string &str, const std::set<std::string> variables,
                                                 const std::string &triple)
 {
@@ -27,18 +116,26 @@ std::optional<bool> BooleanExpression::evaluate(const std::string &str, const st
 
 std::optional<bool> BooleanExpression::parseAll()
 {
-
+   if (m_tokenIterator != m_tokens.end()) {
+      m_token = *m_tokenIterator++;
+   } else {
+      m_token = std::nullopt;
+   }
+   parseOR();
+   expect(LIT_BOOL_PARSE_END_MARK);
+   return m_value;
 }
 
 std::list<std::string> BooleanExpression::tokenize(std::string str)
 {
+
    std::list<std::string> tokens;
    while (true) {
       std::smatch match;
       if (std::regex_match(str, match, sm_pattern)) {
          if (match.empty()) {
             if (str.empty()) {
-               tokens.push_back("END_PARSE_MARK");
+               tokens.push_back(LIT_BOOL_PARSE_END_MARK);
                break;
             } else {
                throw ValueError(std::string("couldn't parse text: ") + str);
@@ -52,7 +149,10 @@ std::list<std::string> BooleanExpression::tokenize(std::string str)
    return tokens;
 }
 
-std::regex BooleanExpression::sm_pattern(R"(\A\s*([()]|[-+=._a-zA-Z0-9]+|&&|\|\||!)\s*(.*)\Z)");
+bool BooleanExpression::getParsedValue()
+{
+   return !m_value.has_value() ? false : m_value.value();
+}
 
 } // lit
 } // polar

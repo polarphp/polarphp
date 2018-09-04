@@ -52,28 +52,31 @@ public:
    {
       m_tokens = tokenize(str);
       m_variables.insert("true");
+      m_tokenIterator = m_tokens.begin();
    }
 
-   std::string &quote(std::string &token);
+   std::string quote(std::string &token);
    bool accept(const std::string &token);
    void expect(const std::string &token);
    bool isIdentifier(const std::string &token);
-   BooleanExpression &parseNOT(const std::string &token);
-   BooleanExpression &parseAND(const std::string &token);
-   BooleanExpression &parseOR(const std::string &token);
+   BooleanExpression &parseNOT();
+   BooleanExpression &parseAND();
+   BooleanExpression &parseOR();
    std::optional<bool> parseAll();
 public:
    static std::optional<bool> evaluate(const std::string &str, const std::set<std::string> variables,
                                        const std::string &triple = "");
    static std::list<std::string> tokenize(std::string str);
-
+protected:
+   bool getParsedValue();
 protected:
    static std::regex sm_pattern;
    std::list<std::string> m_tokens;
+   std::list<std::string>::iterator m_tokenIterator;
    std::set<std::string> m_variables;
    std::string m_triple;
    std::optional<std::string> m_token;
-   std::optional<std::string> m_value;
+   std::optional<bool> m_value;
 };
 
 class ValueError : public std::runtime_error
