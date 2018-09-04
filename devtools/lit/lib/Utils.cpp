@@ -55,16 +55,24 @@ execute_command(const std::string &command, std::optional<std::string> cwd,
    return std::make_tuple(exitCode, out, err);
 }
 
-std::list<std::string> split_string(const std::string &str, char separator)
+std::list<std::string> split_string(const std::string &str, char separator, int maxSplit)
 {
    std::string buff;
    std::list<std::string> parts;
+   int currentSplitCycle = 0;
+   size_t currentPos = 0;
    for(auto n : str) {
+      ++currentPos;
       if(n != separator) {
          buff+=n;
       } else if(n == separator && buff != "") {
          parts.push_back(buff);
+         ++currentSplitCycle;
          buff = "";
+         if (maxSplit != -1 && currentSplitCycle >= maxSplit) {
+            parts.push_back(str.substr(currentPos));
+            return parts;
+         }
       }
    }
    if(buff != "") {

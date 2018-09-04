@@ -9,33 +9,37 @@
 //
 // Created by polarboy on 2018/09/04.
 
-#include "ShellUtil.h"
+#ifndef POLAR_DEVLTOOLS_LIT_PROCESS_POOL_H
+#define POLAR_DEVLTOOLS_LIT_PROCESS_POOL_H
+
+#include <functional>
 
 namespace polar {
 namespace lit {
 
-//ShLexer::ShLexer(const std::vector<char> &data, bool win32Escapes)
-//   : m_data(data),
-//     m_pos(0),
-//     m_end(data.size()),
-//     m_win32Escapes(win32Escapes)
-//{}
-
-//char ShLexer::eat()
-//{
-//   char c = m_data[m_pos];
-//   ++m_pos;
-//   return c;
-//}
-
-bool ShLexer::maybeEat(char c)
+class ProcessPool
 {
-   if (m_data[m_pos] == c){
-      ++m_pos;
-      return true;
+public:
+   template <typename FuncType, typename... ArgTypes>
+   ProcessPool(int jobs = 0, FuncType func = nullptr, ArgTypes&&... args)
+   {
+
    }
-   return false;
-}
+   void apply();
+   void applyAsync();
+   void join();
+   void close();
+   void terminate();
+};
+
+class AsyncResult
+{
+public:
+   void wait(int timeout);
+   bool ready();
+};
 
 } // lit
 } // polar
+
+#endif // POLAR_DEVLTOOLS_LIT_PROCESS_POOL_H

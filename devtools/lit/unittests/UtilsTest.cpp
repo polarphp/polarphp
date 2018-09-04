@@ -80,6 +80,20 @@ TEST_F(UtilsTest, testSplitString)
       ASSERT_EQ(result.size(), 3);
       ASSERT_EQ(result, expected);
    }
+   {
+      std::string str{":aaa:bbb :ccc:"};
+      std::list<std::string> result = polar::lit::split_string(str, ':', 1);
+      std::list<std::string> expected{"aaa","bbb :ccc:"};
+      ASSERT_EQ(result.size(), 2);
+      ASSERT_EQ(result, expected);
+   }
+   {
+      std::string str{":aaa:bbb :ccc:"};
+      std::list<std::string> result = polar::lit::split_string(str, ':', 2);
+      std::list<std::string> expected{"aaa","bbb ","ccc:"};
+      ASSERT_EQ(result.size(), 3);
+      ASSERT_EQ(result, expected);
+   }
 }
 
 TEST_F(UtilsTest, testCenterString)

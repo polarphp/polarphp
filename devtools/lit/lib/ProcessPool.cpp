@@ -9,33 +9,12 @@
 //
 // Created by polarboy on 2018/09/04.
 
-#include "ShellUtil.h"
+#include "ProcessPool.h"
 
 namespace polar {
 namespace lit {
 
-//ShLexer::ShLexer(const std::vector<char> &data, bool win32Escapes)
-//   : m_data(data),
-//     m_pos(0),
-//     m_end(data.size()),
-//     m_win32Escapes(win32Escapes)
-//{}
 
-//char ShLexer::eat()
-//{
-//   char c = m_data[m_pos];
-//   ++m_pos;
-//   return c;
-//}
-
-bool ShLexer::maybeEat(char c)
-{
-   if (m_data[m_pos] == c){
-      ++m_pos;
-      return true;
-   }
-   return false;
-}
 
 } // lit
 } // polar
