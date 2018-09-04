@@ -19,12 +19,12 @@ namespace lit {
 
 std::regex BooleanExpression::sm_pattern(R"(^\s*([()]|[-+=._a-zA-Z0-9]+|&&|\|\||!)\s*(.*)$)");
 
-std::string BooleanExpression::quote(std::string &token)
+std::string BooleanExpression::quote(const std::string &token)
 {
    if (token == LIT_BOOL_PARSE_END_MARK) {
       return "<end of expression>";
    } else {
-      return token;
+      return "'"+token+"'";
    }
 }
 
@@ -48,7 +48,7 @@ void BooleanExpression::expect(const std::string &token)
          }
       }
    } else {
-      throw ValueError(std::string("expected: ") + token + " \nhave: "+ m_token.value());
+      throw ValueError(std::string("expected: ") + quote(token) + "\nhave: "+ quote(m_token.value()));
    }
 }
 
@@ -115,7 +115,7 @@ std::optional<bool> BooleanExpression::evaluate(const std::string &str, const st
       BooleanExpression parser(str, variables, triple);
       return parser.parseAll();
    } catch (ValueError &e) {
-      throw ValueError(std::string(e.what()) + " \nin expression: " + str);
+      throw ValueError(std::string(e.what()) + "\nin expression: " + quote(str));
    }
 }
 
@@ -145,7 +145,7 @@ std::list<std::string> BooleanExpression::tokenize(std::string str)
             tokens.push_back(LIT_BOOL_PARSE_END_MARK);
             break;
          } else {
-            throw ValueError(std::string("couldn't parse text: ") + str);
+            throw ValueError(std::string("couldn't parse text: ") + quote(str));
          }
       }
    }

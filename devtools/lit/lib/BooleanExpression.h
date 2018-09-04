@@ -55,7 +55,7 @@ public:
       m_tokenIterator = m_tokens.begin();
    }
 
-   std::string quote(std::string &token);
+   static std::string quote(const std::string &token);
    bool accept(const std::string &token);
    void expect(const std::string &token);
    bool isIdentifier(const std::string &token);

@@ -12,6 +12,26 @@
 #include <gtest/gtest.h>
 #include "BooleanExpression.h"
 
+#define ASSERT_EXCEPTION( TRY_BLOCK, EXCEPTION_TYPE, MESSAGE )        \
+   try                                                                   \
+{                                                                     \
+   TRY_BLOCK                                                         \
+   FAIL() << "exception '" << MESSAGE << "' not thrown at all!";     \
+   }                                                                     \
+   catch( const EXCEPTION_TYPE& e )                                      \
+{                                                                     \
+   ASSERT_STREQ( MESSAGE, e.what() )                                    \
+   << " exception message is incorrect. Expected the following " \
+   "message:\n\n"                                             \
+   << MESSAGE << "\n";                                           \
+   }                                                                     \
+   catch(...)                                                          \
+{                                                                     \
+   FAIL() << "exception '" << MESSAGE                                \
+   << "' not thrown with expected type '" << #EXCEPTION_TYPE  \
+   << "'!";                                                   \
+   }
+
 namespace {
 
 using namespace polar::lit;
@@ -67,6 +87,45 @@ TEST(BooleanExpressionTest, testOperators)
    ASSERT_TRUE(BooleanExpression::evaluate("false && false || true", {}).value());
    ASSERT_TRUE(BooleanExpression::evaluate("(false && false) || true", {}).value());
    ASSERT_FALSE(BooleanExpression::evaluate("false && (false || true)", {}).value());
+}
+
+TEST(BooleanExpressionTest, testErrors)
+{
+   ASSERT_EXCEPTION({BooleanExpression::evaluate("ba#d", {});}, ValueError, "couldn't parse text: '#d'\nin expression: 'ba#d'");
+   ASSERT_EXCEPTION({BooleanExpression::evaluate("true and true", {});},ValueError, "expected: <end of expression>\n"
+                                                                                    "have: 'and'\n"
+                                                                                    "in expression: 'true and true'");
+   ASSERT_EXCEPTION({BooleanExpression::evaluate("|| true", {});},ValueError, "expected: '!' or '(' or identifier\n"
+                                                                              "have: '||'\n"
+                                                                              "in expression: '|| true'");
+   ASSERT_EXCEPTION({BooleanExpression::evaluate("true &&", {});},ValueError, "expected: '!' or '(' or identifier\n"
+                                                                              "have: <end of expression>\n"
+                                                                              "in expression: 'true &&'");
+   ASSERT_EXCEPTION({BooleanExpression::evaluate("", {});},ValueError, "expected: '!' or '(' or identifier\n"
+                                                                       "have: <end of expression>\n"
+                                                                       "in expression: ''");
+   ASSERT_EXCEPTION({BooleanExpression::evaluate("*", {});},ValueError, "couldn't parse text: '*'\n"
+                                                                        "in expression: '*'");
+   ASSERT_EXCEPTION({BooleanExpression::evaluate("no wait stop", {});},ValueError,"expected: <end of expression>\n"
+                                                                                  "have: 'wait'\n"
+                                                                                  "in expression: 'no wait stop'");
+   ASSERT_EXCEPTION({BooleanExpression::evaluate("no-$-please", {});},ValueError,"couldn't parse text: '$-please'\n"
+                                                                                 "in expression: 'no-$-please'");
+   ASSERT_EXCEPTION({BooleanExpression::evaluate("(((true && true) || true)", {});},
+                    ValueError,"expected: ')'\n"
+                               "have: <end of expression>\n"
+                               "in expression: '(((true && true) || true)'");
+
+   ASSERT_EXCEPTION({BooleanExpression::evaluate("true (true)", {});},
+                    ValueError, "expected: <end of expression>\n"
+                                "have: '('\n"
+                                "in expression: 'true (true)'");
+
+   ASSERT_EXCEPTION({BooleanExpression::evaluate("( )", {});},
+                    ValueError, "expected: '!' or '(' or identifier\n"
+                                "have: ')'\n"
+                                "in expression: '( )'");
+
 }
 
 } // anonymous namespace
