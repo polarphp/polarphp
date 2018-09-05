@@ -218,5 +218,75 @@ std::list<std::any> ShLexer::lex()
    return result;
 }
 
+ShParser::ShParser(const std::string &data, bool win32Escapes, bool pipeFail)
+   : m_data(data),
+     m_pipeFail(pipeFail)
+{
+   m_tokens = ShLexer(data, win32Escapes).lex();
+}
+
+std::any ShParser::lex()
+{
+   for (auto &item : m_tokens) {
+      return item;
+   }
+   return std::any{};
+}
+
+std::any ShParser::look()
+{
+   std::any token = lex();
+   if (token.has_value()) {
+      m_tokens.push_front(token);
+   }
+   return token;
+}
+
+Command ShParser::parseCommand()
+{
+   std::any tokenAny = lex();
+   if (!tokenAny.has_value()) {
+      ValueError("empty command!");
+   }
+   if (tokenAny.type().hash_code() == typeid(std::tuple<std::string, int>).hash_code()) {
+      std::tuple<std::string, int> token = std::any_cast<std::tuple<std::string, int>>(tokenAny);
+      ValueError(std::string("syntax error near unexpected token ") + std::get<0>(token));
+   }
+   std::list<std::any> args{tokenAny};
+   std::list<std::tuple<std::any, std::any>> redirects;
+   while (true) {
+      tokenAny = look();
+      // EOF?
+      if (tokenAny.has_value()) {
+         break;
+      }
+      // If this is an argument, just add it to the current command.
+      int tokenTypeHashCode = tokenAny.type().hash_code();
+      if (tokenTypeHashCode == typeid(std::string).hash_code() ||
+          tokenTypeHashCode == typeid(GlobItem).hash_code()) {
+         args.push_back(lex());
+         continue;
+      }
+      std::tuple<std::string, int> token = std::any_cast<std::tuple<std::string, int>>(tokenAny);
+      assert(tokenTypeHashCode == typeid(std::tuple<std::string, int>).hash_code());
+      std::string &tokenStr = std::get<0>(token);
+      if (tokenStr.find('|') != std::string::npos ||
+          tokenStr.find(';') != std::string::npos ||
+          tokenStr.find('&') != std::string::npos ||
+          tokenStr.find("||") != std::string::npos ||
+          tokenStr.find("&&") != std::string::npos) {
+         break;
+      }
+      std::any op = lex();
+      std::any arg = lex();
+      if (!arg.has_value()) {
+         std::tuple<std::string, int> opTuple = std::any_cast<std::tuple<std::string, int>>(op);
+         ValueError("syntax error near token "+ std::get<0>(opTuple));
+      }
+      redirects.push_back(std::tuple<std::any, std::any>{op, arg});
+   }
+   return Command(args, redirects);
+}
+
 } // lit
 } // polar

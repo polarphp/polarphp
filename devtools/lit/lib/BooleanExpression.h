@@ -79,11 +79,6 @@ protected:
    std::optional<bool> m_value;
 };
 
-class ValueError : public std::runtime_error
-{
-   using std::runtime_error::runtime_error;
-};
-
 } // lit
 } // polar
 

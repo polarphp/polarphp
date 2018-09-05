@@ -14,6 +14,7 @@
 
 #include <list>
 #include <string>
+#include <any>
 
 namespace polar {
 namespace lit {
@@ -21,15 +22,16 @@ namespace lit {
 class Command
 {
 public:
-   Command(const std::list<std::string> &args, const std::list<std::string> &redirects)
+   Command(const std::list<std::any> &args, const std::list<std::tuple<std::any, std::any>> &redirects)
       : m_args(args),
         m_redirects(redirects)
    {}
+
    operator std::string();
    bool operator ==(const Command &other);
 protected:
-   std::list<std::string> m_args;
-   std::list<std::string> m_redirects;
+   std::list<std::any> m_args;
+   std::list<std::tuple<std::any, std::any>> m_redirects;
 };
 
 class GlobItem

@@ -45,17 +45,17 @@ protected:
 class ShParser
 {
 public:
-   ShParser(const std::list<std::string> &data, bool win32Escapes = false);
-   void lex();
-   void look();
-   void parseCommand();
-   void parsePipeline();
-   void parse();
+   ShParser(const std::string &data, bool win32Escapes = false, bool pipeFail = false);
+   std::any lex();
+   std::any look();
+   Command parseCommand();
+   Pipeline parsePipeline();
+   Seq parse();
 protected:
-   std::vector<std::string> m_data;
+   std::string m_data;
    bool m_win32Escapes;
-   bool m_pipefail;
-   std::list<std::string> m_tokens;
+   bool m_pipeFail;
+   std::list<std::any> m_tokens;
 };
 
 } // lit

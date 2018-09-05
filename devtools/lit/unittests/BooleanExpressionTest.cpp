@@ -11,6 +11,7 @@
 
 #include <gtest/gtest.h>
 #include "BooleanExpression.h"
+#include "Global.h"
 
 #define ASSERT_EXCEPTION( TRY_BLOCK, EXCEPTION_TYPE, MESSAGE )        \
    try                                                                   \
