@@ -166,12 +166,56 @@ std::any ShLexer::lexArg(char c)
 
 std::any ShLexer::lexOneToken()
 {
-
+   char c = eat();
+   if (c == ';') {
+      return std::tuple<std::string, int>{std::to_string(c), -1};
+   }
+   if (c == '|') {
+      if (maybeEat('|')) {
+         return std::tuple<std::string, int>("||", -1);
+      }
+      return std::tuple<std::string, int>{std::to_string(c), -1};
+   }
+   if (c == '&') {
+      if (maybeEat('&')) {
+         return std::tuple<std::string, int>{"&&", -1};
+      }
+      if (maybeEat('>')) {
+         return std::tuple<std::string, int>{"&>", -1};
+      }
+      return std::tuple<std::string, int>{std::to_string(c), -1};
+   }
+   if (c == '>') {
+      if (maybeEat('&')) {
+         return std::tuple<std::string, int>{">&", -1};
+      }
+      if (maybeEat('>')) {
+         return std::tuple<std::string, int>{">>", -1};
+      }
+      return std::tuple<std::string, int>{std::to_string(c), -1};
+   }
+   if (c == '<') {
+      if (maybeEat('&')) {
+         return std::tuple<std::string, int>{"<&", -1};
+      }
+      if (maybeEat('<')) {
+         return std::tuple<std::string, int>{"<<", -1};
+      }
+      return std::tuple<std::string, int>{std::to_string(c), -1};
+   }
 }
 
 std::list<std::any> ShLexer::lex()
 {
-
+   std::list<std::any> result;
+   while (m_pos != m_end) {
+      if (std::isspace(look())) {
+         eat();
+      } else {
+         result.push_back(lexOneToken());
+      }
+   }
+   return result;
 }
 
 } // lit
