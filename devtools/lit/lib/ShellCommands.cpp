@@ -8,3 +8,12 @@
 // See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/09/04.
+
+#include "ShellCommands.h"
+
+namespace polar {
+namespace lit {
+
+
+} // lit
+} // polar

@@ -15,14 +15,19 @@
 #include <list>
 #include <string>
 #include <any>
+#include <memory>
+#include <assert.h>
 
 namespace polar {
 namespace lit {
 
+using TokenType = std::tuple<std::any, std::any>;
+using TokenTypePointer = std::shared_ptr<TokenType>;
+
 class Command
 {
 public:
-   Command(const std::list<std::any> &args, const std::list<std::tuple<std::any, std::any>> &redirects)
+   Command(const std::list<std::any> &args, const std::list<TokenType> &redirects)
       : m_args(args),
         m_redirects(redirects)
    {}
@@ -31,7 +36,7 @@ public:
    bool operator ==(const Command &other);
 protected:
    std::list<std::any> m_args;
-   std::list<std::tuple<std::any, std::any>> m_redirects;
+   std::list<TokenType> m_redirects;
 };
 
 class GlobItem
@@ -50,17 +55,34 @@ protected:
 class Pipeline
 {
 public:
-   Pipeline(const std::list<Command> &commands, bool negate = false, bool pipeError = false);
+   Pipeline(const std::list<Command> &commands, bool negate = false, bool pipeError = false)
+      : m_commands(commands),
+        m_negate(negate),
+        m_pipeError(pipeError)
+   {
+   }
+
    operator std::string();
    bool operator ==(const Pipeline &other);
 protected:
    std::list<Command> m_commands;
+   bool m_negate;
+   bool m_pipeError;
 };
 
 class Seq
 {
 public:
-   Seq(const std::any &lhs, const std::string &op, const std::any &rhs);
+   Seq(const std::any &lhs, const std::string &op, const std::any &rhs)
+      : m_op(op),
+        m_lhs(lhs),
+        m_rhs(rhs)
+   {
+      assert(op.find(';') != std::string::npos ||
+            op.find('&') != std::string::npos ||
+            op.find("||") != std::string::npos ||
+            op.find("&&") != std::string::npos);
+   }
    operator std::string();
    bool operator ==(const GlobItem &other);
 protected:
