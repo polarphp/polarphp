@@ -26,7 +26,7 @@ public:
         m_redirects(redirects)
    {}
    operator std::string();
-   operator =(const Command &other);
+   bool operator ==(const Command &other);
 protected:
    std::list<std::string> m_args;
    std::list<std::string> m_redirects;
@@ -40,7 +40,7 @@ public:
    {}
    std::list<std::string> resolve(const std::string &cwd);
    operator std::string();
-   operator =(const GlobItem &other);
+   bool operator ==(const GlobItem &other);
 protected:
    std::string m_pattern;
 };
@@ -50,7 +50,7 @@ class Pipeline
 public:
    Pipeline(const std::list<Command> &commands, bool negate = false, bool pipeError = false);
    operator std::string();
-   operator =(const Pipeline &other);
+   bool operator ==(const Pipeline &other);
 protected:
    std::list<Command> m_commands;
 };
@@ -60,7 +60,7 @@ class Seq
 public:
    Seq(const std::string &lhs, const std::string &op, const std::string &rhs);
    operator std::string();
-   operator =(const GlobItem &other);
+   bool operator ==(const GlobItem &other);
 protected:
    std::string m_op;
    std::string m_lhs;

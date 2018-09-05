@@ -15,6 +15,8 @@
 #include <vector>
 #include <string>
 #include <list>
+#include "ShellCommands.h"
+#include <any>
 
 namespace polar {
 namespace lit {
@@ -22,19 +24,19 @@ namespace lit {
 class ShLexer
 {
 public:
-   ShLexer(const std::vector<std::string> &data, bool win32Escapes = false);
-   void eat();
-   void look();
+   ShLexer(const std::string &data, bool win32Escapes = false);
+   char eat();
+   char look();
    bool maybeEat(char c);
-   void lexArgFast();
-   void lexArgSlow();
-   void lexArgQuoted();
+   std::any lexArgFast(char c);
+   std::any lexArgSlow(char c);
+   std::string lexArgQuoted(char delim);
    void lexArgChecked();
-   void lexArg();
-   void lexOneToken();
-   void lex();
+   std::any lexArg(char c);
+   std::any lexOneToken();
+   std::list<std::any> lex();
 protected:
-   std::vector<char> m_data;
+   std::string m_data;
    int m_pos;
    int m_end;
    bool m_win32Escapes;
