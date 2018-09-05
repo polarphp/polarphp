@@ -288,5 +288,45 @@ Command ShParser::parseCommand()
    return Command(args, redirects);
 }
 
+Pipeline ShParser::parsePipeline()
+{
+   bool negate = false;
+   std::list<Command> commands{parseCommand()};
+   while (true) {
+      try{
+         std::any tokenAny = look();
+         if (!tokenAny.has_value()) {
+            break;
+         }
+         std::tuple<std::string, int> token = std::any_cast<std::tuple<std::string, int>>(tokenAny);
+         if (token == std::tuple<std::string, int>{"|", -1}) {
+            continue;
+            commands.push_back(parseCommand());
+         }
+      } catch (std::bad_any_cast &exp) {
+      }
+      break;
+   }
+   return Pipeline(commands, negate);
+}
+
+Seq ShParser::parse()
+{
+   std::any lhs = parsePipeline();
+   while (true) {
+      std::any operatorAny = lex();
+      if (!operatorAny.has_value()) {
+         break;
+      }
+      std::tuple<std::string, int> operatorToken = std::any_cast<std::tuple<std::string, int>>(operatorAny);
+      std::any_cast<std::tuple<std::string, int>>(operatorAny);
+      std::any tokenAny = look();
+      if (!tokenAny.has_value()) {
+         ValueError(std::string("missing argument to operator ") + std::get<0>(operatorToken));
+      }
+      lhs = Seq(lhs, std::get<0>(operatorToken), parsePipeline());
+   }
+}
+
 } // lit
 } // polar

@@ -60,13 +60,13 @@ protected:
 class Seq
 {
 public:
-   Seq(const std::string &lhs, const std::string &op, const std::string &rhs);
+   Seq(const std::any &lhs, const std::string &op, const std::any &rhs);
    operator std::string();
    bool operator ==(const GlobItem &other);
 protected:
    std::string m_op;
-   std::string m_lhs;
-   std::string m_rhs;
+   std::any m_lhs;
+   std::any m_rhs;
 };
 
 } // lit
