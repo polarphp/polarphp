@@ -14,6 +14,8 @@
 
 #include <string>
 #include <unordered_map>
+#include <any>
+#include "nlohmann/json.hpp"
 
 namespace polar {
 namespace lit {
@@ -21,7 +23,7 @@ namespace lit {
 class ResultCode
 {
 public:
-   ResultCode &getInstance(const std::string &name, bool isFailure)
+   static ResultCode &getInstance(const std::string &name, bool isFailure)
    {
       if (sm_instances.find(name) != sm_instances.end()) {
          return *sm_instances.at(name);
@@ -39,6 +41,11 @@ public:
       }
    }
 
+   bool operator == (const ResultCode &other)
+   {
+      return m_name == other.m_name && m_isFailure == other.m_isFailure;
+   }
+
    operator std::string()
    {
       return std::string("polar::lit::ResultCode "+ m_name + "/" + std::to_string(m_isFailure));
@@ -52,6 +59,79 @@ protected:
    std::string m_name;
    bool m_isFailure;
    static std::unordered_map<std::string, ResultCode *> sm_instances;
+};
+
+const static ResultCode &PASS = ResultCode::getInstance("PASS", false);
+const static ResultCode &FLAKYPASS = ResultCode::getInstance("FLAKYPASS", false);
+const static ResultCode &XFAIL = ResultCode::getInstance("XFAIL", false);
+const static ResultCode &FAIL = ResultCode::getInstance("FAIL", true);
+const static ResultCode &XPASS = ResultCode::getInstance("XPASS", true);
+const static ResultCode &UNRESOLVED = ResultCode::getInstance("UNRESOLVED", true);
+const static ResultCode &UNSUPPORTED = ResultCode::getInstance("UNSUPPORTED", false);
+const static ResultCode &TIMEOUT = ResultCode::getInstance("TIMEOUT", true);
+
+class MetricValue
+{
+public:
+   virtual std::string format() = 0;
+   virtual std::any todata() = 0;
+};
+
+class IntMetricValue : public MetricValue
+{
+public:
+   IntMetricValue(int value)
+      : m_value(value)
+   {}
+   std::string format()
+   {
+      return std::to_string(m_value);
+   }
+
+   std::any todata()
+   {
+      return m_value;
+   }
+protected:
+   int m_value;
+};
+
+class RealMetricValue : public MetricValue
+{
+public:
+   RealMetricValue(double value)
+      : m_value(value)
+   {
+   }
+
+   std::string format()
+   {
+      char buffer[32];
+      std::sprintf(buffer, "%.4f", m_value);
+      return buffer;
+   }
+
+   std::any todata()
+   {
+      return m_value;
+   }
+protected:
+   double m_value;
+};
+
+class JSONMetricValue : public MetricValue
+{
+public:
+   std::string format()
+   {
+
+   }
+
+   std::any todata()
+   {
+   }
+
+
 };
 
 } // lit

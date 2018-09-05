@@ -26,6 +26,7 @@ set_target_properties(
    PROPERTIES
    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib;${CMAKE_CURRENT_BINARY_DIR}"
    )
+target_link_libraries(litkernel PRIVATE nlohmann_json::nlohmann_json)
 
 if (APPLE)
    set(POLAR_OS_DARWIN ON)
