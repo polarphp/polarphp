@@ -85,6 +85,13 @@ bool string_endswith(const std::string &str, const std::string &searchStr) noexc
 
 std::string join_string_list(const std::list<std::string> &list, const std::string &glue) noexcept;
 
+template <typename... ArgTypes>
+std::string format_string(const std::string &format, ArgTypes&&...args)
+{
+   char buffer[256];
+   std::sprintf(buffer, format.c_str(), std::forward<ArgTypes>(args)...);
+}
+
 } // lit
 } // polar
 

@@ -16,6 +16,7 @@
 #include <set>
 #include <map>
 #include <list>
+#include <any>
 
 namespace polar {
 namespace lit {
@@ -65,6 +66,8 @@ public:
    const std::set<std::string> &getLimitToFeatures();
    bool isEarly();
    void loadFromPath(const std::string &path, const LitConfig &litConfig);
+   std::any getExtraConfig(const std::string &name, const std::any &defaultValue = std::any{});
+   TestingConfig &setExtraConfig(const std::string &name, const std::any &value);
 protected:
    TestingConfig *m_parent;
    std::string m_name;
@@ -81,6 +84,7 @@ protected:
    std::set<std::string> m_limitToFeatures;
    bool m_isEarly;
    std::string m_parallelismGroup;
+   std::map<std::string, std::any> m_extraConfig;
 };
 
 } // lit

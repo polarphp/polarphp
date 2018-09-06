@@ -18,6 +18,7 @@
 #include <list>
 #include "nlohmann/json.hpp"
 #include "TestingConfig.h"
+#include "Utils.h"
 
 namespace polar {
 namespace lit {
@@ -77,6 +78,8 @@ class MetricValue
 public:
    virtual std::string format() = 0;
    virtual std::any todata() = 0;
+   ~MetricValue()
+   {}
 };
 
 class IntMetricValue : public MetricValue
@@ -163,9 +166,13 @@ class Result
 {
 public:
    Result(int code, std::string output = "", std::optional<int> elapsed = std::nullopt);
-   void addMetric(const std::string &name, MetricValue *value);
-   void addMicroResult(const std::string &name, const Result &microResult);
+   Result &addMetric(const std::string &name, MetricValue *value);
+   Result &addMicroResult(const std::string &name, std::shared_ptr<Result> microResult);
+   ~Result();
 protected:
+   int m_code;
+   std::string m_output;
+   std::optional<int> m_elapsed;
    std::unordered_map<std::string, MetricValue *> m_metrics;
    std::unordered_map<std::string, std::shared_ptr<Result>> m_microResults;
 };
@@ -189,12 +196,12 @@ class Test
 public:
    Test(const TestSuite &suit, const std::string &pathInSuite,
         const TestingConfig &config, std::optional<std::string> &filePath);
-   void setResult();
+   void setResult(const Result &result);
    void getFullName();
    void getFilePath();
    void getSourcePath();
    void getExecPath();
-   void isExpectedToFail();
+   bool isExpectedToFail();
    void isWithinFeatureLimits();
    void getMissingRequiredFeaturesFromList();
    void getMissingRequiredFeatures();
@@ -209,7 +216,7 @@ protected:
    std::list<std::string> m_xfails;
    std::list<std::string> m_requires;
    std::list<std::string> m_unsupported;
-   std::optional<std::string> m_result;
+   std::optional<Result> m_result;
 };
 
 } // lit
