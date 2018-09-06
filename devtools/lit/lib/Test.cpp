@@ -18,11 +18,48 @@ namespace lit {
 
 std::unordered_map<std::string, ResultCode *> ResultCode::sm_instances{};
 
-Result::Result(int code, std::string output, std::optional<int> elapsed)
+Result::Result(const ResultCode &code, std::string output, std::optional<int> elapsed)
    : m_code(code),
      m_output(output),
      m_elapsed(elapsed)
 {
+}
+
+const ResultCode &Result::getCode()
+{
+   return m_code;
+}
+
+Result &Result::setCode(const ResultCode &code)
+{
+   m_code = code;
+   return *this;
+}
+
+const std::string &Result::getOutput()
+{
+   return m_output;
+}
+
+Result &Result::setOutput(const std::string &output)
+{
+   m_output = output;
+   return *this;
+}
+
+const std::optional<int> &Result::getElapsed()
+{
+   return m_elapsed;
+}
+
+const std::unordered_map<std::string, MetricValue *> &Result::getMetrics()
+{
+   return m_metrics;
+}
+
+std::unordered_map<std::string, std::shared_ptr<Result>> &Result::getMicroResults()
+{
+   return m_microResults;
 }
 
 Result::~Result()
@@ -70,10 +107,23 @@ void Test::setResult(const Result &result)
    // Apply the XFAIL handling to resolve the result exit code.
    try {
       if (isExpectedToFail()) {
-
+         if (m_result.has_value()) {
+            Result &selfResult = m_result.value();
+            const ResultCode &code = selfResult.getCode();
+            if (code == PASS) {
+               selfResult.setCode(XPASS);
+            } else if (code == FAIL) {
+               selfResult.setCode(XFAIL);
+            }
+         }
       }
    } catch (ValueError &e) {
-
+      // Syntax error in an XFAIL line.
+      if (m_result.has_value()) {
+         Result &selfResult = m_result.value();
+         selfResult.setCode(UNRESOLVED);
+         selfResult.setOutput(e.what());
+      }
    }
 }
 
@@ -95,7 +145,7 @@ bool Test::isExpectedToFail()
             return true;
          }
       } catch (ValueError &error) {
-          throw ValueError(format_string("Error in XFAIL list:\n%s", error.what()));
+         throw ValueError(format_string("Error in XFAIL list:\n%s", error.what()));
       }
    }
    return false;

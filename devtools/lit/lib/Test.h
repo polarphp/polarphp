@@ -44,7 +44,7 @@ public:
       }
    }
 
-   bool operator == (const ResultCode &other)
+   bool operator == (const ResultCode &other) const
    {
       return m_name == other.m_name && m_isFailure == other.m_isFailure;
    }
@@ -165,12 +165,19 @@ inline JSONMetricValue to_meteric_value(T value)
 class Result
 {
 public:
-   Result(int code, std::string output = "", std::optional<int> elapsed = std::nullopt);
+   Result(const ResultCode &code, std::string output = "", std::optional<int> elapsed = std::nullopt);
    Result &addMetric(const std::string &name, MetricValue *value);
    Result &addMicroResult(const std::string &name, std::shared_ptr<Result> microResult);
    ~Result();
+   const ResultCode &getCode();
+   Result &setCode(const ResultCode &code);
+   const std::string &getOutput();
+   Result &setOutput(const std::string &output);
+   const std::optional<int> &getElapsed();
+   const std::unordered_map<std::string, MetricValue *> &getMetrics();
+   std::unordered_map<std::string, std::shared_ptr<Result>> &getMicroResults();
 protected:
-   int m_code;
+   ResultCode m_code;
    std::string m_output;
    std::optional<int> m_elapsed;
    std::unordered_map<std::string, MetricValue *> m_metrics;
