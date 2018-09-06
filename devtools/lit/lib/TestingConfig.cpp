@@ -76,6 +76,71 @@ TestingConfig *TestingConfig::getParent()
    }
 }
 
+const std::string &TestingConfig::getName()
+{
+   return m_name;
+}
+
+const std::set<std::string> &TestingConfig::getSuffixes()
+{
+   return m_suffixes;
+}
+
+const std::optional<std::string> &TestingConfig::getTestFormat()
+{
+   return m_testFormat;
+}
+
+const std::map<std::string, std::string> &TestingConfig::getEnvironment()
+{
+   return m_environment;
+}
+
+const std::list<std::string> &TestingConfig::getSubstitutions()
+{
+   return m_substitutions;
+}
+
+bool TestingConfig::isUnsupported()
+{
+   return m_unsupported;
+}
+
+const std::optional<std::string> &TestingConfig::getTestExecRoot()
+{
+   return m_testExecRoot;
+}
+
+const std::optional<std::string> &TestingConfig::getTestSourceRoot()
+{
+   return m_testSourceRoot;
+}
+
+const std::set<std::string> &TestingConfig::getExcludes()
+{
+   return m_excludes;
+}
+
+const std::set<std::string> &TestingConfig::getAvailableFeatures()
+{
+   return m_availableFeatures;
+}
+
+bool TestingConfig::isPipefail()
+{
+   return m_pipefail;
+}
+
+const std::set<std::string> &TestingConfig::getLimitToFeatures()
+{
+   return m_limitToFeatures;
+}
+
+bool TestingConfig::isEarly()
+{
+   return m_isEarly;
+}
+
 void TestingConfig::loadFromPath(const std::string &path, const LitConfig &litConfig)
 {
 

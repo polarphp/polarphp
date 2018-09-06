@@ -15,7 +15,9 @@
 #include <string>
 #include <unordered_map>
 #include <any>
+#include <list>
 #include "nlohmann/json.hpp"
+#include "TestingConfig.h"
 
 namespace polar {
 namespace lit {
@@ -156,6 +158,59 @@ inline JSONMetricValue to_meteric_value(T value)
 {
    return JSONMetricValue(value);
 }
+
+class Result
+{
+public:
+   Result(int code, std::string output = "", std::optional<int> elapsed = std::nullopt);
+   void addMetric(const std::string &name, MetricValue *value);
+   void addMicroResult(const std::string &name, const Result &microResult);
+protected:
+   std::unordered_map<std::string, MetricValue *> m_metrics;
+   std::unordered_map<std::string, std::shared_ptr<Result>> m_microResults;
+};
+
+class TestSuite
+{
+public:
+   TestSuite(const std::string &name, const std::string &sourceRoot,
+             const std::string &execRoot, const TestingConfig &config);
+   std::string getSourcePath(const std::list<std::string> &components);
+   std::string getExecPath(const std::list<std::string> &components);
+protected:
+   std::string m_name;
+   std::string m_sourceRoot;
+   std::string m_execRoot;
+   TestingConfig m_config;
+};
+
+class Test
+{
+public:
+   Test(const TestSuite &suit, const std::string &pathInSuite,
+        const TestingConfig &config, std::optional<std::string> &filePath);
+   void setResult();
+   void getFullName();
+   void getFilePath();
+   void getSourcePath();
+   void getExecPath();
+   void isExpectedToFail();
+   void isWithinFeatureLimits();
+   void getMissingRequiredFeaturesFromList();
+   void getMissingRequiredFeatures();
+   void getUnsupportedFeatures();
+   void isEarlyTest();
+   void writeJUnitXML();
+protected:
+   TestSuite m_suite;
+   std::string m_pathInSuite;
+   TestingConfig m_config;
+   std::optional<std::string> m_filePath;
+   std::list<std::string> m_xfails;
+   std::list<std::string> m_requires;
+   std::list<std::string> m_unsupported;
+   std::optional<std::string> m_result;
+};
 
 } // lit
 } // polar

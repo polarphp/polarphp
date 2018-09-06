@@ -29,7 +29,7 @@ public:
                  const std::map<std::string, std::string> &environment, const std::list<std::string> &substitutions,
                  bool unsupported, const std::optional<std::string> &testExecRoot,
                  const std::optional<std::string> &testSourceRoot, const std::set<std::string> &excludes,
-                 const std::set<std::string> &availableFeatures, bool pipefai,
+                 const std::set<std::string> &availableFeatures, bool pipefail,
                  const std::set<std::string> &limitToFeatures = {}, bool isEarly = false,
                  const std::string &parallelismGroup = "")
       : m_parent(parent),
@@ -43,7 +43,7 @@ public:
         m_testSourceRoot(testSourceRoot),
         m_excludes(excludes),
         m_availableFeatures(availableFeatures),
-        m_pipefail(pipefai),
+        m_pipefail(pipefail),
         m_limitToFeatures(limitToFeatures),
         m_isEarly(isEarly),
         m_parallelismGroup(parallelismGroup)
@@ -51,6 +51,19 @@ public:
 public:
    static TestingConfig fromDefaults(const LitConfig &litConfig);
    TestingConfig *getParent();
+   const std::string &getName();
+   const std::set<std::string> &getSuffixes();
+   const std::optional<std::string> &getTestFormat();
+   const std::map<std::string, std::string> &getEnvironment();
+   const std::list<std::string> &getSubstitutions();
+   bool isUnsupported();
+   const std::optional<std::string> &getTestExecRoot();
+   const std::optional<std::string> &getTestSourceRoot();
+   const std::set<std::string> &getExcludes();
+   const std::set<std::string> &getAvailableFeatures();
+   bool isPipefail();
+   const std::set<std::string> &getLimitToFeatures();
+   bool isEarly();
    void loadFromPath(const std::string &path, const LitConfig &litConfig);
 protected:
    TestingConfig *m_parent;

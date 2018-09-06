@@ -51,7 +51,6 @@ endif()
 add_library(nlohmann_json::nlohmann_json INTERFACE IMPORTED)
 
 set_target_properties(nlohmann_json::nlohmann_json PROPERTIES
-  INTERFACE_COMPILE_FEATURES "cxx_std_17"
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include;${_IMPORT_PREFIX}/include"
 )
 
