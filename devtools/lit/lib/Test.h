@@ -122,17 +122,40 @@ protected:
 class JSONMetricValue : public MetricValue
 {
 public:
+   template <typename T>
+   JSONMetricValue(const T &value)
+      : m_value(value)
+   {}
    std::string format()
    {
-
+      return m_value.dump(2);
    }
 
    std::any todata()
    {
+      return m_value;
    }
-
-
+protected:
+   nlohmann::json m_value;
 };
+
+template <typename T, typename std::enable_if<std::is_integral<T>::value>::type>
+inline IntMetricValue to_meteric_value(T value)
+{
+   return IntMetricValue(value);
+}
+
+template <typename T, typename std::enable_if<std::is_floating_point<T>::value>::type>
+inline RealMetricValue to_meteric_value(T value)
+{
+   return RealMetricValue(value);
+}
+
+template <typename T, typename std::enable_if<!std::is_integral<T>::value && !std::is_floating_point<T>::value>::type>
+inline JSONMetricValue to_meteric_value(T value)
+{
+   return JSONMetricValue(value);
+}
 
 } // lit
 } // polar
