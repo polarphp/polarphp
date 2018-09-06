@@ -146,19 +146,5 @@ void TestingConfig::loadFromPath(const std::string &path, const LitConfig &litCo
 
 }
 
-std::any TestingConfig::getExtraConfig(const std::string &name, const std::any &defaultValue)
-{
-   if (m_extraConfig.find(name) != m_extraConfig.end()) {
-      return m_extraConfig.at(name);
-   }
-   return defaultValue;
-}
-
-TestingConfig &TestingConfig::setExtraConfig(const std::string &name, const std::any &value)
-{
-   m_extraConfig[name] = value;
-   return *this;
-}
-
 } // lit
 } // polar

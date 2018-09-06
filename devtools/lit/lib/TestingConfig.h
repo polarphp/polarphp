@@ -66,8 +66,10 @@ public:
    const std::set<std::string> &getLimitToFeatures();
    bool isEarly();
    void loadFromPath(const std::string &path, const LitConfig &litConfig);
-   std::any getExtraConfig(const std::string &name, const std::any &defaultValue = std::any{});
-   TestingConfig &setExtraConfig(const std::string &name, const std::any &value);
+   template <typename T>
+   const T &getExtraConfig(const std::string &name, const T &defaultValue = T{});
+   template <typename T>
+   TestingConfig &setExtraConfig(const std::string &name, const T &value);
 protected:
    TestingConfig *m_parent;
    std::string m_name;
@@ -86,6 +88,22 @@ protected:
    std::string m_parallelismGroup;
    std::map<std::string, std::any> m_extraConfig;
 };
+
+template <typename T>
+const T &TestingConfig::getExtraConfig(const std::string &name, const T &defaultValue)
+{
+   if (m_extraConfig.find(name) != m_extraConfig.end()) {
+      return std::any_cast<T &>(m_extraConfig.at(name));
+   }
+   return defaultValue;
+}
+
+template <typename T>
+TestingConfig &TestingConfig::setExtraConfig(const std::string &name, const T &value)
+{
+   m_extraConfig[name] = value;
+   return *this;
+}
 
 } // lit
 } // polar

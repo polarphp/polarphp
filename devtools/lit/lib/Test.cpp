@@ -78,6 +78,7 @@ void Test::setResult(const Result &result)
 
 bool Test::isExpectedToFail()
 {
+   const std::set<std::string> &features = m_config.getAvailableFeatures();
 
 }
 
