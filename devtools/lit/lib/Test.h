@@ -189,8 +189,10 @@ class TestSuite
 public:
    TestSuite(const std::string &name, const std::string &sourceRoot,
              const std::string &execRoot, const TestingConfig &config);
+   const std::string &getName();
    std::string getSourcePath(const std::list<std::string> &components);
    std::string getExecPath(const std::list<std::string> &components);
+   TestingConfig &getConfig();
 protected:
    std::string m_name;
    std::string m_sourceRoot;
@@ -204,7 +206,7 @@ public:
    Test(const TestSuite &suit, const std::string &pathInSuite,
         const TestingConfig &config, std::optional<std::string> &filePath);
    void setResult(const Result &result);
-   void getFullName();
+   std::string getFullName();
    void getFilePath();
    void getSourcePath();
    void getExecPath();

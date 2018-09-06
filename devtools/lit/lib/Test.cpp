@@ -88,6 +88,44 @@ Result &Result::addMicroResult(const std::string &name, std::shared_ptr<Result> 
    return *this;
 }
 
+TestSuite::TestSuite(const std::string &name, const std::string &sourceRoot,
+                     const std::string &execRoot, const TestingConfig &config)
+   : m_name(name),
+     m_sourceRoot(sourceRoot),
+     m_execRoot(execRoot),
+     m_config(config)
+{
+   // m_config is the test suite configuration.
+}
+
+const std::string &TestSuite::getName()
+{
+   return m_name;
+}
+
+std::string TestSuite::getSourcePath(const std::list<std::string> &components)
+{
+   fs::path base(m_sourceRoot);
+   for (const std::string &item : components) {
+      base /= item;
+   }
+   return base.string();
+}
+
+std::string TestSuite::getExecPath(const std::list<std::string> &components)
+{
+   fs::path base(m_execRoot);
+   for (const std::string &item : components) {
+      base /= item;
+   }
+   return base.string();
+}
+
+TestingConfig &TestSuite::getConfig()
+{
+   return m_config;
+}
+
 Test::Test(const TestSuite &suit, const std::string &pathInSuite,
            const TestingConfig &config, std::optional<std::string> &filePath)
    : m_suite(suit),
@@ -125,6 +163,10 @@ void Test::setResult(const Result &result)
          selfResult.setOutput(e.what());
       }
    }
+}
+
+std::string Test::getFullName()
+{
 }
 
 bool Test::isExpectedToFail()
