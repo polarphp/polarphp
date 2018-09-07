@@ -203,27 +203,27 @@ protected:
 class Test
 {
 public:
-   Test(const TestSuite &suit, const std::string &pathInSuite,
+   Test(const TestSuite &suit, const std::list<std::string> &pathInSuite,
         const TestingConfig &config, std::optional<std::string> &filePath);
    void setResult(const Result &result);
    std::string getFullName();
-   void getFilePath();
-   void getSourcePath();
-   void getExecPath();
+   std::string getFilePath();
+   std::string getSourcePath();
+   std::string getExecPath();
    bool isExpectedToFail();
-   void isWithinFeatureLimits();
-   void getMissingRequiredFeaturesFromList();
-   void getMissingRequiredFeatures();
-   void getUnsupportedFeatures();
-   void isEarlyTest();
-   void writeJUnitXML();
+   bool isWithinFeatureLimits();
+   std::list<std::string> getMissingRequiredFeaturesFromList(const std::set<std::string> &features);
+   std::list<std::string> getMissingRequiredFeatures();
+   std::list<std::string> getUnsupportedFeatures();
+   bool isEarlyTest();
+   void writeJUnitXML(std::string &xmlStr);
 protected:
    TestSuite m_suite;
-   std::string m_pathInSuite;
+   std::list<std::string> m_pathInSuite;
    TestingConfig m_config;
    std::optional<std::string> m_filePath;
    std::list<std::string> m_xfails;
-   std::list<std::string> m_requires;
+   std::set<std::string> m_requires;
    std::list<std::string> m_unsupported;
    std::optional<Result> m_result;
 };

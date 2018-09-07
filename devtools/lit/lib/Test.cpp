@@ -12,6 +12,7 @@
 #include "Test.h"
 #include "Global.h"
 #include "BooleanExpression.h"
+#include <set>
 
 namespace polar {
 namespace lit {
@@ -126,7 +127,7 @@ TestingConfig &TestSuite::getConfig()
    return m_config;
 }
 
-Test::Test(const TestSuite &suit, const std::string &pathInSuite,
+Test::Test(const TestSuite &suit, const std::list<std::string> &pathInSuite,
            const TestingConfig &config, std::optional<std::string> &filePath)
    : m_suite(suit),
      m_pathInSuite(pathInSuite),
@@ -167,6 +168,25 @@ void Test::setResult(const Result &result)
 
 std::string Test::getFullName()
 {
+   return m_config.getName() + " :: " + join_string_list(m_pathInSuite, "/");
+}
+
+std::string Test::getFilePath()
+{
+   if (m_filePath.has_value()) {
+      return m_filePath.value();
+   }
+   return getSourcePath();
+}
+
+std::string Test::getSourcePath()
+{
+   return m_suite.getSourcePath(m_pathInSuite);
+}
+
+std::string Test::getExecPath()
+{
+   return m_suite.getExecPath(m_pathInSuite);
 }
 
 bool Test::isExpectedToFail()
@@ -191,6 +211,86 @@ bool Test::isExpectedToFail()
       }
    }
    return false;
+}
+
+bool Test::isWithinFeatureLimits()
+{
+   if (m_config.getLimitToFeatures().empty()) {
+      return true; // No limits. Run it.
+   }
+   // Check the requirements as-is (#1)
+   if (!getMissingRequiredFeatures().empty()) {
+      return false;
+   }
+   // Check the requirements after removing the limiting features (#2)
+   std::set<std::string> featuresMinusLimits;
+   const std::set<std::string> &availableFeatures = m_config.getAvailableFeatures();
+   const std::set<std::string> &limitToFeatures = m_config.getLimitToFeatures();
+   auto iter = availableFeatures.begin();
+   auto endMark = availableFeatures.end();
+   while (iter != endMark) {
+      if (limitToFeatures.find(*iter) == limitToFeatures.end()) {
+         featuresMinusLimits.insert(*iter);
+      }
+      ++iter;
+   }
+   if (getMissingRequiredFeaturesFromList(featuresMinusLimits).empty()) {
+      return false;
+   }
+   return true;
+}
+
+std::list<std::string> Test::getMissingRequiredFeatures()
+{
+   const std::set<std::string> &features = m_config.getAvailableFeatures();
+   return getMissingRequiredFeaturesFromList(features);
+}
+
+std::list<std::string> Test::getMissingRequiredFeaturesFromList(const std::set<std::string> &features)
+{
+   std::list<std::string> ret;
+   try {
+      for (const std::string &item : m_requires) {
+         if (!BooleanExpression::evaluate(item, m_requires)) {
+            ret.push_back(item);
+         }
+      }
+      return ret;
+   } catch (ValueError &error) {
+      throw ValueError(format_string("Error in REQUIRES list:\n%s", error.what()));
+   }
+}
+
+std::list<std::string> Test::getUnsupportedFeatures()
+{
+   std::list<std::string> ret;
+   const std::set<std::string> &features = m_config.getAvailableFeatures();
+   const std::string &triple = m_config.getExtraConfig<std::string>("target_triple", std::string(""));
+   try {
+      for (const std::string &item : m_unsupported) {
+         if (BooleanExpression::evaluate(item, features, triple)) {
+            ret.push_back(item);
+         }
+      }
+      return ret;
+   } catch (ValueError &error) {
+      throw ValueError(format_string("Error in UNSUPPORTED list:\n%s", error.what()));
+   }
+}
+
+bool Test::isEarlyTest()
+{
+   return m_suite.getConfig().isEarly();
+}
+
+void Test::writeJUnitXML(std::string &xmlStr)
+{
+   std::string &testName = *m_pathInSuite.rbegin();
+   std::list<std::string> safeTestPath;
+   auto piter = m_pathInSuite.begin();
+   for (int i = 0; i < m_pathInSuite.size() - 1; ++i) {
+
+   }
 }
 
 } // lit
