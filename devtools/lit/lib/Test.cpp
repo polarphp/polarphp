@@ -35,7 +35,7 @@ Result::Result(const ResultCode &code, std::string output, std::optional<int> el
 {
 }
 
-const ResultCode &Result::getCode()
+const ResultCode &Result::getCode() const
 {
    return m_code;
 }
@@ -46,7 +46,7 @@ Result &Result::setCode(const ResultCode &code)
    return *this;
 }
 
-const std::string &Result::getOutput()
+const std::string &Result::getOutput() const
 {
    return m_output;
 }
@@ -57,12 +57,12 @@ Result &Result::setOutput(const std::string &output)
    return *this;
 }
 
-const std::optional<int> &Result::getElapsed()
+const std::optional<int> &Result::getElapsed() const
 {
    return m_elapsed;
 }
 
-const std::unordered_map<std::string, MetricValue *> &Result::getMetrics()
+const std::unordered_map<std::string, MetricValue *> &Result::getMetrics() const
 {
    return m_metrics;
 }
@@ -298,7 +298,44 @@ void Test::writeJUnitXML(std::string &xmlStr)
    std::list<std::string> safeTestPath;
    auto piter = m_pathInSuite.begin();
    for (int i = 0; i < m_pathInSuite.size() - 1; ++i) {
+      std::string pathItem = *piter;
+      replace_string(".", "_", pathItem);
+      safeTestPath.push_back(pathItem);
+      ++piter;
+   }
+   std::string safeName = m_suite.getName();
+   std::string className;
+   replace_string(".", "_", safeName);
+   if (!safeTestPath.empty()) {
+      className = safeName + "." + join_string_list(safeTestPath, "/");
+   } else {
+      className = safeName;
+   }
 
+   std::string testcaseTemplate = "<testcase classname=\"%s\" name=\"%s\" time=\"%.2f\"";
+   float elapsedTime = 0.0;
+   if (m_result.has_value() && m_result.value().getElapsed().has_value()){
+      elapsedTime = m_result.value().getElapsed().value();
+   }
+   std::string testcaseXml = format_string(testcaseTemplate, className.c_str(), testName.c_str(), elapsedTime);
+   xmlStr = testcaseXml;
+   if (m_result && m_result.value().getCode().isFailure()) {
+      xmlStr += ">\n\t<failure ><![CDATA[";
+      std::string output = m_result.value().getOutput();
+      replace_string("]]>", "]]]]><![CDATA[>", output);
+      xmlStr += output;
+      xmlStr += "]]></failure>\n</testcase>";
+   } else if (m_result && m_result.value().getCode() == UNSUPPORTED) {
+      std::list<std::string> unsupportedFeatures = getMissingRequiredFeatures();
+      std::string skipMessage;
+      if (!unsupportedFeatures.empty()) {
+         skipMessage = "Skipping because of: " + join_string_list(unsupportedFeatures, ", ");
+      } else {
+         skipMessage = "Skipping because of configuration.";
+      }
+      xmlStr += format_string(">\n\t<skipped message=\"%s\" />\n</testcase>\n", skipMessage);
+   } else {
+      xmlStr += "/>";
    }
 }
 

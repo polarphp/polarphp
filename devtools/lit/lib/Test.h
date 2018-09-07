@@ -53,6 +53,16 @@ public:
    {
       return std::string("polar::lit::ResultCode "+ m_name + "/" + std::to_string(m_isFailure));
    }
+
+   const std::string &getName() const
+   {
+      return m_name;
+   }
+
+   bool isFailure() const
+   {
+      return m_isFailure;
+   }
 protected:
    ResultCode(const std::string &name, bool isFailure)
       : m_name(name),
@@ -169,12 +179,12 @@ public:
    Result &addMetric(const std::string &name, MetricValue *value);
    Result &addMicroResult(const std::string &name, std::shared_ptr<Result> microResult);
    ~Result();
-   const ResultCode &getCode();
+   const ResultCode &getCode() const;
    Result &setCode(const ResultCode &code);
-   const std::string &getOutput();
+   const std::string &getOutput() const;
    Result &setOutput(const std::string &output);
-   const std::optional<int> &getElapsed();
-   const std::unordered_map<std::string, MetricValue *> &getMetrics();
+   const std::optional<int> &getElapsed() const;
+   const std::unordered_map<std::string, MetricValue *> &getMetrics() const;
    std::unordered_map<std::string, std::shared_ptr<Result>> &getMicroResults();
 protected:
    ResultCode m_code;
