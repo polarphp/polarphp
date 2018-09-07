@@ -150,7 +150,7 @@ TEST_F(UtilsTest, testListdirFiles)
    }
    {
       std::list<std::string> expected{
-               sm_tempDir / "aaa" / "bbb" / "ccc" / "polarphp.dynamic"
+         sm_tempDir / "aaa" / "bbb" / "ccc" / "polarphp.dynamic"
       };
       std::list<std::string> files = polar::lit::listdir_files(( sm_tempDir / "aaa" / "bbb" / "ccc").string());
       ASSERT_EQ(files, expected);
@@ -195,5 +195,19 @@ TEST_F(UtilsTest, testJoinStringList)
       ASSERT_EQ(polar::lit::join_string_list(paths, ""), "aaa");
       ASSERT_EQ(polar::lit::join_string_list(paths, "-"), "aaa");
       ASSERT_EQ(polar::lit::join_string_list(paths, "xxx"), "aaa");
+   }
+}
+
+TEST_F(UtilsTest, testReplaceString)
+{
+   {
+      std::string str("I am from China, I love php programming language!");
+      polar::lit::replace_string("php", "polarphp", str);
+      ASSERT_EQ(str, "I am from China, I love polarphp programming language!");
+   }
+   {
+      std::string str("aaabbbccc");
+      polar::lit::replace_string("php", "polarphp", str);
+      ASSERT_EQ(str, "aaabbbccc");
    }
 }

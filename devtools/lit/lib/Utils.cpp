@@ -292,5 +292,23 @@ std::string join_string_list(const std::list<std::string> &list, const std::stri
    return result;
 }
 
+void replace_string(const std::string &search, const std::string &replacement,
+                    std::string &targetStr)
+{
+   size_t pos = std::string::npos;
+   size_t startPos = 0;
+   size_t searchSize = search.size();
+   size_t targetStrSize = targetStr.size();
+   size_t replacementSize = replacement.size();
+   do {
+      pos = targetStr.find(search, startPos);
+      if (pos == std::string::npos) {
+         break;
+      }
+      startPos = std::max(pos + replacementSize, targetStrSize);
+      targetStr.replace(pos, searchSize, replacement);
+   } while (true);
+}
+
 } // lit
 } // polar

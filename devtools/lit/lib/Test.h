@@ -64,14 +64,14 @@ protected:
    static std::unordered_map<std::string, ResultCode *> sm_instances;
 };
 
-const static ResultCode &PASS = ResultCode::getInstance("PASS", false);
-const static ResultCode &FLAKYPASS = ResultCode::getInstance("FLAKYPASS", false);
-const static ResultCode &XFAIL = ResultCode::getInstance("XFAIL", false);
-const static ResultCode &FAIL = ResultCode::getInstance("FAIL", true);
-const static ResultCode &XPASS = ResultCode::getInstance("XPASS", true);
-const static ResultCode &UNRESOLVED = ResultCode::getInstance("UNRESOLVED", true);
-const static ResultCode &UNSUPPORTED = ResultCode::getInstance("UNSUPPORTED", false);
-const static ResultCode &TIMEOUT = ResultCode::getInstance("TIMEOUT", true);
+extern const ResultCode &PASS;
+extern const ResultCode &FLAKYPASS;
+extern const ResultCode &XFAIL;
+extern const ResultCode &FAIL;
+extern const ResultCode &XPASS;
+extern const ResultCode &UNRESOLVED;
+extern const ResultCode &UNSUPPORTED;
+extern const ResultCode &TIMEOUT;
 
 class MetricValue
 {

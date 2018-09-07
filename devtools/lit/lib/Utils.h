@@ -92,6 +92,9 @@ std::string format_string(const std::string &format, ArgTypes&&...args)
    std::sprintf(buffer, format.c_str(), std::forward<ArgTypes>(args)...);
 }
 
+void replace_string(const std::string &search, const std::string &replacement,
+                    std::string &targetStr);
+
 } // lit
 } // polar
 

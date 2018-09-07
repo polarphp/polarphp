@@ -19,6 +19,15 @@ namespace lit {
 
 std::unordered_map<std::string, ResultCode *> ResultCode::sm_instances{};
 
+const ResultCode &PASS = ResultCode::getInstance("PASS", false);
+const ResultCode &FLAKYPASS = ResultCode::getInstance("FLAKYPASS", false);
+const ResultCode &XFAIL = ResultCode::getInstance("XFAIL", false);
+const ResultCode &FAIL = ResultCode::getInstance("FAIL", true);
+const ResultCode &XPASS = ResultCode::getInstance("XPASS", true);
+const ResultCode &UNRESOLVED = ResultCode::getInstance("UNRESOLVED", true);
+const ResultCode &UNSUPPORTED = ResultCode::getInstance("UNSUPPORTED", false);
+const ResultCode &TIMEOUT = ResultCode::getInstance("TIMEOUT", true);
+
 Result::Result(const ResultCode &code, std::string output, std::optional<int> elapsed)
    : m_code(code),
      m_output(output),
