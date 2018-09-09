@@ -28,30 +28,35 @@ BasicTimer::BasicTimer(const BasicTimer::Timeout &timeout,
 {
 }
 
+BasicTimer::~BasicTimer()
+{
+   stop();
+}
+
 void BasicTimer::start(bool multiThread)
 {
    if (this->running() == true) {
       return;
    }
-   m_running = true;
+   m_running.store(true);
    if (multiThread == true) {
       m_thread = std::thread(
-               &BasicTimer::temporize, this);
+               &BasicTimer::getTemporize, this);
    }
    else{
-      this->temporize();
+      this->getTemporize();
    }
 }
 
 void BasicTimer::stop()
 {
-   m_running = false;
+   m_running.store(false);
    m_thread.join();
 }
 
 bool BasicTimer::running() const
 {
-   return m_running;
+   return m_running.load();
 }
 
 void BasicTimer::setSingleShot(bool singleShot)
@@ -75,25 +80,25 @@ void BasicTimer::setInterval(const BasicTimer::Interval &interval)
    m_interval = interval;
 }
 
-const BasicTimer::Interval &BasicTimer::interval() const
+const BasicTimer::Interval &BasicTimer::getInterval() const
 {
    return m_interval;
 }
 
 void BasicTimer::setTimeout(const Timeout &timeout)
 {
-   if (this->running() == true)
+   if (this->running() == true) {
       return;
-
+   }
    m_timeout = timeout;
 }
 
-const BasicTimer::Timeout &BasicTimer::timeout() const
+const BasicTimer::Timeout &BasicTimer::getTimeout() const
 {
    return m_timeout;
 }
 
-void BasicTimer::temporize()
+void BasicTimer::getTemporize()
 {
    if (m_isSingleShot == true) {
       this->sleepThenTimeout();
@@ -110,7 +115,7 @@ void BasicTimer::sleepThenTimeout()
    std::this_thread::sleep_for(m_interval);
 
    if (this->running() == true) {
-      this->timeout()();
+      this->getTimeout()();
    }
 }
 

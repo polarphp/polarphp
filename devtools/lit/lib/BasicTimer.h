@@ -15,6 +15,7 @@
 #include <chrono>
 #include <thread>
 #include <functional>
+#include <atomic>
 
 namespace polar {
 namespace lit {
@@ -29,6 +30,7 @@ public:
    BasicTimer(const Timeout &timeout,
               const Interval &interval,
               bool singleShot = true);
+   ~BasicTimer();
 
    void start(bool multiThread = false);
    void stop();
@@ -39,16 +41,16 @@ public:
    bool isSingleShot() const;
 
    void setInterval(const Interval &interval);
-   const Interval &interval() const;
+   const Interval &getInterval() const;
 
    void setTimeout(const Timeout &timeout);
-   const Timeout &timeout() const;
+   const Timeout &getTimeout() const;
 private:
-   void temporize();
+   void getTemporize();
    void sleepThenTimeout();
 private:
    std::thread m_thread;
-   bool m_running = false;
+   std::atomic<bool> m_running = false;
    bool m_isSingleShot = true;
    Interval m_interval = Interval(0);
    Timeout m_timeout = nullptr;

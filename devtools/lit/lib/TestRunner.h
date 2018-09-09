@@ -13,6 +13,7 @@
 #define POLAR_DEVLTOOLS_LIT_TEST_RUNNER_H
 
 #include "Global.h"
+#include "ShellCommands.h"
 #include <stdexcept>
 #include <string>
 #include <regex>
@@ -61,16 +62,96 @@ protected:
    std::map<std::string, std::string> m_env;
 };
 
+class BasicTimer;
+
 class TimeoutHelper
 {
+public:
+   TimeoutHelper(int timeout);
+   void cancel();
+   void active();
+   void addProcess();
+   void startTimer();
+   void timeoutReached();
+
+private:
+   void handleTimeoutReached();
+   void kill();
 protected:
    int m_timeout;
    std::list<pid_t> m_procs;
    bool m_timeoutReached;
    bool m_doneKillPass;
    void m_lock;
-   void m_timer;
+   std::optional<BasicTimer> m_timer;
 };
+
+class ShellCommandResult
+{
+public:
+   ShellCommandResult(const Command &command, std::ostream &outStream, std::ostream &errStream,
+                      int exitCode, bool timeoutReached, const std::list<std::string> &outputFiles = []);
+protected:
+   Command m_command;
+   std::ostream &m_outStream;
+   std::ostream &m_errStream;
+   int m_exitCode;
+   bool m_timeoutReached;
+   std::list<std::string> m_outputFiles;
+};
+
+void execute_shcmd();
+void expand_glob();
+void expand_glob_expression();
+void quote_windows_command();
+void update_env();
+void execute_builtin_echo();
+void execute_builtin_mkdir();
+void execute_builtin_diff();
+void execute_builtin_rm();
+void process_redirects();
+void execute_shcmd();
+void execute_script_internal();
+void execute_script();
+void parse_integrated_test_script_commands();
+void get_temp_paths();
+void colon_normalize_path();
+void get_default_substitutions();
+void apply_substitutions();
+
+class ParserKind
+{
+public:
+   enum Kind {
+      TAG = 0,
+      COMMAND,
+      LIST,
+      BOOLEAN_EXPR,
+      CUSTOM
+   };
+public:
+   static std::string allowedKeywordSuffixes(Kind kind);
+   static std::string getKindStr(Kind kind);
+};
+
+class IntegratedTestKeywordParser
+{
+public:
+   IntegratedTestKeywordParser();
+   void parseLine();
+   void getValue();
+private:
+   static void handleTag();
+   static void handleCommand();
+   static void handleList();
+   static void handleBooleanExpr();
+   static void handleRequiresAny();
+};
+
+void parse_integrated_test_script();
+void run_shtest();
+void execute_shtest();
+
 
 } // lit
 } // polar
