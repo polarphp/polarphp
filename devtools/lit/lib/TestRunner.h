@@ -19,6 +19,7 @@
 #include <string>
 #include <regex>
 #include <list>
+#include <mutex>
 
 namespace polar {
 namespace lit {
@@ -75,10 +76,10 @@ class TimeoutHelper
 public:
    TimeoutHelper(int timeout);
    void cancel();
-   void active();
-   void addProcess();
+   bool active();
+   void addProcess(pid_t process);
    void startTimer();
-   void timeoutReached();
+   bool timeoutReached();
 
 private:
    void handleTimeoutReached();
@@ -88,7 +89,7 @@ protected:
    std::list<pid_t> m_procs;
    bool m_timeoutReached;
    bool m_doneKillPass;
-   bool m_lock;
+   std::mutex m_lock;
    std::optional<BasicTimer> m_timer;
 };
 

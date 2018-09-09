@@ -24,5 +24,65 @@ const std::map<std::string, std::string> &ShellEnvironment::getEnv()
    return m_env;
 }
 
+TimeoutHelper::TimeoutHelper(int timeout)
+   : m_timeout(timeout),
+     m_timeoutReached(false),
+     m_doneKillPass(false),
+     m_timer(std::nullopt)
+{
+}
+
+void TimeoutHelper::cancel()
+{
+   if (m_timer) {
+      if (active()) {
+         m_timer.value().stop();
+      }
+   }
+}
+
+bool TimeoutHelper::active()
+{
+   return m_timeout > 0;
+}
+
+void TimeoutHelper::addProcess(pid_t process)
+{
+   if (!active()) {
+      return;
+   }
+   bool needToRunKill = false;
+   {
+      std::lock_guard lock(m_lock);
+      m_procs.push_back(process);
+      // Avoid re-entering the lock by finding out if kill needs to be run
+      // again here but call it if necessary once we have left the lock.
+      // We could use a reentrant lock here instead but this code seems
+      // clearer to me.
+      needToRunKill = m_doneKillPass;
+   }
+   // The initial call to _kill() from the timer thread already happened so
+   // we need to call it again from this thread, otherwise this process
+   // will be left to run even though the timeout was already hit
+   if (needToRunKill) {
+      assert(timeoutReached());
+      kill();
+   }
+}
+
+void TimeoutHelper::startTimer()
+{
+   if (!active()) {
+      return;
+   }
+   // Do some late initialisation that's only needed
+   // if there is a timeout set
+   m_timer.emplace([](){
+      //handleTimeoutReached();
+   }, std::chrono::milliseconds(m_timeout), true);
+   BasicTimer &timer = m_timer.value();
+   timer.start();
+}
+
 } // lit
 } // polar

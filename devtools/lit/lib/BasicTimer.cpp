@@ -42,8 +42,7 @@ void BasicTimer::start(bool multiThread)
    if (multiThread == true) {
       m_thread = std::thread(
                &BasicTimer::getTemporize, this);
-   }
-   else{
+   } else{
       this->getTemporize();
    }
 }
@@ -113,7 +112,6 @@ void BasicTimer::getTemporize()
 void BasicTimer::sleepThenTimeout()
 {
    std::this_thread::sleep_for(m_interval);
-
    if (this->running() == true) {
       this->getTimeout()();
    }
