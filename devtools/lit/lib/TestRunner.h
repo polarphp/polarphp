@@ -16,6 +16,7 @@
 #include <stdexcept>
 #include <string>
 #include <regex>
+#include <list>
 
 namespace polar {
 namespace lit {
@@ -58,6 +59,17 @@ public:
 protected:
    std::string m_cwd;
    std::map<std::string, std::string> m_env;
+};
+
+class TimeoutHelper
+{
+protected:
+   int m_timeout;
+   std::list<pid_t> m_procs;
+   bool m_timeoutReached;
+   bool m_doneKillPass;
+   void m_lock;
+   void m_timer;
 };
 
 } // lit
