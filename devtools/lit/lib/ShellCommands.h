@@ -36,6 +36,8 @@ public:
    bool operator ==(const Command &other);
    const std::list<std::any> &getArgs();
    const std::list<TokenType> &getRedirects();
+private:
+   bool compareTokenAny(const std::any &lhs, const std::any &rhs);
 protected:
    // GlobItem or std::tuple<std::string, int>
    std::list<std::any> m_args;
@@ -50,7 +52,11 @@ public:
    {}
    std::list<std::string> resolve(const std::string &cwd);
    operator std::string();
-   bool operator ==(const GlobItem &other);
+   bool operator ==(const GlobItem &other) const;
+   bool operator !=(const GlobItem &other) const
+   {
+      return !operator ==(other);
+   }
 protected:
    std::string m_pattern;
 };
