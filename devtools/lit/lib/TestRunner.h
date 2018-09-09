@@ -14,6 +14,7 @@
 
 #include "Global.h"
 #include "ShellCommands.h"
+#include "BasicTimer.h"
 #include <stdexcept>
 #include <string>
 #include <regex>
@@ -26,12 +27,16 @@ class InternalShellError : public std::runtime_error
 {
 public:
    InternalShellError(const std::string &command, const std::string &message)
-      : std::runtime_error(command + ": " + message)
+      : std::runtime_error(command + ": " + message),
+        m_command(command),
+        m_message(message)
    {}
+
    const std::string &getCommand() const
    {
       return m_command;
    }
+
    const std::string &getMessage() const
    {
       return m_message;
@@ -57,12 +62,13 @@ public:
       : m_cwd(cwd),
         m_env(env)
    {}
+
+   const std::string &getCwd();
+   const std::map<std::string, std::string> &getEnv();
 protected:
    std::string m_cwd;
    std::map<std::string, std::string> m_env;
 };
-
-class BasicTimer;
 
 class TimeoutHelper
 {
@@ -82,7 +88,7 @@ protected:
    std::list<pid_t> m_procs;
    bool m_timeoutReached;
    bool m_doneKillPass;
-   void m_lock;
+   bool m_lock;
    std::optional<BasicTimer> m_timer;
 };
 
@@ -90,7 +96,7 @@ class ShellCommandResult
 {
 public:
    ShellCommandResult(const Command &command, std::ostream &outStream, std::ostream &errStream,
-                      int exitCode, bool timeoutReached, const std::list<std::string> &outputFiles = []);
+                      int exitCode, bool timeoutReached, const std::list<std::string> &outputFiles = {});
 protected:
    Command m_command;
    std::ostream &m_outStream;
@@ -151,7 +157,6 @@ private:
 void parse_integrated_test_script();
 void run_shtest();
 void execute_shtest();
-
 
 } // lit
 } // polar
