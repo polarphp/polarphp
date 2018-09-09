@@ -8,3 +8,54 @@
 // See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/09/05.
+
+#ifndef POLAR_DEVLTOOLS_LIT_FORMATS_BASE_H
+#define POLAR_DEVLTOOLS_LIT_FORMATS_BASE_H
+
+#include <string>
+
+namespace polar {
+namespace lit {
+
+class TestSuit;
+class TestingConfig;
+class LitConfig;
+class Command;
+
+namespace formats {
+
+using polar::lit::TestingConfig;
+using polar::lit::TestSuit;
+using polar::lit::LitConfig;
+using polar::lit::Command;
+
+class TestFormat
+{
+public:
+   virtual ~TestFormat() = 0;
+};
+
+class FileBasedTest : public TestFormat
+{
+public:
+   void getTestsInDirectory(const TestSuit &testSuit, const std::string &pathInSuite,
+                            const LitConfig &litConfig, const TestingConfig &config);
+};
+
+class OneCommandPerFileTest : public TestFormat
+{
+public:
+   OneCommandPerFileTest(const Command &command, const std::string &dir,
+                         bool recursive = false,
+                         const std::string &pattern = ".*",
+                         bool useTempInput = false);
+   void getTestsInDirectory();
+   void createTempInput();
+   void execute();
+};
+
+} // formats
+} // lit
+} // polar
+
+#endif // POLAR_DEVLTOOLS_LIT_FORMATS_BASE_H

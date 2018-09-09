@@ -8,3 +8,13 @@
 // See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/09/05.
+
+#include "GoogleTest.h"
+
+namespace polar {
+namespace lit {
+namespace formats {
+
+} // formats
+} // lit
+} // polar
