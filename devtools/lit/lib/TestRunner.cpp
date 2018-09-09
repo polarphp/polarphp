@@ -10,6 +10,7 @@
 // Created by polarboy on 2018/09/09.
 
 #include "TestRunner.h"
+#include "Utils.h"
 
 namespace polar {
 namespace lit {
@@ -82,6 +83,27 @@ void TimeoutHelper::startTimer()
    }, std::chrono::milliseconds(m_timeout), true);
    BasicTimer &timer = m_timer.value();
    timer.start();
+}
+
+void TimeoutHelper::handleTimeoutReached()
+{
+   m_timeoutReached = true;
+   kill();
+}
+
+bool TimeoutHelper::timeoutReached()
+{
+   return m_timeoutReached;
+}
+
+void TimeoutHelper::kill()
+{
+   std::lock_guard locker(m_lock);
+   for (pid_t pid : m_procs) {
+      kill_process_and_children(pid);
+   }
+   m_procs.clear();
+   m_doneKillPass = true;
 }
 
 } // lit
