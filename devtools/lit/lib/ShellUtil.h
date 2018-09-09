@@ -50,9 +50,9 @@ public:
    ShParser(const std::string &data, bool win32Escapes = false, bool pipeFail = false);
    std::any lex();
    std::any look();
-   Command parseCommand();
-   Pipeline parsePipeline();
-   Seq parse();
+   std::shared_ptr<ShellAble> parseCommand();
+   std::shared_ptr<ShellAble> parsePipeline();
+   std::shared_ptr<ShellAble> parse();
 protected:
    std::string m_data;
    bool m_win32Escapes;

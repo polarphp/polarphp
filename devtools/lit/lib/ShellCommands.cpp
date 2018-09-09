@@ -176,7 +176,7 @@ bool Pipeline::operator ==(const Pipeline &other) const
          m_pipeError == other.m_pipeError;
 }
 
-void Pipeline::toShell(std::string &str, bool pipeFail)
+void Pipeline::toShell(std::string &str, bool pipeFail) const
 {
    if (pipeFail != m_pipeError) {
       throw ValueError("Inconsistent \"pipeFail\" attribute!");
@@ -186,13 +186,18 @@ void Pipeline::toShell(std::string &str, bool pipeFail)
    }
    int cur = 0;
    int size = m_commands.size();
-   for (const Command &cmd : m_commands) {
-      cmd.toShell(str);
+   for (const std::shared_ptr<ShellAble> &cmd : m_commands) {
+      cmd->toShell(str);
       ++cur;
       if (cur != size - 1) {
          str += "|\n  ";
       }
    }
+}
+
+void Seq::toShell(std::string &str, bool pipeFail) const
+{
+
 }
 
 } // lit

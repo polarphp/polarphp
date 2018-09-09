@@ -26,10 +26,11 @@ using TokenTypePointer = std::shared_ptr<TokenType>;
 
 class ShellAble
 {
+public:
    virtual void toShell(std::string &str, bool pipeFail = false) const = 0;
 };
 
-class Command : ShellAble
+class Command : public ShellAble
 {
 public:
    Command(const std::list<std::any> &args, const std::list<TokenType> &redirects)
@@ -41,7 +42,7 @@ public:
    bool operator ==(const Command &other) const;
    const std::list<std::any> &getArgs();
    const std::list<TokenType> &getRedirects();
-   void toShell(std::string &str, bool pipeFail = false) const;
+   void toShell(std::string &str, bool pipeFail = false) const override;
 private:
    bool compareTokenAny(const std::any &lhs, const std::any &rhs) const;
 protected:
@@ -67,10 +68,10 @@ protected:
    std::string m_pattern;
 };
 
-class Pipeline
+class Pipeline : public ShellAble
 {
 public:
-   Pipeline(const std::list<Command> &commands, bool negate = false, bool pipeError = false)
+   Pipeline(const std::list<std::shared_ptr<ShellAble>> &commands, bool negate = false, bool pipeError = false)
       : m_commands(commands),
         m_negate(negate),
         m_pipeError(pipeError)
@@ -85,17 +86,17 @@ public:
    {
       return !operator ==(other);
    }
-   void toShell(std::string &str, bool pipeFail = false);
+   void toShell(std::string &str, bool pipeFail = false) const override;
 protected:
-   std::list<Command> m_commands;
+   std::list<std::shared_ptr<ShellAble>> m_commands;
    bool m_negate;
    bool m_pipeError;
 };
 
-class Seq
+class Seq : public ShellAble
 {
 public:
-   Seq(const std::any &lhs, const std::string &op, const std::any &rhs)
+   Seq(std::shared_ptr<ShellAble> lhs, const std::string &op, std::shared_ptr<ShellAble> rhs)
       : m_op(op),
         m_lhs(lhs),
         m_rhs(rhs)
@@ -107,10 +108,11 @@ public:
    }
    operator std::string();
    bool operator ==(const GlobItem &other);
+   void toShell(std::string &str, bool pipeFail = false) const override;
 protected:
    std::string m_op;
-   std::any m_lhs;
-   std::any m_rhs;
+   std::shared_ptr<ShellAble> m_lhs;
+   std::shared_ptr<ShellAble> m_rhs;
 };
 
 } // lit
