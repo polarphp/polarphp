@@ -186,7 +186,7 @@ void Pipeline::toShell(std::string &str, bool pipeFail) const
    }
    int cur = 0;
    int size = m_commands.size();
-   for (const std::shared_ptr<ShellAble> &cmd : m_commands) {
+   for (const std::shared_ptr<AbstractCommand> &cmd : m_commands) {
       cmd->toShell(str);
       ++cur;
       if (cur != size - 1) {

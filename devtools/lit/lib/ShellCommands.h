@@ -24,14 +24,21 @@ namespace lit {
 using TokenType = std::tuple<std::any, std::any>;
 using TokenTypePointer = std::shared_ptr<TokenType>;
 
-class ShellAble
+class AbstractCommand
 {
+public:
+   enum class Type {
+      Command,
+      Pipeline,
+      Seq
+   };
 public:
    virtual void toShell(std::string &str, bool pipeFail = false) const = 0;
    virtual operator std::string() = 0;
+   virtual Type getCommandType() = 0;
 };
 
-class Command : public ShellAble
+class Command : public AbstractCommand
 {
 public:
    Command(const std::list<std::any> &args, const std::list<TokenType> &redirects)
@@ -44,6 +51,10 @@ public:
    const std::list<std::any> &getArgs();
    const std::list<TokenType> &getRedirects();
    void toShell(std::string &str, bool pipeFail = false) const override;
+   Type getCommandType() override
+   {
+      return Type::Command;
+   }
 private:
    bool compareTokenAny(const std::any &lhs, const std::any &rhs) const;
 protected:
@@ -69,10 +80,10 @@ protected:
    std::string m_pattern;
 };
 
-class Pipeline : public ShellAble
+class Pipeline : public AbstractCommand
 {
 public:
-   Pipeline(const std::list<std::shared_ptr<ShellAble>> &commands, bool negate = false, bool pipeError = false)
+   Pipeline(const std::list<std::shared_ptr<AbstractCommand>> &commands, bool negate = false, bool pipeError = false)
       : m_commands(commands),
         m_negate(negate),
         m_pipeError(pipeError)
@@ -88,16 +99,20 @@ public:
       return !operator ==(other);
    }
    void toShell(std::string &str, bool pipeFail = false) const override;
+   Type getCommandType() override
+   {
+      return Type::Pipeline;
+   }
 protected:
-   std::list<std::shared_ptr<ShellAble>> m_commands;
+   std::list<std::shared_ptr<AbstractCommand>> m_commands;
    bool m_negate;
    bool m_pipeError;
 };
 
-class Seq : public ShellAble
+class Seq : public AbstractCommand
 {
 public:
-   Seq(std::shared_ptr<ShellAble> lhs, const std::string &op, std::shared_ptr<ShellAble> rhs)
+   Seq(std::shared_ptr<AbstractCommand> lhs, const std::string &op, std::shared_ptr<AbstractCommand> rhs)
       : m_op(op),
         m_lhs(lhs),
         m_rhs(rhs)
@@ -113,11 +128,15 @@ public:
    {
       return !operator ==(other);
    }
+   Type getCommandType() override
+   {
+      return Type::Seq;
+   }
    void toShell(std::string &str, bool pipeFail = false) const override;
 protected:
    std::string m_op;
-   std::shared_ptr<ShellAble> m_lhs;
-   std::shared_ptr<ShellAble> m_rhs;
+   std::shared_ptr<AbstractCommand> m_lhs;
+   std::shared_ptr<AbstractCommand> m_rhs;
 };
 
 } // lit

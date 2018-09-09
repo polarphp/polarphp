@@ -242,7 +242,7 @@ std::any ShParser::look()
    return token;
 }
 
-std::shared_ptr<ShellAble> ShParser::parseCommand()
+std::shared_ptr<AbstractCommand> ShParser::parseCommand()
 {
    std::any tokenAny = lex();
    if (!tokenAny.has_value()) {
@@ -285,13 +285,13 @@ std::shared_ptr<ShellAble> ShParser::parseCommand()
       }
       redirects.push_back(std::tuple<std::any, std::any>{op, arg});
    }
-   return std::shared_ptr<ShellAble>(new Command(args, redirects));
+   return std::shared_ptr<AbstractCommand>(new Command(args, redirects));
 }
 
-std::shared_ptr<ShellAble> ShParser::parsePipeline()
+std::shared_ptr<AbstractCommand> ShParser::parsePipeline()
 {
    bool negate = false;
-   std::list<std::shared_ptr<ShellAble>> commands{parseCommand()};
+   std::list<std::shared_ptr<AbstractCommand>> commands{parseCommand()};
    while (true) {
       try{
          std::any tokenAny = look();
@@ -307,12 +307,12 @@ std::shared_ptr<ShellAble> ShParser::parsePipeline()
       }
       break;
    }
-   return std::shared_ptr<ShellAble>(new Pipeline(commands, negate));
+   return std::shared_ptr<AbstractCommand>(new Pipeline(commands, negate));
 }
 
-std::shared_ptr<ShellAble> ShParser::parse()
+std::shared_ptr<AbstractCommand> ShParser::parse()
 {
-   std::shared_ptr<ShellAble> lhs = parsePipeline();
+   std::shared_ptr<AbstractCommand> lhs = parsePipeline();
    while (true) {
       std::any operatorAny = lex();
       if (!operatorAny.has_value()) {
@@ -324,7 +324,7 @@ std::shared_ptr<ShellAble> ShParser::parse()
       if (!tokenAny.has_value()) {
          ValueError(std::string("missing argument to operator ") + std::get<0>(operatorToken));
       }
-      lhs = std::shared_ptr<ShellAble>(new Seq(lhs, std::get<0>(operatorToken), parsePipeline()));
+      lhs = std::shared_ptr<AbstractCommand>(new Seq(lhs, std::get<0>(operatorToken), parsePipeline()));
    }
    return lhs;
 }
