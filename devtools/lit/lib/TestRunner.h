@@ -20,6 +20,7 @@
 #include <regex>
 #include <list>
 #include <mutex>
+#include <tuple>
 
 namespace polar {
 namespace lit {
@@ -111,7 +112,8 @@ protected:
    std::list<std::string> m_outputFiles;
 };
 
-void execute_shcmd();
+std::tuple<int, std::string> execute_shcmd();
+
 void expand_glob();
 void expand_glob_expression();
 void quote_windows_command();
@@ -121,7 +123,6 @@ void execute_builtin_mkdir();
 void execute_builtin_diff();
 void execute_builtin_rm();
 void process_redirects();
-void execute_shcmd();
 void execute_script_internal();
 void execute_script();
 void parse_integrated_test_script_commands();

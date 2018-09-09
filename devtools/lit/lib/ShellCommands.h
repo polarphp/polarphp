@@ -34,7 +34,10 @@ public:
 
    operator std::string();
    bool operator ==(const Command &other);
+   const std::list<std::any> &getArgs();
+   const std::list<TokenType> &getRedirects();
 protected:
+   // GlobItem or std::tuple<std::string, int>
    std::list<std::any> m_args;
    std::list<TokenType> m_redirects;
 };

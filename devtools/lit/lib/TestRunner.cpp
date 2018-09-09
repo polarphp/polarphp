@@ -11,6 +11,8 @@
 
 #include "TestRunner.h"
 #include "Utils.h"
+#include "ShellCommands.h"
+#include <any>
 
 namespace polar {
 namespace lit {
@@ -107,8 +109,8 @@ void TimeoutHelper::kill()
 }
 
 ShellCommandResult::ShellCommandResult(const Command &command, std::ostream &outStream,
-                   std::ostream &errStream, int exitCode,
-                   bool timeoutReached, const std::list<std::string> &outputFiles)
+                                       std::ostream &errStream, int exitCode,
+                                       bool timeoutReached, const std::list<std::string> &outputFiles)
    : m_command(command),
      m_outStream(outStream),
      m_errStream(errStream),
@@ -133,6 +135,37 @@ bool ShellCommandResult::isTimeoutReached()
 {
    return m_timeoutReached;
 }
+
+namespace {
+
+int do_execute_shcmd();
+
+} // anonymous namespace
+
+std::tuple<int, std::string> execute_shcmd()
+{
+
+}
+
+namespace {
+
+std::optional<int> do_execute_shcmd(std::any &cmd, ShellEnvironment &shenv, std::list<std::string> &results,
+                                    TimeoutHelper &timeoutHelper)
+{
+   if (timeoutHelper.timeoutReached()) {
+      // Prevent further recursion if the timeout has been hit
+      // as we should try avoid launching more processes.
+      return std::nullopt;
+   }
+   if (cmd.type() == typeid(Seq)) {
+      Seq &seqCmd = std::any_cast<Seq &>(cmd);
+
+   }
+   assert(cmd.type() == typeid(Pipeline));
+
+}
+
+} // anonymous namespace
 
 } // lit
 } // polar

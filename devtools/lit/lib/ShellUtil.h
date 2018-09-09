@@ -21,6 +21,8 @@
 namespace polar {
 namespace lit {
 
+using ShellTokenType = std::tuple<std::string, int>;
+
 class ShLexer
 {
 public:

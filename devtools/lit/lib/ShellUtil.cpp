@@ -168,40 +168,40 @@ std::any ShLexer::lexOneToken()
 {
    char c = eat();
    if (c == ';') {
-      return std::tuple<std::string, int>{std::to_string(c), -1};
+      return ShellTokenType{std::to_string(c), -1};
    }
    if (c == '|') {
       if (maybeEat('|')) {
-         return std::tuple<std::string, int>("||", -1);
+         return ShellTokenType("||", -1);
       }
-      return std::tuple<std::string, int>{std::to_string(c), -1};
+      return ShellTokenType{std::to_string(c), -1};
    }
    if (c == '&') {
       if (maybeEat('&')) {
-         return std::tuple<std::string, int>{"&&", -1};
+         return ShellTokenType{"&&", -1};
       }
       if (maybeEat('>')) {
-         return std::tuple<std::string, int>{"&>", -1};
+         return ShellTokenType{"&>", -1};
       }
-      return std::tuple<std::string, int>{std::to_string(c), -1};
+      return ShellTokenType{std::to_string(c), -1};
    }
    if (c == '>') {
       if (maybeEat('&')) {
-         return std::tuple<std::string, int>{">&", -1};
+         return ShellTokenType{">&", -1};
       }
       if (maybeEat('>')) {
-         return std::tuple<std::string, int>{">>", -1};
+         return ShellTokenType{">>", -1};
       }
-      return std::tuple<std::string, int>{std::to_string(c), -1};
+      return ShellTokenType{std::to_string(c), -1};
    }
    if (c == '<') {
       if (maybeEat('&')) {
-         return std::tuple<std::string, int>{"<&", -1};
+         return ShellTokenType{"<&", -1};
       }
       if (maybeEat('<')) {
-         return std::tuple<std::string, int>{"<<", -1};
+         return ShellTokenType{"<<", -1};
       }
-      return std::tuple<std::string, int>{std::to_string(c), -1};
+      return ShellTokenType{std::to_string(c), -1};
    }
 }
 
@@ -248,8 +248,8 @@ Command ShParser::parseCommand()
    if (!tokenAny.has_value()) {
       ValueError("empty command!");
    }
-   if (tokenAny.type().hash_code() == typeid(std::tuple<std::string, int>).hash_code()) {
-      std::tuple<std::string, int> token = std::any_cast<std::tuple<std::string, int>>(tokenAny);
+   if (tokenAny.type() == typeid(ShellTokenType)) {
+      ShellTokenType token = std::any_cast<ShellTokenType>(tokenAny);
       ValueError(std::string("syntax error near unexpected token ") + std::get<0>(token));
    }
    std::list<std::any> args{tokenAny};
@@ -261,14 +261,14 @@ Command ShParser::parseCommand()
          break;
       }
       // If this is an argument, just add it to the current command.
-      int tokenTypeHashCode = tokenAny.type().hash_code();
-      if (tokenTypeHashCode == typeid(std::string).hash_code() ||
-          tokenTypeHashCode == typeid(GlobItem).hash_code()) {
+      auto &tokenType = tokenAny.type();
+      if (tokenType == typeid(ShellTokenType) ||
+          tokenType == typeid(GlobItem)) {
          args.push_back(lex());
          continue;
       }
-      std::tuple<std::string, int> token = std::any_cast<std::tuple<std::string, int>>(tokenAny);
-      assert(tokenTypeHashCode == typeid(std::tuple<std::string, int>).hash_code());
+      ShellTokenType token = std::any_cast<ShellTokenType>(tokenAny);
+      assert(tokenType == typeid(ShellTokenType));
       std::string &tokenStr = std::get<0>(token);
       if (tokenStr.find('|') != std::string::npos ||
           tokenStr.find(';') != std::string::npos ||
@@ -280,7 +280,7 @@ Command ShParser::parseCommand()
       std::any op = lex();
       std::any arg = lex();
       if (!arg.has_value()) {
-         std::tuple<std::string, int> opTuple = std::any_cast<std::tuple<std::string, int>>(op);
+         ShellTokenType opTuple = std::any_cast<ShellTokenType>(op);
          ValueError("syntax error near token "+ std::get<0>(opTuple));
       }
       redirects.push_back(std::tuple<std::any, std::any>{op, arg});
@@ -298,8 +298,8 @@ Pipeline ShParser::parsePipeline()
          if (!tokenAny.has_value()) {
             break;
          }
-         std::tuple<std::string, int> token = std::any_cast<std::tuple<std::string, int>>(tokenAny);
-         if (token == std::tuple<std::string, int>{"|", -1}) {
+         ShellTokenType token = std::any_cast<ShellTokenType>(tokenAny);
+         if (token == ShellTokenType{"|", -1}) {
             continue;
             commands.push_back(parseCommand());
          }
@@ -318,8 +318,8 @@ Seq ShParser::parse()
       if (!operatorAny.has_value()) {
          break;
       }
-      std::tuple<std::string, int> operatorToken = std::any_cast<std::tuple<std::string, int>>(operatorAny);
-      std::any_cast<std::tuple<std::string, int>>(operatorAny);
+      ShellTokenType operatorToken = std::any_cast<ShellTokenType>(operatorAny);
+      std::any_cast<ShellTokenType>(operatorAny);
       std::any tokenAny = look();
       if (!tokenAny.has_value()) {
          ValueError(std::string("missing argument to operator ") + std::get<0>(operatorToken));
