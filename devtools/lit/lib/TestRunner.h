@@ -98,6 +98,10 @@ class ShellCommandResult
 public:
    ShellCommandResult(const Command &command, std::ostream &outStream, std::ostream &errStream,
                       int exitCode, bool timeoutReached, const std::list<std::string> &outputFiles = {});
+   const Command &getCommand();
+   int getExitCode();
+   bool isTimeoutReached();
+
 protected:
    Command m_command;
    std::ostream &m_outStream;

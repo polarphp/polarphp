@@ -106,5 +106,33 @@ void TimeoutHelper::kill()
    m_doneKillPass = true;
 }
 
+ShellCommandResult::ShellCommandResult(const Command &command, std::ostream &outStream,
+                   std::ostream &errStream, int exitCode,
+                   bool timeoutReached, const std::list<std::string> &outputFiles)
+   : m_command(command),
+     m_outStream(outStream),
+     m_errStream(errStream),
+     m_exitCode(exitCode),
+     m_timeoutReached(timeoutReached),
+     m_outputFiles(outputFiles)
+{
+
+}
+
+const Command &ShellCommandResult::getCommand()
+{
+   return m_command;
+}
+
+int ShellCommandResult::getExitCode()
+{
+   return m_exitCode;
+}
+
+bool ShellCommandResult::isTimeoutReached()
+{
+   return m_timeoutReached;
+}
+
 } // lit
 } // polar
