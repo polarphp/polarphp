@@ -28,6 +28,7 @@ class ShellAble
 {
 public:
    virtual void toShell(std::string &str, bool pipeFail = false) const = 0;
+   virtual operator std::string() = 0;
 };
 
 class Command : public ShellAble
@@ -38,7 +39,7 @@ public:
         m_redirects(redirects)
    {}
 
-   operator std::string();
+   operator std::string() override;
    bool operator ==(const Command &other) const;
    const std::list<std::any> &getArgs();
    const std::list<TokenType> &getRedirects();
@@ -78,7 +79,7 @@ public:
    {
    }
 
-   operator std::string();
+   operator std::string() override;
    bool isNegate();
    bool isPipeError();
    bool operator ==(const Pipeline &other) const;
@@ -106,8 +107,12 @@ public:
             op.find("||") != std::string::npos ||
             op.find("&&") != std::string::npos);
    }
-   operator std::string();
-   bool operator ==(const GlobItem &other);
+   operator std::string() override;
+   bool operator ==(const Seq &other) const;
+   bool operator !=(const Seq &other) const
+   {
+      return !operator ==(other);
+   }
    void toShell(std::string &str, bool pipeFail = false) const override;
 protected:
    std::string m_op;

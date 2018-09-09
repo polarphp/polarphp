@@ -195,9 +195,23 @@ void Pipeline::toShell(std::string &str, bool pipeFail) const
    }
 }
 
+Seq::operator std::string()
+{
+   return format_string("Seq(%s, %s, %s)", m_lhs->operator std::string().c_str(), m_op,
+                        m_rhs->operator std::string().c_str());
+}
+
+bool Seq::operator ==(const Seq &other) const
+{
+   return m_lhs == other.m_lhs && m_rhs == other.m_rhs &&
+         m_op == other.m_op;
+}
+
 void Seq::toShell(std::string &str, bool pipeFail) const
 {
-
+   m_lhs->toShell(str, pipeFail);
+   str += format_string(" %s\n", m_op.c_str());
+   m_rhs->toShell(str, pipeFail);
 }
 
 } // lit
