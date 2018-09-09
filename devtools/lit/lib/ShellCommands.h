@@ -24,7 +24,12 @@ namespace lit {
 using TokenType = std::tuple<std::any, std::any>;
 using TokenTypePointer = std::shared_ptr<TokenType>;
 
-class Command
+class ShellAble
+{
+   virtual void toShell(std::string &str, bool pipeFail = false) const = 0;
+};
+
+class Command : ShellAble
 {
 public:
    Command(const std::list<std::any> &args, const std::list<TokenType> &redirects)
@@ -33,11 +38,12 @@ public:
    {}
 
    operator std::string();
-   bool operator ==(const Command &other);
+   bool operator ==(const Command &other) const;
    const std::list<std::any> &getArgs();
    const std::list<TokenType> &getRedirects();
+   void toShell(std::string &str, bool pipeFail = false) const;
 private:
-   bool compareTokenAny(const std::any &lhs, const std::any &rhs);
+   bool compareTokenAny(const std::any &lhs, const std::any &rhs) const;
 protected:
    // GlobItem or std::tuple<std::string, int>
    std::list<std::any> m_args;
@@ -72,7 +78,14 @@ public:
    }
 
    operator std::string();
-   bool operator ==(const Pipeline &other);
+   bool isNegate();
+   bool isPipeError();
+   bool operator ==(const Pipeline &other) const;
+   bool operator !=(const Pipeline &other) const
+   {
+      return !operator ==(other);
+   }
+   void toShell(std::string &str, bool pipeFail = false);
 protected:
    std::list<Command> m_commands;
    bool m_negate;
