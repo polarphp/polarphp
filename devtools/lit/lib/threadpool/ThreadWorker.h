@@ -8,3 +8,17 @@
 // See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/09/10.
+
+#ifndef POLAR_DEVLTOOLS_LIT_THREAD_POOL_THREAD_WORKER_H
+#define POLAR_DEVLTOOLS_LIT_THREAD_POOL_THREAD_WORKER_H
+
+namespace polar {
+namespace lit {
+namespace threadpool {
+
+
+} // threadpool
+} // lit
+} // polar
+
+#endif // POLAR_DEVLTOOLS_LIT_THREAD_POOL_THREAD_WORKER_H
