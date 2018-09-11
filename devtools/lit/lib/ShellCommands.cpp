@@ -195,6 +195,11 @@ void Pipeline::toShell(std::string &str, bool pipeFail) const
    }
 }
 
+const std::list<std::shared_ptr<AbstractCommand>> &Pipeline::getCommands() const
+{
+   return m_commands;
+}
+
 Seq::operator std::string()
 {
    return format_string("Seq(%s, %s, %s)", m_lhs->operator std::string().c_str(), m_op,
@@ -205,6 +210,21 @@ bool Seq::operator ==(const Seq &other) const
 {
    return m_lhs == other.m_lhs && m_rhs == other.m_rhs &&
          m_op == other.m_op;
+}
+
+const std::string &Seq::getOp() const
+{
+   return m_op;
+}
+
+std::shared_ptr<AbstractCommand> Seq::getLhs() const
+{
+   return m_lhs;
+}
+
+std::shared_ptr<AbstractCommand> Seq::getRhs() const
+{
+   return m_rhs;
 }
 
 void Seq::toShell(std::string &str, bool pipeFail) const

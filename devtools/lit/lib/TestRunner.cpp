@@ -28,6 +28,18 @@ const std::map<std::string, std::string> &ShellEnvironment::getEnv()
    return m_env;
 }
 
+ShellEnvironment &ShellEnvironment::setCwd(const std::string &cwd)
+{
+   m_cwd = cwd;
+   return *this;
+}
+
+ShellEnvironment &ShellEnvironment::setEnvItem(const std::string &key, const std::string &value)
+{
+   m_env[key] = value;
+   return *this;
+}
+
 TimeoutHelper::TimeoutHelper(int timeout)
    : m_timeout(timeout),
      m_timeoutReached(false),
@@ -150,7 +162,7 @@ std::tuple<int, std::string> execute_shcmd()
 
 namespace {
 
-std::optional<int> do_execute_shcmd(std::any &cmd, ShellEnvironment &shenv, std::list<std::string> &results,
+std::optional<int> do_execute_shcmd(std::shared_ptr<AbstractCommand> cmd, ShellEnvironment &shenv, std::list<ShellCommandResult> &results,
                                     TimeoutHelper &timeoutHelper)
 {
    if (timeoutHelper.timeoutReached()) {
@@ -158,15 +170,108 @@ std::optional<int> do_execute_shcmd(std::any &cmd, ShellEnvironment &shenv, std:
       // as we should try avoid launching more processes.
       return std::nullopt;
    }
-   if (cmd.type() == typeid(Seq)) {
-      Seq &seqCmd = std::any_cast<Seq &>(cmd);
-
+   std::optional<int> result;
+   AbstractCommand::Type commandType = cmd->getCommandType();
+   if (commandType == AbstractCommand::Type::Seq) {
+      Seq *seqCommand = dynamic_cast<Seq *>(cmd.get());
+      const std::string &op = seqCommand->getOp();
+      if (op == ";") {
+         result = do_execute_shcmd(seqCommand->getLhs(), shenv, results, timeoutHelper);
+         return do_execute_shcmd(seqCommand->getRhs(), shenv, results, timeoutHelper);
+      }
+      if (op == "&") {
+         throw InternalShellError(seqCommand->operator std::string(), "unsupported shell operator: '&'");
+      }
+      if (op == "||") {
+         result = do_execute_shcmd(seqCommand->getLhs(), shenv, results, timeoutHelper);
+         if (result.has_value() && 0 != result.value()) {
+            result = do_execute_shcmd(seqCommand->getRhs(), shenv, results, timeoutHelper);
+         }
+         return result;
+      }
+      if (op == "&&") {
+         result = do_execute_shcmd(seqCommand->getLhs(), shenv, results, timeoutHelper);
+         if (!result.has_value()) {
+            return result;
+         }
+         if (result.has_value() && 0 == result.value()) {
+            result = do_execute_shcmd(seqCommand->getRhs(), shenv, results, timeoutHelper);
+         }
+         return result;
+      }
+      throw ValueError("Unknown shell command: " + op);
    }
-   assert(cmd.type() == typeid(Pipeline));
-
+   assert(commandType == AbstractCommand::Type::Pipeline);
+   // Handle shell builtins first.
+   Pipeline *pipeCommand = dynamic_cast<Pipeline *>(cmd.get());
+   // check first command
+   const std::shared_ptr<AbstractCommand> firstAbstractCommand = pipeCommand->getCommands().front();
+   assert(firstAbstractCommand->getCommandType() == AbstractCommand::Type::Command);
+   Command *firstCommand = dynamic_cast<Command *>(firstAbstractCommand.get());
+   const std::any &firstArgAny = firstCommand->getArgs().front();
+   if (firstArgAny.type() == typeid(std::string)) {
+      const std::string &firstArg = std::any_cast<const std::string &>(firstArgAny);
+      if (firstArg == "cd") {
+         if (pipeCommand->getCommands().size() != 1) {
+            throw ValueError("'cd' cannot be part of a pipeline");
+         }
+         if (firstCommand->getArgs().size() != 2) {
+            throw ValueError("'cd' supports only one argument");
+         }
+         auto iter = firstCommand->getArgs().begin();
+         ++iter;
+         std::string newDir = std::any_cast<std::string>(*iter);
+         // Update the cwd in the parent environment.
+         if (fs::path(newDir).is_absolute()) {
+            shenv.setCwd(newDir);
+         } else {
+            fs::path basePath(shenv.getCwd());
+            basePath /= newDir;
+            basePath = fs::canonical(basePath);
+            shenv.setCwd(basePath);
+         }
+         // The cd builtin always succeeds. If the directory does not exist, the
+         // following Popen calls will fail instead.
+         return 0;
+      }
+   }
+   // Handle "echo" as a builtin if it is not part of a pipeline. This greatly
+   // speeds up tests that construct input files by repeatedly echo-appending to
+   // a file.
+   // FIXME: Standardize on the builtin echo implementation. We can use a
+   // temporary file to sidestep blocking pipe write issues.
+   if (firstArgAny.type() == typeid(std::string)) {
+      const std::string &firstArg = std::any_cast<const std::string &>(firstArgAny);
+      if (firstArg == "echo" && pipeCommand->getCommands().size() == 1) {
+         // std::string output = execute_builtin_echo(firstAbstractCommand, shenv);
+         //         results.emplace_back(firstAbstractCommand, output, "", 0,
+         //                              false);
+         return 0;
+      }
+   }
 }
 
 } // anonymous namespace
+
+/// Return the standard fds for cmd after applying redirects
+/// Returns the three standard file descriptors for the new child process.  Each
+/// fd may be an open, writable file object or a sentinel value from the
+/// subprocess module.
+StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSource,
+                              const ShellEnvironment &shenv,
+                              std::list<OpenFileEntryType> &openedFiles)
+{
+   // Apply the redirections, we use (N,) as a sentinel to indicate stdin,
+   // stdout, stderr for N equal to 0, 1, or 2 respectively. Redirects to or
+   // from a file are represented with a list [file, mode, file-object]
+   // where file-object is initially None.
+   std::list<std::tuple<int, int>> redirects = {{0, -1}, {1, -1}, {2, -1}};
+}
+
+std::string execute_builtin_echo()
+{
+
+}
 
 } // lit
 } // polar

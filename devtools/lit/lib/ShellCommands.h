@@ -103,6 +103,7 @@ public:
    {
       return Type::Pipeline;
    }
+   const std::list<std::shared_ptr<AbstractCommand>> &getCommands() const;
 protected:
    std::list<std::shared_ptr<AbstractCommand>> m_commands;
    bool m_negate;
@@ -132,6 +133,9 @@ public:
    {
       return Type::Seq;
    }
+   const std::string &getOp() const;
+   std::shared_ptr<AbstractCommand> getLhs() const;
+   std::shared_ptr<AbstractCommand> getRhs() const;
    void toShell(std::string &str, bool pipeFail = false) const override;
 protected:
    std::string m_op;

@@ -25,6 +25,9 @@
 namespace polar {
 namespace lit {
 
+using OpenFileEntryType = std::tuple<std::string, int, int>;
+using StdFdsTuple = std::tuple<int, int, int>;
+
 class InternalShellError : public std::runtime_error
 {
 public:
@@ -67,6 +70,8 @@ public:
 
    const std::string &getCwd();
    const std::map<std::string, std::string> &getEnv();
+   ShellEnvironment &setCwd(const std::string &cwd);
+   ShellEnvironment &setEnvItem(const std::string &key, const std::string &value);
 protected:
    std::string m_cwd;
    std::map<std::string, std::string> m_env;
@@ -118,11 +123,13 @@ void expand_glob();
 void expand_glob_expression();
 void quote_windows_command();
 void update_env();
-void execute_builtin_echo();
+std::string execute_builtin_echo();
 void execute_builtin_mkdir();
 void execute_builtin_diff();
 void execute_builtin_rm();
-void process_redirects();
+StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSource,
+                                            const ShellEnvironment &shenv,
+                                            std::list<OpenFileEntryType> &openedFiles);
 void execute_script_internal();
 void execute_script();
 void parse_integrated_test_script_commands();
