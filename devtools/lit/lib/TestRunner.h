@@ -121,7 +121,8 @@ std::tuple<int, std::string> execute_shcmd();
 
 std::list<std::string> expand_glob(GlobItem &glob, const std::string &cwd);
 std::list<std::string> expand_glob(const std::string &glob, const std::string &cwd);
-std::string expand_glob_expression();
+std::list<std::string> expand_glob_expression(const std::list<std::string> &exprs,
+                                              const std::string &cwd);
 void quote_windows_command();
 void update_env();
 std::string execute_builtin_echo();

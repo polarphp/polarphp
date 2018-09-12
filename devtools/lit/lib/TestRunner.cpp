@@ -170,6 +170,24 @@ std::list<std::string> expand_glob(const std::string &path, const std::string &c
    return {path};
 }
 
+std::list<std::string> expand_glob_expression(const std::list<std::string> &exprs,
+                                              const std::string &cwd)
+{
+   auto iter = exprs.begin();
+   auto endMark = exprs.end();
+   std::list<std::string> results{
+      *iter++
+   };
+   while (iter != endMark) {
+      std::list<std::string> files = expand_glob(*iter, cwd);
+      for (const std::string &file : files) {
+         results.push_back(file);
+      }
+      ++iter;
+   }
+   return results;
+}
+
 namespace {
 
 std::optional<int> do_execute_shcmd(std::shared_ptr<AbstractCommand> cmd, ShellEnvironment &shenv,
