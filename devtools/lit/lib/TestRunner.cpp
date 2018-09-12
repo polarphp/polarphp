@@ -13,17 +13,18 @@
 #include "Utils.h"
 #include "ShellCommands.h"
 
+#include <cstdio>
 #include <any>
 
 namespace polar {
 namespace lit {
 
-const std::string &ShellEnvironment::getCwd()
+const std::string &ShellEnvironment::getCwd() const
 {
    return m_cwd;
 }
 
-const std::map<std::string, std::string> &ShellEnvironment::getEnv()
+const std::map<std::string, std::string> &ShellEnvironment::getEnv() const
 {
    return m_env;
 }
@@ -346,10 +347,10 @@ StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSou
    auto endMark = redirects.end();
    std::list<std::optional<int>> stdFds{std::nullopt, std::nullopt, std::nullopt};
    while (iter != endMark) {
+      int fd = -1;
       std::any &itemAny = *iter;
       if (itemAny.type() == typeid(std::tuple<int, int>)) {
          std::tuple<int, int> &item = std::any_cast<std::tuple<int, int> &>(itemAny);
-         int fd = -1;
          if (item == std::tuple<int, int>{0, -1}) {
             fd = stdinSource;
          } else if (item == std::tuple<int, int>{1, -1}) {
@@ -392,7 +393,49 @@ StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSou
          ++iter;
          continue;
       }
+      std::string redirFilename;
+      std::list<std::string> names = expand_glob(filename, shenv.getCwd());
+      if (names.size() != 1) {
+         throw InternalShellError(command->operator std::string(),
+                                  "Unsupported: glob in "
+                                  "redirect expanded to multiple files");
+      }
+      std::string &name = names.front();
+      std::FILE *fileStream = nullptr;
+#ifdef POLAR_AVOID_DEV_NULL
+      if (name == sgc_kdevNull) {
+         fileStream = tmpfile();
+         fd = fileno(fileStream);
+      }
+#elif defined(POLAR_OS_WIN32)
+      if (name == "/dev/tty") {
+         // Simulate /dev/tty on Windows.
+         // "CON" is a special filename for the console.
+         fileStream = std::fopen("CON", mode.c_str());
+         fd = fileno(fileStream);
+      }
+#else
+      // Make sure relative paths are relative to the cwd.
+      redirFilename = fs::path(shenv.getCwd()) / name;
+      fileStream = std::fopen(redirFilename.c_str(), mode.c_str());
+      fd = fileno(fileStream);
+#endif
+      // Workaround a Win32 and/or subprocess bug when appending.
+      //
+      // FIXME: Actually, this is probably an instance of PR6753.
+      if (mode == "a") {
+         std::fseek(fileStream, 0, SEEK_END);
+      }
+      std::get<2>(item) = fd;
+      openedFiles.push_back(OpenFileEntryType{filename, mode, fd});
+      auto fdIter = stdFds.begin();
+      std::advance(fdIter, index);
+      *fdIter = fd;
+      ++index;
+      ++iter;
    }
+   auto iterFd = stdFds.begin();
+   return StdFdsTuple{*iterFd++, *iterFd++, *iterFd++};
 }
 
 std::string execute_builtin_echo()

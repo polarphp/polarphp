@@ -25,8 +25,8 @@
 namespace polar {
 namespace lit {
 
-using OpenFileEntryType = std::tuple<std::string, int, int>;
-using StdFdsTuple = std::tuple<int, int, int>;
+using OpenFileEntryType = std::tuple<std::string, std::string, int>;
+using StdFdsTuple = std::tuple<std::optional<int>, std::optional<int>, std::optional<int>>;
 
 class InternalShellError : public std::runtime_error
 {
@@ -68,8 +68,8 @@ public:
         m_env(env)
    {}
 
-   const std::string &getCwd();
-   const std::map<std::string, std::string> &getEnv();
+   const std::string &getCwd() const;
+   const std::map<std::string, std::string> &getEnv() const;
    ShellEnvironment &setCwd(const std::string &cwd);
    ShellEnvironment &setEnvItem(const std::string &key, const std::string &value);
 protected:
