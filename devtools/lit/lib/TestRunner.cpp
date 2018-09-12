@@ -160,9 +160,20 @@ std::tuple<int, std::string> execute_shcmd()
 
 }
 
+std::list<std::string> expand_glob(GlobItem &glob, const std::string &cwd)
+{
+   return glob.resolve(cwd);
+}
+
+std::list<std::string> expand_glob(const std::string &path, const std::string &cwd)
+{
+   return {path};
+}
+
 namespace {
 
-std::optional<int> do_execute_shcmd(std::shared_ptr<AbstractCommand> cmd, ShellEnvironment &shenv, std::list<ShellCommandResult> &results,
+std::optional<int> do_execute_shcmd(std::shared_ptr<AbstractCommand> cmd, ShellEnvironment &shenv,
+                                    std::list<ShellCommandResult> &results,
                                     TimeoutHelper &timeoutHelper)
 {
    if (timeoutHelper.timeoutReached()) {
@@ -261,11 +272,109 @@ StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSou
                               const ShellEnvironment &shenv,
                               std::list<OpenFileEntryType> &openedFiles)
 {
+   assert(cmd->getCommandType() == AbstractCommand::Type::Command);
    // Apply the redirections, we use (N,) as a sentinel to indicate stdin,
    // stdout, stderr for N equal to 0, 1, or 2 respectively. Redirects to or
    // from a file are represented with a list [file, mode, file-object]
    // where file-object is initially None.
-   std::list<std::tuple<int, int>> redirects = {{0, -1}, {1, -1}, {2, -1}};
+   std::list<std::any> redirects = {std::tuple<int, int>{0, -1},
+                                    std::tuple<int, int>{1, -1},
+                                    std::tuple<int, int>{2, -1}};
+   Command *command = dynamic_cast<Command *>(cmd.get());
+   using OpenFileTuple = std::tuple<std::string, std::string, std::optional<int>>;
+   for (const TokenType &redirect : command->getRedirects()) {
+      const std::any &opAny = std::get<0>(redirect);
+      const std::any &filenameAny = std::get<1>(redirect);
+      const ShellTokenType &op = std::any_cast<const ShellTokenType &>(opAny);
+      const std::string &filename = std::any_cast<const std::string &>(filenameAny);
+      if (op == std::tuple<std::string, int>{">", 2}) {
+         auto iter = redirects.begin();
+         std::advance(iter, 2);
+         *iter = std::any(OpenFileTuple{filename, "w", std::nullopt});
+      } else if (op == std::tuple<std::string, int>{">>", 2}) {
+         auto iter = redirects.begin();
+         std::advance(iter, 2);
+         *iter = std::any(OpenFileTuple{filename, "a", std::nullopt});
+      } else if (op == std::tuple<std::string, int>{">&", 2} &&
+                 (filename == "0" || filename == "1" || filename == "2")) {
+         auto iter = redirects.begin();
+         std::advance(iter, 2);
+         auto targetIter = redirects.begin();
+         std::advance(targetIter, std::stoi(filename));
+         *iter = *targetIter;
+      } else if (op == std::tuple<std::string, int>{">&", -1} ||
+                 op == std::tuple<std::string, int>{"&>", -1}) {
+         auto iter = redirects.begin();
+         *(++iter) = std::any(OpenFileTuple{filename, "w", std::nullopt});
+         *(++iter) = std::any(OpenFileTuple{filename, "w", std::nullopt});
+      } else if (op == std::tuple<std::string, int>{">", -1}) {
+         auto iter = redirects.begin();
+         ++iter;
+         *iter = std::any(OpenFileTuple{filename, "w", std::nullopt});
+      } else if (op == std::tuple<std::string, int>{">>", -1}) {
+         auto iter = redirects.begin();
+         ++iter;
+         *iter = std::any(OpenFileTuple{filename, "a", std::nullopt});
+      } else if (op == std::tuple<std::string, int>{"<", -1}) {
+         auto iter = redirects.begin();
+         *iter = std::any(OpenFileTuple{filename, "a", std::nullopt});
+      } else {
+         throw InternalShellError(command->operator std::string(),
+                                  "Unsupported redirect: (" + std::get<0>(op) + ", " + std::to_string(std::get<1>(op)) + ")" + filename);
+      }
+   }
+   int index = 0;
+   auto iter = redirects.begin();
+   auto endMark = redirects.end();
+   std::list<std::optional<int>> stdFds{std::nullopt, std::nullopt, std::nullopt};
+   while (iter != endMark) {
+      std::any &itemAny = *iter;
+      if (itemAny.type() == typeid(std::tuple<int, int>)) {
+         std::tuple<int, int> &item = std::any_cast<std::tuple<int, int> &>(itemAny);
+         int fd = -1;
+         if (item == std::tuple<int, int>{0, -1}) {
+            fd = stdinSource;
+         } else if (item == std::tuple<int, int>{1, -1}) {
+            if (index == 0) {
+               throw InternalShellError(command->operator std::string(),
+                                        "Unsupported redirect for stdin");
+            } else if (index == 1) {
+               fd = SUBPROCESS_FD_PIPE;
+            } else {
+               fd = 1;
+            }
+         } else if (item == std::tuple<int, int>{2, -1}) {
+            if (index != 2) {
+               throw InternalShellError(command->operator std::string(),
+                                        "Unsupported redirect for stdout");
+            }
+            fd = SUBPROCESS_FD_PIPE;
+         } else {
+            throw InternalShellError(command->operator std::string(),
+                                     "Bad redirect");
+         }
+         auto fdIter = stdFds.begin();
+         std::advance(fdIter, index);
+         *fdIter = fd;
+         ++index;
+         ++iter;
+         continue;
+      }
+      OpenFileTuple &item = std::any_cast<OpenFileTuple &>(itemAny);
+      std::string &filename = std::get<0>(item);
+      std::string &mode = std::get<1>(item);
+      std::optional<int> fdOpt = std::get<2>(item);
+      // Check if we already have an open fd. This can happen if stdout and
+      // stderr go to the same place.
+      if (fdOpt.has_value()) {
+         auto fdIter = stdFds.begin();
+         std::advance(fdIter, index);
+         *fdIter = fdOpt.value();
+         ++index;
+         ++iter;
+         continue;
+      }
+   }
 }
 
 std::string execute_builtin_echo()

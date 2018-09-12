@@ -16,12 +16,11 @@
 #include <string>
 #include <list>
 #include "ShellCommands.h"
+#include "Global.h"
 #include <any>
 
 namespace polar {
 namespace lit {
-
-using ShellTokenType = std::tuple<std::string, int>;
 
 class ShLexer
 {

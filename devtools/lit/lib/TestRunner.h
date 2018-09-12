@@ -119,8 +119,9 @@ protected:
 
 std::tuple<int, std::string> execute_shcmd();
 
-void expand_glob();
-void expand_glob_expression();
+std::list<std::string> expand_glob(GlobItem &glob, const std::string &cwd);
+std::list<std::string> expand_glob(const std::string &glob, const std::string &cwd);
+std::string expand_glob_expression();
 void quote_windows_command();
 void update_env();
 std::string execute_builtin_echo();

@@ -22,7 +22,6 @@ namespace polar {
 namespace lit {
 
 using TokenType = std::tuple<std::any, std::any>;
-using TokenTypePointer = std::shared_ptr<TokenType>;
 
 class AbstractCommand
 {
