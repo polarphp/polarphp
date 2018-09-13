@@ -20,14 +20,18 @@
 namespace polar {
 namespace lit {
 
+class TestSuite;
+
+using TestSuitSearchResult = std::tuple<std::optional<TestSuite>, std::list<std::string>>;
+
 class LitConfig;
 
 std::optional<std::string> choose_config_file_from_dir(const std::string &dir,
                                                        const std::list<std::string> &configNames);
 std::optional<std::string> dir_contains_test_suite(const std::string &path,
                                                    const LitConfig &config);
-void get_test_suite(const std::string &item, const LitConfig &config,
-                    std::map<std::string, std::string> &cache);
+TestSuitSearchResult get_test_suite(std::string item, const LitConfig &config,
+                                    std::map<std::string, TestSuitSearchResult> &cache);
 void get_local_config(const std::string &ts, const std::string &pathInSuite,
                       const LitConfig &config, std::map<std::string, std::string> &cache);
 void get_tests(const std::string &path, const LitConfig &config,

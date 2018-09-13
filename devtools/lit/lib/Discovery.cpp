@@ -44,8 +44,6 @@ std::optional<std::string> dir_contains_test_suite(const std::string &path,
    return cfgPath;
 }
 
-using TestSuitSearchResult = std::tuple<std::optional<TestSuite>, std::list<std::string>>;
-
 namespace {
 
 TestSuitSearchResult search_testsuit(const std::string &path,
@@ -121,10 +119,29 @@ TestSuitSearchResult search_testsuit(const std::string &path,
 
 } // anonymous namespace
 
-void get_test_suite(const std::string &item, const LitConfig &config,
-                    std::map<std::string, std::string> &cache)
+TestSuitSearchResult get_test_suite(std::string item, const LitConfig &config,
+                                    std::map<std::string, TestSuitSearchResult> &cache)
 {
-
+   // Canonicalize the path.
+   item = fs::canonical(fs::current_path() / item);
+   // Skip files and virtual components.
+   std::list<std::string> components;
+   fs::path currentDir(item);
+   while (!fs::is_directory(currentDir)) {
+      std::string parent = currentDir.parent_path();
+      std::string base = currentDir.filename();
+      if (parent == currentDir.string()) {
+         return TestSuitSearchResult{std::nullopt, std::list<std::string>{}};
+      }
+      components.push_back(base);
+      currentDir = parent;
+   }
+   components.reverse();
+   TestSuitSearchResult temp = search_testsuit(currentDir.string(), config, cache);
+   for (const std::string &item : components) {
+      std::get<1>(temp).push_back(item);
+   }
+   return temp;
 }
 
 } // lit
