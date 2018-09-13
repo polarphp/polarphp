@@ -113,5 +113,124 @@ std::optional<std::string> LitConfig::getToolsPath(std::optional<std::string> di
    return dir;
 }
 
+const std::string &LitConfig::getProgName() const
+{
+   return m_progName;
+}
+
+const std::list<std::string> &LitConfig::getPaths() const
+{
+   return m_path;
+}
+
+bool LitConfig::isQuiet() const
+{
+   return m_quiet;
+}
+
+bool LitConfig::isUseValgrind() const
+{
+   return m_useValgrind;
+}
+
+bool LitConfig::isValgrindLeakCheck() const
+{
+   return m_valgrindLeakCheck;
+}
+
+const std::list<std::string> &LitConfig::getValgrindUserArgs() const
+{
+   return m_valgrindUserArgs;
+}
+
+bool LitConfig::isNoExecute() const
+{
+   return m_noExecute;
+}
+
+bool LitConfig::isDebug() const
+{
+   return m_debug;
+}
+
+bool LitConfig::isSingleProcess() const
+{
+   return m_singleProcess;
+}
+
+bool LitConfig::isWindows() const
+{
+   return m_isWindows;
+}
+
+const std::map<std::string, std::string> &LitConfig::getParams() const
+{
+   return m_params;
+}
+
+const std::optional<std::string> &LitConfig::getBashPath() const
+{
+   return m_bashPath;
+}
+
+const std::string &LitConfig::getConfigPrefix() const
+{
+   return m_configPrefix;
+}
+
+const std::list<std::string> &LitConfig::getSuffixes() const
+{
+   return m_suffixes;
+}
+
+const std::list<std::string> &LitConfig::getConfigNames() const
+{
+   return m_configNames;
+}
+
+const std::list<std::string> &LitConfig::getSiteConfigNames() const
+{
+   return m_siteConfigNames;
+}
+const std::list<std::string> &LitConfig::getLocalConfigNames() const
+{
+   return m_localConfigNames;
+}
+
+int LitConfig::getNumErrors() const
+{
+   return m_numErrors;
+}
+
+int LitConfig::getNumWarnings() const
+{
+   return m_numWarnings;
+}
+
+const std::list<std::string> &LitConfig::getValgrindArgs() const
+{
+   return m_valgrindArgs;
+}
+
+int LitConfig::getMaxIndividualTestTime() const
+{
+   return m_maxIndividualTestTime;
+}
+
+const std::optional<int> &LitConfig::getMaxFailures() const
+{
+   return m_maxFailures;
+}
+
+const std::map<std::string, std::string> &LitConfig::getParallelismGroups() const
+{
+   return m_parallelismGroups;
+}
+
+bool LitConfig::isEchoAllCommands() const
+{
+   return m_echoAllCommands;
+}
+
 } // lit
 } // polar

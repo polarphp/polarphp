@@ -46,9 +46,9 @@ TestingConfig TestingConfig::fromDefaults(const LitConfig &litConfig)
 #endif
    // Set the default available features based on the LitConfig.
    std::set<std::string> availableFeatures;
-   if (litConfig.enableValgrind()) {
+   if (litConfig.isUseValgrind()) {
       availableFeatures.insert("valgrind");
-      if (litConfig.enableValgrindLeakCheck()) {
+      if (litConfig.isValgrindLeakCheck()) {
          availableFeatures.insert("vg_leak");
       }
    }

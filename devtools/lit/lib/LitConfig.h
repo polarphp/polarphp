@@ -70,20 +70,31 @@ public:
    std::string getBashPath();
    std::optional<std::string> getToolsPath(std::optional<std::string> dir, const std::string &paths,
                             const std::list<std::string> &tools);
-   const std::list<std::string> &getPaths() const
-   {
-      return m_path;
-   }
 
-   const bool enableValgrind() const
-   {
-      return m_useValgrind;
-   }
-
-   const bool enableValgrindLeakCheck() const
-   {
-      return m_valgrindLeakCheck;
-   }
+   const std::string &getProgName() const;
+   const std::list<std::string> &getPaths() const;
+   bool isQuiet() const;
+   bool isUseValgrind() const;
+   bool isValgrindLeakCheck() const;
+   const std::list<std::string> &getValgrindUserArgs() const;
+   bool isNoExecute() const;
+   bool isDebug() const;
+   bool isSingleProcess() const;
+   bool isWindows() const;
+   const std::map<std::string, std::string> &getParams() const;
+   const std::optional<std::string> &getBashPath() const;
+   const std::string &getConfigPrefix() const;
+   const std::list<std::string> &getSuffixes() const;
+   const std::list<std::string> &getConfigNames() const;
+   const std::list<std::string> &getSiteConfigNames() const;
+   const std::list<std::string> &getLocalConfigNames() const;
+   int getNumErrors() const;
+   int getNumWarnings() const;
+   const std::list<std::string> &getValgrindArgs() const;
+   int getMaxIndividualTestTime() const;
+   const std::optional<int> &getMaxFailures() const;
+   const std::map<std::string, std::string> &getParallelismGroups() const;
+   bool isEchoAllCommands() const;
 
 private:
    void writeMessage(const std::string &kind, const std::string &message,
