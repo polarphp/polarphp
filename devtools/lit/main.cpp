@@ -12,7 +12,27 @@
 #include "CLI/CLI.hpp"
 #include "Config.h"
 #include "lib/Utils.h"
+#include "lib/LitConfig.h"
 #include <iostream>
+#include <thread>
+#include <assert.h>
+#include <filesystem>
+
+using polar::lit::LitConfig;
+namespace fs = std::filesystem;
+
+namespace {
+
+std::list<std::string> vector_to_list(const std::vector<std::string> &items)
+{
+   std::list<std::string> ret;
+   for (const std::string &item : items) {
+      ret.push_back(item);
+   }
+   return ret;
+}
+
+} // anonymous namespace
 
 int main(int argc, char *argv[])
 {
@@ -21,10 +41,10 @@ int main(int argc, char *argv[])
    bool showVersion;
    int threadNumbers;
    std::string cfgPrefix;
-   std::string params;
+   std::vector<std::string> params;
    litApp.add_option("test_paths", testPaths, "Files or paths to include in the test suite");
    litApp.add_flag("--version", showVersion, "Show version and exit");
-   litApp.add_option("-j,--threads", threadNumbers, "Number of testing threads");
+   CLI::Option *threadsOpt = litApp.add_option("-j,--threads", threadNumbers, "Number of testing threads");
    litApp.add_option("--config-prefix", cfgPrefix, "Prefix for 'lit' config files");
    litApp.add_option("-D,--param", params, "Add 'NAME' = 'VAL' to the user defined parameters");
    /// setup command group
@@ -37,11 +57,12 @@ int main(int argc, char *argv[])
    bool noProgressBar;
    bool showUnsupported;
    bool showXFail;
+   bool echoAllCommands;
    litApp.add_option("-q,--quiet", quiet, "Suppress no error output", false)->group("Output Format");
    litApp.add_option("-s,--succinct", succinct, "Reduce amount of output", false)->group("Output Format");
    litApp.add_option("-v,--verbose", verbose, "Show test output for failures", false)->group("Output Format");
-   litApp.add_option("--echo-all-commands", verbose, "Echo all commands as they are executed to stdout."
-                                                     "In case of failure, last command shown will be the failing one.")->group("Output Format");
+   litApp.add_option("--echo-all-commands", echoAllCommands, "Echo all commands as they are executed to stdout."
+                                                             "In case of failure, last command shown will be the failing one.")->group("Output Format");
    litApp.add_option("-a,--show-all", showAll, "Display all commandlines and output", false)->group("Output Format");
    litApp.add_option("-o,--output", outputDir, "Write test results to the provided path")->check(CLI::ExistingDirectory)->group("Output Format");
    litApp.add_option("--no-progress-bar", noProgressBar, "Do not use curses based progress bar", true)->group("Output Format");
@@ -67,7 +88,7 @@ int main(int argc, char *argv[])
    litApp.add_option("--xunit-xml-output", xunitOutputFile, "Write XUnit-compatible XML test reports to the  specified file")->group("Test Execution");
    litApp.add_option("--timeout", maxIndividualTestTime, "Maximum time to spend running a single test (in seconds)."
                                                          "0 means no time limit. [Default: 0]", 0)->group("Test Execution");
-   litApp.add_option("--max-failures", maxFailures, "Stop execution after the given number of failures.", 0)->group("Test Execution");
+   CLI::Option *maxFailuresOpt = litApp.add_option("--max-failures", maxFailures, "Stop execution after the given number of failures.", 0)->group("Test Execution");
 
    /// Test Selection
    int maxTests;
@@ -96,12 +117,62 @@ int main(int argc, char *argv[])
    litApp.add_option("--show-suites", showSuites, "Show discovered test suites", false)->group("Debug and Experimental Options");
    litApp.add_option("--show-tests", showTests, "Show all discovered tests", false)->group("Debug and Experimental Options");
    litApp.add_option("--single-process", singleProcess, "Don't run tests in parallel.  Intended for debugging "
-                                                "single test failures", false)->group("Debug and Experimental Options");
+                                                        "single test failures", false)->group("Debug and Experimental Options");
 
    CLI11_PARSE(litApp, argc, argv);
    if (showVersion) {
       std::cout << "lit " << POLAR_LIT_VERSION << std::endl;
       return 0;
    }
+   if (testPaths.empty()) {
+      std::cerr << "No inputs specified" << std::endl;
+      std::cout << litApp.help() << std::endl;
+   }
+   if (threadsOpt->empty()) {
+      threadNumbers = std::thread::hardware_concurrency();
+   }
+   if (!maxFailuresOpt->empty() && maxFailures == 0) {
+      std::cerr << "Setting --max-failures to 0 does not have any effect." << std::endl;
+   }
+   const std::vector<std::string> &inputs = testPaths;
+   // Create the user defined parameters.
+   std::map<std::string, std::string> userParams;
+   for(std::string &item : params) {
+      if (item.find("=") == std::string::npos) {
+         userParams[item] = "";
+      } else {
+         std::list<std::string> parts = polar::lit::split_string(item, '=', 1);
+         auto iter = parts.begin();
+         assert(parts.size() == 2);
+         const std::string &name = *iter++;
+         const std::string &value = *iter++;
+         userParams[name] = value;
+      }
+   }
+   // Create the global config object.
+   LitConfig litConfig(
+            fs::path(argv[0]).filename(),
+         vector_to_list(paths),
+         quiet,
+         useValgrind,
+         valgrindLeakCheck,
+         vector_to_list(valgrindArgs),
+         noExecute,
+         singleProcess,
+         debug,
+      #ifdef POLAR_OS_WIN32
+         true,
+      #else
+         false,
+      #endif
+         userParams,
+         cfgPrefix,
+         maxIndividualTestTime,
+         maxFailures,
+         std::map<std::string, std::string>{},
+   echoAllCommands
+         );
+   // Perform test discovery.
    return 0;
 }
+
