@@ -12,9 +12,9 @@
 polar_collect_files(
    TYPE_HEADER
    DIR php/global
-   OUTPUT_VAR POLAR_GLOAL_HEADERS)
+   OUTPUT_VAR POLAR_GLOBAL_HEADERS)
 
-add_library(GlobalHeaders OBJECT ${POLAR_GLOAL_HEADERS})
+add_library(GlobalHeaders OBJECT ${POLAR_GLOBAL_HEADERS})
 
 polar_collect_files(
    TYPE_HEADER

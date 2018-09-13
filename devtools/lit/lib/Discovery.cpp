@@ -8,3 +8,27 @@
 // See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/09/05.
+
+#include "Discovery.h"
+#include <filesystem>
+
+namespace fs = std::filesystem;
+
+namespace polar {
+namespace lit {
+
+std::optional<std::string> choose_config_file_from_dir(const std::string &dir,
+                                                       const std::list<std::string> &configNames)
+{
+   for (const std::string &name : configNames) {
+      fs::path p(dir);
+      p /= name;
+      if (fs::exists(p)) {
+         return p;
+      }
+   }
+   return std::nullopt;
+}
+
+} // lit
+} // polar
