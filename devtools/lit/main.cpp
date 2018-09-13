@@ -12,6 +12,7 @@
 #include "CLI/CLI.hpp"
 #include "Config.h"
 #include "lib/Utils.h"
+#include <iostream>
 
 int main(int argc, char *argv[])
 {
@@ -22,7 +23,7 @@ int main(int argc, char *argv[])
    std::string cfgPrefix;
    std::string params;
    litApp.add_option("test_paths", testPaths, "Files or paths to include in the test suite");
-   litApp.add_option("--version", showVersion, "Show version and exit", false);
+   litApp.add_flag("--version", showVersion, "Show version and exit");
    litApp.add_option("-j,--threads", threadNumbers, "Number of testing threads");
    litApp.add_option("--config-prefix", cfgPrefix, "Prefix for 'lit' config files");
    litApp.add_option("-D,--param", params, "Add 'NAME' = 'VAL' to the user defined parameters");
@@ -98,5 +99,9 @@ int main(int argc, char *argv[])
                                                 "single test failures", false)->group("Debug and Experimental Options");
 
    CLI11_PARSE(litApp, argc, argv);
+   if (showVersion) {
+      std::cout << "lit " << POLAR_LIT_VERSION << std::endl;
+      return 0;
+   }
    return 0;
 }

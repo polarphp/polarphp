@@ -25,8 +25,8 @@
 namespace polar {
 namespace lit {
 
-using OpenFileEntryType = std::tuple<std::string, std::string, int>;
-using StdFdsTuple = std::tuple<std::optional<int>, std::optional<int>, std::optional<int>>;
+using OpenFileEntryType = std::tuple<std::string, std::string, int, std::string>;
+using StdFdsTuple = std::tuple<int, int, int>;
 
 class InternalShellError : public std::runtime_error
 {

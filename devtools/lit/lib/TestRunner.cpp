@@ -427,7 +427,7 @@ StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSou
          std::fseek(fileStream, 0, SEEK_END);
       }
       std::get<2>(item) = fd;
-      openedFiles.push_back(OpenFileEntryType{filename, mode, fd});
+      openedFiles.push_back(OpenFileEntryType{filename, mode, fd, redirFilename});
       auto fdIter = stdFds.begin();
       std::advance(fdIter, index);
       *fdIter = fd;
@@ -435,12 +435,41 @@ StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSou
       ++iter;
    }
    auto iterFd = stdFds.begin();
-   return StdFdsTuple{*iterFd++, *iterFd++, *iterFd++};
+   int stdinFd = (*iterFd++).value();
+   int stdoutFd = (*iterFd++).value();
+   int stderrFd = (*iterFd++).value();
+   return StdFdsTuple{stdinFd, stdoutFd, stderrFd};
 }
 
-std::string execute_builtin_echo()
+std::string execute_builtin_echo(std::shared_ptr<AbstractCommand> cmd,
+                                 const ShellEnvironment &shenv)
 {
-
+   std::list<OpenFileEntryType> openedFiles;
+   StdFdsTuple fds = process_redirects(cmd, SUBPROCESS_FD_PIPE, shenv,
+                                       openedFiles);
+   int stdinFd = std::get<0>(fds);
+   int stdoutFd = std::get<1>(fds);
+   int stderrFd = std::get<2>(fds);
+   if (stdinFd != SUBPROCESS_FD_PIPE || stderrFd != SUBPROCESS_FD_PIPE) {
+      throw InternalShellError(cmd->operator std::string(),
+                               "stdin and stderr redirects not supported for echo");
+   }
+   // Some tests have un-redirected echo commands to help debug test failures.
+   // Buffer our output and return it to the caller.
+   bool isRedirected = true;
+   if (stdoutFd == SUBPROCESS_FD_PIPE) {
+      isRedirected = false;
+   } else {
+#ifdef POLAR_OS_WIN32
+      // Reopen stdout in binary mode to avoid CRLF translation. The versions
+      // of echo we are replacing on Windows all emit plain LF, and the LLVM
+      // tests now depend on this.
+      // When we open as binary, however, this also means that we have to write
+      // 'bytes' objects to stdout instead of 'str' objects.
+      openedFiles.push_back({"", "", _fileno(stdout), ""});
+#endif
+   }
+   return "";
 }
 
 } // lit

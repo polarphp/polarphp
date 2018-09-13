@@ -37,6 +37,8 @@ elseif(UNIX)
    set(POLAR_OS_UNIX)
 endif()
 
+set(POLAR_LIT_VERSION "0.0.1")
+
 configure_file(Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/Config.h @ONLY)
 
 list(APPEND POLAR_DEVTOOLS_LIT_LIB_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/Config.h)
