@@ -21,7 +21,7 @@ namespace lit {
 LitConfig::LitConfig(const std::string &progName, const std::list<std::string> &path,
                      bool quiet, bool useValgrind, bool valgrindLeakCheck,
                      const std::list<std::string> &valgrindArgs, bool noExecute, bool debug,
-                     bool singleProcess, bool isWindows, const std::map<std::string, std::string> &params,
+                     bool singleProcess, bool isWindows, const std::map<std::string, std::any> &params,
                      const std::optional<std::string> &configPrefix, int maxIndividualTestTime,
                      const std::optional<int> &maxFailures, const std::map<std::string, std::string> &parallelismGroups,
                      bool echoAllCommands)
@@ -66,7 +66,7 @@ LitConfig &LitConfig::setMaxIndividualTestTime(int value)
 }
 
 void LitConfig::writeMessage(const std::string &kind, const std::string &message,
-                             const std::string &file, const std::string &line)
+                             const std::string &file, const std::string &line) const
 {
    std::cerr << m_progName << ": " << file << ":" << line << " :" << kind << " :" << message
              << std::endl;
@@ -163,7 +163,7 @@ bool LitConfig::isWindows() const
    return m_isWindows;
 }
 
-const std::map<std::string, std::string> &LitConfig::getParams() const
+const std::map<std::string, std::any> &LitConfig::getParams() const
 {
    return m_params;
 }

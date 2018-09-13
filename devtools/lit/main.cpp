@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
    }
    const std::vector<std::string> &inputs = testPaths;
    // Create the user defined parameters.
-   std::map<std::string, std::string> userParams;
+   std::map<std::string, std::any> userParams;
    for(std::string &item : params) {
       if (item.find("=") == std::string::npos) {
          userParams[item] = "";

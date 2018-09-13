@@ -16,6 +16,7 @@
 #include <list>
 #include <map>
 #include <optional>
+#include <any>
 
 namespace polar {
 namespace lit {
@@ -29,7 +30,7 @@ public:
              bool quiet, bool useValgrind,
              bool valgrindLeakCheck, const std::list<std::string> &valgrindArgs,
              bool noExecute, bool debug, bool singleProcess, bool isWindows,
-             const std::map<std::string, std::string> &params, const std::optional<std::string> &configPrefix = std::nullopt,
+             const std::map<std::string, std::any> &params, const std::optional<std::string> &configPrefix = std::nullopt,
              int maxIndividualTestTime = 0, const std::optional<int> &maxFailures = std::nullopt,
              const std::map<std::string, std::string> &parallelismGroups = std::map<std::string, std::string>{},
              bool echoAllCommands = false);
@@ -42,10 +43,11 @@ public:
    LitConfig &setMaxIndividualTestTime(int value);
 
    void note(const std::string &message,
-             const std::string &file = "", const std::string &line = "")
+             const std::string &file = "", int line = -1) const
    {
-      writeMessage("note", message, file, line);
+      writeMessage("note", message, file, std::to_string(line));
    }
+
    void warning(const std::string &message,
                 const std::string &file = "", const std::string &line = "")
    {
@@ -81,7 +83,7 @@ public:
    bool isDebug() const;
    bool isSingleProcess() const;
    bool isWindows() const;
-   const std::map<std::string, std::string> &getParams() const;
+   const std::map<std::string, std::any> &getParams() const;
    const std::optional<std::string> &getBashPath() const;
    const std::string &getConfigPrefix() const;
    const std::list<std::string> &getSuffixes() const;
@@ -98,7 +100,7 @@ public:
 
 private:
    void writeMessage(const std::string &kind, const std::string &message,
-                     const std::string &file = "", const std::string &line = "");
+                     const std::string &file = "", const std::string &line = "") const;
 protected:
    std::string m_progName;
    std::list<std::string> m_path;
@@ -110,7 +112,7 @@ protected:
    bool m_debug;
    bool m_singleProcess;
    bool m_isWindows;
-   std::map<std::string, std::string> m_params;
+   std::map<std::string, std::any> m_params;
    std::optional<std::string> m_bashPath;
    std::string m_configPrefix;
    std::list<std::string> m_suffixes;
