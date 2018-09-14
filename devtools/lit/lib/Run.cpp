@@ -8,3 +8,24 @@
 // See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/09/05.
+
+#include "Run.h"
+
+namespace polar {
+namespace lit {
+
+Run::Run(std::shared_ptr<LitConfig> litConfig, const std::list<std::tuple<TestSuitePointer, TestList>> &tests)
+   : m_litConfig(litConfig),
+     m_tests(tests)
+{
+}
+
+const std::list<std::tuple<TestSuitePointer, TestList>> &Run::getTests() const
+{
+   return m_tests;
+}
+
+} // lit
+} // polar
+
+

@@ -18,11 +18,17 @@ namespace polar {
 namespace lit {
 
 class LitConfig;
+class Run;
+using RunPointer = std::shared_ptr<Run>;
 
 class Run
 {
 public:
-   Run(const LitConfig &litConfig, TestList &test);
+   Run(std::shared_ptr<LitConfig> litConfig, const std::list<std::tuple<TestSuitePointer, TestList>> &tests);
+   const std::list<std::tuple<TestSuitePointer, TestList>> &getTests() const;
+protected:
+   std::shared_ptr<LitConfig> m_litConfig;
+   const std::list<std::tuple<TestSuitePointer, TestList>> &m_tests;
 };
 
 } // lit

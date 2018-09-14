@@ -25,13 +25,15 @@ class LitConfig;
 class Command;
 class Test;
 
+using LitConfigPointer = std::shared_ptr<LitConfig>;
+
 class TestFormat
 {
 public:
    virtual ~TestFormat() = 0;
    virtual std::list<std::shared_ptr<Test>> getTestsInDirectory(const std::shared_ptr<TestSuite> testSuite,
                                                                 const std::list<std::string> &pathInSuite,
-                                                                const LitConfig &litConfig,
+                                                                LitConfigPointer litConfig,
                                                                 std::shared_ptr<TestingConfig> config) = 0;
 };
 
@@ -40,7 +42,7 @@ class FileBasedTest : public TestFormat
 public:
    std::list<std::shared_ptr<Test>> getTestsInDirectory(const std::shared_ptr<TestSuite> testSuite,
                                                         const std::list<std::string> &pathInSuite,
-                                                        const LitConfig &litConfig,
+                                                        LitConfigPointer litConfig,
                                                         std::shared_ptr<TestingConfig> config);
 };
 

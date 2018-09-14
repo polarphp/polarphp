@@ -72,12 +72,12 @@ void LitConfig::writeMessage(const std::string &kind, const std::string &message
              << std::endl;
 }
 
-TestingConfig &LitConfig::loadConfig(TestingConfig &config, const std::string &path)
+TestingConfigPointer LitConfig::loadConfig(TestingConfigPointer config, const std::string &path)
 {
    if (m_debug) {
       note(std::string("loadConfig from ") + path);
    }
-   config.loadFromPath(path, *this);
+   config->loadFromPath(path, *this);
    return config;
 }
 

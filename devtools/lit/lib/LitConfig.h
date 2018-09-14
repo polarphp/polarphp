@@ -17,11 +17,15 @@
 #include <map>
 #include <optional>
 #include <any>
+#include <memory>
 
 namespace polar {
 namespace lit {
 
 class TestingConfig;
+class LitConfig;
+using LitConfigPointer = std::shared_ptr<LitConfig>;
+using TestingConfigPointer = std::shared_ptr<TestingConfig>;
 
 class LitConfig
 {
@@ -68,7 +72,7 @@ public:
       exit(2);
    }
 
-   TestingConfig &loadConfig(TestingConfig &config, const std::string &path);
+   TestingConfigPointer loadConfig(TestingConfigPointer config, const std::string &path);
    std::string getBashPath();
    std::optional<std::string> getToolsPath(std::optional<std::string> dir, const std::string &paths,
                             const std::list<std::string> &tools);

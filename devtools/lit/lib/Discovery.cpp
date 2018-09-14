@@ -15,6 +15,8 @@
 #include <fstream>
 #include <iostream>
 #include "formats/Base.h"
+#include "Run.h"
+#include "LitTestCase.h"
 
 namespace fs = std::filesystem;
 
@@ -37,11 +39,11 @@ std::optional<std::string> choose_config_file_from_dir(const std::string &dir,
 }
 
 std::optional<std::string> dir_contains_test_suite(const std::string &path,
-                                                   const LitConfig &config)
+                                                   LitConfigPointer litConfig)
 {
-   std::optional<std::string> cfgPath = choose_config_file_from_dir(path, config.getSiteConfigNames());
+   std::optional<std::string> cfgPath = choose_config_file_from_dir(path, litConfig->getSiteConfigNames());
    if (!cfgPath.has_value()) {
-      cfgPath = choose_config_file_from_dir(path, config.getConfigNames());
+      cfgPath = choose_config_file_from_dir(path, litConfig->getConfigNames());
    }
    return cfgPath;
 }
@@ -49,15 +51,15 @@ std::optional<std::string> dir_contains_test_suite(const std::string &path,
 namespace {
 
 TestSuitSearchResult search_testsuit(const std::string &path,
-                                     const LitConfig &config,
+                                     LitConfigPointer litConfig,
                                      std::map<std::string, TestSuitSearchResult> &cache);
 
 TestSuitSearchResult do_search_testsuit(const std::string &path,
-                                        const LitConfig &config,
+                                        LitConfigPointer litConfig,
                                         std::map<std::string, TestSuitSearchResult> &cache)
 {
    // Check for a site config or a lit config.
-   std::optional<std::string> cfgPathOpt = dir_contains_test_suite(path, config);
+   std::optional<std::string> cfgPathOpt = dir_contains_test_suite(path, litConfig);
    // If we didn't find a config file, keep looking.
    std::string base;
    if (!cfgPathOpt.has_value()) {
@@ -67,7 +69,7 @@ TestSuitSearchResult do_search_testsuit(const std::string &path,
       if (parent == path) {
          return TestSuitSearchResult{std::nullopt, std::list<std::string>{}};
       }
-      TestSuitSearchResult temp = search_testsuit(parent, config, cache);
+      TestSuitSearchResult temp = search_testsuit(parent, litConfig, cache);
       std::get<1>(temp).push_back(base);
       return temp;
    }
@@ -77,7 +79,7 @@ TestSuitSearchResult do_search_testsuit(const std::string &path,
    // when it finds a configuration it is about to load.  If the given
    // path is in the map, the value of that key is a path to the
    // configuration to load instead.
-   std::any configMapAny = config.getParams().at("config_map");
+   std::any configMapAny = litConfig->getParams().at("config_map");
    std::string cfgPath;
    if (configMapAny.has_value()) {
       cfgPath = fs::canonical(cfgPathOpt.value());
@@ -87,11 +89,11 @@ TestSuitSearchResult do_search_testsuit(const std::string &path,
       }
    }
    // We found a test suite, create a new config for it and load it.
-   if (config.isDebug()) {
-      config.note(format_string("loading suite config %s", cfgPath.c_str()), __FILE__, __LINE__);
+   if (litConfig->isDebug()) {
+      litConfig->note(format_string("loading suite config %s", cfgPath.c_str()), __FILE__, __LINE__);
    }
-   TestingConfigPointer testingCfg = TestingConfig::fromDefaults(config);
-   testingCfg->loadFromPath(cfgPath, config);
+   TestingConfigPointer testingCfg = TestingConfig::fromDefaults(litConfig);
+   testingCfg->loadFromPath(cfgPath, *litConfig.get());
    std::string sourceRoot;
    std::string execRoot;
    if (testingCfg->getTestSourceRoot().has_value()) {
@@ -109,13 +111,13 @@ TestSuitSearchResult do_search_testsuit(const std::string &path,
 }
 
 TestSuitSearchResult search_testsuit(const std::string &path,
-                                     const LitConfig &config,
+                                     LitConfigPointer litConfig,
                                      std::map<std::string, TestSuitSearchResult> &cache)
 {
    // Check for an already instantiated test suite.
    std::string realPath = fs::canonical(path);
    if (cache.find(realPath) == cache.end()) {
-      cache[realPath] = do_search_testsuit(path, config, cache);
+      cache[realPath] = do_search_testsuit(path, litConfig, cache);
    }
    return cache.at(realPath);
 }
@@ -127,7 +129,7 @@ TestSuitSearchResult search_testsuit(const std::string &path,
 /// @retval (None, ...) - Indicates no test suite contains @arg item.
 /// @retval (suite, relative_path) - The suite that @arg item is in, and its
 /// relative path inside that suite.
-TestSuitSearchResult get_test_suite(std::string item, const LitConfig &config,
+TestSuitSearchResult get_test_suite(std::string item, LitConfigPointer litConfig,
                                     std::map<std::string, TestSuitSearchResult> &cache)
 {
    // Canonicalize the path.
@@ -145,14 +147,14 @@ TestSuitSearchResult get_test_suite(std::string item, const LitConfig &config,
       currentDir = parent;
    }
    components.reverse();
-   TestSuitSearchResult temp = search_testsuit(currentDir.string(), config, cache);
+   TestSuitSearchResult temp = search_testsuit(currentDir.string(), litConfig, cache);
    for (const std::string &item : components) {
       std::get<1>(temp).push_back(item);
    }
    return temp;
 }
 
-TestingConfigPointer get_local_config(TestSuitePointer testSuite, const LitConfig &litConfig,
+TestingConfigPointer get_local_config(TestSuitePointer testSuite, LitConfigPointer litConfig,
                                       const std::list<std::string> &pathInSuite)
 {
    TestingConfigPointer parent;
@@ -164,7 +166,7 @@ TestingConfigPointer get_local_config(TestSuitePointer testSuite, const LitConfi
       parent = get_local_config(testSuite, litConfig, paths);
    }
    std::string sourcePath = testSuite->getSourcePath(pathInSuite);
-   std::optional<std::string> cfgPath = choose_config_file_from_dir(sourcePath, litConfig.getLocalConfigNames());
+   std::optional<std::string> cfgPath = choose_config_file_from_dir(sourcePath, litConfig->getLocalConfigNames());
    // If not, just reuse the parent config.
    if (!cfgPath.has_value()){
       return parent;
@@ -172,14 +174,14 @@ TestingConfigPointer get_local_config(TestSuitePointer testSuite, const LitConfi
    // Otherwise, copy the current config and load the local configuration
    // file into it.
    TestingConfigPointer config(new TestingConfig(*parent.get()));
-   if (litConfig.isDebug()) {
-      litConfig.note(format_string("loading local config %s", cfgPath.value().c_str()));
+   if (litConfig->isDebug()) {
+      litConfig->note(format_string("loading local config %s", cfgPath.value().c_str()));
    }
-   config->loadFromPath(cfgPath.value(), litConfig);
+   config->loadFromPath(cfgPath.value(), *litConfig.get());
    return config;
 }
 
-TestList get_tests_in_suite(TestSuitePointer testSuite, const LitConfig &litConfig,
+TestList get_tests_in_suite(TestSuitePointer testSuite, LitConfigPointer litConfig,
                             const std::list<std::string> &pathInSuite,
                             std::map<std::string, TestSuitSearchResult> &cache)
 {
@@ -246,18 +248,18 @@ TestList get_tests_in_suite(TestSuitePointer testSuite, const LitConfig &litConf
    }
 }
 
-std::tuple<TestSuitePointer, TestList> get_tests(const std::string &path, const LitConfig &config,
+std::tuple<TestSuitePointer, TestList> get_tests(const std::string &path, LitConfigPointer config,
                                                  std::map<std::string, TestSuitSearchResult> &cache)
 {
    TestSuitSearchResult testSuiteResult = get_test_suite(path, config, cache);
    std::optional<TestSuitePointer> testSuite = std::get<0>(testSuiteResult);
    std::list<std::string> subpathInSuite = std::get<1>(testSuiteResult);
    if (!testSuite.has_value()) {
-      config.warning(format_string("unable to find test suite for %s", path.c_str()));
+      config->warning(format_string("unable to find test suite for %s", path.c_str()));
       return std::tuple<TestSuitePointer, TestList>{};
    }
-   if (config.isDebug()) {
-      config.note(format_string("resolved input %s to %s", path.c_str(), testSuite.value()->getName().c_str()));
+   if (config->isDebug()) {
+      config->note(format_string("resolved input %s to %s", path.c_str(), testSuite.value()->getName().c_str()));
    }
    return std::tuple<TestSuitePointer, TestList>{testSuite.value(), get_tests_in_suite(testSuite.value(), config, subpathInSuite, cache)};
 }
@@ -267,7 +269,7 @@ std::tuple<TestSuitePointer, TestList> get_tests(const std::string &path, const 
 ///
 /// Given a configuration object and a list of input specifiers, find all the
 /// tests to execute.
-std::list<std::tuple<TestSuitePointer, TestList>> find_tests_for_inputs(const LitConfig &config, const std::list<std::string> &inputs)
+std::list<std::tuple<TestSuitePointer, TestList>> find_tests_for_inputs(LitConfigPointer litConfig, const std::list<std::string> &inputs)
 {
    std::list<std::string> actualInputs;
    for (const std::string &input : inputs) {
@@ -288,17 +290,43 @@ std::list<std::tuple<TestSuitePointer, TestList>> find_tests_for_inputs(const Li
    std::map<std::string, TestSuitSearchResult> cache;
    for (std::string &input : actualInputs) {
       int prevLength = tests.size();
-      tests.push_back(get_tests(input, config, cache));
+      tests.push_back(get_tests(input, litConfig, cache));
       if (prevLength == tests.size()) {
-         config.warning(format_string("input %s contained no tests", input.c_str()));
+         litConfig->warning(format_string("input %s contained no tests", input.c_str()));
       }
    }
    // If there were any errors during test discovery, exit now.
-   if (config.getNumErrors() > 0) {
-      std::cerr << config.getNumErrors() << " errors, exiting." << std::endl;
+   if (litConfig->getNumErrors() > 0) {
+      std::cerr << litConfig->getNumErrors() << " errors, exiting." << std::endl;
       exit(2);
    }
    return tests;
+}
+
+std::list<std::shared_ptr<LitTestCase>> load_test_suite(const std::list<std::string> &inputs)
+{
+   LitConfigPointer litConfig = std::make_shared<LitConfig>(
+            "lit",
+            std::list<std::string>{},
+            false,
+            false,
+            false,
+            std::list<std::string>{},
+            false,
+            false,
+            false,
+         #ifdef POLAR_OS_WIN32
+            true,
+         #else
+            false,
+         #endif
+            std::map<std::string, std::any>{});
+   RunPointer run = std::make_shared<Run>(litConfig, find_tests_for_inputs(litConfig, inputs));
+   std::list<std::shared_ptr<LitTestCase>> testcases;
+   for (auto &test : run->getTests()) {
+      testcases.push_back(std::make_shared<LitTestCase>(test, run));
+   }
+   return testcases;
 }
 
 } // lit

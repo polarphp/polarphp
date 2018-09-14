@@ -17,9 +17,9 @@
 namespace polar {
 namespace lit {
 
-TestingConfigPointer TestingConfig::fromDefaults(const LitConfig &litConfig)
+TestingConfigPointer TestingConfig::fromDefaults(LitConfigPointer litConfig)
 {
-   std::list<std::string> paths = litConfig.getPaths();
+   std::list<std::string> paths = litConfig->getPaths();
    paths.push_back(std::getenv("PATH"));
    std::map<std::string, std::string> environment;
    environment["PATH"] = join_string_list(paths, ":");
@@ -47,9 +47,9 @@ TestingConfigPointer TestingConfig::fromDefaults(const LitConfig &litConfig)
 #endif
    // Set the default available features based on the LitConfig.
    std::set<std::string> availableFeatures;
-   if (litConfig.isUseValgrind()) {
+   if (litConfig->isUseValgrind()) {
       availableFeatures.insert("valgrind");
-      if (litConfig.isValgrindLeakCheck()) {
+      if (litConfig->isValgrindLeakCheck()) {
          availableFeatures.insert("vg_leak");
       }
    }
