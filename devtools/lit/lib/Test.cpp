@@ -102,7 +102,7 @@ TestSuite::TestSuite()
 {}
 
 TestSuite::TestSuite(const std::string &name, const std::string &sourceRoot,
-                     const std::string &execRoot, const TestingConfig &config)
+                     const std::string &execRoot, TestingConfigPointer config)
    : m_name(name),
      m_sourceRoot(sourceRoot),
      m_execRoot(execRoot),
@@ -134,13 +134,13 @@ std::string TestSuite::getExecPath(const std::list<std::string> &components) con
    return base.string();
 }
 
-const TestingConfig &TestSuite::getConfig() const
+TestingConfigPointer TestSuite::getConfig() const
 {
    return m_config;
 }
 
 Test::Test(TestSuitePointer suite, const std::list<std::string> &pathInSuite,
-           const TestingConfig &config, const std::optional<std::string> &filePath)
+           TestingConfigPointer config, const std::optional<std::string> &filePath)
    : m_suite(suite),
      m_pathInSuite(pathInSuite),
      m_config(config),
@@ -180,7 +180,7 @@ void Test::setResult(const Result &result)
 
 std::string Test::getFullName()
 {
-   return m_config.getName() + " :: " + join_string_list(m_pathInSuite, "/");
+   return m_config->getName() + " :: " + join_string_list(m_pathInSuite, "/");
 }
 
 std::string Test::getFilePath()
@@ -203,8 +203,8 @@ std::string Test::getExecPath()
 
 bool Test::isExpectedToFail()
 {
-   const std::set<std::string> &features = m_config.getAvailableFeatures();
-   const std::string &triple = m_config.getExtraConfig<std::string>("target_triple", std::string(""));
+   const std::set<std::string> &features = m_config->getAvailableFeatures();
+   const std::string &triple = m_config->getExtraConfig<std::string>("target_triple", std::string(""));
    // Check if any of the xfails match an available feature or the target.
    for (const std::string &item : m_xfails) {
       // If this is the wildcard, it always fails.
@@ -227,7 +227,7 @@ bool Test::isExpectedToFail()
 
 bool Test::isWithinFeatureLimits()
 {
-   if (m_config.getLimitToFeatures().empty()) {
+   if (m_config->getLimitToFeatures().empty()) {
       return true; // No limits. Run it.
    }
    // Check the requirements as-is (#1)
@@ -236,8 +236,8 @@ bool Test::isWithinFeatureLimits()
    }
    // Check the requirements after removing the limiting features (#2)
    std::set<std::string> featuresMinusLimits;
-   const std::set<std::string> &availableFeatures = m_config.getAvailableFeatures();
-   const std::set<std::string> &limitToFeatures = m_config.getLimitToFeatures();
+   const std::set<std::string> &availableFeatures = m_config->getAvailableFeatures();
+   const std::set<std::string> &limitToFeatures = m_config->getLimitToFeatures();
    auto iter = availableFeatures.begin();
    auto endMark = availableFeatures.end();
    while (iter != endMark) {
@@ -254,7 +254,7 @@ bool Test::isWithinFeatureLimits()
 
 std::list<std::string> Test::getMissingRequiredFeatures()
 {
-   const std::set<std::string> &features = m_config.getAvailableFeatures();
+   const std::set<std::string> &features = m_config->getAvailableFeatures();
    return getMissingRequiredFeaturesFromList(features);
 }
 
@@ -276,8 +276,8 @@ std::list<std::string> Test::getMissingRequiredFeaturesFromList(const std::set<s
 std::list<std::string> Test::getUnsupportedFeatures()
 {
    std::list<std::string> ret;
-   const std::set<std::string> &features = m_config.getAvailableFeatures();
-   const std::string &triple = m_config.getExtraConfig<std::string>("target_triple", std::string(""));
+   const std::set<std::string> &features = m_config->getAvailableFeatures();
+   const std::string &triple = m_config->getExtraConfig<std::string>("target_triple", std::string(""));
    try {
       for (const std::string &item : m_unsupported) {
          if (BooleanExpression::evaluate(item, features, triple)) {
@@ -292,7 +292,7 @@ std::list<std::string> Test::getUnsupportedFeatures()
 
 bool Test::isEarlyTest() const
 {
-   return m_suite->getConfig().isEarly();
+   return m_suite->getConfig()->isEarly();
 }
 
 void Test::writeJUnitXML(std::string &xmlStr)

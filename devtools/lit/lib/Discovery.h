@@ -32,11 +32,11 @@ std::optional<std::string> dir_contains_test_suite(const std::string &path,
                                                    const LitConfig &config);
 TestSuitSearchResult get_test_suite(std::string item, const LitConfig &config,
                                     std::map<std::string, TestSuitSearchResult> &cache);
-TestingConfig get_local_config(const TestSuite &testSuite, const LitConfig &litConfig,
-                               const std::list<std::string> &pathInSuite);
+TestingConfigPointer get_local_config(TestSuitePointer testSuite, const LitConfig &litConfig,
+                                      const std::list<std::string> &pathInSuite);
 std::tuple<TestSuitePointer, TestList> get_tests(const std::string &path, const LitConfig &config,
                                                  std::map<std::string, TestSuitSearchResult> &cache);
-TestList get_tests_in_suite(const TestSuitePointer testSuite, const LitConfig &litConfig,
+TestList get_tests_in_suite(TestSuitePointer testSuite, const LitConfig &litConfig,
                             const std::list<std::string> &pathInSuite,
                             std::map<std::string, TestSuitSearchResult> &cache);
 TestList find_tests_for_inputs(const LitConfig &config, const std::list<std::string> &inputs);

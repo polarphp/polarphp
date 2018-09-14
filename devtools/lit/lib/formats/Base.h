@@ -29,15 +29,19 @@ class TestFormat
 {
 public:
    virtual ~TestFormat() = 0;
-   virtual std::list<std::shared_ptr<Test>> getTestsInDirectory(const std::shared_ptr<TestSuite> testSuite, const std::list<std::string> &pathInSuite,
-                                               const LitConfig &litConfig, const TestingConfig &config) = 0;
+   virtual std::list<std::shared_ptr<Test>> getTestsInDirectory(const std::shared_ptr<TestSuite> testSuite,
+                                                                const std::list<std::string> &pathInSuite,
+                                                                const LitConfig &litConfig,
+                                                                std::shared_ptr<TestingConfig> config) = 0;
 };
 
 class FileBasedTest : public TestFormat
 {
 public:
-   std::list<std::shared_ptr<Test>> getTestsInDirectory(const std::shared_ptr<TestSuite> testSuite, const std::list<std::string> &pathInSuite,
-                                       const LitConfig &litConfig, const TestingConfig &config);
+   std::list<std::shared_ptr<Test>> getTestsInDirectory(const std::shared_ptr<TestSuite> testSuite,
+                                                        const std::list<std::string> &pathInSuite,
+                                                        const LitConfig &litConfig,
+                                                        std::shared_ptr<TestingConfig> config);
 };
 
 class OneCommandPerFileTest : public TestFormat

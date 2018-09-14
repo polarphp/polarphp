@@ -90,21 +90,22 @@ TestSuitSearchResult do_search_testsuit(const std::string &path,
    if (config.isDebug()) {
       config.note(format_string("loading suite config %s", cfgPath.c_str()), __FILE__, __LINE__);
    }
-   TestingConfig testingCfg = TestingConfig::fromDefaults(config);
-   testingCfg.loadFromPath(cfgPath, config);
+   TestingConfigPointer testingCfg = TestingConfig::fromDefaults(config);
+   testingCfg->loadFromPath(cfgPath, config);
    std::string sourceRoot;
    std::string execRoot;
-   if (testingCfg.getTestSourceRoot().has_value()) {
-      sourceRoot = testingCfg.getTestSourceRoot().value();
+   if (testingCfg->getTestSourceRoot().has_value()) {
+      sourceRoot = testingCfg->getTestSourceRoot().value();
    } else {
       sourceRoot = path;
    }
-   if (testingCfg.getTestExecRoot().has_value()) {
-      execRoot = testingCfg.getTestExecRoot().value();
+   if (testingCfg->getTestExecRoot().has_value()) {
+      execRoot = testingCfg->getTestExecRoot().value();
    } else {
       execRoot = path;
    }
-   return TestSuitSearchResult{std::make_shared<TestSuite>(testingCfg.getName(), sourceRoot, execRoot, testingCfg), std::list<std::string>{}};
+   return TestSuitSearchResult{std::make_shared<TestSuite>(testingCfg->getName(), sourceRoot, execRoot, testingCfg),
+            std::list<std::string>{}};
 }
 
 TestSuitSearchResult search_testsuit(const std::string &path,
@@ -146,10 +147,10 @@ TestSuitSearchResult get_test_suite(std::string item, const LitConfig &config,
    return temp;
 }
 
-TestingConfig get_local_config(const TestSuitePointer testSuite, const LitConfig &litConfig,
-                               const std::list<std::string> &pathInSuite)
+TestingConfigPointer get_local_config(TestSuitePointer testSuite, const LitConfig &litConfig,
+                                      const std::list<std::string> &pathInSuite)
 {
-   TestingConfig parent;
+   TestingConfigPointer parent;
    if (pathInSuite.empty()) {
       parent = testSuite->getConfig();
    } else {
@@ -165,15 +166,15 @@ TestingConfig get_local_config(const TestSuitePointer testSuite, const LitConfig
    }
    // Otherwise, copy the current config and load the local configuration
    // file into it.
-   TestingConfig config = parent;
+   TestingConfigPointer config(new TestingConfig(*parent.get()));
    if (litConfig.isDebug()) {
       litConfig.note(format_string("loading local config %s", cfgPath.value().c_str()));
    }
-   config.loadFromPath(cfgPath.value(), litConfig);
+   config->loadFromPath(cfgPath.value(), litConfig);
    return config;
 }
 
-TestList get_tests_in_suite(const TestSuitePointer testSuite, const LitConfig &litConfig,
+TestList get_tests_in_suite(TestSuitePointer testSuite, const LitConfig &litConfig,
                             const std::list<std::string> &pathInSuite,
                             std::map<std::string, TestSuitSearchResult> &cache)
 {
@@ -187,12 +188,12 @@ TestList get_tests_in_suite(const TestSuitePointer testSuite, const LitConfig &l
    if (!fs::is_directory(sourcePath)) {
       std::list<std::string> temp = pathInSuite;
       temp.pop_back();
-      TestingConfig lc = get_local_config(testSuite, litConfig, temp);
+      TestingConfigPointer lc = get_local_config(testSuite, litConfig, temp);
       return TestList{std::make_shared<Test>(testSuite, temp, lc)};
    }
-   TestingConfig lc = get_local_config(testSuite, litConfig, pathInSuite);
-   if (lc.getTestFormat().has_value()) {
-      return lc.getTestFormat().value()->getTestsInDirectory(testSuite, pathInSuite, litConfig, lc);
+   TestingConfigPointer lc = get_local_config(testSuite, litConfig, pathInSuite);
+   if (lc->getTestFormat().has_value()) {
+      return lc->getTestFormat().value()->getTestsInDirectory(testSuite, pathInSuite, litConfig, lc);
    }
    for(auto& p: fs::directory_iterator(sourcePath)) {
       const fs::path &path = p.path();
@@ -200,7 +201,7 @@ TestList get_tests_in_suite(const TestSuitePointer testSuite, const LitConfig &l
       if (filename == "Output" ||
           filename == ".svn" ||
           filename == ".git" ||
-          lc.getExcludes().find(filename) != lc.getExcludes().end()) {
+          lc->getExcludes().find(filename) != lc->getExcludes().end()) {
          continue;
       }
       // Ignore non-directories.
@@ -229,7 +230,6 @@ TestList get_tests_in_suite(const TestSuitePointer testSuite, const LitConfig &l
       // disregard it (this can happen if the exec root is located inside the
       // current test suite, for example).
       if (subTs.value() == testSuite) {
-         // @TODO identity
          continue;
       }
       // Otherwise, load from the nested test suite, if present.

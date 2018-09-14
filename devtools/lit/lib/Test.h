@@ -28,6 +28,7 @@ class TestSuite;
 
 using TestPointer = std::shared_ptr<Test>;
 using TestSuitePointer = std::shared_ptr<TestSuite>;
+using TestingConfigPointer = std::shared_ptr<TestingConfig>;
 using TestList = std::list<TestPointer>;
 using TestSuiteList = std::list<TestSuitePointer>;
 
@@ -207,23 +208,23 @@ class TestSuite
 public:
    TestSuite();
    TestSuite(const std::string &name, const std::string &sourceRoot,
-             const std::string &execRoot, const TestingConfig &config);
+             const std::string &execRoot, TestingConfigPointer config);
    const std::string &getName();
    std::string getSourcePath(const std::list<std::string> &components) const;
    std::string getExecPath(const std::list<std::string> &components) const;
-   const TestingConfig &getConfig() const;
+   TestingConfigPointer getConfig() const;
 protected:
    std::string m_name;
    std::string m_sourceRoot;
    std::string m_execRoot;
-   TestingConfig m_config;
+   TestingConfigPointer m_config;
 };
 
 class Test
 {
 public:
    Test(TestSuitePointer testSuite, const std::list<std::string> &pathInSuite,
-        const TestingConfig &config, const std::optional<std::string> &filePath = std::nullopt);
+        TestingConfigPointer config, const std::optional<std::string> &filePath = std::nullopt);
    void setResult(const Result &result);
    std::string getFullName();
    std::string getFilePath();
@@ -239,7 +240,7 @@ public:
 protected:
    TestSuitePointer m_suite;
    std::list<std::string> m_pathInSuite;
-   TestingConfig m_config;
+   TestingConfigPointer m_config;
    std::optional<std::string> m_filePath;
    std::list<std::string> m_xfails;
    std::set<std::string> m_requires;

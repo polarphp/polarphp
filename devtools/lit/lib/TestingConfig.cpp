@@ -17,7 +17,7 @@
 namespace polar {
 namespace lit {
 
-TestingConfig TestingConfig::fromDefaults(const LitConfig &litConfig)
+TestingConfigPointer TestingConfig::fromDefaults(const LitConfig &litConfig)
 {
    std::list<std::string> paths = litConfig.getPaths();
    paths.push_back(std::getenv("PATH"));
@@ -53,18 +53,18 @@ TestingConfig TestingConfig::fromDefaults(const LitConfig &litConfig)
          availableFeatures.insert("vg_leak");
       }
    }
-   return TestingConfig(nullptr,
-                        "<unnamed>",
-                        std::set<std::string>{},
-                        std::nullopt,
-                        environment,
-                        std::list<std::string>{},
-                        false,
-                        std::nullopt,
-                        std::nullopt,
-                        std::set<std::string>{},
-                        availableFeatures,
-                        true);
+   return std::make_shared<TestingConfig>(nullptr,
+                                          "<unnamed>",
+                                          std::set<std::string>{},
+                                          std::nullopt,
+                                          environment,
+                                          std::list<std::string>{},
+                                          false,
+                                          std::nullopt,
+                                          std::nullopt,
+                                          std::set<std::string>{},
+                                          availableFeatures,
+                                          true);
 
 }
 

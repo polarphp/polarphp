@@ -24,6 +24,8 @@ namespace lit {
 
 class LitConfig;
 class TestFormat;
+class TestingConfig;
+using TestingConfigPointer = std::shared_ptr<TestingConfig>;
 
 class TestingConfig {
 public:
@@ -54,7 +56,7 @@ public:
         m_parallelismGroup(parallelismGroup)
    {}
 public:
-   static TestingConfig fromDefaults(const LitConfig &litConfig);
+   static TestingConfigPointer fromDefaults(const LitConfig &litConfig);
    TestingConfig *getParent();
    const std::string &getName();
    const std::set<std::string> &getSuffixes();
