@@ -113,7 +113,7 @@ const std::string &TestSuite::getName()
    return m_name;
 }
 
-std::string TestSuite::getSourcePath(const std::list<std::string> &components)
+std::string TestSuite::getSourcePath(const std::list<std::string> &components) const
 {
    fs::path base(m_sourceRoot);
    for (const std::string &item : components) {
@@ -122,7 +122,7 @@ std::string TestSuite::getSourcePath(const std::list<std::string> &components)
    return base.string();
 }
 
-std::string TestSuite::getExecPath(const std::list<std::string> &components)
+std::string TestSuite::getExecPath(const std::list<std::string> &components) const
 {
    fs::path base(m_execRoot);
    for (const std::string &item : components) {
@@ -131,7 +131,7 @@ std::string TestSuite::getExecPath(const std::list<std::string> &components)
    return base.string();
 }
 
-TestingConfig &TestSuite::getConfig()
+const TestingConfig &TestSuite::getConfig() const
 {
    return m_config;
 }
@@ -287,7 +287,7 @@ std::list<std::string> Test::getUnsupportedFeatures()
    }
 }
 
-bool Test::isEarlyTest()
+bool Test::isEarlyTest() const
 {
    return m_suite.getConfig().isEarly();
 }

@@ -136,7 +136,7 @@ const std::set<std::string> &TestingConfig::getLimitToFeatures()
    return m_limitToFeatures;
 }
 
-bool TestingConfig::isEarly()
+bool TestingConfig::isEarly() const
 {
    return m_isEarly;
 }

@@ -200,9 +200,9 @@ public:
    TestSuite(const std::string &name, const std::string &sourceRoot,
              const std::string &execRoot, const TestingConfig &config);
    const std::string &getName();
-   std::string getSourcePath(const std::list<std::string> &components);
-   std::string getExecPath(const std::list<std::string> &components);
-   TestingConfig &getConfig();
+   std::string getSourcePath(const std::list<std::string> &components) const;
+   std::string getExecPath(const std::list<std::string> &components) const;
+   const TestingConfig &getConfig() const;
 protected:
    std::string m_name;
    std::string m_sourceRoot;
@@ -225,7 +225,7 @@ public:
    std::list<std::string> getMissingRequiredFeaturesFromList(const std::set<std::string> &features);
    std::list<std::string> getMissingRequiredFeatures();
    std::list<std::string> getUnsupportedFeatures();
-   bool isEarlyTest();
+   bool isEarlyTest() const;
    void writeJUnitXML(std::string &xmlStr);
 protected:
    TestSuite m_suite;

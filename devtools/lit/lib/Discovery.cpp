@@ -144,5 +144,36 @@ TestSuitSearchResult get_test_suite(std::string item, const LitConfig &config,
    return temp;
 }
 
+namespace {
+
+TestingConfig search_local_config(const TestSuite &testSuit, const LitConfig &litConfig,
+                                  const std::list<std::string> &pathInSuite)
+{
+   TestingConfig parent;
+   if (pathInSuite.empty()) {
+      parent = testSuit.getConfig();
+   } else {
+      std::list<std::string> paths = pathInSuite;
+      paths.pop_back();
+      parent = search_local_config(testSuit, litConfig, paths);
+   }
+   std::string sourcePath = testSuit.getSourcePath(pathInSuite);
+   std::optional<std::string> cfgPath = choose_config_file_from_dir(sourcePath, litConfig.getLocalConfigNames());
+   // If not, just reuse the parent config.
+   if (!cfgPath.has_value()){
+      return parent;
+   }
+   // Otherwise, copy the current config and load the local configuration
+   // file into it.
+   TestingConfig config = parent;
+   if (litConfig.isDebug()) {
+       litConfig.note(format_string("loading local config %s", cfgPath.value().c_str()));
+   }
+   config.loadFromPath(cfgPath.value(), litConfig);
+   return config;
+}
+
+} // anonymous namespacs
+
 } // lit
 } // polar

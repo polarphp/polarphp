@@ -25,6 +25,8 @@ class LitConfig;
 
 class TestingConfig {
 public:
+   TestingConfig()
+   {}
    TestingConfig(TestingConfig *parent, const std::string &name,
                  const std::set<std::string> &suffixes, const std::optional<std::string> &testFormat,
                  const std::map<std::string, std::string> &environment, const std::list<std::string> &substitutions,
@@ -64,7 +66,7 @@ public:
    const std::set<std::string> &getAvailableFeatures();
    bool isPipefail();
    const std::set<std::string> &getLimitToFeatures();
-   bool isEarly();
+   bool isEarly() const;
    void loadFromPath(const std::string &path, const LitConfig &litConfig);
    template <typename T>
    const T &getExtraConfig(const std::string &name, const T &defaultValue = T{});
