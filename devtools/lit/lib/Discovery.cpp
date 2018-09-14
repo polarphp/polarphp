@@ -12,6 +12,8 @@
 #include "Discovery.h"
 #include "LitConfig.h"
 #include <filesystem>
+#include <fstream>
+#include <iostream>
 #include "formats/Base.h"
 
 namespace fs = std::filesystem;
@@ -102,7 +104,7 @@ TestSuitSearchResult do_search_testsuit(const std::string &path,
    } else {
       execRoot = path;
    }
-   return TestSuitSearchResult{TestSuite(testingCfg.getName(), sourceRoot, execRoot, testingCfg), std::list<std::string>{}};
+   return TestSuitSearchResult{std::make_shared<TestSuite>(testingCfg.getName(), sourceRoot, execRoot, testingCfg), std::list<std::string>{}};
 }
 
 TestSuitSearchResult search_testsuit(const std::string &path,
@@ -144,18 +146,18 @@ TestSuitSearchResult get_test_suite(std::string item, const LitConfig &config,
    return temp;
 }
 
-TestingConfig get_local_config(const TestSuite &testSuite, const LitConfig &litConfig,
+TestingConfig get_local_config(const TestSuitePointer testSuite, const LitConfig &litConfig,
                                const std::list<std::string> &pathInSuite)
 {
    TestingConfig parent;
    if (pathInSuite.empty()) {
-      parent = testSuite.getConfig();
+      parent = testSuite->getConfig();
    } else {
       std::list<std::string> paths = pathInSuite;
       paths.pop_back();
       parent = get_local_config(testSuite, litConfig, paths);
    }
-   std::string sourcePath = testSuite.getSourcePath(pathInSuite);
+   std::string sourcePath = testSuite->getSourcePath(pathInSuite);
    std::optional<std::string> cfgPath = choose_config_file_from_dir(sourcePath, litConfig.getLocalConfigNames());
    // If not, just reuse the parent config.
    if (!cfgPath.has_value()){
@@ -171,22 +173,22 @@ TestingConfig get_local_config(const TestSuite &testSuite, const LitConfig &litC
    return config;
 }
 
-std::list<Test> get_tests_in_suite(const TestSuite &testSuite, const LitConfig &litConfig,
-                                   const std::list<std::string> &pathInSuite,
-                                   std::map<std::string, TestSuitSearchResult> &cache)
+TestList get_tests_in_suite(const TestSuitePointer testSuite, const LitConfig &litConfig,
+                            const std::list<std::string> &pathInSuite,
+                            std::map<std::string, TestSuitSearchResult> &cache)
 {
    // Check that the source path exists (errors here are reported by the
    // caller).
-   std::string sourcePath = testSuite.getSourcePath(pathInSuite);
+   std::string sourcePath = testSuite->getSourcePath(pathInSuite);
    if (!fs::exists(sourcePath)) {
-      return std::list<Test>{};
+      return TestList{};
    }
    // Check if the user named a test directly.
    if (!fs::is_directory(sourcePath)) {
       std::list<std::string> temp = pathInSuite;
       temp.pop_back();
       TestingConfig lc = get_local_config(testSuite, litConfig, temp);
-      return std::list<Test>{Test(testSuite, temp, lc)};
+      return TestList{std::make_shared<Test>(testSuite, temp, lc)};
    }
    TestingConfig lc = get_local_config(testSuite, litConfig, pathInSuite);
    if (lc.getTestFormat().has_value()) {
@@ -209,8 +211,8 @@ std::list<Test> get_tests_in_suite(const TestSuite &testSuite, const LitConfig &
       // site configuration and then in the source path.
       std::list<std::string> subPath = pathInSuite;
       subPath.push_back(filename);
-      std::string fileExecPath = testSuite.getExecPath(subPath);
-      std::optional<TestSuite> subTs;
+      std::string fileExecPath = testSuite->getExecPath(subPath);
+      std::optional<TestSuitePointer> subTs;
       std::list<std::string> subpathInSuite;
       if (dir_contains_test_suite(fileExecPath, litConfig).has_value()) {
          TestSuitSearchResult searchResult = get_test_suite(fileExecPath, litConfig, cache);
@@ -226,7 +228,7 @@ std::list<Test> get_tests_in_suite(const TestSuite &testSuite, const LitConfig &
       // If the this directory recursively maps back to the current test suite,
       // disregard it (this can happen if the exec root is located inside the
       // current test suite, for example).
-      if (&subTs.value() == &testSuite) {
+      if (subTs.value() == testSuite) {
          // @TODO identity
          continue;
       }
@@ -239,22 +241,51 @@ std::list<Test> get_tests_in_suite(const TestSuite &testSuite, const LitConfig &
    }
 }
 
-std::tuple<TestSuite, std::list<Test>> get_tests(const std::string &path, const LitConfig &config,
+std::tuple<TestSuitePointer, TestList> get_tests(const std::string &path, const LitConfig &config,
                                                  std::map<std::string, TestSuitSearchResult> &cache)
 {
    TestSuitSearchResult testSuiteResult = get_test_suite(path, config, cache);
-   std::optional<TestSuite> testSuite = std::get<0>(testSuiteResult);
+   std::optional<TestSuitePointer> testSuite = std::get<0>(testSuiteResult);
    std::list<std::string> subpathInSuite = std::get<1>(testSuiteResult);
    if (!testSuite.has_value()) {
       config.warning(format_string("unable to find test suite for %s", path.c_str()));
-      return std::tuple<TestSuite, std::list<Test>>{};
+      return std::tuple<TestSuitePointer, TestList>{};
    }
    if (config.isDebug()) {
-      config.note(format_string("resolved input %s to %s", path.c_str(), testSuite.value().getName().c_str()));
+      config.note(format_string("resolved input %s to %s", path.c_str(), testSuite.value()->getName().c_str()));
    }
-   return std::tuple<TestSuite, std::list<Test>>{testSuite.value(), get_tests_in_suite(testSuite.value(), config, subpathInSuite, cache)};
+   return std::tuple<TestSuitePointer, TestList>{testSuite.value(), get_tests_in_suite(testSuite.value(), config, subpathInSuite, cache)};
 }
 
+
+////  find_tests_for_inputs(lit_config, inputs) -> [Test]
+///
+/// Given a configuration object and a list of input specifiers, find all the
+/// tests to execute.
+TestList find_tests_for_inputs(const LitConfig &config, const std::list<std::string> &inputs)
+{
+   std::list<std::string> actualInputs;
+   for (const std::string &input : inputs) {
+      if (string_startswith(input, "@")) {
+         std::fstream f(input.substr(1));
+         char lineBuf[256];
+         while (f.getline(lineBuf, sizeof(lineBuf))) {
+            std::string line(lineBuf);
+            if (!line.empty()) {
+               actualInputs.push_back(line);
+            }
+         }
+      } else {
+         actualInputs.push_back(input);
+      }
+   }
+   TestList tests;
+   std::map<std::string, TestSuitSearchResult> cache;
+   for (std::string &input : actualInputs) {
+      int prevLength = tests.size();
+
+   }
+}
 
 } // lit
 } // polar

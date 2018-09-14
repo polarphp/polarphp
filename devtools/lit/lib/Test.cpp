@@ -139,9 +139,9 @@ const TestingConfig &TestSuite::getConfig() const
    return m_config;
 }
 
-Test::Test(const TestSuite &suit, const std::list<std::string> &pathInSuite,
+Test::Test(TestSuitePointer suite, const std::list<std::string> &pathInSuite,
            const TestingConfig &config, const std::optional<std::string> &filePath)
-   : m_suite(suit),
+   : m_suite(suite),
      m_pathInSuite(pathInSuite),
      m_config(config),
      m_filePath(filePath),
@@ -193,12 +193,12 @@ std::string Test::getFilePath()
 
 std::string Test::getSourcePath()
 {
-   return m_suite.getSourcePath(m_pathInSuite);
+   return m_suite->getSourcePath(m_pathInSuite);
 }
 
 std::string Test::getExecPath()
 {
-   return m_suite.getExecPath(m_pathInSuite);
+   return m_suite->getExecPath(m_pathInSuite);
 }
 
 bool Test::isExpectedToFail()
@@ -292,7 +292,7 @@ std::list<std::string> Test::getUnsupportedFeatures()
 
 bool Test::isEarlyTest() const
 {
-   return m_suite.getConfig().isEarly();
+   return m_suite->getConfig().isEarly();
 }
 
 void Test::writeJUnitXML(std::string &xmlStr)
@@ -306,7 +306,7 @@ void Test::writeJUnitXML(std::string &xmlStr)
       safeTestPath.push_back(pathItem);
       ++piter;
    }
-   std::string safeName = m_suite.getName();
+   std::string safeName = m_suite->getName();
    std::string className;
    replace_string(".", "_", safeName);
    if (!safeTestPath.empty()) {

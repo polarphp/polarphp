@@ -23,6 +23,14 @@
 namespace polar {
 namespace lit {
 
+class Test;
+class TestSuite;
+
+using TestPointer = std::shared_ptr<Test>;
+using TestSuitePointer = std::shared_ptr<TestSuite>;
+using TestList = std::list<TestPointer>;
+using TestSuiteList = std::list<TestSuitePointer>;
+
 class ResultCode
 {
 public:
@@ -214,7 +222,7 @@ protected:
 class Test
 {
 public:
-   Test(const TestSuite &suit, const std::list<std::string> &pathInSuite,
+   Test(TestSuitePointer testSuite, const std::list<std::string> &pathInSuite,
         const TestingConfig &config, const std::optional<std::string> &filePath = std::nullopt);
    void setResult(const Result &result);
    std::string getFullName();
@@ -229,7 +237,7 @@ public:
    bool isEarlyTest() const;
    void writeJUnitXML(std::string &xmlStr);
 protected:
-   TestSuite m_suite;
+   TestSuitePointer m_suite;
    std::list<std::string> m_pathInSuite;
    TestingConfig m_config;
    std::optional<std::string> m_filePath;

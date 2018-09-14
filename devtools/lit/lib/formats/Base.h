@@ -14,6 +14,7 @@
 
 #include <string>
 #include <list>
+#include <memory>
 
 namespace polar {
 namespace lit {
@@ -28,14 +29,14 @@ class TestFormat
 {
 public:
    virtual ~TestFormat() = 0;
-   virtual std::list<Test> getTestsInDirectory(const TestSuite &testSuite, const std::list<std::string> &pathInSuite,
+   virtual std::list<std::shared_ptr<Test>> getTestsInDirectory(const std::shared_ptr<TestSuite> testSuite, const std::list<std::string> &pathInSuite,
                                                const LitConfig &litConfig, const TestingConfig &config) = 0;
 };
 
 class FileBasedTest : public TestFormat
 {
 public:
-   std::list<Test> getTestsInDirectory(const TestSuite &testSuite, const std::list<std::string> &pathInSuite,
+   std::list<std::shared_ptr<Test>> getTestsInDirectory(const std::shared_ptr<TestSuite> testSuite, const std::list<std::string> &pathInSuite,
                                        const LitConfig &litConfig, const TestingConfig &config);
 };
 

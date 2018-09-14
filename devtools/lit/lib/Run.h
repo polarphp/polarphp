@@ -8,3 +8,24 @@
 // See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/09/05.
+
+#ifndef POLAR_DEVLTOOLS_LIT_RUN_H
+#define POLAR_DEVLTOOLS_LIT_RUN_H
+
+#include "Test.h"
+
+namespace polar {
+namespace lit {
+
+class LitConfig;
+
+class Run
+{
+public:
+   Run(const LitConfig &litConfig, TestList &test);
+};
+
+} // lit
+} // polar
+
+#endif // POLAR_DEVLTOOLS_LIT_RUN_H
