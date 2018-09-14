@@ -11,8 +11,8 @@
 
 #include "Discovery.h"
 #include "LitConfig.h"
-#include "Test.h"
 #include <filesystem>
+#include "formats/Base.h"
 
 namespace fs = std::filesystem;
 
@@ -144,20 +144,18 @@ TestSuitSearchResult get_test_suite(std::string item, const LitConfig &config,
    return temp;
 }
 
-namespace {
-
-TestingConfig search_local_config(const TestSuite &testSuit, const LitConfig &litConfig,
-                                  const std::list<std::string> &pathInSuite)
+TestingConfig get_local_config(const TestSuite &testSuite, const LitConfig &litConfig,
+                               const std::list<std::string> &pathInSuite)
 {
    TestingConfig parent;
    if (pathInSuite.empty()) {
-      parent = testSuit.getConfig();
+      parent = testSuite.getConfig();
    } else {
       std::list<std::string> paths = pathInSuite;
       paths.pop_back();
-      parent = search_local_config(testSuit, litConfig, paths);
+      parent = get_local_config(testSuite, litConfig, paths);
    }
-   std::string sourcePath = testSuit.getSourcePath(pathInSuite);
+   std::string sourcePath = testSuite.getSourcePath(pathInSuite);
    std::optional<std::string> cfgPath = choose_config_file_from_dir(sourcePath, litConfig.getLocalConfigNames());
    // If not, just reuse the parent config.
    if (!cfgPath.has_value()){
@@ -167,13 +165,96 @@ TestingConfig search_local_config(const TestSuite &testSuit, const LitConfig &li
    // file into it.
    TestingConfig config = parent;
    if (litConfig.isDebug()) {
-       litConfig.note(format_string("loading local config %s", cfgPath.value().c_str()));
+      litConfig.note(format_string("loading local config %s", cfgPath.value().c_str()));
    }
    config.loadFromPath(cfgPath.value(), litConfig);
    return config;
 }
 
-} // anonymous namespacs
+std::list<Test> get_tests_in_suite(const TestSuite &testSuite, const LitConfig &litConfig,
+                                   const std::list<std::string> &pathInSuite,
+                                   std::map<std::string, TestSuitSearchResult> &cache)
+{
+   // Check that the source path exists (errors here are reported by the
+   // caller).
+   std::string sourcePath = testSuite.getSourcePath(pathInSuite);
+   if (!fs::exists(sourcePath)) {
+      return std::list<Test>{};
+   }
+   // Check if the user named a test directly.
+   if (!fs::is_directory(sourcePath)) {
+      std::list<std::string> temp = pathInSuite;
+      temp.pop_back();
+      TestingConfig lc = get_local_config(testSuite, litConfig, temp);
+      return std::list<Test>{Test(testSuite, temp, lc)};
+   }
+   TestingConfig lc = get_local_config(testSuite, litConfig, pathInSuite);
+   if (lc.getTestFormat().has_value()) {
+      return lc.getTestFormat().value()->getTestsInDirectory(testSuite, pathInSuite, litConfig, lc);
+   }
+   for(auto& p: fs::directory_iterator(sourcePath)) {
+      const fs::path &path = p.path();
+      std::string filename = path.filename();
+      if (filename == "Output" ||
+          filename == ".svn" ||
+          filename == ".git" ||
+          lc.getExcludes().find(filename) != lc.getExcludes().end()) {
+         continue;
+      }
+      // Ignore non-directories.
+      if (!fs::is_directory(path)) {
+         continue;
+      }
+      // Check for nested test suites, first in the execpath in case there is a
+      // site configuration and then in the source path.
+      std::list<std::string> subPath = pathInSuite;
+      subPath.push_back(filename);
+      std::string fileExecPath = testSuite.getExecPath(subPath);
+      std::optional<TestSuite> subTs;
+      std::list<std::string> subpathInSuite;
+      if (dir_contains_test_suite(fileExecPath, litConfig).has_value()) {
+         TestSuitSearchResult searchResult = get_test_suite(fileExecPath, litConfig, cache);
+         subTs = std::get<0>(searchResult);
+         subpathInSuite = std::get<1>(searchResult);
+      } else if (dir_contains_test_suite(path.string(), litConfig).has_value()){
+         TestSuitSearchResult searchResult = get_test_suite(path.string(), litConfig, cache);
+         subTs = std::get<0>(searchResult);
+         subpathInSuite = std::get<1>(searchResult);
+      } else {
+         subTs = std::nullopt;
+      }
+      // If the this directory recursively maps back to the current test suite,
+      // disregard it (this can happen if the exec root is located inside the
+      // current test suite, for example).
+      if (&subTs.value() == &testSuite) {
+         // @TODO identity
+         continue;
+      }
+      // Otherwise, load from the nested test suite, if present.
+      if (subTs.has_value()) {
+         return get_tests_in_suite(subTs.value(), litConfig, subpathInSuite, cache);
+      } else {
+         return get_tests_in_suite(testSuite, litConfig, subPath, cache);
+      }
+   }
+}
+
+std::tuple<TestSuite, std::list<Test>> get_tests(const std::string &path, const LitConfig &config,
+                                                 std::map<std::string, TestSuitSearchResult> &cache)
+{
+   TestSuitSearchResult testSuiteResult = get_test_suite(path, config, cache);
+   std::optional<TestSuite> testSuite = std::get<0>(testSuiteResult);
+   std::list<std::string> subpathInSuite = std::get<1>(testSuiteResult);
+   if (!testSuite.has_value()) {
+      config.warning(format_string("unable to find test suite for %s", path.c_str()));
+      return std::tuple<TestSuite, std::list<Test>>{};
+   }
+   if (config.isDebug()) {
+      config.note(format_string("resolved input %s to %s", path.c_str(), testSuite.value().getName().c_str()));
+   }
+   return std::tuple<TestSuite, std::list<Test>>{testSuite.value(), get_tests_in_suite(testSuite.value(), config, subpathInSuite, cache)};
+}
+
 
 } // lit
 } // polar

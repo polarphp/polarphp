@@ -16,7 +16,6 @@
 
 namespace polar {
 namespace lit {
-namespace formats {
 
 class ShTest : public FileBasedTest
 {
@@ -25,7 +24,6 @@ public:
    void execute();
 };
 
-} // formats
 } // lit
 } // polar
 

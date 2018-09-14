@@ -98,6 +98,9 @@ Result &Result::addMicroResult(const std::string &name, std::shared_ptr<Result> 
    return *this;
 }
 
+TestSuite::TestSuite()
+{}
+
 TestSuite::TestSuite(const std::string &name, const std::string &sourceRoot,
                      const std::string &execRoot, const TestingConfig &config)
    : m_name(name),
@@ -137,7 +140,7 @@ const TestingConfig &TestSuite::getConfig() const
 }
 
 Test::Test(const TestSuite &suit, const std::list<std::string> &pathInSuite,
-           const TestingConfig &config, std::optional<std::string> &filePath)
+           const TestingConfig &config, const std::optional<std::string> &filePath)
    : m_suite(suit),
      m_pathInSuite(pathInSuite),
      m_config(config),

@@ -16,6 +16,7 @@
 #include <string>
 #include <list>
 #include <map>
+#include "Test.h"
 
 namespace polar {
 namespace lit {
@@ -32,15 +33,14 @@ std::optional<std::string> dir_contains_test_suite(const std::string &path,
                                                    const LitConfig &config);
 TestSuitSearchResult get_test_suite(std::string item, const LitConfig &config,
                                     std::map<std::string, TestSuitSearchResult> &cache);
-void get_local_config(const std::string &ts, const std::string &pathInSuite,
-                      const LitConfig &config, std::map<std::string, std::string> &cache);
-void get_tests(const std::string &path, const LitConfig &config,
-               std::map<std::string, std::string> &testSuiteCache,
-               std::map<std::string, std::string> &localConfigCache);
+TestingConfig get_local_config(const TestSuite &testSuite, const LitConfig &litConfig,
+                               const std::list<std::string> &pathInSuite);
+std::tuple<TestSuite, std::list<Test>> get_tests(const std::string &path, const LitConfig &config,
+                                                 std::map<std::string, TestSuitSearchResult> &cache);
 
-void get_tests_in_suite(const std::string &ts, const std::string &pathInSuite,
-                        std::map<std::string, std::string> &testSuiteCache,
-                        std::map<std::string, std::string> &localConfigCache);
+std::list<Test> get_tests_in_suite(const TestSuite &testSuite, const LitConfig &litConfig,
+                                   const std::list<std::string> &pathInSuite,
+                                   std::map<std::string, TestSuitSearchResult> &cache);
 void find_tests_for_inputs(const LitConfig &config, const std::list<std::string> &inputs);
 void load_test_suite(const std::list<std::string> &inputs);
 

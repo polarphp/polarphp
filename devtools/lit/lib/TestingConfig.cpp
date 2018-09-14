@@ -12,6 +12,7 @@
 #include "TestingConfig.h"
 #include "LitConfig.h"
 #include "Utils.h"
+#include "formats/Base.h"
 
 namespace polar {
 namespace lit {
@@ -86,7 +87,7 @@ const std::set<std::string> &TestingConfig::getSuffixes()
    return m_suffixes;
 }
 
-const std::optional<std::string> &TestingConfig::getTestFormat()
+const std::optional<std::shared_ptr<TestFormat>> &TestingConfig::getTestFormat()
 {
    return m_testFormat;
 }

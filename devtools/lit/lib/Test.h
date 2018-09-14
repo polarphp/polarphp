@@ -197,6 +197,7 @@ protected:
 class TestSuite
 {
 public:
+   TestSuite();
    TestSuite(const std::string &name, const std::string &sourceRoot,
              const std::string &execRoot, const TestingConfig &config);
    const std::string &getName();
@@ -214,7 +215,7 @@ class Test
 {
 public:
    Test(const TestSuite &suit, const std::list<std::string> &pathInSuite,
-        const TestingConfig &config, std::optional<std::string> &filePath);
+        const TestingConfig &config, const std::optional<std::string> &filePath = std::nullopt);
    void setResult(const Result &result);
    std::string getFullName();
    std::string getFilePath();

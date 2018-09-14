@@ -16,7 +16,6 @@
 
 namespace polar {
 namespace lit {
-namespace formats {
 
 class GoogleTest : public TestFormat
 {
@@ -28,7 +27,6 @@ public:
    void maybeAddPythonToCmd();
 };
 
-} // formats
 } // lit
 } // polar
 

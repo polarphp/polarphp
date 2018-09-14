@@ -49,7 +49,7 @@ public:
    }
 
    void warning(const std::string &message,
-                const std::string &file = "", const std::string &line = "")
+                const std::string &file = "", const std::string &line = "") const
    {
       writeMessage("warning", message, file, line);
       m_numWarnings += 1;
@@ -120,7 +120,7 @@ protected:
    std::list<std::string> m_siteConfigNames;
    std::list<std::string> m_localConfigNames;
    int m_numErrors;
-   int m_numWarnings;
+   mutable int m_numWarnings;
    std::list<std::string> m_valgrindArgs;
    int m_maxIndividualTestTime;
    std::optional<int> m_maxFailures;

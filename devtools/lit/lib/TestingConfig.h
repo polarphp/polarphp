@@ -17,18 +17,20 @@
 #include <map>
 #include <list>
 #include <any>
+#include <memory>
 
 namespace polar {
 namespace lit {
 
 class LitConfig;
+class TestFormat;
 
 class TestingConfig {
 public:
    TestingConfig()
    {}
    TestingConfig(TestingConfig *parent, const std::string &name,
-                 const std::set<std::string> &suffixes, const std::optional<std::string> &testFormat,
+                 const std::set<std::string> &suffixes, const std::optional<std::shared_ptr<TestFormat>> &testFormat,
                  const std::map<std::string, std::string> &environment, const std::list<std::string> &substitutions,
                  bool unsupported, const std::optional<std::string> &testExecRoot,
                  const std::optional<std::string> &testSourceRoot, const std::set<std::string> &excludes,
@@ -56,7 +58,7 @@ public:
    TestingConfig *getParent();
    const std::string &getName();
    const std::set<std::string> &getSuffixes();
-   const std::optional<std::string> &getTestFormat();
+   const std::optional<std::shared_ptr<TestFormat>> &getTestFormat();
    const std::map<std::string, std::string> &getEnvironment();
    const std::list<std::string> &getSubstitutions();
    bool isUnsupported();
@@ -76,7 +78,7 @@ protected:
    TestingConfig *m_parent;
    std::string m_name;
    std::set<std::string> m_suffixes;
-   std::optional<std::string> m_testFormat;
+   std::optional<std::shared_ptr<TestFormat>> m_testFormat;
    std::map<std::string, std::string> m_environment;
    std::list<std::string> m_substitutions;
    bool m_unsupported;

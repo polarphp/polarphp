@@ -13,8 +13,6 @@
 
 namespace polar {
 namespace lit {
-namespace formats {
 
-} // formats
 } // lit
 } // polar

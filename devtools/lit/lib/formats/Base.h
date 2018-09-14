@@ -13,33 +13,30 @@
 #define POLAR_DEVLTOOLS_LIT_FORMATS_BASE_H
 
 #include <string>
+#include <list>
 
 namespace polar {
 namespace lit {
 
-class TestSuit;
+class TestSuite;
 class TestingConfig;
 class LitConfig;
 class Command;
-
-namespace formats {
-
-using polar::lit::TestingConfig;
-using polar::lit::TestSuit;
-using polar::lit::LitConfig;
-using polar::lit::Command;
+class Test;
 
 class TestFormat
 {
 public:
    virtual ~TestFormat() = 0;
+   virtual std::list<Test> getTestsInDirectory(const TestSuite &testSuite, const std::list<std::string> &pathInSuite,
+                                               const LitConfig &litConfig, const TestingConfig &config) = 0;
 };
 
 class FileBasedTest : public TestFormat
 {
 public:
-   void getTestsInDirectory(const TestSuit &testSuit, const std::string &pathInSuite,
-                            const LitConfig &litConfig, const TestingConfig &config);
+   std::list<Test> getTestsInDirectory(const TestSuite &testSuite, const std::list<std::string> &pathInSuite,
+                                       const LitConfig &litConfig, const TestingConfig &config);
 };
 
 class OneCommandPerFileTest : public TestFormat
@@ -54,7 +51,6 @@ public:
    void execute();
 };
 
-} // formats
 } // lit
 } // polar
 
