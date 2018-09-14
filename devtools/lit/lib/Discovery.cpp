@@ -122,6 +122,11 @@ TestSuitSearchResult search_testsuit(const std::string &path,
 
 } // anonymous namespace
 
+/// getTestSuite(item, litConfig, cache) -> (suite, relative_path)
+/// Find the test suite containing @arg item.
+/// @retval (None, ...) - Indicates no test suite contains @arg item.
+/// @retval (suite, relative_path) - The suite that @arg item is in, and its
+/// relative path inside that suite.
 TestSuitSearchResult get_test_suite(std::string item, const LitConfig &config,
                                     std::map<std::string, TestSuitSearchResult> &cache)
 {
@@ -262,7 +267,7 @@ std::tuple<TestSuitePointer, TestList> get_tests(const std::string &path, const 
 ///
 /// Given a configuration object and a list of input specifiers, find all the
 /// tests to execute.
-TestList find_tests_for_inputs(const LitConfig &config, const std::list<std::string> &inputs)
+std::list<std::tuple<TestSuitePointer, TestList>> find_tests_for_inputs(const LitConfig &config, const std::list<std::string> &inputs)
 {
    std::list<std::string> actualInputs;
    for (const std::string &input : inputs) {
@@ -279,12 +284,21 @@ TestList find_tests_for_inputs(const LitConfig &config, const std::list<std::str
          actualInputs.push_back(input);
       }
    }
-   TestList tests;
+   std::list<std::tuple<TestSuitePointer, TestList>> tests;
    std::map<std::string, TestSuitSearchResult> cache;
    for (std::string &input : actualInputs) {
       int prevLength = tests.size();
-
+      tests.push_back(get_tests(input, config, cache));
+      if (prevLength == tests.size()) {
+         config.warning(format_string("input %s contained no tests", input.c_str()));
+      }
    }
+   // If there were any errors during test discovery, exit now.
+   if (config.getNumErrors() > 0) {
+      std::cerr << config.getNumErrors() << " errors, exiting." << std::endl;
+      exit(2);
+   }
+   return tests;
 }
 
 } // lit

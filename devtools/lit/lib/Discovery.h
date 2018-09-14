@@ -39,7 +39,7 @@ std::tuple<TestSuitePointer, TestList> get_tests(const std::string &path, const 
 TestList get_tests_in_suite(TestSuitePointer testSuite, const LitConfig &litConfig,
                             const std::list<std::string> &pathInSuite,
                             std::map<std::string, TestSuitSearchResult> &cache);
-TestList find_tests_for_inputs(const LitConfig &config, const std::list<std::string> &inputs);
+std::list<std::tuple<TestSuitePointer, TestList>> find_tests_for_inputs(const LitConfig &config, const std::list<std::string> &inputs);
 void load_test_suite(const std::list<std::string> &inputs);
 
 } // lit
