@@ -14,13 +14,13 @@
 namespace polar {
 namespace lit {
 
-Run::Run(std::shared_ptr<LitConfig> litConfig, const std::list<std::tuple<TestSuitePointer, TestList>> &tests)
+Run::Run(std::shared_ptr<LitConfig> litConfig, const TestList &tests)
    : m_litConfig(litConfig),
      m_tests(tests)
 {
 }
 
-const std::list<std::tuple<TestSuitePointer, TestList>> &Run::getTests() const
+const TestList &Run::getTests() const
 {
    return m_tests;
 }

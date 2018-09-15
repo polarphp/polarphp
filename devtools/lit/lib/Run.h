@@ -24,11 +24,11 @@ using RunPointer = std::shared_ptr<Run>;
 class Run
 {
 public:
-   Run(std::shared_ptr<LitConfig> litConfig, const std::list<std::tuple<TestSuitePointer, TestList>> &tests);
-   const std::list<std::tuple<TestSuitePointer, TestList>> &getTests() const;
+   Run(std::shared_ptr<LitConfig> litConfig, const TestList &tests);
+   const TestList &getTests() const;
 protected:
    std::shared_ptr<LitConfig> m_litConfig;
-   const std::list<std::tuple<TestSuitePointer, TestList>> &m_tests;
+   TestList m_tests;
 };
 
 } // lit

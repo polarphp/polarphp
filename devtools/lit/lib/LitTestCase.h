@@ -28,12 +28,26 @@ class UnresolvedError : public std::runtime_error
 class LitTestCase
 {
 public:
-   LitTestCase(const std::tuple<TestSuitePointer, TestList> &test, std::shared_ptr<Run> run)
+   LitTestCase(TestPointer test, std::shared_ptr<Run> run)
       : m_test(test),
         m_run(run)
    {}
+   const std::string &getId()
+   {
+      return m_test->getFullName();
+   }
+
+   const std::string &getShortDescription()
+   {
+      return m_test->getFullName();
+   }
+
+   void runTest()
+   {
+
+   }
 protected:
-   const std::tuple<TestSuitePointer, TestList> m_test;
+   TestPointer m_test;
    std::shared_ptr<Run> m_run;
 };
 

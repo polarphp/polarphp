@@ -198,6 +198,10 @@ TestList get_tests_in_suite(TestSuitePointer testSuite, LitConfigPointer litConf
       TestingConfigPointer lc = get_local_config(testSuite, litConfig, temp);
       return TestList{std::make_shared<Test>(testSuite, temp, lc)};
    }
+   // Search for tests.
+   // @TODO use test format
+   // Otherwise we have a directory to search for tests, start by getting the
+   // local configuration.
    TestingConfigPointer lc = get_local_config(testSuite, litConfig, pathInSuite);
    if (lc->getTestFormat().has_value()) {
       return lc->getTestFormat().value()->getTestsInDirectory(testSuite, pathInSuite, litConfig, lc);
@@ -321,7 +325,15 @@ std::list<std::shared_ptr<LitTestCase>> load_test_suite(const std::list<std::str
             false,
          #endif
             std::map<std::string, std::any>{});
-   RunPointer run = std::make_shared<Run>(litConfig, find_tests_for_inputs(litConfig, inputs));
+   std::list<std::tuple<TestSuitePointer, TestList>> searchResults = find_tests_for_inputs(litConfig, inputs);
+   TestList tests;
+   for (auto &item : searchResults) {
+      TestList &subtests = std::get<1>(item);
+      for (auto &test : subtests) {
+         tests.push_back(test);
+      }
+   }
+   RunPointer run = std::make_shared<Run>(litConfig, tests);
    std::list<std::shared_ptr<LitTestCase>> testcases;
    for (auto &test : run->getTests()) {
       testcases.push_back(std::make_shared<LitTestCase>(test, run));
