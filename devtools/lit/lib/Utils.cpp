@@ -17,9 +17,27 @@
 #include <iostream>
 #include <thread>
 #include <atomic>
+#include <algorithm>
+#include <cctype>
+#include <locale>
 
 namespace polar {
 namespace lit {
+
+std::list<std::FILE *> g_tempFiles {};
+
+void temp_files_clear_handler()
+{
+   for (std::FILE *file : g_tempFiles) {
+      std::fclose(file);
+   }
+   g_tempFiles.clear();
+}
+
+void register_temp_file(std::FILE *file)
+{
+   g_tempFiles.push_back(file);
+}
 
 std::tuple<int, std::string, std::string>
 execute_command(const std::string &command, std::optional<std::string> cwd,
@@ -308,6 +326,29 @@ void replace_string(const std::string &search, const std::string &replacement,
       startPos = std::max(pos + replacementSize, targetStrSize);
       targetStr.replace(pos, searchSize, replacement);
    } while (true);
+}
+
+// trim from start (in place)
+void ltrim_string(std::string &str)
+{
+   str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](int ch) {
+      return !std::isspace(ch);
+   }));
+}
+
+// trim from end (in place)
+void rtrim_string(std::string &str)
+{
+   str.erase(std::find_if(str.rbegin(), str.rend(), [](int ch) {
+      return !std::isspace(ch);
+   }).base(), str.end());
+}
+
+// trim from both ends (in place)
+void trim_string(std::string &str)
+{
+   ltrim_string(str);
+   rtrim_string(str);
 }
 
 } // lit

@@ -24,6 +24,11 @@
 namespace polar {
 namespace lit {
 
+extern std::list<std::FILE *> g_tempFiles;
+
+void temp_files_clear_handler();
+void register_temp_file(std::FILE *file);
+
 std::string center_string(const std::string &text, int width, char fillChar = ' ');
 std::string normal_path(const std::string &path);
 inline std::string make_word_regex(const std::string &word)
@@ -95,6 +100,9 @@ std::string format_string(const std::string &format, ArgTypes&&...args)
 void replace_string(const std::string &search, const std::string &replacement,
                     std::string &targetStr);
 
+void ltrim_string(std::string &str);
+void rtrim_string(std::string &str);
+void trim_string(std::string &str);
 } // lit
 } // polar
 

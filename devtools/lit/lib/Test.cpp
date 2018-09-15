@@ -196,6 +196,22 @@ std::string Test::getSourcePath()
    return m_suite->getSourcePath(m_pathInSuite);
 }
 
+TestingConfigPointer Test::getConfig()
+{
+   return m_config;
+}
+
+const std::string &Test::getSelfSourcePath()
+{
+   return m_selfSourcePath;
+}
+
+Test &Test::setSelfSourcePath(const std::string &sourcePath)
+{
+   m_selfSourcePath = sourcePath;
+   return *this;
+}
+
 std::string Test::getExecPath()
 {
    return m_suite->getExecPath(m_pathInSuite);

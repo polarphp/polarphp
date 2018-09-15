@@ -229,7 +229,11 @@ public:
    std::string getFullName();
    std::string getFilePath();
    std::string getSourcePath();
+   TestingConfigPointer getConfig();
+   const std::string &getSelfSourcePath();
    std::string getExecPath();
+
+   Test &setSelfSourcePath(const std::string &sourcePath);
    bool isExpectedToFail();
    bool isWithinFeatureLimits();
    std::list<std::string> getMissingRequiredFeaturesFromList(const std::set<std::string> &features);
@@ -246,6 +250,7 @@ protected:
    std::set<std::string> m_requires;
    std::list<std::string> m_unsupported;
    std::optional<Result> m_result;
+   std::string m_selfSourcePath;
 };
 
 } // lit

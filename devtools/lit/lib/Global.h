@@ -25,6 +25,11 @@ class ValueError : public std::runtime_error
    using std::runtime_error::runtime_error;
 };
 
+class NotImplementedError : public std::runtime_error
+{
+   using std::runtime_error::runtime_error;
+};
+
 using ShellTokenType = std::tuple<std::string, int>;
 
 #define SUBPROCESS_FD_PIPE -9

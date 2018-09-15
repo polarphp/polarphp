@@ -15,6 +15,7 @@
 #include <string>
 #include <list>
 #include <memory>
+#include <regex>
 
 namespace polar {
 namespace lit {
@@ -24,6 +25,7 @@ class TestingConfig;
 class LitConfig;
 class Command;
 class Test;
+class ResultCode;
 
 using LitConfigPointer = std::shared_ptr<LitConfig>;
 
@@ -49,13 +51,22 @@ public:
 class OneCommandPerFileTest : public TestFormat
 {
 public:
-   OneCommandPerFileTest(const Command &command, const std::string &dir,
+   OneCommandPerFileTest(const std::string &command, const std::string &dir,
                          bool recursive = false,
                          const std::string &pattern = ".*",
                          bool useTempInput = false);
-   void getTestsInDirectory();
-   void createTempInput();
-   void execute();
+   std::list<std::shared_ptr<Test>> getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
+                                                        const std::list<std::string> &pathInSuite,
+                                                        LitConfigPointer litConfig,
+                                                        std::shared_ptr<TestingConfig> localConfig);
+   void createTempInput(std::FILE *temp, std::shared_ptr<Test> test);
+   std::tuple<const ResultCode &, std::string> execute(std::shared_ptr<Test> test, LitConfigPointer litConfig);
+protected:
+   std::string m_command;
+   std::string m_dir;
+   bool m_recursive;
+   std::regex m_pattern;
+   bool m_useTempInput;
 };
 
 } // lit

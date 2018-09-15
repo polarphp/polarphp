@@ -17,6 +17,7 @@
 #include <thread>
 #include <assert.h>
 #include <filesystem>
+#include <list>
 
 using polar::lit::LitConfig;
 namespace fs = std::filesystem;
@@ -134,6 +135,7 @@ int main(int argc, char *argv[])
    if (!maxFailuresOpt->empty() && maxFailures == 0) {
       std::cerr << "Setting --max-failures to 0 does not have any effect." << std::endl;
    }
+   atexit(polar::lit::temp_files_clear_handler);
    const std::vector<std::string> &inputs = testPaths;
    // Create the user defined parameters.
    std::map<std::string, std::any> userParams;
