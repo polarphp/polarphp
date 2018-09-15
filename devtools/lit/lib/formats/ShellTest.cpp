@@ -10,9 +10,20 @@
 // Created by polarboy on 2018/09/05.
 
 #include "ShellTest.h"
+#include "../Test.h"
+#include "../TestRunner.h"
 
 namespace polar {
 namespace lit {
+
+ShTest::ShTest(bool executeExternal)
+   : m_executeExternal(executeExternal)
+{}
+
+Result ShTest::execute(TestPointer test, LitConfigPointer litConfig)
+{
+   return execute_shtest(test, litConfig, m_executeExternal);
+}
 
 } // lit
 } // polar

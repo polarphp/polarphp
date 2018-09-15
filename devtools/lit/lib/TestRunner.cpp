@@ -12,6 +12,7 @@
 #include "TestRunner.h"
 #include "Utils.h"
 #include "ShellCommands.h"
+#include "Test.h"
 
 #include <cstdio>
 #include <any>
@@ -470,6 +471,11 @@ std::string execute_builtin_echo(std::shared_ptr<AbstractCommand> cmd,
 #endif
    }
    return "";
+}
+
+Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool executeExternal)
+{
+
 }
 
 } // lit

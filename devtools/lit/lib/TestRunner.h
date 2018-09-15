@@ -25,8 +25,13 @@
 namespace polar {
 namespace lit {
 
+class Result;
+class Test;
+class LitConfig;
 using OpenFileEntryType = std::tuple<std::string, std::string, int, std::string>;
 using StdFdsTuple = std::tuple<int, int, int>;
+using TestPointer = std::shared_ptr<Test>;
+using LitConfigPointer = std::shared_ptr<LitConfig>;
 
 class InternalShellError : public std::runtime_error
 {
@@ -171,7 +176,7 @@ private:
 
 void parse_integrated_test_script();
 void run_shtest();
-void execute_shtest();
+Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool executeExternal);
 
 } // lit
 } // polar

@@ -17,11 +17,32 @@
 namespace polar {
 namespace lit {
 
+class Result;
+class Test;
+class LitConfig;
+using TestPointer = std::shared_ptr<Test>;
+using LitConfigPointer = std::shared_ptr<LitConfig>;
+
+/**
+ * @brief The ShTest class
+ *
+ * ShTest is a format with one file per test.
+ *
+ * This is the primary format for regression tests as described in the LLVM
+ * testing guide:
+ *
+ * http://llvm.org/docs/TestingGuide.html
+ *
+ * The ShTest files contain some number of shell-like command pipelines, along
+ * with assertions about what should be in the output.
+ */
 class ShTest : public FileBasedTest
 {
 public:
-   ShTest();
-   void execute();
+   ShTest(bool executeExternal = false);
+   Result execute(TestPointer test, LitConfigPointer litConfig);
+protected:
+   bool m_executeExternal;
 };
 
 } // lit
