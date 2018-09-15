@@ -30,20 +30,20 @@ using LitConfigPointer = std::shared_ptr<LitConfig>;
 class TestFormat
 {
 public:
-   virtual ~TestFormat() = 0;
-   virtual std::list<std::shared_ptr<Test>> getTestsInDirectory(const std::shared_ptr<TestSuite> testSuite,
+   virtual ~TestFormat() {}
+   virtual std::list<std::shared_ptr<Test>> getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
                                                                 const std::list<std::string> &pathInSuite,
                                                                 LitConfigPointer litConfig,
-                                                                std::shared_ptr<TestingConfig> config) = 0;
+                                                                std::shared_ptr<TestingConfig> localConfig) = 0;
 };
 
 class FileBasedTest : public TestFormat
 {
 public:
-   std::list<std::shared_ptr<Test>> getTestsInDirectory(const std::shared_ptr<TestSuite> testSuite,
+   std::list<std::shared_ptr<Test>> getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
                                                         const std::list<std::string> &pathInSuite,
                                                         LitConfigPointer litConfig,
-                                                        std::shared_ptr<TestingConfig> config);
+                                                        std::shared_ptr<TestingConfig> localConfig);
 };
 
 class OneCommandPerFileTest : public TestFormat
