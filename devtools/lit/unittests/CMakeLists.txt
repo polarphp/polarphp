@@ -17,6 +17,7 @@ polar_add_files(DEVL_TOOLS_LIT_TEST_SRCS
    ProcessUtilsTest.cpp
    BooleanExpressionTest.cpp
    UtilsTest.cpp
+   ShellLexerTest.cpp
    )
 
 polar_add_unittest(DevToolLitUnittests LitlibTest ${DEVL_TOOLS_LIT_TEST_SRCS})

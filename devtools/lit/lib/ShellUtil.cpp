@@ -59,14 +59,14 @@ std::any ShLexer::lexArgFast(char c)
        chunk.find('"') != std::string::npos ||
        chunk.find(';') != std::string::npos ||
        chunk.find('\\') != std::string::npos) {
-      return std::list<std::string>{};
+      return std::any{};
    }
    m_pos = m_pos - 1 + chunk.size();
    if (chunk.find('*') != std::string::npos ||
        chunk.find('?') != std::string::npos){
       return GlobItem(chunk);
    } else {
-      return std::list<std::string>{chunk};
+      return ShellTokenType{chunk, -1};
    }
 }
 
@@ -88,14 +88,15 @@ std::any ShLexer::lexArgSlow(char c)
          // This is an annoying case; we treat '2>' as a single token so
          // we don't have to track whitespace tokens.
          // If the parse string isn't an integer, do the usual thing.
-         if (!std::isdigit(c)) {
+         try {
+            int num = std::stoi(str);
+            // Otherwise, lex the operator and convert to a redirection
+            // token.
+            ShellTokenType token = std::any_cast<ShellTokenType>(lexOneToken());
+            return ShellTokenType{std::get<0>(token), num};
+         } catch (...) {
             break;
          }
-         // Otherwise, lex the operator and convert to a redirection
-         // token.
-         int num = (int) c;
-         std::tuple<char, int> token = std::any_cast<std::tuple<char, int>>(lexOneToken());
-         return std::make_tuple(std::get<0>(token), num);
       } else if (c == '"' || c == '\'') {
          eat();
          std::string quotedArg = lexArgQuoted(c);
@@ -120,7 +121,10 @@ std::any ShLexer::lexArgSlow(char c)
       }
    }
    assert(!(quotedGlobChar && unquotedGlobChar));
-   return GlobItem(str);
+   if (unquotedGlobChar) {
+      return GlobItem(str);
+   }
+   return ShellTokenType{str, -1};
 }
 
 std::string ShLexer::lexArgQuoted(char delim)
@@ -168,13 +172,13 @@ std::any ShLexer::lexOneToken()
 {
    char c = eat();
    if (c == ';') {
-      return ShellTokenType{std::to_string(c), -1};
+      return ShellTokenType{std::string(1, c), -1};
    }
    if (c == '|') {
       if (maybeEat('|')) {
          return ShellTokenType("||", -1);
       }
-      return ShellTokenType{std::to_string(c), -1};
+      return ShellTokenType{std::string(1, c), -1};
    }
    if (c == '&') {
       if (maybeEat('&')) {
@@ -183,7 +187,7 @@ std::any ShLexer::lexOneToken()
       if (maybeEat('>')) {
          return ShellTokenType{"&>", -1};
       }
-      return ShellTokenType{std::to_string(c), -1};
+      return ShellTokenType{std::string(1, c), -1};
    }
    if (c == '>') {
       if (maybeEat('&')) {
@@ -192,7 +196,7 @@ std::any ShLexer::lexOneToken()
       if (maybeEat('>')) {
          return ShellTokenType{">>", -1};
       }
-      return ShellTokenType{std::to_string(c), -1};
+      return ShellTokenType{std::string(1, c), -1};
    }
    if (c == '<') {
       if (maybeEat('&')) {
@@ -201,8 +205,9 @@ std::any ShLexer::lexOneToken()
       if (maybeEat('<')) {
          return ShellTokenType{"<<", -1};
       }
-      return ShellTokenType{std::to_string(c), -1};
+      return ShellTokenType{std::string(1, c), -1};
    }
+   return lexArg(c);
 }
 
 std::list<std::any> ShLexer::lex()
@@ -303,7 +308,7 @@ std::shared_ptr<AbstractCommand> ShParser::parsePipeline()
             continue;
             commands.push_back(parseCommand());
          }
-      } catch (std::bad_any_cast &exp) {
+      } catch (std::bad_any_cast &) {
       }
       break;
    }
