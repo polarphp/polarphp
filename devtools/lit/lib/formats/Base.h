@@ -29,6 +29,7 @@ class ResultCode;
 class Result;
 
 using LitConfigPointer = std::shared_ptr<LitConfig>;
+using TestingConfigPointer = std::shared_ptr<TestingConfig>;
 using TestPointer = std::shared_ptr<Test>;
 using ExecResultTuple = std::tuple<const ResultCode &, std::string>;
 
@@ -39,7 +40,7 @@ public:
    virtual std::list<std::shared_ptr<Test>> getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
                                                                 const std::list<std::string> &pathInSuite,
                                                                 LitConfigPointer litConfig,
-                                                                std::shared_ptr<TestingConfig> localConfig) = 0;
+                                                                TestingConfigPointer localConfig) = 0;
    virtual std::tuple<const ResultCode &, std::string> execute(TestPointer test, LitConfigPointer litConfig)
    {}
 };
@@ -50,7 +51,7 @@ public:
    std::list<std::shared_ptr<Test>> getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
                                                         const std::list<std::string> &pathInSuite,
                                                         LitConfigPointer litConfig,
-                                                        std::shared_ptr<TestingConfig> localConfig);
+                                                        TestingConfigPointer localConfig);
 };
 
 class OneCommandPerFileTest : public TestFormat
@@ -63,7 +64,7 @@ public:
    std::list<std::shared_ptr<Test>> getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
                                                         const std::list<std::string> &pathInSuite,
                                                         LitConfigPointer litConfig,
-                                                        std::shared_ptr<TestingConfig> localConfig);
+                                                        TestingConfigPointer localConfig);
    void createTempInput(std::FILE *temp, std::shared_ptr<Test> test);
    std::tuple<const ResultCode &, std::string> execute(TestPointer test, LitConfigPointer litConfig);
 protected:

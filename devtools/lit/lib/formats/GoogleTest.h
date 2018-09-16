@@ -13,6 +13,7 @@
 #define POLAR_DEVLTOOLS_LIT_FORMATS_GOOGLETEST_H
 
 #include "Base.h"
+#include <set>
 
 namespace polar {
 namespace lit {
@@ -20,11 +21,15 @@ namespace lit {
 class GoogleTest : public TestFormat
 {
 public:
-   GoogleTest();
-   void getGTestTests();
-   void getTestsInDirectory();
-   void execute();
-   void maybeAddPythonToCmd();
+   GoogleTest(const std::list<std::string> &testSubDirs,
+              const std::set<std::string> &testSuffix);
+   void getGTestTests(const std::string &path, LitConfigPointer litConfig,
+                      TestingConfigPointer localConfig);
+   std::list<std::shared_ptr<Test>> getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
+                                                        const std::list<std::string> &pathInSuite,
+                                                        LitConfigPointer litConfig,
+                                                        TestingConfigPointer localConfig);
+   std::tuple<const ResultCode &, std::string> execute(TestPointer test, LitConfigPointer litConfig);
 };
 
 } // lit
