@@ -132,8 +132,6 @@ void OneCommandPerFileTest::createTempInput(std::FILE *temp, std::shared_ptr<Tes
    throw NotImplementedError("This is an abstract method.");
 }
 
-using ExecResultTuple = std::tuple<const ResultCode &, std::string>;
-
 namespace {
 
 std::string generate_tempfilename()

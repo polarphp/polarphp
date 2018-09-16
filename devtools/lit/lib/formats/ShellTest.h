@@ -40,7 +40,7 @@ class ShTest : public FileBasedTest
 {
 public:
    ShTest(bool executeExternal = false);
-   Result execute(TestPointer test, LitConfigPointer litConfig);
+   std::tuple<const ResultCode &, std::string> execute(TestPointer test, LitConfigPointer litConfig);
 protected:
    bool m_executeExternal;
 };

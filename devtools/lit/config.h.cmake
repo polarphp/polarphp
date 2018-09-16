@@ -22,5 +22,7 @@
 #cmakedefine POLAR_OS_DARWIN
 #cmakedefine POLAR_OS_UNIX
 #cmakedefine POLAR_OS_WIN32
+#cmakedefine POLAR_OS_CYGWIN
+#cmakedefine POLAR_OS_MINGW
 
 #endif // POLAR_DEVLTOOLS_LIT_CONFIG_H

@@ -34,7 +34,15 @@ if (APPLE)
 elseif(WIN32)
    set(POLAR_OS_WIN32 ON)
 elseif(UNIX)
-   set(POLAR_OS_UNIX)
+   set(POLAR_OS_UNIX ON)
+endif()
+
+if (CYGWIN)
+   set(POLAR_OS_CYGWIN ON)
+endif()
+
+if (MINGW)
+   set(POLAR_OS_MINGW ON)
 endif()
 
 set(POLAR_LIT_VERSION "0.0.1")

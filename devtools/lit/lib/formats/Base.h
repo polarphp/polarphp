@@ -26,8 +26,11 @@ class LitConfig;
 class Command;
 class Test;
 class ResultCode;
+class Result;
 
 using LitConfigPointer = std::shared_ptr<LitConfig>;
+using TestPointer = std::shared_ptr<Test>;
+using ExecResultTuple = std::tuple<const ResultCode &, std::string>;
 
 class TestFormat
 {
@@ -37,6 +40,8 @@ public:
                                                                 const std::list<std::string> &pathInSuite,
                                                                 LitConfigPointer litConfig,
                                                                 std::shared_ptr<TestingConfig> localConfig) = 0;
+   virtual std::tuple<const ResultCode &, std::string> execute(TestPointer test, LitConfigPointer litConfig)
+   {}
 };
 
 class FileBasedTest : public TestFormat
@@ -60,7 +65,7 @@ public:
                                                         LitConfigPointer litConfig,
                                                         std::shared_ptr<TestingConfig> localConfig);
    void createTempInput(std::FILE *temp, std::shared_ptr<Test> test);
-   std::tuple<const ResultCode &, std::string> execute(std::shared_ptr<Test> test, LitConfigPointer litConfig);
+   std::tuple<const ResultCode &, std::string> execute(TestPointer test, LitConfigPointer litConfig);
 protected:
    std::string m_command;
    std::string m_dir;
