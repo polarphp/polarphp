@@ -44,4 +44,70 @@ TEST(ShellParseTest, testBasic)
       ASSERT_EQ(argIter->type(), typeid(ShellTokenType));
       ASSERT_EQ(std::get<0>(std::any_cast<ShellTokenType>(*argIter)), "hello");
    }
+   {
+      std::shared_ptr<AbstractCommand> command = ShParser("echo \"\"").parse();
+      ASSERT_EQ(command->getCommandType(), AbstractCommand::Type::Pipeline);
+      Pipeline *pipeCommand = dynamic_cast<Pipeline *>(command.get());
+      ASSERT_TRUE(pipeCommand != nullptr);
+      ASSERT_EQ(pipeCommand->getCommands().size(), 1);
+      ASSERT_FALSE(pipeCommand->isNegate());
+      std::shared_ptr<AbstractCommand> subAbstractCommand = pipeCommand->getCommands().front();
+      ASSERT_EQ(subAbstractCommand->getCommandType(), AbstractCommand::Type::Command);
+      Command *subCommand = dynamic_cast<Command *>(subAbstractCommand.get());
+      ASSERT_TRUE(subCommand != nullptr);
+      ASSERT_EQ(subCommand->getArgs().size(), 2);
+      const std::list<std::any> &args = subCommand->getArgs();
+      std::list<std::any>::const_iterator argIter = args.begin();
+      ASSERT_TRUE(argIter->has_value());
+      ASSERT_EQ(argIter->type(), typeid(ShellTokenType));
+      ASSERT_EQ(std::get<0>(std::any_cast<ShellTokenType>(*argIter)), "echo");
+      ++argIter;
+      ASSERT_TRUE(argIter->has_value());
+      ASSERT_EQ(argIter->type(), typeid(ShellTokenType));
+      ASSERT_EQ(std::get<0>(std::any_cast<ShellTokenType>(*argIter)), "");
+   }
+   {
+      std::shared_ptr<AbstractCommand> command = ShParser(R"(echo -DFOO='a')").parse();
+      ASSERT_EQ(command->getCommandType(), AbstractCommand::Type::Pipeline);
+      Pipeline *pipeCommand = dynamic_cast<Pipeline *>(command.get());
+      ASSERT_TRUE(pipeCommand != nullptr);
+      ASSERT_EQ(pipeCommand->getCommands().size(), 1);
+      ASSERT_FALSE(pipeCommand->isNegate());
+      std::shared_ptr<AbstractCommand> subAbstractCommand = pipeCommand->getCommands().front();
+      ASSERT_EQ(subAbstractCommand->getCommandType(), AbstractCommand::Type::Command);
+      Command *subCommand = dynamic_cast<Command *>(subAbstractCommand.get());
+      ASSERT_TRUE(subCommand != nullptr);
+      ASSERT_EQ(subCommand->getArgs().size(), 2);
+      const std::list<std::any> &args = subCommand->getArgs();
+      std::list<std::any>::const_iterator argIter = args.begin();
+      ASSERT_TRUE(argIter->has_value());
+      ASSERT_EQ(argIter->type(), typeid(ShellTokenType));
+      ASSERT_EQ(std::get<0>(std::any_cast<ShellTokenType>(*argIter)), "echo");
+      ++argIter;
+      ASSERT_TRUE(argIter->has_value());
+      ASSERT_EQ(argIter->type(), typeid(ShellTokenType));
+      ASSERT_EQ(std::get<0>(std::any_cast<ShellTokenType>(*argIter)), "-DFOO=a");
+   }
+   {
+      std::shared_ptr<AbstractCommand> command = ShParser(R"(echo -DFOO="a")").parse();
+      ASSERT_EQ(command->getCommandType(), AbstractCommand::Type::Pipeline);
+      Pipeline *pipeCommand = dynamic_cast<Pipeline *>(command.get());
+      ASSERT_TRUE(pipeCommand != nullptr);
+      ASSERT_EQ(pipeCommand->getCommands().size(), 1);
+      ASSERT_FALSE(pipeCommand->isNegate());
+      std::shared_ptr<AbstractCommand> subAbstractCommand = pipeCommand->getCommands().front();
+      ASSERT_EQ(subAbstractCommand->getCommandType(), AbstractCommand::Type::Command);
+      Command *subCommand = dynamic_cast<Command *>(subAbstractCommand.get());
+      ASSERT_TRUE(subCommand != nullptr);
+      ASSERT_EQ(subCommand->getArgs().size(), 2);
+      const std::list<std::any> &args = subCommand->getArgs();
+      std::list<std::any>::const_iterator argIter = args.begin();
+      ASSERT_TRUE(argIter->has_value());
+      ASSERT_EQ(argIter->type(), typeid(ShellTokenType));
+      ASSERT_EQ(std::get<0>(std::any_cast<ShellTokenType>(*argIter)), "echo");
+      ++argIter;
+      ASSERT_TRUE(argIter->has_value());
+      ASSERT_EQ(argIter->type(), typeid(ShellTokenType));
+      ASSERT_EQ(std::get<0>(std::any_cast<ShellTokenType>(*argIter)), "-DFOO=a");
+   }
 }
