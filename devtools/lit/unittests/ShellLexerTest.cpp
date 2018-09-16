@@ -110,3 +110,62 @@ TEST(ShellLexerTest, testBasic)
    }
 }
 
+TEST(ShellLexerTest, testRedirectionTokens)
+{
+   {
+      std::list<std::any> tokens = ShLexer("a2>c").lex();
+      ASSERT_EQ(tokens.size(), 3);
+      std::list<std::any>::iterator iter = tokens.begin();
+      {
+         std::any tokenAny = *iter;
+         ASSERT_EQ(tokenAny.type(), typeid(ShellTokenType));
+         ShellTokenType &token = std::any_cast<ShellTokenType &>(tokenAny);
+         ASSERT_EQ(std::get<0>(token), "a2");
+         ASSERT_EQ(std::get<1>(token), -1);
+      }
+      ++iter;
+      {
+         std::any tokenAny = *iter;
+         ASSERT_EQ(tokenAny.type(), typeid(ShellTokenType));
+         ShellTokenType &token = std::any_cast<ShellTokenType &>(tokenAny);
+         ASSERT_EQ(std::get<0>(token), ">");
+         ASSERT_EQ(std::get<1>(token), -1);
+      }
+      ++iter;
+      {
+         std::any tokenAny = *iter;
+         ASSERT_EQ(tokenAny.type(), typeid(ShellTokenType));
+         ShellTokenType &token = std::any_cast<ShellTokenType &>(tokenAny);
+         ASSERT_EQ(std::get<0>(token), "c");
+         ASSERT_EQ(std::get<1>(token), -1);
+      }
+   }
+   {
+      std::list<std::any> tokens = ShLexer("a 2>c").lex();
+      ASSERT_EQ(tokens.size(), 3);
+      std::list<std::any>::iterator iter = tokens.begin();
+      {
+         std::any tokenAny = *iter;
+         ASSERT_EQ(tokenAny.type(), typeid(ShellTokenType));
+         ShellTokenType &token = std::any_cast<ShellTokenType &>(tokenAny);
+         ASSERT_EQ(std::get<0>(token), "a");
+         ASSERT_EQ(std::get<1>(token), -1);
+      }
+      ++iter;
+      {
+         std::any tokenAny = *iter;
+         ASSERT_EQ(tokenAny.type(), typeid(ShellTokenType));
+         ShellTokenType &token = std::any_cast<ShellTokenType &>(tokenAny);
+         ASSERT_EQ(std::get<0>(token), ">");
+         ASSERT_EQ(std::get<1>(token), 2);
+      }
+      ++iter;
+      {
+         std::any tokenAny = *iter;
+         ASSERT_EQ(tokenAny.type(), typeid(ShellTokenType));
+         ShellTokenType &token = std::any_cast<ShellTokenType &>(tokenAny);
+         ASSERT_EQ(std::get<0>(token), "c");
+         ASSERT_EQ(std::get<1>(token), -1);
+      }
+   }
+}
