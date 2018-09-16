@@ -261,7 +261,7 @@ std::shared_ptr<AbstractCommand> ShParser::parseCommand()
    }
    assert(tokenAny.type() == typeid(ShellTokenType));
    std::list<std::any> args{tokenAny};
-   std::list<std::tuple<std::any, std::any>> redirects;
+   std::list<RedirectTokenType> redirects;
    while (true) {
       tokenAny = look();
       // EOF?
@@ -279,11 +279,11 @@ std::shared_ptr<AbstractCommand> ShParser::parseCommand()
       ShellTokenType token = std::any_cast<ShellTokenType>(tokenAny);
       assert(tokenType == typeid(ShellTokenType));
       std::string &tokenStr = std::get<0>(token);
-      if (tokenStr.find('|') != std::string::npos ||
-          tokenStr.find(';') != std::string::npos ||
-          tokenStr.find('&') != std::string::npos ||
-          tokenStr.find("||") != std::string::npos ||
-          tokenStr.find("&&") != std::string::npos) {
+      if (tokenStr == "|" ||
+          tokenStr == ";" ||
+          tokenStr == "&" ||
+          tokenStr == "||" ||
+          tokenStr == "&&") {
          break;
       }
       std::any &op = lex();
@@ -292,7 +292,9 @@ std::shared_ptr<AbstractCommand> ShParser::parseCommand()
          ShellTokenType opTuple = std::any_cast<ShellTokenType>(op);
          ValueError("syntax error near token "+ std::get<0>(opTuple));
       }
-      redirects.push_back(std::tuple<std::any, std::any>{op, arg});
+      redirects.push_back(RedirectTokenType{
+                             std::any_cast<ShellTokenType &>(op),
+                             std::get<0>(std::any_cast<ShellTokenType &>(arg))});
    }
    return std::shared_ptr<AbstractCommand>(new Command(args, redirects));
 }
@@ -334,7 +336,7 @@ std::shared_ptr<AbstractCommand> ShParser::parse()
       ShellTokenType operatorToken = std::any_cast<ShellTokenType>(operatorAny);
       std::any &tokenAny = look();
       if (!tokenAny.has_value()) {
-         ValueError(std::string("missing argument to operator ") + std::get<0>(operatorToken));
+         throw ValueError(std::string("missing argument to operator ") + std::get<0>(operatorToken));
       }
       lhs = std::shared_ptr<AbstractCommand>(new Seq(lhs, std::get<0>(operatorToken), parsePipeline()));
    }

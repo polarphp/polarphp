@@ -17,11 +17,12 @@
 #include <any>
 #include <memory>
 #include <assert.h>
+#include "Global.h"
 
 namespace polar {
 namespace lit {
 
-using RedirectTokenType  = std::tuple<std::any, std::any>;
+using RedirectTokenType  = std::tuple<ShellTokenType, std::string>;
 
 class AbstractCommand
 {
