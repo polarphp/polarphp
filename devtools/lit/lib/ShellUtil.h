@@ -47,8 +47,8 @@ class ShParser
 {
 public:
    ShParser(const std::string &data, bool win32Escapes = false, bool pipeFail = false);
-   std::any lex();
-   std::any look();
+   std::any &lex();
+   std::any &look();
    std::shared_ptr<AbstractCommand> parseCommand();
    std::shared_ptr<AbstractCommand> parsePipeline();
    std::shared_ptr<AbstractCommand> parse();
@@ -57,6 +57,8 @@ protected:
    bool m_win32Escapes;
    bool m_pipeFail;
    std::list<std::any> m_tokens;
+   std::list<std::any>::iterator m_curToken;
+   std::any m_emptyToken;
 };
 
 } // lit

@@ -225,44 +225,47 @@ std::list<std::any> ShLexer::lex()
 
 ShParser::ShParser(const std::string &data, bool win32Escapes, bool pipeFail)
    : m_data(data),
+     m_win32Escapes(win32Escapes),
      m_pipeFail(pipeFail)
 {
-   m_tokens = ShLexer(data, win32Escapes).lex();
+   m_tokens = ShLexer(data, m_win32Escapes).lex();
+   if (!m_tokens.empty()) {
+      m_curToken = m_tokens.begin();
+   } else {
+      m_curToken = m_tokens.end();
+   }
 }
 
-std::any ShParser::lex()
+std::any &ShParser::lex()
 {
-   for (auto &item : m_tokens) {
-      return item;
+   if (m_curToken != m_tokens.end()) {
+      return *m_curToken++;
    }
-   return std::any{};
+   return m_emptyToken;
 }
 
-std::any ShParser::look()
+std::any &ShParser::look()
 {
-   std::any token = lex();
-   if (token.has_value()) {
-      m_tokens.push_front(token);
+   if (m_curToken == m_tokens.end()){
+      return m_emptyToken;
    }
+   std::any &token = *m_curToken;
    return token;
 }
 
 std::shared_ptr<AbstractCommand> ShParser::parseCommand()
 {
-   std::any tokenAny = lex();
+   std::any &tokenAny = lex();
    if (!tokenAny.has_value()) {
       ValueError("empty command!");
    }
-   if (tokenAny.type() == typeid(ShellTokenType)) {
-      ShellTokenType token = std::any_cast<ShellTokenType>(tokenAny);
-      ValueError(std::string("syntax error near unexpected token ") + std::get<0>(token));
-   }
+   assert(tokenAny.type() == typeid(ShellTokenType));
    std::list<std::any> args{tokenAny};
    std::list<std::tuple<std::any, std::any>> redirects;
    while (true) {
       tokenAny = look();
       // EOF?
-      if (tokenAny.has_value()) {
+      if (!tokenAny.has_value()) {
          break;
       }
       // If this is an argument, just add it to the current command.
@@ -282,8 +285,8 @@ std::shared_ptr<AbstractCommand> ShParser::parseCommand()
           tokenStr.find("&&") != std::string::npos) {
          break;
       }
-      std::any op = lex();
-      std::any arg = lex();
+      std::any &op = lex();
+      std::any &arg = lex();
       if (!arg.has_value()) {
          ShellTokenType opTuple = std::any_cast<ShellTokenType>(op);
          ValueError("syntax error near token "+ std::get<0>(opTuple));
@@ -299,7 +302,7 @@ std::shared_ptr<AbstractCommand> ShParser::parsePipeline()
    std::list<std::shared_ptr<AbstractCommand>> commands{parseCommand()};
    while (true) {
       try{
-         std::any tokenAny = look();
+         std::any &tokenAny = look();
          if (!tokenAny.has_value()) {
             break;
          }
@@ -319,13 +322,16 @@ std::shared_ptr<AbstractCommand> ShParser::parse()
 {
    std::shared_ptr<AbstractCommand> lhs = parsePipeline();
    while (true) {
-      std::any operatorAny = lex();
+      std::any &lookAny = look();
+      if (!lookAny.has_value()) {
+         break;
+      }
+      std::any &operatorAny = lex();
       if (!operatorAny.has_value()) {
          break;
       }
       ShellTokenType operatorToken = std::any_cast<ShellTokenType>(operatorAny);
-      std::any_cast<ShellTokenType>(operatorAny);
-      std::any tokenAny = look();
+      std::any &tokenAny = look();
       if (!tokenAny.has_value()) {
          ValueError(std::string("missing argument to operator ") + std::get<0>(operatorToken));
       }
