@@ -18,6 +18,12 @@
 namespace polar {
 namespace lit {
 
+#define SUBPROCESS_FD_PIPE -9
+/// we describe all toke by ShellTokenType, and we need to distinguish
+/// normal token and redirects token, so we define the token type code
+#define SHELL_CMD_NORMAL_TOKEN -1
+#define SHELL_CMD_REDIRECT_TOKEN -2
+
 namespace fs = std::filesystem;
 
 class ValueError : public std::runtime_error
@@ -31,8 +37,6 @@ class NotImplementedError : public std::runtime_error
 };
 
 using ShellTokenType = std::tuple<std::string, int>;
-
-#define SUBPROCESS_FD_PIPE -9
 
 } // lit
 } // polar

@@ -66,7 +66,7 @@ std::any ShLexer::lexArgFast(char c)
        chunk.find('?') != std::string::npos){
       return GlobItem(chunk);
    } else {
-      return ShellTokenType{chunk, -1};
+      return ShellTokenType{chunk, SHELL_CMD_NORMAL_TOKEN};
    }
 }
 
@@ -124,7 +124,7 @@ std::any ShLexer::lexArgSlow(char c)
    if (unquotedGlobChar) {
       return GlobItem(str);
    }
-   return ShellTokenType{str, -1};
+   return ShellTokenType{str, SHELL_CMD_NORMAL_TOKEN};
 }
 
 std::string ShLexer::lexArgQuoted(char delim)
@@ -172,40 +172,40 @@ std::any ShLexer::lexOneToken()
 {
    char c = eat();
    if (c == ';') {
-      return ShellTokenType{std::string(1, c), -1};
+      return ShellTokenType{std::string(1, c), SHELL_CMD_REDIRECT_TOKEN};
    }
    if (c == '|') {
       if (maybeEat('|')) {
-         return ShellTokenType("||", -1);
+         return ShellTokenType("||", SHELL_CMD_REDIRECT_TOKEN);
       }
-      return ShellTokenType{std::string(1, c), -1};
+      return ShellTokenType{std::string(1, c), SHELL_CMD_REDIRECT_TOKEN};
    }
    if (c == '&') {
       if (maybeEat('&')) {
-         return ShellTokenType{"&&", -1};
+         return ShellTokenType{"&&", SHELL_CMD_REDIRECT_TOKEN};
       }
       if (maybeEat('>')) {
-         return ShellTokenType{"&>", -1};
+         return ShellTokenType{"&>", SHELL_CMD_REDIRECT_TOKEN};
       }
-      return ShellTokenType{std::string(1, c), -1};
+      return ShellTokenType{std::string(1, c), SHELL_CMD_REDIRECT_TOKEN};
    }
    if (c == '>') {
       if (maybeEat('&')) {
-         return ShellTokenType{">&", -1};
+         return ShellTokenType{">&", SHELL_CMD_REDIRECT_TOKEN};
       }
       if (maybeEat('>')) {
-         return ShellTokenType{">>", -1};
+         return ShellTokenType{">>", SHELL_CMD_REDIRECT_TOKEN};
       }
-      return ShellTokenType{std::string(1, c), -1};
+      return ShellTokenType{std::string(1, c), SHELL_CMD_REDIRECT_TOKEN};
    }
    if (c == '<') {
       if (maybeEat('&')) {
-         return ShellTokenType{"<&", -1};
+         return ShellTokenType{"<&", SHELL_CMD_REDIRECT_TOKEN};
       }
       if (maybeEat('<')) {
-         return ShellTokenType{"<<", -1};
+         return ShellTokenType{"<<", SHELL_CMD_REDIRECT_TOKEN};
       }
-      return ShellTokenType{std::string(1, c), -1};
+      return ShellTokenType{std::string(1, c), SHELL_CMD_REDIRECT_TOKEN};
    }
    return lexArg(c);
 }
@@ -270,7 +270,8 @@ std::shared_ptr<AbstractCommand> ShParser::parseCommand()
       }
       // If this is an argument, just add it to the current command.
       auto &tokenType = tokenAny.type();
-      if (tokenType == typeid(ShellTokenType) ||
+      if ((tokenType == typeid(ShellTokenType) &&
+           std::get<1>(std::any_cast<ShellTokenType &>(tokenAny)) == SHELL_CMD_NORMAL_TOKEN) ||
           tokenType == typeid(GlobItem)) {
          args.push_back(lex());
          continue;
@@ -307,7 +308,7 @@ std::shared_ptr<AbstractCommand> ShParser::parsePipeline()
             break;
          }
          ShellTokenType token = std::any_cast<ShellTokenType>(tokenAny);
-         if (token == ShellTokenType{"|", -1}) {
+         if (token == ShellTokenType{"|", SHELL_CMD_REDIRECT_TOKEN}) {
             continue;
             commands.push_back(parseCommand());
          }
