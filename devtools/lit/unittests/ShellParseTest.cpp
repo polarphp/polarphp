@@ -19,6 +19,7 @@ using polar::lit::Pipeline;
 using polar::lit::Seq;
 using polar::lit::Command;
 using polar::lit::AbstractCommand;
+using polar::lit::RedirectTokenType;
 
 TEST(ShellParseTest, testBasic)
 {
@@ -135,5 +136,9 @@ TEST(ShellParseTest, testRedirection)
       ASSERT_TRUE(argIter->has_value());
       ASSERT_EQ(argIter->type(), typeid(ShellTokenType));
       ASSERT_EQ(std::get<0>(std::any_cast<ShellTokenType>(*argIter)), "hello");
+
+      // redirects
+      const std::list<RedirectTokenType> redirects = subCommand->getRedirects();
+      ASSERT_EQ(redirects.size(), 2);
    }
 }

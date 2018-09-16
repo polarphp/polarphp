@@ -21,7 +21,7 @@
 namespace polar {
 namespace lit {
 
-using TokenType = std::tuple<std::any, std::any>;
+using RedirectTokenType  = std::tuple<std::any, std::any>;
 
 class AbstractCommand
 {
@@ -40,7 +40,7 @@ public:
 class Command : public AbstractCommand
 {
 public:
-   Command(const std::list<std::any> &args, const std::list<TokenType> &redirects)
+   Command(const std::list<std::any> &args, const std::list<RedirectTokenType > &redirects)
       : m_args(args),
         m_redirects(redirects)
    {}
@@ -48,7 +48,7 @@ public:
    operator std::string() override;
    bool operator ==(const Command &other) const;
    const std::list<std::any> &getArgs();
-   const std::list<TokenType> &getRedirects();
+   const std::list<RedirectTokenType > &getRedirects();
    void toShell(std::string &str, bool pipeFail = false) const override;
    Type getCommandType() override
    {
@@ -59,7 +59,7 @@ private:
 protected:
    // GlobItem or std::tuple<std::string, int>
    std::list<std::any> m_args;
-   std::list<TokenType> m_redirects;
+   std::list<RedirectTokenType > m_redirects;
 };
 
 class GlobItem

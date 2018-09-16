@@ -302,7 +302,7 @@ StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSou
                                     std::tuple<int, int>{2, -1}};
    Command *command = dynamic_cast<Command *>(cmd.get());
    using OpenFileTuple = std::tuple<std::string, std::string, std::optional<int>>;
-   for (const TokenType &redirect : command->getRedirects()) {
+   for (const RedirectTokenType &redirect : command->getRedirects()) {
       const std::any &opAny = std::get<0>(redirect);
       const std::any &filenameAny = std::get<1>(redirect);
       const ShellTokenType &op = std::any_cast<const ShellTokenType &>(opAny);

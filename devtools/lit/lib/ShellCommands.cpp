@@ -66,8 +66,8 @@ bool Command::operator ==(const Command &other) const
       auto endaMark = m_redirects.end();
       auto aoiter = other.m_redirects.begin();
       while (aiter != endaMark) {
-         const TokenType &argAny = *aiter;
-         const TokenType &oArgAny = *aoiter;
+         const RedirectTokenType &argAny = *aiter;
+         const RedirectTokenType &oArgAny = *aoiter;
          if (!compareTokenAny(std::get<0>(argAny), std::get<0>(oArgAny)) ||
              !compareTokenAny(std::get<1>(argAny), std::get<1>(oArgAny))) {
             return false;
@@ -82,7 +82,7 @@ const std::list<std::any> &Command::getArgs()
    return m_args;
 }
 
-const std::list<TokenType> &Command::getRedirects()
+const std::list<RedirectTokenType> &Command::getRedirects()
 {
    return m_redirects;
 }
