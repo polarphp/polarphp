@@ -311,8 +311,9 @@ std::shared_ptr<AbstractCommand> ShParser::parsePipeline()
          }
          ShellTokenType token = std::any_cast<ShellTokenType>(tokenAny);
          if (token == ShellTokenType{"|", SHELL_CMD_REDIRECT_TOKEN}) {
-            continue;
+            lex();
             commands.push_back(parseCommand());
+            continue;
          }
       } catch (std::bad_any_cast &) {
       }
