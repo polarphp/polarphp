@@ -13,6 +13,7 @@
 #include "../ProcessUtils.h"
 #include <sys/types.h>
 #include <signal.h>
+#include <unistd.h>
 
 namespace polar {
 namespace lit {
@@ -25,6 +26,11 @@ void kill_process_and_children(pid_t pid) noexcept
          kill(cpid, SIGKILL);
       }
    }
+}
+
+bool stdcout_isatty()
+{
+   return isatty(fileno(stdout));
 }
 
 } // lit

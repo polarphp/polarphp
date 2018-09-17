@@ -10,6 +10,8 @@
 // Created by polarboy on 2018/09/17.
 
 #include "ProgressBar.h"
+#include "Global.h"
+#include "Utils.h"
 
 namespace polar {
 namespace lit {
@@ -96,6 +98,19 @@ std::list<std::string> TerminalController::ANSICOLORS {
    "CYAN",
    "WHITE"
 };
+
+/// Create a `TerminalController` and initialize its attributes
+/// with appropriate values for the current terminal.
+/// `term_stream` is the stream that will be used for terminal
+/// output; if this stream is not a tty, then the terminal is
+/// assumed to be a dumb terminal (i.e., have no capabilities).
+///
+TerminalController::TerminalController(std::ostream &stream)
+{
+   if (!stdcout_isatty()) {
+      throw std::runtime_error("stdcout is not a tty device");
+   }
+}
 
 } // lit
 } // polar

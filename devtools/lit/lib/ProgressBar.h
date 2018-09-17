@@ -51,6 +51,7 @@ namespace lit {
 ///  ```
 ///  Finally, if the width and height of the terminal are known, then
 ///  they will be stored in the `COLS` and `LINES` attributes.
+///
 class TerminalController
 {
 public:
@@ -114,6 +115,36 @@ protected:
    static std::list<std::string> STRING_CAPABILITIES;
    static std::list<std::string> COLORS;
    static std::list<std::string> ANSICOLORS;
+};
+
+/// A simple progress bar which doesn't need any terminal support.
+///
+/// This prints out a progress bar like:
+/// 'Header: 0 .. 10.. 20.. ...'
+class SimpleProgressBar
+{
+public:
+   SimpleProgressBar(const std::string &header);
+   void update(int percent, const std::string &message);
+   void clear();
+};
+
+/// A 3-line progress bar, which looks like::
+///
+///                                Header
+///        20% [===========----------------------------------]
+///                           progress message
+///
+///    The progress bar is colored, if the terminal supports color
+///    output; and adjusts to the width of the terminal.
+///
+class ProgressBar
+{
+public:
+   ProgressBar(const TerminalController &term, const std::string &header,
+               bool useETA = true);
+   void update(int percent, const std::string &message);
+   void clear();
 };
 
 } // lit

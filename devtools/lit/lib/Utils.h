@@ -103,6 +103,8 @@ void replace_string(const std::string &search, const std::string &replacement,
 void ltrim_string(std::string &str);
 void rtrim_string(std::string &str);
 void trim_string(std::string &str);
+
+bool stdcout_isatty();
 } // lit
 } // polar
 
