@@ -39,7 +39,7 @@ void register_temp_file(std::FILE *file)
    g_tempFiles.push_back(file);
 }
 
-std::tuple<int, std::string, std::string>
+RunCmdResponse
 execute_command(const std::string &command, std::optional<std::string> cwd,
                 std::optional<EnvVarType> env, std::optional<std::string> input,
                 int timeout)

@@ -156,9 +156,49 @@ std::list<std::shared_ptr<Test>> GoogleTest::getTestsInDirectory(std::shared_ptr
    return tests;
 }
 
-std::tuple<const ResultCode &, std::string> GoogleTest::execute(TestPointer test, LitConfigPointer litConfig)
+ExecResultTuple GoogleTest::execute(TestPointer test, LitConfigPointer litConfig)
 {
-
+   fs::path sourcePath = test->getSourcePath();
+   std::string testPath = sourcePath.parent_path();
+   std::string testName = sourcePath.filename();
+   while (!fs::exists(testPath)) {
+      // Handle GTest parametrized and typed tests, whose name includes
+      // some '/'s.
+      fs::path curPath = testPath;
+      testPath = curPath.parent_path();
+      std::string namePrefix = curPath.filename();
+      testName = namePrefix + "/" + testName;
+   }
+   std::string cmd = testPath + "--gtest_filter=" + testName;
+   if (litConfig->isUseValgrind()) {
+      cmd = join_string_list(litConfig->getValgrindArgs(), " ") + cmd;
+   }
+   if (litConfig->isNoExecute()) {
+      return ExecResultTuple{PASS, ""};
+   }
+   try {
+      RunCmdResponse runResponse = execute_command(cmd, std::nullopt, test->getConfig()->getEnvironment(),
+                                                   std::nullopt, litConfig->getMaxIndividualTestTime());
+      int exitCode = std::get<0>(runResponse);
+      std::string output = std::get<1>(runResponse);
+      std::string errorMsg = std::get<2>(runResponse);
+      if (exitCode != 0) {
+         return ExecResultTuple{FAIL, output + errorMsg};
+      }
+      std::string passingTestLine = "[  PASSED  ] 1 test.";
+      if (output.find(passingTestLine) == std::string::npos) {
+         std::string msg = format_string("Unable to find %s in gtest output:\n\n%s%s",
+                             passingTestLine, output, errorMsg);
+         return ExecResultTuple{UNRESOLVED, msg};
+      }
+      return ExecResultTuple{
+         PASS, ""
+      };
+   } catch (ExecuteCommandTimeoutException &) {
+      return ExecResultTuple {
+         TIMEOUT, format_string("Reached timeout of %d seconds", litConfig->getMaxIndividualTestTime())
+      };
+   }
 }
 
 } // lit

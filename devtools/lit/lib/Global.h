@@ -37,6 +37,7 @@ class NotImplementedError : public std::runtime_error
 };
 
 using ShellTokenType = std::tuple<std::string, int>;
+using RunCmdResponse = std::tuple<int, std::string, std::string>;
 
 } // lit
 } // polar

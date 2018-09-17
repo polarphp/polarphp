@@ -48,7 +48,6 @@ inline const char *run_program_arg_filter(const std::string &arg)
 
 } // internal
 
-using RunCmdResponse = std::tuple<int, std::string, std::string>;
 bool find_executable(const fs::path &filepath) noexcept;
 std::optional<std::string> look_path(const std::string &file) noexcept;
 

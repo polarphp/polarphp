@@ -29,7 +29,7 @@ public:
                                                         const std::list<std::string> &pathInSuite,
                                                         LitConfigPointer litConfig,
                                                         TestingConfigPointer localConfig);
-   std::tuple<const ResultCode &, std::string> execute(TestPointer test, LitConfigPointer litConfig);
+   ExecResultTuple execute(TestPointer test, LitConfigPointer litConfig);
 protected:
    std::list<std::string> m_testSubDirs;
    std::set<std::string> m_testSuffixes;

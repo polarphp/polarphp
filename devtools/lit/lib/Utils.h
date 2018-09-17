@@ -75,7 +75,7 @@ inline bool kuse_close_fds()
 
 using EnvVarType = std::map<std::string, std::string>;
 
-std::tuple<int, std::string, std::string>
+RunCmdResponse
 execute_command(const std::string &command, std::optional<std::string> cwd = std::nullopt,
                 std::optional<EnvVarType> env = std::nullopt, std::optional<std::string> input = std::nullopt,
                 int timeout = 0);

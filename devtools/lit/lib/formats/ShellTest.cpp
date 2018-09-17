@@ -20,7 +20,7 @@ ShTest::ShTest(bool executeExternal)
    : m_executeExternal(executeExternal)
 {}
 
-std::tuple<const ResultCode &, std::string> ShTest::execute(TestPointer test, LitConfigPointer litConfig)
+ExecResultTuple ShTest::execute(TestPointer test, LitConfigPointer litConfig)
 {
    Result result = execute_shtest(test, litConfig, m_executeExternal);
    return ExecResultTuple{PASS, ""};
