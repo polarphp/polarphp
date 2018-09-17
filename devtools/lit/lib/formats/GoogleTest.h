@@ -21,15 +21,18 @@ namespace lit {
 class GoogleTest : public TestFormat
 {
 public:
-   GoogleTest(const std::list<std::string> &testSubDirs,
-              const std::set<std::string> &testSuffix);
-   void getGTestTests(const std::string &path, LitConfigPointer litConfig,
-                      TestingConfigPointer localConfig);
+   GoogleTest(const std::string &testSubDirs,
+              const std::string &testSuffix);
+   std::list<std::string> getGTestTests(const std::string &path, LitConfigPointer litConfig,
+                                        TestingConfigPointer localConfig);
    std::list<std::shared_ptr<Test>> getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
                                                         const std::list<std::string> &pathInSuite,
                                                         LitConfigPointer litConfig,
                                                         TestingConfigPointer localConfig);
    std::tuple<const ResultCode &, std::string> execute(TestPointer test, LitConfigPointer litConfig);
+protected:
+   std::list<std::string> m_testSubDirs;
+   std::set<std::string> m_testSuffixes;
 };
 
 } // lit
