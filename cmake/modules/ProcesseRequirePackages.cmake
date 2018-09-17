@@ -57,3 +57,7 @@ if (NOT POLAR_PROG_SED)
 endif()
 
 find_package(UUID)
+
+if (POLAR_INCLUDE_TESTS)
+   find_package(Curses REQUIRED)
+endif()

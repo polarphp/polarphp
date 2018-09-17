@@ -24,5 +24,19 @@
 #cmakedefine POLAR_OS_WIN32
 #cmakedefine POLAR_OS_CYGWIN
 #cmakedefine POLAR_OS_MINGW
+#cmakedefine CURSES_HAVE_CURSES_H
+#cmakedefine CURSES_HAVE_NCURSES_H
+#cmakedefine CURSES_HAVE_NCURSES_NCURSES_H
+#cmakedefine CURSES_HAVE_NCURSES_CURSES_H
+
+#ifdef CURSES_HAVE_NCURSES_H
+#include <ncurses.h>
+#elif defined(CURSES_HAVE_CURSES_H)
+#include <curses.h>
+#elif defined(CURSES_HAVE_NCURSES_NCURSES_H)
+#include <ncurses/ncurses.h>
+#elif defined(CURSES_HAVE_NCURSES_CURSES_H)
+#include <ncurses/curses.h>
+#endif
 
 #endif // POLAR_DEVLTOOLS_LIT_CONFIG_H

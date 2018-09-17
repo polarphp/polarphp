@@ -24,9 +24,12 @@ polar_add_library(litkernel SHARED BUILDTREE_ONLY
 set_target_properties(
    litkernel
    PROPERTIES
-   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib;${CMAKE_CURRENT_BINARY_DIR}"
+   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib;${CMAKE_CURRENT_BINARY_DIR};${CURSES_INCLUDE_DIRS}"
    )
-target_link_libraries(litkernel PRIVATE nlohmann_json::nlohmann_json)
+
+target_link_libraries(litkernel PRIVATE
+   nlohmann_json::nlohmann_json
+   ${CURSES_LIBRARIES})
 
 if (APPLE)
    set(POLAR_OS_DARWIN ON)
