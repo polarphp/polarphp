@@ -9,7 +9,7 @@
 #
 # Created by polarboy on 2018/09/18.
 
-polar_add_executable(Cat Cat.h Cat.cpp)
+polar_add_executable(Cat Cat.cpp)
 
 get_filename_component(LIT_CONFIG_DIR ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
 
@@ -18,4 +18,6 @@ set_target_properties(
    PROPERTIES
    INCLUDE_DIRECTORIES "${LIT_CONFIG_DIR};${CMAKE_CURRENT_BINARY_DIR};${CURSES_INCLUDE_DIRS}"
    )
+
+target_link_libraries(Cat PRIVATE CLI11::CLI11)
 
