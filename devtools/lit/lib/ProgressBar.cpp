@@ -13,51 +13,34 @@
 #include "Global.h"
 #include "Utils.h"
 #include <assert.h>
+#include <regex>
 
 namespace polar {
 namespace lit {
 
-std::string TerminalController::BOL{};
-std::string TerminalController::UP{};
-std::string TerminalController::DOWN{};
-std::string TerminalController::LEFT{};
-std::string TerminalController::RIGHT{};
+const std::string TerminalController::BOL{"BOL"};
+const std::string TerminalController::UP{"UP"};
+const std::string TerminalController::DOWN{"DOWN"};
+const std::string TerminalController::LEFT{"LEFT"};
+const std::string TerminalController::RIGHT{"RIGHT"};
 
-std::string TerminalController::CLEAR_SCREEN{};
-std::string TerminalController::CLEAR_EOL{};
-std::string TerminalController::CLEAR_BOL{};
-std::string TerminalController::CLEAR_EOS{};
+const std::string TerminalController::CLEAR_SCREEN{"CLEAR_SCREEN"};
+const std::string TerminalController::CLEAR_EOL{"CLEAR_EOL"};
+const std::string TerminalController::CLEAR_BOL{"CLEAR_BOL"};
+const std::string TerminalController::CLEAR_EOS{"CLEAR_EOS"};
 
-std::string TerminalController::BOLD{};
-std::string TerminalController::BLINK{};
-std::string TerminalController::DIM{};
-std::string TerminalController::REVERSE{};
-std::string TerminalController::NORMAL{};
+const std::string TerminalController::BOLD{"BOLD"};
+const std::string TerminalController::BLINK{"BLINK"};
+const std::string TerminalController::DIM{"DIM"};
+const std::string TerminalController::REVERSE{"REVERSE"};
+const std::string TerminalController::NORMAL{"NORMAL"};
 
-std::string TerminalController::HIDE_CURSOR{};
-std::string TerminalController::SHOW_CURSOR{};
+const std::string TerminalController::HIDE_CURSOR{"HIDE_CURSOR"};
+const std::string TerminalController::SHOW_CURSOR{"SHOW_CURSOR"};
 
 int TerminalController::COLS = -1;
 int TerminalController::LINES = -1;
 bool TerminalController::XN = false;
-
-std::string TerminalController::BLACK{};
-std::string TerminalController::BLUE{};
-std::string TerminalController::GREEN{};
-std::string TerminalController::CYAN{};
-std::string TerminalController::RED{};
-std::string TerminalController::MAGENTA{};
-std::string TerminalController::YELLOW{};
-std::string TerminalController::WHITE{};
-
-std::string TerminalController::BG_BLACK{};
-std::string TerminalController::BG_BLUE{};
-std::string TerminalController::BG_GREEN{};
-std::string TerminalController::BG_CYAN{};
-std::string TerminalController::BG_RED{};
-std::string TerminalController::BG_MAGENTA{};
-std::string TerminalController::BG_YELLOW{};
-std::string TerminalController::BG_WHITE{};
 
 std::list<std::string> TerminalController::STRING_CAPABILITIES {
    "BOL=cr",
@@ -127,7 +110,7 @@ TerminalController::TerminalController(std::ostream &stream)
       std::list<std::string>::iterator iter = parts.begin();
       std::string attribute = *iter++;
       std::string capName = *iter++;
-      m_capabilities[attribute] = tigetStr(capName);
+      m_properties[attribute] = tigetStr(capName);
    }
    // init Colors
    char *setFg = ::tigetstr("setf");
@@ -135,7 +118,7 @@ TerminalController::TerminalController(std::ostream &stream)
       auto iter = COLORS.begin();
       int index = 0;
       for (; iter != COLORS.end(); ++iter, ++index) {
-         m_fgColors[*iter] = ::tparm(setFg, index);
+         m_properties[*iter] = ::tparm(setFg, index);
       }
    }
    char *setAnsiFg = ::tigetstr("setaf");
@@ -143,7 +126,7 @@ TerminalController::TerminalController(std::ostream &stream)
       auto iter = ANSICOLORS.begin();
       int index = 0;
       for (; iter != ANSICOLORS.end(); ++iter, ++index) {
-         m_fgAnsiColors[*iter] = ::tparm(setAnsiFg, index);
+         m_properties[*iter] = ::tparm(setAnsiFg, index);
       }
    }
 
@@ -152,7 +135,7 @@ TerminalController::TerminalController(std::ostream &stream)
       auto iter = COLORS.begin();
       int index = 0;
       for (; iter != COLORS.end(); ++iter, ++index) {
-         m_bgColors[*iter] = ::tparm(setFg, index);
+         m_properties[*iter] = ::tparm(setFg, index);
       }
    }
    char *setAnsiBg = ::tigetstr("setab");
@@ -160,7 +143,7 @@ TerminalController::TerminalController(std::ostream &stream)
       auto iter = ANSICOLORS.begin();
       int index = 0;
       for (; iter != ANSICOLORS.end(); ++iter, ++index) {
-         m_bgAnsiColors[*iter] = ::tparm(setAnsiFg, index);
+         m_properties[*iter] = ::tparm(setAnsiFg, index);
       }
    }
 }
@@ -172,7 +155,39 @@ TerminalController::~TerminalController()
 
 std::string TerminalController::tigetStr(const std::string &capName)
 {
+   // String capabilities can include "delays" of the form "$<2>".
+   // For any modern terminal, we should be able to just ignore
+   // these, so strip them out.
+   std::string cap(::tigetstr(const_cast<char *>(capName.c_str())));
+   if (!cap.empty()) {
+      std::regex regex("\$<\d+>[/*]?");
+      cap = std::regex_replace(cap, regex, "");
+   }
+   return cap;
+}
 
+///
+/// Replace each $-substitutions in the given template string with
+/// the corresponding terminal control string (if it's defined) or
+/// '' (if it's not).
+///
+std::string TerminalController::render(const std::string &tpl)
+{
+   std::regex regex(R"(\$\{\w+\})");
+   auto tplSearchBegin =
+         std::sregex_token_iterator(tpl.begin(), tpl.end(), regex, 0);
+   auto tplSearchEnd = std::sregex_token_iterator();
+   while (tplSearchBegin != tplSearchEnd) {
+      std::sub_match subMatch = *tplSearchBegin;
+      if (subMatch.matched) {
+         std::string varname = subMatch.str().substr(2, subMatch.length() - 3);
+         trim_string(varname);
+         if (m_properties.find(varname) != m_properties.end()) {
+            tpl.replace(subMatch.first, subMatch.second, m_properties.at(varname));
+         }
+      }
+      ++tplSearchBegin;
+   }
 }
 
 } // lit

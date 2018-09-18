@@ -35,7 +35,7 @@ namespace lit {
 ///   '${action}' with the string required to perform 'action':
 ///   ```cpp
 ///       TerminalController term = TerminalController();
-///       std::cout << term.render(std::printf("This is %sgreen%s", term.GREEN, term.NORMAL)) << std::endl;
+///       std::cout << term.render(std::printf("This is ${GREEN}green${NORMAL}")) << std::endl;
 ///   ```
 ///   If the terminal doesn't support a given action, then the value of
 ///   the corresponding instance variable will be set to ''.  As a
@@ -58,7 +58,7 @@ class TerminalController
 public:
    TerminalController(std::ostream &stream = std::cout);
    ~TerminalController();
-   void render(const std::string &tpl);
+   std::string render(const std::string &tpl);
    const std::string getCapability(const std::string &capName);
 protected:
    std::string tigetStr(const std::string &capName);
@@ -66,63 +66,39 @@ protected:
 
 public:
    // Cursor movement
-   static std::string BOL; // Move the cursor to the beginning of the line
-   static std::string UP; // Move the cursor up one line
-   static std::string DOWN; // Move the cursor down one line
-   static std::string LEFT; // Move the cursor left one char
-   static std::string RIGHT; // Move the cursor right one char
+   const static std::string BOL; // Move the cursor to the beginning of the line
+   const static std::string UP; // Move the cursor up one line
+   const static std::string DOWN; // Move the cursor down one line
+   const static std::string LEFT; // Move the cursor left one char
+   const static std::string RIGHT; // Move the cursor right one char
 
    // Deletion
-   static std::string CLEAR_SCREEN; // Clear the screen and move to home position
-   static std::string CLEAR_EOL; // Clear to the end of the line.
-   static std::string CLEAR_BOL; // Clear to the beginning of the line.
-   static std::string CLEAR_EOS; // Clear to the end of the screen
+   const static std::string CLEAR_SCREEN; // Clear the screen and move to home position
+   const static std::string CLEAR_EOL; // Clear to the end of the line.
+   const static std::string CLEAR_BOL; // Clear to the beginning of the line.
+   const static std::string CLEAR_EOS; // Clear to the end of the screen
 
    // Output modes
-   static std::string BOLD; // Turn on bold mode
-   static std::string BLINK; // Turn on blink mode
-   static std::string DIM; // Turn on half-bright mode
-   static std::string REVERSE; // Turn on reverse-video mode
-   static std::string NORMAL; // Turn off all modes
+   const static std::string BOLD; // Turn on bold mode
+   const static std::string BLINK; // Turn on blink mode
+   const static std::string DIM; // Turn on half-bright mode
+   const static std::string REVERSE; // Turn on reverse-video mode
+   const static std::string NORMAL; // Turn off all modes
 
    // Cursor display
-   static std::string HIDE_CURSOR; // Make the cursor invisible
-   static std::string SHOW_CURSOR; // Make the cursor visible
+   const static std::string HIDE_CURSOR; // Make the cursor invisible
+   const static std::string SHOW_CURSOR; // Make the cursor visible
 
    // Terminal size:
    static int COLS; // Width of the terminal (-1 for unknown)
    static int LINES; // Height of the terminal (-1 for unknown)
    static bool XN;
 
-   // Foreground colors
-   static std::string BLACK;
-   static std::string BLUE;
-   static std::string GREEN;
-   static std::string CYAN;
-   static std::string RED;
-   static std::string MAGENTA;
-   static std::string YELLOW;
-   static std::string WHITE;
-
-   // Background colors
-   static std::string BG_BLACK;
-   static std::string BG_BLUE;
-   static std::string BG_GREEN;
-   static std::string BG_CYAN;
-   static std::string BG_RED;
-   static std::string BG_MAGENTA;
-   static std::string BG_YELLOW;
-   static std::string BG_WHITE;
-
 protected:
    static std::list<std::string> STRING_CAPABILITIES;
    static std::list<std::string> COLORS;
    static std::list<std::string> ANSICOLORS;
-   std::map<std::string, std::string> m_capabilities;
-   std::map<std::string, std::string> m_fgColors;
-   std::map<std::string, std::string> m_fgAnsiColors;
-   std::map<std::string, std::string> m_bgColors;
-   std::map<std::string, std::string> m_bgAnsiColors;
+   std::map<std::string, std::string> m_properties;
 };
 
 /// A simple progress bar which doesn't need any terminal support.
