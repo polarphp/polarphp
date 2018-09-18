@@ -15,6 +15,7 @@
 #include <string>
 #include <list>
 #include <iostream>
+#include <map>
 
 namespace polar {
 namespace lit {
@@ -56,10 +57,11 @@ class TerminalController
 {
 public:
    TerminalController(std::ostream &stream = std::cout);
+   ~TerminalController();
    void render(const std::string &tpl);
+   const std::string getCapability(const std::string &capName);
 protected:
-   void tparam(const std::string &arg, int index);
-   void tigetStr(const std::string &capName);
+   std::string tigetStr(const std::string &capName);
    void renderSub(const std::string &match);
 
 public:
@@ -90,6 +92,7 @@ public:
    // Terminal size:
    static int COLS; // Width of the terminal (-1 for unknown)
    static int LINES; // Height of the terminal (-1 for unknown)
+   static bool XN;
 
    // Foreground colors
    static std::string BLACK;
@@ -115,6 +118,11 @@ protected:
    static std::list<std::string> STRING_CAPABILITIES;
    static std::list<std::string> COLORS;
    static std::list<std::string> ANSICOLORS;
+   std::map<std::string, std::string> m_capabilities;
+   std::map<std::string, std::string> m_fgColors;
+   std::map<std::string, std::string> m_fgAnsiColors;
+   std::map<std::string, std::string> m_bgColors;
+   std::map<std::string, std::string> m_bgAnsiColors;
 };
 
 /// A simple progress bar which doesn't need any terminal support.

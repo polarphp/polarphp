@@ -12,6 +12,7 @@
 #include "ProgressBar.h"
 #include "Global.h"
 #include "Utils.h"
+#include <assert.h>
 
 namespace polar {
 namespace lit {
@@ -38,6 +39,7 @@ std::string TerminalController::SHOW_CURSOR{};
 
 int TerminalController::COLS = -1;
 int TerminalController::LINES = -1;
+bool TerminalController::XN = false;
 
 std::string TerminalController::BLACK{};
 std::string TerminalController::BLUE{};
@@ -107,9 +109,70 @@ std::list<std::string> TerminalController::ANSICOLORS {
 ///
 TerminalController::TerminalController(std::ostream &stream)
 {
+   // If the stream isn't a tty, then assume it has no capabilities.
    if (!stdcout_isatty()) {
       throw std::runtime_error("stdcout is not a tty device");
    }
+   // Check the terminal type.  If we fail, then assume that the
+   // terminal has no capabilities.
+   ::initscr();
+   // Look up numeric capabilities.
+   COLS = ::tigetnum("cols");
+   LINES = ::tigetnum("lines");
+   XN = ::tigetflag("xenl");
+   // Look up string capabilities.
+   for (std::string capability : STRING_CAPABILITIES) {
+      std::list<std::string> parts = split_string(capability, '=');
+      assert(parts.size() == 2);
+      std::list<std::string>::iterator iter = parts.begin();
+      std::string attribute = *iter++;
+      std::string capName = *iter++;
+      m_capabilities[attribute] = tigetStr(capName);
+   }
+   // init Colors
+   char *setFg = ::tigetstr("setf");
+   if (nullptr != setFg) {
+      auto iter = COLORS.begin();
+      int index = 0;
+      for (; iter != COLORS.end(); ++iter, ++index) {
+         m_fgColors[*iter] = ::tparm(setFg, index);
+      }
+   }
+   char *setAnsiFg = ::tigetstr("setaf");
+   if (nullptr != setAnsiFg) {
+      auto iter = ANSICOLORS.begin();
+      int index = 0;
+      for (; iter != ANSICOLORS.end(); ++iter, ++index) {
+         m_fgAnsiColors[*iter] = ::tparm(setAnsiFg, index);
+      }
+   }
+
+   char *setBg = ::tigetstr("setb");
+   if (nullptr != setBg) {
+      auto iter = COLORS.begin();
+      int index = 0;
+      for (; iter != COLORS.end(); ++iter, ++index) {
+         m_bgColors[*iter] = ::tparm(setFg, index);
+      }
+   }
+   char *setAnsiBg = ::tigetstr("setab");
+   if (nullptr != setAnsiBg) {
+      auto iter = ANSICOLORS.begin();
+      int index = 0;
+      for (; iter != ANSICOLORS.end(); ++iter, ++index) {
+         m_bgAnsiColors[*iter] = ::tparm(setAnsiFg, index);
+      }
+   }
+}
+
+TerminalController::~TerminalController()
+{
+   ::endwin();
+}
+
+std::string TerminalController::tigetStr(const std::string &capName)
+{
+
 }
 
 } // lit
