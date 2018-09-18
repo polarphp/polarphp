@@ -16,6 +16,7 @@
 #include <list>
 #include <iostream>
 #include <map>
+#include <chrono>
 
 namespace polar {
 namespace lit {
@@ -58,8 +59,8 @@ class TerminalController
 public:
    TerminalController(std::ostream &stream = std::cout);
    ~TerminalController();
-   std::string render(std::string tpl);
-   const std::string &getProperty(const std::string &key);
+   std::string render(std::string tpl) const;
+   const std::string &getProperty(const std::string &key) const;
 protected:
    std::string tigetStr(const std::string &capName);
    void renderSub(const std::string &match);
@@ -130,8 +131,20 @@ class ProgressBar
 public:
    ProgressBar(const TerminalController &term, const std::string &header,
                bool useETA = true);
-   void update(int percent, const std::string &message);
+   void update(float percent, std::string message);
    void clear();
+protected:
+   const static std::string BAR;
+   const static std::string HEADER;
+   std::string BOL;
+   std::string XNL;
+   const TerminalController &m_term;
+   std::string m_bar;
+   std::string m_header;
+   bool m_cleared;
+   bool m_useETA;
+   int m_width;
+   std::chrono::system_clock::time_point m_startTime;
 };
 
 } // lit

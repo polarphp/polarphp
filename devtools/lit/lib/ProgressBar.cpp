@@ -171,7 +171,7 @@ std::string TerminalController::tigetStr(const std::string &capName)
 /// the corresponding terminal control string (if it's defined) or
 /// '' (if it's not).
 ///
-std::string TerminalController::render(std::string tpl)
+std::string TerminalController::render(std::string tpl) const
 {
    std::regex regex(R"(\$\{\w+\})");
    auto tplSearchBegin =
@@ -190,7 +190,7 @@ std::string TerminalController::render(std::string tpl)
    }
 }
 
-const std::string &TerminalController::getProperty(const std::string &key)
+const std::string &TerminalController::getProperty(const std::string &key) const
 {
    return m_properties.at(key);
 }
@@ -233,6 +233,92 @@ void SimpleProgressBar::clear()
       std::cout << std::endl;
       std::cout.flush();
       m_atIndex = -1;
+   }
+}
+
+const std::string ProgressBar::BAR ="%s${GREEN}[${BOLD}%s%s${NORMAL}${GREEN}]${NORMAL}%s";
+const std::string ProgressBar::HEADER = "${BOLD}${CYAN}%s${NORMAL}\n\n";
+
+ProgressBar::ProgressBar(const TerminalController &term, const std::string &header,
+                         bool useETA)
+   : BOL(term.getProperty(TerminalController::BOL)),
+     XNL("\n"),
+     m_term(term),
+     m_cleared(true),
+     m_useETA(useETA)
+{
+   if (m_term.getProperty(TerminalController::CLEAR_EOL).empty() ||
+       m_term.getProperty(TerminalController::UP).empty() ||
+       m_term.getProperty(TerminalController::BOL).empty()) {
+      throw ValueError("Terminal isn't capable enough -- you "
+                       "should use a simpler progress dispaly.");
+   }
+   if (m_term.COLS != -1) {
+      m_width = m_term.COLS;
+      if (!m_term.XN) {
+         BOL = m_term.getProperty(TerminalController::UP) + m_term.getProperty(TerminalController::BOL);
+         XNL = ""; // Cursor must be fed to the next line
+      }
+   } else {
+      m_width = 75;
+   }
+   m_bar = m_term.render(BAR);
+   m_useETA = useETA;
+   if (m_useETA) {
+      m_startTime = std::chrono::system_clock::now();
+   }
+   update(0, "");
+}
+
+void ProgressBar::update(float percent, std::string message)
+{
+   if (m_cleared) {
+      std::printf(m_header.c_str());
+      m_cleared = false;
+   }
+   std::string prefix = format_string("%3d%%", percent * 100);
+   std::string suffix = "";
+   if (m_useETA) {
+      int elapsed = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - m_startTime).count();
+      if (percent > 0.0001 && elapsed > 1) {
+         int total = elapsed / percent;
+         int eta = int(total - elapsed);
+         int h = eta / 3600;
+         int m = (eta / 60) % 60;
+         int s = eta % 60;
+         suffix = format_string(" ETA: %02d:%02d:%02d", h, m, s);
+      }
+   }
+   int barWidth = m_width - prefix.size() - suffix.size() - 2;
+   int n = barWidth * percent;
+   if (message.size() < m_width) {
+      message = message + std::string(m_width - message.size(), ' ');
+   } else {
+      message = "... " + message.substr(-(m_width - 4));
+   }
+   std::string output = BOL + m_term.getProperty(TerminalController::UP) +
+         m_term.getProperty(TerminalController::CLEAR_EOL);
+   output += format_string(m_bar, prefix.c_str(), std::string(n, '=').c_str(),
+                           std::string(barWidth - n, '-'), suffix);
+   output += XNL;
+   output += m_term.getProperty(TerminalController::CLEAR_EOL);
+   output += message;
+   std::printf(message.c_str());
+   if (!m_term.XN) {
+      std::fflush(stdout);
+   }
+}
+
+void ProgressBar::clear()
+{
+   if (!m_cleared) {
+      std::printf((BOL + m_term.getProperty(TerminalController::CLEAR_EOL) +
+                   m_term.getProperty(TerminalController::UP) +
+                   m_term.getProperty(TerminalController::CLEAR_EOL) +
+                   m_term.getProperty(TerminalController::UP) +
+                   m_term.getProperty(TerminalController::CLEAR_EOL)).c_str());
+      std::fflush(stdout);
+      m_cleared = true;
    }
 }
 
