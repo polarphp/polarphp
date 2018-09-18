@@ -171,7 +171,7 @@ std::string TerminalController::tigetStr(const std::string &capName)
 /// the corresponding terminal control string (if it's defined) or
 /// '' (if it's not).
 ///
-std::string TerminalController::render(const std::string &tpl)
+std::string TerminalController::render(std::string tpl)
 {
    std::regex regex(R"(\$\{\w+\})");
    auto tplSearchBegin =
@@ -187,6 +187,52 @@ std::string TerminalController::render(const std::string &tpl)
          }
       }
       ++tplSearchBegin;
+   }
+}
+
+const std::string &TerminalController::getProperty(const std::string &key)
+{
+   return m_properties.at(key);
+}
+
+SimpleProgressBar::SimpleProgressBar(const std::string &header)
+   : m_header(header),
+     m_atIndex(-1)
+{
+}
+
+void SimpleProgressBar::update(float percent, const std::string &message)
+{
+   if (m_atIndex == -1) {
+      std::printf(m_header.c_str());
+      m_atIndex = 0;
+   }
+   int next = int(percent * 50);
+   if (next == m_atIndex) {
+      return;
+   }
+   for (int i = m_atIndex; i < next; ++i) {
+      int idx = i % 5;
+      if (5 == idx) {
+         std::printf("%-2d", i * 2);
+      } else if (1 == idx) {
+         // skip
+      } else if (idx < 4) {
+         std::printf(".");
+      } else {
+         std::printf(" ");
+      }
+   }
+   std::fflush(stdout);
+   m_atIndex = next;
+}
+
+void SimpleProgressBar::clear()
+{
+   if (m_atIndex != -1) {
+      std::cout << std::endl;
+      std::cout.flush();
+      m_atIndex = -1;
    }
 }
 

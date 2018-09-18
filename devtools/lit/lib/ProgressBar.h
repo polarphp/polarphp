@@ -58,8 +58,8 @@ class TerminalController
 public:
    TerminalController(std::ostream &stream = std::cout);
    ~TerminalController();
-   std::string render(const std::string &tpl);
-   const std::string getCapability(const std::string &capName);
+   std::string render(std::string tpl);
+   const std::string &getProperty(const std::string &key);
 protected:
    std::string tigetStr(const std::string &capName);
    void renderSub(const std::string &match);
@@ -109,8 +109,11 @@ class SimpleProgressBar
 {
 public:
    SimpleProgressBar(const std::string &header);
-   void update(int percent, const std::string &message);
+   void update(float percent, const std::string &message);
    void clear();
+protected:
+   std::string m_header;
+   int m_atIndex;
 };
 
 /// A 3-line progress bar, which looks like::
