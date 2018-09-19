@@ -18,7 +18,7 @@
 namespace polar {
 namespace lit {
 
-using TestList = std::shared_ptr<Test>;
+using TestList = std::list<std::shared_ptr<Test>>;
 
 class GoogleTest : public TestFormat
 {
