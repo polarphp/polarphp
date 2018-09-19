@@ -128,7 +128,7 @@ std::list<std::string> GoogleTest::getGTestTests(const std::string &path, LitCon
    return tests;
 }
 
-std::list<std::shared_ptr<Test>> GoogleTest::getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
+TestList GoogleTest::getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
                                                                  const std::list<std::string> &pathInSuite,
                                                                  LitConfigPointer litConfig,
                                                                  TestingConfigPointer localConfig)

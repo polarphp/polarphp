@@ -18,6 +18,8 @@
 namespace polar {
 namespace lit {
 
+using TestList = std::shared_ptr<Test>;
+
 class GoogleTest : public TestFormat
 {
 public:
@@ -25,7 +27,7 @@ public:
               const std::string &testSuffix);
    std::list<std::string> getGTestTests(const std::string &path, LitConfigPointer litConfig,
                                         TestingConfigPointer localConfig);
-   std::list<std::shared_ptr<Test>> getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
+   TestList getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
                                                         const std::list<std::string> &pathInSuite,
                                                         LitConfigPointer litConfig,
                                                         TestingConfigPointer localConfig);
