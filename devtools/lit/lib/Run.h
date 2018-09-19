@@ -20,14 +20,15 @@ namespace lit {
 class LitConfig;
 class Run;
 using RunPointer = std::shared_ptr<Run>;
+using LitConfigPointer = std::shared_ptr<LitConfig>;
 
 class Run
 {
 public:
-   Run(std::shared_ptr<LitConfig> litConfig, const TestList &tests);
+   Run(LitConfigPointer litConfig, const TestList &tests);
    const TestList &getTests() const;
 protected:
-   std::shared_ptr<LitConfig> m_litConfig;
+   LitConfigPointer m_litConfig;
    TestList m_tests;
 };
 

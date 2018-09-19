@@ -105,6 +105,7 @@ void rtrim_string(std::string &str);
 void trim_string(std::string &str);
 
 bool stdcout_isatty();
+void abort_execute_now();
 } // lit
 } // polar
 

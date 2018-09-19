@@ -10,11 +10,12 @@
 // Created by polarboy on 2018/09/05.
 
 #include "Run.h"
+#include "Utils.h"
 
 namespace polar {
 namespace lit {
 
-Run::Run(std::shared_ptr<LitConfig> litConfig, const TestList &tests)
+Run::Run(LitConfigPointer litConfig, const TestList &tests)
    : m_litConfig(litConfig),
      m_tests(tests)
 {
@@ -23,6 +24,24 @@ Run::Run(std::shared_ptr<LitConfig> litConfig, const TestList &tests)
 const TestList &Run::getTests() const
 {
    return m_tests;
+}
+
+/// Run one test in a multiprocessing.Pool
+///
+/// Side effects in this function and functions it calls are not visible in the
+/// main lit process.
+///
+/// Arguments and results of this function are pickled, so they should be cheap
+/// to copy. For efficiency, we copy all data needed to execute all tests into
+/// each worker and store it in the child_* global variables. This reduces the
+/// cost of each task.
+///
+/// Returns an index and a Result, which the parent process uses to update
+/// the display.
+///
+void worker_run_one_test(int testIndex, TestPointer test)
+{
+
 }
 
 } // lit

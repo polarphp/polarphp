@@ -13,12 +13,15 @@
 #include "Config.h"
 #include "lib/Utils.h"
 #include "lib/LitConfig.h"
+#include "lib/Discovery.h"
+#include "lib/Run.h"
 #include <iostream>
 #include <thread>
 #include <assert.h>
 #include <filesystem>
 #include <list>
 
+using polar::lit::LitConfigPointer;
 using polar::lit::LitConfig;
 namespace fs = std::filesystem;
 
@@ -34,6 +37,19 @@ std::list<std::string> vector_to_list(const std::vector<std::string> &items)
 }
 
 } // anonymous namespace
+
+void general_exception_handler(std::exception_ptr eptr)
+{
+   try {
+      if (eptr) {
+         std::rethrow_exception(eptr);
+      }
+   } catch (const std::exception &exp) {
+      std::cerr << exp.what() << std::endl;
+      exit(1);
+   }
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -136,7 +152,10 @@ int main(int argc, char *argv[])
       std::cerr << "Setting --max-failures to 0 does not have any effect." << std::endl;
    }
    atexit(polar::lit::temp_files_clear_handler);
-   const std::vector<std::string> &inputs = testPaths;
+   std::list<std::string> inputs;
+   for (const std::string &path : testPaths) {
+      inputs.push_back(path);
+   }
    // Create the user defined parameters.
    std::map<std::string, std::any> userParams;
    for(std::string &item : params) {
@@ -152,7 +171,7 @@ int main(int argc, char *argv[])
       }
    }
    // Create the global config object.
-   LitConfig litConfig(
+   LitConfigPointer litConfig = std::make_shared<LitConfig>(
             fs::path(argv[0]).filename(),
          vector_to_list(paths),
          quiet,
@@ -175,6 +194,14 @@ int main(int argc, char *argv[])
    echoAllCommands
          );
    // Perform test discovery.
+   std::exception_ptr eptr;
+   try {
+      polar::lit::Run run(litConfig,
+                          polar::lit::find_tests_for_inputs(litConfig, inputs));
+   } catch (...) {
+      eptr = std::current_exception();
+   }
+   general_exception_handler(eptr);
    return 0;
 }
 

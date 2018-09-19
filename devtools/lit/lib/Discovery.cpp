@@ -273,7 +273,7 @@ std::tuple<TestSuitePointer, TestList> get_tests(const std::string &path, LitCon
 ///
 /// Given a configuration object and a list of input specifiers, find all the
 /// tests to execute.
-std::list<std::tuple<TestSuitePointer, TestList>> find_tests_for_inputs(LitConfigPointer litConfig, const std::list<std::string> &inputs)
+TestList find_tests_for_inputs(LitConfigPointer litConfig, const std::list<std::string> &inputs)
 {
    std::list<std::string> actualInputs;
    for (const std::string &input : inputs) {
@@ -290,11 +290,14 @@ std::list<std::tuple<TestSuitePointer, TestList>> find_tests_for_inputs(LitConfi
          actualInputs.push_back(input);
       }
    }
-   std::list<std::tuple<TestSuitePointer, TestList>> tests;
+   TestList tests;
    std::map<std::string, TestSuitSearchResult> cache;
    for (std::string &input : actualInputs) {
       int prevLength = tests.size();
-      tests.push_back(get_tests(input, litConfig, cache));
+      TestList suiteTests = std::get<1>(get_tests(input, litConfig, cache));
+      for (TestPointer test : suiteTests) {
+         tests.push_back(test);
+      }
       if (prevLength == tests.size()) {
          litConfig->warning(format_string("input %s contained no tests", input.c_str()));
       }
@@ -325,13 +328,10 @@ std::list<std::shared_ptr<LitTestCase>> load_test_suite(const std::list<std::str
             false,
          #endif
             std::map<std::string, std::any>{});
-   std::list<std::tuple<TestSuitePointer, TestList>> searchResults = find_tests_for_inputs(litConfig, inputs);
+   TestList searchResults = find_tests_for_inputs(litConfig, inputs);
    TestList tests;
    for (auto &item : searchResults) {
-      TestList &subtests = std::get<1>(item);
-      for (auto &test : subtests) {
-         tests.push_back(test);
-      }
+       tests.push_back(item);
    }
    RunPointer run = std::make_shared<Run>(litConfig, tests);
    std::list<std::shared_ptr<LitTestCase>> testcases;
