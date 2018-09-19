@@ -360,6 +360,7 @@ add_subdirectory(include)
 add_subdirectory(tools)
 
 if (POLAR_INCLUDE_TESTS)
+   include(LitUtils)
    add_subdirectory(devtools)
    add_subdirectory(unittests)
    add_subdirectory(tests)

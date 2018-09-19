@@ -60,3 +60,4 @@ target_link_libraries(lit PRIVATE litkernel CLI11::CLI11)
 
 add_subdirectory(unittests)
 add_subdirectory(builtincommands)
+add_subdirectory(tests)
