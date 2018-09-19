@@ -152,10 +152,7 @@ int main(int argc, char *argv[])
       std::cerr << "Setting --max-failures to 0 does not have any effect." << std::endl;
    }
    atexit(polar::lit::temp_files_clear_handler);
-   std::list<std::string> inputs;
-   for (const std::string &path : testPaths) {
-      inputs.push_back(path);
-   }
+   std::list<std::string> inputs(vector_to_list(testPaths));
    // Create the user defined parameters.
    std::map<std::string, std::any> userParams;
    for(std::string &item : params) {

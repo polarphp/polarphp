@@ -37,7 +37,7 @@ function(polar_add_lit_cfg_setter)
       set(sourceFilename ${CMAKE_CURRENT_LIST_DIR}/lit.cfg.cpp)
       polar_get_lit_cfgsetter_name(cfgsetter targetName)
    endif()
-   add_library(${targetName} ${sourceFilename})
+   add_library(${targetName} MODULE ${sourceFilename})
 endfunction()
 
 macro(polar_get_lit_cfgsetter_name suffix output)

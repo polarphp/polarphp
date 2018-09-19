@@ -272,6 +272,7 @@ std::tuple<TestSuitePointer, TestList> get_tests(const std::string &path, LitCon
 ///
 /// Given a configuration object and a list of input specifiers, find all the
 /// tests to execute.
+///
 TestList find_tests_for_inputs(LitConfigPointer litConfig, const std::list<std::string> &inputs)
 {
    std::list<std::string> actualInputs;
