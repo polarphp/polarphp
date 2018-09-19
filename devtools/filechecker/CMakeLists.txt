@@ -7,7 +7,4 @@
 # See http://polarphp.org/LICENSE.txt for license information
 # See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
-# Created by polarboy on 2018/08/27.
-
-add_subdirectory(lit)
-add_subdirectory(filechecker)
+# Created by polarboy on 2018/09/19.
