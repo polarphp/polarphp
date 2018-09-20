@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
          false,
       #endif
          userParams,
-         cfgPrefix,
+         (!cfgPrefix.empty() ? std::optional(cfgPrefix) : std::nullopt),
          maxIndividualTestTime,
          maxFailures,
          std::map<std::string, std::string>{},

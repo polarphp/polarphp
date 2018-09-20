@@ -133,7 +133,9 @@ TestSuitSearchResult get_test_suite(std::string item, LitConfigPointer litConfig
                                     std::map<std::string, TestSuitSearchResult> &cache)
 {
    // Canonicalize the path.
-   item = fs::canonical(fs::current_path() / item);
+   if (!fs::path(item).is_absolute()) {
+      item = fs::canonical(fs::current_path() / item);
+   }
    // Skip files and virtual components.
    std::list<std::string> components;
    fs::path currentDir(item);
