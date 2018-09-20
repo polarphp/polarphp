@@ -68,7 +68,7 @@ LitConfig &LitConfig::setMaxIndividualTestTime(int value)
 void LitConfig::writeMessage(const std::string &kind, const std::string &message,
                              const std::string &file, const std::string &line) const
 {
-   std::cerr << m_progName << ": " << file << ":" << line << " :" << kind << " :" << message
+   std::cerr << m_progName << ": " << file << ":" << line << " " << kind << " :" << message
              << std::endl;
 }
 

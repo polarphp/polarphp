@@ -33,7 +33,11 @@ TestingConfigPointer TestingConfig::fromDefaults(LitConfigPointer litConfig)
       "FILECHECK_DUMP_INPUT_ON_FAILURE"
    };
    for (const std::string &envVarName : passVars) {
-      std::string envVal = std::getenv(envVarName.c_str());
+      const char *envStr = std::getenv(envVarName.c_str());
+      std::string envVal;
+      if (envStr) {
+         envVal = std::string(envStr, strlen(envStr));
+      }
       if (!envVal.empty()) {
          environment[envVarName] = envVal;
       }

@@ -93,8 +93,9 @@ std::string join_string_list(const std::list<std::string> &list, const std::stri
 template <typename... ArgTypes>
 std::string format_string(const std::string &format, ArgTypes&&...args)
 {
-   char buffer[256];
-   std::sprintf(buffer, format.c_str(), std::forward<ArgTypes>(args)...);
+   char buffer[512];
+   int size = std::snprintf(buffer, 512, format.c_str(), std::forward<ArgTypes>(args)...);
+   return std::string(buffer, size);
 }
 
 void replace_string(const std::string &search, const std::string &replacement,
