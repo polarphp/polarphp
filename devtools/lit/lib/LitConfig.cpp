@@ -20,8 +20,8 @@ namespace lit {
 
 LitConfig::LitConfig(const std::string &progName, const std::list<std::string> &path,
                      bool quiet, bool useValgrind, bool valgrindLeakCheck,
-                     const std::list<std::string> &valgrindArgs, bool noExecute, bool debug,
-                     bool singleProcess, bool isWindows, const std::map<std::string, std::any> &params,
+                     const std::list<std::string> &valgrindArgs, bool noExecute, bool singleProcess,
+                     bool debug, bool isWindows, const std::map<std::string, std::any> &params,
                      const std::optional<std::string> &configPrefix, int maxIndividualTestTime,
                      const std::optional<int> &maxFailures, const std::map<std::string, std::string> &parallelismGroups,
                      bool echoAllCommands)
@@ -29,7 +29,7 @@ LitConfig::LitConfig(const std::string &progName, const std::list<std::string> &
      m_quiet(quiet), m_useValgrind(useValgrind),
      m_valgrindLeakCheck(valgrindLeakCheck),
      m_valgrindUserArgs(valgrindArgs), m_noExecute(noExecute),
-     m_debug(debug), m_singleProcess(singleProcess),
+     m_singleProcess(singleProcess), m_debug(debug),
      m_isWindows(isWindows), m_params(params), m_bashPath(std::nullopt),
      m_configPrefix(configPrefix.has_value() ? configPrefix.value() : "lit"),
      m_suffixes({"cfg.cmake"}), m_maxFailures(maxFailures),

@@ -73,21 +73,25 @@ TestSuitSearchResult do_search_testsuit(const std::string &path,
       std::get<1>(temp).push_back(base);
       return temp;
    }
+   std::string &cfgPath = cfgPathOpt.value();
    // This is a private builtin parameter which can be used to perform
    // translation of configuration paths.  Specifically, this parameter
    // can be set to a dictionary that the discovery process will consult
    // when it finds a configuration it is about to load.  If the given
    // path is in the map, the value of that key is a path to the
    // configuration to load instead.
-   std::any configMapAny = litConfig->getParams().at("config_map");
-   std::string cfgPath;
-   if (configMapAny.has_value()) {
-      cfgPath = fs::canonical(cfgPathOpt.value());
-      StringMap &configMap = std::any_cast<StringMap&>(configMapAny);
-      if (configMap.find(cfgPath) != configMap.end()) {
-         cfgPath = configMap.at(cfgPath);
+   const std::map<std::string, std::any> &params = litConfig->getParams();
+   if (params.find("config_map") != params.end()) {
+      const std::any configMapAny = params.at("config_map");
+      if (configMapAny.has_value()) {
+         cfgPath = fs::canonical(cfgPathOpt.value());
+         const StringMap &configMap = std::any_cast<const StringMap&>(configMapAny);
+         if (configMap.find(cfgPath) != configMap.end()) {
+            cfgPath = configMap.at(cfgPath);
+         }
       }
    }
+
    // We found a test suite, create a new config for it and load it.
    if (litConfig->isDebug()) {
       litConfig->note(format_string("loading suite config %s", cfgPath.c_str()), __FILE__, __LINE__);

@@ -33,7 +33,7 @@ public:
    LitConfig(const std::string &progName, const std::list<std::string> &path,
              bool quiet, bool useValgrind,
              bool valgrindLeakCheck, const std::list<std::string> &valgrindArgs,
-             bool noExecute, bool debug, bool singleProcess, bool isWindows,
+             bool noExecute, bool singleProcess, bool debug, bool isWindows,
              const std::map<std::string, std::any> &params, const std::optional<std::string> &configPrefix = std::nullopt,
              int maxIndividualTestTime = 0, const std::optional<int> &maxFailures = std::nullopt,
              const std::map<std::string, std::string> &parallelismGroups = std::map<std::string, std::string>{},
@@ -113,8 +113,8 @@ protected:
    bool m_valgrindLeakCheck;
    std::list<std::string> m_valgrindUserArgs;
    bool m_noExecute;
-   bool m_debug;
    bool m_singleProcess;
+   bool m_debug;
    bool m_isWindows;
    std::map<std::string, std::any> m_params;
    std::optional<std::string> m_bashPath;
