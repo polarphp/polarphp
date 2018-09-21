@@ -239,3 +239,7 @@ function(polar_libgcc_path path)
    set(${path} ${libdir} PARENT_SCOPE)
 endfunction()
 
+macro(polar_find_parent_dir path output)
+   get_filename_component(${output} ${path} ABSOLUTE)
+   get_filename_component(${output} ${${output}} DIRECTORY)
+endmacro()
