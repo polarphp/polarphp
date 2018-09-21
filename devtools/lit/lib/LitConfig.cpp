@@ -32,7 +32,7 @@ LitConfig::LitConfig(const std::string &progName, const std::list<std::string> &
      m_singleProcess(singleProcess), m_debug(debug),
      m_isWindows(isWindows), m_params(params), m_bashPath(std::nullopt),
      m_configPrefix(configPrefix.has_value() ? configPrefix.value() : "lit"),
-     m_suffixes({"cfg.cmake"}), m_maxFailures(maxFailures),
+     m_suffixes({"cfg.json"}), m_maxFailures(maxFailures),
      m_parallelismGroups(parallelismGroups), m_echoAllCommands(echoAllCommands)
 {
    setMaxIndividualTestTime(maxIndividualTestTime);

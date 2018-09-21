@@ -146,6 +146,11 @@ bool TestingConfig::isEarly() const
    return m_isEarly;
 }
 
+void TestingConfig::loadFromPath(const std::string &path, LitConfigPointer litConfig)
+{
+   loadFromPath(path, *litConfig.get());
+}
+
 void TestingConfig::loadFromPath(const std::string &path, const LitConfig &litConfig)
 {
 

@@ -97,7 +97,7 @@ TestSuitSearchResult do_search_testsuit(const std::string &path,
       litConfig->note(format_string("loading suite config %s", cfgPath.c_str()), __FILE__, __LINE__);
    }
    TestingConfigPointer testingCfg = TestingConfig::fromDefaults(litConfig);
-   testingCfg->loadFromPath(cfgPath, *litConfig.get());
+   testingCfg->loadFromPath(cfgPath, litConfig);
    std::string sourceRoot;
    std::string execRoot;
    if (testingCfg->getTestSourceRoot().has_value()) {
@@ -183,7 +183,7 @@ TestingConfigPointer get_local_config(TestSuitePointer testSuite, LitConfigPoint
    if (litConfig->isDebug()) {
       litConfig->note(format_string("loading local config %s", cfgPath.value().c_str()));
    }
-   config->loadFromPath(cfgPath.value(), *litConfig.get());
+   config->loadFromPath(cfgPath.value(), litConfig);
    return config;
 }
 

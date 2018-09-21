@@ -135,7 +135,6 @@ int main(int argc, char *argv[])
    litApp.add_flag("--show-tests", showTests, "Show all discovered tests")->group("Debug and Experimental Options");
    litApp.add_flag("--single-process", singleProcess, "Don't run tests in parallel.  Intended for debugging "
                                                         "single test failures")->group("Debug and Experimental Options");
-
    CLI11_PARSE(litApp, argc, argv);
    if (showVersion) {
       std::cout << "lit " << POLAR_LIT_VERSION << std::endl;

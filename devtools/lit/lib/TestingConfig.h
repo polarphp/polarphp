@@ -72,6 +72,7 @@ public:
    bool isPipefail();
    const std::set<std::string> &getLimitToFeatures();
    bool isEarly() const;
+   void loadFromPath(const std::string &path, LitConfigPointer litConfig);
    void loadFromPath(const std::string &path, const LitConfig &litConfig);
    template <typename T>
    const T &getExtraConfig(const std::string &name, const T &defaultValue = T{});
