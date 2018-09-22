@@ -22,6 +22,7 @@ LitConfig::LitConfig(const std::string &progName, const std::list<std::string> &
                      bool quiet, bool useValgrind, bool valgrindLeakCheck,
                      const std::list<std::string> &valgrindArgs, bool noExecute, bool singleProcess,
                      bool debug, bool isWindows, const std::map<std::string, std::any> &params,
+                     const std::string &cfgSetterPluginDir,
                      const std::optional<std::string> &configPrefix, int maxIndividualTestTime,
                      const std::optional<int> &maxFailures, const std::map<std::string, std::string> &parallelismGroups,
                      bool echoAllCommands)
@@ -30,7 +31,8 @@ LitConfig::LitConfig(const std::string &progName, const std::list<std::string> &
      m_valgrindLeakCheck(valgrindLeakCheck),
      m_valgrindUserArgs(valgrindArgs), m_noExecute(noExecute),
      m_singleProcess(singleProcess), m_debug(debug),
-     m_isWindows(isWindows), m_params(params), m_bashPath(std::nullopt),
+     m_isWindows(isWindows), m_params(params), m_cfgSetterPluginDir(cfgSetterPluginDir),
+     m_bashPath(std::nullopt),
      m_configPrefix(configPrefix.has_value() ? configPrefix.value() : "lit"),
      m_suffixes({"cfg.json"}), m_maxFailures(maxFailures),
      m_parallelismGroups(parallelismGroups), m_echoAllCommands(echoAllCommands)
@@ -166,6 +168,11 @@ bool LitConfig::isWindows() const
 const std::map<std::string, std::any> &LitConfig::getParams() const
 {
    return m_params;
+}
+
+const std::string &LitConfig::getCfgSetterPluginDir() const
+{
+   return m_cfgSetterPluginDir;
 }
 
 const std::optional<std::string> &LitConfig::getBashPath() const

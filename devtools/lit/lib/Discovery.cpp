@@ -333,7 +333,8 @@ std::list<std::shared_ptr<LitTestCase>> load_test_suite(const std::list<std::str
          #else
             false,
          #endif
-            std::map<std::string, std::any>{});
+            std::map<std::string, std::any>{},
+            POLAR_LIT_RUNTIME_DIR);
    TestList searchResults = find_tests_for_inputs(litConfig, inputs);
    TestList tests;
    for (auto &item : searchResults) {

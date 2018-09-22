@@ -17,6 +17,10 @@
 #include <fstream>
 #include <iostream>
 
+#define CFG_SETTER_SITE_KEY "SiteCfgSetter"
+#define CFG_SETTER_LOCAL_KEY "LocalCfgSetter"
+#define CFG_SETTER_NORMAL_KEY "CfgSetter"
+
 namespace polar {
 namespace lit {
 
@@ -165,8 +169,23 @@ void TestingConfig::loadFromPath(const std::string &path, const LitConfig &litCo
    }
    nlohmann::json cfg;
    jsonFile >> cfg;
-   std::cout << cfg.dump() << std::endl;
-   std::cout << cfg["cfgSetter"] << std::endl;
+   if (!cfg.is_object()) {
+      throw std::runtime_error("setter config file format error");
+   }
+   fs::path setterPluginPath = litConfig.getCfgSetterPluginDir();
+   if (cfg.find(CFG_SETTER_LOCAL_KEY) != cfg.end()) {
+      setterPluginPath /= cfg[CFG_SETTER_LOCAL_KEY];
+   } else if (cfg.find(CFG_SETTER_SITE_KEY) != cfg.end()) {
+      setterPluginPath /= cfg[CFG_SETTER_SITE_KEY];
+   } else if (cfg.find(CFG_SETTER_NORMAL_KEY) != cfg.end()) {
+      setterPluginPath /= cfg[CFG_SETTER_NORMAL_KEY];
+   } else {
+      throw std::runtime_error("setter config file format error");
+   }
+   if (!fs::exists(setterPluginPath)) {
+      throw std::runtime_error(format_string("cfg setter plugin %s is not exist", setterPluginPath.string().c_str()));
+   }
+
 }
 
 } // lit

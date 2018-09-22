@@ -59,11 +59,14 @@ int main(int argc, char *argv[])
    int threadNumbers;
    std::string cfgPrefix;
    std::vector<std::string> params;
+   std::string cfgSetterPluginDir;
    litApp.add_option("test_paths", testPaths, "Files or paths to include in the test suite");
    litApp.add_flag("--version", showVersion, "Show version and exit");
    CLI::Option *threadsOpt = litApp.add_option("-j,--threads", threadNumbers, "Number of testing threads");
    litApp.add_option("--config-prefix", cfgPrefix, "Prefix for 'lit' config files");
    litApp.add_option("-D,--param", params, "Add 'NAME' = 'VAL' to the user defined parameters");
+   litApp.add_option("--cfg-setter-plugin-dir", cfgSetterPluginDir, "the cfg setter plugin base dir");
+
    /// setup command group
    /// Output Format
    bool quiet;
@@ -150,6 +153,9 @@ int main(int argc, char *argv[])
    if (!maxFailuresOpt->empty() && maxFailures == 0) {
       std::cerr << "Setting --max-failures to 0 does not have any effect." << std::endl;
    }
+   if (cfgSetterPluginDir.empty()) {
+      cfgSetterPluginDir = POLAR_LIT_RUNTIME_DIR;
+   }
    atexit(polar::lit::temp_files_clear_handler);
    std::list<std::string> inputs(vector_to_list(testPaths));
    // Create the user defined parameters.
@@ -183,6 +189,7 @@ int main(int argc, char *argv[])
          false,
       #endif
          userParams,
+         cfgSetterPluginDir,
          (!cfgPrefix.empty() ? std::optional(cfgPrefix) : std::nullopt),
          maxIndividualTestTime,
          maxFailures,
