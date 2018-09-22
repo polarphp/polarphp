@@ -56,6 +56,7 @@ public:
         m_isEarly(isEarly),
         m_parallelismGroup(parallelismGroup)
    {}
+   ~TestingConfig();
 public:
    static TestingConfigPointer fromDefaults(LitConfigPointer litConfig);
    TestingConfig *getParent();
@@ -72,8 +73,9 @@ public:
    bool isPipefail();
    const std::set<std::string> &getLimitToFeatures();
    bool isEarly() const;
+   TestingConfig &setIsEarly(bool flag);
    void loadFromPath(const std::string &path, LitConfigPointer litConfig);
-   void loadFromPath(const std::string &path, const LitConfig &litConfig);
+   void loadFromPath(const std::string &path, LitConfig &litConfig);
    template <typename T>
    const T &getExtraConfig(const std::string &name, const T &defaultValue = T{});
    template <typename T>
@@ -95,6 +97,7 @@ protected:
    bool m_isEarly;
    std::string m_parallelismGroup;
    std::map<std::string, std::any> m_extraConfig;
+   std::string m_cfgSetterPlugin;
 };
 
 template <typename T>

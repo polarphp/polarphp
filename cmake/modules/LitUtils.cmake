@@ -30,12 +30,15 @@ endfunction()
 
 function(polar_add_lit_cfg_setter)
    cmake_parse_arguments(ARG "LOCAL" "" "" ${ARGN})
+   set(targetOutputName "")
    if (ARG_LOCAL)
+      set(targetOutputName localcfgsetter)
       set(sourceFilename ${CMAKE_CURRENT_LIST_DIR}/litlocalcfg.cpp)
       polar_get_lit_cfgsetter_name(localcfgsetter targetName)
    else()
       set(sourceFilename ${CMAKE_CURRENT_LIST_DIR}/litcfg.cpp)
       polar_get_lit_cfgsetter_name(cfgsetter targetName)
+      set(targetOutputName cfgsetter)
    endif()
    add_library(${targetName} MODULE ${sourceFilename})
    polar_find_parent_dir(${CMAKE_CURRENT_SOURCE_DIR} baseDir)
@@ -44,7 +47,8 @@ function(polar_add_lit_cfg_setter)
    set(setterModuleDir ${POLAR_SETTER_PLUGIN_DIR}/${setterModuleDir})
    set_target_properties(${targetName}
       PROPERTIES
-      LIBRARY_OUTPUT_DIRECTORY ${setterModuleDir})
+      LIBRARY_OUTPUT_DIRECTORY ${setterModuleDir}
+      LIBRARY_OUTPUT_NAME ${targetOutputName})
    target_link_libraries(${targetName} PRIVATE litkernel)
 endfunction()
 

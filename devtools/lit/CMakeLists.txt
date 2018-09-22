@@ -17,6 +17,7 @@ polar_collect_files(
 if (UNIX)
    list(APPEND POLAR_DEVTOOLS_LIT_LIB_SOURCES lib/_platform/ProcessUtilsUnix.cpp)
    list(APPEND POLAR_DEVTOOLS_LIT_LIB_SOURCES lib/_platform/UtilsUnix.cpp)
+   list(APPEND POLAR_DEVTOOLS_LIT_LIB_SOURCES lib/_platform/CfgSetterPluginLoaderUnix.cpp)
 endif()
 
 polar_add_library(litkernel SHARED BUILDTREE_ONLY

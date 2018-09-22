@@ -14,6 +14,7 @@
 #include "Utils.h"
 #include "formats/Base.h"
 #include "nlohmann/json.hpp"
+#include "CfgSetterPluginLoader.h"
 #include <fstream>
 #include <iostream>
 
@@ -25,6 +26,17 @@ namespace polar {
 namespace lit {
 
 using nlohmann::json;
+
+using CfgSetterType = void (*)(TestingConfig *config, LitConfig *litConfig);
+
+TestingConfig::~TestingConfig()
+{
+   try {
+      unload_cfg_setter_plugin(m_cfgSetterPlugin);
+   } catch (std::runtime_error &exp) {
+      std::cerr << exp.what() << std::endl;
+   }
+}
 
 TestingConfigPointer TestingConfig::fromDefaults(LitConfigPointer litConfig)
 {
@@ -155,12 +167,18 @@ bool TestingConfig::isEarly() const
    return m_isEarly;
 }
 
+TestingConfig &TestingConfig::setIsEarly(bool flag)
+{
+   m_isEarly = flag;
+   return *this;
+}
+
 void TestingConfig::loadFromPath(const std::string &path, LitConfigPointer litConfig)
 {
    loadFromPath(path, *litConfig.get());
 }
 
-void TestingConfig::loadFromPath(const std::string &path, const LitConfig &litConfig)
+void TestingConfig::loadFromPath(const std::string &path, LitConfig &litConfig)
 {
    // here we load cfg setter module config file
    std::ifstream jsonFile(path);
@@ -172,20 +190,19 @@ void TestingConfig::loadFromPath(const std::string &path, const LitConfig &litCo
    if (!cfg.is_object()) {
       throw std::runtime_error("setter config file format error");
    }
-   fs::path setterPluginPath = litConfig.getCfgSetterPluginDir();
+   std::string setterPluginPath;
    if (cfg.find(CFG_SETTER_LOCAL_KEY) != cfg.end()) {
-      setterPluginPath /= cfg[CFG_SETTER_LOCAL_KEY];
+      setterPluginPath = cfg[CFG_SETTER_LOCAL_KEY];
    } else if (cfg.find(CFG_SETTER_SITE_KEY) != cfg.end()) {
-      setterPluginPath /= cfg[CFG_SETTER_SITE_KEY];
+      setterPluginPath = cfg[CFG_SETTER_SITE_KEY];
    } else if (cfg.find(CFG_SETTER_NORMAL_KEY) != cfg.end()) {
-      setterPluginPath /= cfg[CFG_SETTER_NORMAL_KEY];
+      setterPluginPath = cfg[CFG_SETTER_NORMAL_KEY];
    } else {
       throw std::runtime_error("setter config file format error");
    }
-   if (!fs::exists(setterPluginPath)) {
-      throw std::runtime_error(format_string("cfg setter plugin %s is not exist", setterPluginPath.string().c_str()));
-   }
-
+   CfgSetterType setter = load_cfg_setter_plugin<CfgSetterType>(setterPluginPath, litConfig.getCfgSetterPluginDir());
+   m_cfgSetterPlugin = setterPluginPath;
+   setter(this, &litConfig);
 }
 
 } // lit
