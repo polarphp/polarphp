@@ -14,9 +14,13 @@
 #include "Utils.h"
 #include "formats/Base.h"
 #include "nlohmann/json.hpp"
+#include <fstream>
+#include <iostream>
 
 namespace polar {
 namespace lit {
+
+using nlohmann::json;
 
 TestingConfigPointer TestingConfig::fromDefaults(LitConfigPointer litConfig)
 {
@@ -155,7 +159,14 @@ void TestingConfig::loadFromPath(const std::string &path, LitConfigPointer litCo
 void TestingConfig::loadFromPath(const std::string &path, const LitConfig &litConfig)
 {
    // here we load cfg setter module config file
-
+   std::ifstream jsonFile(path);
+   if (!jsonFile.is_open()) {
+      throw std::runtime_error(format_string("reading %s fail", path.c_str()));
+   }
+   nlohmann::json cfg;
+   jsonFile >> cfg;
+   std::cout << cfg.dump() << std::endl;
+   std::cout << cfg["cfgSetter"] << std::endl;
 }
 
 } // lit

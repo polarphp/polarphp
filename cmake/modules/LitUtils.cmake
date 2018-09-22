@@ -41,7 +41,7 @@ function(polar_add_lit_cfg_setter)
    polar_find_parent_dir(${CMAKE_CURRENT_SOURCE_DIR} baseDir)
    set(setterModuleDir ${CMAKE_CURRENT_LIST_DIR})
    string(REPLACE ${baseDir}/ "" setterModuleDir ${setterModuleDir})
-   set(setterModuleDir ${POLAR_LIT_RUNTIME_DIR}/${setterModuleDir})
+   set(setterModuleDir ${POLAR_SETTER_PLUGIN_DIR}/${setterModuleDir})
    set_target_properties(${targetName}
       PROPERTIES
       LIBRARY_OUTPUT_DIRECTORY ${setterModuleDir})
@@ -74,7 +74,7 @@ function(polar_setup_lit_cfg_setters)
    if (NOT EXISTS ${ARG_TEST_DIR} OR NOT IS_DIRECTORY ${ARG_TEST_DIR})
       message(FATAL_ERROR "test directory is not exist")
    endif()
-   set(setterPluginDir ${POLAR_LIT_CFG_SETTER_DIR}/${ARG_OUTPUT_DIR})
+   set(POLAR_SETTER_PLUGIN_DIR ${POLAR_LIT_RUNTIME_DIR}/${ARG_OUTPUT_DIR})
    file(GLOB_RECURSE cfgSetterScripts RELATIVE ${ARG_TEST_DIR}
       *cfg.cmake)
    foreach(script ${cfgSetterScripts})
