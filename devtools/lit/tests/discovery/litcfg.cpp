@@ -7,6 +7,5 @@ using polar::lit::TestingConfig;
 extern "C" {
 void litconfig_setup(TestingConfig *config, LitConfig *litConfig)
 {
-   config->setIsEarly(true);
 }
 }

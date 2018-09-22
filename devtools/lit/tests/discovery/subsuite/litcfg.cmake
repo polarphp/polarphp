@@ -9,4 +9,4 @@
 #
 # Created by polarboy on 2018/09/19.
 
-polar_register_cfg_setter()
+polar_add_lit_cfg_setter()
