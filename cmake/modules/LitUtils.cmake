@@ -38,7 +38,14 @@ function(polar_add_lit_cfg_setter)
       polar_get_lit_cfgsetter_name(cfgsetter targetName)
    endif()
    add_library(${targetName} MODULE ${sourceFilename})
-   polar_find_parent_dir(${CMAKE_CURRENT_SOURCE_DIR} xxx)
+   polar_find_parent_dir(${CMAKE_CURRENT_SOURCE_DIR} baseDir)
+   set(setterModuleDir ${CMAKE_CURRENT_LIST_DIR})
+   string(REPLACE ${baseDir}/ "" setterModuleDir ${setterModuleDir})
+   set(setterModuleDir ${POLAR_LIT_RUNTIME_DIR}/${setterModuleDir})
+   set_target_properties(${targetName}
+      PROPERTIES
+      LIBRARY_OUTPUT_DIRECTORY ${setterModuleDir})
+   target_link_libraries(${targetName} PRIVATE litkernel)
 endfunction()
 
 macro(polar_get_lit_cfgsetter_name suffix output)

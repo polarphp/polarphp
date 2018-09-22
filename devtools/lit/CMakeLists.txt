@@ -27,7 +27,7 @@ set_target_properties(
    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib;${CMAKE_CURRENT_BINARY_DIR};${CURSES_INCLUDE_DIRS}"
    )
 
-target_link_libraries(litkernel PRIVATE
+target_link_libraries(litkernel PUBLIC
    nlohmann_json::nlohmann_json
    ${CURSES_LIBRARIES})
 

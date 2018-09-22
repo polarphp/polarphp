@@ -363,7 +363,6 @@ if (POLAR_INCLUDE_TESTS)
    include(LitUtils)
    #setup some important lit path
    set(POLAR_LIT_RUNTIME_DIR ${POLAR_BINARY_DIR}/litruntime)
-   set(POLAR_LIT_CFG_SETTER_DIR ${POLAR_LIT_RUNTIME_DIR}/cfgsetter)
    add_subdirectory(devtools)
    add_subdirectory(unittests)
    add_subdirectory(tests)

@@ -13,6 +13,7 @@
 #include "LitConfig.h"
 #include "Utils.h"
 #include "formats/Base.h"
+#include "nlohmann/json.hpp"
 
 namespace polar {
 namespace lit {
@@ -153,6 +154,7 @@ void TestingConfig::loadFromPath(const std::string &path, LitConfigPointer litCo
 
 void TestingConfig::loadFromPath(const std::string &path, const LitConfig &litConfig)
 {
+   // here we load cfg setter module config file
 
 }
 

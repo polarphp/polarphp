@@ -31,6 +31,9 @@ ExternalProject_Add(thirdparty_cli11
    )
 
 add_library(CLI11::CLI11 INTERFACE IMPORTED)
+set_target_properties(CLI11::CLI11 PROPERTIES
+  INTERFACE_INCLUDE_DIRECTORIES "${POLAR_DEPS_INSTALL_DIR}/include"
+)
 
 ExternalProject_Add(thirdparty_json
    PREFIX thirdparty
@@ -48,13 +51,7 @@ ExternalProject_Add(thirdparty_json
 
 find_package(nlohmann_json CONFIG REQUIRED
    PATHS ${POLAR_CMAKE_MODULES_DIR}/json)
-if (nlohmann_json_FOUND)
-   set(POLAR_FOUND_NATIVE_GTEST ON)
-endif()
-
-set_target_properties(CLI11::CLI11 PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "${POLAR_DEPS_INSTALL_DIR}/include"
-)
+message(STATUS "found json parser version: ${nlohmann_json_VERSION}")
 
 if(POLAR_INCLUDE_TESTS)
    ExternalProject_Add(thirdparty_gtest
