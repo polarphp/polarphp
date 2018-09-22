@@ -81,7 +81,7 @@ TestingConfigPointer TestingConfig::fromDefaults(LitConfigPointer litConfig)
    return std::make_shared<TestingConfig>(nullptr,
                                           "<unnamed>",
                                           std::set<std::string>{},
-                                          std::nullopt,
+                                          nullptr,
                                           environment,
                                           std::list<std::string>{},
                                           false,
@@ -112,7 +112,7 @@ const std::set<std::string> &TestingConfig::getSuffixes()
    return m_suffixes;
 }
 
-const std::optional<std::shared_ptr<TestFormat>> &TestingConfig::getTestFormat()
+const std::shared_ptr<TestFormat> TestingConfig::getTestFormat()
 {
    return m_testFormat;
 }

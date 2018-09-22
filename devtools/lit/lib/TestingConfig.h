@@ -33,7 +33,7 @@ public:
    TestingConfig()
    {}
    TestingConfig(TestingConfig *parent, const std::string &name,
-                 const std::set<std::string> &suffixes, const std::optional<std::shared_ptr<TestFormat>> &testFormat,
+                 const std::set<std::string> &suffixes, std::shared_ptr<TestFormat> testFormat,
                  const std::map<std::string, std::string> &environment, const std::list<std::string> &substitutions,
                  bool unsupported, const std::optional<std::string> &testExecRoot,
                  const std::optional<std::string> &testSourceRoot, const std::set<std::string> &excludes,
@@ -62,7 +62,7 @@ public:
    TestingConfig *getParent();
    const std::string &getName();
    const std::set<std::string> &getSuffixes();
-   const std::optional<std::shared_ptr<TestFormat>> &getTestFormat();
+   const std::shared_ptr<TestFormat> getTestFormat();
    const std::map<std::string, std::string> &getEnvironment();
    const std::list<std::string> &getSubstitutions();
    bool isUnsupported();
@@ -73,18 +73,20 @@ public:
    bool isPipefail();
    const std::set<std::string> &getLimitToFeatures();
    bool isEarly() const;
-   TestingConfig &setIsEarly(bool flag);
-   void loadFromPath(const std::string &path, LitConfigPointer litConfig);
-   void loadFromPath(const std::string &path, LitConfig &litConfig);
    template <typename T>
    const T &getExtraConfig(const std::string &name, const T &defaultValue = T{});
+   TestingConfig &setName(const std::string &name);
+   TestingConfig &setSuffixes(const std::set<std::string> suffixes);
+   TestingConfig &setIsEarly(bool flag);
    template <typename T>
    TestingConfig &setExtraConfig(const std::string &name, const T &value);
+   void loadFromPath(const std::string &path, LitConfigPointer litConfig);
+   void loadFromPath(const std::string &path, LitConfig &litConfig);
 protected:
    TestingConfig *m_parent;
    std::string m_name;
    std::set<std::string> m_suffixes;
-   std::optional<std::shared_ptr<TestFormat>> m_testFormat;
+   std::shared_ptr<TestFormat> m_testFormat;
    std::map<std::string, std::string> m_environment;
    std::list<std::string> m_substitutions;
    bool m_unsupported;

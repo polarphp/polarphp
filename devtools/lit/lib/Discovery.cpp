@@ -209,8 +209,8 @@ TestList get_tests_in_suite(TestSuitePointer testSuite, LitConfigPointer litConf
    // Otherwise we have a directory to search for tests, start by getting the
    // local configuration.
    TestingConfigPointer lc = get_local_config(testSuite, litConfig, pathInSuite);
-   if (lc->getTestFormat().has_value()) {
-      return lc->getTestFormat().value()->getTestsInDirectory(testSuite, pathInSuite, litConfig, lc);
+   if (lc->getTestFormat()) {
+      return lc->getTestFormat()->getTestsInDirectory(testSuite, pathInSuite, litConfig, lc);
    }
    for(auto& p: fs::directory_iterator(sourcePath)) {
       const fs::path &path = p.path();
