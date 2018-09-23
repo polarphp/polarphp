@@ -167,6 +167,78 @@ bool TestingConfig::isEarly() const
    return m_isEarly;
 }
 
+TestingConfig &TestingConfig::setName(const std::string &name)
+{
+   m_name = name;
+   return *this;
+}
+
+TestingConfig &TestingConfig::setSuffixes(const std::set<std::string> &suffixes)
+{
+   m_suffixes = suffixes;
+   return *this;
+}
+
+TestingConfig &TestingConfig::setTestformat(std::shared_ptr<TestFormat> testFormat)
+{
+   m_testFormat = testFormat;
+   return *this;
+}
+
+TestingConfig &TestingConfig::setEnvironment(const std::map<std::string, std::string> &environment)
+{
+   m_environment = environment;
+   return *this;
+}
+
+TestingConfig &TestingConfig::setSubstitutions(const std::list<std::string> &substitutions)
+{
+   m_substitutions = substitutions;
+   return *this;
+}
+
+TestingConfig &TestingConfig::setIsUnsupported(bool flag)
+{
+   m_unsupported = flag;
+   return *this;
+}
+
+TestingConfig &TestingConfig::setTestExecRoot(const std::optional<std::string> &root)
+{
+   m_testExecRoot = root;
+   return *this;
+}
+
+TestingConfig &TestingConfig::setTestSourceRoot(const std::optional<std::string> &root)
+{
+   m_testSourceRoot = root;
+   return *this;
+}
+
+TestingConfig &TestingConfig::setExcludes(const std::set<std::string> &excludes)
+{
+   m_excludes = excludes;
+   return *this;
+}
+
+TestingConfig &TestingConfig::setAvailableFeatures(const std::set<std::string> &features)
+{
+   m_availableFeatures = features;
+   return *this;
+}
+
+TestingConfig &TestingConfig::setPipeFail(bool flag)
+{
+   m_pipefail = flag;
+   return *this;
+}
+
+TestingConfig &TestingConfig::setLimitToFeatures(const std::set<std::string> &features)
+{
+   m_limitToFeatures = features;
+   return *this;
+}
+
 TestingConfig &TestingConfig::setIsEarly(bool flag)
 {
    m_isEarly = flag;
