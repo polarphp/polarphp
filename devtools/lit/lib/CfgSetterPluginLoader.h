@@ -17,19 +17,49 @@
 namespace polar {
 namespace lit {
 
-namespace internal {
-
-void *do_load_cfg_setter_plugin(const std::string &pluginPath, const std::string &pluginRootDir);
-
-} // internal namespace
-
-template <typename InterfaceType>
-InterfaceType load_cfg_setter_plugin(const std::string &pluginPath, const std::string &pluginRootDir)
+class CfgSetterPlugin
 {
-   void *handle = internal::do_load_cfg_setter_plugin(pluginPath, pluginRootDir);
-   return reinterpret_cast<InterfaceType>(handle);
-}
+public:
+   CfgSetterPlugin()
+   {}
+   CfgSetterPlugin(const std::string &path, void *handle, const std::string &startupPath = "")
+      : m_handle(handle),
+        m_path(path),
+        m_startupPath(startupPath)
+   {}
 
+   const std::string &getPath() const
+   {
+      return m_path;
+   }
+
+   const std::string &getStartupPath()
+   {
+      return m_startupPath;
+   }
+
+   CfgSetterPlugin &setStartupPath(const std::string &path)
+   {
+      m_startupPath = path;
+      return *this;
+   }
+
+   template <typename CfgSetterType>
+   CfgSetterType getCfgSetter(const std::string &setterName)
+   {
+      void *func = getSetterSymbol(setterName);
+      return reinterpret_cast<CfgSetterType>(func);
+   }
+
+protected:
+   void *getSetterSymbol(const std::string &symbol);
+private:
+   void *m_handle = nullptr;
+   std::string m_path;
+   std::string m_startupPath;
+};
+
+CfgSetterPlugin load_cfg_setter_plugin(const std::string &pluginPath, const std::string &pluginRootDir);
 void unload_cfg_setter_plugin(const std::string &pluginPath);
 
 } // lit

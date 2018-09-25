@@ -14,7 +14,7 @@ using polar::lit::TestingConfig;
 // Check that arbitrary config values are copied (tested by subdir/litlocalcfg.cpp).
 
 extern "C" {
-void litconfig_setup(TestingConfig *config, LitConfig *litConfig)
+void litconfig_setup3(TestingConfig *config, LitConfig *litConfig)
 {
 
 }

@@ -22,9 +22,7 @@ namespace fs = std::filesystem;
 
 static std::map<const std::string, void *> sg_pluginPool{};
 
-namespace internal {
-
-void *do_load_cfg_setter_plugin(const std::string &pluginPath, const std::string &pluginRootDir)
+CfgSetterPlugin load_cfg_setter_plugin(const std::string &pluginPath, const std::string &pluginRootDir)
 {
    // @TODO now hard code
    fs::path pluginFilepath = fs::path(pluginRootDir) / (pluginPath + ".so");
@@ -42,15 +40,8 @@ void *do_load_cfg_setter_plugin(const std::string &pluginPath, const std::string
       dlerror();
       sg_pluginPool[pluginPath] = handle;
    }
-   void *funcPtr = dlsym(handle, "litconfig_setup");
-   if (!funcPtr) {
-      throw std::runtime_error(format_string("dlopen error: %s\n", dlerror()));
-   }
-   dlerror();
-   return funcPtr;
+   return CfgSetterPlugin(pluginPath, handle);
 }
-
-} // internal namespace
 
 void unload_cfg_setter_plugin(const std::string &pluginPath)
 {
@@ -60,6 +51,16 @@ void unload_cfg_setter_plugin(const std::string &pluginPath)
    if (dlclose(sg_pluginPool.at(pluginPath))) {
       throw std::runtime_error(format_string("dlopen error: %s\n", dlerror()));
    }
+}
+
+void *CfgSetterPlugin::getSetterSymbol(const std::string &symbol)
+{
+   void *funcPtr = dlsym(m_handle, symbol.c_str());
+   if (!funcPtr) {
+      throw std::runtime_error(format_string("dlopen error: %s\n", dlerror()));
+   }
+   dlerror();
+   return funcPtr;
 }
 
 } // lit

@@ -34,14 +34,14 @@ LitConfig::LitConfig(const std::string &progName, const std::list<std::string> &
      m_isWindows(isWindows), m_params(params), m_cfgSetterPluginDir(cfgSetterPluginDir),
      m_bashPath(std::nullopt),
      m_configPrefix(configPrefix.has_value() ? configPrefix.value() : "lit"),
-     m_suffixes({"cfg.json"}), m_maxFailures(maxFailures),
+     m_suffixes({"cfg.cmake"}), m_maxFailures(maxFailures),
      m_parallelismGroups(parallelismGroups), m_echoAllCommands(echoAllCommands)
 {
    setMaxIndividualTestTime(maxIndividualTestTime);
    for (const std::string &suffix : m_suffixes) {
-      m_configNames.push_back(m_configPrefix + "." + suffix);
-      m_siteConfigNames.push_back(m_configPrefix + ".site." + suffix);
-      m_localConfigNames.push_back(m_configPrefix + ".local." + suffix);
+      m_configNames.push_back(m_configPrefix + suffix);
+      m_siteConfigNames.push_back(m_configPrefix + "site" + suffix);
+      m_localConfigNames.push_back(m_configPrefix + "local" + suffix);
    }
    if (useValgrind) {
       m_valgrindArgs.push_back("valgrind");

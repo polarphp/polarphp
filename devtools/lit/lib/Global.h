@@ -23,6 +23,7 @@ namespace lit {
 /// normal token and redirects token, so we define the token type code
 #define SHELL_CMD_NORMAL_TOKEN -1
 #define SHELL_CMD_REDIRECT_TOKEN -2
+#define CFG_SETTER_KEY "CfgSetterPlugin"
 
 namespace fs = std::filesystem;
 
@@ -36,8 +37,12 @@ class NotImplementedError : public std::runtime_error
    using std::runtime_error::runtime_error;
 };
 
+class TestingConfig;
+class LitConfig;
+
 using ShellTokenType = std::tuple<std::string, int>;
 using RunCmdResponse = std::tuple<int, std::string, std::string>;
+using CfgSetterType = void (*)(TestingConfig *config, LitConfig *litConfig);
 
 } // lit
 } // polar

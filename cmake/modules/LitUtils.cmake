@@ -53,13 +53,8 @@ function(polar_add_lit_cfg_setter)
       configure_file(${sourceTplFilename} ${sourceFilename}
          @ONLY)
    endif()
-   add_library(${targetName} MODULE ${sourceFilename})
-
-   set_target_properties(${targetName}
-      PROPERTIES
-      LIBRARY_OUTPUT_DIRECTORY ${setterModuleDir}
-      LIBRARY_OUTPUT_NAME ${targetOutputName})
-   target_link_libraries(${targetName} PRIVATE litkernel)
+   list(APPEND POLAR_CFG_SETTER_SRCS ${sourceFilename})
+   set(POLAR_CFG_SETTER_SRCS ${POLAR_CFG_SETTER_SRCS} PARENT_SCOPE)
 endfunction()
 
 macro(polar_get_lit_cfgsetter_name suffix output)
@@ -72,14 +67,21 @@ macro(polar_get_lit_cfgsetter_name suffix output)
 endmacro()
 
 function(polar_setup_lit_cfg_setters)
-   cmake_parse_arguments(ARG "" "TEST_DIR;OUTPUT_DIR" "" ${ARGN})
+   cmake_parse_arguments(ARG "" "TEST_DIR;OUTPUT_NAME" "" ${ARGN})
    if (NOT EXISTS ${ARG_TEST_DIR} OR NOT IS_DIRECTORY ${ARG_TEST_DIR})
       message(FATAL_ERROR "test directory is not exist")
    endif()
-   set(POLAR_SETTER_PLUGIN_DIR ${POLAR_LIT_RUNTIME_DIR}/${ARG_OUTPUT_DIR})
+   set(POLAR_SETTER_PLUGIN_DIR ${POLAR_LIT_RUNTIME_DIR}/${ARG_OUTPUT_NAME})
+   set(POLAR_CFG_SETTER_SRCS)
    file(GLOB_RECURSE cfgSetterScripts RELATIVE ${ARG_TEST_DIR}
       *cfg.cmake)
    foreach(script ${cfgSetterScripts})
       include(${ARG_TEST_DIR}/${script})
    endforeach()
+   add_library(${ARG_OUTPUT_NAME} MODULE ${POLAR_CFG_SETTER_SRCS})
+   set_target_properties(${ARG_OUTPUT_NAME}
+      PROPERTIES
+      LIBRARY_OUTPUT_DIRECTORY ${POLAR_SETTER_PLUGIN_DIR}
+      LIBRARY_OUTPUT_NAME ${ARG_OUTPUT_NAME})
+   target_link_libraries(${ARG_OUTPUT_NAME} PRIVATE litkernel)
 endfunction()

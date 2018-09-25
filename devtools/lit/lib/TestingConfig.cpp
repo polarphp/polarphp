@@ -27,15 +27,10 @@ namespace lit {
 
 using nlohmann::json;
 
-using CfgSetterType = void (*)(TestingConfig *config, LitConfig *litConfig);
+const std::tuple<std::string, CfgSetterType> &retrieve_current_cfg_setter_plugin();
 
 TestingConfig::~TestingConfig()
 {
-   try {
-      unload_cfg_setter_plugin(m_cfgSetterPlugin);
-   } catch (std::runtime_error &exp) {
-      std::cerr << exp.what() << std::endl;
-   }
 }
 
 TestingConfigPointer TestingConfig::fromDefaults(LitConfigPointer litConfig)
@@ -253,28 +248,27 @@ void TestingConfig::loadFromPath(const std::string &path, LitConfigPointer litCo
 void TestingConfig::loadFromPath(const std::string &path, LitConfig &litConfig)
 {
    // here we load cfg setter module config file
-   std::ifstream jsonFile(path);
-   if (!jsonFile.is_open()) {
-      throw std::runtime_error(format_string("reading %s fail", path.c_str()));
-   }
-   nlohmann::json cfg;
-   jsonFile >> cfg;
-   if (!cfg.is_object()) {
-      throw std::runtime_error("setter config file format error");
-   }
-   std::string setterPluginPath;
-   if (cfg.find(CFG_SETTER_LOCAL_KEY) != cfg.end()) {
-      setterPluginPath = cfg[CFG_SETTER_LOCAL_KEY];
-   } else if (cfg.find(CFG_SETTER_SITE_KEY) != cfg.end()) {
-      setterPluginPath = cfg[CFG_SETTER_SITE_KEY];
-   } else if (cfg.find(CFG_SETTER_NORMAL_KEY) != cfg.end()) {
-      setterPluginPath = cfg[CFG_SETTER_NORMAL_KEY];
-   } else {
-      throw std::runtime_error("setter config file format error");
-   }
-   CfgSetterType setter = load_cfg_setter_plugin<CfgSetterType>(setterPluginPath, litConfig.getCfgSetterPluginDir());
-   m_cfgSetterPlugin = setterPluginPath;
-   setter(this, &litConfig);
+//   std::ifstream jsonFile(path);
+//   if (!jsonFile.is_open()) {
+//      throw std::runtime_error(format_string("reading %s fail", path.c_str()));
+//   }
+//   nlohmann::json cfg;
+//   jsonFile >> cfg;
+//   if (!cfg.is_object()) {
+//      throw std::runtime_error("setter config file format error");
+//   }
+//   std::string setterPluginPath;
+//   if (cfg.find(CFG_SETTER_LOCAL_KEY) != cfg.end()) {
+//      setterPluginPath = cfg[CFG_SETTER_LOCAL_KEY];
+//   } else if (cfg.find(CFG_SETTER_SITE_KEY) != cfg.end()) {
+//      setterPluginPath = cfg[CFG_SETTER_SITE_KEY];
+//   } else if (cfg.find(CFG_SETTER_NORMAL_KEY) != cfg.end()) {
+//      setterPluginPath = cfg[CFG_SETTER_NORMAL_KEY];
+//   } else {
+//      throw std::runtime_error("setter config file format error");
+//   }
+//   CfgSetterType setter = load_cfg_setter_plugin<CfgSetterType>(setterPluginPath, litConfig.getCfgSetterPluginDir());
+//   setter(this, &litConfig);
 }
 
 } // lit

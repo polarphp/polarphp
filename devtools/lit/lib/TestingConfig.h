@@ -109,7 +109,6 @@ protected:
    bool m_isEarly;
    std::string m_parallelismGroup;
    std::map<std::string, std::any> m_extraConfig;
-   std::string m_cfgSetterPlugin;
 };
 
 template <typename T>

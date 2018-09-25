@@ -11,12 +11,14 @@
 
 #include "Discovery.h"
 #include "LitConfig.h"
+#include "Global.h"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include "formats/Base.h"
 #include "Run.h"
 #include "LitTestCase.h"
+#include "CfgSetterPluginLoader.h"
 
 namespace fs = std::filesystem;
 
@@ -24,6 +26,71 @@ namespace polar {
 namespace lit {
 
 using StringMap = std::map<std::string, std::string>;
+static CfgSetterPlugin sg_currentPluginInfo;
+
+const CfgSetterPlugin &retrieve_current_cfg_setter_plugin()
+{
+   return sg_currentPluginInfo;
+}
+
+namespace {
+
+class CfgPluginUnloader
+{
+public:
+   CfgPluginUnloader &registerPlugin(const std::string &plugin)
+   {
+      m_plugins.push_back(plugin);
+      return *this;
+   }
+   ~CfgPluginUnloader()
+   {
+      for (const std::string &plugin : m_plugins) {
+         try {
+            unload_cfg_setter_plugin(plugin);
+         } catch (std::runtime_error &exp) {
+            std::cerr << exp.what() << std::endl;
+         }
+      }
+   }
+private:
+   std::list<std::string> m_plugins;
+};
+
+std::string load_cfg_setter_plugin_for_path(const std::string &path, LitConfig &litConfig)
+{
+   fs::path currentPath(path);
+   if (!fs::is_directory(currentPath)) {
+      currentPath = currentPath.parent_path();
+   }
+   std::string currentCfgSetterJsonFile;
+   bool found = false;
+   do {
+      currentCfgSetterJsonFile = currentPath / "cfgsetterplugin.json";
+      if (!fs::exists(currentCfgSetterJsonFile)) {
+         currentPath = currentPath.parent_path();
+      } else {
+         found = true;
+         break;
+      }
+   } while (currentPath != currentPath.root_path());
+   // found load the cfg plugin
+   std::ifstream jsonFile(currentCfgSetterJsonFile);
+   if (!jsonFile.is_open()) {
+      throw std::runtime_error(format_string("reading %s fail", currentCfgSetterJsonFile.c_str()));
+   }
+   nlohmann::json cfg;
+   jsonFile >> cfg;
+   if (!cfg.is_object() || cfg.find(CFG_SETTER_KEY) == cfg.end()) {
+      throw std::runtime_error("setter config file format error");
+   }
+   std::string setterPluginPath = cfg[CFG_SETTER_KEY].get<std::string>();
+   sg_currentPluginInfo = load_cfg_setter_plugin(setterPluginPath, litConfig.getCfgSetterPluginDir());
+   sg_currentPluginInfo.setStartupPath(currentPath);
+   return setterPluginPath;
+}
+
+} // anonymous namespace
 
 std::optional<std::string> choose_config_file_from_dir(const std::string &dir,
                                                        const std::list<std::string> &configNames)
@@ -298,7 +365,9 @@ TestList find_tests_for_inputs(LitConfigPointer litConfig, const std::list<std::
    }
    TestList tests;
    std::map<std::string, TestSuitSearchResult> cache;
+   CfgPluginUnloader cfgSetterUnloader;
    for (std::string &input : actualInputs) {
+      cfgSetterUnloader.registerPlugin(load_cfg_setter_plugin_for_path(input, *litConfig.get()));
       int prevLength = tests.size();
       TestList suiteTests = std::get<1>(get_tests(input, litConfig, cache));
       for (TestPointer test : suiteTests) {
@@ -338,7 +407,7 @@ std::list<std::shared_ptr<LitTestCase>> load_test_suite(const std::list<std::str
    TestList searchResults = find_tests_for_inputs(litConfig, inputs);
    TestList tests;
    for (auto &item : searchResults) {
-       tests.push_back(item);
+      tests.push_back(item);
    }
    RunPointer run = std::make_shared<Run>(litConfig, tests);
    std::list<std::shared_ptr<LitTestCase>> testcases;
