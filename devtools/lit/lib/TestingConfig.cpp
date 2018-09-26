@@ -15,19 +15,18 @@
 #include "formats/Base.h"
 #include "nlohmann/json.hpp"
 #include "CfgSetterPluginLoader.h"
-#include <fstream>
 #include <iostream>
 
-#define CFG_SETTER_SITE_KEY "SiteCfgSetter"
-#define CFG_SETTER_LOCAL_KEY "LocalCfgSetter"
-#define CFG_SETTER_NORMAL_KEY "CfgSetter"
+#define CFG_SETTER_SITE_FILENAME "litsitecfg.cmake"
+#define CFG_SETTER_LOCAL_FILENAME "litlocalcfg.cmake"
+#define CFG_SETTER_NORMAL_FILENAME "litcfg.cmake"
 
 namespace polar {
 namespace lit {
 
 using nlohmann::json;
 
-const std::tuple<std::string, CfgSetterType> &retrieve_current_cfg_setter_plugin();
+const CfgSetterPlugin &retrieve_current_cfg_setter_plugin();
 
 TestingConfig::~TestingConfig()
 {
@@ -247,28 +246,36 @@ void TestingConfig::loadFromPath(const std::string &path, LitConfigPointer litCo
 
 void TestingConfig::loadFromPath(const std::string &path, LitConfig &litConfig)
 {
-   // here we load cfg setter module config file
-//   std::ifstream jsonFile(path);
-//   if (!jsonFile.is_open()) {
-//      throw std::runtime_error(format_string("reading %s fail", path.c_str()));
-//   }
-//   nlohmann::json cfg;
-//   jsonFile >> cfg;
-//   if (!cfg.is_object()) {
-//      throw std::runtime_error("setter config file format error");
-//   }
-//   std::string setterPluginPath;
-//   if (cfg.find(CFG_SETTER_LOCAL_KEY) != cfg.end()) {
-//      setterPluginPath = cfg[CFG_SETTER_LOCAL_KEY];
-//   } else if (cfg.find(CFG_SETTER_SITE_KEY) != cfg.end()) {
-//      setterPluginPath = cfg[CFG_SETTER_SITE_KEY];
-//   } else if (cfg.find(CFG_SETTER_NORMAL_KEY) != cfg.end()) {
-//      setterPluginPath = cfg[CFG_SETTER_NORMAL_KEY];
-//   } else {
-//      throw std::runtime_error("setter config file format error");
-//   }
-//   CfgSetterType setter = load_cfg_setter_plugin<CfgSetterType>(setterPluginPath, litConfig.getCfgSetterPluginDir());
-//   setter(this, &litConfig);
+   fs::path fsPath = fs::path(path);
+   std::string cfgSetterName = fsPath.parent_path();
+   std::string filename = fsPath.filename();
+   std::string cfgSetterSuffix;
+   const CfgSetterPlugin &cfgSetterPlugin = retrieve_current_cfg_setter_plugin();
+   if (filename == CFG_SETTER_NORMAL_FILENAME) {
+      cfgSetterSuffix = "cfgsetter";
+   } else if (filename == CFG_SETTER_LOCAL_FILENAME) {
+      cfgSetterSuffix = "local_cfgsetter";
+   } else {
+      // CFG_SETTER_SITE_FILENAME
+      cfgSetterSuffix = "site_cfgsetter";
+   }
+   const std::string &startupPath = cfgSetterPlugin.getStartupPath();
+   if (!string_startswith(cfgSetterName, startupPath)) {
+      return;
+   }
+   if (cfgSetterName.at(0) == fs::path::preferred_separator) {
+      cfgSetterName = cfgSetterName.substr(1);
+   }
+   cfgSetterName = cfgSetterName.replace(0, startupPath.size(), "");
+   if (cfgSetterName.empty()) {
+      cfgSetterName = "root";
+   }
+   cfgSetterName += "_" + cfgSetterSuffix;
+   replace_string(std::string(1, fs::path::preferred_separator), "_", cfgSetterName);
+   // if this method invoked, symbol must exist at normation situation
+   // @TODO can ignore this exception ?
+   CfgSetterType cfgSetter = cfgSetterPlugin.getCfgSetter<CfgSetterType>(cfgSetterName);
+   cfgSetter(this, &litConfig);
 }
 
 } // lit

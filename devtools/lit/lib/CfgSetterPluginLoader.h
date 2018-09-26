@@ -33,7 +33,7 @@ public:
       return m_path;
    }
 
-   const std::string &getStartupPath()
+   const std::string &getStartupPath() const
    {
       return m_startupPath;
    }
@@ -45,14 +45,13 @@ public:
    }
 
    template <typename CfgSetterType>
-   CfgSetterType getCfgSetter(const std::string &setterName)
+   CfgSetterType getCfgSetter(const std::string &setterName) const
    {
-      void *func = getSetterSymbol(setterName);
-      return reinterpret_cast<CfgSetterType>(func);
+      return reinterpret_cast<CfgSetterType>(getSetterSymbol(setterName));
    }
 
 protected:
-   void *getSetterSymbol(const std::string &symbol);
+   void *getSetterSymbol(const std::string &symbol) const;
 private:
    void *m_handle = nullptr;
    std::string m_path;

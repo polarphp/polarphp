@@ -53,11 +53,11 @@ void unload_cfg_setter_plugin(const std::string &pluginPath)
    }
 }
 
-void *CfgSetterPlugin::getSetterSymbol(const std::string &symbol)
+void *CfgSetterPlugin::getSetterSymbol(const std::string &symbol) const
 {
    void *funcPtr = dlsym(m_handle, symbol.c_str());
    if (!funcPtr) {
-      throw std::runtime_error(format_string("dlopen error: %s\n", dlerror()));
+      throw std::runtime_error(format_string("dlsym error: %s\n", dlerror()));
    }
    dlerror();
    return funcPtr;

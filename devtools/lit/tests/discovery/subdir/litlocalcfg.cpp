@@ -5,7 +5,7 @@ using polar::lit::LitConfig;
 using polar::lit::TestingConfig;
 
 extern "C" {
-void litconfig_setup1(TestingConfig *config, LitConfig *litConfig)
+void subdir_local_cfgsetter(TestingConfig *config, LitConfig *litConfig)
 {
 
 }
