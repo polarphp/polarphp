@@ -129,7 +129,7 @@ TestSuitSearchResult do_search_testsuit(const std::string &path,
    std::optional<std::string> cfgPathOpt = dir_contains_test_suite(path, litConfig);
    // If we didn't find a config file, keep looking.
    std::string base;
-   if (!cfgPathOpt.has_value()) {
+   if (!cfgPathOpt) {
       fs::path fsPath(path);
       std::string parent = fsPath.parent_path();
       base = fsPath.filename();
@@ -210,10 +210,11 @@ TestSuitSearchResult get_test_suite(std::string item, LitConfigPointer litConfig
    // Skip files and virtual components.
    std::list<std::string> components;
    fs::path currentDir(item);
+   fs::path parent;
    while (!fs::is_directory(currentDir)) {
-      std::string parent = currentDir.parent_path();
+      parent = currentDir.parent_path();
       std::string base = currentDir.filename();
-      if (parent == currentDir.string()) {
+      if (parent == currentDir) {
          return TestSuitSearchResult{nullptr, std::list<std::string>{}};
       }
       components.push_back(base);
@@ -272,12 +273,12 @@ TestList get_tests_in_suite(TestSuitePointer testSuite, LitConfigPointer litConf
       return TestList{std::make_shared<Test>(testSuite, temp, lc)};
    }
    // Search for tests.
-   // @TODO use test format
    // Otherwise we have a directory to search for tests, start by getting the
    // local configuration.
+   TestList tests;
    TestingConfigPointer lc = get_local_config(testSuite, litConfig, pathInSuite);
    if (lc->getTestFormat()) {
-      return lc->getTestFormat()->getTestsInDirectory(testSuite, pathInSuite, litConfig, lc);
+      tests = lc->getTestFormat()->getTestsInDirectory(testSuite, pathInSuite, litConfig, lc);
    }
    for(auto& p: fs::directory_iterator(sourcePath)) {
       const fs::path &path = p.path();
@@ -297,7 +298,7 @@ TestList get_tests_in_suite(TestSuitePointer testSuite, LitConfigPointer litConf
       std::list<std::string> subPath = pathInSuite;
       subPath.push_back(filename);
       std::string fileExecPath = testSuite->getExecPath(subPath);
-      std::optional<TestSuitePointer> subTs;
+      TestSuitePointer subTs;
       std::list<std::string> subpathInSuite;
       if (dir_contains_test_suite(fileExecPath, litConfig).has_value()) {
          TestSuitSearchResult searchResult = get_test_suite(fileExecPath, litConfig, cache);
@@ -308,37 +309,47 @@ TestList get_tests_in_suite(TestSuitePointer testSuite, LitConfigPointer litConf
          subTs = std::get<0>(searchResult);
          subpathInSuite = std::get<1>(searchResult);
       } else {
-         subTs = std::nullopt;
+         subTs = nullptr;
       }
       // If the this directory recursively maps back to the current test suite,
       // disregard it (this can happen if the exec root is located inside the
       // current test suite, for example).
-      if (subTs.value() == testSuite) {
+      if (subTs == testSuite) {
          continue;
       }
       // Otherwise, load from the nested test suite, if present.
-      if (subTs.has_value()) {
-         return get_tests_in_suite(subTs.value(), litConfig, subpathInSuite, cache);
+      TestList tempList;
+      if (subTs) {
+         tempList = get_tests_in_suite(subTs, litConfig, subpathInSuite, cache);
       } else {
-         return get_tests_in_suite(testSuite, litConfig, subPath, cache);
+         tempList = get_tests_in_suite(testSuite, litConfig, subPath, cache);
+      }
+      int count = 0;
+      for (auto test : tempList) {
+         tests.push_back(test);
+         ++count;
+      }
+      if (subTs && count == 0) {
+         litConfig->warning(format_string("test suite %s contained no tests", subTs->getName()));
       }
    }
+   return tests;
 }
 
 std::tuple<TestSuitePointer, TestList> get_tests(const std::string &path, LitConfigPointer config,
                                                  std::map<std::string, TestSuitSearchResult> &cache)
 {
    TestSuitSearchResult testSuiteResult = get_test_suite(path, config, cache);
-   std::optional<TestSuitePointer> testSuite = std::get<0>(testSuiteResult);
+   TestSuitePointer testSuite = std::get<0>(testSuiteResult);
    std::list<std::string> subpathInSuite = std::get<1>(testSuiteResult);
-   if (!testSuite.has_value()) {
+   if (!testSuite) {
       config->warning(format_string("unable to find test suite for %s", path.c_str()));
       return std::tuple<TestSuitePointer, TestList>{};
    }
    if (config->isDebug()) {
-      config->note(format_string("resolved input %s to %s", path.c_str(), testSuite.value()->getName().c_str()));
+      config->note(format_string("resolved input %s to %s", path.c_str(), testSuite->getName().c_str()), __FILE__, __LINE__);
    }
-   return std::tuple<TestSuitePointer, TestList>{testSuite.value(), get_tests_in_suite(testSuite.value(), config, subpathInSuite, cache)};
+   return std::tuple<TestSuitePointer, TestList>{testSuite, get_tests_in_suite(testSuite, config, subpathInSuite, cache)};
 }
 
 ////  find_tests_for_inputs(lit_config, inputs) -> [Test]

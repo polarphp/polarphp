@@ -23,7 +23,7 @@ namespace fs = std::filesystem;
 std::list<std::shared_ptr<Test>>
 FileBasedTest::getTestsInDirectory(TestSuitePointer testSuite,
                                    const std::list<std::string> &pathInSuite,
-                                   LitConfigPointer litConfig,
+                                   LitConfigPointer,
                                    TestingConfigPointer localConfig)
 {
    std::string sourcePath = testSuite->getSourcePath(pathInSuite);
