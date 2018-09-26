@@ -134,7 +134,7 @@ TestSuitSearchResult do_search_testsuit(const std::string &path,
       std::string parent = fsPath.parent_path();
       base = fsPath.filename();
       if (parent == path) {
-         return TestSuitSearchResult{std::nullopt, std::list<std::string>{}};
+         return TestSuitSearchResult{nullptr, std::list<std::string>{}};
       }
       TestSuitSearchResult temp = search_testsuit(parent, litConfig, cache);
       std::get<1>(temp).push_back(base);
@@ -214,7 +214,7 @@ TestSuitSearchResult get_test_suite(std::string item, LitConfigPointer litConfig
       std::string parent = currentDir.parent_path();
       std::string base = currentDir.filename();
       if (parent == currentDir.string()) {
-         return TestSuitSearchResult{std::nullopt, std::list<std::string>{}};
+         return TestSuitSearchResult{nullptr, std::list<std::string>{}};
       }
       components.push_back(base);
       currentDir = parent;

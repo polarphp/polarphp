@@ -239,6 +239,12 @@ TestingConfig &TestingConfig::setIsEarly(bool flag)
    return *this;
 }
 
+TestingConfig &TestingConfig::setExtraConfig(const std::string &name, std::any value)
+{
+   m_extraConfig[name] = value;
+   return *this;
+}
+
 void TestingConfig::loadFromPath(const std::string &path, LitConfigPointer litConfig)
 {
    loadFromPath(path, *litConfig.get());

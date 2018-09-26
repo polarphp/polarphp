@@ -24,7 +24,7 @@ namespace lit {
 class TestSuite;
 class LitTestCase;
 
-using TestSuitSearchResult = std::tuple<std::optional<TestSuitePointer>, std::list<std::string>>;
+using TestSuitSearchResult = std::tuple<TestSuitePointer, std::list<std::string>>;
 class LitConfig;
 using LitConfigPointer = std::shared_ptr<LitConfig>;
 

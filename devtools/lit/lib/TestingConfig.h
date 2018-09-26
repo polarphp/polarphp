@@ -88,8 +88,7 @@ public:
    TestingConfig &setPipeFail(bool flag);
    TestingConfig &setLimitToFeatures(const std::set<std::string> &features);
    TestingConfig &setIsEarly(bool flag);
-   template <typename T>
-   TestingConfig &setExtraConfig(const std::string &name, const T &value);
+   TestingConfig &setExtraConfig(const std::string &name, std::any value);
    void loadFromPath(const std::string &path, LitConfigPointer litConfig);
    void loadFromPath(const std::string &path, LitConfig &litConfig);
 protected:
@@ -118,13 +117,6 @@ const T &TestingConfig::getExtraConfig(const std::string &name, const T &default
       return std::any_cast<T &>(m_extraConfig.at(name));
    }
    return defaultValue;
-}
-
-template <typename T>
-TestingConfig &TestingConfig::setExtraConfig(const std::string &name, const T &value)
-{
-   m_extraConfig[name] = value;
-   return *this;
 }
 
 } // lit
