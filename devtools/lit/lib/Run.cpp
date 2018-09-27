@@ -11,6 +11,7 @@
 
 #include "Run.h"
 #include "Utils.h"
+#include <iostream>
 
 namespace polar {
 namespace lit {
@@ -19,6 +20,7 @@ Run::Run(LitConfigPointer litConfig, const TestList &tests)
    : m_litConfig(litConfig),
      m_tests(tests)
 {
+   std::cout << m_tests.size() << std::endl;
 }
 
 const TestList &Run::getTests() const

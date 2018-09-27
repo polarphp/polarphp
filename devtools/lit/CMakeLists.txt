@@ -20,18 +20,6 @@ if (UNIX)
    list(APPEND POLAR_DEVTOOLS_LIT_LIB_SOURCES lib/_platform/CfgSetterPluginLoaderUnix.cpp)
 endif()
 
-polar_add_library(litkernel SHARED BUILDTREE_ONLY
-   ${POLAR_DEVTOOLS_LIT_LIB_SOURCES})
-set_target_properties(
-   litkernel
-   PROPERTIES
-   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib;${CMAKE_CURRENT_BINARY_DIR};${CURSES_INCLUDE_DIRS}"
-   )
-
-target_link_libraries(litkernel PUBLIC
-   nlohmann_json::nlohmann_json
-   ${CURSES_LIBRARIES})
-
 if (APPLE)
    set(POLAR_OS_DARWIN ON)
    set(POLAR_OS_MACOS ON)
@@ -54,6 +42,18 @@ set(POLAR_LIT_VERSION "0.0.1")
 configure_file(Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/Config.h @ONLY)
 
 list(APPEND POLAR_DEVTOOLS_LIT_LIB_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/Config.h)
+
+polar_add_library(litkernel SHARED BUILDTREE_ONLY
+   ${POLAR_DEVTOOLS_LIT_LIB_SOURCES})
+set_target_properties(
+   litkernel
+   PROPERTIES
+   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/lib;${CMAKE_CURRENT_BINARY_DIR};${CURSES_INCLUDE_DIRS}"
+   )
+
+target_link_libraries(litkernel PUBLIC
+   nlohmann_json::nlohmann_json
+   ${CURSES_LIBRARIES})
 
 polar_add_executable(lit main.cpp)
 
