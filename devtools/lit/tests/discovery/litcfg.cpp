@@ -19,8 +19,8 @@ extern "C" {
 void root_cfgsetter(TestingConfig *config, LitConfig *litConfig)
 {
    config->setName("top-level-suite");
-   config->setSuffixes({".txt"});
-   config->setTestformat(std::make_shared<ShTest>());
+   config->setSuffixes({".littest"});
+   config->setTestFormat(std::make_shared<ShTest>());
    config->setExtraConfig("an_extra_variable", false);
 }
 }

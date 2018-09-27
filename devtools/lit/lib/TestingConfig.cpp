@@ -173,7 +173,7 @@ TestingConfig &TestingConfig::setSuffixes(const std::set<std::string> &suffixes)
    return *this;
 }
 
-TestingConfig &TestingConfig::setTestformat(std::shared_ptr<TestFormat> testFormat)
+TestingConfig &TestingConfig::setTestFormat(std::shared_ptr<TestFormat> testFormat)
 {
    m_testFormat = testFormat;
    return *this;

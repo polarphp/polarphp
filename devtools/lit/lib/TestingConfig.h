@@ -77,7 +77,7 @@ public:
    const T &getExtraConfig(const std::string &name, const T &defaultValue = T{});
    TestingConfig &setName(const std::string &name);
    TestingConfig &setSuffixes(const std::set<std::string> &suffixes);
-   TestingConfig &setTestformat(std::shared_ptr<TestFormat> testFormat);
+   TestingConfig &setTestFormat(std::shared_ptr<TestFormat> testFormat);
    TestingConfig &setEnvironment(const std::map<std::string, std::string> &environment);
    TestingConfig &setSubstitutions(const std::list<std::string> &substitutions);
    TestingConfig &setIsUnsupported(bool flag);

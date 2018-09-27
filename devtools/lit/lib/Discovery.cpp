@@ -167,12 +167,12 @@ TestSuitSearchResult do_search_testsuit(const std::string &path,
    testingCfg->loadFromPath(cfgPath, litConfig);
    std::string sourceRoot;
    std::string execRoot;
-   if (testingCfg->getTestSourceRoot().has_value()) {
+   if (testingCfg->getTestSourceRoot()) {
       sourceRoot = testingCfg->getTestSourceRoot().value();
    } else {
       sourceRoot = path;
    }
-   if (testingCfg->getTestExecRoot().has_value()) {
+   if (testingCfg->getTestExecRoot()) {
       execRoot = testingCfg->getTestExecRoot().value();
    } else {
       execRoot = path;
@@ -242,14 +242,14 @@ TestingConfigPointer get_local_config(TestSuitePointer testSuite, LitConfigPoint
    std::string sourcePath = testSuite->getSourcePath(pathInSuite);
    std::optional<std::string> cfgPath = choose_config_file_from_dir(sourcePath, litConfig->getLocalConfigNames());
    // If not, just reuse the parent config.
-   if (!cfgPath.has_value()){
+   if (!cfgPath){
       return parent;
    }
    // Otherwise, copy the current config and load the local configuration
    // file into it.
    TestingConfigPointer config(new TestingConfig(*parent.get()));
    if (litConfig->isDebug()) {
-      litConfig->note(format_string("loading local config %s", cfgPath.value().c_str()));
+      litConfig->note(format_string("loading local config %s", cfgPath.value().c_str()), __FILE__, __LINE__);
    }
    config->loadFromPath(cfgPath.value(), litConfig);
    return config;

@@ -11,13 +11,19 @@
 
 #include "LitConfig.h"
 #include "TestingConfig.h"
+#include "formats/ShellTest.h"
 
 using polar::lit::LitConfig;
 using polar::lit::TestingConfig;
+using polar::lit::ShTest;
 
 extern "C" {
 void subsuite_cfgsetter(TestingConfig *config, LitConfig *litConfig)
 {
-
+   config->setName("sub-suite");
+   config->setTestFormat(std::make_shared<ShTest>());
+   config->setSuffixes({".ptest"});
+   config->setTestExecRoot(std::nullopt);
+   config->setTestSourceRoot(std::nullopt);
 }
 }
