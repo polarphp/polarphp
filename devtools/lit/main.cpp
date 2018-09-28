@@ -14,6 +14,7 @@
 #include "lib/Utils.h"
 #include "lib/LitConfig.h"
 #include "lib/Discovery.h"
+#include "lib/Test.h"
 #include "lib/Run.h"
 #include <iostream>
 #include <thread>
@@ -23,6 +24,11 @@
 
 using polar::lit::LitConfigPointer;
 using polar::lit::LitConfig;
+using polar::lit::Test;
+using polar::lit::TestSuite;
+using polar::lit::TestSuitePointer;
+using polar::lit::TestPointer;
+using polar::lit::TestList;
 using polar::lit::format_string;
 namespace fs = std::filesystem;
 
@@ -223,7 +229,40 @@ int main(int argc, char *argv[])
       }
       if (showSuites || showTests) {
          // Aggregate the tests by suite.
+         std::map<int, TestList> suitesAndTests;
+         std::map<int, TestSuitePointer> testsuiteMap;
+         std::list<std::tuple<TestSuitePointer, TestList>> sortedSuitesAndTests;
+         const TestList &tests = run.getTests();
+         for (TestPointer resultTest : tests) {
+            int suiteId = resultTest->getTestSuite()->getId();
+            if (testsuiteMap.find(suiteId) == testsuiteMap.end()) {
+               testsuiteMap[suiteId] = resultTest->getTestSuite();
+            }
+            if (suitesAndTests.find(suiteId) == suitesAndTests.end()) {
+               suitesAndTests[suiteId] = TestList{};
+            }
+            suitesAndTests.at(suiteId).push_back(resultTest);
+         }
 
+         for (const auto &item : suitesAndTests) {
+            sortedSuitesAndTests.push_back(std::make_tuple(testsuiteMap.at(item.first),
+                                                           item.second));
+
+         }
+         sortedSuitesAndTests.sort([](const auto &lhs, const auto &rhs) -> bool {
+            return std::get<0>(lhs)->getName() < std::get<0>(rhs)->getName();
+         });
+         // Show the suites, if requested.
+         if (showSuites) {
+            printf("-- Test Suites --\n");
+            for (auto &item : sortedSuitesAndTests) {
+               TestSuitePointer testsuite = std::get<0>(item);
+               const TestList &tests = std::get<1>(item);
+               printf("  %s - %d tests\n", testsuite->getName().c_str(), tests.size());
+               printf("    Source Root: %s\n", testsuite->getSourcePath().c_str());
+               printf("    Exec Root  : %s\n", testsuite->getExecPath().c_str());
+            }
+         }
       }
    } catch (...) {
       eptr = std::current_exception();

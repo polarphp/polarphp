@@ -211,8 +211,8 @@ public:
              const std::string &execRoot, TestingConfigPointer config);
    const std::string &getName();
    int getId() const;
-   std::string getSourcePath(const std::list<std::string> &components) const;
-   std::string getExecPath(const std::list<std::string> &components) const;
+   std::string getSourcePath(const std::list<std::string> &components = {}) const;
+   std::string getExecPath(const std::list<std::string> &components = {}) const;
    TestingConfigPointer getConfig() const;
 protected:
    std::string m_name;
@@ -235,6 +235,7 @@ public:
    TestingConfigPointer getConfig();
    const std::string &getSelfSourcePath();
    std::string getExecPath();
+   TestSuitePointer getTestSuite() const;
 
    Test &setSelfSourcePath(const std::string &sourcePath);
    bool isExpectedToFail();

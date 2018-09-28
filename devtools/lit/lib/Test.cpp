@@ -220,6 +220,11 @@ Test &Test::setSelfSourcePath(const std::string &sourcePath)
    return *this;
 }
 
+TestSuitePointer Test::getTestSuite() const
+{
+   return m_suite;
+}
+
 std::string Test::getExecPath()
 {
    return m_suite->getExecPath(m_pathInSuite);
