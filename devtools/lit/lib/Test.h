@@ -210,14 +210,17 @@ public:
    TestSuite(const std::string &name, const std::string &sourceRoot,
              const std::string &execRoot, TestingConfigPointer config);
    const std::string &getName();
+   int getId() const;
    std::string getSourcePath(const std::list<std::string> &components) const;
    std::string getExecPath(const std::list<std::string> &components) const;
    TestingConfigPointer getConfig() const;
 protected:
    std::string m_name;
+   int m_id;
    std::string m_sourceRoot;
    std::string m_execRoot;
    TestingConfigPointer m_config;
+   static int sm_gid;
 };
 
 class Test

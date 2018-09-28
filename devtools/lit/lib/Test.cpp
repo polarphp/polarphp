@@ -98,6 +98,8 @@ Result &Result::addMicroResult(const std::string &name, std::shared_ptr<Result> 
    return *this;
 }
 
+int TestSuite::sm_gid = 0;
+
 TestSuite::TestSuite()
 {}
 
@@ -108,12 +110,18 @@ TestSuite::TestSuite(const std::string &name, const std::string &sourceRoot,
      m_execRoot(execRoot),
      m_config(config)
 {
-   // m_config is the test suite configuration.
+   // only one thread running when collect tests
+   m_id = ++sm_gid;
 }
 
 const std::string &TestSuite::getName()
 {
    return m_name;
+}
+
+int TestSuite::getId() const
+{
+   return m_id;
 }
 
 std::string TestSuite::getSourcePath(const std::list<std::string> &components) const
