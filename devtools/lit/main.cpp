@@ -136,8 +136,8 @@ int main(int argc, char *argv[])
                                                      "mtimes)")->group("Test Selection");
    litApp.add_option("--filter", filter, "Only run tests with paths matching the given "
                                          "regular expression")->envname("LIT_FILTER")->group("Test Selection");
-   litApp.add_option("--num-shards", numShards, "Split testsuite into M pieces and only run one")->envname("LIT_NUM_SHARDS")->group("Test Selection");
-   litApp.add_option("--run-shard", runShard, "Run shard #N of the testsuite")->envname("LIT_RUN_SHARD")->group("Test Selection");
+   CLI::Option *numShardsOpt = litApp.add_option("--num-shards", numShards, "Split testsuite into M pieces and only run one")->envname("LIT_NUM_SHARDS")->group("Test Selection");
+   CLI::Option *runShardOpt = litApp.add_option("--run-shard", runShard, "Run shard #N of the testsuite")->envname("LIT_RUN_SHARD")->group("Test Selection");
 
    /// debug
    bool debug = false;
@@ -299,6 +299,53 @@ int main(int argc, char *argv[])
          for (auto &test : tempTests) {
             tests.push_back(test);
          }
+      }
+      // Then optionally restrict our attention to a shard of the tests.
+      if (!numShardsOpt->empty() || !runShardOpt->empty()) {
+         if (numShardsOpt->empty() || runShardOpt->empty()) {
+            throw std::runtime_error("--num-shards and --run-shard must be used together");
+         }
+         if (numShards <= 0) {
+            throw std::runtime_error("--num-shards must be positive");
+         }
+         if (runShard < 1 || runShard > numShards) {
+            throw std::runtime_error("--run-shard must be between 1 and --num-shards (inclusive)");
+         }
+         int numTests = tests.size();
+         // Note: user views tests and shard numbers counting from 1.
+         std::vector<int> testIxs;
+         for (int i = runShard - 1; i < numTests; i += numShards) {
+            testIxs.push_back(i);
+         }
+         auto iter = tests.begin();
+         auto endMark = tests.end();
+         int i = 0;
+         while (iter != endMark) {
+            if (std::find(testIxs.begin(), testIxs.end(), i) == testIxs.end()) {
+               tests.erase(iter++);
+            } else {
+               ++iter;
+            }
+            ++i;
+         }
+         // Generate a preview of the first few test indices in the shard
+         // to accompany the arithmetic expression, for clarity.
+         size_t previewLength = 3;
+         size_t previewMaxLength = std::max(previewLength, testIxs.size());
+         std::string ixPreview;
+         for (int i = 0; i < previewMaxLength; ++i) {
+            if (ixPreview.empty()) {
+               ixPreview = std::to_string(i + 1);
+            } else {
+               ixPreview += ", " + std::to_string(i + 1);
+            }
+         }
+         if (testIxs.size() > previewLength) {
+            ixPreview += ", ...";
+         }
+         litConfig->note(format_string("Selecting shard %d/%d = size %d/%d = tests #(%d*k)+%d = [%s]",
+                                       runShard, numShards, tests.size(), numTests, numShards, runShard,
+                                       ixPreview.c_str()));
       }
    } catch (...) {
       eptr = std::current_exception();
