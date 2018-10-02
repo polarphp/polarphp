@@ -22,6 +22,10 @@
 #include <filesystem>
 #include <list>
 #include <regex>
+#include <vector>
+#include <random>
+#include <algorithm>
+#include <iterator>
 
 using polar::lit::LitConfigPointer;
 using polar::lit::LitConfig;
@@ -275,7 +279,6 @@ int main(int argc, char *argv[])
          auto endMark = tests.end();
          while (iter != endMark) {
             TestPointer test = *iter;
-            std::cout << test->getFullName() << std::endl;
             if (std::regex_search(test->getFullName(), filterRegex)) {
                tests.erase(iter++);
             } else {
@@ -283,7 +286,20 @@ int main(int argc, char *argv[])
             }
          }
       }
-
+      if (shuffle) {
+         std::random_device randonDevice;
+         std::mt19937 randomGenerator(randonDevice());
+         std::vector<TestPointer> tempTests{};
+         tempTests.reserve(tests.size());
+         for (auto &test : tests) {
+            tempTests.push_back(test);
+         }
+         std::shuffle(tempTests.begin(), tempTests.end(), randomGenerator);
+         tests.clear();
+         for (auto &test : tempTests) {
+            tests.push_back(test);
+         }
+      }
    } catch (...) {
       eptr = std::current_exception();
    }
