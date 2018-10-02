@@ -27,6 +27,7 @@ class Run
 public:
    Run(LitConfigPointer litConfig, const TestList &tests);
    const TestList &getTests() const;
+   TestList &getTests();
 protected:
    LitConfigPointer m_litConfig;
    TestList m_tests;

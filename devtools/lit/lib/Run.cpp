@@ -27,6 +27,11 @@ const TestList &Run::getTests() const
    return m_tests;
 }
 
+TestList &Run::getTests()
+{
+   return m_tests;
+}
+
 /// Run one test in a multiprocessing.Pool
 ///
 /// Side effects in this function and functions it calls are not visible in the

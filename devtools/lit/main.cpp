@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <filesystem>
 #include <list>
+#include <regex>
 
 using polar::lit::LitConfigPointer;
 using polar::lit::LitConfig;
@@ -227,12 +228,12 @@ int main(int argc, char *argv[])
             litConfig->setMaxIndividualTestTime(maxIndividualTestTime);
          }
       }
+      TestList &tests = run.getTests();
       if (showSuites || showTests) {
          // Aggregate the tests by suite.
          std::map<int, TestList> suitesAndTests;
          std::map<int, TestSuitePointer> testsuiteMap;
          std::list<std::tuple<TestSuitePointer, TestList>> sortedSuitesAndTests;
-         const TestList &tests = run.getTests();
          for (TestPointer resultTest : tests) {
             int suiteId = resultTest->getTestSuite()->getId();
             if (testsuiteMap.find(suiteId) == testsuiteMap.end()) {
@@ -263,7 +264,26 @@ int main(int argc, char *argv[])
                printf("    Exec Root  : %s\n", testsuite->getExecPath().c_str());
             }
          }
+         return 0;
       }
+      // Select and order the tests.
+      int numTotalTests = tests.size();
+      // First, select based on the filter expression if given.
+      if (!filter.empty()) {
+         std::regex filterRegex(filter);
+         auto iter = tests.begin();
+         auto endMark = tests.end();
+         while (iter != endMark) {
+            TestPointer test = *iter;
+            std::cout << test->getFullName() << std::endl;
+            if (std::regex_search(test->getFullName(), filterRegex)) {
+               tests.erase(iter++);
+            } else {
+               ++iter;
+            }
+         }
+      }
+
    } catch (...) {
       eptr = std::current_exception();
    }
