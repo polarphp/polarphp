@@ -16,6 +16,7 @@
 #include "lib/Discovery.h"
 #include "lib/Test.h"
 #include "lib/Run.h"
+#include "lib/ProgressBar.h"
 #include <iostream>
 #include <thread>
 #include <assert.h>
@@ -34,6 +35,10 @@ using polar::lit::TestSuite;
 using polar::lit::TestSuitePointer;
 using polar::lit::TestPointer;
 using polar::lit::TestList;
+using polar::lit::ProgressBar;
+using polar::lit::TerminalController;
+using polar::lit::SimpleProgressBar;
+using polar::lit::AbstractProgressBar;
 using polar::lit::format_string;
 namespace fs = std::filesystem;
 
@@ -67,7 +72,7 @@ int main(int argc, char *argv[])
    CLI::App litApp;
    std::vector<std::string> testPaths;
    bool showVersion;
-   int threadNumbers;
+   size_t threadNumbers;
    std::string cfgPrefix;
    std::vector<std::string> params;
    std::string cfgSetterPluginDir;
@@ -85,20 +90,20 @@ int main(int argc, char *argv[])
    int showOutput;
    bool showAll;
    std::string outputDir;
-   bool noProgressBar;
+   bool displayProgressBar;
    bool showUnsupported;
    bool showXFail;
    bool echoAllCommands;
-   litApp.add_option("-q,--quiet", quiet, "Suppress no error output", false)->group("Output Format");
-   litApp.add_option("-s,--succinct", succinct, "Reduce amount of output", false)->group("Output Format");
-   litApp.add_option("-v,--verbose", showOutput, "Show test output for failures", false)->group("Output Format");
+   litApp.add_flag("-q,--quiet", quiet, "Suppress no error output")->group("Output Format");
+   litApp.add_flag("-s,--succinct", succinct, "Reduce amount of output")->group("Output Format");
+   litApp.add_flag("-v,--verbose", showOutput, "Show test output for failures")->group("Output Format");
    litApp.add_option("--echo-all-commands", echoAllCommands, "Echo all commands as they are executed to stdout."
                                                              "In case of failure, last command shown will be the failing one.")->group("Output Format");
-   litApp.add_option("-a,--show-all", showAll, "Display all commandlines and output", false)->group("Output Format");
+   litApp.add_flag("-a,--show-all", showAll, "Display all commandlines and output")->group("Output Format");
    litApp.add_option("-o,--output", outputDir, "Write test results to the provided path")->check(CLI::ExistingDirectory)->group("Output Format");
-   litApp.add_option("--no-progress-bar", noProgressBar, "Do not use curses based progress bar", true)->group("Output Format");
-   litApp.add_option("--show-unsupported", showUnsupported, "Show unsupported tests", false)->group("Output Format");
-   litApp.add_option("--show-xfail", showXFail, "Show tests that were expected to fail", false)->group("Output Format");
+   litApp.add_flag("--display-progress-bar", displayProgressBar, "use curses based progress bar")->group("Output Format");
+   litApp.add_flag("--show-unsupported", showUnsupported, "Show unsupported tests")->group("Output Format");
+   litApp.add_flag("--show-xfail", showXFail, "Show tests that were expected to fail")->group("Output Format");
 
    /// Test Execution
    std::vector<std::string> paths;
@@ -140,9 +145,9 @@ int main(int argc, char *argv[])
    CLI::Option *runShardOpt = litApp.add_option("--run-shard", runShard, "Run shard #N of the testsuite")->envname("LIT_RUN_SHARD")->group("Test Selection");
 
    /// debug
-   bool debug = false;
-   bool showSuites = false;
-   bool showTests = false;
+   bool debug;
+   bool showSuites;
+   bool showTests;
    bool singleProcess;
    litApp.add_flag("--debug", debug, "Enable debugging (for 'lit' development)")->group("Debug and Experimental Options");
    litApp.add_flag("--show-suites", showSuites, "Show discovered test suites")->group("Debug and Experimental Options");
@@ -150,6 +155,9 @@ int main(int argc, char *argv[])
    litApp.add_flag("--single-process", singleProcess, "Don't run tests in parallel.  Intended for debugging "
                                                       "single test failures")->group("Debug and Experimental Options");
    CLI11_PARSE(litApp, argc, argv);
+
+
+
    std::exception_ptr eptr;
    try {
       if (showVersion) {
@@ -356,6 +364,29 @@ int main(int argc, char *argv[])
          while (delta > 0) {
             tests.erase(iter++);
             --delta;
+         }
+      }
+      // Don't create more threads than tests.
+      threadNumbers = std::min(threadNumbers, tests.size());
+      std::string extra;
+      if (tests.size() != numTotalTests) {
+         extra = format_string(" of %d", numTotalTests);
+      }
+      std::string header = format_string("-- Testing: %d%s tests, %d threads --\n",
+                                         tests.size(), extra.c_str(), numTotalTests);
+      std::shared_ptr<AbstractProgressBar> progressBarPointer;
+      std::shared_ptr<TerminalController> terminalControllerPointer;
+      if (!quiet) {
+         if (succinct && displayProgressBar) {
+            try {
+               terminalControllerPointer.reset(new TerminalController{});
+               progressBarPointer.reset(new ProgressBar(*terminalControllerPointer.get(), header));
+            } catch (...) {
+               std::printf(header.c_str());
+               progressBarPointer.reset(new SimpleProgressBar("Testing: "));
+            }
+         } else {
+            std::printf(header.c_str());
          }
       }
    } catch (...) {

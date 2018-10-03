@@ -102,16 +102,24 @@ protected:
    std::map<std::string, std::string> m_properties;
 };
 
+class AbstractProgressBar
+{
+public:
+   virtual void update(float percent, std::string message) = 0;
+   virtual void clear() = 0;
+   virtual ~AbstractProgressBar() = default;
+};
+
 /// A simple progress bar which doesn't need any terminal support.
 ///
 /// This prints out a progress bar like:
 /// 'Header: 0 .. 10.. 20.. ...'
-class SimpleProgressBar
+class SimpleProgressBar : public AbstractProgressBar
 {
 public:
    SimpleProgressBar(const std::string &header);
-   void update(float percent, const std::string &message);
-   void clear();
+   void update(float percent, std::string message) override;
+   void clear() override;
 protected:
    std::string m_header;
    int m_atIndex;
@@ -126,13 +134,13 @@ protected:
 ///    The progress bar is colored, if the terminal supports color
 ///    output; and adjusts to the width of the terminal.
 ///
-class ProgressBar
+class ProgressBar : public AbstractProgressBar
 {
 public:
    ProgressBar(const TerminalController &term, const std::string &header,
                bool useETA = true);
-   void update(float percent, std::string message);
-   void clear();
+   void update(float percent, std::string message) override;
+   void clear() override;
 protected:
    const static std::string BAR;
    const static std::string HEADER;

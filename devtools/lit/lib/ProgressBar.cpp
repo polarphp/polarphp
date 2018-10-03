@@ -201,7 +201,7 @@ SimpleProgressBar::SimpleProgressBar(const std::string &header)
 {
 }
 
-void SimpleProgressBar::update(float percent, const std::string &message)
+void SimpleProgressBar::update(float percent, std::string message)
 {
    if (m_atIndex == -1) {
       std::printf(m_header.c_str());
