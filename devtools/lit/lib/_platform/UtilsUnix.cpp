@@ -14,6 +14,9 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <unistd.h>
+#include <time.h>
+#include <utime.h>
+#include <sys/stat.h>
 
 namespace polar {
 namespace lit {
@@ -31,6 +34,18 @@ void kill_process_and_children(pid_t pid) noexcept
 bool stdcout_isatty()
 {
    return isatty(fileno(stdout));
+}
+
+void modify_file_utime_and_atime(const std::string &filename)
+{
+   struct stat fstat;
+   time_t mtime;
+   struct utimbuf newTimes;
+   stat(filename.c_str(), &fstat);
+   mtime = fstat.st_mtime; /* seconds since the epoch */
+   newTimes.actime = fstat.st_atime; /* keep atime unchanged */
+   newTimes.modtime = time(NULL);    /* set mtime to current time */
+   utime(filename.c_str(), &newTimes);
 }
 
 } // lit

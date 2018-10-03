@@ -107,6 +107,8 @@ void trim_string(std::string &str);
 
 bool stdcout_isatty();
 void abort_execute_now();
+void modify_file_utime_and_atime(const std::string &filename);
+
 } // lit
 } // polar
 

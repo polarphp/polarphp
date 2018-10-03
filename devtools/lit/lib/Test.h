@@ -25,12 +25,14 @@ namespace lit {
 
 class Test;
 class TestSuite;
+class Result;
 
 using TestPointer = std::shared_ptr<Test>;
 using TestSuitePointer = std::shared_ptr<TestSuite>;
 using TestingConfigPointer = std::shared_ptr<TestingConfig>;
 using TestList = std::list<TestPointer>;
 using TestSuiteList = std::list<TestSuitePointer>;
+using ResultPointer = std::shared_ptr<Result>;
 
 class ResultCode
 {
@@ -228,7 +230,8 @@ class Test
 public:
    Test(TestSuitePointer testSuite, const std::list<std::string> &pathInSuite,
         TestingConfigPointer config, const std::optional<std::string> &filePath = std::nullopt);
-   void setResult(const Result &result);
+   void setResult(ResultPointer result);
+   ResultPointer getResult() const;
    std::string getFullName();
    std::string getFilePath();
    std::string getSourcePath();
@@ -236,7 +239,6 @@ public:
    const std::string &getSelfSourcePath();
    std::string getExecPath();
    TestSuitePointer getTestSuite() const;
-
    Test &setSelfSourcePath(const std::string &sourcePath);
    bool isExpectedToFail();
    bool isWithinFeatureLimits();
@@ -253,7 +255,7 @@ protected:
    std::list<std::string> m_xfails;
    std::set<std::string> m_requires;
    std::list<std::string> m_unsupported;
-   std::optional<Result> m_result;
+   std::shared_ptr<Result> m_result;
    std::string m_selfSourcePath;
 };
 

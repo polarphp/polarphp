@@ -153,37 +153,40 @@ Test::Test(TestSuitePointer suite, const std::list<std::string> &pathInSuite,
      m_pathInSuite(pathInSuite),
      m_config(config),
      m_filePath(filePath),
-     m_result(std::nullopt)
+     m_result(nullptr)
 {
 }
 
-void Test::setResult(const Result &result)
+void Test::setResult(ResultPointer result)
 {
-   if (m_result.has_value()) {
+   if (m_result) {
       throw ValueError("test result already set");
    }
    m_result = result;
    // Apply the XFAIL handling to resolve the result exit code.
    try {
       if (isExpectedToFail()) {
-         if (m_result.has_value()) {
-            Result &selfResult = m_result.value();
-            const ResultCode &code = selfResult.getCode();
+         if (m_result) {
+            const ResultCode &code = m_result->getCode();
             if (code == PASS) {
-               selfResult.setCode(XPASS);
+               m_result->setCode(XPASS);
             } else if (code == FAIL) {
-               selfResult.setCode(XFAIL);
+               m_result->setCode(XFAIL);
             }
          }
       }
    } catch (ValueError &e) {
       // Syntax error in an XFAIL line.
-      if (m_result.has_value()) {
-         Result &selfResult = m_result.value();
-         selfResult.setCode(UNRESOLVED);
-         selfResult.setOutput(e.what());
+      if (m_result) {
+         m_result->setCode(UNRESOLVED);
+         m_result->setOutput(e.what());
       }
    }
+}
+
+ResultPointer Test::getResult() const
+{
+   return m_result;
 }
 
 std::string Test::getFullName()
@@ -346,18 +349,18 @@ void Test::writeJUnitXML(std::string &xmlStr)
 
    std::string testcaseTemplate = "<testcase classname=\"%s\" name=\"%s\" time=\"%.2f\"";
    float elapsedTime = 0.0;
-   if (m_result.has_value() && m_result.value().getElapsed().has_value()){
-      elapsedTime = m_result.value().getElapsed().value();
+   if (m_result && m_result->getElapsed().has_value()){
+      elapsedTime = m_result->getElapsed().value();
    }
    std::string testcaseXml = format_string(testcaseTemplate, className.c_str(), testName.c_str(), elapsedTime);
    xmlStr = testcaseXml;
-   if (m_result && m_result.value().getCode().isFailure()) {
+   if (m_result && m_result->getCode().isFailure()) {
       xmlStr += ">\n\t<failure ><![CDATA[";
-      std::string output = m_result.value().getOutput();
+      std::string output = m_result->getOutput();
       replace_string("]]>", "]]]]><![CDATA[>", output);
       xmlStr += output;
       xmlStr += "]]></failure>\n</testcase>";
-   } else if (m_result && m_result.value().getCode() == UNSUPPORTED) {
+   } else if (m_result && m_result->getCode() == UNSUPPORTED) {
       std::list<std::string> unsupportedFeatures = getMissingRequiredFeatures();
       std::string skipMessage;
       if (!unsupportedFeatures.empty()) {

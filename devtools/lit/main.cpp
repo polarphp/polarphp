@@ -27,6 +27,7 @@
 #include <random>
 #include <algorithm>
 #include <iterator>
+#include <chrono>
 
 using polar::lit::LitConfigPointer;
 using polar::lit::LitConfig;
@@ -67,6 +68,59 @@ void general_exception_handler(std::exception_ptr eptr)
    }
 }
 
+class TestingProgressDisplay
+{
+public:
+   TestingProgressDisplay(const CLI::App &opts, int numTests, std::shared_ptr<AbstractProgressBar> progressBar = nullptr)
+      : m_opts(opts),
+        m_numTests(numTests),
+        m_progressBar(progressBar),
+        m_completed(0)
+   {
+
+   }
+
+   void finish()
+   {
+      const CLI::Option *quietOpt = m_opts.get_option("-q,--quiet");
+      const CLI::Option *succinctOpt = m_opts.get_option("-s,--succinct");
+      if (m_progressBar) {
+         m_progressBar->clear();
+      } else if (quietOpt->count() > 0) {
+         // TODO
+      } else if (succinctOpt->count() > 0) {
+         std::printf("\n");
+      }
+   }
+
+   void update(TestPointer test)
+   {
+      m_completed += 1;
+   }
+private:
+   const CLI::App &m_opts;
+   int m_numTests;
+   std::shared_ptr<AbstractProgressBar> m_progressBar;
+   int m_completed;
+};
+
+void update_incremental_cache(TestPointer test)
+{
+   if (!test->getResult()->getCode().isFailure()) {
+      return;
+   }
+   polar::lit::modify_file_utime_and_atime(test->getFilePath());
+}
+
+void sort_by_incremental_cache(polar::lit::Run &run)
+{
+   run.getTests().sort([](TestPointer &lhs, TestPointer &rhs) {
+      fs::path lhsPath(lhs->getFilePath());
+      fs::path rhsPath(rhs->getFilePath());
+      return fs::last_write_time(lhsPath) > fs::last_write_time(rhsPath);
+   });
+}
+
 int main(int argc, char *argv[])
 {
    CLI::App litApp;
@@ -76,7 +130,7 @@ int main(int argc, char *argv[])
    std::string cfgPrefix;
    std::vector<std::string> params;
    std::string cfgSetterPluginDir;
-   litApp.add_option("test_paths", testPaths, "Files or paths to include in the test suite");
+   CLI::Option *testPathsOpt = litApp.add_option("test_paths", testPaths, "Files or paths to include in the test suite");
    litApp.add_flag("--version", showVersion, "Show version and exit");
    CLI::Option *threadsOpt = litApp.add_option("-j,--threads", threadNumbers, "Number of testing threads");
    litApp.add_option("--config-prefix", cfgPrefix, "Prefix for 'lit' config files");
@@ -155,8 +209,6 @@ int main(int argc, char *argv[])
    litApp.add_flag("--single-process", singleProcess, "Don't run tests in parallel.  Intended for debugging "
                                                       "single test failures")->group("Debug and Experimental Options");
    CLI11_PARSE(litApp, argc, argv);
-
-
 
    std::exception_ptr eptr;
    try {
@@ -307,6 +359,17 @@ int main(int argc, char *argv[])
          for (auto &test : tempTests) {
             tests.push_back(test);
          }
+      } else if (incremental) {
+         sort_by_incremental_cache(run);
+      } else {
+         tests.sort([](TestPointer lhs, TestPointer rhs) {
+            int learly = lhs->isEarlyTest();
+            int rearly = rhs->isEarlyTest();
+            std::string lname = lhs->getFullName();
+            std::string rname = rhs->getFullName();
+            return std::tie(learly, lname)
+                  < std::tie(rearly, rname);
+         });
       }
       // Then optionally restrict our attention to a shard of the tests.
       if (!numShardsOpt->empty() || !runShardOpt->empty()) {
@@ -389,6 +452,8 @@ int main(int argc, char *argv[])
             std::printf(header.c_str());
          }
       }
+      std::chrono::time_point startTime = std::chrono::system_clock::now();
+      int testingTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime).count();
    } catch (...) {
       eptr = std::current_exception();
    }
