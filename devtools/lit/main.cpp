@@ -122,14 +122,14 @@ int main(int argc, char *argv[])
    CLI::Option *maxFailuresOpt = litApp.add_option("--max-failures", maxFailures, "Stop execution after the given number of failures.", 0)->group("Test Execution");
 
    /// Test Selection
-   int maxTests;
+   size_t maxTests;
    float maxTime;
    bool shuffle;
    bool incremental;
    std::string filter;
    int numShards;
    int runShard;
-   litApp.add_option("--max-tests", maxTests, "Maximum number of tests to run")->group("Test Selection");
+   CLI::Option *maxTestsOpt = litApp.add_option("--max-tests", maxTests, "Maximum number of tests to run")->group("Test Selection");
    litApp.add_option("--max-time", maxTime, "Maximum time to spend testing (in seconds)")->group("Test Selection");
    litApp.add_flag("--shuffle", shuffle, "Run tests in random order")->group("Test Selection");
    litApp.add_flag("-i, --incremental", incremental, "Run modified and failing tests first (updates "
@@ -346,6 +346,17 @@ int main(int argc, char *argv[])
          litConfig->note(format_string("Selecting shard %d/%d = size %d/%d = tests #(%d*k)+%d = [%s]",
                                        runShard, numShards, tests.size(), numTests, numShards, runShard,
                                        ixPreview.c_str()));
+      }
+      // Finally limit the number of tests, if desired.
+      if (!maxTestsOpt->empty()) {
+         maxTests = std::max(0ul, std::min(tests.size(), maxTests));
+         size_t delta = tests.size() - maxTests;
+         auto iter = tests.begin();
+         std::advance(iter, maxTests - 1);
+         while (delta > 0) {
+            tests.erase(iter++);
+            --delta;
+         }
       }
    } catch (...) {
       eptr = std::current_exception();
