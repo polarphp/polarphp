@@ -12,11 +12,17 @@
 #ifndef POLAR_DEVLTOOLS_LIT_PROGRESS_BAR_H
 #define POLAR_DEVLTOOLS_LIT_PROGRESS_BAR_H
 
+#include "Test.h"
 #include <string>
 #include <list>
 #include <iostream>
 #include <map>
 #include <chrono>
+
+// forward declare class with namespace
+namespace CLI {
+class App;
+} // CLI
 
 namespace polar {
 namespace lit {
@@ -153,6 +159,25 @@ protected:
    bool m_useETA;
    int m_width;
    std::chrono::system_clock::time_point m_startTime;
+};
+
+class TestingProgressDisplay
+{
+public:
+   TestingProgressDisplay(const CLI::App &opts, int numTests,
+                          std::shared_ptr<AbstractProgressBar> progressBar = nullptr);
+   void finish();
+   void update(TestPointer test);
+private:
+   const CLI::App &m_opts;
+   int m_numTests;
+   std::shared_ptr<AbstractProgressBar> m_progressBar;
+   int m_completed;
+   bool m_quiet;
+   bool m_succinct;
+   bool m_showAllOutput;
+   bool m_incremental;
+   bool m_showOutput;
 };
 
 } // lit

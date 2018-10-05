@@ -75,14 +75,6 @@ void general_exception_handler(std::exception_ptr eptr)
    }
 }
 
-void update_incremental_cache(TestPointer test)
-{
-   if (!test->getResult()->getCode().isFailure()) {
-      return;
-   }
-   polar::lit::modify_file_utime_and_atime(test->getFilePath());
-}
-
 void sort_by_incremental_cache(polar::lit::Run &run)
 {
    run.getTests().sort([](TestPointer &lhs, TestPointer &rhs) {
@@ -91,108 +83,6 @@ void sort_by_incremental_cache(polar::lit::Run &run)
       return fs::last_write_time(lhsPath) > fs::last_write_time(rhsPath);
    });
 }
-
-class TestingProgressDisplay
-{
-public:
-   TestingProgressDisplay(const CLI::App &opts, int numTests, std::shared_ptr<AbstractProgressBar> progressBar = nullptr)
-      : m_opts(opts),
-        m_numTests(numTests),
-        m_progressBar(progressBar),
-        m_completed(0)
-   {
-      m_showAllOutput = m_opts.get_option("-a,--show-all")->count() > 0 ? true : false;
-      m_incremental = m_opts.get_option("-i, --incremental")->count() > 0 ? true : false;
-      m_quiet = m_opts.get_option("-q,--quiet")->count() > 0 ? true : false;
-      m_succinct = m_opts.get_option("-s,--succinct")->count() > 0 ? true : false;
-      m_showOutput = m_opts.get_option("-v,--verbose")->count() > 0 ? true : false;
-   }
-
-   void finish()
-   {
-      if (m_progressBar) {
-         m_progressBar->clear();
-      } else if (m_quiet) {
-         // TODO
-      } else if (m_succinct) {
-         std::printf("\n");
-      }
-   }
-
-   void update(TestPointer test)
-   {
-      m_completed += 1;
-      if (m_incremental) {
-         update_incremental_cache(test);
-      }
-      if (m_progressBar) {
-         m_progressBar->update(m_completed / m_numTests, test->getFullName());
-      }
-      bool shouldShow = test->getResult()->getCode().isFailure() ||
-            m_showAllOutput ||
-            (!m_quiet && !m_succinct);
-
-      if (!shouldShow) {
-         return;
-      }
-      if (m_progressBar) {
-         m_progressBar->clear();
-      }
-      // Show the test result line.
-      std::string testName = test->getFullName();
-      ResultPointer testResult = test->getResult();
-      const ResultCode &resultCode = testResult->getCode();
-      std::printf("%s: %s (%d of %d)\n", resultCode.getName().c_str(),
-                  testName.c_str(), m_completed, m_numTests);
-      // Show the test failure output, if requested.
-      if ((resultCode.isFailure() && m_showOutput) ||
-          m_showAllOutput) {
-         if (resultCode.isFailure()) {
-            std::printf("%s TEST '%s' FAILED %s\n", std::string('*', 20).c_str(),
-                        test->getFullName().c_str(), std::string('*', 20).c_str());
-         }
-         std::printf("%s\n", testResult->getOutput().c_str());
-         std::printf("%s\n", std::string('*', 20).c_str());
-      }
-      // Report test metrics, if present.
-      if (!testResult->getMetrics().empty()) {
-         // @TODO sort the metrics
-         std::printf("%s TEST '%s' RESULTS %s\n", std::string('*', 10).c_str(),
-                     test->getFullName().c_str(),
-                     std::string('*', 10).c_str());
-         for (auto &item : testResult->getMetrics()) {
-            std::printf("%s: %s \n", item.first.c_str(), item.second->format());
-         }
-         std::printf("%s\n", std::string('*', 10).c_str());
-      }
-      // Report micro-tests, if present
-      if (!testResult->getMicroResults().empty()) {
-         // @TODO sort the MicroResults
-         for (auto &item : testResult->getMicroResults()) {
-            std::printf("%s MICRO-TEST: %s\n", std::string('*', 3).c_str(), item.first.c_str());
-            ResultPointer microTest = item.second;
-            if (!microTest->getMetrics().empty()) {
-               // @TODO sort the metrics
-               for (auto &microItem : microTest->getMetrics()) {
-                  std::printf("    %s:  %s \n", microItem.first.c_str(), microItem.second->format());
-               }
-            }
-         }
-      }
-      // Ensure the output is flushed.
-      std::fflush(stdout);
-   }
-private:
-   const CLI::App &m_opts;
-   int m_numTests;
-   std::shared_ptr<AbstractProgressBar> m_progressBar;
-   int m_completed;
-   bool m_quiet;
-   bool m_succinct;
-   bool m_showAllOutput;
-   bool m_incremental;
-   bool m_showOutput;
-};
 
 void write_test_results(polar::lit::Run &run, LitConfigPointer litConfig, int testingTime,
                         const std::string &outputPath)
