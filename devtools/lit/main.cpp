@@ -153,7 +153,7 @@ public:
       // Report test metrics, if present.
       if (!testResult->getMetrics().empty()) {
          // @TODO sort the metrics
-         std::printf("%s TEST '%s' RESULTS %s", std::string('*', 10).c_str(),
+         std::printf("%s TEST '%s' RESULTS %s\n", std::string('*', 10).c_str(),
                      test->getFullName().c_str(),
                      std::string('*', 10).c_str());
          for (auto &item : testResult->getMetrics()) {
@@ -161,6 +161,22 @@ public:
          }
          std::printf("%s\n", std::string('*', 10).c_str());
       }
+      // Report micro-tests, if present
+      if (!testResult->getMicroResults().empty()) {
+         // @TODO sort the MicroResults
+         for (auto &item : testResult->getMicroResults()) {
+            std::printf("%s MICRO-TEST: %s\n", std::string('*', 3).c_str(), item.first.c_str());
+            ResultPointer microTest = item.second;
+            if (!microTest->getMetrics().empty()) {
+               // @TODO sort the metrics
+               for (auto &microItem : microTest->getMetrics()) {
+                  std::printf("    %s:  %s \n", microItem.first.c_str(), microItem.second->format());
+               }
+            }
+         }
+      }
+      // Ensure the output is flushed.
+      std::fflush(stdout);
    }
 private:
    const CLI::App &m_opts;
