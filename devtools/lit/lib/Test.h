@@ -26,6 +26,7 @@ namespace lit {
 class Test;
 class TestSuite;
 class Result;
+class MetricValue;
 
 using TestPointer = std::shared_ptr<Test>;
 using TestSuitePointer = std::shared_ptr<TestSuite>;
@@ -33,6 +34,7 @@ using TestingConfigPointer = std::shared_ptr<TestingConfig>;
 using TestList = std::list<TestPointer>;
 using TestSuiteList = std::list<TestSuitePointer>;
 using ResultPointer = std::shared_ptr<Result>;
+using MetricValuePointer = std::shared_ptr<MetricValue>;
 
 class ResultCode
 {
@@ -187,22 +189,22 @@ class Result
 {
 public:
    Result(const ResultCode &code, std::string output = "", std::optional<int> elapsed = std::nullopt);
-   Result &addMetric(const std::string &name, MetricValue *value);
-   Result &addMicroResult(const std::string &name, std::shared_ptr<Result> microResult);
+   Result &addMetric(const std::string &name, MetricValuePointer value);
+   Result &addMicroResult(const std::string &name, ResultPointer microResult);
    ~Result();
    const ResultCode &getCode() const;
    Result &setCode(const ResultCode &code);
    const std::string &getOutput() const;
    Result &setOutput(const std::string &output);
    const std::optional<int> &getElapsed() const;
-   const std::unordered_map<std::string, MetricValue *> &getMetrics() const;
-   std::unordered_map<std::string, std::shared_ptr<Result>> &getMicroResults();
+   const std::unordered_map<std::string, MetricValuePointer> &getMetrics() const;
+   std::unordered_map<std::string, ResultPointer> &getMicroResults();
 protected:
    ResultCode m_code;
    std::string m_output;
    std::optional<int> m_elapsed;
-   std::unordered_map<std::string, MetricValue *> m_metrics;
-   std::unordered_map<std::string, std::shared_ptr<Result>> m_microResults;
+   std::unordered_map<std::string, MetricValuePointer> m_metrics;
+   std::unordered_map<std::string, ResultPointer> m_microResults;
 };
 
 class TestSuite

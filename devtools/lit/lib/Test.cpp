@@ -62,25 +62,21 @@ const std::optional<int> &Result::getElapsed() const
    return m_elapsed;
 }
 
-const std::unordered_map<std::string, MetricValue *> &Result::getMetrics() const
+const std::unordered_map<std::string, MetricValuePointer> &Result::getMetrics() const
 {
    return m_metrics;
 }
 
-std::unordered_map<std::string, std::shared_ptr<Result>> &Result::getMicroResults()
+std::unordered_map<std::string, ResultPointer> &Result::getMicroResults()
 {
    return m_microResults;
 }
 
 Result::~Result()
 {
-   auto iter = m_metrics.begin();
-   while (iter != m_metrics.end()) {
-      delete iter->second;
-   }
 }
 
-Result &Result::addMetric(const std::string &name, MetricValue *value)
+Result &Result::addMetric(const std::string &name, MetricValuePointer value)
 {
    if (m_metrics.find(name) != m_metrics.end()) {
       throw ValueError(format_string("result already includes metrics for %s", name.c_str()));
@@ -89,7 +85,7 @@ Result &Result::addMetric(const std::string &name, MetricValue *value)
    return *this;
 }
 
-Result &Result::addMicroResult(const std::string &name, std::shared_ptr<Result> microResult)
+Result &Result::addMicroResult(const std::string &name, ResultPointer microResult)
 {
    if (m_metrics.find(name) != m_metrics.end()) {
       throw ValueError(format_string("esult already includes microResult for %s", name.c_str()));
