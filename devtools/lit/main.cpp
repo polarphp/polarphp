@@ -47,6 +47,7 @@ using polar::lit::ProgressBar;
 using polar::lit::TerminalController;
 using polar::lit::SimpleProgressBar;
 using polar::lit::AbstractProgressBar;
+using polar::lit::TestingProgressDisplay;
 using polar::lit::format_string;
 namespace fs = std::filesystem;
 
@@ -194,7 +195,7 @@ int main(int argc, char *argv[])
    litApp.add_option("--echo-all-commands", echoAllCommands, "Echo all commands as they are executed to stdout."
                                                              "In case of failure, last command shown will be the failing one.")->group("Output Format");
    litApp.add_flag("-a,--show-all", showAll, "Display all commandlines and output")->group("Output Format");
-   litApp.add_option("-o,--output", outputDir, "Write test results to the provided path")->check(CLI::ExistingDirectory)->group("Output Format");
+   CLI::Option *outputDirOpt = litApp.add_option("-o,--output", outputDir, "Write test results to the provided path")->check(CLI::ExistingDirectory)->group("Output Format");
    litApp.add_flag("--display-progress-bar", displayProgressBar, "use curses based progress bar")->group("Output Format");
    litApp.add_flag("--show-unsupported", showUnsupported, "Show unsupported tests")->group("Output Format");
    litApp.add_flag("--show-xfail", showXFail, "Show tests that were expected to fail")->group("Output Format");
@@ -493,7 +494,24 @@ int main(int argc, char *argv[])
          }
       }
       std::chrono::time_point startTime = std::chrono::system_clock::now();
+      std::shared_ptr<TestingProgressDisplay> display(new TestingProgressDisplay(litApp, threadNumbers, progressBarPointer));
+
       int testingTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime).count();
+      if (!quiet) {
+         std::printf("Testing Time: %.2fs", testingTime);
+      }
+      // Write out the test data, if requested.
+      if (!outputDirOpt->empty()) {
+         write_test_results(run, litConfig, testingTime, outputDir);
+      }
+      // List test results organized by kind.
+      bool hasFailures = false;
+      std::unordered_map<ResultCode, TestList> byCode;
+      for (TestPointer test : run.getTests()) {
+         if (byCode.find(test->getResult()->getCode()) == byCode.end()) {
+//            byCode[]
+         }
+      }
    } catch (...) {
       eptr = std::current_exception();
    }

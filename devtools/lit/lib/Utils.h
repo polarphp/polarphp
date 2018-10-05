@@ -12,6 +12,7 @@
 #ifndef POLAR_DEVLTOOLS_LIT_UTILS_H
 #define POLAR_DEVLTOOLS_LIT_UTILS_H
 
+#include <functional>
 #include <string>
 #include <thread>
 #include <optional>
@@ -108,6 +109,17 @@ void trim_string(std::string &str);
 bool stdcout_isatty();
 void abort_execute_now();
 void modify_file_utime_and_atime(const std::string &filename);
+
+// https://stackoverflow.com/questions/17016175/c-unordered-map-using-a-custom-class-type-as-the-key
+
+inline void hash_combine(std::size_t& seed) { }
+
+template <typename T, typename... Rest>
+inline void hash_combine(std::size_t& seed, const T& v, Rest... rest) {
+    std::hash<T> hasher;
+    seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+    hash_combine(seed, rest...);
+}
 
 } // lit
 } // polar

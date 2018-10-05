@@ -19,6 +19,7 @@
 #include "nlohmann/json.hpp"
 #include "TestingConfig.h"
 #include "Utils.h"
+#include "Global.h"
 
 namespace polar {
 namespace lit {
@@ -285,5 +286,8 @@ protected:
 
 } // lit
 } // polar
+
+POLAR_MAKE_HASHABLE(polar::lit::ResultCode, std::hash<std::string>{}(t.getName()),
+                    std::hash<bool>{}(t.isFailure()))
 
 #endif // POLAR_DEVLTOOLS_LIT_TEST_H

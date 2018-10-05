@@ -330,11 +330,11 @@ TestingProgressDisplay::TestingProgressDisplay(const CLI::App &opts, int numTest
      m_progressBar(progressBar),
      m_completed(0)
 {
-   m_showAllOutput = m_opts.get_option("-a,--show-all")->count() > 0 ? true : false;
-   m_incremental = m_opts.get_option("-i, --incremental")->count() > 0 ? true : false;
-   m_quiet = m_opts.get_option("-q,--quiet")->count() > 0 ? true : false;
-   m_succinct = m_opts.get_option("-s,--succinct")->count() > 0 ? true : false;
-   m_showOutput = m_opts.get_option("-v,--verbose")->count() > 0 ? true : false;
+   m_showAllOutput = m_opts.get_option("--show-all")->count() > 0 ? true : false;
+   m_incremental = m_opts.get_option("--incremental")->count() > 0 ? true : false;
+   m_quiet = m_opts.get_option("--quiet")->count() > 0 ? true : false;
+   m_succinct = m_opts.get_option("--succinct")->count() > 0 ? true : false;
+   m_showOutput = m_opts.get_option("--verbose")->count() > 0 ? true : false;
 }
 
 void TestingProgressDisplay::finish()

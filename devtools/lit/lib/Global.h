@@ -44,6 +44,18 @@ using ShellTokenType = std::tuple<std::string, int>;
 using RunCmdResponse = std::tuple<int, std::string, std::string>;
 using CfgSetterType = void (*)(TestingConfig *config, LitConfig *litConfig);
 
+// https://stackoverflow.com/questions/17016175/c-unordered-map-using-a-custom-class-type-as-the-key
+#define POLAR_MAKE_HASHABLE(type, ...) \
+    namespace std {\
+        template<> struct hash<type> {\
+            std::size_t operator()(const type &t) const {\
+                std::size_t ret = 0;\
+                ::polar::lit::hash_combine(ret, __VA_ARGS__);\
+                return ret;\
+            }\
+        };\
+    }
+
 } // lit
 } // polar
 
