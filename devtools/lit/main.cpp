@@ -17,6 +17,7 @@
 #include "lib/Test.h"
 #include "lib/Run.h"
 #include "lib/ProgressBar.h"
+#include "nlohmann/json.hpp"
 #include <iostream>
 #include <thread>
 #include <assert.h>
@@ -28,6 +29,7 @@
 #include <algorithm>
 #include <iterator>
 #include <chrono>
+#include <fstream>
 
 using polar::lit::LitConfigPointer;
 using polar::lit::LitConfig;
@@ -38,6 +40,8 @@ using polar::lit::Result;
 using polar::lit::ResultPointer;
 using polar::lit::TestPointer;
 using polar::lit::ResultCode;
+using polar::lit::MetricValue;
+using polar::lit::MetricValuePointer;
 using polar::lit::TestList;
 using polar::lit::ProgressBar;
 using polar::lit::TerminalController;
@@ -189,6 +193,83 @@ private:
    bool m_incremental;
    bool m_showOutput;
 };
+
+void write_test_results(polar::lit::Run &run, LitConfigPointer litConfig, int testingTime,
+                        const std::string &outputPath)
+{
+   // Construct the data we will write.
+   nlohmann::json testDoc = nlohmann::json::object();
+   testDoc["engineVersion"] = POLAR_LIT_VERSION;
+   testDoc["elapsed"] = testingTime;
+   // FIXME: Record some information on the lit configuration used?
+   // FIXME: Record information from the individual test suites?
+   // Encode the tests.
+   nlohmann::json testsData = nlohmann::json::array();
+   for (TestPointer test : run.getTests()) {
+      ResultPointer testResult = test->getResult();
+      nlohmann::json testData = nlohmann::json::object(
+      {
+                  {"name", test->getFullName()},
+                  {"code", test->getResult()->getCode().getName()},
+                  {"output", test->getResult()->getOutput()},
+                  {"elapse", test->getResult()->getElapsed().has_value() ? test->getResult()->getElapsed().value() : -1}
+               });
+      // Add test metrics, if present.
+      if (!testResult->getMetrics().empty()) {
+         nlohmann::json metrics = nlohmann::json::array();
+         for (auto &metricItem : testResult->getMetrics()) {
+            MetricValuePointer metricValue = metricItem.second;
+            std::any mdata = metricValue->toData();
+            if (metricValue->getValueType() == MetricValue::ValueType::Integer) {
+               metrics[metricItem.first] = std::any_cast<int>(mdata);
+            } else if (metricValue->getValueType() == MetricValue::ValueType::Real) {
+               metrics[metricItem.first] = std::any_cast<double>(mdata);
+            } else if(metricValue->getValueType() == MetricValue::ValueType::Json) {
+               metrics[metricItem.first] = std::any_cast<nlohmann::json>(mdata);
+            }
+            testData["metrics"] = metrics;
+         }
+      }
+      // Report micro-tests separately, if present
+      if (!testResult->getMicroResults().empty()) {
+         // Expand parent test name with micro test name
+         for (auto &microItem : testResult->getMicroResults()){
+            std::string parentName = test->getFullName();
+            ResultPointer microTest = microItem.second;
+            std::string microFullName = parentName + ":" + microItem.first;
+            nlohmann::json microTestData = nlohmann::json::array(
+            {
+                        {"name", microFullName},
+                        {"code", microTest->getCode().getName()},
+                        {"output", microTest->getOutput()},
+                        {"elapsed",microTest->getElapsed().has_value() ? microTest->getElapsed().value() : -1}
+                     });
+            if (!microTest->getMetrics().empty()) {
+               nlohmann::json microMetrics = nlohmann::json::array();
+               for (auto &microMetricItem : testResult->getMetrics()) {
+                  MetricValuePointer microMetricValue = microMetricItem.second;
+                  std::any microMetricdata = microMetricValue->toData();
+                  if (microMetricValue->getValueType() == MetricValue::ValueType::Integer) {
+                     microMetrics[microMetricItem.first] = std::any_cast<int>(microMetricdata);
+                  } else if (microMetricValue->getValueType() == MetricValue::ValueType::Real) {
+                     microMetrics[microMetricItem.first] = std::any_cast<double>(microMetricdata);
+                  } else if(microMetricValue->getValueType() == MetricValue::ValueType::Json) {
+                     microMetrics[microMetricItem.first] = std::any_cast<nlohmann::json>(microMetricdata);
+                  }
+                  microTestData["metrics"] = microMetrics;
+               }
+            }
+            testsData.push_back(microTestData);
+         }
+      }
+      testsData.push_back(testData);
+   }
+   std::fstream jsonStream(outputPath, std::ios_base::out | std::ios_base::trunc);
+   if (!jsonStream.is_open()) {
+      throw std::runtime_error(format_string("open json file %s error", outputPath.c_str()));
+   }
+   jsonStream << std::setw(4) << testsData;
+}
 
 int main(int argc, char *argv[])
 {

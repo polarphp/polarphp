@@ -99,8 +99,15 @@ extern const ResultCode &TIMEOUT;
 class MetricValue
 {
 public:
+   enum class ValueType {
+      Integer,
+      Real,
+      Json
+   };
+public:
    virtual std::string format() = 0;
-   virtual std::any todata() = 0;
+   virtual std::any toData() = 0;
+   virtual ValueType getValueType() const = 0;
    ~MetricValue()
    {}
 };
@@ -116,9 +123,14 @@ public:
       return std::to_string(m_value);
    }
 
-   std::any todata()
+   std::any toData()
    {
       return m_value;
+   }
+
+   ValueType getValueType() const
+   {
+      return ValueType::Integer;
    }
 protected:
    int m_value;
@@ -139,9 +151,14 @@ public:
       return buffer;
    }
 
-   std::any todata()
+   std::any toData()
    {
       return m_value;
+   }
+
+   ValueType getValueType() const
+   {
+      return ValueType::Real;
    }
 protected:
    double m_value;
@@ -159,9 +176,14 @@ public:
       return m_value.dump(2);
    }
 
-   std::any todata()
+   std::any toData()
    {
       return m_value;
+   }
+
+   ValueType getValueType() const
+   {
+      return ValueType::Json;
    }
 protected:
    nlohmann::json m_value;
