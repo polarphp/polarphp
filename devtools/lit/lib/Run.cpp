@@ -128,7 +128,7 @@ void Run::consumeTestResult(std::tuple<int, TestPointer> &poolResult)
 /// the display.
 std::tuple<int, TestPointer> worker_run_one_test(int testIndex, TestPointer test)
 {
-   test->setResult(std::make_shared<Result>(PASS, "pass the test", 30));
+   test->setResult(std::make_shared<Result>(PASS, "pass the test", rand() % 15));
    return std::make_tuple(testIndex, test);
 }
 

@@ -420,33 +420,33 @@ void TestingProgressDisplay::update(TestPointer test)
    if ((resultCode->isFailure() && m_showOutput) ||
        m_showAllOutput) {
       if (resultCode->isFailure()) {
-         std::printf("%s TEST '%s' FAILED %s\n", std::string('*', 20).c_str(),
-                     test->getFullName().c_str(), std::string('*', 20).c_str());
+         std::printf("%s TEST '%s' FAILED %s\n", std::string(20, '*').c_str(),
+                     test->getFullName(), std::string(20, '*').c_str());
       }
-      std::printf("%s\n", testResult->getOutput().c_str());
-      std::printf("%s\n", std::string('*', 20).c_str());
+      std::printf("%s\n", testResult->getOutput());
+      std::printf("%s\n", std::string(20, '*').c_str());
    }
    // Report test metrics, if present.
    if (!testResult->getMetrics().empty()) {
       // @TODO sort the metrics
-      std::printf("%s TEST '%s' RESULTS %s\n", std::string('*', 10).c_str(),
+      std::printf("%s TEST '%s' RESULTS %s\n", std::string(10, '*'),
                   test->getFullName().c_str(),
-                  std::string('*', 10).c_str());
+                  std::string(10, '*').c_str());
       for (auto &item : testResult->getMetrics()) {
-         std::printf("%s: %s \n", item.first.c_str(), item.second->format());
+         std::printf("%s: %s \n", item.first.c_str(), item.second->format().c_str());
       }
-      std::printf("%s\n", std::string('*', 10).c_str());
+      std::printf("%s\n", std::string(10, '*').c_str());
    }
    // Report micro-tests, if present
    if (!testResult->getMicroResults().empty()) {
       // @TODO sort the MicroResults
       for (auto &item : testResult->getMicroResults()) {
-         std::printf("%s MICRO-TEST: %s\n", std::string('*', 3).c_str(), item.first.c_str());
+         std::printf("%s MICRO-TEST: %s\n", std::string(3, '*').c_str(), item.first.c_str());
          ResultPointer microTest = item.second;
          if (!microTest->getMetrics().empty()) {
             // @TODO sort the metrics
             for (auto &microItem : microTest->getMetrics()) {
-               std::printf("    %s:  %s \n", microItem.first.c_str(), microItem.second->format());
+               std::printf("    %s:  %s \n", microItem.first.c_str(), microItem.second->format().c_str());
             }
          }
       }

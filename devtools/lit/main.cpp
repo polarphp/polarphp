@@ -365,9 +365,9 @@ int main(int argc, char *argv[])
             for (auto &item : sortedSuitesAndTests) {
                TestSuitePointer testsuite = std::get<0>(item);
                const TestList &tests = std::get<1>(item);
-               printf("  %s - %d tests\n", testsuite->getName().c_str(), tests.size());
-               printf("    Source Root: %s\n", testsuite->getSourcePath().c_str());
-               printf("    Exec Root  : %s\n", testsuite->getExecPath().c_str());
+               printf("  %s - %d tests\n", testsuite->getName(), tests.size());
+               printf("    Source Root: %s\n", testsuite->getSourcePath());
+               printf("    Exec Root  : %s\n", testsuite->getExecPath());
             }
          }
          return 0;
@@ -487,11 +487,11 @@ int main(int argc, char *argv[])
                terminalControllerPointer.reset(new TerminalController);
                progressBarPointer.reset(new ProgressBar(*terminalControllerPointer.get(), header));
             } catch (...) {
-               std::printf(header.c_str());
+               std::printf("%s\n", header.c_str());
                progressBarPointer.reset(new SimpleProgressBar("Testing: "));
             }
          } else {
-            std::printf(header.c_str());
+            std::printf("%s\n", header.c_str());
          }
       }
       std::chrono::time_point startTime = std::chrono::system_clock::now();
@@ -501,9 +501,10 @@ int main(int argc, char *argv[])
       } catch (...) {
 
       }
+      display->finish();
       int testingTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime).count();
       if (!quiet) {
-         std::printf("Testing Time: %.2fs", testingTime);
+         std::printf("Testing Time: %.2fs\n", testingTime);
       }
       // Write out the test data, if requested.
       if (!outputDirOpt->empty()) {
@@ -511,12 +512,123 @@ int main(int argc, char *argv[])
       }
       // List test results organized by kind.
       bool hasFailures = false;
-      std::unordered_map<ResultCode, TestList> byCode;
-      for (TestPointer test : run.getTests()) {
-         //byCode.find(test->getResult()->getCode());
-//         if (byCode.find(test->getResult()->getCode()) == byCode.end()) {
-////            byCode[]
-//         }
+      std::unordered_map<const ResultCode *, TestList> byCode;
+      for (TestPointer test: run.getTests()) {
+         if (byCode.find(test->getResult()->getCode()) == byCode.end()) {
+            byCode[test->getResult()->getCode()] = TestList{};
+         }
+         byCode[test->getResult()->getCode()].push_back(test);
+         if (test->getResult()->getCode()->isFailure()) {
+            hasFailures = true;
+         }
+      }
+      // Print each test in any of the failing groups.
+      std::list<std::pair<std::string, const ResultCode *>> titleCodeMap = {
+         {"Unexpected Passing Tests", polar::lit::XPASS},
+         {"Failing Tests", polar::lit::FAIL},
+         {"Unresolved Tests", polar::lit::UNRESOLVED},
+         {"Unsupported Tests", polar::lit::UNSUPPORTED},
+         {"Expected Failing Tests", polar::lit::XFAIL},
+         {"Timed Out Tests", polar::lit::TIMEOUT}
+      };
+      for (auto &item: titleCodeMap) {
+         const std::string &title = item.first;
+         const ResultCode *code = item.second;
+         if ((polar::lit::XFAIL == code && !showXFail) ||
+             (polar::lit::UNSUPPORTED == code && !showUnsupported) ||
+             (polar::lit::UNRESOLVED == code && !maxFailuresOpt->empty())) {
+            continue;
+         }
+         if (byCode.find(code) == byCode.end()) {
+            continue;
+         }
+         TestList &elts = byCode.at(code);
+         if (elts.empty()) {
+            continue;
+         }
+         std::printf("%s\n", std::string(20, '*').c_str());
+         std::printf("%s (%d):\n", title.c_str(), elts.size());
+         for (TestPointer test: elts) {
+            std::printf("    %s\n", test->getFullName().c_str());
+         }
+         std::printf("\n");
+      }
+      if (timeTests && !run.getTests().empty()) {
+         // Order by time.
+         std::list<std::tuple<std::string, int>> testTimes;
+         for (TestPointer test: run.getTests()) {
+            int elapsed = test->getResult()->getElapsed() ? test->getResult()->getElapsed().value() : -1;
+            testTimes.push_back({test->getFullName(), elapsed});
+            polar::lit::print_histogram(testTimes, "Tests");
+         }
+      }
+      std::list<std::pair<std::string, const ResultCode *>> nameCodeMap = {
+         {"Expected Passes    ", polar::lit::PASS},
+         {"Passes With Retry  ", polar::lit::FLAKYPASS},
+         {"Expected Failures  ", polar::lit::XFAIL},
+         {"Unsupported Tests  ", polar::lit::UNSUPPORTED},
+         {"Unresolved Tests   ", polar::lit::UNRESOLVED},
+         {"Unexpected Passes  ", polar::lit::XPASS},
+         {"Unexpected Failures", polar::lit::FAIL},
+         {"Individual Timeouts", polar::lit::TIMEOUT}
+      };
+      for (auto &item: nameCodeMap) {
+         const std::string &name = item.first;
+         const ResultCode *code = item.second;
+         if (quiet && !code->isFailure()) {
+            continue;
+         }
+         int N = 0;
+         if (byCode.find(code) != byCode.end()) {
+            N = byCode.at(code).size();
+         }
+         if (N != 0) {
+            std::printf("  %s: %d\n", name.c_str(), N);
+         }
+      }
+      if (!xunitOutputFile.empty()) {
+         // Collect the tests, indexed by test suite
+         // passes:failures:skipped:tests
+         using BySuiteItemType = std::tuple<int, int, int, TestList>;
+         std::map<std::string, BySuiteItemType> bySuite;
+         for (TestPointer test: run.getTests()) {
+            std::string suite = test->getTestSuite()->getName();
+            if (bySuite.find(suite) == bySuite.end()) {
+               bySuite[suite] = std::make_tuple(0, 0, 0, TestList{});
+            }
+            std::get<3>(bySuite[suite]).push_back(test);
+            if (test->getResult()->getCode()->isFailure()) {
+               std::get<1>(bySuite[suite]) += 1;
+
+            } else if (test->getResult()->getCode() == polar::lit::UNSUPPORTED) {
+               std::get<2>(bySuite[suite]) += 1;
+            } else {
+               std::get<0>(bySuite[suite]) += 1;
+            }
+         }
+         std::fstream xmlDoc(xunitOutputFile, std::ios_base::trunc | std::ios_base::out);
+         if (!xmlDoc.is_open()) {
+            throw std::runtime_error(format_string("open xunitOutputFile: %s error", xunitOutputFile.c_str()));
+         }
+         xmlDoc << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << std::endl;
+         xmlDoc << "<testsuites>" << std::endl;
+         for (auto &item: bySuite) {
+            std::string suiteName = item.first;
+            BySuiteItemType &suiteData = item.second;
+            polar::lit::replace_string(".", "-", suiteName);
+            xmlDoc << "<testsuite name=" << suiteName;
+            xmlDoc << " tests=\"" << std::get<0>(suiteData) + std::get<1>(suiteData) + std::get<2>(suiteData);
+            xmlDoc << "\"";
+            xmlDoc << " failures=\"" << std::get<1>(suiteData) << "\"";
+            xmlDoc << " skipped=\"" << std::get<2>(suiteData) << "\">" << std::endl;
+            for (TestPointer test: std::get<3>(suiteData)) {
+               std::string testXml;
+               test->writeJUnitXML(testXml);
+               xmlDoc << testXml << std::endl;
+            }
+            xmlDoc << "</testsuite>" << std::endl;
+         }
+         xmlDoc << "</testsuites>" << std::endl;
       }
    } catch (...) {
       eptr = std::current_exception();
@@ -524,4 +636,3 @@ int main(int argc, char *argv[])
    general_exception_handler(eptr);
    return 0;
 }
-

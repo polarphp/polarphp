@@ -236,7 +236,7 @@ end_iterator:
    }
    int barW = 40;
    std::string hr(barW + 34, '-');
-   std::printf("\nSlowest %s:", title);
+   std::printf("\nSlowest %s:\n", title.c_str());
    std::cout << hr << std::endl;
    int pDigits = (int)std::ceil(std::log10(maxValue));
    int pfDigits = std::max(0, 3 - pDigits);
@@ -244,7 +244,7 @@ end_iterator:
       pDigits += pfDigits + 1;
    }
    int cDigits = (int)std::ceil(std::log10(items.size()));
-   std::printf("[%s] :: [%s] :: [%s]", center_string("Range", (pDigits + 1) * 2 + 3).c_str(),
+   std::printf("[%s] :: [%s] :: [%s]\n", center_string("Range", (pDigits + 1) * 2 + 3).c_str(),
                center_string("Percentage", barW).c_str(),
                center_string("Count", cDigits * 2 + 1).c_str());
    std::cout << hr << std::endl;
@@ -252,7 +252,7 @@ end_iterator:
       const std::set<std::string> &row = histo[i];
       float pct = float(row.size()) / items.size();
       int w = int(barW * pct);
-      std::printf("[%*.*fs,%*.*fs) :: [%s%s] :: [%*d/%*d]",
+      std::printf("[%*.*fs,%*.*fs) :: [%s%s] :: [%*d/%*d]\n",
                   pDigits, pfDigits, i * barH, pDigits, pfDigits, (i + 1) * barH,
                   std::string(w, '*').c_str(), std::string(barW - w, ' ').c_str(),
                   cDigits, row.size(), cDigits, items.size());
