@@ -385,7 +385,7 @@ void TestingProgressDisplay::finish()
 
 void update_incremental_cache(TestPointer test)
 {
-   if (!test->getResult()->getCode().isFailure()) {
+   if (!test->getResult()->getCode()->isFailure()) {
       return;
    }
    polar::lit::modify_file_utime_and_atime(test->getFilePath());
@@ -400,7 +400,7 @@ void TestingProgressDisplay::update(TestPointer test)
    if (m_progressBar) {
       m_progressBar->update(m_completed / m_numTests, test->getFullName());
    }
-   bool shouldShow = test->getResult()->getCode().isFailure() ||
+   bool shouldShow = test->getResult()->getCode()->isFailure() ||
          m_showAllOutput ||
          (!m_quiet && !m_succinct);
 
@@ -413,13 +413,13 @@ void TestingProgressDisplay::update(TestPointer test)
    // Show the test result line.
    std::string testName = test->getFullName();
    ResultPointer testResult = test->getResult();
-   const ResultCode &resultCode = testResult->getCode();
-   std::printf("%s: %s (%d of %d)\n", resultCode.getName().c_str(),
+   const ResultCode *resultCode = testResult->getCode();
+   std::printf("%s: %s (%d of %d)\n", resultCode->getName().c_str(),
                testName.c_str(), m_completed, m_numTests);
    // Show the test failure output, if requested.
-   if ((resultCode.isFailure() && m_showOutput) ||
+   if ((resultCode->isFailure() && m_showOutput) ||
        m_showAllOutput) {
-      if (resultCode.isFailure()) {
+      if (resultCode->isFailure()) {
          std::printf("%s TEST '%s' FAILED %s\n", std::string('*', 20).c_str(),
                      test->getFullName().c_str(), std::string('*', 20).c_str());
       }

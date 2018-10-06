@@ -19,28 +19,28 @@ namespace lit {
 
 std::unordered_map<std::string, ResultCode *> ResultCode::sm_instances{};
 
-const ResultCode &PASS = ResultCode::getInstance("PASS", false);
-const ResultCode &FLAKYPASS = ResultCode::getInstance("FLAKYPASS", false);
-const ResultCode &XFAIL = ResultCode::getInstance("XFAIL", false);
-const ResultCode &FAIL = ResultCode::getInstance("FAIL", true);
-const ResultCode &XPASS = ResultCode::getInstance("XPASS", true);
-const ResultCode &UNRESOLVED = ResultCode::getInstance("UNRESOLVED", true);
-const ResultCode &UNSUPPORTED = ResultCode::getInstance("UNSUPPORTED", false);
-const ResultCode &TIMEOUT = ResultCode::getInstance("TIMEOUT", true);
+const ResultCode *PASS = ResultCode::getInstance("PASS", false);
+const ResultCode *FLAKYPASS = ResultCode::getInstance("FLAKYPASS", false);
+const ResultCode *XFAIL = ResultCode::getInstance("XFAIL", false);
+const ResultCode *FAIL = ResultCode::getInstance("FAIL", true);
+const ResultCode *XPASS = ResultCode::getInstance("XPASS", true);
+const ResultCode *UNRESOLVED = ResultCode::getInstance("UNRESOLVED", true);
+const ResultCode *UNSUPPORTED = ResultCode::getInstance("UNSUPPORTED", false);
+const ResultCode *TIMEOUT = ResultCode::getInstance("TIMEOUT", true);
 
-Result::Result(const ResultCode &code, std::string output, std::optional<int> elapsed)
+Result::Result(const ResultCode *code, std::string output, std::optional<int> elapsed)
    : m_code(code),
      m_output(output),
      m_elapsed(elapsed)
 {
 }
 
-const ResultCode &Result::getCode() const
+const ResultCode *Result::getCode() const
 {
    return m_code;
 }
 
-Result &Result::setCode(const ResultCode &code)
+Result &Result::setCode(const ResultCode *code)
 {
    m_code = code;
    return *this;
@@ -163,7 +163,7 @@ void Test::setResult(ResultPointer result)
    try {
       if (isExpectedToFail()) {
          if (m_result) {
-            const ResultCode &code = m_result->getCode();
+            const ResultCode *code = m_result->getCode();
             if (code == PASS) {
                m_result->setCode(XPASS);
             } else if (code == FAIL) {
@@ -350,7 +350,7 @@ void Test::writeJUnitXML(std::string &xmlStr)
    }
    std::string testcaseXml = format_string(testcaseTemplate, className.c_str(), testName.c_str(), elapsedTime);
    xmlStr = testcaseXml;
-   if (m_result && m_result->getCode().isFailure()) {
+   if (m_result && m_result->getCode()->isFailure()) {
       xmlStr += ">\n\t<failure ><![CDATA[";
       std::string output = m_result->getOutput();
       replace_string("]]>", "]]]]><![CDATA[>", output);

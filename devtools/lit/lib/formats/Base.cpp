@@ -143,9 +143,7 @@ std::string generate_tempfilename()
 
 } // anonymous namespace
 
-
-
-std::tuple<const ResultCode &, std::string>
+ExecResultTuple
 OneCommandPerFileTest::execute(TestPointer test, LitConfigPointer litConfig)
 {
    if (test->getConfig()->isUnsupported()) {

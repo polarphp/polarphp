@@ -40,22 +40,25 @@ using MetricValuePointer = std::shared_ptr<MetricValue>;
 class ResultCode
 {
 public:
-   static ResultCode &getInstance(const std::string &name, bool isFailure)
+   static ResultCode *getInstance(const std::string &name, bool isFailure)
    {
       if (sm_instances.find(name) != sm_instances.end()) {
-         return *sm_instances.at(name);
+         return sm_instances.at(name);
       }
       sm_instances[name] = new ResultCode(name, isFailure);
-      return *sm_instances[name];
+      return sm_instances[name];
+   }
+
+   static void clearupPool()
+   {
+      for (auto &item : sm_instances) {
+         delete item.second;
+      }
+      sm_instances.clear();
    }
 
    ~ResultCode()
    {
-      if (sm_instances.find(m_name) != sm_instances.end()) {
-         ResultCode *code = sm_instances.at(m_name);
-         delete code;
-         sm_instances.erase(m_name);
-      }
    }
 
    bool operator == (const ResultCode &other) const
@@ -88,14 +91,19 @@ protected:
    static std::unordered_map<std::string, ResultCode *> sm_instances;
 };
 
-extern const ResultCode &PASS;
-extern const ResultCode &FLAKYPASS;
-extern const ResultCode &XFAIL;
-extern const ResultCode &FAIL;
-extern const ResultCode &XPASS;
-extern const ResultCode &UNRESOLVED;
-extern const ResultCode &UNSUPPORTED;
-extern const ResultCode &TIMEOUT;
+extern const ResultCode *PASS;
+extern const ResultCode *FLAKYPASS;
+extern const ResultCode *XFAIL;
+extern const ResultCode *FAIL;
+extern const ResultCode *XPASS;
+extern const ResultCode *UNRESOLVED;
+extern const ResultCode *UNSUPPORTED;
+extern const ResultCode *TIMEOUT;
+
+inline void global_resultcode_destroyer()
+{
+   ResultCode::clearupPool();
+}
 
 class MetricValue
 {
@@ -211,19 +219,19 @@ inline JSONMetricValue to_meteric_value(T value)
 class Result
 {
 public:
-   Result(const ResultCode &code, std::string output = "", std::optional<int> elapsed = std::nullopt);
+   Result(const ResultCode *code = nullptr, std::string output = "", std::optional<int> elapsed = std::nullopt);
    Result &addMetric(const std::string &name, MetricValuePointer value);
    Result &addMicroResult(const std::string &name, ResultPointer microResult);
    ~Result();
-   const ResultCode &getCode() const;
-   Result &setCode(const ResultCode &code);
+   const ResultCode *getCode() const;
+   Result &setCode(const ResultCode *code);
    const std::string &getOutput() const;
    Result &setOutput(const std::string &output);
    const std::optional<int> &getElapsed() const;
    const std::unordered_map<std::string, MetricValuePointer> &getMetrics() const;
    std::unordered_map<std::string, ResultPointer> &getMicroResults();
 protected:
-   ResultCode m_code;
+   const ResultCode *m_code;
    std::string m_output;
    std::optional<int> m_elapsed;
    std::unordered_map<std::string, MetricValuePointer> m_metrics;

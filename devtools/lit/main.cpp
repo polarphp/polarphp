@@ -101,7 +101,7 @@ void write_test_results(polar::lit::Run &run, LitConfigPointer litConfig, int te
       nlohmann::json testData = nlohmann::json::object(
       {
                   {"name", test->getFullName()},
-                  {"code", test->getResult()->getCode().getName()},
+                  {"code", test->getResult()->getCode()->getName()},
                   {"output", test->getResult()->getOutput()},
                   {"elapse", test->getResult()->getElapsed().has_value() ? test->getResult()->getElapsed().value() : -1}
                });
@@ -131,7 +131,7 @@ void write_test_results(polar::lit::Run &run, LitConfigPointer litConfig, int te
             nlohmann::json microTestData = nlohmann::json::array(
             {
                         {"name", microFullName},
-                        {"code", microTest->getCode().getName()},
+                        {"code", microTest->getCode()->getName()},
                         {"output", microTest->getOutput()},
                         {"elapsed",microTest->getElapsed().has_value() ? microTest->getElapsed().value() : -1}
                      });
@@ -274,6 +274,7 @@ int main(int argc, char *argv[])
          showOutput = true;
       }
       atexit(polar::lit::temp_files_clear_handler);
+      atexit(polar::lit::global_resultcode_destroyer);
       std::list<std::string> inputs(vector_to_list(testPaths));
       // Create the user defined parameters.
       std::map<std::string, std::any> userParams;
@@ -495,7 +496,11 @@ int main(int argc, char *argv[])
       }
       std::chrono::time_point startTime = std::chrono::system_clock::now();
       std::shared_ptr<TestingProgressDisplay> display(new TestingProgressDisplay(litApp, threadNumbers, progressBarPointer));
+      try {
+         run.executeTests(display, threadNumbers, maxTime);
+      } catch (...) {
 
+      }
       int testingTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime).count();
       if (!quiet) {
          std::printf("Testing Time: %.2fs", testingTime);
@@ -508,7 +513,7 @@ int main(int argc, char *argv[])
       bool hasFailures = false;
       std::unordered_map<ResultCode, TestList> byCode;
       for (TestPointer test : run.getTests()) {
-//         byCode.find(test->getResult()->getCode());
+         //byCode.find(test->getResult()->getCode());
 //         if (byCode.find(test->getResult()->getCode()) == byCode.end()) {
 ////            byCode[]
 //         }
