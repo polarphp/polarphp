@@ -92,6 +92,7 @@ std::list<std::string> TerminalController::ANSICOLORS {
 /// assumed to be a dumb terminal (i.e., have no capabilities).
 ///
 TerminalController::TerminalController(std::ostream &stream)
+   : m_initialized(false)
 {
    // If the stream isn't a tty, then assume it has no capabilities.
    if (!stdcout_isatty()) {
@@ -99,7 +100,7 @@ TerminalController::TerminalController(std::ostream &stream)
    }
    // Check the terminal type.  If we fail, then assume that the
    // terminal has no capabilities.
-   ::initscr();
+   initTermScreen();
    // Look up numeric capabilities.
    COLS = ::tigetnum("cols");
    LINES = ::tigetnum("lines");
@@ -147,11 +148,14 @@ TerminalController::TerminalController(std::ostream &stream)
          m_properties[*iter] = ::tparm(setAnsiFg, index);
       }
    }
+   m_initialized = true;
 }
 
 TerminalController::~TerminalController()
 {
-   ::endwin();
+   if (m_initialized) {
+      ::endwin();
+   }
 }
 
 std::string TerminalController::tigetStr(const std::string &capName)
@@ -165,6 +169,37 @@ std::string TerminalController::tigetStr(const std::string &capName)
       cap = std::regex_replace(cap, regex, "");
    }
    return cap;
+}
+
+void TerminalController::initTermScreen()
+{
+   std::lock_guard locker(m_mutex);
+   NCURSES_CONST char *name;
+   if ((name = getenv("TERM")) == 0
+       || *name == '\0')
+      name = "unknown";
+#ifdef __CYGWIN__
+   /*
+       * 2002/9/21
+       * Work around a bug in Cygwin.  Full-screen subprocesses run from
+       * bash, in turn spawned from another full-screen process, will dump
+       * core when attempting to write to stdout.  Opening /dev/tty
+       * explicitly seems to fix the problem.
+       */
+   if (isatty(fileno(stdout))) {
+      FILE *fp = fopen("/dev/tty", "w");
+      if (fp != 0 && isatty(fileno(fp))) {
+         fclose(stdout);
+         dup2(fileno(fp), STDOUT_FILENO);
+         stdout = fdopen(STDOUT_FILENO, "w");
+      }
+   }
+#endif
+   if (newterm(name, stdout, stdin) == 0) {
+      throw std::runtime_error(format_string("Error opening terminal: %s.\n", name));
+   }
+   /* def_shell_mode - done in newterm/_nc_setupscreen */
+   def_prog_mode();
 }
 
 ///

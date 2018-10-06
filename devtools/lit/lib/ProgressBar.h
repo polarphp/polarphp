@@ -18,6 +18,7 @@
 #include <iostream>
 #include <map>
 #include <chrono>
+#include <mutex>
 
 // forward declare class with namespace
 namespace CLI {
@@ -69,8 +70,7 @@ public:
    const std::string &getProperty(const std::string &key) const;
 protected:
    std::string tigetStr(const std::string &capName);
-   void renderSub(const std::string &match);
-
+   void initTermScreen();
 public:
    // Cursor movement
    const static std::string BOL; // Move the cursor to the beginning of the line
@@ -106,6 +106,8 @@ protected:
    static std::list<std::string> COLORS;
    static std::list<std::string> ANSICOLORS;
    std::map<std::string, std::string> m_properties;
+   std::mutex m_mutex;
+   bool m_initialized;
 };
 
 class AbstractProgressBar

@@ -483,7 +483,7 @@ int main(int argc, char *argv[])
       if (!quiet) {
          if (succinct && displayProgressBar) {
             try {
-               terminalControllerPointer.reset(new TerminalController{});
+               terminalControllerPointer.reset(new TerminalController);
                progressBarPointer.reset(new ProgressBar(*terminalControllerPointer.get(), header));
             } catch (...) {
                std::printf(header.c_str());
@@ -508,9 +508,10 @@ int main(int argc, char *argv[])
       bool hasFailures = false;
       std::unordered_map<ResultCode, TestList> byCode;
       for (TestPointer test : run.getTests()) {
-         if (byCode.find(test->getResult()->getCode()) == byCode.end()) {
-//            byCode[]
-         }
+//         byCode.find(test->getResult()->getCode());
+//         if (byCode.find(test->getResult()->getCode()) == byCode.end()) {
+////            byCode[]
+//         }
       }
    } catch (...) {
       eptr = std::current_exception();
