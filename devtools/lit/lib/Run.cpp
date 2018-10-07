@@ -70,6 +70,7 @@ void Run::executeTests(TestingProgressDisplayPointer display, size_t jobs, size_
    if (m_litConfig->isSingleProcess()) {
       int index = 0;
       for (auto test : m_tests) {
+
          std::tuple<int, TestPointer> result = worker_run_one_test(index, test);
          consumeTestResult(result);
          ++index;

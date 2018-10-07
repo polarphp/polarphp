@@ -304,6 +304,7 @@ ProgressBar::ProgressBar(const TerminalController &term, const std::string &head
    : BOL(term.getProperty(TerminalController::BOL)),
      XNL("\n"),
      m_term(term),
+     m_header(header),
      m_cleared(true),
      m_useETA(useETA)
 {
@@ -327,7 +328,6 @@ ProgressBar::ProgressBar(const TerminalController &term, const std::string &head
    if (m_useETA) {
       m_startTime = std::chrono::system_clock::now();
    }
-   update(0, "");
 }
 
 void ProgressBar::update(float percent, std::string message)
@@ -336,7 +336,7 @@ void ProgressBar::update(float percent, std::string message)
       std::printf("%s\n", m_header.c_str());
       m_cleared = false;
    }
-   std::string prefix = format_string("%3d%%", percent * 100);
+   std::string prefix = format_string("%3d%%", static_cast<int>(percent * 100));
    std::string suffix = "";
    if (m_useETA) {
       auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - m_startTime).count();
@@ -356,27 +356,25 @@ void ProgressBar::update(float percent, std::string message)
    } else {
       message = "... " + message.substr(-(m_width - 4));
    }
-   std::string output = BOL + m_term.getProperty(TerminalController::UP) +
+
+   std::string output = BOL +
          m_term.getProperty(TerminalController::CLEAR_EOL);
+
    output += format_string(m_bar, prefix.c_str(), std::string(n, '=').c_str(),
                            std::string(barWidth - n, '-').c_str(), suffix.c_str());
    output += XNL;
    output += m_term.getProperty(TerminalController::CLEAR_EOL);
    output += message;
-   std::printf("%s\n", message.c_str());
-   std::cout << "xxx" << output << std::endl;
+   std::printf("%s\n", output.c_str());
    if (!m_term.XN) {
       std::fflush(stdout);
    }
-   std::cout << "xxx" << std::endl;
 }
 
 void ProgressBar::clear()
 {
    if (!m_cleared) {
-      std::printf("%s\n", (BOL + m_term.getProperty(TerminalController::CLEAR_EOL) +
-                           m_term.getProperty(TerminalController::UP) +
-                           m_term.getProperty(TerminalController::CLEAR_EOL) +
+      std::printf("%s", (BOL + m_term.getProperty(TerminalController::CLEAR_EOL) +
                            m_term.getProperty(TerminalController::UP) +
                            m_term.getProperty(TerminalController::CLEAR_EOL)).c_str());
       std::fflush(stdout);
@@ -424,7 +422,7 @@ void TestingProgressDisplay::update(TestPointer test)
       update_incremental_cache(test);
    }
    if (m_progressBar) {
-      m_progressBar->update(m_completed / m_numTests, test->getFullName());
+      m_progressBar->update(m_completed / static_cast<float>(m_numTests), test->getFullName());
    }
    bool shouldShow = test->getResult()->getCode()->isFailure() ||
          m_showAllOutput ||
