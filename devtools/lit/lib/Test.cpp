@@ -328,7 +328,7 @@ void Test::writeJUnitXML(std::string &xmlStr)
    std::string &testName = *m_pathInSuite.rbegin();
    std::list<std::string> safeTestPath;
    auto piter = m_pathInSuite.begin();
-   for (int i = 0; i < m_pathInSuite.size() - 1; ++i) {
+   for (size_t i = 0; i < m_pathInSuite.size() - 1; ++i) {
       std::string pathItem = *piter;
       replace_string(".", "_", pathItem);
       safeTestPath.push_back(pathItem);

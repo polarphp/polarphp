@@ -24,9 +24,12 @@ namespace lit {
 
 class LitConfig;
 class TestFormat;
+class Test;
 class TestingConfig;
 using TestingConfigPointer = std::shared_ptr<TestingConfig>;
 using LitConfigPointer = std::shared_ptr<LitConfig>;
+using TestPointer = std::shared_ptr<Test>;
+using ParallelismGroupSetter = void (*)(TestPointer);
 
 class TestingConfig {
 public:
@@ -39,7 +42,7 @@ public:
                  const std::optional<std::string> &testSourceRoot, const std::set<std::string> &excludes,
                  const std::set<std::string> &availableFeatures, bool pipefail,
                  const std::set<std::string> &limitToFeatures = {}, bool isEarly = false,
-                 const std::string &parallelismGroup = "")
+                 const std::any &parallelismGroup = std::any{})
       : m_parent(parent),
         m_name(name),
         m_suffixes(suffixes),
@@ -87,6 +90,10 @@ public:
    TestingConfig &setAvailableFeatures(const std::set<std::string> &features);
    TestingConfig &setPipeFail(bool flag);
    TestingConfig &setLimitToFeatures(const std::set<std::string> &features);
+   TestingConfig &setParallelismGroup(const std::string &pgroup);
+   TestingConfig &setParallelismGroup(ParallelismGroupSetter handle);
+   const std::any &getParallelismGroup() const;
+   std::any &getParallelismGroup();
    TestingConfig &setIsEarly(bool flag);
    TestingConfig &setExtraConfig(const std::string &name, std::any value);
    void loadFromPath(const std::string &path, LitConfigPointer litConfig);
@@ -106,7 +113,7 @@ protected:
    bool m_pipefail;
    std::set<std::string> m_limitToFeatures;
    bool m_isEarly;
-   std::string m_parallelismGroup;
+   std::any m_parallelismGroup;
    std::map<std::string, std::any> m_extraConfig;
 };
 

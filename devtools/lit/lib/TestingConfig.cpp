@@ -233,6 +233,28 @@ TestingConfig &TestingConfig::setLimitToFeatures(const std::set<std::string> &fe
    return *this;
 }
 
+TestingConfig &TestingConfig::setParallelismGroup(const std::string &pgroup)
+{
+   m_parallelismGroup = pgroup;
+   return *this;
+}
+
+TestingConfig &TestingConfig::setParallelismGroup(ParallelismGroupSetter handle)
+{
+   m_parallelismGroup = handle;
+   return *this;
+}
+
+const std::any &TestingConfig::getParallelismGroup() const
+{
+   return m_parallelismGroup;
+}
+
+std::any &TestingConfig::getParallelismGroup()
+{
+   return const_cast<std::any &>(static_cast<const TestingConfig *>(this)->getParallelismGroup());
+}
+
 TestingConfig &TestingConfig::setIsEarly(bool flag)
 {
    m_isEarly = flag;

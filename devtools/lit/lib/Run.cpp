@@ -21,6 +21,8 @@ namespace polar {
 namespace lit {
 
 std::tuple<int, TestPointer> worker_run_one_test(int testIndex, TestPointer test);
+void do_execute_test(TestPointer test, LitConfigPointer litConfig, std::map<std::string,
+                     Semaphore> &parallelismSemaphores);
 
 Run::Run(LitConfigPointer litConfig, const TestList &tests)
    : m_litConfig(litConfig),
@@ -39,6 +41,16 @@ const TestList &Run::getTests() const
 TestList &Run::getTests()
 {
    return m_tests;
+}
+
+void Run::executeTest(TestPointer test)
+{
+   do_execute_test(test, m_litConfig, m_parallelismSemaphores);
+}
+
+void Run::executeTestsInPool(int jobs, int maxTime)
+{
+
 }
 
 // execute_tests(display, jobs, [max_time])
@@ -135,6 +147,12 @@ std::tuple<int, TestPointer> worker_run_one_test(int testIndex, TestPointer test
    std::this_thread::sleep_for(std::chrono::milliseconds(300));
    test->setResult(std::make_shared<Result>(PASS, "pass the test", rand() % 15));
    return std::make_tuple(testIndex, test);
+}
+
+void do_execute_test(TestPointer test, LitConfigPointer litConfig, std::map<std::string,
+                     Semaphore> &parallelismSemaphores)
+{
+
 }
 
 } // lit
