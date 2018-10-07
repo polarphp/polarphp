@@ -13,6 +13,7 @@
 #define POLAR_DEVLTOOLS_LIT_RUN_H
 
 #include "Test.h"
+#include "Semaphore.h"
 
 namespace polar {
 namespace lit {
@@ -41,6 +42,7 @@ protected:
    TestingProgressDisplayPointer m_display;
    int m_failureCount;
    bool m_hitMaxFailures;
+   std::map<std::string, Semaphore> m_parallelismSemaphores;
 };
 
 } // lit

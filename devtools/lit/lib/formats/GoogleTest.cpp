@@ -107,7 +107,7 @@ std::list<std::string> GoogleTest::getGTestTests(const std::string &path, LitCon
       if (line.empty()) {
          continue;
       }
-      int index = 0;
+      size_t index = 0;
       while (line.substr(index * 2, 2) == "  ") {
          index += 1;
       }
@@ -129,9 +129,9 @@ std::list<std::string> GoogleTest::getGTestTests(const std::string &path, LitCon
 }
 
 TestList GoogleTest::getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
-                                                                 const std::list<std::string> &pathInSuite,
-                                                                 LitConfigPointer litConfig,
-                                                                 TestingConfigPointer localConfig)
+                                         const std::list<std::string> &pathInSuite,
+                                         LitConfigPointer litConfig,
+                                         TestingConfigPointer localConfig)
 {
    TestList tests;
    std::string sourcePath = testSuite->getSourcePath(pathInSuite);
@@ -188,7 +188,7 @@ ExecResultTuple GoogleTest::execute(TestPointer test, LitConfigPointer litConfig
       std::string passingTestLine = "[  PASSED  ] 1 test.";
       if (output.find(passingTestLine) == std::string::npos) {
          std::string msg = format_string("Unable to find %s in gtest output:\n\n%s%s",
-                             passingTestLine, output, errorMsg);
+                                         passingTestLine, output, errorMsg);
          return ExecResultTuple{UNRESOLVED, msg};
       }
       return ExecResultTuple{

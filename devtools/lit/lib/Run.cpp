@@ -26,6 +26,9 @@ Run::Run(LitConfigPointer litConfig, const TestList &tests)
    : m_litConfig(litConfig),
      m_tests(tests)
 {
+   for (auto &item: m_litConfig->getParallelismGroups()) {
+      m_parallelismSemaphores.emplace(item.first, item.second);
+   }
 }
 
 const TestList &Run::getTests() const
@@ -129,7 +132,7 @@ void Run::consumeTestResult(std::tuple<int, TestPointer> &poolResult)
 /// the display.
 std::tuple<int, TestPointer> worker_run_one_test(int testIndex, TestPointer test)
 {
-   std::this_thread::sleep_for(std::chrono::milliseconds(500));
+   std::this_thread::sleep_for(std::chrono::milliseconds(300));
    test->setResult(std::make_shared<Result>(PASS, "pass the test", rand() % 15));
    return std::make_tuple(testIndex, test);
 }

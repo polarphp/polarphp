@@ -38,7 +38,7 @@ public:
              const std::string &cfgSetterPluginDir,
              const std::optional<std::string> &configPrefix = std::nullopt,
              int maxIndividualTestTime = 0, const std::optional<int> &maxFailures = std::nullopt,
-             const std::map<std::string, std::string> &parallelismGroups = std::map<std::string, std::string>{},
+             const std::map<std::string, int> &parallelismGroups = std::map<std::string, int>{},
              bool echoAllCommands = false);
 
    int getMaxIndividualTestTime()
@@ -102,7 +102,7 @@ public:
    const std::list<std::string> &getValgrindArgs() const;
    int getMaxIndividualTestTime() const;
    const std::optional<int> &getMaxFailures() const;
-   const std::map<std::string, std::string> &getParallelismGroups() const;
+   const std::map<std::string, int> &getParallelismGroups() const;
    bool isEchoAllCommands() const;
 
 private:
@@ -132,7 +132,7 @@ protected:
    std::list<std::string> m_valgrindArgs;
    int m_maxIndividualTestTime;
    std::optional<int> m_maxFailures;
-   std::map<std::string, std::string> m_parallelismGroups;
+   std::map<std::string, int> m_parallelismGroups;
    bool m_echoAllCommands;
 };
 

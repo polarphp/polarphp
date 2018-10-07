@@ -351,7 +351,7 @@ int main(int argc, char *argv[])
             (!cfgPrefix.empty() ? std::optional(cfgPrefix) : std::nullopt),
             maxIndividualTestTime,
             maxFailures,
-            std::map<std::string, std::string>{},
+            std::map<std::string, int>{},
       echoAllCommands
             );
       // Perform test discovery.

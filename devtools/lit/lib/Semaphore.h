@@ -26,6 +26,11 @@ private:
    unsigned long m_count = 0; // Initialized as locked.
 
 public:
+   Semaphore(unsigned long value)
+      : m_count(value)
+   {}
+   Semaphore(const Semaphore &other) = delete;
+   Semaphore &operator=(const Semaphore &other) = delete;
    void notify()
    {
       std::lock_guard<decltype(m_mutex)> lock(m_mutex);
@@ -36,8 +41,10 @@ public:
    void wait()
    {
       std::unique_lock<decltype(m_mutex)> lock(m_mutex);
-      while(!m_count) // Handle spurious wake-ups.
+      // Handle spurious wake-ups.
+      while(!m_count) {
          m_condition.wait(lock);
+      }
       --m_count;
    }
 

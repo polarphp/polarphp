@@ -24,7 +24,7 @@ LitConfig::LitConfig(const std::string &progName, const std::list<std::string> &
                      bool debug, bool isWindows, const std::map<std::string, std::any> &params,
                      const std::string &cfgSetterPluginDir,
                      const std::optional<std::string> &configPrefix, int maxIndividualTestTime,
-                     const std::optional<int> &maxFailures, const std::map<std::string, std::string> &parallelismGroups,
+                     const std::optional<int> &maxFailures, const std::map<std::string, int> &parallelismGroups,
                      bool echoAllCommands)
    : m_progName(progName), m_path(path),
      m_quiet(quiet), m_useValgrind(useValgrind),
@@ -65,6 +65,7 @@ LitConfig &LitConfig::setMaxIndividualTestTime(int value)
 {
    assert(value >= 0);
    m_maxIndividualTestTime = value;
+   return *this;
 }
 
 void LitConfig::writeMessage(const std::string &kind, const std::string &message,
@@ -229,7 +230,7 @@ const std::optional<int> &LitConfig::getMaxFailures() const
    return m_maxFailures;
 }
 
-const std::map<std::string, std::string> &LitConfig::getParallelismGroups() const
+const std::map<std::string, int> &LitConfig::getParallelismGroups() const
 {
    return m_parallelismGroups;
 }
