@@ -267,13 +267,13 @@ void SimpleProgressBar::update(float percent, std::string message)
       std::printf("%s\n", m_header.c_str());
       m_atIndex = 0;
    }
-   int next = int(percent * 50);
+   int next = static_cast<int>(percent * 50);
    if (next == m_atIndex) {
       return;
    }
    for (int i = m_atIndex; i < next; ++i) {
       int idx = i % 5;
-      if (5 == idx) {
+      if (0 == idx) {
          std::printf("%-2d", i * 2);
       } else if (1 == idx) {
          // skip
@@ -324,7 +324,6 @@ ProgressBar::ProgressBar(const TerminalController &term, const std::string &head
       m_width = 75;
    }
    m_bar = m_term.render(BAR);
-   m_useETA = useETA;
    if (m_useETA) {
       m_startTime = std::chrono::system_clock::now();
    }
@@ -366,9 +365,7 @@ void ProgressBar::update(float percent, std::string message)
    output += m_term.getProperty(TerminalController::CLEAR_EOL);
    output += message;
    std::printf("%s\n", output.c_str());
-   if (!m_term.XN) {
-      std::fflush(stdout);
-   }
+   std::fflush(stdout);
 }
 
 void ProgressBar::clear()

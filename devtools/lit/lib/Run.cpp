@@ -70,7 +70,6 @@ void Run::executeTests(TestingProgressDisplayPointer display, size_t jobs, size_
    if (m_litConfig->isSingleProcess()) {
       int index = 0;
       for (auto test : m_tests) {
-
          std::tuple<int, TestPointer> result = worker_run_one_test(index, test);
          consumeTestResult(result);
          ++index;
@@ -130,6 +129,7 @@ void Run::consumeTestResult(std::tuple<int, TestPointer> &poolResult)
 /// the display.
 std::tuple<int, TestPointer> worker_run_one_test(int testIndex, TestPointer test)
 {
+   std::this_thread::sleep_for(std::chrono::milliseconds(500));
    test->setResult(std::make_shared<Result>(PASS, "pass the test", rand() % 15));
    return std::make_tuple(testIndex, test);
 }

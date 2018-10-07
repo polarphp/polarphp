@@ -81,6 +81,7 @@ BooleanExpression &BooleanExpression::parseNOT()
          m_token = *m_tokenIterator++;
       }
    }
+   return *this;
 }
 
 BooleanExpression &BooleanExpression::parseAND()
@@ -94,6 +95,7 @@ BooleanExpression &BooleanExpression::parseAND()
       // doesn't matter for this limited expression grammar
       m_value = left && right;
    }
+   return *this;
 }
 
 BooleanExpression &BooleanExpression::parseOR()
@@ -107,6 +109,7 @@ BooleanExpression &BooleanExpression::parseOR()
       // doesn't matter for this limited expression grammar
       m_value = left || right;
    }
+   return *this;
 }
 
 std::optional<bool> BooleanExpression::evaluate(const std::string &str, const std::set<std::string> variables,

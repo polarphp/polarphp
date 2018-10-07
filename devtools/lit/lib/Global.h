@@ -56,6 +56,8 @@ using CfgSetterType = void (*)(TestingConfig *config, LitConfig *litConfig);
         };\
     }
 
+#define POLAR_ATTR_UNUSED [[maybe_unused]]
+
 } // lit
 } // polar
 

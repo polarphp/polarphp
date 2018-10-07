@@ -34,6 +34,8 @@
 #include <chrono>
 #include <fstream>
 #include <thread>
+#include <condition_variable>
+#include <atomic>
 
 using polar::lit::LitConfigPointer;
 using polar::lit::LitConfig;
@@ -54,6 +56,10 @@ using polar::lit::AbstractProgressBar;
 using polar::lit::TestingProgressDisplay;
 using polar::lit::format_string;
 namespace fs = std::filesystem;
+
+std::mutex sg_signalMutex;
+std::condition_variable sg_signalConditionVar;
+std::atomic_bool sg_testFinished = false;
 
 namespace {
 
@@ -166,9 +172,9 @@ void write_test_results(polar::lit::Run &run, LitConfigPointer, size_t testingTi
 
 } // anonymous namespace
 
-void polar_signal_handler(int sig)
+void polar_signal_handler(int)
 {
-   std::cout << "xiuxiux" << std::endl;
+   sg_signalConditionVar.notify_one();
 }
 
 void setup_siganl()
@@ -178,6 +184,16 @@ void setup_siganl()
    sigemptyset(&sigIntHandler.sa_mask);
    sigIntHandler.sa_flags = 0;
    sigaction(SIGINT, &sigIntHandler, nullptr);
+}
+
+void signal_detect_worker()
+{
+   std::unique_lock<std::mutex> lk(sg_signalMutex);
+   sg_signalConditionVar.wait(lk);
+   if (!sg_testFinished.load()) {
+      std::cout << std::endl << "catch ctrl-c request, exit test cycle ... " << std::endl;
+      std::exit(2);
+   }
 }
 
 int main(int argc, char *argv[])
@@ -268,7 +284,7 @@ int main(int argc, char *argv[])
    litApp.add_flag("--single-process", singleProcess, "Don't run tests in parallel.  Intended for debugging "
                                                       "single test failures")->group("Debug and Experimental Options");
    CLI11_PARSE(litApp, argc, argv);
-
+   std::thread worker(signal_detect_worker);
    std::exception_ptr eptr;
    try {
       if (showVersion) {
@@ -294,6 +310,7 @@ int main(int argc, char *argv[])
       }
       atexit(polar::lit::temp_files_clear_handler);
       atexit(polar::lit::global_resultcode_destroyer);
+      setup_siganl();
       std::list<std::string> inputs(vector_to_list(testPaths));
       // Create the user defined parameters.
       std::map<std::string, std::any> userParams;
@@ -649,11 +666,15 @@ int main(int argc, char *argv[])
          }
          xmlDoc << "</testsuites>" << std::endl;
       }
+      sg_testFinished.store(true);
+      sg_signalConditionVar.notify_one();
+      worker.join();
       if (hasFailures) {
          exit(1);
       }
       return 0;
    } catch (...) {
+      worker.join();
       eptr = std::current_exception();
    }
    general_exception_handler(eptr);
