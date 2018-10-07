@@ -15,6 +15,7 @@
 #include "../Utils.h"
 #include <filesystem>
 
+
 namespace polar {
 namespace lit {
 
@@ -143,11 +144,10 @@ std::string generate_tempfilename()
 
 } // anonymous namespace
 
-ExecResultTuple
-OneCommandPerFileTest::execute(TestPointer test, LitConfigPointer litConfig)
+ResultPointer OneCommandPerFileTest::execute(TestPointer test, LitConfigPointer litConfig)
 {
    if (test->getConfig()->isUnsupported()) {
-      return ExecResultTuple{UNSUPPORTED, "Test is unsupported"};
+      return std::make_shared<Result>(UNSUPPORTED, "Test is unsupported");
    }
    std::string cmd = m_command;
    // If using temp input, create a temporary file and hand it to the
@@ -176,7 +176,7 @@ OneCommandPerFileTest::execute(TestPointer test, LitConfigPointer litConfig)
    std::string diags = out + err;
    trim_string(diags);
    if (0 == exitCode && diags.empty()) {
-      ExecResultTuple{PASS, ""};
+      return std::make_shared<Result>(PASS, "");
    }
    // Try to include some useful information.
    std::string report = format_string("Command : %s\n", cmd.c_str());
@@ -191,7 +191,7 @@ OneCommandPerFileTest::execute(TestPointer test, LitConfigPointer litConfig)
       report += "--\n" + tempFileContent + "--\n";
    }
    report += "Output:\n--\n" + diags + "--";
-   return ExecResultTuple{FAIL, report};
+   return std::make_shared<Result>(FAIL, report);
 }
 
 } // lit

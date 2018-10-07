@@ -16,6 +16,8 @@
 #include "ProgressBar.h"
 #include <iostream>
 #include <tuple>
+#include <string>
+#include <chrono>
 
 namespace polar {
 namespace lit {
@@ -149,9 +151,56 @@ std::tuple<int, TestPointer> worker_run_one_test(int testIndex, TestPointer test
    return std::make_tuple(testIndex, test);
 }
 
+namespace {
+
+class SemaphoreReleaser
+{
+public:
+   SemaphoreReleaser(Semaphore *semaphore = nullptr)
+      : m_semaphore(semaphore)
+   {
+   }
+
+   SemaphoreReleaser &assign(Semaphore *semaphore)
+   {
+      m_semaphore = semaphore;
+      return *this;
+   }
+
+   ~SemaphoreReleaser()
+   {
+      if (m_semaphore != nullptr) {
+         m_semaphore->notify();
+      }
+   }
+protected:
+   Semaphore *m_semaphore;
+};
+
+} // anonymous namespace
+
 void do_execute_test(TestPointer test, LitConfigPointer litConfig, std::map<std::string,
                      Semaphore> &parallelismSemaphores)
 {
+   std::any &pg = test->getConfig()->getParallelismGroup();
+   std::string pgName;
+   if (pg.has_value()) {
+      if (pg.type() == typeid(ParallelismGroupSetter)) {
+         pgName = std::any_cast<ParallelismGroupSetter>(pg)(test);
+      } else if (pg.type() == typeid(std::string)) {
+         pgName = std::any_cast<std::string>(pg);
+      }
+   }
+   SemaphoreReleaser pgReleaser;
+   Semaphore *semaphore = nullptr;
+   if (!pgName.empty() && parallelismSemaphores.find(pgName) != parallelismSemaphores.end()) {
+      semaphore = &parallelismSemaphores.at(pgName);
+   }
+   if (semaphore != nullptr) {
+      pgReleaser.assign(semaphore);
+      semaphore->wait();
+   }
+   std::chrono::time_point startTime = std::chrono::system_clock::now();
 
 }
 

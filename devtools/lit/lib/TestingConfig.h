@@ -29,7 +29,7 @@ class TestingConfig;
 using TestingConfigPointer = std::shared_ptr<TestingConfig>;
 using LitConfigPointer = std::shared_ptr<LitConfig>;
 using TestPointer = std::shared_ptr<Test>;
-using ParallelismGroupSetter = void (*)(TestPointer);
+using ParallelismGroupSetter = std::string (*)(TestPointer);
 
 class TestingConfig {
 public:

@@ -156,7 +156,7 @@ TestList GoogleTest::getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
    return tests;
 }
 
-ExecResultTuple GoogleTest::execute(TestPointer test, LitConfigPointer litConfig)
+ResultPointer GoogleTest::execute(TestPointer test, LitConfigPointer litConfig)
 {
    fs::path sourcePath = test->getSourcePath();
    std::string testPath = sourcePath.parent_path();
@@ -174,7 +174,7 @@ ExecResultTuple GoogleTest::execute(TestPointer test, LitConfigPointer litConfig
       cmd = join_string_list(litConfig->getValgrindArgs(), " ") + cmd;
    }
    if (litConfig->isNoExecute()) {
-      return ExecResultTuple{PASS, ""};
+      return std::make_shared<Result>(PASS, "");
    }
    try {
       RunCmdResponse runResponse = execute_command(cmd, std::nullopt, test->getConfig()->getEnvironment(),
@@ -183,21 +183,18 @@ ExecResultTuple GoogleTest::execute(TestPointer test, LitConfigPointer litConfig
       std::string output = std::get<1>(runResponse);
       std::string errorMsg = std::get<2>(runResponse);
       if (exitCode != 0) {
-         return ExecResultTuple{FAIL, output + errorMsg};
+         return std::make_shared<Result>(FAIL, output + errorMsg);
       }
       std::string passingTestLine = "[  PASSED  ] 1 test.";
       if (output.find(passingTestLine) == std::string::npos) {
          std::string msg = format_string("Unable to find %s in gtest output:\n\n%s%s",
-                                         passingTestLine, output, errorMsg);
-         return ExecResultTuple{UNRESOLVED, msg};
+                                         passingTestLine.c_str(), output.c_str(), errorMsg.c_str());
+         return std::make_shared<Result>(UNRESOLVED, msg);
       }
-      return ExecResultTuple{
-         PASS, ""
-      };
+      return std::make_shared<Result>(PASS, "");
    } catch (ExecuteCommandTimeoutException &) {
-      return ExecResultTuple {
-         TIMEOUT, format_string("Reached timeout of %d seconds", litConfig->getMaxIndividualTestTime())
-      };
+      return std::make_shared<Result>(
+         TIMEOUT, format_string("Reached timeout of %d seconds", litConfig->getMaxIndividualTestTime()));
    }
 }
 

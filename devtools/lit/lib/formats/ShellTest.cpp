@@ -20,10 +20,10 @@ ShTest::ShTest(bool executeExternal)
    : m_executeExternal(executeExternal)
 {}
 
-ExecResultTuple ShTest::execute(TestPointer test, LitConfigPointer litConfig)
+ResultPointer ShTest::execute(TestPointer test, LitConfigPointer litConfig)
 {
    Result result = execute_shtest(test, litConfig, m_executeExternal);
-   return ExecResultTuple{PASS, ""};
+   return std::make_shared<Result>(PASS, "");
 }
 
 } // lit

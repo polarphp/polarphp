@@ -32,6 +32,8 @@ using LitConfigPointer = std::shared_ptr<LitConfig>;
 using TestingConfigPointer = std::shared_ptr<TestingConfig>;
 using TestPointer = std::shared_ptr<Test>;
 using ExecResultTuple = std::tuple<const ResultCode *, std::string>;
+using ResultPointer = std::shared_ptr<Result>;
+using TestList = std::list<TestPointer>;
 
 class TestFormat
 {
@@ -41,16 +43,16 @@ public:
                                                                 const std::list<std::string> &pathInSuite,
                                                                 LitConfigPointer litConfig,
                                                                 TestingConfigPointer localConfig) = 0;
-   virtual ExecResultTuple execute(TestPointer test, LitConfigPointer litConfig) = 0;
+   virtual ResultPointer execute(TestPointer test, LitConfigPointer litConfig) = 0;
 };
 
 class FileBasedTest : public TestFormat
 {
 public:
-   std::list<std::shared_ptr<Test>> getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
-                                                        const std::list<std::string> &pathInSuite,
-                                                        LitConfigPointer litConfig,
-                                                        TestingConfigPointer localConfig);
+   TestList getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
+                                const std::list<std::string> &pathInSuite,
+                                LitConfigPointer litConfig,
+                                TestingConfigPointer localConfig);
 };
 
 class OneCommandPerFileTest : public TestFormat
@@ -60,12 +62,12 @@ public:
                          bool recursive = false,
                          const std::string &pattern = ".*",
                          bool useTempInput = false);
-   std::list<std::shared_ptr<Test>> getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
-                                                        const std::list<std::string> &pathInSuite,
-                                                        LitConfigPointer litConfig,
-                                                        TestingConfigPointer localConfig);
+   TestList getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
+                                const std::list<std::string> &pathInSuite,
+                                LitConfigPointer litConfig,
+                                TestingConfigPointer localConfig);
    void createTempInput(std::FILE *temp, std::shared_ptr<Test> test);
-   ExecResultTuple execute(TestPointer test, LitConfigPointer litConfig);
+   ResultPointer execute(TestPointer test, LitConfigPointer litConfig);
 protected:
    std::string m_command;
    std::string m_dir;

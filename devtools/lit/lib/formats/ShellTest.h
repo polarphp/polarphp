@@ -40,7 +40,7 @@ class ShTest : public FileBasedTest
 {
 public:
    ShTest(bool executeExternal = false);
-   ExecResultTuple execute(TestPointer test, LitConfigPointer litConfig);
+   ResultPointer execute(TestPointer test, LitConfigPointer litConfig);
 protected:
    bool m_executeExternal;
 };
