@@ -60,7 +60,7 @@ void do_run_program(const std::string &cmd, int &exitCode,
                     const std::optional<std::map<std::string, std::string>> &env,
                     const std::optional<std::string> &input,
                     std::string &output, std::string &errMsg,
-                    const int count, ...)
+                    const size_t count, ...)
 {
    int stdinChannel[2];
    int stdoutChannel[2];
@@ -70,13 +70,13 @@ void do_run_program(const std::string &cmd, int &exitCode,
       errMsg = strerror(errno);
    }
    // prepare args
-   char *targetArgs[count];
-   targetArgs[count - 1] = NULL;
+   std::shared_ptr<char *[]> targetArgs(new char *[count]);
+   targetArgs[static_cast<std::ptrdiff_t>(count - 1)] = nullptr;
    targetArgs[0] = const_cast<char *>(cmd.c_str());
    va_list args;
    va_start(args, count);
-   for (int i = 1; i < count - 1; ++i) {
-      targetArgs[i] = va_arg(args, char *);
+   for (size_t i = 1; i < count - 1; ++i) {
+      targetArgs[static_cast<std::ptrdiff_t>(count - 1)] = va_arg(args, char *);
    }
    va_end(args);
    pid_t cpid = fork();
@@ -124,7 +124,7 @@ void do_run_program(const std::string &cmd, int &exitCode,
          envArray.reset(new char *[envMap.size() + 1]);
          envArray[envMap.size()] = nullptr;
          char lineBuffer[256];
-         int i = 0;
+         size_t i = 0;
          for (auto &envItem : envMap) {
             if (-1 == sprintf(lineBuffer, "%s=%s", envItem.first.c_str(), envItem.second.c_str())) {
                std::cerr << strerror(errno);
@@ -136,7 +136,7 @@ void do_run_program(const std::string &cmd, int &exitCode,
             ++i;
          }
       }
-      if (-1 == execve(cmdpath.value().c_str(), targetArgs, envArray.get())) {
+      if (-1 == execve(cmdpath.value().c_str(), targetArgs.get(), envArray.get())) {
          std::cerr << "execlp error: " << strerror(errno) << std::endl;
          exit(1);
       }
@@ -160,14 +160,14 @@ void do_run_program(const std::string &cmd, int &exitCode,
          const std::string &inputStr = input.value();
          size_t tobeSize = inputStr.size();
          if (tobeSize > 0) {
-            int written = 0;
+            size_t written = 0;
             const char *data = inputStr.data();
-            while (int n = write(stdinChannel[1], data, 256) != 0 && written < tobeSize) {
+            while (ssize_t n = write(stdinChannel[1], data, 256) != 0 && written < tobeSize) {
                if (n == -1) {
                   exitCode = -1;
                   errMsg = strerror(errno);
                } else if (n > 0) {
-                  written += n;
+                  written += static_cast<size_t>(n);
                }
             }
          }
@@ -185,7 +185,7 @@ void do_run_program(const std::string &cmd, int &exitCode,
             return;
          }
          if (readed > 0) {
-            output += std::string(readBuffer, readed);
+            output += std::string(readBuffer, static_cast<size_t>(readed));
          }
       } while (readed > 0);
    } else {
@@ -198,7 +198,7 @@ void do_run_program(const std::string &cmd, int &exitCode,
             return;
          }
          if (readed > 0) {
-            errMsg += std::string(readBuffer, readed);
+            errMsg += std::string(readBuffer, static_cast<size_t>(readed));
          }
       } while (readed > 0);
    }

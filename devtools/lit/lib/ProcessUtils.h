@@ -29,7 +29,7 @@ void do_run_program(const std::string &cmd, int &exitCode,
                     const std::optional<std::map<std::string, std::string>> &env,
                     const std::optional<std::string> &input,
                     std::string &output, std::string &errMsg,
-                    const int count, ...);
+                    const size_t count, ...);
 
 inline char *run_program_arg_filter(char *arg)
 {

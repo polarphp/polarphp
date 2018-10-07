@@ -504,11 +504,7 @@ int main(int argc, char *argv[])
          if (succinct && displayProgressBar) {
             try {
                terminalControllerPointer.reset(new TerminalController);
-               //progressBarPointer.reset(new ProgressBar(*terminalControllerPointer.get(), header));
-               std::cout << "xiuxiux" << std::endl;
-               printw("xiuxiuxiux");
-               refresh();
-               getch();
+               progressBarPointer.reset(new ProgressBar(*terminalControllerPointer.get(), header));
             } catch (...) {
                std::printf("%s\n", header.c_str());
                progressBarPointer.reset(new SimpleProgressBar("Testing: "));

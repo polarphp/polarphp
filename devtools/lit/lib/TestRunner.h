@@ -63,7 +63,7 @@ protected:
 #endif
 
 const static std::string sgc_kdevNull("/dev/null");
-const static std::regex sgc_kpdbgRegex("%dbg\(([^)'\"]*)\)");
+const static std::regex sgc_kpdbgRegex("%dbg\\(([^)'\"]*)\\)");
 
 class ShellEnvironment
 {

@@ -52,7 +52,7 @@ function(polar_add_unittest test_suite test_name)
    # libpthreads overrides some standard library symbols, so main
    # executable must be linked with it in order to provide consistent
    # API for all shared libaries loaded by this executable.
-   target_link_libraries(${test_name} PRIVATE ${POLAR_TEMP_GTEST_LIBS} ${POLAR_PTHREAD_LIB})
+   target_link_libraries(${test_name} PRIVATE  ${POLAR_TEMP_GTEST_LIBS} ${POLAR_PTHREAD_LIB})
 
    add_dependencies(${test_suite} ${test_name})
    get_target_property(test_suite_folder ${test_suite} FOLDER)

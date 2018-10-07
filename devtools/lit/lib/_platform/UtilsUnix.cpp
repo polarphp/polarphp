@@ -39,12 +39,9 @@ bool stdcout_isatty()
 void modify_file_utime_and_atime(const std::string &filename)
 {
    struct stat fstat;
-   time_t mtime;
    struct utimbuf newTimes;
-   stat(filename.c_str(), &fstat);
-   mtime = fstat.st_mtime; /* seconds since the epoch */
    newTimes.actime = fstat.st_atime; /* keep atime unchanged */
-   newTimes.modtime = time(NULL);    /* set mtime to current time */
+   newTimes.modtime = time(nullptr);    /* set mtime to current time */
    utime(filename.c_str(), &newTimes);
 }
 

@@ -11,7 +11,6 @@ set_target_properties(googletest_gtest_main PROPERTIES
   IMPORTED_LOCATION_DEBUG "${_IMPORT_PREFIX}/lib/libgtest_maind.dylib"
   IMPORTED_SONAME_DEBUG "libgtest_maind.dylib"
   )
-
 list(APPEND _IMPORT_CHECK_TARGETS googletest_gtest_main )
 list(APPEND _IMPORT_CHECK_FILES_FOR_googletest_gtest_main "${_IMPORT_PREFIX}/lib/libgtest_maind.dylib" )
 

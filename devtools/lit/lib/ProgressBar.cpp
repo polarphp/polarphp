@@ -239,20 +239,13 @@ void TerminalController::initTermScreen()
 ///
 std::string TerminalController::render(std::string tpl) const
 {
-   std::regex regex(R"(\$\{\w+\})");
-   auto tplSearchBegin =
-         std::sregex_token_iterator(tpl.begin(), tpl.end(), regex, 0);
-   auto tplSearchEnd = std::sregex_token_iterator();
-   while (tplSearchBegin != tplSearchEnd) {
-      std::sub_match subMatch = *tplSearchBegin;
-      if (subMatch.matched) {
-         std::string varname = subMatch.str().substr(2ul, static_cast<size_t>(subMatch.length() - 3));
-         trim_string(varname);
-         if (m_properties.find(varname) != m_properties.end()) {
-            tpl.replace(subMatch.first, subMatch.second, m_properties.at(varname));
-         }
+   std::regex regex(R"(\$\{(\w+)\})");
+   std::smatch varMatch;
+   while(std::regex_search(tpl, varMatch, regex)) {
+      std::string varname = varMatch[1];
+      if (m_properties.find(varname) != m_properties.end()) {
+         tpl.replace(varMatch[0].first, varMatch[0].second, m_properties.at(varname));
       }
-      ++tplSearchBegin;
    }
    return tpl;
 }
