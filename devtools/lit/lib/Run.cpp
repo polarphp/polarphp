@@ -56,7 +56,7 @@ TestList &Run::getTests()
 // Upon completion, each test in the run will have its result
 // computed. Tests which were not actually executed (for any reason) will
 // be given an UNRESOLVED result.
-void Run::executeTests(TestingProgressDisplayPointer display, int jobs, int maxTime)
+void Run::executeTests(TestingProgressDisplayPointer display, size_t jobs, size_t maxTime)
 {
    // Don't do anything if we aren't going to run any tests.
    if (m_tests.empty() || jobs == 0) {
@@ -70,7 +70,8 @@ void Run::executeTests(TestingProgressDisplayPointer display, int jobs, int maxT
    if (m_litConfig->isSingleProcess()) {
       int index = 0;
       for (auto test : m_tests) {
-         worker_run_one_test(index, test);
+         std::tuple<int, TestPointer> result = worker_run_one_test(index, test);
+         consumeTestResult(result);
          ++index;
       }
    }

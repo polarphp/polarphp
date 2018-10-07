@@ -18,6 +18,9 @@
 #include "lib/Run.h"
 #include "lib/ProgressBar.h"
 #include "nlohmann/json.hpp"
+#include <signal.h>
+#include <cstdlib>
+#include <unistd.h>
 #include <iostream>
 #include <thread>
 #include <assert.h>
@@ -30,6 +33,7 @@
 #include <iterator>
 #include <chrono>
 #include <fstream>
+#include <thread>
 
 using polar::lit::LitConfigPointer;
 using polar::lit::LitConfig;
@@ -62,8 +66,6 @@ std::list<std::string> vector_to_list(const std::vector<std::string> &items)
    return ret;
 }
 
-} // anonymous namespace
-
 void general_exception_handler(std::exception_ptr eptr)
 {
    try {
@@ -85,7 +87,7 @@ void sort_by_incremental_cache(polar::lit::Run &run)
    });
 }
 
-void write_test_results(polar::lit::Run &run, LitConfigPointer litConfig, int testingTime,
+void write_test_results(polar::lit::Run &run, LitConfigPointer, size_t testingTime,
                         const std::string &outputPath)
 {
    // Construct the data we will write.
@@ -162,6 +164,22 @@ void write_test_results(polar::lit::Run &run, LitConfigPointer litConfig, int te
    jsonStream << std::setw(4) << testsData;
 }
 
+} // anonymous namespace
+
+void polar_signal_handler(int sig)
+{
+   std::cout << "xiuxiux" << std::endl;
+}
+
+void setup_siganl()
+{
+   struct sigaction sigIntHandler;
+   sigIntHandler.sa_handler = polar_signal_handler;
+   sigemptyset(&sigIntHandler.sa_mask);
+   sigIntHandler.sa_flags = 0;
+   sigaction(SIGINT, &sigIntHandler, nullptr);
+}
+
 int main(int argc, char *argv[])
 {
    CLI::App litApp;
@@ -171,7 +189,7 @@ int main(int argc, char *argv[])
    std::string cfgPrefix;
    std::vector<std::string> params;
    std::string cfgSetterPluginDir;
-   CLI::Option *testPathsOpt = litApp.add_option("test_paths", testPaths, "Files or paths to include in the test suite");
+   litApp.add_option("test_paths", testPaths, "Files or paths to include in the test suite");
    litApp.add_flag("--version", showVersion, "Show version and exit");
    CLI::Option *threadsOpt = litApp.add_option("-j,--threads", threadNumbers, "Number of testing threads");
    litApp.add_option("--config-prefix", cfgPrefix, "Prefix for 'lit' config files");
@@ -223,12 +241,12 @@ int main(int argc, char *argv[])
 
    /// Test Selection
    size_t maxTests;
-   float maxTime;
+   size_t maxTime;
    bool shuffle;
    bool incremental;
    std::string filter;
-   int numShards;
-   int runShard;
+   size_t numShards;
+   size_t runShard;
    CLI::Option *maxTestsOpt = litApp.add_option("--max-tests", maxTests, "Maximum number of tests to run")->group("Test Selection");
    litApp.add_option("--max-time", maxTime, "Maximum time to spend testing (in seconds)")->group("Test Selection");
    litApp.add_flag("--shuffle", shuffle, "Run tests in random order")->group("Test Selection");
@@ -260,6 +278,7 @@ int main(int argc, char *argv[])
       if (testPaths.empty()) {
          std::cerr << "No inputs specified" << std::endl;
          std::cout << litApp.help() << std::endl;
+         exit(1);
       }
       if (threadsOpt->empty()) {
          threadNumbers = std::thread::hardware_concurrency();
@@ -365,15 +384,15 @@ int main(int argc, char *argv[])
             for (auto &item : sortedSuitesAndTests) {
                TestSuitePointer testsuite = std::get<0>(item);
                const TestList &tests = std::get<1>(item);
-               printf("  %s - %d tests\n", testsuite->getName(), tests.size());
-               printf("    Source Root: %s\n", testsuite->getSourcePath());
-               printf("    Exec Root  : %s\n", testsuite->getExecPath());
+               printf("  %s - %lu tests\n", testsuite->getName().c_str(), tests.size());
+               printf("    Source Root: %s\n", testsuite->getSourcePath().c_str());
+               printf("    Exec Root  : %s\n", testsuite->getExecPath().c_str());
             }
          }
          return 0;
       }
       // Select and order the tests.
-      int numTotalTests = tests.size();
+      size_t numTotalTests = tests.size();
       // First, select based on the filter expression if given.
       if (!filter.empty()) {
          std::regex filterRegex(filter);
@@ -424,10 +443,10 @@ int main(int argc, char *argv[])
          if (runShard < 1 || runShard > numShards) {
             throw std::runtime_error("--run-shard must be between 1 and --num-shards (inclusive)");
          }
-         int numTests = tests.size();
+         size_t numTests = tests.size();
          // Note: user views tests and shard numbers counting from 1.
-         std::vector<int> testIxs;
-         for (int i = runShard - 1; i < numTests; i += numShards) {
+         std::vector<size_t> testIxs;
+         for (size_t i = runShard - 1; i < numTests; i += numShards) {
             testIxs.push_back(i);
          }
          auto iter = tests.begin();
@@ -446,7 +465,7 @@ int main(int argc, char *argv[])
          size_t previewLength = 3;
          size_t previewMaxLength = std::max(previewLength, testIxs.size());
          std::string ixPreview;
-         for (int i = 0; i < previewMaxLength; ++i) {
+         for (size_t i = 0; i < previewMaxLength; ++i) {
             if (ixPreview.empty()) {
                ixPreview = std::to_string(i + 1);
             } else {
@@ -485,7 +504,11 @@ int main(int argc, char *argv[])
          if (succinct && displayProgressBar) {
             try {
                terminalControllerPointer.reset(new TerminalController);
-               progressBarPointer.reset(new ProgressBar(*terminalControllerPointer.get(), header));
+               //progressBarPointer.reset(new ProgressBar(*terminalControllerPointer.get(), header));
+               std::cout << "xiuxiux" << std::endl;
+               printw("xiuxiuxiux");
+               refresh();
+               getch();
             } catch (...) {
                std::printf("%s\n", header.c_str());
                progressBarPointer.reset(new SimpleProgressBar("Testing: "));
@@ -502,9 +525,9 @@ int main(int argc, char *argv[])
 
       }
       display->finish();
-      int testingTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime).count();
+      size_t testingTime = static_cast<size_t>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime).count());
       if (!quiet) {
-         std::printf("Testing Time: %.2fs\n", testingTime);
+         std::printf("Testing Time: %.2fs\n", static_cast<double>(testingTime));
       }
       // Write out the test data, if requested.
       if (!outputDirOpt->empty()) {
@@ -547,7 +570,7 @@ int main(int argc, char *argv[])
             continue;
          }
          std::printf("%s\n", std::string(20, '*').c_str());
-         std::printf("%s (%d):\n", title.c_str(), elts.size());
+         std::printf("%s (%lu):\n", title.c_str(), elts.size());
          for (TestPointer test: elts) {
             std::printf("    %s\n", test->getFullName().c_str());
          }
@@ -578,12 +601,12 @@ int main(int argc, char *argv[])
          if (quiet && !code->isFailure()) {
             continue;
          }
-         int N = 0;
+         size_t N = 0;
          if (byCode.find(code) != byCode.end()) {
             N = byCode.at(code).size();
          }
          if (N != 0) {
-            std::printf("  %s: %d\n", name.c_str(), N);
+            std::printf("  %s: %lu\n", name.c_str(), N);
          }
       }
       if (!xunitOutputFile.empty()) {
@@ -630,9 +653,13 @@ int main(int argc, char *argv[])
          }
          xmlDoc << "</testsuites>" << std::endl;
       }
+      if (hasFailures) {
+         exit(1);
+      }
+      return 0;
    } catch (...) {
       eptr = std::current_exception();
    }
    general_exception_handler(eptr);
-   return 0;
+
 }

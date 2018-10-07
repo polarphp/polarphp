@@ -32,7 +32,7 @@ public:
    TestList &getTests();
    void executeTest(TestPointer test);
    void executeTestsInPool(int jobs, int maxTime = -1);
-   void executeTests(TestingProgressDisplayPointer display, int jobs, int maxTime = -1);
+   void executeTests(TestingProgressDisplayPointer display, size_t jobs, size_t maxTime = 0);
 protected:
    void consumeTestResult(std::tuple<int, TestPointer> &poolResult);
 protected:

@@ -85,26 +85,46 @@ std::list<std::string> TerminalController::ANSICOLORS {
    "WHITE"
 };
 
+namespace {
+class CursesWinUnlocker
+{
+public:
+   CursesWinUnlocker(bool needUnlock)
+      : m_needUnlock(needUnlock)
+   {
+   }
+   ~CursesWinUnlocker()
+   {
+      if (m_needUnlock) {
+         ::endwin();
+      }
+   }
+protected:
+   bool m_needUnlock;
+};
+}
+
 /// Create a `TerminalController` and initialize its attributes
 /// with appropriate values for the current terminal.
 /// `term_stream` is the stream that will be used for terminal
 /// output; if this stream is not a tty, then the terminal is
 /// assumed to be a dumb terminal (i.e., have no capabilities).
 ///
-TerminalController::TerminalController(std::ostream &stream)
+TerminalController::TerminalController(std::ostream &)
    : m_initialized(false)
 {
    // If the stream isn't a tty, then assume it has no capabilities.
    if (!stdcout_isatty()) {
       throw std::runtime_error("stdcout is not a tty device");
    }
+   initTermScreen();
+   CursesWinUnlocker winLocker(true);
    // Check the terminal type.  If we fail, then assume that the
    // terminal has no capabilities.
-   initTermScreen();
    // Look up numeric capabilities.
-   COLS = ::tigetnum("cols");
-   LINES = ::tigetnum("lines");
-   XN = ::tigetflag("xenl");
+   COLS = ::tigetnum(const_cast<char *>("cols"));
+   LINES = ::tigetnum(const_cast<char *>("lines"));
+   XN = ::tigetflag(const_cast<char *>("xenl"));
    // Look up string capabilities.
    for (std::string capability : STRING_CAPABILITIES) {
       std::list<std::string> parts = split_string(capability, '=');
@@ -112,50 +132,47 @@ TerminalController::TerminalController(std::ostream &stream)
       std::list<std::string>::iterator iter = parts.begin();
       std::string attribute = *iter++;
       std::string capName = *iter++;
+
       m_properties[attribute] = tigetStr(capName);
    }
    // init Colors
-   char *setFg = ::tigetstr("setf");
-   if (nullptr != setFg) {
+   std::string setFg = tigetStr("setf");
+   if (!setFg.empty()) {
       auto iter = COLORS.begin();
       int index = 0;
       for (; iter != COLORS.end(); ++iter, ++index) {
-         m_properties[*iter] = ::tparm(setFg, index);
+         m_properties[*iter] = tparm(setFg, index);
       }
    }
-   char *setAnsiFg = ::tigetstr("setaf");
-   if (nullptr != setAnsiFg) {
+   std::string setAnsiFg = tigetStr("setaf");
+   if (!setAnsiFg.empty()) {
       auto iter = ANSICOLORS.begin();
       int index = 0;
       for (; iter != ANSICOLORS.end(); ++iter, ++index) {
-         m_properties[*iter] = ::tparm(setAnsiFg, index);
+         m_properties[*iter] = tparm(setAnsiFg, index);
       }
    }
 
-   char *setBg = ::tigetstr("setb");
-   if (nullptr != setBg) {
+   std::string setBg = tigetStr("setb");
+   if (!setBg.empty()) {
       auto iter = COLORS.begin();
       int index = 0;
       for (; iter != COLORS.end(); ++iter, ++index) {
-         m_properties[*iter] = ::tparm(setFg, index);
+         m_properties[*iter] = tparm(setFg, index);
       }
    }
-   char *setAnsiBg = ::tigetstr("setab");
-   if (nullptr != setAnsiBg) {
+   std::string setAnsiBg = tigetStr("setab");
+   if (!setAnsiBg.empty()) {
       auto iter = ANSICOLORS.begin();
       int index = 0;
       for (; iter != ANSICOLORS.end(); ++iter, ++index) {
-         m_properties[*iter] = ::tparm(setAnsiFg, index);
+         m_properties[*iter] = tparm(setAnsiFg, index);
       }
    }
-   m_initialized = true;
 }
 
 TerminalController::~TerminalController()
 {
-   if (m_initialized) {
-      ::endwin();
-   }
 }
 
 std::string TerminalController::tigetStr(const std::string &capName)
@@ -163,21 +180,34 @@ std::string TerminalController::tigetStr(const std::string &capName)
    // String capabilities can include "delays" of the form "$<2>".
    // For any modern terminal, we should be able to just ignore
    // these, so strip them out.
-   std::string cap(::tigetstr(const_cast<char *>(capName.c_str())));
+   char *str = ::tigetstr(const_cast<char *>(capName.c_str()));
+   std::string cap;
+   if (str != nullptr && str != reinterpret_cast<char *>(-1)) {
+      cap = str;
+   }
    if (!cap.empty()) {
-      std::regex regex("\$<\d+>[/*]?");
+      std::regex regex("$<\\d+>[/*]?");
       cap = std::regex_replace(cap, regex, "");
    }
    return cap;
+}
+
+std::string TerminalController::tparm(const std::string &arg, int index)
+{
+   char *str = ::tparm(const_cast<char *>(arg.c_str()), index);
+   if (str == nullptr || str == reinterpret_cast<char *>(-1)) {
+      return std::string{};
+   }
+   return str;
 }
 
 void TerminalController::initTermScreen()
 {
    std::lock_guard locker(m_mutex);
    NCURSES_CONST char *name;
-   if ((name = getenv("TERM")) == 0
+   if ((name = getenv("TERM")) == nullptr
        || *name == '\0')
-      name = "unknown";
+      name = const_cast<char *>("unknown");
 #ifdef __CYGWIN__
    /*
        * 2002/9/21
@@ -195,7 +225,7 @@ void TerminalController::initTermScreen()
       }
    }
 #endif
-   if (newterm(name, stdout, stdin) == 0) {
+   if (newterm(name, stdout, stdin) == nullptr) {
       throw std::runtime_error(format_string("Error opening terminal: %s.\n", name));
    }
    /* def_shell_mode - done in newterm/_nc_setupscreen */
@@ -216,7 +246,7 @@ std::string TerminalController::render(std::string tpl) const
    while (tplSearchBegin != tplSearchEnd) {
       std::sub_match subMatch = *tplSearchBegin;
       if (subMatch.matched) {
-         std::string varname = subMatch.str().substr(2, subMatch.length() - 3);
+         std::string varname = subMatch.str().substr(2ul, static_cast<size_t>(subMatch.length() - 3));
          trim_string(varname);
          if (m_properties.find(varname) != m_properties.end()) {
             tpl.replace(subMatch.first, subMatch.second, m_properties.at(varname));
@@ -224,6 +254,7 @@ std::string TerminalController::render(std::string tpl) const
       }
       ++tplSearchBegin;
    }
+   return tpl;
 }
 
 const std::string &TerminalController::getProperty(const std::string &key) const
@@ -240,7 +271,7 @@ SimpleProgressBar::SimpleProgressBar(const std::string &header)
 void SimpleProgressBar::update(float percent, std::string message)
 {
    if (m_atIndex == -1) {
-      std::printf(m_header.c_str());
+      std::printf("%s\n", m_header.c_str());
       m_atIndex = 0;
    }
    int next = int(percent * 50);
@@ -290,7 +321,7 @@ ProgressBar::ProgressBar(const TerminalController &term, const std::string &head
                        "should use a simpler progress dispaly.");
    }
    if (m_term.COLS != -1) {
-      m_width = m_term.COLS;
+      m_width = static_cast<size_t>(m_term.COLS);
       if (!m_term.XN) {
          BOL = m_term.getProperty(TerminalController::UP) + m_term.getProperty(TerminalController::BOL);
          XNL = ""; // Cursor must be fed to the next line
@@ -309,15 +340,15 @@ ProgressBar::ProgressBar(const TerminalController &term, const std::string &head
 void ProgressBar::update(float percent, std::string message)
 {
    if (m_cleared) {
-      std::printf(m_header.c_str());
+      std::printf("%s\n", m_header.c_str());
       m_cleared = false;
    }
    std::string prefix = format_string("%3d%%", percent * 100);
    std::string suffix = "";
    if (m_useETA) {
-      int elapsed = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - m_startTime).count();
-      if (percent > 0.0001 && elapsed > 1) {
-         int total = elapsed / percent;
+      auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - m_startTime).count();
+      if (percent > 0.0001f && elapsed > 1) {
+         int total = static_cast<int>(elapsed / percent);
          int eta = int(total - elapsed);
          int h = eta / 3600;
          int m = (eta / 60) % 60;
@@ -325,8 +356,8 @@ void ProgressBar::update(float percent, std::string message)
          suffix = format_string(" ETA: %02d:%02d:%02d", h, m, s);
       }
    }
-   int barWidth = m_width - prefix.size() - suffix.size() - 2;
-   int n = barWidth * percent;
+   size_t barWidth = m_width - prefix.size() - suffix.size() - 2;
+   size_t n = static_cast<size_t>(barWidth * percent);
    if (message.size() < m_width) {
       message = message + std::string(m_width - message.size(), ' ');
    } else {
@@ -335,30 +366,32 @@ void ProgressBar::update(float percent, std::string message)
    std::string output = BOL + m_term.getProperty(TerminalController::UP) +
          m_term.getProperty(TerminalController::CLEAR_EOL);
    output += format_string(m_bar, prefix.c_str(), std::string(n, '=').c_str(),
-                           std::string(barWidth - n, '-'), suffix);
+                           std::string(barWidth - n, '-').c_str(), suffix.c_str());
    output += XNL;
    output += m_term.getProperty(TerminalController::CLEAR_EOL);
    output += message;
-   std::printf(message.c_str());
+   std::printf("%s\n", message.c_str());
+   std::cout << "xxx" << output << std::endl;
    if (!m_term.XN) {
       std::fflush(stdout);
    }
+   std::cout << "xxx" << std::endl;
 }
 
 void ProgressBar::clear()
 {
    if (!m_cleared) {
-      std::printf((BOL + m_term.getProperty(TerminalController::CLEAR_EOL) +
-                   m_term.getProperty(TerminalController::UP) +
-                   m_term.getProperty(TerminalController::CLEAR_EOL) +
-                   m_term.getProperty(TerminalController::UP) +
-                   m_term.getProperty(TerminalController::CLEAR_EOL)).c_str());
+      std::printf("%s\n", (BOL + m_term.getProperty(TerminalController::CLEAR_EOL) +
+                           m_term.getProperty(TerminalController::UP) +
+                           m_term.getProperty(TerminalController::CLEAR_EOL) +
+                           m_term.getProperty(TerminalController::UP) +
+                           m_term.getProperty(TerminalController::CLEAR_EOL)).c_str());
       std::fflush(stdout);
       m_cleared = true;
    }
 }
 
-TestingProgressDisplay::TestingProgressDisplay(const CLI::App &opts, int numTests,
+TestingProgressDisplay::TestingProgressDisplay(const CLI::App &opts, size_t numTests,
                                                std::shared_ptr<AbstractProgressBar> progressBar)
    : m_opts(opts),
      m_numTests(numTests),
@@ -414,22 +447,22 @@ void TestingProgressDisplay::update(TestPointer test)
    std::string testName = test->getFullName();
    ResultPointer testResult = test->getResult();
    const ResultCode *resultCode = testResult->getCode();
-   std::printf("%s: %s (%d of %d)\n", resultCode->getName().c_str(),
+   std::printf("%s: %s (%lu of %lu)\n", resultCode->getName().c_str(),
                testName.c_str(), m_completed, m_numTests);
    // Show the test failure output, if requested.
    if ((resultCode->isFailure() && m_showOutput) ||
        m_showAllOutput) {
       if (resultCode->isFailure()) {
          std::printf("%s TEST '%s' FAILED %s\n", std::string(20, '*').c_str(),
-                     test->getFullName(), std::string(20, '*').c_str());
+                     test->getFullName().c_str(), std::string(20, '*').c_str());
       }
-      std::printf("%s\n", testResult->getOutput());
+      std::printf("%s\n", testResult->getOutput().c_str());
       std::printf("%s\n", std::string(20, '*').c_str());
    }
    // Report test metrics, if present.
    if (!testResult->getMetrics().empty()) {
       // @TODO sort the metrics
-      std::printf("%s TEST '%s' RESULTS %s\n", std::string(10, '*'),
+      std::printf("%s TEST '%s' RESULTS %s\n", std::string(10, '*').c_str(),
                   test->getFullName().c_str(),
                   std::string(10, '*').c_str());
       for (auto &item : testResult->getMetrics()) {

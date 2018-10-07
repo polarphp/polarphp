@@ -71,7 +71,7 @@ protected:
 
 inline bool kuse_close_fds()
 {
-   std::strcmp(POLAR_OS, "Window") != 0;
+   return std::strcmp(POLAR_OS, "Window") != 0;
 }
 
 using EnvVarType = std::map<std::string, std::string>;

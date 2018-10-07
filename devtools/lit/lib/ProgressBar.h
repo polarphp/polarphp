@@ -70,6 +70,7 @@ public:
    const std::string &getProperty(const std::string &key) const;
 protected:
    std::string tigetStr(const std::string &capName);
+   std::string tparm(const std::string &arg, int index);
    void initTermScreen();
 public:
    // Cursor movement
@@ -159,22 +160,22 @@ protected:
    std::string m_header;
    bool m_cleared;
    bool m_useETA;
-   int m_width;
+   size_t m_width;
    std::chrono::system_clock::time_point m_startTime;
 };
 
 class TestingProgressDisplay
 {
 public:
-   TestingProgressDisplay(const CLI::App &opts, int numTests,
+   TestingProgressDisplay(const CLI::App &opts, size_t numTests,
                           std::shared_ptr<AbstractProgressBar> progressBar = nullptr);
    void finish();
    void update(TestPointer test);
 private:
    const CLI::App &m_opts;
-   int m_numTests;
+   size_t m_numTests;
    std::shared_ptr<AbstractProgressBar> m_progressBar;
-   int m_completed;
+   size_t m_completed;
    bool m_quiet;
    bool m_succinct;
    bool m_showAllOutput;

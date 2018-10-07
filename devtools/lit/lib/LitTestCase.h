@@ -32,12 +32,12 @@ public:
       : m_test(test),
         m_run(run)
    {}
-   const std::string &getId()
+   const std::string getId()
    {
       return m_test->getFullName();
    }
 
-   const std::string &getShortDescription()
+   const std::string getShortDescription()
    {
       return m_test->getFullName();
    }
