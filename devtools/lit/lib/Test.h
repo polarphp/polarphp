@@ -227,13 +227,14 @@ public:
    Result &setCode(const ResultCode *code);
    const std::string &getOutput() const;
    Result &setOutput(const std::string &output);
-   const std::optional<int> &getElapsed() const;
+   const std::optional<size_t> &getElapsed() const;
+   Result &setElapsed(size_t elapsed);
    const std::unordered_map<std::string, MetricValuePointer> &getMetrics() const;
    std::unordered_map<std::string, ResultPointer> &getMicroResults();
 protected:
    const ResultCode *m_code;
    std::string m_output;
-   std::optional<int> m_elapsed;
+   std::optional<size_t> m_elapsed;
    std::unordered_map<std::string, MetricValuePointer> m_metrics;
    std::unordered_map<std::string, ResultPointer> m_microResults;
 };

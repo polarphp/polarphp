@@ -57,9 +57,15 @@ Result &Result::setOutput(const std::string &output)
    return *this;
 }
 
-const std::optional<int> &Result::getElapsed() const
+const std::optional<size_t> &Result::getElapsed() const
 {
    return m_elapsed;
+}
+
+Result &Result::setElapsed(size_t elapsed)
+{
+   m_elapsed = elapsed;
+   return *this;
 }
 
 const std::unordered_map<std::string, MetricValuePointer> &Result::getMetrics() const

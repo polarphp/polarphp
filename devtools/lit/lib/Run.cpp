@@ -14,6 +14,7 @@
 #include "Test.h"
 #include "LitConfig.h"
 #include "ProgressBar.h"
+#include "formats/Base.h"
 #include <iostream>
 #include <tuple>
 #include <string>
@@ -191,19 +192,31 @@ void do_execute_test(TestPointer test, LitConfigPointer litConfig, std::map<std:
          pgName = std::any_cast<std::string>(pg);
       }
    }
-   SemaphoreReleaser pgReleaser;
-   Semaphore *semaphore = nullptr;
-   if (!pgName.empty() && parallelismSemaphores.find(pgName) != parallelismSemaphores.end()) {
-      semaphore = &parallelismSemaphores.at(pgName);
+   ResultPointer result;
+   try {
+      SemaphoreReleaser pgReleaser;
+      Semaphore *semaphore = nullptr;
+      if (!pgName.empty() && parallelismSemaphores.find(pgName) != parallelismSemaphores.end()) {
+         semaphore = &parallelismSemaphores.at(pgName);
+      }
+      if (semaphore != nullptr) {
+         pgReleaser.assign(semaphore);
+         semaphore->wait();
+      }
+      std::chrono::time_point startTime = std::chrono::system_clock::now();
+      ResultPointer result = test->getConfig()->getTestFormat()->execute(test, litConfig);
+      result->setElapsed(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - startTime).count());
+   } catch (std::exception &exp) {
+      if (litConfig->isDebug()) {
+         throw;
+      }
+      std::string output = "Exception during script execution:\n";
+      output += exp.what();
+      output += "\n";
+      result = std::make_shared<Result>(UNSUPPORTED, output);
    }
-   if (semaphore != nullptr) {
-      pgReleaser.assign(semaphore);
-      semaphore->wait();
-   }
-   std::chrono::time_point startTime = std::chrono::system_clock::now();
-
+   test->setResult(result);
 }
-
 } // lit
 } // polar
 
