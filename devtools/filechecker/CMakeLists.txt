@@ -47,7 +47,8 @@ set_target_properties(
 
 target_link_libraries(filecheckerkernel PUBLIC
    nlohmann_json::nlohmann_json
-   ${CURSES_LIBRARIES})
+   ${CURSES_LIBRARIES}
+   devtoolsutils)
 
 polar_add_executable(filechecker main.cpp)
 

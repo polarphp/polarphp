@@ -20,7 +20,7 @@
 std::string convert_to_caret_and_mnotation(std::string data)
 {
    std::string output;
-   for (char &c : data) {
+   for (std::string::value_type &c : data) {
       if (c == 9 || c == 10) {
          output.push_back(c);
          continue;
