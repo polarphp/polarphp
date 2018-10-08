@@ -12,6 +12,9 @@
 #ifndef POLAR_DEVLTOOLS_UTILS_PROCESS_UTILS_H
 #define POLAR_DEVLTOOLS_UTILS_PROCESS_UTILS_H
 
+#include "DataTypes.h"
+#include <chrono>
+
 namespace polar {
 namespace utils {
 
@@ -22,6 +25,20 @@ unsigned get_process_page_size();
 /// by the process. This only counts the memory allocated via the malloc,
 /// calloc and realloc functions and includes any "free" holes in the
 /// allocated space.
+size_t get_process_malloc_usage();
+
+/// This static function will set \p user_time to the amount of CPU time
+/// spent in user (non-kernel) mode and \p sys_time to the amount of CPU
+/// time spent in system (kernel) mode.  If the operating system does not
+/// support collection of these metrics, a zero duration will be for both
+/// values.
+/// \param elapsed Returns the system_clock::now() giving current time
+/// \param user_time Returns the current amount of user time for the process
+/// \param sys_time Returns the current amount of system time for the process
+void get_process_time_usage(std::chrono::time_point<> &elapsed,
+                            std::chrono::nanoseconds &userTime,
+                            std::chrono::nanoseconds &sysTime);
+
 
 } // utils
 } // polar

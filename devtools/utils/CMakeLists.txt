@@ -18,6 +18,9 @@ if (UNIX)
    list(APPEND POLAR_DEVTOOLS_UTILS_LIB_SOURCES _platform/ProcessUtilsUnix.cpp)
 endif()
 
+configure_file(Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/UtilsConfig.h @ONLY)
+
+list(APPEND POLAR_DEVTOOLS_UTILS_LIB_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/UtilsConfig.h)
 
 polar_add_library(devtoolsutils SHARED BUILDTREE_ONLY
    ${POLAR_DEVTOOLS_UTILS_LIB_SOURCES})
