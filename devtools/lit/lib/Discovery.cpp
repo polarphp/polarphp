@@ -74,7 +74,9 @@ std::string load_cfg_setter_plugin_for_path(const std::string &path, LitConfig &
          break;
       }
    } while (currentPath != currentPath.root_path());
-   // @TODO not found situation
+   if (!found) {
+      return "";
+   }
    // found load the cfg plugin
    std::ifstream jsonFile(currentCfgSetterJsonFile);
    if (!jsonFile.is_open()) {
@@ -379,7 +381,10 @@ TestList find_tests_for_inputs(LitConfigPointer litConfig, const std::list<std::
    std::map<std::string, TestSuitSearchResult> cache;
    CfgPluginUnloader cfgSetterUnloader;
    for (std::string &input : actualInputs) {
-      cfgSetterUnloader.registerPlugin(load_cfg_setter_plugin_for_path(input, *litConfig.get()));
+      std::string cfgSetterKey = load_cfg_setter_plugin_for_path(input, *litConfig.get());
+      if (!cfgSetterKey.empty()) {
+          cfgSetterUnloader.registerPlugin(cfgSetterKey);
+      }
       size_t prevLength = tests.size();
       TestList suiteTests = std::get<1>(get_tests(input, litConfig, cache));
       for (TestPointer test : suiteTests) {
