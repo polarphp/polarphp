@@ -53,6 +53,11 @@ public:
    void start(size_t id, Worker* stealDonor);
 
    /**
+     * @brief check wether worker is stopped
+     */
+   bool isStopped();
+
+   /**
      * @brief stop Stop all worker's thread and stealing activity.
      * Waits until the executing thread became finished.
      */
@@ -134,6 +139,12 @@ inline void Worker<Task, Queue>::stop()
 {
    m_runningFlag.store(false, std::memory_order_relaxed);
    m_thread.join();
+}
+
+template <typename Task, template<typename> class Queue>
+inline bool Worker<Task, Queue>::isStopped()
+{
+   return m_runningFlag.load(std::memory_order_relaxed);
 }
 
 template <typename Task, template<typename> class Queue>

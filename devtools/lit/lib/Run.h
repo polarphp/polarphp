@@ -14,6 +14,8 @@
 
 #include "Test.h"
 #include "Semaphore.h"
+#include "threadpool/ThreadPool.h"
+#include <memory>
 
 namespace polar {
 namespace lit {
@@ -24,6 +26,7 @@ class TestingProgressDisplay;
 using RunPointer = std::shared_ptr<Run>;
 using LitConfigPointer = std::shared_ptr<LitConfig>;
 using TestingProgressDisplayPointer = std::shared_ptr<TestingProgressDisplay>;
+using ThreadPoolPointer = std::shared_ptr<threadpool::ThreadPool>;
 
 class Run
 {
@@ -32,7 +35,7 @@ public:
    const TestList &getTests() const;
    TestList &getTests();
    void executeTest(TestPointer test);
-   void executeTestsInPool(int jobs, int maxTime = -1);
+   void executeTestsInPool(size_t jobs, size_t maxTime = 0);
    void executeTests(TestingProgressDisplayPointer display, size_t jobs, size_t maxTime = 0);
 protected:
    void consumeTestResult(std::tuple<int, TestPointer> &poolResult);
@@ -43,6 +46,7 @@ protected:
    int m_failureCount;
    bool m_hitMaxFailures;
    std::map<std::string, Semaphore> m_parallelismSemaphores;
+   ThreadPoolPointer m_threadPool;
 };
 
 } // lit

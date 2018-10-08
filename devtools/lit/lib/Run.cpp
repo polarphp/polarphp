@@ -15,21 +15,33 @@
 #include "LitConfig.h"
 #include "ProgressBar.h"
 #include "formats/Base.h"
-#include <iostream>
 #include <tuple>
 #include <string>
 #include <chrono>
+#include <future>
+#include <functional>
+#include <list>
+#include <iostream>
 
 namespace polar {
 namespace lit {
 
-std::tuple<int, TestPointer> worker_run_one_test(int testIndex, TestPointer test);
+using threadpool::ThreadPool;
+using threadpool::ThreadPoolOptions;
+using TaskType = std::packaged_task<std::tuple<int, TestPointer>()>;
+
+std::tuple<int, TestPointer> worker_run_one_test(int testIndex, TestPointer test,
+                                                 LitConfigPointer litConfig,
+                                                 std::map<std::string,Semaphore> &parallelismSemaphores);
+
 void do_execute_test(TestPointer test, LitConfigPointer litConfig, std::map<std::string,
                      Semaphore> &parallelismSemaphores);
 
+
 Run::Run(LitConfigPointer litConfig, const TestList &tests)
    : m_litConfig(litConfig),
-     m_tests(tests)
+     m_tests(tests),
+     m_threadPool(nullptr)
 {
    for (auto &item: m_litConfig->getParallelismGroups()) {
       m_parallelismSemaphores.emplace(item.first, item.second);
@@ -51,9 +63,45 @@ void Run::executeTest(TestPointer test)
    do_execute_test(test, m_litConfig, m_parallelismSemaphores);
 }
 
-void Run::executeTestsInPool(int jobs, int maxTime)
+void Run::executeTestsInPool(size_t jobs, size_t maxTime)
 {
-
+   // We need to issue many wait calls, so compute the final deadline and
+   // subtract time.time() from that as we go along.
+   bool hasDeadline = false;
+   std::chrono::time_point deadline = std::chrono::system_clock::now();
+   if (maxTime > 0) {
+      deadline += std::chrono::seconds(maxTime);
+      hasDeadline = true;
+   }
+   // start a thread pool
+   ThreadPoolOptions threadOpts;
+   threadOpts.setThreadCount(jobs);
+   m_threadPool.reset(new ThreadPool(threadOpts));
+   // @TODO port to WINDOWS
+   std::list<std::future<std::tuple<int, TestPointer>>> asyncResults;
+   int testIndex = 0;
+   for (TestPointer test: m_tests) {
+      TaskType task(std::bind(worker_run_one_test, testIndex, test, m_litConfig, std::ref(m_parallelismSemaphores)));
+      asyncResults.push_back(task.get_future());
+      ++testIndex;
+   }
+   try {
+      for (std::future<std::tuple<int, TestPointer>> &future: asyncResults) {
+         if (hasDeadline) {
+            future.wait_until(deadline);
+         } else {
+            future.wait();
+         }
+         future.get();
+         if (m_hitMaxFailures) {
+            break;
+         }
+      }
+   } catch (std::exception &exp) {
+      std::cerr << "catch exception from test packaged_task, error: " << exp.what() << std::endl;
+      m_threadPool->terminate();
+      throw;
+   }
 }
 
 // execute_tests(display, jobs, [max_time])
@@ -88,10 +136,12 @@ void Run::executeTests(TestingProgressDisplayPointer display, size_t jobs, size_
    if (m_litConfig->isSingleProcess()) {
       int index = 0;
       for (auto test : m_tests) {
-         std::tuple<int, TestPointer> result = worker_run_one_test(index, test);
+         std::tuple<int, TestPointer> result = worker_run_one_test(index, test, m_litConfig, m_parallelismSemaphores);
          consumeTestResult(result);
          ++index;
       }
+   } else {
+      executeTestsInPool(jobs, maxTime);
    }
    // Mark any tests that weren't run as UNRESOLVED.
    for (auto test : m_tests) {
@@ -145,10 +195,10 @@ void Run::consumeTestResult(std::tuple<int, TestPointer> &poolResult)
 ///
 /// Returns an index and a Result, which the parent process uses to update
 /// the display.
-std::tuple<int, TestPointer> worker_run_one_test(int testIndex, TestPointer test)
+std::tuple<int, TestPointer> worker_run_one_test(int testIndex, TestPointer test, LitConfigPointer litConfig,
+                                                 std::map<std::string, Semaphore> &parallelismSemaphores)
 {
-   std::this_thread::sleep_for(std::chrono::milliseconds(300));
-   test->setResult(std::make_shared<Result>(PASS, "pass the test", rand() % 15));
+   do_execute_test(test, litConfig, parallelismSemaphores);
    return std::make_tuple(testIndex, test);
 }
 
@@ -180,8 +230,8 @@ protected:
 
 } // anonymous namespace
 
-void do_execute_test(TestPointer test, LitConfigPointer litConfig, std::map<std::string,
-                     Semaphore> &parallelismSemaphores)
+void do_execute_test(TestPointer test, LitConfigPointer litConfig,
+                     std::map<std::string, Semaphore> &parallelismSemaphores)
 {
    std::any &pg = test->getConfig()->getParallelismGroup();
    std::string pgName;

@@ -40,7 +40,8 @@ MPMCBoundedQueue>;
  * It implements cooperative scheduling strategy for tasks.
  */
 template <typename Task, template<typename> class Queue>
-class ThreadPoolImpl {
+class ThreadPoolImpl
+{
 public:
    /**
      * @brief ThreadPool Construct and start new thread pool.
@@ -53,7 +54,10 @@ public:
      * @brief Move ctor implementation.
      */
    ThreadPoolImpl(ThreadPoolImpl &&rhs) noexcept;
-
+   /**
+    * @brief terminate terminate
+    */
+   void terminate();
    /**
      * @brief ~ThreadPool Stop all workers and destroy thread pool.
      */
@@ -101,7 +105,7 @@ inline ThreadPoolImpl<Task, Queue>::ThreadPoolImpl(
    , m_nextWorker(0)
 {
    for(auto & workerPtr : m_workers) {
-       workerPtr.reset(new Worker<Task, Queue>(options.queueSize()));
+      workerPtr.reset(new Worker<Task, Queue>(options.getQueueSize()));
    }
 
    for(size_t i = 0; i < m_workers.size(); ++i) {
@@ -118,10 +122,20 @@ inline ThreadPoolImpl<Task, Queue>::ThreadPoolImpl(ThreadPoolImpl<Task, Queue> &
 }
 
 template <typename Task, template<typename> class Queue>
+inline void ThreadPoolImpl<Task, Queue>::terminate()
+{
+   for (auto &workerPtr : m_workers) {
+      workerPtr->stop();
+   }
+}
+
+template <typename Task, template<typename> class Queue>
 inline ThreadPoolImpl<Task, Queue>::~ThreadPoolImpl()
 {
-   for (auto & workerPtr : m_workers) {
-       workerPtr->stop();
+   for (auto &workerPtr : m_workers) {
+      if (!workerPtr->isStopped()) {
+         workerPtr->stop();
+      }
    }
 }
 
