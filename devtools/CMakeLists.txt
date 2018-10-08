@@ -9,5 +9,6 @@
 #
 # Created by polarboy on 2018/08/27.
 
+add_subdirectory(utils)
 add_subdirectory(lit)
 add_subdirectory(filechecker)
