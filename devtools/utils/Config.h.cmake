@@ -62,6 +62,13 @@
 /* Define to 1 if you have the <signal.h> header file. */
 #cmakedefine01 HAVE_SIGNAL_H
 
+/* Define to 1 if you have the <errno.h> header file. */
+#cmakedefine01 HAVE_ERRNO_H
+
+/* Define to 1 if you have the declaration of `strerror_s', and to 0 if you
+   don't. */
+#cmakedefine01 HAVE_DECL_STRERROR_S
+
 /* Define to 1 if you have the `strerror' function. */
 #cmakedefine01 HAVE_STRERROR
 
