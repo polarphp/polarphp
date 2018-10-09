@@ -243,6 +243,9 @@ else()
    option(POLAR_ENABLE_ASSERTIONS "Enable assertions" ON)
 endif()
 
+set(POLAR_ABI_BREAKING_CHECKS "WITH_ASSERTS" CACHE STRING
+   "Enable abi-breaking checks.  Can be WITH_ASSERTS, FORCE_ON or FORCE_OFF.")
+
 option(POLAR_EXTERNALIZE_DEBUGINFO
    "Generate dSYM files and strip executables and libraries (Darwin Only)" OFF)
 
