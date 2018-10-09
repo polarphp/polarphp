@@ -152,9 +152,6 @@ polar_check_headers(
    stdint.h
    dirent.h
    ApplicationServices/ApplicationServices.h
-   sys/param.h
-   sys/types.h
-   sys/time.h
    netinet/in.h
    alloca.h
    arpa/inet.h
@@ -179,6 +176,9 @@ polar_check_headers(
    string.h
    syslog.h
    sysexits.h
+   sys/param.h
+   sys/types.h
+   sys/time.h
    sys/ioctl.h
    sys/file.h
    sys/mman.h
@@ -195,14 +195,19 @@ polar_check_headers(
    sys/varargs.h
    sys/wait.h
    sys/loadavg.h
+   sys/utsname.h
+   sys/ipc.h
    termios.h
    unistd.h
    unix.h
    utime.h
-   sys/utsname.h
-   sys/ipc.h
+   valgrind/valgrind.h
    dlfcn.h
-   assert.h)
+   assert.h
+   malloc.h
+   malloc/malloc.h
+   errno.h
+   mach/mach.h)
 
 polar_check_c_const()
 polar_check_fopen_cookie()
@@ -307,7 +312,6 @@ polar_check_funcs(
    getservbyname
    getservbyport
    gethostname
-   getrusage
    gettimeofday
    gmtime_r
    getpwnam_r
@@ -372,6 +376,29 @@ polar_check_funcs(
    asprintf
    nanosleep)
 
+# TODO use check_symbol_exists or polar_check_funcs ?
+check_symbol_exists(getpagesize unistd.h HAVE_GETPAGESIZE)
+check_symbol_exists(sysconf unistd.h HAVE_SYSCONF)
+check_symbol_exists(getrusage sys/resource.h HAVE_GETRUSAGE)
+check_symbol_exists(setrlimit sys/resource.h HAVE_SETRLIMIT)
+check_symbol_exists(isatty unistd.h HAVE_ISATTY)
+check_symbol_exists(futimens sys/stat.h HAVE_FUTIMENS)
+check_symbol_exists(futimes sys/time.h HAVE_FUTIMES)
+check_symbol_exists(posix_fallocate fcntl.h HAVE_POSIX_FALLOCATE)
+check_symbol_exists(malloc_zone_statistics malloc/malloc.h
+   HAVE_MALLOC_ZONE_STATISTICS)
+check_symbol_exists(getrlimit "sys/types.h;sys/time.h;sys/resource.h" HAVE_GETRLIMIT)
+check_symbol_exists(sbrk unistd.h HAVE_SBRK)
+check_symbol_exists(strerror_r string.h HAVE_STRERROR_R)
+check_symbol_exists(strerror_s string.h HAVE_DECL_STRERROR_S)
+set(CMAKE_REQUIRED_DEFINITIONS "-D_LARGEFILE64_SOURCE")
+check_symbol_exists(lseek64 "sys/types.h;unistd.h" HAVE_LSEEK64)
+set(CMAKE_REQUIRED_DEFINITIONS "")
+check_symbol_exists(mallctl malloc_np.h HAVE_MALLCTL)
+check_symbol_exists(mallinfo malloc.h HAVE_MALLINFO)
+check_symbol_exists(malloc_zone_statistics malloc/malloc.h
+   HAVE_MALLOC_ZONE_STATISTICS)
+
 # Some systems (like OpenSolaris) do not have nanosleep in libc
 
 check_library_exists(rt nanosleep "" POLAR_HAVE_RT)
@@ -379,9 +406,9 @@ if (POLAR_HAVE_RT)
    set(HAVE_RT ON)
    set(HAVE_NANOSLEEP ON)
    set(POLAR_HAVE_NANOSLEEP ON)
-    polar_append_flag(-lrt CMAKE_EXE_LINKER_FLAGS)
-    set(HAVE_RT ON)
-    set(HAVE_NANOSLEEP ON)
+   polar_append_flag(-lrt CMAKE_EXE_LINKER_FLAGS)
+   set(HAVE_RT ON)
+   set(HAVE_NANOSLEEP ON)
 endif()
 
 # Check for getaddrinfo, should be a better way, but...
@@ -389,8 +416,8 @@ endif()
 check_c_source_runs(
    "#include <netdb.h>
    int main(){
-      struct addrinfo *g,h;g=&h;getaddrinfo(\"\",\"\",g,&g);
-      return 0;
+   struct addrinfo *g,h;g=&h;getaddrinfo(\"\",\"\",g,&g);
+   return 0;
    }" checkLinkGetAddrInfo)
 
 if(checkLinkGetAddrInfo)
@@ -403,254 +430,254 @@ if(checkLinkGetAddrInfo)
       int main(){
       struct addrinfo *ai, *pai, hints;
 
-        memset(&hints, 0, sizeof(hints));
-        hints.ai_flags = AI_NUMERICHOST;
+      memset(&hints, 0, sizeof(hints));
+      hints.ai_flags = AI_NUMERICHOST;
 
-        if (getaddrinfo(\"127.0.0.1\", 0, &hints, &ai) < 0) {
-          exit(1);
-        }
+      if (getaddrinfo(\"127.0.0.1\", 0, &hints, &ai) < 0) {
+         exit(1);
+         }
 
-        if (ai == 0) {
-          exit(1);
-        }
-
-        pai = ai;
-
-        while (pai) {
-          if (pai->ai_family != AF_INET) {
-            /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
+         if (ai == 0) {
             exit(1);
-          }
-          if (pai->ai_addr->sa_family != AF_INET) {
-            /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
-            exit(1);
-          }
-          pai = pai->ai_next;
-        }
-        freeaddrinfo(ai);
-        exit(0);
-      }" checkHaveGetAddrInfo)
-   if (checkHaveGetAddrInfo)
-      set(HAVE_GETADDRINFO ON)
-   endif()
-endif()
+            }
 
-# Check for the __sync_fetch_and_add builtin
-check_c_source_runs(
-   "#include <netdb.h>
-   int main(){
-      int x;__sync_fetch_and_add(&x,1);
-      return 0;
-   }" checkSyncFetchAndAdd)
+            pai = ai;
 
-if (checkSyncFetchAndAdd)
-   set(HAVE_SYNC_FETCH_AND_ADD ON)
-endif()
+            while (pai) {
+               if (pai->ai_family != AF_INET) {
+                  /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
+                  exit(1);
+                  }
+                  if (pai->ai_addr->sa_family != AF_INET) {
+                     /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
+                     exit(1);
+                     }
+                     pai = pai->ai_next;
+                     }
+                     freeaddrinfo(ai);
+                     exit(0);
+                     }" checkHaveGetAddrInfo)
+                  if (checkHaveGetAddrInfo)
+                     set(HAVE_GETADDRINFO ON)
+                  endif()
+               endif()
 
-# todo
-# AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
-polar_check_func_utime_null()
-polar_check_func_alloca()
-polar_check_declare_timezone()
-polar_check_time_r_type()
-polar_check_readdir_r_type()
-polar_check_in_addr_t()
+               # Check for the __sync_fetch_and_add builtin
+               check_c_source_runs(
+                  "#include <netdb.h>
+                  int main(){
+                  int x;__sync_fetch_and_add(&x,1);
+                  return 0;
+                  }" checkSyncFetchAndAdd)
 
-check_function_exists(crypt_r checkFuncCryptR)
+               if (checkSyncFetchAndAdd)
+                  set(HAVE_SYNC_FETCH_AND_ADD ON)
+               endif()
 
-if (checkFuncCryptR)
-   polar_crypt_r_style()
-endif()
+               # todo
+               # AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
+               polar_check_func_utime_null()
+               polar_check_func_alloca()
+               polar_check_declare_timezone()
+               polar_check_time_r_type()
+               polar_check_readdir_r_type()
+               polar_check_in_addr_t()
 
-if (POLAR_WITH_VALGRIND)
-   message("checking for vargrind support")
-   set(_searchPath "")
-   set(_valgrindDir)
-   if (POLAR_VALGRIND_DIR)
-      set(_searchPath ${POLAR_VALGRIND_DIR})
-   else()
-      set(_searchPath "/usr/local /usr")
-   endif()
-   set(_searchFor "/include/valgrind/valgrind.h")
-   foreach(_path ${_searchPath})
-      set(_valgrindFile ${_path}${_searchFor})
-      if (EXISTS ${_valgrindFile})
-         set(_valgrindDir ${_path})
-      endif()
-   endforeach()
-   if(NOT _valgrindDir)
-      message("valgrind not found")
-   else()
-      message("found valgrind in ${_valgrindDir}")
-      set(HAVE_VALGRIND ON)
-   endif()
-endif()
+               check_function_exists(crypt_r checkFuncCryptR)
 
-if(POLAR_ENABLE_GCOV)
-   if (NOT POLAR_CC_GCC)
-      message(FATAL_ERROR "GCC is required for enable gcov")
-   endif()
-   # min: 1.5 (i.e. 105, major * 100 + minor for easier comparison)
-   set(POLAR_LTP_VERSION_MIN 105)
-   # non-working versions, e.g. "1.8 1.18";
-   # remove "none" when introducing the first incompatible LTP version and
-   # separate any following additions by spaces
-   set(POLAR_LTP_EXCLUDE "1.8")
-   find_program(POLAR_PROG_LTP lcov)
-   find_program(POLAR_PROG_LTP_GENHTML genhtml)
-   if (POLAR_PROG_LTP)
-      set(_tempLtpVersion "invalid")
-      execute_process(COMMAND ${POLAR_PROG_LTP} -v 2>/dev/null
-         RESULT_VARIABLE _retCode
-         OUTPUT_VARIABLE _output
-         ERROR_VARIABLE _errorMsg)
-      if (NOT _retCode EQUAL 0)
-         message(FATAL_ERROR "run shell command ${POLAR_PROG_LTP} -v 2>/dev/null error: ${_errorMsg}")
-      endif()
-      string(REGEX MATCH "([0-9]+)\.([0-9]+)"
-         matchResult ${_output})
-      set(POLAR_LTP_VERSION ${matchResult})
-      string(REPLACE "." ";" matchResult "${matchResult}")
-      list(GET matchResult 0 _ltpMajorVersion)
-      list(GET matchResult 1 _ltpMinorVersion)
-      math(EXPR POLAR_LTP_VERSION_NUM "${_ltpMajorVersion} * 100 + ${_ltpMinorVersion}")
-      if (POLAR_LTP_VERSION_NUM GREATER POLAR_LTP_VERSION_MIN)
-         set(_tempLtpVersion "${POLAR_LTP_VERSION} (ok)")
-         foreach(_checkLtpVersion ${POLAR_LTP_EXCLUDE})
-            if (POLAR_LTP_VERSION STREQUAL _checkLtpVersion)
-               set(_tempLtpVersion "invalid")
-               break()
-            endif()
-         endforeach()
-      endif()
-   else()
-      message(FATAL_ERROR "To enable code coverage reporting you must have LTP installed")
-   endif()
-   if (NOT POLAR_LTP_VERSION OR POLAR_LTP_VERSION STREQUAL "invalid")
-      message(FATAL_ERROR "This LTP version is not supported (found: ${POLAR_LTP_VERSION}, min: ${POLAR_LTP_VERSION_MIN}, excluded: ${POLAR_LTP_EXCLUDE}).")
-      set(POLAR_PROG_LTP "exit 0;")
-   endif()
-   if (NOT POLAR_PROG_LTP_GENHTML)
-      message(FATAL_ERROR "Could not find genhtml from the LTP package")
-   endif()
-   # Remove all optimization flags from CFLAGS
+               if (checkFuncCryptR)
+                  polar_crypt_r_style()
+               endif()
 
-   string(REGEX REPLACE "-O[0-9s]*" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-   string(REGEX REPLACE "-O[0-9s]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-   # Add the special gcc flags
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -fprofile-arcs -ftest-coverage")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fprofile-arcs -ftest-coverage")
-endif()
+               if (POLAR_WITH_VALGRIND)
+                  message("checking for vargrind support")
+                  set(_searchPath "")
+                  set(_valgrindDir)
+                  if (POLAR_VALGRIND_DIR)
+                     set(_searchPath ${POLAR_VALGRIND_DIR})
+                  else()
+                     set(_searchPath "/usr/local /usr")
+                  endif()
+                  set(_searchFor "/include/valgrind/valgrind.h")
+                  foreach(_path ${_searchPath})
+                     set(_valgrindFile ${_path}${_searchFor})
+                     if (EXISTS ${_valgrindFile})
+                        set(_valgrindDir ${_path})
+                     endif()
+                  endforeach()
+                  if(NOT _valgrindDir)
+                     message("valgrind not found")
+                  else()
+                     message("found valgrind in ${_valgrindDir}")
+                     set(HAVE_VALGRIND ON)
+                  endif()
+               endif()
 
-if(POLAR_CONFIG_FILE_PATH STREQUAL "Default")
-   # if config path is default, we install php.ini in install_prefix/etc directory
-   # wether we need a global variable ?
-   set(PHP_CONFIG_FILE_PATH ${CMAKE_INSTALL_PREFIX}/etc)
-endif()
+               if(POLAR_ENABLE_GCOV)
+                  if (NOT POLAR_CC_GCC)
+                     message(FATAL_ERROR "GCC is required for enable gcov")
+                  endif()
+                  # min: 1.5 (i.e. 105, major * 100 + minor for easier comparison)
+                  set(POLAR_LTP_VERSION_MIN 105)
+                  # non-working versions, e.g. "1.8 1.18";
+                  # remove "none" when introducing the first incompatible LTP version and
+                  # separate any following additions by spaces
+                  set(POLAR_LTP_EXCLUDE "1.8")
+                  find_program(POLAR_PROG_LTP lcov)
+                  find_program(POLAR_PROG_LTP_GENHTML genhtml)
+                  if (POLAR_PROG_LTP)
+                     set(_tempLtpVersion "invalid")
+                     execute_process(COMMAND ${POLAR_PROG_LTP} -v 2>/dev/null
+                        RESULT_VARIABLE _retCode
+                        OUTPUT_VARIABLE _output
+                        ERROR_VARIABLE _errorMsg)
+                     if (NOT _retCode EQUAL 0)
+                        message(FATAL_ERROR "run shell command ${POLAR_PROG_LTP} -v 2>/dev/null error: ${_errorMsg}")
+                     endif()
+                     string(REGEX MATCH "([0-9]+)\.([0-9]+)"
+                        matchResult ${_output})
+                     set(POLAR_LTP_VERSION ${matchResult})
+                     string(REPLACE "." ";" matchResult "${matchResult}")
+                     list(GET matchResult 0 _ltpMajorVersion)
+                     list(GET matchResult 1 _ltpMinorVersion)
+                     math(EXPR POLAR_LTP_VERSION_NUM "${_ltpMajorVersion} * 100 + ${_ltpMinorVersion}")
+                     if (POLAR_LTP_VERSION_NUM GREATER POLAR_LTP_VERSION_MIN)
+                        set(_tempLtpVersion "${POLAR_LTP_VERSION} (ok)")
+                        foreach(_checkLtpVersion ${POLAR_LTP_EXCLUDE})
+                           if (POLAR_LTP_VERSION STREQUAL _checkLtpVersion)
+                              set(_tempLtpVersion "invalid")
+                              break()
+                           endif()
+                        endforeach()
+                     endif()
+                  else()
+                     message(FATAL_ERROR "To enable code coverage reporting you must have LTP installed")
+                  endif()
+                  if (NOT POLAR_LTP_VERSION OR POLAR_LTP_VERSION STREQUAL "invalid")
+                     message(FATAL_ERROR "This LTP version is not supported (found: ${POLAR_LTP_VERSION}, min: ${POLAR_LTP_VERSION_MIN}, excluded: ${POLAR_LTP_EXCLUDE}).")
+                     set(POLAR_PROG_LTP "exit 0;")
+                  endif()
+                  if (NOT POLAR_PROG_LTP_GENHTML)
+                     message(FATAL_ERROR "Could not find genhtml from the LTP package")
+                  endif()
+                  # Remove all optimization flags from CFLAGS
 
-message("checking where to scan for configuration files")
-if (POLAR_CONFIG_FILE_SCAN_DIR STREQUAL "Default")
-   set(POLAR_CONFIG_FILE_SCAN_DIR "")
-endif()
-if (POLAR_CONFIG_FILE_SCAN_DIR)
-   message("using directory ${POLAR_CONFIG_FILE_SCAN_DIR} for scan configuration files")
-endif()
+                  string(REGEX REPLACE "-O[0-9s]*" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+                  string(REGEX REPLACE "-O[0-9s]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+                  # Add the special gcc flags
+                  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -fprofile-arcs -ftest-coverage")
+                  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fprofile-arcs -ftest-coverage")
+               endif()
 
-if (POLAR_ENABLE_SIGCHILD)
-   set(PHP_SIGCHILD ON)
-   set(POLAR_SIGCHILD ON)
-endif()
+               if(POLAR_CONFIG_FILE_PATH STREQUAL "Default")
+                  # if config path is default, we install php.ini in install_prefix/etc directory
+                  # wether we need a global variable ?
+                  set(PHP_CONFIG_FILE_PATH ${CMAKE_INSTALL_PREFIX}/etc)
+               endif()
 
-if(POLAR_ENABLE_LIBGCC)
-   polar_libgcc_path(POLAR_LIBGCC_LIBPATH)
-   if (NOT POLAR_LIBGCC_LIBPATH)
-      message(FATAL_ERROR "Cannot locate libgcc. Make sure that gcc is in your path")
-   endif()
-   link_directories(${POLAR_LIBGCC_LIBPATH})
-   polar_append_flag(-lgcc CMAKE_EXE_LINKER_FLAGS CMAKE_SHARED_LINKER_FLAGS)
-endif()
+               message("checking where to scan for configuration files")
+               if (POLAR_CONFIG_FILE_SCAN_DIR STREQUAL "Default")
+                  set(POLAR_CONFIG_FILE_SCAN_DIR "")
+               endif()
+               if (POLAR_CONFIG_FILE_SCAN_DIR)
+                  message("using directory ${POLAR_CONFIG_FILE_SCAN_DIR} for scan configuration files")
+               endif()
 
-# we disable short open tag
-set(DEFAULT_SHORT_OPEN_TAG OFF)
-if (POLAR_ENABLE_DMALLOC)
-   check_library_exists(dmalloc dmalloc_error "" checkDMallocExist)
-   if(checkDMallocExist)
-      polar_append_flag(-ldmalloc CMAKE_EXE_LINKER_FLAGS CMAKE_SHARED_LINKER_FLAGS)
-      set(DMALLOC_FUNC_CHECK ON)
-   else()
-      message(FATAL_ERROR "Problem with enabling dmalloc. ")
-   endif()
-endif()
+               if (POLAR_ENABLE_SIGCHILD)
+                  set(PHP_SIGCHILD ON)
+                  set(POLAR_SIGCHILD ON)
+               endif()
 
-if (POLAR_ENABLE_IPV6 AND HAVE_IPV6_SUPPORT)
-   set(HAVE_IPV6_SUPPORT ON)
-   set(HAVE_IPV6 ON)
-endif()
+               if(POLAR_ENABLE_LIBGCC)
+                  polar_libgcc_path(POLAR_LIBGCC_LIBPATH)
+                  if (NOT POLAR_LIBGCC_LIBPATH)
+                     message(FATAL_ERROR "Cannot locate libgcc. Make sure that gcc is in your path")
+                  endif()
+                  link_directories(${POLAR_LIBGCC_LIBPATH})
+                  polar_append_flag(-lgcc CMAKE_EXE_LINKER_FLAGS CMAKE_SHARED_LINKER_FLAGS)
+               endif()
 
-# TODO I don't understand very well about this
-# I need read some article about dtrace
-if (POLAR_ENABLE_DTRACE)
-   check_include_files(sys/sdt.h HAVE_SYS_SDT_H LANGUAGE C)
-   if (HAVE_SYS_SDT_H)
-   else()
-      message(FATAL_ERROR "Cannot find sys/sdt.h which is required for DTrace support")
-   endif()
-endif()
+               # we disable short open tag
+               set(DEFAULT_SHORT_OPEN_TAG OFF)
+               if (POLAR_ENABLE_DMALLOC)
+                  check_library_exists(dmalloc dmalloc_error "" checkDMallocExist)
+                  if(checkDMallocExist)
+                     polar_append_flag(-ldmalloc CMAKE_EXE_LINKER_FLAGS CMAKE_SHARED_LINKER_FLAGS)
+                     set(DMALLOC_FUNC_CHECK ON)
+                  else()
+                     message(FATAL_ERROR "Problem with enabling dmalloc. ")
+                  endif()
+               endif()
 
-if (POLAR_ENABLE_FD_SETSIZE)
-   if (POLAR_FD_SETSIZE GREATER 0)
-      polar_append_flag(-DFD_SETSIZE="${POLAR_FD_SETSIZE}" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
-   else()
-      message(FATAL_ERROR "Invalid value passed to POLAR_FD_SETSIZE!")
-   endif()
-else()
-   message("using system default fd set limit")
-endif()
+               if (POLAR_ENABLE_IPV6 AND HAVE_IPV6_SUPPORT)
+                  set(HAVE_IPV6_SUPPORT ON)
+                  set(HAVE_IPV6 ON)
+               endif()
 
-# By default, we target the host, but this can be overridden at CMake
-# invocation time.
-polar_get_host_triple(POLAR_INFERRED_HOST_TRIPLE)
-set(POLAR_HOST_TRIPLE "${POLAR_INFERRED_HOST_TRIPLE}" CACHE STRING
-    "Host on which polarphp binaries will run")
+               # TODO I don't understand very well about this
+               # I need read some article about dtrace
+               if (POLAR_ENABLE_DTRACE)
+                  check_include_files(sys/sdt.h HAVE_SYS_SDT_H LANGUAGE C)
+                  if (HAVE_SYS_SDT_H)
+                  else()
+                     message(FATAL_ERROR "Cannot find sys/sdt.h which is required for DTrace support")
+                  endif()
+               endif()
 
-string(REGEX MATCH "^[^-]*" POLAR_NATIVE_ARCH ${POLAR_HOST_TRIPLE})
+               if (POLAR_ENABLE_FD_SETSIZE)
+                  if (POLAR_FD_SETSIZE GREATER 0)
+                     polar_append_flag(-DFD_SETSIZE="${POLAR_FD_SETSIZE}" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
+                  else()
+                     message(FATAL_ERROR "Invalid value passed to POLAR_FD_SETSIZE!")
+                  endif()
+               else()
+                  message("using system default fd set limit")
+               endif()
 
-if (POLAR_NATIVE_ARCH MATCHES "i[2-6]86")
-  set(POLAR_NATIVE_ARCH X86)
-elseif (POLAR_NATIVE_ARCH STREQUAL "x86")
-  set(POLAR_NATIVE_ARCH X86)
-elseif (POLAR_NATIVE_ARCH STREQUAL "amd64")
-  set(POLAR_NATIVE_ARCH X86)
-elseif (POLAR_NATIVE_ARCH STREQUAL "x86_64")
-  set(POLAR_NATIVE_ARCH X86)
-elseif (POLAR_NATIVE_ARCH MATCHES "sparc")
-  set(POLAR_NATIVE_ARCH Sparc)
-elseif (POLAR_NATIVE_ARCH MATCHES "powerpc")
-  set(POLAR_NATIVE_ARCH PowerPC)
-elseif (POLAR_NATIVE_ARCH MATCHES "aarch64")
-  set(POLAR_NATIVE_ARCH AArch64)
-elseif (POLAR_NATIVE_ARCH MATCHES "arm64")
-  set(POLAR_NATIVE_ARCH AArch64)
-elseif (POLAR_NATIVE_ARCH MATCHES "arm")
-  set(POLAR_NATIVE_ARCH ARM)
-elseif (POLAR_NATIVE_ARCH MATCHES "mips")
-  set(POLAR_NATIVE_ARCH Mips)
-elseif (POLAR_NATIVE_ARCH MATCHES "xcore")
-  set(POLAR_NATIVE_ARCH XCore)
-elseif (POLAR_NATIVE_ARCH MATCHES "msp430")
-  set(POLAR_NATIVE_ARCH MSP430)
-elseif (POLAR_NATIVE_ARCH MATCHES "hexagon")
-  set(POLAR_NATIVE_ARCH Hexagon)
-elseif (POLAR_NATIVE_ARCH MATCHES "s390x")
-  set(POLAR_NATIVE_ARCH SystemZ)
-elseif (POLAR_NATIVE_ARCH MATCHES "wasm32")
-  set(POLAR_NATIVE_ARCH WebAssembly)
-elseif (POLAR_NATIVE_ARCH MATCHES "wasm64")
-  set(POLAR_NATIVE_ARCH WebAssembly)
-elseif (POLAR_NATIVE_ARCH MATCHES "riscv32")
-  set(POLAR_NATIVE_ARCH RISCV)
-elseif (POLAR_NATIVE_ARCH MATCHES "riscv64")
-  set(POLAR_NATIVE_ARCH RISCV)
-else ()
-  message(FATAL_ERROR "Unknown architecture ${POLAR_NATIVE_ARCH}")
-endif ()
+               # By default, we target the host, but this can be overridden at CMake
+               # invocation time.
+               polar_get_host_triple(POLAR_INFERRED_HOST_TRIPLE)
+               set(POLAR_HOST_TRIPLE "${POLAR_INFERRED_HOST_TRIPLE}" CACHE STRING
+                  "Host on which polarphp binaries will run")
+
+               string(REGEX MATCH "^[^-]*" POLAR_NATIVE_ARCH ${POLAR_HOST_TRIPLE})
+
+               if (POLAR_NATIVE_ARCH MATCHES "i[2-6]86")
+                  set(POLAR_NATIVE_ARCH X86)
+               elseif (POLAR_NATIVE_ARCH STREQUAL "x86")
+                  set(POLAR_NATIVE_ARCH X86)
+               elseif (POLAR_NATIVE_ARCH STREQUAL "amd64")
+                  set(POLAR_NATIVE_ARCH X86)
+               elseif (POLAR_NATIVE_ARCH STREQUAL "x86_64")
+                  set(POLAR_NATIVE_ARCH X86)
+               elseif (POLAR_NATIVE_ARCH MATCHES "sparc")
+                  set(POLAR_NATIVE_ARCH Sparc)
+               elseif (POLAR_NATIVE_ARCH MATCHES "powerpc")
+                  set(POLAR_NATIVE_ARCH PowerPC)
+               elseif (POLAR_NATIVE_ARCH MATCHES "aarch64")
+                  set(POLAR_NATIVE_ARCH AArch64)
+               elseif (POLAR_NATIVE_ARCH MATCHES "arm64")
+                  set(POLAR_NATIVE_ARCH AArch64)
+               elseif (POLAR_NATIVE_ARCH MATCHES "arm")
+                  set(POLAR_NATIVE_ARCH ARM)
+               elseif (POLAR_NATIVE_ARCH MATCHES "mips")
+                  set(POLAR_NATIVE_ARCH Mips)
+               elseif (POLAR_NATIVE_ARCH MATCHES "xcore")
+                  set(POLAR_NATIVE_ARCH XCore)
+               elseif (POLAR_NATIVE_ARCH MATCHES "msp430")
+                  set(POLAR_NATIVE_ARCH MSP430)
+               elseif (POLAR_NATIVE_ARCH MATCHES "hexagon")
+                  set(POLAR_NATIVE_ARCH Hexagon)
+               elseif (POLAR_NATIVE_ARCH MATCHES "s390x")
+                  set(POLAR_NATIVE_ARCH SystemZ)
+               elseif (POLAR_NATIVE_ARCH MATCHES "wasm32")
+                  set(POLAR_NATIVE_ARCH WebAssembly)
+               elseif (POLAR_NATIVE_ARCH MATCHES "wasm64")
+                  set(POLAR_NATIVE_ARCH WebAssembly)
+               elseif (POLAR_NATIVE_ARCH MATCHES "riscv32")
+                  set(POLAR_NATIVE_ARCH RISCV)
+               elseif (POLAR_NATIVE_ARCH MATCHES "riscv64")
+                  set(POLAR_NATIVE_ARCH RISCV)
+               else ()
+                  message(FATAL_ERROR "Unknown architecture ${POLAR_NATIVE_ARCH}")
+               endif ()

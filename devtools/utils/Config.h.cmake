@@ -17,4 +17,58 @@
 /* Define to 1 if you have the `getrusage' function. */
 #cmakedefine01 HAVE_GETRUSAGE
 
+/* Define to 1 if you have the `getpagesize' function. */
+#cmakedefine01 HAVE_GETPAGESIZE
+
+/* Define to 1 if you have the `isatty' function. */
+#cmakedefine01 HAVE_ISATTY
+
+/* Define to 1 if you have the `futimens' function. */
+#cmakedefine01 HAVE_FUTIMENS
+
+/* Define to 1 if you have the `futimes' function. */
+#cmakedefine01 HAVE_FUTIMES
+
+/* Define to 1 if you have the `lseek64' function. */
+#cmakedefine01 HAVE_LSEEK64
+
+/* Define to 1 if you have the <mach/mach.h> header file. */
+#cmakedefine01 HAVE_MACH_MACH_H
+
+/* Define to 1 if you have the `mallctl' function. */
+#cmakedefine01 HAVE_MALLCTL
+
+/* Define to 1 if you have the `mallinfo' function. */
+#cmakedefine01 HAVE_MALLINFO
+
+/* Define to 1 if you have the <malloc.h> header file. */
+#cmakedefine01 HAVE_MALLOC_H
+
+/* Define to 1 if you have the <malloc/malloc.h> header file. */
+#cmakedefine01 HAVE_MALLOC_MALLOC_H
+
+/* Define to 1 if you have the `malloc_zone_statistics' function. */
+#cmakedefine01 HAVE_MALLOC_ZONE_STATISTICS
+
+/* Define to 1 if you have the `sysconf' function. */
+#cmakedefine01 HAVE_SYSCONF
+
+/* Define to 1 if you have the `sbrk' function. */
+#cmakedefine01 HAVE_SBRK
+
+/* Define to 1 if you have the `setenv' function. */
+#cmakedefine01 HAVE_SETENV
+
+/* Define to 1 if you have the <signal.h> header file. */
+#cmakedefine01 HAVE_SIGNAL_H
+
+/* Define to 1 if you have the `strerror' function. */
+#cmakedefine01 HAVE_STRERROR
+
+/* Define to 1 if you have the `strerror_r' function. */
+#cmakedefine01 HAVE_STRERROR_R
+
+/* Define to 1 if you have the `setrlimit' function. */
+#cmakedefine01 HAVE_SETRLIMIT
+
 #endif // POLAR_DEVLTOOLS_UTILS_UTILS_CONFIG_H
