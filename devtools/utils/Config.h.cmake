@@ -71,4 +71,31 @@
 /* Define to 1 if you have the `setrlimit' function. */
 #cmakedefine01 HAVE_SETRLIMIT
 
+/* Define to 1 if you have the <sys/ioctl.h> header file. */
+#cmakedefine01 HAVE_SYS_IOCTL_H
+
+/* Define to 1 if you have the <sys/mman.h> header file. */
+#cmakedefine01 HAVE_SYS_MMAN_H
+
+/* Define to 1 if you have the <sys/param.h> header file. */
+#cmakedefine01 HAVE_SYS_PARAM_H
+
+/* Define to 1 if you have the <sys/resource.h> header file. */
+#cmakedefine01 HAVE_SYS_RESOURCE_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#cmakedefine01 HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#cmakedefine01 HAVE_SYS_TIME_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#cmakedefine01 HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#cmakedefine01 HAVE_UNISTD_H
+
+/* Define to 1 if you have the <valgrind/valgrind.h> header file. */
+#cmakedefine01 HAVE_VALGRIND_VALGRIND_H
+
 #endif // POLAR_DEVLTOOLS_UTILS_UTILS_CONFIG_H
