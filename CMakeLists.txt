@@ -238,6 +238,7 @@ else()
    option(POLAR_ENABLE_LOCAL_SUBMODULE_VISIBILITY "Compile with -fmodules-local-submodule-visibility." ON)
 endif()
 
+option(POLAR_ENABLE_EXPENSIVE_CHECKS "Enable expensive checks" OFF)
 option(POLAR_ENABLE_LLD "Use lld as C and C++ linker." OFF)
 option(POLAR_ENABLE_PEDANTIC "Compile with pedantic enabled." ON)
 option(POLAR_ENABLE_WERROR "Fail and stop if a warning is triggered." OFF)
