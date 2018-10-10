@@ -414,6 +414,13 @@ check_symbol_exists(getrlimit "sys/types.h;sys/time.h;sys/resource.h" HAVE_GETRL
 check_symbol_exists(sbrk unistd.h HAVE_SBRK)
 check_symbol_exists(strerror_r string.h HAVE_STRERROR_R)
 check_symbol_exists(strerror_s string.h HAVE_DECL_STRERROR_S)
+# AddressSanitizer conflicts with lib/Support/Unix/Signals.inc
+# Avoid sigaltstack on Apple platforms, where backtrace() cannot handle it
+# (rdar://7089625) and _Unwind_Backtrace is unusable because it cannot unwind
+# past the signal handler after an assertion failure (rdar://29866587).
+if(HAVE_SIGNAL_H AND NOT APPLE)
+  check_symbol_exists(sigaltstack signal.h HAVE_SIGALTSTACK)
+endif()
 set(CMAKE_REQUIRED_DEFINITIONS "-D_LARGEFILE64_SOURCE")
 check_symbol_exists(lseek64 "sys/types.h;unistd.h" HAVE_LSEEK64)
 set(CMAKE_REQUIRED_DEFINITIONS "")

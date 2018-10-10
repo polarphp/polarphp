@@ -82,6 +82,9 @@
 /* Define to 1 if you have the `setenv' function. */
 #cmakedefine01 HAVE_SETENV
 
+/* Define to 1 if you have the `sigaltstack' function. */
+#cmakedefine01 HAVE_SIGALTSTACK
+
 /* Define to 1 if you have the <signal.h> header file. */
 #cmakedefine01 HAVE_SIGNAL_H
 

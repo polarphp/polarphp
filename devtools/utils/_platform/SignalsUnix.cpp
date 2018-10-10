@@ -36,16 +36,22 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "MemoryAlloc.h"
 #include "MemoryBuffer.h"
 #include "ManagedStatics.h"
 #include "UtilsConfig.h"
 #include "unix/Unix.h"
+#include "StlExtras.h"
+#include "Signals.h"
+#include "Stream.h"
 
 #include <filesystem>
 #include <shared_mutex>
 #include <algorithm>
 #include <string>
 #include <iostream>
+#include <iomanip>
+
 #ifdef HAVE_BACKTRACE
 # include BACKTRACE_HEADER
 #endif
@@ -79,7 +85,7 @@
 
 using polar::utils::ManagedStatic;
 
-void signal_handler(int sig);  // defined below.
+static void signal_handler(int sig);  // defined below.
 /// The function to call if ctrl-c is pressed.
 using InterruptFunctionType = void (*)();
 static std::atomic<InterruptFunctionType> sg_interruptFunction =
@@ -241,15 +247,320 @@ static std::atomic<unsigned> sg_numRegisteredSignals = ATOMIC_VAR_INIT(0);
 static struct {
    struct sigaction m_sa;
    int m_sigNo;
-} sg_registeredSignalInfo[array_lengthof(sg_intSigs) + array_lengthof(sg_killSigs)];
+} sg_registeredSignalInfo[polar::utils::array_lengthof(sg_intSigs) + polar::utils::array_lengthof(sg_killSigs)];
+
+#if defined(HAVE_SIGALTSTACK)
+// Hold onto both the old and new alternate signal stack so that it's not
+// reported as a leak. We don't make any attempt to remove our alt signal
+// stack if we remove our signal handlers; that can't be done reliably if
+// someone else is also trying to do the same thing.
+static stack_t sg_oldAltStack;
+static void* sg_newAltStackPointer;
+
+static void create_sig_alt_stack()
+{
+   const size_t altStackSize = MINSIGSTKSZ + 64 * 1024;
+
+   // If we're executing on the alternate stack, or we already have an alternate
+   // signal stack that we're happy with, there's nothing for us to do. Don't
+   // reduce the size, some other part of the process might need a larger stack
+   // than we do.
+   if (sigaltstack(nullptr, &sg_oldAltStack) != 0 ||
+       sg_oldAltStack.ss_flags & SS_ONSTACK ||
+       (sg_oldAltStack.ss_sp && sg_oldAltStack.ss_size >= altStackSize)) {
+      return;
+   }
+   stack_t altStack = {};
+   altStack.ss_sp = static_cast<char *>(polar::utils::safe_malloc(altStackSize));
+   sg_newAltStackPointer = altStack.ss_sp; // Save to avoid reporting a leak.
+   altStack.ss_size = altStackSize;
+   if (sigaltstack(&altStack, &sg_oldAltStack) != 0) {
+      free(altStack.ss_sp);
+   }
+}
+#else
+static void create_sig_alt_stack() {}
+#endif
+
+static void register_handlers()
+{ // Not signal-safe.
+   // The mutex prevents other threads from registering handlers while we're
+   // doing it. We also have to protect the handlers and their count because
+   // a signal handler could fire while we're registeting handlers.
+   static ManagedStatic<std::shared_mutex> signalHandlerRegistrationMutex;
+   std::shared_lock<std::shared_mutex> writeLocker(*signalHandlerRegistrationMutex);
+
+   // If the handlers are already registered, we're done.
+   if (sg_numRegisteredSignals.load() != 0) {
+      return;
+   }
+   // Create an alternate stack for signal handling. This is necessary for us to
+   // be able to reliably handle signals due to stack overflow.
+   create_sig_alt_stack();
+
+   auto registerHandler = [&](int signal) {
+      unsigned index = sg_numRegisteredSignals.load();
+      assert(index < polar::utils::array_lengthof(sg_registeredSignalInfo) &&
+             "Out of space for signal handlers!");
+
+      struct sigaction newHandler;
+
+      newHandler.sa_handler = signal_handler;
+      newHandler.sa_flags = SA_NODEFER | SA_RESETHAND | SA_ONSTACK;
+      sigemptyset(&newHandler.sa_mask);
+
+      // Install the new handler, save the old one in RegisteredSignalInfo.
+      sigaction(signal, &newHandler, &sg_registeredSignalInfo[index].m_sa);
+      sg_registeredSignalInfo[index].m_sigNo = signal;
+      ++sg_numRegisteredSignals;
+   };
+
+   for (auto sig : sg_intSigs) {
+      registerHandler(sig);
+   }
+   for (auto sig : sg_killSigs) {
+      registerHandler(sig);
+   }
+}
+
+static void unregister_handlers()
+{
+   // Restore all of the signal handlers to how they were before we showed up.
+   for (unsigned i = 0, e = sg_numRegisteredSignals.load(); i != e; ++i) {
+      sigaction(sg_registeredSignalInfo[i].m_sigNo,
+                &sg_registeredSignalInfo[i].m_sa, nullptr);
+      --sg_numRegisteredSignals;
+   }
+}
+
+/// Process the FilesToRemove list.
+static void remove_files_to_remove()
+{
+   FileToRemoveList::removeAllFiles(sg_filesToRemove);
+}
+
+// The signal handler that runs.
+static void signal_handler(int sig)
+{
+   // Restore the signal behavior to default, so that the program actually
+   // crashes when we return and the signal reissues.  This also ensures that if
+   // we crash in our signal handler that the program will terminate immediately
+   // instead of recursing in the signal handler.
+   unregister_handlers();
+
+   // Unmask all potentially blocked kill signals.
+   sigset_t sigMask;
+   sigfillset(&sigMask);
+   sigprocmask(SIG_UNBLOCK, &sigMask, nullptr);
+
+   {
+      remove_files_to_remove();
+      if (std::find(std::begin(sg_intSigs), std::end(sg_intSigs), sig)
+          != std::end(sg_intSigs)) {
+         if (auto oldInterruptFunction = sg_interruptFunction.exchange(nullptr)) {
+            return oldInterruptFunction();
+         }
+         raise(sig);   // Execute the default handler.
+         return;
+      }
+   }
+   // Otherwise if it is a fault (like SEGV) run any handler.
+   polar::utils::run_signal_handlers();
+#ifdef __s390__
+   // On S/390, certain signals are delivered with PSW Address pointing to
+   // *after* the faulting instruction.  Simply returning from the signal
+   // handler would continue execution after that point, instead of
+   // re-raising the signal.  Raise the signal manually in those cases.
+   if (sig == SIGILL || sig == SIGFPE || sig == SIGTRAP) {
+      raise(sig);
+   }
+#endif
+}
 
 namespace polar {
 namespace utils {
 
+void run_interrupt_handlers()
+{
+   remove_files_to_remove();
+}
 
+void set_interrupt_function(void (*ifunc)())
+{
+   sg_interruptFunction.exchange(ifunc);
+   register_handlers();
+}
+
+// The public API
+bool remove_file_on_signal(const std::string &filename,
+                           std::string *)
+{
+   // Ensure that cleanup will occur as soon as one file is added.
+   static ManagedStatic<FilesToRemoveCleanup> filesToRemoveCleanup;
+   *filesToRemoveCleanup;
+   FileToRemoveList::insert(sg_filesToRemove, filename);
+   register_handlers();
+   return false;
+}
+
+
+// The public API
+void dont_remove_file_on_signal(const std::string &filename)
+{
+   FileToRemoveList::erase(sg_filesToRemove, filename);
+}
+
+void insert_signal_handler(SignalHandlerCallback funcPtr,
+                           void *cookie);
+
+/// Add a function to be called when a signal is delivered to the process. The
+/// handler can have a cookie passed to it to identify what instance of the
+/// handler it is.
+void add_signal_handler(SignalHandlerCallback funcPtr,
+                        void *cookie)
+{ // Signal-safe.
+   insert_signal_handler(funcPtr, cookie);
+   register_handlers();
+}
+
+#if ENABLE_BACKTRACES && defined(HAVE__UNWIND_BACKTRACE)
+namespace {
+int unwind_backtrace(void **stackTrace, int maxEntries)
+{
+   if (maxEntries < 0) {
+      return 0;
+   }
+   // Skip the first frame ('unwindBacktrace' itself).
+   int entries = -1;
+
+   auto handleFrame = [&](_Unwind_Context *context) -> _Unwind_Reason_Code {
+      // Apparently we need to detect reaching the end of the stack ourselves.
+      void *ip = (void *)_Unwind_GetIP(context);
+      if (!ip) {
+         return _URC_END_OF_STACK;
+      }
+      assert(entries < maxEntries && "recursively called after END_OF_STACK?");
+      if (entries >= 0) {
+         stackTrace[entries] = ip;
+      }
+      if (++entries == maxEntries) {
+         return _URC_END_OF_STACK;
+      }
+      return _URC_NO_REASON;
+   };
+
+   _Unwind_Backtrace(
+            [](_Unwind_Context *context, void *handler) {
+      return (*static_cast<decltype(handleFrame) *>(handler))(context);
+   },
+   static_cast<void *>(&handleFrame));
+   return std::max(entries, 0);
+}
+} // anonymous namespace
+#endif
+
+// In the case of a program crash or fault, print out a stack trace so that the
+// user has an indication of why and where we died.
+//
+// On glibc systems we have the 'backtrace' function, which works nicely, but
+// doesn't demangle symbols.
+void print_stack_trace(std::ostream &out)
+{
+#if ENABLE_BACKTRACES
+   static void *stackTrace[256];
+   int depth = 0;
+#if defined(HAVE_BACKTRACE)
+   // Use backtrace() to output a backtrace on Linux systems with glibc.
+   if (!depth) {
+      depth = backtrace(stackTrace, static_cast<int>(array_lengthof(stackTrace)));
+   }
+#endif
+#if defined(HAVE__UNWIND_BACKTRACE)
+   // Try _Unwind_Backtrace() if backtrace() failed.
+   if (!depth) {
+      depth = unwind_backtrace(stackTrace,
+                               static_cast<int>(array_lengthof(stackTrace)));
+   }
+#endif
+   if (!depth) {
+      return;
+   }
+#if HAVE_DLFCN_H && HAVE_DLADDR
+   int width = 0;
+   for (int i = 0; i < depth; ++i) {
+      Dl_info dlinfo;
+      dladdr(stackTrace[i], &dlinfo);
+      const char* name = strrchr(dlinfo.dli_fname, '/');
+      int nwidth;
+      if (!name) {
+         nwidth = strlen(dlinfo.dli_fname);
+      } else {
+         nwidth = strlen(name) - 1;
+      }
+      if (nwidth > width) width = nwidth;
+   }
+
+   for (int i = 0; i < depth; ++i) {
+      Dl_info dlinfo;
+      dladdr(stackTrace[i], &dlinfo);
+      out << std::setw(2) << std::left << i;
+
+      const char* name = strrchr(dlinfo.dli_fname, '/');
+      if (!name) {
+         out << std::setw(width) << std::left << dlinfo.dli_fname;
+      } else {
+         out << std::setw(width) << std::left << name+1;
+      }
+      out << std::hex << std::setfill('0') << std::setw((int)(sizeof(void*) * 2) + 2) << (unsigned long)stackTrace[i];
+      if (dlinfo.dli_sname != nullptr) {
+         out << ' ' << dlinfo.dli_sname;
+         // FIXME: When we move to C++11, use %t length modifier. It's not in
+         // C++03 and causes gcc to issue warnings. Losing the upper 32 bits of
+         // the stack offset for a stack dump isn't likely to cause any problems.
+         out << " + " << (unsigned)((char*)stackTrace[i]-
+                                    (char*)dlinfo.dli_saddr);
+      }
+      out << '\n';
+   }
+#elif defined(HAVE_BACKTRACE)
+   backtrace_symbols_fd(stackTrace, depth, STDERR_FILENO);
+#endif
+#endif
+}
+
+namespace {
+void print_stack_trace_signal_handler(void *)
+{
+  print_stack_trace(error_stream());
+}
+}
+
+void disable_system_dialogs_on_crash()
+{}
+
+/// When an error signal (such as SIGABRT or SIGSEGV) is delivered to the
+/// process, print a stack trace and then exit.
+void print_stack_trace_on_error_signal(const std::string &argv0,
+                                       bool disableCrashReporting)
+{
+   ::sg_argv0 = argv0;
+
+   add_signal_handler(print_stack_trace_signal_handler, nullptr);
+
+#if defined(__APPLE__) && ENABLE_CRASH_OVERRIDES
+   // Environment variable to disable any kind of crash dialog.
+   if (disableCrashReporting || getenv("POLAR_DISABLE_CRASH_REPORT")) {
+      mach_port_t self = mach_task_self();
+      exception_mask_t mask = EXC_MASK_CRASH;
+      kern_return_t ret = task_set_exception_ports(self,
+                                                   mask,
+                                                   MACH_PORT_NULL,
+                                                   EXCEPTION_STATE_IDENTITY | MACH_EXCEPTION_CODES,
+                                                   THREAD_STATE_NONE);
+      (void)ret;
+   }
+#endif
+}
 
 } // utils
 } // polar
-
-
-
