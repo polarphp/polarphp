@@ -10,6 +10,8 @@
 // Created by polarboy on 2018/10/10.
 
 #include "ErrorHandling.h"
+#include "ErrorCode.h"
+#include "Error.h"
 #include <cassert>
 #include <cstdlib>
 #include <mutex>

@@ -20,7 +20,7 @@
 #include "ErrorCode.h"
 
 namespace polar {
-namespace filechecker {
+namespace utils {
 
 /// Represents either an error or a value T.
 ///
@@ -268,7 +268,7 @@ private:
    bool m_hasError : 1;
 };
 
-} // filechecker
+} // utils
 } // polar
 
 #endif // POLAR_DEVLTOOLS_UTILS_OPTIONAL_ERROR_H

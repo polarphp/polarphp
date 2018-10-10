@@ -14,11 +14,7 @@
 
 #include "CompilerFeature.h"
 #include <cassert>
-#include <cstddef>
-#include <cstdint>
-#include <cstdlib>
 #include <cstring>
-#include <iterator>
 #include <string>
 #include <utility>
 #include <vector>
@@ -120,7 +116,7 @@ inline bool is_print(char c)
 /// Returns the corresponding lowercase character if \p x is uppercase.
 inline char to_lower(char c)
 {
-   if (c >= 'A' && x <= 'Z') {
+   if (c >= 'A' && c <= 'Z') {
       return c - 'A' + 'a';
    }
    return c;
@@ -147,7 +143,7 @@ inline std::string utohexstr(uint64_t c, bool lowerCase = false)
       *--bufPtr = hexdigit(mod, lowerCase);
       c >>= 4;
    }
-   return std::string(bufPtr, std::end(Buffer));
+   return std::string(bufPtr, std::end(buffer));
 }
 
 /// Convert buffer \p input to its hexadecimal representation.
@@ -192,7 +188,7 @@ inline std::string from_hex(std::string_view input)
    assert(input.size() % 2 == 0);
    while (!input.empty()) {
       uint8_t hex = hex_from_nibbles(input[0], input[1]);
-      output.push_back(Hex);
+      output.push_back(hex);
       input = input.substr(2);
    }
    return output;
@@ -280,7 +276,7 @@ inline std::string join_impl(IteratorT begin, IteratorT end,
    for (IteratorT iter = begin; iter != end; ++iter) {
       len += (*begin).size();
    }
-   str.reserve(Len);
+   str.reserve(len);
    str += (*begin);
    while (++begin != end) {
       str += separator;
@@ -376,6 +372,14 @@ inline std::string join_items(Sep separator, Args &&... args)
    result.reserve(NI + (sizeof...(args) - 1) * NS + 1);
    internal::join_items_impl(result, separator, std::forward<Args>(args)...);
    return result;
+}
+
+template <typename... ArgTypes>
+std::string format_string(const std::string &format, ArgTypes&&...args)
+{
+   char buffer[512];
+   int size = std::snprintf(buffer, 512, format.c_str(), std::forward<ArgTypes>(args)...);
+   return std::string(buffer, size);
 }
 
 } // utils
