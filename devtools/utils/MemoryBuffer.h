@@ -9,8 +9,8 @@
 //
 // Created by polarboy on 2018/10/08.
 
-#ifndef POLAR_DEVLTOOLS_FILECHECKER_MEMORY_BUFFER_H
-#define POLAR_DEVLTOOLS_FILECHECKER_MEMORY_BUFFER_H
+#ifndef POLAR_DEVLTOOLS_UTILS_MEMORY_BUFFER_H
+#define POLAR_DEVLTOOLS_UTILS_MEMORY_BUFFER_H
 
 #include <filesystem>
 #include <cstddef>
@@ -36,4 +36,4 @@ class MemoryBufferRef;
 } // polar
 } // polar
 
-#endif // POLAR_DEVLTOOLS_FILECHECKER_MEMORY_BUFFER_H
+#endif // POLAR_DEVLTOOLS_UTILS_MEMORY_BUFFER_H

@@ -14,6 +14,26 @@
 #ifndef POLAR_DEVLTOOLS_UTILS_UTILS_CONFIG_H
 #define POLAR_DEVLTOOLS_UTILS_UTILS_CONFIG_H
 
+/* Define to 1 to enable backtraces, and to 0 otherwise. */
+#cmakedefine01 ENABLE_BACKTRACES
+
+/* Define to 1 to enable crash overrides, and to 0 otherwise. */
+#cmakedefine01 ENABLE_CRASH_OVERRIDES
+
+/* Define to 1 to enable crash memory dumps, and to 0 otherwise. */
+#cmakedefine01 POLAR_ENABLE_CRASH_DUMPS
+
+/* Define to 1 if you have the `backtrace' function. */
+#cmakedefine01 HAVE_BACKTRACE
+
+#define BACKTRACE_HEADER <@BACKTRACE_HEADER@>
+
+/* Define to 1 if you have the <CrashReporterClient.h> header file. */
+#cmakedefine HAVE_CRASHREPORTERCLIENT_H
+
+/* can use __crashreporter_info__ */
+#cmakedefine01 HAVE_CRASHREPORTER_INFO
+
 /* Define to 1 if you have the `getrusage' function. */
 #cmakedefine01 HAVE_GETRUSAGE
 
@@ -28,6 +48,9 @@
 
 /* Define to 1 if you have the `futimes' function. */
 #cmakedefine01 HAVE_FUTIMES
+
+/* Define to 1 if you have the <link.h> header file. */
+#cmakedefine01 HAVE_LINK_H
 
 /* Define to 1 if you have the `lseek64' function. */
 #cmakedefine01 HAVE_LSEEK64
@@ -113,5 +136,8 @@
 
 /* Define to 1 if you have the <valgrind/valgrind.h> header file. */
 #cmakedefine01 HAVE_VALGRIND_VALGRIND_H
+
+/* Define to 1 if you have the `_Unwind_Backtrace' function. */
+#cmakedefine01 HAVE__UNWIND_BACKTRACE
 
 #endif // POLAR_DEVLTOOLS_UTILS_UTILS_CONFIG_H

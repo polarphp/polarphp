@@ -16,6 +16,7 @@ polar_collect_files(
 
 if (UNIX)
    list(APPEND POLAR_DEVTOOLS_UTILS_LIB_SOURCES _platform/ProcessUtilsUnix.cpp)
+   list(APPEND POLAR_DEVTOOLS_UTILS_LIB_SOURCES _platform/SignalsUnix.cpp)
 endif()
 
 configure_file(Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/UtilsConfig.h @ONLY)

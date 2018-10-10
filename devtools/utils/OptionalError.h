@@ -9,8 +9,8 @@
 //
 // Created by polarboy on 2018/10/08.
 
-#ifndef POLAR_DEVLTOOLS_FILECHECKER_OPTIONAL_ERROR_H
-#define POLAR_DEVLTOOLS_FILECHECKER_OPTIONAL_ERROR_H
+#ifndef POLAR_DEVLTOOLS_UTILS_OPTIONAL_ERROR_H
+#define POLAR_DEVLTOOLS_UTILS_OPTIONAL_ERROR_H
 
 #include <cassert>
 #include <system_error>
@@ -66,7 +66,7 @@ private:
    using ConstReference = const typename std::remove_reference<T>::type &;
    using Pointer = typename std::remove_reference<T>::type *;
    using ConstPointer = const typename std::remove_reference<T>::type *;
-   using reference = reference;
+   using reference = Reference;
    using const_reference = ConstReference;
    using pointer = Pointer;
    using const_pointer = ConstPointer;
@@ -124,7 +124,7 @@ public:
    }
 
    template <class OtherType>
-   OptionalError(OptionalError<OtherType> &&other, typename std::enable_if<!std::is_convertible<OtherType, T>::value>::type * =
+   OptionalError(OptionalError<OtherType> &&other, typename std::enable_if<std::is_convertible<OtherType, T>::value>::type * =
          nullptr)
    {
       moveConstruct(std::move(other));
@@ -271,4 +271,4 @@ private:
 } // filechecker
 } // polar
 
-#endif // POLAR_DEVLTOOLS_FILECHECKER_OPTIONAL_ERROR_H
+#endif // POLAR_DEVLTOOLS_UTILS_OPTIONAL_ERROR_H

@@ -209,6 +209,11 @@ if (POLAR_USE_FOLDERS)
    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
 
+option(POLAR_ENABLE_BACKTRACES "Enable embedding backtraces on crash." ON)
+if(POLAR_ENABLE_BACKTRACES)
+  set(ENABLE_BACKTRACES 1)
+endif()
+
 set(POLAR_WITH_TSRM_PTH_CONFIG "pth-config" CACHE FILEPATH "Use GNU Pth")
 
 set(POLAR_LIBDIR_SUFFIX "" CACHE STRING "Define suffix of library directory name (32/64)" )
