@@ -542,5 +542,6 @@ inline void deallocate_buffer(void *ptr, size_t size, size_t alignment) {
          );
 }
 
+} // polar
 
 #endif // POLAR_DEVLTOOLS_UTILS_COMPILER_FEATURE_H

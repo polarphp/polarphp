@@ -61,3 +61,8 @@ find_package(UUID)
 if (POLAR_INCLUDE_TESTS)
    find_package(Curses REQUIRED)
 endif()
+
+find_package(Backtrace)
+set(HAVE_BACKTRACE ${Backtrace_FOUND})
+set(BACKTRACE_HEADER ${Backtrace_HEADER})
+

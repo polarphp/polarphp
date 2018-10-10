@@ -62,6 +62,15 @@
 /* Define to 1 if you have the <signal.h> header file. */
 #cmakedefine01 HAVE_SIGNAL_H
 
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#cmakedefine01 HAVE_DLFCN_H
+
+/* Define if dlopen() is available on this platform. */
+#cmakedefine01 HAVE_DLOPEN
+
+/* Define if dladdr() is available on this platform. */
+#cmakedefine01 HAVE_DLADDR
+
 /* Define to 1 if you have the <errno.h> header file. */
 #cmakedefine01 HAVE_ERRNO_H
 

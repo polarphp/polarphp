@@ -43,6 +43,11 @@ elseif(${_hostProcessor} MATCHES sparc.*)
    endif()
 endif()
 
+if(WIN32 AND NOT CYGWIN )
+  # We consider Cygwin as another Unix
+  set(PURE_WINDOWS 1)
+endif()
+
 # Mark symbols hidden by default if the compiler (for example, gcc >= 4)
 # supports it. This can help reduce the binary size and startup time.
 # use it just for compile zendVM
@@ -124,8 +129,24 @@ check_library_exists(nsl gethostbyaddr "" HAVE_GETHOSTBYADDR)
 check_library_exists(nsl yp_get_default_domain "" HAVE_YP_GET_DEFAULT_DOMAIN)
 check_library_exists(dl dlopen "" HAVE_DLOPEN)
 
-if (HAVE_DLOPEN)
-   set(HAVE_LIBDL ON)
+# library checks
+if(NOT PURE_WINDOWS)
+  check_library_exists(pthread pthread_create "" HAVE_LIBPTHREAD)
+  if (HAVE_LIBPTHREAD)
+    check_library_exists(pthread pthread_getspecific "" HAVE_PTHREAD_GETSPECIFIC)
+    check_library_exists(pthread pthread_rwlock_init "" HAVE_PTHREAD_RWLOCK_INIT)
+    check_library_exists(pthread pthread_mutex_lock "" HAVE_PTHREAD_MUTEX_LOCK)
+  else()
+    # this could be Android
+    check_library_exists(c pthread_create "" PTHREAD_IN_LIBC)
+    if (PTHREAD_IN_LIBC)
+      check_library_exists(c pthread_getspecific "" HAVE_PTHREAD_GETSPECIFIC)
+      check_library_exists(c pthread_rwlock_init "" HAVE_PTHREAD_RWLOCK_INIT)
+      check_library_exists(c pthread_mutex_lock "" HAVE_PTHREAD_MUTEX_LOCK)
+    endif()
+  endif()
+  check_library_exists(dl dlopen "" HAVE_LIBDL)
+  check_library_exists(rt clock_gettime "" HAVE_LIBRT)
 endif()
 
 check_library_exists(m sin "" HAVE_SIN)
@@ -377,6 +398,7 @@ polar_check_funcs(
    nanosleep)
 
 # TODO use check_symbol_exists or polar_check_funcs ?
+check_symbol_exists(_Unwind_Backtrace "unwind.h" HAVE__UNWIND_BACKTRACE)
 check_symbol_exists(getpagesize unistd.h HAVE_GETPAGESIZE)
 check_symbol_exists(sysconf unistd.h HAVE_SYSCONF)
 check_symbol_exists(getrusage sys/resource.h HAVE_GETRUSAGE)
@@ -398,6 +420,19 @@ check_symbol_exists(mallctl malloc_np.h HAVE_MALLCTL)
 check_symbol_exists(mallinfo malloc.h HAVE_MALLINFO)
 check_symbol_exists(malloc_zone_statistics malloc/malloc.h
    HAVE_MALLOC_ZONE_STATISTICS)
+
+if(HAVE_DLFCN_H)
+  if(HAVE_LIBDL)
+    list(APPEND CMAKE_REQUIRED_LIBRARIES dl)
+  endif()
+  check_symbol_exists(dlopen dlfcn.h HAVE_DLOPEN)
+  check_symbol_exists(dladdr dlfcn.h HAVE_DLADDR)
+  if(HAVE_LIBDL)
+    list(REMOVE_ITEM CMAKE_REQUIRED_LIBRARIES dl)
+  endif()
+endif()
+
+message("xxxxxxxxx${HAVE_DLADDR}")
 
 # Some systems (like OpenSolaris) do not have nanosleep in libc
 
