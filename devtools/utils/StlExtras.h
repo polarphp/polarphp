@@ -37,6 +37,8 @@
 namespace polar {
 namespace utils {
 
+template <typename T, T> struct SameType;
+
 /// An efficient, type-erasing, non-owning reference to a callable. This is
 /// intended for use as the type of a function parameter that is not used
 /// after the function in question returns.
