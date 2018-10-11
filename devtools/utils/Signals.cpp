@@ -39,7 +39,7 @@ static constexpr size_t MaxSignalHandlerCallbacks = 8;
 static CallbackAndCookie sg_callBacksToRun[MaxSignalHandlerCallbacks];
 
 // Signal-safe.
-void run_interrupt_handlers()
+void run_signal_handlers()
 {
    for (size_t index = 0; index < MaxSignalHandlerCallbacks; ++index) {
       auto &callback = sg_callBacksToRun[index];
@@ -57,7 +57,7 @@ void run_interrupt_handlers()
 
 // Signal-safe.
 void insert_signal_handler(SignalHandlerCallback funcPtr,
-                                void *cookie)
+                           void *cookie)
 {
    for (size_t index = 0; index < MaxSignalHandlerCallbacks; ++index) {
       auto &callback = sg_callBacksToRun[index];

@@ -142,8 +142,6 @@ void install_bad_alloc_error_handler(FatalErrorHandlerFunc handler,
 /// Restores default bad alloc error handling behavior.
 void remove_bad_alloc_error_handler();
 
-void install_out_of_memory_new_handler();
-
 /// Reports a bad alloc error, calling any user defined bad alloc
 /// error handler. In contrast to the generic 'report_fatal_error'
 /// functions, this function is expected to return, e.g. the user
@@ -157,6 +155,7 @@ void install_out_of_memory_new_handler();
 /// is thrown, if polarphp is compiled with exception support, otherwise an assertion
 /// is called.
 void report_bad_alloc_error(const char *reason, bool genCrashDiag = true);
+void report_bad_alloc_error(std::string_view reason, bool genCrashDiag = true);
 
 /// This function calls abort(), and prints the optional message to stderr.
 /// Use the llvm_unreachable macro (that adds location info), instead of
