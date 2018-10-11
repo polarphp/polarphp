@@ -12,10 +12,11 @@
 #ifndef POLAR_DEVLTOOLS_UTILS_FORMAT_VARIADIC_DETAIL_H
 #define POLAR_DEVLTOOLS_UTILS_FORMAT_VARIADIC_DETAIL_H
 
-#include "StlExtras.h"
 #include <string_view>
 #include <ostream>
 #include <type_traits>
+
+#include "StlExtras.h"
 
 namespace polar {
 namespace utils {
@@ -26,16 +27,16 @@ class Error;
 
 namespace internal
 {
-class FormatAdapter {
+class FormatAdapterImpl {
 protected:
-   virtual ~FormatAdapter() {}
+   virtual ~FormatAdapterImpl() {}
 
 public:
    virtual void format(std::ostream &out, std::string_view options) = 0;
 };
 
 template <typename T>
-class ProviderFormatAdapter : public FormatAdapter
+class ProviderFormatAdapter : public FormatAdapterImpl
 {
    T m_item;
 
@@ -51,7 +52,7 @@ public:
 };
 
 template <typename T>
-class StreamOperatorFormatAdapter : public FormatAdapter
+class StreamOperatorFormatAdapter : public FormatAdapterImpl
 {
    T m_item;
 
@@ -113,7 +114,7 @@ template <typename T>
 struct UsesFormatMember
       : public std::integral_constant<
       bool,
-      std::is_base_of<FormatAdapter,
+      std::is_base_of<FormatAdapterImpl,
       typename std::remove_reference<T>::type>::value>
 {};
 

@@ -12,12 +12,12 @@
 #ifndef POLAR_DEVLTOOLS_UTILS_FORMAT_COMMON_H
 #define POLAR_DEVLTOOLS_UTILS_FORMAT_COMMON_H
 
-#include "FormatVariadicDetail.h"
-
 #include <string>
 #include <string_view>
 #include <ostream>
 #include <sstream>
+
+#include "FormatVariadicDetail.h"
 
 namespace polar {
 namespace utils {
