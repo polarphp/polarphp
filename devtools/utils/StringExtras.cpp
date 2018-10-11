@@ -62,7 +62,7 @@ std::string_view::size_type str_in_str_no_case(std::string_view s1, std::string_
 /// The function returns a pair containing the extracted token and the
 /// remaining tail string.
 std::pair<std::string_view , std::string_view> get_token(std::string_view source,
-         std::string_view delimiters)
+                                                         std::string_view delimiters)
 {
    // Figure out where the token starts.
    std::string_view ::size_type start = source.find_first_not_of(delimiters);
@@ -120,6 +120,170 @@ void print_lower_case(std::string_view str, std::ostream &out)
    for (const char c : str) {
       out << to_lower(c);
    }
+}
+
+namespace {
+int ascii_strncasecmp(const char *lhs, const char *rhs, size_t length)
+{
+   for (size_t index = 0; index < length; ++index) {
+      unsigned char lhc = to_lower(lhs[index]);
+      unsigned char rhc = to_lower(rhs[index]);
+      if (lhc != rhc) {
+         return lhc < rhc ? -1 : 1;
+      }
+   }
+   return 0;
+}
+
+unsigned get_auto_sense_radix(std::string_view &str) {
+   if (str.empty())
+      return 10;
+
+   if (string_starts_with(str, "0x") || string_starts_with(str, "0X")) {
+      str = str.substr(2);
+      return 16;
+   }
+
+   if (string_starts_with(str, "0b") || string_starts_with(str, "0B")) {
+      str = str.substr(2);
+      return 2;
+   }
+
+   if (string_starts_with(str, "0o")) {
+      str = str.substr(2);
+      return 8;
+   }
+
+   if (str[0] == '0' && str.size() > 1 && is_digit(str[1])) {
+      str = str.substr(1);
+      return 8;
+   }
+
+   return 10;
+}
+
+} // anonymous namespace
+
+bool string_starts_with(std::string_view str, std::string_view prefix)
+{
+   return str.size() >= prefix.size() &&
+         std::memcmp(str.data(), prefix.data(), prefix.size()) == 0;
+}
+
+bool string_starts_with(std::string_view str, std::string_view::value_type prefix)
+{
+   return str.size() >= 1 && str.front() == prefix;
+}
+
+bool string_starts_with_lowercase(std::string_view str, std::string_view prefix)
+{
+   return str.size() >= prefix.size() &&
+         ascii_strncasecmp(str.data(), prefix.data(), prefix.size()) == 0;
+}
+
+bool string_starts_with_lowercase(std::string_view str, std::string_view::value_type prefix)
+{
+   return str.size() >= 1 && to_lower(str.front()) == to_lower(prefix);
+}
+
+bool string_ends_with(std::string_view str, std::string_view prefix)
+{
+   return str.size() >= prefix.size() &&
+         std::memcmp(str.end() - prefix.size(), prefix.data(), prefix.size()) == 0;
+}
+
+bool string_ends_with(std::string_view str, std::string_view::value_type prefix)
+{
+   return str.size() >= 1 && str.back() == prefix;
+}
+
+bool string_ends_with_lowercase(std::string_view str, std::string_view prefix)
+{
+   return str.size() >= prefix.size() &&
+         ascii_strncasecmp(str.end() - prefix.size(), prefix.data(), prefix.size()) == 0;
+}
+
+bool string_ends_with_lowercase(std::string_view str, std::string_view::value_type prefix)
+{
+   return str.size() >= 1 && to_lower(str.back()) == to_lower(prefix);
+}
+
+bool string_consume_signed_integer(std::string_view &str, unsigned radix,
+                                   long long &result)
+{
+   unsigned long long ullValue;
+   // Handle positive strings first.
+   if (str.empty() || str.front() != '-') {
+      if (string_consume_unsigned_integer(str, radix, ullValue) ||
+          // Check for value so large it overflows a signed value.s
+          (long long)ullValue < 0) {
+         return true;
+      }
+      result = ullValue;
+      return false;
+   }
+   // Get the positive part of the value.
+   std::string_view str2 = string_drop_front(str, 1);
+   if (string_consume_unsigned_integer(str2, radix, ullValue) ||
+       // Reject values so large they'd overflow as negative signed, but allow
+       // "-0".  This negates the unsigned so that the negative isn't undefined
+       // on signed overflow.
+       (long long)-ullValue > 0) {
+      return true;
+   }
+   str = str2;
+   result = -ullValue;
+   return false;
+}
+
+bool string_consume_unsigned_integer(std::string_view &str, unsigned radix,
+                                     unsigned long long &result)
+{
+   // Autosense radix if not specified.
+   if (radix == 0) {
+      radix = get_auto_sense_radix(str);
+   }
+   // Empty strings (after the radix autosense) are invalid.
+   if (str.empty()) {
+      return true;
+   }
+   // Parse all the bytes of the string given this radix.  Watch for overflow.
+   std::string_view str2 = str;
+   result = 0;
+   while (!str2.empty()) {
+      unsigned charVal;
+      if (str2[0] >= '0' && str2[0] <= '9') {
+         charVal = str2[0] - '0';
+      } else if (str2[0] >= 'a' && str2[0] <= 'z') {
+         charVal = str2[0] - 'a' + 10;
+      } else if (str2[0] >= 'A' && str2[0] <= 'Z') {
+         charVal = str2[0] - 'A' + 10;
+      } else {
+         break;
+      }
+      // If the parsed value is larger than the integer radix, we cannot
+      // consume any more characters.
+      if (charVal >= radix) {
+         break;
+      }
+      // Add in this character.
+      unsigned long long prevResult = result;
+      result = result * radix + charVal;
+
+      // Check for overflow by shifting back and seeing if bits were lost.
+      if (result / radix < prevResult) {
+         return true;
+      }
+      str2 = str2.substr(1);
+   }
+
+   // We consider the operation a failure if no characters were consumed
+   // successfully.
+   if (str.size() == str2.size()) {
+      return true;
+   }
+   str = str2;
+   return false;
 }
 
 } // utils

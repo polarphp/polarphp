@@ -150,7 +150,7 @@ class FormattedString
 public:
    enum Justification { JustifyNone, JustifyLeft, JustifyRight, JustifyCenter };
    FormattedString(std::string_view str, unsigned width, Justification justify)
-      : m_str(str), m_width(width), Justify(justify)
+      : m_str(str), m_width(width), m_justify(justify)
    {}
 
 private:
@@ -193,7 +193,7 @@ class FormattedNumber
    bool m_hex;
    bool m_upper;
    bool m_hexPrefix;
-   friend class std::ostream;
+   friend class std::basic_ostream<char>;
 
 public:
    FormattedNumber(uint64_t hexValue, int64_t decValue, unsigned width, bool hex, bool upper,
@@ -253,7 +253,7 @@ class FormattedBytes
    uint8_t m_byteGroupSize; // How many hex bytes are grouped without spaces
    bool m_upper;            // Show offset and hex bytes as upper case.
    bool m_ascii;            // Show the ASCII bytes for the hex bytes to the right.
-   friend class std::ostream;
+   friend class std::basic_ostream<char>;
 
 public:
    FormattedBytes(const std::vector<uint8_t> bytes, uint32_t indentLevel, std::optional<uint64_t> offset,

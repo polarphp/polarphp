@@ -382,6 +382,88 @@ std::string format_string(const std::string &format, ArgTypes&&...args)
    return std::string(buffer, size);
 }
 
+bool string_starts_with(std::string_view str, std::string_view prefix);
+bool string_starts_with(std::string_view str, std::string_view::value_type prefix);
+bool string_starts_with_lowercase(std::string_view str, std::string_view prefix);
+bool string_starts_with_lowercase(std::string_view str, std::string_view::value_type prefix);
+
+bool string_ends_with(std::string_view str, std::string_view prefix);
+bool string_ends_with(std::string_view str, std::string_view::value_type prefix);
+bool string_ends_with_lowercase(std::string_view str, std::string_view prefix);
+bool string_ends_with_lowercase(std::string_view str, std::string_view::value_type prefix);
+
+inline bool string_consume_front(std::string_view &str, std::string_view prefix)
+{
+   if (!string_starts_with(str, prefix)) {
+      return false;
+   }
+   assert(str.size() > prefix.size() && "Dropping more elements than exist");
+   str = str.substr(prefix.size());
+   return true;
+}
+
+inline bool string_consume_back(std::string_view &str, std::string_view suffix)
+{
+   if (!string_ends_with(str, suffix)) {
+      return false;
+   }
+   assert(str.size() > suffix.size() && "Dropping more elements than exist");
+   str = str.substr(0, str.size() - suffix.size());
+   return true;
+}
+
+inline std::string_view string_drop_front(std::string_view str, std::size_t size)
+{
+   assert(str.size() >= size && "Dropping more elements than exist");
+   return str.substr(size);
+}
+
+inline std::string_view string_drop_back(std::string_view str, std::size_t size)
+{
+   assert(str.size() >= size && "Dropping more elements than exist");
+   return str.substr(0, str.size() - size);
+}
+
+bool string_consume_signed_integer(std::string_view &str, unsigned radix,
+                                   long long &result);
+bool string_consume_unsigned_integer(std::string_view &str, unsigned radix,
+                                     unsigned long long &result);
+
+/// Parse the current string as an integer of the specified radix.  If
+/// \p Radix is specified as zero, this does radix autosensing using
+/// extended C rules: 0 is octal, 0x is hex, 0b is binary.
+///
+/// If the string does not begin with a number of the specified radix,
+/// this returns true to signify the error. The string is considered
+/// erroneous if empty or if it overflows T.
+/// The portion of the string representing the discovered numeric value
+/// is removed from the beginning of the string.
+template <typename T>
+typename std::enable_if<std::numeric_limits<T>::is_signed, bool>::type
+string_consume_integer(std::string_view &str, unsigned radix, T &result)
+{
+   long long llval;
+   if (string_consume_signed_integer(str, radix, llval) ||
+       static_cast<long long>(static_cast<T>(llval)) != llval) {
+      return true;
+   }
+   result = llval;
+   return false;
+}
+
+template <typename T>
+typename std::enable_if<!std::numeric_limits<T>::is_signed, bool>::type
+string_consume_integer(std::string_view &str, unsigned radix, T &result)
+{
+   unsigned long long ullval;
+   if (string_consume_unsigned_integer(str, radix, ullval) ||
+       static_cast<unsigned long long>(static_cast<T>(ullval)) != ullval) {
+      return true;
+   }
+   result = ullval;
+   return false;
+}
+
 } // utils
 } // polar
 

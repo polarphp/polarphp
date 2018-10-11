@@ -33,9 +33,6 @@
 #ifndef POLAR_DEVLTOOLS_UTILS_DATA_TYPES_H
 #define POLAR_DEVLTOOLS_UTILS_DATA_TYPES_H
 
-namespace polar {
-namespace utils {
-
 #ifdef __cplusplus
 #include <cmath>
 #else
@@ -98,8 +95,5 @@ typedef signed int ssize_t;
 #ifndef HUGE_VALF
 #define HUGE_VALF (float)HUGE_VAL
 #endif
-
-} // utils
-} // polar
 
 #endif // POLAR_DEVLTOOLS_UTILS_DATA_TYPES_H
