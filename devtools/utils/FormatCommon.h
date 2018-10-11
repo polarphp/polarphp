@@ -26,12 +26,12 @@ enum class AlignStyle { Left, Center, Right };
 
 struct FmtAlign
 {
-   internal::FormatAdapter &m_adapter;
+   internal::FormatAdapterImpl &m_adapter;
    AlignStyle m_where;
    size_t m_amount;
    char m_fill;
 
-   FmtAlign(internal::FormatAdapter &adapter, AlignStyle where, size_t amount,
+   FmtAlign(internal::FormatAdapterImpl &adapter, AlignStyle where, size_t amount,
             char fill = ' ')
       : m_adapter(adapter), m_where(where),
         m_amount(amount), m_fill(fill)
@@ -49,7 +49,7 @@ struct FmtAlign
          return;
       }
       std::string item;
-      std::stringstream stream(item);
+      std::ostringstream stream(item);
       m_adapter.format(stream, options);
       if (m_amount <= item.size()) {
          out << item;

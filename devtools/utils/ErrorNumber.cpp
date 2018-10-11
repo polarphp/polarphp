@@ -65,7 +65,7 @@ std::string str_error(int errnum) {
 #else
    // Strange that this system doesn't even have strerror
    // but, oh well, just use a generic message
-   std::stringstream stream(str);
+   std::ostringstream stream(str);
    stream << "Error #" << errnum;
    stream.flush();
 #endif

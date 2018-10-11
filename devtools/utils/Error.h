@@ -1331,7 +1331,7 @@ Error create_string_error(std::error_code errorCode, char const *fmt,
                           const Ts &... values)
 {
    std::string buffer;
-   std::stringstream stream(buffer);
+   std::ostringstream stream(buffer);
    stream << format_string(fmt, values...);
    return make_error<StringError>(stream.str(), errorCode);
 }

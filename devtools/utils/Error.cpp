@@ -144,7 +144,7 @@ void report_fatal_error(Error error, bool genCrashDiag)
    assert(error && "report_fatal_error called with success value");
    std::string errorMsg;
    {
-      std::stringstream errorStream(errorMsg);
+      std::ostringstream errorStream(errorMsg);
       log_all_unhandled_errors(std::move(error), errorStream, "");
    }
    report_fatal_error(errorMsg);
