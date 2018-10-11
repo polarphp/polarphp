@@ -70,7 +70,6 @@ void write_unsigned_impl(std::ostream &out, T N, size_t minDigits,
          out << '0';
       }
    }
-
    if (style == IntegerStyle::Number) {
       write_with_commas(out, std::vector<char>(std::end(numberBuffer) - len, std::end(numberBuffer)));
    } else {
