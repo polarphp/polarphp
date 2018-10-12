@@ -355,17 +355,17 @@ set(CMAKE_BUILD_RPATH "${POLAR_DEPS_INSTALL_DIR}/lib")
 
 include_directories(${POLAR_SOURCE_DIR}
    ${POLAR_MAIN_INCLUDE_DIR}
-   ${POLAR_MAIN_INCLUDE_DIR}/php
-   ${POLAR_MAIN_INCLUDE_DIR}/php/global
-   ${POLAR_MAIN_INCLUDE_DIR}/php/zend
-   ${POLAR_MAIN_INCLUDE_DIR}/php/tsrm
+   ${POLAR_MAIN_INCLUDE_DIR}/polarphp
+   ${POLAR_MAIN_INCLUDE_DIR}/polarphp/global
+   ${POLAR_MAIN_INCLUDE_DIR}/polarphp/zend
+   ${POLAR_MAIN_INCLUDE_DIR}/polarphp/tsrm
    ${POLAR_SOURCE_DIR}/src/Zend
    ${POLAR_SOURCE_DIR}/src/TSRM
    ${POLAR_INCLUDE_DIR}
-   ${POLAR_INCLUDE_DIR}/php
-   ${POLAR_INCLUDE_DIR}/php/global
-   ${POLAR_INCLUDE_DIR}/php/vm/zend
-   ${POLAR_INCLUDE_DIR}/php/vm/tsrm)
+   ${POLAR_INCLUDE_DIR}/polarphp
+   ${POLAR_INCLUDE_DIR}/polarphp/global
+   ${POLAR_INCLUDE_DIR}/polarphp/vm/zend
+   ${POLAR_INCLUDE_DIR}/polarphp/vm/tsrm)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include(ImportThirdparty)

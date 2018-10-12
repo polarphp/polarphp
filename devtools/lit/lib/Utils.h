@@ -30,7 +30,7 @@ extern std::list<std::FILE *> g_tempFiles;
 void temp_files_clear_handler();
 void register_temp_file(std::FILE *file);
 
-std::string center_string(const std::string &text, int width, char fillChar = ' ');
+std::string center_string(const std::string &text, size_t width, char fillChar = ' ');
 std::string normal_path(const std::string &path);
 inline std::string make_word_regex(const std::string &word)
 {

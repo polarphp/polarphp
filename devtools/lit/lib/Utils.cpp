@@ -252,14 +252,14 @@ end_iterator:
       const std::set<std::string> &row = histo[i];
       float pct = float(row.size()) / items.size();
       int w = int(barW * pct);
-      std::printf("[%*.*fs,%*.*fs) :: [%s%s] :: [%*d/%*d]\n",
+      std::printf("[%*.*fs,%*.*fs) :: [%s%s] :: [%*lu/%*lu]\n",
                   pDigits, pfDigits, i * barH, pDigits, pfDigits, (i + 1) * barH,
                   std::string(w, '*').c_str(), std::string(barW - w, ' ').c_str(),
                   cDigits, row.size(), cDigits, items.size());
    }
 }
 
-std::string center_string(const std::string &text, int width, char fillChar)
+std::string center_string(const std::string &text, size_t width, char fillChar)
 {
    size_t textSize = text.size();
    if (width < textSize) {
@@ -297,7 +297,7 @@ std::string join_string_list(const std::list<std::string> &list, const std::stri
    size_t listSize = list.size();
    auto iter = list.begin();
    auto endMark = list.end();
-   int i = 0;
+   size_t i = 0;
    while (iter != endMark) {
       if (i == listSize - 1) {
          result += *iter;
