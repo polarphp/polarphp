@@ -5,7 +5,7 @@
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See http://polarphp.org/LICENSE.txt for license information
-// See http://polarphp.org/CONTRIBUTORS.txt for the list of polarPHP project authors
+// See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by softboy on 2018/06/04.
 
