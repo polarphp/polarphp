@@ -12,24 +12,12 @@
 polar_collect_files(
    TYPE_BOTH
    DIR .
-   OUTPUT_VAR POLAR_UTILS_SOURCES)
+   OUTPUT_VAR POLAR_BASIC_ADT_SOURCES)
 
-if (UNIX)
-   list(APPEND POLAR_UTILS_SOURCES _platform/ProcessUtilsUnix.cpp)
-   list(APPEND POLAR_UTILS_SOURCES _platform/SignalsUnix.cpp)
-endif()
+polar_merge_list(POLAR_BASIC_ADT_SOURCES POLAR_HEADERS)
 
-polar_merge_list(POLAR_UTILS_SOURCES POLAR_HEADERS)
-
-polar_add_library(PolarUtils SHARED BUILDTREE_ONLY
-   ${POLAR_UTILS_SOURCES})
-
+add_library(PolarBasic OBJECT ${POLAR_BASIC_ADT_SOURCES})
 set_target_properties(
-   PolarUtils
-   PROPERTIES
-   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR};"
-   )
-
-target_link_libraries(PolarUtils INTERFACE
    PolarBasic
-   nlohmann_json::nlohmann_json)
+   PROPERTIES
+   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR};")

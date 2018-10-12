@@ -11,4 +11,5 @@
 
 add_subdirectory(TSRM)
 add_subdirectory(Zend)
-add_subdirectory(Utils)
+add_subdirectory(basic)
+add_subdirectory(utils)
