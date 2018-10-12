@@ -12,9 +12,9 @@
 #ifndef POLARPHP_UTILS_FORMAT_PROVIDERS_H
 #define POLARPHP_UTILS_FORMAT_PROVIDERS_H
 
-#include "FormatVariadicDetail.h"
-#include "StringExtras.h"
-#include "NativeFormatting.h"
+#include "polarphp/utils/FormatVariadicDetail.h"
+#include "polarphp/utils/StringExtras.h"
+#include "polarphp/utils/NativeFormatting.h"
 
 #include <optional>
 #include <type_traits>

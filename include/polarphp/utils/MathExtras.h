@@ -12,8 +12,8 @@
 #ifndef POLARPHP_UTILS_MATHEXTRAS_H
 #define POLARPHP_UTILS_MATHEXTRAS_H
 
-#include "CompilerFeature.h"
-#include "SwapByteOrder.h"
+#include "polarphp/global/CompilerFeature.h"
+#include "polarphp/utils/SwapByteOrder.h"
 
 #include <algorithm>
 #include <cassert>

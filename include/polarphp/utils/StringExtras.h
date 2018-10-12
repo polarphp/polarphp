@@ -12,7 +12,7 @@
 #ifndef POLARPHP_UTILS_STRING_EXTRAS_H
 #define POLARPHP_UTILS_STRING_EXTRAS_H
 
-#include "CompilerFeature.h"
+#include "polarphp/global/CompilerFeature.h"
 #include <cassert>
 #include <cstring>
 #include <string>

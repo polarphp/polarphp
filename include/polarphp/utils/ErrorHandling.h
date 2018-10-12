@@ -27,7 +27,7 @@
 #define POLARPHP_UTILS_ERROR_HANDLING_H
 
 #include <string>
-#include "CompilerFeature.h"
+#include "polarphp/global/CompilerFeature.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -12,7 +12,7 @@
 #ifndef POLARPHP_UTILS_DEBUG_H
 #define POLARPHP_UTILS_DEBUG_H
 
-#include "Stream.h"
+#include "polarphp/utils/Stream.h"
 
 namespace polar {
 

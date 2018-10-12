@@ -12,10 +12,10 @@
 #ifndef POLARPHP_UTILS_FORMAT_VARIADIC_H
 #define POLARPHP_UTILS_FORMAT_VARIADIC_H
 
-#include "StlExtras.h"
-#include "FormatCommon.h"
-#include "FormatVariadicDetail.h"
-#include "FormatProviders.h"
+#include "polarphp/utils/StlExtras.h"
+#include "polarphp/utils/FormatCommon.h"
+#include "polarphp/utils/FormatVariadicDetail.h"
+#include "polarphp/utils/FormatProviders.h"
 
 #include <optional>
 #include <ostream>

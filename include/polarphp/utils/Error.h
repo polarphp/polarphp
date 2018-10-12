@@ -12,13 +12,13 @@
 #ifndef POLARPHP_UTILS_ERROR_H
 #define POLARPHP_UTILS_ERROR_H
 
-#include "AbiBreaking.h"
-#include "OptionalError.h"
-#include "AlignOf.h"
-#include "Debug.h"
-#include "ErrorHandling.h"
-#include "StlExtras.h"
-#include "StringExtras.h"
+#include "polarphp/global/AbiBreaking.h"
+#include "polarphp/utils/OptionalError.h"
+#include "polarphp/utils/AlignOf.h"
+#include "polarphp/utils/Debug.h"
+#include "polarphp/utils/ErrorHandling.h"
+#include "polarphp/utils/StlExtras.h"
+#include "polarphp/utils/StringExtras.h"
 
 #include <sstream>
 #include <algorithm>

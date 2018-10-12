@@ -16,9 +16,9 @@
 #include <string_view>
 #include <ostream>
 
-#include "Error.h"
-#include "FormatCommon.h"
-#include "FormatVariadicDetail.h"
+#include "polarphp/utils/Error.h"
+#include "polarphp/utils/FormatCommon.h"
+#include "polarphp/utils/FormatVariadicDetail.h"
 
 namespace polar {
 namespace utils {

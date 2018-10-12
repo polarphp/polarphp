@@ -12,8 +12,8 @@
 #ifndef POLARPHP_UTILS_STLEXTRAS_H
 #define POLARPHP_UTILS_STLEXTRAS_H
 
-#include "ErrorHandling.h"
-#include "AbiBreaking.h"
+#include "polarphp/utils/ErrorHandling.h"
+#include "polarphp/global/AbiBreaking.h"
 
 #include <optional>
 #include <algorithm>

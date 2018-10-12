@@ -12,8 +12,8 @@
 #ifndef POLARPHP_UTILS_MEMORY_ALLOC_H
 #define POLARPHP_UTILS_MEMORY_ALLOC_H
 
-#include "CompilerFeature.h"
-#include "ErrorHandling.h"
+#include "polarphp/global/CompilerFeature.h"
+#include "polarphp/utils/ErrorHandling.h"
 #include <cstdlib>
 
 namespace polar {
