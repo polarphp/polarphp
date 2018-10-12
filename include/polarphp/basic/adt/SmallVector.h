@@ -46,8 +46,8 @@ protected:
 
 protected:
    SmallVectorBase(void *firstEl, size_t capacity)
-      : m_begin(firstEl),
-        m_capacityX(capacity)
+      : m_beginX(firstEl),
+        m_capacity(capacity)
    {}
 
    /// This is an implementation of the grow() method which only works
@@ -502,7 +502,7 @@ public:
          for (auto iter = this->end(), end = this->begin() + size; iter != end; ++iter) {
             new (&*iter) T();
          }
-         this->setSize(tsize);
+         this->setSize(size);
       }
    }
 

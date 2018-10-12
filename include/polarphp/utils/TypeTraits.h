@@ -77,7 +77,7 @@ public:
 
 /// If T is a pointer, just return it. If it is not, return T&.
 template<typename T, typename Enable = void>
-struct add_lvalue_reference_if_not_pointe
+struct add_lvalue_reference_if_not_pointer
 {
    using type = T &;
 };
@@ -142,7 +142,7 @@ template<typename T> union move_construction_triviality_helper
 template <typename T>
 struct is_trivially_copy_constructible
       : std::is_copy_constructible<
-      ::llvm::internal::copy_construction_triviality_helper<T>>
+      internal::copy_construction_triviality_helper<T>>
 {};
 
 template <typename T>
