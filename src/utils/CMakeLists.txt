@@ -21,11 +21,6 @@ endif()
 
 polar_merge_list(POLAR_UTILS_LIB_SOURCES POLAR_HEADERS)
 
-#configure_file(Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/UtilsConfig.h @ONLY)
-#configure_file(ABiBreaking.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/AbiBreaking.h @ONLY)
-
-#list(APPEND POLAR_UTILS_LIB_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/UtilsConfig.h)
-
 polar_add_library(PolarUtils SHARED BUILDTREE_ONLY
    ${POLAR_UTILS_LIB_SOURCES})
 

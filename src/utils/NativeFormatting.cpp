@@ -14,7 +14,7 @@
 #include "polarphp/utils/StringExtras.h"
 #include "polarphp/utils/ArrayExtras.h"
 #include "polarphp/utils/Format.h"
-#include "polarphp/utils/DataTypes.h"
+#include "polarphp/global/DataTypes.h"
 
 #include <string>
 #include <vector>

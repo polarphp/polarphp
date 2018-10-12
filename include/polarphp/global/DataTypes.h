@@ -30,8 +30,8 @@
 |*                                                                            *|
 |*===----------------------------------------------------------------------===*/
 
-#ifndef POLARPHP_UTILS_DATA_TYPES_H
-#define POLARPHP_UTILS_DATA_TYPES_H
+#ifndef POLARPHP_GLOBAL_DATA_TYPES_H
+#define POLARPHP_GLOBAL_DATA_TYPES_H
 
 #ifdef __cplusplus
 #include <cmath>
@@ -96,4 +96,4 @@ typedef signed int ssize_t;
 #define HUGE_VALF (float)HUGE_VAL
 #endif
 
-#endif // POLARPHP_UTILS_DATA_TYPES_H
+#endif // POLARPHP_GLOBAL_DATA_TYPES_H
