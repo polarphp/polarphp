@@ -9,8 +9,8 @@
 //
 // Created by polarboy on 2018/10/10.
 
-#ifndef POLARPHP_UTILS_STLEXTRAS_H
-#define POLARPHP_UTILS_STLEXTRAS_H
+#ifndef POLARPHP_BASIC_ADT_STLEXTRAS_H
+#define POLARPHP_BASIC_ADT_STLEXTRAS_H
 
 #include "polarphp/utils/ErrorHandling.h"
 #include "polarphp/global/AbiBreaking.h"
@@ -137,4 +137,4 @@ constexpr inline size_t array_lengthof(T (&)[N])
 } // utils
 } // polar
 
-#endif // POLARPHP_UTILS_STLEXTRAS_H
+#endif // POLARPHP_BASIC_ADT_STLEXTRAS_H

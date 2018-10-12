@@ -17,8 +17,8 @@
 #include "polarphp/utils/AlignOf.h"
 #include "polarphp/utils/Debug.h"
 #include "polarphp/utils/ErrorHandling.h"
-#include "polarphp/utils/StlExtras.h"
-#include "polarphp/utils/StringExtras.h"
+#include "polarphp/basic/adt/StlExtras.h"
+#include "polarphp/basic/adt/StringExtras.h"
 
 #include <sstream>
 #include <algorithm>

@@ -22,7 +22,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "polarphp/utils/StringExtras.h"
+#include "polarphp/basic/adt/StringExtras.h"
 #include <ostream>
 
 namespace polar {

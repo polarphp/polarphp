@@ -41,7 +41,7 @@
 #include "polarphp/utils/ManagedStatics.h"
 #include "polarphp/global/Config.h"
 #include "unix/Unix.h"
-#include "polarphp/utils/StlExtras.h"
+#include "polarphp/basic/adt/StlExtras.h"
 #include "polarphp/utils/Signals.h"
 #include "polarphp/utils/Stream.h"
 

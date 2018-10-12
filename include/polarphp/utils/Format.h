@@ -26,7 +26,7 @@
 #ifndef POLARPHP_UTILS_FORMAT_H
 #define POLARPHP_UTILS_FORMAT_H
 
-#include "polarphp/utils/StlExtras.h"
+#include "polarphp/basic/adt/StlExtras.h"
 #include "polarphp/global/DataTypes.h"
 
 #include <cassert>

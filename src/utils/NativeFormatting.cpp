@@ -11,7 +11,7 @@
 
 #include "polarphp/utils/NativeFormatting.h"
 #include "polarphp/utils/MathExtras.h"
-#include "polarphp/utils/StringExtras.h"
+#include "polarphp/basic/adt/StringExtras.h"
 #include "polarphp/utils/ArrayExtras.h"
 #include "polarphp/utils/Format.h"
 #include "polarphp/global/DataTypes.h"

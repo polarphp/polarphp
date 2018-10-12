@@ -9,8 +9,8 @@
 //
 // Created by polarboy on 2018/10/10.
 
-#ifndef POLARPHP_UTILS_STRING_EXTRAS_H
-#define POLARPHP_UTILS_STRING_EXTRAS_H
+#ifndef POLARPHP_BASIC_ADT_STRING_EXTRAS_H
+#define POLARPHP_BASIC_ADT_STRING_EXTRAS_H
 
 #include "polarphp/global/CompilerFeature.h"
 #include <cassert>
@@ -467,4 +467,4 @@ string_consume_integer(std::string_view &str, unsigned radix, T &result)
 } // utils
 } // polar
 
-#endif // POLARPHP_UTILS_STRING_EXTRAS_H
+#endif // POLARPHP_BASIC_ADT_STRING_EXTRAS_H
