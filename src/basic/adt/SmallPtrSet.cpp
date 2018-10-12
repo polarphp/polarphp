@@ -27,8 +27,8 @@
 namespace polar {
 namespace basic {
 
-using polar::utils::log2_32_ceil;
-using polar::utils::log2_64_ceil;
+using polar::utils::log2_ceil_32;
+using polar::utils::log2_ceil_64;
 using polar::utils::report_bad_alloc_error;
 
 void SmallPtrSetImplBase::shrinkAndClear()

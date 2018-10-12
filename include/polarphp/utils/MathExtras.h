@@ -629,15 +629,15 @@ inline unsigned log2_64(uint64_t value)
 
 /// Return the ceil log base 2 of the specified value, 32 if the value is zero.
 /// (32 bit edition).
-/// Ex. log2_32_ceil(32) == 5, log2_32_ceil(1) == 0, log2_32_ceil(6) == 3
-inline unsigned log2_32_ceil(uint32_t value)
+/// Ex. log2_ceil_32(32) == 5, log2_ceil_32(1) == 0, log2_ceil_32(6) == 3
+inline unsigned log2_ceil_32(uint32_t value)
 {
    return 32 - count_leading_zeros(value - 1);
 }
 
 /// Return the ceil log base 2 of the specified value, 64 if the value is zero.
 /// (64 bit edition.)
-inline unsigned log2_64_ceil(uint64_t value)
+inline unsigned log2_ceil_64(uint64_t value)
 {
    return 64 - count_leading_zeros(value - 1);
 }

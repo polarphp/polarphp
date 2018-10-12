@@ -258,7 +258,7 @@ public:
    template <class PredicateType>
    ArrayRef<T> dropWhile(PredicateType pred) const
    {
-      return ArrayRef<T>(basic::find_if_not(*this, pred), end());
+      return ArrayRef<T>(find_if_not(*this, pred), end());
    }
 
    /// \brief Return a copy of *this with the first N elements not satisfying

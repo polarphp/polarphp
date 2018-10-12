@@ -247,7 +247,7 @@ static std::atomic<unsigned> sg_numRegisteredSignals = ATOMIC_VAR_INIT(0);
 static struct {
    struct sigaction m_sa;
    int m_sigNo;
-} sg_registeredSignalInfo[polar::utils::array_lengthof(sg_intSigs) + polar::utils::array_lengthof(sg_killSigs)];
+} sg_registeredSignalInfo[polar::basic::array_lengthof(sg_intSigs) + polar::basic::array_lengthof(sg_killSigs)];
 
 #if defined(HAVE_SIGALTSTACK)
 // Hold onto both the old and new alternate signal stack so that it's not
@@ -300,7 +300,7 @@ static void register_handlers()
 
    auto registerHandler = [&](int signal) {
       unsigned index = sg_numRegisteredSignals.load();
-      assert(index < polar::utils::array_lengthof(sg_registeredSignalInfo) &&
+      assert(index < polar::basic::array_lengthof(sg_registeredSignalInfo) &&
              "Out of space for signal handlers!");
 
       struct sigaction newHandler;
@@ -472,14 +472,14 @@ void print_stack_trace(std::ostream &out)
 #if defined(HAVE_BACKTRACE)
    // Use backtrace() to output a backtrace on Linux systems with glibc.
    if (!depth) {
-      depth = backtrace(stackTrace, static_cast<int>(array_lengthof(stackTrace)));
+      depth = backtrace(stackTrace, static_cast<int>(polar::basic::array_lengthof(stackTrace)));
    }
 #endif
 #if defined(HAVE__UNWIND_BACKTRACE)
    // Try _Unwind_Backtrace() if backtrace() failed.
    if (!depth) {
       depth = unwind_backtrace(stackTrace,
-                               static_cast<int>(array_lengthof(stackTrace)));
+                               static_cast<int>(polar::basic::array_lengthof(stackTrace)));
    }
 #endif
    if (!depth) {

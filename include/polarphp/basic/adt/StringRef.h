@@ -1048,7 +1048,7 @@ namespace utils {
 // StringRefs can be treated like a POD type.
 template <typename T> struct IsPodLike;
 template <>
-struct IsPodLike<StringRef>
+struct IsPodLike<polar::basic::StringRef>
 {
    static const bool value = true;
 };

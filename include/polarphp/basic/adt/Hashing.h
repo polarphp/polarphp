@@ -12,6 +12,7 @@
 #ifndef POLAR_BASIC_ADT_HASING_H
 #define POLAR_BASIC_ADT_HASING_H
 
+#include "polarphp/global/ProcessorDetection.h"
 #include "polarphp/global/DataTypes.h"
 #include "polarphp/utils/SwapByteOrder.h"
 #include "polarphp/utils/TypeTraits.h"

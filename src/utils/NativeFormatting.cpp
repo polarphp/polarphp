@@ -12,6 +12,7 @@
 #include "polarphp/utils/NativeFormatting.h"
 #include "polarphp/utils/MathExtras.h"
 #include "polarphp/basic/adt/StringExtras.h"
+#include "polarphp/basic/adt/StlExtras.h"
 #include "polarphp/utils/ArrayExtras.h"
 #include "polarphp/utils/Format.h"
 #include "polarphp/global/DataTypes.h"
@@ -161,7 +162,7 @@ void write_hex(std::ostream &out, uint64_t N, HexPrintStyle style,
          std::max(static_cast<unsigned>(w), std::max(1u, nibbles) + prefixChars);
 
    char numberBuffer[kMaxWidth];
-   ::memset(numberBuffer, '0', array_lengthof(numberBuffer));
+   ::memset(numberBuffer, '0', polar::basic::array_lengthof(numberBuffer));
    if (prefix) {
       numberBuffer[1] = 'x';
    }
