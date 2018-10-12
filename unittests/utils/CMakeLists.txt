@@ -9,7 +9,6 @@
 #
 # Created by polarboy on 2018/10/12.
 
-add_custom_target(PolarBaseLibTests)
-set_target_properties(PolarBaseLibTests PROPERTIES FOLDER "PolarBaseLibTests")
-
-add_subdirectory(utils)
+polar_add_unittest(PolarBaseLibTests BasicUtilsTest
+   ../TestEntry.cpp
+   )
