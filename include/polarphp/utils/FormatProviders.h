@@ -100,7 +100,7 @@ protected:
                                      size_t defaultValue)
    {
       string_consume_integer(str, 10, defaultValue);
-      if (isPrefixedHexStyle(style)) {
+      if (is_prefixed_hex_style(style)) {
          defaultValue += 2;
       }
       return defaultValue;

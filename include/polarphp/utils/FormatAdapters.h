@@ -69,9 +69,9 @@ public:
    void format(std::ostream &stream, std::string_view style)
    {
       auto adapter = internal::BuildFormatAdapter(std::forward<T>(this->m_item));
-      stream.indent(left);
+      stream.indent(m_left);
       adapter.format(stream, style);
-      stream.indent(right);
+      stream.indent(m_right);
    }
 };
 
@@ -88,7 +88,7 @@ public:
    void format(std::ostream &stream, std::string_view style)
    {
       auto adapter = internal::BuildFormatAdapter(std::forward<T>(this->m_item));
-      for (size_t index = 0; index < count; ++index) {
+      for (size_t index = 0; index < m_count; ++index) {
          adapter.format(stream, style);
       }
    }

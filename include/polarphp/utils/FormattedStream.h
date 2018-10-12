@@ -297,8 +297,9 @@ FormattedStreamBuffer<_CharT, _Traits, _Allocator>::overflow(int_type c)
       ptrdiff_t ninp = this->gptr()  - this->eback();
       if (this->pptr() == this->epptr())
       {
-         if (!(m_openMode & ios_base::out))
+         if (!(m_openMode & ios_base::out)) {
             return traits_type::eof();
+         }
          try
          {
             ptrdiff_t nout = this->pptr()  - this->pbase();
