@@ -42,7 +42,7 @@ private:
 
 public:
    // 27.8.1.1 Constructors:
-   inline explicit FormattedStreamBuffer(FormattedStream<_CharT, _Traits, _Traits> stream,
+   inline explicit FormattedStreamBuffer(FormattedStream<_CharT, _Traits, _Traits> &stream,
                                          std::ios_base::openmode openMode = std::ios_base::in | std::ios_base::out);
    FormattedStreamBuffer(FormattedStreamBuffer &&other);
    FormattedStreamBuffer &operator=(FormattedStreamBuffer &&other);
@@ -56,6 +56,8 @@ protected:
                             std::ios_base::openmode openMode = std::ios_base::in | std::ios_base::out);
    inline virtual pos_type seekpos(pos_type pos,
                                    std::ios_base::openmode openMode = std::ios_base::in | std::ios_base::out);
+protected:
+   FormattedStream<_CharT, _Traits, _Traits> &m_stream;
 };
 
 template <class _CharT, class _Traits, class _Allocator>
@@ -69,16 +71,64 @@ public:
    typedef typename traits_type::pos_type pos_type;
    typedef typename traits_type::off_type off_type;
    typedef _Allocator                     allocator_type;
-private:
-   FormattedStreamBuffer<char_type, traits_type, allocator_type> m_buffer;
 public:
    // 27.8.2.1 Constructors:
-   inline explicit FormattedStream(std::ios_base::openmode openMode = std::ios_base::out);
+   inline explicit FormattedStream(std::ostream &stream,
+                                   std::ios_base::openmode openMode = std::ios_base::out);
    inline FormattedStream(FormattedStream &&other);
    FormattedStream& operator=(FormattedStream &&other);
    inline void swap(FormattedStream& other);
    inline FormattedStreamBuffer<char_type, traits_type, allocator_type>* rdbuf() const;
+private:
+   FormattedStreamBuffer<char_type, traits_type, allocator_type> m_buffer;
+   std::ostream &m_upstream;
 };
+
+template <class _CharT, class _Traits, class _Allocator>
+FormattedStream<_CharT, _Traits, _Allocator>::FormattedStream(std::ostream &stream, std::ios_base::openmode openMode)
+   : basic_ostream<_CharT, _Traits>(&m_buffer),
+     m_buffer(*this, openMode | ios_base::out),
+     m_upstream(stream)
+{
+}
+
+template <class _CharT, class _Traits, class _Allocator>
+FormattedStream<_CharT, _Traits, _Allocator>::FormattedStream(FormattedStream &&other)
+   : basic_ostream<_CharT, _Traits>(_VSTD::move(other)),
+     m_buffer(std::move(other.m_buffer))
+{
+   basic_ostream<_CharT, _Traits>::set_rdbuf(&m_buffer);
+}
+
+template <class _CharT, class _Traits, class _Allocator>
+FormattedStream<_CharT, _Traits, _Allocator>&
+FormattedStream<_CharT, _Traits, _Allocator>::operator=(FormattedStream &&other)
+{
+   basic_ostream<char_type, traits_type>::operator=(std::move(other));
+   m_buffer = std::move(other.m_buffer);
+   return *this;
+}
+
+template <class _CharT, class _Traits, class _Allocator>
+void FormattedStream<_CharT, _Traits, _Allocator>::swap(FormattedStream &other)
+{
+   basic_ostream<char_type, traits_type>::swap(other);
+   m_buffer.swap(other.m_buffer);
+}
+
+template <class _CharT, class _Traits, class _Allocator>
+inline void swap(FormattedStream<_CharT, _Traits, _Allocator>& lhs,
+                 FormattedStream<_CharT, _Traits, _Allocator>& rhs)
+{
+   lhs.swap(rhs);
+}
+
+template <class _CharT, class _Traits, class _Allocator>
+FormattedStreamBuffer<_CharT, _Traits, _Allocator>*
+FormattedStream<_CharT, _Traits, _Allocator>::rdbuf() const
+{
+   return const_cast<FormattedStreamBuffer<char_type, traits_type, allocator_type>*>(&m_buffer);
+}
 
 } // utils
 } // polar
