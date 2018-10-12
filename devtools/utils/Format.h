@@ -15,11 +15,11 @@
 // and risk of printf.  This can be used like this (with raw_ostreams as an
 // example):
 //
-//    OS << "mynumber: " << format("%4.5f", 1234.412) << '\n';
+//    out << "mynumber: " << format("%4.5f", 1234.412) << '\n';
 //
 // Or if you prefer:
 //
-//  OS << format("mynumber: %4.5f\n", 1234.412);
+//  out << format("mynumber: %4.5f\n", 1234.412);
 //
 //===----------------------------------------------------------------------===//
 
@@ -135,7 +135,7 @@ public:
 ///
 /// This is typically used like:
 /// \code
-///   OS << format("%0.4f", myfloat) << '\n';
+///   out << format("%0.4f", myfloat) << '\n';
 /// \endcode
 
 template <typename... Ts>
@@ -206,10 +206,10 @@ public:
 
 /// format_hex - Output \p N as a fixed width hexadecimal. If number will not
 /// fit in width, full number is still printed.  Examples:
-///   OS << format_hex(255, 4)              => 0xff
-///   OS << format_hex(255, 4, true)        => 0xFF
-///   OS << format_hex(255, 6)              => 0x00ff
-///   OS << format_hex(255, 2)              => 0xff
+///   out << format_hex(255, 4)              => 0xff
+///   out << format_hex(255, 4, true)        => 0xFF
+///   out << format_hex(255, 6)              => 0x00ff
+///   out << format_hex(255, 2)              => 0xff
 inline FormattedNumber format_hex(uint64_t value, unsigned width,
                                   bool upper = false)
 {
@@ -220,10 +220,10 @@ inline FormattedNumber format_hex(uint64_t value, unsigned width,
 /// format_hex_no_prefix - Output \p N as a fixed width hexadecimal. Does not
 /// prepend '0x' to the outputted string.  If number will not fit in width,
 /// full number is still printed.  Examples:
-///   OS << format_hex_no_prefix(255, 2)              => ff
-///   OS << format_hex_no_prefix(255, 2, true)        => FF
-///   OS << format_hex_no_prefix(255, 4)              => 00ff
-///   OS << format_hex_no_prefix(255, 1)              => ff
+///   out << format_hex_no_prefix(255, 2)              => ff
+///   out << format_hex_no_prefix(255, 2, true)        => FF
+///   out << format_hex_no_prefix(255, 4)              => 00ff
+///   out << format_hex_no_prefix(255, 1)              => ff
 inline FormattedNumber format_hex_no_prefix(uint64_t value, unsigned width,
                                             bool upper = false)
 {
@@ -233,10 +233,10 @@ inline FormattedNumber format_hex_no_prefix(uint64_t value, unsigned width,
 
 /// format_decimal - Output \p N as a right justified, fixed-width decimal. If
 /// number will not fit in width, full number is still printed.  Examples:
-///   OS << format_decimal(0, 5)     => "    0"
-///   OS << format_decimal(255, 5)   => "  255"
-///   OS << format_decimal(-1, 3)    => " -1"
-///   OS << format_decimal(12345, 3) => "12345"
+///   out << format_decimal(0, 5)     => "    0"
+///   out << format_decimal(255, 5)   => "  255"
+///   out << format_decimal(-1, 3)    => " -1"
+///   out << format_decimal(12345, 3) => "12345"
 inline FormattedNumber format_decimal(int64_t value, unsigned width)
 {
    return FormattedNumber(0, value, width, false, false, false);

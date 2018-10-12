@@ -10,6 +10,7 @@
 // Created by polarboy on 2018/10/11.
 
 #include "NativeFormatting.h"
+#include "MathExtras.h"
 #include "StringExtras.h"
 #include "ArrayExtras.h"
 #include "Format.h"
@@ -19,6 +20,7 @@
 #include <vector>
 #include <float.h>
 #include <optional>
+#include <sstream>
 
 namespace polar {
 namespace utils {
@@ -142,137 +144,144 @@ void write_integer(std::ostream &out, long long N, size_t minDigits,
    write_signed(out, N, minDigits, style);
 }
 
-//void write_hex(std::ostream &out, uint64_t N, HexPrintStyle style,
-//               std::optional<std::size_t> width)
-//{
-//   const size_t kMaxWidth = 128u;
+void write_hex(std::ostream &out, uint64_t N, HexPrintStyle style,
+               std::optional<std::size_t> width)
+{
+   const size_t kMaxWidth = 128u;
 
-//   size_t w = std::min(kMaxWidth, width.value_or(0u));
+   size_t w = std::min(kMaxWidth, width.value_or(0u));
 
-//   unsigned nibbles = (64 - countLeadingZeros(N) + 3) / 4;
-//   bool prefix = (style == HexPrintStyle::PrefixLower ||
-//                  style == HexPrintStyle::PrefixUpper);
-//   bool upper =
-//         (style == HexPrintStyle::Upper || style == HexPrintStyle::PrefixUpper);
-//   unsigned prefixChars = prefix ? 2 : 0;
-//   unsigned numChars =
-//         std::max(static_cast<unsigned>(w), std::max(1u, nibbles) + prefixChars);
+   unsigned nibbles = (64 - count_leading_zeros(N) + 3) / 4;
+   bool prefix = (style == HexPrintStyle::PrefixLower ||
+                  style == HexPrintStyle::PrefixUpper);
+   bool upper =
+         (style == HexPrintStyle::Upper || style == HexPrintStyle::PrefixUpper);
+   unsigned prefixChars = prefix ? 2 : 0;
+   unsigned numChars =
+         std::max(static_cast<unsigned>(w), std::max(1u, nibbles) + prefixChars);
 
-//   char numberBuffer[kMaxWidth];
-//   ::memset(numberBuffer, '0', array_lengthof(numberBuffer));
-//   if (prefix)
-//      numberBuffer[1] = 'x';
-//   char *endPtr = numberBuffer + numChars;
-//   char *curPtr = endPtr;
-//   while (N) {
-//      unsigned char x = static_cast<unsigned char>(N) % 16;
-//      *--curPtr = hexdigit(x, !upper);
-//      N /= 16;
-//   }
-//   out.write(numberBuffer, numChars);
-//}
+   char numberBuffer[kMaxWidth];
+   ::memset(numberBuffer, '0', array_lengthof(numberBuffer));
+   if (prefix) {
+      numberBuffer[1] = 'x';
+   }
+   char *endPtr = numberBuffer + numChars;
+   char *curPtr = endPtr;
+   while (N) {
+      unsigned char x = static_cast<unsigned char>(N) % 16;
+      *--curPtr = hexdigit(x, !upper);
+      N /= 16;
+   }
+   out.write(numberBuffer, numChars);
+}
 
-//void write_double(std::ostream &out, double N, FloatStyle style,
-//                  Optional<size_t> Precision) {
-//   size_t Prec = Precision.getValueOr(getDefaultPrecision(style));
+void write_double(std::ostream &out, double N, FloatStyle style,
+                  std::optional<size_t> precision)
+{
+   size_t prec = precision.value_or(get_default_precision(style));
 
-//   if (std::isnan(N)) {
-//      out << "nan";
-//      return;
-//   } else if (std::isinf(N)) {
-//      out << "INF";
-//      return;
-//   }
+   if (std::isnan(N)) {
+      out << "nan";
+      return;
+   } else if (std::isinf(N)) {
+      out << "INF";
+      return;
+   }
 
-//   char Letter;
-//   if (style == FloatStyle::Exponent)
-//      Letter = 'e';
-//   else if (style == FloatStyle::ExponentUpper)
-//      Letter = 'E';
-//   else
-//      Letter = 'f';
+   char letter;
+   if (style == FloatStyle::Exponent) {
+      letter = 'e';
+   } else if (style == FloatStyle::ExponentUpper) {
+      letter = 'E';
+   } else {
+      letter = 'f';
+   }
+   std::string spec;
+   std::ostringstream sout(spec);
+   sout << "%." << prec << letter;
 
-//   SmallString<8> Spec;
-//   llvm::raw_svector_ostream Out(Spec);
-//   Out << "%." << Prec << Letter;
+   if (style == FloatStyle::Exponent || style == FloatStyle::ExponentUpper) {
+#ifdef _WIN32
+      // On MSVCRT and compatible, output of %e is incompatible to Posix
+      // by default. Number of exponent digits should be at least 2. "%+03d"
+      // FIXME: Implement our formatter to here or Support/Format.h!
+#if defined(__MINGW32__)
+      // FIXME: It should be generic to C++11.
+      if (N == 0.0 && std::signbit(N)) {
+         char negativeZero[] = "-0.000000e+00";
+         if (style == FloatStyle::ExponentUpper) {
+             negativeZero[strlen(negativeZero) - 4] = 'E';
+         }
+         out << negativeZero;
+         return;
+      }
+#else
+      int fpcl = _fpclass(N);
 
-//   if (style == FloatStyle::Exponent || style == FloatStyle::ExponentUpper) {
-//#ifdef _WIN32
-//      // On MSVCRT and compatible, output of %e is incompatible to Posix
-//      // by default. Number of exponent digits should be at least 2. "%+03d"
-//      // FIXME: Implement our formatter to here or Support/Format.h!
-//#if defined(__MINGW32__)
-//      // FIXME: It should be generic to C++11.
-//      if (N == 0.0 && std::signbit(N)) {
-//         char NegativeZero[] = "-0.000000e+00";
-//         if (style == FloatStyle::ExponentUpper)
-//            NegativeZero[strlen(NegativeZero) - 4] = 'E';
-//         out << NegativeZero;
-//         return;
-//      }
-//#else
-//      int fpcl = _fpclass(N);
+      // negative zero
+      if (fpcl == _FPCLASS_NZ) {
+         char negativeZero[] = "-0.000000e+00";
+         if (style == FloatStyle::ExponentUpper) {
+            negativeZero[strlen(negativeZero) - 4] = 'E';
+         }
+         out << negativeZero;
+         return;
+      }
+#endif
 
-//      // negative zero
-//      if (fpcl == _FPCLASS_NZ) {
-//         char NegativeZero[] = "-0.000000e+00";
-//         if (style == FloatStyle::ExponentUpper)
-//            NegativeZero[strlen(NegativeZero) - 4] = 'E';
-//         out << NegativeZero;
-//         return;
-//      }
-//#endif
+      char buf[32];
+      unsigned len;
+      len = format(spec.c_str(), N).snprint(buf, sizeof(buf));
+      if (len <= sizeof(buf) - 2) {
+         if (len >= 5 && (buf[len - 5] == 'e' || buf[len - 5] == 'E') &&
+             buf[len - 3] == '0') {
+            int cs = buf[len - 4];
+            if (cs == '+' || cs == '-') {
+               int c1 = buf[len - 2];
+               int c0 = buf[len - 1];
+               if (isdigit(static_cast<unsigned char>(c1)) &&
+                   isdigit(static_cast<unsigned char>(c0))) {
+                  // Trim leading '0': "...e+012" -> "...e+12\0"
+                  buf[len - 3] = c1;
+                  buf[len - 2] = c0;
+                  buf[--len] = 0;
+               }
+            }
+         }
+         out << buf;
+         return;
+      }
+#endif
+   }
 
-//      char buf[32];
-//      unsigned len;
-//      len = format(Spec.c_str(), N).snprint(buf, sizeof(buf));
-//      if (len <= sizeof(buf) - 2) {
-//         if (len >= 5 && (buf[len - 5] == 'e' || buf[len - 5] == 'E') &&
-//             buf[len - 3] == '0') {
-//            int cs = buf[len - 4];
-//            if (cs == '+' || cs == '-') {
-//               int c1 = buf[len - 2];
-//               int c0 = buf[len - 1];
-//               if (isdigit(static_cast<unsigned char>(c1)) &&
-//                   isdigit(static_cast<unsigned char>(c0))) {
-//                  // Trim leading '0': "...e+012" -> "...e+12\0"
-//                  buf[len - 3] = c1;
-//                  buf[len - 2] = c0;
-//                  buf[--len] = 0;
-//               }
-//            }
-//         }
-//         out << buf;
-//         return;
-//      }
-//#endif
-//   }
+   if (style == FloatStyle::Percent) {
+      N *= 100.0;
+   }
+   char buf[32];
+   format(spec.c_str(), N).snprint(buf, sizeof(buf));
+   out << buf;
+   if (style == FloatStyle::Percent) {
+      out << '%';
+   }
+}
 
-//   if (style == FloatStyle::Percent)
-//      N *= 100.0;
+bool is_prefixed_hex_style(HexPrintStyle out)
+{
+   return (out == HexPrintStyle::PrefixLower || out == HexPrintStyle::PrefixUpper);
+}
 
-//   char Buf[32];
-//   format(Spec.c_str(), N).snprint(Buf, sizeof(Buf));
-//   out << Buf;
-//   if (style == FloatStyle::Percent)
-//      out << '%';
-//}
-
-//bool isPrefixedHexStyle(HexPrintStyle out) {
-//   return (out == HexPrintStyle::PrefixLower || out == HexPrintStyle::PrefixUpper);
-//}
-
-//size_t getDefaultPrecision(FloatStyle style) {
-//   switch (style) {
-//   case FloatStyle::Exponent:
-//   case FloatStyle::ExponentUpper:
-//      return 6; // Number of decimal places.
-//   case FloatStyle::Fixed:
-//   case FloatStyle::Percent:
-//      return 2; // Number of decimal places.
-//   }
-//   POLAR_BUILTIN_UNREACHABLE;
-//}
+size_t get_default_precision(FloatStyle style)
+{
+   switch (style) {
+   case FloatStyle::Exponent:
+   case FloatStyle::ExponentUpper:
+      return 6; // Number of decimal places.
+   case FloatStyle::Fixed:
+   case FloatStyle::Percent:
+      return 2; // Number of decimal places.
+   }
+   POLAR_BUILTIN_UNREACHABLE;
+}
 
 } // utils
 } // polar
