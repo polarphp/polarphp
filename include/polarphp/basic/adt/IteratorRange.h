@@ -38,9 +38,9 @@ public:
         m_endIterator(c.end())
    {}
 
-   IteratorRange(IteratorType m_beginIterator, IteratorType m_endIterator)
-      : m_beginIterator(std::move(m_beginIterator)),
-        m_endIterator(std::move(m_endIterator))
+   IteratorRange(IteratorType beginIterator, IteratorType endIterator)
+      : m_beginIterator(std::move(beginIterator)),
+        m_endIterator(std::move(endIterator))
    {}
 
    IteratorType begin() const
