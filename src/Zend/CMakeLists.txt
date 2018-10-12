@@ -88,7 +88,9 @@ bison_target(ZendLangParser zend_language_parser.y ${CMAKE_CURRENT_BINARY_DIR}/z
    COMPILE_FLAGS "-p zend -d"
    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/zend_language_parser.h)
 
-polar_add_library(zendVM SHARED ${zendVM_SRCS} $<TARGET_OBJECTS:ZendHeaders>)
+polar_merge_list(zendVM_SRCS POLAR_ZENDVM_ZEND_HEADERS)
+
+polar_add_library(zendVM SHARED ${zendVM_SRCS})
 target_link_libraries(zendVM tsrm)
 set_target_properties(zendVM
    PROPERTIES
@@ -97,11 +99,11 @@ set_target_properties(zendVM
 polar_collect_files(
    TYPE_HEADER
    DIR ${CMAKE_CURRENT_SOURCE_DIR}
-   OUTPUT_VAR POLAR_ZRNDVM_ZEND_HEADERS)
+   OUTPUT_VAR POLAR_ZENDVM_ZEND_HEADERS)
 
-list(APPEND POLAR_ZRNDVM_ZEND_HEADERS
+list(APPEND POLAR_ZENDVM_ZEND_HEADERS
    ${CMAKE_CURRENT_BINARY_DIR}/zend_ini_parser.h
    ${CMAKE_CURRENT_BINARY_DIR}/zend_language_parser.h)
 
-install(FILES ${POLAR_ZRNDVM_ZEND_HEADERS} DESTINATION ${POLAR_HEADER_INSTALL_DIR}/vm/Zend
+install(FILES ${POLAR_ZENDVM_ZEND_HEADERS} DESTINATION ${POLAR_HEADER_INSTALL_DIR}/vm/Zend
    COMPONENT ZendVMHeaders)

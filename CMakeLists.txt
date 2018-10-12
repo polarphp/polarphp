@@ -370,9 +370,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include(ImportThirdparty)
 
+add_subdirectory(include)
 add_subdirectory(main)
 add_subdirectory(src)
-add_subdirectory(include)
 add_subdirectory(tools)
 
 if (POLAR_INCLUDE_TESTS)

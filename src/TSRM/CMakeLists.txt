@@ -21,8 +21,9 @@ polar_check_headers(
 set(TSRM_SRCS
    TSRM.c
    tsrm_strtok_r.h
-   tsrm_strtok_r.c
-   $<TARGET_OBJECTS:TsrmHeaders>)
+   tsrm_strtok_r.c)
+
+polar_merge_list(TSRM_SRCS POLAR_ZENDVM_ZEND_HEADERS)
 
 set_source_files_properties(TSRM.c
    tsrm_strtok_r.c

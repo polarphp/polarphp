@@ -39,9 +39,9 @@ endif()
 
 set(POLAR_LIT_VERSION "0.0.1")
 
-configure_file(Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/Config.h @ONLY)
+configure_file(Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/LitConfigDef.h @ONLY)
 
-list(APPEND POLAR_DEVTOOLS_LIT_LIB_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/Config.h)
+list(APPEND POLAR_DEVTOOLS_LIT_LIB_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/LitConfigDef.h)
 
 polar_add_library(litkernel SHARED BUILDTREE_ONLY
    ${POLAR_DEVTOOLS_LIT_LIB_SOURCES})
@@ -53,8 +53,7 @@ set_target_properties(
 
 target_link_libraries(litkernel PUBLIC
    nlohmann_json::nlohmann_json
-   ${CURSES_LIBRARIES}
-   devtoolsutils)
+   ${CURSES_LIBRARIES})
 
 polar_add_executable(lit main.cpp)
 

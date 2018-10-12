@@ -10,7 +10,7 @@
 // Created by polarboy on 2018/09/18.
 
 #include "CLI/CLI.hpp"
-#include "Config.h"
+#include "LitConfigDef.h"
 #include <iostream>
 #include <thread>
 #include <assert.h>
@@ -20,7 +20,7 @@
 std::string convert_to_caret_and_mnotation(std::string data)
 {
    std::string output;
-   for (std::string::value_type &c : data) {
+   for (int c : data) {
       if (c == 9 || c == 10) {
          output.push_back(c);
          continue;

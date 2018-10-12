@@ -16,8 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef GLOBAL_PHP_STDINT_H
-#define GLOBAL_PHP_STDINT_H
+#ifndef POLARPHP_GLOBAL_PHP_STDINT_H
+#define POLARPHP_GLOBAL_PHP_STDINT_H
 
 /* C99 requires these for C++ to get the definitions
  * of INT64_MAX and other macros used by Zend/zend_long.h
@@ -217,7 +217,7 @@ typedef unsigned long long uint64_t;
 #endif
 
 #endif /* !PHP_WIN32 */
-#endif /* GLOBAL_PHP_STDINT_H */
+#endif /* POLARPHP_GLOBAL_PHP_STDINT_H */
 
 /*
  * Local variables:

@@ -33,9 +33,9 @@ endif()
 
 set(POLAR_LIT_VERSION "0.0.1")
 
-configure_file(Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/Config.h @ONLY)
+configure_file(Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/FileCheckerConfig.h @ONLY)
 
-list(APPEND POLAR_DEVTOOLS_FILECHECKER_LIB_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/Config.h)
+list(APPEND POLAR_DEVTOOLS_FILECHECKER_LIB_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/FileCheckerConfig.h)
 
 polar_add_library(filecheckerkernel SHARED BUILDTREE_ONLY
    ${POLAR_DEVTOOLS_FILECHECKER_LIB_SOURCES})
@@ -48,7 +48,7 @@ set_target_properties(
 target_link_libraries(filecheckerkernel PUBLIC
    nlohmann_json::nlohmann_json
    ${CURSES_LIBRARIES}
-   devtoolsutils)
+   PolarUtils)
 
 polar_add_executable(filechecker main.cpp)
 

@@ -12,7 +12,7 @@
 #ifndef POLAR_DEVLTOOLS_LIT_GLOBAL_H
 #define POLAR_DEVLTOOLS_LIT_GLOBAL_H
 
-#include "Config.h"
+#include "LitConfigDef.h"
 #include <filesystem>
 
 namespace polar {
