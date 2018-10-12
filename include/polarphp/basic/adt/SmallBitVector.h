@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/06/26.
 
-#ifndef POLAR_BASIC_ADT_SMALL_BIT_VECTOR_H
-#define POLAR_BASIC_ADT_SMALL_BIT_VECTOR_H
+#ifndef POLARPHP_BASIC_ADT_SMALL_BIT_VECTOR_H
+#define POLARPHP_BASIC_ADT_SMALL_BIT_VECTOR_H
 
 #include "polarphp/basic/adt/BitVector.h"
 #include "polarphp/basic/adt/IteratorRange.h"
@@ -811,4 +811,4 @@ swap(polar::basic::SmallBitVector &lhs, polar::basic::SmallBitVector &rhs)
 
 } // end namespace std
 
-#endif // POLAR_BASIC_ADT_SMALL_BIT_VECTOR_H
+#endif // POLARPHP_BASIC_ADT_SMALL_BIT_VECTOR_H

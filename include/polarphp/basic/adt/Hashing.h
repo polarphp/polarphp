@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/05/27.
 
-#ifndef POLAR_BASIC_ADT_HASING_H
-#define POLAR_BASIC_ADT_HASING_H
+#ifndef POLARPHP_BASIC_ADT_HASING_H
+#define POLARPHP_BASIC_ADT_HASING_H
 
 #include "polarphp/global/ProcessorDetection.h"
 #include "polarphp/global/DataTypes.h"
@@ -678,4 +678,4 @@ HashCode hash_value(const std::basic_string<T> &arg)
 } // basic
 } // polar
 
-#endif // POLAR_BASIC_ADT_HASING_H
+#endif // POLARPHP_BASIC_ADT_HASING_H

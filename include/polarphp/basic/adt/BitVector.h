@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/06/22.
 
-#ifndef POLAR_BASIC_ADT_BIT_VECTOR_H
-#define POLAR_BASIC_ADT_BIT_VECTOR_H
+#ifndef POLARPHP_BASIC_ADT_BIT_VECTOR_H
+#define POLARPHP_BASIC_ADT_BIT_VECTOR_H
 
 #include "polarphp/basic/adt/ArrayRef.h"
 #include "polarphp/basic/adt/IteratorRange.h"
@@ -1099,4 +1099,4 @@ inline void swap(polar::basic::BitVector &lhs, polar::basic::BitVector &rhs)
 }
 } // end namespace std
 
-#endif // POLAR_BASIC_ADT_BIT_VECTOR_H
+#endif // POLARPHP_BASIC_ADT_BIT_VECTOR_H

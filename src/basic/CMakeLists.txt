@@ -12,11 +12,11 @@
 polar_collect_files(
    TYPE_BOTH
    DIR .
-   OUTPUT_VAR POLAR_BASIC_ADT_SOURCES)
+   OUTPUT_VAR POLARPHP_BASIC_ADT_SOURCES)
 
-polar_merge_list(POLAR_BASIC_ADT_SOURCES POLAR_HEADERS)
+polar_merge_list(POLARPHP_BASIC_ADT_SOURCES POLAR_HEADERS)
 
-add_library(PolarBasic OBJECT ${POLAR_BASIC_ADT_SOURCES})
+add_library(PolarBasic OBJECT ${POLARPHP_BASIC_ADT_SOURCES})
 set_target_properties(
    PolarBasic
    PROPERTIES

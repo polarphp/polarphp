@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/05/29.
 
-#ifndef POLAR_BASIC_ADT_ARRAY_REF_H
-#define POLAR_BASIC_ADT_ARRAY_REF_H
+#ifndef POLARPHP_BASIC_ADT_ARRAY_REF_H
+#define POLARPHP_BASIC_ADT_ARRAY_REF_H
 
 #include "polarphp/basic/adt/Hashing.h"
 #include "polarphp/basic/adt/SmallVector.h"
@@ -684,4 +684,4 @@ polar::basic::HashCode hash_value(polar::basic::ArrayRef<T> array)
 } // utils
 } // polar
 
-#endif // POLAR_BASIC_ADT_ARRAY_REF_H
+#endif // POLARPHP_BASIC_ADT_ARRAY_REF_H

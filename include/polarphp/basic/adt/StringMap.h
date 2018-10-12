@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/06/04.
 
-#ifndef POLAR_BASIC_ADT_STRING_MAP_H
-#define POLAR_BASIC_ADT_STRING_MAP_H
+#ifndef POLARPHP_BASIC_ADT_STRING_MAP_H
+#define POLARPHP_BASIC_ADT_STRING_MAP_H
 
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/basic/adt/Iterator.h"
@@ -686,4 +686,4 @@ private:
 } // basic
 } // polar
 
-#endif // POLAR_BASIC_ADT_STRING_MAP_H
+#endif // POLARPHP_BASIC_ADT_STRING_MAP_H
