@@ -885,7 +885,7 @@ inline int (*get_array_pod_sort_comparator(const T &))
 ///
 /// NOTE: If qsort_r were portable, we could allow a custom comparator and
 /// default to std::less.
-template<class IteratorTy>
+template<typename IteratorTy>
 inline void array_pod_sort(IteratorTy start, IteratorTy end)
 {
    // Don't inefficiently call qsort with one element or trigger undefined

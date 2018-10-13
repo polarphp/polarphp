@@ -37,7 +37,7 @@ static const int UNALIGNED = 1;
 namespace internal {
 
 /// ::value is either alignment, or alignof(T) if alignment is 0.
-template<class T, int alignment>
+template<typename T, int alignment>
 struct PickAlignment
 {
    enum { value = alignment == 0 ? alignof(T) : alignment };

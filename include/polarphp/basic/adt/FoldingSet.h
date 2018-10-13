@@ -422,8 +422,8 @@ public:
 
 // Convenience type to hide the implementation of the folding set.
 using FoldingSetNode = FoldingSetBase::Node;
-template<class T> class FoldingSetIterator;
-template<class T> class FoldingSetBucketIterator;
+template<typename T> class FoldingSetIterator;
+template<typename T> class FoldingSetBucketIterator;
 
 // Definitions of FoldingSetTrait and ContextualFoldingSetTrait functions, which
 // require the definition of FoldingSetNodeId.

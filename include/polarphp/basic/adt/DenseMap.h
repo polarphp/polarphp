@@ -207,7 +207,7 @@ public:
    /// The DenseMapInfo is responsible for supplying methods
    /// getHashValue(LookupKeyType) and isEqual(LookupKeyType, KeyType) for each key
    /// type used.
-   template<class LookupKeyType>
+   template<typename LookupKeyType>
    iterator findAs(const LookupKeyType &value)
    {
       BucketType *theBucket;
@@ -217,7 +217,7 @@ public:
       return end();
    }
 
-   template<class LookupKeyType>
+   template<typename LookupKeyType>
    const_iterator findAs(const LookupKeyType &value) const
    {
       const BucketType *theBucket;

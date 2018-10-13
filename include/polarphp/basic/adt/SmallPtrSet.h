@@ -483,7 +483,7 @@ private:
 /// smallSize or less elements.  This internally rounds up smallSize to the next
 /// power of two if it is not already a power of two.  See the comments above
 /// SmallPtrSetImplBase for details of the algorithm.
-template<class PtrTypepe, unsigned smallSize>
+template<typename PtrTypepe, unsigned smallSize>
 class SmallPtrSet : public SmallPtrSetImpl<PtrTypepe>
 {
    // In small mode SmallPtrSet uses linear search for the elements, so it is
@@ -559,7 +559,7 @@ public:
 namespace std {
 
 /// Implement std::swap in terms of SmallPtrSet swap.
-template<class T, unsigned N>
+template<typename T, unsigned N>
 inline void swap(polar::basic::SmallPtrSet<T, N> &lhs, polar::basic::SmallPtrSet<T, N> &rhs)
 {
    lhs.swap(rhs);

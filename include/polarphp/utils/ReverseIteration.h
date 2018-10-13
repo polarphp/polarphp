@@ -18,7 +18,7 @@
 namespace polar {
 namespace utils {
 
-template<class T = void *>
+template<typename T = void *>
 bool should_reverse_iterate()
 {
 #if POLAR_ENABLE_REVERSE_ITERATION
