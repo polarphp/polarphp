@@ -14,6 +14,7 @@
 
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/basic/adt/Twine.h"
+#include "polarphp/basic/adt/DenseSet.h"
 #include "polarphp/utils/Allocator.h"
 
 namespace polar {
