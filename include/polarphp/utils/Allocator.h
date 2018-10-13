@@ -22,8 +22,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef POLAR_UTILS_ALLOCATOR_H
-#define POLAR_UTILS_ALLOCATOR_H
+#ifndef POLARPHP_UTILS_ALLOCATOR_H
+#define POLARPHP_UTILS_ALLOCATOR_H
 
 #include "polarphp/basic/adt/SmallVector.h"
 #include "polarphp/global/CompilerFeature.h"
@@ -519,4 +519,4 @@ void operator delete(
       void *, polar::utils::BumpPtrAllocatorImpl<AllocatorType, SlabSize, SizeThreshold> &)
 {}
 
-#endif // POLAR_UTILS_ALLOCATOR_H
+#endif // POLARPHP_UTILS_ALLOCATOR_H

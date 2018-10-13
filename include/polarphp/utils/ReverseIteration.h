@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/06/09.
 
-#ifndef POLAR_UTILS_REVERSE_ITERATION_H
-#define POLAR_UTILS_REVERSE_ITERATION_H
+#ifndef POLARPHP_UTILS_REVERSE_ITERATION_H
+#define POLARPHP_UTILS_REVERSE_ITERATION_H
 
 #include "polarphp/global/Config.h"
 #include "polarphp/utils/PointerLikeTypeTraits.h"
@@ -32,4 +32,4 @@ bool should_reverse_iterate()
 } // utils
 } // polar
 
-#endif // POLAR_UTILS_REVERSE_ITERATION_H
+#endif // POLARPHP_UTILS_REVERSE_ITERATION_H
