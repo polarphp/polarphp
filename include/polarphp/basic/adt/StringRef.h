@@ -988,6 +988,12 @@ public:
 #endif
       : StringRef(str, N - 1) {
    }
+
+   // Explicit construction for strings like "foo\0bar".
+   template <size_t N>
+   static constexpr StringLiteral withInnerNUL(const char (&str)[N]) {
+      return StringLiteral(str, N - 1);
+   }
 };
 
 /// @name StringRef Comparison Operators
