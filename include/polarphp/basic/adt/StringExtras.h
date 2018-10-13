@@ -21,7 +21,7 @@
 #include <array>
 
 namespace polar {
-namespace utils {
+namespace basic {
 
 /// hexdigit - Return the hexadecimal character for the
 /// given number \p value (which should be less than 16).
@@ -464,7 +464,7 @@ string_consume_integer(std::string_view &str, unsigned radix, T &result)
    return false;
 }
 
-} // utils
+} // basic
 } // polar
 
 #endif // POLARPHP_BASIC_ADT_STRING_EXTRAS_H

@@ -170,7 +170,7 @@ void write_hex(std::ostream &out, uint64_t N, HexPrintStyle style,
    char *curPtr = endPtr;
    while (N) {
       unsigned char x = static_cast<unsigned char>(N) % 16;
-      *--curPtr = hexdigit(x, !upper);
+      *--curPtr = polar::basic::hexdigit(x, !upper);
       N /= 16;
    }
    out.write(numberBuffer, numChars);

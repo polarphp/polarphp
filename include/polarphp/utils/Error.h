@@ -1128,7 +1128,7 @@ inline std::string to_string(Error error)
    handle_all_errors(std::move(error), [&errors, &i](const ErrorInfoBase &errorInfo) {
       errors[i++] = errorInfo.message();
    });
-   return join(errors.begin(), errors.end(), "\n");
+   return polar::basic::join(errors.begin(), errors.end(), "\n");
 }
 
 /// Consume a Error without doing anything. This method should be used

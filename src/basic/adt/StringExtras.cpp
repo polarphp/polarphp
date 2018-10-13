@@ -26,7 +26,7 @@
 #include <ostream>
 
 namespace polar {
-namespace utils {
+namespace basic {
 
 namespace {
 bool lowercase_compare(const char &lhs, const char &rhs)
@@ -286,5 +286,5 @@ bool string_consume_unsigned_integer(std::string_view &str, unsigned radix,
    return false;
 }
 
-} // utils
+} // basic
 } // polar
