@@ -18,6 +18,7 @@
 #include "polarphp/utils/BinaryStream.h"
 #include "polarphp/utils/BinaryStreamError.h"
 #include "polarphp/utils/Error.h"
+#include "polarphp/utils/Endian.h"
 #include "polarphp/utils/FileOutputBuffer.h"
 #include "polarphp/utils/MemoryBuffer.h"
 #include <algorithm>
