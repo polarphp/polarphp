@@ -143,4 +143,7 @@
 /* Define to 1 if you have the `_Unwind_Backtrace' function. */
 #cmakedefine01 HAVE__UNWIND_BACKTRACE
 
+/* Define if this is Unixish platform */
+#cmakedefine01 POLAR_ON_UNIX
+
 #endif // POLAR_DEVLTOOLS_UTILS_UTILS_CONFIG_H
