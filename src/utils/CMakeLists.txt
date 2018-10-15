@@ -17,6 +17,7 @@ polar_collect_files(
 if (UNIX)
    list(APPEND POLAR_UTILS_SOURCES _platform/ProcessUtilsUnix.cpp)
    list(APPEND POLAR_UTILS_SOURCES _platform/SignalsUnix.cpp)
+   list(APPEND POLAR_UTILS_SOURCES _platform/PathUnix.cpp)
 endif()
 
 polar_merge_list(POLAR_UTILS_SOURCES POLAR_HEADERS)

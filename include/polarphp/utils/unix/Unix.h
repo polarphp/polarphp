@@ -22,8 +22,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef POLAR_DEVLTOOLS_UTILS_UNIX_UNIX_H
-#define POLAR_DEVLTOOLS_UTILS_UNIX_UNIX_H
+#ifndef POLARPHP_UTILS_UNIX_UNIX_H
+#define POLARPHP_UTILS_UNIX_UNIX_H
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only generic UNIX code that
@@ -56,4 +56,4 @@ inline std::chrono::microseconds convert_time_to_duration(const struct timeval &
 } // unix
 } // polar
 
-#endif // POLAR_DEVLTOOLS_UTILS_UNIX_UNIX_H
+#endif // POLARPHP_UTILS_UNIX_UNIX_H
