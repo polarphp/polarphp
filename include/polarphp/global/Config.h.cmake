@@ -15,16 +15,16 @@
 #define POLAR_DEVLTOOLS_UTILS_UTILS_CONFIG_H
 
 /* Define to 1 to enable backtraces, and to 0 otherwise. */
-#cmakedefine01 ENABLE_BACKTRACES
+#cmakedefine ENABLE_BACKTRACES
 
 /* Define to 1 to enable crash overrides, and to 0 otherwise. */
-#cmakedefine01 ENABLE_CRASH_OVERRIDES
+#cmakedefine ENABLE_CRASH_OVERRIDES
 
 /* Define to 1 to enable crash memory dumps, and to 0 otherwise. */
-#cmakedefine01 POLAR_ENABLE_CRASH_DUMPS
+#cmakedefine POLAR_ENABLE_CRASH_DUMPS
 
 /* Define to 1 if you have the `backtrace' function. */
-#cmakedefine01 HAVE_BACKTRACE
+#cmakedefine HAVE_BACKTRACE
 
 #define BACKTRACE_HEADER <@BACKTRACE_HEADER@>
 
@@ -33,6 +33,9 @@
 
 /* can use __crashreporter_info__ */
 #cmakedefine HAVE_CRASHREPORTER_INFO
+
+/* Define to 1 if you have the `getrlimit' function. */
+#cmakedefine HAVE_GETRLIMIT
 
 /* Define to 1 if you have the `getrusage' function. */
 #cmakedefine HAVE_GETRUSAGE
@@ -62,7 +65,7 @@
 #cmakedefine HAVE_MALLCTL
 
 /* Define to 1 if you have the declaration of `arc4random', and to 0 if you
-   don't. */
+don't. */
 #cmakedefine01 HAVE_DECL_ARC4RANDOM
 
 /* Define to 1 if you have the `mallinfo' function. */
@@ -76,6 +79,15 @@
 
 /* Define to 1 if you have the `malloc_zone_statistics' function. */
 #cmakedefine HAVE_MALLOC_ZONE_STATISTICS
+
+/* Define to 1 if you have the `posix_fallocate' function. */
+#cmakedefine HAVE_POSIX_FALLOCATE
+
+/* Define to 1 if you have the `posix_spawn' function. */
+#cmakedefine HAVE_POSIX_SPAWN
+
+/* Define to 1 if you have the `pread' function. */
+#cmakedefine HAVE_PREAD
 
 /* Define to 1 if you have the `sysconf' function. */
 #cmakedefine HAVE_SYSCONF
@@ -104,8 +116,14 @@
 /* Define to 1 if you have the <errno.h> header file. */
 #cmakedefine HAVE_ERRNO_H
 
+/* Define to 1 if you have the <fcntl.h> header file. */
+#cmakedefine HAVE_FCNTL_H
+
+/* Define to 1 if you have the <fenv.h> header file. */
+#cmakedefine HAVE_FENV_H
+
 /* Define to 1 if you have the declaration of `strerror_s', and to 0 if you
-   don't. */
+don't. */
 #cmakedefine HAVE_DECL_STRERROR_S
 
 /* Define to 1 if you have the `strerror' function. */
@@ -137,6 +155,12 @@
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #cmakedefine HAVE_SYS_TYPES_H
+
+/* Define if the setupterm() function is supported this platform. */
+#cmakedefine HAVE_TERMINFO
+
+/* Define to 1 if you have the <termios.h> header file. */
+#cmakedefine HAVE_TERMIOS_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #cmakedefine HAVE_UNISTD_H

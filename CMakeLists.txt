@@ -264,6 +264,8 @@ option(POLAR_BUILD_TESTS
    "Build polarphp unit tests. If OFF, just generate build targets." OFF)
 option(POLAR_INCLUDE_TESTS "Generate build targets for the polarphp unit tests." ON)
 
+option(POLAR_ENABLE_TERMINFO "Use terminfo database if available." ON)
+
 # They are used as destination of target generators.
 set(POLAR_RUNTIME_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/bin)
 set(POLAR_LIBRARY_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/lib${POLAR_LIBDIR_SUFFIX})
@@ -327,8 +329,8 @@ endif()
 include(CheckCompilerVersion)
 include(DetermineGCCCompatible)
 include(HandlePolarOptions)
-include(ProcesseRequirePackages)
 include(DetectHostEnvironment)
+include(ProcesseRequirePackages)
 
 # Configuring Zend and TSRM.
 include(CheckTsrm)

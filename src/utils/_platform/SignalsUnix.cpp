@@ -40,7 +40,7 @@
 #include "polarphp/utils/MemoryBuffer.h"
 #include "polarphp/utils/ManagedStatics.h"
 #include "polarphp/global/Config.h"
-#include "unix/Unix.h"
+#include "polarphp/utils/unix/Unix.h"
 #include "polarphp/basic/adt/StlExtras.h"
 #include "polarphp/utils/Signals.h"
 #include "polarphp/utils/Stream.h"
@@ -55,20 +55,20 @@
 #ifdef HAVE_BACKTRACE
 # include BACKTRACE_HEADER
 #endif
-#if HAVE_SIGNAL_H
+#ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-#if HAVE_SYS_STAT_H
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#if HAVE_DLFCN_H
+#ifdef HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif
-#if HAVE_MACH_MACH_H
+#ifdef HAVE_MACH_MACH_H
 #include <mach/mach.h>
 #endif
 #include <stdio.h>
-#if HAVE_LINK_H
+#ifdef HAVE_LINK_H
 #include <link.h>
 #endif
 #ifdef HAVE__UNWIND_BACKTRACE
@@ -423,7 +423,7 @@ void add_signal_handler(SignalHandlerCallback funcPtr,
    register_handlers();
 }
 
-#if ENABLE_BACKTRACES && defined(HAVE__UNWIND_BACKTRACE)
+#if defined(ENABLE_BACKTRACES) && defined(HAVE__UNWIND_BACKTRACE)
 namespace {
 int unwind_backtrace(void **stackTrace, int maxEntries)
 {
@@ -466,7 +466,7 @@ int unwind_backtrace(void **stackTrace, int maxEntries)
 // doesn't demangle symbols.
 void print_stack_trace(std::ostream &out)
 {
-#if ENABLE_BACKTRACES
+#ifdef ENABLE_BACKTRACES
    static void *stackTrace[256];
    int depth = 0;
 #if defined(HAVE_BACKTRACE)
@@ -485,7 +485,7 @@ void print_stack_trace(std::ostream &out)
    if (!depth) {
       return;
    }
-#if HAVE_DLFCN_H && HAVE_DLADDR
+#if defined(HAVE_DLFCN_H) && defined(HAVE_DLADDR)
    int width = 0;
    for (int i = 0; i < depth; ++i) {
       Dl_info dlinfo;
@@ -547,7 +547,7 @@ void print_stack_trace_on_error_signal(const std::string &argv0,
 
    add_signal_handler(print_stack_trace_signal_handler, nullptr);
 
-#if defined(__APPLE__) && ENABLE_CRASH_OVERRIDES
+#if defined(__APPLE__) && defined(ENABLE_CRASH_OVERRIDES)
    // Environment variable to disable any kind of crash dialog.
    if (disableCrashReporting || getenv("POLAR_DISABLE_CRASH_REPORT")) {
       mach_port_t self = mach_task_self();

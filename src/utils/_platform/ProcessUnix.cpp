@@ -28,7 +28,7 @@
 #include "polarphp/basic/adt/Hashing.h"
 #include "polarphp/basic/adt/StringRef.h"
 
-#if HAVE_FCNTL_H
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 #ifdef HAVE_SYS_TIME_H
@@ -40,7 +40,7 @@
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#if HAVE_SIGNAL_H
+#ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif
 // DragonFlyBSD, and OpenBSD have deprecated <malloc.h> for
@@ -147,7 +147,7 @@ void Process::getTimeUsage(TimePoint<> &elapsed, std::chrono::nanoseconds &userT
 // does what's necessary to prevent their generation.
 void Process::preventCoreFiles()
 {
-#if HAVE_SETRLIMIT
+#ifdef HAVE_SETRLIMIT
    struct rlimit rlim;
    rlim.rlim_cur = rlim.rlim_max = 0;
    setrlimit(RLIMIT_CORE, &rlim);
@@ -168,10 +168,11 @@ void Process::preventCoreFiles()
                                   OriginalFlavors);
    if (err == KERN_SUCCESS) {
       // replace each with MACH_PORT_NULL.
-      for (unsigned i = 0; i != Count; ++i)
+      for (unsigned i = 0; i != Count; ++i) {
          task_set_exception_ports(mach_task_self(), originalMasks[i],
                                   MACH_PORT_NULL, originalBehaviors[i],
                                   OriginalFlavors[i]);
+      }
    }
 
    // Disable crash reporting on Mac OS X 10.5
@@ -305,7 +306,7 @@ bool Process::standardErrIsDisplayed()
 
 bool Process::fileDescriptorIsDisplayed(int fd)
 {
-#if HAVE_ISATTY
+#ifdef HAVE_ISATTY
    return isatty(fd);
 #else
    // If we don't have isatty, just return false.
