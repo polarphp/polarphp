@@ -14,6 +14,9 @@
 #ifndef POLAR_DEVLTOOLS_UTILS_UTILS_CONFIG_H
 #define POLAR_DEVLTOOLS_UTILS_UTILS_CONFIG_H
 
+/* Define if zlib compression is available */
+#cmakedefine01 POLAR_ENABLE_ZLIB
+
 /* Define to 1 to enable backtraces, and to 0 otherwise. */
 #cmakedefine01 ENABLE_BACKTRACES
 
@@ -54,6 +57,9 @@
 
 /* Define to 1 if you have the <link.h> header file. */
 #cmakedefine HAVE_LINK_H
+
+/* Define to 1 if you have the `z' library (-lz). */
+#cmakedefine HAVE_LIBZ
 
 /* Define to 1 if you have the `lseek64' function. */
 #cmakedefine HAVE_LSEEK64
