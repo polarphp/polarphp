@@ -266,6 +266,10 @@ option(POLAR_INCLUDE_TESTS "Generate build targets for the polarphp unit tests."
 
 option(POLAR_ENABLE_TERMINFO "Use terminfo database if available." ON)
 
+# Override the default target with an environment variable named by POLAR_TARGET_TRIPLE_ENV.
+set(POLAR_TARGET_TRIPLE_ENV CACHE STRING "The name of environment variable to override default target. Disabled by blank.")
+mark_as_advanced(POLAR_TARGET_TRIPLE_ENV)
+
 # They are used as destination of target generators.
 set(POLAR_RUNTIME_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/bin)
 set(POLAR_LIBRARY_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/lib${POLAR_LIBDIR_SUFFIX})

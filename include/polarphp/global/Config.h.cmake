@@ -15,13 +15,13 @@
 #define POLAR_DEVLTOOLS_UTILS_UTILS_CONFIG_H
 
 /* Define to 1 to enable backtraces, and to 0 otherwise. */
-#cmakedefine ENABLE_BACKTRACES
+#cmakedefine01 ENABLE_BACKTRACES
 
 /* Define to 1 to enable crash overrides, and to 0 otherwise. */
-#cmakedefine ENABLE_CRASH_OVERRIDES
+#cmakedefine01 ENABLE_CRASH_OVERRIDES
 
 /* Define to 1 to enable crash memory dumps, and to 0 otherwise. */
-#cmakedefine POLAR_ENABLE_CRASH_DUMPS
+#cmakedefine01 POLAR_ENABLE_CRASH_DUMPS
 
 /* Define to 1 if you have the `backtrace' function. */
 #cmakedefine HAVE_BACKTRACE
@@ -93,13 +93,13 @@ don't. */
 #cmakedefine HAVE_SYSCONF
 
 /* Define to 1 if you have the `sbrk' function. */
-#cmakedefine01 HAVE_SBRK
+#cmakedefine HAVE_SBRK
 
 /* Define to 1 if you have the `setenv' function. */
-#cmakedefine01 HAVE_SETENV
+#cmakedefine HAVE_SETENV
 
 /* Define to 1 if you have the `sigaltstack' function. */
-#cmakedefine01 HAVE_SIGALTSTACK
+#cmakedefine HAVE_SIGALTSTACK
 
 /* Define to 1 if you have the <signal.h> header file. */
 #cmakedefine HAVE_SIGNAL_H
@@ -173,5 +173,8 @@ don't. */
 
 /* Define if this is Unixish platform */
 #cmakedefine01 POLAR_ON_UNIX
+
+/* Define if overriding target triple is enabled */
+#cmakedefine POLAR_TARGET_TRIPLE_ENV "${POLAR_TARGET_TRIPLE_ENV}"
 
 #endif // POLAR_DEVLTOOLS_UTILS_UTILS_CONFIG_H

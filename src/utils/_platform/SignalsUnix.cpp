@@ -423,7 +423,7 @@ void add_signal_handler(SignalHandlerCallback funcPtr,
    register_handlers();
 }
 
-#if defined(ENABLE_BACKTRACES) && defined(HAVE__UNWIND_BACKTRACE)
+#if ENABLE_BACKTRACES && defined(HAVE__UNWIND_BACKTRACE)
 namespace {
 int unwind_backtrace(void **stackTrace, int maxEntries)
 {
@@ -547,7 +547,7 @@ void print_stack_trace_on_error_signal(const std::string &argv0,
 
    add_signal_handler(print_stack_trace_signal_handler, nullptr);
 
-#if defined(__APPLE__) && defined(ENABLE_CRASH_OVERRIDES)
+#if defined(__APPLE__) && ENABLE_CRASH_OVERRIDES
    // Environment variable to disable any kind of crash dialog.
    if (disableCrashReporting || getenv("POLAR_DISABLE_CRASH_REPORT")) {
       mach_port_t self = mach_task_self();
