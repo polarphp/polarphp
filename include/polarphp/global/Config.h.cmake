@@ -32,49 +32,53 @@
 #cmakedefine HAVE_CRASHREPORTERCLIENT_H
 
 /* can use __crashreporter_info__ */
-#cmakedefine01 HAVE_CRASHREPORTER_INFO
+#cmakedefine HAVE_CRASHREPORTER_INFO
 
 /* Define to 1 if you have the `getrusage' function. */
-#cmakedefine01 HAVE_GETRUSAGE
+#cmakedefine HAVE_GETRUSAGE
 
 /* Define to 1 if you have the `getpagesize' function. */
-#cmakedefine01 HAVE_GETPAGESIZE
+#cmakedefine HAVE_GETPAGESIZE
 
 /* Define to 1 if you have the `isatty' function. */
-#cmakedefine01 HAVE_ISATTY
+#cmakedefine HAVE_ISATTY
 
 /* Define to 1 if you have the `futimens' function. */
-#cmakedefine01 HAVE_FUTIMENS
+#cmakedefine HAVE_FUTIMENS
 
 /* Define to 1 if you have the `futimes' function. */
-#cmakedefine01 HAVE_FUTIMES
+#cmakedefine HAVE_FUTIMES
 
 /* Define to 1 if you have the <link.h> header file. */
-#cmakedefine01 HAVE_LINK_H
+#cmakedefine HAVE_LINK_H
 
 /* Define to 1 if you have the `lseek64' function. */
-#cmakedefine01 HAVE_LSEEK64
+#cmakedefine HAVE_LSEEK64
 
 /* Define to 1 if you have the <mach/mach.h> header file. */
-#cmakedefine01 HAVE_MACH_MACH_H
+#cmakedefine HAVE_MACH_MACH_H
 
 /* Define to 1 if you have the `mallctl' function. */
-#cmakedefine01 HAVE_MALLCTL
+#cmakedefine HAVE_MALLCTL
+
+/* Define to 1 if you have the declaration of `arc4random', and to 0 if you
+   don't. */
+#cmakedefine01 HAVE_DECL_ARC4RANDOM
 
 /* Define to 1 if you have the `mallinfo' function. */
-#cmakedefine01 HAVE_MALLINFO
+#cmakedefine HAVE_MALLINFO
 
 /* Define to 1 if you have the <malloc.h> header file. */
-#cmakedefine01 HAVE_MALLOC_H
+#cmakedefine HAVE_MALLOC_H
 
 /* Define to 1 if you have the <malloc/malloc.h> header file. */
-#cmakedefine01 HAVE_MALLOC_MALLOC_H
+#cmakedefine HAVE_MALLOC_MALLOC_H
 
 /* Define to 1 if you have the `malloc_zone_statistics' function. */
-#cmakedefine01 HAVE_MALLOC_ZONE_STATISTICS
+#cmakedefine HAVE_MALLOC_ZONE_STATISTICS
 
 /* Define to 1 if you have the `sysconf' function. */
-#cmakedefine01 HAVE_SYSCONF
+#cmakedefine HAVE_SYSCONF
 
 /* Define to 1 if you have the `sbrk' function. */
 #cmakedefine01 HAVE_SBRK
@@ -86,62 +90,62 @@
 #cmakedefine01 HAVE_SIGALTSTACK
 
 /* Define to 1 if you have the <signal.h> header file. */
-#cmakedefine01 HAVE_SIGNAL_H
+#cmakedefine HAVE_SIGNAL_H
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
-#cmakedefine01 HAVE_DLFCN_H
+#cmakedefine HAVE_DLFCN_H
 
 /* Define if dlopen() is available on this platform. */
-#cmakedefine01 HAVE_DLOPEN
+#cmakedefine HAVE_DLOPEN
 
 /* Define if dladdr() is available on this platform. */
-#cmakedefine01 HAVE_DLADDR
+#cmakedefine HAVE_DLADDR
 
 /* Define to 1 if you have the <errno.h> header file. */
-#cmakedefine01 HAVE_ERRNO_H
+#cmakedefine HAVE_ERRNO_H
 
 /* Define to 1 if you have the declaration of `strerror_s', and to 0 if you
    don't. */
-#cmakedefine01 HAVE_DECL_STRERROR_S
+#cmakedefine HAVE_DECL_STRERROR_S
 
 /* Define to 1 if you have the `strerror' function. */
-#cmakedefine01 HAVE_STRERROR
+#cmakedefine HAVE_STRERROR
 
 /* Define to 1 if you have the `strerror_r' function. */
-#cmakedefine01 HAVE_STRERROR_R
+#cmakedefine HAVE_STRERROR_R
 
 /* Define to 1 if you have the `setrlimit' function. */
-#cmakedefine01 HAVE_SETRLIMIT
+#cmakedefine HAVE_SETRLIMIT
 
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
-#cmakedefine01 HAVE_SYS_IOCTL_H
+#cmakedefine HAVE_SYS_IOCTL_H
 
 /* Define to 1 if you have the <sys/mman.h> header file. */
-#cmakedefine01 HAVE_SYS_MMAN_H
+#cmakedefine HAVE_SYS_MMAN_H
 
 /* Define to 1 if you have the <sys/param.h> header file. */
-#cmakedefine01 HAVE_SYS_PARAM_H
+#cmakedefine HAVE_SYS_PARAM_H
 
 /* Define to 1 if you have the <sys/resource.h> header file. */
-#cmakedefine01 HAVE_SYS_RESOURCE_H
+#cmakedefine HAVE_SYS_RESOURCE_H
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
-#cmakedefine01 HAVE_SYS_STAT_H
+#cmakedefine HAVE_SYS_STAT_H
 
 /* Define to 1 if you have the <sys/time.h> header file. */
-#cmakedefine01 HAVE_SYS_TIME_H
+#cmakedefine HAVE_SYS_TIME_H
 
 /* Define to 1 if you have the <sys/types.h> header file. */
-#cmakedefine01 HAVE_SYS_TYPES_H
+#cmakedefine HAVE_SYS_TYPES_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
-#cmakedefine01 HAVE_UNISTD_H
+#cmakedefine HAVE_UNISTD_H
 
 /* Define to 1 if you have the <valgrind/valgrind.h> header file. */
 #cmakedefine01 HAVE_VALGRIND_VALGRIND_H
 
 /* Define to 1 if you have the `_Unwind_Backtrace' function. */
-#cmakedefine01 HAVE__UNWIND_BACKTRACE
+#cmakedefine HAVE__UNWIND_BACKTRACE
 
 /* Define if this is Unixish platform */
 #cmakedefine01 POLAR_ON_UNIX
