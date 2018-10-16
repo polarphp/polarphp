@@ -17,6 +17,7 @@
 #include "polarphp/utils/Path.h"
 #include "polarphp/utils/RawOutStream.h"
 #include "polarphp/utils/Program.h"
+#include "polarphp/utils/StringSaver.h"
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -58,9 +59,13 @@ namespace sys {
 
 using polar::basic::SmallVector;
 using polar::basic::SmallString;
+using polar::utils::ErrorCode;
+using polar::utils::StringSaver;
+using polar::utils::BumpPtrAllocator;
 
 ProcessInfo::ProcessInfo()
-   : m_pid(0), m_returnCode(0)
+   : m_pid(0),
+     m_returnCode(0)
 {}
 
 OptionalError<std::string> find_program_by_name(StringRef name,
@@ -171,10 +176,22 @@ void set_memory_limits(unsigned size)
 #endif
 }
 
+std::vector<const char *>
+to_null_terminated_cstring_array(ArrayRef<StringRef> strings, StringSaver &saver)
+{
+   std::vector<const char *> result;
+   for (StringRef str : strings) {
+      result.push_back(saver.save(str).getData());
+   }
+   result.push_back(nullptr);
+   return result;
+}
+
 } // anonymous namespace
 
-bool execute(ProcessInfo &processInfo, StringRef program, const char **args,
-             const char **envp, ArrayRef<std::optional<StringRef>> redirects,
+bool execute(ProcessInfo &processInfo, StringRef program,
+             ArrayRef<StringRef>args, std::optional<ArrayRef<StringRef>> env,
+             ArrayRef<std::optional<StringRef>> redirects,
              unsigned memoryLimit, std::string *errMsg)
 {
    if (!fs::exists(program)) {
@@ -183,6 +200,18 @@ bool execute(ProcessInfo &processInfo, StringRef program, const char **args,
                std::string("\" doesn't exist!");
       }
       return false;
+   }
+
+   BumpPtrAllocator allocator;
+   StringSaver saver(Allocator);
+   std::vector<const char *> argVector, envVector;
+   const char **argv = nullptr;
+   const char **envp = nullptr;
+   argVector = to_null_terminated_cstring_array(args, saver);
+   argv = argVector.data();
+   if (env) {
+      envVector = toNullTerminatedCStringArray(*Env, Saver);
+      envp = envVector.data();
    }
 
    // If this OS has posix_spawn and there is no memory limit being implied, use
@@ -320,6 +349,7 @@ bool execute(ProcessInfo &processInfo, StringRef program, const char **args,
    }
 
    processInfo.m_pid = child;
+   processInfo.m_process = child;
    return true;
 }
 
@@ -455,29 +485,40 @@ write_file_with_encoding(StringRef fileName, StringRef contents,
 }
 
 bool command_line_fits_within_system_limits(StringRef program,
-                                            ArrayRef<const char *> args) {
+                                            ArrayRef<StringRef> args)
+{
    static long argMax = sysconf(_SC_ARG_MAX);
+   // POSIX requires that _POSIX_ARG_MAX is 4096, which is the lowest possible
+   // value for ARG_MAX on a POSIX compliant system.
+   static long argMin = _POSIX_ARG_MAX;
+
+   // This the same baseline used by xargs.
+   long effectiveArgMax = 128 * 1024;
+
+   if (effectiveArgMax > argMax) {
+      effectiveArgMax = argMax;
+   } else if (effectiveArgMax < argMin) {
+       effectiveArgMax = argMin;
+   }
 
    // System says no practical limit.
    if (argMax == -1) {
       return true;
    }
    // Conservatively account for space required by environment variables.
-   long halfArgMax = argMax / 2;
+   long halfArgMax = effectiveArgMax / 2;
 
    size_t argLength = program.getSize() + 1;
-   for (const char* arg : args) {
-      size_t length = strlen(arg);
-
+   for (StringRef arg : args) {
       // Ensure that we do not exceed the MAX_ARG_STRLEN constant on Linux, which
       // does not have a constant unlike what the man pages would have you
       // believe. Since this limit is pretty high, perform the check
       // unconditionally rather than trying to be aggressive and limiting it to
       // Linux only.
-      if (length >= (32 * 4096)) {
+      if (arg.size() >= (32 * 4096)) {
          return false;
       }
-      argLength += length + 1;
+      argLength += arg.size() + 1;
       if (argLength > size_t(halfArgMax)) {
          return false;
       }

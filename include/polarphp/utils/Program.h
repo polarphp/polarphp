@@ -34,28 +34,23 @@ const char g_envPathSeparator = ':';
 const char g_envPathSeparator = ';';
 #endif
 
+#if defined(_WIN32)
+typedef unsigned long ProcessIdType; // Must match the type of DWORD on Windows.
+typedef void *ProcessType;        // Must match the type of HANDLE on Windows.
+#else
+typedef pid_t ProcessIdType;
+typedef ProcessIdType ProcessType;
+#endif
+
 /// This struct encapsulates information about a process.
 struct ProcessInfo
 {
-#if defined(POLAR_ON_UNIX)
-   typedef pid_t ProcessId;
-#elif defined(_WIN32)
-   typedef unsigned long ProcessId; // Must match the type of DWORD on Windows.
-   typedef void * HANDLE; // Must match the type of HANDLE on Windows.
-   /// The handle to the process (available on Windows only).
-   HANDLE ProcessHandle;
-#else
-#error "ProcessInfo is not defined for this platform!"
-#endif
-
-   enum : ProcessId { InvalidPid = 0 };
-
+   enum : ProcessIdType { InvalidPid = 0 };
    /// The process identifier.
-   ProcessId m_pid;
-
+   ProcessIdType m_pid;
+   ProcessType m_process;
    /// The return code, set after execution.
    int m_returnCode;
-
    ProcessInfo();
 };
 
@@ -95,10 +90,10 @@ std::error_code change_stdout_to_binary();
 int execute_and_wait(
       StringRef program, ///< Path of the program to be executed. It is
       ///< presumed this is the result of the findProgramByName method.
-      const char **args, ///< A vector of strings that are passed to the
+      ArrayRef<StringRef> args, ///< A vector of strings that are passed to the
       ///< program.  The first element should be the name of the program.
       ///< The list *must* be terminated by a null char* entry.
-      const char **env = nullptr, ///< An optional vector of strings to use for
+      std::optional<ArrayRef<StringRef>> env = std::nullopt, ///< An optional vector of strings to use for
       ///< the program's environment. If not provided, the current program's
       ///< environment will be used.
       ArrayRef<std::optional<StringRef>> redirects = {}, ///<
@@ -129,8 +124,8 @@ int execute_and_wait(
 /// \note On Microsoft Windows systems, users will need to either call
 /// \see Wait until the process finished execution or win32 CloseHandle() API
 /// on ProcessInfo.ProcessHandle to avoid memory leaks.
-ProcessInfo execute_no_wait(StringRef program, const char **args,
-                            const char **env = nullptr,
+ProcessInfo execute_no_wait(StringRef program, ArrayRef<StringRef> args,
+                            std::optional<ArrayRef<StringRef>> env,
                             ArrayRef<std::optional<StringRef>> redirects = {},
                             unsigned memoryLimit = 0,
                             std::string *errMsg = nullptr,
@@ -138,8 +133,13 @@ ProcessInfo execute_no_wait(StringRef program, const char **args,
 
 /// Return true if the given arguments fit within system-specific
 /// argument length limits.
-bool command_line_fits_within_system_limits(StringRef program,
-                                            ArrayRef<const char *> args);
+bool commandline_fits_within_system_limits(StringRef program,
+                                           ArrayRef<StringRef> args);
+
+/// Return true if the given arguments fit within system-specific
+/// argument length limits.
+bool commandline_fits_within_system_limits(StringRef program,
+                                           ArrayRef<const char *> args);
 
 /// File encoding options when writing contents that a non-UTF8 tool will
 /// read (on Windows systems). For UNIX, we always use UTF-8.
@@ -196,7 +196,13 @@ ProcessInfo wait(
       ///< string is non-empty upon return an error occurred while invoking the
       ///< program.
       );
-
+#if defined(_WIN32)
+/// Given a list of command line arguments, quote and escape them as necessary
+/// to build a single flat command line appropriate for calling CreateProcess
+/// on
+/// Windows.
+std::string flatten_windows_commandline(ArrayRef<StringRef> args);
+#endif
 } // sys
 } // polar
 
