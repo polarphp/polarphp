@@ -16,7 +16,7 @@
 #include <ostream>
 #include <type_traits>
 
-#include "polarphp/utils/StlExtras.h"
+#include "polarphp/basic/adt/StlExtras.h"
 
 namespace polar {
 namespace utils {

@@ -13,7 +13,7 @@
 #define POLARPHP_UTILS_FORMAT_PROVIDERS_H
 
 #include "polarphp/utils/FormatVariadicDetail.h"
-#include "polarphp/utils/StringExtras.h"
+#include "polarphp/basic/adt/StringExtras.h"
 #include "polarphp/utils/NativeFormatting.h"
 
 #include <optional>
