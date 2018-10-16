@@ -340,9 +340,6 @@ private:
    /// \invariant { Size > 0 }
    virtual void writeImpl(const char *ptr, size_t size) = 0;
 
-   // An out of line virtual method to provide a home for the class vtable.
-   virtual void handle();
-
    /// Return the current position within the stream, not counting the bytes
    /// currently in the buffer.
    virtual uint64_t getCurrentPos() const = 0;
@@ -456,8 +453,16 @@ public:
    /// As a special case, if Filename is "-", then the stream will use
    /// STDOUT_FILENO instead of opening a file. This will not close the stdout
    /// descriptor.
+   RawFdOutStream(StringRef filename, std::error_code &errorCode);
    RawFdOutStream(StringRef filename, std::error_code &errorCode,
-                  OpenFlags Flags);
+                  fs::CreationDisposition disp);
+   RawFdOutStream(StringRef filename, std::error_code &errorCode,
+                  fs::FileAccess access);
+   RawFdOutStream(StringRef filename, std::error_code &errorCode,
+                  OpenFlags flags);
+   RawFdOutStream(StringRef filename, std::error_code &errorCode,
+                  fs::FileAccess disp, fs::FileAccess access,
+                  OpenFlags flags);
 
    /// FD is the file descriptor that this writes to.  If ShouldClose is true,
    /// this closes the file when the stream is destroyed. If FD is for stdout or

@@ -157,6 +157,48 @@ public:
          getStorage()->~StorageType();
       }
    }
+
+   /// Return false if there is an error.
+   explicit operator bool() const
+   {
+      return !m_hasError;
+   }
+
+   reference get()
+   {
+      return *getStorage();
+   }
+
+   const_reference get() const
+   {
+      return const_cast<OptionalError<T> *>(this)->get();
+   }
+
+   std::error_code getError() const
+   {
+      return m_hasError ? *getErrorStorage() : std::error_code();
+   }
+
+   pointer operator ->()
+   {
+      return toPointer(getStorage());
+   }
+
+   const_pointer operator->() const
+   {
+      return toPointer(getStorage());
+   }
+
+   reference operator *()
+   {
+      return *getStorage();
+   }
+
+   const_reference operator*() const
+   {
+      return *getStorage();
+   }
+
 private:
 
    template <typename T1>
@@ -267,6 +309,15 @@ private:
    };
    bool m_hasError : 1;
 };
+
+template <class T, class E>
+typename std::enable_if<std::is_error_code_enum<E>::value ||
+std::is_error_condition_enum<E>::value,
+bool>::type
+operator==(const OptionalError<T> &error, E code)
+{
+   return error.getError() == code;
+}
 
 } // utils
 } // polar
