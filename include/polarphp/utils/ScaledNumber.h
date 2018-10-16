@@ -1096,5 +1096,4 @@ struct IsPodLike<ScaledNumber<T>>
 } // utils
 } // polar
 
-
 #endif // POLARPHP_UTILS_SCALED_NUMBER_H
