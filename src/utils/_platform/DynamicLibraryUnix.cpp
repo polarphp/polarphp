@@ -23,7 +23,8 @@ namespace sys {
 #if defined(HAVE_DLFCN_H) && defined(HAVE_DLOPEN)
 #include <dlfcn.h>
 
-DynamicLibrary::HandleSet::~HandleSet() {
+DynamicLibrary::HandleSet::~HandleSet()
+{
    // Close the libraries in reverse order.
    for (void *handle : polar::basic::reverse(m_handles)) {
       dlclose(handle);
