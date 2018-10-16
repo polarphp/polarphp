@@ -36,8 +36,8 @@
 ///                            &Scalarizer::ScalarizeLoadStore>();
 ///
 
-#ifndef POLAR_UTILS_OPTIONS_H
-#define POLAR_UTILS_OPTIONS_H
+#ifndef POLARPHP_UTILS_OPTIONS_H
+#define POLARPHP_UTILS_OPTIONS_H
 
 #include "polarphp/basic/adt/DenseMap.h"
 #include "polarphp/utils/CommandLine.h"
@@ -129,4 +129,4 @@ public:
 } // utils
 } // polar
 
-#endif // POLAR_UTILS_OPTIONS_H
+#endif // POLARPHP_UTILS_OPTIONS_H
