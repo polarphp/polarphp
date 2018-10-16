@@ -405,8 +405,8 @@ static bool terminal_has_colors(int fd)
 #else
    // When the terminfo database is not available, check if the current terminal
    // is one of terminals that are known to support ANSI color escape codes.
-   if (const char *TermStr = std::getenv("TERM")) {
-      return StringSwitch<bool>(TermStr)
+   if (const char *termStr = std::getenv("TERM")) {
+      return StringSwitch<bool>(termStr)
             .cond("ansi", true)
             .cond("cygwin", true)
             .cond("linux", true)
