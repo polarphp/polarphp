@@ -29,7 +29,7 @@
 namespace polar {
 namespace basic {
 
-using polar::utils::is_power_of_two_32;
+using polar::utils::is_power_of_two32;
 using polar::utils::power_of_two_floor;
 using polar::basic::StringRef;
 
@@ -324,7 +324,7 @@ void FoldingSetBase::clear()
 void FoldingSetBase::growBucketCount(unsigned newBucketCount)
 {
    assert((newBucketCount > m_numBuckets) && "Can't shrink a folding set with growBucketCount");
-   assert(is_power_of_two_32(newBucketCount) && "Bad bucket count!");
+   assert(is_power_of_two32(newBucketCount) && "Bad bucket count!");
    void **oldBuckets = m_buckets;
    unsigned oldNumBuckets = m_numBuckets;
 

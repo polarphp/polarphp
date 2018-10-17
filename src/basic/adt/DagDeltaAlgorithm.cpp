@@ -50,7 +50,7 @@ namespace basic {
 
 #define DEBUG_TYPE "dag-delta"
 
-using polar::utils::debug_stream;
+using polar::debug_stream;
 
 namespace {
 

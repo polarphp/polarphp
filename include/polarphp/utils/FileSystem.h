@@ -1005,7 +1005,7 @@ std::error_code open_file_for_write(const Twine &name, int &resultFD,
                                     CreationDisposition disp = CD_CreateAlways,
                                     OpenFlags flags = OF_None, unsigned mode = 0666)
 {
-   return openFile(name, resultFD, disp, FA_Write, flags, mode);
+   return open_file(name, resultFD, disp, FA_Write, flags, mode);
 }
 
 /// @brief Opens the file with the given name in a write-only or read-write
@@ -1026,7 +1026,7 @@ inline Expected<FileType> open_native_file_for_write(const Twine &name,
                                                      OpenFlags flags,
                                                      unsigned mode = 0666)
 {
-   return openNativeFile(name, disp, FA_Write, flags, mode);
+   return open_native_file(name, disp, FA_Write, flags, mode);
 }
 
 /// @brief Opens the file with the given name in a write-only or read-write

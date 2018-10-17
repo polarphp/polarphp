@@ -25,6 +25,9 @@ namespace polar {
 
 namespace fs {
 enum OpenFlags : unsigned;
+enum FileAccess : unsigned;
+enum OpenFlags : unsigned;
+enum CreationDisposition : unsigned;
 } // fs
 
 namespace utils {

@@ -201,7 +201,7 @@ struct ApFloatBase
    };
 
    /// Category of internally-represented number.
-   enum class FltCategory
+   enum FltCategory
    {
       fcInfinity,
       fcNaN,
@@ -210,7 +210,7 @@ struct ApFloatBase
    };
 
    /// Convenience enum used to construct an uninitialized ApFloat.
-   enum class UninitializedTag
+   enum UninitializedTag
    {
       uninitialized
    };

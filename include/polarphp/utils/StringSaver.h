@@ -63,7 +63,8 @@ class UniqueStringSaver final
    polar::basic::DenseSet<StringRef> m_unique;
 
 public:
-   UniqueStringSaver(BumpPtrAllocator &alloc) : Strings(alloc)
+   UniqueStringSaver(BumpPtrAllocator &alloc)
+      : m_strings(alloc)
    {}
 
    // All returned strings are null-terminated: *save(S).end() == 0.

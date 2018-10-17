@@ -313,21 +313,21 @@ T reverse_bits(T value)
 // ambiguity.
 
 /// Return the high 32 bits of a 64 bit value.
-constexpr inline uint32_t hi_32(uint64_t value)
+constexpr inline uint32_t high32(uint64_t value)
 {
    return static_cast<uint32_t>(value >> 32);
 }
 
-/// Return the low 32 bits of a 64 bit value.
-constexpr inline uint32_t lo_32(uint64_t value)
+/// Return the next_power_of2 32 bits of a 64 bit value.
+constexpr inline uint32_t low32(uint64_t value)
 {
    return static_cast<uint32_t>(value);
 }
 
-/// Make a 64-bit integer from a high / low pair of 32-bit integers.
-constexpr inline uint64_t make_64(uint32_t high, uint32_t low)
+/// Make a 64-bit integer from a high / next_power_of2 pair of 32-bit integers.
+constexpr inline uint64_t make64(uint32_t high, uint32_t next_power_of2)
 {
-   return ((uint64_t)high << 32) | (uint64_t)low;
+   return ((uint64_t)high << 32) | (uint64_t)next_power_of2;
 }
 
 /// Checks if an integer fits into the given bit width.
@@ -465,42 +465,42 @@ inline bool is_int_n(unsigned N, int64_t x)
 
 /// Return true if the argument is a non-empty sequence of ones starting at the
 /// least significant bit with the remainder zero (32 bit version).
-/// Ex. is_mask_32(0x0000FFFFU) == true.
-constexpr inline bool is_mask_32(uint32_t value)
+/// Ex. is_mask32(0x0000FFFFU) == true.
+constexpr inline bool is_mask32(uint32_t value)
 {
    return value && ((value + 1) & value) == 0;
 }
 
 /// Return true if the argument is a non-empty sequence of ones starting at the
 /// least significant bit with the remainder zero (64 bit version).
-constexpr inline bool is_mask_64(uint64_t value)
+constexpr inline bool is_mask64(uint64_t value)
 {
    return value && ((value + 1) & value) == 0;
 }
 
 /// Return true if the argument contains a non-empty sequence of ones with the
-/// remainder zero (32 bit version.) Ex. is_shifted_mask_32(0x0000FF00U) == true.
-constexpr inline bool is_shifted_mask_32(uint32_t value)
+/// remainder zero (32 bit version.) Ex. is_shifted_mask32(0x0000FF00U) == true.
+constexpr inline bool is_shifted_mask32(uint32_t value)
 {
-   return value && is_mask_32((value - 1) | value);
+   return value && is_mask32((value - 1) | value);
 }
 
 /// Return true if the argument contains a non-empty sequence of ones with the
 /// remainder zero (64 bit version.)
-constexpr inline bool is_shifted_mask_64(uint64_t value)
+constexpr inline bool is_shifted_mask64(uint64_t value)
 {
-   return value && is_mask_64((value - 1) | value);
+   return value && is_mask64((value - 1) | value);
 }
 
 /// Return true if the argument is a power of two > 0.
-/// Ex. is_power_of2_32(0x00100000U) == true (32 bit edition.)
-constexpr inline bool is_power_of2_32(uint32_t value)
+/// Ex. is_power_of_two32(0x00100000U) == true (32 bit edition.)
+constexpr inline bool is_power_of_two32(uint32_t value)
 {
    return value && !(value & (value - 1));
 }
 
 /// Return true if the argument is a power of two > 0 (64 bit edition.)
-constexpr inline bool is_power_of2_64(uint64_t value)
+constexpr inline bool is_power_of_two64(uint64_t value)
 {
    return value && !(value & (value - 1));
 }
@@ -518,7 +518,7 @@ inline uint32_t byte_swap32(uint32_t value)
 }
 
 /// Return a byte-swapped representation of the 64-bit argument.
-inline uint64_t ByteSwap_64(uint64_t value)
+inline uint64_t byte_swap64(uint64_t value)
 {
    return swap_byte_order64(value);
 }
@@ -711,7 +711,7 @@ constexpr inline uint64_t min_align(uint64_t A, uint64_t B)
 /// align_addr(7, 4) == 8 and align_addr(8, 4) == 8.
 inline uintptr_t align_addr(const void *addr, size_t alignment)
 {
-   assert(alignment && is_power_of2_64((uint64_t)alignment) &&
+   assert(alignment && is_power_of_two64((uint64_t)alignment) &&
           "alignment is not a power of two!");
 
    assert((uintptr_t)addr + alignment - 1 >= (uintptr_t)addr);
@@ -728,7 +728,7 @@ inline size_t alignment_adjustment(const void *ptr, size_t alignment)
 
 /// Returns the next power of two (in 64-bits) that is strictly greater than A.
 /// Returns zero on overflow.
-inline uint64_t next_power_of2(uint64_t value)
+inline uint64_t next_power_of_two(uint64_t value)
 {
    value |= (value >> 1);
    value |= (value >> 2);
@@ -741,7 +741,7 @@ inline uint64_t next_power_of2(uint64_t value)
 
 /// Returns the power of two which is less than or equal to the given value.
 /// Essentially, it is a floor operation across the domain of powers of two.
-inline uint64_t power_of2_floor(uint64_t value)
+inline uint64_t power_of_two_floor(uint64_t value)
 {
    if (!value) {
       return 0;
@@ -751,12 +751,12 @@ inline uint64_t power_of2_floor(uint64_t value)
 
 /// Returns the power of two which is greater than or equal to the given value.
 /// Essentially, it is a ceil operation across the domain of powers of two.
-inline uint64_t power_of2_ceil(uint64_t value)
+inline uint64_t power_of_two_ceil(uint64_t value)
 {
    if (!value) {
       return 0;
    }
-   return next_power_of2(value - 1);
+   return next_power_of_two(value - 1);
 }
 
 /// Returns the next integer (mod 2**64) that is greater than or equal to

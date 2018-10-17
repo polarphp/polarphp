@@ -174,7 +174,7 @@ public:
                        StringLiteral str8, StringLiteral str9,
                        T value)
    {
-      return cond(str0, value).conds(str1, str2, str3, str4, str5, str6, str7, str8, S9, value);
+      return cond(str0, value).conds(str1, str2, str3, str4, str5, str6, str7, str8, str9, value);
    }
 
    // cond-insensitive cond matchers.

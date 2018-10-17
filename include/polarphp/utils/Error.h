@@ -19,6 +19,7 @@
 #include "polarphp/utils/ErrorHandling.h"
 #include "polarphp/basic/adt/StlExtras.h"
 #include "polarphp/basic/adt/StringExtras.h"
+#include "polarphp/utils/RawOutStream.h"
 
 #include <sstream>
 #include <algorithm>
@@ -84,7 +85,15 @@ PolarErrorTypeId polar_get_string_error_type_id();
 #endif
 
 namespace polar {
+
+// forward declare with namespace
+namespace basic {
+class Twine;
+} // basic
+
 namespace utils {
+
+using polar::basic::Twine;
 
 class ErrorSuccess;
 
@@ -95,14 +104,14 @@ class ErrorInfoBase
 public:
    virtual ~ErrorInfoBase() = default;
    /// Print an error message to an output stream.
-   virtual void log(std::ostream &out) const = 0;
+   virtual void log(RawOutStream &out) const = 0;
    /// Return the error message as a string.
    virtual std::string message() const
    {
       std::string msg;
-      std::ostringstream out(msg);
+      RawStringOutStream out(msg);
       log(out);
-      return out.str();
+      return out.getStr();
    }
 
    /// Convert this error to a std::error_code.
@@ -186,7 +195,7 @@ private:
 ///       [](std::unique_ptr<OtherError> M) -> Error {
 ///         if (canHandle(*M)) {
 ///           // handle error.
-///           return Error::success();
+///           return Error::getSuccess();
 ///         }
 ///         // Couldn't handle this error instance. Pass it up the stack.
 ///         return Error(std::move(M));
@@ -221,7 +230,7 @@ class POLAR_NODISCARD Error
    friend PolarErrorRef wrap(Error);
 
 protected:
-   /// Create a success value. Prefer using 'Error::success()' for readability
+   /// Create a success value. Prefer using 'Error::getSuccess()' for readability
    Error()
    {
       setPtr(nullptr);
@@ -230,7 +239,7 @@ protected:
 
 public:
    /// Create a success value.
-   static ErrorSuccess success();
+   static ErrorSuccess getSuccess();
 
    // Errors are not copy-constructable.
    Error(const Error &other) = delete;
@@ -369,7 +378,7 @@ private:
       return tmp;
    }
 
-   friend std::ostream &operator<<(std::ostream &out, const Error &error)
+   friend RawOutStream &operator<<(RawOutStream &out, const Error &error)
    {
       if (auto ptr = error.getPtr()) {
          ptr->log(out);
@@ -388,7 +397,7 @@ private:
 class ErrorSuccess : public Error
 {};
 
-inline ErrorSuccess Error::success()
+inline ErrorSuccess Error::getSuccess()
 {
    return ErrorSuccess();
 }
@@ -443,7 +452,7 @@ class ErrorList final : public ErrorInfo<ErrorList>
    friend Error join_errors(Error, Error);
 
 public:
-   void log(std::ostream &out) const override
+   void log(RawOutStream &out) const override
    {
       out << "Multiple errors:\n";
       for (auto &errPayload : m_payloads) {
@@ -548,8 +557,8 @@ public:
       new (getErrorStorage()) error_type(error.takePayload());
    }
 
-   /// Forbid to convert from Error::success() implicitly, this avoids having
-   /// Expected<T> foo() { return Error::success(); } which compiles otherwise
+   /// Forbid to convert from Error::getSuccess() implicitly, this avoids having
+   /// Expected<T> foo() { return Error::getSuccess(); } which compiles otherwise
    /// but triggers the assertion above.
    Expected(ErrorSuccess) = delete;
 
@@ -651,7 +660,7 @@ public:
 #if POLAR_ENABLE_ABI_BREAKING_CHECKS
       m_unchecked = false;
 #endif
-      return m_hasError ? Error(std::move(*getErrorStorage())) : Error::success();
+      return m_hasError ? Error(std::move(*getErrorStorage())) : Error::getSuccess();
    }
 
    /// Returns a pointer to the stored T value.
@@ -744,13 +753,13 @@ private:
    StorageType *getStorage()
    {
       assert(!m_hasError && "Cannot get value when an error exists!");
-      return reinterpret_cast<StorageType *>(m_typeStorage.buffer);
+      return reinterpret_cast<StorageType *>(m_typeStorage.m_buffer);
    }
 
    const StorageType *getStorage() const
    {
       assert(!m_hasError && "Cannot get value when an error exists!");
-      return reinterpret_cast<const StorageType *>(m_typeStorage.buffer);
+      return reinterpret_cast<const StorageType *>(m_typeStorage.m_buffer);
    }
 
    error_type *getErrorStorage()
@@ -823,7 +832,7 @@ POLAR_ATTRIBUTE_NORETURN void report_fatal_error(Error error,
 ///   @code{.cpp}
 ///   // foo only attempts the fallible operation if DoFallibleOperation is
 ///   // true. If DoFallibleOperation is false then foo always returns
-///   // Error::success().
+///   // Error::getSuccess().
 ///   Error foo(bool DoFallibleOperation);
 ///
 ///   cant_fail(foo(false));
@@ -931,7 +940,7 @@ class ErrorHandlerTraits<void (&)(ErrorType &)>
    {
       assert(appliesTo(*error) && "Applying incorrect handler");
       handler(static_cast<ErrorType &>(*error));
-      return Error::success();
+      return Error::getSuccess();
    }
 };
 
@@ -970,7 +979,7 @@ class ErrorHandlerTraits<void (&)(std::unique_ptr<ErrorType>)>
       assert(appliesTo(*error) && "Applying incorrect handler");
       std::unique_ptr<ErrorType> subE(static_cast<ErrorType *>(error.release()));
       handler(std::move(subE));
-      return Error::success();
+      return Error::getSuccess();
    }
 };
 
@@ -1039,7 +1048,7 @@ template <typename... HandlerTs>
 Error handle_errors(Error error, HandlerTs &&... handlers)
 {
    if (!error) {
-      return Error::success();
+      return Error::getSuccess();
    }
    std::unique_ptr<ErrorInfoBase> payload = error.takePayload();
    if (payload->isA<ErrorList>()) {
@@ -1117,7 +1126,7 @@ Expected<T> handleExpected(Expected<T> valOrErr, RecoveryFtor &&recoveryPath,
 /// This is useful in the base level of your program to allow clean termination
 /// (allowing clean deallocation of resources, etc.), while reporting error
 /// information to the user.
-void log_all_unhandled_errors(Error error, std::ostream &out, const std::string &errorBanner);
+void log_all_unhandled_errors(Error error, RawOutStream &out, const std::string &errorBanner);
 
 /// Write all error messages (if any) in E to a string. The newline character
 /// is used to separate error messages.
@@ -1197,7 +1206,7 @@ public:
    {
       // Clear the checked bit.
       if (m_error && !*m_error) {
-         *m_error = Error::success();
+         *m_error = Error::getSuccess();
       }
    }
 
@@ -1248,7 +1257,7 @@ public:
       return m_errorCode;
    }
 
-   void log(std::ostream &out) const override
+   void log(RawOutStream &out) const override
    {
       out << m_errorCode.message();
    }
@@ -1310,9 +1319,9 @@ class StringError : public ErrorInfo<StringError>
 {
 public:
    static char sm_id;
-   StringError(const std::string &str, std::error_code errorCode);
+   StringError(const Twine &str, std::error_code errorCode);
 
-   void log(std::ostream &out) const override;
+   void log(RawOutStream &out) const override;
    std::error_code convertToErrorCode() const override;
 
    const std::string &getMessage() const
@@ -1331,9 +1340,9 @@ Error create_string_error(std::error_code errorCode, char const *fmt,
                           const Ts &... values)
 {
    std::string buffer;
-   std::ostringstream stream(buffer);
+   RawStringOutStream stream(buffer);
    stream << format_string(fmt, values...);
-   return make_error<StringError>(stream.str(), errorCode);
+   return make_error<StringError>(stream.getStr(), errorCode);
 }
 
 Error create_string_error(std::error_code errorCode, char const *msg);

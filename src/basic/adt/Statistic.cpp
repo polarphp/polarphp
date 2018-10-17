@@ -29,7 +29,7 @@
 #include "polarphp/utils/CommandLine.h"
 #include "polarphp/utils/Debug.h"
 #include "polarphp/utils/Format.h"
-#include "polarphp/global/ManagedStatic.h"
+#include "polarphp/utils/ManagedStatics.h"
 #include "polarphp/utils/Timer.h"
 #include "polarphp/utils/yaml/YamlTraits.h"
 #include "polarphp/utils/RawOutStream.h"
@@ -42,6 +42,7 @@ namespace basic {
 
 namespace cmd = polar::cmd;
 using polar::utils::TimerGroup;
+using polar::utils::ManagedStatic;
 
 namespace {
 /// -stats - Command line option to cause transformations to emit stats about
@@ -206,7 +207,7 @@ void print_statistics(RawOutStream &outStream)
    unsigned maxDebugTypeLen = 0, maxValLen = 0;
    for (size_t i = 0, e = stats.m_stats.size(); i != e; ++i) {
       maxValLen = std::max(maxValLen,
-                           (unsigned)utostr(stats.m_stats[i]->getValue()).size());
+                           (unsigned)polar::basic::utostr(stats.m_stats[i]->getValue()).size());
       maxDebugTypeLen = std::max(maxDebugTypeLen,
                                  (unsigned)std::strlen(stats.m_stats[i]->getDebugType()));
    }

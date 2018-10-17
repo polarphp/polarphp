@@ -12,9 +12,11 @@
 #ifndef POLARPHP_UTILS_DEBUG_H
 #define POLARPHP_UTILS_DEBUG_H
 
-#include "polarphp/utils/Stream.h"
-
 namespace polar {
+
+namespace utils {
+class RawOutStream;
+} // utils
 
 #ifndef NDEBUG
 
@@ -88,10 +90,7 @@ extern bool VerifyLoopInfo;
 extern bool EnableDebugBuffering;
 
 
-inline std::ostream &debug_stream()
-{
-   return error_stream();
-}
+utils::RawOutStream &debug_stream();
 
 // DEBUG macro - This macro should be used by passes to emit debug information.
 // In the '-debug' option is specified on the commandline, and if this is a

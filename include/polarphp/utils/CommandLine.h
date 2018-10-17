@@ -67,6 +67,7 @@ using polar::basic::SmallVectorImpl;
 using polar::basic::ArrayRef;
 using polar::basic::IteratorRange;
 using polar::utils::StringSaver;
+using polar::utils::ManagedStatic;
 
 //===----------------------------------------------------------------------===//
 // parse_command_line_options - Command line option processing entry point.

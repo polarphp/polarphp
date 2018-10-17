@@ -20,7 +20,7 @@ namespace basic {
 
 using polar::utils::RawSvectorOutStream;
 using polar::utils::RawOutStream;
-using polar::utils::debug_stream;
+using polar::debug_stream;
 
 std::string Twine::getStr() const
 {

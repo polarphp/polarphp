@@ -13,6 +13,10 @@
 #define POLARPHP_BASIC_ADT_STRING_EXTRAS_H
 
 #include "polarphp/global/CompilerFeature.h"
+#include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/basic/adt/SmallString.h"
+#include "polarphp/basic/adt/Twine.h"
+#include "polarphp/basic/adt/ArrayRef.h"
 #include <cassert>
 #include <cstring>
 #include <string>
@@ -21,7 +25,18 @@
 #include <array>
 
 namespace polar {
+
+// forward declare with namespace
+namespace utils {
+class RawOutStream;
+}
+
 namespace basic {
+
+template<typename T>
+class SmallVectorImpl;
+
+using polar::utils::RawOutStream;
 
 /// hexdigit - Return the hexadecimal character for the
 /// given number \p value (which should be less than 16).
@@ -29,6 +44,25 @@ inline char hexdigit(unsigned value, bool lowerCase = false)
 {
    const char hexChar = lowerCase ? 'a' : 'A';
    return value < 10 ? '0' + value : hexChar + value - 10;
+}
+
+
+/// Construct a string ref from a boolean.
+inline StringRef to_string_ref(bool value)
+{
+   return StringRef(value ? "true" : "false");
+}
+
+/// Construct a string ref from an array ref of unsigned chars.
+inline StringRef to_string_ref(ArrayRef<uint8_t> value)
+{
+   return StringRef(reinterpret_cast<const char *>(value.begin()), value.getSize());
+}
+
+/// Construct a string ref from an array ref of unsigned chars.
+inline ArrayRef<uint8_t> arrayref_from_stringref(StringRef value)
+{
+   return {value.getBytesBegin(), value.getBytesEnd()};
 }
 
 /// Given an array of c-style strings terminated by a null pointer, construct
@@ -163,6 +197,27 @@ inline std::string to_hex(std::string_view input)
    return output;
 }
 
+/// Convert buffer \p Input to its hexadecimal representation.
+/// The returned string is double the size of \p Input.
+inline std::string to_hex(StringRef input)
+{
+   static const char *const lut = "0123456789ABCDEF";
+   size_t length = input.getSize();
+   std::string output;
+   output.reserve(2 * length);
+   for (size_t i = 0; i < length; ++i) {
+      const unsigned char c = input[i];
+      output.push_back(lut[c >> 4]);
+      output.push_back(lut[c & 15]);
+   }
+   return output;
+}
+
+inline std::string to_hex(ArrayRef<uint8_t> input)
+{
+   return to_hex(to_string_ref(input));
+}
+
 inline uint8_t hex_from_nibbles(char msb, char lsb)
 {
    unsigned u1 = hex_digit_value(msb);
@@ -194,6 +249,98 @@ inline std::string from_hex(std::string_view input)
    return output;
 }
 
+/// Convert hexadecimal string \p Input to its binary representation.
+/// The return string is half the size of \p input.
+inline std::string from_hex(StringRef input)
+{
+   if (input.empty()) {
+      return std::string();
+   }
+   std::string output;
+   output.reserve((input.getSize() + 1) / 2);
+   if (input.getSize() % 2 == 1) {
+      output.push_back(hex_from_nibbles('0', input.front()));
+      input = input.dropFront();
+   }
+
+   assert(input.getSize() % 2 == 0);
+   while (!input.empty()) {
+      uint8_t Hex = hex_from_nibbles(input[0], input[1]);
+      output.push_back(Hex);
+      input = input.dropFront(2);
+   }
+   return output;
+}
+
+/// \brief Convert the string \p S to an integer of the specified type using
+/// the radix \p Base.  If \p Base is 0, auto-detects the radix.
+/// Returns true if the number was successfully converted, false otherwise.
+template <typename N>
+bool to_integer(StringRef str, N &num, unsigned base = 0)
+{
+   return !str.getAsInteger(base, num);
+}
+
+namespace internal {
+template <typename N>
+inline bool to_float(const Twine &twine, N &num, N (*strToFunc)(const char *, char **))
+{
+   SmallString<32> storage;
+   StringRef str = twine.toNullTerminatedStringRef(storage);
+   char *end;
+   N temp = strToFunc(str.getData(), &end);
+   if (*end != '\0') {
+      return false;
+   }
+   num = temp;
+   return true;
+}
+}
+
+inline bool to_float(const Twine &twine, float &num)
+{
+   return internal::to_float(twine, num, strtof);
+}
+
+inline bool to_float(const Twine &twine, double &num)
+{
+   return internal::to_float(twine, num, strtod);
+}
+
+inline bool to_float(const Twine &twine, long double &num)
+{
+   return internal::to_float(twine, num, strtold);
+}
+
+inline std::string utostr(uint64_t value, bool isNeg = false)
+{
+   char buffer[21];
+   char *bufPtr = std::end(buffer);
+
+   if (value == 0) {
+      *--bufPtr = '0';  // Handle special case...
+   }
+
+   while (value) {
+      *--bufPtr = '0' + char(value % 10);
+      value /= 10;
+   }
+
+   if (isNeg) {
+      *--bufPtr = '-';   // Add negative sign...
+   }
+   return std::string(bufPtr, std::end(buffer));
+}
+
+inline std::string itostr(int64_t value)
+{
+   if (value < 0) {
+      return utostr(static_cast<uint64_t>(-value), true);
+   } else {
+      return utostr(static_cast<uint64_t>(value));
+   }
+}
+
 /// StrInStrNoCase - Portable version of strcasestr.  Locates the first
 /// occurrence of string 's1' in string 's2', ignoring case.  Returns
 /// the offset of s2 in s1 or npos if s2 cannot be found.
@@ -208,14 +355,49 @@ std::string_view::size_type str_in_str_no_case(std::string_view s1, std::string_
 std::pair<std::string_view, std::string_view> get_token(std::string_view source,
                                                         std::string_view delimiters = " \t\n\v\f\r");
 
+/// StrInStrNoCase - Portable version of strcasestr.  Locates the first
+/// occurrence of string 's1' in string 's2', ignoring case.  Returns
+/// the offset of s2 in s1 or npos if s2 cannot be found.
+StringRef::size_type str_in_str_nocase(StringRef s1, StringRef s2);
+
+/// getToken - This function extracts one token from source, ignoring any
+/// leading characters that appear in the Delimiters string, and ending the
+/// token at any of the characters that appear in the Delimiters string.  If
+/// there are no tokens in the source string, an empty string is returned.
+/// The function returns a pair containing the extracted token and the
+/// remaining tail string.
+std::pair<StringRef, StringRef> get_token(StringRef source,
+                                          StringRef delimiters = " \t\n\v\f\r");
+
 /// SplitString - Split up the specified string according to the specified
 /// delimiters, appending the result fragments to the output list.
 void split_string(std::string_view source,
                   std::vector<std::string_view> &outFragments,
                   std::string_view delimiters = " \t\n\v\f\r");
 
+/// SplitString - Split up the specified string according to the specified
+/// delimiters, appending the result fragments to the output list.
+void split_string(StringRef source,
+                  SmallVectorImpl<StringRef> &outFragments,
+                  StringRef delimiters = " \t\n\v\f\r");
+
+/// HashString - Hash function for strings.
+///
+/// This is the Bernstein hash function.
+//
+// FIXME: Investigate whether a modified bernstein hash function performs
+// better: http://eternallyconfuzzled.com/tuts/algorithms/jsw_tut_hashing.aspx
+//   X*33+c -> X*33^c
+inline unsigned hash_string(StringRef str, unsigned result = 0)
+{
+   for (StringRef::size_type i = 0, e = str.getSize(); i != e; ++i) {
+      result = result * 33 + (unsigned char)str[i];
+   }
+   return result;
+}
+
 /// Returns the English suffix for an ordinal integer (-st, -nd, -rd, -th).
-inline std::string_view get_ordinal_suffix(unsigned value)
+inline StringRef get_ordinal_suffix(unsigned value)
 {
    // It is critically important that we do this perfectly for
    // user-written sequences with over 100 elements.
@@ -234,23 +416,18 @@ inline std::string_view get_ordinal_suffix(unsigned value)
    }
 }
 
-/// Print each character of the specified string, escaping it if it is not
-/// printable or if it is an escape char.
-void print_escaped_string(std::string_view name, std::ostream &out);
+/// PrintEscapedString - Print each character of the specified string, escaping
+/// it if it is not printable or if it is an escape char.
+void print_escaped_string(StringRef name, RawOutStream &out);
 
-/// Print each character of the specified string, escaping HTML special
-/// characters.
-void print_html_escaped(std::string_view string, std::ostream &out);
-
-/// print_lower_case - Print each character as lowercase if it is uppercase.
-void print_lower_case(std::string_view string, std::ostream &out);
+/// printLowerCase - Print each character as lowercase if it is uppercase.
+void print_lower_case(StringRef string, RawOutStream &out);
 
 namespace internal {
 
-template <typename IteratorT>
-inline std::string join_impl(IteratorT begin, IteratorT end,
-                             std::string_view separator, std::input_iterator_tag)
-{
+template <typename IteratorType>
+inline std::string join_impl(IteratorType begin, IteratorType end,
+                             StringRef separator, std::input_iterator_tag) {
    std::string str;
    if (begin == end) {
       return str;
@@ -263,20 +440,18 @@ inline std::string join_impl(IteratorT begin, IteratorT end,
    return str;
 }
 
-template <typename IteratorT>
-inline std::string join_impl(IteratorT begin, IteratorT end,
-                             std::string_view separator, std::forward_iterator_tag)
-{
+template <typename IteratorType>
+inline std::string join_impl(IteratorType begin, IteratorType end,
+                             StringRef separator, std::forward_iterator_tag) {
    std::string str;
    if (begin == end) {
       return str;
    }
-
-   size_t len = (std::distance(begin, end) - 1) * separator.size();
-   for (IteratorT iter = begin; iter != end; ++iter) {
-      len += (*begin).size();
+   size_t length = (std::distance(begin, end) - 1) * separator.getSize();
+   for (IteratorType iter = begin; iter != end; ++iter) {
+      length += (*begin).size();
    }
-   str.reserve(len);
+   str.reserve(length);
    str += (*begin);
    while (++begin != end) {
       str += separator;
@@ -297,14 +472,15 @@ inline void join_items_impl(std::string &result, Sep separator,
 }
 
 template <typename Sep, typename Arg1, typename... Args>
-inline void join_items_impl(std::string &result, Sep separator, const Arg1 &arg1,
-                            Args &&... args) {
-   result += arg1;
+inline void join_items_impl(std::string &result, Sep separator, const Arg1 &a1,
+                            Args &&... items)
+{
+   result += a1;
    result += separator;
-   join_items_impl(result, separator, std::forward<Args>(args)...);
+   join_items_impl(result, separator, std::forward<Args>(items)...);
 }
 
-inline size_t join_one_item_size(char c)
+inline size_t join_one_item_size(char character)
 {
    return 1;
 }
@@ -325,33 +501,33 @@ inline size_t join_items_size()
    return 0;
 }
 
-template <typename A1>
-inline size_t join_items_size(const A1 &arg1)
+template <typename T>
+inline size_t join_items_size(const T &value)
 {
-   return join_one_item_size(arg1);
+   return join_one_item_size(value);
 }
 
-template <typename A1, typename... Args>
-inline size_t join_items_size(const A1 &arg1, Args &&... args)
+template <typename T, typename... Args>
+inline size_t join_items_size(const T &value, Args &&... items)
 {
-   return join_one_item_size(arg1) + join_items_size(std::forward<Args>(args)...);
+   return join_one_item_size(value) + join_items_size(std::forward<Args>(items)...);
 }
 
 } // end namespace internal
 
 /// Joins the strings in the range [begin, end), adding separator between
 /// the elements.
-template <typename IteratorT>
-inline std::string join(IteratorT begin, IteratorT end, std::string_view separator)
+template <typename IteratorType>
+inline std::string join(IteratorType begin, IteratorType end, StringRef separator)
 {
-   using tag = typename std::iterator_traits<IteratorT>::iterator_category;
+   using tag = typename std::iterator_traits<IteratorType>::iterator_category;
    return internal::join_impl(begin, end, separator, tag());
 }
 
 /// Joins the strings in the range [R.begin(), R.end()), adding separator
 /// between the elements.
 template <typename Range>
-inline std::string join(Range &&range, std::string_view separator)
+inline std::string join(Range &&range, StringRef separator)
 {
    return join(range.begin(), range.end(), separator);
 }
@@ -361,18 +537,29 @@ inline std::string join(Range &&range, std::string_view separator)
 /// std::string, or there should be an overload of std::string::operator+=()
 /// that accepts the argument explicitly.
 template <typename Sep, typename... Args>
-inline std::string join_items(Sep separator, Args &&... args)
+inline std::string join_items(Sep separator, Args &&... items)
 {
    std::string result;
-   if (sizeof...(args) == 0) {
+   if (sizeof...(items) == 0) {
       return result;
    }
    size_t NS = internal::join_one_item_size(separator);
-   size_t NI = internal::join_items_size(std::forward<Args>(args)...);
-   result.reserve(NI + (sizeof...(args) - 1) * NS + 1);
-   internal::join_items_impl(result, separator, std::forward<Args>(args)...);
+   size_t NI = internal::join_items_size(std::forward<Args>(items)...);
+   result.reserve(NI + (sizeof...(items) - 1) * NS + 1);
+   internal::join_items_impl(result, separator, std::forward<Args>(items)...);
    return result;
 }
+
+/// Print each character of the specified string, escaping it if it is not
+/// printable or if it is an escape char.
+void print_escaped_string(std::string_view name, std::ostream &out);
+
+/// Print each character of the specified string, escaping HTML special
+/// characters.
+void print_html_escaped(std::string_view string, std::ostream &out);
+
+/// print_lower_case - Print each character as lowercase if it is uppercase.
+void print_lower_case(std::string_view string, std::ostream &out);
 
 template <typename... ArgTypes>
 std::string format_string(const std::string &format, ArgTypes&&...args)

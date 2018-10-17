@@ -7,31 +7,30 @@
 // See http://polarphp.org/LICENSE.txt for license information
 // See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2018/10/11.
+// Created by softboy on 2018/06/10.
 
 #include "polarphp/utils/NativeFormatting.h"
-#include "polarphp/utils/MathExtras.h"
-#include "polarphp/basic/adt/StringExtras.h"
-#include "polarphp/basic/adt/StlExtras.h"
-#include "polarphp/utils/ArrayExtras.h"
-#include "polarphp/utils/Format.h"
-#include "polarphp/global/DataTypes.h"
 
-#include <string>
-#include <vector>
+#include "polarphp/basic/adt/ArrayRef.h"
+#include "polarphp/basic/adt/SmallString.h"
+#include "polarphp/basic/adt/StringExtras.h"
+#include "polarphp/utils/Format.h"
+
 #include <float.h>
-#include <optional>
-#include <sstream>
 
 namespace polar {
 namespace utils {
 
+using polar::basic::SmallString;
+
 namespace {
+
 template<typename T, std::size_t N>
 int format_to_buffer(T value, char (&buffer)[N])
 {
    char *endPtr = std::end(buffer);
    char *curPtr = endPtr;
+
    do {
       *--curPtr = '0' + char(value % 10);
       value /= 10;
@@ -39,114 +38,117 @@ int format_to_buffer(T value, char (&buffer)[N])
    return endPtr - curPtr;
 }
 
-void write_with_commas(std::ostream &out, std::vector<char> buffer)
+void writeWithCommas(RawOutStream &outStream, ArrayRef<char> buffer)
 {
    assert(!buffer.empty());
-   std::vector<char> thisGroup;
-   int initialDigits = ((buffer.size() - 1) % 3) + 1;
-   thisGroup = vector_take_front(buffer, initialDigits);
-   out.write(thisGroup.data(), thisGroup.size());
-   buffer = vector_drop_front(buffer, initialDigits);
-   assert(buffer.size() % 3 == 0);
+
+   ArrayRef<char> thisGroup;
+   int initialDigits = ((buffer.getSize() - 1) % 3) + 1;
+   thisGroup = buffer.takeFront(initialDigits);
+   outStream.write(thisGroup.getData(), thisGroup.getSize());
+   buffer = buffer.dropFront(initialDigits);
+   assert(buffer.getSize() % 3 == 0);
    while (!buffer.empty()) {
-      out << ',';
-      thisGroup = vector_take_front(buffer, 3);
-      out.write(thisGroup.data(), 3);
-      buffer = vector_drop_front(buffer, 3);
+      outStream << ',';
+      thisGroup = buffer.takeFront(3);
+      outStream.write(thisGroup.getData(), 3);
+      buffer = buffer.dropFront(3);
    }
 }
 
 template <typename T>
-void write_unsigned_impl(std::ostream &out, T N, size_t minDigits,
-                         IntegerStyle style, bool isNegative)
-{
+void write_unsigned_impl(RawOutStream &outStream, T N, size_t minDigits,
+                         IntegerStyle style, bool isNegative) {
    static_assert(std::is_unsigned<T>::value, "Value is not unsigned!");
+
    char numberBuffer[128];
    std::memset(numberBuffer, '0', sizeof(numberBuffer));
+
    size_t len = 0;
    len = format_to_buffer(N, numberBuffer);
    if (isNegative) {
-      out << '-';
+      outStream << '-';
    }
    if (len < minDigits && style != IntegerStyle::Number) {
       for (size_t index = len; index < minDigits; ++index) {
-         out << '0';
+         outStream << '0';
       }
    }
+
    if (style == IntegerStyle::Number) {
-      write_with_commas(out, std::vector<char>(std::end(numberBuffer) - len, std::end(numberBuffer)));
+      writeWithCommas(outStream, ArrayRef<char>(std::end(numberBuffer) - len, len));
    } else {
-      out.write(std::end(numberBuffer) - len, len);
+      outStream.write(std::end(numberBuffer) - len, len);
    }
 }
 
 template <typename T>
-void write_unsigned(std::ostream &out, T N, size_t minDigits,
+void write_unsigned(RawOutStream &outStream, T N, size_t minDigits,
                     IntegerStyle style, bool isNegative = false)
 {
    // Output using 32-bit div/mod if possible.
    if (N == static_cast<uint32_t>(N)) {
-      write_unsigned_impl(out, static_cast<uint32_t>(N), minDigits, style,
+      write_unsigned_impl(outStream, static_cast<uint32_t>(N), minDigits, style,
                           isNegative);
    } else {
-      write_unsigned_impl(out, N, minDigits, style, isNegative);
+      write_unsigned_impl(outStream, N, minDigits, style, isNegative);
    }
 }
 
 template <typename T>
-void write_signed(std::ostream &out, T N, size_t minDigits,
+void write_signed(RawOutStream &outStream, T N, size_t minDigits,
                   IntegerStyle style)
 {
    static_assert(std::is_signed<T>::value, "Value is not signed!");
-   using UnsignedT = typename std::make_unsigned<T>::type;
+   using UnsignedType = typename std::make_unsigned<T>::type;
    if (N >= 0) {
-      write_unsigned(out, static_cast<UnsignedT>(N), minDigits, style);
+      write_unsigned(outStream, static_cast<UnsignedType>(N), minDigits, style);
       return;
    }
-
-   UnsignedT unsignedValue = -(UnsignedT)N;
-   write_unsigned(out, unsignedValue, minDigits, style, true);
+   UnsignedType UN = -(UnsignedType)N;
+   write_unsigned(outStream, UN, minDigits, style, true);
 }
+
 } // anonymous namespace
 
-void write_integer(std::ostream &out, unsigned int N, size_t minDigits,
+void write_integer(RawOutStream &outStream, unsigned int N, size_t minDigits,
                    IntegerStyle style)
 {
-   write_unsigned(out, N, minDigits, style);
+   write_unsigned(outStream, N, minDigits, style);
 }
 
-void write_integer(std::ostream &out, int N, size_t minDigits,
+void write_integer(RawOutStream &outStream, int N, size_t minDigits,
                    IntegerStyle style)
 {
-   write_signed(out, N, minDigits, style);
+   write_signed(outStream, N, minDigits, style);
 }
 
-void write_integer(std::ostream &out, unsigned long N, size_t minDigits,
+void write_integer(RawOutStream &outStream, unsigned long N, size_t minDigits,
                    IntegerStyle style)
 {
-   write_unsigned(out, N, minDigits, style);
+   write_unsigned(outStream, N, minDigits, style);
 }
 
-void write_integer(std::ostream &out, long N, size_t minDigits,
+void write_integer(RawOutStream &outStream, long N, size_t minDigits,
                    IntegerStyle style)
 {
-   write_signed(out, N, minDigits, style);
+   write_signed(outStream, N, minDigits, style);
 }
 
-void write_integer(std::ostream &out, unsigned long long N, size_t minDigits,
+void write_integer(RawOutStream &outStream, unsigned long long N, size_t minDigits,
                    IntegerStyle style)
 {
-   write_unsigned(out, N, minDigits, style);
+   write_unsigned(outStream, N, minDigits, style);
 }
 
-void write_integer(std::ostream &out, long long N, size_t minDigits,
+void write_integer(RawOutStream &outStream, long long N, size_t minDigits,
                    IntegerStyle style)
 {
-   write_signed(out, N, minDigits, style);
+   write_signed(outStream, N, minDigits, style);
 }
 
-void write_hex(std::ostream &out, uint64_t N, HexPrintStyle style,
-               std::optional<std::size_t> width)
+void write_hex(RawOutStream &outStream, uint64_t N, HexPrintStyle style,
+               std::optional<size_t> width)
 {
    const size_t kMaxWidth = 128u;
 
@@ -162,7 +164,7 @@ void write_hex(std::ostream &out, uint64_t N, HexPrintStyle style,
          std::max(static_cast<unsigned>(w), std::max(1u, nibbles) + prefixChars);
 
    char numberBuffer[kMaxWidth];
-   ::memset(numberBuffer, '0', polar::basic::array_lengthof(numberBuffer));
+   ::memset(numberBuffer, '0', basic::array_lengthof(numberBuffer));
    if (prefix) {
       numberBuffer[1] = 'x';
    }
@@ -170,22 +172,22 @@ void write_hex(std::ostream &out, uint64_t N, HexPrintStyle style,
    char *curPtr = endPtr;
    while (N) {
       unsigned char x = static_cast<unsigned char>(N) % 16;
-      *--curPtr = polar::basic::hexdigit(x, !upper);
+      *--curPtr = basic::hexdigit(x, !upper);
       N /= 16;
    }
-   out.write(numberBuffer, numChars);
+   outStream.write(numberBuffer, numChars);
 }
 
-void write_double(std::ostream &out, double N, FloatStyle style,
+void write_double(RawOutStream &outStream, double N, FloatStyle style,
                   std::optional<size_t> precision)
 {
    size_t prec = precision.value_or(get_default_precision(style));
 
    if (std::isnan(N)) {
-      out << "nan";
+      outStream << "nan";
       return;
    } else if (std::isinf(N)) {
-      out << "INF";
+      outStream << "INF";
       return;
    }
 
@@ -197,9 +199,10 @@ void write_double(std::ostream &out, double N, FloatStyle style,
    } else {
       letter = 'f';
    }
-   std::string spec;
-   std::ostringstream sout(spec);
-   sout << "%." << prec << letter;
+
+   SmallString<8> spec;
+   RawSvectorOutStream out(spec);
+   out << "%." << prec << letter;
 
    if (style == FloatStyle::Exponent || style == FloatStyle::ExponentUpper) {
 #ifdef _WIN32
@@ -210,10 +213,9 @@ void write_double(std::ostream &out, double N, FloatStyle style,
       // FIXME: It should be generic to C++11.
       if (N == 0.0 && std::signbit(N)) {
          char negativeZero[] = "-0.000000e+00";
-         if (style == FloatStyle::ExponentUpper) {
-             negativeZero[strlen(negativeZero) - 4] = 'E';
-         }
-         out << negativeZero;
+         if (Style == FloatStyle::ExponentUpper)
+            negativeZero[strlen(negativeZero) - 4] = 'E';
+         S << negativeZero;
          return;
       }
 #else
@@ -222,10 +224,9 @@ void write_double(std::ostream &out, double N, FloatStyle style,
       // negative zero
       if (fpcl == _FPCLASS_NZ) {
          char negativeZero[] = "-0.000000e+00";
-         if (style == FloatStyle::ExponentUpper) {
+         if (Style == FloatStyle::ExponentUpper)
             negativeZero[strlen(negativeZero) - 4] = 'E';
-         }
-         out << negativeZero;
+         S << negativeZero;
          return;
       }
 #endif
@@ -249,7 +250,7 @@ void write_double(std::ostream &out, double N, FloatStyle style,
                }
             }
          }
-         out << buf;
+         outStream << buf;
          return;
       }
 #endif
@@ -258,17 +259,18 @@ void write_double(std::ostream &out, double N, FloatStyle style,
    if (style == FloatStyle::Percent) {
       N *= 100.0;
    }
+
    char buf[32];
-   format(spec.c_str(), N).snprint(buf, sizeof(buf));
-   out << buf;
+   format(spec.getCStr(), N).snprint(buf, sizeof(buf));
+   outStream << buf;
    if (style == FloatStyle::Percent) {
-      out << '%';
+      outStream << '%';
    }
 }
 
-bool is_prefixed_hex_style(HexPrintStyle out)
+bool is_prefixed_hex_style(HexPrintStyle style)
 {
-   return (out == HexPrintStyle::PrefixLower || out == HexPrintStyle::PrefixUpper);
+   return (style == HexPrintStyle::PrefixLower || style == HexPrintStyle::PrefixUpper);
 }
 
 size_t get_default_precision(FloatStyle style)

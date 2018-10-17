@@ -7,47 +7,62 @@
 // See http://polarphp.org/LICENSE.txt for license information
 // See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2018/10/11.
+// Created by softboy on 2018/06/03.
 
-#ifndef POLARPHP_UTILS_NATIVE_FORMATTING_H
-#define POLARPHP_UTILS_NATIVE_FORMATTING_H
+#ifndef POLARPHP_SUPPORT_NATIVE_FORMATTING_H
+#define POLARPHP_SUPPORT_NATIVE_FORMATTING_H
 
-#include <optional>
-#include <ostream>
+#include "polarphp/utils/RawOutStream.h"
 #include <cstdint>
+#include <optional>
 
 namespace polar {
 namespace utils {
 
-enum class FloatStyle { Exponent, ExponentUpper, Fixed, Percent };
-enum class IntegerStyle {
+enum class FloatStyle
+{
+   Exponent,
+   ExponentUpper,
+   Fixed,
+   Percent
+};
+
+enum class IntegerStyle
+{
    Integer,
    Number,
 };
-enum class HexPrintStyle { Upper, Lower, PrefixUpper, PrefixLower };
+
+enum class HexPrintStyle
+{
+   Upper,
+   Lower,
+   PrefixUpper,
+   PrefixLower
+};
 
 size_t get_default_precision(FloatStyle style);
 
 bool is_prefixed_hex_style(HexPrintStyle style);
 
-void write_integer(std::ostream &out, unsigned int value, size_t minDigits,
+void write_integer(RawOutStream &outStream, unsigned int size, size_t minDigits,
                    IntegerStyle style);
-void write_integer(std::ostream &out, int value, size_t minDigits, IntegerStyle style);
-void write_integer(std::ostream &out, unsigned long value, size_t minDigits,
+void write_integer(RawOutStream &outStream, int size, size_t minDigits, IntegerStyle Style);
+void write_integer(RawOutStream &outStream, unsigned long size, size_t minDigits,
                    IntegerStyle style);
-void write_integer(std::ostream &out, long value, size_t minDigits,
+void write_integer(RawOutStream &outStream, long size, size_t minDigits,
                    IntegerStyle style);
-void write_integer(std::ostream &out, unsigned long long value, size_t minDigits,
+void write_integer(RawOutStream &outStream, unsigned long long size, size_t minDigits,
                    IntegerStyle style);
-void write_integer(std::ostream &out, long long value, size_t minDigits,
+void write_integer(RawOutStream &outStream, long long size, size_t minDigits,
                    IntegerStyle style);
 
-void write_hex(std::ostream &out, uint64_t value, HexPrintStyle style,
+void write_hex(RawOutStream &outStream, uint64_t size, HexPrintStyle style,
                std::optional<size_t> width = std::nullopt);
-void write_double(std::ostream &out, double value, FloatStyle style,
+void write_double(RawOutStream &outStream, double D, FloatStyle style,
                   std::optional<size_t> precision = std::nullopt);
 
 } // utils
 } // polar
 
-#endif // POLARPHP_UTILS_NATIVE_FORMATTING_H
+#endif // POLARPHP_SUPPORT_NATIVE_FORMATTING_H

@@ -226,7 +226,7 @@ public:
       }
       // Reset the state.
       m_bytesAllocated = 0;
-      m_curPtr = (char *)m_slabs.front();
+      m_curPtr = (char *)m_slabs.getFront();
       m_end = m_curPtr + SlabSize;
 
       __asan_poison_memory_region(*m_slabs.begin(), computeSlabSize(0));
@@ -470,7 +470,7 @@ public:
          size_t allocatedSlabSize = BumpPtrAllocator::computeSlabSize(
                   std::distance(m_allocator.m_slabs.begin(), iter));
          char *begin = (char *)align_addr(*iter, alignof(T));
-         char *end = *iter == m_allocator.m_slabs.back() ? m_allocator.m_curPtr
+         char *end = *iter == m_allocator.m_slabs.getBack() ? m_allocator.m_curPtr
                                                          : (char *)*iter + allocatedSlabSize;
 
          destroyElements(begin, end);
@@ -511,7 +511,7 @@ void *operator new(size_t size,
       } x;
    };
    return allocator.allocate(
-            size, std::min((size_t)polar::utils::next_power_of2(size), offsetof(S, x)));
+            size, std::min((size_t)polar::utils::next_power_of_two(size), offsetof(S, x)));
 }
 
 template <typename AllocatorType, size_t SlabSize, size_t SizeThreshold>

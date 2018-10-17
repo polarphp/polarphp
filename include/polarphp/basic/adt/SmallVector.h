@@ -18,6 +18,7 @@
 #include "polarphp/utils/TypeTraits.h"
 #include "polarphp/utils/ErrorHandling.h"
 #include "polarphp/utils/MemoryAlloc.h"
+#include "polarphp/global/CompilerDetection.h"
 
 #include <algorithm>
 #include <cassert>
@@ -87,7 +88,7 @@ public:
 };
 
 /// Figure out the offset of the first element.
-template <class T, typename = void>
+template <typename T, typename = void>
 struct SmallVectorAlignmentAndSize
 {
    polar::utils::AlignedCharArrayUnion<SmallVectorBase> m_base;
@@ -239,12 +240,12 @@ public:
       return begin()[idx];
    }
 
-   reference GetFront() {
+   reference getFront() {
       assert(!empty());
       return begin()[0];
    }
 
-   const_reference GetFront() const
+   const_reference getFront() const
    {
       assert(!empty());
       return begin()[0];
@@ -305,11 +306,11 @@ public:
 
    void pushBack(const T &element)
    {
-      if (POLAR_UNLIKELY(this->m_endX >= this->m_capacityX)) {
+      if (POLAR_UNLIKELY(this->getSize() >= this->getCapacity())) {
          this->grow();
       }
       ::new ((void*) this->end()) T(element);
-      this->setEnd(this->end() + 1);
+      this->setSize(this->getSize() + 1);
    }
 
    inline void push_back(const T &element)
@@ -319,11 +320,11 @@ public:
 
    void pushBack(T &&element)
    {
-      if (POLAR_UNLIKELY(this->m_endX >= this->m_capacityX)) {
+      if (POLAR_UNLIKELY(this->getSize() >= this->getCapacity())) {
          this->grow();
       }
       ::new ((void*) this->end()) T(::std::move(element));
-      this->setEnd(this->end() + 1);
+      this->setSize(this->getSize() + 1);
    }
 
    inline void push_back(T &&element)
@@ -333,7 +334,7 @@ public:
 
    void popBack()
    {
-      this->setEnd(this->end() - 1);
+      this->setSize(this->getSize() - 1);
       this->end()->~T();
    }
 
@@ -351,7 +352,7 @@ void SmallVectorTemplateBase<T, IsPodLike>::grow(size_t minSize)
       utils::report_bad_alloc_error("SmallVector capacity overflow during allocation");
    }
    // Always grow, even from zero.
-   size_t newCapacity = size_t(polar::utils::next_power_of2(this->getCapacity() + 2));
+   size_t newCapacity = size_t(polar::utils::next_power_of_two(this->getCapacity() + 2));
    newCapacity = std::min(std::max(newCapacity, minSize), size_t(UINT32_MAX));
    T *newElts = static_cast<T*>(polar::utils::safe_malloc(newCapacity*sizeof(T)));
 
@@ -432,7 +433,7 @@ public:
          this->grow();
       }
       memcpy(this->end(), &element, sizeof(T));
-      this->setSize(this->end() + 1);
+      this->setSize(this->getSize() + 1);
    }
 
    inline void push_back(const T &element)
@@ -650,10 +651,10 @@ public:
          iter = this->begin() + eltNo;
       }
 
-      ::new ((void*) this->end()) T(::std::move(this->back()));
+      ::new ((void*) this->end()) T(::std::move(this->getBack()));
       // Push everything else over.
       std::move_backward(iter, this->end() - 1, this->end());
-      this->setEnd(this->end() + 1);
+      this->setSize(this->getSize() + 1);
 
       // If we just moved the element we're inserting, be sure to update
       // the reference.
@@ -683,7 +684,7 @@ public:
       ::new ((void*) this->end()) T(std::move(this->back()));
       // Push everything else over.
       std::move_backward(iter, this->end() - 1, this->end());
-      this->setEnd(this->end() + 1);
+      this->setSize(this->getSize() + 1);
 
       // If we just moved the element we're inserting, be sure to update
       // the reference.
@@ -735,7 +736,7 @@ public:
 
       // Move over the elements that we're about to overwrite.
       T *oldEnd = this->end();
-      this->setEnd(this->end() + numToInsert);
+      this->setSize(this->getSize() + numToInsert);
       size_t numOverwritten = oldEnd - iter;
       this->uninitializedMove(iter, oldEnd, this->end() - numOverwritten);
 
@@ -793,7 +794,7 @@ public:
 
       // Move over the elements that we're about to overwrite.
       T *oldEnd = this->end();
-      this->setEnd(this->end() + numToInsert);
+      this->setSize(this->getSize() + numToInsert);
       size_t numOverwritten = oldEnd - iter;
       this->uninitializedMove(iter, oldEnd, this->end() - numOverwritten);
 
@@ -865,7 +866,7 @@ public:
    void setSize(size_type size)
    {
       assert(size <= this->getCapacity());
-      this->setEnd(this->begin() + size);
+      this->m_size = size;
    }
 };
 

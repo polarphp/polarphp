@@ -12,6 +12,7 @@
 #include "polarphp/utils/Error.h"
 #include "polarphp/utils/ErrorHandling.h"
 #include "polarphp/utils/ManagedStatics.h"
+#include "polarphp/basic/adt/Twine.h"
 #include "AbiBreaking.h"
 #include <system_error>
 
@@ -60,7 +61,7 @@ char ErrorInfoBase::sm_id = 0;
 char ErrorList::sm_id = 0;
 char EcError::sm_id = 0;
 char StringError::sm_id = 0;
-void log_all_unhandled_errors(Error error, std::ostream &out, const std::string &errorBanner)
+void log_all_unhandled_errors(Error error, RawOutStream &out, const std::string &errorBanner)
 {
    if (!error) {
       return;
@@ -88,7 +89,7 @@ std::error_code inconvertibleErrorCode()
 Error error_code_to_error(std::error_code errorCode)
 {
    if (!errorCode) {
-      return Error::success();
+      return Error::getSuccess();
    }
    return Error(std::make_unique<EcError>(EcError(errorCode)));
 }
@@ -119,7 +120,7 @@ void Error::fatalUncheckedError() const
 }
 #endif
 
-StringError::StringError(const std::string &str, std::error_code errorCode)
+StringError::StringError(const Twine &str, std::error_code errorCode)
    : m_msg(str),
      m_errorCode(errorCode)
 {}

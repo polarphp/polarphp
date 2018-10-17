@@ -16,6 +16,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "polarphp/global/Global.h"
 #include "polarphp/basic/adt/ApFloat.h"
 #include "polarphp/basic/adt/ApSInt.h"
 #include "polarphp/basic/adt/ArrayRef.h"
@@ -34,7 +35,7 @@ namespace polar {
 namespace basic {
 
 using polar::utils::next_power_of_two;
-using polar::utils::debug_stream;
+using polar::debug_stream;
 
 #define ApFloat_DISPATCH_ON_SEMANTICS(METHOD_CALL)                             \
    do {                                                                         \

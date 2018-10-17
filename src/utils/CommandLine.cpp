@@ -74,7 +74,7 @@ using polar::basic::SmallPtrSetImpl;
 using polar::basic::array_pod_sort;
 
 using polar::utils::error_stream;
-using polar::utils::debug_stream;
+using polar::debug_stream;
 using polar::utils::out_stream;
 using polar::utils::report_fatal_error;
 using polar::utils::has_utf16_byte_order_mark;
@@ -2281,7 +2281,7 @@ public:
 #ifdef POLAR_PACKAGE_VENDOR
       outstream << PACKAGE_VENDOR << " ";
 #else
-      outstream << "polarVM (http://polarphp.org/):\n  ";
+      outstream << "polarphp (http://polarphp.org/):\n  ";
 #endif
       outstream << POLAR_PACKAGE_NAME << " version " << POLAR_VERSION_STRING;
 #ifdef POLAR_VERSION_STRING

@@ -7,48 +7,55 @@
 // See http://polarphp.org/LICENSE.txt for license information
 // See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2018/10/11.
+// Created by softboy on 2018/06/03.
 
 #ifndef POLARPHP_UTILS_FORMAT_VARIADIC_H
 #define POLARPHP_UTILS_FORMAT_VARIADIC_H
 
-#include "polarphp/utils/StlExtras.h"
+#include "polarphp/basic/adt/StlExtras.h"
+#include "polarphp/basic/adt/SmallString.h"
+#include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/utils/FormatCommon.h"
-#include "polarphp/utils/FormatVariadicDetail.h"
 #include "polarphp/utils/FormatProviders.h"
-
-#include <optional>
-#include <ostream>
-#include <sstream>
+#include "polarphp/utils/FormatVariadicDetail.h"
+#include "polarphp/utils/RawOutStream.h"
 #include <cstddef>
 #include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
+#include <optional>
 
 namespace polar {
 namespace utils {
 
-enum class ReplacementType { Empty, Format, Literal };
+enum class ReplacementType
+{
+   Empty,
+   Format,
+   Literal
+};
 
 struct ReplacementItem
 {
    ReplacementItem() = default;
-   explicit ReplacementItem(std::string_view literal)
-      : m_type(ReplacementType::Literal), m_spec(literal) {}
-   ReplacementItem(std::string_view spec, size_t index, size_t align, AlignStyle where,
-                   char pad, std::string_view options)
-      : m_type(ReplacementType::Format), m_spec(spec), m_index(index), m_Align(align),
-        m_where(where), m_pad(pad), m_options(m_options)
+   explicit ReplacementItem(StringRef literal)
+      : m_type(ReplacementType::Literal), m_spec(literal)
+   {}
+
+   ReplacementItem(StringRef spec, size_t index, size_t align, AlignStyle where,
+                   char pad, StringRef options)
+      : m_type(ReplacementType::Format), m_spec(spec), m_index(index), m_align(align),
+        m_where(where), m_pad(pad), m_options(options)
    {}
 
    ReplacementType m_type = ReplacementType::Empty;
-   std::string_view m_spec;
+   StringRef m_spec;
    size_t m_index = 0;
    size_t m_align = 0;
    AlignStyle m_where = AlignStyle::Right;
    char m_pad;
-   std::string_view m_options;
+   StringRef m_options;
 };
 
 class FormatvObjectBase
@@ -61,7 +68,7 @@ protected:
    // parameters in a template class that derives from a non-template superclass.
    // Essentially, we are converting a std::tuple<Derived<Ts...>> to a
    // std::vector<Base*>.
-   struct CreateAdapters {
+   struct create_adapters {
       template <typename... Ts>
       std::vector<internal::FormatAdapterImpl *> operator()(Ts &... items)
       {
@@ -69,19 +76,19 @@ protected:
       }
    };
 
-   std::string_view m_format;
+   StringRef m_fmt;
    std::vector<internal::FormatAdapterImpl *> m_adapters;
    std::vector<ReplacementItem> m_replacements;
 
-   static bool consumeFieldLayout(std::string_view &spec, AlignStyle &where,
+   static bool consumeFieldLayout(StringRef &spec, AlignStyle &where,
                                   size_t &align, char &pad);
 
-   static std::pair<ReplacementItem, std::string_view>
-   splitLiteralAndReplacement(std::string_view fmt);
+   static std::pair<ReplacementItem, StringRef>
+   splitLiteralAndReplacement(StringRef fmt);
 
 public:
-   FormatvObjectBase(std::string_view fmt, std::size_t paramCount)
-      : m_format(fmt), m_replacements(parseFormatString(fmt))
+   FormatvObjectBase(StringRef fmt, std::size_t paramCount)
+      : m_fmt(fmt), m_replacements(parseFormatString(fmt))
    {
       m_adapters.reserve(paramCount);
    }
@@ -89,45 +96,60 @@ public:
    FormatvObjectBase(FormatvObjectBase const &rhs) = delete;
 
    FormatvObjectBase(FormatvObjectBase &&rhs)
-      : m_format(std::move(rhs.m_format)),
-        m_adapters(), // Adapters are initialized by FormatvObject
+      : m_fmt(std::move(rhs.m_fmt)),
+        m_adapters(), // m_adapters are initialized by FormatvObject
         m_replacements(std::move(rhs.m_replacements))
    {
       m_adapters.reserve(rhs.m_adapters.size());
    }
 
-   void format(std::ostream &out) const
+   void format(RawOutStream &outStream) const
    {
       for (auto &replacement : m_replacements) {
          if (replacement.m_type == ReplacementType::Empty)
             continue;
          if (replacement.m_type == ReplacementType::Literal) {
-            out << replacement.m_spec;
+            outStream << replacement.m_spec;
             continue;
          }
          if (replacement.m_index >= m_adapters.size()) {
-            out << replacement.m_spec;
+            outStream << replacement.m_spec;
             continue;
          }
 
          auto w = m_adapters[replacement.m_index];
 
-         FmtAlign align(*w, replacement.m_where, replacement.m_align, replacement.m_pad);
-         align.format(out, replacement.m_options);
+         FmtAlign align(*w, replacement.m_where, replacement.m_align);
+         align.format(outStream, replacement.m_options);
       }
    }
 
-   static std::vector<ReplacementItem> parseFormatString(std::string_view fmt);
-   static std::optional<ReplacementItem> parseReplacementItem(std::string_view spec);
+   static std::vector<ReplacementItem> parseFormatString(StringRef fmt);
+
+   static std::optional<ReplacementItem> parseReplacementItem(StringRef spec);
 
    std::string getStr() const
    {
       std::string result;
-      std::ostringstream stream(result);
+      RawStringOutStream stream(result);
       stream << *this;
       stream.flush();
       return result;
    }
+
+   template <unsigned N> SmallString<N> getSmallStr() const
+   {
+      SmallString<N> result;
+      RawSvectorOutStream stream(result);
+      stream << *this;
+      return result;
+   }
+
+   template <unsigned N> operator SmallString<N>() const
+   {
+      return getSmallStr<N>();
+   }
+
    operator std::string() const
    {
       return getStr();
@@ -143,11 +165,11 @@ class FormatvObject : public FormatvObjectBase
    Tuple m_parameters;
 
 public:
-   FormatvObject(std::string_view fmt, Tuple &&params)
+   FormatvObject(StringRef fmt, Tuple &&params)
       : FormatvObjectBase(fmt, std::tuple_size<Tuple>::value),
         m_parameters(std::move(params))
    {
-      m_adapters = std::apply(CreateAdapters(), m_parameters);
+      m_adapters = polar::basic::apply_tuple(create_adapters(), m_parameters);
    }
 
    FormatvObject(FormatvObject const &rhs) = delete;
@@ -156,11 +178,11 @@ public:
       : FormatvObjectBase(std::move(rhs)),
         m_parameters(std::move(rhs.m_parameters))
    {
-      m_adapters = apply_tuple(CreateAdapters(), m_parameters);
+      m_adapters = polar::basic::apply_tuple(create_adapters(), m_parameters);
    }
 };
 
-// Format text given a format string and replacement parameters.
+// \brief Format text given a format string and replacement parameters.
 //
 // ===General Description===
 //
@@ -225,12 +247,10 @@ public:
 //   1. If the parameter is of class type, and inherits from format_adapter,
 //      Then format() is invoked on it to produce the formatted output.  The
 //      implementation should write the formatted text into `Stream`.
-//   2. If there is a suitable template specialization of format_provider<>
+//   2. If there is a suitable template specialization of FormatProvider<>
 //      for type T containing a method whose signature is:
-//      void format(const T &Obj, raw_ostream &Stream, StringRef Options)
+//      void format(const T &Obj, RawOutStream &Stream, StringRef Options)
 //      Then this method is invoked as described in Step 1.
-//   3. If an appropriate operator<< for raw_ostream exists, it will be used.
-//      For this to work, (raw_ostream& << const T&) must return raw_ostream&.
 //
 // If a match cannot be found through either of the above methods, a compiler
 // error is generated.
@@ -244,14 +264,23 @@ public:
 //
 template <typename... Ts>
 inline auto formatv(const char *fmt, Ts &&... values) -> FormatvObject<decltype(
-      std::make_tuple(internal::BuildFormatAdapter(std::forward<Ts>(values))...))>
+      std::make_tuple(internal::build_format_adapter(std::forward<Ts>(values))...))>
 {
    using ParamTuple = decltype(
-   std::make_tuple(internal::BuildFormatAdapter(std::forward<Ts>(values))...));
+   std::make_tuple(internal::build_format_adapter(std::forward<Ts>(values))...));
    return FormatvObject<ParamTuple>(
             fmt,
-            std::make_tuple(internal::BuildFormatAdapter(std::forward<Ts>(values))...));
+            std::make_tuple(internal::build_format_adapter(std::forward<Ts>(values))...));
 }
+
+// Allow a FormatvObject to be formatted (no options supported).
+template <typename T> struct FormatProvider<FormatvObject<T>>
+{
+   static void format(const FormatvObject<T> &value, RawOutStream &outStream, StringRef)
+   {
+      outStream << value;
+   }
+};
 
 } // utils
 } // polar

@@ -18,7 +18,7 @@ namespace intervalmapimpl {
 void Path::replaceRoot(void *root, unsigned size, IdxPair offsets)
 {
    assert(!m_path.empty() && "Can't replace missing root");
-   m_path.front() = Entry(root, size, offsets.first);
+   m_path.getFront() = Entry(root, size, offsets.first);
    m_path.insert(m_path.begin() + 1, Entry(subtree(0), offsets.second));
 }
 

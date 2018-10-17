@@ -1303,21 +1303,21 @@
    } while (0)
 
 #if POLAR_HAS_CPP_ATTRIBUTE(fallthrough)
-#   define POLAR_FALLTHROUGH() [[fallthrough]]
+#   define POLAR_FALLTHROUGH [[fallthrough]]
 #elif defined(__cplusplus)
 /* Clang can not parse namespaced attributes in C mode, but defines __has_cpp_attribute */
 #   if POLAR_HAS_CPP_ATTRIBUTE(clang::fallthrough)
-#      define POLAR_FALLTHROUGH() [[clang::fallthrough]]
+#      define POLAR_FALLTHROUGH [[clang::fallthrough]]
 #   elif POLAR_HAS_CPP_ATTRIBUTE(gnu::fallthrough)
-#      define POLAR_FALLTHROUGH() [[gnu::fallthrough]]
+#      define POLAR_FALLTHROUGH [[gnu::fallthrough]]
 #   endif
 #endif
 
 #ifndef POLAR_FALLTHROUGH
 #   if defined(POLAR_CC_GNU) && POLAR_CC_GNU >= 700
-#      define POLAR_FALLTHROUGH() __attribute__((fallthrough))
+#      define POLAR_FALLTHROUGH __attribute__((fallthrough))
 #   else
-#      define POLAR_FALLTHROUGH() (void)0
+#      define POLAR_FALLTHROUGH (void)0
 #   endif
 #endif
 

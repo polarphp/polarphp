@@ -933,28 +933,28 @@ public:
    template <typename NodeType>
    NodeType &getLeaf() const
    {
-      return *reinterpret_cast<NodeType*>(m_path.back().m_node);
+      return *reinterpret_cast<NodeType*>(m_path.getBack().m_node);
    }
 
    unsigned getLeafSize() const
    {
-      return m_path.back().m_size;
+      return m_path.getBack().m_size;
    }
 
    unsigned getLeafOffset() const
    {
-      return m_path.back().m_offset;
+      return m_path.getBack().m_offset;
    }
 
    unsigned &getLeafOffset()
    {
-      return m_path.back().m_offset;
+      return m_path.getBack().m_offset;
    }
 
    /// valid - Return true if path is at a valid node, not at end().
    bool valid() const
    {
-      return !m_path.empty() && m_path.front().m_offset < m_path.front().m_size;
+      return !m_path.empty() && m_path.getFront().m_offset < m_path.getFront().m_size;
    }
 
    /// height - Return the height of the tree corresponding to this m_path.

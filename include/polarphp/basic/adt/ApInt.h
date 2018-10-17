@@ -37,10 +37,10 @@ using polar::utils::count_trailing_ones;
 using polar::utils::count_trailing_zeros;
 using polar::utils::RawOutStream;
 using polar::utils::count_population;
-using polar::utils::is_power_of_two_64;
-using polar::utils::is_mask;
-using polar::utils::is_shifted_mask;
-using polar::utils::sign_extend;
+using polar::utils::is_power_of_two64;
+using polar::utils::is_mask64;
+using polar::utils::is_shifted_mask64;
+using polar::utils::sign_extend64;
 using polar::utils::bits_to_double;
 using polar::utils::double_to_bits;
 using polar::utils::float_to_bits;
@@ -529,7 +529,7 @@ public:
    bool isPowerOf2() const
    {
       if (isSingleWord()) {
-         return is_power_of_two_64(m_intValue.m_value);
+         return is_power_of_two64(m_intValue.m_value);
       }
       return countPopulationSlowCase() == 1;
    }
@@ -584,7 +584,7 @@ public:
    bool isMask() const
    {
       if (isSingleWord()) {
-         return is_mask(m_intValue.m_value);
+         return is_mask64(m_intValue.m_value);
       }
       unsigned ones = countTrailingOnesSlowCase();
       return (ones > 0) && ((ones + countLeadingZerosSlowCase()) == m_bitWidth);
@@ -595,7 +595,7 @@ public:
    bool isShiftedMask() const
    {
       if (isSingleWord()) {
-         return is_shifted_mask(m_intValue.m_value);
+         return is_shifted_mask64(m_intValue.m_value);
       }
       unsigned ones = countPopulationSlowCase();
       unsigned leadZ = countLeadingZerosSlowCase();
@@ -1070,7 +1070,7 @@ public:
    {
       assert(shiftAmt <= m_bitWidth && "Invalid shift amount");
       if (isSingleWord()) {
-         int64_t SignExtVAL = polar::utils::sign_extend(m_intValue.m_value, m_bitWidth);
+         int64_t SignExtVAL = polar::utils::sign_extend64(m_intValue.m_value, m_bitWidth);
          if (shiftAmt == m_bitWidth) {
             m_intValue.m_value = SignExtVAL >> (APINT_BITS_PER_WORD - 1); // Fill with sign bit.
          } else {
@@ -1783,7 +1783,7 @@ public:
    int64_t getSignExtValue() const
    {
       if (isSingleWord()) {
-         return sign_extend(m_intValue.m_value, m_bitWidth);
+         return sign_extend64(m_intValue.m_value, m_bitWidth);
       }
       assert(getMinSignedBits() <= 64 && "Too many bits for int64_t");
       return int64_t(m_intValue.m_pValue[0]);

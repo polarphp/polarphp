@@ -939,7 +939,7 @@ class SmallDenseMap
    // simplicity of referring to them.
    using BaseType = DenseMapBase<SmallDenseMap, KeyType, ValueType, KeyInfoType, BucketType>;
 
-   static_assert(polar::utils::is_power_of_two_64(inlineBuckets),
+   static_assert(polar::utils::is_power_of_two64(inlineBuckets),
                  "InlineBuckets must be a power of 2.");
 
    unsigned m_small : 1;

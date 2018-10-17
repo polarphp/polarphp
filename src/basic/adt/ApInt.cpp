@@ -29,15 +29,15 @@ namespace polar {
 namespace basic {
 
 #define DEBUG_TYPE "ApInt"
-using polar::utils::byte_swap_16;
-using polar::utils::byte_swap_32;
-using polar::utils::byte_swap_64;
+using polar::utils::byte_swap16;
+using polar::utils::byte_swap32;
+using polar::utils::byte_swap64;
 using polar::utils::reverse_bits;
-using polar::utils::sign_extend;
-using polar::utils::debug_stream;
-using polar::utils::low_32;
-using polar::utils::high_32;
-using polar::utils::make_64;
+using polar::utils::sign_extend64;
+using polar::debug_stream;
+using polar::utils::low32;
+using polar::utils::high32;
+using polar::utils::make64;
 using polar::utils::find_last_set;
 using polar::utils::find_first_set;
 using polar::utils::ZeroBehavior;
@@ -299,8 +299,8 @@ int ApInt::compareSigned(const ApInt& other) const
 {
    assert(m_bitWidth == other.m_bitWidth && "Bit widths must be same for comparison");
    if (isSingleWord()) {
-      int64_t lhsSext = sign_extend(m_intValue.m_value, m_bitWidth);
-      int64_t rhsSext = sign_extend(other.m_intValue.m_value, m_bitWidth);
+      int64_t lhsSext = sign_extend64(m_intValue.m_value, m_bitWidth);
+      int64_t rhsSext = sign_extend64(other.m_intValue.m_value, m_bitWidth);
       return lhsSext < rhsSext ? -1 : lhsSext > rhsSext;
    }
    bool lhsNeg = isNegative();
@@ -622,24 +622,24 @@ ApInt ApInt::byteSwap() const
 {
    assert(m_bitWidth >= 16 && m_bitWidth % 16 == 0 && "Cannot byteswap!");
    if (m_bitWidth == 16) {
-      return ApInt(m_bitWidth, byte_swap_16(uint16_t(m_intValue.m_value)));
+      return ApInt(m_bitWidth, byte_swap16(uint16_t(m_intValue.m_value)));
    }
    if (m_bitWidth == 32) {
-      return ApInt(m_bitWidth, byte_swap_32(unsigned(m_intValue.m_value)));
+      return ApInt(m_bitWidth, byte_swap32(unsigned(m_intValue.m_value)));
    }
    if (m_bitWidth == 48) {
       unsigned temp1 = unsigned(m_intValue.m_value >> 16);
-      temp1 = byte_swap_32(temp1);
+      temp1 = byte_swap32(temp1);
       uint16_t temp2 = uint16_t(m_intValue.m_value);
-      temp2 = byte_swap_16(temp2);
+      temp2 = byte_swap16(temp2);
       return ApInt(m_bitWidth, (uint64_t(temp2) << 32) | temp1);
    }
    if (m_bitWidth == 64) {
-      return ApInt(m_bitWidth, byte_swap_64(m_intValue.m_value));
+      return ApInt(m_bitWidth, byte_swap64(m_intValue.m_value));
    }
    ApInt result(getNumWords() * APINT_BITS_PER_WORD, 0);
    for (unsigned index = 0, num = getNumWords(); index != num; ++index) {
-      result.m_intValue.m_pValue[index] = byte_swap_64(m_intValue.m_pValue[num - index - 1]);
+      result.m_intValue.m_pValue[index] = byte_swap64(m_intValue.m_pValue[num - index - 1]);
    }
    if (result.m_bitWidth != m_bitWidth) {
       result.lshrInPlace(result.m_bitWidth - m_bitWidth);
@@ -761,7 +761,7 @@ double ApInt::roundToDouble(bool isSigned) const
    // It is wrong to optimize getWord(0) to VAL; there might be more than one word.
    if (isSingleWord() || getActiveBits() <= APINT_BITS_PER_WORD) {
       if (isSigned) {
-         int64_t sext = sign_extend(getWord(0), m_bitWidth);
+         int64_t sext = sign_extend64(getWord(0), m_bitWidth);
          return double(sext);
       } else
          return double(getWord(0));
@@ -833,14 +833,14 @@ ApInt ApInt::sext(unsigned width) const
 {
    assert(width > m_bitWidth && "Invalid ApInt SignExtend request");
    if (width <= APINT_BITS_PER_WORD) {
-      return ApInt(width, sign_extend(m_intValue.m_value, m_bitWidth));
+      return ApInt(width, sign_extend64(m_intValue.m_value, m_bitWidth));
    }
    ApInt result(get_memory(getNumWords(width)), width);
    // Copy words.
    std::memcpy(result.m_intValue.m_pValue, getRawData(), getNumWords() * APINT_WORD_SIZE);
    // Sign extend the last word since there may be unused bits in the input.
    result.m_intValue.m_pValue[getNumWords() - 1] =
-         sign_extend(result.m_intValue.m_pValue[getNumWords() - 1],
+         sign_extend64(result.m_intValue.m_pValue[getNumWords() - 1],
          ((m_bitWidth - 1) % APINT_BITS_PER_WORD) + 1);
    // Fill with sign bits.
    std::memset(result.m_intValue.m_pValue + getNumWords(), isNegative() ? -1 : 0,
@@ -919,7 +919,7 @@ void ApInt::ashrSlowCase(unsigned shiftAmt)
    unsigned wordsToMove = getNumWords() - wordShift;
    if (wordsToMove != 0) {
       // Sign extend the last word to fill in the unused bits.
-      m_intValue.m_pValue[getNumWords() - 1] = sign_extend(
+      m_intValue.m_pValue[getNumWords() - 1] = sign_extend64(
                m_intValue.m_pValue[getNumWords() - 1], ((m_bitWidth - 1) % APINT_BITS_PER_WORD) + 1);
       // Fastpath for moving by whole words.
       if (bitShift == 0) {
@@ -933,7 +933,7 @@ void ApInt::ashrSlowCase(unsigned shiftAmt)
          m_intValue.m_pValue[wordsToMove - 1] = m_intValue.m_pValue[wordShift + wordsToMove - 1] >> bitShift;
          // Sign extend one more time.
          m_intValue.m_pValue[wordsToMove - 1] =
-               sign_extend(m_intValue.m_pValue[wordsToMove - 1], APINT_BITS_PER_WORD - bitShift);
+               sign_extend64(m_intValue.m_pValue[wordsToMove - 1], APINT_BITS_PER_WORD - bitShift);
       }
    }
    // Fill in the remainder based on the original sign.
@@ -1285,7 +1285,7 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       // on v[n-2] determines at high speed most of the cases in which the trial
       // value qp is one too large, and it eliminates all cases where qp is two
       // too large.
-      uint64_t dividend = make_64(u[j+n], u[j+n-1]);
+      uint64_t dividend = make64(u[j+n], u[j+n-1]);
       DEBUG(debug_stream() << "knuth_div: dividend == " << dividend << '\n');
       uint64_t qp = dividend / v[n-1];
       uint64_t rp = dividend % v[n-1];
@@ -1307,20 +1307,20 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       int64_t borrow = 0;
       for (unsigned i = 0; i < n; ++i) {
          uint64_t p = uint64_t(qp) * uint64_t(v[i]);
-         int64_t subres = int64_t(u[j+i]) - borrow - low_32(p);
-         u[j+i] = low_32(subres);
-         borrow = high_32(p) - high_32(subres);
+         int64_t subres = int64_t(u[j+i]) - borrow - low32(p);
+         u[j+i] = low32(subres);
+         borrow = high32(p) - high32(subres);
          DEBUG(dbgs() << "knuth_div: u[j+i] = " << u[j+i]
                << ", borrow = " << borrow << '\n');
       }
       bool isNeg = u[j+n] < borrow;
-      u[j+n] -= low_32(borrow);
+      u[j+n] -= low32(borrow);
       DEBUG(debug_stream() << "knuth_div: after subtraction:");
       DEBUG(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
       DEBUG(debug_stream() << '\n');
       // D5. [Test remainder.] Set q[j] = qp. If the result of step D4 was
       // negative, go to step D6; otherwise go on to step D7.
-      q[j] = low_32(qp);
+      q[j] = low32(qp);
       if (isNeg) {
          // D6. [Add back]. The probability that this step is necessary is very
          // small, on the order of only 2/b. Make sure that test data accounts for
@@ -1409,16 +1409,16 @@ void ApInt::divide(const WordType *lhs, unsigned lhsWords, const WordType *rhs,
    memset(U, 0, (m+n+1)*sizeof(uint32_t));
    for (unsigned i = 0; i < lhsWords; ++i) {
       uint64_t tmp = lhs[i];
-      U[i * 2] = low_32(tmp);
-      U[i * 2 + 1] = high_32(tmp);
+      U[i * 2] = low32(tmp);
+      U[i * 2 + 1] = high32(tmp);
    }
    U[m+n] = 0; // this extra word is for "spill" in the Knuth algorithm.
    // Initialize the divisor
    memset(V, 0, (n)*sizeof(uint32_t));
    for (unsigned i = 0; i < rhsWords; ++i) {
       uint64_t tmp = rhs[i];
-      V[i * 2] = low_32(tmp);
-      V[i * 2 + 1] = high_32(tmp);
+      V[i * 2] = low32(tmp);
+      V[i * 2 + 1] = high32(tmp);
    }
    // initialize the quotient and remainder
    memset(Q, 0, (m+n) * sizeof(uint32_t));
@@ -1447,19 +1447,19 @@ void ApInt::divide(const WordType *lhs, unsigned lhsWords, const WordType *rhs,
       uint32_t divisor = V[0];
       uint32_t remainder = 0;
       for (int i = m; i >= 0; i--) {
-         uint64_t partial_dividend = make_64(remainder, U[i]);
+         uint64_t partial_dividend = make64(remainder, U[i]);
          if (partial_dividend == 0) {
             Q[i] = 0;
             remainder = 0;
          } else if (partial_dividend < divisor) {
             Q[i] = 0;
-            remainder = low_32(partial_dividend);
+            remainder = low32(partial_dividend);
          } else if (partial_dividend == divisor) {
             Q[i] = 1;
             remainder = 0;
          } else {
-            Q[i] = low_32(partial_dividend / divisor);
-            remainder = low_32(partial_dividend - (Q[i] * divisor));
+            Q[i] = low32(partial_dividend / divisor);
+            remainder = low32(partial_dividend - (Q[i] * divisor));
          }
       }
       if (R) {
@@ -1473,13 +1473,13 @@ void ApInt::divide(const WordType *lhs, unsigned lhsWords, const WordType *rhs,
    // If the caller wants the quotient
    if (quotient) {
       for (unsigned i = 0; i < lhsWords; ++i) {
-         quotient[i] = make_64(Q[i*2+1], Q[i*2]);
+         quotient[i] = make64(Q[i*2+1], Q[i*2]);
       }
    }
    // If the caller wants the remainder
    if (remainder) {
       for (unsigned i = 0; i < rhsWords; ++i) {
-         remainder[i] = make_64(R[i*2+1], R[i*2]);
+         remainder[i] = make64(R[i*2+1], R[i*2]);
       }
    }
    // Clean up the memory we allocated.
@@ -2113,13 +2113,13 @@ inline ApInt::WordType high_half(ApInt::WordType part)
    If the input number has no bits set -1U is returned.  */
 unsigned part_msb(ApInt::WordType value)
 {
-   return find_last_set(value, ZeroBehavior::Max);
+   return find_last_set(value, ZeroBehavior::ZB_Max);
 }
 /* Returns the bit number of the least significant set bit of a
    part.  If the input number has no bits set -1U is returned.  */
 unsigned part_lsb(ApInt::WordType value)
 {
-   return find_first_set(value, ZeroBehavior::Max);
+   return find_first_set(value, ZeroBehavior::ZB_Max);
 }
 } // anonymous namespace
 /* Sets the least significant part of a bignum to the input value, and

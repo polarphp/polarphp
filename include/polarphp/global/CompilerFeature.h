@@ -167,14 +167,6 @@
 #define POLAR_READONLY
 #endif
 
-#if __has_builtin(__builtin_expect) || POLAR_GNUC_PREREQ(4, 0, 0)
-#define POLAR_LIKELY(EXPR) __builtin_expect((bool)(EXPR), true)
-#define POLAR_UNLIKELY(EXPR) __builtin_expect((bool)(EXPR), false)
-#else
-#define POLAR_LIKELY(EXPR) (EXPR)
-#define POLAR_UNLIKELY(EXPR) (EXPR)
-#endif
-
 /// POLAR_ATTRIBUTE_NOINLINE - On compilers where we have a directive to do so,
 /// mark a method "not for inlining".
 #if __has_attribute(noinline) || POLAR_GNUC_PREREQ(3, 4, 0)
@@ -221,21 +213,6 @@
 #define POLAR_ATTRIBUTE_RETURNS_NOALIAS __declspec(restrict)
 #else
 #define POLAR_ATTRIBUTE_RETURNS_NOALIAS
-#endif
-
-/// POLAR_FALLTHROUGH - Mark fallthrough cases in switch statements.
-#if __cplusplus > 201402L && __has_cpp_attribute(fallthrough)
-#define POLAR_FALLTHROUGH [[fallthrough]]
-#elif __has_cpp_attribute(gnu::fallthrough)
-#define POLAR_FALLTHROUGH [[gnu::fallthrough]]
-#elif !__cplusplus
-// Workaround for llvm.org/PR23435, since clang 3.6 and below emit a spurious
-// error when __has_cpp_attribute is given a scoped attribute in C mode.
-#define POLAR_FALLTHROUGH
-#elif __has_cpp_attribute(clang::fallthrough)
-#define POLAR_FALLTHROUGH [[clang::fallthrough]]
-#else
-#define POLAR_FALLTHROUGH
 #endif
 
 /// POLAR_EXTENSION - Support compilers where we have a keyword to suppress
@@ -319,34 +296,6 @@
 # define POLAR_ALIGNAS(x) __attribute__((aligned(x)))
 #else
 # define POLAR_ALIGNAS(x) alignas(x)
-#endif
-
-/// \macro POLAR_PACKED
-/// Used to specify a packed structure.
-/// POLAR_PACKED(
-///    struct A {
-///      int i;
-///      int j;
-///      int k;
-///      long long l;
-///   });
-///
-/// POLAR_PACKED_START
-/// struct B {
-///   int i;
-///   int j;
-///   int k;
-///   long long l;
-/// };
-/// POLAR_PACKED_END
-#ifdef _MSC_VER
-# define POLAR_PACKED(d) __pragma(pack(push, 1)) d __pragma(pack(pop))
-# define POLAR_PACKED_START __pragma(pack(push, 1))
-# define POLAR_PACKED_END   __pragma(pack(pop))
-#else
-# define POLAR_PACKED(d) d __attribute__((packed))
-# define POLAR_PACKED_START _Pragma("pack(push, 1)")
-# define POLAR_PACKED_END   _Pragma("pack(pop)")
 #endif
 
 /// \macro POLAR_PTR_SIZE
