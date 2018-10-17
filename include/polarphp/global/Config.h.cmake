@@ -172,7 +172,7 @@ don't. */
 #cmakedefine HAVE_UNISTD_H
 
 /* Define to 1 if you have the <valgrind/valgrind.h> header file. */
-#cmakedefine01 HAVE_VALGRIND_VALGRIND_H
+#cmakedefine HAVE_VALGRIND_VALGRIND_H
 
 /* Define to 1 if you have the `_Unwind_Backtrace' function. */
 #cmakedefine HAVE__UNWIND_BACKTRACE
