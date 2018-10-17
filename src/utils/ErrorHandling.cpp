@@ -13,6 +13,7 @@
 #include "polarphp/utils/ErrorCode.h"
 #include "polarphp/utils/Error.h"
 #include "polarphp/utils/Signals.h"
+#include "polarphp/utils/WindowsError.h"
 
 #include <cstring>
 #include <cassert>
@@ -196,7 +197,7 @@ void polar_reset_fatal_error_handler()
    case x:                                                                      \
    return make_error_code(errc::y)
 
-std::error_code polar::map_windows_error(unsigned EV)
+std::error_code polar::utils::map_windows_error(unsigned EV)
 {
    switch (EV) {
    MAP_ERR_TO_COND(ERROR_ACCESS_DENIED, permission_denied);
