@@ -65,4 +65,4 @@ private:
 } // utils
 } // polar
 
-#endif // POLAR_UTILS_TRIGRAM_INDEX_H
+#endif // POLARPHP_UTILS_TRIGRAM_INDEX_H

@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/07/01.
 
-#ifndef POLAR_UTILS_SAVE_AND_RESTORE_H
-#define POLAR_UTILS_SAVE_AND_RESTORE_H
+#ifndef POLARPHP_UTILS_SAVE_AND_RESTORE_H
+#define POLARPHP_UTILS_SAVE_AND_RESTORE_H
 
 namespace polar {
 namespace utils {
@@ -45,4 +45,4 @@ private:
 } // utils
 } // polar
 
-#endif // POLAR_UTILS_SAVE_AND_RESTORE_H
+#endif // POLARPHP_UTILS_SAVE_AND_RESTORE_H

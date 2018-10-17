@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/07/01.
 
-#ifndef POLAR_UTILS_PARALLEL_H
-#define POLAR_UTILS_PARALLEL_H
+#ifndef POLARPHP_UTILS_PARALLEL_H
+#define POLARPHP_UTILS_PARALLEL_H
 
 #include "polarphp/basic/adt/StlExtras.h"
 #include "polarphp/utils/MathExtras.h"
@@ -275,4 +275,4 @@ void for_each_n(parallel_execution_policy policy, IndexTy begin, IndexTy end,
 } // utils
 } // basic
 
-#endif // POLAR_UTILS_PARALLEL_H
+#endif // POLARPHP_UTILS_PARALLEL_H
