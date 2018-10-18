@@ -7,12 +7,13 @@
 # See http://polarphp.org/LICENSE.txt for license information
 # See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
-# Created by polarboy on 2018/10/12.
+# Created by polarboy on 2018/10/18.
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-polar_add_unittest(PolarBaseLibTests BasicUtilsTest
-   ../TestEntry.cpp
-   FormatVariadicTest.cpp
-   FormattedStreamTest.cpp
+polar_add_unittest(PolarBaseLibTests BasicAdtTest
+   ../../TestEntry.cpp
+   ApIntTest.cpp
+   StringRefTest.cpp
    )
 
-target_link_libraries(BasicUtilsTest PRIVATE TestSupport)
+target_link_libraries(BasicAdtTest PRIVATE TestSupport)

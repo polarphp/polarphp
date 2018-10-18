@@ -10,6 +10,7 @@
 // Created by polarboy on 2018/10/12.
 
 #include "polarphp/utils/Signals.h"
+#include "polarphp/utils/CommandLine.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -27,9 +28,9 @@ int main(int argc, char **argv)
 {
    polar::utils::print_stack_trace_on_error_signal(argv[0], true);
 
-   //   // Initialize both gmock and gtest.
+   // Initialize both gmock and gtest.
    ::testing::InitGoogleMock(&argc, argv);
-   //   polar::cmd::parse_command_line_options(argc, argv);
+//   polar::cmd::parse_command_line_options(argc, argv);
 
    //   // Make it easy for a test to re-execute itself by saving argv[0].
    //   TestMainArgv0 = argv[0];

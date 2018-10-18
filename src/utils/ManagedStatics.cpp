@@ -18,17 +18,17 @@ namespace polar {
 namespace utils {
 
 static const ManagedStaticBase *sg_staticList = nullptr;
-static std::mutex *sg_managedStaticMutex = nullptr;
+static std::recursive_mutex *sg_managedStaticMutex = nullptr;
 static std::once_flag sg_mutexInitFlag;
 
 namespace {
 
 void initialize_mutex()
 {
-   sg_managedStaticMutex = new std::mutex();
+   sg_managedStaticMutex = new std::recursive_mutex();
 }
 
-std::mutex &get_managed_static_mutex()
+std::recursive_mutex &get_managed_static_mutex()
 {
    std::call_once(sg_mutexInitFlag, initialize_mutex);
    return *sg_managedStaticMutex;
@@ -62,7 +62,7 @@ void ManagedStaticBase::destroy() const
 
 void managed_statics_shutdown()
 {
-   std::lock_guard locker(get_managed_static_mutex());
+   //std::lock_guard locker(get_managed_static_mutex());
    while (sg_staticList) {
       sg_staticList->destroy();
    }
