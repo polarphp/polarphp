@@ -14,6 +14,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    ../../TestEntry.cpp
    ApIntTest.cpp
    StringRefTest.cpp
+   TwineTest.cpp
    )
 
 target_link_libraries(BasicAdtTest PRIVATE TestSupport)
