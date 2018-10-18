@@ -72,6 +72,5 @@ std::string get_default_target_triple()
    return Triple::normalize(targetTripleString);
 }
 
-
 } // sys
 } // polar
