@@ -42,6 +42,7 @@ namespace utils {
 
 using polar::basic::StringMap;
 using polar::basic::StringMapEntry;
+using polar::basic::StringRef;
 
 class PooledStringPtr;
 

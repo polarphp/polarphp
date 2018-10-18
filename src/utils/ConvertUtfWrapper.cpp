@@ -115,7 +115,7 @@ bool convert_utf16_to_utf8_string(ArrayRef<char> srcBytes, std::string &out)
    if (src[0] == UNI_UTF16_BYTE_ORDER_MARK_SWAPPED) {
       byteSwapped.insert(byteSwapped.end(), src, srcEnd);
       for (unsigned index = 0, endMark = byteSwapped.size(); index != endMark; ++index) {
-         byteSwapped[index] = polar::utils::swap_byte_order_16(byteSwapped[index]);
+         byteSwapped[index] = polar::utils::swap_byte_order16(byteSwapped[index]);
       }
       src = &byteSwapped[0];
       srcEnd = &byteSwapped[byteSwapped.size() - 1] + 1;

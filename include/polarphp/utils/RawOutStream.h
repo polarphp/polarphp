@@ -464,8 +464,9 @@ public:
    RawFdOutStream(StringRef filename, std::error_code &errorCode,
                   OpenFlags flags);
    RawFdOutStream(StringRef filename, std::error_code &errorCode,
-                  fs::FileAccess disp, fs::FileAccess access,
-                  OpenFlags flags);
+                  fs::CreationDisposition disp,
+                  fs::FileAccess access,
+                  fs::OpenFlags flags);
 
    /// FD is the file descriptor that this writes to.  If ShouldClose is true,
    /// this closes the file when the stream is destroyed. If FD is for stdout or

@@ -15,7 +15,16 @@
 #include <string>
 
 namespace polar {
+
+// forward declare with namespace
+namespace basic {
+class StringRef;
+} // basic
+
 namespace utils {
+
+class RawOutStream;
+using polar::basic::StringRef;
 
 /// This function runs all the registered interrupt handlers, including the
 /// removal of files registered by RemoveFileOnSignal.
@@ -24,11 +33,11 @@ void run_interrupt_handlers();
 /// This function registers signal handlers to ensure that if a signal gets
 /// delivered that the named file is removed.
 /// Remove a file if a fatal signal occurs.
-bool remove_file_on_signal(const std::string &filename, std::string *errorMsg = nullptr);
+bool remove_file_on_signal(StringRef filename, std::string *errorMsg = nullptr);
 
 /// This function removes a file from the list of files to be removed on
 /// signal delivery.
-void dont_remove_file_on_signal(const std::string &filename);
+void dont_remove_file_on_signal(StringRef filename);
 
 /// When an error signal (such as SIGABRT or SIGSEGV) is delivered to the
 /// process, print a stack trace and then exit.
@@ -38,14 +47,14 @@ void dont_remove_file_on_signal(const std::string &filename);
 ///        StringRef(), in which case we will only search $PATH.
 /// \param DisableCrashReporting if \c true, disable the normal crash
 ///        reporting mechanisms on the underlying operating system.
-void print_stack_trace_on_error_signal(const std::string &argv0,
+void print_stack_trace_on_error_signal(StringRef argv0,
                                        bool disableCrashReporting = false);
 
 /// Disable all system dialog boxes that appear when the process crashes.
 void disable_system_dialogs_on_crash();
 
 /// Print the stack trace using the given \c raw_ostream object.
-void print_stack_trace(std::ostream &out);
+void print_stack_trace(RawOutStream &out);
 
 // Run all registered signal handlers.
 void run_signal_handlers();

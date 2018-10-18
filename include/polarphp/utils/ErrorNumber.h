@@ -23,10 +23,10 @@ namespace utils {
 /// thread-safe variant of strerror() is available.  Be sure to call this
 /// immediately after the function that set errno, or errno may have been
 /// overwritten by an intervening call.
-std::string str_error();
+std::string get_str_error();
 
 /// Like the no-argument version above, but uses \p errnum instead of errno.
-std::string str_error(int errnum);
+std::string get_str_error(int errnum);
 
 template <typename FailT, typename Fun, typename... Args>
 inline auto retry_after_signal(const FailT &fail, const Fun &func,

@@ -25,7 +25,7 @@ namespace utils {
 
 /// Utility function to encode a SLEB128 value to an output stream.
 inline unsigned encode_sleb128(int64_t value, RawOutStream &outstream,
-                           unsigned padTo = 0)
+                               unsigned padTo = 0)
 {
    bool more;
    unsigned count = 0;
@@ -86,8 +86,8 @@ inline unsigned encode_sleb128(int64_t value, uint8_t *p, unsigned padTo = 0)
 }
 
 /// Utility function to encode a ULEB128 value to an output stream.
-inline void encode_uleb128(uint64_t value, RawOutStream &outstream,
-                           unsigned padTo = 0)
+inline unsigned encode_uleb128(uint64_t value, RawOutStream &outstream,
+                               unsigned padTo = 0)
 {
    unsigned count = 0;
    do {

@@ -822,7 +822,7 @@ public:
          this->grow();
       }
       ::new ((void *)this->end()) T(std::forward<ArgTypes>(args)...);
-      this->setSize(this->size() + 1);
+      this->setSize(this->getSize() + 1);
    }
 
    template <typename... ArgTypes>

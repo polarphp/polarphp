@@ -28,14 +28,6 @@
 #endif
 
 using namespace polar::utils::endian;
-using polar::basic::StringRef;
-using polar::utils::error_code_to_error;
-using polar::fs::path::Style;
-using polar::sys::Process;
-using polar::basic::SmallVector;
-using polar::basic::Twine;
-using polar::basic::SmallVectorImpl;
-using polar::basic::SmallString;
 
 enum FSEntity
 {
@@ -47,8 +39,17 @@ enum FSEntity
 namespace polar {
 namespace fs {
 
-namespace {
+using polar::basic::StringRef;
+using polar::utils::error_code_to_error;
+using polar::fs::path::Style;
+using polar::sys::Process;
+using polar::basic::SmallVector;
+using polar::basic::Twine;
+using polar::basic::SmallVectorImpl;
+using polar::basic::SmallString;
+using polar::utils::ErrorCode;
 
+namespace {
 
 inline Style real_style(Style style)
 {
@@ -219,8 +220,8 @@ retry_random_path:
    switch (type) {
    case FS_File: {
       if (std::error_code errorCode =
-          polar::fs::open_file_for_write(Twine(resultPath.begin()), resultFD,
-                                         flags | fs::F_Excl, mode)) {
+          polar::fs::open_file_for_read_write(Twine(resultPath.begin()), resultFD,
+                                              fs::CD_CreateNew, flags, mode)) {
          if (errorCode == ErrorCode::file_exists)
             goto retry_random_path;
          return errorCode;
@@ -253,7 +254,7 @@ retry_random_path:
       return std::error_code();
    }
    }
-   polar_unreachable("Invalid Type");
+   polar_unreachable("Invalid type");
 }
 
 } // end unnamed namespace
@@ -774,12 +775,13 @@ static SmallString<256> remove_dots(StringRef path, bool remove_dot_dot,
          continue;
       // Leading ".." will remain in the path unless it's at the root.
       if (remove_dot_dot && C == "..") {
-         if (!components.empty() && components.back() != "..") {
+         if (!components.empty() && components.getBack() != "..") {
             components.pop_back();
             continue;
          }
-         if (path::is_absolute(path, style))
+         if (path::is_absolute(path, style)) {
             continue;
+         }
       }
       components.push_back(C);
    }
@@ -791,7 +793,8 @@ static SmallString<256> remove_dots(StringRef path, bool remove_dot_dot,
 }
 
 bool remove_dots(SmallVectorImpl<char> &path, bool remove_dot_dot,
-                 Style style) {
+                 Style style)
+{
    StringRef p(path.getData(), path.getSize());
 
    SmallString<256> result = remove_dots(p, remove_dot_dot, style);
@@ -817,63 +820,73 @@ std::error_code get_unique_id(const Twine path, UniqueId &result)
 
 std::error_code create_unique_file(const Twine &model, int &resultFd,
                                    SmallVectorImpl<char> &resultPath,
-                                   unsigned mode, fs::OpenFlags flags)
+                                   unsigned mode)
+{
+   return create_unique_entity(model, resultFd, resultPath, false, mode, FS_File);
+}
+
+static std::error_code create_unique_file(const Twine &model, int &resultFd,
+                                          SmallVectorImpl<char> &resultPath,
+                                          unsigned mode, OpenFlags flags)
 {
    return create_unique_entity(model, resultFd, resultPath, false, mode, FS_File,
                                flags);
 }
 
 std::error_code create_unique_file(const Twine &model,
-                                   SmallVectorImpl<char> &resultPath)
-{
-   int dummy;
-   return create_unique_entity(model, dummy, resultPath, false, 0, FS_Name);
+                                   SmallVectorImpl<char> &resultPath,
+                                   unsigned mode) {
+   int fd;
+   auto errorCode = create_unique_file(model, fd, resultPath, mode);
+   if (errorCode) {
+      return errorCode;
+   }
+   // FD is only needed to avoid race conditions. Close it right away.
+   close(fd);
+   return errorCode;
 }
 
 namespace {
 
-std::error_code
-create_temporary_file(const Twine &model, int &resultFD,
-                      SmallVectorImpl<char> &resultPath, FSEntity type,
-                      fs::OpenFlags flags)
-{
+std::error_code create_temporary_file(const Twine &model, int &resultFD,
+                                      SmallVectorImpl<char> &resultPath, FSEntity type) {
    SmallString<128> storage;
-   StringRef str = model.toNullTerminatedStringRef(storage);
-   assert(str.findFirstOf(separators(Style::native)) == StringRef::npos &&
-          "Model must be a simple filename.");
-   // Use P.begin() so that create_unique_entity doesn't need to recreate Storage.
-   return create_unique_entity(str.begin(), resultFD, resultPath, true,
-                               owner_read | owner_write, type, flags);
+   StringRef p = model.toNullTerminatedStringRef(storage);
+   assert(p.findFirstOf(separators(Style::native)) == StringRef::npos &&
+          "model must be a simple filename.");
+   // Use P.begin() so that createUniqueEntity doesn't need to recreate storage.
+   return create_unique_entity(p.begin(), resultFD, resultPath, true,
+                               owner_read | owner_write, type);
 }
 
-std::error_code
-create_temporary_file(const Twine &prefix, StringRef suffix, int &resultFD,
-                      SmallVectorImpl<char> &resultPath, FSEntity type,
-                      fs::OpenFlags flags = fs::F_None)
-{
+std::error_code create_temporary_file(const Twine &prefix, StringRef suffix, int &resultFD,
+                                      SmallVectorImpl<char> &resultPath, FSEntity type) {
    const char *middle = suffix.empty() ? "-%%%%%%" : "-%%%%%%.";
    return create_temporary_file(prefix + middle + suffix, resultFD, resultPath,
-                                type, flags);
+                                type);
 }
 
 } // anonymous namespace
 
 std::error_code create_temporary_file(const Twine &prefix, StringRef suffix,
                                       int &resultFD,
-                                      SmallVectorImpl<char> &resultPath,
-                                      fs::OpenFlags flags)
+                                      SmallVectorImpl<char> &resultPath)
 {
-   return create_temporary_file(prefix, suffix, resultFD, resultPath, FS_File,
-                                flags);
+   return create_temporary_file(prefix, suffix, resultFD, resultPath, FS_File);
 }
 
 std::error_code create_temporary_file(const Twine &prefix, StringRef suffix,
                                       SmallVectorImpl<char> &resultPath)
 {
-   int dummy;
-   return create_temporary_file(prefix, suffix, dummy, resultPath, FS_Name);
+   int fd;
+   auto errorCode = create_temporary_file(prefix, suffix, fd, resultPath);
+   if (errorCode) {
+      return errorCode;
+   }
+   // FD is only needed to avoid race conditions. Close it right away.
+   close(fd);
+   return errorCode;
 }
-
 
 // This is a mkdtemp with a different pattern. We use create_unique_entity mostly
 // for consistency. We should try using mkdtemp.
@@ -903,9 +916,9 @@ static std::error_code make_absolute(const Twine &currentDirectory,
    // All of the following conditions will need the current directory.
    SmallString<128> currentDir;
    if (useCurrentDirectory) {
-       currentDirectory.toVector(currentDir);
+      currentDirectory.toVector(currentDir);
    } else if (std::error_code ec = current_path(currentDir)) {
-       return ec;
+      return ec;
    }
    // Relative path. Prepend the current directory.
    if (!rootName && !rootDirectory) {
@@ -977,43 +990,59 @@ std::error_code create_directories(const Twine &path, bool ignoreExisting,
    return create_directory(p, ignoreExisting, perms);
 }
 
-std::error_code copy_file(const Twine &from, const Twine &to) {
-   int readFd, writeFd;
-   if (std::error_code errorCode = open_file_for_read(from, readFd)) {
-      return errorCode;
-   }
-   if (std::error_code errorCode = open_file_for_write(to, writeFd, F_None)) {
-      close(readFd);
-      return errorCode;
-   }
-
-   const size_t bufSize = 4096;
-   char *buf = new char[bufSize];
+namespace {
+static std::error_code copy_file_internal(int readFD, int writeFD) {
+   const size_t BufSize = 4096;
+   char *buf = new char[BufSize];
    int bytesRead = 0, bytesWritten = 0;
    for (;;) {
-      bytesRead = read(readFd, buf, bufSize);
-      if (bytesRead <= 0) {
+      bytesRead = read(readFD, buf, BufSize);
+      if (bytesRead <= 0)
          break;
-      }
       while (bytesRead) {
-         bytesWritten = write(writeFd, buf, bytesRead);
-         if (bytesWritten < 0) {
+         bytesWritten = write(writeFD, buf, bytesRead);
+         if (bytesWritten < 0)
             break;
-         }
          bytesRead -= bytesWritten;
       }
-      if (bytesWritten < 0) {
+      if (bytesWritten < 0)
          break;
-      }
    }
-   close(readFd);
-   close(writeFd);
    delete[] buf;
 
    if (bytesRead < 0 || bytesWritten < 0) {
       return std::error_code(errno, std::generic_category());
    }
+
    return std::error_code();
+}
+} // anonymous namespace
+
+std::error_code copy_file(const Twine &from, const Twine &to) {
+   int readFD, writeFD;
+   if (std::error_code errorCode = open_file_for_read(from, readFD, OF_None)) {
+      return errorCode;
+   }
+   if (std::error_code errorCode = open_file_for_write(to, writeFD, CD_CreateAlways, F_None)) {
+      close(readFD);
+      return errorCode;
+   }
+
+   std::error_code errorCode = copy_file_internal(readFD, writeFD);
+   close(readFD);
+   close(writeFD);
+   return errorCode;
+}
+
+std::error_code copy_file(const Twine &from, int toFD)
+{
+   int readFD;
+   if (std::error_code errorCode = open_file_for_read(from, readFD, OF_None)) {
+      return errorCode;
+   }
+   std::error_code errorCode = copy_file_internal(readFD, toFD);
+   close(readFD);
+   return errorCode;
 }
 
 OptionalError<Md5::Md5Result> md5_contents(int fd)
@@ -1179,7 +1208,7 @@ Error TempFile::discard()
    // Always try to close and remove.
    if (!m_tmpName.empty()) {
       removeErrorCode = fs::remove(m_tmpName);
-      polar::sys::dont_remove_file_on_signal(m_tmpName);
+      polar::utils::dont_remove_file_on_signal(m_tmpName);
    }
 #endif
 
@@ -1216,7 +1245,7 @@ Error TempFile::keep(const Twine &name)
    if (renameErrorCode) {
       remove(m_tmpName);
    }
-   sys::dont_remove_file_on_signal(m_tmpName);
+   utils::dont_remove_file_on_signal(m_tmpName);
 #endif
 
    if (!renameErrorCode) {
@@ -1240,7 +1269,7 @@ Error TempFile::keep()
       return error_code_to_error(errorCode);
    }
 #else
-   sys::dont_remove_file_on_signal(m_tmpName);
+   utils::dont_remove_file_on_signal(m_tmpName);
 #endif
 
    m_tmpName = "";
@@ -1259,12 +1288,12 @@ Expected<TempFile> TempFile::create(const Twine &model, unsigned mode)
    int fd;
    SmallString<128> resultPath;
    if (std::error_code errorCode = create_unique_file(model, fd, resultPath, mode,
-                                                      fs::F_RW | fs::F_Delete))
+                                                      fs::OF_Delete))
       return error_code_to_error(errorCode);
 
    TempFile ret(resultPath, fd);
 #ifndef POLAR_ON_WIN32
-   if (sys::remove_file_on_signal(resultPath)) {
+   if (utils::remove_file_on_signal(resultPath)) {
       // Make sure we delete the file when RemoveFileOnSignal fails.
       polar::utils::consume_error(ret.discard());
       std::error_code errorCode(ErrorCode::operation_not_permitted);

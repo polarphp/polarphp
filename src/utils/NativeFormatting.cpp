@@ -22,6 +22,7 @@ namespace polar {
 namespace utils {
 
 using polar::basic::SmallString;
+using polar::basic::ArrayRef;
 
 namespace {
 

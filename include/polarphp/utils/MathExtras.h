@@ -250,14 +250,16 @@ T mask_leading_ones(unsigned N)
 
 /// Create a bitmask with the N right-most bits set to 0, and all other
 /// bits set to 1.  Only unsigned types are allowed.
-template <typename T> T maskTrailingZeros(unsigned N)
+template <typename T>
+T mask_trailing_zeros(unsigned N)
 {
    return mask_leading_ones<T>(CHAR_BIT * sizeof(T) - N);
 }
 
 /// Create a bitmask with the N left-most bits set to 0, and all other
 /// bits set to 1.  Only unsigned types are allowed.
-template <typename T> T mask_leading_zeros(unsigned N)
+template <typename T>
+T mask_leading_zeros(unsigned N)
 {
    return mask_trailing_ones<T>(CHAR_BIT * sizeof(T) - N);
 }
@@ -269,7 +271,8 @@ template <typename T> T mask_leading_zeros(unsigned N)
 ///
 /// \param ZB the behavior on an input of 0. Only ZB_Max and ZB_Undefined are
 ///   valid arguments.
-template <typename T> T find_last_set(T value, ZeroBehavior zb = ZB_Max)
+template <typename T>
+T find_last_set(T value, ZeroBehavior zb = ZB_Max)
 {
    if (zb == ZB_Max && value == 0) {
       return std::numeric_limits<T>::max();

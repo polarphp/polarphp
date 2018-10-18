@@ -39,7 +39,13 @@
 #undef set_current_debug_types
 
 namespace polar {
-namespace utils {
+
+using polar::utils::ManagedStatic;
+using polar::utils::SmallVector;
+using polar::utils::StringRef;
+using polar::utils::CircularRawOutStream;
+using polar::utils::RawOutStream;
+using polar::utils::error_stream;
 
 // Even though polarVM might be built with NDEBUG, define symbols that the code
 // built without NDEBUG can depend on via the poalr/utils/Debug.h header.
@@ -160,7 +166,7 @@ RawOutStream &debug_stream()
          if (sg_enableDebugBuffering && sg_debugFlag && sg_debugBufferSize != 0)
             // TODO: Add a handler for SIGUSER1-type signals so the user can
             // force a debug dump.
-            polar::sys::add_signal_handler(&debug_user_sig_handler, nullptr);
+            polar::utils::add_signal_handler(&debug_user_sig_handler, nullptr);
          // Otherwise we've already set the debug stream buffer size to
          // zero, disabling buffering so it will output directly to errs().
       }
@@ -182,5 +188,4 @@ RawOutStream &debug_stream()
 ///
 bool sg_enableDebugBuffering = false;
 
-} // utils
 } // polar

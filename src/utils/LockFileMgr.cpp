@@ -173,7 +173,7 @@ LockFileManager::LockFileManager(StringRef filename)
    this->m_filename = filename;
    if (std::error_code errorCode = fs::make_absolute(this->m_filename)) {
       std::string str("failed to obtain absolute path for ");
-      str.append(this->m_filename.str());
+      str.append(this->m_filename.getStr());
       setError(errorCode, str);
       return;
    }
@@ -193,7 +193,7 @@ LockFileManager::LockFileManager(StringRef filename)
    if (std::error_code errorCode = fs::create_unique_file(
           m_uniqueLockFilename, uniqueLockFileID, m_uniqueLockFilename)) {
       std::string str("failed to create unique file ");
-      str.append(m_uniqueLockFilename.str());
+      str.append(m_uniqueLockFilename.getStr());
       setError(errorCode, str);
       return;
    }
@@ -219,7 +219,7 @@ LockFileManager::LockFileManager(StringRef filename)
          // unique lock file, and fail.
          std::string str("failed to write to ");
          str.append(m_uniqueLockFilename.getStr());
-         setError(out.getErrorCode(), S);
+         setError(out.getErrorCode(), str);
          fs::remove(m_uniqueLockFilename);
          return;
       }
@@ -264,7 +264,7 @@ LockFileManager::LockFileManager(StringRef filename)
       // ownership.
       if ((errorCode = fs::remove(m_lockFilename))) {
          std::string str("failed to remove lockfile ");
-         str.append(m_uniqueLockFilename.str());
+         str.append(m_uniqueLockFilename.getStr());
          setError(errorCode, str);
          return;
       }
@@ -306,7 +306,6 @@ LockFileManager::~LockFileManager()
    fs::remove(m_uniqueLockFilename);
    // The unique file is now gone, so remove it from the signal handler. This
    // matches a sys::RemoveFileOnSignal() in LockFileManager().
-   consume_error(m_uniqueLockFile->discard());
    dont_remove_file_on_signal(m_uniqueLockFilename);
 }
 
@@ -338,7 +337,7 @@ LockFileManager::WaitForUnlockResult LockFileManager::waitForUnlock() {
       if (polar::fs::access(m_lockFilename.getCStr(), polar::fs::AccessMode::Exist) ==
           ErrorCode::no_such_file_or_directory) {
          // If the original file wasn't created, somone thought the lock was dead.
-         if (!polar::fs::exists(m_fileName)) {
+         if (!polar::fs::exists(m_filename)) {
             return Res_OwnerDied;
          }
          return Res_Success;

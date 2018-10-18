@@ -27,7 +27,7 @@ ToolOutputFile::CleanupInstaller::CleanupInstaller(StringRef filename)
      m_keep(false) {
    // Arrange for the file to be deleted if the process is killed.
    if (m_filename != "-") {
-      sys::remove_file_on_signal(filename);
+      utils::remove_file_on_signal(filename);
    }
 }
 
@@ -40,7 +40,7 @@ ToolOutputFile::CleanupInstaller::~CleanupInstaller()
    // Ok, the file is successfully written and closed, or deleted. There's no
    // further need to clean it up on signals.
    if (m_filename != "-") {
-      sys::dont_remove_file_on_signal(m_filename);
+      utils::dont_remove_file_on_signal(m_filename);
    }
 }
 

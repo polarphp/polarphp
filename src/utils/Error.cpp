@@ -121,11 +121,11 @@ void Error::fatalUncheckedError() const
 #endif
 
 StringError::StringError(const Twine &str, std::error_code errorCode)
-   : m_msg(str),
+   : m_msg(str.getStr()),
      m_errorCode(errorCode)
 {}
 
-void StringError::log(std::ostream &out) const
+void StringError::log(RawOutStream &out) const
 {
    out << m_msg;
 }
@@ -145,7 +145,7 @@ void report_fatal_error(Error error, bool genCrashDiag)
    assert(error && "report_fatal_error called with success value");
    std::string errorMsg;
    {
-      std::ostringstream errorStream(errorMsg);
+      RawStringOutStream errorStream(errorMsg);
       log_all_unhandled_errors(std::move(error), errorStream, "");
    }
    report_fatal_error(errorMsg);

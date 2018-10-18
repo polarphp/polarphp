@@ -131,7 +131,7 @@ void DebugCounter::print(RawOutStream &outstream) const
       outstream << left_justify(m_registeredCounters[kv.first], 32)
             << ": {"
             << kv.second.m_count << "," << kv.second.m_skip << ","
-            << kv.second.stopAfter <<"}\n";
+            << kv.second.m_stopAfter <<"}\n";
    }
 }
 

@@ -275,7 +275,7 @@ enum ProcessorVendors : unsigned
 enum ProcessorTypes : unsigned
 {
    cpu_TYPE_DUMMY,
-#define X86_cpu_TYPE(ARCHNAME, ENUM) \
+#define X86_CPU_TYPE(ARCHNAME, ENUM) \
    ENUM,
 #include "polarphp/utils/X86TargetParser.h"
    cpu_TYPE_MAX
@@ -286,7 +286,7 @@ enum ProcessorTypes : unsigned
 enum ProcessorSubtypes : unsigned
 {
    cpu_SUBTYPE_DUMMY,
-#define X86_cpu_SUBTYPE(ARCHNAME, ENUM) \
+#define X86_CPU_SUBTYPE(ARCHNAME, ENUM) \
    ENUM,
 #include "polarphp/utils/X86TargetParser.h"
    cpu_SUBTYPE_MAX

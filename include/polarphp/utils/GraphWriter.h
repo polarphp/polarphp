@@ -43,6 +43,7 @@ namespace polar {
 namespace utils {
 
 using polar::basic::GraphTraits;
+using polar::basic::Twine;
 
 namespace dot {  // Private functions...
 

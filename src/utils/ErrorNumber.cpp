@@ -14,7 +14,7 @@
 #include <sstream>
 #include <string.h>
 
-#if HAVE_ERRNO_H
+#ifdef HAVE_ERRNO_H
 #include <errno.h>
 #endif
 
@@ -26,14 +26,15 @@
 namespace polar {
 namespace utils {
 
-#if HAVE_ERRNO_H
-std::string str_error()
+#ifdef HAVE_ERRNO_H
+std::string get_str_error()
 {
-   return str_error(errno);
+   return get_str_error(errno);
 }
 #endif  // HAVE_ERRNO_H
 
-std::string str_error(int errnum) {
+std::string get_str_error(int errnum)
+{
    std::string str;
    if (errnum == 0) {
       return str;

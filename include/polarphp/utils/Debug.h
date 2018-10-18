@@ -48,7 +48,7 @@ void set_current_debug_types(const char **Types, unsigned Count);
 /// This will emit the debug information if -debug is present, and -debug-only
 /// is not specified, or is specified as "bitset".
 #define DEBUG_WITH_TYPE(TYPE, X)                                        \
-   do { if (::polar::DebugFlag && ::polar::is_current_debug_type(TYPE)) { X; } \
+   do { if (::polar::sg_debugFlag && ::polar::is_current_debug_type(TYPE)) { X; } \
 } while (false)
 
 #else
@@ -62,7 +62,7 @@ void set_current_debug_types(const char **Types, unsigned Count);
 /// is specified.  This should probably not be referenced directly, instead, use
 /// the DEBUG macro below.
 ///
-extern bool DebugFlag;
+extern bool sg_debugFlag;
 
 /// \name Verification flags.
 ///
@@ -73,11 +73,11 @@ extern bool DebugFlag;
 
 /// Enables verification of dominator trees.
 ///
-extern bool VerifyDomInfo;
+extern bool g_verifyDomInfo;
 
 /// Enables verification of loop info.
 ///
-extern bool VerifyLoopInfo;
+extern bool g_verifyLoopInfo;
 
 ///\}
 
@@ -87,8 +87,17 @@ extern bool VerifyLoopInfo;
 /// to install signal handlers if they are certain there will be no
 /// conflict.
 ///
-extern bool EnableDebugBuffering;
+extern bool g_enableDebugBuffering;
 
+///\}
+
+/// EnableDebugBuffering - This defaults to false.  If true, the debug
+/// stream will install signal handlers to dump any buffered debug
+/// output.  It allows clients to selectively allow the debug stream
+/// to install signal handlers if they are certain there will be no
+/// conflict.
+///
+extern bool sg_enableDebugBuffering;
 
 utils::RawOutStream &debug_stream();
 

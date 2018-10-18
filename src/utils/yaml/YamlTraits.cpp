@@ -38,6 +38,7 @@ using polar::utils::SmallString;
 using polar::basic::StringLiteral;
 using polar::utils::MemoryBuffer;
 using polar::utils::LineIterator;
+using polar::utils::ErrorCode;
 using polar::utils::isa;
 using polar::utils::dyn_cast_or_null;
 using polar::utils::dyn_cast;
@@ -542,7 +543,7 @@ bool Output::mapTag(StringRef tag, bool use)
       bool sequenceElement =
             m_stateStack.getSize() > 1 && (m_stateStack[m_stateStack.getSize() - 2] == inSeq ||
             m_stateStack[m_stateStack.getSize() - 2] == inFlowSeq);
-      if (sequenceElement && m_stateStack.back() == inMapFirstKey) {
+      if (sequenceElement && m_stateStack.getBack() == inMapFirstKey) {
          this->newLineCheck();
       } else {
          this->output(" ");
@@ -551,7 +552,7 @@ bool Output::mapTag(StringRef tag, bool use)
       if (sequenceElement) {
          // If we're writing the tag during the first element of a map, the tag
          // takes the place of the first element in the sequence.
-         if (m_stateStack.back() == inMapFirstKey) {
+         if (m_stateStack.getBack() == inMapFirstKey) {
             m_stateStack.pop_back();
             m_stateStack.push_back(inMapOtherKey);
          }
@@ -577,7 +578,7 @@ bool Output::preflightKey(const char *key, bool required, bool sameAsDefault,
                           bool &useDefault, void *&) {
    useDefault = false;
    if (required || !sameAsDefault || m_writeDefaultValues) {
-      auto state = m_stateStack.back();
+      auto state = m_stateStack.getBack();
       if (state == inFlowMapFirstKey || state == inFlowMapOtherKey) {
          flowKey(key);
       } else {
@@ -591,10 +592,10 @@ bool Output::preflightKey(const char *key, bool required, bool sameAsDefault,
 
 void Output::postflightKey(void *)
 {
-   if (m_stateStack.back() == inMapFirstKey) {
+   if (m_stateStack.getBack() == inMapFirstKey) {
       m_stateStack.pop_back();
       m_stateStack.push_back(inMapOtherKey);
-   } else if (m_stateStack.back() == inFlowMapFirstKey) {
+   } else if (m_stateStack.getBack() == inFlowMapFirstKey) {
       m_stateStack.pop_back();
       m_stateStack.push_back(inFlowMapOtherKey);
    }
@@ -846,7 +847,7 @@ bool Output::canElideEmptySequence()
    if (m_stateStack.getSize() < 2) {
       return true;
    }
-   if (m_stateStack.back() != inMapFirstKey) {
+   if (m_stateStack.getBack() != inMapFirstKey) {
       return true;
    }
    return (m_stateStack[m_stateStack.getSize()-2] != inSeq);
@@ -861,9 +862,9 @@ void Output::output(StringRef str)
 void Output::outputUpToEndOfLine(StringRef str)
 {
    this->output(str);
-   if (m_stateStack.empty() || (m_stateStack.back() != inFlowSeq &&
-                                m_stateStack.back() != inFlowMapFirstKey &&
-                                m_stateStack.back() != inFlowMapOtherKey)) {
+   if (m_stateStack.empty() || (m_stateStack.getBack() != inFlowSeq &&
+                                m_stateStack.getBack() != inFlowMapFirstKey &&
+                                m_stateStack.getBack() != inFlowMapOtherKey)) {
       m_needsNewLine = true;
    }
 }
@@ -888,11 +889,11 @@ void Output::newLineCheck()
    assert(m_stateStack.getSize() > 0);
    unsigned indent = m_stateStack.getSize() - 1;
    bool outputDash = false;
-   if (m_stateStack.back() == inSeq) {
+   if (m_stateStack.getBack() == inSeq) {
       outputDash = true;
-   } else if ((m_stateStack.getSize() > 1) && ((m_stateStack.back() == inMapFirstKey) ||
-                                               (m_stateStack.back() == inFlowSeq) ||
-                                               (m_stateStack.back() == inFlowMapFirstKey)) &&
+   } else if ((m_stateStack.getSize() > 1) && ((m_stateStack.getBack() == inMapFirstKey) ||
+                                               (m_stateStack.getBack() == inFlowSeq) ||
+                                               (m_stateStack.getBack() == inFlowMapFirstKey)) &&
               (m_stateStack[m_stateStack.getSize() - 2] == inSeq)) {
       --indent;
       outputDash = true;
@@ -921,7 +922,7 @@ void Output::paddedKey(StringRef key)
 
 void Output::flowKey(StringRef key)
 {
-   if (m_stateStack.back() == inFlowMapOtherKey) {
+   if (m_stateStack.getBack() == inFlowMapOtherKey) {
       output(", ");
    }
 

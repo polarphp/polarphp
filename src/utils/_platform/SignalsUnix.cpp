@@ -43,7 +43,9 @@
 #include "polarphp/utils/unix/Unix.h"
 #include "polarphp/basic/adt/StlExtras.h"
 #include "polarphp/utils/Signals.h"
-#include "polarphp/utils/Stream.h"
+#include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/utils/RawOutStream.h"
+#include "polarphp/utils/Format.h"
 
 #include <filesystem>
 #include <shared_mutex>
@@ -392,22 +394,22 @@ void set_interrupt_function(void (*ifunc)())
 }
 
 // The public API
-bool remove_file_on_signal(const std::string &filename,
+bool remove_file_on_signal(StringRef filename,
                            std::string *)
 {
    // Ensure that cleanup will occur as soon as one file is added.
    static ManagedStatic<FilesToRemoveCleanup> filesToRemoveCleanup;
    *filesToRemoveCleanup;
-   FileToRemoveList::insert(sg_filesToRemove, filename);
+   FileToRemoveList::insert(sg_filesToRemove, filename.getStr());
    register_handlers();
    return false;
 }
 
 
 // The public API
-void dont_remove_file_on_signal(const std::string &filename)
+void dont_remove_file_on_signal(StringRef filename)
 {
-   FileToRemoveList::erase(sg_filesToRemove, filename);
+   FileToRemoveList::erase(sg_filesToRemove, filename.getStr());
 }
 
 void insert_signal_handler(SignalHandlerCallback funcPtr,
@@ -464,9 +466,9 @@ int unwind_backtrace(void **stackTrace, int maxEntries)
 //
 // On glibc systems we have the 'backtrace' function, which works nicely, but
 // doesn't demangle symbols.
-void print_stack_trace(std::ostream &out)
+void print_stack_trace(RawOutStream &out)
 {
-#ifdef ENABLE_BACKTRACES
+#if ENABLE_BACKTRACES
    static void *stackTrace[256];
    int depth = 0;
 #if defined(HAVE_BACKTRACE)
@@ -481,10 +483,12 @@ void print_stack_trace(std::ostream &out)
       depth = unwind_backtrace(stackTrace,
                                static_cast<int>(polar::basic::array_lengthof(stackTrace)));
    }
+
 #endif
    if (!depth) {
       return;
    }
+
 #if defined(HAVE_DLFCN_H) && defined(HAVE_DLADDR)
    int width = 0;
    for (int i = 0; i < depth; ++i) {
@@ -497,28 +501,36 @@ void print_stack_trace(std::ostream &out)
       } else {
          nwidth = strlen(name) - 1;
       }
-      if (nwidth > width) width = nwidth;
+      if (nwidth > width) {
+         width = nwidth;
+      }
    }
-
    for (int i = 0; i < depth; ++i) {
       Dl_info dlinfo;
       dladdr(stackTrace[i], &dlinfo);
-      out << std::setw(2) << std::left << i;
-
+      out << format("%-2d", i);
       const char* name = strrchr(dlinfo.dli_fname, '/');
       if (!name) {
-         out << std::setw(width) << std::left << dlinfo.dli_fname;
+         out << format(" %-*s", width, dlinfo.dli_fname);
       } else {
-         out << std::setw(width) << std::left << name+1;
+         out << format(" %-*s", width, name+1);
       }
-      out << std::hex << std::setfill('0') << std::setw((int)(sizeof(void*) * 2) + 2) << (unsigned long)stackTrace[i];
+      out << format(" %#0*lx", (int)(sizeof(void*) * 2) + 2,
+                    (unsigned long)stackTrace[i]);
       if (dlinfo.dli_sname != nullptr) {
-         out << ' ' << dlinfo.dli_sname;
+         out << ' ';
+         //         int res;
+         // @TODO add itaniumDemangle
+         //         char* d = itaniumDemangle(dlinfo.dli_sname, nullptr, nullptr, &res);
+         //         if (!d) out << dlinfo.dli_sname;
+         //         else    out << d;
+         //         free(d);
+         out << dlinfo.dli_sname;
          // FIXME: When we move to C++11, use %t length modifier. It's not in
          // C++03 and causes gcc to issue warnings. Losing the upper 32 bits of
          // the stack offset for a stack dump isn't likely to cause any problems.
-         out << " + " << (unsigned)((char*)stackTrace[i]-
-                                    (char*)dlinfo.dli_saddr);
+         out << format(" + %u",(unsigned)((char*)stackTrace[i]-
+                                          (char*)dlinfo.dli_saddr));
       }
       out << '\n';
    }
@@ -531,7 +543,7 @@ void print_stack_trace(std::ostream &out)
 namespace {
 void print_stack_trace_signal_handler(void *)
 {
-  print_stack_trace(error_stream());
+   print_stack_trace(error_stream());
 }
 }
 
@@ -540,7 +552,7 @@ void disable_system_dialogs_on_crash()
 
 /// When an error signal (such as SIGABRT or SIGSEGV) is delivered to the
 /// process, print a stack trace and then exit.
-void print_stack_trace_on_error_signal(const std::string &argv0,
+void print_stack_trace_on_error_signal(StringRef argv0,
                                        bool disableCrashReporting)
 {
    ::sg_argv0 = argv0;

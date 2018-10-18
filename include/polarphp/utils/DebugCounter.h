@@ -75,7 +75,7 @@ public:
    // currently in a state where the counter will always execute.
    static bool isCounterSet(unsigned id)
    {
-      return getInstance().m_counters[id].m_isset;
+      return getInstance().m_counters[id].m_isSet;
    }
 
    // Return the skip and count for a counter. This only works for set counters.
@@ -114,7 +114,7 @@ public:
    // Return the name and description of the counter with the given id.
    std::pair<std::string, std::string> getCounterInfo(unsigned id) const
    {
-      return std::make_pair(m_registeredCounters[id], m_counterDesc.lookup(id));
+      return std::make_pair(m_registeredCounters[id], m_counters.lookup(id).m_desc);
    }
 
    // Iterate through the registered counters
@@ -153,7 +153,8 @@ private:
    unsigned addCounter(const std::string &name, const std::string &desc)
    {
       unsigned result = m_registeredCounters.insert(name);
-      m_counterDesc[result] = desc;
+      m_counters[result] = {};
+      m_counters[result].m_desc = desc;
       return result;
    }
    // Struct to store counter info.

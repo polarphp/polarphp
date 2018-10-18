@@ -68,6 +68,7 @@ namespace polar {
 namespace sys {
 
 using polar::basic::StringSwitch;
+using polar::utils::ManagedStatic;
 
 extern bool sg_coreFilesPrevented;
 extern const char sg_colorcodes[][2][8][10];
@@ -78,7 +79,7 @@ std::pair<std::chrono::microseconds, std::chrono::microseconds> get_resource_usa
 #if defined(HAVE_GETRUSAGE)
    struct rusage ru;
    ::getrusage(RUSAGE_SELF, &ru);
-   return { polar::to_duration(ru.ru_utime), polar::to_duration(ru.ru_stime) };
+   return { polar::utils::to_duration(ru.ru_utime), polar::utils::to_duration(ru.ru_stime) };
 #else
 #warning Cannot get usage times on this platform
    return { std::chrono::microseconds::zero(), std::chrono::microseconds::zero() };
@@ -230,7 +231,7 @@ std::error_code Process::fixupStandardFileDescriptors()
    for (int standardFD : standardFDs) {
       struct stat st;
       errno = 0;
-      if (polar::sys::retry_after_signal(-1, fstat, standardFD, &st) < 0) {
+      if (polar::utils::retry_after_signal(-1, fstat, standardFD, &st) < 0) {
          assert(errno && "expected errno to be set if fstat failed!");
          // fstat should return EBADF if the file descriptor is closed.
          if (errno != EBADF) {
@@ -243,7 +244,7 @@ std::error_code Process::fixupStandardFileDescriptors()
       }
       assert(errno == EBADF && "expected errno to have EBADF at this point!");
       if (nullFD < 0) {
-         if ((nullFD = polar::sys::retry_after_signal(-1, open, "/dev/null", O_RDWR)) < 0) {
+         if ((nullFD = polar::utils::retry_after_signal(-1, open, "/dev/null", O_RDWR)) < 0) {
             return std::error_code(errno, std::generic_category());
          }
       }

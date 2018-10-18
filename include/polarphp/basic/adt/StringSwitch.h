@@ -87,9 +87,8 @@ public:
       return *this;
    }
 
-   template<unsigned N>
    POLAR_ATTRIBUTE_ALWAYS_INLINE
-   StringSwitch& startsWith(StringLiteral str, T value)
+   StringSwitch &startsWith(StringLiteral str, T value)
    {
       if (!m_result && m_str.startsWith(str)) {
          m_result = std::move(value);
@@ -164,8 +163,6 @@ public:
       return cond(str0, value).conds(str1, str2, str3, str4, str5, str6, str7, str8, value);
    }
 
-   template <unsigned N0, unsigned N1, unsigned N2, unsigned N3, unsigned N4,
-             unsigned N5, unsigned N6, unsigned N7, unsigned N8, unsigned N9>
    POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &conds(StringLiteral str0, StringLiteral str1,
                        StringLiteral str2, StringLiteral str3,
@@ -226,7 +223,6 @@ public:
       return condLower(str0, value).condsLower(str1, str2, str3, value);
    }
 
-   template <unsigned N0, unsigned N1, unsigned N2, unsigned N3, unsigned N4>
    POLAR_ATTRIBUTE_ALWAYS_INLINE StringSwitch &
    condsLower(StringLiteral str0, StringLiteral str1,
               StringLiteral str2, StringLiteral str3,

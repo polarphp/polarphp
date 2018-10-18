@@ -976,6 +976,11 @@ public:
 ///
 class StringLiteral : public StringRef
 {
+private:
+   constexpr StringLiteral(const char *str, size_t N)
+      : StringRef(str, N)
+   {}
+
 public:
    template <size_t N>
    constexpr StringLiteral(const char (&str)[N])
@@ -991,7 +996,8 @@ public:
 
    // Explicit construction for strings like "foo\0bar".
    template <size_t N>
-   static constexpr StringLiteral withInnerNUL(const char (&str)[N]) {
+   static constexpr StringLiteral withInnerNUL(const char (&str)[N])
+   {
       return StringLiteral(str, N - 1);
    }
 };

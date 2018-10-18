@@ -186,7 +186,7 @@ void PrettyStackTraceProgram::print(RawOutStream &outstream) const
 #if defined(HAVE_BACKTRACE) && defined(ENABLE_BACKTRACES)
 static bool register_crash_printer()
 {
-   sys::add_signal_handler(crash_handler, nullptr);
+   utils::add_signal_handler(crash_handler, nullptr);
    return false;
 }
 #endif

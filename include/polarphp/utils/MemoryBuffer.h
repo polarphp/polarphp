@@ -52,7 +52,7 @@ protected:
    void init(const char *bufStart, const char *bufEnd,
              bool requiresNullTerminator);
 
-   static constexpr MappedFileRegion::MapMode m_mapMode =
+   static constexpr MappedFileRegion::MapMode sm_mapMode =
          MappedFileRegion::readonly;
 
 public:
@@ -176,7 +176,7 @@ class WritableMemoryBuffer : public MemoryBuffer
 protected:
    WritableMemoryBuffer() = default;
 
-   static constexpr MappedFileRegion::MapMode m_mapMode =
+   static constexpr MappedFileRegion::MapMode sm_mapMode =
          MappedFileRegion::priv;
 
 public:
@@ -244,7 +244,7 @@ class WriteThroughMemoryBuffer : public MemoryBuffer
 protected:
    WriteThroughMemoryBuffer() = default;
 
-   static constexpr MappedFileRegion::MapMode m_mapMode =
+   static constexpr MappedFileRegion::MapMode sm_mapMode =
          MappedFileRegion::readwrite;
 
 public:

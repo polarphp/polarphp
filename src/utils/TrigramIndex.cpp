@@ -69,7 +69,7 @@ void TrigramIndex::insert(std::string regex)
       // as they are weak signals. It's ok to still require them for the
       // rules we have already processed. It's just a small additional
       // computational cost.
-      if (m_index[trigram].size() >= 4) {
+      if (m_index[trigram].getSize() >= 4) {
          continue;
       }
 

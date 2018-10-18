@@ -16,6 +16,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "polarphp/utils/DynamicLibrary.h"
+#include "polarphp/utils/internal/DynamicLibraryHandleSetPrivate.h"
 
 namespace polar {
 namespace sys {
@@ -23,7 +24,8 @@ namespace sys {
 #if defined(HAVE_DLFCN_H) && defined(HAVE_DLOPEN)
 #include <dlfcn.h>
 
-DynamicLibrary::HandleSet::~HandleSet()
+namespace internal {
+HandleSet::~HandleSet()
 {
    // Close the libraries in reverse order.
    for (void *handle : polar::basic::reverse(m_handles)) {
@@ -37,7 +39,7 @@ DynamicLibrary::HandleSet::~HandleSet()
    DynamicLibrary::sm_searchOrder = DynamicLibrary::SO_Linker;
 }
 
-void *DynamicLibrary::HandleSet::dllOpen(const char *file, std::string *errorMsg)
+void *HandleSet::dllOpen(const char *file, std::string *errorMsg)
 {
    void *handle = dlopen(file, RTLD_LAZY|RTLD_GLOBAL);
    if (!handle) {
@@ -55,19 +57,19 @@ void *DynamicLibrary::HandleSet::dllOpen(const char *file, std::string *errorMsg
    return handle;
 }
 
-void DynamicLibrary::HandleSet::dllClose(void *handle)
+void HandleSet::dllClose(void *handle)
 {
    dlclose(handle);
 }
 
-void *DynamicLibrary::HandleSet::dllSym(void *handle, const char *symbol)
+void *HandleSet::dllSym(void *handle, const char *symbol)
 {
    return dlsym(handle, symbol);
 }
 
 #else // !HAVE_DLOPEN
 
-DynamicLibrary::HandleSet::~HandleSet()
+HandleSet::~HandleSet()
 {}
 
 void *DynamicLibrary::HandleSet::dllOpen(const char *file, std::string *errorMsg)
@@ -78,16 +80,17 @@ void *DynamicLibrary::HandleSet::dllOpen(const char *file, std::string *errorMsg
    return &sm_invalid;
 }
 
-void DynamicLibrary::HandleSet::dllClose(void *handle)
+void HandleSet::dllClose(void *handle)
 {
 }
 
-void *DynamicLibrary::HandleSet::dllSym(void *handle, const char *symbol)
+void *HandleSet::dllSym(void *handle, const char *symbol)
 {
    return nullptr;
 }
 
 #endif
+} // internal
 
 // Must declare the symbols in the global namespace.
 void *do_search(const char* symbolName) {

@@ -35,7 +35,6 @@ namespace utils {
 using polar::sys::MemoryBlock;
 using polar::sys::Memory;
 using polar::sys::OwningMemoryBlock;
-using polar::basic::RawFdOutStream;
 
 namespace {
 // A FileOutputBuffer which creates a temporary file in the same directory
@@ -111,8 +110,7 @@ public:
    Error commit() override
    {
       int fd;
-      std::error_code errorCode;
-      if (errorCode = polar::fs::open_file_for_write(m_finalPath, fd, fs::F_None, m_mode)) {
+      if (auto errorCode = polar::fs::open_file_for_write(m_finalPath, fd, fs::CD_CreateAlways, fs::F_None, m_mode)) {
          return error_code_to_error(errorCode);
       }
       RawFdOutStream outstream(fd, /*shouldClose=*/true, /*unbuffered=*/true);
@@ -188,7 +186,7 @@ FileOutputBuffer::create(StringRef path, size_t size, unsigned flags) {
    if ((flags & F_modify) && size == size_t(-1)) {
       if (stat.getType() == fs::FileType::regular_file) {
          size = stat.getSize();
-      } else if (Stat.type() == fs::file_type::file_not_found) {
+      } else if (stat.getType() == fs::FileType::file_not_found) {
          return error_code_to_error(ErrorCode::no_such_file_or_directory);
       } else {
          return error_code_to_error(ErrorCode::invalid_argument);

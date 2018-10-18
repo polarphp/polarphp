@@ -231,7 +231,7 @@ class MemoryBufferMMapFile : public MemoryBufferType
 public:
    MemoryBufferMMapFile(bool requiresNullTerminator, int fd, uint64_t len,
                         uint64_t offset, std::error_code &errorCode)
-      : m_mfr(fd, MemoryBufferType::MapMode, getLegalMapSize(len, offset),
+      : m_mfr(fd, MemoryBufferType::sm_mapMode, getLegalMapSize(len, offset),
               getLegalMapOffset(offset), errorCode)
    {
       if (!errorCode) {
@@ -271,7 +271,7 @@ get_memory_buffer_for_stream(int fd, const Twine &bufferName)
    // Read into Buffer until we hit EOF.
    do {
       buffer.reserve(buffer.getSize() + chunkSize);
-      readBytes = polar::sys::retry_after_signal(-1, read, fd, buffer.end(), chunkSize);
+      readBytes = polar::utils::retry_after_signal(-1, read, fd, buffer.end(), chunkSize);
       if (readBytes == -1) {
          return std::error_code(errno, std::generic_category());
       }
@@ -437,8 +437,8 @@ getReadWriteFile(const Twine &filename, uint64_t fileSize, uint64_t mapSize,
                  uint64_t offset)
 {
    int fd;
-   std::error_code errorCode = fs::open_file_for_write(
-            filename, fd, fs::F_RW | fs::F_NoTrunc);
+   std::error_code errorCode = fs::open_file_for_read_write(
+            filename, fd, fs::CD_OpenExisting, fs::OF_None);
 
    if (errorCode) {
       return errorCode;
@@ -554,7 +554,7 @@ getOpenFileImpl(int fd, const Twine &filename, uint64_t fileSize,
 
    while (bytesLeft) {
 #ifdef HAVE_PREAD
-      ssize_t numRead = sys::retry_after_signal(-1, ::pread, fd, bufPtr, bytesLeft,
+      ssize_t numRead = utils::retry_after_signal(-1, ::pread, fd, bufPtr, bytesLeft,
                                                 mapSize - bytesLeft + offset);
 #else
       ssize_t numRead = sys::retry_after_signal(-1, ::read, fd, bufPtr, bytesLeft);

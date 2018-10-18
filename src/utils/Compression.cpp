@@ -15,7 +15,7 @@
 #include "polarphp/utils/Error.h"
 #include "polarphp/utils/ErrorHandling.h"
 
-#if POLAR_ENABLE_ZLIB == 1 && HAVE_ZLIB_H
+#if defined(POLAR_ENABLE_ZLIB) && defined(HAVE_ZLIB_H)
 #include <zlib.h>
 #endif
 
@@ -23,7 +23,7 @@ namespace polar {
 namespace utils {
 namespace zlib {
 
-#if POLAR_ENABLE_ZLIB == 1 && HAVE_LIBZ
+#if defined(POLAR_ENABLE_ZLIB) && defined(HAVE_LIBZ)
 
 namespace {
 

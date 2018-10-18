@@ -1065,16 +1065,16 @@ StringRef get_host_cpu_name()
    }
 
    // Check subtypes first since those are more specific.
-#define x86_CPU_subtype(ARCHNAME, ENUM) \
+#define X86_CPU_SUBTYPE(ARCHNAME, ENUM) \
    if (subtype == x86::ENUM) \
    return ARCHNAME;
-#include "polar/utils/X86TargetParser.def"
+#include "polarphp/utils/X86TargetParser.h"
 
    // Now check types.
-#define x86_CPU_type(ARCHNAME, ENUM) \
+#define X86_CPU_TYPE(ARCHNAME, ENUM) \
    if (type == x86::ENUM) \
    return ARCHNAME;
-#include "polar/utils/X86TargetParser.def"
+#include "polarphp/utils/X86TargetParser.h"
    return "generic";
 }
 

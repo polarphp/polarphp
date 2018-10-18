@@ -57,6 +57,7 @@ namespace utils {
 
 using polar::basic::SmallString;
 using polar::basic::ArrayRef;
+using polar::basic::StringRef;
 
 class Md5
 {

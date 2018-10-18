@@ -28,18 +28,20 @@
 
 #include "polarphp/basic/adt/StlExtras.h"
 #include "polarphp/global/DataTypes.h"
+#include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/basic/adt/ArrayRef.h"
 
 #include <cassert>
 #include <cstdio>
 #include <tuple>
-#include <string_view>
 #include <utility>
-#include <iosfwd>
-#include <vector>
 #include <optional>
 
 namespace polar {
 namespace utils {
+
+using polar::basic::StringRef;
+using polar::basic::ArrayRef;
 
 /// This is a helper class used for handling formatted output.  It is the
 /// abstract base class of a templated derived class.
@@ -149,21 +151,21 @@ class FormattedString
 {
 public:
    enum Justification { JustifyNone, JustifyLeft, JustifyRight, JustifyCenter };
-   FormattedString(std::string_view str, unsigned width, Justification justify)
+   FormattedString(StringRef str, unsigned width, Justification justify)
       : m_str(str), m_width(width), m_justify(justify)
    {}
 
 private:
-   std::string_view m_str;
+   StringRef m_str;
    unsigned m_width;
    Justification m_justify;
-   friend class raw_ostream;
+   friend class RawOutStream;
 };
 
 /// left_justify - append spaces after string so total output is
 /// \p Width characters.  If \p Str is larger that \p Width, full string
 /// is written with no padding.
-inline FormattedString left_justify(std::string_view str, unsigned width)
+inline FormattedString left_justify(StringRef str, unsigned width)
 {
    return FormattedString(str, width, FormattedString::JustifyLeft);
 }
@@ -171,7 +173,7 @@ inline FormattedString left_justify(std::string_view str, unsigned width)
 /// right_justify - add spaces before string so total output is
 /// \p Width characters.  If \p Str is larger that \p Width, full string
 /// is written with no padding.
-inline FormattedString right_justify(std::string_view str, unsigned width)
+inline FormattedString right_justify(StringRef str, unsigned width)
 {
    return FormattedString(str, width, FormattedString::JustifyRight);
 }
@@ -179,7 +181,7 @@ inline FormattedString right_justify(std::string_view str, unsigned width)
 /// center_justify - add spaces before and after string so total output is
 /// \p Width characters.  If \p Str is larger that \p Width, full string
 /// is written with no padding.
-inline FormattedString center_justify(std::string_view str, unsigned width)
+inline FormattedString center_justify(StringRef str, unsigned width)
 {
    return FormattedString(str, width, FormattedString::JustifyCenter);
 }
@@ -193,7 +195,7 @@ class FormattedNumber
    bool m_hex;
    bool m_upper;
    bool m_hexPrefix;
-   friend class std::basic_ostream<char>;
+   friend class RawOutStream;
 
 public:
    FormattedNumber(uint64_t hexValue, int64_t decValue, unsigned width, bool hex, bool upper,
@@ -244,7 +246,7 @@ inline FormattedNumber format_decimal(int64_t value, unsigned width)
 
 class FormattedBytes
 {
-   std::vector<uint8_t> m_bytes;
+   ArrayRef<uint8_t> m_bytes;
 
    // If not None, display offsets for each line relative to starting value.
    std::optional<uint64_t> m_firstByteOffset;
@@ -253,8 +255,7 @@ class FormattedBytes
    uint8_t m_byteGroupSize; // How many hex bytes are grouped without spaces
    bool m_upper;            // Show offset and hex bytes as upper case.
    bool m_ascii;            // Show the ASCII bytes for the hex bytes to the right.
-   friend class std::basic_ostream<char>;
-
+   friend class RawOutStream;
 public:
    FormattedBytes(const std::vector<uint8_t> bytes, uint32_t indentLevel, std::optional<uint64_t> offset,
                   uint32_t npl, uint8_t bgs, bool upper, bool ascii)

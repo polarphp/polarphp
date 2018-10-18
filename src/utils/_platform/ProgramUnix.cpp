@@ -18,6 +18,7 @@
 #include "polarphp/utils/RawOutStream.h"
 #include "polarphp/utils/Program.h"
 #include "polarphp/utils/StringSaver.h"
+#include "polarphp/utils/ErrorNumber.h"
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -203,14 +204,14 @@ bool execute(ProcessInfo &processInfo, StringRef program,
    }
 
    BumpPtrAllocator allocator;
-   StringSaver saver(Allocator);
+   StringSaver saver(allocator);
    std::vector<const char *> argVector, envVector;
    const char **argv = nullptr;
    const char **envp = nullptr;
    argVector = to_null_terminated_cstring_array(args, saver);
    argv = argVector.data();
    if (env) {
-      envVector = toNullTerminatedCStringArray(*Env, Saver);
+      envVector = to_null_terminated_cstring_array(*env, saver);
       envp = envVector.data();
    }
 
@@ -273,7 +274,7 @@ bool execute(ProcessInfo &processInfo, StringRef program,
       // positive.
       pid_t pid = 0;
       int error = posix_spawn(&pid, program.getStr().c_str(), fileActions,
-                              /*attrp*/nullptr, const_cast<char **>(args),
+                              /*attrp*/nullptr, const_cast<char **>(argv),
                               const_cast<char **>(envp));
 
       if (fileActions) {
@@ -328,11 +329,11 @@ bool execute(ProcessInfo &processInfo, StringRef program,
       std::string pathStr = program;
       if (envp != nullptr) {
          execve(pathStr.c_str(),
-                const_cast<char **>(args),
+                const_cast<char **>(argv),
                 const_cast<char **>(envp));
       } else {
          execv(pathStr.c_str(),
-               const_cast<char **>(args));
+               const_cast<char **>(argv));
       }
 
       // If the execve() failed, we should exit. Follow Unix protocol and
@@ -427,7 +428,7 @@ ProcessInfo wait(const ProcessInfo &processInfo, unsigned secondsToWait,
 
       if (result == 127) {
          if (errMsg) {
-            *errMsg = polar::sys::get_error_str(ENOENT);
+            *errMsg = polar::utils::get_str_error(ENOENT);
          }
          waitResult.m_returnCode = -1;
          return waitResult;

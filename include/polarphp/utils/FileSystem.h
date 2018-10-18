@@ -67,6 +67,15 @@ using polar::utils::Expected;
 using polar::utils::Error;
 using polar::utils::Md5;
 
+#if defined(_WIN32)
+// A Win32 HANDLE is a typedef of void*
+using file_t = void *;
+#else
+using file_t = int;
+#endif
+
+extern const file_t sg_kInvalidFile;
+
 /// An enumeration for the file system's view of the type.
 enum class FileType
 {
@@ -461,7 +470,15 @@ std::error_code rename(const Twine &from, const Twine &to);
 ///
 /// @param From The path to copy from.
 /// @param To The path to copy to. This is created.
-std::error_code copy_file(const Twine &From, const Twine &To);
+std::error_code copy_file(const Twine &from, const Twine &to);
+
+
+/// Copy the contents of \a From to \a To.
+///
+/// @param From The path to copy from.
+/// @param ToFD The open file descriptor of the destination file.
+std::error_code copy_file(const Twine &from, int toFD);
+
 
 /// Resize path to size. File is resized as if by POSIX truncate().
 ///
@@ -981,9 +998,9 @@ std::error_code open_file(const Twine &name, int &resultFD,
 /// @param Mode The access permissions of the file, represented in octal.
 /// @returns errc::success if \a Name has been opened, otherwise a
 ///          platform-specific error_code.
-Expected<FileType> open_native_file(const Twine &name, CreationDisposition disp,
-                                    FileAccess access, OpenFlags flags,
-                                    unsigned mode = 0666);
+Expected<file_t> open_native_file(const Twine &name, CreationDisposition disp,
+                                  FileAccess access, OpenFlags flags,
+                                  unsigned mode = 0666);
 
 
 /// @brief Opens the file with the given name in a write-only or read-write
@@ -1021,7 +1038,7 @@ std::error_code open_file_for_write(const Twine &name, int &resultFD,
 /// @param Mode The access permissions of the file, represented in octal.
 /// @returns a platform-specific file descriptor if \a Name has been opened,
 ///          otherwise an error object.
-inline Expected<FileType> open_native_file_for_write(const Twine &name,
+inline Expected<file_t> open_native_file_for_write(const Twine &name,
                                                      CreationDisposition disp,
                                                      OpenFlags flags,
                                                      unsigned mode = 0666)
@@ -1064,7 +1081,7 @@ inline std::error_code open_file_for_read_write(const Twine &name, int &resultFD
 /// @param Mode The access permissions of the file, represented in octal.
 /// @returns a platform-specific file descriptor if \a Name has been opened,
 ///          otherwise an error object.
-inline Expected<FileType> open_native_file_for_read_write(const Twine &name,
+inline Expected<file_t> open_native_file_for_read_write(const Twine &name,
                                                           CreationDisposition disp,
                                                           OpenFlags flags,
                                                           unsigned mode = 0666)
@@ -1104,7 +1121,7 @@ std::error_code open_file_for_read(const Twine &name, int &resultFD,
 ///                 location.
 /// @returns a platform-specific file descriptor if \a Name has been opened,
 ///          otherwise an error object.
-Expected<FileType>
+Expected<file_t>
 open_native_file_for_read(const Twine &name, OpenFlags flags = OF_None,
                           SmallVectorImpl<char> *realPath = nullptr);
 
@@ -1113,7 +1130,7 @@ open_native_file_for_read(const Twine &name, OpenFlags flags = OF_None,
 ///
 /// @param F On input, this is the file to close.  On output, the file is
 /// set to kInvalidFile.
-void close_file(FileType &file);
+void close_file(file_t &file);
 
 std::error_code get_unique_id(const Twine path, UniqueId &result);
 
@@ -1238,12 +1255,12 @@ struct DirIterState;
 
 std::error_code directory_iterator_construct(DirIterState &, StringRef, bool);
 std::error_code directory_iterator_increment(DirIterState &);
-std::error_code DirectoryIterator_destruct(DirIterState &);
+std::error_code directory_iterator_destruct(DirIterState &);
 
 /// Keeps state for the DirectoryIterator.
 struct DirIterState {
    ~DirIterState() {
-      DirectoryIterator_destruct(*this);
+      directory_iterator_destruct(*this);
    }
 
    intptr_t m_iterationHandle = 0;

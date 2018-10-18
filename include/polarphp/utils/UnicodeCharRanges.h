@@ -24,7 +24,7 @@ namespace polar {
 namespace sys {
 
 using polar::basic::ArrayRef;
-using polar::utils::debug_stream;
+using polar::debug_stream;
 
 /// \brief Represents a closed range of Unicode code points [m_lower, m_upper].
 struct UnicodeCharRange

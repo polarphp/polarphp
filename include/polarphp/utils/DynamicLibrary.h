@@ -16,7 +16,6 @@
 #include <vector>
 #include <algorithm>
 #include "polarphp/global/Global.h"
-#include "polarphp/basic/adt/StlExtras.h"
 
 namespace polar {
 
@@ -28,6 +27,12 @@ class StringRef;
 namespace sys {
 
 using polar::basic::StringRef;
+
+namespace internal {
+class HandleSet;
+}
+
+using internal::HandleSet;
 
 /// This class provides a portable interface to dynamic libraries which also
 /// might be known as shared libraries, shared objects, dynamic shared
@@ -43,14 +48,6 @@ using polar::basic::StringRef;
 /// or for unloading libraries when the LLVM library is unloaded.
 class DynamicLibrary
 {
-   // Placeholder whose address represents an invalid library.
-   // We use this instead of NULL or a pointer-int pair because the OS library
-   // might define 0 or 1 to be "special" handles, such as "search all".
-   static char sm_invalid;
-
-   // Opaque data used to interface with OS-specific dynamic library handling.
-   void *m_data;
-
 public:
    explicit DynamicLibrary(void *data = &sm_invalid) : m_data(data)
    {}
@@ -138,8 +135,15 @@ public:
    /// libraries.
    /// @brief Add searchable symbol/value pair.
    static void addSymbol(StringRef symbolName, void *symbolValue);
+private:
+   friend class HandleSet;
+   // Placeholder whose address represents an invalid library.
+   // We use this instead of NULL or a pointer-int pair because the OS library
+   // might define 0 or 1 to be "special" handles, such as "search all".
+   static char sm_invalid;
 
-   class HandleSet;
+   // Opaque data used to interface with OS-specific dynamic library handling.
+   void *m_data;
 };
 
 } // utils

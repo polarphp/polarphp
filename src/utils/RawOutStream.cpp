@@ -415,7 +415,7 @@ RawOutStream &RawOutStream::operator<<(const FormattedBytes &fbytes)
    size_t lineIndex = 0;
    auto bytes = fbytes.m_bytes;
    const size_t size = bytes.getSize();
-   HexPrintStyle hps = fbytes.m_isUpper ? HexPrintStyle::Upper : HexPrintStyle::Lower;
+   HexPrintStyle hps = fbytes.m_upper ? HexPrintStyle::Upper : HexPrintStyle::Lower;
    uint64_t offsetWidth = 0;
    if (fbytes.m_firstByteOffset.has_value()) {
       // Figure out how many nibbles are needed to print the largest offset
