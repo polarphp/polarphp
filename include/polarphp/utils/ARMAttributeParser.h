@@ -19,124 +19,140 @@
 
 namespace polar {
 
+namespace basic {
+template <typename T>
+class SmallVectorImpl;
 class StringRef;
+template<typename T>
+class ArrayRef;
+} // basic
 
 using polar::utils::ScopedPrinter;
+using polar::basic::StringRef;
+using polar::basic::SmallVectorImpl;
+using polar::basic::ArrayRef;
 
 class ARMAttributeParser
 {
-   ScopedPrinter *SW;
+   ScopedPrinter *m_sw;
 
-   std::map<unsigned, unsigned> Attributes;
+   std::map<unsigned, unsigned> m_attributes;
 
-   struct DisplayHandler {
-      ARMBuildAttrs::AttrType Attribute;
-      void (ARMAttributeParser::*Routine)(ARMBuildAttrs::AttrType,
-                                          const uint8_t *, uint32_t &);
+   struct DisplayHandler
+   {
+      armbuildattrs::AttrType m_attribute;
+      void (ARMAttributeParser::*m_routine)(armbuildattrs::AttrType,
+                                            const uint8_t *, uint32_t &);
    };
-   static const DisplayHandler DisplayRoutines[];
+   static const DisplayHandler sm_displayRoutines[];
 
-   uint64_t ParseInteger(const uint8_t *Data, uint32_t &Offset);
-   StringRef ParseString(const uint8_t *Data, uint32_t &Offset);
+   uint64_t parseInteger(const uint8_t *data, uint32_t &offset);
+   StringRef parseString(const uint8_t *data, uint32_t &offset);
 
-   void IntegerAttribute(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                         uint32_t &Offset);
-   void StringAttribute(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                        uint32_t &Offset);
+   void integerAttribute(armbuildattrs::AttrType tag, const uint8_t *data,
+                         uint32_t &offset);
+   void stringAttribute(armbuildattrs::AttrType tag, const uint8_t *data,
+                        uint32_t &offset);
 
-   void PrintAttribute(unsigned Tag, unsigned Value, StringRef ValueDesc);
+   void printAttribute(unsigned tag, unsigned Value, StringRef ValueDesc);
 
-   void CPU_arch(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                 uint32_t &Offset);
-   void CPU_arch_profile(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                         uint32_t &Offset);
-   void ARM_ISA_use(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                    uint32_t &Offset);
-   void THUMB_ISA_use(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                      uint32_t &Offset);
-   void FP_arch(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                uint32_t &Offset);
-   void WMMX_arch(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                  uint32_t &Offset);
-   void Advanced_SIMD_arch(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                           uint32_t &Offset);
-   void PCS_config(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                   uint32_t &Offset);
-   void ABI_PCS_R9_use(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                       uint32_t &Offset);
-   void ABI_PCS_RW_data(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                        uint32_t &Offset);
-   void ABI_PCS_RO_data(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                        uint32_t &Offset);
-   void ABI_PCS_GOT_use(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                        uint32_t &Offset);
-   void ABI_PCS_wchar_t(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                        uint32_t &Offset);
-   void ABI_FP_rounding(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                        uint32_t &Offset);
-   void ABI_FP_denormal(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                        uint32_t &Offset);
-   void ABI_FP_exceptions(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                          uint32_t &Offset);
-   void ABI_FP_user_exceptions(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                               uint32_t &Offset);
-   void ABI_FP_number_model(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                            uint32_t &Offset);
-   void ABI_align_needed(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                         uint32_t &Offset);
-   void ABI_align_preserved(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                            uint32_t &Offset);
-   void ABI_enum_size(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                      uint32_t &Offset);
-   void ABI_HardFP_use(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                       uint32_t &Offset);
-   void ABI_VFP_args(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                     uint32_t &Offset);
-   void ABI_WMMX_args(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                      uint32_t &Offset);
-   void ABI_optimization_goals(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                               uint32_t &Offset);
-   void ABI_FP_optimization_goals(ARMBuildAttrs::AttrType Tag,
-                                  const uint8_t *Data, uint32_t &Offset);
-   void compatibility(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                      uint32_t &Offset);
-   void CPU_unaligned_access(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                             uint32_t &Offset);
-   void FP_HP_extension(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                        uint32_t &Offset);
-   void ABI_FP_16bit_format(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                            uint32_t &Offset);
-   void MPextension_use(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                        uint32_t &Offset);
-   void DIV_use(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                uint32_t &Offset);
-   void DSP_extension(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                      uint32_t &Offset);
-   void T2EE_use(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                 uint32_t &Offset);
-   void Virtualization_use(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                           uint32_t &Offset);
-   void nodefaults(ARMBuildAttrs::AttrType Tag, const uint8_t *Data,
-                   uint32_t &Offset);
+   void CPU_arch(armbuildattrs::AttrType tag, const uint8_t *data,
+                 uint32_t &offset);
+   void CPU_arch_profile(armbuildattrs::AttrType tag, const uint8_t *data,
+                         uint32_t &offset);
+   void ARM_ISA_use(armbuildattrs::AttrType tag, const uint8_t *data,
+                    uint32_t &offset);
+   void THUMB_ISA_use(armbuildattrs::AttrType tag, const uint8_t *data,
+                      uint32_t &offset);
+   void FP_arch(armbuildattrs::AttrType tag, const uint8_t *data,
+                uint32_t &offset);
+   void WMMX_arch(armbuildattrs::AttrType tag, const uint8_t *data,
+                  uint32_t &offset);
+   void Advanced_SIMD_arch(armbuildattrs::AttrType tag, const uint8_t *data,
+                           uint32_t &offset);
+   void PCS_config(armbuildattrs::AttrType tag, const uint8_t *data,
+                   uint32_t &offset);
+   void ABI_PCS_R9_use(armbuildattrs::AttrType tag, const uint8_t *data,
+                       uint32_t &offset);
+   void ABI_PCS_RW_data(armbuildattrs::AttrType tag, const uint8_t *data,
+                        uint32_t &offset);
+   void ABI_PCS_RO_data(armbuildattrs::AttrType tag, const uint8_t *data,
+                        uint32_t &offset);
+   void ABI_PCS_GOT_use(armbuildattrs::AttrType tag, const uint8_t *data,
+                        uint32_t &offset);
+   void ABI_PCS_wchar_t(armbuildattrs::AttrType tag, const uint8_t *data,
+                        uint32_t &offset);
+   void ABI_FP_rounding(armbuildattrs::AttrType tag, const uint8_t *data,
+                        uint32_t &offset);
+   void ABI_FP_denormal(armbuildattrs::AttrType tag, const uint8_t *data,
+                        uint32_t &offset);
+   void ABI_FP_exceptions(armbuildattrs::AttrType tag, const uint8_t *data,
+                          uint32_t &offset);
+   void ABI_FP_user_exceptions(armbuildattrs::AttrType tag, const uint8_t *data,
+                               uint32_t &offset);
+   void ABI_FP_number_model(armbuildattrs::AttrType tag, const uint8_t *data,
+                            uint32_t &offset);
+   void ABI_align_needed(armbuildattrs::AttrType tag, const uint8_t *data,
+                         uint32_t &offset);
+   void ABI_align_preserved(armbuildattrs::AttrType tag, const uint8_t *data,
+                            uint32_t &offset);
+   void ABI_enum_size(armbuildattrs::AttrType tag, const uint8_t *data,
+                      uint32_t &offset);
+   void ABI_HardFP_use(armbuildattrs::AttrType tag, const uint8_t *data,
+                       uint32_t &offset);
+   void ABI_VFP_args(armbuildattrs::AttrType tag, const uint8_t *data,
+                     uint32_t &offset);
+   void ABI_WMMX_args(armbuildattrs::AttrType tag, const uint8_t *data,
+                      uint32_t &offset);
+   void ABI_optimization_goals(armbuildattrs::AttrType tag, const uint8_t *data,
+                               uint32_t &offset);
+   void ABI_FP_optimization_goals(armbuildattrs::AttrType tag,
+                                  const uint8_t *data, uint32_t &offset);
+   void compatibility(armbuildattrs::AttrType tag, const uint8_t *data,
+                      uint32_t &offset);
+   void CPU_unaligned_access(armbuildattrs::AttrType tag, const uint8_t *data,
+                             uint32_t &offset);
+   void FP_HP_extension(armbuildattrs::AttrType tag, const uint8_t *data,
+                        uint32_t &offset);
+   void ABI_FP_16bit_format(armbuildattrs::AttrType tag, const uint8_t *data,
+                            uint32_t &offset);
+   void MPextension_use(armbuildattrs::AttrType tag, const uint8_t *data,
+                        uint32_t &offset);
+   void DIV_use(armbuildattrs::AttrType tag, const uint8_t *data,
+                uint32_t &offset);
+   void DSP_extension(armbuildattrs::AttrType tag, const uint8_t *data,
+                      uint32_t &offset);
+   void T2EE_use(armbuildattrs::AttrType tag, const uint8_t *data,
+                 uint32_t &offset);
+   void Virtualization_use(armbuildattrs::AttrType tag, const uint8_t *data,
+                           uint32_t &offset);
+   void nodefaults(armbuildattrs::AttrType tag, const uint8_t *data,
+                   uint32_t &offset);
 
-   void ParseAttributeList(const uint8_t *Data, uint32_t &Offset,
+   void parseAttributeList(const uint8_t *data, uint32_t &offset,
                            uint32_t Length);
-   void ParseIndexList(const uint8_t *Data, uint32_t &Offset,
+   void parseIndexList(const uint8_t *data, uint32_t &offset,
                        SmallVectorImpl<uint8_t> &IndexList);
-   void ParseSubsection(const uint8_t *Data, uint32_t Length);
+   void parseSubsection(const uint8_t *data, uint32_t Length);
 public:
-   ARMAttributeParser(ScopedPrinter *SW) : SW(SW) {}
+   ARMAttributeParser(ScopedPrinter *sw)
+      : m_sw(sw)
+   {}
 
-   ARMAttributeParser() : SW(nullptr) { }
+   ARMAttributeParser()
+      : m_sw(nullptr)
+   {}
 
-   void Parse(ArrayRef<uint8_t> Section, bool isLittle);
+   void parse(ArrayRef<uint8_t> Section, bool isLittle);
 
-   bool hasAttribute(unsigned Tag) const {
-      return Attributes.count(Tag);
+   bool hasAttribute(unsigned tag) const
+   {
+      return m_attributes.count(tag);
    }
 
-   unsigned getAttributeValue(unsigned Tag) const {
-      return Attributes.find(Tag)->second;
+   unsigned getAttributeValue(unsigned tag) const
+   {
+      return m_attributes.find(tag)->second;
    }
 };
 
