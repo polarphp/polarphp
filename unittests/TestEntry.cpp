@@ -10,6 +10,7 @@
 // Created by polarboy on 2018/10/12.
 
 #include "polarphp/utils/Signals.h"
+#include "polarphp/basic/adt/StringRef.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -24,8 +25,7 @@ const char *TestMainArgv0;
 
 int main(int argc, char **argv)
 {
-   polar::utils::print_stack_trace_on_error_signal(argv[0],
-         true /* Disable crash reporting */);
+   polar::utils::print_stack_trace_on_error_signal(argv[0], true);
 
    //   // Initialize both gmock and gtest.
    ::testing::InitGoogleMock(&argc, argv);

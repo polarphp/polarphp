@@ -1018,7 +1018,7 @@ Expected<file_t> open_native_file(const Twine &name, CreationDisposition disp,
 /// @param Mode The access permissions of the file, represented in octal.
 /// @returns errc::success if \a Name has been opened, otherwise a
 ///          platform-specific error_code.
-std::error_code open_file_for_write(const Twine &name, int &resultFD,
+inline std::error_code open_file_for_write(const Twine &name, int &resultFD,
                                     CreationDisposition disp = CD_CreateAlways,
                                     OpenFlags flags = OF_None, unsigned mode = 0666)
 {

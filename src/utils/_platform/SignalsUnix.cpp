@@ -86,6 +86,7 @@
 #endif
 
 using polar::utils::ManagedStatic;
+using polar::utils::StringRef;
 
 static void signal_handler(int sig);  // defined below.
 /// The function to call if ctrl-c is pressed.

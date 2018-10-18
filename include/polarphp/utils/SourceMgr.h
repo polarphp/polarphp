@@ -62,8 +62,7 @@ private:
    {
       /// The memory buffer for the file.
       std::unique_ptr<MemoryBuffer> m_buffer;
-      /// This is the location of the parent include, or null if at the top level.
-      SMLocation m_includeLoc;
+
       /// Helper type for OffsetCache below: since we're storing many offsets
       /// into relatively small files (often smaller than 2^8 or 2^16 bytes),
       /// we select the offset vector element type dynamically based on the
@@ -87,7 +86,8 @@ private:
       /// enough to store offsets inside \c Buffer.
       template<typename T>
       unsigned getLineNumber(const char *ptr) const;
-
+      /// This is the location of the parent include, or null if at the top level.
+      SMLocation m_includeLoc;
       SrcBuffer() = default;
       SrcBuffer(SrcBuffer &&);
       SrcBuffer(const SrcBuffer &) = delete;
@@ -113,7 +113,7 @@ public:
    SourceMgr() = default;
    SourceMgr(const SourceMgr &) = delete;
    SourceMgr &operator=(const SourceMgr &) = delete;
-   ~SourceMgr();
+   ~SourceMgr() = default;
 
    void setIncludeDirs(const std::vector<std::string> &dirs)
    {
