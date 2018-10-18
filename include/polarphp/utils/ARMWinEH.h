@@ -238,10 +238,11 @@ inline bool epilogue_folding(const RuntimeFunction &rf)
 /// handling the special encoding when the value is >= 0x3f4.
 inline uint16_t stack_adjustment(const RuntimeFunction &rf)
 {
-   uint16_t Adjustment = RF.getStackAdjust();
-   if (Adjustment >= 0x3f4)
-      return (Adjustment & 0x3) ? ((Adjustment & 0x3) << 2) - 1 : 0;
-   return Adjustment;
+   uint16_t adjustment = rf.getStackAdjust();
+   if (adjustment >= 0x3f4) {
+      return (adjustment & 0x3) ? ((adjustment & 0x3) << 2) - 1 : 0;
+   }
+   return adjustment;
 }
 
 /// saved_register_mask - Utility function to calculate the set of saved general
@@ -416,16 +417,16 @@ struct ExceptionDataRecord
    {
       assert(e() == 0 && "epilogue scopes are only present when the E bit is 0");
       size_t offset = header_words(*this);
-      return makeArrayRef(&m_data[offset], epilogueCount());
+      return polar::basic::make_array_ref(&m_data[offset], epilogueCount());
    }
 
    ArrayRef<uint8_t> unwindByteCode() const
    {
       const size_t offset = header_words(*this)
             + (e() ? 0 :  epilogueCount());
-      const uint8_t *ByteCode =
+      const uint8_t *byteCode =
             reinterpret_cast<const uint8_t *>(&m_data[offset]);
-      return makeArrayRef(ByteCode, codeWords() * sizeof(uint32_t));
+      return polar::basic::make_array_ref(byteCode, codeWords() * sizeof(uint32_t));
    }
 
    uint32_t exceptionHandlerRVA() const
@@ -443,7 +444,7 @@ struct ExceptionDataRecord
 
 inline size_t header_words(const ExceptionDataRecord &xr)
 {
-   return (xr.data[0] & 0xff800000) ? 1 : 2;
+   return (xr.m_data[0] & 0xff800000) ? 1 : 2;
 }
 
 } // wineh
