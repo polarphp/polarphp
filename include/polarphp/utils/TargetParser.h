@@ -73,7 +73,7 @@ enum class NeonSupportLevel
 };
 
 // FPU names.
-enum fpuKind
+enum FPUKind
 {
 #define ARM_FPU(NAME, KIND, VERSION, NEON_SUPPORT, RESTRICTION) KIND,
 #include "polarphp/utils/ARMTargetParser.h"
@@ -88,7 +88,7 @@ enum class ArchKind
 };
 
 // arch extension modifiers for CPUs.
-enum archExtKind : unsigned
+enum ArchExtKind : unsigned
 {
    AEK_INVALID =     0,
    AEK_NONE =        1,
@@ -135,7 +135,7 @@ enum class EndianKind
 };
 
 // v6/v7/v8 profile
-enum class profileKind
+enum class ProfileKind
 {
    INVALID = 0, A, R, M
 };
@@ -176,7 +176,7 @@ ArchKind parse_cpu_arch(StringRef cpu);
 void fill_valid_cpu_arch_list(SmallVectorImpl<StringRef> &values);
 ISAKind parse_arch_isa(StringRef arch);
 EndianKind parse_arch_endian(StringRef arch);
-profileKind parse_arch_profile(StringRef arch);
+ProfileKind parse_arch_profile(StringRef arch);
 unsigned parse_arch_version(StringRef arch);
 
 StringRef compute_default_target_abi(const Triple &TT, StringRef cpu);
@@ -252,7 +252,7 @@ ArchKind parse_cpu_arch(StringRef cpu);
 void fill_valid_cpu_arch_list(SmallVectorImpl<StringRef> &values);
 arm::ISAKind parse_arch_isa(StringRef arch);
 arm::EndianKind parse_arch_endian(StringRef arch);
-arm::profileKind parse_arch_profile(StringRef arch);
+arm::ProfileKind parse_arch_profile(StringRef arch);
 unsigned parse_arch_version(StringRef arch);
 
 } // namespace AArch64

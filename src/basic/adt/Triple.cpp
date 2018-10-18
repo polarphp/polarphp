@@ -385,9 +385,9 @@ Triple::ArchType parse_arm_arch(StringRef archName)
       return Triple::ArchType::UnknownArch;
    }
    // Thumb only for v6m
-   arm::profileKind profile = arm::parse_arch_profile(archName);
+   arm::ProfileKind profile = arm::parse_arch_profile(archName);
    unsigned version = arm::parse_arch_version(archName);
-   if (profile == arm::profileKind::M && version == 6) {
+   if (profile == arm::ProfileKind::M && version == 6) {
       if (endian == arm::EndianKind::BIG) {
          return Triple::ArchType::thumbeb;
       } else {

@@ -485,8 +485,8 @@ write_file_with_encoding(StringRef fileName, StringRef contents,
    return errorCode;
 }
 
-bool command_line_fits_within_system_limits(StringRef program,
-                                            ArrayRef<StringRef> args)
+bool commandline_fits_within_system_limits(StringRef program,
+                                           ArrayRef<StringRef> args)
 {
    static long argMax = sysconf(_SC_ARG_MAX);
    // POSIX requires that _POSIX_ARG_MAX is 4096, which is the lowest possible
@@ -499,7 +499,7 @@ bool command_line_fits_within_system_limits(StringRef program,
    if (effectiveArgMax > argMax) {
       effectiveArgMax = argMax;
    } else if (effectiveArgMax < argMin) {
-       effectiveArgMax = argMin;
+      effectiveArgMax = argMin;
    }
 
    // System says no practical limit.

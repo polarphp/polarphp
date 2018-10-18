@@ -70,7 +70,7 @@ ProcessInfo execute_no_wait(StringRef program, ArrayRef<StringRef> args,
    return processInfo;
 }
 
-bool command_line_fits_within_system_limits(StringRef program,
+bool commandline_fits_within_system_limits(StringRef program,
                                             ArrayRef<const char *> args)
 {
    SmallVector<StringRef, 8> stringRefArgs;

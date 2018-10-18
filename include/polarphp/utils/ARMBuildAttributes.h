@@ -14,9 +14,14 @@
 
 namespace polar {
 
+// forward declare class with namespace
+namespace basic {
 class StringRef;
+} // basic
 
 namespace armbuildattrs {
+
+using polar::basic::StringRef;
 
 enum SpecialAttr
 {

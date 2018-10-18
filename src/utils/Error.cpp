@@ -80,7 +80,7 @@ std::error_code ErrorList::convertToErrorCode() const
                           *sg_errorErrorCat);
 }
 
-std::error_code inconvertibleErrorCode()
+std::error_code inconvertible_error_code()
 {
    return std::error_code(static_cast<int>(ErrorErrorCode::InconvertibleError),
                           *sg_errorErrorCat);
@@ -100,7 +100,7 @@ std::error_code error_to_error_code(Error error)
    handle_all_errors(std::move(error), [&](const ErrorInfoBase &errorInfo) {
       errorCode = errorInfo.convertToErrorCode();
    });
-   if (errorCode == inconvertibleErrorCode()) {
+   if (errorCode == inconvertible_error_code()) {
       report_fatal_error(errorCode.message());
    }
    return errorCode;
