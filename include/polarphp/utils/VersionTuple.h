@@ -65,7 +65,7 @@ public:
                          unsigned build)
       : m_major(major), m_minor(minor),
         m_hasMinor(true), m_subminor(subminor),
-        m_hasSubminor(true), m_build(m_build),
+        m_hasSubminor(true), m_build(build),
         m_hasBuild(true)
    {}
 

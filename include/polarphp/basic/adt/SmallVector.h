@@ -432,7 +432,7 @@ public:
       if (POLAR_UNLIKELY(this->getSize() >= this->getCapacity())) {
          this->grow();
       }
-      memcpy(this->end(), &element, sizeof(T));
+      memcpy((void *)this->end(), &element, sizeof(T));
       this->setSize(this->getSize() + 1);
    }
 

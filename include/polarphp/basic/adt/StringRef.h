@@ -103,7 +103,7 @@ public:
    /// Construct a string ref from an std::string.
    POLAR_ATTRIBUTE_ALWAYS_INLINE
    /*implicit*/ StringRef(const std::string &str)
-      : m_data(str.c_str()), m_length(str.length())
+      : m_data(str.data()), m_length(str.length())
    {}
 
    static StringRef withNullAsEmpty(const char *data)
@@ -362,7 +362,8 @@ public:
    /// found.
    POLAR_NODISCARD
    POLAR_ATTRIBUTE_ALWAYS_INLINE
-   size_t find(char character, size_t from = 0) const {
+   size_t find(char character, size_t from = 0) const
+   {
       size_t findBegin = std::min(from, m_length);
       if (findBegin < m_length) { // Avoid calling memchr with nullptr.
          // Just forward to memchr, which is faster than a hand-rolled loop.
@@ -834,11 +835,7 @@ public:
    POLAR_NODISCARD
    std::pair<StringRef, StringRef> split(char separator) const
    {
-      size_t idx = find(separator);
-      if (idx == npos) {
-         return std::make_pair(*this, StringRef());
-      }
-      return std::make_pair(slice(0, idx), slice(idx + 1, npos));
+      return split(StringRef(&separator, 1));
    }
 
    /// Split into two substrings around the first occurrence of a separator
@@ -860,6 +857,27 @@ public:
       }
       return std::make_pair(slice(0, idx), slice(idx + separator.getSize(), npos));
    }
+
+   /// Split into two substrings around the last occurrence of a separator
+   /// string.
+   ///
+   /// If \p Separator is in the string, then the result is a pair (LHS, RHS)
+   /// such that (*this == LHS + Separator + RHS) is true and RHS is
+   /// minimal. If \p Separator is not in the string, then the result is a
+   /// pair (LHS, RHS) where (*this == LHS) and (RHS == "").
+   ///
+   /// \param Separator - The string to split on.
+   /// \return - The split substrings.
+   POLAR_NODISCARD
+   std::pair<StringRef, StringRef> rsplit(StringRef separator) const
+   {
+      size_t idx = rfind(separator);
+      if (idx == npos) {
+          return std::make_pair(*this, StringRef());
+      }
+      return std::make_pair(slice(0, idx), slice(idx + separator.size(), npos));
+   }
+
 
    /// Split into substrings around the occurrences of a separator string.
    ///
@@ -909,11 +927,7 @@ public:
    POLAR_NODISCARD
    std::pair<StringRef, StringRef> rsplit(char separator) const
    {
-      size_t idx = rfind(separator);
-      if (idx == npos) {
-         return std::make_pair(*this, StringRef());
-      }
-      return std::make_pair(slice(0, idx), slice(idx + 1, npos));
+      return rsplit(StringRef(&separator, 1));
    }
 
    /// Return string with consecutive \p Char characters starting from the
