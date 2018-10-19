@@ -681,7 +681,7 @@ public:
          this->grow();
          iter = this->begin() + eltNo;
       }
-      ::new ((void*) this->end()) T(std::move(this->back()));
+      ::new ((void*) this->end()) T(std::move(this->getBack()));
       // Push everything else over.
       std::move_backward(iter, this->end() - 1, this->end());
       this->setSize(this->getSize() + 1);
