@@ -225,7 +225,7 @@ public:
       }
       // Otherwise, grow from m_vector to set.
       while (!m_vector.empty()) {
-         m_set.insert(m_vector.back());
+         m_set.insert(m_vector.getBack());
          m_vector.pop_back();
       }
       m_set.insert(value);

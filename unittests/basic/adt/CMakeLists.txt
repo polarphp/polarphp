@@ -24,6 +24,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    StringMapTest.cpp
    SmallStringTest.cpp
    SmallVectorTest.cpp
+   SmallSetTest.cpp
    TwineTest.cpp
    TripleTest.cpp
    )
