@@ -18,6 +18,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    ArrayRefTest.cpp
    BitVectorTest.cpp
    BitMaskEnumTest.cpp
+   BreadthFirstIteratorTest.cpp
    FuncExtrasTest.cpp
    FuncRefTest.cpp
    HashingTest.cpp
