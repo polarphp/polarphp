@@ -440,7 +440,7 @@ protected:
       // use memcpy here. Note that iter and end are iterators and thus might be
       // invalid for memcpy if they are equal.
       if (iter != end) {
-         memcpy(dest, iter, (end - iter) * sizeof(T));
+         std::memcpy(reinterpret_cast<void *>(dest), reinterpret_cast<const void *>(iter), (end - iter) * sizeof(T));
       }
    }
 

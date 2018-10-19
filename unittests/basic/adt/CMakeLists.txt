@@ -19,6 +19,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    BitVectorTest.cpp
    BitMaskEnumTest.cpp
    BreadthFirstIteratorTest.cpp
+   BumpPtrListTest.cpp
    DenseMapTest.cpp
    DenseSetTest.cpp
    FuncExtrasTest.cpp
