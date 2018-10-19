@@ -258,10 +258,8 @@ void **get_bucket_for(unsigned hashValue, void **buckets, unsigned numBuckets)
 /// allocate_buckets - Allocated initialized bucket memory.
 void **allocate_buckets(unsigned numBuckets)
 {
-   void **buckets = static_cast<void**>(calloc(numBuckets+1, sizeof(void*)));
-   if (buckets == nullptr) {
-      polar::utils::report_bad_alloc_error("Allocation of Buckets failed.");
-   }
+   void **buckets = static_cast<void**>(polar::utils::safe_calloc(numBuckets + 1,
+                                                    sizeof(void*)));
    // Set the very last bucket to be a non-null "pointer".
    buckets[numBuckets] = reinterpret_cast<void*>(-1);
    return buckets;

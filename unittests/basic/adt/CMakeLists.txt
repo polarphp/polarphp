@@ -23,6 +23,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    DenseMapTest.cpp
    DenseSetTest.cpp
    EquivalenceClassesTest.cpp
+   FoldingSetTest.cpp
    FuncExtrasTest.cpp
    FuncRefTest.cpp
    HashingTest.cpp
