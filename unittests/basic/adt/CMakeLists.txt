@@ -20,6 +20,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    HashingTest.cpp
    IteratorTest.cpp
    MappedIteratorTest.cpp
+   MapVectorTest.cpp
    StringRefTest.cpp
    StringExtrasTest.cpp
    STLExtrasTest.cpp

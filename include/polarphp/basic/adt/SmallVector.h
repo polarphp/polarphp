@@ -61,6 +61,11 @@ public:
       return m_size;
    }
 
+   size_t size() const
+   {
+      return m_size;
+   }
+
    size_t getCapacity() const
    {
       return m_capacity;
@@ -251,6 +256,16 @@ public:
       return begin()[0];
    }
 
+   reference front()
+   {
+      return getFront();
+   }
+
+   const_reference front() const
+   {
+      return getFront();
+   }
+
    reference getBack()
    {
       assert(!empty());
@@ -260,6 +275,16 @@ public:
    {
       assert(!empty());
       return end()[-1];
+   }
+
+   reference back()
+   {
+      return getBack();
+   }
+
+   const_reference back() const
+   {
+      return getBack();
    }
 };
 

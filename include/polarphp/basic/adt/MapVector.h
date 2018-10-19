@@ -33,13 +33,14 @@ template<typename KeyT, typename ValueT,
          typename VectorType = std::vector<std::pair<KeyT, ValueT>>>
 class MapVector
 {
-   using value_type = typename VectorType::value_type;
-   using size_type = typename VectorType::size_type;
-
    MapType m_map;
    VectorType m_vector;
-
+   static_assert(
+         std::is_integral<typename MapType::mapped_type>::value,
+         "The mapped_type of the specified Map must be an integral type");
 public:
+   using value_type = typename VectorType::value_type;
+   using size_type = typename VectorType::size_type;
    using iterator = typename VectorType::iterator;
    using const_iterator = typename VectorType::const_iterator;
    using reverse_iterator = typename VectorType::reverse_iterator;
@@ -165,9 +166,9 @@ public:
 
    std::pair<iterator, bool> insert(const std::pair<KeyT, ValueT> &keyValue)
    {
-      std::pair<KeyT, unsigned> pair = std::make_pair(keyValue.first, 0);
+      std::pair<KeyT, typename MapType::mapped_type> pair = std::make_pair(keyValue.first, 0);
       std::pair<typename MapType::iterator, bool> result = m_map.insert(pair);
-      unsigned &iter = result.first->second;
+      auto &iter = result.first->second;
       if (result.second) {
          m_vector.push_back(std::make_pair(keyValue.first, keyValue.second));
          iter = m_vector.size() - 1;
@@ -179,9 +180,9 @@ public:
    std::pair<iterator, bool> insert(std::pair<KeyT, ValueT> &&keyValue)
    {
       // Copy KV.first into the map, then move it into the m_vector.
-      std::pair<KeyT, unsigned> pair = std::make_pair(keyValue.first, 0);
+      std::pair<KeyT, typename MapType::mapped_type> pair = std::make_pair(keyValue.first, 0);
       std::pair<typename MapType::iterator, bool> result = m_map.insert(pair);
-      unsigned &iter = result.first->second;
+      auto &iter = result.first->second;
       if (result.second) {
          m_vector.push_back(std::move(keyValue));
          iter = m_vector.size() - 1;
@@ -200,17 +201,17 @@ public:
    {
       typename MapType::const_iterator pos = m_map.find(key);
       return pos == m_map.end()? m_vector.end() :
-                               (m_vector.begin() + pos->second);
+                                 (m_vector.begin() + pos->second);
    }
 
    const_iterator find(const KeyT &key) const
    {
       typename MapType::const_iterator pos = m_map.find(key);
       return pos == m_map.end()? m_vector.end() :
-                               (m_vector.begin() + pos->second);
+                                 (m_vector.begin() + pos->second);
    }
 
-   /// \brief Remove the last element from the m_vector.
+   /// Remove the last element from the m_vector.
    void pop_back()
    {
       typename MapType::iterator pos = m_map.find(m_vector.back().first);
@@ -223,7 +224,7 @@ public:
       pop_back();
    }
 
-   /// \brief Remove the element given by Iterator.
+   /// Remove the element given by Iterator.
    ///
    /// Returns an iterator to the element following the one which was removed,
    /// which may be end().
@@ -248,7 +249,7 @@ public:
       return next;
    }
 
-   /// \brief Remove all elements with the key value Key.
+   /// Remove all elements with the key value Key.
    ///
    /// Returns the number of elements removed.
    size_type erase(const KeyT &key)
@@ -261,7 +262,7 @@ public:
       return 1;
    }
 
-   /// \brief Remove the elements that match the predicate.
+   /// Remove the elements that match the predicate.
    ///
    /// Erase all elements that match \c Pred in a single pass.  Takes linear
    /// time.
@@ -291,7 +292,7 @@ void MapVector<KeyT, ValueT, MapType, VectorType>::removeIf(Function pred)
    m_vector.erase(begin, m_vector.end());
 }
 
-/// \brief A MapVector that performs no allocations if smaller than a certain
+/// A MapVector that performs no allocations if smaller than a certain
 /// size.
 template <typename KeyT, typename ValueT, unsigned N>
 struct SmallMapVector

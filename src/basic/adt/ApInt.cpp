@@ -44,20 +44,17 @@ using polar::utils::ZeroBehavior;
 namespace {
 /// A utility function for allocating memory, checking for allocation failures,
 /// and ensuring the contents are zeroed.
-inline uint64_t* get_cleared_memory(unsigned numWords)
+inline uint64_t *get_cleared_memory(unsigned numWords)
 {
-   uint64_t * result = new uint64_t[numWords];
-   assert(result && "ApInt memory allocation fails!");
+   uint64_t *result = new uint64_t[numWords];
    memset(result, 0, numWords * sizeof(uint64_t));
    return result;
 }
 /// A utility function for allocating memory and checking for allocation
 /// failure.  The content is not zeroed.
-inline uint64_t* get_memory(unsigned numWords)
+inline uint64_t *get_memory(unsigned numWords)
 {
-   uint64_t * result = new uint64_t[numWords];
-   assert(result && "ApInt memory allocation fails!");
-   return result;
+   return new uint64_t[numWords];
 }
 /// A utility function that converts a character to a digit.
 inline unsigned get_digit(char cdigit, uint8_t radix)
@@ -433,11 +430,12 @@ ApInt ApInt::extractBits(unsigned numBits, unsigned bitPosition) const
    ApInt result(numBits, 0);
    unsigned numSrcWords = getNumWords();
    unsigned numDstWords = result.getNumWords();
+   uint64_t *destPtr = result.isSingleWord() ? &result.m_intValue.m_value : result.m_intValue.m_pValue;
    for (unsigned word = 0; word < numDstWords; ++word) {
       uint64_t w0 = m_intValue.m_pValue[loWord + word];
       uint64_t w1 =
             (loWord + word + 1) < numSrcWords ? m_intValue.m_pValue[loWord + word + 1] : 0;
-      result.m_intValue.m_pValue[word] = (w0 >> loBit) | (w1 << (APINT_BITS_PER_WORD - loBit));
+      destPtr[word] = (w0 >> loBit) | (w1 << (APINT_BITS_PER_WORD - loBit));
    }
    return result.clearUnusedBits();
 }
@@ -672,7 +670,7 @@ ApInt ApInt::reverseBits() const
    reversed <<= s;
    return reversed;
 }
-ApInt ApIntOps::greatest_common_divisor(ApInt lhs, ApInt rhs) {
+ApInt apintops::greatest_common_divisor(ApInt lhs, ApInt rhs) {
    // Fast-path a common case.
    if (lhs == rhs) {
       return lhs;
@@ -716,7 +714,7 @@ ApInt ApIntOps::greatest_common_divisor(ApInt lhs, ApInt rhs) {
    }
    return lhs;
 }
-ApInt ApIntOps::round_double_to_apint(double doubleValue, unsigned width)
+ApInt apintops::round_double_to_apint(double doubleValue, unsigned width)
 {
    union {
       double m_ddvalue;
@@ -1233,17 +1231,19 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
    const uint64_t b = uint64_t(1) << 32;
    // The DEBUG macros here tend to be spam in the debug output if you're not
    // debugging this code. Disable them unless KNUTH_DEBUG is defined.
-#pragma push_macro("DEBUG")
+#pragma push_macro("POLAR_DEBUG")
 #ifndef KNUTH_DEBUG
-#undef DEBUG
-#define DEBUG(X) do {} while (false)
+#undef POLAR_DEBUG
+#define POLAR_DEBUG(X)                                                          \
+   do {                                                                         \
+} while (false)
 #endif
-   DEBUG(debug_stream() << "knuth_div: m=" << m << " n=" << n << '\n');
-   DEBUG(debug_stream() << "knuth_div: original:");
-   DEBUG(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
-   DEBUG(debug_stream() << " by");
-   DEBUG(for (int i = n; i >0; i--) debug_stream() << " " << v[i-1]);
-   DEBUG(debug_stream() << '\n');
+   POLAR_DEBUG(debug_stream() << "knuth_div: m=" << m << " n=" << n << '\n');
+   POLAR_DEBUG(debug_stream() << "knuth_div: original:");
+   POLAR_DEBUG(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
+   POLAR_DEBUG(debug_stream() << " by");
+   POLAR_DEBUG(for (int i = n; i >0; i--) debug_stream() << " " << v[i-1]);
+   POLAR_DEBUG(debug_stream() << '\n');
    // D1. [Normalize.] Set d = b / (v[n-1] + 1) and multiply all the digits of
    // u and v by d. Note that we have taken Knuth's advice here to use a power
    // of 2 value for d such that d * v[n-1] >= b/2 (b is the base). A power of
@@ -1268,15 +1268,15 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       }
    }
    u[m+n] = u_carry;
-   DEBUG(debug_stream() << "knuth_div:   normal:");
-   DEBUG(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
-   DEBUG(debug_stream() << " by");
-   DEBUG(for (int i = n; i >0; i--) debug_stream() << " " << v[i-1]);
-   DEBUG(debug_stream() << '\n');
+   POLAR_DEBUG(debug_stream() << "knuth_div:   normal:");
+   POLAR_DEBUG(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
+   POLAR_DEBUG(debug_stream() << " by");
+   POLAR_DEBUG(for (int i = n; i >0; i--) debug_stream() << " " << v[i-1]);
+   POLAR_DEBUG(debug_stream() << '\n');
    // D2. [Initialize j.]  Set j to m. This is the loop counter over the places.
    int j = m;
    do {
-      DEBUG(debug_stream() << "knuth_div: quotient digit #" << j << '\n');
+      POLAR_DEBUG(debug_stream() << "knuth_div: quotient digit #" << j << '\n');
       // D3. [Calculate q'.].
       //     Set qp = (u[j+n]*b + u[j+n-1]) / v[n-1]. (qp=qprime=q')
       //     Set rp = (u[j+n]*b + u[j+n-1]) % v[n-1]. (rp=rprime=r')
@@ -1286,7 +1286,7 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       // value qp is one too large, and it eliminates all cases where qp is two
       // too large.
       uint64_t dividend = make64(u[j+n], u[j+n-1]);
-      DEBUG(debug_stream() << "knuth_div: dividend == " << dividend << '\n');
+      POLAR_DEBUG(debug_stream() << "knuth_div: dividend == " << dividend << '\n');
       uint64_t qp = dividend / v[n-1];
       uint64_t rp = dividend % v[n-1];
       if (qp == b || qp*v[n-2] > b*rp + u[j+n-2]) {
@@ -1295,7 +1295,7 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
          if (rp < b && (qp == b || qp*v[n-2] > b*rp + u[j+n-2]))
             qp--;
       }
-      DEBUG(debug_stream() << "knuth_div: qp == " << qp << ", rp == " << rp << '\n');
+      POLAR_DEBUG(debug_stream() << "knuth_div: qp == " << qp << ", rp == " << rp << '\n');
       // D4. [Multiply and subtract.] Replace (u[j+n]u[j+n-1]...u[j]) with
       // (u[j+n]u[j+n-1]..u[j]) - qp * (v[n-1]...v[1]v[0]). This computation
       // consists of a simple multiplication by a one-place number, combined with
@@ -1310,14 +1310,14 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
          int64_t subres = int64_t(u[j+i]) - borrow - low32(p);
          u[j+i] = low32(subres);
          borrow = high32(p) - high32(subres);
-         DEBUG(dbgs() << "knuth_div: u[j+i] = " << u[j+i]
+         POLAR_DEBUG(dbgs() << "knuth_div: u[j+i] = " << u[j+i]
                << ", borrow = " << borrow << '\n');
       }
       bool isNeg = u[j+n] < borrow;
       u[j+n] -= low32(borrow);
-      DEBUG(debug_stream() << "knuth_div: after subtraction:");
-      DEBUG(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
-      DEBUG(debug_stream() << '\n');
+      POLAR_DEBUG(debug_stream() << "knuth_div: after subtraction:");
+      POLAR_DEBUG(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
+      POLAR_DEBUG(debug_stream() << '\n');
       // D5. [Test remainder.] Set q[j] = qp. If the result of step D4 was
       // negative, go to step D6; otherwise go on to step D7.
       q[j] = low32(qp);
@@ -1337,14 +1337,14 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
          }
          u[j+n] += carry;
       }
-      DEBUG(debug_stream() << "knuth_div: after correction:");
-      DEBUG(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
-      DEBUG(debug_stream() << "\nknuth_div: digit result = " << q[j] << '\n');
+      POLAR_DEBUG(debug_stream() << "knuth_div: after correction:");
+      POLAR_DEBUG(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
+      POLAR_DEBUG(debug_stream() << "\nknuth_div: digit result = " << q[j] << '\n');
       // D7. [Loop on j.]  Decrease j by one. Now if j >= 0, go back to D3.
    } while (--j >= 0);
-   DEBUG(debug_stream() << "knuth_div: quotient:");
-   DEBUG(for (int i = m; i >=0; i--) debug_stream() <<" " << q[i]);
-   DEBUG(debug_stream() << '\n');
+   POLAR_DEBUG(debug_stream() << "knuth_div: quotient:");
+   POLAR_DEBUG(for (int i = m; i >=0; i--) debug_stream() <<" " << q[i]);
+   POLAR_DEBUG(debug_stream() << '\n');
    // D8. [Unnormalize]. Now q[...] is the desired quotient, and the desired
    // remainder may be obtained by dividing u[...] by d. If r is non-null we
    // compute the remainder (urem uses this).
@@ -1354,21 +1354,21 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       // shift right here.
       if (shift) {
          uint32_t carry = 0;
-         DEBUG(debug_stream() << "knuth_div: remainder:");
+         POLAR_DEBUG(debug_stream() << "knuth_div: remainder:");
          for (int i = n-1; i >= 0; i--) {
             r[i] = (u[i] >> shift) | carry;
             carry = u[i] << (32 - shift);
-            DEBUG(debug_stream() << " " << r[i]);
+            POLAR_DEBUG(debug_stream() << " " << r[i]);
          }
       } else {
          for (int i = n-1; i >= 0; i--) {
             r[i] = u[i];
-            DEBUG(debug_stream() << " " << r[i]);
+            POLAR_DEBUG(debug_stream() << " " << r[i]);
          }
       }
-      DEBUG(debug_stream() << '\n');
+      POLAR_DEBUG(debug_stream() << '\n');
    }
-   DEBUG(debug_stream() << '\n');
+   POLAR_DEBUG(debug_stream() << '\n');
 #pragma pop_macro("DEBUG")
 }
 } // anonymous namespace
@@ -1710,22 +1710,22 @@ void ApInt::udivrem(const ApInt &lhs, const ApInt &rhs,
    assert(rhsWords && "Performing divrem operation by zero ???");
    // Check the degenerate cases
    if (lhsWords == 0) {
-      quotient = 0;                // 0 / Y ===> 0
-      remainder = 0;               // 0 % Y ===> 0
+      quotient = ApInt(bitWidth, 0);                // 0 / Y ===> 0
+      remainder = ApInt(bitWidth, 0);               // 0 % Y ===> 0
       return;
    }
    if (rhsBits == 1) {
       quotient = lhs;             // X / 1 ===> X
-      remainder = 0;              // X % 1 ===> 0
+      remainder = ApInt(bitWidth, 0);              // X % 1 ===> 0
    }
    if (lhsWords < rhsWords || lhs.ult(rhs)) {
       remainder = lhs;            // X % Y ===> X, iff X < Y
-      quotient = 0;               // X / Y ===> 0, iff X < Y
+      quotient = ApInt(bitWidth, 0);               // X / Y ===> 0, iff X < Y
       return;
    }
    if (lhs == rhs) {
-      quotient  = 1;              // X / X ===> 1
-      remainder = 0;              // X % X ===> 0;
+      quotient  = ApInt(bitWidth, 1);              // X / X ===> 1
+      remainder = ApInt(bitWidth, 0);              // X % X ===> 0;
       return;
    }
    // Make sure there is enough space to hold the results.
@@ -1751,6 +1751,7 @@ void ApInt::udivrem(const ApInt &lhs, const ApInt &rhs,
    std::memset(remainder.m_intValue.m_pValue + rhsWords, 0,
                (getNumWords(bitWidth) - rhsWords) * APINT_WORD_SIZE);
 }
+
 void ApInt::udivrem(const ApInt &lhs, uint64_t rhs, ApInt &quotient,
                     uint64_t &remainder) {
    assert(rhs != 0 && "Divide by zero?");
@@ -1766,7 +1767,7 @@ void ApInt::udivrem(const ApInt &lhs, uint64_t rhs, ApInt &quotient,
    unsigned lhsWords = getNumWords(lhs.getActiveBits());
    // Check the degenerate cases
    if (lhsWords == 0) {
-      quotient = 0;                // 0 / Y ===> 0
+      quotient = ApInt(bitWidth, 0);                // 0 / Y ===> 0
       remainder = 0;               // 0 % Y ===> 0
       return;
    }
@@ -1776,11 +1777,11 @@ void ApInt::udivrem(const ApInt &lhs, uint64_t rhs, ApInt &quotient,
    }
    if (lhs.ult(rhs)) {
       remainder = lhs.getZeroExtValue(); // X % Y ===> X, iff X < Y
-      quotient = 0;                   // X / Y ===> 0, iff X < Y
+      quotient = ApInt(bitWidth, 0);                   // X / Y ===> 0, iff X < Y
       return;
    }
    if (lhs == rhs) {
-      quotient  = 1;              // X / X ===> 1
+      quotient  = ApInt(bitWidth, 1);              // X / X ===> 1
       remainder = 0;              // X % X ===> 0;
       return;
    }
@@ -2566,5 +2567,57 @@ void ApInt::tcSetLeastSignificantBits(WordType *dst, unsigned parts,
       dst[i++] = 0;
    }
 }
+
+ApInt apintops::rounding_udiv(const ApInt &lhs, const ApInt &rhs,
+                              ApInt::Rounding rm)
+{
+   // Currently udivrem always rounds down.
+   switch (rm) {
+   case ApInt::Rounding::DOWN:
+   case ApInt::Rounding::TOWARD_ZERO:
+      return lhs.udiv(rhs);
+   case ApInt::Rounding::UP: {
+      ApInt quo, rem;
+      ApInt::udivrem(lhs, rhs, quo, rem);
+      if (rem == 0)
+         return quo;
+      return quo + 1;
+   }
+   }
+   polar_unreachable("Unknown ApInt::Rounding enum");
+}
+
+ApInt apintops::rounding_sdiv(const ApInt &lhs, const ApInt &rhs,
+                              ApInt::Rounding rm) {
+   switch (rm) {
+   case ApInt::Rounding::DOWN:
+   case ApInt::Rounding::UP: {
+      ApInt quo, rem;
+      ApInt::sdivrem(lhs, rhs, quo, rem);
+      if (rem == 0)
+         return quo;
+      // This algorithm deals with arbitrary rounding mode used by sdivrem.
+      // We want to check whether the non-integer part of the mathematical value
+      // is negative or not. If the non-integer part is negative, we need to round
+      // down from quo; otherwise, if it's positive or 0, we return quo, as it's
+      // already rounded down.
+      if (rm == ApInt::Rounding::DOWN) {
+         if (rem.isNegative() != rhs.isNegative()) {
+            return quo - 1;
+         }
+         return quo;
+      }
+      if (rem.isNegative() != rhs.isNegative()) {
+         return quo;
+      }
+      return quo + 1;
+   }
+      // Currently sdiv rounds twards zero.
+   case ApInt::Rounding::TOWARD_ZERO:
+      return lhs.sdiv(rhs);
+   }
+   polar_unreachable("Unknown ApInt::Rounding enum");
+}
+
 } // basic
 } // polar
