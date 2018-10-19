@@ -374,7 +374,7 @@ public:
                 option->hasArgStr()) {
                addOption(option, subcommand);
             } else {
-               addLiteralOption(*option, subcommand, elem.first());
+               addLiteralOption(*option, subcommand, elem.getFirst());
             }
          }
       }

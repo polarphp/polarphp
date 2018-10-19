@@ -45,13 +45,13 @@ using polar::utils::PointerLikeTypeTraits;
 /// StringMapEntryBase - Shared base class of StringMapEntry instances.
 class StringMapEntryBase
 {
-   unsigned m_strLength;
+   size_t m_strLength;
 public:
-   explicit StringMapEntryBase(unsigned length)
+   explicit StringMapEntryBase(size_t length)
       : m_strLength(length)
    {}
 
-   unsigned getKeyLength() const
+   size_t getKeyLength() const
    {
       return m_strLength;
    }
@@ -159,11 +159,11 @@ class StringMapEntry : public StringMapEntryBase
 public:
    ValueType m_second;
 
-   explicit StringMapEntry(unsigned strLen)
+   explicit StringMapEntry(size_t strLen)
       : StringMapEntryBase(strLen), m_second()
    {}
    template <typename... InitType>
-   StringMapEntry(unsigned strLen, InitType &&... initVals)
+   StringMapEntry(size_t strLen, InitType &&... initVals)
       : StringMapEntryBase(strLen), m_second(std::forward<InitType>(initVals)...)
    {}
    StringMapEntry(StringMapEntry &entry) = delete;
@@ -196,7 +196,7 @@ public:
       return reinterpret_cast<const char*>(this + 1);
    }
 
-   StringRef first() const
+   StringRef getFirst() const
    {
       return StringRef(getKeyData(), getKeyLength());
    }

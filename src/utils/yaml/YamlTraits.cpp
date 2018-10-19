@@ -185,7 +185,7 @@ std::vector<StringRef> Input::getKeys()
       return ret;
    }
    for (auto &map : mapNode->m_mapping) {
-      ret.push_back(map.first());
+      ret.push_back(map.getFirst());
    }
    return ret;
 }
@@ -245,8 +245,8 @@ void Input::endMapping()
    }
 
    for (const auto &mapItem : mapNode->m_mapping) {
-      if (!is_contained(mapNode->m_validKeys, mapItem.first())) {
-         setError(mapItem.m_second.get(), Twine("unknown key '") + mapItem.first() + "'");
+      if (!is_contained(mapNode->m_validKeys, mapItem.getFirst())) {
+         setError(mapItem.m_second.get(), Twine("unknown key '") + mapItem.getFirst() + "'");
          break;
       }
    }
