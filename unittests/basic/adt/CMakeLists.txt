@@ -13,6 +13,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 polar_add_unittest(PolarBaseLibTests BasicAdtTest
    ../../TestEntry.cpp
    ApIntTest.cpp
+   APSIntTest.cpp
    ArrayRefTest.cpp
    BitVectorTest.cpp
    FuncExtrasTest.cpp
