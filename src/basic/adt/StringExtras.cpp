@@ -86,7 +86,7 @@ void split_string(std::string_view  source,
    }
 }
 
-void print_escaped_string(std::string_view name, std::ostream &out)
+void print_escaped_string(StringRef name, RawOutStream &out)
 {
    for (unsigned i = 0, e = name.size(); i != e; ++i) {
       unsigned char c = name[i];
@@ -98,7 +98,7 @@ void print_escaped_string(std::string_view name, std::ostream &out)
    }
 }
 
-void print_html_escaped(std::string_view str, std::ostream &out)
+void print_html_escaped(StringRef str, RawOutStream &out)
 {
    for (char c : str) {
       if (c == '&') {
@@ -117,7 +117,7 @@ void print_html_escaped(std::string_view str, std::ostream &out)
    }
 }
 
-void print_lower_case(std::string_view str, std::ostream &out)
+void print_lower_case(StringRef str, RawOutStream &out)
 {
    for (const char c : str) {
       out << to_lower(c);
@@ -334,14 +334,6 @@ void split_string(StringRef source,
       pair = get_token(pair.second, delimiters);
    }
 }
-
-void print_lower_case(StringRef string, RawOutStream &out)
-{
-   for (const char c : string) {
-      out << to_lower(c);
-   }
-}
-
 
 } // basic
 } // polar

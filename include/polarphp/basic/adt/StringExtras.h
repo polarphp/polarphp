@@ -227,27 +227,6 @@ inline uint8_t hex_from_nibbles(char msb, char lsb)
    return static_cast<uint8_t>((u1 << 4) | u2);
 }
 
-/// Convert hexadecimal string \p input to its binary representation.
-/// The return string is half the size of \p input.
-inline std::string from_hex(std::string_view input)
-{
-   if (input.empty()) {
-      return std::string();
-   }
-   std::string output;
-   output.reserve((input.size() + 1) / 2);
-   if (input.size() % 2 == 1) {
-      output.push_back(hex_from_nibbles('0', input.front()));
-      input = input.substr(1);
-   }
-   assert(input.size() % 2 == 0);
-   while (!input.empty()) {
-      uint8_t hex = hex_from_nibbles(input[0], input[1]);
-      output.push_back(hex);
-      input = input.substr(2);
-   }
-   return output;
-}
 
 /// Convert hexadecimal string \p Input to its binary representation.
 /// The return string is half the size of \p input.
@@ -265,8 +244,8 @@ inline std::string from_hex(StringRef input)
 
    assert(input.getSize() % 2 == 0);
    while (!input.empty()) {
-      uint8_t Hex = hex_from_nibbles(input[0], input[1]);
-      output.push_back(Hex);
+      uint8_t hex = hex_from_nibbles(input[0], input[1]);
+      output.push_back(hex);
       input = input.dropFront(2);
    }
    return output;
@@ -550,16 +529,17 @@ inline std::string join_items(Sep separator, Args &&... items)
    return result;
 }
 
+
 /// Print each character of the specified string, escaping it if it is not
 /// printable or if it is an escape char.
-void print_escaped_string(std::string_view name, std::ostream &out);
+void print_escaped_string(StringRef name, RawOutStream &out);
 
 /// Print each character of the specified string, escaping HTML special
 /// characters.
-void print_html_escaped(std::string_view string, std::ostream &out);
+void print_html_escaped(StringRef string, RawOutStream &out);
 
 /// print_lower_case - Print each character as lowercase if it is uppercase.
-void print_lower_case(std::string_view string, std::ostream &out);
+void print_lower_case(StringRef string, RawOutStream &out);
 
 template <typename... ArgTypes>
 std::string format_string(const std::string &format, ArgTypes&&...args)
