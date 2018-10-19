@@ -3180,6 +3180,7 @@ void IEEEFloat::initFromF80LongDoubleApInt(const ApInt &apint) {
    uint64_t i2 = apint.getRawData()[1];
    uint64_t myexponent = (i2 & 0x7fff);
    uint64_t mysignificand = i1;
+   uint8_t myintegerbit = mysignificand >> 63;
 
    initialize(&sg_semX87DoubleExtended);
    assert(getPartCount()==2);
@@ -3191,7 +3192,8 @@ void IEEEFloat::initFromF80LongDoubleApInt(const ApInt &apint) {
    } else if (myexponent==0x7fff && mysignificand == 0x8000000000000000ULL) {
       // exponent, significand meaningless
       m_category = FltCategory::fcInfinity;
-   } else if (myexponent==0x7fff && mysignificand != 0x8000000000000000ULL) {
+   } else if ((myexponent == 0x7fff && mysignificand != 0x8000000000000000ULL) ||
+              (myexponent != 0x7fff && myexponent != 0 && myintegerbit == 0)) {
       // exponent meaningless
       m_category = FltCategory::fcNaN;
       getSignificandParts()[0] = mysignificand;
@@ -4731,6 +4733,7 @@ ApFloat::OpStatus ApFloat::convert(const FltSemantics &toSemantics,
                                    RoundingMode roundingMode, bool *losesInfo)
 {
    if (&getSemantics() == &toSemantics) {
+      *losesInfo = false;
       return opOK;
    }
 
