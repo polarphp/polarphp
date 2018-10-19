@@ -20,6 +20,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    BitMaskEnumTest.cpp
    BreadthFirstIteratorTest.cpp
    DenseMapTest.cpp
+   DenseSetTest.cpp
    FuncExtrasTest.cpp
    FuncRefTest.cpp
    HashingTest.cpp
