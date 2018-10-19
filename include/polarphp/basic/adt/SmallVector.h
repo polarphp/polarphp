@@ -853,21 +853,6 @@ public:
       return std::lexicographical_compare(this->begin(), this->end(),
                                           rhs.begin(), rhs.end());
    }
-
-   /// Set the array size to \p N, which the current array must have enough
-   /// capacity for.
-   ///
-   /// This does not construct or destroy any elements in the vector.
-   ///
-   /// Clients can use this in conjunction with getCapacity() to write past the end
-   /// of the buffer when they know that more elements are available, and only
-   /// update the size later. This avoids the cost of value initializing elements
-   /// which will only be overwritten.
-   void setSize(size_type size)
-   {
-      assert(size <= this->getCapacity());
-      this->m_size = size;
-   }
 };
 
 template <typename T>
