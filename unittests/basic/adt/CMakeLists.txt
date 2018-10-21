@@ -65,6 +65,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    SmallPtrSetTest.cpp
    SparseBitVectorTest.cpp
    SparseMultiSetTest.cpp
+   StringSwitchTest.cpp
    TwineTest.cpp
    TripleTest.cpp
    )

@@ -223,10 +223,10 @@ public:
       return condLower(str0, value).condsLower(str1, str2, str3, value);
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE StringSwitch &
-   condsLower(StringLiteral str0, StringLiteral str1,
-              StringLiteral str2, StringLiteral str3,
-              StringLiteral str4, T value)
+   POLAR_ATTRIBUTE_ALWAYS_INLINE
+   StringSwitch &condsLower(StringLiteral str0, StringLiteral str1,
+                            StringLiteral str2, StringLiteral str3,
+                            StringLiteral str4, T value)
    {
       return condLower(str0, value).condsLower(str1, str2, str3, str4, value);
    }
