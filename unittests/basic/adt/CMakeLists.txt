@@ -35,6 +35,8 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    ImmutableSetTest.cpp
    IntervalMapTest.cpp
    IntrusiveListBaseTest.cpp
+   IntrusiveListIteratorTest.cpp
+   IntrusiveListNodeBaseTest.cpp
    MappedIteratorTest.cpp
    MapVectorTest.cpp
    StringRefTest.cpp
