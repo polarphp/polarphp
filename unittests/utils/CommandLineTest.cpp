@@ -243,21 +243,24 @@ TEST(CommandLineTest, testTokenizeConfigFile5)
                             array_lengthof(Output));
 }
 
-TEST(CommandLineTest, testTokenizeConfigFile6) {
+TEST(CommandLineTest, testTokenizeConfigFile6)
+{
    const char *Input = "abc\\\n";
    const char *const Output[] = { "abc" };
    testCommandLineTokenizer(cmd::tokenize_config_file, Input, Output,
                             array_lengthof(Output));
 }
 
-TEST(CommandLineTest, testTokenizeConfigFile7) {
+TEST(CommandLineTest, testTokenizeConfigFile7)
+{
    const char *Input = "abc\\\r\n";
    const char *const Output[] = { "abc" };
    testCommandLineTokenizer(cmd::tokenize_config_file, Input, Output,
                             array_lengthof(Output));
 }
 
-TEST(CommandLineTest, testTokenizeConfigFile8) {
+TEST(CommandLineTest, testTokenizeConfigFile8)
+{
    SmallVector<const char *, 0> Actual;
    BumpPtrAllocator A;
    StringSaver Saver(A);
@@ -265,7 +268,8 @@ TEST(CommandLineTest, testTokenizeConfigFile8) {
    EXPECT_TRUE(Actual.empty());
 }
 
-TEST(CommandLineTest, TokenizeConfigFile9) {
+TEST(CommandLineTest, testTokenizeConfigFile9)
+{
    SmallVector<const char *, 0> Actual;
    BumpPtrAllocator A;
    StringSaver Saver(A);
@@ -273,21 +277,24 @@ TEST(CommandLineTest, TokenizeConfigFile9) {
    EXPECT_TRUE(Actual.empty());
 }
 
-TEST(CommandLineTest, TokenizeConfigFile10) {
+TEST(CommandLineTest, testTokenizeConfigFile10)
+{
    const char *Input = "\\\nabc";
    const char *const Output[] = { "abc" };
    testCommandLineTokenizer(cmd::tokenize_config_file, Input, Output,
                             array_lengthof(Output));
 }
 
-TEST(CommandLineTest, TokenizeConfigFile11) {
+TEST(CommandLineTest, testTokenizeConfigFile11)
+{
    const char *Input = "\\\r\nabc";
    const char *const Output[] = { "abc" };
    testCommandLineTokenizer(cmd::tokenize_config_file, Input, Output,
                             array_lengthof(Output));
 }
 
-TEST(CommandLineTest, AliasesWithArguments) {
+TEST(CommandLineTest, testAliasesWithArguments)
+{
    static const size_t ARGC = 3;
    const char *const Inputs[][ARGC] = {
       { "-tool", "-actual=x", "-extra" },
@@ -331,7 +338,8 @@ TEST(CommandLineTest, AliasRequired)
    testAliasRequired(array_lengthof(opts2), opts2);
 }
 
-TEST(CommandLineTest, HideUnrelatedOptions) {
+TEST(CommandLineTest, HideUnrelatedOptions)
+{
    StackOption<int> TestOption1("hide-option-1");
    StackOption<int> TestOption2("hide-option-2", cmd::Category(TestCategory));
 
@@ -350,7 +358,8 @@ TEST(CommandLineTest, HideUnrelatedOptions) {
 
 cmd::OptionCategory TestCategory2("Test Options set 2", "Description");
 
-TEST(CommandLineTest, HideUnrelatedOptionsMulti) {
+TEST(CommandLineTest, HideUnrelatedOptionsMulti)
+{
    StackOption<int> TestOption1("multi-hide-option-1");
    StackOption<int> TestOption2("multi-hide-option-2", cmd::Category(TestCategory));
    StackOption<int> TestOption3("multi-hide-option-3", cmd::Category(TestCategory2));
@@ -479,7 +488,8 @@ TEST(CommandLineTest, testAddToAllSubCommands)
    EXPECT_TRUE(Errs.empty());
 }
 
-TEST(CommandLineTest, ReparseCommandLineOptions) {
+TEST(CommandLineTest, ReparseCommandLineOptions)
+{
    cmd::reset_command_line_parser();
 
    StackOption<bool> TopLevelOpt("top-level", cmd::Sub(*cmd::sg_topLevelSubCommand),
@@ -501,7 +511,8 @@ TEST(CommandLineTest, ReparseCommandLineOptions) {
    EXPECT_TRUE(TopLevelOpt);
 }
 
-TEST(CommandLineTest, RemoveFromRegularSubCommand) {
+TEST(CommandLineTest, RemoveFromRegularSubCommand)
+{
    cmd::reset_command_line_parser();
 
    StackSubCommand SC("sc", "Subcommand");
@@ -527,7 +538,8 @@ TEST(CommandLineTest, RemoveFromRegularSubCommand) {
    EXPECT_FALSE(Errs.empty());
 }
 
-TEST(CommandLineTest, RemoveFromTopLevelSubCommand) {
+TEST(CommandLineTest, RemoveFromTopLevelSubCommand)
+{
    cmd::reset_command_line_parser();
 
    StackOption<bool> TopLevelRemove(
@@ -549,7 +561,8 @@ TEST(CommandLineTest, RemoveFromTopLevelSubCommand) {
             cmd::parse_commandline_options(2, args, StringRef(), &null_stream()));
 }
 
-TEST(CommandLineTest, RemoveFromAllSubCommands) {
+TEST(CommandLineTest, RemoveFromAllSubCommands)
+{
    cmd::reset_command_line_parser();
 
    StackSubCommand SC1("sc1", "First Subcommand");
@@ -599,7 +612,8 @@ TEST(CommandLineTest, RemoveFromAllSubCommands) {
             cmd::parse_commandline_options(3, args2, StringRef(), &null_stream()));
 }
 
-TEST(CommandLineTest, GetRegisteredSubcommands) {
+TEST(CommandLineTest, GetRegisteredSubcommands)
+{
    cmd::reset_command_line_parser();
 
    StackSubCommand SC1("sc1", "First Subcommand");
@@ -638,7 +652,8 @@ TEST(CommandLineTest, ArgumentLimit)
    EXPECT_FALSE(sys::commandline_fits_within_system_limits("cmd", args.data()));
 }
 
-TEST(CommandLineTest, ResponseFileWindows) {
+TEST(CommandLineTest, ResponseFileWindows)
+{
    if (!polar::basic::Triple(sys::get_process_triple()).isOSWindows())
       return;
 
@@ -672,7 +687,8 @@ TEST(CommandLineTest, ResponseFileWindows) {
    polar::fs::remove(TempPath.getCStr());
 }
 
-TEST(CommandLineTest, testResponseFiles) {
+TEST(CommandLineTest, testResponseFiles)
+{
    SmallString<128> TestDir;
    std::error_code EC =
          fs::create_unique_directory("unittest", TestDir);

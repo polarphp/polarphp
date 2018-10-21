@@ -20,6 +20,8 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    CastingTest.cpp
    ChronoTest.cpp
    CommandLineTest.cpp
+   CompressionTest.cpp
+   ConvertUtfTest.cpp
    FormatVariadicTest.cpp
    FormattedStreamTest.cpp
    )
