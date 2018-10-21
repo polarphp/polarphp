@@ -127,7 +127,7 @@ private:
       : DepthFirstIteratorStorage<SetType, ExtStorage>(set)
    {
       if (this->m_visited.insert(node).second) {
-         m_visitStack.push_back(StackElement(node, None));
+         m_visitStack.push_back(StackElement(node, std::nullopt));
       }
    }
 
@@ -144,13 +144,13 @@ private:
          std::optional<ChildItTy> &opt = m_visitStack.back().second;
 
          if (!opt) {
-            opt.emplace(GT::child_begin(node));
+            opt.emplace(GT::childBegin(node));
          }
 
          // Notice that we directly mutate *opt here, so that
          // m_visitStack.back().second actually gets updated as the iterator
          // increases.
-         while (*opt != GT::child_end(node)) {
+         while (*opt != GT::childEnd(node)) {
             NodeRef next = *(*opt)++;
             // Has our next sibling been visited?
             if (this->m_visited.insert(next).second) {

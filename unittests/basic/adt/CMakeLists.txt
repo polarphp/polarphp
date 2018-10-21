@@ -24,6 +24,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    DenseSetTest.cpp
    DAGDeltaAlgorithmTest.cpp
    DeltaAlgorithmTest.cpp
+   DepthFirstIteratorTest.cpp
    EquivalenceClassesTest.cpp
    FoldingSetTest.cpp
    FuncExtrasTest.cpp
