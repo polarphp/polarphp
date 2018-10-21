@@ -50,6 +50,8 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    PointerUnionTest.cpp
    PriorityWorkListTest.cpp
    RangeAdapterTest.cpp
+   SccIteratorTest.cpp
+   ScopeExitTest.cpp
    StringRefTest.cpp
    StringExtrasTest.cpp
    STLExtrasTest.cpp
