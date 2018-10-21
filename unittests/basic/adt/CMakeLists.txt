@@ -47,6 +47,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    PointerEmbeddedIntTest.cpp
    PointerIntPairTest.cpp
    PointerSumTypeTest.cpp
+   PointerUnionTest.cpp
    StringRefTest.cpp
    StringExtrasTest.cpp
    STLExtrasTest.cpp
