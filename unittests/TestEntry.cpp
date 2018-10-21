@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 
    // Initialize both gmock and gtest.
    ::testing::InitGoogleMock(&argc, argv);
-//   polar::cmd::parse_command_line_options(argc, argv);
+//   polar::cmd::parse_commandline_options(argc, argv);
 
    //   // Make it easy for a test to re-execute itself by saving argv[0].
    //   TestMainArgv0 = argv[0];

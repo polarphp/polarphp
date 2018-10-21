@@ -1201,10 +1201,10 @@ void parse_environment_options(const char *progName, const char *envVar,
    // and hand it off to parseCommandLineOptions().
    tokenize_gnu_command_line(*envValue, saver, newArgv);
    int newArgc = static_cast<int>(newArgv.getSize());
-   parse_command_line_options(newArgc, &newArgv[0], StringRef(overview));
+   parse_commandline_options(newArgc, &newArgv[0], StringRef(overview));
 }
 
-bool parse_command_line_options(int argc, const char *const *argv,
+bool parse_commandline_options(int argc, const char *const *argv,
                                 StringRef overview, RawOutStream *errorStream)
 {
    return sg_globalParser->parseCommandLineOptions(argc, argv, overview,
@@ -2503,10 +2503,10 @@ void reset_all_option_occurrences()
    sg_globalParser->resetAllOptionOccurrences();
 }
 
-void polarphp_parse_command_line_options(int argc, const char *const *argv,
+void polarphp_parse_commandline_options(int argc, const char *const *argv,
                                          const char *overview)
 {
-   cmd::parse_command_line_options(argc, argv, StringRef(overview),
+   cmd::parse_commandline_options(argc, argv, StringRef(overview),
                                    &polar::utils::null_stream());
 }
 

@@ -70,12 +70,12 @@ using polar::utils::StringSaver;
 using polar::utils::ManagedStatic;
 
 //===----------------------------------------------------------------------===//
-// parse_command_line_options - Command line option processing entry point.
+// parse_commandline_options - Command line option processing entry point.
 //
 // Returns true on success. Otherwise, this will print the error message to
 // stderr and exit if \p errStream is not set (nullptr by default), or print the
 // error message to \p errStream and return false if \p errStream is provided.
-bool parse_command_line_options(int argc, const char *const *argv,
+bool parse_commandline_options(int argc, const char *const *argv,
                                 StringRef overview = "",
                                 RawOutStream *errStream = nullptr);
 
@@ -2384,14 +2384,14 @@ void print_help_message(bool hidden = false, bool categorized = false);
 /// assert(opts.count("help") == 1)
 /// opts["help"]->setDescription("Show alphabetical help information")
 /// // More code
-/// llvm::cl::parse_command_line_options(argc,argv);
+/// llvm::cl::parse_commandline_options(argc,argv);
 /// //More code
 /// }
 /// \endcode
 ///
 /// This interface is useful for modifying options in libraries that are out of
 /// the control of the client. The options should be modified before calling
-/// llvm::cl::parse_command_line_options().
+/// llvm::cl::parse_commandline_options().
 ///
 /// Hopefully this API can be deprecated soon. Any situation where options need
 /// to be modified by tools or libraries should be handled by sane APIs rather
@@ -2405,7 +2405,7 @@ StringMap<Option *> &get_registered_options(SubCommand &sub = *sg_topLevelSubCom
 /// Typical usage:
 /// \code
 /// main(int argc, char* argv[]) {
-///   llvm::cl::parse_command_line_options(argc, argv);
+///   llvm::cl::parse_commandline_options(argc, argv);
 ///   for (auto* S : llvm::cl::getRegisteredSubcommands()) {
 ///     if (*S) {
 ///       std::cout << "Executing subcommand: " << S->getName() << std::endl;
