@@ -31,6 +31,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    FuncRefTest.cpp
    HashingTest.cpp
    IteratorTest.cpp
+   ImmutableMapTest.cpp
    MappedIteratorTest.cpp
    MapVectorTest.cpp
    StringRefTest.cpp
