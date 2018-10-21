@@ -24,6 +24,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    ConvertUtfTest.cpp
    CrashRecoveryTest.cpp
    DataExtractorTest.cpp
+   DebugTest.cpp
    FormatVariadicTest.cpp
    FormattedStreamTest.cpp
    )
