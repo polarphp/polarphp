@@ -56,7 +56,7 @@ template <typename DerivedType>
 class AllocatorBase
 {
 public:
-   /// \brief Allocate \a Size bytes of \a Alignment aligned memory. This method
+   /// Allocate \a Size bytes of \a Alignment aligned memory. This method
    /// must be implemented by \c DerivedType.
    void *allocate(size_t size, size_t alignment)
    {
@@ -71,7 +71,7 @@ public:
       return static_cast<DerivedType *>(this)->allocate(size, alignment);
    }
 
-   /// \brief Deallocate \a ptr to \a Size bytes of memory allocated by this
+   /// Deallocate \a ptr to \a Size bytes of memory allocated by this
    /// allocator.
    void deallocate(const void *ptr, size_t size)
    {
@@ -89,14 +89,14 @@ public:
    // The rest of these methods are helpers that redirect to one of the above
    // core methods.
 
-   /// \brief Allocate space for a sequence of objects without constructing them.
+   /// Allocate space for a sequence of objects without constructing them.
    template <typename T> T *
    allocate(size_t num = 1)
    {
       return static_cast<T *>(allocate(num * sizeof(T), alignof(T)));
    }
 
-   /// \brief Deallocate space for a sequence of objects without constructing them.
+   /// Deallocate space for a sequence of objects without constructing them.
    template <typename T>
    typename std::enable_if<
    !std::is_same<typename std::remove_cv<T>::type, void>::value, void>::type
@@ -213,7 +213,7 @@ public:
       return *this;
    }
 
-   /// \brief Deallocate all but the current slab and reset the current pointer
+   /// Deallocate all but the current slab and reset the current pointer
    /// to the beginning of it, freeing all memory allocated so far.
    void reset()
    {
@@ -234,7 +234,7 @@ public:
       m_slabs.erase(std::next(m_slabs.begin()), m_slabs.end());
    }
 
-   /// \brief Allocate space at the specified alignment.
+   /// Allocate space at the specified alignment.
    POLAR_ATTRIBUTE_RETURNS_NONNULL POLAR_ATTRIBUTE_RETURNS_NOALIAS void *
    allocate(size_t size, size_t alignment)
    {
@@ -342,30 +342,30 @@ public:
    }
 
 private:
-   /// \brief The current pointer into the current slab.
+   /// The current pointer into the current slab.
    ///
    /// This points to the next free byte in the slab.
    char *m_curPtr = nullptr;
 
-   /// \brief The end of the current slab.
+   /// The end of the current slab.
    char *m_end = nullptr;
 
-   /// \brief The slabs allocated so far.
+   /// The slabs allocated so far.
    SmallVector<void *, 4> m_slabs;
 
-   /// \brief Custom-sized slabs allocated for too-large allocation requests.
+   /// Custom-sized slabs allocated for too-large allocation requests.
    SmallVector<std::pair<void *, size_t>, 0> m_customSizedSlabs;
 
-   /// \brief How many bytes we've allocated.
+   /// How many bytes we've allocated.
    ///
    /// Used so that we can compute how much space was wasted.
    size_t m_bytesAllocated = 0;
 
-   /// \brief The number of bytes to put between allocations when running under
+   /// The number of bytes to put between allocations when running under
    /// a sanitizer.
    size_t m_redZoneSize = 1;
 
-   /// \brief The allocator instance we use to get slabs of memory.
+   /// The allocator instance we use to get slabs of memory.
    AllocatorType m_allocator;
 
    static size_t computeSlabSize(unsigned slabIdx)
@@ -377,7 +377,7 @@ private:
       return SlabSize * ((size_t)1 << std::min<size_t>(30, slabIdx / 128));
    }
 
-   /// \brief Allocate a new slab and move the bump pointers over into the new
+   /// Allocate a new slab and move the bump pointers over into the new
    /// slab, modifying CurPtr and End.
    void startNewSlab()
    {
@@ -393,7 +393,7 @@ private:
       m_end = ((char *)newSlab) + allocatedSlabSize;
    }
 
-   /// \brief Deallocate a sequence of slabs.
+   /// Deallocate a sequence of slabs.
    void deallocateSlabs(SmallVectorImpl<void *>::iterator iter,
                         SmallVectorImpl<void *>::iterator end)
    {
@@ -404,7 +404,7 @@ private:
       }
    }
 
-   /// \brief Deallocate all memory for custom sized slabs.
+   /// Deallocate all memory for custom sized slabs.
    void deallocateCustomSizedSlabs()
    {
       for (auto &ptrAndSize : m_customSizedSlabs) {
@@ -417,11 +417,11 @@ private:
    template <typename T> friend class SpecificBumpPtrAllocator;
 };
 
-/// \brief The standard BumpPtrAllocator which just uses the default template
+/// The standard BumpPtrAllocator which just uses the default template
 /// parameters.
 typedef BumpPtrAllocatorImpl<> BumpPtrAllocator;
 
-/// \brief A BumpPtrAllocator that allows only elements of a specific type to be
+/// A BumpPtrAllocator that allows only elements of a specific type to be
 /// allocated.
 ///
 /// This allows calling the destructor in DestroyAll() and when the allocator is
@@ -485,7 +485,7 @@ public:
       m_allocator.reset();
    }
 
-   /// \brief Allocate space for an array of objects without constructing them.
+   /// Allocate space for an array of objects without constructing them.
    T *allocate(size_t num = 1)
    {
       return m_allocator.allocate<T>(num);

@@ -11,6 +11,8 @@
 
 polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    ../TestEntry.cpp
+   AlignOfTest.cpp
+   AllocatorTest.cpp
    FormatVariadicTest.cpp
    FormattedStreamTest.cpp
    )
