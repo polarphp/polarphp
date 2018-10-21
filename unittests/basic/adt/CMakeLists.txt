@@ -44,6 +44,8 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    MappedIteratorTest.cpp
    MapVectorTest.cpp
    PackedVectorTest.cpp
+   PointerEmbeddedIntTest.cpp
+   PointerIntPairTest.cpp
    StringRefTest.cpp
    StringExtrasTest.cpp
    STLExtrasTest.cpp
