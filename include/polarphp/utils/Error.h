@@ -34,7 +34,6 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-#include <array>
 
 #ifdef __cplusplus
 extern "C" {
@@ -1132,10 +1131,9 @@ void log_all_unhandled_errors(Error error, RawOutStream &out, const std::string 
 /// is used to separate error messages.
 inline std::string to_string(Error error)
 {
-   std::array<std::string, 2> errors;
-   int i = 0;
-   handle_all_errors(std::move(error), [&errors, &i](const ErrorInfoBase &errorInfo) {
-      errors[i++] = errorInfo.message();
+   SmallVector<std::string, 2> errors;
+   handle_all_errors(std::move(error), [&errors](const ErrorInfoBase &errorInfo) {
+      errors.pushBack(errorInfo.message());
    });
    return polar::basic::join(errors.begin(), errors.end(), "\n");
 }

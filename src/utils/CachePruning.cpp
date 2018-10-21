@@ -139,7 +139,8 @@ parse_cache_pruning_policy(StringRef policyStr)
 }
 
 /// Prune the cache of files that haven't been accessed in a long time.
-bool prune_cache(StringRef path, CachePruningPolicy policy) {
+bool prune_cache(StringRef path, CachePruningPolicy policy)
+{
    using namespace std::chrono;
 
    if (path.empty()) {

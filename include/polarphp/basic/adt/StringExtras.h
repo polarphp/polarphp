@@ -421,7 +421,8 @@ inline std::string join_impl(IteratorType begin, IteratorType end,
 
 template <typename IteratorType>
 inline std::string join_impl(IteratorType begin, IteratorType end,
-                             StringRef separator, std::forward_iterator_tag) {
+                             StringRef separator, std::forward_iterator_tag)
+{
    std::string str;
    if (begin == end) {
       return str;
