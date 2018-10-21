@@ -52,6 +52,8 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    RangeAdapterTest.cpp
    SccIteratorTest.cpp
    ScopeExitTest.cpp
+   SequenceTest.cpp
+   SetVectorTest.cpp
    StringRefTest.cpp
    StringExtrasTest.cpp
    STLExtrasTest.cpp
