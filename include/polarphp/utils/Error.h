@@ -19,6 +19,7 @@
 #include "polarphp/utils/ErrorHandling.h"
 #include "polarphp/basic/adt/StlExtras.h"
 #include "polarphp/basic/adt/StringExtras.h"
+#include "polarphp/utils/Format.h"
 #include "polarphp/utils/RawOutStream.h"
 
 #include <sstream>
@@ -176,7 +177,7 @@ private:
 /// returns success.
 ///
 /// For Error instances representing failure, you must use either the
-/// handleErrors or handleAllErrors function with a typed handler. E.g.:
+/// handle_errors or handleAllErrors function with a typed handler. E.g.:
 ///
 ///   @code{.cpp}
 ///   class MyErrorInfo : public ErrorInfo<MyErrorInfo> {
@@ -187,7 +188,7 @@ private:
 ///
 ///   auto E = foo(<...>); // <- foo returns failure with MyErrorInfo.
 ///   auto NewE =
-///     handleErrors(E,
+///     handle_errors(E,
 ///       [](const MyErrorInfo &M) {
 ///         // Deal with the error.
 ///       },
@@ -203,7 +204,7 @@ private:
 ///   // returned a new error.
 ///   @endcode
 ///
-/// The handleAllErrors function is identical to handleErrors, except
+/// The handleAllErrors function is identical to handle_errors, except
 /// that it has a void return type, and requires all errors to be handled and
 /// no new errors be returned. It prevents errors (assuming they can all be
 /// handled) from having to be bubbled all the way to the top-level.
@@ -217,7 +218,7 @@ class POLAR_NODISCARD Error
    // class to add to the error list.
    friend class ErrorList;
 
-   // handleErrors needs to be able to set the Checked flag.
+   // handle_errors needs to be able to set the Checked flag.
    template <typename... HandlerTs>
    friend Error handle_errors(Error error, HandlerTs &&...handlers);
 
@@ -442,7 +443,7 @@ public:
 /// Instances of this class are constructed by joinError.
 class ErrorList final : public ErrorInfo<ErrorList>
 {
-   // handleErrors needs to be able to iterate the payload list of an
+   // handle_errors needs to be able to iterate the payload list of an
    // ErrorList.
    template <typename... HandlerTs>
    friend Error handle_errors(Error error, HandlerTs &&... handlers);
@@ -1064,7 +1065,7 @@ Error handle_errors(Error error, HandlerTs &&... handlers)
    return handle_error_impl(std::move(payload), std::forward<HandlerTs>(handlers)...);
 }
 
-/// Behaves the same as handleErrors, except that by contract all errors
+/// Behaves the same as handle_errors, except that by contract all errors
 /// *must* be handled by the given handlers (i.e. there must be no remaining
 /// errors after running the handlers, or polar_unreachable is called).
 template <typename... HandlerTs>
@@ -1083,9 +1084,9 @@ inline void handle_all_errors(Error error)
 /// Handle any errors (if present) in an Expected<T>, then try a recovery path.
 ///
 /// If the incoming value is a success value it is returned unmodified. If it
-/// is a failure value then it the contained error is passed to handleErrors.
-/// If handleErrors is able to handle the error then the recoveryPath functor
-/// is called to supply the final result. If handleErrors is not able to
+/// is a failure value then it the contained error is passed to handle_errors.
+/// If handle_errors is able to handle the error then the recoveryPath functor
+/// is called to supply the final result. If handle_errors is not able to
 /// handle all errors then the unhandled errors are returned.
 ///
 /// This utility enables the follow pattern:
@@ -1095,7 +1096,7 @@ inline void handle_all_errors(Error error)
 ///   Expected<Foo> foo(FooStrategy S);
 ///
 ///   auto ResultOrErr =
-///     handleExpected(
+///     handle_expected(
 ///       foo(Aggressive),
 ///       []() { return foo(Conservative); },
 ///       [](AggressiveStrategyError&) {
@@ -1105,13 +1106,13 @@ inline void handle_all_errors(Error error)
 ///
 ///   @endcode
 template <typename T, typename RecoveryFtor, typename... HandlerTs>
-Expected<T> handleExpected(Expected<T> valOrErr, RecoveryFtor &&recoveryPath,
+Expected<T> handle_expected(Expected<T> valOrErr, RecoveryFtor &&recoveryPath,
                            HandlerTs &&... handlers)
 {
    if (valOrErr) {
       return valOrErr;
    }
-   if (auto error = handleErrors(valOrErr.takeError(),
+   if (auto error = handle_errors(valOrErr.takeError(),
                                  std::forward<HandlerTs>(handlers)...)) {
       return std::move(error);
    }
@@ -1290,7 +1291,7 @@ std::error_code error_to_error_code(Error errorCode);
 
 /// Convert an ErrorOr<T> to an Expected<T>.
 template <typename T>
-Expected<T> error_or_to_expected(OptionalError<T> &&optError)
+Expected<T> optional_error_to_expected(OptionalError<T> &&optError)
 {
    if (auto errorCode = optError.getError()) {
       return error_code_to_error(errorCode);
@@ -1298,9 +1299,9 @@ Expected<T> error_or_to_expected(OptionalError<T> &&optError)
    return std::move(*optError);
 }
 
-/// Convert an Expected<T> to an ErrorOr<T>.
+/// Convert an Expected<T> to an OptionalError<T>.
 template <typename T>
-OptionalError<T> expectedToErrorOr(Expected<T> &&error)
+OptionalError<T> expected_to_optional_error(Expected<T> &&error)
 {
    if (auto err = error.takeError()) {
       return error_to_error_code(std::move(err));
@@ -1339,7 +1340,7 @@ Error create_string_error(std::error_code errorCode, char const *fmt,
 {
    std::string buffer;
    RawStringOutStream stream(buffer);
-   stream << format_string(fmt, values...);
+   stream << format(fmt, values...);
    return make_error<StringError>(stream.getStr(), errorCode);
 }
 

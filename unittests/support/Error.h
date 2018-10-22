@@ -27,14 +27,14 @@ namespace internal {
 
 ErrorHolder take_error(Error error);
 
-template <typename T> ExpectedHolder<T> TakeExpected(Expected<T> &expected)
+template <typename T> ExpectedHolder<T> take_expected(Expected<T> &expected)
 {
    return {take_error(expected.takeError()), expected};
 }
 
-template <typename T> ExpectedHolder<T> TakeExpected(Expected<T> &&expected)
+template <typename T> ExpectedHolder<T> take_expected(Expected<T> &&expected)
 {
-   return TakeExpected(expected);
+   return take_expected(expected);
 }
 
 template <typename T>
@@ -48,7 +48,7 @@ public:
    bool MatchAndExplain(const ExpectedHolder<T> &holder,
                         testing::MatchResultListener *listener) const override
    {
-      if (!holder.m_success) {
+      if (!holder.getSuccess()) {
          return false;
       }
       bool result = m_matcher.MatchAndExplain(*holder.m_expected, listener);
@@ -95,6 +95,58 @@ private:
    M m_matcher;
 };
 
+template <typename InfoT>
+class ErrorMatchesMono : public testing::MatcherInterface<const ErrorHolder &>
+{
+public:
+   explicit ErrorMatchesMono(std::optional<testing::Matcher<InfoT &>> matcher)
+      : m_matcher(std::move(matcher))
+   {}
+
+   bool MatchAndExplain(const ErrorHolder &holder,
+                        testing::MatchResultListener *listener) const override {
+      if (holder.getSuccess()) {
+         return false;
+      }
+
+      if (holder.m_infos.size() > 1) {
+         *listener << "multiple errors";
+         return false;
+      }
+
+      auto &info = *holder.m_infos[0];
+      if (!info.isA<InfoT>()) {
+         *listener << "Error was not of given type";
+         return false;
+      }
+
+      if (!m_matcher) {
+         return true;
+      }
+      return m_matcher->MatchAndExplain(static_cast<InfoT &>(info), listener);
+   }
+
+   void DescribeTo(std::ostream *OS) const override {
+      *OS << "failed with Error of given type";
+      if (m_matcher) {
+         *OS << " and the error ";
+         m_matcher->DescribeTo(OS);
+      }
+   }
+
+   void DescribeNegationTo(std::ostream *OS) const override {
+      *OS << "succeeded or did not fail with the error of given type";
+      if (m_matcher) {
+         *OS << " or the error ";
+         m_matcher->DescribeNegationTo(OS);
+      }
+   }
+
+private:
+   std::optional<testing::Matcher<InfoT &>> m_matcher;
+};
+
+
 } // namespace internal
 
 #define EXPECT_THAT_ERROR(error, matcher)                                        \
@@ -103,15 +155,34 @@ private:
    ASSERT_THAT(polar::unittest::internal::take_error(error), matcher)
 
 #define EXPECT_THAT_EXPECTED(error, matcher)                                     \
-   EXPECT_THAT(polar::unittest::internal::TakeExpected(error), matcher)
+   EXPECT_THAT(polar::unittest::internal::take_expected(error), matcher)
 #define ASSERT_THAT_EXPECTED(error, matcher)                                     \
-   ASSERT_THAT(polar::unittest::internal::TakeExpected(error), matcher)
+   ASSERT_THAT(polar::unittest::internal::take_expected(error), matcher)
 
-MATCHER(Succeeded, "") { return arg.m_success; }
-MATCHER(Failed, "") { return !arg.m_success; }
+MATCHER(Succeeded, "") { return arg.getSuccess(); }
+MATCHER(Failed, "") { return !arg.getSuccess(); }
 
 template <typename M>
 internal::ValueMatchesPoly<M> has_value(M matcher)
+{
+   return internal::ValueMatchesPoly<M>(matcher);
+}
+
+template <typename InfoT>
+testing::Matcher<const internal::ErrorHolder &> Failed()
+{
+   return MakeMatcher(new internal::ErrorMatchesMono<InfoT>(std::nullopt));
+}
+
+template <typename InfoT, typename M>
+testing::Matcher<const internal::ErrorHolder &> Failed(M matcher)
+{
+   return MakeMatcher(new internal::ErrorMatchesMono<InfoT>(
+                         testing::SafeMatcherCast<InfoT &>(matcher)));
+}
+
+template <typename M>
+internal::ValueMatchesPoly<M> HasValue(M matcher)
 {
    return internal::ValueMatchesPoly<M>(matcher);
 }

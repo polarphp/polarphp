@@ -19,7 +19,7 @@ using namespace polar::utils;
 namespace polar {
 namespace utils {
 
-void print_to(BranchProbability probability, ::std::ostream *outstream)
+void PrintTo(BranchProbability probability, ::std::ostream *outstream)
 {
    *outstream << probability.getNumerator() << "/" << probability.getDenominator();
 }

@@ -16,14 +16,17 @@
 namespace polar {
 namespace unittest {
 
+using polar::utils::handle_all_errors;
+using polar::utils::ErrorInfoBase;
+
 internal::ErrorHolder internal::take_error(Error error)
 {
-  bool succeeded = !static_cast<bool>(error);
-  std::string message;
-  if (!succeeded) {
-     message = polar::utils::to_string(std::move(error));
-  }
-  return {succeeded, message};
+   std::vector<std::shared_ptr<ErrorInfoBase>> infos;
+   handle_all_errors(std::move(error),
+                   [&infos](std::unique_ptr<ErrorInfoBase> info) {
+      infos.emplace_back(std::move(info));
+   });
+   return {std::move(infos)};
 }
 
 } // unittest

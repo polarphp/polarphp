@@ -14,6 +14,7 @@
 
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/utils/Error.h"
+#include "polarphp/utils/RawOsOutStream.h"
 #include "gtest/gtest-printers.h"
 
 namespace polar {
@@ -22,11 +23,17 @@ namespace internal {
 
 using polar::utils::Expected;
 using polar::basic::StringRef;
+using polar::utils::ErrorInfoBase;
+using polar::utils::RawOsOutStream;
 
 struct ErrorHolder
 {
-   bool m_success;
-   std::string m_message;
+   std::vector<std::shared_ptr<ErrorInfoBase>> m_infos;
+
+   bool getSuccess() const
+   {
+      return m_infos.empty();
+   }
 };
 
 template <typename T> struct ExpectedHolder : public ErrorHolder
@@ -40,20 +47,38 @@ template <typename T> struct ExpectedHolder : public ErrorHolder
 
 inline void print_to(const ErrorHolder &error, std::ostream *outstream)
 {
-   *outstream << (error.m_success ? "succeeded" : "failed");
-   if (!error.m_success) {
-      *outstream << "  (" << StringRef(error.m_message).trim().getStr() << ")";
+   RawOsOutStream out(*outstream);
+   out << (error.getSuccess() ? "succeeded" : "failed");
+   if (!error.getSuccess()) {
+      const char *delim = "  (";
+      for (const auto &info : error.m_infos) {
+         out << delim;
+         delim = "; ";
+         info->log(out);
+      }
+      out << ")";
    }
 }
 
 template <typename T>
 void print_to(const ExpectedHolder<T> &item, std::ostream *outstream)
 {
-   if (item.m_success) {
+   if (item.getSuccess()) {
       *outstream << "succeeded with value " << ::testing::PrintToString(*item.m_expected);
    } else {
       print_to(static_cast<const ErrorHolder &>(item), outstream);
    }
+}
+
+inline void PrintTo(const ErrorHolder &error, std::ostream *outstream)
+{
+   print_to(error, outstream);
+}
+
+template <typename T>
+void PrintTo(const ExpectedHolder<T> &item, std::ostream *outstream)
+{
+   print_to(item, outstream);
 }
 
 } // namespace internal

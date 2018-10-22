@@ -22,7 +22,7 @@ namespace polar {
 namespace basic {
 
 // Helper for test code to print hash codes.
-void print_to(const HashCode &code, std::ostream *os)
+void PrintTo(const HashCode &code, std::ostream *os)
 {
    *os << static_cast<size_t>(code);
 }
