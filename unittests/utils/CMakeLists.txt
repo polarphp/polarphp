@@ -45,6 +45,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    Md5Test.cpp
    MemoryBufferTest.cpp
    MemoryTest.cpp
+   NativeFormatTests.cpp
    )
 
 target_link_libraries(BasicUtilsTest PRIVATE TestSupport)
