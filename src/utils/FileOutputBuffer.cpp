@@ -136,7 +136,8 @@ createInMemoryBuffer(StringRef path, size_t size, unsigned mode)
 }
 
 Expected<std::unique_ptr<OnDiskBuffer>>
-createOnDiskBuffer(StringRef path, size_t size, unsigned mode)
+createOnDiskBuffer(StringRef path, size_t size, bool initExisting,
+                   unsigned mode)
 {
    Expected<fs::TempFile> fileOrErr =
          fs::TempFile::create(path + ".tmp%%%%%%%", mode);
@@ -145,18 +146,23 @@ createOnDiskBuffer(StringRef path, size_t size, unsigned mode)
    }
 
    fs::TempFile file = std::move(*fileOrErr);
-
+   if (initExisting) {
+      if (auto errorCode = fs::copy_file(path, file.m_fd)) {
+         return error_code_to_error(errorCode);
+      }
+   } else {
 #ifndef POLAR_OS_WIN
-   // On Windows, CreateFileMapping (the mmap function on Windows)
-   // automatically extends the underlying file. We don't need to
-   // extend the file beforehand. _chsize (ftruncate on Windows) is
-   // pretty slow just like it writes specified amount of bytes,
-   // so we should avoid calling that function.
-   if (auto errorCode = fs::resize_file(file.m_fd, size)) {
-      consume_error(file.discard());
-      return error_code_to_error(errorCode);
-   }
+      // On Windows, CreateFileMapping (the mmap function on Windows)
+      // automatically extends the underlying file. We don't need to
+      // extend the file beforehand. _chsize (ftruncate on Windows) is
+      // pretty slow just like it writes specified amount of bytes,
+      // so we should avoid calling that function.
+      if (auto errorCode = fs::resize_file(file.m_fd, size)) {
+         consume_error(file.discard());
+         return error_code_to_error(errorCode);
+      }
 #endif
+   }
 
    // Mmap it.
    std::error_code errorCode;
@@ -207,7 +213,7 @@ FileOutputBuffer::create(StringRef path, size_t size, unsigned flags) {
    case fs::FileType::regular_file:
    case fs::FileType::file_not_found:
    case fs::FileType::status_error:
-      return createOnDiskBuffer(path, size, mode);
+      return createOnDiskBuffer(path, size, !!(flags & F_modify), mode);
    default:
       return createInMemoryBuffer(path, size, mode);
    }

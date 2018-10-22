@@ -30,6 +30,9 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    EndianTest.cpp
    ErrorNumberTest.cpp
    ErrorTest.cpp
+   OptionalErrorTest.cpp
+   FastHashTest.cpp
+   FileOutputBufferTest.cpp
    FormatVariadicTest.cpp
    FormattedStreamTest.cpp
    )
