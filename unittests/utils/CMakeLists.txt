@@ -42,6 +42,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    LockFileManagerTest.cpp
    ManagedStaticTest.cpp
    MathExtrasTest.cpp
+   Md5Test.cpp
    )
 
 target_link_libraries(BasicUtilsTest PRIVATE TestSupport)
