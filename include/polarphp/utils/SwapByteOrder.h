@@ -13,6 +13,7 @@
 #define POLARPHP_UTILS_SWAP_BYTE_ORDER_H
 
 #include "polarphp/global/CompilerFeature.h"
+#include "polarphp/global/ProcessorDetection.h"
 #include "polarphp/global/DataTypes.h"
 #include <cstddef>
 #if defined(_MSC_VER) && !defined(_DEBUG)

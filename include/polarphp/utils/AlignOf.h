@@ -12,6 +12,8 @@
 #ifndef POLARPHP_UTILS_ALIGN_OF_H
 #define POLARPHP_UTILS_ALIGN_OF_H
 
+#include <cstddef>
+
 namespace polar {
 namespace utils {
 

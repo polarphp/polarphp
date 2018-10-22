@@ -71,7 +71,7 @@ struct Writer
    }
 };
 
-} // end
+} // endian
 } // utils
 } // polar
 

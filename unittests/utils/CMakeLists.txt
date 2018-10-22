@@ -27,6 +27,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    DebugTest.cpp
    DebugCounterTest.cpp
    EndianStreamTest.cpp
+   EndianTest.cpp
    FormatVariadicTest.cpp
    FormattedStreamTest.cpp
    )
