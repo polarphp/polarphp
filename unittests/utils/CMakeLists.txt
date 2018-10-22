@@ -25,6 +25,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    CrashRecoveryTest.cpp
    DataExtractorTest.cpp
    DebugTest.cpp
+   DebugCounterTest.cpp
    FormatVariadicTest.cpp
    FormattedStreamTest.cpp
    )
