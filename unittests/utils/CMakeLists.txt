@@ -44,6 +44,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    MathExtrasTest.cpp
    Md5Test.cpp
    MemoryBufferTest.cpp
+   MemoryTest.cpp
    )
 
 target_link_libraries(BasicUtilsTest PRIVATE TestSupport)
