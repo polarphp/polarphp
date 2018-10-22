@@ -15,6 +15,7 @@
 
 #include "polarphp/basic/adt/SmallString.h"
 #include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/utils/Error.h"
 #include "polarphp/utils/FormatCommon.h"
 #include "polarphp/utils/FormatVariadicDetail.h"
 #include "polarphp/utils/RawOutStream.h"
@@ -26,7 +27,7 @@ template <typename T>
 class FormatAdapter : public internal::FormatAdapterImpl
 {
 protected:
-   explicit FormatAdapter(T &&item) : m_item(item)
+   explicit FormatAdapter(T &&item) : m_item(std::forward<T>(item))
    {}
 
    T m_item;
@@ -91,6 +92,23 @@ public:
       }
    }
 };
+
+class ErrorAdapter : public FormatAdapter<Error>
+{
+public:
+   ErrorAdapter(Error &&item) : FormatAdapter(std::move(item))
+   {}
+   ErrorAdapter(ErrorAdapter &&) = default;
+   ~ErrorAdapter()
+   {
+      consume_error(std::move(m_item));
+   }
+   void format(RawOutStream &stream, StringRef)
+   {
+      stream << m_item;
+   }
+};
+
 } // internal
 
 template <typename T>
@@ -110,6 +128,14 @@ template <typename T>
 internal::RepeatAdapter<T> fmt_repeat(T &&item, size_t count)
 {
    return internal::RepeatAdapter<T>(std::forward<T>(item), count);
+}
+
+// llvm::Error values must be consumed before being destroyed.
+// Wrapping an error in fmt_consume explicitly indicates that the formatv_object
+// should take ownership and consume it.
+inline internal::ErrorAdapter fmt_consume(Error &&item)
+{
+   return internal::ErrorAdapter(std::move(item));
 }
 
 } // utils

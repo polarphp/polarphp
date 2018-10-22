@@ -45,8 +45,10 @@ struct ReplacementItem
 
    ReplacementItem(StringRef spec, size_t index, size_t align, AlignStyle where,
                    char pad, StringRef options)
-      : m_type(ReplacementType::Format), m_spec(spec), m_index(index), m_align(align),
-        m_where(where), m_pad(pad), m_options(options)
+      : m_type(ReplacementType::Format), m_spec(spec),
+        m_index(index), m_align(align),
+        m_where(where), m_pad(pad),
+        m_options(options)
    {}
 
    ReplacementType m_type = ReplacementType::Empty;
@@ -119,7 +121,7 @@ public:
 
          auto w = m_adapters[replacement.m_index];
 
-         FmtAlign align(*w, replacement.m_where, replacement.m_align);
+         FmtAlign align(*w, replacement.m_where, replacement.m_align, replacement.m_pad);
          align.format(outStream, replacement.m_options);
       }
    }
@@ -182,7 +184,7 @@ public:
    }
 };
 
-// \brief Format text given a format string and replacement parameters.
+// Format text given a format string and replacement parameters.
 //
 // ===General Description===
 //
@@ -251,6 +253,8 @@ public:
 //      for type T containing a method whose signature is:
 //      void format(const T &Obj, RawOutStream &Stream, StringRef Options)
 //      Then this method is invoked as described in Step 1.
+//   3. If an appropriate operator<< for raw_ostream exists, it will be used.
+//      For this to work, (RawOutStream& << const T&) must return RawOutStream&.
 //
 // If a match cannot be found through either of the above methods, a compiler
 // error is generated.
@@ -272,15 +276,6 @@ inline auto formatv(const char *fmt, Ts &&... values) -> FormatvObject<decltype(
             fmt,
             std::make_tuple(internal::build_format_adapter(std::forward<Ts>(values))...));
 }
-
-// Allow a FormatvObject to be formatted (no options supported).
-template <typename T> struct FormatProvider<FormatvObject<T>>
-{
-   static void format(const FormatvObject<T> &value, RawOutStream &outStream, StringRef)
-   {
-      outStream << value;
-   }
-};
 
 } // utils
 } // polar

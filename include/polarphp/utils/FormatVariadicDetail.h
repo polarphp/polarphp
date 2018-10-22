@@ -19,6 +19,8 @@
 namespace polar {
 namespace utils {
 
+class Error;
+
 template <typename T, typename Enable = void>
 struct FormatProvider
 {};
@@ -34,7 +36,8 @@ public:
    virtual void format(RawOutStream &stream, StringRef options) = 0;
 };
 
-template <typename T> class ProviderFormatAdapter : public FormatAdapterImpl
+template <typename T>
+class ProviderFormatAdapter : public FormatAdapterImpl
 {
    T m_item;
 
@@ -49,13 +52,30 @@ public:
 };
 
 template <typename T>
+class StreamOperatorFormatAdapter : public FormatAdapterImpl
+{
+   T m_item;
+
+public:
+   explicit StreamOperatorFormatAdapter(T &&item)
+      : m_item(std::forward<T>(item))
+   {}
+
+   void format(RawOutStream &out, StringRef) override
+   {
+      out << m_item;
+   }
+};
+
+template <typename T>
 class MissingFormatAdapter;
 
 // Test if FormatProvider<T> is defined on T and contains a member function
 // with the signature:
 //   static void format(const T&, raw_stream &, StringRef);
 //
-template <class T> class HasFormatProvider
+template <typename T>
+class HasFormatProvider
 {
 public:
    using Decayed = typename std::decay<T>::type;
@@ -71,6 +91,25 @@ public:
          (sizeof(test<polar::utils::FormatProvider<Decayed>>(nullptr)) == 1);
 };
 
+// Test if raw_ostream& << T -> raw_ostream& is findable via ADL.
+template <typename T>
+class HasStreamOperator
+{
+public:
+   using ConstRefT = const typename std::decay<T>::type &;
+
+   template <typename U>
+   static char test(typename std::enable_if<
+                    std::is_same<decltype(std::declval<RawOutStream &>()
+                                          << std::declval<U>()),
+                    RawOutStream &>::value,
+                    int *>::type);
+
+   template <typename U> static double test(...);
+
+   static bool const value = (sizeof(test<ConstRefT>(nullptr)) == 1);
+};
+
 // Simple template that decides whether a type T should use the member-function
 // based format() invocation.
 template <typename T>
@@ -84,10 +123,18 @@ struct UsesFormatMember
 // based format() invocation.  The member function takes priority, so this test
 // will only be true if there is not ALSO a format member.
 template <typename T>
-struct uses_FormatProvider
+struct UsesFormatProvider
       : public std::integral_constant<
       bool, !UsesFormatMember<T>::value && HasFormatProvider<T>::value> {
 };
+
+// Simple template that decides whether a type T should use the operator<<
+// based format() invocation.  This takes last priority.
+template <typename T>
+struct UsesStreamOperator
+      : public std::integral_constant<bool, !UsesFormatMember<T>::value &&
+      !UsesFormatProvider<T>::value &&
+      HasStreamOperator<T>::value> {};
 
 // Simple template that decides whether a type T has neither a member-function
 // nor FormatProvider based implementation that it can use.  Mostly used so
@@ -95,9 +142,9 @@ struct uses_FormatProvider
 // implementation can be located.
 template <typename T>
 struct UsesMissingProvider
-      : public std::integral_constant<bool,
-      !UsesFormatMember<T>::value &&
-      !uses_FormatProvider<T>::value> {};
+      : public std::integral_constant<bool, !UsesFormatMember<T>::value &&
+      !UsesFormatProvider<T>::value &&
+      !UsesStreamOperator<T>::value> {};
 
 template <typename T>
 typename std::enable_if<UsesFormatMember<T>::value, T>::type
@@ -107,12 +154,27 @@ build_format_adapter(T &&item)
 }
 
 template <typename T>
-typename std::enable_if<uses_FormatProvider<T>::value,
+typename std::enable_if<UsesFormatProvider<T>::value,
 ProviderFormatAdapter<T>>::type
 build_format_adapter(T &&item)
 {
    return ProviderFormatAdapter<T>(std::forward<T>(item));
 }
+
+template <typename T>
+typename std::enable_if<UsesStreamOperator<T>::value,
+StreamOperatorFormatAdapter<T>>::type
+build_format_adapter(T &&item)
+{
+   // If the caller passed an Error by value, then stream_operator_format_adapter
+   // would be responsible for consuming it.
+   // Make the caller opt into this by calling fmt_consume().
+   static_assert(
+            !std::is_same<Error, typename std::remove_cv<T>::type>::value,
+            "polarphp::Error-by-value must be wrapped in fmt_consume() for formatv");
+   return StreamOperatorFormatAdapter<T>(std::forward<T>(item));
+}
+
 
 template <typename T>
 typename std::enable_if<UsesMissingProvider<T>::value,
