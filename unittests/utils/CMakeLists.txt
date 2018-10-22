@@ -36,6 +36,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    FormattedRawOutStreamTest.cpp
    FormatVariadicTest.cpp
    GlobPatternTest.cpp
+   HostTest.cpp
    )
 
 target_link_libraries(BasicUtilsTest PRIVATE TestSupport)
