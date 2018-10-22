@@ -41,6 +41,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    LineIteratorTest.cpp
    LockFileManagerTest.cpp
    ManagedStaticTest.cpp
+   MathExtrasTest.cpp
    )
 
 target_link_libraries(BasicUtilsTest PRIVATE TestSupport)
