@@ -38,6 +38,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    GlobPatternTest.cpp
    HostTest.cpp
    LEB128Test.cpp
+   LineIteratorTest.cpp
    )
 
 target_link_libraries(BasicUtilsTest PRIVATE TestSupport)
