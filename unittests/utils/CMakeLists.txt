@@ -69,6 +69,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    UnicodeTest.cpp
    YamlIOTest.cpp
    YamlParserTest.cpp
+   VersionTupleTest.cpp
    )
 
 target_link_libraries(BasicUtilsTest PRIVATE TestSupport)
