@@ -57,7 +57,7 @@ static const struct
 
 // List of canonical arch names (use get_arch_synonym).
 // This table also provides the build attribute fields for CPU arch
-// and Arch ID, according to the Addenda to the ARM ABI, chapters
+// and arch ID, according to the Addenda to the ARM ABI, chapters
 // 2.4 and 2.3.5.2 respectively.
 // FIXME: SubArch values were simplified to fit into the expectations
 // of the triples and are not conforming with their official names.
@@ -75,14 +75,14 @@ struct ArchNames
    unsigned DefaultFPU;
    unsigned ArchBaseExtensions;
    T ID;
-   armbuildattrs::CPUArch ArchAttr; // Arch ID in build attributes.
+   armbuildattrs::CPUArch ArchAttr; // arch ID in build attributes.
 
    StringRef getName() const { return StringRef(NameCStr, NameLength); }
 
    // CPU class in build attributes.
    StringRef get_cpu_attr() const { return StringRef(CPUAttrCStr, CPUAttrLength); }
 
-   // Sub-Arch name.
+   // Sub-arch name.
    StringRef get_sub_arch() const { return StringRef(SubArchCStr, SubArchLength); }
 };
 ArchNames<arm::ArchKind> ARCHNames[] = {
@@ -100,7 +100,7 @@ ArchNames<aarch64::ArchKind> AArch64ARCHNames[] = {
 };
 
 
-// List of Arch Extension names.
+// List of arch Extension names.
 // FIXME: TableGen this.
 static const struct
 {
@@ -138,7 +138,7 @@ static const struct
 
 // List of CPU names and their arches.
 // The same CPU can have multiple arches and can be default on multiple arches.
-// When finding the Arch for a CPU, first-found prevails. Sort them accordingly.
+// When finding the arch for a CPU, first-found prevails. Sort them accordingly.
 // When this becomes table-generated, we'd probably need two tables.
 // FIXME: TableGen this.
 template <typename T> struct CpuNames
@@ -484,6 +484,17 @@ unsigned aarch64::get_default_extensions(StringRef cpu, ArchKind archKind)
          .defaultCond(aarch64::AEK_INVALID);
 }
 
+aarch64::ArchKind aarch64::get_cpu_arch_kind(StringRef cpu) {
+   if (cpu == "generic") {
+      return aarch64::ArchKind::ARMV8A;
+   }
+   return StringSwitch<aarch64::ArchKind>(cpu)
+      #define AARCH64_CPU_NAME(NAME, ID, DEFAULT_FPU, IS_DEFAULT, DEFAULT_EXT) \
+         .cond(NAME, aarch64::ArchKind:: ID)
+      #include "polarphp/utils/AArch64TargetParser.h"
+         .defaultCond(aarch64::ArchKind::INVALID);
+}
+
 bool aarch64::get_extension_features(unsigned Extensions,
                                      std::vector<StringRef> &Features)
 {
@@ -535,6 +546,9 @@ bool aarch64::get_arch_features(aarch64::ArchKind ak,
    }
    if (ak == aarch64::ArchKind::ARMV8_3A) {
       features.push_back("+v8.3a");
+   }
+   if (ak == aarch64::ArchKind::ARMV8_4A) {
+      features.push_back("+v8.4a");
    }
    return ak != aarch64::ArchKind::INVALID;
 }
@@ -656,10 +670,11 @@ StringRef get_arch_synonym(StringRef arch)
          .cond("v7r", "v7-r")
          .cond("v7m", "v7-m")
          .cond("v7em", "v7e-m")
-         .conds("v8", "v8a", "aarch64", "arm64", "v8-a")
+         .conds("v8", "v8a", "v8l", "aarch64", "arm64", "v8-a")
          .cond("v8.1a", "v8.1-a")
          .cond("v8.2a", "v8.2-a")
          .cond("v8.3a", "v8.3-a")
+         .cond("v8.4a", "v8.4-a")
          .cond("v8r", "v8-r")
          .cond("v8m.base", "v8-m.base")
          .cond("v8m.main", "v8-m.main")
@@ -724,7 +739,7 @@ StringRef arm::get_canonical_arch_name(StringRef arch)
          return error;
       }
    }
-   // Arch will either be a 'v' name (v7a) or a marketing name (xscale).
+   // arch will either be a 'v' name (v7a) or a marketing name (xscale).
    return archCopy;
 }
 
@@ -781,6 +796,24 @@ arm::ArchKind arm::parse_cpu_arch(StringRef cpu)
       }
    }
    return arm::ArchKind::INVALID;
+}
+
+void arm::fill_valid_cpu_arch_list(SmallVectorImpl<StringRef> &Values)
+{
+   for (const CpuNames<arm::ArchKind> &arch : CPUNames) {
+      if (arch.ArchID != arm::ArchKind::INVALID) {
+         Values.push_back(arch.getName());
+      }
+   }
+}
+
+void aarch64::fill_valid_cpu_arch_list(SmallVectorImpl<StringRef> &Values)
+{
+   for (const CpuNames<aarch64::ArchKind> &arch : AArch64CPUNames) {
+      if (arch.ArchID != aarch64::ArchKind::INVALID) {
+         Values.push_back(arch.getName());
+      }
+   }
 }
 
 // ARM, Thumb, AArch64
@@ -862,9 +895,9 @@ arm::ProfileKind arm::parse_arch_profile(StringRef arch)
 }
 
 // Version number (ex. v7 = 7).
-unsigned arm::parse_arch_version(StringRef Arch) {
-   Arch = get_canonical_arch_name(Arch);
-   switch (parse_arch(Arch)) {
+unsigned arm::parse_arch_version(StringRef arch) {
+   arch = get_canonical_arch_name(arch);
+   switch (parse_arch(arch)) {
    case arm::ArchKind::ARMV2:
    case arm::ArchKind::ARMV2A:
       return 2;
@@ -979,11 +1012,11 @@ aarch64::ArchKind aarch64::parse_arch(StringRef arch)
    return ArchKind::INVALID;
 }
 
-unsigned aarch64::parse_arch_ext(StringRef archExt)
+aarch64::ArchExtKind aarch64::parse_arch_ext(StringRef archExt)
 {
    for (const auto item : AArch64ARCHExtNames) {
       if (archExt == item.getName()) {
-         return item.ID;
+         return static_cast<ArchExtKind>(item.ID);
       }
    }
    return aarch64::AEK_INVALID;
@@ -1021,6 +1054,11 @@ arm::ProfileKind aarch64::parse_arch_profile(StringRef arch)
 unsigned aarch64::parse_arch_version(StringRef arch)
 {
    return arm::parse_arch_version(arch);
+}
+
+bool aarch64::is_x18_reserved_by_default(const Triple &triple)
+{
+  return triple.isOSDarwin() || triple.isOSFuchsia() || triple.isOSWindows();
 }
 
 } // polar

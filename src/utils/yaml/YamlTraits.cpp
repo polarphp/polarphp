@@ -774,39 +774,23 @@ void Output::scalarString(StringRef &str, QuotingType mustQuote)
    const char *base = str.getData();
 
    const char *const quote = mustQuote == QuotingType::Single ? "'" : "\"";
-   const char quoteChar = mustQuote == QuotingType::Single ? '\'' : '"';
 
    output(quote); // Starting quote.
 
-   // When using single-quoted strings, any single quote ' must be doubled to be
-   // escaped.
-   // When using double-quoted strings, print \x + hex for non-printable ASCII
-   // characters, and escape double quotes.
+   // When using double-quoted strings (and only in that case), non-printable characters may be
+   // present, and will be escaped using a variety of unicode-scalar and special short-form
+   // escapes. This is handled in yaml::escape.
+   if (mustQuote == QuotingType::Double) {
+      output(yaml::escape(base, /* EscapePrintable= */ false));
+      this->outputUpToEndOfLine(quote);
+      return;
+   }
+
+   // When using single-quoted strings, any single quote ' must be doubled to be escaped.
    while (j < endMark) {
-      if (str[j] == quoteChar) {                  // Escape quotes.
-         output(StringRef(&base[i], j - i));     // "flush".
-         if (mustQuote == QuotingType::Double) { // Print it as \"
-            output(StringLiteral("\\"));
-            output(StringRef(quote, 1));
-         } else {                       // Single
-            output(StringLiteral("''")); // Print it as ''
-         }
-         i = j + 1;
-      } else if (mustQuote == QuotingType::Double &&
-                 !sys::unicode::is_printable(str[j]) && (str[j] & 0x80) == 0) {
-         // If we're double quoting non-printable characters, we prefer printing
-         // them as "\x" + their hex representation. Note that special casing is
-         // needed for UTF-8, where a byte may be part of a UTF-8 sequence and
-         // appear as non-printable, in which case we want to print the correct
-         // unicode character and not its hex representation.
-         output(StringRef(&base[i], j - i)); // "flush"
-         output(StringLiteral("\\x"));
-
-         // Output the byte 0x0F as \x0f.
-         auto formattedHex = format_hex_no_prefix(str[j], 2);
-         m_out << formattedHex;
-         m_column += 4; // one for the '\', one for the 'x', and two for the hex
-
+      if (str[j] == '\'') {                    // Escape quotes.
+         output(StringRef(&base[i], j - i));  // "flush".
+         output(StringLiteral("''"));         // Print it as ''
          i = j + 1;
       }
       ++j;

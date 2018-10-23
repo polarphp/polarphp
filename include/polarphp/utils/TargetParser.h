@@ -194,7 +194,7 @@ enum class ArchKind
 };
 
 // arch extension modifiers for CPUs.
-enum archExtKind : unsigned
+enum ArchExtKind : unsigned
 {
    AEK_INVALID =     0,
    AEK_NONE =        1,
@@ -247,13 +247,15 @@ aarch64::ArchKind get_cpu_arch_kind(StringRef cpu);
 // Parser
 unsigned parse_fpu(StringRef FPU);
 aarch64::ArchKind parse_arch(StringRef arch);
-unsigned parse_arch_ext(StringRef archExt);
+aarch64::ArchExtKind parse_arch_ext(StringRef archExt);
 ArchKind parse_cpu_arch(StringRef cpu);
 void fill_valid_cpu_arch_list(SmallVectorImpl<StringRef> &values);
 arm::ISAKind parse_arch_isa(StringRef arch);
 arm::EndianKind parse_arch_endian(StringRef arch);
 arm::ProfileKind parse_arch_profile(StringRef arch);
 unsigned parse_arch_version(StringRef arch);
+
+bool is_x18_reserved_by_default(const Triple &tt);
 
 } // namespace AArch64
 

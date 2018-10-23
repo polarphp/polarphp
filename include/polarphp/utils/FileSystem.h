@@ -1286,6 +1286,7 @@ public:
       SmallString<128> pathStorage;
       errorCode = internal::directory_iterator_construct(
                *m_state, path.toStringRef(pathStorage), m_followSymlinks);
+      updateErrorCodeForCurrentEntry(errorCode);
    }
 
    explicit DirectoryIterator(const DirectoryEntry &direEntry, std::error_code &errorCode,
@@ -1295,6 +1296,7 @@ public:
       m_state = std::make_shared<internal::DirIterState>();
       errorCode = internal::directory_iterator_construct(
                *m_state, direEntry.getPath(), m_followSymlinks);
+      updateErrorCodeForCurrentEntry(errorCode);
    }
 
    /// Construct end iterator.
@@ -1304,6 +1306,7 @@ public:
    DirectoryIterator &increment(std::error_code &errorCode)
    {
       errorCode = internal::directory_iterator_increment(*m_state);
+      updateErrorCodeForCurrentEntry(errorCode);
       return *this;
    }
 

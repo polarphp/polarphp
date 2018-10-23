@@ -309,7 +309,7 @@ ConstIterator &ConstIterator::operator++()
       }
 
       // Treat trailing '/' as a '.'.
-      if (m_position == m_path.getSize()) {
+      if (m_position == m_path.getSize() && m_component != "/") {
          --m_position;
          m_component = ".";
          return *this;
@@ -352,22 +352,23 @@ ReverseIterator rend(StringRef path)
 
 ReverseIterator &ReverseIterator::operator++()
 {
-   // If we're at the end and the previous char was a '/', return '.' unless
-   // we are the root path.
    size_t rootDirPos = root_dir_start(m_path, m_style);
-   if (m_position == m_path.getSize() && m_path.getSize() > rootDirPos + 1 &&
-       is_separator(m_path[m_position - 1], m_style)) {
+
+   // Skip separators unless it's the root directory.
+   size_t endPos = m_position;
+   while (endPos > 0 && (endPos - 1) != rootDirPos &&
+          is_separator(m_path[endPos - 1], m_style))
+      --endPos;
+
+   // Treat trailing '/' as a '.', unless it is the root dir.
+   if (m_position == m_path.size() && !m_path.empty() &&
+       is_separator(m_path.back(), m_style) &&
+       (rootDirPos == StringRef::npos || endPos - 1 > rootDirPos)) {
       --m_position;
       m_component = ".";
       return *this;
    }
 
-   // Skip separators unless it's the root directory.
-   size_t endPos = m_position;
-   while (endPos > 0 && (endPos - 1) != rootDirPos &&
-          is_separator(m_path[endPos - 1], m_style)) {
-      --endPos;
-   }
    // Find next separator.
    size_t start_pos = filename_pos(m_path.substr(0, endPos), m_style);
    m_component = m_path.slice(start_pos, endPos);
@@ -1204,7 +1205,7 @@ Error TempFile::discard()
    m_done = true;
    std::error_code removeErrorCode;
    // On windows closing will remove the file.
-#ifndef POLAR_ON_WIN32
+#ifndef _WIN32
    // Always try to close and remove.
    if (!m_tmpName.empty()) {
       removeErrorCode = fs::remove(m_tmpName);
@@ -1228,7 +1229,7 @@ Error TempFile::keep(const Twine &name)
    assert(!m_done);
    m_done = true;
    // Always try to close and rename.
-#ifdef POLAR_ON_WIN32
+#ifdef _WIN32
    // If we cant't cancel the delete don't rename.
    std::error_code renameErrorCode = cancel_delete_on_close(fd);
    if (!renameErrorCode) {
@@ -1264,7 +1265,7 @@ Error TempFile::keep()
    assert(!m_done);
    m_done = true;
 
-#ifdef POLAR_ON_WIN32
+#ifdef _WIN32
    if (std::error_code errorCode = cancel_delete_on_close(m_fd)) {
       return error_code_to_error(errorCode);
    }
@@ -1292,7 +1293,7 @@ Expected<TempFile> TempFile::create(const Twine &model, unsigned mode)
       return error_code_to_error(errorCode);
 
    TempFile ret(resultPath, fd);
-#ifndef POLAR_ON_WIN32
+#ifndef _WIN32
    if (utils::remove_file_on_signal(resultPath)) {
       // Make sure we delete the file when RemoveFileOnSignal fails.
       polar::utils::consume_error(ret.discard());

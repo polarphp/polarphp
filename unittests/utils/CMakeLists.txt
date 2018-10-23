@@ -46,6 +46,29 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    MemoryBufferTest.cpp
    MemoryTest.cpp
    NativeFormatTests.cpp
+   ParallelTest.cpp
+   PathTest.cpp
+   ProcessTest.cpp
+   ProgramTest.cpp
+   RawOutStreamTest.cpp
+   RawPwriteStreamTest.cpp
+   RawSha1OutStreamTest.cpp
+   ReplaceFileTest.cpp
+   ReverseIterationTest.cpp
+   ScaledNumberTest.cpp
+   SourceMgrTest.cpp
+   SpecialCaseListTest.cpp
+   StringPoolTest.cpp
+   SwapByteOrderTest.cpp
+   TargetParserTest.cpp
+   TarWriterTest.cpp
+   TimerTest.cpp
+   TrailingObjectsTest.cpp
+   TrigramIndexTest.cpp
+   TypeNameTest.cpp
+   UnicodeTest.cpp
+   YamlIOTest.cpp
+   YamlParserTest.cpp
    )
 
 target_link_libraries(BasicUtilsTest PRIVATE TestSupport)
