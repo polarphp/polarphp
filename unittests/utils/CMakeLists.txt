@@ -71,6 +71,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    YamlParserTest.cpp
    VersionTupleTest.cpp
    ThreadPoolTest.cpp
+   TaskQueueTest.cpp
    )
 
 target_link_libraries(BasicUtilsTest PRIVATE TestSupport)
