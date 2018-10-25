@@ -15,6 +15,7 @@
 #include "polarphp/utils/Process.h"
 #include "polarphp/utils/Signals.h"
 #include "polarphp/utils/ManagedStatics.h"
+#include "CLI/CLI.hpp"
 #include <string>
 
 #ifdef _WIN32
@@ -23,7 +24,8 @@
 
 namespace polar {
 
-InitPolar::InitPolar(int &argc, const char **&argv) : m_stackPrinter(argc, argv)
+InitPolar::InitPolar(int &argc, const char **&argv)
+   : m_stackPrinter(argc, argv)
 {
    utils::print_stack_trace_on_error_signal(argv[0]);
 
@@ -49,6 +51,11 @@ InitPolar::InitPolar(int &argc, const char **&argv) : m_stackPrinter(argc, argv)
    argc = args.size() - 1;
    argv = args.data();
 #endif
+}
+
+void InitPolar::initNgOpts(CLI::App &parser)
+{
+
 }
 
 InitPolar::~InitPolar()

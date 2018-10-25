@@ -7,27 +7,10 @@
 // See http://polarphp.org/LICENSE.txt for license information
 // See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2018/10/08.
-
-#ifndef POLAR_DEVLTOOLS_FILECHECKER_SOURCE_MANAGER_H
-#define POLAR_DEVLTOOLS_FILECHECKER_SOURCE_MANAGER_H
-
-#include "SourceLocation.h"
-
-#include <ostream>
-#include <algorithm>
-#include <cassert>
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
+// Created by polarboy on 2018/10/25.
 
 namespace polar {
 namespace filechecker {
 
-
-
 } // filechecker
 } // polar
-
-#endif // POLAR_DEVLTOOLS_FILECHECKER_SOURCE_MANAGER_H

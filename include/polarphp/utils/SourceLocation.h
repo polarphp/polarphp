@@ -20,6 +20,7 @@
 #define POLARPHP_UTILS_SOURCE_LOCATION_H
 
 #include <cassert>
+#include <optional>
 
 namespace polar {
 namespace utils {
@@ -72,7 +73,6 @@ public:
    SMLocation m_end;
 
    SMRange() = default;
-   SMRange(std::nullptr_t) {}
    SMRange(SMLocation start, SMLocation end)
       : m_start(start),
         m_end(end)

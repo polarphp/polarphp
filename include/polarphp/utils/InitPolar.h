@@ -16,6 +16,11 @@
 #include "polarphp/utils/Allocator.h"
 #include "polarphp/utils/PrettyStackTrace.h"
 
+// forward declare class with namespace
+namespace CLI {
+class App;
+} // CLI
+
 namespace polar {
 
 // The main() functions in typical polarphp tools start with InitPolar which does
@@ -38,9 +43,8 @@ public:
    InitPolar(int &argc, char **&argv)
       : InitPolar(argc, const_cast<const char **&>(argv))
    {}
-
+   void initNgOpts(CLI::App &parser);
    ~InitPolar();
-
 private:
    utils::BumpPtrAllocator m_alloc;
    basic::SmallVector<const char *, 0> m_args;

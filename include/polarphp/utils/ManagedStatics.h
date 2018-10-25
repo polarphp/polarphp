@@ -72,8 +72,8 @@ public:
 /// libraries that link in LLVM components) and for making destruction be
 /// explicit through the llvm_shutdown() function call.
 ///
-template <typename Class, class Creator = ObjectCreator<Class>,
-          class Deleter = ObjectDeleter<Class>>
+template <typename Class, typename Creator = ObjectCreator<Class>,
+          typename Deleter = ObjectDeleter<Class>>
 class ManagedStatic : public ManagedStaticBase
 {
 public:
