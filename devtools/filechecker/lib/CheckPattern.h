@@ -56,7 +56,7 @@ public:
    bool parsePattern(StringRef patternStr, StringRef prefix, SourceMgr &sourceMgr,
                      unsigned lineNumber);
    size_t match(StringRef buffer, size_t &matchLen,
-                StringMap<StringRef> &variableTable) const;
+                StringMap<std::string> &variableTable) const;
    void printVariableUses(const SourceMgr &sourceMgr, StringRef buffer,
                           const StringMap<StringRef> &variableTable,
                           SMRange matchRange = {}) const;
