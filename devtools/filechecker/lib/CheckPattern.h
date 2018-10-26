@@ -58,10 +58,10 @@ public:
    size_t match(StringRef buffer, size_t &matchLen,
                 StringMap<std::string> &variableTable) const;
    void printVariableUses(const SourceMgr &sourceMgr, StringRef buffer,
-                          const StringMap<StringRef> &variableTable,
+                          const StringMap<std::string> &variableTable,
                           SMRange matchRange = {}) const;
    void printFuzzyMatch(const SourceMgr &sourceMgr, StringRef buffer,
-                        const StringMap<StringRef> &variableTable) const;
+                        const StringMap<std::string> &variableTable) const;
 
    bool hasVariable() const
    {
@@ -78,7 +78,7 @@ private:
    void addBackrefToRegEx(unsigned backrefNum);
    unsigned
    computeMatchDistance(StringRef buffer,
-                        const StringMap<StringRef> &variableTable) const;
+                        const StringMap<std::string> &variableTable) const;
    bool evaluateExpression(StringRef expr, std::string &value) const;
    size_t findRegexVarEnd(StringRef str, SourceMgr &sourceMgr);
 

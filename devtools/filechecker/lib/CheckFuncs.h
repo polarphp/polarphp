@@ -13,35 +13,38 @@
 #define POLAR_DEVLTOOLS_FILECHECKER_CHECK_FUNCS_H
 
 #include "Global.h"
+#include "polarphp/basic/adt/StringMap.h"
+#include "polarphp/basic/adt/ArrayRef.h"
 #include <string>
 #include <regex>
 
 namespace polar {
-namespace basic {
-class StringRef;
-class StringMap;
-template <typename T>
-class SmallVectorImpl;
-} // basic
-
 namespace utils {
 class MemoryBuffer;
 class SourceMgr;
 class SMLocation;
 } // utils
+
+namespace basic {
+class StringRef;
+template <typename T>
+class SmallVectorImpl;
+} // basic
 } // polar
 
 namespace polar {
 namespace filechecker {
 
 using polar::basic::SmallVectorImpl;
+using polar::basic::ArrayRef;
 using polar::basic::StringRef;
 using polar::basic::StringMap;
 using polar::utils::MemoryBuffer;
 using polar::utils::SourceMgr;
 using polar::utils::SMLocation;
 class CheckString;
-class CheckPattern;
+class Pattern;
+
 /// Canonicalize whitespaces in the file. Line endings are replaced with
 /// UNIX-style '\n'.
 StringRef canonicalize_file(MemoryBuffer &memoryBuffer,
@@ -77,27 +80,35 @@ StringRef find_first_matching_prefix(std::regex &prefixRegex, StringRef &buffer,
 
 /// Read the check file, which specifies the sequence of expected strings.
 ///
-/// The strings are added to the CheckStrings vector. Returns true in case of
+/// The strings are added to the checkStrings vector. Returns true in case of
 /// an error, false otherwise.
 bool read_check_file(SourceMgr &sourceMgr, StringRef buffer, std::regex &prefixRegex,
                      std::vector<CheckString> &checkStrings);
 void print_match(bool expectedMatch, const SourceMgr &sourceMgr,
-                 StringRef prefix, SMLocation loc, const CheckPattern &pattern,
-                 StringRef buffer, StringMap<StringRef> &variableTable,
+                 StringRef prefix, SMLocation loc, const Pattern &pattern,
+                 StringRef buffer, StringMap<std::string> &variableTable,
                  size_t matchPos, size_t matchLen);
 void print_match(bool expectedMatch, const SourceMgr &sourceMgr,
                  const CheckString &checkStr, StringRef buffer,
-                 StringMap<StringRef> &variableTable, size_t matchPos,
+                 StringMap<std::string> &variableTable, size_t matchPos,
                  size_t matchLen);
 void print_no_match(bool expectedMatch, const SourceMgr &sourceMgr,
                     StringRef prefix, SMLocation loc, const Pattern &Pat,
                     StringRef buffer,
-                    StringMap<StringRef> &variableTable);
+                    StringMap<std::string> &variableTable);
 void print_no_match(bool expectedMatch, const SourceMgr &sourceMgr,
                     const CheckString &checkStr, StringRef buffer,
-                    StringMap<StringRef> &variableTable);
+                    StringMap<std::string> &variableTable);
 unsigned count_num_newlines_between(StringRef range,
                                     const char *&firstNewLine);
+
+bool validate_check_prefix(StringRef checkPrefix);
+bool validate_check_prefixes();
+bool build_check_prefix_regex(std::regex &regex, std::string &errorMsg);
+void dump_command_line(int argc, char **argv);
+void clear_local_vars(StringMap<std::string> &variableTable);
+bool check_input(SourceMgr &sourceMgr, StringRef buffer,
+                 ArrayRef<CheckString> checkStrings);
 
 } // filechecker
 } // polar

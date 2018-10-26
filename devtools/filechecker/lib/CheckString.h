@@ -41,16 +41,16 @@ public:
    {}
 
    size_t check(const SourceMgr &sourceMgr, StringRef buffer, bool isLabelScanMode,
-                size_t &matchLen, StringMap<StringRef> &variableTable) const;
+                size_t &matchLen, StringMap<std::string> &variableTable) const;
 
    bool checkNext(const SourceMgr &sourceMgr, StringRef buffer) const;
    bool checkSame(const SourceMgr &sourceMgr, StringRef buffer) const;
    bool checkNot(const SourceMgr &sourceMgr, StringRef buffer,
                  const std::vector<const Pattern *> &notStrings,
-                 StringMap<StringRef> &variableTable) const;
+                 StringMap<std::string> &variableTable) const;
    size_t checkDag(const SourceMgr &sourceMgr, StringRef buffer,
                    std::vector<const Pattern *> &notStrings,
-                   StringMap<StringRef> &variableTable) const;
+                   StringMap<std::string> &variableTable) const;
 };
 
 } // filechecker

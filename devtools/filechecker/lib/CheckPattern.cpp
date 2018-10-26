@@ -366,7 +366,7 @@ size_t Pattern::match(StringRef buffer, size_t &matchLen,
 /// Computes an arbitrary estimate for the quality of matching this pattern at
 /// the start of \p buffer; a distance of zero should correspond to a perfect
 /// match.
-unsigned Pattern::computeMatchDistance(StringRef buffer, const StringMap<StringRef> &variableTable) const
+unsigned Pattern::computeMatchDistance(StringRef buffer, const StringMap<std::string> &variableTable) const
 {
    // Just compute the number of matching characters. For regular expressions, we
    // just compare against the regex itself and hope for the best.
@@ -385,7 +385,7 @@ unsigned Pattern::computeMatchDistance(StringRef buffer, const StringMap<StringR
 }
 
 void Pattern::printVariableUses(const SourceMgr &sourceMgr, StringRef buffer,
-                                const StringMap<StringRef> &variableTable, SMRange matchRange) const
+                                const StringMap<std::string> &variableTable, SMRange matchRange) const
 {
    // If this was a regular expression using variables, print the current
    // variable values.
@@ -405,7 +405,7 @@ void Pattern::printVariableUses(const SourceMgr &sourceMgr, StringRef buffer,
                out.writeEscaped(var) << "\"";
             }
          } else {
-            StringMap<StringRef>::const_iterator iter = variableTable.find(var);
+            StringMap<std::string>::const_iterator iter = variableTable.find(var);
             // Check for undefined variable references.
             if (iter == variableTable.end()) {
                out << "uses undefined variable \"";
@@ -430,7 +430,7 @@ void Pattern::printVariableUses(const SourceMgr &sourceMgr, StringRef buffer,
 
 void Pattern::printFuzzyMatch(
       const SourceMgr &sourceMgr, StringRef buffer,
-      const StringMap<StringRef> &variableTable) const {
+      const StringMap<std::string> &variableTable) const {
    // Attempt to find the closest/best fuzzy match.  Usually an error happens
    // because some string in the output didn't exactly match. In these cases, we
    // would like to show the user a best guess at what "should have" matched, to
