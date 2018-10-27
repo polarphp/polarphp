@@ -68,7 +68,7 @@ bool Pattern::parsePattern(basic::StringRef patternStr, basic::StringRef prefix,
    }
 
    if (m_checkType == CheckType::CheckEmpty) {
-      m_regExStr = "(\n$)";
+      m_regExStr = "([\\n])";
       return false;
    }
 

@@ -464,7 +464,7 @@ unsigned count_num_newlines_between(StringRef range,
                                     const char *&firstNewLine)
 {
    unsigned numNewLines = 0;
-   while (1) {
+   while (true) {
       // Scan for newline.
       range = range.substr(range.findFirstOf("\n\r"));
       if (range.empty()) {
