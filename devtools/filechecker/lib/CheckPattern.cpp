@@ -218,10 +218,10 @@ bool Pattern::parsePattern(basic::StringRef patternStr, basic::StringRef prefix,
 
       // Handle fixed string matches.
       // Find the end, which is the start of the next regex.
-      size_t m_fixedMatchEnd = patternStr.find("{{");
-      m_fixedMatchEnd = std::min(m_fixedMatchEnd, patternStr.find("[["));
-      m_regExStr += regex_escape(patternStr.substr(0, m_fixedMatchEnd));
-      patternStr = patternStr.substr(m_fixedMatchEnd);
+      size_t fixedMatchEnd = patternStr.find("{{");
+      fixedMatchEnd = std::min(fixedMatchEnd, patternStr.find("[["));
+      m_regExStr += regex_escape(patternStr.substr(0, fixedMatchEnd));
+      patternStr = patternStr.substr(fixedMatchEnd);
    }
 
    if (matchFullLinesHere) {
@@ -340,14 +340,13 @@ size_t Pattern::match(StringRef buffer, size_t &matchLen,
       regExToMatch = m_tmpStr;
    }
 
-   std::smatch matchInfo;
-   std::string bufferStr = buffer.getStr();
-   if (!std::regex_match(bufferStr, matchInfo, std::regex(regExToMatch.getStr()))) {
+   std::cmatch matchInfo;
+   if (!std::regex_search(buffer.begin(), buffer.end(), matchInfo, std::regex(regExToMatch.getStr()))) {
       return StringRef::npos;
    }
    // Successful regex match.
    assert(!matchInfo.empty() && "Didn't get any match");
-   StringRef fullMatch = matchInfo[0].str();
+   StringRef fullMatch(buffer.getData() + matchInfo.position(), matchInfo[0].length());
 
    // If this defines any variables, remember their values.
    for (const auto &variableDef : m_variableDefs) {

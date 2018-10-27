@@ -171,12 +171,11 @@ CheckType find_check_type(StringRef buffer, StringRef prefix)
 }
 
 // From the given position, find the next character after the word.
-size_t skip_word(StringRef str, size_t loc)
+size_t skip_word(StringRef str)
 {
-   while (loc < str.size() && is_part_of_word(str[loc])) {
-      ++loc;
-   }
-   return loc;
+   size_t i = 0;
+   for (;i < str.size() && is_part_of_word(str[i]); ++i);
+   return i;
 }
 
 /// Search the buffer for the first prefix in the prefix regular expression.
@@ -203,19 +202,19 @@ StringRef find_first_matching_prefix(std::regex &prefixRegex, StringRef &buffer,
                                      CheckType &checkType)
 {
    while (!buffer.empty()) {
-      std::string bufferStr = buffer.getStr();
-      std::smatch matches;
+      std::cmatch matches;
       // Find the first (longest) match using the RE.
-      if (!std::regex_match(bufferStr, matches, prefixRegex)) {
+      if (!std::regex_search(buffer.begin(), buffer.end(), matches, prefixRegex)) {
          // No match at all, bail.
          return StringRef();
       }
+      StringRef prefix(buffer.getData() + matches.position(), matches[0].length());
 
-      StringRef prefix = matches[0].str();
       assert(prefix.getData() >= buffer.getData() &&
              prefix.getData() < buffer.getData() + buffer.size() &&
-             "prefix doesn't start inside of buffer!");
-      size_t loc = prefix.getData() - buffer.getData();
+             "Prefix doesn't start inside of buffer!");
+
+      size_t loc = matches.position();
       StringRef skipped = buffer.substr(0, loc);
       buffer = buffer.dropFront(loc);
       lineNumber += skipped.count('\n');
@@ -237,7 +236,7 @@ StringRef find_first_matching_prefix(std::regex &prefixRegex, StringRef &buffer,
       // If we didn't successfully find a prefix, we need to skip this invalid
       // prefix and continue scanning. We directly skip the prefix that was
       // matched and any additional parts of that check-like word.
-      buffer = buffer.dropFront(skip_word(buffer, prefix.size()));
+      buffer = buffer.dropFront(skip_word(buffer));
    }
 
    // We ran out of buffer while skipping partial matches so give up.
@@ -254,7 +253,7 @@ bool read_check_file(SourceMgr &sourceMgr, StringRef buffer, std::regex &prefixR
    CLI::App &parser = retrieve_command_parser();
    std::string cmdName = "--implicit-check-not";
    std::vector<std::string> implicitCheckNot = parser.get_option(cmdName)->results();
-   std::vector<std::string> checkPrefixes = parser.get_option("--check-prefix")->results();
+   std::vector<std::string> checkPrefixes = parser.get_option("--check-prefixes")->results();
    bool noCanonicalizeWhiteSpace = parser.get_option("--strict-whitespace")->count() > 0 ? true : false;
    bool matchFullLines = parser.get_option("--match-full-lines")->count() > 0 ? true : false;
    std::vector<Pattern> implicitNegativeChecks;
@@ -280,7 +279,6 @@ bool read_check_file(SourceMgr &sourceMgr, StringRef buffer, std::regex &prefixR
    // lineNumber keeps track of the line on which Checkprefix instances are
    // found.
    unsigned lineNumber = 1;
-
    while (true) {
       CheckType checkType;
       // See if a prefix occurs in the memory buffer.
@@ -308,9 +306,9 @@ bool read_check_file(SourceMgr &sourceMgr, StringRef buffer, std::regex &prefixR
 
       // Okay, we found the prefix, yay. Remember the rest of the line, but ignore
       // leading whitespace.
-      if (!(noCanonicalizeWhiteSpace && matchFullLines))
+      if (!(noCanonicalizeWhiteSpace && matchFullLines)) {
          buffer = buffer.substr(buffer.findFirstNotOf(" \t"));
-
+      }
       // Scan ahead to the end of line.
       size_t eol = buffer.findFirstOf("\n\r");
 
@@ -366,7 +364,6 @@ bool read_check_file(SourceMgr &sourceMgr, StringRef buffer, std::regex &prefixR
                                 SMLocation::getFromPointer(buffer.getData()));
       std::swap(dagNotMatches, checkStrings.back().m_dagNotStrings);
    }
-
    if (checkStrings.empty()) {
       polar::utils::error_stream() << "error: no check strings found with prefix"
                                    << (checkPrefixes.size() > 1 ? "es " : " ");
@@ -521,7 +518,7 @@ bool validate_check_prefixes()
 bool build_check_prefix_regex(std::regex &regex, std::string &errorMsg)
 {
    CLI::App &parser = retrieve_command_parser();
-   std::vector<std::string> checkPrefixes = parser.get_option("--check-prefix")->results();
+   std::vector<std::string> checkPrefixes = parser.get_option("--check-prefixes")->results();
    // I don't think there's a way to specify an initial value for cl::list,
    // so if nothing was specified, add the default
    if (checkPrefixes.empty()) {
@@ -629,10 +626,10 @@ bool check_input(SourceMgr &sourceMgr, StringRef buffer,
          checkRegion = checkRegion.substr(matchPos + matchLen);
       }
 
-      if (j == e)
+      if (j == e) {
          break;
+      }
    }
-
    // Success if no checks failed.
    return !checksFailed;
 }

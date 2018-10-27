@@ -73,6 +73,11 @@ public:
       return m_checkType;
    }
 
+   const std::string &getRegExStr() const
+   {
+      return m_regExStr;
+   }
+
 private:
    bool addRegExToRegEx(StringRef rs, unsigned &curParen, SourceMgr &sourceMgr);
    void addBackrefToRegEx(unsigned backrefNum);

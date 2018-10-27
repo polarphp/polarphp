@@ -54,7 +54,7 @@ size_t check_type_size(CheckType checkType);
 std::string check_type_name(StringRef prefix, CheckType checkType);
 CheckType find_check_type(StringRef buffer, StringRef prefix);
 // From the given position, find the next character after the word.
-size_t skip_word(StringRef str, size_t loc);
+size_t skip_word(StringRef str);
 /// Search the buffer for the first prefix in the prefix regular expression.
 ///
 /// This searches the buffer using the provided regular expression, however it

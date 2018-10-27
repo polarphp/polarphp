@@ -204,21 +204,21 @@ size_t CheckString::checkDag(const SourceMgr &sourceMgr, StringRef buffer,
    // range.
    std::list<MatchRange> matchRanges;
 
-   // We need patternIter and PatEnd later for detecting the end of a CHECK-DAG
+   // We need patternIter and patternEnd later for detecting the end of a CHECK-DAG
    // group, so we don't use a range-based for loop here.
-   for (auto patternIter = m_dagNotStrings.begin(), PatEnd = m_dagNotStrings.end();
-        patternIter != PatEnd; ++patternIter) {
-      const Pattern &m_pattern = *patternIter;
-      assert((m_pattern.getCheckType() == CheckType::CheckDAG ||
-              m_pattern.getCheckType() == CheckType::CheckNot) &&
+   for (auto patternIter = m_dagNotStrings.begin(), patternEnd = m_dagNotStrings.end();
+        patternIter != patternEnd; ++patternIter) {
+      const Pattern &pattern = *patternIter;
+      assert((pattern.getCheckType() == CheckType::CheckDAG ||
+              pattern.getCheckType() == CheckType::CheckNot) &&
              "Invalid CHECK-DAG or CHECK-NOT!");
 
-      if (m_pattern.getCheckType() == CheckType::CheckNot) {
-         notStrings.push_back(&m_pattern);
+      if (pattern.getCheckType() == CheckType::CheckNot) {
+         notStrings.push_back(&pattern);
          continue;
       }
 
-      assert((m_pattern.getCheckType() == CheckType::CheckDAG) && "Expect CHECK-DAG!");
+      assert((pattern.getCheckType() == CheckType::CheckDAG) && "Expect CHECK-DAG!");
 
       // CHECK-DAG always matches from the start.
       size_t matchLen = 0, matchPos = startPos;
@@ -227,18 +227,18 @@ size_t CheckString::checkDag(const SourceMgr &sourceMgr, StringRef buffer,
       // CHECK-DAG group.
       for (auto miter = matchRanges.begin(), mend = matchRanges.end(); true; ++miter) {
          StringRef matchBuffer = buffer.substr(matchPos);
-         size_t matchPosBuf = m_pattern.match(matchBuffer, matchLen, variableTable);
+         size_t matchPosBuf = pattern.match(matchBuffer, matchLen, variableTable);
          // With a group of CHECK-DAGs, a single mismatching means the match on
          // that group of CHECK-DAGs fails immediately.
          if (matchPosBuf == StringRef::npos) {
-            print_no_match(true, sourceMgr, m_prefix, m_pattern.getLoc(), m_pattern, matchBuffer,
+            print_no_match(true, sourceMgr, m_prefix, pattern.getLoc(), pattern, matchBuffer,
                            variableTable);
             return StringRef::npos;
          }
          // Re-calc it as the offset relative to the start of the original string.
          matchPos += matchPosBuf;
          if (verboseVerbose) {
-            print_match(true, sourceMgr, m_prefix, m_pattern.getLoc(), m_pattern, buffer, variableTable,
+            print_match(true, sourceMgr, m_prefix, pattern.getLoc(), pattern, buffer, variableTable,
                         matchPos, matchLen);
          }
 
@@ -282,11 +282,11 @@ size_t CheckString::checkDag(const SourceMgr &sourceMgr, StringRef buffer,
          matchPos = miter->end;
       }
       if (!verboseVerbose)
-         print_match(true, sourceMgr, m_prefix, m_pattern.getLoc(), m_pattern, buffer, variableTable,
+         print_match(true, sourceMgr, m_prefix, pattern.getLoc(), pattern, buffer, variableTable,
                     matchPos, matchLen);
 
       // Handle the end of a CHECK-DAG group.
-      if (std::next(patternIter) == PatEnd ||
+      if (std::next(patternIter) == patternEnd ||
           std::next(patternIter)->getCheckType() == CheckType::CheckNot) {
          if (!notStrings.empty()) {
             // If there are CHECK-NOTs between two CHECK-DAGs or from CHECK to

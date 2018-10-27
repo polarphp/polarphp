@@ -21,6 +21,7 @@
 #include "polarphp/utils/OptionalError.h"
 #include "polarphp/utils/MemoryBuffer.h"
 #include <regex>
+#include <iostream>
 
 using polar::basic::StringRef;
 using namespace polar::filechecker;
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
    polarInitializer.initNgOpts(cmdParser);
    std::string checkFilename;
    std::string inputFilename;
-   std::string checkPrefix;
+   std::vector<std::string> checkPrefix;
    std::vector<std::string> checkPrefixes;
    bool noCanonicalizeWhiteSpace;
    std::vector<std::string> implicitCheckNot;
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
    CLI::Option *dumpInputOnFailureOpt = cmdParser.add_flag("--dump-input-on-failure", dumpInputOnFailure, "Dump original input to stderr before failing."
                                                                                                           "The value can be also controlled using "
                                                                                                           "FILECHECK_DUMP_INPUT_ON_FAILURE environment variable.");
-
+   CLI11_PARSE(cmdParser, argc, argv);
    if (dumpInputOnFailureOpt->count() == 0) {
       std::string dumpInputOnFailureEnv = StringRef(std::getenv("FILECHECK_DUMP_INPUT_ON_FAILURE")).trim().toLower();
       if (!dumpInputOnFailureEnv.empty() && (dumpInputOnFailureEnv == "true" || dumpInputOnFailureEnv == "on")) {
@@ -82,9 +83,11 @@ int main(int argc, char *argv[])
       }
    }
    if (!checkPrefix.empty()) {
-      checkPrefixesOpt->add_result(checkPrefix);
+      for (std::string &prefix : checkPrefix) {
+         checkPrefixesOpt->add_result(prefix);
+      }
    }
-   CLI11_PARSE(cmdParser, argc, argv);
+
    if (!validate_check_prefixes()) {
       error_stream() << "Supplied check-prefix is invalid! Prefixes must be unique and "
                         "start with a letter and contain only alphanumeric characters, "
@@ -103,7 +106,6 @@ int main(int argc, char *argv[])
                      << regexError << "\n";
       return 2;
    }
-
    SourceMgr sourceMgr;
    OptionalError<std::unique_ptr<MemoryBuffer>> checkFileOrErr =
          MemoryBuffer::getFileOrStdIn(checkFilename);
@@ -116,7 +118,6 @@ int main(int argc, char *argv[])
 
    SmallString<4096> checkFileBuffer;
    StringRef checkFileText = canonicalize_file(checkFile, checkFileBuffer);
-
    sourceMgr.addNewSourceBuffer(MemoryBuffer::getMemBuffer(
                                    checkFileText, checkFile.getBufferIdentifier()),
                                 SMLocation());
@@ -125,8 +126,6 @@ int main(int argc, char *argv[])
    if (read_check_file(sourceMgr, checkFileText, prefixRegex, checkStrings)) {
       return 2;
    }
-
-
    // Open the file to check and add it to SourceMgr.
    OptionalError<std::unique_ptr<MemoryBuffer>> inputFileOrErr =
          MemoryBuffer::getFileOrStdIn(inputFilename);
@@ -136,7 +135,6 @@ int main(int argc, char *argv[])
       return 2;
    }
    MemoryBuffer &inputFile = *inputFileOrErr.get();
-
    if (inputFile.getBufferSize() == 0 && !allowEmptyInput) {
       error_stream() << "FileCheck error: '" << inputFilename << "' is empty.\n";
       dump_command_line(argc, argv);
@@ -145,7 +143,6 @@ int main(int argc, char *argv[])
 
    SmallString<4096> inputFileBuffer;
    StringRef inputFileText = canonicalize_file(inputFile, inputFileBuffer);
-
    sourceMgr.addNewSourceBuffer(MemoryBuffer::getMemBuffer(
                                    inputFileText, inputFile.getBufferIdentifier()),
                                 SMLocation());
