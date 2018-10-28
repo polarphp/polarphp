@@ -152,7 +152,7 @@ StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSou
 void execute_script_internal();
 void execute_script();
 void parse_integrated_test_script_commands();
-void get_temp_paths();
+std::pair<std::string, std::string> get_temp_paths(TestPointer test);
 void colon_normalize_path();
 void get_default_substitutions();
 void apply_substitutions();

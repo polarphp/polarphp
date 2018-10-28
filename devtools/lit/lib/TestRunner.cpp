@@ -481,6 +481,18 @@ Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool execute
 
 }
 
+/// Get the temporary location, this is always relative to the test suite
+/// root, not test source root.
+std::pair<std::string, std::string> get_temp_paths(TestPointer test)
+{
+   fs::path execPath(test->getExecPath());
+   fs::path execDir = execPath.parent_path();
+   fs::path execBase = execPath.filename();
+   fs::path tempDir = execDir / "Output";
+   fs::path tempBase = tempDir / execBase;
+   return std::make_pair(tempDir, tempBase);
+}
+
 const SmallVector<char, 4> &ParserKind::allowedKeywordSuffixes(Kind kind)
 {
    return sm_allowedSuffixes[kind];
