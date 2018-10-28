@@ -15,6 +15,7 @@
 #include "polarphp/utils/RawOutStream.h"
 #include "CLI/CLI.hpp"
 #include <regex>
+#include <boost/regex.hpp>
 
 namespace polar {
 namespace filechecker {
@@ -340,8 +341,12 @@ size_t Pattern::match(StringRef buffer, size_t &matchLen,
       regExToMatch = m_tmpStr;
    }
 
-   std::cmatch matchInfo;
-   if (!std::regex_search(buffer.begin(), buffer.end(), matchInfo, std::regex(regExToMatch.getStr()))) {
+//   std::cmatch matchInfo;
+//   if (!std::regex_search(buffer.begin(), buffer.end(), matchInfo, std::regex(regExToMatch.getStr()))) {
+//      return StringRef::npos;
+//   }
+   boost::cmatch matchInfo;
+   if (!boost::regex_search(buffer.begin(), buffer.end(), matchInfo, boost::regex(regExToMatch.getStr()))) {
       return StringRef::npos;
    }
    // Successful regex match.

@@ -22,6 +22,7 @@
 #include "polarphp/utils/MemoryBuffer.h"
 #include <regex>
 #include <iostream>
+#include <boost/regex.hpp>
 
 using polar::basic::StringRef;
 using namespace polar::filechecker;

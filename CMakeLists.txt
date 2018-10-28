@@ -388,6 +388,7 @@ add_subdirectory(include)
 add_subdirectory(main)
 add_subdirectory(src)
 add_subdirectory(tools)
+add_subdirectory(thirdparty)
 
 if (POLAR_INCLUDE_TESTS)
    include(LitUtils)

@@ -83,3 +83,12 @@ if (NOT PURE_WINDOWS)
       set(HAVE_TERMINFO 0)
    endif()
 endif()
+
+# find icu package for unicode
+# for macos install icu by brew
+if (APPLE)
+   list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/icu4c)
+endif()
+find_package(ICU COMPONENTS data i18n io tu uc REQUIRED)
+message("found icu version: ${ICU_VERSION}")
+include_directories(${ICU_INCLUDE_DIRS})
