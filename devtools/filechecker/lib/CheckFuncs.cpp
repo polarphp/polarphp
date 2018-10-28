@@ -18,7 +18,7 @@
 #include "polarphp/basic/adt/Twine.h"
 #include "polarphp/utils/Debug.h"
 #include "CLI/CLI.hpp"
-#include <regex>
+#include <boost/regex.hpp>
 
 namespace polar {
 namespace filechecker {
@@ -197,14 +197,14 @@ size_t skip_word(StringRef str)
 ///
 /// If no valid prefix is found, the state of buffer, lineNumber, and CheckType
 /// is unspecified.
-StringRef find_first_matching_prefix(std::regex &prefixRegex, StringRef &buffer,
+StringRef find_first_matching_prefix(boost::regex &prefixRegex, StringRef &buffer,
                                      unsigned &lineNumber,
                                      CheckType &checkType)
 {
    while (!buffer.empty()) {
-      std::cmatch matches;
+      boost::cmatch matches;
       // Find the first (longest) match using the RE.
-      if (!std::regex_search(buffer.begin(), buffer.end(), matches, prefixRegex)) {
+      if (!boost::regex_search(buffer.begin(), buffer.end(), matches, prefixRegex)) {
          // No match at all, bail.
          return StringRef();
       }
@@ -247,7 +247,7 @@ StringRef find_first_matching_prefix(std::regex &prefixRegex, StringRef &buffer,
 ///
 /// The strings are added to the checkStrings vector. Returns true in case of
 /// an error, false otherwise.
-bool read_check_file(SourceMgr &sourceMgr, StringRef buffer, std::regex &prefixRegex,
+bool read_check_file(SourceMgr &sourceMgr, StringRef buffer, boost::regex &prefixRegex,
                      std::vector<CheckString> &checkStrings)
 {
    CLI::App &parser = retrieve_command_parser();
@@ -487,7 +487,7 @@ unsigned count_num_newlines_between(StringRef range,
 // A check prefix must contain only alphanumeric, hyphens and underscores.
 bool validate_check_prefix(StringRef checkPrefix)
 {
-   return std::regex_match(checkPrefix.getStr(), std::regex("^[a-zA-Z0-9_-]*$"));
+   return boost::regex_match(checkPrefix.getStr(), boost::regex("^[a-zA-Z0-9_-]*$"));
 }
 
 bool validate_check_prefixes()
@@ -515,7 +515,7 @@ bool validate_check_prefixes()
 //
 // The semantics are that the longest-match wins which matches our regex
 // library.
-bool build_check_prefix_regex(std::regex &regex, std::string &errorMsg)
+bool build_check_prefix_regex(boost::regex &regex, std::string &errorMsg)
 {
    CLI::App &parser = retrieve_command_parser();
    std::vector<std::string> checkPrefixes = parser.get_option("--check-prefixes")->results();
@@ -534,7 +534,7 @@ bool build_check_prefix_regex(std::regex &regex, std::string &errorMsg)
       prefixRegexStr.append(prefix);
    }
    try {
-      regex = std::regex(prefixRegexStr.getStr().getStr());
+      regex = boost::regex(prefixRegexStr.getStr().getStr());
       return true;
    } catch (std::exception &e) {
       errorMsg = e.what();

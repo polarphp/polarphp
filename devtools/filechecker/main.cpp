@@ -20,7 +20,6 @@
 #include "polarphp/utils/SourceMgr.h"
 #include "polarphp/utils/OptionalError.h"
 #include "polarphp/utils/MemoryBuffer.h"
-#include <regex>
 #include <iostream>
 #include <boost/regex.hpp>
 
@@ -97,7 +96,7 @@ int main(int argc, char *argv[])
    }
 
 
-   std::regex prefixRegex;
+   boost::regex prefixRegex;
    std::string regexError;
    if (!build_check_prefix_regex(prefixRegex, regexError)) {
       error_stream() << "Unable to combine check-prefix strings into a prefix regular "

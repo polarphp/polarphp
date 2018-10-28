@@ -14,7 +14,6 @@
 #include "polarphp/basic/adt/SmallVector.h"
 #include "polarphp/utils/RawOutStream.h"
 #include "CLI/CLI.hpp"
-#include <regex>
 #include <boost/regex.hpp>
 
 namespace polar {
@@ -69,7 +68,7 @@ bool Pattern::parsePattern(basic::StringRef patternStr, basic::StringRef prefix,
    }
 
    if (m_checkType == CheckType::CheckEmpty) {
-      m_regExStr = "([\\n])";
+      m_regExStr = "(\n$)";
       return false;
    }
 
@@ -239,11 +238,11 @@ bool Pattern::addRegExToRegEx(StringRef regexStr, unsigned &curParen, SourceMgr 
 {
    try {
       std::string stdRegexStr = regexStr.getStr();
-      std::regex regex(stdRegexStr);
+      boost::regex regex(stdRegexStr);
       m_regExStr += stdRegexStr;
       curParen += regex.mark_count();
       return false;
-   } catch (std::regex_error &e) {
+   } catch (boost::regex_error &e) {
       sourceMgr.printMessage(SMLocation::getFromPointer(regexStr.getData()), SourceMgr::DK_Error,
                              "invalid regex: " + StringRef(e.what()));
       return true;
@@ -341,8 +340,8 @@ size_t Pattern::match(StringRef buffer, size_t &matchLen,
       regExToMatch = m_tmpStr;
    }
 
-//   std::cmatch matchInfo;
-//   if (!std::regex_search(buffer.begin(), buffer.end(), matchInfo, std::regex(regExToMatch.getStr()))) {
+//   boost::cmatch matchInfo;
+//   if (!boost::regex_search(buffer.begin(), buffer.end(), matchInfo, boost::regex(regExToMatch.getStr()))) {
 //      return StringRef::npos;
 //   }
    boost::cmatch matchInfo;

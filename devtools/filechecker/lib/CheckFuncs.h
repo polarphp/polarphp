@@ -16,7 +16,7 @@
 #include "polarphp/basic/adt/StringMap.h"
 #include "polarphp/basic/adt/ArrayRef.h"
 #include <string>
-#include <regex>
+#include <boost/regex.hpp>
 
 namespace polar {
 namespace utils {
@@ -74,7 +74,7 @@ size_t skip_word(StringRef str);
 ///
 /// If no valid prefix is found, the state of buffer, LineNumber, and CheckTy
 /// is unspecified.
-StringRef find_first_matching_prefix(std::regex &prefixRegex, StringRef &buffer,
+StringRef find_first_matching_prefix(boost::regex &prefixRegex, StringRef &buffer,
                                      unsigned &lineNumber,
                                      CheckType &checkType);
 
@@ -82,7 +82,7 @@ StringRef find_first_matching_prefix(std::regex &prefixRegex, StringRef &buffer,
 ///
 /// The strings are added to the checkStrings vector. Returns true in case of
 /// an error, false otherwise.
-bool read_check_file(SourceMgr &sourceMgr, StringRef buffer, std::regex &prefixRegex,
+bool read_check_file(SourceMgr &sourceMgr, StringRef buffer, boost::regex &prefixRegex,
                      std::vector<CheckString> &checkStrings);
 void print_match(bool expectedMatch, const SourceMgr &sourceMgr,
                  StringRef prefix, SMLocation loc, const Pattern &pattern,
@@ -104,7 +104,7 @@ unsigned count_num_newlines_between(StringRef range,
 
 bool validate_check_prefix(StringRef checkPrefix);
 bool validate_check_prefixes();
-bool build_check_prefix_regex(std::regex &regex, std::string &errorMsg);
+bool build_check_prefix_regex(boost::regex &regex, std::string &errorMsg);
 void dump_command_line(int argc, char **argv);
 void clear_local_vars(StringMap<std::string> &variableTable);
 bool check_input(SourceMgr &sourceMgr, StringRef buffer,
