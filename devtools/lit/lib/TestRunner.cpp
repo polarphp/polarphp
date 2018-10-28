@@ -9,6 +9,9 @@
 //
 // Created by polarboy on 2018/09/09.
 
+#include "polarphp/basic/adt/SmallVector.h"
+#include "polarphp/basic/adt/StringRef.h"
+
 #include "TestRunner.h"
 #include "Utils.h"
 #include "ShellCommands.h"
@@ -477,6 +480,32 @@ Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool execute
 {
 
 }
+
+const SmallVector<char, 4> &ParserKind::allowedKeywordSuffixes(Kind kind)
+{
+   return sm_allowedSuffixes[kind];
+}
+
+StringRef ParserKind::getKindStr(Kind kind)
+{
+   return sm_keywordStrMap[kind];
+}
+
+std::map<ParserKind::Kind, SmallVector<char, 4>> ParserKind::sm_allowedSuffixes{
+   {ParserKind::TAG, {'.'}},
+   {ParserKind::COMMAND, {':'}},
+   {ParserKind::LIST, {':'}},
+   {ParserKind::BOOLEAN_EXPR, {':'}},
+   {ParserKind::CUSTOM, {':', '.'}}
+};
+
+std::map<ParserKind::Kind, StringRef> ParserKind::sm_keywordStrMap{
+   {ParserKind::TAG, "TAG"},
+   {ParserKind::COMMAND, "COMMAND"},
+   {ParserKind::LIST, "LIST"},
+   {ParserKind::BOOLEAN_EXPR, "BOOLEAN_EXPR"},
+   {ParserKind::CUSTOM, "CUSTOM"}
+};
 
 } // lit
 } // polar

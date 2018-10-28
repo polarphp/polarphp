@@ -21,6 +21,16 @@
 #include <list>
 #include <mutex>
 #include <tuple>
+#include <utility>
+#include <map>
+
+namespace polar {
+namespace basic {
+template <typename T, unsigned N>
+class SmallVector;
+class StringRef;
+} // basic
+} // polar
 
 namespace polar {
 namespace lit {
@@ -32,6 +42,8 @@ using OpenFileEntryType = std::tuple<std::string, std::string, int, std::string>
 using StdFdsTuple = std::tuple<int, int, int>;
 using TestPointer = std::shared_ptr<Test>;
 using LitConfigPointer = std::shared_ptr<LitConfig>;
+using polar::basic::SmallVector;
+using polar::basic::StringRef;
 
 class InternalShellError : public std::runtime_error
 {
@@ -135,8 +147,8 @@ void execute_builtin_mkdir();
 void execute_builtin_diff();
 void execute_builtin_rm();
 StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSource,
-                                            const ShellEnvironment &shenv,
-                                            std::list<OpenFileEntryType> &openedFiles);
+                              const ShellEnvironment &shenv,
+                              std::list<OpenFileEntryType> &openedFiles);
 void execute_script_internal();
 void execute_script();
 void parse_integrated_test_script_commands();
@@ -145,10 +157,21 @@ void colon_normalize_path();
 void get_default_substitutions();
 void apply_substitutions();
 
+/// An enumeration representing the style of an integrated test keyword or
+/// command.
+///
+/// TAG: A keyword taking no value. Ex 'END.'
+/// COMMAND: A keyword taking a list of shell commands. Ex 'RUN:'
+/// LIST: A keyword taking a comma-separated list of values.
+/// BOOLEAN_EXPR: A keyword taking a comma-separated list of
+///     boolean expressions. Ex 'XFAIL:'
+/// CUSTOM: A keyword with custom parsing semantics.
+///
 class ParserKind
 {
 public:
-   enum Kind {
+   enum Kind
+   {
       TAG = 0,
       COMMAND,
       LIST,
@@ -156,8 +179,11 @@ public:
       CUSTOM
    };
 public:
-   static std::string allowedKeywordSuffixes(Kind kind);
-   static std::string getKindStr(Kind kind);
+   static const SmallVector<char, 4> &allowedKeywordSuffixes(Kind kind);
+   static StringRef getKindStr(Kind kind);
+protected:
+   static std::map<Kind, SmallVector<char, 4>> sm_allowedSuffixes;
+   static std::map<Kind, StringRef> sm_keywordStrMap;
 };
 
 class IntegratedTestKeywordParser
@@ -175,7 +201,6 @@ private:
 };
 
 void parse_integrated_test_script();
-void run_shtest();
 Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool executeExternal);
 
 } // lit
