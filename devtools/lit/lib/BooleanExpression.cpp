@@ -18,7 +18,7 @@ namespace lit {
 
 #define LIT_BOOL_PARSE_END_MARK "END_PARSE_MARK"
 
-std::regex BooleanExpression::sm_pattern(R"(^\s*([()]|[-+=._a-zA-Z0-9]+|&&|\|\||!)\s*(.*)$)");
+boost::regex BooleanExpression::sm_pattern(R"(^\s*([()]|[-+=._a-zA-Z0-9]+|&&|\|\||!)\s*(.*)$)");
 
 std::string BooleanExpression::quote(const std::string &token)
 {
@@ -139,8 +139,8 @@ std::list<std::string> BooleanExpression::tokenize(std::string str)
 {
    std::list<std::string> tokens;
    while (true) {
-      std::smatch match;
-      if (std::regex_match(str, match, sm_pattern)) {
+      boost::smatch match;
+      if (boost::regex_match(str, match, sm_pattern)) {
          std::string token = match[1];
          str = match[2];
          tokens.push_back(token);

@@ -14,7 +14,7 @@
 
 #include <set>
 #include <string>
-#include <regex>
+#include <boost/regex.hpp>
 #include <list>
 #include <optional>
 
@@ -70,7 +70,7 @@ public:
 protected:
    bool getParsedValue();
 protected:
-   static std::regex sm_pattern;
+   static boost::regex sm_pattern;
    std::list<std::string> m_tokens;
    std::list<std::string>::iterator m_tokenIterator;
    std::set<std::string> m_variables;

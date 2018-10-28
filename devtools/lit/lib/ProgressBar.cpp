@@ -14,7 +14,7 @@
 #include "Utils.h"
 #include "CLI/CLI.hpp"
 #include <assert.h>
-#include <regex>
+#include <boost/regex.hpp>
 
 namespace polar {
 namespace lit {
@@ -186,8 +186,8 @@ std::string TerminalController::tigetStr(const std::string &capName)
       cap = str;
    }
    if (!cap.empty()) {
-      std::regex regex("$<\\d+>[/*]?");
-      cap = std::regex_replace(cap, regex, "");
+      boost::regex regex("$<\\d+>[/*]?");
+      cap = boost::regex_replace(cap, regex, "");
    }
    return cap;
 }
@@ -239,9 +239,9 @@ void TerminalController::initTermScreen()
 ///
 std::string TerminalController::render(std::string tpl) const
 {
-   std::regex regex(R"(\$\{(\w+)\})");
-   std::smatch varMatch;
-   while(std::regex_search(tpl, varMatch, regex)) {
+   boost::regex regex(R"(\$\{(\w+)\})");
+   boost::smatch varMatch;
+   while(boost::regex_search(tpl, varMatch, regex)) {
       std::string varname = varMatch[1];
       if (m_properties.find(varname) != m_properties.end()) {
          tpl.replace(varMatch[0].first, varMatch[0].second, m_properties.at(varname));

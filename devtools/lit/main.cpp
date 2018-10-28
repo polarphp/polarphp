@@ -26,7 +26,6 @@
 #include <assert.h>
 #include <filesystem>
 #include <list>
-#include <regex>
 #include <vector>
 #include <random>
 #include <algorithm>
@@ -36,6 +35,7 @@
 #include <thread>
 #include <condition_variable>
 #include <atomic>
+#include <boost/regex.hpp>
 
 using polar::lit::LitConfigPointer;
 using polar::lit::LitConfig;
@@ -412,12 +412,12 @@ int main(int argc, char *argv[])
       size_t numTotalTests = tests.size();
       // First, select based on the filter expression if given.
       if (!filter.empty()) {
-         std::regex filterRegex(filter);
+         boost::regex filterRegex(filter);
          auto iter = tests.begin();
          auto endMark = tests.end();
          while (iter != endMark) {
             TestPointer test = *iter;
-            if (std::regex_search(test->getFullName(), filterRegex)) {
+            if (boost::regex_search(test->getFullName(), filterRegex)) {
                tests.erase(iter++);
             } else {
                ++iter;

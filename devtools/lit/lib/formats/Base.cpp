@@ -103,7 +103,7 @@ OneCommandPerFileTest::getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
       const std::string &filename = filePath.filename();
       const std::string &fullPath = filePath.string();
       if (string_startswith(filePath.string(), ".") ||
-          !std::regex_match(filename, m_pattern) ||
+          !boost::regex_match(filename, m_pattern) ||
           excludes.find(filename) != excludes.end()) {
          continue;
       }

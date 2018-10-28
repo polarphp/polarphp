@@ -53,6 +53,7 @@ set_target_properties(
 
 target_link_libraries(litkernel PUBLIC
    nlohmann_json::nlohmann_json
+   boost_regex
    ${CURSES_LIBRARIES})
 
 polar_add_executable(lit main.cpp)

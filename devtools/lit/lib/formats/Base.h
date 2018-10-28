@@ -15,7 +15,7 @@
 #include <string>
 #include <list>
 #include <memory>
-#include <regex>
+#include <boost/regex.hpp>
 
 namespace polar {
 namespace lit {
@@ -72,7 +72,7 @@ protected:
    std::string m_command;
    std::string m_dir;
    bool m_recursive;
-   std::regex m_pattern;
+   boost::regex m_pattern;
    bool m_useTempInput;
 };
 
