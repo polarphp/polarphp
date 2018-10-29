@@ -15,6 +15,7 @@
 #include "formats/Base.h"
 #include "nlohmann/json.hpp"
 #include "CfgSetterPluginLoader.h"
+#include "polarphp/basic/adt/StringRef.h"
 #include <iostream>
 
 #define CFG_SETTER_SITE_FILENAME "litsitecfg.cmake"
@@ -77,7 +78,7 @@ TestingConfigPointer TestingConfig::fromDefaults(LitConfigPointer litConfig)
                                           std::set<std::string>{},
                                           nullptr,
                                           environment,
-                                          std::list<std::string>{},
+                                          SubstitutionList{},
                                           false,
                                           std::nullopt,
                                           std::nullopt,
@@ -116,7 +117,7 @@ const std::map<std::string, std::string> &TestingConfig::getEnvironment()
    return m_environment;
 }
 
-const std::list<std::string> &TestingConfig::getSubstitutions()
+const SubstitutionList &TestingConfig::getSubstitutions()
 {
    return m_substitutions;
 }
@@ -185,7 +186,7 @@ TestingConfig &TestingConfig::setEnvironment(const std::map<std::string, std::st
    return *this;
 }
 
-TestingConfig &TestingConfig::setSubstitutions(const std::list<std::string> &substitutions)
+TestingConfig &TestingConfig::setSubstitutions(const SubstitutionList &substitutions)
 {
    m_substitutions = substitutions;
    return *this;

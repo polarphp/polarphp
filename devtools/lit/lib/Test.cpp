@@ -12,6 +12,7 @@
 #include "Test.h"
 #include "Global.h"
 #include "BooleanExpression.h"
+#include "polarphp/basic/adt/StringRef.h"
 #include <set>
 
 namespace polar {

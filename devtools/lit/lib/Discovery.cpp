@@ -19,6 +19,7 @@
 #include "Run.h"
 #include "LitTestCase.h"
 #include "CfgSetterPluginLoader.h"
+#include "polarphp/basic/adt/StringRef.h"
 
 namespace fs = std::filesystem;
 

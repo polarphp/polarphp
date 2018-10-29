@@ -14,6 +14,7 @@
 #include "../ProcessUtils.h"
 #include "../LitConfig.h"
 #include "../TestingConfig.h"
+#include "polarphp/basic/adt/StringRef.h"
 #include "../Test.h"
 #include <iostream>
 #include <sstream>

@@ -13,6 +13,7 @@
 #include "Global.h"
 #include "Utils.h"
 #include "CLI/CLI.hpp"
+#include "polarphp/basic/adt/StringRef.h"
 #include <assert.h>
 #include <boost/regex.hpp>
 

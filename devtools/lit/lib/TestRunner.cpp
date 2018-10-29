@@ -507,6 +507,38 @@ std::string colon_normalize_path(std::string path)
 #endif
 }
 
+namespace {
+void merge_substitution_list(SubstitutionList &target, const SubstitutionList &source)
+{
+   for (const SubstitutionPair &item : source) {
+      target.push_back(item);
+   }
+}
+}
+
+SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir, std::string tmpBase,
+                                           bool normalizeSlashes)
+{
+   fs::path sourcePath(test->getSourcePath());
+   fs::path sourceDir = sourcePath.parent_path();
+   //  Normalize slashes, if requested.
+   if (normalizeSlashes) {
+      std::string sourcePathStr = sourcePath.string();
+      std::string sourceDirStr = sourceDir.string();
+      replace_string("\\", "/", sourcePathStr);
+      replace_string("\\", "/", sourceDirStr);
+      replace_string("\\", "/", tempDir);
+      replace_string("\\", "/", tmpBase);
+      sourcePath = sourcePathStr;
+      sourceDir = sourceDirStr;
+   }
+   // We use #_MARKER_# to hide %% while we do the other substitutions.
+   SubstitutionList list{
+      {"%%", "#_MARKER_#"}
+   };
+   merge_substitution_list(list, test->getConfig()->getSubstitutions());
+}
+
 const SmallVector<char, 4> &ParserKind::allowedKeywordSuffixes(Kind kind)
 {
    return sm_allowedSuffixes[kind];

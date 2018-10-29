@@ -17,6 +17,7 @@
 #include "lib/Test.h"
 #include "lib/Run.h"
 #include "lib/ProgressBar.h"
+#include "polarphp/basic/adt/StringRef.h"
 #include "nlohmann/json.hpp"
 #include <signal.h>
 #include <cstdlib>

@@ -44,6 +44,8 @@ using TestPointer = std::shared_ptr<Test>;
 using LitConfigPointer = std::shared_ptr<LitConfig>;
 using polar::basic::SmallVector;
 using polar::basic::StringRef;
+using SubstitutionPair = std::pair<StringRef, std::string>;
+using SubstitutionList = std::list<SubstitutionPair>;
 
 class InternalShellError : public std::runtime_error
 {
@@ -154,7 +156,8 @@ void execute_script();
 void parse_integrated_test_script_commands();
 std::pair<std::string, std::string> get_temp_paths(TestPointer test);
 std::string colon_normalize_path(std::string path);
-void get_default_substitutions();
+SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir, std::string tmpBase,
+                                           bool normalizeSlashes=false);
 void apply_substitutions();
 
 /// An enumeration representing the style of an integrated test keyword or

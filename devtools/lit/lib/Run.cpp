@@ -15,6 +15,7 @@
 #include "LitConfig.h"
 #include "ProgressBar.h"
 #include "formats/Base.h"
+#include "polarphp/basic/adt/StringRef.h"
 #include <tuple>
 #include <string>
 #include <chrono>

@@ -1,5 +1,6 @@
 #include "LitConfig.h"
 #include "TestingConfig.h"
+#include "polarphp/basic/adt/StringRef.h"
 
 using polar::lit::LitConfig;
 using polar::lit::TestingConfig;

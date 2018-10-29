@@ -13,6 +13,7 @@
 #include "../Test.h"
 #include "../Global.h"
 #include "../Utils.h"
+#include "polarphp/basic/adt/StringRef.h"
 #include <filesystem>
 
 

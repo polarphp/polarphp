@@ -12,6 +12,7 @@
 #include "LitConfig.h"
 #include "TestingConfig.h"
 #include "Utils.h"
+#include "polarphp/basic/adt/StringRef.h"
 #include <cassert>
 #include <iostream>
 

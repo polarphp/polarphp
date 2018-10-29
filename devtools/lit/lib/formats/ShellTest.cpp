@@ -12,6 +12,7 @@
 #include "ShellTest.h"
 #include "../Test.h"
 #include "../TestRunner.h"
+#include "polarphp/basic/adt/StringRef.h"
 
 namespace polar {
 namespace lit {

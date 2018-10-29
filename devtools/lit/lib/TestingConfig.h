@@ -20,8 +20,15 @@
 #include <memory>
 
 namespace polar {
+namespace basic {
+class StringRef;
+} // lit
+} // polar
+
+namespace polar {
 namespace lit {
 
+using polar::basic::StringRef;
 class LitConfig;
 class TestFormat;
 class Test;
@@ -30,6 +37,8 @@ using TestingConfigPointer = std::shared_ptr<TestingConfig>;
 using LitConfigPointer = std::shared_ptr<LitConfig>;
 using TestPointer = std::shared_ptr<Test>;
 using ParallelismGroupSetter = std::string (*)(TestPointer);
+using SubstitutionPair = std::pair<StringRef, std::string>;
+using SubstitutionList = std::list<SubstitutionPair>;
 
 class TestingConfig {
 public:
@@ -37,7 +46,7 @@ public:
    {}
    TestingConfig(TestingConfig *parent, const std::string &name,
                  const std::set<std::string> &suffixes, std::shared_ptr<TestFormat> testFormat,
-                 const std::map<std::string, std::string> &environment, const std::list<std::string> &substitutions,
+                 const std::map<std::string, std::string> &environment, const SubstitutionList &substitutions,
                  bool unsupported, const std::optional<std::string> &testExecRoot,
                  const std::optional<std::string> &testSourceRoot, const std::set<std::string> &excludes,
                  const std::set<std::string> &availableFeatures, bool pipefail,
@@ -67,7 +76,7 @@ public:
    const std::set<std::string> &getSuffixes();
    const std::shared_ptr<TestFormat> getTestFormat();
    const std::map<std::string, std::string> &getEnvironment();
-   const std::list<std::string> &getSubstitutions();
+   const SubstitutionList &getSubstitutions();
    bool isUnsupported();
    const std::optional<std::string> &getTestExecRoot();
    const std::optional<std::string> &getTestSourceRoot();
@@ -82,7 +91,7 @@ public:
    TestingConfig &setSuffixes(const std::set<std::string> &suffixes);
    TestingConfig &setTestFormat(std::shared_ptr<TestFormat> testFormat);
    TestingConfig &setEnvironment(const std::map<std::string, std::string> &environment);
-   TestingConfig &setSubstitutions(const std::list<std::string> &substitutions);
+   TestingConfig &setSubstitutions(const SubstitutionList &substitutions);
    TestingConfig &setIsUnsupported(bool flag);
    TestingConfig &setTestExecRoot(const std::optional<std::string> &root);
    TestingConfig &setTestSourceRoot(const std::optional<std::string> &root);
@@ -104,7 +113,7 @@ protected:
    std::set<std::string> m_suffixes;
    std::shared_ptr<TestFormat> m_testFormat;
    std::map<std::string, std::string> m_environment;
-   std::list<std::string> m_substitutions;
+   SubstitutionList m_substitutions;
    bool m_unsupported;
    std::optional<std::string> m_testExecRoot;
    std::optional<std::string> m_testSourceRoot;
