@@ -12,6 +12,8 @@
 #ifndef POLAR_DEVLTOOLS_LIT_TESTING_CONFIG_H
 #define POLAR_DEVLTOOLS_LIT_TESTING_CONFIG_H
 
+#include "ForwardDefs.h"
+
 #include <string>
 #include <set>
 #include <map>
@@ -29,16 +31,6 @@ namespace polar {
 namespace lit {
 
 using polar::basic::StringRef;
-class LitConfig;
-class TestFormat;
-class Test;
-class TestingConfig;
-using TestingConfigPointer = std::shared_ptr<TestingConfig>;
-using LitConfigPointer = std::shared_ptr<LitConfig>;
-using TestPointer = std::shared_ptr<Test>;
-using ParallelismGroupSetter = std::string (*)(TestPointer);
-using SubstitutionPair = std::pair<StringRef, std::string>;
-using SubstitutionList = std::list<SubstitutionPair>;
 
 class TestingConfig {
 public:

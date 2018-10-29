@@ -12,6 +12,8 @@
 #ifndef POLAR_DEVLTOOLS_LIT_FORMATS_BASE_H
 #define POLAR_DEVLTOOLS_LIT_FORMATS_BASE_H
 
+#include "../ForwardDefs.h"
+
 #include <string>
 #include <list>
 #include <memory>
@@ -19,21 +21,6 @@
 
 namespace polar {
 namespace lit {
-
-class TestSuite;
-class TestingConfig;
-class LitConfig;
-class Command;
-class Test;
-class ResultCode;
-class Result;
-
-using LitConfigPointer = std::shared_ptr<LitConfig>;
-using TestingConfigPointer = std::shared_ptr<TestingConfig>;
-using TestPointer = std::shared_ptr<Test>;
-using ExecResultTuple = std::tuple<const ResultCode *, std::string>;
-using ResultPointer = std::shared_ptr<Result>;
-using TestList = std::list<TestPointer>;
 
 class TestFormat
 {

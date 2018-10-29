@@ -17,16 +17,10 @@
 #include <list>
 #include <map>
 #include "Test.h"
+#include "ForwardDefs.h"
 
 namespace polar {
 namespace lit {
-
-class TestSuite;
-class LitTestCase;
-
-using TestSuitSearchResult = std::tuple<TestSuitePointer, std::list<std::string>>;
-class LitConfig;
-using LitConfigPointer = std::shared_ptr<LitConfig>;
 
 std::optional<std::string> choose_config_file_from_dir(const std::string &dir,
                                                        const std::list<std::string> &configNames);

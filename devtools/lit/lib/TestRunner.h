@@ -15,6 +15,7 @@
 #include "Global.h"
 #include "ShellCommands.h"
 #include "BasicTimer.h"
+#include "ForwardDefs.h"
 #include <stdexcept>
 #include <string>
 #include <boost/regex.hpp>
@@ -35,17 +36,8 @@ class StringRef;
 namespace polar {
 namespace lit {
 
-class Result;
-class Test;
-class LitConfig;
-using OpenFileEntryType = std::tuple<std::string, std::string, int, std::string>;
-using StdFdsTuple = std::tuple<int, int, int>;
-using TestPointer = std::shared_ptr<Test>;
-using LitConfigPointer = std::shared_ptr<LitConfig>;
 using polar::basic::SmallVector;
 using polar::basic::StringRef;
-using SubstitutionPair = std::pair<StringRef, std::string>;
-using SubstitutionList = std::list<SubstitutionPair>;
 
 class InternalShellError : public std::runtime_error
 {

@@ -13,12 +13,11 @@
 #define POLAR_DEVLTOOLS_LIT_FORMATS_GOOGLETEST_H
 
 #include "Base.h"
+#include "../ForwardDefs.h"
 #include <set>
 
 namespace polar {
 namespace lit {
-
-using TestList = std::list<std::shared_ptr<Test>>;
 
 class GoogleTest : public TestFormat
 {

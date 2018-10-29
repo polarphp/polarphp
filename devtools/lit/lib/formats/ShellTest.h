@@ -13,15 +13,10 @@
 #define POLAR_DEVLTOOLS_LIT_FORMATS_SHELLTEST_H
 
 #include "Base.h"
+#include "../ForwardDefs.h"
 
 namespace polar {
 namespace lit {
-
-class Result;
-class Test;
-class LitConfig;
-using TestPointer = std::shared_ptr<Test>;
-using LitConfigPointer = std::shared_ptr<LitConfig>;
 
 /**
  * @brief The ShTest class

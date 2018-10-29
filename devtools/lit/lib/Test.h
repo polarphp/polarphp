@@ -20,22 +20,10 @@
 #include "TestingConfig.h"
 #include "Utils.h"
 #include "Global.h"
+#include "ForwardDefs.h"
 
 namespace polar {
 namespace lit {
-
-class Test;
-class TestSuite;
-class Result;
-class MetricValue;
-
-using TestPointer = std::shared_ptr<Test>;
-using TestSuitePointer = std::shared_ptr<TestSuite>;
-using TestingConfigPointer = std::shared_ptr<TestingConfig>;
-using TestList = std::list<TestPointer>;
-using TestSuiteList = std::list<TestSuitePointer>;
-using ResultPointer = std::shared_ptr<Result>;
-using MetricValuePointer = std::shared_ptr<MetricValue>;
 
 class ResultCode
 {

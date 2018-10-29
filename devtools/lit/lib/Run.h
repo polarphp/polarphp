@@ -15,17 +15,12 @@
 #include "Test.h"
 #include "Semaphore.h"
 #include "threadpool/ThreadPool.h"
+#include "ForwardDefs.h"
 #include <memory>
 
 namespace polar {
 namespace lit {
 
-class LitConfig;
-class Run;
-class TestingProgressDisplay;
-using RunPointer = std::shared_ptr<Run>;
-using LitConfigPointer = std::shared_ptr<LitConfig>;
-using TestingProgressDisplayPointer = std::shared_ptr<TestingProgressDisplay>;
 using ThreadPoolPointer = std::shared_ptr<threadpool::ThreadPool>;
 
 class Run
