@@ -150,7 +150,12 @@ std::pair<std::string, std::string> get_temp_paths(TestPointer test);
 std::string colon_normalize_path(std::string path);
 SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir, std::string tempBase,
                                            bool normalizeSlashes=false);
-void apply_substitutions();
+
+/// Apply substitutions to the script.  Allow full regular expression syntax.
+/// Replace each matching occurrence of regular expression pattern a with
+/// substitution b in line ln.
+///
+std::list<std::string> apply_substitutions(const std::string &script, const SubstitutionList &substitutions);
 
 /// An enumeration representing the style of an integrated test keyword or
 /// command.

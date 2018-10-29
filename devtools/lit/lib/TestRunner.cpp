@@ -19,6 +19,7 @@
 
 #include <cstdio>
 #include <any>
+#include <sstream>
 #include <boost/regex.hpp>
 
 namespace polar {
@@ -559,6 +560,28 @@ SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir
                               {"%s:T", colon_normalize_path(tempDir)}
                            });
    return list;
+}
+
+std::list<std::string> apply_substitutions(const std::string &script, const SubstitutionList &substitutions)
+{
+   std::istringstream scriptInput;
+   scriptInput.str(script);
+   char lineBuffer[1024];
+   std::list<std::string> lines;
+   while (scriptInput.getline(lineBuffer, 1024)) {
+      for (const SubstitutionPair &substitution: substitutions) {
+         StringRef a = std::get<0>(substitution);
+         std::string b = std::get<1>(substitution);
+#ifdef POLAR_OS_WIN32
+         replace_string("\\", "\\\\", b);
+
+#endif
+         std::string line = boost::regex_replace(std::string(lineBuffer), boost::regex(a.getStr()), b,
+                                                 boost::match_default | boost::format_all);
+         lines.push_back(line);
+      }
+   }
+   return lines;
 }
 
 const SmallVector<char, 4> &ParserKind::allowedKeywordSuffixes(Kind kind)

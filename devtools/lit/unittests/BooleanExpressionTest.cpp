@@ -40,6 +40,11 @@ using namespace polar::lit;
 
 TEST(BooleanExpressionTest, testVariables)
 {
+   std::string str1("A://polarphp version 123");
+   std::cout << "result " << boost::regex_replace(str1, boost::regex("(.):"), "xiuxiu_$&", boost::match_default | boost::format_all) << std::endl;
+std::set<std::string> variables = {
+   "its-true", "false-lol-true", "under_score",
+   "e=quals", "d1g1ts"};
 //   std::string str1("A://polarphp version 123");
 //   std::cout << "result " << boost::regex_replace(str1, boost::regex("(.):"), [](boost::smatch match) -> std::string{
 //      std::cout << match[1].str() << std::endl;
