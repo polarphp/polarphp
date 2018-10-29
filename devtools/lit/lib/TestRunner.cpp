@@ -11,6 +11,9 @@
 
 #include "polarphp/basic/adt/SmallVector.h"
 #include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/utils/MemoryBuffer.h"
+#include "polarphp/utils/OptionalError.h"
+#include "polarphp/utils/StringUtils.h"
 
 #include "TestRunner.h"
 #include "Utils.h"
@@ -20,10 +23,14 @@
 #include <cstdio>
 #include <any>
 #include <sstream>
+#include <iostream>
 #include <boost/regex.hpp>
 
 namespace polar {
 namespace lit {
+
+using polar::utils::MemoryBuffer;
+using polar::utils::OptionalError;
 
 const std::string &ShellEnvironment::getCwd() const
 {
@@ -481,6 +488,50 @@ std::string execute_builtin_echo(std::shared_ptr<AbstractCommand> cmd,
 Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool executeExternal)
 {
 
+}
+
+ParsedScriptLines parse_integrated_test_script_commands(const std::string &sourcePath,
+                                                        const std::list<std::string> &keywords)
+{
+   ParsedScriptLines lines;
+   std::string fileContent;
+   {
+      // Open the file to check and add it to SourceMgr.
+      OptionalError<std::unique_ptr<MemoryBuffer>> inputFileOrErr =
+            MemoryBuffer::getFileOrStdIn(sourcePath);
+      if (std::error_code errorCode = inputFileOrErr.getError()) {
+         std::cerr << "Could not open input file '" << sourcePath
+                   << "': " << errorCode.message() << '\n';
+         return lines;
+      }
+      MemoryBuffer &inputFile = *inputFileOrErr.get();
+      if (inputFile.getBufferSize() == 0) {
+         return lines;
+      }
+      fileContent = inputFile.getBuffer();
+      if (fileContent.back() != '\n') {
+         fileContent.push_back('\n');
+      }
+   }
+   try {
+      // Iterate over the matches.
+      size_t lineNumber = 1;
+      size_t lastMatchPosition = 0;
+      std::string regexStr = polar::utils::regex_escape(join_string_list(keywords, "|"));
+      boost::regex regex(regexStr);
+      boost::sregex_iterator riter(fileContent.begin(), fileContent.end(), regex);
+      boost::sregex_iterator eiter;
+      std::for_each(riter, eiter, [&lines, &lineNumber, &lastMatchPosition, &fileContent](const boost::match_results<std::string::const_iterator> &match){
+         int matchPosition = match.position();
+         lineNumber += StringRef(fileContent.data() + lastMatchPosition, matchPosition - lastMatchPosition).count('\n');
+         lastMatchPosition = matchPosition;
+         lines.emplace_back(lineNumber, std::move(match[0].str()), std::move(match[1].str()));
+      });
+      return lines;
+   } catch (boost::bad_expression &e) {
+      std::cerr << "regex syntax error: " << e.what() << std::endl;
+      return lines;
+   }
 }
 
 /// Get the temporary location, this is always relative to the test suite

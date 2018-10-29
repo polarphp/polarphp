@@ -38,6 +38,8 @@ namespace lit {
 
 using polar::basic::SmallVector;
 using polar::basic::StringRef;
+using ParsedScriptLine = std::tuple<size_t, std::string, std::string>;
+using ParsedScriptLines = std::list<ParsedScriptLine>;
 
 class InternalShellError : public std::runtime_error
 {
@@ -145,7 +147,7 @@ StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSou
                               std::list<OpenFileEntryType> &openedFiles);
 void execute_script_internal();
 void execute_script();
-void parse_integrated_test_script_commands();
+
 std::pair<std::string, std::string> get_temp_paths(TestPointer test);
 std::string colon_normalize_path(std::string path);
 SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir, std::string tempBase,
@@ -186,6 +188,14 @@ protected:
    static std::map<Kind, StringRef> sm_keywordStrMap;
 };
 
+/// parse_integrated_test_script_commands(source_path) -> commands
+///
+///  Parse the commands in an integrated test script file into a list of
+/// (line_number, command_type, line).
+///
+ParsedScriptLines parse_integrated_test_script_commands(const std::string &sourcePath,
+                                                        const std::list<std::string> keywords);
+
 class IntegratedTestKeywordParser
 {
 public:
@@ -207,5 +217,3 @@ Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool execute
 } // polar
 
 #endif // POLAR_DEVLTOOLS_LIT_TEST_RUNNER_H
-
-
