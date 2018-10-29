@@ -188,10 +188,28 @@ to_null_terminated_cstring_array(ArrayRef<StringRef> strings, StringSaver &saver
    return result;
 }
 
+bool setup_process_cwd(std::optional<StringRef> cwd, std::string &errorMsg)
+{
+   // if we chdir, wether need detect target directory exists?
+   if (cwd.has_value()) {
+      const std::string &cwdStr = cwd.value();
+      if (!fs::exists(cwdStr)) {
+         errorMsg = "chdir error: Can't redirect stderr to stdout";
+         return false;
+      }
+      if (-1 == chdir(cwdStr.c_str())) {
+         make_error_msg(&errorMsg, "Can't redirect stderr to stdout", errno);
+         return false;
+      }
+   }
+   return true;
+}
+
 } // anonymous namespace
 
 bool execute(ProcessInfo &processInfo, StringRef program,
-             ArrayRef<StringRef>args, std::optional<ArrayRef<StringRef>> env,
+             ArrayRef<StringRef>args, std::optional<StringRef> cwd,
+             std::optional<ArrayRef<StringRef>> env,
              ArrayRef<std::optional<StringRef>> redirects,
              unsigned memoryLimit, std::string *errMsg)
 {
@@ -218,75 +236,77 @@ bool execute(ProcessInfo &processInfo, StringRef program,
    // If this OS has posix_spawn and there is no memory limit being implied, use
    // posix_spawn.  It is more efficient than fork/exec.
 #ifdef HAVE_POSIX_SPAWN
-   if (memoryLimit == 0) {
-      posix_spawn_file_actions_t fileActionsStore;
-      posix_spawn_file_actions_t *fileActions = nullptr;
+   if (!cwd) {
+      if (memoryLimit == 0) {
+         posix_spawn_file_actions_t fileActionsStore;
+         posix_spawn_file_actions_t *fileActions = nullptr;
 
-      // If we call posix_spawn_file_actions_addopen we have to make sure the
-      // c strings we pass to it stay alive until the call to posix_spawn,
-      // so we copy any StringRefs into this variable.
-      std::string redirectsStorage[3];
+         // If we call posix_spawn_file_actions_addopen we have to make sure the
+         // c strings we pass to it stay alive until the call to posix_spawn,
+         // so we copy any StringRefs into this variable.
+         std::string redirectsStorage[3];
 
-      if (!redirects.empty()) {
-         assert(redirects.getSize() == 3);
-         std::string *redirectsStr[3] = {nullptr, nullptr, nullptr};
-         for (int index = 0; index < 3; ++index) {
-            if (redirects[index]) {
-               redirectsStorage[index] = *redirects[index];
-               redirectsStr[index] = &redirectsStorage[index];
+         if (!redirects.empty()) {
+            assert(redirects.getSize() == 3);
+            std::string *redirectsStr[3] = {nullptr, nullptr, nullptr};
+            for (int index = 0; index < 3; ++index) {
+               if (redirects[index]) {
+                  redirectsStorage[index] = *redirects[index];
+                  redirectsStr[index] = &redirectsStorage[index];
+               }
             }
-         }
 
-         fileActions = &fileActionsStore;
-         posix_spawn_file_actions_init(fileActions);
+            fileActions = &fileActionsStore;
+            posix_spawn_file_actions_init(fileActions);
 
-         // Redirect stdin/stdout.
-         if (redirect_io_ps(redirectsStr[0], 0, errMsg, fileActions) ||
-             redirect_io_ps(redirectsStr[1], 1, errMsg, fileActions)) {
-            return false;
-         }
-
-         if (!redirects[1] || !redirects[2] || *redirects[1] != *redirects[2]) {
-            // Just redirect stderr
-            if (redirect_io_ps(redirectsStr[2], 2, errMsg, fileActions)) {
+            // Redirect stdin/stdout.
+            if (redirect_io_ps(redirectsStr[0], 0, errMsg, fileActions) ||
+                redirect_io_ps(redirectsStr[1], 1, errMsg, fileActions)) {
                return false;
             }
 
-         } else {
-            // If stdout and stderr should go to the same place, redirect stderr
-            // to the FD already open for stdout.
-            if (int error = posix_spawn_file_actions_adddup2(fileActions, 1, 2)) {
-               return !make_error_msg(errMsg, "Can't redirect stderr to stdout", error);
+            if (!redirects[1] || !redirects[2] || *redirects[1] != *redirects[2]) {
+               // Just redirect stderr
+               if (redirect_io_ps(redirectsStr[2], 2, errMsg, fileActions)) {
+                  return false;
+               }
+
+            } else {
+               // If stdout and stderr should go to the same place, redirect stderr
+               // to the FD already open for stdout.
+               if (int error = posix_spawn_file_actions_adddup2(fileActions, 1, 2)) {
+                  return !make_error_msg(errMsg, "Can't redirect stderr to stdout", error);
+               }
             }
          }
-      }
-
-      if (!envp) {
+         if (!envp) {
 #if !USE_NSGETENVIRON
-         envp = const_cast<const char **>(environ);
+            envp = const_cast<const char **>(environ);
 #else
-         // environ is missing in dylibs.
-         envp = const_cast<const char **>(*_NSGetEnviron());
+            // environ is missing in dylibs.
+            envp = const_cast<const char **>(*_NSGetEnviron());
 #endif
-      }
+         }
 
-      // Explicitly initialized to prevent what appears to be a valgrind false
-      // positive.
-      pid_t pid = 0;
-      int error = posix_spawn(&pid, program.getStr().c_str(), fileActions,
-                              /*attrp*/nullptr, const_cast<char **>(argv),
-                              const_cast<char **>(envp));
+         // Explicitly initialized to prevent what appears to be a valgrind false
+         // positive.
+         pid_t pid = 0;
+         int error = posix_spawn(&pid, program.getStr().c_str(), fileActions,
+                                 /*attrp*/nullptr, const_cast<char **>(argv),
+                                 const_cast<char **>(envp));
 
-      if (fileActions) {
-         posix_spawn_file_actions_destroy(fileActions);
-      }
+         if (fileActions) {
+            posix_spawn_file_actions_destroy(fileActions);
+         }
 
-      if (error) {
-         return !make_error_msg(errMsg, "posix_spawn failed", error);
+         if (error) {
+            return !make_error_msg(errMsg, "posix_spawn failed", error);
+         }
+         processInfo.m_pid = pid;
+         return true;
       }
-      processInfo.m_pid = pid;
-      return true;
    }
+
 #endif
 
    // Create a child process.
@@ -324,7 +344,9 @@ bool execute(ProcessInfo &processInfo, StringRef program,
       if (memoryLimit != 0) {
          set_memory_limits(memoryLimit);
       }
-
+      if (cwd && !setup_process_cwd(cwd, *errMsg)) {
+         return false;
+      }
       // Execute!
       std::string pathStr = program;
       if (envp != nullptr) {

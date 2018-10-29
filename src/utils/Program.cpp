@@ -16,6 +16,7 @@
 
 #include "polarphp/utils/Program.h"
 #include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/basic/adt/ArrayRef.h"
 #include "polarphp/basic/adt/SmallVector.h"
 #include "polarphp/global/Config.h"
 #include <system_error>
@@ -24,19 +25,23 @@ namespace polar {
 namespace sys {
 
 using polar::basic::SmallVector;
+using polar::basic::ArrayRef;
 
 bool execute(ProcessInfo &processInfo, StringRef program, ArrayRef<StringRef> args,
-             std::optional<ArrayRef<StringRef>> envp, ArrayRef<std::optional<StringRef>> redirects,
+             std::optional<StringRef> cwd, std::optional<ArrayRef<StringRef>> envp,
+             ArrayRef<std::optional<StringRef>> redirects,
              unsigned memoryLimit, std::string *errMsg);
 
-int execute_and_wait(StringRef program, ArrayRef<StringRef> args, std::optional<ArrayRef<StringRef>> envp,
+int execute_and_wait(StringRef program, ArrayRef<StringRef> args,
+                     std::optional<StringRef> cwd,
+                     std::optional<ArrayRef<StringRef>> envp,
                      ArrayRef<std::optional<StringRef>> redirects,
                      unsigned secondsToWait, unsigned memoryLimit,
                      std::string *errMsg, bool *executionFailed)
 {
    assert(redirects.empty() || redirects.getSize() == 3);
    ProcessInfo processInfo;
-   if (execute(processInfo, program, args, envp, redirects, memoryLimit, errMsg)) {
+   if (execute(processInfo, program, args, cwd, envp, redirects, memoryLimit, errMsg)) {
       if (executionFailed) {
          *executionFailed = false;
       }
@@ -52,7 +57,8 @@ int execute_and_wait(StringRef program, ArrayRef<StringRef> args, std::optional<
 }
 
 ProcessInfo execute_no_wait(StringRef program, ArrayRef<StringRef> args,
-                            std::optional<ArrayRef<StringRef>>  envp,
+                            std::optional<StringRef> cwd,
+                            std::optional<ArrayRef<StringRef>> envp,
                             ArrayRef<std::optional<StringRef>> redirects,
                             unsigned memoryLimit, std::string *errMsg,
                             bool *executionFailed)
@@ -62,7 +68,7 @@ ProcessInfo execute_no_wait(StringRef program, ArrayRef<StringRef> args,
    if (executionFailed) {
       *executionFailed = false;
    }
-   if (!execute(processInfo, program, args, envp, redirects, memoryLimit, errMsg)) {
+   if (!execute(processInfo, program, args, cwd, envp, redirects, memoryLimit, errMsg)) {
       if (executionFailed) {
          *executionFailed = true;
       }
@@ -71,7 +77,7 @@ ProcessInfo execute_no_wait(StringRef program, ArrayRef<StringRef> args,
 }
 
 bool commandline_fits_within_system_limits(StringRef program,
-                                            ArrayRef<const char *> args)
+                                           ArrayRef<const char *> args)
 {
    SmallVector<StringRef, 8> stringRefArgs;
    stringRefArgs.reserve(args.getSize());

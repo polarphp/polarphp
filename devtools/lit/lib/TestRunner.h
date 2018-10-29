@@ -40,6 +40,7 @@ using polar::basic::SmallVector;
 using polar::basic::StringRef;
 using ParsedScriptLine = std::tuple<size_t, std::string, std::string>;
 using ParsedScriptLines = std::list<ParsedScriptLine>;
+using ExecScriptResult = std::tuple<std::string, std::string, int, std::string>;
 
 class InternalShellError : public std::runtime_error
 {
@@ -71,7 +72,7 @@ protected:
 #endif
 
 const static std::string sgc_kdevNull("/dev/null");
-const static boost::regex sgc_kpdbgRegex("%dbg\\(([^)'\"]*)\\)");
+const static boost::regex sgc_kpdbgRegex("%dbg\\(([^)'\"]*)\\)", boost::match_default | boost::format_all);
 
 class ShellEnvironment
 {
@@ -146,7 +147,9 @@ StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSou
                               const ShellEnvironment &shenv,
                               std::list<OpenFileEntryType> &openedFiles);
 void execute_script_internal();
-void execute_script();
+ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
+                                const std::string &tempBase, std::list<std::string> &commands,
+                                const std::string cwd);
 
 std::pair<std::string, std::string> get_temp_paths(TestPointer test);
 std::string colon_normalize_path(std::string path);

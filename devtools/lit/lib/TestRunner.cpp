@@ -11,19 +11,23 @@
 
 #include "polarphp/basic/adt/SmallVector.h"
 #include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/basic/adt/Twine.h"
 #include "polarphp/utils/MemoryBuffer.h"
 #include "polarphp/utils/OptionalError.h"
 #include "polarphp/utils/StringUtils.h"
+#include "polarphp/utils/Program.h"
 
 #include "TestRunner.h"
 #include "Utils.h"
 #include "ShellCommands.h"
 #include "Test.h"
+#include "LitConfig.h"
 
 #include <cstdio>
 #include <any>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 #include <boost/regex.hpp>
 
 namespace polar {
@@ -31,6 +35,7 @@ namespace lit {
 
 using polar::utils::MemoryBuffer;
 using polar::utils::OptionalError;
+using polar::basic::Twine;
 
 const std::string &ShellEnvironment::getCwd() const
 {
@@ -488,6 +493,76 @@ std::string execute_builtin_echo(std::shared_ptr<AbstractCommand> cmd,
 Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool executeExternal)
 {
 
+}
+
+ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
+                                const std::string &tempBase, std::list<std::string> &commands,
+                                const std::string cwd)
+{
+   const std::optional<std::string> &bashPath = litConfig->getBashPath();
+   bool isWin32CMDEXE = litConfig->isWindows() && !bashPath;
+   std::string script = tempBase + ".script";
+   if (isWin32CMDEXE) {
+      script +=".bat";
+   }
+   // Write script file
+   std::ios_base::openmode openModes = std::ios_base::out;
+   if (litConfig->isWindows() && !isWin32CMDEXE) {
+      openModes |= std::ios_base::binary;
+   }
+   std::ofstream ostream(script, openModes);
+   if (!ostream.is_open()) {
+      std::cerr << "open script file error" << std::endl;
+   }
+   if (isWin32CMDEXE) {
+      for (std::string &command : commands) {
+         command = boost::regex_replace(command, sgc_kpdbgRegex, "echo '$1' > nul && ");
+      }
+      if (litConfig->isEchoAllCommands()) {
+         ostream << "@echo on" << std::endl;
+      } else {
+         ostream << "@echo off" << std::endl;
+      }
+      ostream << join_string_list(commands, "\n@if %ERRORLEVEL% NEQ 0 EXIT\n");
+   } else {
+      for (std::string &command : commands) {
+         command = boost::regex_replace(command, sgc_kpdbgRegex, ": '$1'; ");
+      }
+      if (test->getConfig()->isPipefail()) {
+         ostream << "set -o pipefail;";
+      }
+      if (litConfig->isEchoAllCommands()) {
+         ostream << "set -x;";
+      }
+      ostream << "{" << join_string_list(commands, "; } &&\n{ ") << "; }";
+   }
+   ostream << std::endl;
+   ostream.flush();
+   ostream.close();
+   Twine cmdTwine;
+   std::string cmdStr;
+   if (isWin32CMDEXE) {
+      cmdTwine.concat("cmd")
+            .concat("/c")
+            .concat(script);
+   } else {
+      if (bashPath) {
+         cmdTwine.concat(bashPath.value())
+               .concat(script);
+      } else {
+         cmdTwine.concat("/bin/sh")
+               .concat(script);
+      }
+      if (litConfig->isUseValgrind()) {
+         /// @TODO
+         /// FIXME: Running valgrind on sh is overkill. We probably could just
+         /// run on clang with no real loss.
+         cmdStr = join_string_list(litConfig->getValgrindArgs(), " ") + cmdTwine.getStr();
+      } else {
+         cmdStr = cmdTwine.getStr();
+      }
+//      polar::sys::execute_and_wait(cmdStr);
+   }
 }
 
 ParsedScriptLines parse_integrated_test_script_commands(const std::string &sourcePath,

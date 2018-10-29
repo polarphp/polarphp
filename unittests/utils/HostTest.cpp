@@ -203,7 +203,7 @@ TEST_F(HostTestFix, testGetMacOSHostVersion) {
    const std::optional<StringRef> Redirects[] = {/*STDIN=*/std::nullopt,
                                                  /*STDOUT=*/OutputPath,
                                                  /*STDERR=*/std::nullopt};
-   int RetCode = sys::execute_and_wait(SwVersPath, ArrayRef(argv), /*env=*/std::nullopt, Redirects);
+   int RetCode = sys::execute_and_wait(SwVersPath, argv,std::nullopt, /*env=*/std::nullopt, Redirects);
    ASSERT_EQ(0, RetCode);
 
    int FD = 0;

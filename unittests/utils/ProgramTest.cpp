@@ -13,6 +13,7 @@
 #include "polarphp/utils/CommandLine.h"
 #include "polarphp/utils/ConvertUtf.h"
 #include "polarphp/utils/FileSystem.h"
+#include "polarphp/basic/adt/ArrayRef.h"
 #include "polarphp/utils/Path.h"
 #include "gtest/gtest.h"
 #include <stdlib.h>
@@ -197,7 +198,7 @@ TEST_F(ProgramEnvTest, testCreateProcessTrailingSlash) {
    StringRef nul("/dev/null");
 #endif
    std::optional<StringRef> redirects[] = { nul, nul, std::nullopt };
-   int rc = execute_and_wait(my_exe, argv, getEnviron(), redirects,
+   int rc = execute_and_wait(my_exe, argv, std::nullopt, getEnviron(), redirects,
                              /*secondsToWait=*/ 10, /*memoryLimit=*/ 0, &error,
                              &ExecutionFailed);
    EXPECT_FALSE(ExecutionFailed) << error;
@@ -222,7 +223,7 @@ TEST_F(ProgramEnvTest, testExecuteNoWait)
 
    std::string Error;
    bool ExecutionFailed;
-   ProcessInfo PI1 = execute_no_wait(Executable, argv, getEnviron(), {}, 0, &Error,
+   ProcessInfo PI1 = execute_no_wait(Executable, argv, std::nullopt, getEnviron(), {}, 0, &Error,
                                      &ExecutionFailed);
    ASSERT_FALSE(ExecutionFailed) << Error;
    ASSERT_NE(PI1.m_pid, ProcessInfo::InvalidPid) << "Invalid process id";
@@ -241,7 +242,7 @@ TEST_F(ProgramEnvTest, testExecuteNoWait)
 
    EXPECT_EQ(loopCount, 1u) << "loopCount should be 1";
 
-   ProcessInfo pi2 = execute_no_wait(Executable, argv, getEnviron(), {}, 0, &Error,
+   ProcessInfo pi2 = execute_no_wait(Executable, argv, std::nullopt, getEnviron(), {}, 0, &Error,
                                      &ExecutionFailed);
    ASSERT_FALSE(ExecutionFailed) << Error;
    ASSERT_NE(pi2.m_pid, ProcessInfo::InvalidPid) << "Invalid process id";
@@ -277,7 +278,7 @@ TEST_F(ProgramEnvTest, testExecuteAndWaitTimeout)
    std::string Error;
    bool ExecutionFailed;
    int RetCode =
-         execute_and_wait(Executable, argv, getEnviron(), {}, /*secondsToWait=*/1, 0,
+         execute_and_wait(Executable, argv, std::nullopt, getEnviron(), {}, /*secondsToWait=*/1, 0,
                           &Error, &ExecutionFailed);
    ASSERT_EQ(-2, RetCode);
 }
@@ -289,7 +290,7 @@ TEST(ProgramTest, testExecuteNegative)
    {
       std::string Error;
       bool ExecutionFailed;
-      int RetCode = execute_and_wait(Executable, argv, std::nullopt, {}, 0, 0, &Error,
+      int RetCode = execute_and_wait(Executable, argv, std::nullopt, std::nullopt, {}, 0, 0, &Error,
                                      &ExecutionFailed);
       ASSERT_TRUE(RetCode < 0) << "On error execute_and_wait should return 0 or "
                                   "positive value indicating the result code";
@@ -300,7 +301,7 @@ TEST(ProgramTest, testExecuteNegative)
    {
       std::string Error;
       bool ExecutionFailed;
-      ProcessInfo PI = execute_no_wait(Executable, argv, std::nullopt, {}, 0, &Error,
+      ProcessInfo PI = execute_no_wait(Executable, argv, std::nullopt, std::nullopt, {}, 0, &Error,
                                        &ExecutionFailed);
       ASSERT_EQ(PI.m_pid, ProcessInfo::InvalidPid)
             << "On error execute_no_wait should return an invalid ProcessInfo";

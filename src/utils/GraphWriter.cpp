@@ -98,7 +98,7 @@ static bool exec_graph_viewer(StringRef execPath, std::vector<StringRef> &args,
                               std::string &errMsg)
 {
    if (wait) {
-      if (sys::execute_and_wait(execPath, args, std::nullopt, {}, 0, 0,
+      if (sys::execute_and_wait(execPath, args, std::nullopt, std::nullopt, {}, 0, 0,
                                 &errMsg)) {
          error_stream() << "Error: " << errMsg << "\n";
          return true;
@@ -106,7 +106,7 @@ static bool exec_graph_viewer(StringRef execPath, std::vector<StringRef> &args,
       polar::fs::remove(filename);
       error_stream() << " done. \n";
    } else {
-      sys::execute_no_wait(execPath, args, std::nullopt, {}, 0, &errMsg);
+      sys::execute_no_wait(execPath, args, std::nullopt, std::nullopt, {}, 0, &errMsg);
       error_stream() << "Remember to erase graph file: " << filename << "\n";
    }
    return false;

@@ -93,6 +93,7 @@ int execute_and_wait(
       ArrayRef<StringRef> args, ///< A vector of strings that are passed to the
       ///< program.  The first element should be the name of the program.
       ///< The list *must* be terminated by a null char* entry.
+      std::optional<StringRef> cwd,
       std::optional<ArrayRef<StringRef>> env = std::nullopt, ///< An optional vector of strings to use for
       ///< the program's environment. If not provided, the current program's
       ///< environment will be used.
@@ -125,6 +126,7 @@ int execute_and_wait(
 /// \see Wait until the process finished execution or win32 CloseHandle() API
 /// on ProcessInfo.ProcessHandle to avoid memory leaks.
 ProcessInfo execute_no_wait(StringRef program, ArrayRef<StringRef> args,
+                            std::optional<StringRef> cwd,
                             std::optional<ArrayRef<StringRef>> env,
                             ArrayRef<std::optional<StringRef>> redirects = {},
                             unsigned memoryLimit = 0,
