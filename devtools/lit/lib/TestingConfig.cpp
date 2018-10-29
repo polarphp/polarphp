@@ -192,6 +192,12 @@ TestingConfig &TestingConfig::setSubstitutions(const SubstitutionList &substitut
    return *this;
 }
 
+TestingConfig &TestingConfig::addSubstitution(StringRef name, const std::string &replacement)
+{
+   m_substitutions.emplace_back(name, replacement);
+   return *this;
+}
+
 TestingConfig &TestingConfig::setIsUnsupported(bool flag)
 {
    m_unsupported = flag;

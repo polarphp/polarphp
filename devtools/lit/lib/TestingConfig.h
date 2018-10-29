@@ -84,6 +84,7 @@ public:
    TestingConfig &setTestFormat(std::shared_ptr<TestFormat> testFormat);
    TestingConfig &setEnvironment(const std::map<std::string, std::string> &environment);
    TestingConfig &setSubstitutions(const SubstitutionList &substitutions);
+   TestingConfig &addSubstitution(StringRef name, const std::string &replacement);
    TestingConfig &setIsUnsupported(bool flag);
    TestingConfig &setTestExecRoot(const std::optional<std::string> &root);
    TestingConfig &setTestSourceRoot(const std::optional<std::string> &root);

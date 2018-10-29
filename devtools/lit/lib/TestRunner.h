@@ -148,7 +148,7 @@ void execute_script();
 void parse_integrated_test_script_commands();
 std::pair<std::string, std::string> get_temp_paths(TestPointer test);
 std::string colon_normalize_path(std::string path);
-SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir, std::string tmpBase,
+SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir, std::string tempBase,
                                            bool normalizeSlashes=false);
 void apply_substitutions();
 

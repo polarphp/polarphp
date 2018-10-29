@@ -516,7 +516,7 @@ void merge_substitution_list(SubstitutionList &target, const SubstitutionList &s
 }
 }
 
-SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir, std::string tmpBase,
+SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir, std::string tempBase,
                                            bool normalizeSlashes)
 {
    fs::path sourcePath(test->getSourcePath());
@@ -528,7 +528,7 @@ SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir
       replace_string("\\", "/", sourcePathStr);
       replace_string("\\", "/", sourceDirStr);
       replace_string("\\", "/", tempDir);
-      replace_string("\\", "/", tmpBase);
+      replace_string("\\", "/", tempBase);
       sourcePath = sourcePathStr;
       sourceDir = sourceDirStr;
    }
@@ -537,6 +537,28 @@ SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir
       {"%%", "#_MARKER_#"}
    };
    merge_substitution_list(list, test->getConfig()->getSubstitutions());
+   std::string tempName = tempBase + ".temp";
+   std::string baseName = fs::path(tempName).filename();
+   merge_substitution_list(list, {
+                              {"%s", sourcePath},
+                              {"%S", sourceDir},
+                              {"%P", sourceDir},
+                              {"%{pathseq}", std::string(1, fs::path::preferred_separator)},
+                              {"%t", tempName},
+                              {"basename_t", baseName},
+                              {"%T", tempDir},
+                              {"#_MARKER_#", "%"}
+                           });
+   // "%:[STpst]" are normalized paths without colons and without a leading
+   // slash.
+   merge_substitution_list(list, {
+                              {"%:s", colon_normalize_path(sourcePath)},
+                              {"%:S", colon_normalize_path(sourceDir)},
+                              {"%s:p", colon_normalize_path(sourceDir)},
+                              {"%s:t", colon_normalize_path(tempBase + ".temp")},
+                              {"%s:T", colon_normalize_path(tempDir)}
+                           });
+   return list;
 }
 
 const SmallVector<char, 4> &ParserKind::allowedKeywordSuffixes(Kind kind)
