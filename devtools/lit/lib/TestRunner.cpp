@@ -19,6 +19,7 @@
 
 #include <cstdio>
 #include <any>
+#include <boost/regex.hpp>
 
 namespace polar {
 namespace lit {
@@ -491,6 +492,19 @@ std::pair<std::string, std::string> get_temp_paths(TestPointer test)
    fs::path tempDir = execDir / "Output";
    fs::path tempBase = tempDir / execBase;
    return std::make_pair(tempDir, tempBase);
+}
+
+std::string colon_normalize_path(std::string path)
+{
+#ifdef POLAR_OS_WIN32
+   replace_string("\\", "/", path);
+   return boost::regex_replace(path, boost::regex("^(.):"), [](boost::smatch match) -> std::string{
+      return match[1].str();
+   }, boost::match_default | boost::format_all);
+#else
+   assert(path[0] == '/');
+   return path.substr(1);
+#endif
 }
 
 const SmallVector<char, 4> &ParserKind::allowedKeywordSuffixes(Kind kind)

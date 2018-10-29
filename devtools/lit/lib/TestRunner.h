@@ -153,7 +153,7 @@ void execute_script_internal();
 void execute_script();
 void parse_integrated_test_script_commands();
 std::pair<std::string, std::string> get_temp_paths(TestPointer test);
-void colon_normalize_path();
+std::string colon_normalize_path(std::string path);
 void get_default_substitutions();
 void apply_substitutions();
 
