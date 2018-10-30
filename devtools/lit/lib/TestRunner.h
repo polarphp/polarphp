@@ -149,7 +149,7 @@ StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSou
 void execute_script_internal();
 ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
                                 const std::string &tempBase, std::list<std::string> &commands,
-                                const std::string cwd);
+                                const std::string &cwd);
 
 std::pair<std::string, std::string> get_temp_paths(TestPointer test);
 std::string colon_normalize_path(std::string path);

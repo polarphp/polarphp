@@ -10,12 +10,16 @@
 // Created by polarboy on 2018/09/09.
 
 #include "polarphp/basic/adt/SmallVector.h"
+#include "polarphp/basic/adt/ArrayRef.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/basic/adt/Twine.h"
+#include "polarphp/basic/adt/SmallString.h"
 #include "polarphp/utils/MemoryBuffer.h"
 #include "polarphp/utils/OptionalError.h"
 #include "polarphp/utils/StringUtils.h"
 #include "polarphp/utils/Program.h"
+#include "polarphp/utils/FileSystem.h"
+#include "polarphp/utils/FileUtils.h"
 
 #include "TestRunner.h"
 #include "Utils.h"
@@ -35,7 +39,10 @@ namespace lit {
 
 using polar::utils::MemoryBuffer;
 using polar::utils::OptionalError;
+using polar::fs::FileRemover;
 using polar::basic::Twine;
+using polar::basic::ArrayRef;
+using polar::basic::SmallString;
 
 const std::string &ShellEnvironment::getCwd() const
 {
@@ -497,7 +504,7 @@ Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool execute
 
 ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
                                 const std::string &tempBase, std::list<std::string> &commands,
-                                const std::string cwd)
+                                const std::string &cwd)
 {
    const std::optional<std::string> &bashPath = litConfig->getBashPath();
    bool isWin32CMDEXE = litConfig->isWindows() && !bashPath;
@@ -561,8 +568,42 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
       } else {
          cmdStr = cmdTwine.getStr();
       }
-//      polar::sys::execute_and_wait(cmdStr);
    }
+   std::vector<std::string> env;
+   std::vector<StringRef> envRef;
+   for (auto &envitem : test->getConfig()->getEnvironment()) {
+      env.push_back(format_string("%s=%s", envitem.first.c_str(), envitem.second.c_str()));
+      envRef.push_back(StringRef(env.back()));
+   }
+   SmallString<32> outputFile;
+   SmallString<32> errorFile;
+
+   polar::fs::create_temporary_file("testrunner-exec-script-output", "", outputFile);
+   polar::fs::create_temporary_file("testrunner-exec-script-error", "", errorFile);
+   FileRemover outputRemover(outputFile.getCStr());
+   FileRemover errorRemover(errorFile.getCStr());
+   std::optional<StringRef> redirects[] = {
+      std::nullopt,
+      StringRef(outputFile),
+      StringRef(errorFile)};
+   std::string errorMsg;
+   int runResult = polar::sys::execute_and_wait(cmdStr, {}, cwd, envRef, redirects,
+                                                litConfig->getMaxIndividualTestTime(), 0, &errorMsg);
+
+   if (runResult != 0) {
+      auto errorBuf = MemoryBuffer::getFile(errorFile.getCStr());
+      if (!errorBuf) {
+         return std::make_tuple("", strerror(errno), -99, strerror(errno));
+      }
+      StringRef errorOutput = errorBuf.get()->getBuffer();
+      return std::make_tuple("", errorOutput.getStr(), runResult, errorMsg);
+   }
+   auto outputBuf = MemoryBuffer::getFile(outputFile.getCStr());
+   if (!outputBuf) {
+      return std::make_tuple("", strerror(errno), -99, strerror(errno));
+   }
+   StringRef output = outputBuf.get()->getBuffer();
+   return std::make_tuple(output.getStr(), "", runResult, "");
 }
 
 ParsedScriptLines parse_integrated_test_script_commands(const std::string &sourcePath,
