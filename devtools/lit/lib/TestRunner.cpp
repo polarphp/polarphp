@@ -586,6 +586,23 @@ bool delete_dir_error_handler(const DirectoryEntry &entry)
    return true;
 }
 
+///
+/// Tree is a tuple of form (dirname, child_trees).
+/// An empty dir has child_trees = [], a file has child_trees = None.
+///
+void get_dir_tree(const std::string &path, std::list<std::pair<std::string, std::list<std::string>>> &list)
+{
+   std::list<std::string> files;
+   for(const stdfs::directory_entry &entry: stdfs::directory_iterator(path)) {
+      if (entry.is_directory()) {
+         get_dir_tree(entry.path(), list);
+      } else {
+         files.push_back(entry.path());
+      }
+   }
+   list.push_back(std::make_pair(path, files));
+}
+
 }
 
 ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironment &shenv)
