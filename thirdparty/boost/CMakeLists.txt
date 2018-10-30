@@ -14,8 +14,6 @@ polar_collect_files(
    DIR libs/regex/src
    OUTPUT_VAR POLAR_THIRDPARTY_BOOST_SOURCES)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
 polar_add_library(boost_regex SHARED
    ${POLAR_THIRDPARTY_BOOST_SOURCES})
 

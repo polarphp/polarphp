@@ -7,10 +7,17 @@
 # See http://polarphp.org/LICENSE.txt for license information
 # See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
-# Created by polarboy on 2018/10/28.
+# Created by polarboy on 2018/10/30.
+# head only libraray just add into include directories
 
-add_subdirectory(boost)
+polar_collect_files(
+   TYPE_BOTH
+   DIR dtl
+   OUTPUT_VAR POLAR_THIRDPARTY_CPPDIFF_SOURCES)
 
-if (POLAR_INCLUDE_TESTS)
-   add_subdirectory(cppdiff)
-endif()
+add_library(cppdiff OBJECT ${POLAR_THIRDPARTY_CPPDIFF_SOURCES})
+set_target_properties(
+   cppdiff
+   PROPERTIES
+   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}")
+
