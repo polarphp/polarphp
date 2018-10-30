@@ -20,6 +20,7 @@
 #include "polarphp/utils/Program.h"
 #include "polarphp/utils/FileSystem.h"
 #include "polarphp/utils/FileUtils.h"
+#include "dtl/dtl.hpp"
 
 #include "TestRunner.h"
 #include "Utils.h"
@@ -47,6 +48,7 @@ using polar::basic::Twine;
 using polar::basic::ArrayRef;
 using polar::basic::SmallString;
 using polar::fs::DirectoryEntry;
+using polar::basic::SmallVectorImpl;
 
 #define TIMEOUT_ERROR_CODE -999
 
@@ -601,6 +603,117 @@ void get_dir_tree(const std::string &path, std::list<std::pair<std::string, std:
       }
    }
    list.push_back(std::make_pair(path, files));
+}
+
+void show_diff_stats(StringRef lhsFilename, StringRef rhsFilename)
+{
+   const int    MAX_LENGTH    = 255;
+   char         time_format[] = "%Y-%m-%d %H:%M:%S %z";
+   time_t       rawtime[2];
+   struct tm   *timeinfo[2];
+   struct stat  st[2];
+
+   if (stat(lhsFilename.getStr().c_str(), &st[0]) == -1) {
+      std::cerr << "argv1 is invalid." << std::endl;
+      return;
+   }
+   if (stat(lhsFilename.getStr().c_str(), &st[1]) == -1) {
+      std::cerr << "argv2 is invalid" << std::endl;
+      return;
+   }
+   char buf[2][MAX_LENGTH + 1];
+   rawtime[0] = st[0].st_mtime;
+   timeinfo[0] = localtime(&rawtime[0]);
+   strftime(buf[0], MAX_LENGTH, time_format, timeinfo[0]);
+   std::cout << "--- " << lhsFilename.getStr() << '\t' << buf[0] << std::endl;
+   rawtime[1] = st[1].st_mtime;
+   timeinfo[1] = localtime(&rawtime[1]);
+   strftime(buf[1], MAX_LENGTH, time_format, timeinfo[1]);
+   std::cout << "+++ " << rhsFilename.getStr() << '\t' << buf[1] << std::endl;
+}
+
+bool unified_diff(std::vector<StringRef> &lhs, std::vector<StringRef> &rhs)
+{
+   using dtl::Diff;
+   using dtl::elemInfo;
+   using dtl::uniHunk;
+   StringRef lhsFilename = lhs.back();
+   StringRef rhsFilename = rhs.back();
+   lhs.pop_back();
+   rhs.pop_back();
+   Diff<StringRef> diff(lhs, rhs);
+   diff.onHuge();
+   //diff.onUnserious();
+   diff.compose();
+   // type unihunk definition test
+   uniHunk<std::pair<StringRef, elemInfo>> hunk;
+   if (diff.getEditDistance() == 0) {
+      return true;
+   }
+   show_diff_stats(lhsFilename, rhsFilename);
+   diff.composeUnifiedHunks();
+   diff.printUnifiedFormat();
+   return false;
+}
+
+int compare_two_binary_files(const std::list<std::string> &filePaths, std::string &errorMsg)
+{
+   // @TODO need open in binary mode ?
+   SmallVector<std::vector<StringRef>, 2> fileContents;
+   int i = 0;
+   for (const std::string &file : filePaths) {
+      OptionalError<std::unique_ptr<MemoryBuffer>> buffer = MemoryBuffer::getFile(file.c_str());
+      if (!buffer) {
+         errorMsg = format_string("open file %s error : %s", file.c_str(), strerror(errno));
+         return 2;
+      }
+      SmallVector<StringRef, 128> lines;
+      buffer.get()->getBuffer().split(lines, '\n');
+      for (size_t j = 0; j < lines.size(); j++) {
+         fileContents[i].push_back(lines[j]);
+      }
+      fileContents[i].push_back(file);
+      i++;
+   }
+   int exitCode = 0;
+   if (!unified_diff(fileContents[0], fileContents[1])) {
+      exitCode = 1;
+   }
+   return exitCode;
+}
+
+int compare_two_text_files(const std::list<std::string> &filePaths, std::string &errorMsg)
+{
+
+}
+
+void print_dir_vs_file(const std::string &dirPath, const std::string &filePath)
+{
+   std::string msg;
+   if (stdfs::is_regular_file(filePath)) {
+      msg = "File %s is a regular file while file %s is a directory";
+   } else {
+      msg = "File %s is a regular empty file while file %s is a directory";
+   }
+   std::cout << format_string(msg, dirPath.c_str(), filePath.c_str()) << std::endl;
+}
+
+void print_file_vs_dir(const std::string &filePath, const std::string &dirPath)
+{
+   std::string msg;
+   if (stdfs::is_regular_file(filePath)) {
+      msg = "File %s is a regular file while file %s is a directory";
+   } else {
+      msg = "File %s is a regular empty file while file %s is a directory";
+   }
+   std::cout << format_string(msg, filePath.c_str(), dirPath.c_str()) << std::endl;
+}
+
+void print_only_in(const std::string &basedir, const std::string &path,
+                   const std::string &name)
+{
+   std::cout << "Only in %s: %s" << basedir << stdfs::path::preferred_separator << path
+             << name << std::endl;
 }
 
 }

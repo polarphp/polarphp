@@ -14,7 +14,7 @@ polar_collect_files(
    TYPE_BOTH
    DIR dtl
    OUTPUT_VAR POLAR_THIRDPARTY_CPPDIFF_SOURCES)
-
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_library(cppdiff OBJECT ${POLAR_THIRDPARTY_CPPDIFF_SOURCES})
 set_target_properties(
    cppdiff

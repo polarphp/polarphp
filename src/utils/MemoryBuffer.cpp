@@ -283,7 +283,7 @@ get_memory_buffer_for_stream(int fd, const Twine &bufferName)
 
 template <typename MemoryBufferType>
 static OptionalError<std::unique_ptr<MemoryBufferType>>
-getOpenFileImpl(int fd, const Twine &filename, uint64_t fileSize,
+get_pen_file_impl(int fd, const Twine &filename, uint64_t fileSize,
                 uint64_t mapSize, int64_t offset, bool requiresNullTerminator,
                 bool isVolatile);
 
@@ -298,7 +298,7 @@ get_file_aux(const Twine &filename, int64_t fileSize, uint64_t mapSize,
    if (errorCode) {
       return errorCode;
    }
-   auto ret = getOpenFileImpl<MemoryBufferType>(fd, filename, fileSize, mapSize, offset,
+   auto ret = get_pen_file_impl<MemoryBufferType>(fd, filename, fileSize, mapSize, offset,
                                                 requiresNullTerminator, isVolatile);
    close(fd);
    return ret;
@@ -495,7 +495,7 @@ namespace {
 
 template <typename MemoryBufferType>
 OptionalError<std::unique_ptr<MemoryBufferType>>
-getOpenFileImpl(int fd, const Twine &filename, uint64_t fileSize,
+get_pen_file_impl(int fd, const Twine &filename, uint64_t fileSize,
                 uint64_t mapSize, int64_t offset, bool requiresNullTerminator,
                 bool isVolatile)
 {
@@ -580,7 +580,7 @@ OptionalError<std::unique_ptr<MemoryBuffer>>
 MemoryBuffer::getOpenFile(int fd, const Twine &filename, uint64_t fileSize,
                           bool requiresNullTerminator, bool isVolatile)
 {
-   return getOpenFileImpl<MemoryBuffer>(fd, filename, fileSize, fileSize, 0,
+   return get_pen_file_impl<MemoryBuffer>(fd, filename, fileSize, fileSize, 0,
                                         requiresNullTerminator, isVolatile);
 }
 
@@ -589,7 +589,7 @@ MemoryBuffer::getOpenFileSlice(int fd, const Twine &filename, uint64_t mapSize,
                                int64_t offset, bool isVolatile)
 {
    assert(mapSize != uint64_t(-1));
-   return getOpenFileImpl<MemoryBuffer>(fd, filename, -1, mapSize, offset, false,
+   return get_pen_file_impl<MemoryBuffer>(fd, filename, -1, mapSize, offset, false,
                                         isVolatile);
 }
 
