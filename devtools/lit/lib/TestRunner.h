@@ -131,7 +131,11 @@ protected:
    std::list<std::string> m_outputFiles;
 };
 
-std::tuple<int, std::string> execute_shcmd();
+/// Wrapper around _executeShCmd that handles
+/// timeout
+///
+std::pair<int, std::string> execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv, ShExecResultList &results,
+                                          size_t execTimeout = 0);
 
 std::list<std::string> expand_glob(GlobItem &glob, const std::string &cwd);
 std::list<std::string> expand_glob(const std::string &glob, const std::string &cwd);
@@ -146,7 +150,9 @@ void execute_builtin_rm();
 StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSource,
                               const ShellEnvironment &shenv,
                               std::list<OpenFileEntryType> &openedFiles);
-void execute_script_internal();
+ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litConfig,
+                                         const std::string &tempBase, std::list<std::string> &commands,
+                                         const std::string &cwd);
 ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
                                 const std::string &tempBase, std::list<std::string> &commands,
                                 const std::string &cwd);

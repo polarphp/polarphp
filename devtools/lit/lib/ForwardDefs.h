@@ -39,18 +39,23 @@ class TestFormat;
 class Run;
 class TestingProgressDisplay;
 class Command;
+class AbstractCommand;
+class ShellCommandResult;
 
 using RunPointer = std::shared_ptr<Run>;
 using TestPointer = std::shared_ptr<Test>;
 using TestSuitePointer = std::shared_ptr<TestSuite>;
-using TestList = std::list<TestPointer>;
-using TestSuiteList = std::list<TestSuitePointer>;
 using TestSuitSearchResult = std::tuple<TestSuitePointer, std::list<std::string>>;
 using LitConfigPointer = std::shared_ptr<LitConfig>;
 using TestingConfigPointer = std::shared_ptr<TestingConfig>;
 using ResultPointer = std::shared_ptr<Result>;
 using MetricValuePointer = std::shared_ptr<MetricValue>;
 using ParallelismGroupSetter = std::string (*)(TestPointer);
+using CommandPointer = std::shared_ptr<AbstractCommand>;
+
+using TestList = std::list<TestPointer>;
+using TestSuiteList = std::list<TestSuitePointer>;
+using ShExecResultList = std::list<ShellCommandResult>;
 
 using OpenFileEntryType = std::tuple<std::string, std::string, int, std::string>;
 using StdFdsTuple = std::tuple<int, int, int>;

@@ -26,6 +26,7 @@
 #include "ShellCommands.h"
 #include "Test.h"
 #include "LitConfig.h"
+#include "ShellUtil.h"
 
 #include <cstdio>
 #include <any>
@@ -43,6 +44,8 @@ using polar::fs::FileRemover;
 using polar::basic::Twine;
 using polar::basic::ArrayRef;
 using polar::basic::SmallString;
+
+#define TIMEOUT_ERROR_CODE -999
 
 const std::string &ShellEnvironment::getCwd() const
 {
@@ -176,14 +179,28 @@ bool ShellCommandResult::isTimeoutReached()
 }
 
 namespace {
-
-int do_execute_shcmd();
-
+/// forward declare function
+int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
+                     ShExecResultList &results,
+                     TimeoutHelper &timeoutHelper);
 } // anonymous namespace
 
-std::tuple<int, std::string> execute_shcmd()
+std::pair<int, std::string> execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv, ShExecResultList &results,
+                                          size_t execTimeout)
 {
-
+   // Use the helper even when no timeout is required to make
+   // other code simpler (i.e. avoid bunch of ``!= None`` checks)
+   TimeoutHelper timeoutHelper(execTimeout);
+   if (execTimeout > 0) {
+      timeoutHelper.startTimer();
+   }
+   int finalExitCode = do_execute_shcmd(cmd, shenv, results, timeoutHelper);
+   timeoutHelper.cancel();
+   std::string timeoutInfo;
+   if (timeoutHelper.timeoutReached()) {
+      timeoutInfo = format_string("Reached timeout of %nz seconds", execTimeout);
+   }
+   return std::make_pair(finalExitCode, timeoutInfo);
 }
 
 std::list<std::string> expand_glob(GlobItem &glob, const std::string &cwd)
@@ -216,16 +233,16 @@ std::list<std::string> expand_glob_expression(const std::list<std::string> &expr
 
 namespace {
 
-std::optional<int> do_execute_shcmd(std::shared_ptr<AbstractCommand> cmd, ShellEnvironment &shenv,
-                                    std::list<ShellCommandResult> &results,
-                                    TimeoutHelper &timeoutHelper)
+int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
+                     ShExecResultList &results,
+                     TimeoutHelper &timeoutHelper)
 {
    if (timeoutHelper.timeoutReached()) {
       // Prevent further recursion if the timeout has been hit
       // as we should try avoid launching more processes.
-      return std::nullopt;
+      return TIMEOUT_ERROR_CODE;
    }
-   std::optional<int> result;
+   int result;
    AbstractCommand::Type commandType = cmd->getCommandType();
    if (commandType == AbstractCommand::Type::Seq) {
       Seq *seqCommand = dynamic_cast<Seq *>(cmd.get());
@@ -239,17 +256,17 @@ std::optional<int> do_execute_shcmd(std::shared_ptr<AbstractCommand> cmd, ShellE
       }
       if (op == "||") {
          result = do_execute_shcmd(seqCommand->getLhs(), shenv, results, timeoutHelper);
-         if (result.has_value() && 0 != result.value()) {
+         if (0 != result) {
             result = do_execute_shcmd(seqCommand->getRhs(), shenv, results, timeoutHelper);
          }
          return result;
       }
       if (op == "&&") {
          result = do_execute_shcmd(seqCommand->getLhs(), shenv, results, timeoutHelper);
-         if (!result.has_value()) {
+         if (result == TIMEOUT_ERROR_CODE) {
             return result;
          }
-         if (result.has_value() && 0 == result.value()) {
+         if (0 == result) {
             result = do_execute_shcmd(seqCommand->getRhs(), shenv, results, timeoutHelper);
          }
          return result;
@@ -385,7 +402,7 @@ StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSou
             } else if (index == 1) {
                fd = SUBPROCESS_FD_PIPE;
             } else {
-               fd = 1;
+               fd = SUBPROCESS_FD_STDOUT;
             }
          } else if (item == std::tuple<int, int>{2, -1}) {
             if (index != 2) {
@@ -500,6 +517,25 @@ std::string execute_builtin_echo(std::shared_ptr<AbstractCommand> cmd,
 Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool executeExternal)
 {
 
+}
+
+ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litConfig,
+                                         const std::string &tempBase, std::list<std::string> &commands,
+                                         const std::string &cwd)
+{
+   std::vector<CommandPointer> cmds;
+   for (std::string &cmdStr: commands) {
+      cmdStr = boost::regex_replace(cmdStr, sgc_kpdbgRegex, ": '$1'; ");
+      try {
+         cmds.push_back(ShParser(cmdStr, litConfig->isWindows(), test->getConfig()->isPipefail()).parse());
+      } catch (...) {
+         return std::make_tuple("", format_string("shell parser error on: %s", cmdStr), -1, "");
+      }
+   }
+   CommandPointer cmd = cmds[0];
+   for (size_t i = 1; i < cmds.size(); ++i) {
+      cmd = std::make_shared<Seq>(cmd, "&&", cmds[i]);
+   }
 }
 
 ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,

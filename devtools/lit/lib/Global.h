@@ -18,7 +18,8 @@
 namespace polar {
 namespace lit {
 
-#define SUBPROCESS_FD_PIPE -9
+#define SUBPROCESS_FD_PIPE -9999
+#define SUBPROCESS_FD_STDOUT -9998
 /// we describe all toke by ShellTokenType, and we need to distinguish
 /// normal token and redirects token, so we define the token type code
 #define SHELL_CMD_NORMAL_TOKEN -1
