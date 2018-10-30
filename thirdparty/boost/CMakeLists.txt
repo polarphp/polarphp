@@ -17,6 +17,8 @@ polar_collect_files(
 polar_add_library(boost_regex SHARED
    ${POLAR_THIRDPARTY_BOOST_SOURCES})
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 target_link_libraries(boost_regex PUBLIC
    ${ICU_LIBRARIES})
 

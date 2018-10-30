@@ -145,8 +145,12 @@ void quote_windows_command();
 void update_env();
 std::string execute_builtin_echo(Command *command,
                                  const ShellEnvironment &shenv);
-void execute_builtin_mkdir();
-void execute_builtin_diff();
+/// executeBuiltinMkdir - Create new directories.
+///
+ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironment &shenv);
+/// executeBuiltinDiff - Compare files line by line.
+///
+ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironment &shenv);
 ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironment &shenv);
 StdFdsTuple process_redirects(Command *command, int stdinSource,
                               const ShellEnvironment &shenv,

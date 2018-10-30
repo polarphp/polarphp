@@ -585,6 +585,55 @@ bool delete_dir_error_handler(const DirectoryEntry &entry)
    polar::fs::remove(entry.getPath());
    return true;
 }
+
+}
+
+ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironment &shenv)
+{
+   std::list<std::string> args;
+   for (auto &anyArg : command->getArgs()) {
+      args.push_back(std::any_cast<std::string>(anyArg));
+   }
+   args = expand_glob_expression(args, shenv.getCwd());
+   std::shared_ptr<const char *[]> argv(new const char *[args.size()]);
+   size_t i = 0;
+   for (std::string &arg : args) {
+      argv[i++] = arg.c_str();
+   }
+   CLI::App cmdParser;
+   bool parent = false;
+   std::vector<std::string> paths;
+   cmdParser.add_option("paths", paths, "paths to be create")->required();
+   cmdParser.add_flag("-p", parent, "force remove items");
+   int exitCode = 0;
+   try {
+      cmdParser.parse(args.size(), argv.get());
+      std::ostringstream errorStream;
+      try {
+         for (std::string &pathStr: paths) {
+            stdfs::path path(pathStr);
+            if (!path.is_absolute()) {
+               path = stdfs::path(shenv.getCwd()) / path;
+            }
+            if (parent) {
+               stdfs::create_directories(path);
+            } else {
+               stdfs::create_directory(path);
+            }
+         }
+      }catch(std::exception &e) {
+         exitCode = 1;
+         errorStream << format_string("Error: 'mkdir' command failed, %s", e.what()) << std::endl;
+      }
+      return std::make_shared<ShellCommandResult>(command, "", errorStream.str(), exitCode, false);
+   } catch(const CLI::ParseError &e) {
+      throw InternalShellError(command->operator std::string(), format_string("Unsupported: 'rm': %s\n", e.what()));
+   }
+}
+
+ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironment &shenv)
+{
+
 }
 
 /// executeBuiltinRm - Removes (deletes) files or directories.
