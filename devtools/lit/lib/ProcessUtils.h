@@ -48,7 +48,7 @@ inline const char *run_program_arg_filter(const std::string &arg)
 
 } // internal
 
-bool find_executable(const fs::path &filepath) noexcept;
+bool find_executable(const stdfs::path &filepath) noexcept;
 std::optional<std::string> look_path(const std::string &file) noexcept;
 
 std::tuple<std::list<pid_t>, bool> retrieve_children_pids(pid_t pid, bool recursive = false) noexcept;

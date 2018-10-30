@@ -129,7 +129,7 @@ int TestSuite::getId() const
 
 std::string TestSuite::getSourcePath(const std::list<std::string> &components) const
 {
-   fs::path base(m_sourceRoot);
+   stdfs::path base(m_sourceRoot);
    for (const std::string &item : components) {
       base /= item;
    }
@@ -138,7 +138,7 @@ std::string TestSuite::getSourcePath(const std::list<std::string> &components) c
 
 std::string TestSuite::getExecPath(const std::list<std::string> &components) const
 {
-   fs::path base(m_execRoot);
+   stdfs::path base(m_execRoot);
    for (const std::string &item : components) {
       base /= item;
    }

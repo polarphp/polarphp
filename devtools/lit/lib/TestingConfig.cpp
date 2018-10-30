@@ -281,7 +281,7 @@ void TestingConfig::loadFromPath(const std::string &path, LitConfigPointer litCo
 
 void TestingConfig::loadFromPath(const std::string &path, LitConfig &litConfig)
 {
-   fs::path fsPath = fs::path(path);
+   stdfs::path fsPath = stdfs::path(path);
    std::string cfgSetterName = fsPath.parent_path();
    std::string filename = fsPath.filename();
    std::string cfgSetterSuffix;
@@ -298,7 +298,7 @@ void TestingConfig::loadFromPath(const std::string &path, LitConfig &litConfig)
    if (!string_startswith(cfgSetterName, startupPath)) {
       return;
    }
-   if (cfgSetterName.at(0) == fs::path::preferred_separator) {
+   if (cfgSetterName.at(0) == stdfs::path::preferred_separator) {
       cfgSetterName = cfgSetterName.substr(1);
    }
    cfgSetterName = cfgSetterName.replace(0, startupPath.size(), "");
@@ -306,7 +306,7 @@ void TestingConfig::loadFromPath(const std::string &path, LitConfig &litConfig)
       cfgSetterName = "root";
    }
    cfgSetterName += "_" + cfgSetterSuffix;
-   replace_string(std::string(1, fs::path::preferred_separator), "_", cfgSetterName);
+   replace_string(std::string(1, stdfs::path::preferred_separator), "_", cfgSetterName);
    // if this method invoked, symbol must exist at normation situation
    // @TODO can ignore this exception ?
    CfgSetterType cfgSetter = cfgSetterPlugin.getCfgSetter<CfgSetterType>(cfgSetterName);

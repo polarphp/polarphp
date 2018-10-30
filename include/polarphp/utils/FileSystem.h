@@ -49,6 +49,7 @@
 #include <system_error>
 #include <tuple>
 #include <vector>
+#include <functional>
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -66,6 +67,10 @@ using polar::basic::StringRef;
 using polar::utils::Expected;
 using polar::utils::Error;
 using polar::utils::Md5;
+using polar::basic::FunctionRef;
+
+// forward declare class
+class DirectoryEntry;
 
 #if defined(_WIN32)
 // A Win32 HANDLE is a typedef of void*
@@ -455,7 +460,7 @@ std::error_code remove(const Twine &path, bool ignoreNonExisting = true);
 /// @returns errc::success if path has been removed or didn't exist, otherwise a
 ///          platform-specific error code.
 std::error_code remove_directories(const Twine &path, bool ignoreErrors = true);
-
+std::error_code remove_directories_with_callback(const Twine &path, FunctionRef<bool(const DirectoryEntry &entry)> errorHandler);
 /// Rename \a from to \a to.
 ///
 /// Files are renamed as if by POSIX rename(), except that on Windows there may

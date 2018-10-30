@@ -130,12 +130,12 @@ std::list<std::string> listdir_files(const std::string &dirname,
                                      const std::set<std::string> &suffixes,
                                      const std::set<std::string> &excludeFilenames)
 {
-   fs::path dir(dirname);
-   if (!fs::exists(dir)) {
+   stdfs::path dir(dirname);
+   if (!stdfs::exists(dir)) {
       return {};
    }
    std::list<std::string> files;
-   for (const fs::directory_entry &entry: fs::recursive_directory_iterator(dir)) {
+   for (const stdfs::directory_entry &entry: stdfs::recursive_directory_iterator(dir)) {
       std::string filename = entry.path().string();
       if (entry.is_directory() || filename[0] == '.' ||
           excludeFilenames.find(filename) != excludeFilenames.end() ||
@@ -147,10 +147,10 @@ std::list<std::string> listdir_files(const std::string &dirname,
    return files;
 }
 
-std::optional<std::string> which(const fs::path &command, const std::optional<std::string> &paths) noexcept
+std::optional<std::string> which(const stdfs::path &command, const std::optional<std::string> &paths) noexcept
 {
-   if (command.is_absolute() && fs::exists(command)) {
-      return fs::canonical(command).string();
+   if (command.is_absolute() && stdfs::exists(command)) {
+      return stdfs::canonical(command).string();
    }
    std::string cmdStrPaths;
    // current only support posix os
@@ -164,7 +164,7 @@ std::optional<std::string> which(const fs::path &command, const std::optional<st
       if (dir == "") {
          dir = ".";
       }
-      fs::path path(dir);
+      stdfs::path path(dir);
       path /= command;
       if (find_executable(path)) {
          return path.string();
@@ -173,11 +173,11 @@ std::optional<std::string> which(const fs::path &command, const std::optional<st
    return std::nullopt;
 }
 
-bool check_tools_path(const fs::path &dir, const std::list<std::string> &tools) noexcept
+bool check_tools_path(const stdfs::path &dir, const std::list<std::string> &tools) noexcept
 {
    for (const std::string &tool : tools) {
-      fs::path toolPath = dir / tool;
-      if (!fs::exists(toolPath)) {
+      stdfs::path toolPath = dir / tool;
+      if (!stdfs::exists(toolPath)) {
          return false;
       }
    }

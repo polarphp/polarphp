@@ -116,16 +116,16 @@ protected:
 class ShellCommandResult
 {
 public:
-   ShellCommandResult(const Command &command, std::ostream &outStream, std::ostream &errStream,
+   ShellCommandResult(Command *command, const std::string &outputMsg, const std::string &errorMsg,
                       int exitCode, bool timeoutReached, const std::list<std::string> &outputFiles = {});
    const Command &getCommand();
    int getExitCode();
    bool isTimeoutReached();
 
 protected:
-   Command m_command;
-   std::ostream &m_outStream;
-   std::ostream &m_errStream;
+   Command *m_command;
+   std::string m_outputMsg;
+   std::string m_errorMsg;
    int m_exitCode;
    bool m_timeoutReached;
    std::list<std::string> m_outputFiles;
@@ -143,11 +143,12 @@ std::list<std::string> expand_glob_expression(const std::list<std::string> &expr
                                               const std::string &cwd);
 void quote_windows_command();
 void update_env();
-std::string execute_builtin_echo();
+std::string execute_builtin_echo(Command *command,
+                                 const ShellEnvironment &shenv);
 void execute_builtin_mkdir();
 void execute_builtin_diff();
-void execute_builtin_rm();
-StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSource,
+ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironment &shenv);
+StdFdsTuple process_redirects(Command *command, int stdinSource,
                               const ShellEnvironment &shenv,
                               std::list<OpenFileEntryType> &openedFiles);
 ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litConfig,

@@ -26,7 +26,7 @@ namespace lit {
 #define SHELL_CMD_REDIRECT_TOKEN -2
 #define CFG_SETTER_KEY "CfgSetterPlugin"
 
-namespace fs = std::filesystem;
+namespace stdfs = std::filesystem;
 
 class ValueError : public std::runtime_error
 {

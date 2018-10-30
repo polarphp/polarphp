@@ -27,12 +27,14 @@
 #include "Test.h"
 #include "LitConfig.h"
 #include "ShellUtil.h"
+#include "CLI/CLI.hpp"
 
 #include <cstdio>
 #include <any>
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <boost/regex.hpp>
 
 namespace polar {
@@ -44,6 +46,7 @@ using polar::fs::FileRemover;
 using polar::basic::Twine;
 using polar::basic::ArrayRef;
 using polar::basic::SmallString;
+using polar::fs::DirectoryEntry;
 
 #define TIMEOUT_ERROR_CODE -999
 
@@ -150,12 +153,12 @@ void TimeoutHelper::kill()
    m_doneKillPass = true;
 }
 
-ShellCommandResult::ShellCommandResult(const Command &command, std::ostream &outStream,
-                                       std::ostream &errStream, int exitCode,
+ShellCommandResult::ShellCommandResult(Command *command, const std::string &outputMsg,
+                                       const std::string &errorMsg, int exitCode,
                                        bool timeoutReached, const std::list<std::string> &outputFiles)
    : m_command(command),
-     m_outStream(outStream),
-     m_errStream(errStream),
+     m_outputMsg(outputMsg),
+     m_errorMsg(errorMsg),
      m_exitCode(exitCode),
      m_timeoutReached(timeoutReached),
      m_outputFiles(outputFiles)
@@ -165,7 +168,7 @@ ShellCommandResult::ShellCommandResult(const Command &command, std::ostream &out
 
 const Command &ShellCommandResult::getCommand()
 {
-   return m_command;
+   return *m_command;
 }
 
 int ShellCommandResult::getExitCode()
@@ -294,12 +297,12 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
          ++iter;
          std::string newDir = std::any_cast<std::string>(*iter);
          // Update the cwd in the parent environment.
-         if (fs::path(newDir).is_absolute()) {
+         if (stdfs::path(newDir).is_absolute()) {
             shenv.setCwd(newDir);
          } else {
-            fs::path basePath(shenv.getCwd());
+            stdfs::path basePath(shenv.getCwd());
             basePath /= newDir;
-            basePath = fs::canonical(basePath);
+            basePath = stdfs::canonical(basePath);
             shenv.setCwd(basePath);
          }
          // The cd builtin always succeeds. If the directory does not exist, the
@@ -329,11 +332,10 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
 /// Returns the three standard file descriptors for the new child process.  Each
 /// fd may be an open, writable file object or a sentinel value from the
 /// subprocess module.
-StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSource,
+StdFdsTuple process_redirects(Command *command, int stdinSource,
                               const ShellEnvironment &shenv,
                               std::list<OpenFileEntryType> &openedFiles)
 {
-   assert(cmd->getCommandType() == AbstractCommand::Type::Command);
    // Apply the redirections, we use (N,) as a sentinel to indicate stdin,
    // stdout, stderr for N equal to 0, 1, or 2 respectively. Redirects to or
    // from a file are represented with a list [file, mode, file-object]
@@ -341,7 +343,6 @@ StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSou
    std::list<std::any> redirects = {std::tuple<int, int>{0, -1},
                                     std::tuple<int, int>{1, -1},
                                     std::tuple<int, int>{2, -1}};
-   Command *command = dynamic_cast<Command *>(cmd.get());
    using OpenFileTuple = std::tuple<std::string, std::string, std::optional<int>>;
    for (const RedirectTokenType &redirect : command->getRedirects()) {
       const std::any &opAny = std::get<0>(redirect);
@@ -458,7 +459,7 @@ StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSou
       }
 #else
       // Make sure relative paths are relative to the cwd.
-      redirFilename = fs::path(shenv.getCwd()) / name;
+      redirFilename = stdfs::path(shenv.getCwd()) / name;
       fileStream = std::fopen(redirFilename.c_str(), mode.c_str());
       fd = fileno(fileStream);
 #endif
@@ -483,35 +484,167 @@ StdFdsTuple process_redirects(std::shared_ptr<AbstractCommand> cmd, int stdinSou
    return StdFdsTuple{stdinFd, stdoutFd, stderrFd};
 }
 
-std::string execute_builtin_echo(std::shared_ptr<AbstractCommand> cmd,
+/// TODO the fd may leak
+std::string execute_builtin_echo(Command *command,
                                  const ShellEnvironment &shenv)
 {
    std::list<OpenFileEntryType> openedFiles;
-   StdFdsTuple fds = process_redirects(cmd, SUBPROCESS_FD_PIPE, shenv,
+   StdFdsTuple fds = process_redirects(command, SUBPROCESS_FD_PIPE, shenv,
                                        openedFiles);
    int stdinFd = std::get<0>(fds);
    int stdoutFd = std::get<1>(fds);
    int stderrFd = std::get<2>(fds);
    if (stdinFd != SUBPROCESS_FD_PIPE || stderrFd != SUBPROCESS_FD_PIPE) {
-      throw InternalShellError(cmd->operator std::string(),
+      throw InternalShellError(command->operator std::string(),
                                "stdin and stderr redirects not supported for echo");
    }
    // Some tests have un-redirected echo commands to help debug test failures.
    // Buffer our output and return it to the caller.
+   std::ostream *outstream = &std::cout;
+   std::ostringstream strstream;
    bool isRedirected = true;
    if (stdoutFd == SUBPROCESS_FD_PIPE) {
       isRedirected = false;
+      outstream = &strstream;
    } else {
 #ifdef POLAR_OS_WIN32
+      // @TODO WIN32
       // Reopen stdout in binary mode to avoid CRLF translation. The versions
       // of echo we are replacing on Windows all emit plain LF, and the LLVM
       // tests now depend on this.
       // When we open as binary, however, this also means that we have to write
       // 'bytes' objects to stdout instead of 'str' objects.
-      openedFiles.push_back({"", "", _fileno(stdout), ""});
+      // openedFiles.push_back({"", "", _fileno(stdout), ""});
 #endif
    }
+   // Implement echo flags. We only support -e and -n, and not yet in
+   // combination. We have to ignore unknown flags, because `echo "-D FOO"`
+   // prints the dash.
+   std::list<std::any> args;
+   auto copyIter = command->getArgs().begin();
+   auto copyEndMark = command->getArgs().end();
+   ++copyIter;
+   std::copy(copyIter, copyEndMark, args.begin());
+   bool interpretEscapes = false;
+   bool writeNewline = true;
+   while (args.size() >= 1) {
+      std::any flagAny = args.front();
+      std::string flag = std::any_cast<std::string>(flagAny);
+      if (flag == "-e" || flag == "-n") {
+         args.pop_front();
+         if (flag == "-e") {
+            interpretEscapes = true;
+         } else if (flag == "-n") {
+            writeNewline = false;
+         }
+      } else {
+         break;
+      }
+   }
+   if (!args.empty()) {
+      size_t i = 0;
+      size_t argSize = args.size();
+      auto iter = args.begin();
+      auto endMark = args.end();
+      while (iter != endMark) {
+         if (i != argSize -1) {
+            *outstream << std::any_cast<std::string>(*iter) << " ";
+         } else {
+            *outstream << std::any_cast<std::string>(*iter);
+         }
+      }
+   }
+   if (writeNewline) {
+      *outstream << std::endl;
+   }
+   for (auto &entry : openedFiles) {
+      close(std::get<2>(entry));
+   }
+   if (!isRedirected) {
+      outstream->flush();
+      return dynamic_cast<std::ostringstream *>(outstream)->str();
+   }
    return "";
+}
+
+namespace {
+bool delete_dir_error_handler(const DirectoryEntry &entry)
+{
+   // path contains the path of the file that couldn't be removed
+   // let's just assume that it's read-only and remove it.
+   // need check if permission error ?
+   OptionalError<polar::fs::Permission> permsOr = polar::fs::get_permissions(entry.getPath());
+   if (!permsOr) {
+      // stop process
+      return false;
+   }
+   polar::fs::Permission perms = permsOr.get();
+   perms |= polar::fs::Permission::all_write;
+   // @TODO ignore error ok ?
+   polar::fs::set_permissions(entry.getPath(), perms);
+   polar::fs::remove(entry.getPath());
+   return true;
+}
+}
+
+/// executeBuiltinRm - Removes (deletes) files or directories.
+/// @TODO do remove std::any args
+///
+ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironment &shenv)
+{
+   std::list<std::string> args;
+   for (auto &anyArg : command->getArgs()) {
+      args.push_back(std::any_cast<std::string>(anyArg));
+   }
+   args = expand_glob_expression(args, shenv.getCwd());
+   std::shared_ptr<const char *[]> argv(new const char *[args.size()]);
+   size_t i = 0;
+   for (std::string &arg : args) {
+      argv[i++] = arg.c_str();
+   }
+   bool force = false;
+   bool recursive = false;
+   std::vector<std::string> paths;
+   CLI::App cmdParser;
+   cmdParser.add_option("paths", paths, "paths to be removed")->required();
+   cmdParser.add_flag("-f", force, "force remove items");
+   cmdParser.add_flag("-r,-R,--recursive", recursive, "remove items recursive");
+   try {
+      cmdParser.parse(args.size(), argv.get());
+      std::ostringstream errorStream;
+      int exitCode = 0;
+      std::error_code errorCode;
+      for (std::string &pathStr: paths) {
+         stdfs::path path(pathStr);
+         if (!path.is_absolute()) {
+            path = stdfs::path(shenv.getCwd()) / path;
+         }
+         if (force && !stdfs::exists(path, errorCode)) {
+            continue;
+         }
+         try {
+            if (stdfs::is_directory(path)) {
+               if (!recursive) {
+                  errorStream << "Error: "<< path.string() << " is a directory" << std::endl;
+                  exitCode = 1;
+               }
+               polar::fs::remove_directories_with_callback(path.string(), delete_dir_error_handler);
+            } else {
+               stdfs::file_status fileStatus = stdfs::status(path);
+               if (force && ((fileStatus.permissions() & (stdfs::perms::owner_write | stdfs::perms::group_write | stdfs::perms::others_write)) == stdfs::perms::none)) {
+                  stdfs::permissions(path, fileStatus.permissions() | stdfs::perms::owner_write, errorCode);
+               }
+               stdfs::remove(path);
+            }
+         } catch (std::exception &e) {
+            errorStream << "Error: 'rm' command failed, " << e.what() << std::endl;
+            exitCode = 1;
+         }
+      }
+      return std::make_shared<ShellCommandResult>(command, "", errorStream.str(), exitCode, false);
+   } catch(const CLI::ParseError &e) {
+      throw InternalShellError(command->operator std::string(), format_string("Unsupported: 'rm':  %s", e.what()));
+   }
 }
 
 Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool executeExternal)
@@ -529,7 +662,7 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
       try {
          cmds.push_back(ShParser(cmdStr, litConfig->isWindows(), test->getConfig()->isPipefail()).parse());
       } catch (...) {
-         return std::make_tuple("", format_string("shell parser error on: %s", cmdStr), -1, "");
+         return std::make_tuple("", format_string("shell parser error on: %s", cmdStr.c_str()), -1, "");
       }
    }
    CommandPointer cmd = cmds[0];
@@ -690,11 +823,11 @@ ParsedScriptLines parse_integrated_test_script_commands(const std::string &sourc
 /// root, not test source root.
 std::pair<std::string, std::string> get_temp_paths(TestPointer test)
 {
-   fs::path execPath(test->getExecPath());
-   fs::path execDir = execPath.parent_path();
-   fs::path execBase = execPath.filename();
-   fs::path tempDir = execDir / "Output";
-   fs::path tempBase = tempDir / execBase;
+   stdfs::path execPath(test->getExecPath());
+   stdfs::path execDir = execPath.parent_path();
+   stdfs::path execBase = execPath.filename();
+   stdfs::path tempDir = execDir / "Output";
+   stdfs::path tempBase = tempDir / execBase;
    return std::make_pair(tempDir, tempBase);
 }
 
@@ -723,8 +856,8 @@ void merge_substitution_list(SubstitutionList &target, const SubstitutionList &s
 SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir, std::string tempBase,
                                            bool normalizeSlashes)
 {
-   fs::path sourcePath(test->getSourcePath());
-   fs::path sourceDir = sourcePath.parent_path();
+   stdfs::path sourcePath(test->getSourcePath());
+   stdfs::path sourceDir = sourcePath.parent_path();
    //  Normalize slashes, if requested.
    if (normalizeSlashes) {
       std::string sourcePathStr = sourcePath.string();
@@ -742,12 +875,12 @@ SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir
    };
    merge_substitution_list(list, test->getConfig()->getSubstitutions());
    std::string tempName = tempBase + ".temp";
-   std::string baseName = fs::path(tempName).filename();
+   std::string baseName = stdfs::path(tempName).filename();
    merge_substitution_list(list, {
                               {"%s", sourcePath},
                               {"%S", sourceDir},
                               {"%P", sourceDir},
-                              {"%{pathseq}", std::string(1, fs::path::preferred_separator)},
+                              {"%{pathseq}", std::string(1, stdfs::path::preferred_separator)},
                               {"%t", tempName},
                               {"basename_t", baseName},
                               {"%T", tempDir},

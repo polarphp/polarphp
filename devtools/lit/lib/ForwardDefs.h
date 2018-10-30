@@ -52,6 +52,7 @@ using ResultPointer = std::shared_ptr<Result>;
 using MetricValuePointer = std::shared_ptr<MetricValue>;
 using ParallelismGroupSetter = std::string (*)(TestPointer);
 using CommandPointer = std::shared_ptr<AbstractCommand>;
+using ShellCommandResultPointer = std::shared_ptr<ShellCommandResult>;
 
 using TestList = std::list<TestPointer>;
 using TestSuiteList = std::list<TestSuitePointer>;

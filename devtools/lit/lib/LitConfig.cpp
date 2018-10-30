@@ -103,7 +103,7 @@ std::string LitConfig::getBashPath()
 std::optional<std::string> LitConfig::getToolsPath(std::optional<std::string> dir, const std::string &paths,
                                                    const std::list<std::string> &tools)
 {
-   if (dir.has_value() && fs::path(dir.value()).is_absolute() && fs::is_directory(dir.value())) {
+   if (dir.has_value() && stdfs::path(dir.value()).is_absolute() && stdfs::is_directory(dir.value())) {
       if (!check_tools_path(dir.value(), tools)) {
          return std::nullopt;
       }

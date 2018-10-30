@@ -22,10 +22,10 @@
 namespace polar {
 namespace lit {
 
-bool find_executable(const fs::path &filepath) noexcept
+bool find_executable(const stdfs::path &filepath) noexcept
 {
    std::error_code errCode;
-   if (fs::exists(filepath, errCode) && fs::is_regular_file(filepath)) {
+   if (stdfs::exists(filepath, errCode) && stdfs::is_regular_file(filepath)) {
       return true;
    }
    return false;
@@ -45,7 +45,7 @@ std::optional<std::string> look_path(const std::string &file) noexcept
       if (dir == "") {
          dir = ".";
       }
-      fs::path path(dir);
+      stdfs::path path(dir);
       path /= file;
       if (find_executable(path)) {
          return path.string();
@@ -109,7 +109,7 @@ void do_run_program(const std::string &cmd, int &exitCode,
       // if we chdir, wether need detect target directory exists?
       if (cwd.has_value()) {
          const std::string &cwdStr = cwd.value();
-         if (!fs::exists(cwdStr)) {
+         if (!stdfs::exists(cwdStr)) {
             std::cerr << "chdir error: target directory is not exist" << std::endl;
             exit(1);
          }

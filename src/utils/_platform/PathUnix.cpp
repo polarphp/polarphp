@@ -20,13 +20,15 @@
 //===          is guaranteed to work on *all* UNIX variants.
 //===----------------------------------------------------------------------===//
 
+#include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/basic/adt/StlExtras.h"
 #include "polarphp/utils/unix/Unix.h"
 #include "polarphp/utils/FileSystem.h"
-#include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/utils/Chrono.h"
 #include "polarphp/utils/Path.h"
 #include "polarphp/utils/ErrorCode.h"
 #include "polarphp/utils/Process.h"
+
 #include <limits.h>
 #include <stdio.h>
 #ifdef HAVE_SYS_STAT_H
@@ -942,9 +944,14 @@ void close_file(file_t &f)
    f = sg_kInvalidFile;
 }
 
+bool default_remove_dirs_handler(const DirectoryEntry &entry)
+{
+   return true;
+}
+
 template <typename T>
-static std::error_code remove_directories_impl(const T &entry,
-                                               bool ignoreErrors)
+static std::error_code remove_directories_impl(const T &entry, bool ignoreErrors,
+                                               FunctionRef<bool(const DirectoryEntry &entry)> errorHandler = default_remove_dirs_handler)
 {
    std::error_code errorCode;
    DirectoryIterator begin(entry, errorCode, false);
@@ -956,8 +963,10 @@ static std::error_code remove_directories_impl(const T &entry,
          return st.getError();
       }
       if (is_directory(*st)) {
-         errorCode = remove_directories_impl(item, ignoreErrors);
+         errorCode = remove_directories_impl(item, ignoreErrors, errorHandler);
          if (errorCode && !ignoreErrors) {
+            return errorCode;
+         } else if (errorCode && !errorHandler(item)) {
             return errorCode;
          }
       }
@@ -965,9 +974,13 @@ static std::error_code remove_directories_impl(const T &entry,
       errorCode = fs::remove(item.getPath(), true);
       if (errorCode && !ignoreErrors) {
          return errorCode;
+      } else if (errorCode && !errorHandler(item)) {
+         return errorCode;
       }
       begin.increment(errorCode);
       if (errorCode && !ignoreErrors) {
+         return errorCode;
+      } else if (errorCode && !errorHandler(item)) {
          return errorCode;
       }
    }
@@ -982,6 +995,19 @@ std::error_code remove_directories(const Twine &path, bool ignoreErrors)
    }
    errorCode = fs::remove(path, true);
    if (errorCode && !ignoreErrors) {
+      return errorCode;
+   }
+   return std::error_code();
+}
+
+std::error_code remove_directories_with_callback(const Twine &path, FunctionRef<bool(const DirectoryEntry &entry)> errorHandler)
+{
+   auto errorCode = remove_directories_impl(path, true, errorHandler);
+   if (errorCode) {
+      return errorCode;
+   }
+   errorCode = fs::remove(path, true);
+   if (errorCode && !errorHandler(DirectoryEntry(path))) {
       return errorCode;
    }
    return std::error_code();
@@ -1126,8 +1152,9 @@ void system_temp_directory(bool erasedOnReboot, SmallVectorImpl<char> &result)
       }
    }
 
-   if (get_darwin_conf_dir(erasedOnReboot, result))
+   if (get_darwin_conf_dir(erasedOnReboot, result)) {
       return;
+   }
 
    const char *requestedDir = get_default_temp_dir(erasedOnReboot);
    result.append(requestedDir, requestedDir + strlen(requestedDir));

@@ -137,13 +137,13 @@ TestList GoogleTest::getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
    TestList tests;
    std::string sourcePath = testSuite->getSourcePath(pathInSuite);
    for (const std::string &subDir : m_testSubDirs) {
-      std::string dirPath = fs::path(sourcePath) / subDir;
-      if (fs::is_directory(dirPath)) {
+      std::string dirPath = stdfs::path(sourcePath) / subDir;
+      if (stdfs::is_directory(dirPath)) {
          continue;
       }
       for (const std::string &fn : listdir_files(dirPath, m_testSuffixes)) {
          // Discover the tests in this executable.
-         std::string execPath = fs::path(sourcePath) / subDir / fn;
+         std::string execPath = stdfs::path(sourcePath) / subDir / fn;
          std::list<std::string> testNames = getGTestTests(execPath, litConfig, localConfig);
          for (const std::string &testName : testNames) {
             std::list<std::string> testPath = pathInSuite;
@@ -159,13 +159,13 @@ TestList GoogleTest::getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
 
 ResultPointer GoogleTest::execute(TestPointer test, LitConfigPointer litConfig)
 {
-   fs::path sourcePath = test->getSourcePath();
+   stdfs::path sourcePath = test->getSourcePath();
    std::string testPath = sourcePath.parent_path();
    std::string testName = sourcePath.filename();
-   while (!fs::exists(testPath)) {
+   while (!stdfs::exists(testPath)) {
       // Handle GTest parametrized and typed tests, whose name includes
       // some '/'s.
-      fs::path curPath = testPath;
+      stdfs::path curPath = testPath;
       testPath = curPath.parent_path();
       std::string namePrefix = curPath.filename();
       testName = namePrefix + "/" + testName;

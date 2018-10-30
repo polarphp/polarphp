@@ -44,14 +44,14 @@ inline unsigned detect_cpus()
 
 inline bool mkdir_p(const std::string &path, std::error_code& ec)
 {
-   return fs::create_directories(path, ec);
+   return stdfs::create_directories(path, ec);
 }
 
 std::list<std::string> listdir_files(const std::string &dirname,
                                      const std::set<std::string> &suffixes = {""},
                                      const std::set<std::string> &excludeFilenames = {});
-std::optional<std::string> which(const fs::path &command, const std::optional<std::string> &paths = std::nullopt) noexcept;
-bool check_tools_path(const fs::path &dir, const std::list<std::string> &tools) noexcept;
+std::optional<std::string> which(const stdfs::path &command, const std::optional<std::string> &paths = std::nullopt) noexcept;
+bool check_tools_path(const stdfs::path &dir, const std::list<std::string> &tools) noexcept;
 std::optional<std::string> which_tools(const std::list<std::string> &tools, const std::string &paths) noexcept;
 void print_histogram(std::list<std::tuple<std::string, int>> items, const std::string &title = "Items");
 

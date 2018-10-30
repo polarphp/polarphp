@@ -129,12 +129,12 @@ void Command::toShell(std::string &str, bool) const
 
 std::list<std::string> GlobItem::resolve(const std::string &cwd)
 {
-   fs::path path(m_pattern);
+   stdfs::path path(m_pattern);
    if (!path.is_absolute()) {
-      path = fs::path(cwd) / path;
+      path = stdfs::path(cwd) / path;
    }
    std::list<std::string> files;
-   for(auto& entry: fs::recursive_directory_iterator(path)) {
+   for(auto& entry: stdfs::recursive_directory_iterator(path)) {
       files.push_back(entry.path());
    }
    if (files.empty()){
