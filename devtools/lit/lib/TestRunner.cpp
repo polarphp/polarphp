@@ -20,6 +20,7 @@
 #include "polarphp/utils/Program.h"
 #include "polarphp/utils/FileSystem.h"
 #include "polarphp/utils/FileUtils.h"
+#include "polarphp/basic/adt/StringExtras.h"
 #include "dtl/dtl.hpp"
 
 #include "TestRunner.h"
@@ -682,9 +683,54 @@ int compare_two_binary_files(const std::list<std::string> &filePaths, std::strin
    return exitCode;
 }
 
-int compare_two_text_files(const std::list<std::string> &filePaths, std::string &errorMsg)
+std::string filter_text_diff_line(StringRef line, bool stripTrailingCR, bool ignoreAllSpace,
+                                bool ignoreSpaceChange)
 {
+   std::string filtered;
+   if (stripTrailingCR) {
+      line = line.rtrim("\r");
+   }
+   if (ignoreSpaceChange || ignoreAllSpace) {
+      SmallVector<StringRef, 32> parts;
+      line.split(parts, " ", -1, false);
+      if (ignoreAllSpace) {
+         filtered = polar::basic::join(parts.begin(), parts.end(), StringRef(""));
+      } else {
+         filtered = polar::basic::join(parts.begin(), parts.end(), " ");
+      }
+   } else {
+      filtered = line;
+   }
+   return filtered;
+}
 
+int compare_two_text_files(const std::list<std::string> &filePaths,
+                           bool stripTrailingCR, bool ignoreAllSpace,
+                           bool ignoreSpaceChange, std::string &errorMsg)
+{
+   // @TODO need open in binary mode ?
+   SmallVector<std::vector<StringRef>, 2> fileContents;
+   int i = 0;
+   for (const std::string &file : filePaths) {
+      OptionalError<std::unique_ptr<MemoryBuffer>> buffer = MemoryBuffer::getFile(file.c_str());
+      if (!buffer) {
+         errorMsg = format_string("open file %s error : %s", file.c_str(), strerror(errno));
+         return 2;
+      }
+      SmallVector<StringRef, 128> lines;
+      buffer.get()->getBuffer().split(lines, '\n');
+      for (size_t j = 0; j < lines.size(); j++) {
+         fileContents[i].push_back(filter_text_diff_line(lines[j], stripTrailingCR,
+                                                         ignoreAllSpace, ignoreSpaceChange));
+      }
+      fileContents[i].push_back(file);
+      i++;
+   }
+   int exitCode = 0;
+   if (!unified_diff(fileContents[0], fileContents[1])) {
+      exitCode = 1;
+   }
+   return exitCode;
 }
 
 void print_dir_vs_file(const std::string &dirPath, const std::string &filePath)
