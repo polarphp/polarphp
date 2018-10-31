@@ -931,11 +931,6 @@ ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironment 
    }
 }
 
-Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool executeExternal)
-{
-
-}
-
 ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litConfig,
                                          const std::string &tempBase, std::list<std::string> &commands,
                                          const std::string &cwd)
@@ -1375,6 +1370,23 @@ std::vector<std::string> &IntegratedTestKeywordParser::handleRequiresAny(int lin
    std::string expression = join_string_list(conditions, " || ");
    handleBooleanExpr(lineNumber, expression, output);
    return output;
+}
+
+std::vector<std::string> parse_integrated_test_script(TestPointer test, IntegratedTestKeywordParserList additionalParsers,
+                                                      bool requireScript)
+{
+   std::vector<std::string> script;
+   // Install the built-in keyword parsers.
+   IntegratedTestKeywordParserList builtinParsers{
+      std::make_shared<IntegratedTestKeywordParser>("RUN:", ParserKind::COMMAND, nullptr, script),
+            std::make_shared<IntegratedTestKeywordParser>("XFAIL:", ParserKind::BOOLEAN_EXPR, nullptr, test->getXFails())
+   };
+   return script;
+}
+
+Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool executeExternal)
+{
+
 }
 
 } // lit

@@ -16,8 +16,6 @@
 #include <thread>
 #include "ProcessUtils.h"
 #include <sys/types.h>
-#include <signal.h>
-#include <set>
 
 namespace {
 

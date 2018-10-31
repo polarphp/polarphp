@@ -15,11 +15,12 @@
 #include "ForwardDefs.h"
 
 #include <string>
-#include <set>
 #include <map>
 #include <list>
 #include <any>
 #include <memory>
+#include <set>
+#include <vector>
 
 namespace polar {
 namespace basic {
@@ -41,8 +42,8 @@ public:
                  const std::map<std::string, std::string> &environment, const SubstitutionList &substitutions,
                  bool unsupported, const std::optional<std::string> &testExecRoot,
                  const std::optional<std::string> &testSourceRoot, const std::set<std::string> &excludes,
-                 const std::set<std::string> &availableFeatures, bool pipefail,
-                 const std::set<std::string> &limitToFeatures = {}, bool isEarly = false,
+                 const std::vector<std::string> &availableFeatures, bool pipefail,
+                 const std::vector<std::string> &limitToFeatures = {}, bool isEarly = false,
                  const std::any &parallelismGroup = std::any{})
       : m_parent(parent),
         m_name(name),
@@ -73,9 +74,9 @@ public:
    const std::optional<std::string> &getTestExecRoot();
    const std::optional<std::string> &getTestSourceRoot();
    const std::set<std::string> &getExcludes();
-   const std::set<std::string> &getAvailableFeatures();
+   const std::vector<std::string> &getAvailableFeatures();
    bool isPipefail();
-   const std::set<std::string> &getLimitToFeatures();
+   const std::vector<std::string> &getLimitToFeatures();
    bool isEarly() const;
    template <typename T>
    const T &getExtraConfig(const std::string &name, const T &defaultValue = T{});
@@ -89,9 +90,9 @@ public:
    TestingConfig &setTestExecRoot(const std::optional<std::string> &root);
    TestingConfig &setTestSourceRoot(const std::optional<std::string> &root);
    TestingConfig &setExcludes(const std::set<std::string> &excludes);
-   TestingConfig &setAvailableFeatures(const std::set<std::string> &features);
+   TestingConfig &setAvailableFeatures(const std::vector<std::string> &features);
    TestingConfig &setPipeFail(bool flag);
-   TestingConfig &setLimitToFeatures(const std::set<std::string> &features);
+   TestingConfig &setLimitToFeatures(const std::vector<std::string> &features);
    TestingConfig &setParallelismGroup(const std::string &pgroup);
    TestingConfig &setParallelismGroup(ParallelismGroupSetter handle);
    const std::any &getParallelismGroup() const;
@@ -111,9 +112,9 @@ protected:
    std::optional<std::string> m_testExecRoot;
    std::optional<std::string> m_testSourceRoot;
    std::set<std::string> m_excludes;
-   std::set<std::string> m_availableFeatures;
+   std::vector<std::string> m_availableFeatures;
    bool m_pipefail;
-   std::set<std::string> m_limitToFeatures;
+   std::vector<std::string> m_limitToFeatures;
    bool m_isEarly;
    std::any m_parallelismGroup;
    std::map<std::string, std::any> m_extraConfig;

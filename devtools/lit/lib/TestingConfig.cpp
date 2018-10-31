@@ -66,11 +66,11 @@ TestingConfigPointer TestingConfig::fromDefaults(LitConfigPointer litConfig)
    m_environment["TMP"] = std::getenv("TMP");
 #endif
    // Set the default available features based on the LitConfig.
-   std::set<std::string> availableFeatures;
+   std::vector<std::string> availableFeatures;
    if (litConfig->isUseValgrind()) {
-      availableFeatures.insert("valgrind");
+      availableFeatures.push_back("valgrind");
       if (litConfig->isValgrindLeakCheck()) {
-         availableFeatures.insert("vg_leak");
+         availableFeatures.push_back("vg_leak");
       }
    }
    return std::make_shared<TestingConfig>(nullptr,
@@ -142,7 +142,7 @@ const std::set<std::string> &TestingConfig::getExcludes()
    return m_excludes;
 }
 
-const std::set<std::string> &TestingConfig::getAvailableFeatures()
+const std::vector<std::string> &TestingConfig::getAvailableFeatures()
 {
    return m_availableFeatures;
 }
@@ -152,7 +152,7 @@ bool TestingConfig::isPipefail()
    return m_pipefail;
 }
 
-const std::set<std::string> &TestingConfig::getLimitToFeatures()
+const std::vector<std::string> &TestingConfig::getLimitToFeatures()
 {
    return m_limitToFeatures;
 }
@@ -222,7 +222,7 @@ TestingConfig &TestingConfig::setExcludes(const std::set<std::string> &excludes)
    return *this;
 }
 
-TestingConfig &TestingConfig::setAvailableFeatures(const std::set<std::string> &features)
+TestingConfig &TestingConfig::setAvailableFeatures(const std::vector<std::string> &features)
 {
    m_availableFeatures = features;
    return *this;
@@ -234,7 +234,7 @@ TestingConfig &TestingConfig::setPipeFail(bool flag)
    return *this;
 }
 
-TestingConfig &TestingConfig::setLimitToFeatures(const std::set<std::string> &features)
+TestingConfig &TestingConfig::setLimitToFeatures(const std::vector<std::string> &features)
 {
    m_limitToFeatures = features;
    return *this;

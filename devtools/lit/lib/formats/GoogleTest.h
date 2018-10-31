@@ -14,7 +14,6 @@
 
 #include "Base.h"
 #include "../ForwardDefs.h"
-#include <set>
 
 namespace polar {
 namespace lit {

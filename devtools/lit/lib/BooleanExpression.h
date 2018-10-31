@@ -12,7 +12,6 @@
 #ifndef POLAR_DEVLTOOLS_LIT_BOOLEAN_EXPRESSION_H
 #define POLAR_DEVLTOOLS_LIT_BOOLEAN_EXPRESSION_H
 
-#include <set>
 #include <string>
 #include <boost/regex.hpp>
 #include <list>
@@ -43,7 +42,7 @@ namespace lit {
 class BooleanExpression
 {
 public:
-   BooleanExpression(const std::string &str, const std::set<std::string> &variables,
+   BooleanExpression(const std::string &str, const std::vector<std::string> &variables,
                      const std::string &triple = "")
       : m_variables(variables),
         m_triple (triple),
@@ -51,7 +50,7 @@ public:
         m_value(std::nullopt)
    {
       m_tokens = tokenize(str);
-      m_variables.insert("true");
+      m_variables.push_back("true");
       m_tokenIterator = m_tokens.begin();
    }
 
@@ -64,7 +63,7 @@ public:
    BooleanExpression &parseOR();
    std::optional<bool> parseAll();
 public:
-   static std::optional<bool> evaluate(const std::string &str, const std::set<std::string> variables,
+   static std::optional<bool> evaluate(const std::string &str, const std::vector<std::string> variables,
                                        const std::string &triple = "");
    static std::list<std::string> tokenize(std::string str);
 protected:
@@ -73,7 +72,7 @@ protected:
    static boost::regex sm_pattern;
    std::list<std::string> m_tokens;
    std::list<std::string>::iterator m_tokenIterator;
-   std::set<std::string> m_variables;
+   std::vector<std::string> m_variables;
    std::string m_triple;
    std::optional<std::string> m_token;
    std::optional<bool> m_value;

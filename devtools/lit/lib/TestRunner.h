@@ -231,7 +231,7 @@ private:
    static std::vector<std::string> &handleTag(int lineNumber, std::string &line, std::vector<std::string> &output);
    /// A helper for parsing COMMAND type keywords
    static std::vector<std::string> &handleCommand(int lineNumber, std::string &line, std::vector<std::string> &output,
-                                     const std::string &keyword);
+                                                  const std::string &keyword);
    /// A parser for LIST type keywords
    static std::vector<std::string> &handleList(int lineNumber, std::string &line,
                                                std::vector<std::string> &output);
@@ -260,7 +260,8 @@ private:
 /// may be returned. This can be used for test formats where the actual script
 /// is optional or ignored.
 ///
-void parse_integrated_test_script();
+std::vector<std::string> parse_integrated_test_script(TestPointer test, IntegratedTestKeywordParserList additionalParsers = {},
+                                                      bool requireScript = true);
 Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool executeExternal);
 
 } // lit

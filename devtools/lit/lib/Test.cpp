@@ -13,7 +13,6 @@
 #include "Global.h"
 #include "BooleanExpression.h"
 #include "polarphp/basic/adt/StringRef.h"
-#include <set>
 
 namespace polar {
 namespace lit {
@@ -215,6 +214,11 @@ TestingConfigPointer Test::getConfig()
    return m_config;
 }
 
+std::vector<std::string> Test::getXFails()
+{
+   return m_xfails;
+}
+
 const std::string &Test::getSelfSourcePath()
 {
    return m_selfSourcePath;
@@ -238,7 +242,7 @@ std::string Test::getExecPath()
 
 bool Test::isExpectedToFail()
 {
-   const std::set<std::string> &features = m_config->getAvailableFeatures();
+   const std::vector<std::string> &features = m_config->getAvailableFeatures();
    const std::string &triple = m_config->getExtraConfig<std::string>("target_triple", std::string(""));
    // Check if any of the xfails match an available feature or the target.
    for (const std::string &item : m_xfails) {
@@ -270,14 +274,14 @@ bool Test::isWithinFeatureLimits()
       return false;
    }
    // Check the requirements after removing the limiting features (#2)
-   std::set<std::string> featuresMinusLimits;
-   const std::set<std::string> &availableFeatures = m_config->getAvailableFeatures();
-   const std::set<std::string> &limitToFeatures = m_config->getLimitToFeatures();
+   std::vector<std::string> featuresMinusLimits;
+   const std::vector<std::string> &availableFeatures = m_config->getAvailableFeatures();
+   const std::vector<std::string> &limitToFeatures = m_config->getLimitToFeatures();
    auto iter = availableFeatures.begin();
    auto endMark = availableFeatures.end();
    while (iter != endMark) {
-      if (limitToFeatures.find(*iter) == limitToFeatures.end()) {
-         featuresMinusLimits.insert(*iter);
+      if (std::find(limitToFeatures.begin(), limitToFeatures.end(), *iter) == limitToFeatures.end()) {
+         featuresMinusLimits.push_back(*iter);
       }
       ++iter;
    }
@@ -289,11 +293,11 @@ bool Test::isWithinFeatureLimits()
 
 std::list<std::string> Test::getMissingRequiredFeatures()
 {
-   const std::set<std::string> &features = m_config->getAvailableFeatures();
+   const std::vector<std::string> &features = m_config->getAvailableFeatures();
    return getMissingRequiredFeaturesFromList(features);
 }
 
-std::list<std::string> Test::getMissingRequiredFeaturesFromList(const std::set<std::string> &features)
+std::list<std::string> Test::getMissingRequiredFeaturesFromList(const std::vector<std::string> &features)
 {
    std::list<std::string> ret;
    try {
@@ -311,7 +315,7 @@ std::list<std::string> Test::getMissingRequiredFeaturesFromList(const std::set<s
 std::list<std::string> Test::getUnsupportedFeatures()
 {
    std::list<std::string> ret;
-   const std::set<std::string> &features = m_config->getAvailableFeatures();
+   const std::vector<std::string> &features = m_config->getAvailableFeatures();
    const std::string &triple = m_config->getExtraConfig<std::string>("target_triple", std::string(""));
    try {
       for (const std::string &item : m_unsupported) {

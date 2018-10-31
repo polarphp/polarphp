@@ -13,7 +13,6 @@
 #include "ProcessUtils.h"
 #include "Config.h"
 #include <cmath>
-#include <set>
 #include <iostream>
 #include <thread>
 #include <atomic>

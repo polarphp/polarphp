@@ -41,6 +41,7 @@ class TestingProgressDisplay;
 class Command;
 class AbstractCommand;
 class ShellCommandResult;
+class IntegratedTestKeywordParser;
 
 using RunPointer = std::shared_ptr<Run>;
 using TestPointer = std::shared_ptr<Test>;
@@ -53,10 +54,12 @@ using MetricValuePointer = std::shared_ptr<MetricValue>;
 using ParallelismGroupSetter = std::string (*)(TestPointer);
 using CommandPointer = std::shared_ptr<AbstractCommand>;
 using ShellCommandResultPointer = std::shared_ptr<ShellCommandResult>;
+using IntegratedTestKeywordParserPointer = std::shared_ptr<IntegratedTestKeywordParser>;
 
 using TestList = std::list<TestPointer>;
 using TestSuiteList = std::list<TestSuitePointer>;
 using ShExecResultList = std::list<ShellCommandResult>;
+using IntegratedTestKeywordParserList = std::list<IntegratedTestKeywordParserPointer>;
 
 using OpenFileEntryType = std::tuple<std::string, std::string, int, std::string>;
 using StdFdsTuple = std::tuple<int, int, int>;

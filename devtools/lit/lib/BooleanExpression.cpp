@@ -73,7 +73,7 @@ BooleanExpression &BooleanExpression::parseNOT()
    } else if (!isIdentifier(m_token.value())) {
       throw ValueError(std::string("expected: '!' or '(' or identifier\nhave: "+ quote(m_token.value())));
    } else {
-      m_value = (m_variables.find(m_token.value()) != m_variables.end()
+      m_value = ( std::find(m_variables.begin(), m_variables.end(), m_token.value()) != m_variables.end()
             || m_triple.find(m_token.value()) != std::string::npos);
       if (m_tokenIterator == m_tokens.end()) {
          m_token = std::nullopt;
@@ -112,7 +112,7 @@ BooleanExpression &BooleanExpression::parseOR()
    return *this;
 }
 
-std::optional<bool> BooleanExpression::evaluate(const std::string &str, const std::set<std::string> variables,
+std::optional<bool> BooleanExpression::evaluate(const std::string &str, const std::vector<std::string> variables,
                                                 const std::string &triple)
 {
    try {

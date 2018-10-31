@@ -258,13 +258,14 @@ public:
    std::string getFilePath();
    std::string getSourcePath();
    TestingConfigPointer getConfig();
+   std::vector<std::string> getXFails();
    const std::string &getSelfSourcePath();
    std::string getExecPath();
    TestSuitePointer getTestSuite() const;
    Test &setSelfSourcePath(const std::string &sourcePath);
    bool isExpectedToFail();
    bool isWithinFeatureLimits();
-   std::list<std::string> getMissingRequiredFeaturesFromList(const std::set<std::string> &features);
+   std::list<std::string> getMissingRequiredFeaturesFromList(const std::vector<std::string> &features);
    std::list<std::string> getMissingRequiredFeatures();
    std::list<std::string> getUnsupportedFeatures();
    bool isEarlyTest() const;
@@ -274,8 +275,8 @@ protected:
    std::list<std::string> m_pathInSuite;
    TestingConfigPointer m_config;
    std::optional<std::string> m_filePath;
-   std::list<std::string> m_xfails;
-   std::set<std::string> m_requires;
+   std::vector<std::string> m_xfails;
+   std::vector<std::string> m_requires;
    std::list<std::string> m_unsupported;
    std::shared_ptr<Result> m_result;
    std::string m_selfSourcePath;
