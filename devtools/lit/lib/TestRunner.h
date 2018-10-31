@@ -157,11 +157,11 @@ StdFdsTuple process_redirects(Command *command, int stdinSource,
                               const ShellEnvironment &shenv,
                               std::list<OpenFileEntryType> &openedFiles);
 ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litConfig,
-                                         const std::string &tempBase, std::list<std::string> &commands,
-                                         const std::string &cwd);
+                                         const std::string &tempBase, std::vector<std::string> &commands,
+                                         const std::string &cwd, ResultPointer result);
 ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
-                                const std::string &tempBase, std::list<std::string> &commands,
-                                const std::string &cwd);
+                                const std::string &tempBase, std::vector<std::string> &commands,
+                                const std::string &cwd, ResultPointer result);
 
 std::pair<std::string, std::string> get_temp_paths(TestPointer test);
 std::string colon_normalize_path(std::string path);

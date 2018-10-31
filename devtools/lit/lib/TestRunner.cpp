@@ -933,8 +933,8 @@ ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironment 
 }
 
 ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litConfig,
-                                         const std::string &tempBase, std::list<std::string> &commands,
-                                         const std::string &cwd)
+                                         const std::string &tempBase, std::vector<std::string> &commands,
+                                         const std::string &cwd, ResultPointer result)
 {
    std::vector<CommandPointer> cmds;
    for (std::string &cmdStr: commands) {
@@ -952,8 +952,8 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
 }
 
 ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
-                                const std::string &tempBase, std::list<std::string> &commands,
-                                const std::string &cwd)
+                                const std::string &tempBase, std::vector<std::string> &commands,
+                                const std::string &cwd, ResultPointer result)
 {
    const std::optional<std::string> &bashPath = litConfig->getBashPath();
    bool isWin32CMDEXE = litConfig->isWindows() && !bashPath;
@@ -1181,7 +1181,7 @@ SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir
 
 std::vector<std::string> &apply_substitutions(std::vector<std::string> &script, const SubstitutionList &substitutions)
 {
-   for (int i = 0; i < script.size(); ++i) {
+   for (size_t i = 0; i < script.size(); ++i) {
       std::string &line = script[i];
       for (const SubstitutionPair &substitution: substitutions) {
          StringRef a = std::get<0>(substitution);
@@ -1451,7 +1451,51 @@ namespace {
 ResultPointer do_run_shtest(TestPointer test, LitConfigPointer litConfig, bool useExternalSh,
                             std::vector<std::string> &script, const std::string &tempBase)
 {
-
+   // Create the output directory if it does not already exist.
+   ResultPointer result;
+   std::error_code errorCode;
+   std::string execDir = stdfs::path(test->getExecPath()).parent_path();
+   stdfs::create_directories(stdfs::path(tempBase).parent_path(), errorCode);
+   if (errorCode) {
+      return std::make_shared<Result>(FAIL, errorCode.message());
+   }
+   ExecScriptResult execScriptResult;
+   if (useExternalSh) {
+      execScriptResult = execute_script(test, litConfig, tempBase, script, execDir, result);
+   } else {
+      execScriptResult = execute_script_internal(test, litConfig, tempBase, script, execDir, result);
+   }
+   if (result) {
+      return result;
+   }
+   std::string &out = std::get<0>(execScriptResult);
+   std::string &errorMsg = std::get<1>(execScriptResult);
+   int exitCode = std::get<2>(execScriptResult);
+   std::string &timeoutInfo = std::get<3>(execScriptResult);
+   const ResultCode *status = nullptr;
+   if (exitCode == 0) {
+      status = PASS;
+   } else {
+      if (timeoutInfo.empty()) {
+         status = FAIL;
+      } else {
+         status = TIMEOUT;
+      }
+   }
+   // Form the output log.
+   Twine output(format_string("Script:\n--\n%s\n--\nExit Code: %d\n", join_string_list(script, "\n").c_str(), exitCode));
+   if (!timeoutInfo.empty()) {
+      output.concat(format_string("Timeout: %s\n", timeoutInfo.c_str()));
+   }
+   output.concat("\n");
+   // Append the outputs, if present.
+   if (!out.empty()) {
+      output.concat(format_string("Command Output (stdout):\n--\n%s\n--\n", out.c_str()));
+   }
+   if (!errorMsg.empty()) {
+      output.concat(format_string("Command Output (stderr):\n--\n%s\n--\n", errorMsg.c_str()));
+   }
+   return std::make_shared<Result>(status, output.getStr());
 }
 } // anonymous namespace
 
