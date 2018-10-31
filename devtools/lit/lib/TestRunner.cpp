@@ -38,6 +38,9 @@
 #include <fstream>
 #include <filesystem>
 #include <boost/regex.hpp>
+#include <unicode/ucnv.h>
+#include <unicode/utypes.h>
+#include <unicode/ucsdet.h>
 
 namespace polar {
 namespace lit {
@@ -657,24 +660,26 @@ bool unified_diff(std::vector<StringRef> &lhs, std::vector<StringRef> &rhs)
    return false;
 }
 
-int compare_two_binary_files(const std::list<std::string> &filePaths, std::string &errorMsg)
+int compare_two_binary_files(std::pair<StringRef, StringRef> lhs, std::pair<StringRef, StringRef> rhs,
+                             std::string &errorMsg)
 {
    // @TODO need open in binary mode ?
    SmallVector<std::vector<StringRef>, 2> fileContents;
-   int i = 0;
-   for (const std::string &file : filePaths) {
-      OptionalError<std::unique_ptr<MemoryBuffer>> buffer = MemoryBuffer::getFile(file.c_str());
-      if (!buffer) {
-         errorMsg = format_string("open file %s error : %s", file.c_str(), strerror(errno));
-         return 2;
-      }
+   {
       SmallVector<StringRef, 128> lines;
-      buffer.get()->getBuffer().split(lines, '\n');
+      lhs.second.split(lines, '\n');
       for (size_t j = 0; j < lines.size(); j++) {
-         fileContents[i].push_back(lines[j]);
+         fileContents[0].push_back(lines[j]);
       }
-      fileContents[i].push_back(file);
-      i++;
+      fileContents[0].push_back(lhs.first);
+   }
+   {
+      SmallVector<StringRef, 128> lines;
+      rhs.second.split(lines, '\n');
+      for (size_t j = 0; j < lines.size(); j++) {
+         fileContents[1].push_back(lines[j]);
+      }
+      fileContents[1].push_back(rhs.first);
    }
    int exitCode = 0;
    if (!unified_diff(fileContents[0], fileContents[1])) {
@@ -684,7 +689,7 @@ int compare_two_binary_files(const std::list<std::string> &filePaths, std::strin
 }
 
 std::string filter_text_diff_line(StringRef line, bool stripTrailingCR, bool ignoreAllSpace,
-                                bool ignoreSpaceChange)
+                                  bool ignoreSpaceChange)
 {
    std::string filtered;
    if (stripTrailingCR) {
@@ -704,33 +709,85 @@ std::string filter_text_diff_line(StringRef line, bool stripTrailingCR, bool ign
    return filtered;
 }
 
-int compare_two_text_files(const std::list<std::string> &filePaths,
+int compare_two_text_files(std::pair<StringRef, StringRef> lhs, std::pair<StringRef, StringRef> rhs,
                            bool stripTrailingCR, bool ignoreAllSpace,
                            bool ignoreSpaceChange, std::string &errorMsg)
 {
    // @TODO need open in binary mode ?
    SmallVector<std::vector<StringRef>, 2> fileContents;
-   int i = 0;
-   for (const std::string &file : filePaths) {
-      OptionalError<std::unique_ptr<MemoryBuffer>> buffer = MemoryBuffer::getFile(file.c_str());
-      if (!buffer) {
-         errorMsg = format_string("open file %s error : %s", file.c_str(), strerror(errno));
-         return 2;
-      }
+   {
       SmallVector<StringRef, 128> lines;
-      buffer.get()->getBuffer().split(lines, '\n');
+      lhs.second.split(lines, '\n');
       for (size_t j = 0; j < lines.size(); j++) {
-         fileContents[i].push_back(filter_text_diff_line(lines[j], stripTrailingCR,
+         fileContents[0].push_back(filter_text_diff_line(lines[j], stripTrailingCR,
                                                          ignoreAllSpace, ignoreSpaceChange));
       }
-      fileContents[i].push_back(file);
-      i++;
+      fileContents[0].push_back(lhs.first);
+   }
+   {
+      SmallVector<StringRef, 128> lines;
+      rhs.second.split(lines, '\n');
+      for (size_t j = 0; j < lines.size(); j++) {
+         fileContents[1].push_back(filter_text_diff_line(lines[j], stripTrailingCR,
+                                                         ignoreAllSpace, ignoreSpaceChange));
+      }
+      fileContents[1].push_back(rhs.second);
    }
    int exitCode = 0;
    if (!unified_diff(fileContents[0], fileContents[1])) {
       exitCode = 1;
    }
    return exitCode;
+}
+
+bool is_binary_content(StringRef content)
+{
+   // detect encodings
+   UCharsetDetector* csd;
+   int32_t matchCount = 0;
+   UErrorCode status = U_ZERO_ERROR;
+   csd = ucsdet_open(&status);
+   if(status != U_ZERO_ERROR) {
+      return true;
+   }
+   ucsdet_setText(csd, content.getData(), content.getSize(), &status);
+   if(status != U_ZERO_ERROR) {
+      return true;
+   }
+   ucsdet_detectAll(csd, &matchCount, &status);
+   if(status != U_ZERO_ERROR) {
+      return true;
+   }
+   if (matchCount == 0) {
+      return true;
+   }
+   return false;
+}
+
+int compare_two_files(const std::list<std::string> &filePaths,
+                      bool stripTrailingCR, bool ignoreAllSpace,
+                      bool ignoreSpaceChange, std::string &errorMsg)
+{
+   SmallVector<std::string, 2> fileContents;
+   bool isBinaryFile = false;
+   int i = 0;
+   for (const std::string &file : filePaths) {
+      OptionalError<std::shared_ptr<MemoryBuffer>> buffer = MemoryBuffer::getFile(file.c_str());
+      if (!buffer) {
+         errorMsg = format_string("open file %s error : %s", file.c_str(), strerror(errno));
+         return 2;
+      }
+      fileContents[i] = buffer.get()->getBuffer().getStr();
+      isBinaryFile = is_binary_content(fileContents[i]);
+      i++;
+   }
+   auto iter = filePaths.begin();
+   std::pair<StringRef, StringRef> lhs = std::make_pair(*iter++, fileContents[0]);
+   std::pair<StringRef, StringRef> rhs = std::make_pair(*iter++, fileContents[1]);
+   if (isBinaryFile) {
+      return compare_two_binary_files(lhs, rhs, errorMsg);
+   }
+   return compare_two_text_files(lhs, rhs, stripTrailingCR, ignoreAllSpace, ignoreSpaceChange, errorMsg);
 }
 
 void print_dir_vs_file(const std::string &dirPath, const std::string &filePath)

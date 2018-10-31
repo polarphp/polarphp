@@ -56,6 +56,7 @@ target_link_libraries(litkernel PUBLIC
    cppdiff
    boost_regex
    PolarUtils
+   ${ICU_LIBRARIES}
    ${CURSES_LIBRARIES})
 
 polar_add_executable(lit main.cpp)
