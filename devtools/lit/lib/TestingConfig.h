@@ -78,6 +78,7 @@ public:
    bool isPipefail();
    const std::vector<std::string> &getLimitToFeatures();
    bool isEarly() const;
+   bool hasExtraConfig(const std::string &name);
    template <typename T>
    const T &getExtraConfig(const std::string &name, const T &defaultValue = T{});
    TestingConfig &setName(const std::string &name);

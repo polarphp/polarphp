@@ -172,7 +172,7 @@ SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir
 /// Replace each matching occurrence of regular expression pattern a with
 /// substitution b in line ln.
 ///
-std::list<std::string> apply_substitutions(const std::string &script, const SubstitutionList &substitutions);
+std::vector<std::string> &apply_substitutions(std::vector<std::string> &script, const SubstitutionList &substitutions);
 
 /// An enumeration representing the style of an integrated test keyword or
 /// command.
@@ -264,7 +264,8 @@ private:
 ///
 std::vector<std::string> parse_integrated_test_script(TestPointer test, IntegratedTestKeywordParserList additionalParsers = {},
                                                       bool requireScript = true, ResultPointer result = nullptr);
-Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool executeExternal);
+ResultPointer execute_shtest(TestPointer test, LitConfigPointer litConfig, bool useExternalSh,
+                             SubstitutionList extraSubstitutions);
 
 } // lit
 } // polar

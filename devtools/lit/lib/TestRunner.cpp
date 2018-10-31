@@ -1179,13 +1179,10 @@ SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir
    return list;
 }
 
-std::list<std::string> apply_substitutions(const std::string &script, const SubstitutionList &substitutions)
+std::vector<std::string> &apply_substitutions(std::vector<std::string> &script, const SubstitutionList &substitutions)
 {
-   std::istringstream scriptInput;
-   scriptInput.str(script);
-   char lineBuffer[1024];
-   std::list<std::string> lines;
-   while (scriptInput.getline(lineBuffer, 1024)) {
+   for (int i = 0; i < script.size(); ++i) {
+      std::string &line = script[i];
       for (const SubstitutionPair &substitution: substitutions) {
          StringRef a = std::get<0>(substitution);
          std::string b = std::get<1>(substitution);
@@ -1193,12 +1190,11 @@ std::list<std::string> apply_substitutions(const std::string &script, const Subs
          replace_string("\\", "\\\\", b);
 
 #endif
-         std::string line = boost::regex_replace(std::string(lineBuffer), boost::regex(a.getStr()), b,
-                                                 boost::match_default | boost::format_all);
-         lines.push_back(line);
+         line = boost::regex_replace(line, boost::regex(a.getStr()), b,
+                                     boost::match_default | boost::format_all);
       }
    }
-   return lines;
+   return script;
 }
 
 const SmallVector<StringRef, 4> &ParserKind::allowedKeywordSuffixes(Kind kind)
@@ -1451,9 +1447,54 @@ std::vector<std::string> parse_integrated_test_script(TestPointer test, Integrat
    return script;
 }
 
-Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool executeExternal)
+namespace {
+ResultPointer do_run_shtest(TestPointer test, LitConfigPointer litConfig, bool useExternalSh,
+                            std::vector<std::string> &script, const std::string &tempBase)
 {
 
+}
+} // anonymous namespace
+
+ResultPointer execute_shtest(TestPointer test, LitConfigPointer litConfig, bool useExternalSh,
+                             SubstitutionList extraSubstitutions)
+{
+   if (test->getConfig()->isUnsupported()) {
+      return std::make_shared<Result>(UNSUPPORTED, "Test is unsupported");
+   }
+   ResultPointer result;
+   std::vector<std::string> script = parse_integrated_test_script(test, {}, true, result);
+   if (result) {
+      return result;
+   }
+   if (litConfig->isNoExecute()) {
+      return std::make_shared<Result>(PASS);
+   }
+   std::pair<std::string, std::string> tempPaths = get_temp_paths(test);
+   for (const SubstitutionPair &item : get_default_substitutions(test, std::get<0>(tempPaths), std::get<1>(tempPaths), useExternalSh)) {
+      extraSubstitutions.push_back(item);
+   }
+   apply_substitutions(script, extraSubstitutions);
+   // Re-run failed tests up to test_retry_attempts times.
+   int attempts = 1;
+   TestingConfigPointer testConfig = test->getConfig();
+   if (testConfig->hasExtraConfig("TestRetryAttempts")) {
+      try {
+         attempts += testConfig->getExtraConfig<int>("TestRetryAttempts");
+      } catch(...) {}
+   }
+   int i = 0;
+   for (; i < attempts; ++i) {
+      result = do_run_shtest(test, litConfig, useExternalSh, script, std::get<1>(tempPaths));
+      if (result->getCode() != FAIL) {
+         break;
+      }
+   }
+   // If we had to run the test more than once, count it as a flaky pass. These
+   // will be printed separately in the test summary.
+   if (i > 0 && result->getCode() == PASS) {
+      result->setCode(FLAKYPASS);
+   }
+   return result;
 }
 
 } // lit

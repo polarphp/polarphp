@@ -157,6 +157,11 @@ const std::vector<std::string> &TestingConfig::getLimitToFeatures()
    return m_limitToFeatures;
 }
 
+bool TestingConfig::hasExtraConfig(const std::string &name)
+{
+   return m_extraConfig.find(name) != m_extraConfig.end();
+}
+
 bool TestingConfig::isEarly() const
 {
    return m_isEarly;
