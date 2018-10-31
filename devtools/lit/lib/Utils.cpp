@@ -310,6 +310,25 @@ std::string join_string_list(const std::list<std::string> &list, const std::stri
    return result;
 }
 
+std::string join_string_list(const std::vector<std::string> &list, const std::string &glue) noexcept
+{
+   std::string result;
+   size_t listSize = list.size();
+   auto iter = list.begin();
+   auto endMark = list.end();
+   size_t i = 0;
+   while (iter != endMark) {
+      if (i == listSize - 1) {
+         result += *iter;
+      } else {
+         result += *iter + glue;
+      }
+      ++i;
+      ++iter;
+   }
+   return result;
+}
+
 void replace_string(const std::string &search, const std::string &replacement,
                     std::string &targetStr)
 {

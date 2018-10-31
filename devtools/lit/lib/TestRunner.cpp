@@ -30,6 +30,7 @@
 #include "LitConfig.h"
 #include "ShellUtil.h"
 #include "CLI/CLI.hpp"
+#include "BooleanExpression.h"
 
 #include <cstdio>
 #include <any>
@@ -606,6 +607,7 @@ void get_dir_tree(const std::string &path, std::list<std::pair<std::string, std:
          files.push_back(entry.path());
       }
    }
+   files.sort();
    list.push_back(std::make_pair(path, files));
 }
 
@@ -866,7 +868,7 @@ ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironme
 
 ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironment &shenv)
 {
-
+   return std::make_shared<ShellCommandResult>(command, "", "", 0, false);
 }
 
 /// executeBuiltinRm - Removes (deletes) files or directories.
@@ -940,7 +942,7 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
 {
    std::vector<CommandPointer> cmds;
    for (std::string &cmdStr: commands) {
-      cmdStr = boost::regex_replace(cmdStr, sgc_kpdbgRegex, ": '$1'; ");
+      cmdStr = boost::regex_replace(cmdStr, boost::regex(sgc_kpdbgRegex, boost::match_default | boost::format_all), ": '$1'; ");
       try {
          cmds.push_back(ShParser(cmdStr, litConfig->isWindows(), test->getConfig()->isPipefail()).parse());
       } catch (...) {
@@ -972,9 +974,10 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
    if (!ostream.is_open()) {
       std::cerr << "open script file error" << std::endl;
    }
+   boost::regex kpdbgRegex(sgc_kpdbgRegex, boost::match_default | boost::format_all);
    if (isWin32CMDEXE) {
       for (std::string &command : commands) {
-         command = boost::regex_replace(command, sgc_kpdbgRegex, "echo '$1' > nul && ");
+         command = boost::regex_replace(command, kpdbgRegex, "echo '$1' > nul && ");
       }
       if (litConfig->isEchoAllCommands()) {
          ostream << "@echo on" << std::endl;
@@ -984,7 +987,7 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
       ostream << join_string_list(commands, "\n@if %ERRORLEVEL% NEQ 0 EXIT\n");
    } else {
       for (std::string &command : commands) {
-         command = boost::regex_replace(command, sgc_kpdbgRegex, ": '$1'; ");
+         command = boost::regex_replace(command, kpdbgRegex, ": '$1'; ");
       }
       if (test->getConfig()->isPipefail()) {
          ostream << "set -o pipefail;";
@@ -1202,7 +1205,7 @@ std::list<std::string> apply_substitutions(const std::string &script, const Subs
    return lines;
 }
 
-const SmallVector<char, 4> &ParserKind::allowedKeywordSuffixes(Kind kind)
+const SmallVector<StringRef, 4> &ParserKind::allowedKeywordSuffixes(Kind kind)
 {
    return sm_allowedSuffixes[kind];
 }
@@ -1212,12 +1215,12 @@ StringRef ParserKind::getKindStr(Kind kind)
    return sm_keywordStrMap[kind];
 }
 
-std::map<ParserKind::Kind, SmallVector<char, 4>> ParserKind::sm_allowedSuffixes{
-   {ParserKind::TAG, {'.'}},
-   {ParserKind::COMMAND, {':'}},
-   {ParserKind::LIST, {':'}},
-   {ParserKind::BOOLEAN_EXPR, {':'}},
-   {ParserKind::CUSTOM, {':', '.'}}
+std::map<ParserKind::Kind, SmallVector<StringRef, 4>> ParserKind::sm_allowedSuffixes{
+   {ParserKind::TAG, {"."}},
+   {ParserKind::COMMAND, {":"}},
+   {ParserKind::LIST, {":"}},
+   {ParserKind::BOOLEAN_EXPR, {":"}},
+   {ParserKind::CUSTOM, {":", "."}}
 };
 
 std::map<ParserKind::Kind, StringRef> ParserKind::sm_keywordStrMap{
@@ -1227,6 +1230,152 @@ std::map<ParserKind::Kind, StringRef> ParserKind::sm_keywordStrMap{
    {ParserKind::BOOLEAN_EXPR, "BOOLEAN_EXPR"},
    {ParserKind::CUSTOM, "CUSTOM"}
 };
+
+IntegratedTestKeywordParser::IntegratedTestKeywordParser(const std::string &keyword, ParserKind::Kind kind,
+                                                         ParserHandler parser, const std::vector<std::string> &initialValue)
+   : m_kind(kind),
+     m_keyword(keyword),
+     m_value(initialValue)
+{
+   SmallVector<StringRef, 4> allowedSuffixes = ParserKind::allowedKeywordSuffixes(kind);
+
+   if (keyword.empty() || (std::find(allowedSuffixes.begin(), allowedSuffixes.end(), StringRef(keyword.data() + keyword.size() - 1, 1)) == allowedSuffixes.end())) {
+      if (allowedSuffixes.getSize() == 1) {
+         throw ValueError(format_string("Keyword '%s' of kind '%s' must end in '%s'", keyword.c_str(),
+                                        ParserKind::getKindStr(kind).getStr().c_str(), allowedSuffixes.front().getStr().c_str()));
+      } else {
+         throw ValueError(format_string("Keyword '%s' of kind '%s' must end in "
+                                        " one of '%s'", keyword.c_str(),
+                                        ParserKind::getKindStr(kind).getStr().c_str(),
+                                        polar::basic::join(allowedSuffixes.begin(), allowedSuffixes.end(), " ").c_str()));
+      }
+   }
+   if (parser != nullptr && kind != ParserKind::CUSTOM) {
+      throw ValueError("custom parsers can only be specified with "
+                       "ParserKind.CUSTOM");
+   }
+   if (kind == ParserKind::COMMAND) {
+      m_parser = [&](int lineNumber, std::string &line, std::vector<std::string> &output) -> std::vector<std::string> & {
+         return IntegratedTestKeywordParser::handleCommand(lineNumber, line, output, this->m_keyword);
+      };
+   } else if (kind == ParserKind::LIST) {
+      m_parser = IntegratedTestKeywordParser::handleList;
+   } else if (kind == ParserKind::BOOLEAN_EXPR) {
+      m_parser = IntegratedTestKeywordParser::handleBooleanExpr;
+   } else if (kind == ParserKind::TAG) {
+      m_parser = IntegratedTestKeywordParser::handleTag;
+   } else if (kind == ParserKind::CUSTOM) {
+      if (parser == nullptr) {
+         throw ValueError("ParserKind.CUSTOM requires a custom parser");
+      }
+      m_parser = parser;
+   } else {
+      throw ValueError(format_string("Unknown kind '%s'", ParserKind::getKindStr(kind).getStr().c_str()));
+   }
+}
+
+void IntegratedTestKeywordParser::parseLine(int lineNumber, std::string &line)
+{
+   try {
+      m_parsedLines.push_back(std::make_pair(lineNumber, line));
+      m_value = m_parser(lineNumber, line, m_value);
+   } catch (ValueError &e) {
+      throw ValueError(format_string("%s \nin %s directive on test line %d", e.what(),
+                                     m_keyword.c_str(), lineNumber));
+   }
+}
+
+const std::vector<std::string> &IntegratedTestKeywordParser::getValue()
+{
+   return m_value;
+}
+
+std::vector<std::string> &IntegratedTestKeywordParser::handleTag(int, std::string &line, std::vector<std::string> &output)
+{
+   StringRef lineTrip(line);
+   lineTrip = lineTrip.trim();
+   if (lineTrip.empty()) {
+      output.push_back(lineTrip.getStr());
+   }
+   return output;
+}
+
+std::vector<std::string> &IntegratedTestKeywordParser::handleCommand(int lineNumber, std::string &line, std::vector<std::string> &output,
+                                                                     const std::string &keyword)
+{
+   line = StringRef(line).trim().getStr();
+   line = boost::regex_replace(line, boost::regex("%\\(line\\)"), std::to_string(lineNumber));
+   line = boost::regex_replace(line, boost::regex("%\\(line *([\\+-]) *(\\d+)\\)"), [&lineNumber](const boost::smatch &match) -> std::string{
+      std::string mstr = match[1].str();
+      std::string number = match[2].str();
+      if (mstr == "+") {
+         return std::to_string(lineNumber + std::stoi(number));
+      }
+      if (mstr == "-") {
+         return std::to_string(lineNumber - std::stoi(number));
+      }
+      return match[0].str();
+   });
+   // Collapse lines with trailing '\\'.
+   if (!output.empty() && output.back().back() == '\\') {
+      output.back() = output.back().substr(0, output.size() - 2) + line;
+   } else {
+      std::string pdbg = format_string("%dbg(%s at line %d)", keyword.c_str(), lineNumber);
+      assert(boost::regex_match(pdbg, boost::regex(sgc_kpdbgRegex + "$", boost::match_default | boost::format_all)) && "kPdbgRegex expected to match actual %dbg usage");
+      line = format_string("%s %s", pdbg.c_str(), line.c_str());
+      output.push_back(line);
+   }
+   return output;
+}
+
+std::vector<std::string> &IntegratedTestKeywordParser::handleList(int lineNumber, std::string &line,
+                                                                  std::vector<std::string> &output)
+{
+   StringRef lineRef(line);
+   SmallVector<StringRef, 10> parts;
+   lineRef.split(parts, ",", -1, false);
+   auto iter = parts.begin();
+   auto endMark = parts.end();
+   while (iter != endMark) {
+      output.push_back((*iter).trim().getStr());
+      ++iter;
+   }
+   return output;
+}
+
+std::vector<std::string> &IntegratedTestKeywordParser::handleBooleanExpr(int lineNumber, std::string &line,
+                                                                         std::vector<std::string> &output)
+{
+   StringRef lineRef(line);
+   SmallVector<StringRef, 10> parts;
+   lineRef.split(parts, ",", -1, false);
+   auto iter = parts.begin();
+   auto endMark = parts.end();
+   while (iter != endMark) {
+      output.push_back((*iter).trim().getStr());
+      ++iter;
+   }
+   // Evaluate each expression to verify syntax.
+   // We don't want any results, just the raised ValueError.
+   for (std::string &str : output) {
+      if (str != "*") {
+         BooleanExpression::evaluate(str, {});
+      }
+   }
+   return output;
+}
+
+std::vector<std::string> &IntegratedTestKeywordParser::handleRequiresAny(int lineNumber, std::string &line,
+                                                                         std::vector<std::string> &output)
+{
+   // Extract the conditions specified in REQUIRES-ANY: as written.
+   std::vector<std::string> conditions;
+   handleList(lineNumber, line, conditions);
+   // Output a `REQUIRES: a || b || c` expression in its place.
+   std::string expression = join_string_list(conditions, " || ");
+   handleBooleanExpr(lineNumber, expression, output);
+   return output;
+}
 
 } // lit
 } // polar

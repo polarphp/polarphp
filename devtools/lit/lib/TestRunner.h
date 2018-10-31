@@ -24,6 +24,7 @@
 #include <tuple>
 #include <utility>
 #include <map>
+#include <functional>
 
 namespace polar {
 namespace basic {
@@ -72,7 +73,7 @@ protected:
 #endif
 
 const static std::string sgc_kdevNull("/dev/null");
-const static boost::regex sgc_kpdbgRegex("%dbg\\(([^)'\"]*)\\)", boost::match_default | boost::format_all);
+const static std::string sgc_kpdbgRegex("%dbg\\(([^)'\"]*)\\)");
 
 class ShellEnvironment
 {
@@ -195,10 +196,10 @@ public:
       CUSTOM
    };
 public:
-   static const SmallVector<char, 4> &allowedKeywordSuffixes(Kind kind);
+   static const SmallVector<StringRef, 4> &allowedKeywordSuffixes(Kind kind);
    static StringRef getKindStr(Kind kind);
 protected:
-   static std::map<Kind, SmallVector<char, 4>> sm_allowedSuffixes;
+   static std::map<Kind, SmallVector<StringRef, 4>> sm_allowedSuffixes;
    static std::map<Kind, StringRef> sm_keywordStrMap;
 };
 
@@ -210,20 +211,55 @@ protected:
 ParsedScriptLines parse_integrated_test_script_commands(const std::string &sourcePath,
                                                         const std::list<std::string> keywords);
 
+/// A parser for LLVM/Clang style integrated test scripts.
+///
+/// keyword: The keyword to parse for. It must end in either '.' or ':'.
+/// kind: An value of ParserKind.
+/// parser: A custom parser. This value may only be specified with
+///        ParserKind.CUSTOM.
+///
 class IntegratedTestKeywordParser
 {
 public:
-   IntegratedTestKeywordParser();
-   void parseLine();
-   void getValue();
+   using ParserHandler = std::vector<std::string> &(*)(int, std::string &, std::vector<std::string> &);
+   IntegratedTestKeywordParser(const std::string &keyword, ParserKind::Kind kind,
+                               ParserHandler parser = nullptr, const std::vector<std::string> &initialValue = {});
+   void parseLine(int lineNumber, std::string &line);
+   const std::vector<std::string> &getValue();
 private:
-   static void handleTag();
-   static void handleCommand();
-   static void handleList();
-   static void handleBooleanExpr();
-   static void handleRequiresAny();
+   /// A helper for parsing TAG type keywords
+   static std::vector<std::string> &handleTag(int lineNumber, std::string &line, std::vector<std::string> &output);
+   /// A helper for parsing COMMAND type keywords
+   static std::vector<std::string> &handleCommand(int lineNumber, std::string &line, std::vector<std::string> &output,
+                                     const std::string &keyword);
+   /// A parser for LIST type keywords
+   static std::vector<std::string> &handleList(int lineNumber, std::string &line,
+                                               std::vector<std::string> &output);
+   /// A parser for BOOLEAN_EXPR type keywords
+   static std::vector<std::string> &handleBooleanExpr(int lineNumber, std::string &line,
+                                                      std::vector<std::string> &output);
+   /// A custom parser to transform REQUIRES-ANY: into REQUIRES:
+   static std::vector<std::string> &handleRequiresAny(int lineNumber, std::string &line,
+                                                      std::vector<std::string> &output);
+private:
+   ParserKind::Kind m_kind;
+   std::string m_keyword;
+   std::vector<std::string> m_value;
+   std::list<std::pair<int, StringRef>> m_parsedLines;
+   std::function<std::vector<std::string> &(int, std::string &, std::vector<std::string> &)> m_parser;
 };
 
+/// parseIntegratedTestScript - Scan an LLVM/Clang style integrated test
+/// script and extract the lines to 'RUN' as well as 'XFAIL' and 'REQUIRES'
+/// and 'UNSUPPORTED' information.
+///
+/// If additional parsers are specified then the test is also scanned for the
+/// keywords they specify and all matches are passed to the custom parser.
+///
+/// If 'require_script' is False an empty script
+/// may be returned. This can be used for test formats where the actual script
+/// is optional or ignored.
+///
 void parse_integrated_test_script();
 Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool executeExternal);
 

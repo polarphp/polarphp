@@ -90,6 +90,7 @@ bool string_startswith(const std::string &str, const std::string &searchStr) noe
 bool string_endswith(const std::string &str, const std::string &searchStr) noexcept;
 
 std::string join_string_list(const std::list<std::string> &list, const std::string &glue) noexcept;
+std::string join_string_list(const std::vector<std::string> &list, const std::string &glue) noexcept;
 
 template <typename... ArgTypes>
 std::string format_string(const std::string &format, ArgTypes&&...args)
