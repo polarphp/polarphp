@@ -208,8 +208,7 @@ protected:
 ///  Parse the commands in an integrated test script file into a list of
 /// (line_number, command_type, line).
 ///
-ParsedScriptLines parse_integrated_test_script_commands(const std::string &sourcePath,
-                                                        const std::list<std::string> keywords);
+ParsedScriptLines parse_integrated_test_script_commands(StringRef sourcePath, const std::list<StringRef> keywords);
 
 /// A parser for LLVM/Clang style integrated test scripts.
 ///
@@ -225,8 +224,11 @@ public:
    IntegratedTestKeywordParser(const std::string &keyword, ParserKind::Kind kind,
                                ParserHandler parser = nullptr, const std::vector<std::string> &initialValue = {});
    void parseLine(int lineNumber, std::string &line);
+   ParserKind::Kind getKind();
+   const std::string &getKeyword();
+   const std::list<std::pair<int, StringRef>> getParsedLines();
    const std::vector<std::string> &getValue();
-private:
+
    /// A helper for parsing TAG type keywords
    static std::vector<std::string> &handleTag(int lineNumber, std::string &line, std::vector<std::string> &output);
    /// A helper for parsing COMMAND type keywords
@@ -261,7 +263,7 @@ private:
 /// is optional or ignored.
 ///
 std::vector<std::string> parse_integrated_test_script(TestPointer test, IntegratedTestKeywordParserList additionalParsers = {},
-                                                      bool requireScript = true);
+                                                      bool requireScript = true, ResultPointer result = nullptr);
 Result execute_shtest(TestPointer test, LitConfigPointer litConfig, bool executeExternal);
 
 } // lit

@@ -32,6 +32,7 @@
 #include "CLI/CLI.hpp"
 #include "BooleanExpression.h"
 
+#include <set>
 #include <cstdio>
 #include <any>
 #include <sstream>
@@ -1280,6 +1281,21 @@ void IntegratedTestKeywordParser::parseLine(int lineNumber, std::string &line)
    }
 }
 
+ParserKind::Kind IntegratedTestKeywordParser::getKind()
+{
+   return m_kind;
+}
+
+const std::string &IntegratedTestKeywordParser::getKeyword()
+{
+   return m_keyword;
+}
+
+const std::list<std::pair<int, StringRef>> IntegratedTestKeywordParser::getParsedLines()
+{
+   return m_parsedLines;
+}
+
 const std::vector<std::string> &IntegratedTestKeywordParser::getValue()
 {
    return m_value;
@@ -1373,14 +1389,65 @@ std::vector<std::string> &IntegratedTestKeywordParser::handleRequiresAny(int lin
 }
 
 std::vector<std::string> parse_integrated_test_script(TestPointer test, IntegratedTestKeywordParserList additionalParsers,
-                                                      bool requireScript)
+                                                      bool requireScript, ResultPointer result)
 {
    std::vector<std::string> script;
    // Install the built-in keyword parsers.
    IntegratedTestKeywordParserList builtinParsers{
       std::make_shared<IntegratedTestKeywordParser>("RUN:", ParserKind::COMMAND, nullptr, script),
-            std::make_shared<IntegratedTestKeywordParser>("XFAIL:", ParserKind::BOOLEAN_EXPR, nullptr, test->getXFails())
+            std::make_shared<IntegratedTestKeywordParser>("XFAIL:", ParserKind::BOOLEAN_EXPR, nullptr, test->getXFails()),
+            std::make_shared<IntegratedTestKeywordParser>("REQUIRES:", ParserKind::BOOLEAN_EXPR, nullptr, test->getRequires()),
+            std::make_shared<IntegratedTestKeywordParser>("REQUIRES-ANY:", ParserKind::CUSTOM,
+                                                          IntegratedTestKeywordParser::handleRequiresAny, test->getRequires()),
+            std::make_shared<IntegratedTestKeywordParser>("UNSUPPORTED:", ParserKind::BOOLEAN_EXPR, nullptr, test->getUnsupportedFeatures()),
+            std::make_shared<IntegratedTestKeywordParser>("END.", ParserKind::TAG)
    };
+   std::map<StringRef, IntegratedTestKeywordParserPointer> keywordParsers;
+   std::list<StringRef> keywords;
+   for (IntegratedTestKeywordParserPointer parser : builtinParsers) {
+      keywordParsers[parser->getKeyword()] = parser;
+      keywords.push_back(parser->getKeyword());
+   }
+
+   // Install user-defined additional parsers.
+   for (IntegratedTestKeywordParserPointer parser : additionalParsers) {
+      if (keywordParsers.find(parser->getKeyword()) != keywordParsers.end()) {
+         throw ValueError(format_string("Parser for keyword '%s' already exists", parser->getKeyword().c_str()));
+      }
+   }
+   // Collect the test lines from the script.
+   std::string sourcePath = test->getSourcePath();
+   for (ParsedScriptLine &entry : parse_integrated_test_script_commands(sourcePath, keywords)) {
+      size_t lineNumber = std::get<0>(entry);
+      std::string &commandType = std::get<1>(entry);
+      std::string &line = std::get<2>(entry);
+      IntegratedTestKeywordParserPointer parser = keywordParsers[commandType];
+      parser->parseLine(lineNumber, line);
+      if (commandType == "END." && !parser->getValue().empty()) {
+         break;
+      }
+   }
+   // Verify the script contains a run line.
+   if(requireScript && script.empty()) {
+      result = std::make_shared<Result>(UNRESOLVED, "Test has no run line!");
+   }
+   // Check for unterminated run lines.
+   if (!script.empty() && script.back().back() == '\\') {
+      result = std::make_shared<Result>(UNSUPPORTED, "Test has unterminated run lines (with '\\')");
+   }
+   // Enforce REQUIRES:
+   std::list<std::string> missingRequiredFeatures = test->getMissingRequiredFeatures();
+   if (!missingRequiredFeatures.empty()) {
+      std::string msg = join_string_list(missingRequiredFeatures, ", ");
+      result = std::make_shared<Result>(UNSUPPORTED, format_string("Test does not support the following features "
+                                                                   "and/or targets: %s", msg.c_str()));
+   }
+   // Enforce limit_to_features.
+   if (!test->isWithinFeatureLimits()) {
+      std::string msg = join_string_list(test->getConfig()->getLimitToFeatures(), ", ");
+      result = std::make_shared<Result>(UNSUPPORTED, format_string("Test does not require any of the features "
+                                                                   "specified in limit_to_features: %s", msg.c_str()));
+   }
    return script;
 }
 

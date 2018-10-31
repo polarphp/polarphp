@@ -219,6 +219,11 @@ std::vector<std::string> Test::getXFails()
    return m_xfails;
 }
 
+std::vector<std::string> Test::getRequires()
+{
+   return m_requires;
+}
+
 const std::string &Test::getSelfSourcePath()
 {
    return m_selfSourcePath;
@@ -312,9 +317,9 @@ std::list<std::string> Test::getMissingRequiredFeaturesFromList(const std::vecto
    }
 }
 
-std::list<std::string> Test::getUnsupportedFeatures()
+std::vector<std::string> Test::getUnsupportedFeatures()
 {
-   std::list<std::string> ret;
+   std::vector<std::string> ret;
    const std::vector<std::string> &features = m_config->getAvailableFeatures();
    const std::string &triple = m_config->getExtraConfig<std::string>("target_triple", std::string(""));
    try {
