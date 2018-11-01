@@ -675,7 +675,6 @@ int main(int argc, char *argv[])
       }
       return 0;
    } catch (...) {
-      worker.join();
       eptr = std::current_exception();
    }
    general_exception_handler(eptr);

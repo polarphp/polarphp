@@ -7,7 +7,6 @@
 # See http://polarphp.org/LICENSE.txt for license information
 # See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
-# Created by polarboy on 2018/09/19.
+# Created by polarboy on 2018/11/01.
 
-add_subdirectory(Inputs/discovery)
-add_subdirectory(Inputs/shtest-env)
+polar_add_lit_cfg_setter()
