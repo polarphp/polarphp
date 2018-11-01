@@ -46,13 +46,13 @@ using ExecScriptResult = std::tuple<std::string, std::string, int, std::string>;
 class InternalShellError : public std::runtime_error
 {
 public:
-   InternalShellError(const std::string &command, const std::string &message)
-      : std::runtime_error(command + ": " + message),
+   InternalShellError(AbstractCommand *command, const std::string &message)
+      : std::runtime_error(command->operator std::string() + ": " + message),
         m_command(command),
         m_message(message)
    {}
 
-   const std::string &getCommand() const
+   AbstractCommand *getCommand() const
    {
       return m_command;
    }
@@ -62,7 +62,7 @@ public:
       return m_message;
    }
 protected:
-   const std::string &m_command;
+   AbstractCommand *m_command;
    const std::string &m_message;
 };
 
@@ -117,14 +117,15 @@ protected:
 class ShellCommandResult
 {
 public:
-   ShellCommandResult(Command *command, const std::string &outputMsg, const std::string &errorMsg,
+   ShellCommandResult(AbstractCommand *command, const std::string &outputMsg, const std::string &errorMsg,
                       int exitCode, bool timeoutReached, const std::list<std::string> &outputFiles = {});
-   const Command &getCommand();
+   AbstractCommand *getCommand();
    int getExitCode();
    bool isTimeoutReached();
-
+   const std::string &getOutputMsg();
+   const std::string &getErrorMsg();
 protected:
-   Command *m_command;
+   AbstractCommand *m_command;
    std::string m_outputMsg;
    std::string m_errorMsg;
    int m_exitCode;

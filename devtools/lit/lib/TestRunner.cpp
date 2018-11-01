@@ -161,7 +161,7 @@ void TimeoutHelper::kill()
    m_doneKillPass = true;
 }
 
-ShellCommandResult::ShellCommandResult(Command *command, const std::string &outputMsg,
+ShellCommandResult::ShellCommandResult(AbstractCommand *command, const std::string &outputMsg,
                                        const std::string &errorMsg, int exitCode,
                                        bool timeoutReached, const std::list<std::string> &outputFiles)
    : m_command(command),
@@ -174,9 +174,9 @@ ShellCommandResult::ShellCommandResult(Command *command, const std::string &outp
 
 }
 
-const Command &ShellCommandResult::getCommand()
+AbstractCommand *ShellCommandResult::getCommand()
 {
-   return *m_command;
+   return m_command;
 }
 
 int ShellCommandResult::getExitCode()
@@ -187,6 +187,16 @@ int ShellCommandResult::getExitCode()
 bool ShellCommandResult::isTimeoutReached()
 {
    return m_timeoutReached;
+}
+
+const std::string &ShellCommandResult::getOutputMsg()
+{
+   return m_outputMsg;
+}
+
+const std::string &ShellCommandResult::getErrorMsg()
+{
+   return m_errorMsg;
 }
 
 namespace {
@@ -263,7 +273,7 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
          return do_execute_shcmd(seqCommand->getRhs(), shenv, results, timeoutHelper);
       }
       if (op == "&") {
-         throw InternalShellError(seqCommand->operator std::string(), "unsupported shell operator: '&'");
+         throw InternalShellError(seqCommand, "unsupported shell operator: '&'");
       }
       if (op == "||") {
          result = do_execute_shcmd(seqCommand->getLhs(), shenv, results, timeoutHelper);
@@ -389,7 +399,7 @@ StdFdsTuple process_redirects(Command *command, int stdinSource,
          auto iter = redirects.begin();
          *iter = std::any(OpenFileTuple{filename, "a", std::nullopt});
       } else {
-         throw InternalShellError(command->operator std::string(),
+         throw InternalShellError(command,
                                   "Unsupported redirect: (" + std::get<0>(op) + ", " + std::to_string(std::get<1>(op)) + ")" + filename);
       }
    }
@@ -406,7 +416,7 @@ StdFdsTuple process_redirects(Command *command, int stdinSource,
             fd = stdinSource;
          } else if (item == std::tuple<int, int>{1, -1}) {
             if (index == 0) {
-               throw InternalShellError(command->operator std::string(),
+               throw InternalShellError(command,
                                         "Unsupported redirect for stdin");
             } else if (index == 1) {
                fd = SUBPROCESS_FD_PIPE;
@@ -415,12 +425,12 @@ StdFdsTuple process_redirects(Command *command, int stdinSource,
             }
          } else if (item == std::tuple<int, int>{2, -1}) {
             if (index != 2) {
-               throw InternalShellError(command->operator std::string(),
+               throw InternalShellError(command,
                                         "Unsupported redirect for stdout");
             }
             fd = SUBPROCESS_FD_PIPE;
          } else {
-            throw InternalShellError(command->operator std::string(),
+            throw InternalShellError(command,
                                      "Bad redirect");
          }
          auto fdIter = stdFds.begin();
@@ -447,7 +457,7 @@ StdFdsTuple process_redirects(Command *command, int stdinSource,
       std::string redirFilename;
       std::list<std::string> names = expand_glob(filename, shenv.getCwd());
       if (names.size() != 1) {
-         throw InternalShellError(command->operator std::string(),
+         throw InternalShellError(command,
                                   "Unsupported: glob in "
                                   "redirect expanded to multiple files");
       }
@@ -503,7 +513,7 @@ std::string execute_builtin_echo(Command *command,
    int stdoutFd = std::get<1>(fds);
    int stderrFd = std::get<2>(fds);
    if (stdinFd != SUBPROCESS_FD_PIPE || stderrFd != SUBPROCESS_FD_PIPE) {
-      throw InternalShellError(command->operator std::string(),
+      throw InternalShellError(command,
                                "stdin and stderr redirects not supported for echo");
    }
    // Some tests have un-redirected echo commands to help debug test failures.
@@ -863,7 +873,7 @@ ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironme
       }
       return std::make_shared<ShellCommandResult>(command, "", errorStream.str(), exitCode, false);
    } catch(const CLI::ParseError &e) {
-      throw InternalShellError(command->operator std::string(), format_string("Unsupported: 'rm': %s\n", e.what()));
+      throw InternalShellError(command, format_string("Unsupported: 'rm': %s\n", e.what()));
    }
 }
 
@@ -928,7 +938,7 @@ ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironment 
       }
       return std::make_shared<ShellCommandResult>(command, "", errorStream.str(), exitCode, false);
    } catch(const CLI::ParseError &e) {
-      throw InternalShellError(command->operator std::string(), format_string("Unsupported: 'rm':  %s", e.what()));
+      throw InternalShellError(command, format_string("Unsupported: 'rm':  %s", e.what()));
    }
 }
 
@@ -942,18 +952,91 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
       try {
          cmds.push_back(ShParser(cmdStr, litConfig->isWindows(), test->getConfig()->isPipefail()).parse());
       } catch (...) {
-         return std::make_tuple("", format_string("shell parser error on: %s", cmdStr.c_str()), -1, "");
+         result = std::make_shared<Result>(FAIL, format_string("shell parser error on: %s", cmdStr.c_str()));
+         return ExecScriptResult{};
       }
    }
    CommandPointer cmd = cmds[0];
    for (size_t i = 1; i < cmds.size(); ++i) {
       cmd = std::make_shared<Seq>(cmd, "&&", cmds[i]);
    }
+   ShExecResultList results;
+   std::string timeoutInfo;
+   int exitCode = 0;
+   try {
+      ShellEnvironment shenv(cwd, test->getConfig()->getEnvironment());
+      std::pair<int, std::string> r = execute_shcmd(cmd, shenv, results, litConfig->getMaxIndividualTestTime());
+      exitCode = std::get<0>(r);
+      timeoutInfo = std::get<1>(r);
+   } catch (InternalShellError &e) {
+      exitCode = 127;
+      results.push_back(
+               std::make_shared<ShellCommandResult>(e.getCommand(), "", e.what(), exitCode, false));
+   }
+   Twine out;
+   std::string err;
+   int i = 0;
+   for (ShellCommandResultPointer shExecResult : results) {
+      // Write the command line run.
+      Command *cmd = dynamic_cast<Command *>(shExecResult->getCommand());
+      if (cmd != nullptr) {
+         std::string argMsg;
+         int j = 0;
+         int argSize = cmd->getArgs().size();
+         for (const std::any &argAny : cmd->getArgs()) {
+            if (i < argSize - 1) {
+               argMsg += " " + std::any_cast<std::string>(argAny);
+            } else {
+               argMsg += std::any_cast<std::string>(argAny);
+            }
+            ++j;
+         }
+         out.concat(format_string("$ %s\n", argMsg));
+      } else {
+         out.concat("$ \n");
+      }
+      //  If nothing interesting happened, move on.
+      if (litConfig->getMaxIndividualTestTime() == 0 && shExecResult->getExitCode() == 0 &&
+          StringRef(shExecResult->getOutputMsg()).trim().empty() &&
+          StringRef(shExecResult->getErrorMsg()).trim().empty()) {
+         continue;
+      }
+      // Otherwise, something failed or was printed, show it.
+      if (!StringRef(shExecResult->getOutputMsg()).trim().empty()) {
+         out.concat(format_string("# command output:\n%s\n", shExecResult->getOutputMsg()));
+      }
+      if (!StringRef(shExecResult->getErrorMsg()).trim().empty()) {
+         out.concat(format_string("# command stderr:\n%s\n", shExecResult->getOutputMsg()));
+      }
+      if (StringRef(shExecResult->getOutputMsg()).trim().empty() &&
+          StringRef(shExecResult->getErrorMsg()).trim().empty()) {
+         out.concat("note: command had no output on stdout or stderr\n");
+      }
+      // Show the error conditions:
+      if (shExecResult->getExitCode() == 0) {
+         std::string codeStr;
+         // On Windows, a negative exit code indicates a signal, and those are
+         // easier to recognize or look up if we print them in hex.
+         if (litConfig->isWindows() && shExecResult->getExitCode() < 0) {
+            int exitCode = shExecResult->getExitCode() & 0xFFFFFFFF;
+            codeStr = polar::basic::utohexstr(exitCode);
+         } else {
+            codeStr = std::to_string(shExecResult->getExitCode());
+         }
+         out.concat(format_string("error: command failed with exit status: %s\n",
+                                  codeStr.c_str()));
+      }
+      if (litConfig->getMaxIndividualTestTime() > 0) {
+         out.concat(format_string("error: command reached timeout: %s\n", shExecResult->isTimeoutReached() ? "true" : "false"));
+      }
+      ++i;
+   }
+   return std::make_tuple(out.getStr(), err, exitCode, timeoutInfo);
 }
 
 ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
                                 const std::string &tempBase, std::vector<std::string> &commands,
-                                const std::string &cwd, ResultPointer result)
+                                const std::string &cwd, ResultPointer)
 {
    const std::optional<std::string> &bashPath = litConfig->getBashPath();
    bool isWin32CMDEXE = litConfig->isWindows() && !bashPath;

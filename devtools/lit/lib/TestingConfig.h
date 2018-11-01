@@ -68,7 +68,7 @@ public:
    const std::string &getName();
    const std::set<std::string> &getSuffixes();
    const std::shared_ptr<TestFormat> getTestFormat();
-   const std::map<std::string, std::string> &getEnvironment();
+   std::map<std::string, std::string> &getEnvironment();
    const SubstitutionList &getSubstitutions();
    bool isUnsupported();
    const std::optional<std::string> &getTestExecRoot();

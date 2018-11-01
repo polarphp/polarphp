@@ -112,7 +112,7 @@ const std::shared_ptr<TestFormat> TestingConfig::getTestFormat()
    return m_testFormat;
 }
 
-const std::map<std::string, std::string> &TestingConfig::getEnvironment()
+std::map<std::string, std::string> &TestingConfig::getEnvironment()
 {
    return m_environment;
 }

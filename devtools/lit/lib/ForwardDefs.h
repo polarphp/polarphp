@@ -58,7 +58,7 @@ using IntegratedTestKeywordParserPointer = std::shared_ptr<IntegratedTestKeyword
 
 using TestList = std::list<TestPointer>;
 using TestSuiteList = std::list<TestSuitePointer>;
-using ShExecResultList = std::list<ShellCommandResult>;
+using ShExecResultList = std::list<ShellCommandResultPointer>;
 using IntegratedTestKeywordParserList = std::list<IntegratedTestKeywordParserPointer>;
 
 using OpenFileEntryType = std::tuple<std::string, std::string, int, std::string>;
