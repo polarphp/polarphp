@@ -77,7 +77,7 @@ bool Command::operator ==(const Command &other) const
    return true;
 }
 
-const std::list<std::any> &Command::getArgs()
+std::list<std::any> &Command::getArgs()
 {
    return m_args;
 }

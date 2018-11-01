@@ -84,7 +84,7 @@ public:
    {}
 
    const std::string &getCwd() const;
-   const std::map<std::string, std::string> &getEnv() const;
+   std::map<std::string, std::string> &getEnv();
    ShellEnvironment &setCwd(const std::string &cwd);
    ShellEnvironment &setEnvItem(const std::string &key, const std::string &value);
 protected:
@@ -143,8 +143,8 @@ std::list<std::string> expand_glob(GlobItem &glob, const std::string &cwd);
 std::list<std::string> expand_glob(const std::string &glob, const std::string &cwd);
 std::list<std::string> expand_glob_expression(const std::list<std::string> &exprs,
                                               const std::string &cwd);
-void quote_windows_command();
-void update_env();
+std::string quote_windows_command(const std::vector<std::string> &seq);
+void update_env(ShellEnvironment &shenv, Command *command);
 std::string execute_builtin_echo(Command *command,
                                  const ShellEnvironment &shenv);
 /// executeBuiltinMkdir - Create new directories.

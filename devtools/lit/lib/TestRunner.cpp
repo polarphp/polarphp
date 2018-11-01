@@ -63,7 +63,7 @@ const std::string &ShellEnvironment::getCwd() const
    return m_cwd;
 }
 
-const std::map<std::string, std::string> &ShellEnvironment::getEnv() const
+std::map<std::string, std::string> &ShellEnvironment::getEnv()
 {
    return m_env;
 }
@@ -250,6 +250,102 @@ std::list<std::string> expand_glob_expression(const std::list<std::string> &expr
       ++iter;
    }
    return results;
+}
+
+std::string quote_windows_command(const std::vector<std::string> &seq)
+{
+   std::vector<std::string> result;
+   bool needQuote = false;
+   for (const std::string &arg : seq) {
+      std::string bsBuf;
+      // Add a space to separate this argument from the others
+      if (!result.empty()) {
+         result.push_back(" ");
+      }
+      // This logic differs from upstream list2cmdline.
+      needQuote = arg.find(' ') != std::string::npos ||
+            arg.find('\t') != std::string::npos ||
+            arg.find('\"') != std::string::npos ||
+            arg.empty();
+      if (needQuote) {
+         result.push_back("\"");
+      }
+      for (char c: arg) {
+         if (c == '\\') {
+            // Don't know if we need to double yet.
+            bsBuf += c;
+         } else if (c == '"') {
+            // Double backslashes.
+            result.push_back(std::string(bsBuf.size() * 2, '\\'));
+            bsBuf.clear();
+            result.push_back("\\\"");
+         } else {
+            // Normal char
+            if (!bsBuf.empty()) {
+               for (char item: bsBuf) {
+                  result.push_back(std::string(1, item));
+               }
+               bsBuf.clear();
+               result.push_back(std::string(1, c));
+            }
+         }
+      }
+      // Add remaining backslashes, if any.
+      if (!bsBuf.empty()) {
+         for (char item: bsBuf) {
+            result.push_back(std::string(1, item));
+         }
+      }
+      if (needQuote) {
+         for (char item: bsBuf) {
+            result.push_back(std::string(1, item));
+         }
+         result.push_back(std::string(1, '"'));
+      }
+   }
+   return join_string_list(result, "");
+}
+
+void update_env(ShellEnvironment &shenv, Command *command)
+{
+   bool unsetNextEnvVar = false;
+   std::list<std::any> &args = command->getArgs();
+   auto iter = args.begin();
+   // skip command name
+   ++iter;
+   auto endMark = args.end();
+   int argIdx = 1;
+   std::map<std::string, std::string> &env = shenv.getEnv();
+   while (iter != endMark) {
+      std::string arg = std::any_cast<std::string>(*iter);
+      // Support for the -u flag (unsetting) for env command
+      // e.g., env -u FOO -u BAR will remove both FOO and BAR
+      // from the environment.
+      if (arg == "-u") {
+         unsetNextEnvVar = true;
+         continue;
+      }
+      if (unsetNextEnvVar) {
+         unsetNextEnvVar = false;
+         if (env.find(arg) != env.end()) {
+            env.erase(arg);
+         }
+         continue;
+      }
+      // Partition the string into KEY=VALUE.
+      std::string::size_type equalPos = arg.find('=');
+      if (equalPos == std::string::npos) {
+         break;
+      }
+      std::string key = arg.substr(0, equalPos);
+      std::string value = arg.substr(equalPos + 1);
+      env[key] = value;
+      ++argIdx;
+      ++iter;
+   }
+   for (int i = 0; i <= argIdx; ++i) {
+      args.pop_front();
+   }
 }
 
 namespace {

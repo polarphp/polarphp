@@ -48,7 +48,7 @@ public:
 
    operator std::string() override;
    bool operator ==(const Command &other) const;
-   const std::list<std::any> &getArgs();
+   std::list<std::any> &getArgs();
    const std::list<RedirectTokenType > &getRedirects();
    void toShell(std::string &str, bool pipeFail = false) const override;
    Type getCommandType() override
