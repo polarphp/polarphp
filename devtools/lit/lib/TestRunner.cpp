@@ -398,8 +398,10 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
    assert(firstAbstractCommand->getCommandType() == AbstractCommand::Type::Command);
    Command *firstCommand = dynamic_cast<Command *>(firstAbstractCommand.get());
    const std::any &firstArgAny = firstCommand->getArgs().front();
-   assert(firstArgAny.type() == typeid(std::string));
-   const std::string &firstArg = std::any_cast<const std::string &>(firstArgAny);
+   // here maybe glob item
+   // @TODO
+   assert(firstArgAny.type() == typeid(ShellTokenType));
+   const std::string &firstArg = std::get<0>(std::any_cast<const ShellTokenType &>(firstArgAny));
    if (firstArg == "cd") {
       if (pipeCommand->getCommands().size() != 1) {
          throw ValueError("'cd' cannot be part of a pipeline");
