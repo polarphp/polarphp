@@ -11,7 +11,7 @@
 
 #include "Base.h"
 #include "../Test.h"
-#include "../Global.h"
+#include "../LitGlobal.h"
 #include "../Utils.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include <filesystem>

@@ -10,7 +10,7 @@
 // Created by polarboy on 2018/09/03.
 
 #include "BooleanExpression.h"
-#include "Global.h"
+#include "LitGlobal.h"
 #include <iostream>
 
 namespace polar {

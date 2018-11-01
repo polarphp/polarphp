@@ -17,7 +17,7 @@
 #include <any>
 #include <memory>
 #include <assert.h>
-#include "Global.h"
+#include "LitGlobal.h"
 
 namespace polar {
 namespace lit {

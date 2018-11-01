@@ -1,55 +1,45 @@
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See http://polarphp.org/LICENSE.txt for license information
-// See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2018/09/04.
+//// This source file is part of the polarphp.org open source project
+////
+//// Copyright (c) 2017 - 2018 polarphp software foundation
+//// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+//// Licensed under Apache License v2.0 with Runtime Library Exception
+////
+//// See http://polarphp.org/LICENSE.txt for license information
+//// See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+////
+//// Created by polarboy on 2018/09/04.
 
-#include <gtest/gtest.h>
-#include "BooleanExpression.h"
-#include "Global.h"
-#include <boost/regex.hpp>
+//#include <gtest/gtest.h>
+//#include "BooleanExpression.h"
+//#include "Global.h"
+//#include <boost/regex.hpp>
 
-#define ASSERT_EXCEPTION( TRY_BLOCK, EXCEPTION_TYPE, MESSAGE )        \
-   try                                                                   \
-{                                                                     \
-   TRY_BLOCK                                                         \
-   FAIL() << "exception '" << MESSAGE << "' not thrown at all!";     \
-   }                                                                     \
-   catch( const EXCEPTION_TYPE& e )                                      \
-{                                                                     \
-   ASSERT_STREQ( MESSAGE, e.what() )                                    \
-   << " exception message is incorrect. Expected the following " \
-   "message:\n\n"                                             \
-   << MESSAGE << "\n";                                           \
-   }                                                                     \
-   catch(...)                                                          \
-{                                                                     \
-   FAIL() << "exception '" << MESSAGE                                \
-   << "' not thrown with expected type '" << #EXCEPTION_TYPE  \
-   << "'!";                                                   \
-   }
+//#define ASSERT_EXCEPTION( TRY_BLOCK, EXCEPTION_TYPE, MESSAGE )        \
+//   try                                                                   \
+//{                                                                     \
+//   TRY_BLOCK                                                         \
+//   FAIL() << "exception '" << MESSAGE << "' not thrown at all!";     \
+//   }                                                                     \
+//   catch( const EXCEPTION_TYPE& e )                                      \
+//{                                                                     \
+//   ASSERT_STREQ( MESSAGE, e.what() )                                    \
+//   << " exception message is incorrect. Expected the following " \
+//   "message:\n\n"                                             \
+//   << MESSAGE << "\n";                                           \
+//   }                                                                     \
+//   catch(...)                                                          \
+//{                                                                     \
+//   FAIL() << "exception '" << MESSAGE                                \
+//   << "' not thrown with expected type '" << #EXCEPTION_TYPE  \
+//   << "'!";                                                   \
+//   }
 
-namespace {
+//namespace {
 
-using namespace polar::lit;
+//using namespace polar::lit;
 
-TEST(BooleanExpressionTest, testVariables)
-{
-   std::string str1("A://(polarphp) version 123");
-//   std::cout << "result " << boost::regex_replace(str1, boost::regex("\\(([^)'\"]*)\\)"), "<$1>", boost::match_default | boost::format_all) << std::endl;
-//std::set<std::string> variables = {
-//   "its-true", "false-lol-true", "under_score",
-//   "e=quals", "d1g1ts"};
-//   std::string str1("A://polarphp version 123");
-//   std::cout << "result " << boost::regex_replace(str1, boost::regex("(.):"), [](boost::smatch match) -> std::string{
-//      std::cout << match[1].str() << std::endl;
-//      return match[1].str();
-//   }, boost::match_default | boost::format_all) << std::endl;
+//TEST(BooleanExpressionTest, testVariables)
+//{
 //   std::set<std::string> variables = {
 //      "its-true", "false-lol-true", "under_score",
 //      "e=quals", "d1g1ts"};
@@ -65,7 +55,7 @@ TEST(BooleanExpressionTest, testVariables)
 //   ASSERT_FALSE(BooleanExpression::evaluate("true-ish", variables).value());
 //   ASSERT_FALSE(BooleanExpression::evaluate("not_true", variables).value());
 //   ASSERT_FALSE(BooleanExpression::evaluate("tru", variables).value());
-}
+//}
 
 //TEST(BooleanExpressionTest, testTriple)
 //{
@@ -140,5 +130,5 @@ TEST(BooleanExpressionTest, testVariables)
 
 //}
 
-} // anonymous namespace
+//} // anonymous namespace
 

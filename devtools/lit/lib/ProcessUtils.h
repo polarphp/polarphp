@@ -17,7 +17,7 @@
 #include <tuple>
 #include <list>
 #include <map>
-#include "Global.h"
+#include "LitGlobal.h"
 
 namespace polar {
 namespace lit {

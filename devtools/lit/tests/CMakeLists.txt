@@ -9,4 +9,4 @@
 #
 # Created by polarboy on 2018/09/19.
 
-add_subdirectory(discovery)
+add_subdirectory(Inputs/discovery)

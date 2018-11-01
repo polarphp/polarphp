@@ -20,7 +20,7 @@
 #include <map>
 #include <set>
 #include <cstring>
-#include "Global.h"
+#include "LitGlobal.h"
 
 namespace polar {
 namespace lit {
