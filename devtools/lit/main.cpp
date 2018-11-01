@@ -675,6 +675,9 @@ int main(int argc, char *argv[])
       }
       return 0;
    } catch (...) {
+      sg_testFinished.store(true);
+      sg_signalConditionVar.notify_one();
+      worker.join();
       eptr = std::current_exception();
    }
    general_exception_handler(eptr);

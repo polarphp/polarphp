@@ -274,7 +274,7 @@ TestList get_tests_in_suite(TestSuitePointer testSuite, LitConfigPointer litConf
       std::list<std::string> temp = pathInSuite;
       temp.pop_back();
       TestingConfigPointer lc = get_local_config(testSuite, litConfig, temp);
-      return TestList{std::make_shared<Test>(testSuite, temp, lc)};
+      return TestList{std::make_shared<Test>(testSuite, pathInSuite, lc)};
    }
    // Search for tests.
    // Otherwise we have a directory to search for tests, start by getting the

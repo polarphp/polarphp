@@ -22,7 +22,7 @@ void root_cfgsetter(TestingConfig *config, LitConfig *litConfig)
    config->setName("shtest-env");
    config->setSuffixes({".txt"});
    config->setTestFormat(std::make_shared<ShTest>());
-//   config->setTestExecRoot(std::nullopt);
-//   config->setTestSourceRoot(std::nullopt);
+   config->setTestExecRoot(std::nullopt);
+   config->setTestSourceRoot(std::nullopt);
 }
 }
