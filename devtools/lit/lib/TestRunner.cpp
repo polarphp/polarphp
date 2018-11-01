@@ -1301,11 +1301,15 @@ ParsedScriptLines parse_integrated_test_script_commands(StringRef sourcePath,
          fileContent.push_back('\n');
       }
    }
+   std::vector<std::string> filteredKeywords;
+   std::for_each(keywords.begin(), keywords.end(), [&filteredKeywords](const StringRef &keywork) {
+      filteredKeywords.push_back(polar::utils::regex_escape(keywork));
+   });
    try {
       // Iterate over the matches.
       size_t lineNumber = 1;
       size_t lastMatchPosition = 0;
-      std::string regexStr = polar::utils::regex_escape(polar::basic::join(keywords, "|"));
+      std::string regexStr = format_string("(%s)(.*)\n", polar::basic::join(filteredKeywords, "|").c_str());
       boost::regex regex(regexStr);
       boost::sregex_iterator riter(fileContent.begin(), fileContent.end(), regex);
       boost::sregex_iterator eiter;
@@ -1313,7 +1317,7 @@ ParsedScriptLines parse_integrated_test_script_commands(StringRef sourcePath,
          int matchPosition = match.position();
          lineNumber += StringRef(fileContent.data() + lastMatchPosition, matchPosition - lastMatchPosition).count('\n');
          lastMatchPosition = matchPosition;
-         lines.emplace_back(lineNumber, std::move(match[0].str()), std::move(match[1].str()));
+         lines.emplace_back(lineNumber, match[1].str(), StringRef(match[2].str()).rtrim("\r").getStr());
       });
       return lines;
    } catch (boost::bad_expression &e) {
@@ -1549,7 +1553,7 @@ std::vector<std::string> &IntegratedTestKeywordParser::handleCommand(int lineNum
    if (!output.empty() && output.back().back() == '\\') {
       output.back() = output.back().substr(0, output.size() - 2) + line;
    } else {
-      std::string pdbg = format_string("%dbg(%s at line %d)", keyword.c_str(), lineNumber);
+      std::string pdbg = format_string("%%dbg(%s at line %d)", keyword.c_str(), lineNumber);
       assert(boost::regex_match(pdbg, boost::regex(sgc_kpdbgRegex + "$", boost::match_default | boost::format_all)) && "kPdbgRegex expected to match actual %dbg usage");
       line = format_string("%s %s", pdbg.c_str(), line.c_str());
       output.push_back(line);
@@ -1644,6 +1648,10 @@ std::vector<std::string> parse_integrated_test_script(TestPointer test, ResultPo
       if (commandType == "END." && !parser->getValue().empty()) {
          break;
       }
+      const std::vector<std::string> &parsedValue = parser->getValue();
+      std::for_each(parsedValue.begin(), parsedValue.end(), [&script](const std::string &line) {
+         script.push_back(line);
+      });
    }
    // Verify the script contains a run line.
    if(requireScript && script.empty()) {

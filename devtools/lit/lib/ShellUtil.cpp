@@ -319,17 +319,13 @@ std::shared_ptr<AbstractCommand> ShParser::parsePipeline()
       }
       break;
    }
-   return std::shared_ptr<AbstractCommand>(new Pipeline(commands, negate));
+   return std::shared_ptr<AbstractCommand>(new Pipeline(commands, negate, m_pipeFail));
 }
 
 std::shared_ptr<AbstractCommand> ShParser::parse()
 {
    std::shared_ptr<AbstractCommand> lhs = parsePipeline();
-   while (true) {
-      std::any &lookAny = look();
-      if (!lookAny.has_value()) {
-         break;
-      }
+   while (look().has_value()) {
       std::any &operatorAny = lex();
       if (!operatorAny.has_value()) {
          break;

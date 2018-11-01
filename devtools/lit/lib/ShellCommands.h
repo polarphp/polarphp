@@ -60,7 +60,7 @@ private:
 protected:
    // GlobItem or std::tuple<std::string, int>
    std::list<std::any> m_args;
-   std::list<RedirectTokenType > m_redirects;
+   std::list<RedirectTokenType> m_redirects;
 };
 
 class GlobItem

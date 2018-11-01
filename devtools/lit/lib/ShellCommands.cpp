@@ -12,13 +12,32 @@
 #include "ShellCommands.h"
 #include "ShellUtil.h"
 #include "Utils.h"
+#include "ForwardDefs.h"
 
 namespace polar {
 namespace lit {
 
 Command::operator std::string()
 {
-   return format_string("Command(%d, %d)", m_args.size(), m_redirects.size());
+   std::string argMsg = "";
+   int argSize = m_args.size();
+   int i = 0;
+   for (std::any &argAny: m_args) {
+      if (argAny.type() == typeid(ShellTokenType)) {
+         if (i < argSize - 1) {
+            argMsg += "\"" + std::get<0>(std::any_cast<ShellTokenType &>(argAny)) + "\", ";
+         } else {
+            argMsg += "\"" + std::get<0>(std::any_cast<ShellTokenType &>(argAny)) + "\"";
+         }
+      }
+      ++i;
+   }
+   std::string redirectMsg = "";
+   int redirectSize = m_redirects.size();
+   if (redirectSize == 0) {
+
+   }
+   return format_string("Command([%s], [%s])", argMsg.c_str(), redirectMsg.c_str());
 }
 
 bool Command::compareTokenAny(const std::any &lhs, const std::any &rhs) const
@@ -155,7 +174,14 @@ bool GlobItem::operator ==(const GlobItem &other) const
 
 Pipeline::operator std::string()
 {
-   return format_string("Pipeline(commands, negate, pipeError)");
+   std::string commands = "[";
+   for (CommandPointer command : m_commands) {
+      commands += command->operator std::string();
+   }
+   commands += "]";
+   return format_string("Pipeline(%s, negate: %s, pipeError: %s)", commands.c_str(),
+                        m_negate ? "true" : "false",
+                        m_pipeError ? "true" : "false");
 }
 
 bool Pipeline::isNegate()
@@ -202,7 +228,7 @@ const std::list<std::shared_ptr<AbstractCommand>> &Pipeline::getCommands() const
 
 Seq::operator std::string()
 {
-   return format_string("Seq(%s, %s, %s)", m_lhs->operator std::string().c_str(), m_op,
+   return format_string("Seq(%s, \"%s\", %s)", m_lhs->operator std::string().c_str(), m_op.c_str(),
                         m_rhs->operator std::string().c_str());
 }
 
