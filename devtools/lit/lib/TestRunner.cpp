@@ -1082,7 +1082,7 @@ ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironment 
 }
 
 ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litConfig,
-                                         const std::string &tempBase, std::vector<std::string> &commands,
+                                         const std::string &, std::vector<std::string> &commands,
                                          const std::string &cwd, ResultPointer result)
 {
    std::vector<CommandPointer> cmds;
@@ -1606,8 +1606,8 @@ std::vector<std::string> &IntegratedTestKeywordParser::handleRequiresAny(int lin
    return output;
 }
 
-std::vector<std::string> parse_integrated_test_script(TestPointer test, IntegratedTestKeywordParserList additionalParsers,
-                                                      bool requireScript, ResultPointer result)
+std::vector<std::string> parse_integrated_test_script(TestPointer test, ResultPointer &result, IntegratedTestKeywordParserList additionalParsers,
+                                                      bool requireScript)
 {
    std::vector<std::string> script;
    // Install the built-in keyword parsers.
@@ -1648,10 +1648,12 @@ std::vector<std::string> parse_integrated_test_script(TestPointer test, Integrat
    // Verify the script contains a run line.
    if(requireScript && script.empty()) {
       result = std::make_shared<Result>(UNRESOLVED, "Test has no run line!");
+      return script;
    }
    // Check for unterminated run lines.
    if (!script.empty() && script.back().back() == '\\') {
       result = std::make_shared<Result>(UNSUPPORTED, "Test has unterminated run lines (with '\\')");
+      return script;
    }
    // Enforce REQUIRES:
    std::list<std::string> missingRequiredFeatures = test->getMissingRequiredFeatures();
@@ -1659,12 +1661,14 @@ std::vector<std::string> parse_integrated_test_script(TestPointer test, Integrat
       std::string msg = join_string_list(missingRequiredFeatures, ", ");
       result = std::make_shared<Result>(UNSUPPORTED, format_string("Test does not support the following features "
                                                                    "and/or targets: %s", msg.c_str()));
+      return script;
    }
    // Enforce limit_to_features.
    if (!test->isWithinFeatureLimits()) {
       std::string msg = join_string_list(test->getConfig()->getLimitToFeatures(), ", ");
       result = std::make_shared<Result>(UNSUPPORTED, format_string("Test does not require any of the features "
                                                                    "specified in limit_to_features: %s", msg.c_str()));
+      return script;
    }
    return script;
 }
@@ -1728,7 +1732,7 @@ ResultPointer execute_shtest(TestPointer test, LitConfigPointer litConfig, bool 
       return std::make_shared<Result>(UNSUPPORTED, "Test is unsupported");
    }
    ResultPointer result;
-   std::vector<std::string> script = parse_integrated_test_script(test, {}, true, result);
+   std::vector<std::string> script = parse_integrated_test_script(test, result, {}, true);
    if (result) {
       return result;
    }

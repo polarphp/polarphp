@@ -255,7 +255,7 @@ void do_execute_test(TestPointer test, LitConfigPointer litConfig,
          semaphore->wait();
       }
       std::chrono::time_point startTime = std::chrono::system_clock::now();
-      ResultPointer result = test->getConfig()->getTestFormat()->execute(test, litConfig);
+      result = test->getConfig()->getTestFormat()->execute(test, litConfig);
       result->setElapsed(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - startTime).count());
    } catch (std::exception &exp) {
       if (litConfig->isDebug()) {

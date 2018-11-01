@@ -263,8 +263,8 @@ private:
 /// may be returned. This can be used for test formats where the actual script
 /// is optional or ignored.
 ///
-std::vector<std::string> parse_integrated_test_script(TestPointer test, IntegratedTestKeywordParserList additionalParsers = {},
-                                                      bool requireScript = true, ResultPointer result = nullptr);
+std::vector<std::string> parse_integrated_test_script(TestPointer test, ResultPointer &result, IntegratedTestKeywordParserList additionalParsers = {},
+                                                      bool requireScript = true);
 ResultPointer execute_shtest(TestPointer test, LitConfigPointer litConfig, bool useExternalSh,
                              SubstitutionList extraSubstitutions = {});
 
