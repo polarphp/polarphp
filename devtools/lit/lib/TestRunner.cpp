@@ -398,46 +398,89 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
    assert(firstAbstractCommand->getCommandType() == AbstractCommand::Type::Command);
    Command *firstCommand = dynamic_cast<Command *>(firstAbstractCommand.get());
    const std::any &firstArgAny = firstCommand->getArgs().front();
-   if (firstArgAny.type() == typeid(std::string)) {
-      const std::string &firstArg = std::any_cast<const std::string &>(firstArgAny);
-      if (firstArg == "cd") {
-         if (pipeCommand->getCommands().size() != 1) {
-            throw ValueError("'cd' cannot be part of a pipeline");
-         }
-         if (firstCommand->getArgs().size() != 2) {
-            throw ValueError("'cd' supports only one argument");
-         }
-         auto iter = firstCommand->getArgs().begin();
-         ++iter;
-         std::string newDir = std::any_cast<std::string>(*iter);
-         // Update the cwd in the parent environment.
-         if (stdfs::path(newDir).is_absolute()) {
-            shenv.setCwd(newDir);
-         } else {
-            stdfs::path basePath(shenv.getCwd());
-            basePath /= newDir;
-            basePath = stdfs::canonical(basePath);
-            shenv.setCwd(basePath);
-         }
-         // The cd builtin always succeeds. If the directory does not exist, the
-         // following Popen calls will fail instead.
-         return 0;
+   assert(firstArgAny.type() == typeid(std::string));
+   const std::string &firstArg = std::any_cast<const std::string &>(firstArgAny);
+   if (firstArg == "cd") {
+      if (pipeCommand->getCommands().size() != 1) {
+         throw ValueError("'cd' cannot be part of a pipeline");
       }
+      if (firstCommand->getArgs().size() != 2) {
+         throw ValueError("'cd' supports only one argument");
+      }
+      auto iter = firstCommand->getArgs().begin();
+      ++iter;
+      std::string newDir = std::any_cast<std::string>(*iter);
+      // Update the cwd in the parent environment.
+      if (stdfs::path(newDir).is_absolute()) {
+         shenv.setCwd(newDir);
+      } else {
+         stdfs::path basePath(shenv.getCwd());
+         basePath /= newDir;
+         basePath = stdfs::canonical(basePath);
+         shenv.setCwd(basePath);
+      }
+      // The cd builtin always succeeds. If the directory does not exist, the
+      // following Popen calls will fail instead.
+      return 0;
    }
    // Handle "echo" as a builtin if it is not part of a pipeline. This greatly
    // speeds up tests that construct input files by repeatedly echo-appending to
    // a file.
    // FIXME: Standardize on the builtin echo implementation. We can use a
    // temporary file to sidestep blocking pipe write issues.
-   if (firstArgAny.type() == typeid(std::string)) {
-      const std::string &firstArg = std::any_cast<const std::string &>(firstArgAny);
-      if (firstArg == "echo" && pipeCommand->getCommands().size() == 1) {
-         // std::string output = execute_builtin_echo(firstAbstractCommand, shenv);
-         //         results.emplace_back(firstAbstractCommand, output, "", 0,
-         //                              false);
-         return 0;
-      }
+   if (firstArg == "echo" && pipeCommand->getCommands().size() == 1) {
+      std::string output = execute_builtin_echo(firstCommand, shenv);
+      results.push_back(std::make_shared<ShellCommandResult>(firstCommand, output, "", 0,
+                                                             false));
+      return 0;
    }
+   if (firstArg == "export") {
+      size_t commandSize = pipeCommand->getCommands().size();
+      if (commandSize != 1) {
+         throw ValueError("'export' cannot be part of a pipeline");
+      }
+      if (commandSize != 2) {
+         throw ValueError("'export' supports only one argument");
+      }
+      update_env(shenv, firstCommand);
+      return 0;
+   }
+   if (firstArg == "mkdir") {
+      if (pipeCommand->getCommands().size() != 1) {
+         throw InternalShellError(firstCommand, "Unsupported: 'mkdir' "
+                                                "cannot be part of a pipeline");
+      }
+      ShellCommandResultPointer cmdResult = execute_builtin_mkdir(firstCommand, shenv);
+      results.push_back(cmdResult);
+      return cmdResult->getExitCode();
+   }
+   if (firstArg == "diff") {
+      if (pipeCommand->getCommands().size() != 1) {
+         throw InternalShellError(firstCommand, "Unsupported: 'diff' "
+                                                "cannot be part of a pipeline");
+      }
+      ShellCommandResultPointer cmdResult = execute_builtin_diff(firstCommand, shenv);
+      results.push_back(cmdResult);
+      return cmdResult->getExitCode();
+   }
+   if (firstArg == "rm") {
+      if (pipeCommand->getCommands().size() != 1) {
+         throw InternalShellError(firstCommand, "Unsupported: 'rm' "
+                                                "cannot be part of a pipeline");
+      }
+      ShellCommandResultPointer cmdResult = execute_builtin_rm(firstCommand, shenv);
+      results.push_back(cmdResult);
+      return cmdResult->getExitCode();
+   }
+   if (firstArg == ":") {
+      if (pipeCommand->getCommands().size() != 1) {
+         throw InternalShellError(firstCommand, "Unsupported: ':' "
+                                                "cannot be part of a pipeline");
+      }
+      results.push_back(std::make_shared<ShellCommandResult>(firstCommand, "", "", 0, false));
+      return 0;
+   }
+   return 0;
 }
 
 } // anonymous namespace
@@ -639,7 +682,7 @@ std::string execute_builtin_echo(Command *command,
    auto copyEndMark = command->getArgs().end();
    ++copyIter;
    std::copy(copyIter, copyEndMark, args.begin());
-   bool interpretEscapes = false;
+   //bool interpretEscapes = false;
    bool writeNewline = true;
    while (args.size() >= 1) {
       std::any flagAny = args.front();
@@ -647,7 +690,7 @@ std::string execute_builtin_echo(Command *command,
       if (flag == "-e" || flag == "-n") {
          args.pop_front();
          if (flag == "-e") {
-            interpretEscapes = true;
+            //interpretEscapes = true;
          } else if (flag == "-n") {
             writeNewline = false;
          }
@@ -1235,8 +1278,8 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
    return std::make_tuple(output.getStr(), "", runResult, "");
 }
 
-ParsedScriptLines parse_integrated_test_script_commands(const std::string &sourcePath,
-                                                        const std::list<std::string> &keywords)
+ParsedScriptLines parse_integrated_test_script_commands(StringRef sourcePath,
+                                                        const std::vector<StringRef> &keywords)
 {
    ParsedScriptLines lines;
    std::string fileContent;
@@ -1262,7 +1305,7 @@ ParsedScriptLines parse_integrated_test_script_commands(const std::string &sourc
       // Iterate over the matches.
       size_t lineNumber = 1;
       size_t lastMatchPosition = 0;
-      std::string regexStr = polar::utils::regex_escape(join_string_list(keywords, "|"));
+      std::string regexStr = polar::utils::regex_escape(polar::basic::join(keywords, "|"));
       boost::regex regex(regexStr);
       boost::sregex_iterator riter(fileContent.begin(), fileContent.end(), regex);
       boost::sregex_iterator eiter;
@@ -1578,7 +1621,7 @@ std::vector<std::string> parse_integrated_test_script(TestPointer test, Integrat
             std::make_shared<IntegratedTestKeywordParser>("END.", ParserKind::TAG)
    };
    std::map<StringRef, IntegratedTestKeywordParserPointer> keywordParsers;
-   std::list<StringRef> keywords;
+   std::vector<StringRef> keywords;
    for (IntegratedTestKeywordParserPointer parser : builtinParsers) {
       keywordParsers[parser->getKeyword()] = parser;
       keywords.push_back(parser->getKeyword());

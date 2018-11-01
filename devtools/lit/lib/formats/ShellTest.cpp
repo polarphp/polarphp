@@ -23,8 +23,7 @@ ShTest::ShTest(bool executeExternal)
 
 ResultPointer ShTest::execute(TestPointer test, LitConfigPointer litConfig)
 {
-//   Result result = execute_shtest(test, litConfig, m_executeExternal);
-//   return std::make_shared<Result>(PASS, "");
+   return execute_shtest(test, litConfig, m_executeExternal);
 }
 
 } // lit

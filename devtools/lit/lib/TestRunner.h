@@ -209,7 +209,7 @@ protected:
 ///  Parse the commands in an integrated test script file into a list of
 /// (line_number, command_type, line).
 ///
-ParsedScriptLines parse_integrated_test_script_commands(StringRef sourcePath, const std::list<StringRef> keywords);
+ParsedScriptLines parse_integrated_test_script_commands(StringRef sourcePath, const std::vector<StringRef> &keywords);
 
 /// A parser for LLVM/Clang style integrated test scripts.
 ///
@@ -266,7 +266,7 @@ private:
 std::vector<std::string> parse_integrated_test_script(TestPointer test, IntegratedTestKeywordParserList additionalParsers = {},
                                                       bool requireScript = true, ResultPointer result = nullptr);
 ResultPointer execute_shtest(TestPointer test, LitConfigPointer litConfig, bool useExternalSh,
-                             SubstitutionList extraSubstitutions);
+                             SubstitutionList extraSubstitutions = {});
 
 } // lit
 } // polar
