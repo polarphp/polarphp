@@ -51,7 +51,16 @@ struct ProcessInfo
    ProcessType m_process;
    /// The return code, set after execution.
    int m_returnCode;
+   std::optional<std::string> m_stdinFilename;
+   std::optional<std::string> m_stdoutFilename;
+   std::optional<std::string> m_stderrFilename;
    ProcessInfo();
+   ProcessIdType getPid();
+   ProcessIdType getProcess();
+   int getReturnCode();
+   std::optional<StringRef> getStdinFilename();
+   std::optional<StringRef> getStdoutFilename();
+   std::optional<StringRef> getStderrFilename();
 };
 
 /// Find the first executable file \p Name in \p Paths.

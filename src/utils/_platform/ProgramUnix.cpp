@@ -69,6 +69,45 @@ ProcessInfo::ProcessInfo()
      m_returnCode(0)
 {}
 
+ProcessIdType ProcessInfo::getPid()
+{
+   return m_pid;
+}
+
+ProcessIdType ProcessInfo::getProcess()
+{
+   return m_process;
+}
+
+int ProcessInfo::getReturnCode()
+{
+   return m_returnCode;
+}
+
+std::optional<StringRef> ProcessInfo::getStdinFilename()
+{
+   if (m_stdinFilename.has_value()) {
+      return m_stdinFilename.value();
+   }
+   return std::nullopt;
+}
+
+std::optional<StringRef> ProcessInfo::getStdoutFilename()
+{
+   if (m_stdoutFilename.has_value()) {
+      return m_stdoutFilename.value();
+   }
+   return std::nullopt;
+}
+
+std::optional<StringRef> ProcessInfo::getStderrFilename()
+{
+   if (m_stderrFilename.has_value()) {
+      return m_stderrFilename.value();
+   }
+   return std::nullopt;
+}
+
 OptionalError<std::string> find_program_by_name(StringRef name,
                                                 ArrayRef<StringRef> paths) {
    assert(!name.empty() && "Must have a name!");
@@ -255,7 +294,15 @@ bool execute(ProcessInfo &processInfo, StringRef program,
                   redirectsStr[index] = &redirectsStorage[index];
                }
             }
-
+            if (redirectsStr[0] != nullptr) {
+               processInfo.m_stdinFilename = *redirectsStr[0];
+            }
+            if (redirectsStr[1] != nullptr) {
+               processInfo.m_stdoutFilename = *redirectsStr[1];
+            }
+            if (redirectsStr[2] != nullptr) {
+               processInfo.m_stderrFilename = *redirectsStr[2];
+            }
             fileActions = &fileActionsStore;
             posix_spawn_file_actions_init(fileActions);
 
@@ -321,6 +368,27 @@ bool execute(ProcessInfo &processInfo, StringRef program,
    case 0: {
       // Redirect file descriptors...
       if (!redirects.empty()) {
+         if (redirects[0]) {
+            if (redirects[0]->empty()) {
+               processInfo.m_stdinFilename = "/dev/null";
+            } else {
+               processInfo.m_stdinFilename = redirects[0];
+            }
+         }
+         if (redirects[1]) {
+            if (redirects[1]->empty()) {
+               processInfo.m_stdoutFilename = "/dev/null";
+            } else {
+               processInfo.m_stdoutFilename = redirects[1];
+            }
+         }
+         if (redirects[2]) {
+            if (redirects[2]->empty()) {
+               processInfo.m_stderrFilename = "/dev/null";
+            } else {
+               processInfo.m_stderrFilename = redirects[2];
+            }
+         }
          // Redirect stdin
          if (redirect_io(redirects[0], 0, errMsg)) { return false; }
          // Redirect stdout

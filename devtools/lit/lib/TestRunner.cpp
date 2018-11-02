@@ -354,7 +354,8 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
                      ShExecResultList &results,
                      TimeoutHelper &timeoutHelper)
 {
-   if (timeoutHelper.timeoutReached()) {
+   std::cout << cmd->operator std::string() << std::endl;
+  if (timeoutHelper.timeoutReached()) {
       // Prevent further recursion if the timeout has been hit
       // as we should try avoid launching more processes.
       return TIMEOUT_ERROR_CODE;
@@ -483,7 +484,6 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
       results.push_back(std::make_shared<ShellCommandResult>(firstCommand, "", "", 0, false));
       return 0;
    }
-
    return 0;
 }
 
@@ -493,66 +493,171 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
 /// Returns the three standard file descriptors for the new child process.  Each
 /// fd may be an open, writable file object or a sentinel value from the
 /// subprocess module.
+//StdFdsTuple process_redirects(Command *command, int stdinSource,
+//                              const ShellEnvironment &shenv,
+//                              std::list<OpenFileEntryType> &openedFiles)
+//{
+//   // Apply the redirections, we use (N,) as a sentinel to indicate stdin,
+//   // stdout, stderr for N equal to 0, 1, or 2 respectively. Redirects to or
+//   // from a file are represented with a list [file, mode, file-object]
+//   // where file-object is initially None.
+//   SmallVector<std::any, 3> redirects = {std::tuple<int, int>{0, -1},
+//                                         std::tuple<int, int>{1, -1},
+//                                         std::tuple<int, int>{2, -1}};
+
+//   for (const RedirectTokenType &redirect : command->getRedirects()) {
+//      const ShellTokenType &op = std::get<0>(redirect);
+//      const std::string &filename = std::get<1>(redirect);
+//      if (op == std::tuple<std::string, int>{">", 2}) {
+//         redirects[2] = std::any(OpenFileTuple{filename, "w", std::nullopt});
+//      } else if (op == std::tuple<std::string, int>{">>", 2}) {
+//         redirects[2] = std::any(OpenFileTuple{filename, "a", std::nullopt});
+//      } else if (op == std::tuple<std::string, int>{">&", 2} &&
+//                 (filename == "0" || filename == "1" || filename == "2")) {
+//         redirects[2] = redirects[std::stoi(filename)];
+//      } else if (op == std::tuple<std::string, int>{">&", -1} ||
+//                 op == std::tuple<std::string, int>{"&>", -1}) {
+//         redirects[1] = redirects[2] = std::any(OpenFileTuple{filename, "w", std::nullopt});
+//      } else if (op == std::tuple<std::string, int>{">", -1}) {
+//         redirects[1] = std::any(OpenFileTuple{filename, "w", std::nullopt});
+//      } else if (op == std::tuple<std::string, int>{">>", -1}) {
+//         redirects[1] = std::any(OpenFileTuple{filename, "a", std::nullopt});
+//      } else if (op == std::tuple<std::string, int>{"<", -1}) {
+//         redirects[1] = std::any(OpenFileTuple{filename, "r", std::nullopt});
+//      } else {
+//         throw InternalShellError(command,
+//                                  "Unsupported redirect: (" + std::get<0>(op) + ", " + std::to_string(std::get<1>(op)) + ")" + filename);
+//      }
+//   }
+//   // Open file descriptors in a second pass.
+//   SmallVector<int, 3> stdFds{-1, -1, -1};
+//   for (int index = 0; index < 2; ++index) {
+//      int fd = -1;
+//      std::any &itemAny = redirects[index];
+//      // Handle the sentinel values for defaults up front.
+//      if (itemAny.type() == typeid(std::tuple<int, int>)) {
+//         std::tuple<int, int> &item = std::any_cast<std::tuple<int, int> &>(itemAny);
+//         if (item == std::tuple<int, int>{0, -1}) {
+//            fd = stdinSource;
+//         } else if (item == std::tuple<int, int>{1, -1}) {
+//            if (index == 0) {
+//               throw InternalShellError(command,
+//                                        "Unsupported redirect for stdin");
+//            } else if (index == 1) {
+//               fd = SUBPROCESS_FD_PIPE;
+//            } else {
+//               fd = SUBPROCESS_FD_STDOUT;
+//            }
+//         } else if (item == std::tuple<int, int>{2, -1}) {
+//            if (index != 2) {
+//               throw InternalShellError(command,
+//                                        "Unsupported redirect for stdout");
+//            }
+//            fd = SUBPROCESS_FD_PIPE;
+//         } else {
+//            throw InternalShellError(command,
+//                                     "Bad redirect");
+//         }
+//         stdFds[index] = fd;
+//         continue;
+//      }
+//      OpenFileTuple &item = std::any_cast<OpenFileTuple &>(itemAny);
+//      std::string &filename = std::get<0>(item);
+//      std::string &mode = std::get<1>(item);
+//      std::optional<int> fdOpt = std::get<2>(item);
+//      // Check if we already have an open fd. This can happen if stdout and
+//      // stderr go to the same place.
+//      if (fdOpt.has_value()) {
+//         stdFds[index] = fd;
+//         continue;
+//      }
+//      std::string redirFilename;
+//      std::list<std::string> names = expand_glob(filename, shenv.getCwd());
+//      if (names.size() != 1) {
+//         throw InternalShellError(command,
+//                                  "Unsupported: glob in "
+//                                  "redirect expanded to multiple files");
+//      }
+//      std::string &name = names.front();
+//      std::FILE *fileStream = nullptr;
+//#ifdef POLAR_AVOID_DEV_NULL
+//      if (name == sgc_kdevNull) {
+//         fileStream = tmpfile();
+//         fd = fileno(fileStream);
+//      }
+//#elif defined(POLAR_OS_WIN32)
+//      if (name == "/dev/tty") {
+//         // Simulate /dev/tty on Windows.
+//         // "CON" is a special filename for the console.
+//         fileStream = std::fopen("CON", mode.c_str());
+//         fd = fileno(fileStream);
+//      }
+//#else
+//      // Make sure relative paths are relative to the cwd.
+//      redirFilename = stdfs::path(shenv.getCwd()) / name;
+//      fileStream = std::fopen(redirFilename.c_str(), mode.c_str());
+//      fd = fileno(fileStream);
+//#endif
+//      // Workaround a Win32 and/or subprocess bug when appending.
+//      //
+//      // FIXME: Actually, this is probably an instance of PR6753.
+//      if (mode == "a") {
+//         std::fseek(fileStream, 0, SEEK_END);
+//      }
+//      std::get<2>(item) = fd;
+//      openedFiles.push_back(OpenFileEntryType{filename, mode, fd, redirFilename});
+//      stdFds[index] = fd;
+//   }
+//   return StdFdsTuple{stdFds[0], stdFds[1], stdFds[2]};
+//}
+
+/// Return the standard fds for cmd after applying redirects
+/// Returns the three standard file descriptors for the new child process.  Each
+/// fd may be an open, writable file object or a sentinel value from the
+/// subprocess module.
 StdFdsTuple process_redirects(Command *command, int stdinSource,
-                              const ShellEnvironment &shenv,
-                              std::list<OpenFileEntryType> &openedFiles)
+                              const ShellEnvironment &shenv)
 {
    // Apply the redirections, we use (N,) as a sentinel to indicate stdin,
    // stdout, stderr for N equal to 0, 1, or 2 respectively. Redirects to or
    // from a file are represented with a list [file, mode, file-object]
    // where file-object is initially None.
-   std::list<std::any> redirects = {std::tuple<int, int>{0, -1},
-                                    std::tuple<int, int>{1, -1},
-                                    std::tuple<int, int>{2, -1}};
-   using OpenFileTuple = std::tuple<std::string, std::string, std::optional<int>>;
+   SmallVector<std::any, 3> redirects = {
+      std::tuple<int, int>{0, -1},
+      std::tuple<int, int>{1, -1},
+      std::tuple<int, int>{2, -1}
+   };
+
    for (const RedirectTokenType &redirect : command->getRedirects()) {
-      const std::any &opAny = std::get<0>(redirect);
-      const std::any &filenameAny = std::get<1>(redirect);
-      const ShellTokenType &op = std::any_cast<const ShellTokenType &>(opAny);
-      const std::string &filename = std::any_cast<const std::string &>(filenameAny);
+      const ShellTokenType &op = std::get<0>(redirect);
+      const std::string &filename = std::get<1>(redirect);
       if (op == std::tuple<std::string, int>{">", 2}) {
-         auto iter = redirects.begin();
-         std::advance(iter, 2);
-         *iter = std::any(OpenFileTuple{filename, "w", std::nullopt});
+         redirects[2] = std::any(OpenFileTuple{filename, "w", std::nullopt});
       } else if (op == std::tuple<std::string, int>{">>", 2}) {
-         auto iter = redirects.begin();
-         std::advance(iter, 2);
-         *iter = std::any(OpenFileTuple{filename, "a", std::nullopt});
+         redirects[2] = std::any(OpenFileTuple{filename, "a", std::nullopt});
       } else if (op == std::tuple<std::string, int>{">&", 2} &&
                  (filename == "0" || filename == "1" || filename == "2")) {
-         auto iter = redirects.begin();
-         std::advance(iter, 2);
-         auto targetIter = redirects.begin();
-         std::advance(targetIter, std::stoi(filename));
-         *iter = *targetIter;
-      } else if (op == std::tuple<std::string, int>{">&", -1} ||
-                 op == std::tuple<std::string, int>{"&>", -1}) {
-         auto iter = redirects.begin();
-         *(++iter) = std::any(OpenFileTuple{filename, "w", std::nullopt});
-         *(++iter) = std::any(OpenFileTuple{filename, "w", std::nullopt});
-      } else if (op == std::tuple<std::string, int>{">", -1}) {
-         auto iter = redirects.begin();
-         ++iter;
-         *iter = std::any(OpenFileTuple{filename, "w", std::nullopt});
-      } else if (op == std::tuple<std::string, int>{">>", -1}) {
-         auto iter = redirects.begin();
-         ++iter;
-         *iter = std::any(OpenFileTuple{filename, "a", std::nullopt});
-      } else if (op == std::tuple<std::string, int>{"<", -1}) {
-         auto iter = redirects.begin();
-         *iter = std::any(OpenFileTuple{filename, "a", std::nullopt});
+         redirects[2] = redirects[std::stoi(filename)];
+      } else if (op == std::tuple<std::string, int>{">&", SHELL_CMD_REDIRECT_TOKEN} ||
+                 op == std::tuple<std::string, int>{"&>", SHELL_CMD_REDIRECT_TOKEN}) {
+         redirects[1] = redirects[2] = std::any(OpenFileTuple{filename, "w", std::nullopt});
+      } else if (op == std::tuple<std::string, int>{">", SHELL_CMD_REDIRECT_TOKEN}) {
+         redirects[1] = std::any(OpenFileTuple{filename, "w", std::nullopt});
+      } else if (op == std::tuple<std::string, int>{">>", SHELL_CMD_REDIRECT_TOKEN}) {
+         redirects[1] = std::any(OpenFileTuple{filename, "a", std::nullopt});
+      } else if (op == std::tuple<std::string, int>{"<", SHELL_CMD_REDIRECT_TOKEN}) {
+         redirects[1] = std::any(OpenFileTuple{filename, "r", std::nullopt});
       } else {
          throw InternalShellError(command,
                                   "Unsupported redirect: (" + std::get<0>(op) + ", " + std::to_string(std::get<1>(op)) + ")" + filename);
       }
    }
-   int index = 0;
-   auto iter = redirects.begin();
-   auto endMark = redirects.end();
-   std::list<std::optional<int>> stdFds{std::nullopt, std::nullopt, std::nullopt};
-   while (iter != endMark) {
+   // Open file descriptors in a second pass.
+   SmallVector<std::any, 3> stdFds{-1, -1, -1};
+   for (int index = 0; index < 2; ++index) {
       int fd = -1;
-      std::any &itemAny = *iter;
+      std::any &itemAny = redirects[index];
+      // Handle the sentinel values for defaults up front.
       if (itemAny.type() == typeid(std::tuple<int, int>)) {
          std::tuple<int, int> &item = std::any_cast<std::tuple<int, int> &>(itemAny);
          if (item == std::tuple<int, int>{0, -1}) {
@@ -576,27 +681,11 @@ StdFdsTuple process_redirects(Command *command, int stdinSource,
             throw InternalShellError(command,
                                      "Bad redirect");
          }
-         auto fdIter = stdFds.begin();
-         std::advance(fdIter, index);
-         *fdIter = fd;
-         ++index;
-         ++iter;
+         stdFds[index] = fd;
          continue;
       }
       OpenFileTuple &item = std::any_cast<OpenFileTuple &>(itemAny);
       std::string &filename = std::get<0>(item);
-      std::string &mode = std::get<1>(item);
-      std::optional<int> fdOpt = std::get<2>(item);
-      // Check if we already have an open fd. This can happen if stdout and
-      // stderr go to the same place.
-      if (fdOpt.has_value()) {
-         auto fdIter = stdFds.begin();
-         std::advance(fdIter, index);
-         *fdIter = fdOpt.value();
-         ++index;
-         ++iter;
-         continue;
-      }
       std::string redirFilename;
       std::list<std::string> names = expand_glob(filename, shenv.getCwd());
       if (names.size() != 1) {
@@ -605,126 +694,93 @@ StdFdsTuple process_redirects(Command *command, int stdinSource,
                                   "redirect expanded to multiple files");
       }
       std::string &name = names.front();
-      std::FILE *fileStream = nullptr;
-#ifdef POLAR_AVOID_DEV_NULL
-      if (name == sgc_kdevNull) {
-         fileStream = tmpfile();
-         fd = fileno(fileStream);
-      }
-#elif defined(POLAR_OS_WIN32)
-      if (name == "/dev/tty") {
-         // Simulate /dev/tty on Windows.
-         // "CON" is a special filename for the console.
-         fileStream = std::fopen("CON", mode.c_str());
-         fd = fileno(fileStream);
-      }
-#else
       // Make sure relative paths are relative to the cwd.
       redirFilename = stdfs::path(shenv.getCwd()) / name;
-      fileStream = std::fopen(redirFilename.c_str(), mode.c_str());
-      fd = fileno(fileStream);
-#endif
-      // Workaround a Win32 and/or subprocess bug when appending.
-      //
-      // FIXME: Actually, this is probably an instance of PR6753.
-      if (mode == "a") {
-         std::fseek(fileStream, 0, SEEK_END);
-      }
-      std::get<2>(item) = fd;
-      openedFiles.push_back(OpenFileEntryType{filename, mode, fd, redirFilename});
-      auto fdIter = stdFds.begin();
-      std::advance(fdIter, index);
-      *fdIter = fd;
-      ++index;
-      ++iter;
+      stdFds[index] = redirFilename;
    }
-   auto iterFd = stdFds.begin();
-   int stdinFd = (*iterFd++).value();
-   int stdoutFd = (*iterFd++).value();
-   int stderrFd = (*iterFd++).value();
-   return StdFdsTuple{stdinFd, stdoutFd, stderrFd};
+   return StdFdsTuple{stdFds[0], stdFds[1], stdFds[2]};
 }
 
 /// TODO the fd may leak
 std::string execute_builtin_echo(Command *command,
                                  const ShellEnvironment &shenv)
 {
+   std::cout << command->operator std::string() << std::endl;
    std::list<OpenFileEntryType> openedFiles;
-   StdFdsTuple fds = process_redirects(command, SUBPROCESS_FD_PIPE, shenv,
-                                       openedFiles);
-   int stdinFd = std::get<0>(fds);
-   int stdoutFd = std::get<1>(fds);
-   int stderrFd = std::get<2>(fds);
-   if (stdinFd != SUBPROCESS_FD_PIPE || stderrFd != SUBPROCESS_FD_PIPE) {
-      throw InternalShellError(command,
-                               "stdin and stderr redirects not supported for echo");
-   }
-   // Some tests have un-redirected echo commands to help debug test failures.
-   // Buffer our output and return it to the caller.
-   std::ostream *outstream = &std::cout;
-   std::ostringstream strstream;
-   bool isRedirected = true;
-   if (stdoutFd == SUBPROCESS_FD_PIPE) {
-      isRedirected = false;
-      outstream = &strstream;
-   } else {
-#ifdef POLAR_OS_WIN32
-      // @TODO WIN32
-      // Reopen stdout in binary mode to avoid CRLF translation. The versions
-      // of echo we are replacing on Windows all emit plain LF, and the LLVM
-      // tests now depend on this.
-      // When we open as binary, however, this also means that we have to write
-      // 'bytes' objects to stdout instead of 'str' objects.
-      // openedFiles.push_back({"", "", _fileno(stdout), ""});
-#endif
-   }
-   // Implement echo flags. We only support -e and -n, and not yet in
-   // combination. We have to ignore unknown flags, because `echo "-D FOO"`
-   // prints the dash.
-   std::list<std::any> args;
-   auto copyIter = command->getArgs().begin();
-   auto copyEndMark = command->getArgs().end();
-   ++copyIter;
-   std::copy(copyIter, copyEndMark, args.begin());
-   //bool interpretEscapes = false;
-   bool writeNewline = true;
-   while (args.size() >= 1) {
-      std::any flagAny = args.front();
-      std::string flag = std::any_cast<std::string>(flagAny);
-      if (flag == "-e" || flag == "-n") {
-         args.pop_front();
-         if (flag == "-e") {
-            //interpretEscapes = true;
-         } else if (flag == "-n") {
-            writeNewline = false;
-         }
-      } else {
-         break;
-      }
-   }
-   if (!args.empty()) {
-      size_t i = 0;
-      size_t argSize = args.size();
-      auto iter = args.begin();
-      auto endMark = args.end();
-      while (iter != endMark) {
-         if (i != argSize -1) {
-            *outstream << std::any_cast<std::string>(*iter) << " ";
-         } else {
-            *outstream << std::any_cast<std::string>(*iter);
-         }
-      }
-   }
-   if (writeNewline) {
-      *outstream << std::endl;
-   }
-   for (auto &entry : openedFiles) {
-      close(std::get<2>(entry));
-   }
-   if (!isRedirected) {
-      outstream->flush();
-      return dynamic_cast<std::ostringstream *>(outstream)->str();
-   }
+   StdFdsTuple fds = process_redirects(command, SUBPROCESS_FD_PIPE, shenv);
+//   int stdinFd = std::get<0>(fds);
+//   int stdoutFd = std::get<1>(fds);
+//   int stderrFd = std::get<2>(fds);
+//   if (stdinFd != SUBPROCESS_FD_PIPE || stderrFd != SUBPROCESS_FD_PIPE) {
+//      throw InternalShellError(command,
+//                               "stdin and stderr redirects not supported for echo");
+//   }
+//   // Some tests have un-redirected echo commands to help debug test failures.
+//   // Buffer our output and return it to the caller.
+//   std::ostream *outstream = &std::cout;
+//   std::ostringstream strstream;
+//   bool isRedirected = true;
+//   if (stdoutFd == SUBPROCESS_FD_PIPE) {
+//      isRedirected = false;
+//      outstream = &strstream;
+//   } else {
+//#ifdef POLAR_OS_WIN32
+//      // @TODO WIN32
+//      // Reopen stdout in binary mode to avoid CRLF translation. The versions
+//      // of echo we are replacing on Windows all emit plain LF, and the LLVM
+//      // tests now depend on this.
+//      // When we open as binary, however, this also means that we have to write
+//      // 'bytes' objects to stdout instead of 'str' objects.
+//      // openedFiles.push_back({"", "", _fileno(stdout), ""});
+//#endif
+//   }
+//   // Implement echo flags. We only support -e and -n, and not yet in
+//   // combination. We have to ignore unknown flags, because `echo "-D FOO"`
+//   // prints the dash.
+//   std::list<std::any> args;
+//   auto copyIter = command->getArgs().begin();
+//   auto copyEndMark = command->getArgs().end();
+//   ++copyIter;
+//   std::copy(copyIter, copyEndMark, args.begin());
+//   //bool interpretEscapes = false;
+//   bool writeNewline = true;
+//   while (args.size() >= 1) {
+//      std::any flagAny = args.front();
+//      std::string flag = std::any_cast<std::string>(flagAny);
+//      if (flag == "-e" || flag == "-n") {
+//         args.pop_front();
+//         if (flag == "-e") {
+//            //interpretEscapes = true;
+//         } else if (flag == "-n") {
+//            writeNewline = false;
+//         }
+//      } else {
+//         break;
+//      }
+//   }
+//   if (!args.empty()) {
+//      size_t i = 0;
+//      size_t argSize = args.size();
+//      auto iter = args.begin();
+//      auto endMark = args.end();
+//      while (iter != endMark) {
+//         if (i != argSize -1) {
+//            *outstream << std::any_cast<std::string>(*iter) << " ";
+//         } else {
+//            *outstream << std::any_cast<std::string>(*iter);
+//         }
+//      }
+//   }
+//   if (writeNewline) {
+//      *outstream << std::endl;
+//   }
+//   for (auto &entry : openedFiles) {
+//      close(std::get<2>(entry));
+//   }
+//   if (!isRedirected) {
+//      outstream->flush();
+//      return dynamic_cast<std::ostringstream *>(outstream)->str();
+//   }
    return "";
 }
 

@@ -14,6 +14,8 @@
 
 #include <memory>
 #include <list>
+#include <optional>
+#include <any>
 
 namespace polar {
 namespace basic {
@@ -62,11 +64,12 @@ using ShExecResultList = std::list<ShellCommandResultPointer>;
 using IntegratedTestKeywordParserList = std::list<IntegratedTestKeywordParserPointer>;
 
 using OpenFileEntryType = std::tuple<std::string, std::string, int, std::string>;
-using StdFdsTuple = std::tuple<int, int, int>;
+using StdFdsTuple = std::tuple<std::any, std::any, std::any>;
 using SubstitutionPair = std::pair<StringRef, std::string>;
 using SubstitutionList = std::list<SubstitutionPair>;
 using TestingProgressDisplayPointer = std::shared_ptr<TestingProgressDisplay>;
 using ExecResultTuple = std::tuple<const ResultCode *, std::string>;
+using OpenFileTuple = std::tuple<std::string, std::string, std::optional<int>>;
 
 } // lit
 } // polar

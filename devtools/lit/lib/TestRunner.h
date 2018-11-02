@@ -155,8 +155,7 @@ ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironme
 ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironment &shenv);
 ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironment &shenv);
 StdFdsTuple process_redirects(Command *command, int stdinSource,
-                              const ShellEnvironment &shenv,
-                              std::list<OpenFileEntryType> &openedFiles);
+                              const ShellEnvironment &shenv);
 ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litConfig,
                                          const std::string &tempBase, std::vector<std::string> &commands,
                                          const std::string &cwd, ResultPointer result);

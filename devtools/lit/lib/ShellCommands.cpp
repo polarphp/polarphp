@@ -33,6 +33,7 @@ Command::operator std::string()
       ++i;
    }
    std::string redirectMsg = "";
+   i = 0;
    int redirectSize = m_redirects.size();
    for (RedirectTokenType &redirect: m_redirects) {
       if (i < redirectSize - 1) {
