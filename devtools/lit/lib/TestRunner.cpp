@@ -425,6 +425,7 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
       // following Popen calls will fail instead.
       return 0;
    }
+
    // Handle "echo" as a builtin if it is not part of a pipeline. This greatly
    // speeds up tests that construct input files by repeatedly echo-appending to
    // a file.
@@ -482,6 +483,7 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
       results.push_back(std::make_shared<ShellCommandResult>(firstCommand, "", "", 0, false));
       return 0;
    }
+
    return 0;
 }
 

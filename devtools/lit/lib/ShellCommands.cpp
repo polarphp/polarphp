@@ -34,8 +34,17 @@ Command::operator std::string()
    }
    std::string redirectMsg = "";
    int redirectSize = m_redirects.size();
-   if (redirectSize == 0) {
-
+   for (RedirectTokenType &redirect: m_redirects) {
+      if (i < redirectSize - 1) {
+         redirectMsg += format_string("((%s, %d), %s)", std::get<0>(std::get<0>(redirect)).c_str(),
+                                      std::get<1>(std::get<0>(redirect)),
+                                      std::get<1>(redirect).c_str()) + ", ";
+      } else {
+         redirectMsg += format_string("((%s, %d), %s)", std::get<0>(std::get<0>(redirect)).c_str(),
+                                      std::get<1>(std::get<0>(redirect)),
+                                      std::get<1>(redirect).c_str());
+      }
+      ++i;
    }
    return format_string("Command([%s], [%s])", argMsg.c_str(), redirectMsg.c_str());
 }
@@ -174,9 +183,16 @@ bool GlobItem::operator ==(const GlobItem &other) const
 
 Pipeline::operator std::string()
 {
+   size_t i = 0;
+   size_t cmdSize = m_commands.size();
    std::string commands = "[";
    for (CommandPointer command : m_commands) {
-      commands += command->operator std::string();
+      if (i < cmdSize - 1) {
+         commands += command->operator std::string() + ", ";
+      } else {
+         commands += command->operator std::string();
+      }
+      ++i;
    }
    commands += "]";
    return format_string("Pipeline(%s, negate: %s, pipeError: %s)", commands.c_str(),
