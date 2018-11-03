@@ -55,6 +55,7 @@ using polar::basic::ArrayRef;
 using polar::basic::SmallString;
 using polar::fs::DirectoryEntry;
 using polar::basic::SmallVectorImpl;
+using polar::sys::ProcessInfo;
 
 #define TIMEOUT_ERROR_CODE -999
 
@@ -201,12 +202,12 @@ const std::string &ShellCommandResult::getErrorMsg()
 
 namespace {
 /// forward declare function
-int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
+int do_execute_shcmd(CommandPointer cmd, ShellEnvironmentPointer shenv,
                      ShExecResultList &results,
                      TimeoutHelper &timeoutHelper);
 } // anonymous namespace
 
-std::pair<int, std::string> execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv, ShExecResultList &results,
+std::pair<int, std::string> execute_shcmd(CommandPointer cmd, ShellEnvironmentPointer shenv, ShExecResultList &results,
                                           size_t execTimeout)
 {
    // Use the helper even when no timeout is required to make
@@ -306,7 +307,7 @@ std::string quote_windows_command(const std::vector<std::string> &seq)
    return join_string_list(result, "");
 }
 
-void update_env(ShellEnvironment &shenv, Command *command)
+void update_env(ShellEnvironmentPointer shenv, Command *command)
 {
    bool unsetNextEnvVar = false;
    std::list<std::any> &args = command->getArgs();
@@ -315,7 +316,7 @@ void update_env(ShellEnvironment &shenv, Command *command)
    ++iter;
    auto endMark = args.end();
    int argIdx = 1;
-   std::map<std::string, std::string> &env = shenv.getEnv();
+   std::map<std::string, std::string> &env = shenv->getEnv();
    while (iter != endMark) {
       std::string arg = std::any_cast<std::string>(*iter);
       // Support for the -u flag (unsetting) for env command
@@ -350,12 +351,24 @@ void update_env(ShellEnvironment &shenv, Command *command)
 
 namespace {
 
-int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
+class OpenTempFilesMgr
+{
+public:
+   OpenTempFilesMgr &registerTempFile(const std::string &temp)
+   {
+      m_files.push_back(std::make_shared<FileRemover>(temp.c_str()));
+      return *this;
+   }
+protected:
+   std::list<std::shared_ptr<FileRemover>> m_files;
+};
+
+int do_execute_shcmd(CommandPointer cmd, ShellEnvironmentPointer shenv,
                      ShExecResultList &results,
                      TimeoutHelper &timeoutHelper)
 {
    std::cout << cmd->operator std::string() << std::endl;
-  if (timeoutHelper.timeoutReached()) {
+   if (timeoutHelper.timeoutReached()) {
       // Prevent further recursion if the timeout has been hit
       // as we should try avoid launching more processes.
       return TIMEOUT_ERROR_CODE;
@@ -415,12 +428,12 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
       std::string newDir = std::any_cast<std::string>(*iter);
       // Update the cwd in the parent environment.
       if (stdfs::path(newDir).is_absolute()) {
-         shenv.setCwd(newDir);
+         shenv->setCwd(newDir);
       } else {
-         stdfs::path basePath(shenv.getCwd());
+         stdfs::path basePath(shenv->getCwd());
          basePath /= newDir;
          basePath = stdfs::canonical(basePath);
-         shenv.setCwd(basePath);
+         shenv->setCwd(basePath);
       }
       // The cd builtin always succeeds. If the directory does not exist, the
       // following Popen calls will fail instead.
@@ -484,6 +497,26 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
       results.push_back(std::make_shared<ShellCommandResult>(firstCommand, "", "", 0, false));
       return 0;
    }
+   SmallVector<ProcessInfo, 6> proces;
+   std::string defaultStdin;
+   OpenTempFilesMgr tempFilesMgr;
+   int inputFd;
+   SmallString<32> rootInputFile;
+   SmallString<32> rootOutputFile;
+   fs::create_temporary_file("testrunner-shell-command-root-input", "", inputFd, rootInputFile);
+   tempFilesMgr.registerTempFile(rootInputFile.getCStr());
+   fs::create_temporary_file("testrunner-shell-command-root-output", "", rootOutputFile);
+   tempFilesMgr.registerTempFile(rootOutputFile.getCStr());
+   std::set<StringRef> builtinCommands{};
+   // To avoid deadlock, we use a single stderr stream for piped
+   // output. This is null until we have seen some output using
+   // stderr.
+   CommandList commands = pipeCommand->getCommands();
+   int i = 0;
+   for (CommandPointer command : commands) {
+
+      ++i;
+   }
    return 0;
 }
 
@@ -494,7 +527,7 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
 /// fd may be an open, writable file object or a sentinel value from the
 /// subprocess module.
 //StdFdsTuple process_redirects(Command *command, int stdinSource,
-//                              const ShellEnvironment &shenv,
+//                              const ShellEnvironmentPointer shenv,
 //                              std::list<OpenFileEntryType> &openedFiles)
 //{
 //   // Apply the redirections, we use (N,) as a sentinel to indicate stdin,
@@ -572,7 +605,7 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
 //         continue;
 //      }
 //      std::string redirFilename;
-//      std::list<std::string> names = expand_glob(filename, shenv.getCwd());
+//      std::list<std::string> names = expand_glob(filename, shenv->getCwd());
 //      if (names.size() != 1) {
 //         throw InternalShellError(command,
 //                                  "Unsupported: glob in "
@@ -594,7 +627,7 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
 //      }
 //#else
 //      // Make sure relative paths are relative to the cwd.
-//      redirFilename = stdfs::path(shenv.getCwd()) / name;
+//      redirFilename = stdfs::path(shenv->getCwd()) / name;
 //      fileStream = std::fopen(redirFilename.c_str(), mode.c_str());
 //      fd = fileno(fileStream);
 //#endif
@@ -616,7 +649,7 @@ int do_execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv,
 /// fd may be an open, writable file object or a sentinel value from the
 /// subprocess module.
 StdFdsTuple process_redirects(Command *command, int stdinSource,
-                              const ShellEnvironment &shenv)
+                              const ShellEnvironmentPointer shenv)
 {
    // Apply the redirections, we use (N,) as a sentinel to indicate stdin,
    // stdout, stderr for N equal to 0, 1, or 2 respectively. Redirects to or
@@ -687,7 +720,7 @@ StdFdsTuple process_redirects(Command *command, int stdinSource,
       OpenFileTuple &item = std::any_cast<OpenFileTuple &>(itemAny);
       std::string &filename = std::get<0>(item);
       std::string redirFilename;
-      std::list<std::string> names = expand_glob(filename, shenv.getCwd());
+      std::list<std::string> names = expand_glob(filename, shenv->getCwd());
       if (names.size() != 1) {
          throw InternalShellError(command,
                                   "Unsupported: glob in "
@@ -695,7 +728,7 @@ StdFdsTuple process_redirects(Command *command, int stdinSource,
       }
       std::string &name = names.front();
       // Make sure relative paths are relative to the cwd.
-      redirFilename = stdfs::path(shenv.getCwd()) / name;
+      redirFilename = stdfs::path(shenv->getCwd()) / name;
       stdFds[index] = redirFilename;
    }
    return StdFdsTuple{stdFds[0], stdFds[1], stdFds[2]};
@@ -703,84 +736,84 @@ StdFdsTuple process_redirects(Command *command, int stdinSource,
 
 /// TODO the fd may leak
 std::string execute_builtin_echo(Command *command,
-                                 const ShellEnvironment &shenv)
+                                 const ShellEnvironmentPointer shenv)
 {
    std::cout << command->operator std::string() << std::endl;
    std::list<OpenFileEntryType> openedFiles;
    StdFdsTuple fds = process_redirects(command, SUBPROCESS_FD_PIPE, shenv);
-//   int stdinFd = std::get<0>(fds);
-//   int stdoutFd = std::get<1>(fds);
-//   int stderrFd = std::get<2>(fds);
-//   if (stdinFd != SUBPROCESS_FD_PIPE || stderrFd != SUBPROCESS_FD_PIPE) {
-//      throw InternalShellError(command,
-//                               "stdin and stderr redirects not supported for echo");
-//   }
-//   // Some tests have un-redirected echo commands to help debug test failures.
-//   // Buffer our output and return it to the caller.
-//   std::ostream *outstream = &std::cout;
-//   std::ostringstream strstream;
-//   bool isRedirected = true;
-//   if (stdoutFd == SUBPROCESS_FD_PIPE) {
-//      isRedirected = false;
-//      outstream = &strstream;
-//   } else {
-//#ifdef POLAR_OS_WIN32
-//      // @TODO WIN32
-//      // Reopen stdout in binary mode to avoid CRLF translation. The versions
-//      // of echo we are replacing on Windows all emit plain LF, and the LLVM
-//      // tests now depend on this.
-//      // When we open as binary, however, this also means that we have to write
-//      // 'bytes' objects to stdout instead of 'str' objects.
-//      // openedFiles.push_back({"", "", _fileno(stdout), ""});
-//#endif
-//   }
-//   // Implement echo flags. We only support -e and -n, and not yet in
-//   // combination. We have to ignore unknown flags, because `echo "-D FOO"`
-//   // prints the dash.
-//   std::list<std::any> args;
-//   auto copyIter = command->getArgs().begin();
-//   auto copyEndMark = command->getArgs().end();
-//   ++copyIter;
-//   std::copy(copyIter, copyEndMark, args.begin());
-//   //bool interpretEscapes = false;
-//   bool writeNewline = true;
-//   while (args.size() >= 1) {
-//      std::any flagAny = args.front();
-//      std::string flag = std::any_cast<std::string>(flagAny);
-//      if (flag == "-e" || flag == "-n") {
-//         args.pop_front();
-//         if (flag == "-e") {
-//            //interpretEscapes = true;
-//         } else if (flag == "-n") {
-//            writeNewline = false;
-//         }
-//      } else {
-//         break;
-//      }
-//   }
-//   if (!args.empty()) {
-//      size_t i = 0;
-//      size_t argSize = args.size();
-//      auto iter = args.begin();
-//      auto endMark = args.end();
-//      while (iter != endMark) {
-//         if (i != argSize -1) {
-//            *outstream << std::any_cast<std::string>(*iter) << " ";
-//         } else {
-//            *outstream << std::any_cast<std::string>(*iter);
-//         }
-//      }
-//   }
-//   if (writeNewline) {
-//      *outstream << std::endl;
-//   }
-//   for (auto &entry : openedFiles) {
-//      close(std::get<2>(entry));
-//   }
-//   if (!isRedirected) {
-//      outstream->flush();
-//      return dynamic_cast<std::ostringstream *>(outstream)->str();
-//   }
+   //   int stdinFd = std::get<0>(fds);
+   //   int stdoutFd = std::get<1>(fds);
+   //   int stderrFd = std::get<2>(fds);
+   //   if (stdinFd != SUBPROCESS_FD_PIPE || stderrFd != SUBPROCESS_FD_PIPE) {
+   //      throw InternalShellError(command,
+   //                               "stdin and stderr redirects not supported for echo");
+   //   }
+   //   // Some tests have un-redirected echo commands to help debug test failures.
+   //   // Buffer our output and return it to the caller.
+   //   std::ostream *outstream = &std::cout;
+   //   std::ostringstream strstream;
+   //   bool isRedirected = true;
+   //   if (stdoutFd == SUBPROCESS_FD_PIPE) {
+   //      isRedirected = false;
+   //      outstream = &strstream;
+   //   } else {
+   //#ifdef POLAR_OS_WIN32
+   //      // @TODO WIN32
+   //      // Reopen stdout in binary mode to avoid CRLF translation. The versions
+   //      // of echo we are replacing on Windows all emit plain LF, and the LLVM
+   //      // tests now depend on this.
+   //      // When we open as binary, however, this also means that we have to write
+   //      // 'bytes' objects to stdout instead of 'str' objects.
+   //      // openedFiles.push_back({"", "", _fileno(stdout), ""});
+   //#endif
+   //   }
+   //   // Implement echo flags. We only support -e and -n, and not yet in
+   //   // combination. We have to ignore unknown flags, because `echo "-D FOO"`
+   //   // prints the dash.
+   //   std::list<std::any> args;
+   //   auto copyIter = command->getArgs().begin();
+   //   auto copyEndMark = command->getArgs().end();
+   //   ++copyIter;
+   //   std::copy(copyIter, copyEndMark, args.begin());
+   //   //bool interpretEscapes = false;
+   //   bool writeNewline = true;
+   //   while (args.size() >= 1) {
+   //      std::any flagAny = args.front();
+   //      std::string flag = std::any_cast<std::string>(flagAny);
+   //      if (flag == "-e" || flag == "-n") {
+   //         args.pop_front();
+   //         if (flag == "-e") {
+   //            //interpretEscapes = true;
+   //         } else if (flag == "-n") {
+   //            writeNewline = false;
+   //         }
+   //      } else {
+   //         break;
+   //      }
+   //   }
+   //   if (!args.empty()) {
+   //      size_t i = 0;
+   //      size_t argSize = args.size();
+   //      auto iter = args.begin();
+   //      auto endMark = args.end();
+   //      while (iter != endMark) {
+   //         if (i != argSize -1) {
+   //            *outstream << std::any_cast<std::string>(*iter) << " ";
+   //         } else {
+   //            *outstream << std::any_cast<std::string>(*iter);
+   //         }
+   //      }
+   //   }
+   //   if (writeNewline) {
+   //      *outstream << std::endl;
+   //   }
+   //   for (auto &entry : openedFiles) {
+   //      close(std::get<2>(entry));
+   //   }
+   //   if (!isRedirected) {
+   //      outstream->flush();
+   //      return dynamic_cast<std::ostringstream *>(outstream)->str();
+   //   }
    return "";
 }
 
@@ -1033,13 +1066,13 @@ void print_only_in(const std::string &basedir, const std::string &path,
 
 }
 
-ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironment &shenv)
+ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironmentPointer shenv)
 {
    std::list<std::string> args;
    for (auto &anyArg : command->getArgs()) {
       args.push_back(std::any_cast<std::string>(anyArg));
    }
-   args = expand_glob_expression(args, shenv.getCwd());
+   args = expand_glob_expression(args, shenv->getCwd());
    std::shared_ptr<const char *[]> argv(new const char *[args.size()]);
    size_t i = 0;
    for (std::string &arg : args) {
@@ -1058,7 +1091,7 @@ ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironme
          for (std::string &pathStr: paths) {
             stdfs::path path(pathStr);
             if (!path.is_absolute()) {
-               path = stdfs::path(shenv.getCwd()) / path;
+               path = stdfs::path(shenv->getCwd()) / path;
             }
             if (parent) {
                stdfs::create_directories(path);
@@ -1076,7 +1109,7 @@ ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironme
    }
 }
 
-ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironment &shenv)
+ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmentPointer shenv)
 {
    return std::make_shared<ShellCommandResult>(command, "", "", 0, false);
 }
@@ -1084,13 +1117,13 @@ ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmen
 /// executeBuiltinRm - Removes (deletes) files or directories.
 /// @TODO do remove std::any args
 ///
-ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironment &shenv)
+ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironmentPointer shenv)
 {
    std::list<std::string> args;
    for (auto &anyArg : command->getArgs()) {
       args.push_back(std::any_cast<std::string>(anyArg));
    }
-   args = expand_glob_expression(args, shenv.getCwd());
+   args = expand_glob_expression(args, shenv->getCwd());
    std::shared_ptr<const char *[]> argv(new const char *[args.size()]);
    size_t i = 0;
    for (std::string &arg : args) {
@@ -1111,7 +1144,7 @@ ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironment 
       for (std::string &pathStr: paths) {
          stdfs::path path(pathStr);
          if (!path.is_absolute()) {
-            path = stdfs::path(shenv.getCwd()) / path;
+            path = stdfs::path(shenv->getCwd()) / path;
          }
          if (force && !stdfs::exists(path, errorCode)) {
             continue;
@@ -1163,7 +1196,7 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
    std::string timeoutInfo;
    int exitCode = 0;
    try {
-      ShellEnvironment shenv(cwd, test->getConfig()->getEnvironment());
+      ShellEnvironmentPointer shenv = std::make_shared<ShellEnvironment>(cwd, test->getConfig()->getEnvironment());
       std::pair<int, std::string> r = execute_shcmd(cmd, shenv, results, litConfig->getMaxIndividualTestTime());
       exitCode = std::get<0>(r);
       timeoutInfo = std::get<1>(r);

@@ -229,7 +229,7 @@ void Pipeline::toShell(std::string &str, bool pipeFail) const
    }
    int cur = 0;
    int size = m_commands.size();
-   for (const std::shared_ptr<AbstractCommand> &cmd : m_commands) {
+   for (const CommandPointer &cmd : m_commands) {
       cmd->toShell(str);
       ++cur;
       if (cur != size - 1) {
@@ -238,7 +238,7 @@ void Pipeline::toShell(std::string &str, bool pipeFail) const
    }
 }
 
-const std::list<std::shared_ptr<AbstractCommand>> &Pipeline::getCommands() const
+const CommandList &Pipeline::getCommands() const
 {
    return m_commands;
 }
@@ -260,12 +260,12 @@ const std::string &Seq::getOp() const
    return m_op;
 }
 
-std::shared_ptr<AbstractCommand> Seq::getLhs() const
+CommandPointer Seq::getLhs() const
 {
    return m_lhs;
 }
 
-std::shared_ptr<AbstractCommand> Seq::getRhs() const
+CommandPointer Seq::getRhs() const
 {
    return m_rhs;
 }

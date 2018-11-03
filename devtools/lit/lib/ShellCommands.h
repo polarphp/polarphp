@@ -18,6 +18,7 @@
 #include <memory>
 #include <assert.h>
 #include "LitGlobal.h"
+#include "ForwardDefs.h"
 
 namespace polar {
 namespace lit {
@@ -103,9 +104,9 @@ public:
    {
       return Type::Pipeline;
    }
-   const std::list<std::shared_ptr<AbstractCommand>> &getCommands() const;
+   const CommandList &getCommands() const;
 protected:
-   std::list<std::shared_ptr<AbstractCommand>> m_commands;
+   CommandList m_commands;
    bool m_negate;
    bool m_pipeError;
 };
@@ -134,13 +135,13 @@ public:
       return Type::Seq;
    }
    const std::string &getOp() const;
-   std::shared_ptr<AbstractCommand> getLhs() const;
-   std::shared_ptr<AbstractCommand> getRhs() const;
+   CommandPointer getLhs() const;
+   CommandPointer getRhs() const;
    void toShell(std::string &str, bool pipeFail = false) const override;
 protected:
    std::string m_op;
-   std::shared_ptr<AbstractCommand> m_lhs;
-   std::shared_ptr<AbstractCommand> m_rhs;
+   CommandPointer m_lhs;
+   CommandPointer m_rhs;
 };
 
 } // lit

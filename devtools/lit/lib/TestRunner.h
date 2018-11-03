@@ -136,7 +136,7 @@ protected:
 /// Wrapper around _executeShCmd that handles
 /// timeout
 ///
-std::pair<int, std::string> execute_shcmd(CommandPointer cmd, ShellEnvironment &shenv, ShExecResultList &results,
+std::pair<int, std::string> execute_shcmd(CommandPointer cmd, ShellEnvironmentPointer shenv, ShExecResultList &results,
                                           size_t execTimeout = 0);
 
 std::list<std::string> expand_glob(GlobItem &glob, const std::string &cwd);
@@ -144,18 +144,18 @@ std::list<std::string> expand_glob(const std::string &glob, const std::string &c
 std::list<std::string> expand_glob_expression(const std::list<std::string> &exprs,
                                               const std::string &cwd);
 std::string quote_windows_command(const std::vector<std::string> &seq);
-void update_env(ShellEnvironment &shenv, Command *command);
+void update_env(ShellEnvironmentPointer shenv, Command *command);
 std::string execute_builtin_echo(Command *command,
-                                 const ShellEnvironment &shenv);
+                                 const ShellEnvironmentPointer shenv);
 /// executeBuiltinMkdir - Create new directories.
 ///
-ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironment &shenv);
+ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironmentPointer shenv);
 /// executeBuiltinDiff - Compare files line by line.
 ///
-ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironment &shenv);
-ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironment &shenv);
+ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmentPointer shenv);
+ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironmentPointer shenv);
 StdFdsTuple process_redirects(Command *command, int stdinSource,
-                              const ShellEnvironment &shenv);
+                              const ShellEnvironmentPointer shenv);
 ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litConfig,
                                          const std::string &tempBase, std::vector<std::string> &commands,
                                          const std::string &cwd, ResultPointer result);

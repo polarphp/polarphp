@@ -44,6 +44,7 @@ class Command;
 class AbstractCommand;
 class ShellCommandResult;
 class IntegratedTestKeywordParser;
+class ShellEnvironment;
 
 using RunPointer = std::shared_ptr<Run>;
 using TestPointer = std::shared_ptr<Test>;
@@ -57,11 +58,13 @@ using ParallelismGroupSetter = std::string (*)(TestPointer);
 using CommandPointer = std::shared_ptr<AbstractCommand>;
 using ShellCommandResultPointer = std::shared_ptr<ShellCommandResult>;
 using IntegratedTestKeywordParserPointer = std::shared_ptr<IntegratedTestKeywordParser>;
+using ShellEnvironmentPointer = std::shared_ptr<ShellEnvironment>;
 
 using TestList = std::list<TestPointer>;
 using TestSuiteList = std::list<TestSuitePointer>;
 using ShExecResultList = std::list<ShellCommandResultPointer>;
 using IntegratedTestKeywordParserList = std::list<IntegratedTestKeywordParserPointer>;
+using CommandList = std::list<CommandPointer>;
 
 using OpenFileEntryType = std::tuple<std::string, std::string, int, std::string>;
 using StdFdsTuple = std::tuple<std::any, std::any, std::any>;
