@@ -237,9 +237,8 @@ std::list<std::string> expand_glob_expression(const std::list<std::any> &exprs,
 {
    auto iter = exprs.begin();
    auto endMark = exprs.end();
-   assert((*iter++).type() == typeid(std::string));
    std::list<std::string> results{
-      std::any_cast<std::string>(*iter++)
+
    };
    while (iter != endMark) {
       const std::any &exprAny = *iter;
@@ -402,6 +401,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
                      ShExecResultList &results,
                      TimeoutHelper &timeoutHelper)
 {
+   std::cout << cmd->operator std::string() << std::endl;
    if (timeoutHelper.timeoutReached()) {
       // Prevent further recursion if the timeout has been hit
       // as we should try avoid launching more processes.
@@ -446,8 +446,6 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
    assert(firstAbstractCommand->getCommandType() == AbstractCommand::Type::Command);
    Command *firstCommand = dynamic_cast<Command *>(firstAbstractCommand.get());
    const std::any &firstArgAny = firstCommand->getArgs().front();
-   // here maybe glob item
-   // @TODO
    assert(firstArgAny.type() == typeid(std::string));
    const std::string &firstArg = std::any_cast<std::string>(firstArgAny);
    if (firstArg == "cd") {
@@ -572,7 +570,8 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
             update_env(cmdShEnv, command);
          }
          StdFdsTuple fds = process_redirects(command, defaultStdin, cmdShEnv);
-         std::optional<StringRef> stdinFilename;
+         std::optional<std::string> stdinFilename;
+
          std::string rawStdinFilename = std::get<0>(fds);
          std::string rawStdoutFilename = std::get<1>(fds);
          std::string rawStderrFilename = std::get<2>(fds);
@@ -587,6 +586,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          if (!rawStderrFilename.empty()) {
             stderrFilename = rawStderrFilename;
          }
+
          bool stderrIsStdout = false;
          // If stderr wants to come from stdout, but stdout isn't a pipe, then put
          // stderr on a pipe and treat it as stdout.
@@ -625,6 +625,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
             }
          }
          std::list<std::any> &args = command->getArgs();
+         args.pop_front();
          // Replace uses of /dev/null with temporary files.
          // sgc_kdevNull
 #ifdef POLAR_AVOID_DEV_NULL
@@ -640,6 +641,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          }
 #endif
          // Expand all glob expressions
+
          std::list<std::string> expandedArgs = expand_glob_expression(args, shenv->getCwd());
          if (isBuiltinCmd) {
             // todo setup
@@ -656,6 +658,9 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          for (auto &item : cmdShEnv->getEnv()) {
             envList.push_back(format_string("%s=%s", item.first.c_str(), item.second.c_str()));
             envsRef.pushBack(envList.back());
+         }
+         for (auto &item : envsRef) {
+            std::cout << item << std::endl;
          }
          if (stdoutFilename == SUBPROCESS_FD_PIPE) {
             std::shared_ptr<SmallString<32>> tempFilename(new SmallString<32>{});
@@ -678,6 +683,11 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          };
          std::string errorMsg;
          bool execFailed;
+         std::cout << stdoutFilename.value() << std::endl;
+         if (executable.value()  == "/usr/bin/wc") {
+            std::cout << "xiuxiux" << std::endl;
+            std::cout << stdinFilename.value() << std::endl;
+         }
          ProcessInfo procInfo = polar::sys::execute_no_wait(executable.value(), argsRef, cmdShEnv->getCwd(), envsRef,
                                                             redirects, -1, &errorMsg,
                                                             &execFailed);
@@ -690,32 +700,32 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          timeoutHelper.addProcess(procInfo.getPid());
          // Update the current stdin source.
          if (rawStdoutFilename == SUBPROCESS_FD_PIPE) {
-            //defaultStdin = procInfo.getStdoutFilename().value();
+            defaultStdin = procInfo.getStdoutFilename().value();
          } else if (stderrIsStdout) {
-            //defaultStdin = procInfo.getStderrFilename().value();
+            defaultStdin = procInfo.getStderrFilename().value();
          } else {
-            //defaultStdin = rootInputFile.getCStr();
+            defaultStdin = rootInputFile.getCStr();
          }
          ++i;
       }
       std::string error;
-      // wait last process
+//      // wait last process
       ProcessInfo waitResult;
-      while (true) {
-         waitResult =  polar::sys::wait(processes.back(), 0, true, &error);
-         processes.back().m_returnCode = waitResult.getReturnCode();
-         if (waitResult.getPid() == processes.back().getPid()) {
-            break;
-         }
-      }
+//      while (true) {
+//         waitResult = polar::sys::wait(processes.back(), 0, true, &error);
+//         processes.back().m_returnCode = waitResult.getReturnCode();
+//         if (waitResult.getPid() == processes.back().getPid()) {
+//            break;
+//         }
+//      }
 
-      int returnCode = waitResult.getReturnCode();
-      if (returnCode == -1 || returnCode == -2) {
-         processesData.back() = std::make_tuple(returnCode, "", error);
-      } else {
-         processesData.back() = get_process_output(processes.back());
-      }
-      for (size_t i = 0; i < processes.size() - 1; ++i){
+//      int returnCode = waitResult.getReturnCode();
+//      if (returnCode == -1 || returnCode == -2) {
+//         processesData.back() = std::make_tuple(returnCode, "", error);
+//      } else {
+//         processesData.back() = get_process_output(processes.back());
+//      }
+      for (size_t i = 0; i < processes.size(); ++i){
          ProcessInfo &process = processes[i];
          while (true) {
             waitResult =  polar::sys::wait(process, 0, true, &error);
@@ -756,6 +766,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          if (processDataOpt) {
             auto processData = processDataOpt.value();
             lastExitCode = std::get<0>(processData);
+            std::cout << std::get<1>(processData) << std::endl;
             results.push_back(std::make_shared<ShellCommandResult>(acmd.get(),
                                  std::get<1>(processData), std::get<2>(processData),
                                  lastExitCode, timeoutHelper.timeoutReached()));
@@ -782,128 +793,6 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
 }
 
 } // anonymous namespace
-
-/// Return the standard fds for cmd after applying redirects
-/// Returns the three standard file descriptors for the new child process.  Each
-/// fd may be an open, writable file object or a sentinel value from the
-/// subprocess module.
-//StdFdsTuple process_redirects(Command *command, int stdinSource,
-//                              ShellEnvironmentPointer shenv,
-//                              std::list<OpenFileEntryType> &openedFiles)
-//{
-//   // Apply the redirections, we use (N,) as a sentinel to indicate stdin,
-//   // stdout, stderr for N equal to 0, 1, or 2 respectively. Redirects to or
-//   // from a file are represented with a list [file, mode, file-object]
-//   // where file-object is initially None.
-//   SmallVector<std::any, 3> redirects = {std::tuple<int, int>{0, -1},
-//                                         std::tuple<int, int>{1, -1},
-//                                         std::tuple<int, int>{2, -1}};
-
-//   for (const RedirectTokenType &redirect : command->getRedirects()) {
-//      const ShellTokenType &op = std::get<0>(redirect);
-//      const std::string &filename = std::get<1>(redirect);
-//      if (op == std::tuple<std::string, int>{">", 2}) {
-//         redirects[2] = std::any(OpenFileTuple{filename, "w", std::nullopt});
-//      } else if (op == std::tuple<std::string, int>{">>", 2}) {
-//         redirects[2] = std::any(OpenFileTuple{filename, "a", std::nullopt});
-//      } else if (op == std::tuple<std::string, int>{">&", 2} &&
-//                 (filename == "0" || filename == "1" || filename == "2")) {
-//         redirects[2] = redirects[std::stoi(filename)];
-//      } else if (op == std::tuple<std::string, int>{">&", -1} ||
-//                 op == std::tuple<std::string, int>{"&>", -1}) {
-//         redirects[1] = redirects[2] = std::any(OpenFileTuple{filename, "w", std::nullopt});
-//      } else if (op == std::tuple<std::string, int>{">", -1}) {
-//         redirects[1] = std::any(OpenFileTuple{filename, "w", std::nullopt});
-//      } else if (op == std::tuple<std::string, int>{">>", -1}) {
-//         redirects[1] = std::any(OpenFileTuple{filename, "a", std::nullopt});
-//      } else if (op == std::tuple<std::string, int>{"<", -1}) {
-//         redirects[1] = std::any(OpenFileTuple{filename, "r", std::nullopt});
-//      } else {
-//         throw InternalShellError(command,
-//                                  "Unsupported redirect: (" + std::get<0>(op) + ", " + std::to_string(std::get<1>(op)) + ")" + filename);
-//      }
-//   }
-//   // Open file descriptors in a second pass.
-//   SmallVector<int, 3> stdFds{-1, -1, -1};
-//   for (int index = 0; index < 2; ++index) {
-//      int fd = -1;
-//      std::any &itemAny = redirects[index];
-//      // Handle the sentinel values for defaults up front.
-//      if (itemAny.type() == typeid(std::tuple<int, int>)) {
-//         std::tuple<int, int> &item = std::any_cast<std::tuple<int, int> &>(itemAny);
-//         if (item == std::tuple<int, int>{0, -1}) {
-//            fd = stdinSource;
-//         } else if (item == std::tuple<int, int>{1, -1}) {
-//            if (index == 0) {
-//               throw InternalShellError(command,
-//                                        "Unsupported redirect for stdin");
-//            } else if (index == 1) {
-//               fd = SUBPROCESS_FD_PIPE;
-//            } else {
-//               fd = SUBPROCESS_FD_STDOUT;
-//            }
-//         } else if (item == std::tuple<int, int>{2, -1}) {
-//            if (index != 2) {
-//               throw InternalShellError(command,
-//                                        "Unsupported redirect for stdout");
-//            }
-//            fd = SUBPROCESS_FD_PIPE;
-//         } else {
-//            throw InternalShellError(command,
-//                                     "Bad redirect");
-//         }
-//         stdFds[index] = fd;
-//         continue;
-//      }
-//      OpenFileTuple &item = std::any_cast<OpenFileTuple &>(itemAny);
-//      std::string &filename = std::get<0>(item);
-//      std::string &mode = std::get<1>(item);
-//      std::optional<int> fdOpt = std::get<2>(item);
-//      // Check if we already have an open fd. This can happen if stdout and
-//      // stderr go to the same place.
-//      if (fdOpt.has_value()) {
-//         stdFds[index] = fd;
-//         continue;
-//      }
-//      std::string redirFilename;
-//      std::list<std::string> names = expand_glob(filename, shenv->getCwd());
-//      if (names.size() != 1) {
-//         throw InternalShellError(command,
-//                                  "Unsupported: glob in "
-//                                  "redirect expanded to multiple files");
-//      }
-//      std::string &name = names.front();
-//      std::FILE *fileStream = nullptr;
-//#ifdef POLAR_AVOID_DEV_NULL
-//      if (name == sgc_kdevNull) {
-//         fileStream = tmpfile();
-//         fd = fileno(fileStream);
-//      }
-//#elif defined(POLAR_OS_WIN32)
-//      if (name == "/dev/tty") {
-//         // Simulate /dev/tty on Windows.
-//         // "CON" is a special filename for the console.
-//         fileStream = std::fopen("CON", mode.c_str());
-//         fd = fileno(fileStream);
-//      }
-//#else
-//      // Make sure relative paths are relative to the cwd.
-//      redirFilename = stdfs::path(shenv->getCwd()) / name;
-//      fileStream = std::fopen(redirFilename.c_str(), mode.c_str());
-//      fd = fileno(fileStream);
-//#endif
-//      // Workaround a Win32 and/or subprocess bug when appending.
-//      //
-//      // FIXME: Actually, this is probably an instance of PR6753.
-//      if (mode == "a") {
-//         std::fseek(fileStream, 0, SEEK_END);
-//      }
-//      std::get<2>(item) = fd;
-//      openedFiles.push_back(OpenFileEntryType{filename, mode, fd, redirFilename});
-//      stdFds[index] = fd;
-//   }
-//   return StdFdsTuple{stdFds[0], stdFds[1], stdFds[2]};
-//}
 
 /// Return the standard fds for cmd after applying redirects
 /// Returns the three standard file descriptors for the new child process.  Each
