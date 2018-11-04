@@ -368,27 +368,6 @@ bool execute(ProcessInfo &processInfo, StringRef program,
    case 0: {
       // Redirect file descriptors...
       if (!redirects.empty()) {
-         if (redirects[0]) {
-            if (redirects[0]->empty()) {
-               processInfo.m_stdinFilename = "/dev/null";
-            } else {
-               processInfo.m_stdinFilename = redirects[0];
-            }
-         }
-         if (redirects[1]) {
-            if (redirects[1]->empty()) {
-               processInfo.m_stdoutFilename = "/dev/null";
-            } else {
-               processInfo.m_stdoutFilename = redirects[1];
-            }
-         }
-         if (redirects[2]) {
-            if (redirects[2]->empty()) {
-               processInfo.m_stderrFilename = "/dev/null";
-            } else {
-               processInfo.m_stderrFilename = redirects[2];
-            }
-         }
          // Redirect stdin
          if (redirect_io(redirects[0], 0, errMsg)) { return false; }
          // Redirect stdout
@@ -438,14 +417,37 @@ bool execute(ProcessInfo &processInfo, StringRef program,
    default:
       break;
    }
-
+   if (!redirects.empty()) {
+      if (redirects[0]) {
+         if (redirects[0]->empty()) {
+            processInfo.m_stdinFilename = "/dev/null";
+         } else {
+            processInfo.m_stdinFilename = redirects[0].value();
+         }
+      }
+      if (redirects[1]) {
+         if (redirects[1]->empty()) {
+            processInfo.m_stdoutFilename = "/dev/null";
+         } else {
+            processInfo.m_stdoutFilename = redirects[1].value();
+         }
+      }
+      if (redirects[2]) {
+         if (redirects[2]->empty()) {
+            processInfo.m_stderrFilename = "/dev/null";
+         } else {
+            processInfo.m_stderrFilename = redirects[2].value();
+         }
+      }
+   }
    processInfo.m_pid = child;
    processInfo.m_process = child;
    return true;
 }
 
 ProcessInfo wait(const ProcessInfo &processInfo, unsigned secondsToWait,
-                 bool waitUntilTerminates, std::string *errMsg) {
+                 bool waitUntilTerminates, std::string *errMsg)
+{
    struct sigaction act, old;
    assert(processInfo.m_pid && "invalid pid to wait on, process not started?");
 

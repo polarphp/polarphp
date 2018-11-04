@@ -16,6 +16,7 @@
 #include "ShellCommands.h"
 #include "BasicTimer.h"
 #include "ForwardDefs.h"
+#include "polarphp/basic/adt/StringRef.h"
 #include <stdexcept>
 #include <string>
 #include <boost/regex.hpp>
@@ -72,7 +73,7 @@ protected:
 #define POLAR_AVOID_DEV_NULL
 #endif
 
-const static std::string sgc_kdevNull("/dev/null");
+const static StringRef sgc_kdevNull("/dev/null");
 const static std::string sgc_kpdbgRegex("%dbg\\(([^)'\"]*)\\)");
 
 class ShellEnvironment
@@ -118,7 +119,7 @@ class ShellCommandResult
 {
 public:
    ShellCommandResult(AbstractCommand *command, const std::string &outputMsg, const std::string &errorMsg,
-                      int exitCode, bool timeoutReached, const std::list<std::string> &outputFiles = {});
+                      int exitCode, bool timeoutReached);
    AbstractCommand *getCommand();
    int getExitCode();
    bool isTimeoutReached();
@@ -130,23 +131,22 @@ protected:
    std::string m_errorMsg;
    int m_exitCode;
    bool m_timeoutReached;
-   std::list<std::string> m_outputFiles;
 };
 
 /// Wrapper around _executeShCmd that handles
 /// timeout
 ///
-std::pair<int, std::string> execute_shcmd(CommandPointer cmd, ShellEnvironmentPointer shenv, ShExecResultList &results,
+std::pair<int, std::string> execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv, ShExecResultList &results,
                                           size_t execTimeout = 0);
 
 std::list<std::string> expand_glob(GlobItem &glob, const std::string &cwd);
 std::list<std::string> expand_glob(const std::string &glob, const std::string &cwd);
-std::list<std::string> expand_glob_expression(const std::list<std::string> &exprs,
+std::list<std::string> expand_glob_expression(const std::list<std::any> &exprs,
                                               const std::string &cwd);
-std::string quote_windows_command(const std::vector<std::string> &seq);
+std::string quote_windows_command(const std::list<std::string> &seq);
 void update_env(ShellEnvironmentPointer shenv, Command *command);
 std::string execute_builtin_echo(Command *command,
-                                 const ShellEnvironmentPointer shenv);
+                                 ShellEnvironmentPointer shenv);
 /// executeBuiltinMkdir - Create new directories.
 ///
 ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironmentPointer shenv);
@@ -154,8 +154,8 @@ ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironme
 ///
 ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmentPointer shenv);
 ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironmentPointer shenv);
-StdFdsTuple process_redirects(Command *command, int stdinSource,
-                              const ShellEnvironmentPointer shenv);
+StdFdsTuple process_redirects(Command *command, const std::string &stdinSource,
+                              ShellEnvironmentPointer shenv);
 ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litConfig,
                                          const std::string &tempBase, std::vector<std::string> &commands,
                                          const std::string &cwd, ResultPointer result);

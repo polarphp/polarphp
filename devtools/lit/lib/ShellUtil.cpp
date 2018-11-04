@@ -260,7 +260,7 @@ std::shared_ptr<AbstractCommand> ShParser::parseCommand()
       ValueError("empty command!");
    }
    assert(tokenAny.type() == typeid(ShellTokenType));
-   std::list<std::any> args{tokenAny};
+   std::list<std::any> args{std::get<0>(std::any_cast<ShellTokenType &>(tokenAny))};
    std::list<RedirectTokenType> redirects;
    while (true) {
       tokenAny = look();
@@ -273,7 +273,11 @@ std::shared_ptr<AbstractCommand> ShParser::parseCommand()
       if ((tokenType == typeid(ShellTokenType) &&
            std::get<1>(std::any_cast<ShellTokenType &>(tokenAny)) == SHELL_CMD_NORMAL_TOKEN) ||
           tokenType == typeid(GlobItem)) {
-         args.push_back(lex());
+         if (tokenType == typeid(GlobItem)) {
+            args.push_back(lex());
+         } else {
+            args.push_back(std::get<0>(std::any_cast<ShellTokenType &>(lex())));
+         }
          continue;
       }
       ShellTokenType token = std::any_cast<ShellTokenType>(tokenAny);

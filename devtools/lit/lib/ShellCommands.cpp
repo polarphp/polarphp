@@ -23,11 +23,11 @@ Command::operator std::string()
    int argSize = m_args.size();
    int i = 0;
    for (std::any &argAny: m_args) {
-      if (argAny.type() == typeid(ShellTokenType)) {
+      if (argAny.type() == typeid(std::string)) {
          if (i < argSize - 1) {
-            argMsg += "\"" + std::get<0>(std::any_cast<ShellTokenType &>(argAny)) + "\", ";
+            argMsg += "\"" + std::any_cast<std::string>(argAny) + "\", ";
          } else {
-            argMsg += "\"" + std::get<0>(std::any_cast<ShellTokenType &>(argAny)) + "\"";
+            argMsg += "\"" + std::any_cast<std::string>(argAny) + "\"";
          }
       }
       ++i;
@@ -61,9 +61,9 @@ bool Command::compareTokenAny(const std::any &lhs, const std::any &rhs) const
       if (lhsValue != rhsValue) {
          return false;
       }
-   } else if (lhs.type() == typeid(ShellTokenType)) {
-      const ShellTokenType &lhsValue = std::any_cast<const ShellTokenType &>(lhs);
-      const ShellTokenType &rhsValue = std::any_cast<const ShellTokenType &>(rhs);
+   } else if (lhs.type() == typeid(std::string)) {
+      const std::string &lhsValue = std::any_cast<std::string>(lhs);
+      const std::string &rhsValue = std::any_cast<std::string>(rhs);
       if (lhsValue != rhsValue) {
          return false;
       }
@@ -119,9 +119,8 @@ const std::list<RedirectTokenType> &Command::getRedirects()
 void Command::toShell(std::string &str, bool) const
 {
    for (const std::any &argAny : m_args) {
-      if (argAny.type() == typeid(ShellTokenType)) {
-         const ShellTokenType &token = std::any_cast<const ShellTokenType &>(argAny);
-         const std::string &arg = std::get<0>(token);
+      if (argAny.type() == typeid(std::string)) {
+         const std::string &arg = std::any_cast<std::string>(argAny);
          std::string quotedArg;
          if (arg.find("'") == std::string::npos) {
             quotedArg = "\'" + arg + "\'";
@@ -187,7 +186,7 @@ Pipeline::operator std::string()
    size_t i = 0;
    size_t cmdSize = m_commands.size();
    std::string commands = "[";
-   for (CommandPointer command : m_commands) {
+   for (AbstractCommandPointer command : m_commands) {
       if (i < cmdSize - 1) {
          commands += command->operator std::string() + ", ";
       } else {
@@ -229,7 +228,7 @@ void Pipeline::toShell(std::string &str, bool pipeFail) const
    }
    int cur = 0;
    int size = m_commands.size();
-   for (const CommandPointer &cmd : m_commands) {
+   for (const AbstractCommandPointer &cmd : m_commands) {
       cmd->toShell(str);
       ++cur;
       if (cur != size - 1) {
@@ -260,12 +259,12 @@ const std::string &Seq::getOp() const
    return m_op;
 }
 
-CommandPointer Seq::getLhs() const
+AbstractCommandPointer Seq::getLhs() const
 {
    return m_lhs;
 }
 
-CommandPointer Seq::getRhs() const
+AbstractCommandPointer Seq::getRhs() const
 {
    return m_rhs;
 }

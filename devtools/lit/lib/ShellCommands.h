@@ -135,13 +135,13 @@ public:
       return Type::Seq;
    }
    const std::string &getOp() const;
-   CommandPointer getLhs() const;
-   CommandPointer getRhs() const;
+   AbstractCommandPointer getLhs() const;
+   AbstractCommandPointer getRhs() const;
    void toShell(std::string &str, bool pipeFail = false) const override;
 protected:
    std::string m_op;
-   CommandPointer m_lhs;
-   CommandPointer m_rhs;
+   AbstractCommandPointer m_lhs;
+   AbstractCommandPointer m_rhs;
 };
 
 } // lit
