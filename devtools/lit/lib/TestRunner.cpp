@@ -1567,6 +1567,7 @@ SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir
    SubstitutionList list{
       {"%%", "#_MARKER_#"}
    };
+   // apply testcase config registered substitutions
    merge_substitution_list(list, test->getConfig()->getSubstitutions());
    std::string tempName = tempBase + ".temp";
    std::string baseName = stdfs::path(tempName).filename();
@@ -1940,6 +1941,7 @@ ResultPointer execute_shtest(TestPointer test, LitConfigPointer litConfig, bool 
    for (const SubstitutionPair &item : get_default_substitutions(test, std::get<0>(tempPaths), std::get<1>(tempPaths), useExternalSh)) {
       extraSubstitutions.push_back(item);
    }
+
    apply_substitutions(script, extraSubstitutions);
    // Re-run failed tests up to test_retry_attempts times.
    int attempts = 1;

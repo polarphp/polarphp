@@ -553,7 +553,7 @@ endmacro(polar_add_loadable_module)
 
 macro(polar_add_executable name)
    cmake_parse_arguments(ARG "DISABLE_POLAR_LINK_POLAR_DYLIB;IGNORE_EXTERNALIZE_DEBUGINFO;NO_INSTALL_RPATH" "" "DEPENDS" ${ARGN})
-   polar_process_sources(ALL_FILES ${ARG_UNPARSED_ARGUMENTS} )
+   polar_process_sources(ALL_FILES ${ARG_UNPARSED_ARGUMENTS})
    list(APPEND POLAR_COMMON_DEPENDS ${ARG_DEPENDS})
    # Generate objlib
    if(POLAR_ENABLE_OBJLIB)

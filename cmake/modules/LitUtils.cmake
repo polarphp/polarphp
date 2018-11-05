@@ -28,6 +28,34 @@ function(polar_add_lit_testsuites)
 
 endfunction()
 
+macro(polar_add_lit_extra_test_executable name)
+   cmake_parse_arguments(ARG "" "DEPENDS;LINK_LIBS" "" ${ARGN})
+   polar_process_sources(ALL_FILES ${ARG_UNPARSED_ARGUMENTS})
+   string(REPLACE " " ";" ARG_DEPENDS "${ARG_DEPENDS}")
+   string(REPLACE " " ";" ARG_LINK_LIBS "${ARG_LINK_LIBS}")
+   if(EXCLUDE_FROM_ALL)
+      add_executable(${name} EXCLUDE_FROM_ALL ${ALL_FILES})
+   else()
+      add_executable(${name} ${ALL_FILES})
+   endif()
+   if(NOT ARG_NO_INSTALL_RPATH)
+      polar_setup_rpath(${name})
+   endif()
+   set(EXCLUDE_FROM_ALL OFF)
+   polar_set_output_directory(${name} BINARY_DIR ${POLAR_LIT_TEST_BIN_DIR} LIBRARY_DIR ${POLAR_LIT_TEST_LIB_DIR})
+   if(ARG_DEPENDS)
+      add_dependencies(${name} ${ARG_DEPENDS})
+   endif(ARG_DEPENDS)
+
+   if (POLAR_THREADS_WORKING)
+      # libpthreads overrides some standard library symbols, so main
+      # executable must be linked with it in order to provide consistent
+      # API for all shared libaries loaded by this executable.
+      list(APPEND ARG_LINK_LIBS ${POLAR_THREADS_LIBRARY})
+   endif()
+   target_link_libraries(${name} PRIVATE ${ARG_LINK_LIBS})
+endmacro()
+
 function(polar_add_lit_cfg_setter)
    cmake_parse_arguments(ARG "LOCAL;NEED_CONFIGURE" "" "" ${ARGN})
    set(targetOutputName "")
