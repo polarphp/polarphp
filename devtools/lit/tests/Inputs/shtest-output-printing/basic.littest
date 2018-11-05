@@ -1,1 +1,3 @@
-# RUN: echo hi | wc
+# RUN: true
+# RUN: echo hi
+# RUN: wc missing-file &> %t.out

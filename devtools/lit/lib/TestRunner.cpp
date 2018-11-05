@@ -676,7 +676,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       ArrayRef<std::optional<StringRef>> redirects{
          stdinFilename,
                stdoutFilename,
-               std::nullopt
+               stderrFilename
       };
       std::string errorMsg;
       bool execFailed;
@@ -1570,7 +1570,8 @@ SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir
    merge_substitution_list(list, test->getConfig()->getSubstitutions());
    std::string tempName = tempBase + ".temp";
    std::string baseName = stdfs::path(tempName).filename();
-   merge_substitution_list(list, {
+   merge_substitution_list(list,
+   {
                               {"%s", sourcePath},
                               {"%S", sourceDir},
                               {"%P", sourceDir},
@@ -1582,7 +1583,8 @@ SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir
                            });
    // "%:[STpst]" are normalized paths without colons and without a leading
    // slash.
-   merge_substitution_list(list, {
+   merge_substitution_list(list,
+   {
                               {"%:s", colon_normalize_path(sourcePath)},
                               {"%:S", colon_normalize_path(sourceDir)},
                               {"%s:p", colon_normalize_path(sourceDir)},
