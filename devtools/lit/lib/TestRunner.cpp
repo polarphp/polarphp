@@ -238,7 +238,7 @@ std::list<std::string> expand_glob_expression(const std::list<std::any> &exprs,
    auto iter = exprs.begin();
    auto endMark = exprs.end();
    std::list<std::string> results{
-
+      std::any_cast<std::string>(*iter++)
    };
    while (iter != endMark) {
       const std::any &exprAny = *iter;
@@ -354,25 +354,26 @@ void update_env(ShellEnvironmentPointer shenv, Command *command)
 
 namespace {
 
-std::tuple<bool, std::string, std::string> get_process_output(ProcessInfo &processInfo)
+std::tuple<bool, std::string, std::string> get_process_output(std::optional<StringRef> stdoutFilename,
+                                                              std::optional<StringRef> stderrFilename)
 {
    std::string output;
    std::string errorMsg;
-   if (processInfo.getStdoutFilename()) {
-      auto outputBuf = MemoryBuffer::getFile(processInfo.getStdoutFilename().value().getStr());
+   if (stdoutFilename) {
+      auto outputBuf = MemoryBuffer::getFile(stdoutFilename.value().getStr());
       if (!outputBuf) {
-         return std::make_tuple(-4, output, errorMsg);
+         return std::make_tuple(false, output, outputBuf.getError().message());
       }
       output = outputBuf.get()->getBuffer().getStr();
    }
-   if (processInfo.getStderrFilename()) {
-      auto outputBuf = MemoryBuffer::getFile(processInfo.getStderrFilename().value().getStr());
+   if (stderrFilename) {
+      auto outputBuf = MemoryBuffer::getFile(stderrFilename.value().getStr());
       if (!outputBuf) {
-         return std::make_tuple(-4, output, errorMsg);
+         return std::make_tuple(false, output, outputBuf.getError().message());
       }
       errorMsg = outputBuf.get()->getBuffer().getStr();
    }
-   return std::make_tuple(processInfo.getReturnCode(), output, errorMsg);
+   return std::make_tuple(true, output, errorMsg);
 }
 
 class OpenTempFilesMgr
@@ -401,7 +402,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
                      ShExecResultList &results,
                      TimeoutHelper &timeoutHelper)
 {
-   std::cout << cmd->operator std::string() << std::endl;
+   //std::cout << cmd->operator std::string() << std::endl;
    if (timeoutHelper.timeoutReached()) {
       // Prevent further recursion if the timeout has been hit
       // as we should try avoid launching more processes.
@@ -553,243 +554,199 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
    }
    size_t i = 0;
    size_t commandSize = abstractCommands.size();
-   try {
-      for (AbstractCommandPointer abstractCommand : abstractCommands) {
-         Command *command = dynamic_cast<Command *>(abstractCommand.get());
-         ShellEnvironmentPointer cmdShEnv = shenv;
-         const std::any &firstArgAny = command->getArgs().front();
-         // here maybe glob item
-         // @TODO
-         assert(firstArgAny.type() == typeid(std::string));
-         const std::string &firstArg = std::any_cast<std::string>(firstArgAny);
-         if (firstArg == "env") {
-            // Create a copy of the global environment and modify it for this one
-            // command. There might be multiple envs in a pipeline:
-            //  env FOO=1 llc < %s | env BAR=2 llvm-mc | FileCheck %s
-            cmdShEnv = std::make_shared<ShellEnvironment>(shenv->getCwd(), shenv->getEnv());
-            update_env(cmdShEnv, command);
-         }
-         StdFdsTuple fds = process_redirects(command, defaultStdin, cmdShEnv);
-         std::optional<std::string> stdinFilename;
+   for (AbstractCommandPointer abstractCommand : abstractCommands) {
+      Command *command = dynamic_cast<Command *>(abstractCommand.get());
+      ShellEnvironmentPointer cmdShEnv = shenv;
+      const std::any &firstArgAny = command->getArgs().front();
+      assert(firstArgAny.type() == typeid(std::string));
+      const std::string &firstArg = std::any_cast<std::string>(firstArgAny);
+      if (firstArg == "env") {
+         // Create a copy of the global environment and modify it for this one
+         // command. There might be multiple envs in a pipeline:
+         //  env FOO=1 llc < %s | env BAR=2 llvm-mc | FileCheck %s
+         cmdShEnv = std::make_shared<ShellEnvironment>(shenv->getCwd(), shenv->getEnv());
+         update_env(cmdShEnv, command);
+      }
+      StdFdsTuple fds = process_redirects(command, defaultStdin, cmdShEnv);
+      std::optional<std::string> stdinFilename;
 
-         std::string rawStdinFilename = std::get<0>(fds);
-         std::string rawStdoutFilename = std::get<1>(fds);
-         std::string rawStderrFilename = std::get<2>(fds);
-         if (!rawStdinFilename.empty()) {
-            stdinFilename = rawStdinFilename;
-         }
-         std::optional<StringRef> stdoutFilename;
-         if (!rawStdoutFilename.empty()) {
-            stdoutFilename = rawStdoutFilename;
-         }
-         std::optional<StringRef> stderrFilename;
-         if (!rawStderrFilename.empty()) {
-            stderrFilename = rawStderrFilename;
-         }
+      std::string rawStdinFilename = std::get<0>(fds);
+      std::string rawStdoutFilename = std::get<1>(fds);
+      std::string rawStderrFilename = std::get<2>(fds);
+      if (!rawStdinFilename.empty()) {
+         stdinFilename = rawStdinFilename;
+      }
+      std::optional<StringRef> stdoutFilename;
+      if (!rawStdoutFilename.empty()) {
+         stdoutFilename = rawStdoutFilename;
+      }
+      std::optional<StringRef> stderrFilename;
+      if (!rawStderrFilename.empty()) {
+         stderrFilename = rawStderrFilename;
+      }
 
-         bool stderrIsStdout = false;
-         // If stderr wants to come from stdout, but stdout isn't a pipe, then put
-         // stderr on a pipe and treat it as stdout.
-         if(stderrFilename == SUBPROCESS_FD_PIPE && stdoutFilename != SUBPROCESS_FD_PIPE){
-            stderrFilename = SUBPROCESS_FD_PIPE;
-            stderrIsStdout = true;
-         } else {
-            stderrIsStdout = false;
-            if (stderrFilename == SUBPROCESS_FD_PIPE) {
-               if (i < commandSize - 1) {
-                  SmallString<32> tempFilename;
-                  fs::create_temporary_file(TESTRUNNER_SUB_PROCESS_STDIN_PREFIX, "", tempFilename);
-                  tempFilesMgr.registerTempFile(tempFilename.getCStr());
-                  stderrFilename = tempFilename.getStr();
-                  stderrTempFiles.push_back(std::make_pair(i, tempFilename.getStr()));
-               }
-            }
-         }
-         // Resolve the executable path ourselves.
-         std::optional<std::string> executable;
-         bool isBuiltinCmd = builtinCommands.find(firstArg) != builtinCommands.end();
-         if (!isBuiltinCmd) {
-            // For paths relative to cwd, use the cwd of the shell environment.
-            StringRef firstArgRef = firstArg;
-            if (firstArgRef.startsWith(".")) {
-               stdfs::path execInCwd = stdfs::path(cmdShEnv->getCwd()) / firstArg;
-               if (stdfs::is_regular_file(execInCwd)) {
-                  executable = execInCwd.string();
-               }
-            }
-            if (!executable) {
-               executable = which(firstArg, shenv->getEnv()["PATH"]);
-            }
-            if (!executable) {
-               throw InternalShellError(command, format_string("%s: command not found", firstArg.c_str()));
-            }
-         }
-         std::list<std::any> &args = command->getArgs();
-         args.pop_front();
-         // Replace uses of /dev/null with temporary files.
-         // sgc_kdevNull
-#ifdef POLAR_AVOID_DEV_NULL
-         int j = 0;
-         for (std::any &argAny: args) {
-            if (argAny.type() == typeid(std::string)) {
-               StringRef argRef = std::any_cast<std::string>(argAny);
-               if (argRef.startsWith(sgc_kdevNull)) {
-                  argAny = argRef.substr(sgc_kdevNull.size());
-               }
-            }
-            ++j;
-         }
-#endif
-         // Expand all glob expressions
-
-         std::list<std::string> expandedArgs = expand_glob_expression(args, shenv->getCwd());
-         if (isBuiltinCmd) {
-            // todo setup
-         }
-#ifdef POLAR_OS_WIN32
-         expandedArgs = quote_windows_command();
-#endif
-         SmallVector<StringRef, 10> argsRef;
-         for (const std::string &argStr : expandedArgs) {
-            argsRef.push_back(argStr);
-         }
-         std::list<std::string> envList;
-         SmallVector<StringRef, 10> envsRef;
-         for (auto &item : cmdShEnv->getEnv()) {
-            envList.push_back(format_string("%s=%s", item.first.c_str(), item.second.c_str()));
-            envsRef.pushBack(envList.back());
-         }
-         for (auto &item : envsRef) {
-            std::cout << item << std::endl;
-         }
-         if (stdoutFilename == SUBPROCESS_FD_PIPE) {
-            std::shared_ptr<SmallString<32>> tempFilename(new SmallString<32>{});
-            fs::create_temporary_file(TESTRUNNER_SUB_ROCESS_STDOUT_PREFIX, "", *tempFilename.get());
-            tempFilesMgr.registerTempFile(tempFilename->getCStr());
-            stdoutFilename = tempFilename->getCStr();
-            tempFilenamesPool.push_back(tempFilename);
-         }
+      bool stderrIsStdout = false;
+      // If stderr wants to come from stdout, but stdout isn't a pipe, then put
+      // stderr on a pipe and treat it as stdout.
+      if(stderrFilename == SUBPROCESS_FD_PIPE && stdoutFilename != SUBPROCESS_FD_PIPE){
+         stderrFilename = SUBPROCESS_FD_PIPE;
+         stderrIsStdout = true;
+      } else {
+         stderrIsStdout = false;
          if (stderrFilename == SUBPROCESS_FD_PIPE) {
-            std::shared_ptr<SmallString<32>> tempFilename(new SmallString<32>{});
-            fs::create_temporary_file(TESTRUNNER_SUB_ROCESS_STDERR_PREFIX, "", *tempFilename.get());
-            tempFilesMgr.registerTempFile(tempFilename->getCStr());
-            stderrFilename = tempFilename->getCStr();
-            tempFilenamesPool.push_back(tempFilename);
-         }
-         ArrayRef<std::optional<StringRef>> redirects{
-            stdinFilename,
-                  stdoutFilename,
-                  stderrFilename
-         };
-         std::string errorMsg;
-         bool execFailed;
-         std::cout << stdoutFilename.value() << std::endl;
-         if (executable.value()  == "/usr/bin/wc") {
-            std::cout << "xiuxiux" << std::endl;
-            std::cout << stdinFilename.value() << std::endl;
-         }
-         ProcessInfo procInfo = polar::sys::execute_no_wait(executable.value(), argsRef, cmdShEnv->getCwd(), envsRef,
-                                                            redirects, -1, &errorMsg,
-                                                            &execFailed);
-         if(execFailed) {
-            throw InternalShellError(command, format_string("Could not create process (%s) due to %s",
-                                                            executable.value().c_str(), errorMsg.c_str()));
-         }
-         processes.push_back(procInfo);
-         // Let the helper know about this process
-         timeoutHelper.addProcess(procInfo.getPid());
-         // Update the current stdin source.
-         if (rawStdoutFilename == SUBPROCESS_FD_PIPE) {
-            defaultStdin = procInfo.getStdoutFilename().value();
-         } else if (stderrIsStdout) {
-            defaultStdin = procInfo.getStderrFilename().value();
-         } else {
-            defaultStdin = rootInputFile.getCStr();
-         }
-         ++i;
-      }
-      std::string error;
-//      // wait last process
-      ProcessInfo waitResult;
-//      while (true) {
-//         waitResult = polar::sys::wait(processes.back(), 0, true, &error);
-//         processes.back().m_returnCode = waitResult.getReturnCode();
-//         if (waitResult.getPid() == processes.back().getPid()) {
-//            break;
-//         }
-//      }
-
-//      int returnCode = waitResult.getReturnCode();
-//      if (returnCode == -1 || returnCode == -2) {
-//         processesData.back() = std::make_tuple(returnCode, "", error);
-//      } else {
-//         processesData.back() = get_process_output(processes.back());
-//      }
-      for (size_t i = 0; i < processes.size(); ++i){
-         ProcessInfo &process = processes[i];
-         while (true) {
-            waitResult =  polar::sys::wait(process, 0, true, &error);
-            if (waitResult.getPid() == process.getPid()) {
-               break;
-            }
-         }
-         int returnCode = waitResult.getReturnCode();
-         if (returnCode == -1 || returnCode == -2) {
-            processesData[i] = std::make_tuple(returnCode, "", error);
-         } else {
-            processesData[i] = get_process_output(process);
-         }
-      }
-      for (auto &item : stderrTempFiles) {
-         int i = std::get<0>(item);
-         StringRef filename = std::get<1>(item);
-         std::string errorMsg;
-         auto outputBuf = MemoryBuffer::getFile(filename);
-         if (outputBuf) {
-            errorMsg = outputBuf.get()->getBuffer().getStr();
-         }
-         std::optional<std::tuple<bool, std::string, std::string>> errorTuple = processesData[i];
-         if (errorTuple) {
-            auto errorValue = errorTuple.value();
-            std::get<2>(errorValue) = errorMsg;
-            processesData[i] = errorValue;
-         } else {
-            processesData[i] = std::make_tuple(-4, "", errorMsg);
-         }
-      }
-      int lastExitCode = 0;
-      CommandList cmds = pipeCommand->getCommands();
-      auto cmdIter = cmds.begin();
-      for (size_t i = 0; i < processesData.size(); ++i) {
-         auto processDataOpt = processesData[i];
-         AbstractCommandPointer acmd = *cmdIter++;
-         if (processDataOpt) {
-            auto processData = processDataOpt.value();
-            lastExitCode = std::get<0>(processData);
-            std::cout << std::get<1>(processData) << std::endl;
-            results.push_back(std::make_shared<ShellCommandResult>(acmd.get(),
-                                 std::get<1>(processData), std::get<2>(processData),
-                                 lastExitCode, timeoutHelper.timeoutReached()));
-         }
-      }
-
-      if (pipeCommand->isNegate()) {
-         lastExitCode = lastExitCode == 0 ? -1 : 0;
-      }
-      return lastExitCode;
-      return 0;
-   } catch (...) {
-      std::string error;
-      for (ProcessInfo &process : processes) {
-         while (true) {
-            ProcessInfo waitResult =  polar::sys::wait(process, 0, true, &error);
-            if (waitResult.getPid() == process.getPid()) {
-               break;
+            if (i < commandSize - 1) {
+               SmallString<32> tempFilename;
+               fs::create_temporary_file(TESTRUNNER_SUB_PROCESS_STDIN_PREFIX, "", tempFilename);
+               tempFilesMgr.registerTempFile(tempFilename.getCStr());
+               stderrFilename = tempFilename.getStr();
+               stderrTempFiles.push_back(std::make_pair(i, tempFilename.getStr()));
             }
          }
       }
-      throw;
+      // Resolve the executable path ourselves.
+      std::optional<std::string> executable;
+      bool isBuiltinCmd = builtinCommands.find(firstArg) != builtinCommands.end();
+      if (!isBuiltinCmd) {
+         // For paths relative to cwd, use the cwd of the shell environment.
+         StringRef firstArgRef = firstArg;
+         if (firstArgRef.startsWith(".")) {
+            stdfs::path execInCwd = stdfs::path(cmdShEnv->getCwd()) / firstArg;
+            if (stdfs::is_regular_file(execInCwd)) {
+               executable = execInCwd.string();
+            }
+         }
+         if (!executable) {
+            executable = which(firstArg, shenv->getEnv()["PATH"]);
+         }
+         if (!executable) {
+            throw InternalShellError(command, format_string("%s: command not found", firstArg.c_str()));
+         }
+      }
+      std::list<std::any> &args = command->getArgs();
+      // Replace uses of /dev/null with temporary files.
+      // sgc_kdevNull
+#ifdef POLAR_AVOID_DEV_NULL
+      int j = 0;
+      for (std::any &argAny: args) {
+         if (argAny.type() == typeid(std::string)) {
+            StringRef argRef = std::any_cast<std::string>(argAny);
+            if (argRef.startsWith(sgc_kdevNull)) {
+               argAny = argRef.substr(sgc_kdevNull.size());
+            }
+         }
+         ++j;
+      }
+#endif
+      // Expand all glob expressions
+
+      std::list<std::string> expandedArgs = expand_glob_expression(args, shenv->getCwd());
+      if (isBuiltinCmd) {
+         // todo setup
+      }
+#ifdef POLAR_OS_WIN32
+      expandedArgs = quote_windows_command();
+#endif
+      SmallVector<StringRef, 10> argsRef;
+      for (const std::string &argStr : expandedArgs) {
+         argsRef.push_back(argStr);
+      }
+      std::list<std::string> envList;
+      SmallVector<StringRef, 10> envsRef;
+      for (auto &item : cmdShEnv->getEnv()) {
+         envList.push_back(format_string("%s=%s", item.first.c_str(), item.second.c_str()));
+         envsRef.pushBack(envList.back());
+      }
+      if (stdoutFilename == SUBPROCESS_FD_PIPE) {
+         std::shared_ptr<SmallString<32>> tempFilename(new SmallString<32>{});
+         fs::create_temporary_file(TESTRUNNER_SUB_ROCESS_STDOUT_PREFIX, "", *tempFilename.get());
+         tempFilesMgr.registerTempFile(tempFilename->getCStr());
+         stdoutFilename = tempFilename->getCStr();
+         tempFilenamesPool.push_back(tempFilename);
+      }
+      if (stderrFilename == SUBPROCESS_FD_PIPE) {
+         std::shared_ptr<SmallString<32>> tempFilename(new SmallString<32>{});
+         fs::create_temporary_file(TESTRUNNER_SUB_ROCESS_STDERR_PREFIX, "", *tempFilename.get());
+         tempFilesMgr.registerTempFile(tempFilename->getCStr());
+         stderrFilename = tempFilename->getCStr();
+         tempFilenamesPool.push_back(tempFilename);
+      }
+      ArrayRef<std::optional<StringRef>> redirects{
+         stdinFilename,
+               stdoutFilename,
+               std::nullopt
+      };
+      std::string errorMsg;
+      bool execFailed;
+
+      int returnCode = polar::sys::execute_and_wait(executable.value(), argsRef, cmdShEnv->getCwd(), envsRef,
+                                                    redirects, 0, 0, &errorMsg,
+                                                    &execFailed);
+      if(execFailed) {
+         throw InternalShellError(command, format_string("Could not create process (%s) due to %s",
+                                                         executable.value().c_str(), errorMsg.c_str()));
+      }
+      if (returnCode == -1 || returnCode == -2) {
+         processesData[i] = std::make_tuple(returnCode, "", errorMsg);
+      } else {
+         auto processResult = get_process_output(stdoutFilename, stderrFilename);
+         if (std::get<0>(processResult)) {
+            processesData[i] = std::make_tuple(returnCode, std::get<1>(processResult), std::get<2>(processResult));
+         } else {
+            throw InternalShellError(command, format_string("get command stdout or stderr content error: %s",
+                                                            std::get<2>(processResult).c_str()));
+         }
+      }
+      // Let the helper know about this process
+      // @TODO add timeout
+      // timeoutHelper.addProcess(procInfo.getPid());
+      // Update the current stdin source.
+      if (rawStdoutFilename == SUBPROCESS_FD_PIPE) {
+         defaultStdin = stdoutFilename.value();
+      } else if (stderrIsStdout) {
+         defaultStdin = stderrFilename.value();
+      } else {
+         defaultStdin = rootInputFile.getCStr();
+      }
+      ++i;
    }
+
+   for (auto &item : stderrTempFiles) {
+      int i = std::get<0>(item);
+      StringRef filename = std::get<1>(item);
+      std::string errorMsg;
+      auto outputBuf = MemoryBuffer::getFile(filename);
+      if (outputBuf) {
+         errorMsg = outputBuf.get()->getBuffer().getStr();
+      }
+      std::optional<std::tuple<bool, std::string, std::string>> errorTuple = processesData[i];
+      if (errorTuple) {
+         auto errorValue = errorTuple.value();
+         std::get<2>(errorValue) = errorMsg;
+         processesData[i] = errorValue;
+      } else {
+         processesData[i] = std::make_tuple(-4, "", errorMsg);
+      }
+   }
+   int lastExitCode = 0;
+   CommandList cmds = pipeCommand->getCommands();
+   auto cmdIter = cmds.begin();
+   for (size_t i = 0; i < processesData.size(); ++i) {
+      auto processDataOpt = processesData[i];
+      AbstractCommandPointer acmd = *cmdIter++;
+      if (processDataOpt) {
+         auto processData = processDataOpt.value();
+         lastExitCode = std::get<0>(processData);
+         results.push_back(std::make_shared<ShellCommandResult>(
+                              acmd.get(),
+                              std::get<1>(processData), std::get<2>(processData),
+                              lastExitCode, timeoutHelper.timeoutReached()));
+      }
+   }
+
+   if (pipeCommand->isNegate()) {
+      lastExitCode = lastExitCode == 0 ? -1 : 0;
+   }
+   return lastExitCode;
 }
 
 } // anonymous namespace
