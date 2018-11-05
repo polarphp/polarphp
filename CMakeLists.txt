@@ -292,6 +292,8 @@ else()
    set(POLAR_SHLIB_OUTPUT_INTDIR ${POLAR_LIBRARY_OUTPUT_INTDIR})
 endif()
 
+file(TO_NATIVE_PATH "/" DIR_SEPARATOR)
+
 # Sanity check our source directory to make sure that we are not trying to
 # generate an in-source build (unless on MSVC_IDE, where it is ok), and to make
 # sure that we don't have any stray generated files lying around in the tree

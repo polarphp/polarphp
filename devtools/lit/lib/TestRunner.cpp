@@ -1580,7 +1580,8 @@ SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir
                               {"%t", tempName},
                               {"basename_t", baseName},
                               {"%T", tempDir},
-                              {"#_MARKER_#", "%"}
+                              {"#_MARKER_#", "%"},
+                              {"%{filechecker}", FILECHECKER_BIN},
                            });
    // "%:[STpst]" are normalized paths without colons and without a leading
    // slash.
@@ -1941,7 +1942,6 @@ ResultPointer execute_shtest(TestPointer test, LitConfigPointer litConfig, bool 
    for (const SubstitutionPair &item : get_default_substitutions(test, std::get<0>(tempPaths), std::get<1>(tempPaths), useExternalSh)) {
       extraSubstitutions.push_back(item);
    }
-
    apply_substitutions(script, extraSubstitutions);
    // Re-run failed tests up to test_retry_attempts times.
    int attempts = 1;

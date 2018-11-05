@@ -46,14 +46,13 @@ macro(polar_add_lit_extra_test_executable name)
    if(ARG_DEPENDS)
       add_dependencies(${name} ${ARG_DEPENDS})
    endif(ARG_DEPENDS)
-
    if (POLAR_THREADS_WORKING)
       # libpthreads overrides some standard library symbols, so main
       # executable must be linked with it in order to provide consistent
       # API for all shared libaries loaded by this executable.
       list(APPEND ARG_LINK_LIBS ${POLAR_THREADS_LIBRARY})
    endif()
-   target_link_libraries(${name} PRIVATE ${ARG_LINK_LIBS})
+   target_link_libraries(${name} PRIVATE ${ARG_LINK_LIBS} CLI11::CLI11)
 endmacro()
 
 function(polar_add_lit_cfg_setter)
