@@ -530,11 +530,9 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       results.push_back(std::make_shared<ShellCommandResult>(firstCommand, "", "", 0, false));
       return 0;
    }
-   SmallVector<ProcessInfo, 6> processes;
    SmallVector<std::optional<std::tuple<int, std::string, std::string>>, 6> processesData;
    std::string defaultStdin;
    std::list<std::pair<int, StringRef>> stderrTempFiles;
-   std::list<std::pair<int, StringRef>> namedTempFiles;
    std::list<std::shared_ptr<SmallString<32>>> tempFilenamesPool;
    OpenTempFilesMgr tempFilesMgr;
    int inputFd;
@@ -631,7 +629,10 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          if (argAny.type() == typeid(std::string)) {
             StringRef argRef = std::any_cast<std::string>(argAny);
             if (argRef.startsWith(sgc_kdevNull)) {
-               argAny = argRef.substr(sgc_kdevNull.size());
+               SmallString<32> tempFilename;
+               fs::create_temporary_file(TESTRUNNER_SUB_ROCESS_STDOUT_PREFIX, "", tempFilename);
+               tempFilesMgr.registerTempFile(tempFilename.getCStr());
+               argAny = tempFilename.getStr() + argRef.substr(sgc_kdevNull.size());
             }
          }
          ++j;
@@ -644,7 +645,8 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          // todo setup
       }
 #ifdef POLAR_OS_WIN32
-      expandedArgs = quote_windows_command();
+      // @TODO quote windows
+      //      expandedArgs = quote_windows_command(expandedArgs);
 #endif
       SmallVector<StringRef, 10> argsRef;
       for (const std::string &argStr : expandedArgs) {
@@ -794,7 +796,7 @@ StdFdsTuple process_redirects(Command *command, const std::string &stdinSource,
    }
    // Open file descriptors in a second pass.
    SmallVector<std::string, 3> stdFds{"", "", ""};
-   for (int index = 0; index < 2; ++index) {
+   for (int index = 0; index <= 2; ++index) {
       std::string fd;
       std::any &itemAny = redirects[index];
       // Handle the sentinel values for defaults up front.
@@ -845,81 +847,75 @@ StdFdsTuple process_redirects(Command *command, const std::string &stdinSource,
 std::string execute_builtin_echo(Command *command,
                                  ShellEnvironmentPointer shenv)
 {
-   std::list<OpenFileEntryType> openedFiles;
    StdFdsTuple fds = process_redirects(command, SUBPROCESS_FD_PIPE, shenv);
-   //   int stdinFd = std::get<0>(fds);
-   //   int stdoutFd = std::get<1>(fds);
-   //   int stderrFd = std::get<2>(fds);
-   //   if (stdinFd != SUBPROCESS_FD_PIPE || stderrFd != SUBPROCESS_FD_PIPE) {
-   //      throw InternalShellError(command,
-   //                               "stdin and stderr redirects not supported for echo");
-   //   }
-   //   // Some tests have un-redirected echo commands to help debug test failures.
-   //   // Buffer our output and return it to the caller.
-   //   std::ostream *outstream = &std::cout;
-   //   std::ostringstream strstream;
-   //   bool isRedirected = true;
-   //   if (stdoutFd == SUBPROCESS_FD_PIPE) {
-   //      isRedirected = false;
-   //      outstream = &strstream;
-   //   } else {
-   //#ifdef POLAR_OS_WIN32
-   //      // @TODO WIN32
-   //      // Reopen stdout in binary mode to avoid CRLF translation. The versions
-   //      // of echo we are replacing on Windows all emit plain LF, and the LLVM
-   //      // tests now depend on this.
-   //      // When we open as binary, however, this also means that we have to write
-   //      // 'bytes' objects to stdout instead of 'str' objects.
-   //      // openedFiles.push_back({"", "", _fileno(stdout), ""});
-   //#endif
-   //   }
-   //   // Implement echo flags. We only support -e and -n, and not yet in
-   //   // combination. We have to ignore unknown flags, because `echo "-D FOO"`
-   //   // prints the dash.
-   //   std::list<std::any> args;
-   //   auto copyIter = command->getArgs().begin();
-   //   auto copyEndMark = command->getArgs().end();
-   //   ++copyIter;
-   //   std::copy(copyIter, copyEndMark, args.begin());
-   //   //bool interpretEscapes = false;
-   //   bool writeNewline = true;
-   //   while (args.size() >= 1) {
-   //      std::any flagAny = args.front();
-   //      std::string flag = std::any_cast<std::string>(flagAny);
-   //      if (flag == "-e" || flag == "-n") {
-   //         args.pop_front();
-   //         if (flag == "-e") {
-   //            //interpretEscapes = true;
-   //         } else if (flag == "-n") {
-   //            writeNewline = false;
-   //         }
-   //      } else {
-   //         break;
-   //      }
-   //   }
-   //   if (!args.empty()) {
-   //      size_t i = 0;
-   //      size_t argSize = args.size();
-   //      auto iter = args.begin();
-   //      auto endMark = args.end();
-   //      while (iter != endMark) {
-   //         if (i != argSize -1) {
-   //            *outstream << std::any_cast<std::string>(*iter) << " ";
-   //         } else {
-   //            *outstream << std::any_cast<std::string>(*iter);
-   //         }
-   //      }
-   //   }
-   //   if (writeNewline) {
-   //      *outstream << std::endl;
-   //   }
-   //   for (auto &entry : openedFiles) {
-   //      close(std::get<2>(entry));
-   //   }
-   //   if (!isRedirected) {
-   //      outstream->flush();
-   //      return dynamic_cast<std::ostringstream *>(outstream)->str();
-   //   }
+   std::string rawStdinFilename = std::get<0>(fds);
+   std::string rawStdoutFilename = std::get<1>(fds);
+   std::string rawStderrFilename = std::get<2>(fds);
+   if (rawStdinFilename != SUBPROCESS_FD_PIPE || rawStderrFilename != SUBPROCESS_FD_PIPE) {
+      throw InternalShellError(command,
+                               "stdin and stderr redirects not supported for echo");
+   }
+   // Some tests have un-redirected echo commands to help debug test failures.
+   // Buffer our output and return it to the caller.
+   std::ostream *outstream = &std::cout;
+   std::ostringstream strstream;
+   bool isRedirected = true;
+   if (rawStdoutFilename == SUBPROCESS_FD_PIPE) {
+      isRedirected = false;
+      outstream = &strstream;
+   } else {
+#ifdef POLAR_OS_WIN32
+      // @TODO WIN32
+      // Reopen stdout in binary mode to avoid CRLF translation. The versions
+      // of echo we are replacing on Windows all emit plain LF, and the LLVM
+      // tests now depend on this.
+      // When we open as binary, however, this also means that we have to write
+      // 'bytes' objects to stdout instead of 'str' objects.
+      // openedFiles.push_back({"", "", _fileno(stdout), ""});
+#endif
+   }
+   // Implement echo flags. We only support -e and -n, and not yet in
+   // combination. We have to ignore unknown flags, because `echo "-D FOO"`
+   // prints the dash.
+   std::list<std::any> args = command->getArgs();
+   args.pop_front();
+   //bool interpretEscapes = false;
+   bool writeNewline = true;
+   while (args.size() >= 1) {
+      std::any flagAny = args.front();
+      std::string flag = std::any_cast<std::string>(flagAny);
+      if (flag == "-e" || flag == "-n") {
+         args.pop_front();
+         if (flag == "-e") {
+            //interpretEscapes = true;
+         } else if (flag == "-n") {
+            writeNewline = false;
+         }
+      } else {
+         break;
+      }
+   }
+   if (!args.empty()) {
+      size_t i = 0;
+      size_t argSize = args.size();
+      auto iter = args.begin();
+      auto endMark = args.end();
+      while (iter != endMark) {
+         if (i != argSize -1) {
+            *outstream << std::any_cast<std::string>(*iter) << " ";
+         } else {
+            *outstream << std::any_cast<std::string>(*iter);
+         }
+         ++iter;
+      }
+   }
+   if (writeNewline) {
+      *outstream << std::endl;
+   }
+   if (!isRedirected) {
+      outstream->flush();
+      return dynamic_cast<std::ostringstream *>(outstream)->str();
+   }
    return "";
 }
 

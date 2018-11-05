@@ -81,7 +81,7 @@
 # define ConvertUTF_RESTORE_WARNINGS
 #endif
 
-ConvertUTF_DISABLE_WARNINGS
+//ConvertUTF_DISABLE_WARNINGS
 
 namespace polar {
 namespace utils {
@@ -771,4 +771,4 @@ ConversionResult convert_utf8_to_utf32(const Utf8 **sourceStart,
 
    --------------------------------------------------------------------- */
 
-ConvertUTF_RESTORE_WARNINGS
+//ConvertUTF_RESTORE_WARNINGS

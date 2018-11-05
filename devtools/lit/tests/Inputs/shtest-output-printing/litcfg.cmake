@@ -9,6 +9,4 @@
 #
 # Created by polarboy on 2018/09/19.
 
-add_subdirectory(Inputs/discovery)
-add_subdirectory(Inputs/shtest-env)
-add_subdirectory(Inputs/shtest-output-printing)
+polar_add_lit_cfg_setter()
