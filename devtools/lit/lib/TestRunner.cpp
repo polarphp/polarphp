@@ -565,6 +565,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          cmdShEnv = std::make_shared<ShellEnvironment>(shenv->getCwd(), shenv->getEnv());
          update_env(cmdShEnv, command);
       }
+
       StdFdsTuple fds = process_redirects(command, defaultStdin, cmdShEnv);
       std::optional<std::string> stdinFilename;
 
@@ -593,11 +594,11 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          stderrIsStdout = false;
          if (stderrFilename == SUBPROCESS_FD_PIPE) {
             if (i < commandSize - 1) {
-               SmallString<32> tempFilename;
-               fs::create_temporary_file(TESTRUNNER_SUB_PROCESS_STDIN_PREFIX, "", tempFilename);
-               tempFilesMgr.registerTempFile(tempFilename.getCStr());
-               stderrFilename = tempFilename.getStr();
-               stderrTempFiles.push_back(std::make_pair(i, tempFilename.getStr()));
+               std::shared_ptr<SmallString<32>> tempFilename(new SmallString<32>{});
+               fs::create_temporary_file(TESTRUNNER_SUB_ROCESS_STDERR_PREFIX, "", *tempFilename.get());
+               tempFilesMgr.registerTempFile(tempFilename->getCStr());
+               stderrFilename = tempFilename->getStr();
+               stderrTempFiles.push_back(std::make_pair(i, tempFilename->getStr()));
             }
          }
       }
@@ -679,7 +680,6 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       };
       std::string errorMsg;
       bool execFailed;
-
       int returnCode = polar::sys::execute_and_wait(executable.value(), argsRef, cmdShEnv->getCwd(), envsRef,
                                                     redirects, 0, 0, &errorMsg,
                                                     &execFailed);
@@ -690,7 +690,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       if (returnCode == -1 || returnCode == -2) {
          processesData[i] = std::make_tuple(returnCode, "", errorMsg);
       } else {
-         auto processResult = get_process_output(stdoutFilename, stderrFilename);
+         auto processResult = get_process_output(stdoutFilename, std::nullopt);
          if (std::get<0>(processResult)) {
             processesData[i] = std::make_tuple(returnCode, std::get<1>(processResult), std::get<2>(processResult));
          } else {
