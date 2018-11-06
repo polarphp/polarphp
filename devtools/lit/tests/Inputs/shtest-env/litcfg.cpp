@@ -24,6 +24,8 @@ void root_cfgsetter(TestingConfig *config, LitConfig *litConfig)
    config->setTestFormat(std::make_shared<ShTest>());
    config->setTestExecRoot(std::nullopt);
    config->setTestSourceRoot(std::nullopt);
+   config->addEnvironment("FOO", "1");
+   config->addEnvironment("BAR", "2");
    config->addSubstitution("%{print_env}", LIT_TEST_PRINT_ENVIRONMENT_BIN);
 }
 }

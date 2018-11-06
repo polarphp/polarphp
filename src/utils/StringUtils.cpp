@@ -16,7 +16,7 @@
 namespace polar {
 namespace utils {
 
-static const char sg_regexMetachars[] = "()^$|*+?.[]\\{}";
+static const char sg_regexMetachars[] = "()^$|*+?.:[]\\{}";
 
 std::string regex_escape(StringRef str)
 {

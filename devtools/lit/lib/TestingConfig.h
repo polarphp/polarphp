@@ -85,6 +85,7 @@ public:
    TestingConfig &setSuffixes(const std::set<std::string> &suffixes);
    TestingConfig &setTestFormat(std::shared_ptr<TestFormat> testFormat);
    TestingConfig &setEnvironment(const std::map<std::string, std::string> &environment);
+   TestingConfig &addEnvironment(StringRef name, StringRef value);
    TestingConfig &setSubstitutions(const SubstitutionList &substitutions);
    TestingConfig &addSubstitution(StringRef name, const std::string &replacement);
    TestingConfig &setIsUnsupported(bool flag);

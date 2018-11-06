@@ -15,6 +15,7 @@
 #include "LitConfig.h"
 #include "ProgressBar.h"
 #include "formats/Base.h"
+#include "ForwardDefs.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include <tuple>
 #include <string>
@@ -255,7 +256,12 @@ void do_execute_test(TestPointer test, LitConfigPointer litConfig,
          semaphore->wait();
       }
       std::chrono::time_point startTime = std::chrono::system_clock::now();
-      result = test->getConfig()->getTestFormat()->execute(test, litConfig);
+      TestFormatPointer testFormatter = test->getConfig()->getTestFormat();
+      // here we need setting the shtest format as the default formatter ?
+      if (!testFormatter) {
+         throw ValueError("Test Format is not settings");
+      }
+      result = testFormatter->execute(test, litConfig);
       result->setElapsed(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - startTime).count());
    } catch (std::exception &exp) {
       if (litConfig->isDebug()) {

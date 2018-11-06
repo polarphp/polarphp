@@ -191,6 +191,12 @@ TestingConfig &TestingConfig::setEnvironment(const std::map<std::string, std::st
    return *this;
 }
 
+TestingConfig &TestingConfig::addEnvironment(StringRef name, StringRef value)
+{
+   m_environment[name.getStr()] = value.getStr();
+   return *this;
+}
+
 TestingConfig &TestingConfig::setSubstitutions(const SubstitutionList &substitutions)
 {
    m_substitutions = substitutions;
@@ -312,6 +318,7 @@ void TestingConfig::loadFromPath(const std::string &path, LitConfig &litConfig)
    }
    cfgSetterName += "_" + cfgSetterSuffix;
    replace_string(std::string(1, stdfs::path::preferred_separator), "_", cfgSetterName);
+   replace_string("-", "_", cfgSetterName);
    // if this method invoked, symbol must exist at normation situation
    // @TODO can ignore this exception ?
    CfgSetterType cfgSetter = cfgSetterPlugin.getCfgSetter<CfgSetterType>(cfgSetterName);

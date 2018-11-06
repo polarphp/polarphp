@@ -340,10 +340,6 @@ size_t Pattern::match(StringRef buffer, size_t &matchLen,
       regExToMatch = m_tmpStr;
    }
 
-//   boost::cmatch matchInfo;
-//   if (!boost::regex_search(buffer.begin(), buffer.end(), matchInfo, boost::regex(regExToMatch.getStr()))) {
-//      return StringRef::npos;
-//   }
    boost::cmatch matchInfo;
    if (!boost::regex_search(buffer.begin(), buffer.end(), matchInfo, boost::regex(regExToMatch.getStr()))) {
       return StringRef::npos;

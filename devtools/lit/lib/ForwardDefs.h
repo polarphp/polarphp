@@ -59,6 +59,7 @@ using AbstractCommandPointer = std::shared_ptr<AbstractCommand>;
 using ShellCommandResultPointer = std::shared_ptr<ShellCommandResult>;
 using IntegratedTestKeywordParserPointer = std::shared_ptr<IntegratedTestKeywordParser>;
 using ShellEnvironmentPointer = std::shared_ptr<ShellEnvironment>;
+using TestFormatPointer = std::shared_ptr<TestFormat>;
 
 using TestList = std::list<TestPointer>;
 using TestSuiteList = std::list<TestSuitePointer>;

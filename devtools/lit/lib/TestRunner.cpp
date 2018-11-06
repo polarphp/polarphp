@@ -1288,7 +1288,7 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
 {
    std::vector<AbstractCommandPointer> cmds;
    for (std::string &cmdStr: commands) {
-      cmdStr = boost::regex_replace(cmdStr, boost::regex(sgc_kpdbgRegex, boost::match_default | boost::format_all), ": '$1'; ");
+      cmdStr = boost::regex_replace(cmdStr, boost::regex(sgc_kpdbgRegex, boost::match_default | boost::match_all), ": '$1'; ");
       try {
          cmds.push_back(ShParser(cmdStr, litConfig->isWindows(), test->getConfig()->isPipefail()).parse());
       } catch (...) {
@@ -1393,7 +1393,7 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
    if (!ostream.is_open()) {
       std::cerr << "open script file error" << std::endl;
    }
-   boost::regex kpdbgRegex(sgc_kpdbgRegex, boost::match_default | boost::format_all);
+   boost::regex kpdbgRegex(sgc_kpdbgRegex, boost::match_default | boost::match_all);
    if (isWin32CMDEXE) {
       for (std::string &command : commands) {
          command = boost::regex_replace(command, kpdbgRegex, "echo '$1' > nul && ");
@@ -1409,12 +1409,12 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
          command = boost::regex_replace(command, kpdbgRegex, ": '$1'; ");
       }
       if (test->getConfig()->isPipefail()) {
-         ostream << "set -o pipefail;";
+         ostream << "set -o pipefail;" << std::endl;;
       }
       if (litConfig->isEchoAllCommands()) {
-         ostream << "set -x;";
+         ostream << "set -x;" << std::endl;;
       }
-      ostream << "{" << join_string_list(commands, "; } &&\n{ ") << "; }";
+      ostream << "{" << join_string_list(commands, "; } &&\n{ ") << "; }" << std::endl;
    }
    ostream << std::endl;
    ostream.flush();
@@ -1507,14 +1507,12 @@ ParsedScriptLines parse_integrated_test_script_commands(StringRef sourcePath,
       filteredKeywords.push_back(polar::utils::regex_escape(keywork));
    });
    try {
-      // Iterate over the matches.
       size_t lineNumber = 1;
       size_t lastMatchPosition = 0;
-      std::string regexStr = format_string("(%s)(.*)\n", polar::basic::join(filteredKeywords, "|").c_str());
-      boost::regex regex(regexStr);
-      boost::sregex_iterator riter(fileContent.begin(), fileContent.end(), regex);
+      std::string regexStr = format_string("(%s)(.*)", polar::basic::join(filteredKeywords, "|").c_str());
+      boost::sregex_iterator riter(fileContent.begin(), fileContent.end(), boost::regex(regexStr), boost::match_not_dot_newline);
       boost::sregex_iterator eiter;
-      std::for_each(riter, eiter, [&lines, &lineNumber, &lastMatchPosition, &fileContent](const boost::match_results<std::string::const_iterator> &match){
+      std::for_each(riter, eiter, [&lines, &lineNumber, &lastMatchPosition, &fileContent](const boost::smatch &match){
          int matchPosition = match.position();
          lineNumber += StringRef(fileContent.data() + lastMatchPosition, matchPosition - lastMatchPosition).count('\n');
          lastMatchPosition = matchPosition;
@@ -1545,7 +1543,7 @@ std::string colon_normalize_path(std::string path)
    replace_string("\\", "/", path);
    return boost::regex_replace(path, boost::regex("^(.):"), [](boost::smatch match) -> std::string{
       return match[1].str();
-   }, boost::match_default | boost::format_all);
+   }, boost::match_default | boost::match_all);
 #else
    assert(path[0] == '/');
    return path.substr(1);
@@ -1622,7 +1620,7 @@ std::vector<std::string> &apply_substitutions(std::vector<std::string> &script, 
 
 #endif
          line = boost::regex_replace(line, boost::regex(a.getStr()), b,
-                                     boost::match_default | boost::format_all);
+                                     boost::match_default | boost::match_all);
       }
    }
    return script;
@@ -1759,7 +1757,7 @@ std::vector<std::string> &IntegratedTestKeywordParser::handleCommand(int lineNum
       output.back() = output.back().substr(0, output.size() - 2) + line;
    } else {
       std::string pdbg = format_string("%%dbg(%s at line %d)", keyword.c_str(), lineNumber);
-      assert(boost::regex_match(pdbg, boost::regex(sgc_kpdbgRegex + "$", boost::match_default | boost::format_all)) && "kPdbgRegex expected to match actual %dbg usage");
+      assert(boost::regex_match(pdbg, boost::regex(sgc_kpdbgRegex + "$", boost::match_default | boost::match_all)) && "kPdbgRegex expected to match actual %dbg usage");
       line = format_string("%s %s", pdbg.c_str(), line.c_str());
       output.push_back(line);
    }
