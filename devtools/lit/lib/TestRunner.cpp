@@ -327,6 +327,8 @@ void update_env(ShellEnvironmentPointer shenv, Command *command)
       // from the environment.
       if (arg == "-u") {
          unsetNextEnvVar = true;
+         ++argIdx;
+         ++iter;
          continue;
       }
       if (unsetNextEnvVar) {
@@ -334,6 +336,8 @@ void update_env(ShellEnvironmentPointer shenv, Command *command)
          if (env.find(arg) != env.end()) {
             env.erase(arg);
          }
+         ++argIdx;
+         ++iter;
          continue;
       }
       // Partition the string into KEY=VALUE.
@@ -347,7 +351,7 @@ void update_env(ShellEnvironmentPointer shenv, Command *command)
       ++argIdx;
       ++iter;
    }
-   for (int i = 0; i < argIdx; ++i) {
+   for (int i = 0; i <= argIdx; ++i) {
       args.pop_front();
    }
 }
@@ -564,8 +568,12 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          //  env FOO=1 llc < %s | env BAR=2 llvm-mc | FileCheck %s
          cmdShEnv = std::make_shared<ShellEnvironment>(shenv->getCwd(), shenv->getEnv());
          update_env(cmdShEnv, command);
+         std::list<std::any> &args = command->getArgs();
+         if (args.size() == 0) {
+            throw InternalShellError(command, "env command syntax error, maybe you need add command after setup envronment var");
+         }
          // here we must reset firstArg
-         std::any &firstArgAny = command->getArgs().front();
+         std::any &firstArgAny = args.front();
          assert(firstArgAny.type() == typeid(std::string));
          firstArg = std::any_cast<std::string>(firstArgAny);
       }
@@ -618,6 +626,8 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
             if (stdfs::is_regular_file(execInCwd)) {
                executable = execInCwd.string();
             }
+         } else if (firstArgRef.startsWith("/") && stdfs::is_regular_file(firstArgRef.getStr())) {
+            executable = firstArgRef.getStr();
          }
          if (!executable) {
             executable = which(firstArg, shenv->getEnv()["PATH"]);
@@ -694,7 +704,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       if (returnCode == -1 || returnCode == -2) {
          processesData[i] = std::make_tuple(returnCode, "", errorMsg);
       } else {
-         auto processResult = get_process_output(stdoutFilename, std::nullopt);
+         auto processResult = get_process_output(stdoutFilename, stderrFilename);
          if (std::get<0>(processResult)) {
             processesData[i] = std::make_tuple(returnCode, std::get<1>(processResult), std::get<2>(processResult));
          } else {
