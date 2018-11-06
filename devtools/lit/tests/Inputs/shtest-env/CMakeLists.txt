@@ -11,3 +11,11 @@
 
 polar_setup_lit_cfg_setters(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    OUTPUT_NAME littestsshtestenv)
+
+# need add depended ?
+
+polar_add_lit_extra_test_executable(LittestPrintEnvironment PrintEnvironment.cpp)
+
+set_target_properties(littestsshtestenv
+   PROPERTIES
+   COMPILE_DEFINITIONS "LIT_TEST_PRINT_ENVIRONMENT_BIN=\"${POLAR_LIT_TEST_BIN_DIR}${DIR_SEPARATOR}LittestPrintEnvironment\"")

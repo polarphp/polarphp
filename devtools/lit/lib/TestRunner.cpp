@@ -318,7 +318,7 @@ void update_env(ShellEnvironmentPointer shenv, Command *command)
    // skip command name
    ++iter;
    auto endMark = args.end();
-   int argIdx = 1;
+   int argIdx = 0;
    std::map<std::string, std::string> &env = shenv->getEnv();
    while (iter != endMark) {
       std::string arg = std::any_cast<std::string>(*iter);
@@ -347,7 +347,7 @@ void update_env(ShellEnvironmentPointer shenv, Command *command)
       ++argIdx;
       ++iter;
    }
-   for (int i = 0; i <= argIdx; ++i) {
+   for (int i = 0; i < argIdx; ++i) {
       args.pop_front();
    }
 }
@@ -555,15 +555,19 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
    for (AbstractCommandPointer abstractCommand : abstractCommands) {
       Command *command = dynamic_cast<Command *>(abstractCommand.get());
       ShellEnvironmentPointer cmdShEnv = shenv;
-      const std::any &firstArgAny = command->getArgs().front();
+      std::any &firstArgAny = command->getArgs().front();
       assert(firstArgAny.type() == typeid(std::string));
-      const std::string &firstArg = std::any_cast<std::string>(firstArgAny);
+      std::string firstArg = std::any_cast<std::string>(firstArgAny);
       if (firstArg == "env") {
          // Create a copy of the global environment and modify it for this one
          // command. There might be multiple envs in a pipeline:
          //  env FOO=1 llc < %s | env BAR=2 llvm-mc | FileCheck %s
          cmdShEnv = std::make_shared<ShellEnvironment>(shenv->getCwd(), shenv->getEnv());
          update_env(cmdShEnv, command);
+         // here we must reset firstArg
+         std::any &firstArgAny = command->getArgs().front();
+         assert(firstArgAny.type() == typeid(std::string));
+         firstArg = std::any_cast<std::string>(firstArgAny);
       }
 
       StdFdsTuple fds = process_redirects(command, defaultStdin, cmdShEnv);
@@ -602,6 +606,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
             }
          }
       }
+      std::list<std::any> &args = command->getArgs();
       // Resolve the executable path ourselves.
       std::optional<std::string> executable;
       bool isBuiltinCmd = builtinCommands.find(firstArg) != builtinCommands.end();
@@ -621,7 +626,6 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
             throw InternalShellError(command, format_string("%s: command not found", firstArg.c_str()));
          }
       }
-      std::list<std::any> &args = command->getArgs();
       // Replace uses of /dev/null with temporary files.
       // sgc_kdevNull
 #ifdef POLAR_AVOID_DEV_NULL
