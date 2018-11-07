@@ -1,0 +1,2 @@
+# RUN: : first line continued \
+# RUN:   to second line

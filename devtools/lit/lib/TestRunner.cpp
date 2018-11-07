@@ -1710,6 +1710,9 @@ void IntegratedTestKeywordParser::parseLine(int lineNumber, std::string &line)
    try {
       m_parsedLines.push_back(std::make_pair(lineNumber, line));
       m_value = m_parser(lineNumber, line, m_value);
+      for (auto item : m_value) {
+         std::cout << item << std::endl;
+      }
    } catch (ValueError &e) {
       throw ValueError(format_string("%s \nin %s directive on test line %d", e.what(),
                                      m_keyword.c_str(), lineNumber));
@@ -1749,7 +1752,7 @@ std::vector<std::string> &IntegratedTestKeywordParser::handleTag(int, std::strin
 std::vector<std::string> &IntegratedTestKeywordParser::handleCommand(int lineNumber, std::string &line, std::vector<std::string> &output,
                                                                      const std::string &keyword)
 {
-   line = StringRef(line).trim().getStr();
+   line = StringRef(line).rtrim().getStr();
    line = boost::regex_replace(line, boost::regex("%\\(line\\)"), std::to_string(lineNumber));
    line = boost::regex_replace(line, boost::regex("%\\(line *([\\+-]) *(\\d+)\\)"), [&lineNumber](const boost::smatch &match) -> std::string{
       std::string mstr = match[1].str();
@@ -1764,7 +1767,8 @@ std::vector<std::string> &IntegratedTestKeywordParser::handleCommand(int lineNum
    });
    // Collapse lines with trailing '\\'.
    if (!output.empty() && output.back().back() == '\\') {
-      output.back() = output.back().substr(0, output.size() - 2) + line;
+      std::string &currentLine = output.back();
+      currentLine = currentLine.substr(0, currentLine.size() - 1) + line;
    } else {
       std::string pdbg = format_string("%%dbg(%s at line %d)", keyword.c_str(), lineNumber);
       assert(boost::regex_match(pdbg, boost::regex(sgc_kpdbgRegex + "$", boost::match_default | boost::match_all)) && "kPdbgRegex expected to match actual %dbg usage");
@@ -1857,11 +1861,17 @@ std::vector<std::string> parse_integrated_test_script(TestPointer test, ResultPo
       std::string &commandType = std::get<1>(entry);
       std::string &line = std::get<2>(entry);
       IntegratedTestKeywordParserPointer parser = keywordParsers[commandType];
+
       parser->parseLine(lineNumber, line);
       if (commandType == "END." && !parser->getValue().empty()) {
          break;
       }
-      script.push_back(line);
+   }
+   // get parser result
+   // @TODO other parser type
+   {
+      IntegratedTestKeywordParserPointer parser = keywordParsers["RUN:"];
+      script = parser->getValue();
    }
    // Verify the script contains a run line.
    if(requireScript && script.empty()) {

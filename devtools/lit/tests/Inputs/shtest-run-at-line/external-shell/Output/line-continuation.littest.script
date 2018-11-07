@@ -1,0 +1,2 @@
+set -o pipefail;set -x;{ : 'RUN: at line 1';   : first line continued    to second line; }
+
