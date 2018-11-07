@@ -1409,37 +1409,39 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
          command = boost::regex_replace(command, kpdbgRegex, ": '$1'; ");
       }
       if (test->getConfig()->isPipefail()) {
-         ostream << "set -o pipefail;" << std::endl;;
+         ostream << "set -o pipefail;";
       }
       if (litConfig->isEchoAllCommands()) {
-         ostream << "set -x;" << std::endl;;
+         ostream << "set -x;";
       }
-      ostream << "{" << join_string_list(commands, "; } &&\n{ ") << "; }" << std::endl;
+      ostream << "{ " << join_string_list(commands, "; } &&\n{ ") << "; }" << std::endl;
    }
    ostream << std::endl;
    ostream.flush();
    ostream.close();
-   Twine cmdTwine;
    std::string cmdStr;
+   SmallVector<StringRef, 10> argsRef;
    if (isWin32CMDEXE) {
-      cmdTwine.concat("cmd")
-            .concat("/c")
-            .concat(script);
+      cmdStr = "cmd";
+      argsRef.push_back(StringRef("/c"));
+      argsRef.push_back(script);
    } else {
-      if (bashPath) {
-         cmdTwine.concat(bashPath.value())
-               .concat(script);
-      } else {
-         cmdTwine.concat("/bin/sh")
-               .concat(script);
-      }
       if (litConfig->isUseValgrind()) {
          /// @TODO
          /// FIXME: Running valgrind on sh is overkill. We probably could just
          /// run on clang with no real loss.
-         cmdStr = join_string_list(litConfig->getValgrindArgs(), " ") + cmdTwine.getStr();
+         for (const std::string &valgrindArg: litConfig->getValgrindArgs()) {
+            argsRef.push_back(valgrindArg);
+         }
+      }
+      if (bashPath) {
+         cmdStr = bashPath.value();
+         argsRef.push_back("-c");
+         argsRef.push_back(script);
       } else {
-         cmdStr = cmdTwine.getStr();
+         cmdStr = "/bin/sh";
+         argsRef.push_back("-c");
+         argsRef.push_back(script);
       }
    }
    std::vector<std::string> env;
@@ -1451,32 +1453,40 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
    SmallString<32> outputFile;
    SmallString<32> errorFile;
 
-   polar::fs::create_temporary_file("testrunner-exec-script-output", "", outputFile);
-   polar::fs::create_temporary_file("testrunner-exec-script-error", "", errorFile);
+   polar::fs::create_temporary_file(TESTRUNNER_ROOT_ROCESS_STDOUT_PREFIX, "", outputFile);
+   polar::fs::create_temporary_file(TESTRUNNER_ROOT_ROCESS_STDERR_PREFIX, "", errorFile);
    FileRemover outputRemover(outputFile.getCStr());
    FileRemover errorRemover(errorFile.getCStr());
    std::optional<StringRef> redirects[] = {
       std::nullopt,
-      StringRef(outputFile),
-      StringRef(errorFile)};
+      outputFile,
+      errorFile};
    std::string errorMsg;
-   int runResult = polar::sys::execute_and_wait(cmdStr, {}, cwd, envRef, redirects,
-                                                litConfig->getMaxIndividualTestTime(), 0, &errorMsg);
-
-   if (runResult != 0) {
-      auto errorBuf = MemoryBuffer::getFile(errorFile.getCStr());
-      if (!errorBuf) {
-         return std::make_tuple("", strerror(errno), -99, strerror(errno));
+   bool execFailed;
+   int returnCode = polar::sys::execute_and_wait(cmdStr, argsRef, cwd, envRef, redirects,
+                                                litConfig->getMaxIndividualTestTime(), 0, &errorMsg, &execFailed);
+   if(execFailed) {
+      throw ValueError(format_string("Could not create process (%s) due to %s",
+                                     cmdStr.c_str(), errorMsg.c_str()));
+   }
+   if (returnCode == -1 || returnCode == -2) {
+      return std::make_tuple("", "", returnCode, errorMsg);
+   } else {
+      if (returnCode != 0) {
+         auto errorBuf = MemoryBuffer::getFile(errorFile.getCStr());
+         if (!errorBuf) {
+            return std::make_tuple("", "", -errno, strerror(errno));
+         }
+         StringRef errorOutput = errorBuf.get()->getBuffer();
+         return std::make_tuple("", errorOutput.getStr(), returnCode, errorMsg);
       }
-      StringRef errorOutput = errorBuf.get()->getBuffer();
-      return std::make_tuple("", errorOutput.getStr(), runResult, errorMsg);
+      auto outputBuf = MemoryBuffer::getFile(outputFile.getCStr());
+      if (!outputBuf) {
+         return std::make_tuple("", "", -errno, strerror(errno));
+      }
+      StringRef output = outputBuf.get()->getBuffer();
+      return std::make_tuple(output.getStr(), "", returnCode, "");
    }
-   auto outputBuf = MemoryBuffer::getFile(outputFile.getCStr());
-   if (!outputBuf) {
-      return std::make_tuple("", strerror(errno), -99, strerror(errno));
-   }
-   StringRef output = outputBuf.get()->getBuffer();
-   return std::make_tuple(output.getStr(), "", runResult, "");
 }
 
 ParsedScriptLines parse_integrated_test_script_commands(StringRef sourcePath,
@@ -1851,10 +1861,7 @@ std::vector<std::string> parse_integrated_test_script(TestPointer test, ResultPo
       if (commandType == "END." && !parser->getValue().empty()) {
          break;
       }
-      const std::vector<std::string> &parsedValue = parser->getValue();
-      std::for_each(parsedValue.begin(), parsedValue.end(), [&script](const std::string &line) {
-         script.push_back(line);
-      });
+      script.push_back(line);
    }
    // Verify the script contains a run line.
    if(requireScript && script.empty()) {
@@ -1920,19 +1927,19 @@ ResultPointer do_run_shtest(TestPointer test, LitConfigPointer litConfig, bool u
       }
    }
    // Form the output log.
-   Twine output(format_string("Script:\n--\n%s\n--\nExit Code: %d\n", join_string_list(script, "\n").c_str(), exitCode));
+   std::string output(format_string("Script:\n--\n%s\n--\nExit Code: %d\n", join_string_list(script, "\n").c_str(), exitCode));
    if (!timeoutInfo.empty()) {
-      output.concat(format_string("Timeout: %s\n", timeoutInfo.c_str()));
+      output += format_string("Timeout: %s\n", timeoutInfo.c_str());
    }
-   output.concat("\n");
+   output += "\n";
    // Append the outputs, if present.
    if (!out.empty()) {
-      output.concat(format_string("Command Output (stdout):\n--\n%s\n--\n", out.c_str()));
+      output += format_string("Command Output (stdout):\n--\n%s\n--\n", out.c_str());
    }
    if (!errorMsg.empty()) {
-      output.concat(format_string("Command Output (stderr):\n--\n%s\n--\n", errorMsg.c_str()));
+      output += format_string("Command Output (stderr):\n--\n%s\n--\n", errorMsg.c_str());
    }
-   return std::make_shared<Result>(status, output.getStr());
+   return std::make_shared<Result>(status, output);
 }
 } // anonymous namespace
 
