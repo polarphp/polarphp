@@ -641,13 +641,15 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
 #ifdef POLAR_AVOID_DEV_NULL
       int j = 0;
       for (std::any &argAny: args) {
-         if (argAny.type() == typeid(std::string)) {
-            StringRef argRef = std::any_cast<std::string>(argAny);
-            if (argRef.startsWith(sgc_kdevNull)) {
-               SmallString<32> tempFilename;
-               fs::create_temporary_file(TESTRUNNER_SUB_ROCESS_STDOUT_PREFIX, "", tempFilename);
-               tempFilesMgr.registerTempFile(tempFilename.getCStr());
-               argAny = tempFilename.getStr() + argRef.substr(sgc_kdevNull.size());
+         if (j != 0) {
+            if (argAny.type() == typeid(std::string)) {
+               StringRef argRef = std::any_cast<std::string>(argAny);
+               if (argRef.startsWith(sgc_kdevNull)) {
+                  std::shared_ptr<SmallString<32>> tempFilename(new SmallString<32>{});
+                  fs::create_temporary_file(TESTRUNNER_SUB_ROCESS_STDOUT_PREFIX, "", *tempFilename.get());
+                  tempFilesMgr.registerTempFile(tempFilename->getCStr());
+                  argAny = (tempFilename->getStr() + argRef.substr(sgc_kdevNull.size())).getStr();
+               }
             }
          }
          ++j;
@@ -1629,8 +1631,7 @@ std::vector<std::string> &apply_substitutions(std::vector<std::string> &script, 
          replace_string("\\", "\\\\", b);
 
 #endif
-         line = boost::regex_replace(line, boost::regex(a.getStr()), b,
-                                     boost::match_default | boost::match_all);
+         line = boost::regex_replace(line, boost::regex(a.getStr()), b);
       }
    }
    return script;
@@ -1710,9 +1711,6 @@ void IntegratedTestKeywordParser::parseLine(int lineNumber, std::string &line)
    try {
       m_parsedLines.push_back(std::make_pair(lineNumber, line));
       m_value = m_parser(lineNumber, line, m_value);
-      for (auto item : m_value) {
-         std::cout << item << std::endl;
-      }
    } catch (ValueError &e) {
       throw ValueError(format_string("%s \nin %s directive on test line %d", e.what(),
                                      m_keyword.c_str(), lineNumber));

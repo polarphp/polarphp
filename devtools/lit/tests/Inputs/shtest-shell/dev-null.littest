@@ -1,0 +1,4 @@
+# Check handling of /dev/null in command line options
+# On windows, it should be redirected to a temp file.
+#
+# RUN: %{check_args} --my_arg /dev/null
