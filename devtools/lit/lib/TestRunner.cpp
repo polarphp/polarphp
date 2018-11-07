@@ -712,6 +712,9 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          processesData[i] = std::make_tuple(returnCode, "", errorMsg);
       } else {
          auto processResult = get_process_output(stdoutFilename, stderrFilename);
+//         std::cout << std::get<1>(processResult) << std::endl;
+//         std::cout << "---" << std::endl;
+//         std::cout << std::get<2>(processResult) << std::endl;
          if (std::get<0>(processResult)) {
             processesData[i] = std::make_tuple(returnCode, std::get<1>(processResult), std::get<2>(processResult));
          } else {
@@ -1320,7 +1323,7 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
       results.push_back(
                std::make_shared<ShellCommandResult>(e.getCommand(), "", e.what(), exitCode, false));
    }
-   Twine out;
+   std::string out;
    std::string err;
    int i = 0;
    for (ShellCommandResultPointer shExecResult : results) {
@@ -1338,9 +1341,9 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
             }
             ++j;
          }
-         out.concat(format_string("$ %s\n", argMsg));
+         out += format_string("$ %s\n", argMsg.c_str());
       } else {
-         out.concat("$ \n");
+         out += "$ \n";
       }
       //  If nothing interesting happened, move on.
       if (litConfig->getMaxIndividualTestTime() == 0 && shExecResult->getExitCode() == 0 &&
@@ -1350,17 +1353,17 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
       }
       // Otherwise, something failed or was printed, show it.
       if (!StringRef(shExecResult->getOutputMsg()).trim().empty()) {
-         out.concat(format_string("# command output:\n%s\n", shExecResult->getOutputMsg()));
+         out += format_string("# command output:\n%s\n", shExecResult->getOutputMsg().c_str());
       }
       if (!StringRef(shExecResult->getErrorMsg()).trim().empty()) {
-         out.concat(format_string("# command stderr:\n%s\n", shExecResult->getOutputMsg()));
+         out += format_string("# command stderr:\n%s\n", shExecResult->getErrorMsg().c_str());
       }
       if (StringRef(shExecResult->getOutputMsg()).trim().empty() &&
           StringRef(shExecResult->getErrorMsg()).trim().empty()) {
-         out.concat("note: command had no output on stdout or stderr\n");
+         out += "note: command had no output on stdout or stderr\n";
       }
       // Show the error conditions:
-      if (shExecResult->getExitCode() == 0) {
+      if (shExecResult->getExitCode() != 0) {
          std::string codeStr;
          // On Windows, a negative exit code indicates a signal, and those are
          // easier to recognize or look up if we print them in hex.
@@ -1370,15 +1373,15 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
          } else {
             codeStr = std::to_string(shExecResult->getExitCode());
          }
-         out.concat(format_string("error: command failed with exit status: %s\n",
-                                  codeStr.c_str()));
+         out += format_string("error: command failed with exit status: %s\n",
+                              codeStr.c_str());
       }
       if (litConfig->getMaxIndividualTestTime() > 0) {
-         out.concat(format_string("error: command reached timeout: %s\n", shExecResult->isTimeoutReached() ? "true" : "false"));
+         out += format_string("error: command reached timeout: %s\n", shExecResult->isTimeoutReached() ? "true" : "false");
       }
       ++i;
    }
-   return std::make_tuple(out.getStr(), err, exitCode, timeoutInfo);
+   return std::make_tuple(out, err, exitCode, timeoutInfo);
 }
 
 ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
@@ -1471,7 +1474,7 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
    std::string errorMsg;
    bool execFailed;
    int returnCode = polar::sys::execute_and_wait(cmdStr, argsRef, cwd, envRef, redirects,
-                                                litConfig->getMaxIndividualTestTime(), 0, &errorMsg, &execFailed);
+                                                 litConfig->getMaxIndividualTestTime(), 0, &errorMsg, &execFailed);
    if(execFailed) {
       throw ValueError(format_string("Could not create process (%s) due to %s",
                                      cmdStr.c_str(), errorMsg.c_str()));
