@@ -32,6 +32,7 @@
 #include "BooleanExpression.h"
 
 #include <set>
+#include <map>
 #include <cstdio>
 #include <any>
 #include <sstream>
@@ -57,6 +58,11 @@ using polar::basic::SmallVectorImpl;
 using polar::sys::ProcessInfo;
 
 #define TIMEOUT_ERROR_CODE -999
+
+std::map<StringRef, StringRef> sg_builtinCommands
+{
+   {"cat", CAT_BIN}
+};
 
 const std::string &ShellEnvironment::getCwd() const
 {
@@ -546,7 +552,6 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
    tempFilesMgr.registerTempFile(rootInputFile.getCStr());
    fs::create_temporary_file(TESTRUNNER_ROOT_ROCESS_STDOUT_PREFIX, "", rootOutputFile);
    tempFilesMgr.registerTempFile(rootOutputFile.getCStr());
-   std::set<StringRef> builtinCommands{};
    // To avoid deadlock, we use a single stderr stream for piped
    // output. This is null until we have seen some output using
    // stderr.
@@ -617,7 +622,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       std::list<std::any> &args = command->getArgs();
       // Resolve the executable path ourselves.
       std::optional<std::string> executable;
-      bool isBuiltinCmd = builtinCommands.find(firstArg) != builtinCommands.end();
+      bool isBuiltinCmd = sg_builtinCommands.find(firstArg) != sg_builtinCommands.end();
       if (!isBuiltinCmd) {
          // For paths relative to cwd, use the cwd of the shell environment.
          StringRef firstArgRef = firstArg;
@@ -659,7 +664,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
 
       std::list<std::string> expandedArgs = expand_glob_expression(args, shenv->getCwd());
       if (isBuiltinCmd) {
-         // todo setup
+         executable = sg_builtinCommands.at(firstArg);
       }
 #ifdef POLAR_OS_WIN32
       // @TODO quote windows
