@@ -95,8 +95,16 @@ std::string join_string_list(const std::vector<std::string> &list, const std::st
 template <typename... ArgTypes>
 std::string format_string(const std::string &format, ArgTypes&&...args)
 {
-   char buffer[512];
-   int size = std::snprintf(buffer, 512, format.c_str(), std::forward<ArgTypes>(args)...);
+   char buffer[1024];
+   int size = std::snprintf(buffer, 1024, format.c_str(), std::forward<ArgTypes>(args)...);
+   return std::string(buffer, size);
+}
+
+template <typename... ArgTypes>
+std::string format_string_with(const std::string &format, const size_t bufferSize, ArgTypes&&...args)
+{
+   char buffer[bufferSize];
+   int size = std::snprintf(buffer, bufferSize, format.c_str(), std::forward<ArgTypes>(args)...);
    return std::string(buffer, size);
 }
 

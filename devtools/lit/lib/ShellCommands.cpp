@@ -13,9 +13,12 @@
 #include "ShellUtil.h"
 #include "Utils.h"
 #include "ForwardDefs.h"
+#include "polarphp/basic/adt/Twine.h"
 
 namespace polar {
 namespace lit {
+
+using polar::basic::Twine;
 
 Command::operator std::string()
 {
@@ -128,13 +131,13 @@ void Command::toShell(std::string &str, bool) const
                     arg.find("$") == std::string::npos){
             quotedArg = "\"" + arg + "\"";
          } else {
-            throw std::runtime_error(format_string("Unable to quote %s", arg));
+            throw std::runtime_error(format_string("Unable to quote %s", arg.c_str()));
          }
          str += quotedArg;
          // For debugging / validation.
          std::list<std::any> dequoted = ShLexer(quotedArg).lex();
          if (!compareTokenAny(dequoted.front(), argAny)) {
-            throw std::runtime_error(format_string("Unable to quote %s", arg));
+            throw std::runtime_error(format_string("Unable to quote %s", arg.c_str()));
          }
       }
    }
@@ -146,10 +149,10 @@ void Command::toShell(std::string &str, bool) const
          const ShellTokenType &op = std::any_cast<const ShellTokenType &>(opAny);
          const ShellTokenType &arg = std::any_cast<const ShellTokenType &>(argAny);
          if (std::get<1>(op) == -1) {
-            str += format_string("%s '%s'", std::get<0>(op).c_str(), std::get<0>(arg));
+            str += format_string("%s '%s'", std::get<0>(op).c_str(), std::get<0>(arg).c_str());
          } else {
             str += format_string("%d%s '%s'", std::get<1>(op), std::get<0>(op).c_str(),
-                                 std::get<0>(arg));
+                                 std::get<0>(arg).c_str());
          }
       }
    }
@@ -195,9 +198,8 @@ Pipeline::operator std::string()
       ++i;
    }
    commands += "]";
-   return format_string("Pipeline(%s, negate: %s, pipeError: %s)", commands.c_str(),
-                        m_negate ? "true" : "false",
-                        m_pipeError ? "true" : "false");
+   return Twine("Pipeline(").concat(commands).concat(", negate: ").concat(m_negate ? "true" : "false")
+         .concat(", pipeError:").concat(m_pipeError ? "true" : "false").concat(")").getStr();
 }
 
 bool Pipeline::isNegate()
@@ -244,8 +246,9 @@ const CommandList &Pipeline::getCommands() const
 
 Seq::operator std::string()
 {
-   return format_string("Seq(%s, \"%s\", %s)", m_lhs->operator std::string().c_str(), m_op.c_str(),
-                        m_rhs->operator std::string().c_str());
+   return Twine("Seq(").concat(m_lhs->operator std::string())
+         .concat(", \"").concat(m_op).concat("\", ")
+         .concat(m_rhs->operator std::string().c_str()).getStr();
 }
 
 bool Seq::operator ==(const Seq &other) const
@@ -272,7 +275,7 @@ AbstractCommandPointer Seq::getRhs() const
 void Seq::toShell(std::string &str, bool pipeFail) const
 {
    m_lhs->toShell(str, pipeFail);
-   str += format_string(" %s\n", m_op.c_str());
+   str += Twine(" ", m_op).concat("\n").getStr();
    m_rhs->toShell(str, pipeFail);
 }
 
