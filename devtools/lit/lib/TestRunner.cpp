@@ -412,7 +412,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
                      ShExecResultList &results,
                      TimeoutHelper &timeoutHelper)
 {
-   //std::cout << cmd->operator std::string() << std::endl;
+   std::cout << cmd->operator std::string() << std::endl;
    if (timeoutHelper.timeoutReached()) {
       // Prevent further recursion if the timeout has been hit
       // as we should try avoid launching more processes.
@@ -1268,6 +1268,9 @@ ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironmentP
             continue;
          }
          try {
+            if (!stdfs::exists(path)) {
+               throw ValueError(format_string("No such file or directory: %s", path.string().c_str()));
+            }
             if (stdfs::is_directory(path)) {
                if (!recursive) {
                   errorStream << "Error: "<< path.string() << " is a directory" << std::endl;
@@ -1279,11 +1282,15 @@ ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironmentP
                if (force && ((fileStatus.permissions() & (stdfs::perms::owner_write | stdfs::perms::group_write | stdfs::perms::others_write)) == stdfs::perms::none)) {
                   stdfs::permissions(path, fileStatus.permissions() | stdfs::perms::owner_write, errorCode);
                }
-               stdfs::remove(path);
+               std::error_code error;
+               if (!stdfs::remove(path, error)) {
+                  throw ValueError(error.message());
+               }
             }
          } catch (std::exception &e) {
-            errorStream << "Error: 'rm' command failed, " << e.what() << std::endl;
+            errorStream << "Error: 'rm' command failed, " << e.what();
             exitCode = 1;
+            break;
          }
       }
       return std::make_shared<ShellCommandResult>(command, "", errorStream.str(), exitCode, false);
