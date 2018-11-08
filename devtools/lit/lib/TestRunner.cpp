@@ -43,6 +43,9 @@
 #include <unicode/ucnv.h>
 #include <unicode/utypes.h>
 #include <unicode/ucsdet.h>
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 
 namespace polar {
 namespace lit {
@@ -541,7 +544,6 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       return 0;
    }
    SmallVector<std::optional<std::tuple<int, std::string, std::string>>, 6> processesData;
-   std::string defaultStdin;
    std::list<std::pair<int, StringRef>> stderrTempFiles;
    std::list<std::shared_ptr<SmallString<32>>> tempFilenamesPool;
    OpenTempFilesMgr tempFilesMgr;
@@ -552,6 +554,8 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
    tempFilesMgr.registerTempFile(rootInputFile.getCStr());
    fs::create_temporary_file(TESTRUNNER_ROOT_ROCESS_STDOUT_PREFIX, "", rootOutputFile);
    tempFilesMgr.registerTempFile(rootOutputFile.getCStr());
+   // @TODO to be test
+   std::string defaultStdin = rootInputFile.getStr().getStr();
    // To avoid deadlock, we use a single stderr stream for piped
    // output. This is null until we have seen some output using
    // stderr.
@@ -593,6 +597,14 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       std::string rawStdinFilename = std::get<0>(stdinFd);
       std::string rawStdoutFilename = std::get<0>(stdoutFd);
       std::string rawStderrFilename = std::get<0>(stderrFd);
+
+      std::ios_base::openmode rawStdinOpenMode = std::get<1>(stdinFd);
+      std::ios_base::openmode rawStdoutOpenMode = std::get<1>(stdoutFd);
+      std::ios_base::openmode rawStderrOpenMode = std::get<1>(stderrFd);
+
+      std::optional<int> stdinOpenMode = std::nullopt;
+      std::optional<int> stdoutOpenMode = std::nullopt;
+      std::optional<int> stderrOpenMode = std::nullopt;
 
       if (!rawStdinFilename.empty()) {
          stdinFilename = rawStdinFilename;
@@ -699,15 +711,48 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          stderrFilename = tempFilename->getCStr();
          tempFilenamesPool.push_back(tempFilename);
       }
+      int curOpenMode = 0;
+      if (rawStdinOpenMode & std::ios_base::in) {
+         curOpenMode |= O_RDONLY;
+      }
+      stdinOpenMode = curOpenMode;
+      curOpenMode = 0;
+      if (rawStdoutOpenMode & std::ios_base::out) {
+         curOpenMode |= O_CREAT;
+         curOpenMode |= O_WRONLY;
+      }
+      if (rawStdoutOpenMode & std::ios_base::app) {
+         curOpenMode |= O_APPEND;
+      } else if (rawStdoutOpenMode & std::ios_base::trunc) {
+         curOpenMode |= O_TRUNC;
+      }
+      stdoutOpenMode = curOpenMode;
+      curOpenMode = 0;
+      if (rawStderrOpenMode & std::ios_base::out) {
+         curOpenMode |= O_CREAT;
+         curOpenMode |= O_WRONLY;
+      }
+      if (rawStderrOpenMode & std::ios_base::app) {
+         curOpenMode |= O_APPEND;
+      } else if (rawStderrOpenMode & std::ios_base::trunc) {
+         curOpenMode |= O_TRUNC;
+      }
+      stderrOpenMode = curOpenMode;
+
       ArrayRef<std::optional<StringRef>> redirects{
          stdinFilename,
                stdoutFilename,
                stderrFilename
       };
+      ArrayRef<std::optional<int>> redirectsOpenModes{
+         stdinOpenMode,
+               stdoutOpenMode,
+               stderrOpenMode
+      };
       std::string errorMsg;
       bool execFailed;
       int returnCode = polar::sys::execute_and_wait(executable.value(), argsRef, cmdShEnv->getCwd(), envsRef,
-                                                    redirects, 0, 0, &errorMsg,
+                                                    redirects, redirectsOpenModes, 0, 0, &errorMsg,
                                                     &execFailed);
       if(execFailed) {
          throw InternalShellError(command, format_string("Could not create process (%s) due to %s",
@@ -805,7 +850,7 @@ StdFdsTuple process_redirects(Command *command, const std::string &stdinSource,
       if (op == std::tuple<std::string, int>{">", 2}) {
          redirects[2] = std::any(OpenFileTuple{filename, std::ios_base::out, std::nullopt});
       } else if (op == std::tuple<std::string, int>{">>", 2}) {
-         redirects[2] = std::any(OpenFileTuple{filename, std::ios_base::app, std::nullopt});
+         redirects[2] = std::any(OpenFileTuple{filename, std::ios_base::out| std::ios_base::app, std::nullopt});
       } else if (op == std::tuple<std::string, int>{">&", 2} &&
                  (filename == "0" || filename == "1" || filename == "2")) {
          redirects[2] = redirects[std::stoi(filename)];

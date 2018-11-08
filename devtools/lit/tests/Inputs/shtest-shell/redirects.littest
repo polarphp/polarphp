@@ -1,3 +1,3 @@
 # Check stderr redirect (2> and 2>>).
-#
+# RUN: echo "not-present" > %t.stderr-write
 # RUN: %{write_to_stderr} 2>> %t.stderr-write
