@@ -139,7 +139,7 @@ OptionalError<std::string> find_program_by_name(StringRef name,
 
 namespace {
 
-bool redirect_io(std::optional<StringRef> path, int fd, std::string* errMsg)
+bool redirect_io(std::optional<StringRef> path, int fd, std::optional<int> mode, std::string* errMsg)
 {
    if (!path) {// Noop
       return false;
@@ -151,9 +151,12 @@ bool redirect_io(std::optional<StringRef> path, int fd, std::string* errMsg)
    } else {
       file = *path;
    }
+   if (!mode) {
+      mode = fd == 0 ? O_RDONLY : O_WRONLY|O_CREAT;
+   }
 
    // Open the file
-   int inFD = open(file.c_str(), fd == 0 ? O_RDONLY : O_WRONLY|O_CREAT, 0666);
+   int inFD = open(file.c_str(), mode.value(), 0666);
    if (inFD == -1) {
       make_error_msg(errMsg, "Cannot open file '" + file + "' for "
                      + (fd == 0 ? "input" : "output"));
@@ -171,7 +174,7 @@ bool redirect_io(std::optional<StringRef> path, int fd, std::string* errMsg)
 }
 
 #ifdef HAVE_POSIX_SPAWN
-bool redirect_io_ps(const std::string *path, int fd, std::string *errMsg,
+bool redirect_io_ps(const std::string *path, int fd, std::optional<int> mode, std::string *errMsg,
                     posix_spawn_file_actions_t *fileActions)
 {
    if (!path) {// Noop
@@ -184,13 +187,17 @@ bool redirect_io_ps(const std::string *path, int fd, std::string *errMsg,
    } else {
       file = path->c_str();
    }
+   if (!mode) {
+      mode = fd == 0 ? O_RDONLY : O_WRONLY|O_CREAT;
+   }
    if (int error = posix_spawn_file_actions_addopen(
           fileActions, fd, file,
-          fd == 0 ? O_RDONLY : O_WRONLY | O_CREAT, 0666)) {
+          mode.value(), 0666)) {
       return make_error_msg(errMsg, "Cannot dup2", error);
    }
    return false;
 }
+
 #endif
 
 void timeout_handler(int sig)
@@ -250,6 +257,7 @@ bool execute(ProcessInfo &processInfo, StringRef program,
              ArrayRef<StringRef>args, std::optional<StringRef> cwd,
              std::optional<ArrayRef<StringRef>> env,
              ArrayRef<std::optional<StringRef>> redirects,
+             ArrayRef<std::optional<int>> redirectsOpenModes,
              unsigned memoryLimit, std::string *errMsg)
 {
    if (!fs::exists(program)) {
@@ -287,6 +295,7 @@ bool execute(ProcessInfo &processInfo, StringRef program,
 
          if (!redirects.empty()) {
             assert(redirects.getSize() == 3);
+            assert(redirectsOpenModes.getSize() == 3);
             std::string *redirectsStr[3] = {nullptr, nullptr, nullptr};
             for (int index = 0; index < 3; ++index) {
                if (redirects[index]) {
@@ -307,14 +316,14 @@ bool execute(ProcessInfo &processInfo, StringRef program,
             posix_spawn_file_actions_init(fileActions);
 
             // Redirect stdin/stdout.
-            if (redirect_io_ps(redirectsStr[0], 0, errMsg, fileActions) ||
-                redirect_io_ps(redirectsStr[1], 1, errMsg, fileActions)) {
+            if (redirect_io_ps(redirectsStr[0], 0, redirectsOpenModes[0], errMsg, fileActions) ||
+                redirect_io_ps(redirectsStr[1], 1, redirectsOpenModes[1], errMsg, fileActions)) {
                return false;
             }
 
             if (!redirects[1] || !redirects[2] || *redirects[1] != *redirects[2]) {
                // Just redirect stderr
-               if (redirect_io_ps(redirectsStr[2], 2, errMsg, fileActions)) {
+               if (redirect_io_ps(redirectsStr[2], 2, redirectsOpenModes[2], errMsg, fileActions)) {
                   return false;
                }
 
@@ -369,9 +378,9 @@ bool execute(ProcessInfo &processInfo, StringRef program,
       // Redirect file descriptors...
       if (!redirects.empty()) {
          // Redirect stdin
-         if (redirect_io(redirects[0], 0, errMsg)) { return false; }
+         if (redirect_io(redirects[0], 0, redirectsOpenModes[0], errMsg)) { return false; }
          // Redirect stdout
-         if (redirect_io(redirects[1], 1, errMsg)) { return false; }
+         if (redirect_io(redirects[1], 1, redirectsOpenModes[1], errMsg)) { return false; }
          if (redirects[1] && redirects[2] && *redirects[1] == *redirects[2]) {
             // If stdout and stderr should go to the same place, redirect stderr
             // to the FD already open for stdout.
@@ -381,7 +390,7 @@ bool execute(ProcessInfo &processInfo, StringRef program,
             }
          } else {
             // Just redirect stderr
-            if (redirect_io(redirects[2], 2, errMsg)) {
+            if (redirect_io(redirects[2], 2, redirectsOpenModes[2], errMsg)) {
                return false;
             }
          }

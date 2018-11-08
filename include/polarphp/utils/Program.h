@@ -129,6 +129,18 @@ int execute_and_wait(
       ///< program.
       bool *executionFailed = nullptr);
 
+int execute_and_wait(
+      StringRef program, ///< Path of the program to be executed. It is
+      ArrayRef<StringRef> args, ///< A vector of strings that are passed to the
+      std::optional<StringRef> cwd,
+      std::optional<ArrayRef<StringRef>> env, ///< An optional vector of strings to use for
+      ArrayRef<std::optional<StringRef>> redirects, ///<
+      ArrayRef<std::optional<int>> redirectsOpenModes,
+      unsigned secondsToWait = 0, ///< If non-zero, this specifies the amount
+      unsigned memoryLimit = 0, ///< If non-zero, this specifies max. amount
+      std::string *errMsg = nullptr, ///< If non-zero, provides a pointer to a
+      bool *executionFailed = nullptr);
+
 /// Similar to ExecuteAndWait, but returns immediately.
 /// @returns The \see ProcessInfo of the newly launced process.
 /// \note On Microsoft Windows systems, users will need to either call
@@ -138,6 +150,15 @@ ProcessInfo execute_no_wait(StringRef program, ArrayRef<StringRef> args,
                             std::optional<StringRef> cwd,
                             std::optional<ArrayRef<StringRef>> env,
                             ArrayRef<std::optional<StringRef>> redirects = {},
+                            unsigned memoryLimit = 0,
+                            std::string *errMsg = nullptr,
+                            bool *executionFailed = nullptr);
+
+ProcessInfo execute_no_wait(StringRef program, ArrayRef<StringRef> args,
+                            std::optional<StringRef> cwd,
+                            std::optional<ArrayRef<StringRef>> env,
+                            ArrayRef<std::optional<StringRef>> redirects,
+                            ArrayRef<std::optional<int>> redirectsOpenModes,
                             unsigned memoryLimit = 0,
                             std::string *errMsg = nullptr,
                             bool *executionFailed = nullptr);

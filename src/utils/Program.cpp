@@ -30,6 +30,7 @@ using polar::basic::ArrayRef;
 bool execute(ProcessInfo &processInfo, StringRef program, ArrayRef<StringRef> args,
              std::optional<StringRef> cwd, std::optional<ArrayRef<StringRef>> envp,
              ArrayRef<std::optional<StringRef>> redirects,
+             ArrayRef<std::optional<int>> redirectsOpenModes,
              unsigned memoryLimit, std::string *errMsg);
 
 int execute_and_wait(StringRef program, ArrayRef<StringRef> args,
@@ -39,9 +40,22 @@ int execute_and_wait(StringRef program, ArrayRef<StringRef> args,
                      unsigned secondsToWait, unsigned memoryLimit,
                      std::string *errMsg, bool *executionFailed)
 {
+   return execute_and_wait(program, args, cwd, envp, redirects, std::nullopt, secondsToWait,
+                           memoryLimit, errMsg, executionFailed);
+}
+
+int execute_and_wait(StringRef program, ArrayRef<StringRef> args,
+                     std::optional<StringRef> cwd,
+                     std::optional<ArrayRef<StringRef>> envp,
+                     ArrayRef<std::optional<StringRef>> redirects,
+                     ArrayRef<std::optional<int>> redirectsOpenModes,
+                     unsigned secondsToWait, unsigned memoryLimit,
+                     std::string *errMsg, bool *executionFailed)
+{
    assert(redirects.empty() || redirects.getSize() == 3);
    ProcessInfo processInfo;
-   if (execute(processInfo, program, args, cwd, envp, redirects, memoryLimit, errMsg)) {
+   if (execute(processInfo, program, args, cwd, envp, redirects, redirectsOpenModes,
+               memoryLimit, errMsg)) {
       if (executionFailed) {
          *executionFailed = false;
       }
@@ -63,12 +77,25 @@ ProcessInfo execute_no_wait(StringRef program, ArrayRef<StringRef> args,
                             unsigned memoryLimit, std::string *errMsg,
                             bool *executionFailed)
 {
+   return execute_no_wait(program, args, cwd, envp, redirects, std::nullopt,
+                          memoryLimit, errMsg, executionFailed);
+}
+
+ProcessInfo execute_no_wait(StringRef program, ArrayRef<StringRef> args,
+                            std::optional<StringRef> cwd,
+                            std::optional<ArrayRef<StringRef>> envp,
+                            ArrayRef<std::optional<StringRef>> redirects,
+                            ArrayRef<std::optional<int>> redirectsOpenModes,
+                            unsigned memoryLimit, std::string *errMsg,
+                            bool *executionFailed)
+{
    assert(redirects.empty() || redirects.getSize() == 3);
    ProcessInfo processInfo;
    if (executionFailed) {
       *executionFailed = false;
    }
-   if (!execute(processInfo, program, args, cwd, envp, redirects, memoryLimit, errMsg)) {
+   if (!execute(processInfo, program, args, cwd, envp, redirects, redirectsOpenModes,
+                memoryLimit, errMsg)) {
       if (executionFailed) {
          *executionFailed = true;
       }
