@@ -18,8 +18,8 @@
 namespace polar {
 namespace lit {
 
-#define SUBPROCESS_FD_PIPE "littest_subprocess_fd_pipe_filemark"
-#define SUBPROCESS_FD_STDOUT "littest_subprocess_fd_stdout_filemark"
+#define SUBPROCESS_FD_PIPE "______littest_subprocess_fd_pipe_filemark______"
+#define SUBPROCESS_FD_STDOUT "______littest_subprocess_fd_stdout_filemark______"
 /// we describe all toke by ShellTokenType, and we need to distinguish
 /// normal token and redirects token, so we define the token type code
 #define SHELL_CMD_NORMAL_TOKEN -1

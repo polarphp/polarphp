@@ -16,6 +16,7 @@
 #include <list>
 #include <optional>
 #include <any>
+#include <ios>
 
 namespace polar {
 namespace basic {
@@ -68,12 +69,13 @@ using IntegratedTestKeywordParserList = std::list<IntegratedTestKeywordParserPoi
 using CommandList = std::list<AbstractCommandPointer>;
 
 using OpenFileEntryType = std::tuple<std::string, std::string, int, std::string>;
-using StdFdsTuple = std::tuple<std::string, std::string, std::string>;
+using StdFdPair = std::pair<std::string, std::ios_base::openmode>;
+using StdFdsTuple = std::tuple<StdFdPair, StdFdPair, StdFdPair>;
 using SubstitutionPair = std::pair<StringRef, std::string>;
 using SubstitutionList = std::list<SubstitutionPair>;
 using TestingProgressDisplayPointer = std::shared_ptr<TestingProgressDisplay>;
 using ExecResultTuple = std::tuple<const ResultCode *, std::string>;
-using OpenFileTuple = std::tuple<std::string, std::string, std::optional<int>>;
+using OpenFileTuple = std::tuple<std::string, int, std::optional<int>>;
 
 } // lit
 } // polar

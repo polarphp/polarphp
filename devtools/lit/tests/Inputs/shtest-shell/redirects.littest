@@ -1,14 +1,4 @@
 # Check stdout redirect (> and >>).
 #
 # RUN: echo "is-present" > %t.stdout-write
-# RUN: echo "is-present" > %t.stdout-write
-# RUN: echo "is-present" > %t.stdout-write
-# RUN: echo "is-present" > %t.stdout-write
-# RUN: echo "is-present" > %t.stdout-write
-# RUN: echo "is-present" > %t.stdout-write
-# RUN: echo "is-present" > %t.stdout-write
-# RUN: echo "is-present" > %t.stdout-write
-# RUN: echo "is-present" > %t.stdout-write
-# RUN: echo "is-present" > %t.stdout-write
-# RUN: echo "is-present" > %t.stdout-write
-# RUN: echo "is-present" > %t.stdout-write
+# RUN: echo "appended-line" >> %t.stdout-write

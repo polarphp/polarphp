@@ -586,9 +586,14 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       StdFdsTuple fds = process_redirects(command, defaultStdin, cmdShEnv);
       std::optional<std::string> stdinFilename;
 
-      std::string rawStdinFilename = std::get<0>(fds);
-      std::string rawStdoutFilename = std::get<1>(fds);
-      std::string rawStderrFilename = std::get<2>(fds);
+      StdFdPair stdinFd = std::get<0>(fds);
+      StdFdPair stdoutFd = std::get<1>(fds);
+      StdFdPair stderrFd = std::get<2>(fds);
+
+      std::string rawStdinFilename = std::get<0>(stdinFd);
+      std::string rawStdoutFilename = std::get<0>(stdoutFd);
+      std::string rawStderrFilename = std::get<0>(stderrFd);
+
       if (!rawStdinFilename.empty()) {
          stdinFilename = rawStdinFilename;
       }
@@ -798,28 +803,33 @@ StdFdsTuple process_redirects(Command *command, const std::string &stdinSource,
       const ShellTokenType &op = std::get<0>(redirect);
       const std::string &filename = std::get<1>(redirect);
       if (op == std::tuple<std::string, int>{">", 2}) {
-         redirects[2] = std::any(OpenFileTuple{filename, "w", std::nullopt});
+         redirects[2] = std::any(OpenFileTuple{filename, std::ios_base::out, std::nullopt});
       } else if (op == std::tuple<std::string, int>{">>", 2}) {
-         redirects[2] = std::any(OpenFileTuple{filename, "a", std::nullopt});
+         redirects[2] = std::any(OpenFileTuple{filename, std::ios_base::app, std::nullopt});
       } else if (op == std::tuple<std::string, int>{">&", 2} &&
                  (filename == "0" || filename == "1" || filename == "2")) {
          redirects[2] = redirects[std::stoi(filename)];
       } else if (op == std::tuple<std::string, int>{">&", SHELL_CMD_REDIRECT_TOKEN} ||
                  op == std::tuple<std::string, int>{"&>", SHELL_CMD_REDIRECT_TOKEN}) {
-         redirects[1] = redirects[2] = std::any(OpenFileTuple{filename, "w", std::nullopt});
+         redirects[1] = redirects[2] = std::any(OpenFileTuple{filename, std::ios_base::out | std::ios_base::trunc, std::nullopt});
       } else if (op == std::tuple<std::string, int>{">", SHELL_CMD_REDIRECT_TOKEN}) {
-         redirects[1] = std::any(OpenFileTuple{filename, "w", std::nullopt});
+         redirects[1] = std::any(OpenFileTuple{filename, std::ios_base::out | std::ios_base::trunc, std::nullopt});
       } else if (op == std::tuple<std::string, int>{">>", SHELL_CMD_REDIRECT_TOKEN}) {
-         redirects[1] = std::any(OpenFileTuple{filename, "a", std::nullopt});
+         redirects[1] = std::any(OpenFileTuple{filename, std::ios_base::out | std::ios_base::app, std::nullopt});
       } else if (op == std::tuple<std::string, int>{"<", SHELL_CMD_REDIRECT_TOKEN}) {
-         redirects[1] = std::any(OpenFileTuple{filename, "r", std::nullopt});
+         redirects[1] = std::any(OpenFileTuple{filename, std::ios_base::in, std::nullopt});
       } else {
          throw InternalShellError(command,
                                   "Unsupported redirect: (" + std::get<0>(op) + ", " + std::to_string(std::get<1>(op)) + ")" + filename);
       }
    }
    // Open file descriptors in a second pass.
-   SmallVector<std::string, 3> stdFds{"", "", ""};
+   SmallVector<StdFdPair, 3> stdFds
+   {
+      StdFdPair{"", std::ios_base::in},
+      StdFdPair{"", std::ios_base::out},
+      StdFdPair{"", std::ios_base::out}
+   };
    for (int index = 0; index <= 2; ++index) {
       std::string fd;
       std::any &itemAny = redirects[index];
@@ -847,7 +857,7 @@ StdFdsTuple process_redirects(Command *command, const std::string &stdinSource,
             throw InternalShellError(command,
                                      "Bad redirect");
          }
-         stdFds[index] = fd;
+         stdFds[index] = std::make_pair(fd, std::ios_base::openmode{});
          continue;
       }
       OpenFileTuple &item = std::any_cast<OpenFileTuple &>(itemAny);
@@ -862,7 +872,7 @@ StdFdsTuple process_redirects(Command *command, const std::string &stdinSource,
       std::string &name = names.front();
       // Make sure relative paths are relative to the cwd.
       redirFilename = stdfs::path(shenv->getCwd()) / name;
-      stdFds[index] = redirFilename;
+      stdFds[index] = std::make_pair(redirFilename, std::ios_base::openmode(std::get<1>(item)));
    }
    return StdFdsTuple{stdFds[0], stdFds[1], stdFds[2]};
 }
@@ -872,9 +882,14 @@ std::string execute_builtin_echo(Command *command,
                                  ShellEnvironmentPointer shenv)
 {
    StdFdsTuple fds = process_redirects(command, SUBPROCESS_FD_PIPE, shenv);
-   std::string rawStdinFilename = std::get<0>(fds);
-   std::string rawStdoutFilename = std::get<1>(fds);
-   std::string rawStderrFilename = std::get<2>(fds);
+
+   StdFdPair stdinFd = std::get<0>(fds);
+   StdFdPair stdoutFd = std::get<1>(fds);
+   StdFdPair stderrFd = std::get<2>(fds);
+
+   std::string rawStdinFilename = std::get<0>(stdinFd);
+   std::string rawStdoutFilename = std::get<0>(stdoutFd);
+   std::string rawStderrFilename = std::get<0>(stderrFd);
    if (rawStdinFilename != SUBPROCESS_FD_PIPE || rawStderrFilename != SUBPROCESS_FD_PIPE) {
       throw InternalShellError(command,
                                "stdin and stderr redirects not supported for echo");
@@ -890,7 +905,7 @@ std::string execute_builtin_echo(Command *command,
       strstream.reset(new std::ostringstream);
       outstream = strstream.get();
    } else {
-      std::ios_base::openmode openModes =  std::ios_base::trunc | std::ios_base::out;
+      std::ios_base::openmode openModes = std::get<1>(stdoutFd);
 #ifdef POLAR_OS_WIN32
       openModes |= std::ios_base::binary;
 #else
