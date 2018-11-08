@@ -412,7 +412,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
                      ShExecResultList &results,
                      TimeoutHelper &timeoutHelper)
 {
-   std::cout << cmd->operator std::string() << std::endl;
+   //std::cout << cmd->operator std::string() << std::endl;
    if (timeoutHelper.timeoutReached()) {
       // Prevent further recursion if the timeout has been hit
       // as we should try avoid launching more processes.
@@ -712,9 +712,9 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          processesData[i] = std::make_tuple(returnCode, "", errorMsg);
       } else {
          auto processResult = get_process_output(stdoutFilename, stderrFilename);
-//         std::cout << std::get<1>(processResult) << std::endl;
-//         std::cout << "---" << std::endl;
-//         std::cout << std::get<2>(processResult) << std::endl;
+         //         std::cout << std::get<1>(processResult) << std::endl;
+         //         std::cout << "---" << std::endl;
+         //         std::cout << std::get<2>(processResult) << std::endl;
          if (std::get<0>(processResult)) {
             processesData[i] = std::make_tuple(returnCode, std::get<1>(processResult), std::get<2>(processResult));
          } else {
@@ -881,21 +881,25 @@ std::string execute_builtin_echo(Command *command,
    }
    // Some tests have un-redirected echo commands to help debug test failures.
    // Buffer our output and return it to the caller.
-   std::ostream *outstream = &std::cout;
-   std::ostringstream strstream;
+   std::ostream *outstream = nullptr;
+   std::unique_ptr<std::ostringstream> strstream;
+   std::unique_ptr<std::ofstream> fostream;
    bool isRedirected = true;
    if (rawStdoutFilename == SUBPROCESS_FD_PIPE) {
       isRedirected = false;
-      outstream = &strstream;
+      strstream.reset(new std::ostringstream);
+      outstream = strstream.get();
    } else {
+      std::ios_base::openmode openModes =  std::ios_base::trunc | std::ios_base::out;
 #ifdef POLAR_OS_WIN32
-      // @TODO WIN32
-      // Reopen stdout in binary mode to avoid CRLF translation. The versions
-      // of echo we are replacing on Windows all emit plain LF, and the LLVM
-      // tests now depend on this.
-      // When we open as binary, however, this also means that we have to write
-      // 'bytes' objects to stdout instead of 'str' objects.
-      // openedFiles.push_back({"", "", _fileno(stdout), ""});
+      openModes |= std::ios_base::binary;
+#else
+      fostream.reset(new std::ofstream(rawStdoutFilename, openModes));
+      if (!fostream->is_open()) {
+         throw InternalShellError(command,
+                                  strerror(errno));
+      }
+      outstream = fostream.get();
 #endif
    }
    // Implement echo flags. We only support -e and -n, and not yet in
@@ -936,8 +940,8 @@ std::string execute_builtin_echo(Command *command,
    if (writeNewline) {
       *outstream << std::endl;
    }
+   outstream->flush();
    if (!isRedirected) {
-      outstream->flush();
       return dynamic_cast<std::ostringstream *>(outstream)->str();
    }
    return "";

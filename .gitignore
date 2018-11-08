@@ -159,7 +159,7 @@ Zend/zend_language_parser.output
 **/tests/**/*.exp
 **/tests/**/*.log
 **/tests/**/*.sh
-
+**/tests/**/Output/*.*
 # Used by some test cases.
 **/tests/**/*.db
 **/tests/**/*.tmp

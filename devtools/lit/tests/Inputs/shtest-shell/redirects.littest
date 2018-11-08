@@ -1,0 +1,3 @@
+# Check stdout redirect (> and >>).
+#
+# RUN: echo "not-present" > %t.stdout-write
