@@ -393,6 +393,7 @@ add_subdirectory(tools)
 add_subdirectory(thirdparty)
 
 if (POLAR_INCLUDE_TESTS)
+   polar_check_headers(glob)
    include(LitUtils)
    #setup some important lit path
    set(POLAR_LIT_RUNTIME_DIR ${POLAR_BINARY_DIR}/litruntime)

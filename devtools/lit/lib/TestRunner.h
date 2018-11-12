@@ -139,7 +139,7 @@ protected:
 std::pair<int, std::string> execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv, ShExecResultList &results,
                                           size_t execTimeout = 0);
 
-std::list<std::string> expand_glob(GlobItem &glob, const std::string &cwd);
+std::list<std::string> expand_glob(const GlobItem &glob, const std::string &cwd);
 std::list<std::string> expand_glob(const std::string &glob, const std::string &cwd);
 std::list<std::string> expand_glob_expression(const std::list<std::any> &exprs,
                                               const std::string &cwd);

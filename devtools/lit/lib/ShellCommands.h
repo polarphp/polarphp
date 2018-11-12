@@ -70,7 +70,7 @@ public:
    GlobItem(const std::string &pattern)
       : m_pattern(pattern)
    {}
-   std::list<std::string> resolve(const std::string &cwd);
+   std::list<std::string> resolve(const std::string &cwd) const;
    operator std::string();
    bool operator ==(const GlobItem &other) const;
    bool operator !=(const GlobItem &other) const

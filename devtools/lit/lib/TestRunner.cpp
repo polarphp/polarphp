@@ -231,7 +231,7 @@ std::pair<int, std::string> execute_shcmd(AbstractCommandPointer cmd, ShellEnvir
    return std::make_pair(finalExitCode, timeoutInfo);
 }
 
-std::list<std::string> expand_glob(GlobItem &glob, const std::string &cwd)
+std::list<std::string> expand_glob(const GlobItem &glob, const std::string &cwd)
 {
    return glob.resolve(cwd);
 }
@@ -764,13 +764,12 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
                                                          executable.value().c_str(), errorMsg.c_str()));
       }
       if (returnCode == -1 || returnCode == -2) {
-         std::cout << errorMsg << std::endl;
          processesData[i] = std::make_tuple(returnCode, "", errorMsg);
       } else {
          auto processResult = get_process_output(stdoutFilename, stderrFilename);
-         //         std::cout << std::get<1>(processResult) << std::endl;
-         //         std::cout << "---" << std::endl;
-         //         std::cout << std::get<2>(processResult) << std::endl;
+         std::cout << std::get<1>(processResult) << std::endl;
+         std::cout << "---" << std::endl;
+         std::cout << std::get<2>(processResult) << std::endl;
          if (std::get<0>(processResult)) {
             processesData[i] = std::make_tuple(returnCode, std::get<1>(processResult), std::get<2>(processResult));
          } else {
@@ -1390,8 +1389,8 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
    ShExecResultList results;
    std::string timeoutInfo;
    int exitCode = 0;
+   ShellEnvironmentPointer shenv = std::make_shared<ShellEnvironment>(cwd, test->getConfig()->getEnvironment());
    try {
-      ShellEnvironmentPointer shenv = std::make_shared<ShellEnvironment>(cwd, test->getConfig()->getEnvironment());
       std::pair<int, std::string> r = execute_shcmd(cmd, shenv, results, litConfig->getMaxIndividualTestTime());
       exitCode = std::get<0>(r);
       timeoutInfo = std::get<1>(r);
@@ -1411,10 +1410,16 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
          int j = 0;
          int argSize = cmd->getArgs().size();
          for (const std::any &argAny : cmd->getArgs()) {
+            std::string argStr;
+            if (argAny.type() == typeid(std::string)) {
+               argStr = std::any_cast<std::string>(argAny);
+            } else if (argAny.type() == typeid(GlobItem)) {
+               argStr = std::any_cast<GlobItem>(argAny);
+            }
             if (i < argSize - 1) {
-               argMsg += " " + std::any_cast<std::string>(argAny);
+               argMsg += " " + argStr;
             } else {
-               argMsg += std::any_cast<std::string>(argAny);
+               argMsg += argStr;
             }
             ++j;
          }

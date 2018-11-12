@@ -14,6 +14,7 @@
 #include "Utils.h"
 #include "ForwardDefs.h"
 #include "polarphp/basic/adt/Twine.h"
+#include <glob.h>
 
 namespace polar {
 namespace lit {
@@ -158,15 +159,36 @@ void Command::toShell(std::string &str, bool) const
    }
 }
 
-std::list<std::string> GlobItem::resolve(const std::string &cwd)
+namespace {
+class GlobCleaner
+{
+public:
+   GlobCleaner(glob_t *globResult)
+      : m_globResult(globResult)
+   {
+   }
+   ~GlobCleaner()
+   {
+      globfree(m_globResult);
+   }
+protected:
+   glob_t *m_globResult;
+};
+} // anonymous namespace
+
+std::list<std::string> GlobItem::resolve(const std::string &cwd) const
 {
    stdfs::path path(m_pattern);
    if (!path.is_absolute()) {
       path = stdfs::path(cwd) / path;
    }
    std::list<std::string> files;
-   for(auto& entry: stdfs::recursive_directory_iterator(path)) {
-      files.push_back(entry.path());
+   glob_t globResult;
+   GlobCleaner cleaner(&globResult);
+   if (0 == glob(path.string().c_str(), GLOB_TILDE, NULL, &globResult)) {
+      for(unsigned int i=0; i < globResult.gl_pathc; ++i) {
+         files.push_back(std::string(globResult.gl_pathv[i]));
+      }
    }
    if (files.empty()){
       files.push_back(path);
