@@ -17,6 +17,8 @@
 #include <filesystem>
 #include <list>
 
+namespace fs = std::filesystem;
+
 std::string convert_to_caret_and_mnotation(std::string data)
 {
    std::string output;
@@ -65,6 +67,9 @@ int main(int argc, char *argv[])
    try {
       char buffer[1024];
       for (const std::string &filename : filenames) {
+         if (!fs::exists(filename)) {
+            throw std::runtime_error(std::string("No such file or directory: ") + filename);
+         }
          std::ifstream fstream(filename, std::ios_base::in | std::ios_base::binary);
          if (!fstream.is_open()) {
             throw std::runtime_error(std::string("open file ") + filename + " failure");

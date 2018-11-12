@@ -711,12 +711,14 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          stderrFilename = tempFilename->getCStr();
          tempFilenamesPool.push_back(tempFilename);
       }
-      int curOpenMode = 0;
+      int curOpenMode = -1;
       if (rawStdinOpenMode & std::ios_base::in) {
          curOpenMode |= O_RDONLY;
       }
-      stdinOpenMode = curOpenMode;
-      curOpenMode = 0;
+      if (-1 != curOpenMode) {
+         stdinOpenMode = curOpenMode;
+      }
+      curOpenMode = -1;
       if (rawStdoutOpenMode & std::ios_base::out) {
          curOpenMode |= O_CREAT;
          curOpenMode |= O_WRONLY;
@@ -726,8 +728,10 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       } else if (rawStdoutOpenMode & std::ios_base::trunc) {
          curOpenMode |= O_TRUNC;
       }
-      stdoutOpenMode = curOpenMode;
-      curOpenMode = 0;
+      if (-1 != curOpenMode) {
+         stdoutOpenMode = curOpenMode;
+      }
+      curOpenMode = -1;
       if (rawStderrOpenMode & std::ios_base::out) {
          curOpenMode |= O_CREAT;
          curOpenMode |= O_WRONLY;
@@ -737,8 +741,9 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       } else if (rawStderrOpenMode & std::ios_base::trunc) {
          curOpenMode |= O_TRUNC;
       }
-      stderrOpenMode = curOpenMode;
-
+      if (-1 != curOpenMode) {
+         stderrOpenMode = curOpenMode;
+      }
       ArrayRef<std::optional<StringRef>> redirects{
          stdinFilename,
                stdoutFilename,
@@ -759,6 +764,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
                                                          executable.value().c_str(), errorMsg.c_str()));
       }
       if (returnCode == -1 || returnCode == -2) {
+         std::cout << errorMsg << std::endl;
          processesData[i] = std::make_tuple(returnCode, "", errorMsg);
       } else {
          auto processResult = get_process_output(stdoutFilename, stderrFilename);
