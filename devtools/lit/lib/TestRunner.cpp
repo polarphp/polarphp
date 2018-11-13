@@ -41,9 +41,6 @@
 #include <sstream>
 #include <filesystem>
 #include <boost/regex.hpp>
-#include <unicode/ucnv.h>
-#include <unicode/utypes.h>
-#include <unicode/ucsdet.h>
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -1086,8 +1083,6 @@ bool unified_diff(std::vector<std::string> &lhs, std::vector<std::string> &rhs,
    using dtl::uniHunk;
    std::string lhsFilename = lhs.back();
    std::string rhsFilename = rhs.back();
-   std::cout << lhsFilename << std::endl;
-   std::cout << rhsFilename << std::endl;
    lhs.pop_back();
    rhs.pop_back();
    Diff<std::string> diff(lhs, rhs);
@@ -1109,8 +1104,9 @@ int compare_two_binary_files(std::pair<StringRef, StringRef> lhs, std::pair<Stri
                              std::ostringstream &outStream, std::ostringstream &errStream,
                              std::string &errorMsg)
 {
-   // @TODO need open in binary mode ?
-   SmallVector<std::vector<std::string>, 2> fileContents;
+   SmallVector<std::vector<std::string>, 2> fileContents{
+      {}, {}
+   };
    {
       SmallVector<StringRef, 128> lines;
       lhs.second.split(lines, '\n');
@@ -1188,45 +1184,30 @@ int compare_two_text_files(std::pair<StringRef, StringRef> lhs, std::pair<String
    return exitCode;
 }
 
-bool is_binary_content(StringRef content)
-{
-   // detect encodings
-   UCharsetDetector* csd;
-   int32_t matchCount = 0;
-   UErrorCode status = U_ZERO_ERROR;
-   csd = ucsdet_open(&status);
-   if(status != U_ZERO_ERROR) {
-      return true;
-   }
-   ucsdet_setText(csd, content.getData(), content.getSize(), &status);
-   if(status != U_ZERO_ERROR) {
-      return true;
-   }
-   ucsdet_detectAll(csd, &matchCount, &status);
-   if(status != U_ZERO_ERROR) {
-      return true;
-   }
-   if (matchCount == 0) {
-      return true;
-   }
-   return false;
-}
-
 int compare_two_files(const SmallVectorImpl<std::string> &filePaths,
                       bool stripTrailingCR, bool ignoreAllSpace,
-                      bool ignoreSpaceChange, std::ostringstream &outStream,
-                      std::ostringstream &errStream, std::string &errorMsg)
+                      bool ignoreSpaceChange, bool isBinaryFile,
+                      std::ostringstream &outStream, std::ostringstream &errStream,
+                      std::string &errorMsg)
 {
    SmallVector<std::string, 2> fileContents;
-   bool isBinaryFile = false;
    for (const std::string &file : filePaths) {
-      OptionalError<std::shared_ptr<MemoryBuffer>> buffer = MemoryBuffer::getFile(file.c_str());
-      if (!buffer) {
+      if (!stdfs::exists(file)) {
+         errorMsg = format_string("file %s is not exist", file.c_str());
+         return -1;
+      }
+      std::ifstream istrm(file, std::ios_base::in | std::ios_base::binary);
+      std::string curFileContent;
+      if (!istrm.is_open()) {
          errorMsg = format_string("open file %s error : %s", file.c_str(), strerror(errno));
          return -1;
       }
-      fileContents.push_back(buffer.get()->getBuffer().getStr());
-      isBinaryFile = is_binary_content(fileContents.back());
+      istrm.seekg(0, std::ios::end);
+      curFileContent.reserve(istrm.tellg());
+      istrm.seekg(0, std::ios::beg);
+      curFileContent.assign((std::istreambuf_iterator<char>(istrm)),
+                            std::istreambuf_iterator<char>());
+      fileContents.push_back(std::move(curFileContent));
    }
    std::pair<StringRef, StringRef> lhs = std::make_pair(StringRef(filePaths[0]), fileContents[0]);
    std::pair<StringRef, StringRef> rhs = std::make_pair(StringRef(filePaths[1]), fileContents[1]);
@@ -1322,12 +1303,14 @@ ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmen
    bool unifiedDiff = false;
    bool recursiveDiff = false;
    bool stripTrailingCr = false;
+   bool binaryMode = false;
    std::vector<std::string> paths;
    cmdParser.add_flag("-w", ignoreAllSpace, "Ignore all white space.");
    cmdParser.add_flag("-b", ignoreSpaceChange, "Ignore changes in the amount of white space.");
    cmdParser.add_flag("-u", unifiedDiff, "use unified diff");
    cmdParser.add_flag("-r", recursiveDiff, "use recursive diff.");
    cmdParser.add_flag("--strip-trailing-cr", stripTrailingCr, "strip trailing cr.");
+   cmdParser.add_flag("--binary-mode", binaryMode, "compare with binary mode");
    cmdParser.add_option("paths", paths, "paths to be diff")->required();
    SmallVector<std::string, 2> filePaths;
    SmallVector<std::list<std::pair<std::string, std::list<std::string>>>, 2> dirTrees;
@@ -1336,8 +1319,8 @@ ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmen
       if (paths.size() != 2) {
          throw InternalShellError(command, "Error:  missing or extra operand");
       }
-      std::ostringstream outStream;
-      std::ostringstream errStream;
+      std::ostringstream outStream(std::stringstream::out|std::stringstream::binary);
+      std::ostringstream errStream(std::stringstream::out|std::stringstream::binary);
       for (std::string &file : paths) {
          std::list<std::pair<std::string, std::list<std::string>>> list{};
          stdfs::path filepath(file);
@@ -1353,7 +1336,8 @@ ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmen
       }
       std::string errorMsg;
       if (!recursiveDiff) {
-         exitCode = compare_two_files(filePaths, stripTrailingCr, ignoreAllSpace, ignoreSpaceChange,
+         exitCode = compare_two_files(filePaths, stripTrailingCr, ignoreAllSpace,
+                                      ignoreSpaceChange, binaryMode,
                                       outStream, errStream, errorMsg);
       }
       errorMsg += errStream.str();
@@ -1485,6 +1469,7 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
       } else {
          out += "$ \n";
       }
+
       //  If nothing interesting happened, move on.
       if (litConfig->getMaxIndividualTestTime() == 0 && shExecResult->getExitCode() == 0 &&
           StringRef(shExecResult->getOutputMsg()).trim().empty() &&
@@ -1493,10 +1478,10 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
       }
       // Otherwise, something failed or was printed, show it.
       if (!StringRef(shExecResult->getOutputMsg()).trim().empty()) {
-         out += format_string("# command output:\n%s\n", shExecResult->getOutputMsg().c_str());
+         out += Twine("# command output:\n", shExecResult->getOutputMsg()).concat("\n").getStr();
       }
       if (!StringRef(shExecResult->getErrorMsg()).trim().empty()) {
-         out += format_string("# command stderr:\n%s\n", shExecResult->getErrorMsg().c_str());
+         out += Twine("# command stderr:\n", shExecResult->getErrorMsg()).concat("\n").getStr();
       }
       if (StringRef(shExecResult->getOutputMsg()).trim().empty() &&
           StringRef(shExecResult->getErrorMsg()).trim().empty()) {
@@ -2090,10 +2075,10 @@ ResultPointer do_run_shtest(TestPointer test, LitConfigPointer litConfig, bool u
    output += "\n";
    // Append the outputs, if present.
    if (!out.empty()) {
-      output += format_string("Command Output (stdout):\n--\n%s\n--\n", out.c_str());
+      output += Twine("Command Output (stdout):\n--\n", out).concat("\n--\n").getStr();
    }
    if (!errorMsg.empty()) {
-      output += format_string("Command Output (stderr):\n--\n%s\n--\n", errorMsg.c_str());
+      output += Twine("Command Output (stderr):\n--\n", errorMsg).concat("\n--\n").getStr();
    }
    return std::make_shared<Result>(status, output);
 }

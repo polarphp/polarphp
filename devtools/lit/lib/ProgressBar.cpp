@@ -445,8 +445,8 @@ void TestingProgressDisplay::update(TestPointer test)
          std::printf("%s TEST '%s' FAILED %s\n", std::string(20, '*').c_str(),
                      test->getFullName().c_str(), std::string(20, '*').c_str());
       }
-      std::printf("%s\n", testResult->getOutput().c_str());
-      std::printf("%s\n", std::string(20, '*').c_str());
+      std::cout << testResult->getOutput() << std::endl;
+      std::cout << std::string(20, '*') << std::endl;
    }
    // Report test metrics, if present.
    if (!testResult->getMetrics().empty()) {
@@ -457,7 +457,7 @@ void TestingProgressDisplay::update(TestPointer test)
       for (auto &item : testResult->getMetrics()) {
          std::printf("%s: %s \n", item.first.c_str(), item.second->format().c_str());
       }
-      std::printf("%s\n", std::string(10, '*').c_str());
+      std::cout << std::string(10, '*') << std::endl;
    }
    // Report micro-tests, if present
    if (!testResult->getMicroResults().empty()) {
