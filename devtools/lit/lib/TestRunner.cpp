@@ -1029,6 +1029,8 @@ bool delete_dir_error_handler(const DirectoryEntry &entry)
    return true;
 }
 
+using DiffDirItems = std::list<std::pair<std::string, std::list<std::string>>>;
+
 ///
 /// Tree is a tuple of form (dirname, child_trees).
 /// An empty dir has child_trees = [], a file has child_trees = None.
@@ -1040,7 +1042,7 @@ void get_dir_tree(const std::string &path, std::list<std::pair<std::string, std:
       if (entry.is_directory()) {
          get_dir_tree(entry.path(), list);
       } else {
-         files.push_back(entry.path());
+         files.push_back(entry.path().filename());
       }
    }
    files.sort();
@@ -1218,35 +1220,174 @@ int compare_two_files(const SmallVectorImpl<std::string> &filePaths,
                                  outStream, errStream, errorMsg);
 }
 
-void print_dir_vs_file(const std::string &dirPath, const std::string &filePath)
+void print_only_in(const std::string &dir, std::string &filename,
+                   std::ostringstream &outStream)
 {
-   std::string msg;
-   if (stdfs::is_regular_file(filePath)) {
-      msg = "File %s is a regular file while file %s is a directory";
-   } else {
-      msg = "File %s is a regular empty file while file %s is a directory";
+   outStream << "Only in " << dir << ": " << filename
+             << std::endl;
+}
+
+int compare_dir_trees(SmallVectorImpl<DiffDirItems> &dirTrees,
+                      std::ostringstream &outStream,
+                      std::ostringstream &errStream)
+{
+   DiffDirItems &lhs = dirTrees[0];
+   DiffDirItems &rhs = dirTrees[1];
+   size_t lhsSize = lhs.size();
+   size_t rhsSize = rhs.size();
+   if (lhsSize == 0 && rhsSize == 0) {
+      return 0;
    }
-   std::cout << format_string(msg, dirPath.c_str(), filePath.c_str()) << std::endl;
-}
-
-void print_file_vs_dir(const std::string &filePath, const std::string &dirPath)
-{
-   std::string msg;
-   if (stdfs::is_regular_file(filePath)) {
-      msg = "File %s is a regular file while file %s is a directory";
-   } else {
-      msg = "File %s is a regular empty file while file %s is a directory";
+   if (lhsSize == 0 && rhsSize != 0) {
+      for (auto &dirItem : rhs) {
+         for (std::string &filename : dirItem.second) {
+            print_only_in(dirItem.first, filename, outStream);
+         }
+      }
+      return 1;
    }
-   std::cout << format_string(msg, filePath.c_str(), dirPath.c_str()) << std::endl;
+   if (lhsSize != 0 && rhsSize == 0) {
+      for (auto &dirItem : lhs) {
+         for (std::string &filename : dirItem.second) {
+            print_only_in(dirItem.first, filename, outStream);
+         }
+      }
+      return 1;
+   }
+   int exitCode = 0;
+   // compare files
+   size_t minSize = std::min(lhsSize, rhsSize);
+   auto liter = lhs.begin();
+   auto riter = rhs.begin();
+   size_t i = 0;
+   for (; i < minSize; ++i) {
+      auto &lhsDirItems = *liter;
+      auto &rhsDirItems = *riter;
+      std::string &lhsDirName = lhsDirItems.first;
+      std::string &rhsDirName = rhsDirItems.first;
+      std::list<std::string> &lhsFiles = lhsDirItems.second;
+      std::list<std::string> &rhsFiles = rhsDirItems.second;
+      size_t lhsFilesSize = lhsFiles.size();
+      size_t rhsFilesSize = rhsFiles.size();
+      size_t minFilesSize = std::min(lhsFilesSize, rhsFilesSize);
+      auto fliter = lhsFiles.begin();
+      auto friter = rhsFiles.begin();
+      size_t j = 0;
+      for (; j < minFilesSize; ++j) {
+         std::string &lfilename = *fliter;
+         std::string &rfilename = *friter;
+         if (lfilename < rfilename) {
+            print_only_in(lhsDirName, lfilename, outStream);
+            exitCode = 1;
+         } else if (lfilename > rfilename) {
+            print_only_in(rhsDirName, rfilename, outStream);
+            exitCode = 1;
+         }
+         ++fliter;
+         ++friter;
+      }
+      while (j < lhsFilesSize) {
+         print_only_in(lhsDirName, *fliter, outStream);
+         exitCode = 1;
+         ++j;
+         ++fliter;
+      }
+      while (j < lhsFilesSize) {
+         print_only_in(rhsDirName, *friter, outStream);
+         exitCode = 1;
+         ++j;
+         ++friter;
+      }
+      ++liter;
+      ++riter;
+   }
+
+   while (i < lhsSize) {
+      exitCode = 1;
+      auto &dirItems = *liter;
+      for (std::string &filename : dirItems.second) {
+         print_only_in(dirItems.first, filename, outStream);
+      }
+      ++liter;
+      ++i;
+   }
+   while (i < rhsSize) {
+      exitCode = 1;
+      auto &dirItems = *riter;
+      for (std::string &filename : dirItems.second) {
+         print_only_in(dirItems.first, filename, outStream);
+      }
+      ++riter;
+      ++i;
+   }
+   return exitCode;
 }
 
-void print_only_in(const std::string &basedir, const std::string &path,
-                   const std::string &name)
+} // anonymous namespace
+
+ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmentPointer shenv)
 {
-   std::cout << "Only in %s: %s" << basedir << stdfs::path::preferred_separator << path
-             << name << std::endl;
-}
-
+   std::list<std::string> args = expand_glob_expression(command->getArgs(), shenv->getCwd());
+   std::shared_ptr<const char *[]> argv(new const char *[args.size()]);
+   size_t i = 0;
+   for (std::string &arg : args) {
+      argv[i++] = arg.c_str();
+   }
+   CLI::App cmdParser;
+   int exitCode = 0;
+   bool ignoreAllSpace = false;
+   bool ignoreSpaceChange = false;
+   bool unifiedDiff = false;
+   bool recursiveDiff = false;
+   bool stripTrailingCr = false;
+   bool binaryMode = false;
+   std::vector<std::string> paths;
+   cmdParser.add_flag("-w", ignoreAllSpace, "Ignore all white space.");
+   cmdParser.add_flag("-b", ignoreSpaceChange, "Ignore changes in the amount of white space.");
+   cmdParser.add_flag("-u", unifiedDiff, "use unified diff");
+   cmdParser.add_flag("-r", recursiveDiff, "use recursive diff.");
+   cmdParser.add_flag("--strip-trailing-cr", stripTrailingCr, "strip trailing cr.");
+   cmdParser.add_flag("--binary-mode", binaryMode, "compare with binary mode");
+   cmdParser.add_option("paths", paths, "paths to be diff")->required();
+   SmallVector<std::string, 2> filePaths;
+   SmallVector<DiffDirItems, 2> dirTrees;
+   try {
+      cmdParser.parse(args.size(), argv.get());
+      if (paths.size() != 2) {
+         throw InternalShellError(command, "Error:  missing or extra operand");
+      }
+      std::ostringstream outStream(std::stringstream::out|std::stringstream::binary);
+      std::ostringstream errStream(std::stringstream::out|std::stringstream::binary);
+      for (std::string &file : paths) {
+         std::list<std::pair<std::string, std::list<std::string>>> list{};
+         stdfs::path filepath(file);
+         if (!filepath.is_absolute()) {
+            filepath = stdfs::canonical(stdfs::path(shenv->getCwd()) / filepath);
+         }
+         if (recursiveDiff) {
+            get_dir_tree(filepath, list);
+            // sort
+            list.sort([](auto &lhs, auto &rhs) -> bool {
+               return lhs.first < rhs.first;
+            });
+            dirTrees.push_back(list);
+         } else {
+            filePaths.push_back(filepath.string());
+         }
+      }
+      std::string errorMsg;
+      if (!recursiveDiff) {
+         exitCode = compare_two_files(filePaths, stripTrailingCr, ignoreAllSpace,
+                                      ignoreSpaceChange, binaryMode,
+                                      outStream, errStream, errorMsg);
+      } else {
+         exitCode = compare_dir_trees(dirTrees, outStream, errStream);
+      }
+      errorMsg += errStream.str();
+      return std::make_shared<ShellCommandResult>(command, outStream.str(), errorMsg, exitCode, false);
+   } catch (const CLI::ParseError &e) {
+      throw InternalShellError(command, format_string("Unsupported: 'diff': %s\n", e.what()));
+   }
 }
 
 ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironmentPointer shenv)
@@ -1285,65 +1426,6 @@ ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironme
       return std::make_shared<ShellCommandResult>(command, "", errorStream.str(), exitCode, false);
    } catch(const CLI::ParseError &e) {
       throw InternalShellError(command, format_string("Unsupported: 'rm': %s\n", e.what()));
-   }
-}
-
-ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmentPointer shenv)
-{
-   std::list<std::string> args = expand_glob_expression(command->getArgs(), shenv->getCwd());
-   std::shared_ptr<const char *[]> argv(new const char *[args.size()]);
-   size_t i = 0;
-   for (std::string &arg : args) {
-      argv[i++] = arg.c_str();
-   }
-   CLI::App cmdParser;
-   int exitCode = 0;
-   bool ignoreAllSpace = false;
-   bool ignoreSpaceChange = false;
-   bool unifiedDiff = false;
-   bool recursiveDiff = false;
-   bool stripTrailingCr = false;
-   bool binaryMode = false;
-   std::vector<std::string> paths;
-   cmdParser.add_flag("-w", ignoreAllSpace, "Ignore all white space.");
-   cmdParser.add_flag("-b", ignoreSpaceChange, "Ignore changes in the amount of white space.");
-   cmdParser.add_flag("-u", unifiedDiff, "use unified diff");
-   cmdParser.add_flag("-r", recursiveDiff, "use recursive diff.");
-   cmdParser.add_flag("--strip-trailing-cr", stripTrailingCr, "strip trailing cr.");
-   cmdParser.add_flag("--binary-mode", binaryMode, "compare with binary mode");
-   cmdParser.add_option("paths", paths, "paths to be diff")->required();
-   SmallVector<std::string, 2> filePaths;
-   SmallVector<std::list<std::pair<std::string, std::list<std::string>>>, 2> dirTrees;
-   try {
-      cmdParser.parse(args.size(), argv.get());
-      if (paths.size() != 2) {
-         throw InternalShellError(command, "Error:  missing or extra operand");
-      }
-      std::ostringstream outStream(std::stringstream::out|std::stringstream::binary);
-      std::ostringstream errStream(std::stringstream::out|std::stringstream::binary);
-      for (std::string &file : paths) {
-         std::list<std::pair<std::string, std::list<std::string>>> list{};
-         stdfs::path filepath(file);
-         if (!filepath.is_absolute()) {
-            filepath = stdfs::canonical(stdfs::path(shenv->getCwd()) / filepath);
-         }
-         if (recursiveDiff) {
-            get_dir_tree(filepath, list);
-            dirTrees.push_back(list);
-         } else {
-            filePaths.push_back(filepath.string());
-         }
-      }
-      std::string errorMsg;
-      if (!recursiveDiff) {
-         exitCode = compare_two_files(filePaths, stripTrailingCr, ignoreAllSpace,
-                                      ignoreSpaceChange, binaryMode,
-                                      outStream, errStream, errorMsg);
-      }
-      errorMsg += errStream.str();
-      return std::make_shared<ShellCommandResult>(command, outStream.str(), errorMsg, exitCode, false);
-   } catch (const CLI::ParseError &e) {
-      throw InternalShellError(command, format_string("Unsupported: 'diff': %s\n", e.what()));
    }
 }
 
