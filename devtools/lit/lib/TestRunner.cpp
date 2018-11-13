@@ -1229,7 +1229,7 @@ void print_only_in(const std::string &dir, std::string &filename,
 
 int compare_dir_trees(SmallVectorImpl<DiffDirItems> &dirTrees,
                       std::ostringstream &outStream,
-                      std::ostringstream &errStream)
+                      std::ostringstream &)
 {
    DiffDirItems &lhs = dirTrees[0];
    DiffDirItems &rhs = dirTrees[1];

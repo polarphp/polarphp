@@ -19,10 +19,10 @@
 
 namespace fs = std::filesystem;
 
-std::string convert_to_caret_and_mnotation(std::string data)
+std::string convert_to_caret_and_mnotation(std::wstring data)
 {
    std::string output;
-   for (int c : data) {
+   for (wchar_t c : data) {
       if (c == 9 || c == 10) {
          output.push_back(c);
          continue;
@@ -60,26 +60,26 @@ int main(int argc, char *argv[])
    CLI::App catApp;
    bool showNonprinting = false;
    std::vector<std::string> filenames;
-   catApp.add_option("-v, --show-nonprinting", showNonprinting, "show all non printable char", false);
+   catApp.add_flag("-v, --show-nonprinting", showNonprinting, "show all non printable char");
    catApp.add_option("filenames", filenames, "Filenames to been print")->required();
    CLI11_PARSE(catApp, argc, argv);
    std::exception_ptr eptr;
    try {
-      char buffer[1024];
+      wchar_t buffer[1024];
       for (const std::string &filename : filenames) {
          if (!fs::exists(filename)) {
             throw std::runtime_error(std::string("No such file or directory: ") + filename);
          }
-         std::ifstream fstream(filename, std::ios_base::in | std::ios_base::binary);
+         std::wifstream fstream(filename, std::ios_base::in | std::ios_base::binary);
          if (!fstream.is_open()) {
             throw std::runtime_error(std::string("open file ") + filename + " failure");
          }
          while (!fstream.eof()) {
             fstream.read(buffer, 1024);
             if (showNonprinting) {
-               std::cout << convert_to_caret_and_mnotation(std::string(buffer, fstream.gcount()));
+               std::cout << convert_to_caret_and_mnotation(std::wstring(buffer, fstream.gcount()));
             } else {
-               std::cout << std::string(buffer, fstream.gcount());
+               std::wcout << std::wstring(buffer, fstream.gcount());
             }
          }
          std::cout.flush();
