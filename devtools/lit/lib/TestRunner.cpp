@@ -38,6 +38,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <filesystem>
 #include <boost/regex.hpp>
 #include <unicode/ucnv.h>
@@ -1049,7 +1050,8 @@ void get_dir_tree(const std::string &path, std::list<std::pair<std::string, std:
    list.push_back(std::make_pair(path, files));
 }
 
-void show_diff_stats(StringRef lhsFilename, StringRef rhsFilename)
+void show_diff_stats(StringRef lhsFilename, StringRef rhsFilename,
+                     std::ostringstream &outStream, std::ostringstream &errStream)
 {
    const int    MAX_LENGTH    = 255;
    char         time_format[] = "%Y-%m-%d %H:%M:%S %z";
@@ -1058,53 +1060,57 @@ void show_diff_stats(StringRef lhsFilename, StringRef rhsFilename)
    struct stat  st[2];
 
    if (stat(lhsFilename.getStr().c_str(), &st[0]) == -1) {
-      std::cerr << "argv1 is invalid." << std::endl;
+      errStream << "argv1 is invalid." << std::endl;
       return;
    }
    if (stat(lhsFilename.getStr().c_str(), &st[1]) == -1) {
-      std::cerr << "argv2 is invalid" << std::endl;
+      errStream << "argv2 is invalid" << std::endl;
       return;
    }
    char buf[2][MAX_LENGTH + 1];
    rawtime[0] = st[0].st_mtime;
    timeinfo[0] = localtime(&rawtime[0]);
    strftime(buf[0], MAX_LENGTH, time_format, timeinfo[0]);
-   std::cout << "--- " << lhsFilename.getStr() << '\t' << buf[0] << std::endl;
+   outStream << "--- " << lhsFilename.getStr() << '\t' << buf[0] << std::endl;
    rawtime[1] = st[1].st_mtime;
    timeinfo[1] = localtime(&rawtime[1]);
    strftime(buf[1], MAX_LENGTH, time_format, timeinfo[1]);
-   std::cout << "+++ " << rhsFilename.getStr() << '\t' << buf[1] << std::endl;
+   outStream << "+++ " << rhsFilename.getStr() << '\t' << buf[1] << std::endl;
 }
 
-bool unified_diff(std::vector<StringRef> &lhs, std::vector<StringRef> &rhs)
+bool unified_diff(std::vector<std::string> &lhs, std::vector<std::string> &rhs,
+                  std::ostringstream &outStream, std::ostringstream &errStream)
 {
    using dtl::Diff;
    using dtl::elemInfo;
    using dtl::uniHunk;
-   StringRef lhsFilename = lhs.back();
-   StringRef rhsFilename = rhs.back();
+   std::string lhsFilename = lhs.back();
+   std::string rhsFilename = rhs.back();
+   std::cout << lhsFilename << std::endl;
+   std::cout << rhsFilename << std::endl;
    lhs.pop_back();
    rhs.pop_back();
-   Diff<StringRef> diff(lhs, rhs);
+   Diff<std::string> diff(lhs, rhs);
    diff.onHuge();
    //diff.onUnserious();
    diff.compose();
    // type unihunk definition test
-   uniHunk<std::pair<StringRef, elemInfo>> hunk;
+   // uniHunk<std::pair<StringRef, elemInfo>> hunk;
    if (diff.getEditDistance() == 0) {
       return true;
    }
-   show_diff_stats(lhsFilename, rhsFilename);
+   show_diff_stats(lhsFilename, rhsFilename, outStream, errStream);
    diff.composeUnifiedHunks();
-   diff.printUnifiedFormat();
+   diff.printUnifiedFormat(outStream);
    return false;
 }
 
 int compare_two_binary_files(std::pair<StringRef, StringRef> lhs, std::pair<StringRef, StringRef> rhs,
+                             std::ostringstream &outStream, std::ostringstream &errStream,
                              std::string &errorMsg)
 {
    // @TODO need open in binary mode ?
-   SmallVector<std::vector<StringRef>, 2> fileContents;
+   SmallVector<std::vector<std::string>, 2> fileContents;
    {
       SmallVector<StringRef, 128> lines;
       lhs.second.split(lines, '\n');
@@ -1122,8 +1128,8 @@ int compare_two_binary_files(std::pair<StringRef, StringRef> lhs, std::pair<Stri
       fileContents[1].push_back(rhs.first);
    }
    int exitCode = 0;
-   if (!unified_diff(fileContents[0], fileContents[1])) {
-      exitCode = 1;
+   if (!unified_diff(fileContents[0], fileContents[1], outStream, errStream)) {
+      exitCode = -1;
    }
    return exitCode;
 }
@@ -1144,17 +1150,19 @@ std::string filter_text_diff_line(StringRef line, bool stripTrailingCR, bool ign
          filtered = polar::basic::join(parts.begin(), parts.end(), " ");
       }
    } else {
-      filtered = line;
+      filtered = line.getStr();
    }
    return filtered;
 }
 
 int compare_two_text_files(std::pair<StringRef, StringRef> lhs, std::pair<StringRef, StringRef> rhs,
                            bool stripTrailingCR, bool ignoreAllSpace,
-                           bool ignoreSpaceChange, std::string &errorMsg)
+                           bool ignoreSpaceChange, std::ostringstream &outStream,
+                           std::ostringstream &errStream, std::string &errorMsg)
 {
-   // @TODO need open in binary mode ?
-   SmallVector<std::vector<StringRef>, 2> fileContents;
+   SmallVector<std::vector<std::string>, 2> fileContents{
+      {}, {}
+   };
    {
       SmallVector<StringRef, 128> lines;
       lhs.second.split(lines, '\n');
@@ -1171,10 +1179,10 @@ int compare_two_text_files(std::pair<StringRef, StringRef> lhs, std::pair<String
          fileContents[1].push_back(filter_text_diff_line(lines[j], stripTrailingCR,
                                                          ignoreAllSpace, ignoreSpaceChange));
       }
-      fileContents[1].push_back(rhs.second);
+      fileContents[1].push_back(rhs.first);
    }
    int exitCode = 0;
-   if (!unified_diff(fileContents[0], fileContents[1])) {
+   if (!unified_diff(fileContents[0], fileContents[1], outStream, errStream)) {
       exitCode = 1;
    }
    return exitCode;
@@ -1204,30 +1212,29 @@ bool is_binary_content(StringRef content)
    return false;
 }
 
-int compare_two_files(const std::list<std::string> &filePaths,
+int compare_two_files(const SmallVectorImpl<std::string> &filePaths,
                       bool stripTrailingCR, bool ignoreAllSpace,
-                      bool ignoreSpaceChange, std::string &errorMsg)
+                      bool ignoreSpaceChange, std::ostringstream &outStream,
+                      std::ostringstream &errStream, std::string &errorMsg)
 {
    SmallVector<std::string, 2> fileContents;
    bool isBinaryFile = false;
-   int i = 0;
    for (const std::string &file : filePaths) {
       OptionalError<std::shared_ptr<MemoryBuffer>> buffer = MemoryBuffer::getFile(file.c_str());
       if (!buffer) {
          errorMsg = format_string("open file %s error : %s", file.c_str(), strerror(errno));
-         return 2;
+         return -1;
       }
-      fileContents[i] = buffer.get()->getBuffer().getStr();
-      isBinaryFile = is_binary_content(fileContents[i]);
-      i++;
+      fileContents.push_back(buffer.get()->getBuffer().getStr());
+      isBinaryFile = is_binary_content(fileContents.back());
    }
-   auto iter = filePaths.begin();
-   std::pair<StringRef, StringRef> lhs = std::make_pair(*iter++, fileContents[0]);
-   std::pair<StringRef, StringRef> rhs = std::make_pair(*iter++, fileContents[1]);
+   std::pair<StringRef, StringRef> lhs = std::make_pair(StringRef(filePaths[0]), fileContents[0]);
+   std::pair<StringRef, StringRef> rhs = std::make_pair(StringRef(filePaths[1]), fileContents[1]);
    if (isBinaryFile) {
-      return compare_two_binary_files(lhs, rhs, errorMsg);
+      return compare_two_binary_files(lhs, rhs, outStream, errStream, errorMsg);
    }
-   return compare_two_text_files(lhs, rhs, stripTrailingCR, ignoreAllSpace, ignoreSpaceChange, errorMsg);
+   return compare_two_text_files(lhs, rhs, stripTrailingCR, ignoreAllSpace, ignoreSpaceChange,
+                                 outStream, errStream, errorMsg);
 }
 
 void print_dir_vs_file(const std::string &dirPath, const std::string &filePath)
@@ -1302,7 +1309,58 @@ ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironme
 
 ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmentPointer shenv)
 {
-   return std::make_shared<ShellCommandResult>(command, "", "", 0, false);
+   std::list<std::string> args = expand_glob_expression(command->getArgs(), shenv->getCwd());
+   std::shared_ptr<const char *[]> argv(new const char *[args.size()]);
+   size_t i = 0;
+   for (std::string &arg : args) {
+      argv[i++] = arg.c_str();
+   }
+   CLI::App cmdParser;
+   int exitCode = 0;
+   bool ignoreAllSpace = false;
+   bool ignoreSpaceChange = false;
+   bool unifiedDiff = false;
+   bool recursiveDiff = false;
+   bool stripTrailingCr = false;
+   std::vector<std::string> paths;
+   cmdParser.add_flag("-w", ignoreAllSpace, "Ignore all white space.");
+   cmdParser.add_flag("-b", ignoreSpaceChange, "Ignore changes in the amount of white space.");
+   cmdParser.add_flag("-u", unifiedDiff, "use unified diff");
+   cmdParser.add_flag("-r", recursiveDiff, "use recursive diff.");
+   cmdParser.add_flag("--strip-trailing-cr", stripTrailingCr, "strip trailing cr.");
+   cmdParser.add_option("paths", paths, "paths to be diff")->required();
+   SmallVector<std::string, 2> filePaths;
+   SmallVector<std::list<std::pair<std::string, std::list<std::string>>>, 2> dirTrees;
+   try {
+      cmdParser.parse(args.size(), argv.get());
+      if (paths.size() != 2) {
+         throw InternalShellError(command, "Error:  missing or extra operand");
+      }
+      std::ostringstream outStream;
+      std::ostringstream errStream;
+      for (std::string &file : paths) {
+         std::list<std::pair<std::string, std::list<std::string>>> list{};
+         stdfs::path filepath(file);
+         if (!filepath.is_absolute()) {
+            filepath = stdfs::canonical(stdfs::path(shenv->getCwd()) / filepath);
+         }
+         if (recursiveDiff) {
+            get_dir_tree(filepath, list);
+            dirTrees.push_back(list);
+         } else {
+            filePaths.push_back(filepath.string());
+         }
+      }
+      std::string errorMsg;
+      if (!recursiveDiff) {
+         exitCode = compare_two_files(filePaths, stripTrailingCr, ignoreAllSpace, ignoreSpaceChange,
+                                      outStream, errStream, errorMsg);
+      }
+      errorMsg += errStream.str();
+      return std::make_shared<ShellCommandResult>(command, outStream.str(), errorMsg, exitCode, false);
+   } catch (const CLI::ParseError &e) {
+      throw InternalShellError(command, format_string("Unsupported: 'diff': %s\n", e.what()));
+   }
 }
 
 /// executeBuiltinRm - Removes (deletes) files or directories.
