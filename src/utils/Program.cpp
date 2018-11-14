@@ -40,7 +40,12 @@ int execute_and_wait(StringRef program, ArrayRef<StringRef> args,
                      unsigned secondsToWait, unsigned memoryLimit,
                      std::string *errMsg, bool *executionFailed)
 {
-   return execute_and_wait(program, args, cwd, envp, redirects, std::nullopt, secondsToWait,
+   ArrayRef<std::optional<int>> openModes{
+      std::nullopt,
+            std::nullopt,
+            std::nullopt
+   };
+   return execute_and_wait(program, args, cwd, envp, redirects, openModes, secondsToWait,
                            memoryLimit, errMsg, executionFailed);
 }
 
@@ -77,7 +82,12 @@ ProcessInfo execute_no_wait(StringRef program, ArrayRef<StringRef> args,
                             unsigned memoryLimit, std::string *errMsg,
                             bool *executionFailed)
 {
-   return execute_no_wait(program, args, cwd, envp, redirects, std::nullopt,
+   ArrayRef<std::optional<int>> openModes{
+      std::nullopt,
+            std::nullopt,
+            std::nullopt
+   };
+   return execute_no_wait(program, args, cwd, envp, redirects, openModes,
                           memoryLimit, errMsg, executionFailed);
 }
 
