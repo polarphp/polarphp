@@ -2123,10 +2123,20 @@ std::vector<std::string> parse_integrated_test_script(TestPointer test, ResultPo
       result = std::make_shared<Result>(UNSUPPORTED, "Test has unterminated run lines (with '\\')");
       return script;
    }
+
    // Enforce REQUIRES:
    std::list<std::string> missingRequiredFeatures = test->getMissingRequiredFeatures();
    if (!missingRequiredFeatures.empty()) {
       std::string msg = join_string_list(missingRequiredFeatures, ", ");
+      result = std::make_shared<Result>(UNSUPPORTED, format_string("Test requires the following unavailable  "
+                                                                   "features: %s", msg.c_str()));
+      return script;
+   }
+
+   // Enforce UNSUPPORTED:
+   std::vector<std::string> unsupportedFeatures = test->getUnSupportedFeatures();
+   if (!unsupportedFeatures.empty()) {
+      std::string msg = join_string_list(unsupportedFeatures, ", ");
       result = std::make_shared<Result>(UNSUPPORTED, format_string("Test does not support the following features "
                                                                    "and/or targets: %s", msg.c_str()));
       return script;
