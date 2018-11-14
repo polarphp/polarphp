@@ -270,7 +270,7 @@ void do_execute_test(TestPointer test, LitConfigPointer litConfig,
       std::string output = "Exception during script execution:\n";
       output += exp.what();
       output += "\n";
-      result = std::make_shared<Result>(UNSUPPORTED, output);
+      result = std::make_shared<Result>(UNRESOLVED, output);
    }
    test->setResult(result);
 }
