@@ -1,0 +1,1 @@
+# RUN: echo "first-line" > %t.out; echo "second-line" >> %t.out

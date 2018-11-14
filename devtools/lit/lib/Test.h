@@ -258,8 +258,8 @@ public:
    std::string getFilePath();
    std::string getSourcePath();
    TestingConfigPointer getConfig();
-   std::vector<std::string> getXFails();
-   std::vector<std::string> getRequires();
+   std::vector<std::string> &getXFails();
+   std::vector<std::string> &getRequires();
    const std::string &getSelfSourcePath();
    std::string getExecPath();
    TestSuitePointer getTestSuite() const;
@@ -268,7 +268,8 @@ public:
    bool isWithinFeatureLimits();
    std::list<std::string> getMissingRequiredFeaturesFromList(const std::vector<std::string> &features);
    std::list<std::string> getMissingRequiredFeatures();
-   std::vector<std::string> getUnsupportedFeatures();
+   std::vector<std::string> getUnSupportedFeatures();
+   std::vector<std::string> &getRawUnSupported();
    bool isEarlyTest() const;
    void writeJUnitXML(std::string &xmlStr);
 protected:

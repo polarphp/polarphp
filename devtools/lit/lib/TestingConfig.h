@@ -93,6 +93,7 @@ public:
    TestingConfig &setTestSourceRoot(const std::optional<std::string> &root);
    TestingConfig &setExcludes(const std::set<std::string> &excludes);
    TestingConfig &setAvailableFeatures(const std::vector<std::string> &features);
+   TestingConfig &addAvailableFeature(const std::string &feature);
    TestingConfig &setPipeFail(bool flag);
    TestingConfig &setLimitToFeatures(const std::vector<std::string> &features);
    TestingConfig &setParallelismGroup(const std::string &pgroup);

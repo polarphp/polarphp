@@ -239,6 +239,12 @@ TestingConfig &TestingConfig::setAvailableFeatures(const std::vector<std::string
    return *this;
 }
 
+TestingConfig &TestingConfig::addAvailableFeature(const std::string &feature)
+{
+   m_availableFeatures.push_back(feature);
+   return *this;
+}
+
 TestingConfig &TestingConfig::setPipeFail(bool flag)
 {
    m_pipefail = flag;

@@ -2051,7 +2051,7 @@ std::vector<std::string> parse_integrated_test_script(TestPointer test, ResultPo
             std::make_shared<IntegratedTestKeywordParser>("REQUIRES:", ParserKind::BOOLEAN_EXPR, nullptr, test->getRequires()),
             std::make_shared<IntegratedTestKeywordParser>("REQUIRES-ANY:", ParserKind::CUSTOM,
                                                           IntegratedTestKeywordParser::handleRequiresAny, test->getRequires()),
-            std::make_shared<IntegratedTestKeywordParser>("UNSUPPORTED:", ParserKind::BOOLEAN_EXPR, nullptr, test->getUnsupportedFeatures()),
+            std::make_shared<IntegratedTestKeywordParser>("UNSUPPORTED:", ParserKind::BOOLEAN_EXPR, nullptr, test->getRawUnSupported()),
             std::make_shared<IntegratedTestKeywordParser>("END.", ParserKind::TAG)
    };
    std::map<StringRef, IntegratedTestKeywordParserPointer> keywordParsers;
@@ -2081,10 +2081,37 @@ std::vector<std::string> parse_integrated_test_script(TestPointer test, ResultPo
       }
    }
    // get parser result
-   // @TODO other parser type
    {
       IntegratedTestKeywordParserPointer parser = keywordParsers["RUN:"];
       script = parser->getValue();
+   }
+   {
+      IntegratedTestKeywordParserPointer parser = keywordParsers["XFAIL:"];
+      std::vector<std::string> &fails = test->getXFails();
+      for (const std::string &fail : parser->getValue()) {
+         fails.push_back(fail);
+      }
+   }
+   {
+      IntegratedTestKeywordParserPointer parser = keywordParsers["REQUIRES:"];
+      std::vector<std::string> &requires = test->getRequires();
+      for (const std::string &require : parser->getValue()) {
+         requires.push_back(require);
+      }
+   }
+   {
+      IntegratedTestKeywordParserPointer parser = keywordParsers["REQUIRES-ANY:"];
+      std::vector<std::string> &requires = test->getRequires();
+      for (const std::string &require : parser->getValue()) {
+         requires.push_back(require);
+      }
+   }
+   {
+      IntegratedTestKeywordParserPointer parser = keywordParsers["UNSUPPORTED:"];
+      std::vector<std::string> &unsupporteds = test->getRawUnSupported();
+      for (const std::string &unsupported : parser->getValue()) {
+         unsupporteds.push_back(unsupported);
+      }
    }
    // Verify the script contains a run line.
    if(requireScript && script.empty()) {

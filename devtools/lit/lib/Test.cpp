@@ -214,12 +214,12 @@ TestingConfigPointer Test::getConfig()
    return m_config;
 }
 
-std::vector<std::string> Test::getXFails()
+std::vector<std::string> &Test::getXFails()
 {
    return m_xfails;
 }
 
-std::vector<std::string> Test::getRequires()
+std::vector<std::string> &Test::getRequires()
 {
    return m_requires;
 }
@@ -307,7 +307,8 @@ std::list<std::string> Test::getMissingRequiredFeaturesFromList(const std::vecto
    std::list<std::string> ret;
    try {
       for (const std::string &item : m_requires) {
-         if (!BooleanExpression::evaluate(item, m_requires)) {
+         std::optional<bool> evalResult = BooleanExpression::evaluate(item, features);
+         if (evalResult.has_value() && !evalResult.value()) {
             ret.push_back(item);
          }
       }
@@ -317,14 +318,15 @@ std::list<std::string> Test::getMissingRequiredFeaturesFromList(const std::vecto
    }
 }
 
-std::vector<std::string> Test::getUnsupportedFeatures()
+std::vector<std::string> Test::getUnSupportedFeatures()
 {
    std::vector<std::string> ret;
    const std::vector<std::string> &features = m_config->getAvailableFeatures();
    const std::string &triple = m_config->getExtraConfig<std::string>("target_triple", std::string(""));
    try {
       for (const std::string &item : m_unsupported) {
-         if (BooleanExpression::evaluate(item, features, triple)) {
+         std::optional<bool> evalResult = BooleanExpression::evaluate(item, features, triple);
+         if (evalResult.has_value() && !evalResult.value()) {
             ret.push_back(item);
          }
       }
@@ -332,6 +334,11 @@ std::vector<std::string> Test::getUnsupportedFeatures()
    } catch (ValueError &error) {
       throw ValueError(format_string("Error in UNSUPPORTED list:\n%s", error.what()));
    }
+}
+
+std::vector<std::string> &Test::getRawUnSupported()
+{
+   return m_unsupported;
 }
 
 bool Test::isEarlyTest() const
