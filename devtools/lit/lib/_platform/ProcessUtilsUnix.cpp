@@ -57,7 +57,7 @@ std::optional<std::string> look_path(const std::string &file) noexcept
 namespace internal {
 void do_run_program(const std::string &cmd, int &exitCode,
                     const std::optional<std::string> &cwd,
-                    const std::optional<std::map<std::string, std::string>> &env,
+                    const std::optional<std::list<std::string>> &env,
                     const std::optional<std::string> &input,
                     std::string &output, std::string &errMsg,
                     const size_t count, ...)
@@ -120,19 +120,13 @@ void do_run_program(const std::string &cmd, int &exitCode,
       }
       std::unique_ptr<char *[]> envArray = nullptr;
       if (env.has_value()) {
-         const std::map<std::string, std::string> envMap = env.value();
+         const std::list<std::string> envMap = env.value();
          envArray.reset(new char *[envMap.size() + 1]);
          envArray[envMap.size()] = nullptr;
-         char lineBuffer[256];
          size_t i = 0;
          for (auto &envItem : envMap) {
-            if (-1 == sprintf(lineBuffer, "%s=%s", envItem.first.c_str(), envItem.second.c_str())) {
-               std::cerr << strerror(errno);
-               exit(1);
-            }
-            // @TODO wether need release?
-            envArray[i] = new char[std::strlen(lineBuffer)];
-            std::strcpy(envArray[i], lineBuffer);
+            envArray[i] = new char[envItem.size()];
+            std::strcpy(envArray[i], envItem.data());
             ++i;
          }
       }

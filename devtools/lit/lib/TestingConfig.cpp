@@ -15,6 +15,7 @@
 #include "formats/Base.h"
 #include "nlohmann/json.hpp"
 #include "CfgSetterPluginLoader.h"
+#include "polarphp/basic/adt/Twine.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include <iostream>
 
@@ -26,6 +27,7 @@ namespace polar {
 namespace lit {
 
 using nlohmann::json;
+using polar::basic::Twine;
 
 const CfgSetterPlugin &retrieve_current_cfg_setter_plugin();
 
@@ -37,9 +39,9 @@ TestingConfigPointer TestingConfig::fromDefaults(LitConfigPointer litConfig)
 {
    std::list<std::string> paths = litConfig->getPaths();
    paths.push_back(std::getenv("PATH"));
-   std::map<std::string, std::string> environment;
-   environment["PATH"] = join_string_list(paths, ":");
-   environment["POLARPHP_DISABLE_CRASH_REPORT"] = "1";
+   std::list<std::string> environment;
+   environment.push_back(Twine("PATH").concat("=").concat(join_string_list(paths, ":")).getStr());
+   environment.push_back("POLARPHP_DISABLE_CRASH_REPORT=1");
    std::list<std::string> passVars = {
       "LIBRARY_PATH", "LD_LIBRARY_PATH", "SYSTEMROOT", "TERM",
       "CLANG", "LD_PRELOAD", "ASAN_OPTIONS", "UBSAN_OPTIONS",
@@ -55,7 +57,7 @@ TestingConfigPointer TestingConfig::fromDefaults(LitConfigPointer litConfig)
          envVal = std::string(envStr, strlen(envStr));
       }
       if (!envVal.empty()) {
-         environment[envVarName] = envVal;
+         environment.push_back(Twine(envVarName).concat("=").concat(envVal).getStr());
       }
    }
 #ifdef POLAR_OS_WIN32
@@ -112,7 +114,7 @@ const std::shared_ptr<TestFormat> TestingConfig::getTestFormat()
    return m_testFormat;
 }
 
-std::map<std::string, std::string> &TestingConfig::getEnvironment()
+std::list<std::string> &TestingConfig::getEnvironment()
 {
    return m_environment;
 }
@@ -185,7 +187,7 @@ TestingConfig &TestingConfig::setTestFormat(std::shared_ptr<TestFormat> testForm
    return *this;
 }
 
-TestingConfig &TestingConfig::setEnvironment(const std::map<std::string, std::string> &environment)
+TestingConfig &TestingConfig::setEnvironment(const std::list<std::string> &environment)
 {
    m_environment = environment;
    return *this;
@@ -193,7 +195,16 @@ TestingConfig &TestingConfig::setEnvironment(const std::map<std::string, std::st
 
 TestingConfig &TestingConfig::addEnvironment(StringRef name, StringRef value)
 {
-   m_environment[name.getStr()] = value.getStr();
+   // first search
+   auto iter = std::find_if(m_environment.begin(), m_environment.end(), [name](const std::string &item) {
+      return StringRef(item).startsWith(name.trim());
+   });
+   Twine envItem = Twine(name.trim()).concat("=").concat(value.trim());
+   if (iter != m_environment.end()) {
+      *iter = envItem.getStr();
+   } else {
+      m_environment.push_back(envItem.getStr());
+   }
    return *this;
 }
 

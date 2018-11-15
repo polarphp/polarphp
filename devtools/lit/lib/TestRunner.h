@@ -79,18 +79,20 @@ const static std::string sgc_kpdbgRegex("%dbg\\(([^)'\"]*)\\)");
 class ShellEnvironment
 {
 public:
-   ShellEnvironment(const std::string &cwd, std::map<std::string, std::string> &env)
+   ShellEnvironment(const std::string &cwd, std::list<std::string> &env)
       : m_cwd(cwd),
         m_env(env)
    {}
 
    const std::string &getCwd() const;
-   std::map<std::string, std::string> &getEnv();
+   std::list<std::string> &getEnv();
    ShellEnvironment &setCwd(const std::string &cwd);
-   ShellEnvironment &setEnvItem(const std::string &key, const std::string &value);
+   ShellEnvironment &setEnvItem(StringRef key, StringRef value);
+   StringRef getEnvItem(StringRef key);
+   ShellEnvironment &deleteEnvItem(StringRef key);
 protected:
    std::string m_cwd;
-   std::map<std::string, std::string> m_env;
+   std::list<std::string> m_env;
 };
 
 class TimeoutHelper

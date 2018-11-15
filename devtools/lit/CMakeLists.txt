@@ -49,6 +49,7 @@ polar_add_library(litkernel SHARED BUILDTREE_ONLY
 set(DEFS "")
 list(APPEND DEFS "FILECHECKER_BIN=\"${POLAR_RUNTIME_OUTPUT_INTDIR}${DIR_SEPARATOR}filechecker\"")
 list(APPEND DEFS "CAT_BIN=\"${POLAR_LIT_TEST_BIN_DIR}${DIR_SEPARATOR}LitBuiltinCat\"")
+list(APPEND DEFS "UNITEST_BIN_DIR=\"${POLAR_UNITTEST_BINARY_DIR}\"")
 
 set_target_properties(
    litkernel

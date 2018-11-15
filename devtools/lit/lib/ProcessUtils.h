@@ -26,7 +26,7 @@ namespace internal {
 
 void do_run_program(const std::string &cmd, int &exitCode,
                     const std::optional<std::string> &cwd,
-                    const std::optional<std::map<std::string, std::string>> &env,
+                    const std::optional<std::list<std::string>> &env,
                     const std::optional<std::string> &input,
                     std::string &output, std::string &errMsg,
                     const size_t count, ...);
@@ -56,7 +56,7 @@ std::tuple<std::list<pid_t>, bool> call_pgrep_command(pid_t pid) noexcept;
 template <typename... ArgTypes>
 RunCmdResponse run_program(const std::string &cmd,
                            const std::optional<std::string> &cwd = std::nullopt,
-                           const std::optional<std::map<std::string, std::string>> &env = std::nullopt,
+                           const std::optional<std::list<std::string>> &env = std::nullopt,
                            const std::optional<std::string> &input = std::nullopt,
                            ArgTypes&&... args) noexcept
 {

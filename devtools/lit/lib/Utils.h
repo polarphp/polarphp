@@ -74,7 +74,7 @@ inline bool kuse_close_fds()
    return std::strcmp(POLAR_OS, "Window") != 0;
 }
 
-using EnvVarType = std::map<std::string, std::string>;
+using EnvVarType = std::list<std::string>;
 
 RunCmdResponse
 execute_command(const std::string &command, std::optional<std::string> cwd = std::nullopt,

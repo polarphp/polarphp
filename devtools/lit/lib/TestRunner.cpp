@@ -70,7 +70,7 @@ const std::string &ShellEnvironment::getCwd() const
    return m_cwd;
 }
 
-std::map<std::string, std::string> &ShellEnvironment::getEnv()
+std::list<std::string> &ShellEnvironment::getEnv()
 {
    return m_env;
 }
@@ -81,9 +81,37 @@ ShellEnvironment &ShellEnvironment::setCwd(const std::string &cwd)
    return *this;
 }
 
-ShellEnvironment &ShellEnvironment::setEnvItem(const std::string &key, const std::string &value)
+ShellEnvironment &ShellEnvironment::setEnvItem(StringRef key, StringRef value)
 {
-   m_env[key] = value;
+   //first search
+   auto iter = std::find_if(m_env.begin(), m_env.end(), [key](const std::string &item) -> bool {
+      return StringRef(item).startsWith(key.trim());
+   });
+   Twine envItem = Twine(key.trim()).concat("=").concat(value.trim());
+   if (iter != m_env.end()) {
+      *iter = envItem.getStr();
+   } else {
+      m_env.push_back(envItem.getStr());
+   }
+   return *this;
+}
+
+StringRef ShellEnvironment::getEnvItem(StringRef key)
+{
+   auto iter = std::find_if(m_env.begin(), m_env.end(), [key](const std::string &item) -> bool {
+      return StringRef(item).startsWith(key.trim());
+   });
+   if (iter != m_env.end()) {
+      return *iter;
+   }
+   return StringRef(sg_emptyStr);
+}
+
+ShellEnvironment &ShellEnvironment::deleteEnvItem(StringRef key)
+{
+   m_env.remove_if([key](StringRef item) {
+      return item.startsWith(key.trim());
+   });
    return *this;
 }
 
@@ -326,7 +354,6 @@ void update_env(ShellEnvironmentPointer shenv, Command *command)
    ++iter;
    auto endMark = args.end();
    int argIdx = 0;
-   std::map<std::string, std::string> &env = shenv->getEnv();
    while (iter != endMark) {
       std::string arg = std::any_cast<std::string>(*iter);
       // Support for the -u flag (unsetting) for env command
@@ -340,9 +367,7 @@ void update_env(ShellEnvironmentPointer shenv, Command *command)
       }
       if (unsetNextEnvVar) {
          unsetNextEnvVar = false;
-         if (env.find(arg) != env.end()) {
-            env.erase(arg);
-         }
+         shenv->deleteEnvItem(arg);
          ++argIdx;
          ++iter;
          continue;
@@ -354,7 +379,7 @@ void update_env(ShellEnvironmentPointer shenv, Command *command)
       }
       std::string key = arg.substr(0, equalPos);
       std::string value = arg.substr(equalPos + 1);
-      env[key] = value;
+      shenv->setEnvItem(key, value);
       ++argIdx;
       ++iter;
    }
@@ -650,7 +675,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
             executable = firstArgRef.getStr();
          }
          if (!executable) {
-            executable = which(firstArg, shenv->getEnv()["PATH"]);
+            executable = which(firstArg, shenv->getEnvItem("PATH"));
          }
          if (!executable) {
             throw InternalShellError(command, format_string("%s: command not found", firstArg.c_str()));
@@ -689,11 +714,9 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       for (const std::string &argStr : expandedArgs) {
          argsRef.push_back(argStr);
       }
-      std::list<std::string> envList;
       SmallVector<StringRef, 10> envsRef;
       for (auto &item : cmdShEnv->getEnv()) {
-         envList.push_back(format_string("%s=%s", item.first.c_str(), item.second.c_str()));
-         envsRef.pushBack(envList.back());
+         envsRef.pushBack(item);
       }
       if (stdoutFilename == SUBPROCESS_FD_PIPE) {
          std::shared_ptr<SmallString<32>> tempFilename(new SmallString<32>{});
@@ -1661,11 +1684,9 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
          argsRef.push_back(script);
       }
    }
-   std::vector<std::string> env;
    std::vector<StringRef> envRef;
    for (auto &envitem : test->getConfig()->getEnvironment()) {
-      env.push_back(format_string("%s=%s", envitem.first.c_str(), envitem.second.c_str()));
-      envRef.push_back(StringRef(env.back()));
+      envRef.push_back(StringRef(envitem));
    }
    SmallString<32> outputFile;
    SmallString<32> errorFile;

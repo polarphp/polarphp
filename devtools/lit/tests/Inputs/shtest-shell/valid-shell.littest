@@ -1,0 +1,1 @@
+# RUN: cat --show-nonprinting %S/cat_nonprinting.bin

@@ -21,8 +21,7 @@ namespace lit {
 class GoogleTest : public TestFormat
 {
 public:
-   GoogleTest(const std::string &testSubDirs,
-              const std::string &testSuffix);
+   GoogleTest(const std::list<std::string> &googletestBins);
    std::list<std::string> getGTestTests(const std::string &path, LitConfigPointer litConfig,
                                         TestingConfigPointer localConfig);
    TestList getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
@@ -33,6 +32,7 @@ public:
 protected:
    std::list<std::string> m_testSubDirs;
    std::set<std::string> m_testSuffixes;
+   std::list<std::string> m_googletestBins;
 };
 
 } // lit

@@ -39,7 +39,7 @@ public:
    {}
    TestingConfig(TestingConfig *parent, const std::string &name,
                  const std::set<std::string> &suffixes, std::shared_ptr<TestFormat> testFormat,
-                 const std::map<std::string, std::string> &environment, const SubstitutionList &substitutions,
+                 const std::list<std::string> &environment, const SubstitutionList &substitutions,
                  bool unsupported, const std::optional<std::string> &testExecRoot,
                  const std::optional<std::string> &testSourceRoot, const std::set<std::string> &excludes,
                  const std::vector<std::string> &availableFeatures, bool pipefail,
@@ -68,7 +68,7 @@ public:
    const std::string &getName();
    const std::set<std::string> &getSuffixes();
    const std::shared_ptr<TestFormat> getTestFormat();
-   std::map<std::string, std::string> &getEnvironment();
+   std::list<std::string> &getEnvironment();
    const SubstitutionList &getSubstitutions();
    bool isUnsupported();
    const std::optional<std::string> &getTestExecRoot();
@@ -84,7 +84,7 @@ public:
    TestingConfig &setName(const std::string &name);
    TestingConfig &setSuffixes(const std::set<std::string> &suffixes);
    TestingConfig &setTestFormat(std::shared_ptr<TestFormat> testFormat);
-   TestingConfig &setEnvironment(const std::map<std::string, std::string> &environment);
+   TestingConfig &setEnvironment(const std::list<std::string> &environment);
    TestingConfig &addEnvironment(StringRef name, StringRef value);
    TestingConfig &setSubstitutions(const SubstitutionList &substitutions);
    TestingConfig &addSubstitution(StringRef name, const std::string &replacement);
@@ -109,7 +109,7 @@ protected:
    std::string m_name;
    std::set<std::string> m_suffixes;
    std::shared_ptr<TestFormat> m_testFormat;
-   std::map<std::string, std::string> m_environment;
+   std::list<std::string> m_environment;
    SubstitutionList m_substitutions;
    bool m_unsupported;
    std::optional<std::string> m_testExecRoot;
