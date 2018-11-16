@@ -317,7 +317,7 @@ int main(int argc, char *argv[])
       setup_siganl();
       std::list<std::string> inputs(vector_to_list(testPaths));
       // Create the user defined parameters.
-      std::map<std::string, std::any> userParams;
+      std::map<std::string, std::string> userParams;
       for(std::string &item : params) {
          if (item.find("=") == std::string::npos) {
             userParams[item] = "";

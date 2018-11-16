@@ -53,7 +53,6 @@ FirstTest.
    } else if (testName == "FirstTest.subTestC") {
       std::cout << "I am subTest C, I will hang" << std::endl;
       while (true) {
-
       }
    } else {
       std::cerr << "error: invalid test name: " << testName.getStr() << std::endl;

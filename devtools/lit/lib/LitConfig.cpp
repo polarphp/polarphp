@@ -22,7 +22,7 @@ namespace lit {
 LitConfig::LitConfig(const std::string &progName, const std::list<std::string> &path,
                      bool quiet, bool useValgrind, bool valgrindLeakCheck,
                      const std::list<std::string> &valgrindArgs, bool noExecute, bool singleProcess,
-                     bool debug, bool isWindows, const std::map<std::string, std::any> &params,
+                     bool debug, bool isWindows, const std::map<std::string, std::string> &params,
                      const std::string &cfgSetterPluginDir,
                      const std::optional<std::string> &configPrefix, int maxIndividualTestTime,
                      const std::optional<int> &maxFailures, const std::map<std::string, int> &parallelismGroups,
@@ -167,9 +167,19 @@ bool LitConfig::isWindows() const
    return m_isWindows;
 }
 
-const std::map<std::string, std::any> &LitConfig::getParams() const
+const std::map<std::string, std::string> &LitConfig::getParams() const
 {
    return m_params;
+}
+
+bool LitConfig::hasParam(const std::string &name) const
+{
+   return m_params.find(name) != m_params.end();
+}
+
+const std::string &LitConfig::getParam(const std::string &name) const
+{
+   return m_params.at(name);
 }
 
 const std::string &LitConfig::getCfgSetterPluginDir() const

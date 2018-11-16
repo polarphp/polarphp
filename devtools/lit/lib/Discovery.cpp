@@ -151,7 +151,7 @@ TestSuitSearchResult do_search_testsuit(const std::string &path,
    // when it finds a configuration it is about to load.  If the given
    // path is in the map, the value of that key is a path to the
    // configuration to load instead.
-   const std::map<std::string, std::any> &params = litConfig->getParams();
+   const std::map<std::string, std::string> &params = litConfig->getParams();
    if (params.find("config_map") != params.end()) {
       const std::any configMapAny = params.at("config_map");
       if (configMapAny.has_value()) {
@@ -420,7 +420,7 @@ std::list<std::shared_ptr<LitTestCase>> load_test_suite(const std::list<std::str
          #else
             false,
          #endif
-            std::map<std::string, std::any>{},
+            std::map<std::string, std::string>{},
             POLAR_LIT_RUNTIME_DIR);
    TestList searchResults = find_tests_for_inputs(litConfig, inputs);
    TestList tests;

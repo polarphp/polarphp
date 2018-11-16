@@ -34,7 +34,7 @@ public:
              bool quiet, bool useValgrind,
              bool valgrindLeakCheck, const std::list<std::string> &valgrindArgs,
              bool noExecute, bool singleProcess, bool debug, bool isWindows,
-             const std::map<std::string, std::any> &params,
+             const std::map<std::string, std::string> &params,
              const std::string &cfgSetterPluginDir,
              const std::optional<std::string> &configPrefix = std::nullopt,
              int maxIndividualTestTime = 0, const std::optional<int> &maxFailures = std::nullopt,
@@ -89,7 +89,9 @@ public:
    bool isDebug() const;
    bool isSingleProcess() const;
    bool isWindows() const;
-   const std::map<std::string, std::any> &getParams() const;
+   const std::map<std::string, std::string> &getParams() const;
+   bool hasParam(const std::string &name) const;
+   const std::string &getParam(const std::string &name) const;
    const std::string &getCfgSetterPluginDir() const;
    const std::optional<std::string> &getBashPath() const;
    const std::string &getConfigPrefix() const;
@@ -119,7 +121,7 @@ protected:
    bool m_singleProcess;
    bool m_debug;
    bool m_isWindows;
-   std::map<std::string, std::any> m_params;
+   std::map<std::string, std::string> m_params;
    std::string m_cfgSetterPluginDir;
    std::optional<std::string> m_bashPath;
    std::string m_configPrefix;

@@ -253,6 +253,7 @@ ResultPointer GoogleTest::execute(TestPointer test, LitConfigPointer litConfig)
             outTempFilename,
             errorTempFilename
    };
+
    int exitCode = polar::sys::execute_and_wait(executabe, args, std::nullopt, envsRef,
                                                redirects, litConfig->getMaxIndividualTestTime(), 0,
                                                &errorMsg, &execFailed);
@@ -270,6 +271,9 @@ ResultPointer GoogleTest::execute(TestPointer test, LitConfigPointer litConfig)
          // here get the buffer info error
          throw std::runtime_error(format_string("get error output buffer error: %s",
                                                 errorMsgBuffer.getError().message()));
+      }
+      if (-2 == exitCode) {
+         return std::make_shared<Result>(TIMEOUT, errorMsg);
       }
       return std::make_shared<Result>(FAIL, errOutput);
    }
