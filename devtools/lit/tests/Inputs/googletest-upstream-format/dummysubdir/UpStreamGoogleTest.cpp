@@ -50,8 +50,8 @@ ParameterizedTest/1.
       std::cout << "[  PASSED  ] 1 test." << std::endl;
       return 0;
    } else if (testName == "FirstTest.subTestB") {
-      std::cout << "I am subTest B, I FAIL" << std::endl;
-      std::cout << "And I have two lines of output" << std::endl;
+      std::cerr << "I am subTest B, I FAIL" << std::endl;
+      std::cerr << "And I have two lines of output" << std::endl;
       return 1;
    } else if (testName == "ParameterizedTest/0.subTest" ||
              testName == "ParameterizedTest/1.subTest") {
