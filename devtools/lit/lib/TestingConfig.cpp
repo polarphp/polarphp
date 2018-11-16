@@ -296,7 +296,25 @@ TestingConfig &TestingConfig::setIsEarly(bool flag)
    return *this;
 }
 
-TestingConfig &TestingConfig::setExtraConfig(const std::string &name, std::any value)
+TestingConfig &TestingConfig::setExtraConfig(const std::string &name, const char *value)
+{
+   m_extraConfig[name] = std::string(value);
+   return *this;
+}
+
+TestingConfig &TestingConfig::setExtraConfig(const std::string &name, StringRef value)
+{
+   m_extraConfig[name] = value.getStr();
+   return *this;
+}
+
+TestingConfig &TestingConfig::setExtraConfig(const std::string &name, int value)
+{
+   m_extraConfig[name] = value;
+   return *this;
+}
+
+TestingConfig &TestingConfig::setExtraConfig(const std::string &name, bool value)
 {
    m_extraConfig[name] = value;
    return *this;

@@ -101,7 +101,11 @@ public:
    const std::any &getParallelismGroup() const;
    std::any &getParallelismGroup();
    TestingConfig &setIsEarly(bool flag);
-   TestingConfig &setExtraConfig(const std::string &name, std::any value);
+
+   TestingConfig &setExtraConfig(const std::string &name, const char *value);
+   TestingConfig &setExtraConfig(const std::string &name, StringRef value);
+   TestingConfig &setExtraConfig(const std::string &name, int value);
+   TestingConfig &setExtraConfig(const std::string &name, bool value);
    void loadFromPath(const std::string &path, LitConfigPointer litConfig);
    void loadFromPath(const std::string &path, LitConfig &litConfig);
 protected:

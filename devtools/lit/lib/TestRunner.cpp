@@ -115,87 +115,6 @@ ShellEnvironment &ShellEnvironment::deleteEnvItem(StringRef key)
    return *this;
 }
 
-TimeoutHelper::TimeoutHelper(int timeout)
-   : m_timeout(timeout),
-     m_timeoutReached(false),
-     m_doneKillPass(false),
-     m_timer(std::nullopt)
-{
-}
-
-void TimeoutHelper::cancel()
-{
-   if (m_timer) {
-      if (active()) {
-         m_timer.value().stop();
-      }
-   }
-}
-
-bool TimeoutHelper::active()
-{
-   return m_timeout > 0;
-}
-
-void TimeoutHelper::addProcess(pid_t process)
-{
-   if (!active()) {
-      return;
-   }
-   bool needToRunKill = false;
-   {
-      std::lock_guard lock(m_lock);
-      m_procs.push_back(process);
-      // Avoid re-entering the lock by finding out if kill needs to be run
-      // again here but call it if necessary once we have left the lock.
-      // We could use a reentrant lock here instead but this code seems
-      // clearer to me.
-      needToRunKill = m_doneKillPass;
-   }
-   // The initial call to _kill() from the timer thread already happened so
-   // we need to call it again from this thread, otherwise this process
-   // will be left to run even though the timeout was already hit
-   if (needToRunKill) {
-      assert(timeoutReached());
-      kill();
-   }
-}
-
-void TimeoutHelper::startTimer()
-{
-   if (!active()) {
-      return;
-   }
-   // Do some late initialisation that's only needed
-   // if there is a timeout set
-   m_timer.emplace([](){
-      //handleTimeoutReached();
-   }, std::chrono::milliseconds(m_timeout), true);
-   BasicTimer &timer = m_timer.value();
-   timer.start();
-}
-
-void TimeoutHelper::handleTimeoutReached()
-{
-   m_timeoutReached = true;
-   kill();
-}
-
-bool TimeoutHelper::timeoutReached()
-{
-   return m_timeoutReached;
-}
-
-void TimeoutHelper::kill()
-{
-   std::lock_guard locker(m_lock);
-   for (pid_t pid : m_procs) {
-      kill_process_and_children(pid);
-   }
-   m_procs.clear();
-   m_doneKillPass = true;
-}
-
 ShellCommandResult::ShellCommandResult(AbstractCommand *command, const std::string &outputMsg,
                                        const std::string &errorMsg, int exitCode,
                                        bool timeoutReached)
@@ -235,26 +154,19 @@ const std::string &ShellCommandResult::getErrorMsg()
 namespace {
 /// forward declare function
 int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
-                     ShExecResultList &results,
-                     TimeoutHelper &timeoutHelper);
+                     ShExecResultList &results, size_t execTimeout, bool &timeoutReached);
 } // anonymous namespace
 
 std::pair<int, std::string> execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv, ShExecResultList &results,
                                           size_t execTimeout)
 {
-   // Use the helper even when no timeout is required to make
-   // other code simpler (i.e. avoid bunch of ``!= None`` checks)
-   TimeoutHelper timeoutHelper(execTimeout);
-   if (execTimeout > 0) {
-      timeoutHelper.startTimer();
-   }
-   int finalExitCode = do_execute_shcmd(cmd, shenv, results, timeoutHelper);
-   timeoutHelper.cancel();
+   bool timeoutReached = false;
+   int exitCode = do_execute_shcmd(cmd, shenv, results, execTimeout, timeoutReached);
    std::string timeoutInfo;
-   if (timeoutHelper.timeoutReached()) {
-      timeoutInfo = format_string("Reached timeout of %nz seconds", execTimeout);
+   if (timeoutReached) {
+      timeoutInfo = format_string("Reached timeout of %dz seconds", execTimeout);
    }
-   return std::make_pair(finalExitCode, timeoutInfo);
+   return std::make_pair(exitCode, timeoutInfo);
 }
 
 std::list<std::string> expand_glob(const GlobItem &glob, const std::string &cwd)
@@ -435,41 +347,35 @@ protected:
 #define TESTRUNNER_SUB_ROCESS_TEMPFILE_PREFIX "polarphp-lit-testrunner-shell-command-sub-temp"
 
 int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
-                     ShExecResultList &results,
-                     TimeoutHelper &timeoutHelper)
+                     ShExecResultList &results, size_t execTimeout, bool &timeoutReached)
 {
    std::cout << cmd->operator std::string() << std::endl;
-   if (timeoutHelper.timeoutReached()) {
-      // Prevent further recursion if the timeout has been hit
-      // as we should try avoid launching more processes.
-      return TIMEOUT_ERROR_CODE;
-   }
    int result;
    AbstractCommand::Type commandType = cmd->getCommandType();
    if (commandType == AbstractCommand::Type::Seq) {
       Seq *seqCommand = dynamic_cast<Seq *>(cmd.get());
       const std::string &op = seqCommand->getOp();
       if (op == ";") {
-         result = do_execute_shcmd(seqCommand->getLhs(), shenv, results, timeoutHelper);
-         return do_execute_shcmd(seqCommand->getRhs(), shenv, results, timeoutHelper);
+         result = do_execute_shcmd(seqCommand->getLhs(), shenv, results, execTimeout, timeoutReached);
+         return do_execute_shcmd(seqCommand->getRhs(), shenv, results, execTimeout, timeoutReached);
       }
       if (op == "&") {
          throw InternalShellError(seqCommand, "unsupported shell operator: '&'");
       }
       if (op == "||") {
-         result = do_execute_shcmd(seqCommand->getLhs(), shenv, results, timeoutHelper);
+         result = do_execute_shcmd(seqCommand->getLhs(), shenv, results, execTimeout, timeoutReached);
          if (0 != result) {
-            result = do_execute_shcmd(seqCommand->getRhs(), shenv, results, timeoutHelper);
+            result = do_execute_shcmd(seqCommand->getRhs(), shenv, results, execTimeout, timeoutReached);
          }
          return result;
       }
       if (op == "&&") {
-         result = do_execute_shcmd(seqCommand->getLhs(), shenv, results, timeoutHelper);
+         result = do_execute_shcmd(seqCommand->getLhs(), shenv, results, execTimeout, timeoutReached);
          if (result == TIMEOUT_ERROR_CODE) {
             return result;
          }
          if (0 == result) {
-            result = do_execute_shcmd(seqCommand->getRhs(), shenv, results, timeoutHelper);
+            result = do_execute_shcmd(seqCommand->getRhs(), shenv, results, execTimeout, timeoutReached);
          }
          return result;
       }
@@ -566,7 +472,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       results.push_back(std::make_shared<ShellCommandResult>(firstCommand, "", "", 0, false));
       return 0;
    }
-   SmallVector<std::optional<std::tuple<int, std::string, std::string>>, 6> processesData;
+   SmallVector<std::optional<std::tuple<int, std::string, std::string, bool>>, 6> processesData;
    std::list<std::pair<int, StringRef>> stderrTempFiles;
    std::list<std::shared_ptr<SmallString<32>>> tempFilenamesPool;
    OpenTempFilesMgr tempFilesMgr;
@@ -778,29 +684,30 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       std::string errorMsg;
       bool execFailed;
       int returnCode = polar::sys::execute_and_wait(executable.value(), argsRef, cmdShEnv->getCwd(), envsRef,
-                                                    redirects, redirectsOpenModes, 0, 0, &errorMsg,
+                                                    redirects, redirectsOpenModes, execTimeout, 0, &errorMsg,
                                                     &execFailed);
       if(execFailed) {
          throw InternalShellError(command, format_string("Could not create process (%s) due to %s",
                                                          executable.value().c_str(), errorMsg.c_str()));
       }
       if (returnCode == -1 || returnCode == -2) {
-         processesData[i] = std::make_tuple(returnCode, "", errorMsg);
+         if (returnCode == -2) {
+            timeoutReached = true;
+         }
+         processesData[i] = std::make_tuple(returnCode, "", errorMsg, timeoutReached);
       } else {
          auto processResult = get_process_output(stdoutFilename, stderrFilename);
          std::cout << std::get<1>(processResult) << std::endl;
          std::cout << "---" << std::endl;
          std::cout << std::get<2>(processResult) << std::endl;
          if (std::get<0>(processResult)) {
-            processesData[i] = std::make_tuple(returnCode, std::get<1>(processResult), std::get<2>(processResult));
+            processesData[i] = std::make_tuple(returnCode, std::get<1>(processResult), std::get<2>(processResult), false);
          } else {
             throw InternalShellError(command, format_string("get command stdout or stderr content error: %s",
                                                             std::get<2>(processResult).c_str()));
          }
       }
       // Let the helper know about this process
-      // @TODO add timeout
-      // timeoutHelper.addProcess(procInfo.getPid());
       // Update the current stdin source.
       if (rawStdoutFilename == SUBPROCESS_FD_PIPE) {
          defaultStdin = stdoutFilename.value();
@@ -820,13 +727,13 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       if (outputBuf) {
          errorMsg = outputBuf.get()->getBuffer().getStr();
       }
-      std::optional<std::tuple<bool, std::string, std::string>> errorTuple = processesData[i];
+      std::optional<std::tuple<bool, std::string, std::string, bool>> errorTuple = processesData[i];
       if (errorTuple) {
          auto errorValue = errorTuple.value();
          std::get<2>(errorValue) = errorMsg;
          processesData[i] = errorValue;
       } else {
-         processesData[i] = std::make_tuple(-4, "", errorMsg);
+         processesData[i] = std::make_tuple(-4, "", errorMsg, false);
       }
    }
    int lastExitCode = 0;
@@ -841,7 +748,8 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          results.push_back(std::make_shared<ShellCommandResult>(
                               acmd.get(),
                               std::get<1>(processData), std::get<2>(processData),
-                              lastExitCode, timeoutHelper.timeoutReached()));
+                              lastExitCode,
+                              timeoutReached));
       }
    }
 
@@ -1534,8 +1442,8 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
       cmd = std::make_shared<Seq>(cmd, "&&", cmds[i]);
    }
    ShExecResultList results;
-   std::string timeoutInfo;
    int exitCode = 0;
+   std::string timeoutInfo;
    ShellEnvironmentPointer shenv = std::make_shared<ShellEnvironment>(cwd, test->getConfig()->getEnvironment());
    try {
       std::pair<int, std::string> r = execute_shcmd(cmd, shenv, results, litConfig->getMaxIndividualTestTime());
@@ -1570,7 +1478,7 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
             }
             ++j;
          }
-         out += format_string("$ %s\n", argMsg.c_str());
+         out += Twine("$ ", argMsg).concat("\n").getStr();
       } else {
          out += "$ \n";
       }
@@ -1586,7 +1494,7 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
          out += Twine("# command output:\n", shExecResult->getOutputMsg()).concat("\n").getStr();
       }
       if (!StringRef(shExecResult->getErrorMsg()).trim().empty()) {
-         out += Twine("# command stderr:\n", shExecResult->getErrorMsg()).concat("\n").getStr();
+         err += Twine("# command stderr:\n", shExecResult->getErrorMsg()).concat("\n").getStr();
       }
       if (StringRef(shExecResult->getOutputMsg()).trim().empty() &&
           StringRef(shExecResult->getErrorMsg()).trim().empty()) {
@@ -1603,11 +1511,11 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
          } else {
             codeStr = std::to_string(shExecResult->getExitCode());
          }
-         out += format_string("error: command failed with exit status: %s\n",
-                              codeStr.c_str());
+         err += Twine("error: command failed with exit status: ", codeStr).concat("\n").getStr();
       }
       if (litConfig->getMaxIndividualTestTime() > 0) {
-         out += format_string("error: command reached timeout: %s\n", shExecResult->isTimeoutReached() ? "true" : "false");
+         err += Twine(StringRef("error: command reached timeout: "),
+                      shExecResult->isTimeoutReached() ? "true" : "false").concat("\n").getStr();
       }
       ++i;
    }
@@ -2208,9 +2116,12 @@ ResultPointer do_run_shtest(TestPointer test, LitConfigPointer litConfig, bool u
       }
    }
    // Form the output log.
-   std::string output(format_string("Script:\n--\n%s\n--\nExit Code: %d\n", join_string_list(script, "\n").c_str(), exitCode));
+   std::string output = Twine("Script:\n--\n", join_string_list(script, "\n"))
+         .concat("\n--\nExit Code: ")
+         .concat(std::to_string(exitCode))
+         .concat("\n").getStr();
    if (!timeoutInfo.empty()) {
-      output += format_string("Timeout: %s\n", timeoutInfo.c_str());
+      output += Twine("Timeout: ", timeoutInfo).concat("\n").getStr();
    }
    output += "\n";
    // Append the outputs, if present.

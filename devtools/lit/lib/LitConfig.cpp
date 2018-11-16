@@ -177,9 +177,12 @@ bool LitConfig::hasParam(const std::string &name) const
    return m_params.find(name) != m_params.end();
 }
 
-const std::string &LitConfig::getParam(const std::string &name) const
+const std::string &LitConfig::getParam(const std::string &name, const std::string &defaultValue) const
 {
-   return m_params.at(name);
+   if (m_params.find(name) != m_params.end()) {
+      return m_params.at(name);
+   }
+   return defaultValue;
 }
 
 const std::string &LitConfig::getCfgSetterPluginDir() const

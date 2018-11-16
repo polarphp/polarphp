@@ -248,7 +248,7 @@ std::string Test::getExecPath()
 bool Test::isExpectedToFail()
 {
    const std::vector<std::string> &features = m_config->getAvailableFeatures();
-   const std::string &triple = m_config->getExtraConfig<std::string>("target_triple", std::string(""));
+   const std::string &triple = m_config->getExtraConfig<std::string>("target_triple", "");
    // Check if any of the xfails match an available feature or the target.
    for (const std::string &item : m_xfails) {
       // If this is the wildcard, it always fails.
@@ -322,7 +322,7 @@ std::vector<std::string> Test::getUnSupportedFeatures()
 {
    std::vector<std::string> ret;
    const std::vector<std::string> &features = m_config->getAvailableFeatures();
-   const std::string &triple = m_config->getExtraConfig<std::string>("target_triple", std::string(""));
+   const std::string &triple = m_config->getExtraConfig<std::string>("target_triple", "");
    try {
       for (const std::string &item : m_unsupported) {
          std::optional<bool> evalResult = BooleanExpression::evaluate(item, features, triple);

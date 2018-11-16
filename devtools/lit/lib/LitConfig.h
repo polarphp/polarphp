@@ -91,7 +91,7 @@ public:
    bool isWindows() const;
    const std::map<std::string, std::string> &getParams() const;
    bool hasParam(const std::string &name) const;
-   const std::string &getParam(const std::string &name) const;
+   const std::string &getParam(const std::string &name, const std::string &defaultValue = "") const;
    const std::string &getCfgSetterPluginDir() const;
    const std::optional<std::string> &getBashPath() const;
    const std::string &getConfigPrefix() const;

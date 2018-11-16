@@ -95,28 +95,6 @@ protected:
    std::list<std::string> m_env;
 };
 
-class TimeoutHelper
-{
-public:
-   TimeoutHelper(int timeout);
-   void cancel();
-   bool active();
-   void addProcess(pid_t process);
-   void startTimer();
-   bool timeoutReached();
-
-private:
-   void handleTimeoutReached();
-   void kill();
-protected:
-   int m_timeout;
-   std::list<pid_t> m_procs;
-   bool m_timeoutReached;
-   bool m_doneKillPass;
-   std::mutex m_lock;
-   std::optional<BasicTimer> m_timer;
-};
-
 class ShellCommandResult
 {
 public:
