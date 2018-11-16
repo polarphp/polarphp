@@ -22,6 +22,11 @@ namespace lit {
 
 namespace fs = std::filesystem;
 
+bool TestFormat::needSearchAgain()
+{
+   return true;
+}
+
 std::list<std::shared_ptr<Test>>
 FileBasedTest::getTestsInDirectory(TestSuitePointer testSuite,
                                    const std::list<std::string> &pathInSuite,

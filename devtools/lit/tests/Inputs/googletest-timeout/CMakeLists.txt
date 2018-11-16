@@ -15,3 +15,6 @@ polar_setup_lit_cfg_setters(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 polar_add_lit_extra_test_executable(LittestTimeoutGoogleTest
    LINK_LIBS "PolarUtils"
    dummysubdir/TimeoutGoogleTest.cpp)
+
+# simulate google test binary
+polar_set_output_directory(LittestTimeoutGoogleTest BINARY_DIR ${POLAR_UNITTEST_BINARY_DIR})

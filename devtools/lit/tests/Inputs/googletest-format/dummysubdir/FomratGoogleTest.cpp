@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
       return -1;
    }
    if (StringRef(argv[1]) == "--gtest_list_tests") {
-      std::string output = R"(\
+      std::string output = R"(
 FirstTest.
   subTestA
   subTestB
@@ -36,7 +36,7 @@ ParameterizedTest/1.
 )";
       std::cout << output << std::endl;
       return 0;
-   } else if (StringRef(argv[1]).startsWith("--gtest_filter=")) {
+   } else if (!StringRef(argv[1]).startsWith("--gtest_filter=")) {
       std::cerr << "unexpected argument: " << argv[1] << std::endl;
       return -1;
    }
@@ -48,8 +48,8 @@ ParameterizedTest/1.
       std::cout << "[  PASSED  ] 1 test." << std::endl;
       return 0;
    } else if (testName == "FirstTest.subTestB") {
-      std::cout << "I am subTest B, I FAIL" << std::endl;
-      std::cout << "And I have two lines of output" << std::endl;
+      std::cerr << "I am subTest B, I FAIL" << std::endl;
+      std::cerr << "And I have two lines of output" << std::endl;
       return 1;
    } else if (testName == "ParameterizedTest/0.subTest" ||
               testName == "ParameterizedTest/1.subTest") {

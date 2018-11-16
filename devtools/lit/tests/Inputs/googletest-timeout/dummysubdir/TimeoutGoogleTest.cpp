@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
       return -1;
    }
    if (StringRef(argv[1]) == "--gtest_list_tests") {
-      std::string output = R"(\
+      std::string output = R"(
 FirstTest.
   subTestA
   subTestB
@@ -34,7 +34,7 @@ FirstTest.
 )";
       std::cout << output << std::endl;
       return 0;
-   } else if (StringRef(argv[1]).startsWith("--gtest_filter=")) {
+   } else if (!StringRef(argv[1]).startsWith("--gtest_filter=")) {
       std::cerr << "unexpected argument: " << argv[1] << std::endl;
       return -1;
    }

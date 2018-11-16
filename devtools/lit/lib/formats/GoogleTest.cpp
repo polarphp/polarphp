@@ -16,26 +16,42 @@
 #include "../TestingConfig.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/basic/adt/ArrayRef.h"
+#include "polarphp/basic/adt/SmallVector.h"
+#include "polarphp/basic/adt/SmallString.h"
+#include "polarphp/basic/adt/StringExtras.h"
+#include "polarphp/basic/adt/Twine.h"
+#include "polarphp/utils/FileSystem.h"
+#include "polarphp/utils/FileUtils.h"
 #include "polarphp/utils/Program.h"
+#include "polarphp/utils/MemoryBuffer.h"
 #include "../Test.h"
 #include <iostream>
 #include <sstream>
 
 using polar::basic::ArrayRef;
+using polar::basic::SmallVector;
+using polar::basic::SmallString;
+using polar::basic::Twine;
+using polar::utils::MemoryBuffer;
+using polar::fs::create_temporary_file;
+using polar::fs::FileRemover;
+
+#define TESTRUNNER_GTEST_FORMAT_PROCESS_TEMP_PREFIX "polarphp-lit-gtest-format-"
 
 namespace polar {
 namespace lit {
 
 GoogleTest::GoogleTest(const std::list<std::string> &googletestBins)
-   : m_googletestBins(googletestBins)
+   : m_googletestBins(googletestBins),
+     m_searched(false)
 {
 }
 
 namespace {
-inline bool search_in_string_list(std::function<bool(const std::string &)> predictor,
+inline bool search_in_string_list(std::function<bool(StringRef)> predictor,
                                   const std::list<std::string> &strList)
 {
-   for (const std::string &str : strList) {
+   for (StringRef str : strList) {
       if (predictor(str)) {
          return true;
       }
@@ -43,14 +59,19 @@ inline bool search_in_string_list(std::function<bool(const std::string &)> predi
    return false;
 }
 
-inline bool is_start_with(const std::string &str)
+inline bool is_start_with(StringRef str)
 {
-   return string_startswith(str, "DISABLED_");
+   return str.startsWith("DISABLED_");
 }
 
-inline std::list<std::string> &append_string_list(std::list<std::string> &list, const std::string &str)
+inline std::list<std::string> &append_string_list(std::list<std::string> &list, StringRef str)
 {
-   list.push_back(str);
+   list.push_back(str.getStr());
+   return list;
+}
+inline std::list<std::string> append_string_list_copy(std::list<std::string> list, StringRef str)
+{
+   list.push_back(str.getStr());
    return list;
 }
 } // anonymous namespace
@@ -62,167 +83,105 @@ std::list<std::string> GoogleTest::getGTestTests(const std::string &path, LitCon
       path,
             "--gtest_list_tests"
    };
-   localConfig->getEnvironment();
-   polar::sys::execute_and_wait(path, args, std::nullopt);
-//   RunCmdResponse response = run_program(path, std::nullopt, localConfig->getEnvironment(),
-//                                         std::nullopt, "--gtest_list_tests");
-//   int exitCode = std::get<0>(response);
-//   std::string output = std::get<1>(response);
-//   std::string errorMsg = std::get<2>(response);
-//   if (0 != exitCode) {
-//      litConfig->warning(
-//               format_string("unable to discover google-tests in %s. Process output: %s",
-//                             path.c_str(), output.c_str()));
-//      throw std::runtime_error(format_string("unable to discover google-tests in %s. Process output: %s",
-//                                             path.c_str(), errorMsg.c_str()));
-//   }
-//   std::istringstream stream(output);
-//   char lineBuf[256];
-//   std::list<std::string> nestedTests;
-//   std::list<std::string> tests;
-//   while (stream.getline(lineBuf, sizeof(lineBuf))) {
-//      std::string line(lineBuf);
-//      if (line.empty()) {
-//         continue;
-//      }
-//      if (line.find("Running main() from") != std::string::npos) {
-//         // Upstream googletest prints this to stdout prior to running
-//         // tests. polarphp removed that print statement in r61540, but we
-//         // handle it here in case upstream googletest is being used.
-//         continue;
-//      }
-//      // The test name list includes trailing comments beginning with
-//      // a '#' on some lines, so skip those. We don't support test names
-//      // that use escaping to embed '#' into their name as the names come
-//      // from C++ class and method names where such things are hard and
-//      // uninteresting to support.
-//      std::list<std::string> parts = split_string(line, '#', 1);
-//      line = parts.front();
-//      rtrim_string(line);
-//      ltrim_string(line);
-//      if (line.empty()) {
-//         continue;
-//      }
-//      size_t index = 0;
-//      while (line.substr(index * 2, 2) == "  ") {
-//         index += 1;
-//      }
-//      while (nestedTests.size() > index) {
-//         nestedTests.pop_back();
-//      }
-//      line = line.substr(index * 2);
-//      if (string_endswith(line, ".")) {
-//         nestedTests.push_back(line);
-//      } else if (search_in_string_list(is_start_with, append_string_list(nestedTests, line))) {
-//         // Gtest will internally skip these tests. No need to launch a
-//         // child process for it.
-//         continue;
-//      } else {
-//         tests.push_back(join_string_list(nestedTests, "") + line);
-//      }
-//   }
-//   return tests;
+   SmallVector<StringRef, 10> envsRef;
+   for (const std::string &envStr : localConfig->getEnvironment()) {
+      envsRef.pushBack(envStr);
+   }
+
+   std::string errorMsg;
+   bool execFailed;
+   SmallString<32> outTempFilename;
+   fs::create_temporary_file(TESTRUNNER_GTEST_FORMAT_PROCESS_TEMP_PREFIX, "", outTempFilename);
+   SmallString<32> errorTempFilename;
+   fs::create_temporary_file(TESTRUNNER_GTEST_FORMAT_PROCESS_TEMP_PREFIX, "", errorTempFilename);
+   FileRemover outTempRemover(outTempFilename);
+   FileRemover errTempRemover(errorTempFilename);
+   ArrayRef<std::optional<StringRef>> redirects{
+      std::nullopt,
+            outTempFilename,
+            errorTempFilename
+   };
+   int exitCode = polar::sys::execute_and_wait(path, args, std::nullopt, envsRef,
+                                               redirects, 0, 0, &errorMsg, &execFailed);
+   if(execFailed) {
+      throw ValueError(format_string("Could not create process (%s) due to %s",
+                                     path.c_str(), errorMsg.c_str()));
+   }
+
+   if (0 != exitCode) {
+      std::string errOutput;
+      auto errorMsgBuffer = MemoryBuffer::getFile(errorTempFilename);
+      if (errorMsgBuffer) {
+         errOutput = errorMsgBuffer.get()->getBuffer().getStr();
+      } else {
+         // here get the buffer info error
+         throw std::runtime_error(format_string("get error output buffer error: %s",
+                                                errorMsgBuffer.getError().message()));
+      }
+
+      litConfig->warning(
+               format_string("unable to discover google-tests in %s. Process output: %s",
+                             path.c_str(), errOutput.c_str()));
+      throw std::runtime_error(format_string("unable to discover google-tests in %s. Process output: %s",
+                                             path.c_str(), errOutput.c_str()));
+   }
+
+   std::string output;
+   // here we can get the error message or output message
+   auto outputBuf = MemoryBuffer::getFile(outTempFilename);
+   if (outputBuf) {
+      output = outputBuf.get()->getBuffer().getStr();
+   } else {
+      // here get the buffer info error
+      throw std::runtime_error(format_string("get output buffer error: %s",
+                                             outputBuf.getError().message()));
+   }
+   std::istringstream stream(output);
+   char lineBuf[1024];
+   std::list<std::string> nestedTests;
+   std::list<std::string> tests;
+   while (stream.getline(lineBuf, sizeof(lineBuf))) {
+      StringRef lineRef(lineBuf);
+      if (lineRef.empty()) {
+         continue;
+      }
+      if (lineRef.find("Running main() from") != StringRef::npos) {
+         // Upstream googletest prints this to stdout prior to running
+         // tests. polarphp removed that print statement in r61540, but we
+         // handle it here in case upstream googletest is being used.
+         continue;
+      }
+      // The test name list includes trailing comments beginning with
+      // a '#' on some lines, so skip those. We don't support test names
+      // that use escaping to embed '#' into their name as the names come
+      // from C++ class and method names where such things are hard and
+      // uninteresting to support.
+      SmallVector<StringRef, 3> parts;
+      lineRef.split(parts, '#', 1);
+      lineRef = parts[0].rtrim();
+      if (lineRef.ltrim().empty()) {
+         continue;
+      }
+      size_t index = 0;
+      while (lineRef.substr(index * 2, 2) == "  ") {
+         index += 1;
+      }
+      while (nestedTests.size() > index) {
+         nestedTests.pop_back();
+      }
+      lineRef = lineRef.substr(index * 2);
+      if (lineRef.endsWith(".")) {
+         nestedTests.push_back(lineRef);
+      } else if (search_in_string_list(is_start_with, append_string_list_copy(nestedTests, lineRef))) {
+         // Gtest will internally skip these tests. No need to launch a
+         // child process for it.
+         continue;
+      } else {
+         tests.push_back(polar::basic::join(nestedTests.begin(), nestedTests.end(), StringRef("")) + lineRef.getStr());
+      }
+   }
+   return tests;
 }
-
-///
-/// getGTestTests(path) - [name]
-/// Return the tests available in gtest executable.
-///
-/// Args:
-/// path: String path to a gtest executable
-/// litConfig: LitConfig instance
-/// localConfig: TestingConfig instance
-///
-//std::list<std::string> GoogleTest::getGTestTests(const std::string &path, LitConfigPointer litConfig,
-//                                                 TestingConfigPointer localConfig)
-//{
-//   RunCmdResponse response = run_program(path, std::nullopt, localConfig->getEnvironment(),
-//                                         std::nullopt, "--gtest_list_tests");
-//   int exitCode = std::get<0>(response);
-//   std::string output = std::get<1>(response);
-//   std::string errorMsg = std::get<2>(response);
-//   if (0 != exitCode) {
-//      litConfig->warning(
-//               format_string("unable to discover google-tests in %s. Process output: %s",
-//                             path.c_str(), output.c_str()));
-//      throw std::runtime_error(format_string("unable to discover google-tests in %s. Process output: %s",
-//                                             path.c_str(), errorMsg.c_str()));
-//   }
-//   std::istringstream stream(output);
-//   char lineBuf[256];
-//   std::list<std::string> nestedTests;
-//   std::list<std::string> tests;
-//   while (stream.getline(lineBuf, sizeof(lineBuf))) {
-//      std::string line(lineBuf);
-//      if (line.empty()) {
-//         continue;
-//      }
-//      if (line.find("Running main() from") != std::string::npos) {
-//         // Upstream googletest prints this to stdout prior to running
-//         // tests. polarphp removed that print statement in r61540, but we
-//         // handle it here in case upstream googletest is being used.
-//         continue;
-//      }
-//      // The test name list includes trailing comments beginning with
-//      // a '#' on some lines, so skip those. We don't support test names
-//      // that use escaping to embed '#' into their name as the names come
-//      // from C++ class and method names where such things are hard and
-//      // uninteresting to support.
-//      std::list<std::string> parts = split_string(line, '#', 1);
-//      line = parts.front();
-//      rtrim_string(line);
-//      ltrim_string(line);
-//      if (line.empty()) {
-//         continue;
-//      }
-//      size_t index = 0;
-//      while (line.substr(index * 2, 2) == "  ") {
-//         index += 1;
-//      }
-//      while (nestedTests.size() > index) {
-//         nestedTests.pop_back();
-//      }
-//      line = line.substr(index * 2);
-//      if (string_endswith(line, ".")) {
-//         nestedTests.push_back(line);
-//      } else if (search_in_string_list(is_start_with, append_string_list(nestedTests, line))) {
-//         // Gtest will internally skip these tests. No need to launch a
-//         // child process for it.
-//         continue;
-//      } else {
-//         tests.push_back(join_string_list(nestedTests, "") + line);
-//      }
-//   }
-//   return tests;
-//}
-
-//TestList GoogleTest::getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
-//                                         const std::list<std::string> &pathInSuite,
-//                                         LitConfigPointer litConfig,
-//                                         TestingConfigPointer localConfig)
-//{
-//   TestList tests;
-//   std::string sourcePath = testSuite->getSourcePath(pathInSuite);
-//   for (const std::string &subDir : m_testSubDirs) {
-//      std::string dirPath = stdfs::path(sourcePath) / subDir;
-//      if (stdfs::is_directory(dirPath)) {
-//         continue;
-//      }
-//      for (const std::string &fn : listdir_files(dirPath, m_testSuffixes)) {
-//         // Discover the tests in this executable.
-//         std::string execPath = stdfs::path(sourcePath) / subDir / fn;
-//         std::list<std::string> testNames = getGTestTests(execPath, litConfig, localConfig);
-//         for (const std::string &testName : testNames) {
-//            std::list<std::string> testPath = pathInSuite;
-//            append_string_list(testPath, subDir);
-//            append_string_list(testPath, fn);
-//            append_string_list(testPath, testName);
-//            tests.push_back(std::make_shared<Test>(testSuite, testPath, localConfig, execPath));
-//         }
-//      }
-//   }
-//   return tests;
-//}
 
 TestList GoogleTest::getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
                                          const std::list<std::string> &pathInSuite,
@@ -232,59 +191,107 @@ TestList GoogleTest::getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
 
    TestList tests;
    size_t testNameStartPos = StringRef(UNITEST_BIN_DIR).size() + 1;
-//   for (const std::string &gtestBin : m_googletestBins) {
-//      std::string gtestBaseName = gtestBin.substr(testNameStartPos);
-//      std::list<std::string> testNames = getGTestTests(gtestBin, litConfig, localConfig);
-//      for (const std::string &testName : testNames) {
-//         std::list<std::string> testPath = pathInSuite;
-//         append_string_list(testPath, gtestBaseName);
-//         append_string_list(testPath, testName);
-//         tests.push_back(std::make_shared<Test>(testSuite, testPath, localConfig, gtestBin));
-//      }
-//   }
+   for (const std::string &gtestBin : m_googletestBins) {
+      std::string gtestBaseName = gtestBin.substr(testNameStartPos);
+      std::list<std::string> testNames = getGTestTests(gtestBin, litConfig, localConfig);
+      for (const std::string &testName : testNames) {
+         std::list<std::string> testPath = pathInSuite;
+         testPath.push_back(gtestBaseName);
+         testPath.push_back(testName);
+         tests.push_back(std::make_shared<Test>(testSuite, testPath, localConfig, gtestBin));
+      }
+   }
+   m_searched = true;
    return tests;
+}
+
+bool GoogleTest::needSearchAgain()
+{
+   return !m_searched;
 }
 
 ResultPointer GoogleTest::execute(TestPointer test, LitConfigPointer litConfig)
 {
-   stdfs::path sourcePath = test->getSourcePath();
-   std::string testPath = sourcePath.parent_path();
-   std::string testName = sourcePath.filename();
-   while (!stdfs::exists(testPath)) {
-      // Handle GTest parametrized and typed tests, whose name includes
-      // some '/'s.
-      stdfs::path curPath = testPath;
-      testPath = curPath.parent_path();
-      std::string namePrefix = curPath.filename();
-      testName = namePrefix + "/" + testName;
+   std::string sourceRoot = test->getTestSuite()->getSourcePath();
+   std::string sourcePath = test->getSourcePath().substr(sourceRoot.size() + 1);
+   size_t splitPos = sourcePath.find('/');
+   std::string testName = sourcePath;
+   if (splitPos != std::string::npos) {
+      testName = sourcePath.substr(splitPos + 1);
    }
-   std::string cmd = testPath + "--gtest_filter=" + testName;
+   std::string executabe = test->getFilePath();
+   if (!stdfs::exists(executabe)) {
+      return std::make_shared<Result>(UNRESOLVED, format_string("executable: %s is not exist", executabe.c_str()));
+   }
+   SmallVector<StringRef, 10> args;
    if (litConfig->isUseValgrind()) {
-      cmd = join_string_list(litConfig->getValgrindArgs(), " ") + cmd;
+      for (const std::string &arg : litConfig->getValgrindArgs()) {
+         args.push_back(arg);
+      }
    }
+   args.push_back(executabe);
+   std::string testFilter = "--gtest_filter=" + testName;
+   args.push_back(testFilter);
    if (litConfig->isNoExecute()) {
       return std::make_shared<Result>(PASS, "");
    }
-   try {
-      RunCmdResponse runResponse = execute_command(cmd, std::nullopt, test->getConfig()->getEnvironment(),
-                                                   std::nullopt, litConfig->getMaxIndividualTestTime());
-      int exitCode = std::get<0>(runResponse);
-      std::string output = std::get<1>(runResponse);
-      std::string errorMsg = std::get<2>(runResponse);
-      if (exitCode != 0) {
-         return std::make_shared<Result>(FAIL, output + errorMsg);
-      }
-      std::string passingTestLine = "[  PASSED  ] 1 test.";
-      if (output.find(passingTestLine) == std::string::npos) {
-         std::string msg = format_string("Unable to find %s in gtest output:\n\n%s%s",
-                                         passingTestLine.c_str(), output.c_str(), errorMsg.c_str());
-         return std::make_shared<Result>(UNRESOLVED, msg);
-      }
-      return std::make_shared<Result>(PASS, "");
-   } catch (ExecuteCommandTimeoutException &) {
-      return std::make_shared<Result>(
-         TIMEOUT, format_string("Reached timeout of %d seconds", litConfig->getMaxIndividualTestTime()));
+   SmallVector<StringRef, 10> envsRef;
+   for (const std::string &envStr : test->getConfig()->getEnvironment()) {
+      envsRef.pushBack(envStr);
    }
+
+   std::string errorMsg;
+   bool execFailed;
+   SmallString<32> outTempFilename;
+   fs::create_temporary_file(TESTRUNNER_GTEST_FORMAT_PROCESS_TEMP_PREFIX, "", outTempFilename);
+   SmallString<32> errorTempFilename;
+   fs::create_temporary_file(TESTRUNNER_GTEST_FORMAT_PROCESS_TEMP_PREFIX, "", errorTempFilename);
+   FileRemover outTempRemover(outTempFilename);
+   FileRemover errTempRemover(errorTempFilename);
+   ArrayRef<std::optional<StringRef>> redirects{
+      std::nullopt,
+            outTempFilename,
+            errorTempFilename
+   };
+   int exitCode = polar::sys::execute_and_wait(executabe, args, std::nullopt, envsRef,
+                                               redirects, litConfig->getMaxIndividualTestTime(), 0,
+                                               &errorMsg, &execFailed);
+   if(execFailed) {
+      throw ValueError(format_string("Could not create process (%s) due to %s",
+                                     executabe.c_str(), errorMsg.c_str()));
+   }
+
+   if (0 != exitCode) {
+      std::string errOutput;
+      auto errorMsgBuffer = MemoryBuffer::getFile(errorTempFilename);
+      if (errorMsgBuffer) {
+         errOutput = errorMsgBuffer.get()->getBuffer().getStr();
+      } else {
+         // here get the buffer info error
+         throw std::runtime_error(format_string("get error output buffer error: %s",
+                                                errorMsgBuffer.getError().message()));
+      }
+      return std::make_shared<Result>(FAIL, errOutput);
+   }
+   std::string output;
+   auto outputBuf = MemoryBuffer::getFile(outTempFilename);
+   if (outputBuf) {
+      output = outputBuf.get()->getBuffer().getStr();
+   } else {
+      // here get the buffer info error
+      throw std::runtime_error(format_string("get output buffer error: %s",
+                                             outputBuf.getError().message()));
+   }
+   StringRef outputRef(output);
+   StringRef passingTestLine("[  PASSED  ] 1 test.");
+   if (outputRef.find(passingTestLine) == StringRef::npos) {
+      std::string msg = Twine("Unable to find ",  passingTestLine)
+            .concat(" in gtest output:\n\n")
+            .concat(output)
+            .concat(errorMsg).getStr();
+      return std::make_shared<Result>(UNRESOLVED, msg);
+   }
+   return std::make_shared<Result>(PASS, "");
 }
 
 } // lit

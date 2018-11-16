@@ -30,6 +30,7 @@ public:
                                                                 const std::list<std::string> &pathInSuite,
                                                                 LitConfigPointer litConfig,
                                                                 TestingConfigPointer localConfig) = 0;
+   virtual bool needSearchAgain();
    virtual ResultPointer execute(TestPointer test, LitConfigPointer litConfig) = 0;
 };
 

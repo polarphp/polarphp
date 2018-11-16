@@ -27,12 +27,14 @@ public:
    TestList getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
                                                         const std::list<std::string> &pathInSuite,
                                                         LitConfigPointer litConfig,
-                                                        TestingConfigPointer localConfig);
+                                                        TestingConfigPointer localConfig) override;
+   bool needSearchAgain() override;
    ResultPointer execute(TestPointer test, LitConfigPointer litConfig);
 protected:
    std::list<std::string> m_testSubDirs;
    std::set<std::string> m_testSuffixes;
    std::list<std::string> m_googletestBins;
+   bool m_searched;
 };
 
 } // lit

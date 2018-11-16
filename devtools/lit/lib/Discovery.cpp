@@ -281,7 +281,7 @@ TestList get_tests_in_suite(TestSuitePointer testSuite, LitConfigPointer litConf
    // local configuration.
    TestList tests;
    TestingConfigPointer lc = get_local_config(testSuite, litConfig, pathInSuite);
-   if (lc->getTestFormat()) {
+   if (lc->getTestFormat() && lc->getTestFormat()->needSearchAgain()) {
       tests = lc->getTestFormat()->getTestsInDirectory(testSuite, pathInSuite, litConfig, lc);
    }
    for(auto& p: fs::directory_iterator(sourcePath)) {

@@ -16,6 +16,9 @@ polar_add_lit_extra_test_executable(LittestFormatGoogleTest
    LINK_LIBS "PolarUtils"
    dummysubdir/FomratGoogleTest.cpp)
 
+# simulate google test binary
+polar_set_output_directory(LittestFormatGoogleTest BINARY_DIR ${POLAR_UNITTEST_BINARY_DIR})
+
 set(DEFS "")
 list(APPEND DEFS "FORMAT_GTEST_BIN=\"${POLAR_UNITTEST_BINARY_DIR}${DIR_SEPARATOR}LittestFormatGoogleTest\"")
 

@@ -424,15 +424,15 @@ protected:
    std::list<std::shared_ptr<FileRemover>> m_files;
 };
 
-#define TESTRUNNER_ROOT_PROCESS_STDIN_PREFIX "testrunner-shell-command-root-stdin"
-#define TESTRUNNER_ROOT_ROCESS_STDOUT_PREFIX "testrunner-shell-command-root-stdout"
-#define TESTRUNNER_ROOT_ROCESS_STDERR_PREFIX "testrunner-shell-command-root-stderr"
+#define TESTRUNNER_ROOT_PROCESS_STDIN_PREFIX "polarphp-lit-testrunner-shell-command-root-stdin"
+#define TESTRUNNER_ROOT_ROCESS_STDOUT_PREFIX "polarphp-lit-testrunner-shell-command-root-stdout"
+#define TESTRUNNER_ROOT_ROCESS_STDERR_PREFIX "polarphp-lit-testrunner-shell-command-root-stderr"
 
-#define TESTRUNNER_SUB_PROCESS_STDIN_PREFIX "testrunner-shell-command-sub-stdin"
-#define TESTRUNNER_SUB_ROCESS_STDOUT_PREFIX "testrunner-shell-command-sub-stdout"
-#define TESTRUNNER_SUB_ROCESS_STDERR_PREFIX "testrunner-shell-command-sub-stderr"
+#define TESTRUNNER_SUB_PROCESS_STDIN_PREFIX "polarphp-lit-testrunner-shell-command-sub-stdin"
+#define TESTRUNNER_SUB_ROCESS_STDOUT_PREFIX "polarphp-lit-testrunner-shell-command-sub-stdout"
+#define TESTRUNNER_SUB_ROCESS_STDERR_PREFIX "polarphp-lit-testrunner-shell-command-sub-stderr"
 
-#define TESTRUNNER_SUB_ROCESS_TEMPFILE_PREFIX "testrunner-shell-command-sub-temp"
+#define TESTRUNNER_SUB_ROCESS_TEMPFILE_PREFIX "polarphp-lit-testrunner-shell-command-sub-temp"
 
 int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
                      ShExecResultList &results,

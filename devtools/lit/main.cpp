@@ -300,8 +300,11 @@ int main(int argc, char *argv[])
       if (threadsOpt->empty()) {
          threadNumbers = std::thread::hardware_concurrency();
       }
+      std::optional<int> maxFailuresOr;
       if (!maxFailuresOpt->empty() && maxFailures == 0) {
          std::cerr << "Setting --max-failures to 0 does not have any effect." << std::endl;
+      } else if (!maxFailuresOpt->empty() && maxFailures > 0) {
+         maxFailuresOr = maxFailures;
       }
       if (cfgSetterPluginDir.empty()) {
          cfgSetterPluginDir = POLAR_LIT_RUNTIME_DIR;
@@ -351,7 +354,7 @@ int main(int argc, char *argv[])
             cfgSetterPluginDir,
             (!cfgPrefix.empty() ? std::optional(cfgPrefix) : std::nullopt),
             maxIndividualTestTime,
-            maxFailures,
+            maxFailuresOr,
             std::map<std::string, int>{},
       echoAllCommands
             );
