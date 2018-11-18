@@ -13,6 +13,7 @@
 #include "Global.h"
 #include "BooleanExpression.h"
 #include "polarphp/basic/adt/StringRef.h"
+#include <map>
 
 namespace polar {
 namespace lit {
@@ -27,6 +28,17 @@ const ResultCode *XPASS = ResultCode::getInstance("XPASS", true);
 const ResultCode *UNRESOLVED = ResultCode::getInstance("UNRESOLVED", true);
 const ResultCode *UNSUPPORTED = ResultCode::getInstance("UNSUPPORTED", false);
 const ResultCode *TIMEOUT = ResultCode::getInstance("TIMEOUT", true);
+
+const std::map<std::string, const ResultCode *> sg_resultCodeMap{
+   {"PASS", PASS},
+   {"FLAKYPASS", FLAKYPASS},
+   {"XFAIL", XFAIL},
+   {"FAIL", FAIL},
+   {"XPASS", XPASS},
+   {"UNRESOLVED", UNRESOLVED},
+   {"UNSUPPORTED", UNSUPPORTED},
+   {"TIMEOUT", TIMEOUT}
+};
 
 Result::Result(const ResultCode *code, std::string output, std::optional<int> elapsed)
    : m_code(code),

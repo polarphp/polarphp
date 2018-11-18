@@ -88,6 +88,13 @@ extern const ResultCode *UNRESOLVED;
 extern const ResultCode *UNSUPPORTED;
 extern const ResultCode *TIMEOUT;
 
+extern const std::map<std::string, const ResultCode *> sg_resultCodeMap;
+
+inline const ResultCode *get_result_code_by_name(const std::string &name)
+{
+   return sg_resultCodeMap.at(name);
+}
+
 inline void global_resultcode_destroyer()
 {
    ResultCode::clearupPool();

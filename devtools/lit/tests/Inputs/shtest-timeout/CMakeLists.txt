@@ -25,5 +25,3 @@ set_target_properties(littestsshtesttimeout
    PROPERTIES
    COMPILE_DEFINITIONS "${DEFS}")
 
-polar_get_formatplugin_path(xiuxixiuuxiux PLUGIN)
-
