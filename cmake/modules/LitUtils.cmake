@@ -56,7 +56,7 @@ macro(polar_add_lit_extra_test_executable name)
 endmacro()
 
 function(polar_add_lit_cfg_setter)
-   cmake_parse_arguments(ARG "LOCAL;NEED_CONFIGURE" "" "" ${ARGN})
+   cmake_parse_arguments(ARG "LOCAL;NEED_CONFIGURE" "" "EXTRA_SOURCES" ${ARGN})
    set(targetOutputName "")
    set(targetCfgSourceFilename "")
    if (ARG_LOCAL)
@@ -81,6 +81,9 @@ function(polar_add_lit_cfg_setter)
          @ONLY)
    endif()
    list(APPEND POLAR_CFG_SETTER_SRCS ${sourceFilename})
+   foreach(_filename ${ARG_EXTRA_SOURCES})
+      list(APPEND POLAR_CFG_SETTER_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/${_filename})
+   endforeach()
    set(POLAR_CFG_SETTER_SRCS ${POLAR_CFG_SETTER_SRCS} PARENT_SCOPE)
 endfunction()
 
@@ -115,21 +118,4 @@ endfunction()
 
 macro(polar_get_cfgsetterplugin_path name output)
    set(${output} ${POLAR_SETTER_PLUGIN_DIR}${DIR_SEPARATOR}${name}${CMAKE_SHARED_MODULE_SUFFIX})
-endmacro()
-
-macro(polar_add_testformat_plugin)
-   cmake_parse_arguments(ARG "" "OUTPUT_NAME;LINK_LIBS" "" ${ARGN})
-   polar_process_sources(ALL_FILES ${ARG_UNPARSED_ARGUMENTS})
-   string(REPLACE " " ";" ARG_DEPENDS "${ARG_DEPENDS}")
-   string(REPLACE " " ";" ARG_LINK_LIBS "${ARG_LINK_LIBS}")
-   add_library(${ARG_OUTPUT_NAME} MODULE ${ALL_FILES})
-   set_target_properties(${ARG_OUTPUT_NAME}
-      PROPERTIES
-      LIBRARY_OUTPUT_DIRECTORY ${POLAR_LIT_TEST_FORMAT_PLUGIN}
-      LIBRARY_OUTPUT_NAME ${ARG_OUTPUT_NAME})
-   target_link_libraries(${ARG_OUTPUT_NAME} PRIVATE litkernel)
-endmacro()
-
-macro(polar_get_formatplugin_path name output)
-   set(${output} ${POLAR_LIT_TEST_FORMAT_PLUGIN}${DIR_SEPARATOR}${name}${CMAKE_SHARED_MODULE_SUFFIX})
 endmacro()
