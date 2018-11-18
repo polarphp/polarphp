@@ -23,7 +23,7 @@ namespace lit {
 
 ResultPointer TestDataFormatter::execute(TestPointer test, LitConfigPointer litConfig)
 {
-   std::string cfgFilepath = (StringRef(LIT_SOURCE_DIR"/metrics.tjson")).getStr();
+   std::string cfgFilepath = (StringRef(LIT_SOURCE_DIR"/micro-metrics.tjson")).getStr();
    std::ifstream dataStream(cfgFilepath);
    if (!dataStream.is_open()) {
       return std::make_shared<Result>(UNRESOLVED, cfgFilepath + " open failed");
@@ -47,6 +47,27 @@ ResultPointer TestDataFormatter::execute(TestPointer test, LitConfigPointer litC
          throw std::runtime_error("unsupported result type");
       }
       result->addMetric(iter.key(), metric);
+   }
+   // Create micro test results
+   json microTests = jsonDoc["micro-tests"];
+   for (json::iterator iter = microTests.begin(); iter != microTests.end(); ++iter) {
+      ResultPointer microResult = std::make_shared<Result>(get_result_code_by_name(resultCode), resultOutput);
+      // Load micro test additional metrics
+      json microResults = jsonDoc["micro-results"];
+      for (json::iterator microResultIter = microResults.begin(); microResultIter != microResults.end(); ++microResultIter) {
+         MetricValuePointer metric;
+         json value = microResultIter.value();
+         if (value.is_number_integer()) {
+            metric.reset(new IntMetricValue(value.get<int>()));
+         } else if (value.is_number_float()) {
+            metric.reset(new RealMetricValue(value.get<double>()));
+         } else {
+            throw std::runtime_error("unsupported result type");
+         }
+         microResult->addMetric(microResultIter.key(), metric);
+      }
+      std::string microName = iter.value().get<std::string>();
+      result->addMicroResult(microName, microResult);
    }
    return result;
 }
