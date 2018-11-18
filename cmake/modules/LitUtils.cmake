@@ -112,8 +112,9 @@ function(polar_setup_lit_cfg_setters)
    set_target_properties(${ARG_OUTPUT_NAME}
       PROPERTIES
       LIBRARY_OUTPUT_DIRECTORY ${POLAR_SETTER_PLUGIN_DIR}
-      LIBRARY_OUTPUT_NAME ${ARG_OUTPUT_NAME})
-   target_link_libraries(${ARG_OUTPUT_NAME} PRIVATE litkernel)
+      LIBRARY_OUTPUT_NAME ${ARG_OUTPUT_NAME}
+      COMPILE_DEFINITIONS "LIT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+   target_link_libraries(${ARG_OUTPUT_NAME} PRIVATE litkernel nlohmann_json::nlohmann_json)
 endfunction()
 
 macro(polar_get_cfgsetterplugin_path name output)
