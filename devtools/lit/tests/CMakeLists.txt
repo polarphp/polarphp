@@ -22,3 +22,7 @@ add_subdirectory(Inputs/googletest-upstream-format)
 add_subdirectory(Inputs/testrunner-custom-parsers)
 add_subdirectory(Inputs/test-data)
 add_subdirectory(Inputs/test-data-micro)
+
+polar_setup_lit_cfg_setters(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+   OUTPUT_NAME littests
+   SKIP_DIRS "Inputs")
