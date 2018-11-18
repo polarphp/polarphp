@@ -24,3 +24,6 @@ list(APPEND DEFS "INFINITE_LOOP_GTEST_BIN=\"${POLAR_LIT_TEST_BIN_DIR}${DIR_SEPAR
 set_target_properties(littestsshtesttimeout
    PROPERTIES
    COMPILE_DEFINITIONS "${DEFS}")
+
+polar_get_formatplugin_path(xiuxixiuuxiux PLUGIN)
+

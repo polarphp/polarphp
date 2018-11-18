@@ -112,3 +112,24 @@ function(polar_setup_lit_cfg_setters)
       LIBRARY_OUTPUT_NAME ${ARG_OUTPUT_NAME})
    target_link_libraries(${ARG_OUTPUT_NAME} PRIVATE litkernel)
 endfunction()
+
+macro(polar_get_cfgsetterplugin_path name output)
+   set(${output} ${POLAR_SETTER_PLUGIN_DIR}${DIR_SEPARATOR}${name}${CMAKE_SHARED_MODULE_SUFFIX})
+endmacro()
+
+macro(polar_add_testformat_plugin)
+   cmake_parse_arguments(ARG "" "OUTPUT_NAME;LINK_LIBS" "" ${ARGN})
+   polar_process_sources(ALL_FILES ${ARG_UNPARSED_ARGUMENTS})
+   string(REPLACE " " ";" ARG_DEPENDS "${ARG_DEPENDS}")
+   string(REPLACE " " ";" ARG_LINK_LIBS "${ARG_LINK_LIBS}")
+   add_library(${ARG_OUTPUT_NAME} MODULE ${ALL_FILES})
+   set_target_properties(${ARG_OUTPUT_NAME}
+      PROPERTIES
+      LIBRARY_OUTPUT_DIRECTORY ${POLAR_LIT_TEST_FORMAT_PLUGIN}
+      LIBRARY_OUTPUT_NAME ${ARG_OUTPUT_NAME})
+   target_link_libraries(${ARG_OUTPUT_NAME} PRIVATE litkernel)
+endmacro()
+
+macro(polar_get_formatplugin_path name output)
+   set(${output} ${POLAR_LIT_TEST_FORMAT_PLUGIN}${DIR_SEPARATOR}${name}${CMAKE_SHARED_MODULE_SUFFIX})
+endmacro()
