@@ -1,4 +1,5 @@
-; RUN: not FileCheck -input-file %s %s 2>&1 | FileCheck --check-prefix=ERROR %s
+; TODO
+; RUN: not filechecker --input-file %s %s 2>&1 | filechecker --check-prefix=ERROR %s
 
 bar
 zed
