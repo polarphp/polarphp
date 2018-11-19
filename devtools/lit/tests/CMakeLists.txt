@@ -26,3 +26,12 @@ add_subdirectory(Inputs/test-data-micro)
 polar_setup_lit_cfg_setters(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    OUTPUT_NAME littests
    SKIP_DIRS "Inputs")
+
+set(DEFS "")
+
+list(APPEND DEFS "LIT_TEST_BIN=\"${POLAR_RUNTIME_OUTPUT_INTDIR}${DIR_SEPARATOR}lit\"")
+list(APPEND DEFS "POLAR_RUNTIME_OUTPUT_INTDIR=\"${POLAR_RUNTIME_OUTPUT_INTDIR}\"")
+
+set_target_properties(littests
+   PROPERTIES
+   COMPILE_DEFINITIONS "${DEFS}")

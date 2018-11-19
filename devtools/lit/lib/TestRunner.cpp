@@ -349,7 +349,7 @@ protected:
 int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
                      ShExecResultList &results, size_t execTimeout, bool &timeoutReached)
 {
-   std::cout << cmd->operator std::string() << std::endl;
+   //std::cout << cmd->operator std::string() << std::endl;
    int result;
    AbstractCommand::Type commandType = cmd->getCommandType();
    if (commandType == AbstractCommand::Type::Seq) {
@@ -697,9 +697,9 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          processesData[i] = std::make_tuple(returnCode, "", errorMsg, timeoutReached);
       } else {
          auto processResult = get_process_output(stdoutFilename, stderrFilename);
-         std::cout << std::get<1>(processResult) << std::endl;
-         std::cout << "---" << std::endl;
-         std::cout << std::get<2>(processResult) << std::endl;
+//         std::cout << std::get<1>(processResult) << std::endl;
+//         std::cout << "---" << std::endl;
+//         std::cout << std::get<2>(processResult) << std::endl;
          if (std::get<0>(processResult)) {
             processesData[i] = std::make_tuple(returnCode, std::get<1>(processResult), std::get<2>(processResult), false);
          } else {
