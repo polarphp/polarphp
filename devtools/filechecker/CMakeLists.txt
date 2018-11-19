@@ -31,8 +31,6 @@ if (MINGW)
    set(POLAR_OS_MINGW ON)
 endif()
 
-set(POLAR_LIT_VERSION "0.0.1")
-
 configure_file(Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/FileCheckerConfig.h @ONLY)
 
 list(APPEND POLAR_DEVTOOLS_FILECHECKER_LIB_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/FileCheckerConfig.h)

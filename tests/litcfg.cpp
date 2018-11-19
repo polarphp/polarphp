@@ -27,13 +27,13 @@ void root_cfgsetter(TestingConfig *config, LitConfig *litConfig)
    config->setName("littests");
    config->setSuffixes({".littest"});
    config->setExcludes({"Inputs"});
-   config->setTestFormat(std::make_shared<ShTest>());
+   config->setTestFormat(std::make_shared<ShTest>(true));
    fs::path testSourceRoot = fs::path(__FILE__).parent_path();
    config->setTestSourceRoot(testSourceRoot);
    config->setTestExecRoot(testSourceRoot);
    config->setExtraConfig("target_triple", "(unused)");
    config->addSubstitution("%{inputs}", testSourceRoot / "Inputs");
    config->addSubstitution("%{lit}", LIT_TEST_BIN);
-   config->addEnvironment("PATH", POLAR_RUNTIME_OUTPUT_INTDIR);
+//   config->addEnvironment("PATH", POLAR_RUNTIME_OUTPUT_INTDIR);
 }
 }

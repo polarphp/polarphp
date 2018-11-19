@@ -1,5 +1,5 @@
 ;---------------------------------------------------------------------
-; RUN: FileCheck -input-file %s %s -check-prefix=NotSearchEnd
+; RUN: %{filechecker} --input-file %s %s --check-prefix=NotSearchEnd
 
 The search range for the NOTs used to end at the start of the match range for
 the first DAG in the following DAG group.  Now it ends at the start of the
@@ -33,7 +33,7 @@ __NotSearchEnd
 ; NotSearchEnd:     {{^}}__NotSearchEnd
 
 ;---------------------------------------------------------------------
-; RUN: FileCheck -input-file %s %s -check-prefix=Dag2SearchStart
+; RUN: %{filechecker} --input-file %s %s --check-prefix=Dag2SearchStart
 
 The start of the search range for the second or later DAG group used to be
 different for its first DAG than its other DAGs.  For the first DAG, it was

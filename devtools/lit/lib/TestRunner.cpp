@@ -1610,7 +1610,7 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
    std::string errorMsg;
    bool execFailed;
    int returnCode = polar::sys::execute_and_wait(cmdStr, argsRef, cwd, envRef, redirects,
-                                                 litConfig->getMaxIndividualTestTime(), 0, &errorMsg, &execFailed);
+                                                 0, 0, &errorMsg, &execFailed);
    if(execFailed) {
       throw ValueError(format_string("Could not create process (%s) due to %s",
                                      cmdStr.c_str(), errorMsg.c_str()));

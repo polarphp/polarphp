@@ -1,4 +1,4 @@
-; RUN: FileCheck -check-prefix=A -check-prefix=B -input-file %s %s
+; RUN: %{filechecker} --check-prefix=A --check-prefix=B --input-file %s %s
 
 add r10, r1, r2
 add r11, r3, r4
