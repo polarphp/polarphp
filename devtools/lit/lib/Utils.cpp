@@ -23,7 +23,7 @@
 namespace polar {
 namespace lit {
 
-char *sg_emptyStr = "";
+const char *sg_emptyStr = "";
 
 std::list<std::FILE *> g_tempFiles {};
 

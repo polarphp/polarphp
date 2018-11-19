@@ -14,13 +14,16 @@
 #include "../LitGlobal.h"
 #include "../Utils.h"
 #include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/basic/adt/SmallString.h"
+#include "polarphp/utils/FileSystem.h"
 #include <filesystem>
-
 
 namespace polar {
 namespace lit {
 
-namespace fs = std::filesystem;
+namespace stdfs = std::filesystem;
+
+using polar::basic::SmallString;
 
 bool TestFormat::needSearchAgain()
 {
@@ -35,8 +38,8 @@ FileBasedTest::getTestsInDirectory(TestSuitePointer testSuite,
 {
    std::string sourcePath = testSuite->getSourcePath(pathInSuite);
    std::list<std::shared_ptr<Test>> tests;
-   for(auto& entry: fs::directory_iterator(sourcePath)) {
-      fs::path pathInfo = entry.path();
+   for(auto& entry: stdfs::directory_iterator(sourcePath)) {
+      stdfs::path pathInfo = entry.path();
       // Ignore dot files and excluded tests.
       std::string filename = pathInfo.filename();
       const std::set<std::string> &excludes = localConfig->getExcludes();
@@ -44,7 +47,7 @@ FileBasedTest::getTestsInDirectory(TestSuitePointer testSuite,
           excludes.find(filename) != excludes.end()) {
          continue;
       }
-      if (!fs::is_directory(pathInfo)) {
+      if (!stdfs::is_directory(pathInfo)) {
          std::string ext = pathInfo.extension();
          const std::set<std::string> &suffixes = localConfig->getSuffixes();
          if (suffixes.find(ext) != suffixes.end()) {
@@ -81,31 +84,31 @@ OneCommandPerFileTest::getTestsInDirectory(std::shared_ptr<TestSuite> testSuite,
    if (dir.empty()) {
       dir = testSuite->getSourcePath(pathInSuite);
    }
-   std::list<fs::path> fileInfos;
+   std::list<stdfs::path> fileInfos;
    if (!m_recursive) {
-      for(auto &entry : fs::directory_iterator(dir)) {
-         if (!fs::is_directory(entry.path())) {
+      for(auto &entry : stdfs::directory_iterator(dir)) {
+         if (!stdfs::is_directory(entry.path())) {
             fileInfos.push_back(entry.path());
          }
       }
    } else {
-      for(auto iter = fs::recursive_directory_iterator(dir);
-          iter != fs::recursive_directory_iterator();
+      for(auto iter = stdfs::recursive_directory_iterator(dir);
+          iter != stdfs::recursive_directory_iterator();
           ++iter) {
 
-         const fs::path &fileInfo = iter->path();
+         const stdfs::path &fileInfo = iter->path();
          std::string filename = fileInfo.filename();
          if (filename == ".svn" ||
              filename == ".git" ||
              excludes.find(filename) != excludes.end()) {
             iter.disable_recursion_pending();
          }
-         if (!fs::is_directory(fileInfo)) {
+         if (!stdfs::is_directory(fileInfo)) {
             fileInfos.push_back(fileInfo);
          }
       }
    }
-   for (const fs::path &filePath : fileInfos) {
+   for (const stdfs::path &filePath : fileInfos) {
       const std::string &filename = filePath.filename();
       const std::string &fullPath = filePath.string();
       if (string_startswith(filePath.string(), ".") ||
@@ -143,9 +146,10 @@ namespace {
 
 std::string generate_tempfilename()
 {
-   std::string temp = std::tmpnam(nullptr);
-   temp += ".cpp";
-   return temp;
+   SmallString<32> filename;
+   polar::fs::create_temporary_file(TESTRUNNER_TEMP_PREFIX, "", filename);
+   filename += ".cpp";
+   return filename.getStr().getStr();
 }
 
 } // anonymous namespace

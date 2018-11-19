@@ -1,4 +1,4 @@
-// RUN: not FileCheck -input-file %s %s
+// RUN: not filechecker --input-file %s %s
 
 foo
 bar

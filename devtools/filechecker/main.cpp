@@ -76,6 +76,9 @@ int main(int argc, char *argv[])
                                                                                                           "The value can be also controlled using "
                                                                                                           "FILECHECK_DUMP_INPUT_ON_FAILURE environment variable.");
    CLI11_PARSE(cmdParser, argc, argv);
+   for (auto i : globalDefines) {
+      std::cout << i << std::endl;
+   }
    if (dumpInputOnFailureOpt->count() == 0) {
       std::string dumpInputOnFailureEnv = StringRef(std::getenv("FILECHECK_DUMP_INPUT_ON_FAILURE")).trim().toLower();
       if (!dumpInputOnFailureEnv.empty() && (dumpInputOnFailureEnv == "true" || dumpInputOnFailureEnv == "on")) {
@@ -86,9 +89,6 @@ int main(int argc, char *argv[])
       for (std::string &prefix : checkPrefix) {
          checkPrefixesOpt->add_result(prefix);
       }
-   }
-   for (auto i : checkPrefixes) {
-      std::cout << i << std::endl;
    }
 
    if (!validate_check_prefixes()) {

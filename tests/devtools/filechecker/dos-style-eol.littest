@@ -1,8 +1,8 @@
-// Test for using FileCheck on DOS style end-of-line
+// Test for using filechecker on DOS style end-of-line
 // This test was deliberately committed with DOS style end of line.
 // Don't change line endings!
-// RUN: FileCheck -input-file %s %s
-// RUN: FileCheck  --strict-whitespace -input-file %s %s
+// RUN: filechecker --input-file %s %s
+// RUN: filechecker  --strict-whitespace --input-file %s %s
 
 LINE 1
 ; CHECK: {{^}}LINE 1{{$}}

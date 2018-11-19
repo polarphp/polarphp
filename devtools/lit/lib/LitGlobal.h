@@ -20,6 +20,7 @@ namespace lit {
 
 #define SUBPROCESS_FD_PIPE "______littest_subprocess_fd_pipe_filemark______"
 #define SUBPROCESS_FD_STDOUT "______littest_subprocess_fd_stdout_filemark______"
+#define TESTRUNNER_TEMP_PREFIX "polarphp-lit-"
 /// we describe all toke by ShellTokenType, and we need to distinguish
 /// normal token and redirects token, so we define the token type code
 #define SHELL_CMD_NORMAL_TOKEN -1
@@ -58,7 +59,7 @@ using CfgSetterType = void (*)(TestingConfig *config, LitConfig *litConfig);
     }
 
 #define POLAR_ATTR_UNUSED [[maybe_unused]]
-extern char *sg_emptyStr;
+extern const char *sg_emptyStr;
 
 } // lit
 } // polar

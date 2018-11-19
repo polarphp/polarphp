@@ -1,4 +1,4 @@
-// RUN: FileCheck -input-file %s %s
+// RUN: filechecker --input-file %s %s
 
 op1 r1
 op2 r1, r2

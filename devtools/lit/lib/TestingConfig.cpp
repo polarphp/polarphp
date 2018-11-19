@@ -17,7 +17,6 @@
 #include "CfgSetterPluginLoader.h"
 #include "polarphp/basic/adt/Twine.h"
 #include "polarphp/basic/adt/StringRef.h"
-#include <iostream>
 
 #define CFG_SETTER_SITE_FILENAME "litsitecfg.cmake"
 #define CFG_SETTER_LOCAL_FILENAME "litlocalcfg.cmake"

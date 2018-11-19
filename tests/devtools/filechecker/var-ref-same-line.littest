@@ -1,5 +1,5 @@
 // Test for referencing a variable defined on the same line
-// RUN: FileCheck -input-file %s %s
+// RUN: filechecker --input-file %s %s
 
 op1 r1, r2, r1
 
@@ -11,6 +11,6 @@ op3 r1, r2, r1, r2
 
 op4 g1, g2, g1
 
-; Test that parens inside the regex don't confuse FileCheck
+; Test that parens inside the regex don't confuse filechecker
 ; CHECK: {{([a-z]+[0-9])+}} [[REG:g[0-9]+]], {{g[0-9]+}}, [[REG]]
 
