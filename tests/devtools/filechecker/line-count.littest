@@ -1,5 +1,5 @@
-; RUN: FileCheck  -input-file %s %s
-; RUN: not FileCheck -check-prefix BAD -input-file %s %s
+; RUN: filechecker  --input-file %s %s
+; RUN: not filechecker --check-prefix BAD --input-file %s %s
 3
 4 aaa
 5 bbb

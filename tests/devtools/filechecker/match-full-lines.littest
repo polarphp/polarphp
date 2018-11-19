@@ -1,7 +1,7 @@
-// RUN: not FileCheck -match-full-lines -input-file %s %s  2>&1 \
-// RUN:   | FileCheck --check-prefix=ERROR --implicit-check-not=error: %s
-// RUN: not FileCheck -match-full-lines -strict-whitespace -input-file %s %s  2>&1 \
-// RUN:   | FileCheck --check-prefix=ERROR-STRICT --check-prefix=ERROR --implicit-check-not=error: %s
+// RUN: not filechecker --match-full-lines --input-file %s %s  2>&1 \
+// RUN:   | filechecker --check-prefix=ERROR --implicit-check-not=error: %s
+// RUN: not filechecker --match-full-lines --strict-whitespace --input-file %s %s  2>&1 \
+// RUN:   | filechecker --check-prefix=ERROR-STRICT --check-prefix=ERROR --implicit-check-not=error: %s
 
 Label 1
 a line

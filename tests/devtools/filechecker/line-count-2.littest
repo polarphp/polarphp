@@ -1,4 +1,4 @@
-// RUN: FileCheck -input-file %s %s
+// RUN: filechecker --input-file %s %s
 
 something else
 CHECK: {{some}}thing else
