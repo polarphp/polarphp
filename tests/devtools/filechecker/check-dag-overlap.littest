@@ -1,20 +1,14 @@
 
+__WrongNumReps
+0: task_begin
+1: task_begin
+0: barrier_begin
+1: barrier_begin
+__WrongNumReps
 
-;---------------------------------------------------------------------
-; RUN: not %{filechecker} --allow-deprecated-dag-overlap --input-file %s %s \
-; RUN:               --check-prefix=IdentPatNot
-; RUN: %{filechecker} --input-file %s %s --check-prefix=IdentPatNot
-
-__IdentPatNot
-add r11, r1, r2
-xor r12, r1, r2
-add r10, r3, r4
-mul r5, r10, r11
-__IdentPatNot
-
-; IdentPatNot:     {{^}}__IdentPatNot
-; IdentPatNot-DAG: {{^}}add {{r[0-9]+}}, {{r[0-9]+}}, {{r[0-9]+}}
-; IdentPatNot-DAG: {{^}}add {{r[0-9]+}}, {{r[0-9]+}}, {{r[0-9]+}}
-; IdentPatNot-NOT: {{^}}xor
-; IdentPatNot-DAG: {{^}}mul r5, r10, r11
-; IdentPatNot:     {{^}}__IdentPatNot
+; WrongNumReps:      {{^}}__WrongNumReps
+; WrongNumReps-DAG:  {{^}}[[THID:[0-9]+]]: task_begin
+; WrongNumReps-DAG:  {{^}}[[THID]]: barrier_begin
+; WrongNumReps2-DAG: {{^}}[[THID:[0-9]+]]: task_begin
+; WrongNumReps2-DAG: {{^}}[[THID]]: barrier_begin
+; WrongNumReps-NEXT: {{^}}__WrongNumReps

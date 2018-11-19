@@ -13,11 +13,14 @@
 #include "TestingConfig.h"
 #include "formats/ShellTest.h"
 #include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/basic/adt/Twine.h"
 #include <filesystem>
 
 using polar::lit::LitConfig;
 using polar::lit::TestingConfig;
 using polar::lit::ShTest;
+using polar::basic::Twine;
+using polar::basic::StringRef;
 
 namespace fs = std::filesystem;
 
@@ -34,6 +37,6 @@ void root_cfgsetter(TestingConfig *config, LitConfig *litConfig)
    config->setExtraConfig("target_triple", "(unused)");
    config->addSubstitution("%{inputs}", testSourceRoot / "Inputs");
    config->addSubstitution("%{lit}", LIT_TEST_BIN);
-//   config->addEnvironment("PATH", POLAR_RUNTIME_OUTPUT_INTDIR);
+   config->addEnvironment("PATH", Twine(POLAR_RUNTIME_OUTPUT_INTDIR, StringRef(":")).concat(std::getenv("PATH")).getStr());
 }
 }

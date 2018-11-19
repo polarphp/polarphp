@@ -544,7 +544,7 @@ bool build_check_prefix_regex(boost::regex &regex, std::string &errorMsg)
 
 void dump_command_line(int argc, char **argv)
 {
-   polar::utils::error_stream() << "FileCheck command line: ";
+   polar::utils::error_stream() << "filechecker command line: ";
    for (int index = 0; index < argc; index++) {
       polar::utils::error_stream() << " " << argv[index];
    }
@@ -566,7 +566,7 @@ void clear_local_vars(StringMap<std::string> &variableTable)
    }
 }
 
-/// Check the input to FileCheck provided in the \p buffer against the \p
+/// Check the input to filechecker provided in the \p buffer against the \p
 /// checkStrings read from the check file.
 ///
 /// Returns false if the input fails to satisfy the checks.

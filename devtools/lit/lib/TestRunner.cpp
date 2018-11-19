@@ -1748,8 +1748,7 @@ SubstitutionList get_default_substitutions(TestPointer test, std::string tempDir
                               {"%t", tempName},
                               {"basename_t", baseName},
                               {"%T", tempDir},
-                              {"#_MARKER_#", "%"},
-                              {"%{filechecker}", FILECHECKER_BIN},
+                              {"#_MARKER_#", "%"}
                            });
    // "%:[STpst]" are normalized paths without colons and without a leading
    // slash.

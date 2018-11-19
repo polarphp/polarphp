@@ -281,9 +281,10 @@ size_t CheckString::checkDag(const SourceMgr &sourceMgr, StringRef buffer,
          }
          matchPos = miter->end;
       }
-      if (!verboseVerbose)
+      if (!verboseVerbose) {
          print_match(true, sourceMgr, m_prefix, pattern.getLoc(), pattern, buffer, variableTable,
                     matchPos, matchLen);
+      }
 
       // Handle the end of a CHECK-DAG group.
       if (std::next(patternIter) == patternEnd ||

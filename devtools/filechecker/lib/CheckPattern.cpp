@@ -122,7 +122,7 @@ bool Pattern::parsePattern(basic::StringRef patternStr, basic::StringRef prefix,
       }
 
       // Named RegEx matches.  These are of two forms: [[foo:.*]] which matches .*
-      // (or some other regex) and assigns iter to the FileCheck variable 'foo'. The
+      // (or some other regex) and assigns iter to the filechecker variable 'foo'. The
       // second form is [[foo]] which is a reference to foo.  The variable name
       // itself must be of the form "[a-zA-Z_][0-9a-zA-Z_]*", otherwise we reject
       // iter.  This is to catch some common errors.
@@ -151,7 +151,7 @@ bool Pattern::parsePattern(basic::StringRef patternStr, basic::StringRef prefix,
             return true;
          }
 
-         // Verify that the name/expression is well formed. FileCheck currently
+         // Verify that the name/expression is well formed. filechecker currently
          // supports @LINE, @LINE+number, @LINE-number expressions. The check here
          // is relaxed, more strict check is performed in \c evaluateExpression.
          bool isExpression = false;

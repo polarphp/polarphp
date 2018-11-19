@@ -87,6 +87,9 @@ int main(int argc, char *argv[])
          checkPrefixesOpt->add_result(prefix);
       }
    }
+   for (auto i : checkPrefixes) {
+      std::cout << i << std::endl;
+   }
 
    if (!validate_check_prefixes()) {
       error_stream() << "Supplied check-prefix is invalid! Prefixes must be unique and "
@@ -100,7 +103,7 @@ int main(int argc, char *argv[])
    std::string regexError;
    if (!build_check_prefix_regex(prefixRegex, regexError)) {
       error_stream() << "Unable to combine check-prefix strings into a prefix regular "
-                        "expression! This is likely a bug in FileCheck's verification of "
+                        "expression! This is likely a bug in filechecker's verification of "
                         "the check-prefix strings. Regular expression parsing failed "
                         "with the following error: "
                      << regexError << "\n";
@@ -136,7 +139,7 @@ int main(int argc, char *argv[])
    }
    MemoryBuffer &inputFile = *inputFileOrErr.get();
    if (inputFile.getBufferSize() == 0 && !allowEmptyInput) {
-      error_stream() << "FileCheck error: '" << inputFilename << "' is empty.\n";
+      error_stream() << "filechecker error: '" << inputFilename << "' is empty.\n";
       dump_command_line(argc, argv);
       return 2;
    }
