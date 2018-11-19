@@ -1,4 +1,4 @@
-// RUN: FileCheck -check-prefix=AAAOVERLAP -check-prefix=OVERLAP -input-file %s %s
+// RUN: filechecker --check-prefix=AAAOVERLAP --check-prefix=OVERLAP --input-file %s %s
 
 foo
 bar
