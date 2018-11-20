@@ -259,7 +259,7 @@ bool read_check_file(SourceMgr &sourceMgr, StringRef buffer, boost::regex &prefi
    for (const auto &patternstring : sg_implicitCheckNot) {
       // Create a buffer with fake command line content in order to display the
       // command line option responsible for the specific implicit CHECK-NOT.
-      std::string prefix = (Twine("-", cmdName.substr(2)).concat("='")).getStr();
+      std::string prefix = Twine(cmdName, " '").getStr();
       std::string suffix = "'";
       std::unique_ptr<MemoryBuffer> cmdLine = MemoryBuffer::getMemBufferCopy(
                prefix + patternstring + suffix, "command line");
@@ -426,9 +426,10 @@ void print_no_match(bool expectedMatch, const SourceMgr &sourceMgr,
 {
    CLI::App &parser = retrieve_command_parser();
    bool verboseVerbose = parser.get_option("-v")->count() > 1 ? true : false;
-   if (!expectedMatch && !verboseVerbose)
+   if (!expectedMatch && !verboseVerbose) {
       return;
-
+   }
+     
    // Otherwise, we have an error, emit an error message.
    sourceMgr.printMessage(loc,
                           expectedMatch ? SourceMgr::DK_Error : SourceMgr::DK_Remark,
@@ -492,9 +493,8 @@ bool validate_check_prefix(StringRef checkPrefix)
 bool validate_check_prefixes()
 {
    StringSet<> prefixSet;
-   CLI::App &parser = retrieve_command_parser();
-   std::vector<std::string> checkPrefixes = parser.get_option("--check-prefixes")->results();
-   for (StringRef prefix : checkPrefixes) {
+   
+   for (StringRef prefix : sg_checkPrefixes) {
       // Reject empty prefixes.
       if (prefix == "") {
          return false;

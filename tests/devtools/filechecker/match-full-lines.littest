@@ -6,8 +6,8 @@
 
 Label 1
 a line
-trailing whitespace
-trailing more whitespace
+trailing whitespace   
+trailing more whitespace   
 Label 2
 a line
    leading whitespace

@@ -185,8 +185,8 @@ void SourceMgr::printIncludeStack(SMLocation includeLoc, RawOutStream &outstream
 
 SMDiagnostic SourceMgr::getMessage(SMLocation loc, SourceMgr::DiagKind m_kind,
                                    const Twine &msg,
-                                   ArrayRef<SMRange> m_ranges,
-                                   ArrayRef<SMFixIt> m_fixIts) const
+                                   ArrayRef<SMRange> ranges,
+                                   ArrayRef<SMFixIt> fixIts) const
 {
    // First thing to do: find the current buffer containing the specified
    // location to pull out the source line.
@@ -215,10 +215,10 @@ SMDiagnostic SourceMgr::getMessage(SMLocation loc, SourceMgr::DiagKind m_kind,
          ++lineEnd;
       }
       lineStr = std::string(lineStart, lineEnd);
-      // Convert any m_ranges to column m_ranges that only intersect the line of the
+      // Convert any ranges to column ranges that only intersect the line of the
       // location.
-      for (unsigned i = 0, e = m_ranges.getSize(); i != e; ++i) {
-         SMRange range = m_ranges[i];
+      for (unsigned i = 0, e = ranges.getSize(); i != e; ++i) {
+         SMRange range = ranges[i];
          if (!range.isValid()) {
             continue;
          }
@@ -233,7 +233,7 @@ SMDiagnostic SourceMgr::getMessage(SMLocation loc, SourceMgr::DiagKind m_kind,
          if (range.m_end.getPointer() > lineEnd) {
             range.m_end = SMLocation::getFromPointer(lineEnd);
          }
-         // Translate from SMLocation m_ranges to column m_ranges.
+         // Translate from SMLocation ranges to column ranges.
          // FIXME: Handle multibyte characters.
          colRanges.push_back(std::make_pair(range.m_start.getPointer()-lineStart,
                                             range.m_end.getPointer()-lineStart));
@@ -244,7 +244,7 @@ SMDiagnostic SourceMgr::getMessage(SMLocation loc, SourceMgr::DiagKind m_kind,
 
    return SMDiagnostic(*this, loc, bufferID, lineAndCol.first,
                        lineAndCol.second - 1, m_kind, msg.getStr(),
-                       lineStr, colRanges, m_fixIts);
+                       lineStr, colRanges, fixIts);
 }
 
 void SourceMgr::printMessage(RawOutStream &outstream, const SMDiagnostic &diagnostic,
@@ -267,17 +267,17 @@ void SourceMgr::printMessage(RawOutStream &outstream, const SMDiagnostic &diagno
 
 void SourceMgr::printMessage(RawOutStream &outstream, SMLocation loc,
                              SourceMgr::DiagKind m_kind,
-                             const Twine &msg, ArrayRef<SMRange> m_ranges,
+                             const Twine &msg, ArrayRef<SMRange> ranges,
                              ArrayRef<SMFixIt> m_fixIts, bool showColors) const
 {
-   printMessage(outstream, getMessage(loc, m_kind, msg, m_ranges, m_fixIts), showColors);
+   printMessage(outstream, getMessage(loc, m_kind, msg, ranges, m_fixIts), showColors);
 }
 
 void SourceMgr::printMessage(SMLocation loc, SourceMgr::DiagKind m_kind,
-                             const Twine &msg, ArrayRef<SMRange> m_ranges,
+                             const Twine &msg, ArrayRef<SMRange> ranges,
                              ArrayRef<SMFixIt> m_fixIts, bool showColors) const
 {
-   printMessage(error_stream(), loc, m_kind, msg, m_ranges, m_fixIts, showColors);
+   printMessage(error_stream(), loc, m_kind, msg, ranges, m_fixIts, showColors);
 }
 
 //===----------------------------------------------------------------------===//
@@ -287,7 +287,7 @@ void SourceMgr::printMessage(SMLocation loc, SourceMgr::DiagKind m_kind,
 SMDiagnostic::SMDiagnostic(const SourceMgr &sm, SMLocation location, StringRef filename,
                            int line, int column, SourceMgr::DiagKind m_kind,
                            StringRef msg, StringRef lineStr,
-                           ArrayRef<std::pair<unsigned,unsigned>> m_ranges,
+                           ArrayRef<std::pair<unsigned,unsigned>> ranges,
                            ArrayRef<SMFixIt> hints)
    : m_sourceMgr(&sm),
      m_location(location),
@@ -297,7 +297,7 @@ SMDiagnostic::SMDiagnostic(const SourceMgr &sm, SMLocation location, StringRef f
      m_kind(m_kind),
      m_message(msg),
      m_lineContents(lineStr),
-     m_ranges(m_ranges.getVector()),
+     m_ranges(ranges.getVector()),
      m_fixIts(hints.begin(), hints.end())
 {
    std::sort(m_fixIts.begin(), m_fixIts.end());
