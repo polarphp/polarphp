@@ -1,4 +1,3 @@
-; TODO
 ;---------------------------------------------------------------------
 ; RUN: not filechecker --allow-deprecated-dag-overlap --input-file %s %s \
 ; RUN:               --check-prefix IdentPat

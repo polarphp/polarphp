@@ -388,7 +388,7 @@ void print_match(bool expectedMatch, const SourceMgr &sourceMgr,
                  size_t matchPos, size_t matchLen)
 {
    CLI::App &parser = retrieve_command_parser();
-   bool verbose = parser.get_option("-v")->count() == 1 ? true : false;
+   bool verbose = parser.get_option("-v")->count() >= 1 ? true : false;
    bool verboseVerbose = parser.get_option("-v")->count() > 1 ? true : false;
    if (expectedMatch) {
       if (!verbose) {

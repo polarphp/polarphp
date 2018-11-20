@@ -1,6 +1,5 @@
-
 ; RUN: filechecker --input-file %s %s 2>&1 | filechecker --check-prefix QUIET --allow-empty %s
-; RUN: filechecker -v --input-file %s %s 2>&1 | filechecker --check-prefix V %s
+; RUN: filechecker -v --input-file %s %s 2>&1 | filechecker %s --check-prefix V 
 ; RUN: filechecker -vv --input-file %s %s 2>&1 | filechecker %s --check-prefixes V VV
 
 foo

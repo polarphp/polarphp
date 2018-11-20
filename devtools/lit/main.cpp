@@ -518,7 +518,7 @@ int main(int argc, char *argv[])
          extra = format_string(" of %d", numTotalTests);
       }
       std::string header = format_string("-- Testing: %d%s tests, %d threads --\n",
-                                         tests.size(), extra.c_str(), numTotalTests);
+                                         tests.size(), extra.c_str(), threadNumbers);
       std::shared_ptr<AbstractProgressBar> progressBarPointer;
       std::shared_ptr<TerminalController> terminalControllerPointer;
       if (!quiet) {
@@ -535,7 +535,7 @@ int main(int argc, char *argv[])
          }
       }
       std::chrono::time_point startTime = std::chrono::system_clock::now();
-      std::shared_ptr<TestingProgressDisplay> display(new TestingProgressDisplay(litApp, threadNumbers, progressBarPointer));
+      std::shared_ptr<TestingProgressDisplay> display(new TestingProgressDisplay(litApp, run.getTests().size(), progressBarPointer));
       try {
          run.executeTests(display, threadNumbers, maxTime);
       } catch (...) {
