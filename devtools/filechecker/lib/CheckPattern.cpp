@@ -341,12 +341,12 @@ size_t Pattern::match(StringRef buffer, size_t &matchLen,
    }
 
    boost::cmatch matchInfo;
-   if (!boost::regex_search(buffer.begin(), buffer.end(), matchInfo, boost::regex(regExToMatch.getStr()))) {
+   if (!boost::regex_search(buffer.begin(), buffer.end(), matchInfo, boost::regex(regExToMatch.getStr()), boost::match_not_dot_newline)) {
       return StringRef::npos;
    }
    // Successful regex match.
    assert(!matchInfo.empty() && "Didn't get any match");
-   StringRef fullMatch(buffer.getData() + matchInfo.position(), matchInfo[0].length());
+   StringRef fullMatch(buffer.getData() + matchInfo.position(), matchInfo[1].length());
 
    // If this defines any variables, remember their values.
    for (const auto &variableDef : m_variableDefs) {

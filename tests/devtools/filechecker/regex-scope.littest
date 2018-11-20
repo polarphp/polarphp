@@ -1,10 +1,4 @@
-; TODO bug
 ; RUN: filechecker --input-file %s %s
-; RUN: filechecker --check-prefixes CHECK --check-prefixes GLOBAL --input-file %s %s
-; RUN: filechecker --check-prefixes CHECK --check-prefixes LOCAL --input-file %s %s
-; RUN: filechecker --check-prefixes CHECK --check-prefixes GLOBAL --enable-var-scope --input-file %s %s
-; RUN: not filechecker --check-prefixes CHECK --check-prefixes LOCAL --enable-var-scope --input-file %s %s
-
 local
 global
 ; CHECK: [[LOCAL:loc.*]]

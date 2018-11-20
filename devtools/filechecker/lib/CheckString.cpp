@@ -27,7 +27,6 @@ size_t CheckString::check(const SourceMgr &sourceMgr, StringRef buffer,
 {
    size_t lastPos = 0;
    std::vector<const Pattern *> notStrings;
-
    // isLabelScanMode is true when we are scanning forward to find CHECK-LABEL
    // bounds; we have not processed variable definitions within the bounded block
    // yet so cannot handle any final CHECK-DAG yet; this is handled when going
@@ -283,7 +282,7 @@ size_t CheckString::checkDag(const SourceMgr &sourceMgr, StringRef buffer,
       }
       if (!verboseVerbose) {
          print_match(true, sourceMgr, m_prefix, pattern.getLoc(), pattern, buffer, variableTable,
-                    matchPos, matchLen);
+                     matchPos, matchLen);
       }
 
       // Handle the end of a CHECK-DAG group.
@@ -296,7 +295,7 @@ size_t CheckString::checkDag(const SourceMgr &sourceMgr, StringRef buffer,
             StringRef skippedRegion =
                   buffer.slice(startPos, matchRanges.begin()->pos);
             if (checkNot(sourceMgr, skippedRegion, notStrings, variableTable)) {
-                return StringRef::npos;
+               return StringRef::npos;
             }
             // Clear "not strings".
             notStrings.clear();
