@@ -346,7 +346,7 @@ size_t Pattern::match(StringRef buffer, size_t &matchLen,
    }
    // Successful regex match.
    assert(!matchInfo.empty() && "Didn't get any match");
-   StringRef fullMatch(buffer.getData() + matchInfo.position(), matchInfo[1].length());
+   StringRef fullMatch(buffer.getData() + matchInfo.position(), matchInfo[0].length());
 
    // If this defines any variables, remember their values.
    for (const auto &variableDef : m_variableDefs) {
