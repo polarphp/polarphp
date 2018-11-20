@@ -15,6 +15,8 @@
 #include "FileCheckerConfig.h"
 #include "polarphp/utils/ManagedStatics.h"
 #include <cstddef>
+#include <vector>
+#include <string>
 
 // forward declare with namespace
 namespace CLI {
@@ -45,6 +47,9 @@ enum class CheckType
 
 extern CLI::App *sg_commandParser;
 CLI::App &retrieve_command_parser();
+extern std::vector<std::string> sg_checkPrefixes;
+extern std::vector<std::string> sg_defines;
+extern std::vector<std::string> sg_implicitCheckNot;
 
 } // filechecker
 } // polar

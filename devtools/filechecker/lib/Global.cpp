@@ -17,6 +17,9 @@ namespace polar {
 namespace filechecker {
 
 CLI::App *sg_commandParser = nullptr;
+std::vector<std::string> sg_checkPrefixes{};
+std::vector<std::string> sg_defines{};
+std::vector<std::string> sg_implicitCheckNot;
 
 CLI::App &retrieve_command_parser()
 {

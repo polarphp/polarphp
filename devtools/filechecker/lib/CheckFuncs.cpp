@@ -19,6 +19,7 @@
 #include "polarphp/utils/Debug.h"
 #include "CLI/CLI.hpp"
 #include <boost/regex.hpp>
+#include <iostream>
 
 namespace polar {
 namespace filechecker {
@@ -252,18 +253,16 @@ bool read_check_file(SourceMgr &sourceMgr, StringRef buffer, boost::regex &prefi
 {
    CLI::App &parser = retrieve_command_parser();
    std::string cmdName = "--implicit-check-not";
-   std::vector<std::string> implicitCheckNot = parser.get_option(cmdName)->results();
-   std::vector<std::string> checkPrefixes = parser.get_option("--check-prefixes")->results();
    bool noCanonicalizeWhiteSpace = parser.get_option("--strict-whitespace")->count() > 0 ? true : false;
    bool matchFullLines = parser.get_option("--match-full-lines")->count() > 0 ? true : false;
    std::vector<Pattern> implicitNegativeChecks;
-   for (const auto &patternstring : implicitCheckNot) {
+   for (const auto &patternstring : sg_implicitCheckNot) {
       // Create a buffer with fake command line content in order to display the
       // command line option responsible for the specific implicit CHECK-NOT.
-      std::string prefix = (Twine("-") + cmdName.substr(2) + "='").getStr();
-      std::string Suffix = "'";
+      std::string prefix = (Twine("-", cmdName.substr(2)).concat("='")).getStr();
+      std::string suffix = "'";
       std::unique_ptr<MemoryBuffer> cmdLine = MemoryBuffer::getMemBufferCopy(
-               prefix + patternstring + Suffix, "command line");
+               prefix + patternstring + suffix, "command line");
 
       StringRef patternInbuffer =
             cmdLine->getBuffer().substr(prefix.size(), patternstring.size());
@@ -360,15 +359,15 @@ bool read_check_file(SourceMgr &sourceMgr, StringRef buffer, boost::regex &prefi
    // Add an EOF pattern for any trailing CHECK-DAG/-NOTs, and use the first
    // prefix as a filler for the error message.
    if (!dagNotMatches.empty()) {
-      checkStrings.emplace_back(Pattern(CheckType::CheckEOF), *checkPrefixes.begin(),
+      checkStrings.emplace_back(Pattern(CheckType::CheckEOF), *sg_checkPrefixes.begin(),
                                 SMLocation::getFromPointer(buffer.getData()));
       std::swap(dagNotMatches, checkStrings.back().m_dagNotStrings);
    }
    if (checkStrings.empty()) {
       polar::utils::error_stream() << "error: no check strings found with prefix"
-                                   << (checkPrefixes.size() > 1 ? "es " : " ");
-      auto iter = checkPrefixes.begin();
-      auto endMark = checkPrefixes.end();
+                                   << (sg_checkPrefixes.size() > 1 ? "es " : " ");
+      auto iter = sg_checkPrefixes.begin();
+      auto endMark = sg_checkPrefixes.end();
       if (iter != endMark) {
          polar::utils::error_stream() << "\'" << *iter << ":'";
          ++iter;
@@ -517,18 +516,16 @@ bool validate_check_prefixes()
 // library.
 bool build_check_prefix_regex(boost::regex &regex, std::string &errorMsg)
 {
-   CLI::App &parser = retrieve_command_parser();
-   std::vector<std::string> checkPrefixes = parser.get_option("--check-prefixes")->results();
    // I don't think there's a way to specify an initial value for cl::list,
    // so if nothing was specified, add the default
-   if (checkPrefixes.empty()) {
-      checkPrefixes.push_back("CHECK");
+   if (sg_checkPrefixes.empty()) {
+      sg_checkPrefixes.push_back("CHECK");
    }
    // We already validated the contents of checkPrefixes so just concatenate
    // them as alternatives.
    SmallString<32> prefixRegexStr;
-   for (StringRef prefix : checkPrefixes) {
-      if (prefix != checkPrefixes.front()) {
+   for (StringRef prefix : sg_checkPrefixes) {
+      if (prefix != sg_checkPrefixes.front()) {
          prefixRegexStr.push_back('|');
       }
       prefixRegexStr.append(prefix);
@@ -574,12 +571,11 @@ bool check_input(SourceMgr &sourceMgr, StringRef buffer,
                  ArrayRef<CheckString> checkStrings)
 {
    CLI::App &parser = retrieve_command_parser();
-   std::vector<std::string> globalDefines = parser.get_option("-D")->results();
    bool enableVarScope = parser.get_option("--enable-var-scope")->count() > 0 ? true : false;
    bool checksFailed = false;
    /// variableTable - This holds all the current filecheck variables.
    StringMap<std::string> variableTable;
-   for (const auto& def : globalDefines) {
+   for (const auto& def : sg_defines) {
       variableTable.insert(StringRef(def).split('='));
    }
    unsigned i = 0, j = 0, e = checkStrings.getSize();

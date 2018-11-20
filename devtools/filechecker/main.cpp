@@ -20,7 +20,6 @@
 #include "polarphp/utils/SourceMgr.h"
 #include "polarphp/utils/OptionalError.h"
 #include "polarphp/utils/MemoryBuffer.h"
-#include <iostream>
 #include <boost/regex.hpp>
 
 using polar::basic::StringRef;
@@ -37,10 +36,7 @@ int main(int argc, char *argv[])
    std::string checkFilename;
    std::string inputFilename;
    std::vector<std::string> checkPrefix;
-   std::vector<std::string> checkPrefixes;
    bool noCanonicalizeWhiteSpace;
-   std::vector<std::string> implicitCheckNot;
-   std::vector<std::string> globalDefines;
    bool allowEmptyInput;
    bool matchFullLines;
    bool enableVarScope;
@@ -52,13 +48,13 @@ int main(int argc, char *argv[])
    cmdParser.add_option("--input-file", inputFilename, "File to check (defaults to stdin)")->default_val("-")
          ->type_name("filename");
    cmdParser.add_option("--check-prefix", checkPrefix, "Prefix to use from check file (defaults to 'CHECK')");
-   CLI::Option *checkPrefixesOpt = cmdParser.add_option("--check-prefixes", checkPrefixes, "Alias for -check-prefix permitting multiple comma separated values");
+   cmdParser.add_option("--check-prefixes", sg_checkPrefixes, "Alias for -check-prefix permitting multiple comma separated values");
    cmdParser.add_flag("--strict-whitespace", noCanonicalizeWhiteSpace, "Do not treat all horizontal whitespace as equivalent");
-   cmdParser.add_option("--implicit-check-not", implicitCheckNot, "Add an implicit negative check with this pattern to every"
+   cmdParser.add_option("--implicit-check-not", sg_implicitCheckNot, "Add an implicit negative check with this pattern to every"
                                                                   "positive check. This can be used to ensure that no instances of"
                                                                   "this pattern occur which are not matched by a positive pattern")
          ->type_name("pattern");
-   cmdParser.add_option("-D", globalDefines, "Define a variable to be used in capture patterns.")->type_name("VAR=VALUE");
+   cmdParser.add_option("-D", sg_defines, "Define a variable to be used in capture patterns.")->type_name("VAR=VALUE");
    cmdParser.add_flag("--allow-empty", allowEmptyInput, "Allow the input file to be empty. This is useful when making"
                                                         "checks that some error message does not occur, for example.");
    cmdParser.add_flag("--match-full-lines", matchFullLines, "Require all positive matches to cover an entire input line."
@@ -76,9 +72,6 @@ int main(int argc, char *argv[])
                                                                                                           "The value can be also controlled using "
                                                                                                           "FILECHECK_DUMP_INPUT_ON_FAILURE environment variable.");
    CLI11_PARSE(cmdParser, argc, argv);
-   for (auto i : globalDefines) {
-      std::cout << i << std::endl;
-   }
    if (dumpInputOnFailureOpt->count() == 0) {
       std::string dumpInputOnFailureEnv = StringRef(std::getenv("FILECHECK_DUMP_INPUT_ON_FAILURE")).trim().toLower();
       if (!dumpInputOnFailureEnv.empty() && (dumpInputOnFailureEnv == "true" || dumpInputOnFailureEnv == "on")) {
@@ -87,7 +80,7 @@ int main(int argc, char *argv[])
    }
    if (!checkPrefix.empty()) {
       for (std::string &prefix : checkPrefix) {
-         checkPrefixesOpt->add_result(prefix);
+         sg_checkPrefixes.push_back(prefix);
       }
    }
 
