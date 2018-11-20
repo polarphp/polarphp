@@ -1,4 +1,4 @@
-; RUN: not FileCheck -check-prefix=A -check-prefix=AA -input-file %s %s
+; RUN: not filechecker --check-prefix A --check-prefix AA --input-file %s %s
 
 this is the string to be matched
 this should also be matched

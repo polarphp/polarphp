@@ -1,4 +1,4 @@
-// RUN: filechecker --check-prefix=ONE --check-prefix=TWO --input-file %s %s
+// RUN: filechecker --check-prefix ONE --check-prefix TWO --input-file %s %s
 
 foo
 bar

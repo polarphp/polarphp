@@ -1,5 +1,5 @@
-// RUN: filechecker --check-prefix=ANOTHER-PREFIX --input-file %s %s
-// RUN: not filechecker --check-prefix=PREFIX --input-file %s %s 2>&1 | filechecker --check-prefix=CHECK-NONEXISTENT-PREFIX %s
+// RUN: filechecker --check-prefix ANOTHER-PREFIX --input-file %s %s
+// RUN: not filechecker --check-prefix PREFIX --input-file %s %s 2>&1 | filechecker --check-prefix CHECK-NONEXISTENT-PREFIX %s
 
 foobar
 ; ANOTHER-PREFIX: foobar

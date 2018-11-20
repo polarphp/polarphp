@@ -1,4 +1,4 @@
-; RUN: %{filechecker} --check-prefix=A --input-file %s %s
+; RUN: filechecker --check-prefix A --input-file %s %s
 
 this should be matched
 

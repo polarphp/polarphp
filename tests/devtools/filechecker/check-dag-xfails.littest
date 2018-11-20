@@ -1,9 +1,9 @@
-; RUN: not filechecker --check-prefix=X1 --input-file %s %s
-; RUN: not filechecker --check-prefix=X2 --input-file %s %s
-; RUN: not filechecker --check-prefix=X3 --input-file %s %s
-; RUN: not filechecker --check-prefix=X4 --input-file %s %s
-; RUN: not filechecker --check-prefix=X5 --input-file %s %s
-; RUN: not filechecker --check-prefix=X6 --input-file %s %s
+; RUN: not filechecker --check-prefix X1 --input-file %s %s
+; RUN: not filechecker --check-prefix X2 --input-file %s %s
+; RUN: not filechecker --check-prefix X3 --input-file %s %s
+; RUN: not filechecker --check-prefix X4 --input-file %s %s
+; RUN: not filechecker --check-prefix X5 --input-file %s %s
+; RUN: not filechecker --check-prefix X6 --input-file %s %s
 
 __x1
 add r10, r1, r2

@@ -1,4 +1,3 @@
-; TODO bug
 ; RUN: not filechecker --input-file %s %s 2>&1 | filechecker --check-prefix DIAG %s
 
 CHECK-NOT: test
