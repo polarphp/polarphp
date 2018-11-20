@@ -496,7 +496,7 @@ bool validate_check_prefixes()
    
    for (StringRef prefix : sg_checkPrefixes) {
       // Reject empty prefixes.
-      if (prefix == "") {
+      if (prefix.trim() == "") {
          return false;
       }
       if (!prefixSet.insert(prefix).second) {
