@@ -19,7 +19,6 @@
 #include "polarphp/utils/Debug.h"
 #include "CLI/CLI.hpp"
 #include <boost/regex.hpp>
-#include <iostream>
 
 namespace polar {
 namespace filechecker {
@@ -205,12 +204,12 @@ StringRef find_first_matching_prefix(boost::regex &prefixRegex, StringRef &buffe
    while (!buffer.empty()) {
       boost::cmatch matches;
       // Find the first (longest) match using the RE.
-      if (!boost::regex_search(buffer.begin(), buffer.end(), matches, prefixRegex)) {
+      if (!boost::regex_search(buffer.begin(), buffer.end(), matches, prefixRegex,
+                               boost::match_posix)) {
          // No match at all, bail.
          return StringRef();
       }
       StringRef prefix(buffer.getData() + matches.position(), matches[0].length());
-
       assert(prefix.getData() >= buffer.getData() &&
              prefix.getData() < buffer.getData() + buffer.size() &&
              "Prefix doesn't start inside of buffer!");
@@ -372,8 +371,9 @@ bool read_check_file(SourceMgr &sourceMgr, StringRef buffer, boost::regex &prefi
          polar::utils::error_stream() << "\'" << *iter << ":'";
          ++iter;
       }
-      for (; iter != endMark; ++iter)
+      for (; iter != endMark; ++iter) {
          polar::utils::error_stream() << ", \'" << *iter << ":'";
+      }
 
       polar::utils::error_stream() << '\n';
       return true;
@@ -429,7 +429,7 @@ void print_no_match(bool expectedMatch, const SourceMgr &sourceMgr,
    if (!expectedMatch && !verboseVerbose) {
       return;
    }
-     
+
    // Otherwise, we have an error, emit an error message.
    sourceMgr.printMessage(loc,
                           expectedMatch ? SourceMgr::DK_Error : SourceMgr::DK_Remark,
@@ -493,7 +493,7 @@ bool validate_check_prefix(StringRef checkPrefix)
 bool validate_check_prefixes()
 {
    StringSet<> prefixSet;
-   
+
    for (StringRef prefix : sg_checkPrefixes) {
       // Reject empty prefixes.
       if (prefix.trim() == "") {
