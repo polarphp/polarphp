@@ -144,7 +144,7 @@ inline void Worker<Task, Queue>::stop()
 template <typename Task, template<typename> class Queue>
 inline bool Worker<Task, Queue>::isStopped()
 {
-   return m_runningFlag.load(std::memory_order_relaxed);
+   return !m_runningFlag.load(std::memory_order_relaxed);
 }
 
 template <typename Task, template<typename> class Queue>
