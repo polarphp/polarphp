@@ -30,15 +30,15 @@ namespace lit {
 
 using threadpool::ThreadPool;
 using threadpool::ThreadPoolOptions;
-using TaskType = std::packaged_task<std::tuple<int, TestPointer>()>;
+using TaskType = std::packaged_task<void()>;
 
-std::tuple<int, TestPointer> worker_run_one_test(int testIndex, TestPointer test,
-                                                 LitConfigPointer litConfig,
-                                                 std::map<std::string,Semaphore> &parallelismSemaphores);
+
+void worker_run_one_test(int testIndex, TestPointer test,
+                         LitConfigPointer litConfig,
+                         Run &run, std::map<std::string,Semaphore> &parallelismSemaphores);
 
 void do_execute_test(TestPointer test, LitConfigPointer litConfig, std::map<std::string,
                      Semaphore> &parallelismSemaphores);
-
 
 Run::Run(LitConfigPointer litConfig, const TestList &tests)
    : m_litConfig(litConfig),
@@ -79,16 +79,20 @@ void Run::executeTestsInPool(size_t jobs, size_t maxTime)
    ThreadPoolOptions threadOpts;
    threadOpts.setThreadCount(jobs);
    m_threadPool.reset(new ThreadPool(threadOpts));
+   std::list<std::shared_ptr<TaskType>> tasks;
    // @TODO port to WINDOWS
-   std::list<std::future<std::tuple<int, TestPointer>>> asyncResults;
+   std::list<std::future<void>> asyncResults;
    int testIndex = 0;
    for (TestPointer test: m_tests) {
-      TaskType task(std::bind(worker_run_one_test, testIndex, test, m_litConfig, std::ref(m_parallelismSemaphores)));
-      asyncResults.push_back(task.get_future());
+      std::shared_ptr<TaskType> task = std::make_shared<TaskType>(std::bind(worker_run_one_test, testIndex, test, m_litConfig,
+                                                                            std::ref(*this), std::ref(m_parallelismSemaphores)));
+      tasks.push_back(task);
+      asyncResults.push_back(task->get_future());
+      m_threadPool->post(*task.get());
       ++testIndex;
    }
    try {
-      for (std::future<std::tuple<int, TestPointer>> &future: asyncResults) {
+      for (std::future<void> &future: asyncResults) {
          if (hasDeadline) {
             future.wait_until(deadline);
          } else {
@@ -138,8 +142,7 @@ void Run::executeTests(TestingProgressDisplayPointer display, size_t jobs, size_
    if (m_litConfig->isSingleProcess()) {
       int index = 0;
       for (auto test : m_tests) {
-         std::tuple<int, TestPointer> result = worker_run_one_test(index, test, m_litConfig, m_parallelismSemaphores);
-         consumeTestResult(result);
+         worker_run_one_test(index, test, m_litConfig, *this, m_parallelismSemaphores);
          ++index;
       }
    } else {
@@ -197,11 +200,12 @@ void Run::consumeTestResult(std::tuple<int, TestPointer> &poolResult)
 ///
 /// Returns an index and a Result, which the parent process uses to update
 /// the display.
-std::tuple<int, TestPointer> worker_run_one_test(int testIndex, TestPointer test, LitConfigPointer litConfig,
-                                                 std::map<std::string, Semaphore> &parallelismSemaphores)
+void worker_run_one_test(int testIndex, TestPointer test, LitConfigPointer litConfig,
+                         Run& run, std::map<std::string, Semaphore> &parallelismSemaphores)
 {
    do_execute_test(test, litConfig, parallelismSemaphores);
-   return std::make_tuple(testIndex, test);
+   std::tuple<int, TestPointer> result = std::make_tuple(testIndex, test);
+   run.consumeTestResult(result);
 }
 
 namespace {

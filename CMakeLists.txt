@@ -388,7 +388,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include(ImportThirdparty)
 
 add_subdirectory(include)
-add_subdirectory(main)
+add_subdirectory(artifacts)
 add_subdirectory(src)
 add_subdirectory(tools)
 add_subdirectory(thirdparty)

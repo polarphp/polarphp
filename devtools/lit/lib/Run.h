@@ -32,7 +32,6 @@ public:
    void executeTest(TestPointer test);
    void executeTestsInPool(size_t jobs, size_t maxTime = 0);
    void executeTests(TestingProgressDisplayPointer display, size_t jobs, size_t maxTime = 0);
-protected:
    void consumeTestResult(std::tuple<int, TestPointer> &poolResult);
 protected:
    LitConfigPointer m_litConfig;
