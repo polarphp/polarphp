@@ -349,7 +349,7 @@ protected:
 int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
                      ShExecResultList &results, size_t execTimeout, bool &timeoutReached)
 {
-   //std::cout << cmd->operator std::string() << std::endl;
+   // std::cout << cmd->operator std::string() << std::endl;
    int result;
    AbstractCommand::Type commandType = cmd->getCommandType();
    if (commandType == AbstractCommand::Type::Seq) {
@@ -581,7 +581,14 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
             executable = firstArgRef.getStr();
          }
          if (!executable) {
-            executable = which(firstArg, shenv->getEnvItem("PATH"));
+            StringRef pathStr = shenv->getEnvItem("PATH");
+            pathStr = pathStr.substr(pathStr.find("=") + 1);
+            SmallVector<StringRef, 10> parts;
+            pathStr.split(parts, ':', -1, false);
+            OptionalError<std::string> findResult = polar::sys::find_program_by_name(firstArgRef, parts);
+            if (findResult) {
+               executable = *findResult;
+            }
          }
          if (!executable) {
             throw InternalShellError(command, format_string("%s: command not found", firstArg.c_str()));
@@ -796,7 +803,7 @@ StdFdsTuple process_redirects(Command *command, const std::string &stdinSource,
       } else if (op == std::tuple<std::string, int>{">>", SHELL_CMD_REDIRECT_TOKEN}) {
          redirects[1] = std::any(OpenFileTuple{filename, std::ios_base::out | std::ios_base::app, std::nullopt});
       } else if (op == std::tuple<std::string, int>{"<", SHELL_CMD_REDIRECT_TOKEN}) {
-         redirects[1] = std::any(OpenFileTuple{filename, std::ios_base::in, std::nullopt});
+         redirects[0] = std::any(OpenFileTuple{filename, std::ios_base::in, std::nullopt});
       } else {
          throw InternalShellError(command,
                                   "Unsupported redirect: (" + std::get<0>(op) + ", " + std::to_string(std::get<1>(op)) + ")" + filename);
