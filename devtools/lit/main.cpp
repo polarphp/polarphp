@@ -544,7 +544,7 @@ int main(int argc, char *argv[])
       display->finish();
       size_t testingTime = static_cast<size_t>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime).count());
       if (!quiet) {
-         std::printf("Testing Time: %.2fs\n", static_cast<double>(testingTime));
+         std::printf("Testing Time: %.2fs\n", static_cast<double>(testingTime) / 1000);
       }
       // Write out the test data, if requested.
       if (!outputDirOpt->empty()) {
