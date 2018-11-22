@@ -22,6 +22,6 @@ using polar::lit::ShTest;
 extern "C" {
 void internal_shell_local_cfgsetter(TestingConfig *config, LitConfig *litConfig)
 {
-   //config->setTestFormat(std::make_shared<ShTest>(false));
+   config->setTestFormat(std::make_shared<ShTest>(false));
 }
 }

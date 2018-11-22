@@ -517,7 +517,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       }
 
       StdFdsTuple fds = process_redirects(command, defaultStdin, cmdShEnv);
-      std::optional<std::string> stdinFilename;
+      std::optional<StringRef> stdinFilename;
 
       StdFdPair stdinFd = std::get<0>(fds);
       StdFdPair stdoutFd = std::get<1>(fds);
@@ -562,6 +562,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
                tempFilesMgr.registerTempFile(tempFilename->getCStr());
                stderrFilename = tempFilename->getStr();
                stderrTempFiles.push_back(std::make_pair(i, tempFilename->getStr()));
+               tempFilenamesPool.push_back(tempFilename);
             }
          }
       }
@@ -645,38 +646,56 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          stderrFilename = tempFilename->getCStr();
          tempFilenamesPool.push_back(tempFilename);
       }
-      int curOpenMode = -1;
+      std::optional<int> curOpenMode = std::nullopt;
       if (rawStdinOpenMode & std::ios_base::in) {
-         curOpenMode |= O_RDONLY;
+         if (curOpenMode) {
+            curOpenMode = curOpenMode.value() | O_RDONLY;
+         } else {
+            curOpenMode = O_RDONLY;
+         }
       }
-      if (-1 != curOpenMode) {
-         stdinOpenMode = curOpenMode;
+      if (curOpenMode) {
+         stdinOpenMode = curOpenMode.value();
       }
-      curOpenMode = -1;
+      curOpenMode = std::nullopt;
       if (rawStdoutOpenMode & std::ios_base::out) {
-         curOpenMode |= O_CREAT;
-         curOpenMode |= O_WRONLY;
+         curOpenMode = O_CREAT | O_WRONLY;
       }
       if (rawStdoutOpenMode & std::ios_base::app) {
-         curOpenMode |= O_APPEND;
+         if (curOpenMode) {
+            curOpenMode = curOpenMode.value() | O_APPEND;
+         } else {
+            curOpenMode = O_APPEND;
+         }
       } else if (rawStdoutOpenMode & std::ios_base::trunc) {
-         curOpenMode |= O_TRUNC;
+         if (curOpenMode) {
+            curOpenMode = curOpenMode.value() | O_TRUNC;
+         } else {
+            curOpenMode = O_TRUNC;
+         }
       }
-      if (-1 != curOpenMode) {
-         stdoutOpenMode = curOpenMode;
+      if (curOpenMode) {
+         stdoutOpenMode = curOpenMode.value();
       }
-      curOpenMode = -1;
+      curOpenMode = std::nullopt;
       if (rawStderrOpenMode & std::ios_base::out) {
-         curOpenMode |= O_CREAT;
-         curOpenMode |= O_WRONLY;
+         curOpenMode = O_CREAT | O_WRONLY;
       }
       if (rawStderrOpenMode & std::ios_base::app) {
-         curOpenMode |= O_APPEND;
+         if (curOpenMode) {
+            curOpenMode = curOpenMode.value() | O_APPEND;
+         } else {
+            curOpenMode = O_APPEND;
+         }
       } else if (rawStderrOpenMode & std::ios_base::trunc) {
-         curOpenMode |= O_TRUNC;
+         if (curOpenMode) {
+            curOpenMode = curOpenMode.value() | O_TRUNC;
+         } else {
+            curOpenMode = O_TRUNC;
+         }
       }
-      if (-1 != curOpenMode) {
-         stderrOpenMode = curOpenMode;
+      if (curOpenMode) {
+         stderrOpenMode = curOpenMode.value();
       }
       ArrayRef<std::optional<StringRef>> redirects{
          stdinFilename,
@@ -717,9 +736,9 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       // Let the helper know about this process
       // Update the current stdin source.
       if (rawStdoutFilename == SUBPROCESS_FD_PIPE) {
-         defaultStdin = stdoutFilename.value();
+         defaultStdin = stdoutFilename.value().getStr();
       } else if (stderrIsStdout) {
-         defaultStdin = stderrFilename.value();
+         defaultStdin = stderrFilename.value().getStr();
       } else {
          defaultStdin = rootInputFile.getCStr();
       }
@@ -843,7 +862,7 @@ StdFdsTuple process_redirects(Command *command, const std::string &stdinSource,
             throw InternalShellError(command,
                                      "Bad redirect");
          }
-         stdFds[index] = std::make_pair(fd, std::ios_base::openmode{});
+         stdFds[index].first = fd;
          continue;
       }
       OpenFileTuple &item = std::any_cast<OpenFileTuple &>(itemAny);
@@ -1481,7 +1500,7 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
             if (i < argSize - 1) {
                argMsg += " " + argStr;
             } else {
-               argMsg += argStr;
+               argMsg += argStr + " ";
             }
             ++j;
          }

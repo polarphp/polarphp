@@ -1,0 +1,6 @@
+
+# RUN: echo \
+# RUN: 'foo baz' \
+# RUN: | filechecker %s
+
+# CHECK: foo bar

@@ -13,15 +13,20 @@
 #include "TestingConfig.h"
 #include "formats/ShellTest.h"
 #include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/basic/adt/Twine.h"
 
 using polar::lit::LitConfig;
 using polar::lit::TestingConfig;
 using polar::lit::ShTest;
+using polar::basic::StringRef;
+using polar::basic::Twine;
 
 extern "C" {
 void root_cfgsetter(TestingConfig *config, LitConfig *litConfig)
 {
    config->setName("shtest-run-at-line");
    config->setSuffixes({".littest"});
+   config->addSubstitution("%{lit}", LIT_TEST_BIN);
+   config->addEnvironment("PATH", Twine(POLAR_RUNTIME_OUTPUT_INTDIR, StringRef(":")).concat(std::getenv("PATH")).getStr());
 }
 }
