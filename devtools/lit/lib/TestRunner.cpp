@@ -1504,7 +1504,7 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
             }
             ++j;
          }
-         out += Twine("$ ", argMsg).concat("\n").getStr();
+         out += Twine("$ ", StringRef(argMsg).ltrim()).concat("\n").getStr();
       } else {
          out += "$ \n";
       }
