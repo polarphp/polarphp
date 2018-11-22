@@ -10,4 +10,4 @@
 # Created by polarboy on 2018/11/19.
 
 polar_setup_lit_cfg_setters(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-   OUTPUT_NAME littestsxuintoutput)
+   OUTPUT_NAME littestsxunitoutput)

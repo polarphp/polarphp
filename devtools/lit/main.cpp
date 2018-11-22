@@ -661,7 +661,7 @@ int main(int argc, char *argv[])
             std::string suiteName = item.first;
             BySuiteItemType &suiteData = item.second;
             polar::lit::replace_string(".", "-", suiteName);
-            xmlDoc << "<testsuite name=" << suiteName;
+            xmlDoc << "<testsuite name=\"" << suiteName << "\" ";
             xmlDoc << " tests=\"" << std::get<0>(suiteData) + std::get<1>(suiteData) + std::get<2>(suiteData);
             xmlDoc << "\"";
             xmlDoc << " failures=\"" << std::get<1>(suiteData) << "\"";
