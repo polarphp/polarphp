@@ -709,6 +709,14 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       };
       std::string errorMsg;
       bool execFailed;
+      // std::cout << stdinFilename.value().getStr() << std::endl;
+      // std::cout << stdoutFilename.value().getStr() << std::endl;
+      // std::cout << stderrFilename.value().getStr() << std::endl;
+      // TODO need check stdoutFilename and stderrFilename
+      if (stdinFilename && !fs::exists(stdinFilename.value())) {
+         throw InternalShellError(command, format_string("%s: file or directory %s is not exist", executable.value().c_str(),
+                                                         stdinFilename.value().getStr().c_str()));
+      }
       int returnCode = polar::sys::execute_and_wait(executable.value(), argsRef, cmdShEnv->getCwd(), envsRef,
                                                     redirects, redirectsOpenModes, execTimeout, 0, &errorMsg,
                                                     &execFailed);
