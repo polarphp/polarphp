@@ -18,9 +18,16 @@
 #include <list>
 #include <map>
 #include "LitGlobal.h"
+#include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/basic/adt/ArrayRef.h"
+#include "polarphp/utils/Program.h"
 
 namespace polar {
 namespace lit {
+
+using polar::sys::ProcessInfo;
+using polar::basic::StringRef;
+using polar::basic::ArrayRef;
 
 namespace internal {
 
@@ -68,6 +75,62 @@ RunCmdResponse run_program(const std::string &cmd,
                             sizeof...(args) + 2, internal::run_program_arg_filter(std::forward<ArgTypes>(args))...);
    return std::make_tuple(exitCode, output, errMsg);
 }
+
+/// This function executes the program using the arguments provided.  The
+/// invoked program will inherit the stdin, stdout, and stderr file
+/// descriptors, the environment and other configuration settings of the
+/// invoking program.
+/// This function waits for the program to finish, so should be avoided in
+/// library functions that aren't expected to block. Consider using
+/// ExecuteNoWait() instead.
+/// \returns an integer result code indicating the status of the program.
+/// A zero or positive value indicates the result code of the program.
+/// -1 indicates failure to execute
+/// -2 indicates a crash during execution or timeout
+int execute_and_wait(
+      StringRef program, ///< Path of the program to be executed. It is
+      ///< presumed this is the result of the findProgramByName method.
+      ArrayRef<StringRef> args, ///< A vector of strings that are passed to the
+      ///< program.  The first element should be the name of the program.
+      ///< The list *must* be terminated by a null char* entry.
+      std::optional<StringRef> cwd,
+      std::optional<ArrayRef<StringRef>> env = std::nullopt, ///< An optional vector of strings to use for
+      ///< the program's environment. If not provided, the current program's
+      ///< environment will be used.
+      ArrayRef<std::optional<StringRef>> redirects = {}, ///<
+      ///< An array of optional paths. Should have a size of zero or three.
+      ///< If the array is empty, no redirections are performed.
+      ///< Otherwise, the inferior process's stdin(0), stdout(1), and stderr(2)
+      ///< will be redirected to the corresponding paths, if the optional path
+      ///< is present (not \c polar::basic::None).
+      ///< When an empty path is passed in, the corresponding file descriptor
+      ///< will be disconnected (ie, /dev/null'd) in a portable way.
+      unsigned secondsToWait = 0, ///< If non-zero, this specifies the amount
+      ///< of time to wait for the child process to exit. If the time
+      ///< expires, the child is killed and this call returns. If zero,
+      ///< this function will wait until the child finishes or forever if
+      ///< it doesn't.
+      unsigned memoryLimit = 0, ///< If non-zero, this specifies max. amount
+      ///< of memory can be allocated by process. If memory usage will be
+      ///< higher limit, the child is killed and this call returns. If zero
+      ///< - no memory limit.
+      std::string *errMsg = nullptr, ///< If non-zero, provides a pointer to a
+      ///< string instance in which error messages will be returned. If the
+      ///< string is non-empty upon return an error occurred while invoking the
+      ///< program.
+      bool *executionFailed = nullptr);
+
+int execute_and_wait(
+      StringRef program, ///< Path of the program to be executed. It is
+      ArrayRef<StringRef> args, ///< A vector of strings that are passed to the
+      std::optional<StringRef> cwd,
+      std::optional<ArrayRef<StringRef>> env, ///< An optional vector of strings to use for
+      ArrayRef<std::optional<StringRef>> redirects, ///<
+      ArrayRef<std::optional<int>> redirectsOpenModes,
+      unsigned secondsToWait = 0, ///< If non-zero, this specifies the amount
+      unsigned memoryLimit = 0, ///< If non-zero, this specifies max. amount
+      std::string *errMsg = nullptr, ///< If non-zero, provides a pointer to a
+      bool *executionFailed = nullptr);
 
 } // lit
 } // polar

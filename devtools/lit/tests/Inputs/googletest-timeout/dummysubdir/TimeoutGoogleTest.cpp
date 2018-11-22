@@ -47,7 +47,7 @@ FirstTest.
       return 0;
    } else if (testName == "FirstTest.subTestB") {
       std::cout << "I am subTest B, I am slow" << std::endl;
-      std::this_thread::sleep_for(std::chrono::seconds(6));
+      std::this_thread::sleep_for(std::chrono::seconds(10));
       std::cout << "[  PASSED  ] 1 test." << std::endl;
       return 0;
    } else if (testName == "FirstTest.subTestC") {

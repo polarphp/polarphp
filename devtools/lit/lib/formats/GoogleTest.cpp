@@ -255,7 +255,7 @@ ResultPointer GoogleTest::execute(TestPointer test, LitConfigPointer litConfig)
    };
 
    int exitCode = polar::sys::execute_and_wait(executabe, args, std::nullopt, envsRef,
-                                               redirects, litConfig->getMaxIndividualTestTime(), 0,
+                                               redirects, 3, 0,
                                                &errorMsg, &execFailed);
    if(execFailed) {
       throw ValueError(format_string("Could not create process (%s) due to %s",

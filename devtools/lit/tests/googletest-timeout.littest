@@ -1,0 +1,3 @@
+# Check that the per test timeout is enforced when running GTest tests.
+#
+# RUN: %{lit} --single-process  -v %{inputs}/googletest-timeout

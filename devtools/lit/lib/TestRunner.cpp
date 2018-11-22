@@ -349,7 +349,7 @@ protected:
 int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
                      ShExecResultList &results, size_t execTimeout, bool &timeoutReached)
 {
-   // std::cout << cmd->operator std::string() << std::endl;
+   std::cout << cmd->operator std::string() << std::endl;
    int result;
    AbstractCommand::Type commandType = cmd->getCommandType();
    if (commandType == AbstractCommand::Type::Seq) {
@@ -709,9 +709,10 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       };
       std::string errorMsg;
       bool execFailed;
-      // std::cout << stdinFilename.value().getStr() << std::endl;
-      // std::cout << stdoutFilename.value().getStr() << std::endl;
-      // std::cout << stderrFilename.value().getStr() << std::endl;
+      std::cout << executable.value() << std::endl;
+//       std::cout << stdinFilename.value().getStr() << std::endl;
+//       std::cout << stdoutFilename.value().getStr() << std::endl;
+//       std::cout << stderrFilename.value().getStr() << std::endl;
       // TODO need check stdoutFilename and stderrFilename
       if (stdinFilename && !fs::exists(stdinFilename.value())) {
          throw InternalShellError(command, format_string("%s: file or directory %s is not exist", executable.value().c_str(),
@@ -1644,7 +1645,7 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
    std::string errorMsg;
    bool execFailed;
    int returnCode = polar::sys::execute_and_wait(cmdStr, argsRef, cwd, envRef, redirects,
-                                                 0, 0, &errorMsg, &execFailed);
+                                                 litConfig->getMaxIndividualTestTime(), 0, &errorMsg, &execFailed);
    if(execFailed) {
       throw ValueError(format_string("Could not create process (%s) due to %s",
                                      cmdStr.c_str(), errorMsg.c_str()));

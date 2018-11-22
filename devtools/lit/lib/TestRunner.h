@@ -14,14 +14,12 @@
 
 #include "Global.h"
 #include "ShellCommands.h"
-#include "BasicTimer.h"
 #include "ForwardDefs.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include <stdexcept>
 #include <string>
 #include <boost/regex.hpp>
 #include <list>
-#include <mutex>
 #include <tuple>
 #include <utility>
 #include <map>
