@@ -112,11 +112,11 @@ void write_test_results(polar::lit::Run &run, LitConfigPointer, size_t testingTi
                   {"name", test->getFullName()},
                   {"code", test->getResult()->getCode()->getName()},
                   {"output", test->getResult()->getOutput()},
-                  {"elapse", test->getResult()->getElapsed().has_value() ? test->getResult()->getElapsed().value() : -1}
+                  {"elapse", static_cast<int>(test->getResult()->getElapsed().has_value() ? test->getResult()->getElapsed().value() : -1)}
                });
       // Add test metrics, if present.
       if (!testResult->getMetrics().empty()) {
-         nlohmann::json metrics = nlohmann::json::array();
+         nlohmann::json metrics = nlohmann::json::object();
          for (auto &metricItem : testResult->getMetrics()) {
             MetricValuePointer metricValue = metricItem.second;
             std::any mdata = metricValue->toData();
@@ -137,15 +137,15 @@ void write_test_results(polar::lit::Run &run, LitConfigPointer, size_t testingTi
             std::string parentName = test->getFullName();
             ResultPointer microTest = microItem.second;
             std::string microFullName = parentName + ":" + microItem.first;
-            nlohmann::json microTestData = nlohmann::json::array(
+            nlohmann::json microTestData = nlohmann::json::object(
             {
                         {"name", microFullName},
                         {"code", microTest->getCode()->getName()},
                         {"output", microTest->getOutput()},
-                        {"elapsed",microTest->getElapsed().has_value() ? microTest->getElapsed().value() : -1}
+                        {"elapsed", static_cast<int>(microTest->getElapsed().has_value() ? microTest->getElapsed().value() : -1)}
                      });
             if (!microTest->getMetrics().empty()) {
-               nlohmann::json microMetrics = nlohmann::json::array();
+               nlohmann::json microMetrics = nlohmann::json::object();
                for (auto &microMetricItem : testResult->getMetrics()) {
                   MetricValuePointer microMetricValue = microMetricItem.second;
                   std::any microMetricdata = microMetricValue->toData();
@@ -163,6 +163,11 @@ void write_test_results(polar::lit::Run &run, LitConfigPointer, size_t testingTi
          }
       }
       testsData.push_back(testData);
+   }
+   fs::path outputDir(outputPath);
+   outputDir = outputDir.parent_path();
+   if (!fs::exists(outputDir)) {
+      fs::create_directory(outputDir);
    }
    std::fstream jsonStream(outputPath, std::ios_base::out | std::ios_base::trunc);
    if (!jsonStream.is_open()) {
@@ -230,7 +235,7 @@ int main(int argc, char *argv[])
    litApp.add_option("--echo-all-commands", echoAllCommands, "Echo all commands as they are executed to stdout."
                                                              "In case of failure, last command shown will be the failing one.")->group("Output Format");
    litApp.add_flag("-a,--show-all", showAll, "Display all commandlines and output")->group("Output Format");
-   CLI::Option *outputDirOpt = litApp.add_option("-o,--output", outputDir, "Write test results to the provided path")->check(CLI::ExistingDirectory)->group("Output Format");
+   CLI::Option *outputDirOpt = litApp.add_option("-o,--output", outputDir, "Write test results to the provided path")->group("Output Format");
    litApp.add_flag("--display-progress-bar", displayProgressBar, "use curses based progress bar")->group("Output Format");
    litApp.add_flag("--show-unsupported", showUnsupported, "Show unsupported tests")->group("Output Format");
    litApp.add_flag("--show-xfail", showXFail, "Show tests that were expected to fail")->group("Output Format");
