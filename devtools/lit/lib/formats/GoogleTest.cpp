@@ -254,7 +254,7 @@ ResultPointer GoogleTest::execute(TestPointer test, LitConfigPointer litConfig)
             errorTempFilename
    };
 
-   int exitCode = polar::sys::execute_and_wait(executabe, args, std::nullopt, envsRef,
+   int exitCode = polar::lit::execute_and_wait(executabe, args, std::nullopt, envsRef,
                                                redirects, 3, 0,
                                                &errorMsg, &execFailed);
    if(execFailed) {

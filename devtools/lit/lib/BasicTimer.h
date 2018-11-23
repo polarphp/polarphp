@@ -15,7 +15,8 @@
 #include <chrono>
 #include <thread>
 #include <functional>
-#include <atomic>
+#include <condition_variable>
+#include <mutex>
 
 namespace polar {
 namespace lit {
@@ -23,11 +24,12 @@ namespace lit {
 class BasicTimer
 {
 public:
-   using Interval = std::chrono::milliseconds ;
-   using Timeout = std::function<void(void)> ;
+   using Interval = std::chrono::milliseconds;
+   using TimeoutFunc = std::function<void(void)> ;
 
-   BasicTimer(const Timeout &timeout);
-   BasicTimer(const Timeout &timeout,
+   BasicTimer();
+   BasicTimer(const TimeoutFunc &timeoutHandler);
+   BasicTimer(const TimeoutFunc &timeoutHandler,
               const Interval &interval,
               bool singleShot = true);
    ~BasicTimer();
@@ -43,17 +45,19 @@ public:
    void setInterval(const Interval &interval);
    const Interval &getInterval() const;
 
-   void setTimeout(const Timeout &timeout);
-   const Timeout &getTimeout() const;
+   void setTimeoutHandler(const TimeoutFunc &handler);
+   const TimeoutFunc &getTimeoutHandler() const;
 private:
    void getTemporize();
    void sleepThenTimeout();
 private:
+   bool m_isSingleShot;
+   bool m_running;
+   Interval m_interval;
+   std::condition_variable m_interupted;
+   std::mutex m_mutex;
+   TimeoutFunc m_timeoutHandler;
    std::thread m_thread;
-   std::atomic<bool> m_running = false;
-   bool m_isSingleShot = true;
-   Interval m_interval = Interval(0);
-   Timeout m_timeout = nullptr;
 };
 
 } // lit

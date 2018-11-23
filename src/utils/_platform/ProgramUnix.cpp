@@ -69,22 +69,22 @@ ProcessInfo::ProcessInfo()
      m_returnCode(0)
 {}
 
-ProcessIdType ProcessInfo::getPid()
+ProcessIdType ProcessInfo::getPid() const
 {
    return m_pid;
 }
 
-ProcessIdType ProcessInfo::getProcess()
+ProcessIdType ProcessInfo::getProcess() const
 {
    return m_process;
 }
 
-int ProcessInfo::getReturnCode()
+int ProcessInfo::getReturnCode() const
 {
    return m_returnCode;
 }
 
-std::optional<StringRef> ProcessInfo::getStdinFilename()
+std::optional<StringRef> ProcessInfo::getStdinFilename() const
 {
    if (m_stdinFilename.has_value()) {
       return m_stdinFilename.value();
@@ -92,7 +92,7 @@ std::optional<StringRef> ProcessInfo::getStdinFilename()
    return std::nullopt;
 }
 
-std::optional<StringRef> ProcessInfo::getStdoutFilename()
+std::optional<StringRef> ProcessInfo::getStdoutFilename() const
 {
    if (m_stdoutFilename.has_value()) {
       return m_stdoutFilename.value();
@@ -100,7 +100,7 @@ std::optional<StringRef> ProcessInfo::getStdoutFilename()
    return std::nullopt;
 }
 
-std::optional<StringRef> ProcessInfo::getStderrFilename()
+std::optional<StringRef> ProcessInfo::getStderrFilename() const
 {
    if (m_stderrFilename.has_value()) {
       return m_stderrFilename.value();

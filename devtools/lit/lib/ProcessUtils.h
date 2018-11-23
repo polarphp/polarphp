@@ -132,6 +132,20 @@ int execute_and_wait(
       std::string *errMsg = nullptr, ///< If non-zero, provides a pointer to a
       bool *executionFailed = nullptr);
 
+ProcessInfo wait_with_timer(
+      const ProcessInfo &processInfo, ///< The child process that should be waited on.
+      unsigned secondsToWait, ///< If non-zero, this specifies the amount of
+      ///< time to wait for the child process to exit. If the time expires, the
+      ///< child is killed and this function returns. If zero, this function
+      ///< will perform a non-blocking wait on the child process.
+      bool waitUntilTerminates, ///< If true, ignores \p SecondsToWait and waits
+      ///< until child has terminated.
+      std::string *errMsg = nullptr ///< If non-zero, provides a pointer to a
+      ///< string instance in which error messages will be returned. If the
+      ///< string is non-empty upon return an error occurred while invoking the
+      ///< program.
+      );
+
 } // lit
 } // polar
 

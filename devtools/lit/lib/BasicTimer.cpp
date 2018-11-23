@@ -10,35 +10,48 @@
 // Created by polarboy on 2018/09/09.
 
 #include "BasicTimer.h"
+#include <cassert>
+#include <condition_variable>
 
 namespace polar {
 namespace lit {
 
-BasicTimer::BasicTimer(const Timeout &timeout)
-   : m_timeout(timeout)
-{
-}
+BasicTimer::BasicTimer()
+   : m_isSingleShot(true),
+     m_running(false),
+     m_interval(0),
+     m_timeoutHandler(nullptr)
+{}
 
-BasicTimer::BasicTimer(const BasicTimer::Timeout &timeout,
+BasicTimer::BasicTimer(const TimeoutFunc &handler)
+   : m_isSingleShot(true),
+     m_running(false),
+     m_interval(0),
+     m_timeoutHandler(handler)
+{}
+
+BasicTimer::BasicTimer(const BasicTimer::TimeoutFunc &handler,
                        const BasicTimer::Interval &interval,
                        bool singleShot)
    : m_isSingleShot(singleShot),
+     m_running(false),
      m_interval(interval),
-     m_timeout(timeout)
+     m_timeoutHandler(handler)
 {
 }
 
 BasicTimer::~BasicTimer()
 {
-   stop();
+   m_interupted.notify_one();
+   m_thread.join();
 }
 
 void BasicTimer::start(bool multiThread)
 {
+   assert(m_timeoutHandler != nullptr && "the timeout handler of timer can not be null.");
    if (this->running() == true) {
       return;
    }
-   m_running.store(true);
    if (multiThread == true) {
       m_thread = std::thread(
                &BasicTimer::getTemporize, this);
@@ -49,13 +62,12 @@ void BasicTimer::start(bool multiThread)
 
 void BasicTimer::stop()
 {
-   m_running.store(false);
-   m_thread.join();
+   m_interupted.notify_one();
 }
 
 bool BasicTimer::running() const
 {
-   return m_running.load();
+   return m_running;
 }
 
 void BasicTimer::setSingleShot(bool singleShot)
@@ -84,17 +96,17 @@ const BasicTimer::Interval &BasicTimer::getInterval() const
    return m_interval;
 }
 
-void BasicTimer::setTimeout(const Timeout &timeout)
+void BasicTimer::setTimeoutHandler(const TimeoutFunc &handler)
 {
    if (this->running() == true) {
       return;
    }
-   m_timeout = timeout;
+   m_timeoutHandler = handler;
 }
 
-const BasicTimer::Timeout &BasicTimer::getTimeout() const
+const BasicTimer::TimeoutFunc &BasicTimer::getTimeoutHandler() const
 {
-   return m_timeout;
+   return m_timeoutHandler;
 }
 
 void BasicTimer::getTemporize()
@@ -103,7 +115,7 @@ void BasicTimer::getTemporize()
       this->sleepThenTimeout();
    }
    else {
-      while (this->running() == true) {
+      while (this->running()) {
          this->sleepThenTimeout();
       }
    }
@@ -111,9 +123,11 @@ void BasicTimer::getTemporize()
 
 void BasicTimer::sleepThenTimeout()
 {
-   std::this_thread::sleep_for(m_interval);
-   if (this->running() == true) {
-      this->getTimeout()();
+   std::unique_lock<std::mutex> locker(m_mutex);
+   std::cv_status status = m_interupted.wait_for(locker, m_interval);
+   if (status == std::cv_status::timeout) {
+      // timeout we need invoke handler
+      this->getTimeoutHandler()();
    }
 }
 

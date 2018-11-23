@@ -55,12 +55,12 @@ struct ProcessInfo
    std::optional<std::string> m_stdoutFilename;
    std::optional<std::string> m_stderrFilename;
    ProcessInfo();
-   ProcessIdType getPid();
-   ProcessIdType getProcess();
-   int getReturnCode();
-   std::optional<StringRef> getStdinFilename();
-   std::optional<StringRef> getStdoutFilename();
-   std::optional<StringRef> getStderrFilename();
+   ProcessIdType getPid() const;
+   ProcessIdType getProcess() const;
+   int getReturnCode() const;
+   std::optional<StringRef> getStdinFilename() const;
+   std::optional<StringRef> getStdoutFilename() const;
+   std::optional<StringRef> getStderrFilename() const;
 };
 
 /// Find the first executable file \p Name in \p Paths.

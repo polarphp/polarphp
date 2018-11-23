@@ -11,6 +11,9 @@
 
 #include "../ProcessUtils.h"
 #include "../Utils.h"
+#include "polarphp/utils/unix/Unix.h"
+#include "../BasicTimer.h"
+#include <atomic>
 #include <unistd.h>
 #include <cstdio>
 #include <list>
@@ -18,6 +21,19 @@
 #include <sys/wait.h>
 #include <iostream>
 #include <memory>
+#include <signal.h>
+
+namespace polar {
+namespace sys {
+
+bool execute(ProcessInfo &processInfo, StringRef program, ArrayRef<StringRef> args,
+             std::optional<StringRef> cwd, std::optional<ArrayRef<StringRef>> envp,
+             ArrayRef<std::optional<StringRef>> redirects,
+             ArrayRef<std::optional<int>> redirectsOpenModes,
+             unsigned memoryLimit, std::string *errMsg);
+
+} // sys
+} // polar
 
 namespace polar {
 namespace lit {
@@ -198,6 +214,123 @@ void do_run_program(const std::string &cmd, int &exitCode,
    }
 }
 } // internal
+
+int execute_and_wait(StringRef program, ArrayRef<StringRef> args,
+                     std::optional<StringRef> cwd,
+                     std::optional<ArrayRef<StringRef>> env,
+                     ArrayRef<std::optional<StringRef>> redirects,
+                     ArrayRef<std::optional<int>> redirectsOpenModes,
+                     unsigned secondsToWait, unsigned memoryLimit,
+                     std::string *errMsg, bool *executionFailed)
+{
+   assert(redirects.empty() || redirects.getSize() == 3);
+   ProcessInfo processInfo;
+   if (polar::sys::execute(processInfo, program, args, cwd, env, redirects, redirectsOpenModes,
+                           memoryLimit, errMsg)) {
+      if (executionFailed) {
+         *executionFailed = false;
+      }
+      ProcessInfo result = wait_with_timer(
+               processInfo, secondsToWait, /*WaitUntilTerminates=*/secondsToWait == 0, errMsg);
+      return result.m_returnCode;
+   }
+
+   if (executionFailed) {
+      *executionFailed = true;
+   }
+   return -1;
+}
+
+ProcessInfo wait_with_timer(
+      const ProcessInfo &processInfo,
+      unsigned secondsToWait,
+      bool waitUntilTerminates,
+      std::string *errMsg)
+{
+   assert(processInfo.m_pid && "invalid pid to wait on, process not started?");
+   int waitPidOptions = 0;
+   pid_t childPid = processInfo.m_pid;
+   BasicTimer timer;
+   std::atomic_bool isTimeout(false);
+   if (waitUntilTerminates) {
+      secondsToWait = 0;
+   } else if (secondsToWait > 0) {
+      timer.setInterval(std::chrono::milliseconds(secondsToWait * 1000));
+      pid_t cpid = processInfo.getPid();
+      timer.setTimeoutHandler([cpid, &isTimeout]() {
+         isTimeout.store(true);
+         ::kill(cpid, SIGKILL);
+         //kill_process_and_children(cpid);
+      });
+      timer.start(true);
+   } else if (secondsToWait == 0) {
+      waitPidOptions = WNOHANG;
+   }
+
+   // Parent process: Wait for the child process to terminate.
+   int status;
+   ProcessInfo waitResult;
+   do {
+      waitResult.m_pid = waitpid(childPid, &status, waitPidOptions);
+   } while (waitUntilTerminates && waitResult.m_pid == -1 && errno == EINTR);
+   if (waitResult.m_pid != processInfo.m_pid) {
+      if (waitResult.m_pid == 0) {
+         // Non-blocking wait.
+         return waitResult;
+      } else if (errno != EINTR) {
+         make_error_msg(errMsg, "Error waiting for child process");
+         waitResult.m_returnCode = -1;
+         return waitResult;
+      }
+   }
+
+   // normal waitpid return
+   if (isTimeout.load()) {
+      waitResult.m_returnCode = -2; // Timeout detected
+      return waitResult;
+   }
+
+   // We exited normally without timeout, so turn off the timer.
+   if (secondsToWait && !waitUntilTerminates) {
+      timer.stop();
+   }
+
+   // Return the proper exit status. Detect error conditions
+   // so we can return -1 for them and set ErrMsg informatively.
+   int result = 0;
+   if (WIFEXITED(status)) {
+      result = WEXITSTATUS(status);
+      waitResult.m_returnCode = result;
+
+      if (result == 127) {
+         if (errMsg) {
+            *errMsg = polar::utils::get_str_error(ENOENT);
+         }
+         waitResult.m_returnCode = -1;
+         return waitResult;
+      }
+      if (result == 126) {
+         if (errMsg) {
+            *errMsg = "Program could not be executed";
+         }
+         waitResult.m_returnCode = -1;
+         return waitResult;
+      }
+   } else if (WIFSIGNALED(status)) {
+      if (errMsg) {
+         *errMsg = strsignal(WTERMSIG(status));
+#ifdef WCOREDUMP
+         if (WCOREDUMP(status)) {
+            *errMsg += " (core dumped)";
+         }
+#endif
+      }
+      // Return a special value to indicate that the process received an unhandled
+      // signal during execution as opposed to failing to execute.
+      waitResult.m_returnCode = -2;
+   }
+   return waitResult;
+}
 
 } // lit
 } // polar

@@ -14,18 +14,6 @@
 #include <stack>
 
 namespace polar {
-namespace sys {
-
-bool execute(ProcessInfo &processInfo, StringRef program, ArrayRef<StringRef> args,
-             std::optional<StringRef> cwd, std::optional<ArrayRef<StringRef>> envp,
-             ArrayRef<std::optional<StringRef>> redirects,
-             ArrayRef<std::optional<int>> redirectsOpenModes,
-             unsigned memoryLimit, std::string *errMsg);
-
-} // sys
-} // polar
-
-namespace polar {
 namespace lit {
 
 std::tuple<std::list<pid_t>, bool> retrieve_children_pids(pid_t pid, bool recursive) noexcept
@@ -90,32 +78,6 @@ int execute_and_wait(
    };
    return execute_and_wait(program, args, cwd, env, redirects, openModes, secondsToWait,
                            memoryLimit, errMsg, executionFailed);
-}
-
-int execute_and_wait(StringRef program, ArrayRef<StringRef> args,
-                     std::optional<StringRef> cwd,
-                     std::optional<ArrayRef<StringRef>> env,
-                     ArrayRef<std::optional<StringRef>> redirects,
-                     ArrayRef<std::optional<int>> redirectsOpenModes,
-                     unsigned secondsToWait, unsigned memoryLimit,
-                     std::string *errMsg, bool *executionFailed)
-{
-   assert(redirects.empty() || redirects.getSize() == 3);
-   ProcessInfo processInfo;
-   if (polar::sys::execute(processInfo, program, args, cwd, env, redirects, redirectsOpenModes,
-               memoryLimit, errMsg)) {
-      if (executionFailed) {
-         *executionFailed = false;
-      }
-      ProcessInfo result = wait(
-               processInfo, secondsToWait, /*WaitUntilTerminates=*/secondsToWait == 0, errMsg);
-      return result.m_returnCode;
-   }
-
-   if (executionFailed) {
-      *executionFailed = true;
-   }
-   return -1;
 }
 
 } // lit
