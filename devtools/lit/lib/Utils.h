@@ -50,7 +50,6 @@ inline bool mkdir_p(const std::string &path, std::error_code& ec)
 std::list<std::string> listdir_files(const std::string &dirname,
                                      const std::set<std::string> &suffixes = {""},
                                      const std::set<std::string> &excludeFilenames = {});
-std::optional<std::string> which(const stdfs::path &command, const std::optional<std::string> &paths = std::nullopt) noexcept;
 bool check_tools_path(const stdfs::path &dir, const std::list<std::string> &tools) noexcept;
 std::optional<std::string> which_tools(const std::list<std::string> &tools, const std::string &paths) noexcept;
 void print_histogram(std::list<std::tuple<std::string, int>> items, const std::string &title = "Items");
@@ -76,10 +75,6 @@ inline bool kuse_close_fds()
 
 using EnvVarType = std::list<std::string>;
 
-RunCmdResponse
-execute_command(const std::string &command, std::optional<std::string> cwd = std::nullopt,
-                std::optional<EnvVarType> env = std::nullopt, std::optional<std::string> input = std::nullopt,
-                int timeout = 0);
 
 void use_platform_sdk_on_darwin();
 std::optional<std::string> find_platform_sdk_version_on_macos() noexcept;

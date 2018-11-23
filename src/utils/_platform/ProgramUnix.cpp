@@ -137,6 +137,16 @@ OptionalError<std::string> find_program_by_name(StringRef name,
    return ErrorCode::no_such_file_or_directory;
 }
 
+OptionalError<std::string>
+find_program_by_name(StringRef name, const std::list<std::string> &paths)
+{
+   SmallVector<StringRef, 16> pathsRef;
+   for (const std::string &path: paths) {
+      pathsRef.pushBack(path);
+   }
+   return find_program_by_name(name, pathsRef);
+}
+
 namespace {
 
 bool redirect_io(std::optional<StringRef> path, int fd, std::optional<int> mode, std::string* errMsg)

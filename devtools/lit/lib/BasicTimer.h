@@ -53,6 +53,7 @@ private:
 private:
    bool m_isSingleShot;
    bool m_running;
+   bool m_startupMultithread;
    Interval m_interval;
    std::condition_variable m_interupted;
    std::mutex m_mutex;

@@ -10,11 +10,24 @@
 // Created by polarboy on 2018/08/29.
 
 #include "ProcessUtils.h"
+#include "polarphp/basic/adt/SmallVector.h"
+#include "polarphp/basic/adt/SmallString.h"
+#include "polarphp/utils/FileSystem.h"
+#include "polarphp/utils/MemoryBuffer.h"
+#include "polarphp/utils/FileUtils.h"
+#include "polarphp/utils/OptionalError.h"
+
 #include "Utils.h"
 #include <stack>
 
 namespace polar {
 namespace lit {
+
+using polar::basic::SmallString;
+using polar::basic::SmallVector;
+using polar::utils::MemoryBuffer;
+using polar::fs::create_temporary_file;
+using polar::fs::FileRemover;
 
 std::tuple<std::list<pid_t>, bool> retrieve_children_pids(pid_t pid, bool recursive) noexcept
 {
@@ -48,8 +61,13 @@ std::tuple<std::list<pid_t>, bool> retrieve_children_pids(pid_t pid, bool recurs
 
 std::tuple<std::list<pid_t>, bool> call_pgrep_command(pid_t pid) noexcept
 {
-   RunCmdResponse result = run_program("pgrep", std::nullopt, std::nullopt, std::nullopt,
-                                       "-P " + std::to_string(pid));
+   polar::utils::OptionalError<std::string> findResult = polar::sys::find_program_by_name("pgrep");
+   assert(findResult && "pgrep command not found.");
+   std::string pidArg = "-P " + std::to_string(pid);
+   ArrayRef<StringRef> args{
+      pidArg
+   };
+   RunCmdResponse result = execute_and_wait(findResult.get(), args);
    if (!std::get<0>(result)) {
       return std::make_tuple(std::list<pid_t>{}, false);
    }
@@ -78,6 +96,54 @@ int execute_and_wait(
    };
    return execute_and_wait(program, args, cwd, env, redirects, openModes, secondsToWait,
                            memoryLimit, errMsg, executionFailed);
+}
+
+RunCmdResponse execute_and_wait(
+      StringRef program,
+      ArrayRef<StringRef> args,
+      std::optional<StringRef> cwd,
+      std::optional<ArrayRef<StringRef>> env,
+      unsigned secondsToWait,
+      unsigned memoryLimit,
+      std::string *errMsg,
+      bool *executionFailed)
+{
+   SmallString<32> outTempFilename;
+   fs::create_temporary_file(TESTRUNNER_TEMP_PREFIX, "", outTempFilename);
+   SmallString<32> errorTempFilename;
+   fs::create_temporary_file(TESTRUNNER_TEMP_PREFIX, "", errorTempFilename);
+   FileRemover outTempRemover(outTempFilename);
+   FileRemover errTempRemover(errorTempFilename);
+   ArrayRef<std::optional<StringRef>> redirects{
+      std::nullopt,
+            outTempFilename,
+            errorTempFilename
+   };
+   int exitCode = execute_and_wait(program, args, cwd, env,
+                                   redirects, secondsToWait, memoryLimit, errMsg, executionFailed);
+   std::string output;
+   std::string errorMsg;
+   if (0 != exitCode) {
+      auto errorMsgBuffer = MemoryBuffer::getFile(errorTempFilename);
+      if (errorMsgBuffer) {
+         errorMsg = errorMsgBuffer.get()->getBuffer().getStr();
+      } else {
+         // here get the buffer info error
+         errorMsg = format_string("get error output buffer error: %s",
+                                  errorMsgBuffer.getError().message());
+         exitCode = -3;
+      }
+   }
+   auto outputBuf = MemoryBuffer::getFile(outTempFilename);
+   if (outputBuf) {
+      output = outputBuf.get()->getBuffer().getStr();
+   } else {
+      // here get the buffer info error
+      errorMsg = format_string("get output buffer error: %s",
+                               outputBuf.getError().message());
+      exitCode = -3;
+   }
+   return std::make_tuple(exitCode, output, errorMsg);
 }
 
 } // lit

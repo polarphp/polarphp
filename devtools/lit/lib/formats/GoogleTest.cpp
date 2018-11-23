@@ -219,9 +219,9 @@ ResultPointer GoogleTest::execute(TestPointer test, LitConfigPointer litConfig)
    if (splitPos != std::string::npos) {
       testName = sourcePath.substr(splitPos + 1);
    }
-   std::string executabe = test->getFilePath();
-   if (!stdfs::exists(executabe)) {
-      return std::make_shared<Result>(UNRESOLVED, format_string("executable: %s is not exist", executabe.c_str()));
+   std::string executable = test->getFilePath();
+   if (!stdfs::exists(executable)) {
+      return std::make_shared<Result>(UNRESOLVED, format_string("executable: %s is not exist", executable.c_str()));
    }
    SmallVector<StringRef, 10> args;
    if (litConfig->isUseValgrind()) {
@@ -229,7 +229,7 @@ ResultPointer GoogleTest::execute(TestPointer test, LitConfigPointer litConfig)
          args.push_back(arg);
       }
    }
-   args.push_back(executabe);
+   args.push_back(executable);
    std::string testFilter = "--gtest_filter=" + testName;
    args.push_back(testFilter);
    if (litConfig->isNoExecute()) {
@@ -254,12 +254,12 @@ ResultPointer GoogleTest::execute(TestPointer test, LitConfigPointer litConfig)
             errorTempFilename
    };
 
-   int exitCode = polar::lit::execute_and_wait(executabe, args, std::nullopt, envsRef,
-                                               redirects, 3, 0,
+   int exitCode = polar::lit::execute_and_wait(executable, args, std::nullopt, envsRef,
+                                               redirects, litConfig->getMaxIndividualTestTime(), 0,
                                                &errorMsg, &execFailed);
    if(execFailed) {
       throw ValueError(format_string("Could not create process (%s) due to %s",
-                                     executabe.c_str(), errorMsg.c_str()));
+                                     executable.c_str(), errorMsg.c_str()));
    }
 
    if (0 != exitCode) {

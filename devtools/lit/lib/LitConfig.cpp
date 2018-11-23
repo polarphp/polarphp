@@ -13,11 +13,17 @@
 #include "TestingConfig.h"
 #include "Utils.h"
 #include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/basic/adt/ArrayRef.h"
+#include "polarphp/utils/OptionalError.h"
+#include "polarphp/utils/Program.h"
 #include <cassert>
 #include <iostream>
 
 namespace polar {
 namespace lit {
+
+using polar::utils::OptionalError;
+using polar::basic::ArrayRef;
 
 LitConfig::LitConfig(const std::string &progName, const std::list<std::string> &path,
                      bool quiet, bool useValgrind, bool valgrindLeakCheck,
@@ -90,9 +96,14 @@ std::string LitConfig::getBashPath()
    if (m_bashPath.has_value()){
       return m_bashPath.value();
    }
-   m_bashPath = which("bash", join_string_list(m_path, ":"));
-   if (!m_bashPath.has_value()) {
-      m_bashPath = which("bash");
+   OptionalError<std::string> bash = polar::sys::find_program_by_name("bash", m_path);
+   if (bash) {
+      m_bashPath = bash.get();
+   } else {
+      bash = polar::sys::find_program_by_name("bash");
+      if (bash) {
+         m_bashPath = bash.get();
+      }
    }
    if (!m_bashPath.has_value()) {
       m_bashPath = "";
@@ -100,6 +111,7 @@ std::string LitConfig::getBashPath()
    return m_bashPath.value();
 }
 
+/// TODO optimize
 std::optional<std::string> LitConfig::getToolsPath(std::optional<std::string> dir, const std::string &paths,
                                                    const std::list<std::string> &tools)
 {
@@ -110,7 +122,13 @@ std::optional<std::string> LitConfig::getToolsPath(std::optional<std::string> di
    } else {
       dir = which_tools(tools, paths);
    }
-   m_bashPath = which("bash", dir);
+   std::list<std::string> findPaths{
+      dir.value()
+   };
+   OptionalError bash = polar::sys::find_program_by_name("bash", findPaths);
+   if (bash) {
+      m_bashPath = bash.get();
+   }
    if (!m_bashPath.has_value()) {
       m_bashPath = "";
    }

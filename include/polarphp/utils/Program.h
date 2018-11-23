@@ -18,6 +18,7 @@
 #include "polarphp/utils/OptionalError.h"
 #include <system_error>
 #include <optional>
+#include <list>
 
 namespace polar {
 namespace sys {
@@ -78,6 +79,8 @@ struct ProcessInfo
 ///   exists. \p Name if \p Name has slashes in it. Otherwise an error.
 OptionalError<std::string>
 find_program_by_name(StringRef name, ArrayRef<StringRef> paths = {});
+OptionalError<std::string>
+find_program_by_name(StringRef name, const std::list<std::string> &paths);
 
 // These functions change the specified standard stream (stdin or stdout) to
 // binary mode. They return errc::success if the specified stream

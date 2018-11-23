@@ -73,29 +73,6 @@ public:
 fs::path ProcessUtilsTest::sm_tempDir{UNITTEST_TEMP_DIR};
 std::string ProcessUtilsTest::sm_oldPath;
 
-TEST_F(ProcessUtilsTest, testFindExecutable)
-{
-   ASSERT_FALSE(polar::lit::find_executable("something_not_exists"));
-   ASSERT_TRUE(polar::lit::find_executable(std::string(UNITTEST_CURRENT_BUILD_DIR)+"/LitlibTest"));
-}
-
-TEST_F(ProcessUtilsTest, testLookPath)
-{
-   {
-      std::optional<std::string> file = polar::lit::look_path("ls");
-      ASSERT_TRUE(file.has_value());
-   }
-   {
-      std::optional<std::string> file = polar::lit::look_path("not_exist_cmd");
-      ASSERT_FALSE(file.has_value());
-   }
-   {
-      std::optional<std::string> file = polar::lit::look_path("lit");
-      ASSERT_TRUE(file.has_value());
-      ASSERT_EQ(file.value(), std::string(POLAR_BUILD_BINARY_DIR)+"/lit");
-   }
-}
-
 TEST_F(ProcessUtilsTest, testCallPgrepCommand)
 {
    std::set<pid_t> processes;

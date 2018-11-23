@@ -43,7 +43,7 @@ class TestingConfig;
 class LitConfig;
 
 using ShellTokenType = std::tuple<std::string, int>;
-using RunCmdResponse = std::tuple<int, std::string, std::string>;
+using RunCmdResponse = std::tuple<int, std::string, std::string>;// exitCode, stdout, stderr
 using CfgSetterType = void (*)(TestingConfig *config, LitConfig *litConfig);
 
 // https://stackoverflow.com/questions/17016175/c-unordered-map-using-a-custom-class-type-as-the-key

@@ -19,6 +19,7 @@ namespace lit {
 BasicTimer::BasicTimer()
    : m_isSingleShot(true),
      m_running(false),
+     m_startupMultithread(true),
      m_interval(0),
      m_timeoutHandler(nullptr)
 {}
@@ -26,6 +27,7 @@ BasicTimer::BasicTimer()
 BasicTimer::BasicTimer(const TimeoutFunc &handler)
    : m_isSingleShot(true),
      m_running(false),
+     m_startupMultithread(true),
      m_interval(0),
      m_timeoutHandler(handler)
 {}
@@ -35,6 +37,7 @@ BasicTimer::BasicTimer(const BasicTimer::TimeoutFunc &handler,
                        bool singleShot)
    : m_isSingleShot(singleShot),
      m_running(false),
+     m_startupMultithread(true),
      m_interval(interval),
      m_timeoutHandler(handler)
 {
@@ -43,7 +46,9 @@ BasicTimer::BasicTimer(const BasicTimer::TimeoutFunc &handler,
 BasicTimer::~BasicTimer()
 {
    m_interupted.notify_one();
-   m_thread.join();
+   if (m_startupMultithread && m_running) {
+      m_thread.join();
+   }
 }
 
 void BasicTimer::start(bool multiThread)
@@ -52,6 +57,8 @@ void BasicTimer::start(bool multiThread)
    if (this->running() == true) {
       return;
    }
+   m_running = true;
+   m_startupMultithread = multiThread;
    if (multiThread == true) {
       m_thread = std::thread(
                &BasicTimer::getTemporize, this);

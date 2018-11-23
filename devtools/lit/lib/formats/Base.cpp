@@ -12,8 +12,9 @@
 #include "Base.h"
 #include "../Test.h"
 #include "../LitGlobal.h"
-#include "../Utils.h"
+#include "../ProcessUtils.h"
 #include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/basic/adt/ArrayRef.h"
 #include "polarphp/basic/adt/SmallString.h"
 #include "polarphp/utils/FileSystem.h"
 #include <filesystem>
@@ -24,6 +25,8 @@ namespace lit {
 namespace stdfs = std::filesystem;
 
 using polar::basic::SmallString;
+using polar::basic::StringRef;
+using polar::basic::ArrayRef;
 
 bool TestFormat::needSearchAgain()
 {
@@ -164,6 +167,7 @@ ResultPointer OneCommandPerFileTest::execute(TestPointer test, LitConfigPointer 
    // subclass.
    std::string tempFilename;
    std::FILE * tempFile;
+   std::string argStr;
    if (m_useTempInput) {
       tempFilename = generate_tempfilename();
       tempFile = std::fopen(tempFilename.c_str(), "wb+");
@@ -173,13 +177,16 @@ ResultPointer OneCommandPerFileTest::execute(TestPointer test, LitConfigPointer 
       register_temp_file(tempFile);
       createTempInput(tempFile, test);
       std::fflush(tempFile);
-      cmd += " " + tempFilename;
+      argStr = tempFilename;
    } else if (!test->getSelfSourcePath().empty()) {
-      cmd += " " + test->getSelfSourcePath();
+      argStr = test->getSelfSourcePath();
    } else {
-      cmd += " " + test->getSourcePath();
+      argStr = test->getSourcePath();
    }
-   std::tuple<int, std::string, std::string> ret = execute_command(cmd);
+   ArrayRef<StringRef> args{
+      argStr
+   };
+   RunCmdResponse ret = execute_and_wait(cmd, args);
    int exitCode = std::get<0>(ret);
    std::string out = std::get<1>(ret);
    std::string err = std::get<2>(ret);

@@ -11,6 +11,9 @@
 
 #include "Utils.h"
 #include "ProcessUtils.h"
+#include "polarphp/basic/adt/ArrayRef.h"
+#include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/utils/OptionalError.h"
 #include "Config.h"
 #include <cmath>
 #include <iostream>
@@ -22,6 +25,10 @@
 
 namespace polar {
 namespace lit {
+
+using polar::basic::StringRef;
+using polar::basic::ArrayRef;
+using polar::utils::OptionalError;
 
 const char *sg_emptyStr = "";
 
@@ -38,40 +45,6 @@ void temp_files_clear_handler()
 void register_temp_file(std::FILE *file)
 {
    g_tempFiles.push_back(file);
-}
-
-RunCmdResponse
-execute_command(const std::string &command, std::optional<std::string> cwd,
-                std::optional<EnvVarType> env, std::optional<std::string> input,
-                int timeout)
-{
-   std::thread thread;
-   std::atomic<bool> hitTimeout = false;
-   try {
-      if (timeout > 0) {
-         thread = std::thread([&hitTimeout](int timeout){
-            std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
-            hitTimeout.store(true);
-         }, timeout);
-      }
-   } catch (...) {
-      if (timeout > 0) {
-         thread.join();
-      }
-   }
-   RunCmdResponse response = run_program(command, cwd, env, input);
-   thread.join();
-   const std::string &out = std::get<1>(response);
-   const std::string &err = std::get<2>(response);
-   int exitCode = std::get<0>(response);
-   if (hitTimeout.load()) {
-      throw ExecuteCommandTimeoutException(std::string("Reached timeout of ") +std::to_string(timeout)+ " seconds",
-                                           out, err, exitCode);
-   }
-   if (exitCode == SIGINT) {
-      throw std::runtime_error("Interrupt by SIGINT signal");
-   }
-   return std::make_tuple(exitCode, out, err);
 }
 
 std::list<std::string> split_string(const std::string &str, char separator, int maxSplit)
@@ -105,8 +78,15 @@ std::optional<std::string> find_platform_sdk_version_on_macos() noexcept
    if (std::strcmp(POLAR_OS, "Darwin") != 0) {
       return std::nullopt;
    }
-   RunCmdResponse result = run_program("xcrun", std::nullopt, std::nullopt, std::nullopt,
-                                       "--show-sdk-version", "--sdk", "macosx");
+
+   ArrayRef<StringRef> args{
+      "--show-sdk-version",
+      "--sdk",
+      "macosx"
+   };
+   OptionalError xcrun = polar::sys::find_program_by_name("xcrun");
+   assert(xcrun && "xcrun command not found");
+   RunCmdResponse result = execute_and_wait(xcrun.get(), args);
    if (std::get<0>(result)) {
       return std::get<1>(result);
    }
@@ -146,32 +126,6 @@ std::list<std::string> listdir_files(const std::string &dirname,
       files.push_back(filename);
    }
    return files;
-}
-
-std::optional<std::string> which(const stdfs::path &command, const std::optional<std::string> &paths) noexcept
-{
-   if (command.is_absolute() && stdfs::exists(command)) {
-      return stdfs::canonical(command).string();
-   }
-   std::string cmdStrPaths;
-   // current only support posix os
-   if (!paths.has_value()) {
-      cmdStrPaths = std::getenv("PATH");
-   } else {
-      cmdStrPaths = paths.value();
-   }
-   std::list<std::string> dirs(split_string(cmdStrPaths, ':'));
-   for (std::string dir : dirs) {
-      if (dir == "") {
-         dir = ".";
-      }
-      stdfs::path path(dir);
-      path /= command;
-      if (find_executable(path)) {
-         return path.string();
-      }
-   }
-   return std::nullopt;
 }
 
 bool check_tools_path(const stdfs::path &dir, const std::list<std::string> &tools) noexcept

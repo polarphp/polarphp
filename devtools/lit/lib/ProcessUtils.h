@@ -29,52 +29,8 @@ using polar::sys::ProcessInfo;
 using polar::basic::StringRef;
 using polar::basic::ArrayRef;
 
-namespace internal {
-
-void do_run_program(const std::string &cmd, int &exitCode,
-                    const std::optional<std::string> &cwd,
-                    const std::optional<std::list<std::string>> &env,
-                    const std::optional<std::string> &input,
-                    std::string &output, std::string &errMsg,
-                    const size_t count, ...);
-
-inline char *run_program_arg_filter(char *arg)
-{
-   return arg;
-}
-
-inline const char *run_program_arg_filter(const char *arg)
-{
-   return arg;
-}
-
-inline const char *run_program_arg_filter(const std::string &arg)
-{
-   return arg.c_str();
-}
-
-} // internal
-
-bool find_executable(const stdfs::path &filepath) noexcept;
-std::optional<std::string> look_path(const std::string &file) noexcept;
-
 std::tuple<std::list<pid_t>, bool> retrieve_children_pids(pid_t pid, bool recursive = false) noexcept;
 std::tuple<std::list<pid_t>, bool> call_pgrep_command(pid_t pid) noexcept;
-template <typename... ArgTypes>
-RunCmdResponse run_program(const std::string &cmd,
-                           const std::optional<std::string> &cwd = std::nullopt,
-                           const std::optional<std::list<std::string>> &env = std::nullopt,
-                           const std::optional<std::string> &input = std::nullopt,
-                           ArgTypes&&... args) noexcept
-{
-   std::string output;
-   std::string errMsg;
-   int exitCode;
-   internal::do_run_program(cmd, exitCode, cwd,
-                            env, input, output, errMsg,
-                            sizeof...(args) + 2, internal::run_program_arg_filter(std::forward<ArgTypes>(args))...);
-   return std::make_tuple(exitCode, output, errMsg);
-}
 
 /// This function executes the program using the arguments provided.  The
 /// invoked program will inherit the stdin, stdout, and stderr file
@@ -130,6 +86,16 @@ int execute_and_wait(
       unsigned secondsToWait = 0, ///< If non-zero, this specifies the amount
       unsigned memoryLimit = 0, ///< If non-zero, this specifies max. amount
       std::string *errMsg = nullptr, ///< If non-zero, provides a pointer to a
+      bool *executionFailed = nullptr);
+
+RunCmdResponse execute_and_wait(
+      StringRef program,
+      ArrayRef<StringRef> args,
+      std::optional<StringRef> cwd = std::nullopt,
+      std::optional<ArrayRef<StringRef>> env = std::nullopt,
+      unsigned secondsToWait = 0,
+      unsigned memoryLimit = 0,
+      std::string *errMsg = nullptr,
       bool *executionFailed = nullptr);
 
 ProcessInfo wait_with_timer(
