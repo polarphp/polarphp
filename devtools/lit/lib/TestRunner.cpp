@@ -30,6 +30,7 @@
 #include "ShellUtil.h"
 #include "CLI/CLI.hpp"
 #include "BooleanExpression.h"
+#include "ProcessUtils.h"
 
 #include <set>
 #include <map>
@@ -349,7 +350,7 @@ protected:
 int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
                      ShExecResultList &results, size_t execTimeout, bool &timeoutReached)
 {
-   std::cout << cmd->operator std::string() << std::endl;
+   // std::cout << cmd->operator std::string() << std::endl;
    int result;
    AbstractCommand::Type commandType = cmd->getCommandType();
    if (commandType == AbstractCommand::Type::Seq) {
@@ -718,7 +719,7 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          throw InternalShellError(command, format_string("%s: file or directory %s is not exist", executable.value().c_str(),
                                                          stdinFilename.value().getStr().c_str()));
       }
-      int returnCode = polar::sys::execute_and_wait(executable.value(), argsRef, cmdShEnv->getCwd(), envsRef,
+      int returnCode = polar::lit::execute_and_wait(executable.value(), argsRef, cmdShEnv->getCwd(), envsRef,
                                                     redirects, redirectsOpenModes, execTimeout, 0, &errorMsg,
                                                     &execFailed);
       if(execFailed) {
@@ -1644,7 +1645,7 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
       errorFile};
    std::string errorMsg;
    bool execFailed;
-   int returnCode = polar::sys::execute_and_wait(cmdStr, argsRef, cwd, envRef, redirects,
+   int returnCode = polar::lit::execute_and_wait(cmdStr, argsRef, cwd, envRef, redirects,
                                                  litConfig->getMaxIndividualTestTime(), 0, &errorMsg, &execFailed);
    if(execFailed) {
       throw ValueError(format_string("Could not create process (%s) due to %s",
