@@ -1185,7 +1185,7 @@ int compare_two_files(const SmallVectorImpl<std::string> &filePaths,
                                  outStream, errStream);
 }
 
-void print_only_in(const std::string &dir, std::string &filename,
+void print_only_in(const std::string &dir, const std::string &filename,
                    std::ostringstream &outStream)
 {
    outStream << "Only in " << dir << ": " << filename
@@ -1251,8 +1251,8 @@ int compare_dir_trees(SmallVectorImpl<DiffDirItems> &dirTrees,
             filePaths.push_back(stdfs::path(lhsDirName) / lfilename);
             filePaths.push_back(stdfs::path(rhsDirName) / rfilename);
             exitCode = compare_two_files(filePaths, stripTrailingCR, ignoreAllSpace,
-                              ignoreSpaceChange, isBinaryFile, outStream,
-                              errStream);
+                                         ignoreSpaceChange, isBinaryFile, outStream,
+                                         errStream);
             ++fliter;
             ++friter;
          }
@@ -1274,16 +1274,27 @@ int compare_dir_trees(SmallVectorImpl<DiffDirItems> &dirTrees,
    while (liter != lhs.end()) {
       exitCode = 1;
       auto &dirItems = *liter;
-      for (std::string &filename : dirItems.second) {
-         print_only_in(dirItems.first, filename, outStream);
+      if (!dirItems.second.empty()) {
+         for (std::string &filename : dirItems.second) {
+            print_only_in(dirItems.first, filename, outStream);
+         }
+      } else {
+         stdfs::path filePath(dirItems.first);
+         print_only_in(filePath.parent_path().string(), filePath.filename().string(), outStream);
       }
       ++liter;
    }
    while (riter != rhs.end()) {
       exitCode = 1;
       auto &dirItems = *riter;
-      for (std::string &filename : dirItems.second) {
-         print_only_in(dirItems.first, filename, outStream);
+
+      if (!dirItems.second.empty()) {
+         for (std::string &filename : dirItems.second) {
+            print_only_in(dirItems.first, filename, outStream);
+         }
+      } else {
+         stdfs::path filePath(dirItems.first);
+         print_only_in(filePath.parent_path().string(), filePath.filename().string(), outStream);
       }
       ++riter;
    }

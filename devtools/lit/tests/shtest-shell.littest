@@ -141,6 +141,85 @@
 # CHECK: Command Output (stderr):
 # CHECK: error: command failed with exit status: 1
 
+# CHECK: FAIL: shtest-shell :: diff-r-error-2.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-r-error-2.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Exit Code: 1
+# CHECK: Command Output (stdout):
+# CHECK: $ : RUN: at line 2
+# CHECK: $ rm -rf {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 3
+# CHECK: $ mkdir -p {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 6
+# CHECK: $ echo extra
+# CHECK: $ : RUN: at line 7
+# CHECK: $ diff -r {{.*}}/dir1 {{.*}}/dir2
+# CHECK: # command output:
+# CHECK: Only in {{.*}}/dir2: extrafile
+
+# CHECK: FAIL: shtest-shell :: diff-r-error-3.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-r-error-3.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Exit Code: 1
+
+# CHECK: Command Output (stdout):
+# CHECK: $ : RUN: at line 2
+# CHECK: $ rm -rf {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 3
+# CHECK: $ mkdir -p {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 6
+# CHECK: $ mkdir -p {{.*}}/dir1/extra_subdir
+# CHECK: $ : RUN: at line 7
+# CHECK: $ diff -r {{.*}}/dir1 {{.*}}/dir2
+# CHECK: # command output:
+# CHECK: Only in {{.*}}/dir1: extra_subdir
+# CHECK: Command Output (stderr):
+# CHECK: error: command failed with exit status: 1
+
+# CHECK: FAIL: shtest-shell :: diff-r-error-4.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-r-error-4.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Exit Code: 1
+# CHECK: Command Output (stdout):
+# CHECK: $ : RUN: at line 2
+# CHECK: $ rm -rf {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 3
+# CHECK: $ mkdir -p {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 6
+# CHECK: $ mkdir -p {{.*}}/extra_subdir
+# CHECK: $ : RUN: at line 7
+# CHECK: $ echo ZYX
+# CHECK: $ : RUN: at line 8
+# CHECK: $ diff -r {{.*}}/dir1 {{.*}}/dir2
+# CHECK: # command output:
+# CHECK: Only in {{.*}}/dir2: extra_subdir
+# CHECK: Only in {{.*}}/dir1: extra_subdir
+# CHECK: Command Output (stderr):
+# CHECK: error: command failed with exit status: 1
+
+# CHECK: FAIL: shtest-shell :: diff-r-error-5.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-r-error-5.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Exit Code: 1
+# CHECK: Command Output (stdout):
+# CHECK: $ diff -r {{.*}}/dir1 {{.*}}/dir2
+# CHECK: # command output:
+# CHECK: Only in {{.*}}/dir1/extra_subdir: extra_file
+# CHECK: Command Output (stderr):
+# CHECK: error: command failed with exit status: 1
+
+# CHECK: FAIL: shtest-shell :: diff-r-error-6.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-r-error-6.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Exit Code: 1
+# CHECK: Command Output (stdout):
+# CHECK: $ diff -r {{.*}}/dir1 {{.*}}/dir2
+# CHECK: # command output:
+# CHECK: Only in {{.*}}/dir1: extra_file
+# CHECK: Only in {{.*}}/dir2: extra_file
+# CHECK: Command Output (stderr):
+# CHECK: error: command failed with exit status: 1
+
 # CHECK: PASS: shtest-shell :: diff-r.littest
 
 # CHECK: FAIL: shtest-shell :: error-0.littest
