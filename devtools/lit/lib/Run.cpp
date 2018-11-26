@@ -32,6 +32,7 @@ using threadpool::ThreadPool;
 using threadpool::ThreadPoolOptions;
 using TaskType = std::packaged_task<void()>;
 
+LitConfig *sg_litCfg = nullptr;
 
 void worker_run_one_test(int testIndex, TestPointer test,
                          LitConfigPointer litConfig,
@@ -45,6 +46,7 @@ Run::Run(LitConfigPointer litConfig, const TestList &tests)
      m_tests(tests),
      m_threadPool(nullptr)
 {
+   sg_litCfg = litConfig.get();
    for (auto &item: m_litConfig->getParallelismGroups()) {
       m_parallelismSemaphores.emplace(item.first, item.second);
    }

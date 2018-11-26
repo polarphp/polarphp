@@ -11,6 +11,8 @@
 
 #include "ShellUtil.h"
 #include "ShellCommands.h"
+#include "ForwardDefs.h"
+#include "LitConfig.h"
 #include "Utils.h"
 #include <iostream>
 #include <cctype>
@@ -18,6 +20,8 @@
 
 namespace polar {
 namespace lit {
+
+extern LitConfig *sg_litCfg;
 
 ShLexer::ShLexer(const std::string &data, bool win32Escapes)
    : m_data(data),
@@ -109,7 +113,7 @@ std::any ShLexer::lexArgSlow(char c)
          // Outside of a string, '\\' escapes everything.
          eat();
          if (m_pos == m_end) {
-            std::cout << "escape at end of quoted argument in: " << m_data << std::endl;
+            sg_litCfg->warning(format_string("escape at end of quoted argument in: %s\n", m_data.c_str()), __FILE__, __LINE__);
             return str;
          }
          str += eat();
@@ -139,7 +143,7 @@ std::string ShLexer::lexArgQuoted(char delim)
          // Inside a '"' quoted string, '\\' only escapes the quote
          // character and backslash, otherwise it is preserved.
          if (m_pos == m_end) {
-            std::cout << "escape at end of quoted argument in:" << m_data << std::endl;
+            sg_litCfg->warning(format_string("escape at end of quoted argument in: %s\n", m_data.c_str()), __FILE__, __LINE__);
             return str;
          }
          c = eat();
@@ -155,7 +159,9 @@ std::string ShLexer::lexArgQuoted(char delim)
          str += c;
       }
    }
-   std::cout << "missing quote character in:" << m_data << std::endl;
+   std::string warning(format_string("missing quote character in: %s\n", m_data.c_str()));
+   sg_litCfg->warning(warning, __FILE__, __LINE__);
+   throw ValueError(warning);
    return str;
 }
 
@@ -257,7 +263,7 @@ std::shared_ptr<AbstractCommand> ShParser::parseCommand()
 {
    std::any &tokenAny = lex();
    if (!tokenAny.has_value()) {
-      ValueError("empty command!");
+      throw ValueError("empty command!");
    }
    assert(tokenAny.type() == typeid(ShellTokenType));
    std::list<std::any> args{std::get<0>(std::any_cast<ShellTokenType &>(tokenAny))};
@@ -294,7 +300,7 @@ std::shared_ptr<AbstractCommand> ShParser::parseCommand()
       std::any &arg = lex();
       if (!arg.has_value()) {
          ShellTokenType opTuple = std::any_cast<ShellTokenType>(op);
-         ValueError("syntax error near token "+ std::get<0>(opTuple));
+         throw ValueError("syntax error near token "+ std::get<0>(opTuple));
       }
       redirects.push_back(RedirectTokenType{
                              std::any_cast<ShellTokenType &>(op),

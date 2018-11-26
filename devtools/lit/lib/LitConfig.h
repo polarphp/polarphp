@@ -51,24 +51,24 @@ public:
    void note(const std::string &message,
              const std::string &file = "", int line = -1) const
    {
-      writeMessage("note", message, file, std::to_string(line));
+      writeMessage("note", message, file, line);
    }
 
    void warning(const std::string &message,
-                const std::string &file = "", const std::string &line = "") const
+                const std::string &file = "", int line = -1) const
    {
       writeMessage("warning", message, file, line);
       m_numWarnings += 1;
    }
    void error(const std::string &message,
-              const std::string &file = "", const std::string &line = "")
+              const std::string &file = "", int line = -1)
    {
       writeMessage("error", message, file, line);
       m_numErrors += 1;
    }
 
    void fatal(const std::string &message,
-              const std::string &file = "", const std::string &line = "")
+              const std::string &file = "", int line = -1)
    {
       writeMessage("fatal", message, file, line);
       exit(2);
@@ -109,7 +109,7 @@ public:
 
 private:
    void writeMessage(const std::string &kind, const std::string &message,
-                     const std::string &file = "", const std::string &line = "") const;
+                     const std::string &file = "", int line = -1) const;
 protected:
    std::string m_progName;
    std::list<std::string> m_path;

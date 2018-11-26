@@ -14,6 +14,7 @@
 #include "lib/Utils.h"
 #include "lib/LitConfig.h"
 #include "lib/Discovery.h"
+#include "lib/LitGlobal.h"
 #include "lib/Test.h"
 #include "lib/Run.h"
 #include "lib/ProgressBar.h"

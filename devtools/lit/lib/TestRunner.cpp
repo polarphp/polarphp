@@ -710,10 +710,10 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
       };
       std::string errorMsg;
       bool execFailed;
-      std::cout << executable.value() << std::endl;
-//       std::cout << stdinFilename.value().getStr() << std::endl;
-//       std::cout << stdoutFilename.value().getStr() << std::endl;
-//       std::cout << stderrFilename.value().getStr() << std::endl;
+      // std::cout << executable.value() << std::endl;
+      //       std::cout << stdinFilename.value().getStr() << std::endl;
+      //       std::cout << stdoutFilename.value().getStr() << std::endl;
+      //       std::cout << stderrFilename.value().getStr() << std::endl;
       // TODO need check stdoutFilename and stderrFilename
       if (stdinFilename && !fs::exists(stdinFilename.value())) {
          throw InternalShellError(command, format_string("%s: file or directory %s is not exist", executable.value().c_str(),
@@ -733,9 +733,9 @@ int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
          processesData[i] = std::make_tuple(returnCode, "", errorMsg, timeoutReached);
       } else {
          auto processResult = get_process_output(stdoutFilename, stderrFilename);
-//         std::cout << std::get<1>(processResult) << std::endl;
-//         std::cout << "---" << std::endl;
-//         std::cout << std::get<2>(processResult) << std::endl;
+         //         std::cout << std::get<1>(processResult) << std::endl;
+         //         std::cout << "---" << std::endl;
+         //         std::cout << std::get<2>(processResult) << std::endl;
          if (std::get<0>(processResult)) {
             processesData[i] = std::make_tuple(returnCode, std::get<1>(processResult), std::get<2>(processResult), false);
          } else {
@@ -835,7 +835,7 @@ StdFdsTuple process_redirects(Command *command, const std::string &stdinSource,
          redirects[0] = std::any(OpenFileTuple{filename, std::ios_base::in, std::nullopt});
       } else {
          throw InternalShellError(command,
-                                  "Unsupported redirect: (" + std::get<0>(op) + ", " + std::to_string(std::get<1>(op)) + ")" + filename);
+                                  "Unsupported redirect: (" + std::get<0>(op) + ", " + std::to_string(std::get<1>(op)) + ")");
       }
    }
    // Open file descriptors in a second pass.
@@ -1223,69 +1223,63 @@ int compare_dir_trees(SmallVectorImpl<DiffDirItems> &dirTrees,
    }
    int exitCode = 0;
    // compare files
-   size_t minSize = std::min(lhsSize, rhsSize);
    auto liter = lhs.begin();
    auto riter = rhs.begin();
-   size_t i = 0;
-   for (; i < minSize; ++i) {
+   while (liter != lhs.end() && riter != rhs.end()) {
       auto &lhsDirItems = *liter;
       auto &rhsDirItems = *riter;
       std::string &lhsDirName = lhsDirItems.first;
       std::string &rhsDirName = rhsDirItems.first;
       std::list<std::string> &lhsFiles = lhsDirItems.second;
       std::list<std::string> &rhsFiles = rhsDirItems.second;
-      size_t lhsFilesSize = lhsFiles.size();
-      size_t rhsFilesSize = rhsFiles.size();
-      size_t minFilesSize = std::min(lhsFilesSize, rhsFilesSize);
       auto fliter = lhsFiles.begin();
       auto friter = rhsFiles.begin();
-      size_t j = 0;
-      for (; j < minFilesSize; ++j) {
+      while (fliter != lhsFiles.end() && friter != rhsFiles.end()) {
          std::string &lfilename = *fliter;
          std::string &rfilename = *friter;
          if (lfilename < rfilename) {
             print_only_in(lhsDirName, lfilename, outStream);
             exitCode = 1;
+            ++fliter;
          } else if (lfilename > rfilename) {
             print_only_in(rhsDirName, rfilename, outStream);
             exitCode = 1;
+            ++friter;
+         } else {
+            // compare file content
+            ++fliter;
+            ++friter;
          }
-         ++fliter;
-         ++friter;
       }
-      while (j < lhsFilesSize) {
+      while (fliter != lhsFiles.end()) {
          print_only_in(lhsDirName, *fliter, outStream);
          exitCode = 1;
-         ++j;
          ++fliter;
       }
-      while (j < lhsFilesSize) {
+      while (friter != rhsFiles.end()) {
          print_only_in(rhsDirName, *friter, outStream);
          exitCode = 1;
-         ++j;
          ++friter;
       }
       ++liter;
       ++riter;
    }
 
-   while (i < lhsSize) {
+   while (liter != lhs.end()) {
       exitCode = 1;
       auto &dirItems = *liter;
       for (std::string &filename : dirItems.second) {
          print_only_in(dirItems.first, filename, outStream);
       }
       ++liter;
-      ++i;
    }
-   while (i < rhsSize) {
+   while (riter != rhs.end()) {
       exitCode = 1;
       auto &dirItems = *riter;
       for (std::string &filename : dirItems.second) {
          print_only_in(dirItems.first, filename, outStream);
       }
       ++riter;
-      ++i;
    }
    return exitCode;
 }
@@ -1318,13 +1312,14 @@ ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmen
    cmdParser.add_option("paths", paths, "paths to be diff")->required();
    SmallVector<std::string, 2> filePaths;
    SmallVector<DiffDirItems, 2> dirTrees;
+   std::ostringstream outStream(std::stringstream::out|std::stringstream::binary);
+   std::ostringstream errStream(std::stringstream::out|std::stringstream::binary);
+   std::string errorMsg;
    try {
       cmdParser.parse(args.size(), argv.get());
       if (paths.size() != 2) {
          throw InternalShellError(command, "Error:  missing or extra operand");
       }
-      std::ostringstream outStream(std::stringstream::out|std::stringstream::binary);
-      std::ostringstream errStream(std::stringstream::out|std::stringstream::binary);
       for (std::string &file : paths) {
          std::list<std::pair<std::string, std::list<std::string>>> list{};
          stdfs::path filepath(file);
@@ -1332,7 +1327,7 @@ ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmen
             filepath = stdfs::canonical(stdfs::path(shenv->getCwd()) / filepath);
          }
          if (recursiveDiff) {
-            get_dir_tree(filepath, list);
+            get_dir_tree(filepath.string(), list);
             // sort
             list.sort([](auto &lhs, auto &rhs) -> bool {
                return lhs.first < rhs.first;
@@ -1342,7 +1337,7 @@ ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmen
             filePaths.push_back(filepath.string());
          }
       }
-      std::string errorMsg;
+
       if (!recursiveDiff) {
          exitCode = compare_two_files(filePaths, stripTrailingCr, ignoreAllSpace,
                                       ignoreSpaceChange, binaryMode,
@@ -1350,11 +1345,14 @@ ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmen
       } else {
          exitCode = compare_dir_trees(dirTrees, outStream, errStream);
       }
-      errorMsg += errStream.str();
-      return std::make_shared<ShellCommandResult>(command, outStream.str(), errorMsg, exitCode, false);
    } catch (const CLI::ParseError &e) {
       throw InternalShellError(command, format_string("Unsupported: 'diff': %s\n", e.what()));
+   } catch (const std::filesystem::filesystem_error &e) {
+      errStream << "Error: 'diff' command failed, " << e.what() << std::endl;
+      exitCode = 1;
    }
+   errorMsg += errStream.str();
+   return std::make_shared<ShellCommandResult>(command, outStream.str(), errorMsg, exitCode, false);
 }
 
 ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironmentPointer shenv)
@@ -1371,29 +1369,27 @@ ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironme
    cmdParser.add_option("paths", paths, "paths to be create")->required();
    cmdParser.add_flag("-p", parent, "force remove items");
    int exitCode = 0;
+   std::ostringstream errorStream;
    try {
       cmdParser.parse(args.size(), argv.get());
-      std::ostringstream errorStream;
-      try {
-         for (std::string &pathStr: paths) {
-            stdfs::path path(pathStr);
-            if (!path.is_absolute()) {
-               path = stdfs::path(shenv->getCwd()) / path;
-            }
-            if (parent) {
-               stdfs::create_directories(path);
-            } else {
-               stdfs::create_directory(path);
-            }
+      for (std::string &pathStr: paths) {
+         stdfs::path path(pathStr);
+         if (!path.is_absolute()) {
+            path = stdfs::path(shenv->getCwd()) / path;
          }
-      }catch(std::exception &e) {
-         exitCode = 1;
-         errorStream << format_string("Error: 'mkdir' command failed, %s", e.what()) << std::endl;
+         if (parent) {
+            stdfs::create_directories(path);
+         } else {
+            stdfs::create_directory(path);
+         }
       }
-      return std::make_shared<ShellCommandResult>(command, "", errorStream.str(), exitCode, false);
-   } catch(const CLI::ParseError &e) {
+   } catch (const CLI::ParseError &e) {
       throw InternalShellError(command, format_string("Unsupported: 'rm': %s\n", e.what()));
+   } catch(std::exception &e) {
+      exitCode = 1;
+      errorStream << "Error: 'mkdir' command failed, " << e.what() << std::endl;
    }
+   return std::make_shared<ShellCommandResult>(command, "", errorStream.str(), exitCode, false);
 }
 
 /// executeBuiltinRm - Removes (deletes) files or directories.
@@ -1461,7 +1457,7 @@ ShellCommandResultPointer execute_builtin_rm(Command *command, ShellEnvironmentP
 
 ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litConfig,
                                          const std::string &, std::vector<std::string> &commands,
-                                         const std::string &cwd, ResultPointer result)
+                                         const std::string &cwd, ResultPointer &result)
 {
    std::vector<AbstractCommandPointer> cmds;
    for (std::string &cmdStr: commands) {
@@ -1560,7 +1556,7 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
 
 ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
                                 const std::string &tempBase, std::vector<std::string> &commands,
-                                const std::string &cwd, ResultPointer)
+                                const std::string &cwd, ResultPointer &)
 {
    const std::optional<std::string> &bashPath = litConfig->getBashPath();
    bool isWin32CMDEXE = litConfig->isWindows() && !bashPath;
