@@ -1070,8 +1070,7 @@ bool unified_diff(std::vector<std::string> &lhs, std::vector<std::string> &rhs,
 }
 
 int compare_two_binary_files(std::pair<StringRef, StringRef> lhs, std::pair<StringRef, StringRef> rhs,
-                             std::ostringstream &outStream, std::ostringstream &errStream,
-                             std::string &errorMsg)
+                             std::ostringstream &outStream, std::ostringstream &errStream)
 {
    SmallVector<std::vector<std::string>, 2> fileContents{
       {}, {}
@@ -1123,7 +1122,7 @@ std::string filter_text_diff_line(StringRef line, bool stripTrailingCR, bool ign
 int compare_two_text_files(std::pair<StringRef, StringRef> lhs, std::pair<StringRef, StringRef> rhs,
                            bool stripTrailingCR, bool ignoreAllSpace,
                            bool ignoreSpaceChange, std::ostringstream &outStream,
-                           std::ostringstream &errStream, std::string &errorMsg)
+                           std::ostringstream &errStream)
 {
    SmallVector<std::vector<std::string>, 2> fileContents{
       {}, {}
@@ -1156,19 +1155,18 @@ int compare_two_text_files(std::pair<StringRef, StringRef> lhs, std::pair<String
 int compare_two_files(const SmallVectorImpl<std::string> &filePaths,
                       bool stripTrailingCR, bool ignoreAllSpace,
                       bool ignoreSpaceChange, bool isBinaryFile,
-                      std::ostringstream &outStream, std::ostringstream &errStream,
-                      std::string &errorMsg)
+                      std::ostringstream &outStream, std::ostringstream &errStream)
 {
    SmallVector<std::string, 2> fileContents;
    for (const std::string &file : filePaths) {
       if (!stdfs::exists(file)) {
-         errorMsg = format_string("file %s is not exist", file.c_str());
+         errStream << "file: " << file << " is not exist" << std::endl;
          return -1;
       }
       std::ifstream istrm(file, std::ios_base::in | std::ios_base::binary);
       std::string curFileContent;
       if (!istrm.is_open()) {
-         errorMsg = format_string("open file %s error : %s", file.c_str(), strerror(errno));
+         errStream << "open file: " << file << " error: " << strerror(errno) << std::endl;;
          return -1;
       }
       istrm.seekg(0, std::ios::end);
@@ -1181,10 +1179,10 @@ int compare_two_files(const SmallVectorImpl<std::string> &filePaths,
    std::pair<StringRef, StringRef> lhs = std::make_pair(StringRef(filePaths[0]), fileContents[0]);
    std::pair<StringRef, StringRef> rhs = std::make_pair(StringRef(filePaths[1]), fileContents[1]);
    if (isBinaryFile) {
-      return compare_two_binary_files(lhs, rhs, outStream, errStream, errorMsg);
+      return compare_two_binary_files(lhs, rhs, outStream, errStream);
    }
    return compare_two_text_files(lhs, rhs, stripTrailingCR, ignoreAllSpace, ignoreSpaceChange,
-                                 outStream, errStream, errorMsg);
+                                 outStream, errStream);
 }
 
 void print_only_in(const std::string &dir, std::string &filename,
@@ -1195,8 +1193,10 @@ void print_only_in(const std::string &dir, std::string &filename,
 }
 
 int compare_dir_trees(SmallVectorImpl<DiffDirItems> &dirTrees,
+                      bool stripTrailingCR, bool ignoreAllSpace,
+                      bool ignoreSpaceChange, bool isBinaryFile,
                       std::ostringstream &outStream,
-                      std::ostringstream &)
+                      std::ostringstream &errStream)
 {
    DiffDirItems &lhs = dirTrees[0];
    DiffDirItems &rhs = dirTrees[1];
@@ -1247,6 +1247,12 @@ int compare_dir_trees(SmallVectorImpl<DiffDirItems> &dirTrees,
             ++friter;
          } else {
             // compare file content
+            SmallVector<std::string, 2> filePaths;
+            filePaths.push_back(stdfs::path(lhsDirName) / lfilename);
+            filePaths.push_back(stdfs::path(rhsDirName) / rfilename);
+            exitCode = compare_two_files(filePaths, stripTrailingCR, ignoreAllSpace,
+                              ignoreSpaceChange, isBinaryFile, outStream,
+                              errStream);
             ++fliter;
             ++friter;
          }
@@ -1314,7 +1320,6 @@ ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmen
    SmallVector<DiffDirItems, 2> dirTrees;
    std::ostringstream outStream(std::stringstream::out|std::stringstream::binary);
    std::ostringstream errStream(std::stringstream::out|std::stringstream::binary);
-   std::string errorMsg;
    try {
       cmdParser.parse(args.size(), argv.get());
       if (paths.size() != 2) {
@@ -1341,9 +1346,10 @@ ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmen
       if (!recursiveDiff) {
          exitCode = compare_two_files(filePaths, stripTrailingCr, ignoreAllSpace,
                                       ignoreSpaceChange, binaryMode,
-                                      outStream, errStream, errorMsg);
+                                      outStream, errStream);
       } else {
-         exitCode = compare_dir_trees(dirTrees, outStream, errStream);
+         exitCode = compare_dir_trees(dirTrees, stripTrailingCr, ignoreAllSpace,
+                                      ignoreSpaceChange, binaryMode, outStream, errStream);
       }
    } catch (const CLI::ParseError &e) {
       throw InternalShellError(command, format_string("Unsupported: 'diff': %s\n", e.what()));
@@ -1351,8 +1357,7 @@ ShellCommandResultPointer execute_builtin_diff(Command *command, ShellEnvironmen
       errStream << "Error: 'diff' command failed, " << e.what() << std::endl;
       exitCode = 1;
    }
-   errorMsg += errStream.str();
-   return std::make_shared<ShellCommandResult>(command, outStream.str(), errorMsg, exitCode, false);
+   return std::make_shared<ShellCommandResult>(command, outStream.str(), errStream.str(), exitCode, false);
 }
 
 ShellCommandResultPointer execute_builtin_mkdir(Command *command, ShellEnvironmentPointer shenv)

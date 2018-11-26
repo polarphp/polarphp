@@ -116,6 +116,31 @@
 # CHECK: Command Output (stderr):
 # CHECK: error: command failed with exit status: 1
 
+# CHECK: FAIL: shtest-shell :: diff-r-error-1.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-r-error-1.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Exit Code: 1
+# CHECK: $ : RUN: at line 2
+# CHECK: $ rm -rf {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 3
+# CHECK: $ mkdir -p {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 6
+# CHECK: $ mkdir -p {{.*}}/dir1/subdir {{.*}}/dir2/subdir
+# CHECK: $ : RUN: at line 7
+# CHECK: $ echo 12345
+# CHECK: $ : RUN: at line 8
+# CHECK: $ echo 00000
+# CHECK: $ : RUN: at line 9
+# CHECK: $ diff -r {{.*}}/dir1 {{.*}}/dir2
+# CHECK: # command output:
+# CHECK: --- {{.*}}/dir1/subdir/f01
+# CHECK: +++ {{.*}}/dir2/subdir/f01
+# CHECK: @@ -1,2 +1,2 @@
+# CHECK: -12345
+# CHECK: +00000
+# CHECK: Command Output (stderr):
+# CHECK: error: command failed with exit status: 1
+
 # CHECK: PASS: shtest-shell :: diff-r.littest
 
 # CHECK: FAIL: shtest-shell :: error-0.littest
