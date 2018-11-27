@@ -1485,23 +1485,33 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
          return ExecScriptResult{};
       }
    }
-   AbstractCommandPointer cmd = cmds[0];
-   for (size_t i = 1; i < cmds.size(); ++i) {
-      cmd = std::make_shared<Seq>(cmd, "&&", cmds[i]);
-   }
    ShExecResultList results;
    int exitCode = 0;
    std::string timeoutInfo;
+   size_t total = commands.size();
+   size_t pageSize = 30;
+   size_t curPos = 0;
+   size_t pages = (int)std::ceil(total / float(pageSize));
    ShellEnvironmentPointer shenv = std::make_shared<ShellEnvironment>(cwd, test->getConfig()->getEnvironment());
-   try {
-      std::pair<int, std::string> r = execute_shcmd(cmd, shenv, results, litConfig->getMaxIndividualTestTime());
-      exitCode = std::get<0>(r);
-      timeoutInfo = std::get<1>(r);
-   } catch (InternalShellError &e) {
-      exitCode = 127;
-      results.push_back(
-               std::make_shared<ShellCommandResult>(e.getCommand(), "", e.what(), exitCode, false));
+  for (size_t page = 0; page < pages; ++page){
+      curPos = page * pageSize;
+      size_t cycleStop = std::min(curPos + pageSize, total - 1);
+      AbstractCommandPointer cmd = cmds[curPos];
+      for (size_t i = curPos + 1; i < cycleStop; ++i) {
+         cmd = std::make_shared<Seq>(cmd, "&&", cmds[i]);
+      }
+      try {
+         std::pair<int, std::string> r = execute_shcmd(cmd, shenv, results, litConfig->getMaxIndividualTestTime());
+         exitCode = std::get<0>(r);
+         timeoutInfo = std::get<1>(r);
+      } catch (InternalShellError &e) {
+         exitCode = 127;
+         results.push_back(
+                  std::make_shared<ShellCommandResult>(e.getCommand(), "", e.what(), exitCode, false));
+         break;
+      }
    }
+
    std::string out;
    std::string err;
    int i = 0;
