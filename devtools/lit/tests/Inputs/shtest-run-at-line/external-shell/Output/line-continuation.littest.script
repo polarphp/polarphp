@@ -1,4 +1,4 @@
-set -o pipefail;{ : 'RUN: at line 4';   echo 'foo bar'  | filechecker /Volumes/data/projects/polarphp/devtools/lit/tests/Inputs/shtest-run-at-line/external-shell/line-continuation.littest; } &&
+set -o pipefail;set -x;{ : 'RUN: at line 4';   echo 'foo bar'  | filechecker /Volumes/data/projects/polarphp/devtools/lit/tests/Inputs/shtest-run-at-line/external-shell/line-continuation.littest; } &&
 { : 'RUN: at line 6';   echo  'foo baz'  | filechecker /Volumes/data/projects/polarphp/devtools/lit/tests/Inputs/shtest-run-at-line/external-shell/line-continuation.littest; } &&
 { : 'RUN: at line 9';   echo 'foo bar'  | filechecker /Volumes/data/projects/polarphp/devtools/lit/tests/Inputs/shtest-run-at-line/external-shell/line-continuation.littest; }
 

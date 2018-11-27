@@ -23,7 +23,6 @@
 #include <future>
 #include <functional>
 #include <list>
-#include <iostream>
 
 namespace polar {
 namespace lit {

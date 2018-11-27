@@ -1,1 +1,1655 @@
-# RUN: cat --show-nonprinting %S/cat_nonprinting.bin
+# Check rm file operations.
+# Check force remove commands success whether the file does or doesn't exist.
+#
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# Check rm file operations.
+# Check force remove commands success whether the file does or doesn't exist.
+#
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# Check rm file operations.
+# Check force remove commands success whether the file does or doesn't exist.
+#
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# Check rm file operations.
+# Check force remove commands success whether the file does or doesn't exist.
+#
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: echo "create a temp file" > %t.write
+# RUN: %{check_path} file %t.write > %t.out
+# RUN: rm -f %t.write
+# RUN: %{check_path} file %t.write > %t.out
+

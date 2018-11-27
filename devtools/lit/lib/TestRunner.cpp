@@ -350,7 +350,7 @@ protected:
 int do_execute_shcmd(AbstractCommandPointer cmd, ShellEnvironmentPointer shenv,
                      ShExecResultList &results, size_t execTimeout, bool &timeoutReached)
 {
-   // std::cout << cmd->operator std::string() << std::endl;
+   //std::cout << cmd->operator std::string() << std::endl;
    int result;
    AbstractCommand::Type commandType = cmd->getCommandType();
    if (commandType == AbstractCommand::Type::Seq) {
