@@ -1495,7 +1495,7 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
    ShellEnvironmentPointer shenv = std::make_shared<ShellEnvironment>(cwd, test->getConfig()->getEnvironment());
   for (size_t page = 0; page < pages; ++page){
       curPos = page * pageSize;
-      size_t cycleStop = std::min(curPos + pageSize, total - 1);
+      size_t cycleStop = std::min(curPos + pageSize, total);
       AbstractCommandPointer cmd = cmds[curPos];
       for (size_t i = curPos + 1; i < cycleStop; ++i) {
          cmd = std::make_shared<Seq>(cmd, "&&", cmds[i]);
