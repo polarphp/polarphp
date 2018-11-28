@@ -204,7 +204,7 @@ ResultPointer Test::getResult() const
    return m_result;
 }
 
-std::string Test::getFullName()
+std::string Test::getFullName() const
 {
    return m_config->getName() + " :: " + join_string_list(m_pathInSuite, "/");
 }
@@ -237,7 +237,7 @@ std::vector<std::string> &Test::getRequires()
    return m_requires;
 }
 
-const std::string &Test::getSelfSourcePath()
+const std::string &Test::getSelfSourcePath() const
 {
    return m_selfSourcePath;
 }

@@ -261,13 +261,13 @@ public:
         TestingConfigPointer config, const std::optional<std::string> &filePath = std::nullopt);
    void setResult(ResultPointer result);
    ResultPointer getResult() const;
-   std::string getFullName();
+   std::string getFullName() const;
    std::string getFilePath();
    std::string getSourcePath();
    TestingConfigPointer getConfig();
    std::vector<std::string> &getXFails();
    std::vector<std::string> &getRequires();
-   const std::string &getSelfSourcePath();
+   const std::string &getSelfSourcePath() const;
    std::string getExecPath();
    TestSuitePointer getTestSuite() const;
    Test &setSelfSourcePath(const std::string &sourcePath);

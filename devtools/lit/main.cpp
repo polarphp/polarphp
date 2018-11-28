@@ -416,6 +416,22 @@ int main(int argc, char *argv[])
                printf("    Exec Root  : %s\n", testsuite->getExecPath().c_str());
             }
          }
+         printf("\n");
+         if (showTests) {
+            printf("-- Test Suites --\n");
+            for (auto &item : sortedSuitesAndTests) {
+               TestList &tests = std::get<1>(item);
+               tests.sort([](auto &lhs, auto &rhs) -> bool {
+                  return lhs->getSourcePath() < rhs->getSourcePath();
+               });
+               for (TestPointer test: tests) {
+                  printf(" %s\n", test->getFullName().c_str());
+               }
+            }
+         }
+         sg_testFinished.store(true);
+         sg_signalConditionVar.notify_one();
+         worker.join();
          return 0;
       }
       // Select and order the tests.
@@ -518,6 +534,9 @@ int main(int argc, char *argv[])
          }
       }
       // Don't create more threads than tests.
+      if (singleProcess) {
+         threadNumbers = 1;
+      }
       threadNumbers = std::min(threadNumbers, tests.size());
       std::string extra;
       if (tests.size() != numTotalTests) {
