@@ -321,3 +321,4 @@
 
 # CHECK: PASS: shtest-shell :: sequencing-0.littest
 # CHECK: XFAIL: shtest-shell :: sequencing-1.littest
+# CHECK: PASS: shtest-shell :: valid-shell.littest

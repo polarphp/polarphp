@@ -376,7 +376,7 @@ int main(int argc, char *argv[])
                                           " test timeout of %d seconds but a timeout of %d seconds was"
                                           " requested on the command line. Forcing timeout to be %d"
                                           " seconds", litConfig->getMaxIndividualTestTime(),
-                                          maxIndividualTestTime));
+                                          maxIndividualTestTime, maxIndividualTestTime));
             litConfig->setMaxIndividualTestTime(maxIndividualTestTime);
          }
       }

@@ -165,7 +165,7 @@ std::pair<int, std::string> execute_shcmd(AbstractCommandPointer cmd, ShellEnvir
    int exitCode = do_execute_shcmd(cmd, shenv, results, execTimeout, timeoutReached);
    std::string timeoutInfo;
    if (timeoutReached) {
-      timeoutInfo = format_string("Reached timeout of %dz seconds", execTimeout);
+      timeoutInfo = format_string("Reached timeout of %d seconds", execTimeout);
    }
    return std::make_pair(exitCode, timeoutInfo);
 }
@@ -1674,6 +1674,9 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
                                      cmdStr.c_str(), errorMsg.c_str()));
    }
    if (returnCode == -1 || returnCode == -2) {
+      if (returnCode == -2) {
+         errorMsg = format_string("Reached timeout of %d seconds", litConfig->getMaxIndividualTestTime());
+      }
       return std::make_tuple("", "", returnCode, errorMsg);
    } else {
       if (returnCode != 0) {
@@ -2168,7 +2171,7 @@ ResultPointer do_run_shtest(TestPointer test, LitConfigPointer litConfig, bool u
    } else {
       if (timeoutInfo.empty()) {
          status = FAIL;
-      } else {
+      } else if (exitCode == -2 && !timeoutInfo.empty()) {
          status = TIMEOUT;
       }
    }
