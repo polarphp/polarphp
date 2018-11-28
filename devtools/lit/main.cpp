@@ -308,7 +308,7 @@ int main(int argc, char *argv[])
       }
       std::optional<int> maxFailuresOr;
       if (!maxFailuresOpt->empty() && maxFailures == 0) {
-         std::cerr << "Setting --max-failures to 0 does not have any effect." << std::endl;
+         std::cerr << "error: Setting --max-failures to 0 does not have any effect." << std::endl;
       } else if (!maxFailuresOpt->empty() && maxFailures > 0) {
          maxFailuresOr = maxFailures;
       }

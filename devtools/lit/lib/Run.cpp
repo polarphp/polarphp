@@ -23,6 +23,7 @@
 #include <future>
 #include <functional>
 #include <list>
+#include <mutex>
 
 namespace polar {
 namespace lit {
@@ -165,14 +166,18 @@ void Run::executeTests(TestingProgressDisplayPointer display, size_t jobs, size_
 // complete.
 void Run::consumeTestResult(std::tuple<int, TestPointer> &poolResult)
 {
+   int testIndex = std::get<0>(poolResult);
+   TestPointer testWithResult = std::get<1>(poolResult);
    // Don't add any more test results after we've hit the maximum failure
    // count.  Otherwise we're racing with the main thread, which is going
    // to terminate the process pool soon.
-   if (m_hitMaxFailures) {
+   if (m_hitMaxFailures.load()) {
+      ResultPointer result = testWithResult->getResult();
+      if (result) {
+         result->setCode(UNRESOLVED);
+      }
       return;
    }
-   int testIndex = std::get<0>(poolResult);
-   TestPointer testWithResult = std::get<1>(poolResult);
    auto testIter = m_tests.begin();
    std::advance(testIter, testIndex);
    // Update the parent process copy of the test. This includes the result,
@@ -185,7 +190,7 @@ void Run::consumeTestResult(std::tuple<int, TestPointer> &poolResult)
    // the main thread that we've stopped testing.
    m_failureCount += testWithResult->getResult()->getCode() == FAIL;
    if (m_litConfig->getMaxFailures() && m_failureCount == m_litConfig->getMaxFailures().value()) {
-      m_hitMaxFailures = true;
+      m_hitMaxFailures.store(true);
    }
 }
 
@@ -201,9 +206,14 @@ void Run::consumeTestResult(std::tuple<int, TestPointer> &poolResult)
 ///
 /// Returns an index and a Result, which the parent process uses to update
 /// the display.
+std::mutex sg_workerMutex;
 void worker_run_one_test(int testIndex, TestPointer test, LitConfigPointer litConfig,
                          Run& run, std::map<std::string, Semaphore> &parallelismSemaphores)
 {
+   std::lock_guard locker(sg_workerMutex);
+   if (run.m_hitMaxFailures.load()) {
+      return;
+   }
    do_execute_test(test, litConfig, parallelismSemaphores);
    std::tuple<int, TestPointer> result = std::make_tuple(testIndex, test);
    run.consumeTestResult(result);

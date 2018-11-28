@@ -17,6 +17,7 @@
 #include "threadpool/ThreadPool.h"
 #include "ForwardDefs.h"
 #include <memory>
+#include <atomic>
 
 namespace polar {
 namespace lit {
@@ -33,12 +34,12 @@ public:
    void executeTestsInPool(size_t jobs, size_t maxTime = 0);
    void executeTests(TestingProgressDisplayPointer display, size_t jobs, size_t maxTime = 0);
    void consumeTestResult(std::tuple<int, TestPointer> &poolResult);
+   std::atomic_bool m_hitMaxFailures;
 protected:
+   int m_failureCount;
    LitConfigPointer m_litConfig;
    TestList m_tests;
    TestingProgressDisplayPointer m_display;
-   int m_failureCount;
-   bool m_hitMaxFailures;
    std::map<std::string, Semaphore> m_parallelismSemaphores;
    ThreadPoolPointer m_threadPool;
 };

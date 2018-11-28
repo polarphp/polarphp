@@ -10,6 +10,7 @@
 # Created by polarboy on 2018/09/19.
 
 add_subdirectory(Inputs/discovery)
+add_subdirectory(Inputs/max-failures)
 add_subdirectory(Inputs/shtest-env)
 add_subdirectory(Inputs/shtest-output-printing)
 add_subdirectory(Inputs/shtest-run-at-line)
