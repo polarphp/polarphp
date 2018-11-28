@@ -14,6 +14,7 @@
 #include "BooleanExpression.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include <map>
+#include <iostream>
 
 namespace polar {
 namespace lit {
@@ -338,7 +339,7 @@ std::vector<std::string> Test::getUnSupportedFeatures()
    try {
       for (const std::string &item : m_unsupported) {
          std::optional<bool> evalResult = BooleanExpression::evaluate(item, features, triple);
-         if (evalResult.has_value() && !evalResult.value()) {
+         if (evalResult.has_value() && evalResult.value()) {
             ret.push_back(item);
          }
       }
@@ -399,7 +400,7 @@ void Test::writeJUnitXML(std::string &xmlStr)
       } else {
          skipMessage = "Skipping because of configuration.";
       }
-      xmlStr += format_string(">\n\t<skipped message=\"%s\" />\n</testcase>\n", skipMessage);
+      xmlStr += format_string(">\n\t<skipped message=\"%s\" />\n</testcase>\n", skipMessage.c_str());
    } else {
       xmlStr += "/>";
    }
