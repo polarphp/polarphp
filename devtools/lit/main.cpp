@@ -291,18 +291,18 @@ int main(int argc, char *argv[])
    litApp.add_flag("--single-process", singleProcess, "Don't run tests in parallel.  Intended for debugging "
                                                       "single test failures")->group("Debug and Experimental Options");
    CLI11_PARSE(litApp, argc, argv);
+   if (showVersion) {
+      std::cout << "lit " << POLAR_LIT_VERSION << std::endl;
+      return 0;
+   }
+   if (testPaths.empty()) {
+      std::cerr << "No inputs specified" << std::endl;
+      std::cout << litApp.help() << std::endl;
+      exit(1);
+   }
    std::thread worker(signal_detect_worker);
    std::exception_ptr eptr;
    try {
-      if (showVersion) {
-         std::cout << "lit " << POLAR_LIT_VERSION << std::endl;
-         return 0;
-      }
-      if (testPaths.empty()) {
-         std::cerr << "No inputs specified" << std::endl;
-         std::cout << litApp.help() << std::endl;
-         exit(1);
-      }
       if (threadsOpt->empty()) {
          threadNumbers = std::thread::hardware_concurrency();
       }

@@ -36,6 +36,7 @@
 #include <tuple>
 #include <utility>
 #include <optional>
+#include <iostream>
 
 namespace polar {
 namespace utils {
@@ -257,7 +258,7 @@ class FormattedBytes
    bool m_ascii;            // Show the ASCII bytes for the hex bytes to the right.
    friend class RawOutStream;
 public:
-   FormattedBytes(const std::vector<uint8_t> bytes, uint32_t indentLevel, std::optional<uint64_t> offset,
+   FormattedBytes(ArrayRef<uint8_t> bytes, uint32_t indentLevel, std::optional<uint64_t> offset,
                   uint32_t npl, uint8_t bgs, bool upper, bool ascii)
       : m_bytes(bytes), m_firstByteOffset(offset), m_indentLevel(indentLevel),
         m_numPerLine(npl), m_byteGroupSize(bgs), m_upper(upper), m_ascii(ascii)
@@ -269,7 +270,7 @@ public:
 };
 
 inline FormattedBytes
-format_bytes(std::vector<uint8_t> bytes, std::optional<uint64_t> firstByteOffset = std::nullopt,
+format_bytes(ArrayRef<uint8_t> bytes, std::optional<uint64_t> firstByteOffset = std::nullopt,
              uint32_t numPerLine = 16, uint8_t byteGroupSize = 4,
              uint32_t indentLevel = 0, bool upper = false)
 {
@@ -278,7 +279,7 @@ format_bytes(std::vector<uint8_t> bytes, std::optional<uint64_t> firstByteOffset
 }
 
 inline FormattedBytes
-format_bytes_with_ascii(std::vector<uint8_t> bytes,
+format_bytes_with_ascii(ArrayRef<uint8_t> bytes,
                         std::optional<uint64_t> firstByteOffset = std::nullopt,
                         uint32_t numPerLine = 16, uint8_t byteGroupSize = 4,
                         uint32_t indentLevel = 0, bool upper = false)

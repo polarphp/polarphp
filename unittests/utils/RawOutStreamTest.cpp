@@ -204,24 +204,24 @@ TEST(RawOutStreamTest, testFormatDecimal)
              print_to_string(format_decimal(INT64_MIN, 21), 21));
 }
 
-static std::string formatted_bytes_str(ArrayRef<uint8_t> Bytes,
-                                       std::optional<uint64_t> Offset = std::nullopt,
-                                       uint32_t NumPerLine = 16,
-                                       uint8_t ByteGroupSize = 4) {
+static std::string formatted_bytes_str(ArrayRef<uint8_t> bytes,
+                                       std::optional<uint64_t> offset = std::nullopt,
+                                       uint32_t numPerLine = 16,
+                                       uint8_t byteGroupSize = 4) {
    std::string S;
    RawStringOutStream str(S);
-   str << format_bytes(Bytes, Offset, NumPerLine, ByteGroupSize);
+   str << format_bytes(bytes, offset, numPerLine, byteGroupSize);
    str.flush();
    return S;
 }
 
-static std::string format_bytes_with_ascii_str(ArrayRef<uint8_t> Bytes,
-                                               std::optional<uint64_t> Offset = std::nullopt,
-                                               uint32_t NumPerLine = 16,
-                                               uint8_t ByteGroupSize = 4) {
+static std::string format_bytes_with_ascii_str(ArrayRef<uint8_t> bytes,
+                                               std::optional<uint64_t> offset = std::nullopt,
+                                               uint32_t numPerLine = 16,
+                                               uint8_t byteGroupSize = 4) {
    std::string S;
    RawStringOutStream str(S);
-   str << format_bytes_with_ascii(Bytes, Offset, NumPerLine, ByteGroupSize);
+   str << format_bytes_with_ascii(bytes, offset, numPerLine, byteGroupSize);
    str.flush();
    return S;
 }
@@ -233,7 +233,6 @@ TEST(RawOutStreamTest, testFormattedHexBytes)
                                's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0',
                                '1', '2', '3', '4', '5', '6', '7', '8', '9'};
    ArrayRef<uint8_t> B(Buf);
-
    // Test invalid input.
    EXPECT_EQ("", formatted_bytes_str(ArrayRef<uint8_t>()));
    EXPECT_EQ("", format_bytes_with_ascii_str(ArrayRef<uint8_t>()));
