@@ -66,7 +66,6 @@ install-sh
 internal_functions.c
 lcov_data
 lcov_html
-libs
 libtool
 meta_cc
 meta_ccld
