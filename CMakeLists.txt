@@ -218,6 +218,9 @@ endif()
 set(POLAR_WITH_TSRM_PTH_CONFIG "pth-config" CACHE FILEPATH "Use GNU Pth")
 
 set(POLAR_LIBDIR_SUFFIX "" CACHE STRING "Define suffix of library directory name (32/64)" )
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+   set(POLAR_LIBDIR_SUFFIX 64)
+endif()
 
 set(POLAR_TOOLS_INSTALL_DIR "bin" CACHE STRING "Path for binary subdirectory (defaults to 'bin')")
 mark_as_advanced(POLAR_TOOLS_INSTALL_DIR)
@@ -311,6 +314,7 @@ endif()
 set(POLAR_COMPILE_DEFINITIONS "")
 set(POLAR_COMPILE_FLAGS "")
 set(POLAR_COMMON_DEPENDS "")
+set(POLAR_RT_REQUIRE_LIBS "")
 
 # setup php version info
 polar_setup_php_version()
@@ -386,7 +390,6 @@ include_directories(${POLAR_SOURCE_DIR}
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include(ImportThirdparty)
-
 add_subdirectory(include)
 add_subdirectory(artifacts)
 add_subdirectory(src)

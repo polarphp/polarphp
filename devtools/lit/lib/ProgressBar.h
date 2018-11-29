@@ -98,13 +98,13 @@ public:
    const static std::string SHOW_CURSOR; // Make the cursor visible
 
    // Terminal size:
-   static int COLS; // Width of the terminal (-1 for unknown)
-   static int LINES; // Height of the terminal (-1 for unknown)
+   static int COLUMNS; // Width of the terminal (-1 for unknown)
+   static int LINE_COUNT; // Height of the terminal (-1 for unknown)
    static bool XN;
 
 protected:
    static std::list<std::string> STRING_CAPABILITIES;
-   static std::list<std::string> COLORS;
+   static std::list<std::string> COLOR_TYPES;
    static std::list<std::string> ANSICOLORS;
    std::map<std::string, std::string> m_properties;
    std::mutex m_mutex;

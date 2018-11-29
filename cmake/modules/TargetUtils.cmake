@@ -410,11 +410,12 @@ function(polar_add_library_internal name)
       # We can use PRIVATE since SO knows its dependent libs.
       set(libtype PRIVATE)
    endif()
-
    target_link_libraries(${name} ${libtype}
       ${ARG_LINK_LIBS}
       ${lib_deps}
       ${polar_libs}
+      ${POLAR_THREADS_LIBRARY}
+      ${POLAR_RT_REQUIRE_LIBS}
       )
 
    if(POLAR_COMMON_DEPENDS)

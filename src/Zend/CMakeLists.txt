@@ -91,7 +91,7 @@ bison_target(ZendLangParser zend_language_parser.y ${CMAKE_CURRENT_BINARY_DIR}/z
 polar_merge_list(zendVM_SRCS POLAR_ZENDVM_ZEND_HEADERS)
 
 polar_add_library(zendVM SHARED ${zendVM_SRCS})
-target_link_libraries(zendVM tsrm)
+target_link_libraries(zendVM PRIVATE tsrm)
 set_target_properties(zendVM
    PROPERTIES
    COMPILE_DEFINITIONS "ZEND_ENABLE_STATIC_TSRMLS_CACHE=1")

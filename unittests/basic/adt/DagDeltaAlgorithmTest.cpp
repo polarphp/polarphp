@@ -9,7 +9,7 @@
 //
 // Created by softboy on 2018/10/20.
 
-#include "polarphp/basic/adt/DAGDeltaAlgorithm.h"
+#include "polarphp/basic/adt/DagDeltaAlgorithm.h"
 #include "gtest/gtest.h"
 #include <algorithm>
 #include <cstdarg>

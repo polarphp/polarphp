@@ -10,7 +10,7 @@
 # Created by polarboy on 2018/08/22.
 
 # find dependence package
-find_package(RE2C)
+find_package(Re2c)
 if (${RE2C_FOUND})
    message("using re2c version: ${RE2C_VERSION}")
 endif()

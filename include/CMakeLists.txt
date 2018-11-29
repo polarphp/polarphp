@@ -38,17 +38,17 @@ polar_collect_files(
 configure_file(polarphp/global/php_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/polarphp/global/php_config.h
    @ONLY)
 configure_file(polarphp/global/Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/polarphp/global/Config.h @ONLY)
-configure_file(polarphp/global/ABiBreaking.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/polarphp/global/AbiBreaking.h @ONLY)
+configure_file(polarphp/global/AbiBreaking.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/polarphp/global/AbiBreaking.h @ONLY)
 list(APPEND POLAR_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/polarphp/global/php_config.h)
 list(APPEND POLAR_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/polarphp/global/Config.h)
 list(APPEND POLAR_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/polarphp/global/AbiBreaking.h)
 
-configure_file(polarphp/vm/TSRM/tsrm_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/polarphp/vm/TSRM/tsrm_config.h
+configure_file(polarphp/vm/tsrm/tsrm_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/polarphp/vm/tsrm/tsrm_config.h
    @ONLY)
-configure_file(polarphp/vm/Zend/zend_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/polarphp/vm/Zend/zend_config.h
+configure_file(polarphp/vm/zend/zend_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/polarphp/vm/zend/zend_config.h
    @ONLY)
 
-list(APPEND POLAR_ZENDVM_ZEND_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/polarphp/vm/Zend/zend_config.h)
-list(APPEND POLAR_ZENDVM_ZEND_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/polarphp/vm/TSRM/tsrm_config.h)
+list(APPEND POLAR_ZENDVM_ZEND_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/polarphp/vm/zend/zend_config.h)
+list(APPEND POLAR_ZENDVM_ZEND_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/polarphp/vm/tsrm/tsrm_config.h)
 set(POLAR_ZENDVM_ZEND_HEADERS ${POLAR_ZENDVM_ZEND_HEADERS} PARENT_SCOPE)
 set(POLAR_HEADERS ${POLAR_HEADERS} PARENT_SCOPE)

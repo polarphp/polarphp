@@ -250,3 +250,11 @@ macro(polar_merge_list target list)
    endforeach()
    list(REMOVE_DUPLICATES ${target})
 endmacro()
+
+macro(polar_add_rt_require_lib name)
+   list(APPEND POLAR_RT_REQUIRE_LIBS ${name})
+   if (NOT ${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+      set(POLAR_RT_REQUIRE_LIBS ${POLAR_RT_REQUIRE_LIBS} PARENT_SCOPE)
+   endif()
+endmacro()
+

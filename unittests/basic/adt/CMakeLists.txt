@@ -13,8 +13,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 polar_add_unittest(PolarBaseLibTests BasicAdtTest
    ../../TestEntry.cpp
    ApIntTest.cpp
-   APSIntTest.cpp
-   APFloatTest.cpp
+   ApSIntTest.cpp
+   ApFloatTest.cpp
    ArrayRefTest.cpp
    BitVectorTest.cpp
    BitMaskEnumTest.cpp
@@ -22,7 +22,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    BumpPtrListTest.cpp
    DenseMapTest.cpp
    DenseSetTest.cpp
-   DAGDeltaAlgorithmTest.cpp
+   DagDeltaAlgorithmTest.cpp
    DeltaAlgorithmTest.cpp
    DepthFirstIteratorTest.cpp
    EquivalenceClassesTest.cpp

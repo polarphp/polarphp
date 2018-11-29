@@ -40,8 +40,8 @@ const std::string TerminalController::NORMAL{"NORMAL"};
 const std::string TerminalController::HIDE_CURSOR{"HIDE_CURSOR"};
 const std::string TerminalController::SHOW_CURSOR{"SHOW_CURSOR"};
 
-int TerminalController::COLS = -1;
-int TerminalController::LINES = -1;
+int TerminalController::COLUMNS = -1;
+int TerminalController::LINE_COUNT = -1;
 bool TerminalController::XN = false;
 
 std::list<std::string> TerminalController::STRING_CAPABILITIES {
@@ -64,7 +64,7 @@ std::list<std::string> TerminalController::STRING_CAPABILITIES {
    "SHOW_CURSOR=cnorm"
 };
 
-std::list<std::string> TerminalController::COLORS {
+std::list<std::string> TerminalController::COLOR_TYPES {
    "BLACK",
    "BLUE",
    "GREEN",
@@ -123,8 +123,8 @@ TerminalController::TerminalController(std::ostream &)
    // Check the terminal type.  If we fail, then assume that the
    // terminal has no capabilities.
    // Look up numeric capabilities.
-   COLS = ::tigetnum(const_cast<char *>("cols"));
-   LINES = ::tigetnum(const_cast<char *>("lines"));
+   COLUMNS = ::tigetnum(const_cast<char *>("cols"));
+   LINE_COUNT = ::tigetnum(const_cast<char *>("lines"));
    XN = ::tigetflag(const_cast<char *>("xenl"));
    // Look up string capabilities.
    for (std::string capability : STRING_CAPABILITIES) {
@@ -139,9 +139,9 @@ TerminalController::TerminalController(std::ostream &)
    // init Colors
    std::string setFg = tigetStr("setf");
    if (!setFg.empty()) {
-      auto iter = COLORS.begin();
+      auto iter = COLOR_TYPES.begin();
       int index = 0;
-      for (; iter != COLORS.end(); ++iter, ++index) {
+      for (; iter != COLOR_TYPES.end(); ++iter, ++index) {
          m_properties[*iter] = tparm(setFg, index);
       }
    }
@@ -156,9 +156,9 @@ TerminalController::TerminalController(std::ostream &)
 
    std::string setBg = tigetStr("setb");
    if (!setBg.empty()) {
-      auto iter = COLORS.begin();
+      auto iter = COLOR_TYPES.begin();
       int index = 0;
-      for (; iter != COLORS.end(); ++iter, ++index) {
+      for (; iter != COLOR_TYPES.end(); ++iter, ++index) {
          m_properties[*iter] = tparm(setFg, index);
       }
    }
@@ -315,8 +315,8 @@ ProgressBar::ProgressBar(const TerminalController &term, const std::string &head
       throw ValueError("Terminal isn't capable enough -- you "
                        "should use a simpler progress dispaly.");
    }
-   if (m_term.COLS != -1) {
-      m_width = static_cast<size_t>(m_term.COLS);
+   if (m_term.COLUMNS != -1) {
+      m_width = static_cast<size_t>(m_term.COLUMNS);
       if (!m_term.XN) {
          BOL = m_term.getProperty(TerminalController::UP) + m_term.getProperty(TerminalController::BOL);
          XNL = ""; // Cursor must be fed to the next line

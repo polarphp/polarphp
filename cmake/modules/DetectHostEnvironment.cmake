@@ -159,9 +159,17 @@ if(NOT PURE_WINDOWS)
    endif()
    check_library_exists(dl dlopen "" HAVE_LIBDL)
    check_library_exists(rt clock_gettime "" HAVE_LIBRT)
+   # we require dl library
+   polar_add_rt_require_lib(dl)
 endif()
 
-check_library_exists(m sin "" HAVE_SIN)
+check_library_exists(m sin "" HAVE_LIBM)
+if (NOT HAVE_LIBM)
+   message(FATAL_ERROR "m library is require by polarphp")
+endif()
+
+polar_add_rt_require_lib(m)
+
 check_library_exists(c inet_aton "" HAVE_INET_ATON)
 if (NOT HAVE_INET_ATON)
    unset(HAVE_INET_ATON CACHE)
