@@ -30,7 +30,6 @@
 .libs
 .DS_Store
 phpt.*
-core
 dynlib.m4
 Makefile
 Makefile.fragments
