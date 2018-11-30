@@ -1493,7 +1493,7 @@ ExecScriptResult execute_script_internal(TestPointer test, LitConfigPointer litC
    size_t curPos = 0;
    size_t pages = (int)std::ceil(total / float(pageSize));
    ShellEnvironmentPointer shenv = std::make_shared<ShellEnvironment>(cwd, test->getConfig()->getEnvironment());
-  for (size_t page = 0; page < pages; ++page){
+   for (size_t page = 0; page < pages; ++page){
       curPos = page * pageSize;
       size_t cycleStop = std::min(curPos + pageSize, total);
       AbstractCommandPointer cmd = cmds[curPos];
@@ -1622,13 +1622,20 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
       }
       ostream << "{ " << join_string_list(commands, "; } &&\n{ ") << "; }" << std::endl;
    }
-   ostream << std::endl;
+
    ostream.flush();
    ostream.close();
+   std::error_code ec;
+   stdfs::permissions(script.c_str(), stdfs::perms::owner_all, stdfs::perm_options::add, ec);
+   if (ec) {
+      throw ValueError(format_string("set file: %s permission error: %s",
+                                     script.c_str(), ec.message().c_str()));
+   }
    std::string cmdStr;
    SmallVector<StringRef, 10> argsRef;
    if (isWin32CMDEXE) {
       cmdStr = "cmd";
+      argsRef.push_back(cmdStr);
       argsRef.push_back(StringRef("/c"));
       argsRef.push_back(script);
    } else {
@@ -1642,10 +1649,12 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
       }
       if (bashPath) {
          cmdStr = bashPath.value();
+         argsRef.pushBack("");
          argsRef.push_back("-c");
          argsRef.push_back(script);
       } else {
          cmdStr = "/bin/sh";
+         argsRef.pushBack("");
          argsRef.push_back("-c");
          argsRef.push_back(script);
       }
@@ -1677,7 +1686,7 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
       if (returnCode == -2) {
          errorMsg = format_string("Reached timeout of %d seconds", litConfig->getMaxIndividualTestTime());
       }
-      return std::make_tuple("", "", returnCode, errorMsg);
+      return std::make_tuple("", errorMsg, returnCode, "");
    } else {
       if (returnCode != 0) {
          auto errorBuf = MemoryBuffer::getFile(errorFile.getCStr());
@@ -2169,10 +2178,10 @@ ResultPointer do_run_shtest(TestPointer test, LitConfigPointer litConfig, bool u
    if (exitCode == 0) {
       status = PASS;
    } else {
-      if (timeoutInfo.empty()) {
-         status = FAIL;
-      } else if (exitCode == -2 && !timeoutInfo.empty()) {
+      if (exitCode == -2 && !timeoutInfo.empty()) {
          status = TIMEOUT;
+      } else if (!errorMsg.empty()) {
+         status = FAIL;
       }
    }
    // Form the output log.

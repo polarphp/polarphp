@@ -1,4 +1,0 @@
-set -o pipefail;{ : 'RUN: at line 4';   true; } &&
-{ : 'RUN: at line 5';   false; } &&
-{ : 'RUN: at line 6';   true; }
-

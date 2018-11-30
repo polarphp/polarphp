@@ -268,7 +268,7 @@ ProcessInfo wait_with_timer(
    }
 
    // Parent process: Wait for the child process to terminate.
-   int status;
+   int status = 0;
    ProcessInfo waitResult;
    do {
       waitResult.m_pid = waitpid(childPid, &status, waitPidOptions);
