@@ -26,6 +26,6 @@
 # CHECK: $ : RUN: at line 3
 # CHECK-NEXT: $ wc missing-file
 # CHECK-NEXT: # command output:
-# CHECK-NEXT: wc: missing-file: open: No such file or directory
+# CHECK-NEXT: wc: missing-file:{{.*}}No such file or directory
 # CHECK: error: command failed with exit status: 1
 
