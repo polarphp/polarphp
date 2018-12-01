@@ -1,8 +1,9 @@
 # Check the various features of the ShTest format.
 #
 # RUN: rm -f %t.xml
-# RUN: filechecker < %t.out %s
 # RUN: not %{lit} -j 1 -v %{inputs}/shtest-format --xunit-xml-output %t.xml > %t.out
+# RUN: filechecker < %t.out %s
+
 # RUN: filechecker --check-prefix XUNIT < %t.xml %s
 
 # END.
