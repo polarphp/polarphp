@@ -2180,7 +2180,7 @@ ResultPointer do_run_shtest(TestPointer test, LitConfigPointer litConfig, bool u
    } else {
       if (exitCode == -2 && !timeoutInfo.empty()) {
          status = TIMEOUT;
-      } else if (!errorMsg.empty()) {
+      } else if (exitCode != 0) {
          status = FAIL;
       }
    }

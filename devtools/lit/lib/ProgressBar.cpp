@@ -422,6 +422,7 @@ void TestingProgressDisplay::update(TestPointer test)
    if (m_progressBar) {
       m_progressBar->update(m_completed / static_cast<float>(m_numTests), test->getFullName());
    }
+   assert(test->getResult()->getCode() && "test result code is not set");
    bool shouldShow = test->getResult()->getCode()->isFailure() ||
          m_showAllOutput ||
          (!m_quiet && !m_succinct);

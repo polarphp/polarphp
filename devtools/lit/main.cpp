@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
    litApp.add_flag("-q,--quiet", quiet, "Suppress no error output")->group("Output Format");
    litApp.add_flag("-s,--succinct", succinct, "Reduce amount of output")->group("Output Format");
    litApp.add_flag("-v,--verbose", showOutput, "Show test output for failures")->group("Output Format");
-   litApp.add_option("--echo-all-commands", echoAllCommands, "Echo all commands as they are executed to stdout."
+   litApp.add_flag("--echo-all-commands", echoAllCommands, "Echo all commands as they are executed to stdout."
                                                              "In case of failure, last command shown will be the failing one.")->group("Output Format");
    litApp.add_flag("-a,--show-all", showAll, "Display all commandlines and output")->group("Output Format");
    CLI::Option *outputDirOpt = litApp.add_option("-o,--output", outputDir, "Write test results to the provided path")->group("Output Format");
