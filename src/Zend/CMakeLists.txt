@@ -73,7 +73,7 @@ endif()
 re2c_target(NAME ZendIniScannerLex
    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/zend_ini_scanner.c
    INPUT ${CMAKE_CURRENT_SOURCE_DIR}/zend_ini_scanner.l
-   OPTIONS --no-generation-date --case-inverted -cbdFt ${CMAKE_CURRENT_SOURCE_DIR}/zend_ini_scanner_defs.h.h)
+   OPTIONS --no-generation-date --case-inverted -cbdFt ${CMAKE_CURRENT_SOURCE_DIR}/zend_ini_scanner_defs.h)
 
 bison_target(ZendIniParser zend_ini_parser.y ${CMAKE_CURRENT_BINARY_DIR}/zend_ini_parser.c
    COMPILE_FLAGS "-p ini_ -d"
