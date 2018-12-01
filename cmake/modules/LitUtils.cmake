@@ -52,7 +52,10 @@ macro(polar_add_lit_extra_test_executable name)
       # API for all shared libaries loaded by this executable.
       list(APPEND ARG_LINK_LIBS ${POLAR_THREADS_LIBRARY})
    endif()
-   target_link_libraries(${name} PRIVATE ${ARG_LINK_LIBS} CLI11::CLI11 stdc++fs)
+   target_link_libraries(${name} 
+      PRIVATE
+      ${ARG_LINK_LIBS} CLI11::CLI11
+      ${POLAR_RT_REQUIRE_LIBS})
 endmacro()
 
 function(polar_add_lit_cfg_setter)

@@ -9,12 +9,20 @@
 #
 # Created by polarboy on 2018/09/18.
 
-polar_add_lit_extra_test_executable(LitBuiltinCat Cat.cpp)
+polar_add_lit_extra_test_executable(LitBuiltinCat Cat.cpp
+   LINK_LIBS
+   "PolarUtils")
 
 get_filename_component(LIT_CONFIG_DIR ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
 
+get_target_property(props LitBuiltinCat INCLUDE_DIRECTORIES)
+list(APPEND props ${LIT_CONFIG_DIR})
+list(APPEND props ${CMAKE_CURRENT_BINARY_DIR})
+list(APPEND props ${LIT_CONFIG_DIR})
+list(APPEND props ${CURSES_INCLUDE_DIRS})
 set_target_properties(
    LitBuiltinCat
    PROPERTIES
-   INCLUDE_DIRECTORIES "${LIT_CONFIG_DIR};${CMAKE_CURRENT_BINARY_DIR};${CURSES_INCLUDE_DIRS}"
+   INCLUDE_DIRECTORIES "${props}"
+   INSTALL_RPATH ${POLAR_LIBRARY_OUTPUT_INTDIR}
    )

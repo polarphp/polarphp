@@ -11,6 +11,7 @@
 
 #include "CLI/CLI.hpp"
 #include "LitConfigDef.h"
+#include "polarphp/basic/adt/StringRef.h"
 #include <iostream>
 #include <thread>
 #include <assert.h>
@@ -19,10 +20,12 @@
 
 namespace fs = std::filesystem;
 
-std::string convert_to_caret_and_mnotation(std::wstring data)
+using polar::basic::StringRef;
+
+std::string convert_to_caret_and_mnotation(StringRef data)
 {
    std::string output;
-   for (wchar_t c : data) {
+   for (unsigned char c : data) {
       if (c == 9 || c == 10) {
          output.push_back(c);
          continue;
@@ -55,6 +58,7 @@ void general_exception_handler(std::exception_ptr eptr)
    }
 }
 
+
 int main(int argc, char *argv[])
 {
    CLI::App catApp;
@@ -65,21 +69,21 @@ int main(int argc, char *argv[])
    CLI11_PARSE(catApp, argc, argv);
    std::exception_ptr eptr;
    try {
-      wchar_t buffer[1024];
+      char buffer[1024];
       for (const std::string &filename : filenames) {
          if (!fs::exists(filename)) {
             throw std::runtime_error(std::string("No such file or directory: ") + filename);
          }
-         std::wifstream fstream(filename, std::ios_base::in | std::ios_base::binary);
+         std::ifstream fstream(filename, std::ios_base::in | std::ios_base::binary);
          if (!fstream.is_open()) {
             throw std::runtime_error(std::string("open file ") + filename + " failure");
          }
          while (!fstream.eof()) {
             fstream.read(buffer, 1024);
             if (showNonprinting) {
-               std::cout << convert_to_caret_and_mnotation(std::wstring(buffer, fstream.gcount()));
+               std::cout << convert_to_caret_and_mnotation(StringRef(buffer, fstream.gcount()));
             } else {
-               std::wcout << std::wstring(buffer, fstream.gcount());
+               std::cout << std::string(buffer,fstream.gcount());
             }
          }
          std::cout.flush();
