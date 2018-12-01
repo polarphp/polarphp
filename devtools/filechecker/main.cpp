@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
                                                                                    "provided for convenience as old tests are migrated to the new"
                                                                                    "non-overlapping CHECK-DAG implementation.");
    cmdParser.add_flag("-v", verbose, "Print directive pattern matches, you can specify --vv to print extra verbose info.");
-   CLI::Option *dumpInputOnFailureOpt = cmdParser.add_option("--dump-input-on-failure", dumpInputOnFailure, "Dump original input to stderr before failing."
+   CLI::Option *dumpInputOnFailureOpt = cmdParser.add_flag("--dump-input-on-failure", dumpInputOnFailure, "Dump original input to stderr before failing."
                                                                                                           "The value can be also controlled using "
                                                                                                           "FILECHECK_DUMP_INPUT_ON_FAILURE environment variable.");
    CLI11_PARSE(cmdParser, argc, argv);
