@@ -49,6 +49,9 @@ using polar::lit::ResultPointer;
 using polar::lit::TestPointer;
 using polar::lit::ResultCode;
 using polar::lit::MetricValue;
+using polar::lit::IntMetricValue;
+using polar::lit::RealMetricValue;
+using polar::lit::JSONMetricValue;
 using polar::lit::MetricValuePointer;
 using polar::lit::TestList;
 using polar::lit::ProgressBar;
@@ -120,13 +123,15 @@ void write_test_results(polar::lit::Run &run, LitConfigPointer, size_t testingTi
          nlohmann::json metrics = nlohmann::json::object();
          for (auto &metricItem : testResult->getMetrics()) {
             MetricValuePointer metricValue = metricItem.second;
-            std::any mdata = metricValue->toData();
             if (metricValue->getValueType() == MetricValue::ValueType::Integer) {
-               metrics[metricItem.first] = std::any_cast<int>(mdata);
+               IntMetricValue *metric = dynamic_cast<IntMetricValue *>(metricValue.get());
+               metrics[metricItem.first] = metric->toData();
             } else if (metricValue->getValueType() == MetricValue::ValueType::Real) {
-               metrics[metricItem.first] = std::any_cast<double>(mdata);
+               RealMetricValue *metric = dynamic_cast<RealMetricValue *>(metricValue.get());
+               metrics[metricItem.first] = metric->toData();
             } else if(metricValue->getValueType() == MetricValue::ValueType::Json) {
-               metrics[metricItem.first] = std::any_cast<nlohmann::json>(mdata);
+               JSONMetricValue *metric = dynamic_cast<JSONMetricValue *>(metricValue.get());
+               metrics[metricItem.first] = metric->toData();
             }
             testData["metrics"] = metrics;
          }
@@ -149,13 +154,15 @@ void write_test_results(polar::lit::Run &run, LitConfigPointer, size_t testingTi
                nlohmann::json microMetrics = nlohmann::json::object();
                for (auto &microMetricItem : testResult->getMetrics()) {
                   MetricValuePointer microMetricValue = microMetricItem.second;
-                  std::any microMetricdata = microMetricValue->toData();
                   if (microMetricValue->getValueType() == MetricValue::ValueType::Integer) {
-                     microMetrics[microMetricItem.first] = std::any_cast<int>(microMetricdata);
+                     IntMetricValue *metric = dynamic_cast<IntMetricValue *>(microMetricValue.get());
+                     microMetrics[microMetricItem.first] = metric->toData();
                   } else if (microMetricValue->getValueType() == MetricValue::ValueType::Real) {
-                     microMetrics[microMetricItem.first] = std::any_cast<double>(microMetricdata);
+                     RealMetricValue *metric = dynamic_cast<RealMetricValue *>(microMetricValue.get());
+                     microMetrics[microMetricItem.first] = metric->toData();
                   } else if(microMetricValue->getValueType() == MetricValue::ValueType::Json) {
-                     microMetrics[microMetricItem.first] = std::any_cast<nlohmann::json>(microMetricdata);
+                     JSONMetricValue *metric = dynamic_cast<JSONMetricValue *>(microMetricValue.get());
+                     microMetrics[microMetricItem.first] = metric->toData();
                   }
                   microTestData["metrics"] = microMetrics;
                }

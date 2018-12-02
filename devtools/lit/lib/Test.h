@@ -21,6 +21,7 @@
 #include "Utils.h"
 #include "Global.h"
 #include "ForwardDefs.h"
+#include <iostream>
 
 namespace polar {
 namespace lit {
@@ -110,7 +111,6 @@ public:
    };
 public:
    virtual std::string format() = 0;
-   virtual std::any toData() = 0;
    virtual ValueType getValueType() const = 0;
    ~MetricValue()
    {}
@@ -127,7 +127,7 @@ public:
       return std::to_string(m_value);
    }
 
-   std::any toData()
+   int toData()
    {
       return m_value;
    }
@@ -155,7 +155,7 @@ public:
       return buffer;
    }
 
-   std::any toData()
+   double toData()
    {
       return m_value;
    }
@@ -180,11 +180,11 @@ public:
       return m_value.dump(2);
    }
 
-   std::any toData()
+   nlohmann::json toData()
    {
       return m_value;
    }
-
+   
    ValueType getValueType() const
    {
       return ValueType::Json;

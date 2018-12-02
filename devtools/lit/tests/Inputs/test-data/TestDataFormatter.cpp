@@ -37,16 +37,14 @@ ResultPointer TestDataFormatter::execute(TestPointer test, LitConfigPointer litC
    ResultPointer result = std::make_shared<Result>(get_result_code_by_name(resultCode), resultOutput);
    json results = jsonDoc["results"];
    for (json::iterator iter = results.begin(); iter != results.end(); ++iter) {
-      MetricValuePointer metric;
       json value = iter.value();
       if (value.is_number_integer()) {
-         metric.reset(new IntMetricValue(value.get<int>()));
+         result->addMetric(iter.key(), std::make_shared<IntMetricValue>(value.get<int>()));
       } else if (value.is_number_float()) {
-         metric.reset(new RealMetricValue(value.get<double>()));
+         result->addMetric(iter.key(), std::make_shared<RealMetricValue>(value.get<double>()));
       } else {
          throw std::runtime_error("unsupported result type");
       }
-      result->addMetric(iter.key(), metric);
    }
    return result;
 }
