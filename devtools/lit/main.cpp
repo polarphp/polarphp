@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
    litApp.add_option("--config-prefix", cfgPrefix, "Prefix for 'lit' config files");
    litApp.add_option("-D,--param", params, "Add 'NAME' = 'VAL' to the user defined parameters");
    litApp.add_option("--cfg-setter-plugin-dir", cfgSetterPluginDir, "the cfg setter plugin base dir");
-
+   
    /// setup command group
    /// Output Format
    bool quiet;
@@ -234,13 +234,13 @@ int main(int argc, char *argv[])
    litApp.add_flag("-s,--succinct", succinct, "Reduce amount of output")->group("Output Format");
    litApp.add_flag("-v,--verbose", showOutput, "Show test output for failures")->group("Output Format");
    litApp.add_flag("--echo-all-commands", echoAllCommands, "Echo all commands as they are executed to stdout."
-                                                             "In case of failure, last command shown will be the failing one.")->group("Output Format");
+                                                           "In case of failure, last command shown will be the failing one.")->group("Output Format");
    litApp.add_flag("-a,--show-all", showAll, "Display all commandlines and output")->group("Output Format");
    CLI::Option *outputDirOpt = litApp.add_option("-o,--output", outputDir, "Write test results to the provided path")->group("Output Format");
    litApp.add_flag("--display-progress-bar", displayProgressBar, "use curses based progress bar")->group("Output Format");
    litApp.add_flag("--show-unsupported", showUnsupported, "Show unsupported tests")->group("Output Format");
    litApp.add_flag("--show-xfail", showXFail, "Show tests that were expected to fail")->group("Output Format");
-
+   
    /// Test Execution
    std::vector<std::string> paths;
    bool useValgrind;
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
    CLI::Option *maxIndividualTestTimeOpt = litApp.add_option("--timeout", maxIndividualTestTime, "Maximum time to spend running a single test (in seconds)."
                                                                                                  "0 means no time limit. [Default: 0]", 0)->group("Test Execution");
    CLI::Option *maxFailuresOpt = litApp.add_option("--max-failures", maxFailures, "Stop execution after the given number of failures.", 0)->group("Test Execution");
-
+   
    /// Test Selection
    size_t maxTests;
    size_t maxTime;
@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
                                          "regular expression")->envname("LIT_FILTER")->group("Test Selection");
    CLI::Option *numShardsOpt = litApp.add_option("--num-shards", numShards, "Split testsuite into M pieces and only run one")->envname("LIT_NUM_SHARDS")->group("Test Selection");
    CLI::Option *runShardOpt = litApp.add_option("--run-shard", runShard, "Run shard #N of the testsuite")->envname("LIT_RUN_SHARD")->group("Test Selection");
-
+   
    /// debug
    bool debug;
    bool showSuites;
@@ -396,11 +396,11 @@ int main(int argc, char *argv[])
             }
             suitesAndTests.at(suiteId).push_back(resultTest);
          }
-
+         
          for (const auto &item : suitesAndTests) {
             sortedSuitesAndTests.push_back(std::make_tuple(testsuiteMap.at(item.first),
                                                            item.second));
-
+            
          }
          sortedSuitesAndTests.sort([](const auto &lhs, const auto &rhs) -> bool {
             return std::get<0>(lhs)->getName() < std::get<0>(rhs)->getName();
@@ -564,7 +564,7 @@ int main(int argc, char *argv[])
       try {
          run.executeTests(display, threadNumbers, maxTime);
       } catch (...) {
-
+         
       }
       display->finish();
       size_t testingTime = static_cast<size_t>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime).count());
@@ -664,7 +664,7 @@ int main(int argc, char *argv[])
             std::get<3>(bySuite[suite]).push_back(test);
             if (test->getResult()->getCode()->isFailure()) {
                std::get<1>(bySuite[suite]) += 1;
-
+               
             } else if (test->getResult()->getCode() == polar::lit::UNSUPPORTED) {
                std::get<2>(bySuite[suite]) += 1;
             } else {
@@ -709,5 +709,5 @@ int main(int argc, char *argv[])
       eptr = std::current_exception();
    }
    general_exception_handler(eptr);
-
+   
 }

@@ -1685,6 +1685,7 @@ ExecScriptResult execute_script(TestPointer test, LitConfigPointer litConfig,
    if (returnCode == -1 || returnCode == -2) {
       if (returnCode == -2) {
          errorMsg = format_string("Reached timeout of %d seconds", litConfig->getMaxIndividualTestTime());
+         return std::make_tuple("", "", returnCode, errorMsg);
       }
       return std::make_tuple("", errorMsg, returnCode, "");
    } else {

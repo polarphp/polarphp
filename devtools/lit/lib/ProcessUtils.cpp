@@ -63,12 +63,14 @@ std::tuple<std::list<pid_t>, bool> call_pgrep_command(pid_t pid) noexcept
 {
    polar::utils::OptionalError<std::string> findResult = polar::sys::find_program_by_name("pgrep");
    assert(findResult && "pgrep command not found.");
-   std::string pidArg = "-P " + std::to_string(pid);
+   std::string pidStr = std::to_string(pid);
    ArrayRef<StringRef> args{
-      pidArg
+      "pgrep",
+      "-P",
+      pidStr
    };
    RunCmdResponse result = execute_and_wait(findResult.get(), args);
-   if (!std::get<0>(result)) {
+   if (0 != std::get<0>(result)) {
       return std::make_tuple(std::list<pid_t>{}, false);
    }
    std::list<int32_t> pids;

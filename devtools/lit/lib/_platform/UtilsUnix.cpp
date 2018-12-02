@@ -26,9 +26,10 @@ void kill_process_and_children(pid_t pid) noexcept
    std::tuple<std::list<pid_t>, bool> result = retrieve_children_pids(pid, true);
    if (std::get<1>(result)) {
       for (pid_t cpid : std::get<0>(result)) {
-         kill(cpid, SIGKILL);
+         ::kill(cpid, SIGKILL);
       }
    }
+   ::kill(pid, SIGKILL);
 }
 
 bool stdcout_isatty()

@@ -153,10 +153,10 @@ TEST_F(ProcessUtilsTest, testRetrieveChildrenPids)
    }
    std::set<pid_t> expectedPids;
    int status = 0;
-   std::tuple<std::list<pid_t>, bool> result = polar::lit::retrieve_children_pids(getpid(), true);
+   std::tuple<std::list<pid_t>, bool> result = polar::lit::retrieve_children_pids(1);
    if (std::get<1>(result)) {
       for (int cpid : std::get<0>(result)) {
-         expectedPids.insert(cpid);
+         std::cout << cpid<< std::endl;
       }
    }
    while (-1 != wait(&status) || errno == EINTR || errno == EAGAIN)

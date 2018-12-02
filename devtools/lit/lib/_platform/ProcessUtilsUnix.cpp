@@ -259,8 +259,7 @@ ProcessInfo wait_with_timer(
       pid_t cpid = processInfo.getPid();
       timer.setTimeoutHandler([cpid, &isTimeout]() {
          isTimeout.store(true);
-         ::kill(cpid, SIGKILL);
-         //kill_process_and_children(cpid);
+         kill_process_and_children(cpid);
       });
       timer.start(true);
    } else if (secondsToWait == 0) {
