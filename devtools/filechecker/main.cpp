@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
    bool enableVarScope;
    bool allowDeprecatedDagOverlap;
    bool verbose;
-   bool dumpInputOnFailure;
+   int dumpInputOnFailure = 0;
 
    cmdParser.add_option("check-filename", checkFilename, "<check-file>")->required(true);
    cmdParser.add_option("--input-file", inputFilename, "File to check (defaults to stdin)")->default_val("-")
@@ -68,14 +68,16 @@ int main(int argc, char *argv[])
                                                                                    "provided for convenience as old tests are migrated to the new"
                                                                                    "non-overlapping CHECK-DAG implementation.");
    cmdParser.add_flag("-v", verbose, "Print directive pattern matches, you can specify --vv to print extra verbose info.");
-   CLI::Option *dumpInputOnFailureOpt = cmdParser.add_flag("--dump-input-on-failure", dumpInputOnFailure, "Dump original input to stderr before failing."
+   CLI::Option *dumpInputOnFailureOpt = cmdParser.add_option("--dump-input-on-failure", dumpInputOnFailure, "Dump original input to stderr before failing."
                                                                                                           "The value can be also controlled using "
                                                                                                           "FILECHECK_DUMP_INPUT_ON_FAILURE environment variable.");
    CLI11_PARSE(cmdParser, argc, argv);
    if (dumpInputOnFailureOpt->count() == 0) {
       std::string dumpInputOnFailureEnv = StringRef(std::getenv("FILECHECK_DUMP_INPUT_ON_FAILURE")).trim().toLower();
       if (!dumpInputOnFailureEnv.empty() && (dumpInputOnFailureEnv == "true" || dumpInputOnFailureEnv == "on" || dumpInputOnFailureEnv == "1")) {
-         dumpInputOnFailure = true;
+         dumpInputOnFailure = 1;
+      } else {
+         dumpInputOnFailure = 0;
       }
    }
    if (!checkPrefix.empty()) {
@@ -144,7 +146,7 @@ int main(int argc, char *argv[])
                                 SMLocation());
 
    int exitCode = check_input(sourceMgr, inputFileText, checkStrings) ? EXIT_SUCCESS : 1;
-   if (exitCode == 1 && dumpInputOnFailure) {
+   if (exitCode == 1 && dumpInputOnFailure != 0) {
       error_stream() << "Full input was:\n<<<<<<\n" << inputFileText << "\n>>>>>>\n";
    }
    return exitCode;
