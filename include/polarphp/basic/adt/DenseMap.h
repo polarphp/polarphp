@@ -28,6 +28,7 @@
 #include <new>
 #include <type_traits>
 #include <utility>
+#include <initializer_list>
 
 namespace polar {
 namespace basic {
@@ -43,6 +44,35 @@ namespace internal {
 template <typename KeyType, typename ValueType>
 struct DenseMapPair : public std::pair<KeyType, ValueType>
 {
+   // FIXME: Switch to inheriting constructors when we drop support for older
+   //        clang versions.
+   // NOTE: This default constructor is declared with '{}' rather than
+   //       '= default' to work around a separate bug in clang-3.8. This can
+   //       also go when we switch to inheriting constructors.
+   DenseMapPair() {}
+
+   DenseMapPair(const KeyType &Key, const ValueType &Value)
+      : std::pair<KeyType, ValueType>(Key, Value) {}
+
+   DenseMapPair(KeyType &&Key, ValueType &&Value)
+      : std::pair<KeyType, ValueType>(std::move(Key), std::move(Value))
+   {}
+
+   template <typename AltKeyT, typename AltValueT>
+   DenseMapPair(AltKeyT &&AltKey, AltValueT &&AltValue,
+                typename std::enable_if<
+                std::is_convertible<AltKeyT, KeyType>::value &&
+                std::is_convertible<AltValueT, ValueType>::value>::type * = 0)
+      : std::pair<KeyType, ValueType>(std::forward<AltKeyT>(AltKey),
+                                      std::forward<AltValueT>(AltValue)) {}
+
+   template <typename AltPairT>
+   DenseMapPair(AltPairT &&AltPair,
+                typename std::enable_if<std::is_convertible<
+                AltPairT, std::pair<KeyType, ValueType>>::value>::type * = 0)
+      : std::pair<KeyType, ValueType>(std::forward<AltPairT>(AltPair))
+   {}
+
    KeyType &getFirst()
    {
       return std::pair<KeyType, ValueType>::first;
@@ -66,8 +96,10 @@ struct DenseMapPair : public std::pair<KeyType, ValueType>
 } // end namespace internal
 
 template <
-      typename KeyType, typename ValueType, typename KeyInfoType = DenseMapInfo<KeyType>,
-      typename Bucket = internal::DenseMapPair<KeyType, ValueType>, bool IsConst = false>
+      typename KeyType, typename ValueType,
+      typename KeyInfoType = DenseMapInfo<KeyType>,
+      typename Bucket = polar::basic::internal::DenseMapPair<KeyType, ValueType>,
+      bool IsConst = false>
 class DenseMapIterator;
 
 template <typename DerivedType, typename KeyType, typename ValueType, typename KeyInfoType,
@@ -472,7 +504,7 @@ protected:
       setNumTombstones(other.getNumTombstones());
 
       if (IsPodLike<KeyType>::value && IsPodLike<ValueType>::value) {
-         memcpy(reinterpret_cast<void *>(getBuckets()), reinterpret_cast<const void *>(other.getBuckets()),
+         memcpy(reinterpret_cast<void *>(getBuckets()), other.getBuckets(),
                 getNumBuckets() * sizeof(BucketType));
       } else {
          for (size_t i = 0; i < getNumBuckets(); ++i) {
@@ -744,9 +776,48 @@ public:
    }
 };
 
+/// Equality comparison for DenseMap.
+///
+/// Iterates over elements of lhs confirming that each (key, value) pair in lhs
+/// is also in rhs, and that no additional pairs are in rhs.
+/// Equivalent to N calls to rhs.find and N value comparisons. Amortized
+/// complexity is linear, worst case is O(N^2) (if every hash collides).
+template <typename DerivedT, typename KeyT, typename ValueT, typename KeyInfoT,
+          typename BucketT>
+bool operator==(
+      const DenseMapBase<DerivedT, KeyT, ValueT, KeyInfoT, BucketT> &lhs,
+      const DenseMapBase<DerivedT, KeyT, ValueT, KeyInfoT, BucketT> &rhs)
+{
+   if (lhs.size() != rhs.size()) {
+      return false;
+   }
+
+   for (auto &kv : lhs) {
+      auto iter = rhs.find(kv.first);
+      if (iter == rhs.end() || iter->second != kv.second) {
+         return false;
+      }
+   }
+
+   return true;
+}
+
+/// Inequality comparison for DenseMap.
+///
+/// Equivalent to !(lhs == rhs). See operator== for performance notes.
+template <typename DerivedT, typename KeyT, typename ValueT, typename KeyInfoT,
+          typename BucketT>
+bool operator!=(
+      const DenseMapBase<DerivedT, KeyT, ValueT, KeyInfoT, BucketT> &lhs,
+      const DenseMapBase<DerivedT, KeyT, ValueT, KeyInfoT, BucketT> &rhs)
+{
+   return !(lhs == rhs);
+}
+
+
 template <typename KeyType, typename ValueType,
           typename KeyInfoType = DenseMapInfo<KeyType>,
-          typename BucketType = internal::DenseMapPair<KeyType, ValueType>>
+          typename BucketType = polar::basic::internal::DenseMapPair<KeyType, ValueType>>
 class DenseMap : public DenseMapBase<DenseMap<KeyType, ValueType, KeyInfoType, BucketType>,
       KeyType, ValueType, KeyInfoType, BucketType>
 {
@@ -786,6 +857,12 @@ public:
    {
       init(std::distance(iter, end));
       this->insert(iter, end);
+   }
+
+   DenseMap(std::initializer_list<typename BaseType::value_type> values)
+   {
+      init(values.size());
+      this->insert(values.begin(), values.end());
    }
 
    ~DenseMap()
@@ -927,7 +1004,7 @@ private:
 
 template <typename KeyType, typename ValueType, unsigned inlineBuckets = 4,
           typename KeyInfoType = DenseMapInfo<KeyType>,
-          typename BucketType = internal::DenseMapPair<KeyType, ValueType>>
+          typename BucketType = polar::basic::internal::DenseMapPair<KeyType, ValueType>>
 class SmallDenseMap
       : public DenseMapBase<
       SmallDenseMap<KeyType, ValueType, inlineBuckets, KeyInfoType, BucketType>, KeyType,

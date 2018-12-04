@@ -457,7 +457,7 @@ public:
    /// resize - Grow or shrink the bitvector.
    void resize(unsigned size, bool flag = false)
    {
-      if (size > getBitcapacity()) {
+      if (size > getBitCapacity()) {
          unsigned oldcapacity = m_bits.getSize();
          grow(size);
          initWords(m_bits.dropFront(oldcapacity), flag);
@@ -479,7 +479,7 @@ public:
 
    void reserve(unsigned size)
    {
-      if (size > getBitcapacity()) {
+      if (size > getBitCapacity()) {
          grow(size);
       }
    }
@@ -606,6 +606,31 @@ public:
    bool test(unsigned idx) const
    {
       return (*this)[idx];
+   }
+
+   // Push single bit to end of vector.
+   void pushBack(bool value)
+   {
+      unsigned oldSize = m_size;
+      unsigned newSize = m_size + 1;
+
+      // Resize, which will insert zeros.
+      // If we already fit then the unused bits will be already zero.
+      if (newSize > getBitCapacity()) {
+         resize(newSize, false);
+      } else {
+         m_size = newSize;
+      }
+
+      // If true, set single bit.
+      if (value) {
+          set(oldSize);
+      }
+   }
+
+   inline void push_back(bool value)
+   {
+      pushBack(value);
    }
 
    /// Test if any common bits are set.
@@ -838,7 +863,7 @@ public:
 
       m_size = rhs.size();
       unsigned rhsWords = numBitWords(m_size);
-      if (m_size <= getBitcapacity()) {
+      if (m_size <= getBitCapacity()) {
          if (m_size) {
             std::memcpy(m_bits.getData(), rhs.m_bits.getData(), rhsWords * sizeof(BitWord));
          }
@@ -1077,7 +1102,7 @@ public:
       return m_bits.getSize() * sizeof(BitWord);
    }
 
-   size_t getBitcapacity() const
+   size_t getBitCapacity() const
    {
       return m_bits.getSize() * BITWORD_SIZE;
    }
