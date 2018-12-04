@@ -9,6 +9,9 @@
 #
 # Created by polarboy on 2018/08/26.
 
+add_subdirectory(ast)
+add_subdirectory(parser)
+add_subdirectory(syntax)
 add_subdirectory(basic)
 add_subdirectory(utils)
 add_subdirectory(vm)
