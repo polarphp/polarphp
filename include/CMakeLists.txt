@@ -18,8 +18,23 @@ polar_collect_files(
 
 polar_collect_files(
    TYPE_HEADER
+   DIR polarphp/ast
+   OUTPUT_VAR POLAR_AST_HEADERS)
+
+polar_collect_files(
+   TYPE_HEADER
    DIR polarphp/basic
-   OUTPUT_VAR POLARPHP_BASIC_HEADERS)
+   OUTPUT_VAR POLAR_BASIC_HEADERS)
+
+polar_collect_files(
+   TYPE_HEADER
+   DIR polarphp/parser
+   OUTPUT_VAR POLAR_PARSER_HEADERS)
+
+polar_collect_files(
+   TYPE_HEADER
+   DIR polarphp/syntax
+   OUTPUT_VAR POLAR_SYNTAX_HEADERS)
 
 polar_collect_files(
    TYPE_HEADER
@@ -32,7 +47,10 @@ polar_collect_files(
    OUTPUT_VAR POLAR_RUNTIME_HEADERS)
 
 polar_merge_list(POLAR_HEADERS POLAR_GLOBAL_HEADERS)
-polar_merge_list(POLAR_HEADERS POLARPHP_BASIC_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_AST_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_BASIC_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_PARSER_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_SYNTAX_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_UTILS_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_RUNTIME_HEADERS)
 

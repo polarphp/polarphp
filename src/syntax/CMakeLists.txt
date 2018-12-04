@@ -16,7 +16,7 @@ polar_collect_files(
 polar_merge_list(POLAR_SYNTAX_SOURCES POLAR_HEADERS)
 
 polar_add_library(PolarSyntax SHARED BUILDTREE_ONLY
-   ${POLAR_AST_SOURCES}
+   ${POLAR_SYNTAX_SOURCES}
    LINK_LIBS PolarUtils PolarBasic)
 
 set_target_properties(
