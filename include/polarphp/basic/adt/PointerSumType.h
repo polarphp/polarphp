@@ -13,7 +13,9 @@
 #define POLAR_BASIC_ADT_POINTER_SUM_TYPE_H
 
 #include "polarphp/basic/adt/DenseMapInfo.h"
+#include "polarphp/basic/adt/Bit.h"
 #include "polarphp/utils/PointerLikeTypeTraits.h"
+
 #include <cassert>
 #include <cstdint>
 #include <type_traits>
@@ -63,17 +65,51 @@ struct PointerSumTypeHelper;
 /// and may be desirable to set to a state that is particularly desirable to
 /// default construct.
 ///
+/// Having a supported zero-valued tag also enables getting the address of a
+/// pointer stored with that tag provided it is stored in its natural bit
+/// representation. This works because in the case of a zero-valued tag, the
+/// pointer's value is directly stored into this object and we can expose the
+/// address of that internal storage. This is especially useful when building an
+/// `ArrayRef` of a single pointer stored in a sum type.
+///
 /// There is no support for constructing or accessing with a dynamic tag as
 /// that would fundamentally violate the type safety provided by the sum type.
 template <typename TagT, typename... MemberTs>
 class PointerSumType
 {
-   uintptr_t m_value = 0;
-
    using HelperT = internal::PointerSumTypeHelper<TagT, MemberTs...>;
+   // We keep both the raw value and the min tag value's pointer in a union. When
+   // the minimum tag value is zero, this allows code below to cleanly expose the
+   // address of the zero-tag pointer instead of just the zero-tag pointer
+   // itself. This is especially useful when building `ArrayRef`s out of a single
+   // pointer. However, we have to carefully access the union due to the active
+   // member potentially changing. When we *store* a new value, we directly
+   // access the union to allow us to store using the obvious types. However,
+   // when we *read* a value, we copy the underlying storage out to avoid relying
+   // on one member or the other being active.
+   union StorageT {
+      // Ensure we get a null default constructed value. We don't use a member
+      // initializer because some compilers seem to not implement those correctly
+      // for a union.
+      StorageT() : m_value(0) {}
 
+      uintptr_t m_value;
+
+      typename HelperT::template Lookup<HelperT::MinTag>::PointerT m_minTagPointer;
+   };
+
+   StorageT m_storage;
 public:
    constexpr PointerSumType() = default;
+   /// A typed setter to a given tagged member of the sum type.
+   template <TagT N>
+   void set(typename HelperT::template Lookup<N>::PointerT pointer)
+   {
+      void *value = HelperT::template Lookup<N>::TraitsT::getAsVoidPointer(pointer);
+      assert((reinterpret_cast<uintptr_t>(value) & HelperT::TagMask) == 0 &&
+             "pointer is insufficiently aligned to store the discriminant!");
+      m_storage.m_value = reinterpret_cast<uintptr_t>(value) | N;
+   }
 
    /// A typed constructor for a specific tagged member of the sum type.
    template <TagT N>
@@ -81,16 +117,19 @@ public:
    create(typename HelperT::template Lookup<N>::PointerT pointer)
    {
       PointerSumType result;
-      void *value = HelperT::template Lookup<N>::TraitsT::getAsVoidPointer(pointer);
-      assert((reinterpret_cast<uintptr_t>(value) & HelperT::TagMask) == 0 &&
-             "Pointer is insufficiently aligned to store the discriminant!");
-      result.m_value = reinterpret_cast<uintptr_t>(value) | N;
+      result.set<N>(pointer);
       return result;
+   }
+
+   /// Clear the value to null with the min tag type.
+   void clear()
+   {
+      set<HelperT::MinTag>(nullptr);
    }
 
    TagT getTag() const
    {
-      return static_cast<TagT>(m_value & HelperT::TagMask);
+      return static_cast<TagT>(getOpaqueValue() & HelperT::TagMask);
    }
 
    template <TagT N> bool is() const
@@ -101,7 +140,7 @@ public:
    template <TagT N>
    typename HelperT::template Lookup<N>::PointerT get() const
    {
-      void *ptr = is<N>() ? getImpl() : nullptr;
+      void *ptr = is<N>() ? getVoidPtr() : nullptr;
       return HelperT::template Lookup<N>::TraitsT::getFromVoidPointer(ptr);
    }
 
@@ -109,53 +148,84 @@ public:
    typename HelperT::template Lookup<N>::PointerT cast() const
    {
       assert(is<N>() && "This instance has a different active member.");
-      return HelperT::template Lookup<N>::TraitsT::getFromVoidPointer(getImpl());
+      return HelperT::template Lookup<N>::TraitsT::getFromVoidPointer(getVoidPtr());
+   }
+
+   /// If the tag is zero and the pointer's value isn't changed when being
+   /// stored, get the address of the stored value type-punned to the zero-tag's
+   /// pointer type.
+   typename HelperT::template Lookup<HelperT::MinTag>::PointerT const *
+   getAddrOfZeroTagPointer() const
+   {
+      return const_cast<PointerSumType *>(this)->getAddrOfZeroTagPointer();
+   }
+
+   /// If the tag is zero and the pointer's value isn't changed when being
+   /// stored, get the address of the stored value type-punned to the zero-tag's
+   /// pointer type.
+   typename HelperT::template Lookup<HelperT::MinTag>::PointerT *
+   getAddrOfZeroTagPointer()
+   {
+      static_assert(HelperT::MinTag == 0, "Non-zero minimum tag value!");
+      assert(is<HelperT::MinTag>() && "The active tag is not zero!");
+      // Store the initial value of the pointer when read out of our storage.
+      auto initialPtr = get<HelperT::MinTag>();
+      // Now update the active member of the union to be the actual pointer-typed
+      // member so that accessing it indirectly through the returned address is
+      // valid.
+      m_storage.m_minTagPointer = initialPtr;
+      // Finally, validate that this was a no-op as expected by reading it back
+      // out using the same underlying-storage read as above.
+      assert(initialPtr == get<HelperT::MinTag>() &&
+             "Switching to typed storage changed the pointer returned!");
+      // Now we can correctly return an address to typed storage.
+      return &m_storage.m_minTagPointer;
    }
 
    explicit operator bool() const
    {
-      return m_value & HelperT::PointerMask;
+      return getOpaqueValue() & HelperT::PointerMask;
    }
 
    bool operator==(const PointerSumType &other) const
    {
-      return m_value == other.m_value;
+      return getOpaqueValue() == other.getOpaqueValue();
    }
 
    bool operator!=(const PointerSumType &other) const
    {
-      return m_value != other.m_value;
+      return getOpaqueValue() != other.getOpaqueValue();
    }
 
    bool operator<(const PointerSumType &other) const
    {
-      return m_value < other.m_value;
+      return getOpaqueValue() < other.getOpaqueValue();
    }
 
    bool operator>(const PointerSumType &other) const
    {
-      return m_value > other.m_value;
+      return getOpaqueValue() > other.getOpaqueValue();
    }
 
    bool operator<=(const PointerSumType &other) const
    {
-      return m_value <= other.m_value;
+      return getOpaqueValue() <= other.getOpaqueValue();
    }
 
    bool operator>=(const PointerSumType &other) const
    {
-      return m_value >= other.m_value;
+      return getOpaqueValue() >= other.getOpaqueValue();
    }
 
    uintptr_t getOpaqueValue() const
    {
-      return m_value;
+      return bit_cast<uintptr_t>(m_storage);
    }
 
 protected:
-   void *getImpl() const
+   void *getVoidPtr() const
    {
-      return reinterpret_cast<void *>(m_value & HelperT::PointerMask);
+      return reinterpret_cast<void *>(getOpaqueValue() & HelperT::PointerMask);
    }
 };
 
@@ -194,15 +264,17 @@ struct PointerSumTypeHelper : MemberTs...
    // would be amazingly easier with good constexpr support.
    template <uintptr_t V, uintptr_t... Vs>
    struct Min : std::integral_constant<
-         uintptr_t, (V < Min<Vs...>::value ? V : Min<Vs...>::value)> {
+         uintptr_t, (V < Min<Vs...>::value ? V : Min<Vs...>::value)>
+   {
    };
    template <uintptr_t V>
    struct Min<V> : std::integral_constant<uintptr_t, V> {};
    enum { NumTagBits = Min<MemberTs::TraitsT::NumLowBitsAvailable...>::value };
 
    // Also compute the smallest discriminant and various masks for convenience.
+   constexpr static TagT MinTag =
+         static_cast<TagT>(Min<MemberTs::Tag...>::value);
    enum : uint64_t {
-      MinTag = Min<MemberTs::Tag...>::value,
       PointerMask = static_cast<uint64_t>(-1) << NumTagBits,
       TagMask = ~PointerMask
    };

@@ -31,8 +31,9 @@ class ImmutableListImpl : public FoldingSetNode
    T m_head;
    const ImmutableListImpl* m_tail;
 
-   ImmutableListImpl(const T &head, const ImmutableListImpl* tail = nullptr)
-      : m_head(head), m_tail(tail)
+   template <typename ElemT>
+   ImmutableListImpl(ElemT &&head, const ImmutableListImpl *tail = nullptr)
+      : m_head(std::forward<ElemT>(head)), m_tail(tail)
    {}
 
 public:
@@ -76,15 +77,17 @@ class ImmutableList
 public:
    using value_type = T;
    using Factory = ImmutableListFactory<T>;
+   static_assert(std::is_trivially_destructible<T>::value,
+                 "T must be trivially destructible!");
 
 private:
-   const ImmutableListImpl<T>* m_list;
+   const ImmutableListImpl<T> *m_list;
 
 public:
    // This constructor should normally only be called by ImmutableListFactory<T>.
    // There may be cases, however, when one needs to extract the internal pointer
    // and reconstruct a list object from that pointer.
-   ImmutableList(const ImmutableListImpl<T>* other = nullptr) : m_list(other)
+   ImmutableList(const ImmutableListImpl<T> *other = nullptr) : m_list(other)
    {}
 
    const ImmutableListImpl<T>* getInternalPointer() const
@@ -94,7 +97,7 @@ public:
 
    class iterator
    {
-      const ImmutableListImpl<T>* m_list = nullptr;
+      const ImmutableListImpl<T> *m_list = nullptr;
 
    public:
       iterator() = default;
@@ -120,6 +123,11 @@ public:
       const value_type &operator*() const
       {
          return m_list->getHead();
+      }
+
+      const typename std::remove_reference<value_type>::type* operator->() const
+      {
+         return &m_list->getHead();
       }
 
       ImmutableList getList() const
@@ -174,15 +182,15 @@ public:
    }
 
    /// getHead - Returns the head of the list.
-   const T &getHead()
+   const T &getHead() const
    {
-      assert(!isEmpty() & &"Cannot get the head of an empty list.");
+      assert(!isEmpty() &&"Cannot get the head of an empty list.");
       return m_list->getHead();
    }
 
    /// getTail - Returns the tail of the list, which is another (possibly empty)
    ///  ImmutableList.
-   ImmutableList getTail()
+   ImmutableList getTail() const
    {
       return m_list ? m_list->getTail() : nullptr;
    }
@@ -228,7 +236,8 @@ public:
       }
    }
 
-   POLAR_NODISCARD ImmutableList<T> concat(const T &head, ImmutableList<T> tail)
+   template <typename ElemT>
+   POLAR_NODISCARD ImmutableList<T> concat(ElemT &&head, ImmutableList<T> tail)
    {
       // profile the new list to see if it already exists in our cache.
       FoldingSetNodeId id;
@@ -242,7 +251,7 @@ public:
          // The list does not exist in our cache.  Create it.
          BumpPtrAllocator &allocator = getAllocator();
          list = (ListType*) allocator.allocate<ListType>();
-         new (list) ListType(head, tailImpl);
+         new (list) ListType(std::forward<ElemT>(head), tailImpl);
 
          // Insert the new list into the cache.
          m_cache.InsertNode(list, insertPos);
@@ -250,9 +259,17 @@ public:
       return list;
    }
 
-   POLAR_NODISCARD ImmutableList<T> add(const T &dest, ImmutableList<T> list)
+   template <typename ElemT>
+   POLAR_NODISCARD ImmutableList<T> add(ElemT &&data, ImmutableList<T> list)
    {
-      return concat(dest, list);
+      return concat(std::forward<ElemT>(data), list);
+   }
+
+   template <typename ...CtorArgs>
+   POLAR_NODISCARD ImmutableList<T> emplace(ImmutableList<T> tail,
+                                            CtorArgs &&...args)
+   {
+      return concat(T(std::forward<CtorArgs>(args)...), tail);
    }
 
    ImmutableList<T> getEmptyList() const
@@ -260,9 +277,10 @@ public:
       return ImmutableList<T>(nullptr);
    }
 
-   ImmutableList<T> create(const T &other)
+   template <typename ElemT>
+   ImmutableList<T> create(ElemT &&data)
    {
-      return concat(other, getEmptyList());
+      return concat(std::forward<ElemT>(data), getEmptyList());
    }
 };
 

@@ -360,6 +360,7 @@ class ReversePostOrderTraversal
 
 public:
    using rpo_iterator = typename std::vector<NodeRef>::reverse_iterator;
+   using const_rpo_iterator = typename std::vector<NodeRef>::const_reverse_iterator;
 
    ReversePostOrderTraversal(GraphT graph)
    {
@@ -372,9 +373,19 @@ public:
       return m_blocks.rbegin();
    }
 
+   const_rpo_iterator begin() const
+   {
+      return m_blocks.crbegin();
+   }
+
    rpo_iterator end()
    {
       return m_blocks.rend();
+   }
+
+   const_rpo_iterator end() const
+   {
+      return m_blocks.crend();
    }
 };
 

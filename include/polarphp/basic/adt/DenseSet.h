@@ -14,6 +14,7 @@
 
 #include "polarphp/basic/adt/DenseMap.h"
 #include "polarphp/basic/adt/DenseMapInfo.h"
+#include "polarphp/utils/MathExtras.h"
 #include "polarphp/utils/TypeTraits.h"
 #include <algorithm>
 #include <cstddef>
@@ -67,7 +68,8 @@ public:
 /// or the equivalent SmallDenseMap type.  ValueInfoType must implement the
 /// DenseMapInfo "concept".
 template <typename ValueType, typename MapType, typename ValueInfoType>
-class DenseSetImpl {
+class DenseSetImpl
+{
    static_assert(sizeof(typename MapType::value_type) == sizeof(ValueType),
                  "DenseMap buckets unexpectedly large!");
    MapType m_theMap;
@@ -84,7 +86,7 @@ public:
    {}
 
    DenseSetImpl(std::initializer_list<ValueType> elems)
-      : DenseSetImpl(elems.size())
+      : DenseSetImpl(polar::utils::power_of_two_ceil(elems.size()))
    {
       insert(elems.begin(), elems.end());
    }
@@ -210,8 +212,8 @@ public:
    public:
       using difference_type = typename MapType::const_iterator::difference_type;
       using value_type = ValueType;
-      using pointer = value_type *;
-      using reference = value_type &;
+      using pointer = const value_type *;
+      using reference = const value_type &;
       using iterator_category = std::forward_iterator_tag;
 
       ConstIterator() = default;
@@ -349,6 +351,37 @@ public:
       }
    }
 };
+
+/// Equality comparison for DenseSet.
+///
+/// Iterates over elements of lhs confirming that each element is also a member
+/// of rhs, and that rhs contains no additional values.
+/// Equivalent to N calls to rhs.count. Amortized complexity is linear, worst
+/// case is O(N^2) (if every hash collides).
+template <typename ValueT, typename MapTy, typename ValueInfoT>
+bool operator==(const DenseSetImpl<ValueT, MapTy, ValueInfoT> &lhs,
+                const DenseSetImpl<ValueT, MapTy, ValueInfoT> &rhs)
+{
+   if (lhs.size() != rhs.size()) {
+      return false;
+   }
+   for (auto &e : lhs) {
+      if (!rhs.count(e)) {
+         return false;
+      }
+   }
+   return true;
+}
+
+/// Inequality comparison for DenseSet.
+///
+/// Equivalent to !(lhs == rhs). See operator== for performance notes.
+template <typename ValueT, typename MapTy, typename ValueInfoT>
+bool operator!=(const DenseSetImpl<ValueT, MapTy, ValueInfoT> &lhs,
+                const DenseSetImpl<ValueT, MapTy, ValueInfoT> &rhs)
+{
+   return !(lhs == rhs);
+}
 
 } // end namespace internal
 

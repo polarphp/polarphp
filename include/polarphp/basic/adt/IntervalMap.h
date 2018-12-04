@@ -109,6 +109,8 @@
 #include "polarphp/utils/AlignOf.h"
 #include "polarphp/utils/Allocator.h"
 #include "polarphp/utils/RecyclingAllocator.h"
+#include "polarphp/basic/adt/Bit.h"
+
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -1129,6 +1131,7 @@ public:
 
 private:
    // The root data is either a RootLeaf or a RootBranchData instance.
+   POLAR_ALIGNAS(RootLeaf) POLAR_ALIGNAS(RootBranchData)
    AlignedCharArrayUnion<RootLeaf, RootBranchData> m_data;
 
    // Tree height.
@@ -1143,16 +1146,11 @@ private:
    // Allocator used for creating external nodes.
    Allocator &m_allocator;
 
-   /// dataAs - Represent data as a node type without breaking aliasing rules.
+    /// Represent data as a node type without breaking aliasing rules.
    template <typename T>
    T &getDataAs() const
    {
-      union {
-         const char *d;
-         T *t;
-      } u;
-      u.d = m_data.m_buffer;
-      return *u.t;
+      *bit_cast<T *>(const_cast<char *>(m_data.m_buffer));
    }
 
    const RootLeaf &getRootLeaf() const

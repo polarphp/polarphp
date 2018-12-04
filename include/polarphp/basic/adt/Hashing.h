@@ -111,7 +111,7 @@ HashCode hash_value(const std::basic_string<T> &arg);
 /// undone. This makes it thread-hostile and very hard to use outside of
 /// immediately on start of a simple program designed for reproducible
 /// behavior.
-void set_fixed_execution_hash_seed(size_t fixed_value);
+void set_fixed_execution_hash_seed(uint64_t fixedValue);
 
 
 // All of the implementation details of actually computing the various hash
@@ -313,9 +313,9 @@ struct HashState
 /// This variable can be set using the \see llvm::set_fixed_execution_seed
 /// function. See that function for details. Do not, under any circumstances,
 /// set or read this variable.
-extern size_t fixed_seed_override;
+extern uint64_t fixed_seed_override;
 
-inline size_t get_execution_seed()
+inline uint64_t get_execution_seed()
 {
    // FIXME: This needs to be a per-execution seed. This is just a placeholder
    // implementation. Switching to a per-execution seed is likely to flush out
@@ -323,9 +323,9 @@ inline size_t get_execution_seed()
    //
    // However, if there is a fixed seed override set the first time this is
    // called, return that instead of the per-execution seed.
-   const uint64_t seed_prime = 0xff51afd7ed558ccdULL;
-   static size_t seed = fixed_seed_override ? fixed_seed_override
-                                            : (size_t)seed_prime;
+   const uint64_t seedPrime = 0xff51afd7ed558ccdULL;
+   static uint64_t seed = fixed_seed_override ? fixed_seed_override
+                                            : (size_t)seedPrime;
    return seed;
 }
 
@@ -408,7 +408,7 @@ bool store_and_advance(char *&bufferPtr, char *bufferEnd, const T& value,
 template <typename InputIteratorT>
 HashCode hash_combine_range_impl(InputIteratorT first, InputIteratorT last)
 {
-   const size_t seed = get_execution_seed();
+   const uint64_t seed = get_execution_seed();
    char buffer[64], *bufferPtr = buffer;
    char *const bufferEnd = std::end(buffer);
    while (first != last && store_and_advance(bufferPtr, bufferEnd,
@@ -506,7 +506,7 @@ struct HashCombineRecursiveHelper
 {
    char buffer[64];
    HashState state;
-   const size_t seed;
+   const uint64_t seed;
 
 public:
    /// \brief Construct a recursive hash combining helper.
