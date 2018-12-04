@@ -17,6 +17,7 @@
 #include <climits>
 #include <cstring>
 #include <string>
+#include <optional>
 
 namespace polar {
 
@@ -101,7 +102,7 @@ public:
       TOWARD_ZERO,
       UP,
    };
-   static const WordType WORD_MAX = ~WordType(0);
+   static const WordType WORDTYPE_MAX = ~WordType(0);
 
 private:
    /// This union is used to store the integer value. When the
@@ -175,7 +176,7 @@ private:
       unsigned WordBits = ((m_bitWidth-1) % APINT_BITS_PER_WORD) + 1;
 
       // Mask out the high bits.
-      uint64_t mask = WORD_MAX >> (APINT_BITS_PER_WORD - WordBits);
+      uint64_t mask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - WordBits);
       if (isSingleWord()) {
          m_intValue.m_value &= mask;
       } else {
@@ -449,7 +450,7 @@ public:
    bool isAllOnesValue() const
    {
       if (isSingleWord()) {
-         return m_intValue.m_value == WORD_MAX >> (APINT_BITS_PER_WORD - m_bitWidth);
+         return m_intValue.m_value == WORDTYPE_MAX >> (APINT_BITS_PER_WORD - m_bitWidth);
       }
       return countTrailingOnesSlowCase() == m_bitWidth;
    }
@@ -577,7 +578,7 @@ public:
       assert(numBits != 0 && "numBits must be non-zero");
       assert(numBits <= m_bitWidth && "numBits out of range");
       if (isSingleWord()) {
-         return m_intValue.m_value == (WORD_MAX >> (APINT_BITS_PER_WORD - numBits));
+         return m_intValue.m_value == (WORDTYPE_MAX >> (APINT_BITS_PER_WORD - numBits));
       }
       unsigned ones = countTrailingOnesSlowCase();
       return (numBits == ones) &&
@@ -654,7 +655,7 @@ public:
    /// \returns the all-ones value for an ApInt of the specified bit-width.
    static ApInt getAllOnesValue(unsigned numBits)
    {
-      return ApInt(numBits, WORD_MAX, true);
+      return ApInt(numBits, WORDTYPE_MAX, true);
    }
 
    /// Get the '0' value.
@@ -1237,6 +1238,12 @@ public:
    ApInt sshlOverflow(const ApInt &amt, bool &overflow) const;
    ApInt ushlOverflow(const ApInt &amt, bool &overflow) const;
 
+   // Operations that saturate
+   ApInt saddSaturate(const ApInt &rhs) const;
+   ApInt uaddSaturate(const ApInt &rhs) const;
+   ApInt ssubSaturate(const ApInt &rhs) const;
+   ApInt usubSaturate(const ApInt &rhs) const;
+
    /// Array-indexing support.
    ///
    /// \returns the bit value at bitPosition
@@ -1576,7 +1583,7 @@ public:
    void setAllBits()
    {
       if (isSingleWord()) {
-         m_intValue.m_value = WORD_MAX;
+         m_intValue.m_value = WORDTYPE_MAX;
       } else {
          // Set all the bits in all the words.
          memset(m_intValue.m_pValue, -1, getNumWords() * APINT_WORD_SIZE);
@@ -1590,7 +1597,7 @@ public:
    /// Set the given bit to 1 whose position is given as "bitPosition".
    void setBit(unsigned bitPosition)
    {
-      assert(bitPosition <= m_bitWidth && "bitPosition out of range");
+      assert(bitPosition < m_bitWidth && "bitPosition out of range");
       WordType Mask = maskBit(bitPosition);
       if (isSingleWord()) {
          m_intValue.m_value |= Mask;
@@ -1615,7 +1622,7 @@ public:
          return;
       }
       if (loBit < APINT_BITS_PER_WORD && hiBit <= APINT_BITS_PER_WORD) {
-         uint64_t mask = WORD_MAX >> (APINT_BITS_PER_WORD - (hiBit - loBit));
+         uint64_t mask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - (hiBit - loBit));
          mask <<= loBit;
          if (isSingleWord()) {
             m_intValue.m_value |= mask;
@@ -1660,7 +1667,7 @@ public:
    /// Set the given bit to 0 whose position is given as "bitPosition".
    void clearBit(unsigned bitPosition)
    {
-      assert(bitPosition <= m_bitWidth && "bitPosition out of range");
+      assert(bitPosition < m_bitWidth && "bitPosition out of range");
       WordType mask = ~maskBit(bitPosition);
       if (isSingleWord()) {
          m_intValue.m_value &= mask;
@@ -1679,7 +1686,7 @@ public:
    void flipAllBits()
    {
       if (isSingleWord()) {
-         m_intValue.m_value ^= WORD_MAX;
+         m_intValue.m_value ^= WORDTYPE_MAX;
          clearUnusedBits();
       } else {
          flipAllBitsSlowCase();
@@ -2013,7 +2020,7 @@ public:
    unsigned nearestLogBase2() const
    {
       // Special case when we have a m_bitWidth of 1. If VAL is 1, then we
-      // get 0. If VAL is 0, we get WORD_MAX which gets truncated to
+      // get 0. If VAL is 0, we get WORDTYPE_MAX which gets truncated to
       // UINT32_MAX.
       if (m_bitWidth == 1) {
          return m_intValue.m_value - 1;
@@ -2468,7 +2475,41 @@ ApInt rounding_udiv(const ApInt &lhs, const ApInt &rhs, ApInt::Rounding rm);
 /// Return A sign-divided by B, rounded by the given rounding mode.
 ApInt rounding_sdiv(const ApInt &lhs, const ApInt &rhs, ApInt::Rounding rm);
 
-
+/// Let q(n) = An^2 + Bn + C, and BW = bit width of the value range
+/// (e.g. 32 for i32).
+/// This function finds the smallest number n, such that
+/// (a) n >= 0 and q(n) = 0, or
+/// (b) n >= 1 and q(n-1) and q(n), when evaluated in the set of all
+///     integers, belong to two different intervals [Rk, Rk+R),
+///     where R = 2^BW, and k is an integer.
+/// The idea here is to find when q(n) "overflows" 2^BW, while at the
+/// same time "allowing" subtraction. In unsigned modulo arithmetic a
+/// subtraction (treated as addition of negated numbers) would always
+/// count as an overflow, but here we want to allow values to decrease
+/// and increase as long as they are within the same interval.
+/// Specifically, adding of two negative numbers should not cause an
+/// overflow (as long as the magnitude does not exceed the bith width).
+/// On the other hand, given a positive number, adding a negative
+/// number to it can give a negative result, which would cause the
+/// value to go from [-2^BW, 0) to [0, 2^BW). In that sense, zero is
+/// treated as a special case of an overflow.
+///
+/// This function returns None if after finding k that minimizes the
+/// positive solution to q(n) = kR, both solutions are contained between
+/// two consecutive integers.
+///
+/// There are cases where q(n) > T, and q(n+1) < T (assuming evaluation
+/// in arithmetic modulo 2^BW, and treating the values as signed) by the
+/// virtue of *signed* overflow. This function will *not* find such an n,
+/// however it may find a value of n satisfying the inequalities due to
+/// an *unsigned* overflow (if the values are treated as unsigned).
+/// To find a solution for a signed overflow, treat it as a problem of
+/// finding an unsigned overflow with a range with of BW-1.
+///
+/// The returned value may have a different bit width from the input
+/// coefficients.
+std::optional<ApInt> solve_quadratic_equation_wrap(ApInt A, ApInt B, ApInt C,
+                                                   unsigned rangeWidth);
 } // End of apintops namespace
 
 // See friend declaration above. This additional declaration is required in

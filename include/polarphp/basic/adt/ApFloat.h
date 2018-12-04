@@ -1537,7 +1537,46 @@ inline ApFloat maxnum(const ApFloat &lhs, const ApFloat &rhs)
    return (lhs.compare(rhs) == ApFloat::CmpResult::cmpLessThan) ? rhs : lhs;
 }
 
+
+/// Implements IEEE 754-2018 minimum semantics. Returns the smaller of 2
+/// arguments, propagating NaNs and treating -0 as less than +0.
+POLAR_READONLY
+inline ApFloat minimum(const ApFloat &lhs, const ApFloat &rhs)
+{
+   if (lhs.isNaN()) {
+      return lhs;
+   }
+   if (rhs.isNaN()) {
+      return rhs;
+   }
+
+   if (lhs.isZero() && rhs.isZero() && (lhs.isNegative() != rhs.isNegative())) {
+      return lhs.isNegative() ? lhs : rhs;
+   }
+
+   return (rhs.compare(lhs) == ApFloat::CmpResult::cmpLessThan) ? rhs : lhs;
+}
+
+/// Implements IEEE 754-2018 maximum semantics. Returns the larger of 2
+/// arguments, propagating NaNs and treating -0 as less than +0.
+POLAR_READONLY
+inline ApFloat maximum(const ApFloat &lhs, const ApFloat &rhs)
+{
+   if (lhs.isNaN()) {
+      return lhs;
+   }
+   if (rhs.isNaN()) {
+      return rhs;
+   }
+   if (lhs.isZero() && rhs.isZero() && (lhs.isNegative() != rhs.isNegative())) {
+      return lhs.isNegative() ? rhs : lhs;
+   }
+   return (lhs.compare(rhs) == ApFloat::CmpResult::cmpLessThan) ? rhs : lhs;
+}
+
 } // basic
 } // polar
+
+#undef APFLOAT_DISPATCH_ON_SEMANTICS
 
 #endif // POLARPHP_BASIC_ADT_AP_FLOAT_H

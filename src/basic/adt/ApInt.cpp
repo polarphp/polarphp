@@ -15,6 +15,8 @@
 #include "polarphp/basic/adt/Hashing.h"
 #include "polarphp/basic/adt/SmallString.h"
 #include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/basic/adt/ApInt.h"
+#include "polarphp/basic/adt/Bit.h"
 #include "polarphp/utils/Debug.h"
 #include "polarphp/utils/ErrorHandling.h"
 #include "polarphp/utils/MathExtras.h"
@@ -24,6 +26,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <optional>
 
 namespace polar {
 namespace basic {
@@ -41,6 +44,7 @@ using polar::utils::make64;
 using polar::utils::find_last_set;
 using polar::utils::find_first_set;
 using polar::utils::ZeroBehavior;
+
 namespace {
 /// A utility function for allocating memory, checking for allocation failures,
 /// and ensuring the contents are zeroed.
@@ -88,7 +92,7 @@ void ApInt::initSlowCase(uint64_t value, bool isSigned)
    m_intValue.m_pValue[0] = value;
    if (isSigned && int64_t(value) < 0) {
       for (unsigned i = 1; i < getNumWords(); ++i) {
-         m_intValue.m_pValue[i] = WORD_MAX;
+         m_intValue.m_pValue[i] = WORDTYPE_MAX;
       }
    }
    clearUnusedBits();
@@ -131,19 +135,19 @@ ApInt::ApInt(unsigned numbits, StringRef str, uint8_t radix)
    assert(m_bitWidth && "Bitwidth too small");
    fromString(numbits, str, radix);
 }
-void ApInt::reallocate(unsigned newBitWidth)
+void ApInt::reallocate(unsigned newm_bitWidth)
 {
    // If the number of words is the same we can just change the width and stop.
-   if (getNumWords() == getNumWords(newBitWidth)) {
-      m_bitWidth = newBitWidth;
+   if (getNumWords() == getNumWords(newm_bitWidth)) {
+      m_bitWidth = newm_bitWidth;
       return;
    }
    // If we have an allocation, delete it.
    if (!isSingleWord()) {
       delete [] m_intValue.m_pValue;
    }
-   // Update BitWidth.
-   m_bitWidth = newBitWidth;
+   // Update m_bitWidth.
+   m_bitWidth = newm_bitWidth;
    // If we are supposed to have an allocation, create it.
    if (!isSingleWord()) {
       m_intValue.m_pValue = get_memory(getNumWords());
@@ -197,8 +201,8 @@ ApInt& ApInt::operator--()
    }
    return clearUnusedBits();
 }
-/// Adds the RHS ApInt to this ApInt.
-/// @returns this, after addition of RHS.
+/// Adds the rhs ApInt to this ApInt.
+/// @returns this, after addition of rhs.
 /// @brief Addition assignment operator.
 ApInt& ApInt::operator+=(const ApInt& other)
 {
@@ -219,7 +223,7 @@ ApInt& ApInt::operator+=(uint64_t other)
    }
    return clearUnusedBits();
 }
-/// Subtracts the RHS ApInt from this ApInt
+/// Subtracts the rhs ApInt from this ApInt
 /// @returns this, after subtraction
 /// @brief Subtraction assignment operator.
 ApInt& ApInt::operator-=(const ApInt& other)
@@ -302,7 +306,7 @@ int ApInt::compareSigned(const ApInt& other) const
    }
    bool lhsNeg = isNegative();
    bool rhsNeg = other.isNegative();
-   // If the sign bits don't match, then (LHS < RHS) if LHS is negative
+   // If the sign bits don't match, then (LHS < rhs) if LHS is negative
    if (lhsNeg != rhsNeg) {
       return lhsNeg ? -1 : 1;
    }
@@ -315,12 +319,12 @@ void ApInt::setBitsSlowCase(unsigned loBit, unsigned hiBit)
    unsigned loWord = whichWord(loBit);
    unsigned hiWord = whichWord(hiBit);
    // Create an initial mask for the low word with zeros below loBit.
-   uint64_t loMask = WORD_MAX << whichBit(loBit);
+   uint64_t loMask = WORDTYPE_MAX << whichBit(loBit);
    // If hiBit is not aligned, we need a high mask.
    unsigned hiShiftAmt = whichBit(hiBit);
    if (hiShiftAmt != 0) {
       // Create a high mask with zeros above hiBit.
-      uint64_t hiMask = WORD_MAX >> (APINT_BITS_PER_WORD - hiShiftAmt);
+      uint64_t hiMask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - hiShiftAmt);
       // If loWord and hiWord are equal, then we combine the masks. Otherwise,
       // set the bits in hiWord.
       if (hiWord == loWord) {
@@ -333,7 +337,7 @@ void ApInt::setBitsSlowCase(unsigned loBit, unsigned hiBit)
    m_intValue.m_pValue[loWord] |= loMask;
    // Fill any words between loWord and hiWord with all ones.
    for (unsigned word = loWord + 1; word < hiWord; ++word) {
-      m_intValue.m_pValue[word] = WORD_MAX;
+      m_intValue.m_pValue[word] = WORDTYPE_MAX;
    }
 }
 /// @brief Toggle every bit to its opposite value.
@@ -355,27 +359,27 @@ void ApInt::flipBit(unsigned bitPosition)
 }
 void ApInt::insertBits(const ApInt &subBits, unsigned bitPosition)
 {
-   unsigned subBitWidth = subBits.getBitWidth();
-   assert(0 < subBitWidth && (subBitWidth + bitPosition) <= m_bitWidth &&
+   unsigned subm_bitWidth = subBits.getBitWidth();
+   assert(0 < subm_bitWidth && (subm_bitWidth + bitPosition) <= m_bitWidth &&
           "Illegal bit insertion");
    // Insertion is a direct copy.
-   if (subBitWidth == m_bitWidth) {
+   if (subm_bitWidth == m_bitWidth) {
       *this = subBits;
       return;
    }
    // Single word result can be done as a direct bitmask.
    if (isSingleWord()) {
-      uint64_t mask = WORD_MAX >> (APINT_BITS_PER_WORD - subBitWidth);
+      uint64_t mask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - subm_bitWidth);
       m_intValue.m_value &= ~(mask << bitPosition);
       m_intValue.m_value |= (subBits.m_intValue.m_value << bitPosition);
       return;
    }
    unsigned loBit = whichBit(bitPosition);
    unsigned loWord = whichWord(bitPosition);
-   unsigned hi1Word = whichWord(bitPosition + subBitWidth - 1);
+   unsigned hi1Word = whichWord(bitPosition + subm_bitWidth - 1);
    // Insertion within a single word can be done as a direct bitmask.
    if (loWord == hi1Word) {
-      uint64_t mask = WORD_MAX >> (APINT_BITS_PER_WORD - subBitWidth);
+      uint64_t mask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - subm_bitWidth);
       m_intValue.m_pValue[loWord] &= ~(mask << loBit);
       m_intValue.m_pValue[loWord] |= (subBits.m_intValue.m_value << loBit);
       return;
@@ -383,22 +387,22 @@ void ApInt::insertBits(const ApInt &subBits, unsigned bitPosition)
    // Insert on word boundaries.
    if (loBit == 0) {
       // Direct copy whole words.
-      unsigned numWholeSubWords = subBitWidth / APINT_BITS_PER_WORD;
+      unsigned numWholeSubWords = subm_bitWidth / APINT_BITS_PER_WORD;
       memcpy(m_intValue.m_pValue + loWord, subBits.getRawData(),
              numWholeSubWords * APINT_WORD_SIZE);
       // Mask+insert remaining bits.
-      unsigned remainingBits = subBitWidth % APINT_BITS_PER_WORD;
+      unsigned remainingBits = subm_bitWidth % APINT_BITS_PER_WORD;
       if (remainingBits != 0) {
-         uint64_t mask = WORD_MAX >> (APINT_BITS_PER_WORD - remainingBits);
+         uint64_t mask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - remainingBits);
          m_intValue.m_pValue[hi1Word] &= ~mask;
-         m_intValue.m_pValue[hi1Word] |= subBits.getWord(subBitWidth - 1);
+         m_intValue.m_pValue[hi1Word] |= subBits.getWord(subm_bitWidth - 1);
       }
       return;
    }
    // General case - set/clear individual bits in dst based on src.
    // TODO - there is scope for optimization here, but at the moment this code
    // path is barely used so prefer readability over performance.
-   for (unsigned i = 0; i != subBitWidth; ++i) {
+   for (unsigned i = 0; i != subm_bitWidth; ++i) {
       if (subBits[i]) {
          setBit(bitPosition + i);
       } else {
@@ -555,7 +559,7 @@ unsigned ApInt::countLeadingOnesSlowCase() const
    unsigned count = count_leading_ones(m_intValue.m_pValue[i] << shift);
    if (count == highWordBits) {
       for (i--; i >= 0; --i) {
-         if (m_intValue.m_pValue[i] == WORD_MAX) {
+         if (m_intValue.m_pValue[i] == WORDTYPE_MAX) {
             count += APINT_BITS_PER_WORD;
          } else {
             count += count_leading_ones(m_intValue.m_pValue[i]);
@@ -581,7 +585,7 @@ unsigned ApInt::countTrailingOnesSlowCase() const
 {
    unsigned count = 0;
    unsigned i = 0;
-   for (; i < getNumWords() && m_intValue.m_pValue[i] == WORD_MAX; ++i) {
+   for (; i < getNumWords() && m_intValue.m_pValue[i] == WORDTYPE_MAX; ++i) {
       count += APINT_BITS_PER_WORD;
    }
    if (i < getNumWords()) {
@@ -716,21 +720,17 @@ ApInt apintops::greatest_common_divisor(ApInt lhs, ApInt rhs) {
 }
 ApInt apintops::round_double_to_apint(double doubleValue, unsigned width)
 {
-   union {
-      double m_ddvalue;
-      uint64_t m_ivalue;
-   } temp;
-   temp.m_ddvalue = doubleValue;
+   uint64_t temp = bit_cast<uint64_t>(doubleValue);
    // Get the sign bit from the highest order bit
-   bool isNeg = temp.m_ivalue >> 63;
+   bool isNeg = temp >> 63;
    // Get the 11-bit exponent and adjust for the 1023 bit bias
-   int64_t exp = ((temp.m_ivalue >> 52) & 0x7ff) - 1023;
+   int64_t exp = ((temp >> 52) & 0x7ff) - 1023;
    // If the exponent is negative, the value is < 0 so just return 0.
    if (exp < 0) {
       return ApInt(width, 0u);
    }
    // Extract the mantissa by clearing the top 12 bits (sign + exponent).
-   uint64_t mantissa = (temp.m_ivalue & (~0ULL >> 12)) | 1ULL << 52;
+   uint64_t mantissa = (temp & (~0ULL >> 12)) | 1ULL << 52;
    // If the exponent doesn't shift all bits out of the mantissa
    if (exp < 52) {
       return isNeg ? -ApInt(width, mantissa >> (52 - exp)) :
@@ -798,13 +798,11 @@ double ApInt::roundToDouble(bool isSigned) const
    }
    // The leading bit of mantissa is implicit, so get rid of it.
    uint64_t sign = isNeg ? (1ULL << (APINT_BITS_PER_WORD - 1)) : 0;
-   union {
-      double dvalue;
-      uint64_t ivalue;
-   } ret;
-   ret.ivalue = sign | (exp << 52) | mantissa;
-   return ret.dvalue;
+
+   uint64_t ret = sign | (exp << 52) | mantissa;
+   return bit_cast<double>(ret);
 }
+
 // Truncate to new width.
 ApInt ApInt::trunc(unsigned width) const
 {
@@ -955,7 +953,7 @@ void ApInt::lshrSlowCase(unsigned shiftAmt)
 /// @brief Left-shift function.
 ApInt &ApInt::operator<<=(const ApInt &shiftAmt)
 {
-   // It's undefined behavior in C to shift by BitWidth or greater.
+   // It's undefined behavior in C to shift by m_bitWidth or greater.
    *this <<= (unsigned)shiftAmt.getLimitedValue(m_bitWidth);
    return *this;
 }
@@ -968,9 +966,9 @@ namespace {
 // Calculate the rotate amount modulo the bit width.
 unsigned rotate_modulo(unsigned bitWidth, const ApInt &rotateAmt)
 {
-   unsigned rotBitWidth = rotateAmt.getBitWidth();
+   unsigned rotm_bitWidth = rotateAmt.getBitWidth();
    ApInt rot = rotateAmt;
-   if (rotBitWidth < bitWidth) {
+   if (rotm_bitWidth < bitWidth) {
       // Extend the rotate ApInt, so that the urem doesn't divide by 0.
       // e.g. ApInt(1, 32) would give ApInt(1, 0).
       rot = rotateAmt.zext(bitWidth);
@@ -1091,7 +1089,7 @@ ApInt ApInt::multiplicativeInverse(const ApInt& modulo) const
    // Using the properties listed at the following web page (accessed 06/21/08):
    //   http://www.numbertheory.org/php/euclid.html
    // (especially the properties numbered 3, 4 and 9) it can be proved that
-   // BitWidth bits suffice for all the computations in the algorithm implemented
+   // m_bitWidth bits suffice for all the computations in the algorithm implemented
    // below. More precisely, this number of bits suffice if the multiplicative
    // inverse exists, but may not suffice for the general extended Euclidean
    // algorithm.
@@ -1214,6 +1212,7 @@ ApInt::MagicUnsign ApInt::getMagicUnsign(unsigned leadingZeros) const
    magu.m_shift = p - d.getBitWidth();  // resulting shift
    return magu;
 }
+
 namespace {
 /// Implementation of Knuth's Algorithm D (Division of nonnegative integers)
 /// from "Art of Computer Programming, Volume 2", section 4.3.1, p. 272. The
@@ -1231,19 +1230,17 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
    const uint64_t b = uint64_t(1) << 32;
    // The DEBUG macros here tend to be spam in the debug output if you're not
    // debugging this code. Disable them unless KNUTH_DEBUG is defined.
-#pragma push_macro("POLAR_DEBUG")
-#ifndef KNUTH_DEBUG
-#undef POLAR_DEBUG
-#define POLAR_DEBUG(X)                                                          \
-   do {                                                                         \
-} while (false)
+#ifdef KNUTH_DEBUG
+#define DEBUG_KNUTH(X) POLAR_DEBUG(X)
+#else
+#define DEBUG_KNUTH(X) do {} while(false)
 #endif
-   POLAR_DEBUG(debug_stream() << "knuth_div: m=" << m << " n=" << n << '\n');
-   POLAR_DEBUG(debug_stream() << "knuth_div: original:");
-   POLAR_DEBUG(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
-   POLAR_DEBUG(debug_stream() << " by");
-   POLAR_DEBUG(for (int i = n; i >0; i--) debug_stream() << " " << v[i-1]);
-   POLAR_DEBUG(debug_stream() << '\n');
+   DEBUG_KNUTH(debug_stream() << "knuth_div: m=" << m << " n=" << n << '\n');
+   DEBUG_KNUTH(debug_stream() << "knuth_div: original:");
+   DEBUG_KNUTH(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
+   DEBUG_KNUTH(debug_stream() << " by");
+   DEBUG_KNUTH(for (int i = n; i >0; i--) debug_stream() << " " << v[i-1]);
+   DEBUG_KNUTH(debug_stream() << '\n');
    // D1. [Normalize.] Set d = b / (v[n-1] + 1) and multiply all the digits of
    // u and v by d. Note that we have taken Knuth's advice here to use a power
    // of 2 value for d such that d * v[n-1] >= b/2 (b is the base). A power of
@@ -1268,15 +1265,15 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       }
    }
    u[m+n] = u_carry;
-   POLAR_DEBUG(debug_stream() << "knuth_div:   normal:");
-   POLAR_DEBUG(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
-   POLAR_DEBUG(debug_stream() << " by");
-   POLAR_DEBUG(for (int i = n; i >0; i--) debug_stream() << " " << v[i-1]);
-   POLAR_DEBUG(debug_stream() << '\n');
+   DEBUG_KNUTH(debug_stream() << "knuth_div:   normal:");
+   DEBUG_KNUTH(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
+   DEBUG_KNUTH(debug_stream() << " by");
+   DEBUG_KNUTH(for (int i = n; i >0; i--) debug_stream() << " " << v[i-1]);
+   DEBUG_KNUTH(debug_stream() << '\n');
    // D2. [Initialize j.]  Set j to m. This is the loop counter over the places.
    int j = m;
    do {
-      POLAR_DEBUG(debug_stream() << "knuth_div: quotient digit #" << j << '\n');
+      DEBUG_KNUTH(debug_stream() << "knuth_div: quotient digit #" << j << '\n');
       // D3. [Calculate q'.].
       //     Set qp = (u[j+n]*b + u[j+n-1]) / v[n-1]. (qp=qprime=q')
       //     Set rp = (u[j+n]*b + u[j+n-1]) % v[n-1]. (rp=rprime=r')
@@ -1286,7 +1283,7 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       // value qp is one too large, and it eliminates all cases where qp is two
       // too large.
       uint64_t dividend = make64(u[j+n], u[j+n-1]);
-      POLAR_DEBUG(debug_stream() << "knuth_div: dividend == " << dividend << '\n');
+      DEBUG_KNUTH(debug_stream() << "knuth_div: dividend == " << dividend << '\n');
       uint64_t qp = dividend / v[n-1];
       uint64_t rp = dividend % v[n-1];
       if (qp == b || qp*v[n-2] > b*rp + u[j+n-2]) {
@@ -1295,7 +1292,7 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
          if (rp < b && (qp == b || qp*v[n-2] > b*rp + u[j+n-2]))
             qp--;
       }
-      POLAR_DEBUG(debug_stream() << "knuth_div: qp == " << qp << ", rp == " << rp << '\n');
+      DEBUG_KNUTH(debug_stream() << "knuth_div: qp == " << qp << ", rp == " << rp << '\n');
       // D4. [Multiply and subtract.] Replace (u[j+n]u[j+n-1]...u[j]) with
       // (u[j+n]u[j+n-1]..u[j]) - qp * (v[n-1]...v[1]v[0]). This computation
       // consists of a simple multiplication by a one-place number, combined with
@@ -1310,14 +1307,14 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
          int64_t subres = int64_t(u[j+i]) - borrow - low32(p);
          u[j+i] = low32(subres);
          borrow = high32(p) - high32(subres);
-         POLAR_DEBUG(dbgs() << "knuth_div: u[j+i] = " << u[j+i]
+         DEBUG_KNUTH(debug_stream() << "knuth_div: u[j+i] = " << u[j+i]
                << ", borrow = " << borrow << '\n');
       }
       bool isNeg = u[j+n] < borrow;
       u[j+n] -= low32(borrow);
-      POLAR_DEBUG(debug_stream() << "knuth_div: after subtraction:");
-      POLAR_DEBUG(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
-      POLAR_DEBUG(debug_stream() << '\n');
+      DEBUG_KNUTH(debug_stream() << "knuth_div: after subtraction:");
+      DEBUG_KNUTH(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
+      DEBUG_KNUTH(debug_stream() << '\n');
       // D5. [Test remainder.] Set q[j] = qp. If the result of step D4 was
       // negative, go to step D6; otherwise go on to step D7.
       q[j] = low32(qp);
@@ -1337,14 +1334,14 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
          }
          u[j+n] += carry;
       }
-      POLAR_DEBUG(debug_stream() << "knuth_div: after correction:");
-      POLAR_DEBUG(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
-      POLAR_DEBUG(debug_stream() << "\nknuth_div: digit result = " << q[j] << '\n');
+      DEBUG_KNUTH(debug_stream() << "knuth_div: after correction:");
+      DEBUG_KNUTH(for (int i = m+n; i >=0; i--) debug_stream() << " " << u[i]);
+      DEBUG_KNUTH(debug_stream() << "\nknuth_div: digit result = " << q[j] << '\n');
       // D7. [Loop on j.]  Decrease j by one. Now if j >= 0, go back to D3.
    } while (--j >= 0);
-   POLAR_DEBUG(debug_stream() << "knuth_div: quotient:");
-   POLAR_DEBUG(for (int i = m; i >=0; i--) debug_stream() <<" " << q[i]);
-   POLAR_DEBUG(debug_stream() << '\n');
+   DEBUG_KNUTH(debug_stream() << "knuth_div: quotient:");
+   DEBUG_KNUTH(for (int i = m; i >=0; i--) debug_stream() <<" " << q[i]);
+   DEBUG_KNUTH(debug_stream() << '\n');
    // D8. [Unnormalize]. Now q[...] is the desired quotient, and the desired
    // remainder may be obtained by dividing u[...] by d. If r is non-null we
    // compute the remainder (urem uses this).
@@ -1354,24 +1351,24 @@ void knuth_div(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       // shift right here.
       if (shift) {
          uint32_t carry = 0;
-         POLAR_DEBUG(debug_stream() << "knuth_div: remainder:");
+         DEBUG_KNUTH(debug_stream() << "knuth_div: remainder:");
          for (int i = n-1; i >= 0; i--) {
             r[i] = (u[i] >> shift) | carry;
             carry = u[i] << (32 - shift);
-            POLAR_DEBUG(debug_stream() << " " << r[i]);
+            DEBUG_KNUTH(debug_stream() << " " << r[i]);
          }
       } else {
          for (int i = n-1; i >= 0; i--) {
             r[i] = u[i];
-            POLAR_DEBUG(debug_stream() << " " << r[i]);
+            DEBUG_KNUTH(debug_stream() << " " << r[i]);
          }
       }
-      POLAR_DEBUG(debug_stream() << '\n');
+      DEBUG_KNUTH(debug_stream() << '\n');
    }
-   POLAR_DEBUG(debug_stream() << '\n');
-#pragma pop_macro("DEBUG")
+   DEBUG_KNUTH(debug_stream() << '\n');
 }
 } // anonymous namespace
+
 void ApInt::divide(const WordType *lhs, unsigned lhsWords, const WordType *rhs,
                    unsigned rhsWords, WordType *quotient, WordType *remainder)
 {
@@ -1498,7 +1495,7 @@ ApInt ApInt::udiv(const ApInt &other) const
       assert(other.m_intValue.m_value != 0 && "Divide by zero?");
       return ApInt(m_bitWidth, m_intValue.m_value / other.m_intValue.m_value);
    }
-   // Get some facts about the LHS and RHS number of bits and words
+   // Get some facts about the LHS and rhs number of bits and words
    unsigned lhsWords = getNumWords(getActiveBits());
    unsigned rhsBits  = other.getActiveBits();
    unsigned rhsWords = getNumWords(rhsBits);
@@ -1599,7 +1596,7 @@ ApInt ApInt::urem(const ApInt &other) const
    }
    // Get some facts about the LHS
    unsigned lhsWords = getNumWords(getActiveBits());
-   // Get some facts about the RHS
+   // Get some facts about the rhs
    unsigned rhsBits = other.getActiveBits();
    unsigned rhsWords = getNumWords(rhsBits);
    assert(rhsWords && "Performing remainder operation by zero ???");
@@ -1905,6 +1902,7 @@ ApInt ApInt::sshlOverflow(const ApInt &shAmt, bool &overflow) const
    }
    return *this << shAmt;
 }
+
 ApInt ApInt::ushlOverflow(const ApInt &shAmt, bool &overflow) const
 {
    overflow = shAmt.uge(getBitWidth());
@@ -1914,6 +1912,52 @@ ApInt ApInt::ushlOverflow(const ApInt &shAmt, bool &overflow) const
    overflow = shAmt.ugt(countLeadingZeros());
    return *this << shAmt;
 }
+
+
+ApInt ApInt::saddSaturate(const ApInt &rhs) const
+{
+   bool overflow;
+   ApInt result = saddOverflow(rhs, overflow);
+   if (!overflow) {
+      return result;
+   }
+
+
+   return isNegative() ? ApInt::getSignedMinValue(m_bitWidth)
+                       : ApInt::getSignedMaxValue(m_bitWidth);
+}
+
+ApInt ApInt::uaddSaturate(const ApInt &rhs) const
+{
+   bool overflow;
+   ApInt result = uaddOverflow(rhs, overflow);
+   if (!overflow) {
+      return result;
+   }
+   return ApInt::getMaxValue(m_bitWidth);
+}
+
+ApInt ApInt::ssubSaturate(const ApInt &rhs) const
+{
+   bool overflow;
+   ApInt result = ssubOverflow(rhs, overflow);
+   if (!overflow) {
+      return result;
+   }
+   return isNegative() ? ApInt::getSignedMinValue(m_bitWidth)
+                       : ApInt::getSignedMaxValue(m_bitWidth);
+}
+
+ApInt ApInt::usubSaturate(const ApInt &rhs) const
+{
+   bool overflow;
+   ApInt result = usubOverflow(rhs, overflow);
+   if (!overflow) {
+      return result;
+   }
+   return ApInt(m_bitWidth, 0);
+}
+
 void ApInt::fromString(unsigned numbits, StringRef str, uint8_t radix)
 {
    // Check our assumptions here
@@ -2618,6 +2662,203 @@ ApInt apintops::rounding_sdiv(const ApInt &lhs, const ApInt &rhs,
    }
    polar_unreachable("Unknown ApInt::Rounding enum");
 }
+
+
+std::optional<ApInt>
+apintops::solve_quadratic_equation_wrap(ApInt A, ApInt B, ApInt C,
+                                           unsigned rangeWidth)
+{
+   unsigned CoeffWidth = A.getBitWidth();
+   assert(CoeffWidth == B.getBitWidth() && CoeffWidth == C.getBitWidth());
+   assert(rangeWidth <= CoeffWidth &&
+          "Value range width should be less than coefficient width");
+   assert(rangeWidth > 1 && "Value range bit width should be > 1");
+
+   POLAR_DEBUG(debug_stream() << __func__ << ": solving " << A << "x^2 + " << B
+              << "x + " << C << ", rw:" << rangeWidth << '\n');
+
+   // Identify 0 as a (non)solution immediately.
+   if (C.sextOrTrunc(rangeWidth).isNullValue() ) {
+      POLAR_DEBUG(debug_stream() << __func__ << ": zero solution\n");
+      return ApInt(CoeffWidth, 0);
+   }
+
+   // The result of ApInt arithmetic has the same bit width as the operands,
+   // so it can actually lose high bits. A product of two n-bit integers needs
+   // 2n-1 bits to represent the full value.
+   // The operation done below (on quadratic coefficients) that can produce
+   // the largest value is the evaluation of the equation during bisection,
+   // which needs 3 times the bitwidth of the coefficient, so the total number
+   // of required bits is 3n.
+   //
+   // The purpose of this extension is to simulate the set Z of all integers,
+   // where n+1 > n for all n in Z. In Z it makes sense to talk about positive
+   // and negative numbers (not so much in a modulo arithmetic). The method
+   // used to solve the equation is based on the standard formula for real
+   // numbers, and uses the concepts of "positive" and "negative" with their
+   // usual meanings.
+   CoeffWidth *= 3;
+   A = A.sext(CoeffWidth);
+   B = B.sext(CoeffWidth);
+   C = C.sext(CoeffWidth);
+
+   // Make A > 0 for simplicity. Negate cannot overflow at this point because
+   // the bit width has increased.
+   if (A.isNegative()) {
+      A.negate();
+      B.negate();
+      C.negate();
+   }
+
+   // Solving an equation q(x) = 0 with coefficients in modular arithmetic
+   // is really solving a set of equations q(x) = kR for k = 0, 1, 2, ...,
+   // and R = 2^m_bitWidth.
+   // Since we're trying not only to find exact solutions, but also values
+   // that "wrap around", such a set will always have a solution, i.e. an x
+   // that satisfies at least one of the equations, or such that |q(x)|
+   // exceeds kR, while |q(x-1)| for the same k does not.
+   //
+   // We need to find a value k, such that Ax^2 + Bx + C = kR will have a
+   // positive solution n (in the above sense), and also such that the n
+   // will be the least among all solutions corresponding to k = 0, 1, ...
+   // (more precisely, the least element in the set
+   //   { n(k) | k is such that a solution n(k) exists }).
+   //
+   // Consider the parabola (over real numbers) that corresponds to the
+   // quadratic equation. Since A > 0, the arms of the parabola will point
+   // up. Picking different values of k will shift it up and down by R.
+   //
+   // We want to shift the parabola in such a way as to reduce the problem
+   // of solving q(x) = kR to solving shifted_q(x) = 0.
+   // (The interesting solutions are the ceilings of the real number
+   // solutions.)
+   ApInt R = ApInt::getOneBitSet(CoeffWidth, rangeWidth);
+   ApInt TwoA = 2 * A;
+   ApInt SqrB = B * B;
+   bool PickLow;
+
+   auto RoundUp = [] (const ApInt &V, const ApInt &A) -> ApInt {
+      assert(A.isStrictlyPositive());
+      ApInt T = V.abs().urem(A);
+      if (T.isNullValue()) {
+         return V;
+      }
+      return V.isNegative() ? V+T : V+(A-T);
+   };
+
+   // The vertex of the parabola is at -B/2A, but since A > 0, it's negative
+   // iff B is positive.
+   if (B.isNonNegative()) {
+      // If B >= 0, the vertex it at a negative location (or at 0), so in
+      // order to have a non-negative solution we need to pick k that makes
+      // C-kR negative. To satisfy all the requirements for the solution
+      // that we are looking for, it needs to be closest to 0 of all k.
+      C = C.srem(R);
+      if (C.isStrictlyPositive()) {
+          C -= R;
+      }
+      // Pick the greater solution.
+      PickLow = false;
+   } else {
+      // If B < 0, the vertex is at a positive location. For any solution
+      // to exist, the discriminant must be non-negative. This means that
+      // C-kR <= B^2/4A is a necessary condition for k, i.e. there is a
+      // lower bound on values of k: kR >= C - B^2/4A.
+      ApInt LowkR = C - SqrB.udiv(2*TwoA); // udiv because all values > 0.
+      // Round LowkR up (towards +inf) to the nearest kR.
+      LowkR = RoundUp(LowkR, R);
+
+      // If there exists k meeting the condition above, and such that
+      // C-kR > 0, there will be two positive real number solutions of
+      // q(x) = kR. Out of all such values of k, pick the one that makes
+      // C-kR closest to 0, (i.e. pick maximum k such that C-kR > 0).
+      // In other words, find maximum k such that LowkR <= kR < C.
+      if (C.sgt(LowkR)) {
+         // If LowkR < C, then such a k is guaranteed to exist because
+         // LowkR itself is a multiple of R.
+         C -= -RoundUp(-C, R);      // C = C - RoundDown(C, R)
+         // Pick the smaller solution.
+         PickLow = true;
+      } else {
+         // If C-kR < 0 for all potential k's, it means that one solution
+         // will be negative, while the other will be positive. The positive
+         // solution will shift towards 0 if the parabola is moved up.
+         // Pick the kR closest to the lower bound (i.e. make C-kR closest
+         // to 0, or in other words, out of all parabolas that have solutions,
+         // pick the one that is the farthest "up").
+         // Since LowkR is itself a multiple of R, simply take C-LowkR.
+         C -= LowkR;
+         // Pick the greater solution.
+         PickLow = false;
+      }
+   }
+
+   POLAR_DEBUG(debug_stream() << __func__ << ": updated coefficients " << A << "x^2 + "
+              << B << "x + " << C << ", rw:" << rangeWidth << '\n');
+
+   ApInt D = SqrB - 4*A*C;
+   assert(D.isNonNegative() && "Negative discriminant");
+   ApInt SQ = D.sqrt();
+
+   ApInt Q = SQ * SQ;
+   bool InexactSQ = Q != D;
+   // The calculated SQ may actually be greater than the exact (non-integer)
+   // value. If that's the case, decremement SQ to get a value that is lower.
+   if (Q.sgt(D)) {
+      SQ -= 1;
+   }
+
+   ApInt X;
+   ApInt Rem;
+
+   // SQ is rounded down (i.e SQ * SQ <= D), so the roots may be inexact.
+   // When using the quadratic formula directly, the calculated low root
+   // may be greater than the exact one, since we would be subtracting SQ.
+   // To make sure that the calculated root is not greater than the exact
+   // one, subtract SQ+1 when calculating the low root (for inexact value
+   // of SQ).
+   if (PickLow) {
+       ApInt::sdivrem(-B - (SQ+InexactSQ), TwoA, X, Rem);
+   } else {
+      ApInt::sdivrem(-B + SQ, TwoA, X, Rem);
+   }
+
+   // The updated coefficients should be such that the (exact) solution is
+   // positive. Since ApInt division rounds towards 0, the calculated one
+   // can be 0, but cannot be negative.
+   assert(X.isNonNegative() && "Solution should be non-negative");
+
+   if (!InexactSQ && Rem.isNullValue()) {
+      POLAR_DEBUG(debug_stream() << __func__ << ": solution (root): " << X << '\n');
+      return X;
+   }
+
+   assert((SQ*SQ).sle(D) && "SQ = |_sqrt(D)_|, so SQ*SQ <= D");
+   // The exact value of the square root of D should be between SQ and SQ+1.
+   // This implies that the solution should be between that corresponding to
+   // SQ (i.e. X) and that corresponding to SQ+1.
+   //
+   // The calculated X cannot be greater than the exact (real) solution.
+   // Actually it must be strictly less than the exact solution, while
+   // X+1 will be greater than or equal to it.
+
+   ApInt VX = (A*X + B)*X + C;
+   ApInt VY = VX + TwoA*X + A + B;
+   bool SignChange = VX.isNegative() != VY.isNegative() ||
+         VX.isNullValue() != VY.isNullValue();
+   // If the sign did not change between X and X+1, X is not a valid solution.
+   // This could happen when the actual (exact) roots don't have an integer
+   // between them, so they would both be contained between X and X+1.
+   if (!SignChange) {
+      POLAR_DEBUG(debug_stream() << __func__ << ": no valid solution\n");
+      return std::nullopt;
+   }
+
+   X += 1;
+   POLAR_DEBUG(debug_stream() << __func__ << ": solution (wrap): " << X << '\n');
+   return X;
+}
+
 
 } // basic
 } // polar
