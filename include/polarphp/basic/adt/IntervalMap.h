@@ -1150,7 +1150,7 @@ private:
    template <typename T>
    T &getDataAs() const
    {
-      *bit_cast<T *>(const_cast<char *>(m_data.m_buffer));
+      return *bit_cast<T *>(const_cast<char *>(m_data.m_buffer));
    }
 
    const RootLeaf &getRootLeaf() const
@@ -1220,7 +1220,7 @@ private:
       new (&getRootBranchData()) RootBranchData();
    }
 
-   void  switchRootToLeaf()
+   void switchRootToLeaf()
    {
       getRootBranchData().~RootBranchData();
       m_height = 0;

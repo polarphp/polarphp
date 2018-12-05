@@ -531,6 +531,19 @@ public:
       return (*this)[idx];
    }
 
+
+   // Push single bit to end of vector.
+   void push_back(bool value)
+   {
+      resize(size() + 1, value);
+   }
+
+   // Push single bit to end of vector.
+   void pushBack(bool value)
+   {
+      resize(size() + 1, value);
+   }
+
    /// Test if any common bits are set.
    bool anyCommon(const SmallBitVector &other) const
    {

@@ -199,23 +199,24 @@ inline std::string to_hex(std::string_view input)
 
 /// Convert buffer \p Input to its hexadecimal representation.
 /// The returned string is double the size of \p Input.
-inline std::string to_hex(StringRef input)
+inline std::string to_hex(StringRef input, bool lowerCase = false)
 {
    static const char *const lut = "0123456789ABCDEF";
+   const uint8_t offset = lowerCase ? 32 : 0;
    size_t length = input.getSize();
    std::string output;
    output.reserve(2 * length);
    for (size_t i = 0; i < length; ++i) {
       const unsigned char c = input[i];
-      output.push_back(lut[c >> 4]);
-      output.push_back(lut[c & 15]);
+      output.push_back(lut[c >> 4] | offset);
+      output.push_back(lut[c & 15] | offset);
    }
    return output;
 }
 
-inline std::string to_hex(ArrayRef<uint8_t> input)
+inline std::string to_hex(ArrayRef<uint8_t> input, bool lowerCase = false)
 {
-   return to_hex(to_string_ref(input));
+   return to_hex(to_string_ref(input), lowerCase);
 }
 
 inline uint8_t hex_from_nibbles(char msb, char lsb)

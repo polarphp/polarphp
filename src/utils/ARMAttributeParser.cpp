@@ -30,7 +30,7 @@ using polar::basic::utostr;
 using polar::basic::make_array_ref;
 using polar::basic::Twine;
 
-static const EnumEntry<unsigned> TagNames[] = {
+static const EnumEntry<unsigned> sg_tagNames[] = {
    { "tag_File", armbuildattrs::File },
    { "tag_section", armbuildattrs::Section },
    { "tag_Symbol", armbuildattrs::Symbol },
@@ -697,7 +697,7 @@ void ARMAttributeParser::parseSubsection(const uint8_t *data, uint32_t length)
       offset = offset + sizeof(size);
 
       if (m_sw) {
-         m_sw->printEnum("Tag", tag, make_array_ref(TagNames));
+         m_sw->printEnum("Tag", tag, make_array_ref(sg_tagNames));
          m_sw->printNumber("size", size);
       }
 

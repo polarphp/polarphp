@@ -290,7 +290,7 @@ public:
 
 /// SmallVectorTemplateBase<IsPodLike = false> - This is where we put method
 /// implementations that are designed to work with non-POD-like T's.
-template <typename T, bool IsPodLike>
+template <typename T, bool = polar::utils::IsPodLike<T>::value>
 class SmallVectorTemplateBase : public SmallVectorTemplateCommon<T>
 {
 protected:
@@ -440,7 +440,7 @@ protected:
       // use memcpy here. Note that iter and end are iterators and thus might be
       // invalid for memcpy if they are equal.
       if (iter != end) {
-         std::memcpy(reinterpret_cast<void *>(dest), reinterpret_cast<const void *>(iter), (end - iter) * sizeof(T));
+         std::memcpy(reinterpret_cast<void *>(dest), iter, (end - iter) * sizeof(T));
       }
    }
 
@@ -457,7 +457,7 @@ public:
       if (POLAR_UNLIKELY(this->getSize() >= this->getCapacity())) {
          this->grow();
       }
-      memcpy((void *)this->end(), &element, sizeof(T));
+      memcpy(reinterpret_cast<void *>(this->end()), &element, sizeof(T));
       this->setSize(this->getSize() + 1);
    }
 
@@ -480,9 +480,9 @@ public:
 /// This class consists of common code factored out of the SmallVector class to
 /// reduce code duplication based on the SmallVector 'N' template parameter.
 template <typename T>
-class SmallVectorImpl : public SmallVectorTemplateBase<T, utils::IsPodLike<T>::value>
+class SmallVectorImpl : public SmallVectorTemplateBase<T>
 {
-   using SuperClass = SmallVectorTemplateBase<T, utils::IsPodLike<T>::value>;
+   using SuperClass = SmallVectorTemplateBase<T>;
 
 public:
    using iterator = typename SuperClass::iterator;

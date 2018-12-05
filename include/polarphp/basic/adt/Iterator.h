@@ -239,9 +239,7 @@ template <
       typename ReferenceT = typename std::conditional<
          std::is_same<T, typename std::iterator_traits<
                          WrappedIteratorT>::value_type>::value,
-         typename std::iterator_traits<WrappedIteratorT>::reference, T &>::type,
-      // Don't provide these, they are mostly to act as aliases below.
-      typename WrappedTraitsT = std::iterator_traits<WrappedIteratorT>>
+         typename std::iterator_traits<WrappedIteratorT>::reference, T &>::type>
 class IteratorAdaptorBase
       : public IteratorFacadeBase<DerivedT, IteratorCategoryT, T,
       DifferenceTypeT, PointerT, ReferenceT>
@@ -374,8 +372,10 @@ make_pointee_range(RangeType &&range)
 template <typename WrappedIteratorT,
           typename T = decltype(&*std::declval<WrappedIteratorT>())>
 class PointerIterator
-      : public IteratorAdaptorBase<PointerIterator<WrappedIteratorT, T>,
-      WrappedIteratorT, T>
+      : public IteratorAdaptorBase<
+      PointerIterator<WrappedIteratorT, T>, WrappedIteratorT,
+      typename std::iterator_traits<WrappedIteratorT>::iterator_category,
+      T>
 {
    mutable T m_ptr;
 
@@ -406,6 +406,37 @@ make_pointer_range(RangeType &&range)
    return make_range(PointerIteratorT(std::begin(std::forward<RangeType>(range))),
                      PointerIteratorT(std::end(std::forward<RangeType>(range))));
 }
+
+// Wrapper iterator over iterator ItType, adding DataRef to the type of ItType,
+// to create NodeRef = std::pair<InnerTypeOfItType, DataRef>.
+template <typename ItType, typename NodeRef, typename DataRef>
+class WrappedPairNodeDataIterator
+      : public IteratorAdaptorBase<
+      WrappedPairNodeDataIterator<ItType, NodeRef, DataRef>, ItType,
+      typename std::iterator_traits<ItType>::iterator_category, NodeRef,
+      std::ptrdiff_t, NodeRef *, NodeRef &>
+{
+   using BaseT = IteratorAdaptorBase<
+   WrappedPairNodeDataIterator, ItType,
+   typename std::iterator_traits<ItType>::iterator_category, NodeRef,
+   std::ptrdiff_t, NodeRef *, NodeRef &>;
+
+   const DataRef m_dataRef;
+   mutable NodeRef m_nodeRef;
+
+public:
+   WrappedPairNodeDataIterator(ItType begin, const DataRef dataRef)
+      : BaseT(begin), m_dataRef(dataRef)
+   {
+      m_nodeRef.first = m_dataRef;
+   }
+
+   NodeRef &operator*() const
+   {
+      m_nodeRef.second = *this->m_iter;
+      return m_nodeRef;
+   }
+};
 
 } // basic
 } // polar

@@ -11,110 +11,123 @@
 
 //===----------------------------------------------------------------------===//
 //
-// This file provides defines to build up the AARCH64 target parser's logic.
+// This file implements a target parser to recognise AArch64 hardware features
+// such as FPU/CPU/ARCH and extension names.
 //
 //===----------------------------------------------------------------------===//
 
-// NOTE: NO INCLUDE GUARD DESIRED!
+#ifndef POLARPHP_UTILS_AARCH64_TARGET_PARSER_H
+#define POLARPHP_UTILS_AARCH64_TARGET_PARSER_H
 
-#ifndef AARCH64_ARCH
-#define AARCH64_ARCH(NAME, ID, CPU_ATTR, SUB_ARCH, ARCH_ATTR, ARCH_FPU, ARCH_BASE_EXT)
-#endif
-AARCH64_ARCH("invalid", INVALID, "", "",
-             armbuildattrs::CPUArch::v8_A, FK_NONE, aarch64::AEK_NONE)
-AARCH64_ARCH("armv8-a", ARMV8A, "8-A", "v8", armbuildattrs::CPUArch::v8_A,
-             FK_CRYPTO_NEON_FP_ARMV8,
-             (aarch64::AEK_CRYPTO | aarch64::AEK_FP | aarch64::AEK_SIMD))
-AARCH64_ARCH("armv8.1-a", ARMV8_1A, "8.1-A", "v8.1a",
-             armbuildattrs::CPUArch::v8_A, FK_CRYPTO_NEON_FP_ARMV8,
-             (aarch64::AEK_CRC | aarch64::AEK_CRYPTO | aarch64::AEK_FP |
-              aarch64::AEK_SIMD | aarch64::AEK_LSE | aarch64::AEK_RDM))
-AARCH64_ARCH("armv8.2-a", ARMV8_2A, "8.2-A", "v8.2a",
-             armbuildattrs::CPUArch::v8_A, FK_CRYPTO_NEON_FP_ARMV8,
-             (aarch64::AEK_CRC | aarch64::AEK_CRYPTO | aarch64::AEK_FP |
-              aarch64::AEK_SIMD | aarch64::AEK_RAS | aarch64::AEK_LSE |
-              aarch64::AEK_RDM))
-AARCH64_ARCH("armv8.3-a", ARMV8_3A, "8.3-A", "v8.3a",
-             armbuildattrs::CPUArch::v8_A, FK_CRYPTO_NEON_FP_ARMV8,
-             (aarch64::AEK_CRC | aarch64::AEK_CRYPTO | aarch64::AEK_FP |
-              aarch64::AEK_SIMD | aarch64::AEK_RAS | aarch64::AEK_LSE |
-              aarch64::AEK_RDM | aarch64::AEK_RCPC))
-AARCH64_ARCH("armv8.4-a", ARMV8_4A, "8.4-A", "v8.4a",
-             armbuildattrs::CPUArch::v8_A, FK_CRYPTO_NEON_FP_ARMV8,
-             (aarch64::AEK_CRC | aarch64::AEK_CRYPTO | aarch64::AEK_FP |
-              aarch64::AEK_SIMD | aarch64::AEK_RAS | aarch64::AEK_LSE |
-              aarch64::AEK_RDM | aarch64::AEK_RCPC | aarch64::AEK_DOTPROD))
-#undef AARCH64_ARCH
+#include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/basic/adt/Triple.h"
+#include "polarphp/utils/ARMTargetParser.h"
+#include <vector>
 
-#ifndef AARCH64_ARCH_EXT_NAME
-#define AARCH64_ARCH_EXT_NAME(NAME, ID, FEATURE, NEGFEATURE)
-#endif
-// FIXME: This would be nicer were it tablegen
-AARCH64_ARCH_EXT_NAME("invalid",  aarch64::AEK_INVALID,  nullptr,  nullptr)
-AARCH64_ARCH_EXT_NAME("none",     aarch64::AEK_NONE,     nullptr,  nullptr)
-AARCH64_ARCH_EXT_NAME("crc",      aarch64::AEK_CRC,      "+crc",   "-crc")
-AARCH64_ARCH_EXT_NAME("lse",      aarch64::AEK_LSE,      "+lse",   "-lse")
-AARCH64_ARCH_EXT_NAME("rdm",      aarch64::AEK_RDM,      "+rdm",   "-rdm")
-AARCH64_ARCH_EXT_NAME("crypto",   aarch64::AEK_CRYPTO,   "+crypto","-crypto")
-AARCH64_ARCH_EXT_NAME("sm4",      aarch64::AEK_SM4,      "+sm4",   "-sm4")
-AARCH64_ARCH_EXT_NAME("sha3",     aarch64::AEK_SHA3,     "+sha3",  "-sha3")
-AARCH64_ARCH_EXT_NAME("sha2",     aarch64::AEK_SHA2,     "+sha2",  "-sha2")
-AARCH64_ARCH_EXT_NAME("aes",      aarch64::AEK_AES,      "+aes",   "-aes")
-AARCH64_ARCH_EXT_NAME("dotprod",  aarch64::AEK_DOTPROD,  "+dotprod","-dotprod")
-AARCH64_ARCH_EXT_NAME("fp",       aarch64::AEK_FP,       "+fp-armv8",  "-fp-armv8")
-AARCH64_ARCH_EXT_NAME("simd",     aarch64::AEK_SIMD,     "+neon",  "-neon")
-AARCH64_ARCH_EXT_NAME("fp16",     aarch64::AEK_FP16,     "+fullfp16",  "-fullfp16")
-AARCH64_ARCH_EXT_NAME("profile",  aarch64::AEK_PROFILE,  "+spe",  "-spe")
-AARCH64_ARCH_EXT_NAME("ras",      aarch64::AEK_RAS,      "+ras",  "-ras")
-AARCH64_ARCH_EXT_NAME("sve",      aarch64::AEK_SVE,      "+sve",  "-sve")
-AARCH64_ARCH_EXT_NAME("rcpc",     aarch64::AEK_RCPC,     "+rcpc", "-rcpc")
-#undef AARCH64_ARCH_EXT_NAME
+namespace polar {
+// FIXME:This should be made into class design,to avoid dupplication.
+namespace aarch64 {
 
-#ifndef AARCH64_CPU_NAME
-#define AARCH64_CPU_NAME(NAME, ID, DEFAULT_FPU, IS_DEFAULT, DEFAULT_EXT)
-#endif
+using polar::basic::SmallVectorImpl;
+using polar::basic::StringRef;
+using polar::basic::Triple;
 
-AARCH64_CPU_NAME("cortex-a35", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC))
-AARCH64_CPU_NAME("cortex-a53", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, true,
-                (aarch64::AEK_CRC))
-AARCH64_CPU_NAME("cortex-a55", ARMV8_2A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                 (aarch64::AEK_FP16 | aarch64::AEK_DOTPROD | aarch64::AEK_RCPC))
-AARCH64_CPU_NAME("cortex-a57", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC))
-AARCH64_CPU_NAME("cortex-a72", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC))
-AARCH64_CPU_NAME("cortex-a73", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC))
-AARCH64_CPU_NAME("cortex-a75", ARMV8_2A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                 (aarch64::AEK_FP16 | aarch64::AEK_DOTPROD | aarch64::AEK_RCPC))
-AARCH64_CPU_NAME("cyclone", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_NONE))
-AARCH64_CPU_NAME("exynos-m1", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC))
-AARCH64_CPU_NAME("exynos-m2", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC))
-AARCH64_CPU_NAME("exynos-m3", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC))
-AARCH64_CPU_NAME("exynos-m4", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC))
-AARCH64_CPU_NAME("falkor", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC | aarch64::AEK_RDM))
-AARCH64_CPU_NAME("saphira", ARMV8_3A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_PROFILE))
-AARCH64_CPU_NAME("kryo", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC))
-AARCH64_CPU_NAME("thunderx2t99", ARMV8_1A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_NONE))
-AARCH64_CPU_NAME("thunderx", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC | aarch64::AEK_PROFILE))
-AARCH64_CPU_NAME("thunderxt88", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC | aarch64::AEK_PROFILE))
-AARCH64_CPU_NAME("thunderxt81", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC | aarch64::AEK_PROFILE))
-AARCH64_CPU_NAME("thunderxt83", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC | aarch64::AEK_PROFILE))
+// arch extension modifiers for CPUs.
+enum ArchExtKind : unsigned
+{
+   AEK_INVALID =     0,
+   AEK_NONE =        1,
+   AEK_CRC =         1 << 1,
+   AEK_CRYPTO =      1 << 2,
+   AEK_FP =          1 << 3,
+   AEK_SIMD =        1 << 4,
+   AEK_FP16 =        1 << 5,
+   AEK_PROFILE =     1 << 6,
+   AEK_RAS =         1 << 7,
+   AEK_LSE =         1 << 8,
+   AEK_SVE =         1 << 9,
+   AEK_DOTPROD =     1 << 10,
+   AEK_RCPC =        1 << 11,
+   AEK_RDM =         1 << 12,
+   AEK_SM4 =         1 << 13,
+   AEK_SHA3 =        1 << 14,
+   AEK_SHA2 =        1 << 15,
+   AEK_AES =         1 << 16,
+   AEK_FP16FML =     1 << 17,
+   AEK_RAND =        1 << 18,
+   AEK_MTE =         1 << 19,
+   AEK_SSBS =        1 << 20,
+};
 
-// Invalid CPU
-AARCH64_CPU_NAME("invalid", INVALID, FK_INVALID, true, aarch64::AEK_INVALID)
-#undef AARCH64_CPU_NAME
+// arch names.
+enum class ArchKind
+{
+#define AARCH64_ARCH(NAME, ID, cpu_ATTR, SUB_ARCH, ARCH_ATTR, ARCH_FPU, ARCH_BASE_EXT) ID,
+#include "polarphp/utils/AArch64TargetParserDefs.h"
+};
+
+const arm::ArchNames<ArchKind> sg_aarch64ARCHNames[] = {
+   #define AARCH64_ARCH(NAME, ID, CPU_ATTR, SUB_ARCH, ARCH_ATTR, ARCH_FPU,        \
+      ARCH_BASE_EXT)                                            \
+   {  NAME,                                                                       \
+      sizeof(NAME) - 1,                                                           \
+      CPU_ATTR,                                                                   \
+      sizeof(CPU_ATTR) - 1,                                                       \
+      SUB_ARCH,                                                                   \
+      sizeof(SUB_ARCH) - 1,                                                       \
+      arm::FPUKind::ARCH_FPU,                                                     \
+      ARCH_BASE_EXT,                                                              \
+      aarch64::ArchKind::ID,                                                      \
+      ARCH_ATTR},
+   #include "polarphp/utils/AArch64TargetParserDefs.h"
+};
+
+const arm::ExtName sg_aarch64ARCHExtNames[] = {
+   #define AARCH64_ARCH_EXT_NAME(NAME, ID, FEATURE, NEGFEATURE)                   \
+{NAME, sizeof(NAME) - 1, ID, FEATURE, NEGFEATURE},
+   #include "polarphp/utils/AArch64TargetParserDefs.h"
+};
+
+const arm::CpuNames<ArchKind> sg_aarch64CPUNames[] = {
+   #define AARCH64_CPU_NAME(NAME, ID, DEFAULT_FPU, IS_DEFAULT, DEFAULT_EXT)       \
+{NAME, sizeof(NAME) - 1, aarch64::ArchKind::ID, IS_DEFAULT, DEFAULT_EXT},
+   #include "polarphp/utils/AArch64TargetParserDefs.h"
+};
+
+const ArchKind sg_archKinds[] = {
+   #define AARCH64_ARCH(NAME, ID, CPU_ATTR, SUB_ARCH, ARCH_ATTR, ARCH_FPU, ARCH_BASE_EXT) \
+      ArchKind::ID,
+   #include "polarphp/utils/AArch64TargetParserDefs.h"
+};
+
+bool get_extension_features(unsigned extensions,
+                            std::vector<StringRef> &features);
+bool get_arch_features(ArchKind ak, std::vector<StringRef> &features);
+
+StringRef get_arch_name(ArchKind ak);
+unsigned get_arch_attr(ArchKind ak);
+StringRef get_cpu_attr(ArchKind ak);
+StringRef get_sub_arch(ArchKind ak);
+StringRef get_arch_ext_name(unsigned archExtKind);
+StringRef get_arch_ext_feature(StringRef archExt);
+
+// Information by Name
+unsigned  get_default_fpu(StringRef cpu, ArchKind ak);
+unsigned  get_default_extensions(StringRef cpu, ArchKind ak);
+StringRef get_default_cpu(StringRef arch);
+aarch64::ArchKind get_cpu_arch_kind(StringRef cpu);
+
+// Parser
+aarch64::ArchKind parse_arch(StringRef arch);
+aarch64::ArchExtKind parse_arch_ext(StringRef archExt);
+ArchKind parse_cpu_arch(StringRef cpu);
+void fill_valid_cpu_arch_list(SmallVectorImpl<StringRef> &values);
+
+// Used by target parser tests
+void fill_valid_cpu_arch_list(SmallVectorImpl<StringRef> &Values);
+bool is_x18_reserved_by_default(const Triple &tt);
+
+} // namespace AArch64
+} // polar
+
+#endif // POLARPHP_UTILS_AARCH64_TARGET_PARSER_H

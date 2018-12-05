@@ -62,10 +62,10 @@ public:
       bpfel,          // eBPF or extended BPF or 64-bit BPF (little endian)
       bpfeb,          // eBPF or extended BPF or 64-bit BPF (big endian)
       hexagon,        // Hexagon: hexagon
-      mips,           // MIPS: mips, mipsallegrex
-      mipsel,         // MIPSEL: mipsel, mipsallegrexel
-      mips64,         // MIPS64: mips64
-      mips64el,       // MIPS64EL: mips64el
+      mips,           // MIPS: mips, mipsallegrex, mipsr6
+      mipsel,         // MIPSEL: mipsel, mipsallegrexe, mipsr6el
+      mips64,         // MIPS64: mips64, mips64r6, mipsn32, mipsn32r6
+      mips64el,       // MIPS64EL: mips64el, mips64r6el, mipsn32el, mipsn32r6el
       msp430,         // MSP430: msp430
       nios2,          // NIOSII: nios2
       ppc,            // PPC: powerpc
@@ -110,6 +110,7 @@ public:
    {
       NoSubArch,
 
+      ARMSubArch_v8_5a,
       ARMSubArch_v8_4a,
       ARMSubArch_v8_3a,
       ARMSubArch_v8_2a,
@@ -134,7 +135,9 @@ public:
 
       KalimbaSubArch_v3,
       KalimbaSubArch_v4,
-      KalimbaSubArch_v5
+      KalimbaSubArch_v5,
+
+      MipsSubArch_r6
    };
 
    enum class VendorType
@@ -195,7 +198,9 @@ public:
       Mesa3D,
       Contiki,
       AMDPAL,     // AMD PAL Runtime
-      LastOSType = AMDPAL
+      HermitCore, // HermitCore Unikernel/Multikernel
+      Hurd,       // GNU/Hurd
+      LastOSType = Hurd
    };
 
    enum class EnvironmentType
@@ -673,10 +678,18 @@ public:
       return getOS() == Triple::OSType::KFreeBSD;
    }
 
+
+   /// Tests whether the OS is Hurd.
+   bool isOSHurd() const
+   {
+      return getOS() == Triple::OSType::Hurd;
+   }
+
    /// Tests whether the OS uses glibc.
    bool isOSGlibc() const
    {
-      return (getOS() == Triple::OSType::Linux || getOS() == Triple::OSType::KFreeBSD) &&
+      return (getOS() == Triple::OSType::Linux || getOS() == Triple::OSType::KFreeBSD ||
+              getOS() == Triple::OSType::Hurd) &&
             !isAndroid();
    }
 

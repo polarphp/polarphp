@@ -300,20 +300,32 @@ class SparseBitVector
       BITWORD_SIZE = SparseBitVectorElement<ElementSize>::BITWORD_SIZE
    };
 
-   // Pointer to our current Element.
-   ElementListIter m_currElementIter;
    ElementList m_elements;
+
+   // Pointer to our current Element. This has no visible effect on the external
+   // state of a SparseBitVector, it's just used to improve performance in the
+   // common case of testing/modifying bits with similar indices.
+   mutable ElementListIter m_currElementIter;
 
    // This is like std::lower_bound, except we do linear searching from the
    // current position.
-   ElementListIter findLowerBound(unsigned elementIndex)
+   ElementListIter findLowerBoundImpl(unsigned elementIndex) const
    {
+      // We cache a non-const iterator so we're forced to resort to const_cast to
+      // get the begin/end in the case where 'this' is const. To avoid duplication
+      // of code with the only difference being whether the const cast is present
+      // 'this' is always const in this particular function and we sort out the
+      // difference in FindLowerBound and FindLowerBoundConst.
+      ElementListIter begin =
+            const_cast<SparseBitVector<ElementSize> *>(this)->m_elements.begin();
+      ElementListIter end =
+            const_cast<SparseBitVector<ElementSize> *>(this)->m_elements.end();
       if (m_elements.empty()) {
-         m_currElementIter = m_elements.begin();
-         return m_elements.begin();
+         m_currElementIter = begin;
+         return m_currElementIter;
       }
       // Make sure our current iterator is valid.
-      if (m_currElementIter == m_elements.end()) {
+      if (m_currElementIter == end) {
          --m_currElementIter;
       }
       // Search from our current iterator, either backwards or forwards,
@@ -322,18 +334,28 @@ class SparseBitVector
       if (m_currElementIter->index() == elementIndex) {
          return elementIter;
       } else if (m_currElementIter->index() > elementIndex) {
-         while (elementIter != m_elements.begin()
+         while (elementIter != begin
                 && elementIter->index() > elementIndex) {
             --elementIter;
          }
       } else {
-         while (elementIter != m_elements.end() &&
+         while (elementIter != end &&
                 elementIter->index() < elementIndex) {
             ++elementIter;
          }
       }
       m_currElementIter = elementIter;
       return elementIter;
+   }
+
+   ElementListConstIter findLowerBoundConst(unsigned elementIndex) const
+   {
+      return findLowerBoundImpl(elementIndex);
+   }
+
+   ElementListIter findLowerBound(unsigned elementIndex)
+   {
+      return findLowerBoundImpl(elementIndex);
    }
 
    // Iterator to walk set bits in the bitmap.  This iterator is a lot uglier
@@ -468,22 +490,20 @@ public:
    using iterator = SparseBitVectorIterator;
 
    SparseBitVector()
+      : m_elements(),
+        m_currElementIter(m_elements.begin())
    {
-      m_currElementIter = m_elements.begin();
    }
 
-   // SparseBitVector copy ctor.
    SparseBitVector(const SparseBitVector &other)
-   {
-      ElementListConstIter elementIter = other.m_elements.begin();
-      while (elementIter != other.m_elements.end()) {
-         m_elements.push_back(SparseBitVectorElement<ElementSize>(*elementIter));
-         ++elementIter;
-      }
-      m_currElementIter = m_elements.begin();
-   }
+      : m_elements(other.m_elements),
+        m_currElementIter(m_elements.begin())
+   {}
 
-   ~SparseBitVector() = default;
+   SparseBitVector(SparseBitVector &&other)
+      : m_elements(std::move(other.m_elements)),
+        m_currElementIter(m_elements.begin())
+   {}
 
    // Clear.
    void clear()
@@ -497,24 +517,19 @@ public:
       if (this == &other) {
          return *this;
       }
-      m_elements.clear();
-      ElementListConstIter elementIter = other.m_elements.begin();
-      while (elementIter != other.m_elements.end()) {
-         m_elements.push_back(SparseBitVectorElement<ElementSize>(*elementIter));
-         ++elementIter;
-      }
+      m_elements = other.m_elements;
       m_currElementIter = m_elements.begin();
       return *this;
    }
 
    // Test, Reset, and Set a bit in the bitmap.
-   bool test(unsigned idx)
+   bool test(unsigned idx) const
    {
       if (m_elements.empty()) {
          return false;
       }
       unsigned elementIndex = idx / ElementSize;
-      ElementListIter elementIter = findLowerBound(elementIndex);
+      ElementListConstIter elementIter = findLowerBoundConst(elementIndex);
 
       // If we can't find an element that is supposed to contain this bit, there
       // is nothing more to do.

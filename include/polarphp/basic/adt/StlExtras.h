@@ -16,6 +16,8 @@
 #include "polarphp/basic/adt/Iterator.h"
 #include "polarphp/basic/adt/IteratorRange.h"
 #include "polarphp/utils/ErrorHandling.h"
+#include "polarphp/global/AbiBreaking.h"
+
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -215,6 +217,13 @@ void adl_swap(T &&lhs, T &&rhs) noexcept(
    adlinternal::adl_swap(std::forward<T>(lhs), std::forward<T>(rhs));
 }
 
+/// Test whether \p rangeOrContainer is empty. Similar to C++17 std::empty.
+template <typename T>
+constexpr bool empty(const T &rangeOrContainer)
+{
+   return adl_begin(rangeOrContainer) == adl_end(rangeOrContainer);
+}
+
 // MappedIterator - This is a simple iterator adapter that causes a function to
 // be applied whenever operator* is invoked on the iterator.
 
@@ -276,7 +285,7 @@ template <typename Ty>
 struct has_rbegin : HasRbeginImpl<typename std::remove_reference<Ty>::type> {
 };
 
-// Returns an iterator_range over the given container which iterates in reverse.
+// Returns an IteratorRange over the given container which iterates in reverse.
 // Note that the container must have rbegin()/rend() methods for this to work.
 template <typename ContainerTy>
 auto reverse(ContainerTy &&container,
@@ -293,7 +302,7 @@ std::reverse_iterator<IteratorTy> make_reverse_iterator(IteratorTy iter)
    return std::reverse_iterator<IteratorTy>(iter);
 }
 
-// Returns an iterator_range over the given container which iterates in reverse.
+// Returns an IteratorRange over the given container which iterates in reverse.
 // Note that the container must have begin()/end() methods which return
 // bidirectional iterators for this to work.
 template <typename ContainerTy>
@@ -355,7 +364,7 @@ protected:
    // is, so that it can properly stop when it gets there. The end iterator only
    // needs the predicate to support bidirectional iteration.
    FilterIteratorBase(WrappedIteratorT begin, WrappedIteratorT end,
-                        PredicateT pred)
+                      PredicateT pred)
       : BaseT(begin), m_end(end), m_pred(pred)
    {
       findNextValid();
@@ -376,43 +385,43 @@ public:
 template <typename WrappedIteratorT, typename PredicateT,
           typename IterTag = std::forward_iterator_tag>
 class FilterIteratorImpl
-    : public FilterIteratorBase<WrappedIteratorT, PredicateT, IterTag>
+      : public FilterIteratorBase<WrappedIteratorT, PredicateT, IterTag>
 {
-  using BaseT = FilterIteratorBase<WrappedIteratorT, PredicateT, IterTag>;
+   using BaseT = FilterIteratorBase<WrappedIteratorT, PredicateT, IterTag>;
 
 public:
-  FilterIteratorImpl(WrappedIteratorT begin, WrappedIteratorT end,
-                       PredicateT pred)
+   FilterIteratorImpl(WrappedIteratorT begin, WrappedIteratorT end,
+                      PredicateT pred)
       : BaseT(begin, end, pred) {}
 };
 
 /// Specialization of FilterIteratorBase for bidirectional iteration.
 template <typename WrappedIteratorT, typename PredicateT>
 class FilterIteratorImpl<WrappedIteratorT, PredicateT,
-                           std::bidirectional_iterator_tag>
-    : public FilterIteratorBase<WrappedIteratorT, PredicateT,
-                                  std::bidirectional_iterator_tag> {
-  using BaseT = FilterIteratorBase<WrappedIteratorT, PredicateT,
-                                     std::bidirectional_iterator_tag>;
-  void findPrevValid()
-  {
-    while (!this->m_pred(*this->m_iter))
-      BaseT::operator--();
-  }
+      std::bidirectional_iterator_tag>
+      : public FilterIteratorBase<WrappedIteratorT, PredicateT,
+      std::bidirectional_iterator_tag> {
+   using BaseT = FilterIteratorBase<WrappedIteratorT, PredicateT,
+   std::bidirectional_iterator_tag>;
+   void findPrevValid()
+   {
+      while (!this->m_pred(*this->m_iter))
+         BaseT::operator--();
+   }
 
 public:
-  using BaseT::operator--;
+   using BaseT::operator--;
 
-  FilterIteratorImpl(WrappedIteratorT begin, WrappedIteratorT end,
-                       PredicateT pred)
+   FilterIteratorImpl(WrappedIteratorT begin, WrappedIteratorT end,
+                      PredicateT pred)
       : BaseT(begin, end, pred) {}
 
-  FilterIteratorImpl &operator--()
-  {
-    BaseT::operator--();
-    findPrevValid();
-    return *this;
-  }
+   FilterIteratorImpl &operator--()
+   {
+      BaseT::operator--();
+      findPrevValid();
+      return *this;
+   }
 };
 
 namespace internal {
@@ -420,13 +429,13 @@ namespace internal {
 template <bool is_bidirectional>
 struct fwd_or_bidi_tag_impl
 {
-  using type = std::forward_iterator_tag;
+   using type = std::forward_iterator_tag;
 };
 
 template <>
 struct fwd_or_bidi_tag_impl<true>
 {
-  using type = std::bidirectional_iterator_tag;
+   using type = std::bidirectional_iterator_tag;
 };
 
 /// Helper which sets its type member to forward_iterator_tag if the category
@@ -435,9 +444,9 @@ struct fwd_or_bidi_tag_impl<true>
 template <typename IterT>
 struct fwd_or_bidi_tag
 {
-  using type = typename fwd_or_bidi_tag_impl<std::is_base_of<
-      std::bidirectional_iterator_tag,
-      typename std::iterator_traits<IterT>::iterator_category>::value>::type;
+   using type = typename fwd_or_bidi_tag_impl<std::is_base_of<
+   std::bidirectional_iterator_tag,
+   typename std::iterator_traits<IterT>::iterator_category>::value>::type;
 };
 
 } // namespace internal
@@ -446,15 +455,15 @@ struct fwd_or_bidi_tag
 /// FilterIteratorImpl, based on the underlying iterator's category.
 template <typename WrappedIteratorT, typename PredicateT>
 using FilterIterator = FilterIteratorImpl<
-    WrappedIteratorT, PredicateT,
-    typename internal::fwd_or_bidi_tag<WrappedIteratorT>::type>;
+WrappedIteratorT, PredicateT,
+typename internal::fwd_or_bidi_tag<WrappedIteratorT>::type>;
 
 /// Convenience function that takes a range of elements and a predicate,
 /// and return a new FilterIterator range.
 ///
 /// FIXME: Currently if RangeT && is a rvalue reference to a temporary, the
 /// lifetime of that temporary is not kept by the returned range object, and the
-/// temporary is going to be dropped on the floor after the make_iterator_range
+/// temporary is going to be dropped on the floor after the make_IteratorRange
 /// full expression that contains this function call.
 template <typename RangeT, typename PredicateT>
 IteratorRange<FilterIterator<internal::IterOfRange<RangeT>, PredicateT>>
@@ -468,6 +477,94 @@ make_filter_range(RangeT &&range, PredicateT pred)
                      FilterIteratorT(std::end(std::forward<RangeT>(range)),
                                      std::end(std::forward<RangeT>(range)),
                                      pred));
+}
+
+
+/// A pseudo-iterator adaptor that is designed to implement "early increment"
+/// style loops.
+///
+/// This is *not a normal iterator* and should almost never be used directly. It
+/// is intended primarily to be used with range based for loops and some range
+/// algorithms.
+///
+/// The iterator isn't quite an `OutputIterator` or an `InputIterator` but
+/// somewhere between them. The constraints of these iterators are:
+///
+/// - On construction or after being incremented, it is comparable and
+///   dereferencable. It is *not* incrementable.
+/// - After being dereferenced, it is neither comparable nor dereferencable, it
+///   is only incrementable.
+///
+/// This means you can only dereference the iterator once, and you can only
+/// increment it once between dereferences.
+template <typename WrappedIteratorT>
+class early_inc_iterator_impl
+      : public IteratorAdaptorBase<early_inc_iterator_impl<WrappedIteratorT>,
+      WrappedIteratorT, std::input_iterator_tag>
+{
+   using BaseT =
+   IteratorAdaptorBase<early_inc_iterator_impl<WrappedIteratorT>,
+   WrappedIteratorT, std::input_iterator_tag>;
+
+   using PointerT = typename std::iterator_traits<WrappedIteratorT>::pointer;
+
+protected:
+#if POLAR_ENABLE_ABI_BREAKING_CHECKS
+   bool m_isEarlyIncremented = false;
+#endif
+
+public:
+   early_inc_iterator_impl(WrappedIteratorT iter) : BaseT(iter) {}
+
+   using BaseT::operator*;
+   typename BaseT::reference operator*()
+   {
+#if POLAR_ENABLE_ABI_BREAKING_CHECKS
+      assert(!m_isEarlyIncremented && "Cannot dereference twice!");
+      m_isEarlyIncremented = true;
+#endif
+      return *(this->m_iter)++;
+   }
+
+   using BaseT::operator++;
+   early_inc_iterator_impl &operator++()
+   {
+#if POLAR_ENABLE_ABI_BREAKING_CHECKS
+      assert(m_isEarlyIncremented && "Cannot increment before dereferencing!");
+      m_isEarlyIncremented = false;
+#endif
+      return *this;
+   }
+
+   using BaseT::operator==;
+   bool operator==(const early_inc_iterator_impl &rhs) const
+   {
+#if POLAR_ENABLE_ABI_BREAKING_CHECKS
+      assert(!m_isEarlyIncremented && "Cannot compare after dereferencing!");
+#endif
+      return BaseT::operator==(rhs);
+   }
+};
+
+/// Make a range that does early increment to allow mutation of the underlying
+/// range without disrupting iteration.
+///
+/// The underlying iterator will be incremented immediately after it is
+/// dereferenced, allowing deletion of the current node or insertion of nodes to
+/// not disrupt iteration provided they do not invalidate the *next* iterator --
+/// the current iterator can be invalidated.
+///
+/// This requires a very exact pattern of use that is only really suitable to
+/// range based for loops and other range algorithms that explicitly guarantee
+/// to dereference exactly once each element, and to increment exactly once each
+/// element.
+template <typename RangeT>
+IteratorRange<early_inc_iterator_impl<internal::IterOfRange<RangeT>>>
+make_early_inc_range(RangeT &&range) {
+   using EarlyIncIteratorT =
+   early_inc_iterator_impl<internal::IterOfRange<RangeT>>;
+   return make_range(EarlyIncIteratorT(std::begin(std::forward<RangeT>(range))),
+                     EarlyIncIteratorT(std::end(std::forward<RangeT>(range))));
 }
 
 // forward declarations required by ZipShortest/ZipFirst
@@ -673,42 +770,46 @@ zip_first(T &&t, U &&u, Args &&... args)
 /// Currently this only supports forward or higher iterator categories as
 /// inputs and always exposes a forward iterator interface.
 template <typename ValueT, typename... IterTs>
-class concat_iterator
-      : public IteratorFacadeBase<concat_iterator<ValueT, IterTs...>,
+class ConcatIterator
+      : public IteratorFacadeBase<ConcatIterator<ValueT, IterTs...>,
       std::forward_iterator_tag, ValueT>
 {
-   using BaseT = typename concat_iterator::IteratorFacadeBase;
+   using BaseT = typename ConcatIterator::IteratorFacadeBase;
 
    /// We store both the current and end iterators for each concatenated
    /// sequence in a tuple of pairs.
    ///
-   /// Note that something like iterator_range seems nice at first here, but the
+   /// Note that something like IteratorRange seems nice at first here, but the
    /// range properties are of little benefit and end up getting in the way
    /// because we need to do mutation on the current iterators.
-   std::tuple<std::pair<IterTs, IterTs>...> m_iterPairs;
+   std::tuple<IterTs...> m_begins;
+   std::tuple<IterTs...> m_ends;
 
    /// Attempts to increment a specific iterator.
    ///
    /// Returns true if it was able to increment the iterator. Returns false if
    /// the iterator is already at the end iterator.
-   template <size_t Index> bool incrementHelper()
+   template <size_t Index>
+   bool incrementHelper()
    {
-      auto &IterPair = std::get<Index>(m_iterPairs);
-      if (IterPair.first == IterPair.second)
+      auto &begin = std::get<Index>(m_begins);
+      auto &end = std::get<Index>(m_ends);
+      if (begin == end) {
          return false;
-
-      ++IterPair.first;
+      }
+      ++begin;
       return true;
    }
 
    /// Increments the first non-end iterator.
    ///
    /// It is an error to call this with all iterators at the end.
-   template <size_t... Ns> void increment(index_sequence<Ns...>)
+   template <size_t... Ns>
+   void increment(index_sequence<Ns...>)
    {
       // Build a sequence of functions to increment each iterator if possible.
-      bool (concat_iterator::*IncrementHelperFns[])() = {
-            &concat_iterator::incrementHelper<Ns>...};
+      bool (ConcatIterator::*IncrementHelperFns[])() = {
+            &ConcatIterator::incrementHelper<Ns>...};
 
       // Loop over them, and stop as soon as we succeed at incrementing one.
       for (auto &IncrementHelperFn : IncrementHelperFns) {
@@ -722,24 +823,27 @@ class concat_iterator
    /// Returns null if the specified iterator is at the end. Otherwise,
    /// dereferences the iterator and returns the address of the resulting
    /// reference.
-   template <size_t Index> ValueT *getHelper() const
+   template <size_t Index>
+   ValueT *getHelper() const
    {
-      auto &IterPair = std::get<Index>(m_iterPairs);
-      if (IterPair.first == IterPair.second) {
+      auto &begin = std::get<Index>(m_begins);
+      auto &end = std::get<Index>(m_ends);
+      if (begin == end) {
          return nullptr;
       }
-      return &*IterPair.first;
+      return &*begin;
    }
 
    /// Finds the first non-end iterator, dereferences, and returns the resulting
    /// reference.
    ///
    /// It is an error to call this with all iterators at the end.
-   template <size_t... Ns> ValueT &get(index_sequence<Ns...>) const
+   template <size_t... Ns>
+   ValueT &get(index_sequence<Ns...>) const
    {
       // Build a sequence of functions to get from iterator if possible.
-      ValueT *(concat_iterator::*GetHelperFns[])() const = {
-            &concat_iterator::getHelper<Ns>...};
+      ValueT *(ConcatIterator::*GetHelperFns[])() const = {
+            &ConcatIterator::getHelper<Ns>...};
 
       // Loop over them, and return the first result we find.
       for (auto &GetHelperFn : GetHelperFns) {
@@ -756,13 +860,14 @@ public:
    /// We need the full range to know how to switch between each of the
    /// iterators.
    template <typename... RangeTs>
-   explicit concat_iterator(RangeTs &&... ranges)
-      : m_iterPairs({std::begin(ranges), std::end(ranges)}...)
+   explicit ConcatIterator(RangeTs &&... ranges)
+      : m_begins(std::begin(ranges)...),
+        m_ends(std::end(ranges)...)
    {}
 
    using BaseT::operator++;
 
-   concat_iterator &operator++()
+   ConcatIterator &operator++()
    {
       increment(index_sequence_for<IterTs...>());
       return *this;
@@ -773,9 +878,9 @@ public:
       return get(index_sequence_for<IterTs...>());
    }
 
-   bool operator==(const concat_iterator &rhs) const
+   bool operator==(const ConcatIterator &other) const
    {
-      return m_iterPairs == rhs.m_iterPairs;
+      return m_begins == other.m_begins && m_ends == other.m_ends;
    }
 };
 
@@ -791,7 +896,7 @@ class ConcatRange
 {
 public:
    using iterator =
-   concat_iterator<ValueT,
+   ConcatIterator<ValueT,
    decltype(std::begin(std::declval<RangeTs &>()))...>;
 
 private:
@@ -858,6 +963,21 @@ struct LessSecond
    template <typename T> bool operator()(const T &lhs, const T &rhs) const
    {
       return lhs.second < rhs.second;
+   }
+};
+
+
+/// \brief Function object to apply a binary function to the first component of
+/// a std::pair.
+template<typename FuncTy>
+struct on_first
+{
+   FuncTy func;
+   template <typename T>
+   auto operator()(const T &lhs, const T &rhs) const
+   -> decltype(func(lhs.first, rhs.first))
+   {
+      return func(lhs.first, rhs.first);
    }
 };
 
@@ -1019,6 +1139,12 @@ inline void sort(IteratorTy start, IteratorTy end)
    std::sort(start, end);
 }
 
+template <typename Container>
+inline void sort(Container &&container)
+{
+   polar::basic::sort(adl_begin(container), adl_end(container));
+}
+
 template <typename IteratorTy, typename Compare>
 inline void sort(IteratorTy start, IteratorTy end, Compare comp)
 {
@@ -1036,7 +1162,7 @@ inline void sort(IteratorTy start, IteratorTy end, Compare comp)
 /// For a container of pointers, deletes the pointers and then clears the
 /// container.
 template<typename Container>
-void DeleteContainerPointers(Container &container)
+void delete_container_pointers(Container &container)
 {
    for (auto item : container) {
       delete item;
@@ -1047,7 +1173,7 @@ void DeleteContainerPointers(Container &container)
 /// In a container of pairs (usually a map) whose second element is a pointer,
 /// deletes the second elements and then clears the container.
 template<typename Container>
-void DeleteContainerSeconds(Container &container)
+void delete_container_seconds(Container &container)
 {
    for (auto &item : container) {
       delete item.second;
@@ -1134,7 +1260,7 @@ bool is_contained(R &&range, const E &element)
 }
 
 /// Wrapper function around std::count to count the number of times an element
-/// \p Element occurs in the given range \p Range.
+/// \p Element occurs in the given range \p range.
 template <typename R, typename E>
 auto count(R &&range, const E &element) ->
 typename std::iterator_traits<decltype(adl_begin(range))>::difference_type
@@ -1173,6 +1299,38 @@ template <typename R, typename ForwardIt>
 auto lower_bound(R &&range, ForwardIt iter) -> decltype(adl_begin(range))
 {
    return std::lower_bound(adl_begin(range), adl_end(range), iter);
+}
+
+template <typename R, typename ForwardIt, typename Compare>
+auto lower_bound(R &&range, ForwardIt iter, Compare compare)
+-> decltype(adl_begin(range))
+{
+   return std::lower_bound(adl_begin(range), adl_end(range), iter, compare);
+}
+
+/// Provide wrappers to std::upper_bound which take ranges instead of having to
+/// pass begin/end explicitly.
+template <typename R, typename ForwardIt>
+auto upper_bound(R &&range, ForwardIt iter) -> decltype(adl_begin(range))
+{
+   return std::upper_bound(adl_begin(range), adl_end(range), iter);
+}
+
+template <typename R, typename ForwardIt, typename Compare>
+auto upper_bound(R &&range, ForwardIt iter, Compare compare)
+-> decltype(adl_begin(range))
+{
+   return std::upper_bound(adl_begin(range), adl_end(range), iter, compare);
+}
+
+/// Wrapper function around std::equal to detect if all elements
+/// in a container are same.
+template <typename R>
+bool is_splat(R &&range)
+{
+   size_t range_size = size(range);
+   return range_size != 0 && (range_size == 1 ||
+                              std::equal(adl_begin(range) + 1, adl_end(range), adl_begin(range)));
 }
 
 ///  Given a range of type R, iterate the entire range and return a
@@ -1457,6 +1615,46 @@ auto apply_tuple(Func &&func, Tuple &&tuple) -> decltype(internal::apply_tuple_i
 
    return internal::apply_tuple_impl(std::forward<Func>(func), std::forward<Tuple>(tuple),
                                      Indices{});
+}
+
+/// Return true if the sequence [begin, end) has exactly N items. Runs in O(N)
+/// time. Not meant for use with random-access iterators.
+template <typename IterTy>
+bool has_n_items(
+      IterTy &&begin, IterTy &&end, unsigned N,
+      typename std::enable_if<
+      !std::is_same<
+      typename std::iterator_traits<typename std::remove_reference<
+      decltype(begin)>::type>::iterator_category,
+      std::random_access_iterator_tag>::value,
+      void>::type * = nullptr)
+{
+   for (; N; --N, ++begin) {
+      if (begin == end) {
+         return false; // Too few.
+      }
+   }
+   return begin == end;
+}
+
+/// Return true if the sequence [begin, end) has N or more items. Runs in O(N)
+/// time. Not meant for use with random-access iterators.
+template <typename IterTy>
+bool has_n_items_or_more(
+      IterTy &&begin, IterTy &&end, unsigned N,
+      typename std::enable_if<
+      !std::is_same<
+      typename std::iterator_traits<typename std::remove_reference<
+      decltype(begin)>::type>::iterator_category,
+      std::random_access_iterator_tag>::value,
+      void>::type * = nullptr)
+{
+   for (; N; --N, ++begin) {
+      if (begin == end) {
+         return false; // Too few.
+      }
+   }
+   return true;
 }
 
 } // basic

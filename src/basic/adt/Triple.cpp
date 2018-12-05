@@ -28,56 +28,56 @@ StringRef Triple::getArchTypeName(Triple::ArchType kind)
    switch (kind) {
    case ArchType::UnknownArch:    return "unknown";
 
-    case ArchType::aarch64:        return "aarch64";
-    case ArchType::aarch64_be:     return "aarch64_be";
-    case ArchType::arm:            return "arm";
-    case ArchType::armeb:          return "armeb";
-    case ArchType::arc:            return "arc";
-    case ArchType::avr:            return "avr";
-    case ArchType::bpfel:          return "bpfel";
-    case ArchType::bpfeb:          return "bpfeb";
-    case ArchType::hexagon:        return "hexagon";
-    case ArchType::mips:           return "mips";
-    case ArchType::mipsel:         return "mipsel";
-    case ArchType::mips64:         return "mips64";
-    case ArchType::mips64el:       return "mips64el";
-    case ArchType::msp430:         return "msp430";
-    case ArchType::nios2:          return "nios2";
-    case ArchType::ppc64:          return "powerpc64";
-    case ArchType::ppc64le:        return "powerpc64le";
-    case ArchType::ppc:            return "powerpc";
-    case ArchType::r600:           return "r600";
-    case ArchType::amdgcn:         return "amdgcn";
-    case ArchType::riscv32:        return "riscv32";
-    case ArchType::riscv64:        return "riscv64";
-    case ArchType::sparc:          return "sparc";
-    case ArchType::sparcv9:        return "sparcv9";
-    case ArchType::sparcel:        return "sparcel";
-    case ArchType::systemz:        return "s390x";
-    case ArchType::tce:            return "tce";
-    case ArchType::tcele:          return "tcele";
-    case ArchType::thumb:          return "thumb";
-    case ArchType::thumbeb:        return "thumbeb";
-    case ArchType::x86:            return "i386";
-    case ArchType::x86_64:         return "x86_64";
-    case ArchType::xcore:          return "xcore";
-    case ArchType::nvptx:          return "nvptx";
-    case ArchType::nvptx64:        return "nvptx64";
-    case ArchType::le32:           return "le32";
-    case ArchType::le64:           return "le64";
-    case ArchType::amdil:          return "amdil";
-    case ArchType::amdil64:        return "amdil64";
-    case ArchType::hsail:          return "hsail";
-    case ArchType::hsail64:        return "hsail64";
-    case ArchType::spir:           return "spir";
-    case ArchType::spir64:         return "spir64";
-    case ArchType::kalimba:        return "kalimba";
-    case ArchType::lanai:          return "lanai";
-    case ArchType::shave:          return "shave";
-    case ArchType::wasm32:         return "wasm32";
-    case ArchType::wasm64:         return "wasm64";
-    case ArchType::renderscript32: return "renderscript32";
-    case ArchType::renderscript64: return "renderscript64";
+   case ArchType::aarch64:        return "aarch64";
+   case ArchType::aarch64_be:     return "aarch64_be";
+   case ArchType::arm:            return "arm";
+   case ArchType::armeb:          return "armeb";
+   case ArchType::arc:            return "arc";
+   case ArchType::avr:            return "avr";
+   case ArchType::bpfel:          return "bpfel";
+   case ArchType::bpfeb:          return "bpfeb";
+   case ArchType::hexagon:        return "hexagon";
+   case ArchType::mips:           return "mips";
+   case ArchType::mipsel:         return "mipsel";
+   case ArchType::mips64:         return "mips64";
+   case ArchType::mips64el:       return "mips64el";
+   case ArchType::msp430:         return "msp430";
+   case ArchType::nios2:          return "nios2";
+   case ArchType::ppc64:          return "powerpc64";
+   case ArchType::ppc64le:        return "powerpc64le";
+   case ArchType::ppc:            return "powerpc";
+   case ArchType::r600:           return "r600";
+   case ArchType::amdgcn:         return "amdgcn";
+   case ArchType::riscv32:        return "riscv32";
+   case ArchType::riscv64:        return "riscv64";
+   case ArchType::sparc:          return "sparc";
+   case ArchType::sparcv9:        return "sparcv9";
+   case ArchType::sparcel:        return "sparcel";
+   case ArchType::systemz:        return "s390x";
+   case ArchType::tce:            return "tce";
+   case ArchType::tcele:          return "tcele";
+   case ArchType::thumb:          return "thumb";
+   case ArchType::thumbeb:        return "thumbeb";
+   case ArchType::x86:            return "i386";
+   case ArchType::x86_64:         return "x86_64";
+   case ArchType::xcore:          return "xcore";
+   case ArchType::nvptx:          return "nvptx";
+   case ArchType::nvptx64:        return "nvptx64";
+   case ArchType::le32:           return "le32";
+   case ArchType::le64:           return "le64";
+   case ArchType::amdil:          return "amdil";
+   case ArchType::amdil64:        return "amdil64";
+   case ArchType::hsail:          return "hsail";
+   case ArchType::hsail64:        return "hsail64";
+   case ArchType::spir:           return "spir";
+   case ArchType::spir64:         return "spir64";
+   case ArchType::kalimba:        return "kalimba";
+   case ArchType::lanai:          return "lanai";
+   case ArchType::shave:          return "shave";
+   case ArchType::wasm32:         return "wasm32";
+   case ArchType::wasm64:         return "wasm64";
+   case ArchType::renderscript32: return "renderscript32";
+   case ArchType::renderscript64: return "renderscript64";
    }
    polar_unreachable("Invalid ArchType!");
 }
@@ -217,6 +217,8 @@ StringRef Triple::getOSTypeName(OSType kind)
    case OSType::Mesa3D: return "mesa3d";
    case OSType::Contiki: return "contiki";
    case OSType::AMDPAL: return "amdpal";
+   case OSType::HermitCore: return "hermit";
+   case OSType::Hurd: return "hurd";
    }
 
    polar_unreachable("Invalid OSType");
@@ -419,10 +421,14 @@ Triple::ArchType parse_arch(StringRef archName)
          .cond("thumbeb", Triple::ArchType::thumbeb)
          .cond("avr", Triple::ArchType::avr)
          .cond("msp430", Triple::ArchType::msp430)
-         .conds("mips", "mipseb", "mipsallegrex", Triple::ArchType::mips)
-         .conds("mipsel", "mipsallegrexel", Triple::ArchType::mipsel)
-         .conds("mips64", "mips64eb", Triple::ArchType::mips64)
-         .cond("mips64el", Triple::ArchType::mips64el)
+         .conds("mips", "mipseb", "mipsallegrex", "mipsisa32r6",
+                "mipsr6", Triple::ArchType::mips)
+         .conds("mipsel", "mipsallegrexel", "mipsisa32r6el", "mipsr6el",
+                Triple::ArchType::mipsel)
+         .conds("mips64", "mips64eb", "mipsn32", "mipsisa64r6",
+                "mips64r6", "mipsn32r6", Triple::ArchType::mips64)
+         .conds("mips64el", "mipsn32el", "mipsisa64r6el", "mips64r6el",
+                "mipsn32r6el", Triple::ArchType::mips64el)
          .cond("nios2", Triple::ArchType::nios2)
          .cond("r600", Triple::ArchType::r600)
          .cond("amdgcn", Triple::ArchType::amdgcn)
@@ -524,6 +530,8 @@ Triple::OSType parse_os(StringRef osName) {
          .startsWith("mesa3d", Triple::OSType::Mesa3D)
          .startsWith("contiki", Triple::OSType::Contiki)
          .startsWith("amdpal", Triple::OSType::AMDPAL)
+         .startsWith("hermit", Triple::OSType::HermitCore)
+         .startsWith("hurd", Triple::OSType::Hurd)
          .defaultCond(Triple::OSType::UnknownOS);
 }
 
@@ -561,7 +569,13 @@ Triple::ObjectFormatType parse_format(StringRef environmentName)
          .defaultCond(Triple::ObjectFormatType::UnknownObjectFormat);
 }
 
-Triple::SubArchType parse_sub_arch(StringRef subArchName) {
+Triple::SubArchType parse_sub_arch(StringRef subArchName)
+{
+   if (subArchName.startsWith("mips") &&
+       (subArchName.endsWith("r6el") || subArchName.endsWith("r6"))) {
+      return Triple::SubArchType::MipsSubArch_r6;
+   }
+
    StringRef armSubArch = arm::get_canonical_arch_name(subArchName);
 
    // For now, this is the small part. Early return.
@@ -616,6 +630,10 @@ Triple::SubArchType parse_sub_arch(StringRef subArchName) {
       return Triple::SubArchType::ARMSubArch_v8_2a;
    case arm::ArchKind::ARMV8_3A:
       return Triple::SubArchType::ARMSubArch_v8_3a;
+   case arm::ArchKind::ARMV8_4A:
+      return Triple::SubArchType::ARMSubArch_v8_4a;
+   case arm::ArchKind::ARMV8_5A:
+      return Triple::SubArchType::ARMSubArch_v8_5a;
    case arm::ArchKind::ARMV8R:
       return Triple::SubArchType::ARMSubArch_v8r;
    case arm::ArchKind::ARMV8MBaseline:
@@ -739,6 +757,15 @@ Triple::Triple(const Twine &str)
             }
          }
       }
+   } else {
+      m_environment =
+            StringSwitch<Triple::EnvironmentType>(components[0])
+            .startsWith("mipsn32", Triple::EnvironmentType::GNUABIN32)
+            .startsWith("mips64", Triple::EnvironmentType::GNUABI64)
+            .startsWith("mipsisa64", Triple::EnvironmentType::GNUABI64)
+            .startsWith("mipsisa32", Triple::EnvironmentType::GNU)
+            .conds("mips", "mipsel", "mipsr6", "mipsr6el", Triple::EnvironmentType::GNU)
+            .defaultCond(Triple::EnvironmentType::UnknownEnvironment);
    }
    if (m_objectFormat == ObjectFormatType::UnknownObjectFormat) {
       m_objectFormat = get_default_format(*this);
@@ -925,6 +952,13 @@ std::string Triple::normalize(StringRef str)
                 "Component moved wrong!");
          found[pos] = true;
          break;
+      }
+   }
+
+   // Replace empty components with "unknown" value.
+   for (unsigned i = 0, e = components.size(); i < e; ++i) {
+      if (components[i].empty()) {
+         components[i] = "unknown";
       }
    }
 
