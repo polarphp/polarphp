@@ -78,6 +78,13 @@ public:
       consume_error(m_temp.discard());
    }
 
+   void discard() override
+   {
+      // Delete the temp file if it still was open, but keeping the mapping
+      // active.
+      consume_error(m_temp.discard());
+   }
+
 private:
    std::unique_ptr<fs::MappedFileRegion> m_buffer;
    fs::TempFile m_temp;
@@ -181,7 +188,8 @@ createOnDiskBuffer(StringRef path, size_t size, bool initExisting,
 
 // Create an instance of FileOutputBuffer.
 Expected<std::unique_ptr<FileOutputBuffer>>
-FileOutputBuffer::create(StringRef path, size_t size, unsigned flags) {
+FileOutputBuffer::create(StringRef path, size_t size, unsigned flags)
+{
    unsigned mode = fs::all_read | fs::all_write;
    if (flags & F_executable) {
       mode |= fs::all_exe;

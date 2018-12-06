@@ -50,6 +50,8 @@
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
 #include <sys/attr.h>
+#elif defined(__DragonFly__)
+#include <sys/mount.h>
 #endif
 
 // Both stdio.h and cstdio are included via different paths and
@@ -61,6 +63,7 @@
 // For GNU Hurd
 #if defined(__GNU__) && !defined(PATH_MAX)
 # define PATH_MAX 4096
+# define MAXPATHLEN 4096
 #endif
 
 #include <sys/types.h>
@@ -94,7 +97,7 @@
 #define STATVFS_F_FRSIZE(vfs) static_cast<uint64_t>(vfs.f_bsize)
 #endif
 
-#if defined(__NetBSD__)
+#if defined(__NetBSD__) || defined(__DragonFly__) || defined(__GNU__)
 #define STATVFS_F_FLAG(vfs) (vfs).f_flag
 #else
 #define STATVFS_F_FLAG(vfs) (vfs).f_flags
@@ -112,7 +115,7 @@ const file_t sg_kInvalidFile = -1;
 namespace {
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) ||     \
    defined(__minix) || defined(__FreeBSD_kernel__) || defined(__linux__) ||   \
-   defined(__CYGWIN__) || defined(__DragonFly__) || defined(_AIX)
+   defined(__CYGWIN__) || defined(__DragonFly__) || defined(_AIX) || defined(__GNU__)
 int
 test_dir(char ret[PATH_MAX], const char *dir, const char *bin)
 {
@@ -204,10 +207,29 @@ std::string get_main_executable(const char *argv0, void *mainAddr)
    StringRef aPath("/proc/self/exe");
    if (fs::exists(aPath)) {
       // /proc is not always mounted under Linux (chroot for example).
-      ssize_t len = readlink(aPath.getStr().c_str(), exePath, sizeof(exePath));
-      if (len >= 0) {
-         return std::string(exePath, len);
+      ssize_t len = readlink(aPath.str().c_str(), exe_path, sizeof(exe_path));
+      if (len < 0) {
+         return "";
       }
+      // Null terminate the string for realpath. readlink never null
+      // terminates its output.
+      len = std::min(len, ssize_t(sizeof(exe_path) - 1));
+      exe_path[len] = '\0';
+
+      // On Linux, /proc/self/exe always looks through symlinks. However, on
+      // GNU/Hurd, /proc/self/exe is a symlink to the path that was used to start
+      // the program, and not the eventual binary file. Therefore, call realpath
+      // so this behaves the same on all platforms.
+#if _POSIX_VERSION >= 200112 || defined(__GLIBC__)
+      char *real_path = realpath(exe_path, NULL);
+      std::string ret = std::string(real_path);
+      free(real_path);
+      return ret;
+#else
+      char real_path[MAXPATHLEN];
+      realpath(exe_path, real_path);
+      return std::string(real_path);
+#endif
    } else {
       // Fall back to the classical detection.
       if (get_program_path(exePath, argv0)) {
@@ -237,12 +259,12 @@ std::string get_main_executable(const char *argv0, void *mainAddr)
 
 TimePoint<> BasicFileStatus::getLastAccessedTime() const
 {
-   return polar::utils::to_time_point(m_fsStatusAtime);
+   return polar::utils::to_time_point(m_fsStatusAtime, m_fsStatusAtimeNsec);
 }
 
 TimePoint<> BasicFileStatus::getLastModificationTime() const
 {
-   return polar::utils::to_time_point(m_fsStatusMtime);
+   return polar::utils::to_time_point(m_fsStatusMtime, m_fsStatusMtimeNsec);
 }
 
 UniqueId FileStatus::getUniqueId() const
@@ -388,7 +410,7 @@ std::error_code remove(const Twine &path, bool IgnoreNonExisting)
 }
 
 static bool is_local_impl(struct STATVFS &vfs) {
-#if defined(__linux__)
+#if defined(__linux__) || defined(__GNU__)
 #ifndef NFS_SUPER_MAGIC
 #define NFS_SUPER_MAGIC 0x6969
 #endif
@@ -398,7 +420,11 @@ static bool is_local_impl(struct STATVFS &vfs) {
 #ifndef CIFS_MAGIC_NUMBER
 #define CIFS_MAGIC_NUMBER 0xFF534D42
 #endif
+#ifdef __GNU__
+   switch ((uint32_t)vfs.__f_type) {
+#else
    switch ((uint32_t)vfs.f_type) {
+#endif
    case NFS_SUPER_MAGIC:
    case SMB_SUPER_MAGIC:
    case CIFS_MAGIC_NUMBER:
@@ -577,6 +603,26 @@ void expand_tilde_expr(SmallVectorImpl<char> &pathVector)
    path::append(pathVector, storage);
 }
 
+FileType type_for_mode(mode_t mode)
+{
+   if (S_ISDIR(mode)) {
+      return FileType::directory_file;
+   } else if (S_ISREG(mode)) {
+      return FileType::regular_file;
+   } else if (S_ISBLK(mode)) {
+      return FileType::block_file;
+   } else if (S_ISCHR(mode)) {
+      return FileType::character_file;
+   } else if (S_ISFIFO(mode)) {
+      return FileType::fifo_file;
+   } else if (S_ISSOCK(mode)) {
+      return FileType::socket_file;
+   } else if (S_ISLNK(mode)) {
+      return FileType::symlink_file;
+   }
+   return FileType::type_unknown;
+}
+
 std::error_code fill_status(int statRet, const struct stat &status,
                             FileStatus &result)
 {
@@ -590,32 +636,38 @@ std::error_code fill_status(int statRet, const struct stat &status,
       return errorCode;
    }
 
-   FileType type = FileType::type_unknown;
+   uint32_t atimeNsec, mtimeNsec;
+#if defined(HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC)
+   atimeNsec = status.st_atimespec.tv_nsec;
+   mtimeNsec = status.st_mtimespec.tv_nsec;
+#elif defined(HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC)
+   atimeNsec = status.st_atim.tv_nsec;
+   mtimeNsec = status.st_mtim.tv_nsec;
+#else
+   atimeNsec = mtimeNsec = 0;
+#endif
 
-   if (S_ISDIR(status.st_mode)) {
-      type = FileType::directory_file;
-   } else if (S_ISREG(status.st_mode)) {
-      type = FileType::regular_file;
-   } else if (S_ISBLK(status.st_mode)) {
-      type = FileType::block_file;
-   } else if (S_ISCHR(status.st_mode)) {
-      type = FileType::character_file;
-   } else if (S_ISFIFO(status.st_mode)) {
-      type = FileType::fifo_file;
-   } else if (S_ISSOCK(status.st_mode)) {
-      type = FileType::socket_file;
-   } else if (S_ISLNK(status.st_mode)) {
-      type = FileType::symlink_file;
-   }
    Permission perms = static_cast<Permission>(status.st_mode) & all_perms;
-   result = FileStatus(type, perms, status.st_dev, status.st_nlink,
-                       status.st_ino, status.st_atime, status.st_mtime,
+   result = FileStatus(type_for_mode(status.st_mode), perms, status.st_dev, status.st_nlink,
+                       status.st_ino, status.st_atime,atimeNsec,
+                       status.st_mtime, mtimeNsec,
                        status.st_uid, status.st_gid, status.st_size);
 
    return std::error_code();
 }
 
 } // anonymous namespace
+
+void expand_tilde(const Twine &path, SmallVectorImpl<char> &dest)
+{
+   dest.clear();
+   if (path.isTriviallyEmpty()) {
+      return;
+   }
+   path.toVector(dest);
+   expand_tilde_expr(dest);
+   return;
+}
 
 std::error_code status(const Twine &path, FileStatus &result, bool follow)
 {
@@ -645,19 +697,24 @@ std::error_code set_permissions(const Twine &path, Permission permissions)
    return std::error_code();
 }
 
-std::error_code set_last_modification_and_access_time(int fd, TimePoint<> time)
+std::error_code set_last_access_and_modification_time(int fd, TimePoint<> accessTime,
+                                                      TimePoint<> modificationTime)
 {
 #if defined(HAVE_FUTIMENS)
    timespec times[2];
-   times[0] = times[1] = to_time_spec(time);
+   times[0] = polar::utils::to_time_spec(accessTime);
+   times[1] = polar::utils::to_time_spec(modificationTime);
    if (::futimens(fd, times)) {
       return std::error_code(errno, std::generic_category());
    }
    return std::error_code();
 #elif defined(HAVE_FUTIMES)
    timeval times[2];
-   times[0] = times[1] = to_time_spec(
-            std::chrono::time_point_cast<std::chrono::microseconds>(time));
+   times[0] = polar::utils::to_time_val(
+            std::chrono::time_point_cast<std::chrono::microseconds>(accessTime));
+   times[1] =
+         polar::utils::to_time_val(std::chrono::time_point_cast<std::chrono::microseconds>(
+                           modificationTime));
    if (::futimes(fd, times)) {
       return std::error_code(errno, std::generic_category());
    }
@@ -771,6 +828,19 @@ std::error_code directory_iterator_destruct(DirIterState &iter)
    return std::error_code();
 }
 
+namespace {
+FileType dirent_type(dirent* entry) {
+  // Most platforms provide the file type in the dirent: Linux/BSD/Mac.
+  // The DTTOIF macro lets us reuse our status -> type conversion.
+#if defined(_DIRENT_HAVE_D_TYPE) && defined(DTTOIF)
+  return type_for_mode(DTTOIF(entry->d_type));
+#else
+  // Other platforms such as Solaris require a stat() to get the type.
+  return FileType::type_unknown;
+#endif
+}
+} // anonymous namespace
+
 std::error_code directory_iterator_increment(DirIterState &iter)
 {
    errno = 0;
@@ -783,7 +853,7 @@ std::error_code directory_iterator_increment(DirIterState &iter)
           (name.getSize() == 2 && name[0] == '.' && name[1] == '.')) {
          return directory_iterator_increment(iter);
       }
-      iter.m_currentEntry.replaceFilename(name);
+      iter.m_currentEntry.replaceFilename(name, dirent_type(curDir));
    } else {
       return directory_iterator_destruct(iter);
    }
@@ -1082,30 +1152,6 @@ bool get_darwin_conf_dir(bool tempDir, SmallVectorImpl<char> &result)
 }
 
 } // anonymous namespace
-
-bool get_user_cache_dir(SmallVectorImpl<char> &result)
-{
-   // First try using XDG_CACHE_HOME env variable,
-   // as specified in XDG Base Directory Specification at
-   // http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
-   if (const char *xdgCacheDir = std::getenv("XDG_CACHE_HOME")) {
-      result.clear();
-      result.append(xdgCacheDir, xdgCacheDir + strlen(xdgCacheDir));
-      return true;
-   }
-
-   // Try Darwin configuration query
-   if (get_darwin_conf_dir(false, result))
-      return true;
-
-   // Use "$HOME/.cache" if $HOME is available
-   if (home_directory(result)) {
-      append(result, ".cache");
-      return true;
-   }
-
-   return false;
-}
 
 namespace {
 

@@ -152,8 +152,8 @@ void remove_bad_alloc_error_handler();
 /// in the unwind chain.
 ///
 /// If no error handler is installed (default), then a bad_alloc exception
-/// is thrown, if polarphp is compiled with exception support, otherwise an assertion
-/// is called.
+/// is thrown, if LLVM is compiled with exception support, otherwise an
+/// assertion is called..
 void report_bad_alloc_error(const char *reason, bool genCrashDiag = true);
 void report_bad_alloc_error(std::string_view reason, bool genCrashDiag = true);
 

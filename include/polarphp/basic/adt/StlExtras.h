@@ -1251,6 +1251,12 @@ OutputIt copy_if(R &&range, OutputIt out, UnaryPredicate pred)
    return std::copy_if(adl_begin(range), adl_end(range), out, pred);
 }
 
+template <typename R, typename OutputIt>
+OutputIt copy(R &&range, OutputIt out)
+{
+   return std::copy(adl_begin(range), adl_end(range), out);
+}
+
 /// Wrapper function around std::find to detect if an element exists
 /// in a container.
 template <typename R, typename E>

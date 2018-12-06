@@ -54,7 +54,7 @@ enum ProcessorVendors : unsigned
    VENDOR_DUMMY,
 #define X86_VENDOR(ENUM, STRING) \
    ENUM,
-#include "polarphp/utils/X86TargetParser.h"
+#include "polarphp/utils/X86TargetParserDefs.h"
    VENDOR_OTHER
 };
 
@@ -65,7 +65,7 @@ enum ProcessorTypes : unsigned
    cpu_TYPE_DUMMY,
 #define X86_CPU_TYPE(ARCHNAME, ENUM) \
    ENUM,
-#include "polarphp/utils/X86TargetParser.h"
+#include "polarphp/utils/X86TargetParserDefs.h"
    cpu_TYPE_MAX
 };
 
@@ -76,7 +76,7 @@ enum ProcessorSubtypes : unsigned
    cpu_SUBTYPE_DUMMY,
 #define X86_CPU_SUBTYPE(ARCHNAME, ENUM) \
    ENUM,
-#include "polarphp/utils/X86TargetParser.h"
+#include "polarphp/utils/X86TargetParserDefs.h"
    cpu_SUBTYPE_MAX
 };
 
@@ -86,7 +86,7 @@ enum ProcessorFeatures
 {
 #define X86_FEATURE(VAL, ENUM) \
    ENUM = VAL,
-#include "polarphp/utils/X86TargetParser.h"
+#include "polarphp/utils/X86TargetParserDefs.h"
 };
 } // namespace X86
 

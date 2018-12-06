@@ -349,7 +349,7 @@ void TimerGroup::addTimer(Timer &timer)
 void TimerGroup::printQueuedTimers(RawOutStream &outstream)
 {
    // Sort the timers in descending order by amount of time taken.
-   polar::basic::sort(m_timersToPrint.begin(), m_timersToPrint.end());
+   polar::basic::sort(m_timersToPrint);
    TimeRecord total;
    for (const PrintRecord &record : m_timersToPrint) {
       total += record.m_time;
@@ -401,8 +401,7 @@ void TimerGroup::printQueuedTimers(RawOutStream &outstream)
 
 void TimerGroup::prepareToPrintList()
 {
-   // See if any of our timers were started, if so add them to TimersToPrint and
-   // reset them.
+   // See if any of our timers were started, if so add them to TimersToPrint.
    for (Timer *timer = m_firstTimer; timer; timer = timer->m_next) {
       if (!timer->hasTriggered()) continue;
       bool wasRunning = timer->isRunning();
@@ -426,11 +425,28 @@ void TimerGroup::print(RawOutStream &outstream)
    }
 }
 
+void TimerGroup::clear()
+{
+   std::lock_guard lock(sg_timerLock);
+   for (Timer *timer = m_firstTimer; timer; timer = timer->m_next) {
+      timer->clear();
+   }
+}
+
+
 void TimerGroup::printAll(RawOutStream &outstream)
 {
    std::lock_guard lock(sg_timerLock);
    for (TimerGroup *timerGroup = sg_timerGroupList; timerGroup; timerGroup = timerGroup->m_next) {
       timerGroup->print(outstream);
+   }
+}
+
+void TimerGroup::clearAll()
+{
+   std::lock_guard lock(sg_timerLock);
+   for (TimerGroup *timerGroup = sg_timerGroupList; timerGroup; timerGroup = timerGroup->m_next) {
+      timerGroup->clear();
    }
 }
 

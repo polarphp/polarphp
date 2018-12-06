@@ -189,7 +189,7 @@ public:
          }
       }
 
-      std::sort(setFlags.begin(), setFlags.end(), &flagName<TFlag>);
+      std::sort(setFlags, &flagName<TFlag>);
 
       startLine() << label << " [ (" << hex(value) << ")\n";
       for (const auto &flag : setFlags) {

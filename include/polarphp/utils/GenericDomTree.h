@@ -28,6 +28,15 @@
 #ifndef POLARPHP_UTILS_GENERIC_DOMTREE_H
 #define POLARPHP_UTILS_GENERIC_DOMTREE_H
 
+#include "polarphp/basic/adt/DenseMap.h"
+#include "polarphp/basic/adt/GraphTraits.h"
+#include "polarphp/basic/adt/PointerIntPair.h"
+#include "polarphp/basic/adt/StlExtras.h"
+#include "polarphp/basic/adt/SmallPtrSet.h"
+#include "polarphp/basic/adt/SmallVector.h"
+#include "polarphp/utils/CfgUpdate.h"
+#include "polarphp/utils/RawOutStream.h"
+
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -36,13 +45,6 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-#include "polarphp/basic/adt/DenseMap.h"
-#include "polarphp/basic/adt/GraphTraits.h"
-#include "polarphp/basic/adt/PointerIntPair.h"
-#include "polarphp/basic/adt/StlExtras.h"
-#include "polarphp/basic/adt/SmallPtrSet.h"
-#include "polarphp/basic/adt/SmallVector.h"
-#include "polarphp/utils/RawOutStream.h"
 
 namespace polar {
 namespace utils {
@@ -263,61 +265,16 @@ template <typename DomTreeT>
 void calculate(DomTreeT &domTree);
 
 template <typename DomTreeT>
+void calculate_with_updates(DomTreeT &dataTree,
+                            ArrayRef<typename DomTreeT::UpdateType> updates);
+
+template <typename DomTreeT>
 void insert_edge(DomTreeT &domTree, typename DomTreeT::NodePtr from,
                  typename DomTreeT::NodePtr to);
 
 template <typename DomTreeT>
 void delete_edge(DomTreeT &domTree, typename DomTreeT::NodePtr from,
                  typename DomTreeT::NodePtr to);
-
-// UpdateKind and Update are used by the batch update API and it's easiest to
-// define them here.
-enum class UpdateKind : unsigned char
-{
-   Insert,
-   Delete
-};
-
-template <typename NodePtr>
-struct Update {
-   using NodeKindPair = PointerIntPair<NodePtr, 1, UpdateKind>;
-
-   NodePtr m_from;
-   NodeKindPair m_toAndKind;
-
-   Update(UpdateKind kind, NodePtr from, NodePtr to)
-      : m_from(from), m_toAndKind(to, kind)
-   {}
-
-   UpdateKind getKind() const
-   {
-      return m_toAndKind.getInt();
-   }
-
-   NodePtr getFrom() const
-   {
-      return m_from;
-   }
-
-   NodePtr getTo() const
-   {
-      return m_toAndKind.getPointer();
-   }
-
-   bool operator==(const Update &other) const
-   {
-      return m_from == other.m_from && m_toAndKind == other.m_toAndKind;
-   }
-
-   friend RawOutStream &operator<<(RawOutStream &outstream, const Update &update)
-   {
-      outstream << (update.getKind() == UpdateKind::Insert ? "Insert " : "Delete ");
-      update.getFrom()->printAsOperand(outstream, false);
-      outstream << " -> ";
-      update.getTo()->printAsOperand(outstream, false);
-      return outstream;
-   }
-};
 
 template <typename DomTreeT>
 void apply_updates(DomTreeT &domTree,
@@ -346,8 +303,8 @@ public:
    using ParentType = typename std::remove_pointer<ParentPtr>::type;
    static constexpr bool sm_isPostDominator = IsPostDom;
 
-   using UpdateType = domtreebuilder::Update<NodePtr>;
-   using UpdateKind = domtreebuilder::UpdateKind;
+   using UpdateType = cfg::Update<NodePtr>;
+   using UpdateKind = cfg::UpdateKind;
    static constexpr UpdateKind sm_insert = UpdateKind::Insert;
    static constexpr UpdateKind sm_delete = UpdateKind::Delete;
 
@@ -904,7 +861,26 @@ public:
       domtreebuilder::calculate(*this);
    }
 
-   /// verify - check parent and sibling property
+   void recalculate(ParentType &func, ArrayRef<UpdateType> updates)
+   {
+      m_parent = &func;
+      domtreebuilder::calculate_with_updates(*this, updates);
+   }
+
+   /// verify - checks if the tree is correct. There are 3 level of verification:
+   ///  - Full --  verifies if the tree is correct by making sure all the
+   ///             properties (including the parent and the sibling property)
+   ///             hold.
+   ///             Takes O(N^3) time.
+   ///
+   ///  - Basic -- checks if the tree is correct, but compares it to a freshly
+   ///             constructed tree instead of checking the sibling property.
+   ///             Takes O(N^2) time.
+   ///
+   ///  - Fast  -- checks basic tree structure and compares it with a freshly
+   ///             constructed tree.
+   ///             Takes O(N^2) time worst case, but is faster in practise (same
+   ///             as tree construction).
    bool verify() const
    {
       return domtreebuilder::verify(*this);

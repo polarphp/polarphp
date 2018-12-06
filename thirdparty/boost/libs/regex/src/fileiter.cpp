@@ -3,12 +3,12 @@
  * Copyright (c) 1998-2002
  * John Maddock
  *
- * Use, modification and distribution are subject to the 
- * Boost Software License, Version 1.0. (See accompanying file 
+ * Use, modification and distribution are subject to the
+ * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  *
  */
- 
+
  /*
   *   LOCATION:    see http://www.boost.org for most recent version.
   *   FILE:        fileiter.cpp
@@ -259,23 +259,23 @@ void mapfile::lock(pointer* node)const
             *p = 0;
             *(reinterpret_cast<int*>(*node)) = 1;
          }
- 
-        std::size_t read_size = 0; 
-        int read_pos = std::fseek(hfile, (node - _first) * buf_size, SEEK_SET); 
 
-        if(0 == read_pos && node == _last - 1) 
-           read_size = std::fread(*node + sizeof(int), _size % buf_size, 1, hfile); 
+        std::size_t read_size = 0;
+        int read_pos = std::fseek(hfile, (node - _first) * buf_size, SEEK_SET);
+
+        if(0 == read_pos && node == _last - 1)
+           read_size = std::fread(*node + sizeof(int), _size % buf_size, 1, hfile);
         else
            read_size = std::fread(*node + sizeof(int), buf_size, 1, hfile);
         if((read_size == 0) || (std::ferror(hfile)))
-        { 
-#ifndef BOOST_NO_EXCEPTIONS 
+        {
+#ifndef BOOST_NO_EXCEPTIONS
            unlock(node);
-           throw std::runtime_error("Unable to read file."); 
-#else 
-           BOOST_REGEX_NOEH_ASSERT((0 == std::ferror(hfile)) && (read_size != 0)); 
-#endif 
-        } 
+           throw std::runtime_error("Unable to read file.");
+#else
+           BOOST_REGEX_NOEH_ASSERT((0 == std::ferror(hfile)) && (read_size != 0));
+#endif
+        }
       }
       else
       {
@@ -392,7 +392,7 @@ inline bool find_next_file(_fi_find_handle hf,  _fi_find_data& data)
    return FindNextFileA(hf, &data);
 #endif
 }
-   
+
 inline void copy_find_file_result_with_overflow_check(const _fi_find_data& data,  char* path, size_t max_size)
 {
 #ifdef BOOST_NO_ANSI_APIS
@@ -833,6 +833,7 @@ bool iswild(const char* mask, const char* name)
             continue;
          }
          // fall through:
+
       default:
          if(BOOST_REGEX_FI_TRANSLATE(*mask) != BOOST_REGEX_FI_TRANSLATE(*name))
             return false;

@@ -465,6 +465,11 @@ if(HAVE_DLFCN_H)
    endif()
 endif()
 
+CHECK_STRUCT_HAS_MEMBER("struct stat" st_mtimespec.tv_nsec
+    "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC)
+CHECK_STRUCT_HAS_MEMBER("struct stat" st_mtim.tv_nsec
+    "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC)
+
 check_symbol_exists(__GLIBC__ stdio.h POLAR_USING_GLIBC)
 if(POLAR_USING_GLIBC)
    add_definitions(-D_GNU_SOURCE)

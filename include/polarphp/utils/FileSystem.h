@@ -207,6 +207,8 @@ protected:
 #if defined(POLAR_ON_UNIX)
    time_t m_fsStatusAtime = 0;
    time_t m_fsStatusMtime = 0;
+   uint32_t m_fsStatusAtimeNsec = 0;
+   uint32_t m_fsStatusMtimeNsec = 0;
    uid_t m_fsStatusUid = 0;
    gid_t m_fsStatusGid = 0;
    off_t m_fsStatusSize = 0;
@@ -228,10 +230,14 @@ public:
    {}
 
 #if defined(POLAR_ON_UNIX)
-   BasicFileStatus(FileType type, Permission perms, time_t atime, time_t mtime,
+   BasicFileStatus(FileType type, Permission perms, time_t aTime,
+                   uint32_t aTimeNSec, time_t mTime, uint32_t mTimeNSec,
                    uid_t uid, gid_t gid, off_t size)
-      : m_fsStatusAtime(atime), m_fsStatusMtime(mtime), m_fsStatusUid(uid), m_fsStatusGid(gid),
-        m_fsStatusSize(size), m_type(type), m_permissions(perms)
+      : m_fsStatusAtime(aTime), m_fsStatusMtime(mTime),
+        m_fsStatusAtimeNsec(aTimeNSec), m_fsStatusMtimeNsec(mTimeNSec),
+        m_fsStatusUid(uid), m_fsStatusGid(gid),
+        m_fsStatusSize(size), m_type(type),
+        m_permissions(perms)
    {}
 #elif defined(_WIN32)
    BasicFileStatus(FileType type, Permisson perms, uint32_t lastAccessTimeHigh,
@@ -256,8 +262,19 @@ public:
    {
       return m_permissions;
    }
-
+   /// The file access time as reported from the underlying file system.
+   ///
+   /// Also see comments on \c getLastModificationTime() related to the precision
+   /// of the returned value.
    TimePoint<> getLastAccessedTime() const;
+
+   /// The file modification time as reported from the underlying file system.
+   ///
+   /// The returned value allows for nanosecond precision but the actual
+   /// resolution is an implementation detail of the underlying file system.
+   /// There is no guarantee for what kind of resolution you can expect, the
+   /// resolution can differ across platforms and even across mountpoints on the
+   /// same machine.
    TimePoint<> getLastModificationTime() const;
 
 #if defined(POLAR_ON_UNIX)
@@ -327,9 +344,12 @@ public:
    {}
 
 #if defined(POLAR_ON_UNIX)
-   FileStatus(FileType type, Permission perms, dev_t dev, nlink_t links, ino_t inode,
-              time_t atime, time_t mtime, uid_t uid, gid_t gid, off_t size)
-      : BasicFileStatus(type, perms, atime, mtime, uid, gid, size),
+   FileStatus(FileType type, Permission perms, dev_t dev,
+              nlink_t links, ino_t inode,
+              time_t atime, uint32_t aTimeNSec,
+              time_t mtime, uint32_t mTimeNSec,
+              uid_t uid, gid_t gid, off_t size)
+      : BasicFileStatus(type, perms, atime, aTimeNSec, mtime, mTimeNSec, uid, gid, size),
         m_fsStatusDev(dev), m_fsStatusNlinks(links), m_fsStatusInode(inode)
    {}
 #elif defined(_WIN32)
@@ -431,6 +451,12 @@ std::error_code create_hard_link(const Twine &to, const Twine &from);
 ///                     directory.
 std::error_code real_path(const Twine &path, SmallVectorImpl<char> &output,
                           bool expandTilde = false);
+
+/// Expands ~ expressions to the user's home directory. On Unix ~user
+/// directories are resolved as well.
+///
+/// @param path The path to resolve.
+void expand_tilde(const Twine &path, SmallVectorImpl<char> &output);
 
 /// Get the current path.
 ///
@@ -764,7 +790,16 @@ inline std::error_code file_size(const Twine &path, uint64_t &result)
 /// @returns errc::success if the file times were successfully set, otherwise a
 ///          platform-specific error_code or errc::function_not_supported on
 ///          platforms where the functionality isn't available.
-std::error_code setLastModificationAndAccessTime(int fd, TimePoint<> time);
+std::error_code set_last_access_and_modification_time(int fd, TimePoint<> time,
+                                                      TimePoint<> modificationTime);
+
+/// Simpler version that sets both file modification and access time to the same
+/// time.
+inline std::error_code set_last_access_and_modification_time(int fd,
+                                                             TimePoint<> time)
+{
+   return set_last_access_and_modification_time(fd, time, time);
+}
 
 /// Is status available?
 ///
@@ -792,7 +827,7 @@ enum CreationDisposition : unsigned
    ///   * If it does not already exist, create a new file.
    CD_CreateNew = 1,
 
-   /// CD_OpenAlways - When opening a file:
+   /// CD_OpenExisting - When opening a file:
    ///   * If it already exists, open the file with the offset set to 0.
    ///   * If it does not already exist, fail.
    CD_OpenExisting = 2,
@@ -1024,8 +1059,8 @@ Expected<file_t> open_native_file(const Twine &name, CreationDisposition disp,
 /// @returns errc::success if \a Name has been opened, otherwise a
 ///          platform-specific error_code.
 inline std::error_code open_file_for_write(const Twine &name, int &resultFD,
-                                    CreationDisposition disp = CD_CreateAlways,
-                                    OpenFlags flags = OF_None, unsigned mode = 0666)
+                                           CreationDisposition disp = CD_CreateAlways,
+                                           OpenFlags flags = OF_None, unsigned mode = 0666)
 {
    return open_file(name, resultFD, disp, FA_Write, flags, mode);
 }
@@ -1044,9 +1079,9 @@ inline std::error_code open_file_for_write(const Twine &name, int &resultFD,
 /// @returns a platform-specific file descriptor if \a Name has been opened,
 ///          otherwise an error object.
 inline Expected<file_t> open_native_file_for_write(const Twine &name,
-                                                     CreationDisposition disp,
-                                                     OpenFlags flags,
-                                                     unsigned mode = 0666)
+                                                   CreationDisposition disp,
+                                                   OpenFlags flags,
+                                                   unsigned mode = 0666)
 {
    return open_native_file(name, disp, FA_Write, flags, mode);
 }
@@ -1087,9 +1122,9 @@ inline std::error_code open_file_for_read_write(const Twine &name, int &resultFD
 /// @returns a platform-specific file descriptor if \a Name has been opened,
 ///          otherwise an error object.
 inline Expected<file_t> open_native_file_for_read_write(const Twine &name,
-                                                          CreationDisposition disp,
-                                                          OpenFlags flags,
-                                                          unsigned mode = 0666)
+                                                        CreationDisposition disp,
+                                                        OpenFlags flags,
+                                                        unsigned mode = 0666)
 {
    return open_native_file(name, disp, FA_Write | FA_Read, flags, mode);
 }
@@ -1203,32 +1238,32 @@ std::string get_main_executable(const char *argv0, void *mainExecAddr);
 /// @name Iterators
 /// @{
 
-/// DirectoryEntry - A single entry in a directory. Caches the status either
-/// from the result of the iteration syscall, or the first time status is
-/// called.
+/// directory_entry - A single entry in a directory.
 class DirectoryEntry
 {
+   // FIXME: different platforms make different information available "for free"
+   // when traversing a directory. The design of this class wraps most of the
+   // information in basic_file_status, so on platforms where we can't populate
+   // that whole structure, callers end up paying for a stat().
+   // std::filesystem::directory_entry may be a better model.
    std::string m_path;
-   bool m_followSymlinks;
-   BasicFileStatus m_status;
+   FileType m_type;           // Most platforms can provide this.
+   bool m_followSymlinks;     // Affects the behavior of status().
+   BasicFileStatus m_status;  // If available.
 
 public:
    explicit DirectoryEntry(const Twine &path, bool followSymlinks = true,
+                           FileType type = FileType::type_unknown,
                            BasicFileStatus fileStatus = BasicFileStatus())
       : m_path(path.getStr()),
+        m_type(type),
         m_followSymlinks(followSymlinks),
         m_status(fileStatus)
    {}
 
    DirectoryEntry() = default;
 
-   void assign(const Twine &path, BasicFileStatus status = BasicFileStatus())
-   {
-      m_path = path.getStr();
-      m_status = status;
-   }
-
-   void replaceFilename(const Twine &filename,
+   void replaceFilename(const Twine &filename, FileType type,
                         BasicFileStatus status = BasicFileStatus());
 
    const std::string &getPath() const
@@ -1236,7 +1271,22 @@ public:
       return m_path;
    }
 
+   // Get basic information about entry file (a subset of fs::status()).
+   // On most platforms this is a stat() call.
+   // On windows the information was already retrieved from the directory.
    OptionalError<BasicFileStatus> getStatus() const;
+
+   // Get the type of this file.
+   // On most platforms (Linux/Mac/Windows/BSD), this was already retrieved.
+   // On some platforms (e.g. Solaris) this is a stat() call.
+   FileType getType() const
+   {
+      if (m_type != FileType::type_unknown) {
+         return m_type;
+      }
+      auto status = getStatus();
+      return status ? status->getType() : FileType::type_unknown;
+   }
 
    bool operator==(const DirectoryEntry &other) const
    {
@@ -1291,7 +1341,6 @@ public:
       SmallString<128> pathStorage;
       errorCode = internal::directory_iterator_construct(
                *m_state, path.toStringRef(pathStorage), m_followSymlinks);
-      updateErrorCodeForCurrentEntry(errorCode);
    }
 
    explicit DirectoryIterator(const DirectoryEntry &direEntry, std::error_code &errorCode,
@@ -1301,7 +1350,6 @@ public:
       m_state = std::make_shared<internal::DirIterState>();
       errorCode = internal::directory_iterator_construct(
                *m_state, direEntry.getPath(), m_followSymlinks);
-      updateErrorCodeForCurrentEntry(errorCode);
    }
 
    /// Construct end iterator.
@@ -1311,7 +1359,6 @@ public:
    DirectoryIterator &increment(std::error_code &errorCode)
    {
       errorCode = internal::directory_iterator_increment(*m_state);
-      updateErrorCodeForCurrentEntry(errorCode);
       return *this;
    }
 
@@ -1340,29 +1387,6 @@ public:
    bool operator!=(const DirectoryIterator &other) const
    {
       return !(*this == other);
-   }
-   // Other members as required by
-   // C++ Std, 24.1.1 Input iterators [input.iterators]
-
-private:
-   // Checks if current entry is valid and populates error code. For example,
-   // current entry may not exist due to broken symbol links.
-   void updateErrorCodeForCurrentEntry(std::error_code &errorCode)
-   {
-      // Bail out if error has already occured earlier to avoid overwriting it.
-      if (errorCode) {
-         return;
-      }
-
-      // Empty directory entry is used to mark the end of an interation, it's not
-      // an error.
-      if (m_state->m_currentEntry == DirectoryEntry()) {
-         return;
-      }
-      OptionalError<BasicFileStatus> status = m_state->m_currentEntry.getStatus();
-      if (!status) {
-         errorCode = status.getError();
-      }
    }
 };
 
@@ -1406,8 +1430,16 @@ public:
       if (m_state->m_hasNoPushRequest) {
          m_state->m_hasNoPushRequest = false;
       } else {
-         OptionalError<BasicFileStatus> status = m_state->m_stack.top()->getStatus();
-         if (status && is_directory(*status)) {
+         FileType type = m_state->m_stack.top()->getType();
+         if (type == FileType::symlink_file && m_follow) {
+            // Resolve the symlink: is it a directory to recurse into?
+            OptionalError<BasicFileStatus> status = m_state->m_stack.top()->getStatus();
+            if (status) {
+                type = status->getType();
+            }
+            // Otherwise broken symlink, and we'll continue.
+         }
+         if (type == FileType::directory_file) {
             m_state->m_stack.push(DirectoryIterator(*m_state->m_stack.top(), errorCode, m_follow));
             if (m_state->m_stack.top() != endIter) {
                ++m_state->m_level;
@@ -1493,8 +1525,6 @@ public:
    {
       return !(*this == other);
    }
-   // Other members as required by
-   // C++ Std, 24.1.1 Input iterators [input.iterators]
 };
 
 /// @}

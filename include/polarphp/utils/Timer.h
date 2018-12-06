@@ -289,15 +289,23 @@ public:
       m_description.assign(newDescription.begin(), newDescription.end());
    }
 
-   /// Print any started timers in this group and zero them.
+   /// Print any started timers in this group.
    void print(RawOutStream &outStream);
 
-   /// This static method prints all timers and clears them all out.
+   /// Clear all timers in this group.
+   void clear();
+
+   /// This static method prints all timers.
    static void printAll(RawOutStream &outStream);
+
+   /// Clear out all timers. This is mostly used to disable automatic
+   /// printing on shutdown, when timers have already been printed explicitly
+   /// using \c printAll or \c printJSONValues.
+   static void clearAll();
 
    const char *printJSONValues(RawOutStream &outStream, const char *delim);
 
-   /// Prints all timers as JSON key/value pairs, and clears them all out.
+   /// Prints all timers as JSON key/value pairs.
    static const char *printAllJSONValues(RawOutStream &outStream, const char *delim);
 
    /// Ensure global timer group lists are initialized. This function is mostly

@@ -31,6 +31,7 @@
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/basic/adt/Twine.h"
 #include "polarphp/utils/DotGraphTraits.h"
+#include "polarphp/utils/FileSystem.h"
 #include "polarphp/utils/RawOutStream.h"
 #include <algorithm>
 #include <cstddef>
@@ -370,23 +371,39 @@ RawOutStream &write_graph(RawOutStream &m_outstream, const GraphType &m_graph,
 
 std::string create_graph_filename(const Twine &name, int &fd);
 
+/// Writes graph into a provided {@code filename}.
+/// If {@code filename} is empty, generates a random one.
+/// \return The resulting filename, or an empty string if writing
+/// failed.
 template <typename GraphType>
 std::string write_graph(const GraphType &graph, const Twine &name,
-                        bool shortNames = false, const Twine &title = "") {
+                        bool shortNames = false, const Twine &title = "",
+                        std::string filename = "") {
    int fd;
    // Windows can't always handle long paths, so limit the length of the name.
-   std::string nameStr = name.getStr();
-   nameStr = nameStr.substr(0, std::min<std::size_t>(nameStr.size(), 140));
-   std::string filename = create_graph_filename(nameStr, fd);
-   RawFdOutStream outstream(fd, /*shouldClose=*/ true);
+   std::string N = name.getStr();
+   N = N.substr(0, std::min<std::size_t>(N.size(), 140));
+   if (filename.empty()) {
+      filename = create_graph_filename(N, fd);
+   } else {
+      std::error_code errorCode = polar::fs::open_file_for_write(filename, fd);
+
+      // Writing over an existing file is not considered an error.
+      if (errorCode == std::errc::file_exists) {
+         error_stream() << "file exists, overwriting" << "\n";
+      } else if (errorCode) {
+         error_stream() << "error writing into file" << "\n";
+         return "";
+      }
+   }
+   RawFdOutStream out(fd, /*shouldClose=*/ true);
 
    if (fd == -1) {
       error_stream() << "error opening file '" << filename << "' for writing!\n";
       return "";
    }
-   write_graph(outstream, graph, shortNames, title);
+   write_graph(out, graph, shortNames, title);
    error_stream() << " done. \n";
-
    return filename;
 }
 

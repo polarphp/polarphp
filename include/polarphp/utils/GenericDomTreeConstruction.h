@@ -87,6 +87,7 @@ struct SemiNCAInfo
    DenseMap<NodePtr, InfoRec> m_nodeToInfo;
 
    using UpdateT = typename DomTreeT::UpdateType;
+   using UpdateKind = typename DomTreeT::UpdateKind;
    struct BatchUpdateInfo
    {
       SmallVector<UpdateT, 4> m_updates;
@@ -677,8 +678,8 @@ struct SemiNCAInfo
       SmallVector<TreeNodePtr, 8> m_visitedNotAffectedQueue;
    };
 
-   static void insertedge(DomTreeT &domTree, const BatchUpdatePtr batchUpdatePtr,
-                          const NodePtr from, const NodePtr to) {
+   static void insert_edge(DomTreeT &domTree, const BatchUpdatePtr batchUpdatePtr,
+                           const NodePtr from, const NodePtr to) {
       assert((from || sm_isPostDom) &&
              "from has to be a valid CFG node or a virtual root");
       assert(to && "Cannot be a nullptr");
@@ -960,8 +961,8 @@ struct SemiNCAInfo
       POLAR_DEBUG(debug_stream() << "After adding unreachable nodes\n");
    }
 
-   static void deleteedge(DomTreeT &domTree, const BatchUpdatePtr batchUpdatePtr,
-                          const NodePtr from, const NodePtr to)
+   static void delete_edge(DomTreeT &domTree, const BatchUpdatePtr batchUpdatePtr,
+                           const NodePtr from, const NodePtr to)
    {
       assert(from && to && "Cannot disconnect nullptrs");
       POLAR_DEBUG(debug_stream() << "Deleting edge " << BlockNamePrinter(from) << " -> "
@@ -1201,7 +1202,8 @@ struct SemiNCAInfo
    //===--------------------- DomTree Batch Updater --------------------------===
    //~~
 
-   static void applyUpdates(DomTreeT &domTree, ArrayRef<UpdateT> updates) {
+   static void applyUpdates(DomTreeT &domTree, ArrayRef<UpdateT> updates)
+   {
       const size_t numUpdates = updates.getSize();
       if (numUpdates == 0) {
          return;
@@ -1212,15 +1214,16 @@ struct SemiNCAInfo
       if (numUpdates == 1) {
          const auto &update = m_updates.front();
          if (update.getKind() == UpdateKind::Insert) {
-            domTree.insertedge(update.getFrom(), update.getTo());
+            domTree.insert_edge(update.getFrom(), update.getTo());
          } else {
-            domTree.deleteedge(update.getFrom(), update.getTo());
+            domTree.delete_edge(update.getFrom(), update.getTo());
          }
          return;
       }
 
       BatchUpdateInfo batchUpdatePtr;
-      legalizeUpdates(updates, batchUpdatePtr.m_updates);
+      POLAR_DEBUG(debug_stream() << "Legalizing " << batchUpdatePtr.m_updates.size() << " updates\n");
+      cfg::LegalizeUpdates<NodePtr>(updates, batchUpdatePtr.m_updates, sm_isPostDom);
 
       const size_t numLegalized = batchUpdatePtr.m_updates.getSize();
       batchUpdatePtr.m_futureSuccessors.reserve(numLegalized);
@@ -1236,9 +1239,27 @@ struct SemiNCAInfo
 
       POLAR_DEBUG(debug_stream() << "About to apply " << numLegalized << " updates\n");
       POLAR_DEBUG(if (numLegalized < 32) for (const auto &update
-                                              : reverse(batchUpdatePtr.m_updates)) debug_stream()
-                  << '\t' << update << "\n");
+                                              : reverse(batchUpdatePtr.m_updates)) {
+                     debug_stream() << "\t";
+                     update.dump();
+                     debug_stream() << "\n";
+                  });
       POLAR_DEBUG(debug_stream() << "\n");
+
+      // Recalculate the DominatorTree when the number of updates
+      // exceeds a threshold, which usually makes direct updating slower than
+      // recalculation. We select this threshold proportional to the
+      // size of the DominatorTree. The constant is selected
+      // by choosing the one with an acceptable performance on some real-world
+      // inputs.
+      // Make unittests of the incremental algorithm work
+      if (domTree.m_domTreeNodes.size() <= 100) {
+         if (numLegalized > domTree.m_domTreeNodes.size()) {
+            calculateFromScratch(domTree, &batchUpdatePtr);
+         }
+      } else if (numLegalized > domTree.m_domTreeNodes.size() / 40) {
+         calculateFromScratch(domTree, &batchUpdatePtr);
+      }
 
       // If the DominatorTree was recalculated at some point, stop the batch
       // updates. Full recalculations ignore batch updates and look at the actual
@@ -1248,425 +1269,357 @@ struct SemiNCAInfo
       }
    }
 
-   // This function serves double purpose:
-   // a) It removes redundant updates, which makes it easier to reverse-apply
-   //    them when traversing CFG.
-   // b) It optimizes away updates that cancel each other out, as the end result
-   //    is the same.
-   //
-   // It relies on the property of the incremental updates that says that the
-   // order of updates doesn't matter. This allows us to reorder them and end up
-   // with the exact same DomTree every time.
-   //
-   // Following the same logic, the function doesn't care about the order of
-   // input updates, so it's OK to pass it an unordered sequence of updates, that
-   // doesn't make sense when applied sequentially, eg. performing double
-   // insertions or deletions and then doing an opposite update.
-   //
-   // In the future, it should be possible to schedule updates in way that
-   // minimizes the amount of work needed done during incremental updates.
-   static void legalizeUpdates(ArrayRef<UpdateT> allUpdates,
-                               SmallVectorImpl<UpdateT> &result) {
-      POLAR_DEBUG(debug_stream() << "Legalizing " << allUpdates.size() << " updates\n");
-      // Count the total number of inserions of each edge.
-      // Each insertion adds 1 and deletion subtracts 1. The end number should be
-      // one of {-1 (deletion), 0 (NOP), +1 (insertion)}. Otherwise, the sequence
-      // of updates contains multiple updates of the same kind and we assert for
-      // that case.
-      SmallDenseMap<std::pair<NodePtr, NodePtr>, int, 4> operations;
-      operations.reserve(allUpdates.size());
+   static void applynextUpdate(DomTreeT &domTree, BatchUpdateInfo &batchUpdatePtr)
+   {
+      assert(!batchUpdatePtr.m_updates.empty() && "No updates to apply!");
+      UpdateT currentUpdate = batchUpdatePtr.m_updates.popBackValue();
+      POLAR_DEBUG(debug_stream() << "Applying update: ");
+      POLAR_DEBUG(currentUpdate.dump(); debug_stream() << "\n");
 
-      for (const auto &update : allUpdates) {
-         NodePtr from = update.getFrom();
-         NodePtr to = update.getTo();
-         if (sm_isPostDom) {
-            std::swap(from, to);  // Reverse edge for postdominators.
+      // Move to the next snapshot of the CFG by removing the reverse-applied
+      // current update.
+      auto &fs = batchUpdatePtr.m_futureSuccessors[currentUpdate.getFrom()];
+      fs.erase({currentUpdate.getTo(), currentUpdate.getKind()});
+      if (fs.empty()) {
+         batchUpdatePtr.m_futureSuccessors.erase(currentUpdate.getFrom());
+      }
+      auto &fp = batchUpdatePtr.m_futurepredecessors[currentUpdate.getTo()];
+      fp.erase({currentUpdate.getFrom(), currentUpdate.getKind()});
+      if (fp.empty()) {
+         batchUpdatePtr.m_futurepredecessors.erase(currentUpdate.getTo());
+      }
+      if (currentUpdate.getKind() == UpdateKind::Insert) {
+         insert_edge(domTree, &batchUpdatePtr, currentUpdate.getFrom(), currentUpdate.getTo());
+      } else {
+         delete_edge(domTree, &batchUpdatePtr, currentUpdate.getFrom(), currentUpdate.getTo());
+      }
+   }
+
+   //~~
+   //===--------------- DomTree correctness verification ---------------------===
+   //~~
+
+   // Check if the tree has correct roots. A DominatorTree always has a single
+   // root which is the function's entry node. A PostDominatorTree can have
+   // multiple roots - one for each node with no successors and for infinite
+   // loops.
+   bool verify_roots(const DomTreeT &domTree) {
+      if (!domTree.m_parent && !domTree.m_roots.empty()) {
+         debug_stream() << "Tree has no parent but has roots!\n";
+         debug_stream().flush();
+         return false;
+      }
+
+      if (!sm_isPostDom) {
+         if (domTree.m_roots.empty()) {
+            debug_stream() << "Tree doesn't have a root!\n";
+            debug_stream().flush();
+            return false;
          }
-         operations[std::make_pair(from, to)] += (update.getKind() == UpdateKind::Insert ? 1 : -1);
-      }
 
-      result.clear();
-      result.reserve(operations.size());
-      for (auto &Op : operations) {
-         const int numInsertions = Op.second;
-         assert(std::abs(numInsertions) <= 1 && "Unbalanced operations!");
-         if (numInsertions == 0) continue;
-         const UpdateKind updateKind =
-               numInsertions > 0 ? UpdateKind::Insert : UpdateKind::Delete;
-         result.push_back({updateKind, Op.first.first, Op.first.second});
-      }
-
-      // Make the order consistent by not relying on pointer values within the
-      // set. Reuse the old operations map.
-      // In the future, we should sort by something else to minimize the amount
-      // of work needed to perform the series of updates.
-      for (size_t i = 0, e = allUpdates.size(); i != e; ++i) {
-         const auto &update = allUpdates[i];
-         if (!sm_isPostDom) {
-            operations[std::make_pair(update.getFrom(), update.getTo())] = int(i);
-         } else {
-            operations[std::make_pair(update.getTo(), update.getFrom())] = int(i);
+         if (domTree.getRoot() != getEntryNode(domTree)) {
+            debug_stream() << "Tree's root is not its parent's entry node!\n";
+            debug_stream().flush();
+            return false;
          }
       }
 
-      std::sort(result.begin(), result.end(),
-                [&operations](const UpdateT &A, const UpdateT &B) {
-         return operations[{A.getFrom(), A.getTo()}] >
-               operations[{B.getFrom(), B.getTo()}];
-   });
-}
+      RootsT computedRoots = findRoots(domTree, nullptr);
+      if (domTree.m_roots.size() != computedRoots.size() ||
+          !std::is_permutation(domTree.m_roots.begin(), domTree.m_roots.end(),
+                               computedRoots.begin())) {
+         debug_stream() << "Tree has different roots than freshly computed ones!\n";
+         debug_stream() << "\tPdomTree roots: ";
+         for (const NodePtr node : domTree.m_roots) {
+            debug_stream() << BlockNamePrinter(node) << ", ";
+         }
+         debug_stream() << "\n\tComputed roots: ";
+         for (const NodePtr node : computedRoots) {
+            debug_stream() << BlockNamePrinter(node) << ", ";
+         }
 
-static void applynextUpdate(DomTreeT &domTree, BatchUpdateInfo &batchUpdatePtr)
-{
-   assert(!batchUpdatePtr.m_updates.empty() && "No updates to apply!");
-   UpdateT currentUpdate = batchUpdatePtr.m_updates.popBackValue();
-   POLAR_DEBUG(debug_stream() << "Applying update: " << currentUpdate << "\n");
-
-   // Move to the next snapshot of the CFG by removing the reverse-applied
-   // current update.
-   auto &fs = batchUpdatePtr.m_futureSuccessors[currentUpdate.getFrom()];
-   fs.erase({currentUpdate.getTo(), currentUpdate.getKind()});
-   if (fs.empty()) {
-      batchUpdatePtr.m_futureSuccessors.erase(currentUpdate.getFrom());
-   }
-   auto &fp = batchUpdatePtr.m_futurepredecessors[currentUpdate.getTo()];
-   fp.erase({currentUpdate.getFrom(), currentUpdate.getKind()});
-   if (fp.empty()) {
-      batchUpdatePtr.m_futurepredecessors.erase(currentUpdate.getTo());
-   }
-   if (currentUpdate.getKind() == UpdateKind::Insert) {
-      insertedge(domTree, &batchUpdatePtr, currentUpdate.getFrom(), currentUpdate.getTo());
-   } else {
-      deleteedge(domTree, &batchUpdatePtr, currentUpdate.getFrom(), currentUpdate.getTo());
-   }
-}
-
-//~~
-//===--------------- DomTree correctness verification ---------------------===
-//~~
-
-// Check if the tree has correct roots. A DominatorTree always has a single
-// root which is the function's entry node. A PostDominatorTree can have
-// multiple roots - one for each node with no successors and for infinite
-// loops.
-bool verify_roots(const DomTreeT &domTree) {
-   if (!domTree.m_parent && !domTree.m_roots.empty()) {
-      debug_stream() << "Tree has no parent but has roots!\n";
-      debug_stream().flush();
-      return false;
-   }
-
-   if (!sm_isPostDom) {
-      if (domTree.m_roots.empty()) {
-         debug_stream() << "Tree doesn't have a root!\n";
+         debug_stream() << "\n";
          debug_stream().flush();
          return false;
       }
 
-      if (domTree.getRoot() != getEntryNode(domTree)) {
-         debug_stream() << "Tree's root is not its parent's entry node!\n";
-         debug_stream().flush();
-         return false;
-      }
-   }
-
-   RootsT computedRoots = findRoots(domTree, nullptr);
-   if (domTree.m_roots.size() != computedRoots.size() ||
-       !std::is_permutation(domTree.m_roots.begin(), domTree.m_roots.end(),
-                            computedRoots.begin())) {
-      debug_stream() << "Tree has different roots than freshly computed ones!\n";
-      debug_stream() << "\tPdomTree roots: ";
-      for (const NodePtr node : domTree.m_roots) {
-         debug_stream() << BlockNamePrinter(node) << ", ";
-      }
-      debug_stream() << "\n\tComputed roots: ";
-      for (const NodePtr node : computedRoots) {
-         debug_stream() << BlockNamePrinter(node) << ", ";
-      }
-
-      debug_stream() << "\n";
-      debug_stream().flush();
-      return false;
-   }
-
-   return true;
-}
-
-// Checks if the tree contains all reachable nodes in the input graph.
-bool verify_reachability(const DomTreeT &domTree) {
-   clear();
-   doFullDFSWalk(domTree, alwaysDescend);
-
-   for (auto &nodeToTreeNode : domTree.m_domTreeNodes) {
-      const TreeNodePtr treeNode = nodeToTreeNode.second.get();
-      const NodePtr bb = treeNode->getBlock();
-
-      // Virtual root has a corresponding virtual CFG node.
-      if (domTree.isvirtualRoot(treeNode)) {
-         continue;
-      }
-
-      if (m_nodeToInfo.count(bb) == 0) {
-         debug_stream() << "DomTree node " << BlockNamePrinter(bb)
-                        << " not found by DFS walk!\n";
-         debug_stream().flush();
-
-         return false;
-      }
-   }
-
-   for (const NodePtr node : m_numToNode) {
-      if (node && !domTree.getNode(node)) {
-         debug_stream() << "CFG node " << BlockNamePrinter(node)
-                        << " not found in the DomTree!\n";
-         debug_stream().flush();
-
-         return false;
-      }
-   }
-
-   return true;
-}
-
-// Check if for every parent with a level L in the tree all of its children
-// have level L + 1.
-static bool verify_levels(const DomTreeT &domTree)
-{
-   for (auto &nodeToTreeNode : domTree.m_domTreeNodes) {
-      const TreeNodePtr treeNode = nodeToTreeNode.second.get();
-      const NodePtr bb = treeNode->getBlock();
-      if (!bb) {
-         continue;
-      }
-      const TreeNodePtr idom = treeNode->getIDom();
-      if (!idom && treeNode->getLevel() != 0) {
-         debug_stream() << "node without an idom " << BlockNamePrinter(bb)
-                        << " has a nonzero level " << treeNode->getLevel() << "!\n";
-         debug_stream().flush();
-
-         return false;
-      }
-
-      if (idom && treeNode->getLevel() != idom->getLevel() + 1) {
-         debug_stream() << "node " << BlockNamePrinter(bb) << " has level "
-                        << treeNode->getLevel() << " while its idom "
-                        << BlockNamePrinter(idom->getBlock()) << " has level "
-                        << idom->getLevel() << "!\n";
-         debug_stream().flush();
-
-         return false;
-      }
-   }
-
-   return true;
-}
-
-// Check if the computed DFS numbers are correct. Note that DFS info may not
-// be valid, and when that is the case, we don't verify the numbers.
-static bool verify_dfs_numbers(const DomTreeT &domTree)
-{
-   if (!domTree.m_dfsInfoValid || !domTree.m_parent) {
       return true;
    }
-   const NodePtr rootBB = sm_isPostDom ? nullptr : domTree.getRoots()[0];
-   const TreeNodePtr root = domTree.getNode(rootBB);
 
-   auto printNodeAndDFSNums = [](const TreeNodePtr treeNode) {
-      debug_stream() << BlockNamePrinter(treeNode) << " {" << treeNode->getDFSNumIn() << ", "
-                     << treeNode->getDFSNumOut() << '}';
-   };
+   // Checks if the tree contains all reachable nodes in the input graph.
+   bool verify_reachability(const DomTreeT &domTree) {
+      clear();
+      doFullDFSWalk(domTree, alwaysDescend);
 
-   // verify the root's DFS In number. Although DFS numbering would also work
-   // if we started from some other value, we assume 0-based numbering.
-   if (root->getDFSNumIn() != 0) {
-      debug_stream() << "DFSIn number for the tree root is not:\n\t";
-      printNodeAndDFSNums(root);
-      debug_stream() << '\n';
-      debug_stream().flush();
-      return false;
+      for (auto &nodeToTreeNode : domTree.m_domTreeNodes) {
+         const TreeNodePtr treeNode = nodeToTreeNode.second.get();
+         const NodePtr bb = treeNode->getBlock();
+
+         // Virtual root has a corresponding virtual CFG node.
+         if (domTree.isvirtualRoot(treeNode)) {
+            continue;
+         }
+
+         if (m_nodeToInfo.count(bb) == 0) {
+            debug_stream() << "DomTree node " << BlockNamePrinter(bb)
+                           << " not found by DFS walk!\n";
+            debug_stream().flush();
+
+            return false;
+         }
+      }
+
+      for (const NodePtr node : m_numToNode) {
+         if (node && !domTree.getNode(node)) {
+            debug_stream() << "CFG node " << BlockNamePrinter(node)
+                           << " not found in the DomTree!\n";
+            debug_stream().flush();
+
+            return false;
+         }
+      }
+
+      return true;
    }
 
-   // For each tree node verify if children's DFS numbers cover their parent's
-   // DFS numbers with no gaps.
-   for (const auto &nodeToTreeNode : domTree.m_domTreeNodes) {
-      const TreeNodePtr node = nodeToTreeNode.second.get();
-
-      // Handle tree leaves.
-      if (node->getChildren().empty()) {
-         if (node->getDFSNumIn() + 1 != node->getDFSNumOut()) {
-            debug_stream() << "Tree leaf should have DFSOut = DFSIn + 1:\n\t";
-            printNodeAndDFSNums(node);
-            debug_stream() << '\n';
+   // Check if for every parent with a level L in the tree all of its children
+   // have level L + 1.
+   static bool verify_levels(const DomTreeT &domTree)
+   {
+      for (auto &nodeToTreeNode : domTree.m_domTreeNodes) {
+         const TreeNodePtr treeNode = nodeToTreeNode.second.get();
+         const NodePtr bb = treeNode->getBlock();
+         if (!bb) {
+            continue;
+         }
+         const TreeNodePtr idom = treeNode->getIDom();
+         if (!idom && treeNode->getLevel() != 0) {
+            debug_stream() << "node without an idom " << BlockNamePrinter(bb)
+                           << " has a nonzero level " << treeNode->getLevel() << "!\n";
             debug_stream().flush();
+
             return false;
          }
 
-         continue;
+         if (idom && treeNode->getLevel() != idom->getLevel() + 1) {
+            debug_stream() << "node " << BlockNamePrinter(bb) << " has level "
+                           << treeNode->getLevel() << " while its idom "
+                           << BlockNamePrinter(idom->getBlock()) << " has level "
+                           << idom->getLevel() << "!\n";
+            debug_stream().flush();
+
+            return false;
+         }
       }
 
-      // Make a copy and sort it such that it is possible to check if there are
-      // no gaps between DFS numbers of adjacent children.
-      SmallVector<TreeNodePtr, 8> children(node->begin(), node->end());
-      std::sort(children.begin(), children.end(),
-                [](const TreeNodePtr child1, const TreeNodePtr child2) {
-         return child1->getDFSNumIn() < child2->getDFSNumIn();
-      });
+      return true;
+   }
 
-      auto printChildrenError = [node, &children, printNodeAndDFSNums](
-            const TreeNodePtr firstCh, const TreeNodePtr secondCh) {
-         assert(firstCh);
+   // Check if the computed DFS numbers are correct. Note that DFS info may not
+   // be valid, and when that is the case, we don't verify the numbers.
+   static bool verify_dfs_numbers(const DomTreeT &domTree)
+   {
+      if (!domTree.m_dfsInfoValid || !domTree.m_parent) {
+         return true;
+      }
+      const NodePtr rootBB = sm_isPostDom ? nullptr : domTree.getRoots()[0];
+      const TreeNodePtr root = domTree.getNode(rootBB);
 
-         debug_stream() << "Incorrect DFS numbers for:\n\tParent ";
-         printNodeAndDFSNums(node);
-
-         debug_stream() << "\n\tChild ";
-         printNodeAndDFSNums(firstCh);
-
-         if (secondCh) {
-            debug_stream() << "\n\tSecond child ";
-            printNodeAndDFSNums(secondCh);
-         }
-
-         debug_stream() << "\nAll children: ";
-         for (const TreeNodePtr child : children) {
-            printNodeAndDFSNums(child);
-            debug_stream() << ", ";
-         }
-
-         debug_stream() << '\n';
-         debug_stream().flush();
+      auto printNodeAndDFSNums = [](const TreeNodePtr treeNode) {
+         debug_stream() << BlockNamePrinter(treeNode) << " {" << treeNode->getDFSNumIn() << ", "
+                        << treeNode->getDFSNumOut() << '}';
       };
 
-      if (children.front()->getDFSNumIn() != node->getDFSNumIn() + 1) {
-         printChildrenError(children.front(), nullptr);
+      // verify the root's DFS In number. Although DFS numbering would also work
+      // if we started from some other value, we assume 0-based numbering.
+      if (root->getDFSNumIn() != 0) {
+         debug_stream() << "DFSIn number for the tree root is not:\n\t";
+         printNodeAndDFSNums(root);
+         debug_stream() << '\n';
+         debug_stream().flush();
          return false;
       }
 
-      if (children.back()->getDFSNumOut() + 1 != node->getDFSNumOut()) {
-         printChildrenError(children.back(), nullptr);
-         return false;
-      }
+      // For each tree node verify if children's DFS numbers cover their parent's
+      // DFS numbers with no gaps.
+      for (const auto &nodeToTreeNode : domTree.m_domTreeNodes) {
+         const TreeNodePtr node = nodeToTreeNode.second.get();
 
-      for (size_t i = 0, e = children.size() - 1; i != e; ++i) {
-         if (children[i]->getDFSNumOut() + 1 != children[i + 1]->getDFSNumIn()) {
-            printChildrenError(children[i], children[i + 1]);
-            return false;
+         // Handle tree leaves.
+         if (node->getChildren().empty()) {
+            if (node->getDFSNumIn() + 1 != node->getDFSNumOut()) {
+               debug_stream() << "Tree leaf should have DFSOut = DFSIn + 1:\n\t";
+               printNodeAndDFSNums(node);
+               debug_stream() << '\n';
+               debug_stream().flush();
+               return false;
+            }
+
+            continue;
          }
-      }
-   }
 
-   return true;
-}
-
-// The below routines verify the correctness of the dominator tree relative to
-// the CFG it's coming from.  A tree is a dominator tree iff it has two
-// properties, called the parent property and the sibling property.  Tarjan
-// and Lengauer prove (but don't explicitly name) the properties as part of
-// the proofs in their 1972 paper, but the proofs are mostly part of proving
-// things about semidominators and idoms, and some of them are simply asserted
-// based on even earlier papers (see, e.g., lemma 2).  Some papers refer to
-// these properties as "valid" and "co-valid".  See, e.g., "Dominators,
-// directed bipolar orders, and independent spanning trees" by Loukas
-// Georgiadis and Robert E. Tarjan, as well as "Dominator Tree Verification
-// and Vertex-Disjoint Paths " by the same authors.
-
-// A very simple and direct explanation of these properties can be found in
-// "An Experimental Study of Dynamic Dominators", found at
-// https://arxiv.org/abs/1604.02711
-
-// The easiest way to think of the parent property is that it's a requirement
-// of being a dominator.  Let's just take immediate dominators.  For PARENT to
-// be an immediate dominator of CHILD, all paths in the CFG must go through
-// PARENT before they hit CHILD.  This implies that if you were to cut PARENT
-// out of the CFG, there should be no paths to CHILD that are reachable.  If
-// there are, then you now have a path from PARENT to CHILD that goes around
-// PARENT and still reaches CHILD, which by definition, means PARENT can't be
-// a dominator of CHILD (let alone an immediate one).
-
-// The sibling property is similar.  It says that for each pair of sibling
-// nodes in the dominator tree (LEFT and RIGHT) , they must not dominate each
-// other.  If sibling LEFT dominated sibling RIGHT, it means there are no
-// paths in the CFG from sibling LEFT to sibling RIGHT that do not go through
-// LEFT, and thus, LEFT is really an ancestor (in the dominator tree) of
-// RIGHT, not a sibling.
-
-// It is possible to verify the parent and sibling properties in
-// linear time, but the algorithms are complex. Instead, we do it in a
-// straightforward node^2 and node^3 way below, using direct path reachability.
-
-
-// Checks if the tree has the parent property: if for all edges from V to wnode in
-// the input graph, such that V is reachable, the parent of wnode in the tree is
-// an ancestor of V in the tree.
-//
-// This means that if a node gets disconnected from the graph, then all of
-// the nodes it dominated previously will now become unreachable.
-bool verify_parent_property(const DomTreeT &domTree)
-{
-   for (auto &nodeToTreeNode : domTree.m_domTreeNodes) {
-      const TreeNodePtr treeNode = nodeToTreeNode.second.get();
-      const NodePtr bb = treeNode->getBlock();
-      if (!bb || treeNode->getChildren().empty()) continue;
-
-      POLAR_DEBUG(debug_stream() << "Verifying parent property of node "
-                  << BlockNamePrinter(treeNode) << "\n");
-      clear();
-      doFullDFSWalk(domTree, [bb](NodePtr from, NodePtr to) {
-         return from != bb && to != bb;
-      });
-
-      for (TreeNodePtr child : treeNode->getChildren())
-         if (m_nodeToInfo.count(child->getBlock()) != 0) {
-            debug_stream() << "child " << BlockNamePrinter(child)
-                           << " reachable after its parent " << BlockNamePrinter(bb)
-                           << " is removed!\n";
-            debug_stream().flush();
-
-            return false;
-         }
-   }
-
-   return true;
-}
-
-// Check if the tree has sibling property: if a node V does not dominate a
-// node wnode for all siblings V and wnode in the tree.
-//
-// This means that if a node gets disconnected from the graph, then all of its
-// siblings will now still be reachable.
-bool verify_sibling_property(const DomTreeT &domTree)
-{
-   for (auto &nodeToTreeNode : domTree.m_domTreeNodes) {
-      const TreeNodePtr treeNode = nodeToTreeNode.second.get();
-      const NodePtr bb = treeNode->getBlock();
-      if (!bb || treeNode->getChildren().empty()) {
-         continue;
-      }
-      const auto &siblings = treeNode->getChildren();
-      for (const TreeNodePtr node : siblings) {
-         clear();
-         NodePtr BBN = node->getBlock();
-         doFullDFSWalk(domTree, [BBN](NodePtr from, NodePtr to) {
-            return from != BBN && to != BBN;
+         // Make a copy and sort it such that it is possible to check if there are
+         // no gaps between DFS numbers of adjacent children.
+         SmallVector<TreeNodePtr, 8> children(node->begin(), node->end());
+         polar::basic::sort(children, [](const TreeNodePtr child1, const TreeNodePtr child2) {
+            return child1->getDFSNumIn() < child2->getDFSNumIn();
          });
 
-         for (const TreeNodePtr S : siblings) {
-            if (S == node) continue;
+         auto printChildrenError = [node, &children, printNodeAndDFSNums](
+               const TreeNodePtr firstCh, const TreeNodePtr secondCh) {
+            assert(firstCh);
 
-            if (m_nodeToInfo.count(S->getBlock()) == 0) {
-               debug_stream() << "node " << BlockNamePrinter(S)
-                              << " not reachable when its sibling " << BlockNamePrinter(node)
+            debug_stream() << "Incorrect DFS numbers for:\n\tParent ";
+            printNodeAndDFSNums(node);
+
+            debug_stream() << "\n\tChild ";
+            printNodeAndDFSNums(firstCh);
+
+            if (secondCh) {
+               debug_stream() << "\n\tSecond child ";
+               printNodeAndDFSNums(secondCh);
+            }
+
+            debug_stream() << "\nAll children: ";
+            for (const TreeNodePtr child : children) {
+               printNodeAndDFSNums(child);
+               debug_stream() << ", ";
+            }
+
+            debug_stream() << '\n';
+            debug_stream().flush();
+         };
+
+         if (children.front()->getDFSNumIn() != node->getDFSNumIn() + 1) {
+            printChildrenError(children.front(), nullptr);
+            return false;
+         }
+
+         if (children.back()->getDFSNumOut() + 1 != node->getDFSNumOut()) {
+            printChildrenError(children.back(), nullptr);
+            return false;
+         }
+
+         for (size_t i = 0, e = children.size() - 1; i != e; ++i) {
+            if (children[i]->getDFSNumOut() + 1 != children[i + 1]->getDFSNumIn()) {
+               printChildrenError(children[i], children[i + 1]);
+               return false;
+            }
+         }
+      }
+
+      return true;
+   }
+
+   // The below routines verify the correctness of the dominator tree relative to
+   // the CFG it's coming from.  A tree is a dominator tree iff it has two
+   // properties, called the parent property and the sibling property.  Tarjan
+   // and Lengauer prove (but don't explicitly name) the properties as part of
+   // the proofs in their 1972 paper, but the proofs are mostly part of proving
+   // things about semidominators and idoms, and some of them are simply asserted
+   // based on even earlier papers (see, e.g., lemma 2).  Some papers refer to
+   // these properties as "valid" and "co-valid".  See, e.g., "Dominators,
+   // directed bipolar orders, and independent spanning trees" by Loukas
+   // Georgiadis and Robert E. Tarjan, as well as "Dominator Tree Verification
+   // and Vertex-Disjoint Paths " by the same authors.
+
+   // A very simple and direct explanation of these properties can be found in
+   // "An Experimental Study of Dynamic Dominators", found at
+   // https://arxiv.org/abs/1604.02711
+
+   // The easiest way to think of the parent property is that it's a requirement
+   // of being a dominator.  Let's just take immediate dominators.  For PARENT to
+   // be an immediate dominator of CHILD, all paths in the CFG must go through
+   // PARENT before they hit CHILD.  This implies that if you were to cut PARENT
+   // out of the CFG, there should be no paths to CHILD that are reachable.  If
+   // there are, then you now have a path from PARENT to CHILD that goes around
+   // PARENT and still reaches CHILD, which by definition, means PARENT can't be
+   // a dominator of CHILD (let alone an immediate one).
+
+   // The sibling property is similar.  It says that for each pair of sibling
+   // nodes in the dominator tree (LEFT and RIGHT) , they must not dominate each
+   // other.  If sibling LEFT dominated sibling RIGHT, it means there are no
+   // paths in the CFG from sibling LEFT to sibling RIGHT that do not go through
+   // LEFT, and thus, LEFT is really an ancestor (in the dominator tree) of
+   // RIGHT, not a sibling.
+
+   // It is possible to verify the parent and sibling properties in
+   // linear time, but the algorithms are complex. Instead, we do it in a
+   // straightforward node^2 and node^3 way below, using direct path reachability.
+
+
+   // Checks if the tree has the parent property: if for all edges from V to wnode in
+   // the input graph, such that V is reachable, the parent of wnode in the tree is
+   // an ancestor of V in the tree.
+   //
+   // This means that if a node gets disconnected from the graph, then all of
+   // the nodes it dominated previously will now become unreachable.
+   bool verify_parent_property(const DomTreeT &domTree)
+   {
+      for (auto &nodeToTreeNode : domTree.m_domTreeNodes) {
+         const TreeNodePtr treeNode = nodeToTreeNode.second.get();
+         const NodePtr bb = treeNode->getBlock();
+         if (!bb || treeNode->getChildren().empty()) continue;
+
+         POLAR_DEBUG(debug_stream() << "Verifying parent property of node "
+                     << BlockNamePrinter(treeNode) << "\n");
+         clear();
+         doFullDFSWalk(domTree, [bb](NodePtr from, NodePtr to) {
+            return from != bb && to != bb;
+         });
+
+         for (TreeNodePtr child : treeNode->getChildren())
+            if (m_nodeToInfo.count(child->getBlock()) != 0) {
+               debug_stream() << "child " << BlockNamePrinter(child)
+                              << " reachable after its parent " << BlockNamePrinter(bb)
                               << " is removed!\n";
                debug_stream().flush();
 
                return false;
             }
-         }
       }
+
+      return true;
    }
 
-   return true;
-}
+   // Check if the tree has sibling property: if a node V does not dominate a
+   // node wnode for all siblings V and wnode in the tree.
+   //
+   // This means that if a node gets disconnected from the graph, then all of its
+   // siblings will now still be reachable.
+   bool verify_sibling_property(const DomTreeT &domTree)
+   {
+      for (auto &nodeToTreeNode : domTree.m_domTreeNodes) {
+         const TreeNodePtr treeNode = nodeToTreeNode.second.get();
+         const NodePtr bb = treeNode->getBlock();
+         if (!bb || treeNode->getChildren().empty()) {
+            continue;
+         }
+         const auto &siblings = treeNode->getChildren();
+         for (const TreeNodePtr node : siblings) {
+            clear();
+            NodePtr BBN = node->getBlock();
+            doFullDFSWalk(domTree, [BBN](NodePtr from, NodePtr to) {
+               return from != BBN && to != BBN;
+            });
+
+            for (const TreeNodePtr S : siblings) {
+               if (S == node) continue;
+
+               if (m_nodeToInfo.count(S->getBlock()) == 0) {
+                  debug_stream() << "node " << BlockNamePrinter(S)
+                                 << " not reachable when its sibling " << BlockNamePrinter(node)
+                                 << " is removed!\n";
+                  debug_stream().flush();
+
+                  return false;
+               }
+            }
+         }
+      }
+
+      return true;
+   }
 };
 
 template <class DomTreeT>
@@ -1675,21 +1628,42 @@ void calculate(DomTreeT &domTree)
    SemiNCAInfo<DomTreeT>::calculateFromScratch(domTree, nullptr);
 }
 
-template <class DomTreeT>
-void insertedge(DomTreeT &domTree, typename DomTreeT::NodePtr from,
-                typename DomTreeT::NodePtr to)
+
+template <typename DomTreeT>
+void calculate_with_updates(DomTreeT &domTree,
+                          ArrayRef<typename DomTreeT::UpdateType> updates)
 {
-   if (domTree.isPostDominator()) std::swap(from, to);
-   SemiNCAInfo<DomTreeT>::insertedge(domTree, nullptr, from, to);
+   // TODO: Move BUI creation in common method, reuse in ApplyUpdates.
+   typename SemiNCAInfo<DomTreeT>::BatchUpdateInfo bui;
+   POLAR_DEBUG(debug_stream() << "Legalizing " << bui.m_updates.size() << " updates\n");
+   cfg::LegalizeUpdates<typename DomTreeT::NodePtr>(updates, bui.m_updates,
+                                                    DomTreeT::sg_isPostDominator);
+   const size_t numLegalized = bui.m_updates.size();
+   bui.m_futureSuccessors.reserve(numLegalized);
+   bui.m_futureSuccessors.reserve(numLegalized);
+   for (auto &item : bui.updates) {
+      bui.FutureSuccessors[item.getFrom()].push_back({item.getTo(), item.getKind()});
+      bui.FuturePredecessors[item.getTo()].push_back({item.getFrom(), item.getKind()});
+   }
+
+   SemiNCAInfo<DomTreeT>::calculateFromScratch(domTree, &bui);
 }
 
 template <class DomTreeT>
-void deleteedge(DomTreeT &domTree, typename DomTreeT::NodePtr from,
-                typename DomTreeT::NodePtr to) {
+void insert_edge(DomTreeT &domTree, typename DomTreeT::NodePtr from,
+                 typename DomTreeT::NodePtr to)
+{
+   if (domTree.isPostDominator()) std::swap(from, to);
+   SemiNCAInfo<DomTreeT>::insert_edge(domTree, nullptr, from, to);
+}
+
+template <class DomTreeT>
+void delete_edge(DomTreeT &domTree, typename DomTreeT::NodePtr from,
+                 typename DomTreeT::NodePtr to) {
    if (domTree.isPostDominator()) {
       std::swap(from, to);
    }
-   SemiNCAInfo<DomTreeT>::deleteedge(domTree, nullptr, from, to);
+   SemiNCAInfo<DomTreeT>::delete_edge(domTree, nullptr, from, to);
 }
 
 template <class DomTreeT>

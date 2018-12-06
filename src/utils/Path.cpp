@@ -11,6 +11,7 @@
 
 #include "polarphp/utils/Path.h"
 #include "polarphp/basic/adt/ArrayRef.h"
+#include "polarphp/basic/adt/StlExtras.h"
 #include "polarphp/global/Config.h"
 #include "polarphp/utils/Endian.h"
 #include "polarphp/utils/ErrorCode.h"
@@ -208,53 +209,63 @@ std::error_code create_unique_entity(const Twine &model, int &resultFD,
    resultPath.push_back(0);
    resultPath.pop_back();
 
-retry_random_path:
-   // Replace '%' with random chars.
-   for (unsigned i = 0, e = modelStorage.getSize(); i != e; ++i) {
-      if (modelStorage[i] == '%') {
-         resultPath[i] = "0123456789abcdef"[Process::getRandomNumber() & 15];
-      }
-   }
-
-   // Try to open + create the file.
-   switch (type) {
-   case FS_File: {
-      if (std::error_code errorCode =
-          polar::fs::open_file_for_read_write(Twine(resultPath.begin()), resultFD,
-                                              fs::CD_CreateNew, flags, mode)) {
-         if (errorCode == ErrorCode::file_exists)
-            goto retry_random_path;
-         return errorCode;
+   // Limit the number of attempts we make, so that we don't infinite loop. E.g.
+   // "permission denied" could be for a specific file (so we retry with a
+   // different name) or for the whole directory (retry would always fail).
+   // Checking which is racy, so we try a number of times, then give up.
+   std::error_code errorCode;
+   for (int retries = 128; retries > 0; --retries) {
+      // Replace '%' with random chars.
+      for (unsigned i = 0, e = modelStorage.size(); i != e; ++i) {
+         if (modelStorage[i] == '%') {
+            resultPath[i] =
+                  "0123456789abcdef"[sys::Process::getRandomNumber() & 15];
+         }
       }
 
-      return std::error_code();
-   }
+      // Try to open + create the file.
+      switch (type) {
+      case FS_File: {
+         errorCode = polar::fs::open_file_for_read_write(Twine(resultPath.begin()), resultFD,
+                                                         polar::fs::CD_CreateNew, flags, mode);
+         if (errorCode) {
+            // errc::permission_denied happens on Windows when we try to open a file
+            // that has been marked for deletion.
+            if (errorCode == ErrorCode::file_exists || errorCode == ErrorCode::permission_denied) {
+               continue;
+            }
 
-   case FS_Name: {
-      std::error_code errorCode =
-            polar::fs::access(resultPath.begin(), fs::AccessMode::Exist);
-      if (errorCode == ErrorCode::no_such_file_or_directory) {
+            return errorCode;
+         }
+
          return std::error_code();
       }
-      if (errorCode) {
-         return errorCode;
-      }
 
-      goto retry_random_path;
-   }
-
-   case FS_Dir: {
-      if (std::error_code errorCode =
-          fs::create_directory(resultPath.begin(), false)) {
-         if (errorCode == ErrorCode::file_exists) {
-            goto retry_random_path;
+      case FS_Name: {
+         errorCode = polar::fs::access(resultPath.begin(), polar::fs::AccessMode::Exist);
+         if (errorCode == ErrorCode::no_such_file_or_directory) {
+            return std::error_code();
          }
-         return errorCode;
+         if (errorCode) {
+            return errorCode;
+         }
+         continue;
       }
-      return std::error_code();
+
+      case FS_Dir: {
+         errorCode = polar::fs::create_directory(resultPath.begin(), false);
+         if (errorCode) {
+            if (errorCode == ErrorCode::file_exists) {
+               continue;
+            }
+            return errorCode;
+         }
+         return std::error_code();
+      }
+      }
+      polar_unreachable("Invalid Type");
    }
-   }
-   polar_unreachable("Invalid type");
+   return errorCode;
 }
 
 } // end unnamed namespace
@@ -566,7 +577,7 @@ void replace_path_prefix(SmallVectorImpl<char> &pathVector,
    }
    // If prefixes have the same size we can simply copy the new one over.
    if (oldPrefix.getSize() == newPrefix.getSize()) {
-      std::copy(newPrefix.begin(), newPrefix.end(), pathVector.begin());
+      polar::basic::copy(newPrefix, pathVector.begin());
       return;
    }
 
@@ -1169,12 +1180,13 @@ OptionalError<Permission> get_permissions(const Twine &path) {
    return fstatus.getPermissions();
 }
 
-void DirectoryEntry::replaceFilename(const Twine &filename,
+void DirectoryEntry::replaceFilename(const Twine &filename, FileType type,
                                      BasicFileStatus status)
 {
    SmallString<128> pathStr = path::parent_path(m_path);
    path::append(pathStr, filename);
    m_path = pathStr.getStr();
+   m_type = type;
    m_status = status;
 }
 
@@ -1303,22 +1315,6 @@ Expected<TempFile> TempFile::create(const Twine &model, unsigned mode)
 #endif
    return std::move(ret);
 }
-
-namespace path {
-
-bool get_user_cache_dir(SmallVectorImpl<char> &result);
-
-bool user_cache_directory(SmallVectorImpl<char> &result, const Twine &path1,
-                          const Twine &path2, const Twine &path3)
-{
-   if (get_user_cache_dir(result)) {
-      append(result, path1, path2, path3);
-      return true;
-   }
-   return false;
-}
-
-} // end namespace path
 
 } // fs
 } // polar
