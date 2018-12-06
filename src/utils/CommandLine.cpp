@@ -806,6 +806,11 @@ bool is_whitespace(char c)
    return c == ' ' || c == '\t' || c == '\r' || c == '\n';
 }
 
+bool is_whitespace_or_null(char c)
+{
+   return is_whitespace(c) || c == '\0';
+}
+
 bool is_quote(char c)
 {
    return c == '\"' || c == '\'';
@@ -888,7 +893,7 @@ bool expand_response_file(StringRef fname, StringSaver &saver,
    }
 
 
-   // Tokenize the contents into NewArgv.
+   // Tokenize the contents into newArgv.
    tokenizer(str, saver, newArgv, markEOLs);
 
    // If names of nested response files should be resolved relative to including
@@ -1005,7 +1010,7 @@ void tokenize_windows_command_line(StringRef src, StringSaver &saver,
       // INIT state indicates that the current input index is at the start of
       // the string or between tokens.
       if (state == INIT) {
-         if (is_whitespace(c)) {
+         if (is_whitespace_or_null(c)) {
             // Mark the end of lines in response files
             if (markEOLs && c == '\n') {
                newArgv.push_back(nullptr);
@@ -1030,7 +1035,7 @@ void tokenize_windows_command_line(StringRef src, StringSaver &saver,
       // quotes.
       if (state == UNQUOTED) {
          // Whitespace means the end of the token.
-         if (is_whitespace(c)) {
+         if (is_whitespace_or_null(c)) {
             newArgv.push_back(saver.save(StringRef(token)).getData());
             token.clear();
             state = INIT;
@@ -1205,10 +1210,31 @@ void parse_environment_options(const char *progName, const char *envVar,
 }
 
 bool parse_commandline_options(int argc, const char *const *argv,
-                                StringRef overview, RawOutStream *errorStream)
+                               StringRef overview, RawOutStream *errorStream,
+                               const char *envVar)
 {
-   return sg_globalParser->parseCommandLineOptions(argc, argv, overview,
-                                                   errorStream);
+   SmallVector<const char *, 20> newArgv;
+   BumpPtrAllocator allocator;
+   StringSaver saver(allocator);
+   newArgv.push_back(argv[0]);
+
+   // Parse options from environment variable.
+   if (envVar) {
+      if (std::optional<std::string> envValue =
+          sys::Process::getEnv(StringRef(envVar))) {
+         tokenize_gnu_command_line(*envValue, saver, newArgv);
+      }
+   }
+
+   // Append options from command line.
+   for (int i = 1; i < argc; ++i) {
+      newArgv.push_back(argv[i]);
+   }
+   int newArgc = static_cast<int>(newArgv.size());
+
+   // Parse all options.
+   return sg_globalParser->parseCommandLineOptions(newArgc, &newArgv[0], overview,
+         errorStream);
 }
 
 void CommandLineParser::resetAllOptionOccurrences()
@@ -2504,10 +2530,10 @@ void reset_all_option_occurrences()
 }
 
 void polarphp_parse_commandline_options(int argc, const char *const *argv,
-                                         const char *overview)
+                                        const char *overview)
 {
    cmd::parse_commandline_options(argc, argv, StringRef(overview),
-                                   &polar::utils::null_stream());
+                                  &polar::utils::null_stream());
 }
 
 } // cmd

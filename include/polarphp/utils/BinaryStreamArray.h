@@ -164,6 +164,16 @@ public:
       m_stream = stream;
    }
 
+   void drop_front()
+   {
+      m_stream = m_stream.dropFront(begin()->length());
+   }
+
+   inline void dropFront()
+   {
+      drop_front();
+   }
+
 private:
    BinaryStreamRef m_stream;
    Extractor m_extractor;

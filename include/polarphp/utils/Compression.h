@@ -32,18 +32,15 @@ using polar::basic::SmallVectorImpl;
 
 namespace zlib {
 
-enum CompressionLevel
-{
-   NoCompression,
-   DefaultCompression,
-   BestSpeedCompression,
-   BestSizeCompression
-};
+static constexpr int NoCompression = 0;
+static constexpr int BestSpeedCompression = 1;
+static constexpr int DefaultCompression = 6;
+static constexpr int BestSizeCompression = 9;
 
 bool is_available();
 
 Error compress(StringRef inputBuffer, SmallVectorImpl<char> &compressedBuffer,
-               CompressionLevel level = DefaultCompression);
+               int level = DefaultCompression);
 
 Error uncompress(StringRef inputBuffer, char *uncompressedBuffer,
                  size_t &uncompressedSize);

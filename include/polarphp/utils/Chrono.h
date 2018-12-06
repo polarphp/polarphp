@@ -51,6 +51,15 @@ to_time_point(std::time_t time)
 }
 
 
+/// Convert a std::time_t + nanoseconds to a TimePoint
+POLAR_ATTRIBUTE_ALWAYS_INLINE inline TimePoint<>
+to_time_point(std::time_t T, uint32_t nsec)
+{
+   using namespace std::chrono;
+   return time_point_cast<nanoseconds>(system_clock::from_time_t(T))
+         + nanoseconds(nsec);
+}
+
 RawOutStream &operator<<(RawOutStream &outStream, TimePoint<> timePoint);
 
 /// Format provider for TimePoint<>

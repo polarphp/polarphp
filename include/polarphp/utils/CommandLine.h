@@ -75,9 +75,17 @@ using polar::utils::ManagedStatic;
 // Returns true on success. Otherwise, this will print the error message to
 // stderr and exit if \p errStream is not set (nullptr by default), or print the
 // error message to \p errStream and return false if \p errStream is provided.
+//
+// If EnvVar is not nullptr, command-line options are also parsed from the
+// environment variable named by EnvVar.  Precedence is given to occurrences
+// from argv.  This precedence is currently implemented by parsing argv after
+// the environment variable, so it is only implemented correctly for options
+// that give precedence to later occurrences.  If your program supports options
+// that give precedence to earlier occurrences, you will need to extend this
 bool parse_commandline_options(int argc, const char *const *argv,
-                                StringRef overview = "",
-                                RawOutStream *errStream = nullptr);
+                               StringRef overview = "",
+                               RawOutStream *errStream = nullptr,
+                               const char *envVar = nullptr);
 
 //===----------------------------------------------------------------------===//
 // parse_environment_options - Environment variable option processing alternate
@@ -2452,8 +2460,8 @@ void tokenize_gnu_command_line(StringRef source, StringSaver &saver,
 /// lines and end of the response file to be marked with a nullptr string.
 /// \param [out] NewArgv All parsed strings are appended to NewArgv.
 void tokenize_windows_command_line(StringRef source, StringSaver &saver,
-                                  SmallVectorImpl<const char *> &newArgv,
-                                  bool markEOLs = false);
+                                   SmallVectorImpl<const char *> &newArgv,
+                                   bool markEOLs = false);
 
 /// String tokenization function type.  Should be compatible with either
 /// Windows or Unix command line tokenizers.

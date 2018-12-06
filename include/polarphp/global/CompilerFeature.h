@@ -129,6 +129,20 @@
 #define POLAR_NODISCARD
 #endif
 
+
+// Indicate that a non-static, non-const C++ member function reinitializes
+// the entire object to a known state, independent of the previous state of
+// the object.
+//
+// The clang-tidy check bugprone-use-after-move recognizes this attribute as a
+// marker that a moved-from object has left the indeterminate state and can be
+// reused.
+#if __has_cpp_attribute(clang::reinitializes)
+#define POLAR_ATTRIBUTE_REINITIALIZES [[clang::reinitializes]]
+#else
+#define POLAR_ATTRIBUTE_REINITIALIZES
+#endif
+
 // Some compilers warn about unused functions. When a function is sometimes
 // used or not depending on build settings (e.g. a function only called from
 // within "assert"), this attribute can be used to suppress such warnings.
@@ -464,7 +478,7 @@ namespace polar {
 /// reduced default alignment.
 inline void *allocate_buffer(size_t size, size_t alignment) {
    return ::operator new(size
-                      #if __cpp_aligned_new
+                      #ifdef __cpp_aligned_new
                          ,
                          std::align_val_t(alignment)
                       #endif
@@ -480,7 +494,7 @@ inline void *allocate_buffer(size_t size, size_t alignment) {
 /// most likely using the above helper.
 inline void deallocate_buffer(void *ptr, size_t size, size_t alignment) {
    ::operator delete(ptr
-      #if __cpp_sized_deallocation
+      #ifdef __cpp_sized_deallocation
          ,
          size
       #endif

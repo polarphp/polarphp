@@ -32,17 +32,6 @@ Error create_error(StringRef error)
    return make_error<StringError>(error, inconvertible_error_code());
 }
 
-int encode_zlib_compression_level(zlib::CompressionLevel level)
-{
-   switch (level) {
-   case zlib::NoCompression: return 0;
-   case zlib::BestSpeedCompression: return 1;
-   case zlib::DefaultCompression: return Z_DEFAULT_COMPRESSION;
-   case zlib::BestSizeCompression: return 9;
-   }
-   polar_unreachable("Invalid zlib::CompressionLevel!");
-}
-
 StringRef convert_zlib_code_to_string(int code)
 {
    switch (code) {
@@ -70,18 +59,17 @@ bool is_available()
 
 Error compress(StringRef inputBuffer,
                SmallVectorImpl<char> &compressedBuffer,
-               CompressionLevel level)
+               int level)
 {
    unsigned long compressedSize = ::compressBound(inputBuffer.getSize());
    compressedBuffer.resize(compressedSize);
-   int clevel = encode_zlib_compression_level(level);
-   int res = ::compress2((Bytef *)compressedBuffer.getData(), &compressedSize,
-                         (const Bytef *)inputBuffer.getData(), inputBuffer.getSize(),
-                         clevel);
+   int res =
+         ::compress2((Bytef *)compressedBuffer.getData(), &compressedSize,
+                     (const Bytef *)inputBuffer.getData(), inputBuffer.size(), level);
    // Tell MemorySanitizer that zlib output buffer is fully initialized.
-   // This avoids a false report when running polarVM with uninstrumented ZLib.
+   // This avoids a false report when running LLVM with uninstrumented ZLib.
    __msan_unpoison(compressedBuffer.getData(), compressedSize);
-   compressedBuffer.resize(compressedSize);
+   compressedBuffer.setSize(compressedSize);
    return res ? create_error(convert_zlib_code_to_string(res)) : Error::getSuccess();
 }
 
@@ -121,20 +109,20 @@ bool is_available()
 
 Error compress(StringRef inputBuffer,
                SmallVectorImpl<char> &compressedBuffer,
-               CompressionLevel level)
+               int level)
 {
    polar_unreachable("zlib::compress is unavailable");
 }
 
 Error uncompress(StringRef inputBuffer, char *uncompressedBuffer,
-                       size_t &uncompressedSize)
+                 size_t &uncompressedSize)
 {
    polar_unreachable("zlib::uncompress is unavailable");
 }
 
 Error uncompress(StringRef inputBuffer,
-                       SmallVectorImpl<char> &uncompressedBuffer,
-                       size_t uncompressedSize)
+                 SmallVectorImpl<char> &uncompressedBuffer,
+                 size_t uncompressedSize)
 {
    polar_unreachable("zlib::uncompress is unavailable");
 }

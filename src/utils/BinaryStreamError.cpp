@@ -58,7 +58,7 @@ BinaryStreamError::BinaryStreamError(StreamErrorCode code, StringRef context)
 
 void BinaryStreamError::log(RawOutStream &outstream) const
 {
-   outstream << m_errorMsg << "\n";
+   outstream << m_errorMsg;
 }
 
 StringRef BinaryStreamError::getErrorMessage() const

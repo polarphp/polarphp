@@ -39,6 +39,7 @@
 #include <iterator>
 #include <type_traits>
 #include <utility>
+#include <optional>
 
 namespace polar {
 namespace utils {
@@ -313,6 +314,65 @@ public:
       return m_slabs.getSize() + m_customSizedSlabs.getSize();
    }
 
+   /// \return An index uniquely and reproducibly identifying
+   /// an input pointer \p ptr in the given allocator.
+   /// The returned value is negative iff the object is inside a custom-size
+   /// slab.
+   /// Returns an empty optional if the pointer is not found in the allocator.
+   std::optional<int64_t> identifyObject(const void *ptr)
+   {
+      const char *P = static_cast<const char *>(ptr);
+      int64_t inSlabIdx = 0;
+      for (size_t idx = 0, E = m_slabs.size(); idx < E; idx++) {
+         const char *S = static_cast<const char *>(m_slabs[idx]);
+         if (P >= S && P < S + computeSlabSize(idx)) {
+            return inSlabIdx + static_cast<int64_t>(P - S);
+         }
+         inSlabIdx += static_cast<int64_t>(computeSlabSize(idx));
+      }
+
+      // Use negative index to denote custom sized slabs.
+      int64_t inCustomSizedSlabIdx = -1;
+      for (size_t idx = 0, E = m_customSizedSlabs.size(); idx < E; idx++) {
+         const char *S = static_cast<const char *>(m_customSizedSlabs[idx].first);
+         size_t Size = m_customSizedSlabs[idx].second;
+         if (P >= S && P < S + Size) {
+            return inCustomSizedSlabIdx - static_cast<int64_t>(P - S);
+         }
+         inCustomSizedSlabIdx -= static_cast<int64_t>(Size);
+      }
+      return std::nullopt;
+   }
+
+   /// A wrapper around identifyObject that additionally asserts that
+   /// the object is indeed within the allocator.
+   /// \return An index uniquely and reproducibly identifying
+   /// an input pointer \p ptr in the given allocator.
+   int64_t identifyKnownObject(const void *ptr)
+   {
+      std::optional<int64_t> out = identifyObject(ptr);
+      assert(out && "Wrong allocator used");
+      return *out;
+   }
+
+   /// A wrapper around identifyKnownObject. Accepts type information
+   /// about the object and produces a smaller identifier by relying on
+   /// the alignment information. Note that sub-classes may have different
+   /// alignment, so the most base class should be passed as template parameter
+   /// in order to obtain correct results. For that reason automatic template
+   /// parameter deduction is disabled.
+   /// \return An index uniquely and reproducibly identifying
+   /// an input pointer \p ptr in the given allocator. This identifier is
+   /// different from the ones produced by identifyObject and
+   /// identifyAlignedObject.
+   template <typename T>
+   int64_t identifyKnownAlignedObject(const void *ptr)
+   {
+      int64_t out = identifyKnownObject(ptr);
+      assert(out % alignof(T) == 0 && "Wrong alignment information");
+      return out / alignof(T);
+   }
+
    size_t getTotalMemory() const
    {
       size_t totalMemory = 0;
@@ -471,7 +531,7 @@ public:
                   std::distance(m_allocator.m_slabs.begin(), iter));
          char *begin = (char *)align_addr(*iter, alignof(T));
          char *end = *iter == m_allocator.m_slabs.getBack() ? m_allocator.m_curPtr
-                                                         : (char *)*iter + allocatedSlabSize;
+                                                            : (char *)*iter + allocatedSlabSize;
 
          destroyElements(begin, end);
       }
