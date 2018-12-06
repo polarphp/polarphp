@@ -832,6 +832,7 @@ bool iswild(const char* mask, const char* name)
             ++mask;
             continue;
          }
+         [[fallthrough]];
          // fall through:
 
       default:
