@@ -21,6 +21,7 @@ namespace {
 enum class ErrorErrorCode : int
 {
    MultipleErrors = 1,
+   FileError,
    InconvertibleError
 };
 
@@ -44,12 +45,14 @@ public:
          return "Inconvertible error value. An error has occurred that could "
                 "not be converted to a known std::error_code. Please file a "
                 "bug.";
+      case ErrorErrorCode::FileError:
+         return "A file error occurred.";
       }
       polar_unreachable("Unhandled error code");
    }
 };
 
-}
+} // anonymous namespace
 
 static polar::utils::ManagedStatic<ErrorErrorCategory> sg_errorErrorCat;
 
@@ -61,6 +64,8 @@ char ErrorInfoBase::sm_id = 0;
 char ErrorList::sm_id = 0;
 char EcError::sm_id = 0;
 char StringError::sm_id = 0;
+char FileError::sm_id = 0;
+
 void log_all_unhandled_errors(Error error, RawOutStream &out, const std::string &errorBanner)
 {
    if (!error) {
@@ -83,6 +88,12 @@ std::error_code ErrorList::convertToErrorCode() const
 std::error_code inconvertible_error_code()
 {
    return std::error_code(static_cast<int>(ErrorErrorCode::InconvertibleError),
+                          *sg_errorErrorCat);
+}
+
+std::error_code FileError::convertToErrorCode() const
+{
+   return std::error_code(static_cast<int>(ErrorErrorCode::FileError),
                           *sg_errorErrorCat);
 }
 
@@ -120,6 +131,11 @@ void Error::fatalUncheckedError() const
 }
 #endif
 
+StringError::StringError(std::error_code errorCode, const Twine &str)
+   : m_msg(str.getStr()),
+     m_errorCode(errorCode)
+{}
+
 StringError::StringError(const Twine &str, std::error_code errorCode)
    : m_msg(str.getStr()),
      m_errorCode(errorCode)
@@ -127,7 +143,14 @@ StringError::StringError(const Twine &str, std::error_code errorCode)
 
 void StringError::log(RawOutStream &out) const
 {
-   out << m_msg;
+   if (m_printMsgOnly) {
+      out << m_msg;
+   } else {
+      out << m_errorCode.message();
+      if (!m_msg.empty()) {
+         out << (" " + m_msg);
+      }
+   }
 }
 
 std::error_code StringError::convertToErrorCode() const
@@ -146,7 +169,7 @@ void report_fatal_error(Error error, bool genCrashDiag)
    std::string errorMsg;
    {
       RawStringOutStream errorStream(errorMsg);
-      log_all_unhandled_errors(std::move(error), errorStream, "");
+      log_all_unhandled_errors(std::move(error), errorStream);
    }
    report_fatal_error(errorMsg);
 }

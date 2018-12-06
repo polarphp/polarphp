@@ -64,7 +64,20 @@ static DebugCounterList sg_debugCounterOption(
       cmd::Desc("Comma separated list of debug counter skip and count"),
       cmd::CommaSeparated, cmd::ZeroOrMore, cmd::location(DebugCounter::getInstance()));
 
+
+static polar::cmd::Opt<bool> sg_printDebugCounter(
+      "print-debug-counter", polar::cmd::Hidden, polar::cmd::init(false), polar::cmd::Optional,
+      polar::cmd::Desc("Print out debug counter info after all counters accumulated"));
+
 static ManagedStatic<DebugCounter> sg_debugCounter;
+
+// Print information when destroyed, iff command line option is specified.
+DebugCounter::~DebugCounter()
+{
+   if (isCountingEnabled() && sg_printDebugCounter) {
+      print(debug_stream());
+   }
+}
 
 DebugCounter &DebugCounter::getInstance()
 {
@@ -103,9 +116,10 @@ void DebugCounter::pushBack(const std::string &value)
          return;
       }
 
-      enableAllCounters();
-      m_counters[counterID].m_skip = counterVal;
-      m_counters[counterID].m_isSet = true;
+      CounterInfo &counter = m_counters[counterID];
+      counter.Skip = counterVal;
+      counter.IsSet = true;
+
    } else if (counterPair.first.endsWith("-count")) {
       auto counterName = counterPair.first.dropBack(6);
       unsigned counterID = getCounterId(counterName);
@@ -116,8 +130,10 @@ void DebugCounter::pushBack(const std::string &value)
       }
 
       enableAllCounters();
-      m_counters[counterID].m_stopAfter = counterVal;
-      m_counters[counterID].m_isSet = true;
+
+      CounterInfo &counter = m_counters[counterID];
+      counter.StopAfter = counterVal;
+      counter.IsSet = true;
    } else {
       error_stream() << "DebugCounter Error: " << counterPair.first
                      << " does not end with -skip or -count\n";
@@ -126,12 +142,17 @@ void DebugCounter::pushBack(const std::string &value)
 
 void DebugCounter::print(RawOutStream &outstream) const
 {
+   SmallVector<StringRef, 16> counterNames(m_registeredCounters.begin(),
+                                           m_registeredCounters.end());
+   sort(counterNames.begin(), counterNames.end());
+
+   auto &us = getInstance();
    outstream << "Counters and values:\n";
-   for (const auto &kv : m_counters) {
-      outstream << left_justify(m_registeredCounters[kv.first], 32)
-            << ": {"
-            << kv.second.m_count << "," << kv.second.m_skip << ","
-            << kv.second.m_stopAfter <<"}\n";
+   for (auto &CounterName : counterNames) {
+      unsigned counterID = getCounterId(CounterName);
+      outstream << left_justify(m_registeredCounters[counterID], 32) << ": {"
+                << us.m_counters[counterID].Count << "," << us.m_counters[counterID].Skip
+                << "," << us.m_counters[counterID].StopAfter << "}\n";
    }
 }
 

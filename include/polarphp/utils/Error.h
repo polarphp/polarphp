@@ -214,9 +214,10 @@ private:
 /// been checked. This enforces checking through all levels of the call stack.
 class POLAR_NODISCARD Error
 {
-   // ErrorList needs to be able to yank ErrorInfoBase pointers out of this
-   // class to add to the error list.
+   // Both ErrorList and FileError need to be able to yank ErrorInfoBase
+   // pointers out of this class to add to the error list.
    friend class ErrorList;
+   friend class FileError;
 
    // handle_errors needs to be able to set the Checked flag.
    template <typename... HandlerTs>
@@ -423,6 +424,7 @@ template <typename ThisErrT, typename ParentErrT = ErrorInfoBase>
 class ErrorInfo : public ParentErrT
 {
 public:
+   using ParentErrT::ParentErrT; // inherit constructors
    static const void *getClassId()
    {
       return &ThisErrT::sm_id;
@@ -1107,13 +1109,13 @@ inline void handle_all_errors(Error error)
 ///   @endcode
 template <typename T, typename RecoveryFtor, typename... HandlerTs>
 Expected<T> handle_expected(Expected<T> valOrErr, RecoveryFtor &&recoveryPath,
-                           HandlerTs &&... handlers)
+                            HandlerTs &&... handlers)
 {
    if (valOrErr) {
       return valOrErr;
    }
    if (auto error = handle_errors(valOrErr.takeError(),
-                                 std::forward<HandlerTs>(handlers)...)) {
+                                  std::forward<HandlerTs>(handlers)...)) {
       return std::move(error);
    }
    return recoveryPath();
@@ -1123,10 +1125,14 @@ Expected<T> handle_expected(Expected<T> valOrErr, RecoveryFtor &&recoveryPath,
 /// will be printed before the first one is logged. A newline will be printed
 /// after each error.
 ///
+/// This function is compatible with the helpers from Support/WithColor.h. You
+/// can pass any of them as the OS. Please consider using them instead of
+/// including 'error: ' in the ErrorBanner.
+///
 /// This is useful in the base level of your program to allow clean termination
 /// (allowing clean deallocation of resources, etc.), while reporting error
 /// information to the user.
-void log_all_unhandled_errors(Error error, RawOutStream &out, const std::string &errorBanner);
+void log_all_unhandled_errors(Error error, RawOutStream &out, const std::string &errorBanner = {});
 
 /// Write all error messages (if any) in E to a string. The newline character
 /// is used to separate error messages.
@@ -1309,15 +1315,39 @@ OptionalError<T> expected_to_optional_error(Expected<T> &&error)
    return std::move(*error);
 }
 
+
 /// This class wraps a string in an Error.
 ///
 /// StringError is useful in cases where the client is not expected to be able
 /// to consume the specific error message programmatically (for example, if the
 /// error message is to be presented to the user).
+///
+/// StringError can also be used when additional information is to be printed
+/// along with a error_code message. Depending on the constructor called, this
+/// class can either display:
+///    1. the error_code message (ECError behavior)
+///    2. a string
+///    3. the error_code message and a string
+///
+/// These behaviors are useful when subtyping is required; for example, when a
+/// specific library needs an explicit error type. In the example below,
+/// PDBError is derived from StringError:
+///
+///   @code{.cpp}
+///   Expected<int> foo() {
+///      return llvm::make_error<PDBError>(pdb_error_code::dia_failed_loading,
+///                                        "Additional information");
+///   }
+///   @endcode
+///
 class StringError : public ErrorInfo<StringError>
 {
 public:
    static char sm_id;
+   // Prints errorCode + str and converts to errorCode
+   StringError(std::error_code errorCode, const Twine &str = Twine());
+
+   // Prints str and converts to errorCode
    StringError(const Twine &str, std::error_code errorCode);
 
    void log(RawOutStream &out) const override;
@@ -1331,6 +1361,7 @@ public:
 private:
    std::string m_msg;
    std::error_code m_errorCode;
+   const bool m_printMsgOnly = false;
 };
 
 /// Create formatted StringError object.
@@ -1345,6 +1376,55 @@ Error create_string_error(std::error_code errorCode, char const *fmt,
 }
 
 Error create_string_error(std::error_code errorCode, char const *msg);
+
+
+/// This class wraps a filename and another Error.
+///
+/// In some cases, an error needs to live along a 'source' name, in order to
+/// show more detailed information to the user.
+class FileError final : public ErrorInfo<FileError>
+{
+
+   friend Error create_file_error(std::string, Error);
+
+public:
+   void log(RawOutStream &outstream) const override
+   {
+      assert(m_error && !m_fileName.empty() && "Trying to log after takeError().");
+      outstream << "'" << m_fileName << "': ";
+      m_error->log(outstream);
+   }
+
+   Error takeError()
+   {
+      return Error(std::move(m_error));
+   }
+
+   std::error_code convertToErrorCode() const override;
+
+   // Used by ErrorInfo::classID.
+   static char sm_id;
+
+private:
+   FileError(std::string file, std::unique_ptr<ErrorInfoBase> error)
+   {
+      assert(error && "Cannot create FileError from Error success value.");
+      assert(!file.empty() &&
+             "The file name provided to FileError must not be empty.");
+      m_fileName = file;
+      m_error = std::move(error);
+   }
+
+   static Error build(std::string file, Error error)
+   {
+      return Error(std::unique_ptr<FileError>(new FileError(file, error.takePayload())));
+   }
+
+   std::string m_fileName;
+   std::unique_ptr<ErrorInfoBase> m_error;
+};
+
+Error create_file_error(std::string file, ErrorSuccess) = delete;
 
 /// Helper for check-and-exit error handling.
 ///

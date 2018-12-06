@@ -28,6 +28,7 @@ using polar::basic::UniqueVector;
 class DebugCounter
 {
 public:
+   ~DebugCounter();
    /// \brief Returns a reference to the singleton getInstance.
    static DebugCounter &getInstance();
 
@@ -53,18 +54,18 @@ public:
       auto result = us.m_counters.find(counterName);
       if (result != us.m_counters.end()) {
          auto &counterInfo = result->second;
-         ++counterInfo.m_count;
+         ++counterInfo.Count;
 
          // We only execute while the Skip is not smaller than Count,
          // and the stopAfter + skip is larger than Count.
          // Negative counters always execute.
-         if (counterInfo.m_skip < 0)
+         if (counterInfo.Skip < 0)
             return true;
-         if (counterInfo.m_skip >= counterInfo.m_count)
+         if (counterInfo.Skip >= counterInfo.Count)
             return false;
-         if (counterInfo.m_stopAfter < 0)
+         if (counterInfo.StopAfter < 0)
             return true;
-         return counterInfo.m_stopAfter + counterInfo.m_skip >= counterInfo.m_count;
+         return counterInfo.StopAfter + counterInfo.Skip >= counterInfo.Count;
       }
       // Didn't find the counter, should we warn?
       return true;
@@ -75,7 +76,7 @@ public:
    // currently in a state where the counter will always execute.
    static bool isCounterSet(unsigned id)
    {
-      return getInstance().m_counters[id].m_isSet;
+      return getInstance().m_counters[id].IsSet;
    }
 
    // Return the skip and count for a counter. This only works for set counters.
@@ -84,14 +85,14 @@ public:
       auto &us = getInstance();
       auto result = us.m_counters.find(id);
       assert(result != us.m_counters.end() && "Asking about a non-set counter");
-      return result->second.m_count;
+      return result->second.Count;
    }
 
    // Set a registered counter to a given value.
    static void setCounterValue(unsigned id, int64_t count)
    {
       auto &us = getInstance();
-      us.m_counters[id].m_count = count;
+      us.m_counters[id].Count = count;
    }
 
    // Dump or print the current counter set into polar::debug_stream().
@@ -114,7 +115,7 @@ public:
    // Return the name and description of the counter with the given id.
    std::pair<std::string, std::string> getCounterInfo(unsigned id) const
    {
-      return std::make_pair(m_registeredCounters[id], m_counters.lookup(id).m_desc);
+      return std::make_pair(m_registeredCounters[id], m_counters.lookup(id).Desc);
    }
 
    // Iterate through the registered counters
@@ -154,19 +155,19 @@ private:
    {
       unsigned result = m_registeredCounters.insert(name);
       m_counters[result] = {};
-      m_counters[result].m_desc = desc;
+      m_counters[result].Desc = desc;
       return result;
    }
    // Struct to store counter info.
-   struct counterInfo
+   struct CounterInfo
    {
-      int64_t m_count = 0;
-      int64_t m_skip = 0;
-      int64_t m_stopAfter = -1;
-      bool m_isSet = false;
-      std::string m_desc;
+      int64_t Count = 0;
+      int64_t Skip = 0;
+      int64_t StopAfter = -1;
+      bool IsSet = false;
+      std::string Desc;
    };
-   DenseMap<unsigned, counterInfo> m_counters;
+   DenseMap<unsigned, CounterInfo> m_counters;
    CounterVector m_registeredCounters;
    // Whether we should do DebugCounting at all. DebugCounters aren't
    // thread-safe, so this should always be false in multithreaded scenarios.

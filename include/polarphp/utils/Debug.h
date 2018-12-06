@@ -79,6 +79,10 @@ extern bool g_verifyDomInfo;
 ///
 extern bool g_verifyLoopInfo;
 
+/// Enables verification of MemorySSA.
+///
+extern bool g_verifyMemorySSA;
+
 ///\}
 
 /// EnableDebugBuffering - This defaults to false.  If true, the debug
