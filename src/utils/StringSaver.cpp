@@ -18,10 +18,12 @@ StringRef StringSaver::save(StringRef str)
 {
    char *ptr = m_alloc.allocate<char>(str.getSize() + 1);
    memcpy(ptr, str.getData(), str.getSize());
+   if (!str.empty()) {
+      memcpy(ptr, str.getData(), str.getSize());
+   }
    ptr[str.getSize()] = '\0';
    return StringRef(ptr, str.getSize());
 }
-
 
 StringRef UniqueStringSaver::save(StringRef str)
 {

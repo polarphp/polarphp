@@ -28,6 +28,7 @@
 #include "polarphp/utils/MemoryBuffer.h"
 #include "polarphp/utils/Path.h"
 #include "polarphp/utils/SourceLocation.h"
+#include "polarphp/utils/WithColor.h"
 #include "polarphp/utils/RawOutStream.h"
 #include <algorithm>
 #include <cassert>
@@ -300,11 +301,12 @@ SMDiagnostic::SMDiagnostic(const SourceMgr &sm, SMLocation location, StringRef f
      m_ranges(ranges.getVector()),
      m_fixIts(hints.begin(), hints.end())
 {
-   std::sort(m_fixIts.begin(), m_fixIts.end());
+   polar::basic::sort(m_fixIts);
 }
 
-static void build_fixit_line(std::string &caretLine, std::string &fixItLine,
-                             ArrayRef<SMFixIt> fixIts, ArrayRef<char> sourceLine)
+namespace {
+void build_fixit_line(std::string &caretLine, std::string &fixItLine,
+                      ArrayRef<SMFixIt> fixIts, ArrayRef<char> sourceLine)
 {
    if (fixIts.empty()) {
       return;
@@ -374,15 +376,21 @@ static void build_fixit_line(std::string &caretLine, std::string &fixItLine,
    }
 }
 
-static void print_source_line(RawOutStream &stream, StringRef m_lineContents) {
+void print_source_line(RawOutStream &stream, StringRef m_lineContents)
+{
    // Print out the source line one character at a time, so we can expand tabs.
    for (unsigned i = 0, e = m_lineContents.getSize(), outCol = 0; i != e; ++i) {
-      if (m_lineContents[i] != '\t') {
-         stream << m_lineContents[i];
-         ++outCol;
-         continue;
+      size_t nextTab = m_lineContents.find('\t', i);
+      // If there were no tabs left, print the rest, we are done.
+      if (nextTab == StringRef::npos) {
+         stream << m_lineContents.dropFront(i);
+         break;
       }
 
+      // Otherwise, print from i to nextTab.
+      stream << m_lineContents.slice(i, nextTab);
+      outCol += nextTab - i;
+      i = nextTab;
       // If we have a tab, emit at least one space, then round up to 8 columns.
       do {
          stream << ' ';
@@ -392,90 +400,74 @@ static void print_source_line(RawOutStream &stream, StringRef m_lineContents) {
    stream << '\n';
 }
 
-static bool is_non_ascii(char c)
+bool is_non_ascii(char c)
 {
    return c & 0x80;
 }
 
-void SMDiagnostic::print(const char *progName, RawOutStream &stream, bool showColors,
-                         bool showKindLabel) const
+} // anonymous namespace
+
+void SMDiagnostic::print(const char *progName, RawOutStream &stream,
+                         bool showColors, bool showKindLabel) const
 {
-   // Display colors only if outstream supports colors.
-   showColors &= stream.hasColors();
-   if (showColors) {
-      stream.changeColor(RawOutStream::Colors::SAVEDCOLOR, true);
-   }
-   if (progName && progName[0]) {
-      stream << progName << ": ";
-   }
-   if (!m_filename.empty()) {
-      if (m_filename == "-") {
-         stream << "<stdin>";
-      } else {
-         stream << m_filename;
+   {
+      WithColor colorStream(stream, RawOutStream::Colors::SAVEDCOLOR, true, false, !showColors);
+
+      if (progName && progName[0]) {
+         colorStream << progName << ": ";
       }
-      if (m_lineNo != -1) {
-         stream << ':' << m_lineNo;
-         if (m_columnNo != -1) {
-            stream << ':' << (m_columnNo + 1);
+      if (!m_filename.empty()) {
+         if (m_filename == "-") {
+            colorStream << "<stdin>";
+         } else {
+            colorStream << m_filename;
          }
+         if (m_lineNo != -1) {
+            colorStream << ':' << m_lineNo;
+            if (m_columnNo != -1) {
+               colorStream << ':' << (m_columnNo + 1);
+            }
+         }
+         colorStream << ": ";
       }
-      stream << ": ";
    }
 
    if (showKindLabel) {
       switch (m_kind) {
       case SourceMgr::DK_Error:
-         if (showColors) {
-            stream.changeColor(RawOutStream::Colors::RED, true);
-         }
-         stream << "error: ";
+         WithColor::error(stream, "", !showColors);
          break;
       case SourceMgr::DK_Warning:
-         if (showColors) {
-            stream.changeColor(RawOutStream::Colors::MAGENTA, true);
-         }
-         stream << "warning: ";
+         WithColor::warning(stream, "", !showColors);
          break;
       case SourceMgr::DK_Note:
-         if (showColors) {
-            stream.changeColor(RawOutStream::Colors::BLACK, true);
-         }
-         stream << "note: ";
+         WithColor::note(stream, "", !showColors);
          break;
       case SourceMgr::DK_Remark:
-         if (showColors) {
-            stream.changeColor(RawOutStream::Colors::BLUE, true);
-         }
-         stream << "remark: ";
+         WithColor::remark(stream, "", !showColors);
          break;
       }
+   }
 
-      if (showColors) {
-         stream.resetColor();
-         stream.changeColor(RawOutStream::Colors::SAVEDCOLOR, true);
-      }
-   }
-   stream << m_message << '\n';
-   if (showColors) {
-      stream.resetColor();
-   }
+   WithColor(stream, RawOutStream::Colors::SAVEDCOLOR, true, false, !showColors)
+         << m_message << '\n';
+
    if (m_lineNo == -1 || m_columnNo == -1) {
       return;
    }
    // FIXME: If there are multibyte or multi-column characters in the source, all
-   // our m_ranges will be wrong. To do this properly, we'll need a byte-to-column
+   // our ranges will be wrong. To do this properly, we'll need a byte-to-column
    // map like Clang's TextDiagnostic. For now, we'll just handle tabs by
-   // expanding them later, and bail out rather than show incorrect m_ranges and
+   // expanding them later, and bail out rather than show incorrect ranges and
    // misaligned fixits for any other odd characters.
    if (find_if(m_lineContents, is_non_ascii) != m_lineContents.end()) {
       print_source_line(stream, m_lineContents);
       return;
    }
-   size_t m_numColumns = m_lineContents.size();
+   size_t numColumns = m_lineContents.size();
 
-   // Build the line with the caret and m_ranges.
-   std::string caretLine(m_numColumns+1, ' ');
+   // Build the line with the caret and ranges.
+   std::string caretLine(numColumns+1, ' ');
 
    // Expand any ranges.
    for (unsigned r = 0, e = m_ranges.size(); r != e; ++r) {
@@ -493,43 +485,42 @@ void SMDiagnostic::print(const char *progName, RawOutStream &stream, bool showCo
                                    m_lineContents.size()));
 
    // Finally, plop on the caret.
-   if (unsigned(m_columnNo) <= m_numColumns) {
+   if (unsigned(m_columnNo) <= numColumns) {
       caretLine[m_columnNo] = '^';
    } else {
-      caretLine[m_numColumns] = '^';
+      caretLine[numColumns] = '^';
    }
+
    // ... and remove trailing whitespace so the output doesn't wrap for it.  We
    // know that the line isn't completely empty because it has the caret in it at
    // least.
    caretLine.erase(caretLine.find_last_not_of(' ')+1);
+
    print_source_line(stream, m_lineContents);
-   if (showColors) {
-      stream.changeColor(RawOutStream::Colors::GREEN, true);
-   }
-   // Print out the caret line, matching tabs in the source line.
-   for (unsigned i = 0, e = caretLine.size(), outCol = 0; i != e; ++i) {
-      if (i >= m_lineContents.size() || m_lineContents[i] != '\t') {
-         stream << caretLine[i];
-         ++outCol;
-         continue;
+
+   {
+      WithColor colorStream(stream, RawOutStream::Colors::GREEN, true, false, !showColors);
+
+      // Print out the caret line, matching tabs in the source line.
+      for (unsigned i = 0, e = caretLine.size(), outCol = 0; i != e; ++i) {
+         if (i >= m_lineContents.size() || m_lineContents[i] != '\t') {
+            colorStream << caretLine[i];
+            ++outCol;
+            continue;
+         }
+
+         // Okay, we have a tab.  Insert the appropriate number of characters.
+         do {
+            colorStream << caretLine[i];
+            ++outCol;
+         } while ((outCol % sg_tabStop) != 0);
       }
-
-      // Okay, we have a tab.  Insert the appropriate number of characters.
-      do {
-         stream << caretLine[i];
-         ++outCol;
-      } while ((outCol % sg_tabStop) != 0);
+      colorStream << '\n';
    }
-   stream << '\n';
 
-   if (showColors) {
-      stream.resetColor();
-   }
    // Print out the replacement line, matching tabs in the source line.
-   if (fixItInsertionLine.empty()) {
+   if (fixItInsertionLine.empty())
       return;
-   }
-
 
    for (size_t i = 0, e = fixItInsertionLine.size(), outCol = 0; i < e; ++i) {
       if (i >= m_lineContents.size() || m_lineContents[i] != '\t') {

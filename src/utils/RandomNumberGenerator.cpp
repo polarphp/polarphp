@@ -53,7 +53,7 @@ RandomNumberGenerator::RandomNumberGenerator(StringRef salt)
    data[0] = sg_seed;
    data[1] = sg_seed >> 32;
 
-   std::copy(salt.begin(), salt.end(), data.begin() + 2);
+   polar::basic::copy(salt, data.begin() + 2);
 
    std::seed_seq SeedSeq(data.begin(), data.end());
    m_generator.seed(SeedSeq);

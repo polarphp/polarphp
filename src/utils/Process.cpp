@@ -96,8 +96,9 @@ extern const char sg_colorcodes[2][2][8][10] =
    { ALLCOLORS("4",""), ALLCOLORS("4","1;") }
 };
 
-// This is set to true when Process::PreventCoreFiles() is called.
-bool sg_coreFilesPrevented = false;
+// A CMake option controls wheter we emit core dumps by default. An application
+// may disable core dumps by calling Process::PreventCoreFiles().
+bool sg_coreFilesPrevented = !POLAR_ENABLE_CRASH_DUMPS;
 
 bool Process::areCoreFilesPrevented()
 {

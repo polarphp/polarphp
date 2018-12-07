@@ -25,7 +25,29 @@ namespace polar {
 namespace utils {
 
 namespace {
+struct FileInfo {
+   TimePoint<> Time;
+   uint64_t Size;
+   std::string Path;
 
+   /// Used to determine which files to prune first. Also used to determine
+   /// set membership, so must take into account all fields.
+   bool operator<(const FileInfo &other) const
+   {
+      if (Time < other.Time) {
+         return true;
+      } else if (other.Time < Time) {
+         return false;
+      }
+
+      if (other.Size < Size) {
+         return true;
+      } else if (Size < other.Size) {
+         return false;
+      }
+      return Path < other.Path;
+   }
+};
 /// Write a new timestamp file with the given path. This is used for the pruning
 /// interval option.
 static void write_timestamp_file(StringRef timestampFile)
@@ -62,6 +84,7 @@ static Expected<std::chrono::seconds> parse_duration(StringRef duration)
 }
 
 } // anonymous namespace
+
 Expected<CachePruningPolicy>
 parse_cache_pruning_policy(StringRef policyStr)
 {
@@ -202,8 +225,9 @@ bool prune_cache(StringRef path, CachePruningPolicy policy)
       write_timestamp_file(timestampFile);
    }
 
-   // Keep track of space. Needs to be kept ordered by size for determinism.
-   std::set<std::pair<uint64_t, std::string>> fileSizes;
+   // Keep track of files to delete to get below the size limit.
+   // Order by time of last use so that recently used files are preserved.
+   std::set<FileInfo> fileInfos;
    uint64_t totalSize = 0;
 
    // Walk the entire directory cache, looking for unused files.
@@ -241,22 +265,22 @@ bool prune_cache(StringRef path, CachePruningPolicy policy)
 
       // Leave it here for now, but add it to the list of size-based pruning.
       totalSize += statusOrErr->getSize();
-      fileSizes.insert({statusOrErr->getSize(), std::string(file->getPath())});
+      fileInfos.insert({fileAccessTime, statusOrErr->getSize(), file->getPath()});
    }
 
-   auto fileAndSize = fileSizes.rbegin();
-   size_t numFiles = fileSizes.size();
+   auto fileInfo = fileInfos.begin();
+   size_t numFiles = fileInfos.size();
 
    auto removeCacheFile = [&]() {
       // Remove the file.
-      polar::fs::remove(fileAndSize->second);
+      polar::fs::remove(fileInfo->Path);
       // Update size
-      totalSize -= fileAndSize->first;
+      totalSize -= fileInfo->Size;
       numFiles--;
-      POLAR_DEBUG(debug_stream() << " - Remove " << fileAndSize->second << " (size "
-                  << fileAndSize->first << "), new occupancy is " << totalSize
+      POLAR_DEBUG(debug_stream() << " - Remove " << fileInfo->Path << " (size "
+                  << fileInfo->Size << "), new occupancy is " << totalSize
                   << "%\n");
-      ++fileAndSize;
+      ++fileInfo;
    };
 
    // Prune for number of files.
@@ -289,7 +313,7 @@ bool prune_cache(StringRef path, CachePruningPolicy policy)
                   << "%, " << policy.m_maxSizeBytes << " bytes\n");
 
       // Remove the oldest accessed files first, till we get below the threshold.
-      while (totalSize > totalSizeTarget && fileAndSize != fileSizes.rend()) {
+      while (totalSize > totalSizeTarget && fileInfo != fileInfos.end()) {
          removeCacheFile();
       }
    }

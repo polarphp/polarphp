@@ -63,6 +63,7 @@
 #endif
 
 #ifdef _WIN32
+#include "polarphp/utils/ConvertUtf.h"
 #include "Windows/WindowsSupport.h"
 #endif
 
@@ -603,7 +604,9 @@ RawFdOutStream::RawFdOutStream(StringRef filename, std::error_code &errorCode,
 /// FD is the file descriptor that this writes to.  If ShouldClose is true, this
 /// closes the file when the stream is destroyed.
 RawFdOutStream::RawFdOutStream(int fd, bool shouldClose, bool unbuffered)
-   : RawPwriteStream(unbuffered), m_fd(fd), m_shouldClose(shouldClose)
+   : RawPwriteStream(unbuffered),
+     m_fd(fd),
+     m_shouldClose(shouldClose)
 {
    if (m_fd < 0 ) {
       m_shouldClose = false;
@@ -619,6 +622,11 @@ RawFdOutStream::RawFdOutStream(int fd, bool shouldClose, bool unbuffered)
    if (m_fd <= STDERR_FILENO) {
       m_shouldClose = false;
    }
+#ifdef _WIN32
+   // Check if this is a console device. This is not equivalent to isatty.
+   m_isWindowsConsole =
+         ::GetFileType((HANDLE)::_get_osfhandle(fd)) == FILE_TYPE_CHAR;
+#endif
    // Get the starting position.
    off_t loc = ::lseek(m_fd, 0, SEEK_CUR);
 #ifdef _WIN32
@@ -665,27 +673,80 @@ RawFdOutStream::~RawFdOutStream()
    }
 }
 
+#if defined(_WIN32)
+// The most reliable way to print unicode in a Windows console is with
+// WriteConsoleW. To use that, first transcode from UTF-8 to UTF-16. This
+// assumes that LLVM programs always print valid UTF-8 to the console. The data
+// might not be UTF-8 for two major reasons:
+// 1. The program is printing binary (-filetype=obj -o -), in which case it
+// would have been gibberish anyway.
+// 2. The program is printing text in a semi-ascii compatible codepage like
+// shift-jis or cp1252.
+//
+// Most LLVM programs don't produce non-ascii text unless they are quoting
+// user source input. A well-behaved LLVM program should either validate that
+// the input is UTF-8 or transcode from the local codepage to UTF-8 before
+// quoting it. If they don't, this may mess up the encoding, but this is still
+// probably the best compromise we can make.
+static bool write_console_impl(int FD, StringRef Data) {
+   SmallVector<wchar_t, 256> wideText;
+
+   // Fall back to ::write if it wasn't valid UTF-8.
+   if (auto EC = sys::windows::UTF8ToUTF16(Data, wideText))
+      return false;
+
+   // On Windows 7 and earlier, WriteConsoleW has a low maximum amount of data
+   // that can be written to the console at a time.
+   size_t maxWriteSize = wideText.size();
+   if (!RunningWindows8OrGreater()) {
+      maxWriteSize = 32767;
+   }
+   size_t wcharsWritten = 0;
+   do {
+      size_t wcharsToWrite =
+            std::min(maxWriteSize, wideText.size() - wcharsWritten);
+      DWORD ActuallyWritten;
+      bool Success =
+            ::WriteConsoleW((HANDLE)::_get_osfhandle(FD), &wideText[wcharsWritten],
+                            wcharsToWrite, &ActuallyWritten,
+                            /*Reserved=*/nullptr);
+
+      // The most likely reason for WriteConsoleW to fail is that FD no longer
+      // points to a console. Fall back to ::write. If this isn't the first loop
+      // iteration, something is truly wrong.
+      if (!Success)
+         return false;
+
+      wcharsWritten += ActuallyWritten;
+   } while (wcharsWritten != wideText.size());
+   return true;
+}
+#endif
+
 void RawFdOutStream::writeImpl(const char *ptr, size_t size)
 {
    assert(m_fd >= 0 && "File already closed.");
    m_pos += size;
 
-   // The maximum write size is limited to SSIZE_MAX because a write
-   // greater than SSIZE_MAX is implementation-defined in POSIX.
-   // Since SSIZE_MAX is not portable, we use SIZE_MAX >> 1 instead.
-   size_t maxWriteSize = SIZE_MAX >> 1;
+#if defined(_WIN32)
+   // If this is a Windows console device, try re-encoding from UTF-8 to UTF-16
+   // and using WriteConsoleW. If that fails, fall back to plain write().
+   if (m_isWindowsConsole) {
+      if (write_console_impl(fd, StringRef(ptr, size))) {
+         return;
+      }
+   }
+#endif
+
+   // The maximum write size is limited to INT32_MAX. A write
+   // greater than SSIZE_MAX is implementation-defined in POSIX,
+   // and Windows _write requires 32 bit input.
+   size_t maxWriteSize = INT32_MAX;
 
 #if defined(__linux__)
    // It is observed that Linux returns EINVAL for a very large write (>2G).
    // Make it a reasonably small value.
    maxWriteSize = 1024 * 1024 * 1024;
-#elif defined(_WIN32)
-   // Writing a large size of output to Windows console returns ENOMEM. It seems
-   // that, prior to Windows 8, WriteFile() is redirecting to WriteConsole(), and
-   // the latter has a size limit (66000 bytes or less, depending on heap usage).
-   if (::_isatty(m_fd) && !RunningWindows8OrGreater()) {
-      maxWriteSize = 32767;
-   }
 #endif
 
    do {
@@ -760,8 +821,19 @@ void RawFdOutStream::pwriteImpl(const char *ptr, size_t size,
 
 size_t RawFdOutStream::getPreferredBufferSize() const
 {
-#if !defined(_MSC_VER) && !defined(__MINGW32__) && !defined(__minix)
-   // Windows and Minix have no st_blksize.
+#if defined(_WIN32)
+   // Disable buffering for console devices. Console output is re-encoded from
+   // UTF-8 to UTF-16 on Windows, and buffering it would require us to split the
+   // buffer on a valid UTF-8 codepoint boundary. Terminal buffering is disabled
+   // below on most other OSs, so do the same thing on Windows and avoid that
+   // complexity.
+   if (m_isWindowsConsole) {
+      return 0;
+   }
+
+   return RawOutStream::getPreferredBufferSize();
+#elif !defined(__minix)
+   // Minix has no st_blksize.
    assert(m_fd >= 0 && "File not yet open!");
    struct stat statbuf;
    if (fstat(m_fd, &statbuf) != 0) {

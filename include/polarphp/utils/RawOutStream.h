@@ -420,11 +420,16 @@ class RawFdOutStream : public RawPwriteStream
 {
    int m_fd;
    bool m_shouldClose;
+   bool m_supportsSeeking;
+
+#ifdef _WIN32
+   /// True if this fd refers to a Windows console device. Mintty and other
+   /// terminal emulators are TTYs, but they are not consoles.
+   bool m_isWindowsConsole = false;
+#endif
 
    std::error_code m_errorCode;
    uint64_t m_pos;
-   bool m_supportsSeeking;
-
    /// See RawOutStream::write_impl.
    void writeImpl(const char *ptr, size_t size) override;
 

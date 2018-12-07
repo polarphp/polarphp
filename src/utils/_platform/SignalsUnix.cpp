@@ -51,6 +51,7 @@
 #include <shared_mutex>
 #include <algorithm>
 #include <string>
+#include <sysexits.h>
 #include <iostream>
 #include <iomanip>
 
@@ -362,6 +363,10 @@ static void signal_handler(int sig)
           != std::end(sg_intSigs)) {
          if (auto oldInterruptFunction = sg_interruptFunction.exchange(nullptr)) {
             return oldInterruptFunction();
+         }
+         // Send a special return code that drivers can check for, from sysexits.h.
+         if (sig == SIGPIPE) {
+            exit(EX_IOERR);
          }
          raise(sig);   // Execute the default handler.
          return;
