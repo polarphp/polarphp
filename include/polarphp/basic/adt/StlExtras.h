@@ -1155,6 +1155,12 @@ inline void sort(IteratorTy start, IteratorTy end, Compare comp)
    std::sort(start, end, comp);
 }
 
+template <typename Container, typename Compare>
+inline void sort(Container &&container, Compare comp)
+{
+   polar::basic::sort(adl_begin(container), adl_end(container), comp);
+}
+
 //===----------------------------------------------------------------------===//
 //     Extra additions to <algorithm>
 //===----------------------------------------------------------------------===//

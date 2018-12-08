@@ -162,10 +162,12 @@ public:
    explicit StringMapEntry(size_t strLen)
       : StringMapEntryBase(strLen), m_second()
    {}
+
    template <typename... InitType>
    StringMapEntry(size_t strLen, InitType &&... initVals)
       : StringMapEntryBase(strLen), m_second(std::forward<InitType>(initVals)...)
    {}
+
    StringMapEntry(StringMapEntry &entry) = delete;
 
    StringRef getKey() const
