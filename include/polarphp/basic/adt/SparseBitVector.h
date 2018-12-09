@@ -522,6 +522,13 @@ public:
       return *this;
    }
 
+   SparseBitVector &operator=(SparseBitVector &&other)
+   {
+      m_elements = std::move(other.m_elements);
+      m_currElementIter = m_elements.begin();
+      return *this;
+   }
+
    // Test, Reset, and Set a bit in the bitmap.
    bool test(unsigned idx) const
    {

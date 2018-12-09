@@ -12,14 +12,14 @@
 #ifndef POLARPHP_BASIC_ADT_IMMUTABLE_LIST_H
 #define POLARPHP_BASIC_ADT_IMMUTABLE_LIST_H
 
-namespace polar {
-namespace basic {
-
 #include "polarphp/basic/adt/FoldingSet.h"
 #include "polarphp/utils/Allocator.h"
 #include <cassert>
 #include <cstdint>
 #include <new>
+
+namespace polar {
+namespace basic {
 
 template <typename T>
 class ImmutableListFactory;
@@ -197,7 +197,7 @@ public:
 
    void profile(FoldingSetNodeId &id) const
    {
-      id.AddPointer(m_list);
+      id.addPointer(m_list);
    }
 };
 
@@ -245,7 +245,7 @@ public:
 
       const ListType* tailImpl = tail.getInternalPointer();
       ListType::profile(id, head, tailImpl);
-      ListType* list = m_cache.FindNodeOrInsertPos(id, insertPos);
+      ListType* list = m_cache.findNodeOrInsertPos(id, insertPos);
 
       if (!list) {
          // The list does not exist in our cache.  Create it.
@@ -254,7 +254,7 @@ public:
          new (list) ListType(std::forward<ElemT>(head), tailImpl);
 
          // Insert the new list into the cache.
-         m_cache.InsertNode(list, insertPos);
+         m_cache.insertNode(list, insertPos);
       }
       return list;
    }

@@ -12,6 +12,7 @@
 #include "polarphp/basic/adt/ApInt.h"
 #include "polarphp/basic/adt/ArrayRef.h"
 #include "polarphp/basic/adt/SmallString.h"
+#include "polarphp/basic/adt/Twine.h"
 #include "gtest/gtest.h"
 #include <array>
 
@@ -1207,6 +1208,31 @@ TEST(ApIntTest, testFromString)
    EXPECT_EQ(ApInt(32, uint64_t(-72LL)), ApInt(32, "-20", 36));
 }
 
+
+TEST(ApIntTest, testSaturatingMath) {
+   ApInt AP_10 = ApInt(8, 10);
+   ApInt AP_100 = ApInt(8, 100);
+   ApInt AP_200 = ApInt(8, 200);
+
+   EXPECT_EQ(ApInt(8, 200), AP_100.uaddSaturate(AP_100));
+   EXPECT_EQ(ApInt(8, 255), AP_100.uaddSaturate(AP_200));
+   EXPECT_EQ(ApInt(8, 255), ApInt(8, 255).uaddSaturate(ApInt(8, 255)));
+
+   EXPECT_EQ(ApInt(8, 110), AP_10.saddSaturate(AP_100));
+   EXPECT_EQ(ApInt(8, 127), AP_100.saddSaturate(AP_100));
+   EXPECT_EQ(ApInt(8, -128), (-AP_100).saddSaturate(-AP_100));
+   EXPECT_EQ(ApInt(8, -128), ApInt(8, -128).saddSaturate(ApInt(8, -128)));
+
+   EXPECT_EQ(ApInt(8, 90), AP_100.usubSaturate(AP_10));
+   EXPECT_EQ(ApInt(8, 0), AP_100.usubSaturate(AP_200));
+   EXPECT_EQ(ApInt(8, 0), ApInt(8, 0).usubSaturate(ApInt(8, 255)));
+
+   EXPECT_EQ(ApInt(8, -90), AP_10.ssubSaturate(AP_100));
+   EXPECT_EQ(ApInt(8, 127), AP_100.ssubSaturate(-AP_100));
+   EXPECT_EQ(ApInt(8, -128), (-AP_100).ssubSaturate(AP_100));
+   EXPECT_EQ(ApInt(8, -128), ApInt(8, -128).ssubSaturate(ApInt(8, 127)));
+}
+
 TEST(ApIntTest, testFromArray)
 {
    EXPECT_EQ(ApInt(32, uint64_t(1)), ApInt(32, ArrayRef<uint64_t>(1)));
@@ -2363,71 +2389,157 @@ TEST(ApIntTest, testMultiply)
 
 TEST(ApIntTest, testRoundingUDiv)
 {
-  for (uint64_t Ai = 1; Ai <= 255; Ai++) {
-    ApInt A(8, Ai);
-    ApInt Zero(8, 0);
-    EXPECT_EQ(0, apintops::rounding_udiv(Zero, A, ApInt::Rounding::UP));
-    EXPECT_EQ(0, apintops::rounding_udiv(Zero, A, ApInt::Rounding::DOWN));
-    EXPECT_EQ(0, apintops::rounding_udiv(Zero, A, ApInt::Rounding::TOWARD_ZERO));
+   for (uint64_t Ai = 1; Ai <= 255; Ai++) {
+      ApInt A(8, Ai);
+      ApInt Zero(8, 0);
+      EXPECT_EQ(0, apintops::rounding_udiv(Zero, A, ApInt::Rounding::UP));
+      EXPECT_EQ(0, apintops::rounding_udiv(Zero, A, ApInt::Rounding::DOWN));
+      EXPECT_EQ(0, apintops::rounding_udiv(Zero, A, ApInt::Rounding::TOWARD_ZERO));
 
-    for (uint64_t Bi = 1; Bi <= 255; Bi++) {
-      ApInt B(8, Bi);
-      {
-        ApInt quo = apintops::rounding_udiv(A, B, ApInt::Rounding::UP);
-        auto prod = quo.zext(16) * B.zext(16);
-        EXPECT_TRUE(prod.uge(Ai));
-        if (prod.ugt(Ai)) {
-          EXPECT_TRUE(((quo - 1).zext(16) * B.zext(16)).ult(Ai));
-        }
+      for (uint64_t Bi = 1; Bi <= 255; Bi++) {
+         ApInt B(8, Bi);
+         {
+            ApInt quo = apintops::rounding_udiv(A, B, ApInt::Rounding::UP);
+            auto prod = quo.zext(16) * B.zext(16);
+            EXPECT_TRUE(prod.uge(Ai));
+            if (prod.ugt(Ai)) {
+               EXPECT_TRUE(((quo - 1).zext(16) * B.zext(16)).ult(Ai));
+            }
+         }
+         {
+            ApInt quo = A.udiv(B);
+            EXPECT_EQ(quo, apintops::rounding_udiv(A, B, ApInt::Rounding::TOWARD_ZERO));
+            EXPECT_EQ(quo, apintops::rounding_udiv(A, B, ApInt::Rounding::DOWN));
+         }
       }
-      {
-        ApInt quo = A.udiv(B);
-        EXPECT_EQ(quo, apintops::rounding_udiv(A, B, ApInt::Rounding::TOWARD_ZERO));
-        EXPECT_EQ(quo, apintops::rounding_udiv(A, B, ApInt::Rounding::DOWN));
-      }
-    }
-  }
+   }
 }
 
 TEST(ApIntTest, testRoundingSDiv)
 {
-  for (int64_t Ai = -128; Ai <= 127; Ai++) {
-    ApInt A(8, Ai);
+   for (int64_t Ai = -128; Ai <= 127; Ai++) {
+      ApInt A(8, Ai);
 
-    if (Ai != 0) {
-      ApInt Zero(8, 0);
-      EXPECT_EQ(0, apintops::rounding_sdiv(Zero, A, ApInt::Rounding::UP));
-      EXPECT_EQ(0, apintops::rounding_sdiv(Zero, A, ApInt::Rounding::DOWN));
-      EXPECT_EQ(0, apintops::rounding_sdiv(Zero, A, ApInt::Rounding::TOWARD_ZERO));
-    }
+      if (Ai != 0) {
+         ApInt Zero(8, 0);
+         EXPECT_EQ(0, apintops::rounding_sdiv(Zero, A, ApInt::Rounding::UP));
+         EXPECT_EQ(0, apintops::rounding_sdiv(Zero, A, ApInt::Rounding::DOWN));
+         EXPECT_EQ(0, apintops::rounding_sdiv(Zero, A, ApInt::Rounding::TOWARD_ZERO));
+      }
 
-    for (uint64_t Bi = -128; Bi <= 127; Bi++) {
-      if (Bi == 0)
-        continue;
+      for (uint64_t Bi = -128; Bi <= 127; Bi++) {
+         if (Bi == 0)
+            continue;
 
-      ApInt B(8, Bi);
-      {
-        ApInt quo = apintops::rounding_sdiv(A, B, ApInt::Rounding::UP);
-        auto prod = quo.sext(16) * B.sext(16);
-        EXPECT_TRUE(prod.uge(A));
-        if (prod.ugt(A)) {
-          EXPECT_TRUE(((quo - 1).sext(16) * B.sext(16)).ult(A));
-        }
+         ApInt B(8, Bi);
+         {
+            ApInt quo = apintops::rounding_sdiv(A, B, ApInt::Rounding::UP);
+            auto prod = quo.sext(16) * B.sext(16);
+            EXPECT_TRUE(prod.uge(A));
+            if (prod.ugt(A)) {
+               EXPECT_TRUE(((quo - 1).sext(16) * B.sext(16)).ult(A));
+            }
+         }
+         {
+            ApInt quo = apintops::rounding_sdiv(A, B, ApInt::Rounding::DOWN);
+            auto prod = quo.sext(16) * B.sext(16);
+            EXPECT_TRUE(prod.ule(A));
+            if (prod.ult(A)) {
+               EXPECT_TRUE(((quo + 1).sext(16) * B.sext(16)).ugt(A));
+            }
+         }
+         {
+            ApInt quo = A.sdiv(B);
+            EXPECT_EQ(quo, apintops::rounding_sdiv(A, B, ApInt::Rounding::TOWARD_ZERO));
+         }
       }
-      {
-        ApInt quo = apintops::rounding_sdiv(A, B, ApInt::Rounding::DOWN);
-        auto prod = quo.sext(16) * B.sext(16);
-        EXPECT_TRUE(prod.ule(A));
-        if (prod.ult(A)) {
-          EXPECT_TRUE(((quo + 1).sext(16) * B.sext(16)).ugt(A));
-        }
+   }
+}
+
+TEST(ApIntTest, testSolveQuadraticEquationWrap)
+{
+   // Verify that "Solution" is the first non-negative integer that solves
+   // Ax^2 + Bx + C = "0 or overflow", i.e. that it is a correct solution
+   // as calculated by SolveQuadraticEquationWrap.
+   auto Validate = [] (int A, int B, int C, unsigned Width, int Solution) {
+      int Mask = (1 << Width) - 1;
+
+      // Solution should be non-negative.
+      EXPECT_GE(Solution, 0);
+
+      auto OverflowBits = [] (int64_t V, unsigned W) {
+         return V & -(1 << W);
+      };
+
+      int64_t Over0 = OverflowBits(C, Width);
+
+      auto IsZeroOrOverflow = [&] (int X) {
+         int64_t ValueAtX = A*X*X + B*X + C;
+         int64_t OverX = OverflowBits(ValueAtX, Width);
+         return (ValueAtX & Mask) == 0 || OverX != Over0;
+      };
+
+      auto EquationToString = [&] (const char *X_str) {
+         return (Twine(A) + Twine(X_str) + Twine("^2 + ") + Twine(B) +
+                 Twine(X_str) + Twine(" + ") + Twine(C) + Twine(", bitwidth: ") +
+                 Twine(Width)).getStr();
+      };
+
+      auto IsSolution = [&] (const char *X_str, int X) {
+         if (IsZeroOrOverflow(X))
+            return ::testing::AssertionSuccess()
+                  << X << " is a solution of " << EquationToString(X_str);
+         return ::testing::AssertionFailure()
+               << X << " is not an expected solution of "
+               << EquationToString(X_str);
+      };
+
+      auto IsNotSolution = [&] (const char *X_str, int X) {
+         if (!IsZeroOrOverflow(X))
+            return ::testing::AssertionSuccess()
+                  << X << " is not a solution of " << EquationToString(X_str);
+         return ::testing::AssertionFailure()
+               << X << " is an unexpected solution of "
+               << EquationToString(X_str);
+      };
+
+      // This is the important part: make sure that there is no solution that
+      // is less than the calculated one.
+      if (Solution > 0) {
+         for (int X = 1; X < Solution-1; ++X)
+            EXPECT_PRED_FORMAT1(IsNotSolution, X);
       }
-      {
-        ApInt quo = A.sdiv(B);
-        EXPECT_EQ(quo, apintops::rounding_sdiv(A, B, ApInt::Rounding::TOWARD_ZERO));
+
+      // Verify that the calculated solution is indeed a solution.
+      EXPECT_PRED_FORMAT1(IsSolution, Solution);
+   };
+
+   // Generate all possible quadratic equations with Width-bit wide integer
+   // coefficients, get the solution from SolveQuadraticEquationWrap, and
+   // verify that the solution is correct.
+   auto Iterate = [&] (unsigned Width) {
+      assert(1 < Width && Width < 32);
+      int Low = -(1 << (Width-1));
+      int High = (1 << (Width-1));
+
+      for (int A = Low; A != High; ++A) {
+         if (A == 0)
+            continue;
+         for (int B = Low; B != High; ++B) {
+            for (int C = Low; C != High; ++C) {
+               std::optional<ApInt> S = apintops::solve_quadratic_equation_wrap(
+                        ApInt(Width, A), ApInt(Width, B),
+                        ApInt(Width, C), Width);
+               if (S.has_value())
+                  Validate(A, B, C, Width, S->getSignExtValue());
+            }
+         }
       }
-    }
-  }
+   };
+
+   // Test all widths in [2..6].
+   for (unsigned i = 2; i <= 6; ++i)
+      Iterate(i);
 }
 
 } // anonymous namespace

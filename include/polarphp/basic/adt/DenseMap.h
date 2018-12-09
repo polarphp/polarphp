@@ -163,6 +163,11 @@ public:
       return getNumEntries();
    }
 
+   inline unsigned size() const
+   {
+      return getSize();
+   }
+
    /// Grow the densemap so that it can contain at least \p NumEntries items
    /// before resizing again.
    void reserve(size_type numEntries)

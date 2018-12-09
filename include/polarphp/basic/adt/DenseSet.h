@@ -47,12 +47,32 @@ public:
       return m_key;
    }
 
+   KeyType &first()
+   {
+      return m_key;
+   }
+
+   const KeyType &first() const
+   {
+      return m_key;
+   }
+
    DenseSetEmpty &getSecond()
    {
       return *this;
    }
 
    const DenseSetEmpty &getSecond() const
+   {
+      return *this;
+   }
+
+   DenseSetEmpty &second()
+   {
+      return *this;
+   }
+
+   const DenseSetEmpty &second() const
    {
       return *this;
    }
@@ -99,6 +119,11 @@ public:
    size_type getSize() const
    {
       return m_theMap.getSize();
+   }
+
+   size_type size() const
+   {
+      return getSize();
    }
 
    size_t getMemorySize() const

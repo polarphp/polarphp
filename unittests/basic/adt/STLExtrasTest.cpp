@@ -18,6 +18,8 @@
 namespace {
 using polar::basic::rank;
 using polar::basic::StringRef;
+using polar::basic::is_splat;
+using polar::basic::make_range;
 
 int f(rank<0>) { return 0; }
 int f(rank<1>) { return 1; }
@@ -386,7 +388,7 @@ void swap(SomeStruct &lhs, SomeStruct &rhs)
 } // namespace some_namespace
 
 
-TEST(StlExtrasTest, testADLTest)
+TEST(StlExtrasTest, testADL)
 {
    some_namespace::SomeStruct s{{1, 2, 3, 4, 5}, ""};
    some_namespace::SomeStruct s2{{2, 4, 6, 8, 10}, ""};
@@ -402,3 +404,90 @@ TEST(StlExtrasTest, testADLTest)
    polar::basic::for_each(s, [&count](int) { ++count; });
    EXPECT_EQ(5, count);
 }
+
+TEST(StlExtrasTest, testEmpty)
+{
+   std::vector<void*> V;
+   EXPECT_TRUE(polar::basic::empty(V));
+   V.push_back(nullptr);
+   EXPECT_FALSE(polar::basic::empty(V));
+
+   std::initializer_list<int> E = {};
+   std::initializer_list<int> NotE = {7, 13, 42};
+   EXPECT_TRUE(polar::basic::empty(E));
+   EXPECT_FALSE(polar::basic::empty(NotE));
+
+   auto R0 = make_range(V.begin(), V.begin());
+   EXPECT_TRUE(polar::basic::empty(R0));
+   auto R1 = make_range(V.begin(), V.end());
+   EXPECT_FALSE(polar::basic::empty(R1));
+}
+
+TEST(StlExtrasTest, testEarlyIncrement)
+{
+   std::list<int> L = {1, 2, 3, 4};
+
+   auto EIR = polar::basic::make_early_inc_range(L);
+
+   auto I = EIR.begin();
+   auto EI = EIR.end();
+   EXPECT_NE(I, EI);
+
+   EXPECT_EQ(1, *I);
+#if POLAR_ENABLE_ABI_BREAKING_CHECKS
+#ifndef NDEBUG
+   // Repeated dereferences are not allowed.
+   EXPECT_DEATH(*I, "Cannot dereference");
+   // Comparison after dereference is not allowed.
+   EXPECT_DEATH((void)(I == EI), "Cannot compare");
+   EXPECT_DEATH((void)(I != EI), "Cannot compare");
+#endif
+#endif
+
+   ++I;
+   EXPECT_NE(I, EI);
+#if POLAR_ENABLE_ABI_BREAKING_CHECKS
+#ifndef NDEBUG
+   // You cannot increment prior to dereference.
+   EXPECT_DEATH(++I, "Cannot increment");
+#endif
+#endif
+   EXPECT_EQ(2, *I);
+#if POLAR_ENABLE_ABI_BREAKING_CHECKS
+#ifndef NDEBUG
+   // Repeated dereferences are not allowed.
+   EXPECT_DEATH(*I, "Cannot dereference");
+#endif
+#endif
+
+   // Inserting shouldn't break anything. We should be able to keep dereferencing
+   // the currrent iterator and increment. The increment to go to the "next"
+   // iterator from before we inserted.
+   L.insert(std::next(L.begin(), 2), -1);
+   ++I;
+   EXPECT_EQ(3, *I);
+
+   // Erasing the front including the current doesn't break incrementing.
+   L.erase(L.begin(), std::prev(L.end()));
+   ++I;
+   EXPECT_EQ(4, *I);
+   ++I;
+   EXPECT_EQ(EIR.end(), I);
+}
+
+TEST(StlExtrasTest, testSplat)
+{
+   std::vector<int> V;
+   EXPECT_FALSE(is_splat(V));
+
+   V.push_back(1);
+   EXPECT_TRUE(is_splat(V));
+
+   V.push_back(1);
+   V.push_back(1);
+   EXPECT_TRUE(is_splat(V));
+
+   V.push_back(2);
+   EXPECT_FALSE(is_splat(V));
+}
+

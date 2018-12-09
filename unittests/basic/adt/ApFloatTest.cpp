@@ -568,6 +568,39 @@ TEST(ApFloatTest, testMaxNum)
    EXPECT_EQ(1.0, maxnum(nan, f1).convertToDouble());
 }
 
+
+TEST(APFloatTest, testMinimum)
+{
+  ApFloat f1(1.0);
+  ApFloat f2(2.0);
+  ApFloat zp(0.0);
+  ApFloat zn(-0.0);
+  ApFloat nan = ApFloat::getNaN(ApFloat::getIEEEdouble());
+
+  EXPECT_EQ(1.0, minimum(f1, f2).convertToDouble());
+  EXPECT_EQ(1.0, minimum(f2, f1).convertToDouble());
+  EXPECT_EQ(-0.0, minimum(zp, zn).convertToDouble());
+  EXPECT_EQ(-0.0, minimum(zn, zp).convertToDouble());
+  EXPECT_TRUE(std::isnan(minimum(f1, nan).convertToDouble()));
+  EXPECT_TRUE(std::isnan(minimum(nan, f1).convertToDouble()));
+}
+
+TEST(APFloatTest, testMaximum)
+{
+  ApFloat f1(1.0);
+  ApFloat f2(2.0);
+  ApFloat zp(0.0);
+  ApFloat zn(-0.0);
+  ApFloat nan = ApFloat::getNaN(ApFloat::getIEEEdouble());
+
+  EXPECT_EQ(2.0, maximum(f1, f2).convertToDouble());
+  EXPECT_EQ(2.0, maximum(f2, f1).convertToDouble());
+  EXPECT_EQ(0.0, maximum(zp, zn).convertToDouble());
+  EXPECT_EQ(0.0, maximum(zn, zp).convertToDouble());
+  EXPECT_TRUE(std::isnan(maximum(f1, nan).convertToDouble()));
+  EXPECT_TRUE(std::isnan(maximum(nan, f1).convertToDouble()));
+}
+
 TEST(ApFloatTest, testDenormal)
 {
    ApFloat::RoundingMode rdmd = ApFloat::RoundingMode::rmNearestTiesToEven;
