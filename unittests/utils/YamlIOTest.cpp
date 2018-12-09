@@ -9,6 +9,7 @@
 //
 // Created by softboy on 2018/07/15.
 
+#include "polarphp/basic/adt/StringMap.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/basic/adt/Twine.h"
 #include "polarphp/utils/Casting.h"
@@ -22,22 +23,22 @@ using namespace polar;
 using namespace polar::utils;
 using namespace polar::basic;
 
+using polar::yaml::Hex8;
+using polar::yaml::Hex16;
+using polar::yaml::Hex32;
+using polar::yaml::Hex64;
 using polar::yaml::Input;
 using polar::yaml::Output;
 using polar::yaml::IO;
 using polar::yaml::MappingTraits;
 using polar::yaml::MappingNormalization;
 using polar::yaml::ScalarTraits;
-using polar::yaml::Hex8;
-using polar::yaml::Hex16;
-using polar::yaml::Hex32;
-using polar::yaml::Hex64;
+using polar::yaml::is_numeric;
+
 using ::testing::StartsWith;
 
 static void suppress_error_messages(const SMDiagnostic &, void *) {
 }
-
-
 
 //===----------------------------------------------------------------------===//
 //  test MappingTraits
@@ -2612,7 +2613,9 @@ TEST(YamlIOTest, testEscaped)
    // Single quote
    testEscaped("@abc@", "'@abc@'");
    // No quote
-   testEscaped("abc/", "abc/");
+   testEscaped("abc", "abc");
+   // Forward slash quoted
+   testEscaped("abc/", "'abc/'");
    // Double quote non-printable
    testEscaped("\01@abc@", "\"\\x01@abc@\"");
    // Double quote inside single quote
@@ -2640,3 +2643,318 @@ TEST(YamlIOTest, testEscaped)
    }
 }
 
+
+TEST(YamlIOTest, testNumeric)
+{
+   EXPECT_TRUE(is_numeric(".inf"));
+   EXPECT_TRUE(is_numeric(".INF"));
+   EXPECT_TRUE(is_numeric(".Inf"));
+   EXPECT_TRUE(is_numeric("-.inf"));
+   EXPECT_TRUE(is_numeric("+.inf"));
+
+   EXPECT_TRUE(is_numeric(".nan"));
+   EXPECT_TRUE(is_numeric(".NaN"));
+   EXPECT_TRUE(is_numeric(".NAN"));
+
+   EXPECT_TRUE(is_numeric("0"));
+   EXPECT_TRUE(is_numeric("0."));
+   EXPECT_TRUE(is_numeric("0.0"));
+   EXPECT_TRUE(is_numeric("-0.0"));
+   EXPECT_TRUE(is_numeric("+0.0"));
+
+   EXPECT_TRUE(is_numeric("12345"));
+   EXPECT_TRUE(is_numeric("012345"));
+   EXPECT_TRUE(is_numeric("+12.0"));
+   EXPECT_TRUE(is_numeric(".5"));
+   EXPECT_TRUE(is_numeric("+.5"));
+   EXPECT_TRUE(is_numeric("-1.0"));
+
+   EXPECT_TRUE(is_numeric("2.3e4"));
+   EXPECT_TRUE(is_numeric("-2E+05"));
+   EXPECT_TRUE(is_numeric("+12e03"));
+   EXPECT_TRUE(is_numeric("6.8523015e+5"));
+
+   EXPECT_TRUE(is_numeric("1.e+1"));
+   EXPECT_TRUE(is_numeric(".0e+1"));
+
+   EXPECT_TRUE(is_numeric("0x2aF3"));
+   EXPECT_TRUE(is_numeric("0o01234567"));
+
+   EXPECT_FALSE(is_numeric("not a number"));
+   EXPECT_FALSE(is_numeric("."));
+   EXPECT_FALSE(is_numeric(".e+1"));
+   EXPECT_FALSE(is_numeric(".1e"));
+   EXPECT_FALSE(is_numeric(".1e+"));
+   EXPECT_FALSE(is_numeric(".1e++1"));
+
+   EXPECT_FALSE(is_numeric("ABCD"));
+   EXPECT_FALSE(is_numeric("+0x2AF3"));
+   EXPECT_FALSE(is_numeric("-0x2AF3"));
+   EXPECT_FALSE(is_numeric("0x2AF3Z"));
+   EXPECT_FALSE(is_numeric("0o012345678"));
+   EXPECT_FALSE(is_numeric("0xZ"));
+   EXPECT_FALSE(is_numeric("-0o012345678"));
+   EXPECT_FALSE(is_numeric("000003A8229434B839616A25C16B0291F77A438B"));
+
+   EXPECT_FALSE(is_numeric(""));
+   EXPECT_FALSE(is_numeric("."));
+   EXPECT_FALSE(is_numeric(".e+1"));
+   EXPECT_FALSE(is_numeric(".e+"));
+   EXPECT_FALSE(is_numeric(".e"));
+   EXPECT_FALSE(is_numeric("e1"));
+
+   // Deprecated formats: as for YAML 1.2 specification, the following are not
+   // valid numbers anymore:
+   //
+   // * Sexagecimal numbers
+   // * Decimal numbers with comma s the delimiter
+   // * "inf", "nan" without '.' prefix
+   EXPECT_FALSE(is_numeric("3:25:45"));
+   EXPECT_FALSE(is_numeric("+12,345"));
+   EXPECT_FALSE(is_numeric("-inf"));
+   EXPECT_FALSE(is_numeric("1,230.15"));
+}
+
+//===----------------------------------------------------------------------===//
+//  Test PolymorphicTraits and TaggedScalarTraits
+//===----------------------------------------------------------------------===//
+
+struct Poly {
+   enum NodeKind {
+      NK_Scalar,
+      NK_Seq,
+      NK_Map,
+   } Kind;
+
+   Poly(NodeKind Kind) : Kind(Kind) {}
+
+   virtual ~Poly() = default;
+
+   NodeKind getKind() const { return Kind; }
+};
+
+struct Scalar : Poly {
+   enum ScalarKind {
+      SK_Unknown,
+      SK_Double,
+      SK_Bool,
+   } SKind;
+
+   union {
+      double DoubleValue;
+      bool BoolValue;
+   };
+
+   Scalar() : Poly(NK_Scalar), SKind(SK_Unknown) {}
+   Scalar(double DoubleValue)
+      : Poly(NK_Scalar), SKind(SK_Double), DoubleValue(DoubleValue) {}
+   Scalar(bool BoolValue)
+      : Poly(NK_Scalar), SKind(SK_Bool), BoolValue(BoolValue) {}
+
+   static bool classof(const Poly *N) { return N->getKind() == NK_Scalar; }
+};
+
+struct Seq : Poly, std::vector<std::unique_ptr<Poly>> {
+   Seq() : Poly(NK_Seq) {}
+
+   static bool classof(const Poly *N) { return N->getKind() == NK_Seq; }
+};
+
+struct Map : Poly, StringMap<std::unique_ptr<Poly>>
+{
+   Map() : Poly(NK_Map) {}
+
+   static bool classof(const Poly *N) { return N->getKind() == NK_Map; }
+};
+
+namespace polar {
+namespace yaml {
+
+template <> struct PolymorphicTraits<std::unique_ptr<Poly>> {
+   static NodeKind getKind(const std::unique_ptr<Poly> &N) {
+      if (isa<Scalar>(*N))
+         return NodeKind::Scalar;
+      if (isa<Seq>(*N))
+         return NodeKind::Sequence;
+      if (isa<Map>(*N))
+         return NodeKind::Map;
+      polar_unreachable("unsupported node type");
+   }
+
+   static Scalar &getAsScalar(std::unique_ptr<Poly> &N) {
+      if (!N || !isa<Scalar>(*N))
+         N = std::make_unique<Scalar>();
+      return *cast<Scalar>(N.get());
+   }
+
+   static Seq &getAsSequence(std::unique_ptr<Poly> &N) {
+      if (!N || !isa<Seq>(*N))
+         N = std::make_unique<Seq>();
+      return *cast<Seq>(N.get());
+   }
+
+   static Map &getAsMap(std::unique_ptr<Poly> &N) {
+      if (!N || !isa<Map>(*N))
+         N = std::make_unique<Map>();
+      return *cast<Map>(N.get());
+   }
+};
+
+template <> struct TaggedScalarTraits<Scalar>
+{
+   static void output(const Scalar &S, void *Ctxt, RawOutStream &ScalarOS,
+                      RawOutStream &TagOS)
+   {
+      switch (S.SKind) {
+      case Scalar::SK_Unknown:
+         report_fatal_error("output unknown scalar");
+         break;
+      case Scalar::SK_Double:
+         TagOS << "!double";
+         ScalarTraits<double>::output(S.DoubleValue, Ctxt, ScalarOS);
+         break;
+      case Scalar::SK_Bool:
+         TagOS << "!bool";
+         ScalarTraits<bool>::output(S.BoolValue, Ctxt, ScalarOS);
+         break;
+      }
+   }
+
+   static StringRef input(StringRef ScalarStr, StringRef Tag, void *Ctxt,
+                          Scalar &S)
+   {
+      S.SKind = StringSwitch<Scalar::ScalarKind>(Tag)
+            .cond("!double", Scalar::SK_Double)
+            .cond("!bool", Scalar::SK_Bool)
+            .defaultCond(Scalar::SK_Unknown);
+      switch (S.SKind) {
+      case Scalar::SK_Unknown:
+         return StringRef("unknown scalar tag");
+      case Scalar::SK_Double:
+         return ScalarTraits<double>::input(ScalarStr, Ctxt, S.DoubleValue);
+      case Scalar::SK_Bool:
+         return ScalarTraits<bool>::input(ScalarStr, Ctxt, S.BoolValue);
+      }
+      polar_unreachable("unknown scalar kind");
+   }
+
+   static QuotingType mustQuote(const Scalar &S, StringRef Str)
+   {
+      switch (S.SKind) {
+      case Scalar::SK_Unknown:
+         report_fatal_error("quote unknown scalar");
+      case Scalar::SK_Double:
+         return ScalarTraits<double>::mustQuote(Str);
+      case Scalar::SK_Bool:
+         return ScalarTraits<bool>::mustQuote(Str);
+      }
+      polar_unreachable("unknown scalar kind");
+   }
+};
+
+template <> struct CustomMappingTraits<Map>
+{
+   static void inputOne(IO &IO, StringRef Key, Map &M)
+   {
+      IO.mapRequired(Key.getStr().c_str(), M[Key]);
+   }
+
+   static void output(IO &IO, Map &M)
+   {
+      for (auto &N : M)
+         IO.mapRequired(N.getKey().getStr().c_str(), N.getValue());
+   }
+};
+
+template <> struct SequenceTraits<Seq>
+{
+   static size_t size(IO &IO, Seq &A) { return A.size(); }
+
+   static std::unique_ptr<Poly> &element(IO &IO, Seq &A, size_t Index) {
+      if (Index >= A.size())
+         A.resize(Index + 1);
+      return A[Index];
+   }
+};
+
+} // namespace yaml
+} // namespace polar
+
+TEST(YamlIOTest, testReadWritePolymorphicScalar)
+{
+   std::string intermediate;
+   std::unique_ptr<Poly> node = std::make_unique<Scalar>(true);
+
+   RawStringOutStream ostr(intermediate);
+   Output yout(ostr);
+#ifdef GTEST_HAS_DEATH_TEST
+#ifndef NDEBUG
+   EXPECT_DEATH(yout << node, "plain scalar documents are not supported");
+#endif
+#endif
+}
+
+TEST(YamlIOTest, testReadWritePolymorphicSeq)
+{
+   std::string intermediate;
+   {
+      auto seq = std::make_unique<Seq>();
+      seq->push_back(std::make_unique<Scalar>(true));
+      seq->push_back(std::make_unique<Scalar>(1.0));
+      auto node = unique_dyn_cast<Poly>(seq);
+
+      RawStringOutStream ostr(intermediate);
+      Output yout(ostr);
+      yout << node;
+   }
+   {
+      Input yin(intermediate);
+      std::unique_ptr<Poly> node;
+      yin >> node;
+
+      EXPECT_FALSE(yin.getError());
+      auto seq = dyn_cast<Seq>(node.get());
+      ASSERT_TRUE(seq);
+      ASSERT_EQ(seq->size(), 2u);
+      auto first = dyn_cast<Scalar>((*seq)[0].get());
+      ASSERT_TRUE(first);
+      EXPECT_EQ(first->SKind, Scalar::SK_Bool);
+      EXPECT_TRUE(first->BoolValue);
+      auto second = dyn_cast<Scalar>((*seq)[1].get());
+      ASSERT_TRUE(second);
+      EXPECT_EQ(second->SKind, Scalar::SK_Double);
+      EXPECT_EQ(second->DoubleValue, 1.0);
+   }
+}
+
+TEST(YamlIOTest, TestReadWritePolymorphicMap)
+{
+   std::string intermediate;
+   {
+      auto map = std::make_unique<Map>();
+      (*map)["foo"] = std::make_unique<Scalar>(false);
+      (*map)["bar"] = std::make_unique<Scalar>(2.0);
+      std::unique_ptr<Poly> node = unique_dyn_cast<Poly>(map);
+
+      RawStringOutStream ostr(intermediate);
+      Output yout(ostr);
+      yout << node;
+   }
+   {
+      Input yin(intermediate);
+      std::unique_ptr<Poly> node;
+      yin >> node;
+
+      EXPECT_FALSE(yin.getError());
+      auto map = dyn_cast<Map>(node.get());
+      ASSERT_TRUE(map);
+      auto foo = dyn_cast<Scalar>((*map)["foo"].get());
+      ASSERT_TRUE(foo);
+      EXPECT_EQ(foo->SKind, Scalar::SK_Bool);
+      EXPECT_FALSE(foo->BoolValue);
+      auto bar = dyn_cast<Scalar>((*map)["bar"].get());
+      ASSERT_TRUE(bar);
+      EXPECT_EQ(bar->SKind, Scalar::SK_Double);
+      EXPECT_EQ(bar->DoubleValue, 2.0);
+   }
+}
