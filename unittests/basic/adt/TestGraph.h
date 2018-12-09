@@ -20,7 +20,6 @@
 namespace polar {
 namespace basic {
 
-
 /// Graph<N> - A graph with N nodes.  Note that N can be at most 8.
 template <unsigned N>
 class Graph

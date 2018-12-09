@@ -298,26 +298,26 @@ TEST_F(StringMapTest, testIterMapKeys)
    map["C"] = 3;
    map["D"] = 3;
 
-   auto Keys = to_vector<4>(map.getKeys());
-   std::sort(Keys.begin(), Keys.end());
+   auto keys = to_vector<4>(map.getKeys());
+   polar::basic::sort(keys);
 
    SmallVector<StringRef, 4> Expected = {"A", "B", "C", "D"};
-   EXPECT_EQ(Expected, Keys);
+   EXPECT_EQ(Expected, keys);
 }
 
 TEST_F(StringMapTest, testIterSetKeys)
 {
-   StringSet<> Set;
-   Set.insert("A");
-   Set.insert("B");
-   Set.insert("C");
-   Set.insert("D");
+   StringSet<> set;
+   set.insert("A");
+   set.insert("B");
+   set.insert("C");
+   set.insert("D");
 
-   auto Keys = to_vector<4>(Set.getKeys());
-   std::sort(Keys.begin(), Keys.end());
+   auto keys = to_vector<4>(set.getKeys());
+   polar::basic::sort(keys);
 
    SmallVector<StringRef, 4> Expected = {"A", "B", "C", "D"};
-   EXPECT_EQ(Expected, Keys);
+   EXPECT_EQ(Expected, keys);
 }
 
 // Create a non-default constructable value

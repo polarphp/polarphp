@@ -17,7 +17,7 @@
 #include "polarphp/utils/TargetParser.h"
 #include "polarphp/utils/Host.h"
 #include <cstring>
-
+#include <iostream>
 namespace polar {
 namespace basic {
 
@@ -406,7 +406,7 @@ Triple::ArchType parse_arch(StringRef archName)
          // FIXME: Do we need to support these?
          .conds("i786", "i886", "i986", Triple::ArchType::x86)
          .conds("amd64", "x86_64", "x86_64h", Triple::ArchType::x86_64)
-         .conds("powerpc", "ppc32", Triple::ArchType::ppc)
+         .conds("powerpc", "ppc", "ppc32", Triple::ArchType::ppc)
          .conds("powerpc64", "ppu", "ppc64", Triple::ArchType::ppc64)
          .conds("powerpc64le", "ppc64le", Triple::ArchType::ppc64le)
          .cond("xscale", Triple::ArchType::arm)
@@ -493,10 +493,12 @@ Triple::VendorType parse_vendor(StringRef vendorName)
          .cond("amd", Triple::VendorType::AMD)
          .cond("mesa", Triple::VendorType::Mesa)
          .cond("suse", Triple::VendorType::SUSE)
+         .cond("oe", Triple::VendorType::OpenEmbedded)
          .defaultCond(Triple::VendorType::UnknownVendor);
 }
 
-Triple::OSType parse_os(StringRef osName) {
+Triple::OSType parse_os(StringRef osName)
+{
    return StringSwitch<Triple::OSType>(osName)
          .startsWith("ananas", Triple::OSType::Ananas)
          .startsWith("cloudabi", Triple::OSType::CloudABI)
@@ -713,8 +715,6 @@ Triple::ObjectFormatType get_default_format(const Triple &triple)
    case Triple::ArchType::tce:
    case Triple::ArchType::tcele:
    case Triple::ArchType::thumbeb:
-   case Triple::ArchType::wasm32:
-   case Triple::ArchType::wasm64:
    case Triple::ArchType::xcore:
       return Triple::ObjectFormatType::ELF;
 
@@ -723,6 +723,9 @@ Triple::ObjectFormatType get_default_format(const Triple &triple)
       if (triple.isOSDarwin())
          return Triple::ObjectFormatType::MachO;
       return Triple::ObjectFormatType::ELF;
+   case Triple::ArchType::wasm32:
+   case Triple::ArchType::wasm64:
+       return Triple::ObjectFormatType::Wasm;
    }
    polar_unreachable("unknown architecture");
 }
@@ -756,16 +759,16 @@ Triple::Triple(const Twine &str)
                m_objectFormat = parse_format(components[3]);
             }
          }
+      } else {
+         m_environment =
+               StringSwitch<Triple::EnvironmentType>(components[0])
+               .startsWith("mipsn32", Triple::EnvironmentType::GNUABIN32)
+               .startsWith("mips64", Triple::EnvironmentType::GNUABI64)
+               .startsWith("mipsisa64", Triple::EnvironmentType::GNUABI64)
+               .startsWith("mipsisa32", Triple::EnvironmentType::GNU)
+               .conds("mips", "mipsel", "mipsr6", "mipsr6el", Triple::EnvironmentType::GNU)
+               .defaultCond(Triple::EnvironmentType::UnknownEnvironment);
       }
-   } else {
-      m_environment =
-            StringSwitch<Triple::EnvironmentType>(components[0])
-            .startsWith("mipsn32", Triple::EnvironmentType::GNUABIN32)
-            .startsWith("mips64", Triple::EnvironmentType::GNUABI64)
-            .startsWith("mipsisa64", Triple::EnvironmentType::GNUABI64)
-            .startsWith("mipsisa32", Triple::EnvironmentType::GNU)
-            .conds("mips", "mipsel", "mipsr6", "mipsr6el", Triple::EnvironmentType::GNU)
-            .defaultCond(Triple::EnvironmentType::UnknownEnvironment);
    }
    if (m_objectFormat == ObjectFormatType::UnknownObjectFormat) {
       m_objectFormat = get_default_format(*this);
