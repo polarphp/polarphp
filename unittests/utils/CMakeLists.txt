@@ -72,6 +72,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    VersionTupleTest.cpp
    ThreadPoolTest.cpp
    TaskQueueTest.cpp
+   VirtualFileSystemTest.cpp
    )
 
 target_link_libraries(BasicUtilsTest PRIVATE TestSupport)

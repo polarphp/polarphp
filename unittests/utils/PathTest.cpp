@@ -914,95 +914,93 @@ TEST_F(FileSystemTest, testDirectoryIteration)
 #ifdef POLAR_ON_UNIX
 TEST_F(FileSystemTest, testBrokenSymlinkDirectoryIteration)
 {
-   std::cout << TestDirectory.getCStr() << std::endl;
    // Create a known hierarchy to recurse over.
-   ASSERT_NO_ERROR(fs::create_directories(Twine(TestDirectory) + "/symlink"));
-   ASSERT_NO_ERROR(
-            fs::create_link("no_such_file", Twine(TestDirectory) + "/symlink/a"));
-   ASSERT_NO_ERROR(
-            fs::create_directories(Twine(TestDirectory) + "/symlink/b/bb"));
-   ASSERT_NO_ERROR(
-            fs::create_link("no_such_file", Twine(TestDirectory) + "/symlink/b/ba"));
-   ASSERT_NO_ERROR(
-            fs::create_link("no_such_file", Twine(TestDirectory) + "/symlink/b/bc"));
-   ASSERT_NO_ERROR(
-            fs::create_link("no_such_file", Twine(TestDirectory) + "/symlink/c"));
-   ASSERT_NO_ERROR(
-            fs::create_directories(Twine(TestDirectory) + "/symlink/d/dd/ddd"));
-   ASSERT_NO_ERROR(fs::create_link(Twine(TestDirectory) + "/symlink/d/dd",
-                                   Twine(TestDirectory) + "/symlink/d/da"));
-   ASSERT_NO_ERROR(
-            fs::create_link("no_such_file", Twine(TestDirectory) + "/symlink/e"));
+     ASSERT_NO_ERROR(fs::create_directories(Twine(TestDirectory) + "/symlink"));
+     ASSERT_NO_ERROR(
+         fs::create_link("no_such_file", Twine(TestDirectory) + "/symlink/a"));
+     ASSERT_NO_ERROR(
+         fs::create_directories(Twine(TestDirectory) + "/symlink/b/bb"));
+     ASSERT_NO_ERROR(
+         fs::create_link("no_such_file", Twine(TestDirectory) + "/symlink/b/ba"));
+     ASSERT_NO_ERROR(
+         fs::create_link("no_such_file", Twine(TestDirectory) + "/symlink/b/bc"));
+     ASSERT_NO_ERROR(
+         fs::create_link("no_such_file", Twine(TestDirectory) + "/symlink/c"));
+     ASSERT_NO_ERROR(
+         fs::create_directories(Twine(TestDirectory) + "/symlink/d/dd/ddd"));
+     ASSERT_NO_ERROR(fs::create_link(Twine(TestDirectory) + "/symlink/d/dd",
+                                     Twine(TestDirectory) + "/symlink/d/da"));
+     ASSERT_NO_ERROR(
+         fs::create_link("no_such_file", Twine(TestDirectory) + "/symlink/e"));
 
-   typedef std::vector<std::string> v_t;
-   v_t visitedNonBrokenSymlinks;
-   v_t visitedBrokenSymlinks;
+     typedef std::vector<std::string> v_t;
+     v_t VisitedNonBrokenSymlinks;
+     v_t VisitedBrokenSymlinks;
+     std::error_code ec;
+     using testing::UnorderedElementsAre;
+     using testing::UnorderedElementsAreArray;
 
-   // The directory iterator doesn't stat the file, so we should be able to
-   // iterate over the whole directory.
-   std::error_code ec;
-   using testing::UnorderedElementsAre;
-   using testing::UnorderedElementsAreArray;
-
-   // Broken symbol links are expected to throw an error.
-   for (fs::DirectoryIterator i(Twine(TestDirectory) + "/symlink", ec), e;
-        i != e; i.increment(ec)) {
-      ASSERT_NO_ERROR(ec);
-      if (i->getStatus().getError() ==
-          std::make_error_code(std::errc::no_such_file_or_directory)) {
-         visitedNonBrokenSymlinks.push_back(fs::path::filename(i->getPath()));
+     // Broken symbol links are expected to throw an error.
+     for (fs::DirectoryIterator i(Twine(TestDirectory) + "/symlink", ec), e;
+          i != e; i.increment(ec)) {
+       ASSERT_NO_ERROR(ec);
+       if (i->getStatus().getError() ==
+           std::make_error_code(std::errc::no_such_file_or_directory)) {
+         VisitedBrokenSymlinks.push_back(polar::fs::path::filename(i->getPath()));
          continue;
-      }
-      visitedNonBrokenSymlinks.push_back(fs::path::filename(i->getPath()));
-   }
+       }
+       VisitedNonBrokenSymlinks.push_back(polar::fs::path::filename(i->getPath()));
+     }
+     EXPECT_THAT(VisitedNonBrokenSymlinks, UnorderedElementsAre("b", "d"));
+     VisitedNonBrokenSymlinks.clear();
 
-   EXPECT_THAT(visitedNonBrokenSymlinks, UnorderedElementsAre("b", "d"));
-   visitedNonBrokenSymlinks.clear();
+     EXPECT_THAT(VisitedBrokenSymlinks, UnorderedElementsAre("a", "c", "e"));
+     VisitedBrokenSymlinks.clear();
 
-   EXPECT_THAT(visitedBrokenSymlinks, UnorderedElementsAre("a", "c", "e"));
-   visitedBrokenSymlinks.clear();
-
-   // Broken symbol links are expected to throw an error.
-   for (fs::RecursiveDirectoryIterator i(
-           Twine(TestDirectory) + "/symlink", ec), e; i != e; i.increment(ec)) {
-      ASSERT_NO_ERROR(ec);
-      if (ec == std::make_error_code(std::errc::no_such_file_or_directory)) {
-         visitedBrokenSymlinks.push_back(fs::path::filename(i->getPath()));
+     // Broken symbol links are expected to throw an error.
+     for (fs::RecursiveDirectoryIterator i(
+         Twine(TestDirectory) + "/symlink", ec), e; i != e; i.increment(ec)) {
+       ASSERT_NO_ERROR(ec);
+       if (i->getStatus().getError() ==
+           std::make_error_code(std::errc::no_such_file_or_directory)) {
+         VisitedBrokenSymlinks.push_back(polar::fs::path::filename(i->getPath()));
          continue;
-      }
-      visitedNonBrokenSymlinks.push_back(fs::path::filename(i->getPath()));
-   }
-   EXPECT_THAT(visitedNonBrokenSymlinks,
-               UnorderedElementsAre("b", "bb", "d", "da", "dd", "ddd", "ddd"));
-   visitedNonBrokenSymlinks.clear();
+       }
+       VisitedNonBrokenSymlinks.push_back(polar::fs::path::filename(i->getPath()));
+     }
+     EXPECT_THAT(VisitedNonBrokenSymlinks,
+                 UnorderedElementsAre("b", "bb", "d", "da", "dd", "ddd", "ddd"));
+     VisitedNonBrokenSymlinks.clear();
 
-   EXPECT_THAT(visitedBrokenSymlinks,
-               UnorderedElementsAre("a", "ba", "bc", "c", "e"));
-   visitedBrokenSymlinks.clear();
+     EXPECT_THAT(VisitedBrokenSymlinks,
+                 UnorderedElementsAre("a", "ba", "bc", "c", "e"));
+     VisitedBrokenSymlinks.clear();
 
-   for (fs::RecursiveDirectoryIterator i(
-           Twine(TestDirectory) + "/symlink", ec, /*follow_symlinks=*/false), e;
-        i != e; i.increment(ec)) {
-      ASSERT_NO_ERROR(ec);
-      if (ec == std::make_error_code(std::errc::no_such_file_or_directory)) {
-         visitedBrokenSymlinks.push_back(fs::path::filename(i->getPath()));
+     for (fs::RecursiveDirectoryIterator i(
+         Twine(TestDirectory) + "/symlink", ec, /*follow_symlinks=*/false), e;
+          i != e; i.increment(ec)) {
+       ASSERT_NO_ERROR(ec);
+       if (i->getStatus().getError() ==
+           std::make_error_code(std::errc::no_such_file_or_directory)) {
+         VisitedBrokenSymlinks.push_back(polar::fs::path::filename(i->getPath()));
          continue;
-      }
-      visitedNonBrokenSymlinks.push_back(fs::path::filename(i->getPath()));
-   }
-   EXPECT_THAT(visitedNonBrokenSymlinks,
-               UnorderedElementsAreArray({"a", "b", "ba", "bb", "bc", "c", "d",
-                                          "da", "dd", "ddd", "e"}));
-   visitedNonBrokenSymlinks.clear();
+       }
+       VisitedNonBrokenSymlinks.push_back(polar::fs::path::filename(i->getPath()));
+     }
+     EXPECT_THAT(VisitedNonBrokenSymlinks,
+                 UnorderedElementsAreArray({"a", "b", "ba", "bb", "bc", "c", "d",
+                                            "da", "dd", "ddd", "e"}));
+     VisitedNonBrokenSymlinks.clear();
 
-   EXPECT_THAT(visitedBrokenSymlinks, UnorderedElementsAre());
-   visitedBrokenSymlinks.clear();
+     EXPECT_THAT(VisitedBrokenSymlinks, UnorderedElementsAre());
+     VisitedBrokenSymlinks.clear();
 
-   ASSERT_NO_ERROR(fs::remove_directories(Twine(TestDirectory) + "/symlink"));
+     ASSERT_NO_ERROR(fs::remove_directories(Twine(TestDirectory) + "/symlink"));
 }
 #endif
 
-TEST_F(FileSystemTest, testRemove) {
+TEST_F(FileSystemTest, testRemove)
+{
    SmallString<64> BaseDir;
    SmallString<64> Paths[4];
    int fds[4];
