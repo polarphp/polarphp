@@ -12,7 +12,18 @@
 #include "polarphp/utils/Memory.h"
 #include "polarphp/utils/Process.h"
 #include "gtest/gtest.h"
+#include <cassert>
 #include <cstdlib>
+
+#if defined(__NetBSD__)
+// clang-format off
+#include <sys/param.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#include <err.h>
+#include <unistd.h>
+// clang-format on
+#endif
 
 using namespace polar;
 using namespace polar::basic;
@@ -20,6 +31,27 @@ using namespace polar::utils;
 using namespace polar::sys;
 
 namespace {
+
+bool IsMPROTECT()
+{
+#if defined(__NetBSD__)
+   int mib[3];
+   int paxflags;
+   size_t len = sizeof(paxflags);
+
+   mib[0] = CTL_PROC;
+   mib[1] = getpid();
+   mib[2] = PROC_PID_PAXFLAGS;
+
+   if (sysctl(mib, 3, &paxflags, &len, NULL, 0) != 0)
+      err(EXIT_FAILURE, "sysctl");
+
+   return !!(paxflags & CTL_PROC_PAXFLAGS_MPROTECT);
+#else
+   return false;
+#endif
+}
+
 
 class MappedMemoryTest : public ::testing::TestWithParam<unsigned>
 {
@@ -64,8 +96,17 @@ protected:
    size_t   PageSize;
 };
 
+// MPROTECT prevents W+X mmaps
+#define CHECK_UNSUPPORTED() \
+   do { \
+   if ((Flags & Memory::MF_WRITE) && (Flags & Memory::MF_EXEC) && \
+   IsMPROTECT()) \
+   return; \
+} while (0)
+
 TEST_P(MappedMemoryTest, testAllocAndRelease)
 {
+   CHECK_UNSUPPORTED();
    std::error_code errorCode;
    MemoryBlock M1 = Memory::allocateMappedMemory(sizeof(int), nullptr, Flags,errorCode);
    EXPECT_EQ(std::error_code(), errorCode);
@@ -78,6 +119,7 @@ TEST_P(MappedMemoryTest, testAllocAndRelease)
 
 TEST_P(MappedMemoryTest, testMultipleAllocAndRelease)
 {
+   CHECK_UNSUPPORTED();
    std::error_code errorCode;
    MemoryBlock M1 = Memory::allocateMappedMemory(16, nullptr, Flags, errorCode);
    EXPECT_EQ(std::error_code(), errorCode);
@@ -112,7 +154,7 @@ TEST_P(MappedMemoryTest, testBasicWrite) {
    if (Flags &&
        !((Flags & Memory::MF_READ) && (Flags & Memory::MF_WRITE)))
       return;
-
+   CHECK_UNSUPPORTED();
    std::error_code errorCode;
    MemoryBlock M1 = Memory::allocateMappedMemory(sizeof(int), nullptr, Flags,errorCode);
    EXPECT_EQ(std::error_code(), errorCode);
@@ -133,6 +175,7 @@ TEST_P(MappedMemoryTest, testMultipleWrite)
    if (Flags &&
        !((Flags & Memory::MF_READ) && (Flags & Memory::MF_WRITE)))
       return;
+   CHECK_UNSUPPORTED();
    std::error_code errorCode;
    MemoryBlock M1 = Memory::allocateMappedMemory(sizeof(int), nullptr, Flags,
                                                  errorCode);
@@ -192,6 +235,10 @@ TEST_P(MappedMemoryTest, testMultipleWrite)
 
 TEST_P(MappedMemoryTest, testEnabledWrite)
 {
+   // MPROTECT prevents W+X, and since this test always adds W we need
+   // to block any variant with X.
+   if ((Flags & Memory::MF_EXEC) && IsMPROTECT())
+      return;
    std::error_code errorCode;
    MemoryBlock M1 = Memory::allocateMappedMemory(2 * sizeof(int), nullptr, Flags,
                                                  errorCode);
@@ -276,6 +323,7 @@ TEST_P(MappedMemoryTest, testSuccessiveNear)
 
 TEST_P(MappedMemoryTest, testDuplicateNear)
 {
+   CHECK_UNSUPPORTED();
    std::error_code errorCode;
    MemoryBlock Near((void*)(3*PageSize), 16);
    MemoryBlock M1 = Memory::allocateMappedMemory(16, &Near, Flags, errorCode);
@@ -299,6 +347,7 @@ TEST_P(MappedMemoryTest, testDuplicateNear)
 
 TEST_P(MappedMemoryTest, testZeroNear)
 {
+   CHECK_UNSUPPORTED();
    std::error_code errorCode;
    MemoryBlock Near(nullptr, 0);
    MemoryBlock M1 = Memory::allocateMappedMemory(16, &Near, Flags, errorCode);
@@ -326,6 +375,7 @@ TEST_P(MappedMemoryTest, testZeroNear)
 
 TEST_P(MappedMemoryTest, testZeroSizeNear)
 {
+   CHECK_UNSUPPORTED();
    std::error_code errorCode;
    MemoryBlock Near((void*)(4*PageSize), 0);
    MemoryBlock M1 = Memory::allocateMappedMemory(16, &Near, Flags, errorCode);

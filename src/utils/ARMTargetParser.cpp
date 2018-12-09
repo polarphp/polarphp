@@ -592,7 +592,7 @@ ArchKind parse_cpu_arch(StringRef cpu)
    return ArchKind::INVALID;
 }
 
-void fill_valid_cpu_archList(SmallVectorImpl<StringRef> &values)
+void fill_valid_cpu_arch_list(SmallVectorImpl<StringRef> &values)
 {
    for (const CpuNames<ArchKind> &arch : sg_cpuNames) {
       if (arch.ArchID != ArchKind::INVALID) {

@@ -1424,6 +1424,13 @@ private:
    std::unique_ptr<ErrorInfoBase> m_error;
 };
 
+/// Concatenate a source file path and/or name with an Error. The resulting
+/// Error is unchecked.
+inline Error create_file_error(std::string file, Error error)
+{
+   return FileError::build(file, std::move(error));
+}
+
 Error create_file_error(std::string file, ErrorSuccess) = delete;
 
 /// Helper for check-and-exit error handling.

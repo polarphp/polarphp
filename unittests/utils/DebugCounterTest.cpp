@@ -25,11 +25,10 @@
 using namespace polar::utils;
 
 #ifndef NDEBUG
-DEBUG_COUNTER(TestCounter, "test-counter",
-              "Counter used for unit test");
 
 TEST(DebugCounterTest, testCounterCheck)
 {
+   DEBUG_COUNTER(TestCounter, "test-counter", "Counter used for unit test");
    EXPECT_FALSE(DebugCounter::isCounterSet(TestCounter));
 
    auto DC = &DebugCounter::getInstance();

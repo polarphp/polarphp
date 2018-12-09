@@ -14,6 +14,7 @@
 #include "polarphp/basic/adt/Twine.h"
 #include "polarphp/utils/ErrorCode.h"
 #include "polarphp/utils/ErrorHandling.h"
+#include "polarphp/utils/ManagedStatics.h"
 #include "../support/Error.h"
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
@@ -115,7 +116,7 @@ TEST(ErrorTest, testCheckedSuccess)
    EXPECT_FALSE(E) << "Unexpected error while testing Error 'Success'";
 }
 
-// Test that unchecked succes values cause an abort.
+// Test that unchecked success values cause an abort.
 #if POLAR_ENABLE_ABI_BREAKING_CHECKS
 TEST(ErrorTest, UncheckedSuccess) {
    EXPECT_DEATH({ Error E = Error::getSuccess(); },
@@ -463,7 +464,7 @@ TEST(ErrorTest, testStringError)
    RawStringOutStream S(Msg);
    log_all_unhandled_errors(make_error<StringError>("foo" + Twine(42),
                                                     inconvertible_error_code()),
-                            S, "");
+                            S);
    EXPECT_EQ(S.getStr(), "foo42\n") << "Unexpected StringError log result";
 
    auto EC =
@@ -472,19 +473,19 @@ TEST(ErrorTest, testStringError)
          << "Failed to convert StringError to error_code.";
 }
 
-TEST(Error, testCreateStringError) {
+TEST(ErrorTest, testCreateStringError) {
    static const char *Bar = "bar";
    static const std::error_code EC = ErrorCode::invalid_argument;
    std::string Msg;
    RawStringOutStream S(Msg);
    log_all_unhandled_errors(create_string_error(EC, "foo%s%d0x%" PRIx8, Bar, 1, 0xff),
-                            S, "");
+                            S);
    EXPECT_EQ(S.getStr(), "foobar10xff\n")
          << "Unexpected createStringError() log result";
 
    S.flush();
    Msg.clear();
-   log_all_unhandled_errors(create_string_error(EC, Bar), S, "");
+   log_all_unhandled_errors(create_string_error(EC, Bar), S);
    EXPECT_EQ(S.getStr(), "bar\n")
          << "Unexpected createStringError() (overloaded) log result";
 
@@ -785,7 +786,7 @@ TEST(ErrorTest, testErrorMessage)
              0);
 }
 
-TEST(Error, testStream)
+TEST(ErrorTest, testStream)
 {
    {
       Error OK = Error::getSuccess();
@@ -879,6 +880,120 @@ TEST(ErrorTest, testErrorMatchers)
             "Expected: succeeded with value (is > 1)\n"
             "  Actual: failed  (CustomError {0})");
 }
+
+TEST(Error, FileErrorTest) {
+#if !defined(NDEBUG) && GTEST_HAS_DEATH_TEST
+   EXPECT_DEATH(
+   {
+               Error S = Error::getSuccess();
+               consume_error(create_file_error("file.bin", std::move(S)));
+            },
+            "");
+#endif
+   // Not allowed, would fail at compile-time
+   //consumeError(create_file_error("file.bin", ErrorSuccess()));
+
+   Error E1 = make_error<CustomError>(1);
+   Error FE1 = create_file_error("file.bin", std::move(E1));
+   EXPECT_EQ(to_string(std::move(FE1)).compare("'file.bin': CustomError {1}"), 0);
+
+   Error E2 = make_error<CustomError>(2);
+   Error FE2 = create_file_error("file.bin", std::move(E2));
+   handle_all_errors(std::move(FE2), [](const FileError &F) {
+      EXPECT_EQ(F.message().compare("'file.bin': CustomError {2}"), 0);
+   });
+
+   Error E3 = make_error<CustomError>(3);
+   Error FE3 = create_file_error("file.bin", std::move(E3));
+   auto E31 = handle_errors(std::move(FE3), [](std::unique_ptr<FileError> F) {
+         return F->takeError();
+});
+   handle_all_errors(std::move(E31), [](const CustomError &C) {
+      EXPECT_EQ(C.message().compare("CustomError {3}"), 0);
+   });
+
+   Error FE4 =
+         join_errors(create_file_error("file.bin", make_error<CustomError>(41)),
+                    create_file_error("file2.bin", make_error<CustomError>(42)));
+   EXPECT_EQ(to_string(std::move(FE4))
+             .compare("'file.bin': CustomError {41}\n"
+                      "'file2.bin': CustomError {42}"),
+             0);
+}
+
+enum class test_error_code {
+   unspecified = 1,
+   error_1,
+   error_2,
+};
+
+} // end anon namespace
+
+namespace std {
+template <>
+struct is_error_code_enum<test_error_code> : std::true_type {};
+} // namespace std
+
+namespace {
+
+const std::error_category &TErrorCategory();
+
+inline std::error_code make_error_code(test_error_code E) {
+   return std::error_code(static_cast<int>(E), TErrorCategory());
+}
+
+class TestDebugError : public ErrorInfo<TestDebugError, StringError> {
+public:
+   using ErrorInfo<TestDebugError, StringError >::ErrorInfo; // inherit constructors
+   TestDebugError(const Twine &S) : ErrorInfo(S, test_error_code::unspecified) {}
+   static char sm_id;
+};
+
+class TestErrorCategory : public std::error_category {
+public:
+   const char *name() const noexcept override { return "error"; }
+   std::string message(int Condition) const override {
+      switch (static_cast<test_error_code>(Condition)) {
+      case test_error_code::unspecified:
+         return "An unknown error has occurred.";
+      case test_error_code::error_1:
+         return "Error 1.";
+      case test_error_code::error_2:
+         return "Error 2.";
+      }
+      polar_unreachable("Unrecognized test_error_code");
+   }
+};
+
+static polar::utils::ManagedStatic<TestErrorCategory> TestErrCategory;
+const std::error_category &TErrorCategory() { return *TestErrCategory; }
+
+char TestDebugError::sm_id;
+
+TEST(ErrorTest, testSubtypeStringErrorTest)
+{
+   auto E1 = make_error<TestDebugError>(test_error_code::error_1);
+   EXPECT_EQ(to_string(std::move(E1)).compare("Error 1."), 0);
+
+   auto E2 = make_error<TestDebugError>(test_error_code::error_1,
+                                        "Detailed information");
+   EXPECT_EQ(to_string(std::move(E2)).compare("Error 1. Detailed information"),
+             0);
+
+   auto E3 = make_error<TestDebugError>(test_error_code::error_2);
+   handle_all_errors(std::move(E3), [](const TestDebugError &F) {
+      EXPECT_EQ(F.message().compare("Error 2."), 0);
+   });
+
+   auto E4 = join_errors(make_error<TestDebugError>(test_error_code::error_1,
+                                                   "Detailed information"),
+                        make_error<TestDebugError>(test_error_code::error_2));
+   EXPECT_EQ(to_string(std::move(E4))
+             .compare("Error 1. Detailed information\n"
+                      "Error 2."),
+             0);
+}
+
 
 } // anonymous namespace
 
