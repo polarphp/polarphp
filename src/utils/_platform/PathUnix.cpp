@@ -207,21 +207,21 @@ std::string get_main_executable(const char *argv0, void *mainAddr)
    StringRef aPath("/proc/self/exe");
    if (fs::exists(aPath)) {
       // /proc is not always mounted under Linux (chroot for example).
-      ssize_t len = readlink(aPath.str().c_str(), exe_path, sizeof(exe_path));
+      ssize_t len = readlink(aPath.getStr().c_str(), exePath, sizeof(exePath));
       if (len < 0) {
          return "";
       }
       // Null terminate the string for realpath. readlink never null
       // terminates its output.
-      len = std::min(len, ssize_t(sizeof(exe_path) - 1));
-      exe_path[len] = '\0';
+      len = std::min(len, ssize_t(sizeof(exePath) - 1));
+      exePath[len] = '\0';
 
       // On Linux, /proc/self/exe always looks through symlinks. However, on
       // GNU/Hurd, /proc/self/exe is a symlink to the path that was used to start
       // the program, and not the eventual binary file. Therefore, call realpath
       // so this behaves the same on all platforms.
 #if _POSIX_VERSION >= 200112 || defined(__GLIBC__)
-      char *real_path = realpath(exe_path, NULL);
+      char *real_path = realpath(exePath, NULL);
       std::string ret = std::string(real_path);
       free(real_path);
       return ret;
