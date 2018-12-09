@@ -138,7 +138,8 @@ StringError::StringError(std::error_code errorCode, const Twine &str)
 
 StringError::StringError(const Twine &str, std::error_code errorCode)
    : m_msg(str.getStr()),
-     m_errorCode(errorCode)
+     m_errorCode(errorCode),
+     m_printMsgOnly(true)
 {}
 
 void StringError::log(RawOutStream &out) const

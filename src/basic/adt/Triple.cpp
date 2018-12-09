@@ -17,7 +17,7 @@
 #include "polarphp/utils/TargetParser.h"
 #include "polarphp/utils/Host.h"
 #include <cstring>
-#include <iostream>
+
 namespace polar {
 namespace basic {
 

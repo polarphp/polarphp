@@ -1054,9 +1054,9 @@ Error handle_errors(Error error, HandlerTs &&... handlers)
    }
    std::unique_ptr<ErrorInfoBase> payload = error.takePayload();
    if (payload->isA<ErrorList>()) {
-      ErrorList &List = static_cast<ErrorList &>(*payload);
+      ErrorList &list = static_cast<ErrorList &>(*payload);
       Error error;
-      for (auto &payload : List.m_payloads) {
+      for (auto &payload : list.m_payloads) {
          error = ErrorList::join(
                   std::move(error),
                   handle_error_impl(std::move(payload), std::forward<HandlerTs>(handlers)...));
