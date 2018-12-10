@@ -9,6 +9,8 @@
 #
 # Created by polarboy on 2018/08/27.
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 add_subdirectory(lit)
 add_subdirectory(filechecker)
 add_subdirectory(not)

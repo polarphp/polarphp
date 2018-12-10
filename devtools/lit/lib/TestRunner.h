@@ -12,7 +12,7 @@
 #ifndef POLAR_DEVLTOOLS_LIT_TEST_RUNNER_H
 #define POLAR_DEVLTOOLS_LIT_TEST_RUNNER_H
 
-#include "Global.h"
+#include "LitGlobal.h"
 #include "ShellCommands.h"
 #include "ForwardDefs.h"
 #include "polarphp/basic/adt/StringRef.h"

@@ -51,7 +51,7 @@ bool ShLexer::maybeEat(char c)
    return false;
 }
 
-std::any ShLexer::lexArgFast(char c)
+std::any ShLexer::lexArgFast(char)
 {
    std::string chunk = m_data.substr(m_pos - 1);
    chunk = split_string(chunk, ' ', 1).front();
@@ -114,7 +114,7 @@ std::any ShLexer::lexArgSlow(char c)
          eat();
          if (m_pos == m_end) {
             sg_litCfg->warning(format_string("escape at end of quoted argument in: %s\n", m_data.c_str()), __FILE__, __LINE__);
-            return str;
+            return std::any(str);
          }
          str += eat();
       } else if (c == '*' || c == '?') {

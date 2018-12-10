@@ -16,7 +16,7 @@
 #include <string>
 #include <list>
 #include "ShellCommands.h"
-#include "Global.h"
+#include "LitGlobal.h"
 #include <any>
 
 namespace polar {
@@ -38,8 +38,8 @@ public:
    std::list<std::any> lex();
 protected:
    std::string m_data;
-   int m_pos;
-   int m_end;
+   size_t m_pos;
+   size_t m_end;
    bool m_win32Escapes;
 };
 

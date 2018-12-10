@@ -10,7 +10,7 @@
 // Created by polarboy on 2018/09/17.
 
 #include "ProgressBar.h"
-#include "Global.h"
+#include "LitGlobal.h"
 #include "Utils.h"
 #include "CLI/CLI.hpp"
 #include "polarphp/basic/adt/StringRef.h"

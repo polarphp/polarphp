@@ -10,7 +10,6 @@
 // Created by polarboy on 2018/08/27.
 
 #include "CLI/CLI.hpp"
-#include "Config.h"
 #include "lib/Utils.h"
 #include "lib/LitConfig.h"
 #include "lib/Discovery.h"
@@ -62,9 +61,9 @@ using polar::lit::TestingProgressDisplay;
 using polar::lit::format_string;
 namespace fs = std::filesystem;
 
-std::mutex sg_signalMutex;
-std::condition_variable sg_signalConditionVar;
-std::atomic_bool sg_testFinished = false;
+static std::mutex sg_signalMutex{};
+static std::condition_variable sg_signalConditionVar{};
+static std::atomic_bool sg_testFinished = false;
 
 namespace {
 
@@ -111,12 +110,13 @@ void write_test_results(polar::lit::Run &run, LitConfigPointer, size_t testingTi
    nlohmann::json testsData = nlohmann::json::array();
    for (TestPointer test : run.getTests()) {
       ResultPointer testResult = test->getResult();
+      int elapse = test->getResult()->getElapsed().has_value() ? static_cast<int>(test->getResult()->getElapsed().value()) : -1;
       nlohmann::json testData = nlohmann::json::object(
       {
                   {"name", test->getFullName()},
                   {"code", test->getResult()->getCode()->getName()},
                   {"output", test->getResult()->getOutput()},
-                  {"elapse", static_cast<int>(test->getResult()->getElapsed().has_value() ? test->getResult()->getElapsed().value() : -1)}
+                  {"elapse", elapse}
                });
       // Add test metrics, if present.
       if (!testResult->getMetrics().empty()) {
@@ -143,12 +143,13 @@ void write_test_results(polar::lit::Run &run, LitConfigPointer, size_t testingTi
             std::string parentName = test->getFullName();
             ResultPointer microTest = microItem.second;
             std::string microFullName = parentName + ":" + microItem.first;
+            int elapse = microTest->getElapsed().has_value() ? static_cast<int>(microTest->getElapsed().value()) : -1;
             nlohmann::json microTestData = nlohmann::json::object(
             {
                         {"name", microFullName},
                         {"code", microTest->getCode()->getName()},
                         {"output", microTest->getOutput()},
-                        {"elapsed", static_cast<int>(microTest->getElapsed().has_value() ? microTest->getElapsed().value() : -1)}
+                        {"elapsed", elapse}
                      });
             if (!microTest->getMetrics().empty()) {
                nlohmann::json microMetrics = nlohmann::json::object();
@@ -225,7 +226,7 @@ int main(int argc, char *argv[])
    litApp.add_option("--config-prefix", cfgPrefix, "Prefix for 'lit' config files");
    litApp.add_option("-D,--param", params, "Add 'NAME' = 'VAL' to the user defined parameters");
    litApp.add_option("--cfg-setter-plugin-dir", cfgSetterPluginDir, "the cfg setter plugin base dir");
-   
+
    /// setup command group
    /// Output Format
    bool quiet;
@@ -247,7 +248,7 @@ int main(int argc, char *argv[])
    litApp.add_flag("--display-progress-bar", displayProgressBar, "use curses based progress bar")->group("Output Format");
    litApp.add_flag("--show-unsupported", showUnsupported, "Show unsupported tests")->group("Output Format");
    litApp.add_flag("--show-xfail", showXFail, "Show tests that were expected to fail")->group("Output Format");
-   
+
    /// Test Execution
    std::vector<std::string> paths;
    bool useValgrind;
@@ -268,7 +269,7 @@ int main(int argc, char *argv[])
    CLI::Option *maxIndividualTestTimeOpt = litApp.add_option("--timeout", maxIndividualTestTime, "Maximum time to spend running a single test (in seconds)."
                                                                                                  "0 means no time limit. [Default: 0]", 0)->group("Test Execution");
    CLI::Option *maxFailuresOpt = litApp.add_option("--max-failures", maxFailures, "Stop execution after the given number of failures.", 0)->group("Test Execution");
-   
+
    /// Test Selection
    size_t maxTests;
    size_t maxTime;
@@ -286,7 +287,7 @@ int main(int argc, char *argv[])
                                          "regular expression")->envname("LIT_FILTER")->group("Test Selection");
    CLI::Option *numShardsOpt = litApp.add_option("--num-shards", numShards, "Split testsuite into M pieces and only run one")->envname("LIT_NUM_SHARDS")->group("Test Selection");
    CLI::Option *runShardOpt = litApp.add_option("--run-shard", runShard, "Run shard #N of the testsuite")->envname("LIT_RUN_SHARD")->group("Test Selection");
-   
+
    /// debug
    bool debug;
    bool showSuites;
@@ -403,11 +404,11 @@ int main(int argc, char *argv[])
             }
             suitesAndTests.at(suiteId).push_back(resultTest);
          }
-         
+
          for (const auto &item : suitesAndTests) {
             sortedSuitesAndTests.push_back(std::make_tuple(testsuiteMap.at(item.first),
                                                            item.second));
-            
+
          }
          sortedSuitesAndTests.sort([](const auto &lhs, const auto &rhs) -> bool {
             return std::get<0>(lhs)->getName() < std::get<0>(rhs)->getName();
@@ -571,7 +572,7 @@ int main(int argc, char *argv[])
       try {
          run.executeTests(display, threadNumbers, maxTime);
       } catch (...) {
-         
+
       }
       display->finish();
       size_t testingTime = static_cast<size_t>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime).count());
@@ -629,7 +630,7 @@ int main(int argc, char *argv[])
          // Order by time.
          std::list<std::tuple<std::string, int>> testTimes;
          for (TestPointer test: run.getTests()) {
-            int elapsed = test->getResult()->getElapsed() ? test->getResult()->getElapsed().value() : -1;
+            int elapsed = test->getResult()->getElapsed() ? static_cast<int>(test->getResult()->getElapsed().value()) : -1;
             testTimes.push_back({test->getFullName(), elapsed});
             polar::lit::print_histogram(testTimes, "Tests");
          }
@@ -671,7 +672,7 @@ int main(int argc, char *argv[])
             std::get<3>(bySuite[suite]).push_back(test);
             if (test->getResult()->getCode()->isFailure()) {
                std::get<1>(bySuite[suite]) += 1;
-               
+
             } else if (test->getResult()->getCode() == polar::lit::UNSUPPORTED) {
                std::get<2>(bySuite[suite]) += 1;
             } else {
@@ -716,5 +717,5 @@ int main(int argc, char *argv[])
       eptr = std::current_exception();
    }
    general_exception_handler(eptr);
-   
+
 }

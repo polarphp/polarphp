@@ -11,7 +11,7 @@
 
 #include "Discovery.h"
 #include "LitConfig.h"
-#include "Global.h"
+#include "LitGlobal.h"
 #include <filesystem>
 #include <fstream>
 #include <iostream>

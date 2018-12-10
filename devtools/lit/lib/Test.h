@@ -19,7 +19,7 @@
 #include "nlohmann/json.hpp"
 #include "TestingConfig.h"
 #include "Utils.h"
-#include "Global.h"
+#include "LitGlobal.h"
 #include "ForwardDefs.h"
 #include <iostream>
 
@@ -184,7 +184,7 @@ public:
    {
       return m_value;
    }
-   
+
    ValueType getValueType() const
    {
       return ValueType::Json;

@@ -9,11 +9,12 @@
 //
 // Created by polarboy on 2018/10/10.
 
+#include "polarphp/global/AbiBreaking.h"
+#include "polarphp/basic/adt/Twine.h"
 #include "polarphp/utils/Error.h"
 #include "polarphp/utils/ErrorHandling.h"
 #include "polarphp/utils/ManagedStatics.h"
-#include "polarphp/basic/adt/Twine.h"
-#include "AbiBreaking.h"
+
 #include <system_error>
 
 namespace {
@@ -164,7 +165,7 @@ Error create_string_error(std::error_code errorCode, char const *msg)
    return make_error<StringError>(msg, errorCode);
 }
 
-void report_fatal_error(Error error, bool genCrashDiag)
+void report_fatal_error(Error error, bool)
 {
    assert(error && "report_fatal_error called with success value");
    std::string errorMsg;

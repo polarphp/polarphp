@@ -9,7 +9,6 @@
 #
 # Created by polarboy on 2018/08/26.
 
-add_subdirectory(TSRM)
-add_subdirectory(Zend)
 add_subdirectory(basic)
 add_subdirectory(utils)
+add_subdirectory(vm)

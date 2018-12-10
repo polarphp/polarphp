@@ -14,7 +14,7 @@
 #include "polarphp/basic/adt/ArrayRef.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/utils/OptionalError.h"
-#include "Config.h"
+#include "LitConfig.h"
 #include <cmath>
 #include <iostream>
 #include <thread>

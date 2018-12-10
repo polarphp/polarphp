@@ -10,7 +10,7 @@
 // Created by polarboy on 2018/09/05.
 
 #include "Test.h"
-#include "Global.h"
+#include "LitGlobal.h"
 #include "BooleanExpression.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include <map>

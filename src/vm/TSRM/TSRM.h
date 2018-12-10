@@ -20,7 +20,7 @@
 # include <tsrm_config.h>
 #endif
 
-#include "polarphp/global/php_stdint.h"
+#include "php_stdint.h"
 
 #ifdef TSRM_WIN32
 #	ifdef TSRM_EXPORTS

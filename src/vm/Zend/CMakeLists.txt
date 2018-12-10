@@ -101,7 +101,15 @@ if (POLAR_ENABLE_WARNINGS AND (POLAR_COMPILER_IS_GCC_COMPATIBLE OR CLANG_CL))
    polar_append_flag("-Wno-format" CMAKE_C_FLAGS)
 endif (POLAR_ENABLE_WARNINGS AND (POLAR_COMPILER_IS_GCC_COMPATIBLE OR CLANG_CL))
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 polar_add_library(zendVM SHARED ${zendVM_SRCS})
+
+get_target_property(zendVMIncludeDirs tsrm INCLUDE_DIRECTORIES)
+polar_merge_list(zendVMIncludeDirs POLAR_ZENDVM_INCLUDE_DIRS)
+
+set_target_properties(zendVM
+   PROPERTIES INCLUDE_DIRECTORIES "${zendVMIncludeDirs}")
 
 target_link_libraries(zendVM PRIVATE tsrm)
 set_target_properties(zendVM

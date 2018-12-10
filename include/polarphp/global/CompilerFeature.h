@@ -12,7 +12,7 @@
 #ifndef POLARPHP_GLOBAL_COMPILER_FEATURE_H
 #define POLARPHP_GLOBAL_COMPILER_FEATURE_H
 
-#include "Config.h"
+#include "polarphp/global/Config.h"
 #include <new>
 #include <stddef.h>
 
