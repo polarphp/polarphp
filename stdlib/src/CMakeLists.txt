@@ -6,7 +6,8 @@
 #
 # See http://polarphp.org/LICENSE.txt for license information
 # See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+#
+# Created by polarboy on 2018/12/10.
 
-add_subdirectory(cycle)
-
-polar_add_executable(polar main.cpp)
+add_subdirectory(kernel)
+add_subdirectory(modules)
