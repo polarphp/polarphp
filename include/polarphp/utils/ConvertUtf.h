@@ -124,11 +124,11 @@ using Utf8 = unsigned char;   /* typically 8 bits */
 using Boolean = unsigned char; /* 0 or 1 */
 
 /* Some fundamental constants */
-#define UNI_REPLACEMENT_CHAR (Utf32)0x0000FFFD
-#define UNI_MAX_BMP (Utf32)0x0000FFFF
-#define UNI_MAX_UTF16 (Utf32)0x0010FFFF
-#define UNI_MAX_UTF32 (Utf32)0x7FFFFFFF
-#define UNI_MAX_LEGAL_UTF32 (Utf32)0x0010FFFF
+#define UNI_REPLACEMENT_CHAR static_cast<Utf32>(0x0000FFFD)
+#define UNI_MAX_BMP static_cast<Utf32>(0x0000FFFF)
+#define UNI_MAX_UTF16 static_cast<Utf32>(0x0010FFFF)
+#define UNI_MAX_UTF32 static_cast<Utf32>(0x7FFFFFFF)
+#define UNI_MAX_LEGAL_UTF32 static_cast<Utf32>(0x0010FFFF)
 
 #define UNI_MAX_UTF8_BYTES_PER_CODE_POINT 4
 

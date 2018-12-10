@@ -49,6 +49,7 @@
 ------------------------------------------------------------------------ */
 
 #include "polarphp/utils/ConvertUtf.h"
+#include "polarphp/global/CompilerDetection.h"
 
 #ifdef CVTUTF_DEBUG
 #include <stdio.h>
@@ -91,10 +92,10 @@ static const int sg_halfShift  = 10; /* used for shifting by 10 bits */
 static const Utf32 sg_halfBase = 0x0010000UL;
 static const Utf32 sg_halfMask = 0x3FFUL;
 
-#define UNI_SUR_HIGH_START  (Utf32)0xD800
-#define UNI_SUR_HIGH_END    (Utf32)0xDBFF
-#define UNI_SUR_LOW_START   (Utf32)0xDC00
-#define UNI_SUR_LOW_END     (Utf32)0xDFFF
+#define UNI_SUR_HIGH_START  static_cast<Utf32>(0xD800)
+#define UNI_SUR_HIGH_END    static_cast<Utf32>(0xDBFF)
+#define UNI_SUR_LOW_START   static_cast<Utf32>(0xDC00)
+#define UNI_SUR_LOW_END     static_cast<Utf32>(0xDFFF)
 
 /* --------------------------------------------------------------------- */
 
@@ -171,7 +172,7 @@ ConversionResult convert_utf32_to_utf16 (
                *target++ = UNI_REPLACEMENT_CHAR;
             }
          } else {
-            *target++ = (Utf16)ch; /* normal case */
+            *target++ = static_cast<Utf16>(ch); /* normal case */
          }
       } else if (ch > UNI_MAX_LEGAL_UTF32) {
          if (flags == ConversionFlags::StrictConversion) {
@@ -187,8 +188,8 @@ ConversionResult convert_utf32_to_utf16 (
             break;
          }
          ch -= sg_halfBase;
-         *target++ = (Utf16)((ch >> sg_halfShift) + UNI_SUR_HIGH_START);
-         *target++ = (Utf16)((ch & sg_halfMask) + UNI_SUR_LOW_START);
+         *target++ = static_cast<Utf16>((ch >> sg_halfShift) + UNI_SUR_HIGH_START);
+         *target++ = static_cast<Utf16>((ch & sg_halfMask) + UNI_SUR_LOW_START);
       }
    }
    *sourceStart = source;
@@ -297,13 +298,13 @@ ConversionResult convert_utf16_to_utf8 (
          }
       }
       /* Figure out how many bytes the result will require */
-      if (ch < (Utf32)0x80) {
+      if (ch < static_cast<Utf32>(0x80)) {
          bytesToWrite = 1;
-      } else if (ch < (Utf32)0x800) {
+      } else if (ch < static_cast<Utf32>(0x800)) {
          bytesToWrite = 2;
-      } else if (ch < (Utf32)0x10000) {
+      } else if (ch < static_cast<Utf32>(0x10000)) {
          bytesToWrite = 3;
-      } else if (ch < (Utf32)0x110000) {
+      } else if (ch < static_cast<Utf32>(0x110000)) {
          bytesToWrite = 4;
       } else {
          bytesToWrite = 3;
@@ -318,10 +319,10 @@ ConversionResult convert_utf16_to_utf8 (
          break;
       }
       switch (bytesToWrite) { /* note: everything falls through. */
-      case 4: *--target = (Utf8)((ch | byteMark) & byteMask); ch >>= 6;
-      case 3: *--target = (Utf8)((ch | byteMark) & byteMask); ch >>= 6;
-      case 2: *--target = (Utf8)((ch | byteMark) & byteMask); ch >>= 6;
-      case 1: *--target =  (Utf8)(ch | sg_firstByteMark[bytesToWrite]);
+      case 4: *--target = static_cast<Utf8>((ch | byteMark) & byteMask); ch >>= 6;POLAR_FALLTHROUGH;
+      case 3: *--target = static_cast<Utf8>((ch | byteMark) & byteMask); ch >>= 6;POLAR_FALLTHROUGH;
+      case 2: *--target = static_cast<Utf8>((ch | byteMark) & byteMask); ch >>= 6;POLAR_FALLTHROUGH;
+      case 1: *--target = static_cast<Utf8>(ch | sg_firstByteMark[bytesToWrite]);POLAR_FALLTHROUGH;
       }
       target += bytesToWrite;
    }
@@ -357,11 +358,11 @@ ConversionResult convert_utf32_to_utf8 (
          * Figure out how many bytes the result will require. Turn any
          * illegally large UTF32 things (> Plane 17) into replacement chars.
          */
-      if (ch < (Utf32)0x80) {
+      if (ch < static_cast<Utf32>(0x80)) {
          bytesToWrite = 1;
-      } else if (ch < (Utf32)0x800) {
+      } else if (ch < static_cast<Utf32>(0x800)) {
          bytesToWrite = 2;
-      } else if (ch < (Utf32)0x10000) {
+      } else if (ch < static_cast<Utf32>(0x10000)) {
          bytesToWrite = 3;
       } else if (ch <= UNI_MAX_LEGAL_UTF32) {
          bytesToWrite = 4;
@@ -378,10 +379,10 @@ ConversionResult convert_utf32_to_utf8 (
          result = ConversionResult::TargetExhausted; break;
       }
       switch (bytesToWrite) { /* note: everything falls through. */
-      case 4: *--target = (Utf8)((ch | byteMark) & byteMask); ch >>= 6;
-      case 3: *--target = (Utf8)((ch | byteMark) & byteMask); ch >>= 6;
-      case 2: *--target = (Utf8)((ch | byteMark) & byteMask); ch >>= 6;
-      case 1: *--target = (Utf8) (ch | sg_firstByteMark[bytesToWrite]);
+      case 4: *--target = static_cast<Utf8>((ch | byteMark) & byteMask); ch >>= 6;POLAR_FALLTHROUGH;
+      case 3: *--target = static_cast<Utf8>((ch | byteMark) & byteMask); ch >>= 6;POLAR_FALLTHROUGH;
+      case 2: *--target = static_cast<Utf8>((ch | byteMark) & byteMask); ch >>= 6;POLAR_FALLTHROUGH;
+      case 1: *--target = static_cast<Utf8>(ch | sg_firstByteMark[bytesToWrite]);
       }
       target += bytesToWrite;
    }
@@ -410,10 +411,9 @@ static Boolean is_legal_utf8(const Utf8 *source, int length)
    switch (length) {
    default: return false;
       /* Everything else falls through when "true"... */
-   case 4: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
-   case 3: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
+   case 4: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;POLAR_FALLTHROUGH;
+   case 3: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;POLAR_FALLTHROUGH;
    case 2: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
-
       switch (*source) {
       /* no fall-through in this inner switch */
       case 0xE0: if (a < 0xA0) return false; break;
@@ -422,7 +422,7 @@ static Boolean is_legal_utf8(const Utf8 *source, int length)
       case 0xF4: if (a > 0x8F) return false; break;
       default:   if (a < 0x80) return false;
       }
-
+   POLAR_FALLTHROUGH;
    case 1: if (*source >= 0x80 && *source < 0xC2) return false;
    }
    if (*source > 0xF4) {
@@ -437,7 +437,8 @@ static Boolean is_legal_utf8(const Utf8 *source, int length)
  * Exported function to return whether a UTF-8 sequence is legal or not.
  * This is not used here; it's just exported.
  */
-Boolean is_legal_utf8_sequence(const Utf8 *source, const Utf8 *sourceEnd) {
+Boolean is_legal_utf8_sequence(const Utf8 *source, const Utf8 *sourceEnd)
+{
    int length = sg_trailingBytesForUTF8[*source] + 1;
    if (length > sourceEnd - source) {
       return false;
@@ -545,7 +546,7 @@ find_maximal_subpart_of_illformed_utf8_sequence(const Utf8 *source,
  */
 unsigned get_num_bytes_for_utf8(Utf8 first)
 {
-   return sg_trailingBytesForUTF8[first] + 1;
+   return static_cast<unsigned>(sg_trailingBytesForUTF8[first] + 1);
 }
 
 /* --------------------------------------------------------------------- */
@@ -577,7 +578,7 @@ ConversionResult convert_utf8_to_utf16 (
    Utf16 *target = *targetStart;
    while (source < sourceEnd) {
       Utf32 ch = 0;
-      unsigned short extraBytesToRead = sg_trailingBytesForUTF8[*source];
+      unsigned short extraBytesToRead = static_cast<unsigned short>(sg_trailingBytesForUTF8[*source]);
       if (extraBytesToRead >= sourceEnd - source) {
          result = ConversionResult::SourceExhausted; break;
       }
@@ -590,11 +591,11 @@ ConversionResult convert_utf8_to_utf16 (
          * The cases all fall through. See "Note A" below.
          */
       switch (extraBytesToRead) {
-      case 5: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
-      case 4: ch += *source++; ch <<= 6; /* remember, illegal UTF-8 */
-      case 3: ch += *source++; ch <<= 6;
-      case 2: ch += *source++; ch <<= 6;
-      case 1: ch += *source++; ch <<= 6;
+      case 5: ch += *source++; ch <<= 6;POLAR_FALLTHROUGH; /* remember, illegal UTF-8 */
+      case 4: ch += *source++; ch <<= 6;POLAR_FALLTHROUGH; /* remember, illegal UTF-8 */
+      case 3: ch += *source++; ch <<= 6;POLAR_FALLTHROUGH;
+      case 2: ch += *source++; ch <<= 6;POLAR_FALLTHROUGH;
+      case 1: ch += *source++; ch <<= 6;POLAR_FALLTHROUGH;
       case 0: ch += *source++;
       }
       ch -= sg_offsetsFromUTF8[extraBytesToRead];
@@ -615,7 +616,7 @@ ConversionResult convert_utf8_to_utf16 (
                *target++ = UNI_REPLACEMENT_CHAR;
             }
          } else {
-            *target++ = (Utf16)ch; /* normal case */
+            *target++ = static_cast<Utf16>(ch); /* normal case */
          }
       } else if (ch > UNI_MAX_UTF16) {
          if (flags == ConversionFlags::StrictConversion) {
@@ -632,8 +633,8 @@ ConversionResult convert_utf8_to_utf16 (
             result = ConversionResult::TargetExhausted; break;
          }
          ch -= sg_halfBase;
-         *target++ = (Utf16)((ch >> sg_halfShift) + UNI_SUR_HIGH_START);
-         *target++ = (Utf16)((ch & sg_halfMask) + UNI_SUR_LOW_START);
+         *target++ = static_cast<Utf16>((ch >> sg_halfShift) + UNI_SUR_HIGH_START);
+         *target++ = static_cast<Utf16>((ch & sg_halfMask) + UNI_SUR_LOW_START);
       }
    }
    *sourceStart = source;
@@ -653,7 +654,7 @@ static ConversionResult convert_utf8_to_utf32_impl(
    Utf32 *target = *targetStart;
    while (source < sourceEnd) {
       Utf32 ch = 0;
-      unsigned short extraBytesToRead = sg_trailingBytesForUTF8[*source];
+      unsigned short extraBytesToRead = static_cast<unsigned short>(sg_trailingBytesForUTF8[*source]);
       if (extraBytesToRead >= sourceEnd - source) {
          if (flags == ConversionFlags::StrictConversion || InputIsPartial) {
             result = ConversionResult::SourceExhausted;
@@ -696,11 +697,11 @@ static ConversionResult convert_utf8_to_utf32_impl(
          * The cases all fall through. See "Note A" below.
          */
       switch (extraBytesToRead) {
-      case 5: ch += *source++; ch <<= 6;
-      case 4: ch += *source++; ch <<= 6;
-      case 3: ch += *source++; ch <<= 6;
-      case 2: ch += *source++; ch <<= 6;
-      case 1: ch += *source++; ch <<= 6;
+      case 5: ch += *source++; ch <<= 6;POLAR_FALLTHROUGH;
+      case 4: ch += *source++; ch <<= 6;POLAR_FALLTHROUGH;
+      case 3: ch += *source++; ch <<= 6;POLAR_FALLTHROUGH;
+      case 2: ch += *source++; ch <<= 6;POLAR_FALLTHROUGH;
+      case 1: ch += *source++; ch <<= 6;POLAR_FALLTHROUGH;
       case 0: ch += *source++;
       }
       ch -= sg_offsetsFromUTF8[extraBytesToRead];

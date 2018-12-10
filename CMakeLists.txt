@@ -270,6 +270,7 @@ mark_as_advanced(POLAR_TARGET_TRIPLE_ENV)
 
 # devel options
 option(POLAR_DEV_BUILD_DEVTOOLS_TESTS "turn on to build tests of devtools" OFF)
+option(POLAR_DEV_BUILD_LLVM_UNITTEST "turn on llvm support libraries unitests" OFF)
 
 # They are used as destination of target generators.
 set(POLAR_RUNTIME_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/bin)

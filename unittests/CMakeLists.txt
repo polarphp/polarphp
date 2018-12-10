@@ -13,5 +13,8 @@ add_custom_target(PolarBaseLibTests)
 set_target_properties(PolarBaseLibTests PROPERTIES FOLDER "PolarBaseLibTests")
 
 add_subdirectory(support)
-add_subdirectory(basic/adt)
-add_subdirectory(utils)
+
+if (POLAR_DEV_BUILD_LLVM_UNITTEST)
+   add_subdirectory(basic/adt)
+   add_subdirectory(utils)
+endif()
