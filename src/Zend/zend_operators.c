@@ -12,9 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -3234,7 +3234,7 @@ ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d)
 	if (dmod < 0) {
 		/* we're going to make this number positive; call ceil()
 		 * to simulate rounding towards 0 of the negative number */
-		dmod = ceil(dmod);// + two_pow_32;
+		dmod = ceil(dmod) + two_pow_32;
 	}
 	return (zend_long)(zend_ulong)dmod;
 }

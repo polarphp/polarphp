@@ -225,12 +225,6 @@ endif()
 set(POLAR_TOOLS_INSTALL_DIR "bin" CACHE STRING "Path for binary subdirectory (defaults to 'bin')")
 mark_as_advanced(POLAR_TOOLS_INSTALL_DIR)
 
-option(POLAR_ENABLE_FFI "Use libffi to call external functions from the interpreter" OFF)
-set(FFI_LIBRARY_DIR "" CACHE PATH "Additional directory, where CMake should search for libffi.so")
-set(FFI_INCLUDE_DIR "" CACHE PATH "Additional directory, where CMake should search for ffi.h or ffi/ffi.h")
-
-option(POLAR_ENABLE_TERMINFO "Use terminfo database if available." ON)
-
 option(POLAR_ENABLE_PIC "Build Position-Independent Code" ON)
 option(POLAR_ENABLE_WARNINGS "Enable compiler warnings." ON)
 
@@ -273,6 +267,9 @@ option(POLAR_ENABLE_ZLIB "Use zlib for compression/decompression if available." 
 # Override the default target with an environment variable named by POLAR_TARGET_TRIPLE_ENV.
 set(POLAR_TARGET_TRIPLE_ENV CACHE STRING "The name of environment variable to override default target. Disabled by blank.")
 mark_as_advanced(POLAR_TARGET_TRIPLE_ENV)
+
+# devel options
+option(POLAR_DEV_BUILD_DEVTOOLS_TESTS "turn on to build tests of devtools" OFF)
 
 # They are used as destination of target generators.
 set(POLAR_RUNTIME_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/bin)

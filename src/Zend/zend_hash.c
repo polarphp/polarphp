@@ -12,9 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -1114,9 +1114,11 @@ ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 							if (UNEXPECTED(ht->nInternalPointer == i)) {
 								ht->nInternalPointer = j;
 							}
-							if (UNEXPECTED(i == iter_pos)) {
-								zend_hash_iterators_update(ht, i, j);
-								iter_pos = zend_hash_iterators_lower_pos(ht, iter_pos + 1);
+							if (UNEXPECTED(i >= iter_pos)) {
+								do {
+									zend_hash_iterators_update(ht, iter_pos, j);
+									iter_pos = zend_hash_iterators_lower_pos(ht, iter_pos + 1);
+								} while (iter_pos < i);
 							}
 							q++;
 							j++;

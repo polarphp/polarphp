@@ -13,7 +13,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Jani Taskinen <jani@php.net>                                |
    +----------------------------------------------------------------------+
 */
@@ -128,7 +128,7 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 		}
 	}
 	op1_len = (int)Z_STRLEN_P(op1);
-	
+
 	if (Z_TYPE_P(op2) != IS_STRING) {
 		convert_to_string(op2);
 	}

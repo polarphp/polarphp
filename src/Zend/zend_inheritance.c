@@ -12,8 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 
@@ -1178,10 +1178,11 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 	zend_function *new_fn;
 
 	if ((existing_fn = zend_hash_find_ptr(&ce->function_table, key)) != NULL) {
-		/* if it is the same function with the same visibility regardless of where it is coming from */
-		/* there is no conflict and we do not need to add it again */
+		/* if it is the same function with the same visibility and has not been assigned a class scope yet, regardless
+		 * of where it is coming from there is no conflict and we do not need to add it again */
 		if (existing_fn->op_array.opcodes == fn->op_array.opcodes &&
-			(existing_fn->common.fn_flags & ZEND_ACC_PPP_MASK) == (fn->common.fn_flags & ZEND_ACC_PPP_MASK)) {
+			(existing_fn->common.fn_flags & ZEND_ACC_PPP_MASK) == (fn->common.fn_flags & ZEND_ACC_PPP_MASK) &&
+			(existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 			return;
 		}
 
@@ -1250,9 +1251,14 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 	}
 
 	function_add_ref(fn);
-	new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
-	memcpy(new_fn, fn, sizeof(zend_op_array));
-	new_fn->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
+	if (UNEXPECTED(fn->type == ZEND_INTERNAL_FUNCTION)) {
+		new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
+		memcpy(new_fn, fn, sizeof(zend_internal_function));
+		new_fn->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
+	} else {
+		new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+		memcpy(new_fn, fn, sizeof(zend_op_array));
+	}
 	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
 	zend_add_magic_methods(ce, key, fn);
 }

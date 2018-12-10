@@ -12,9 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -1161,7 +1161,6 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	}
 	func->opcodes = &EG(call_trampoline_op);
 	func->run_time_cache = (void*)(intptr_t)-1;
-	func->reserved[0] = fbc;
 	func->scope = fbc->common.scope;
 	/* reserve space for arguments, local and temorary variables */
 	func->T = (fbc->type == ZEND_USER_FUNCTION)? MAX(fbc->op_array.last_var + fbc->op_array.T, 2) : 2;
@@ -1244,12 +1243,17 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 		 */
 
 		scope = zend_get_executed_scope();
-		if (fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
-			zend_function *priv_fbc = zend_get_parent_private(scope, fbc->common.scope, lc_method_name);
-			if (priv_fbc) {
-				fbc = priv_fbc;
+		do {
+			if (fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
+				zend_function *priv_fbc = zend_get_parent_private(scope, fbc->common.scope, lc_method_name);
+				if (priv_fbc) {
+					fbc = priv_fbc;
+					break;
+				} else if (!(fbc->op_array.fn_flags & ZEND_ACC_PROTECTED)) {
+					break;
+				}
 			}
-		} else {
+
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 * If we're not and __call() handler exists, invoke it, otherwise error out.
 			 */
@@ -1261,7 +1265,7 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 					fbc = NULL;
 				}
 			}
-		}
+		} while (0);
 	}
 
 	if (UNEXPECTED(!key)) {
@@ -1515,14 +1519,11 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		return 1; /* different classes */
 	}
 	if (!zobj1->properties && !zobj2->properties) {
-		zval *p1, *p2, *end;
+		zend_property_info *info;
 
 		if (!zobj1->ce->default_properties_count) {
 			return 0;
 		}
-		p1 = zobj1->properties_table;
-		p2 = zobj2->properties_table;
-		end = p1 + zobj1->ce->default_properties_count;
 
 		/* It's enough to protect only one of the objects.
 		 * The second one may be referenced from the first and this may cause
@@ -1533,7 +1534,15 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 			zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");
 		}
 		Z_PROTECT_RECURSION_P(o1);
-		do {
+
+		ZEND_HASH_FOREACH_PTR(&zobj1->ce->properties_info, info) {
+			zval *p1 = OBJ_PROP(zobj1, info->offset);
+			zval *p2 = OBJ_PROP(zobj2, info->offset);
+
+			if (info->flags & ZEND_ACC_STATIC) {
+				continue;
+			}
+
 			if (Z_TYPE_P(p1) != IS_UNDEF) {
 				if (Z_TYPE_P(p2) != IS_UNDEF) {
 					zval result;
@@ -1556,9 +1565,8 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 					return 1;
 				}
 			}
-			p1++;
-			p2++;
-		} while (p1 != end);
+		} ZEND_HASH_FOREACH_END();
+
 		Z_UNPROTECT_RECURSION_P(o1);
 		return 0;
 	} else {

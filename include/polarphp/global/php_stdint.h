@@ -62,7 +62,7 @@
 # define HAVE_UINT64_T 1
 #else
 
-#include "../global/php_config.h"
+#include "php_config.h"
 
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>

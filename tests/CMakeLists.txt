@@ -9,15 +9,17 @@
 #
 # Created by polarboy on 2018/11/19.
 
-polar_setup_lit_cfg_setters(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-   OUTPUT_NAME tests
-   SKIP_DIRS "Inputs")
+if (POLAR_DEV_BUILD_DEVTOOLS_TESTS)
+   polar_setup_lit_cfg_setters(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/devtools
+      OUTPUT_NAME devtools_tests
+      SKIP_DIRS "Inputs")
 
-set(DEFS "")
+   set(DEFS "")
 
-list(APPEND DEFS "LIT_TEST_BIN=\"${POLAR_RUNTIME_OUTPUT_INTDIR}${DIR_SEPARATOR}lit\"")
-list(APPEND DEFS "POLAR_RUNTIME_OUTPUT_INTDIR=\"${POLAR_RUNTIME_OUTPUT_INTDIR}\"")
+   list(APPEND DEFS "LIT_TEST_BIN=\"${POLAR_RUNTIME_OUTPUT_INTDIR}${DIR_SEPARATOR}lit\"")
+   list(APPEND DEFS "POLAR_RUNTIME_OUTPUT_INTDIR=\"${POLAR_RUNTIME_OUTPUT_INTDIR}\"")
 
-set_target_properties(tests
-   PROPERTIES
-   COMPILE_DEFINITIONS "${DEFS}")
+   set_target_properties(devtools_tests
+      PROPERTIES
+      COMPILE_DEFINITIONS "${DEFS}")
+endif()

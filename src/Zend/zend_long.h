@@ -19,7 +19,7 @@
 #ifndef ZEND_LONG_H
 #define ZEND_LONG_H
 
-#include "global/php_stdint.h"
+#include "polarphp/global/php_stdint.h"
 
 /* This is the heart of the whole int64 enablement in zval. */
 #if defined(__x86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)
@@ -69,10 +69,10 @@ typedef int32_t zend_off_t;
 #  define ZEND_ABS _abs64
 # else
 #  define ZEND_LTOA(i, s, len) \
-	do { \
-		int st = snprintf((s), (len), ZEND_LONG_FMT, (i)); \
-		(s)[st] = '\0'; \
- 	} while (0)
+   do { \
+      int st = snprintf((s), (len), ZEND_LONG_FMT, (i)); \
+      (s)[st] = '\0'; \
+   } while (0)
 #  define ZEND_ATOL(i, s) (i) = atoll((s))
 #  define ZEND_STRTOL(s0, s1, base) strtoll((s0), (s1), (base))
 #  define ZEND_STRTOUL(s0, s1, base) strtoull((s0), (s1), (base))
@@ -93,10 +93,10 @@ typedef int32_t zend_off_t;
 #  define ZEND_ATOL(i, s) i = atol((s))
 # else
 #  define ZEND_LTOA(i, s, len) \
-	do { \
-		int st = snprintf((s), (len), ZEND_LONG_FMT, (i)); \
-		(s)[st] = '\0'; \
- 	} while (0)
+   do { \
+      int st = snprintf((s), (len), ZEND_LONG_FMT, (i)); \
+      (s)[st] = '\0'; \
+   } while (0)
 #  define ZEND_ATOL(i, s) (i) = atol((s))
 # endif
 # define ZEND_STRTOL_PTR strtol

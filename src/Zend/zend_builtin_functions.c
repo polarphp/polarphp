@@ -12,8 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 
@@ -794,7 +794,7 @@ static int validate_constant_array(HashTable *ht) /* {{{ */
 					}
 				}
 			} else if (Z_TYPE_P(val) != IS_STRING && Z_TYPE_P(val) != IS_RESOURCE) {
-				zend_error(E_WARNING, "Constants may only evaluate to scalar values or arrays");
+				zend_error(E_WARNING, "Constants may only evaluate to scalar values, arrays or resources");
 				ret = 0;
 				break;
 			}
@@ -895,7 +895,7 @@ repeat:
 			}
 			/* no break */
 		default:
-			zend_error(E_WARNING, "Constants may only evaluate to scalar values or arrays");
+			zend_error(E_WARNING, "Constants may only evaluate to scalar values, arrays or resources");
 			zval_ptr_dtor(&val_free);
 			RETURN_FALSE;
 	}
@@ -1347,13 +1347,10 @@ ZEND_FUNCTION(method_exists)
 	if (zend_hash_exists(&ce->function_table, lcname)) {
 		zend_string_release_ex(lcname, 0);
 		RETURN_TRUE;
-	} else {
-		union _zend_function *func = NULL;
-
-		if (Z_TYPE_P(klass) == IS_OBJECT
-		&& Z_OBJ_HT_P(klass)->get_method != NULL
-		&& (func = Z_OBJ_HT_P(klass)->get_method(&Z_OBJ_P(klass), method_name, NULL)) != NULL
-		) {
+	} else if (Z_TYPE_P(klass) == IS_OBJECT && Z_OBJ_HT_P(klass)->get_method != NULL) {
+		zend_object *obj = Z_OBJ_P(klass);
+		zend_function *func = Z_OBJ_HT_P(klass)->get_method(&obj, method_name, NULL);
+		if (func != NULL) {
 			if (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				/* Returns true to the fake Closure's __invoke */
 				RETVAL_BOOL(func->common.scope == zend_ce_closure

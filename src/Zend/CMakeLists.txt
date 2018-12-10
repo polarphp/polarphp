@@ -90,7 +90,19 @@ bison_target(ZendLangParser zend_language_parser.y ${CMAKE_CURRENT_BINARY_DIR}/z
 
 polar_merge_list(zendVM_SRCS POLAR_ZENDVM_ZEND_HEADERS)
 
+# turn off warning, zendVM team ensure the code correctness
+if (POLAR_ENABLE_WARNINGS AND (POLAR_COMPILER_IS_GCC_COMPATIBLE OR CLANG_CL))
+   string(REPLACE "-Wall" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
+   string(REPLACE "-pedantic" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
+   polar_append_flag("-Wno-implicit-fallthrough" CMAKE_C_FLAGS)
+   polar_append_flag("-Wno-discarded-qualifiers" CMAKE_C_FLAGS)
+   polar_append_flag("-Wno-cast-function-type" CMAKE_C_FLAGS)
+   polar_append_flag("-Wno-sign-compare" CMAKE_C_FLAGS)
+   polar_append_flag("-Wno-format" CMAKE_C_FLAGS)
+endif (POLAR_ENABLE_WARNINGS AND (POLAR_COMPILER_IS_GCC_COMPATIBLE OR CLANG_CL))
+
 polar_add_library(zendVM SHARED ${zendVM_SRCS})
+
 target_link_libraries(zendVM PRIVATE tsrm)
 set_target_properties(zendVM
    PROPERTIES

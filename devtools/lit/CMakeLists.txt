@@ -70,6 +70,10 @@ polar_add_executable(lit main.cpp)
 
 target_link_libraries(lit PRIVATE litkernel CLI11::CLI11)
 
-add_subdirectory(unittests)
+if (POLAR_DEV_BUILD_DEVTOOLS_TESTS)
+   add_subdirectory(tests)
+   add_subdirectory(unittests)
+endif()
+
 add_subdirectory(builtincommands)
-add_subdirectory(tests)
+

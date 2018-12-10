@@ -16,8 +16,8 @@
    |          Nuno Lopes <nlopess@php.net>                                |
    |          Scott MacVicar <scottmac@php.net>                           |
    | Flex version authors:                                                |
-   |          Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 
@@ -2347,6 +2347,7 @@ skip_escape_conversion:
 
 		zend_ptr_stack_reverse_apply(&current_state.heredoc_label_stack, copy_heredoc_label_stack);
 
+		zend_exception_save();
 		while (heredoc_nesting_level) {
 			zval zv;
 			int retval;
@@ -2375,6 +2376,7 @@ skip_escape_conversion:
 					heredoc_nesting_level = 0;
 			}
 		}
+		zend_exception_restore();
 
 		if (
 		    (first_token == T_VARIABLE

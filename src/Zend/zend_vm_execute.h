@@ -12,9 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -1942,7 +1942,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 	call = execute_data;
 	execute_data = EG(current_execute_data) = EX(prev_execute_data);
 
-	call->func = fbc->op_array.reserved[0];
+	call->func = (fbc->op_array.fn_flags & ZEND_ACC_STATIC) ? fbc->op_array.scope->__callstatic : fbc->op_array.scope->__call;
 	ZEND_ASSERT(zend_vm_calc_used_stack(2, call->func) <= (size_t)(((char*)EG(vm_stack_end)) - (char*)call));
 	ZEND_CALL_NUM_ARGS(call) = 2;
 
@@ -65142,14 +65142,13 @@ static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend
 ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler(zend_op* op)
 {
 	zend_uchar opcode = zend_user_opcodes[op->opcode];
-	uint32_t spec = zend_spec_handlers[opcode];
 
-	if (spec & SPEC_RULE_COMMUTATIVE) {
+	if (zend_spec_handlers[op->opcode] & SPEC_RULE_COMMUTATIVE) {
 		if (op->op1_type < op->op2_type) {
 			zend_swap_operands(op);
 		}
 	}
-	op->handler = zend_vm_get_opcode_handler_ex(spec, op);
+	op->handler = zend_vm_get_opcode_handler_ex(zend_spec_handlers[opcode], op);
 }
 
 ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint32_t op2_info, uint32_t res_info)
@@ -65370,6 +65369,13 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 		case ZEND_IS_NOT_IDENTICAL:
 			if (op->op1_type < op->op2_type) {
 				zend_swap_operands(op);
+			}
+			break;
+		case ZEND_USER_OPCODE:
+			if (zend_spec_handlers[op->opcode] & SPEC_RULE_COMMUTATIVE) {
+				if (op->op1_type < op->op2_type) {
+					zend_swap_operands(op);
+				}
 			}
 			break;
 		default:
