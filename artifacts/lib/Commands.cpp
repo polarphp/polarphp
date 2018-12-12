@@ -4,13 +4,18 @@
 // Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See http://polarphp.org/LICENSE.txt for license information
-// See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+// See https://polarphp.org/LICENSE.txt for license information
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/12/12.
 
 #include "Commands.h"
+#include "polarphp/global/CompilerFeature.h"
 #include "lib/PolarVersion.h"
+
+POLAR_BEGIN_DISABLE_ZENDVM_WARNING()
+#include "polarphp/vm/zend/zend.h"
+POLAR_END_DISABLE_ZENDVM_WARNING()
 
 #include <iostream>
 
@@ -18,7 +23,9 @@ namespace polar {
 
 void print_polar_version()
 {
-   std::cout << "v0.0.1" << std::endl;
+   std::cout << POLARPHP_PACKAGE_STRING << " (built: "<< BUILD_TIME <<  ") "<< std::endl
+             << "Copyright (c) 2016-2018 The polarphp Foundation" << std::endl
+             << get_zend_version() << std::endl;
 }
 
 } // polar

@@ -4,8 +4,8 @@
 // Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See http://polarphp.org/LICENSE.txt for license information
-// See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+// See https://polarphp.org/LICENSE.txt for license information
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/10/08.
 //
@@ -13,6 +13,16 @@
 
 #ifndef POLAR_DEVLTOOLS_UTILS_UTILS_CONFIG_H
 #define POLAR_DEVLTOOLS_UTILS_UTILS_CONFIG_H
+
+#define POLAR_PACKAGE_NAME      "@POLAR_PACKAGE_NAME@"
+#define POLAR_VERSION_MAJOR      @POLAR_VERSION_MAJOR@
+#define POLAR_VERSION_MINOR      @POLAR_VERSION_MINOR@
+#define POLAR_VERSION_PATCH      @POLAR_VERSION_PATCH@
+#define POLAR_VERSION_SUFFIX    "@POLAR_VERSION_SUFFIX@"
+#define POLAR_VERSION           "@POLAR_VERSION@"
+#define POLAR_PACKAGE_STRING    "@POLAR_PACKAGE_STRING@"
+#define POLAR_VERSION_ID         @POLAR_VERSION_ID@
+#define POLAR_PACKAGE_BUGREPORT "@POLAR_PACKAGE_BUGREPORT@"
 
 /* Host triple polarVM will be executed on */
 #cmakedefine POLAR_HOST_TRIPLE "@POLAR_HOST_TRIPLE@"
@@ -25,20 +35,8 @@
 /* Define if this is Win32ish platform */
 #cmakedefine POLAR_ON_WIN32 @POLAR_ON_WIN32@
 
-#define POLAR_PACKAGE_NAME "@POLAR_PACKAGE_NAME@"
-
-/* Major version of the polarphp API */
-#define POLAR_VERSION_MAJOR @POLAR_VERSION_MAJOR@
-
-/* Minor version of the polarphp API */
-#define POLAR_VERSION_MINOR @POLAR_VERSION_MINOR@
-
-/* polarphp version string */
-#define POLAR_VERSION_STRING "@POLAR_PACKAGE_VERSION@"
-
-/* Target triple polarphp will generate code for by default */
-/* Doesn't use `cmakedefine` because it is allowed to be empty. */
-#define POLAR_DEFAULT_TARGET_TRIPLE "@POLAR_DEFAULT_TARGET_TRIPLE@"
+#cmakedefine POLAR_COMPILER_NAME "@POLAR_COMPILER_NAME@"
+#cmakedefine POLAR_COMPILER_VERSION "@POLAR_COMPILER_VERSION@"
 
 /* Define if zlib compression is available */
 #cmakedefine POLAR_ENABLE_ZLIB

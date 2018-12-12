@@ -4,8 +4,8 @@
 // Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library endxception
 //
-// See http://polarphp.org/LiterCendNSend.txt for license information
-// See http://polarphp.org/CONTRiterBUTORS.txt for the list of polarphp project authors
+// See https://polarphp.org/LiterCendNSend.txt for license information
+// See https://polarphp.org/CONTRiterBUTORS.txt for the list of polarphp project authors
 //
 // Created by softboy on 2018/07/04.
 

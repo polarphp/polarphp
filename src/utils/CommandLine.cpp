@@ -4,8 +4,8 @@
 // Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See http://polarphp.org/LICENSE.txt for license information
-// See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+// See https://polarphp.org/LICENSE.txt for license information
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by softboy on 2018/06/12.
 
@@ -2307,9 +2307,9 @@ public:
 #ifdef POLAR_PACKAGE_VENDOR
       outstream << PACKAGE_VENDOR << " ";
 #else
-      outstream << "polarphp (http://polarphp.org/):\n  ";
+      outstream << "polarphp (https://polarphp.org/):\n  ";
 #endif
-      outstream << POLAR_PACKAGE_NAME << " version " << POLAR_VERSION_STRING;
+      outstream << POLAR_PACKAGE_NAME << " version " << POLAR_VERSION;
 #ifdef POLAR_VERSION_STRING
       outstream << " " << POLAR_VERSION_STRING;
 #endif

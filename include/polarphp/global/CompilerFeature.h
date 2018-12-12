@@ -4,15 +4,15 @@
 // Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See http://polarphp.org/LICENSE.txt for license information
-// See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+// See https://polarphp.org/LICENSE.txt for license information
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/10/09.
 
 #ifndef POLARPHP_GLOBAL_COMPILER_FEATURE_H
 #define POLARPHP_GLOBAL_COMPILER_FEATURE_H
 
-#include "polarphp/global/Config.h"
+#include "polarphp/global/CompilerDetection.h"
 #include <new>
 #include <stddef.h>
 
@@ -506,5 +506,12 @@ inline void deallocate_buffer(void *ptr, size_t size, size_t alignment) {
 }
 
 } // polar
+
+#ifdef POLAR_CC_GNU
+#define POLAR_BEGIN_DISABLE_ZENDVM_WARNING() \
+   POLAR_WARNING_PUSH\
+   _Pragma("GCC diagnostic ignored \"-Wignored-qualifiers\"")
+#define POLAR_END_DISABLE_ZENDVM_WARNING() POLAR_WARNING_POP
+#endif
 
 #endif // POLAR_DEVLTOOLS_UTILS_COMPILER_FEATURE_H

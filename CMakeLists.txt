@@ -4,8 +4,8 @@
 # Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
-# See http://polarphp.org/LICENSE.txt for license information
-# See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+# See https://polarphp.org/LICENSE.txt for license information
+# See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
 # Created by polarboy on 2018/08/17.
 
@@ -17,10 +17,10 @@ if(POLICY CMP0068)
 endif()
 
 if(NOT DEFINED POLAR_VERSION_MAJOR)
-   set(POLAR_VERSION_MAJOR 1)
+   set(POLAR_VERSION_MAJOR 0)
 endif()
 if(NOT DEFINED POLAR_VERSION_MINOR)
-   set(POLAR_VERSION_MINOR 1)
+   set(POLAR_VERSION_MINOR 0)
 endif()
 if(NOT DEFINED POLAR_VERSION_PATCH)
    set(POLAR_VERSION_PATCH 1)
@@ -43,7 +43,7 @@ math(EXPR POLAR_VERSION_ID ${POLAR_VERSION_MAJOR}*10000+${POLAR_VERSION_MINOR}*1
 
 set(POLAR_PACKAGE_NAME polarphp)
 set(POLAR_PACKAGE_STRING "${POLAR_PACKAGE_NAME} ${POLAR_PACKAGE_VERSION}")
-set(POLAR_PACKAGE_BUGREPORT "http://polarphp.org/bugs/")
+set(POLAR_PACKAGE_BUGREPORT "https://polarphp.org/bugs/")
 
 set(POLAR_BUG_REPORT_URL "${POLAR_PACKAGE_BUGREPORT}" CACHE STRING
    "Default URL where bug reports are to be submitted.")
@@ -353,14 +353,6 @@ polar_setup_php_version()
 message("build polarphp version: ${POLAR_PACKAGE_VERSION}")
 message("build polarphp version id: ${POLAR_VERSION_ID}")
 
-set(POLAR_PACKAGE_NAME polarphp)
-set(POLAR_PACKAGE_STRING "${POLAR_PACKAGE_NAME} ${POLAR_PACKAGE_VERSION}")
-set(POLAR_BUG_REPORT_URL "http://polarphp.org/bugs/")
-set(PACKAGE_NAME ${POLAR_PACKAGE_NAME})
-set(PACKAGE_STRING ${POLAR_PACKAGE_STRING})
-set(PACKAGE_BUGREPORT ${POLAR_BUG_REPORT_URL})
-set(PACKAGE_VERSION ${POLAR_PACKAGE_VERSION})
-
 # add /usr/local/bin to PATH Env var
 set(ENV{PATH} "/usr/local/bin:$ENV{PATH}")
 
@@ -371,6 +363,10 @@ endif()
 include(CheckCompilerVersion)
 include(DetermineGCCCompatible)
 include(DetectHostEnvironment)
+
+# set compiler info
+set(POLAR_COMPILER_NAME ${CMAKE_CXX_COMPILER_ID})
+set(POLAR_COMPILER_VERSION ${CMAKE_CXX_COMPILER_VERSION})
 
 # By default, we target the host, but this can be overridden at CMake
 # invocation time.
@@ -413,11 +409,11 @@ include_directories(${POLAR_SOURCE_DIR}
 
 include(ImportThirdparty)
 add_subdirectory(include)
-add_subdirectory(artifacts)
 add_subdirectory(src)
 add_subdirectory(stdlib)
 add_subdirectory(tools)
 add_subdirectory(thirdparty)
+add_subdirectory(artifacts)
 
 if (POLAR_INCLUDE_TESTS)
    polar_check_headers(glob)
