@@ -9,11 +9,14 @@
 //
 // Created by polarboy on 2018/12/12.
 
-#ifndef POLARPHP_ARTIFACTS_MODULE_MGR_H
-#define POLARPHP_ARTIFACTS_MODULE_MGR_H
+#ifndef POLARPHP_ARTIFACTS_LIFE_CYCLE_H
+#define POLARPHP_ARTIFACTS_LIFE_CYCLE_H
 
 namespace polar {
+class LifeCycle
+{
 
+};
 } // polar
 
-#endif // POLARPHP_ARTIFACTS_MODULE_MGR_H
+#endif // POLARPHP_ARTIFACTS_LIFE_CYCLE_H

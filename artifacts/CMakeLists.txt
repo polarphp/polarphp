@@ -7,6 +7,19 @@
 # See http://polarphp.org/LICENSE.txt for license information
 # See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 
-add_subdirectory(lib)
+polar_collect_files(
+   TYPE_BOTH
+   DIR lib
+   OUTPUT_VAR POLAR_MAIN_LIB_SOURCES)
 
-polar_add_executable(polar main.cpp)
+configure_file(
+   ${CMAKE_CURRENT_SOURCE_DIR}/lib/PolarVersion.h.cmake
+   ${CMAKE_CURRENT_BINARY_DIR}/lib/PolarVersion.h
+   @ONLY
+   NEWLINE_STYLE UNIX)
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+polar_add_executable(polar main.cpp ${POLAR_MAIN_LIB_SOURCES})
+
+target_link_libraries(polar PRIVATE ZendVM PolarUtils CLI11::CLI11)

@@ -166,9 +166,12 @@ bool Input::mapTag(StringRef tag, bool defaultValue)
    return tag.equals(foundTag);
 }
 
-void Input::beginMapping() {
-   if (m_errorCode)
+void Input::beginMapping()
+{
+   if (m_errorCode) {
       return;
+   }
+
    // m_currentNode can be null if the document is empty.
    MapHNode *mapNode = dyn_cast_or_null<MapHNode>(m_currentNode);
    if (mapNode) {
@@ -236,8 +239,9 @@ void Input::postflightKey(void *saveInfo)
 
 void Input::endMapping()
 {
-   if (m_errorCode)
+   if (m_errorCode) {
       return;
+   }
    // m_currentNode can be null if the document is empty.
    MapHNode *mapNode = dyn_cast_or_null<MapHNode>(m_currentNode);
    if (!mapNode) {
@@ -262,7 +266,7 @@ void Input::endFlowMapping()
    endMapping();
 }
 
-unsigned Input::beginSequence()
+size_t Input::beginSequence()
 {
    if (SequenceHNode *sequence = dyn_cast<SequenceHNode>(m_currentNode)) {
       return sequence->m_entries.size();
@@ -303,7 +307,7 @@ void Input::postflightElement(void *saveInfo)
    m_currentNode = reinterpret_cast<HNode *>(saveInfo);
 }
 
-unsigned Input::beginFlowSequence()
+size_t Input::beginFlowSequence()
 {
    return beginSequence();
 }
@@ -644,7 +648,7 @@ void Output::beginDocuments()
    outputUpToEndOfLine("---");
 }
 
-bool Output::preflightDocument(unsigned index)
+bool Output::preflightDocument(size_t index)
 {
    if (index > 0) {
       outputUpToEndOfLine("\n---");
@@ -661,7 +665,7 @@ void Output::endDocuments()
    output("\n...\n");
 }
 
-unsigned Output::beginSequence()
+size_t Output::beginSequence()
 {
    m_stateStack.push_back(inSeqFirstElement);
    m_needsNewLine = true;
@@ -693,7 +697,7 @@ void Output::postflightElement(void *)
    }
 }
 
-unsigned Output::beginFlowSequence()
+size_t Output::beginFlowSequence()
 {
    m_stateStack.push_back(inFlowSeqFirstElement);
    newLineCheck();
@@ -805,7 +809,7 @@ void Output::scalarString(StringRef &str, QuotingType mustQuote)
 
    unsigned i = 0;
    unsigned j = 0;
-   unsigned endMark = str.getSize();
+   size_t endMark = str.getSize();
    const char *base = str.getData();
 
    const char *const quote = mustQuote == QuotingType::Single ? "'" : "\"";
@@ -841,7 +845,7 @@ void Output::blockScalarString(StringRef &str)
    }
    output(" |");
    outputNewLine();
-   unsigned indent = m_stateStack.empty() ? 1 : m_stateStack.getSize();
+   size_t indent = m_stateStack.empty() ? 1 : m_stateStack.getSize();
    auto buffer = MemoryBuffer::getMemBuffer(str, "", false);
    for (LineIterator lines(*buffer, false); !lines.isAtEnd(); ++lines) {
       for (unsigned index = 0; index < indent; ++index) {
@@ -863,7 +867,7 @@ void Output::scalarTag(std::string &tag)
    output(" ");
 }
 
-void Output::setError(const Twine &message)
+void Output::setError(const Twine &)
 {
 }
 
@@ -918,7 +922,7 @@ void Output::newLineCheck()
    if (m_stateStack.size() == 0) {
       return;
    }
-   unsigned indent = m_stateStack.size() - 1;
+   size_t indent = m_stateStack.size() - 1;
    bool outputDash = false;
 
    if (m_stateStack.back() == inSeqFirstElement ||
@@ -1061,7 +1065,7 @@ StringRef ScalarTraits<uint8_t>::input(StringRef scalar, void *, uint8_t &value)
    if (n > 0xFF) {
       return "out of range number";
    }
-   value = n;
+   value = static_cast<uint8_t>(n);
    return StringRef();
 }
 
@@ -1081,7 +1085,7 @@ StringRef ScalarTraits<uint16_t>::input(StringRef scalar, void *,
    if (n > 0xFFFF) {
       return "out of range number";
    }
-   value = n;
+   value = static_cast<uint16_t>(n);
    return StringRef();
 }
 
@@ -1100,7 +1104,7 @@ StringRef ScalarTraits<uint32_t>::input(StringRef scalar, void *,
    if (n > 0xFFFFFFFFUL) {
       return "out of range number";
    }
-   value = n;
+   value = static_cast<uint32_t>(n);
    return StringRef();
 }
 
@@ -1137,7 +1141,7 @@ StringRef ScalarTraits<int8_t>::input(StringRef scalar, void *, int8_t &value)
    if ((node > 127) || (node < -128)) {
       return "out of range number";
    }
-   value = node;
+   value = static_cast<int8_t>(node);
    return StringRef();
 }
 
@@ -1156,7 +1160,7 @@ StringRef ScalarTraits<int16_t>::input(StringRef scalar, void *, int16_t &value)
    if ((node > INT16_MAX) || (node < INT16_MIN)) {
       return "out of range number";
    }
-   value = node;
+   value = static_cast<int16_t>(node);
    return StringRef();
 }
 
@@ -1174,7 +1178,7 @@ StringRef ScalarTraits<int32_t>::input(StringRef scalar, void *, int32_t &value)
    if ((node > INT32_MAX) || (node < INT32_MIN)) {
       return "out of range number";
    }
-   value = node;
+   value = static_cast<int32_t>(node);
    return StringRef();
 }
 
@@ -1234,7 +1238,7 @@ StringRef ScalarTraits<Hex8>::input(StringRef scalar, void *, Hex8 &value) {
    if (n > 0xFF) {
       return "out of range hex8 number";
    }
-   value = n;
+   value = static_cast<Hex8>(n);
    return StringRef();
 }
 
@@ -1253,7 +1257,7 @@ StringRef ScalarTraits<Hex16>::input(StringRef scalar, void *, Hex16 &value)
    if (n > 0xFFFF) {
       return "out of range hex16 number";
    }
-   value = n;
+   value = static_cast<Hex16>(n);
    return StringRef();
 }
 
@@ -1272,7 +1276,7 @@ StringRef ScalarTraits<Hex32>::input(StringRef scalar, void *, Hex32 &value)
    if (n > 0xFFFFFFFFUL) {
       return "out of range hex32 number";
    }
-   value = n;
+   value = static_cast<Hex32>(n);
    return StringRef();
 }
 

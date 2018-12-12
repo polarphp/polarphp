@@ -11,7 +11,7 @@
 #
 # Created by polarboy on 2018/08/20.
 
-set(zendVM_SRCS
+set(ZendVM_SRCS
    zend_alloc.c
    zend_API.c
    zend_ast.c
@@ -64,10 +64,10 @@ set(zendVM_SRCS
    )
 
 if (ZEND_BROKEN_SPRINTF)
-   list(APPEND zendVM_SRCS zend_sprintf.c)
+   list(APPEND ZendVM_SRCS zend_sprintf.c)
 endif()
 if (HAVE_DTRACE)
-   list(APPEND zendVM_SRCS zend_dtrace.c)
+   list(APPEND ZendVM_SRCS zend_dtrace.c)
 endif()
 
 re2c_target(NAME ZendIniScannerLex
@@ -88,9 +88,9 @@ bison_target(ZendLangParser zend_language_parser.y ${CMAKE_CURRENT_BINARY_DIR}/z
    COMPILE_FLAGS "-p zend -d"
    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/zend_language_parser.h)
 
-polar_merge_list(zendVM_SRCS POLAR_ZENDVM_ZEND_HEADERS)
+polar_merge_list(ZendVM_SRCS POLAR_ZendVM_ZEND_HEADERS)
 
-# turn off warning, zendVM team ensure the code correctness
+# turn off warning, ZendVM team ensure the code correctness
 if (POLAR_ENABLE_WARNINGS AND (POLAR_COMPILER_IS_GCC_COMPATIBLE OR CLANG_CL))
    string(REPLACE "-Wall" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
    string(REPLACE "-pedantic" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
@@ -103,27 +103,27 @@ endif (POLAR_ENABLE_WARNINGS AND (POLAR_COMPILER_IS_GCC_COMPATIBLE OR CLANG_CL))
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-polar_add_library(zendVM SHARED ${zendVM_SRCS})
+polar_add_library(ZendVM SHARED ${ZendVM_SRCS})
 
-get_target_property(zendVMIncludeDirs tsrm INCLUDE_DIRECTORIES)
-polar_merge_list(zendVMIncludeDirs POLAR_ZENDVM_INCLUDE_DIRS)
+get_target_property(ZendVMIncludeDirs tsrm INCLUDE_DIRECTORIES)
+polar_merge_list(ZendVMIncludeDirs POLAR_ZendVM_INCLUDE_DIRS)
 
-set_target_properties(zendVM
-   PROPERTIES INCLUDE_DIRECTORIES "${zendVMIncludeDirs}")
+set_target_properties(ZendVM
+   PROPERTIES INCLUDE_DIRECTORIES "${ZendVMIncludeDirs}")
 
-target_link_libraries(zendVM PRIVATE tsrm)
-set_target_properties(zendVM
+target_link_libraries(ZendVM PRIVATE tsrm)
+set_target_properties(ZendVM
    PROPERTIES
    COMPILE_DEFINITIONS "ZEND_ENABLE_STATIC_TSRMLS_CACHE=1")
 
 polar_collect_files(
    TYPE_HEADER
    DIR ${CMAKE_CURRENT_SOURCE_DIR}
-   OUTPUT_VAR POLAR_ZENDVM_ZEND_HEADERS)
+   OUTPUT_VAR POLAR_ZendVM_ZEND_HEADERS)
 
-list(APPEND POLAR_ZENDVM_ZEND_HEADERS
+list(APPEND POLAR_ZendVM_ZEND_HEADERS
    ${CMAKE_CURRENT_BINARY_DIR}/zend_ini_parser.h
    ${CMAKE_CURRENT_BINARY_DIR}/zend_language_parser.h)
 
-install(FILES ${POLAR_ZENDVM_ZEND_HEADERS} DESTINATION ${POLAR_HEADER_INSTALL_DIR}/vm/Zend
+install(FILES ${POLAR_ZendVM_ZEND_HEADERS} DESTINATION ${POLAR_HEADER_INSTALL_DIR}/vm/Zend
    COMPONENT ZendVMHeaders)

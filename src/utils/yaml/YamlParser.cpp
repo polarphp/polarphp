@@ -141,7 +141,8 @@ void AliasNode::getAnchor()
 {}
 
 /// Token - A single YAML token.
-struct Token {
+struct Token
+{
    enum TokenKind
    {
       token_Error, // Uninitialized token.
@@ -194,11 +195,11 @@ namespace {
 /// others) before the SimpleKey's m_token.
 struct SimpleKey
 {
-   TokenQueueT::Iterator m_token;
+   bool m_isRequired;
    unsigned m_column;
    unsigned m_line;
    unsigned m_flowLevel;
-   bool m_isRequired;
+   TokenQueueT::Iterator m_token;
 
    bool operator ==(const SimpleKey &other)
    {
@@ -287,7 +288,7 @@ public:
       m_sourceMgr.printMessage(location, kind, message, ranges, /* FixIts= */ std::nullopt, m_showColors);
    }
 
-   void setError(const Twine &message, StringRef::iterator position)
+   void setError(const Twine &message, StringRef::iterator)
    {
       if (m_current >= m_end) {
          m_current = m_end - 1;

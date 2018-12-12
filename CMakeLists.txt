@@ -16,7 +16,40 @@ if(POLICY CMP0068)
    set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
 endif()
 
-project(polarphp C CXX)
+if(NOT DEFINED POLAR_VERSION_MAJOR)
+   set(POLAR_VERSION_MAJOR 1)
+endif()
+if(NOT DEFINED POLAR_VERSION_MINOR)
+   set(POLAR_VERSION_MINOR 1)
+endif()
+if(NOT DEFINED POLAR_VERSION_PATCH)
+   set(POLAR_VERSION_PATCH 1)
+endif()
+if(NOT DEFINED POLAR_VERSION_SUFFIX)
+   set(POLAR_VERSION_SUFFIX git)
+endif()
+
+if (NOT POLAR_PACKAGE_VERSION)
+   set(POLAR_PACKAGE_VERSION
+      "${POLAR_VERSION_MAJOR}.${POLAR_VERSION_MINOR}.${POLAR_VERSION_PATCH}-${POLAR_VERSION_SUFFIX}")
+endif()
+
+if (NOT POLAR_VERSION)
+   set(POLAR_VERSION
+      "${POLAR_VERSION_MAJOR}.${POLAR_VERSION_MINOR}.${POLAR_VERSION_PATCH}")
+endif()
+
+math(EXPR POLAR_VERSION_ID ${POLAR_VERSION_MAJOR}*10000+${POLAR_VERSION_MINOR}*100+${POLAR_VERSION_PATCH})
+
+set(POLAR_PACKAGE_NAME polarphp)
+set(POLAR_PACKAGE_STRING "${POLAR_PACKAGE_NAME} ${POLAR_PACKAGE_VERSION}")
+set(POLAR_PACKAGE_BUGREPORT "http://polarphp.org/bugs/")
+
+set(POLAR_BUG_REPORT_URL "${POLAR_PACKAGE_BUGREPORT}" CACHE STRING
+   "Default URL where bug reports are to be submitted.")
+
+project(${POLAR_PACKAGE_NAME} LANGUAGES C CXX
+   VERSION ${POLAR_VERSION_MAJOR}.${POLAR_VERSION_MINOR}.${POLAR_VERSION_PATCH})
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
    message(STATUS "No build type selected, default to Debug")
@@ -342,7 +375,7 @@ include(DetectHostEnvironment)
 # By default, we target the host, but this can be overridden at CMake
 # invocation time.
 set(POLAR_DEFAULT_TARGET_TRIPLE "${POLAR_HOST_TRIPLE}" CACHE STRING
-  "Default target for which LLVM will generate code." )
+   "Default target for which LLVM will generate code." )
 set(TARGET_TRIPLE "${POLAR_DEFAULT_TARGET_TRIPLE}")
 message(STATUS "polarphp host triple: ${POLAR_HOST_TRIPLE}")
 message(STATUS "polarphp default target triple: ${POLAR_DEFAULT_TARGET_TRIPLE}")

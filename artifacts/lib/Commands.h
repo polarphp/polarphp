@@ -9,11 +9,13 @@
 //
 // Created by polarboy on 2018/12/12.
 
-#ifndef POLARPHP_ARTIFACTS_MODULE_MGR_H
-#define POLARPHP_ARTIFACTS_MODULE_MGR_H
+#ifndef POLARPHP_ARTIFACTS_COMMANDS_H
+#define POLARPHP_ARTIFACTS_COMMANDS_H
 
 namespace polar {
 
+void print_polar_version();
+
 } // polar
 
-#endif // POLARPHP_ARTIFACTS_MODULE_MGR_H
+#endif // POLARPHP_ARTIFACTS_COMMANDS_H

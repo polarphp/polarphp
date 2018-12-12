@@ -9,11 +9,16 @@
 //
 // Created by polarboy on 2018/12/12.
 
-#ifndef POLARPHP_ARTIFACTS_MODULE_MGR_H
-#define POLARPHP_ARTIFACTS_MODULE_MGR_H
+#include "Commands.h"
+#include "lib/PolarVersion.h"
+
+#include <iostream>
 
 namespace polar {
 
-} // polar
+void print_polar_version()
+{
+   std::cout << "v0.0.1" << std::endl;
+}
 
-#endif // POLARPHP_ARTIFACTS_MODULE_MGR_H
+} // polar

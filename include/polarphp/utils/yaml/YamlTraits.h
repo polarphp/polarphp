@@ -808,13 +808,13 @@ public:
 
    virtual bool outputting() = 0;
 
-   virtual unsigned beginSequence() = 0;
+   virtual size_t beginSequence() = 0;
    virtual bool preflightElement(unsigned, void *&) = 0;
    virtual void postflightElement(void*) = 0;
    virtual void endSequence() = 0;
    virtual bool canElideEmptySequence() = 0;
 
-   virtual unsigned beginFlowSequence() = 0;
+   virtual size_t beginFlowSequence() = 0;
    virtual bool preflightFlowElement(unsigned, void *&) = 0;
    virtual void postflightFlowElement(void*) = 0;
    virtual void endFlowSequence() = 0;
@@ -1040,7 +1040,7 @@ void do_mapping(IO &io, T &value, Context &context)
    MappingContextTraits<T, Context>::mapping(io, value, context);
 }
 
-template <typename T> void do_mapping(IO &io, T &value, EmptyContext &context)
+template <typename T> void do_mapping(IO &io, T &value, EmptyContext &)
 {
    MappingTraits<T>::mapping(io, value);
 }
@@ -1049,7 +1049,7 @@ template <typename T> void do_mapping(IO &io, T &value, EmptyContext &context)
 
 template <typename T>
 typename std::enable_if<HasScalarEnumerationTraits<T>::value, void>::type
-yamlize(IO &io, T &value, bool, EmptyContext &context)
+yamlize(IO &io, T &value, bool, EmptyContext &)
 {
    io.beginEnumScalar();
    ScalarEnumerationTraits<T>::enumeration(io, value);
@@ -1058,7 +1058,8 @@ yamlize(IO &io, T &value, bool, EmptyContext &context)
 
 template <typename T>
 typename std::enable_if<HasScalarBitSetTraits<T>::value, void>::type
-yamlize(IO &io, T &value, bool, EmptyContext &context) {
+yamlize(IO &io, T &value, bool, EmptyContext &)
+{
    bool doClear;
    if (io.beginBitSetScalar(doClear)) {
       if (doClear) {
@@ -1071,9 +1072,9 @@ yamlize(IO &io, T &value, bool, EmptyContext &context) {
 
 template <typename T>
 typename std::enable_if<HasScalarTraits<T>::value, void>::type
-yamlize(IO &io, T &value, bool, EmptyContext &context)
+yamlize(IO &io, T &value, bool, EmptyContext &)
 {
-   if ( io.outputting() ) {
+   if (io.outputting()) {
       std::string storage;
       RawStringOutStream buffer(storage);
       ScalarTraits<T>::output(value, io.getContext(), buffer);
@@ -1091,7 +1092,7 @@ yamlize(IO &io, T &value, bool, EmptyContext &context)
 
 template <typename T>
 typename std::enable_if<HasBlockScalarTraits<T>::value, void>::type
-yamlize(IO &yamlIo, T &value, bool, EmptyContext &context)
+yamlize(IO &yamlIo, T &value, bool, EmptyContext &)
 {
    if (yamlIo.outputting()) {
       std::string storage;
@@ -1113,7 +1114,7 @@ yamlize(IO &yamlIo, T &value, bool, EmptyContext &context)
 
 template <typename T>
 typename std::enable_if<HasTaggedScalarTraits<T>::value, void>::type
-yamlize(IO &io, T &value, bool, EmptyContext &ctx)
+yamlize(IO &io, T &value, bool, EmptyContext &)
 {
    if (io.outputting()) {
       std::string scalarStorage, tagStorage;
@@ -1184,7 +1185,7 @@ yamlize(IO &io, T &value, bool, Context &context)
 
 template <typename T>
 typename std::enable_if<HasCustomMappingTraits<T>::value, void>::type
-yamlize(IO &io, T &value, bool, EmptyContext &context) {
+yamlize(IO &io, T &value, bool, EmptyContext &) {
    if ( io.outputting() ) {
       io.beginMapping();
       CustomMappingTraits<T>::output(io, value);
@@ -1215,7 +1216,7 @@ yamlize(IO &io, T &value, bool, EmptyContext &ctx)
 
 template <typename T>
 typename std::enable_if<missingTraits<T, EmptyContext>::value, void>::type
-yamlize(IO &io, T &value, bool, EmptyContext &context)
+yamlize(IO &, T &, bool, EmptyContext &)
 {
    char missing_yaml_trait_for_type[sizeof(MissingTrait<T>)];
 }
@@ -1225,8 +1226,8 @@ typename std::enable_if<HasSequenceTraits<T>::value, void>::type
 yamlize(IO &io, T &seq, bool, Context &context)
 {
    if (HasFlowTraits<SequenceTraits<T>>::value) {
-      unsigned incnt = io.beginFlowSequence();
-      unsigned count = io.outputting() ? SequenceTraits<T>::size(io, seq) : incnt;
+      size_t incnt = io.beginFlowSequence();
+      size_t count = io.outputting() ? SequenceTraits<T>::size(io, seq) : incnt;
       for(unsigned i = 0; i < count; ++i) {
          void *saveInfo;
          if (io.preflightFlowElement(i, saveInfo)) {
@@ -1237,8 +1238,8 @@ yamlize(IO &io, T &seq, bool, Context &context)
       io.endFlowSequence();
    }
    else {
-      unsigned incnt = io.beginSequence();
-      unsigned count = io.outputting() ? SequenceTraits<T>::size(io, seq) : incnt;
+      size_t incnt = io.beginSequence();
+      size_t count = io.outputting() ? SequenceTraits<T>::size(io, seq) : incnt;
       for(unsigned i=0; i < count; ++i) {
          void *saveInfo;
          if (io.preflightElement(i, saveInfo)) {
@@ -1284,7 +1285,8 @@ struct ScalarTraits<std::string>
 };
 
 template<>
-struct ScalarTraits<uint8_t> {
+struct ScalarTraits<uint8_t>
+{
    static void output(const uint8_t &, void *, RawOutStream &);
    static StringRef input(StringRef, void *, uint8_t &);
    static QuotingType mustQuote(StringRef)
@@ -1541,11 +1543,11 @@ private:
    std::vector<StringRef> getKeys() override;
    void beginFlowMapping() override;
    void endFlowMapping() override;
-   unsigned beginSequence() override;
+   size_t beginSequence() override;
    void endSequence() override;
    bool preflightElement(unsigned index, void *&) override;
    void postflightElement(void *) override;
-   unsigned beginFlowSequence() override;
+   size_t beginFlowSequence() override;
    bool preflightFlowElement(unsigned , void *&) override;
    void postflightFlowElement(void *) override;
    void endFlowSequence() override;
@@ -1723,11 +1725,11 @@ public:
    std::vector<StringRef> getKeys() override;
    void beginFlowMapping() override;
    void endFlowMapping() override;
-   unsigned beginSequence() override;
+   size_t beginSequence() override;
    void endSequence() override;
    bool preflightElement(unsigned, void *&) override;
    void postflightElement(void *) override;
-   unsigned beginFlowSequence() override;
+   size_t beginFlowSequence() override;
    bool preflightFlowElement(unsigned, void *&) override;
    void postflightFlowElement(void *) override;
    void endFlowSequence() override;
@@ -1748,7 +1750,7 @@ public:
    // These are only used by operator<<. They could be private
    // if that templated operator could be made a friend.
    void beginDocuments();
-   bool preflightDocument(unsigned);
+   bool preflightDocument(size_t);
    void postflightDocument();
    void endDocuments();
 
