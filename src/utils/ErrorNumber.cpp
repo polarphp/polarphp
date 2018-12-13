@@ -14,7 +14,7 @@
 #include <sstream>
 #include <string.h>
 
-#ifdef HAVE_ERRNO_H
+#ifdef POLAR_HAVE_ERRNO_H
 #include <errno.h>
 #endif
 
@@ -26,12 +26,12 @@
 namespace polar {
 namespace utils {
 
-#ifdef HAVE_ERRNO_H
+#ifdef POLAR_HAVE_ERRNO_H
 std::string get_str_error()
 {
    return get_str_error(errno);
 }
-#endif  // HAVE_ERRNO_H
+#endif  // POLAR_HAVE_ERRNO_H
 
 std::string get_str_error(int errnum)
 {
@@ -58,7 +58,7 @@ std::string get_str_error(int errnum)
 #elif HAVE_DECL_STRERROR_S // "Windows Secure API"
    strerror_s(buffer, maxErrStrLen - 1, errnum);
    str = buffer;
-#elif defined(HAVE_STRERROR)
+#elif defined(POLAR_HAVE_STRERROR)
    // Copy the thread un-safe result of strerror into
    // the buffer as fast as possible to minimize impact
    // of collision of strerror in multiple threads.

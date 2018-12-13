@@ -44,24 +44,24 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#ifdef HAVE_UNISTD_H
+#ifdef POLAR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-#ifdef HAVE_SYS_PARAM_H
+#ifdef POLAR_HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 
-#ifdef HAVE_SYS_TIME_H
+#ifdef POLAR_HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
 #include <time.h>
 
-#ifdef HAVE_DLFCN_H
+#ifdef POLAR_HAVE_DLFCN_H
 # include <dlfcn.h>
 #endif
 
-#ifdef HAVE_FCNTL_H
+#ifdef POLAR_HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
 

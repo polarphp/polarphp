@@ -193,9 +193,9 @@ macro(polar_check_libzend_basic_requires)
    polar_check_funcs(memcpy strdup getpid kill strtod strtol finite fpclass sigsetjmp)
    polar_check_broken_sprintf()
 
-   check_symbol_exists(isfinite math.h HAVE_DECL_ISFINITE)
-   check_symbol_exists(isnan math.h HAVE_DECL_ISNAN)
-   check_symbol_exists(isinf math.h HAVE_DECL_ISINF)
+   polar_check_symbol_exists(isfinite math.h HAVE_DECL_ISFINITE)
+   polar_check_symbol_exists(isnan math.h HAVE_DECL_ISNAN)
+   polar_check_symbol_exists(isinf math.h HAVE_DECL_ISINF)
 
    polar_check_zend_fp_except()
    polar_check_zend_float_precision()

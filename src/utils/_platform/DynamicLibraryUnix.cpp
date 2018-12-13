@@ -21,7 +21,7 @@
 namespace polar {
 namespace sys {
 
-#if defined(HAVE_DLFCN_H) && defined(HAVE_DLOPEN)
+#if defined(POLAR_HAVE_DLFCN_H) && defined(POLAR_HAVE_DLOPEN)
 #include <dlfcn.h>
 
 namespace internal {
@@ -67,7 +67,7 @@ void *HandleSet::dllSym(void *handle, const char *symbol)
    return dlsym(handle, symbol);
 }
 
-#else // !HAVE_DLOPEN
+#else // !POLAR_HAVE_DLOPEN
 
 HandleSet::~HandleSet()
 {}

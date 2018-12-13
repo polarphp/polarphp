@@ -258,3 +258,17 @@ macro(polar_add_rt_require_lib name)
    endif()
 endmacro()
 
+macro(polar_check_library_exists library function location variable)
+   check_library_exists("${library}" "${function}" "${location}" "${variable}")
+   if (${${variable}})
+      set(POLAR_${variable} ON)
+   endif()
+endmacro()
+
+macro(polar_check_symbol_exists symbol files variable)
+   check_symbol_exists("${symbol}" "${files}" "${variable}")
+   if (${${variable}})
+      set(POLAR_${variable} ON)
+   endif()
+endmacro()
+

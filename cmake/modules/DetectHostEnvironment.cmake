@@ -121,18 +121,18 @@ endif()
 # to avoid -lnsl checks, if we already have the functions which
 # are usually in libnsl
 # Also, uClibc will bark at linking with glibc's libnsl.
-check_library_exists(socket socket "" HAVE_SOCKET)
-check_library_exists(socket socketpair "" HAVE_SOCKETPAIR)
-check_library_exists(socket htonl "" HAVE_HTONL)
-check_library_exists(nsl gethostname "" HAVE_GETHOSTNAME)
-check_library_exists(nsl gethostbyaddr "" HAVE_GETHOSTBYADDR)
-check_library_exists(nsl yp_get_default_domain "" HAVE_YP_GET_DEFAULT_DOMAIN)
-check_library_exists(dl dlopen "" HAVE_DLOPEN)
+polar_check_library_exists(socket socket "" HAVE_SOCKET)
+polar_check_library_exists(socket socketpair "" HAVE_SOCKETPAIR)
+polar_check_library_exists(socket htonl "" HAVE_HTONL)
+polar_check_library_exists(nsl gethostname "" HAVE_GETHOSTNAME)
+polar_check_library_exists(nsl gethostbyaddr "" HAVE_GETHOSTBYADDR)
+polar_check_library_exists(nsl yp_get_default_domain "" HAVE_YP_GET_DEFAULT_DOMAIN)
+polar_check_library_exists(dl dlopen "" HAVE_DLOPEN)
 
 if(POLAR_ENABLE_ZLIB)
    foreach(library z zlib_static zlib)
       string(TOUPPER ${library} library_suffix)
-      check_library_exists(${library} compress2 "" HAVE_LIBZ_${library_suffix})
+      polar_check_library_exists(${library} compress2 "" HAVE_LIBZ_${library_suffix})
       if(HAVE_LIBZ_${library_suffix})
          set(HAVE_LIBZ 1)
          set(ZLIB_LIBRARIES "${library}")
@@ -143,42 +143,42 @@ endif()
 
 # library checks
 if(NOT PURE_WINDOWS)
-   check_library_exists(pthread pthread_create "" HAVE_LIBPTHREAD)
+   polar_check_library_exists(pthread pthread_create "" HAVE_LIBPTHREAD)
    if (HAVE_LIBPTHREAD)
-      check_library_exists(pthread pthread_getspecific "" HAVE_PTHREAD_GETSPECIFIC)
-      check_library_exists(pthread pthread_rwlock_init "" HAVE_PTHREAD_RWLOCK_INIT)
-      check_library_exists(pthread pthread_mutex_lock "" HAVE_PTHREAD_MUTEX_LOCK)
+      polar_check_library_exists(pthread pthread_getspecific "" HAVE_PTHREAD_GETSPECIFIC)
+      polar_check_library_exists(pthread pthread_rwlock_init "" HAVE_PTHREAD_RWLOCK_INIT)
+      polar_check_library_exists(pthread pthread_mutex_lock "" HAVE_PTHREAD_MUTEX_LOCK)
    else()
       # this could be Android
-      check_library_exists(c pthread_create "" PTHREAD_IN_LIBC)
+      polar_check_library_exists(c pthread_create "" PTHREAD_IN_LIBC)
       if (PTHREAD_IN_LIBC)
-         check_library_exists(c pthread_getspecific "" HAVE_PTHREAD_GETSPECIFIC)
-         check_library_exists(c pthread_rwlock_init "" HAVE_PTHREAD_RWLOCK_INIT)
-         check_library_exists(c pthread_mutex_lock "" HAVE_PTHREAD_MUTEX_LOCK)
+         polar_check_library_exists(c pthread_getspecific "" HAVE_PTHREAD_GETSPECIFIC)
+         polar_check_library_exists(c pthread_rwlock_init "" HAVE_PTHREAD_RWLOCK_INIT)
+         polar_check_library_exists(c pthread_mutex_lock "" HAVE_PTHREAD_MUTEX_LOCK)
       endif()
    endif()
-   check_library_exists(dl dlopen "" HAVE_LIBDL)
-   check_library_exists(rt clock_gettime "" HAVE_LIBRT)
+   polar_check_library_exists(dl dlopen "" HAVE_LIBDL)
+   polar_check_library_exists(rt clock_gettime "" HAVE_LIBRT)
    # we require dl library
    polar_add_rt_require_lib(dl)
 endif()
 
-check_library_exists(m sin "" HAVE_LIBM)
+polar_check_library_exists(m sin "" HAVE_LIBM)
 if (NOT HAVE_LIBM)
    message(FATAL_ERROR "m library is require by polarphp")
 endif()
 
 polar_add_rt_require_lib(m)
 
-check_library_exists(c inet_aton "" HAVE_INET_ATON)
+polar_check_library_exists(c inet_aton "" HAVE_INET_ATON)
 if (NOT HAVE_INET_ATON)
    unset(HAVE_INET_ATON CACHE)
 endif()
-check_library_exists(resolv inet_aton "" HAVE_INET_ATON)
+polar_check_library_exists(resolv inet_aton "" HAVE_INET_ATON)
 if (NOT HAVE_INET_ATON)
    unset(HAVE_INET_ATON CACHE)
 endif()
-check_library_exists(bind inet_aton "" HAVE_INET_ATON)
+polar_check_library_exists(bind inet_aton "" HAVE_INET_ATON)
 
 # Then headers.
 # -------------------------------------------------------------------------
@@ -419,47 +419,47 @@ polar_check_funcs(
    asprintf
    nanosleep)
 
-# TODO use check_symbol_exists or polar_check_funcs ?
-check_symbol_exists(arc4random "stdlib.h" HAVE_DECL_ARC4RANDOM)
-check_symbol_exists(_Unwind_Backtrace "unwind.h" HAVE__UNWIND_BACKTRACE)
-check_symbol_exists(getpagesize unistd.h HAVE_GETPAGESIZE)
-check_symbol_exists(sysconf unistd.h HAVE_SYSCONF)
-check_symbol_exists(getrusage sys/resource.h HAVE_GETRUSAGE)
-check_symbol_exists(setrlimit sys/resource.h HAVE_SETRLIMIT)
-check_symbol_exists(isatty unistd.h HAVE_ISATTY)
-check_symbol_exists(futimens sys/stat.h HAVE_FUTIMENS)
-check_symbol_exists(futimes sys/time.h HAVE_FUTIMES)
-check_symbol_exists(posix_fallocate fcntl.h HAVE_POSIX_FALLOCATE)
-check_symbol_exists(malloc_zone_statistics malloc/malloc.h
+# TODO use polar_check_symbol_exists or polar_check_funcs ?
+polar_check_symbol_exists(arc4random "stdlib.h" HAVE_DECL_ARC4RANDOM)
+polar_check_symbol_exists(_Unwind_Backtrace "unwind.h" HAVE__UNWIND_BACKTRACE)
+polar_check_symbol_exists(getpagesize unistd.h HAVE_GETPAGESIZE)
+polar_check_symbol_exists(sysconf unistd.h HAVE_SYSCONF)
+polar_check_symbol_exists(getrusage sys/resource.h HAVE_GETRUSAGE)
+polar_check_symbol_exists(setrlimit sys/resource.h HAVE_SETRLIMIT)
+polar_check_symbol_exists(isatty unistd.h HAVE_ISATTY)
+polar_check_symbol_exists(futimens sys/stat.h HAVE_FUTIMENS)
+polar_check_symbol_exists(futimes sys/time.h HAVE_FUTIMES)
+polar_check_symbol_exists(posix_fallocate fcntl.h HAVE_POSIX_FALLOCATE)
+polar_check_symbol_exists(malloc_zone_statistics malloc/malloc.h
    HAVE_MALLOC_ZONE_STATISTICS)
-check_symbol_exists(posix_spawn spawn.h HAVE_POSIX_SPAWN)
-check_symbol_exists(pread unistd.h HAVE_PREAD)
-check_symbol_exists(realpath stdlib.h HAVE_REALPATH)
-check_symbol_exists(getrlimit "sys/types.h;sys/time.h;sys/resource.h" HAVE_GETRLIMIT)
-check_symbol_exists(sbrk unistd.h HAVE_SBRK)
-check_symbol_exists(strerror_r string.h HAVE_STRERROR_R)
-check_symbol_exists(strerror_s string.h HAVE_DECL_STRERROR_S)
+polar_check_symbol_exists(posix_spawn spawn.h HAVE_POSIX_SPAWN)
+polar_check_symbol_exists(pread unistd.h HAVE_PREAD)
+polar_check_symbol_exists(realpath stdlib.h HAVE_REALPATH)
+polar_check_symbol_exists(getrlimit "sys/types.h;sys/time.h;sys/resource.h" HAVE_GETRLIMIT)
+polar_check_symbol_exists(sbrk unistd.h HAVE_SBRK)
+polar_check_symbol_exists(strerror_r string.h HAVE_STRERROR_R)
+polar_check_symbol_exists(strerror_s string.h HAVE_DECL_STRERROR_S)
 # AddressSanitizer conflicts with lib/Support/Unix/Signals.inc
 # Avoid sigaltstack on Apple platforms, where backtrace() cannot handle it
 # (rdar://7089625) and _Unwind_Backtrace is unusable because it cannot unwind
 # past the signal handler after an assertion failure (rdar://29866587).
 if(HAVE_SIGNAL_H AND NOT APPLE)
-   check_symbol_exists(sigaltstack signal.h HAVE_SIGALTSTACK)
+   polar_check_symbol_exists(sigaltstack signal.h HAVE_SIGALTSTACK)
 endif()
 set(CMAKE_REQUIRED_DEFINITIONS "-D_LARGEFILE64_SOURCE")
-check_symbol_exists(lseek64 "sys/types.h;unistd.h" HAVE_LSEEK64)
+polar_check_symbol_exists(lseek64 "sys/types.h;unistd.h" HAVE_LSEEK64)
 set(CMAKE_REQUIRED_DEFINITIONS "")
-check_symbol_exists(mallctl malloc_np.h HAVE_MALLCTL)
-check_symbol_exists(mallinfo malloc.h HAVE_MALLINFO)
-check_symbol_exists(malloc_zone_statistics malloc/malloc.h
+polar_check_symbol_exists(mallctl malloc_np.h HAVE_MALLCTL)
+polar_check_symbol_exists(mallinfo malloc.h HAVE_MALLINFO)
+polar_check_symbol_exists(malloc_zone_statistics malloc/malloc.h
    HAVE_MALLOC_ZONE_STATISTICS)
 
 if(HAVE_DLFCN_H)
    if(HAVE_LIBDL)
       list(APPEND CMAKE_REQUIRED_LIBRARIES dl)
    endif()
-   check_symbol_exists(dlopen dlfcn.h HAVE_DLOPEN)
-   check_symbol_exists(dladdr dlfcn.h HAVE_DLADDR)
+   polar_check_symbol_exists(dlopen dlfcn.h HAVE_DLOPEN)
+   polar_check_symbol_exists(dladdr dlfcn.h HAVE_DLADDR)
    if(HAVE_LIBDL)
       list(REMOVE_ITEM CMAKE_REQUIRED_LIBRARIES dl)
    endif()
@@ -470,18 +470,18 @@ CHECK_STRUCT_HAS_MEMBER("struct stat" st_mtimespec.tv_nsec
 CHECK_STRUCT_HAS_MEMBER("struct stat" st_mtim.tv_nsec
     "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC)
 
-check_symbol_exists(__GLIBC__ stdio.h POLAR_USING_GLIBC)
+polar_check_symbol_exists(__GLIBC__ stdio.h POLAR_USING_GLIBC)
 if(POLAR_USING_GLIBC)
    add_definitions(-D_GNU_SOURCE)
    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")
 endif()
 # This check requires _GNU_SOURCE
-check_symbol_exists(sched_getaffinity sched.h HAVE_SCHED_GETAFFINITY)
-check_symbol_exists(CPU_COUNT sched.h HAVE_CPU_COUNT)
+polar_check_symbol_exists(sched_getaffinity sched.h HAVE_SCHED_GETAFFINITY)
+polar_check_symbol_exists(CPU_COUNT sched.h HAVE_CPU_COUNT)
 
 # Some systems (like OpenSolaris) do not have nanosleep in libc
 
-check_library_exists(rt nanosleep "" POLAR_HAVE_RT)
+polar_check_library_exists(rt nanosleep "" HAVE_RT)
 if (POLAR_HAVE_RT)
    set(HAVE_RT ON)
    set(HAVE_NANOSLEEP ON)
@@ -762,3 +762,14 @@ elseif (POLAR_NATIVE_ARCH MATCHES "riscv64")
 else ()
    message(FATAL_ERROR "Unknown architecture ${POLAR_NATIVE_ARCH}")
 endif ()
+
+# check asm_goto
+try_run(retCode compileResult
+   ${CMAKE_CURRENT_BINARY_DIR} ${POLAR_CMAKE_TEST_CODE_DIR}/test_asm_goto.c
+   COMPILE_DEFINITIONS ${POLAR_COMPILE_DEFINITIONS}
+   COMPILE_OUTPUT_VARIABLE compileOutput
+   RUN_OUTPUT_VARIABLE runOutput)
+
+if (retCode EQUAL 0)
+   set(HAVE_ASM_GOTO ON)
+endif()

@@ -10,7 +10,7 @@
 // Created by softboy on 2018/07/05.
 
 #include "polarphp/utils/WatchDog.h"
-#ifdef HAVE_UNISTD_H
+#ifdef POLAR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -19,14 +19,14 @@ namespace sys {
 
 WatchDog::WatchDog(unsigned int seconds)
 {
-#ifdef HAVE_UNISTD_H
+#ifdef POLAR_HAVE_UNISTD_H
    alarm(seconds);
 #endif
 }
 
 WatchDog::~WatchDog()
 {
-#ifdef HAVE_UNISTD_H
+#ifdef POLAR_HAVE_UNISTD_H
    alarm(0);
 #endif
 }

@@ -20,19 +20,19 @@
 #include "polarphp/utils/StringSaver.h"
 #include "polarphp/utils/ErrorNumber.h"
 
-#ifdef HAVE_SYS_STAT_H
+#ifdef POLAR_HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
 #endif
-#ifdef HAVE_SIGNAL_H
+#ifdef POLAR_HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-#ifdef HAVE_FCNTL_H
+#ifdef POLAR_HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#ifdef POLAR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #ifdef HAVE_POSIX_SPAWN
@@ -216,7 +216,7 @@ void timeout_handler(int sig)
 
 void set_memory_limits(unsigned size)
 {
-#if defined(HAVE_SYS_RESOURCE_H) && defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
+#if defined(HAVE_SYS_RESOURCE_H) && defined(POLAR_HAVE_GETRLIMIT) && defined(POLAR_HAVE_SETRLIMIT)
    struct rlimit r;
    __typeof__ (r.rlim_cur) limit = (__typeof__ (r.rlim_cur)) (size) * 1048576;
 

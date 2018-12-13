@@ -517,9 +517,6 @@
 /* Define to 1 if you have the `getrlimit' function. */
 #cmakedefine01 HAVE_GETRLIMIT
 
-/* Define to 1 if you have the `getrusage' function. */
-#cmakedefine01 HAVE_GETRUSAGE
-
 /* Define to 1 if you have the `getservbyname' function. */
 #cmakedefine01 HAVE_GETSERVBYNAME
 
@@ -1066,9 +1063,6 @@
 /* Define to 1 if you have the `setegid' function. */
 #cmakedefine01 HAVE_SETEGID
 
-/* Define to 1 if you have the `setenv' function. */
-#cmakedefine01 HAVE_SETENV
-
 /* Define to 1 if you have the `seteuid' function. */
 #cmakedefine01 HAVE_SETEUID
 
@@ -1389,9 +1383,6 @@
 /* Define to 1 if you have the <sys/pstat.h> header file. */
 #cmakedefine01 HAVE_SYS_PSTAT_H
 
-/* Define to 1 if you have the <sys/resource.h> header file. */
-#cmakedefine01 HAVE_SYS_RESOURCE_H
-
 /* Define to 1 if you have the <sys/sdt.h> header file. */
 #cmakedefine01 HAVE_SYS_SDT_H
 
@@ -1409,9 +1400,6 @@
 
 /* Define to 1 if you have the <sys/statvfs.h> header file. */
 #cmakedefine01 HAVE_SYS_STATVFS_H
-
-/* Define to 1 if you have the <sys/stat.h> header file. */
-#cmakedefine01 HAVE_SYS_STAT_H
 
 /* Define to 1 if you have the <sys/sysexits.h> header file. */
 #cmakedefine01 HAVE_SYS_SYSEXITS_H
@@ -1445,9 +1433,6 @@
 
 /* Define to 1 if you have the `tempnam' function. */
 #cmakedefine01 HAVE_TEMPNAM
-
-/* Define to 1 if you have the <termios.h> header file. */
-#cmakedefine01 HAVE_TERMIOS_H
 
 /* */
 #cmakedefine HAVE_TIDY
@@ -1890,6 +1875,8 @@
 
 /* */
 #cmakedefine01 ZTS
+
+#cmakedefine HAVE_ASM_GOTO
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #cmakedefine const @const@

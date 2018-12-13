@@ -12,7 +12,14 @@
 #include "CLI/CLI.hpp"
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/utils/InitPolar.h"
+#include "polarphp/global/CompilerFeature.h"
 #include "lib/Commands.h"
+
+POLAR_BEGIN_DISABLE_ZENDVM_WARNING()
+#include "polarphp/vm/zend/zend.h"
+#include "polarphp/global/Config.h"
+#include "polarphp/vm/zend/zend_config.h"
+POLAR_END_DISABLE_ZENDVM_WARNING()
 
 #include <vector>
 #include <string>
@@ -53,6 +60,10 @@ int main(int argc, char *argv[])
    polarInitializer.initNgOpts(cmdParser);
    setup_command_opts(cmdParser);
    CLI11_PARSE(cmdParser, argc, argv);
+   if (sg_showVersion) {
+      polar::print_polar_version();
+      return 0;
+   }
    return 0;
 }
 

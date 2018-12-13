@@ -37,11 +37,11 @@
 #include <system_error>
 
 // <fcntl.h> may provide O_BINARY.
-#if defined(HAVE_FCNTL_H)
+#if defined(POLAR_HAVE_FCNTL_H)
 # include <fcntl.h>
 #endif
 
-#if defined(HAVE_UNISTD_H)
+#if defined(POLAR_HAVE_UNISTD_H)
 # include <unistd.h>
 #endif
 

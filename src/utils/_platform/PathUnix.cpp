@@ -31,16 +31,16 @@
 
 #include <limits.h>
 #include <stdio.h>
-#ifdef HAVE_SYS_STAT_H
+#ifdef POLAR_HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#ifdef HAVE_FCNTL_H
+#ifdef POLAR_HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#ifdef POLAR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_SYS_MMAN_H
+#ifdef POLAR_HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
 
@@ -236,7 +236,7 @@ std::string get_main_executable(const char *argv0, void *mainAddr)
          return exePath;
       }
    }
-#elif defined(HAVE_DLFCN_H) && defined(HAVE_DLADDR)
+#elif defined(POLAR_HAVE_DLFCN_H) && defined(POLAR_HAVE_DLADDR)
    // Use dladdr to get executable path if available.
    Dl_info DLInfo;
    int err = dladdr(mainAddr, &DLInfo);

@@ -24,7 +24,7 @@
 #include "polarphp/utils/Memory.h"
 #include "polarphp/utils/Valgrind.h"
 
-#ifdef HAVE_SYS_MMAN_H
+#ifdef POLAR_HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
 

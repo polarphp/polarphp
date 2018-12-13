@@ -58,13 +58,13 @@
 #ifdef HAVE_BACKTRACE
 # include BACKTRACE_HEADER
 #endif
-#ifdef HAVE_SIGNAL_H
+#ifdef POLAR_HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
+#ifdef POLAR_HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#ifdef HAVE_DLFCN_H
+#ifdef POLAR_HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif
 #ifdef HAVE_MACH_MACH_H
@@ -495,7 +495,7 @@ void print_stack_trace(RawOutStream &out)
       return;
    }
 
-#if defined(HAVE_DLFCN_H) && defined(HAVE_DLADDR)
+#if defined(POLAR_HAVE_DLFCN_H) && defined(POLAR_HAVE_DLADDR)
    int width = 0;
    for (int i = 0; i < depth; ++i) {
       Dl_info dlinfo;

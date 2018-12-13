@@ -28,19 +28,19 @@
 #include "polarphp/basic/adt/Hashing.h"
 #include "polarphp/basic/adt/StringRef.h"
 
-#ifdef HAVE_FCNTL_H
+#ifdef POLAR_HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef HAVE_SYS_TIME_H
+#ifdef POLAR_HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
+#ifdef POLAR_HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#ifdef HAVE_SIGNAL_H
+#ifdef POLAR_HAVE_SIGNAL_H
 #include <signal.h>
 #endif
 // DragonFlyBSD, and OpenBSD have deprecated <malloc.h> for
@@ -55,7 +55,7 @@
 #ifdef HAVE_MALLOC_MALLOC_H
 #include <malloc/malloc.h>
 #endif
-#ifdef HAVE_SYS_IOCTL_H
+#ifdef POLAR_HAVE_SYS_IOCTL_H
 #  include <sys/ioctl.h>
 #endif
 #ifdef HAVE_TERMIOS_H
@@ -148,7 +148,7 @@ void Process::getTimeUsage(TimePoint<> &elapsed, std::chrono::nanoseconds &userT
 // does what's necessary to prevent their generation.
 void Process::preventCoreFiles()
 {
-#ifdef HAVE_SETRLIMIT
+#ifdef POLAR_HAVE_SETRLIMIT
    struct rlimit rlim;
    rlim.rlim_cur = rlim.rlim_max = 0;
    setrlimit(RLIMIT_CORE, &rlim);
@@ -325,7 +325,7 @@ static unsigned getColumns(int fileId)
       }
    }
    unsigned columns = 0;
-#if defined(HAVE_SYS_IOCTL_H) && defined(HAVE_TERMIOS_H)
+#if defined(POLAR_HAVE_SYS_IOCTL_H) && defined(HAVE_TERMIOS_H)
    // Try to determine the width of the terminal.
    struct winsize ws;
    if (ioctl(fileId, TIOCGWINSZ, &ws) == 0) {
