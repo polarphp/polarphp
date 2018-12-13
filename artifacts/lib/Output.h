@@ -43,11 +43,12 @@ namespace polar {
 #define PHP_OUTPUT_HANDLER_PROCESSED	0x4000
 
 /* handler op return values */
-typedef enum _php_output_handler_status_t {
+enum PhpOutputHandlerStatusType
+{
    PHP_OUTPUT_HANDLER_FAILURE,
    PHP_OUTPUT_HANDLER_SUCCESS,
    PHP_OUTPUT_HANDLER_NO_DATA
-} php_output_handler_status_t;
+};
 
 /* php_output_stack_pop() flags */
 #define PHP_OUTPUT_POP_TRY			0x000
@@ -67,7 +68,8 @@ typedef enum _php_output_handler_status_t {
 #define PHP_OUTPUT_ACTIVATED		0x100000
 
 /* handler hooks */
-typedef enum _php_output_handler_hook_t {
+enum PhpOutputHandlerHookType
+{
    PHP_OUTPUT_HANDLER_HOOK_GET_OPAQ,
    PHP_OUTPUT_HANDLER_HOOK_GET_FLAGS,
    PHP_OUTPUT_HANDLER_HOOK_GET_LEVEL,
@@ -75,7 +77,7 @@ typedef enum _php_output_handler_hook_t {
    PHP_OUTPUT_HANDLER_HOOK_DISABLE,
    /* unused */
    PHP_OUTPUT_HANDLER_HOOK_LAST
-} php_output_handler_hook_t;
+};
 
 #define PHP_OUTPUT_HANDLER_INITBUF_SIZE(s) \
    ( ((s) > 1) ? \
@@ -85,59 +87,61 @@ typedef enum _php_output_handler_hook_t {
 #define PHP_OUTPUT_HANDLER_ALIGNTO_SIZE		0x1000
 #define PHP_OUTPUT_HANDLER_DEFAULT_SIZE		0x4000
 
-typedef struct _php_output_buffer {
+struct PhpOutputBuffer
+{
    char *data;
    size_t size;
    size_t used;
    uint32_t free:1;
    uint32_t _reserved:31;
-} php_output_buffer;
+};
 
-typedef struct _php_output_context {
+struct PhpOutputContext
+{
    int op;
-   php_output_buffer in;
-   php_output_buffer out;
-} php_output_context;
+   PhpOutputBuffer in;
+   PhpOutputBuffer out;
+};
 
+struct PhpOutputHandler;
 
 /* old-style, stateless callback */
-typedef bool (*php_output_handler_func_t)(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode);
+typedef bool (*PhpOutputHandlerFuncType)(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode);
 /* new-style, opaque context callback */
-typedef bool (*php_output_handler_context_func_t)(void **handler_context, php_output_context *output_context);
+typedef bool (*PhpOutputHandlerContextFuncType)(void **handler_context, PhpOutputContext *output_context);
 /* output handler context dtor */
-typedef void (*php_output_handler_context_dtor_t)(void *opaq);
+typedef void (*PhpOutputHandlerContextDtorType)(void *opaq);
 /* conflict check callback */
-typedef bool (*php_output_handler_conflict_check_t)(const char *handler_name, size_t handler_name_len);
+typedef bool (*PhpOutputHandlerConflictCheckType)(const char *handler_name, size_t handler_name_len);
 /* ctor for aliases */
-typedef struct _php_output_handler *(*php_output_handler_alias_ctor_t)(const char *handler_name, size_t handler_name_len, size_t chunk_size, int flags);
+typedef PhpOutputHandler *(*PhpOutputHandlerAliasCtorType)(const char *handler_name, size_t handler_name_len, size_t chunk_size, int flags);
 
-typedef struct _php_output_handler_user_func_t {
+struct PhpOutputHandlerUserFuncType
+{
    zend_fcall_info fci;
    zend_fcall_info_cache fcc;
    zval zoh;
-} php_output_handler_user_func_t;
+};
 
-typedef struct _php_output_handler
+struct PhpOutputHandler
 {
    zend_string *name;
    int flags;
    int level;
    size_t size;
-   php_output_buffer buffer;
-
+   PhpOutputBuffer buffer;
    void *opaq;
    void (*dtor)(void *opaq);
-
    union {
-      php_output_handler_user_func_t *user;
-      php_output_handler_context_func_t internal;
+      PhpOutputHandlerUserFuncType *user;
+      PhpOutputHandlerContextFuncType internal;
    } func;
-} php_output_handler;
+};
 
 ZEND_BEGIN_MODULE_GLOBALS(output)
 zend_stack handlers;
-php_output_handler *active;
-php_output_handler *running;
+PhpOutputHandler *active;
+PhpOutputHandler *running;
 const char *output_start_filename;
 int output_start_lineno;
 int flags;
@@ -209,39 +213,39 @@ POLAR_DECL_EXPORT void php_output_discard_all();
 POLAR_DECL_EXPORT bool php_output_get_contents(zval *p);
 POLAR_DECL_EXPORT bool php_output_get_length(zval *p);
 POLAR_DECL_EXPORT int php_output_get_level();
-POLAR_DECL_EXPORT php_output_handler* php_output_get_active_handler();
+POLAR_DECL_EXPORT PhpOutputHandler* php_output_get_active_handler();
 
 POLAR_DECL_EXPORT bool php_output_start_default();
 POLAR_DECL_EXPORT bool php_output_start_devnull();
 
 POLAR_DECL_EXPORT bool php_output_start_user(zval *output_handler, size_t chunk_size, int flags);
 POLAR_DECL_EXPORT bool php_output_start_internal(const char *name, size_t name_len,
-                                                 php_output_handler_func_t output_handler,
+                                                 PhpOutputHandlerFuncType output_handler,
                                                  size_t chunk_size, int flags);
 
-POLAR_DECL_EXPORT php_output_handler *php_output_handler_create_user(zval *handler, size_t chunk_size, int flags);
-POLAR_DECL_EXPORT php_output_handler *php_output_handler_create_internal(const char *name, size_t name_len,
-                                                                         php_output_handler_context_func_t handler,
-                                                                         size_t chunk_size, int flags);
+POLAR_DECL_EXPORT PhpOutputHandler *php_output_handler_create_user(zval *handler, size_t chunk_size, int flags);
+POLAR_DECL_EXPORT PhpOutputHandler *php_output_handler_create_internal(const char *name, size_t name_len,
+                                                                       PhpOutputHandlerContextFuncType handler,
+                                                                       size_t chunk_size, int flags);
 
-POLAR_DECL_EXPORT void php_output_handler_set_context(php_output_handler *handler, void *opaq, void (*dtor)(void*));
-POLAR_DECL_EXPORT bool php_output_handler_start(php_output_handler *handler);
+POLAR_DECL_EXPORT void php_output_handler_set_context(PhpOutputHandler *handler, void *opaq, void (*dtor)(void*));
+POLAR_DECL_EXPORT bool php_output_handler_start(PhpOutputHandler *handler);
 POLAR_DECL_EXPORT int php_output_handler_started(const char *name, size_t name_len);
-POLAR_DECL_EXPORT int php_output_handler_hook(php_output_handler_hook_t type, void *arg);
-POLAR_DECL_EXPORT void php_output_handler_dtor(php_output_handler *handler);
-POLAR_DECL_EXPORT void php_output_handler_free(php_output_handler **handler);
+POLAR_DECL_EXPORT int php_output_handler_hook(PhpOutputHandlerHookType type, void *arg);
+POLAR_DECL_EXPORT void php_output_handler_dtor(PhpOutputHandler *handler);
+POLAR_DECL_EXPORT void php_output_handler_free(PhpOutputHandler **handler);
 
 POLAR_DECL_EXPORT int php_output_handler_conflict(const char *handler_new,
                                                   size_t handler_new_len, const char *handler_set,
                                                   size_t handler_set_len);
 POLAR_DECL_EXPORT bool php_output_handler_conflict_register(const char *handler_name, size_t handler_name_len,
-                                                            php_output_handler_conflict_check_t check_func);
+                                                            PhpOutputHandlerConflictCheckType check_func);
 POLAR_DECL_EXPORT bool php_output_handler_reverse_conflict_register(const char *handler_name, size_t handler_name_len,
-                                                                    php_output_handler_conflict_check_t check_func);
+                                                                    PhpOutputHandlerConflictCheckType check_func);
 
-POLAR_DECL_EXPORT php_output_handler_alias_ctor_t php_output_handler_alias(const char *handler_name, size_t handler_name_len);
+POLAR_DECL_EXPORT PhpOutputHandlerAliasCtorType php_output_handler_alias(const char *handler_name, size_t handler_name_len);
 POLAR_DECL_EXPORT bool php_output_handler_alias_register(const char *handler_name, size_t handler_name_len,
-                                                        php_output_handler_alias_ctor_t func);
+                                                         PhpOutputHandlerAliasCtorType func);
 
 } // polar
 

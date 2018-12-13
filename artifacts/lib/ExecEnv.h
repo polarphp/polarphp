@@ -16,99 +16,105 @@
 
 #include "ZendHeaders.h"
 
+/* Error display modes */
+#define PHP_DISPLAY_ERRORS_STDOUT	1
+#define PHP_DISPLAY_ERRORS_STDERR	2
+
 namespace polar {
+
+struct _php_tick_function_entry;
 
 struct PhpCoreGlobals;
 extern thread_local POLAR_DECL_EXPORT PhpCoreGlobals sg_coreGlobals;
 
-struct PhpCoreGlobals
+struct ArgSeparators
 {
-   bool ImplicitFlush;
-   zend_long OutputBuffering;
-   bool EnableDl;
-   std::string OutputHandler;
-   std::string UnserializeCallbackFunc;
-   zend_long SerializePrecision;
-   zend_long MemoryLimit;
-   zend_long MaxInputTime;
-   bool TrackErrors;
-   bool DisplayErrors;
-   bool DisplayStartupErrors;
-   bool LogErrors;
-   zend_long LogErrorsMaxLen;
-   bool IgnoreRepeatedErrors;
-   bool IgnoreRepeatedSource;
-   bool ReportMemLeaks;
-   std::string ErrorLog;
-   std::string DocRoot;
-   std::string UserDir;
-   std::string IncludePath;
-   std::string OpenBaseDir;
-   std::string ExtensionDir;
-   std::string PolarBinary;
-   std::string SysTempDir;
-   std::string ErrorAppendString;
-   std::string ErrorPrependString;
-   std::string AutoPrependFile;
-   std::string AutoAppendFile;
-   std::string InputEncoding;
-   std::string InternalEncoding;
-   std::string OutputEncoding;
-   //   arg_separators arg_separator;
-   std::string VariablesOrder;
-
-   bool IgnoreUserAbort;
-
-   //   zend_llist tick_functions;
-   bool ExposePhp;
-
-   bool RegisterArgcArgv;
-   bool AutoGlobalsJit;
-
-   std::string DocrefRoot;
-   std::string DocrefExt;
-
-   bool HtmlErrors;
-   bool ModulesActivated;
-   bool DuringRequestStartup;
-   bool AllowUrlFopen;
-   bool ReportZendDebug;
-
-   int LastErrorType;
-   std::string LastErrorMessage;
-   std::string LastErrorFile;
-   int  LastErrorLineno;
-
-   std::string PhpSysTempDir;
-
-   std::string DisableFunctions;
-   std::string DisableClasses;
-   bool AllowUrlInclude;
-#ifdef PHP_WIN32
-   bool ComInitialized;
-#endif
-   zend_long MaxInputNestingLevel;
-   zend_long MaxInputVars;
-   bool InUserInclude;
-
-   std::string UserIniFilename;
-   zend_long UserIniCacheTtl;
-
-   std::string RequestOrder;
-   bool InErrorLog;
-
-#ifdef PHP_WIN32
-   bool WindowsShowCrtWarning;
-#endif
-
-   zend_long SyslogFacility;
-   std::string SyslogIdent;
-   bool HaveCalledOpenlog;
-   zend_long SyslogFilter;
+   char *output;
+   char *input;
 };
 
-POLAR_DECL_EXPORT int php_execute_script(zend_file_handle *primary_file);
-POLAR_DECL_EXPORT int php_execute_simple_script(zend_file_handle *primary_file, zval *ret);
+struct PhpCoreGlobals
+{
+   bool implicitFlush;
+   zend_long outputBuffering;
+   bool enableDl;
+   std::string outputHandler;
+   std::string unserializeCallbackFunc;
+   zend_long serializePrecision;
+   zend_long memoryLimit;
+   zend_long maxInputTime;
+   bool trackErrors;
+   bool displayErrors;
+   bool displayStartupErrors;
+   bool logErrors;
+   zend_long logErrorsMaxLen;
+   bool ignoreRepeatedErrors;
+   bool ignoreRepeatedSource;
+   bool reportMemLeaks;
+   std::string errorLog;
+   std::string docRoot;
+   std::string userDir;
+   std::string includePath;
+   std::string openBaseDir;
+   std::string extensionDir;
+   std::string polarBinary;
+   std::string sysTempDir;
+   std::string errorAppendString;
+   std::string errorPrependString;
+   std::string autoPrependFile;
+   std::string autoAppendFile;
+   std::string inputEncoding;
+   std::string internalEncoding;
+   std::string outputEncoding;
+   ArgSeparators argSeparator;
+   std::string variablesOrder;
+   bool ignoreUserAbort;
+   zend_llist tickFunctions;
+   bool exposePhp;
+   bool registerArgcArgv;
+   bool autoGlobalsJit;
+   std::string docrefRoot;
+   std::string docrefExt;
+   bool htmlErrors;
+   bool modulesActivated;
+   bool duringRequestStartup;
+   bool allowUrlFopen;
+   bool reportZendDebug;
+   int lastErrorType;
+   std::string lastErrorMessage;
+   std::string lastErrorFile;
+   int lastErrorLineno;
+   std::string phpSysTempDir;
+   std::string disableFunctions;
+   std::string disableClasses;
+   bool allowUrlInclude;
+#ifdef PHP_WIN32
+   bool comInitialized;
+#endif
+   zend_long maxInputNestingLevel;
+   zend_long maxInputVars;
+   bool inUserInclude;
+   std::string userIniFilename;
+   zend_long userIniCacheTtl;
+   std::string requestOrder;
+   bool inErrorLog;
+#ifdef PHP_WIN32
+   bool windowsShowCrtWarning;
+#endif
+   zend_long syslogFacility;
+   std::string syslogIdent;
+   bool haveCalledOpenlog;
+   zend_long syslogFilter;
+};
+
+POLAR_DECL_EXPORT int php_execute_script(zend_file_handle *primaryFile);
+POLAR_DECL_EXPORT int php_execute_simple_script(zend_file_handle *primaryFile, zval *ret);
+
+class ExecEnv
+{
+public:
+   void unbufferWrite(const char *str, int len);
+};
 
 } // polar
 
