@@ -186,6 +186,8 @@ extern char **environ;
 #define php_error zend_error
 #define error_handling_t zend_error_handling_t
 
+namespace polar {
+
 static inline ZEND_ATTRIBUTE_DEPRECATED void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class)
 {
    zend_replace_error_handling(error_handling, exception_class, NULL);
@@ -205,7 +207,6 @@ PHP_ATTRIBUTE_FORMAT(printf, 5, 6);
 POLAR_DECL_EXPORT ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2);
 #endif
 
-
 #define php_error_docref php_error_docref0
 #define zenderror phperror
 #define zendlex phplex
@@ -214,12 +215,13 @@ POLAR_DECL_EXPORT ZEND_COLD void php_win32_docref2_from_error(DWORD error, const
 #define phpin zendin
 #define php_memnstr zend_memnstr
 
-POLAR_DECL_EXPORT extern int (*php_register_internal_extensions_func)(void);
-POLAR_DECL_EXPORT int php_register_internal_extensions(void);
-POLAR_DECL_EXPORT int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *));
+POLAR_DECL_EXPORT extern int (*php_register_internal_extensions_func)();
+POLAR_DECL_EXPORT int php_register_internal_extensions();
 POLAR_DECL_EXPORT void php_register_pre_request_shutdown(void (*func)(void *), void *userdata);
-POLAR_DECL_EXPORT void php_com_initialize(void);
-POLAR_DECL_EXPORT char *php_get_current_user(void);
+POLAR_DECL_EXPORT void php_com_initialize();
+POLAR_DECL_EXPORT char *php_get_current_user();
+
+} // polar
 
 /* PHP-named Zend macro wrappers */
 #define PHP_FN					ZEND_FN

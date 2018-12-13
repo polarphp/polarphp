@@ -16,6 +16,7 @@ namespace polar {
 
 void print_polar_version();
 void setup_init_ini_entries();
+//POLAR_DECL_EXPORT int php_lint_script(zend_file_handle *file);
 
 } // polar
 

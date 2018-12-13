@@ -16,10 +16,7 @@
 
 namespace polar {
 
-POLAR_DECL_EXPORT int php_request_startup();
-POLAR_DECL_EXPORT void php_request_shutdown(void *dummy);
-POLAR_DECL_EXPORT void php_request_shutdown_for_exec(void *dummy);
-//POLAR_DECL_EXPORT int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint32_t num_additional_modules);
+POLAR_DECL_EXPORT bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditionalModules);
 POLAR_DECL_EXPORT void php_module_shutdown();
 POLAR_DECL_EXPORT void php_module_shutdown_for_exec();
 //POLAR_DECL_EXPORT int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
@@ -28,8 +25,6 @@ POLAR_DECL_EXPORT int php_register_extensions(zend_module_entry * const * ptr, i
 
 POLAR_DECL_EXPORT int php_execute_script(zend_file_handle *primary_file);
 POLAR_DECL_EXPORT int php_execute_simple_script(zend_file_handle *primary_file, zval *ret);
-POLAR_DECL_EXPORT int php_handle_special_queries();
-POLAR_DECL_EXPORT int php_lint_script(zend_file_handle *file);
 
 POLAR_DECL_EXPORT void php_html_puts(const char *str, size_t siz);
 POLAR_DECL_EXPORT int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode);

@@ -16,7 +16,7 @@
 #include "polarphp/global/Config.h"
 #include "lib/Defs.h"
 #include "lib/Commands.h"
-
+#include "lib/ProcessTitle.h"
 
 #include <vector>
 #include <string>
@@ -69,29 +69,28 @@ int main(int argc, char *argv[])
    BOOL using_wide_argv = 0;
 #endif
 
-   int c;
-   int exit_status = SUCCESS;
-   int module_started = 0, sapi_started = 0;
-   char *php_optarg = NULL;
-   int php_optind = 1, use_extended_info = 0;
-   char *ini_path_override = NULL;
-   char *ini_entries = NULL;
-   size_t ini_entries_len = 0;
-   int ini_ignore = 0;
+//   int c;
+//   int exit_status = SUCCESS;
+//   int module_started = 0, sapi_started = 0;
+//   char *php_optarg = NULL;
+//   int php_optind = 1, use_extended_info = 0;
+//   char *ini_path_override = NULL;
+//   char *ini_entries = NULL;
+//   size_t ini_entries_len = 0;
+//   int ini_ignore = 0;
 
-   /*
-    * Do not move this initialization. It needs to happen before argv is used
-    * in any way.
-    */
-//   argv = save_ps_args(argc, argv);
+//   /*
+//    * Do not move this initialization. It needs to happen before argv is used
+//    * in any way.
+//    */
+//   argv = polar::save_ps_args(argc, argv);
 
-//#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+//#if defined(POLAR_OS_WIN32) && !defined(POLAR_CLI_WIN32_NO_CONSOLE)
 //   php_win32_console_fileno_set_vt100(STDOUT_FILENO, TRUE);
 //   php_win32_console_fileno_set_vt100(STDERR_FILENO, TRUE);
 //#endif
 
-
-//#if defined(PHP_WIN32) && defined(_DEBUG) && defined(PHP_WIN32_DEBUG_HEAP)
+//#if defined(POLAR_OS_WIN32) && defined(_DEBUG) && defined(POLAR_WIN32_DEBUG_HEAP)
 //   {
 //      int tmp_flag;
 //      _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
@@ -103,37 +102,50 @@ int main(int argc, char *argv[])
 //      tmp_flag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
 //      tmp_flag |= _CRTDBG_DELAY_FREE_MEM_DF;
 //      tmp_flag |= _CRTDBG_LEAK_CHECK_DF;
-
 //      _CrtSetDbgFlag(tmp_flag);
 //   }
 //#endif
 
 //#ifdef HAVE_SIGNAL_H
 //#if defined(SIGPIPE) && defined(SIG_IGN)
-//   signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
-//                        that sockets created via fsockopen()
-//                        don't kill PHP if the remote site
-//                        closes it.  in apache|apxs mode apache
-//                        does that for us!  thies@thieso.net
-//                        20000419 */
+//   signal(SIGPIPE, SIG_IGN);
+//   /// ignore SIGPIPE in standalone mode so
+//   /// that sockets created via fsockopen()
+//   /// don't kill PHP if the remote site
+//   /// closes it.  in apache|apxs mode apache
+//   /// does that for us!  thies@thieso.net
+//   /// 20000419
 //#endif
 //#endif
 
-
-//#ifdef ZTS
-//   tsrm_startup(1, 1, 0, NULL);
+//   tsrm_startup(1, 1, 0, nullptr);
 //   (void)ts_resource(0);
 //   ZEND_TSRMLS_CACHE_UPDATE();
-//#endif
 
 //   zend_signal_startup();
+//#ifdef POLAR_OS_WIN32
+//   _fmode = _O_BINARY;			/*sets default for file streams to binary */
+//   setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
+//   setmode(_fileno(stdout), O_BINARY);		/* make the stdio mode be binary */
+//   setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
+//#endif
 
-
-   if (sg_showVersion) {
-      polar::print_polar_version();
-      return 0;
-   }
-   return 0;
+//   /* startup after we get the above ini override se we get things right */
+//   if (sapi_module->startup(sapi_module) == FAILURE) {
+//      /* there is no way to see if we must call zend_ini_deactivate()
+//          * since we cannot check if EG(ini_directives) has been initialised
+//          * because the executor's constructor does not set initialize it.
+//          * Apart from that there seems no need for zend_ini_deactivate() yet.
+//          * So we goto out_err.*/
+//      exit_status = 1;
+//      goto out;
+//   }
+//   module_started = 1;
+//   if (sg_showVersion) {
+//      polar::print_polar_version();
+//      return 0;
+//   }
+//   return 0;
 }
 
 void setup_command_opts(CLI::App &parser)

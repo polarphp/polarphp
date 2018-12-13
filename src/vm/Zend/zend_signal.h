@@ -37,30 +37,30 @@
 
 /* Signal structs */
 typedef struct _zend_signal_entry_t {
-	int   flags;          /* sigaction style flags */
-	void* handler;      /* signal handler or context */
+   int   flags;          /* sigaction style flags */
+   void* handler;      /* signal handler or context */
 } zend_signal_entry_t;
 
 typedef struct _zend_signal_t {
-	int signo;
-	siginfo_t *siginfo;
-	void* context;
+   int signo;
+   siginfo_t *siginfo;
+   void* context;
 } zend_signal_t;
 
 typedef struct _zend_signal_queue_t {
-	zend_signal_t zend_signal;
-	struct _zend_signal_queue_t *next;
+   zend_signal_t zend_signal;
+   struct _zend_signal_queue_t *next;
 } zend_signal_queue_t;
 
 /* Signal Globals */
 typedef struct _zend_signal_globals_t {
-	int depth;
-	int blocked;            /* 1==TRUE, 0==FALSE */
-	int running;            /* in signal handler execution */
-	int active;             /* internal signal handling is enabled */
-	zend_bool check;        /* check for replaced handlers on shutdown */
-	zend_signal_entry_t handlers[NSIG];
-	zend_signal_queue_t pstorage[ZEND_SIGNAL_QUEUE_SIZE], *phead, *ptail, *pavail; /* pending queue */
+   int depth;
+   int blocked;            /* 1==TRUE, 0==FALSE */
+   int running;            /* in signal handler execution */
+   int active;             /* internal signal handling is enabled */
+   zend_bool check;        /* check for replaced handlers on shutdown */
+   zend_signal_entry_t handlers[NSIG];
+   zend_signal_queue_t pstorage[ZEND_SIGNAL_QUEUE_SIZE], *phead, *ptail, *pavail; /* pending queue */
 } zend_signal_globals_t;
 
 # ifdef ZTS
@@ -87,7 +87,7 @@ ZEND_API void zend_signal_handler_unblock(void);
 void zend_signal_activate(void);
 void zend_signal_deactivate(void);
 BEGIN_EXTERN_C()
-void zend_signal_startup(void);
+ZEND_API void zend_signal_startup(void);
 END_EXTERN_C()
 void zend_signal_init(void);
 
