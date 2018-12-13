@@ -14,6 +14,14 @@
 
 namespace polar {
 
+class ModuleMgr
+{
+public:
+   void registerModule();
+   void getBuiltinModules();
+   void mountToZendVM();
+};
+
 } // polar
 
 #endif // POLARPHP_ARTIFACTS_MODULE_MGR_H

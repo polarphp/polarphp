@@ -213,6 +213,9 @@ don't. */
 /* Define if this is Unixish platform */
 #cmakedefine01 POLAR_ON_UNIX
 
+/* Define to 1 if you have the `setlocale' function. */
+#cmakedefine POLAR_HAVE_SETLOCALE
+
 /* Define if overriding target triple is enabled */
 #cmakedefine POLAR_TARGET_TRIPLE_ENV "${POLAR_TARGET_TRIPLE_ENV}"
 

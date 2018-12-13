@@ -511,6 +511,7 @@ inline void deallocate_buffer(void *ptr, size_t size, size_t alignment) {
 #define POLAR_BEGIN_DISABLE_ZENDVM_WARNING() \
    POLAR_WARNING_PUSH\
    _Pragma("GCC diagnostic ignored \"-Wignored-qualifiers\"")
+
 #define POLAR_END_DISABLE_ZENDVM_WARNING() POLAR_WARNING_POP
 #endif
 

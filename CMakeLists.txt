@@ -199,7 +199,7 @@ set(POLAR_CONFIG_FILE_SCAN_DIR "Default" CACHE string "Set the path where to sca
 
 option(POLAR_ENABLE_SIGCHILD
    "whether to enable PHP's own SIGCHLD handler"
-   OFF)
+   ON)
 
 option(POLAR_ENABLE_DMALLOC
    "whether to enable dmalloc"

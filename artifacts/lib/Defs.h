@@ -13,13 +13,38 @@
 #define POLARPHP_ARTIFACTS_DEFS_H
 
 #include "polarphp/global/CompilerFeature.h"
+#include "polarphp/global/SystemDetection.h"
 #include "polarphp/global/Config.h"
 #include "lib/PolarVersion.h"
+#include "ZendHeaders.h"
+
+#define PHP_DEFAULT_CHARSET "UTF-8"
+/* PHP's DEBUG value must match Zend's ZEND_DEBUG value */
+#undef PHP_DEBUG
+#define PHP_DEBUG ZEND_DEBUG
+
+#ifdef POLAR_OS_WIN32
+#	define PHP_DIR_SEPARATOR '\\'
+#	define PHP_EOL "\r\n"
+#else
+#	define PHP_DIR_SEPARATOR '/'
+#	define PHP_EOL "\n"
+#endif
+
+#define PHP_MT_RAND_MAX ((zend_long) (0x7FFFFFFF)) /* (1<<31) - 1 */
+/* System Rand functions */
+#ifndef RAND_MAX
+#define RAND_MAX PHP_MT_RAND_MAX
+#endif
+
+#define PHP_RAND_MAX PHP_MT_RAND_MAX
 
 // forward declare with namespace
 namespace CLI {
 class App;
 } // CLI
+
+namespace polar {
 
 enum class ExecMode
 {
@@ -38,5 +63,7 @@ enum class ExecMode
 };
 
 extern CLI::App *sg_commandParser;
+
+} // polar
 
 #endif // POLARPHP_ARTIFACTS_DEFS_H

@@ -13,13 +13,10 @@
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/utils/InitPolar.h"
 #include "polarphp/global/CompilerFeature.h"
+#include "polarphp/global/Config.h"
 #include "lib/Commands.h"
 
-POLAR_BEGIN_DISABLE_ZENDVM_WARNING()
-#include "polarphp/vm/zend/zend.h"
-#include "polarphp/global/Config.h"
-#include "polarphp/vm/zend/zend_config.h"
-POLAR_END_DISABLE_ZENDVM_WARNING()
+
 
 #include <vector>
 #include <string>
