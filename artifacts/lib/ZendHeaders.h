@@ -27,6 +27,10 @@ POLAR_BEGIN_DISABLE_ZENDVM_WARNING()
 #include "polarphp/vm/zend/zend_dtrace.h"
 #include "polarphp/vm/zend/zend_long.h"
 #include "polarphp/vm/zend/zend_portability.h"
+#include "polarphp/vm/zend/zend_hash.h"
+#include "polarphp/vm/zend/zend_alloc.h"
+#include "polarphp/vm/zend/zend_stack.h"
+#include "polarphp/global/php_stdint.h"
 
 #ifdef POLAR_OS_WIN32
 #	include "polarphp/vm/tsrm/tsrm_win32.h"

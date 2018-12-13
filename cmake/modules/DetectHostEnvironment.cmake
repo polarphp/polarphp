@@ -417,7 +417,9 @@ polar_check_funcs(
    vsnprintf
    vasprintf
    asprintf
-   nanosleep)
+   nanosleep
+   setproctitle
+   setproctitle_fast)
 
 # TODO use polar_check_symbol_exists or polar_check_funcs ?
 polar_check_symbol_exists(arc4random "stdlib.h" HAVE_DECL_ARC4RANDOM)

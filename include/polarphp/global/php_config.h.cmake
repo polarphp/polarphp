@@ -986,7 +986,7 @@
 #cmakedefine HAVE_PSPELL
 
 /* Define to 1 if the PS_STRINGS thing exists. */
-#cmakedefine01 HAVE_PS_STRINGS
+#cmakedefine HAVE_PS_STRINGS
 
 /* do we have ptrace? */
 #cmakedefine HAVE_PTRACE
@@ -1079,7 +1079,7 @@
 #cmakedefine01 HAVE_SETPRIORITY
 
 /* Define to 1 if you have the `setproctitle' function. */
-#cmakedefine01 HAVE_SETPROCTITLE
+#cmakedefine HAVE_SETPROCTITLE
 
 /* Define to 1 if you have the `setrlimit' function. */
 #cmakedefine01 HAVE_SETRLIMIT

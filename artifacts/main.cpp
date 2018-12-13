@@ -14,8 +14,8 @@
 #include "polarphp/utils/InitPolar.h"
 #include "polarphp/global/CompilerFeature.h"
 #include "polarphp/global/Config.h"
+#include "lib/Defs.h"
 #include "lib/Commands.h"
-
 
 
 #include <vector>
@@ -57,6 +57,78 @@ int main(int argc, char *argv[])
    polarInitializer.initNgOpts(cmdParser);
    setup_command_opts(cmdParser);
    CLI11_PARSE(cmdParser, argc, argv);
+
+#if defined(POLAR_OS_WIN32)
+# ifdef PHP_CLI_WIN32_NO_CONSOLE
+   int argc = __argc;
+   char **argv = __argv;
+# endif
+   int num_args;
+   wchar_t **argv_wide;
+   char **argv_save = argv;
+   BOOL using_wide_argv = 0;
+#endif
+
+   int c;
+   int exit_status = SUCCESS;
+   int module_started = 0, sapi_started = 0;
+   char *php_optarg = NULL;
+   int php_optind = 1, use_extended_info = 0;
+   char *ini_path_override = NULL;
+   char *ini_entries = NULL;
+   size_t ini_entries_len = 0;
+   int ini_ignore = 0;
+
+   /*
+    * Do not move this initialization. It needs to happen before argv is used
+    * in any way.
+    */
+//   argv = save_ps_args(argc, argv);
+
+//#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+//   php_win32_console_fileno_set_vt100(STDOUT_FILENO, TRUE);
+//   php_win32_console_fileno_set_vt100(STDERR_FILENO, TRUE);
+//#endif
+
+
+//#if defined(PHP_WIN32) && defined(_DEBUG) && defined(PHP_WIN32_DEBUG_HEAP)
+//   {
+//      int tmp_flag;
+//      _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+//      _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+//      _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+//      _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+//      _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+//      _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+//      tmp_flag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+//      tmp_flag |= _CRTDBG_DELAY_FREE_MEM_DF;
+//      tmp_flag |= _CRTDBG_LEAK_CHECK_DF;
+
+//      _CrtSetDbgFlag(tmp_flag);
+//   }
+//#endif
+
+//#ifdef HAVE_SIGNAL_H
+//#if defined(SIGPIPE) && defined(SIG_IGN)
+//   signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
+//                        that sockets created via fsockopen()
+//                        don't kill PHP if the remote site
+//                        closes it.  in apache|apxs mode apache
+//                        does that for us!  thies@thieso.net
+//                        20000419 */
+//#endif
+//#endif
+
+
+//#ifdef ZTS
+//   tsrm_startup(1, 1, 0, NULL);
+//   (void)ts_resource(0);
+//   ZEND_TSRMLS_CACHE_UPDATE();
+//#endif
+
+//   zend_signal_startup();
+
+
    if (sg_showVersion) {
       polar::print_polar_version();
       return 0;
