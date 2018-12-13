@@ -9,4 +9,4 @@
 //
 // Created by polarboy on 2018/08/25.
 
-#include "../../../../src/TSRM/tsrm_config_common.h"
+#include "../../../../src/vm/TSRM/tsrm_config_common.h"
