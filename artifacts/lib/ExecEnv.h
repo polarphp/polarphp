@@ -22,10 +22,12 @@
 
 namespace polar {
 
-struct _php_tick_function_entry;
+struct php_tick_function_entry;
 
 struct PhpCoreGlobals;
-extern thread_local POLAR_DECL_EXPORT PhpCoreGlobals sg_coreGlobals;
+# define PG(v) ZEND_TSRMG(sg_coreGlobalsId, PhpCoreGlobals *, v)
+extern POLAR_DECL_EXPORT int sg_coreGlobalsId;
+//extern thread_local POLAR_DECL_EXPORT PhpCoreGlobals sg_coreGlobals;
 
 struct ArgSeparators
 {

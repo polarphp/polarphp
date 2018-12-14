@@ -33,6 +33,9 @@ POLAR_DECL_EXPORT int php_stream_open_for_zend_ex(const char *filename, zend_fil
 extern int php_init_environ();
 extern int php_shutdown_environ();
 
+/// private
+
+
 } // polar
 
 #endif // POLARPHP_ARTIFACTS_LIFE_CYCLE_H

@@ -62,7 +62,8 @@ ZEND_TSRMLS_CACHE_DEFINE()
 
 namespace polar
 {
-thread_local PhpCoreGlobals sg_coreGlobals;
+//thread_local PhpCoreGlobals sg_coreGlobals;
+int sg_coreGlobalsId;
 
 void php_module_startup();
 void php_module_shutdown();
