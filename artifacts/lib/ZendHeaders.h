@@ -24,6 +24,7 @@ POLAR_BEGIN_DISABLE_ZENDVM_WARNING()
 #include "polarphp/vm/zend/zend_execute.h"
 #include "polarphp/vm/zend/zend_highlight.h"
 #include "polarphp/vm/zend/zend_extensions.h"
+#include "polarphp/vm/zend/zend_ini_scanner.h"
 #include "polarphp/vm/zend/zend_ini.h"
 #include "polarphp/vm/zend/zend_dtrace.h"
 #include "polarphp/vm/zend/zend_long.h"

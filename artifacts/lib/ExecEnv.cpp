@@ -58,8 +58,6 @@
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
-ZEND_TSRMLS_CACHE_DEFINE()
-
 namespace polar
 {
 //thread_local PhpCoreGlobals sg_coreGlobals;

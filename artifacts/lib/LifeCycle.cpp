@@ -29,27 +29,27 @@ namespace {
 
 void core_globals_ctor(PhpCoreGlobals *coreGlobals)
 {
-//   std::memset(coreGlobals, 0, sizeof(*coreGlobals));
+   //   std::memset(coreGlobals, 0, sizeof(*coreGlobals));
    startup_ticks();
 }
 
 void core_globals_dtor(PhpCoreGlobals *coreGlobals)
 {
-//   if (coreGlobals->lastErrorMessage) {
-//      free(coreGlobals->lastErrorMessage);
-//   }
-//   if (coreGlobals->lastErrorFile) {
-//      free(coreGlobals->lastErrorFile);
-//   }
-//   if (coreGlobals->disableFunctions) {
-//      free(coreGlobals->disableFunctions);
-//   }
-//   if (coreGlobals->disableClasses) {
-//      free(coreGlobals->disableClasses);
-//   }
-//   if (coreGlobals->polarBinary) {
-//      free(coreGlobals->polarBinary);
-//   }
+   //   if (coreGlobals->lastErrorMessage) {
+   //      free(coreGlobals->lastErrorMessage);
+   //   }
+   //   if (coreGlobals->lastErrorFile) {
+   //      free(coreGlobals->lastErrorFile);
+   //   }
+   //   if (coreGlobals->disableFunctions) {
+   //      free(coreGlobals->disableFunctions);
+   //   }
+   //   if (coreGlobals->disableClasses) {
+   //      free(coreGlobals->disableClasses);
+   //   }
+   //   if (coreGlobals->polarBinary) {
+   //      free(coreGlobals->polarBinary);
+   //   }
    shutdown_ticks();
 }
 
@@ -98,16 +98,11 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
       return true;
    }
    php_output_startup();
-#ifdef ZTS
    ts_allocate_id(&sg_coreGlobalsId, sizeof(PhpCoreGlobals), (ts_allocate_ctor) core_globals_ctor, (ts_allocate_dtor) core_globals_dtor);
-#  ifdef PHP_WIN32
+#ifdef PHP_WIN32
    ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor) php_win32_core_globals_ctor, (ts_allocate_dtor) php_win32_core_globals_dtor);
-#  endif
-#else
-   memset(&core_globals, 0, sizeof(core_globals));
-   php_startup_ticks();
 #endif
-   //   gc_globals_ctor();
+   gc_globals_ctor();
 
    //   zuf.error_function = php_error_cb;
    //   zuf.printf_function = php_printf;

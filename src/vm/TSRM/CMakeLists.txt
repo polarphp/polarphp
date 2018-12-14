@@ -48,13 +48,12 @@ endif (POLAR_ENABLE_WARNINGS AND (POLAR_COMPILER_IS_GCC_COMPATIBLE OR CLANG_CL))
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-polar_add_library(tsrm SHARED ${TSRM_SRCS})
+polar_add_library_internal(tsrm STATIC ${TSRM_SRCS})
 
 get_target_property(tsrmIncludeDirs tsrm INCLUDE_DIRECTORIES)
 polar_merge_list(tsrmIncludeDirs POLAR_ZENDVM_INCLUDE_DIRS)
 
-set_target_properties(tsrm
-   PROPERTIES INCLUDE_DIRECTORIES "${tsrmIncludeDirs}")
+target_include_directories(tsrm PUBLIC "${tsrmIncludeDirs}")
 
 install(FILES ${POLAR_ZRNDVM_TSRM_HEADERS} DESTINATION ${POLAR_HEADER_INSTALL_DIR}/vm/TSRM
    COMPONENT ZendVMHeaders)

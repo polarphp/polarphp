@@ -467,7 +467,7 @@ macro(polar_add_library name)
    if(BUILD_SHARED_LIBS OR ARG_SHARED)
       polar_add_library_internal(${name} SHARED ${ARG_UNPARSED_ARGUMENTS})
    else()
-      polar_add_library_internal(${name} ${ARG_UNPARSED_ARGUMENTS})
+      polar_add_library_internal(${name} STATIC ${ARG_UNPARSED_ARGUMENTS})
    endif()
 
    # Libraries that are meant to only be exposed via the build tree only are
