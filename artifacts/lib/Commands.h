@@ -12,11 +12,23 @@
 #ifndef POLARPHP_ARTIFACTS_COMMANDS_H
 #define POLARPHP_ARTIFACTS_COMMANDS_H
 
+#include "ZendHeaders.h"
+#include <string>
+#include <iostream>
+
+namespace CLI {
+class App;
+} // CLI
+
+
 namespace polar {
 
+using CLI::App;
+
 void print_polar_version();
-void setup_init_ini_entries();
-//POLAR_DECL_EXPORT int php_lint_script(zend_file_handle *file);
+POLAR_DECL_EXPORT int php_lint_script(zend_file_handle *file);
+void setup_init_entries_commands(std::string &iniEntries);
+int dispatch_cli_command(App &cmdParser, int argc, char *argv[]);
 
 } // polar
 

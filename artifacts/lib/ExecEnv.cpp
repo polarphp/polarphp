@@ -63,7 +63,12 @@ namespace polar
 
 //thread_local PhpCoreGlobals sg_coreGlobals;
 int sg_coreGlobalsId;
-thread_local ExecEnv sg_execEnv;
+
+ExecEnv &retrieve_global_execenv()
+{
+   thread_local ExecEnv execEnv;
+   return execEnv;
+}
 
 ExecEnv &ExecEnv::setArgc(int argc)
 {
@@ -91,6 +96,36 @@ ExecEnv &ExecEnv::setArgv(char **argv)
    return *this;
 }
 
+ExecEnv &ExecEnv::setPhpIniIgnore(bool flag)
+{
+   m_phpIniIgnore = flag;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setPhpIniIgnoreCwd(bool flag)
+{
+   m_phpIniIgnoreCwd = flag;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setPhpIniPathOverride(const std::string &path)
+{
+   m_phpIniPathOverride = path;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setInitEntries(const std::string &entries)
+{
+   m_iniEntries = entries;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setIniDefaultsHandler(IniConfigDefaultInitFunc handler)
+{
+   m_iniDefaultInitHandler = handler;
+   return *this;
+}
+
 const std::vector<StringRef> &ExecEnv::getArgv() const
 {
    return m_argv;
@@ -99,6 +134,31 @@ const std::vector<StringRef> &ExecEnv::getArgv() const
 int ExecEnv::getArgc() const
 {
    return m_argc;
+}
+
+bool ExecEnv::getPhpIniIgnore() const
+{
+   return m_phpIniIgnore;
+}
+
+bool ExecEnv::getPhpIniIgnoreCwd() const
+{
+   return m_phpIniIgnoreCwd;
+}
+
+StringRef ExecEnv::getPhpIniPathOverride() const
+{
+   return m_phpIniPathOverride;
+}
+
+StringRef ExecEnv::getIniEntries() const
+{
+   return m_iniEntries;
+}
+
+IniConfigDefaultInitFunc ExecEnv::getIniConfigDeaultHandler() const
+{
+   return m_iniDefaultInitHandler;
 }
 
 StringRef ExecEnv::getExecutableFilepath() const

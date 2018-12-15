@@ -34,7 +34,8 @@ struct PhpCoreGlobals;
 # define PG(v) ZEND_TSRMG(sg_coreGlobalsId, PhpCoreGlobals *, v)
 extern POLAR_DECL_EXPORT int sg_coreGlobalsId;
 //extern thread_local POLAR_DECL_EXPORT PhpCoreGlobals sg_coreGlobals;
-extern thread_local POLAR_DECL_EXPORT ExecEnv sg_execEnv;
+
+ExecEnv &retrieve_global_execenv();
 
 struct ArgSeparators
 {
@@ -116,20 +117,38 @@ struct PhpCoreGlobals
    zend_long syslogFilter;
 };
 
+using IniConfigDefaultInitFunc = void (*)(HashTable *configuration_hash);
+
 class ExecEnv
 {
 public:
    ExecEnv &setArgc(int argc);
    ExecEnv &setArgv(const std::vector<StringRef> &argv);
    ExecEnv &setArgv(char *argv[]);
+   ExecEnv &setPhpIniIgnore(bool flag);
+   ExecEnv &setPhpIniIgnoreCwd(bool flag);
+   ExecEnv &setPhpIniPathOverride(const std::string &path);
+   ExecEnv &setInitEntries(const std::string &entries);
+   ExecEnv &setIniDefaultsHandler(IniConfigDefaultInitFunc handler);
 
    const std::vector<StringRef> &getArgv() const;
    int getArgc() const;
    StringRef getExecutableFilepath() const;
+   bool getPhpIniIgnore() const;
+   bool getPhpIniIgnoreCwd() const;
+   StringRef getPhpIniPathOverride() const;
+   StringRef getIniEntries() const;
+   IniConfigDefaultInitFunc getIniConfigDeaultHandler() const;
 
    void unbufferWrite(const char *str, int len);
 private:
+   bool m_phpIniIgnore;
+   /// don't look for php.ini in the current directory
+   bool m_phpIniIgnoreCwd;
    int m_argc;
+   std::string m_iniEntries;
+   std::string m_phpIniPathOverride;
+   IniConfigDefaultInitFunc m_iniDefaultInitHandler;
    std::vector<StringRef> m_argv;
 };
 

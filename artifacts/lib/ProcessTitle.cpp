@@ -448,7 +448,6 @@ void cleanup_ps_args(char **argv)
 #endif /* PS_USE_CHANGE_ARGV or PS_USE_CLOBBER_ARGV */
    }
 #endif /* PS_USE_NONE */
-
    return;
 }
 

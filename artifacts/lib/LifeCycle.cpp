@@ -61,7 +61,7 @@ void core_globals_dtor(PhpCoreGlobals *coreGlobals)
 void php_binary_init()
 {
    char *binaryLocation = nullptr;
-#ifdef PHP_WIN32
+#ifdef POLAR_OS_WIN32
    binaryLocation = (char *)malloc(MAXPATHLEN);
    if (binaryLocation && GetModuleFileName(0, binaryLocation, MAXPATHLEN) == 0) {
       free(binaryLocation);
@@ -69,7 +69,8 @@ void php_binary_init()
    }
 #else
    binaryLocation = reinterpret_cast<char *>(malloc(MAXPATHLEN));
-   if (binaryLocation && sg_execEnv.getExecutableFilepath().find('/') == StringRef::npos) {
+   ExecEnv &execEnv = retrieve_global_execenv();
+   if (binaryLocation && execEnv.getExecutableFilepath().find('/') == StringRef::npos) {
       char *envpath, *path;
       int found = 0;
       if ((envpath = getenv("PATH")) != nullptr) {
@@ -79,7 +80,7 @@ void php_binary_init()
          path = estrdup(envpath);
          searchDir = polar_strtok_r(path, ":", &last);
          while (searchDir) {
-            snprintf(search_path, MAXPATHLEN, "%s/%s", searchDir, sg_execEnv.getExecutableFilepath().getData());
+            snprintf(search_path, MAXPATHLEN, "%s/%s", searchDir, execEnv.getExecutableFilepath().getData());
             if (VCWD_REALPATH(search_path, binaryLocation) && !VCWD_ACCESS(binaryLocation, X_OK) && VCWD_STAT(binaryLocation, &s) == 0 && S_ISREG(s.st_mode)) {
                found = 1;
                break;
@@ -92,7 +93,7 @@ void php_binary_init()
          free(binaryLocation);
          binaryLocation = nullptr;
       }
-   } else if (!VCWD_REALPATH(sg_execEnv.getExecutableFilepath().getData(), binaryLocation) || VCWD_ACCESS(binaryLocation, X_OK)) {
+   } else if (!VCWD_REALPATH(execEnv.getExecutableFilepath().getData(), binaryLocation) || VCWD_ACCESS(binaryLocation, X_OK)) {
       free(binaryLocation);
       binaryLocation = nullptr;
    }
@@ -101,6 +102,13 @@ void php_binary_init()
 }
 
 } // anonymous namespace
+
+void cli_ini_defaults(HashTable *configuration_hash)
+{
+   zval tmp;
+   POLAR_INI_DEFAULT("report_zend_debug", "0");
+   POLAR_INI_DEFAULT("display_errors", "1");
+}
 
 bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditionalModules)
 {
@@ -238,7 +246,7 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    //      REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_NT_WORKSTATION", VER_NT_WORKSTATION, CONST_PERSISTENT | CONST_CS);
    //#endif
 
-   php_binary_init();
+   //php_binary_init();
    if (!PG(polarBinary).empty()) {
       //REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", PG(php_binary), strlen(PG(php_binary)), CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
    } else {
@@ -257,7 +265,7 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    //   /* Register PHP core ini entries */
    //REGISTER_INI_ENTRIES();
    /* Register Zend ini entries */
-  // zend_register_standard_ini_entries();
+   // zend_register_standard_ini_entries();
 #ifdef ZEND_WIN32
    /* Until the current ini values was setup, the current cp is 65001.
             If the actual ini vaues are different, some stuff needs to be updated.
@@ -371,22 +379,22 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
          }
       }
    };
-//      unsigned int i;
-//      zend_try {
-//         /* 2 = Count of deprecation structs */
-//         for (i = 0; i < 2; i++) {
-//            const char **p = directives[i].directives;
-//            while(*p) {
-//               zend_long value;
-//               if (cfg_get_long((char*)*p, &value) == SUCCESS && value) {
-//                  zend_error(directives[i].error_level, directives[i].phrase, *p);
-//               }
-//               ++p;
-//            }
-//         }
-//      } zend_catch {
-//         retval = false;
-//      } zend_end_try();
+      //      unsigned int i;
+      //      zend_try {
+      //         /* 2 = Count of deprecation structs */
+      //         for (i = 0; i < 2; i++) {
+      //            const char **p = directives[i].directives;
+      //            while(*p) {
+      //               zend_long value;
+      //               if (cfg_get_long((char*)*p, &value) == SUCCESS && value) {
+      //                  zend_error(directives[i].error_level, directives[i].phrase, *p);
+      //               }
+      //               ++p;
+      //            }
+      //         }
+      //      } zend_catch {
+      //         retval = false;
+      //      } zend_end_try();
    }
    virtual_cwd_deactivate();
    sg_moduleStartup = 0;

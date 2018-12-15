@@ -27,7 +27,6 @@ using polar::basic::StringRef;
 
 void setup_command_opts(CLI::App &parser);
 
-namespace {
 static bool sg_showVersion;
 static bool sg_showNgInfo;
 static bool sg_interactive;
@@ -35,22 +34,22 @@ static bool sg_generateExtendInfo;
 static bool sg_syntaxCheck;
 static bool sg_showModulesInfo;
 static bool sg_hideExternArgs;
-static std::string sg_configPath;
-static std::string sg_scriptFilepath;
-static std::string sg_codeWithoutPhpTags;
-static std::string sg_beginCode;
-static std::string sg_everyLineExecCode;
-static std::string sg_everyLineExecScriptFilename;
-static std::string sg_endCode;
-static std::string sg_stripCodeFilename;
-static std::string sg_zendExtensionFilename;
-static std::vector<std::string> sg_scriptArgs;
-static std::string sg_reflectFunc;
-static std::string sg_reflectClass;
-static std::string sg_reflectModule;
-static std::string sg_reflectZendExt;
-static std::string sg_reflectConfig;
-} // anonymous namespace
+static std::string sg_configPath{};
+static std::string sg_scriptFilepath{};
+static std::string sg_codeWithoutPhpTags{};
+static std::string sg_beginCode{};
+static std::string sg_everyLineExecCode{};
+static std::string sg_everyLineExecScriptFilename{};
+static std::string sg_endCode{};
+static std::string sg_stripCodeFilename{};
+static std::string sg_zendExtensionFilename{};
+static std::vector<std::string> sg_scriptArgs{};
+static std::vector<std::string> sg_defines{};
+static std::string sg_reflectFunc{};
+static std::string sg_reflectClass{};
+static std::string sg_reflectModule{};
+static std::string sg_reflectZendExt{};
+static std::string sg_reflectConfig{};
 
 int main(int argc, char *argv[])
 {
@@ -59,8 +58,9 @@ int main(int argc, char *argv[])
    polarInitializer.initNgOpts(cmdParser);
    setup_command_opts(cmdParser);
    CLI11_PARSE(cmdParser, argc, argv);
-   polar::sg_execEnv.setArgc(argc);
-   polar::sg_execEnv.setArgv(argv);
+   polar::ExecEnv execEnv = polar::retrieve_global_execenv();
+   execEnv.setArgc(argc);
+   execEnv.setArgv(argv);
 #if defined(POLAR_OS_WIN32)
 # ifdef PHP_CLI_WIN32_NO_CONSOLE
    int argc = __argc;
@@ -71,28 +71,19 @@ int main(int argc, char *argv[])
    char **argv_save = argv;
    BOOL using_wide_argv = 0;
 #endif
-
-   int c;
-   int exit_status = SUCCESS;
-   int module_started = 0, sapi_started = 0;
-   char *php_optarg = NULL;
-   int php_optind = 1, use_extended_info = 0;
-   char *ini_path_override = NULL;
-   char *ini_entries = NULL;
-   size_t ini_entries_len = 0;
-   int ini_ignore = 0;
-
+   int exitStatus = SUCCESS;
+   int moduleStarted = 0;
+   std::string iniEntries;
+   bool iniIgnore = 0;
    /*
     * Do not move this initialization. It needs to happen before argv is used
     * in any way.
     */
    argv = polar::save_ps_args(argc, argv);
-
 #if defined(POLAR_OS_WIN32) && !defined(POLAR_CLI_WIN32_NO_CONSOLE)
    php_win32_console_fileno_set_vt100(STDOUT_FILENO, TRUE);
    php_win32_console_fileno_set_vt100(STDERR_FILENO, TRUE);
 #endif
-
 #if defined(POLAR_OS_WIN32) && defined(_DEBUG) && defined(POLAR_WIN32_DEBUG_HEAP)
    {
       int tmp_flag;
@@ -120,11 +111,9 @@ int main(int argc, char *argv[])
    /// 20000419
 #endif
 #endif
-
    tsrm_startup(1, 1, 0, nullptr);
    (void)ts_resource(0);
    ZEND_TSRMLS_CACHE_UPDATE();
-
    zend_signal_startup();
 #ifdef POLAR_OS_WIN32
    _fmode = _O_BINARY;			/*sets default for file streams to binary */
@@ -132,23 +121,33 @@ int main(int argc, char *argv[])
    setmode(_fileno(stdout), O_BINARY);		/* make the stdio mode be binary */
    setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
+   /// processing pre module init command options
+   if (!sg_defines.empty()) {
+      polar::setup_init_entries_commands(iniEntries);
+   }
+   /// processing ini definitions
+   ///
+   execEnv.setIniDefaultsHandler(polar::cli_ini_defaults);
+   execEnv.setPhpIniPathOverride(sg_configPath);
+   execEnv.setPhpIniIgnoreCwd(true);
+   execEnv.setPhpIniIgnore(iniIgnore);
+   iniEntries += polar::HARDCODED_INI;
 
-   /* startup after we get the above ini override se we get things right */
+   execEnv.setInitEntries(iniEntries);
+   /// startup after we get the above ini override se we get things right
+   ///
    if (!polar::php_module_startup(nullptr, 0)) {
-      /* there is no way to see if we must call zend_ini_deactivate()
-          * since we cannot check if EG(ini_directives) has been initialised
-          * because the executor's constructor does not set initialize it.
-          * Apart from that there seems no need for zend_ini_deactivate() yet.
-          * So we goto out_err.*/
-      exit_status = 1;
+      // there is no way to see if we must call zend_ini_deactivate()
+      // since we cannot check if EG(ini_directives) has been initialised
+      // because the executor's constructor does not set initialize it.
+      // Apart from that there seems no need for zend_ini_deactivate() yet.
+      // So we goto out_err.
+      exitStatus = 1;
       goto out;
    }
-   module_started = 1;
-   if (sg_showVersion) {
-      polar::print_polar_version();
-      return 0;
-   }
-#if defined(PHP_WIN32)
+   moduleStarted = 1;
+   /// module init finished
+#if defined(POLAR_OS_WIN32)
    php_win32_cp_cli_setup();
    orig_cp = (php_win32_cp_get_orig())->id;
    /* Ignore the delivered argv and argc, read from W API. This place
@@ -157,45 +156,42 @@ int main(int argc, char *argv[])
    argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
    PHP_WIN32_CP_W_TO_ANY_ARRAY(argv_wide, num_args, argv, argc)
          using_wide_argv = 1;
-
    SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
 #endif
+   /// processing options
+   if (sg_showVersion) {
+      polar::print_polar_version();
+      return 0;
+   }
 
    /* -e option */
-   if (use_extended_info) {
+   if (sg_generateExtendInfo) {
       CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
    }
-
    zend_first_try {
-      //exit_status = do_cli(argc, argv);
+      exitStatus = polar::dispatch_cli_command(cmdParser, argc, argv);
    } zend_end_try();
+
+   /// module finished
+   ///
 out:
-   if (ini_path_override) {
-      free(ini_path_override);
-   }
-   if (ini_entries) {
-      free(ini_entries);
-   }
-   if (module_started) {
+   if (moduleStarted) {
       polar::php_module_shutdown();
    }
    tsrm_shutdown();
-
 #if defined(POLAR_OS_WIN32)
    (void)php_win32_cp_cli_restore();
-
    if (using_wide_argv) {
       PHP_WIN32_CP_FREE_ARRAY(argv, argc);
       LocalFree(argv_wide);
    }
    argv = argv_save;
 #endif
-   /*
-    * Do not move this de-initialization. It needs to happen right before
-    * exiting.
-    */
-   //   cleanup_ps_args(argv);
-   exit(exit_status);
+   /// Do not move this de-initialization. It needs to happen right before
+   /// exiting.
+   ///
+   polar::cleanup_ps_args(argv);
+   exit(exitStatus);
    return 0;
 }
 
@@ -208,6 +204,7 @@ void setup_command_opts(CLI::App &parser)
    parser.add_flag("-l, --lint", sg_syntaxCheck, "Syntax check only (lint)");
    parser.add_flag("-m, --modules-info", sg_showModulesInfo, "Show compiled in modules.");
    parser.add_option("-c, --config", sg_configPath, "Look for php.yaml file in this directory.")->type_name("<path>|<file>");
+   parser.add_option("-d", sg_defines, "Define INI entry foo with value 'bar'.")->type_name("foo[=bar]");
    parser.add_option("-f", sg_scriptFilepath, "Parse and execute <file>.")->type_name("<file>");
    parser.add_option("-r", sg_codeWithoutPhpTags, "Run PHP <code> without using script tags <?..?>.")->type_name("<code>");
    parser.add_option("-B", sg_beginCode, "Run PHP <begin_code> before processing input lines.")->type_name("<begin_code>");

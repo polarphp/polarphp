@@ -18,6 +18,9 @@ POLAR_BEGIN_DISABLE_ZENDVM_WARNING()
 POLAR_END_DISABLE_ZENDVM_WARNING()
 
 #include <iostream>
+#include <vector>
+
+extern std::vector<std::string> sg_defines;
 
 namespace polar {
 
@@ -26,6 +29,16 @@ void print_polar_version()
    std::cout << POLARPHP_PACKAGE_STRING << " (built: "<< BUILD_TIME <<  ") "<< std::endl
              << "Copyright (c) 2016-2018 The polarphp Foundation" << std::endl
              << get_zend_version();
+}
+
+void setup_init_entries_commands(std::string &iniEntries)
+{
+
+}
+
+int dispatch_cli_command(App &cmdParser, int argc, char *argv[])
+{
+
 }
 
 } // polar

@@ -275,6 +275,11 @@ POLAR_DECL_EXPORT char *php_get_current_user();
 
 #include "Reentrancy.h"
 
+#define POLAR_INI_DEFAULT(name, value)\
+   ZVAL_NEW_STR(&tmp, zend_string_init(value, sizeof(value) - 1, 1));\
+   zend_hash_str_update(configuration_hash, name, sizeof(name) - 1, &tmp);\
+
+void cli_ini_defaults(HashTable *configuration_hash);
 
 #ifndef XtOffset
 #if defined(CRAY) || (defined(__arm) && !(defined(LINUX) || defined(__riscos__)))
@@ -283,7 +288,7 @@ POLAR_DECL_EXPORT char *php_get_current_user();
 #else
 #ifdef CRAY2
 #define XtOffset(p_type, field) \
-    (sizeof(int)*((unsigned int)&(((p_type)NULL)->field)))
+   (sizeof(int)*((unsigned int)&(((p_type)NULL)->field)))
 
 #else /* !CRAY2 */
 
@@ -294,7 +299,7 @@ POLAR_DECL_EXPORT char *php_get_current_user();
 #else /* ! (CRAY || __arm) */
 
 #define XtOffset(p_type, field) \
-    ((zend_long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
+   ((zend_long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
 
 #endif /* !CRAY */
 #endif /* ! XtOffset */
