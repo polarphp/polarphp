@@ -17,11 +17,13 @@
 
 POLAR_BEGIN_DISABLE_ZENDVM_WARNING()
 
+extern "C" {
 #include "polarphp/vm/zend/zend.h"
 #include "polarphp/vm/zend/zend_API.h"
 #include "polarphp/vm/zend/zend_config.h"
 #include "polarphp/vm/zend/zend_compile.h"
 #include "polarphp/vm/zend/zend_execute.h"
+#include "polarphp/vm/zend/zend_modules.h"
 #include "polarphp/vm/zend/zend_highlight.h"
 #include "polarphp/vm/zend/zend_extensions.h"
 #include "polarphp/vm/zend/zend_ini_scanner.h"
@@ -32,11 +34,13 @@ POLAR_BEGIN_DISABLE_ZENDVM_WARNING()
 #include "polarphp/vm/zend/zend_hash.h"
 #include "polarphp/vm/zend/zend_alloc.h"
 #include "polarphp/vm/zend/zend_stack.h"
+#include "polarphp/vm/zend/zend_virtual_cwd.h"
 #include "polarphp/global/php_stdint.h"
 
 #ifdef POLAR_OS_WIN32
 #	include "polarphp/vm/tsrm/tsrm_win32.h"
 #endif
+}
 
 POLAR_END_DISABLE_ZENDVM_WARNING()
 

@@ -79,7 +79,6 @@ char *polar_asctime_r(const struct tm *tm, char *buf);
 #endif
 #endif
 
-
 #if !defined(HAVE_GMTIME_R) && defined(HAVE_GMTIME)
 #define PHP_NEED_REENTRANCY 1
 POLAR_DECL_EXPORT struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm);

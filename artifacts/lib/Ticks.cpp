@@ -27,7 +27,6 @@ int compare_tick_functions(void *elem1, void *elem2)
    st_tick_function *e1 = reinterpret_cast<st_tick_function *>(elem1);
    st_tick_function *e2 = reinterpret_cast<st_tick_function *>(elem2);
    return e1->func == e2->func && e1->arg == e2->arg;
-
 }
 
 void tick_iterator(void *d, void *arg)

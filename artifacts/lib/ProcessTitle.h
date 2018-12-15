@@ -27,6 +27,6 @@ const char *ps_title_errno(int rc);
 int is_ps_title_available();
 void cleanup_ps_args(char **argv);
 
-}
+} // polar
 
 #endif // POLARPHP_ARTIFACTS_PROCESS_TITLE_H

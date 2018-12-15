@@ -25,7 +25,7 @@ void print_polar_version()
 {
    std::cout << POLARPHP_PACKAGE_STRING << " (built: "<< BUILD_TIME <<  ") "<< std::endl
              << "Copyright (c) 2016-2018 The polarphp Foundation" << std::endl
-             << get_zend_version() << std::endl;
+             << get_zend_version();
 }
 
 } // polar

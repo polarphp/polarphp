@@ -19,7 +19,8 @@
 #include <dirent.h>
 #endif
 
-enum {
+enum
+{
    LOCALTIME_R,
    CTIME_R,
    ASCTIME_R,
