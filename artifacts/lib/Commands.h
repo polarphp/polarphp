@@ -43,10 +43,18 @@ int dispatch_cli_command();
 void interactive_opt_setter(int count);
 bool everyline_exec_script_filename_opt_setter(CLI::results_t res);
 bool script_file_opt_setter(CLI::results_t res);
-void lint_opt_setter(int);
+void lint_opt_setter(int count);
 bool code_without_php_tags_opt_setter(CLI::results_t res);
 bool everyline_code_opt_setter(CLI::results_t res);
-
+bool begin_code_opt_setter(CLI::results_t res);
+bool end_code_opt_setter(CLI::results_t res);
+void strip_code_opt_setter(int count);
+bool reflection_func_opt_setter(CLI::results_t res);
+bool reflection_class_opt_setter(CLI::results_t res);
+bool reflection_extension_opt_setter(CLI::results_t res);
+bool reflection_zend_extension_opt_setter(CLI::results_t res);
+bool reflection_ext_info_opt_setter(CLI::results_t res);
+void reflection_show_ini_cfg_opt_setter(int count);
 
 } // polar
 

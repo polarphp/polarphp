@@ -45,14 +45,10 @@ std::string sg_codeWithoutPhpTags{};
 std::string sg_beginCode{};
 std::string sg_everyLineExecCode{};
 std::string sg_endCode{};
-std::string sg_zendExtensionFilename{};
+std::vector<std::string> sg_zendExtensionFilenames{};
 std::vector<std::string> sg_scriptArgs{};
 std::vector<std::string> sg_defines{};
-std::string sg_reflectFunc{};
-std::string sg_reflectClass{};
-std::string sg_reflectModule{};
-std::string sg_reflectZendExt{};
-std::string sg_reflectConfig{};
+std::string sg_reflectWhat{};
 
 int main(int argc, char *argv[])
 {
@@ -214,18 +210,18 @@ void setup_command_opts(CLI::App &parser)
    parser.add_flag("-l, --lint", polar::lint_opt_setter, "Syntax check only (lint)");
    parser.add_option("-r",CLI::callback_t(polar::code_without_php_tags_opt_setter), "Run PHP <code> without using script tags <?..?>.")->type_name("<code>");
    parser.add_option("-R", CLI::callback_t(polar::everyline_code_opt_setter), "Run PHP <code> for every input line.")->type_name("<code>");
-   parser.add_option("-B", sg_beginCode, "Run PHP <begin_code> before processing input lines.")->type_name("<begin_code>");
-   parser.add_option("-E", sg_endCode, "Run PHP <end_code> after processing all input lines.")->type_name("<end_code>");
-   parser.add_flag("-w", sg_stripCode, "Output source with stripped comments and whitespace.");
-   parser.add_option("-z", sg_zendExtensionFilename, "Load Zend extension <file>.")->type_name("<file>");
+   parser.add_option("-B", CLI::callback_t(polar::begin_code_opt_setter), "Run PHP <begin_code> before processing input lines.")->type_name("<begin_code>");
+   parser.add_option("-E", CLI::callback_t(polar::end_code_opt_setter), "Run PHP <end_code> after processing all input lines.")->type_name("<end_code>");
+   parser.add_flag("-w",  polar::strip_code_opt_setter, "Output source with stripped comments and whitespace.");
+   parser.add_option("-z", sg_zendExtensionFilenames, "Load Zend extension <file>.")->type_name("<file>");
    parser.add_flag("-H", sg_hideExternArgs, "Hide any passed arguments from external tools.");
 
-   parser.add_option("--rf", sg_reflectFunc, "Show information about function <name>.")->type_name("<name>");
-   parser.add_option("--rc", sg_reflectClass, "Show information about class <name>.")->type_name("<name>");
-   parser.add_option("--rm", sg_reflectModule, "Show information about extension <name>.")->type_name("<name>");
-   parser.add_option("--rz", sg_reflectZendExt, "Show information about Zend extension <name>.")->type_name("<name>");
-   parser.add_option("--ri", sg_reflectConfig, "Show configuration for extension <name>.")->type_name("<name>");
-   parser.add_option("--ini", sg_showIniCfg, "Show configuration file names.")->type_name("");
+   parser.add_option("--rf", CLI::callback_t(polar::reflection_func_opt_setter), "Show information about function <name>.")->type_name("<name>");
+   parser.add_option("--rc", CLI::callback_t(polar::reflection_class_opt_setter), "Show information about class <name>.")->type_name("<name>");
+   parser.add_option("--rm", CLI::callback_t(polar::reflection_extension_opt_setter), "Show information about extension <name>.")->type_name("<name>");
+   parser.add_option("--rz", CLI::callback_t(polar::reflection_zend_extension_opt_setter), "Show information about Zend extension <name>.")->type_name("<name>");
+   parser.add_option("--ri", CLI::callback_t(polar::reflection_ext_info_opt_setter), "Show configuration for extension <name>.")->type_name("<name>");
+   parser.add_flag("--ini", polar::reflection_show_ini_cfg_opt_setter, "Show configuration file names.")->type_name("");
 
    parser.add_option("args", sg_scriptArgs, "Arguments passed to script. Use -- args when first argument.")->type_name("string");
 }

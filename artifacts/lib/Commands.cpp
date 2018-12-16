@@ -39,15 +39,10 @@ extern std::string sg_codeWithoutPhpTags;
 extern std::string sg_beginCode;
 extern std::string sg_everyLineExecCode;
 extern std::string sg_endCode;
-extern std::string sg_zendExtensionFilename;
+extern std::vector<std::string> sg_zendExtensionFilenames;
 extern std::vector<std::string> sg_scriptArgs;
 extern std::vector<std::string> sg_defines;
-extern std::string sg_reflectFunc;
-extern std::string sg_reflectClass;
-extern std::string sg_reflectModule;
-extern std::string sg_reflectZendExt;
-extern std::string sg_reflectConfig;
-
+extern std::string sg_reflectWhat;
 extern int sg_exitStatus;
 extern std::string sg_errorMsg;
 
@@ -145,6 +140,74 @@ bool everyline_code_opt_setter(CLI::results_t res)
    return CLI::detail::lexical_cast(res[0], sg_everyLineExecCode);
 }
 
+bool begin_code_opt_setter(CLI::results_t res)
+{
+   if (sg_behavior != ExecMode::Standard || sg_interactive) {
+      sg_exitStatus = 1;
+      sg_errorMsg = PARAM_MODE_CONFLICT;
+      throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
+   }
+   sg_behavior = ExecMode::ProcessStdin;
+   return CLI::detail::lexical_cast(res[0], sg_beginCode);
+}
+
+bool end_code_opt_setter(CLI::results_t res)
+{
+   if (sg_behavior != ExecMode::Standard || sg_interactive) {
+      sg_exitStatus = 1;
+      sg_errorMsg = PARAM_MODE_CONFLICT;
+      throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
+   }
+   sg_behavior = ExecMode::ProcessStdin;
+   return CLI::detail::lexical_cast(res[0], sg_endCode);
+}
+
+void strip_code_opt_setter(int)
+{
+   if (sg_behavior == ExecMode::CliDirect || sg_behavior == ExecMode::ProcessStdin) {
+      sg_exitStatus = 1;
+      sg_errorMsg = PARAM_MODE_CONFLICT;
+      throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
+   }
+   sg_behavior = ExecMode::Strip;
+   sg_stripCode = true;
+}
+
+bool reflection_func_opt_setter(CLI::results_t res)
+{
+   sg_behavior = ExecMode::ReflectionFunction;
+   return CLI::detail::lexical_cast(res[0], sg_reflectWhat);
+}
+
+bool reflection_class_opt_setter(CLI::results_t res)
+{
+   sg_behavior = ExecMode::ReflectionClass;
+   return CLI::detail::lexical_cast(res[0], sg_reflectWhat);
+}
+
+bool reflection_extension_opt_setter(CLI::results_t res)
+{
+   sg_behavior = ExecMode::ReflectionExtension;
+   return CLI::detail::lexical_cast(res[0], sg_reflectWhat);
+}
+
+bool reflection_zend_extension_opt_setter(CLI::results_t res)
+{
+   sg_behavior = ExecMode::ReflectionZendExtension;
+   return CLI::detail::lexical_cast(res[0], sg_reflectWhat);
+}
+
+bool reflection_ext_info_opt_setter(CLI::results_t res)
+{
+   sg_behavior = ExecMode::ReflectionExtInfo;
+   return CLI::detail::lexical_cast(res[0], sg_reflectWhat);
+}
+
+void reflection_show_ini_cfg_opt_setter(int)
+{
+   sg_behavior = ExecMode::ReflectionExtInfo;
+   sg_showIniCfg = true;
+}
 
 void print_polar_version()
 {
