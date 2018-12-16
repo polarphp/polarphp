@@ -37,13 +37,14 @@ bool sg_ignoreIni;
 bool sg_syntaxCheck;
 bool sg_showModulesInfo;
 bool sg_hideExternArgs;
+bool sg_showIniCfg;
+bool sg_stripCode;
 std::string sg_configPath{};
 std::string sg_scriptFile{};
 std::string sg_codeWithoutPhpTags{};
 std::string sg_beginCode{};
 std::string sg_everyLineExecCode{};
 std::string sg_endCode{};
-std::string sg_stripCodeFilename{};
 std::string sg_zendExtensionFilename{};
 std::vector<std::string> sg_scriptArgs{};
 std::vector<std::string> sg_defines{};
@@ -57,6 +58,7 @@ int main(int argc, char *argv[])
 {
    polar::InitPolar polarInitializer(argc, argv);
    CLI::App cmdParser;
+   cmdParser.formatter(std::make_shared<polar::PhpOptFormatter>());
    polarInitializer.initNgOpts(cmdParser);
    setup_command_opts(cmdParser);
    CLI11_PARSE(cmdParser, argc, argv);
@@ -197,28 +199,32 @@ out:
 
 void setup_command_opts(CLI::App &parser)
 {
-   parser.add_flag("-v, --version", sg_showVersion, "Show polarphp version info.");
-   parser.add_flag("-i, --ng-info", sg_showNgInfo, "Show polarphp info.");
-   parser.add_flag("-a, --interactive", polar::interactive_opt_setter, "Run interactively PHP shell.");
-   parser.add_flag("-e, --generate-extend-info", sg_generateExtendInfo, "Generate extended information for debugger/profiler.");
-   parser.add_flag("-l, --lint", sg_syntaxCheck, "Syntax check only (lint)");
-   parser.add_flag("-m, --modules-info", sg_showModulesInfo, "Show compiled in modules.");
    parser.add_option("-c, --config", sg_configPath, "Look for php.yaml file in this directory.")->type_name("<path>|<file>");
    parser.add_flag("-n", sg_ignoreIni, "No configuration (ini) files will be used");
    parser.add_option("-d", sg_defines, "Define INI entry foo with value 'bar'.")->type_name("foo[=bar]");
-   parser.add_option("-f", sg_scriptFile, "Parse and execute <file>.")->type_name("<file>");
-   parser.add_option("-r", sg_codeWithoutPhpTags, "Run PHP <code> without using script tags <?..?>.")->type_name("<code>");
-   parser.add_option("-B", sg_beginCode, "Run PHP <begin_code> before processing input lines.")->type_name("<begin_code>");
-   parser.add_option("-R", CLI::callback_t(polar::everyline_code_opt_setter), "Run PHP <code> for every input line.")->type_name("<code>");
+   parser.add_flag("-e, --generate-extend-info", sg_generateExtendInfo, "Generate extended information for debugger/profiler.");
+   parser.add_flag("-m, --modules-info", sg_showModulesInfo, "Show compiled in modules.");
+
+   parser.add_flag("-i, --ng-info", sg_showNgInfo, "Show polarphp info.");
+   parser.add_flag("-v, --version", sg_showVersion, "Show polarphp version info.");
+   parser.add_flag("-a, --interactive", polar::interactive_opt_setter, "Run interactively PHP shell.");
    parser.add_option("-F", CLI::callback_t(polar::everyline_exec_script_filename_opt_setter), "Parse and execute <file> for every input line.")->type_name("<file>");
+   parser.add_option("-f", CLI::callback_t(polar::script_file_opt_setter), "Parse and execute <file>.")->type_name("<file>");
+   parser.add_flag("-l, --lint", sg_syntaxCheck, "Syntax check only (lint)");
+   parser.add_option("-r", sg_codeWithoutPhpTags, "Run PHP <code> without using script tags <?..?>.")->type_name("<code>");
+   parser.add_option("-R", CLI::callback_t(polar::everyline_code_opt_setter), "Run PHP <code> for every input line.")->type_name("<code>");
+   parser.add_option("-B", sg_beginCode, "Run PHP <begin_code> before processing input lines.")->type_name("<begin_code>");
    parser.add_option("-E", sg_endCode, "Run PHP <end_code> after processing all input lines.")->type_name("<end_code>");
-   parser.add_flag("-H", sg_hideExternArgs, "Hide any passed arguments from external tools.");
-   parser.add_option("-w", sg_stripCodeFilename, "Output source with stripped comments and whitespace.")->type_name("<file>");
+   parser.add_flag("-w", sg_stripCode, "Output source with stripped comments and whitespace.");
    parser.add_option("-z", sg_zendExtensionFilename, "Load Zend extension <file>.")->type_name("<file>");
-   parser.add_option("args", sg_scriptArgs, "Arguments passed to script. Use -- args when first argument.")->type_name("string");
+   parser.add_flag("-H", sg_hideExternArgs, "Hide any passed arguments from external tools.");
+
    parser.add_option("--rf", sg_reflectFunc, "Show information about function <name>.")->type_name("<name>");
    parser.add_option("--rc", sg_reflectClass, "Show information about class <name>.")->type_name("<name>");
    parser.add_option("--rm", sg_reflectModule, "Show information about extension <name>.")->type_name("<name>");
    parser.add_option("--rz", sg_reflectZendExt, "Show information about Zend extension <name>.")->type_name("<name>");
    parser.add_option("--ri", sg_reflectConfig, "Show configuration for extension <name>.")->type_name("<name>");
+   parser.add_option("--ini", sg_showIniCfg, "Show configuration file names.")->type_name("");
+
+   parser.add_option("args", sg_scriptArgs, "Arguments passed to script. Use -- args when first argument.")->type_name("string");
 }
