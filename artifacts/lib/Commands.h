@@ -31,8 +31,8 @@ void setup_init_entries_commands(const std::vector<std::string> defines, std::st
 int dispatch_cli_command();
 
 void interactive_opt_setter(int count);
-bool everyline_exec_script_filename_setter(CLI::results_t res);
-
+bool everyline_exec_script_filename_opt_setter(CLI::results_t res);
+bool everyline_code_opt_setter(CLI::results_t res);
 } // polar
 
 #endif // POLARPHP_ARTIFACTS_COMMANDS_H

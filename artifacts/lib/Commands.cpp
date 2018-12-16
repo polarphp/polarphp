@@ -30,6 +30,21 @@ extern bool sg_ignoreIni;
 extern bool sg_syntaxCheck;
 extern bool sg_showModulesInfo;
 extern bool sg_hideExternArgs;
+extern std::string sg_configPath;
+extern std::string sg_scriptFile;
+extern std::string sg_codeWithoutPhpTags;
+extern std::string sg_beginCode;
+extern std::string sg_everyLineExecCode;
+extern std::string sg_endCode;
+extern std::string sg_stripCodeFilename;
+extern std::string sg_zendExtensionFilename;
+extern std::vector<std::string> sg_scriptArgs;
+extern std::vector<std::string> sg_defines;
+extern std::string sg_reflectFunc;
+extern std::string sg_reflectClass;
+extern std::string sg_reflectModule;
+extern std::string sg_reflectZendExt;
+extern std::string sg_reflectConfig;
 
 extern int sg_exitStatus;
 extern std::string sg_errorMsg;
@@ -48,13 +63,42 @@ void interactive_opt_setter(int)
    if (sg_behavior != ExecMode::Standard) {
       sg_exitStatus = 1;
       sg_errorMsg = PARAM_MODE_CONFLICT;
-      throw CLI::ParseError(PARAM_MODE_CONFLICT, sg_exitStatus);
+      throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
    }
 }
 
-bool everyline_exec_script_filename_setter(CLI::results_t res)
+bool everyline_exec_script_filename_opt_setter(CLI::results_t res)
 {
-   return true;
+   if (sg_behavior == ExecMode::ProcessStdin) {
+      if (!sg_everyLineExecCode.empty() || !sg_scriptFile.empty()) {
+         sg_exitStatus = 1;
+         sg_errorMsg = "You can use -R or -F only once.";
+         throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
+      }
+   } else if (sg_behavior != ExecMode::Standard) {
+      sg_exitStatus = 1;
+      sg_errorMsg = PARAM_MODE_CONFLICT;
+      throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
+   }
+   sg_behavior = ExecMode::ProcessStdin;
+   return CLI::detail::lexical_cast(res[0], sg_scriptFile);
+}
+
+bool everyline_code_opt_setter(CLI::results_t res)
+{
+   if (sg_behavior == ExecMode::ProcessStdin) {
+      if (!sg_everyLineExecCode.empty() || !sg_scriptFile.empty()) {
+         sg_exitStatus = 1;
+         sg_errorMsg = "You can use -R or -F only once.";
+         throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
+      }
+   } else if (sg_behavior != ExecMode::Standard) {
+      sg_exitStatus = 1;
+      sg_errorMsg = PARAM_MODE_CONFLICT;
+      throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
+   }
+   sg_behavior = ExecMode::ProcessStdin;
+   return CLI::detail::lexical_cast(res[0], sg_everyLineExecCode);
 }
 
 void print_polar_version()
