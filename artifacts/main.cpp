@@ -199,6 +199,7 @@ out:
 
 void setup_command_opts(CLI::App &parser)
 {
+   /// order sensitive
    parser.add_option("-c, --config", sg_configPath, "Look for php.yaml file in this directory.")->type_name("<path>|<file>");
    parser.add_flag("-n", sg_ignoreIni, "No configuration (ini) files will be used");
    parser.add_option("-d", sg_defines, "Define INI entry foo with value 'bar'.")->type_name("foo[=bar]");
@@ -210,8 +211,8 @@ void setup_command_opts(CLI::App &parser)
    parser.add_flag("-a, --interactive", polar::interactive_opt_setter, "Run interactively PHP shell.");
    parser.add_option("-F", CLI::callback_t(polar::everyline_exec_script_filename_opt_setter), "Parse and execute <file> for every input line.")->type_name("<file>");
    parser.add_option("-f", CLI::callback_t(polar::script_file_opt_setter), "Parse and execute <file>.")->type_name("<file>");
-   parser.add_flag("-l, --lint", sg_syntaxCheck, "Syntax check only (lint)");
-   parser.add_option("-r", sg_codeWithoutPhpTags, "Run PHP <code> without using script tags <?..?>.")->type_name("<code>");
+   parser.add_flag("-l, --lint", polar::lint_opt_setter, "Syntax check only (lint)");
+   parser.add_option("-r",CLI::callback_t(polar::code_without_php_tags_opt_setter), "Run PHP <code> without using script tags <?..?>.")->type_name("<code>");
    parser.add_option("-R", CLI::callback_t(polar::everyline_code_opt_setter), "Run PHP <code> for every input line.")->type_name("<code>");
    parser.add_option("-B", sg_beginCode, "Run PHP <begin_code> before processing input lines.")->type_name("<begin_code>");
    parser.add_option("-E", sg_endCode, "Run PHP <end_code> after processing all input lines.")->type_name("<end_code>");

@@ -62,12 +62,12 @@ ExecMode sg_behavior = ExecMode::Standard;
 
 void interactive_opt_setter(int)
 {
-   std::cout << "interactive_opt_setter" << std::endl;
    if (sg_behavior != ExecMode::Standard) {
       sg_exitStatus = 1;
       sg_errorMsg = PARAM_MODE_CONFLICT;
       throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
    }
+   sg_interactive = true;
 }
 
 bool everyline_exec_script_filename_opt_setter(CLI::results_t res)
@@ -83,11 +83,49 @@ bool everyline_exec_script_filename_opt_setter(CLI::results_t res)
       sg_errorMsg = PARAM_MODE_CONFLICT;
       throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
    }
-   std::cout << "F"<< sg_scriptFile << std::endl;
    sg_behavior = ExecMode::ProcessStdin;
+   return CLI::detail::lexical_cast(res[0], sg_scriptFile);
+}
+
+bool script_file_opt_setter(CLI::results_t res)
+{
+   if (sg_behavior == ExecMode::CliDirect || sg_behavior == ExecMode::ProcessStdin) {
+      sg_exitStatus = 1;
+      sg_errorMsg = PARAM_MODE_CONFLICT;
+      throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
+   } else if (!sg_scriptFile.empty()) {
+      sg_exitStatus = 1;
+      sg_errorMsg = "You can use -f only once.";
+      throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
+   }
    CLI::detail::lexical_cast(res[0], sg_scriptFile);
-   std::cout << "F"<< sg_scriptFile << std::endl;
    return true;
+}
+
+void lint_opt_setter(int)
+{
+   if (sg_behavior == ExecMode::Standard) {
+      return;
+   }
+   sg_syntaxCheck = true;
+   sg_behavior = ExecMode::Lint;
+}
+
+bool code_without_php_tags_opt_setter(CLI::results_t res)
+{
+   if (sg_behavior == ExecMode::CliDirect) {
+      if (!sg_codeWithoutPhpTags.empty() || !sg_scriptFile.empty()) {
+         sg_exitStatus = 1;
+         sg_errorMsg = "You can use -r only once.";
+         throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
+      }
+   } else if(sg_behavior != ExecMode::Standard || sg_interactive) {
+      sg_exitStatus = 1;
+      sg_errorMsg = PARAM_MODE_CONFLICT;
+      throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
+   }
+   sg_behavior = ExecMode::CliDirect;
+   return CLI::detail::lexical_cast(res[0], sg_codeWithoutPhpTags);
 }
 
 bool everyline_code_opt_setter(CLI::results_t res)
@@ -107,22 +145,6 @@ bool everyline_code_opt_setter(CLI::results_t res)
    return CLI::detail::lexical_cast(res[0], sg_everyLineExecCode);
 }
 
-bool script_file_opt_setter(CLI::results_t res)
-{
-   if (sg_behavior == ExecMode::CliDirect || sg_behavior == ExecMode::ProcessStdin) {
-      sg_exitStatus = 1;
-      sg_errorMsg = PARAM_MODE_CONFLICT;
-      throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
-   } else if (!sg_scriptFile.empty()) {
-      sg_exitStatus = 1;
-      sg_errorMsg = "You can use -f only once.";
-      throw CLI::ParseError(sg_errorMsg, sg_exitStatus);
-   }
-   std::cout << sg_scriptFile << std::endl;
-   CLI::detail::lexical_cast(res[0], sg_scriptFile);
-   std::cout << sg_scriptFile << std::endl;
-   return true;
-}
 
 void print_polar_version()
 {

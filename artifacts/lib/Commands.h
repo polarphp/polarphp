@@ -42,8 +42,11 @@ int dispatch_cli_command();
 
 void interactive_opt_setter(int count);
 bool everyline_exec_script_filename_opt_setter(CLI::results_t res);
-bool everyline_code_opt_setter(CLI::results_t res);
 bool script_file_opt_setter(CLI::results_t res);
+void lint_opt_setter(int);
+bool code_without_php_tags_opt_setter(CLI::results_t res);
+bool everyline_code_opt_setter(CLI::results_t res);
+
 
 } // polar
 
