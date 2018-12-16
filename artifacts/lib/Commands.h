@@ -14,12 +14,12 @@
 
 #include "ZendHeaders.h"
 #include <string>
-#include <iostream>
+#include <vector>
+#include <CLI/Option.hpp>
 
 namespace CLI {
 class App;
 } // CLI
-
 
 namespace polar {
 
@@ -27,8 +27,11 @@ using CLI::App;
 
 void print_polar_version();
 POLAR_DECL_EXPORT int php_lint_script(zend_file_handle *file);
-void setup_init_entries_commands(std::string &iniEntries);
-int dispatch_cli_command(App &cmdParser, int argc, char *argv[]);
+void setup_init_entries_commands(const std::vector<std::string> defines, std::string &iniEntries);
+int dispatch_cli_command();
+
+void interactive_opt_setter(int count);
+bool everyline_exec_script_filename_setter(CLI::results_t res);
 
 } // polar
 

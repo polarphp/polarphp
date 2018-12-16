@@ -27,29 +27,32 @@ using polar::basic::StringRef;
 
 void setup_command_opts(CLI::App &parser);
 
-static bool sg_showVersion;
-static bool sg_showNgInfo;
-static bool sg_interactive;
-static bool sg_generateExtendInfo;
-static bool sg_syntaxCheck;
-static bool sg_showModulesInfo;
-static bool sg_hideExternArgs;
-static std::string sg_configPath{};
-static std::string sg_scriptFilepath{};
-static std::string sg_codeWithoutPhpTags{};
-static std::string sg_beginCode{};
-static std::string sg_everyLineExecCode{};
-static std::string sg_everyLineExecScriptFilename{};
-static std::string sg_endCode{};
-static std::string sg_stripCodeFilename{};
-static std::string sg_zendExtensionFilename{};
-static std::vector<std::string> sg_scriptArgs{};
-static std::vector<std::string> sg_defines{};
-static std::string sg_reflectFunc{};
-static std::string sg_reflectClass{};
-static std::string sg_reflectModule{};
-static std::string sg_reflectZendExt{};
-static std::string sg_reflectConfig{};
+int sg_exitStatus = SUCCESS;
+std::string sg_errorMsg;
+bool sg_showVersion;
+bool sg_showNgInfo;
+bool sg_interactive;
+bool sg_generateExtendInfo;
+bool sg_ignoreIni;
+bool sg_syntaxCheck;
+bool sg_showModulesInfo;
+bool sg_hideExternArgs;
+std::string sg_configPath{};
+std::string sg_scriptFilepath{};
+std::string sg_codeWithoutPhpTags{};
+std::string sg_beginCode{};
+std::string sg_everyLineExecCode{};
+std::string sg_everyLineExecScriptFilename{};
+std::string sg_endCode{};
+std::string sg_stripCodeFilename{};
+std::string sg_zendExtensionFilename{};
+std::vector<std::string> sg_scriptArgs{};
+std::vector<std::string> sg_defines{};
+std::string sg_reflectFunc{};
+std::string sg_reflectClass{};
+std::string sg_reflectModule{};
+std::string sg_reflectZendExt{};
+std::string sg_reflectConfig{};
 
 int main(int argc, char *argv[])
 {
@@ -58,6 +61,11 @@ int main(int argc, char *argv[])
    polarInitializer.initNgOpts(cmdParser);
    setup_command_opts(cmdParser);
    CLI11_PARSE(cmdParser, argc, argv);
+   /// check command semantic error
+   if (sg_exitStatus != 0) {
+      std::cerr << sg_errorMsg << std::endl;
+      exit(sg_exitStatus);
+   }
    polar::ExecEnv execEnv = polar::retrieve_global_execenv();
    execEnv.setArgc(argc);
    execEnv.setArgv(argv);
@@ -71,10 +79,8 @@ int main(int argc, char *argv[])
    char **argv_save = argv;
    BOOL using_wide_argv = 0;
 #endif
-   int exitStatus = SUCCESS;
    int moduleStarted = 0;
    std::string iniEntries;
-   bool iniIgnore = 0;
    /*
     * Do not move this initialization. It needs to happen before argv is used
     * in any way.
@@ -123,14 +129,14 @@ int main(int argc, char *argv[])
 #endif
    /// processing pre module init command options
    if (!sg_defines.empty()) {
-      polar::setup_init_entries_commands(iniEntries);
+      polar::setup_init_entries_commands(sg_defines, iniEntries);
    }
    /// processing ini definitions
    ///
    execEnv.setIniDefaultsHandler(polar::cli_ini_defaults);
    execEnv.setPhpIniPathOverride(sg_configPath);
    execEnv.setPhpIniIgnoreCwd(true);
-   execEnv.setPhpIniIgnore(iniIgnore);
+   execEnv.setPhpIniIgnore(sg_ignoreIni);
    iniEntries += polar::HARDCODED_INI;
 
    execEnv.setInitEntries(iniEntries);
@@ -142,7 +148,7 @@ int main(int argc, char *argv[])
       // because the executor's constructor does not set initialize it.
       // Apart from that there seems no need for zend_ini_deactivate() yet.
       // So we goto out_err.
-      exitStatus = 1;
+      sg_exitStatus = 1;
       goto out;
    }
    moduleStarted = 1;
@@ -159,17 +165,13 @@ int main(int argc, char *argv[])
    SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
 #endif
    /// processing options
-   if (sg_showVersion) {
-      polar::print_polar_version();
-      return 0;
-   }
 
    /* -e option */
    if (sg_generateExtendInfo) {
       CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
    }
    zend_first_try {
-      exitStatus = polar::dispatch_cli_command(cmdParser, argc, argv);
+      sg_exitStatus = polar::dispatch_cli_command();
    } zend_end_try();
 
    /// module finished
@@ -191,25 +193,25 @@ out:
    /// exiting.
    ///
    polar::cleanup_ps_args(argv);
-   exit(exitStatus);
-   return 0;
+   exit(sg_exitStatus);
 }
 
 void setup_command_opts(CLI::App &parser)
 {
    parser.add_flag("-v, --version", sg_showVersion, "Show polarphp version info.");
    parser.add_flag("-i, --ng-info", sg_showNgInfo, "Show polarphp info.");
-   parser.add_flag("-a, --interactive", sg_interactive, "Run interactively PHP shell.");
+   parser.add_flag("-a, --interactive", polar::interactive_opt_setter, "Run interactively PHP shell.");
    parser.add_flag("-e, --generate-extend-info", sg_generateExtendInfo, "Generate extended information for debugger/profiler.");
    parser.add_flag("-l, --lint", sg_syntaxCheck, "Syntax check only (lint)");
    parser.add_flag("-m, --modules-info", sg_showModulesInfo, "Show compiled in modules.");
    parser.add_option("-c, --config", sg_configPath, "Look for php.yaml file in this directory.")->type_name("<path>|<file>");
+   parser.add_flag("-n", sg_ignoreIni, "No configuration (ini) files will be used");
    parser.add_option("-d", sg_defines, "Define INI entry foo with value 'bar'.")->type_name("foo[=bar]");
    parser.add_option("-f", sg_scriptFilepath, "Parse and execute <file>.")->type_name("<file>");
    parser.add_option("-r", sg_codeWithoutPhpTags, "Run PHP <code> without using script tags <?..?>.")->type_name("<code>");
    parser.add_option("-B", sg_beginCode, "Run PHP <begin_code> before processing input lines.")->type_name("<begin_code>");
    parser.add_option("-R", sg_everyLineExecCode, "Run PHP <code> for every input line.")->type_name("<code>");
-   parser.add_option("-F", sg_everyLineExecScriptFilename, "Parse and execute <file> for every input line.")->type_name("<file>");
+   parser.add_option("-F", CLI::callback_t(polar::everyline_exec_script_filename_setter), "Parse and execute <file> for every input line.")->type_name("<file>");
    parser.add_option("-E", sg_endCode, "Run PHP <end_code> after processing all input lines.")->type_name("<end_code>");
    parser.add_flag("-H", sg_hideExternArgs, "Hide any passed arguments from external tools.");
    parser.add_option("-w", sg_stripCodeFilename, "Output source with stripped comments and whitespace.")->type_name("<file>");

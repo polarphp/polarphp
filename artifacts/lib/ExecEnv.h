@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include "ZendHeaders.h"
 
@@ -122,6 +123,9 @@ using IniConfigDefaultInitFunc = void (*)(HashTable *configuration_hash);
 class ExecEnv
 {
 public:
+   void activate();
+   void deactivate();
+
    ExecEnv &setArgc(int argc);
    ExecEnv &setArgv(const std::vector<StringRef> &argv);
    ExecEnv &setArgv(char *argv[]);

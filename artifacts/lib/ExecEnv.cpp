@@ -70,6 +70,16 @@ ExecEnv &retrieve_global_execenv()
    return execEnv;
 }
 
+void ExecEnv::activate()
+{
+
+}
+
+void ExecEnv::deactivate()
+{
+
+}
+
 ExecEnv &ExecEnv::setArgc(int argc)
 {
    m_argc = argc;
