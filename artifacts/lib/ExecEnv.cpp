@@ -13,6 +13,7 @@
 #include "polarphp/global/CompilerFeature.h"
 #include "polarphp/global/Config.h"
 #include "Defs.h"
+#include "Ticks.h"
 
 #include <cstdio>
 
@@ -61,13 +62,20 @@
 namespace polar
 {
 
-//thread_local PhpCoreGlobals sg_coreGlobals;
-int sg_coreGlobalsId;
-
 ExecEnv &retrieve_global_execenv()
 {
    thread_local ExecEnv execEnv;
    return execEnv;
+}
+
+ExecEnv::ExecEnv()
+{
+   startup_ticks();
+}
+
+ExecEnv::~ExecEnv()
+{
+   shutdown_ticks();
 }
 
 void ExecEnv::activate()
@@ -76,108 +84,6 @@ void ExecEnv::activate()
 }
 
 void ExecEnv::deactivate()
-{
-
-}
-
-ExecEnv &ExecEnv::setArgc(int argc)
-{
-   m_argc = argc;
-   return *this;
-}
-
-ExecEnv &ExecEnv::setArgv(const std::vector<StringRef> &argv)
-{
-   m_argv = argv;
-   return *this;
-}
-
-ExecEnv &ExecEnv::setArgv(char **argv)
-{
-   std::vector<StringRef> tempArgv;
-   char **arg = argv;
-   while (*arg != nullptr) {
-      tempArgv.push_back(*arg);
-      ++arg;
-   }
-   if (!tempArgv.empty()) {
-      m_argv = tempArgv;
-   }
-   return *this;
-}
-
-ExecEnv &ExecEnv::setPhpIniIgnore(bool flag)
-{
-   m_phpIniIgnore = flag;
-   return *this;
-}
-
-ExecEnv &ExecEnv::setPhpIniIgnoreCwd(bool flag)
-{
-   m_phpIniIgnoreCwd = flag;
-   return *this;
-}
-
-ExecEnv &ExecEnv::setPhpIniPathOverride(const std::string &path)
-{
-   m_phpIniPathOverride = path;
-   return *this;
-}
-
-ExecEnv &ExecEnv::setInitEntries(const std::string &entries)
-{
-   m_iniEntries = entries;
-   return *this;
-}
-
-ExecEnv &ExecEnv::setIniDefaultsHandler(IniConfigDefaultInitFunc handler)
-{
-   m_iniDefaultInitHandler = handler;
-   return *this;
-}
-
-const std::vector<StringRef> &ExecEnv::getArgv() const
-{
-   return m_argv;
-}
-
-int ExecEnv::getArgc() const
-{
-   return m_argc;
-}
-
-bool ExecEnv::getPhpIniIgnore() const
-{
-   return m_phpIniIgnore;
-}
-
-bool ExecEnv::getPhpIniIgnoreCwd() const
-{
-   return m_phpIniIgnoreCwd;
-}
-
-StringRef ExecEnv::getPhpIniPathOverride() const
-{
-   return m_phpIniPathOverride;
-}
-
-StringRef ExecEnv::getIniEntries() const
-{
-   return m_iniEntries;
-}
-
-IniConfigDefaultInitFunc ExecEnv::getIniConfigDeaultHandler() const
-{
-   return m_iniDefaultInitHandler;
-}
-
-StringRef ExecEnv::getExecutableFilepath() const
-{
-   assert(m_argv.size() > 0);
-   return m_argv[0];
-}
-
-void ExecEnv::unbufferWrite(const char *str, int len)
 {
 
 }
@@ -573,5 +479,41 @@ zend_string *php_resolve_path_for_zend(const char *filename, size_t filenameLen)
 
 }
 
+bool seek_file_begin(zend_file_handle *fileHandle, const char *scriptFile, int *lineno)
+{
+   int c;
+   *lineno = 1;
+   fileHandle->type = ZEND_HANDLE_FP;
+   fileHandle->opened_path = NULL;
+   fileHandle->free_filename = 0;
+   if (!(fileHandle->handle.fp = VCWD_FOPEN(scriptFile, "rb"))) {
+      php_printf("Could not open input file: %s\n", scriptFile);
+      return false;
+   }
+   fileHandle->filename = scriptFile;
+   /* #!php support */
+   c = fgetc(fileHandle->handle.fp);
+   if (c == '#' && (c = fgetc(fileHandle->handle.fp)) == '!') {
+      while (c != '\n' && c != '\r' && c != EOF) {
+         c = fgetc(fileHandle->handle.fp);	/* skip to end of line */
+      }
+      /* handle situations where line is terminated by \r\n */
+      if (c == '\r') {
+         if (fgetc(fileHandle->handle.fp) != '\n') {
+            zend_long pos = zend_ftell(fileHandle->handle.fp);
+            zend_fseek(fileHandle->handle.fp, pos - 1, SEEK_SET);
+         }
+      }
+      *lineno = 2;
+   } else {
+      rewind(fileHandle->handle.fp);
+   }
+   return true;
+}
+
+void ExecEnv::unbufferWrite(const char *str, int len)
+{
+
+}
 
 } // polar

@@ -38,35 +38,47 @@ void tick_iterator(void *d, void *arg)
 
 bool startup_ticks(void)
 {
-   zend_llist_init(&PG(tickFunctions), sizeof(st_tick_function), nullptr, 1);
+   ExecEnv &execEnv = retrieve_global_execenv();
+   zend_llist &tickFunctions = execEnv.getTickFunctions();
+   zend_llist_init(&tickFunctions, sizeof(st_tick_function), nullptr, 1);
    return true;
 }
 
 void deactivate_ticks(void)
 {
-   zend_llist_clean(&PG(tickFunctions));
+   ExecEnv &execEnv = retrieve_global_execenv();
+   zend_llist &tickFunctions = execEnv.getTickFunctions();
+   zend_llist_clean(&tickFunctions);
 }
 
 void shutdown_ticks(void)
 {
-   zend_llist_destroy(&PG(tickFunctions));
+   ExecEnv &execEnv = retrieve_global_execenv();
+   zend_llist &tickFunctions = execEnv.getTickFunctions();
+   zend_llist_destroy(&tickFunctions);
 }
 
 void add_tick_function(void (*func)(int, void*), void * arg)
 {
+   ExecEnv &execEnv = retrieve_global_execenv();
+   zend_llist &tickFunctions = execEnv.getTickFunctions();
    st_tick_function tmp = {func, arg};
-   zend_llist_add_element(&PG(tickFunctions), (void *)&tmp);
+   zend_llist_add_element(&tickFunctions, (void *)&tmp);
 }
 
 void remove_tick_function(void (*func)(int, void *), void * arg)
 {
+   ExecEnv &execEnv = retrieve_global_execenv();
+   zend_llist &tickFunctions = execEnv.getTickFunctions();
    st_tick_function tmp = {func, arg};
-   zend_llist_del_element(&PG(tickFunctions), (void *)&tmp, (int(*)(void*, void*))compare_tick_functions);
+   zend_llist_del_element(&tickFunctions, (void *)&tmp, (int(*)(void*, void*))compare_tick_functions);
 }
 
 void run_ticks(int count)
 {
-   zend_llist_apply_with_argument(&PG(tickFunctions), (llist_apply_with_arg_func_t) tick_iterator, &count);
+   ExecEnv &execEnv = retrieve_global_execenv();
+   zend_llist &tickFunctions = execEnv.getTickFunctions();
+   zend_llist_apply_with_argument(&tickFunctions, (llist_apply_with_arg_func_t) tick_iterator, &count);
 }
 
 } // polar

@@ -53,6 +53,7 @@ using polar::basic::StringRef;
 namespace {
 const char *PARAM_MODE_CONFLICT = "Either execute direct code, process stdin or use a file.";
 ExecMode sg_behavior = ExecMode::Standard;
+char *sg_phpSelf = "";
 }
 
 void interactive_opt_setter(int)
@@ -240,9 +241,7 @@ int dispatch_cli_command()
 {
    ExecEnv &execEnv = retrieve_global_execenv();
    int c;
-   zend_file_handle file_handle;
-   char *reflection_what = nullptr;
-   volatile int request_started = 0;
+   zend_file_handle fileHandle;
    volatile int exitStatus = 0;
    char *php_optarg = nullptr;
    char *orig_optarg = nullptr;
@@ -254,8 +253,7 @@ int dispatch_cli_command()
    char *exec_end = nullptr;
    char *arg_free = nullptr;
    char **arg_excp = &arg_free;
-   char *script_file = nullptr;
-   char *translated_path = nullptr;
+   std::string translatedPath;
    int interactive = 0;
    int lineno = 0;
    const char *param_error = nullptr;
@@ -269,11 +267,44 @@ int dispatch_cli_command()
       }
       /// processing with priority
       ///
+      if (interactive) {
+#if (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)) && !defined(COMPILE_DL_READLINE)
+         printf("Interactive shell\n\n");
+#else
+         printf("Interactive mode enabled\n\n");
+#endif
+         std::cout.flush();
+      }
+      /// setup script file from position arguments
+      if (sg_scriptFile.empty() && sg_behavior != ExecMode::CliDirect &&
+          sg_behavior != ExecMode::ProcessStdin &&
+          !sg_scriptArgs.empty()) {
+         sg_scriptFile = sg_scriptArgs.front();
+      }
+      if (!sg_scriptFile.empty()) {
+         if (!seek_file_begin(&fileHandle, sg_scriptFile.c_str(), &lineno)) {
+            goto err;
+         } else {
+            char realPath[MAXPATHLEN];
+            if (VCWD_REALPATH(sg_scriptFile.c_str(), realPath)) {
+               translatedPath = realPath;
+            }
+         }
+      } else {
+         /// We could handle PHP_MODE_PROCESS_STDIN in a different manner
+         /// here but this would make things only more complicated. And it
+         /// is consitent with the way -R works where the stdin file handle
+         /// is also accessible.
+         fileHandle.filename = "Standard input code";
+         fileHandle.handle.fp = stdin;
+      }
+      fileHandle.type = ZEND_HANDLE_FP;
+      fileHandle.opened_path = nullptr;
+      fileHandle.free_filename = 0;
+      sg_phpSelf = (char*)fileHandle.filename;
+
    } zend_end_try();
 out:
-   if (translated_path) {
-      free(translated_path);
-   }
    if (exitStatus == 0) {
       exitStatus = EG(exit_status);
    }

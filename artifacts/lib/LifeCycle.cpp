@@ -32,32 +32,6 @@ POLAR_DECL_EXPORT int (*php_register_internal_extensions_func)(void) = php_regis
 
 namespace {
 
-void core_globals_ctor(PhpCoreGlobals *coreGlobals)
-{
-   //   std::memset(coreGlobals, 0, sizeof(*coreGlobals));
-   startup_ticks();
-}
-
-void core_globals_dtor(PhpCoreGlobals *coreGlobals)
-{
-   //   if (coreGlobals->lastErrorMessage) {
-   //      free(coreGlobals->lastErrorMessage);
-   //   }
-   //   if (coreGlobals->lastErrorFile) {
-   //      free(coreGlobals->lastErrorFile);
-   //   }
-   //   if (coreGlobals->disableFunctions) {
-   //      free(coreGlobals->disableFunctions);
-   //   }
-   //   if (coreGlobals->disableClasses) {
-   //      free(coreGlobals->disableClasses);
-   //   }
-   //   if (coreGlobals->polarBinary) {
-   //      free(coreGlobals->polarBinary);
-   //   }
-   shutdown_ticks();
-}
-
 void php_binary_init()
 {
    char *binaryLocation = nullptr;
@@ -98,7 +72,7 @@ void php_binary_init()
       binaryLocation = nullptr;
    }
 #endif
-   PG(polarBinary) = binaryLocation;
+   execEnv.setPolarBinary(binaryLocation);
 }
 
 } // anonymous namespace
@@ -118,7 +92,7 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    int moduleNumber = 0;	/* for REGISTER_INI_ENTRIES() */
    char *phpOs;
    zend_module_entry *module;
-
+   ExecEnv &execEnv = retrieve_global_execenv();
 #ifdef POLAR_OS_WIN32
    WORD wVersionRequested = MAKEWORD(2, 0);
    WSADATA wsaData;
@@ -153,10 +127,6 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
       return true;
    }
    php_output_startup();
-   ts_allocate_id(&sg_coreGlobalsId, sizeof(PhpCoreGlobals), (ts_allocate_ctor) core_globals_ctor, (ts_allocate_dtor) core_globals_dtor);
-#ifdef PHP_WIN32
-   ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor) php_win32_core_globals_ctor, (ts_allocate_dtor) php_win32_core_globals_dtor);
-#endif
    gc_globals_ctor();
 
    zuf.error_function = php_error_callback;
@@ -247,7 +217,7 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    //#endif
 
    //php_binary_init();
-   if (!PG(polarBinary).empty()) {
+   if (!execEnv.getPolarBinary().empty()) {
       //REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", PG(php_binary), strlen(PG(php_binary)), CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
    } else {
       //REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", "", 0, CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
@@ -436,7 +406,6 @@ void php_module_shutdown()
    zend_ini_global_shutdown();
    php_output_shutdown();
    sg_moduleInitialized = 0;
-   ts_free_id(sg_coreGlobalsId);
 #ifdef PHP_WIN32
    if (old_invalid_parameter_handler == NULL) {
       _set_invalid_parameter_handler(old_invalid_parameter_handler);
