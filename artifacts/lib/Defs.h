@@ -131,7 +131,6 @@ typedef int pid_t;
 #include <limits.h>
 #endif
 
-
 #ifndef LONG_MAX
 #define LONG_MAX 2147483647L
 #endif
@@ -147,7 +146,6 @@ typedef int pid_t;
 #ifndef INT_MIN
 #define INT_MIN (- INT_MAX - 1)
 #endif
-
 
 /* double limits */
 #include <float.h>
@@ -221,6 +219,10 @@ POLAR_DECL_EXPORT void php_register_pre_request_shutdown(void (*func)(void *), v
 POLAR_DECL_EXPORT void php_com_initialize();
 POLAR_DECL_EXPORT char *php_get_current_user();
 
+/* emit warning and suggestion for unsafe select(2) usage */
+namespace internal {
+void emit_fd_setsize_warning(int maxFd);
+} // internal
 } // polar
 
 /* PHP-named Zend macro wrappers */
@@ -272,6 +274,26 @@ POLAR_DECL_EXPORT char *php_get_current_user();
 #define PHP_GSHUTDOWN_FUNCTION	ZEND_GSHUTDOWN_FUNCTION
 
 #define PHP_MODULE_GLOBALS		ZEND_MODULE_GLOBALS
+
+#ifdef POLAR_OS_WIN32
+/* it is safe to FD_SET too many fd's under win32; the macro will simply ignore
+ * descriptors that go beyond the default FD_SETSIZE */
+# define PHP_SAFE_FD_SET(fd, set)	FD_SET(fd, set)
+# define PHP_SAFE_FD_CLR(fd, set)	FD_CLR(fd, set)
+# define PHP_SAFE_FD_ISSET(fd, set)	FD_ISSET(fd, set)
+# define PHP_SAFE_MAX_FD(m, n)		do { if (n + 1 >= FD_SETSIZE) { polar::internal::emit_fd_setsize_warning(n); }} while(0)
+#else
+# define PHP_SAFE_FD_SET(fd, set)	do { if (fd < FD_SETSIZE) FD_SET(fd, set); } while(0)
+# define PHP_SAFE_FD_CLR(fd, set)	do { if (fd < FD_SETSIZE) FD_CLR(fd, set); } while(0)
+# define PHP_SAFE_FD_ISSET(fd, set)	((fd < FD_SETSIZE) && FD_ISSET(fd, set))
+# define PHP_SAFE_MAX_FD(m, n)		do { if (m >= FD_SETSIZE) { polar::internal::emit_fd_setsize_warning(m); m = FD_SETSIZE - 1; }} while(0)
+#endif
+
+#ifdef POLAR_OS_WIN32
+typedef SOCKET php_socket_t;
+#else
+typedef int php_socket_t;
+#endif
 
 #include "Reentrancy.h"
 

@@ -13,7 +13,6 @@
 #include "polarphp/global/CompilerFeature.h"
 #include "polarphp/global/Config.h"
 #include "Defs.h"
-#include "Ticks.h"
 
 #include <cstdio>
 
@@ -34,6 +33,12 @@
 #ifdef PHP_SIGCHILD
 #include <sys/types.h>
 #include <sys/wait.h>
+#endif
+
+#ifndef POLAR_OS_WIN32
+# define php_select(m, r, w, e, t)	::select(m, r, w, e, t)
+#else
+# include "win32/select.h"
 #endif
 
 #if HAVE_MMAP || defined(PHP_WIN32)
@@ -62,6 +67,23 @@
 namespace polar
 {
 
+CliShellCallbacksType sg_cliShellCallbacks = {nullptr, nullptr, nullptr};
+
+POLAR_DECL_EXPORT CliShellCallbacksType *php_cli_get_shell_callbacks()
+{
+   return &sg_cliShellCallbacks;
+}
+
+int php_execute_script(zend_file_handle *primaryFile)
+{
+   return 0;
+}
+
+POLAR_DECL_EXPORT int php_execute_simple_script(zend_file_handle *primaryFile, zval *ret)
+{
+   return 0;
+}
+
 ExecEnv &retrieve_global_execenv()
 {
    thread_local ExecEnv execEnv;
@@ -69,34 +91,32 @@ ExecEnv &retrieve_global_execenv()
 }
 
 ExecEnv::ExecEnv()
+   : m_started(false),
+     /// TODO read from cfg file
+     m_defaultSocketTimeout(60)
 {
-   startup_ticks();
 }
 
 ExecEnv::~ExecEnv()
 {
-   shutdown_ticks();
 }
 
 void ExecEnv::activate()
 {
-
+   m_started = false;
 }
 
 void ExecEnv::deactivate()
 {
-
+   m_started = false;
 }
 
-void php_module_startup();
-void php_module_shutdown();
-
 //      PHP_INI_BEGIN()
-//         PHP_INI_ENTRY_EX("highlight.comment",		HL_COMMENT_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
-//         PHP_INI_ENTRY_EX("highlight.default",		HL_DEFAULT_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
-//         PHP_INI_ENTRY_EX("highlight.html",			HL_HTML_COLOR,		PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
-//         PHP_INI_ENTRY_EX("highlight.keyword",		HL_KEYWORD_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
-//         PHP_INI_ENTRY_EX("highlight.string",		HL_STRING_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
+//         PHP_INI_ENTRY_EX("highlight.comment",		HL_COMMENT_COLOR,	PHP_INI_ALL,	nullptr,			php_ini_color_displayer_cb)
+//         PHP_INI_ENTRY_EX("highlight.default",		HL_DEFAULT_COLOR,	PHP_INI_ALL,	nullptr,			php_ini_color_displayer_cb)
+//         PHP_INI_ENTRY_EX("highlight.html",			HL_HTML_COLOR,		PHP_INI_ALL,	nullptr,			php_ini_color_displayer_cb)
+//         PHP_INI_ENTRY_EX("highlight.keyword",		HL_KEYWORD_COLOR,	PHP_INI_ALL,	nullptr,			php_ini_color_displayer_cb)
+//         PHP_INI_ENTRY_EX("highlight.string",		HL_STRING_COLOR,	PHP_INI_ALL,	nullptr,			php_ini_color_displayer_cb)
 
 //         STD_PHP_INI_ENTRY_EX("display_errors",		"1",		PHP_INI_ALL,		OnUpdateDisplayErrors,	display_errors,			php_core_globals,	core_globals, display_errors_mode)
 //         STD_PHP_INI_BOOLEAN("display_startup_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			display_startup_errors,	php_core_globals,	core_globals)
@@ -117,59 +137,59 @@ void php_module_shutdown();
 //         STD_PHP_INI_BOOLEAN("report_memleaks",		"1",		PHP_INI_ALL,		OnUpdateBool,			report_memleaks,		php_core_globals,	core_globals)
 //         STD_PHP_INI_BOOLEAN("report_zend_debug",	"1",		PHP_INI_ALL,		OnUpdateBool,			report_zend_debug,		php_core_globals,	core_globals)
 //         STD_PHP_INI_ENTRY("output_buffering",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateLong,	output_buffering,		php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("output_handler",			NULL,		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateString,	output_handler,		php_core_globals,	core_globals)
+//         STD_PHP_INI_ENTRY("output_handler",			nullptr,		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateString,	output_handler,		php_core_globals,	core_globals)
 //         STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_argc_argv,		php_core_globals,	core_globals)
 //         STD_PHP_INI_BOOLEAN("auto_globals_jit",		"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	auto_globals_jit,	php_core_globals,	core_globals)
 //         STD_PHP_INI_BOOLEAN("short_open_tag",	DEFAULT_SHORT_OPEN_TAG,	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
 //         STD_PHP_INI_BOOLEAN("track_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			track_errors,			php_core_globals,	core_globals)
 
-//         STD_PHP_INI_ENTRY("unserialize_callback_func",	NULL,	PHP_INI_ALL,		OnUpdateString,			unserialize_callback_func,	php_core_globals,	core_globals)
+//         STD_PHP_INI_ENTRY("unserialize_callback_func",	nullptr,	PHP_INI_ALL,		OnUpdateString,			unserialize_callback_func,	php_core_globals,	core_globals)
 //         STD_PHP_INI_ENTRY("serialize_precision",	"-1",	PHP_INI_ALL,		OnSetSerializePrecision,			serialize_precision,	php_core_globals,	core_globals)
 //         STD_PHP_INI_ENTRY("arg_separator.output",	"&",		PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator.output,	php_core_globals,	core_globals)
 //         STD_PHP_INI_ENTRY("arg_separator.input",	"&",		PHP_INI_SYSTEM|PHP_INI_PERDIR,	OnUpdateStringUnempty,	arg_separator.input,	php_core_globals,	core_globals)
 
-//         STD_PHP_INI_ENTRY("auto_append_file",		NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_append_file,		php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("auto_prepend_file",		NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_prepend_file,		php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("doc_root",				NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,				php_core_globals,	core_globals)
+//         STD_PHP_INI_ENTRY("auto_append_file",		nullptr,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_append_file,		php_core_globals,	core_globals)
+//         STD_PHP_INI_ENTRY("auto_prepend_file",		nullptr,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_prepend_file,		php_core_globals,	core_globals)
+//         STD_PHP_INI_ENTRY("doc_root",				nullptr,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,				php_core_globals,	core_globals)
 //         STD_PHP_INI_ENTRY("default_charset",		PHP_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateDefaultCharset,			default_charset,		sapi_globals_struct, sapi_globals)
 //         STD_PHP_INI_ENTRY("default_mimetype",		SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateString,			default_mimetype,		sapi_globals_struct, sapi_globals)
-//         STD_PHP_INI_ENTRY("internal_encoding",		NULL,			PHP_INI_ALL,	OnUpdateInternalEncoding,	internal_encoding,	php_core_globals, core_globals)
-//         STD_PHP_INI_ENTRY("input_encoding",			NULL,			PHP_INI_ALL,	OnUpdateInputEncoding,				input_encoding,		php_core_globals, core_globals)
-//         STD_PHP_INI_ENTRY("output_encoding",		NULL,			PHP_INI_ALL,	OnUpdateOutputEncoding,				output_encoding,	php_core_globals, core_globals)
-//         STD_PHP_INI_ENTRY("error_log",				NULL,		PHP_INI_ALL,		OnUpdateErrorLog,			error_log,				php_core_globals,	core_globals)
+//         STD_PHP_INI_ENTRY("internal_encoding",		nullptr,			PHP_INI_ALL,	OnUpdateInternalEncoding,	internal_encoding,	php_core_globals, core_globals)
+//         STD_PHP_INI_ENTRY("input_encoding",			nullptr,			PHP_INI_ALL,	OnUpdateInputEncoding,				input_encoding,		php_core_globals, core_globals)
+//         STD_PHP_INI_ENTRY("output_encoding",		nullptr,			PHP_INI_ALL,	OnUpdateOutputEncoding,				output_encoding,	php_core_globals, core_globals)
+//         STD_PHP_INI_ENTRY("error_log",				nullptr,		PHP_INI_ALL,		OnUpdateErrorLog,			error_log,				php_core_globals,	core_globals)
 //         STD_PHP_INI_ENTRY("extension_dir",			PHP_EXTENSION_DIR,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("sys_temp_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	sys_temp_dir,			php_core_globals,	core_globals)
+//         STD_PHP_INI_ENTRY("sys_temp_dir",			nullptr,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	sys_temp_dir,			php_core_globals,	core_globals)
 //         STD_PHP_INI_ENTRY("include_path",			PHP_INCLUDE_PATH,		PHP_INI_ALL,		OnUpdateStringUnempty,	include_path,			php_core_globals,	core_globals)
 //         PHP_INI_ENTRY("max_execution_time",			"30",		PHP_INI_ALL,			OnUpdateTimeout)
-//         STD_PHP_INI_ENTRY("open_basedir",			NULL,		PHP_INI_ALL,		OnUpdateBaseDir,			open_basedir,			php_core_globals,	core_globals)
+//         STD_PHP_INI_ENTRY("open_basedir",			nullptr,		PHP_INI_ALL,		OnUpdateBaseDir,			open_basedir,			php_core_globals,	core_globals)
 
 //         STD_PHP_INI_BOOLEAN("file_uploads",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			file_uploads,			php_core_globals,	core_globals)
 //         STD_PHP_INI_ENTRY("upload_max_filesize",	"2M",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateLong,			upload_max_filesize,	php_core_globals,	core_globals)
 //         STD_PHP_INI_ENTRY("post_max_size",			"8M",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateLong,			post_max_size,			sapi_globals_struct,sapi_globals)
-//         STD_PHP_INI_ENTRY("upload_tmp_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	upload_tmp_dir,			php_core_globals,	core_globals)
+//         STD_PHP_INI_ENTRY("upload_tmp_dir",			nullptr,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	upload_tmp_dir,			php_core_globals,	core_globals)
 //         STD_PHP_INI_ENTRY("max_input_nesting_level", "64",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateLongGEZero,	max_input_nesting_level,			php_core_globals,	core_globals)
 //         STD_PHP_INI_ENTRY("max_input_vars",			"1000",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateLongGEZero,	max_input_vars,						php_core_globals,	core_globals)
 
-//         STD_PHP_INI_ENTRY("user_dir",				NULL,		PHP_INI_SYSTEM,		OnUpdateString,			user_dir,				php_core_globals,	core_globals)
+//         STD_PHP_INI_ENTRY("user_dir",				nullptr,		PHP_INI_SYSTEM,		OnUpdateString,			user_dir,				php_core_globals,	core_globals)
 //         STD_PHP_INI_ENTRY("variables_order",		"EGPCS",	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateStringUnempty,	variables_order,		php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("request_order",			NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,	request_order,		php_core_globals,	core_globals)
+//         STD_PHP_INI_ENTRY("request_order",			nullptr,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,	request_order,		php_core_globals,	core_globals)
 
-//         STD_PHP_INI_ENTRY("error_append_string",	NULL,		PHP_INI_ALL,		OnUpdateString,			error_append_string,	php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("error_prepend_string",	NULL,		PHP_INI_ALL,		OnUpdateString,			error_prepend_string,	php_core_globals,	core_globals)
+//         STD_PHP_INI_ENTRY("error_append_string",	nullptr,		PHP_INI_ALL,		OnUpdateString,			error_append_string,	php_core_globals,	core_globals)
+//         STD_PHP_INI_ENTRY("error_prepend_string",	nullptr,		PHP_INI_ALL,		OnUpdateString,			error_prepend_string,	php_core_globals,	core_globals)
 
-//         PHP_INI_ENTRY("SMTP",						"localhost",PHP_INI_ALL,		NULL)
-//         PHP_INI_ENTRY("smtp_port",					"25",		PHP_INI_ALL,		NULL)
+//         PHP_INI_ENTRY("SMTP",						"localhost",PHP_INI_ALL,		nullptr)
+//         PHP_INI_ENTRY("smtp_port",					"25",		PHP_INI_ALL,		nullptr)
 //         STD_PHP_INI_BOOLEAN("mail.add_x_header",			"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			mail_x_header,			php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("mail.log",					NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailLog,			mail_log,			php_core_globals,	core_globals)
-//         PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		OnChangeBrowscap)
+//         STD_PHP_INI_ENTRY("mail.log",					nullptr,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailLog,			mail_log,			php_core_globals,	core_globals)
+//         PHP_INI_ENTRY("browscap",					nullptr,		PHP_INI_SYSTEM,		OnChangeBrowscap)
 //         PHP_INI_ENTRY("memory_limit",				"128M",		PHP_INI_ALL,		OnChangeMemoryLimit)
 //         PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
-//         PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)
-//         PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
-//         PHP_INI_ENTRY("mail.force_extra_parameters",NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnChangeMailForceExtra)
-//         PHP_INI_ENTRY("disable_functions",			"",			PHP_INI_SYSTEM,		NULL)
-//         PHP_INI_ENTRY("disable_classes",			"",			PHP_INI_SYSTEM,		NULL)
-//         PHP_INI_ENTRY("max_file_uploads",			"20",			PHP_INI_SYSTEM|PHP_INI_PERDIR,		NULL)
+//         PHP_INI_ENTRY("sendmail_from",				nullptr,		PHP_INI_ALL,		nullptr)
+//         PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		nullptr)
+//         PHP_INI_ENTRY("mail.force_extra_parameters",nullptr,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnChangeMailForceExtra)
+//         PHP_INI_ENTRY("disable_functions",			"",			PHP_INI_SYSTEM,		nullptr)
+//         PHP_INI_ENTRY("disable_classes",			"",			PHP_INI_SYSTEM,		nullptr)
+//         PHP_INI_ENTRY("max_file_uploads",			"20",			PHP_INI_SYSTEM|PHP_INI_PERDIR,		nullptr)
 
 //         STD_PHP_INI_BOOLEAN("allow_url_fopen",		"1",		PHP_INI_SYSTEM,		OnUpdateBool,		allow_url_fopen,		php_core_globals,		core_globals)
 //         STD_PHP_INI_BOOLEAN("allow_url_include",	"0",		PHP_INI_SYSTEM,		OnUpdateBool,		allow_url_include,		php_core_globals,		core_globals)
@@ -188,6 +208,107 @@ void php_module_shutdown();
 //         STD_PHP_INI_ENTRY("syslog.ident",		"php",			PHP_INI_SYSTEM,		OnUpdateString,		syslog_ident,		php_core_globals,		core_globals)
 //         STD_PHP_INI_ENTRY("syslog.filter",		"no-ctrl",		PHP_INI_ALL,		OnSetLogFilter,		syslog_filter,		php_core_globals, 		core_globals)
 //         PHP_INI_END()
+
+namespace {
+inline int cli_select(php_socket_t fd)
+{
+   fd_set wfd, dfd;
+   struct timeval tv;
+   int ret;
+   ExecEnv &execEnv = retrieve_global_execenv();
+   FD_ZERO(&wfd);
+   FD_ZERO(&dfd);
+   PHP_SAFE_FD_SET(fd, &wfd);
+   tv.tv_sec = (long)execEnv.getDefaultSocketTimeout();
+   tv.tv_usec = 0;
+   ret = php_select(fd+1, &dfd, &wfd, &dfd, &tv);
+   return ret != -1;
+}
+}
+
+ssize_t cli_single_write(const char *str, size_t strLength)
+{
+   ssize_t ret;
+   if (sg_cliShellCallbacks.cliShellWrite) {
+      sg_cliShellCallbacks.cliShellWrite(str, strLength);
+   }
+#ifdef PHP_WRITE_STDOUT
+   do {
+      ret = ::write(STDOUT_FILENO, str, strLength);
+   } while (ret <= 0 && errno == EAGAIN && cli_select(STDOUT_FILENO));
+#else
+   ret = ::fwrite(str, 1, MIN(strLength, 16384), stdout);
+#endif
+   return ret;
+}
+
+size_t cli_unbuffer_write(const char *str, size_t strLength)
+{
+   const char *ptr = str;
+   size_t remaining = strLength;
+   ssize_t ret;
+
+   if (!strLength) {
+      return 0;
+   }
+
+   if (sg_cliShellCallbacks.cliShellUnbufferWrite) {
+      size_t ubWrote;
+      ubWrote = sg_cliShellCallbacks.cliShellUnbufferWrite(str, strLength);
+      if (ubWrote != (size_t) -1) {
+         return ubWrote;
+      }
+   }
+
+   while (remaining > 0)
+   {
+      ret = cli_single_write(ptr, remaining);
+      if (ret < 0) {
+#ifndef PHP_CLI_WIN32_NO_CONSOLE
+         EG(exit_status) = 255;
+#endif
+         break;
+      }
+      ptr += ret;
+      remaining -= ret;
+   }
+
+   return (ptr - str);
+}
+
+void cli_flush(void *server_context)
+{
+   /* Ignore EBADF here, it's caused by the fact that STDIN/STDOUT/STDERR streams
+       * are/could be closed before fflush() is called.
+       */
+   fflush(stdout);
+}
+
+namespace internal {
+void emit_fd_setsize_warning(int maxFd)
+{
+
+#ifdef POLAR_OS_WIN32
+   php_error_docref(nullptr, E_WARNING,
+                    "PHP needs to be recompiled with a larger value of FD_SETSIZE.\n"
+                    "If this binary is from an official www.php.net package, file a bug report\n"
+                    "at http://bugs.php.net, including the following information:\n"
+                    "FD_SETSIZE=%d, but you are using %d.\n"
+                    " --enable-fd-setsize=%d is recommended, but you may want to set it\n"
+                    "to match to maximum number of sockets each script will work with at\n"
+                    "one time, in order to avoid seeing this error again at a later date.",
+                    FD_SETSIZE, maxFd, (maxFd + 128) & ~127);
+#else
+   php_error_docref(nullptr, E_WARNING,
+                    "You MUST recompile PHP with a larger value of FD_SETSIZE.\n"
+                    "It is set to %d, but you have descriptors numbered at least as high as %d.\n"
+                    " --enable-fd-setsize=%d is recommended, but you may want to set it\n"
+                    "to equal the maximum number of open files supported by your system,\n"
+                    "in order to avoid seeing this error again at a later date.",
+                    FD_SETSIZE, maxFd, (maxFd + 1024) & ~1023);
+#endif
+}
+} // internal
 
 ZEND_COLD void php_error_docref0(const char *docref, int type, const char *format, ...)
 {
@@ -222,8 +343,8 @@ ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const c
 
 ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)
 {
-   //   zend_string *replace_buffer = NULL, *replace_origin = NULL;
-   //   char *buffer = NULL, *docref_buf = NULL, *target = NULL;
+   //   zend_string *replace_buffer = nullptr, *replace_origin = nullptr;
+   //   char *buffer = nullptr, *docref_buf = nullptr, *target = nullptr;
    //   char *docref_target = "", *docref_root = "";
    //   char *p;
    //   int buffer_len = 0;
@@ -317,7 +438,7 @@ ZEND_COLD void php_verror(const char *docref, const char *params, int type, cons
    //   /* origin and buffer available, so lets come up with the error message */
    //   if (docref && docref[0] == '#') {
    //      docref_target = strchr(docref, '#');
-   //      docref = NULL;
+   //      docref = nullptr;
    //   }
 
    //   /* no docref given but function is known (the default) */
@@ -331,7 +452,7 @@ ZEND_COLD void php_verror(const char *docref, const char *params, int type, cons
    //      } else {
    //         doclen = (int)spprintf(&docref_buf, 0, "%s.%s", class_name, function);
    //      }
-   //      while((p = strchr(docref_buf, '_')) != NULL) {
+   //      while((p = strchr(docref_buf, '_')) != nullptr) {
    //         *p = '-';
    //      }
    //      docref = php_strtolower(docref_buf, doclen);
@@ -484,7 +605,7 @@ bool seek_file_begin(zend_file_handle *fileHandle, const char *scriptFile, int *
    int c;
    *lineno = 1;
    fileHandle->type = ZEND_HANDLE_FP;
-   fileHandle->opened_path = NULL;
+   fileHandle->opened_path = nullptr;
    fileHandle->free_filename = 0;
    if (!(fileHandle->handle.fp = VCWD_FOPEN(scriptFile, "rb"))) {
       php_printf("Could not open input file: %s\n", scriptFile);
@@ -509,6 +630,21 @@ bool seek_file_begin(zend_file_handle *fileHandle, const char *scriptFile, int *
       rewind(fileHandle->handle.fp);
    }
    return true;
+}
+
+bool php_hash_environment()
+{
+   //   memset(PG(http_globals), 0, sizeof(PG(http_globals)));
+   //   zend_activate_auto_globals();
+   //   if (PG(register_argc_argv)) {
+   //      php_build_argv(SG(request_info).query_string, &PG(http_globals)[TRACK_VARS_SERVER]);
+   //   }
+   return true;
+}
+
+void cli_register_file_handles()
+{
+   /// TODO register std file fd
 }
 
 void ExecEnv::unbufferWrite(const char *str, int len)

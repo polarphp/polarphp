@@ -27,7 +27,7 @@ const char HARDCODED_INI[] =
 POLAR_DECL_EXPORT bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditionalModules);
 POLAR_DECL_EXPORT void php_module_shutdown();
 POLAR_DECL_EXPORT void php_module_shutdown_for_exec();
-POLAR_DECL_EXPORT void php_exec_env_startup();
+POLAR_DECL_EXPORT bool php_exec_env_startup();
 POLAR_DECL_EXPORT void php_exec_env_shutdown();
 //POLAR_DECL_EXPORT int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
 

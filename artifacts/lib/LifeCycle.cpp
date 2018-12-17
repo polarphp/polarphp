@@ -122,11 +122,13 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
 
    sg_moduleShutdown = 0;
    sg_moduleStartup = 1;
+   execEnv.activate();
 
    if (sg_moduleInitialized) {
       return true;
    }
    php_output_startup();
+   startup_ticks();
    gc_globals_ctor();
 
    zuf.error_function = php_error_callback;
@@ -367,6 +369,7 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
       //      } zend_end_try();
    }
    virtual_cwd_deactivate();
+   execEnv.deactivate();
    sg_moduleStartup = 0;
    shutdown_memory_manager(1, 0);
    virtual_cwd_activate();
@@ -405,12 +408,99 @@ void php_module_shutdown()
    php_shutdown_config();
    zend_ini_global_shutdown();
    php_output_shutdown();
+   /// interned_strings
+   /// shutdown by zend_startup
+   /// tsrm_set_shutdown_handler(zend_interned_strings_dtor);
    sg_moduleInitialized = 0;
+   shutdown_ticks();
+   /// ZTS mode dtor call by tsrm
+   // gc_globals_dtor();
 #ifdef PHP_WIN32
    if (old_invalid_parameter_handler == NULL) {
       _set_invalid_parameter_handler(old_invalid_parameter_handler);
    }
 #endif
+}
+
+
+#ifdef PHP_SIGCHILD
+namespace {
+void sigchld_handler(int)
+{
+   int errnoSave = errno;
+   while (::waitpid(-1, nullptr, WNOHANG) > 0);
+   ::signal(SIGCHLD, sigchld_handler);
+   errno = errnoSave;
+}
+} // anonymous namespace
+#endif
+
+
+bool php_exec_env_startup()
+{
+   int retval = true;
+   zend_interned_strings_activate();
+   ExecEnv &execEnv = retrieve_global_execenv();
+   /// TODO dtrace
+   //#ifdef HAVE_DTRACE
+   //   DTRACE_REQUEST_STARTUP(SAFE_FILENAME(SG(request_info).path_translated), SAFE_FILENAME(SG(request_info).request_uri), (char *)SAFE_FILENAME(SG(request_info).request_method));
+   //#endif /* HAVE_DTRACE */
+#ifdef POLAR_OS_WIN32
+   _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+   execEnv.setComInitialized(false);
+#endif
+
+#ifdef PHP_SIGCHILD
+   ::signal(SIGCHLD, sigchld_handler);
+#endif
+
+   zend_try {
+      execEnv.setInErrorLog(false);
+      execEnv.setDuringExecEnvStartup(true);
+      php_output_activate();
+      /* initialize global variables */
+      execEnv.setModulesActivated(false);
+      execEnv.setInUserInclude(false);
+      zend_activate();
+      execEnv.activate();
+
+#ifdef ZEND_SIGNALS
+      zend_signal_activate();
+#endif
+      /* Disable realpath cache if an open_basedir is set */
+      if (!execEnv.getOpenBaseDir().empty()) {
+         CWDG(realpath_cache_size_limit) = 0;
+      }
+      StringRef outputHandler = execEnv.getOutputHandler();
+      zend_long outputBuffering = execEnv.getOutputBuffering();
+      bool implicitFlush = execEnv.getImplicitFlush();
+      if (!outputHandler.empty()) {
+         zval oh;
+         ZVAL_STRING(&oh, outputHandler.getData());
+         php_output_start_user(&oh, 0, PHP_OUTPUT_HANDLER_STDFLAGS);
+         zval_ptr_dtor(&oh);
+      } else if (outputBuffering) {
+         php_output_start_user(nullptr, outputBuffering > 1 ? outputBuffering : 0, PHP_OUTPUT_HANDLER_STDFLAGS);
+      } else if (implicitFlush) {
+         php_output_set_implicit_flush(1);
+      }
+
+      /* We turn this off in php_execute_script() */
+      /* PG(during_request_startup) = 0; */
+
+      php_hash_environment();
+      zend_activate_modules();
+      execEnv.setModulesActivated(true);
+   } zend_catch {
+      retval = FAILURE;
+   } zend_end_try();
+   execEnv.setStarted(true);
+   return retval;
+}
+
+void php_exec_env_shutdown()
+{
+
 }
 
 } // polar

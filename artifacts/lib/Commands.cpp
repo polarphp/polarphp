@@ -14,6 +14,7 @@
 #include "Commands.h"
 #include "ExecEnv.h"
 #include "Defs.h"
+#include "LifeCycle.h"
 #include "lib/PolarVersion.h"
 
 #include <iostream>
@@ -49,6 +50,8 @@ extern std::string sg_errorMsg;
 namespace polar {
 
 using polar::basic::StringRef;
+
+extern CliShellCallbacksType sg_cliShellCallbacks;
 
 namespace {
 const char *PARAM_MODE_CONFLICT = "Either execute direct code, process stdin or use a file.";
@@ -237,26 +240,19 @@ void setup_init_entries_commands(const std::vector<std::string> defines, std::st
    }
 }
 
+namespace {
+void standard_exec_command(ExecEnv &execEnv, zend_file_handle &fileHandle);
+} // anonymous namespace
+
 int dispatch_cli_command()
 {
    ExecEnv &execEnv = retrieve_global_execenv();
-   int c;
    zend_file_handle fileHandle;
    volatile int exitStatus = 0;
-   char *php_optarg = nullptr;
-   char *orig_optarg = nullptr;
-   int php_optind = 1;
-   int orig_optind = 1;
-   char *exec_direct = nullptr;
-   char *exec_run = nullptr;
-   char *exec_begin = nullptr;
-   char *exec_end = nullptr;
-   char *arg_free = nullptr;
-   char **arg_excp = &arg_free;
+   volatile bool execEnvStarted = false;
    std::string translatedPath;
    int interactive = 0;
    int lineno = 0;
-   const char *param_error = nullptr;
    int hide_argv = 0;
    zend_try {
       CG(in_compilation) = 0; /* not initialized but needed for several options */
@@ -302,9 +298,34 @@ int dispatch_cli_command()
       fileHandle.opened_path = nullptr;
       fileHandle.free_filename = 0;
       sg_phpSelf = (char*)fileHandle.filename;
-
+      if (!php_exec_env_startup()) {
+         fclose(fileHandle.handle.fp);
+         std::cerr << "Could not startup." << std::endl;
+         goto err;
+      }
+      execEnvStarted = true;
+      CG(start_lineno) = lineno;
+      if (hide_argv) {
+         int i;
+         //         for (i = 1; i < argc; i++) {
+         //            memset(argv[i], 0, strlen(argv[i]));
+         //         }
+      }
+      execEnv.setDuringExecEnvStartup(false);
+      /// php exec env is ready
+      /// begin dispatch commands
+      ///
+      switch (sg_behavior) {
+      case ExecMode::Standard:
+         standard_exec_command(execEnv, fileHandle);
+         break;
+      }
    } zend_end_try();
 out:
+   if (execEnvStarted){
+      php_exec_env_shutdown();
+      execEnvStarted = false;
+   }
    if (exitStatus == 0) {
       exitStatus = EG(exit_status);
    }
@@ -315,6 +336,21 @@ err:
    exitStatus = 1;
    goto out;
 }
+
+namespace {
+void standard_exec_command(ExecEnv &execEnv, zend_file_handle &fileHandle)
+{
+   if (strcmp(fileHandle.filename, "Standard input code")) {
+      cli_register_file_handles();
+   }
+   if (sg_interactive && sg_cliShellCallbacks.cliShellRun) {
+      sg_exitStatus = sg_cliShellCallbacks.cliShellRun();
+   } else {
+      php_execute_script(&fileHandle);
+      sg_exitStatus = EG(exit_status);
+   }
+}
+} // anonymous namespace
 
 std::string PhpOptFormatter::make_usage(const CLI::App *, std::string name) const
 {

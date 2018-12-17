@@ -111,12 +111,6 @@ ExecEnv &ExecEnv::setIgnoreUserAbort(bool flag)
    return *this;
 }
 
-ExecEnv &ExecEnv::setExposePhp(bool flag)
-{
-   m_exposePhp = flag;
-   return *this;
-}
-
 ExecEnv &ExecEnv::setRegisterArgcArgv(bool flag)
 {
    m_registerArgcArgv = flag;
@@ -129,21 +123,15 @@ ExecEnv &ExecEnv::setAutoGlobalsJit(bool flag)
    return *this;
 }
 
-ExecEnv &ExecEnv::setHtmlErrors(bool flag)
-{
-   m_htmlErrors = flag;
-   return *this;
-}
-
 ExecEnv &ExecEnv::setModulesActivated(bool flag)
 {
    m_modulesActivated = flag;
    return *this;
 }
 
-ExecEnv &ExecEnv::setDuringRequestStartup(bool flag)
+ExecEnv &ExecEnv::setDuringExecEnvStartup(bool flag)
 {
-   m_duringRequestStartup = flag;
+   m_duringExecEnvStartup = flag;
    return *this;
 }
 
@@ -198,6 +186,12 @@ ExecEnv &ExecEnv::setComInitialized(bool flag)
 }
 #endif
 
+ExecEnv &ExecEnv::setStarted(bool flag)
+{
+   m_started = flag;
+   return *this;
+}
+
 ExecEnv &ExecEnv::setSerializePrecision(zend_long value)
 {
    m_serializePrecision = value;
@@ -207,12 +201,6 @@ ExecEnv &ExecEnv::setSerializePrecision(zend_long value)
 ExecEnv &ExecEnv::setMemoryLimit(zend_long value)
 {
    m_memoryLimit = value;
-   return *this;
-}
-
-ExecEnv &ExecEnv::setMaxInputTime(zend_long value)
-{
-   m_maxInputTime = value;
    return *this;
 }
 
@@ -255,6 +243,12 @@ ExecEnv &ExecEnv::setSyslogFacility(zend_long value)
 ExecEnv &ExecEnv::setSyslogFilter(zend_long value)
 {
    m_syslogFilter = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setDefaultSocketTimeout(zend_long value)
+{
+   m_defaultSocketTimeout = value;
    return *this;
 }
 
@@ -538,11 +532,6 @@ bool ExecEnv::getIgnoreUserAbort() const
    return m_ignoreUserAbort;
 }
 
-bool ExecEnv::getExposePhp() const
-{
-   return m_exposePhp;
-}
-
 bool ExecEnv::getRegisterArgcArgv() const
 {
    return m_registerArgcArgv;
@@ -553,19 +542,14 @@ bool ExecEnv::getAutoGlobalsJit() const
    return m_autoGlobalsJit;
 }
 
-bool ExecEnv::getHtmlErrors() const
-{
-   return m_htmlErrors;
-}
-
 bool ExecEnv::getModulesActivated() const
 {
    return m_modulesActivated;
 }
 
-bool ExecEnv::getDuringRequestStartup() const
+bool ExecEnv::getDuringExecEnvStartup() const
 {
-   return m_duringRequestStartup;
+   return m_duringExecEnvStartup;
 }
 
 bool ExecEnv::getAllowUrlFopen() const
@@ -606,11 +590,16 @@ bool ExecEnv::getAllowUrlInclude() const
 }
 
 #ifdef POLAR_OS_WIN32
-bool ExecEnv::getComInitialized()
+bool ExecEnv::getComInitialized() const
 {
    return m_comInitialized;
 }
 #endif
+
+bool ExecEnv::getStarted() const
+{
+   return m_started;
+}
 
 int ExecEnv::getLastErrorType() const
 {
@@ -630,11 +619,6 @@ zend_long ExecEnv::getSerializePrecision() const
 zend_long ExecEnv::getMemoryLimit() const
 {
    return m_memoryLimit;
-}
-
-zend_long ExecEnv::getMaxInputTime() const
-{
-   return m_maxInputTime;
 }
 
 zend_long ExecEnv::getOutputBuffering() const
@@ -670,6 +654,11 @@ zend_long ExecEnv::getSyslogFacility() const
 zend_long ExecEnv::getSyslogFilter() const
 {
    return m_syslogFilter;
+}
+
+zend_long ExecEnv::getDefaultSocketTimeout() const
+{
+   return m_defaultSocketTimeout;
 }
 
 StringRef ExecEnv::getPhpIniPathOverride() const
