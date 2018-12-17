@@ -13,6 +13,7 @@
 #include "polarphp/global/CompilerFeature.h"
 #include "polarphp/global/Config.h"
 #include "Defs.h"
+#include "ZendHeaders.h"
 
 #include <cstdio>
 
@@ -74,16 +75,6 @@ POLAR_DECL_EXPORT CliShellCallbacksType *php_cli_get_shell_callbacks()
    return &sg_cliShellCallbacks;
 }
 
-int php_execute_script(zend_file_handle *primaryFile)
-{
-   return 0;
-}
-
-POLAR_DECL_EXPORT int php_execute_simple_script(zend_file_handle *primaryFile, zval *ret)
-{
-   return 0;
-}
-
 ExecEnv &retrieve_global_execenv()
 {
    thread_local ExecEnv execEnv;
@@ -111,103 +102,122 @@ void ExecEnv::deactivate()
    m_started = false;
 }
 
-//      PHP_INI_BEGIN()
-//         PHP_INI_ENTRY_EX("highlight.comment",		HL_COMMENT_COLOR,	PHP_INI_ALL,	nullptr,			php_ini_color_displayer_cb)
-//         PHP_INI_ENTRY_EX("highlight.default",		HL_DEFAULT_COLOR,	PHP_INI_ALL,	nullptr,			php_ini_color_displayer_cb)
-//         PHP_INI_ENTRY_EX("highlight.html",			HL_HTML_COLOR,		PHP_INI_ALL,	nullptr,			php_ini_color_displayer_cb)
-//         PHP_INI_ENTRY_EX("highlight.keyword",		HL_KEYWORD_COLOR,	PHP_INI_ALL,	nullptr,			php_ini_color_displayer_cb)
-//         PHP_INI_ENTRY_EX("highlight.string",		HL_STRING_COLOR,	PHP_INI_ALL,	nullptr,			php_ini_color_displayer_cb)
+int php_execute_script(zend_file_handle *primaryFile)
+{
+   ExecEnv &execEnv = retrieve_global_execenv();
+   zend_file_handle *prepend_file_p = nullptr, *append_file_p = nullptr;
+   zend_file_handle prepend_file = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)}, append_file = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)};
+#if HAVE_BROKEN_GETCWD
+   volatile int old_cwd_fd = -1;
+#else
+   char *old_cwd;
+   ALLOCA_FLAG(use_heap)
+      #endif
+         int retval = 0;
 
-//         STD_PHP_INI_ENTRY_EX("display_errors",		"1",		PHP_INI_ALL,		OnUpdateDisplayErrors,	display_errors,			php_core_globals,	core_globals, display_errors_mode)
-//         STD_PHP_INI_BOOLEAN("display_startup_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			display_startup_errors,	php_core_globals,	core_globals)
-//         STD_PHP_INI_BOOLEAN("enable_dl",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			enable_dl,				php_core_globals,	core_globals)
-//         STD_PHP_INI_BOOLEAN("expose_php",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			expose_php,				php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("docref_root", 			"", 		PHP_INI_ALL,		OnUpdateString,			docref_root,			php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("docref_ext",				"",			PHP_INI_ALL,		OnUpdateString,			docref_ext,				php_core_globals,	core_globals)
-//         STD_PHP_INI_BOOLEAN("html_errors",			"1",		PHP_INI_ALL,		OnUpdateBool,			html_errors,			php_core_globals,	core_globals)
-//         STD_PHP_INI_BOOLEAN("xmlrpc_errors",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			xmlrpc_errors,			php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("xmlrpc_error_number",	"0",		PHP_INI_ALL,		OnUpdateLong,			xmlrpc_error_number,	php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("max_input_time",			"-1",	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateLong,			max_input_time,	php_core_globals,	core_globals)
-//         STD_PHP_INI_BOOLEAN("ignore_user_abort",	"0",		PHP_INI_ALL,		OnUpdateBool,			ignore_user_abort,		php_core_globals,	core_globals)
-//         STD_PHP_INI_BOOLEAN("implicit_flush",		"0",		PHP_INI_ALL,		OnUpdateBool,			implicit_flush,			php_core_globals,	core_globals)
-//         STD_PHP_INI_BOOLEAN("log_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			log_errors,				php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("log_errors_max_len",	 "1024",		PHP_INI_ALL,		OnUpdateLong,			log_errors_max_len,		php_core_globals,	core_globals)
-//         STD_PHP_INI_BOOLEAN("ignore_repeated_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_errors,	php_core_globals,	core_globals)
-//         STD_PHP_INI_BOOLEAN("ignore_repeated_source",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_source,	php_core_globals,	core_globals)
-//         STD_PHP_INI_BOOLEAN("report_memleaks",		"1",		PHP_INI_ALL,		OnUpdateBool,			report_memleaks,		php_core_globals,	core_globals)
-//         STD_PHP_INI_BOOLEAN("report_zend_debug",	"1",		PHP_INI_ALL,		OnUpdateBool,			report_zend_debug,		php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("output_buffering",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateLong,	output_buffering,		php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("output_handler",			nullptr,		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateString,	output_handler,		php_core_globals,	core_globals)
-//         STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_argc_argv,		php_core_globals,	core_globals)
-//         STD_PHP_INI_BOOLEAN("auto_globals_jit",		"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	auto_globals_jit,	php_core_globals,	core_globals)
-//         STD_PHP_INI_BOOLEAN("short_open_tag",	DEFAULT_SHORT_OPEN_TAG,	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
-//         STD_PHP_INI_BOOLEAN("track_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			track_errors,			php_core_globals,	core_globals)
+   EG(exit_status) = 0;
+#ifndef HAVE_BROKEN_GETCWD
+# define OLD_CWD_SIZE 4096
+   old_cwd = reinterpret_cast<char *>(do_alloca(OLD_CWD_SIZE, use_heap));
+   old_cwd[0] = '\0';
+#endif
 
-//         STD_PHP_INI_ENTRY("unserialize_callback_func",	nullptr,	PHP_INI_ALL,		OnUpdateString,			unserialize_callback_func,	php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("serialize_precision",	"-1",	PHP_INI_ALL,		OnSetSerializePrecision,			serialize_precision,	php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("arg_separator.output",	"&",		PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator.output,	php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("arg_separator.input",	"&",		PHP_INI_SYSTEM|PHP_INI_PERDIR,	OnUpdateStringUnempty,	arg_separator.input,	php_core_globals,	core_globals)
+   polar_try {
+      char realfile[MAXPATHLEN];
 
-//         STD_PHP_INI_ENTRY("auto_append_file",		nullptr,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_append_file,		php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("auto_prepend_file",		nullptr,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_prepend_file,		php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("doc_root",				nullptr,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,				php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("default_charset",		PHP_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateDefaultCharset,			default_charset,		sapi_globals_struct, sapi_globals)
-//         STD_PHP_INI_ENTRY("default_mimetype",		SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateString,			default_mimetype,		sapi_globals_struct, sapi_globals)
-//         STD_PHP_INI_ENTRY("internal_encoding",		nullptr,			PHP_INI_ALL,	OnUpdateInternalEncoding,	internal_encoding,	php_core_globals, core_globals)
-//         STD_PHP_INI_ENTRY("input_encoding",			nullptr,			PHP_INI_ALL,	OnUpdateInputEncoding,				input_encoding,		php_core_globals, core_globals)
-//         STD_PHP_INI_ENTRY("output_encoding",		nullptr,			PHP_INI_ALL,	OnUpdateOutputEncoding,				output_encoding,	php_core_globals, core_globals)
-//         STD_PHP_INI_ENTRY("error_log",				nullptr,		PHP_INI_ALL,		OnUpdateErrorLog,			error_log,				php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("extension_dir",			PHP_EXTENSION_DIR,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("sys_temp_dir",			nullptr,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	sys_temp_dir,			php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("include_path",			PHP_INCLUDE_PATH,		PHP_INI_ALL,		OnUpdateStringUnempty,	include_path,			php_core_globals,	core_globals)
-//         PHP_INI_ENTRY("max_execution_time",			"30",		PHP_INI_ALL,			OnUpdateTimeout)
-//         STD_PHP_INI_ENTRY("open_basedir",			nullptr,		PHP_INI_ALL,		OnUpdateBaseDir,			open_basedir,			php_core_globals,	core_globals)
+#ifdef PHP_WIN32
+      if(primaryFile->filename) {
+         UpdateIniFromRegistry((char*)primaryFile->filename);
+      }
+#endif
+      execEnv.setDuringExecEnvStartup(false);
+      //      if (primaryFile->filename && !(SG(options) & SAPI_OPTION_NO_CHDIR)) {
+      //#if HAVE_BROKEN_GETCWD
+      //         /* this looks nasty to me */
+      //         old_cwd_fd = open(".", 0);
+      //#else
+      //         php_ignore_value(VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1));
+      //#endif
+      //         VCWD_CHDIR_FILE(primaryFile->filename);
+      //      }
 
-//         STD_PHP_INI_BOOLEAN("file_uploads",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			file_uploads,			php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("upload_max_filesize",	"2M",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateLong,			upload_max_filesize,	php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("post_max_size",			"8M",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateLong,			post_max_size,			sapi_globals_struct,sapi_globals)
-//         STD_PHP_INI_ENTRY("upload_tmp_dir",			nullptr,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	upload_tmp_dir,			php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("max_input_nesting_level", "64",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateLongGEZero,	max_input_nesting_level,			php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("max_input_vars",			"1000",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateLongGEZero,	max_input_vars,						php_core_globals,	core_globals)
+      /* Only lookup the real file path and add it to the included_files list if already opened
+       *   otherwise it will get opened and added to the included_files list in zend_execute_scripts
+       */
+      if (primaryFile->filename &&
+          strcmp("Standard input code", primaryFile->filename) &&
+          primaryFile->opened_path == nullptr &&
+          primaryFile->type != ZEND_HANDLE_FILENAME
+          ) {
+         //         if (expand_filepath(primaryFile->filename, realfile)) {
+         //            primaryFile->opened_path = zend_string_init(realfile, strlen(realfile), 0);
+         //            zend_hash_add_empty_element(&EG(included_files), primaryFile->opened_path);
+         //         }
+      }
 
-//         STD_PHP_INI_ENTRY("user_dir",				nullptr,		PHP_INI_SYSTEM,		OnUpdateString,			user_dir,				php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("variables_order",		"EGPCS",	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateStringUnempty,	variables_order,		php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("request_order",			nullptr,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,	request_order,		php_core_globals,	core_globals)
+      //      if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
+      //         prepend_file.filename = PG(auto_prepend_file);
+      //         prepend_file.opened_path = nullptr;
+      //         prepend_file.free_filename = 0;
+      //         prepend_file.type = ZEND_HANDLE_FILENAME;
+      //         prepend_file_p = &prepend_file;
+      //      } else {
+      //         prepend_file_p = nullptr;
+      //      }
 
-//         STD_PHP_INI_ENTRY("error_append_string",	nullptr,		PHP_INI_ALL,		OnUpdateString,			error_append_string,	php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("error_prepend_string",	nullptr,		PHP_INI_ALL,		OnUpdateString,			error_prepend_string,	php_core_globals,	core_globals)
+      //      if (PG(auto_append_file) && PG(auto_append_file)[0]) {
+      //         append_file.filename = PG(auto_append_file);
+      //         append_file.opened_path = nullptr;
+      //         append_file.free_filename = 0;
+      //         append_file.type = ZEND_HANDLE_FILENAME;
+      //         append_file_p = &append_file;
+      //      } else {
+      //         append_file_p = nullptr;
+      //      }
 
-//         PHP_INI_ENTRY("SMTP",						"localhost",PHP_INI_ALL,		nullptr)
-//         PHP_INI_ENTRY("smtp_port",					"25",		PHP_INI_ALL,		nullptr)
-//         STD_PHP_INI_BOOLEAN("mail.add_x_header",			"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			mail_x_header,			php_core_globals,	core_globals)
-//         STD_PHP_INI_ENTRY("mail.log",					nullptr,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailLog,			mail_log,			php_core_globals,	core_globals)
-//         PHP_INI_ENTRY("browscap",					nullptr,		PHP_INI_SYSTEM,		OnChangeBrowscap)
-//         PHP_INI_ENTRY("memory_limit",				"128M",		PHP_INI_ALL,		OnChangeMemoryLimit)
-//         PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
-//         PHP_INI_ENTRY("sendmail_from",				nullptr,		PHP_INI_ALL,		nullptr)
-//         PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		nullptr)
-//         PHP_INI_ENTRY("mail.force_extra_parameters",nullptr,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnChangeMailForceExtra)
-//         PHP_INI_ENTRY("disable_functions",			"",			PHP_INI_SYSTEM,		nullptr)
-//         PHP_INI_ENTRY("disable_classes",			"",			PHP_INI_SYSTEM,		nullptr)
-//         PHP_INI_ENTRY("max_file_uploads",			"20",			PHP_INI_SYSTEM|PHP_INI_PERDIR,		nullptr)
 
-//         STD_PHP_INI_BOOLEAN("allow_url_fopen",		"1",		PHP_INI_SYSTEM,		OnUpdateBool,		allow_url_fopen,		php_core_globals,		core_globals)
-//         STD_PHP_INI_BOOLEAN("allow_url_include",	"0",		PHP_INI_SYSTEM,		OnUpdateBool,		allow_url_include,		php_core_globals,		core_globals)
-//         STD_PHP_INI_BOOLEAN("enable_post_data_reading",	"1",	PHP_INI_SYSTEM|PHP_INI_PERDIR,	OnUpdateBool,	enable_post_data_reading,	php_core_globals,	core_globals)
+      /*
+         If cli primary file has shabang line and there is a prepend file,
+         the `start_lineno` will be used by prepend file but not primary file,
+         save it and restore after prepend file been executed.
+       */
+      if (CG(start_lineno) && prepend_file_p) {
+         int orig_start_lineno = CG(start_lineno);
 
-//         STD_PHP_INI_ENTRY("realpath_cache_size",	"4096K",	PHP_INI_SYSTEM,		OnUpdateLong,	realpath_cache_size_limit,	virtual_cwd_globals,	cwd_globals)
-//         STD_PHP_INI_ENTRY("realpath_cache_ttl",		"120",		PHP_INI_SYSTEM,		OnUpdateLong,	realpath_cache_ttl,			virtual_cwd_globals,	cwd_globals)
+         CG(start_lineno) = 0;
+         if (zend_execute_scripts(ZEND_REQUIRE, nullptr, 1, prepend_file_p) == SUCCESS) {
+            CG(start_lineno) = orig_start_lineno;
+            retval = (zend_execute_scripts(ZEND_REQUIRE, nullptr, 2, primaryFile, append_file_p) == SUCCESS);
+         }
+      } else {
+         retval = (zend_execute_scripts(ZEND_REQUIRE, nullptr, 3, prepend_file_p, primaryFile, append_file_p) == SUCCESS);
+      }
+   } polar_end_try;
 
-//         STD_PHP_INI_ENTRY("user_ini.filename",		".user.ini",	PHP_INI_SYSTEM,		OnUpdateString,		user_ini_filename,	php_core_globals,		core_globals)
-//         STD_PHP_INI_ENTRY("user_ini.cache_ttl",		"300",			PHP_INI_SYSTEM,		OnUpdateLong,		user_ini_cache_ttl,	php_core_globals,		core_globals)
-//         STD_PHP_INI_ENTRY("hard_timeout",			"2",			PHP_INI_SYSTEM,		OnUpdateLong,		hard_timeout,		zend_executor_globals,	executor_globals)
-//      #ifdef PHP_WIN32
-//         STD_PHP_INI_BOOLEAN("windows.show_crt_warning",		"0",		PHP_INI_ALL,		OnUpdateBool,			windows_show_crt_warning,			php_core_globals,	core_globals)
-//      #endif
-//         STD_PHP_INI_ENTRY("syslog.facility",		"LOG_USER",		PHP_INI_SYSTEM,		OnSetFacility,		syslog_facility,	php_core_globals,		core_globals)
-//         STD_PHP_INI_ENTRY("syslog.ident",		"php",			PHP_INI_SYSTEM,		OnUpdateString,		syslog_ident,		php_core_globals,		core_globals)
-//         STD_PHP_INI_ENTRY("syslog.filter",		"no-ctrl",		PHP_INI_ALL,		OnSetLogFilter,		syslog_filter,		php_core_globals, 		core_globals)
-//         PHP_INI_END()
+   if (EG(exception)) {
+      polar_try {
+         zend_exception_error(EG(exception), E_ERROR);
+      } polar_end_try;
+   }
+
+#if HAVE_BROKEN_GETCWD
+   if (old_cwd_fd != -1) {
+      fchdir(old_cwd_fd);
+      close(old_cwd_fd);
+   }
+#else
+   if (old_cwd[0] != '\0') {
+      php_ignore_value(VCWD_CHDIR(old_cwd));
+   }
+   free_alloca(old_cwd, use_heap);
+#endif
+   return retval;
+}
+
+int php_execute_simple_script(zend_file_handle *primaryFile, zval *ret)
+{
+   return 0;
+}
 
 namespace {
 inline int cli_select(php_socket_t fd)
@@ -276,7 +286,7 @@ size_t cli_unbuffer_write(const char *str, size_t strLength)
    return (ptr - str);
 }
 
-void cli_flush(void *server_context)
+void cli_flush()
 {
    /* Ignore EBADF here, it's caused by the fact that STDIN/STDOUT/STDERR streams
        * are/could be closed before fflush() is called.

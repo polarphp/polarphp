@@ -289,6 +289,26 @@ void emit_fd_setsize_warning(int maxFd);
 # define PHP_SAFE_MAX_FD(m, n)		do { if (m >= FD_SETSIZE) { polar::internal::emit_fd_setsize_warning(m); m = FD_SETSIZE - 1; }} while(0)
 #endif
 
+//#define zend_try												\
+//   {															\
+//      JMP_BUF *__orig_bailout = EG(bailout);					\
+//      JMP_BUF __bailout;										\
+//                                                \
+//      EG(bailout) = &__bailout;								\
+//      if (SETJMP(__bailout)==0) {
+//#define zend_catch												\
+//      } else {												\
+//         EG(bailout) = __orig_bailout;
+//#define zend_end_try()											\
+//      }														\
+//      EG(bailout) = __orig_bailout;							\
+//   }
+//#define zend_first_try		EG(bailout)=NULL;	zend_try
+#define polar_try zend_try
+#define polar_catch zend_catch
+#define polar_first_try zend_first_try
+#define polar_end_try zend_end_try()
+
 #ifdef POLAR_OS_WIN32
 typedef SOCKET php_socket_t;
 #else

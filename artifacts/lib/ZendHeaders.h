@@ -25,6 +25,7 @@ extern "C" {
 #include "polarphp/vm/zend/zend_execute.h"
 #include "polarphp/vm/zend/zend_modules.h"
 #include "polarphp/vm/zend/zend_highlight.h"
+#include "polarphp/vm/zend/zend_exceptions.h"
 #include "polarphp/vm/zend/zend_extensions.h"
 #include "polarphp/vm/zend/zend_ini_scanner.h"
 #include "polarphp/vm/zend/zend_ini.h"

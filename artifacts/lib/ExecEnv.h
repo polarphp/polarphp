@@ -52,8 +52,8 @@ class ExecEnv;
 ExecEnv &retrieve_global_execenv();
 
 ssize_t cli_single_write(const char *str, size_t strLength);
-size_t cli_unbuffer_write(const char *str, size_t str_length);
-void sapi_cli_flush(void *server_context);
+size_t cli_unbuffer_write(const char *str, size_t strLength);
+void cli_flush();
 CliShellCallbacksType *php_cli_get_shell_callbacks();
 
 POLAR_DECL_EXPORT int php_execute_script(zend_file_handle *primaryFile);

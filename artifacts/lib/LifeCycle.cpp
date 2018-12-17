@@ -493,7 +493,7 @@ bool php_exec_env_startup()
       execEnv.setModulesActivated(true);
    } zend_catch {
       retval = FAILURE;
-   } zend_end_try();
+   } zend_end_try()
    execEnv.setStarted(true);
    return retval;
 }

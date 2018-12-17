@@ -248,7 +248,6 @@ int dispatch_cli_command()
 {
    ExecEnv &execEnv = retrieve_global_execenv();
    zend_file_handle fileHandle;
-   volatile int exitStatus = 0;
    volatile bool execEnvStarted = false;
    std::string translatedPath;
    int interactive = 0;
@@ -297,7 +296,7 @@ int dispatch_cli_command()
       fileHandle.type = ZEND_HANDLE_FP;
       fileHandle.opened_path = nullptr;
       fileHandle.free_filename = 0;
-      sg_phpSelf = (char*)fileHandle.filename;
+      sg_phpSelf = const_cast<char *>(fileHandle.filename);
       if (!php_exec_env_startup()) {
          fclose(fileHandle.handle.fp);
          std::cerr << "Could not startup." << std::endl;
@@ -319,6 +318,8 @@ int dispatch_cli_command()
       case ExecMode::Standard:
          standard_exec_command(execEnv, fileHandle);
          break;
+      default:
+         polar_unreachable("can't execute here");
       }
    } zend_end_try();
 out:
@@ -326,14 +327,14 @@ out:
       php_exec_env_shutdown();
       execEnvStarted = false;
    }
-   if (exitStatus == 0) {
-      exitStatus = EG(exit_status);
+   if (sg_exitStatus == 0) {
+      sg_exitStatus = EG(exit_status);
    }
-   return exitStatus;
+   return sg_exitStatus;
 err:
    execEnv.deactivate();
    zend_ini_deactivate();
-   exitStatus = 1;
+   sg_exitStatus = 1;
    goto out;
 }
 
