@@ -85,14 +85,61 @@ public:
    ExecEnv &setComInitialized(bool flag);
 #endif
 
+   ExecEnv &setIniDefaultsHandler(IniConfigDefaultInitFunc handler);
+
+   ExecEnv &setLastErrorType(int type);
+   ExecEnv &setLastErrorLineno(int line);
+
+   ExecEnv &setSerializePrecision(zend_long value);
+   ExecEnv &setMemoryLimit(zend_long value);
+   ExecEnv &setMaxInputTime(zend_long value);
+   ExecEnv &setOutputBuffering(zend_long value);
+   ExecEnv &setLogErrorsMaxLen(zend_long value);
+   ExecEnv &setMaxInputNestingLevel(zend_long value);
+   ExecEnv &setMaxInputVars(zend_long value);
+   ExecEnv &setUserIniCacheTtl(zend_long value);
+   ExecEnv &setSyslogFacility(zend_long value);
+   ExecEnv &setSyslogFilter(zend_long value);
+
    ExecEnv &setPhpIniPathOverride(const std::string &path);
    ExecEnv &setInitEntries(const std::string &entries);
-   ExecEnv &setPolarBinary(const std::string &binary);
-   ExecEnv &setIniDefaultsHandler(IniConfigDefaultInitFunc handler);
+   ExecEnv &setOutputHandler(const std::string &value);
+   ExecEnv &setUnserializeCallbackFunc(const std::string &value);
+   ExecEnv &setErrorLog(const std::string &value);
+   ExecEnv &setDocRoot(const std::string &value);
+   ExecEnv &setUserDir(const std::string &value);
+   ExecEnv &setIncludePath(const std::string &value);
+   ExecEnv &setOpenBaseDir(const std::string &value);
+   ExecEnv &setExtensionDir(const std::string &value);
+   ExecEnv &setPolarBinary(const std::string &value);
+   ExecEnv &setSysTempDir(const std::string &value);
+   ExecEnv &setErrorAppendString(const std::string &value);
+   ExecEnv &setErrorPrependString(const std::string &value);
+   ExecEnv &setAutoPrependFile(const std::string &value);
+   ExecEnv &setAutoAppendFile(const std::string &value);
+   ExecEnv &setInputEncoding(const std::string &value);
+   ExecEnv &setInternalEncoding(const std::string &value);
+   ExecEnv &setOutputEncoding(const std::string &value);
+
+   ExecEnv &setVariablesOrder(const std::string &value);
+   ExecEnv &setLastErrorMessage(const std::string &value);
+   ExecEnv &setLastErrorFile(const std::string &value);
+   ExecEnv &setPhpSysTempDir(const std::string &value);
+   ExecEnv &setDisableFunctions(const std::string &value);
+   ExecEnv &setDisableClasses(const std::string &value);
+   ExecEnv &setDocrefRoot(const std::string &value);
+   ExecEnv &setDocrefExt(const std::string &value);
+   ExecEnv &setUserIniFilename(const std::string &value);
+   ExecEnv &setRequestOrder(const std::string &value);
+   ExecEnv &setSyslogIdent(const std::string &value);
+
+   ExecEnv &setIniConfigDeaultHandler(IniConfigDefaultInitFunc func);
+   ExecEnv &setArgSeparator(ArgSeparators seps);
 
    const std::vector<StringRef> &getArgv() const;
    int getArgc() const;
    StringRef getExecutableFilepath() const;
+
    bool getPhpIniIgnore() const;
    bool getPhpIniIgnoreCwd() const;
    bool getImplicitFlush() const;
@@ -124,10 +171,55 @@ public:
    bool getComInitialized();
 #endif
 
+   int getLastErrorType() const;
+   int getLastErrorLineno() const;
+
+   zend_long getSerializePrecision() const;
+   zend_long getMemoryLimit() const;
+   zend_long getMaxInputTime() const;
+   zend_long getOutputBuffering() const;
+   zend_long getLogErrorsMaxLen() const;
+   zend_long getMaxInputNestingLevel() const;
+   zend_long getMaxInputVars() const;
+   zend_long getUserIniCacheTtl() const;
+   zend_long getSyslogFacility() const;
+   zend_long getSyslogFilter() const;
+
    StringRef getPhpIniPathOverride() const;
    StringRef getIniEntries() const;
+   StringRef getOutputHandler() const;
+   StringRef getUnserializeCallbackFunc() const;
+   StringRef getErrorLog() const;
+   StringRef getDocRoot() const;
+   StringRef getUserDir() const;
+   StringRef getIncludePath() const;
+   StringRef getOpenBaseDir() const;
+   StringRef getExtensionDir() const;
    StringRef getPolarBinary() const;
+   StringRef getSysTempDir() const;
+   StringRef getErrorAppendString() const;
+   StringRef getErrorPrependString() const;
+   StringRef getAutoPrependFile() const;
+   StringRef getAutoAppendFile() const;
+   StringRef getInputEncoding() const;
+   StringRef getInternalEncoding() const;
+   StringRef getOutputEncoding() const;
+
+   StringRef getVariablesOrder() const;
+   StringRef getLastErrorMessage() const;
+   StringRef getLastErrorFile() const;
+   StringRef getPhpSysTempDir() const;
+   StringRef getDisableFunctions() const;
+   StringRef getDisableClasses() const;
+   StringRef getDocrefRoot() const;
+   StringRef getDocrefExt() const;
+   StringRef getUserIniFilename() const;
+   StringRef getRequestOrder() const;
+   StringRef getSyslogIdent() const;
+
    IniConfigDefaultInitFunc getIniConfigDeaultHandler() const;
+   const ArgSeparators &getArgSeparator() const;
+   const zend_llist &getTickFunctions() const;
    zend_llist &getTickFunctions();
 
    void unbufferWrite(const char *str, int len);
@@ -165,53 +257,54 @@ private:
 #endif
 
    int m_argc;
-   int lastErrorType;
-   int lastErrorLineno;
+   int m_lastErrorType;
+   int m_lastErrorLineno;
 
-   zend_long serializePrecision;
-   zend_long memoryLimit;
-   zend_long maxInputTime;
+   zend_long m_serializePrecision;
+   zend_long m_memoryLimit;
+   zend_long m_maxInputTime;
    zend_long m_outputBuffering;
+   zend_long m_logErrorsMaxLen;
+   zend_long m_maxInputNestingLevel;
+   zend_long m_maxInputVars;
+   zend_long m_userIniCacheTtl;
+   zend_long m_syslogFacility;
+   zend_long m_syslogFilter;
 
-   zend_long logErrorsMaxLen;
-   zend_long maxInputNestingLevel;
-   zend_long maxInputVars;
-   zend_long userIniCacheTtl;
-   zend_long syslogFacility;
-   zend_long syslogFilter;
    std::string m_iniEntries;
    std::string m_phpIniPathOverride;
-   std::string outputHandler;
-   std::string unserializeCallbackFunc;
-   std::string errorLog;
-   std::string docRoot;
-   std::string userDir;
-   std::string includePath;
-   std::string openBaseDir;
-   std::string extensionDir;
+   std::string m_outputHandler;
+   std::string m_unserializeCallbackFunc;
+   std::string m_errorLog;
+   std::string m_docRoot;
+   std::string m_userDir;
+   std::string m_includePath;
+   std::string m_openBaseDir;
+   std::string m_extensionDir;
    std::string m_polarBinary;
-   std::string sysTempDir;
-   std::string errorAppendString;
-   std::string errorPrependString;
-   std::string autoPrependFile;
-   std::string autoAppendFile;
-   std::string inputEncoding;
-   std::string internalEncoding;
-   std::string outputEncoding;
+   std::string m_sysTempDir;
+   std::string m_errorAppendString;
+   std::string m_errorPrependString;
+   std::string m_autoPrependFile;
+   std::string m_autoAppendFile;
+   std::string m_inputEncoding;
+   std::string m_internalEncoding;
+   std::string m_outputEncoding;
 
-   std::string variablesOrder;
-   std::string lastErrorMessage;
-   std::string lastErrorFile;
-   std::string phpSysTempDir;
-   std::string disableFunctions;
-   std::string disableClasses;
-   std::string docrefRoot;
-   std::string docrefExt;
-   std::string userIniFilename;
-   std::string requestOrder;
-   std::string syslogIdent;
+   std::string m_variablesOrder;
+   std::string m_lastErrorMessage;
+   std::string m_lastErrorFile;
+   std::string m_phpSysTempDir;
+   std::string m_disableFunctions;
+   std::string m_disableClasses;
+   std::string m_docrefRoot;
+   std::string m_docrefExt;
+   std::string m_userIniFilename;
+   std::string m_requestOrder;
+   std::string m_syslogIdent;
+
    IniConfigDefaultInitFunc m_iniDefaultInitHandler;
-   ArgSeparators argSeparator;
+   ArgSeparators m_argSeparator;
    std::vector<StringRef> m_argv;
    zend_llist m_tickFunctions;
 };

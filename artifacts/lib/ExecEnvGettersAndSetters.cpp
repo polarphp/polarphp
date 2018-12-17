@@ -198,6 +198,66 @@ ExecEnv &ExecEnv::setComInitialized(bool flag)
 }
 #endif
 
+ExecEnv &ExecEnv::setSerializePrecision(zend_long value)
+{
+   m_serializePrecision = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setMemoryLimit(zend_long value)
+{
+   m_memoryLimit = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setMaxInputTime(zend_long value)
+{
+   m_maxInputTime = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setOutputBuffering(zend_long value)
+{
+   m_outputBuffering = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setLogErrorsMaxLen(zend_long value)
+{
+   m_logErrorsMaxLen = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setMaxInputNestingLevel(zend_long value)
+{
+   m_maxInputNestingLevel = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setMaxInputVars(zend_long value)
+{
+   m_maxInputVars = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setUserIniCacheTtl(zend_long value)
+{
+   m_userIniCacheTtl = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setSyslogFacility(zend_long value)
+{
+   m_syslogFacility = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setSyslogFilter(zend_long value)
+{
+   m_syslogFilter = value;
+   return *this;
+}
+
 ExecEnv &ExecEnv::setPhpIniPathOverride(const std::string &path)
 {
    m_phpIniPathOverride = path;
@@ -210,15 +270,201 @@ ExecEnv &ExecEnv::setInitEntries(const std::string &entries)
    return *this;
 }
 
-ExecEnv &ExecEnv::setPolarBinary(const std::string &binary)
+ExecEnv &ExecEnv::setOutputHandler(const std::string &value)
 {
-   m_polarBinary = binary;
+   m_outputHandler = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setUnserializeCallbackFunc(const std::string &value)
+{
+   m_unserializeCallbackFunc = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setErrorLog(const std::string &value)
+{
+   m_errorLog = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setDocRoot(const std::string &value)
+{
+   m_docRoot = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setUserDir(const std::string &value)
+{
+   m_userDir = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setIncludePath(const std::string &value)
+{
+   m_includePath = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setOpenBaseDir(const std::string &value)
+{
+   m_openBaseDir = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setExtensionDir(const std::string &value)
+{
+   m_extensionDir = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setPolarBinary(const std::string &value)
+{
+   m_polarBinary = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setSysTempDir(const std::string &value)
+{
+   m_sysTempDir = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setErrorAppendString(const std::string &value)
+{
+   m_errorAppendString = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setErrorPrependString(const std::string &value)
+{
+   m_errorPrependString = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setAutoPrependFile(const std::string &value)
+{
+   m_autoPrependFile = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setAutoAppendFile(const std::string &value)
+{
+   m_autoAppendFile = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setInputEncoding(const std::string &value)
+{
+   m_inputEncoding = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setInternalEncoding(const std::string &value)
+{
+   m_internalEncoding = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setOutputEncoding(const std::string &value)
+{
+   m_outputEncoding = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setVariablesOrder(const std::string &value)
+{
+   m_variablesOrder = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setLastErrorMessage(const std::string &value)
+{
+   m_lastErrorMessage = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setLastErrorFile(const std::string &value)
+{
+   m_lastErrorFile = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setPhpSysTempDir(const std::string &value)
+{
+   m_phpSysTempDir = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setDisableFunctions(const std::string &value)
+{
+   m_disableFunctions = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setDisableClasses(const std::string &value)
+{
+   m_disableClasses = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setDocrefRoot(const std::string &value)
+{
+   m_docrefRoot = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setDocrefExt(const std::string &value)
+{
+   m_docrefExt = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setUserIniFilename(const std::string &value)
+{
+   m_userIniFilename = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setRequestOrder(const std::string &value)
+{
+   m_requestOrder = value;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setSyslogIdent(const std::string &value)
+{
+   m_syslogIdent = value;
    return *this;
 }
 
 ExecEnv &ExecEnv::setIniDefaultsHandler(IniConfigDefaultInitFunc handler)
 {
    m_iniDefaultInitHandler = handler;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setLastErrorType(int type)
+{
+   m_lastErrorType = type;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setLastErrorLineno(int line)
+{
+   m_lastErrorLineno = line;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setIniConfigDeaultHandler(IniConfigDefaultInitFunc func)
+{
+   m_iniDefaultInitHandler = func;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setArgSeparator(ArgSeparators seps)
+{
+   m_argSeparator = seps;
    return *this;
 }
 
@@ -366,6 +612,66 @@ bool ExecEnv::getComInitialized()
 }
 #endif
 
+int ExecEnv::getLastErrorType() const
+{
+   return m_lastErrorType;
+}
+
+int ExecEnv::getLastErrorLineno() const
+{
+   return m_lastErrorLineno;
+}
+
+zend_long ExecEnv::getSerializePrecision() const
+{
+   return m_serializePrecision;
+}
+
+zend_long ExecEnv::getMemoryLimit() const
+{
+   return m_memoryLimit;
+}
+
+zend_long ExecEnv::getMaxInputTime() const
+{
+   return m_maxInputTime;
+}
+
+zend_long ExecEnv::getOutputBuffering() const
+{
+   return m_outputBuffering;
+}
+
+zend_long ExecEnv::getLogErrorsMaxLen() const
+{
+   return m_logErrorsMaxLen;
+}
+
+zend_long ExecEnv::getMaxInputNestingLevel() const
+{
+   return m_maxInputNestingLevel;
+}
+
+zend_long ExecEnv::getMaxInputVars() const
+{
+   return m_maxInputVars;
+}
+
+zend_long ExecEnv::getUserIniCacheTtl() const
+{
+   return m_userIniCacheTtl;
+}
+
+zend_long ExecEnv::getSyslogFacility() const
+{
+   return m_syslogFacility;
+}
+
+zend_long ExecEnv::getSyslogFilter() const
+{
+   return m_syslogFilter;
+}
+
 StringRef ExecEnv::getPhpIniPathOverride() const
 {
    return m_phpIniPathOverride;
@@ -376,14 +682,159 @@ StringRef ExecEnv::getIniEntries() const
    return m_iniEntries;
 }
 
+StringRef ExecEnv::getOutputHandler() const
+{
+   return m_outputHandler;
+}
+
+StringRef ExecEnv::getUnserializeCallbackFunc() const
+{
+   return m_unserializeCallbackFunc;
+}
+
+StringRef ExecEnv::getErrorLog() const
+{
+   return m_errorLog;
+}
+
+StringRef ExecEnv::getDocRoot() const
+{
+   return m_docrefRoot;
+}
+
+StringRef ExecEnv::getUserDir() const
+{
+   return m_userDir;
+}
+
+StringRef ExecEnv::getIncludePath() const
+{
+   return m_includePath;
+}
+
+StringRef ExecEnv::getOpenBaseDir() const
+{
+   return m_openBaseDir;
+}
+
+StringRef ExecEnv::getExtensionDir() const
+{
+   return m_extensionDir;
+}
+
 StringRef ExecEnv::getPolarBinary() const
 {
    return m_polarBinary;
 }
 
+StringRef ExecEnv::getSysTempDir() const
+{
+   return m_sysTempDir;
+}
+
+StringRef ExecEnv::getErrorAppendString() const
+{
+   return m_errorAppendString;
+}
+
+StringRef ExecEnv::getErrorPrependString() const
+{
+   return m_errorPrependString;
+}
+
+StringRef ExecEnv::getAutoPrependFile() const
+{
+   return m_autoPrependFile;
+}
+
+StringRef ExecEnv::getAutoAppendFile() const
+{
+   return m_autoAppendFile;
+}
+
+StringRef ExecEnv::getInputEncoding() const
+{
+   return m_inputEncoding;
+}
+
+StringRef ExecEnv::getInternalEncoding() const
+{
+   return m_internalEncoding;
+}
+
+StringRef ExecEnv::getOutputEncoding() const
+{
+   return m_outputEncoding;
+}
+
+StringRef ExecEnv::getVariablesOrder() const
+{
+   return m_variablesOrder;
+}
+
+StringRef ExecEnv::getLastErrorMessage() const
+{
+   return m_lastErrorMessage;
+}
+
+StringRef ExecEnv::getLastErrorFile() const
+{
+   return m_lastErrorFile;
+}
+
+StringRef ExecEnv::getPhpSysTempDir() const
+{
+   return m_phpSysTempDir;
+}
+
+StringRef ExecEnv::getDisableFunctions() const
+{
+   return m_disableFunctions;
+}
+
+StringRef ExecEnv::getDisableClasses() const
+{
+   return m_disableClasses;
+}
+
+StringRef ExecEnv::getDocrefRoot() const
+{
+   return m_docrefRoot;
+}
+
+StringRef ExecEnv::getDocrefExt() const
+{
+   return m_docrefExt;
+}
+
+StringRef ExecEnv::getUserIniFilename() const
+{
+   return m_userIniFilename;
+}
+
+StringRef ExecEnv::getRequestOrder() const
+{
+   return m_requestOrder;
+}
+
+StringRef ExecEnv::getSyslogIdent() const
+{
+   return m_syslogIdent;
+}
+
 IniConfigDefaultInitFunc ExecEnv::getIniConfigDeaultHandler() const
 {
    return m_iniDefaultInitHandler;
+}
+
+const ArgSeparators &ExecEnv::getArgSeparator() const
+{
+   return m_argSeparator;
+}
+
+const zend_llist &ExecEnv::getTickFunctions() const
+{
+   return m_tickFunctions;
 }
 
 zend_llist &ExecEnv::getTickFunctions()
