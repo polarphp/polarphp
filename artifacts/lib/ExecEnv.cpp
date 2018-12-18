@@ -870,7 +870,7 @@ size_t php_printf(const char *format, ...)
 
 size_t php_output_wrapper(const char *str, size_t strLength)
 {
-
+   return php_output_write(str, strLength);
 }
 
 FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **openedPath)

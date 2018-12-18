@@ -36,9 +36,6 @@ POLAR_DECL_EXPORT int php_register_extensions(zend_module_entry * const * ptr, i
 POLAR_DECL_EXPORT int php_execute_script(zend_file_handle *primary_file);
 POLAR_DECL_EXPORT int php_execute_simple_script(zend_file_handle *primary_file, zval *ret);
 
-POLAR_DECL_EXPORT void php_html_puts(const char *str, size_t siz);
-POLAR_DECL_EXPORT int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode);
-
 /* environment module */
 int php_init_environ();
 int php_shutdown_environ();

@@ -152,12 +152,14 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    zuf.error_function = php_error_callback;
    zuf.printf_function = php_printf;
    zuf.write_function = php_output_wrapper;
-   zuf.fopen_function = php_fopen_wrapper_for_zend;
+   /// polarphp does not use php stream
+   zuf.fopen_function = nullptr;
+   zuf.stream_open_function = nullptr;
+   /// need review whether need execute timeout mechanism
+   zuf.on_timeout = nullptr;
    zuf.message_handler = php_message_handler_for_zend;
    zuf.get_configuration_directive = php_get_configuration_directive_for_zend;
    zuf.ticks_function = run_ticks;
-   zuf.on_timeout = php_on_timeout;
-   zuf.stream_open_function = php_stream_open_for_zend;
    zuf.printf_to_smart_string_function = php_printf_to_smart_string;
    zuf.printf_to_smart_str_function = php_printf_to_smart_str;
    zuf.getenv_function = bootstrap_getenv;
@@ -256,7 +258,7 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    //REGISTER_INI_ENTRIES();
    /* Register Zend ini entries */
    // zend_register_standard_ini_entries();
-#ifdef ZEND_WIN32
+#ifdef POLAR_OS_WIN32
    /* Until the current ini values was setup, the current cp is 65001.
             If the actual ini vaues are different, some stuff needs to be updated.
             It concerns at least main_cwd_state and there might be more. As we're
@@ -452,7 +454,6 @@ void sigchld_handler(int)
 }
 } // anonymous namespace
 #endif
-
 
 bool php_exec_env_startup()
 {

@@ -74,11 +74,9 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
 POLAR_DECL_EXPORT size_t php_write(void *buf, size_t size);
 POLAR_DECL_EXPORT  size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
 size_t php_output_wrapper(const char *str, size_t strLength);
-FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **openedPath);
 zval *php_get_configuration_directive_for_zend(zend_string *name);
 POLAR_DECL_EXPORT void php_message_handler_for_zend(zend_long message, const void *data);
 void php_on_timeout(int seconds);
-int php_stream_open_for_zend(const char *filename, zend_file_handle *handle);
 //POLAR_DECL_EXPORT void php_printf_to_smart_string(smart_string *buf, const char *format, va_list ap);
 //POLAR_DECL_EXPORT void php_printf_to_smart_str(smart_str *buf, const char *format, va_list ap);
 POLAR_DECL_EXPORT char *bootstrap_getenv(char *name, size_t nameLen);
