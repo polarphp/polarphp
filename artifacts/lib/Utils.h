@@ -13,12 +13,14 @@
 #define POLARPHP_ARTIFACTS_UTILS_H
 
 #include <ctime>
+#include "polarphp/global/CompilerFeature.h"
 
 namespace polar {
 
 std::size_t php_format_date(char* str, std::size_t count, const char* format,
                             time_t ts, bool localtime);
-
+POLAR_DECL_EXPORT char *php_strtoupper(char *s, size_t len);
+POLAR_DECL_EXPORT char *php_strtolower(char *s, size_t len);
 } // polar
 
 #endif // POLARPHP_ARTIFACTS_UTILS_H

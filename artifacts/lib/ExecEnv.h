@@ -20,6 +20,7 @@
 #include <iostream>
 
 #include "ZendHeaders.h"
+#include "Defs.h"
 
 /* Error display modes */
 #define PHP_DISPLAY_ERRORS_STDOUT	1
@@ -70,7 +71,8 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
                                   const uint32_t errorLineno, const char *format,
                                   va_list args);
 
-POLAR_DECL_EXPORT size_t php_printf(const char *format, ...);
+POLAR_DECL_EXPORT size_t php_write(void *buf, size_t size);
+POLAR_DECL_EXPORT  size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
 size_t php_output_wrapper(const char *str, size_t strLength);
 FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **openedPath);
 zval *php_get_configuration_directive_for_zend(zend_string *name);

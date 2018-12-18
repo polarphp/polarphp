@@ -253,7 +253,7 @@ int dispatch_cli_command()
    int interactive = 0;
    int lineno = 0;
    int hide_argv = 0;
-   zend_try {
+   polar_try {
       CG(in_compilation) = 0; /* not initialized but needed for several options */
       if (sg_showVersion) {
          polar::print_polar_version();
@@ -321,7 +321,7 @@ int dispatch_cli_command()
       default:
          polar_unreachable("can't execute here");
       }
-   } zend_end_try();
+   } polar_end_try;
 out:
    if (execEnvStarted){
       php_exec_env_shutdown();

@@ -472,7 +472,7 @@ bool php_exec_env_startup()
    ::signal(SIGCHLD, sigchld_handler);
 #endif
 
-   zend_try {
+   polar_try {
       execEnv.setInErrorLog(false);
       execEnv.setDuringExecEnvStartup(true);
       php_output_activate();
@@ -509,10 +509,10 @@ bool php_exec_env_startup()
       php_hash_environment();
       zend_activate_modules();
       execEnv.setModulesActivated(true);
-   } zend_catch {
+   } polar_catch {
       retval = FAILURE;
-   } zend_end_try()
-         execEnv.setStarted(true);
+   } polar_end_try;
+   execEnv.setStarted(true);
    return retval;
 }
 

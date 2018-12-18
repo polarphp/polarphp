@@ -295,6 +295,8 @@ void emit_fd_setsize_warning(int maxFd);
 # define PHP_SAFE_MAX_FD(m, n)		do { if (m >= FD_SETSIZE) { polar::internal::emit_fd_setsize_warning(m); m = FD_SETSIZE - 1; }} while(0)
 #endif
 
+#define PHP_EMPTY_STR const_cast<char *>("")
+
 /* Syslog filters */
 #define PHP_SYSLOG_FILTER_ALL		0
 #define PHP_SYSLOG_FILTER_NO_CTRL	1

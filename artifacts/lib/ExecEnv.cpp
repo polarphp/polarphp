@@ -16,6 +16,7 @@
 #include "LifeCycle.h"
 #include "PhpSpprintf.h"
 #include "ZendHeaders.h"
+#include "Output.h"
 #include "Utils.h"
 
 #include <cstdio>
@@ -106,7 +107,9 @@ ExecEnv::ExecEnv()
      m_syslogFacility(LOG_USER),
      m_syslogIdent("polarphp"),
      m_syslogFilter(PHP_SYSLOG_FILTER_NO_CTRL),
-     m_memoryLimit(Z_L(1)<<30)
+     m_memoryLimit(Z_L(1)<<30),
+     m_docrefRoot("/phpmanual/"),
+     m_docrefExt(".html")
 {
 }
 
@@ -146,8 +149,8 @@ int php_execute_script(zend_file_handle *primaryFile)
 {
    ExecEnv &execEnv = retrieve_global_execenv();
    zend_file_handle *prepend_file_p = nullptr, *append_file_p = nullptr;
-//   zend_file_handle prepend_file = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)};
-//   zend_file_handle append_file = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)};
+   //   zend_file_handle prepend_file = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)};
+   //   zend_file_handle append_file = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)};
 #if HAVE_BROKEN_GETCWD
    volatile int old_cwd_fd = -1;
 #else
@@ -363,7 +366,6 @@ void emit_fd_setsize_warning(int maxFd)
 ZEND_COLD void php_error_docref0(const char *docref, int type, const char *format, ...)
 {
    va_list args;
-
    va_start(args, format);
    php_verror(docref, "", type, format, args);
    va_end(args);
@@ -391,201 +393,180 @@ ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const c
    }
 }
 
-ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)
+///
+/// TODO review memory leak
+///
+ZEND_COLD void php_verror(const char *docref, const char *params,
+                          int type, const char *format,
+                          va_list args)
 {
-   //   zend_string *replace_buffer = nullptr, *replace_origin = nullptr;
-   //   char *buffer = nullptr, *docref_buf = nullptr, *target = nullptr;
-   //   char *docref_target = "", *docref_root = "";
-   //   char *p;
-   //   int buffer_len = 0;
-   //   const char *space = "";
-   //   const char *class_name = "";
-   //   const char *function;
-   //   int origin_len;
-   //   char *origin;
-   //   char *message;
-   //   int is_function = 0;
+   ExecEnv &execEnv = retrieve_global_execenv();
+   zend_string *replace_buffer = nullptr;
+   zend_string *replace_origin = nullptr;
+   char *buffer = nullptr;
+   char *docref_buf = nullptr;
+   char *target = nullptr;
+   char *docref_target = PHP_EMPTY_STR;
+   char *docref_root = PHP_EMPTY_STR;
+   char *p;
+   int buffer_len = 0;
+   const char *space = PHP_EMPTY_STR;
+   const char *class_name = PHP_EMPTY_STR;
+   const char *function;
+   char *origin;
+   char *message;
+   int is_function = 0;
 
-   //   /* get error text into buffer and escape for html if necessary */
-   //   buffer_len = (int)vspprintf(&buffer, 0, format, args);
+   /* get error text into buffer and escape for html if necessary */
+   buffer_len = (int)polar_vspprintf(&buffer, 0, format, args);
 
-   //   if (PG(html_errors)) {
-   //      replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, get_safe_charset_hint());
-   //      /* Retry with substituting invalid chars on fail. */
-   //      if (!replace_buffer || ZSTR_LEN(replace_buffer) < 1) {
-   //         replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT | ENT_HTML_SUBSTITUTE_ERRORS, get_safe_charset_hint());
-   //      }
+   /* which function caused the problem if any at all */
+   if (php_during_module_startup()) {
+      function = const_cast<char *>("polarphp startup");
+   } else if (php_during_module_shutdown()) {
+      function = const_cast<char *>("polarphp shutdown");
+   } else if (EG(current_execute_data) &&
+              EG(current_execute_data)->func &&
+              ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
+              EG(current_execute_data)->opline &&
+              EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL
+              ) {
+      switch (EG(current_execute_data)->opline->extended_value) {
+      case ZEND_EVAL:
+         function = const_cast<char *>("eval");
+         is_function = 1;
+         break;
+      case ZEND_INCLUDE:
+         function = const_cast<char *>("include");
+         is_function = 1;
+         break;
+      case ZEND_INCLUDE_ONCE:
+         function = const_cast<char *>("include_once");
+         is_function = 1;
+         break;
+      case ZEND_REQUIRE:
+         function = const_cast<char *>("require");
+         is_function = 1;
+         break;
+      case ZEND_REQUIRE_ONCE:
+         function = const_cast<char *>("require_once");
+         is_function = 1;
+         break;
+      default:
+         function = const_cast<char *>("Unknown");
+      }
+   } else {
+      function = get_active_function_name();
+      if (!function || !strlen(function)) {
+         function = const_cast<char *>("Unknown");
+      } else {
+         is_function = 1;
+         class_name = get_active_class_name(&space);
+      }
+   }
 
-   //      efree(buffer);
+   /* if we still have memory then format the origin */
+   if (is_function) {
+      polar_spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);
+   } else {
+      polar_spprintf(&origin, 0, "%s", function);
+   }
 
-   //      if (replace_buffer) {
-   //         buffer = ZSTR_VAL(replace_buffer);
-   //         buffer_len = (int)ZSTR_LEN(replace_buffer);
-   //      } else {
-   //         buffer = "";
-   //         buffer_len = 0;
-   //      }
-   //   }
+   /* origin and buffer available, so lets come up with the error message */
+   if (docref && docref[0] == '#') {
+      docref_target = strchr(docref, '#');
+      docref = nullptr;
+   }
 
-   //   /* which function caused the problem if any at all */
-   //   if (php_during_module_startup()) {
-   //      function = "PHP Startup";
-   //   } else if (php_during_module_shutdown()) {
-   //      function = "PHP Shutdown";
-   //   } else if (EG(current_execute_data) &&
-   //            EG(current_execute_data)->func &&
-   //            ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
-   //            EG(current_execute_data)->opline &&
-   //            EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL
-   //   ) {
-   //      switch (EG(current_execute_data)->opline->extended_value) {
-   //         case ZEND_EVAL:
-   //            function = "eval";
-   //            is_function = 1;
-   //            break;
-   //         case ZEND_INCLUDE:
-   //            function = "include";
-   //            is_function = 1;
-   //            break;
-   //         case ZEND_INCLUDE_ONCE:
-   //            function = "include_once";
-   //            is_function = 1;
-   //            break;
-   //         case ZEND_REQUIRE:
-   //            function = "require";
-   //            is_function = 1;
-   //            break;
-   //         case ZEND_REQUIRE_ONCE:
-   //            function = "require_once";
-   //            is_function = 1;
-   //            break;
-   //         default:
-   //            function = "Unknown";
-   //      }
-   //   } else {
-   //      function = get_active_function_name();
-   //      if (!function || !strlen(function)) {
-   //         function = "Unknown";
-   //      } else {
-   //         is_function = 1;
-   //         class_name = get_active_class_name(&space);
-   //      }
-   //   }
+   /* no docref given but function is known (the default) */
+   if (!docref && is_function) {
+      int doclen;
+      while (*function == '_') {
+         function++;
+      }
+      if (space[0] == '\0') {
+         doclen = (int)polar_spprintf(&docref_buf, 0, "function.%s", function);
+      } else {
+         doclen = (int)polar_spprintf(&docref_buf, 0, "%s.%s", class_name, function);
+      }
+      while((p = strchr(docref_buf, '_')) != nullptr) {
+         *p = '-';
+      }
+      docref = php_strtolower(docref_buf, doclen);
+   }
 
-   //   /* if we still have memory then format the origin */
-   //   if (is_function) {
-   //      origin_len = (int)spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);
-   //   } else {
-   //      origin_len = (int)spprintf(&origin, 0, "%s", function);
-   //   }
+   /* we have a docref for a function AND
+       * - we show errors in html mode AND
+       * - the user wants to see the links
+       */
+   StringRef docrefRoot = execEnv.getDocrefRoot();
+   if (docref && is_function  && !docrefRoot.empty()) {
+      if (strncmp(docref, "http://", 7)) {
+         /* We don't have 'http://' so we use docref_root */
 
-   //   if (PG(html_errors)) {
-   //      replace_origin = php_escape_html_entities((unsigned char*)origin, origin_len, 0, ENT_COMPAT, get_safe_charset_hint());
-   //      efree(origin);
-   //      origin = ZSTR_VAL(replace_origin);
-   //   }
+         char *ref;  /* temp copy for duplicated docref */
 
-   //   /* origin and buffer available, so lets come up with the error message */
-   //   if (docref && docref[0] == '#') {
-   //      docref_target = strchr(docref, '#');
-   //      docref = nullptr;
-   //   }
+         ref = estrdup(docref);
+         if (docref_buf) {
+            efree(docref_buf);
+         }
+         docref_buf = ref;
+         /* strip of the target if any */
+         p = strrchr(ref, '#');
+         if (p) {
+            target = estrdup(p);
+            if (target) {
+               docref_target = target;
+               *p = '\0';
+            }
+         }
+         //execEnv.getDocrefExt()
+         StringRef docrefExt = execEnv.getDocrefExt();
+         /* add the extension if it is set in ini */
+         if (!docrefExt.empty()) {
+            polar_spprintf(&docref_buf, 0, "%s%s", ref, docrefExt.getData());
+            efree(ref);
+         }
+         docref = docref_buf;
+      }
+      polar_spprintf(&message, 0, "%s [%s%s%s]: %s", origin, docref_root, docref, docref_target, buffer);
+      if (target) {
+         efree(target);
+      }
+   } else {
+      polar_spprintf(&message, 0, "%s: %s", origin, buffer);
+   }
+   if (replace_origin) {
+      zend_string_free(replace_origin);
+   } else {
+      efree(origin);
+   }
+   if (docref_buf) {
+      efree(docref_buf);
+   }
 
-   //   /* no docref given but function is known (the default) */
-   //   if (!docref && is_function) {
-   //      int doclen;
-   //      while (*function == '_') {
-   //         function++;
-   //      }
-   //      if (space[0] == '\0') {
-   //         doclen = (int)spprintf(&docref_buf, 0, "function.%s", function);
-   //      } else {
-   //         doclen = (int)spprintf(&docref_buf, 0, "%s.%s", class_name, function);
-   //      }
-   //      while((p = strchr(docref_buf, '_')) != nullptr) {
-   //         *p = '-';
-   //      }
-   //      docref = php_strtolower(docref_buf, doclen);
-   //   }
+   if (execEnv.getTrackErrors() && sg_moduleInitialized && EG(active) &&
+       (Z_TYPE(EG(user_error_handler)) == IS_UNDEF || !(EG(user_error_handler_error_reporting) & type))) {
+      zval tmp;
+      ZVAL_STRINGL(&tmp, buffer, buffer_len);
+      if (EG(current_execute_data)) {
+         if (zend_set_local_var_str("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0) == FAILURE) {
+            zval_ptr_dtor(&tmp);
+         }
+      } else {
+         zend_hash_str_update_ind(&EG(symbol_table), "php_errormsg", sizeof("php_errormsg")-1, &tmp);
+      }
+   }
+   if (replace_buffer) {
+      zend_string_free(replace_buffer);
+   } else {
+      if (buffer_len > 0) {
+         efree(buffer);
+      }
+   }
 
-   //   /* we have a docref for a function AND
-   //    * - we show errors in html mode AND
-   //    * - the user wants to see the links
-   //    */
-   //   if (docref && is_function && PG(html_errors) && strlen(PG(docref_root))) {
-   //      if (strncmp(docref, "http://", 7)) {
-   //         /* We don't have 'http://' so we use docref_root */
-
-   //         char *ref;  /* temp copy for duplicated docref */
-
-   //         docref_root = PG(docref_root);
-
-   //         ref = estrdup(docref);
-   //         if (docref_buf) {
-   //            efree(docref_buf);
-   //         }
-   //         docref_buf = ref;
-   //         /* strip of the target if any */
-   //         p = strrchr(ref, '#');
-   //         if (p) {
-   //            target = estrdup(p);
-   //            if (target) {
-   //               docref_target = target;
-   //               *p = '\0';
-   //            }
-   //         }
-   //         /* add the extension if it is set in ini */
-   //         if (PG(docref_ext) && strlen(PG(docref_ext))) {
-   //            spprintf(&docref_buf, 0, "%s%s", ref, PG(docref_ext));
-   //            efree(ref);
-   //         }
-   //         docref = docref_buf;
-   //      }
-   //      /* display html formatted or only show the additional links */
-   //      if (PG(html_errors)) {
-   //         spprintf(&message, 0, "%s [<a href='%s%s%s'>%s</a>]: %s", origin, docref_root, docref, docref_target, docref, buffer);
-   //      } else {
-   //         spprintf(&message, 0, "%s [%s%s%s]: %s", origin, docref_root, docref, docref_target, buffer);
-   //      }
-   //      if (target) {
-   //         efree(target);
-   //      }
-   //   } else {
-   //      spprintf(&message, 0, "%s: %s", origin, buffer);
-   //   }
-   //   if (replace_origin) {
-   //      zend_string_free(replace_origin);
-   //   } else {
-   //      efree(origin);
-   //   }
-   //   if (docref_buf) {
-   //      efree(docref_buf);
-   //   }
-
-   //   if (PG(track_errors) && module_initialized && EG(active) &&
-   //         (Z_TYPE(EG(user_error_handler)) == IS_UNDEF || !(EG(user_error_handler_error_reporting) & type))) {
-   //      zval tmp;
-   //      ZVAL_STRINGL(&tmp, buffer, buffer_len);
-   //      if (EG(current_execute_data)) {
-   //         if (zend_set_local_var_str("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0) == FAILURE) {
-   //            zval_ptr_dtor(&tmp);
-   //         }
-   //      } else {
-   //         zend_hash_str_update_ind(&EG(symbol_table), "php_errormsg", sizeof("php_errormsg")-1, &tmp);
-   //      }
-   //   }
-   //   if (replace_buffer) {
-   //      zend_string_free(replace_buffer);
-   //   } else {
-   //      if (buffer_len > 0) {
-   //         efree(buffer);
-   //      }
-   //   }
-
-   //   php_error(type, "%s", message);
-   //   efree(message);
-
-
+   php_error(type, "%s", message);
+   efree(message);
 }
 
 ZEND_COLD void php_error_callback(int type, const char *errorFilename,
@@ -863,9 +844,28 @@ ZEND_COLD void php_log_err_with_severity(char *logMessage, int syslogTypeInt)
    execEnv.setInErrorLog(false);
 }
 
+size_t php_write(void *buf, size_t size)
+{
+   return PHPWRITE(reinterpret_cast<char *>(buf), size);
+}
+
+///
+/// review check memory leak
+///
 size_t php_printf(const char *format, ...)
 {
+   va_list args;
+   size_t ret;
+   char *buffer;
+   size_t size;
 
+   va_start(args, format);
+   size = polar_vspprintf(&buffer, 0, format, args);
+   ret = PHPWRITE(buffer, size);
+   efree(buffer);
+   va_end(args);
+
+   return ret;
 }
 
 size_t php_output_wrapper(const char *str, size_t strLength)

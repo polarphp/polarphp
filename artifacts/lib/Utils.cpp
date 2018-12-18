@@ -10,6 +10,7 @@
 // Created by polarboy on 2018/12/18.
 
 #include "Utils.h"
+#include <cctype>
 
 namespace polar {
 
@@ -26,6 +27,36 @@ std::size_t php_format_date(char* str, std::size_t count, const char* format,
    }
    tm = *tempTm;
    return std::strftime(str, count, format, &tm);
+}
+
+char *php_strtolower(char *s, size_t len)
+{
+   unsigned char *c;
+   const unsigned char *e;
+
+   c = (unsigned char *)s;
+   e = c+len;
+
+   while (c < e) {
+      *c = std::tolower(*c);
+      c++;
+   }
+   return s;
+}
+
+char *php_strtoupper(char *s, size_t len)
+{
+   unsigned char *c;
+   const unsigned char *e;
+
+   c = (unsigned char *)s;
+   e = (unsigned char *)c+len;
+
+   while (c < e) {
+      *c = toupper(*c);
+      c++;
+   }
+   return s;
 }
 
 } // utils
