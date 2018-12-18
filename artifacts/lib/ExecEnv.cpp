@@ -17,6 +17,10 @@
 
 #include <cstdio>
 
+#ifdef HAVE_SYSLOG_H
+#include <syslog.h>
+#endif
+
 #ifdef POLAR_HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -68,6 +72,10 @@
 namespace polar
 {
 
+extern int sg_moduleInitialized;
+extern int sg_moduleStartup;
+extern int sg_moduleShutdown;
+
 CliShellCallbacksType sg_cliShellCallbacks = {nullptr, nullptr, nullptr};
 
 POLAR_DECL_EXPORT CliShellCallbacksType *php_cli_get_shell_callbacks()
@@ -84,7 +92,15 @@ ExecEnv &retrieve_global_execenv()
 ExecEnv::ExecEnv()
    : m_started(false),
      /// TODO read from cfg file
-     m_defaultSocketTimeout(60)
+     m_defaultSocketTimeout(60),
+     m_logErrorsMaxLen(1024),
+     m_ignoreRepeatedErrors(false),
+     m_ignoreRepeatedSource(false),
+     m_displayErrors(true),
+     m_logErrors(true),
+     m_syslogFacility(LOG_USER),
+     m_syslogIdent("polarphp"),
+     m_syslogFilter(PHP_SYSLOG_FILTER_NO_CTRL)
 {
 }
 
@@ -100,6 +116,13 @@ void ExecEnv::activate()
 void ExecEnv::deactivate()
 {
    m_started = false;
+}
+
+/// polarphp don't use timeout at vm level
+///
+void php_on_timeout(int seconds)
+{
+
 }
 
 int php_execute_script(zend_file_handle *primaryFile)
@@ -124,8 +147,7 @@ int php_execute_script(zend_file_handle *primaryFile)
 
    polar_try {
       char realfile[MAXPATHLEN];
-
-#ifdef PHP_WIN32
+#ifdef POALR_OS_WIN32
       if(primaryFile->filename) {
          UpdateIniFromRegistry((char*)primaryFile->filename);
       }
@@ -552,7 +574,187 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
                                   const uint32_t errorLineno, const char *format,
                                   va_list args)
 {
+   ExecEnv &execEnv = retrieve_global_execenv();
+   /// need protected for memory leak
+   /// TODO find elegance way
+   ///
+   char *bufferRaw = nullptr;
+   bool display;
+   int bufferLen = static_cast<int>(zend_vspprintf(&bufferRaw, execEnv.getLogErrorsMaxLen(), format, args));
+   std::shared_ptr<char> buffer;
+   if (bufferRaw) {
+      buffer.reset(bufferRaw, [](void *ptr){
+         efree(ptr);
+      });
+   }
+   /* check for repeated errors to be ignored */
+   if (execEnv.getIgnoreRepeatedErrors() && !execEnv.getLastErrorMessage().empty()) {
+      /* no check for execEnv.getLastErrorFile() is needed since it cannot
+          * be empty if execEnv.getLastErrorMessage() is not empty */
+      StringRef lastErrorMsg = execEnv.getLastErrorMessage();
+      if (lastErrorMsg != buffer.get()
+          || (!execEnv.getIgnoreRepeatedSource()
+              && ((execEnv.getLastErrorLineno() != (int)errorLineno)
+                  || execEnv.getLastErrorFile() != errorFilename))) {
+         display = true;
+      } else {
+         display = false;
+      }
+   } else {
+      display = true;
+   }
 
+   /* according to error handling mode, throw exception or show it */
+   if (EG(error_handling) == EH_THROW) {
+      switch (type) {
+      case E_ERROR:
+      case E_CORE_ERROR:
+      case E_COMPILE_ERROR:
+      case E_USER_ERROR:
+      case E_PARSE:
+         /* fatal errors are real errors and cannot be made exceptions */
+         break;
+      case E_STRICT:
+      case E_DEPRECATED:
+      case E_USER_DEPRECATED:
+         /* for the sake of BC to old damaged code */
+         break;
+      case E_NOTICE:
+      case E_USER_NOTICE:
+         /* notices are no errors and are not treated as such like E_WARNINGS */
+         break;
+      default:
+         /* throw an exception if we are in EH_THROW mode
+                * but DO NOT overwrite a pending exception
+                */
+         if (!EG(exception)) {
+            zend_throw_error_exception(EG(exception_class), bufferRaw, 0, type);
+         }
+         return;
+      }
+   }
+
+   /* store the error if it has changed */
+   if (display) {
+      if (!errorFilename) {
+         errorFilename = "Unknown";
+      }
+      execEnv.setLastErrorType(type);
+      execEnv.setLastErrorMessage(std::string(bufferRaw, bufferLen));
+      // errorFilename must be c string ?
+      execEnv.setLastErrorFile(errorFilename);
+      execEnv.setLastErrorLineno(errorLineno);
+   }
+
+//   /* display/log the error if necessary */
+//   if (display && (EG(error_reporting) & type || (type & E_CORE))
+//       && (execEnv.getLogErrors() || execEnv.getDisplayErrors() || (!sg_moduleInitialized))) {
+//      char *error_type_str;
+//      int syslog_type_int = LOG_NOTICE;
+
+//      switch (type) {
+//      case E_ERROR:
+//      case E_CORE_ERROR:
+//      case E_COMPILE_ERROR:
+//      case E_USER_ERROR:
+//         error_type_str = "Fatal error";
+//         syslog_type_int = LOG_ERR;
+//         break;
+//      case E_RECOVERABLE_ERROR:
+//         error_type_str = "Recoverable fatal error";
+//         syslog_type_int = LOG_ERR;
+//         break;
+//      case E_WARNING:
+//      case E_CORE_WARNING:
+//      case E_COMPILE_WARNING:
+//      case E_USER_WARNING:
+//         error_type_str = "Warning";
+//         syslog_type_int = LOG_WARNING;
+//         break;
+//      case E_PARSE:
+//         error_type_str = "Parse error";
+//         syslog_type_int = LOG_EMERG;
+//         break;
+//      case E_NOTICE:
+//      case E_USER_NOTICE:
+//         error_type_str = "Notice";
+//         syslog_type_int = LOG_NOTICE;
+//         break;
+//      case E_STRICT:
+//         error_type_str = "Strict Standards";
+//         syslog_type_int = LOG_INFO;
+//         break;
+//      case E_DEPRECATED:
+//      case E_USER_DEPRECATED:
+//         error_type_str = "Deprecated";
+//         syslog_type_int = LOG_INFO;
+//         break;
+//      default:
+//         error_type_str = "Unknown error";
+//         break;
+//      }
+
+//      if (!module_initialized || PG(log_errors)) {
+//         char *log_buffer;
+//#ifdef PHP_WIN32
+//         if (type == E_CORE_ERROR || type == E_CORE_WARNING) {
+//            syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, buffer, GetCommandLine());
+//         }
+//#endif
+//         spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %" PRIu32, error_type_str, buffer, error_filename, error_lineno);
+//         php_log_err_with_severity(log_buffer, syslog_type_int);
+//         efree(log_buffer);
+//      }
+
+//      if (PG(display_errors) && ((module_initialized && !PG(during_request_startup)) || (PG(display_startup_errors)))) {
+//         if (PG(xmlrpc_errors)) {
+//            php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>" ZEND_LONG_FMT "</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %" PRIu32 "</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, buffer, error_filename, error_lineno);
+//         } else {
+//            char *prepend_string = INI_STR("error_prepend_string");
+//            char *append_string = INI_STR("error_append_string");
+
+//            if (PG(html_errors)) {
+//               if (type == E_ERROR || type == E_PARSE) {
+//                  zend_string *buf = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, get_safe_charset_hint());
+//                  php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(buf), error_filename, error_lineno, STR_PRINT(append_string));
+//                  zend_string_free(buf);
+//               } else {
+//                  php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+//               }
+//            } else {
+//               /* Write CLI/CGI errors to stderr if display_errors = "stderr" */
+//               if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi")) &&
+//                   PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
+//                   ) {
+//                  fprintf(stderr, "%s: %s in %s on line %" PRIu32 "\n", error_type_str, buffer, error_filename, error_lineno);
+//#ifdef PHP_WIN32
+//                  fflush(stderr);
+//#endif
+//               } else {
+//                  php_printf("%s\n%s: %s in %s on line %" PRIu32 "\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+//               }
+//            }
+//         }
+//      }
+//#if ZEND_DEBUG
+//      if (PG(report_zend_debug)) {
+//         zend_bool trigger_break;
+
+//         switch (type) {
+//         case E_ERROR:
+//         case E_CORE_ERROR:
+//         case E_COMPILE_ERROR:
+//         case E_USER_ERROR:
+//            trigger_break=1;
+//            break;
+//         default:
+//            trigger_break=0;
+//            break;
+//         }
+//         zend_output_debug_string(trigger_break, "%s(%" PRIu32 ") : %s - %s", error_filename, error_lineno, error_type_str, buffer);
+//      }
+//#endif
+//   }
 }
 
 size_t php_printf(const char *format, ...)
@@ -580,25 +782,20 @@ POLAR_DECL_EXPORT void php_message_handler_for_zend(zend_long message, const voi
 
 }
 
-void php_on_timeout(int seconds)
-{
-
-}
-
 int php_stream_open_for_zend(const char *filename, zend_file_handle *handle)
 {
 
 }
 
-POLAR_DECL_EXPORT void php_printf_to_smart_string(smart_string *buf, const char *format, va_list ap)
-{
+//POLAR_DECL_EXPORT void php_printf_to_smart_string(smart_string *buf, const char *format, va_list ap)
+//{
 
-}
+//}
 
-POLAR_DECL_EXPORT void php_printf_to_smart_str(smart_str *buf, const char *format, va_list ap)
-{
+//POLAR_DECL_EXPORT void php_printf_to_smart_str(smart_str *buf, const char *format, va_list ap)
+//{
 
-}
+//}
 
 POLAR_DECL_EXPORT char *bootstrap_getenv(char *name, size_t nameLen)
 {

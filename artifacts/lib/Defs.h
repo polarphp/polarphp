@@ -16,7 +16,10 @@
 #include "polarphp/global/SystemDetection.h"
 #include "polarphp/global/Config.h"
 #include "lib/PolarVersion.h"
-#include "ZendHeaders.h"
+
+extern "C" {
+#include "polarphp/vm/zend/zend_portability.h"
+}
 
 #define PHP_DEFAULT_CHARSET "UTF-8"
 /* PHP's DEBUG value must match Zend's ZEND_DEBUG value */
@@ -289,21 +292,11 @@ void emit_fd_setsize_warning(int maxFd);
 # define PHP_SAFE_MAX_FD(m, n)		do { if (m >= FD_SETSIZE) { polar::internal::emit_fd_setsize_warning(m); m = FD_SETSIZE - 1; }} while(0)
 #endif
 
-//#define zend_try												\
-//   {															\
-//      JMP_BUF *__orig_bailout = EG(bailout);					\
-//      JMP_BUF __bailout;										\
-//                                                \
-//      EG(bailout) = &__bailout;								\
-//      if (SETJMP(__bailout)==0) {
-//#define zend_catch												\
-//      } else {												\
-//         EG(bailout) = __orig_bailout;
-//#define zend_end_try()											\
-//      }														\
-//      EG(bailout) = __orig_bailout;							\
-//   }
-//#define zend_first_try		EG(bailout)=NULL;	zend_try
+/* Syslog filters */
+#define PHP_SYSLOG_FILTER_ALL		0
+#define PHP_SYSLOG_FILTER_NO_CTRL	1
+#define PHP_SYSLOG_FILTER_ASCII		2
+
 #define polar_try zend_try
 #define polar_catch zend_catch
 #define polar_first_try zend_first_try

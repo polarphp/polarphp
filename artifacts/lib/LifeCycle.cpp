@@ -16,6 +16,7 @@
 #include "Ticks.h"
 #include "Defs.h"
 #include "Reentrancy.h"
+#include "PhpSpprintf.h"
 #include "Ini.h"
 
 #include <cstring>
@@ -24,9 +25,9 @@ namespace polar {
 
 /* True globals (no need for thread safety */
 /* But don't make them a single int bitfield */
-static int sg_moduleInitialized = 0;
-static int sg_moduleStartup = 1;
-static int sg_moduleShutdown = 0;
+int sg_moduleInitialized = 0;
+int sg_moduleStartup = 1;
+int sg_moduleShutdown = 0;
 
 POLAR_DECL_EXPORT int (*php_register_internal_extensions_func)(void) = php_register_internal_extensions;
 
