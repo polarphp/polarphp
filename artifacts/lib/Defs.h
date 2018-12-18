@@ -278,6 +278,9 @@ void emit_fd_setsize_warning(int maxFd);
 
 #define PHP_MODULE_GLOBALS		ZEND_MODULE_GLOBALS
 
+/* macros */
+#define PHP_STR_PRINT(str)	((str)?(str):"")
+
 #ifdef POLAR_OS_WIN32
 /* it is safe to FD_SET too many fd's under win32; the macro will simply ignore
  * descriptors that go beyond the default FD_SETSIZE */

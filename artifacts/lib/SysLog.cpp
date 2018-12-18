@@ -70,11 +70,9 @@ void php_syslog(int priority, const char *format, ...)
     * not already been done; call it ourselves and pass the
     * correct parameters!
     */
-
    if (!execEnv.getHaveCalledOpenlog()) {
       php_openlog(execEnv.getSyslogIdent().getData(), 0, execEnv.getSyslogFacility());
    }
-
    va_start(args, format);
    zend_printf_to_smart_string(&fbuf, format, args);
    smart_string_0(&fbuf);
@@ -98,7 +96,6 @@ void php_syslog(int priority, const char *format, ...)
          smart_string_appendc(&sbuf, c);
       else {
          const char xdigits[] = "0123456789abcdef";
-
          smart_string_appendl(&sbuf, "\\x", 2);
          smart_string_appendc(&sbuf, xdigits[(c / 0x10)]);
          c &= 0x0f;

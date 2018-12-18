@@ -13,10 +13,14 @@
 #include "polarphp/global/CompilerFeature.h"
 #include "polarphp/global/Config.h"
 #include "Defs.h"
+#include "LifeCycle.h"
+#include "PhpSpprintf.h"
 #include "ZendHeaders.h"
+#include "Utils.h"
 
 #include <cstdio>
-
+#include <sys/stat.h>
+#include <fcntl.h>
 #ifdef HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
@@ -96,16 +100,25 @@ ExecEnv::ExecEnv()
      m_logErrorsMaxLen(1024),
      m_ignoreRepeatedErrors(false),
      m_ignoreRepeatedSource(false),
-     m_displayErrors(true),
+     m_displayErrors(PHP_DISPLAY_ERRORS_STDOUT),
      m_logErrors(true),
+     m_trackErrors(true),
      m_syslogFacility(LOG_USER),
      m_syslogIdent("polarphp"),
-     m_syslogFilter(PHP_SYSLOG_FILTER_NO_CTRL)
+     m_syslogFilter(PHP_SYSLOG_FILTER_NO_CTRL),
+     m_memoryLimit(Z_L(1)<<30)
 {
 }
 
 ExecEnv::~ExecEnv()
 {
+}
+
+/// default log handler
+///
+void ExecEnv::logMessage(const char *logMessage, int syslogTypeInt)
+{
+
 }
 
 void ExecEnv::activate()
@@ -125,11 +138,16 @@ void php_on_timeout(int seconds)
 
 }
 
+
+///
+/// TODO support prepend and append file
+///
 int php_execute_script(zend_file_handle *primaryFile)
 {
    ExecEnv &execEnv = retrieve_global_execenv();
    zend_file_handle *prepend_file_p = nullptr, *append_file_p = nullptr;
-   zend_file_handle prepend_file = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)}, append_file = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)};
+//   zend_file_handle prepend_file = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)};
+//   zend_file_handle append_file = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)};
 #if HAVE_BROKEN_GETCWD
    volatile int old_cwd_fd = -1;
 #else
@@ -646,115 +664,203 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
       execEnv.setLastErrorLineno(errorLineno);
    }
 
-//   /* display/log the error if necessary */
-//   if (display && (EG(error_reporting) & type || (type & E_CORE))
-//       && (execEnv.getLogErrors() || execEnv.getDisplayErrors() || (!sg_moduleInitialized))) {
-//      char *error_type_str;
-//      int syslog_type_int = LOG_NOTICE;
+   /* display/log the error if necessary */
+   if (display && (EG(error_reporting) & type || (type & E_CORE))
+       && (execEnv.getLogErrors() || execEnv.getDisplayErrors() || (!sg_moduleInitialized))) {
+      char *error_type_str;
+      int syslogTypeInt = LOG_NOTICE;
 
-//      switch (type) {
-//      case E_ERROR:
-//      case E_CORE_ERROR:
-//      case E_COMPILE_ERROR:
-//      case E_USER_ERROR:
-//         error_type_str = "Fatal error";
-//         syslog_type_int = LOG_ERR;
-//         break;
-//      case E_RECOVERABLE_ERROR:
-//         error_type_str = "Recoverable fatal error";
-//         syslog_type_int = LOG_ERR;
-//         break;
-//      case E_WARNING:
-//      case E_CORE_WARNING:
-//      case E_COMPILE_WARNING:
-//      case E_USER_WARNING:
-//         error_type_str = "Warning";
-//         syslog_type_int = LOG_WARNING;
-//         break;
-//      case E_PARSE:
-//         error_type_str = "Parse error";
-//         syslog_type_int = LOG_EMERG;
-//         break;
-//      case E_NOTICE:
-//      case E_USER_NOTICE:
-//         error_type_str = "Notice";
-//         syslog_type_int = LOG_NOTICE;
-//         break;
-//      case E_STRICT:
-//         error_type_str = "Strict Standards";
-//         syslog_type_int = LOG_INFO;
-//         break;
-//      case E_DEPRECATED:
-//      case E_USER_DEPRECATED:
-//         error_type_str = "Deprecated";
-//         syslog_type_int = LOG_INFO;
-//         break;
-//      default:
-//         error_type_str = "Unknown error";
-//         break;
-//      }
+      switch (type) {
+      case E_ERROR:
+      case E_CORE_ERROR:
+      case E_COMPILE_ERROR:
+      case E_USER_ERROR:
+         error_type_str = const_cast<char *>("Fatal error");
+         syslogTypeInt = LOG_ERR;
+         break;
+      case E_RECOVERABLE_ERROR:
+         error_type_str = const_cast<char *>("Recoverable fatal error");
+         syslogTypeInt = LOG_ERR;
+         break;
+      case E_WARNING:
+      case E_CORE_WARNING:
+      case E_COMPILE_WARNING:
+      case E_USER_WARNING:
+         error_type_str = const_cast<char *>("Warning");
+         syslogTypeInt = LOG_WARNING;
+         break;
+      case E_PARSE:
+         error_type_str = const_cast<char *>("Parse error");
+         syslogTypeInt = LOG_EMERG;
+         break;
+      case E_NOTICE:
+      case E_USER_NOTICE:
+         error_type_str = const_cast<char *>("Notice");
+         syslogTypeInt = LOG_NOTICE;
+         break;
+      case E_STRICT:
+         error_type_str = const_cast<char *>("Strict Standards");
+         syslogTypeInt = LOG_INFO;
+         break;
+      case E_DEPRECATED:
+      case E_USER_DEPRECATED:
+         error_type_str = const_cast<char *>("Deprecated");
+         syslogTypeInt = LOG_INFO;
+         break;
+      default:
+         error_type_str = const_cast<char *>("Unknown error");
+         break;
+      }
 
-//      if (!module_initialized || PG(log_errors)) {
-//         char *log_buffer;
-//#ifdef PHP_WIN32
-//         if (type == E_CORE_ERROR || type == E_CORE_WARNING) {
-//            syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, buffer, GetCommandLine());
-//         }
-//#endif
-//         spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %" PRIu32, error_type_str, buffer, error_filename, error_lineno);
-//         php_log_err_with_severity(log_buffer, syslog_type_int);
-//         efree(log_buffer);
-//      }
+      if (!sg_moduleInitialized || execEnv.getLogErrors()) {
+         /// TODO maybe memory leak
+         char *log_buffer;
+#ifdef POLAR_OS_WIN32
+         if (type == E_CORE_ERROR || type == E_CORE_WARNING) {
+            syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, buffer, GetCommandLine());
+         }
+#endif
+         polar_spprintf(&log_buffer, 0, "polarphp %s:  %s in %s on line %" PRIu32, error_type_str, buffer.get(), errorFilename, errorLineno);
+         php_log_err_with_severity(log_buffer, syslogTypeInt);
+         efree(log_buffer);
+      }
 
-//      if (PG(display_errors) && ((module_initialized && !PG(during_request_startup)) || (PG(display_startup_errors)))) {
-//         if (PG(xmlrpc_errors)) {
-//            php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>" ZEND_LONG_FMT "</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %" PRIu32 "</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, buffer, error_filename, error_lineno);
-//         } else {
-//            char *prepend_string = INI_STR("error_prepend_string");
-//            char *append_string = INI_STR("error_append_string");
+      if (execEnv.getDisplayErrors() && ((sg_moduleInitialized && !execEnv.getDuringExecEnvStartup()) || execEnv.getDisplayStartupErrors())) {
+         char *prepend_string = INI_STR("error_prepend_string");
+         char *append_string = INI_STR("error_append_string");
+         /* Write CLI/CGI errors to stderr if display_errors = "stderr" */
+         if (execEnv.getDisplayErrors() == PHP_DISPLAY_ERRORS_STDERR) {
+            fprintf(stderr, "%s: %s in %s on line %" PRIu32 "\n", error_type_str, buffer.get(), errorFilename, errorLineno);
+#ifdef POLAR_OS_WIN32
+            fflush(stderr);
+#endif
+         } else {
+            php_printf("%s\n%s: %s in %s on line %" PRIu32 "\n%s", PHP_STR_PRINT(prepend_string), error_type_str, buffer.get(), errorFilename, errorLineno, PHP_STR_PRINT(append_string));
+         }
+      }
+#if ZEND_DEBUG
+      if (execEnv.getReportZendDebug()) {
+         zend_bool trigger_break;
 
-//            if (PG(html_errors)) {
-//               if (type == E_ERROR || type == E_PARSE) {
-//                  zend_string *buf = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, get_safe_charset_hint());
-//                  php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(buf), error_filename, error_lineno, STR_PRINT(append_string));
-//                  zend_string_free(buf);
-//               } else {
-//                  php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
-//               }
-//            } else {
-//               /* Write CLI/CGI errors to stderr if display_errors = "stderr" */
-//               if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi")) &&
-//                   PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
-//                   ) {
-//                  fprintf(stderr, "%s: %s in %s on line %" PRIu32 "\n", error_type_str, buffer, error_filename, error_lineno);
-//#ifdef PHP_WIN32
-//                  fflush(stderr);
-//#endif
-//               } else {
-//                  php_printf("%s\n%s: %s in %s on line %" PRIu32 "\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
-//               }
-//            }
-//         }
-//      }
-//#if ZEND_DEBUG
-//      if (PG(report_zend_debug)) {
-//         zend_bool trigger_break;
+         switch (type) {
+         case E_ERROR:
+         case E_CORE_ERROR:
+         case E_COMPILE_ERROR:
+         case E_USER_ERROR:
+            trigger_break=1;
+            break;
+         default:
+            trigger_break=0;
+            break;
+         }
+         zend_output_debug_string(trigger_break, "%s(%" PRIu32 ") : %s - %s", errorFilename, errorLineno, error_type_str, buffer.get());
+      }
+#endif
+   }
 
-//         switch (type) {
-//         case E_ERROR:
-//         case E_CORE_ERROR:
-//         case E_COMPILE_ERROR:
-//         case E_USER_ERROR:
-//            trigger_break=1;
-//            break;
-//         default:
-//            trigger_break=0;
-//            break;
-//         }
-//         zend_output_debug_string(trigger_break, "%s(%" PRIu32 ") : %s - %s", error_filename, error_lineno, error_type_str, buffer);
-//      }
-//#endif
-//   }
+   /* Bail out if we can't recover */
+   switch (type) {
+   case E_CORE_ERROR:
+      if(!sg_moduleInitialized) {
+         /* bad error in module startup - no way we can live with this */
+         exit(-2);
+      }
+      POLAR_FALLTHROUGH;
+      /* no break - intentionally */
+   case E_ERROR:
+   case E_RECOVERABLE_ERROR:
+   case E_PARSE:
+   case E_COMPILE_ERROR:
+   case E_USER_ERROR:
+      EG(exit_status) = 255;
+      if (sg_moduleInitialized) {
+         /* the parser would return 1 (failure), we can bail out nicely */
+         if (type != E_PARSE) {
+            /* restore memory limit */
+            zend_set_memory_limit(execEnv.getMemoryLimit());
+            zend_objects_store_mark_destructed(&EG(objects_store));
+            zend_bailout();
+            return;
+         }
+      }
+      break;
+   }
+
+   /* Log if necessary */
+   if (!display) {
+      return;
+   }
+
+   if (execEnv.getTrackErrors() && sg_moduleInitialized && EG(active)) {
+      zval tmp;
+
+      ZVAL_STRINGL(&tmp, buffer.get(), bufferLen);
+      if (EG(current_execute_data)) {
+         if (zend_set_local_var_str("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0) == FAILURE) {
+            zval_ptr_dtor(&tmp);
+         }
+      } else {
+         zend_hash_str_update_ind(&EG(symbol_table), "php_errormsg", sizeof("php_errormsg")-1, &tmp);
+      }
+   }
+}
+
+///
+/// TODO maybe memory leak in this function
+///
+ZEND_COLD void php_log_err_with_severity(char *logMessage, int syslogTypeInt)
+{
+   ExecEnv &execEnv = retrieve_global_execenv();
+   int fd = -1;
+   time_t error_time;
+
+   if (execEnv.getInErrorLog()) {
+      /* prevent recursive invocation */
+      return;
+   }
+   execEnv.setInErrorLog(true);
+   StringRef errorLog = execEnv.getErrorLog();
+   /* Try to use the specified logging location. */
+   if (!errorLog.empty()) {
+#ifdef HAVE_SYSLOG_H
+      if (errorLog == "syslog") {
+         php_syslog(syslogTypeInt, "%s", logMessage);
+         execEnv.setInErrorLog(false);
+         return;
+      }
+#endif
+      fd = VCWD_OPEN_MODE(errorLog.getData(), O_CREAT | O_APPEND | O_WRONLY, 0644);
+      if (fd != -1) {
+         char *tmp;
+         size_t len;
+         /// TODO which size enough here
+         char errorTimeBuffer[128];
+         time(&error_time);
+         if (!php_during_module_startup()) {
+            php_format_date(errorTimeBuffer, 128, "d-M-Y H:i:s e", error_time, true);
+         } else {
+            php_format_date(errorTimeBuffer, 128, "d-M-Y H:i:s e", error_time, false);
+         }
+         len = polar_spprintf(&tmp, 0, "[%s] %s%s", errorTimeBuffer, logMessage, PHP_EOL);
+#ifdef POLAR_OS_WIN32
+         php_flock(fd, 2);
+         /* XXX should eventually write in a loop if len > UINT_MAX */
+         php_ignore_value(write(fd, tmp, (unsigned)len));
+#else
+         php_ignore_value(write(fd, tmp, len));
+#endif
+         efree(tmp);
+         close(fd);
+         execEnv.setInErrorLog(false);
+         return;
+      }
+   }
+
+   /* Otherwise fall back to the default logging location, if we have one */
+   /// maybe here we need user hook
+   /// TODO
+   execEnv.logMessage(logMessage, syslogTypeInt);
+   execEnv.setInErrorLog(false);
 }
 
 size_t php_printf(const char *format, ...)

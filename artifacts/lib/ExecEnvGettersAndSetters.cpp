@@ -69,12 +69,6 @@ ExecEnv &ExecEnv::setTrackErrors(bool flag)
    return *this;
 }
 
-ExecEnv &ExecEnv::setDisplayErrors(bool flag)
-{
-   m_displayErrors = flag;
-   return *this;
-}
-
 ExecEnv &ExecEnv::setDisplayStartupErrors(bool flag)
 {
    m_displayStartupErrors = flag;
@@ -189,6 +183,12 @@ ExecEnv &ExecEnv::setComInitialized(bool flag)
 ExecEnv &ExecEnv::setStarted(bool flag)
 {
    m_started = flag;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setDisplayErrors(std::uint8_t value)
+{
+   m_displayErrors = value;
    return *this;
 }
 
@@ -497,11 +497,6 @@ bool ExecEnv::getTrackErrors() const
    return m_trackErrors;
 }
 
-bool ExecEnv::getDisplayErrors() const
-{
-   return m_displayErrors;
-}
-
 bool ExecEnv::getDisplayStartupErrors() const
 {
    return m_displayStartupErrors;
@@ -599,6 +594,11 @@ bool ExecEnv::getComInitialized() const
 bool ExecEnv::getStarted() const
 {
    return m_started;
+}
+
+std::uint8_t ExecEnv::getDisplayErrors() const
+{
+   return m_displayErrors;
 }
 
 int ExecEnv::getLastErrorType() const

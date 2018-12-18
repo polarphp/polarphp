@@ -25,6 +25,13 @@
 #define PHP_DISPLAY_ERRORS_STDOUT	1
 #define PHP_DISPLAY_ERRORS_STDERR	2
 
+#ifdef HAVE_SYSLOG_H
+#include "SysLog.h"
+#define php_log_err(msg) php_log_err_with_severity(msg, LOG_NOTICE)
+#else
+#define php_log_err(msg) php_log_err_with_severity(msg, 5)
+#endif
+
 namespace polar {
 
 using polar::basic::StringRef;
@@ -77,6 +84,7 @@ zend_string *php_resolve_path_for_zend(const char *filename, size_t filenameLen)
 bool seek_file_begin(zend_file_handle *fileHandle, const char *scriptFile, int *lineno);
 POLAR_DECL_EXPORT bool php_hash_environment();
 void cli_register_file_handles();
+POLAR_DECL_EXPORT ZEND_COLD void php_log_err_with_severity(char *logMessage, int syslogTypeInt);
 
 class ExecEnv
 {
@@ -94,7 +102,6 @@ public:
    ExecEnv &setImplicitFlush(bool flag);
    ExecEnv &setEnableDl(bool flag);
    ExecEnv &setTrackErrors(bool flag);
-   ExecEnv &setDisplayErrors(bool flag);
    ExecEnv &setDisplayStartupErrors(bool flag);
    ExecEnv &setLogErrors(bool flag);
    ExecEnv &setIgnoreRepeatedErrors(bool flag);
@@ -120,6 +127,8 @@ public:
    ExecEnv &setStarted(bool flag);
 
    ExecEnv &setIniDefaultsHandler(IniConfigDefaultInitFunc handler);
+
+   ExecEnv &setDisplayErrors(std::uint8_t value);
 
    ExecEnv &setLastErrorType(int type);
    ExecEnv &setLastErrorLineno(int line);
@@ -179,7 +188,6 @@ public:
    bool getImplicitFlush() const;
    bool getEnableDl() const;
    bool getTrackErrors() const;
-   bool getDisplayErrors() const;
    bool getDisplayStartupErrors() const;
    bool getLogErrors() const;
    bool getIgnoreRepeatedErrors() const;
@@ -203,6 +211,8 @@ public:
    bool getComInitialized() const;
 #endif
    bool getStarted() const;
+
+   std::uint8_t getDisplayErrors() const;
 
    int getLastErrorType() const;
    int getLastErrorLineno() const;
@@ -256,6 +266,7 @@ public:
    zend_llist &getTickFunctions();
 
    void unbufferWrite(const char *str, int len);
+   void logMessage(const char *logMessage, int syslogTypeInt);
 private:
    bool m_phpIniIgnore;
    /// don't look for php.ini in the current directory
@@ -263,7 +274,6 @@ private:
    bool m_implicitFlush;
    bool m_enableDl;
    bool m_trackErrors;
-   bool m_displayErrors;
    bool m_displayStartupErrors;
    bool m_logErrors;
    bool m_ignoreRepeatedErrors;
@@ -287,6 +297,8 @@ private:
    bool m_comInitialized;
 #endif
    bool m_started;
+
+   std::uint8_t m_displayErrors;
 
    int m_argc;
    int m_lastErrorType;

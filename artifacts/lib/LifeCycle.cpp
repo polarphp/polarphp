@@ -23,8 +23,10 @@
 
 namespace polar {
 
-/* True globals (no need for thread safety */
-/* But don't make them a single int bitfield */
+/// True globals (no need for thread safety
+/// But don't make them a single int bitfield
+/// TODO review polarphp bootstrap
+///
 int sg_moduleInitialized = 0;
 int sg_moduleStartup = 1;
 int sg_moduleShutdown = 0;
@@ -77,6 +79,21 @@ void php_binary_init()
 }
 
 } // anonymous namespace
+
+int php_during_module_startup()
+{
+   return sg_moduleStartup;
+}
+
+int php_during_module_shutdown()
+{
+   return sg_moduleShutdown;
+}
+
+int php_get_module_initialized()
+{
+   return sg_moduleInitialized;
+}
 
 void cli_ini_defaults(HashTable *configuration_hash)
 {
@@ -495,7 +512,7 @@ bool php_exec_env_startup()
    } zend_catch {
       retval = FAILURE;
    } zend_end_try()
-   execEnv.setStarted(true);
+         execEnv.setStarted(true);
    return retval;
 }
 

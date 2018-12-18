@@ -45,6 +45,10 @@ int php_shutdown_environ();
 
 void cli_ini_defaults(HashTable *configuration_hash);
 
+POLAR_DECL_EXPORT int php_during_module_startup();
+POLAR_DECL_EXPORT int php_during_module_shutdown();
+POLAR_DECL_EXPORT int php_get_module_initialized();
+
 } // polar
 
 #endif // POLARPHP_ARTIFACTS_LIFE_CYCLE_H
