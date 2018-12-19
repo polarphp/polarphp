@@ -29,22 +29,19 @@ POLAR_DECL_EXPORT void php_module_shutdown();
 POLAR_DECL_EXPORT void php_module_shutdown_for_exec();
 POLAR_DECL_EXPORT bool php_exec_env_startup();
 POLAR_DECL_EXPORT void php_exec_env_shutdown();
-//POLAR_DECL_EXPORT int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
-
 POLAR_DECL_EXPORT int php_register_extensions(zend_module_entry * const * ptr, int count);
-
 POLAR_DECL_EXPORT int php_execute_script(zend_file_handle *primary_file);
 POLAR_DECL_EXPORT int php_execute_simple_script(zend_file_handle *primary_file, zval *ret);
 
 /* environment module */
 int php_init_environ();
 int php_shutdown_environ();
-
 void cli_ini_defaults(HashTable *configuration_hash);
-
 POLAR_DECL_EXPORT int php_during_module_startup();
 POLAR_DECL_EXPORT int php_during_module_shutdown();
 POLAR_DECL_EXPORT int php_get_module_initialized();
+
+void php_free_cli_exec_globals();
 
 } // polar
 

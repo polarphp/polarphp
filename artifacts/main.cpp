@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
       std::cerr << sg_errorMsg << std::endl;
       exit(sg_exitStatus);
    }
-   polar::ExecEnv execEnv = polar::retrieve_global_execenv();
+   polar::ExecEnv &execEnv = polar::retrieve_global_execenv();
    execEnv.setArgc(argc);
    execEnv.setArgv(argv);
 #if defined(POLAR_OS_WIN32)

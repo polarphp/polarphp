@@ -25,7 +25,7 @@
 #define POLAR_INI_MH		ZEND_INI_MH
 #define POLAR_INI_DISP	ZEND_INI_DISP
 
-#define POLAR_INI_BEGIN		ZEND_INI_BEGIN
+#define POLAR_INI_BEGIN()	 zend_ini_entry_def sg_iniEntries[] = {
 #define POLAR_INI_END			ZEND_INI_END
 
 #define POLAR_INI_ENTRY3_EX	ZEND_INI_ENTRY3_EX

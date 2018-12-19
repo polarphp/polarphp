@@ -58,7 +58,6 @@ struct CliShellCallbacksType
 class ExecEnv;
 
 ExecEnv &retrieve_global_execenv();
-
 ssize_t cli_single_write(const char *str, size_t strLength);
 size_t cli_unbuffer_write(const char *str, size_t strLength);
 void cli_flush();

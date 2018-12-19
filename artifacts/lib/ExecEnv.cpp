@@ -93,7 +93,7 @@ POLAR_DECL_EXPORT CliShellCallbacksType *php_cli_get_shell_callbacks()
 
 ExecEnv &retrieve_global_execenv()
 {
-   thread_local ExecEnv execEnv;
+   static thread_local ExecEnv execEnv;
    return execEnv;
 }
 
@@ -113,7 +113,8 @@ ExecEnv::ExecEnv()
      m_memoryLimit(Z_L(1)<<30),
      m_docrefRoot("/phpmanual/"),
      m_docrefExt(".html"),
-     m_includePath(".:/php/includes")
+     m_includePath(".:/php/includes"),
+     m_reportMemLeaks(true)
 {
 }
 
@@ -152,9 +153,10 @@ void php_on_timeout(int seconds)
 int php_execute_script(zend_file_handle *primaryFile)
 {
    ExecEnv &execEnv = retrieve_global_execenv();
-   zend_file_handle *prepend_file_p = nullptr, *append_file_p = nullptr;
-   //   zend_file_handle prepend_file = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)};
-   //   zend_file_handle append_file = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)};
+   zend_file_handle *prependFilePointer = nullptr;
+   zend_file_handle *appendFilePointer = nullptr;
+   zend_file_handle prependFile = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)};
+   zend_file_handle appendFile = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)};
 #if HAVE_BROKEN_GETCWD
    volatile int old_cwd_fd = -1;
 #else
@@ -202,24 +204,24 @@ int php_execute_script(zend_file_handle *primaryFile)
          //         }
       }
 
-      //      if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
-      //         prepend_file.filename = PG(auto_prepend_file);
-      //         prepend_file.opened_path = nullptr;
-      //         prepend_file.free_filename = 0;
-      //         prepend_file.type = ZEND_HANDLE_FILENAME;
-      //         prepend_file_p = &prepend_file;
+      //      if (PG(auto_prependFile) && PG(auto_prependFile)[0]) {
+      //         prependFile.filename = PG(auto_prependFile);
+      //         prependFile.opened_path = nullptr;
+      //         prependFile.free_filename = 0;
+      //         prependFile.type = ZEND_HANDLE_FILENAME;
+      //         prependFilePointer = &prependFile;
       //      } else {
-      //         prepend_file_p = nullptr;
+      //         prependFilePointer = nullptr;
       //      }
 
-      //      if (PG(auto_append_file) && PG(auto_append_file)[0]) {
-      //         append_file.filename = PG(auto_append_file);
-      //         append_file.opened_path = nullptr;
-      //         append_file.free_filename = 0;
-      //         append_file.type = ZEND_HANDLE_FILENAME;
-      //         append_file_p = &append_file;
+      //      if (PG(auto_appendFile) && PG(auto_appendFile)[0]) {
+      //         appendFile.filename = PG(auto_appendFile);
+      //         appendFile.opened_path = nullptr;
+      //         appendFile.free_filename = 0;
+      //         appendFile.type = ZEND_HANDLE_FILENAME;
+      //         appendFilePointer = &appendFile;
       //      } else {
-      //         append_file_p = nullptr;
+      //         appendFilePointer = nullptr;
       //      }
 
 
@@ -228,16 +230,16 @@ int php_execute_script(zend_file_handle *primaryFile)
          the `start_lineno` will be used by prepend file but not primary file,
          save it and restore after prepend file been executed.
        */
-      if (CG(start_lineno) && prepend_file_p) {
+      if (CG(start_lineno) && prependFilePointer) {
          int orig_start_lineno = CG(start_lineno);
 
          CG(start_lineno) = 0;
-         if (zend_execute_scripts(ZEND_REQUIRE, nullptr, 1, prepend_file_p) == SUCCESS) {
+         if (zend_execute_scripts(ZEND_REQUIRE, nullptr, 1, prependFilePointer) == SUCCESS) {
             CG(start_lineno) = orig_start_lineno;
-            retval = (zend_execute_scripts(ZEND_REQUIRE, nullptr, 2, primaryFile, append_file_p) == SUCCESS);
+            retval = (zend_execute_scripts(ZEND_REQUIRE, nullptr, 2, primaryFile, appendFilePointer) == SUCCESS);
          }
       } else {
-         retval = (zend_execute_scripts(ZEND_REQUIRE, nullptr, 3, prepend_file_p, primaryFile, append_file_p) == SUCCESS);
+         retval = (zend_execute_scripts(ZEND_REQUIRE, nullptr, 3, prependFilePointer, primaryFile, appendFilePointer) == SUCCESS);
       }
    } polar_end_try;
 
@@ -1078,10 +1080,11 @@ bool php_hash_environment()
    return true;
 }
 
+///
+/// we mybe not use this function
+///
 void cli_register_file_handles()
-{
-
-}
+{}
 
 size_t ExecEnv::unbufferWrite(const char *str, int len)
 {

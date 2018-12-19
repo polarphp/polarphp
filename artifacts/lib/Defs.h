@@ -177,7 +177,7 @@ typedef int pid_t;
 
 #undef ZEND_IGNORE_VALUE
 #if defined(__GNUC__) && __GNUC__ >= 4
-# define ZEND_IGNORE_VALUE(x) ({ __typeof__ (x) __x = (x); (void) __x; })
+# define ZEND_IGNORE_VALUE(x) { __typeof__ (x) __x = (x); (void) __x; }
 #else
 # define ZEND_IGNORE_VALUE(x) ((void) (x))
 #endif
@@ -281,6 +281,8 @@ void emit_fd_setsize_warning(int maxFd);
 #define PHP_MINFO_FUNCTION		ZEND_MODULE_INFO_D
 #define PHP_GINIT_FUNCTION		ZEND_GINIT_FUNCTION
 #define PHP_GSHUTDOWN_FUNCTION	ZEND_GSHUTDOWN_FUNCTION
+
+#define POLAR_REGISTER_INI_ENTRIES() zend_register_ini_entries(sg_iniEntries, module_number)
 
 #define PHP_MODULE_GLOBALS		ZEND_MODULE_GLOBALS
 

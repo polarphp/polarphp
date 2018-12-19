@@ -31,6 +31,8 @@ bool sg_moduleInitialized = false;
 bool sg_moduleStartup = true;
 bool sg_moduleShutdown = false;
 
+extern zend_ini_entry_def sg_iniEntries[];
+
 POLAR_DECL_EXPORT int (*php_register_internal_extensions_func)(void) = php_register_internal_extensions;
 
 namespace {
@@ -107,7 +109,7 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    zend_utility_functions zuf;
    zend_utility_values zuv;
    bool retval = true;
-   int moduleNumber = 0;	/* for REGISTER_INI_ENTRIES() */
+   int module_number = 0;	/* for REGISTER_INI_ENTRIES() */
    char *phpOs;
    zend_module_entry *module;
    ExecEnv &execEnv = retrieve_global_execenv();
@@ -238,11 +240,12 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    //      REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_NT_WORKSTATION", VER_NT_WORKSTATION, CONST_PERSISTENT | CONST_CS);
    //#endif
 
-   //php_binary_init();
-   if (!execEnv.getPolarBinary().empty()) {
-      //REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", PG(php_binary), strlen(PG(php_binary)), CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
+   php_binary_init();
+   StringRef polarBinary = execEnv.getPolarBinary();
+   if (!polarBinary.empty()) {
+      REGISTER_MAIN_STRINGL_CONSTANT("POLAR_BINARY", const_cast<char *>(polarBinary.getData()), polarBinary.getSize(), CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
    } else {
-      //REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", "", 0, CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
+      REGISTER_MAIN_STRINGL_CONSTANT("POLAR_BINARY", "", 0, CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
    }
 
    php_output_register_constants();
@@ -255,9 +258,9 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    //   }
 
    //   /* Register PHP core ini entries */
-   //REGISTER_INI_ENTRIES();
+   //POLAR_REGISTER_INI_ENTRIES();
    /* Register Zend ini entries */
-   // zend_register_standard_ini_entries();
+   //zend_register_standard_ini_entries();
 #ifdef POLAR_OS_WIN32
    /* Until the current ini values was setup, the current cp is 65001.
             If the actual ini vaues are different, some stuff needs to be updated.
@@ -517,9 +520,136 @@ bool php_exec_env_startup()
    return retval;
 }
 
-void php_exec_env_shutdown()
+///
+/// current we do not use this function
+///
+void php_free_cli_exec_globals()
 {
 
+}
+
+void php_exec_env_shutdown()
+{
+   ExecEnv &execEnv = retrieve_global_execenv();
+   EG(flags) |= EG_FLAGS_IN_SHUTDOWN;
+   bool reportMemleaks = execEnv.getReportMemLeaks();
+   /* EG(current_execute_data) points into nirvana and therefore cannot be safely accessed
+       * inside zend_executor callback functions.
+       */
+   EG(current_execute_data) = nullptr;
+   deactivate_ticks();
+   bool modulesActivated = execEnv.getModulesActivated();
+   /* 1. Call all possible shutdown functions registered with register_shutdown_function() */
+   if (modulesActivated) {
+      polar_try {
+         ///
+         /// TODO review we need support this hook mechanism in libpdk, not here
+         /// but we need from here to invoke libpdk functions
+         ///
+         /// php_call_shutdown_functions();
+         ///
+      } polar_end_try;
+   }
+
+   /* 2. Call all possible __destruct() functions */
+   polar_try {
+      zend_call_destructors();
+   } polar_end_try;
+
+   /* 3. Flush all output buffers */
+   polar_try {
+      bool sendBuffer = true;
+      if (CG(unclean_shutdown) && execEnv.getLastErrorType() == E_ERROR &&
+          static_cast<size_t>(execEnv.getMemoryLimit()) < zend_memory_usage(1)
+          ) {
+         sendBuffer = false;
+      }
+      if (!sendBuffer) {
+         php_output_discard_all();
+      } else {
+         php_output_end_all();
+      }
+   } polar_end_try;
+
+   /* 4. Reset max_execution_time (no longer executing php code after response sent) */
+   polar_try {
+      ///
+      /// review we does not use timeout
+      ///
+      zend_unset_timeout();
+   } polar_end_try;
+   /* 5. Call all extensions RSHUTDOWN functions */
+   if (modulesActivated) {
+      zend_deactivate_modules();
+   }
+
+   /* 6. Shutdown output layer (send the set HTTP headers, cleanup output handlers, etc.) */
+   polar_try {
+      php_output_deactivate();
+   } polar_end_try;
+
+   /* 7. Free shutdown functions */
+   if (modulesActivated) {
+      ///
+      /// TODO review we need support this hook mechanism in libpdk, not here
+      /// but we need from here to invoke libpdk functions
+      ///
+      /// php_free_shutdown_functions();
+   }
+
+   /// polarphp wether support
+//   /* 8. Destroy super-globals */
+//   polar_try {
+//      int i;
+
+//      for (i=0; i<NUM_TRACK_VARS; i++) {
+//         zval_ptr_dtor(&PG(http_globals)[i]);
+//      }
+//   } polar_end_try;
+
+   /* 9. free request-bound globals */
+   php_free_cli_exec_globals();
+
+   /* 10. Shutdown scanner/executor/compiler and restore ini entries */
+   zend_deactivate();
+
+   /* 11. Call all extensions post-RSHUTDOWN functions */
+   polar_try {
+      zend_post_deactivate_modules();
+   } polar_end_try;
+
+   /* 12. exec env related shutdown (free stuff) */
+   polar_try {
+      execEnv.deactivate();
+   } polar_end_try;
+
+   /* 13. free virtual CWD memory */
+   virtual_cwd_deactivate();
+
+   /* 14. Free Willy (here be crashes) */
+   zend_interned_strings_deactivate();
+   polar_try {
+      shutdown_memory_manager(CG(unclean_shutdown) || !reportMemleaks, 0);
+   } polar_end_try;
+
+   /* 15. Reset max_execution_time */
+   polar_try {
+      zend_unset_timeout();
+   } polar_end_try;
+
+#ifdef POLAR_OS_WIN32
+   if (PG(com_initialized) ) {
+      CoUninitialize();
+      PG(com_initialized) = 0;
+   }
+#endif
+
+   ///
+   /// TODO add dtrace support
+   ///
+#ifdef HAVE_DTRACE
+   // DTRACE_REQUEST_SHUTDOWN(SAFE_FILENAME(SG(request_info).path_translated), SAFE_FILENAME(SG(request_info).request_uri), (char *)SAFE_FILENAME(SG(request_info).request_method));
+#endif /* HAVE_DTRACE */
 }
 
 } // polar

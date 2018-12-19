@@ -103,7 +103,7 @@
 #define NUL             '\0'
 #define INT_NULL        ((int *)0)
 
-#define S_NULL          "(null)"
+#define S_NULL          const_cast<char *>("(null)")
 #define S_NULL_LEN      6
 
 #define FLOAT_DIGITS    6
@@ -376,6 +376,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
             if (*fmt == 'h') {
                fmt++;
             }
+            POLAR_FALLTHROUGH;
             /* these are promoted to int, so no break */
          default:
             modifier = LM_STD;
@@ -439,11 +440,13 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
                i_num = (wide_int) va_arg(ap, zend_ulong);
                break;
             }
+            POLAR_FALLTHROUGH;
             /*
                 * The rest also applies to other integer formats, so fall
                 * into that case.
                 */
          case 'd':
+            POLAR_FALLTHROUGH;
          case 'i':
             /*
                 * Get the arg if we haven't already.
@@ -619,10 +622,10 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
             }
 
             if (zend_isnan(fp_num)) {
-               s = "nan";
+               s = const_cast<char *>("nan");
                s_len = 3;
             } else if (zend_isinf(fp_num)) {
-               s = "inf";
+               s = const_cast<char *>("inf");
                s_len = 3;
             } else {
 #ifdef HAVE_LOCALE_H
@@ -664,15 +667,15 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
             }
 
             if (zend_isnan(fp_num)) {
-               s = "NAN";
+               s = const_cast<char *>("NAN");
                s_len = 3;
                break;
             } else if (zend_isinf(fp_num)) {
                if (fp_num > 0) {
-                  s = "INF";
+                  s = const_cast<char *>("INF");
                   s_len = 3;
                } else {
-                  s = "-INF";
+                  s = const_cast<char *>("-INF");
                   s_len = 4;
                }
                break;
@@ -748,7 +751,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
                   s_len += 2;
                }
             } else {
-               s = "%p";
+               s = const_cast<char *>("%p");
                s_len = 2;
             }
             pad_char = ' ';
@@ -761,8 +764,6 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
                 * We ignore it.
                 */
             continue;
-
-
 fmt_error:
             php_error(E_ERROR, "Illegal length modifier specified '%c' in s[np]printf call", *fmt);
             /*
@@ -775,6 +776,7 @@ fmt_error:
                 * Note that we can't point s inside fmt because the
                 * unknown <char> could be preceded by width etc.
                 */
+            POLAR_FALLTHROUGH;
          default:
             char_buf[0] = '%';
             char_buf[1] = *fmt;
