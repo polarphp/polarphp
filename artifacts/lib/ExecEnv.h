@@ -71,15 +71,16 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
                                   const uint32_t errorLineno, const char *format,
                                   va_list args);
 
-POLAR_DECL_EXPORT size_t php_write(void *buf, size_t size);
-POLAR_DECL_EXPORT  size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
+size_t php_write(void *buf, size_t size);
+size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
 size_t php_output_wrapper(const char *str, size_t strLength);
 zval *php_get_configuration_directive_for_zend(zend_string *name);
-POLAR_DECL_EXPORT void php_message_handler_for_zend(zend_long message, const void *data);
+void php_message_handler_for_zend(zend_long message, const void *data);
 void php_on_timeout(int seconds);
 //POLAR_DECL_EXPORT void php_printf_to_smart_string(smart_string *buf, const char *format, va_list ap);
 //POLAR_DECL_EXPORT void php_printf_to_smart_str(smart_str *buf, const char *format, va_list ap);
-POLAR_DECL_EXPORT char *bootstrap_getenv(char *name, size_t nameLen);
+char *bootstrap_getenv(char *name, size_t nameLen);
+zend_string *php_resolve_path(const char *filename, size_t filename_len, const char *path);
 zend_string *php_resolve_path_for_zend(const char *filename, size_t filenameLen);
 bool seek_file_begin(zend_file_handle *fileHandle, const char *scriptFile, int *lineno);
 POLAR_DECL_EXPORT bool php_hash_environment();

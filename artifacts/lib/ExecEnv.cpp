@@ -109,7 +109,8 @@ ExecEnv::ExecEnv()
      m_syslogFilter(PHP_SYSLOG_FILTER_NO_CTRL),
      m_memoryLimit(Z_L(1)<<30),
      m_docrefRoot("/phpmanual/"),
-     m_docrefExt(".html")
+     m_docrefExt(".html"),
+     m_includePath(".:/php/includes")
 {
 }
 
@@ -873,22 +874,12 @@ size_t php_output_wrapper(const char *str, size_t strLength)
    return php_output_write(str, strLength);
 }
 
-FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **openedPath)
-{
-
-}
-
 zval *php_get_configuration_directive_for_zend(zend_string *name)
 {
 
 }
 
 POLAR_DECL_EXPORT void php_message_handler_for_zend(zend_long message, const void *data)
-{
-
-}
-
-int php_stream_open_for_zend(const char *filename, zend_file_handle *handle)
 {
 
 }
@@ -903,14 +894,107 @@ int php_stream_open_for_zend(const char *filename, zend_file_handle *handle)
 
 //}
 
-POLAR_DECL_EXPORT char *bootstrap_getenv(char *name, size_t nameLen)
+///
+/// here we does not use it, but need review
+///
+POLAR_DECL_EXPORT char *bootstrap_getenv(char *, size_t)
 {
+   return nullptr;
+}
 
+///
+/// need review for memory leak, we remove stream, so we need check the result
+///
+zend_string *php_resolve_path(const char *filename, size_t filenameLen, const char *path)
+{
+   char resolvedPath[MAXPATHLEN];
+   char trypath[MAXPATHLEN];
+   const char *ptr;
+   const char *end;
+   const char *p;
+   const char *actualPath;
+   zend_string *execFilename;
+   if (!filename || CHECK_NULL_PATH(filename, filenameLen)) {
+      return nullptr;
+   }
+   /// polarphp does not handle stream protocol
+   for (p = filename; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++);
+   if ((*filename == '.' &&
+        (IS_SLASH(filename[1]) ||
+         ((filename[1] == '.') && IS_SLASH(filename[2])))) ||
+       IS_ABSOLUTE_PATH(filename, filenameLen) ||
+    #ifdef POLAR_OS_WIN32
+       /* This should count as an absolute local path as well, however
+                    IS_ABSOLUTE_PATH doesn't care about this path form till now. It
+                    might be a big thing to extend, thus just a local handling for
+                    now. */
+       filenameLen >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1]) ||
+    #endif
+       !path ||
+       !*path) {
+      if (tsrm_realpath(filename, resolvedPath)) {
+         return zend_string_init(resolvedPath, strlen(resolvedPath), 0);
+      } else {
+         return nullptr;
+      }
+   }
+   ptr = path;
+   while (ptr && *ptr) {
+      /// polarphp does not use stream
+      for (p = ptr; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++);
+      end = strchr(p, DEFAULT_DIR_SEPARATOR);
+      if (end) {
+         if (filenameLen > (MAXPATHLEN - 2) || (end-ptr) > MAXPATHLEN || (end-ptr) + 1 + filenameLen + 1 >= MAXPATHLEN) {
+            ptr = end + 1;
+            continue;
+         }
+         memcpy(trypath, ptr, end-ptr);
+         trypath[end-ptr] = '/';
+         memcpy(trypath+(end-ptr)+1, filename, filenameLen+1);
+         ptr = end+1;
+      } else {
+         size_t len = strlen(ptr);
+         if (filenameLen > (MAXPATHLEN - 2) || len > MAXPATHLEN || len + 1 + filenameLen + 1 >= MAXPATHLEN) {
+            break;
+         }
+         memcpy(trypath, ptr, len);
+         trypath[len] = '/';
+         memcpy(trypath+len+1, filename, filenameLen+1);
+         ptr = nullptr;
+      }
+      actualPath = trypath;
+      if (tsrm_realpath(actualPath, resolvedPath)) {
+         return zend_string_init(resolvedPath, strlen(resolvedPath), 0);
+      }
+   } /* end provided path */
+
+   /* check in calling scripts' current working directory as a fall back case
+       */
+   if (zend_is_executing() &&
+       (execFilename = zend_get_executed_filename_ex()) != nullptr) {
+      const char *exec_fname = ZSTR_VAL(execFilename);
+      size_t execFnameLength = ZSTR_LEN(execFilename);
+      while ((--execFnameLength < SIZE_MAX) && !IS_SLASH(exec_fname[execFnameLength]));
+      if (execFnameLength > 0 &&
+          filenameLen < (MAXPATHLEN - 2) &&
+          execFnameLength + 1 + filenameLen + 1 < MAXPATHLEN) {
+         memcpy(trypath, exec_fname, execFnameLength + 1);
+         memcpy(trypath+execFnameLength + 1, filename, filenameLen+1);
+         actualPath = trypath;
+         /* Check for stream wrapper */
+         for (p = trypath; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++);
+         if (tsrm_realpath(actualPath, resolvedPath)) {
+            return zend_string_init(resolvedPath, strlen(resolvedPath), 0);
+         }
+      }
+   }
+   return nullptr;
 }
 
 zend_string *php_resolve_path_for_zend(const char *filename, size_t filenameLen)
 {
-
+   ExecEnv &execEnv = retrieve_global_execenv();
+   return php_resolve_path(filename, filenameLen, execEnv.getIncludePath().getData());
 }
 
 bool seek_file_begin(zend_file_handle *fileHandle, const char *scriptFile, int *lineno)
