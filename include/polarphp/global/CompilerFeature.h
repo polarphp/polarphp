@@ -510,7 +510,8 @@ inline void deallocate_buffer(void *ptr, size_t size, size_t alignment) {
 #ifdef POLAR_CC_GNU
 #define POLAR_BEGIN_DISABLE_ZENDVM_WARNING() \
    POLAR_WARNING_PUSH\
-   _Pragma("GCC diagnostic ignored \"-Wignored-qualifiers\"")
+   _Pragma("GCC diagnostic ignored \"-Wignored-qualifiers\"")\
+   _Pragma("GCC diagnostic ignored \"-Wpedantic\"")
 
 #define POLAR_END_DISABLE_ZENDVM_WARNING() POLAR_WARNING_POP
 #endif

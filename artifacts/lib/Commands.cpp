@@ -56,7 +56,7 @@ extern CliShellCallbacksType sg_cliShellCallbacks;
 namespace {
 const char *PARAM_MODE_CONFLICT = "Either execute direct code, process stdin or use a file.";
 ExecMode sg_behavior = ExecMode::Standard;
-char *sg_phpSelf = "";
+std::string sg_phpSelf = "";
 }
 
 void interactive_opt_setter(int)
@@ -297,6 +297,11 @@ int dispatch_cli_command()
       fileHandle.opened_path = nullptr;
       fileHandle.free_filename = 0;
       sg_phpSelf = const_cast<char *>(fileHandle.filename);
+      if (!translatedPath.empty()) {
+         execEnv.setEntryScriptFilename(translatedPath);
+      } else {
+         execEnv.setEntryScriptFilename(fileHandle.filename);
+      }
       if (!php_exec_env_startup()) {
          fclose(fileHandle.handle.fp);
          std::cerr << "Could not startup." << std::endl;

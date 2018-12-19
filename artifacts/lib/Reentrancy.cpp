@@ -50,7 +50,7 @@ static MUTEX_T reentrant_locks[NUMBER_OF_LOCKS];
 #define HAVE_CTIME_R 1
 #define HAVE_ASCTIME_R 1
 
-POLAR_DECL_EXPORT char *php_ctime_r(const time_t *clock, char *buf)
+POLAR_DECL_EXPORT char *polar_ctime_r(const time_t *clock, char *buf)
 {
    if (ctime_r(clock, buf) == buf) {
       return buf;
@@ -58,7 +58,7 @@ POLAR_DECL_EXPORT char *php_ctime_r(const time_t *clock, char *buf)
    return nullptr;
 }
 
-POLAR_DECL_EXPORT char *php_asctime_r(const struct tm *tm, char *buf)
+POLAR_DECL_EXPORT char *polar_asctime_r(const struct tm *tm, char *buf)
 {
    if (asctime_r(tm, buf) == buf) {
       return buf;
@@ -75,7 +75,7 @@ POLAR_DECL_EXPORT char *php_asctime_r(const struct tm *tm, char *buf)
 #define HAVE_ASCTIME_R 1
 #define HAVE_GMTIME_R 1
 
-POLAR_DECL_EXPORT struct tm *php_localtime_r(const time_t *const timep, struct tm *p_tm)
+POLAR_DECL_EXPORT struct tm *polar_localtime_r(const time_t *const timep, struct tm *p_tm)
 {
    if (localtime_r(timep, p_tm) == 0) {
       return (p_tm);
@@ -83,7 +83,7 @@ POLAR_DECL_EXPORT struct tm *php_localtime_r(const time_t *const timep, struct t
    return nullptr;
 }
 
-POLAR_DECL_EXPORT char *php_ctime_r(const time_t *clock, char *buf)
+POLAR_DECL_EXPORT char *polar_ctime_r(const time_t *clock, char *buf)
 {
    if (ctime_r(clock, buf, 26) != -1) {
       return buf;
@@ -91,7 +91,7 @@ POLAR_DECL_EXPORT char *php_ctime_r(const time_t *clock, char *buf)
    return nullptr;
 }
 
-POLAR_DECL_EXPORT char *php_asctime_r(const struct tm *tm, char *buf)
+POLAR_DECL_EXPORT char *polar_asctime_r(const struct tm *tm, char *buf)
 {
    if (asctime_r(tm, buf, 26) != -1) {
       return buf;
@@ -99,7 +99,7 @@ POLAR_DECL_EXPORT char *php_asctime_r(const struct tm *tm, char *buf)
    return nullptr;
 }
 
-POLAR_DECL_EXPORT struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm)
+POLAR_DECL_EXPORT struct tm *polar_gmtime_r(const time_t *const timep, struct tm *p_tm)
 {
    if (gmtime_r(timep, p_tm) == 0) {
       return (p_tm);

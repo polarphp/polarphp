@@ -17,9 +17,9 @@
 #include "polarphp/global/Config.h"
 #include "lib/PolarVersion.h"
 
-extern "C" {
+POLAR_BEGIN_DISABLE_ZENDVM_WARNING()
 #include "polarphp/vm/zend/zend_portability.h"
-}
+POLAR_END_DISABLE_ZENDVM_WARNING()
 
 #define PHP_DEFAULT_CHARSET "UTF-8"
 /* PHP's DEBUG value must match Zend's ZEND_DEBUG value */
@@ -175,6 +175,12 @@ typedef int pid_t;
 # endif
 #endif
 
+#undef ZEND_IGNORE_VALUE
+#if defined(__GNUC__) && __GNUC__ >= 4
+# define ZEND_IGNORE_VALUE(x) ({ __typeof__ (x) __x = (x); (void) __x; })
+#else
+# define ZEND_IGNORE_VALUE(x) ((void) (x))
+#endif
 #define php_ignore_value(x) ZEND_IGNORE_VALUE(x)
 
 /* global variables */

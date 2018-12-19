@@ -432,6 +432,12 @@ ExecEnv &ExecEnv::setSyslogIdent(const std::string &value)
    return *this;
 }
 
+ExecEnv &ExecEnv::setEntryScriptFilename(const std::string &value)
+{
+   m_entryScriptFilename = value;
+   return *this;
+}
+
 ExecEnv &ExecEnv::setIniDefaultsHandler(IniConfigDefaultInitFunc handler)
 {
    m_iniDefaultInitHandler = handler;
@@ -809,6 +815,11 @@ StringRef ExecEnv::getRequestOrder() const
 StringRef ExecEnv::getSyslogIdent() const
 {
    return m_syslogIdent;
+}
+
+StringRef ExecEnv::getEntryScriptFilename() const
+{
+   return m_entryScriptFilename;
 }
 
 IniConfigDefaultInitFunc ExecEnv::getIniConfigDeaultHandler() const

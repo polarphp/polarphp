@@ -287,7 +287,7 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    //      return FAILURE;
    //   }
    zuv.html_errors = 1;
-   zuv.import_use_extension = ".php";
+   zuv.import_use_extension = const_cast<char *>(".php");
    zuv.import_use_extension_length = (uint32_t)strlen(zuv.import_use_extension);
    zend_set_utility_values(&zuv);
    /* startup extensions statically compiled in */

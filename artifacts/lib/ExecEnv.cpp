@@ -16,10 +16,13 @@
 #include "LifeCycle.h"
 #include "PhpSpprintf.h"
 #include "ZendHeaders.h"
+#include "Reentrancy.h"
 #include "Output.h"
 #include "Utils.h"
+#include "Ini.h"
 
 #include <cstdio>
+#include <cstring>
 #include <sys/stat.h>
 #include <fcntl.h>
 #ifdef HAVE_SYSLOG_H
@@ -294,40 +297,6 @@ ssize_t cli_single_write(const char *str, size_t strLength)
    ret = ::fwrite(str, 1, MIN(strLength, 16384), stdout);
 #endif
    return ret;
-}
-
-size_t cli_unbuffer_write(const char *str, size_t strLength)
-{
-   const char *ptr = str;
-   size_t remaining = strLength;
-   ssize_t ret;
-
-   if (!strLength) {
-      return 0;
-   }
-
-   if (sg_cliShellCallbacks.cliShellUnbufferWrite) {
-      size_t ubWrote;
-      ubWrote = sg_cliShellCallbacks.cliShellUnbufferWrite(str, strLength);
-      if (ubWrote != (size_t) -1) {
-         return ubWrote;
-      }
-   }
-
-   while (remaining > 0)
-   {
-      ret = cli_single_write(ptr, remaining);
-      if (ret < 0) {
-#ifndef PHP_CLI_WIN32_NO_CONSOLE
-         EG(exit_status) = 255;
-#endif
-         break;
-      }
-      ptr += ret;
-      remaining -= ret;
-   }
-
-   return (ptr - str);
 }
 
 void cli_flush()
@@ -708,8 +677,8 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
       }
 
       if (execEnv.getDisplayErrors() && ((sg_moduleInitialized && !execEnv.getDuringExecEnvStartup()) || execEnv.getDisplayStartupErrors())) {
-         char *prepend_string = INI_STR("error_prepend_string");
-         char *append_string = INI_STR("error_append_string");
+         char *prepend_string = INI_STR(const_cast<char *>("error_prepend_string"));
+         char *append_string = INI_STR(const_cast<char *>("error_append_string"));
          /* Write CLI/CGI errors to stderr if display_errors = "stderr" */
          if (execEnv.getDisplayErrors() == PHP_DISPLAY_ERRORS_STDERR) {
             fprintf(stderr, "%s: %s in %s on line %" PRIu32 "\n", error_type_str, buffer.get(), errorFilename, errorLineno);
@@ -876,12 +845,82 @@ size_t php_output_wrapper(const char *str, size_t strLength)
 
 zval *php_get_configuration_directive_for_zend(zend_string *name)
 {
-
+   return cfg_get_entry_ex(name);
 }
 
 POLAR_DECL_EXPORT void php_message_handler_for_zend(zend_long message, const void *data)
 {
-
+   ExecEnv &execEnv = retrieve_global_execenv();
+   switch (message) {
+   case ZMSG_FAILED_INCLUDE_FOPEN:
+      php_error_docref("function.include", E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php_strip_url_passwd(reinterpret_cast<char *>(const_cast<void *>(data))), PHP_STR_PRINT(execEnv.getIncludePath().getData()));
+      break;
+   case ZMSG_FAILED_REQUIRE_FOPEN:
+      php_error_docref("function.require", E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php_strip_url_passwd(reinterpret_cast<char *>(const_cast<void *>(data))), PHP_STR_PRINT(execEnv.getIncludePath().getData()));
+      break;
+   case ZMSG_FAILED_HIGHLIGHT_FOPEN:
+      php_error_docref(NULL, E_WARNING, "Failed opening '%s' for highlighting", php_strip_url_passwd(reinterpret_cast<char *>(const_cast<void *>(data))));
+      break;
+   case ZMSG_MEMORY_LEAK_DETECTED:
+   case ZMSG_MEMORY_LEAK_REPEATED:
+#if ZEND_DEBUG
+      if (EG(error_reporting) & E_WARNING) {
+         char memoryLeakBuf[1024];
+         if (message==ZMSG_MEMORY_LEAK_DETECTED) {
+            zend_leak_info *t = reinterpret_cast<zend_leak_info *>(const_cast<void *>(data));
+            std::snprintf(memoryLeakBuf, 512, "%s(%" PRIu32 ") :  Freeing " ZEND_ADDR_FMT " (%zu bytes), script=%s\n", t->filename, t->lineno, (size_t)t->addr, t->size, SAFE_FILENAME(execEnv.getEntryScriptFilename().getData()));
+            if (t->orig_filename) {
+               char relayBuf[512];
+               std::snprintf(relayBuf, 512, "%s(%" PRIu32 ") : Actual location (location was relayed)\n", t->orig_filename, t->orig_lineno);
+               strlcat(memoryLeakBuf, relayBuf, sizeof(memoryLeakBuf));
+            }
+         } else {
+            unsigned long leak_count = (zend_uintptr_t) data;
+            std::snprintf(memoryLeakBuf, 512, "Last leak repeated %lu time%s\n", leak_count, (leak_count>1?"s":""));
+         }
+#	if defined(POLAR_OS_WIN32)
+         OutputDebugString(memoryLeakBuf);
+#	else
+         std::fprintf(stderr, "%s", memoryLeakBuf);
+#	endif
+      }
+#endif
+      break;
+   case ZMSG_MEMORY_LEAKS_GRAND_TOTAL:
+#if ZEND_DEBUG
+      if (EG(error_reporting) & E_WARNING) {
+         char memoryLeakBuf[512];
+         std::snprintf(memoryLeakBuf, 512, "=== Total %d memory leaks detected ===\n", *(reinterpret_cast<uint32_t *>(const_cast<void *>(data))));
+#	if defined(POLAR_OS_WIN32)
+         OutputDebugString(memoryLeakBuf);
+#	else
+         std::fprintf(stderr, "%s", memoryLeakBuf);
+#	endif
+      }
+#endif
+      break;
+   case ZMSG_LOG_SCRIPT_NAME: {
+      struct tm *ta, tmbuf;
+      time_t curtime;
+      char *datetime_str, asctimebuf[52];
+      char memoryLeakBuf[4096];
+      time(&curtime);
+      ta = php_localtime_r(&curtime, &tmbuf);
+      datetime_str = polar_asctime_r(ta, asctimebuf);
+      if (datetime_str) {
+         datetime_str[strlen(datetime_str)-1]=0;	/* get rid of the trailing newline */
+         std::snprintf(memoryLeakBuf, sizeof(memoryLeakBuf), "[%s]  Script:  '%s'\n", datetime_str, SAFE_FILENAME(execEnv.getEntryScriptFilename().getData()));
+      } else {
+         std::snprintf(memoryLeakBuf, sizeof(memoryLeakBuf), "[null]  Script:  '%s'\n", SAFE_FILENAME(execEnv.getEntryScriptFilename().getData()));
+      }
+#	if defined(POLAR_OS_WIN32)
+      OutputDebugString(memoryLeakBuf);
+#	else
+      std::fprintf(stderr, "%s", memoryLeakBuf);
+#	endif
+   }
+      break;
+   }
 }
 
 //POLAR_DECL_EXPORT void php_printf_to_smart_string(smart_string *buf, const char *format, va_list ap)
@@ -925,9 +964,9 @@ zend_string *php_resolve_path(const char *filename, size_t filenameLen, const ch
        IS_ABSOLUTE_PATH(filename, filenameLen) ||
     #ifdef POLAR_OS_WIN32
        /* This should count as an absolute local path as well, however
-                    IS_ABSOLUTE_PATH doesn't care about this path form till now. It
-                    might be a big thing to extend, thus just a local handling for
-                    now. */
+                                                                IS_ABSOLUTE_PATH doesn't care about this path form till now. It
+                                                                might be a big thing to extend, thus just a local handling for
+                                                                now. */
        filenameLen >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1]) ||
     #endif
        !path ||
@@ -1041,12 +1080,41 @@ bool php_hash_environment()
 
 void cli_register_file_handles()
 {
-   /// TODO register std file fd
+
 }
 
-void ExecEnv::unbufferWrite(const char *str, int len)
+size_t ExecEnv::unbufferWrite(const char *str, int len)
 {
+   const char *ptr = str;
+   size_t remaining = len;
+   ssize_t ret;
 
+   if (!len) {
+      return 0;
+   }
+
+   if (sg_cliShellCallbacks.cliShellUnbufferWrite) {
+      size_t ubWrote;
+      ubWrote = sg_cliShellCallbacks.cliShellUnbufferWrite(str, len);
+      if (ubWrote != (size_t) -1) {
+         return ubWrote;
+      }
+   }
+
+   while (remaining > 0)
+   {
+      ret = cli_single_write(ptr, remaining);
+      if (ret < 0) {
+#ifndef PHP_CLI_WIN32_NO_CONSOLE
+         EG(exit_status) = 255;
+#endif
+         break;
+      }
+      ptr += ret;
+      remaining -= ret;
+   }
+
+   return (ptr - str);
 }
 
 } // polar

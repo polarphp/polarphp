@@ -18,6 +18,7 @@
 
 #include "Output.h"
 #include "Defs.h"
+#include "ExecEnv.h"
 
 namespace polar {
 
@@ -79,27 +80,6 @@ size_t php_output_stderr(const char *str, size_t str_len)
 
 size_t (*php_output_direct)(const char *str, size_t str_len) = php_output_stderr;
 
-void php_output_header()
-{
-   //   if (!SG(headers_sent)) {
-   //      if (!OG(output_start_filename)) {
-   //         if (zend_is_compiling()) {
-   //            OG(output_start_filename) = ZSTR_VAL(zend_get_compiled_filename());
-   //            OG(output_start_lineno) = zend_get_compiled_lineno();
-   //         } else if (zend_is_executing()) {
-   //            OG(output_start_filename) = zend_get_executed_filename();
-   //            OG(output_start_lineno) = zend_get_executed_lineno();
-   //         }
-   //#if PHP_OUTPUT_DEBUG
-   //         fprintf(stderr, "!!! output started at: %s (%d)\n", OG(output_start_filename), OG(output_start_lineno));
-   //#endif
-   //      }
-   //      if (!php_header()) {
-   //         OG(flags) |= PHP_OUTPUT_DISABLED;
-   //      }
-   //   }
-}
-
 void reverse_conflict_dtor(zval *zv)
 {
    HashTable *ht = reinterpret_cast<HashTable *>(Z_PTR_P(zv));
@@ -144,7 +124,6 @@ void php_output_deactivate()
    PhpOutputHandler **handler = nullptr;
 
    if ((OG(flags) & PHP_OUTPUT_ACTIVATED)) {
-      php_output_header();
       OG(flags) ^= PHP_OUTPUT_ACTIVATED;
       OG(active) = nullptr;
       OG(running) = nullptr;
@@ -904,19 +883,15 @@ inline void php_output_op(int op, const char *str, size_t len)
    }
 
    if (context.out.data && context.out.used) {
-      php_output_header();
-
       if (!(OG(flags) & PHP_OUTPUT_DISABLED)) {
 #if PHP_OUTPUT_DEBUG
          fprintf(stderr, "::: sapi_write('%s', %zu)\n", context.out.data, context.out.used);
 #endif
-         // TODO remove
-         // sapi_module.ub_write(context.out.data, context.out.used);
-
+         ExecEnv &execEnv = retrieve_global_execenv();
+         execEnv.unbufferWrite(context.out.data, context.out.used);
          if (OG(flags) & PHP_OUTPUT_IMPLICITFLUSH) {
-            // sapi_flush();
+            cli_flush();
          }
-
          OG(flags) |= PHP_OUTPUT_SENT;
       }
    }

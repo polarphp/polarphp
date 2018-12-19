@@ -59,4 +59,37 @@ char *php_strtoupper(char *s, size_t len)
    return s;
 }
 
+char *php_strip_url_passwd(char *url)
+{
+   char *p = nullptr;
+   char *url_start = nullptr;
+   if (url == NULL) {
+      return "";
+   }
+   p = url;
+   while (*p) {
+      if (*p == ':' && *(p + 1) == '/' && *(p + 2) == '/') {
+         /* found protocol */
+         url_start = p = p + 3;
+         while (*p) {
+            if (*p == '@') {
+               int i;
+               for (i = 0; i < 3 && url_start < p; i++, url_start++) {
+                  *url_start = '.';
+               }
+               for (; *p; p++) {
+                  *url_start++ = *p;
+               }
+               *url_start=0;
+               break;
+            }
+            p++;
+         }
+         return url;
+      }
+      p++;
+   }
+   return url;
+}
+
 } // utils

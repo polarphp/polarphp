@@ -176,6 +176,7 @@ public:
    ExecEnv &setUserIniFilename(const std::string &value);
    ExecEnv &setRequestOrder(const std::string &value);
    ExecEnv &setSyslogIdent(const std::string &value);
+   ExecEnv &setEntryScriptFilename(const std::string &value);
 
    ExecEnv &setIniConfigDeaultHandler(IniConfigDefaultInitFunc func);
    ExecEnv &setArgSeparator(ArgSeparators seps);
@@ -260,13 +261,14 @@ public:
    StringRef getUserIniFilename() const;
    StringRef getRequestOrder() const;
    StringRef getSyslogIdent() const;
+   StringRef getEntryScriptFilename() const;
 
    IniConfigDefaultInitFunc getIniConfigDeaultHandler() const;
    const ArgSeparators &getArgSeparator() const;
    const zend_llist &getTickFunctions() const;
    zend_llist &getTickFunctions();
 
-   void unbufferWrite(const char *str, int len);
+   size_t unbufferWrite(const char *str, int len);
    void logMessage(const char *logMessage, int syslogTypeInt);
 private:
    bool m_phpIniIgnore;
@@ -347,6 +349,7 @@ private:
    std::string m_userIniFilename;
    std::string m_requestOrder;
    std::string m_syslogIdent;
+   std::string m_entryScriptFilename;
 
    IniConfigDefaultInitFunc m_iniDefaultInitHandler;
    ArgSeparators m_argSeparator;
