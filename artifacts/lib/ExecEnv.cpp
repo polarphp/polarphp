@@ -77,9 +77,9 @@
 namespace polar
 {
 
-extern int sg_moduleInitialized;
-extern int sg_moduleStartup;
-extern int sg_moduleShutdown;
+extern bool sg_moduleInitialized;
+extern bool sg_moduleStartup;
+extern bool sg_moduleShutdown;
 
 CliShellCallbacksType sg_cliShellCallbacks = {nullptr, nullptr, nullptr};
 

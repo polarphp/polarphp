@@ -27,9 +27,9 @@ namespace polar {
 /// But don't make them a single int bitfield
 /// TODO review polarphp bootstrap
 ///
-int sg_moduleInitialized = 0;
-int sg_moduleStartup = 1;
-int sg_moduleShutdown = 0;
+bool sg_moduleInitialized = false;
+bool sg_moduleStartup = true;
+bool sg_moduleShutdown = false;
 
 POLAR_DECL_EXPORT int (*php_register_internal_extensions_func)(void) = php_register_internal_extensions;
 
@@ -138,8 +138,8 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    }
 #endif
 
-   sg_moduleShutdown = 0;
-   sg_moduleStartup = 1;
+   sg_moduleShutdown = false;
+   sg_moduleStartup = true;
    execEnv.activate();
 
    if (sg_moduleInitialized) {
@@ -330,7 +330,7 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    if (zend_post_startup() != SUCCESS) {
       return false;
    }
-   sg_moduleInitialized = 1;
+   sg_moduleInitialized = true;
    /* Check for deprecated directives */
    /* NOTE: If you add anything here, remember to add it to Makefile.global! */
    {
@@ -390,7 +390,7 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    }
    virtual_cwd_deactivate();
    execEnv.deactivate();
-   sg_moduleStartup = 0;
+   sg_moduleStartup = false;
    shutdown_memory_manager(1, 0);
    virtual_cwd_activate();
    zend_interned_strings_switch_storage(1);
@@ -404,7 +404,7 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
 void php_module_shutdown()
 {
    int module_number = 0;	/* for UNREGISTER_INI_ENTRIES() */
-   sg_moduleShutdown = 1;
+   sg_moduleShutdown = true;
    if (!sg_moduleInitialized) {
       return;
    }
@@ -431,7 +431,7 @@ void php_module_shutdown()
    /// interned_strings
    /// shutdown by zend_startup
    /// tsrm_set_shutdown_handler(zend_interned_strings_dtor);
-   sg_moduleInitialized = 0;
+   sg_moduleInitialized = false;
    shutdown_ticks();
    /// ZTS mode dtor call by tsrm
    // gc_globals_dtor();
