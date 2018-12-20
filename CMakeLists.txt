@@ -306,6 +306,26 @@ mark_as_advanced(POLAR_TARGET_TRIPLE_ENV)
 option(POLAR_DEV_BUILD_DEVTOOLS_TESTS "turn on to build tests of devtools" OFF)
 option(POLAR_DEV_BUILD_LLVM_UNITTEST "turn on llvm support libraries unitests" OFF)
 
+# install dir setup options
+set(POLAR_INSTALL_BIN_DIR "" CACHE STRING
+   "Custom install bin directory of polarphp.")
+set(POLAR_INSTALL_LIB_DIR "" CACHE STRING
+   "Custom install lib directory of polarphp.")
+set(POLAR_INSTALL_DATA_DIR "" CACHE STRING
+   "Custom install data directory of polarphp.")
+set(POLAR_INSTALL_CFG_DIR "" CACHE STRING
+   "Custom install config directory of polarphp.")
+set(POLAR_INSTALL_LOCAL_STATE_DIR "" CACHE STRING
+   "Custom install local state directory of polarphp.")
+set(POLAR_DEFAULT_INCLUDE_DIR "" CACHE STRING
+   "Custom default include directory of polarphp.")
+
+mark_as_advanced(POLAR_INSTALL_BIN_DIR)
+mark_as_advanced(POLAR_INSTALL_LIB_DIR)
+mark_as_advanced(POLAR_INSTALL_DATA_DIR)
+mark_as_advanced(POLAR_INSTALL_CFG_DIR)
+mark_as_advanced(POLAR_INSTALL_LOCAL_STATE_DIR)
+
 if (POLAR_BUILD_TYPE STREQUAL "debug")
    set(POLAR_DEBUG_BUILD ON)
 endif()
@@ -352,11 +372,49 @@ set(POLAR_COMPILE_FLAGS "")
 set(POLAR_COMMON_DEPENDS "")
 set(POLAR_RT_REQUIRE_LIBS "")
 
+# setup php version info
+polar_setup_php_version()
+
+# setup polarphp env const
+
+string(STRIP "${POLAR_INSTALL_BIN_DIR}"         POLAR_INSTALL_BIN_DIR)
+string(STRIP "${POLAR_INSTALL_LIB_DIR}"         POLAR_INSTALL_LIB_DIR)
+string(STRIP "${POLAR_INSTALL_DATA_DIR}"        POLAR_INSTALL_DATA_DIR)
+string(STRIP "${POLAR_INSTALL_CFG_DIR}"         POLAR_INSTALL_CFG_DIR)
+string(STRIP "${POLAR_INSTALL_LOCAL_STATE_DIR}" POLAR_INSTALL_LOCAL_STATE_DIR)
+string(STRIP "${POLAR_DEFAULT_INCLUDE_DIR}"     POLAR_DEFAULT_INCLUDE_DIR)
+
+if (POLAR_INSTALL_BIN_DIR STREQUAL "")
+   set(POLAR_INSTALL_BIN_DIR "${POLAR_RUNTIME_OUTPUT_INTDIR}")
+endif()
+
+if (POLAR_INSTALL_LIB_DIR STREQUAL "")
+   set(POLAR_INSTALL_LIB_DIR "${POLAR_LIBRARY_OUTPUT_INTDIR}")
+endif()
+
+if (POLAR_INSTALL_DATA_DIR STREQUAL "")
+   set(POLAR_INSTALL_DATA_DIR "${POLAR_BINARY_DIR}/share/polarphp")
+endif()
+
+if (POLAR_INSTALL_CFG_DIR STREQUAL "")
+   set(POLAR_INSTALL_CFG_DIR "${POLAR_BINARY_DIR}/etc")
+endif()
+
+if (POLAR_INSTALL_LOCAL_STATE_DIR STREQUAL "")
+   set(POLAR_INSTALL_LOCAL_STATE_DIR "${POLAR_BINARY_DIR}/var")
+endif()
+
+if (POLAR_DEFAULT_INCLUDE_DIR STREQUAL "")
+   set(POLAR_DEFAULT_INCLUDE_DIR ".:${POLAR_INSTALL_DATA_DIR}/include")
+endif()
+
+set(POLAR_EXECUTABLE_FILEPATH ${POLAR_RUNTIME_OUTPUT_INTDIR}/polar)
+
 # processing php.ini paths
 # TODO at unix system, when build in release mode
 # we need put php.ini int /etc directory
 if (POLARPHP_CONFIG_FILE_PATH STREQUAL "Default")
-   set(POLARPHP_CONFIG_FILE_PATH ${POLAR_BINARY_DIR}/data/config)
+   set(POLARPHP_CONFIG_FILE_PATH ${POLAR_INSTALL_CFG_DIR}/polarphp)
    if (NOT EXISTS ${POLARPHP_CONFIG_FILE_PATH})
       file(MAKE_DIRECTORY ${POLARPHP_CONFIG_FILE_PATH})
    endif()
@@ -367,11 +425,6 @@ if (POLARPHP_CONFIG_FILE_SCAN_DIR STREQUAL "Default")
       file(MAKE_DIRECTORY ${POLARPHP_CONFIG_FILE_SCAN_DIR})
    endif()
 endif()
-
-# setup php version info
-polar_setup_php_version()
-
-set(POLAR_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
 
 message("build polarphp version: ${POLAR_PACKAGE_VERSION}")
 message("build polarphp version id: ${POLAR_VERSION_ID}")
