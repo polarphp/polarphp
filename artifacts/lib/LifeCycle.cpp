@@ -31,7 +31,7 @@ bool sg_moduleInitialized = false;
 bool sg_moduleStartup = true;
 bool sg_moduleShutdown = false;
 
-extern zend_ini_entry_def sg_iniEntries[];
+extern zend_ini_entry_def ini_entries[];
 
 POLAR_DECL_EXPORT int (*php_register_internal_extensions_func)(void) = php_register_internal_extensions;
 
@@ -102,6 +102,28 @@ void cli_ini_defaults(HashTable *configuration_hash)
    zval tmp;
    POLAR_INI_DEFAULT("report_zend_debug", "0");
    POLAR_INI_DEFAULT("display_errors", "1");
+}
+
+namespace {
+int php_register_extensions_bc(zend_module_entry *ptr, int count)
+{
+   while (count--) {
+      if (zend_register_internal_module(ptr++) == NULL) {
+         return FAILURE;
+      }
+   }
+   return SUCCESS;
+}
+} // anonymous namespace
+
+void php_disable_functions()
+{
+
+}
+
+void php_disable_classes()
+{
+
 }
 
 bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditionalModules)
@@ -188,17 +210,17 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    le_index_ptr = zend_register_list_destructors_ex(nullptr, nullptr, "index pointer", 0);
 
    /* Register constants */
-   //      REGISTER_MAIN_STRINGL_CONSTANT("PHP_VERSION", PHP_VERSION, sizeof(PHP_VERSION)-1, CONST_PERSISTENT | CONST_CS);
-   //      REGISTER_MAIN_LONG_CONSTANT("PHP_MAJOR_VERSION", PHP_MAJOR_VERSION, CONST_PERSISTENT | CONST_CS);
-   //      REGISTER_MAIN_LONG_CONSTANT("PHP_MINOR_VERSION", PHP_MINOR_VERSION, CONST_PERSISTENT | CONST_CS);
-   //      REGISTER_MAIN_LONG_CONSTANT("PHP_RELEASE_VERSION", PHP_RELEASE_VERSION, CONST_PERSISTENT | CONST_CS);
-   //      REGISTER_MAIN_STRINGL_CONSTANT("PHP_EXTRA_VERSION", PHP_EXTRA_VERSION, sizeof(PHP_EXTRA_VERSION) - 1, CONST_PERSISTENT | CONST_CS);
-   //      REGISTER_MAIN_LONG_CONSTANT("PHP_VERSION_ID", PHP_VERSION_ID, CONST_PERSISTENT | CONST_CS);
-   //      REGISTER_MAIN_LONG_CONSTANT("PHP_ZTS", 1, CONST_PERSISTENT | CONST_CS);
-   //      REGISTER_MAIN_LONG_CONSTANT("PHP_DEBUG", PHP_DEBUG, CONST_PERSISTENT | CONST_CS);
-   //      REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS", phpOs, strlen(phpOs), CONST_PERSISTENT | CONST_CS);
-   //      REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS_FAMILY", PHP_OS_FAMILY, sizeof(PHP_OS_FAMILY)-1, CONST_PERSISTENT | CONST_CS);
-   //      REGISTER_MAIN_STRINGL_CONSTANT("PHP_SAPI", sapi_module.name, strlen(sapi_module.name), CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
+   REGISTER_MAIN_STRINGL_CONSTANT("POLARPHP_VERSION", POLAR_VERSION, sizeof(POLAR_VERSION)-1, CONST_PERSISTENT | CONST_CS);
+   REGISTER_MAIN_LONG_CONSTANT("POLARPHP_VERSION_MAJOR", POLAR_VERSION_MAJOR, CONST_PERSISTENT | CONST_CS);
+   REGISTER_MAIN_LONG_CONSTANT("POLARPHP_VERSION_MINOR", POLAR_VERSION_MINOR, CONST_PERSISTENT | CONST_CS);
+   REGISTER_MAIN_LONG_CONSTANT("POLARPHP_VERSION_PATCH", POLAR_VERSION_PATCH, CONST_PERSISTENT | CONST_CS);
+   REGISTER_MAIN_STRINGL_CONSTANT("POLARPHP_VERSION_SUFFIX", POLAR_VERSION_SUFFIX, sizeof(POLAR_VERSION_SUFFIX) - 1, CONST_PERSISTENT | CONST_CS);
+   REGISTER_MAIN_LONG_CONSTANT("POLARPHP_VERSION_ID", POLAR_VERSION_ID, CONST_PERSISTENT | CONST_CS);
+   REGISTER_MAIN_LONG_CONSTANT("POLARPHP_ZTS", 1, CONST_PERSISTENT | CONST_CS);
+   REGISTER_MAIN_LONG_CONSTANT("POLARPHP_DEBUG", PHP_DEBUG, CONST_PERSISTENT | CONST_CS);
+   REGISTER_MAIN_STRINGL_CONSTANT("POLARPHP_OS", phpOs, strlen(phpOs), CONST_PERSISTENT | CONST_CS);
+   REGISTER_MAIN_STRINGL_CONSTANT("POLARPHP_OS_FAMILY", POLAR_SYSTEM_NAME, sizeof(POLAR_SYSTEM_NAME)-1, CONST_PERSISTENT | CONST_CS);
+   REGISTER_MAIN_STRINGL_CONSTANT("PHPPHP_SAPI", "cli", strlen("cli"), CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
    //      REGISTER_MAIN_STRINGL_CONSTANT("DEFAULT_INCLUDE_PATH", PHP_INCLUDE_PATH, sizeof(PHP_INCLUDE_PATH)-1, CONST_PERSISTENT | CONST_CS);
    //      REGISTER_MAIN_STRINGL_CONSTANT("PEAR_INSTALL_DIR", PEAR_INSTALLDIR, sizeof(PEAR_INSTALLDIR)-1, CONST_PERSISTENT | CONST_CS);
    //      REGISTER_MAIN_STRINGL_CONSTANT("PEAR_EXTENSION_DIR", PHP_EXTENSION_DIR, sizeof(PHP_EXTENSION_DIR)-1, CONST_PERSISTENT | CONST_CS);
@@ -247,20 +269,18 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    } else {
       REGISTER_MAIN_STRINGL_CONSTANT("POLAR_BINARY", PHP_EMPTY_STR, 0, CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
    }
-
    php_output_register_constants();
 
    /// this will read in php.ini, set up the configuration parameters,
    /// load zend extensions and register php function extensions
    /// to be loaded later
-   if (php_init_config() == FAILURE) {
-      return FAILURE;
+   if (!php_init_config()) {
+      return false;
    }
-
    /// Register PHP core ini entries
-   //POLAR_REGISTER_INI_ENTRIES();
+   REGISTER_INI_ENTRIES();
    /* Register Zend ini entries */
-   //zend_register_standard_ini_entries();
+   zend_register_standard_ini_entries();
 #ifdef POLAR_OS_WIN32
    /* Until the current ini values was setup, the current cp is 65001.
             If the actual ini vaues are different, some stuff needs to be updated.
@@ -275,40 +295,34 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    }
 #endif
 
-   /* Disable realpath cache if an open_basedir is set */
-   //   if (PG(open_basedir) && *PG(open_basedir)) {
-   //      CWDG(realpath_cache_size_limit) = 0;
-   //   }
-
-   // PG(have_called_openlog) = 0;
-
-   /* initialize stream wrappers registry
-          * (this uses configuration parameters from php.ini)
-          */
-   //   if (php_init_stream_wrappers(moduleNumber) == FAILURE)	{
-   //      php_printf("PHP:  Unable to initialize stream url wrappers.\n");
-   //      return FAILURE;
-   //   }
-   zuv.html_errors = 1;
+   /// Disable realpath cache if an open_basedir is set
+   StringRef openBaseDir = execEnv.getOpenBaseDir();
+   if (!openBaseDir.empty()) {
+      CWDG(realpath_cache_size_limit) = 0;
+   }
+   execEnv.setHaveCalledOpenlog(false);
+   /// polarphp does not use html errors
+   zuv.html_errors = 0;
    zuv.import_use_extension = const_cast<char *>(".php");
    zuv.import_use_extension_length = (uint32_t)strlen(zuv.import_use_extension);
    zend_set_utility_values(&zuv);
+
    /* startup extensions statically compiled in */
    if (php_register_internal_extensions_func() == FAILURE) {
       php_printf("Unable to start builtin modules\n");
       return false;
    }
    /* start additional PHP extensions */
-   // php_register_extensions_bc(additional_modules, num_additional_modules);
+   php_register_extensions_bc(additionalModules, numAdditionalModules);
 
-   /* load and startup extensions compiled as shared objects (aka DLLs)
-            as requested by php.ini entries
-            these are loaded after initialization of internal extensions
-            as extensions *might* rely on things from ext/standard
-            which is always an internal extension and to be initialized
-            ahead of all other internals
-          */
-   // php_ini_register_extensions();
+   /// load and startup extensions compiled as shared objects (aka DLLs)
+   /// as requested by php.ini entries
+   /// these are loaded after initialization of internal extensions
+   /// as extensions *might* rely on things from ext/standard
+   /// which is always an internal extension and to be initialized
+   /// ahead of all other internals
+
+   php_ini_register_extensions();
    zend_startup_modules();
    /* start Zend extensions */
    zend_startup_extensions();
@@ -322,8 +336,8 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    //      }
    //   }
    /* disable certain classes and functions as requested by php.ini */
-   //   php_disable_functions();
-   //   php_disable_classes();
+   php_disable_functions();
+   php_disable_classes();
 
    /* make core report what it should */
    //   if ((module = zend_hash_str_find_ptr(&module_registry, "core", sizeof("core")-1)) != nullptr) {
@@ -374,22 +388,22 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
          }
       }
    };
-      //      unsigned int i;
-      //      zend_try {
-      //         /* 2 = Count of deprecation structs */
-      //         for (i = 0; i < 2; i++) {
-      //            const char **p = directives[i].directives;
-      //            while(*p) {
-      //               zend_long value;
-      //               if (cfg_get_long((char*)*p, &value) == SUCCESS && value) {
-      //                  zend_error(directives[i].error_level, directives[i].phrase, *p);
-      //               }
-      //               ++p;
-      //            }
-      //         }
-      //      } zend_catch {
-      //         retval = false;
-      //      } zend_end_try();
+      unsigned int i;
+      polar_try {
+         /* 2 = Count of deprecation structs */
+         for (i = 0; i < 2; i++) {
+            const char **p = directives[i].directives;
+            while(*p) {
+               zend_long value;
+               if (cfg_get_long(const_cast<char*>(*p), &value) == SUCCESS && value) {
+                  zend_error(directives[i].error_level, const_cast<char *>(directives[i].phrase), *p);
+               }
+               ++p;
+            }
+         }
+      } polar_catch {
+         retval = false;
+      } polar_end_try;
    }
    virtual_cwd_deactivate();
    execEnv.deactivate();

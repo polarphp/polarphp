@@ -13,7 +13,11 @@
 #define POLARPHP_ARTIFACTS_UTILS_H
 
 #include <ctime>
+#include <cstdio>
+
 #include "polarphp/global/CompilerFeature.h"
+
+struct _zend_string;
 
 namespace polar {
 
@@ -22,6 +26,17 @@ std::size_t php_format_date(char* str, std::size_t count, const char* format,
 POLAR_DECL_EXPORT char *php_strtoupper(char *s, size_t len);
 POLAR_DECL_EXPORT char *php_strtolower(char *s, size_t len);
 POLAR_DECL_EXPORT char *php_strip_url_passwd(char *url);
+POLAR_DECL_EXPORT char *expand_filepath(const char *filePath, char *realPath);
+POLAR_DECL_EXPORT char *expand_filepath(const char *filePath, char *realPath,
+                                        const char *relativeTo, size_t relativeToLen);
+POLAR_DECL_EXPORT char *expand_filepath(const char *filePath, char *realPath,
+                                        const char *relativeTo, size_t relativeToLen,
+                                        int realPathMode);
+POLAR_DECL_EXPORT FILE *php_fopen_with_path(const char *filename, const char *mode,
+                                            const char *path, _zend_string **openedPath);
+POLAR_DECL_EXPORT int php_check_open_basedir(const char *path);
+POLAR_DECL_EXPORT int php_check_open_basedir(const char *path, int warn);
+POLAR_DECL_EXPORT int php_check_specific_open_basedir(const char *basedir, const char *path);
 
 } // polar
 

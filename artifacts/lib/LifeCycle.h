@@ -42,6 +42,8 @@ POLAR_DECL_EXPORT int php_during_module_shutdown();
 POLAR_DECL_EXPORT int php_get_module_initialized();
 
 void php_free_cli_exec_globals();
+void php_disable_functions();
+void php_disable_classes();
 
 } // polar
 

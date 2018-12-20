@@ -21,9 +21,10 @@ namespace polar {
 
 //};
 
-POLAR_DECL_EXPORT int php_register_internal_extensions()
+int php_register_internal_extensions()
 {
    //return php_register_extensions(php_builtin_extensions, EXTCOUNT);
+   return 0;
 }
 
 } // polar

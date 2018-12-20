@@ -14,7 +14,10 @@
 #include "Ini.h"
 #include "Output.h"
 #include "ExecEnv.h"
+#include "Utils.h"
 #include "ZendHeaders.h"
+#include "PhpSpprintf.h"
+#include "ScanDir.h"
 #ifdef POLAR_OS_WIN32
 #include "win32/php_registry.h"
 #endif
@@ -356,322 +359,319 @@ static void php_load_zend_extension_callback(void *arg) { }
 ///
 bool php_init_config()
 {
-//   StringRef phpIniFileName;
-//   char *phpIniSearchPath;
-//   int phpIniScannedPathLen;
-//   StringRef openBaseDir;
-//   int freeIniSearchPath = 0;
-//   zend_file_handle fh;
-//   zend_string *openedPath = nullptr;
-//   ExecEnv &execEnv = retrieve_global_execenv();
-//   zend_hash_init(&sg_configurationHash, 8, nullptr, config_zval_dtor, 1);
-//   /// invoke exec env to setup default config
-//   execEnv.initDefaultConfig(&sg_configurationHash);
-//   zend_llist_init(&sg_extensionLists.engine, sizeof(char *), reinterpret_cast<llist_dtor_func_t>(free_estring), 1);
-//   zend_llist_init(&sg_extensionLists.functions, sizeof(char *), reinterpret_cast<llist_dtor_func_t>(free_estring), 1);
-//   openBaseDir = execEnv.getOpenBaseDir();
-//   StringRef phpIniexecPathOverride = execEnv.getPhpIniPathOverride();
-//   if (!phpIniexecPathOverride.empty()) {
-//      phpIniFileName = phpIniexecPathOverride;
-//      phpIniSearchPath = const_cast<char *>(phpIniexecPathOverride.getData());
-//      freeIniSearchPath = 0;
-//   } else if (!execEnv.getPhpIniIgnore()) {
-//      int searchPathSize;
-//      StringRef defaultLocation;
-//      StringRef envLocation;
-//      static const char pathsSeparator[] = { ZEND_PATHS_SEPARATOR, 0 };
-//#ifdef POLAR_OS_WIN32
-//      char *reg_location;
-//      char phprc_path[MAXPATHLEN];
-//#endif
+   StringRef phpIniFileName;
+   char *phpIniSearchPath;
+   int phpIniScannedPathLen;
+   StringRef openBaseDir;
+   int freeIniSearchPath = 0;
+   zend_file_handle fh;
+   zend_string *openedPath = nullptr;
+   ExecEnv &execEnv = retrieve_global_execenv();
+   zend_hash_init(&sg_configurationHash, 8, nullptr, config_zval_dtor, 1);
+   /// invoke exec env to setup default config
+   execEnv.initDefaultConfig(&sg_configurationHash);
+   zend_llist_init(&sg_extensionLists.engine, sizeof(char *), reinterpret_cast<llist_dtor_func_t>(free_estring), 1);
+   zend_llist_init(&sg_extensionLists.functions, sizeof(char *), reinterpret_cast<llist_dtor_func_t>(free_estring), 1);
+   openBaseDir = execEnv.getOpenBaseDir();
+   StringRef phpIniexecPathOverride = execEnv.getPhpIniPathOverride();
+   if (!phpIniexecPathOverride.empty()) {
+      phpIniFileName = phpIniexecPathOverride;
+      phpIniSearchPath = const_cast<char *>(phpIniexecPathOverride.getData());
+      freeIniSearchPath = 0;
+   } else if (!execEnv.getPhpIniIgnore()) {
+      int searchPathSize;
+      StringRef defaultLocation;
+      StringRef envLocation;
+      static const char pathsSeparator[] = { ZEND_PATHS_SEPARATOR, 0 };
+#ifdef POLAR_OS_WIN32
+      char *reg_location;
+      char phprc_path[MAXPATHLEN];
+#endif
 
-//      envLocation = getenv("PHPRC");
+      envLocation = getenv("PHPRC");
 
-//#ifdef POLAR_OS_WIN32
-//      if (!envLocation) {
-//         char dummybuf;
-//         int size;
+#ifdef POLAR_OS_WIN32
+      if (!envLocation) {
+         char dummybuf;
+         int size;
 
-//         SetLastError(0);
+         SetLastError(0);
 
-//         /*If the given buffer is not large enough to hold the data, the return value is
-//            the buffer size,  in characters, required to hold the string and its terminating
-//            null character. We use this return value to alloc the final buffer. */
-//         size = GetEnvironmentVariableA("PHPRC", &dummybuf, 0);
-//         if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
-//            /* The environment variable doesn't exist. */
-//            envLocation = "";
-//         } else {
-//            if (size == 0) {
-//               envLocation = "";
-//            } else {
-//               size = GetEnvironmentVariableA("PHPRC", phprc_path, size);
-//               if (size == 0) {
-//                  envLocation = "";
-//               } else {
-//                  envLocation = phprc_path;
-//               }
-//            }
-//         }
-//      }
-//#else
-//      if (!envLocation.empty()) {
-//         envLocation = "";
-//      }
-//#endif
-//      /*
-//          * Prepare search path
-//          */
+         /*If the given buffer is not large enough to hold the data, the return value is
+            the buffer size,  in characters, required to hold the string and its terminating
+            null character. We use this return value to alloc the final buffer. */
+         size = GetEnvironmentVariableA("PHPRC", &dummybuf, 0);
+         if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
+            /* The environment variable doesn't exist. */
+            envLocation = "";
+         } else {
+            if (size == 0) {
+               envLocation = "";
+            } else {
+               size = GetEnvironmentVariableA("PHPRC", phprc_path, size);
+               if (size == 0) {
+                  envLocation = "";
+               } else {
+                  envLocation = phprc_path;
+               }
+            }
+         }
+      }
+#else
+      if (!envLocation.empty()) {
+         envLocation = "";
+      }
+#endif
+      /*
+          * Prepare search path
+          */
 
-//      searchPathSize = MAXPATHLEN * 4 + (int)envLocation.size() + 3 + 1;
-//      phpIniSearchPath = reinterpret_cast<char *>(emalloc(searchPathSize));
-//      freeIniSearchPath = 1;
-//      phpIniSearchPath[0] = 0;
+      searchPathSize = MAXPATHLEN * 4 + (int)envLocation.size() + 3 + 1;
+      phpIniSearchPath = reinterpret_cast<char *>(emalloc(searchPathSize));
+      freeIniSearchPath = 1;
+      phpIniSearchPath[0] = 0;
 
-//      /* Add environment location */
-//      if (envLocation[0]) {
-//         if (*phpIniSearchPath) {
-//            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
-//         }
-//         strlcat(phpIniSearchPath, envLocation.getData(), searchPathSize);
-//         phpIniFileName = envLocation;
-//      }
+      /* Add environment location */
+      if (!envLocation.empty()) {
+         if (*phpIniSearchPath) {
+            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
+         }
+         strlcat(phpIniSearchPath, envLocation.getData(), searchPathSize);
+         phpIniFileName = envLocation;
+      }
 
-//#ifdef POLAR_OS_WIN32
-//      /* Add registry location */
-//      reg_location = GetIniPathFromRegistry();
-//      if (reg_location != nullptr) {
-//         if (*phpIniSearchPath) {
-//            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
-//         }
-//         strlcat(phpIniSearchPath, reg_location, searchPathSize);
-//         efree(reg_location);
-//      }
-//#endif
+#ifdef POLAR_OS_WIN32
+      /* Add registry location */
+      reg_location = GetIniPathFromRegistry();
+      if (reg_location != nullptr) {
+         if (*phpIniSearchPath) {
+            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
+         }
+         strlcat(phpIniSearchPath, reg_location, searchPathSize);
+         efree(reg_location);
+      }
+#endif
 
-//      /* Add cwd (not with CLI) */
-//      if (!execEnv.getPhpIniIgnoreCwd()) {
-//         if (*phpIniSearchPath) {
-//            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
-//         }
-//         strlcat(phpIniSearchPath, ".", searchPathSize);
-//      }
-//      StringRef polarBinary = execEnv.getPolarBinary();
-//      if (!polarBinary.empty()) {
-//         char *separatorLocation;
-//         char *binaryLocation;
-//         binaryLocation = estrdup(polarBinary.getData());
-//         separatorLocation = strrchr(binaryLocation, DEFAULT_SLASH);
-//         if (separatorLocation && separatorLocation != binaryLocation) {
-//            *(separatorLocation) = 0;
-//         }
-//         if (*phpIniSearchPath) {
-//            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
-//         }
-//         strlcat(phpIniSearchPath, binaryLocation, searchPathSize);
-//         efree(binaryLocation);
-//      }
+      /* Add cwd (not with CLI) */
+      if (!execEnv.getPhpIniIgnoreCwd()) {
+         if (*phpIniSearchPath) {
+            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
+         }
+         strlcat(phpIniSearchPath, ".", searchPathSize);
+      }
+      StringRef polarBinary = execEnv.getPolarBinary();
+      if (!polarBinary.empty()) {
+         char *separatorLocation;
+         char *binaryLocation;
+         binaryLocation = estrdup(polarBinary.getData());
+         separatorLocation = strrchr(binaryLocation, DEFAULT_SLASH);
+         if (separatorLocation && separatorLocation != binaryLocation) {
+            *(separatorLocation) = 0;
+         }
+         if (*phpIniSearchPath) {
+            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
+         }
+         strlcat(phpIniSearchPath, binaryLocation, searchPathSize);
+         efree(binaryLocation);
+      }
 
-//      /* Add default location */
-//#ifdef POLAR_OS_WIN32
-//      defaultLocation = (char *) emalloc(MAXPATHLEN + 1);
-//      if (0 < GetWindowsDirectory(defaultLocation, MAXPATHLEN)) {
-//         if (*phpIniSearchPath) {
-//            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
-//         }
-//         strlcat(phpIniSearchPath, defaultLocation, searchPathSize);
-//      }
-//      /* For people running under terminal services, GetWindowsDirectory will
-//          * return their personal Windows directory, so lets add the system
-//          * windows directory too */
-//      if (0 < GetSystemWindowsDirectory(defaultLocation, MAXPATHLEN)) {
-//         if (*phpIniSearchPath) {
-//            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
-//         }
-//         strlcat(phpIniSearchPath, defaultLocation, searchPathSize);
-//      }
-//      efree(defaultLocation);
-//#else
-//      defaultLocation = PHP_CONFIG_FILE_PATH;
-//      if (*phpIniSearchPath) {
-//         strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
-//      }
-//      strlcat(phpIniSearchPath, defaultLocation, searchPathSize);
-//#endif
-//   }
-//   PG(openBaseDir) = nullptr;
-//   /*
-//       * Find and open actual ini file
-//       */
+      /* Add default location */
+#ifdef POLAR_OS_WIN32
+      defaultLocation = (char *) emalloc(MAXPATHLEN + 1);
+      if (0 < GetWindowsDirectory(defaultLocation, MAXPATHLEN)) {
+         if (*phpIniSearchPath) {
+            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
+         }
+         strlcat(phpIniSearchPath, defaultLocation, searchPathSize);
+      }
+      /* For people running under terminal services, GetWindowsDirectory will
+          * return their personal Windows directory, so lets add the system
+          * windows directory too */
+      if (0 < GetSystemWindowsDirectory(defaultLocation, MAXPATHLEN)) {
+         if (*phpIniSearchPath) {
+            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
+         }
+         strlcat(phpIniSearchPath, defaultLocation, searchPathSize);
+      }
+      efree(defaultLocation);
+#else
+      defaultLocation = const_cast<char *>(POLARPHP_CONFIG_FILE_PATH);
+      if (*phpIniSearchPath) {
+         strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
+      }
+      strlcat(phpIniSearchPath, defaultLocation.getData(), searchPathSize);
+#endif
+   }
+   execEnv.setOpenBaseDir("");
+   /// Find and open actual ini file
+   memset(&fh, 0, sizeof(fh));
+   /* If SAPI does not want to ignore all ini files OR an overriding file/path is given.
+       * This allows disabling scanning for ini files in the PHP_CONFIG_FILE_SCAN_DIR but still
+       * load an optional ini file. */
 
-//   memset(&fh, 0, sizeof(fh));
+   if (!execEnv.getPhpIniIgnore() || !phpIniexecPathOverride.empty()) {
+      /* Check if phpIniFileName is a file and can be opened */
+      if (!phpIniFileName.empty()) {
+         zend_stat_t statbuf;
+         if (!VCWD_STAT(phpIniFileName.getData(), &statbuf)) {
+            if (!((statbuf.st_mode & S_IFMT) == S_IFDIR)) {
+               fh.handle.fp = VCWD_FOPEN(phpIniFileName.getData(), "r");
+               if (fh.handle.fp) {
+                  fh.filename = expand_filepath(phpIniFileName.getData(), nullptr);
+               }
+            }
+         }
+      }
 
-//   /* If SAPI does not want to ignore all ini files OR an overriding file/path is given.
-//       * This allows disabling scanning for ini files in the PHP_CONFIG_FILE_SCAN_DIR but still
-//       * load an optional ini file. */
-//   if (!sapi_module.php_ini_ignore || sapi_module.php_ini_path_override) {
+      ///
+      /// polarphp does not use SAPI mechanism
+      ///
+      /* Otherwise search for php-cli.ini file in search path */
+      if (!fh.handle.fp) {
+         const char *fmt = "php-%s.ini";
+         char *ini_fname;
+         polar_spprintf(&ini_fname, 0, fmt, "cli");
+         fh.handle.fp = php_fopen_with_path(ini_fname, "r", phpIniSearchPath, &openedPath);
+         efree(ini_fname);
+         if (fh.handle.fp) {
+            fh.filename = ZSTR_VAL(openedPath);
+         }
+      }
 
-//      /* Check if phpIniFileName is a file and can be opened */
-//      if (phpIniFileName && phpIniFileName[0]) {
-//         zend_stat_t statbuf;
+      /* If still no ini file found, search for php.ini file in search path */
+      if (!fh.handle.fp) {
+         fh.handle.fp = php_fopen_with_path("php.ini", "r", phpIniSearchPath, &openedPath);
+         if (fh.handle.fp) {
+            fh.filename = ZSTR_VAL(openedPath);
+         }
+      }
+   }
 
-//         if (!VCWD_STAT(phpIniFileName, &statbuf)) {
-//            if (!((statbuf.st_mode & S_IFMT) == S_IFDIR)) {
-//               fh.handle.fp = VCWD_FOPEN(phpIniFileName, "r");
-//               if (fh.handle.fp) {
-//                  fh.filename = expand_filepath(phpIniFileName, nullptr);
-//               }
-//            }
-//         }
-//      }
+   if (freeIniSearchPath) {
+      efree(phpIniSearchPath);
+   }
+   execEnv.setOpenBaseDir(openBaseDir);
+   if (fh.handle.fp) {
+      fh.type = ZEND_HANDLE_FP;
+      RESET_ACTIVE_INI_HASH();
+      zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_callback, &sg_configurationHash);
 
-//      /* Otherwise search for php-%sapi-module-name%.ini file in search path */
-//      if (!fh.handle.fp) {
-//         const char *fmt = "php-%s.ini";
-//         char *ini_fname;
-//         spprintf(&ini_fname, 0, fmt, sapi_module.name);
-//         fh.handle.fp = php_fopen_with_path(ini_fname, "r", phpIniSearchPath, &openedPath);
-//         efree(ini_fname);
-//         if (fh.handle.fp) {
-//            fh.filename = ZSTR_VAL(openedPath);
-//         }
-//      }
+      {
+         zval tmp;
+         ZVAL_NEW_STR(&tmp, zend_string_init(fh.filename, strlen(fh.filename), 1));
+         zend_hash_str_update(&sg_configurationHash, const_cast<char *>("cfg_file_path"), sizeof("cfg_file_path")-1, &tmp);
+         if (openedPath) {
+            zend_string_release_ex(openedPath, 0);
+         } else {
+            efree(const_cast<char *>(fh.filename));
+         }
+         sg_phpIniOpenedPath = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
+      }
+   }
 
-//      /* If still no ini file found, search for php.ini file in search path */
-//      if (!fh.handle.fp) {
-//         fh.handle.fp = php_fopen_with_path("php.ini", "r", phpIniSearchPath, &openedPath);
-//         if (fh.handle.fp) {
-//            fh.filename = ZSTR_VAL(openedPath);
-//         }
-//      }
-//   }
+   /* Check for PHP_INI_SCAN_DIR environment variable to override/set config file scan directory */
+   sg_phpIniScannedPath = getenv("PHP_INI_SCAN_DIR");
+   if (!sg_phpIniScannedPath) {
+      /* Or fall back using possible --with-config-file-scan-dir setting (defaults to empty string!) */
+      sg_phpIniScannedPath = const_cast<char *>(POLARPHP_CONFIG_FILE_SCAN_DIR);
+   }
+   phpIniScannedPathLen = (int)strlen(sg_phpIniScannedPath);
 
-//   if (freeIniSearchPath) {
-//      efree(phpIniSearchPath);
-//   }
+   /* Scan and parse any .ini files found in scan path if path not empty. */
+   if (!execEnv.getPhpIniIgnore() && phpIniScannedPathLen) {
+      struct dirent **namelist;
+      int ndir, i;
+      zend_stat_t sb;
+      char iniFile[MAXPATHLEN + 2];
+      char *p;
+      zend_file_handle fh2;
+      zend_llist scanned_ini_list;
+      zend_llist_element *element;
+      int l, total_l = 0;
+      char *bufpath, *debpath, *endpath;
+      int lenpath;
+      zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
+      memset(&fh2, 0, sizeof(fh2));
+      bufpath = estrdup(sg_phpIniScannedPath);
+      for (debpath = bufpath ; debpath ; debpath=endpath) {
+         endpath = strchr(debpath, DEFAULT_DIR_SEPARATOR);
+         if (endpath) {
+            *(endpath++) = 0;
+         }
+         if (!debpath[0]) {
+            /* empty string means default builtin value
+                  to allow "/foo/php.d:" or ":/foo/php.d" */
+            debpath = const_cast<char *>(POLARPHP_CONFIG_FILE_SCAN_DIR);
+         }
+         lenpath = (int)strlen(debpath);
+         if (lenpath > 0 && (ndir = php_scandir(debpath, &namelist, 0, php_alphasort)) > 0) {
+            for (i = 0; i < ndir; i++) {
+               /* check for any file with .ini extension */
+               if (!(p = strrchr(namelist[i]->d_name, '.')) || (p && strcmp(p, ".ini"))) {
+                  free(namelist[i]);
+                  continue;
+               }
+               /* Reset active ini section */
+               RESET_ACTIVE_INI_HASH();
 
-//   PG(openBaseDir) = openBaseDir;
-//   if (fh.handle.fp) {
-//      fh.type = ZEND_HANDLE_FP;
-//      RESET_ACTIVE_INI_HASH();
-//      zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_callback, &sg_configurationHash);
+               if (IS_SLASH(debpath[lenpath - 1])) {
+                  std::snprintf(iniFile, MAXPATHLEN, "%s%s", debpath, namelist[i]->d_name);
+               } else {
+                  ///
+                  /// TODO review print result
+                  ///
+                  std::snprintf(iniFile, MAXPATHLEN + 2, "%s%c%s", debpath, DEFAULT_SLASH, namelist[i]->d_name);
+               }
+               if (VCWD_STAT(iniFile, &sb) == 0) {
+                  if (S_ISREG(sb.st_mode)) {
+                     if ((fh2.handle.fp = VCWD_FOPEN(iniFile, "r"))) {
+                        fh2.filename = iniFile;
+                        fh2.type = ZEND_HANDLE_FP;
 
-//      {
-//         zval tmp;
+                        if (zend_parse_ini_file(&fh2, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_callback, &sg_configurationHash) == SUCCESS) {
+                           /* Here, add it to the list of ini files read */
+                           l = (int)strlen(iniFile);
+                           total_l += l + 2;
+                           p = estrndup(iniFile, l);
+                           zend_llist_add_element(&scanned_ini_list, &p);
+                        }
+                     }
+                  }
+               }
+               free(namelist[i]);
+            }
+            free(namelist);
+         }
+      }
+      efree(bufpath);
 
-//         ZVAL_NEW_STR(&tmp, zend_string_init(fh.filename, strlen(fh.filename), 1));
-//         zend_hash_str_update(&sg_configurationHash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
-//         if (openedPath) {
-//            zend_string_release_ex(openedPath, 0);
-//         } else {
-//            efree((char *)fh.filename);
-//         }
-//         sg_phpIniOpenedPath = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
-//      }
-//   }
-
-//   /* Check for PHP_INI_SCAN_DIR environment variable to override/set config file scan directory */
-//   sg_phpIniScannedPath = getenv("PHP_INI_SCAN_DIR");
-//   if (!sg_phpIniScannedPath) {
-//      /* Or fall back using possible --with-config-file-scan-dir setting (defaults to empty string!) */
-//      sg_phpIniScannedPath = PHP_CONFIG_FILE_SCAN_DIR;
-//   }
-//   phpIniScannedPathLen = (int)strlen(sg_phpIniScannedPath);
-
-//   /* Scan and parse any .ini files found in scan path if path not empty. */
-//   if (!sapi_module.php_ini_ignore && phpIniScannedPathLen) {
-//      struct dirent **namelist;
-//      int ndir, i;
-//      zend_stat_t sb;
-//      char ini_file[MAXPATHLEN];
-//      char *p;
-//      zend_file_handle fh2;
-//      zend_llist scanned_ini_list;
-//      zend_llist_element *element;
-//      int l, total_l = 0;
-//      char *bufpath, *debpath, *endpath;
-//      int lenpath;
-
-//      zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
-//      memset(&fh2, 0, sizeof(fh2));
-
-//      bufpath = estrdup(sg_phpIniScannedPath);
-//      for (debpath = bufpath ; debpath ; debpath=endpath) {
-//         endpath = strchr(debpath, DEFAULT_DIR_SEPARATOR);
-//         if (endpath) {
-//            *(endpath++) = 0;
-//         }
-//         if (!debpath[0]) {
-//            /* empty string means default builtin value
-//                  to allow "/foo/php.d:" or ":/foo/php.d" */
-//            debpath = PHP_CONFIG_FILE_SCAN_DIR;
-//         }
-//         lenpath = (int)strlen(debpath);
-//         if (lenpath > 0 && (ndir = php_scandir(debpath, &namelist, 0, php_alphasort)) > 0) {
-//            for (i = 0; i < ndir; i++) {
-//               /* check for any file with .ini extension */
-//               if (!(p = strrchr(namelist[i]->d_name, '.')) || (p && strcmp(p, ".ini"))) {
-//                  free(namelist[i]);
-//                  continue;
-//               }
-//               /* Reset active ini section */
-//               RESET_ACTIVE_INI_HASH();
-
-//               if (IS_SLASH(debpath[lenpath - 1])) {
-//                  snprintf(ini_file, MAXPATHLEN, "%s%s", debpath, namelist[i]->d_name);
-//               } else {
-//                  snprintf(ini_file, MAXPATHLEN, "%s%c%s", debpath, DEFAULT_SLASH, namelist[i]->d_name);
-//               }
-//               if (VCWD_STAT(ini_file, &sb) == 0) {
-//                  if (S_ISREG(sb.st_mode)) {
-//                     if ((fh2.handle.fp = VCWD_FOPEN(ini_file, "r"))) {
-//                        fh2.filename = ini_file;
-//                        fh2.type = ZEND_HANDLE_FP;
-
-//                        if (zend_parse_ini_file(&fh2, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_callback, &sg_configurationHash) == SUCCESS) {
-//                           /* Here, add it to the list of ini files read */
-//                           l = (int)strlen(ini_file);
-//                           total_l += l + 2;
-//                           p = estrndup(ini_file, l);
-//                           zend_llist_add_element(&scanned_ini_list, &p);
-//                        }
-//                     }
-//                  }
-//               }
-//               free(namelist[i]);
-//            }
-//            free(namelist);
-//         }
-//      }
-//      efree(bufpath);
-
-//      if (total_l) {
-//         int phpIniScannedFilesLen = (sg_phpIniScannedFiles) ? (int)strlen(sg_phpIniScannedFiles) + 1 : 0;
-//         sg_phpIniScannedFiles = (char *) realloc(sg_phpIniScannedFiles, phpIniScannedFilesLen + total_l + 1);
-//         if (!phpIniScannedFilesLen) {
-//            *sg_phpIniScannedFiles = '\0';
-//         }
-//         total_l += phpIniScannedFilesLen;
-//         for (element = scanned_ini_list.head; element; element = element->next) {
-//            if (phpIniScannedFilesLen) {
-//               strlcat(sg_phpIniScannedFiles, ",\n", total_l);
-//            }
-//            strlcat(sg_phpIniScannedFiles, *(char **)element->data, total_l);
-//            strlcat(sg_phpIniScannedFiles, element->next ? ",\n" : "\n", total_l);
-//         }
-//      }
-//      zend_llist_destroy(&scanned_ini_list);
-//   } else {
-//      /* Make sure an empty sg_phpIniScannedPath ends up as nullptr */
-//      sg_phpIniScannedPath = nullptr;
-//   }
-//   if (sapi_module.ini_entries) {
-//      /* Reset active ini section */
-//      RESET_ACTIVE_INI_HASH();
-//      zend_parse_ini_string(sapi_module.ini_entries, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_callback, &sg_configurationHash);
-//   }
-
-//   return SUCCESS;
+      if (total_l) {
+         int phpIniScannedFilesLen = (sg_phpIniScannedFiles) ? (int)strlen(sg_phpIniScannedFiles) + 1 : 0;
+         sg_phpIniScannedFiles = (char *) realloc(sg_phpIniScannedFiles, phpIniScannedFilesLen + total_l + 1);
+         if (!phpIniScannedFilesLen) {
+            *sg_phpIniScannedFiles = '\0';
+         }
+         total_l += phpIniScannedFilesLen;
+         for (element = scanned_ini_list.head; element; element = element->next) {
+            if (phpIniScannedFilesLen) {
+               strlcat(sg_phpIniScannedFiles, ",\n", total_l);
+            }
+            strlcat(sg_phpIniScannedFiles, *(char **)element->data, total_l);
+            strlcat(sg_phpIniScannedFiles, element->next ? ",\n" : "\n", total_l);
+         }
+      }
+      zend_llist_destroy(&scanned_ini_list);
+   } else {
+      /* Make sure an empty sg_phpIniScannedPath ends up as nullptr */
+      sg_phpIniScannedPath = nullptr;
+   }
+   StringRef iniEntries = execEnv.getIniEntries();
+   if (!iniEntries.empty()) {
+      /* Reset active ini section */
+      RESET_ACTIVE_INI_HASH();
+      zend_parse_ini_string(const_cast<char *>(iniEntries.getData()), 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_callback, &sg_configurationHash);
+   }
+   return true;
 }
 
 int php_shutdown_config(void)
@@ -699,14 +699,14 @@ void php_ini_register_extensions(void)
 int php_parse_user_ini_file(const char *dirname, char *ini_filename, HashTable *target_hash)
 {
    zend_stat_t sb;
-   char ini_file[MAXPATHLEN];
+   char iniFile[MAXPATHLEN];
    zend_file_handle fh;
-   snprintf(ini_file, MAXPATHLEN, "%s%c%s", dirname, DEFAULT_SLASH, ini_filename);
-   if (VCWD_STAT(ini_file, &sb) == 0) {
+   snprintf(iniFile, MAXPATHLEN, "%s%c%s", dirname, DEFAULT_SLASH, ini_filename);
+   if (VCWD_STAT(iniFile, &sb) == 0) {
       if (S_ISREG(sb.st_mode)) {
          memset(&fh, 0, sizeof(fh));
-         if ((fh.handle.fp = VCWD_FOPEN(ini_file, "r"))) {
-            fh.filename = ini_file;
+         if ((fh.handle.fp = VCWD_FOPEN(iniFile, "r"))) {
+            fh.filename = iniFile;
             fh.type = ZEND_HANDLE_FP;
             /* Reset active ini section */
             RESET_ACTIVE_INI_HASH();

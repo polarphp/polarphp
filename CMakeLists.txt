@@ -371,6 +371,8 @@ endif()
 # setup php version info
 polar_setup_php_version()
 
+set(POLAR_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
+
 message("build polarphp version: ${POLAR_PACKAGE_VERSION}")
 message("build polarphp version id: ${POLAR_VERSION_ID}")
 

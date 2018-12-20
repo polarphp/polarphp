@@ -282,8 +282,6 @@ void emit_fd_setsize_warning(int maxFd);
 #define PHP_GINIT_FUNCTION		ZEND_GINIT_FUNCTION
 #define PHP_GSHUTDOWN_FUNCTION	ZEND_GSHUTDOWN_FUNCTION
 
-#define POLAR_REGISTER_INI_ENTRIES() zend_register_ini_entries(sg_iniEntries, module_number)
-
 #define PHP_MODULE_GLOBALS		ZEND_MODULE_GLOBALS
 
 /* macros */
