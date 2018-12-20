@@ -63,7 +63,7 @@
 namespace polar {
 
 POLAR_DECL_EXPORT void config_zval_dtor(zval *zvalue);
-int php_init_config();
+bool php_init_config();
 int php_shutdown_config();
 void php_ini_register_extensions();
 POLAR_DECL_EXPORT zval *cfg_get_entry_ex(zend_string *name);

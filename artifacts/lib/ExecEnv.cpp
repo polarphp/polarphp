@@ -129,6 +129,11 @@ void ExecEnv::logMessage(const char *logMessage, int syslogTypeInt)
 
 }
 
+void ExecEnv::initDefaultConfig(HashTable *configurationHash)
+{
+
+}
+
 void ExecEnv::activate()
 {
    m_started = false;

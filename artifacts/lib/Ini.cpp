@@ -13,6 +13,7 @@
 
 #include "Ini.h"
 #include "Output.h"
+#include "ExecEnv.h"
 #include "ZendHeaders.h"
 #ifdef POLAR_OS_WIN32
 #include "win32/php_registry.h"
@@ -44,15 +45,15 @@ struct php_extension_lists
 };
 
 /* True globals */
-static int is_special_section = 0;
-static HashTable *active_ini_hash;
-static HashTable configuration_hash;
-static int has_per_dir_config = 0;
-static int has_per_host_config = 0;
-POLAR_DECL_EXPORT char *php_ini_opened_path = nullptr;
-static php_extension_lists extension_lists;
-POLAR_DECL_EXPORT char *php_ini_scanned_path = nullptr;
-POLAR_DECL_EXPORT char *php_ini_scanned_files = nullptr;
+static bool sg_isSpecialSection = false;
+static HashTable *sg_activeIniHash;
+static HashTable sg_configurationHash;
+static int sg_hasPerDirConfig = 0;
+static int sg_hasPerHostConfig = 0;
+char *sg_phpIniOpenedPath = nullptr;
+static php_extension_lists sg_extensionLists;
+char *sg_phpIniScannedPath = nullptr;
+char *sg_phpIniScannedFiles = nullptr;
 
 namespace polar {
 
@@ -69,14 +70,14 @@ void php_ini_displayer_callback(zend_ini_entry *ini_entry, int type)
             display_string = ZSTR_VAL(ini_entry->orig_value);
             display_string_length = ZSTR_LEN(ini_entry->orig_value);
          } else {
-            display_string = "no value";
+            display_string = const_cast<char *>("no value");
             display_string_length = sizeof("no value") - 1;
          }
       } else if (ini_entry->value && ZSTR_VAL(ini_entry->value)[0]) {
          display_string = ZSTR_VAL(ini_entry->value);
          display_string_length = ZSTR_LEN(ini_entry->value);
       } else {
-         display_string = "no value";
+         display_string = const_cast<char *>("no value");
          display_string_length = sizeof("no value") - 1;
       }
       PHPWRITE(display_string, display_string_length);
@@ -114,7 +115,7 @@ int php_ini_available(zval *el, void *arg)
 
 } // anonymous namespace
 
-POLAR_DECL_EXPORT void display_ini_entries(zend_module_entry *module)
+void display_ini_entries(zend_module_entry *module)
 {
    int module_number, module_number_available;
 
@@ -137,7 +138,7 @@ POLAR_DECL_EXPORT void display_ini_entries(zend_module_entry *module)
 #define PHP_EXTENSION_TOKEN		"extension"
 #define ZEND_EXTENSION_TOKEN	"zend_extension"
 
-POLAR_DECL_EXPORT void config_zval_dtor(zval *zvalue)
+void config_zval_dtor(zval *zvalue)
 {
    if (Z_TYPE_P(zvalue) == IS_ARRAY) {
       zend_hash_destroy(Z_ARRVAL_P(zvalue));
@@ -148,8 +149,8 @@ POLAR_DECL_EXPORT void config_zval_dtor(zval *zvalue)
 }
 /* Reset / free active_ini_sectin global */
 #define RESET_ACTIVE_INI_HASH() do { \
-   active_ini_hash = NULL;          \
-   is_special_section = 0;          \
+   sg_activeIniHash = nullptr;          \
+   sg_isSpecialSection = false;          \
 } while (0)
 
 static void php_ini_parser_callback(zval *arg1, zval *arg2, zval *arg3, int callback_type, HashTable *target_hash)
@@ -158,8 +159,8 @@ static void php_ini_parser_callback(zval *arg1, zval *arg2, zval *arg3, int call
    HashTable *active_hash;
    char *extension_name;
 
-   if (active_ini_hash) {
-      active_hash = active_ini_hash;
+   if (sg_activeIniHash) {
+      active_hash = sg_activeIniHash;
    } else {
       active_hash = target_hash;
    }
@@ -172,14 +173,14 @@ static void php_ini_parser_callback(zval *arg1, zval *arg2, zval *arg3, int call
       }
 
       /* PHP and Zend extensions are not added into configuration hash! */
-      if (!is_special_section && !strcasecmp(Z_STRVAL_P(arg1), PHP_EXTENSION_TOKEN)) { /* load PHP extension */
+      if (!sg_isSpecialSection && !strcasecmp(Z_STRVAL_P(arg1), PHP_EXTENSION_TOKEN)) { /* load PHP extension */
          extension_name = estrndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
-         zend_llist_add_element(&extension_lists.functions, &extension_name);
-      } else if (!is_special_section && !strcasecmp(Z_STRVAL_P(arg1), ZEND_EXTENSION_TOKEN)) { /* load Zend extension */
+         zend_llist_add_element(&sg_extensionLists.functions, &extension_name);
+      } else if (!sg_isSpecialSection && !strcasecmp(Z_STRVAL_P(arg1), ZEND_EXTENSION_TOKEN)) { /* load Zend extension */
          extension_name = estrndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
-         zend_llist_add_element(&extension_lists.engine, &extension_name);
+         zend_llist_add_element(&sg_extensionLists.engine, &extension_name);
 
-         /* All other entries are added into either configuration_hash or active ini section array */
+         /* All other entries are added into either sg_configurationHash or active ini section array */
       } else {
          /* Store in active hash */
          entry = zend_hash_update(active_hash, Z_STR_P(arg1), arg2);
@@ -200,9 +201,9 @@ static void php_ini_parser_callback(zval *arg1, zval *arg2, zval *arg3, int call
       /* fprintf(stdout, "ZEND_INI_PARSER_POP_ENTRY: %s[%s] = %s\n",Z_STRVAL_P(arg1), Z_STRVAL_P(arg3), Z_STRVAL_P(arg2)); */
 
       /* If option not found in hash or is not an array -> create array, otherwise add to existing array */
-      if ((find_arr = zend_hash_find(active_hash, Z_STR_P(arg1))) == NULL || Z_TYPE_P(find_arr) != IS_ARRAY) {
+      if ((find_arr = zend_hash_find(active_hash, Z_STR_P(arg1))) == nullptr || Z_TYPE_P(find_arr) != IS_ARRAY) {
          ZVAL_NEW_PERSISTENT_ARR(&option_arr);
-         zend_hash_init(Z_ARRVAL(option_arr), 8, NULL, config_zval_dtor, 1);
+         zend_hash_init(Z_ARRVAL(option_arr), 8, nullptr, config_zval_dtor, 1);
          find_arr = zend_hash_update(active_hash, Z_STR_P(arg1), &option_arr);
       }
 
@@ -220,7 +221,7 @@ static void php_ini_parser_callback(zval *arg1, zval *arg2, zval *arg3, int call
 
       /* fprintf(stdout, "ZEND_INI_PARSER_SECTION: %s\n",Z_STRVAL_P(arg1)); */
 
-      char *key = NULL;
+      char *key = nullptr;
       size_t key_len;
 
       /* PATH sections */
@@ -228,8 +229,8 @@ static void php_ini_parser_callback(zval *arg1, zval *arg2, zval *arg3, int call
          key = Z_STRVAL_P(arg1);
          key = key + sizeof("PATH") - 1;
          key_len = Z_STRLEN_P(arg1) - sizeof("PATH") + 1;
-         is_special_section = 1;
-         has_per_dir_config = 1;
+         sg_isSpecialSection = true;
+         sg_hasPerDirConfig = 1;
 
          /* make the path lowercase on Windows, for case insensitivity. Does nothing for other platforms */
          TRANSLATE_SLASHES_LOWER(key);
@@ -239,12 +240,12 @@ static void php_ini_parser_callback(zval *arg1, zval *arg2, zval *arg3, int call
          key = Z_STRVAL_P(arg1);
          key = key + sizeof("HOST") - 1;
          key_len = Z_STRLEN_P(arg1) - sizeof("HOST") + 1;
-         is_special_section = 1;
-         has_per_host_config = 1;
+         sg_isSpecialSection = true;
+         sg_hasPerHostConfig = 1;
          zend_str_tolower(key, key_len); /* host names are case-insensitive. */
 
       } else {
-         is_special_section = 0;
+         sg_isSpecialSection = false;
       }
 
       if (key && key_len > 0) {
@@ -264,14 +265,14 @@ static void php_ini_parser_callback(zval *arg1, zval *arg2, zval *arg3, int call
             key_len--;
          }
          /* Search for existing entry and if it does not exist create one */
-         if ((entry = zend_hash_str_find(target_hash, key, key_len)) == NULL) {
+         if ((entry = zend_hash_str_find(target_hash, key, key_len)) == nullptr) {
             zval section_arr;
             ZVAL_NEW_PERSISTENT_ARR(&section_arr);
-            zend_hash_init(Z_ARRVAL(section_arr), 8, NULL, (dtor_func_t) config_zval_dtor, 1);
+            zend_hash_init(Z_ARRVAL(section_arr), 8, nullptr, (dtor_func_t) config_zval_dtor, 1);
             entry = zend_hash_str_update(target_hash, key, key_len, &section_arr);
          }
          if (Z_TYPE_P(entry) == IS_ARRAY) {
-            active_ini_hash = Z_ARRVAL_P(entry);
+            sg_activeIniHash = Z_ARRVAL_P(entry);
          }
       }
    }
@@ -292,7 +293,7 @@ static void php_load_zend_extension_callback(void *arg)
    //   char *filename = *((char **) arg);
    //   const size_t length = strlen(filename);
 
-   //#ifndef PHP_OS_WIN32
+   //#ifndef POLAR_OS_WIN32
    //   (void) length;
    //#endif
 
@@ -350,365 +351,352 @@ static void php_load_zend_extension_callback(void *arg)
 static void php_load_zend_extension_callback(void *arg) { }
 #endif
 
-int php_init_config(void)
+///
+/// need review for memory leak
+///
+bool php_init_config()
 {
-   //   char *php_ini_file_name = NULL;
-   //   char *php_ini_search_path = NULL;
-   //   int php_ini_scanned_path_len;
-   //   char *open_basedir;
-   //   int free_ini_search_path = 0;
-   //   zend_file_handle fh;
-   //   zend_string *opened_path = NULL;
+//   StringRef phpIniFileName;
+//   char *phpIniSearchPath;
+//   int phpIniScannedPathLen;
+//   StringRef openBaseDir;
+//   int freeIniSearchPath = 0;
+//   zend_file_handle fh;
+//   zend_string *openedPath = nullptr;
+//   ExecEnv &execEnv = retrieve_global_execenv();
+//   zend_hash_init(&sg_configurationHash, 8, nullptr, config_zval_dtor, 1);
+//   /// invoke exec env to setup default config
+//   execEnv.initDefaultConfig(&sg_configurationHash);
+//   zend_llist_init(&sg_extensionLists.engine, sizeof(char *), reinterpret_cast<llist_dtor_func_t>(free_estring), 1);
+//   zend_llist_init(&sg_extensionLists.functions, sizeof(char *), reinterpret_cast<llist_dtor_func_t>(free_estring), 1);
+//   openBaseDir = execEnv.getOpenBaseDir();
+//   StringRef phpIniexecPathOverride = execEnv.getPhpIniPathOverride();
+//   if (!phpIniexecPathOverride.empty()) {
+//      phpIniFileName = phpIniexecPathOverride;
+//      phpIniSearchPath = const_cast<char *>(phpIniexecPathOverride.getData());
+//      freeIniSearchPath = 0;
+//   } else if (!execEnv.getPhpIniIgnore()) {
+//      int searchPathSize;
+//      StringRef defaultLocation;
+//      StringRef envLocation;
+//      static const char pathsSeparator[] = { ZEND_PATHS_SEPARATOR, 0 };
+//#ifdef POLAR_OS_WIN32
+//      char *reg_location;
+//      char phprc_path[MAXPATHLEN];
+//#endif
 
-   //   zend_hash_init(&configuration_hash, 8, NULL, config_zval_dtor, 1);
+//      envLocation = getenv("PHPRC");
 
-   ////   if (sapi_module.ini_defaults) {
-   ////      sapi_module.ini_defaults(&configuration_hash);
-   ////   }
+//#ifdef POLAR_OS_WIN32
+//      if (!envLocation) {
+//         char dummybuf;
+//         int size;
 
-   //   zend_llist_init(&extension_lists.engine, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
-   //   zend_llist_init(&extension_lists.functions, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
+//         SetLastError(0);
 
-   //   open_basedir = PG(open_basedir);
+//         /*If the given buffer is not large enough to hold the data, the return value is
+//            the buffer size,  in characters, required to hold the string and its terminating
+//            null character. We use this return value to alloc the final buffer. */
+//         size = GetEnvironmentVariableA("PHPRC", &dummybuf, 0);
+//         if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
+//            /* The environment variable doesn't exist. */
+//            envLocation = "";
+//         } else {
+//            if (size == 0) {
+//               envLocation = "";
+//            } else {
+//               size = GetEnvironmentVariableA("PHPRC", phprc_path, size);
+//               if (size == 0) {
+//                  envLocation = "";
+//               } else {
+//                  envLocation = phprc_path;
+//               }
+//            }
+//         }
+//      }
+//#else
+//      if (!envLocation.empty()) {
+//         envLocation = "";
+//      }
+//#endif
+//      /*
+//          * Prepare search path
+//          */
 
-   //   if (sapi_module.php_ini_path_override) {
-   //      php_ini_file_name = sapi_module.php_ini_path_override;
-   //      php_ini_search_path = sapi_module.php_ini_path_override;
-   //      free_ini_search_path = 0;
-   //   } else if (!sapi_module.php_ini_ignore) {
-   //      int search_path_size;
-   //      char *default_location;
-   //      char *env_location;
-   //      static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
-   //#ifdef PHP_OS_WIN32
-   //      char *reg_location;
-   //      char phprc_path[MAXPATHLEN];
-   //#endif
+//      searchPathSize = MAXPATHLEN * 4 + (int)envLocation.size() + 3 + 1;
+//      phpIniSearchPath = reinterpret_cast<char *>(emalloc(searchPathSize));
+//      freeIniSearchPath = 1;
+//      phpIniSearchPath[0] = 0;
 
-   //      env_location = getenv("PHPRC");
+//      /* Add environment location */
+//      if (envLocation[0]) {
+//         if (*phpIniSearchPath) {
+//            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
+//         }
+//         strlcat(phpIniSearchPath, envLocation.getData(), searchPathSize);
+//         phpIniFileName = envLocation;
+//      }
 
-   //#ifdef PHP_OS_WIN32
-   //      if (!env_location) {
-   //         char dummybuf;
-   //         int size;
+//#ifdef POLAR_OS_WIN32
+//      /* Add registry location */
+//      reg_location = GetIniPathFromRegistry();
+//      if (reg_location != nullptr) {
+//         if (*phpIniSearchPath) {
+//            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
+//         }
+//         strlcat(phpIniSearchPath, reg_location, searchPathSize);
+//         efree(reg_location);
+//      }
+//#endif
 
-   //         SetLastError(0);
+//      /* Add cwd (not with CLI) */
+//      if (!execEnv.getPhpIniIgnoreCwd()) {
+//         if (*phpIniSearchPath) {
+//            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
+//         }
+//         strlcat(phpIniSearchPath, ".", searchPathSize);
+//      }
+//      StringRef polarBinary = execEnv.getPolarBinary();
+//      if (!polarBinary.empty()) {
+//         char *separatorLocation;
+//         char *binaryLocation;
+//         binaryLocation = estrdup(polarBinary.getData());
+//         separatorLocation = strrchr(binaryLocation, DEFAULT_SLASH);
+//         if (separatorLocation && separatorLocation != binaryLocation) {
+//            *(separatorLocation) = 0;
+//         }
+//         if (*phpIniSearchPath) {
+//            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
+//         }
+//         strlcat(phpIniSearchPath, binaryLocation, searchPathSize);
+//         efree(binaryLocation);
+//      }
 
-   //         /*If the given buffer is not large enough to hold the data, the return value is
-   //         the buffer size,  in characters, required to hold the string and its terminating
-   //         null character. We use this return value to alloc the final buffer. */
-   //         size = GetEnvironmentVariableA("PHPRC", &dummybuf, 0);
-   //         if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
-   //            /* The environment variable doesn't exist. */
-   //            env_location = "";
-   //         } else {
-   //            if (size == 0) {
-   //               env_location = "";
-   //            } else {
-   //               size = GetEnvironmentVariableA("PHPRC", phprc_path, size);
-   //               if (size == 0) {
-   //                  env_location = "";
-   //               } else {
-   //                  env_location = phprc_path;
-   //               }
-   //            }
-   //         }
-   //      }
-   //#else
-   //      if (!env_location) {
-   //         env_location = "";
-   //      }
-   //#endif
-   //      /*
-   //       * Prepare search path
-   //       */
+//      /* Add default location */
+//#ifdef POLAR_OS_WIN32
+//      defaultLocation = (char *) emalloc(MAXPATHLEN + 1);
+//      if (0 < GetWindowsDirectory(defaultLocation, MAXPATHLEN)) {
+//         if (*phpIniSearchPath) {
+//            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
+//         }
+//         strlcat(phpIniSearchPath, defaultLocation, searchPathSize);
+//      }
+//      /* For people running under terminal services, GetWindowsDirectory will
+//          * return their personal Windows directory, so lets add the system
+//          * windows directory too */
+//      if (0 < GetSystemWindowsDirectory(defaultLocation, MAXPATHLEN)) {
+//         if (*phpIniSearchPath) {
+//            strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
+//         }
+//         strlcat(phpIniSearchPath, defaultLocation, searchPathSize);
+//      }
+//      efree(defaultLocation);
+//#else
+//      defaultLocation = PHP_CONFIG_FILE_PATH;
+//      if (*phpIniSearchPath) {
+//         strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
+//      }
+//      strlcat(phpIniSearchPath, defaultLocation, searchPathSize);
+//#endif
+//   }
+//   PG(openBaseDir) = nullptr;
+//   /*
+//       * Find and open actual ini file
+//       */
 
-   //      search_path_size = MAXPATHLEN * 4 + (int)strlen(env_location) + 3 + 1;
-   //      php_ini_search_path = (char *) emalloc(search_path_size);
-   //      free_ini_search_path = 1;
-   //      php_ini_search_path[0] = 0;
+//   memset(&fh, 0, sizeof(fh));
 
-   //      /* Add environment location */
-   //      if (env_location[0]) {
-   //         if (*php_ini_search_path) {
-   //            strlcat(php_ini_search_path, paths_separator, search_path_size);
-   //         }
-   //         strlcat(php_ini_search_path, env_location, search_path_size);
-   //         php_ini_file_name = env_location;
-   //      }
+//   /* If SAPI does not want to ignore all ini files OR an overriding file/path is given.
+//       * This allows disabling scanning for ini files in the PHP_CONFIG_FILE_SCAN_DIR but still
+//       * load an optional ini file. */
+//   if (!sapi_module.php_ini_ignore || sapi_module.php_ini_path_override) {
 
-   //#ifdef PHP_OS_WIN32
-   //      /* Add registry location */
-   //      reg_location = GetIniPathFromRegistry();
-   //      if (reg_location != NULL) {
-   //         if (*php_ini_search_path) {
-   //            strlcat(php_ini_search_path, paths_separator, search_path_size);
-   //         }
-   //         strlcat(php_ini_search_path, reg_location, search_path_size);
-   //         efree(reg_location);
-   //      }
-   //#endif
+//      /* Check if phpIniFileName is a file and can be opened */
+//      if (phpIniFileName && phpIniFileName[0]) {
+//         zend_stat_t statbuf;
 
-   //      /* Add cwd (not with CLI) */
-   //      if (!sapi_module.php_ini_ignore_cwd) {
-   //         if (*php_ini_search_path) {
-   //            strlcat(php_ini_search_path, paths_separator, search_path_size);
-   //         }
-   //         strlcat(php_ini_search_path, ".", search_path_size);
-   //      }
+//         if (!VCWD_STAT(phpIniFileName, &statbuf)) {
+//            if (!((statbuf.st_mode & S_IFMT) == S_IFDIR)) {
+//               fh.handle.fp = VCWD_FOPEN(phpIniFileName, "r");
+//               if (fh.handle.fp) {
+//                  fh.filename = expand_filepath(phpIniFileName, nullptr);
+//               }
+//            }
+//         }
+//      }
 
-   //      if (PG(php_binary)) {
-   //         char *separator_location, *binary_location;
+//      /* Otherwise search for php-%sapi-module-name%.ini file in search path */
+//      if (!fh.handle.fp) {
+//         const char *fmt = "php-%s.ini";
+//         char *ini_fname;
+//         spprintf(&ini_fname, 0, fmt, sapi_module.name);
+//         fh.handle.fp = php_fopen_with_path(ini_fname, "r", phpIniSearchPath, &openedPath);
+//         efree(ini_fname);
+//         if (fh.handle.fp) {
+//            fh.filename = ZSTR_VAL(openedPath);
+//         }
+//      }
 
-   //         binary_location = estrdup(PG(php_binary));
-   //         separator_location = strrchr(binary_location, DEFAULT_SLASH);
+//      /* If still no ini file found, search for php.ini file in search path */
+//      if (!fh.handle.fp) {
+//         fh.handle.fp = php_fopen_with_path("php.ini", "r", phpIniSearchPath, &openedPath);
+//         if (fh.handle.fp) {
+//            fh.filename = ZSTR_VAL(openedPath);
+//         }
+//      }
+//   }
 
-   //         if (separator_location && separator_location != binary_location) {
-   //            *(separator_location) = 0;
-   //         }
-   //         if (*php_ini_search_path) {
-   //            strlcat(php_ini_search_path, paths_separator, search_path_size);
-   //         }
-   //         strlcat(php_ini_search_path, binary_location, search_path_size);
-   //         efree(binary_location);
-   //      }
+//   if (freeIniSearchPath) {
+//      efree(phpIniSearchPath);
+//   }
 
-   //      /* Add default location */
-   //#ifdef PHP_OS_WIN32
-   //      default_location = (char *) emalloc(MAXPATHLEN + 1);
+//   PG(openBaseDir) = openBaseDir;
+//   if (fh.handle.fp) {
+//      fh.type = ZEND_HANDLE_FP;
+//      RESET_ACTIVE_INI_HASH();
+//      zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_callback, &sg_configurationHash);
 
-   //      if (0 < GetWindowsDirectory(default_location, MAXPATHLEN)) {
-   //         if (*php_ini_search_path) {
-   //            strlcat(php_ini_search_path, paths_separator, search_path_size);
-   //         }
-   //         strlcat(php_ini_search_path, default_location, search_path_size);
-   //      }
+//      {
+//         zval tmp;
 
-   //      /* For people running under terminal services, GetWindowsDirectory will
-   //       * return their personal Windows directory, so lets add the system
-   //       * windows directory too */
-   //      if (0 < GetSystemWindowsDirectory(default_location, MAXPATHLEN)) {
-   //         if (*php_ini_search_path) {
-   //            strlcat(php_ini_search_path, paths_separator, search_path_size);
-   //         }
-   //         strlcat(php_ini_search_path, default_location, search_path_size);
-   //      }
-   //      efree(default_location);
+//         ZVAL_NEW_STR(&tmp, zend_string_init(fh.filename, strlen(fh.filename), 1));
+//         zend_hash_str_update(&sg_configurationHash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
+//         if (openedPath) {
+//            zend_string_release_ex(openedPath, 0);
+//         } else {
+//            efree((char *)fh.filename);
+//         }
+//         sg_phpIniOpenedPath = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
+//      }
+//   }
 
-   //#else
-   //      default_location = PHP_CONFIG_FILE_PATH;
-   //      if (*php_ini_search_path) {
-   //         strlcat(php_ini_search_path, paths_separator, search_path_size);
-   //      }
-   //      strlcat(php_ini_search_path, default_location, search_path_size);
-   //#endif
-   //   }
+//   /* Check for PHP_INI_SCAN_DIR environment variable to override/set config file scan directory */
+//   sg_phpIniScannedPath = getenv("PHP_INI_SCAN_DIR");
+//   if (!sg_phpIniScannedPath) {
+//      /* Or fall back using possible --with-config-file-scan-dir setting (defaults to empty string!) */
+//      sg_phpIniScannedPath = PHP_CONFIG_FILE_SCAN_DIR;
+//   }
+//   phpIniScannedPathLen = (int)strlen(sg_phpIniScannedPath);
 
-   //   PG(open_basedir) = NULL;
+//   /* Scan and parse any .ini files found in scan path if path not empty. */
+//   if (!sapi_module.php_ini_ignore && phpIniScannedPathLen) {
+//      struct dirent **namelist;
+//      int ndir, i;
+//      zend_stat_t sb;
+//      char ini_file[MAXPATHLEN];
+//      char *p;
+//      zend_file_handle fh2;
+//      zend_llist scanned_ini_list;
+//      zend_llist_element *element;
+//      int l, total_l = 0;
+//      char *bufpath, *debpath, *endpath;
+//      int lenpath;
 
-   //   /*
-   //    * Find and open actual ini file
-   //    */
+//      zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
+//      memset(&fh2, 0, sizeof(fh2));
 
-   //   memset(&fh, 0, sizeof(fh));
+//      bufpath = estrdup(sg_phpIniScannedPath);
+//      for (debpath = bufpath ; debpath ; debpath=endpath) {
+//         endpath = strchr(debpath, DEFAULT_DIR_SEPARATOR);
+//         if (endpath) {
+//            *(endpath++) = 0;
+//         }
+//         if (!debpath[0]) {
+//            /* empty string means default builtin value
+//                  to allow "/foo/php.d:" or ":/foo/php.d" */
+//            debpath = PHP_CONFIG_FILE_SCAN_DIR;
+//         }
+//         lenpath = (int)strlen(debpath);
+//         if (lenpath > 0 && (ndir = php_scandir(debpath, &namelist, 0, php_alphasort)) > 0) {
+//            for (i = 0; i < ndir; i++) {
+//               /* check for any file with .ini extension */
+//               if (!(p = strrchr(namelist[i]->d_name, '.')) || (p && strcmp(p, ".ini"))) {
+//                  free(namelist[i]);
+//                  continue;
+//               }
+//               /* Reset active ini section */
+//               RESET_ACTIVE_INI_HASH();
 
-   //   /* If SAPI does not want to ignore all ini files OR an overriding file/path is given.
-   //    * This allows disabling scanning for ini files in the PHP_CONFIG_FILE_SCAN_DIR but still
-   //    * load an optional ini file. */
-   //   if (!sapi_module.php_ini_ignore || sapi_module.php_ini_path_override) {
+//               if (IS_SLASH(debpath[lenpath - 1])) {
+//                  snprintf(ini_file, MAXPATHLEN, "%s%s", debpath, namelist[i]->d_name);
+//               } else {
+//                  snprintf(ini_file, MAXPATHLEN, "%s%c%s", debpath, DEFAULT_SLASH, namelist[i]->d_name);
+//               }
+//               if (VCWD_STAT(ini_file, &sb) == 0) {
+//                  if (S_ISREG(sb.st_mode)) {
+//                     if ((fh2.handle.fp = VCWD_FOPEN(ini_file, "r"))) {
+//                        fh2.filename = ini_file;
+//                        fh2.type = ZEND_HANDLE_FP;
 
-   //      /* Check if php_ini_file_name is a file and can be opened */
-   //      if (php_ini_file_name && php_ini_file_name[0]) {
-   //         zend_stat_t statbuf;
+//                        if (zend_parse_ini_file(&fh2, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_callback, &sg_configurationHash) == SUCCESS) {
+//                           /* Here, add it to the list of ini files read */
+//                           l = (int)strlen(ini_file);
+//                           total_l += l + 2;
+//                           p = estrndup(ini_file, l);
+//                           zend_llist_add_element(&scanned_ini_list, &p);
+//                        }
+//                     }
+//                  }
+//               }
+//               free(namelist[i]);
+//            }
+//            free(namelist);
+//         }
+//      }
+//      efree(bufpath);
 
-   //         if (!VCWD_STAT(php_ini_file_name, &statbuf)) {
-   //            if (!((statbuf.st_mode & S_IFMT) == S_IFDIR)) {
-   //               fh.handle.fp = VCWD_FOPEN(php_ini_file_name, "r");
-   //               if (fh.handle.fp) {
-   //                  fh.filename = expand_filepath(php_ini_file_name, NULL);
-   //               }
-   //            }
-   //         }
-   //      }
+//      if (total_l) {
+//         int phpIniScannedFilesLen = (sg_phpIniScannedFiles) ? (int)strlen(sg_phpIniScannedFiles) + 1 : 0;
+//         sg_phpIniScannedFiles = (char *) realloc(sg_phpIniScannedFiles, phpIniScannedFilesLen + total_l + 1);
+//         if (!phpIniScannedFilesLen) {
+//            *sg_phpIniScannedFiles = '\0';
+//         }
+//         total_l += phpIniScannedFilesLen;
+//         for (element = scanned_ini_list.head; element; element = element->next) {
+//            if (phpIniScannedFilesLen) {
+//               strlcat(sg_phpIniScannedFiles, ",\n", total_l);
+//            }
+//            strlcat(sg_phpIniScannedFiles, *(char **)element->data, total_l);
+//            strlcat(sg_phpIniScannedFiles, element->next ? ",\n" : "\n", total_l);
+//         }
+//      }
+//      zend_llist_destroy(&scanned_ini_list);
+//   } else {
+//      /* Make sure an empty sg_phpIniScannedPath ends up as nullptr */
+//      sg_phpIniScannedPath = nullptr;
+//   }
+//   if (sapi_module.ini_entries) {
+//      /* Reset active ini section */
+//      RESET_ACTIVE_INI_HASH();
+//      zend_parse_ini_string(sapi_module.ini_entries, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_callback, &sg_configurationHash);
+//   }
 
-   //      /* Otherwise search for php-%sapi-module-name%.ini file in search path */
-   //      if (!fh.handle.fp) {
-   //         const char *fmt = "php-%s.ini";
-   //         char *ini_fname;
-   //         spprintf(&ini_fname, 0, fmt, sapi_module.name);
-   //         fh.handle.fp = php_fopen_with_path(ini_fname, "r", php_ini_search_path, &opened_path);
-   //         efree(ini_fname);
-   //         if (fh.handle.fp) {
-   //            fh.filename = ZSTR_VAL(opened_path);
-   //         }
-   //      }
-
-   //      /* If still no ini file found, search for php.ini file in search path */
-   //      if (!fh.handle.fp) {
-   //         fh.handle.fp = php_fopen_with_path("php.ini", "r", php_ini_search_path, &opened_path);
-   //         if (fh.handle.fp) {
-   //            fh.filename = ZSTR_VAL(opened_path);
-   //         }
-   //      }
-   //   }
-
-   //   if (free_ini_search_path) {
-   //      efree(php_ini_search_path);
-   //   }
-
-   //   PG(open_basedir) = open_basedir;
-
-   //   if (fh.handle.fp) {
-   //      fh.type = ZEND_HANDLE_FP;
-   //      RESET_ACTIVE_INI_HASH();
-
-   //      zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_callback, &configuration_hash);
-
-   //      {
-   //         zval tmp;
-
-   //         ZVAL_NEW_STR(&tmp, zend_string_init(fh.filename, strlen(fh.filename), 1));
-   //         zend_hash_str_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
-   //         if (opened_path) {
-   //            zend_string_release_ex(opened_path, 0);
-   //         } else {
-   //            efree((char *)fh.filename);
-   //         }
-   //         php_ini_opened_path = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
-   //      }
-   //   }
-
-   //   /* Check for PHP_INI_SCAN_DIR environment variable to override/set config file scan directory */
-   //   php_ini_scanned_path = getenv("PHP_INI_SCAN_DIR");
-   //   if (!php_ini_scanned_path) {
-   //      /* Or fall back using possible --with-config-file-scan-dir setting (defaults to empty string!) */
-   //      php_ini_scanned_path = PHP_CONFIG_FILE_SCAN_DIR;
-   //   }
-   //   php_ini_scanned_path_len = (int)strlen(php_ini_scanned_path);
-
-   //   /* Scan and parse any .ini files found in scan path if path not empty. */
-   //   if (!sapi_module.php_ini_ignore && php_ini_scanned_path_len) {
-   //      struct dirent **namelist;
-   //      int ndir, i;
-   //      zend_stat_t sb;
-   //      char ini_file[MAXPATHLEN];
-   //      char *p;
-   //      zend_file_handle fh2;
-   //      zend_llist scanned_ini_list;
-   //      zend_llist_element *element;
-   //      int l, total_l = 0;
-   //      char *bufpath, *debpath, *endpath;
-   //      int lenpath;
-
-   //      zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
-   //      memset(&fh2, 0, sizeof(fh2));
-
-   //      bufpath = estrdup(php_ini_scanned_path);
-   //      for (debpath = bufpath ; debpath ; debpath=endpath) {
-   //         endpath = strchr(debpath, DEFAULT_DIR_SEPARATOR);
-   //         if (endpath) {
-   //            *(endpath++) = 0;
-   //         }
-   //         if (!debpath[0]) {
-   //            /* empty string means default builtin value
-   //               to allow "/foo/php.d:" or ":/foo/php.d" */
-   //            debpath = PHP_CONFIG_FILE_SCAN_DIR;
-   //         }
-   //         lenpath = (int)strlen(debpath);
-
-   //         if (lenpath > 0 && (ndir = php_scandir(debpath, &namelist, 0, php_alphasort)) > 0) {
-
-   //            for (i = 0; i < ndir; i++) {
-
-   //               /* check for any file with .ini extension */
-   //               if (!(p = strrchr(namelist[i]->d_name, '.')) || (p && strcmp(p, ".ini"))) {
-   //                  free(namelist[i]);
-   //                  continue;
-   //               }
-   //               /* Reset active ini section */
-   //               RESET_ACTIVE_INI_HASH();
-
-   //               if (IS_SLASH(debpath[lenpath - 1])) {
-   //                  snprintf(ini_file, MAXPATHLEN, "%s%s", debpath, namelist[i]->d_name);
-   //               } else {
-   //                  snprintf(ini_file, MAXPATHLEN, "%s%c%s", debpath, DEFAULT_SLASH, namelist[i]->d_name);
-   //               }
-   //               if (VCWD_STAT(ini_file, &sb) == 0) {
-   //                  if (S_ISREG(sb.st_mode)) {
-   //                     if ((fh2.handle.fp = VCWD_FOPEN(ini_file, "r"))) {
-   //                        fh2.filename = ini_file;
-   //                        fh2.type = ZEND_HANDLE_FP;
-
-   //                        if (zend_parse_ini_file(&fh2, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_callback, &configuration_hash) == SUCCESS) {
-   //                           /* Here, add it to the list of ini files read */
-   //                           l = (int)strlen(ini_file);
-   //                           total_l += l + 2;
-   //                           p = estrndup(ini_file, l);
-   //                           zend_llist_add_element(&scanned_ini_list, &p);
-   //                        }
-   //                     }
-   //                  }
-   //               }
-   //               free(namelist[i]);
-   //            }
-   //            free(namelist);
-   //         }
-   //      }
-   //      efree(bufpath);
-
-   //      if (total_l) {
-   //         int php_ini_scanned_files_len = (php_ini_scanned_files) ? (int)strlen(php_ini_scanned_files) + 1 : 0;
-   //         php_ini_scanned_files = (char *) realloc(php_ini_scanned_files, php_ini_scanned_files_len + total_l + 1);
-   //         if (!php_ini_scanned_files_len) {
-   //            *php_ini_scanned_files = '\0';
-   //         }
-   //         total_l += php_ini_scanned_files_len;
-   //         for (element = scanned_ini_list.head; element; element = element->next) {
-   //            if (php_ini_scanned_files_len) {
-   //               strlcat(php_ini_scanned_files, ",\n", total_l);
-   //            }
-   //            strlcat(php_ini_scanned_files, *(char **)element->data, total_l);
-   //            strlcat(php_ini_scanned_files, element->next ? ",\n" : "\n", total_l);
-   //         }
-   //      }
-   //      zend_llist_destroy(&scanned_ini_list);
-   //   } else {
-   //      /* Make sure an empty php_ini_scanned_path ends up as NULL */
-   //      php_ini_scanned_path = NULL;
-   //   }
-
-   //   if (sapi_module.ini_entries) {
-   //      /* Reset active ini section */
-   //      RESET_ACTIVE_INI_HASH();
-   //      zend_parse_ini_string(sapi_module.ini_entries, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_callback, &configuration_hash);
-   //   }
-
-   //   return SUCCESS;
+//   return SUCCESS;
 }
 
 int php_shutdown_config(void)
 {
-   zend_hash_destroy(&configuration_hash);
-   if (php_ini_opened_path) {
-      free(php_ini_opened_path);
-      php_ini_opened_path = NULL;
+   zend_hash_destroy(&sg_configurationHash);
+   if (sg_phpIniOpenedPath) {
+      free(sg_phpIniOpenedPath);
+      sg_phpIniOpenedPath = nullptr;
    }
-   if (php_ini_scanned_files) {
-      free(php_ini_scanned_files);
-      php_ini_scanned_files = NULL;
+   if (sg_phpIniScannedFiles) {
+      free(sg_phpIniScannedFiles);
+      sg_phpIniScannedFiles = nullptr;
    }
    return SUCCESS;
 }
 
 void php_ini_register_extensions(void)
 {
-   zend_llist_apply(&extension_lists.engine, php_load_zend_extension_callback);
-   zend_llist_apply(&extension_lists.functions, php_load_php_extension_callback);
-   zend_llist_destroy(&extension_lists.engine);
-   zend_llist_destroy(&extension_lists.functions);
+   zend_llist_apply(&sg_extensionLists.engine, php_load_zend_extension_callback);
+   zend_llist_apply(&sg_extensionLists.functions, php_load_php_extension_callback);
+   zend_llist_destroy(&sg_extensionLists.engine);
+   zend_llist_destroy(&sg_extensionLists.functions);
 }
 
-POLAR_DECL_EXPORT int php_parse_user_ini_file(const char *dirname, char *ini_filename, HashTable *target_hash)
+int php_parse_user_ini_file(const char *dirname, char *ini_filename, HashTable *target_hash)
 {
    zend_stat_t sb;
    char ini_file[MAXPATHLEN];
@@ -733,7 +721,7 @@ POLAR_DECL_EXPORT int php_parse_user_ini_file(const char *dirname, char *ini_fil
    return FAILURE;
 }
 
-POLAR_DECL_EXPORT void php_ini_activate_config(HashTable *source_hash, int modify_type, int stage)
+void php_ini_activate_config(HashTable *source_hash, int modify_type, int stage)
 {
    zend_string *str;
    zval *data;
@@ -743,20 +731,20 @@ POLAR_DECL_EXPORT void php_ini_activate_config(HashTable *source_hash, int modif
    } ZEND_HASH_FOREACH_END();
 }
 
-POLAR_DECL_EXPORT int php_ini_has_per_dir_config(void)
+int php_ini_has_per_dir_config(void)
 {
-   return has_per_dir_config;
+   return sg_hasPerDirConfig;
 }
 
-POLAR_DECL_EXPORT void php_ini_activate_per_dir_config(char *path, size_t path_len)
+void php_ini_activate_per_dir_config(char *path, size_t path_len)
 {
    zval *tmp2;
    char *ptr;
-#ifdef PHP_OS_WIN32
+#ifdef POLAR_OS_WIN32
    char path_bak[MAXPATHLEN];
 #endif
 
-#ifdef PHP_OS_WIN32
+#ifdef POLAR_OS_WIN32
    /* MAX_PATH is \0-terminated, path_len == MAXPATHLEN would overrun path_bak */
    if (path_len >= MAXPATHLEN) {
 #else
@@ -765,20 +753,20 @@ POLAR_DECL_EXPORT void php_ini_activate_per_dir_config(char *path, size_t path_l
       return;
    }
 
-#ifdef PHP_OS_WIN32
+#ifdef POLAR_OS_WIN32
    memcpy(path_bak, path, path_len);
    path_bak[path_len] = 0;
    TRANSLATE_SLASHES_LOWER(path_bak);
    path = path_bak;
 #endif
 
-   /* Walk through each directory in path and apply any found per-dir-system-configuration from configuration_hash */
-   if (has_per_dir_config && path && path_len) {
+   /* Walk through each directory in path and apply any found per-dir-system-configuration from sg_configurationHash */
+   if (sg_hasPerDirConfig && path && path_len) {
       ptr = path + 1;
-      while ((ptr = strchr(ptr, '/')) != NULL) {
+      while ((ptr = strchr(ptr, '/')) != nullptr) {
          *ptr = 0;
-         /* Search for source array matching the path from configuration_hash */
-         if ((tmp2 = zend_hash_str_find(&configuration_hash, path, strlen(path))) != NULL) {
+         /* Search for source array matching the path from sg_configurationHash */
+         if ((tmp2 = zend_hash_str_find(&sg_configurationHash, path, strlen(path))) != nullptr) {
             php_ini_activate_config(Z_ARRVAL_P(tmp2), POLAR_INI_SYSTEM, POLAR_INI_STAGE_ACTIVATE);
          }
          *ptr = '/';
@@ -787,36 +775,36 @@ POLAR_DECL_EXPORT void php_ini_activate_per_dir_config(char *path, size_t path_l
    }
 }
 
-POLAR_DECL_EXPORT int php_ini_has_per_host_config(void)
+int php_ini_has_per_host_config()
 {
-   return has_per_host_config;
+   return sg_hasPerHostConfig;
 }
 
-POLAR_DECL_EXPORT void php_ini_activate_per_host_config(const char *host, size_t host_len)
+void php_ini_activate_per_host_config(const char *host, size_t host_len)
 {
    zval *tmp;
-   if (has_per_host_config && host && host_len) {
-      /* Search for source array matching the host from configuration_hash */
-      if ((tmp = zend_hash_str_find(&configuration_hash, host, host_len)) != NULL) {
+   if (sg_hasPerHostConfig && host && host_len) {
+      /* Search for source array matching the host from sg_configurationHash */
+      if ((tmp = zend_hash_str_find(&sg_configurationHash, host, host_len)) != nullptr) {
          php_ini_activate_config(Z_ARRVAL_P(tmp), POLAR_INI_SYSTEM, POLAR_INI_STAGE_ACTIVATE);
       }
    }
 }
 
-POLAR_DECL_EXPORT zval *cfg_get_entry_ex(zend_string *name)
+zval *cfg_get_entry_ex(zend_string *name)
 {
-   return zend_hash_find(&configuration_hash, name);
+   return zend_hash_find(&sg_configurationHash, name);
 }
 
-POLAR_DECL_EXPORT zval *cfg_get_entry(const char *name, size_t name_length)
+zval *cfg_get_entry(const char *name, size_t name_length)
 {
-   return zend_hash_str_find(&configuration_hash, name, name_length);
+   return zend_hash_str_find(&sg_configurationHash, name, name_length);
 }
 
-POLAR_DECL_EXPORT int cfg_get_long(const char *varname, zend_long *result)
+int cfg_get_long(const char *varname, zend_long *result)
 {
    zval *tmp;
-   if ((tmp = zend_hash_str_find(&configuration_hash, varname, strlen(varname))) == NULL) {
+   if ((tmp = zend_hash_str_find(&sg_configurationHash, varname, strlen(varname))) == nullptr) {
       *result = 0;
       return FAILURE;
    }
@@ -824,10 +812,10 @@ POLAR_DECL_EXPORT int cfg_get_long(const char *varname, zend_long *result)
    return SUCCESS;
 }
 
-POLAR_DECL_EXPORT int cfg_get_double(const char *varname, double *result)
+int cfg_get_double(const char *varname, double *result)
 {
    zval *tmp;
-   if ((tmp = zend_hash_str_find(&configuration_hash, varname, strlen(varname))) == NULL) {
+   if ((tmp = zend_hash_str_find(&sg_configurationHash, varname, strlen(varname))) == nullptr) {
       *result = (double) 0;
       return FAILURE;
    }
@@ -835,20 +823,20 @@ POLAR_DECL_EXPORT int cfg_get_double(const char *varname, double *result)
    return SUCCESS;
 }
 
-POLAR_DECL_EXPORT int cfg_get_string(const char *varname, char **result)
+int cfg_get_string(const char *varname, char **result)
 {
    zval *tmp;
-   if ((tmp = zend_hash_str_find(&configuration_hash, varname, strlen(varname))) == NULL) {
-      *result = NULL;
+   if ((tmp = zend_hash_str_find(&sg_configurationHash, varname, strlen(varname))) == nullptr) {
+      *result = nullptr;
       return FAILURE;
    }
    *result = Z_STRVAL_P(tmp);
    return SUCCESS;
 }
 
-POLAR_DECL_EXPORT HashTable* php_ini_get_configuration_hash()
+HashTable* php_ini_get_configuration_hash()
 {
-   return &configuration_hash;
+   return &sg_configurationHash;
 }
 
 } // polar

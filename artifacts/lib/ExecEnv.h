@@ -269,6 +269,7 @@ public:
 
    size_t unbufferWrite(const char *str, int len);
    void logMessage(const char *logMessage, int syslogTypeInt);
+   void initDefaultConfig(HashTable *configurationHash);
 private:
    bool m_phpIniIgnore;
    /// don't look for php.ini in the current directory

@@ -245,19 +245,19 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    if (!polarBinary.empty()) {
       REGISTER_MAIN_STRINGL_CONSTANT("POLAR_BINARY", const_cast<char *>(polarBinary.getData()), polarBinary.getSize(), CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
    } else {
-      REGISTER_MAIN_STRINGL_CONSTANT("POLAR_BINARY", "", 0, CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
+      REGISTER_MAIN_STRINGL_CONSTANT("POLAR_BINARY", PHP_EMPTY_STR, 0, CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
    }
 
    php_output_register_constants();
 
-   /* this will read in php.ini, set up the configuration parameters,
-            load zend extensions and register php function extensions
-            to be loaded later */
-   //   if (php_init_config() == FAILURE) {
-   //      return FAILURE;
-   //   }
+   /// this will read in php.ini, set up the configuration parameters,
+   /// load zend extensions and register php function extensions
+   /// to be loaded later
+   if (php_init_config() == FAILURE) {
+      return FAILURE;
+   }
 
-   //   /* Register PHP core ini entries */
+   /// Register PHP core ini entries
    //POLAR_REGISTER_INI_ENTRIES();
    /* Register Zend ini entries */
    //zend_register_standard_ini_entries();
@@ -598,14 +598,14 @@ void php_exec_env_shutdown()
    }
 
    /// polarphp wether support
-//   /* 8. Destroy super-globals */
-//   polar_try {
-//      int i;
+   //   /* 8. Destroy super-globals */
+   //   polar_try {
+   //      int i;
 
-//      for (i=0; i<NUM_TRACK_VARS; i++) {
-//         zval_ptr_dtor(&PG(http_globals)[i]);
-//      }
-//   } polar_end_try;
+   //      for (i=0; i<NUM_TRACK_VARS; i++) {
+   //         zval_ptr_dtor(&PG(http_globals)[i]);
+   //      }
+   //   } polar_end_try;
 
    /* 9. free request-bound globals */
    php_free_cli_exec_globals();

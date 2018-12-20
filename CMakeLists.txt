@@ -68,6 +68,7 @@ set(POLAR_MAIN_INCLUDE_DIR "${POLAR_SOURCE_DIR}/include")
 set(POLAR_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include") # --includedir
 set(POLAR_MAIN_INCLUDE_DIR "${POLAR_SOURCE_DIR}/include")
 set(POLAR_TEST_DIR "${POLAR_SOURCE_DIR}/tests")
+set(POLAR_ASSET_DIR "${POLAR_SOURCE_DIR}/assets")
 set(POLAR_CMAKE_TEST_CODE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake/codes)
 set(POLAR_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_NAME})
 string(TOLOWER ${POLAR_SYSTEM_NAME} POLAR_SYSTEM_NORMAL_NAME)
@@ -305,6 +306,10 @@ mark_as_advanced(POLAR_TARGET_TRIPLE_ENV)
 option(POLAR_DEV_BUILD_DEVTOOLS_TESTS "turn on to build tests of devtools" OFF)
 option(POLAR_DEV_BUILD_LLVM_UNITTEST "turn on llvm support libraries unitests" OFF)
 
+if (POLAR_BUILD_TYPE STREQUAL "debug")
+   set(POLAR_DEBUG_BUILD ON)
+endif()
+
 # They are used as destination of target generators.
 set(POLAR_RUNTIME_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/bin)
 set(POLAR_LIBRARY_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/lib${POLAR_LIBDIR_SUFFIX})
@@ -346,6 +351,22 @@ set(POLAR_COMPILE_DEFINITIONS "")
 set(POLAR_COMPILE_FLAGS "")
 set(POLAR_COMMON_DEPENDS "")
 set(POLAR_RT_REQUIRE_LIBS "")
+
+# processing php.ini paths
+# TODO at unix system, when build in release mode
+# we need put php.ini int /etc directory
+if (POLAR_CONFIG_FILE_PATH STREQUAL "Default")
+   set(POLAR_CONFIG_FILE_PATH ${POLAR_BINARY_DIR}/data/config)
+   if (NOT EXISTS ${POLAR_CONFIG_FILE_PATH})
+      file(MAKE_DIRECTORY ${POLAR_CONFIG_FILE_PATH})
+   endif()
+endif()
+if (POLAR_CONFIG_FILE_SCAN_DIR STREQUAL "Default")
+   set(POLAR_CONFIG_FILE_SCAN_DIR ${POLAR_CONFIG_FILE_PATH}/conf.d)
+   if (NOT EXISTS ${POLAR_CONFIG_FILE_SCAN_DIR})
+      file(MAKE_DIRECTORY ${POLAR_CONFIG_FILE_SCAN_DIR})
+   endif()
+endif()
 
 # setup php version info
 polar_setup_php_version()
@@ -408,6 +429,8 @@ include_directories(${POLAR_SOURCE_DIR}
    ${POLAR_INCLUDE_DIR}/polarphp)
 
 include(ImportThirdparty)
+
+add_subdirectory(assets)
 add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(stdlib)

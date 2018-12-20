@@ -1,5 +1,5 @@
 <p align="center">
-   <img width="350" src ="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/polarphp.png?sanitize=true"/>
+   <img width="350" src ="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/polarphp.png?sanitize=true"/>
 </p>
 
 ## 为什么要做 polarphp 项目
@@ -78,17 +78,17 @@
     <tr>
       <td align="center" valign="middle">
         <a href="https://www.oschina.net/" target="_blank">
-          <img width="177px" src="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/osc.svg?sanitize=true">
+          <img width="177px" src="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/osc.svg?sanitize=true">
         </a>
       </td>
       <td align="center" valign="middle">
         <a href="https://gitee.com/?from=polarphp.org" target="_blank">
-          <img width="177px" src="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/gitee.svg?sanitize=true">
+          <img width="177px" src="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/gitee.svg?sanitize=true">
         </a>
       </td>
       <td align="center" valign="middle">
         <a href="http://www.hacknown.com/" target="_blank">
-          <img width="177px" src="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/hacknown.svg?sanitize=true">
+          <img width="177px" src="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/hacknown.svg?sanitize=true">
         </a>
       </td>
     </tr><tr></tr>
