@@ -195,8 +195,8 @@ option(POLAR_DISABLE_INLINE_OPTIMIZATION
    "If building zend_execute.lo fails, try this switch"
    OFF)
 
-set(POLAR_CONFIG_FILE_PATH "Default" CACHE string "Set the path in which to look for php.ini")
-set(POLAR_CONFIG_FILE_SCAN_DIR "Default" CACHE string "Set the path where to scan for configuration files")
+set(POLARPHP_CONFIG_FILE_PATH "Default" CACHE string "Set the path in which to look for php.ini")
+set(POLARPHP_CONFIG_FILE_SCAN_DIR "Default" CACHE string "Set the path where to scan for configuration files")
 
 option(POLAR_ENABLE_SIGCHILD
    "whether to enable PHP's own SIGCHLD handler"
@@ -355,16 +355,16 @@ set(POLAR_RT_REQUIRE_LIBS "")
 # processing php.ini paths
 # TODO at unix system, when build in release mode
 # we need put php.ini int /etc directory
-if (POLAR_CONFIG_FILE_PATH STREQUAL "Default")
-   set(POLAR_CONFIG_FILE_PATH ${POLAR_BINARY_DIR}/data/config)
-   if (NOT EXISTS ${POLAR_CONFIG_FILE_PATH})
-      file(MAKE_DIRECTORY ${POLAR_CONFIG_FILE_PATH})
+if (POLARPHP_CONFIG_FILE_PATH STREQUAL "Default")
+   set(POLARPHP_CONFIG_FILE_PATH ${POLAR_BINARY_DIR}/data/config)
+   if (NOT EXISTS ${POLARPHP_CONFIG_FILE_PATH})
+      file(MAKE_DIRECTORY ${POLARPHP_CONFIG_FILE_PATH})
    endif()
 endif()
-if (POLAR_CONFIG_FILE_SCAN_DIR STREQUAL "Default")
-   set(POLAR_CONFIG_FILE_SCAN_DIR ${POLAR_CONFIG_FILE_PATH}/conf.d)
-   if (NOT EXISTS ${POLAR_CONFIG_FILE_SCAN_DIR})
-      file(MAKE_DIRECTORY ${POLAR_CONFIG_FILE_SCAN_DIR})
+if (POLARPHP_CONFIG_FILE_SCAN_DIR STREQUAL "Default")
+   set(POLARPHP_CONFIG_FILE_SCAN_DIR ${POLARPHP_CONFIG_FILE_PATH}/conf.d)
+   if (NOT EXISTS ${POLARPHP_CONFIG_FILE_SCAN_DIR})
+      file(MAKE_DIRECTORY ${POLARPHP_CONFIG_FILE_SCAN_DIR})
    endif()
 endif()
 

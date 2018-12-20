@@ -652,18 +652,18 @@ if(POLAR_ENABLE_GCOV)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fprofile-arcs -ftest-coverage")
 endif()
 
-if(POLAR_CONFIG_FILE_PATH STREQUAL "Default")
+if(POLARPHP_CONFIG_FILE_PATH STREQUAL "Default")
    # if config path is default, we install php.ini in install_prefix/etc directory
    # wether we need a global variable ?
    set(PHP_CONFIG_FILE_PATH ${CMAKE_INSTALL_PREFIX}/etc)
 endif()
 
 message("checking where to scan for configuration files")
-if (POLAR_CONFIG_FILE_SCAN_DIR STREQUAL "Default")
-   set(POLAR_CONFIG_FILE_SCAN_DIR "")
+if (POLARPHP_CONFIG_FILE_SCAN_DIR STREQUAL "Default")
+   set(POLARPHP_CONFIG_FILE_SCAN_DIR "")
 endif()
-if (POLAR_CONFIG_FILE_SCAN_DIR)
-   message("using directory ${POLAR_CONFIG_FILE_SCAN_DIR} for scan configuration files")
+if (POLARPHP_CONFIG_FILE_SCAN_DIR)
+   message("using directory ${POLARPHP_CONFIG_FILE_SCAN_DIR} for scan configuration files")
 endif()
 
 if (POLAR_ENABLE_SIGCHILD)

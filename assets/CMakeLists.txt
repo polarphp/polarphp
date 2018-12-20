@@ -13,11 +13,11 @@
 #
 if (POLAR_DEBUG_BUILD)
    file(COPY ${POLAR_ASSET_DIR}/php.ini-development
-      DESTINATION ${POLAR_CONFIG_FILE_PATH}/php.ini)
+      DESTINATION ${POLARPHP_CONFIG_FILE_PATH}/php.ini)
 endif()
 
 install(FILES ${POLAR_ASSET_DIR}/php.ini-production
-   DESTINATION ${POLAR_CONFIG_FILE_PATH}
+   DESTINATION ${POLARPHP_CONFIG_FILE_PATH}
    CONFIGURATIONS Release
    COMPONENT data
    RENAME php.ini)
