@@ -50,7 +50,7 @@ static MUTEX_T reentrant_locks[NUMBER_OF_LOCKS];
 #define HAVE_CTIME_R 1
 #define HAVE_ASCTIME_R 1
 
-POLAR_DECL_EXPORT char *polar_ctime_r(const time_t *clock, char *buf)
+char *polar_ctime_r(const time_t *clock, char *buf)
 {
    if (ctime_r(clock, buf) == buf) {
       return buf;
@@ -58,7 +58,7 @@ POLAR_DECL_EXPORT char *polar_ctime_r(const time_t *clock, char *buf)
    return nullptr;
 }
 
-POLAR_DECL_EXPORT char *polar_asctime_r(const struct tm *tm, char *buf)
+char *polar_asctime_r(const struct tm *tm, char *buf)
 {
    if (asctime_r(tm, buf) == buf) {
       return buf;
@@ -75,7 +75,7 @@ POLAR_DECL_EXPORT char *polar_asctime_r(const struct tm *tm, char *buf)
 #define HAVE_ASCTIME_R 1
 #define HAVE_GMTIME_R 1
 
-POLAR_DECL_EXPORT struct tm *polar_localtime_r(const time_t *const timep, struct tm *p_tm)
+struct tm *polar_localtime_r(const time_t *const timep, struct tm *p_tm)
 {
    if (localtime_r(timep, p_tm) == 0) {
       return (p_tm);
@@ -91,7 +91,7 @@ POLAR_DECL_EXPORT char *polar_ctime_r(const time_t *clock, char *buf)
    return nullptr;
 }
 
-POLAR_DECL_EXPORT char *polar_asctime_r(const struct tm *tm, char *buf)
+char *polar_asctime_r(const struct tm *tm, char *buf)
 {
    if (asctime_r(tm, buf, 26) != -1) {
       return buf;
@@ -99,7 +99,7 @@ POLAR_DECL_EXPORT char *polar_asctime_r(const struct tm *tm, char *buf)
    return nullptr;
 }
 
-POLAR_DECL_EXPORT struct tm *polar_gmtime_r(const time_t *const timep, struct tm *p_tm)
+struct tm *polar_gmtime_r(const time_t *const timep, struct tm *p_tm)
 {
    if (gmtime_r(timep, p_tm) == 0) {
       return (p_tm);
@@ -111,7 +111,7 @@ POLAR_DECL_EXPORT struct tm *polar_gmtime_r(const time_t *const timep, struct tm
 
 #if !defined(HAVE_POSIX_READDIR_R)
 
-POLAR_DECL_EXPORT int polar_readdir_r(DIR *dirp, struct dirent *entry,
+int polar_readdir_r(DIR *dirp, struct dirent *entry,
                                       struct dirent **result)
 {
 #if defined(HAVE_OLD_READDIR_R)
@@ -152,7 +152,7 @@ POLAR_DECL_EXPORT int polar_readdir_r(DIR *dirp, struct dirent *entry,
 
 #if !defined(HAVE_LOCALTIME_R) && defined(HAVE_LOCALTIME)
 
-POLAR_DECL_EXPORT struct tm *polar_localtime_r(const time_t *const timep, struct tm *p_tm)
+struct tm *polar_localtime_r(const time_t *const timep, struct tm *p_tm)
 {
    struct tm *tmp;
    local_lock(LOCALTIME_R);
@@ -169,7 +169,7 @@ POLAR_DECL_EXPORT struct tm *polar_localtime_r(const time_t *const timep, struct
 
 #if !defined(HAVE_CTIME_R) && defined(HAVE_CTIME)
 
-POLAR_DECL_EXPORT char *polar_ctime_r(const time_t *clock, char *buf)
+char *polar_ctime_r(const time_t *clock, char *buf)
 {
    char *tmp;
    local_lock(CTIME_R);
@@ -183,7 +183,7 @@ POLAR_DECL_EXPORT char *polar_ctime_r(const time_t *clock, char *buf)
 
 #if !defined(HAVE_ASCTIME_R) && defined(HAVE_ASCTIME)
 
-POLAR_DECL_EXPORT char *polar_asctime_r(const struct tm *tm, char *buf)
+char *polar_asctime_r(const struct tm *tm, char *buf)
 {
    char *tmp;
    local_lock(ASCTIME_R);
@@ -197,7 +197,7 @@ POLAR_DECL_EXPORT char *polar_asctime_r(const struct tm *tm, char *buf)
 
 #if !defined(HAVE_GMTIME_R) && defined(HAVE_GMTIME)
 
-POLAR_DECL_EXPORT struct tm *polar_gmtime_r(const time_t *const timep, struct tm *p_tm)
+struct tm *polar_gmtime_r(const time_t *const timep, struct tm *p_tm)
 {
    struct tm *tmp;
 

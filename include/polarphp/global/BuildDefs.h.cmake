@@ -36,6 +36,7 @@
 #define POLARPHP_BINDIR                       "@POLAR_INSTALL_BIN_DIR@"
 #define POLARPHP_LIBDIR                       "@POLAR_INSTALL_LIB_DIR@"
 #define POLARPHP_DATADIR                      "@POLAR_INSTALL_DATA_DIR@"
+#define POLARPHP_MAN_DIR                      "@POLAR_INSTALL_MAN_DIR@"
 #define POLARPHP_SYSCONFDIR                   "@POLAR_INSTALL_CFG_DIR@"
 #define POLARPHP_LOCALSTATEDIR                "@POLAR_INSTALL_LOCAL_STATE_DIR@"
 #define POLARPHP_CONFIG_FILE_PATH             "@POLARPHP_CONFIG_FILE_PATH@"
