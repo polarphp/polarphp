@@ -50,7 +50,8 @@ void php_binary_init()
 #else
    binaryLocation = reinterpret_cast<char *>(malloc(MAXPATHLEN));
    ExecEnv &execEnv = retrieve_global_execenv();
-   if (binaryLocation && execEnv.getExecutableFilepath().find('/') == StringRef::npos) {
+   ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
+   if (binaryLocation &&  execEnv.getExecutableFilepath().find('/') == StringRef::npos) {
       char *envpath, *path;
       int found = 0;
       if ((envpath = getenv("PATH")) != nullptr) {
@@ -78,7 +79,7 @@ void php_binary_init()
       binaryLocation = nullptr;
    }
 #endif
-   execEnv.setPolarBinary(binaryLocation);
+   execEnvInfo.polarBinary = binaryLocation;
 }
 
 } // anonymous namespace
@@ -136,6 +137,7 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    char *phpOs;
    zend_module_entry *module;
    ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
 #ifdef POLAR_OS_WIN32
    WORD wVersionRequested = MAKEWORD(2, 0);
    WSADATA wsaData;
@@ -262,9 +264,9 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
 #endif
 
    php_binary_init();
-   StringRef polarBinary = execEnv.getPolarBinary();
+   std::string &polarBinary = execEnvInfo.polarBinary;
    if (!polarBinary.empty()) {
-      REGISTER_MAIN_STRINGL_CONSTANT("POLAR_BINARY", const_cast<char *>(polarBinary.getData()), polarBinary.getSize(), CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
+      REGISTER_MAIN_STRINGL_CONSTANT("POLAR_BINARY", const_cast<char *>(polarBinary.c_str()), polarBinary.size(), CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
    } else {
       REGISTER_MAIN_STRINGL_CONSTANT("POLAR_BINARY", PHP_EMPTY_STR, 0, CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
    }
@@ -295,11 +297,11 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
 #endif
 
    /// Disable realpath cache if an open_basedir is set
-   StringRef openBaseDir = execEnv.getOpenBaseDir();
+   std::string &openBaseDir = execEnvInfo.openBaseDir;
    if (!openBaseDir.empty()) {
       CWDG(realpath_cache_size_limit) = 0;
    }
-   execEnv.setHaveCalledOpenlog(false);
+   execEnvInfo.haveCalledOpenlog = false;
    /// polarphp does not use html errors
    zuv.html_errors = 0;
    zuv.import_use_extension = const_cast<char *>(".php");
@@ -476,6 +478,8 @@ bool php_exec_env_startup()
    int retval = true;
    zend_interned_strings_activate();
    ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
+
    /// TODO dtrace
    //#ifdef HAVE_DTRACE
    //   DTRACE_REQUEST_STARTUP(SAFE_FILENAME(SG(request_info).path_translated), SAFE_FILENAME(SG(request_info).request_uri), (char *)SAFE_FILENAME(SG(request_info).request_method));
@@ -490,12 +494,12 @@ bool php_exec_env_startup()
 #endif
 
    polar_try {
-      execEnv.setInErrorLog(false);
-      execEnv.setDuringExecEnvStartup(true);
+      execEnvInfo.inErrorLog = false;
+      execEnvInfo.duringExecEnvStartup = true;
       php_output_activate();
       /* initialize global variables */
-      execEnv.setModulesActivated(false);
-      execEnv.setInUserInclude(false);
+      execEnvInfo.modulesActivated = false;
+      execEnvInfo.inUserInclude = false;
       zend_activate();
       execEnv.activate();
 
@@ -503,15 +507,15 @@ bool php_exec_env_startup()
       zend_signal_activate();
 #endif
       /* Disable realpath cache if an open_basedir is set */
-      if (!execEnv.getOpenBaseDir().empty()) {
+      if (!execEnvInfo.openBaseDir.empty()) {
          CWDG(realpath_cache_size_limit) = 0;
       }
-      StringRef outputHandler = execEnv.getOutputHandler();
-      zend_long outputBuffering = execEnv.getOutputBuffering();
-      bool implicitFlush = execEnv.getImplicitFlush();
+      std::string &outputHandler = execEnvInfo.outputHandler;
+      zend_long outputBuffering = execEnvInfo.outputBuffering;
+      bool implicitFlush = execEnvInfo.implicitFlush;
       if (!outputHandler.empty()) {
          zval oh;
-         ZVAL_STRING(&oh, outputHandler.getData());
+         ZVAL_STRING(&oh, outputHandler.c_str());
          php_output_start_user(&oh, 0, PHP_OUTPUT_HANDLER_STDFLAGS);
          zval_ptr_dtor(&oh);
       } else if (outputBuffering) {
@@ -525,7 +529,7 @@ bool php_exec_env_startup()
 
       php_hash_environment();
       zend_activate_modules();
-      execEnv.setModulesActivated(true);
+      execEnvInfo.modulesActivated = true;
    } polar_catch {
       retval = FAILURE;
    } polar_end_try;
@@ -544,14 +548,15 @@ void php_free_cli_exec_globals()
 void php_exec_env_shutdown()
 {
    ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
    EG(flags) |= EG_FLAGS_IN_SHUTDOWN;
-   bool reportMemleaks = execEnv.getReportMemLeaks();
+   bool reportMemleaks = execEnvInfo.reportMemLeaks;
    /* EG(current_execute_data) points into nirvana and therefore cannot be safely accessed
        * inside zend_executor callback functions.
        */
    EG(current_execute_data) = nullptr;
    deactivate_ticks();
-   bool modulesActivated = execEnv.getModulesActivated();
+   bool modulesActivated = execEnvInfo.modulesActivated;
    /* 1. Call all possible shutdown functions registered with register_shutdown_function() */
    if (modulesActivated) {
       polar_try {
@@ -572,8 +577,8 @@ void php_exec_env_shutdown()
    /* 3. Flush all output buffers */
    polar_try {
       bool sendBuffer = true;
-      if (CG(unclean_shutdown) && execEnv.getLastErrorType() == E_ERROR &&
-          static_cast<size_t>(execEnv.getMemoryLimit()) < zend_memory_usage(1)
+      if (CG(unclean_shutdown) && execEnvInfo.lastErrorType == E_ERROR &&
+          static_cast<size_t>(execEnvInfo.memoryLimit) < zend_memory_usage(1)
           ) {
          sendBuffer = false;
       }

@@ -14,6 +14,7 @@
 
 namespace polar {
 
+
 POLAR_INI_BEGIN()
    POLAR_INI_ENTRY_EX("highlight.comment",		HL_COMMENT_COLOR,	POLAR_INI_ALL,	NULL,			zend_ini_color_displayer_cb)
    POLAR_INI_ENTRY_EX("highlight.default",		HL_DEFAULT_COLOR,	POLAR_INI_ALL,	NULL,			zend_ini_color_displayer_cb)
@@ -21,7 +22,7 @@ POLAR_INI_BEGIN()
    POLAR_INI_ENTRY_EX("highlight.keyword",		HL_KEYWORD_COLOR,	POLAR_INI_ALL,	NULL,			zend_ini_color_displayer_cb)
    POLAR_INI_ENTRY_EX("highlight.string",		HL_STRING_COLOR,	POLAR_INI_ALL,	NULL,			zend_ini_color_displayer_cb)
 
-//   STD_POLAR_INI_ENTRY_EX("display_errors",		"1",		POLAR_INI_ALL,		OnUpdateDisplayErrors,	display_errors,			php_core_globals,	core_globals, display_errors_mode)
+   //STD_POLAR_INI_ENTRY_EX("display_errors",		"1",		POLAR_INI_ALL,		OnUpdateDisplayErrors,	display_errors,			php_core_globals,	core_globals, display_errors_mode)
 //   STD_POLAR_INI_BOOLEAN("display_startup_errors",	"0",	POLAR_INI_ALL,		OnUpdateBool,			display_startup_errors,	php_core_globals,	core_globals)
 //   STD_POLAR_INI_BOOLEAN("enable_dl",			"1",		POLAR_INI_SYSTEM,		OnUpdateBool,			enable_dl,				php_core_globals,	core_globals)
 //   STD_POLAR_INI_BOOLEAN("expose_php",			"1",		POLAR_INI_SYSTEM,		OnUpdateBool,			expose_php,				php_core_globals,	core_globals)

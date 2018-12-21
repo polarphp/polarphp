@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
       exit(sg_exitStatus);
    }
    polar::ExecEnv &execEnv = polar::retrieve_global_execenv();
+   polar::ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
    execEnv.setArgc(argc);
    execEnv.setArgv(argv);
 #if defined(POLAR_OS_WIN32)
@@ -130,13 +131,15 @@ int main(int argc, char *argv[])
    }
    /// processing ini definitions
    ///
-   execEnv.setIniDefaultsHandler(polar::cli_ini_defaults);
-   execEnv.setPhpIniPathOverride(sg_configPath);
-   execEnv.setPhpIniIgnoreCwd(true);
-   execEnv.setPhpIniIgnore(sg_ignoreIni);
+   execEnvInfo.iniDefaultInitHandler = polar::cli_ini_defaults;
+   execEnvInfo.phpIniPathOverride = sg_configPath;
+   execEnvInfo.phpIniIgnoreCwd = true;
+   execEnvInfo.phpIniIgnore = sg_ignoreIni;
+
    iniEntries += polar::HARDCODED_INI;
 
-   execEnv.setInitEntries(iniEntries);
+   execEnvInfo.iniEntries = iniEntries;
+
    /// startup after we get the above ini override se we get things right
    ///
    if (!polar::php_module_startup(nullptr, 0)) {

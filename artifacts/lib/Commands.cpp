@@ -247,6 +247,7 @@ void standard_exec_command(ExecEnv &execEnv, zend_file_handle &fileHandle);
 int dispatch_cli_command()
 {
    ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
    zend_file_handle fileHandle;
    volatile bool execEnvStarted = false;
    std::string translatedPath;
@@ -298,9 +299,9 @@ int dispatch_cli_command()
       fileHandle.free_filename = 0;
       sg_phpSelf = const_cast<char *>(fileHandle.filename);
       if (!translatedPath.empty()) {
-         execEnv.setEntryScriptFilename(translatedPath);
+         execEnvInfo.entryScriptFilename = translatedPath;
       } else {
-         execEnv.setEntryScriptFilename(fileHandle.filename);
+         execEnvInfo.entryScriptFilename = fileHandle.filename;
       }
       if (!php_exec_env_startup()) {
          fclose(fileHandle.handle.fp);
@@ -315,7 +316,7 @@ int dispatch_cli_command()
          //            memset(argv[i], 0, strlen(argv[i]));
          //         }
       }
-      execEnv.setDuringExecEnvStartup(false);
+      execEnvInfo.duringExecEnvStartup = false;
       /// php exec env is ready
       /// begin dispatch commands
       ///

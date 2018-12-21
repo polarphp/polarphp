@@ -117,9 +117,9 @@ int php_check_open_basedir(const char *path)
 ///
 int php_check_open_basedir(const char *path, int warn)
 {
-   ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = retrieve_global_execenv_runtime_info();
    /// Only check when open_basedir is available
-   StringRef openBaseDir = execEnv.getOpenBaseDir();
+   std::string &openBaseDir = execEnvInfo.openBaseDir;
    if (!openBaseDir.empty()) {
       char *pathbuf;
       char *ptr;
@@ -131,7 +131,7 @@ int php_check_open_basedir(const char *path, int warn)
          errno = EINVAL;
          return -1;
       }
-      pathbuf = estrdup(openBaseDir.getData());
+      pathbuf = estrdup(openBaseDir.c_str());
       ptr = pathbuf;
       while (ptr && *ptr) {
          end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
@@ -146,7 +146,7 @@ int php_check_open_basedir(const char *path, int warn)
          ptr = end;
       }
       if (warn) {
-         php_error_docref(nullptr, E_WARNING, "open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%s)", path, openBaseDir.getData());
+         php_error_docref(nullptr, E_WARNING, "open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%s)", path, openBaseDir.c_str());
       }
       efree(pathbuf);
       errno = EPERM; /* we deny permission to open it */
@@ -331,7 +331,7 @@ char *expand_filepath(const char *filePath, char *realPath,
    char cwd[MAXPATHLEN];
    size_t copyLen;
    size_t pathLen;
-   ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = retrieve_global_execenv_runtime_info();
    if (!filePath[0]) {
       return nullptr;
    }
@@ -339,7 +339,7 @@ char *expand_filepath(const char *filePath, char *realPath,
    if (IS_ABSOLUTE_PATH(filePath, pathLen)) {
       cwd[0] = '\0';
    } else {
-      const char *iam = execEnv.getEntryScriptFilename().getData();
+      const char *iam = execEnvInfo.entryScriptFilename.c_str();
       const char *result;
       if (relativeTo) {
          if (relativeToLen > MAXPATHLEN-1U) {

@@ -367,18 +367,19 @@ bool php_init_config()
    zend_file_handle fh;
    zend_string *openedPath = nullptr;
    ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
    zend_hash_init(&sg_configurationHash, 8, nullptr, config_zval_dtor, 1);
    /// invoke exec env to setup default config
    execEnv.initDefaultConfig(&sg_configurationHash);
    zend_llist_init(&sg_extensionLists.engine, sizeof(char *), reinterpret_cast<llist_dtor_func_t>(free_estring), 1);
    zend_llist_init(&sg_extensionLists.functions, sizeof(char *), reinterpret_cast<llist_dtor_func_t>(free_estring), 1);
-   openBaseDir = execEnv.getOpenBaseDir();
-   StringRef phpIniexecPathOverride = execEnv.getPhpIniPathOverride();
+   openBaseDir = execEnvInfo.openBaseDir;
+   std::string &phpIniexecPathOverride = execEnvInfo.phpIniPathOverride;
    if (!phpIniexecPathOverride.empty()) {
       phpIniFileName = phpIniexecPathOverride;
-      phpIniSearchPath = const_cast<char *>(phpIniexecPathOverride.getData());
+      phpIniSearchPath = const_cast<char *>(phpIniexecPathOverride.c_str());
       freeIniSearchPath = 0;
-   } else if (!execEnv.getPhpIniIgnore()) {
+   } else if (!execEnvInfo.phpIniIgnore) {
       int searchPathSize;
       StringRef defaultLocation;
       StringRef envLocation;
@@ -453,17 +454,17 @@ bool php_init_config()
 #endif
 
       /* Add cwd (not with CLI) */
-      if (!execEnv.getPhpIniIgnoreCwd()) {
+      if (!execEnvInfo.phpIniIgnoreCwd) {
          if (*phpIniSearchPath) {
             strlcat(phpIniSearchPath, pathsSeparator, searchPathSize);
          }
          strlcat(phpIniSearchPath, ".", searchPathSize);
       }
-      StringRef polarBinary = execEnv.getPolarBinary();
+      std::string &polarBinary = execEnvInfo.polarBinary;
       if (!polarBinary.empty()) {
          char *separatorLocation;
          char *binaryLocation;
-         binaryLocation = estrdup(polarBinary.getData());
+         binaryLocation = estrdup(polarBinary.c_str());
          separatorLocation = strrchr(binaryLocation, DEFAULT_SLASH);
          if (separatorLocation && separatorLocation != binaryLocation) {
             *(separatorLocation) = 0;
@@ -502,14 +503,14 @@ bool php_init_config()
       strlcat(phpIniSearchPath, defaultLocation.getData(), searchPathSize);
 #endif
    }
-   execEnv.setOpenBaseDir("");
+   execEnvInfo.openBaseDir.clear();
    /// Find and open actual ini file
    memset(&fh, 0, sizeof(fh));
    /* If SAPI does not want to ignore all ini files OR an overriding file/path is given.
        * This allows disabling scanning for ini files in the PHP_CONFIG_FILE_SCAN_DIR but still
        * load an optional ini file. */
 
-   if (!execEnv.getPhpIniIgnore() || !phpIniexecPathOverride.empty()) {
+   if (!execEnvInfo.phpIniIgnore || !phpIniexecPathOverride.empty()) {
       /* Check if phpIniFileName is a file and can be opened */
       if (!phpIniFileName.empty()) {
          zend_stat_t statbuf;
@@ -550,7 +551,7 @@ bool php_init_config()
    if (freeIniSearchPath) {
       efree(phpIniSearchPath);
    }
-   execEnv.setOpenBaseDir(openBaseDir);
+   execEnvInfo.openBaseDir = openBaseDir;
    if (fh.handle.fp) {
       fh.type = ZEND_HANDLE_FP;
       RESET_ACTIVE_INI_HASH();
@@ -578,7 +579,7 @@ bool php_init_config()
    phpIniScannedPathLen = (int)strlen(sg_phpIniScannedPath);
 
    /* Scan and parse any .ini files found in scan path if path not empty. */
-   if (!execEnv.getPhpIniIgnore() && phpIniScannedPathLen) {
+   if (!execEnvInfo.phpIniIgnore && phpIniScannedPathLen) {
       struct dirent **namelist;
       int ndir, i;
       zend_stat_t sb;
@@ -665,11 +666,11 @@ bool php_init_config()
       /* Make sure an empty sg_phpIniScannedPath ends up as nullptr */
       sg_phpIniScannedPath = nullptr;
    }
-   StringRef iniEntries = execEnv.getIniEntries();
+   std::string &iniEntries = execEnvInfo.iniEntries;
    if (!iniEntries.empty()) {
       /* Reset active ini section */
       RESET_ACTIVE_INI_HASH();
-      zend_parse_ini_string(const_cast<char *>(iniEntries.getData()), 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_callback, &sg_configurationHash);
+      zend_parse_ini_string(const_cast<char *>(iniEntries.c_str()), 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_callback, &sg_configurationHash);
    }
    return true;
 }

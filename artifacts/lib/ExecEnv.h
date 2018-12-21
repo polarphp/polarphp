@@ -56,8 +56,10 @@ struct CliShellCallbacksType
 };
 
 class ExecEnv;
+struct ExecEnvInfo;
 
 ExecEnv &retrieve_global_execenv();
+ExecEnvInfo &retrieve_global_execenv_runtime_info();
 ssize_t cli_single_write(const char *str, size_t strLength);
 size_t cli_unbuffer_write(const char *str, size_t strLength);
 void cli_flush();
@@ -86,6 +88,94 @@ POLAR_DECL_EXPORT bool php_hash_environment();
 void cli_register_file_handles();
 POLAR_DECL_EXPORT ZEND_COLD void php_log_err_with_severity(char *logMessage, int syslogTypeInt);
 
+///
+/// POD data of execute environment
+///
+struct ExecEnvInfo
+{
+   bool phpIniIgnore;
+   /// don't look for php.ini in the current directory
+   bool phpIniIgnoreCwd;
+   bool implicitFlush;
+   bool enableDl;
+   bool trackErrors;
+   bool displayStartupErrors;
+   bool logErrors;
+   bool ignoreRepeatedErrors;
+   bool ignoreRepeatedSource;
+   bool reportMemLeaks;
+   bool ignoreUserAbort;
+   bool registerArgcArgv;
+   bool autoGlobalsJit;
+   bool modulesActivated;
+   bool duringExecEnvStartup;
+   bool allowUrlFopen;
+   bool reportZendDebug;
+   bool inErrorLog;
+   bool inUserInclude;
+#ifdef POLAR_OS_WIN32
+   bool windowsShowCrtWarning;
+#endif
+   bool haveCalledOpenlog;
+   bool allowUrlInclude;
+#ifdef POLAR_OS_WIN32
+   bool comInitialized;
+#endif
+
+   std::uint8_t displayErrors;
+
+   int lastErrorType;
+   int lastErrorLineno;
+
+   zend_long serializePrecision;
+   zend_long memoryLimit;
+   zend_long outputBuffering;
+   zend_long logErrorsMaxLen;
+   zend_long maxInputNestingLevel;
+   zend_long maxInputVars;
+   zend_long userIniCacheTtl;
+   zend_long syslogFacility;
+   zend_long syslogFilter;
+   zend_long defaultSocketTimeout;
+
+   std::string iniEntries;
+   std::string phpIniPathOverride;
+   std::string outputHandler;
+   std::string unserializeCallbackFunc;
+   std::string errorLog;
+   std::string docRoot;
+   std::string userDir;
+   std::string includePath;
+   std::string openBaseDir;
+   std::string extensionDir;
+   std::string polarBinary;
+   std::string sysTempDir;
+   std::string errorAppendString;
+   std::string errorPrependString;
+   std::string autoPrependFile;
+   std::string autoAppendFile;
+   std::string inputEncoding;
+   std::string internalEncoding;
+   std::string outputEncoding;
+
+   std::string variablesOrder;
+   std::string lastErrorMessage;
+   std::string lastErrorFile;
+   std::string phpSysTempDir;
+   std::string disableFunctions;
+   std::string disableClasses;
+   std::string docrefRoot;
+   std::string docrefExt;
+   std::string userIniFilename;
+   std::string requestOrder;
+   std::string syslogIdent;
+   std::string entryScriptFilename;
+
+   IniConfigDefaultInitFunc iniDefaultInitHandler;
+   ArgSeparators argSeparator;
+   zend_llist tickFunctions;
+};
+
 class ExecEnv
 {
 public:
@@ -97,264 +187,23 @@ public:
    ExecEnv &setArgc(int argc);
    ExecEnv &setArgv(const std::vector<StringRef> &argv);
    ExecEnv &setArgv(char *argv[]);
-   ExecEnv &setPhpIniIgnore(bool flag);
-   ExecEnv &setPhpIniIgnoreCwd(bool flag);
-   ExecEnv &setImplicitFlush(bool flag);
-   ExecEnv &setEnableDl(bool flag);
-   ExecEnv &setTrackErrors(bool flag);
-   ExecEnv &setDisplayStartupErrors(bool flag);
-   ExecEnv &setLogErrors(bool flag);
-   ExecEnv &setIgnoreRepeatedErrors(bool flag);
-   ExecEnv &setIgnoreRepeatedSource(bool flag);
-   ExecEnv &setReportMemLeaks(bool flag);
-   ExecEnv &setIgnoreUserAbort(bool flag);
-   ExecEnv &setRegisterArgcArgv(bool flag);
-   ExecEnv &setAutoGlobalsJit(bool flag);
-   ExecEnv &setModulesActivated(bool flag);
-   ExecEnv &setDuringExecEnvStartup(bool flag);
-   ExecEnv &setAllowUrlFopen(bool flag);
-   ExecEnv &setReportZendDebug(bool flag);
-   ExecEnv &setInErrorLog(bool flag);
-   ExecEnv &setInUserInclude(bool flag);
-#ifdef POLAR_OS_WIN32
-   ExecEnv &setWindowsShowCrtWarning(bool flag);
-#endif
-   ExecEnv &setHaveCalledOpenlog(bool flag);
-   ExecEnv &setAllowUrlInclude(bool flag);
-#ifdef POLAR_OS_WIN32
-   ExecEnv &setComInitialized(bool flag);
-#endif
    ExecEnv &setStarted(bool flag);
 
-   ExecEnv &setIniDefaultsHandler(IniConfigDefaultInitFunc handler);
-
-   ExecEnv &setDisplayErrors(std::uint8_t value);
-
-   ExecEnv &setLastErrorType(int type);
-   ExecEnv &setLastErrorLineno(int line);
-
-   ExecEnv &setSerializePrecision(zend_long value);
-   ExecEnv &setMemoryLimit(zend_long value);
-   ExecEnv &setOutputBuffering(zend_long value);
-   ExecEnv &setLogErrorsMaxLen(zend_long value);
-   ExecEnv &setMaxInputNestingLevel(zend_long value);
-   ExecEnv &setMaxInputVars(zend_long value);
-   ExecEnv &setUserIniCacheTtl(zend_long value);
-   ExecEnv &setSyslogFacility(zend_long value);
-   ExecEnv &setSyslogFilter(zend_long value);
-   ExecEnv &setDefaultSocketTimeout(zend_long value);
-
-   ExecEnv &setPhpIniPathOverride(const std::string &path);
-   ExecEnv &setInitEntries(const std::string &entries);
-   ExecEnv &setOutputHandler(const std::string &value);
-   ExecEnv &setUnserializeCallbackFunc(const std::string &value);
-   ExecEnv &setErrorLog(const std::string &value);
-   ExecEnv &setDocRoot(const std::string &value);
-   ExecEnv &setUserDir(const std::string &value);
-   ExecEnv &setIncludePath(const std::string &value);
-   ExecEnv &setOpenBaseDir(const std::string &value);
-   ExecEnv &setExtensionDir(const std::string &value);
-   ExecEnv &setPolarBinary(const std::string &value);
-   ExecEnv &setSysTempDir(const std::string &value);
-   ExecEnv &setErrorAppendString(const std::string &value);
-   ExecEnv &setErrorPrependString(const std::string &value);
-   ExecEnv &setAutoPrependFile(const std::string &value);
-   ExecEnv &setAutoAppendFile(const std::string &value);
-   ExecEnv &setInputEncoding(const std::string &value);
-   ExecEnv &setInternalEncoding(const std::string &value);
-   ExecEnv &setOutputEncoding(const std::string &value);
-
-   ExecEnv &setVariablesOrder(const std::string &value);
-   ExecEnv &setLastErrorMessage(const std::string &value);
-   ExecEnv &setLastErrorFile(const std::string &value);
-   ExecEnv &setPhpSysTempDir(const std::string &value);
-   ExecEnv &setDisableFunctions(const std::string &value);
-   ExecEnv &setDisableClasses(const std::string &value);
-   ExecEnv &setDocrefRoot(const std::string &value);
-   ExecEnv &setDocrefExt(const std::string &value);
-   ExecEnv &setUserIniFilename(const std::string &value);
-   ExecEnv &setRequestOrder(const std::string &value);
-   ExecEnv &setSyslogIdent(const std::string &value);
-   ExecEnv &setEntryScriptFilename(const std::string &value);
-
-   ExecEnv &setIniConfigDeaultHandler(IniConfigDefaultInitFunc func);
-   ExecEnv &setArgSeparator(ArgSeparators seps);
-
+   bool getStarted() const;
+   ExecEnvInfo &getRuntimeInfo();
    const std::vector<StringRef> &getArgv() const;
    int getArgc() const;
    StringRef getExecutableFilepath() const;
 
-   bool getPhpIniIgnore() const;
-   bool getPhpIniIgnoreCwd() const;
-   bool getImplicitFlush() const;
-   bool getEnableDl() const;
-   bool getTrackErrors() const;
-   bool getDisplayStartupErrors() const;
-   bool getLogErrors() const;
-   bool getIgnoreRepeatedErrors() const;
-   bool getIgnoreRepeatedSource() const;
-   bool getReportMemLeaks() const;
-   bool getIgnoreUserAbort() const;
-   bool getRegisterArgcArgv() const;
-   bool getAutoGlobalsJit() const;
-   bool getModulesActivated() const;
-   bool getDuringExecEnvStartup() const;
-   bool getAllowUrlFopen() const;
-   bool getReportZendDebug() const;
-   bool getInErrorLog() const;
-   bool getInUserInclude() const;
-#ifdef POLAR_OS_WIN32
-   bool getWindowsShowCrtWarning() const;
-#endif
-   bool getHaveCalledOpenlog() const;
-   bool getAllowUrlInclude() const;
-#ifdef POLAR_OS_WIN32
-   bool getComInitialized() const;
-#endif
-   bool getStarted() const;
-
-   std::uint8_t getDisplayErrors() const;
-
-   int getLastErrorType() const;
-   int getLastErrorLineno() const;
-
-   zend_long getSerializePrecision() const;
-   zend_long getMemoryLimit() const;
-   zend_long getOutputBuffering() const;
-   zend_long getLogErrorsMaxLen() const;
-   zend_long getMaxInputNestingLevel() const;
-   zend_long getMaxInputVars() const;
-   zend_long getUserIniCacheTtl() const;
-   zend_long getSyslogFacility() const;
-   zend_long getSyslogFilter() const;
-   zend_long getDefaultSocketTimeout() const;
-
-   StringRef getPhpIniPathOverride() const;
-   StringRef getIniEntries() const;
-   StringRef getOutputHandler() const;
-   StringRef getUnserializeCallbackFunc() const;
-   StringRef getErrorLog() const;
-   StringRef getDocRoot() const;
-   StringRef getUserDir() const;
-   StringRef getIncludePath() const;
-   StringRef getOpenBaseDir() const;
-   StringRef getExtensionDir() const;
-   StringRef getPolarBinary() const;
-   StringRef getSysTempDir() const;
-   StringRef getErrorAppendString() const;
-   StringRef getErrorPrependString() const;
-   StringRef getAutoPrependFile() const;
-   StringRef getAutoAppendFile() const;
-   StringRef getInputEncoding() const;
-   StringRef getInternalEncoding() const;
-   StringRef getOutputEncoding() const;
-
-   StringRef getVariablesOrder() const;
-   StringRef getLastErrorMessage() const;
-   StringRef getLastErrorFile() const;
-   StringRef getPhpSysTempDir() const;
-   StringRef getDisableFunctions() const;
-   StringRef getDisableClasses() const;
-   StringRef getDocrefRoot() const;
-   StringRef getDocrefExt() const;
-   StringRef getUserIniFilename() const;
-   StringRef getRequestOrder() const;
-   StringRef getSyslogIdent() const;
-   StringRef getEntryScriptFilename() const;
-
-   IniConfigDefaultInitFunc getIniConfigDeaultHandler() const;
-   const ArgSeparators &getArgSeparator() const;
-   const zend_llist &getTickFunctions() const;
-   zend_llist &getTickFunctions();
-
    size_t unbufferWrite(const char *str, int len);
    void logMessage(const char *logMessage, int syslogTypeInt);
    void initDefaultConfig(HashTable *configurationHash);
+
 private:
-   bool m_phpIniIgnore;
-   /// don't look for php.ini in the current directory
-   bool m_phpIniIgnoreCwd;
-   bool m_implicitFlush;
-   bool m_enableDl;
-   bool m_trackErrors;
-   bool m_displayStartupErrors;
-   bool m_logErrors;
-   bool m_ignoreRepeatedErrors;
-   bool m_ignoreRepeatedSource;
-   bool m_reportMemLeaks;
-   bool m_ignoreUserAbort;
-   bool m_registerArgcArgv;
-   bool m_autoGlobalsJit;
-   bool m_modulesActivated;
-   bool m_duringExecEnvStartup;
-   bool m_allowUrlFopen;
-   bool m_reportZendDebug;
-   bool m_inErrorLog;
-   bool m_inUserInclude;
-#ifdef POLAR_OS_WIN32
-   bool m_windowsShowCrtWarning;
-#endif
-   bool m_haveCalledOpenlog;
-   bool m_allowUrlInclude;
-#ifdef POLAR_OS_WIN32
-   bool m_comInitialized;
-#endif
    bool m_started;
-
-   std::uint8_t m_displayErrors;
-
    int m_argc;
-   int m_lastErrorType;
-   int m_lastErrorLineno;
-
-   zend_long m_serializePrecision;
-   zend_long m_memoryLimit;
-   zend_long m_outputBuffering;
-   zend_long m_logErrorsMaxLen;
-   zend_long m_maxInputNestingLevel;
-   zend_long m_maxInputVars;
-   zend_long m_userIniCacheTtl;
-   zend_long m_syslogFacility;
-   zend_long m_syslogFilter;
-   zend_long m_defaultSocketTimeout;
-
-   std::string m_iniEntries;
-   std::string m_phpIniPathOverride;
-   std::string m_outputHandler;
-   std::string m_unserializeCallbackFunc;
-   std::string m_errorLog;
-   std::string m_docRoot;
-   std::string m_userDir;
-   std::string m_includePath;
-   std::string m_openBaseDir;
-   std::string m_extensionDir;
-   std::string m_polarBinary;
-   std::string m_sysTempDir;
-   std::string m_errorAppendString;
-   std::string m_errorPrependString;
-   std::string m_autoPrependFile;
-   std::string m_autoAppendFile;
-   std::string m_inputEncoding;
-   std::string m_internalEncoding;
-   std::string m_outputEncoding;
-
-   std::string m_variablesOrder;
-   std::string m_lastErrorMessage;
-   std::string m_lastErrorFile;
-   std::string m_phpSysTempDir;
-   std::string m_disableFunctions;
-   std::string m_disableClasses;
-   std::string m_docrefRoot;
-   std::string m_docrefExt;
-   std::string m_userIniFilename;
-   std::string m_requestOrder;
-   std::string m_syslogIdent;
-   std::string m_entryScriptFilename;
-
-   IniConfigDefaultInitFunc m_iniDefaultInitHandler;
-   ArgSeparators m_argSeparator;
    std::vector<StringRef> m_argv;
-   zend_llist m_tickFunctions;
+   ExecEnvInfo m_runtimeInfo;
 };
 
 } // polar

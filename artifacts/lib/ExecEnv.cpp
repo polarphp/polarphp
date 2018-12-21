@@ -97,25 +97,30 @@ ExecEnv &retrieve_global_execenv()
    return execEnv;
 }
 
-ExecEnv::ExecEnv()
-   : m_started(false),
-     /// TODO read from cfg file
-     m_defaultSocketTimeout(60),
-     m_logErrorsMaxLen(1024),
-     m_ignoreRepeatedErrors(false),
-     m_ignoreRepeatedSource(false),
-     m_displayErrors(PHP_DISPLAY_ERRORS_STDOUT),
-     m_logErrors(true),
-     m_trackErrors(true),
-     m_syslogFacility(LOG_USER),
-     m_syslogIdent("polarphp"),
-     m_syslogFilter(PHP_SYSLOG_FILTER_NO_CTRL),
-     m_memoryLimit(Z_L(1)<<30),
-     m_docrefRoot("/phpmanual/"),
-     m_docrefExt(".html"),
-     m_includePath(".:/php/includes"),
-     m_reportMemLeaks(true)
+ExecEnvInfo &retrieve_global_execenv_runtime_info()
 {
+   return retrieve_global_execenv().getRuntimeInfo();
+}
+
+ExecEnv::ExecEnv()
+   : m_started(false)
+{
+   /// TODO read from cfg file
+   m_runtimeInfo.defaultSocketTimeout = 60;
+   m_runtimeInfo.logErrorsMaxLen = 1024;
+   m_runtimeInfo.ignoreRepeatedErrors = false;
+   m_runtimeInfo.ignoreRepeatedSource = false;
+   m_runtimeInfo.displayErrors = PHP_DISPLAY_ERRORS_STDOUT;
+   m_runtimeInfo.logErrors = true;
+   m_runtimeInfo.trackErrors = true;
+   m_runtimeInfo.syslogFacility = LOG_USER;
+   m_runtimeInfo.syslogIdent = "polarphp";
+   m_runtimeInfo.syslogFilter = PHP_SYSLOG_FILTER_NO_CTRL;
+   m_runtimeInfo.memoryLimit = Z_L(1)<<30;
+   m_runtimeInfo.docrefRoot = "/phpmanual/";
+   m_runtimeInfo.docrefExt = ".html";
+   m_runtimeInfo.includePath = ".:/php/includes";
+   m_runtimeInfo.reportMemLeaks = true;
 }
 
 ExecEnv::~ExecEnv()
@@ -134,6 +139,7 @@ void ExecEnv::initDefaultConfig(HashTable *configurationHash)
 
 }
 
+
 void ExecEnv::activate()
 {
    m_started = false;
@@ -142,6 +148,64 @@ void ExecEnv::activate()
 void ExecEnv::deactivate()
 {
    m_started = false;
+}
+
+ExecEnv &ExecEnv::setArgc(int argc)
+{
+   m_argc = argc;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setArgv(const std::vector<StringRef> &argv)
+{
+   m_argv = argv;
+   return *this;
+}
+
+ExecEnv &ExecEnv::setArgv(char *argv[])
+{
+   std::vector<StringRef> tempArgv;
+   char **arg = argv;
+   while (*arg != nullptr) {
+      tempArgv.push_back(*arg);
+      ++arg;
+   }
+   if (!tempArgv.empty()) {
+      m_argv = tempArgv;
+   }
+   return *this;
+}
+
+ExecEnv &ExecEnv::setStarted(bool flag)
+{
+   m_started = flag;
+   return *this;
+}
+
+bool ExecEnv::getStarted() const
+{
+   return m_started;
+}
+
+const std::vector<StringRef> &ExecEnv::getArgv() const
+{
+   return m_argv;
+}
+
+int ExecEnv::getArgc() const
+{
+   return m_argc;
+}
+
+ExecEnvInfo &ExecEnv::getRuntimeInfo()
+{
+   return m_runtimeInfo;
+}
+
+StringRef ExecEnv::getExecutableFilepath() const
+{
+   assert(m_argv.size() > 0);
+   return m_argv[0];
 }
 
 /// polarphp don't use timeout at vm level
@@ -157,7 +221,7 @@ void php_on_timeout(int seconds)
 ///
 int php_execute_script(zend_file_handle *primaryFile)
 {
-   ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = retrieve_global_execenv_runtime_info();
    zend_file_handle *prependFilePointer = nullptr;
    zend_file_handle *appendFilePointer = nullptr;
    zend_file_handle prependFile = {{0}, nullptr, nullptr, zend_stream_type(0), zend_stream_type(0)};
@@ -184,7 +248,7 @@ int php_execute_script(zend_file_handle *primaryFile)
          UpdateIniFromRegistry((char*)primaryFile->filename);
       }
 #endif
-      execEnv.setDuringExecEnvStartup(false);
+      execEnvInfo.duringExecEnvStartup = false;
       //      if (primaryFile->filename && !(SG(options) & SAPI_OPTION_NO_CHDIR)) {
       //#if HAVE_BROKEN_GETCWD
       //         /* this looks nasty to me */
@@ -279,11 +343,11 @@ inline int cli_select(php_socket_t fd)
    fd_set wfd, dfd;
    struct timeval tv;
    int ret;
-   ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = retrieve_global_execenv_runtime_info();
    FD_ZERO(&wfd);
    FD_ZERO(&dfd);
    PHP_SAFE_FD_SET(fd, &wfd);
-   tv.tv_sec = (long)execEnv.getDefaultSocketTimeout();
+   tv.tv_sec = (long)execEnvInfo.defaultSocketTimeout;
    tv.tv_usec = 0;
    ret = php_select(fd+1, &dfd, &wfd, &dfd, &tv);
    return ret != -1;
@@ -377,7 +441,7 @@ ZEND_COLD void php_verror(const char *docref, const char *params,
                           int type, const char *format,
                           va_list args)
 {
-   ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = retrieve_global_execenv_runtime_info();
    zend_string *replace_buffer = nullptr;
    zend_string *replace_origin = nullptr;
    char *buffer = nullptr;
@@ -476,7 +540,7 @@ ZEND_COLD void php_verror(const char *docref, const char *params,
        * - we show errors in html mode AND
        * - the user wants to see the links
        */
-   StringRef docrefRoot = execEnv.getDocrefRoot();
+   std::string &docrefRoot = execEnvInfo.docrefRoot;
    if (docref && is_function  && !docrefRoot.empty()) {
       if (strncmp(docref, "http://", 7)) {
          /* We don't have 'http://' so we use docref_root */
@@ -497,11 +561,10 @@ ZEND_COLD void php_verror(const char *docref, const char *params,
                *p = '\0';
             }
          }
-         //execEnv.getDocrefExt()
-         StringRef docrefExt = execEnv.getDocrefExt();
+         std::string &docrefExt = execEnvInfo.docrefExt;
          /* add the extension if it is set in ini */
          if (!docrefExt.empty()) {
-            polar_spprintf(&docref_buf, 0, "%s%s", ref, docrefExt.getData());
+            polar_spprintf(&docref_buf, 0, "%s%s", ref, docrefExt.c_str());
             efree(ref);
          }
          docref = docref_buf;
@@ -522,7 +585,7 @@ ZEND_COLD void php_verror(const char *docref, const char *params,
       efree(docref_buf);
    }
 
-   if (execEnv.getTrackErrors() && sg_moduleInitialized && EG(active) &&
+   if (execEnvInfo.trackErrors && sg_moduleInitialized && EG(active) &&
        (Z_TYPE(EG(user_error_handler)) == IS_UNDEF || !(EG(user_error_handler_error_reporting) & type))) {
       zval tmp;
       ZVAL_STRINGL(&tmp, buffer, buffer_len);
@@ -550,13 +613,13 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
                                   const uint32_t errorLineno, const char *format,
                                   va_list args)
 {
-   ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = retrieve_global_execenv_runtime_info();
    /// need protected for memory leak
    /// TODO find elegance way
    ///
    char *bufferRaw = nullptr;
    bool display;
-   int bufferLen = static_cast<int>(zend_vspprintf(&bufferRaw, execEnv.getLogErrorsMaxLen(), format, args));
+   int bufferLen = static_cast<int>(zend_vspprintf(&bufferRaw, execEnvInfo.logErrorsMaxLen, format, args));
    std::shared_ptr<char> buffer;
    if (bufferRaw) {
       buffer.reset(bufferRaw, [](void *ptr){
@@ -564,14 +627,14 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
       });
    }
    /* check for repeated errors to be ignored */
-   if (execEnv.getIgnoreRepeatedErrors() && !execEnv.getLastErrorMessage().empty()) {
+   if (execEnvInfo.ignoreRepeatedErrors && !execEnvInfo.lastErrorMessage.empty()) {
       /* no check for execEnv.getLastErrorFile() is needed since it cannot
           * be empty if execEnv.getLastErrorMessage() is not empty */
-      StringRef lastErrorMsg = execEnv.getLastErrorMessage();
+      std::string &lastErrorMsg = execEnvInfo.lastErrorMessage;
       if (lastErrorMsg != buffer.get()
-          || (!execEnv.getIgnoreRepeatedSource()
-              && ((execEnv.getLastErrorLineno() != (int)errorLineno)
-                  || execEnv.getLastErrorFile() != errorFilename))) {
+          || (!execEnvInfo.ignoreRepeatedSource
+              && ((execEnvInfo.lastErrorLineno != (int)errorLineno)
+                  || execEnvInfo.lastErrorFile != errorFilename))) {
          display = true;
       } else {
          display = false;
@@ -615,16 +678,16 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
       if (!errorFilename) {
          errorFilename = "Unknown";
       }
-      execEnv.setLastErrorType(type);
-      execEnv.setLastErrorMessage(std::string(bufferRaw, bufferLen));
+      execEnvInfo.lastErrorType = type;
+      execEnvInfo.lastErrorMessage = std::string(bufferRaw, bufferLen);
       // errorFilename must be c string ?
-      execEnv.setLastErrorFile(errorFilename);
-      execEnv.setLastErrorLineno(errorLineno);
+      execEnvInfo.lastErrorFile = errorFilename;
+      execEnvInfo.lastErrorLineno = errorLineno;
    }
 
    /* display/log the error if necessary */
    if (display && (EG(error_reporting) & type || (type & E_CORE))
-       && (execEnv.getLogErrors() || execEnv.getDisplayErrors() || (!sg_moduleInitialized))) {
+       && (execEnvInfo.logErrors || execEnvInfo.displayErrors || (!sg_moduleInitialized))) {
       char *error_type_str;
       int syslogTypeInt = LOG_NOTICE;
 
@@ -670,7 +733,7 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
          break;
       }
 
-      if (!sg_moduleInitialized || execEnv.getLogErrors()) {
+      if (!sg_moduleInitialized || execEnvInfo.logErrors) {
          /// TODO maybe memory leak
          char *log_buffer;
 #ifdef POLAR_OS_WIN32
@@ -683,11 +746,11 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
          efree(log_buffer);
       }
 
-      if (execEnv.getDisplayErrors() && ((sg_moduleInitialized && !execEnv.getDuringExecEnvStartup()) || execEnv.getDisplayStartupErrors())) {
+      if (execEnvInfo.displayErrors && ((sg_moduleInitialized && !execEnvInfo.duringExecEnvStartup) || execEnvInfo.displayStartupErrors)) {
          char *prepend_string = INI_STR(const_cast<char *>("error_prepend_string"));
          char *append_string = INI_STR(const_cast<char *>("error_append_string"));
          /* Write CLI/CGI errors to stderr if display_errors = "stderr" */
-         if (execEnv.getDisplayErrors() == PHP_DISPLAY_ERRORS_STDERR) {
+         if (execEnvInfo.displayErrors == PHP_DISPLAY_ERRORS_STDERR) {
             fprintf(stderr, "%s: %s in %s on line %" PRIu32 "\n", error_type_str, buffer.get(), errorFilename, errorLineno);
 #ifdef POLAR_OS_WIN32
             fflush(stderr);
@@ -697,7 +760,7 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
          }
       }
 #if ZEND_DEBUG
-      if (execEnv.getReportZendDebug()) {
+      if (execEnvInfo.reportZendDebug) {
          zend_bool trigger_break;
 
          switch (type) {
@@ -735,7 +798,7 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
          /* the parser would return 1 (failure), we can bail out nicely */
          if (type != E_PARSE) {
             /* restore memory limit */
-            zend_set_memory_limit(execEnv.getMemoryLimit());
+            zend_set_memory_limit(execEnvInfo.memoryLimit);
             zend_objects_store_mark_destructed(&EG(objects_store));
             zend_bailout();
             return;
@@ -749,7 +812,7 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
       return;
    }
 
-   if (execEnv.getTrackErrors() && sg_moduleInitialized && EG(active)) {
+   if (execEnvInfo.trackErrors && sg_moduleInitialized && EG(active)) {
       zval tmp;
 
       ZVAL_STRINGL(&tmp, buffer.get(), bufferLen);
@@ -769,25 +832,26 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
 ZEND_COLD void php_log_err_with_severity(char *logMessage, int syslogTypeInt)
 {
    ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
    int fd = -1;
    time_t error_time;
 
-   if (execEnv.getInErrorLog()) {
+   if (execEnvInfo.inErrorLog) {
       /* prevent recursive invocation */
       return;
    }
-   execEnv.setInErrorLog(true);
-   StringRef errorLog = execEnv.getErrorLog();
+   execEnvInfo.inErrorLog = true;
+   std::string &errorLog = execEnvInfo.errorLog;
    /* Try to use the specified logging location. */
    if (!errorLog.empty()) {
 #ifdef HAVE_SYSLOG_H
       if (errorLog == "syslog") {
          php_syslog(syslogTypeInt, "%s", logMessage);
-         execEnv.setInErrorLog(false);
+         execEnvInfo.inErrorLog = false;
          return;
       }
 #endif
-      fd = VCWD_OPEN_MODE(errorLog.getData(), O_CREAT | O_APPEND | O_WRONLY, 0644);
+      fd = VCWD_OPEN_MODE(errorLog.c_str(), O_CREAT | O_APPEND | O_WRONLY, 0644);
       if (fd != -1) {
          char *tmp;
          size_t len;
@@ -809,7 +873,7 @@ ZEND_COLD void php_log_err_with_severity(char *logMessage, int syslogTypeInt)
 #endif
          efree(tmp);
          close(fd);
-         execEnv.setInErrorLog(false);
+         execEnvInfo.inErrorLog = false;
          return;
       }
    }
@@ -818,7 +882,7 @@ ZEND_COLD void php_log_err_with_severity(char *logMessage, int syslogTypeInt)
    /// maybe here we need user hook
    /// TODO
    execEnv.logMessage(logMessage, syslogTypeInt);
-   execEnv.setInErrorLog(false);
+   execEnvInfo.inErrorLog = false;
 }
 
 size_t php_write(void *buf, size_t size)
@@ -857,13 +921,13 @@ zval *php_get_configuration_directive_for_zend(zend_string *name)
 
 POLAR_DECL_EXPORT void php_message_handler_for_zend(zend_long message, const void *data)
 {
-   ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = retrieve_global_execenv_runtime_info();
    switch (message) {
    case ZMSG_FAILED_INCLUDE_FOPEN:
-      php_error_docref("function.include", E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php_strip_url_passwd(reinterpret_cast<char *>(const_cast<void *>(data))), PHP_STR_PRINT(execEnv.getIncludePath().getData()));
+      php_error_docref("function.include", E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php_strip_url_passwd(reinterpret_cast<char *>(const_cast<void *>(data))), PHP_STR_PRINT(execEnvInfo.includePath.c_str()));
       break;
    case ZMSG_FAILED_REQUIRE_FOPEN:
-      php_error_docref("function.require", E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php_strip_url_passwd(reinterpret_cast<char *>(const_cast<void *>(data))), PHP_STR_PRINT(execEnv.getIncludePath().getData()));
+      php_error_docref("function.require", E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php_strip_url_passwd(reinterpret_cast<char *>(const_cast<void *>(data))), PHP_STR_PRINT(execEnvInfo.includePath.c_str()));
       break;
    case ZMSG_FAILED_HIGHLIGHT_FOPEN:
       php_error_docref(NULL, E_WARNING, "Failed opening '%s' for highlighting", php_strip_url_passwd(reinterpret_cast<char *>(const_cast<void *>(data))));
@@ -875,7 +939,7 @@ POLAR_DECL_EXPORT void php_message_handler_for_zend(zend_long message, const voi
          char memoryLeakBuf[1024];
          if (message==ZMSG_MEMORY_LEAK_DETECTED) {
             zend_leak_info *t = reinterpret_cast<zend_leak_info *>(const_cast<void *>(data));
-            std::snprintf(memoryLeakBuf, 512, "%s(%" PRIu32 ") :  Freeing " ZEND_ADDR_FMT " (%zu bytes), script=%s\n", t->filename, t->lineno, (size_t)t->addr, t->size, SAFE_FILENAME(execEnv.getEntryScriptFilename().getData()));
+            std::snprintf(memoryLeakBuf, 512, "%s(%" PRIu32 ") :  Freeing " ZEND_ADDR_FMT " (%zu bytes), script=%s\n", t->filename, t->lineno, (size_t)t->addr, t->size, SAFE_FILENAME(execEnvInfo.entryScriptFilename.c_str()));
             if (t->orig_filename) {
                char relayBuf[512];
                std::snprintf(relayBuf, 512, "%s(%" PRIu32 ") : Actual location (location was relayed)\n", t->orig_filename, t->orig_lineno);
@@ -916,9 +980,9 @@ POLAR_DECL_EXPORT void php_message_handler_for_zend(zend_long message, const voi
       datetime_str = polar_asctime_r(ta, asctimebuf);
       if (datetime_str) {
          datetime_str[strlen(datetime_str)-1]=0;	/* get rid of the trailing newline */
-         std::snprintf(memoryLeakBuf, sizeof(memoryLeakBuf), "[%s]  Script:  '%s'\n", datetime_str, SAFE_FILENAME(execEnv.getEntryScriptFilename().getData()));
+         std::snprintf(memoryLeakBuf, sizeof(memoryLeakBuf), "[%s]  Script:  '%s'\n", datetime_str, SAFE_FILENAME(execEnvInfo.entryScriptFilename.c_str()));
       } else {
-         std::snprintf(memoryLeakBuf, sizeof(memoryLeakBuf), "[null]  Script:  '%s'\n", SAFE_FILENAME(execEnv.getEntryScriptFilename().getData()));
+         std::snprintf(memoryLeakBuf, sizeof(memoryLeakBuf), "[null]  Script:  '%s'\n", SAFE_FILENAME(execEnvInfo.entryScriptFilename.c_str()));
       }
 #	if defined(POLAR_OS_WIN32)
       OutputDebugString(memoryLeakBuf);
@@ -971,9 +1035,9 @@ zend_string *php_resolve_path(const char *filename, size_t filenameLen, const ch
        IS_ABSOLUTE_PATH(filename, filenameLen) ||
     #ifdef POLAR_OS_WIN32
        /* This should count as an absolute local path as well, however
-                                                                IS_ABSOLUTE_PATH doesn't care about this path form till now. It
-                                                                might be a big thing to extend, thus just a local handling for
-                                                                now. */
+                                                                                            IS_ABSOLUTE_PATH doesn't care about this path form till now. It
+                                                                                            might be a big thing to extend, thus just a local handling for
+                                                                                            now. */
        filenameLen >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1]) ||
     #endif
        !path ||
@@ -1039,8 +1103,8 @@ zend_string *php_resolve_path(const char *filename, size_t filenameLen, const ch
 
 zend_string *php_resolve_path_for_zend(const char *filename, size_t filenameLen)
 {
-   ExecEnv &execEnv = retrieve_global_execenv();
-   return php_resolve_path(filename, filenameLen, execEnv.getIncludePath().getData());
+   ExecEnvInfo &execEnvInfo = retrieve_global_execenv_runtime_info();
+   return php_resolve_path(filename, filenameLen, execEnvInfo.includePath.c_str());
 }
 
 bool seek_file_begin(zend_file_handle *fileHandle, const char *scriptFile, int *lineno)

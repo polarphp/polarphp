@@ -187,7 +187,7 @@ namespace polar {
  */
 static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt, va_list ap) /* {{{ */
 {
-   char *s = NULL;
+   char *s = nullptr;
    size_t s_len;
    int free_zcopy;
    zval *zvp, zcopy;
@@ -211,7 +211,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 #ifdef ZTS
    struct lconv lconv;
 #else
-   struct lconv *lconv = NULL;
+   struct lconv *lconv = nullptr;
 #endif
 #endif
 
@@ -592,7 +592,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
          case 's':
          case 'v':
             s = va_arg(ap, char *);
-            if (s != NULL) {
+            if (s != nullptr) {
                if (!adjust_precision) {
                   s_len = strlen(s);
                } else {
@@ -707,7 +707,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 
             s_len = strlen(s);
 
-            if (alternate_form && (strchr(s, '.')) == NULL)
+            if (alternate_form && (strchr(s, '.')) == nullptr)
                s[s_len++] = '.';
             break;
 

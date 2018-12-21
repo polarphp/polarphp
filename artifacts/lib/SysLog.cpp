@@ -31,9 +31,9 @@ namespace polar {
 
 void php_openlog(const char *ident, int option, int facility)
 {
-   ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = retrieve_global_execenv_runtime_info();
    ::openlog(ident, option, facility);
-   execEnv.setHaveCalledOpenlog(true);
+   execEnvInfo.haveCalledOpenlog = true;
 }
 
 #ifdef POLAR_OS_WIN32
@@ -64,14 +64,14 @@ void php_syslog(int priority, const char *format, ...)
    smart_string fbuf = {0};
    smart_string sbuf = {0};
    va_list args;
-   ExecEnv &execEnv = retrieve_global_execenv();
+   ExecEnvInfo &execEnvInfo = retrieve_global_execenv_runtime_info();
    /*
     * don't rely on openlog() being called by syslog() if it's
     * not already been done; call it ourselves and pass the
     * correct parameters!
     */
-   if (!execEnv.getHaveCalledOpenlog()) {
-      php_openlog(execEnv.getSyslogIdent().getData(), 0, execEnv.getSyslogFacility());
+   if (!execEnvInfo.haveCalledOpenlog) {
+      php_openlog(execEnvInfo.syslogIdent.c_str(), 0, execEnvInfo.syslogFacility);
    }
    va_start(args, format);
    zend_printf_to_smart_string(&fbuf, format, args);
@@ -87,12 +87,12 @@ void php_syslog(int priority, const char *format, ...)
       /* check for NVT ASCII only unless test disabled */
       if (((0x20 <= c) && (c <= 0x7e)))
          smart_string_appendc(&sbuf, c);
-      else if ((c >= 0x80) && (execEnv.getSyslogFilter() != PHP_SYSLOG_FILTER_ASCII))
+      else if ((c >= 0x80) && (execEnvInfo.syslogFilter != PHP_SYSLOG_FILTER_ASCII))
          smart_string_appendc(&sbuf, c);
       else if (c == '\n') {
          syslog(priority, "%.*s", (int)sbuf.len, sbuf.c);
          smart_string_reset(&sbuf);
-      } else if ((c < 0x20) && (execEnv.getSyslogFilter() == PHP_SYSLOG_FILTER_ALL))
+      } else if ((c < 0x20) && (execEnvInfo.syslogFilter == PHP_SYSLOG_FILTER_ALL))
          smart_string_appendc(&sbuf, c);
       else {
          const char xdigits[] = "0123456789abcdef";
