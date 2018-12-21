@@ -253,7 +253,6 @@ int dispatch_cli_command()
    std::string translatedPath;
    int interactive = 0;
    int lineno = 0;
-   int hide_argv = 0;
    polar_try {
       CG(in_compilation) = 0; /* not initialized but needed for several options */
       if (sg_showVersion) {
@@ -318,12 +317,6 @@ int dispatch_cli_command()
       }
       execEnvStarted = true;
       CG(start_lineno) = lineno;
-      if (hide_argv) {
-         int i;
-         //         for (i = 1; i < argc; i++) {
-         //            memset(argv[i], 0, strlen(argv[i]));
-         //         }
-      }
       execEnvInfo.duringExecEnvStartup = false;
       ///
       /// php exec env is ready

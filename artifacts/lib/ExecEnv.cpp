@@ -134,11 +134,12 @@ void ExecEnv::logMessage(const char *logMessage, int syslogTypeInt)
 
 }
 
-void ExecEnv::initDefaultConfig(HashTable *configurationHash)
+void ExecEnv::initDefaultConfig(HashTable *configuration_hash)
 {
-
+   zval tmp;
+   POLAR_INI_DEFAULT("report_zend_debug", "1");
+   POLAR_INI_DEFAULT("display_errors", "1");
 }
-
 
 void ExecEnv::activate()
 {
@@ -1034,9 +1035,9 @@ zend_string *php_resolve_path(const char *filename, size_t filenameLen, const ch
        IS_ABSOLUTE_PATH(filename, filenameLen) ||
     #ifdef POLAR_OS_WIN32
        /* This should count as an absolute local path as well, however
-                                                                                            IS_ABSOLUTE_PATH doesn't care about this path form till now. It
-                                                                                            might be a big thing to extend, thus just a local handling for
-                                                                                            now. */
+                                                                                                    IS_ABSOLUTE_PATH doesn't care about this path form till now. It
+                                                                                                    might be a big thing to extend, thus just a local handling for
+                                                                                                    now. */
        filenameLen >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1]) ||
     #endif
        !path ||
