@@ -284,6 +284,10 @@ void emit_fd_setsize_warning(int maxFd);
 
 #define PHP_MODULE_GLOBALS		ZEND_MODULE_GLOBALS
 
+/* Error display modes */
+#define PHP_DISPLAY_ERRORS_STDOUT	1
+#define PHP_DISPLAY_ERRORS_STDERR	2
+
 /* macros */
 #define PHP_STR_PRINT(str)	((str)?(str):"")
 

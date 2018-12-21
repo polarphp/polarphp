@@ -93,7 +93,7 @@ POLAR_DECL_EXPORT CliShellCallbacksType *php_cli_get_shell_callbacks()
 
 ExecEnv &retrieve_global_execenv()
 {
-   static thread_local ExecEnv execEnv;
+   thread_local ExecEnv execEnv;
    return execEnv;
 }
 

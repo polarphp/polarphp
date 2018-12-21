@@ -41,8 +41,8 @@ struct php_tick_function_entry;
 
 struct ArgSeparators
 {
-   char *output;
-   char *input;
+   std::string output;
+   std::string input;
 };
 
 /// TODO
@@ -106,7 +106,6 @@ struct ExecEnvInfo
    bool reportMemLeaks;
    bool ignoreUserAbort;
    bool registerArgcArgv;
-   bool autoGlobalsJit;
    bool modulesActivated;
    bool duringExecEnvStartup;
    bool allowUrlFopen;
@@ -158,7 +157,6 @@ struct ExecEnvInfo
    std::string internalEncoding;
    std::string outputEncoding;
 
-   std::string variablesOrder;
    std::string lastErrorMessage;
    std::string lastErrorFile;
    std::string phpSysTempDir;
@@ -167,7 +165,6 @@ struct ExecEnvInfo
    std::string docrefRoot;
    std::string docrefExt;
    std::string userIniFilename;
-   std::string requestOrder;
    std::string syslogIdent;
    std::string entryScriptFilename;
 

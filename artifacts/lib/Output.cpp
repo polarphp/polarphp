@@ -172,10 +172,10 @@ int php_output_get_status(void)
 
 size_t php_output_write_unbuffered(const char *str, size_t len)
 {
-   //   if (OG(flags) & PHP_OUTPUT_ACTIVATED) {
-   //      return sapi_module.ub_write(str, len);
-   //   }
-   //   return php_output_direct(str, len);
+      if (OG(flags) & PHP_OUTPUT_ACTIVATED) {
+         return retrieve_global_execenv().unbufferWrite(str, len);
+      }
+      return php_output_direct(str, len);
 }
 
 size_t php_output_write(const char *str, size_t len)

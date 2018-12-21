@@ -92,7 +92,27 @@ POLAR_DECL_EXPORT ZEND_INI_MH(update_long_handler);
 POLAR_DECL_EXPORT ZEND_INI_MH(update_long_ge_zero_handler);
 POLAR_DECL_EXPORT ZEND_INI_MH(update_real_handler);
 POLAR_DECL_EXPORT ZEND_INI_MH(update_string_handler);
-POLAR_DECL_EXPORT ZEND_INI_MH(update_string_unempty);
+POLAR_DECL_EXPORT ZEND_INI_MH(update_string_unempty_handler);
+
+///
+/// custom ini modify handlers
+///
+POLAR_INI_MH(set_serialize_precision_handler);
+POLAR_INI_MH(update_display_errors_handler);
+POLAR_INI_MH(update_internal_encoding_handler);
+POLAR_INI_MH(update_error_log_handler);
+POLAR_INI_MH(update_timeout_handler);
+POLAR_INI_MH(update_base_dir_handler);
+POLAR_INI_MH(change_memory_limit_handler);
+POLAR_INI_MH(set_precision_handler);
+POLAR_INI_MH(set_facility_handler);
+POLAR_INI_MH(set_log_filter_handler);
+
+///
+/// custom ini displayer handlers
+///
+POLAR_INI_DISP(display_errors_mode);
+
 
 } // polar
 
