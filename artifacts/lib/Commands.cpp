@@ -317,6 +317,7 @@ int dispatch_cli_command()
          //         }
       }
       execEnvInfo.duringExecEnvStartup = false;
+      ///
       /// php exec env is ready
       /// begin dispatch commands
       ///

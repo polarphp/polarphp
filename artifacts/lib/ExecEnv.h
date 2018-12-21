@@ -39,12 +39,6 @@ using polar::basic::StringRef;
 using IniConfigDefaultInitFunc = void (*)(HashTable *configuration_hash);
 struct php_tick_function_entry;
 
-struct ArgSeparators
-{
-   std::string output;
-   std::string input;
-};
-
 /// TODO
 ///  for interactive command shell
 ///
@@ -169,7 +163,6 @@ struct ExecEnvInfo
    std::string entryScriptFilename;
 
    IniConfigDefaultInitFunc iniDefaultInitHandler;
-   ArgSeparators argSeparator;
    zend_llist tickFunctions;
 };
 

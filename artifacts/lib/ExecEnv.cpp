@@ -267,32 +267,31 @@ int php_execute_script(zend_file_handle *primaryFile)
           primaryFile->opened_path == nullptr &&
           primaryFile->type != ZEND_HANDLE_FILENAME
           ) {
-         //         if (expand_filepath(primaryFile->filename, realfile)) {
-         //            primaryFile->opened_path = zend_string_init(realfile, strlen(realfile), 0);
-         //            zend_hash_add_empty_element(&EG(included_files), primaryFile->opened_path);
-         //         }
+         if (expand_filepath(primaryFile->filename, realfile)) {
+            primaryFile->opened_path = zend_string_init(realfile, strlen(realfile), 0);
+            zend_hash_add_empty_element(&EG(included_files), primaryFile->opened_path);
+         }
       }
-
-      //      if (PG(auto_prependFile) && PG(auto_prependFile)[0]) {
-      //         prependFile.filename = PG(auto_prependFile);
-      //         prependFile.opened_path = nullptr;
-      //         prependFile.free_filename = 0;
-      //         prependFile.type = ZEND_HANDLE_FILENAME;
-      //         prependFilePointer = &prependFile;
-      //      } else {
-      //         prependFilePointer = nullptr;
-      //      }
-
-      //      if (PG(auto_appendFile) && PG(auto_appendFile)[0]) {
-      //         appendFile.filename = PG(auto_appendFile);
-      //         appendFile.opened_path = nullptr;
-      //         appendFile.free_filename = 0;
-      //         appendFile.type = ZEND_HANDLE_FILENAME;
-      //         appendFilePointer = &appendFile;
-      //      } else {
-      //         appendFilePointer = nullptr;
-      //      }
-
+      std::string &autoPrependFile = execEnvInfo.autoAppendFile;
+      if (!autoPrependFile.empty()) {
+         prependFile.filename = autoPrependFile.c_str();
+         prependFile.opened_path = nullptr;
+         prependFile.free_filename = 0;
+         prependFile.type = ZEND_HANDLE_FILENAME;
+         prependFilePointer = &prependFile;
+      } else {
+         prependFilePointer = nullptr;
+      }
+      std::string &autoAppendFile = execEnvInfo.autoAppendFile;
+      if (!autoAppendFile.empty()) {
+         appendFile.filename = autoAppendFile.c_str();
+         appendFile.opened_path = nullptr;
+         appendFile.free_filename = 0;
+         appendFile.type = ZEND_HANDLE_FILENAME;
+         appendFilePointer = &appendFile;
+      } else {
+         appendFilePointer = nullptr;
+      }
 
       /*
          If cli primary file has shabang line and there is a prepend file,
