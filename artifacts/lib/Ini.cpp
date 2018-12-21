@@ -840,4 +840,74 @@ HashTable* php_ini_get_configuration_hash()
    return &sg_configurationHash;
 }
 
+ZEND_INI_MH(update_bool_handler)
+{
+   zend_bool *p;
+   char *base = (char *) mh_arg2;
+   p = (zend_bool *) (base+(size_t) mh_arg1);
+   *p = zend_ini_parse_bool(new_value);
+   return SUCCESS;
+}
+
+ZEND_INI_MH(update_long_handler)
+{
+   zend_long *p;
+   char *base = (char *) mh_arg2;
+   p = (zend_long *) (base+(size_t) mh_arg1);
+   *p = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+   return SUCCESS;
+}
+
+ZEND_INI_MH(update_long_ge_zero_handler)
+{
+   zend_long *p, tmp;
+   char *base = (char *) mh_arg2;
+   tmp = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+   if (tmp < 0) {
+      return FAILURE;
+   }
+   p = (zend_long *) (base+(size_t) mh_arg1);
+   *p = tmp;
+   return SUCCESS;
+}
+
+ZEND_INI_MH(update_real_handler)
+{
+   double *p;
+   char *base;
+   base = (char *) ts_resource(*((int *) mh_arg2));
+   p = (double *) (base+(size_t) mh_arg1);
+   *p = zend_strtod(ZSTR_VAL(new_value), nullptr);
+   return SUCCESS;
+}
+
+ZEND_INI_MH(update_string_handler)
+{
+   char **p;
+#ifndef ZTS
+   char *base = (char *) mh_arg2;
+#else
+   char *base;
+
+   base = (char *) ts_resource(*((int *) mh_arg2));
+#endif
+
+   p = (char **) (base+(size_t) mh_arg1);
+
+   *p = new_value ? ZSTR_VAL(new_value) : nullptr;
+   return SUCCESS;
+}
+
+ZEND_INI_MH(update_string_unempty)
+{
+   char **p;
+   char *base = (char *) mh_arg2;
+   if (new_value && !ZSTR_VAL(new_value)[0]) {
+      return FAILURE;
+   }
+   p = (char **) (base+(size_t) mh_arg1);
+   *p = new_value ? ZSTR_VAL(new_value) : nullptr;
+   return SUCCESS;
+}
+
 } // polar

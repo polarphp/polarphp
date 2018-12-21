@@ -37,10 +37,6 @@
 #define POLAR_INI_ENTRY_EX	ZEND_INI_ENTRY_EX
 #define POLAR_INI_ENTRY		ZEND_INI_ENTRY
 
-#define STD_POLAR_INI_ENTRY		STD_ZEND_INI_ENTRY
-#define STD_POLAR_INI_ENTRY_EX	STD_ZEND_INI_ENTRY_EX
-#define STD_POLAR_INI_BOOLEAN		STD_ZEND_INI_BOOLEAN
-
 #define POLAR_INI_DISPLAY_ORIG	ZEND_INI_DISPLAY_ORIG
 #define POLAR_INI_DISPLAY_ACTIVE	ZEND_INI_DISPLAY_ACTIVE
 
@@ -50,6 +46,13 @@
 #define POLAR_INI_STAGE_DEACTIVATE	ZEND_INI_STAGE_DEACTIVATE
 #define POLAR_INI_STAGE_RUNTIME		ZEND_INI_STAGE_RUNTIME
 #define POLAR_INI_STAGE_HTACCESS		ZEND_INI_STAGE_HTACCESS
+
+#define POLAR_STD_INI_ENTRY(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr) \
+   ZEND_INI_ENTRY2(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr)
+#define POLAR_STD_INI_ENTRY_EX(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr, displayer) \
+   ZEND_INI_ENTRY2_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, displayer)
+#define POLAR_STD_INI_BOOLEAN(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr) \
+   ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, NULL, zend_ini_boolean_displayer_cb)
 
 #define polar_ini_boolean_displayer_cb	zend_ini_boolean_displayer_cb
 #define polar_ini_color_displayer_cb		zend_ini_color_displayer_cb
@@ -78,6 +81,18 @@ POLAR_DECL_EXPORT int php_ini_has_per_host_config(void);
 POLAR_DECL_EXPORT void php_ini_activate_per_dir_config(char *path, size_t pathLen);
 POLAR_DECL_EXPORT void php_ini_activate_per_host_config(const char *host, size_t hostLen);
 POLAR_DECL_EXPORT HashTable *php_ini_get_configuration_hash(void);
+
+///
+/// because polarphp use thread_local mechanism instead of TSRM
+/// so we need rewrite ini modify callbacks
+/// here we use update_xxx_handler name schema
+///
+POLAR_DECL_EXPORT ZEND_INI_MH(update_bool_handler);
+POLAR_DECL_EXPORT ZEND_INI_MH(update_long_handler);
+POLAR_DECL_EXPORT ZEND_INI_MH(update_long_ge_zero_handler);
+POLAR_DECL_EXPORT ZEND_INI_MH(update_real_handler);
+POLAR_DECL_EXPORT ZEND_INI_MH(update_string_handler);
+POLAR_DECL_EXPORT ZEND_INI_MH(update_string_unempty);
 
 } // polar
 
