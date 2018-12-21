@@ -271,12 +271,20 @@ int dispatch_cli_command()
 #endif
          std::cout.flush();
       }
+      size_t scriptStartIndex = 0;
       /// setup script file from position arguments
       if (sg_scriptFile.empty() && sg_behavior != ExecMode::CliDirect &&
           sg_behavior != ExecMode::ProcessStdin &&
           !sg_scriptArgs.empty()) {
          sg_scriptFile = sg_scriptArgs.front();
+         ++scriptStartIndex;
       }
+      size_t scriptArgc = sg_scriptArgs.size();
+      std::vector<std::string> &scriptArgv = execEnvInfo.scriptArgv;
+      for (size_t i = scriptStartIndex; i < scriptArgc; ++i) {
+         scriptArgv.push_back(sg_scriptArgs[i]);
+      }
+      execEnvInfo.scriptArgc = scriptArgv.size();
       if (!sg_scriptFile.empty()) {
          if (!seek_file_begin(&fileHandle, sg_scriptFile.c_str(), &lineno)) {
             goto err;

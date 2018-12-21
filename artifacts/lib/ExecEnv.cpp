@@ -150,19 +150,19 @@ void ExecEnv::deactivate()
    m_started = false;
 }
 
-ExecEnv &ExecEnv::setArgc(int argc)
+ExecEnv &ExecEnv::setContainerArgc(int argc)
 {
    m_argc = argc;
    return *this;
 }
 
-ExecEnv &ExecEnv::setArgv(const std::vector<StringRef> &argv)
+ExecEnv &ExecEnv::setContainerArgv(const std::vector<StringRef> &argv)
 {
    m_argv = argv;
    return *this;
 }
 
-ExecEnv &ExecEnv::setArgv(char *argv[])
+ExecEnv &ExecEnv::setContainerArgv(char *argv[])
 {
    std::vector<StringRef> tempArgv;
    char **arg = argv;
@@ -187,12 +187,12 @@ bool ExecEnv::getStarted() const
    return m_started;
 }
 
-const std::vector<StringRef> &ExecEnv::getArgv() const
+const std::vector<StringRef> &ExecEnv::getContainerArgv() const
 {
    return m_argv;
 }
 
-int ExecEnv::getArgc() const
+int ExecEnv::getContainerArgc() const
 {
    return m_argc;
 }

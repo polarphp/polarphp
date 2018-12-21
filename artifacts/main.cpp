@@ -65,8 +65,8 @@ int main(int argc, char *argv[])
    }
    polar::ExecEnv &execEnv = polar::retrieve_global_execenv();
    polar::ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
-   execEnv.setArgc(argc);
-   execEnv.setArgv(argv);
+   execEnv.setContainerArgc(argc);
+   execEnv.setContainerArgv(argv);
 #if defined(POLAR_OS_WIN32)
 # ifdef PHP_CLI_WIN32_NO_CONSOLE
    int argc = __argc;

@@ -119,6 +119,7 @@ struct ExecEnvInfo
 
    int lastErrorType;
    int lastErrorLineno;
+   size_t scriptArgc;
 
    zend_long serializePrecision;
    zend_long memoryLimit;
@@ -162,6 +163,7 @@ struct ExecEnvInfo
    std::string syslogIdent;
    std::string entryScriptFilename;
 
+   std::vector<std::string> scriptArgv;
    IniConfigDefaultInitFunc iniDefaultInitHandler;
    zend_llist tickFunctions;
 };
@@ -174,15 +176,15 @@ public:
    void activate();
    void deactivate();
 
-   ExecEnv &setArgc(int argc);
-   ExecEnv &setArgv(const std::vector<StringRef> &argv);
-   ExecEnv &setArgv(char *argv[]);
+   ExecEnv &setContainerArgc(int argc);
+   ExecEnv &setContainerArgv(const std::vector<StringRef> &argv);
+   ExecEnv &setContainerArgv(char *argv[]);
    ExecEnv &setStarted(bool flag);
 
    bool getStarted() const;
    ExecEnvInfo &getRuntimeInfo();
-   const std::vector<StringRef> &getArgv() const;
-   int getArgc() const;
+   const std::vector<StringRef> &getContainerArgv() const;
+   int getContainerArgc() const;
    StringRef getExecutableFilepath() const;
 
    size_t unbufferWrite(const char *str, int len);
