@@ -57,7 +57,6 @@ Variant CallableVariant::operator ()(Args&&... args)
    return exec(sizeof...(Args), vargs);
 }
 
-
 } // vmapi
 } // polar
 
