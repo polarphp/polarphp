@@ -24,7 +24,6 @@
 
 #include "polarphp/vm/lang/Argument.h"
 #include "polarphp/vm/lang/Parameter.h"
-#include "polarphp/vm/lang/StdClass.h"
 #include "polarphp/vm/lang/Type.h"
 #include "polarphp/vm/lang/Class.h"
 #include "polarphp/vm/lang/Constant.h"
@@ -34,5 +33,7 @@
 #include "polarphp/vm/lang/Method.h"
 #include "polarphp/vm/lang/Namespace.h"
 #include "polarphp/vm/lang/Ini.h"
+
+#include "polarphp/vm/StdClass.h"
 
 #endif // POLARPHP_VM_ZENDAPI_HEADERS_H

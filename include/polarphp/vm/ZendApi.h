@@ -13,6 +13,8 @@
 #define  POLARPHP_VM_ZENDAPI_H
 
 #include "polarphp/global/Global.h"
+#include "polarphp/vm/lang/Type.h"
+#include "polarphp/vm/TypeDefs.h"
 
 #define VMAPI_DECLARE_PRIVATE POLAR_DECLARE_PRIVATE
 #define WMAPI_DECLARE_PUBLIC  POLAR_DECLARE_PUBLIC
