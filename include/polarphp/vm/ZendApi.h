@@ -21,4 +21,16 @@
 #define VMAPI_Q POLAR_Q
 #define VMAPI_DECL_EXPORT POLAR_DECL_EXPORT
 
+namespace polar {
+namespace vmapi {
+
+extern thread_local VMAPI_DECL_EXPORT std::ostream out;
+extern thread_local VMAPI_DECL_EXPORT std::ostream error;
+extern thread_local VMAPI_DECL_EXPORT std::ostream notice;
+extern thread_local VMAPI_DECL_EXPORT std::ostream warning;
+extern thread_local VMAPI_DECL_EXPORT std::ostream deprecated;
+
+} // vmapi
+} // polar
+
 #endif // POLARPHP_VM_ZENDAPI_H
