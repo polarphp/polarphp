@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/12/23.
 
-#ifndef POLAR_VMAPI_PROTOCOL_ARRAY_ACCESS_H
-#define POLAR_VMAPI_PROTOCOL_ARRAY_ACCESS_H
+#ifndef POLARPHP_VMAPI_PROTOCOL_ARRAY_ACCESS_H
+#define POLARPHP_VMAPI_PROTOCOL_ARRAY_ACCESS_H
 
 #include "polarphp/vm/ZendApi.h"
 
@@ -33,4 +33,4 @@ public:
 } // vmapi
 } // polar
 
-#endif // POLAR_VMAPI_PROTOCOL_ARRAY_ACCESS_H
+#endif // POLARPHP_VMAPI_PROTOCOL_ARRAY_ACCESS_H

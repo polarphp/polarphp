@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/12/23.
 
-#ifndef POLAR_VMAPI_PROTOCOL_ABSTRACT_ITERATOR_H
-#define POLAR_VMAPI_PROTOCOL_ABSTRACT_ITERATOR_H
+#ifndef POLARPHP_VMAPI_PROTOCOL_ABSTRACT_ITERATOR_H
+#define POLARPHP_VMAPI_PROTOCOL_ABSTRACT_ITERATOR_H
 
 #include "polarphp/vm/ZendApi.h"
 #include <memory>
@@ -45,4 +45,4 @@ protected:
 } // vmapi
 } // polar
 
-#endif // POLAR_VMAPI_PROTOCOL_ABSTRACT_ITERATOR_H
+#endif // POLARPHP_VMAPI_PROTOCOL_ABSTRACT_ITERATOR_H

@@ -32,7 +32,17 @@ extern thread_local VMAPI_DECL_EXPORT std::ostream notice;
 extern thread_local VMAPI_DECL_EXPORT std::ostream warning;
 extern thread_local VMAPI_DECL_EXPORT std::ostream deprecated;
 
+using VmApiVaridicItemType = zval;
+
 } // vmapi
 } // polar
+
+#define VMAPI_ASSERT ZEND_ASSERT
+
+#define VMAPI_SUCCESS SUCCESS
+#define VMAPI_FAILURE FAILURE
+
+// define some zend macro
+#define vmapi_bailout() _zend_bailout(const_cast<char *>(static_cast<const char *>(__FILE__)), __LINE__)
 
 #endif // POLARPHP_VM_ZENDAPI_H

@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/12/23.
 
-#ifndef POLAR_VMAPI_PROTOCOL_TRAVERSABLE_H
-#define POLAR_VMAPI_PROTOCOL_TRAVERSABLE_H
+#ifndef POLARPHP_VMAPI_PROTOCOL_TRAVERSABLE_H
+#define POLARPHP_VMAPI_PROTOCOL_TRAVERSABLE_H
 
 #include "polarphp/vm/ZendApi.h"
 
@@ -29,4 +29,4 @@ public:
 } // vmapi
 } // polar
 
-#endif // POLAR_VMAPI_PROTOCOL_TRAVERSABLE_H
+#endif // POLARPHP_VMAPI_PROTOCOL_TRAVERSABLE_H
