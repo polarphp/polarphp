@@ -80,7 +80,7 @@ int hash_zval_identical_function(const void *z1, const void *z2)
 }
 } // anonymous namespace
 
-using zapi::ds::internal::VariantPrivate;
+using internal::VariantPrivate;
 
 // iterator class alias
 using ArrayIterator = ArrayVariant::Iterator;
@@ -193,7 +193,7 @@ ArrayVariant::ArrayVariant(const std::initializer_list<std::pair<Variant, Varian
    }
 }
 
-ArrayVariant::ArrayVariant(const std::map<Variant, Variant, zapi::utils::VariantKeyLess> &map)
+ArrayVariant::ArrayVariant(const std::map<Variant, Variant, VariantKeyLess> &map)
    : ArrayVariant()
 {
    for(auto &item : map) {
@@ -447,7 +447,7 @@ ArrayVariant::Iterator ArrayVariant::erase(ConstIterator &iter)
    } else {
       deleteStatus = zend_hash_index_del(array, key.first);
    }
-   if (ZAPI_FAILURE == deleteStatus) {
+   if (VMAPI_FAILURE == deleteStatus) {
       return iter;
    }
    return nextIter;
@@ -508,7 +508,7 @@ Variant ArrayVariant::getValue(vmapi_ulong index) const
 {
    zval *val = zend_hash_index_find(getZendArrayPtr(), index);
    if (nullptr == val) {
-      zapi::notice << "Undefined offset: " << index << std::endl;
+      vmapi::notice << "Undefined offset: " << index << std::endl;
    }
    return val;
 }
@@ -517,7 +517,7 @@ Variant ArrayVariant::getValue(const std::string &key) const
 {
    zval *val = zend_hash_str_find(getZendArrayPtr(), key.c_str(), key.length());
    if (nullptr == val) {
-      zapi::notice << "Undefined index: " << key << std::endl;
+      vmapi::notice << "Undefined index: " << key << std::endl;
    }
    return val;
 }
