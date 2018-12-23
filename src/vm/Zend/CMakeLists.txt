@@ -11,7 +11,7 @@
 #
 # Created by polarboy on 2018/08/20.
 
-set(ZendVM_SRCS
+set(ZENDVM_SRCS
    zend_alloc.c
    zend_API.c
    zend_ast.c
@@ -64,10 +64,10 @@ set(ZendVM_SRCS
    )
 
 if (ZEND_BROKEN_SPRINTF)
-   list(APPEND ZendVM_SRCS zend_sprintf.c)
+   list(APPEND ZENDVM_SRCS zend_sprintf.c)
 endif()
 if (HAVE_DTRACE)
-   list(APPEND ZendVM_SRCS zend_dtrace.c)
+   list(APPEND ZENDVM_SRCS zend_dtrace.c)
 endif()
 
 re2c_target(NAME ZendIniScannerLex
@@ -88,7 +88,7 @@ bison_target(ZendLangParser zend_language_parser.y ${CMAKE_CURRENT_BINARY_DIR}/z
    COMPILE_FLAGS "-p zend -d"
    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/zend_language_parser.h)
 
-polar_merge_list(ZendVM_SRCS POLAR_ZendVM_ZEND_HEADERS)
+polar_merge_list(ZENDVM_SRCS POLAR_ZendVM_ZEND_HEADERS)
 
 # turn off warning, ZendVM team ensure the code correctness
 if (POLAR_ENABLE_WARNINGS AND (POLAR_COMPILER_IS_GCC_COMPATIBLE OR CLANG_CL))
@@ -103,7 +103,7 @@ endif (POLAR_ENABLE_WARNINGS AND (POLAR_COMPILER_IS_GCC_COMPATIBLE OR CLANG_CL))
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-polar_add_library_internal(ZendVM STATIC ${ZendVM_SRCS})
+polar_add_library_internal(ZendVM STATIC ${ZENDVM_SRCS})
 
 get_target_property(ZendVMIncludeDirs tsrm INCLUDE_DIRECTORIES)
 polar_merge_list(ZendVMIncludeDirs POLAR_ZENDVM_INCLUDE_DIRS)

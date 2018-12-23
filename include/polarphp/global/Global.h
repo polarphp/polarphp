@@ -216,24 +216,24 @@ static inline T *get_ptr_helper(const std::unique_ptr<T> &p)
 
 #define POLAR_DECLARE_PRIVATE(Class)\
    inline Class##Private* getImplPtr()\
-{\
-   return reinterpret_cast<Class##Private *>(polar::get_ptr_helper(m_implPtr));\
-}\
+   {\
+      return reinterpret_cast<Class##Private *>(polar::get_ptr_helper(m_implPtr));\
+   }\
    inline const Class##Private* getImplPtr() const\
-{\
-   return reinterpret_cast<const Class##Private *>(polar::get_ptr_helper(m_implPtr));\
-}\
+   {\
+      return reinterpret_cast<const Class##Private *>(polar::get_ptr_helper(m_implPtr));\
+   }\
    friend class Class##Private
 
 #define POLAR_DECLARE_PUBLIC(Class)\
    inline Class* getApiPtr()\
-{\
-   return static_cast<Class *>(m_apiPtr);\
-}\
+   {\
+      return static_cast<Class *>(m_apiPtr);\
+   }\
    inline const Class* getApiPtr() const\
-{\
-   return static_cast<const Class *>(m_apiPtr);\
-}\
+   {\
+      return static_cast<const Class *>(m_apiPtr);\
+   }\
    friend class Class
 
 #define POLAR_D(Class) Class##Private * const implPtr = getImplPtr()
