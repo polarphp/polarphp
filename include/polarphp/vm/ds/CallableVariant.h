@@ -21,6 +21,42 @@ namespace vmapi {
 /// forward declare class
 class Parameters;
 
+class VMAPI_DECL_EXPORT CallableVariant final : public Variant
+{
+public:
+   using HaveArgCallable = Variant(Parameters &);
+   using NoArgCallable = Variant();
+   CallableVariant(HaveArgCallable callable);
+   CallableVariant(NoArgCallable callable);
+
+   CallableVariant(const Variant &other);
+   CallableVariant(const CallableVariant &other);
+   CallableVariant(Variant &&other);
+   CallableVariant(CallableVariant &&other) noexcept;
+   CallableVariant(zval &other);
+   CallableVariant(zval &&other);
+   CallableVariant(zval *other);
+
+   CallableVariant &operator =(const CallableVariant &other);
+   CallableVariant &operator =(const Variant &other);
+   CallableVariant &operator =(CallableVariant &&other) noexcept;
+   CallableVariant &operator =(Variant &&other);
+
+   Variant operator ()() const;
+   template <typename ...Args>
+   Variant operator ()(Args&&... args);
+   virtual ~CallableVariant();
+protected:
+   Variant exec(int argc, Variant *argv) const;
+};
+
+template <typename ...Args>
+Variant CallableVariant::operator ()(Args&&... args)
+{
+   Variant vargs[] = { static_cast<Variant>(args)... };
+   return exec(sizeof...(Args), vargs);
+}
+
 
 } // vmapi
 } // polar
