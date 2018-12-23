@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/12/23.
 
-#ifndef POLAR_VMAPI_INTERNAL_DEPS_ZENDVM_HEADERS_H
-#define POLAR_VMAPI_INTERNAL_DEPS_ZENDVM_HEADERS_H
+#ifndef POLARPHP_VMAPI_INTERNAL_DEPS_ZENDVM_HEADERS_H
+#define POLARPHP_VMAPI_INTERNAL_DEPS_ZENDVM_HEADERS_H
 
 #include "polarphp/global/CompilerFeature.h"
 #include "polarphp/global/SystemDetection.h"
@@ -20,6 +20,8 @@ POLAR_BEGIN_DISABLE_ZENDVM_WARNING()
 extern "C" {
 #include "polarphp/vm/zend/zend_API.h"
 #include "polarphp/vm/zend/zend_types.h"
+#include "polarphp/vm/zend/zend_errors.h"
+#include "polarphp/vm/zend/zend_compile.h"
 #include "polarphp/vm/zend/zend_exceptions.h"
 #include "polarphp/global/php_stdint.h"
 
@@ -30,4 +32,4 @@ extern "C" {
 
 POLAR_END_DISABLE_ZENDVM_WARNING()
 
-#endif // POLAR_VMAPI_INTERNAL_DEPS_ZENDVM_HEADERS_H
+#endif // POLARPHP_VMAPI_INTERNAL_DEPS_ZENDVM_HEADERS_H

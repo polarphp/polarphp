@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/12/23.
 
-#ifndef POLAR_VMAPI_UTILS_STREAM_BUFFER_H
-#define POLAR_VMAPI_UTILS_STREAM_BUFFER_H
+#ifndef POLARPHP_VMAPI_UTILS_STREAM_BUFFER_H
+#define POLARPHP_VMAPI_UTILS_STREAM_BUFFER_H
 
 #include "polarphp/vm/ZendApi.h"
 
@@ -42,4 +42,4 @@ private:
 } // vmapi
 } // polar
 
-#endif // POLAR_VMAPI_UTILS_STREAM_BUFFER_H
+#endif // POLARPHP_VMAPI_UTILS_STREAM_BUFFER_H
