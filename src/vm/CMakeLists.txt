@@ -38,6 +38,7 @@ set(ZENDAPI_SRCS
    StringMember.cpp
    ZendApi.cpp
    ZvalMember.cpp
+   StdClass.cpp
    )
 
 polar_collect_files(
