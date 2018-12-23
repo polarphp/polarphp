@@ -18,6 +18,7 @@
 POLAR_BEGIN_DISABLE_ZENDVM_WARNING()
 
 extern "C" {
+#include "polarphp/vm/zend/zend_API.h"
 #include "polarphp/vm/zend/zend_types.h"
 #include "polarphp/vm/zend/zend_exceptions.h"
 #include "polarphp/global/php_stdint.h"
