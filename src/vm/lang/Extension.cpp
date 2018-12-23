@@ -9,8 +9,6 @@
 //
 // Created by softboy on 2018/12/23.
 
-#include "polarphp/vm/utils/Exception.h"
-
 namespace polar {
 namespace vmapi {
 

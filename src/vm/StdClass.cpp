@@ -12,6 +12,7 @@
 #include "polarphp/vm/StdClass.h"
 #include "polarphp/vm/internal/StdClassPrivate.h"
 #include "polarphp/vm/ds/Variant.h"
+#include "polarphp/vm/ds/ArrayVariant.h"
 #include "polarphp/vm/ds/ObjectVariant.h"
 #include "polarphp/vm/utils/NotImplemented.h"
 
@@ -240,7 +241,7 @@ zval *StdClass::doCallParent(const char *name, const int argc, Variant *argv, zv
    fci.size = sizeof(fci);
    fci.object = object;
    ZVAL_STRINGL(&fci.function_name, name, std::strlen(name));
-   vmapi::utils::str_tolower(Z_STRVAL(fci.function_name), Z_STRLEN(fci.function_name));
+   str_tolower(Z_STRVAL(fci.function_name), Z_STRLEN(fci.function_name));
    fci.retval = retvalPtr ? retvalPtr : &retval;
    fci.param_count = argc;
    fci.params = params.get();

@@ -17,7 +17,7 @@
 #include "polarphp/vm/TypeDefs.h"
 
 #define VMAPI_DECLARE_PRIVATE POLAR_DECLARE_PRIVATE
-#define WMAPI_DECLARE_PUBLIC  POLAR_DECLARE_PUBLIC
+#define VMAPI_DECLARE_PUBLIC  POLAR_DECLARE_PUBLIC
 
 #define VMAPI_D POLAR_D
 #define VMAPI_Q POLAR_Q
@@ -34,10 +34,23 @@ extern thread_local VMAPI_DECL_EXPORT std::ostream deprecated;
 
 using VmApiVaridicItemType = zval;
 
+VMAPI_DECL_EXPORT Modifier operator~(Modifier modifier);
+VMAPI_DECL_EXPORT Modifier operator|(Modifier lhs, Modifier rhs);
+VMAPI_DECL_EXPORT Modifier operator&(Modifier lhs, Modifier rhs);
+VMAPI_DECL_EXPORT Modifier &operator|=(Modifier &lhs, Modifier rhs);
+VMAPI_DECL_EXPORT Modifier &operator&=(Modifier &lhs, Modifier rhs);
+VMAPI_DECL_EXPORT bool operator==(const Modifier lhs, unsigned long rhs);
+VMAPI_DECL_EXPORT bool operator==(unsigned long lhs, const Modifier &rhs);
+VMAPI_DECL_EXPORT bool operator==(Modifier lhs, Modifier rhs);
+
 } // vmapi
 } // polar
 
-#define VMAPI_ASSERT ZEND_ASSERT
+#define vmapi_long  zend_long
+#define vmapi_ulong zend_ulong
+
+#define VMAPI_ASSERT   POLAR_ASSERT
+#define VMAPI_ASSERT_X POLAR_ASSERT_X
 
 #define VMAPI_SUCCESS SUCCESS
 #define VMAPI_FAILURE FAILURE
