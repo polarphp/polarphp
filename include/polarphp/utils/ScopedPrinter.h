@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/06/18.
+// Created by polarboy on 2018/06/18.
 
 #ifndef POLARPHP_UTILS_SCOPED_PRINTER_H
 #define POLARPHP_UTILS_SCOPED_PRINTER_H

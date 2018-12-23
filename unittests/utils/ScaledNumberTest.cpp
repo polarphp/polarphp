@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarPHP project authors
 //
-// Created by softboy on 2018/07/15.
+// Created by polarboy on 2018/07/15.
 
 #include "polarphp/utils/ScaledNumber.h"
 #include "polarphp/global/DataTypes.h"

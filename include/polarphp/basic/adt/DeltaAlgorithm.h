@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/06/29.
+// Created by polarboy on 2018/06/29.
 
 /// DAGdeltaAlgorithm - Implements a "delta debugging" algorithm for minimizing
 /// directed acyclic graphs using a predicate function.

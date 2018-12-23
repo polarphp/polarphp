@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of pola project authors
 //
-// Created by softboy on 2018/06/11.
+// Created by polarboy on 2018/06/11.
 
 #include "polarphp/utils/StringSaver.h"
 

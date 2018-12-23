@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/05/31.
+// Created by polarboy on 2018/05/31.
 
 #ifndef POLARPHP_UTILS_POINTER_LIKE_TYPE_TRAITS_H
 #define POLARPHP_UTILS_POINTER_LIKE_TYPE_TRAITS_H

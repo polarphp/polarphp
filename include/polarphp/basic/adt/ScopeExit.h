@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/06/26.
+// Created by polarboy on 2018/06/26.
 
 #ifndef POLAR_BASIC_ADT_SCOPE_EXIT_H
 #define POLAR_BASIC_ADT_SCOPE_EXIT_H

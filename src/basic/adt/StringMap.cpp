@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/06/14.
+// Created by polarboy on 2018/06/14.
 
 #include "polarphp/basic/adt/StringMap.h"
 #include "polarphp/basic/adt/StringExtras.h"

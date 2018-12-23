@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarPHP project authors
 //
-// Created by softboy on 2018/07/08.
+// Created by polarboy on 2018/07/08.
 
 #include "polarphp/basic/adt/SetVector.h"
 #include "gtest/gtest.h"

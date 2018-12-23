@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/07/05.
+// Created by polarboy on 2018/07/05.
 
 #ifndef POLARPHP_BASIC_ADT_ALLOCATOR_LIST_H
 #define POLARPHP_BASIC_ADT_ALLOCATOR_LIST_H

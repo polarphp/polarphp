@@ -7,7 +7,7 @@
 // See http://polarphpath.org/LICENSE.txt for license information
 // See http://polarphpath.org/CONTRIBUTORS.txt for the list of  polarphp project authors
 //
-// Created by softboy on 2018/06/24.
+// Created by polarboy on 2018/06/24.
 
 //===----------------------------------------------------------------------===//
 //

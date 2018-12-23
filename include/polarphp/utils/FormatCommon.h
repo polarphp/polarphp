@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of POLARPHP_UTILS_FORMAT_COMMON_H project authors
 //
-// Created by softboy on 2018/06/03.
+// Created by polarboy on 2018/06/03.
 
 #ifndef POLARPHP_UTILS_FORMAT_COMMON_H
 #define POLARPHP_UTILS_FORMAT_COMMON_H

@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/10/25.
+// Created by polarboy on 2018/10/25.
 
 #include "polarphp/utils/StringUtils.h"
 #include "polarphp/basic/adt/StringRef.h"

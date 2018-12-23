@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/06/14.
+// Created by polarboy on 2018/06/14.
 
 #ifndef POLARPHP_BASIC_ADT_AP_SINT_H
 #define POLARPHP_BASIC_ADT_AP_SINT_H

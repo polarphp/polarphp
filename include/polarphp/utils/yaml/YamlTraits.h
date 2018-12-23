@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORstr.txt for the list of polarPHP project authors
 //
-// Created by softboy on 2018/06/27.
+// Created by polarboy on 2018/06/27.
 
 #ifndef POLARPHP_UTILS_YAML_TRAITS_H
 #define POLARPHP_UTILS_YAML_TRAITS_H

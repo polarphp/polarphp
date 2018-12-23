@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/10/18.
+// Created by polarboy on 2018/10/18.
 
 #include "polarphp/utils/ARMWinEH.h"
 #include "polarphp/utils/RawOutStream.h"

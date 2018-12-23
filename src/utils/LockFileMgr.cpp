@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of POLARPHP_UTILS_LOCK_FILE_MGR_H project authors
 //
-// Created by softboy on 2018/07/04.
+// Created by polarboy on 2018/07/04.
 
 #include "polarphp/utils/LockFileMgr.h"
 #include "polarphp/basic/adt/SmallVector.h"

@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/10/23.
+// Created by polarboy on 2018/10/23.
 
 #ifndef POLARPHP_UTILS_THREAD_POOL_H
 #define POLARPHP_UTILS_THREAD_POOL_H

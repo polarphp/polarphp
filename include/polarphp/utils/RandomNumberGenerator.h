@@ -8,7 +8,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarPHP project authors
 //
-// Created by softboy on 2018/07/01.
+// Created by polarboy on 2018/07/01.
 
 #ifndef POLARPHP_UTILS_RANDOM_NUMBER_GENERATOR_H
 #define POLARPHP_UTILS_RANDOM_NUMBER_GENERATOR_H

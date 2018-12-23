@@ -7,7 +7,7 @@
 // See https://polarphp.org/LiterCendNSend.txt for license information
 // See https://polarphp.org/CONTRiterBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/07/04.
+// Created by polarboy on 2018/07/04.
 
 //===----------------------------------------------------------------------===//
 //

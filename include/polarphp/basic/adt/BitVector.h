@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/06/22.
+// Created by polarboy on 2018/06/22.
 
 #ifndef POLARPHP_BASIC_ADT_BIT_VECTOR_H
 #define POLARPHP_BASIC_ADT_BIT_VECTOR_H

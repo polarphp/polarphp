@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/12/23.
+// Created by polarboy on 2018/12/23.
 
 #include "polarphp/vm/ZendApi.h"
 #include "polarphp/vm/utils/StreamBuffer.h"

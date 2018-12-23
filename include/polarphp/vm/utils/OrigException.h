@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/12/23.
+// Created by polarboy on 2018/12/23.
 
 #ifndef POLARPHP_VMAPI_UTILS_ORIG_EXCEPTION_H
 #define POLARPHP_VMAPI_UTILS_ORIG_EXCEPTION_H

@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by softboy on 2018/10/17.
+// Created by polarboy on 2018/10/17.
 
 //===- Support/FileUtilities.cpp - File System Utilities ------------------===//
 //
@@ -32,7 +32,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarPHP project authors
 //
-// Created by softboy on 2018/06/11.
+// Created by polarboy on 2018/06/11.
 
 //===----------------------------------------------------------------------===//
 //
