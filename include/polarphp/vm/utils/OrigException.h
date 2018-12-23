@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/12/23.
 
-#ifndef POLAR_VMAPI_UTILS_ORIG_EXCEPTION_H
-#define POLAR_VMAPI_UTILS_ORIG_EXCEPTION_H
+#ifndef POLARPHP_VMAPI_UTILS_ORIG_EXCEPTION_H
+#define POLARPHP_VMAPI_UTILS_ORIG_EXCEPTION_H
 
 #include <string>
 
@@ -134,4 +134,4 @@ inline void process_exception(Exception &exception)
 } // vmapi
 } // polar
 
-#endif // POLAR_VMAPI_UTILS_ORIG_EXCEPTION_H
+#endif // POLARPHP_VMAPI_UTILS_ORIG_EXCEPTION_H

@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/12/23.
 
-#ifndef POLAR_VMAPI_UTILS_EXCEPTION_H
-#define POLAR_VMAPI_UTILS_EXCEPTION_H
+#ifndef POLARPHP_VMAPI_UTILS_EXCEPTION_H
+#define POLARPHP_VMAPI_UTILS_EXCEPTION_H
 
 #include "polarphp/vm/ZendApi.h"
 
@@ -91,4 +91,4 @@ protected:
 } // vmapi
 } // polar
 
-#endif // POLAR_VMAPI_UTILS_EXCEPTION_H
+#endif // POLARPHP_VMAPI_UTILS_EXCEPTION_H

@@ -9,8 +9,8 @@
 //
 // Created by softboy on 2018/12/23.
 
-#ifndef POLAR_VMAPI_UTILS_FATAL_ERROR_H
-#define POLAR_VMAPI_UTILS_FATAL_ERROR_H
+#ifndef POLARPHP_VMAPI_UTILS_FATAL_ERROR_H
+#define POLARPHP_VMAPI_UTILS_FATAL_ERROR_H
 
 #include "polarphp/vm/utils/Exception.h"
 
@@ -47,4 +47,4 @@ public:
 } // vmapi
 } // polar
 
-#endif // POLAR_VMAPI_UTILS_FATAL_ERROR_H
+#endif // POLARPHP_VMAPI_UTILS_FATAL_ERROR_H
