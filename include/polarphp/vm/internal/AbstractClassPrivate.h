@@ -9,6 +9,9 @@
 //
 // Created by polarboy on 2018/12/24.
 
+#ifndef POLARPHP_VMAPI_INTERNAL_ABSTRACT_CLASS_PRIVATE_H
+#define POLARPHP_VMAPI_INTERNAL_ABSTRACT_CLASS_PRIVATE_H
+
 #include "polarphp/vm/ZendApi.h"
 
 #include <string>
@@ -103,3 +106,5 @@ public:
 } // internal
 } // vmapi
 } // polar
+
+#endif // POLARPHP_VMAPI_INTERNAL_ABSTRACT_CLASS_PRIVATE_H

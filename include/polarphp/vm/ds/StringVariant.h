@@ -269,39 +269,39 @@ public:
    void resize(SizeType size);
    void resize(SizeType size, char fillChar);
    // access methods
-   zapi_long indexOf(const StringVariant &needle, zapi_long offset = 0, bool caseSensitive = true) const noexcept;
-   zapi_long indexOf(const char *needle, zapi_long offset = 0, bool caseSensitive = true) const noexcept;
-   zapi_long indexOf(const std::string &needle, zapi_long offset = 0, bool caseSensitive = true) const noexcept;
-   zapi_long indexOf(const char needle, zapi_long offset = 0, bool caseSensitive = true) const noexcept;
+   vmapi_long indexOf(const StringVariant &needle, vmapi_long offset = 0, bool caseSensitive = true) const noexcept;
+   vmapi_long indexOf(const char *needle, vmapi_long offset = 0, bool caseSensitive = true) const noexcept;
+   vmapi_long indexOf(const std::string &needle, vmapi_long offset = 0, bool caseSensitive = true) const noexcept;
+   vmapi_long indexOf(const char needle, vmapi_long offset = 0, bool caseSensitive = true) const noexcept;
    template<size_t arrayLength>
-   zapi_long indexOf(char (&needle)[arrayLength], size_t length, zapi_long offset = 0,
-                     bool caseSensitive = true) const noexcept;
+   vmapi_long indexOf(char (&needle)[arrayLength], size_t length, vmapi_long offset = 0,
+                      bool caseSensitive = true) const noexcept;
    template<typename T,
             size_t arrayLength,
             typename Selector = typename std::enable_if<std::is_integral<T>::value &&
                                                         std::is_signed<T>::value>::type>
-   zapi_long indexOf(char (&needle)[arrayLength], T length, zapi_long offset = 0,
-                     bool caseSensitive = true) const noexcept;
+   vmapi_long indexOf(char (&needle)[arrayLength], T length, vmapi_long offset = 0,
+                      bool caseSensitive = true) const noexcept;
    template<size_t arrayLength>
-   zapi_long indexOf(char (&needle)[arrayLength], zapi_long offset = 0,
-                     bool caseSensitive = true) const noexcept;
+   vmapi_long indexOf(char (&needle)[arrayLength], vmapi_long offset = 0,
+                      bool caseSensitive = true) const noexcept;
 
-   zapi_long lastIndexOf(const StringVariant &needle, zapi_long offset = 0, bool caseSensitive = true) const noexcept;
-   zapi_long lastIndexOf(const char *needle, zapi_long offset = 0, bool caseSensitive = true) const noexcept;
-   zapi_long lastIndexOf(const std::string &needle, zapi_long offset = 0, bool caseSensitive = true) const noexcept;
-   zapi_long lastIndexOf(const char needle, zapi_long offset = 0, bool caseSensitive = true) const noexcept;
+   vmapi_long lastIndexOf(const StringVariant &needle, vmapi_long offset = 0, bool caseSensitive = true) const noexcept;
+   vmapi_long lastIndexOf(const char *needle, vmapi_long offset = 0, bool caseSensitive = true) const noexcept;
+   vmapi_long lastIndexOf(const std::string &needle, vmapi_long offset = 0, bool caseSensitive = true) const noexcept;
+   vmapi_long lastIndexOf(const char needle, vmapi_long offset = 0, bool caseSensitive = true) const noexcept;
    template<size_t arrayLength>
-   zapi_long lastIndexOf(char (&needle)[arrayLength], size_t length, zapi_long offset = 0,
-                         bool caseSensitive = true) const noexcept;
+   vmapi_long lastIndexOf(char (&needle)[arrayLength], size_t length, vmapi_long offset = 0,
+                          bool caseSensitive = true) const noexcept;
    template<typename T,
             size_t arrayLength,
             typename Selector = typename std::enable_if<std::is_integral<T>::value &&
                                                         std::is_signed<T>::value>::type>
-   zapi_long lastIndexOf(char (&needle)[arrayLength], T length, zapi_long offset = 0,
-                         bool caseSensitive = true) const noexcept;
+   vmapi_long lastIndexOf(char (&needle)[arrayLength], T length, vmapi_long offset = 0,
+                          bool caseSensitive = true) const noexcept;
    template<size_t arrayLength>
-   zapi_long lastIndexOf(char (&needle)[arrayLength], zapi_long offset = 0,
-                         bool caseSensitive = true) const noexcept;
+   vmapi_long lastIndexOf(char (&needle)[arrayLength], vmapi_long offset = 0,
+                          bool caseSensitive = true) const noexcept;
 
    bool contains(const StringVariant &needle, bool caseSensitive = true) const noexcept;
    bool contains(const char *needle, bool caseSensitive = true) const noexcept;
@@ -643,7 +643,7 @@ StringVariant &StringVariant::prepend(char (&str)[arrayLength], T length)
       len = static_cast<size_t>(length);
    }
    len = std::min(arrayLength, len);
-   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(len)), zapi::utils::std_php_memory_deleter);
+   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(len)), std_php_memory_deleter);
    std::memcpy(buffer.get(), str, len);
    buffer.get()[length] = '\0';
    return prepend(buffer.get());
@@ -672,7 +672,7 @@ StringVariant &StringVariant::append(char (&str)[arrayLength], T length)
       len = static_cast<size_t>(length);
    }
    len = std::min(arrayLength, len);
-   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(len)), zapi::utils::std_php_memory_deleter);
+   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(len)), std_php_memory_deleter);
    std::memcpy(buffer.get(), str, len);
    buffer.get()[len] = '\0';
    return append(buffer.get());
@@ -691,7 +691,7 @@ StringVariant &StringVariant::remove(T pos, size_t length)
    size_t targetPos = 0;
    size_t selfLength = getLength();
    size_t positivePos = static_cast<size_t>(std::abs(pos));
-   zapi_long lpos = static_cast<zapi_long>(pos);
+   vmapi_long lpos = static_cast<vmapi_long>(pos);
    if (lpos < 0) {
       // out of range
       if (selfLength < positivePos) {
@@ -713,7 +713,7 @@ StringVariant &StringVariant::remove(T pos)
 template <typename T, typename Selector>
 StringVariant &StringVariant::insert(T pos, const char *str)
 {
-   zapi_long lpos = static_cast<zapi_long>(pos);
+   vmapi_long lpos = static_cast<vmapi_long>(pos);
    if (lpos < 0) {
       lpos += getLength();
    }
@@ -726,7 +726,7 @@ StringVariant &StringVariant::insert(T pos, const char *str)
 template <typename T, typename Selector>
 StringVariant &StringVariant::insert(T pos, const char c)
 {
-   zapi_long lpos = static_cast<zapi_long>(pos);
+   vmapi_long lpos = static_cast<vmapi_long>(pos);
    if (lpos < 0) {
       lpos += getLength();
    }
@@ -739,7 +739,7 @@ StringVariant &StringVariant::insert(T pos, const char c)
 template <typename T, typename Selector>
 StringVariant &StringVariant::insert(T pos, const std::string &str)
 {
-   zapi_long lpos = static_cast<zapi_long>(pos);
+   vmapi_long lpos = static_cast<vmapi_long>(pos);
    if (lpos < 0) {
       lpos += getLength();
    }
@@ -752,7 +752,7 @@ StringVariant &StringVariant::insert(T pos, const std::string &str)
 template <typename T, typename Selector>
 StringVariant &StringVariant::insert(T pos, const StringVariant &str)
 {
-   zapi_long lpos = static_cast<zapi_long>(pos);
+   vmapi_long lpos = static_cast<vmapi_long>(pos);
    if (lpos < 0) {
       lpos += getLength();
    }
@@ -772,7 +772,7 @@ StringVariant &StringVariant::insert(size_t pos, T value)
 template <typename T, typename V, typename SelectorT, typename Selector>
 StringVariant &StringVariant::insert(T pos, V value)
 {
-   zapi_long lpos = static_cast<zapi_long>(pos);
+   vmapi_long lpos = static_cast<vmapi_long>(pos);
    if (lpos < 0) {
       lpos += getLength();
    }
@@ -787,7 +787,7 @@ template<size_t arrayLength>
 StringVariant &StringVariant::insert(size_t pos, char (&str)[arrayLength], size_t length)
 {
    length = std::min(arrayLength, length);
-   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(length)), zapi::utils::std_php_memory_deleter);
+   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(length)), std_php_memory_deleter);
    std::memcpy(buffer.get(), str, length);
    buffer.get()[length] = '\0';
    return insert(pos, buffer.get());
@@ -824,7 +824,7 @@ StringVariant &StringVariant::insert(T pos, char (&str)[arrayLength], V length)
    } else {
       rlen = static_cast<size_t>(length);
    }
-   zapi_long lpos = static_cast<zapi_long>(pos);
+   vmapi_long lpos = static_cast<vmapi_long>(pos);
    if (lpos < 0) {
       lpos += getLength();
    }
@@ -846,7 +846,7 @@ template<size_t arrayLength>
 StringVariant &StringVariant::replace(size_t pos, size_t length, char (&replaceArr)[arrayLength], size_t replaceLength)
 {
    replaceLength = std::min(arrayLength, replaceLength);
-   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(replaceLength)), zapi::utils::std_php_memory_deleter);
+   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(replaceLength)), std_php_memory_deleter);
    std::memcpy(buffer.get(), replaceArr, replaceLength);
    buffer.get()[replaceLength] = '\0';
    return replace(pos, length, buffer.get());
@@ -947,20 +947,20 @@ StringVariant &StringVariant::operator =(T value)
 }
 
 template<size_t arrayLength>
-zapi_long StringVariant::indexOf(char (&needle)[arrayLength], size_t length,
-                                 zapi_long offset, bool caseSensitive) const noexcept
+vmapi_long StringVariant::indexOf(char (&needle)[arrayLength], size_t length,
+                                  vmapi_long offset, bool caseSensitive) const noexcept
 {
    length = std::min(arrayLength, static_cast<size_t>(length));
    // here maybe not c str, we make a local buffer for it
-   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(length)), zapi::utils::std_php_memory_deleter);
+   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(length)), std_php_memory_deleter);
    std::memcpy(buffer.get(), needle, length);
    buffer.get()[length] = '\0';
    return indexOf(buffer.get(), offset, caseSensitive);
 }
 
 template<typename T, size_t arrayLength, typename Selector>
-zapi_long StringVariant::indexOf(char (&needle)[arrayLength], T length,
-                                 zapi_long offset, bool caseSensitive) const noexcept
+vmapi_long StringVariant::indexOf(char (&needle)[arrayLength], T length,
+                                  vmapi_long offset, bool caseSensitive) const noexcept
 {
    size_t len;
    if (length < 0) {
@@ -972,27 +972,27 @@ zapi_long StringVariant::indexOf(char (&needle)[arrayLength], T length,
 }
 
 template<size_t arrayLength>
-zapi_long StringVariant::indexOf(char (&needle)[arrayLength],
-                                 zapi_long offset, bool caseSensitive) const noexcept
+vmapi_long StringVariant::indexOf(char (&needle)[arrayLength],
+                                  vmapi_long offset, bool caseSensitive) const noexcept
 {
    return indexOf(needle, arrayLength, offset, caseSensitive);
 }
 
 template<size_t arrayLength>
-zapi_long StringVariant::lastIndexOf(char (&needle)[arrayLength], size_t length,
-                                     zapi_long offset, bool caseSensitive) const noexcept
+vmapi_long StringVariant::lastIndexOf(char (&needle)[arrayLength], size_t length,
+                                      vmapi_long offset, bool caseSensitive) const noexcept
 {
    length = std::min(arrayLength, length);
    // here maybe not c str, we make a local buffer for it
-   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(length)), zapi::utils::std_php_memory_deleter);
+   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(length)), std_php_memory_deleter);
    std::memcpy(buffer.get(), needle, length);
    buffer.get()[length] = '\0';
    return lastIndexOf(buffer.get(), offset, caseSensitive);
 }
 
 template<typename T, size_t arrayLength, typename Selector>
-zapi_long StringVariant::lastIndexOf(char (&needle)[arrayLength], T length,
-                                     zapi_long offset, bool caseSensitive) const noexcept
+vmapi_long StringVariant::lastIndexOf(char (&needle)[arrayLength], T length,
+                                      vmapi_long offset, bool caseSensitive) const noexcept
 {
    size_t len;
    if (length < 0) {
@@ -1004,8 +1004,8 @@ zapi_long StringVariant::lastIndexOf(char (&needle)[arrayLength], T length,
 }
 
 template<size_t arrayLength>
-zapi_long StringVariant::lastIndexOf(char (&needle)[arrayLength],
-                                     zapi_long offset, bool caseSensitive) const noexcept
+vmapi_long StringVariant::lastIndexOf(char (&needle)[arrayLength],
+                                      vmapi_long offset, bool caseSensitive) const noexcept
 {
    return lastIndexOf(needle, arrayLength, offset, caseSensitive);
 }
@@ -1039,7 +1039,7 @@ bool StringVariant::startsWith(char (&str)[arrayLength], size_t length, bool cas
 {
    length = std::min(arrayLength, length);
    // here maybe not c str, we make a local buffer for it
-   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(length)), zapi::utils::std_php_memory_deleter);
+   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(length)), std_php_memory_deleter);
    std::memcpy(buffer.get(), str, length);
    buffer.get()[length] = '\0';
    return startsWith(buffer.get(), caseSensitive);
@@ -1068,7 +1068,7 @@ bool StringVariant::endsWith(char (&str)[arrayLength], size_t length, bool caseS
 {
    length = std::min(arrayLength, static_cast<size_t>(length));
    // here maybe not c str, we make a local buffer for it
-   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(length)), zapi::utils::std_php_memory_deleter);
+   GuardValuePtrType buffer(static_cast<Pointer>(emalloc(length)), std_php_memory_deleter);
    std::memcpy(buffer.get(), str, length);
    buffer.get()[length] = '\0';
    return endsWith(buffer.get(), caseSensitive);
