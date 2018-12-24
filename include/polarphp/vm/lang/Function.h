@@ -12,6 +12,31 @@
 #ifndef POLARPHP_VMAPI_LANG_FUNCTION_H
 #define POLARPHP_VMAPI_LANG_FUNCTION_H
 
+#include "polarphp/vm/Callable.h"
 
+namespace polar {
+namespace vmapi {
+
+namespace internal {
+class FunctionPrivate;
+} // internal
+
+using internal::FunctionPrivate;
+
+class VMAPI_DECL_EXPORT Function : public Callable
+{
+public:
+   Function(const char *name, ZendCallable callable, const Arguments &arguments = {});
+   Function(const char *name, const Arguments &arguments = {});
+   Function(const Function &other);
+   Function &operator=(const Function &other);
+   virtual Variant invoke(Parameters &parameters);
+   virtual ~Function();
+private:
+   VMAPI_DECLARE_PRIVATE(Function);
+};
+
+} // vmapi
+} // polar
 
 #endif // POLARPHP_VMAPI_LANG_FUNCTION_H
