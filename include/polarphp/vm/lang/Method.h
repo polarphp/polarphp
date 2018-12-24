@@ -30,7 +30,7 @@ using internal::AbstractClassPrivate;
 class VMAPI_DECL_EXPORT Method : public Callable
 {
 public:
-   Method(const char *name, zapi::ZendCallable callback, Modifier flags, const Arguments &args);
+   Method(const char *name, ZendCallable callback, Modifier flags, const Arguments &args);
    Method(const char *name, Modifier flags, const Arguments &args);
    Method(const Method &other);
    Method &operator=(const Method &other);

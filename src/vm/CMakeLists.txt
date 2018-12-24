@@ -29,7 +29,6 @@ set(ZENDAPI_SRCS
    Callable.cpp
    Closure.cpp
    FloatMember.cpp
-   InvokeBridge.cpp
    IteratorBridge.cpp
    NullMember.cpp
    NumericMember.cpp
