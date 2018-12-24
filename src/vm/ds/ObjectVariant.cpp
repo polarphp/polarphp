@@ -340,7 +340,7 @@ bool ObjectVariant::derivedFrom(const char *className, size_t size) const
       return false;
    }
    GuardStrType clsName(zend_string_init(className, size, 0),
-                        zapi::utils::std_zend_string_force_deleter);
+                        std_zend_string_force_deleter);
    zend_class_entry *clsEntry = zend_lookup_class_ex(clsName.get(), nullptr, 0);
    if (!clsEntry) {
       return false;
@@ -457,7 +457,7 @@ bool ObjectVariant::doClassInvoke(int argc, Variant *argv, zval *retval)
          callInfo |= ZEND_CALL_RELEASE_THIS;
       }
    } else {
-      zapi::error << "Function name must be a string" << std::endl;
+      vmapi::error << "Function name must be a string" << std::endl;
       return false;
    }
    call = zend_vm_stack_push_call_frame(callInfo, func, argc, calledScope, object);
