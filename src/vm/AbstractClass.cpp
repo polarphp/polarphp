@@ -131,7 +131,7 @@ void verify_abstract_class(zend_class_entry *ce) /* {{{ */
 
 ContextMapType AbstractClassPrivate::sm_contextPtrs;
 
-AbstractClassPrivate::AbstractClassPrivate(const char *className, lang::ClassType type)
+AbstractClassPrivate::AbstractClassPrivate(const char *className, ClassType type)
    : m_name(className),
      m_type(type),
      m_self(nullptr, acp_ptr_deleter)
