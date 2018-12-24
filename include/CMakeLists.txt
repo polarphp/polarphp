@@ -37,6 +37,8 @@ polar_collect_files(
 
 configure_file(polarphp/global/php_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/polarphp/global/php_config.h
    @ONLY)
+configure_file(polarphp/global/PolarVersion.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/polarphp/global/PolarVersion.h
+   @ONLY)
 configure_file(polarphp/global/BuildDefs.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/polarphp/global/BuildDefs.h
    @ONLY)
 
