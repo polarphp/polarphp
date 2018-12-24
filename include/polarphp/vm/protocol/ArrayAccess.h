@@ -27,7 +27,7 @@ public:
    virtual void offsetSet(Variant offset, Variant value) = 0;
    virtual Variant offsetGet(Variant offset) = 0;
    virtual void offsetUnset(Variant offset) = 0;
-   virtual ~ArrayAccess();
+   virtual ~ArrayAccess() = default;
 };
 
 } // vmapi
