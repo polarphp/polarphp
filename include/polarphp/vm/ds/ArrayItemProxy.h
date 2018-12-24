@@ -28,7 +28,7 @@ class Variant;
 class NumericVariant;
 class DoubleVariant;
 class StringVariant;
-class BoolVariant;
+class BooleanVariant;
 class ArrayVariant;
 using internal::ArrayItemProxyPrivate;
 
@@ -53,13 +53,13 @@ public:
    ArrayItemProxy &operator =(const NumericVariant &value);
    ArrayItemProxy &operator =(const DoubleVariant &value);
    ArrayItemProxy &operator =(const StringVariant &value);
-   ArrayItemProxy &operator =(const BoolVariant &value);
+   ArrayItemProxy &operator =(const BooleanVariant &value);
    ArrayItemProxy &operator =(const ArrayVariant &value);
 
    ArrayItemProxy &operator =(NumericVariant &&value);
    ArrayItemProxy &operator =(DoubleVariant &&value);
    ArrayItemProxy &operator =(StringVariant &&value);
-   ArrayItemProxy &operator =(BoolVariant &&value);
+   ArrayItemProxy &operator =(BooleanVariant &&value);
    ArrayItemProxy &operator =(ArrayVariant &&value);
 
    ArrayItemProxy &operator =(const char *value);
@@ -75,13 +75,13 @@ public:
    operator NumericVariant();
    operator DoubleVariant();
    operator StringVariant();
-   operator BoolVariant();
+   operator BooleanVariant();
    operator ArrayVariant();
    Variant toVariant();
    NumericVariant toNumericVariant();
    DoubleVariant toDoubleVariant();
    StringVariant toStringVariant();
-   BoolVariant toBoolVariant();
+   BooleanVariant toBooleanVariant();
    ArrayVariant toArrayVariant();
    // nest assign
    ArrayItemProxy operator [](vmapi_long index);

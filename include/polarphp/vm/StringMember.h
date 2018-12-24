@@ -23,7 +23,6 @@ namespace internal
 class StringMemberPrivate;
 } // internal
 
-using AbstractMember;
 using internal::StringMemberPrivate;
 
 class VMAPI_DECL_EXPORT StringMember : public AbstractMember

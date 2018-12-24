@@ -23,6 +23,7 @@ extern "C" {
 #include "polarphp/vm/zend/zend_API.h"
 #include "polarphp/vm/zend/zend_types.h"
 #include "polarphp/vm/zend/zend_errors.h"
+#include "polarphp/vm/zend/zend_closures.h"
 #include "polarphp/vm/zend/zend_compile.h"
 #include "polarphp/vm/zend/zend_exceptions.h"
 #include "polarphp/vm/zend/zend_constants.h"

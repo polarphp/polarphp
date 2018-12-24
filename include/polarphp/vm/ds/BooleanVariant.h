@@ -19,30 +19,30 @@ namespace vmapi {
 
 class ArrayItemProxy;
 
-class VMAPI_DECL_EXPORT BoolVariant final : public Variant
+class VMAPI_DECL_EXPORT BooleanVariant final : public Variant
 {
 public:
-   BoolVariant();
-   BoolVariant(const BoolVariant &other);
-   BoolVariant(BoolVariant &other, bool isRef);
-   BoolVariant(BoolVariant &&other) noexcept;
-   BoolVariant(const Variant &other);
-   BoolVariant(Variant &&other);
-   BoolVariant(bool value);
-   BoolVariant(zval &other, bool isRef = false);
-   BoolVariant(zval &&other, bool isRef = false);
-   BoolVariant(zval *other, bool isRef = false);
+   BooleanVariant();
+   BooleanVariant(const BooleanVariant &other);
+   BooleanVariant(BooleanVariant &other, bool isRef);
+   BooleanVariant(BooleanVariant &&other) noexcept;
+   BooleanVariant(const Variant &other);
+   BooleanVariant(Variant &&other);
+   BooleanVariant(bool value);
+   BooleanVariant(zval &other, bool isRef = false);
+   BooleanVariant(zval &&other, bool isRef = false);
+   BooleanVariant(zval *other, bool isRef = false);
    virtual bool toBool() const noexcept override;
    operator bool () const override;
-   BoolVariant &operator=(const BoolVariant &other);
-   BoolVariant &operator=(const Variant &other);
-   BoolVariant &operator=(ArrayItemProxy &&other);
-   BoolVariant &operator=(bool value);
-   virtual ~BoolVariant();
+   BooleanVariant &operator=(const BooleanVariant &other);
+   BooleanVariant &operator=(const Variant &other);
+   BooleanVariant &operator=(ArrayItemProxy &&other);
+   BooleanVariant &operator=(bool value);
+   virtual ~BooleanVariant();
 };
 
-VMAPI_DECL_EXPORT bool operator ==(const BoolVariant &lhs, const BoolVariant &rhs);
-VMAPI_DECL_EXPORT bool operator !=(const BoolVariant &lhs, const BoolVariant &rhs);
+VMAPI_DECL_EXPORT bool operator ==(const BooleanVariant &lhs, const BooleanVariant &rhs);
+VMAPI_DECL_EXPORT bool operator !=(const BooleanVariant &lhs, const BooleanVariant &rhs);
 
 } // vmapi
 } // polar

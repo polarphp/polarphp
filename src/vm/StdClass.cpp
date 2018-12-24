@@ -249,7 +249,8 @@ zval *StdClass::doCallParent(const char *name, const int argc, Variant *argv, zv
 
    // setup cache
    zend_fcall_info_cache fcic;
-   fcic.initialized = 1;
+   /// TODO REVIEW
+   /// fcic.initialized = 1;
    zend_class_entry *parentClassType = object->ce->parent;
    if (parentClassType) {
       funcTable = &parentClassType->function_table;

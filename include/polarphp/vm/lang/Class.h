@@ -565,28 +565,28 @@ template <typename T>
 Variant Class<T>::castToString(StdClass *nativeObject) const
 {
    T *object = static_cast<T *>(nativeObject);
-   return zapi::ds::StringVariant(object->__toString());
+   return StringVariant(object->__toString());
 }
 
 template <typename T>
 Variant Class<T>::castToInteger(StdClass *nativeObject) const
 {
    T *object = static_cast<T *>(nativeObject);
-   return zapi::ds::NumericVariant(object->__toInteger());
+   return NumericVariant(object->__toInteger());
 }
 
 template <typename T>
 Variant Class<T>::castToDouble(StdClass *nativeObject) const
 {
    T *object = static_cast<T *>(nativeObject);
-   return zapi::ds::DoubleVariant(object->__toDouble());
+   return DoubleVariant(object->__toDouble());
 }
 
 template <typename T>
 Variant Class<T>::castToBool(StdClass *nativeObject) const
 {
    T *object = static_cast<T *>(nativeObject);
-   return zapi::ds::BoolVariant(object->__toBool());
+   return BooleanVariant(object->__toBool());
 }
 
 template <typename T>

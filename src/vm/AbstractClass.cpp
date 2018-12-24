@@ -155,7 +155,8 @@ zend_class_entry *AbstractClassPrivate::initialize(AbstractClass *cls, const std
    // check if traversable
    if (m_apiPtr->traversable()) {
       entry.get_iterator = &AbstractClassPrivate::getIterator;
-      entry.iterator_funcs.funcs = IteratorBridge::getIteratorFuncs();
+      /// TODO review
+      ///entry.iterator_funcs.funcs = IteratorBridge::getIteratorFuncs();
    }
 
    // check if serializable
@@ -315,7 +316,7 @@ zend_object *AbstractClassPrivate::cloneObject(zval *object)
    // Zend engine, we can call zend_error() (which does a longjmp()) to throw
    // an exception back to the Zend engine)
    if (!newNativeObject) {
-      zend_error(E_ERROR, "Unable to clone %s", entry->name);
+      zend_error(E_ERROR, "Unable to clone %s", ZSTR_VAL(entry->name));
    }
    ObjectBinder *newObjectBinder = new ObjectBinder(entry, std::move(newNativeObject), selfPtr->getObjectHandlers(), 1);
    zend_objects_clone_members(newObjectBinder->getZendObject(), objectBinder->getZendObject());
@@ -331,14 +332,14 @@ int AbstractClassPrivate::countElements(zval *object, zend_long *count)
    if (countable) {
       try {
          *count = countable->count();
-         return ZAPI_SUCCESS;
+         return VMAPI_SUCCESS;
       } catch (Exception &exception) {
          process_exception(exception);
-         return ZAPI_FAILURE; // unreachable, prevent some compiler warning
+         return VMAPI_FAILURE; // unreachable, prevent some compiler warning
       }
    } else {
       if (!std_object_handlers.count_elements) {
-         return ZAPI_FAILURE;
+         return VMAPI_FAILURE;
       }
       return std_object_handlers.count_elements(object, count);
    }
@@ -403,19 +404,21 @@ int AbstractClassPrivate::hasDimension(zval *object, zval *offset, int checkEmpt
    if (arrayAccess) {
       try {
          if (!arrayAccess->offsetExists(offset)) {
-            return false;
+            return VMAPI_FAILURE;
          }
          if (!checkEmpty) {
-            return true;
+            return VMAPI_SUCCESS;
          }
-         return zapi::empty(arrayAccess->offsetGet(offset));
+         return VMAPI_SUCCESS;
+         /// TODO REVIEW
+         /// return zapi::empty(arrayAccess->offsetGet(offset));
       } catch (Exception &exception) {
          process_exception(exception);
-         return false; // unreachable, prevent some compiler warning
+         return VMAPI_FAILURE; // unreachable, prevent some compiler warning
       }
    } else {
       if (!std_object_handlers.has_dimension) {
-         return false;
+         return VMAPI_FAILURE;
       }
       return std_object_handlers.has_dimension(object, offset, checkEmpty);
    }
@@ -448,10 +451,10 @@ zend_object_iterator *AbstractClassPrivate::getIterator(zend_class_entry *entry,
       zend_error(E_ERROR, "Foreach by ref is not possible");
    }
    Traversable *traversable = dynamic_cast<Traversable *>(ObjectBinder::retrieveSelfPtr(object)->getNativeObject());
-   ZAPI_ASSERT_X(traversable, "AbstractClassPrivate::getIterator", "traversable can't be nullptr");
+   VMAPI_ASSERT_X(traversable, "AbstractClassPrivate::getIterator", "traversable can't be nullptr");
    try {
       AbstractIterator *iterator = traversable->getIterator();
-      ZAPI_ASSERT_X(iterator,  "AbstractClassPrivate::getIterator", "iterator can't be nullptr");
+      VMAPI_ASSERT_X(iterator,  "AbstractClassPrivate::getIterator", "iterator can't be nullptr");
       // @mark native memory alloc
       // we are going to allocate an extended iterator (because php nowadays destructs
       // the iteraters itself, we can no longer let c++ allocate the buffer + object
@@ -475,9 +478,9 @@ int AbstractClassPrivate::serialize(zval *object, unsigned char **buffer, size_t
       *bufLength = value.length();
    } catch (Exception &exception) {
       process_exception(exception);
-      return ZAPI_FAILURE; // unreachable, prevent some compiler warning
+      return VMAPI_FAILURE; // unreachable, prevent some compiler warning
    }
-   return ZAPI_SUCCESS;
+   return VMAPI_SUCCESS;
 }
 
 int AbstractClassPrivate::unserialize(zval *object, zend_class_entry *entry, const unsigned char *buffer,
@@ -491,10 +494,11 @@ int AbstractClassPrivate::unserialize(zval *object, zend_class_entry *entry, con
    } catch (Exception &exception) {
       // user threw an exception in its method
       // implementation, send it to user space
-      php_error_docref(NULL, E_NOTICE, "Error while unserializing");
-      return ZAPI_FAILURE;
+      /// TODO REVIEW
+      /// php_error_docref(NULL, E_NOTICE, "Error while unserializing");
+      return VMAPI_FAILURE;
    }
-   return ZAPI_SUCCESS;
+   return VMAPI_SUCCESS;
 }
 
 HashTable *AbstractClassPrivate::debugInfo(zval *object, int *isTemp)
@@ -752,7 +756,7 @@ int AbstractClassPrivate::getClosure(zval *object, zend_class_entry **entry, zen
    }
    *retFunc = reinterpret_cast<zend_function *>(callContext);
    *objectPtr = Z_OBJ_P(object);
-   return ZAPI_SUCCESS;
+   return VMAPI_SUCCESS;
 }
 
 class ScopedFree
@@ -859,15 +863,15 @@ int AbstractClassPrivate::cast(zval *object, zval *retValue, int type)
          break;
       }
       ZVAL_COPY(retValue, &temp);
-      return ZAPI_SUCCESS;
+      return VMAPI_SUCCESS;
    } catch (const NotImplemented &exception) {
       if (!std_object_handlers.cast_object) {
-         return ZAPI_FAILURE;
+         return VMAPI_FAILURE;
       }
       return std_object_handlers.cast_object(object, retValue, type);
    } catch (Exception &exception) {
       process_exception(exception);
-      return ZAPI_FAILURE;
+      return VMAPI_FAILURE;
    }
 }
 
@@ -936,7 +940,7 @@ zval *AbstractClassPrivate::toZval(Variant &&value, int type, zval *rv)
 } // internal
 
 
-AbstractClass::AbstractClass(const char *className, lang::ClassType type)
+AbstractClass::AbstractClass(const char *className, ClassType type)
    : m_implPtr(std::make_shared<AbstractClassPrivate>(className, type))
 {
 }
@@ -1047,8 +1051,8 @@ void AbstractClass::registerProperty(const char *name, const char *value, Modifi
 void AbstractClass::registerProperty(const char *name, bool value, Modifier flags)
 {
    VMAPI_D(AbstractClass);
-   implPtr->m_members.push_back(std::make_shared<BoolMember>(name, value,
-                                                             flags & Modifier::PropertyModifiers));
+   implPtr->m_members.push_back(std::make_shared<BooleanMember>(name, value,
+                                                                flags & Modifier::PropertyModifiers));
 }
 
 void AbstractClass::registerProperty(const char *name, double value, Modifier flags)
@@ -1058,41 +1062,41 @@ void AbstractClass::registerProperty(const char *name, double value, Modifier fl
                                                               flags & Modifier::PropertyModifiers));
 }
 
-void AbstractClass::registerProperty(const char *name, const zapi::GetterMethodCallable0 &getter)
+void AbstractClass::registerProperty(const char *name, const GetterMethodCallable0 &getter)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_properties[name] = std::make_shared<Property>(getter);
 }
 
-void AbstractClass::registerProperty(const char *name, const zapi::GetterMethodCallable1 &getter)
+void AbstractClass::registerProperty(const char *name, const GetterMethodCallable1 &getter)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_properties[name] = std::make_shared<Property>(getter);
 }
 
-void AbstractClass::registerProperty(const char *name, const zapi::GetterMethodCallable0 &getter,
-                                     const zapi::SetterMethodCallable0 &setter)
+void AbstractClass::registerProperty(const char *name, const GetterMethodCallable0 &getter,
+                                     const SetterMethodCallable0 &setter)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_properties[name] = std::make_shared<Property>(getter, setter);
 }
 
-void AbstractClass::registerProperty(const char *name, const zapi::GetterMethodCallable0 &getter,
-                                     const zapi::SetterMethodCallable1 &setter)
+void AbstractClass::registerProperty(const char *name, const GetterMethodCallable0 &getter,
+                                     const SetterMethodCallable1 &setter)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_properties[name] = std::make_shared<Property>(getter, setter);
 }
 
-void AbstractClass::registerProperty(const char *name, const zapi::GetterMethodCallable1 &getter,
-                                     const zapi::SetterMethodCallable0 &setter)
+void AbstractClass::registerProperty(const char *name, const GetterMethodCallable1 &getter,
+                                     const SetterMethodCallable0 &setter)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_properties[name] = std::make_shared<Property>(getter, setter);
 }
 
-void AbstractClass::registerProperty(const char *name, const zapi::GetterMethodCallable1 &getter,
-                                     const zapi::SetterMethodCallable1 &setter)
+void AbstractClass::registerProperty(const char *name, const GetterMethodCallable1 &getter,
+                                     const SetterMethodCallable1 &setter)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_properties[name] = std::make_shared<Property>(getter, setter);
@@ -1133,7 +1137,7 @@ void AbstractClass::registerConstant(const Constant &constant)
    }
 }
 
-void AbstractClass::registerMethod(const char *name, zapi::ZendCallable callable,
+void AbstractClass::registerMethod(const char *name, ZendCallable callable,
                                    Modifier flags, const Arguments &args)
 {
    m_implPtr->m_methods.push_back(std::make_shared<Method>(name, callable, (flags & Modifier::MethodModifiers), args));
@@ -1220,7 +1224,7 @@ Variant AbstractClass::castToDouble(StdClass *nativeObject) const
 
 Variant AbstractClass::castToBool(StdClass *nativeObject) const
 {
-   return BoolVariant();
+   return BooleanVariant();
 }
 
 bool AbstractClass::clonable() const

@@ -20,7 +20,7 @@
 #include "polarphp/vm/StdClass.h"
 #include "polarphp/vm/internal/StdClassPrivate.h"
 #include "polarphp/vm/ds/internal/VariantPrivate.h"
-#include "polarphp/vm/utils/FataError.h"
+#include "polarphp/vm/utils/FatalError.h"
 #include "polarphp/vm/utils/OrigException.h"
 
 #include <cstring>
@@ -281,7 +281,7 @@ Variant::Variant(Variant &other, bool isRef)
    }
 }
 
-Variant::Variant(BoolVariant &value, bool isRef)
+Variant::Variant(BooleanVariant &value, bool isRef)
    : m_implPtr(new VariantPrivate, std_zval_deleter)
 {
    zval *self = getUnDerefZvalPtr();
@@ -346,7 +346,7 @@ Variant::Variant(ArrayVariant &value, bool isRef)
    }
 }
 
-Variant::Variant(const BoolVariant &value)
+Variant::Variant(const BooleanVariant &value)
    : m_implPtr(new VariantPrivate, std_zval_deleter)
 {
    ZVAL_BOOL(getUnDerefZvalPtr(), value.toBool());
@@ -399,7 +399,7 @@ Variant::Variant(Variant &&other) noexcept
    m_implPtr = std::move(other.m_implPtr);
 }
 
-Variant::Variant(BoolVariant &&value)
+Variant::Variant(BooleanVariant &&value)
 {
    m_implPtr = std::move(value.m_implPtr);
 }

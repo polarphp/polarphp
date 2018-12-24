@@ -387,7 +387,7 @@ std::string StringVariant::toLowerCase() const
       return std::string();
    }
    std::string ret(cbegin(), cend());
-   return zapi::utils::str_tolower(ret);
+   return str_tolower(ret);
 }
 
 std::string StringVariant::toUpperCase() const
@@ -396,7 +396,7 @@ std::string StringVariant::toUpperCase() const
       return std::string();
    }
    std::string ret(cbegin(), cend());
-   return zapi::utils::str_toupper(ret);
+   return str_toupper(ret);
 }
 
 StringVariant::Reference StringVariant::at(SizeType pos)
@@ -473,7 +473,7 @@ StringVariant::ConstReverseIterator StringVariant::crend() const noexcept
    return ConstReverseIterator(getCStr());
 }
 
-zapi_long StringVariant::indexOf(const char *needle, zapi_long offset,
+vmapi_long StringVariant::indexOf(const char *needle, vmapi_long offset,
                                  bool caseSensitive) const noexcept
 {
    if (isEmpty()) {
@@ -482,8 +482,8 @@ zapi_long StringVariant::indexOf(const char *needle, zapi_long offset,
    Pointer haystack = getRawStrPtr();
    size_t haystackLength = getSize();
    size_t needleLength = std::strlen(needle);
-   GuardValuePtrType haystackDup(nullptr, zapi::utils::std_php_memory_deleter);
-   GuardValuePtrType needleDup(nullptr, zapi::utils::std_php_memory_deleter);
+   GuardValuePtrType haystackDup(nullptr, std_php_memory_deleter);
+   GuardValuePtrType needleDup(nullptr, std_php_memory_deleter);
    ConstPointer found = nullptr;
    if (offset < 0) {
       offset += haystackLength;
@@ -502,8 +502,8 @@ zapi_long StringVariant::indexOf(const char *needle, zapi_long offset,
       std::memcpy(needleDup.get(), needle, needleLength);
       haystack = haystackDup.get();
       needle = needleDup.get();
-      zapi::utils::str_tolower(haystackDup.get(), haystackLength);
-      zapi::utils::str_tolower(needleDup.get(), needleLength);
+      str_tolower(haystackDup.get(), haystackLength);
+      str_tolower(needleDup.get(), needleLength);
    }
    found = zend_memnstr(haystack + offset, needle, needleLength,
                         haystack + haystackLength);
@@ -513,26 +513,26 @@ zapi_long StringVariant::indexOf(const char *needle, zapi_long offset,
    return -1;
 }
 
-zapi_long StringVariant::indexOf(const StringVariant &needle, zapi_long offset,
+vmapi_long StringVariant::indexOf(const StringVariant &needle, vmapi_long offset,
                                  bool caseSensitive) const noexcept
 {
    return indexOf(needle.getCStr(), offset, caseSensitive);
 }
 
-zapi_long StringVariant::indexOf(const std::string &needle, zapi_long offset,
+vmapi_long StringVariant::indexOf(const std::string &needle, vmapi_long offset,
                                  bool caseSensitive) const noexcept
 {
    return indexOf(needle.c_str(), offset, caseSensitive);
 }
 
-zapi_long StringVariant::indexOf(const char needle, zapi_long offset,
+vmapi_long StringVariant::indexOf(const char needle, vmapi_long offset,
                                  bool caseSensitive) const noexcept
 {
    ValueType buffer[2] = {needle, '\0'};
    return indexOf(reinterpret_cast<Pointer>(buffer), offset, caseSensitive);
 }
 
-zapi_long StringVariant::lastIndexOf(const char *needle, zapi_long offset,
+vmapi_long StringVariant::lastIndexOf(const char *needle, vmapi_long offset,
                                      bool caseSensitive) const noexcept
 {
    if (isEmpty()) {
@@ -541,8 +541,8 @@ zapi_long StringVariant::lastIndexOf(const char *needle, zapi_long offset,
    Pointer haystack = getRawStrPtr();
    size_t haystackLength = getSize();
    size_t needleLength = std::strlen(needle);
-   GuardValuePtrType haystackDup(nullptr, zapi::utils::std_php_memory_deleter);
-   GuardValuePtrType needleDup(nullptr, zapi::utils::std_php_memory_deleter);
+   GuardValuePtrType haystackDup(nullptr, std_php_memory_deleter);
+   GuardValuePtrType needleDup(nullptr, std_php_memory_deleter);
    Pointer p = nullptr;
    Pointer e = nullptr;
    ConstPointer found = nullptr;
@@ -553,8 +553,8 @@ zapi_long StringVariant::lastIndexOf(const char *needle, zapi_long offset,
       std::memcpy(needleDup.get(), needle, needleLength);
       haystack = haystackDup.get();
       needle = needleDup.get();
-      zapi::utils::str_tolower(haystackDup.get(), haystackLength);
-      zapi::utils::str_tolower(needleDup.get(), needleLength);
+      str_tolower(haystackDup.get(), haystackLength);
+      str_tolower(needleDup.get(), needleLength);
    }
    if (offset >= 0) {
       if (static_cast<size_t>(offset) > haystackLength) {
@@ -584,19 +584,19 @@ zapi_long StringVariant::lastIndexOf(const char *needle, zapi_long offset,
    return -1;
 }
 
-zapi_long StringVariant::lastIndexOf(const StringVariant &needle, zapi_long offset,
+vmapi_long StringVariant::lastIndexOf(const StringVariant &needle, vmapi_long offset,
                                      bool caseSensitive) const noexcept
 {
    return lastIndexOf(needle.getCStr(), offset, caseSensitive);
 }
 
-zapi_long StringVariant::lastIndexOf(const std::string &needle, zapi_long offset,
+vmapi_long StringVariant::lastIndexOf(const std::string &needle, vmapi_long offset,
                                      bool caseSensitive) const noexcept
 {
    return lastIndexOf(needle.c_str(), offset, caseSensitive);
 }
 
-zapi_long StringVariant::lastIndexOf(const char needle, zapi_long offset,
+vmapi_long StringVariant::lastIndexOf(const char needle, vmapi_long offset,
                                      bool caseSensitive) const noexcept
 {
    ValueType buffer[2] = {needle, '\0'};
@@ -635,8 +635,8 @@ bool StringVariant::startsWith(const char *str, bool caseSensitive) const noexce
    }
    Pointer selfStr = getRawStrPtr();
    Pointer otherStrPtr = const_cast<Pointer>(str);
-   GuardValuePtrType selfStrLowerCase(nullptr, zapi::utils::std_php_memory_deleter);
-   GuardValuePtrType otherStrLowerCase(nullptr, zapi::utils::std_php_memory_deleter);
+   GuardValuePtrType selfStrLowerCase(nullptr, std_php_memory_deleter);
+   GuardValuePtrType otherStrLowerCase(nullptr, std_php_memory_deleter);
    size_t selfStrLength = getSize();
    size_t otherStrLength = std::strlen(str);
    if (selfStrLength < otherStrLength) {
@@ -649,8 +649,8 @@ bool StringVariant::startsWith(const char *str, bool caseSensitive) const noexce
       std::memcpy(otherStrLowerCase.get(), otherStrPtr, otherStrLength);
       selfStr = selfStrLowerCase.get();
       otherStrPtr = otherStrLowerCase.get();
-      zapi::utils::str_tolower(selfStr);
-      zapi::utils::str_tolower(otherStrPtr);
+      str_tolower(selfStr);
+      str_tolower(otherStrPtr);
    }
    return 0 == std::memcmp(selfStr, otherStrPtr, otherStrLength);
 }
@@ -678,8 +678,8 @@ bool StringVariant::endsWith(const char *str, bool caseSensitive) const noexcept
    }
    Pointer selfStr = getRawStrPtr();
    Pointer otherStrPtr = const_cast<Pointer>(str);
-   GuardValuePtrType selfStrLowerCase(nullptr, zapi::utils::std_php_memory_deleter);
-   GuardValuePtrType otherStrLowerCase(nullptr, zapi::utils::std_php_memory_deleter);
+   GuardValuePtrType selfStrLowerCase(nullptr, std_php_memory_deleter);
+   GuardValuePtrType otherStrLowerCase(nullptr, std_php_memory_deleter);
    size_t selfStrLength = getSize();
    size_t otherStrLength = std::strlen(str);
    if (selfStrLength < otherStrLength) {
@@ -692,8 +692,8 @@ bool StringVariant::endsWith(const char *str, bool caseSensitive) const noexcept
       std::memcpy(otherStrLowerCase.get(), otherStrPtr, otherStrLength);
       selfStr = selfStrLowerCase.get();
       otherStrPtr = otherStrLowerCase.get();
-      zapi::utils::str_tolower(selfStr);
-      zapi::utils::str_tolower(otherStrPtr);
+      str_tolower(selfStr);
+      str_tolower(otherStrPtr);
    }
    return 0 == std::memcmp(selfStr + selfStrLength - otherStrLength, otherStrPtr, otherStrLength);
 }
@@ -809,7 +809,7 @@ StringVariant &StringVariant::remove(size_t pos, size_t length)
 StringVariant &StringVariant::remove(const char *str, bool caseSensitive)
 {
    size_t length = std::strlen(str);
-   zapi_long pos = -1;
+   vmapi_long pos = -1;
    while (-1 != (pos = indexOf(str, 0, caseSensitive))) {
       remove(static_cast<size_t>(pos), length);
    }
@@ -907,7 +907,7 @@ StringVariant &StringVariant::replace(size_t pos, size_t length, const StringVar
 StringVariant &StringVariant::replace(const char *search, const char *replaceStr, bool caseSensitive)
 {
    size_t length = std::strlen(search);
-   zapi_long pos = -1;
+   vmapi_long pos = -1;
    size_t startPos = 0;
    while (-1 != (pos = indexOf(search, startPos, caseSensitive))) {
       replace(static_cast<size_t>(pos), length, replaceStr);
@@ -918,7 +918,7 @@ StringVariant &StringVariant::replace(const char *search, const char *replaceStr
 
 StringVariant &StringVariant::replace(char search, char replaceStr, bool caseSensitive)
 {
-   zapi_long pos = -1;
+   vmapi_long pos = -1;
    size_t startPos = 0;
    while (-1 != (pos = indexOf(search, startPos, caseSensitive))) {
       replace(static_cast<size_t>(pos), 1, replaceStr);
@@ -1061,7 +1061,7 @@ std::string StringVariant::simplified() const
    }
    ConstPointer start = getRawStrPtr();
    ConstPointer end = start + getLength();
-   GuardValuePtrType tempStr(static_cast<Pointer>(emalloc(getSize())), zapi::utils::std_php_memory_deleter);
+   GuardValuePtrType tempStr(static_cast<Pointer>(emalloc(getSize())), std_php_memory_deleter);
    // trim two side space chars
    while (start < end && std::isspace(*start)) {
       ++start;
@@ -1195,7 +1195,7 @@ std::vector<std::string> StringVariant::split(const char *sep, bool keepEmptyPar
       return list;
    }
    std::list<size_t> points;
-   zapi_long pos = -1;
+   vmapi_long pos = -1;
    size_t startPos = 0;
    size_t sepLength = std::strlen(sep);
    while (-1 != (pos = indexOf(sep, startPos, caseSensitive))) {

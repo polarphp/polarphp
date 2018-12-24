@@ -739,6 +739,19 @@ struct is_reference_wrapper
       : public is_reference_wrapper_impl<typename std::remove_cv<TargetType>::type>
 {};
 
+template <typename FuncType, size_t... Is>
+auto gen_tuple_impl(FuncType func, std::index_sequence<Is...> )
+-> decltype(std::make_tuple(func(Is)...))
+{
+   return std::make_tuple(func(Is)...);
+}
+
+template <typename CallableType, typename GeneratorType, size_t... Is>
+auto gen_tuple_with_type_impl(GeneratorType generator, std::index_sequence<Is...> )
+-> decltype(std::make_tuple(generator.template generate<typename CallableInfoTrait<CallableType>::template arg<Is>::type>(Is)...))
+{
+   return std::make_tuple(generator.template generate<typename CallableInfoTrait<CallableType>::template arg<Is>::type>(Is)...);
+}
 } // internal
 
 template <typename CallableType>
@@ -773,6 +786,20 @@ struct member_pointer_traits
       CallableInfoTrait<MemberPointer>::isMemberCallable,
       IsMemberObjectPointer<MemberPointer>::value>
 {};
+
+template <size_t N, typename Generator>
+auto gen_tuple(Generator func)
+-> decltype(internal::gen_tuple_impl(func, std::make_index_sequence<N>{}))
+{
+   return internal::gen_tuple_impl(func, std::make_index_sequence<N>{});
+}
+
+template <size_t N, typename CallableType, typename Generator>
+auto gen_tuple_with_type(Generator generator)
+-> decltype(internal::gen_tuple_with_type_impl<CallableType>(generator, std::make_index_sequence<N>{}))
+{
+   return internal::gen_tuple_with_type_impl<CallableType>(generator, std::make_index_sequence<N>{});
+}
 
 } // vmapi
 } // polar

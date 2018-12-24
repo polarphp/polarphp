@@ -34,7 +34,7 @@ class StringVariant;
 class NumericVariant;
 class DoubleVariant;
 class ArrayVariant;
-class BoolVariant;
+class BooleanVariant;
 class ObjectVariant;
 class CallableVariant;
 
@@ -69,13 +69,13 @@ public:
     */
    Variant(const Variant &other);
    Variant(Variant &other, bool isRef);
-   Variant(BoolVariant &value, bool isRef);
+   Variant(BooleanVariant &value, bool isRef);
    Variant(NumericVariant &value, bool isRef);
    Variant(DoubleVariant &value, bool isRef);
    Variant(StringVariant &value, bool isRef);
    Variant(ArrayVariant &value, bool isRef);
 
-   Variant(const BoolVariant &value);
+   Variant(const BooleanVariant &value);
    Variant(const NumericVariant &value);
    Variant(const StringVariant &value);
    Variant(const DoubleVariant &value);
@@ -83,7 +83,7 @@ public:
    Variant(const ObjectVariant &value);
    Variant(const CallableVariant &value);
 
-   Variant(BoolVariant &&value);
+   Variant(BooleanVariant &&value);
    Variant(NumericVariant &&value);
    Variant(StringVariant &&value);
    Variant(DoubleVariant &&value);
@@ -240,7 +240,7 @@ protected:
    friend class NumericVariant;
    friend class DoubleVariant;
    friend class ArrayVariant;
-   friend class BoolVariant;
+   friend class BooleanVariant;
    friend class ObjectVariant;
    friend class CallableVariant;
    VMAPI_DECLARE_PRIVATE(Variant);

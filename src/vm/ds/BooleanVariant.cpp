@@ -17,23 +17,23 @@ namespace vmapi {
 
 using internal::VariantPrivate;
 
-BoolVariant::BoolVariant()
+BooleanVariant::BooleanVariant()
    : Variant(false)
 {}
 
-BoolVariant::BoolVariant(bool value)
+BooleanVariant::BooleanVariant(bool value)
    : Variant(value)
 {}
 
-BoolVariant::BoolVariant(zval &other, bool isRef)
-   : BoolVariant(&other, isRef)
+BooleanVariant::BooleanVariant(zval &other, bool isRef)
+   : BooleanVariant(&other, isRef)
 {}
 
-BoolVariant::BoolVariant(zval &&other, bool isRef)
-   : BoolVariant(&other, isRef)
+BooleanVariant::BooleanVariant(zval &&other, bool isRef)
+   : BooleanVariant(&other, isRef)
 {}
 
-BoolVariant::BoolVariant(zval *other, bool isRef)
+BooleanVariant::BooleanVariant(zval *other, bool isRef)
 {
    zval *self = getUnDerefZvalPtr();
    if (nullptr != other) {
@@ -55,11 +55,11 @@ BoolVariant::BoolVariant(zval *other, bool isRef)
    }
 }
 
-BoolVariant::BoolVariant(const BoolVariant &other)
+BooleanVariant::BooleanVariant(const BooleanVariant &other)
    : Variant(other)
 {}
 
-BoolVariant::BoolVariant(BoolVariant &other, bool isRef)
+BooleanVariant::BooleanVariant(BooleanVariant &other, bool isRef)
 {
    zval *self = getUnDerefZvalPtr();
    if (!isRef) {
@@ -71,11 +71,11 @@ BoolVariant::BoolVariant(BoolVariant &other, bool isRef)
    }
 }
 
-BoolVariant::BoolVariant(BoolVariant &&other) noexcept
+BooleanVariant::BooleanVariant(BooleanVariant &&other) noexcept
    : Variant(std::move(other))
 {}
 
-BoolVariant::BoolVariant(const Variant &other)
+BooleanVariant::BooleanVariant(const Variant &other)
 {
    zval *self = getZvalPtr();
    zval *from = const_cast<zval *>(other.getZvalPtr());
@@ -89,7 +89,7 @@ BoolVariant::BoolVariant(const Variant &other)
    }
 }
 
-BoolVariant::BoolVariant(Variant &&other)
+BooleanVariant::BooleanVariant(Variant &&other)
    : Variant(std::move(other))
 {
    if (getType() != Type::Boolean) {
@@ -97,7 +97,7 @@ BoolVariant::BoolVariant(Variant &&other)
    }
 }
 
-BoolVariant &BoolVariant::operator=(const BoolVariant &other)
+BooleanVariant &BooleanVariant::operator=(const BooleanVariant &other)
 {
    if (this != &other) {
       ZVAL_BOOL(getZvalPtr(), Z_TYPE_INFO_P(other.getZvalPtr()) == IS_TRUE);
@@ -105,42 +105,42 @@ BoolVariant &BoolVariant::operator=(const BoolVariant &other)
    return *this;
 }
 
-BoolVariant &BoolVariant::operator=(const Variant &other)
+BooleanVariant &BooleanVariant::operator=(const Variant &other)
 {
    ZVAL_BOOL(getZvalPtr(), other.toBool());
    return *this;
 }
 
-BoolVariant &BoolVariant::operator=(ArrayItemProxy &&other)
+BooleanVariant &BooleanVariant::operator=(ArrayItemProxy &&other)
 {
-   return operator =(other.toBoolVariant());
+   return operator =(other.toBooleanVariant());
 }
 
-BoolVariant &BoolVariant::operator=(bool value)
+BooleanVariant &BooleanVariant::operator=(bool value)
 {
    ZVAL_BOOL(getZvalPtr(), value);
    return *this;
 }
 
-BoolVariant::~BoolVariant()
+BooleanVariant::~BooleanVariant()
 {}
 
-BoolVariant::operator bool() const
+BooleanVariant::operator bool() const
 {
    return toBool();
 }
 
-bool BoolVariant::toBool() const noexcept
+bool BooleanVariant::toBool() const noexcept
 {
    return Z_TYPE_INFO_P(getZvalPtr()) == IS_TRUE ? true : false;
 }
 
-bool operator ==(const BoolVariant &lhs, const BoolVariant &rhs)
+bool operator ==(const BooleanVariant &lhs, const BooleanVariant &rhs)
 {
    return lhs.toBool() == rhs.toBool();
 }
 
-bool operator !=(const BoolVariant &lhs, const BoolVariant &rhs)
+bool operator !=(const BooleanVariant &lhs, const BooleanVariant &rhs)
 {
    return lhs.toBool() != rhs.toBool();
 }

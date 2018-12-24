@@ -26,6 +26,7 @@
 #include <ostream>
 #include <list>
 #include <type_traits>
+#include <tuple>
 
 struct _zend_execute_data;
 struct _zval_struct;
@@ -37,7 +38,6 @@ namespace vmapi {
 class Variant;
 class Parameters;
 class StdClass;
-
 
 namespace
 {
@@ -91,7 +91,7 @@ public:
    {
       using ClassType = typename std::remove_reference<ParamType>::type;
       zval *arg = &m_arguments[index];
-      if (!vmapi::utils::zval_type_is_valid(arg)) {
+      if (!zval_type_is_valid(arg)) {
          ZVAL_NULL(arg);
       }
       if (Z_TYPE_P(arg) == IS_REFERENCE) {
@@ -104,12 +104,7 @@ private:
    zval *m_arguments;
 };
 
-}
-
-namespace vmapi
-{
-namespace vm
-{
+} // anonymous namespace
 
 template <typename CallableType, CallableType callable,
           bool isMemberFunc, bool HasReturn, bool HasVariableParam>
@@ -137,7 +132,7 @@ public:
          zend_get_parameters_array_ex(argNumber, arguments.get());
          InvokeParamGenerator generator(arguments.get());
          auto tuple = gen_tuple_with_type<paramNumber, CallableType>(generator);
-         apply(callable, tuple);
+         std::apply(callable, tuple);
          yield(return_value, nullptr);
       } catch (Exception &exception) {
          process_exception(exception);
@@ -175,7 +170,7 @@ public:
                return temp;
             }
          });
-         apply(callable, tuple);
+         std::apply(callable, tuple);
          yield(return_value, nullptr);
       } catch (Exception &exception) {
          process_exception(exception);
@@ -200,7 +195,7 @@ public:
          zend_get_parameters_array_ex(argNumber, arguments.get());
          InvokeParamGenerator generator(arguments.get());
          auto tuple = gen_tuple_with_type<paramNumber, CallableType>(generator);
-         yield(return_value, apply(callable, tuple));
+         yield(return_value, std::apply(callable, tuple));
       } catch (Exception &exception) {
          process_exception(exception);
       }
@@ -266,7 +261,7 @@ public:
          InvokeParamGenerator generator(arguments.get());
          auto objectTuple = std::make_tuple(static_cast<ClassType *>(nativeObject));
          auto tuple = std::tuple_cat(objectTuple, gen_tuple_with_type<paramNumber, CallableType>(generator));
-         apply(callable, tuple);
+         std::apply(callable, tuple);
          yield(return_value, nullptr);
       } catch (Exception &exception) {
          process_exception(exception);
@@ -311,7 +306,7 @@ public:
          apply(callable, tuple);
          yield(return_value, nullptr);
       } catch (Exception &exception) {
-         vmapi::kernel::process_exception(exception);
+         process_exception(exception);
       }
    }
 };

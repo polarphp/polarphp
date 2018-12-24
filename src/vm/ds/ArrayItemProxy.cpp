@@ -150,7 +150,7 @@ ArrayItemProxy &ArrayItemProxy::operator =(const StringVariant &value)
    return operator =(Variant(value));
 }
 
-ArrayItemProxy &ArrayItemProxy::operator =(const BoolVariant &value)
+ArrayItemProxy &ArrayItemProxy::operator =(const BooleanVariant &value)
 {
    return operator =(Variant(value));
 }
@@ -175,7 +175,7 @@ ArrayItemProxy &ArrayItemProxy::operator =(StringVariant &&value)
    return operator =(Variant(std::move(value)));
 }
 
-ArrayItemProxy &ArrayItemProxy::operator =(BoolVariant &&value)
+ArrayItemProxy &ArrayItemProxy::operator =(BooleanVariant &&value)
 {
    return operator =(Variant(std::move(value)));
 }
@@ -220,9 +220,9 @@ ArrayItemProxy::operator StringVariant()
    return toStringVariant();
 }
 
-ArrayItemProxy::operator BoolVariant()
+ArrayItemProxy::operator BooleanVariant()
 {
-   return toBoolVariant();
+   return toBooleanVariant();
 }
 
 ArrayItemProxy::operator ArrayVariant()
@@ -286,14 +286,14 @@ StringVariant ArrayItemProxy::toStringVariant()
    return StringVariant(std::move(value));
 }
 
-BoolVariant ArrayItemProxy::toBoolVariant()
+BooleanVariant ArrayItemProxy::toBooleanVariant()
 {
    if (!isKeychianOk(false)) {
       throw std::bad_cast();
    }
    Variant value(retrieveZvalPtr());
    m_implPtr->m_needCheckRequestItem = false;
-   return BoolVariant(std::move(value));
+   return BooleanVariant(std::move(value));
 }
 
 ArrayVariant ArrayItemProxy::toArrayVariant()

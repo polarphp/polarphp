@@ -34,16 +34,20 @@ static void _zend_is_inconsistent(const HashTable *ht, const char *file, int lin
    }
    switch ((ht->u.flags & HASH_MASK_CONSISTENCY)) {
    case HT_IS_DESTROYING:
-      zend_output_debug_string(1, "%s(%d) : ht=%p is being destroyed", file, line, ht);
+      zend_output_debug_string(1, "%s(%d) : ht=%p is being destroyed", file, line,
+                               reinterpret_cast<void *>(const_cast<HashTable *>(ht)));
       break;
    case HT_DESTROYED:
-      zend_output_debug_string(1, "%s(%d) : ht=%p is already destroyed", file, line, ht);
+      zend_output_debug_string(1, "%s(%d) : ht=%p is already destroyed", file, line,
+                               reinterpret_cast<void *>(const_cast<HashTable *>(ht)));
       break;
    case HT_CLEANING:
-      zend_output_debug_string(1, "%s(%d) : ht=%p is being cleaned", file, line, ht);
+      zend_output_debug_string(1, "%s(%d) : ht=%p is being cleaned", file, line,
+                               reinterpret_cast<void *>(const_cast<HashTable *>(ht)));
       break;
    default:
-      zend_output_debug_string(1, "%s(%d) : ht=%p is inconsistent", file, line, ht);
+      zend_output_debug_string(1, "%s(%d) : ht=%p is inconsistent", file, line,
+                               reinterpret_cast<void *>(const_cast<HashTable *>(ht)));
       break;
    }
    vmapi_bailout();
@@ -135,9 +139,9 @@ ArrayVariant::ArrayVariant(zval *other, bool isRef)
                     (Z_TYPE_P(other) == IS_REFERENCE && Z_TYPE_P(Z_REFVAL_P(other)) == IS_ARRAY))) {
          SEPARATE_STRING(other);
          ZVAL_MAKE_REF(other);
-         zend_reference *ref = Z_REF_P(other);
+         zend_reference ref = Z_REF(other);
          ++GC_REFCOUNT(ref);
-         ZVAL_REF(self, ref);
+         ZVAL_REF(self, &ref);
       } else if ((Z_TYPE_P(other) == IS_ARRAY ||
                   (Z_TYPE_P(other) == IS_REFERENCE && Z_TYPE_P(Z_REFVAL_P(other)) == IS_ARRAY))) {
          ZVAL_DEREF(other);
