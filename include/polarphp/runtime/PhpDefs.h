@@ -12,7 +12,6 @@
 #ifndef POLARPHP_RUNTIME_PHPDEFS_H
 #define POLARPHP_RUNTIME_PHPDEFS_H
 
-
 #include "polarphp/global/CompilerFeature.h"
 #include "polarphp/global/SystemDetection.h"
 #include "polarphp/global/Config.h"
