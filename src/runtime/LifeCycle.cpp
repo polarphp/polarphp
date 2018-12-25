@@ -281,7 +281,9 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
       return false;
    }
    /// Register PHP core ini entries
-   REGISTER_INI_ENTRIES();
+   /// TODO refactor
+   ///
+//   REGISTER_INI_ENTRIES();
    /* Register Zend ini entries */
    zend_register_standard_ini_entries();
 #ifdef POLAR_OS_WIN32
