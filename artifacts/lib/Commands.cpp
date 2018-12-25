@@ -287,6 +287,7 @@ int dispatch_cli_command()
    default:
       polar_unreachable("can't execute here");
    }
+   return sg_exitStatus;
 }
 
 namespace {

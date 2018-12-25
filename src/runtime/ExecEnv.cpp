@@ -1127,16 +1127,6 @@ POLAR_DECL_EXPORT void php_message_handler_for_zend(zend_long message, const voi
    }
 }
 
-//POLAR_DECL_EXPORT void php_printf_to_smart_string(smart_string *buf, const char *format, va_list ap)
-//{
-
-//}
-
-//POLAR_DECL_EXPORT void php_printf_to_smart_str(smart_str *buf, const char *format, va_list ap)
-//{
-
-//}
-
 ///
 /// here we does not use it, but need review
 ///
