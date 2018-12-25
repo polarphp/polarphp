@@ -12,7 +12,8 @@
 #ifndef POLARPHP_ARTIFACTS_COMMANDS_H
 #define POLARPHP_ARTIFACTS_COMMANDS_H
 
-#include "ZendHeaders.h"
+#include "polarphp/runtime/internal/DepsZendVmHeaders.h"
+
 #include <string>
 #include <vector>
 #include <CLI/Option.hpp>

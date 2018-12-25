@@ -364,4 +364,6 @@ void cli_ini_defaults(HashTable *configuration_hash);
 #endif
 #endif /* !XtOffsetOf */
 
+#define PHP_STDIN_FILENAME_MARK const_cast<char *>("Standard input code")
+
 #endif // POLARPHP_RUNTIME_PHPDEFS_H

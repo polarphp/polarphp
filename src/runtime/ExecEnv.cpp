@@ -21,6 +21,7 @@
 #include "polarphp/runtime/Utils.h"
 #include "polarphp/runtime/Ini.h"
 
+#include <filesystem>
 #include <cstdio>
 #include <cstring>
 #include <sys/stat.h>
@@ -80,6 +81,8 @@
 namespace polar {
 namespace runtime {
 
+namespace fs = std::filesystem;
+
 extern bool sg_moduleInitialized;
 extern bool sg_moduleStartup;
 extern bool sg_moduleShutdown;
@@ -103,7 +106,10 @@ ExecEnvInfo &retrieve_global_execenv_runtime_info()
 }
 
 ExecEnv::ExecEnv()
-   : m_started(false)
+   : m_moduleStarted(false),
+     m_execEnvStarted(false),
+     m_execEnvReady(false),
+     m_execEnvDestroyed(false)
 {
    /// TODO read from cfg file
    m_runtimeInfo.defaultSocketTimeout = 60;
@@ -125,6 +131,63 @@ ExecEnv::ExecEnv()
 
 ExecEnv::~ExecEnv()
 {
+   shutdown();
+}
+
+bool ExecEnv::bootup()
+{
+#ifdef HAVE_SIGNAL_H
+#if defined(SIGPIPE) && defined(SIG_IGN)
+   signal(SIGPIPE, SIG_IGN);
+   /// ignore SIGPIPE in standalone mode so
+   /// that sockets created via fsockopen()
+   /// don't kill PHP if the remote site
+   /// closes it.  in apache|apxs mode apache
+   /// does that for us!  thies@thieso.net
+   /// 20000419
+#endif
+#endif
+   tsrm_startup(1, 1, 0, nullptr);
+   (void)ts_resource(0);
+   ZEND_TSRMLS_CACHE_UPDATE();
+   zend_signal_startup();
+   if (!polar::runtime::php_module_startup(nullptr, 0)) {
+      // there is no way to see if we must call zend_ini_deactivate()
+      // since we cannot check if EG(ini_directives) has been initialised
+      // because the executor's constructor does not set initialize it.
+      // Apart from that there seems no need for zend_ini_deactivate() yet.
+      // So we goto out_err.
+      return false;
+   }
+   m_moduleStarted = true;
+   polar_try {
+      CG(in_compilation) = 0; /* not initialized but needed for several options */
+      if (!php_exec_env_startup()) {
+         std::cerr << "Could not startup." << std::endl;
+         return false;
+      }
+   } polar_end_try;
+   m_execEnvStarted = true;
+   m_runtimeInfo.duringExecEnvStartup = false;
+   return true;
+}
+
+void ExecEnv::shutdown()
+{
+   if (m_execEnvDestroyed) {
+      return;
+   }
+   if (m_execEnvStarted) {
+      deactivate();
+      zend_ini_deactivate();
+      php_exec_env_shutdown();
+      m_execEnvStarted = false;
+   }
+   if (m_moduleStarted) {
+      php_module_shutdown();
+      m_moduleStarted = false;
+   }
+   tsrm_shutdown();
 }
 
 /// default log handler
@@ -143,12 +206,18 @@ void ExecEnv::initDefaultConfig(HashTable *configuration_hash)
 
 void ExecEnv::activate()
 {
-   m_started = false;
+   m_execEnvReady = true;
 }
 
 void ExecEnv::deactivate()
 {
-   m_started = false;
+   m_execEnvReady = false;
+}
+
+ExecEnv &ExecEnv::setCompileOptions(int opts)
+{
+   CG(compiler_options) = opts;
+   return *this;
 }
 
 ExecEnv &ExecEnv::setContainerArgc(int argc)
@@ -177,15 +246,15 @@ ExecEnv &ExecEnv::setContainerArgv(char *argv[])
    return *this;
 }
 
-ExecEnv &ExecEnv::setStarted(bool flag)
+ExecEnv &ExecEnv::setEnvReady(bool flag)
 {
-   m_started = flag;
+   m_execEnvReady = flag;
    return *this;
 }
 
-bool ExecEnv::getStarted() const
+bool ExecEnv::isEnvReady() const
 {
-   return m_started;
+   return m_execEnvReady;
 }
 
 const std::vector<StringRef> &ExecEnv::getContainerArgv() const
@@ -198,6 +267,11 @@ int ExecEnv::getContainerArgc() const
    return m_argc;
 }
 
+uint32_t ExecEnv::getCompileOptions() const
+{
+   return CG(compiler_options);
+}
+
 ExecEnvInfo &ExecEnv::getRuntimeInfo()
 {
    return m_runtimeInfo;
@@ -207,6 +281,66 @@ StringRef ExecEnv::getExecutableFilepath() const
 {
    assert(m_argv.size() > 0);
    return m_argv[0];
+}
+
+int ExecEnv::getVmExitStatus() const
+{
+   return EG(exit_status);
+}
+
+bool ExecEnv::execScript(StringRef filename, int &exitStatus)
+{
+   bool useStdin = false;
+   if (!filename.empty()) {
+      if (!fs::exists(filename.getStr())) {
+         std::cerr << "script: " << filename.getData() << " is not exist" << std::endl;
+         exitStatus = 1;
+         return false;
+      }
+   } else {
+      filename = PHP_STDIN_FILENAME_MARK;
+      useStdin = true;
+   }
+   zend_file_handle fileHandle;
+   StringRef translatedPath;
+   int lineno = 0;
+   polar_try {
+      CG(in_compilation) = 0; /* not initialized but needed for several options */
+      if (!useStdin) {
+         if (!seek_file_begin(&fileHandle, filename.getData(), &lineno)) {
+            std::cerr << "seek_file_begin error: " << strerror(errno) << std::endl;
+            exitStatus = 1;
+            return false;
+         } else {
+            char realPath[MAXPATHLEN];
+            if (VCWD_REALPATH(filename.getData(), realPath)) {
+               translatedPath = realPath;
+            }
+         }
+      } else {
+         /// We could handle PHP_MODE_PROCESS_STDIN in a different manner
+         /// here but this would make things only more complicated. And it
+         /// is consitent with the way -R works where the stdin file handle
+         /// is also accessible.
+         fileHandle.filename = PHP_STDIN_FILENAME_MARK;
+         fileHandle.handle.fp = stdin;
+      }
+      fileHandle.type = ZEND_HANDLE_FP;
+      fileHandle.opened_path = nullptr;
+      fileHandle.free_filename = 0;
+      if (!translatedPath.empty()) {
+         m_runtimeInfo.entryScriptFilename = translatedPath;
+      } else {
+         m_runtimeInfo.entryScriptFilename = fileHandle.filename;
+      }
+      CG(start_lineno) = lineno;
+      if (filename == "Standard input code") {
+         cli_register_file_handles();
+      }
+      php_execute_script(&fileHandle);
+      exitStatus = EG(exit_status);
+   } polar_end_try;
+   return true;
 }
 
 /// polarphp don't use timeout at vm level
@@ -249,7 +383,6 @@ int php_execute_script(zend_file_handle *primaryFile)
          UpdateIniFromRegistry((char*)primaryFile->filename);
       }
 #endif
-      execEnvInfo.duringExecEnvStartup = false;
       //      if (primaryFile->filename && !(SG(options) & SAPI_OPTION_NO_CHDIR)) {
       //#if HAVE_BROKEN_GETCWD
       //         /* this looks nasty to me */
@@ -1035,9 +1168,9 @@ zend_string *php_resolve_path(const char *filename, size_t filenameLen, const ch
        IS_ABSOLUTE_PATH(filename, filenameLen) ||
     #ifdef POLAR_OS_WIN32
        /* This should count as an absolute local path as well, however
-                                                                                                    IS_ABSOLUTE_PATH doesn't care about this path form till now. It
-                                                                                                    might be a big thing to extend, thus just a local handling for
-                                                                                                    now. */
+                                                                                                                                                                                                                IS_ABSOLUTE_PATH doesn't care about this path form till now. It
+                                                                                                                                                                                                                might be a big thing to extend, thus just a local handling for
+                                                                                                                                                                                                                now. */
        filenameLen >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1]) ||
     #endif
        !path ||

@@ -22,12 +22,31 @@ namespace runtime {
 /// so we need rewrite ini modify callbacks
 /// here we use update_xxx_handler name schema
 ///
-POLAR_DECL_EXPORT ZEND_INI_MH(update_bool_handler);
-POLAR_DECL_EXPORT ZEND_INI_MH(update_long_handler);
-POLAR_DECL_EXPORT ZEND_INI_MH(update_long_ge_zero_handler);
-POLAR_DECL_EXPORT ZEND_INI_MH(update_real_handler);
-POLAR_DECL_EXPORT ZEND_INI_MH(update_string_handler);
-POLAR_DECL_EXPORT ZEND_INI_MH(update_string_unempty_handler);
+ZEND_INI_MH(update_bool_handler);
+ZEND_INI_MH(update_long_handler);
+ZEND_INI_MH(update_long_ge_zero_handler);
+ZEND_INI_MH(update_real_handler);
+ZEND_INI_MH(update_string_handler);
+ZEND_INI_MH(update_string_unempty_handler);
+
+///
+/// custom ini modify handlers
+///
+ZEND_INI_MH(set_serialize_precision_handler);
+ZEND_INI_MH(update_display_errors_handler);
+ZEND_INI_MH(update_internal_encoding_handler);
+ZEND_INI_MH(update_error_log_handler);
+ZEND_INI_MH(update_timeout_handler);
+ZEND_INI_MH(update_base_dir_handler);
+ZEND_INI_MH(change_memory_limit_handler);
+ZEND_INI_MH(set_precision_handler);
+ZEND_INI_MH(set_facility_handler);
+ZEND_INI_MH(set_log_filter_handler);
+
+///
+/// custom ini displayer handlers
+///
+ZEND_INI_DISP(display_errors_mode);
 
 } // runtime
 } // polar

@@ -283,7 +283,7 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    /// Register PHP core ini entries
    /// TODO refactor
    ///
-//   REGISTER_INI_ENTRIES();
+   REGISTER_INI_ENTRIES();
    /* Register Zend ini entries */
    zend_register_standard_ini_entries();
 #ifdef POLAR_OS_WIN32
@@ -537,7 +537,7 @@ bool php_exec_env_startup()
    } polar_catch {
       retval = FAILURE;
    } polar_end_try;
-   execEnv.setStarted(true);
+   execEnv.setEnvReady(true);
    return retval;
 }
 

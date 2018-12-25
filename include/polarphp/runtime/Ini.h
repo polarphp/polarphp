@@ -83,37 +83,6 @@ POLAR_DECL_EXPORT void php_ini_activate_per_dir_config(char *path, size_t pathLe
 POLAR_DECL_EXPORT void php_ini_activate_per_host_config(const char *host, size_t hostLen);
 POLAR_DECL_EXPORT HashTable *php_ini_get_configuration_hash(void);
 
-///
-/// because polarphp use thread_local mechanism instead of TSRM
-/// so we need rewrite ini modify callbacks
-/// here we use update_xxx_handler name schema
-///
-POLAR_DECL_EXPORT ZEND_INI_MH(update_bool_handler);
-POLAR_DECL_EXPORT ZEND_INI_MH(update_long_handler);
-POLAR_DECL_EXPORT ZEND_INI_MH(update_long_ge_zero_handler);
-POLAR_DECL_EXPORT ZEND_INI_MH(update_real_handler);
-POLAR_DECL_EXPORT ZEND_INI_MH(update_string_handler);
-POLAR_DECL_EXPORT ZEND_INI_MH(update_string_unempty_handler);
-
-///
-/// custom ini modify handlers
-///
-POLAR_INI_MH(set_serialize_precision_handler);
-POLAR_INI_MH(update_display_errors_handler);
-POLAR_INI_MH(update_internal_encoding_handler);
-POLAR_INI_MH(update_error_log_handler);
-POLAR_INI_MH(update_timeout_handler);
-POLAR_INI_MH(update_base_dir_handler);
-POLAR_INI_MH(change_memory_limit_handler);
-POLAR_INI_MH(set_precision_handler);
-POLAR_INI_MH(set_facility_handler);
-POLAR_INI_MH(set_log_filter_handler);
-
-///
-/// custom ini displayer handlers
-///
-POLAR_INI_DISP(display_errors_mode);
-
 } // runtime
 } // polar
 

@@ -36,6 +36,12 @@
 namespace polar {
 namespace runtime {
 
+void init();
+inline zend_executor_globals *eg()
+{
+   return TSRMG_BULK_STATIC(executor_globals_id, zend_executor_globals *);
+}
+
 using polar::basic::StringRef;
 using IniConfigDefaultInitFunc = void (*)(HashTable *configuration_hash);
 struct php_tick_function_entry;
@@ -174,26 +180,37 @@ class ExecEnv
 public:
    ExecEnv();
    ~ExecEnv();
+
+   bool bootup();
+   void shutdown();
    void activate();
    void deactivate();
 
+   ExecEnv &setCompileOptions(int opts);
    ExecEnv &setContainerArgc(int argc);
    ExecEnv &setContainerArgv(const std::vector<StringRef> &argv);
    ExecEnv &setContainerArgv(char *argv[]);
-   ExecEnv &setStarted(bool flag);
+   ExecEnv &setEnvReady(bool flag);
 
-   bool getStarted() const;
+   bool isEnvReady() const;
    ExecEnvInfo &getRuntimeInfo();
+   uint32_t getCompileOptions() const;
    const std::vector<StringRef> &getContainerArgv() const;
    int getContainerArgc() const;
    StringRef getExecutableFilepath() const;
+   int getVmExitStatus() const;
+
+   bool execScript(StringRef filename, int &exitStatus);
 
    size_t unbufferWrite(const char *str, int len);
    void logMessage(const char *logMessage, int syslogTypeInt);
    void initDefaultConfig(HashTable *configurationHash);
 
 private:
-   bool m_started;
+   bool m_moduleStarted;
+   bool m_execEnvStarted;
+   bool m_execEnvReady;
+   bool m_execEnvDestroyed;
    int m_argc;
    std::vector<StringRef> m_argv;
    ExecEnvInfo m_runtimeInfo;

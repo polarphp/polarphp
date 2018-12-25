@@ -14,8 +14,8 @@
 #include "polarphp/utils/InitPolar.h"
 #include "polarphp/global/CompilerFeature.h"
 #include "polarphp/global/Config.h"
-#include "lib/ExecEnv.h"
-#include "lib/LifeCycle.h"
+#include "polarphp/runtime/ExecEnv.h"
+#include "polarphp/runtime/LifeCycle.h"
 #include "lib/Defs.h"
 #include "lib/Commands.h"
 #include "lib/ProcessTitle.h"
@@ -63,8 +63,8 @@ int main(int argc, char *argv[])
       std::cerr << sg_errorMsg << std::endl;
       exit(sg_exitStatus);
    }
-   polar::ExecEnv &execEnv = polar::retrieve_global_execenv();
-   polar::ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
+   polar::runtime::ExecEnv &execEnv = polar::runtime::retrieve_global_execenv();
+   polar::runtime::ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
    execEnv.setContainerArgc(argc);
    execEnv.setContainerArgv(argv);
 #if defined(POLAR_OS_WIN32)
@@ -77,7 +77,6 @@ int main(int argc, char *argv[])
    char **argv_save = argv;
    BOOL using_wide_argv = 0;
 #endif
-   int moduleStarted = 0;
    std::string iniEntries;
    /*
     * Do not move this initialization. It needs to happen before argv is used
@@ -103,22 +102,6 @@ int main(int argc, char *argv[])
       _CrtSetDbgFlag(tmp_flag);
    }
 #endif
-
-#ifdef HAVE_SIGNAL_H
-#if defined(SIGPIPE) && defined(SIG_IGN)
-   signal(SIGPIPE, SIG_IGN);
-   /// ignore SIGPIPE in standalone mode so
-   /// that sockets created via fsockopen()
-   /// don't kill PHP if the remote site
-   /// closes it.  in apache|apxs mode apache
-   /// does that for us!  thies@thieso.net
-   /// 20000419
-#endif
-#endif
-   tsrm_startup(1, 1, 0, nullptr);
-   (void)ts_resource(0);
-   ZEND_TSRMLS_CACHE_UPDATE();
-   zend_signal_startup();
 #ifdef POLAR_OS_WIN32
    _fmode = _O_BINARY;			/*sets default for file streams to binary */
    setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
@@ -131,28 +114,12 @@ int main(int argc, char *argv[])
    }
    /// processing ini definitions
    ///
-   execEnvInfo.iniDefaultInitHandler = polar::cli_ini_defaults;
+   execEnvInfo.iniDefaultInitHandler = polar::runtime::cli_ini_defaults;
    execEnvInfo.phpIniPathOverride = sg_configPath;
    execEnvInfo.phpIniIgnoreCwd = true;
    execEnvInfo.phpIniIgnore = sg_ignoreIni;
-
-   iniEntries += polar::HARDCODED_INI;
-
+   iniEntries += polar::runtime::HARDCODED_INI;
    execEnvInfo.iniEntries = iniEntries;
-
-   /// startup after we get the above ini override se we get things right
-   ///
-   if (!polar::php_module_startup(nullptr, 0)) {
-      // there is no way to see if we must call zend_ini_deactivate()
-      // since we cannot check if EG(ini_directives) has been initialised
-      // because the executor's constructor does not set initialize it.
-      // Apart from that there seems no need for zend_ini_deactivate() yet.
-      // So we goto out_err.
-      sg_exitStatus = 1;
-      goto out;
-   }
-   moduleStarted = 1;
-   /// module init finished
 #if defined(POLAR_OS_WIN32)
    php_win32_cp_cli_setup();
    orig_cp = (php_win32_cp_get_orig())->id;
@@ -165,22 +132,21 @@ int main(int argc, char *argv[])
    SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
 #endif
    /// processing options
-
    /* -e option */
    if (sg_generateExtendInfo) {
-      CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
+      uint32_t copts = execEnv.getCompileOptions();
+      copts |= ZEND_COMPILE_EXTENDED_INFO;
+      execEnv.setCompileOptions(copts);
    }
-   zend_first_try {
-      sg_exitStatus = polar::dispatch_cli_command();
-   } zend_end_try();
-
-   /// module finished
-   ///
-out:
-   if (moduleStarted) {
-      polar::php_module_shutdown();
+   if (!execEnv.bootup()) {
+      sg_exitStatus = 1;
+      exit(sg_exitStatus);
    }
-   tsrm_shutdown();
+   try {
+       sg_exitStatus = polar::dispatch_cli_command();
+   } catch(std::exception &e) {
+      std::cerr << e.what() << std::endl;
+   }
 #if defined(POLAR_OS_WIN32)
    (void)php_win32_cp_cli_restore();
    if (using_wide_argv) {
@@ -191,7 +157,6 @@ out:
 #endif
    /// Do not move this de-initialization. It needs to happen right before
    /// exiting.
-   ///
    polar::cleanup_ps_args(argv);
    exit(sg_exitStatus);
 }

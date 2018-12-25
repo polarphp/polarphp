@@ -9,13 +9,13 @@
 //
 // Created by polarboy on 2018/12/12.
 
+#include "Commands.h"
+#include "Defs.h"
+
 #include "polarphp/global/CompilerFeature.h"
 #include "polarphp/basic/adt/StringRef.h"
-#include "Commands.h"
-#include "ExecEnv.h"
-#include "Defs.h"
-#include "LifeCycle.h"
-#include "lib/PolarVersion.h"
+#include "polarphp/runtime/ExecEnv.h"
+#include "polarphp/runtime/LifeCycle.h"
 
 #include <iostream>
 #include <vector>
@@ -49,9 +49,14 @@ extern std::string sg_errorMsg;
 
 namespace polar {
 
-using polar::basic::StringRef;
-
+namespace runtime {
 extern CliShellCallbacksType sg_cliShellCallbacks;
+}
+
+using namespace runtime;
+
+using polar::basic::StringRef;
+using runtime::sg_cliShellCallbacks;
 
 namespace {
 const char *PARAM_MODE_CONFLICT = "Either execute direct code, process stdin or use a file.";
@@ -241,122 +246,59 @@ void setup_init_entries_commands(const std::vector<std::string> defines, std::st
 }
 
 namespace {
-void standard_exec_command(ExecEnv &execEnv, zend_file_handle &fileHandle);
+void standard_exec_command(ExecEnv &execEnv, StringRef fileHandle);
 } // anonymous namespace
 
 int dispatch_cli_command()
 {
    ExecEnv &execEnv = retrieve_global_execenv();
    ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
-   zend_file_handle fileHandle;
-   volatile bool execEnvStarted = false;
-   std::string translatedPath;
    int interactive = 0;
-   int lineno = 0;
-   polar_try {
-      CG(in_compilation) = 0; /* not initialized but needed for several options */
-      if (sg_showVersion) {
-         polar::print_polar_version();
-         execEnv.deactivate();
-         goto out;
-      }
-      /// processing with priority
-      ///
-      if (interactive) {
+   if (interactive) {
 #if (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)) && !defined(COMPILE_DL_READLINE)
-         printf("Interactive shell\n\n");
+      printf("Interactive shell\n\n");
 #else
-         printf("Interactive mode enabled\n\n");
+      printf("Interactive mode enabled\n\n");
 #endif
-         std::cout.flush();
-      }
-      size_t scriptStartIndex = 0;
-      /// setup script file from position arguments
-      if (sg_scriptFile.empty() && sg_behavior != ExecMode::CliDirect &&
-          sg_behavior != ExecMode::ProcessStdin &&
-          !sg_scriptArgs.empty()) {
-         sg_scriptFile = sg_scriptArgs.front();
-         ++scriptStartIndex;
-      }
-      size_t scriptArgc = sg_scriptArgs.size();
-      std::vector<std::string> &scriptArgv = execEnvInfo.scriptArgv;
-      for (size_t i = scriptStartIndex; i < scriptArgc; ++i) {
-         scriptArgv.push_back(sg_scriptArgs[i]);
-      }
-      execEnvInfo.scriptArgc = scriptArgv.size();
-      if (!sg_scriptFile.empty()) {
-         if (!seek_file_begin(&fileHandle, sg_scriptFile.c_str(), &lineno)) {
-            goto err;
-         } else {
-            char realPath[MAXPATHLEN];
-            if (VCWD_REALPATH(sg_scriptFile.c_str(), realPath)) {
-               translatedPath = realPath;
-            }
-         }
-      } else {
-         /// We could handle PHP_MODE_PROCESS_STDIN in a different manner
-         /// here but this would make things only more complicated. And it
-         /// is consitent with the way -R works where the stdin file handle
-         /// is also accessible.
-         fileHandle.filename = "Standard input code";
-         fileHandle.handle.fp = stdin;
-      }
-      fileHandle.type = ZEND_HANDLE_FP;
-      fileHandle.opened_path = nullptr;
-      fileHandle.free_filename = 0;
-      sg_phpSelf = const_cast<char *>(fileHandle.filename);
-      if (!translatedPath.empty()) {
-         execEnvInfo.entryScriptFilename = translatedPath;
-      } else {
-         execEnvInfo.entryScriptFilename = fileHandle.filename;
-      }
-      if (!php_exec_env_startup()) {
-         fclose(fileHandle.handle.fp);
-         std::cerr << "Could not startup." << std::endl;
-         goto err;
-      }
-      execEnvStarted = true;
-      CG(start_lineno) = lineno;
-      execEnvInfo.duringExecEnvStartup = false;
-      ///
-      /// php exec env is ready
-      /// begin dispatch commands
-      ///
-      switch (sg_behavior) {
-      case ExecMode::Standard:
-         standard_exec_command(execEnv, fileHandle);
-         break;
-      default:
-         polar_unreachable("can't execute here");
-      }
-   } polar_end_try;
-out:
-   if (execEnvStarted){
-      php_exec_env_shutdown();
-      execEnvStarted = false;
+      std::cout.flush();
    }
-   if (sg_exitStatus == 0) {
-      sg_exitStatus = EG(exit_status);
+   size_t scriptStartIndex = 0;
+   /// setup script file from position arguments
+   if (sg_scriptFile.empty() && sg_behavior != ExecMode::CliDirect &&
+       sg_behavior != ExecMode::ProcessStdin &&
+       !sg_scriptArgs.empty()) {
+      sg_scriptFile = sg_scriptArgs.front();
+      ++scriptStartIndex;
    }
-   return sg_exitStatus;
-err:
-   execEnv.deactivate();
-   zend_ini_deactivate();
-   sg_exitStatus = 1;
-   goto out;
+   size_t scriptArgc = sg_scriptArgs.size();
+   std::vector<std::string> &scriptArgv = execEnvInfo.scriptArgv;
+   for (size_t i = scriptStartIndex; i < scriptArgc; ++i) {
+      scriptArgv.push_back(sg_scriptArgs[i]);
+   }
+   execEnvInfo.scriptArgc = scriptArgv.size();
+   ///
+   /// php exec env is ready
+   /// begin dispatch commands
+   ///
+   switch (sg_behavior) {
+   case ExecMode::Standard:
+      standard_exec_command(execEnv, sg_scriptFile);
+      break;
+   default:
+      polar_unreachable("can't execute here");
+   }
 }
 
 namespace {
-void standard_exec_command(ExecEnv &execEnv, zend_file_handle &fileHandle)
+void standard_exec_command(ExecEnv &execEnv, StringRef filename)
 {
-   if (strcmp(fileHandle.filename, "Standard input code")) {
+   if (filename == PHP_STDIN_FILENAME_MARK) {
       cli_register_file_handles();
    }
    if (sg_interactive && sg_cliShellCallbacks.cliShellRun) {
       sg_exitStatus = sg_cliShellCallbacks.cliShellRun();
    } else {
-      php_execute_script(&fileHandle);
-      sg_exitStatus = EG(exit_status);
+      execEnv.execScript(filename, sg_exitStatus);
    }
 }
 } // anonymous namespace
