@@ -275,9 +275,9 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
    /// this will read in php.ini, set up the configuration parameters,
    /// load zend extensions and register php function extensions
    /// to be loaded later
-   if (!php_init_config()) {
-      return false;
-   }
+//   if (!php_init_config()) {
+//      return false;
+//   }
    /// Register PHP core ini entries
    REGISTER_INI_ENTRIES();
    /* Register Zend ini entries */

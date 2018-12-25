@@ -364,33 +364,4 @@ void cli_ini_defaults(HashTable *configuration_hash);
 #endif
 #endif /* !XtOffsetOf */
 
-// forward declare with namespace
-namespace CLI {
-class App;
-} // CLI
-
-namespace polar {
-namespace runtime {
-
-enum class ExecMode
-{
-   Standard = 1,
-   HighLight,
-   Lint,
-   Strip,
-   CliDirect,
-   ProcessStdin,
-   ReflectionFunction,
-   ReflectionClass,
-   ReflectionExtension,
-   ReflectionExtInfo,
-   ReflectionZendExtension,
-   ShowIniConfig
-};
-
-extern CLI::App *sg_commandParser;
-
-} // runtime
-} // polar
-
 #endif // POLARPHP_RUNTIME_PHPDEFS_H
