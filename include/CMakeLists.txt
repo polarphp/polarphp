@@ -26,9 +26,15 @@ polar_collect_files(
    DIR polarphp/utils
    OUTPUT_VAR POLAR_UTILS_HEADERS)
 
+polar_collect_files(
+   TYPE_HEADER
+   DIR polarphp/runtime
+   OUTPUT_VAR POLAR_RUNTIME_HEADERS)
+
 polar_merge_list(POLAR_HEADERS POLAR_GLOBAL_HEADERS)
 polar_merge_list(POLAR_HEADERS POLARPHP_BASIC_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_UTILS_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_RUNTIME_HEADERS)
 
 polar_collect_files(
    TYPE_HEADER

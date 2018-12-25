@@ -12,3 +12,4 @@
 add_subdirectory(basic)
 add_subdirectory(utils)
 add_subdirectory(vm)
+add_subdirectory(runtime)

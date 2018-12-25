@@ -7,11 +7,11 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2018/10/08.
+// Created by polarboy on 2018/12/25.
 
-#ifndef POLARPHP_GLOBAL_PHPDEFS_H
-#define POLARPHP_GLOBAL_PHPDEFS_H
+#ifndef POLARPHP_RUNTIME_OUTPUT_H
+#define POLARPHP_RUNTIME_OUTPUT_H
 
 
 
-#endif // POLARPHP_GLOBAL_PHPDEFS_H
+#endif // POLARPHP_RUNTIME_OUTPUT_H
