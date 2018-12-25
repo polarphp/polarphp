@@ -108,7 +108,7 @@ polar_add_library_internal(ZendVM STATIC ${ZENDVM_SRCS})
 get_target_property(ZendVMIncludeDirs tsrm INCLUDE_DIRECTORIES)
 polar_merge_list(ZendVMIncludeDirs POLAR_ZENDVM_INCLUDE_DIRS)
 
-target_include_directories(ZendVM INTERFACE "${ZendVMIncludeDirs}")
+target_include_directories(ZendVM PUBLIC "${ZendVMIncludeDirs}")
 
 target_link_libraries(ZendVM PUBLIC tsrm)
 set_target_properties(ZendVM

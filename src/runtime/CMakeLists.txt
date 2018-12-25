@@ -16,7 +16,7 @@ polar_collect_files(
 
 polar_merge_list(POLARPHP_RUNTIME_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarRuntime STATIC
+polar_add_library(PolarRuntime SHARED
    ${POLARPHP_RUNTIME_SOURCES}
    LINK_LIBS PolarUtils ZendVM)
 
@@ -24,5 +24,6 @@ set_target_properties(
    PolarRuntime
    PROPERTIES
    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR};"
+   COMPILE_DEFINITIONS "ZEND_ENABLE_STATIC_TSRMLS_CACHE"
    )
 
