@@ -14,16 +14,10 @@ polar_collect_files(
    DIR lib
    OUTPUT_VAR POLAR_MAIN_LIB_SOURCES)
 
-configure_file(
-   ${CMAKE_CURRENT_SOURCE_DIR}/lib/PolarVersion.h.cmake
-   ${CMAKE_CURRENT_BINARY_DIR}/lib/PolarVersion.h
-   @ONLY
-   NEWLINE_STYLE UNIX)
-
 string(TIMESTAMP _buildDate "%Y-%m-%d %H:%M")
 
 polar_add_executable(polar main.cpp ${POLAR_MAIN_LIB_SOURCES})
 
-set_target_properties(polar PROPERTIES COMPILE_DEFINITIONS "BUILD_TIME=\"${_buildDate}\";ZEND_ENABLE_STATIC_TSRMLS_CACHE=1")
+set_target_properties(polar PROPERTIES COMPILE_DEFINITIONS "BUILD_TIME=\"${_buildDate}\"")
 
 target_link_libraries(polar PUBLIC PolarRuntime CLI11::CLI11)

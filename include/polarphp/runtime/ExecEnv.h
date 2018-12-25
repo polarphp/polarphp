@@ -36,12 +36,6 @@
 namespace polar {
 namespace runtime {
 
-void init();
-inline zend_executor_globals *eg()
-{
-   return TSRMG_BULK_STATIC(executor_globals_id, zend_executor_globals *);
-}
-
 using polar::basic::StringRef;
 using IniConfigDefaultInitFunc = void (*)(HashTable *configuration_hash);
 struct php_tick_function_entry;
