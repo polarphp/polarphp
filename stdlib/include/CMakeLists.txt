@@ -7,17 +7,22 @@
 # See https://polarphp.org/LICENSE.txt for license information
 # See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
-# Created by polarboy on 2018/12/20.
+# Created by polarboy on 2018/12/26.
+
+set(STDLIB_HEADERS "")
 
 polar_collect_files(
-   TYPE_BOTH
-   DIR lib
-   OUTPUT_VAR POLAR_MAIN_LIB_SOURCES)
+   TYPE_HEADER
+   DIR php/base
+   OUTPUT_VAR POLAR_MODULE_BASE_HEADERS)
 
-string(TIMESTAMP _buildDate "%Y-%m-%d %H:%M")
+polar_merge_list(STDLIB_HEADERS POLAR_MODULE_BASE_HEADERS)
 
-polar_add_executable(polar main.cpp ${POLAR_MAIN_LIB_SOURCES})
+polar_collect_files(
+   TYPE_HEADER
+   DIR php/vmbinder
+   OUTPUT_VAR POLAR_VMBINDER_HEADERS)
 
-set_target_properties(polar PROPERTIES COMPILE_DEFINITIONS "BUILD_TIME=\"${_buildDate}\"")
+polar_merge_list(STDLIB_HEADERS POLAR_VMBINDER_HEADERS)
 
-target_link_libraries(polar PUBLIC PolarRuntime Stdlib CLI11::CLI11)
+set(STDLIB_HEADERS ${STDLIB_HEADERS} PARENT_SCOPE)

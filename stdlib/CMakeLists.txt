@@ -9,4 +9,8 @@
 #
 # Created by polarboy on 2018/12/10.
 
+set(POLARPHP_STDLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+include_directories(BEFORE ${POLARPHP_STDLIB_INCLUDE_DIR})
+add_subdirectory(include)
 add_subdirectory(src)
