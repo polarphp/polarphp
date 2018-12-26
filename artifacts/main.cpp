@@ -138,6 +138,7 @@ int main(int argc, char *argv[])
       copts |= ZEND_COMPILE_EXTENDED_INFO;
       execEnv.setCompileOptions(copts);
    }
+   /// polar::runtime::sg_vmExtensionInitHook = vm_extension_init;
    if (!execEnv.bootup()) {
       sg_exitStatus = 1;
       exit(sg_exitStatus);

@@ -9,5 +9,29 @@
 #
 # Created by polarboy on 2018/12/10.
 
-add_subdirectory(kernel)
-add_subdirectory(modules)
+set(STDLIB_SOURCES)
+
+polar_collect_files(
+   TYPE_BOTH
+   DIR kernel
+   OUTPUT_VAR STDLIB_KERNEL_SOURCES)
+
+polar_merge_list(STDLIB_SOURCES STDLIB_KERNEL_SOURCES)
+
+polar_collect_files(
+   TYPE_BOTH
+   DIR module/base
+   OUTPUT_VAR STDLIB_MODULE_BASE_SOURCES)
+
+polar_merge_list(STDLIB_SOURCES STDLIB_MODULE_BASE_SOURCES)
+
+polar_collect_files(
+   TYPE_BOTH
+   DIR vmbinder
+   OUTPUT_VAR STDLIB_VM_BINDER_SOURCES)
+
+polar_merge_list(STDLIB_SOURCES STDLIB_VM_BINDER_SOURCES)
+
+polar_add_library(Stdlib SHARED
+   ${STDLIB_SOURCES}
+   LINK_LIBS ZendApi)

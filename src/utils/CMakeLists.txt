@@ -66,7 +66,7 @@ endif(MSVC OR MINGW)
 set(system_libs ${system_libs} PolarBasic)
 set(system_libs ${system_libs} nlohmann_json::nlohmann_json)
 
-polar_add_library(PolarUtils SHARED BUILDTREE_ONLY
+polar_add_library(PolarUtils SHARED
    ${POLAR_UTILS_SOURCES}
    LINK_LIBS ${system_libs})
 

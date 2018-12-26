@@ -10,12 +10,21 @@
 // Created by polarboy on 2018/12/25.
 
 #include "polarphp/runtime/internal/DepsZendVmHeaders.h"
+#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/vm/Callable.h"
 
 namespace polar {
 namespace runtime {
 
+VmExtensionInitFuncType sg_vmExtensionInitHook = nullptr;
+
 bool php_register_internal_extensions()
 {
+   if (sg_vmExtensionInitHook != nullptr) {
+      if (!sg_vmExtensionInitHook()) {
+         return false;
+      }
+   }
    return true;
 }
 

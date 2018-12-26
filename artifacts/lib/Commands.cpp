@@ -16,6 +16,7 @@
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/runtime/ExecEnv.h"
 #include "polarphp/runtime/LifeCycle.h"
+#include "polarphp/runtime/PhpDefs.h"
 
 #include <iostream>
 #include <vector>

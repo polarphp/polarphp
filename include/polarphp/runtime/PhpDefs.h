@@ -196,6 +196,9 @@ extern char **environ;
 namespace polar {
 namespace runtime {
 
+using VmExtensionInitFuncType = bool(*)();
+extern VmExtensionInitFuncType sg_vmExtensionInitHook;
+
 POLAR_DECL_EXPORT ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
 
 /* POLAR_DECL_EXPORT void php_error(int type, const char *format, ...); */
