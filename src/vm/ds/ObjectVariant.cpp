@@ -451,7 +451,7 @@ bool ObjectVariant::doClassInvoke(int argc, Variant *argv, zval *retval)
       if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
          /* Delay closure destruction until its invocation */
          ZEND_ASSERT(GC_TYPE((zend_object*)func->common.prototype) == IS_OBJECT);
-         GC_REFCOUNT((zend_object*)func->common.prototype)++;
+         GC_ADDREF((zend_object*)func->common.prototype);
          callInfo |= ZEND_CALL_CLOSURE;
       } else if (object) {
          callInfo |= ZEND_CALL_RELEASE_THIS;

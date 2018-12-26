@@ -52,12 +52,12 @@ NumericVariant::NumericVariant(zval *other, bool isRef)
    zval *self = getUnDerefZvalPtr();
    if (nullptr != other) {
       if ((isRef && (Z_TYPE_P(other) == IS_LONG ||
-                     (Z_TYPE_P(other) == IS_REFERENCE && Z_TYPE_P(Z_REFVAL_P(other)) == IS_LONG))) ||
+                    (Z_TYPE_P(other) == IS_REFERENCE && Z_TYPE_P(Z_REFVAL_P(other)) == IS_LONG))) ||
           (!isRef && (Z_TYPE_P(other) == IS_REFERENCE && Z_TYPE_P(Z_REFVAL_P(other)) == IS_LONG))) {
          // for support pass ref arg when pass variant args
          ZVAL_MAKE_REF(other);
          zend_reference *ref = Z_REF_P(other);
-         ++GC_REFCOUNT(ref);
+         GC_ADDREF(ref);
          ZVAL_REF(self, ref);
       } else {
          // here the zval of other pointer maybe not initialize

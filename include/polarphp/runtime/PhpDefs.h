@@ -215,7 +215,7 @@ PHP_ATTRIBUTE_FORMAT(printf, 5, 6);
 POLAR_DECL_EXPORT ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2);
 #endif
 
-#define php_error_docref php_error_docref0
+#define php_error_docref ::polar::runtime::php_error_docref0
 #define zenderror phperror
 #define zendlex phplex
 #define phpparse zendparse

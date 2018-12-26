@@ -31,7 +31,6 @@
  * multi-threading builds). We make this a static variable because
  * this already is bad enough.
  */
-VMAPI_DECLARE_MODULE_GLOBALS(vmapi);
 
 namespace polar {
 namespace vmapi {
@@ -39,6 +38,8 @@ namespace vmapi {
 using internal::ExtensionPrivate;
 using internal::AbstractClassPrivate;
 using internal::NamespacePrivate;
+
+VMAPI_DECLARE_MODULE_GLOBALS(XXXX);
 
 namespace
 {
@@ -48,7 +49,7 @@ namespace
    * method (crazy)
    * @param  globals
    */
-void init_globals(zend_zapi_globals *globals){}
+//void init_globals(zend_XXXX_globals *globals){}
 
 std::map<std::string, Extension *> name2extension;
 std::map<int, Extension *> mid2extension;
@@ -147,8 +148,8 @@ const char *Extension::getVersion() const
    return implPtr->m_entry.version;
 }
 
-Extension &Extension::registerFunction(const char *name, zapi::ZendCallable function,
-                                       const lang::Arguments &arguments)
+Extension &Extension::registerFunction(const char *name, ZendCallable function,
+                                       const Arguments &arguments)
 {
    getImplPtr()->registerFunction(name, function, arguments);
    return *this;
@@ -328,7 +329,7 @@ ExtensionPrivate::ExtensionPrivate(const char *name, const char *version, int ap
 #else
    m_entry.globals_ptr = nullptr;
 #endif
-   if (apiversion == ZAPI_API_VERSION) {
+   if (apiversion == VMAPI_API_VERSION) {
       return;
    }
    // mismatch between api versions, the extension is invalid, we use a
@@ -399,14 +400,14 @@ void ExtensionPrivate::iterateFunctions(const std::function<void(Function &func)
    }
 }
 
-void ExtensionPrivate::iterateIniEntries(const std::function<void (lang::Ini &)> &callback)
+void ExtensionPrivate::iterateIniEntries(const std::function<void (Ini &)> &callback)
 {
    for (auto &entry : m_iniEntries) {
       callback(*entry);
    }
 }
 
-void ExtensionPrivate::iterateConstants(const std::function<void (lang::Constant &)> &callback)
+void ExtensionPrivate::iterateConstants(const std::function<void (Constant &)> &callback)
 {
    for (auto &constant : m_constants) {
       callback(*constant);
@@ -451,7 +452,7 @@ int ExtensionPrivate::processRequestShutdown(SHUTDOWN_FUNC_ARGS)
 
 int ExtensionPrivate::processStartup(INIT_FUNC_ARGS)
 {
-   ZEND_INIT_MODULE_GLOBALS(zapi, init_globals, nullptr);
+   //ZEND_INIT_MODULE_GLOBALS(XXXX, init_globals, nullptr);
    Extension *extension = find_module(module_number);
    return BOOL2SUCCESS(extension->initialize(module_number));
 }
@@ -471,7 +472,7 @@ void ExtensionPrivate::processModuleInfo(ZEND_MODULE_INFO_FUNC_ARGS)
    }
 }
 
-ExtensionPrivate &ExtensionPrivate::registerFunction(const char *name, zapi::ZendCallable function,
+ExtensionPrivate &ExtensionPrivate::registerFunction(const char *name, ZendCallable function,
                                                      const Arguments &arguments)
 {
    if (m_locked) {

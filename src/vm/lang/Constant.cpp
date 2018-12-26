@@ -40,14 +40,12 @@ void ConstantPrivate::initialize(const std::string &prefix, int moduleNumber)
    if (!prefix.empty()) {
       m_constant.name = zend_string_alloc(prefix.size() + 1 + m_name.size(), 1);
       std::strncpy(ZSTR_VAL(m_constant.name), prefix.c_str(), prefix.size());
-      std::strncpy(ZSTR_VAL(m_constant.name) + prefix.size(), "\\", 1);
+      *(ZSTR_VAL(m_constant.name) + prefix.size()) = '\\';
       std::strncpy(ZSTR_VAL(m_constant.name) + prefix.size() + 1, m_name.c_str(), m_name.size() + 1);
    } else {
       m_constant.name = zend_string_init(m_name.c_str(), m_name.size(), 1);
    }
-   m_constant.flags = CONST_CS | CONST_PERSISTENT;
-   m_constant.module_number = moduleNumber;
-   zval_add_ref(&m_constant.value);
+   ZEND_CONSTANT_SET_FLAGS(&m_constant, CONST_CS | CONST_PERSISTENT, moduleNumber);
    zend_register_constant(&m_constant);
    m_initialized = true;
 }

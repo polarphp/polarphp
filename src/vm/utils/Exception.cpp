@@ -10,7 +10,7 @@
 // Created by polarboy on 2018/12/23.
 
 #include "polarphp/vm/utils/Exception.h"
-#include "polarphp/vm/utils/FataError.h"
+#include "polarphp/vm/utils/FatalError.h"
 #include "polarphp/vm/utils/NotImplemented.h"
 #include "polarphp/vm/utils/OrigException.h"
 

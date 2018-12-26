@@ -139,9 +139,9 @@ ArrayVariant::ArrayVariant(zval *other, bool isRef)
                     (Z_TYPE_P(other) == IS_REFERENCE && Z_TYPE_P(Z_REFVAL_P(other)) == IS_ARRAY))) {
          SEPARATE_STRING(other);
          ZVAL_MAKE_REF(other);
-         zend_reference ref = Z_REF(other);
-         ++GC_REFCOUNT(ref);
-         ZVAL_REF(self, &ref);
+         zend_reference *ref = Z_REF_P(other);
+         GC_ADDREF(ref);
+         ZVAL_REF(self, ref);
       } else if ((Z_TYPE_P(other) == IS_ARRAY ||
                   (Z_TYPE_P(other) == IS_REFERENCE && Z_TYPE_P(Z_REFVAL_P(other)) == IS_ARRAY))) {
          ZVAL_DEREF(other);

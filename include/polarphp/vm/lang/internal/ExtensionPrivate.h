@@ -33,7 +33,7 @@ namespace internal
 class ExtensionPrivate
 {
 public:
-   ZAPI_DECLARE_PUBLIC(Extension)
+   VMAPI_DECLARE_PUBLIC(Extension);
    ExtensionPrivate(Extension *extension)
       :m_apiPtr(extension)
    {}

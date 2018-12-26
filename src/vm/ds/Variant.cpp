@@ -252,7 +252,7 @@ Variant::Variant(zval *value, bool isRef)
       } else {
          ZVAL_MAKE_REF(value);
          zend_reference *ref = Z_REF_P(value);
-         ++GC_REFCOUNT(ref);
+         GC_ADDREF(ref);
          ZVAL_REF(self, ref);
       }
    } else {

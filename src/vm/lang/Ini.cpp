@@ -115,11 +115,12 @@ void Ini::setupIniDef(_zend_ini_entry_def *zendIniDef, int moduleNumber)
    zendIniDef->name_length = implPtr->m_name.size();
    zendIniDef->on_modify = OnUpdateString;
    zendIniDef->mh_arg1 = nullptr;
-#ifdef ZTS
-   zendIniDef->mh_arg2 = (void *) &zapi_globals_id;
-#else
-   zendIniDef->mh_arg2 = (void *) &zapi_globals;
-#endif
+   /// TODO vmapi_globals_id
+//#ifdef ZTS
+//   zendIniDef->mh_arg2 = (void *) &vmapi_globals_id;
+//#else
+//   zendIniDef->mh_arg2 = (void *) &vmapi_globals;
+//#endif
    zendIniDef->mh_arg3 = nullptr;
    zendIniDef->value = implPtr->m_value.data();
    zendIniDef->value_length = implPtr->m_value.size();

@@ -44,7 +44,7 @@ BooleanVariant::BooleanVariant(zval *other, bool isRef)
                       (Z_TYPE_P(Z_REFVAL_P(other)) == IS_TRUE || Z_TYPE_P(Z_REFVAL_P(other)) == IS_FALSE)))) {
          ZVAL_MAKE_REF(other);
          zend_reference *ref = Z_REF_P(other);
-         ++GC_REFCOUNT(ref);
+         GC_ADDREF(ref);
          ZVAL_REF(self, ref);
       } else {
          ZVAL_DUP(self, other);

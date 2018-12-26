@@ -22,49 +22,49 @@ list(APPEND POLAR_ZENDVM_INCLUDE_DIRS
 add_subdirectory(TSRM)
 add_subdirectory(Zend)
 
-#set(ZENDAPI_SRCS
-#   AbstractClass.cpp
-#   AbstractMember.cpp
-#   BooleanMember.cpp
-#   Callable.cpp
-#   Closure.cpp
-#   FloatMember.cpp
-#   IteratorBridge.cpp
-#   NullMember.cpp
-#   NumericMember.cpp
-#   ObjectBinder.cpp
-#   Property.cpp
-#   StringMember.cpp
-#   ZendApi.cpp
-#   ZvalMember.cpp
-#   StdClass.cpp
-#   )
+set(ZENDAPI_SRCS
+   AbstractClass.cpp
+   AbstractMember.cpp
+   BooleanMember.cpp
+   Callable.cpp
+   Closure.cpp
+   FloatMember.cpp
+   IteratorBridge.cpp
+   NullMember.cpp
+   NumericMember.cpp
+   ObjectBinder.cpp
+   Property.cpp
+   StringMember.cpp
+   ZendApi.cpp
+   ZvalMember.cpp
+   StdClass.cpp
+   )
 
-#polar_collect_files(
-#   TYPE_SOURCE
-#   DIR ds
-#   OUTPUT_VAR ZENDAPI_DS_SRCS)
+polar_collect_files(
+   TYPE_SOURCE
+   DIR ds
+   OUTPUT_VAR ZENDAPI_DS_SRCS)
 
-#polar_collect_files(
-#   TYPE_SOURCE
-#   DIR lang
-#   OUTPUT_VAR ZENDAPI_LANG_SRCS)
+polar_collect_files(
+   TYPE_SOURCE
+   DIR lang
+   OUTPUT_VAR ZENDAPI_LANG_SRCS)
 
-#polar_collect_files(
-#   TYPE_SOURCE
-#   DIR protocol
-#   OUTPUT_VAR ZENDAPI_PROTOCOL_SRCS)
+polar_collect_files(
+   TYPE_SOURCE
+   DIR protocol
+   OUTPUT_VAR ZENDAPI_PROTOCOL_SRCS)
 
-#polar_collect_files(
-#   TYPE_SOURCE
-#   DIR utils
-#   OUTPUT_VAR ZENDAPI_UTILS_SRCS)
+polar_collect_files(
+   TYPE_SOURCE
+   DIR utils
+   OUTPUT_VAR ZENDAPI_UTILS_SRCS)
 
-#polar_merge_list(ZENDAPI_SRCS ZENDAPI_DS_SRCS)
-#polar_merge_list(ZENDAPI_SRCS ZENDAPI_LANG_SRCS)
-#polar_merge_list(ZENDAPI_SRCS ZENDAPI_PROTOCOL_SRCS)
-#polar_merge_list(ZENDAPI_SRCS ZENDAPI_UTILS_SRCS)
-#polar_merge_list(ZENDAPI_SRCS POLAR_ZENDVM_ZEND_HEADERS)
+polar_merge_list(ZENDAPI_SRCS ZENDAPI_DS_SRCS)
+polar_merge_list(ZENDAPI_SRCS ZENDAPI_LANG_SRCS)
+polar_merge_list(ZENDAPI_SRCS ZENDAPI_PROTOCOL_SRCS)
+polar_merge_list(ZENDAPI_SRCS ZENDAPI_UTILS_SRCS)
+polar_merge_list(ZENDAPI_SRCS POLAR_ZENDVM_ZEND_HEADERS)
 
-#polar_add_library_internal(ZendApi STATIC ${ZENDAPI_SRCS})
-#target_link_libraries(ZendApi PUBLIC ZendVM)
+polar_add_library_internal(ZendApi STATIC ${ZENDAPI_SRCS})
+target_link_libraries(ZendApi PUBLIC PolarRuntime)

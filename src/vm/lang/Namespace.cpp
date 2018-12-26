@@ -131,7 +131,7 @@ void Namespace::initialize(int moduleNumber)
    implPtr->initialize(implPtr->m_name, moduleNumber);
 }
 
-Namespace &Namespace::registerFunction(const char *name, zapi::ZendCallable function, const Arguments &arguments)
+Namespace &Namespace::registerFunction(const char *name, ZendCallable function, const Arguments &arguments)
 {
    VMAPI_D(Namespace);
    implPtr->m_functions.push_back(std::make_shared<Function>(name, function, arguments));
