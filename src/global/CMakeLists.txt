@@ -7,10 +7,17 @@
 # See https://polarphp.org/LICENSE.txt for license information
 # See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
-# Created by polarboy on 2018/08/26.
+# Created by polarboy on 2018/12/16.
 
-add_subdirectory(basic)
-add_subdirectory(utils)
-add_subdirectory(vm)
-add_subdirectory(runtime)
-add_subdirectory(global)
+polar_collect_files(
+   TYPE_BOTH
+   DIR .
+   OUTPUT_VAR POLARPHP_GLOBAL_SOURCES)
+
+polar_merge_list(POLARPHP_GLOBAL_SOURCES POLAR_HEADERS)
+
+add_library(PolarGlobal OBJECT ${POLARPHP_GLOBAL_SOURCES})
+set_target_properties(
+   PolarGlobal
+   PROPERTIES
+   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR};")

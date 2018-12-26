@@ -66,5 +66,5 @@ polar_merge_list(ZENDAPI_SRCS ZENDAPI_PROTOCOL_SRCS)
 polar_merge_list(ZENDAPI_SRCS ZENDAPI_UTILS_SRCS)
 polar_merge_list(ZENDAPI_SRCS POLAR_ZENDVM_ZEND_HEADERS)
 
-polar_add_library_internal(ZendApi STATIC ${ZENDAPI_SRCS})
-target_link_libraries(ZendApi PUBLIC PolarRuntime)
+polar_add_library_internal(ZendApi SHARED ${ZENDAPI_SRCS})
+target_link_libraries(ZendApi PUBLIC PolarRuntime PolarGlobal)
