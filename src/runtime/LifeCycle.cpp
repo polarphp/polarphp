@@ -106,18 +106,6 @@ void cli_ini_defaults(HashTable *configuration_hash)
    POLAR_INI_DEFAULT("display_errors", "1");
 }
 
-namespace {
-int php_register_extensions_bc(zend_module_entry *ptr, int count)
-{
-   while (count--) {
-      if (zend_register_internal_module(ptr++) == NULL) {
-         return FAILURE;
-      }
-   }
-   return SUCCESS;
-}
-} // anonymous namespace
-
 void php_disable_functions()
 {
 
@@ -128,11 +116,23 @@ void php_disable_classes()
 
 }
 
+bool php_register_extensions(std::list<zend_module_entry *> extensions)
+{
+   for (zend_module_entry *extension : extensions) {
+      if (extension != nullptr) {
+         if (zend_register_internal_module(extension) == nullptr) {
+            return false;
+         }
+      }
+   }
+   return true;
+}
+
 namespace {
 void php_register_buildin_constants();
 } // anonymous namespace
 
-bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditionalModules)
+bool php_module_startup()
 {
    zend_utility_functions zuf;
    zend_utility_values zuv;
@@ -266,8 +266,6 @@ bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditi
       php_printf("Unable to start builtin modules\n");
       return false;
    }
-   /* start additional PHP extensions */
-   php_register_extensions_bc(additionalModules, numAdditionalModules);
 
    /// load and startup extensions compiled as shared objects (aka DLLs)
    /// as requested by php.ini entries

@@ -151,7 +151,7 @@ bool ExecEnv::bootup()
    (void)ts_resource(0);
    ZEND_TSRMLS_CACHE_UPDATE();
    zend_signal_startup();
-   if (!polar::runtime::php_module_startup(nullptr, 0)) {
+   if (!polar::runtime::php_module_startup()) {
       // there is no way to see if we must call zend_ini_deactivate()
       // since we cannot check if EG(ini_directives) has been initialised
       // because the executor's constructor does not set initialize it.

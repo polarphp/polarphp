@@ -14,6 +14,8 @@
 
 #include "polarphp/runtime/internal/DepsZendVmHeaders.h"
 
+#include <list>
+
 namespace polar {
 namespace runtime {
 
@@ -25,12 +27,12 @@ const char HARDCODED_INI[] =
       "max_execution_time=0\n"
       "max_input_time=-1\n\0";
 
-POLAR_DECL_EXPORT bool php_module_startup(zend_module_entry *additionalModules, uint32_t numAdditionalModules);
+POLAR_DECL_EXPORT bool php_module_startup();
 POLAR_DECL_EXPORT void php_module_shutdown();
 POLAR_DECL_EXPORT void php_module_shutdown_for_exec();
 POLAR_DECL_EXPORT bool php_exec_env_startup();
 POLAR_DECL_EXPORT void php_exec_env_shutdown();
-POLAR_DECL_EXPORT int php_register_extensions(zend_module_entry * const * ptr, int count);
+POLAR_DECL_EXPORT bool php_register_extensions(std::list<zend_module_entry *> extensions);
 POLAR_DECL_EXPORT int php_execute_script(zend_file_handle *primary_file);
 POLAR_DECL_EXPORT int php_execute_simple_script(zend_file_handle *primary_file, zval *ret);
 
