@@ -262,7 +262,7 @@ bool php_module_startup()
    zend_set_utility_values(&zuv);
 
    /* startup extensions statically compiled in */
-   if (php_register_internal_extensions() == FAILURE) {
+   if (!php_register_internal_extensions()) {
       php_printf("Unable to start builtin modules\n");
       return false;
    }

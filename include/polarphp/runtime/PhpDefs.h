@@ -217,8 +217,7 @@ POLAR_DECL_EXPORT ZEND_COLD void php_win32_docref2_from_error(DWORD error, const
 #define phpin zendin
 #define php_memnstr zend_memnstr
 
-POLAR_DECL_EXPORT extern int (*php_register_internal_extensions_func)();
-POLAR_DECL_EXPORT int php_register_internal_extensions();
+POLAR_DECL_EXPORT bool php_register_internal_extensions();
 POLAR_DECL_EXPORT void php_register_pre_request_shutdown(void (*func)(void *), void *userdata);
 POLAR_DECL_EXPORT void php_com_initialize();
 POLAR_DECL_EXPORT char *php_get_current_user();

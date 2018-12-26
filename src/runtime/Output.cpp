@@ -50,8 +50,12 @@ inline int php_output_stack_pop(int flags);
 
 int php_output_stack_apply_op(void *h, void *c);
 int php_output_stack_apply_clean(void *h, void *c);
-int php_output_stack_apply_list(void *h, void *z);
-int php_output_stack_apply_status(void *h, void *z);
+
+///
+/// TODO review functions
+///
+POLAR_DECL_UNUSED int php_output_stack_apply_list(void *h, void *z);
+POLAR_DECL_UNUSED int php_output_stack_apply_status(void *h, void *z);
 
 bool php_output_handler_compat_func(void **handler_context, PhpOutputContext *output_context);
 bool php_output_handler_default_func(void **handler_context, PhpOutputContext *output_context);

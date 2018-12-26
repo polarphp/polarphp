@@ -11,21 +11,12 @@
 
 #include "polarphp/runtime/internal/DepsZendVmHeaders.h"
 
-#include <cstdarg>
-#include <cstdlib>
-#include <cstdio>
-
 namespace polar {
 namespace runtime {
 
-//static zend_module_entry * const sg_phpBuiltinExtensions[] = {
-
-//};
-
-int php_register_internal_extensions()
+bool php_register_internal_extensions()
 {
-   //return php_register_extensions(php_builtin_extensions, EXTCOUNT);
-   return 0;
+   return true;
 }
 
 } // runtime
