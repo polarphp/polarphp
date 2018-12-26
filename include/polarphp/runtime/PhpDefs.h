@@ -196,12 +196,6 @@ extern char **environ;
 namespace polar {
 namespace runtime {
 
-static inline ZEND_ATTRIBUTE_DEPRECATED void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class)
-{
-   zend_replace_error_handling(error_handling, exception_class, NULL);
-}
-static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling() {}
-
 POLAR_DECL_EXPORT ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
 
 /* POLAR_DECL_EXPORT void php_error(int type, const char *format, ...); */
@@ -363,6 +357,8 @@ void cli_ini_defaults(HashTable *configuration_hash);
 #define XtOffsetOf(s_type, field) XtOffset(s_type*, field)
 #endif
 #endif /* !XtOffsetOf */
+
+#define POLAR_LITERAL_STR(str) const_cast<char *>((str))
 
 #define PHP_STDIN_FILENAME_MARK const_cast<char *>("Standard input code")
 

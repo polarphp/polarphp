@@ -42,17 +42,17 @@ class StdClass;
 namespace
 {
 
-void yield(_zval_struct *return_value, const Variant &value)
+POLAR_DECL_UNUSED void yield(_zval_struct *return_value, const Variant &value)
 {
    RETVAL_ZVAL(static_cast<zval *>(value), 1, 0);
 }
 
-void yield(_zval_struct *return_value, std::nullptr_t value)
+POLAR_DECL_UNUSED void yield(_zval_struct *return_value, std::nullptr_t value)
 {
    RETVAL_NULL();
 }
 
-StdClass *instance(zend_execute_data *execute_data)
+POLAR_DECL_UNUSED StdClass *instance(zend_execute_data *execute_data)
 {
    return ObjectBinder::retrieveSelfPtr(getThis())->getNativeObject();
 }
