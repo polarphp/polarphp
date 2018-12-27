@@ -15,7 +15,7 @@
 #include "polarphp/global/Config.h"
 #include "polarphp/runtime/ExecEnv.h"
 #include "polarphp/runtime/LifeCycle.h"
-#include "php/vmbinder/StdlibExports.h"
+#include "php/global/Defs.h"
 
 #include "CLI/CLI.hpp"
 #include "lib/Defs.h"
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
       copts |= ZEND_COMPILE_EXTENDED_INFO;
       execEnv.setCompileOptions(copts);
    }
-   polar::runtime::sg_vmExtensionInitHook = php::vm_extension_init;
+   polar::runtime::sg_vmExtensionInitHook = php::stdlib_init_entry;
    if (!execEnv.bootup()) {
       sg_exitStatus = 1;
       exit(sg_exitStatus);

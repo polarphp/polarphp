@@ -7,21 +7,15 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2018/12/12.
+// Created by polarboy on 2018/12/26.
 
-#ifndef POLARPHP_ARTIFACTS_MODULE_MGR_H
-#define POLARPHP_ARTIFACTS_MODULE_MGR_H
+#ifndef POLARPHP_STDLIB_GLOBAL_DEFS_H
+#define POLARPHP_STDLIB_GLOBAL_DEFS_H
 
-namespace polar {
+namespace php {
 
-class ModuleMgr
-{
-public:
-   void registerModule();
-   void getBuiltinModules();
-   void mountToZendVM();
-};
+bool stdlib_init_entry();
 
-} // polar
+} // php
 
-#endif // POLARPHP_ARTIFACTS_MODULE_MGR_H
+#endif // POLARPHP_STDLIB_GLOBAL_DEFS_H

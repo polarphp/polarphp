@@ -13,6 +13,15 @@ set(STDLIB_HEADERS "")
 
 polar_collect_files(
    TYPE_HEADER
+   DIR php/global
+   OUTPUT_VAR POLAR_GLOBAL_HEADERS)
+
+message("xx${POLAR_GLOBAL_HEADERS}")
+
+polar_merge_list(STDLIB_HEADERS POLAR_GLOBAL_HEADERS)
+
+polar_collect_files(
+   TYPE_HEADER
    DIR php/base
    OUTPUT_VAR POLAR_MODULE_BASE_HEADERS)
 

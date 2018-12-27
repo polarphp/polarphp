@@ -13,6 +13,13 @@ set(STDLIB_SOURCES)
 
 polar_collect_files(
    TYPE_BOTH
+   DIR global
+   OUTPUT_VAR STDLIB_GLOBAL_SOURCES)
+
+polar_merge_list(STDLIB_SOURCES STDLIB_GLOBAL_SOURCES)
+
+polar_collect_files(
+   TYPE_BOTH
    DIR kernel
    OUTPUT_VAR STDLIB_KERNEL_SOURCES)
 

@@ -13,9 +13,11 @@
 #define POLARPHP_STDLIB_VMBINDER_STDLIB_EXPORTS_H
 
 namespace php {
+namespace vmbinder {
 
-bool vm_extension_init();
+bool export_stdlib_to_zendvm();
 
-} // polar
+} // vmbinder
+} // php
 
 #endif // POLARPHP_STDLIB_VMBINDER_STDLIB_EXPORTS_H

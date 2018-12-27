@@ -13,9 +13,9 @@
 
 namespace php {
 
-bool vm_extension_init()
+bool export_stdlib_to_zendvm()
 {
-   return true;
+
 }
 
 } // php

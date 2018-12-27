@@ -7,12 +7,19 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2018/12/12.
+// Created by polarboy on 2018/12/26.
 
-#include "polarphp/runtime/ModuleMgr.h"
+#include "php/global/Defs.h"
+#include "php/vmbinder/StdlibExports.h"
 
-namespace polar {
+namespace php {
 
+bool stdlib_init_entry()
+{
+   if (!vmbinder::export_stdlib_to_zendvm()) {
+      return false;
+   }
+   return true;
+}
 
-
-} // polar
+} // php
