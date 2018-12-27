@@ -25,27 +25,27 @@ class Function;
 class Constant;
 class Namespace;
 class Ini;
-class Extension;
+class Module;
 class AbstractClass;
 
 namespace internal
 {
-class ExtensionPrivate
+class ModulePrivate
 {
 public:
-   VMAPI_DECLARE_PUBLIC(Extension);
-   ExtensionPrivate(Extension *extension)
-      :m_apiPtr(extension)
+   VMAPI_DECLARE_PUBLIC(Module);
+   ModulePrivate(Module *module)
+      :m_apiPtr(module)
    {}
 
-   ExtensionPrivate(const char *name, const char *version, int apiversion, Extension *extension);
-   ExtensionPrivate(const ExtensionPrivate &) = delete;
-   ExtensionPrivate(const ExtensionPrivate &&) = delete;
-   ~ExtensionPrivate();
+   ModulePrivate(const char *name, const char *version, int apiversion, Module *module);
+   ModulePrivate(const ModulePrivate &) = delete;
+   ModulePrivate(const ModulePrivate &&) = delete;
+   ~ModulePrivate();
 
    // methods
 
-   ExtensionPrivate &registerFunction(const char *name, ZendCallable function, const Arguments &arguments = {});
+   ModulePrivate &registerFunction(const char *name, ZendCallable function, const Arguments &arguments = {});
    void iterateFunctions(const std::function<void(Function &func)> &callback);
    void iterateIniEntries(const std::function<void(Ini &ini)> &callback);
    void iterateConstants(const std::function<void(Constant &constant)> &callback);
@@ -64,7 +64,7 @@ public:
    static void processModuleInfo(ZEND_MODULE_INFO_FUNC_ARGS);
    // properties
 
-   Extension *m_apiPtr;
+   Module *m_apiPtr;
    Callback m_startupHandler;
    Callback m_requestStartupHandler;
    Callback m_requestShutdownHandler;

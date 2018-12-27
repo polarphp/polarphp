@@ -12,10 +12,12 @@
 #include "php/vmbinder/StdlibExports.h"
 
 namespace php {
+namespace vmbinder {
 
 bool export_stdlib_to_zendvm()
 {
-
+   return true;
 }
 
+} // vmbinder
 } // php

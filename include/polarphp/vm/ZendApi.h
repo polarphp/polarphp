@@ -57,6 +57,9 @@ VMAPI_DECL_EXPORT bool operator==(const Modifier lhs, unsigned long rhs);
 VMAPI_DECL_EXPORT bool operator==(unsigned long lhs, const Modifier &rhs);
 VMAPI_DECL_EXPORT bool operator==(Modifier lhs, Modifier rhs);
 
+class Module;
+bool register_module_to_zendvm(const Module &module);
+
 } // vmapi
 } // polar
 

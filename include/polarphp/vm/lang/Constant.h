@@ -21,7 +21,7 @@ namespace vmapi {
 
 namespace internal
 {
-class ExtensionPrivate;
+class ModulePrivate;
 class ConstantPrivate;
 class NamespacePrivate;
 } // internal
@@ -52,7 +52,7 @@ private:
 private:
    VMAPI_DECLARE_PRIVATE(Constant);
    std::shared_ptr<ConstantPrivate> m_implPtr;
-   friend class internal::ExtensionPrivate;
+   friend class internal::ModulePrivate;
    friend class internal::NamespacePrivate;
 };
 

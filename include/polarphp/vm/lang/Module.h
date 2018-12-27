@@ -9,13 +9,13 @@
 //
 // Created by polarboy on 2018/12/24.
 
-#ifndef POLARPHP_VMAPI_LANG_EXTENSION_H
-#define POLARPHP_VMAPI_LANG_EXTENSION_H
+#ifndef POLARPHP_VMAPI_LANG_MODULE_H
+#define POLARPHP_VMAPI_LANG_MODULE_H
 
 #include "polarphp/vm/ZendApi.h"
 #include "polarphp/vm/lang/Argument.h"
 #include "polarphp/vm/lang/Interface.h"
-#include "polarphp/vm/lang/internal/ExtensionPrivate.h"
+#include "polarphp/vm/lang/internal/ModulePrivate.h"
 #include "polarphp/vm/InvokeBridge.h"
 #include "polarphp/vm/AbstractClass.h"
 
@@ -32,7 +32,9 @@ class Namespace;
 class Ini;
 template <typename> class Class;
 
-class VMAPI_DECL_EXPORT Extension
+using internal::ModulePrivate;
+
+class VMAPI_DECL_EXPORT Module
 {
 public:
   /**
@@ -45,34 +47,34 @@ public:
    * that is currently installed on the server is the same as the PHP-CPP version
    * that was used to compile the extension with.
    *
-   * @param  name        Extension name
-   * @param  version     Extension version string
+   * @param  name        Module name
+   * @param  version     Module version string
    * @param  apiversion  ZAPI API version (this should always be VMAPI_API_VERSION, so you better not supply it)
    */
-   Extension(const char *name, const char *version = "1.0", int apiVersion = VMAPI_API_VERSION);
-   Extension(const Extension &extension) = delete;
-   Extension(Extension &&extension) = delete;
-   virtual ~Extension();
+   Module(const char *name, const char *version = "1.0", int apiVersion = VMAPI_API_VERSION);
+   Module(const Module &extension) = delete;
+   Module(Module &&extension) = delete;
+   virtual ~Module();
 public:
    template <typename T, typename std::decay<T>::type callable>
-   Extension &registerFunction(const char *name, const Arguments &args = {});
+   Module &registerFunction(const char *name, const Arguments &args = {});
 
-   Extension &registerIni(const Ini &entry);
-   Extension &registerIni(Ini &&entry);
+   Module &registerIni(const Ini &entry);
+   Module &registerIni(Ini &&entry);
 
    template <typename T>
-   Extension &registerClass(const Class<T> &nativeClass);
+   Module &registerClass(const Class<T> &nativeClass);
    template <typename T>
-   Extension &registerClass(Class<T> &&nativeClass);
+   Module &registerClass(Class<T> &&nativeClass);
 
-   Extension &registerInterface(const Interface &interface);
-   Extension &registerInterface(Interface &&interface);
+   Module &registerInterface(const Interface &interface);
+   Module &registerInterface(Interface &&interface);
 
-   Extension &registerNamespace(const Namespace &ns);
-   Extension &registerNamespace(Namespace &&ns);
+   Module &registerNamespace(const Namespace &ns);
+   Module &registerNamespace(Namespace &&ns);
 
-   Extension &registerConstant(Constant &&constant);
-   Extension &registerConstant(const Constant &constant);
+   Module &registerConstant(Constant &&constant);
+   Module &registerConstant(const Constant &constant);
 
    Namespace *findNamespace(const std::string &ns) const;
    AbstractClass *findClass(const std::string &clsName) const;
@@ -95,9 +97,9 @@ public:
    * when the engine is ready, for example to initialize certain things.
    *
    * @param Callback callback Function to be called
-   * @return Extension Same object to allow chaining
+   * @return Module Same object to allow chaining
    */
-   Extension &setStartupHandler(const Callback &callback);
+   Module &setStartupHandler(const Callback &callback);
 
   /**
    * Register a function to be called when the PHP engine is going to stop
@@ -106,9 +108,9 @@ public:
    * You can register a function if you want to clean up certain things.
    *
    * @param callback Function to be called
-   * @return Extension Same object to allow chaining
+   * @return Module Same object to allow chaining
    */
-   Extension &setShutdownHandler(const Callback &callback);
+   Module &setShutdownHandler(const Callback &callback);
 
   /**
    * Register a callback that is called at the beginning of each pageview/request
@@ -119,9 +121,9 @@ public:
    * global variables to their initial variables in front of each request
    *
    * @param Callback callback Function to be called
-   * @return Extension Same object to allow chaining
+   * @return Module Same object to allow chaining
    */
-   Extension &setRequestStartupHandler(const Callback &callback);
+   Module &setRequestStartupHandler(const Callback &callback);
 
   /**
    * Register a callback that is called to cleanup things after a pageview/request
@@ -132,11 +134,11 @@ public:
    * requests.
    *
    * @param Callback callback Function to be called
-   * @return Extension Same object to allow chaining
+   * @return Module Same object to allow chaining
    */
-   Extension &setRequestShutdownHandler(const Callback &callback);
+   Module &setRequestShutdownHandler(const Callback &callback);
 
-   Extension &setInfoHandler(const Callback &callback);
+   Module &setInfoHandler(const Callback &callback);
 
   /**
    * Retrieve the module pointer
@@ -151,24 +153,24 @@ public:
    const char *getName() const;
    const char *getVersion() const;
 protected:
-   Extension &registerFunction(const char *name, ZendCallable function, const Arguments &args);
+   Module &registerFunction(const char *name, ZendCallable function, const Arguments &args);
    bool isLocked() const;
 private:
    bool initialize(int moduleNumber);
 private:
-   VMAPI_DECLARE_PRIVATE(Extension);
+   VMAPI_DECLARE_PRIVATE(Module);
   /**
    * The implementation object
    *
-   * @var std::unique_ptr<ExtensionPrivate> m_implPtr
+   * @var std::unique_ptr<ModulePrivate> m_implPtr
    */
-   std::unique_ptr<internal::ExtensionPrivate> m_implPtr;
+   std::unique_ptr<internal::ModulePrivate> m_implPtr;
 };
 
 template <typename T>
-Extension &Extension::registerClass(const Class<T> &nativeClass)
+Module &Module::registerClass(const Class<T> &nativeClass)
 {
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    if (implPtr->m_locked) {
       return *this;
    }
@@ -178,9 +180,9 @@ Extension &Extension::registerClass(const Class<T> &nativeClass)
 }
 
 template <typename T>
-Extension &Extension::registerClass(Class<T> &&nativeClass)
+Module &Module::registerClass(Class<T> &&nativeClass)
 {
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    if (implPtr->m_locked) {
       return *this;
    }
@@ -189,7 +191,7 @@ Extension &Extension::registerClass(Class<T> &&nativeClass)
 }
 
 template <typename T, typename std::decay<T>::type callable>
-Extension &Extension::registerFunction(const char *name, const Arguments &args)
+Module &Module::registerFunction(const char *name, const Arguments &args)
 {
    return registerFunction(name, &InvokeBridge<T, callable>::invoke, args);
 }
@@ -197,4 +199,4 @@ Extension &Extension::registerFunction(const char *name, const Arguments &args)
 } // vmapi
 } // polar
 
-#endif // POLARPHP_VMAPI_LANG_EXTENSION_H
+#endif // POLARPHP_VMAPI_LANG_MODULE_H

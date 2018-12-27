@@ -22,11 +22,11 @@ namespace vmapi {
 
 namespace internal
 {
-class ExtensionPrivate;
+class ModulePrivate;
 } // internal
 
 class Constant;
-using internal::ExtensionPrivate;
+using internal::ModulePrivate;
 
 class VMAPI_DECL_EXPORT Namespace final
 {
@@ -68,7 +68,7 @@ protected:
 private:
    VMAPI_DECLARE_PRIVATE(Namespace);
    std::shared_ptr<NamespacePrivate> m_implPtr;
-   friend class ExtensionPrivate;
+   friend class ModulePrivate;
 };
 
 template <typename T>

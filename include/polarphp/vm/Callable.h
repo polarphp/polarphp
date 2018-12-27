@@ -25,12 +25,12 @@ class Variant;
 class Parameters;
 namespace internal
 {
-class ExtensionPrivate;
+class ModulePrivate;
 class CallablePrivate;
 } // internal
 
 using internal::CallablePrivate;
-using internal::ExtensionPrivate;
+using internal::ModulePrivate;
 
 class VMAPI_DECL_EXPORT Callable
 {
@@ -59,7 +59,7 @@ protected:
 protected:
    VMAPI_DECLARE_PRIVATE(Callable);
    std::shared_ptr<CallablePrivate> m_implPtr;
-   friend class ExtensionPrivate;
+   friend class ModulePrivate;
 };
 
 } // vmapi

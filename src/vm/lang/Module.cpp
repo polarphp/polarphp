@@ -12,8 +12,8 @@
 #include "polarphp/vm/internal/CallablePrivate.h"
 #include "polarphp/vm/internal/AbstractClassPrivate.h"
 #include "polarphp/vm/internal/DepsZendVmHeaders.h"
-#include "polarphp/vm/lang/Extension.h"
-#include "polarphp/vm/lang/internal/ExtensionPrivate.h"
+#include "polarphp/vm/lang/Module.h"
+#include "polarphp/vm/lang/internal/ModulePrivate.h"
 #include "polarphp/vm/lang/internal/NamespacePrivate.h"
 #include "polarphp/vm/lang/Ini.h"
 #include "polarphp/vm/lang/Function.h"
@@ -35,7 +35,7 @@
 namespace polar {
 namespace vmapi {
 
-using internal::ExtensionPrivate;
+using internal::ModulePrivate;
 using internal::AbstractClassPrivate;
 using internal::NamespacePrivate;
 
@@ -51,8 +51,8 @@ namespace
    */
 //void init_globals(zend_XXXX_globals *globals){}
 
-std::map<std::string, Extension *> name2extension;
-std::map<int, Extension *> mid2extension;
+std::map<std::string, Module *> name2extension;
+std::map<int, Module *> mid2extension;
 
 int match_module(zval *value)
 {
@@ -65,7 +65,7 @@ int match_module(zval *value)
    return ZEND_HASH_APPLY_KEEP;
 }
 
-Extension *find_module(int mid)
+Module *find_module(int mid)
 {
    auto iter = mid2extension.find(mid);
    if (iter != mid2extension.end()) {
@@ -81,83 +81,83 @@ Extension *find_module(int mid)
 } // anonymous namespace
 
 
-Extension::Extension(const char *name, const char *version, int apiVersion)
-   : m_implPtr(new ExtensionPrivate(name, version, apiVersion, this))
+Module::Module(const char *name, const char *version, int apiVersion)
+   : m_implPtr(new ModulePrivate(name, version, apiVersion, this))
 {
    name2extension[name] = this;
 }
 
-Extension::~Extension()
+Module::~Module()
 {}
 
-Extension &Extension::setStartupHandler(const Callback &callback)
+Module &Module::setStartupHandler(const Callback &callback)
 {
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    implPtr->m_startupHandler = callback;
    return *this;
 }
 
-Extension &Extension::setShutdownHandler(const Callback &callback)
+Module &Module::setShutdownHandler(const Callback &callback)
 {
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    implPtr->m_shutdownHandler = callback;
    return *this;
 }
 
-Extension &Extension::setRequestStartupHandler(const Callback &callback)
+Module &Module::setRequestStartupHandler(const Callback &callback)
 {
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    implPtr->m_requestStartupHandler = callback;
    return *this;
 }
 
-Extension &Extension::setRequestShutdownHandler(const Callback &callback)
+Module &Module::setRequestShutdownHandler(const Callback &callback)
 {
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    implPtr->m_requestShutdownHandler = callback;
    return *this;
 }
 
-Extension &Extension::setInfoHandler(const Callback &callback)
+Module &Module::setInfoHandler(const Callback &callback)
 {
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    implPtr->m_minfoHandler = callback;
    return *this;
 }
 
-void *Extension::getModule()
+void *Module::getModule()
 {
    return getImplPtr()->getModule();
 }
 
-bool Extension::isLocked() const
+bool Module::isLocked() const
 {
-   VMAPI_D(const Extension);
+   VMAPI_D(const Module);
    return implPtr->m_locked;
 }
 
-const char *Extension::getName() const
+const char *Module::getName() const
 {
-   VMAPI_D(const Extension);
+   VMAPI_D(const Module);
    return implPtr->m_entry.name;
 }
 
-const char *Extension::getVersion() const
+const char *Module::getVersion() const
 {
-   VMAPI_D(const Extension);
+   VMAPI_D(const Module);
    return implPtr->m_entry.version;
 }
 
-Extension &Extension::registerFunction(const char *name, ZendCallable function,
+Module &Module::registerFunction(const char *name, ZendCallable function,
                                        const Arguments &arguments)
 {
    getImplPtr()->registerFunction(name, function, arguments);
    return *this;
 }
 
-Extension &Extension::registerInterface(const Interface &interface)
+Module &Module::registerInterface(const Interface &interface)
 {
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    if (implPtr->m_locked) {
       return *this;
    }
@@ -165,10 +165,10 @@ Extension &Extension::registerInterface(const Interface &interface)
    return *this;
 }
 
-Extension &Extension::registerInterface(Interface &&interface)
+Module &Module::registerInterface(Interface &&interface)
 {
 
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    if (implPtr->m_locked) {
       return *this;
    }
@@ -176,9 +176,9 @@ Extension &Extension::registerInterface(Interface &&interface)
    return *this;
 }
 
-Extension &Extension::registerNamespace(const Namespace &ns)
+Module &Module::registerNamespace(const Namespace &ns)
 {
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    if (implPtr->m_locked) {
       return *this;
    }
@@ -186,9 +186,9 @@ Extension &Extension::registerNamespace(const Namespace &ns)
    return *this;
 }
 
-Extension &Extension::registerNamespace(Namespace &&ns)
+Module &Module::registerNamespace(Namespace &&ns)
 {
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    if (implPtr->m_locked) {
       return *this;
    }
@@ -196,9 +196,9 @@ Extension &Extension::registerNamespace(Namespace &&ns)
    return *this;
 }
 
-Extension &Extension::registerConstant(const Constant &constant)
+Module &Module::registerConstant(const Constant &constant)
 {
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    if (implPtr->m_locked) {
       return *this;
    }
@@ -206,9 +206,9 @@ Extension &Extension::registerConstant(const Constant &constant)
    return *this;
 }
 
-Extension &Extension::registerConstant(Constant &&constant)
+Module &Module::registerConstant(Constant &&constant)
 {
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    if (implPtr->m_locked) {
       return *this;
    }
@@ -216,9 +216,9 @@ Extension &Extension::registerConstant(Constant &&constant)
    return *this;
 }
 
-Namespace *Extension::findNamespace(const std::string &ns) const
+Namespace *Module::findNamespace(const std::string &ns) const
 {
-   VMAPI_D(const Extension);
+   VMAPI_D(const Module);
    auto begin = implPtr->m_namespaces.begin();
    auto end = implPtr->m_namespaces.end();
    while (begin != end) {
@@ -231,9 +231,9 @@ Namespace *Extension::findNamespace(const std::string &ns) const
    return nullptr;
 }
 
-AbstractClass *Extension::findClass(const std::string &clsName) const
+AbstractClass *Module::findClass(const std::string &clsName) const
 {
-   VMAPI_D(const Extension);
+   VMAPI_D(const Module);
    auto begin = implPtr->m_classes.begin();
    auto end = implPtr->m_classes.end();
    while (begin != end) {
@@ -246,14 +246,14 @@ AbstractClass *Extension::findClass(const std::string &clsName) const
    return nullptr;
 }
 
-bool Extension::initialize(int moduleNumber)
+bool Module::initialize(int moduleNumber)
 {
    return getImplPtr()->initialize(moduleNumber);
 }
 
-Extension &Extension::registerIni(const Ini &entry)
+Module &Module::registerIni(const Ini &entry)
 {
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    if (isLocked()) {
       return *this;
    }
@@ -261,9 +261,9 @@ Extension &Extension::registerIni(const Ini &entry)
    return *this;
 }
 
-Extension &Extension::registerIni(Ini &&entry)
+Module &Module::registerIni(Ini &&entry)
 {
-   VMAPI_D(Extension);
+   VMAPI_D(Module);
    if (isLocked()) {
       return *this;
    }
@@ -271,33 +271,33 @@ Extension &Extension::registerIni(Ini &&entry)
    return *this;
 }
 
-size_t Extension::getFunctionQuantity() const
+size_t Module::getFunctionQuantity() const
 {
-   VMAPI_D(const Extension);
+   VMAPI_D(const Module);
    return implPtr->m_functions.size();
 }
 
-size_t Extension::getIniQuantity() const
+size_t Module::getIniQuantity() const
 {
-   VMAPI_D(const Extension);
+   VMAPI_D(const Module);
    return implPtr->m_iniEntries.size();
 }
 
-size_t Extension::getConstantQuantity() const
+size_t Module::getConstantQuantity() const
 {
-   VMAPI_D(const Extension);
+   VMAPI_D(const Module);
    return implPtr->m_constants.size();
 }
 
-size_t Extension::getNamespaceQuantity() const
+size_t Module::getNamespaceQuantity() const
 {
-   VMAPI_D(const Extension);
+   VMAPI_D(const Module);
    return implPtr->m_namespaces.size();
 }
 
 namespace internal
 {
-ExtensionPrivate::ExtensionPrivate(const char *name, const char *version, int apiversion, Extension *extension)
+ModulePrivate::ModulePrivate(const char *name, const char *version, int apiversion, Module *extension)
    : m_apiPtr(extension)
 {
    // assign all members (apart from the globals)
@@ -309,11 +309,11 @@ ExtensionPrivate::ExtensionPrivate(const char *name, const char *version, int ap
    m_entry.deps = nullptr;
    m_entry.name = name;
    m_entry.functions = nullptr;
-   m_entry.module_startup_func = &ExtensionPrivate::processStartup;
-   m_entry.module_shutdown_func = &ExtensionPrivate::processShutdown;
-   m_entry.request_startup_func = &ExtensionPrivate::processRequestStartup;
-   m_entry.request_shutdown_func = &ExtensionPrivate::processRequestShutdown;
-   m_entry.info_func = &ExtensionPrivate::processModuleInfo;
+   m_entry.module_startup_func = &ModulePrivate::processStartup;
+   m_entry.module_shutdown_func = &ModulePrivate::processShutdown;
+   m_entry.request_startup_func = &ModulePrivate::processRequestStartup;
+   m_entry.request_shutdown_func = &ModulePrivate::processRequestShutdown;
+   m_entry.info_func = &ModulePrivate::processModuleInfo;
    m_entry.version = version;
    m_entry.globals_size = 0;
    m_entry.globals_ctor = nullptr;
@@ -324,17 +324,13 @@ ExtensionPrivate::ExtensionPrivate(const char *name, const char *version, int ap
    m_entry.handle = nullptr;
    m_entry.module_number = 0;
    m_entry.build_id = const_cast<char *>(static_cast<const char *>(ZEND_MODULE_BUILD_ID));
-#ifdef ZTS
    m_entry.globals_id_ptr = nullptr;
-#else
-   m_entry.globals_ptr = nullptr;
-#endif
    if (apiversion == VMAPI_API_VERSION) {
       return;
    }
    // mismatch between api versions, the extension is invalid, we use a
    // different startup function to report to the user
-   m_entry.module_startup_func = &ExtensionPrivate::processMismatch;
+   m_entry.module_startup_func = &ModulePrivate::processMismatch;
    // the other callback functions are no longer necessary
    m_entry.module_shutdown_func = nullptr;
    m_entry.request_startup_func = nullptr;
@@ -342,13 +338,13 @@ ExtensionPrivate::ExtensionPrivate(const char *name, const char *version, int ap
    m_entry.info_func = nullptr;
 }
 
-ExtensionPrivate::~ExtensionPrivate()
+ModulePrivate::~ModulePrivate()
 {
    name2extension.erase(m_entry.name);
    delete[] m_entry.functions;
 }
 
-size_t ExtensionPrivate::getFunctionQuantity() const
+size_t ModulePrivate::getFunctionQuantity() const
 {
    // now just return global namespaces functions
    size_t ret = m_functions.size();
@@ -358,17 +354,17 @@ size_t ExtensionPrivate::getFunctionQuantity() const
    return ret;
 }
 
-size_t ExtensionPrivate::getIniQuantity() const
+size_t ModulePrivate::getIniQuantity() const
 {
    return m_iniEntries.size();
 }
 
-zend_module_entry *ExtensionPrivate::getModule()
+zend_module_entry *ModulePrivate::getModule()
 {
    if (m_entry.functions) {
       return &m_entry;
    }
-   if (m_entry.module_startup_func == &ExtensionPrivate::processMismatch) {
+   if (m_entry.module_startup_func == &ModulePrivate::processMismatch) {
       return &m_entry;
    }
    size_t count = getFunctionQuantity();
@@ -393,55 +389,55 @@ zend_module_entry *ExtensionPrivate::getModule()
    return &m_entry;
 }
 
-void ExtensionPrivate::iterateFunctions(const std::function<void(Function &func)> &callback)
+void ModulePrivate::iterateFunctions(const std::function<void(Function &func)> &callback)
 {
    for (auto &function : m_functions) {
       callback(*function);
    }
 }
 
-void ExtensionPrivate::iterateIniEntries(const std::function<void (Ini &)> &callback)
+void ModulePrivate::iterateIniEntries(const std::function<void (Ini &)> &callback)
 {
    for (auto &entry : m_iniEntries) {
       callback(*entry);
    }
 }
 
-void ExtensionPrivate::iterateConstants(const std::function<void (Constant &)> &callback)
+void ModulePrivate::iterateConstants(const std::function<void (Constant &)> &callback)
 {
    for (auto &constant : m_constants) {
       callback(*constant);
    }
 }
 
-void ExtensionPrivate::iterateClasses(const std::function<void(AbstractClass &cls)> &callback)
+void ModulePrivate::iterateClasses(const std::function<void(AbstractClass &cls)> &callback)
 {
    for (auto &cls : m_classes) {
       callback(*cls);
    }
 }
 
-int ExtensionPrivate::processMismatch(INIT_FUNC_ARGS)
+int ModulePrivate::processMismatch(INIT_FUNC_ARGS)
 {
-   Extension *extension = find_module(module_number);
+   Module *extension = find_module(module_number);
    // @TODO is this really good? we need a method to check compatibility more graceful
    vmapi::warning << " Version mismatch between zendAPI and extension " << extension->getName()
                  << " " << extension->getVersion() << " (recompile needed?) " << std::endl;
    return BOOL2SUCCESS(true);
 }
 
-int ExtensionPrivate::processRequestStartup(INIT_FUNC_ARGS)
+int ModulePrivate::processRequestStartup(INIT_FUNC_ARGS)
 {
-   Extension *extension = find_module(module_number);
+   Module *extension = find_module(module_number);
    if (extension->m_implPtr->m_requestStartupHandler) {
       extension->m_implPtr->m_requestStartupHandler();
    }
    return BOOL2SUCCESS(true);
 }
 
-int ExtensionPrivate::processRequestShutdown(SHUTDOWN_FUNC_ARGS)
+int ModulePrivate::processRequestShutdown(SHUTDOWN_FUNC_ARGS)
 {
-   Extension *extension = find_module(module_number);
+   Module *extension = find_module(module_number);
    if (extension->m_implPtr->m_requestShutdownHandler) {
       extension->m_implPtr->m_requestShutdownHandler();
    }
@@ -450,29 +446,29 @@ int ExtensionPrivate::processRequestShutdown(SHUTDOWN_FUNC_ARGS)
    return BOOL2SUCCESS(true);
 }
 
-int ExtensionPrivate::processStartup(INIT_FUNC_ARGS)
+int ModulePrivate::processStartup(INIT_FUNC_ARGS)
 {
    //ZEND_INIT_MODULE_GLOBALS(XXXX, init_globals, nullptr);
-   Extension *extension = find_module(module_number);
+   Module *extension = find_module(module_number);
    return BOOL2SUCCESS(extension->initialize(module_number));
 }
 
-int ExtensionPrivate::processShutdown(SHUTDOWN_FUNC_ARGS)
+int ModulePrivate::processShutdown(SHUTDOWN_FUNC_ARGS)
 {
-   Extension *extension = find_module(module_number);
+   Module *extension = find_module(module_number);
    mid2extension.erase(module_number);
    return BOOL2SUCCESS(extension->m_implPtr->shutdown(module_number));
 }
 
-void ExtensionPrivate::processModuleInfo(ZEND_MODULE_INFO_FUNC_ARGS)
+void ModulePrivate::processModuleInfo(ZEND_MODULE_INFO_FUNC_ARGS)
 {
-   Extension *extension = find_module(zend_module->module_number);
+   Module *extension = find_module(zend_module->module_number);
    if (extension->m_implPtr->m_minfoHandler) {
       extension->m_implPtr->m_minfoHandler();
    }
 }
 
-ExtensionPrivate &ExtensionPrivate::registerFunction(const char *name, ZendCallable function,
+ModulePrivate &ModulePrivate::registerFunction(const char *name, ZendCallable function,
                                                      const Arguments &arguments)
 {
    if (m_locked) {
@@ -482,7 +478,7 @@ ExtensionPrivate &ExtensionPrivate::registerFunction(const char *name, ZendCalla
    return *this;
 }
 
-bool ExtensionPrivate::initialize(int moduleNumber)
+bool ModulePrivate::initialize(int moduleNumber)
 {
    m_zendIniDefs.reset(new zend_ini_entry_def[getIniQuantity() + 1]);
    int i = 0;
@@ -519,7 +515,7 @@ bool ExtensionPrivate::initialize(int moduleNumber)
    return true;
 }
 
-bool ExtensionPrivate::shutdown(int moduleNumber)
+bool ModulePrivate::shutdown(int moduleNumber)
 {
    zend_unregister_ini_entries(moduleNumber);
    m_zendIniDefs.reset();

@@ -28,11 +28,11 @@ class Parameters;
 class Closure;
 namespace internal
 {
-class ExtensionPrivate;
+class ModulePrivate;
 class NamespacePrivate;
 class AbstractClassPrivate;
 } // internal
-using internal::ExtensionPrivate;
+using internal::ModulePrivate;
 using internal::NamespacePrivate;
 using internal::AbstractClassPrivate;
 
@@ -107,7 +107,7 @@ private:
 private:
    VMAPI_DECLARE_PRIVATE(AbstractClass);
    std::shared_ptr<AbstractClassPrivate> m_implPtr;
-   friend class ExtensionPrivate;
+   friend class ModulePrivate;
    friend class NamespacePrivate;
    friend class Closure;
 };

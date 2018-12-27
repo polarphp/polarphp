@@ -263,7 +263,7 @@ bool php_module_startup()
 
    /* startup extensions statically compiled in */
    if (!php_register_internal_extensions()) {
-      php_printf("Unable to start builtin modules\n");
+      php_printf("Unable to start polarphp standard library (libpdk)\n");
       return false;
    }
 

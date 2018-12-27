@@ -24,9 +24,9 @@ namespace vmapi {
 class Variant;
 class Parameters;
 namespace internal {
-class ExtensionPrivate;
+class ModulePrivate;
 } // internal
-using internal::ExtensionPrivate;
+using internal::ModulePrivate;
 using ClosureCallableType = std::function<Variant(Parameters &)>;
 
 class Closure final : public StdClass
@@ -40,7 +40,7 @@ private:
    static void registerToZendNg(int moduleNumber);
    static void unregisterFromZendNg();
 private:
-   friend class ExtensionPrivate;
+   friend class ModulePrivate;
    static zend_class_entry *m_entry;
    const ClosureCallableType m_callable;
 };
