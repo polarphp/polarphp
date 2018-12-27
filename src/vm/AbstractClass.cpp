@@ -42,6 +42,7 @@
 #include "polarphp/vm/protocol/Serializable.h"
 #include "polarphp/vm/protocol/Traversable.h"
 #include "polarphp/vm/utils/Funcs.h"
+#include "polarphp/vm/utils/UserspaceFuncs.h"
 
 #include "polarphp/runtime/PhpDefs.h"
 
@@ -406,9 +407,7 @@ int AbstractClassPrivate::hasDimension(zval *object, zval *offset, int checkEmpt
          if (!checkEmpty) {
             return VMAPI_SUCCESS;
          }
-         return VMAPI_SUCCESS;
-         /// TODO REVIEW
-         /// return zapi::empty(arrayAccess->offsetGet(offset));
+         return empty(arrayAccess->offsetGet(offset));
       } catch (Exception &exception) {
          process_exception(exception);
          return VMAPI_FAILURE; // unreachable, prevent some compiler warning
@@ -553,7 +552,7 @@ zval *AbstractClassPrivate::readProperty(zval *object, zval *name, int type, voi
       } else {
          return toZval(meta->callGet(nativeObject, key), type, rv);
       }
-   } catch (const NotImplemented &exception) {
+   } catch (const NotImplemented &) {
       if (!std_object_handlers.read_property) {
          // TODO here maybe problems
          return nullptr;
@@ -583,7 +582,7 @@ void AbstractClassPrivate::writeProperty(zval *object, zval *name, zval *value, 
       } else {
          meta->callSet(nativeObject, key, value);
       }
-   } catch (const NotImplemented &exception) {
+   } catch (const NotImplemented &) {
       if (!std_object_handlers.write_property) {
          return;
       }
@@ -617,7 +616,7 @@ int AbstractClassPrivate::hasProperty(zval *object, zval *name, int hasSetExists
       } else {
          return value.toBool();
       }
-   } catch (const NotImplemented &exception) {
+   } catch (const NotImplemented &) {
       if (!std_object_handlers.has_property) {
          return false;
       }
@@ -638,10 +637,9 @@ void AbstractClassPrivate::unsetProperty(zval *object, zval *name, void **cacheS
       std::string key(Z_STRVAL_P(name), Z_STRLEN_P(name));
       if (selfPtr->m_properties.find(key) == selfPtr->m_properties.end()) {
          meta->callUnset(nativeObject, key);
-         return;
       }
       zend_error(E_ERROR, "Property %s can not be unset", key.c_str());
-   } catch (const NotImplemented &exception) {
+   } catch (const NotImplemented &) {
       if (!std_object_handlers.unset_property) {
          return;
       }
@@ -653,6 +651,15 @@ void AbstractClassPrivate::unsetProperty(zval *object, zval *name, void **cacheS
 
 zend_function *AbstractClassPrivate::getMethod(zend_object **object, zend_string *methodName, const zval *key)
 {
+   // something strange about the Zend engine (once more). The structure with
+   // object-handlers has a get_method and call_method member. When a function is
+   // called, the get_method function is called first, to retrieve information
+   // about the method (like the handler that should be called to execute it),
+   // after that, this returned handler is also called. The call_method property
+   // of the object_handlers structure however, never gets called. Typical.
+
+   // first we'll check if the default handler does not have an implementation,
+   // in that case the method is probably already implemented as a regular method
    zend_function *defaultFuncInfo = std_object_handlers.get_method(object, methodName, key);
    if (defaultFuncInfo) {
       return defaultFuncInfo;
@@ -725,7 +732,15 @@ zend_function *AbstractClassPrivate::getStaticMethod(zend_class_entry *entry, ze
 int AbstractClassPrivate::getClosure(zval *object, zend_class_entry **entry, zend_function **retFunc,
                                      zend_object **objectPtr)
 {
-   // @mark is this really right ?
+   // it is really unbelievable how the Zend engine manages to implement every feature
+   // in a complete different manner. You would expect the __invoke() and the
+   // __call() functions not to be very different from each other. However, they
+   // both have a completely different API. This getClosure method is supposed
+   // to fill the function parameter with all information about the invoke()
+   // method that is going to get called
+
+   // just like we did for getMethod(), we're going to dynamically allocate memory
+   // with all information about the function
    zend_class_entry *defClassEntry = Z_OBJCE_P(object);
    assert(defClassEntry);
    std::string contextKey(defClassEntry->name->val, defClassEntry->name->len);
@@ -800,7 +815,7 @@ void AbstractClassPrivate::magicCallForwarder(INTERNAL_FUNCTION_PARAMETERS)
          zval temp = meta->callMagicStaticCall(name, params).detach(false);
          ZVAL_COPY(return_value, &temp);
       }
-   } catch (const NotImplemented &exception) {
+   } catch (const NotImplemented &) {
       if (isStatic) {
          zend_error(E_ERROR, "Undefined static method %s::%s", meta->getClassName().c_str(), name);
       } else {
@@ -818,7 +833,6 @@ void AbstractClassPrivate::magicInvokeForwarder(INTERNAL_FUNCTION_PARAMETERS)
    AbstractClass *meta = callContext->m_selfPtr->m_apiPtr;
    zend_class_entry *defClassEntry = callContext->m_selfPtr->m_classEntry;
    assert(defClassEntry);
-   // @mark is this really right ?
    std::string contextKey(defClassEntry->name->val, defClassEntry->name->len);
    contextKey.append("::__invoke");
    ScopedFree scopeFree(sm_contextPtrs, contextKey);
@@ -827,13 +841,16 @@ void AbstractClassPrivate::magicInvokeForwarder(INTERNAL_FUNCTION_PARAMETERS)
       StdClass *nativeObject = params.getObject();
       zval temp = meta->callMagicInvoke(nativeObject, params).detach(false);
       ZVAL_COPY(return_value, &temp);
-   } catch (const NotImplemented &exception) {
+   } catch (const NotImplemented &) {
       zend_error(E_ERROR, "Function name must be a string");
    } catch (Exception &exception) {
       process_exception(exception);
    }
 }
 
+///
+/// TODO Review
+///
 int AbstractClassPrivate::cast(zval *object, zval *retValue, int type)
 {
    ObjectBinder *objectBinder = ObjectBinder::retrieveSelfPtr(object);
@@ -861,7 +878,7 @@ int AbstractClassPrivate::cast(zval *object, zval *retValue, int type)
       }
       ZVAL_COPY(retValue, &temp);
       return VMAPI_SUCCESS;
-   } catch (const NotImplemented &exception) {
+   } catch (const NotImplemented &) {
       if (!std_object_handlers.cast_object) {
          return VMAPI_FAILURE;
       }
@@ -906,10 +923,10 @@ void AbstractClassPrivate::destructObject(zend_object *object)
       if (nativeObject) {
          selfPtr->m_apiPtr->callDestruct(nativeObject);
       }
-   } catch (const NotImplemented &exception) {
+   } catch (const NotImplemented &) {
       zend_objects_destroy_object(object);
    } catch (Exception &exception) {
-      // a regular zapi::kernel::Exception was thrown by the extension, pass it on
+      // a regular Exception was thrown by the extension, pass it on
       // to PHP user space
       process_exception(exception);
    }
