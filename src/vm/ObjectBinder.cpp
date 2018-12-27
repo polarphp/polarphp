@@ -34,7 +34,6 @@ ObjectBinder::ObjectBinder(zend_class_entry *entry, std::shared_ptr<StdClass> na
    object_properties_init(&m_container->m_zendObject, entry);
    m_container->m_zendObject.handlers = objectHandlers;
    if (refCount != 1) {
-//      GC_REFCOUNT(&m_container->m_zendObject) = refCount;
       GC_SET_REFCOUNT(&m_container->m_zendObject, refCount);
    }
    m_nativeObject->m_implPtr->m_zendObject = &m_container->m_zendObject;

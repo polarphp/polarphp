@@ -43,6 +43,8 @@
 #include "polarphp/vm/protocol/Traversable.h"
 #include "polarphp/vm/utils/Funcs.h"
 
+#include "polarphp/runtime/PhpDefs.h"
+
 #include <iostream>
 #include <cstring>
 
@@ -99,7 +101,7 @@ void verify_abstract_class_function(zend_function *fn, zend_abstract_info *ai) /
             ai->cnt++;
             ai->ctor = 1;
          } else {
-            ai->afn[ai->cnt] = NULL;
+            ai->afn[ai->cnt] = nullptr;
          }
       } else {
          ai->cnt++;
@@ -107,7 +109,7 @@ void verify_abstract_class_function(zend_function *fn, zend_abstract_info *ai) /
    }
 }
 
-void verify_abstract_class(zend_class_entry *ce) /* {{{ */
+void verify_abstract_class(zend_class_entry *ce)
 {
    void *func;
    zend_abstract_info ai;
@@ -132,9 +134,9 @@ void verify_abstract_class(zend_class_entry *ce) /* {{{ */
 ContextMapType AbstractClassPrivate::sm_contextPtrs;
 
 AbstractClassPrivate::AbstractClassPrivate(const char *className, ClassType type)
-   : m_name(className),
-     m_type(type),
-     m_self(nullptr, acp_ptr_deleter)
+   : m_type(type),
+     m_self(nullptr, acp_ptr_deleter),
+     m_name(className)
 {}
 
 zend_class_entry *AbstractClassPrivate::initialize(AbstractClass *cls, const std::string &ns, int moduleNumber)
@@ -145,9 +147,6 @@ zend_class_entry *AbstractClassPrivate::initialize(AbstractClass *cls, const std
    if (ns.size() > 0 && ns != "\\") {
       m_name = ns + "\\" + m_name;
    }
-   if ("Person" == m_name) {
-
-   }
    // initialize the class entry
    INIT_CLASS_ENTRY_EX(entry, m_name.c_str(), m_name.size(), getMethodEntries().get());
    entry.create_object = &AbstractClassPrivate::createObject;
@@ -155,10 +154,8 @@ zend_class_entry *AbstractClassPrivate::initialize(AbstractClass *cls, const std
    // check if traversable
    if (m_apiPtr->traversable()) {
       entry.get_iterator = &AbstractClassPrivate::getIterator;
-      /// TODO review
-      ///entry.iterator_funcs.funcs = IteratorBridge::getIteratorFuncs();
+      // // from 7.3 and up, we may have to allocate it ourself
    }
-
    // check if serializable
    if (m_apiPtr->serializable()) {
       entry.serialize = &AbstractClassPrivate::serialize;
@@ -290,7 +287,7 @@ zend_object *AbstractClassPrivate::createObject(zend_class_entry *entry)
    }
    // here we assocaited a native object with an ObjectBinder object
    // ObjectBinder can make an relationship on nativeObject and zend_object
-   // don't warry about memory, we do relase
+   // don't warry about memory, we do release
    // maybe memory leak
    ObjectBinder *binder = new ObjectBinder(entry, nativeObject, abstractClsPrivatePtr->getObjectHandlers(), 1);
    return binder->getZendObject();
@@ -494,8 +491,8 @@ int AbstractClassPrivate::unserialize(zval *object, zend_class_entry *entry, con
    } catch (Exception &exception) {
       // user threw an exception in its method
       // implementation, send it to user space
-      /// TODO REVIEW
-      /// php_error_docref(NULL, E_NOTICE, "Error while unserializing");
+      // process_exception(exception);
+      php_error_docref(nullptr, E_NOTICE, "Error while unserializing");
       return VMAPI_FAILURE;
    }
    return VMAPI_SUCCESS;

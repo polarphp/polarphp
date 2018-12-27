@@ -88,19 +88,19 @@ public:
    static zval *toZval(Variant &&value, int type, zval *rv);
 
 public:
-   AbstractClass *m_apiPtr;
-   std::string m_name;
+   bool m_intialized = false;
    ClassType m_type = ClassType::Regular;
+   AbstractClass *m_apiPtr;
    zend_class_entry *m_classEntry = nullptr;
+   std::shared_ptr<AbstractClass> m_parent;
+   std::unique_ptr<zend_string, std::function<void(zend_string *)>> m_self = nullptr;
    std::unique_ptr<zend_function_entry[]> m_methodEntries;
+   std::string m_name;
    zend_object_handlers m_handlers;
    std::list<std::shared_ptr<AbstractClass>> m_interfaces;
    std::list<std::shared_ptr<Method>> m_methods;
    std::list<std::shared_ptr<AbstractMember>> m_members;
    std::map<std::string, std::shared_ptr<Property>> m_properties;
-   std::shared_ptr<AbstractClass> m_parent;
-   bool m_intialized = false;
-   std::unique_ptr<zend_string, std::function<void(zend_string *)>> m_self = nullptr;
    static ContextMapType sm_contextPtrs;
 };
 } // internal

@@ -112,6 +112,10 @@ struct ClassMethodRegister
 
 } // internal
 
+///
+/// Refactor Class::registerMethod
+///
+
 template <typename T>
 class VMAPI_DECL_EXPORT Class final : public AbstractClass
 {

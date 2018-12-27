@@ -76,6 +76,7 @@ protected:
    void registerInterface(Interface &&interface);
    void registerBaseClass(const AbstractClass &base);
    void registerBaseClass(AbstractClass &&base);
+
 protected:
    virtual StdClass *construct() const;
    virtual StdClass *clone(StdClass *orig) const;
@@ -99,11 +100,14 @@ protected:
    virtual Variant castToInteger(StdClass *nativeObject) const;
    virtual Variant castToDouble(StdClass *nativeObject) const;
    virtual Variant castToBool(StdClass *nativeObject) const;
+
 protected:
    static void notImplemented();
+
 private:
    zend_class_entry *initialize(const std::string &ns, int moduleNumber);
    zend_class_entry *initialize(int moduleNumber);
+
 private:
    VMAPI_DECLARE_PRIVATE(AbstractClass);
    std::shared_ptr<AbstractClassPrivate> m_implPtr;
