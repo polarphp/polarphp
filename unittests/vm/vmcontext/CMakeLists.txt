@@ -19,3 +19,9 @@ set(VMCONTEXT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${VMCONTEXT_INCLUDE_DIR})
 add_library(PolarEmbed ${POLAR_TEST_VMCONTEXT_SOURCES})
 target_link_libraries(PolarEmbed ZendApi)
+set_target_properties(
+   PolarEmbed
+   PROPERTIES
+   INTERFACE_INCLUDE_DIRECTORIES "${VMCONTEXT_INCLUDE_DIR}"
+   COMPILE_DEFINITIONS "ZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+   )

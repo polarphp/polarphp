@@ -8,3 +8,14 @@
 # See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
 # Created by polarboy on 2018/12/28.
+
+polar_collect_files(
+   TYPE_BOTH
+   RELATIVE
+   DIR ${CMAKE_CURRENT_SOURCE_DIR}
+   OUTPUT_VAR POLAR_UNITTEST_VM_DS_SOURCES)
+
+polar_add_unittest(ZendApiTests ZendApiDsTest
+   ${POLAR_UNITTEST_VM_DS_SOURCES})
+
+target_link_libraries(ZendApiDsTest PRIVATE PolarEmbed)

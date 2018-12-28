@@ -9,20 +9,16 @@
 //
 // Created by polarboy on 2018/12/28.
 
+#include "gtest/gtest.h"
+
 #include "PolarEmbed.h"
 
-namespace polar {
-namespace unittest {
-
-void begin_vm_context(int argc, char *argv[])
+int main(int argc, char **argv)
 {
-
+   int retCode = 0;
+   polar::unittest::begin_vm_context(argc, argv);
+   ::testing::InitGoogleTest(&argc, argv);
+   retCode = RUN_ALL_TESTS();
+   polar::unittest::end_vm_context();
+   return retCode;
 }
-
-void end_vm_context()
-{
-
-}
-
-} // unittest
-} // polar

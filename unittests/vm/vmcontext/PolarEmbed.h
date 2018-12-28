@@ -15,7 +15,7 @@
 namespace polar {
 namespace unittest {
 
-void begin_vm_context();
+void begin_vm_context(int argc, char *argv[]);
 void end_vm_context();
 
 } // unittest
