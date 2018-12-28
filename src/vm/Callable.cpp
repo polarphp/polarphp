@@ -103,17 +103,6 @@ void CallablePrivate::initialize(zend_function_entry *entry, const char *classNa
 
 void CallablePrivate::initialize(zend_internal_function_info *info, const char *className) const
 {
-   // current not support return type
-#if ZEND_MODULE_API_NO < 20170718 // for version less than PHP 7.
-   info->type_hint = static_cast<unsigned char>(m_returnType);
-   if (m_returnType == Type::Object) {
-      info->class_name = m_retClsName.c_str();
-   }
-   // since php 5.6 there are _allow_null and _is_variadic properties. It's
-   // not exactly clear what they do (@todo find this out) so for now we set
-   // them to false
-   info->allow_null = false;
-#else
    // we use new facility type system for zend_internal_function_info / zend_function_info
    if (nullptr != className) {
       // method
@@ -134,7 +123,6 @@ void CallablePrivate::initialize(zend_internal_function_info *info, const char *
          info->type = ZEND_TYPE_ENCODE(get_raw_type(m_returnType), true);
       }
    }
-#endif
    info->required_num_args = m_required;
    // current we don't support return by reference
    info->return_reference = false;

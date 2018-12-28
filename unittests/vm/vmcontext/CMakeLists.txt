@@ -7,19 +7,15 @@
 # See https://polarphp.org/LICENSE.txt for license information
 # See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
-# Created by polarboy on 2018/10/12.
+# Created by polarboy on 2018/12/28.
 
-add_custom_target(PolarBaseLibTests)
-set_target_properties(PolarBaseLibTests PROPERTIES FOLDER "PolarBaseLibTests")
+polar_collect_files(
+   TYPE_BOTH
+   RELATIVE
+   DIR ${CMAKE_CURRENT_SOURCE_DIR}
+   OUTPUT_VAR POLAR_TEST_VMCONTEXT_SOURCES)
 
-add_subdirectory(support)
-
-if (POLAR_DEV_BUILD_LLVM_UNITTEST)
-   add_subdirectory(basic/adt)
-   add_subdirectory(utils)
-endif()
-
-if (POLAR_DEV_BUILD_VMAPI_UNITEST)
-   add_subdirectory(vm)
-endif()
-
+set(VMCONTEXT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${VMCONTEXT_INCLUDE_DIR})
+add_library(PolarEmbed ${POLAR_TEST_VMCONTEXT_SOURCES})
+target_link_libraries(PolarEmbed ZendApi)

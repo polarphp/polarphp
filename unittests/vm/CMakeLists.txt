@@ -7,19 +7,8 @@
 # See https://polarphp.org/LICENSE.txt for license information
 # See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
-# Created by polarboy on 2018/10/12.
+# Created by polarboy on 2018/12/28.
 
-add_custom_target(PolarBaseLibTests)
-set_target_properties(PolarBaseLibTests PROPERTIES FOLDER "PolarBaseLibTests")
-
-add_subdirectory(support)
-
-if (POLAR_DEV_BUILD_LLVM_UNITTEST)
-   add_subdirectory(basic/adt)
-   add_subdirectory(utils)
-endif()
-
-if (POLAR_DEV_BUILD_VMAPI_UNITEST)
-   add_subdirectory(vm)
-endif()
-
+add_subdirectory(vmcontext)
+add_subdirectory(ds)
+add_subdirectory(lang)

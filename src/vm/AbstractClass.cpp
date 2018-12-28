@@ -594,6 +594,7 @@ void AbstractClassPrivate::writeProperty(zval *object, zval *name, zval *value, 
 
 int AbstractClassPrivate::hasProperty(zval *object, zval *name, int hasSetExists, void **cacheSlot)
 {
+
    try {
       ObjectBinder *objectBinder = ObjectBinder::retrieveSelfPtr(object);
       AbstractClassPrivate *selfPtr = retrieve_acp_ptr_from_cls_entry(Z_OBJCE_P(object));
