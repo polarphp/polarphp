@@ -9,6 +9,10 @@
 #
 # Created by polarboy on 2018/12/28.
 
+add_custom_target(ZendApiTests)
+set_target_properties(ZendApiTests PROPERTIES FOLDER "ZendApiTests")
+
 add_subdirectory(vmcontext)
 add_subdirectory(ds)
 add_subdirectory(lang)
+add_subdirectory(utils)
