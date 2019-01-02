@@ -13,6 +13,7 @@
 #define POLARPHP_VMAPI_DS_INTERNAL_VARIANT_PRIVATE_H
 
 #include "polarphp/vm/internal/DepsZendVmHeaders.h"
+#include "polarphp/global/Config.h"
 
 #include <type_traits>
 #include <memory>
@@ -34,8 +35,12 @@ public:
    operator const _zval_struct *() const &;
    _zval_struct &operator*() const &;
    _zval_struct *dereference() const;
-   //std::aligned_storage<16>::type m_buffer;
+#ifndef POLAR_DEBUG_BUILD
+   std::aligned_storage<16>::type m_buffer;
+#else
    zval m_buffer;
+#endif
+
 };
 
 } // internal

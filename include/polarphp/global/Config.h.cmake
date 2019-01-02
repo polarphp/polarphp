@@ -25,6 +25,8 @@
 #define POLAR_PACKAGE_BUGREPORT "@POLAR_PACKAGE_BUGREPORT@"
 #define POLAR_SYSTEM_NAME       "@POLAR_SYSTEM_NAME@"
 
+#cmakedefine POLAR_DEBUG_BUILD
+
 /* Host triple polarVM will be executed on */
 #cmakedefine POLAR_HOST_TRIPLE "@POLAR_HOST_TRIPLE@"
 /* Target triple polarVM will generate code for by default */
