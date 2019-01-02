@@ -18,12 +18,11 @@ HashTableDataDeleter sg_zValDataDeleter = ZVAL_PTR_DTOR;
 
 HashTable &HashTable::insert(StringRef key, const Variant &value, bool forceNew)
 {
-   zend_string zkey;
-   initZStrFromStringRef(&zkey, key);
+   std::shared_ptr<zend_string> zkey = initZStrFromStringRef(key);
    if (forceNew) {
-      zend_hash_add_new(&m_hashTable, &zkey, value);
+      zend_hash_add_new(&m_hashTable, zkey.get(), value);
    } else {
-      zend_hash_add(&m_hashTable, &zkey, value);
+      zend_hash_add(&m_hashTable, zkey.get(), value);
    }
    return *this;
 }
@@ -55,11 +54,10 @@ HashTable::~HashTable()
 
 Variant HashTable::operator [](StringRef key)
 {
-   zend_string zkey;
-   initZStrFromStringRef(&zkey, key);
-   zval *value = zend_hash_find(&m_hashTable, &zkey);
+   std::shared_ptr<zend_string> zkey = initZStrFromStringRef(key);
+   zval *value = zend_hash_find(&m_hashTable, zkey.get());
    if (nullptr == value) {
-      value = zend_hash_add_empty_element(&m_hashTable, &zkey);
+      value = zend_hash_add_empty_element(&m_hashTable, zkey.get());
    }
    return Variant(value, true);
 }
@@ -124,9 +122,8 @@ Variant HashTable::getValue(vmapi_ulong index, const Variant &defaultValue) cons
 
 Variant HashTable::getValue(StringRef key, const Variant &defaultValue) const
 {
-   zend_string zkey;
-   initZStrFromStringRef(&zkey, key);
-   zval *result = zend_hash_find(&m_hashTable, &zkey);
+   std::shared_ptr<zend_string> zkey = initZStrFromStringRef(key);
+   zval *result = zend_hash_find(&m_hashTable, zkey.get());
    if (nullptr == result) {
       return defaultValue;
    }
@@ -139,7 +136,7 @@ Variant HashTable::getKey() const
    zend_ulong index;
    int keyType = zend_hash_get_current_key(const_cast<::HashTable *>(&m_hashTable), &key, &index);
    VMAPI_ASSERT_X(keyType != HASH_KEY_NON_EXISTENT, "vmapi::HashTable::iterator", "Current key is not exist");
-   return keyType == HASH_KEY_IS_STRING ? Variant(key->val, key->len) : Variant(static_cast<vmapi_long>(index));
+   return keyType == HASH_KEY_IS_STRING ? Variant(ZSTR_VAL(key), ZSTR_LEN(key)) : Variant(static_cast<vmapi_long>(index));
 }
 
 Variant HashTable::getKey(const Variant &value, const Variant &defaultKey) const
@@ -182,7 +179,9 @@ HashTable::iterator &HashTable::iterator::operator ++()
 {
    VMAPI_ASSERT_X(m_hashTable != nullptr, "vmapi::HashTable::iterator", "m_hashTable can't be nullptr");
    int result = zend_hash_move_forward_ex(m_hashTable, &m_index);
-   VMAPI_ASSERT_X(result == VMAPI_SUCCESS, "vmapi::HashTable::iterator", "Iterating beyond end()");
+   if (result == VMAPI_FAILURE) {
+      m_index = HT_INVALID_IDX;
+   }
    return *this;
 }
 
@@ -191,7 +190,9 @@ HashTable::iterator HashTable::iterator::operator ++(int)
    iterator iter = *this;
    VMAPI_ASSERT_X(m_hashTable != nullptr, "vmapi::HashTable::iterator", "m_hashTable can't be nullptr");
    int result = zend_hash_move_forward_ex(m_hashTable, &m_index);
-   VMAPI_ASSERT_X(result == VMAPI_SUCCESS, "vmapi::HashTable::iterator", "Iterating beyond end()");
+   if (result == VMAPI_FAILURE) {
+      m_index = HT_INVALID_IDX;
+   }
    return iter;
 }
 
@@ -305,16 +306,11 @@ std::vector<Variant> HashTable::getValues() const
 HashTable::iterator::~iterator()
 {}
 
-void HashTable::initZStrFromStringRef(zend_string *zstr, StringRef str) const
+std::shared_ptr<zend_string> HashTable::initZStrFromStringRef(StringRef str) const
 {
-   char **vptr = nullptr;
-   std::memset(zstr, 0, sizeof(zend_string));
-   zend_string_forget_hash_val(zstr);
-   GC_SET_REFCOUNT(zstr, 1);
-   GC_ADD_FLAGS(zstr, IS_STR_INTERNED);
-   vptr = reinterpret_cast<char **>(ZSTR_VAL(zstr));
-   *vptr = const_cast<char *>(str.getData());
-   ZSTR_LEN(zstr) = str.size();
+   return std::shared_ptr<zend_string>(zend_string_init(str.getData(), str.size(), 0), [](zend_string *ptr){
+      zend_string_release(ptr);
+   });
 }
 
 } // vmapi

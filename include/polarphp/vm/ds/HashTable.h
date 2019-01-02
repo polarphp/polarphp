@@ -122,9 +122,8 @@ public:
 
    Variant update(StringRef key, const Variant &value)
    {
-      zend_string zkey;
-      initZStrFromStringRef(&zkey, key);
-      return zend_hash_update(&m_hashTable, &zkey, value);
+      std::shared_ptr<zend_string> zkey = initZStrFromStringRef(key);
+      return zend_hash_update(&m_hashTable, zkey.get(), value);
    }
 
    Variant update(vmapi_ulong index, const Variant &value)
@@ -134,9 +133,8 @@ public:
 
    bool remove(StringRef key)
    {
-      zend_string zkey;
-      initZStrFromStringRef(&zkey, key);
-      return zend_hash_del(&m_hashTable, &zkey) == VMAPI_SUCCESS ? true : false;
+      std::shared_ptr<zend_string> zkey = initZStrFromStringRef(key);
+      return zend_hash_del(&m_hashTable, zkey.get()) == VMAPI_SUCCESS ? true : false;
    }
 
    bool remove(int16_t index)
@@ -166,9 +164,8 @@ public:
 
    Variant getValue(StringRef key) const
    {
-      zend_string zkey;
-      initZStrFromStringRef(&zkey, key);
-      return zend_hash_find(&m_hashTable, &zkey);
+      std::shared_ptr<zend_string> zkey = initZStrFromStringRef(key);
+      return zend_hash_find(&m_hashTable, zkey.get());
    }
 
    Variant getValue(vmapi_ulong index) const
@@ -246,9 +243,8 @@ public:
 
    bool contains(StringRef key)
    {
-      zend_string zkey;
-      initZStrFromStringRef(&zkey, key);
-      return zend_hash_exists(&m_hashTable, &zkey) == 1 ? true : false;
+      std::shared_ptr<zend_string> zkey = initZStrFromStringRef(key);
+      return zend_hash_exists(&m_hashTable, zkey.get()) == 1 ? true : false;
    }
 
    bool contains(int16_t index)
@@ -357,10 +353,10 @@ public:
          return m_index != other.m_index;
       }
 
-      iterator &operator++();
-      iterator operator++(int);
-      iterator &operator--();
-      iterator operator--(int);
+      iterator &operator ++();
+      iterator operator ++(int);
+      iterator &operator --();
+      iterator operator --(int);
       iterator operator+(int32_t step);
 
       iterator operator-(int32_t step)
@@ -401,49 +397,49 @@ public:
          return Variant(zend_hash_get_current_data_ex(const_cast<::HashTable *>(m_hashTable),
                                                       const_cast<HashPosition *>(&m_index)));
       }
-      const_iterator &operator++()
+      const_iterator &operator ++()
       {
          iterator::operator ++();
          return *this;
       }
 
-      const_iterator operator++(int)
+      const_iterator operator ++(int)
       {
          const_iterator iter = *this;
          iterator::operator++();
          return iter;
       }
 
-      const_iterator &operator--()
+      const_iterator &operator --()
       {
          iterator::operator--();
          return *this;
       }
 
-      const_iterator operator--(int)
+      const_iterator operator --(int)
       {
          const_iterator iter = *this;
          iterator::operator--();
          return iter;
       }
 
-      const_iterator operator+(int32_t step)
+      const_iterator operator +(int32_t step)
       {
          iterator::operator+(step);
          return *this;
       }
 
-      const_iterator operator-(int32_t step)
+      const_iterator operator -(int32_t step)
       {
          return operator+(-step);
       }
 
-      const_iterator &operator+=(int step)
+      const_iterator &operator +=(int step)
       {
          return *this = *this + step;
       }
 
-      const_iterator &operator-=(int step) {
+      const_iterator &operator -=(int step) {
          return *this = *this - step;
       }
 
@@ -540,7 +536,7 @@ public:
    void reverseEach(DefaultForeachVisitor visitor) const;
 
 protected:
-   void initZStrFromStringRef(zend_string *zstr, StringRef str) const;
+   std::shared_ptr<zend_string> initZStrFromStringRef(StringRef str) const;
 
 protected:
    ::HashTable m_hashTable;
