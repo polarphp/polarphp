@@ -766,7 +766,7 @@ zval Variant::detach(bool keeprefcount)
    zval result;
    zval *self = getUnDerefZvalPtr();
    // copy the value
-   ZVAL_COPY_VALUE(&result, self);
+   ZVAL_COPY(&result, self);
    if (!keeprefcount) {
       Z_TRY_DELREF_P(self);
    }

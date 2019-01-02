@@ -95,30 +95,12 @@ public:
    }
 
    HashTable &insert(StringRef key, const Variant &value, bool forceNew = false);
-
-   HashTable &insert(int16_t index, const Variant &value, bool forceNew = false)
-   {
-      return insert(static_cast<vmapi_ulong>(index < 0 ? 0 : index), value, forceNew);
-   }
-
-   HashTable &insert(int32_t index, const Variant &value, bool forceNew = false)
-   {
-      return insert(static_cast<vmapi_ulong>(index < 0 ? 0 : index), value, forceNew);
-   }
-
-   HashTable &insert(uint16_t index, const Variant &value, bool forceNew = false)
-   {
-      return insert(static_cast<vmapi_ulong>(index), value, forceNew);
-   }
-
-   HashTable &insert(uint32_t index, const Variant &value, bool forceNew = false)
-   {
-      return insert(static_cast<vmapi_ulong>(index), value, forceNew);
-   }
-
    HashTable &insert(vmapi_ulong index, const Variant &value, bool forceNew = false);
+   HashTable &insert(StringRef key, Variant &&value, bool forceNew = false);
+   HashTable &insert(vmapi_ulong index, Variant &&value, bool forceNew = false);
 
    HashTable &append(const Variant &value, bool forceNew = true);
+   HashTable &append(Variant &&value, bool forceNew = true);
 
    Variant update(StringRef key, const Variant &value)
    {

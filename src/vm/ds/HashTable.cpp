@@ -41,10 +41,45 @@ HashTable &HashTable::insert(vmapi_ulong index, const Variant &value, bool force
    return *this;
 }
 
+HashTable &HashTable::insert(StringRef key, Variant &&value, bool forceNew)
+{
+   zval val = value.detach(false);
+   std::shared_ptr<zend_string> zkey = initZStrFromStringRef(key);
+   if (forceNew) {
+      zend_hash_add_new(&m_hashTable, zkey.get(), &val);
+   } else {
+      zend_hash_add(&m_hashTable, zkey.get(), &val);
+   }
+   return *this;
+   return *this;
+}
+
+HashTable &HashTable::insert(vmapi_ulong index, Variant &&value, bool forceNew)
+{
+   zval val = value.detach(false);
+   if (forceNew) {
+      zend_hash_index_add_new(&m_hashTable, index, &val);
+   } else {
+      zend_hash_index_add(&m_hashTable, index, &val);
+   }
+   return *this;
+}
+
 HashTable &HashTable::append(const Variant &value, bool forceNew)
 {
    zval val;
    ZVAL_DUP(&val, value.getZvalPtr());
+   if (forceNew) {
+      zend_hash_next_index_insert_new(&m_hashTable, &val);
+   } else {
+      zend_hash_next_index_insert(&m_hashTable, &val);
+   }
+   return *this;
+}
+
+HashTable &HashTable::append(Variant &&value, bool forceNew)
+{
+   zval val = value.detach(false);
    if (forceNew) {
       zend_hash_next_index_insert_new(&m_hashTable, &val);
    } else {
