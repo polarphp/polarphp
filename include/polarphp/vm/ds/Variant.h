@@ -93,7 +93,7 @@ public:
 
    template <typename T,
              size_t arrayLength,
-             typename Selector = typename std::enable_if<std::is_integral<T>::value>::type>
+             typename std::enable_if<std::is_integral<T>::value>::type>
    Variant(char (&value)[arrayLength], T length);
    template <size_t arrayLength>
    Variant(char (&value)[arrayLength]);
@@ -144,6 +144,8 @@ public:
    Variant &operator =(zval *value);
    bool operator ==(const Variant &other) const;
    bool operator !=(const Variant &other) const;
+   bool operator ==(const zval &other) const;
+   bool operator !=(const zval &other) const;
    bool strictEqual(const Variant &other) const;
    bool strictNotEqual(const Variant &other) const;
    /**

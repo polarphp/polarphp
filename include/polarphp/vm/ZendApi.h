@@ -74,6 +74,138 @@ bool register_module_to_zendvm(const Module &module);
 
 #define BOOL2SUCCESS(b) ((b) ? VMAPI_SUCCESS : VMAPI_FAILURE)
 
+#define POLAR_HASH_FOREACH(_ht, indirect) do { \
+      ::HashTable *__ht = (_ht); \
+      ::Bucket *_p = __ht->arData; \
+      ::Bucket *_end = _p + __ht->nNumUsed; \
+      for (; _p != _end; _p++) { \
+         zval *_z = &_p->val; \
+         if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
+            _z = Z_INDIRECT_P(_z); \
+         } \
+         if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
+
+#define POLAR_HASH_REVERSE_FOREACH(_ht, indirect) do { \
+      ::HashTable *__ht = (_ht); \
+      uint32_t _idx = __ht->nNumUsed; \
+      ::Bucket *_p = __ht->arData + _idx; \
+      zval *_z; \
+      for (_idx = __ht->nNumUsed; _idx > 0; _idx--) { \
+         _p--; \
+         _z = &_p->val; \
+         if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
+            _z = Z_INDIRECT_P(_z); \
+         } \
+         if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
+
+#define POLAR_HASH_FOREACH_BUCKET(ht, _bucket) \
+   POLAR_HASH_FOREACH(ht, 0); \
+   _bucket = _p;
+
+#define POLAR_HASH_FOREACH_VAL(ht, _val) \
+   POLAR_HASH_FOREACH(ht, 0); \
+   _val = _z;
+
+#define POLAR_HASH_FOREACH_VAL_IND(ht, _val) \
+   POLAR_HASH_FOREACH(ht, 1); \
+   _val = _z;
+
+#define POLAR_HASH_FOREACH_PTR(ht, _ptr) \
+   POLAR_HASH_FOREACH(ht, 0); \
+   _ptr = Z_PTR_P(_z);
+
+#define POLAR_HASH_FOREACH_NUM_KEY(ht, _h) \
+   POLAR_HASH_FOREACH(ht, 0); \
+   _h = _p->h;
+
+#define POLAR_HASH_FOREACH_STR_KEY(ht, _key) \
+   POLAR_HASH_FOREACH(ht, 0); \
+   _key = _p->key;
+
+#define POLAR_HASH_FOREACH_KEY(ht, _h, _key) \
+   POLAR_HASH_FOREACH(ht, 0); \
+   _h = _p->h; \
+   _key = _p->key;
+
+#define POLAR_HASH_FOREACH_NUM_KEY_VAL(ht, _h, _val) \
+   POLAR_HASH_FOREACH(ht, 0); \
+   _h = _p->h; \
+   _val = _z;
+
+#define POLAR_HASH_FOREACH_STR_KEY_VAL(ht, _key, _val) \
+   POLAR_HASH_FOREACH(ht, 0); \
+   _key = _p->key; \
+   _val = _z;
+
+#define POLAR_HASH_FOREACH_KEY_VAL(ht, _h, _key, _val) \
+   POLAR_HASH_FOREACH(ht, 0); \
+   _h = _p->h; \
+   _key = _p->key; \
+   _val = _z;
+
+#define POLAR_HASH_FOREACH_STR_KEY_VAL_IND(ht, _key, _val) \
+   POLAR_HASH_FOREACH(ht, 1); \
+   _key = _p->key; \
+   _val = _z;
+
+#define POLAR_HASH_FOREACH_KEY_VAL_IND(ht, _h, _key, _val) \
+   POLAR_HASH_FOREACH(ht, 1); \
+   _h = _p->h; \
+   _key = _p->key; \
+   _val = _z;
+
+#define POLAR_HASH_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
+   POLAR_HASH_FOREACH(ht, 0); \
+   _h = _p->h; \
+   _ptr = Z_PTR_P(_z);
+
+#define POLAR_HASH_FOREACH_STR_KEY_PTR(ht, _key, _ptr) \
+   POLAR_HASH_FOREACH(ht, 0); \
+   _key = _p->key; \
+   _ptr = Z_PTR_P(_z);
+
+#define POLAR_HASH_FOREACH_KEY_PTR(ht, _h, _key, _ptr) \
+   POLAR_HASH_FOREACH(ht, 0); \
+   _h = _p->h; \
+   _key = _p->key; \
+   _ptr = Z_PTR_P(_z);
+
+#define POLAR_HASH_REVERSE_FOREACH_BUCKET(ht, _bucket) \
+   POLAR_HASH_REVERSE_FOREACH(ht, 0); \
+   _bucket = _p;
+
+#define POLAR_HASH_REVERSE_FOREACH_VAL(ht, _val) \
+   POLAR_HASH_REVERSE_FOREACH(ht, 0); \
+   _val = _z;
+
+#define POLAR_HASH_REVERSE_FOREACH_PTR(ht, _ptr) \
+   POLAR_HASH_REVERSE_FOREACH(ht, 0); \
+   _ptr = Z_PTR_P(_z);
+
+#define POLAR_HASH_REVERSE_FOREACH_VAL_IND(ht, _val) \
+   POLAR_HASH_REVERSE_FOREACH(ht, 1); \
+   _val = _z;
+
+#define POLAR_HASH_REVERSE_FOREACH_STR_KEY_VAL(ht, _key, _val) \
+   POLAR_HASH_REVERSE_FOREACH(ht, 0); \
+   _key = _p->key; \
+   _val = _z;
+
+#define POLAR_HASH_REVERSE_FOREACH_KEY_VAL(ht, _h, _key, _val) \
+   POLAR_HASH_REVERSE_FOREACH(ht, 0); \
+   _h = _p->h; \
+   _key = _p->key; \
+   _val = _z;
+
+#define POLAR_HASH_REVERSE_FOREACH_KEY_VAL_IND(ht, _h, _key, _val) \
+   POLAR_HASH_REVERSE_FOREACH(ht, 1); \
+   _h = _p->h; \
+   _key = _p->key; \
+   _val = _z;
+
+#define POLAR_HASH_FOREACH_END ZEND_HASH_FOREACH_END
+#define POLAR_HASH_FOREACH_END_DEL ZEND_HASH_FOREACH_END_DEL
+
 // define some zend macro
 #define vmapi_bailout() _zend_bailout(const_cast<char *>(static_cast<const char *>(__FILE__)), __LINE__)
 

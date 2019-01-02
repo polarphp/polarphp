@@ -628,6 +628,16 @@ bool Variant::operator !=(const Variant &other) const
    return !fast_equal_check_function(const_cast<zval *>(getZvalPtr()), const_cast<zval *>(other.getZvalPtr()));
 }
 
+bool Variant::operator ==(const zval &other) const
+{
+   return fast_equal_check_function(const_cast<zval *>(getZvalPtr()), const_cast<zval *>(&other));
+}
+
+bool Variant::operator !=(const zval &other) const
+{
+   return fast_equal_check_function(const_cast<zval *>(getZvalPtr()), const_cast<zval *>(&other));
+}
+
 bool Variant::strictEqual(const Variant &other) const
 {
    return fast_is_identical_function(const_cast<zval *>(getZvalPtr()), const_cast<zval *>(other.getZvalPtr()));

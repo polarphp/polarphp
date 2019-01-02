@@ -14,8 +14,6 @@
 #include "polarphp/vm/ds/DoubleVariant.h"
 #include "polarphp/vm/ds/NumericVariant.h"
 
-#include <iostream>
-
 using polar::vmapi::Type;
 using polar::vmapi::NumericVariant;
 using polar::vmapi::DoubleVariant;
