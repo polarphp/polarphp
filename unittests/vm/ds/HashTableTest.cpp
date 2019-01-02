@@ -76,3 +76,22 @@ TEST(HashTableTest, testIterator)
    ASSERT_EQ(expectedValueInts, actualValueInts);
 }
 
+TEST(HashTableTest, testGetValue)
+{
+   {
+      ZVMHashTable table;
+      table.insert("name", Variant("polarphp"));
+      table.insert("city", Variant("beijing"));
+      table.insert("height", Variant(123));
+      ASSERT_EQ(table.getSize(), 3);
+      ASSERT_EQ(table.getValue("name").toString(), "polarphp");
+      ASSERT_EQ(table.getValue("city").toString(), "beijing");
+      ASSERT_EQ(Z_LVAL(table.getValue("height").getZval()), 123);
+      ASSERT_EQ(table["name"].toString(), "polarphp");
+      ASSERT_EQ(table["city"].toString(), "beijing");
+      ASSERT_EQ(Z_LVAL(table["height"].getZval()), 123);
+      // test default value
+      ASSERT_EQ(Z_LVAL(table.getValue("notExistKey", 123).getZval()), 123);
+      ASSERT_EQ(table.getValue("notExistKey", "polarphp").toString(), "polarphp");
+   }
+}
