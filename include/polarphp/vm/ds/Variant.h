@@ -249,6 +249,8 @@ protected:
    std::shared_ptr<VariantPrivate> m_implPtr;
 };
 
+std::ostream &operator <<(std::ostream &stream, const Variant &value);
+
 } // vmapi
 } // polar
 
