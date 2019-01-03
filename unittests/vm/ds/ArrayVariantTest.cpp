@@ -584,15 +584,464 @@ TEST(ArrayVariantTest, testUnset)
    // polar::vmapi::array_unset(array[1]["name"]); // Fatal error - Can't use string offset as an array
    // polar::vmapi::array_unset(array[1][1]); // Can't use string offset as an array
    ASSERT_FALSE(polar::vmapi::array_unset(array[2][1]));
-//   // polar::vmapi::array_unset(array[3]["name"][1]); // Fatal error: Can't use string offset as an array
-//   // polar::vmapi::array_unset(array[3]["name"]["key"]); // Fatal error - Can't use string offset as an array
-//   ASSERT_FALSE(polar::vmapi::array_unset(array[3][1]["age"]));
-//   ASSERT_FALSE(polar::vmapi::array_unset(array[3]["data"][22]));
-//   ASSERT_FALSE(polar::vmapi::array_unset(array[3]["data"]["xiuxiu"]));
-//   // polar::vmapi::array_unset(array[3]["name"][1]); // Can't use string offset as an array
-//   // polar::vmapi::array_unset(array[3]["name"]["age"]); // Can't use string offset as an array
-//   ASSERT_TRUE(polar::vmapi::array_isset(array[3]["data"]));
-//   ASSERT_TRUE(polar::vmapi::array_unset(array[3]["data"]));
-//   ASSERT_FALSE(polar::vmapi::array_isset(array[3]["data"]));
-//   ASSERT_FALSE(polar::vmapi::array_unset(array[3]["data"]));
+   // polar::vmapi::array_unset(array[3]["name"][1]); // Fatal error: Can't use string offset as an array
+   // polar::vmapi::array_unset(array[3]["name"]["key"]); // Fatal error - Can't use string offset as an array
+   ASSERT_FALSE(polar::vmapi::array_unset(array[3][1]["age"]));
+   ASSERT_FALSE(polar::vmapi::array_unset(array[3]["data"][22]));
+   ASSERT_FALSE(polar::vmapi::array_unset(array[3]["data"]["xiuxiu"]));
+   // polar::vmapi::array_unset(array[3]["name"][1]); // Can't use string offset as an array
+   // polar::vmapi::array_unset(array[3]["name"]["age"]); // Can't use string offset as an array
+   ASSERT_TRUE(polar::vmapi::array_isset(array[3]["data"]));
+   ASSERT_TRUE(polar::vmapi::array_unset(array[3]["data"]));
+   ASSERT_FALSE(polar::vmapi::array_isset(array[3]["data"]));
+   ASSERT_FALSE(polar::vmapi::array_unset(array[3]["data"]));
+}
+
+TEST(ArrayVariantTest, testIsset)
+{
+   ArrayVariant array;
+   array.insert("name", "polarphp");
+   array.insert("age", 123);
+   array[1][2][3][4][5][6] = "polarphp";
+   array[1][2][3][4][5]["info"] = "cloud";
+   //std::cout << str << std::endl;
+   ASSERT_FALSE(polar::vmapi::array_isset(array[9][2][3][4][5][7]));
+   ASSERT_TRUE(polar::vmapi::array_isset(array[1][2][3][4][5]["info"]));
+}
+
+TEST(ArrayVariantTest, testCastOperators)
+{
+   ArrayVariant array;
+   array.insert("name", "polarphp");
+   array.insert("age", 123);
+   array[1][2][3][4][5][6] = "polarphp";
+   array[1][2][3][4][5]["info"] = "cloud";
+   array[1][2][3]["name"][5]["info"] = "zzu_softboy";
+   array[1][2][3][4][5][5] = true;
+   array[1][2][3][4][5][4] = 3.14;
+   array[1][2][3][4][5]["num"] = 123;
+
+   ASSERT_THROW(StringVariant str = array[2], std::bad_cast);
+   ASSERT_THROW(NumericVariant num = array[2], std::bad_cast);
+   ASSERT_THROW(DoubleVariant dnum = array[2], std::bad_cast);
+   ASSERT_THROW(BooleanVariant bval = array[2], std::bad_cast);
+   ASSERT_THROW(Variant var = array[2], std::bad_cast);
+   ASSERT_THROW(StringVariant str = array[2][3], std::bad_cast);
+   ASSERT_THROW(NumericVariant num = array[2][3], std::bad_cast);
+   ASSERT_THROW(DoubleVariant dnum = array[2][3], std::bad_cast);
+   ASSERT_THROW(BooleanVariant bval = array[2][3], std::bad_cast);
+   ASSERT_THROW(Variant var = array[2][3], std::bad_cast);
+
+   ASSERT_THROW(StringVariant str = array["key"], std::bad_cast);
+   ASSERT_THROW(NumericVariant num = array["key"], std::bad_cast);
+   ASSERT_THROW(DoubleVariant dnum = array["key"], std::bad_cast);
+   ASSERT_THROW(BooleanVariant bval = array["key"], std::bad_cast);
+   ASSERT_THROW(Variant var = array["key"], std::bad_cast);
+   ASSERT_THROW(StringVariant str = array["key"][3]["key2"], std::bad_cast);
+   ASSERT_THROW(NumericVariant num = array["key"][3]["key2"], std::bad_cast);
+   ASSERT_THROW(DoubleVariant dnum = array["key"][3]["key2"], std::bad_cast);
+   ASSERT_THROW(BooleanVariant bval = array["key"][3]["key2"], std::bad_cast);
+   ASSERT_THROW(Variant var = array["key"][3]["key2"], std::bad_cast);
+
+   StringVariant str = array[1][2][3][4][5][6];
+   ASSERT_STREQ(str.getCStr(), "polarphp");
+   str = array[1][2][3][4][5]["info"];
+   ASSERT_STREQ(str.getCStr(), "cloud");
+   NumericVariant num = array[1][2][3][4][5]["num"];
+   ASSERT_EQ(num.toLong(), 123);
+   num = array[1][2][3][4][5]["num"];
+   ASSERT_EQ(num.toLong(), 123);
+
+   BooleanVariant bval = array[1][2][3][4][5][5];
+   ASSERT_TRUE(bval.toBoolean());
+   bval = array[1][2][3][4][5][5];
+   ASSERT_TRUE(bval.toBoolean());
+
+   DoubleVariant dval = array[1][2][3][4][5][4];
+   ASSERT_EQ(dval.toDouble(), 3.14);
+   dval = array[1][2][3][4][5][4];
+
+   Variant var = array[1][2][3]["name"][5]["info"];
+   var = array[1][2][3]["name"][5]["info"];
+}
+
+TEST(ArrayVariantTest, testGetNextInertIndex)
+{
+   ArrayVariant array;
+   ASSERT_EQ(array.getNextInsertIndex(), 0);
+   array.append(123);
+   ASSERT_EQ(array.getNextInsertIndex(), 1);
+   array.append("beijing");
+   ASSERT_EQ(array.getNextInsertIndex(), 2);
+   array.insert(11, "360");
+   ASSERT_EQ(array.getNextInsertIndex(), 12);
+   array.append("beijing");
+   ASSERT_EQ(array.getNextInsertIndex(), 13);
+}
+
+TEST(ArrayVariantTest, testGetKeys)
+{
+   ArrayVariant array;
+
+   std::list<KeyType> expectKeys = {
+      KeyType(-1, std::shared_ptr<std::string>(new std::string("name"))),
+      KeyType(-1, std::shared_ptr<std::string>(new std::string("age"))),
+      KeyType(0, nullptr),
+      KeyType(1, nullptr),
+      KeyType(2, nullptr),
+      KeyType(-1, std::shared_ptr<std::string>(new std::string("info"))),
+      KeyType(-1, std::shared_ptr<std::string>(new std::string("data"))),
+      KeyType(-1, std::shared_ptr<std::string>(new std::string("xxx"))),
+      KeyType(-1, std::shared_ptr<std::string>(new std::string("key3"))),
+   };
+   std::list<ArrayVariant::KeyType> keys = array.getKeys();
+   ASSERT_EQ(keys.size(), 0);
+   array.insert("name", "polarphp");
+   array.insert("age", 123);
+   array.append("beijing");
+   array.append("aaa");
+   array.append("bbb");
+   array.insert("info", "ccc");
+   array.insert("data", 3.14);
+   array.insert("xxx", 3.14);
+   array.insert("key3", "ccc");
+   keys = array.getKeys();
+   ASSERT_EQ(keys.size(), expectKeys.size());
+   auto iter = keys.begin();
+   auto expectIter = expectKeys.begin();
+   while (iter != keys.end()) {
+      ASSERT_EQ(iter->first, expectIter->first);
+      if (iter->second) {
+         ASSERT_EQ(*iter->second, *expectIter->second);
+      }
+      ++iter;
+      ++expectIter;
+   }
+   keys = array.getKeys("notExistValue");
+   ASSERT_TRUE(keys.empty());
+   keys = array.getKeys(3.14);
+   expectKeys = {
+      KeyType(-1, std::shared_ptr<std::string>(new std::string("data"))),
+      KeyType(-1, std::shared_ptr<std::string>(new std::string("xxx"))),
+   };
+   ASSERT_EQ(keys.size(), expectKeys.size());
+   iter = keys.begin();
+   expectIter = expectKeys.begin();
+   while (iter != keys.end()) {
+      ASSERT_EQ(iter->first, expectIter->first);
+      if (iter->second) {
+         ASSERT_EQ(*iter->second, *expectIter->second);
+      }
+      ++iter;
+      ++expectIter;
+   }
+}
+
+TEST(ArrayVariantTest, testGetValues)
+{
+   ArrayVariant array;
+   std::list<Variant> values = array.getValues();
+   std::list<Variant> expectValues = {
+      Variant("polarphp"),
+      Variant(123)
+   };
+   ASSERT_EQ(values.size(), 0);
+   array.insert("name", "polarphp");
+   array.insert("age", 123);
+   values = array.getValues();
+   ASSERT_EQ(values.size(), 2);
+   ASSERT_EQ(values, expectValues);
+}
+
+TEST(ArrayVariantTest, testFind)
+{
+   ArrayVariant array;
+   array.insert("name", "polarphp");
+   array.insert("age", 123);
+   array.append("beijing");
+   array.append("aaa");
+   array.append("bbb");
+   array.insert("info", "ccc");
+   array.insert("data", 3.14);
+   array.insert("xxx", 3.14);
+   array.insert("key3", "ccc");
+   ArrayVariant::Iterator iter = array.find("notExist");
+   ASSERT_TRUE(iter == array.end());
+   iter = array.find(122);
+   ASSERT_TRUE(iter == array.end());
+   iter = array.find("name");
+   ASSERT_STREQ(StringVariant(iter.getValue()).getCStr(), "polarphp");
+   ++iter;
+   ASSERT_EQ(NumericVariant(iter.getValue()).toLong(), 123);
+
+   const ArrayVariant &carray = array;
+   ArrayVariant::ConstIterator citer = carray.find("notExist");
+   ASSERT_TRUE(citer == carray.cend());
+   citer = carray.find(122);
+   ASSERT_TRUE(citer == carray.cend());
+   citer = carray.find("name");
+   ASSERT_STREQ(StringVariant(citer.getValue()).getCStr(), "polarphp");
+   ++citer;
+   ASSERT_EQ(NumericVariant(citer.getValue()).toLong(), 123);
+}
+
+TEST(ArrayVariantTest, testMap)
+{
+   ArrayVariant array;
+   array.insert("name", "polarphp");
+   array.insert("age", 123);
+   array.append("beijing");
+   array.append("aaa");
+   array.append("bbb");
+   array.insert("info", "ccc");
+   array.insert("data", 3.14);
+   array.insert("xxx", 3.14);
+   array.insert("key3", "ccc");
+   std::list<std::string> strKeys;
+   std::list<std::string> expectedStrKeys {
+      "name", "age", "info", "data", "xxx", "key3"
+   };
+   std::list<vmapi_ulong> indexes;
+   std::list<vmapi_ulong> expectedIndexes {
+      0, 1, 2
+   };
+   array.map([&strKeys, &indexes](const ArrayVariant::KeyType &key, const Variant &value) -> bool {
+      if (key.second) {
+         strKeys.push_back(*key.second.get());
+      } else {
+         indexes.push_back(key.first);
+      }
+      return true;
+   });
+   ASSERT_EQ(strKeys, expectedStrKeys);
+   ASSERT_EQ(indexes, expectedIndexes);
+
+   strKeys.clear();
+   expectedStrKeys = {"name", "age"};
+   array.map([&strKeys](const ArrayVariant::KeyType &key, const Variant &value) -> bool {
+      if (key.second) {
+         std::string &str = *key.second.get();
+         if (str != "info") {
+            strKeys.push_back(*key.second.get());
+            return true;
+         } else {
+            return false;
+         }
+      }
+      return true;
+   });
+   ASSERT_EQ(strKeys, expectedStrKeys);
+}
+
+TEST(ArrayVariantTest, testInsert)
+{
+   ArrayVariant array;
+   ASSERT_TRUE(array.isEmpty());
+   array.insert(1, "polarphp");
+   array.insert(5, true);
+   BooleanVariant boolVar = array.getValue(5);
+   StringVariant strVar = array.getValue(1);
+   ASSERT_EQ(array.getSize(), 2);
+   ASSERT_EQ(boolVar.toBoolean(), true);
+   ASSERT_STREQ(strVar.getCStr(), "polarphp");
+   ASSERT_EQ(strVar.getRefCount(), 2);
+   array.insert(1, "zzu_softboy");
+   ASSERT_EQ(strVar.getRefCount(), 1);
+   //   array.getValue(111); echo notice msg
+   //   array.getValue("name"); echo notice msg
+   ArrayVariant::Iterator iter =  array.insert("name", "zzu_softboy");
+   array.insert("age", 123);
+   StringVariant name = array.getValue("name");
+   ASSERT_EQ(array.getSize(), 4);
+   ASSERT_STREQ(name.getCStr(), "zzu_softboy");
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "zzu_softboy");
+   ASSERT_STREQ(StringVariant(iter.getValue()).getCStr(), "zzu_softboy");
+   array.insert(0, "xiuxiu");
+   iter = array.begin();
+   // array keep insert order
+   ASSERT_STREQ(StringVariant(iter.getZvalPtr()).getCStr(), "zzu_softboy");
+
+   ArrayVariant arr2;
+   arr2.insert("info", "beijing");
+   array.insert("data", arr2);
+
+   Variant ditem = array["data"];
+   ASSERT_EQ(ditem.getType(), polar::vmapi::Type::Array);
+   ArrayVariant arr3(std::move(ditem)); // can not use ditem anymore
+   ASSERT_EQ(arr2.getRefCount(), 3);
+   ASSERT_EQ(arr3.getRefCount(), 3);
+   StringVariant info = arr3["info"];
+   ASSERT_STREQ(info.getCStr(), "beijing");
+}
+
+TEST(ArrayVariantTest, testIterators)
+{
+   ArrayVariant array;
+   array.append(1);
+   array.append("polarphp");
+   array.append("zzu_softboy");
+   array.append("aaa");
+   array.append("bbb");
+   array.append("ccc");
+   ArrayVariant::Iterator iter = array.begin();
+   ArrayVariant::ConstIterator citer = array.cbegin();
+   zval &item1 = iter.getZval();
+   ASSERT_EQ(Z_LVAL(item1), 1);
+   const zval &citem1 = citer.getZval();
+   ASSERT_EQ(Z_LVAL(item1), 1);
+   // Z_LVAL(citem1) = 123; compile error
+   Z_LVAL(item1) = 123;
+   ASSERT_EQ(Z_LVAL(citem1), 123);
+   // iterator ++ operators
+   iter++;
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "polarphp");
+   iter += 2;
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "aaa");
+   iter += -2;
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "polarphp");
+   iter += 2;
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "aaa");
+   iter -= 2;
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "polarphp");
+   iter++;
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "zzu_softboy");
+   iter--;
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "polarphp");
+   iter--;
+
+   ++iter;
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "polarphp");
+   iter += 2;
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "aaa");
+   iter += -2;
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "polarphp");
+   iter += 2;
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "aaa");
+   iter -= 2;
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "polarphp");
+   ++iter;
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "zzu_softboy");
+   --iter;
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "polarphp");
+
+   ArrayVariant::Iterator preIter = iter++;
+   ASSERT_STREQ(Z_STRVAL_P(preIter.getZvalPtr()), "polarphp");
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "zzu_softboy");
+
+   preIter = ++iter;
+   ASSERT_STREQ(Z_STRVAL_P(preIter.getZvalPtr()), "aaa");
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "aaa");
+
+   preIter = iter--;
+   ASSERT_STREQ(Z_STRVAL_P(preIter.getZvalPtr()), "aaa");
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "zzu_softboy");
+
+   preIter = --iter;
+   ASSERT_STREQ(Z_STRVAL_P(preIter.getZvalPtr()), "polarphp");
+   ASSERT_STREQ(Z_STRVAL_P(iter.getZvalPtr()), "polarphp");
+
+   // const
+   citer++;
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "polarphp");
+   citer += 2;
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "aaa");
+   citer += -2;
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "polarphp");
+   citer += 2;
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "aaa");
+   citer -= 2;
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "polarphp");
+   citer++;
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "zzu_softboy");
+   citer--;
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "polarphp");
+   citer--;
+
+   ++citer;
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "polarphp");
+   citer += 2;
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "aaa");
+   citer += -2;
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "polarphp");
+   citer += 2;
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "aaa");
+   citer -= 2;
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "polarphp");
+   ++citer;
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "zzu_softboy");
+   --citer;
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "polarphp");
+
+   ArrayVariant::ConstIterator preciter = citer++;
+   ASSERT_STREQ(Z_STRVAL_P(preciter.getZvalPtr()), "polarphp");
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "zzu_softboy");
+
+   preciter = ++citer;
+   ASSERT_STREQ(Z_STRVAL_P(preciter.getZvalPtr()), "aaa");
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "aaa");
+
+   preciter = citer--;
+   ASSERT_STREQ(Z_STRVAL_P(preciter.getZvalPtr()), "aaa");
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "zzu_softboy");
+
+   preciter = --citer;
+   ASSERT_STREQ(Z_STRVAL_P(preciter.getZvalPtr()), "polarphp");
+   ASSERT_STREQ(Z_STRVAL_P(citer.getZvalPtr()), "polarphp");
+}
+
+TEST(ArrayVariantTest, testAccessOperator)
+{
+   ArrayVariant array;
+   array.append(1);
+   array.append("zapi");
+   array.append("zzu_softboy");
+   array.append("aaa");
+   array.insert(5, "21212");
+   array.append("bbb");
+   array.append("ccc");
+   StringVariant str = array[1];
+   ASSERT_STREQ(str.getCStr(), "zapi");
+   array[0] = 123;
+   NumericVariant num = array.getValue(0);
+   ASSERT_EQ(num.toLong(), 123);
+   array[10] = "polar foundation";
+   StringVariant team = array[10];
+   ASSERT_STREQ(team.getCStr(), "polar foundation");
+   array["city"] = "beijing";
+   StringVariant city = array["city"];
+   ASSERT_STREQ(city.getCStr(), "beijing");
+   array[11][1][3] = "zzu_softboy";
+   StringVariant str1 = array[11][1][3];
+   // ::cout << str1 << std::endl;
+   ASSERT_STREQ(str1.getCStr(), "zzu_softboy");
+   array[4][5][6][7][8][9][10][11][12]["name"] = "polar foundation";
+   array[4][5][6][7][8][9][10][11][12]["address"] = "polarphp Building";
+   array[4][5][6][7][8][9][10][11][12]["offical_site"] = "http://polarphp.org";
+   array[4][5][6][7][8][9][10][11][12][111] = 213;
+   array[4][5][6][7][8][9][10][11][12][112] = 3.1415926;
+   NumericVariant num1 = array[4][5][6][7][8][9][10][11][12][111];
+   DoubleVariant doubleNum = array[4][5][6][7][8][9][10][11][12][112];
+   StringVariant polarphpTeamName = array[4][5][6][7][8][9][10][11][12]["name"];
+   StringVariant polarphpTeamAddress = array[4][5][6][7][8][9][10][11][12]["address"];
+   StringVariant polarphpTeamOfficalSite = array[4][5][6][7][8][9][10][11][12]["offical_site"];
+   ASSERT_STREQ(polarphpTeamName.getCStr(), "polar foundation");
+   ASSERT_STREQ(polarphpTeamAddress.getCStr(), "polarphp Building");
+   ASSERT_STREQ(polarphpTeamOfficalSite.getCStr(), "http://polarphp.org");
+   ASSERT_EQ(num1.toLong(), 213);
+   ASSERT_EQ(doubleNum.toDouble(), 3.1415926);
+   //   std::cout << polarphpTeamName << std::endl;
+   //   std::cout << polarphpTeamAddress << std::endl;
+   //   std::cout << polarphpTeamOfficalSite << std::endl;
+   //   std::cout << num1 << std::endl;
+   //   std::cout << doubleNum << std::endl;
+   //array[5][6] = "fata error"; //Fatal error - Can't use string offset as an array
+   //array[0][1] = 123;
+
+   // NumericVariant num11 = array[0][1][0]; // Can't use a scalar value as an array
+   // NumericVariant num12 = array[10][12]; // Can't use string offset as an array
+   // NumericVariant num12 = array[10]["key"]; // Can't use string offset as an array
+   // StringVariant name = array["city"][1][2]; // Can't use string offset as an array
+   // StringVariant name = array["city"]["name"]["name"]; //  Can't use string offset as an array
+   array["info"] = 3.14;
+   // StringVariant name = array["info"]["name"]["name"]; // Can't use a scalar value as an array
 }
