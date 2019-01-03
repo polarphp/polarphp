@@ -13,6 +13,7 @@
 #define POLARPHP_VMAPI_LANG_CONSTANT_H
 
 #include "polarphp/vm/ZendApi.h"
+#include "polarphp/basic/adt/StringRef.h"
 #include <any>
 
 struct _zend_constant;
@@ -28,6 +29,7 @@ class NamespacePrivate;
 } // internal
 
 using internal::ConstantPrivate;
+using polar::basic::StringRef;
 
 class VMAPI_DECL_EXPORT Constant final
 {

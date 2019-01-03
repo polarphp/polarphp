@@ -56,7 +56,6 @@ void ConstantPrivate::initialize(const std::string &prefix, int moduleNumber)
 
 ConstantPrivate::~ConstantPrivate()
 {
-   zval_ptr_dtor(&m_constant.value);
 }
 
 } // internal
@@ -127,7 +126,7 @@ Constant::Constant(Constant &&other) noexcept
    : m_implPtr(std::move(other.m_implPtr))
 {}
 
-Constant& Constant::operator=(const Constant &other)
+Constant& Constant::operator =(const Constant &other)
 {
    if (this != &other) {
       m_implPtr = other.m_implPtr;
@@ -135,7 +134,7 @@ Constant& Constant::operator=(const Constant &other)
    return *this;
 }
 
-Constant& Constant::operator=(Constant &&other) noexcept
+Constant& Constant::operator =(Constant &&other) noexcept
 {
    assert(this != &other);
    m_implPtr = std::move(other.m_implPtr);
