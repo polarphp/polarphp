@@ -56,7 +56,7 @@ bool array_isset(ArrayItemProxy &&arrayItem)
 
 bool empty(const Variant &value)
 {
-   return value.isNull() || !value.toBool();
+   return value.isNull() || !value.toBoolean();
 }
 
 } // vmapi

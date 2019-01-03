@@ -251,7 +251,7 @@ ArrayVariant &ArrayVariant::operator =(const ArrayVariant &other)
 {
    if (this != &other) {
       if (getUnDerefType() != Type::Reference) {
-         SEPARATE_ZVAL_NOREF(getUnDerefZvalPtr());
+         SEPARATE_ARRAY(getUnDerefZvalPtr());
       }
       Variant::operator =(other);
    }
@@ -263,7 +263,7 @@ ArrayVariant &ArrayVariant::operator =(const Variant &other)
    zval *self = getZvalPtr();
    zval *from = const_cast<zval *>(other.getZvalPtr());
    if (getUnDerefType() != Type::Reference) {
-      SEPARATE_ZVAL_NOREF(self);
+      SEPARATE_ARRAY(self);
    }
    // need set gc info
    if (other.getType() == Type::Array) {
@@ -299,7 +299,7 @@ bool ArrayVariant::strictNotEqual(const ArrayVariant &other) const
 ArrayIterator ArrayVariant::insert(vmapi_ulong index, const Variant &value)
 {
    if (getUnDerefType() != Type::Reference) {
-      SEPARATE_ZVAL_NOREF(getUnDerefZvalPtr());
+      SEPARATE_ARRAY(getUnDerefZvalPtr());
    }
    zval *zvalPtr = const_cast<zval *>(value.getZvalPtr());
    zval temp;
@@ -317,7 +317,7 @@ ArrayIterator ArrayVariant::insert(vmapi_ulong index, const Variant &value)
 ArrayIterator ArrayVariant::insert(vmapi_ulong index, Variant &&value)
 {
    if (getUnDerefType() != Type::Reference) {
-      SEPARATE_ZVAL_NOREF(getUnDerefZvalPtr());
+      SEPARATE_ARRAY(getUnDerefZvalPtr());
    }
    zval *zvalPtr = value.getZvalPtr();
    zval temp;
@@ -336,7 +336,7 @@ ArrayIterator ArrayVariant::insert(vmapi_ulong index, Variant &&value)
 ArrayIterator ArrayVariant::insert(const std::string &key, const Variant &value)
 {
    if (getUnDerefType() != Type::Reference) {
-      SEPARATE_ZVAL_NOREF(getUnDerefZvalPtr());
+      SEPARATE_ARRAY(getUnDerefZvalPtr());
    }
    zval *zvalPtr = const_cast<zval *>(value.getZvalPtr());
    zval temp;
@@ -354,7 +354,7 @@ ArrayIterator ArrayVariant::insert(const std::string &key, const Variant &value)
 ArrayIterator ArrayVariant::insert(const std::string &key, Variant &&value)
 {
    if (getUnDerefType() != Type::Reference) {
-      SEPARATE_ZVAL_NOREF(getUnDerefZvalPtr());
+      SEPARATE_ARRAY(getUnDerefZvalPtr());
    }
    zval *zvalPtr = value.getZvalPtr();
    zval temp;
@@ -373,7 +373,7 @@ ArrayIterator ArrayVariant::insert(const std::string &key, Variant &&value)
 ArrayIterator ArrayVariant::append(const Variant &value)
 {
    if (getUnDerefType() != Type::Reference) {
-      SEPARATE_ZVAL_NOREF(getUnDerefZvalPtr());
+      SEPARATE_ARRAY(getUnDerefZvalPtr());
    }
    zval *zvalPtr = const_cast<zval *>(value.getZvalPtr());
    zval temp;
@@ -391,7 +391,7 @@ ArrayIterator ArrayVariant::append(const Variant &value)
 ArrayIterator ArrayVariant::append(Variant &&value)
 {
    if (getUnDerefType() != Type::Reference) {
-      SEPARATE_ZVAL_NOREF(getUnDerefZvalPtr());
+      SEPARATE_ARRAY(getUnDerefZvalPtr());
    }
    zval *zvalPtr = value.getZvalPtr();
    zval temp;
@@ -410,7 +410,7 @@ ArrayIterator ArrayVariant::append(Variant &&value)
 void ArrayVariant::clear() noexcept
 {
    if (getUnDerefType() != Type::Reference) {
-      SEPARATE_ZVAL_NOREF(getUnDerefZvalPtr());
+      SEPARATE_ARRAY(getUnDerefZvalPtr());
    }
    zend_hash_clean(getZendArrayPtr());
 }
@@ -418,7 +418,7 @@ void ArrayVariant::clear() noexcept
 bool ArrayVariant::remove(vmapi_ulong index) noexcept
 {
    if (getUnDerefType() != Type::Reference) {
-      SEPARATE_ZVAL_NOREF(getUnDerefZvalPtr());
+      SEPARATE_ARRAY(getUnDerefZvalPtr());
    }
    return zend_hash_index_del(getZendArrayPtr(), index) == VMAPI_SUCCESS;
 }
@@ -426,7 +426,7 @@ bool ArrayVariant::remove(vmapi_ulong index) noexcept
 bool ArrayVariant::remove(const std::string &key) noexcept
 {
    if (getUnDerefType() != Type::Reference) {
-      SEPARATE_ZVAL_NOREF(getUnDerefZvalPtr());
+      SEPARATE_ARRAY(getUnDerefZvalPtr());
    }
    return zend_hash_str_del(getZendArrayPtr(), key.c_str(), key.length()) == VMAPI_SUCCESS;
 }
@@ -434,7 +434,7 @@ bool ArrayVariant::remove(const std::string &key) noexcept
 ArrayVariant::Iterator ArrayVariant::erase(ConstIterator &iter)
 {
    if (getUnDerefType() != Type::Reference) {
-      SEPARATE_ZVAL_NOREF(getUnDerefZvalPtr());
+      SEPARATE_ARRAY(getUnDerefZvalPtr());
    }
    zend_array *array = getZendArrayPtr();
    // here we need check the iter check whether iter pointer this array
@@ -546,17 +546,16 @@ std::list<ArrayVariant::KeyType> ArrayVariant::getKeys() const
    std::list<KeyType> keys;
    vmapi_ulong index;
    zend_string *key;
-   zval *entry;
    if (0 == getSize()) {
       return keys;
    }
-   ZEND_HASH_FOREACH_KEY_VAL_IND(getZendArrayPtr(), index, key, entry) {
+   POLAR_HASH_FOREACH_KEY(getZendArrayPtr(), index, key) {
       if (key) {
          keys.push_back(KeyType(-1, std::shared_ptr<std::string>(new std::string(ZSTR_VAL(key), ZSTR_LEN(key)))));
       } else {
          keys.push_back(KeyType(index, nullptr));
       }
-   } ZEND_HASH_FOREACH_END();
+   } POLAR_HASH_FOREACH_END();
    return keys;
 }
 
@@ -571,7 +570,7 @@ std::list<ArrayVariant::KeyType> ArrayVariant::getKeys(const Variant &value, boo
       return keys;
    }
    if (strict) {
-      ZEND_HASH_FOREACH_KEY_VAL_IND(getZendArrayPtr(), index, key, entry) {
+      POLAR_HASH_FOREACH_KEY_VAL_IND(getZendArrayPtr(), index, key, entry) {
          ZVAL_DEREF(entry);
          if (fast_is_identical_function(searchValue, entry)) {
             if (key) {
@@ -580,9 +579,9 @@ std::list<ArrayVariant::KeyType> ArrayVariant::getKeys(const Variant &value, boo
                keys.push_back(KeyType(index, nullptr));
             }
          }
-      } ZEND_HASH_FOREACH_END();
+      } POLAR_HASH_FOREACH_END();
    } else {
-      ZEND_HASH_FOREACH_KEY_VAL_IND(getZendArrayPtr(), index, key, entry) {
+      POLAR_HASH_FOREACH_KEY_VAL_IND(getZendArrayPtr(), index, key, entry) {
          if (fast_equal_check_function(searchValue, entry)) {
             if (key) {
                keys.push_back(KeyType(-1, std::shared_ptr<std::string>(new std::string(ZSTR_VAL(key), ZSTR_LEN(key)))));
@@ -590,7 +589,7 @@ std::list<ArrayVariant::KeyType> ArrayVariant::getKeys(const Variant &value, boo
                keys.push_back(KeyType(index, nullptr));
             }
          }
-      } ZEND_HASH_FOREACH_END();
+      } POLAR_HASH_FOREACH_END();
    }
    return keys;
 }
@@ -602,12 +601,12 @@ std::list<Variant> ArrayVariant::getValues() const
    if (0 == getSize()) {
       return values;
    }
-   ZEND_HASH_FOREACH_VAL(getZendArrayPtr(), entry) {
+   POLAR_HASH_FOREACH_VAL(getZendArrayPtr(), entry) {
       if (UNEXPECTED(Z_ISREF_P(entry) && Z_REFCOUNT_P(entry) == 1)) {
          entry = Z_REFVAL_P(entry);
       }
       values.emplace_back(entry);
-   } ZEND_HASH_FOREACH_END();
+   } POLAR_HASH_FOREACH_END();
    return values;
 }
 
@@ -661,7 +660,7 @@ void ArrayVariant::map(Visitor visitor) const noexcept
    zend_string *key;
    zval *entry;
    bool visitorRet = true;
-   ZEND_HASH_FOREACH_KEY_VAL_IND(getZendArrayPtr(), index, key, entry) {
+   POLAR_HASH_FOREACH_KEY_VAL_IND(getZendArrayPtr(), index, key, entry) {
       if (key) {
          visitorRet = visitor(KeyType(-1, std::shared_ptr<std::string>(new std::string(ZSTR_VAL(key), ZSTR_LEN(key)))), Variant(entry));
       } else {
@@ -670,7 +669,7 @@ void ArrayVariant::map(Visitor visitor) const noexcept
       if (!visitorRet) {
          return;
       }
-   } ZEND_HASH_FOREACH_END();
+   } POLAR_HASH_FOREACH_END();
 }
 
 ArrayIterator ArrayVariant::begin() noexcept
@@ -707,7 +706,8 @@ ConstArrayIterator ArrayVariant::cend() const noexcept
 }
 
 ArrayVariant::~ArrayVariant()
-{}
+{
+}
 
 _zend_array *ArrayVariant::getZendArrayPtr() const noexcept
 {

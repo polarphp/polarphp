@@ -110,7 +110,7 @@ DoubleVariant::DoubleVariant(Variant &&other)
    }
 }
 
-bool DoubleVariant::toBool() const noexcept
+bool DoubleVariant::toBoolean() const noexcept
 {
    return toDouble();
 }

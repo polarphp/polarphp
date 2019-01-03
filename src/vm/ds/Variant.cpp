@@ -286,7 +286,7 @@ Variant::Variant(BooleanVariant &value, bool isRef)
 {
    zval *self = getUnDerefZvalPtr();
    if (!isRef) {
-      ZVAL_BOOL(self, value.toBool());
+      ZVAL_BOOL(self, value.toBoolean());
    } else {
       zval *source = value.getUnDerefZvalPtr();
       ZVAL_MAKE_REF(source);
@@ -349,7 +349,7 @@ Variant::Variant(ArrayVariant &value, bool isRef)
 Variant::Variant(const BooleanVariant &value)
    : m_implPtr(new VariantPrivate, std_zval_deleter)
 {
-   ZVAL_BOOL(getUnDerefZvalPtr(), value.toBool());
+   ZVAL_BOOL(getUnDerefZvalPtr(), value.toBoolean());
 }
 
 Variant::Variant(const NumericVariant &value)
@@ -948,7 +948,7 @@ Variant Variant::clone() const
  * Retrieve the value as boolean
  * @return bool
  */
-bool Variant::toBool() const noexcept
+bool Variant::toBoolean() const noexcept
 {
    switch (getType()) {
    case Type::Undefined:

@@ -154,7 +154,7 @@ public:
     */
    virtual operator bool () const
    {
-      return toBool();
+      return toBoolean();
    }
 
    /**
@@ -211,7 +211,7 @@ public:
     *
     * @return bool
     */
-   virtual bool toBool() const noexcept;
+   virtual bool toBoolean() const noexcept;
 
    /**
     * Retrieve the value as a string
@@ -246,7 +246,7 @@ protected:
    friend class ObjectVariant;
    friend class CallableVariant;
    VMAPI_DECLARE_PRIVATE(Variant);
-   std::shared_ptr<VariantPrivate> m_implPtr;
+   std::shared_ptr<VariantPrivate> m_implPtr = nullptr;
 };
 
 std::ostream &operator <<(std::ostream &stream, const Variant &value);

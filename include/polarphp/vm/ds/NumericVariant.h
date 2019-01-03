@@ -84,7 +84,7 @@ public:
    NumericVariant &operator %=(T value) noexcept;
    NumericVariant &operator %=(const NumericVariant &value) noexcept;
 
-   virtual bool toBool() const noexcept override;
+   virtual bool toBoolean() const noexcept override;
    vmapi_long toLong() const noexcept;
    virtual ~NumericVariant() noexcept;
 };

@@ -126,7 +126,7 @@ vmapi_long NumericVariant::toLong() const noexcept
    return zval_get_long(const_cast<zval *>(getZvalPtr()));
 }
 
-bool NumericVariant::toBool() const noexcept
+bool NumericVariant::toBoolean() const noexcept
 {
    return zval_get_long(const_cast<zval *>(getZvalPtr()));
 }

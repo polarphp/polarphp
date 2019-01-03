@@ -116,7 +116,7 @@ ArrayItemProxy &ArrayItemProxy::operator =(const Variant &value)
          return *this;
       }
    }
-   SEPARATE_ZVAL_NOREF(m_implPtr->m_array);
+   SEPARATE_ARRAY(m_implPtr->m_array);
    // here we don't check exist, we just insert it if not exists
    m_implPtr->m_needCheckRequestItem = false;
    zval *from = const_cast<zval *>(value.getZvalPtr());
@@ -131,7 +131,7 @@ ArrayItemProxy &ArrayItemProxy::operator =(const Variant &value)
    } else {
       inserted = zend_hash_index_update(target, m_implPtr->m_requestKey.first, &temp);
    }
-   // @TODO here we need check the inserted ?
+   POLAR_ASSERT(inserted != nullptr);
    return *this;
 }
 
@@ -222,7 +222,7 @@ ArrayItemProxy::operator StringVariant()
 
 ArrayItemProxy::operator BooleanVariant()
 {
-   return toBooleanVariant();
+   return toBooleaneanVariant();
 }
 
 ArrayItemProxy::operator ArrayVariant()
@@ -286,7 +286,7 @@ StringVariant ArrayItemProxy::toStringVariant()
    return StringVariant(std::move(value));
 }
 
-BooleanVariant ArrayItemProxy::toBooleanVariant()
+BooleanVariant ArrayItemProxy::toBooleaneanVariant()
 {
    if (!isKeychianOk(false)) {
       throw std::bad_cast();

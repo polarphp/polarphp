@@ -615,7 +615,7 @@ int AbstractClassPrivate::hasProperty(zval *object, zval *name, int hasSetExists
       if (0 == hasSetExists) {
          return value.getType() != Type::Null;
       } else {
-         return value.toBool();
+         return value.toBoolean();
       }
    } catch (const NotImplemented &) {
       if (!std_object_handlers.has_property) {

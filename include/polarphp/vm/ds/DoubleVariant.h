@@ -40,7 +40,7 @@ public:
    DoubleVariant(DoubleVariant &&other) noexcept;
    DoubleVariant(const Variant &other);
    DoubleVariant(Variant &&other);
-   virtual bool toBool() const noexcept override;
+   virtual bool toBoolean() const noexcept override;
    double toDouble() const noexcept;
    operator double() const;
    DoubleVariant &operator =(std::int8_t other);

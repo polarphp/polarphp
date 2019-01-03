@@ -32,7 +32,7 @@ public:
    BooleanVariant(zval &other, bool isRef = false);
    BooleanVariant(zval &&other, bool isRef = false);
    BooleanVariant(zval *other, bool isRef = false);
-   virtual bool toBool() const noexcept override;
+   virtual bool toBoolean() const noexcept override;
    operator bool () const override;
    BooleanVariant &operator=(const BooleanVariant &other);
    BooleanVariant &operator=(const Variant &other);

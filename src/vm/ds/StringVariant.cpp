@@ -368,7 +368,7 @@ bool StringVariant::operator >=(const StringVariant &other) const noexcept
          0 == std::memcmp(getCStr(),  other.getCStr(), len);
 }
 
-bool StringVariant::toBool() const noexcept
+bool StringVariant::toBoolean() const noexcept
 {
    return getType() != Type::Null && 0 != Z_STRLEN_P(const_cast<zval *>(getZvalPtr()));
 }

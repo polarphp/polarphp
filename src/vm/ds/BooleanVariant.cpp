@@ -107,13 +107,13 @@ BooleanVariant &BooleanVariant::operator=(const BooleanVariant &other)
 
 BooleanVariant &BooleanVariant::operator=(const Variant &other)
 {
-   ZVAL_BOOL(getZvalPtr(), other.toBool());
+   ZVAL_BOOL(getZvalPtr(), other.toBoolean());
    return *this;
 }
 
 BooleanVariant &BooleanVariant::operator=(ArrayItemProxy &&other)
 {
-   return operator =(other.toBooleanVariant());
+   return operator =(other.toBooleaneanVariant());
 }
 
 BooleanVariant &BooleanVariant::operator=(bool value)
@@ -127,22 +127,22 @@ BooleanVariant::~BooleanVariant()
 
 BooleanVariant::operator bool() const
 {
-   return toBool();
+   return toBoolean();
 }
 
-bool BooleanVariant::toBool() const noexcept
+bool BooleanVariant::toBoolean() const noexcept
 {
    return Z_TYPE_INFO_P(getZvalPtr()) == IS_TRUE ? true : false;
 }
 
 bool operator ==(const BooleanVariant &lhs, const BooleanVariant &rhs)
 {
-   return lhs.toBool() == rhs.toBool();
+   return lhs.toBoolean() == rhs.toBoolean();
 }
 
 bool operator !=(const BooleanVariant &lhs, const BooleanVariant &rhs)
 {
-   return lhs.toBool() != rhs.toBool();
+   return lhs.toBoolean() != rhs.toBoolean();
 }
 
 } // vmapi

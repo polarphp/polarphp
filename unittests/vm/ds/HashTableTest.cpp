@@ -193,7 +193,7 @@ TEST(HashTableTest, testEach)
       ASSERT_EQ(values.size(), 3);
       ASSERT_EQ(Z_LVAL(values[0].getZval()), 123);
       ASSERT_EQ(values[1].toString(), "polarboy");
-      ASSERT_EQ(values[2].toBool(), true);
+      ASSERT_EQ(values[2].toBoolean(), true);
    }
    {
       std::vector<std::string> expectedKeys{"item3", "item2", "item1"};
@@ -208,7 +208,7 @@ TEST(HashTableTest, testEach)
       ASSERT_EQ(keys.size(), 3);
       ASSERT_EQ(keys, expectedKeys);
       ASSERT_EQ(values.size(), 3);
-      ASSERT_EQ(values[0].toBool(), true);
+      ASSERT_EQ(values[0].toBoolean(), true);
       ASSERT_EQ(values[1].toString(), "polarboy");
       ASSERT_EQ(Z_LVAL(values[2].getZval()), 123);
    }

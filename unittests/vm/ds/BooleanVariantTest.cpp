@@ -123,16 +123,16 @@ TEST(BooleanVariantTest, testRefConstruct)
       BooleanVariant bool3 = bool2;
       ASSERT_EQ(bool3.getUnDerefType(), Type::True);
       ASSERT_EQ(bool3.getType(), Type::True);
-      ASSERT_TRUE(bool1.toBool());
-      ASSERT_TRUE(bool2.toBool());
+      ASSERT_TRUE(bool1.toBoolean());
+      ASSERT_TRUE(bool2.toBoolean());
       bool2 = false;
-      ASSERT_FALSE(bool1.toBool());
-      ASSERT_FALSE(bool2.toBool());
-      ASSERT_TRUE(bool3.toBool());
+      ASSERT_FALSE(bool1.toBoolean());
+      ASSERT_FALSE(bool2.toBoolean());
+      ASSERT_TRUE(bool3.toBoolean());
       bool3 = bool2;
-      ASSERT_FALSE(bool1.toBool());
-      ASSERT_FALSE(bool2.toBool());
-      ASSERT_FALSE(bool3.toBool());
+      ASSERT_FALSE(bool1.toBoolean());
+      ASSERT_FALSE(bool2.toBoolean());
+      ASSERT_FALSE(bool3.toBoolean());
       ASSERT_EQ(bool3.getType(), Type::False);
    }
    {
@@ -146,7 +146,7 @@ TEST(BooleanVariantTest, testRefConstruct)
       ASSERT_TRUE(Z_TYPE_P(&var1) == IS_REFERENCE);
       zval_dtor(&var1);
       bool2 = false;
-      ASSERT_FALSE(bool2.toBool());
+      ASSERT_FALSE(bool2.toBoolean());
       zval *rval = &var1;
       ZVAL_DEREF(rval);
       ASSERT_TRUE(Z_TYPE_P(rval) == IS_FALSE);

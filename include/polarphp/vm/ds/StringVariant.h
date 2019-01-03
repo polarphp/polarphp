@@ -108,7 +108,7 @@ public:
    template <size_t arrayLength>
    bool operator >=(char (&other)[arrayLength]) const noexcept;
 
-   virtual bool toBool() const noexcept override;
+   virtual bool toBoolean() const noexcept override;
    virtual std::string toString() const noexcept override;
    // iterator
    Iterator begin() noexcept;
