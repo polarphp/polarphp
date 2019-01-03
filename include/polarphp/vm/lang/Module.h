@@ -83,6 +83,7 @@ public:
    size_t getFunctionQuantity() const;
    size_t getConstantQuantity() const;
    size_t getNamespaceQuantity() const;
+   size_t getClassQuantity() const;
    operator void * ()
    {
       return getModule();

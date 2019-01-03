@@ -295,6 +295,12 @@ size_t Module::getNamespaceQuantity() const
    return implPtr->m_namespaces.size();
 }
 
+size_t Module::getClassQuantity() const
+{
+   VMAPI_D(const Module);
+   return implPtr->m_classes.size();
+}
+
 namespace internal
 {
 ModulePrivate::ModulePrivate(const char *name, const char *version, int apiversion, Module *extension)
