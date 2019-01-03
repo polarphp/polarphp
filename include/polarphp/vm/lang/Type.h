@@ -13,6 +13,7 @@
 #define POLARPHP_VMAPI_LANG_TYPE_H
 
 #include "polarphp/vm/internal/DepsZendVmHeaders.h"
+#include "polarphp/global/CompilerDetection.h"
 
 namespace polar {
 namespace vmapi {
@@ -68,6 +69,15 @@ enum class  Modifier : unsigned long
    Constructor       = ZEND_ACC_CTOR,
    Destructor        = ZEND_ACC_DTOR,
 };
+
+POLAR_DECL_EXPORT Modifier operator ~(Modifier modifier);
+POLAR_DECL_EXPORT Modifier operator |(Modifier left, Modifier right);
+POLAR_DECL_EXPORT Modifier operator &(Modifier left, Modifier right);
+POLAR_DECL_EXPORT Modifier &operator |=(Modifier &left, Modifier right);
+POLAR_DECL_EXPORT Modifier &operator &=(Modifier &left, Modifier right);
+POLAR_DECL_EXPORT bool operator ==(const Modifier left, unsigned long value);
+POLAR_DECL_EXPORT bool operator ==(unsigned long value, const Modifier &right);
+POLAR_DECL_EXPORT bool operator ==(Modifier left, Modifier right);
 
 using HashTableDataDeleter = dtor_func_t;
 

@@ -14,44 +14,44 @@
 namespace polar {
 namespace vmapi {
 
-Modifier operator~(Modifier modifier)
+Modifier operator ~(Modifier modifier)
 {
    return static_cast<Modifier>(~static_cast<unsigned int>(modifier));
 }
 
-Modifier operator|(Modifier lhs, Modifier rhs)
+Modifier operator |(Modifier lhs, Modifier rhs)
 {
    return static_cast<Modifier>(static_cast<unsigned int>(lhs) | static_cast<unsigned int>(rhs));
 }
 
-Modifier operator&(Modifier lhs, Modifier rhs)
+Modifier operator &(Modifier lhs, Modifier rhs)
 {
    return static_cast<Modifier>(static_cast<unsigned int>(lhs) & static_cast<unsigned int>(rhs));
 }
 
-Modifier &operator|=(Modifier &lhs, Modifier rhs)
+Modifier &operator |=(Modifier &lhs, Modifier rhs)
 {
    lhs = static_cast<Modifier>(static_cast<unsigned int>(lhs) | static_cast<unsigned int>(rhs));
    return lhs;
 }
 
-Modifier &operator&=(Modifier &lhs, Modifier rhs)
+Modifier &operator &=(Modifier &lhs, Modifier rhs)
 {
    lhs = static_cast<Modifier>(static_cast<unsigned int>(lhs) & static_cast<unsigned int>(rhs));
    return lhs;
 }
 
-bool operator==(unsigned long value, Modifier rhs)
+bool operator ==(unsigned long value, Modifier rhs)
 {
    return static_cast<unsigned long>(rhs) == value;
 }
 
-bool operator==(Modifier lhs, unsigned long value)
+bool operator ==(Modifier lhs, unsigned long value)
 {
    return static_cast<unsigned long>(lhs) == value;
 }
 
-bool operator==(Modifier lhs, Modifier rhs)
+bool operator ==(Modifier lhs, Modifier rhs)
 {
    return static_cast<unsigned long>(lhs) == static_cast<unsigned long>(rhs);
 }
