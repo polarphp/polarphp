@@ -32,14 +32,14 @@ TEST(StringVariantTest, testConstructors)
    //   //std::cout << emptyStr << std::endl;
    emptyStr.append('C');
    ASSERT_EQ(emptyStr.getSize(), 2);
-   ASSERT_EQ(emptyStr.getCapacity(), 199);
+   ASSERT_EQ(emptyStr.getCapacity(), 256);
    ASSERT_EQ(emptyStr.at(0), '1');
    emptyStr.clear();
    ASSERT_EQ(emptyStr.getSize(), 0);
    ASSERT_EQ(emptyStr.getCapacity(), 0);
    emptyStr = str;
    ASSERT_EQ(emptyStr.getSize(), 8);
-   ASSERT_EQ(emptyStr.getCapacity(), 199);
+   ASSERT_EQ(emptyStr.getCapacity(), 256);
    ASSERT_EQ(emptyStr.getRefCount(), 2);
    ASSERT_EQ(str.getRefCount(), 2);
    emptyStr.clear();
@@ -539,14 +539,14 @@ TEST(StringVariantTest, testClear)
    str.append('c');
    ASSERT_STREQ(str.getCStr(), "c");
    ASSERT_EQ(str.getLength(), 1);
-   ASSERT_EQ(str.getCapacity(), 199);
+   ASSERT_EQ(str.getCapacity(), 256);
 }
 
 TEST(StringVariantTest, testResize)
 {
    {
       StringVariant str("my name is polarboy, i think php is the best programming language in the world. php is the best!");
-      ASSERT_EQ(str.getCapacity(), 199);
+      ASSERT_EQ(str.getCapacity(), 256);
       ASSERT_EQ(str.getSize(), 96);
       str.resize(32);
       ASSERT_EQ(str.getCapacity(), 64);
@@ -593,26 +593,26 @@ TEST(StringVariantTest, testResize)
       ASSERT_EQ(str4.getUnDerefType(), Type::Reference);
       ASSERT_EQ(str5.getUnDerefType(), Type::String);
       ASSERT_EQ(str6.getUnDerefType(), Type::String);
-      ASSERT_EQ(str1.getCapacity(), 199);
+      ASSERT_EQ(str1.getCapacity(), 256);
       ASSERT_EQ(str1.getSize(), 96);
-      ASSERT_EQ(str2.getCapacity(), 199);
+      ASSERT_EQ(str2.getCapacity(), 256);
       ASSERT_EQ(str2.getSize(), 96);
-      ASSERT_EQ(str3.getCapacity(), 199);
+      ASSERT_EQ(str3.getCapacity(), 256);
       ASSERT_EQ(str3.getSize(), 96);
-      ASSERT_EQ(str4.getCapacity(), 199);
+      ASSERT_EQ(str4.getCapacity(), 256);
       ASSERT_EQ(str4.getSize(), 96);
-      ASSERT_EQ(str5.getCapacity(), 199);
+      ASSERT_EQ(str5.getCapacity(), 256);
       ASSERT_EQ(str5.getSize(), 96);
-      ASSERT_EQ(str6.getCapacity(), 199);
+      ASSERT_EQ(str6.getCapacity(), 256);
       ASSERT_EQ(str6.getSize(), 96);
       str1.resize(32);
       ASSERT_EQ(str1.getCapacity(), 64);
       ASSERT_EQ(str1.getSize(), 32);
       ASSERT_EQ(str2.getCapacity(), 64);
       ASSERT_EQ(str2.getSize(), 32);
-      ASSERT_EQ(str5.getCapacity(), 199);
+      ASSERT_EQ(str5.getCapacity(), 256);
       ASSERT_EQ(str5.getSize(), 96);
-      ASSERT_EQ(str6.getCapacity(), 199);
+      ASSERT_EQ(str6.getCapacity(), 256);
       ASSERT_EQ(str6.getSize(), 96);
    }
 }

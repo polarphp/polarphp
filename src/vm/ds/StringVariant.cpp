@@ -25,15 +25,15 @@ using internal::VariantPrivate;
 
 const size_t STR_VARIANT_OVERHEAD = ZEND_MM_OVERHEAD + _ZSTR_HEADER_SIZE;
 #ifdef SMART_STR_PAGE
-const size_t STR_VARIAMT_PAGE_SIZE = SMART_STR_PAGE; // just use zend default now
+const size_t STR_VARIANT_PAGE_SIZE = SMART_STR_PAGE; // just use zend default now
 #else
-const size_t STR_VARIAMT_PAGE_SIZE = 4096;
+const size_t STR_VARIANT_PAGE_SIZE = 4096;
 #endif
 
 #ifdef SMART_STR_START_SIZE
 const size_t STR_VARIANT_START_SIZE = SMART_STR_START_SIZE;
 #else
-const size_t STR_VARIANT_START_SIZE = (256 - STR_VARIANT_OVERHEAD - 1);
+const size_t STR_VARIANT_START_SIZE = 256;
 #endif
 
 StringVariant::StringVariant()
@@ -1285,53 +1285,43 @@ zend_string *StringVariant::getZendStringPtr() const
 
 size_t StringVariant::calculateNewStrSize(size_t length) noexcept
 {
-   return ((length + STR_VARIANT_OVERHEAD + STR_VARIAMT_PAGE_SIZE) & ~(STR_VARIAMT_PAGE_SIZE - 1)) - STR_VARIANT_OVERHEAD - 1;
+   return ZEND_MM_ALIGNED_SIZE_EX(length + STR_VARIANT_OVERHEAD, STR_VARIANT_PAGE_SIZE) - STR_VARIANT_OVERHEAD;
 }
 
 void StringVariant::strStdRealloc(zend_string *&str, size_t length)
 {
    if (UNEXPECTED(!str)) {
-      size_t newCapcity = length < STR_VARIANT_START_SIZE
+      size_t newCapacity = length < STR_VARIANT_START_SIZE
             ? STR_VARIANT_START_SIZE
             : calculateNewStrSize(length);
-      str = zend_string_alloc(newCapcity, 0);
-      str->h = newCapcity;
+      str = zend_string_alloc(newCapacity, 0);
+      str->h = newCapacity;
       ZSTR_LEN(str) = 0;
    } else {
-      size_t newCapcity = calculateNewStrSize(length);
-      zend_string *newStr = static_cast<zend_string *>(erealloc2(str, _ZSTR_HEADER_SIZE + newCapcity + 1,
-                                                                 _ZSTR_HEADER_SIZE + ZSTR_LEN(str) + 1));
+      size_t newCapacity = calculateNewStrSize(length);
+      zend_string *newStr = reinterpret_cast<zend_string *>(erealloc2(str, _ZSTR_HEADER_SIZE + newCapacity + 1,
+                                                                 _ZSTR_HEADER_SIZE + ZSTR_LEN(str)));
       VMAPI_ASSERT_X(newStr, "StringVariant::strStdRealloc", "realloc memory error");
-      if (!newStr) {
-         // @TODO error process
-         //
-         return;
-      }
       str = newStr;
-      str->h = newCapcity;
+      str->h = newCapacity;
    }
 }
 
 void StringVariant::strPersistentRealloc(zend_string *&str, size_t length)
 {
    if (UNEXPECTED(!str)) {
-      size_t newCapcity = length < STR_VARIANT_START_SIZE
+      size_t newCapacity = length < STR_VARIANT_START_SIZE
             ? STR_VARIANT_START_SIZE
             : calculateNewStrSize(length);
-      str = zend_string_alloc(newCapcity, 1);
-      str->h = newCapcity;
+      str = zend_string_alloc(newCapacity, 1);
+      str->h = newCapacity;
       ZSTR_LEN(str) = 0;
    } else {
-      size_t newCapcity = calculateNewStrSize(length);
-      zend_string *newStr = static_cast<zend_string *>(realloc(str, _ZSTR_HEADER_SIZE + newCapcity + 1));
+      size_t newCapacity = calculateNewStrSize(length);
+      zend_string *newStr = reinterpret_cast<zend_string *>(perealloc(str, _ZSTR_HEADER_SIZE + newCapacity + 1, 1));
       VMAPI_ASSERT_X(newStr, "StringVariant::strPersistentRealloc", "realloc memory error");
-      if (!newStr) {
-         // @TODO error process
-         //
-         return;
-      }
       str = newStr;
-      str->h = newCapcity;
+      str->h = newCapacity;
    }
 }
 
