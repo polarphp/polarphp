@@ -512,7 +512,7 @@ Variant ArrayVariant::getValue(vmapi_ulong index) const
 {
    zval *val = zend_hash_index_find(getZendArrayPtr(), index);
    if (nullptr == val) {
-      vmapi::notice << "Undefined offset: " << index << std::endl;
+      vmapi::notice() << "Undefined offset: " << index << std::endl;
    }
    return val;
 }
@@ -521,7 +521,7 @@ Variant ArrayVariant::getValue(const std::string &key) const
 {
    zval *val = zend_hash_str_find(getZendArrayPtr(), key.c_str(), key.length());
    if (nullptr == val) {
-      vmapi::notice << "Undefined index: " << key << std::endl;
+      vmapi::notice() << "Undefined index: " << key << std::endl;
    }
    return val;
 }

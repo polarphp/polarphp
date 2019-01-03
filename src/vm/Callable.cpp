@@ -237,7 +237,7 @@ void Callable::invoke(INTERNAL_FUNCTION_PARAMETERS)
    // check if sufficient parameters were passed (for some reason this check
    // is not done by Zend, so we do it here ourselves)
    if (ZEND_NUM_ARGS() < callable->m_implPtr->m_required) {
-      vmapi::warning << get_active_function_name() << "() expects at least "
+      vmapi::warning() << get_active_function_name() << "() expects at least "
                      << callable->m_implPtr->m_required << " parameter(s)," << ZEND_NUM_ARGS()
                      << " given" << std::flush;
       RETURN_NULL();

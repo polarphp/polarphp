@@ -81,7 +81,7 @@ public:
    NumericVariant toNumericVariant();
    DoubleVariant toDoubleVariant();
    StringVariant toStringVariant();
-   BooleanVariant toBooleaneanVariant();
+   BooleanVariant toBooleanVariant();
    ArrayVariant toArrayVariant();
    // nest assign
    ArrayItemProxy operator [](vmapi_long index);

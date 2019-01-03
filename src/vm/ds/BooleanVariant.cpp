@@ -113,7 +113,7 @@ BooleanVariant &BooleanVariant::operator=(const Variant &other)
 
 BooleanVariant &BooleanVariant::operator=(ArrayItemProxy &&other)
 {
-   return operator =(other.toBooleaneanVariant());
+   return operator =(other.toBooleanVariant());
 }
 
 BooleanVariant &BooleanVariant::operator=(bool value)

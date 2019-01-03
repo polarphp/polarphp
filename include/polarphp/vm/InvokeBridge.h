@@ -64,7 +64,7 @@ bool check_invoke_arguments(_zend_execute_data *execute_data, _zval_struct *retu
    uint32_t provided = ZEND_NUM_ARGS();
    const char *name = get_active_function_name();
    if (funcDefinedArgNumber > argNumer) {
-      vmapi::warning << name << " native cpp callable definition have " << funcDefinedArgNumber << " parameter(s), "
+      vmapi::warning() << name << " native cpp callable definition have " << funcDefinedArgNumber << " parameter(s), "
                     << "but register meta info given " << argNumer << " parameter(s)." << std::flush;
       RETVAL_NULL();
       return false;
@@ -74,7 +74,7 @@ bool check_invoke_arguments(_zend_execute_data *execute_data, _zval_struct *retu
       return true;
    }
    // TODO
-   vmapi::warning << name << "() expects at least " << required << " parameter(s), "
+   vmapi::warning() << name << "() expects at least " << required << " parameter(s), "
                  << provided << " given" << std::flush;
    RETVAL_NULL();
    return false;

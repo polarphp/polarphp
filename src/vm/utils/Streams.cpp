@@ -22,11 +22,35 @@ static thread_local StreamBuffer sg_bufWarning    (E_WARNING);
 static thread_local StreamBuffer sg_bufNotice     (E_NOTICE);
 static thread_local StreamBuffer sg_bufDeprecated (E_DEPRECATED);
 
-thread_local std::ostream out               (&sg_bufOut);
-thread_local std::ostream error             (&sg_bufError);
-thread_local std::ostream warning           (&sg_bufWarning);
-thread_local std::ostream notice            (&sg_bufNotice);
-thread_local std::ostream deprecated        (&sg_bufDeprecated);
+std::ostream &out()
+{
+   thread_local std::ostream outStream(&sg_bufOut);
+   return outStream;
+}
+
+std::ostream &error()
+{
+   thread_local std::ostream errorStream(&sg_bufError);
+   return errorStream;
+}
+
+std::ostream &warning()
+{
+   thread_local std::ostream warningStream(&sg_bufWarning);
+   return warningStream;
+}
+
+std::ostream &notice()
+{
+   thread_local std::ostream noticeStream(&sg_bufNotice);
+   return noticeStream;
+}
+
+std::ostream &deprecated()
+{
+   thread_local std::ostream deprecatedStream(&sg_bufDeprecated);
+   return deprecatedStream;
+}
 
 } // vmapi
 } // polar

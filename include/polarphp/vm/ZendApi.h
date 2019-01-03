@@ -40,11 +40,11 @@
 namespace polar {
 namespace vmapi {
 
-extern thread_local VMAPI_DECL_EXPORT std::ostream out;
-extern thread_local VMAPI_DECL_EXPORT std::ostream error;
-extern thread_local VMAPI_DECL_EXPORT std::ostream notice;
-extern thread_local VMAPI_DECL_EXPORT std::ostream warning;
-extern thread_local VMAPI_DECL_EXPORT std::ostream deprecated;
+VMAPI_DECL_EXPORT std::ostream &out();
+VMAPI_DECL_EXPORT std::ostream &error();
+VMAPI_DECL_EXPORT std::ostream &notice();
+VMAPI_DECL_EXPORT std::ostream &warning();
+VMAPI_DECL_EXPORT std::ostream &deprecated();
 
 using VmApiVaridicItemType = zval;
 

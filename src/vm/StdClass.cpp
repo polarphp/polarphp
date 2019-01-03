@@ -222,7 +222,7 @@ zval *StdClass::doCallParent(const char *name, const int argc, Variant *argv, zv
 {
    zend_object *object = m_implPtr->m_zendObject;
    if (!object) {
-      vmapi::error << "invoke StdClass::doCallParent on unbinded nativeObject" << std::endl;
+      vmapi::error() << "invoke StdClass::doCallParent on unbinded nativeObject" << std::endl;
    }
    int result;
    zend_fcall_info fci;

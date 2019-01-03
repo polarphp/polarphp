@@ -36,9 +36,9 @@ void print_key_not_exist_notice(const KeyType &key)
 {
    if (key.second) {
       std::string *keyStr = key.second.get();
-      vmapi::notice << "Undefined offset: " << *keyStr << std::endl;
+      vmapi::notice() << "Undefined offset: " << *keyStr << std::endl;
    } else {
-      vmapi::notice << "Undefined index: " << key.first << std::endl;
+      vmapi::notice() << "Undefined index: " << key.first << std::endl;
    }
 }
 
@@ -46,20 +46,20 @@ void print_type_not_compatible_info(const zval *valPtr)
 {
    switch (Z_TYPE_P(valPtr)) {
    case IS_OBJECT:
-      vmapi::error << "Can't use object type as array" << std::endl;
+      vmapi::error() << "Can't use object type as array" << std::endl;
       break;
    case IS_STRING:
-      vmapi::error << "Can't use string offset as an array" << std::endl;
+      vmapi::error() << "Can't use string offset as an array" << std::endl;
       break;
    case IS_TRUE:
    case IS_FALSE:
    case _IS_BOOL:
    case IS_DOUBLE:
    case IS_LONG:
-      vmapi::warning << "Can't use a scalar value as an array" << std::endl;
+      vmapi::warning() << "Can't use a scalar value as an array" << std::endl;
       break;
    default:
-      vmapi::warning << "Can't use type of " << get_zval_type_str(valPtr)
+      vmapi::warning() << "Can't use type of " << get_zval_type_str(valPtr)
                      << " as array " << std::endl;
       break;
    }
@@ -222,7 +222,7 @@ ArrayItemProxy::operator StringVariant()
 
 ArrayItemProxy::operator BooleanVariant()
 {
-   return toBooleaneanVariant();
+   return toBooleanVariant();
 }
 
 ArrayItemProxy::operator ArrayVariant()
@@ -249,7 +249,7 @@ NumericVariant ArrayItemProxy::toNumericVariant()
    m_implPtr->m_needCheckRequestItem = false;
    Type type = value.getType();
    if (type != Type::Long && type != Type::Double) {
-      vmapi::notice << "Array proxy type "<< value.getTypeStr()
+      vmapi::notice() << "Array proxy type "<< value.getTypeStr()
                    << " not compatible with NumericVariant" << std::endl;
    }
    return NumericVariant(std::move(value));
@@ -264,7 +264,7 @@ DoubleVariant ArrayItemProxy::toDoubleVariant()
    m_implPtr->m_needCheckRequestItem = false;
    Type type = value.getType();
    if (type != Type::Long && type != Type::Double) {
-      vmapi::notice << "Array proxy type "<< value.getTypeStr()
+      vmapi::notice() << "Array proxy type "<< value.getTypeStr()
                    << "not compatible with DoubleVariant" << std::endl;
    }
    return DoubleVariant(std::move(value));
@@ -280,13 +280,13 @@ StringVariant ArrayItemProxy::toStringVariant()
    Type type = value.getType();
    if (type != Type::Long && type != Type::Double &&
        type != Type::String && type != Type::Boolean) {
-      vmapi::notice << "Array proxy type "<< value.getTypeStr()
+      vmapi::notice() << "Array proxy type "<< value.getTypeStr()
                    << "not compatible with StringVariant" << std::endl;
    }
    return StringVariant(std::move(value));
 }
 
-BooleanVariant ArrayItemProxy::toBooleaneanVariant()
+BooleanVariant ArrayItemProxy::toBooleanVariant()
 {
    if (!isKeychianOk(false)) {
       throw std::bad_cast();
@@ -303,7 +303,7 @@ ArrayVariant ArrayItemProxy::toArrayVariant()
    }
    Variant value(retrieveZvalPtr());
    if (value.getType() != Type::Array) {
-      vmapi::notice << "Array proxy type "<< value.getTypeStr()
+      vmapi::notice() << "Array proxy type "<< value.getTypeStr()
                    << "is not Array" << std::endl;
    }
    return ArrayVariant(Variant(retrieveZvalPtr()));
@@ -425,12 +425,12 @@ zval *ArrayItemProxy::retrieveZvalPtr(bool quiet) const
       std::string *key = m_implPtr->m_requestKey.second.get();
       valPtr = zend_hash_str_find(Z_ARRVAL_P(m_implPtr->m_array), key->c_str(), key->length());
       if (nullptr == valPtr && !quiet) {
-         vmapi::notice << "Undefined offset: " << *key << std::endl;
+         vmapi::notice() << "Undefined offset: " << *key << std::endl;
       }
    } else {
       valPtr = zend_hash_index_find(Z_ARRVAL_P(m_implPtr->m_array), m_implPtr->m_requestKey.first);
       if (nullptr == valPtr && !quiet) {
-         vmapi::notice << "Undefined index: " << m_implPtr->m_requestKey.first << std::endl;
+         vmapi::notice() << "Undefined index: " << m_implPtr->m_requestKey.first << std::endl;
       }
    }
    return valPtr;

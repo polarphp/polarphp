@@ -421,7 +421,7 @@ int ModulePrivate::processMismatch(INIT_FUNC_ARGS)
 {
    Module *extension = find_module(module_number);
    // @TODO is this really good? we need a method to check compatibility more graceful
-   vmapi::warning << " Version mismatch between zendAPI and extension " << extension->getName()
+   vmapi::warning() << " Version mismatch between polarphp vmapi and extension " << extension->getName()
                  << " " << extension->getVersion() << " (recompile needed?) " << std::endl;
    return BOOL2SUCCESS(true);
 }
