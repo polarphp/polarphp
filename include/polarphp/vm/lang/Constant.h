@@ -13,6 +13,7 @@
 #define POLARPHP_VMAPI_LANG_CONSTANT_H
 
 #include "polarphp/vm/ZendApi.h"
+#include <any>
 
 struct _zend_constant;
 
@@ -45,6 +46,8 @@ public:
    Constant &operator=(Constant &&other) noexcept;
    const std::string &getName() const;
    const _zend_constant &getZendConstant() const;
+   Variant getValueVariant() const;
+   std::any getValue() const;
    virtual ~Constant();
 private:
    void initialize(const std::string &prefix, int moduleNumber);

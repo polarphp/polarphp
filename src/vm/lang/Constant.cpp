@@ -9,7 +9,9 @@
 //
 // Created by polarboy on 2018/12/24.
 
+#include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/vm/lang/Constant.h"
+#include "polarphp/vm/ds/Variant.h"
 #include "polarphp/vm/internal/DepsZendVmHeaders.h"
 
 #include <string>
@@ -18,6 +20,8 @@
 
 namespace polar {
 namespace vmapi {
+
+using polar::basic::StringRef;
 
 namespace internal
 {
@@ -162,6 +166,34 @@ const std::string &Constant::getName() const
 {
    VMAPI_D(const Constant);
    return implPtr->m_name;
+}
+
+Variant Constant::getValueVariant() const
+{
+   VMAPI_D(const Constant);
+   return Variant(&implPtr->m_constant.value);
+}
+
+std::any Constant::getValue() const
+{
+   VMAPI_D(const Constant);
+   zval *val = const_cast<zval *>(&implPtr->m_constant.value);
+   zend_uchar type = Z_TYPE_P(val);
+   if (type == IS_NULL || type == IS_UNDEF) {
+      return nullptr;
+   } else if (type == IS_LONG) {
+      return Z_LVAL_P(val);
+   } else if (type == IS_STRING) {
+      zend_string *str = Z_STR_P(val);
+      return StringRef(ZSTR_VAL(str), ZSTR_LEN(str));
+   } else if (type == IS_TRUE) {
+      return true;
+   } else if (type == IS_FALSE) {
+      return false;
+   } else if (type == IS_DOUBLE) {
+      return Z_DVAL_P(val);
+   }
+   polar_unreachable("Constant::getValue() reache at unexception point.");
 }
 
 } // vmapi

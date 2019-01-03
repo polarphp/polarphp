@@ -8,3 +8,16 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/12/28.
+
+#include "polarphp/vm/lang/Constant.h"
+#include "gtest/gtest.h"
+
+using polar::vmapi::Type;
+using polar::vmapi::Constant;
+
+TEST(ConstantTest, test)
+{
+   {
+      Constant constant("MY_NAME", "zzu_softboy");
+   }
+}
