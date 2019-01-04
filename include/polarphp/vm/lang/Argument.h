@@ -83,7 +83,7 @@ public:
 class VMAPI_DECL_EXPORT ValueArgument : public Argument
 {
 public:
-   ValueArgument(const char *name, Type type = Type::Undefined,
+   ValueArgument(const char *name, Type type = Type::Null,
                  bool required = true, bool isVariadic = false)
       : Argument(name, type, required, false, isVariadic)
    {}
