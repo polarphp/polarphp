@@ -32,7 +32,7 @@ public:
    Argument(Argument &&other) noexcept;
    Argument &operator=(const Argument &other);
    Argument &operator=(Argument &&other) noexcept;
-   virtual ~Argument() = 0;
+   virtual ~Argument();
    bool isNullable() const;
    bool isReference() const;
    bool isRequired() const;

@@ -42,10 +42,6 @@ Function::Function(StringRef name, ZendCallable callable, const Arguments &argum
    : Callable(new FunctionPrivate(name, callable, arguments))
 {}
 
-Function::Function(StringRef name, const Arguments &arguments)
-   : Callable(new FunctionPrivate(name, nullptr, arguments))
-{}
-
 Function::Function(const Function &other)
    : Callable(other)
 {
@@ -57,12 +53,6 @@ Function &Function::operator=(const Function &other)
       Callable::operator=(other);
    }
    return *this;
-}
-
-Variant Function::invoke(Parameters &parameters)
-{
-   // now we just do nothing
-   return nullptr;
 }
 
 void Function::initialize(const std::string &prefix, zend_function_entry *entry)

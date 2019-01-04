@@ -17,19 +17,73 @@ using polar::vmapi::Arguments;
 using polar::vmapi::Type;
 using polar::vmapi::ValueArgument;
 using polar::vmapi::RefArgument;
+using polar::vmapi::VariadicArgument;
 
 void dummy_func(struct _zend_execute_data *executeData, struct _zval_struct *returnValue)
 {}
 
 TEST(FunctionTest, testConstructor)
 {
-   {
-//      Function func("polarphp_version", dummy_func);
-//      zend_function_entry funcEntry;
-//      func.initialize(&funcEntry);
-//      ASSERT_STREQ(funcEntry.fname, "zapi_version");
-//      ASSERT_EQ(funcEntry.handler, &dummy_func);
-//      ASSERT_EQ(funcEntry.num_args, 0);
-//      ASSERT_EQ(funcEntry.flags, 0);
-   }
+   Function func("polarphp_version", dummy_func);
+   zend_function_entry funcEntry = func.buildCallableEntry();
+   ASSERT_STREQ(funcEntry.fname, "polarphp_version");
+   ASSERT_EQ(funcEntry.handler, &dummy_func);
+   ASSERT_EQ(funcEntry.num_args, 0);
+   ASSERT_EQ(funcEntry.flags, 0);
+   func.markDeprecated();
+   funcEntry = func.buildCallableEntry();
+   ASSERT_TRUE(funcEntry.flags & ZEND_ACC_DEPRECATED);
+   /// test basic arg info
+   const zend_internal_function_info *argInfo = reinterpret_cast<const zend_internal_function_info *>(funcEntry.arg_info);
+   ASSERT_FALSE(argInfo->_is_variadic);
+   ASSERT_EQ(argInfo->type, ZEND_TYPE_ENCODE(IS_UNDEF, 1));
+   ASSERT_FALSE(argInfo->return_reference);
+   ASSERT_EQ(argInfo->required_num_args, 0);
+   /// self pointer info
+   const zend_arg_info *selfInfo = reinterpret_cast<const zend_arg_info *>(funcEntry.arg_info + 1);
+   ASSERT_EQ(selfInfo->name, nullptr);
+}
+
+TEST(FunctionTest, testArguments)
+{
+   Function func("some_func", dummy_func, {ValueArgument("name", Type::String, true),
+                                           RefArgument("ret", Type::Long, false),
+                                           VariadicArgument("extraArgs")});
+   func.setReturnType(Type::Boolean);
+   zend_function_entry funcEntry = func.buildCallableEntry();
+   ASSERT_STREQ(funcEntry.fname, "some_func");
+   ASSERT_EQ(funcEntry.handler, &dummy_func);
+   ASSERT_EQ(funcEntry.flags, 0);
+   ASSERT_EQ(funcEntry.num_args, 3);
+
+   /// test basic arg info
+   const zend_internal_function_info *argInfo = reinterpret_cast<const zend_internal_function_info *>(funcEntry.arg_info);
+   ASSERT_FALSE(argInfo->_is_variadic);
+   ASSERT_EQ(argInfo->type, ZEND_TYPE_ENCODE(_IS_BOOL, 1));
+   ASSERT_FALSE(argInfo->return_reference);
+   ASSERT_EQ(argInfo->required_num_args, 1);
+   /// test arg
+   const zend_internal_arg_info *arg = funcEntry.arg_info + 1;
+   ASSERT_FALSE(arg->is_variadic);
+   ASSERT_FALSE(arg->pass_by_reference);
+   ASSERT_STREQ(arg->name, "name");
+   ASSERT_EQ(arg->type, ZEND_TYPE_ENCODE(IS_STRING, 0));
+
+   arg = funcEntry.arg_info + 2;
+   ASSERT_FALSE(arg->is_variadic);
+   ASSERT_TRUE(arg->pass_by_reference);
+   ASSERT_STREQ(arg->name, "ret");
+   ASSERT_EQ(arg->type, ZEND_TYPE_ENCODE(IS_LONG, 0));
+
+   arg = funcEntry.arg_info + 3;
+   ASSERT_TRUE(arg->is_variadic);
+   ASSERT_FALSE(arg->pass_by_reference);
+   ASSERT_STREQ(arg->name, "extraArgs");
+   ASSERT_EQ(arg->type, 0);
+
+   func.setReturnType("Person");
+   funcEntry = func.buildCallableEntry();
+   argInfo = reinterpret_cast<const zend_internal_function_info *>(funcEntry.arg_info);
+   ASSERT_FALSE(argInfo->_is_variadic);
+   ASSERT_STREQ(reinterpret_cast<char *>(argInfo->type & ~0x1), "Person");
 }

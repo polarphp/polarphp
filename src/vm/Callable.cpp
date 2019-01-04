@@ -64,6 +64,7 @@ CallablePrivate::CallablePrivate(StringRef name, ZendCallable callable, const Ar
       // setup the actually argument info
       setupCallableArgInfo(&m_argv[i++], argument);
    }
+   /// last item record callable object address info
    m_argv[i].name = nullptr;
 }
 
@@ -76,7 +77,7 @@ void CallablePrivate::initialize(zend_function_entry *entry, StringRef className
    if (m_callable) {
       entry->handler = m_callable;
    } else {
-      m_argv[m_argc + 1].name = reinterpret_cast<const char*>(this);
+      m_argv[m_argc + 1].type = reinterpret_cast<zend_type>(this);
       // we use our own invoke method, which does a lookup
       // in the map we just installed ourselves in
       entry->handler = &Callable::invoke;
@@ -96,23 +97,28 @@ void CallablePrivate::initialize(zend_internal_function_info *info, StringRef cl
       // method
       if (m_name != "__construct" && m_name != "__destruct") {
          if (m_returnType == Type::Object) {
-            info->type = ZEND_TYPE_ENCODE_CLASS(m_retClsName.c_str(), true);
+            info->type = ZEND_TYPE_ENCODE_CLASS(m_retClsName.c_str(), 1);
          } else {
-            info->type = ZEND_TYPE_ENCODE(get_raw_type(m_returnType), true);
+            info->type = ZEND_TYPE_ENCODE(get_raw_type(m_returnType), 1);
          }
       } else {
+         ///
+         /// need review here
+         ///
          info->type = Z_L(1);
       }
    } else {
       // function
       if (m_returnType == Type::Object) {
-         info->type = ZEND_TYPE_ENCODE_CLASS(m_retClsName.c_str(), true);
+         info->type = ZEND_TYPE_ENCODE_CLASS(m_retClsName.c_str(), 1);
       } else {
-         info->type = ZEND_TYPE_ENCODE(get_raw_type(m_returnType), true);
+         info->type = ZEND_TYPE_ENCODE(get_raw_type(m_returnType), 1);
       }
    }
    info->required_num_args = m_required;
-   // current we don't support return by reference
+   ///
+   /// TODO current we don't support return by reference
+   ///
    info->return_reference = false;
    info->_is_variadic = false;
 }
@@ -133,7 +139,11 @@ void CallablePrivate::setupCallableArgInfo(zend_internal_arg_info *info, const A
    info->name = arg.getName();
    int rawType = get_raw_type(arg.getType());
    if (rawType == IS_OBJECT) {
-      info->type = ZEND_TYPE_ENCODE_CLASS(arg.getClassName(), arg.isNullable());
+      if (nullptr != arg.getClassName()) {
+         info->type = ZEND_TYPE_ENCODE_CLASS(arg.getClassName(), arg.isNullable());
+      } else {
+         info->type = ZEND_TYPE_ENCODE(IS_OBJECT, arg.isNullable());
+      }
    } else {
       info->type = ZEND_TYPE_ENCODE(rawType, arg.isNullable());
    }
@@ -193,8 +203,11 @@ Callable &Callable::operator=(Callable &&other) noexcept
 
 Callable &Callable::setReturnType(Type type) noexcept
 {
-   if (Type::Object != type && Type::Resource != type && Type::Ptr != type) {
+   if (Type::Object != type && Type::Resource != type &&
+       Type::Ptr != type && Type::ConstantAST != type &&
+       Type::Error != type) {
       m_implPtr->m_returnType = type;
+      m_implPtr->m_retClsName.clear();
    }
    return *this;
 }
@@ -207,6 +220,7 @@ Callable &Callable::setReturnType(const std::string &clsName) noexcept
 
 Callable &Callable::setReturnType(const char *clsName) noexcept
 {
+   m_implPtr->m_returnType = Type::Object;
    m_implPtr->m_retClsName = clsName;
    return *this;
 }
@@ -215,6 +229,11 @@ Callable &Callable::markDeprecated() noexcept
 {
    m_implPtr->m_flags |= Modifier::Deprecated;
    return *this;
+}
+
+Variant Callable::invoke(Parameters &parameters)
+{
+   return nullptr;
 }
 
 zend_function_entry Callable::buildCallableEntry(StringRef className) const noexcept
@@ -234,7 +253,7 @@ void Callable::invoke(INTERNAL_FUNCTION_PARAMETERS)
 {
    uint32_t argc       = EX(func)->common.num_args;
    zend_arg_info *info = EX(func)->common.arg_info;
-   assert(info[argc].name != nullptr);
+   assert(info[argc].type != 0 && info[argc].name == nullptr);
    Callable *callable = reinterpret_cast<Callable *>(info[argc].name);
    // check if sufficient parameters were passed (for some reason this check
    // is not done by Zend, so we do it here ourselves)

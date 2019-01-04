@@ -28,16 +28,15 @@ class VMAPI_DECL_EXPORT Function : public Callable
 {
 public:
    Function(StringRef name, ZendCallable callable, const Arguments &arguments = {});
-   Function(StringRef name, const Arguments &arguments = {});
    Function(const Function &other);
    Function &operator=(const Function &other);
-   virtual Variant invoke(Parameters &parameters);
    virtual ~Function();
 
 protected:
    void initialize(const std::string &prefix, zend_function_entry *entry);
    void initialize(zend_function_entry *entry);
    friend class ModulePrivate;
+
 private:
    VMAPI_DECLARE_PRIVATE(Function);
 };

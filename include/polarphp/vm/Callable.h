@@ -42,7 +42,7 @@ public:
    Callable(StringRef name, const Arguments &arguments = {});
    Callable(const Callable &other);
    Callable(Callable &&other) noexcept;
-   virtual ~Callable();
+   virtual ~Callable() = 0;
 
 public:
    Callable &operator=(const Callable &other);
@@ -57,7 +57,7 @@ public:
    zend_function_entry buildCallableEntry(StringRef className = "") const noexcept;
 
 public:
-   virtual Variant invoke(Parameters &parameters) = 0;
+   virtual Variant invoke(Parameters &parameters);
 
 protected:
    Callable(CallablePrivate *implPtr);
