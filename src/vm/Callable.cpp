@@ -97,9 +97,9 @@ void CallablePrivate::initialize(zend_internal_function_info *info, bool isMetho
       // method
       if (m_name != "__construct" && m_name != "__destruct") {
          if (m_returnType == Type::Object) {
-            info->type = ZEND_TYPE_ENCODE_CLASS(m_retClsName.c_str(), 1);
+            info->type = ZEND_TYPE_ENCODE_CLASS(m_retClsName.c_str(), m_returnTypeNullable);
          } else {
-            info->type = ZEND_TYPE_ENCODE(get_raw_type(m_returnType), 1);
+            info->type = ZEND_TYPE_ENCODE(get_raw_type(m_returnType), m_returnTypeNullable);
          }
       } else {
          ///
@@ -110,9 +110,9 @@ void CallablePrivate::initialize(zend_internal_function_info *info, bool isMetho
    } else {
       // function
       if (m_returnType == Type::Object) {
-         info->type = ZEND_TYPE_ENCODE_CLASS(m_retClsName.c_str(), 1);
+         info->type = ZEND_TYPE_ENCODE_CLASS(m_retClsName.c_str(), m_returnTypeNullable);
       } else {
-         info->type = ZEND_TYPE_ENCODE(get_raw_type(m_returnType), 1);
+         info->type = ZEND_TYPE_ENCODE(get_raw_type(m_returnType), m_returnTypeNullable);
       }
    }
    info->required_num_args = m_required;
@@ -201,27 +201,25 @@ Callable &Callable::operator=(Callable &&other) noexcept
    return *this;
 }
 
-Callable &Callable::setReturnType(Type type) noexcept
+Callable &Callable::setReturnType(Type type, bool nullable) noexcept
 {
    if (Type::Object != type && Type::Resource != type &&
        Type::Ptr != type && Type::ConstantAST != type &&
        Type::Error != type) {
-      m_implPtr->m_returnType = type;
-      m_implPtr->m_retClsName.clear();
+      VMAPI_D(Callable);
+      implPtr->m_returnType = type;
+      implPtr->m_returnTypeNullable = nullable;
+      implPtr->m_retClsName.clear();
    }
    return *this;
 }
-Callable &Callable::setReturnType(const std::string &clsName) noexcept
-{
-   m_implPtr->m_returnType = Type::Object;
-   m_implPtr->m_retClsName = clsName;
-   return *this;
-}
 
-Callable &Callable::setReturnType(const char *clsName) noexcept
+Callable &Callable::setReturnType(StringRef clsName, bool nullable) noexcept
 {
-   m_implPtr->m_returnType = Type::Object;
-   m_implPtr->m_retClsName = clsName;
+   VMAPI_D(Callable);
+   implPtr->m_returnType = Type::Object;
+   implPtr->m_retClsName = clsName.getStr();
+   implPtr->m_returnTypeNullable = nullable;
    return *this;
 }
 
@@ -231,7 +229,7 @@ Callable &Callable::markDeprecated() noexcept
    return *this;
 }
 
-Variant Callable::invoke(Parameters &parameters)
+Variant Callable::invoke(Parameters &)
 {
    return nullptr;
 }

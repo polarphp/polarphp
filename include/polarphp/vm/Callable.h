@@ -45,11 +45,10 @@ public:
    virtual ~Callable() = 0;
 
 public:
-   Callable &operator=(const Callable &other);
-   Callable &operator=(Callable &&other) noexcept;
-   Callable &setReturnType(Type type) noexcept;
-   Callable &setReturnType(const std::string &clsName) noexcept;
-   Callable &setReturnType(const char *clsName) noexcept;
+   Callable &operator =(const Callable &other);
+   Callable &operator =(Callable &&other) noexcept;
+   Callable &setReturnType(Type type, bool nullable = true) noexcept;
+   Callable &setReturnType(StringRef clsName, bool nullable = true) noexcept;
    Callable &markDeprecated() noexcept;
    ///
    /// for unittest only

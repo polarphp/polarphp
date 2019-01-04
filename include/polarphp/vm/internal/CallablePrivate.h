@@ -35,6 +35,7 @@ public:
    void initialize(const std::string &prefix, zend_function_entry *entry, int flags = 0);
    CallablePrivate &operator=(const CallablePrivate &other);
    CallablePrivate &operator=(CallablePrivate &&other) noexcept;
+   bool m_returnTypeNullable = true;
    Type m_returnType = Type::Undefined;
    uint32_t m_required = 0;
    int m_argc = 0;
