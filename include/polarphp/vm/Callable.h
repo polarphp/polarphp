@@ -51,6 +51,10 @@ public:
    Callable &setReturnType(const std::string &clsName) noexcept;
    Callable &setReturnType(const char *clsName) noexcept;
    Callable &markDeprecated() noexcept;
+   ///
+   /// for unittest only
+   ///
+   zend_function_entry buildCallableEntry(StringRef className = "") const noexcept;
 
 public:
    virtual Variant invoke(Parameters &parameters) = 0;

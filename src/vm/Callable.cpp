@@ -217,6 +217,14 @@ Callable &Callable::markDeprecated() noexcept
    return *this;
 }
 
+zend_function_entry Callable::buildCallableEntry(StringRef className) const noexcept
+{
+   zend_function_entry entry;
+   VMAPI_D(const Callable);
+   implPtr->initialize(&entry, className, static_cast<int>(implPtr->m_flags));
+   return entry;
+}
+
 void Callable::setupCallableArgInfo(zend_internal_arg_info *info, const Argument &arg) const
 {
    getImplPtr()->setupCallableArgInfo(info, arg);
