@@ -29,8 +29,8 @@ namespace internal
 class ConstantPrivate
 {
 public:
-   ConstantPrivate(const char *name)
-      : m_name(name)
+   ConstantPrivate(StringRef name)
+      : m_name(name.getData(), name.getSize())
    {}
    ~ConstantPrivate();
    void initialize(const std::string &prefix, int moduleNumber);
@@ -62,60 +62,51 @@ ConstantPrivate::~ConstantPrivate()
 
 using internal::ConstantPrivate;
 
-Constant::Constant(const char *name, std::nullptr_t)
+Constant::Constant(StringRef name, std::nullptr_t)
    : m_implPtr(new ConstantPrivate(name))
 {
    VMAPI_D(Constant);
    ZVAL_NULL(&implPtr->m_constant.value);
 }
 
-Constant::Constant(const char *name, bool value)
+Constant::Constant(StringRef name, bool value)
    : m_implPtr(new ConstantPrivate(name))
 {
    VMAPI_D(Constant);
    ZVAL_BOOL(&implPtr->m_constant.value, value);
 }
 
-Constant::Constant(const char *name, int32_t value)
+Constant::Constant(StringRef name, int32_t value)
    : m_implPtr(new ConstantPrivate(name))
 {
    VMAPI_D(Constant);
    ZVAL_LONG(&implPtr->m_constant.value, value);
 }
 
-Constant::Constant(const char *name, int64_t value)
+Constant::Constant(StringRef name, int64_t value)
    : m_implPtr(new ConstantPrivate(name))
 {
    VMAPI_D(Constant);
    ZVAL_LONG(&implPtr->m_constant.value, value);
 }
 
-Constant::Constant(const char *name, double value)
+Constant::Constant(StringRef name, double value)
    : m_implPtr(new ConstantPrivate(name))
 {
    VMAPI_D(Constant);
    ZVAL_DOUBLE(&implPtr->m_constant.value, value);
 }
 
-Constant::Constant(const char *name, const char *value)
+Constant::Constant(StringRef name, StringRef value)
    : m_implPtr(new ConstantPrivate(name))
 {
    VMAPI_D(Constant);
-   ZVAL_PSTRINGL(&implPtr->m_constant.value, value, ::strlen(value));
+   ZVAL_PSTRINGL(&implPtr->m_constant.value, value.getData(), value.size());
 }
 
-Constant::Constant(const char *name, const char *value, size_t size)
-   : m_implPtr(new ConstantPrivate(name))
+Constant::Constant(StringRef name, const char *value)
+   : Constant(name, StringRef(value))
 {
-   VMAPI_D(Constant);
-   ZVAL_PSTRINGL(&implPtr->m_constant.value, value, size);
-}
-
-Constant::Constant(const char *name, const std::string &value)
-   : m_implPtr(new ConstantPrivate(name))
-{
-   VMAPI_D(Constant);
-   ZVAL_PSTRINGL(&implPtr->m_constant.value, value.c_str(), value.size());
 }
 
 Constant::Constant(const Constant &other)

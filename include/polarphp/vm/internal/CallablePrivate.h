@@ -14,6 +14,7 @@
 
 #include "polarphp/vm/ZendApi.h"
 #include "polarphp/vm/lang/Argument.h"
+#include "polarphp/basic/adt/StringRef.h"
 
 namespace polar {
 namespace vmapi {
@@ -21,14 +22,16 @@ namespace vmapi {
 namespace internal
 {
 
+using polar::basic::StringRef;
+
 class CallablePrivate
 {
 public:
-   CallablePrivate(const char *name, ZendCallable callable, const Arguments &arguments);
-   CallablePrivate(const char *name, const Arguments &arguments);
+   CallablePrivate(StringRef name, ZendCallable callable, const Arguments &arguments);
+   CallablePrivate(StringRef name, const Arguments &arguments);
    void setupCallableArgInfo(zend_internal_arg_info *info, const Argument &arg) const;
-   void initialize(zend_function_entry *entry, const char *className = nullptr, int flags = 0) const;
-   void initialize(zend_internal_function_info *info, const char *className = nullptr) const;
+   void initialize(zend_function_entry *entry, StringRef className = "", int flags = 0) const;
+   void initialize(zend_internal_function_info *info, StringRef className = "") const;
    void initialize(const std::string &prefix, zend_function_entry *entry);
    CallablePrivate &operator=(const CallablePrivate &other);
    CallablePrivate &operator=(CallablePrivate &&other) noexcept;

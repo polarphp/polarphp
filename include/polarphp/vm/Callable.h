@@ -16,6 +16,7 @@
 
 #include "polarphp/vm/ZendApi.h"
 #include "polarphp/vm/lang/Argument.h"
+#include "polarphp/basic/adt/StringRef.h"
 
 namespace polar {
 namespace vmapi {
@@ -31,31 +32,36 @@ class CallablePrivate;
 
 using internal::CallablePrivate;
 using internal::ModulePrivate;
+using polar::basic::StringRef;
 
 class VMAPI_DECL_EXPORT Callable
 {
 public:
    Callable();
-   Callable(const char *name, ZendCallable callable, const Arguments &arguments = {});
-   Callable(const char *name, const Arguments &arguments = {});
+   Callable(StringRef name, ZendCallable callable, const Arguments &arguments = {});
+   Callable(StringRef name, const Arguments &arguments = {});
    Callable(const Callable &other);
    Callable(Callable &&other) noexcept;
    virtual ~Callable();
+
 public:
    Callable &operator=(const Callable &other);
    Callable &operator=(Callable &&other) noexcept;
    Callable &setReturnType(Type type) noexcept;
    Callable &setReturnType(const std::string &clsName) noexcept;
    Callable &setReturnType(const char *clsName) noexcept;
+
 public:
    virtual Variant invoke(Parameters &parameters) = 0;
+
 protected:
    Callable(CallablePrivate *implPtr);
    void setupCallableArgInfo(zend_internal_arg_info *info, const Argument &arg) const;
    static void invoke(INTERNAL_FUNCTION_PARAMETERS);
-   void initialize(zend_function_entry *entry, const char *className = nullptr, int flags = 0) const;
-   void initialize(zend_internal_function_info *info, const char *className = nullptr) const;
+   void initialize(zend_function_entry *entry, StringRef className = "", int flags = 0) const;
+   void initialize(zend_internal_function_info *info, StringRef className = "") const;
    void initialize(const std::string &prefix, zend_function_entry *entry);
+
 protected:
    VMAPI_DECLARE_PRIVATE(Callable);
    std::shared_ptr<CallablePrivate> m_implPtr;

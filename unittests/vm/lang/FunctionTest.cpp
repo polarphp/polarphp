@@ -18,3 +18,18 @@ using polar::vmapi::Type;
 using polar::vmapi::ValueArgument;
 using polar::vmapi::RefArgument;
 
+void dummy_func(struct _zend_execute_data *executeData, struct _zval_struct *returnValue)
+{}
+
+TEST(FunctionTest, testConstructor)
+{
+   {
+//      Function func("polarphp_version", dummy_func);
+//      zend_function_entry funcEntry;
+//      func.initialize(&funcEntry);
+//      ASSERT_STREQ(funcEntry.fname, "zapi_version");
+//      ASSERT_EQ(funcEntry.handler, &dummy_func);
+//      ASSERT_EQ(funcEntry.num_args, 0);
+//      ASSERT_EQ(funcEntry.flags, 0);
+   }
+}

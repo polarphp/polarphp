@@ -49,7 +49,7 @@ int get_raw_type(Type type)
    }
 }
 
-CallablePrivate::CallablePrivate(const char *name, ZendCallable callable, const Arguments &arguments)
+CallablePrivate::CallablePrivate(StringRef name, ZendCallable callable, const Arguments &arguments)
    : m_callable(callable),
      m_name(name),
      m_argc(arguments.size()),
@@ -64,31 +64,19 @@ CallablePrivate::CallablePrivate(const char *name, ZendCallable callable, const 
       // setup the actually argument info
       setupCallableArgInfo(&m_argv[i++], argument);
    }
-   // note from PHP 7.2, zend engine remove class_name of zend_internal_arg_info
-   // and encode the class_name pointer data into type field of zend_internal_arg_info
-#if ZEND_MODULE_API_NO < 20170718 // for version less than PHP 7.2
-   // last entry, we save extra infomation about self
-   // this just for m_callable = nullptr and self::invoke been set for entry->handler
-   m_argv[i].class_name = nullptr;
-#endif
    m_argv[i].name = nullptr;
 }
 
-CallablePrivate::CallablePrivate(const char *name, const Arguments &arguments)
+CallablePrivate::CallablePrivate(StringRef name, const Arguments &arguments)
    : CallablePrivate(name, nullptr,  arguments)
 {}
 
-void CallablePrivate::initialize(zend_function_entry *entry, const char *className, int flags) const
+void CallablePrivate::initialize(zend_function_entry *entry, StringRef className, int flags) const
 {
    if (m_callable) {
       entry->handler = m_callable;
    } else {
-      // install ourselves in the extra argument
-#if ZEND_MODULE_API_NO < 20170718 // for version less than PHP 7.2
-      m_argv[m_argc + 1].class_name = reinterpret_cast<const char*>(this);
-#else
       m_argv[m_argc + 1].name = reinterpret_cast<const char*>(this);
-#endif
       // we use our own invoke method, which does a lookup
       // in the map we just installed ourselves in
       entry->handler = &Callable::invoke;
@@ -101,10 +89,10 @@ void CallablePrivate::initialize(zend_function_entry *entry, const char *classNa
    initialize(reinterpret_cast<zend_internal_function_info *>(m_argv.get()), className);
 }
 
-void CallablePrivate::initialize(zend_internal_function_info *info, const char *className) const
+void CallablePrivate::initialize(zend_internal_function_info *info, StringRef className) const
 {
    // we use new facility type system for zend_internal_function_info / zend_function_info
-   if (nullptr != className) {
+   if (!className.empty()) {
       // method
       if (m_name != "__construct" && m_name != "__destruct") {
          if (m_returnType == Type::Object) {
@@ -162,12 +150,12 @@ void CallablePrivate::setupCallableArgInfo(zend_internal_arg_info *info, const A
 Callable::Callable()
 {}
 
-Callable::Callable(const char *name, ZendCallable callable, const Arguments &arguments)
+Callable::Callable(StringRef name, ZendCallable callable, const Arguments &arguments)
    : m_implPtr(new CallablePrivate(name, callable, arguments))
 {
 }
 
-Callable::Callable(const char *name, const Arguments &arguments)
+Callable::Callable(StringRef name, const Arguments &arguments)
    : Callable(name, nullptr, arguments)
 {}
 
@@ -238,8 +226,8 @@ void Callable::invoke(INTERNAL_FUNCTION_PARAMETERS)
    // is not done by Zend, so we do it here ourselves)
    if (ZEND_NUM_ARGS() < callable->m_implPtr->m_required) {
       vmapi::warning() << get_active_function_name() << "() expects at least "
-                     << callable->m_implPtr->m_required << " parameter(s)," << ZEND_NUM_ARGS()
-                     << " given" << std::flush;
+                       << callable->m_implPtr->m_required << " parameter(s)," << ZEND_NUM_ARGS()
+                       << " given" << std::flush;
       RETURN_NULL();
    } else {
       Parameters params(getThis(), ZEND_NUM_ARGS());
@@ -253,13 +241,13 @@ void Callable::invoke(INTERNAL_FUNCTION_PARAMETERS)
    }
 }
 
-void Callable::initialize(zend_function_entry *entry, const char *className, int flags) const
+void Callable::initialize(zend_function_entry *entry, StringRef className, int flags) const
 {
    VMAPI_D(const Callable);
    implPtr->initialize(entry, className, flags);
 }
 
-void Callable::initialize(zend_internal_function_info *info, const char *className) const
+void Callable::initialize(zend_internal_function_info *info, StringRef className) const
 {
    VMAPI_D(const Callable);
    implPtr->initialize(info, className);

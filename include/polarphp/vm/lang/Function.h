@@ -22,12 +22,13 @@ class FunctionPrivate;
 } // internal
 
 using internal::FunctionPrivate;
+using polar::basic::StringRef;
 
 class VMAPI_DECL_EXPORT Function : public Callable
 {
 public:
-   Function(const char *name, ZendCallable callable, const Arguments &arguments = {});
-   Function(const char *name, const Arguments &arguments = {});
+   Function(StringRef name, ZendCallable callable, const Arguments &arguments = {});
+   Function(StringRef name, const Arguments &arguments = {});
    Function(const Function &other);
    Function &operator=(const Function &other);
    virtual Variant invoke(Parameters &parameters);

@@ -34,14 +34,13 @@ using polar::basic::StringRef;
 class VMAPI_DECL_EXPORT Constant final
 {
 public:
-   Constant(const char *name, std::nullptr_t value = nullptr);
-   Constant(const char *name, bool value);
-   Constant(const char *name, int32_t value);
-   Constant(const char *name, int64_t value);
-   Constant(const char *name, double value);
-   Constant(const char *name, const char *value);
-   Constant(const char *name, const char *value, size_t size);
-   Constant(const char *name, const std::string &value);
+   Constant(StringRef name, std::nullptr_t value = nullptr);
+   Constant(StringRef name, bool value);
+   Constant(StringRef name, int32_t value);
+   Constant(StringRef name, int64_t value);
+   Constant(StringRef name, double value);
+   Constant(StringRef name, const char *value);
+   Constant(StringRef name, StringRef value);
    Constant(const Constant &other);
    Constant(Constant &&other) noexcept;
    Constant &operator=(const Constant &other);
