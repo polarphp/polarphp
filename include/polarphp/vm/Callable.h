@@ -50,6 +50,7 @@ public:
    Callable &setReturnType(Type type) noexcept;
    Callable &setReturnType(const std::string &clsName) noexcept;
    Callable &setReturnType(const char *clsName) noexcept;
+   Callable &markDeprecated() noexcept;
 
 public:
    virtual Variant invoke(Parameters &parameters) = 0;

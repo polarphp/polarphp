@@ -33,6 +33,11 @@ public:
    Function &operator=(const Function &other);
    virtual Variant invoke(Parameters &parameters);
    virtual ~Function();
+
+protected:
+   void initialize(const std::string &prefix, zend_function_entry *entry);
+   void initialize(zend_function_entry *entry);
+   friend class ModulePrivate;
 private:
    VMAPI_DECLARE_PRIVATE(Function);
 };

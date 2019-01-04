@@ -32,15 +32,16 @@ public:
    void setupCallableArgInfo(zend_internal_arg_info *info, const Argument &arg) const;
    void initialize(zend_function_entry *entry, StringRef className = "", int flags = 0) const;
    void initialize(zend_internal_function_info *info, StringRef className = "") const;
-   void initialize(const std::string &prefix, zend_function_entry *entry);
+   void initialize(const std::string &prefix, zend_function_entry *entry, int flags = 0);
    CallablePrivate &operator=(const CallablePrivate &other);
    CallablePrivate &operator=(CallablePrivate &&other) noexcept;
-   ZendCallable m_callable;
-   std::string m_name;
    Type m_returnType = Type::Undefined;
    uint32_t m_required = 0;
-   std::string m_retClsName;
    int m_argc = 0;
+   Modifier m_flags = Modifier::None;
+   ZendCallable m_callable;
+   std::string m_name;
+   std::string m_retClsName;
    std::unique_ptr<zend_internal_arg_info[]> m_argv;
 };
 

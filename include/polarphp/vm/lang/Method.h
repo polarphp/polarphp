@@ -38,6 +38,7 @@ public:
    virtual Variant invoke(Parameters &parameters) override;
 protected:
    void initialize(zend_function_entry *entry, const char *className);
+
 private:
    VMAPI_DECLARE_PRIVATE(Method);
    friend class AbstractClassPrivate;

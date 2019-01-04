@@ -61,6 +61,7 @@ enum class  Modifier : unsigned long
    Final             = ZEND_ACC_FINAL,
    Public            = ZEND_ACC_PUBLIC,
    Protected         = ZEND_ACC_PROTECTED,
+   Deprecated        = ZEND_ACC_DEPRECATED,
    Private           = ZEND_ACC_PRIVATE,
    Const             = 0x10000, // we define this number ourself
    MethodModifiers   = Final | Public | Protected | Private | Static,

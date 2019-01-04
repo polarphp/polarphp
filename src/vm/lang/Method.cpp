@@ -24,19 +24,18 @@ class MethodPrivate : public CallablePrivate
 {
 public:
    MethodPrivate(const char *name, ZendCallable callback, Modifier flags, const Arguments &args)
-      : CallablePrivate(name, callback, args),
-        m_flags(flags)
+      : CallablePrivate(name, callback, args)
    {
+      m_flags = flags;
    }
 
    MethodPrivate(const char *name, Modifier flags, const Arguments &args)
-      : CallablePrivate(name, args),
-        m_flags(flags)
+      : CallablePrivate(name, args)
    {
+      m_flags = flags;
    }
 
    void initialize(zend_function_entry *entry, const std::string &className);
-   Modifier m_flags;
 };
 
 void MethodPrivate::initialize(zend_function_entry *entry, const std::string &className)

@@ -21,7 +21,21 @@ class FunctionPrivate : public CallablePrivate
 {
 public:
    using CallablePrivate::CallablePrivate;
+   void initialize(const std::string &prefix, zend_function_entry *entry);
+   void initialize(zend_function_entry *entry);
 };
+
+void FunctionPrivate::initialize(const std::string &prefix, zend_function_entry *entry)
+{
+   /// TODO mask unsupport flags
+   CallablePrivate::initialize(prefix, entry, static_cast<int>(m_flags));
+}
+
+void FunctionPrivate::initialize(zend_function_entry *entry)
+{
+   CallablePrivate::initialize(entry, "", static_cast<int>(m_flags));
+}
+
 } // internal
 
 Function::Function(StringRef name, ZendCallable callable, const Arguments &arguments)
@@ -49,6 +63,18 @@ Variant Function::invoke(Parameters &parameters)
 {
    // now we just do nothing
    return nullptr;
+}
+
+void Function::initialize(const std::string &prefix, zend_function_entry *entry)
+{
+   VMAPI_D(Function);
+   implPtr->initialize(prefix, entry);
+}
+
+void Function::initialize(zend_function_entry *entry)
+{
+   VMAPI_D(Function);
+   implPtr->initialize(entry);
 }
 
 Function::~Function()

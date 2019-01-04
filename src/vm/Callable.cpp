@@ -50,9 +50,9 @@ int get_raw_type(Type type)
 }
 
 CallablePrivate::CallablePrivate(StringRef name, ZendCallable callable, const Arguments &arguments)
-   : m_callable(callable),
+   : m_argc(arguments.size()),
+     m_callable(callable),
      m_name(name),
-     m_argc(arguments.size()),
      m_argv(new zend_internal_arg_info[arguments.size() + 2])
 {
    // first entry record function infomation, so skip it
@@ -117,14 +117,14 @@ void CallablePrivate::initialize(zend_internal_function_info *info, StringRef cl
    info->_is_variadic = false;
 }
 
-void CallablePrivate::initialize(const std::string &prefix, zend_function_entry *entry)
+void CallablePrivate::initialize(const std::string &prefix, zend_function_entry *entry, int flags)
 {
    // if there is a namespace prefix, we should adjust the name
    if (!prefix.empty()) {
       m_name = prefix + '\\' + m_name;
    }
    // call base initialize
-   CallablePrivate::initialize(entry);
+   CallablePrivate::initialize(entry, "", flags);
 }
 
 void CallablePrivate::setupCallableArgInfo(zend_internal_arg_info *info, const Argument &arg) const
@@ -208,6 +208,12 @@ Callable &Callable::setReturnType(const std::string &clsName) noexcept
 Callable &Callable::setReturnType(const char *clsName) noexcept
 {
    m_implPtr->m_retClsName = clsName;
+   return *this;
+}
+
+Callable &Callable::markDeprecated() noexcept
+{
+   m_implPtr->m_flags |= Modifier::Deprecated;
    return *this;
 }
 
