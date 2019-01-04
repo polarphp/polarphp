@@ -89,3 +89,25 @@ TEST(FunctionTest, testArguments)
    ASSERT_FALSE(argInfo->_is_variadic);
    ASSERT_STREQ(reinterpret_cast<char *>(argInfo->type & ~0x1), "Person");
 }
+
+TEST(FunctionTest, testFunctionReturnType)
+{
+   Function func("some_func", dummy_func, {ValueArgument("name", Type::String, true),
+                                           RefArgument("ret", Type::Long, false),
+                                           VariadicArgument("extraArgs")});
+   func.setReturnType(Type::Boolean);
+   zend_function_entry funcEntry = func.buildCallableEntry();
+   const zend_internal_function_info *argInfo = reinterpret_cast<const zend_internal_function_info *>(funcEntry.arg_info);
+   ASSERT_EQ(argInfo->type & ~0x1, _IS_BOOL);
+
+   func.setReturnType(Type::String, false);
+   funcEntry = func.buildCallableEntry();
+   argInfo = reinterpret_cast<const zend_internal_function_info *>(funcEntry.arg_info);
+   ASSERT_EQ(argInfo->type & ~0x0, IS_STRING);
+
+   func.setReturnType("SomeClass", false);
+   funcEntry = func.buildCallableEntry();
+   argInfo = reinterpret_cast<const zend_internal_function_info *>(funcEntry.arg_info);
+   ASSERT_STREQ(reinterpret_cast<char *>(argInfo->type & ~0x0), "SomeClass");
+
+}
