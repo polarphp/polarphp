@@ -14,6 +14,7 @@
 
 #include "polarphp/vm/ZendApi.h"
 #include "polarphp/vm/Callable.h"
+#include "polarphp/basic/adt/StringRef.h"
 
 namespace polar {
 namespace vmapi {
@@ -26,18 +27,19 @@ class AbstractClassPrivate;
 
 using internal::MethodPrivate;
 using internal::AbstractClassPrivate;
+using polar::basic::StringRef;
 
 class VMAPI_DECL_EXPORT Method : public Callable
 {
 public:
-   Method(const char *name, ZendCallable callback, Modifier flags, const Arguments &args);
-   Method(const char *name, Modifier flags, const Arguments &args);
+   Method(StringRef name, ZendCallable callback, Modifier flags, const Arguments &args);
+   Method(StringRef name, Modifier flags, const Arguments &args);
    Method(const Method &other);
    Method &operator=(const Method &other);
    virtual ~Method();
    virtual Variant invoke(Parameters &parameters) override;
 protected:
-   void initialize(zend_function_entry *entry, const char *className);
+   void initialize(zend_function_entry *entry, StringRef className);
 
 private:
    VMAPI_DECLARE_PRIVATE(Method);

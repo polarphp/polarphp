@@ -23,38 +23,38 @@ namespace internal
 class MethodPrivate : public CallablePrivate
 {
 public:
-   MethodPrivate(const char *name, ZendCallable callback, Modifier flags, const Arguments &args)
+   MethodPrivate(StringRef name, ZendCallable callback, Modifier flags, const Arguments &args)
       : CallablePrivate(name, callback, args)
    {
       m_flags = flags;
    }
 
-   MethodPrivate(const char *name, Modifier flags, const Arguments &args)
+   MethodPrivate(StringRef name, Modifier flags, const Arguments &args)
       : CallablePrivate(name, args)
    {
       m_flags = flags;
    }
 
-   void initialize(zend_function_entry *entry, const std::string &className);
+   void initialize(zend_function_entry *entry, StringRef className);
 };
 
-void MethodPrivate::initialize(zend_function_entry *entry, const std::string &className)
+void MethodPrivate::initialize(zend_function_entry *entry, StringRef className)
 {
    if ((m_flags & (Modifier::Public | Modifier::Private | Modifier::Protected)) == 0) {
       m_flags |= Modifier::Public;
    }
-   CallablePrivate::initialize(entry, className.c_str(), static_cast<int>(m_flags));
+   CallablePrivate::initialize(entry, className.getData(), static_cast<int>(m_flags));
 }
 
 } // internal
 
 using internal::MethodPrivate;
 
-Method::Method(const char *name, ZendCallable callback, Modifier flags, const Arguments &args)
+Method::Method(StringRef name, ZendCallable callback, Modifier flags, const Arguments &args)
    : Callable(new MethodPrivate(name, callback, flags, args))
 {}
 
-Method::Method(const char *name, Modifier flags, const Arguments &args)
+Method::Method(StringRef name, Modifier flags, const Arguments &args)
    : Callable(new MethodPrivate(name, flags, args))
 {}
 
@@ -80,7 +80,7 @@ Variant Method::invoke(Parameters &parameters)
 Method::~Method()
 {}
 
-void Method::initialize(zend_function_entry *entry, const char *className)
+void Method::initialize(zend_function_entry *entry, StringRef className)
 {
    VMAPI_D(Method);
    implPtr->initialize(entry, className);
