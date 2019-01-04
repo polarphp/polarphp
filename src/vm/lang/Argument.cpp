@@ -82,6 +82,9 @@ Argument::Argument(Argument &&other) noexcept
 {
 }
 
+Argument::~Argument()
+{}
+
 Argument &Argument::operator=(const Argument &other)
 {
    if (this != &other) {
@@ -96,9 +99,6 @@ Argument &Argument::operator=(Argument &&other) noexcept
    m_implPtr = std::move(other.m_implPtr);
    return *this;
 }
-
-Argument::~Argument()
-{}
 
 bool Argument::isNullable() const
 {

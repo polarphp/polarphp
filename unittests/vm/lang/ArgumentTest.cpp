@@ -13,6 +13,8 @@
 #include "polarphp/vm/lang/Argument.h"
 
 using polar::vmapi::ValueArgument;
+using polar::vmapi::RefArgument;
+using polar::vmapi::VariadicArgument;
 using polar::vmapi::Type;
 
 TEST(ArgumentTest, testConstructor)
@@ -24,6 +26,7 @@ TEST(ArgumentTest, testConstructor)
       ASSERT_EQ(arg.getType(), Type::Null);
       ASSERT_TRUE(arg.isRequired());
       ASSERT_FALSE(arg.isReference());
+      ASSERT_FALSE(arg.isVariadic());
    }
    {
       ValueArgument arg("argname", Type::Array);
@@ -104,4 +107,40 @@ TEST(ArgumentTest, testAssignOperator)
       ASSERT_STREQ(move.getClassName(), "classname1");
       ASSERT_FALSE(move.isNullable());
    }
+}
+
+TEST(ArgumentTest, testRefArguments)
+{
+   {
+      RefArgument arg("argname", "classname1", false);
+      ASSERT_FALSE(arg.isRequired());
+      ASSERT_STREQ(arg.getClassName(), "classname1");
+      ASSERT_FALSE(arg.isNullable());
+      ASSERT_FALSE(arg.isRequired());
+      ASSERT_FALSE(arg.isVariadic());
+      ASSERT_TRUE(arg.isReference());
+   }
+   {
+      RefArgument arg("argname", Type::Array, true);
+      ASSERT_TRUE(arg.isRequired());
+      ASSERT_STREQ(arg.getClassName(), nullptr);
+      ASSERT_EQ(arg.getType(), Type::Array);
+      ASSERT_FALSE(arg.isNullable());
+      ASSERT_TRUE(arg.isRequired());
+      ASSERT_FALSE(arg.isVariadic());
+      ASSERT_TRUE(arg.isReference());
+   }
+}
+
+TEST(ArgumentTest, testVaridicArguments)
+{
+
+   VariadicArgument arg("argname", true);
+   ASSERT_FALSE(arg.isRequired());
+   ASSERT_STREQ(arg.getClassName(), nullptr);
+   ASSERT_FALSE(arg.isNullable());
+   ASSERT_FALSE(arg.isRequired());
+   ASSERT_TRUE(arg.isVariadic());
+   ASSERT_TRUE(arg.isReference());
+   ASSERT_EQ(arg.getType(), Type::Undefined);
 }

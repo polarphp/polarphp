@@ -32,7 +32,7 @@ public:
    Argument(Argument &&other) noexcept;
    Argument &operator=(const Argument &other);
    Argument &operator=(Argument &&other) noexcept;
-   virtual ~Argument();
+   virtual ~Argument() = 0;
    bool isNullable() const;
    bool isReference() const;
    bool isRequired() const;
@@ -59,14 +59,12 @@ using Arguments = std::initializer_list<Argument>;
 class VMAPI_DECL_EXPORT RefArgument : public Argument
 {
 public:
-   RefArgument(const char *name, Type type = Type::Undefined, bool required = true,
-               bool isVariadic = false)
-      : Argument(name, type, required, true, isVariadic)
+   RefArgument(const char *name, Type type = Type::Null, bool required = true)
+      : Argument(name, type, required, true, false)
    {}
 
-   RefArgument(const char *name, const char *className, bool nullable = false,
-               bool required = true, bool isVariadic = false)
-      : Argument(name, className, nullable, required, true, isVariadic)
+   RefArgument(const char *name, const char *className, bool required = true)
+      : Argument(name, className, false, required, true, false)
    {}
 
    RefArgument(const RefArgument &argument)
@@ -84,13 +82,13 @@ class VMAPI_DECL_EXPORT ValueArgument : public Argument
 {
 public:
    ValueArgument(const char *name, Type type = Type::Null,
-                 bool required = true, bool isVariadic = false)
-      : Argument(name, type, required, false, isVariadic)
+                 bool required = true)
+      : Argument(name, type, required, false, false)
    {}
 
    ValueArgument(const char *name, const char *className, bool nullable = false,
-                 bool required = true, bool isVariadic = false)
-      : Argument(name, className, nullable, required, false, isVariadic)
+                 bool required = true)
+      : Argument(name, className, nullable, required, false, false)
    {}
 
    ValueArgument(const ValueArgument &argument)
@@ -107,13 +105,8 @@ public:
 class VMAPI_DECL_EXPORT VariadicArgument : public Argument
 {
 public:
-   VariadicArgument(const char *name, Type type = Type::Undefined, bool isReference = false)
-      : Argument(name, type, false, isReference, true)
-   {}
-
-   VariadicArgument(const char *name, const char *className, bool nullable = false,
-                    bool isReference = false)
-      : Argument(name, className, nullable, false, isReference, true)
+   VariadicArgument(const char *name, bool isReference = false)
+      : Argument(name, Type::Undefined, false, isReference, true)
    {}
 
    VariadicArgument(const ValueArgument &argument)

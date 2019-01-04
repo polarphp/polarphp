@@ -8,3 +8,13 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/12/28.
+
+#include "gtest/gtest.h"
+#include "polarphp/vm/lang/Function.h"
+
+using polar::vmapi::Function;
+using polar::vmapi::Arguments;
+using polar::vmapi::Type;
+using polar::vmapi::ValueArgument;
+using polar::vmapi::RefArgument;
+
