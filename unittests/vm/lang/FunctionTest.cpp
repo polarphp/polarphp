@@ -19,8 +19,10 @@ using polar::vmapi::ValueArgument;
 using polar::vmapi::RefArgument;
 using polar::vmapi::VariadicArgument;
 
+namespace {
 void dummy_func(struct _zend_execute_data *executeData, struct _zval_struct *returnValue)
 {}
+} // anonymous namespace
 
 TEST(FunctionTest, testConstructor)
 {

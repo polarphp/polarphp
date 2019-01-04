@@ -54,7 +54,7 @@ public:
    ///
    /// for unittest only
    ///
-   zend_function_entry buildCallableEntry(StringRef className = "") const noexcept;
+   zend_function_entry buildCallableEntry(bool isMethod = false) const noexcept;
 
 public:
    virtual Variant invoke(Parameters &parameters);
@@ -63,8 +63,8 @@ protected:
    Callable(CallablePrivate *implPtr);
    void setupCallableArgInfo(zend_internal_arg_info *info, const Argument &arg) const;
    static void invoke(INTERNAL_FUNCTION_PARAMETERS);
-   void initialize(zend_function_entry *entry, StringRef className = "", int flags = 0) const;
-   void initialize(zend_internal_function_info *info, StringRef className = "") const;
+   void initialize(zend_function_entry *entry, bool isMethod = false, int flags = 0) const;
+   void initialize(zend_internal_function_info *info, bool isMethod = false) const;
    void initialize(const std::string &prefix, zend_function_entry *entry);
 
 protected:

@@ -72,7 +72,7 @@ CallablePrivate::CallablePrivate(StringRef name, const Arguments &arguments)
    : CallablePrivate(name, nullptr,  arguments)
 {}
 
-void CallablePrivate::initialize(zend_function_entry *entry, StringRef className, int flags) const
+void CallablePrivate::initialize(zend_function_entry *entry, bool isMethod, int flags) const
 {
    if (m_callable) {
       entry->handler = m_callable;
@@ -87,13 +87,13 @@ void CallablePrivate::initialize(zend_function_entry *entry, StringRef className
    entry->num_args = m_argc;
    entry->flags = flags;
    // first arg info save the infomation of callable itself
-   initialize(reinterpret_cast<zend_internal_function_info *>(m_argv.get()), className);
+   initialize(reinterpret_cast<zend_internal_function_info *>(m_argv.get()), isMethod);
 }
 
-void CallablePrivate::initialize(zend_internal_function_info *info, StringRef className) const
+void CallablePrivate::initialize(zend_internal_function_info *info, bool isMethod) const
 {
    // we use new facility type system for zend_internal_function_info / zend_function_info
-   if (!className.empty()) {
+   if (isMethod) {
       // method
       if (m_name != "__construct" && m_name != "__destruct") {
          if (m_returnType == Type::Object) {
@@ -103,7 +103,7 @@ void CallablePrivate::initialize(zend_internal_function_info *info, StringRef cl
          }
       } else {
          ///
-         /// need review here
+         /// need review here, Z_L(1) mean nullable
          ///
          info->type = Z_L(1);
       }
@@ -236,11 +236,11 @@ Variant Callable::invoke(Parameters &parameters)
    return nullptr;
 }
 
-zend_function_entry Callable::buildCallableEntry(StringRef className) const noexcept
+zend_function_entry Callable::buildCallableEntry(bool isMethod) const noexcept
 {
    zend_function_entry entry;
    VMAPI_D(const Callable);
-   implPtr->initialize(&entry, className, static_cast<int>(implPtr->m_flags));
+   implPtr->initialize(&entry, isMethod, static_cast<int>(implPtr->m_flags));
    return entry;
 }
 
@@ -274,16 +274,16 @@ void Callable::invoke(INTERNAL_FUNCTION_PARAMETERS)
    }
 }
 
-void Callable::initialize(zend_function_entry *entry, StringRef className, int flags) const
+void Callable::initialize(zend_function_entry *entry, bool isMethod, int flags) const
 {
    VMAPI_D(const Callable);
-   implPtr->initialize(entry, className, flags);
+   implPtr->initialize(entry, isMethod, flags);
 }
 
-void Callable::initialize(zend_internal_function_info *info, StringRef className) const
+void Callable::initialize(zend_internal_function_info *info, bool isMethod) const
 {
    VMAPI_D(const Callable);
-   implPtr->initialize(info, className);
+   implPtr->initialize(info, isMethod);
 }
 
 void Callable::initialize(const std::string &prefix, zend_function_entry *entry)

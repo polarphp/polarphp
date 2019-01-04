@@ -32,8 +32,8 @@ using polar::basic::StringRef;
 class VMAPI_DECL_EXPORT Method : public Callable
 {
 public:
-   Method(StringRef name, ZendCallable callback, Modifier flags, const Arguments &args);
-   Method(StringRef name, Modifier flags, const Arguments &args);
+   Method(StringRef name, ZendCallable callback, Modifier flags = Modifier::Public, const Arguments &args = {});
+   Method(StringRef name, Modifier flags = Modifier::Public, const Arguments &args = {});
    Method(const Method &other);
    Method &operator=(const Method &other);
    virtual ~Method();

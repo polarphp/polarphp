@@ -134,7 +134,6 @@ TEST(ArgumentTest, testRefArguments)
 
 TEST(ArgumentTest, testVaridicArguments)
 {
-
    VariadicArgument arg("argname", true);
    ASSERT_FALSE(arg.isRequired());
    ASSERT_STREQ(arg.getClassName(), nullptr);
