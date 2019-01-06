@@ -30,26 +30,6 @@ using HANDLE = void *;
 using Callback = std::function<void()>;
 using ZendCallable = void(*)(struct _zend_execute_data *executeData, struct _zval_struct *returnValue);
 
-// native function signature type alias
-using NativeCallable0 = void (*)();
-using NativeCallable1 = void (*)(Parameters &);
-using NativeCallable2 = Variant (*)();
-using NativeCallable3 = Variant (*)(Parameters &);
-
-// class method signature type alias
-using MethodCallable0  = void (StdClass::*)();
-using MethodCallable1  = void (StdClass::*)(Parameters &);
-using MethodCallable2  = Variant (StdClass::*)();
-using MethodCallable3  = Variant (StdClass::*)(Parameters &);
-using MethodCallable4  = void (StdClass::*)() const;
-using MethodCallable5  = void (StdClass::*)(Parameters &) const;
-using MethodCallable6  = Variant (StdClass::*)() const;
-using MethodCallable7  = Variant (StdClass::*)(Parameters &) const;
-using MethodCallable8  = NativeCallable0;
-using MethodCallable9  = NativeCallable1;
-using MethodCallable10 = NativeCallable2;
-using MethodCallable11 = NativeCallable3;
-
 // class getter and setter signature type alias
 using GetterMethodCallable0 = Variant (StdClass::*)();
 using GetterMethodCallable1 = Variant (StdClass::*)() const;
