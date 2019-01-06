@@ -14,6 +14,7 @@
 
 #include "polarphp/vm/ZendApi.h"
 #include "polarphp/vm/lang/Argument.h"
+#include "polarphp/basic/adt/StringRef.h"
 
 namespace polar {
 namespace vmapi {
@@ -35,40 +36,44 @@ class AbstractClassPrivate;
 using internal::ModulePrivate;
 using internal::NamespacePrivate;
 using internal::AbstractClassPrivate;
+using polar::basic::StringRef;
 
 class VMAPI_DECL_EXPORT AbstractClass
 {
 public:
-   AbstractClass(const char *className, ClassType type);
+   AbstractClass(StringRef className, ClassType type);
    AbstractClass(const AbstractClass &other);
    AbstractClass(AbstractClass &&other) noexcept;
    AbstractClass &operator=(const AbstractClass &other);
    AbstractClass &operator=(AbstractClass &&other) noexcept;
    virtual ~AbstractClass();
-
    std::string getClassName() const;
 
-protected:
-   void registerMethod(const char *name, vmapi::ZendCallable callable, Modifier flags = Modifier::None, const Arguments &args = {});
-   // abstract
-   void registerMethod(const char *name, Modifier flags = Modifier::None, const Arguments &args = {});
+   ///
+   /// for test only
+   ///
+   zend_class_entry *buildClassEntry(StringRef ns, int moduleNumber) noexcept;
 
-   void registerProperty(const char *name, std::nullptr_t value, Modifier flags = Modifier::Public);
-   void registerProperty(const char *name, int16_t value, Modifier flags = Modifier::Public);
-   void registerProperty(const char *name, int32_t value, Modifier flags = Modifier::Public);
-   void registerProperty(const char *name, int64_t value, Modifier flags = Modifier::Public);
-   void registerProperty(const char *name, char value, Modifier flags = Modifier::Public);
-   void registerProperty(const char *name, const std::string &value, Modifier flags = Modifier::Public);
-   void registerProperty(const char *name, const char *value, Modifier flags = Modifier::Public);
-   void registerProperty(const char *name, bool value, Modifier flags = Modifier::Public);
-   void registerProperty(const char *name, double value, Modifier flags = Modifier::Public);
+protected:
+   void registerMethod(StringRef name, vmapi::ZendCallable callable, Modifier flags = Modifier::None, const Arguments &args = {});
+   // abstract
+   void registerMethod(StringRef name, Modifier flags = Modifier::None, const Arguments &args = {});
+
+   void registerProperty(StringRef name, std::nullptr_t value, Modifier flags = Modifier::Public);
+   void registerProperty(StringRef name, int16_t value, Modifier flags = Modifier::Public);
+   void registerProperty(StringRef name, int32_t value, Modifier flags = Modifier::Public);
+   void registerProperty(StringRef name, int64_t value, Modifier flags = Modifier::Public);
+   void registerProperty(StringRef name, const std::string &value, Modifier flags = Modifier::Public);
+   void registerProperty(StringRef name, const char *value, Modifier flags = Modifier::Public);
+   void registerProperty(StringRef name, bool value, Modifier flags = Modifier::Public);
+   void registerProperty(StringRef name, double value, Modifier flags = Modifier::Public);
    // callback property
-   void registerProperty(const char *name, const vmapi::GetterMethodCallable0 &getter);
-   void registerProperty(const char *name, const vmapi::GetterMethodCallable1 &getter);
-   void registerProperty(const char *name, const vmapi::GetterMethodCallable0 &getter, const vmapi::SetterMethodCallable0 &setter);
-   void registerProperty(const char *name, const vmapi::GetterMethodCallable0 &getter, const vmapi::SetterMethodCallable1 &setter);
-   void registerProperty(const char *name, const vmapi::GetterMethodCallable1 &getter, const vmapi::SetterMethodCallable0 &setter);
-   void registerProperty(const char *name, const vmapi::GetterMethodCallable1 &getter, const vmapi::SetterMethodCallable1 &setter);
+   void registerProperty(StringRef name, const vmapi::GetterMethodCallable0 &getter);
+   void registerProperty(StringRef name, const vmapi::GetterMethodCallable1 &getter);
+   void registerProperty(StringRef name, const vmapi::GetterMethodCallable0 &getter, const vmapi::SetterMethodCallable0 &setter);
+   void registerProperty(StringRef name, const vmapi::GetterMethodCallable0 &getter, const vmapi::SetterMethodCallable1 &setter);
+   void registerProperty(StringRef name, const vmapi::GetterMethodCallable1 &getter, const vmapi::SetterMethodCallable0 &setter);
+   void registerProperty(StringRef name, const vmapi::GetterMethodCallable1 &getter, const vmapi::SetterMethodCallable1 &setter);
 
    void registerConstant(const Constant &constant);
 
@@ -86,8 +91,8 @@ protected:
    virtual int callCompare(StdClass *left, StdClass *right) const;
    virtual void callClone(StdClass *nativeObject) const;
    virtual void callDestruct(StdClass *nativeObject) const;
-   virtual Variant callMagicCall(StdClass *nativeObject, const char *name, Parameters &params) const;
-   virtual Variant callMagicStaticCall(const char *name, Parameters &params) const;
+   virtual Variant callMagicCall(StdClass *nativeObject, StringRef name, Parameters &params) const;
+   virtual Variant callMagicStaticCall(StringRef name, Parameters &params) const;
    virtual Variant callMagicInvoke(StdClass *nativeObject, Parameters &params) const;
    virtual ArrayVariant callDebugInfo(StdClass *nativeObject) const;
    // property

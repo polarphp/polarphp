@@ -23,18 +23,21 @@ namespace internal
 class StringMemberPrivate : public AbstractMemberPrivate
 {
 public:
-   StringMemberPrivate(const char *name, const char *value, size_t size, Modifier flags)
+   StringMemberPrivate(StringRef name, const char *value, size_t size, Modifier flags)
       : AbstractMemberPrivate(name, flags),
         m_value(value, size)
    {}
-   StringMemberPrivate(const char *name, const char *value, Modifier flags)
+
+   StringMemberPrivate(StringRef name, const char *value, Modifier flags)
       : AbstractMemberPrivate(name, flags),
         m_value(value, std::strlen(value))
    {}
-   StringMemberPrivate(const char *name, const std::string &value, Modifier flags)
+
+   StringMemberPrivate(StringRef name, const std::string &value, Modifier flags)
       : AbstractMemberPrivate(name, flags),
         m_value(value)
    {}
+
    std::string m_value;
 };
 
@@ -42,22 +45,13 @@ public:
 
 using internal::StringMemberPrivate;
 
-StringMember::StringMember(const char *name, const char *value, size_t size, Modifier flags)
-   : AbstractMember(new StringMemberPrivate(name, value, size, flags))
-{}
-
-StringMember::StringMember(const char *name, const char *value, Modifier flags)
-   : AbstractMember(new StringMemberPrivate(name, value, flags))
-{}
-
-StringMember::StringMember(const char *name, const std::string &value, Modifier flags)
+StringMember::StringMember(StringRef name, StringRef value, Modifier flags)
    : AbstractMember(new StringMemberPrivate(name, value, flags))
 {}
 
 StringMember::StringMember(const StringMember &other)
    : AbstractMember(other)
-{
-}
+{}
 
 StringMember &StringMember::operator=(const StringMember &other)
 {

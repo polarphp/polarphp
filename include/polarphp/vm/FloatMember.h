@@ -28,7 +28,7 @@ using internal::FloatMemberPrivate;
 class FloatMember : public AbstractMember
 {
 public:
-   FloatMember(const char *name, double value, Modifier flags);
+   FloatMember(StringRef name, double value, Modifier flags);
    FloatMember(const FloatMember &other);
    FloatMember &operator=(const FloatMember &other);
    virtual ~FloatMember();

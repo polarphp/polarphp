@@ -20,7 +20,7 @@ namespace internal
 class BooleanMemberPrivate : public AbstractMemberPrivate
 {
 public:
-   BooleanMemberPrivate(const char *name, double value, Modifier flags)
+   BooleanMemberPrivate(StringRef name, double value, Modifier flags)
       : AbstractMemberPrivate(name, flags),
         m_value(value)
    {}
@@ -32,7 +32,7 @@ public:
 
 using internal::BooleanMemberPrivate;
 
-BooleanMember::BooleanMember(const char *name, double value, Modifier flags)
+BooleanMember::BooleanMember(StringRef name, double value, Modifier flags)
    : AbstractMember(new BooleanMemberPrivate(name, value, flags))
 {}
 

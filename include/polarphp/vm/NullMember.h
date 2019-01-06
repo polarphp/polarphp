@@ -20,7 +20,7 @@ namespace vmapi {
 class NullMember : public AbstractMember
 {
 public:
-   NullMember(const char *name, Modifier flags);
+   NullMember(StringRef name, Modifier flags);
    virtual ~NullMember();
 protected:
    virtual void setupConstant(zend_class_entry *entry);

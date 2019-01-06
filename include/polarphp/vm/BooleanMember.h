@@ -28,7 +28,7 @@ using internal::BooleanMemberPrivate;
 class BooleanMember : public AbstractMember
 {
 public:
-   BooleanMember(const char *name, double value, Modifier flags);
+   BooleanMember(StringRef name, double value, Modifier flags);
    BooleanMember(const BooleanMember &other);
    BooleanMember &operator=(const BooleanMember &other);
    virtual ~BooleanMember();

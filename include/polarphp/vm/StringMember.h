@@ -28,9 +28,7 @@ using internal::StringMemberPrivate;
 class VMAPI_DECL_EXPORT StringMember : public AbstractMember
 {
 public:
-   StringMember(const char *name, const char *value, size_t size, Modifier flags);
-   StringMember(const char *name, const char *value, Modifier flags);
-   StringMember(const char *name, const std::string &value, Modifier flags);
+   StringMember(StringRef name, StringRef value, Modifier flags);
    StringMember(const StringMember &other);
    StringMember &operator=(const StringMember &other);
    virtual ~StringMember();

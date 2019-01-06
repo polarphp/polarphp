@@ -20,7 +20,7 @@ namespace internal
 class FloatMemberPrivate : public AbstractMemberPrivate
 {
 public:
-   FloatMemberPrivate(const char *name, double value, Modifier flags)
+   FloatMemberPrivate(StringRef name, double value, Modifier flags)
       : AbstractMemberPrivate(name, flags),
         m_value(value)
    {}
@@ -31,7 +31,7 @@ public:
 
 using internal::FloatMemberPrivate;
 
-FloatMember::FloatMember(const char *name, double value, Modifier flags)
+FloatMember::FloatMember(StringRef name, double value, Modifier flags)
    : AbstractMember(new FloatMemberPrivate(name, value, flags))
 {}
 

@@ -18,7 +18,7 @@ namespace vmapi {
 AbstractMember::AbstractMember()
 {}
 
-AbstractMember::AbstractMember(const char *name, Modifier flags)
+AbstractMember::AbstractMember(StringRef name, Modifier flags)
    : m_implPtr(new AbstractMemberPrivate(name, flags))
 {}
 

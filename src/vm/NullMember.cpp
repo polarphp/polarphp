@@ -17,7 +17,7 @@ namespace vmapi {
 
 using internal::AbstractMemberPrivate;
 
-NullMember::NullMember(const char *name, Modifier flags)
+NullMember::NullMember(StringRef name, Modifier flags)
    : AbstractMember(name, flags)
 {}
 

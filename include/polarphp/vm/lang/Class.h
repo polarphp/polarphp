@@ -23,6 +23,8 @@
 #include "polarphp/vm/protocol/Traversable.h"
 #include "polarphp/vm/utils/CallableTraits.h"
 
+#include "polarphp/basic/adt/StringRef.h"
+
 namespace polar {
 namespace vmapi {
 
@@ -32,6 +34,8 @@ class Interface;
 // forward declare for internal::ClassMethodRegister
 template <typename T>
 class Class;
+
+using polar::basic::StringRef;
 
 namespace internal
 {
@@ -52,7 +56,7 @@ struct ClassMethodRegisterImpl<TargetClassType, CallalbleType, callable, false, 
    // is member pointer but class type of the pointer is not same with
    // register class type
 //public:
-//   static void registerMethod(Class<TargetClassType> &meta, const char *name, Modifier flags, const Arguments &args)
+//   static void registerMethod(Class<TargetClassType> &meta, StringRef name, Modifier flags, const Arguments &args)
 //   {
 //      ZAPI_ASSERT_X(false, "Class::registerMethod",
 //                    "try to register class member pointer, and the class type "
@@ -68,7 +72,7 @@ struct ClassMethodRegisterImpl<TargetClassType, CallalbleType, callable, true, f
    using ForwardCallableType = CallalbleType;
    // for static method register
 public:
-   inline static void registerMethod(Class<TargetClassType> &meta, const char *name, Modifier flags, const Arguments &args)
+   inline static void registerMethod(Class<TargetClassType> &meta, StringRef name, Modifier flags, const Arguments &args)
    {
       meta.registerMethod(name, &InvokeBridge<ForwardCallableType, callable>::invoke, flags | Modifier::Static, args);
    }
@@ -82,7 +86,7 @@ struct ClassMethodRegisterImpl<TargetClassType, CallalbleType, callable, false, 
    // for instance method register
    using ForwardCallableType = CallalbleType;
 public:
-   inline static void registerMethod(Class<TargetClassType> &meta, const char *name, Modifier flags, const Arguments &args)
+   inline static void registerMethod(Class<TargetClassType> &meta, StringRef name, Modifier flags, const Arguments &args)
    {
       meta.registerMethod(name, &InvokeBridge<ForwardCallableType, callable>::invoke, flags, args);
    }
@@ -122,7 +126,7 @@ class VMAPI_DECL_EXPORT Class final : public AbstractClass
 public:
    using HandlerClassType = T;
    public:
-   Class(const char *name, ClassType classType = ClassType::Regular);
+   Class(StringRef name, ClassType classType = ClassType::Regular);
    Class(const Class<T> &other);
    Class(Class<T> &&other) noexcept;
    virtual ~Class();
@@ -130,38 +134,38 @@ public:
    Class<T> &operator=(Class<T> &&other);
 public:
    template <typename CallableType, CallableType callable>
-   Class<T> &registerMethod(const char *name, Modifier flags, const Arguments &args = {});
+   Class<T> &registerMethod(StringRef name, Modifier flags, const Arguments &args = {});
    template <typename CallableType, CallableType callable>
-   Class<T> &registerMethod(const char *name, const Arguments &args = {});
+   Class<T> &registerMethod(StringRef name, const Arguments &args = {});
 
-   Class<T> &registerMethod(const char *name, Modifier flags, const Arguments &args = {});
-   Class<T> &registerMethod(const char *name, const Arguments &args = {});
+   Class<T> &registerMethod(StringRef name, Modifier flags, const Arguments &args = {});
+   Class<T> &registerMethod(StringRef name, const Arguments &args = {});
 
-   Class<T> &registerProperty(const char *name, std::nullptr_t value, Modifier flags = Modifier::Public);
-   Class<T> &registerProperty(const char *name, int16_t value, Modifier flags = Modifier::Public);
-   Class<T> &registerProperty(const char *name, int32_t value, Modifier flags = Modifier::Public);
-   Class<T> &registerProperty(const char *name, int64_t value, Modifier flags = Modifier::Public);
-   Class<T> &registerProperty(const char *name, char value, Modifier flags = Modifier::Public);
-   Class<T> &registerProperty(const char *name, const char *value, Modifier flags = Modifier::Public);
-   Class<T> &registerProperty(const char *name, const std::string &value, Modifier flags = Modifier::Public);
-   Class<T> &registerProperty(const char *name, bool value, Modifier flags = Modifier::Public);
-   Class<T> &registerProperty(const char *name, double value, Modifier flags = Modifier::Public);
-   Class<T> &registerProperty(const char *name, Variant (T::*getter)());
-   Class<T> &registerProperty(const char *name, Variant (T::*getter)() const);
-   Class<T> &registerProperty(const char *name, Variant (T::*getter)(), void (T::*setter)(const Variant &value));
-   Class<T> &registerProperty(const char *name, Variant (T::*getter)(), void (T::*setter)(const Variant &value) const);
-   Class<T> &registerProperty(const char *name, Variant (T::*getter)() const, void (T::*setter)(const Variant &value));
-   Class<T> &registerProperty(const char *name, Variant (T::*getter)() const, void (T::*setter)(const Variant &value) const);
+   Class<T> &registerProperty(StringRef name, std::nullptr_t value, Modifier flags = Modifier::Public);
+   Class<T> &registerProperty(StringRef name, int16_t value, Modifier flags = Modifier::Public);
+   Class<T> &registerProperty(StringRef name, int32_t value, Modifier flags = Modifier::Public);
+   Class<T> &registerProperty(StringRef name, int64_t value, Modifier flags = Modifier::Public);
+   Class<T> &registerProperty(StringRef name, char value, Modifier flags = Modifier::Public);
+   Class<T> &registerProperty(StringRef name, const char *value, Modifier flags = Modifier::Public);
+   Class<T> &registerProperty(StringRef name, const std::string &value, Modifier flags = Modifier::Public);
+   Class<T> &registerProperty(StringRef name, bool value, Modifier flags = Modifier::Public);
+   Class<T> &registerProperty(StringRef name, double value, Modifier flags = Modifier::Public);
+   Class<T> &registerProperty(StringRef name, Variant (T::*getter)());
+   Class<T> &registerProperty(StringRef name, Variant (T::*getter)() const);
+   Class<T> &registerProperty(StringRef name, Variant (T::*getter)(), void (T::*setter)(const Variant &value));
+   Class<T> &registerProperty(StringRef name, Variant (T::*getter)(), void (T::*setter)(const Variant &value) const);
+   Class<T> &registerProperty(StringRef name, Variant (T::*getter)() const, void (T::*setter)(const Variant &value));
+   Class<T> &registerProperty(StringRef name, Variant (T::*getter)() const, void (T::*setter)(const Variant &value) const);
 
-   Class<T> &registerConstant(const char *name, std::nullptr_t value);
-   Class<T> &registerConstant(const char *name, int16_t value);
-   Class<T> &registerConstant(const char *name, int32_t value);
-   Class<T> &registerConstant(const char *name, int64_t value);
-   Class<T> &registerConstant(const char *name, char value);
-   Class<T> &registerConstant(const char *name, const char *value);
-   Class<T> &registerConstant(const char *name, const std::string &value);
-   Class<T> &registerConstant(const char *name, bool value);
-   Class<T> &registerConstant(const char *name, double value);
+   Class<T> &registerConstant(StringRef name, std::nullptr_t value);
+   Class<T> &registerConstant(StringRef name, int16_t value);
+   Class<T> &registerConstant(StringRef name, int32_t value);
+   Class<T> &registerConstant(StringRef name, int64_t value);
+   Class<T> &registerConstant(StringRef name, char value);
+   Class<T> &registerConstant(StringRef name, const char *value);
+   Class<T> &registerConstant(StringRef name, const std::string &value);
+   Class<T> &registerConstant(StringRef name, bool value);
+   Class<T> &registerConstant(StringRef name, double value);
    Class<T> &registerConstant(const Constant &constant);
 
    Class<T> &registerInterface(const Interface &interface);
@@ -181,8 +185,8 @@ private:
    virtual void callClone(StdClass *nativeObject) const override;
    virtual int callCompare(StdClass *left, StdClass *right) const override;
    virtual void callDestruct(StdClass *nativeObject) const override;
-   virtual Variant callMagicCall(StdClass *nativeObject, const char *name, Parameters &params) const override;
-   virtual Variant callMagicStaticCall(const char *name, Parameters &params) const override;
+   virtual Variant callMagicCall(StdClass *nativeObject, StringRef name, Parameters &params) const override;
+   virtual Variant callMagicStaticCall(StringRef name, Parameters &params) const override;
    virtual Variant callMagicInvoke(StdClass *nativeObject, Parameters &params) const override;
    virtual ArrayVariant callDebugInfo(StdClass *nativeObject) const override;
 
@@ -227,11 +231,11 @@ private:
 
    template <typename X>
    typename std::enable_if<HasCallStatic<X>::value, Variant>::type
-   static doCallStatic(const char *name, Parameters &params);
+   static doCallStatic(StringRef name, Parameters &params);
 
    template <typename X>
    typename std::enable_if<!HasCallStatic<X>::value, Variant>::type
-   static doCallStatic(const char *name, Parameters &params);
+   static doCallStatic(StringRef name, Parameters &params);
    using AbstractClass::registerMethod;
 
    template <typename TargetClassType, typename CallalbleType,
@@ -240,7 +244,7 @@ private:
 };
 
 template <typename T>
-Class<T>::Class(const char *name, ClassType classType)
+Class<T>::Class(StringRef name, ClassType classType)
    : AbstractClass(name, classType)
 {}
 
@@ -286,7 +290,7 @@ Class<T> &Class<T>::registerBaseClass(Class<ClassType> &&baseClass)
 
 template <typename T>
 template <typename CallableType, CallableType callable>
-Class<T> &Class<T>::registerMethod(const char *name, Modifier flags, const Arguments &args)
+Class<T> &Class<T>::registerMethod(StringRef name, Modifier flags, const Arguments &args)
 {
    internal::ClassMethodRegister<T, typename std::decay<CallableType>::type, callable>::registerMethod(*this, name, flags, args);
    return *this;
@@ -294,7 +298,7 @@ Class<T> &Class<T>::registerMethod(const char *name, Modifier flags, const Argum
 
 template <typename T>
 template <typename CallableType, CallableType callable>
-Class<T> &Class<T>::registerMethod(const char *name, const Arguments &args)
+Class<T> &Class<T>::registerMethod(StringRef name, const Arguments &args)
 {
    // we must ensure the T is same with ClassType in CallableType
    internal::ClassMethodRegister<T, typename std::decay<CallableType>::type, callable>::registerMethod(*this, name, Modifier::Public, args);
@@ -302,97 +306,97 @@ Class<T> &Class<T>::registerMethod(const char *name, const Arguments &args)
 }
 
 template <typename T>
-Class<T> &Class<T>::registerMethod(const char *name, Modifier flags, const Arguments &args)
+Class<T> &Class<T>::registerMethod(StringRef name, Modifier flags, const Arguments &args)
 {
    AbstractClass::registerMethod(name, flags | Modifier::Abstract, args);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerMethod(const char *name, const Arguments &args)
+Class<T> &Class<T>::registerMethod(StringRef name, const Arguments &args)
 {
    AbstractClass::registerMethod(name, Modifier::Public | Modifier::Abstract, args);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, std::nullptr_t value, Modifier flags)
+Class<T> &Class<T>::registerProperty(StringRef name, std::nullptr_t value, Modifier flags)
 {
    AbstractClass::registerProperty(name, value, flags);
    return *this;
 }
 template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, int16_t value, Modifier flags)
-{
-   AbstractClass::registerProperty(name, value, flags);
-   return *this;
-}
-
-template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, int32_t value, Modifier flags)
+Class<T> &Class<T>::registerProperty(StringRef name, int16_t value, Modifier flags)
 {
    AbstractClass::registerProperty(name, value, flags);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, int64_t value, Modifier flags)
+Class<T> &Class<T>::registerProperty(StringRef name, int32_t value, Modifier flags)
 {
    AbstractClass::registerProperty(name, value, flags);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, char value, Modifier flags)
+Class<T> &Class<T>::registerProperty(StringRef name, int64_t value, Modifier flags)
 {
    AbstractClass::registerProperty(name, value, flags);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, const char *value, Modifier flags)
+Class<T> &Class<T>::registerProperty(StringRef name, char value, Modifier flags)
 {
    AbstractClass::registerProperty(name, value, flags);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, const std::string &value, Modifier flags)
+Class<T> &Class<T>::registerProperty(StringRef name, const char *value, Modifier flags)
 {
    AbstractClass::registerProperty(name, value, flags);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, bool value, Modifier flags)
+Class<T> &Class<T>::registerProperty(StringRef name, const std::string &value, Modifier flags)
 {
    AbstractClass::registerProperty(name, value, flags);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, double value, Modifier flags)
+Class<T> &Class<T>::registerProperty(StringRef name, bool value, Modifier flags)
 {
    AbstractClass::registerProperty(name, value, flags);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, Variant (T::*getter)())
+Class<T> &Class<T>::registerProperty(StringRef name, double value, Modifier flags)
+{
+   AbstractClass::registerProperty(name, value, flags);
+   return *this;
+}
+
+template <typename T>
+Class<T> &Class<T>::registerProperty(StringRef name, Variant (T::*getter)())
 {
    AbstractClass::registerProperty(name, static_cast<GetterMethodCallable0>(getter));
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, Variant (T::*getter)() const)
+Class<T> &Class<T>::registerProperty(StringRef name, Variant (T::*getter)() const)
 {
    AbstractClass::registerProperty(name, static_cast<GetterMethodCallable1>(getter));
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, Variant (T::*getter)(),
+Class<T> &Class<T>::registerProperty(StringRef name, Variant (T::*getter)(),
                                      void (T::*setter)(const Variant &value))
 {
    AbstractClass::registerProperty(name, static_cast<GetterMethodCallable0>(getter),
@@ -401,7 +405,7 @@ Class<T> &Class<T>::registerProperty(const char *name, Variant (T::*getter)(),
 }
 
 template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, Variant (T::*getter)(),
+Class<T> &Class<T>::registerProperty(StringRef name, Variant (T::*getter)(),
                                      void (T::*setter)(const Variant &value) const)
 {
    AbstractClass::registerProperty(name, static_cast<GetterMethodCallable0>(getter),
@@ -410,7 +414,7 @@ Class<T> &Class<T>::registerProperty(const char *name, Variant (T::*getter)(),
 }
 
 template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, Variant (T::*getter)() const,
+Class<T> &Class<T>::registerProperty(StringRef name, Variant (T::*getter)() const,
                                      void (T::*setter)(const Variant &value))
 {
    AbstractClass::registerProperty(name, static_cast<GetterMethodCallable1>(getter),
@@ -419,7 +423,7 @@ Class<T> &Class<T>::registerProperty(const char *name, Variant (T::*getter)() co
 }
 
 template <typename T>
-Class<T> &Class<T>::registerProperty(const char *name, Variant (T::*getter)() const,
+Class<T> &Class<T>::registerProperty(StringRef name, Variant (T::*getter)() const,
                                      void (T::*setter)(const Variant &value) const)
 {
    AbstractClass::registerProperty(name, static_cast<GetterMethodCallable1>(getter),
@@ -428,63 +432,63 @@ Class<T> &Class<T>::registerProperty(const char *name, Variant (T::*getter)() co
 }
 
 template <typename T>
-Class<T> &Class<T>::registerConstant(const char *name, std::nullptr_t value)
+Class<T> &Class<T>::registerConstant(StringRef name, std::nullptr_t value)
 {
    AbstractClass::registerProperty(name, value, Modifier::Const);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerConstant(const char *name, int16_t value)
+Class<T> &Class<T>::registerConstant(StringRef name, int16_t value)
 {
    AbstractClass::registerProperty(name, value, Modifier::Const);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerConstant(const char *name, int32_t value)
+Class<T> &Class<T>::registerConstant(StringRef name, int32_t value)
 {
    AbstractClass::registerProperty(name, value, Modifier::Const);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerConstant(const char *name, int64_t value)
+Class<T> &Class<T>::registerConstant(StringRef name, int64_t value)
 {
    AbstractClass::registerProperty(name, value, Modifier::Const);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerConstant(const char *name, char value)
+Class<T> &Class<T>::registerConstant(StringRef name, char value)
 {
    AbstractClass::registerProperty(name, value, Modifier::Const);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerConstant(const char *name, const char *value)
+Class<T> &Class<T>::registerConstant(StringRef name, const char *value)
 {
    AbstractClass::registerProperty(name, value, Modifier::Const);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerConstant(const char *name, const std::string &value)
+Class<T> &Class<T>::registerConstant(StringRef name, const std::string &value)
 {
    AbstractClass::registerProperty(name, value, Modifier::Const);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerConstant(const char *name, bool value)
+Class<T> &Class<T>::registerConstant(StringRef name, bool value)
 {
    AbstractClass::registerProperty(name, value, Modifier::Const);
    return *this;
 }
 
 template <typename T>
-Class<T> &Class<T>::registerConstant(const char *name, double value)
+Class<T> &Class<T>::registerConstant(StringRef name, double value)
 {
    AbstractClass::registerProperty(name, value, Modifier::Const);
    return *this;
@@ -511,14 +515,14 @@ void Class<T>::callDestruct(StdClass *nativeObject) const
 }
 
 template <typename T>
-Variant Class<T>::callMagicCall(StdClass *nativeObject, const char *name, Parameters &params) const
+Variant Class<T>::callMagicCall(StdClass *nativeObject, StringRef name, Parameters &params) const
 {
    T *object = static_cast<T *>(nativeObject);
    return object->__call(name, params);
 }
 
 template <typename T>
-Variant Class<T>::callMagicStaticCall(const char *name, Parameters &params) const
+Variant Class<T>::callMagicStaticCall(StringRef name, Parameters &params) const
 {
    return doCallStatic<T>(name, params);
 }
@@ -628,7 +632,7 @@ Class<T>::doCloneObject(X *orig)
 template <typename T>
 template <typename X>
 typename std::enable_if<Class<T>::template HasCallStatic<X>::value, Variant>::type
-Class<T>::doCallStatic(const char *name, Parameters &params)
+Class<T>::doCallStatic(StringRef name, Parameters &params)
 {
    return X::__callStatic(name, params);
 }
@@ -636,7 +640,7 @@ Class<T>::doCallStatic(const char *name, Parameters &params)
 template <typename T>
 template <typename X>
 typename std::enable_if<!Class<T>::template HasCallStatic<X>::value, Variant>::type
-Class<T>::doCallStatic(const char *name, Parameters &params)
+Class<T>::doCallStatic(StringRef name, Parameters &params)
 {
    notImplemented();
    // prevent some compiler warnning

@@ -13,6 +13,7 @@
 #define POLARPHP_VMAPI_ABSTRACT_MEMBER_H
 
 #include "polarphp/vm/ZendApi.h"
+#include "polarphp/basic/adt/StringRef.h"
 
 namespace polar {
 namespace vmapi {
@@ -24,12 +25,13 @@ class AbstractClassPrivate;
 
 using internal::AbstractClassPrivate;
 using internal::AbstractMemberPrivate;
+using polar::basic::StringRef;
 
 class AbstractMember
 {
 public:
    AbstractMember();
-   AbstractMember(const char *name, Modifier flags);
+   AbstractMember(StringRef name, Modifier flags);
    AbstractMember(const AbstractMember &other);
    AbstractMember(AbstractMember &&other) noexcept;
    virtual ~AbstractMember();

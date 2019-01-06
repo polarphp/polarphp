@@ -13,6 +13,7 @@
 #define POLARPHP_VMAPI_INTERNAL_ABSTRACT_CLASS_PRIVATE_H
 
 #include "polarphp/vm/ZendApi.h"
+#include "polarphp/basic/adt/StringRef.h"
 
 #include <string>
 #include <list>
@@ -30,6 +31,8 @@ class AbstractMember;
 class AbstractClass;
 class Property;
 
+using polar::basic::StringRef;
+
 namespace internal
 {
 
@@ -46,7 +49,7 @@ using ContextMapType = std::map<std::string, std::shared_ptr<CallContext>>;
 class AbstractClassPrivate
 {
 public:
-   AbstractClassPrivate(const char *classname, ClassType type);
+   AbstractClassPrivate(StringRef classname, ClassType type);
    zend_class_entry *initialize(AbstractClass *cls, const std::string &ns, int moduleNumber);
    std::unique_ptr<zend_function_entry[]> &getMethodEntries();
    zend_object_handlers *getObjectHandlers();

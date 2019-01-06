@@ -134,10 +134,10 @@ void verify_abstract_class(zend_class_entry *ce)
 
 ContextMapType AbstractClassPrivate::sm_contextPtrs;
 
-AbstractClassPrivate::AbstractClassPrivate(const char *className, ClassType type)
+AbstractClassPrivate::AbstractClassPrivate(StringRef className, ClassType type)
    : m_type(type),
      m_self(nullptr, acp_ptr_deleter),
-     m_name(className)
+     m_name(className.getStr())
 {}
 
 zend_class_entry *AbstractClassPrivate::initialize(AbstractClass *cls, const std::string &ns, int moduleNumber)
@@ -955,7 +955,7 @@ zval *AbstractClassPrivate::toZval(Variant &&value, int type, zval *rv)
 } // internal
 
 
-AbstractClass::AbstractClass(const char *className, ClassType type)
+AbstractClass::AbstractClass(StringRef className, ClassType type)
    : m_implPtr(std::make_shared<AbstractClassPrivate>(className, type))
 {
 }
@@ -982,6 +982,11 @@ AbstractClass::~AbstractClass()
 std::string AbstractClass::getClassName() const
 {
    return m_implPtr->m_name;
+}
+
+zend_class_entry *AbstractClass::buildClassEntry(StringRef ns, int moduleNumber) noexcept
+{
+   return initialize(ns, moduleNumber);
 }
 
 AbstractClass &AbstractClass::operator=(AbstractClass &&other) noexcept
@@ -1015,102 +1020,95 @@ void AbstractClass::registerBaseClass(AbstractClass &&base)
    implPtr->m_parent = std::make_shared<AbstractClass>(std::move(base));
 }
 
-void AbstractClass::registerProperty(const char *name, std::nullptr_t, Modifier flags)
+void AbstractClass::registerProperty(StringRef name, std::nullptr_t, Modifier flags)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_members.push_back(std::make_shared<NullMember>(name, flags & Modifier::PropertyModifiers));
 }
 
-void AbstractClass::registerProperty(const char *name, int16_t value, Modifier flags)
+void AbstractClass::registerProperty(StringRef name, int16_t value, Modifier flags)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_members.push_back(std::make_shared<NumericMember>(name, value,
                                                                 flags & Modifier::PropertyModifiers));
 }
 
-void AbstractClass::registerProperty(const char *name, int32_t value, Modifier flags)
+void AbstractClass::registerProperty(StringRef name, int32_t value, Modifier flags)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_members.push_back(std::make_shared<NumericMember>(name, value,
                                                                 flags & Modifier::PropertyModifiers));
 }
 
-void AbstractClass::registerProperty(const char *name, int64_t value, Modifier flags)
+void AbstractClass::registerProperty(StringRef name, int64_t value, Modifier flags)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_members.push_back(std::make_shared<NumericMember>(name, value,
                                                                 flags & Modifier::PropertyModifiers));
 }
 
-void AbstractClass::registerProperty(const char *name, char value, Modifier flags)
-{
-   VMAPI_D(AbstractClass);
-   implPtr->m_members.push_back(std::make_shared<StringMember>(name, &value, 1,
-                                                               flags & Modifier::PropertyModifiers));
-}
-
-void AbstractClass::registerProperty(const char *name, const std::string &value, Modifier flags)
+void AbstractClass::registerProperty(StringRef name, const std::string &value, Modifier flags)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_members.push_back(std::make_shared<StringMember>(name, value,
                                                                flags & Modifier::PropertyModifiers));
 }
 
-void AbstractClass::registerProperty(const char *name, const char *value, Modifier flags)
+void AbstractClass::registerProperty(StringRef name, const char *value, Modifier flags)
 {
    VMAPI_D(AbstractClass);
-   implPtr->m_members.push_back(std::make_shared<StringMember>(name, value, std::strlen(value),
+   implPtr->m_members.push_back(std::make_shared<StringMember>(name, StringRef(value, std::strlen(value)),
                                                                flags & Modifier::PropertyModifiers));
 }
 
-void AbstractClass::registerProperty(const char *name, bool value, Modifier flags)
+void AbstractClass::registerProperty(StringRef name, bool value, Modifier flags)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_members.push_back(std::make_shared<BooleanMember>(name, value,
                                                                 flags & Modifier::PropertyModifiers));
 }
 
-void AbstractClass::registerProperty(const char *name, double value, Modifier flags)
+void AbstractClass::registerProperty(StringRef name, double value, Modifier flags)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_members.push_back(std::make_shared<FloatMember>(name, value,
                                                               flags & Modifier::PropertyModifiers));
 }
 
-void AbstractClass::registerProperty(const char *name, const GetterMethodCallable0 &getter)
+void AbstractClass::registerProperty(StringRef name, const GetterMethodCallable0 &getter)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_properties[name] = std::make_shared<Property>(getter);
 }
 
-void AbstractClass::registerProperty(const char *name, const GetterMethodCallable1 &getter)
+void AbstractClass::registerProperty(StringRef name, const GetterMethodCallable1 &getter)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_properties[name] = std::make_shared<Property>(getter);
 }
 
-void AbstractClass::registerProperty(const char *name, const GetterMethodCallable0 &getter,
+void AbstractClass::registerProperty(StringRef name, const GetterMethodCallable0 &getter,
                                      const SetterMethodCallable0 &setter)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_properties[name] = std::make_shared<Property>(getter, setter);
 }
 
-void AbstractClass::registerProperty(const char *name, const GetterMethodCallable0 &getter,
+void AbstractClass::registerProperty(StringRef name, const GetterMethodCallable0 &getter,
                                      const SetterMethodCallable1 &setter)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_properties[name] = std::make_shared<Property>(getter, setter);
 }
 
-void AbstractClass::registerProperty(const char *name, const GetterMethodCallable1 &getter,
+void AbstractClass::registerProperty(StringRef name, const GetterMethodCallable1 &getter,
                                      const SetterMethodCallable0 &setter)
 {
    VMAPI_D(AbstractClass);
    implPtr->m_properties[name] = std::make_shared<Property>(getter, setter);
 }
 
-void AbstractClass::registerProperty(const char *name, const GetterMethodCallable1 &getter,
+void AbstractClass::registerProperty(StringRef name, const GetterMethodCallable1 &getter,
                                      const SetterMethodCallable1 &setter)
 {
    VMAPI_D(AbstractClass);
@@ -1152,14 +1150,14 @@ void AbstractClass::registerConstant(const Constant &constant)
    }
 }
 
-void AbstractClass::registerMethod(const char *name, ZendCallable callable,
+void AbstractClass::registerMethod(StringRef name, ZendCallable callable,
                                    Modifier flags, const Arguments &args)
 {
    m_implPtr->m_methods.push_back(std::make_shared<Method>(name, callable, (flags & Modifier::MethodModifiers), args));
 }
 
 // abstract
-void AbstractClass::registerMethod(const char *name, Modifier flags, const Arguments &args)
+void AbstractClass::registerMethod(StringRef name, Modifier flags, const Arguments &args)
 {
    m_implPtr->m_methods.push_back(std::make_shared<Method>(name, (flags & Modifier::MethodModifiers) | Modifier::Abstract, args));
 }
@@ -1185,12 +1183,12 @@ void AbstractClass::callClone(StdClass *nativeObject) const
 void AbstractClass::callDestruct(StdClass *nativeObject) const
 {}
 
-Variant AbstractClass::callMagicCall(StdClass *nativeObject, const char *name, Parameters &params) const
+Variant AbstractClass::callMagicCall(StdClass *nativeObject, StringRef name, Parameters &params) const
 {
    return nullptr;
 }
 
-Variant AbstractClass::callMagicStaticCall(const char *name, Parameters &params) const
+Variant AbstractClass::callMagicStaticCall(StringRef name, Parameters &params) const
 {
    return nullptr;
 }

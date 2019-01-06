@@ -28,7 +28,7 @@ using internal::NumericMemberPrivate;
 class NumericMember : public AbstractMember
 {
 public:
-   NumericMember(const char *name, double value, Modifier flags);
+   NumericMember(StringRef name, double value, Modifier flags);
    NumericMember(const NumericMember &other);
    NumericMember &operator=(const NumericMember &other);
    virtual ~NumericMember();

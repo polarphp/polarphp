@@ -20,7 +20,7 @@ namespace internal
 class NumericMemberPrivate : public AbstractMemberPrivate
 {
 public:
-   NumericMemberPrivate(const char *name, double value, Modifier flags)
+   NumericMemberPrivate(StringRef name, double value, Modifier flags)
       : AbstractMemberPrivate(name, flags),
         m_value(value)
    {}
@@ -31,7 +31,7 @@ public:
 
 using internal::NumericMemberPrivate;
 
-NumericMember::NumericMember(const char *name, double value, Modifier flags)
+NumericMember::NumericMember(StringRef name, double value, Modifier flags)
    : AbstractMember(new NumericMemberPrivate(name, value, flags))
 {}
 
