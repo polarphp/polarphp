@@ -37,6 +37,7 @@ public:
    virtual ~AbstractMember();
    AbstractMember &operator=(const AbstractMember &other);
    AbstractMember &operator=(AbstractMember &&other) noexcept;
+   bool isConstant() const noexcept;
 protected:
    AbstractMember(AbstractMemberPrivate *implPtr);
    void initialize(zend_class_entry *entry);

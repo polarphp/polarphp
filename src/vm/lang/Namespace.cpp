@@ -61,29 +61,29 @@ void NamespacePrivate::initializeClasses(const std::string &ns, int moduleNumber
    }
 }
 
-size_t NamespacePrivate::calculateFunctionQuantity() const
+size_t NamespacePrivate::calculateFunctionCount() const
 {
    size_t ret = m_functions.size();
    for (const std::shared_ptr<Namespace> &ns : m_namespaces) {
-      ret += ns->m_implPtr->calculateFunctionQuantity();
+      ret += ns->m_implPtr->calculateFunctionCount();
    }
    return ret;
 }
 
-size_t NamespacePrivate::calculateClassQuantity() const
+size_t NamespacePrivate::calculateClassCount() const
 {
    size_t ret = m_classes.size();
    for (const std::shared_ptr<Namespace> &ns : m_namespaces) {
-      ret += ns->m_implPtr->calculateClassQuantity();
+      ret += ns->m_implPtr->calculateClassCount();
    }
    return ret;
 }
 
-size_t NamespacePrivate::calculateConstantQuantity() const
+size_t NamespacePrivate::calculateConstantCount() const
 {
    size_t ret = m_constants.size();
    for (const std::shared_ptr<Namespace> &ns : m_namespaces) {
-      ret += ns->m_implPtr->calculateConstantQuantity();
+      ret += ns->m_implPtr->calculateConstantCount();
    }
    return ret;
 }
@@ -168,16 +168,16 @@ AbstractClass *Namespace::findClass(const std::string &clsName) const
    return nullptr;
 }
 
-size_t Namespace::getFunctionQuantity() const
+size_t Namespace::getFunctionCount() const
 {
    VMAPI_D(const Namespace);
-   return implPtr->calculateFunctionQuantity();
+   return implPtr->calculateFunctionCount();
 }
 
 size_t Namespace::getClassQuanlity() const
 {
    VMAPI_D(const Namespace);
-   return implPtr->calculateClassQuantity();
+   return implPtr->calculateClassCount();
 }
 
 const std::string &Namespace::getName() const
@@ -189,7 +189,7 @@ const std::string &Namespace::getName() const
 size_t Namespace::getConstantQuanlity() const
 {
    VMAPI_D(const Namespace);
-   return implPtr->calculateConstantQuantity();
+   return implPtr->calculateConstantCount();
 }
 
 Namespace &Namespace::registerNamespace(const Namespace &ns)

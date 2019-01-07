@@ -55,7 +55,7 @@ public:
    Namespace *findNamespace(const std::string &ns) const;
    AbstractClass *findClass(const std::string &clsName) const;
 
-   size_t getFunctionQuantity() const;
+   size_t getFunctionCount() const;
    size_t getConstantQuanlity() const;
    size_t getClassQuanlity() const;
 

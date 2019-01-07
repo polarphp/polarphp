@@ -53,15 +53,16 @@ template <typename TargetClassType,
           CallalbleType callable>
 struct ClassMethodRegisterImpl<TargetClassType, CallalbleType, callable, false, false>
 {
-   // is member pointer but class type of the pointer is not same with
-   // register class type
-//public:
-//   static void registerMethod(Class<TargetClassType> &meta, StringRef name, Modifier flags, const Arguments &args)
-//   {
-//      ZAPI_ASSERT_X(false, "Class::registerMethod",
-//                    "try to register class member pointer, and the class type "
-//                    "of the member pointer is not the registered class type");
-//   }
+   /// error situation
+   /// is member pointer but class type of the pointer is not same with
+   /// register class type
+   ///public:
+   ///   static void registerMethod(Class<TargetClassType> &meta, StringRef name, Modifier flags, const Arguments &args)
+   ///   {
+   ///      ZAPI_ASSERT_X(false, "Class::registerMethod",
+   ///                    "try to register class member pointer, and the class type "
+   ///                    "of the member pointer is not the registered class type");
+   ///   }
 };
 
 template <typename TargetClassType,
@@ -70,7 +71,7 @@ template <typename TargetClassType,
 struct ClassMethodRegisterImpl<TargetClassType, CallalbleType, callable, true, false>
 {
    using ForwardCallableType = CallalbleType;
-   // for static method register
+   /// for static method register
 public:
    inline static void registerMethod(Class<TargetClassType> &meta, StringRef name, Modifier flags, const Arguments &args)
    {
@@ -83,7 +84,7 @@ template <typename TargetClassType,
           CallalbleType callable>
 struct ClassMethodRegisterImpl<TargetClassType, CallalbleType, callable, false, true>
 {
-   // for instance method register
+   /// for instance method register
    using ForwardCallableType = CallalbleType;
 public:
    inline static void registerMethod(Class<TargetClassType> &meta, StringRef name, Modifier flags, const Arguments &args)
@@ -97,7 +98,7 @@ template <typename TargetClassType,
           CallalbleType callable>
 struct ClassMethodRegisterImpl<TargetClassType, CallalbleType, callable, true, true>
 {
-   // error situation
+   /// error situation
 };
 
 template <typename TargetClassType,
@@ -119,7 +120,6 @@ struct ClassMethodRegister
 ///
 /// Refactor Class::registerMethod
 ///
-
 template <typename T>
 class VMAPI_DECL_EXPORT Class final : public AbstractClass
 {

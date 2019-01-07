@@ -20,7 +20,7 @@ TEST(TypeTest, testModifierOperator)
       Modifier modifier = Modifier::Abstract;
       ASSERT_TRUE(modifier == Modifier::Abstract);
       modifier |= Modifier::Public;
-      ASSERT_TRUE(modifier == 0x02 | 0x100);
+      ASSERT_TRUE(modifier == (0x02 | 0x100));
    }
    ASSERT_EQ(Modifier::Abstract | Modifier::Public, (0x02 | 0x100));
    ASSERT_EQ(Modifier::MethodModifiers, Modifier::Final | Modifier::Public | Modifier::Protected | Modifier::Private | Modifier::Static);

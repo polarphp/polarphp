@@ -79,11 +79,11 @@ public:
    Namespace *findNamespace(const std::string &ns) const;
    AbstractClass *findClass(const std::string &clsName) const;
 
-   size_t getIniQuantity() const;
-   size_t getFunctionQuantity() const;
-   size_t getConstantQuantity() const;
-   size_t getNamespaceQuantity() const;
-   size_t getClassQuantity() const;
+   size_t getIniCount() const;
+   size_t getFunctionCount() const;
+   size_t getConstantCount() const;
+   size_t getNamespaceCount() const;
+   size_t getClassCount() const;
    operator void * ()
    {
       return getModule();

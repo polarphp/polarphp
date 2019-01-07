@@ -15,6 +15,7 @@
 #include "polarphp/vm/ZendApi.h"
 #include "polarphp/vm/lang/Argument.h"
 #include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/vm/TypeDefs.h"
 
 namespace polar {
 namespace vmapi {
@@ -48,6 +49,11 @@ public:
    AbstractClass &operator=(AbstractClass &&other) noexcept;
    virtual ~AbstractClass();
    std::string getClassName() const;
+
+   size_t getPropertyCount() const;
+   size_t getInterfaceCount() const;
+   size_t getMethodCount() const;
+   size_t getConstantCount() const;
 
    ///
    /// for test only

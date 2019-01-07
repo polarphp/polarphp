@@ -49,6 +49,11 @@ AbstractMember &AbstractMember::operator=(AbstractMember &&other) noexcept
    return *this;
 }
 
+bool AbstractMember::isConstant() const noexcept
+{
+   return (m_implPtr->m_flags & Modifier::Const) == Modifier::Const;
+}
+
 void AbstractMember::initialize(zend_class_entry *entry)
 {
    VMAPI_D(AbstractMember);

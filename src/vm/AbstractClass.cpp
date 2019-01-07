@@ -155,7 +155,9 @@ zend_class_entry *AbstractClassPrivate::initialize(AbstractClass *cls, const std
    // check if traversable
    if (m_apiPtr->traversable()) {
       entry.get_iterator = &AbstractClassPrivate::getIterator;
-      // // from 7.3 and up, we may have to allocate it ourself
+      /// TODO review here
+      /// from 7.3 and up, we may have to allocate it ourself
+      /// entry.iterator_funcs_ptr = calloc(1, sizeof(zend_class_iterator_funcs))
    }
    // check if serializable
    if (m_apiPtr->serializable()) {
@@ -982,6 +984,32 @@ AbstractClass::~AbstractClass()
 std::string AbstractClass::getClassName() const
 {
    return m_implPtr->m_name;
+}
+
+size_t AbstractClass::getPropertyCount() const
+{
+   return m_implPtr->m_properties.size();
+}
+
+size_t AbstractClass::getInterfaceCount() const
+{
+   return m_implPtr->m_interfaces.size();
+}
+
+size_t AbstractClass::getMethodCount() const
+{
+   return m_implPtr->m_methods.size();
+}
+
+size_t AbstractClass::getConstantCount() const
+{
+   size_t ret = 0;
+   for (std::shared_ptr<AbstractMember> member : m_implPtr->m_members) {
+      if (member->isConstant()) {
+         ++ret;
+      }
+   }
+   return ret;
 }
 
 zend_class_entry *AbstractClass::buildClassEntry(StringRef ns, int moduleNumber) noexcept

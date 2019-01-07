@@ -52,8 +52,8 @@ public:
    void iterateClasses(const std::function<void(AbstractClass &cls)> &callback);
 
    zend_module_entry *getModule();
-   size_t getFunctionQuantity() const;
-   size_t getIniQuantity() const;
+   size_t getFunctionCount() const;
+   size_t getIniCount() const;
    bool initialize(int moduleNumber);
    bool shutdown(int moduleNumber);
    static int processStartup(INIT_FUNC_ARGS);

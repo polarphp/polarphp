@@ -48,9 +48,9 @@ public:
    void initialize(const std::string &ns, int moduleName);
    void initializeConstants(const std::string &ns, int moduleName);
    void initializeClasses(const std::string &ns, int moduleName);
-   size_t calculateFunctionQuantity() const;
-   size_t calculateClassQuantity() const;
-   size_t calculateConstantQuantity() const;
+   size_t calculateFunctionCount() const;
+   size_t calculateClassCount() const;
+   size_t calculateConstantCount() const;
 public:
    std::string m_name;
    std::list<std::shared_ptr<Function>> m_functions;

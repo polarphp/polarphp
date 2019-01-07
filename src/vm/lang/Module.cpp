@@ -271,31 +271,31 @@ Module &Module::registerIni(Ini &&entry)
    return *this;
 }
 
-size_t Module::getFunctionQuantity() const
+size_t Module::getFunctionCount() const
 {
    VMAPI_D(const Module);
    return implPtr->m_functions.size();
 }
 
-size_t Module::getIniQuantity() const
+size_t Module::getIniCount() const
 {
    VMAPI_D(const Module);
    return implPtr->m_iniEntries.size();
 }
 
-size_t Module::getConstantQuantity() const
+size_t Module::getConstantCount() const
 {
    VMAPI_D(const Module);
    return implPtr->m_constants.size();
 }
 
-size_t Module::getNamespaceQuantity() const
+size_t Module::getNamespaceCount() const
 {
    VMAPI_D(const Module);
    return implPtr->m_namespaces.size();
 }
 
-size_t Module::getClassQuantity() const
+size_t Module::getClassCount() const
 {
    VMAPI_D(const Module);
    return implPtr->m_classes.size();
@@ -350,17 +350,17 @@ ModulePrivate::~ModulePrivate()
    delete[] m_entry.functions;
 }
 
-size_t ModulePrivate::getFunctionQuantity() const
+size_t ModulePrivate::getFunctionCount() const
 {
    // now just return global namespaces functions
    size_t ret = m_functions.size();
    for (const std::shared_ptr<Namespace> &ns : m_namespaces) {
-      ret += ns->getFunctionQuantity();
+      ret += ns->getFunctionCount();
    }
    return ret;
 }
 
-size_t ModulePrivate::getIniQuantity() const
+size_t ModulePrivate::getIniCount() const
 {
    return m_iniEntries.size();
 }
@@ -373,7 +373,7 @@ zend_module_entry *ModulePrivate::getModule()
    if (m_entry.module_startup_func == &ModulePrivate::processMismatch) {
       return &m_entry;
    }
-   size_t count = getFunctionQuantity();
+   size_t count = getFunctionCount();
    if (0 == count) {
       return &m_entry;
    }
@@ -486,7 +486,7 @@ ModulePrivate &ModulePrivate::registerFunction(const char *name, ZendCallable fu
 
 bool ModulePrivate::initialize(int moduleNumber)
 {
-   m_zendIniDefs.reset(new zend_ini_entry_def[getIniQuantity() + 1]);
+   m_zendIniDefs.reset(new zend_ini_entry_def[getIniCount() + 1]);
    int i = 0;
    // fill ini entry def
    iterateIniEntries([this, &i, moduleNumber](Ini &iniEntry){

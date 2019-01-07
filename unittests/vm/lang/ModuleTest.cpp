@@ -33,7 +33,7 @@ TEST(ModuleTest, testFindNamespace)
    Module ext("dummyext", "1.0");
    ext.registerNamespace(Namespace("polar"));
    ext.registerNamespace(Namespace("php"));
-   ASSERT_EQ(ext.getNamespaceQuantity(), 2);
+   ASSERT_EQ(ext.getNamespaceCount(), 2);
    Namespace *result = nullptr;
    result = ext.findNamespace("notexist");
    ASSERT_EQ(result, nullptr);
@@ -45,5 +45,5 @@ TEST(ModuleTest, testFindNamespace)
    ASSERT_EQ(result->getName(), "php");
    ext.registerClass(Class<ClassA>("ClassA"));
    ext.registerClass(Class<ClassB>("ClassB"));
-   ASSERT_EQ(ext.getClassQuantity(), 2);
+   ASSERT_EQ(ext.getClassCount(), 2);
 }
