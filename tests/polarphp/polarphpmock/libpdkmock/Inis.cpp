@@ -22,17 +22,17 @@ void register_inis_hook(Module &module)
    // this have no effect we write this in php.ini
    module.registerIni(Ini("polarphp_author", "polarboy"));
    // rewrite in php.ini
-//   module.registerIni(Ini("polarphp_team_address", "beijing"));
-//   // register but empty value
-//   module.registerIni(Ini("polarphp_product", ""));
-//   module.registerIni(Ini("polarphp_enable_gpu", "off"));
-//   module.registerIni(Ini("polarphp_name", "polarphp"));
-//   module.registerIni(Ini("polarphp_age", 1));
-//   // int type
-//   module.registerIni(Ini("polarphp_string_value", "stringvalue"));
-//   module.registerIni(Ini("polarphp_int_value", 2019));
-//   module.registerIni(Ini("polarphp_bool_value", true));
-//   module.registerIni(Ini("polarphp_double_value", 3.14));
+   module.registerIni(Ini("polarphp_team_address", "beijing"));
+   // register but empty value
+   module.registerIni(Ini("polarphp_product", ""));
+   module.registerIni(Ini("polarphp_enable_gpu", "off"));
+   module.registerIni(Ini("polarphp_name", "polarphp"));
+   module.registerIni(Ini("polarphp_age", 1));
+   // int type
+   module.registerIni(Ini("polarphp_string_value", "stringvalue"));
+   module.registerIni(Ini("polarphp_int_value", 2019));
+   module.registerIni(Ini("polarphp_bool_value", true));
+   module.registerIni(Ini("polarphp_double_value", 3.14));
 }
 
 } // php

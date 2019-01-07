@@ -20,7 +20,7 @@ namespace vmapi {
 class VMAPI_DECL_EXPORT Countable
 {
 public:
-   virtual long count() = 0;
+   virtual vmapi_long count() = 0;
    virtual ~Countable() = default;
 };
 

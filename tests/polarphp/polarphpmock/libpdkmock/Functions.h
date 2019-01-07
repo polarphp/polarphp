@@ -12,6 +12,18 @@
 #ifndef POLARPHP_STDLIBMOCK_FUNCTIONS_H
 #define POLARPHP_STDLIBMOCK_FUNCTIONS_H
 
+namespace polar {
+namespace vmapi {
+class Module;
+} // vmapi
+} // polar
 
+namespace php {
+
+using polar::vmapi::Module;
+
+void register_functions_hook(Module &module);
+
+} // php
 
 #endif // POLARPHP_STDLIBMOCK_FUNCTIONS_H

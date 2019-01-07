@@ -213,13 +213,13 @@ protected:
    ObjectVariant *getObjectZvalPtr() const;
    ObjectVariant *getObjectZvalPtr();
    template <typename ...Args>
-   Variant callParent(const char *name, Args&&... args);
+   Variant callParent(const char *name, Args &&...args);
    template <typename ...Args>
-   Variant callParent(const char *name, Args&&... args) const;
+   Variant callParent(const char *name, Args &&...args) const;
    template <typename ...Args>
-   Variant call(const char *name, Args&&... args);
+   Variant call(const char *name, Args &&...args);
    template <typename ...Args>
-   Variant call(const char *name, Args&&... args) const;
+   Variant call(const char *name, Args &&...args) const;
 private:
    zval *doCallParent(const char *name, const int argc, Variant *argv, zval *retval) const;
 protected:
@@ -234,10 +234,10 @@ protected:
 template <typename ...Args>
 Variant StdClass::callParent(const char *name, Args&&... args) const
 {
-   Variant vargs[] = { Variant(std::forward<Args>(args))... };
+   std::array<Variant, sizeof...(args)> vargs{ Variant(std::forward<Args>(args))... };
    zval retval;
    std::memset(&retval, 0, sizeof(retval));
-   doCallParent(name, sizeof...(Args), vargs, &retval);
+   doCallParent(name, sizeof...(Args), vargs.data(), &retval);
    Variant resultVarint(retval);
    zval_dtor(&retval);
    return resultVarint;
