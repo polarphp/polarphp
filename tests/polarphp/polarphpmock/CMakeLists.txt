@@ -16,9 +16,16 @@ polar_collect_files(
 
 add_library(stdlibmock ${POLAR_TEST_LIBPDK_MOCK_SOURCES})
 
+target_link_libraries(stdlibmock ZendApi)
+
 polar_add_lit_extra_test_executable(polarmock
-   LINK_LIBS "ZendApi stdlibmock"
+   LINK_LIBS "ZendApi stdlibmock CLI11::CLI11"
    main.cpp)
+
+set_target_properties(polarmock PROPERTIES
+   BUILD_WITH_INSTALL_RPATH ON
+   BUILD_RPATH "${POLAR_LIBRARY_DIR};${POLAR_REGRESS_LIB_DIR}"
+   INSTALL_RPATH "${POLAR_LIBRARY_DIR};${POLAR_REGRESS_LIB_DIR}")
 
 polar_set_output_directory(polarmock BINARY_DIR ${POLAR_REGRESS_TEST_BINARY_DIR})
 polar_set_output_directory(stdlibmock LIBRARY_DIR ${POLAR_REGRESS_LIB_DIR})

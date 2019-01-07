@@ -20,6 +20,7 @@
 #include "polarphp/vm/lang/Constant.h"
 #include "polarphp/vm/lang/Namespace.h"
 #include "polarphp/vm/Closure.h"
+#include "polarphp/runtime/PhpDefs.h"
 
 #include <ostream>
 #include <map>
@@ -39,17 +40,8 @@ using internal::ModulePrivate;
 using internal::AbstractClassPrivate;
 using internal::NamespacePrivate;
 
-VMAPI_DECLARE_MODULE_GLOBALS(XXXX);
-
 namespace
 {
-/**
-   * Function that must be defined to initialize the "globals"
-   * We do not have to initialize anything, but PHP needs to call this
-   * method (crazy)
-   * @param  globals
-   */
-//void init_globals(zend_XXXX_globals *globals){}
 
 std::map<std::string, Module *> name2extension;
 std::map<int, Module *> mid2extension;
@@ -149,7 +141,7 @@ const char *Module::getVersion() const
 }
 
 Module &Module::registerFunction(const char *name, ZendCallable function,
-                                       const Arguments &arguments)
+                                 const Arguments &arguments)
 {
    getImplPtr()->registerFunction(name, function, arguments);
    return *this;
@@ -301,6 +293,36 @@ size_t Module::getClassCount() const
    return implPtr->m_classes.size();
 }
 
+bool Module::registerToVM()
+{
+   zend_module_entry *mentry = reinterpret_cast<zend_module_entry *>(getModule());
+   if (mentry->zend_api != ZEND_MODULE_API_NO) {
+      php_error_docref(NULL, E_CORE_WARNING,
+                       "%s: Unable to initialize module\n"
+                       "Module compiled with module API=%d\n"
+                       "PHP    compiled with module API=%d\n"
+                       "These options need to match\n",
+                       mentry->name, mentry->zend_api, ZEND_MODULE_API_NO);
+      return false;
+   }
+   if(strcmp(mentry->build_id, ZEND_MODULE_BUILD_ID)) {
+      php_error_docref(NULL, E_CORE_WARNING,
+                       "%s: Unable to initialize module\n"
+                       "Module compiled with build ID=%s\n"
+                       "PHP    compiled with build ID=%s\n"
+                       "These options need to match\n",
+                       mentry->name, mentry->build_id, ZEND_MODULE_BUILD_ID);
+      return false;
+   }
+   mentry->type = MODULE_PERSISTENT;
+   mentry->module_number = zend_next_free_module();
+   mentry->handle = nullptr;
+   if ((mentry = zend_register_module_ex(mentry)) == NULL) {
+      return false;
+   }
+   return true;
+}
+
 namespace internal
 {
 ModulePrivate::ModulePrivate(const char *name, const char *version, int apiversion, Module *extension)
@@ -428,7 +450,7 @@ int ModulePrivate::processMismatch(INIT_FUNC_ARGS)
    Module *extension = find_module(module_number);
    // @TODO is this really good? we need a method to check compatibility more graceful
    vmapi::warning() << " Version mismatch between polarphp vmapi and extension " << extension->getName()
-                 << " " << extension->getVersion() << " (recompile needed?) " << std::endl;
+                    << " " << extension->getVersion() << " (recompile needed?) " << std::endl;
    return BOOL2SUCCESS(true);
 }
 
@@ -454,7 +476,6 @@ int ModulePrivate::processRequestShutdown(SHUTDOWN_FUNC_ARGS)
 
 int ModulePrivate::processStartup(INIT_FUNC_ARGS)
 {
-   //ZEND_INIT_MODULE_GLOBALS(XXXX, init_globals, nullptr);
    Module *extension = find_module(module_number);
    return BOOL2SUCCESS(extension->initialize(module_number));
 }
@@ -475,7 +496,7 @@ void ModulePrivate::processModuleInfo(ZEND_MODULE_INFO_FUNC_ARGS)
 }
 
 ModulePrivate &ModulePrivate::registerFunction(const char *name, ZendCallable function,
-                                                     const Arguments &arguments)
+                                               const Arguments &arguments)
 {
    if (m_locked) {
       return *this;

@@ -11,8 +11,8 @@
 
 list(APPEND POLAR_ZENDVM_INCLUDE_DIRS
    ${POLAR_MAIN_INCLUDE_DIR}/polarphp/global
-   ${POLAR_MAIN_INCLUDE_DIR}/polarphp/zend
-   ${POLAR_MAIN_INCLUDE_DIR}/polarphp/tsrm
+   ${POLAR_MAIN_INCLUDE_DIR}/polarphp/vm/zend
+   ${POLAR_MAIN_INCLUDE_DIR}/polarphp/vm/tsrm
    ${POLAR_SOURCE_DIR}/src/vm/TSRM
    ${POLAR_SOURCE_DIR}/src/vm/Zend
    ${POLAR_INCLUDE_DIR}/polarphp/global
@@ -68,3 +68,6 @@ polar_merge_list(ZENDAPI_SRCS POLAR_ZENDVM_ZEND_HEADERS)
 
 polar_add_library_internal(ZendApi SHARED ${ZENDAPI_SRCS})
 target_link_libraries(ZendApi PUBLIC PolarRuntime PolarGlobal)
+set_target_properties(ZendApi
+   PROPERTIES
+   INTERFACE_INCLUDE_DIRECTORIES "${POLAR_ZENDVM_INCLUDE_DIRS}")

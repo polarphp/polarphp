@@ -84,6 +84,9 @@ public:
    size_t getConstantCount() const;
    size_t getNamespaceCount() const;
    size_t getClassCount() const;
+
+   bool registerToVM();
+
    operator void * ()
    {
       return getModule();
@@ -150,7 +153,6 @@ public:
    * @return void*
    */
    void *getModule();
-   const void *getModule() const;
    const char *getName() const;
    const char *getVersion() const;
 protected:

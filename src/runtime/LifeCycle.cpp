@@ -349,9 +349,7 @@ bool php_module_startup()
    sg_moduleStartup = false;
    shutdown_memory_manager(1, 0);
    virtual_cwd_activate();
-   ///
-   /// polarphp does not have request life cycle
-   zend_interned_strings_switch_storage(0);
+   zend_interned_strings_switch_storage(1);
 #if ZEND_RC_DEBUG
    zend_rc_debug = 1;
 #endif

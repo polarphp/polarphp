@@ -16,8 +16,6 @@ polar_collect_files(
    DIR php/global
    OUTPUT_VAR POLAR_GLOBAL_HEADERS)
 
-message("xx${POLAR_GLOBAL_HEADERS}")
-
 polar_merge_list(STDLIB_HEADERS POLAR_GLOBAL_HEADERS)
 
 polar_collect_files(
