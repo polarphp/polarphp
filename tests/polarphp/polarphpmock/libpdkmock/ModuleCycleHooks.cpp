@@ -40,7 +40,7 @@ void register_module_cycle_hooks(Module &module)
 //   module.setStartupHandler(module_startup_hook);
 //   module.setRequestStartupHandler(module_process_startup_hook);
 //   module.setRequestShutdownHandler(module_process_shutdown_hook);
-//   module.setShutdownHandler(module_process_shutdown_hook);
+//   module.setShutdownHandler(module_shutdown_hook);
 }
 
 } // php
