@@ -14,6 +14,7 @@
 #include "polarphp/vm/lang/Module.h"
 #include "ModuleCycleHooks.h"
 #include "Namespaces.h"
+#include "Inis.h"
 
 namespace php {
 
@@ -24,6 +25,7 @@ bool export_stdlib_to_zendvm()
    static Module stdlibModule("stdlib");
    register_module_cycle_hooks(stdlibModule);
    register_namepsace_hook(stdlibModule);
+   register_inis_hook(stdlibModule);
    return stdlibModule.registerToVM();
 }
 
