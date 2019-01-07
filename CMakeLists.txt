@@ -60,7 +60,7 @@ endif()
 
 set(POLAR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}") # --src-root
 set(POLAR_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}") # --prefix
-set(POLAR_UNITTEST_BINARY_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/unittestbins")
+
 set(POLAR_THIRDPARTY_DIR "${POLAR_SOURCE_DIR}/thirdparty")
 set(POLAR_DEPS_INSTALL_DIR "${POLAR_BINARY_DIR}/depslibs")
 set(POLAR_CMAKE_MODULES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
@@ -74,6 +74,12 @@ set(POLAR_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_NAME})
 string(TOLOWER ${POLAR_SYSTEM_NAME} POLAR_SYSTEM_NORMAL_NAME)
 set(POLAR_CONFIGURE_TEMP_DIR ${POLAR_BINARY_DIR}/conf_temp)
 set(POLAR_HEADER_INSTALL_DIR ${CMAKE_PREFIX_PATH}/include/php)
+
+# for test only
+set(POLAR_REGRESS_TEST_BINARY_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/tests/bin")
+set(POLAR_REGRESS_LIB_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/tests/lib")
+set(POLAR_UNITTEST_TEST_BINARY_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/unittests/bin")
+set(POLAR_UNITTEST_LIB_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/unittests/lib")
 
 # Add path for custom CMake modules.
 list(APPEND CMAKE_MODULE_PATH
@@ -304,6 +310,7 @@ mark_as_advanced(POLAR_TARGET_TRIPLE_ENV)
 
 # devel options
 option(POLAR_DEV_BUILD_DEVTOOLS_TESTS "turn on to build tests of devtools" OFF)
+option(POLAR_DEV_BUILD_POLARPHP_TESTS "turn on to build tests of devtools" ON)
 option(POLAR_DEV_BUILD_LLVM_UNITTEST "turn on llvm support libraries unitests" OFF)
 option(POLAR_DEV_BUILD_VMAPI_UNITEST "turn on to build unittests of vmapi" ON)
 

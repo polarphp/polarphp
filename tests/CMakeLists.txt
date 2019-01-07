@@ -23,3 +23,7 @@ if (POLAR_DEV_BUILD_DEVTOOLS_TESTS)
       PROPERTIES
       COMPILE_DEFINITIONS "${DEFS}")
 endif()
+
+if (POLAR_DEV_BUILD_POLARPHP_TESTS)
+   add_subdirectory(polarphp/polarphpmock)
+endif()

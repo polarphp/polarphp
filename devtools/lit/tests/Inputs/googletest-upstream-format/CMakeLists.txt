@@ -17,10 +17,10 @@ polar_add_lit_extra_test_executable(LittestUpStreamGoogleTest
    dummysubdir/UpStreamGoogleTest.cpp)
 
 # simulate google test binary
-polar_set_output_directory(LittestUpStreamGoogleTest BINARY_DIR ${POLAR_UNITTEST_BINARY_DIR})
+polar_set_output_directory(LittestUpStreamGoogleTest BINARY_DIR ${POLAR_REGRESS_TEST_BINARY_DIR})
 
 set(DEFS "")
-list(APPEND DEFS "UPSTREAM_FORMAT_GTEST_BIN=\"${POLAR_UNITTEST_BINARY_DIR}${DIR_SEPARATOR}LittestUpStreamGoogleTest\"")
+list(APPEND DEFS "UPSTREAM_FORMAT_GTEST_BIN=\"${POLAR_REGRESS_TEST_BINARY_DIR}${DIR_SEPARATOR}LittestUpStreamGoogleTest\"")
 
 set_target_properties(littestsgtestupstreamformat
    PROPERTIES

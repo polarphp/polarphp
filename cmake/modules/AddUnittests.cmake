@@ -47,7 +47,7 @@ function(polar_add_unittest test_suite test_name)
 
    #list(APPEND POLAR_LINK_COMPONENTS Utils) # gtest needs it for RawOutStream
    polar_add_executable(${test_name} IGNORE_EXTERNALIZE_DEBUGINFO NO_INSTALL_RPATH ${ARGN})
-   set(outdir ${POLAR_UNITTEST_BINARY_DIR})
+   set(outdir ${POLAR_UNITTEST_TEST_BINARY_DIR})
    polar_set_output_directory(${test_name} BINARY_DIR ${outdir} LIBRARY_DIR ${outdir})
    # libpthreads overrides some standard library symbols, so main
    # executable must be linked with it in order to provide consistent
