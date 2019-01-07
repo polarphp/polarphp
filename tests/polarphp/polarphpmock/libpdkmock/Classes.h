@@ -22,10 +22,7 @@ namespace php {
 
 using polar::vmapi::Module;
 
-void register_classes_hook(Module &module)
-{
-
-}
+void register_classes_hook(Module &module);
 
 } // php
 

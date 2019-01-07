@@ -8,3 +8,16 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/02/07.
+
+#include "polarphp/vm/lang/Module.h"
+#include "polarphp/vm/lang/Class.h"
+#include "Classes.h"
+
+namespace php {
+
+void register_classes_hook(Module &module)
+{
+
+}
+
+} // php

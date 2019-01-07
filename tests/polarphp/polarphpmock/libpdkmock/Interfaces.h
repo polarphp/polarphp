@@ -12,6 +12,18 @@
 #ifndef POLARPHP_STDLIBMOCK_INTERFACES_H
 #define POLARPHP_STDLIBMOCK_INTERFACES_H
 
+namespace polar {
+namespace vmapi {
+class Module;
+} // vmapi
+} // polar
 
+namespace php {
+
+using polar::vmapi::Module;
+
+void register_interfaces_hook(Module &module);
+
+} // php
 
 #endif // POLARPHP_STDLIBMOCK_INTERFACES_H
