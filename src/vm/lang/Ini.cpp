@@ -10,11 +10,14 @@
 // Created by polarboy on 2018/12/24.
 
 #include "polarphp/vm/lang/Ini.h"
+#include "polarphp/runtime/BuildinIniModifyHandler.h"
 
 #include <iostream>
 
 namespace polar {
 namespace vmapi {
+
+using polar::runtime::update_string_handler;
 
 namespace internal {
 class IniPrivate
@@ -107,20 +110,17 @@ bool Ini::operator==(const Ini &other) const
 Ini::~Ini()
 {}
 
-void Ini::setupIniDef(_zend_ini_entry_def *zendIniDef, int moduleNumber)
+void Ini::setupIniDef(_zend_ini_entry_def *zendIniDef, int)
 {
    VMAPI_D(Ini);
    zendIniDef->modifiable = static_cast<int>(implPtr->m_cfgType);
    zendIniDef->name = implPtr->m_name.data();
    zendIniDef->name_length = implPtr->m_name.size();
-   zendIniDef->on_modify = OnUpdateString;
+   zendIniDef->on_modify = nullptr;
    zendIniDef->mh_arg1 = nullptr;
-   /// TODO vmapi_globals_id
-//#ifdef ZTS
-//   zendIniDef->mh_arg2 = (void *) &vmapi_globals_id;
-//#else
-//   zendIniDef->mh_arg2 = (void *) &vmapi_globals;
-//#endif
+   /// TODO polarphp does not have global data right now
+   // zendIniDef->mh_arg2 = (void *) &vmapi_globals_id;
+   zendIniDef->mh_arg2 = nullptr;
    zendIniDef->mh_arg3 = nullptr;
    zendIniDef->value = implPtr->m_value.data();
    zendIniDef->value_length = implPtr->m_value.size();
@@ -132,7 +132,6 @@ std::string IniValue::getStringValue() const
    const char *value = getRawValue();
    return std::string(value ? value : "");
 }
-
 
 class IniValuePrivate
 {
