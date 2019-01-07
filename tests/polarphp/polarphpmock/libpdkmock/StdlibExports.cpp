@@ -11,6 +11,7 @@
 
 #include "StdlibExports.h"
 #include "polarphp/vm/lang/Module.h"
+#include "ModuleCycleHooks.h"
 
 namespace php {
 
@@ -19,6 +20,7 @@ using polar::vmapi::Module;
 bool export_stdlib_to_zendvm()
 {
    static Module stdlibModule("stdlib");
+   register_module_cycle_hooks(stdlibModule);
    return stdlibModule.registerToVM();
 }
 
