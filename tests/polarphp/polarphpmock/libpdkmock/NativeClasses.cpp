@@ -787,5 +787,4 @@ void ObjectVariantClass::changeNameByRef(StringVariant &name)
    name = "hello, polarphp";
 }
 
-
 } // php
