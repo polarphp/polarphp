@@ -17,10 +17,10 @@ polar_add_lit_extra_test_executable(LittestTimeoutGoogleTest
    dummysubdir/TimeoutGoogleTest.cpp)
 
 # simulate google test binary
-polar_set_output_directory(LittestTimeoutGoogleTest BINARY_DIR ${POLAR_REGRESS_TEST_BINARY_DIR})
+polar_set_output_directory(LittestTimeoutGoogleTest BINARY_DIR ${POLAR_REGRESSION_TEST_BINARY_DIR})
 
 set(DEFS "")
-list(APPEND DEFS "TIMEOUT_GTEST_BIN=\"${POLAR_REGRESS_TEST_BINARY_DIR}${DIR_SEPARATOR}LittestTimeoutGoogleTest\"")
+list(APPEND DEFS "TIMEOUT_GTEST_BIN=\"${POLAR_REGRESSION_TEST_BINARY_DIR}${DIR_SEPARATOR}LittestTimeoutGoogleTest\"")
 
 set_target_properties(littestsgtesttimeout
    PROPERTIES

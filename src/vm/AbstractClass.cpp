@@ -300,7 +300,6 @@ zend_object *AbstractClassPrivate::createObject(zend_class_entry *entry)
    return binder->getZendObject();
 }
 
-
 ///
 /// special interface check
 ///

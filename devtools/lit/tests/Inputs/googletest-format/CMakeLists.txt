@@ -17,10 +17,10 @@ polar_add_lit_extra_test_executable(LittestFormatGoogleTest
    dummysubdir/FomratGoogleTest.cpp)
 
 # simulate google test binary
-polar_set_output_directory(LittestFormatGoogleTest BINARY_DIR ${POLAR_REGRESS_TEST_BINARY_DIR})
+polar_set_output_directory(LittestFormatGoogleTest BINARY_DIR ${POLAR_REGRESSION_TEST_BINARY_DIR})
 
 set(DEFS "")
-list(APPEND DEFS "FORMAT_GTEST_BIN=\"${POLAR_REGRESS_TEST_BINARY_DIR}${DIR_SEPARATOR}LittestFormatGoogleTest\"")
+list(APPEND DEFS "FORMAT_GTEST_BIN=\"${POLAR_REGRESSION_TEST_BINARY_DIR}${DIR_SEPARATOR}LittestFormatGoogleTest\"")
 
 set_target_properties(littestsgtestformat
    PROPERTIES

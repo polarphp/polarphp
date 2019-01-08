@@ -24,8 +24,8 @@ polar_add_lit_extra_test_executable(polarmock
 
 set_target_properties(polarmock PROPERTIES
    BUILD_WITH_INSTALL_RPATH ON
-   BUILD_RPATH "${POLAR_LIBRARY_DIR};${POLAR_REGRESS_LIB_DIR}"
-   INSTALL_RPATH "${POLAR_LIBRARY_DIR};${POLAR_REGRESS_LIB_DIR}")
+   BUILD_RPATH "${POLAR_LIBRARY_DIR};${POLAR_REGRESSION_LIB_DIR}"
+   INSTALL_RPATH "${POLAR_LIBRARY_DIR};${POLAR_REGRESSION_LIB_DIR}")
 
-polar_set_output_directory(polarmock BINARY_DIR ${POLAR_REGRESS_TEST_BINARY_DIR})
-polar_set_output_directory(stdlibmock LIBRARY_DIR ${POLAR_REGRESS_LIB_DIR})
+polar_set_output_directory(polarmock BINARY_DIR ${POLAR_REGRESSION_TEST_BINARY_DIR})
+polar_set_output_directory(stdlibmock LIBRARY_DIR ${POLAR_REGRESSION_LIB_DIR})
