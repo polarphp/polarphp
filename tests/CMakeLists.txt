@@ -15,12 +15,7 @@ list(APPEND REGRESSION_TEST_DEFS "LIT_TEST_BIN=\"${POLAR_RUNTIME_OUTPUT_INTDIR}$
 list(APPEND REGRESSION_TEST_DEFS "POLAR_RUNTIME_OUTPUT_INTDIR=\"${POLAR_RUNTIME_OUTPUT_INTDIR}\"")
 
 if (POLAR_DEV_BUILD_DEVTOOLS_TESTS)
-   polar_setup_lit_cfg_setters(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/devtools
-      OUTPUT_NAME devtools_tests
-      SKIP_DIRS "Inputs")
-   set_target_properties(devtools_tests
-      PROPERTIES
-      COMPILE_DEFINITIONS "${DEFS}")
+   add_subdirectory(devtools)
 endif()
 
 if (POLAR_DEV_BUILD_POLARPHP_TESTS)
