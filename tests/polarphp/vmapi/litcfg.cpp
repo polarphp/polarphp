@@ -37,6 +37,7 @@ void root_cfgsetter(TestingConfig *config, LitConfig *litConfig)
    config->setExtraConfig("target_triple", "(unused)");
    config->addSubstitution("%{inputs}", testSourceRoot / "Inputs");
    config->addSubstitution("%{lit}", LIT_TEST_BIN);
+   config->addSubstitution("%{polarphp}", POLARPHP_TEST_BIN);
    config->addEnvironment("PATH", Twine(POLAR_RUNTIME_OUTPUT_INTDIR, StringRef(":")).concat(std::getenv("PATH")).getStr());
 }
 }

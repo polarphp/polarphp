@@ -13,6 +13,8 @@ polar_setup_lit_cfg_setters(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    OUTPUT_NAME polarphp_vmapi_tests
    SKIP_DIRS "Inputs")
 
+list(APPEND REGRESSION_TEST_DEFS "POLARPHP_TEST_BIN=\"${POLAR_REGRESSION_TEST_BINARY_DIR}${DIR_SEPARATOR}polarmock\"")
+
 set_target_properties(polarphp_vmapi_tests
    PROPERTIES
    COMPILE_DEFINITIONS "${REGRESSION_TEST_DEFS}")
