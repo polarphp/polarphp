@@ -22,10 +22,12 @@ class VMAPI_DECL_EXPORT Interface final : public AbstractClass
 public:
    Interface(const char *name);
    virtual ~Interface();
+
 public:
    Interface &registerMethod(const char *name, const Arguments args = {});
    Interface &registerMethod(const char *name, Modifier flags, const Arguments args = {});
    Interface &registerBaseInterface(const Interface &interface);
+
 protected:
    template<typename ANYTHING> friend class Class;
 };

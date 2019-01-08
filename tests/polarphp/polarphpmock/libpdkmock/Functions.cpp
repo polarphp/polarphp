@@ -62,11 +62,11 @@ void register_functions_hook(Module &module)
           });
 
    // register for namespace
-   Namespace *polar = module.findNamespace("polar");
-   Namespace *io = polar->findNamespace("io");
+   Namespace *php = module.findNamespace("php");
+   Namespace *io = php->findNamespace("io");
 
-   polar->registerFunction<decltype(&php::get_name), &php::get_name>("get_name");
-   polar->registerFunction<decltype(&php::show_something), &php::show_something>("show_something");
+   php->registerFunction<decltype(&php::get_name), &php::get_name>("get_name");
+   php->registerFunction<decltype(&php::show_something), &php::show_something>("show_something");
 
    io->registerFunction<decltype(&php::calculate_sum), &php::calculate_sum>
          ("calculate_sum", {

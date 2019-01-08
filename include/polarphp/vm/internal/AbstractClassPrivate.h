@@ -58,6 +58,7 @@ public:
 
    // php class system facility static handle methods
    static zend_object *createObject(zend_class_entry *entry);
+   static int inlineInterfaceImplement(zend_class_entry *iface, zend_class_entry *classType);
    static zend_object *cloneObject(zval *object);
 
    // php object handlers

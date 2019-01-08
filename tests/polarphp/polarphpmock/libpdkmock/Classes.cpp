@@ -124,10 +124,10 @@ void register_construct_and_destruct_classes(Module &module)
 void register_namespace_classes(Module &module)
 {
    Class<Address> addressClass("Address");
-   Namespace *polar = module.findNamespace("zapi");
-   polar->registerClass(addressClass);
+   Namespace *php = module.findNamespace("php");
+   php->registerClass(addressClass);
    Class<EmptyClass> emptyCls("EmptyClass");
-   polar->registerClass(emptyCls);
+   php->registerClass(emptyCls);
 }
 
 void register_inherit_test_classes(Module &module)

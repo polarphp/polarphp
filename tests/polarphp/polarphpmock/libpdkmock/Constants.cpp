@@ -28,11 +28,11 @@ void register_constants_hook(Module &module)
    module.registerConstant(Constant("POLAR_VERSION", "v0.0.1"));
    module.registerConstant(Constant("POLARPHP", "beijing polarphp"));
    // register constant in namespace
-   Namespace *polarphp = module.findNamespace("polarphp");
-   Namespace *io = polarphp->findNamespace("io");
+   Namespace *php = module.findNamespace("php");
+   Namespace *io = php->findNamespace("io");
    io->registerConstant(Constant("IO_TYPE", "ASYNC"));
    io->registerConstant(Constant("NATIVE_STREAM", true));
-   polarphp->registerConstant(Constant("SYS_VERSION", "0.1.1-alpha"));
+   php->registerConstant(Constant("SYS_VERSION", "0.1.1-alpha"));
 }
 
 } // php

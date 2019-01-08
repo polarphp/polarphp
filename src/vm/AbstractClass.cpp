@@ -150,7 +150,11 @@ zend_class_entry *AbstractClassPrivate::initialize(AbstractClass *cls, const std
    }
    // initialize the class entry
    INIT_CLASS_ENTRY_EX(entry, m_name.c_str(), m_name.size(), getMethodEntries().get());
-   entry.create_object = &AbstractClassPrivate::createObject;
+   if (m_type != ClassType::Interface) {
+      entry.create_object = &AbstractClassPrivate::createObject;
+   } else {
+      entry.interface_gets_implemented = &AbstractClassPrivate::inlineInterfaceImplement;
+   }
    entry.get_static_method = &AbstractClassPrivate::getStaticMethod;
    // check if traversable
    if (m_apiPtr->traversable()) {
@@ -177,8 +181,8 @@ zend_class_entry *AbstractClassPrivate::initialize(AbstractClass *cls, const std
    } else {
       m_classEntry = zend_register_internal_class(&entry);
    }
+   m_classEntry->ce_flags = static_cast<uint32_t>(m_type);
    // register the interfaces of the class
-
    for (std::shared_ptr<AbstractClass> &interface : m_interfaces) {
       if (interface->m_implPtr->m_classEntry) {
          zend_do_implement_interface(m_classEntry, interface->m_implPtr->m_classEntry);
@@ -189,7 +193,6 @@ zend_class_entry *AbstractClassPrivate::initialize(AbstractClass *cls, const std
                    << std::endl;
       }
    }
-   m_classEntry->ce_flags = static_cast<uint32_t>(m_type);
    for (std::shared_ptr<AbstractMember> &member : m_members) {
       member->initialize(m_classEntry);
    }
@@ -287,6 +290,7 @@ zend_object *AbstractClassPrivate::createObject(zend_class_entry *entry)
       // Zend engine, we can call zend_error() here (which does a longjmp() back to
       // the Zend engine)
       zend_error(E_ERROR, "Unable to instantiate %s", entry->name->val);
+      //return nullptr;
    }
    // here we assocaited a native object with an ObjectBinder object
    // ObjectBinder can make an relationship on nativeObject and zend_object
@@ -294,6 +298,15 @@ zend_object *AbstractClassPrivate::createObject(zend_class_entry *entry)
    // maybe memory leak
    ObjectBinder *binder = new ObjectBinder(entry, nativeObject, abstractClsPrivatePtr->getObjectHandlers(), 1);
    return binder->getZendObject();
+}
+
+
+///
+/// special interface check
+///
+int AbstractClassPrivate::inlineInterfaceImplement(zend_class_entry *, zend_class_entry *)
+{
+   return SUCCESS;
 }
 
 zend_object_handlers *AbstractClassPrivate::getObjectHandlers(zend_class_entry *entry)
