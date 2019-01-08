@@ -23,6 +23,7 @@ void register_constants_hook(Module &module)
 {
    module.registerConstant(Constant("MY_CONST", 12333));
    module.registerConstant(Constant("PI", 3.14));
+   module.registerConstant(Constant("POLAR_FOUNDATION", "polar foundation"));
    Constant nameConst("POLAR_NAME", "polarphp");
    module.registerConstant(nameConst);
    module.registerConstant(Constant("POLAR_VERSION", "v0.0.1"));
