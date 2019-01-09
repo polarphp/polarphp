@@ -55,7 +55,7 @@ TEST(BooleanVariantTest, testMoveConstuctorAndAssign)
    BooleanVariant bool1(true);
    BooleanVariant bool2(false);
    Variant bool3(true);
-   Variant str("zapi"); // true
+   Variant str("polarphp"); // true
    BooleanVariant bool4(std::move(bool1));
    ASSERT_TRUE(bool4);
    bool4 = bool2;

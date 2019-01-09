@@ -59,7 +59,7 @@ using Arguments = std::initializer_list<Argument>;
 class VMAPI_DECL_EXPORT RefArgument : public Argument
 {
 public:
-   RefArgument(const char *name, Type type = Type::Null, bool required = true)
+   RefArgument(const char *name, Type type = Type::Undefined, bool required = true)
       : Argument(name, type, required, true, false)
    {}
 
@@ -81,7 +81,7 @@ public:
 class VMAPI_DECL_EXPORT ValueArgument : public Argument
 {
 public:
-   ValueArgument(const char *name, Type type = Type::Null,
+   ValueArgument(const char *name, Type type = Type::Undefined,
                  bool required = true)
       : Argument(name, type, required, false, false)
    {}

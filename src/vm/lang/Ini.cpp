@@ -54,7 +54,7 @@ public:
         m_cfgType(other.m_cfgType)
    {}
 
-#ifdef ZAPI_CC_MSVC
+#ifdef POLAR_CC_MSVC
    static const char *bool2str(const bool value)
 #else
    static constexpr const char *bool2str(const bool value)

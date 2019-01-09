@@ -71,7 +71,7 @@ CallableVariant::CallableVariant(const Variant &other)
    zval *self = getUnDerefZvalPtr();
    zend_class_entry *classEntry = nullptr;
    if (other.getType() == Type::Object &&
-       (classEntry = Z_OBJCE_P(from)) && 0 == std::memcmp("ZapiClosure", classEntry->name->val, classEntry->name->len)) {
+       (classEntry = Z_OBJCE_P(from)) && 0 == std::memcmp("VmApiClosure", classEntry->name->val, classEntry->name->len)) {
       ZVAL_COPY(self, from);
    } else {
       ObjectVariant defaultCallable(Closure::getClassEntry(), std::make_shared<Closure>(do_nothing));
@@ -90,7 +90,7 @@ CallableVariant::CallableVariant(Variant &&other)
    zval *self = getUnDerefZvalPtr();
    zend_class_entry *classEntry = nullptr;
    if (getUnDerefType() != Type::Object ||
-       ((classEntry = Z_OBJCE_P(self)) && 0 != std::memcmp("ZapiClosure", classEntry->name->val, classEntry->name->len))) {
+       ((classEntry = Z_OBJCE_P(self)) && 0 != std::memcmp("VmApiClosure", classEntry->name->val, classEntry->name->len))) {
       ObjectVariant defaultCallable(Closure::getClassEntry(), std::make_shared<Closure>(do_nothing));
       zval temp = defaultCallable.detach(true);
       ZVAL_COPY_VALUE(self, &temp);
@@ -117,7 +117,7 @@ CallableVariant::CallableVariant(zval *other)
            (Z_TYPE_P(other) == IS_REFERENCE && Z_TYPE_P(Z_REFVAL_P(other)) == IS_OBJECT))) {
          ZVAL_DEREF(other);
          zend_class_entry *classEntry = Z_OBJCE_P(other);
-         if (classEntry && 0 == std::memcmp("ZapiClosure", classEntry->name->val, classEntry->name->len)) {
+         if (classEntry && 0 == std::memcmp("VmApiClosure", classEntry->name->val, classEntry->name->len)) {
             ZVAL_COPY(self, other);
             return;
          }
@@ -144,7 +144,7 @@ CallableVariant &CallableVariant::operator =(const Variant &other)
       zval *from = const_cast<zval *>(other.getZvalPtr());
       zend_class_entry *classEntry = nullptr;
       if (other.getType() == Type::Object &&
-          (classEntry = Z_OBJCE_P(from)) && 0 == std::memcmp("ZapiClosure", classEntry->name->val, classEntry->name->len)) {
+          (classEntry = Z_OBJCE_P(from)) && 0 == std::memcmp("VmApiClosure", classEntry->name->val, classEntry->name->len)) {
          // standard copy
          Variant::operator =(from);
       } else {
@@ -171,7 +171,7 @@ CallableVariant &CallableVariant::operator =(Variant &&other)
    zval *self = getUnDerefZvalPtr();
    zend_class_entry *classEntry = nullptr;
    if (getUnDerefType() != Type::Object ||
-       ((classEntry = Z_OBJCE_P(self)) && 0 == std::memcmp("ZapiClosure", classEntry->name->val, classEntry->name->len))) {
+       ((classEntry = Z_OBJCE_P(self)) && 0 == std::memcmp("VmApiClosure", classEntry->name->val, classEntry->name->len))) {
       ObjectVariant defaultCallable(Closure::getClassEntry(), std::make_shared<Closure>(do_nothing));
       zval temp = defaultCallable.detach(true);
       ZVAL_COPY_VALUE(self, &temp);

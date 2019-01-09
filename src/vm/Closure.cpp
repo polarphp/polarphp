@@ -34,7 +34,7 @@ void Closure::registerToZendNg(int moduleNumber)
       return;
    }
    // @mark we save meta class as local static is really ok ?
-   static std::unique_ptr<AbstractClass> closureWrapper(new Class<Closure>("ZapiClosure", ClassType::Final));
+   static std::unique_ptr<AbstractClass> closureWrapper(new Class<Closure>("VmApiClosure", ClassType::Final));
    m_entry = closureWrapper->initialize(moduleNumber);
 }
 

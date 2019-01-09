@@ -161,9 +161,9 @@ void register_inherit_test_classes(Module &module)
           });
    a.registerMethod<decltype(&A::privateAMethod), &A::privateAMethod>("privateAMethod", Modifier::Private);
    a.registerMethod<decltype(&A::protectedAMethod), &A::protectedAMethod>("protectedAMethod", Modifier::Protected);
-   a.registerProperty("name", "zapi");
-   a.registerProperty("protectedName", "protected zapi", Modifier::Protected);
-   a.registerProperty("privateName", "private zapi", Modifier::Private);
+   a.registerProperty("name", "polarphp");
+   a.registerProperty("protectedName", "protected polarphp", Modifier::Protected);
+   a.registerProperty("privateName", "private polarphp", Modifier::Private);
    b.registerMethod<decltype(&B::privateBMethod), &B::privateBMethod>("privateBMethod", Modifier::Private);
    b.registerMethod<decltype(&B::protectedBMethod), &B::protectedBMethod>("protectedBMethod", Modifier::Protected);
    b.registerMethod<decltype(&B::printInfo), &B::printInfo>("printInfo");
@@ -246,16 +246,16 @@ void register_props_test_classes(Module &module)
    propsTestClass.registerProperty("falseProp", false);
    propsTestClass.registerProperty("numProp", 2017);
    propsTestClass.registerProperty("doubleProp", 3.1415);
-   propsTestClass.registerProperty("strProp", "zapi");
-   propsTestClass.registerProperty("str1Prop", std::string("zapi"));
+   propsTestClass.registerProperty("strProp", "polarphp");
+   propsTestClass.registerProperty("str1Prop", std::string("polarphp"));
 
    propsTestClass.registerProperty("staticNullProp", nullptr, Modifier::Static);
    propsTestClass.registerProperty("staticTrueProp", true, Modifier::Static);
    propsTestClass.registerProperty("staticFalseProp", false, Modifier::Static);
    propsTestClass.registerProperty("staticNumProp", 2012, Modifier::Static);
    propsTestClass.registerProperty("staticDoubleProp", 3.1415, Modifier::Static);
-   propsTestClass.registerProperty("staticStrProp", "static zapi", Modifier::Static);
-   propsTestClass.registerProperty("staticStr1Prop", std::string("static zapi"), Modifier::Static);
+   propsTestClass.registerProperty("staticStrProp", "static polarphp", Modifier::Static);
+   propsTestClass.registerProperty("staticStr1Prop", std::string("static polarphp"), Modifier::Static);
 
    propsTestClass.registerProperty("MATH_PI", 3.14, Modifier::Const);
 

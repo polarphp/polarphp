@@ -15,6 +15,6 @@ if (function_exists("show_something")) {
     \php\io\show_something();
  }
 
-// CHECK: hello world, zapi
-// CHECK: hello world, zapi
-// CHECK: hello world, zapi
+// CHECK: hello world, polarphp
+// CHECK: hello world, polarphp
+// CHECK: hello world, polarphp

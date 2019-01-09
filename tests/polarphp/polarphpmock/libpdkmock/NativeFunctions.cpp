@@ -20,7 +20,7 @@ namespace php {
 
 void show_something()
 {
-   polar::vmapi::out() << "hello world, zapi" << std::flush;
+   polar::vmapi::out() << "hello world, polarphp" << std::flush;
 }
 
 void get_value_ref(NumericVariant &number)
@@ -79,7 +79,7 @@ Variant add_two_number(const NumericVariant &num1, const NumericVariant &num2)
 void say_hello(StringVariant &name)
 {
    if (name.getSize() == 0) {
-      name = "zapi";
+      name = "polarphp";
    }
    polar::vmapi::out() << "hello, " << name << std::endl;
 }

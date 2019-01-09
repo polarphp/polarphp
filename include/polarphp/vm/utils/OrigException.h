@@ -86,7 +86,7 @@ private:
     * Is this a an exception that was caught by extension C++ code.
     *
     * When the object is initially created, we assume that it will be caught
-    * by C++ code. If it later turns out that the zapi can catch this
+    * by C++ code. If it later turns out that the polarphp can catch this
     * exception after the extension C++ code ran, the variable is set back
     * to false.
     *

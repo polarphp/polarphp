@@ -993,14 +993,14 @@ TEST(ArrayVariantTest, testAccessOperator)
 {
    ArrayVariant array;
    array.append(1);
-   array.append("zapi");
+   array.append("polarphp");
    array.append("zzu_softboy");
    array.append("aaa");
    array.insert(5, "21212");
    array.append("bbb");
    array.append("ccc");
    StringVariant str = array[1];
-   ASSERT_STREQ(str.getCStr(), "zapi");
+   ASSERT_STREQ(str.getCStr(), "polarphp");
    array[0] = 123;
    NumericVariant num = array.getValue(0);
    ASSERT_EQ(num.toLong(), 123);
