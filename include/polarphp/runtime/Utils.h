@@ -38,6 +38,11 @@ POLAR_DECL_EXPORT FILE *php_fopen_with_path(const char *filename, const char *mo
 POLAR_DECL_EXPORT int php_check_open_basedir(const char *path);
 POLAR_DECL_EXPORT int php_check_open_basedir(const char *path, int warn);
 POLAR_DECL_EXPORT int php_check_specific_open_basedir(const char *basedir, const char *path);
+POLAR_DECL_EXPORT _zend_string *php_addcslashes_str(const char *str, size_t len, char *what, size_t wlength);
+POLAR_DECL_EXPORT _zend_string *php_addcslashes(_zend_string *str, char *what, size_t wlength);
+POLAR_DECL_EXPORT _zend_string *php_str_to_str(const char *haystack, size_t length, const char *needle,
+                                               size_t needle_len, const char *str, size_t str_len);
+POLAR_DECL_EXPORT _zend_string *php_string_tolower(_zend_string *s);
 
 } // runtime
 } // polar

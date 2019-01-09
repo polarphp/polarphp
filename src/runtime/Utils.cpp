@@ -475,5 +475,370 @@ FILE *php_fopen_with_path(const char *filename, const char *mode,
    return nullptr;
 }
 
+namespace {
+inline int php_charmask(const unsigned char *input, size_t len, char *mask)
+{
+   const unsigned char *end;
+   unsigned char c;
+   int result = SUCCESS;
+   memset(mask, 0, 256);
+   for (end = input+len; input < end; input++) {
+      c=*input;
+      if ((input+3 < end) && input[1] == '.' && input[2] == '.'
+          && input[3] >= c) {
+         memset(mask+c, 1, input[3] - c + 1);
+         input+=3;
+      } else if ((input+1 < end) && input[0] == '.' && input[1] == '.') {
+         /* Error, try to be as helpful as possible:
+            (a range ending/starting with '.' won't be captured here) */
+         if (end-len >= input) { /* there was no 'left' char */
+            php_error_docref(NULL, E_WARNING, "Invalid '..'-range, no character to the left of '..'");
+            result = FAILURE;
+            continue;
+         }
+         if (input+2 >= end) { /* there is no 'right' char */
+            php_error_docref(NULL, E_WARNING, "Invalid '..'-range, no character to the right of '..'");
+            result = FAILURE;
+            continue;
+         }
+         if (input[-1] > input[2]) { /* wrong order */
+            php_error_docref(NULL, E_WARNING, "Invalid '..'-range, '..'-range needs to be incrementing");
+            result = FAILURE;
+            continue;
+         }
+         /* FIXME: better error (a..b..c is the only left possibility?) */
+         php_error_docref(NULL, E_WARNING, "Invalid '..'-range");
+         result = FAILURE;
+         continue;
+      } else {
+         mask[c]=1;
+      }
+   }
+   return result;
+}
+} // anonymous namespace
+
+zend_string *php_addcslashes_str(const char *str, size_t len, char *what, size_t wlength)
+{
+   char flags[256];
+   char *target;
+   const char *source, *end;
+   char c;
+   size_t  newlen;
+   zend_string *new_str = zend_string_safe_alloc(4, len, 0, 0);
+
+   php_charmask((unsigned char *)what, wlength, flags);
+
+   for (source = str, end = source + len, target = ZSTR_VAL(new_str); source < end; source++) {
+      c = *source;
+      if (flags[(unsigned char)c]) {
+         if ((unsigned char) c < 32 || (unsigned char) c > 126) {
+            *target++ = '\\';
+            switch (c) {
+            case '\n': *target++ = 'n'; break;
+            case '\t': *target++ = 't'; break;
+            case '\r': *target++ = 'r'; break;
+            case '\a': *target++ = 'a'; break;
+            case '\v': *target++ = 'v'; break;
+            case '\b': *target++ = 'b'; break;
+            case '\f': *target++ = 'f'; break;
+            default: target += sprintf(target, "%03o", (unsigned char) c);
+            }
+            continue;
+         }
+         *target++ = '\\';
+      }
+      *target++ = c;
+   }
+   *target = 0;
+   newlen = target - ZSTR_VAL(new_str);
+   if (newlen < len * 4) {
+      new_str = zend_string_truncate(new_str, newlen, 0);
+   }
+   return new_str;
+}
+
+zend_string *php_addcslashes(zend_string *str, char *what, size_t wlength)
+{
+   return php_addcslashes_str(ZSTR_VAL(str), ZSTR_LEN(str), what, wlength);
+}
+
+namespace {
+zend_string *php_str_to_str_ex(zend_string *haystack,
+                               const char *needle, size_t needle_len, const char *str, size_t str_len, zend_long *replace_count)
+{
+   zend_string *new_str;
+
+   if (needle_len < ZSTR_LEN(haystack)) {
+      const char *end;
+      const char *p, *r;
+      char *e;
+
+      if (needle_len == str_len) {
+         new_str = NULL;
+         end = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
+         for (p = ZSTR_VAL(haystack); (r = (char*)php_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
+            if (!new_str) {
+               new_str = zend_string_init(ZSTR_VAL(haystack), ZSTR_LEN(haystack), 0);
+            }
+            memcpy(ZSTR_VAL(new_str) + (r - ZSTR_VAL(haystack)), str, str_len);
+            (*replace_count)++;
+         }
+         if (!new_str) {
+            goto nothing_todo;
+         }
+         return new_str;
+      } else {
+         size_t count = 0;
+         const char *o = ZSTR_VAL(haystack);
+         const char *n = needle;
+         const char *endp = o + ZSTR_LEN(haystack);
+
+         while ((o = (char*)php_memnstr(o, n, needle_len, endp))) {
+            o += needle_len;
+            count++;
+         }
+         if (count == 0) {
+            /* Needle doesn't occur, shortcircuit the actual replacement. */
+            goto nothing_todo;
+         }
+         if (str_len > needle_len) {
+            new_str = zend_string_safe_alloc(count, str_len - needle_len, ZSTR_LEN(haystack), 0);
+         } else {
+            new_str = zend_string_alloc(count * (str_len - needle_len) + ZSTR_LEN(haystack), 0);
+         }
+
+         e = ZSTR_VAL(new_str);
+         end = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
+         for (p = ZSTR_VAL(haystack); (r = (char*)php_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
+            memcpy(e, p, r - p);
+            e += r - p;
+            memcpy(e, str, str_len);
+            e += str_len;
+            (*replace_count)++;
+         }
+
+         if (p < end) {
+            memcpy(e, p, end - p);
+            e += end - p;
+         }
+
+         *e = '\0';
+         return new_str;
+      }
+   } else if (needle_len > ZSTR_LEN(haystack) || memcmp(ZSTR_VAL(haystack), needle, ZSTR_LEN(haystack))) {
+nothing_todo:
+      return zend_string_copy(haystack);
+   } else {
+      if (str_len == 0) {
+         new_str = ZSTR_EMPTY_ALLOC();
+      } else if (str_len == 1) {
+         new_str = ZSTR_CHAR((zend_uchar)(*str));
+      } else {
+         new_str = zend_string_init(str, str_len, 0);
+      }
+
+      (*replace_count)++;
+      return new_str;
+   }
+}
+/* }}} */
+
+/* {{{ php_str_to_str_i_ex
+ */
+zend_string *php_str_to_str_i_ex(zend_string *haystack, const char *lc_haystack,
+                                 zend_string *needle, const char *str, size_t str_len, zend_long *replace_count)
+{
+   zend_string *new_str = NULL;
+   zend_string *lc_needle;
+
+   if (ZSTR_LEN(needle) < ZSTR_LEN(haystack)) {
+      const char *end;
+      const char *p, *r;
+      char *e;
+
+      if (ZSTR_LEN(needle) == str_len) {
+         lc_needle = php_string_tolower(needle);
+         end = lc_haystack + ZSTR_LEN(haystack);
+         for (p = lc_haystack; (r = (char*)php_memnstr(p, ZSTR_VAL(lc_needle), ZSTR_LEN(lc_needle), end)); p = r + ZSTR_LEN(lc_needle)) {
+            if (!new_str) {
+               new_str = zend_string_init(ZSTR_VAL(haystack), ZSTR_LEN(haystack), 0);
+            }
+            memcpy(ZSTR_VAL(new_str) + (r - lc_haystack), str, str_len);
+            (*replace_count)++;
+         }
+         zend_string_release_ex(lc_needle, 0);
+
+         if (!new_str) {
+            goto nothing_todo;
+         }
+         return new_str;
+      } else {
+         size_t count = 0;
+         const char *o = lc_haystack;
+         const char *n;
+         const char *endp = o + ZSTR_LEN(haystack);
+
+         lc_needle = php_string_tolower(needle);
+         n = ZSTR_VAL(lc_needle);
+
+         while ((o = (char*)php_memnstr(o, n, ZSTR_LEN(lc_needle), endp))) {
+            o += ZSTR_LEN(lc_needle);
+            count++;
+         }
+         if (count == 0) {
+            /* Needle doesn't occur, shortcircuit the actual replacement. */
+            zend_string_release_ex(lc_needle, 0);
+            goto nothing_todo;
+         }
+
+         if (str_len > ZSTR_LEN(lc_needle)) {
+            new_str = zend_string_safe_alloc(count, str_len - ZSTR_LEN(lc_needle), ZSTR_LEN(haystack), 0);
+         } else {
+            new_str = zend_string_alloc(count * (str_len - ZSTR_LEN(lc_needle)) + ZSTR_LEN(haystack), 0);
+         }
+
+         e = ZSTR_VAL(new_str);
+         end = lc_haystack + ZSTR_LEN(haystack);
+
+         for (p = lc_haystack; (r = (char*)php_memnstr(p, ZSTR_VAL(lc_needle), ZSTR_LEN(lc_needle), end)); p = r + ZSTR_LEN(lc_needle)) {
+            memcpy(e, ZSTR_VAL(haystack) + (p - lc_haystack), r - p);
+            e += r - p;
+            memcpy(e, str, str_len);
+            e += str_len;
+            (*replace_count)++;
+         }
+
+         if (p < end) {
+            memcpy(e, ZSTR_VAL(haystack) + (p - lc_haystack), end - p);
+            e += end - p;
+         }
+         *e = '\0';
+
+         zend_string_release_ex(lc_needle, 0);
+
+         return new_str;
+      }
+   } else if (ZSTR_LEN(needle) > ZSTR_LEN(haystack)) {
+nothing_todo:
+      return zend_string_copy(haystack);
+   } else {
+      lc_needle = php_string_tolower(needle);
+
+      if (memcmp(lc_haystack, ZSTR_VAL(lc_needle), ZSTR_LEN(lc_needle))) {
+         zend_string_release_ex(lc_needle, 0);
+         goto nothing_todo;
+      }
+      zend_string_release_ex(lc_needle, 0);
+
+      new_str = zend_string_init(str, str_len, 0);
+
+      (*replace_count)++;
+      return new_str;
+   }
+}
+} // anonymous namespace
+
+zend_string *php_str_to_str(const char *haystack, size_t length, const char *needle,
+                            size_t needle_len, const char *str, size_t str_len)
+{
+   zend_string *new_str;
+
+   if (needle_len < length) {
+      const char *end;
+      const char *s, *p;
+      char *e, *r;
+
+      if (needle_len == str_len) {
+         new_str = zend_string_init(haystack, length, 0);
+         end = ZSTR_VAL(new_str) + length;
+         for (p = ZSTR_VAL(new_str); (r = (char*)php_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
+            memcpy(r, str, str_len);
+         }
+         return new_str;
+      } else {
+         if (str_len < needle_len) {
+            new_str = zend_string_alloc(length, 0);
+         } else {
+            size_t count = 0;
+            const char *o = haystack;
+            const char *n = needle;
+            const char *endp = o + length;
+
+            while ((o = (char*)php_memnstr(o, n, needle_len, endp))) {
+               o += needle_len;
+               count++;
+            }
+            if (count == 0) {
+               /* Needle doesn't occur, shortcircuit the actual replacement. */
+               new_str = zend_string_init(haystack, length, 0);
+               return new_str;
+            } else {
+               if (str_len > needle_len) {
+                  new_str = zend_string_safe_alloc(count, str_len - needle_len, length, 0);
+               } else {
+                  new_str = zend_string_alloc(count * (str_len - needle_len) + length, 0);
+               }
+            }
+         }
+
+         s = e = ZSTR_VAL(new_str);
+         end = haystack + length;
+         for (p = haystack; (r = (char*)php_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
+            memcpy(e, p, r - p);
+            e += r - p;
+            memcpy(e, str, str_len);
+            e += str_len;
+         }
+
+         if (p < end) {
+            memcpy(e, p, end - p);
+            e += end - p;
+         }
+
+         *e = '\0';
+         new_str = zend_string_truncate(new_str, e - s, 0);
+         return new_str;
+      }
+   } else if (needle_len > length || memcmp(haystack, needle, length)) {
+      new_str = zend_string_init(haystack, length, 0);
+      return new_str;
+   } else {
+      new_str = zend_string_init(str, str_len, 0);
+
+      return new_str;
+   }
+}
+
+zend_string *php_string_tolower(zend_string *s)
+{
+   unsigned char *c;
+   const unsigned char *e;
+
+   c = (unsigned char *)ZSTR_VAL(s);
+   e = c + ZSTR_LEN(s);
+
+   while (c < e) {
+      if (isupper(*c)) {
+         register unsigned char *r;
+         zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
+
+         if (c != (unsigned char*)ZSTR_VAL(s)) {
+            memcpy(ZSTR_VAL(res), ZSTR_VAL(s), c - (unsigned char*)ZSTR_VAL(s));
+         }
+         r = c + (ZSTR_VAL(res) - ZSTR_VAL(s));
+         while (c < e) {
+            *r = tolower(*c);
+            r++;
+            c++;
+         }
+         *r = '\0';
+         return res;
+      }
+      c++;
+   }
+   return zend_string_copy(s);
+}
+
 } // runtime
 } // utils

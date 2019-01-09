@@ -127,6 +127,7 @@ ExecEnv::ExecEnv()
    m_runtimeInfo.docrefExt = ".html";
    m_runtimeInfo.includePath = ".:/php/includes";
    m_runtimeInfo.reportMemLeaks = true;
+   m_runtimeInfo.serializePrecision = -1;
 }
 
 ExecEnv::~ExecEnv()

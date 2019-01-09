@@ -21,7 +21,7 @@ if(defined("POLAR_NAME")) {
 }
 
 if(defined("POLAR_VERSION")) {
-   if (is_string(ZAPI_VERSION)) {
+   if (is_string(POLAR_VERSION)) {
       echo "POLAR_VERSION is string\n";
    }
 }
