@@ -63,7 +63,7 @@ At present, we only target Chinese users for the time being, so we use the commu
 
 ## License
 
-`polarphp` is redeveloped on top of the `php` language project, following the agreement of the `php` project. For details, please see: [Project Agreement] (/LICENSE)
+`polarphp` is redeveloped on top of the `php` language project, following the agreement of the `php` project. For details, please see: [Project Agreement](/LICENSE)
 
 ## Contribution code guidance
 ===========================

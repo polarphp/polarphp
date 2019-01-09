@@ -10,6 +10,7 @@
 // Created by polarboy on 2018/12/25.
 
 #include "polarphp/runtime/internal/DepsZendVmHeaders.h"
+#include "polarphp/runtime/langsupport/LangSupportFuncs.h"
 #include "polarphp/runtime/PhpDefs.h"
 #include "polarphp/vm/Callable.h"
 
@@ -20,6 +21,10 @@ VmExtensionInitFuncType sg_vmExtensionInitHook = nullptr;
 
 bool php_register_internal_extensions()
 {
+   // binding language support functions
+   if (!register_lang_support_funcs()) {
+      return false;
+   }
    if (sg_vmExtensionInitHook != nullptr) {
       if (!sg_vmExtensionInitHook()) {
          return false;
