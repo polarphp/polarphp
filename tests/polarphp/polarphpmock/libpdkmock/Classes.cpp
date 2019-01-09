@@ -64,7 +64,7 @@ namespace {
 void register_basic_classes(Module &module)
 {
    Class<Person> personClass("Person");
-   personClass.registerConstant("UNICORNTEAM", "beijing unicornteam");
+   personClass.registerConstant("POLARPHP_TEAM", "beijing polarphp team");
    personClass.registerConstant("MY_CONST", "MY_CONST_VALUE");
    personClass.registerConstant(Constant("PI", 3.1415926));
    personClass.registerConstant("HEADER_SIZE", 123);
@@ -178,7 +178,7 @@ void register_inherit_test_classes(Module &module)
              ValueArgument("lhs"),
              ValueArgument("rhs")
           });
-   b.registerProperty("propsFromB", "unicornteam", Modifier::Protected);
+   b.registerProperty("propsFromB", "polarphp team", Modifier::Protected);
    c.registerMethod<decltype(&C::printInfo), &C::printInfo>("printInfo");
    c.registerMethod<decltype(&C::testCallParentPassRefArg), &C::testCallParentPassRefArg>("testCallParentPassRefArg");
    c.registerMethod<decltype(&C::testCallParentWithReturn), &C::testCallParentWithReturn>("testCallParentWithReturn");

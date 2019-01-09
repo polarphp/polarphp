@@ -486,7 +486,7 @@ Variant MagicMethodClass::__get(const std::string &key) const
    if (key == "prop1") {
       return "polarphp";
    } else if(key == "teamName" && !m_teamNameUnset) {
-      return "unicornteam";
+      return "polarphp team";
    } else if (key == "address" && !m_teamAddressUnset) {
       return m_address;
    } else if (key == "length") {
