@@ -12,10 +12,19 @@
 #ifndef POLARPHP_RUNTIME_LANG_SUPPORT_VARIABLE_FUNCS_H
 #define POLARPHP_RUNTIME_LANG_SUPPORT_VARIABLE_FUNCS_H
 
+#include "polarphp/runtime/PhpDefs.h"
+
 namespace polar {
 namespace runtime {
 
+PHP_FUNCTION(var_dump);
+PHP_FUNCTION(var_export);
+PHP_FUNCTION(debug_zval_dump);
 
+POLAR_DECL_EXPORT void var_dump(zval *struc, int level);
+POLAR_DECL_EXPORT void var_export(zval *struc, int level);
+POLAR_DECL_EXPORT void var_export_ex(zval *struc, int level, smart_str *buf);
+POLAR_DECL_EXPORT void debug_zval_dump(zval *struc, int level);
 
 } // runtime
 } // polar
