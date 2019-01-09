@@ -49,3 +49,12 @@ if(defined("\php\io\NATIVE_STREAM")) {
    }
 }
 
+// CHECK: MY_CONST is int
+// CHECK: PI is double
+// CHECK: POLAR_NAME is string
+// CHECK: POLAR_VERSION is string
+// CHECK: POLAR_FOUNDATION is string
+// CHECK: \php\SYS_VERSION is string
+// CHECK: \php\io\IO_TYPE is string
+// CHECK: \php\io\NATIVE_STREAM is bool
+
