@@ -13,8 +13,7 @@
 #define POLARPHP_VMAPI_LANG_PARAMETER_H
 
 #include "polarphp/vm/ZendApi.h"
-#include "polarphp/vm/ds/Variant.h"
-
+#include <any>
 #include <vector>
 
 namespace polar {
@@ -28,7 +27,7 @@ class StdClass;
 class VMAPI_DECL_EXPORT Parameters final
 {
 public:
-   using ParamCollectionType = std::vector<Variant>;
+   using ParamCollectionType = std::vector<std::any>;
    using ValueType = ParamCollectionType::value_type;
    using SizeType = ParamCollectionType::size_type;
    using DifferenceType = ParamCollectionType::difference_type;
@@ -36,18 +35,16 @@ public:
    using ConstReference = ParamCollectionType::const_reference;
    using Pointer = ParamCollectionType::pointer;
    using ConstPointer = ParamCollectionType::const_pointer;
-   using Iterator = ParamCollectionType::iterator;
-   using ConstIterator = ParamCollectionType::const_iterator;
-   using ReverseIterator = ParamCollectionType::reverse_iterator;
-   using ConstReverseIterator = ParamCollectionType::const_reverse_iterator;
+
 public:
-   Parameters(std::initializer_list<Variant> items)
+   Parameters(std::initializer_list<std::any> items)
       : m_data(items)
    {}
 
    Parameters(const Parameters &other)
       : m_object(other.m_object), m_data(other.m_data)
-   {}
+   {
+   }
 
    Parameters(const ParamCollectionType::iterator begin,
               const ParamCollectionType::iterator end)
@@ -55,12 +52,13 @@ public:
    {}
 
    Parameters(Parameters &&params) noexcept
-      : m_object(params.m_object), m_data(std::move(params.m_data))
+      : m_object(params.m_object),
+        m_data(std::move(params.m_data))
    {}
 
-   Parameters(StdClass *object) : m_object(object)
+   Parameters(StdClass *object)
+      : m_object(object)
    {}
-
    Parameters(zval *thisPtr, uint32_t argc);
 
 public:
@@ -70,26 +68,40 @@ public:
       return m_object;
    }
 
-   Reference at(SizeType pos);
-   ConstReference at(SizeType pos) const;
-   bool empty() const noexcept;
-   SizeType size() const noexcept;
+   template <typename T>
+   T &at(SizeType pos)
+   {
+      std::any &arg = m_data.at(pos);
+      return std::any_cast<T &>(arg);
+   }
+
+   template <typename T>
+   const T &at(SizeType pos) const
+   {
+      const std::any &arg = m_data.at(pos);
+      return std::any_cast<const T &>(arg);
+   }
+
+   Variant retrieveAsVariant(SizeType pos);
+   Variant retrieveAsVariant(SizeType pos) const;
+
+   bool empty() const noexcept
+   {
+      return m_data.empty();
+   }
+
+   SizeType size() const noexcept
+   {
+      return m_data.size();
+   }
+
 private:
    /**
     *  The base object
     *  @var Base
     */
    StdClass *m_object = nullptr;
-   std::vector<Variant> m_data;
-};
-
-class VariadicParameters : private std::vector<Variant>
-{
-   using Vector = std::vector<Variant>;
-public:
-   using Vector::at;
-   using Vector::operator[];
-   using Vector::empty;
+   std::vector<std::any> m_data;
 };
 
 } // vmapi
