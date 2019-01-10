@@ -13,6 +13,7 @@
 #include "polarphp/runtime/langsupport/TypeFuncs.h"
 #include "polarphp/runtime/langsupport/VariableFuncs.h"
 #include "polarphp/runtime/langsupport/ArrayFuncs.h"
+#include "polarphp/runtime/langsupport/AssertFuncs.h"
 
 namespace polar {
 namespace runtime {
@@ -523,6 +524,17 @@ ZEND_ARG_INFO(0, keys)   /* ARRAY_INFO(0, keys, 0) */
 ZEND_ARG_INFO(0, values) /* ARRAY_INFO(0, values, 0) */
 ZEND_END_ARG_INFO()
 
+/// args for assert
+ZEND_BEGIN_ARG_INFO_EX(arginfo_assert, 0, 0, 1)
+   ZEND_ARG_INFO(0, assertion)
+   ZEND_ARG_INFO(0, description)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_assert_options, 0, 0, 1)
+   ZEND_ARG_INFO(0, what)
+   ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry sg_langSupportFunctions[] = {
    ///
    /// functions for types
@@ -637,11 +649,12 @@ static const zend_function_entry sg_langSupportFunctions[] = {
    PHP_FE(array_chunk,													arginfo_array_chunk)
    PHP_FE(array_combine,												arginfo_array_combine)
    PHP_FE(array_key_exists,											arginfo_array_key_exists)
-
-   /* aliases from array.c */
    PHP_FALIAS(pos,					current,							arginfo_current)
    PHP_FALIAS(sizeof,				count,							arginfo_count)
    PHP_FALIAS(key_exists,			array_key_exists,				arginfo_array_key_exists)
+   /// aseert
+   PHP_FE(assert,                                           arginfo_assert)
+   PHP_FE(assert_options,                                   arginfo_assert_options)
    ZEND_FE_END
 };
 
@@ -712,12 +725,14 @@ PHP_MINIT_FUNCTION(Runtime)
    REGISTER_DOUBLE_CONSTANT("INF", ZEND_INFINITY, CONST_CS | CONST_PERSISTENT);
    REGISTER_DOUBLE_CONSTANT("NAN", ZEND_NAN, CONST_CS | CONST_PERSISTENT);
    RUNTIME_MINIT_SUBMODULE(array);
+   RUNTIME_MINIT_SUBMODULE(assert);
    return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(Runtime)
 {
    RUNTIME_MSHUTDOWN_SUBMODULE(array);
+   RUNTIME_MSHUTDOWN_SUBMODULE(assert);
    zend_hash_destroy(&sg_RuntimeSubmodules);
    return SUCCESS;
 }
@@ -732,7 +747,7 @@ PHP_RINIT_FUNCTION(Runtime)
    return SUCCESS;
 }
 
-PHP_RSHUTDOWN_FUNCTION(Runtime) /* {{{ */
+PHP_RSHUTDOWN_FUNCTION(Runtime)
 {
    RuntimeModuleData &rdata = retrieve_runtime_module_data();
    if (rdata.userTickFunctions) {
@@ -740,6 +755,7 @@ PHP_RSHUTDOWN_FUNCTION(Runtime) /* {{{ */
       efree(rdata.userTickFunctions);
       rdata.userTickFunctions = nullptr;
    }
+   RUNTIME_RSHUTDOWN_SUBMODULE(assert);
    return SUCCESS;
 }
 
