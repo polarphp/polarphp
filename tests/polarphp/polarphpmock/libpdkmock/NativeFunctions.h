@@ -38,7 +38,7 @@ void print_name(const StringVariant &name);
 void print_name_and_age(const StringVariant &name, const NumericVariant &age);
 Variant calculate_sum(NumericVariant argQuantity, ...);
 Variant add_two_number(const NumericVariant &num1, const NumericVariant &num2);
-void say_hello(StringVariant &name);
+void say_hello(StringVariant name);
 Variant print_something();
 Variant have_ret_and_have_arg(Parameters &params);
 

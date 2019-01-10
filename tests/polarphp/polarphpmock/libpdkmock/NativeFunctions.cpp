@@ -76,7 +76,7 @@ Variant add_two_number(const NumericVariant &num1, const NumericVariant &num2)
    return num1 + num2;
 }
 
-void say_hello(StringVariant &name)
+void say_hello(StringVariant name)
 {
    if (name.getSize() == 0) {
       name = "polarphp";

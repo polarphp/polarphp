@@ -586,7 +586,7 @@ static const zend_function_entry sg_langSupportFunctions[] = {
    PHP_FE(shuffle,														arginfo_shuffle)
    PHP_FE(array_walk,													arginfo_array_walk)
    PHP_FE(array_walk_recursive,										arginfo_array_walk_recursive)
-   PHP_FE(count,															arginfo_count)
+   PHP_FE(array_count,												   arginfo_count)
    PHP_FE(end,																arginfo_end)
    PHP_FE(prev,															arginfo_prev)
    PHP_FE(next,															arginfo_next)
@@ -649,9 +649,6 @@ static const zend_function_entry sg_langSupportFunctions[] = {
    PHP_FE(array_chunk,													arginfo_array_chunk)
    PHP_FE(array_combine,												arginfo_array_combine)
    PHP_FE(array_key_exists,											arginfo_array_key_exists)
-   PHP_FALIAS(pos,					current,							arginfo_current)
-   PHP_FALIAS(sizeof,				count,							arginfo_count)
-   PHP_FALIAS(key_exists,			array_key_exists,				arginfo_array_key_exists)
    /// aseert
    PHP_FE(assert,                                           arginfo_assert)
    PHP_FE(assert_options,                                   arginfo_assert_options)

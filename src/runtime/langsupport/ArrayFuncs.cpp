@@ -12,6 +12,7 @@
 #include "polarphp/runtime/langsupport/LangSupportFuncs.h"
 #include "polarphp/runtime/langsupport/ArrayFuncs.h"
 #include "polarphp/runtime/Utils.h"
+#include <iostream>
 
 #include <random>
 
@@ -693,8 +694,9 @@ zend_long array_count_recursive(HashTable *ht)
    return cnt;
 }
 
-PHP_FUNCTION(count)
+PHP_FUNCTION(array_count)
 {
+   std::cout << "begin invoke count ... " << std::endl;
    zval *array;
    zend_long mode = COUNT_NORMAL;
    zend_long cnt;
@@ -716,6 +718,8 @@ PHP_FUNCTION(count)
       } else {
          cnt = array_count_recursive(Z_ARRVAL_P(array));
       }
+      std::cout << "count num: " << cnt << std::endl;
+      std::cout << "end invoke count ... " << std::endl;
       RETURN_LONG(cnt);
       break;
    case IS_OBJECT: {
@@ -724,6 +728,7 @@ PHP_FUNCTION(count)
       if (Z_OBJ_HT_P(array)->count_elements) {
          RETVAL_LONG(1);
          if (SUCCESS == Z_OBJ_HT(*array)->count_elements(array, &Z_LVAL_P(return_value))) {
+            std::cout << "end invoke count ... " << std::endl;
             return;
          }
       }
@@ -734,6 +739,7 @@ PHP_FUNCTION(count)
             RETVAL_LONG(zval_get_long(&retval));
             zval_ptr_dtor(&retval);
          }
+         std::cout << "end invoke count ... " << std::endl;
          return;
       }
 
@@ -3057,8 +3063,8 @@ PHP_FUNCTION(shuffle)
 {
    zval *array;
    ZEND_PARSE_PARAMETERS_START(1, 1)
-      Z_PARAM_ARRAY_EX(array, 0, 1)
-   ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+         Z_PARAM_ARRAY_EX(array, 0, 1)
+         ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
    array_data_shuffle(array);
    RETURN_TRUE;
 }
@@ -5706,11 +5712,11 @@ PHP_FUNCTION(array_rand)
    uint32_t bitset_len;
    ALLOCA_FLAG(use_heap)
 
-   ZEND_PARSE_PARAMETERS_START(1, 2)
-      Z_PARAM_ARRAY(input)
-      Z_PARAM_OPTIONAL
-      Z_PARAM_LONG(num_req)
-   ZEND_PARSE_PARAMETERS_END();
+         ZEND_PARSE_PARAMETERS_START(1, 2)
+         Z_PARAM_ARRAY(input)
+         Z_PARAM_OPTIONAL
+         Z_PARAM_LONG(num_req)
+         ZEND_PARSE_PARAMETERS_END();
 
    num_avail = zend_hash_num_elements(Z_ARRVAL_P(input));
 
@@ -5827,13 +5833,13 @@ PHP_FUNCTION(array_sum)
 PHP_FUNCTION(array_product)
 {
    zval *input,
-       *entry,
-       entry_n;
+         *entry,
+         entry_n;
    double dval;
 
    ZEND_PARSE_PARAMETERS_START(1, 1)
-      Z_PARAM_ARRAY(input)
-   ZEND_PARSE_PARAMETERS_END();
+         Z_PARAM_ARRAY(input)
+         ZEND_PARSE_PARAMETERS_END();
 
    ZVAL_LONG(return_value, 1);
    if (!zend_hash_num_elements(Z_ARRVAL_P(input))) {

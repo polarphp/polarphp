@@ -73,7 +73,6 @@ bool check_invoke_arguments(_zend_execute_data *execute_data, _zval_struct *retu
    if (provided >= required) {
       return true;
    }
-   // TODO
    vmapi::warning() << name << "() expects at least " << required << " parameter(s), "
                  << provided << " given" << std::flush;
    RETVAL_NULL();

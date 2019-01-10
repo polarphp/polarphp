@@ -83,6 +83,15 @@ private:
    std::vector<Variant> m_data;
 };
 
+class VariadicParameters : private std::vector<Variant>
+{
+   using Vector = std::vector<Variant>;
+public:
+   using Vector::at;
+   using Vector::operator[];
+   using Vector::empty;
+};
+
 } // vmapi
 } // polar
 
