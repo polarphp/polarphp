@@ -12,10 +12,18 @@
 #include "polarphp/runtime/langsupport/LangSupportFuncs.h"
 #include "polarphp/runtime/langsupport/TypeFuncs.h"
 #include "polarphp/runtime/langsupport/VariableFuncs.h"
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/langsupport/ArrayFuncs.h"
 
 namespace polar {
 namespace runtime {
+
+RuntimeModuleData &retrieve_runtime_module_data()
+{
+   thread_local RuntimeModuleData rdata;
+   return rdata;
+}
+
+static HashTable sg_RuntimeSubmodules;
 
 ///
 /// type args
@@ -157,14 +165,99 @@ zend_module_entry g_langSupportModule = {
    STANDARD_MODULE_HEADER,
    "Runtime",
    sg_langSupportFunctions,
-   nullptr,
-   nullptr,
-   nullptr,
-   nullptr,
-   nullptr,
+   PHP_MINIT(Runtime),			/* process startup */
+   PHP_MSHUTDOWN(Runtime),		/* process shutdown */
+   PHP_RINIT(Runtime),			/* request startup */
+   PHP_RSHUTDOWN(Runtime),		/* request shutdown */
+   nullptr,			/* extension info */
    ZEND_VERSION,
    STANDARD_MODULE_PROPERTIES
 };
+
+#define RUNTIME_MINIT_SUBMODULE(module) \
+   if (PHP_MINIT(module)(INIT_FUNC_ARGS_PASSTHRU) == SUCCESS) {\
+   RUNTIME_ADD_SUBMODULE(module); \
+}
+
+#define RUNTIME_ADD_SUBMODULE(module) \
+   zend_hash_str_add_empty_element(&sg_RuntimeSubmodules, #module, strlen(#module));
+
+#define RUNTIME_RINIT_SUBMODULE(module) \
+   if (zend_hash_str_exists(&sg_RuntimeSubmodules, #module, strlen(#module))) { \
+   PHP_RINIT(module)(INIT_FUNC_ARGS_PASSTHRU); \
+}
+
+#define RUNTIME_MINFO_SUBMODULE(module) \
+   if (zend_hash_str_exists(&sg_RuntimeSubmodules, #module, strlen(#module))) { \
+   PHP_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU); \
+}
+
+#define RUNTIME_RSHUTDOWN_SUBMODULE(module) \
+   if (zend_hash_str_exists(&sg_RuntimeSubmodules, #module, strlen(#module))) { \
+   PHP_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS_PASSTHRU); \
+}
+
+#define RUNTIME_MSHUTDOWN_SUBMODULE(module) \
+   if (zend_hash_str_exists(&sg_RuntimeSubmodules, #module, strlen(#module))) { \
+   PHP_MSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS_PASSTHRU); \
+}
+
+PHP_MINIT_FUNCTION(Runtime)
+{
+   zend_hash_init(&sg_RuntimeSubmodules, 0, NULL, NULL, 1);
+
+   REGISTER_LONG_CONSTANT("INI_USER",   ZEND_INI_USER,   CONST_CS | CONST_PERSISTENT);
+   REGISTER_LONG_CONSTANT("INI_PERDIR", ZEND_INI_PERDIR, CONST_CS | CONST_PERSISTENT);
+   REGISTER_LONG_CONSTANT("INI_SYSTEM", ZEND_INI_SYSTEM, CONST_CS | CONST_PERSISTENT);
+   REGISTER_LONG_CONSTANT("INI_ALL",    ZEND_INI_ALL,    CONST_CS | CONST_PERSISTENT);
+
+#define REGISTER_MATH_CONSTANT(x)  REGISTER_DOUBLE_CONSTANT(#x, x, CONST_CS | CONST_PERSISTENT)
+   REGISTER_MATH_CONSTANT(M_E);
+   REGISTER_MATH_CONSTANT(M_LOG2E);
+   REGISTER_MATH_CONSTANT(M_LOG10E);
+   REGISTER_MATH_CONSTANT(M_LN2);
+   REGISTER_MATH_CONSTANT(M_LN10);
+   REGISTER_MATH_CONSTANT(M_PI);
+   REGISTER_MATH_CONSTANT(M_PI_2);
+   REGISTER_MATH_CONSTANT(M_PI_4);
+   REGISTER_MATH_CONSTANT(M_1_PI);
+   REGISTER_MATH_CONSTANT(M_2_PI);
+   REGISTER_MATH_CONSTANT(M_2_SQRTPI);
+   REGISTER_MATH_CONSTANT(M_SQRT2);
+   REGISTER_MATH_CONSTANT(M_SQRT1_2);
+   REGISTER_DOUBLE_CONSTANT("INF", ZEND_INFINITY, CONST_CS | CONST_PERSISTENT);
+   REGISTER_DOUBLE_CONSTANT("NAN", ZEND_NAN, CONST_CS | CONST_PERSISTENT);
+   RUNTIME_MINIT_SUBMODULE(array);
+   return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(Runtime)
+{
+   RUNTIME_MSHUTDOWN_SUBMODULE(array);
+   zend_hash_destroy(&sg_RuntimeSubmodules);
+   return SUCCESS;
+}
+
+PHP_RINIT_FUNCTION(Runtime)
+{
+   RuntimeModuleData &rdata = retrieve_runtime_module_data();
+   rdata.arrayWalkFci = empty_fcall_info;
+   rdata.arrayWalkFciCache = empty_fcall_info_cache;
+   rdata.userCompareFci = empty_fcall_info;
+   rdata.userCompareFciCache = empty_fcall_info_cache;
+   return SUCCESS;
+}
+
+PHP_RSHUTDOWN_FUNCTION(Runtime) /* {{{ */
+{
+   RuntimeModuleData &rdata = retrieve_runtime_module_data();
+   if (rdata.userTickFunctions) {
+      zend_llist_destroy(rdata.userTickFunctions);
+      efree(rdata.userTickFunctions);
+      rdata.userTickFunctions = nullptr;
+   }
+   return SUCCESS;
+}
 
 bool register_lang_support_funcs()
 {

@@ -364,4 +364,12 @@ void cli_ini_defaults(HashTable *configuration_hash);
 
 #define PHP_STDIN_FILENAME_MARK const_cast<char *>("Standard input code")
 
+/// use cpp cast
+///
+#define POLAR_ZVAL_EMPTY_ARRAY(z) do {						\
+      zval *__z = (z);								\
+      Z_ARR_P(__z) = const_cast<zend_array*>(&zend_empty_array);	\
+      Z_TYPE_INFO_P(__z) = IS_ARRAY; \
+   } while (0)
+
 #endif // POLARPHP_RUNTIME_PHPDEFS_H

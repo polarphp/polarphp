@@ -634,6 +634,36 @@ zend_string *php_str_to_str(const char *haystack, size_t length, const char *nee
    }
 }
 
+zend_string *php_string_toupper(zend_string *s)
+{
+  unsigned char *c;
+  const unsigned char *e;
+
+  c = (unsigned char *)ZSTR_VAL(s);
+  e = c + ZSTR_LEN(s);
+
+  while (c < e) {
+     if (islower(*c)) {
+        unsigned char *r;
+        zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
+
+        if (c != (unsigned char*)ZSTR_VAL(s)) {
+           memcpy(ZSTR_VAL(res), ZSTR_VAL(s), c - (unsigned char*)ZSTR_VAL(s));
+        }
+        r = c + (ZSTR_VAL(res) - ZSTR_VAL(s));
+        while (c < e) {
+           *r = toupper(*c);
+           r++;
+           c++;
+        }
+        *r = '\0';
+        return res;
+     }
+     c++;
+  }
+  return zend_string_copy(s);
+}
+
 zend_string *php_string_tolower(zend_string *s)
 {
    unsigned char *c;
@@ -662,6 +692,145 @@ zend_string *php_string_tolower(zend_string *s)
       c++;
    }
    return zend_string_copy(s);
+}
+
+namespace {
+int compare_right(char const **a, char const *aend, char const **b, char const *bend)
+{
+   int bias = 0;
+
+   /* The longest run of digits wins.  That aside, the greatest
+      value wins, but we can't know that it will until we've scanned
+      both numbers to know that they have the same magnitude, so we
+      remember it in BIAS. */
+   for(;; (*a)++, (*b)++) {
+      if ((*a == aend || !isdigit((int)(unsigned char)**a)) &&
+          (*b == bend || !isdigit((int)(unsigned char)**b))) {
+         return bias;
+      } else if (*a == aend || !isdigit((int)(unsigned char)**a)) {
+          return -1;
+      } else if (*b == bend || !isdigit((int)(unsigned char)**b)) {
+         return +1;
+      } else if (**a < **b) {
+         if (!bias) {
+            bias = -1;
+         }
+      } else if (**a > **b) {
+         if (!bias) {
+            bias = +1;
+         }
+      }
+   }
+   return 0;
+}
+
+int compare_left(char const **a, char const *aend, char const **b, char const *bend)
+{
+   /* Compare two left-aligned numbers: the first to have a
+        different value wins. */
+   for(;; (*a)++, (*b)++) {
+      if ((*a == aend || !isdigit((int)(unsigned char)**a)) &&
+          (*b == bend || !isdigit((int)(unsigned char)**b))) {
+         return 0;
+      } else if (*a == aend || !isdigit((int)(unsigned char)**a)) {
+         return -1;
+      } else if (*b == bend || !isdigit((int)(unsigned char)**b)) {
+         return +1;
+      } else if (**a < **b) {
+         return -1;
+      } else if (**a > **b) {
+         return +1;
+      }
+   }
+
+   return 0;
+}
+} // anonymous namespace
+
+int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, int fold_case)
+{
+   unsigned char ca, cb;
+   char const *ap, *bp;
+   char const *aend = a + a_len,
+         *bend = b + b_len;
+   int fractional, result;
+   short leading = 1;
+
+   if (a_len == 0 || b_len == 0) {
+      return (a_len == b_len ? 0 : (a_len > b_len ? 1 : -1));
+   }
+
+   ap = a;
+   bp = b;
+   while (1) {
+      ca = *ap; cb = *bp;
+
+      /* skip over leading zeros */
+      while (leading && ca == '0' && (ap+1 < aend) && isdigit((int)(unsigned char)*(ap+1))) {
+         ca = *++ap;
+      }
+
+      while (leading && cb == '0' && (bp+1 < bend) && isdigit((int)(unsigned char)*(bp+1))) {
+         cb = *++bp;
+      }
+
+      leading = 0;
+
+      /* Skip consecutive whitespace */
+      while (isspace((int)(unsigned char)ca)) {
+         ca = *++ap;
+      }
+
+      while (isspace((int)(unsigned char)cb)) {
+         cb = *++bp;
+      }
+
+      /* process run of digits */
+      if (isdigit((int)(unsigned char)ca)  &&  isdigit((int)(unsigned char)cb)) {
+         fractional = (ca == '0' || cb == '0');
+
+         if (fractional) {
+            result = compare_left(&ap, aend, &bp, bend);
+         } else {
+            result = compare_right(&ap, aend, &bp, bend);
+         }
+         if (result != 0) {
+            return result;
+         } else if (ap == aend && bp == bend) {
+            /* End of the strings. Let caller sort them out. */
+            return 0;
+         } else if (ap == aend) {
+            return -1;
+         } else if (bp == bend) {
+            return 1;
+         } else {
+            /* Keep on comparing from the current point. */
+            ca = *ap; cb = *bp;
+         }
+      }
+
+      if (fold_case) {
+         ca = toupper((int)(unsigned char)ca);
+         cb = toupper((int)(unsigned char)cb);
+      }
+
+      if (ca < cb) {
+          return -1;
+      } else if (ca > cb) {
+         return +1;
+      }
+
+      ++ap; ++bp;
+      if (ap >= aend && bp >= bend) {
+         /* The strings compare the same.  Perhaps the caller
+            will want to call strcmp to break the tie. */
+         return 0;
+      } else if (ap >= aend) {
+         return -1;
+      } else if (bp >= bend) {
+         return 1;
+      }
+   }
 }
 
 } // runtime
