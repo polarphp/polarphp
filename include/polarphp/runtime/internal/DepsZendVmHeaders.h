@@ -30,6 +30,7 @@ extern "C" {
 #include "polarphp/vm/zend/zend_extensions.h"
 #include "polarphp/vm/zend/zend_ini_scanner.h"
 #include "polarphp/vm/zend/zend_ini.h"
+#include "polarphp/vm/zend/zend_bitset.h"
 #include "polarphp/vm/zend/zend_interfaces.h"
 #include "polarphp/vm/zend/zend_dtrace.h"
 #include "polarphp/vm/zend/zend_long.h"

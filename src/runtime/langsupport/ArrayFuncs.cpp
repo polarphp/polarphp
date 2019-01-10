@@ -13,6 +13,8 @@
 #include "polarphp/runtime/langsupport/ArrayFuncs.h"
 #include "polarphp/runtime/Utils.h"
 
+#include <random>
+
 namespace polar {
 namespace runtime {
 
@@ -2582,6 +2584,9 @@ PHP_FUNCTION(array_fill_keys)
 
 namespace {
 
+/// TODO
+/// replace with cpp version
+///
 inline int php_intlog10abs(double value)
 {
    int result;
@@ -2951,86 +2956,112 @@ err:
 
 namespace {
 
-//void array_data_shuffle(zval *array)
-//{
-//   uint32_t idx, j, n_elems;
-//   Bucket *p, temp;
-//   HashTable *hash;
-//   zend_long rnd_idx;
-//   uint32_t n_left;
+zend_long mt_rand_range(zend_long min, zend_long max)
+{
+   zend_ulong umax = max - min;
+   std::random_device rd;
+#if ZEND_ULONG_MAX > UINT32_MAX
+   if (umax > UINT32_MAX) {
+      std::mt19937_64 gen(rd());
+      std::uniform_int_distribution<uint64_t> dis(min, max);
+      return static_cast<zend_long>(dis(gen));
+   }
+#endif
+   std::mt19937 gen(rd());
+   std::uniform_int_distribution<uint32_t> dis(min, max);
+   return static_cast<zend_long>(dis(gen));
+}
 
-//   n_elems = zend_hash_num_elements(Z_ARRVAL_P(array));
+void array_data_shuffle(zval *array)
+{
+   uint32_t idx, j, n_elems;
+   Bucket *p, temp;
+   HashTable *hash;
+   zend_long rnd_idx;
+   uint32_t n_left;
 
-//   if (n_elems < 1) {
-//      return;
-//   }
+   n_elems = zend_hash_num_elements(Z_ARRVAL_P(array));
 
-//   hash = Z_ARRVAL_P(array);
-//   n_left = n_elems;
+   if (n_elems < 1) {
+      return;
+   }
 
-//   if (EXPECTED(!HT_HAS_ITERATORS(hash))) {
-//      if (hash->nNumUsed != hash->nNumOfElements) {
-//         for (j = 0, idx = 0; idx < hash->nNumUsed; idx++) {
-//            p = hash->arData + idx;
-//            if (Z_TYPE(p->val) == IS_UNDEF) continue;
-//            if (j != idx) {
-//               hash->arData[j] = *p;
-//            }
-//            j++;
-//         }
-//      }
-//      while (--n_left) {
-//         rnd_idx = php_mt_rand_range(0, n_left);
-//         if (rnd_idx != n_left) {
-//            temp = hash->arData[n_left];
-//            hash->arData[n_left] = hash->arData[rnd_idx];
-//            hash->arData[rnd_idx] = temp;
-//         }
-//      }
-//   } else {
-//      uint32_t iter_pos = zend_hash_iterators_lower_pos(hash, 0);
+   hash = Z_ARRVAL_P(array);
+   n_left = n_elems;
 
-//      if (hash->nNumUsed != hash->nNumOfElements) {
-//         for (j = 0, idx = 0; idx < hash->nNumUsed; idx++) {
-//            p = hash->arData + idx;
-//            if (Z_TYPE(p->val) == IS_UNDEF) continue;
-//            if (j != idx) {
-//               hash->arData[j] = *p;
-//               if (idx == iter_pos) {
-//                  zend_hash_iterators_update(hash, idx, j);
-//                  iter_pos = zend_hash_iterators_lower_pos(hash, iter_pos + 1);
-//               }
-//            }
-//            j++;
-//         }
-//      }
-//      while (--n_left) {
-//         rnd_idx = php_mt_rand_range(0, n_left);
-//         if (rnd_idx != n_left) {
-//            temp = hash->arData[n_left];
-//            hash->arData[n_left] = hash->arData[rnd_idx];
-//            hash->arData[rnd_idx] = temp;
-//            zend_hash_iterators_update(hash, (uint32_t)rnd_idx, n_left);
-//         }
-//      }
-//   }
-//   hash->nNumUsed = n_elems;
-//   hash->nInternalPointer = 0;
+   if (EXPECTED(!HT_HAS_ITERATORS(hash))) {
+      if (hash->nNumUsed != hash->nNumOfElements) {
+         for (j = 0, idx = 0; idx < hash->nNumUsed; idx++) {
+            p = hash->arData + idx;
+            if (Z_TYPE(p->val) == IS_UNDEF) continue;
+            if (j != idx) {
+               hash->arData[j] = *p;
+            }
+            j++;
+         }
+      }
+      while (--n_left) {
+         rnd_idx = mt_rand_range(0, n_left);
+         if (rnd_idx != n_left) {
+            temp = hash->arData[n_left];
+            hash->arData[n_left] = hash->arData[rnd_idx];
+            hash->arData[rnd_idx] = temp;
+         }
+      }
+   } else {
+      uint32_t iter_pos = zend_hash_iterators_lower_pos(hash, 0);
 
-//   for (j = 0; j < n_elems; j++) {
-//      p = hash->arData + j;
-//      if (p->key) {
-//         zend_string_release_ex(p->key, 0);
-//      }
-//      p->h = j;
-//      p->key = NULL;
-//   }
-//   hash->nNextFreeElement = n_elems;
-//   if (!(HT_FLAGS(hash) & HASH_FLAG_PACKED)) {
-//      zend_hash_to_packed(hash);
-//   }
-//}
+      if (hash->nNumUsed != hash->nNumOfElements) {
+         for (j = 0, idx = 0; idx < hash->nNumUsed; idx++) {
+            p = hash->arData + idx;
+            if (Z_TYPE(p->val) == IS_UNDEF) continue;
+            if (j != idx) {
+               hash->arData[j] = *p;
+               if (idx == iter_pos) {
+                  zend_hash_iterators_update(hash, idx, j);
+                  iter_pos = zend_hash_iterators_lower_pos(hash, iter_pos + 1);
+               }
+            }
+            j++;
+         }
+      }
+      while (--n_left) {
+         rnd_idx = mt_rand_range(0, n_left);
+         if (rnd_idx != n_left) {
+            temp = hash->arData[n_left];
+            hash->arData[n_left] = hash->arData[rnd_idx];
+            hash->arData[rnd_idx] = temp;
+            zend_hash_iterators_update(hash, (uint32_t)rnd_idx, n_left);
+         }
+      }
+   }
+   hash->nNumUsed = n_elems;
+   hash->nInternalPointer = 0;
+
+   for (j = 0; j < n_elems; j++) {
+      p = hash->arData + j;
+      if (p->key) {
+         zend_string_release_ex(p->key, 0);
+      }
+      p->h = j;
+      p->key = NULL;
+   }
+   hash->nNextFreeElement = n_elems;
+   if (!(HT_FLAGS(hash) & HASH_FLAG_PACKED)) {
+      zend_hash_to_packed(hash);
+   }
+}
 } // anonymous namespace
+
+PHP_FUNCTION(shuffle)
+{
+   zval *array;
+   ZEND_PARSE_PARAMETERS_START(1, 1)
+      Z_PARAM_ARRAY_EX(array, 0, 1)
+   ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+   array_data_shuffle(array);
+   RETURN_TRUE;
+}
 
 namespace {
 void array_splice(HashTable *in_hash, zend_long offset, zend_long length,
@@ -5310,8 +5341,8 @@ PHP_FUNCTION(array_diff)
    }
 
    ZEND_PARSE_PARAMETERS_START(1, -1)
-      Z_PARAM_VARIADIC('+', args, argc)
-   ZEND_PARSE_PARAMETERS_END();
+         Z_PARAM_VARIADIC('+', args, argc)
+         ZEND_PARSE_PARAMETERS_END();
 
    if (Z_TYPE(args[0]) != IS_ARRAY) {
       php_error_docref(NULL, E_WARNING, "Expected parameter 1 to be an array, %s given", zend_zval_type_name(&args[0]));
@@ -5506,8 +5537,8 @@ PHP_FUNCTION(array_multisort)
    int				i, k, n;
 
    ZEND_PARSE_PARAMETERS_START(1, -1)
-      Z_PARAM_VARIADIC('+', args, argc)
-   ZEND_PARSE_PARAMETERS_END();
+         Z_PARAM_VARIADIC('+', args, argc)
+         ZEND_PARSE_PARAMETERS_END();
 
    /* Allocate space for storing pointers to input arrays and sort flags. */
    arrays = (zval **)ecalloc(argc, sizeof(zval *));
@@ -5542,41 +5573,41 @@ PHP_FUNCTION(array_multisort)
          }
       } else if (Z_TYPE_P(arg) == IS_LONG) {
          switch (Z_LVAL_P(arg) & ~PHP_SORT_FLAG_CASE) {
-            case PHP_SORT_ASC:
-            case PHP_SORT_DESC:
-               /* flag allowed here */
-               if (parse_state[MULTISORT_ORDER] == 1) {
-                  /* Save the flag and make sure then next arg is not the current flag. */
-                  sort_order = Z_LVAL_P(arg) == PHP_SORT_DESC ? PHP_SORT_DESC : PHP_SORT_ASC;
-                  parse_state[MULTISORT_ORDER] = 0;
-               } else {
-                  php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
-                  MULTISORT_ABORT;
-               }
-               break;
-
-            case PHP_SORT_REGULAR:
-            case PHP_SORT_NUMERIC:
-            case PHP_SORT_STRING:
-            case PHP_SORT_NATURAL:
-#if HAVE_STRCOLL
-            case PHP_SORT_LOCALE_STRING:
-#endif
-               /* flag allowed here */
-               if (parse_state[MULTISORT_TYPE] == 1) {
-                  /* Save the flag and make sure then next arg is not the current flag. */
-                  sort_type = (int)Z_LVAL_P(arg);
-                  parse_state[MULTISORT_TYPE] = 0;
-               } else {
-                  php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
-                  MULTISORT_ABORT;
-               }
-               break;
-
-            default:
-               php_error_docref(NULL, E_WARNING, "Argument #%d is an unknown sort flag", i + 1);
+         case PHP_SORT_ASC:
+         case PHP_SORT_DESC:
+            /* flag allowed here */
+            if (parse_state[MULTISORT_ORDER] == 1) {
+               /* Save the flag and make sure then next arg is not the current flag. */
+               sort_order = Z_LVAL_P(arg) == PHP_SORT_DESC ? PHP_SORT_DESC : PHP_SORT_ASC;
+               parse_state[MULTISORT_ORDER] = 0;
+            } else {
+               php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
                MULTISORT_ABORT;
-               break;
+            }
+            break;
+
+         case PHP_SORT_REGULAR:
+         case PHP_SORT_NUMERIC:
+         case PHP_SORT_STRING:
+         case PHP_SORT_NATURAL:
+#if HAVE_STRCOLL
+         case PHP_SORT_LOCALE_STRING:
+#endif
+            /* flag allowed here */
+            if (parse_state[MULTISORT_TYPE] == 1) {
+               /* Save the flag and make sure then next arg is not the current flag. */
+               sort_type = (int)Z_LVAL_P(arg);
+               parse_state[MULTISORT_TYPE] = 0;
+            } else {
+               php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
+               MULTISORT_ABORT;
+            }
+            break;
+
+         default:
+            php_error_docref(NULL, E_WARNING, "Argument #%d is an unknown sort flag", i + 1);
+            MULTISORT_ABORT;
+            break;
 
          }
       } else {
@@ -5662,15 +5693,124 @@ PHP_FUNCTION(array_multisort)
    RETURN_TRUE;
 }
 
+PHP_FUNCTION(array_rand)
+{
+   zval *input;
+   zend_long num_req = 1;
+   zend_string *string_key;
+   zend_ulong num_key;
+   int i;
+   int num_avail;
+   zend_bitset bitset;
+   int negative_bitset = 0;
+   uint32_t bitset_len;
+   ALLOCA_FLAG(use_heap)
+
+   ZEND_PARSE_PARAMETERS_START(1, 2)
+      Z_PARAM_ARRAY(input)
+      Z_PARAM_OPTIONAL
+      Z_PARAM_LONG(num_req)
+   ZEND_PARSE_PARAMETERS_END();
+
+   num_avail = zend_hash_num_elements(Z_ARRVAL_P(input));
+
+   if (num_avail == 0) {
+      php_error_docref(NULL, E_WARNING, "Array is empty");
+      return;
+   }
+
+   if (num_req == 1) {
+      HashTable *ht = Z_ARRVAL_P(input);
+
+      if ((uint32_t)num_avail < ht->nNumUsed - (ht->nNumUsed>>1)) {
+         /* If less than 1/2 of elements are used, don't sample. Instead search for a
+          * specific offset using linear scan. */
+         zend_long i = 0, randval = mt_rand_range(0, num_avail - 1);
+         ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(input), num_key, string_key) {
+            if (i == randval) {
+               if (string_key) {
+                  RETURN_STR_COPY(string_key);
+               } else {
+                  RETURN_LONG(num_key);
+               }
+            }
+            i++;
+         } ZEND_HASH_FOREACH_END();
+      }
+
+      /* Sample random buckets until we hit one that is not empty.
+       * The worst case probability of hitting an empty element is 1-1/2. The worst case
+       * probability of hitting N empty elements in a row is (1-1/2)**N.
+       * For N=10 this becomes smaller than 0.1%. */
+      do {
+         zend_long randval = mt_rand_range(0, ht->nNumUsed - 1);
+         Bucket *bucket = &ht->arData[randval];
+         if (!Z_ISUNDEF(bucket->val)) {
+            if (bucket->key) {
+               RETURN_STR_COPY(bucket->key);
+            } else {
+               RETURN_LONG(bucket->h);
+            }
+         }
+      } while (1);
+   }
+
+   if (num_req <= 0 || num_req > num_avail) {
+      php_error_docref(NULL, E_WARNING, "Second argument has to be between 1 and the number of elements in the array");
+      return;
+   }
+
+   /* Make the return value an array only if we need to pass back more than one result. */
+   array_init_size(return_value, (uint32_t)num_req);
+   if (num_req > (num_avail >> 1)) {
+      negative_bitset = 1;
+      num_req = num_avail - num_req;
+   }
+
+   bitset_len = zend_bitset_len(num_avail);
+   bitset = ZEND_BITSET_ALLOCA(bitset_len, use_heap);
+   zend_bitset_clear(bitset, bitset_len);
+
+   i = num_req;
+   while (i) {
+      zend_long randval = mt_rand_range(0, num_avail - 1);
+      if (!zend_bitset_in(bitset, randval)) {
+         zend_bitset_incl(bitset, randval);
+         i--;
+      }
+   }
+   /* i = 0; */
+
+   zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+   ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+      zval zv;
+      /* We can't use zend_hash_index_find()
+       * because the array may have string keys or gaps. */
+      ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(input), num_key, string_key) {
+         if (zend_bitset_in(bitset, i) ^ negative_bitset) {
+            if (string_key) {
+               ZVAL_STR_COPY(&zv, string_key);
+            } else {
+               ZVAL_LONG(&zv, num_key);
+            }
+            ZEND_HASH_FILL_ADD(&zv);
+         }
+         i++;
+      } ZEND_HASH_FOREACH_END();
+   } ZEND_HASH_FILL_END();
+
+   free_alloca(bitset, use_heap);
+}
+
 PHP_FUNCTION(array_sum)
 {
    zval *input,
-       *entry,
-       entry_n;
+         *entry,
+         entry_n;
 
    ZEND_PARSE_PARAMETERS_START(1, 1)
-      Z_PARAM_ARRAY(input)
-   ZEND_PARSE_PARAMETERS_END();
+         Z_PARAM_ARRAY(input)
+         ZEND_PARSE_PARAMETERS_END();
 
    ZVAL_LONG(return_value, 0);
 
@@ -5681,6 +5821,42 @@ PHP_FUNCTION(array_sum)
       ZVAL_COPY(&entry_n, entry);
       convert_scalar_to_number(&entry_n);
       fast_add_function(return_value, return_value, &entry_n);
+   } ZEND_HASH_FOREACH_END();
+}
+
+PHP_FUNCTION(array_product)
+{
+   zval *input,
+       *entry,
+       entry_n;
+   double dval;
+
+   ZEND_PARSE_PARAMETERS_START(1, 1)
+      Z_PARAM_ARRAY(input)
+   ZEND_PARSE_PARAMETERS_END();
+
+   ZVAL_LONG(return_value, 1);
+   if (!zend_hash_num_elements(Z_ARRVAL_P(input))) {
+      return;
+   }
+
+   ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
+      if (Z_TYPE_P(entry) == IS_ARRAY || Z_TYPE_P(entry) == IS_OBJECT) {
+         continue;
+      }
+      ZVAL_COPY(&entry_n, entry);
+      convert_scalar_to_number(&entry_n);
+
+      if (Z_TYPE(entry_n) == IS_LONG && Z_TYPE_P(return_value) == IS_LONG) {
+         dval = (double)Z_LVAL_P(return_value) * (double)Z_LVAL(entry_n);
+         if ( (double)ZEND_LONG_MIN <= dval && dval <= (double)ZEND_LONG_MAX ) {
+            Z_LVAL_P(return_value) *= Z_LVAL(entry_n);
+            continue;
+         }
+      }
+      convert_to_double(return_value);
+      convert_to_double(&entry_n);
+      Z_DVAL_P(return_value) *= Z_DVAL(entry_n);
    } ZEND_HASH_FOREACH_END();
 }
 
@@ -5697,11 +5873,11 @@ PHP_FUNCTION(array_reduce)
    HashTable *htbl;
 
    ZEND_PARSE_PARAMETERS_START(2, 3)
-      Z_PARAM_ARRAY(input)
-      Z_PARAM_FUNC(fci, fci_cache)
-      Z_PARAM_OPTIONAL
-      Z_PARAM_ZVAL(initial)
-   ZEND_PARSE_PARAMETERS_END();
+         Z_PARAM_ARRAY(input)
+         Z_PARAM_FUNC(fci, fci_cache)
+         Z_PARAM_OPTIONAL
+         Z_PARAM_ZVAL(initial)
+         ZEND_PARSE_PARAMETERS_END();
 
 
    if (ZEND_NUM_ARGS() > 2) {
@@ -5758,11 +5934,11 @@ PHP_FUNCTION(array_filter)
    zend_ulong num_key;
 
    ZEND_PARSE_PARAMETERS_START(1, 3)
-      Z_PARAM_ARRAY(array)
-      Z_PARAM_OPTIONAL
-      Z_PARAM_FUNC(fci, fci_cache)
-      Z_PARAM_LONG(use_type)
-   ZEND_PARSE_PARAMETERS_END();
+         Z_PARAM_ARRAY(array)
+         Z_PARAM_OPTIONAL
+         Z_PARAM_FUNC(fci, fci_cache)
+         Z_PARAM_LONG(use_type)
+         ZEND_PARSE_PARAMETERS_END();
 
    array_init(return_value);
    if (zend_hash_num_elements(Z_ARRVAL_P(array)) == 0) {
@@ -5841,9 +6017,9 @@ PHP_FUNCTION(array_map)
    uint32_t k, maxlen = 0;
 
    ZEND_PARSE_PARAMETERS_START(2, -1)
-      Z_PARAM_FUNC_EX(fci, fci_cache, 1, 0)
-      Z_PARAM_VARIADIC('+', arrays, n_arrays)
-   ZEND_PARSE_PARAMETERS_END();
+         Z_PARAM_FUNC_EX(fci, fci_cache, 1, 0)
+         Z_PARAM_VARIADIC('+', arrays, n_arrays)
+         ZEND_PARSE_PARAMETERS_END();
 
    RETVAL_NULL();
 
@@ -5990,30 +6166,30 @@ PHP_FUNCTION(array_key_exists)
    HashTable *array;			/* array to check in */
 
    ZEND_PARSE_PARAMETERS_START(2, 2)
-      Z_PARAM_ZVAL(key)
-      Z_PARAM_ARRAY_OR_OBJECT_HT(array)
-   ZEND_PARSE_PARAMETERS_END();
+         Z_PARAM_ZVAL(key)
+         Z_PARAM_ARRAY_OR_OBJECT_HT(array)
+         ZEND_PARSE_PARAMETERS_END();
 
    switch (Z_TYPE_P(key)) {
-      case IS_STRING:
-         if (zend_symtable_exists_ind(array, Z_STR_P(key))) {
-            RETURN_TRUE;
-         }
-         RETURN_FALSE;
-      case IS_LONG:
-         if (zend_hash_index_exists(array, Z_LVAL_P(key))) {
-            RETURN_TRUE;
-         }
-         RETURN_FALSE;
-      case IS_NULL:
-         if (zend_hash_exists_ind(array, ZSTR_EMPTY_ALLOC())) {
-            RETURN_TRUE;
-         }
-         RETURN_FALSE;
+   case IS_STRING:
+      if (zend_symtable_exists_ind(array, Z_STR_P(key))) {
+         RETURN_TRUE;
+      }
+      RETURN_FALSE;
+   case IS_LONG:
+      if (zend_hash_index_exists(array, Z_LVAL_P(key))) {
+         RETURN_TRUE;
+      }
+      RETURN_FALSE;
+   case IS_NULL:
+      if (zend_hash_exists_ind(array, ZSTR_EMPTY_ALLOC())) {
+         RETURN_TRUE;
+      }
+      RETURN_FALSE;
 
-      default:
-         php_error_docref(NULL, E_WARNING, "The first argument should be either a string or an integer");
-         RETURN_FALSE;
+   default:
+      php_error_docref(NULL, E_WARNING, "The first argument should be either a string or an integer");
+      RETURN_FALSE;
    }
 }
 
@@ -6029,11 +6205,11 @@ PHP_FUNCTION(array_chunk)
    zval *entry;
 
    ZEND_PARSE_PARAMETERS_START(2, 3)
-      Z_PARAM_ARRAY(input)
-      Z_PARAM_LONG(size)
-      Z_PARAM_OPTIONAL
-      Z_PARAM_BOOL(preserve_keys)
-   ZEND_PARSE_PARAMETERS_END();
+         Z_PARAM_ARRAY(input)
+         Z_PARAM_LONG(size)
+         Z_PARAM_OPTIONAL
+         Z_PARAM_BOOL(preserve_keys)
+         ZEND_PARSE_PARAMETERS_END();
 
    /* Do bounds checking for size parameter. */
    if (size < 1) {
@@ -6091,9 +6267,9 @@ PHP_FUNCTION(array_combine)
    int num_keys, num_values;
 
    ZEND_PARSE_PARAMETERS_START(2, 2)
-      Z_PARAM_ARRAY_HT(keys)
-      Z_PARAM_ARRAY_HT(values)
-   ZEND_PARSE_PARAMETERS_END();
+         Z_PARAM_ARRAY_HT(keys)
+         Z_PARAM_ARRAY_HT(values)
+         ZEND_PARSE_PARAMETERS_END();
 
    num_keys = zend_hash_num_elements(keys);
    num_values = zend_hash_num_elements(values);
@@ -6117,12 +6293,12 @@ PHP_FUNCTION(array_combine)
             entry_values = &values->arData[pos_values].val;
             if (Z_TYPE_P(entry_keys) == IS_LONG) {
                entry_values = zend_hash_index_update(Z_ARRVAL_P(return_value),
-                  Z_LVAL_P(entry_keys), entry_values);
+                                                     Z_LVAL_P(entry_keys), entry_values);
             } else {
                zend_string *tmp_key;
                zend_string *key = zval_get_tmp_string(entry_keys, &tmp_key);
                entry_values = zend_symtable_update(Z_ARRVAL_P(return_value),
-                  key, entry_values);
+                                                   key, entry_values);
                zend_tmp_string_release(tmp_key);
             }
             zval_add_ref(entry_values);
