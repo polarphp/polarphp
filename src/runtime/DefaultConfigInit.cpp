@@ -66,12 +66,12 @@ POLAR_INI_BEGIN()
    POLAR_INI_ENTRY("disable_functions",             "",                     POLAR_INI_SYSTEM,                  nullptr)
    POLAR_INI_ENTRY("disable_classes",               "",                     POLAR_INI_SYSTEM,                  nullptr)
    POLAR_INI_ENTRY("max_file_uploads",              "20",                   POLAR_INI_SYSTEM|POLAR_INI_PERDIR, nullptr)
-   STD_ZEND_INI_ENTRY("realpath_cache_size",        "4096K",                POLAR_INI_SYSTEM,                  update_long_handler,               realpath_cache_size_limit, virtual_cwd_globals,   cwd_globals)
-   STD_ZEND_INI_ENTRY("realpath_cache_ttl",         "120",                  POLAR_INI_SYSTEM,                  update_long_handler,               realpath_cache_ttl,        virtual_cwd_globals,   cwd_globals)
+   STD_ZEND_INI_ENTRY("realpath_cache_size",        "4096K",                POLAR_INI_SYSTEM,                  OnUpdateLong,                      realpath_cache_size_limit, virtual_cwd_globals,   cwd_globals)
+   STD_ZEND_INI_ENTRY("realpath_cache_ttl",         "120",                  POLAR_INI_SYSTEM,                  OnUpdateLong,                      realpath_cache_ttl,        virtual_cwd_globals,   cwd_globals)
 
    POLAR_STD_INI_ENTRY("user_ini.filename",         ".user.ini",            POLAR_INI_SYSTEM,                  update_string_handler,             userIniFilename,           ExecEnvInfo,           sg_execEnvInfo)
    POLAR_STD_INI_ENTRY("user_ini.cache_ttl",        "300",                  POLAR_INI_SYSTEM,                  update_long_handler,               userIniCacheTtl,           ExecEnvInfo,           sg_execEnvInfo)
-   STD_ZEND_INI_ENTRY("hard_timeout",               "2",                    POLAR_INI_SYSTEM,                  update_long_handler,               hard_timeout,              zend_executor_globals, executor_globals)
+   STD_ZEND_INI_ENTRY("hard_timeout",               "2",                    POLAR_INI_SYSTEM,                  OnUpdateLong,                      hard_timeout,              zend_executor_globals, executor_globals)
    #ifdef POLAR_OS_WIN32
    POLAR_STD_INI_BOOLEAN("windows.show_crt_warning","0",                    POLAR_INI_ALL,                     update_bool_handler,               windowsShowCrtWarning,     ExecEnvInfo,           sg_execEnvInfo)
    #endif

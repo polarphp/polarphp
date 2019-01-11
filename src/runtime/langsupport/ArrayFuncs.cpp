@@ -696,7 +696,26 @@ zend_long array_count_recursive(HashTable *ht)
 
 PHP_FUNCTION(array_count)
 {
-   std::cout << "begin invoke count ... " << std::endl;
+   zval *array;
+   zend_long mode = COUNT_NORMAL;
+   zend_long cnt;
+
+   ZEND_PARSE_PARAMETERS_START(1, 2)
+         Z_PARAM_ARRAY(array)
+         Z_PARAM_OPTIONAL
+         Z_PARAM_LONG(mode)
+         ZEND_PARSE_PARAMETERS_END();
+
+   if (mode != COUNT_RECURSIVE) {
+      cnt = zend_array_count(Z_ARRVAL_P(array));
+   } else {
+      cnt = array_count_recursive(Z_ARRVAL_P(array));
+   }
+   RETURN_LONG(cnt);
+}
+
+PHP_FUNCTION(count)
+{
    zval *array;
    zend_long mode = COUNT_NORMAL;
    zend_long cnt;
@@ -718,8 +737,6 @@ PHP_FUNCTION(array_count)
       } else {
          cnt = array_count_recursive(Z_ARRVAL_P(array));
       }
-      std::cout << "count num: " << cnt << std::endl;
-      std::cout << "end invoke count ... " << std::endl;
       RETURN_LONG(cnt);
       break;
    case IS_OBJECT: {
@@ -728,7 +745,6 @@ PHP_FUNCTION(array_count)
       if (Z_OBJ_HT_P(array)->count_elements) {
          RETVAL_LONG(1);
          if (SUCCESS == Z_OBJ_HT(*array)->count_elements(array, &Z_LVAL_P(return_value))) {
-            std::cout << "end invoke count ... " << std::endl;
             return;
          }
       }
@@ -739,7 +755,6 @@ PHP_FUNCTION(array_count)
             RETVAL_LONG(zval_get_long(&retval));
             zval_ptr_dtor(&retval);
          }
-         std::cout << "end invoke count ... " << std::endl;
          return;
       }
 
@@ -3906,7 +3921,7 @@ PHP_FUNCTION(array_keys)
          ZEND_PARSE_PARAMETERS_END();
    arrval = Z_ARRVAL_P(input);
    elem_count = zend_hash_num_elements(arrval);
-
+   std::cout << "fuck you, bige" << std::endl;
    /* Base case: empty input */
    if (!elem_count) {
       RETURN_ZVAL(input, 1, 0)

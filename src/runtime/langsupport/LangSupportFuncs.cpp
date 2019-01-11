@@ -138,6 +138,11 @@ ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
 ZEND_ARG_INFO(0, sort_flags)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_count, 0, 0, 1)
+ZEND_ARG_ARRAY_INFO(0, var, 0)
+ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_count, 0, 0, 1)
 ZEND_ARG_INFO(0, var)
 ZEND_ARG_INFO(0, mode)
@@ -586,7 +591,8 @@ static const zend_function_entry sg_langSupportFunctions[] = {
    PHP_FE(shuffle,														arginfo_shuffle)
    PHP_FE(array_walk,													arginfo_array_walk)
    PHP_FE(array_walk_recursive,										arginfo_array_walk_recursive)
-   PHP_FE(array_count,												   arginfo_count)
+   PHP_FE(count,												         arginfo_count)
+   PHP_FE(array_count,												   arginfo_array_count)
    PHP_FE(end,																arginfo_end)
    PHP_FE(prev,															arginfo_prev)
    PHP_FE(next,															arginfo_next)
