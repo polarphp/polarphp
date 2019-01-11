@@ -100,7 +100,7 @@ TEST(HashTableTest, testGetKey)
 {
    ZVMHashTable table;
    // this trigger a warning
-   // table.getKey();
+   table.getKey();
    table.insert("name", Variant("polarphp"));
    ASSERT_EQ(table.getKey().toString(), "name");
    table.insert("key1", Variant("item1"));

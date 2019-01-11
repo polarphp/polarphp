@@ -1073,11 +1073,15 @@ POLAR_DECL_EXPORT void php_message_handler_for_zend(zend_long message, const voi
          char memoryLeakBuf[1024];
          if (message==ZMSG_MEMORY_LEAK_DETECTED) {
             zend_leak_info *t = reinterpret_cast<zend_leak_info *>(const_cast<void *>(data));
-            std::snprintf(memoryLeakBuf, 512, "%s(%" PRIu32 ") :  Freeing " ZEND_ADDR_FMT " (%zu bytes), script=%s\n", t->filename, t->lineno, (size_t)t->addr, t->size, SAFE_FILENAME(execEnvInfo.entryScriptFilename.c_str()));
-            if (t->orig_filename) {
-               char relayBuf[512];
-               std::snprintf(relayBuf, 512, "%s(%" PRIu32 ") : Actual location (location was relayed)\n", t->orig_filename, t->orig_lineno);
-               strlcat(memoryLeakBuf, relayBuf, sizeof(memoryLeakBuf));
+            if (!execEnvInfo.entryScriptFilename.empty()) {
+               std::snprintf(memoryLeakBuf, 512, "%s(%" PRIu32 ") :  Freeing " ZEND_ADDR_FMT " (%zu bytes), script=%s\n", t->filename, t->lineno, (size_t)t->addr, t->size, SAFE_FILENAME(execEnvInfo.entryScriptFilename.c_str()));
+               if (t->orig_filename) {
+                  char relayBuf[512];
+                  std::snprintf(relayBuf, 512, "%s(%" PRIu32 ") : Actual location (location was relayed)\n", t->orig_filename, t->orig_lineno);
+                  strlcat(memoryLeakBuf, relayBuf, sizeof(memoryLeakBuf));
+               }
+            } else {
+               std::snprintf(memoryLeakBuf, 512, "Freeing " ZEND_ADDR_FMT " (%zu bytes), script=%s\n", (size_t)t->addr, t->size, SAFE_FILENAME(execEnvInfo.entryScriptFilename.c_str()));
             }
          } else {
             unsigned long leak_count = (zend_uintptr_t) data;
@@ -1159,9 +1163,9 @@ zend_string *php_resolve_path(const char *filename, size_t filenameLen, const ch
        IS_ABSOLUTE_PATH(filename, filenameLen) ||
     #ifdef POLAR_OS_WIN32
        /* This should count as an absolute local path as well, however
-                                                                                                                                                                                                                IS_ABSOLUTE_PATH doesn't care about this path form till now. It
-                                                                                                                                                                                                                might be a big thing to extend, thus just a local handling for
-                                                                                                                                                                                                                now. */
+                                                                                                                                                                                                                        IS_ABSOLUTE_PATH doesn't care about this path form till now. It
+                                                                                                                                                                                                                        might be a big thing to extend, thus just a local handling for
+                                                                                                                                                                                                                        now. */
        filenameLen >=2 && IS_SLASH(filename[0]) && !IS_SLASH(filename[1]) ||
     #endif
        !path ||

@@ -17,10 +17,10 @@ if (class_exists("\IterateTestClass")) {
         echo "the value of item key3 is : ".$data["key3"]."\n";
     }
     // test unset
-    echo "now \$data item count is " . array_count($data)."\n";
+    echo "now \$data item count is " . count($data)."\n";
     unset($data["key1"]);
     if (!isset($data["key1"])) {
         echo "key key1 is not exists\n";
     }
-    echo "now \$data item count is " . array_count($data)."\n";
+    echo "now \$data item count is " . count($data)."\n";
 }

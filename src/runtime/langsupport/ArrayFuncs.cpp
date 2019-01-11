@@ -12,7 +12,6 @@
 #include "polarphp/runtime/langsupport/LangSupportFuncs.h"
 #include "polarphp/runtime/langsupport/ArrayFuncs.h"
 #include "polarphp/runtime/Utils.h"
-#include <iostream>
 
 #include <random>
 
@@ -3921,7 +3920,6 @@ PHP_FUNCTION(array_keys)
          ZEND_PARSE_PARAMETERS_END();
    arrval = Z_ARRVAL_P(input);
    elem_count = zend_hash_num_elements(arrval);
-   std::cout << "fuck you, bige" << std::endl;
    /* Base case: empty input */
    if (!elem_count) {
       RETURN_ZVAL(input, 1, 0)

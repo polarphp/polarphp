@@ -344,14 +344,14 @@ int AbstractClassPrivate::countElements(zval *object, zend_long *count)
    if (countable) {
       try {
          *count = countable->count();
-         return VMAPI_SUCCESS;
+         return true;
       } catch (Exception &exception) {
          process_exception(exception);
-         return VMAPI_FAILURE; // unreachable, prevent some compiler warning
+         return false; // unreachable, prevent some compiler warning
       }
    } else {
       if (!std_object_handlers.count_elements) {
-         return VMAPI_FAILURE;
+         return false;
       }
       return std_object_handlers.count_elements(object, count);
    }
@@ -416,19 +416,19 @@ int AbstractClassPrivate::hasDimension(zval *object, zval *offset, int checkEmpt
    if (arrayAccess) {
       try {
          if (!arrayAccess->offsetExists(offset)) {
-            return VMAPI_FAILURE;
+            return false;
          }
          if (!checkEmpty) {
-            return VMAPI_SUCCESS;
+            return true;
          }
          return empty(arrayAccess->offsetGet(offset));
       } catch (Exception &exception) {
          process_exception(exception);
-         return VMAPI_FAILURE; // unreachable, prevent some compiler warning
+         return false; // unreachable, prevent some compiler warning
       }
    } else {
       if (!std_object_handlers.has_dimension) {
-         return VMAPI_FAILURE;
+         return false;
       }
       return std_object_handlers.has_dimension(object, offset, checkEmpty);
    }
@@ -488,9 +488,9 @@ int AbstractClassPrivate::serialize(zval *object, unsigned char **buffer, size_t
       *bufLength = value.length();
    } catch (Exception &exception) {
       process_exception(exception);
-      return VMAPI_FAILURE; // unreachable, prevent some compiler warning
+      return false; // unreachable, prevent some compiler warning
    }
-   return VMAPI_SUCCESS;
+   return true;
 }
 
 int AbstractClassPrivate::unserialize(zval *object, zend_class_entry *entry, const unsigned char *buffer,
@@ -506,9 +506,9 @@ int AbstractClassPrivate::unserialize(zval *object, zend_class_entry *entry, con
       // implementation, send it to user space
       // process_exception(exception);
       php_error_docref(nullptr, E_NOTICE, "Error while unserializing");
-      return VMAPI_FAILURE;
+      return false;
    }
-   return VMAPI_SUCCESS;
+   return true;
 }
 
 HashTable *AbstractClassPrivate::debugInfo(zval *object, int *isTemp)
@@ -783,7 +783,7 @@ int AbstractClassPrivate::getClosure(zval *object, zend_class_entry **entry, zen
    }
    *retFunc = reinterpret_cast<zend_function *>(callContext);
    *objectPtr = Z_OBJ_P(object);
-   return VMAPI_SUCCESS;
+   return true;
 }
 
 class ScopedFree
@@ -892,15 +892,15 @@ int AbstractClassPrivate::cast(zval *object, zval *retValue, int type)
          break;
       }
       ZVAL_COPY(retValue, &temp);
-      return VMAPI_SUCCESS;
+      return true;
    } catch (const NotImplemented &) {
       if (!std_object_handlers.cast_object) {
-         return VMAPI_FAILURE;
+         return false;
       }
       return std_object_handlers.cast_object(object, retValue, type);
    } catch (Exception &exception) {
       process_exception(exception);
-      return VMAPI_FAILURE;
+      return false;
    }
 }
 
@@ -955,6 +955,7 @@ void AbstractClassPrivate::freeObject(zend_object *object)
 
 zval *AbstractClassPrivate::toZval(Variant &&value, int type, zval *rv)
 {
+   /// TODO review here
    zval result;
    if (type == 0 || value.getRefCount() <= 1) {
       result = value.detach(true);
