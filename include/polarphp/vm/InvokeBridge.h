@@ -42,6 +42,54 @@ class StdClass;
 namespace
 {
 
+template <typename CallableType>
+struct callable_prototype_checker : public std::false_type
+{};
+
+template <typename ReturnType>
+struct callable_prototype_checker <ReturnType (*)(Parameters &)> : public std::true_type
+{};
+
+template <typename ReturnType>
+struct callable_prototype_checker <ReturnType (*)()> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)(Parameters &)> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) const> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) volatile> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) const volatile> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) &> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) const &> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) volatile &> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) const volatile &> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) &&> : public std::true_type
+{};
+
 POLAR_DECL_UNUSED void yield(_zval_struct *return_value, const Variant &value)
 {
    RETVAL_ZVAL(static_cast<zval *>(value), 1, 0);
@@ -100,9 +148,13 @@ public:
          if (!check_invoke_arguments(execute_data, return_value, paramNumber)) {
             return;
          }
-         const size_t argNumber = ZEND_NUM_ARGS();
-         Parameters arguments(nullptr, argNumber);
-         std::invoke(callable, arguments);
+         if constexpr(paramNumber == 0) {
+            std::invoke(callable);
+         } else {
+            const size_t argNumber = ZEND_NUM_ARGS();
+            Parameters arguments(nullptr, argNumber);
+            std::invoke(callable, arguments);
+         }
          yield(return_value, nullptr);
       } catch (Exception &exception) {
          process_exception(exception);
@@ -122,9 +174,13 @@ public:
          if (!check_invoke_arguments(execute_data, return_value, paramNumber)) {
             return;
          }
-         const size_t argNumber = ZEND_NUM_ARGS();
-         Parameters arguments(nullptr, argNumber);
-         yield(return_value, std::invoke(callable, arguments));
+         if constexpr (paramNumber == 0) {
+            yield(return_value, std::invoke(callable));
+         } else {
+            const size_t argNumber = ZEND_NUM_ARGS();
+            Parameters arguments(nullptr, argNumber);
+            yield(return_value, std::invoke(callable, arguments));
+         }
       } catch (Exception &exception) {
          process_exception(exception);
       }
@@ -146,10 +202,14 @@ public:
          using ClassType = typename std::decay<typename member_pointer_traits<CallableType>::ClassType>::type;
          StdClass *nativeObject = ObjectBinder::retrieveSelfPtr(getThis())->getNativeObject();
          const size_t argNumber = ZEND_NUM_ARGS();
-         Parameters arguments(getThis(), argNumber);
-         // for class object
-         auto tuple = std::make_tuple<ClassType *, Parameters&>(static_cast<ClassType *>(nativeObject), arguments);
-         std::apply(callable, tuple);
+         if constexpr(paramNumber == 0) {
+            std::invoke(callable, static_cast<ClassType *>(nativeObject));
+         } else {
+            Parameters arguments(getThis(), argNumber);
+            // for class object
+            auto tuple = std::make_tuple<ClassType *, Parameters&>(static_cast<ClassType *>(nativeObject), arguments);
+            std::apply(callable, tuple);
+         }
          yield(return_value, nullptr);
       } catch (Exception &exception) {
          process_exception(exception);
@@ -171,11 +231,15 @@ public:
          }
          using ClassType = typename std::decay<typename member_pointer_traits<CallableType>::ClassType>::type;
          StdClass *nativeObject = ObjectBinder::retrieveSelfPtr(getThis())->getNativeObject();
-         const size_t argNumber = ZEND_NUM_ARGS();
-         Parameters arguments(getThis(), argNumber);
-         // for class object
-         auto tuple = std::make_tuple<ClassType *, Parameters&>(static_cast<ClassType *>(nativeObject), arguments);
-         yield(return_value, std::apply(callable, tuple));
+         if constexpr(paramNumber == 0) {
+            yield(return_value, std::invoke(callable, static_cast<ClassType *>(nativeObject)));
+         } else {
+            const size_t argNumber = ZEND_NUM_ARGS();
+            Parameters arguments(getThis(), argNumber);
+            // for class object
+            auto tuple = std::make_tuple<ClassType *, Parameters&>(static_cast<ClassType *>(nativeObject), arguments);
+            yield(return_value, std::apply(callable, tuple));
+         }
       } catch (Exception &exception) {
          process_exception(exception);
       }
@@ -187,7 +251,8 @@ public:
 // for normal function and static method
 template <typename CallableType,
           typename std::decay<CallableType>::type callable,
-          typename DecayCallableType = typename std::decay<CallableType>::type>
+          typename DecayCallableType = typename std::decay<CallableType>::type,
+          typename std::enable_if<callable_prototype_checker<DecayCallableType>::value, DecayCallableType>::type * = nullptr>
 class InvokeBridge : public InvokeBridgePrivate<DecayCallableType, callable,
       CallableInfoTrait<DecayCallableType>::isMemberCallable,
       CallableHasReturn<DecayCallableType>::value>
