@@ -105,8 +105,8 @@ public:
 class VMAPI_DECL_EXPORT VariadicArgument : public Argument
 {
 public:
-   VariadicArgument(const char *name, bool isReference = false)
-      : Argument(name, Type::Undefined, false, isReference, true)
+   VariadicArgument(const char *name, Type type = Type::Undefined, bool isReference = false)
+      : Argument(name, type, false, isReference, true)
    {}
 
    VariadicArgument(const ValueArgument &argument)

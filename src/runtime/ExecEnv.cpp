@@ -908,7 +908,7 @@ ZEND_COLD void php_error_callback(int type, const char *errorFilename,
             trigger_break=0;
             break;
          }
-         zend_output_debug_string(trigger_break, "%s(%" PRIu32 ") : %s - %s", errorFilename, errorLineno, error_type_str, buffer.get());
+         zend_output_debug_string(trigger_break, "%s(%" PRIu32 ") : %s - %s %s\n", errorFilename, errorLineno, error_type_str, buffer.get(), errorFilename);
       }
 #endif
    }

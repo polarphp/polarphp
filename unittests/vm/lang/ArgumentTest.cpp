@@ -134,7 +134,7 @@ TEST(ArgumentTest, testRefArguments)
 
 TEST(ArgumentTest, testVaridicArguments)
 {
-   VariadicArgument arg("argname", true);
+   VariadicArgument arg("argname", Type::Undefined, true);
    ASSERT_FALSE(arg.isRequired());
    ASSERT_STREQ(arg.getClassName(), nullptr);
    ASSERT_FALSE(arg.isNullable());
