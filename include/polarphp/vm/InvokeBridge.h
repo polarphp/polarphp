@@ -145,8 +145,12 @@ bool check_invoke_arguments(_zend_execute_data *execute_data, _zval_struct *retu
 {
    uint32_t required = execute_data->func->common.required_num_args;
    uint32_t argNumer = execute_data->func->common.num_args;
+   bool hasVariadic = execute_data->func->common.fn_flags & ZEND_ACC_VARIADIC;
    uint32_t provided = ZEND_NUM_ARGS();
    const char *name = get_active_function_name();
+   if (hasVariadic) {
+      ++argNumer;
+   }
    if (funcDefinedArgNumber > argNumer) {
       vmapi::warning() << name << " native cpp callable definition have " << funcDefinedArgNumber << " parameter(s), "
                        << "but register meta info given " << argNumer << " parameter(s)." << std::flush;
