@@ -32,26 +32,33 @@ Parameters::Parameters(zval *thisPtr, uint32_t argc)
    m_data.reserve(argc);
    std::unique_ptr<zval[]> arguments(new zval[argc]);
    zend_get_parameters_array_ex(argc, arguments.get());
-   for (uint32_t i = 0; i < argc; i++)
-   {
+   bool isRef = false;
+   for (uint32_t i = 0; i < argc; i++) {
       zval *arg = &arguments[i];
       zend_uchar type = Z_TYPE_P(arg);
+      if (type == IS_REFERENCE) {
+         ZVAL_DEREF(arg);
+         type = Z_TYPE_P(arg);
+         isRef = true;
+      } else {
+         isRef = false;
+      }
       if (type == IS_LONG) {
-         m_data.emplace_back(NumericVariant(arg));
+         m_data.emplace_back(NumericVariant(arg, isRef));
       } else if (type == IS_ARRAY) {
-         m_data.emplace_back(ArrayVariant(arg));
+         m_data.emplace_back(ArrayVariant(arg, isRef));
       } else if (type == IS_DOUBLE) {
-         m_data.emplace_back(DoubleVariant(arg));
+         m_data.emplace_back(DoubleVariant(arg, isRef));
       } else if (type == IS_STRING) {
-         m_data.emplace_back(StringVariant(arg));
+         m_data.emplace_back(StringVariant(arg, isRef));
       } else if (type == IS_TRUE || type == IS_FALSE) {
-         m_data.emplace_back(BooleanVariant(arg));
+         m_data.emplace_back(BooleanVariant(arg, isRef));
       } else if (type == IS_CALLABLE) {
          m_data.emplace_back(CallableVariant(arg));
       } else if (type == IS_OBJECT) {
          m_data.emplace_back(ObjectVariant(arg));
       } else {
-         m_data.emplace_back(Variant(arg));
+         m_data.emplace_back(Variant(arg, isRef));
       }
    }
 }
