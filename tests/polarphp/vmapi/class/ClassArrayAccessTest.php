@@ -24,3 +24,15 @@ if (class_exists("\IterateTestClass")) {
     }
     echo "now \$data item count is " . count($data)."\n";
 }
+// CHECK: class IterateTestClass exists
+// CHECK: key key1 is exists
+// CHECK: the value of item key1 is : value1
+// CHECK: key key2 is exists
+// CHECK: the value of item key2 is : value2
+// CHECK: key key3 is exists
+// CHECK: the value of item key3 is : value3
+// CHECK: IterateTestClass::count called
+// CHECK: now $data item count is 4
+// CHECK: key key1 is not exists
+// CHECK: IterateTestClass::count called
+// CHECK: now $data item count is 3
