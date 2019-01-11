@@ -344,14 +344,14 @@ int AbstractClassPrivate::countElements(zval *object, zend_long *count)
    if (countable) {
       try {
          *count = countable->count();
-         return true;
+         return VMAPI_SUCCESS;
       } catch (Exception &exception) {
          process_exception(exception);
-         return false; // unreachable, prevent some compiler warning
+         return VMAPI_FAILURE; // unreachable, prevent some compiler warning
       }
    } else {
       if (!std_object_handlers.count_elements) {
-         return false;
+         return VMAPI_FAILURE;
       }
       return std_object_handlers.count_elements(object, count);
    }
