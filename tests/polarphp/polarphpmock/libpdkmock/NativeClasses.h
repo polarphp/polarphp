@@ -43,19 +43,19 @@ class Person : public StdClass
 public:
    Person();
    void showName();
-   void print_sum(NumericVariant argQuantity, ...);
-   void setAge(const NumericVariant &age);
+   void print_sum(Parameters &args);
+   void setAge(Parameters &args);
    int getAge();
 
    Variant getName();
-   int addTwoNum(const NumericVariant &num1, const NumericVariant &num2);
-   int addSum(NumericVariant argQuantity, ...);
+   int addTwoNum(Parameters &args);
+   int addSum(Parameters &args);
    // access level test method
    void protectedMethod();
    void privateMethod();
 
    static void staticShowName();
-   static StringVariant concatStr(const StringVariant &lhs, const StringVariant &rhs);
+   static StringVariant concatStr(Parameters &args);
    static void staticProtectedMethod();
    static void staticPrivateMethod();
    static void makeNewPerson();
@@ -92,7 +92,7 @@ class A : public StdClass
 {
 public:
    void printInfo();
-   void changeNameByRef(StringVariant &name);
+   void changeNameByRef(Parameters &args);
    void privateAMethod();
    void protectedAMethod();
 };
@@ -102,8 +102,8 @@ class B : public StdClass
 public:
    void printInfo();
    void showSomething();
-   void calculateSumByRef(NumericVariant argQuantity, NumericVariant retval, ...);
-   Variant addTwoNumber(NumericVariant &lhs, NumericVariant &rhs);
+   void calculateSumByRef(Parameters &args);
+   Variant addTwoNumber(Parameters &args);
    void privateBMethod();
    void protectedBMethod();
 };
@@ -242,9 +242,9 @@ public:
    void testVarArgsCall();
    void printName();
    std::string getName();
-   void printSum(NumericVariant argQuantity, ...);
-   int calculateSum(NumericVariant argQuantity, ...);
-   void changeNameByRef(StringVariant &name);
+   void printSum(Parameters &args);
+   int calculateSum(Parameters &args);
+   void changeNameByRef(Parameters &args);
 };
 
 } // php

@@ -28,17 +28,17 @@ using polar::vmapi::Variant;
 using polar::vmapi::StringVariant;
 using polar::vmapi::Parameters;
 
-Variant return_arg(Variant &value);
+Variant return_arg(Parameters &args);
 void show_something();
 Variant get_name();
-void get_value_ref(NumericVariant &number);
-void passby_value(NumericVariant &number);
-void print_sum(NumericVariant argQuantity, ...);
-void print_name(const StringVariant &name);
-void print_name_and_age(const StringVariant &name, const NumericVariant &age);
-Variant calculate_sum(NumericVariant argQuantity, ...);
-Variant add_two_number(const NumericVariant &num1, const NumericVariant &num2);
-void say_hello(StringVariant name);
+void get_value_ref(Parameters &args);
+void passby_value(Parameters &args);
+void print_sum(Parameters &args);
+void print_name(Parameters &args);
+void print_name_and_age(Parameters &args);
+Variant calculate_sum(Parameters &args);
+Variant add_two_number(Parameters &args);
+void say_hello(Parameters &args);
 Variant print_something();
 Variant have_ret_and_have_arg(Parameters &params);
 

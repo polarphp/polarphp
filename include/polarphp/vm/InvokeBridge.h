@@ -90,6 +90,42 @@ template <typename Class, typename ReturnType>
 struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) &&> : public std::true_type
 {};
 
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)()> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)() const> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)() volatile> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)() const volatile> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)() &> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)() const &> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)() volatile &> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)() const volatile &> : public std::true_type
+{};
+
+template <typename Class, typename ReturnType>
+struct callable_prototype_checker <ReturnType (Class::*)() &&> : public std::true_type
+{};
+
 POLAR_DECL_UNUSED void yield(_zval_struct *return_value, const Variant &value)
 {
    RETVAL_ZVAL(static_cast<zval *>(value), 1, 0);
@@ -201,10 +237,10 @@ public:
          }
          using ClassType = typename std::decay<typename member_pointer_traits<CallableType>::ClassType>::type;
          StdClass *nativeObject = ObjectBinder::retrieveSelfPtr(getThis())->getNativeObject();
-         const size_t argNumber = ZEND_NUM_ARGS();
          if constexpr(paramNumber == 0) {
             std::invoke(callable, static_cast<ClassType *>(nativeObject));
          } else {
+            const size_t argNumber = ZEND_NUM_ARGS();
             Parameters arguments(getThis(), argNumber);
             // for class object
             auto tuple = std::make_tuple<ClassType *, Parameters&>(static_cast<ClassType *>(nativeObject), arguments);

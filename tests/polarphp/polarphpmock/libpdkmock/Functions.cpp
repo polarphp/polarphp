@@ -76,12 +76,14 @@ void register_functions_hook(Module &module)
          ("print_name", {
              ValueArgument("name", Type::String)
           });
+
    // for test varidic
    io->registerFunction<decltype(&php::print_sum), &php::print_sum>
          ("print_sum", {
              VariadicArgument("numbers")
           });
    io->registerFunction<decltype(&php::show_something), &php::show_something>("show_something");
+   io->registerFunction<decltype(&php::print_something), &php::print_something>("print_something");
 }
 
 } // php

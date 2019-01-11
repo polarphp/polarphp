@@ -31,9 +31,9 @@ void Person::showName()
    polar::vmapi::out() << "my name is polarphp" << std::endl;
 }
 
-void Person::setAge(const NumericVariant &age)
+void Person::setAge(Parameters &args)
 {
-   m_age = age.toLong();
+   m_age = args.at<NumericVariant>(0).toLong();
 }
 
 int Person::getAge()
@@ -51,8 +51,10 @@ void Person::staticShowName()
    polar::vmapi::out() << "static my name is polarphp" << std::endl;
 }
 
-StringVariant Person::concatStr(const StringVariant &lhs, const StringVariant &rhs)
+StringVariant Person::concatStr(Parameters &args)
 {
+   StringVariant &lhs = args.at<StringVariant>(0);
+   StringVariant &rhs = args.at<StringVariant>(1);
    return lhs + rhs;
 }
 
@@ -71,24 +73,20 @@ void Person::makeNewPerson()
    ObjectVariant obj("Person", std::make_shared<Person>());
 }
 
-void Person::print_sum(NumericVariant argQuantity, ...)
+void Person::print_sum(Parameters &args)
 {
-   va_list args;
-   va_start(args, argQuantity);
    NumericVariant result;
-   for (int i = 0; i < argQuantity; ++i) {
-      result += NumericVariant(va_arg(args, polar::vmapi::VmApiVaridicItemType), false);
+   for (size_t i = 0; i < args.size(); ++i) {
+      result += args.at<NumericVariant>(i);
    }
    polar::vmapi::out() << "the sum is " << result << std::endl;
 }
 
-int Person::addSum(NumericVariant argQuantity, ...)
+int Person::addSum(Parameters &args)
 {
-   va_list args;
-   va_start(args, argQuantity);
    NumericVariant result;
-   for (int i = 0; i < argQuantity; ++i) {
-      result += NumericVariant(va_arg(args, polar::vmapi::VmApiVaridicItemType), false);
+   for (size_t i = 0; i < args.size(); ++i) {
+      result += args.at<NumericVariant>(i);
    }
    return result.toLong();
 }
@@ -103,8 +101,10 @@ void Person::privateMethod()
 
 }
 
-int Person::addTwoNum(const NumericVariant &num1, const NumericVariant &num2)
+int Person::addTwoNum(Parameters &args)
 {
+   NumericVariant &num1 = args.at<NumericVariant>(0);
+   NumericVariant &num2 = args.at<NumericVariant>(1);
    return num1 + num2;
 }
 
@@ -129,9 +129,10 @@ void A::printInfo()
    polar::vmapi::out() << "A::printInfo been called" << std::endl;
 }
 
-void A::changeNameByRef(StringVariant &name)
+void A::changeNameByRef(Parameters &args)
 {
    polar::vmapi::out() << "A::changeNameByRef been called" << std::endl;
+   StringVariant &name = args.at<StringVariant>(0);
    if (name.getUnDerefType() == Type::Reference) {
       polar::vmapi::out() << "get ref arg" << std::endl;
    }
@@ -159,22 +160,23 @@ void B::showSomething()
 
 }
 
-void B::calculateSumByRef(NumericVariant argQuantity, NumericVariant retval, ...)
+void B::calculateSumByRef(Parameters &args)
 {
    polar::vmapi::out() << "C::calculateSumByRef been called" << std::endl;
-   polar::vmapi::out() << "got " << argQuantity << " args" << std::endl;
+   polar::vmapi::out() << "got " << args.size() << " args" << std::endl;
+   NumericVariant &retval = args.at<NumericVariant>(0);
    if (retval.getUnDerefType() == Type::Reference) {
       polar::vmapi::out() << "retval is reference arg" << std::endl;
    }
-   va_list args;
-   va_start(args, retval);
-   for (int i = 0; i < argQuantity - 1; ++i) {
-      retval += NumericVariant(va_arg(args, polar::vmapi::VmApiVaridicItemType), false);
+   for (size_t i = 1; i < args.size(); ++i) {
+      retval += args.at<NumericVariant>(i);
    }
 }
 
-Variant B::addTwoNumber(NumericVariant &lhs, NumericVariant &rhs)
+Variant B::addTwoNumber(Parameters &args)
 {
+   NumericVariant &lhs = args.at<NumericVariant>(0);
+   NumericVariant &rhs = args.at<NumericVariant>(1);
    polar::vmapi::out() << "B::addTwoNumber been called" << std::endl;
    return lhs + rhs;
 }
@@ -450,8 +452,8 @@ Variant MagicMethodClass::__call(const std::string &method, Parameters &params) 
    polar::vmapi::out() << "MagicMethodClass::__call is called" << std::endl;
    if (method == "calculateSum") {
       NumericVariant sum;
-      for (Parameters::SizeType i = 0; i < params.size(); i++) {
-         sum += NumericVariant(params.at(i));
+      for (size_t i = 0; i < params.size(); i++) {
+         sum += params.at<NumericVariant>(i);
       }
       return sum;
    } else {
@@ -463,8 +465,8 @@ Variant MagicMethodClass::__invoke(Parameters &params) const
 {
    polar::vmapi::out() << "MagicMethodClass::__invoke is called" << std::endl;
    NumericVariant sum;
-   for (Parameters::SizeType i = 0; i < params.size(); i++) {
-      sum += NumericVariant(params.at(i));
+   for (size_t i = 0; i < params.size(); i++) {
+      sum += params.at<NumericVariant>(i);
    }
    return sum;
 }
@@ -574,13 +576,13 @@ Variant MagicMethodClass::__callStatic(const std::string &method, Parameters &pa
    polar::vmapi::out() << "MagicMethodClass::__callStatic is called" << std::endl;
    if (method == "staticCalculateSum") {
       NumericVariant sum;
-      for (Parameters::SizeType i = 0; i < params.size(); i++) {
-         sum += NumericVariant(params.at(i));
+      for (size_t i = 0; i < params.size(); i++) {
+         sum += params.at<NumericVariant>(i);
       }
       return sum;
    } else {
       StringVariant str("hello, ");
-      str += StringVariant(params.at(0));
+      str += params.at<StringVariant>(0);
       return str;
    }
 }
@@ -625,13 +627,13 @@ Variant PropsTestClass::getName()
    return m_name;
 }
 
-Variant ObjectVariantClass::__invoke(Parameters &params) const
+Variant ObjectVariantClass::__invoke(Parameters &args) const
 {
    polar::vmapi::out() << "ObjectVariantClass::__invoke invoked" << std::endl;
-   StringVariant str(params.at(0).getUnDerefZvalPtr(), true);
+   StringVariant str(args.retrieveAsVariant(0).getUnDerefZvalPtr(), true);
    NumericVariant result;
-   for (Parameters::SizeType i = 1; i < params.size(); i++) {
-      result += NumericVariant(params.at(i));
+   for (size_t i = 1; i < args.size(); i++) {
+      result += args.at<NumericVariant>(i);
    }
    str = "polarphp";
    return str;
@@ -750,37 +752,34 @@ std::string ObjectVariantClass::getName()
    return "hello, polarphp";
 }
 
-void ObjectVariantClass::printSum(NumericVariant argQuantity, ...)
+void ObjectVariantClass::printSum(Parameters &args)
 {
    polar::vmapi::out() << "ObjectVariantClass::printSum been called" << std::endl;
-   polar::vmapi::out() << "got " << argQuantity << " args" << std::endl;
-   va_list args;
-   va_start(args, argQuantity);
+   polar::vmapi::out() << "got " << args.size() << " args" << std::endl;
    NumericVariant result;
-   for (int i = 0; i < argQuantity; ++i) {
-      result += NumericVariant(va_arg(args, polar::vmapi::VmApiVaridicItemType), false);
+   for (size_t i = 0; i < args.size(); ++i) {
+      result += args.at<NumericVariant>(i);
    }
    polar::vmapi::out() << "the result is " << result << std::endl;
 }
 
-int ObjectVariantClass::calculateSum(NumericVariant argQuantity, ...)
+int ObjectVariantClass::calculateSum(Parameters &args)
 {
    polar::vmapi::out() << "ObjectVariantClass::calculateSum been called" << std::endl;
-   polar::vmapi::out() << "got " << argQuantity << " args" << std::endl;
-   va_list args;
-   va_start(args, argQuantity);
+   polar::vmapi::out() << "got " << args.size() << " args" << std::endl;
    NumericVariant result;
-   for (int i = 0; i < argQuantity; ++i) {
-      result += NumericVariant(va_arg(args, polar::vmapi::VmApiVaridicItemType), false);
+   for (size_t i = 0; i < args.size(); ++i) {
+      result += args.at<NumericVariant>(i);
    }
    polar::vmapi::out() << "the result is " << result << std::endl;
    return result;
 }
 
 
-void ObjectVariantClass::changeNameByRef(StringVariant &name)
+void ObjectVariantClass::changeNameByRef(Parameters &args)
 {
    polar::vmapi::out() << "ObjectVariantClass::changeNameByRef been called" << std::endl;
+   StringVariant &name = args.at<StringVariant>(0);
    if (name.getUnDerefType() == Type::Reference) {
       polar::vmapi::out() << "get ref arg" << std::endl;
    }

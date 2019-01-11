@@ -23,15 +23,15 @@ void show_something()
    polar::vmapi::out() << "hello world, polarphp" << std::flush;
 }
 
-void get_value_ref(NumericVariant &number)
+void get_value_ref(Parameters &args)
 {
-   number = 321;
+   args.at<NumericVariant>(0) = 321;
 }
 
-void passby_value(NumericVariant &number)
+void passby_value(Parameters &args)
 {
    // have no effect
-   number = 321;
+   args.at<NumericVariant>(0) = 321;
 }
 
 Variant get_name()
@@ -39,54 +39,56 @@ Variant get_name()
    return "polarboy";
 }
 
-void print_name(const StringVariant &name)
+void print_name(Parameters &args)
 {
-   polar::vmapi::out() << name << std::flush;
+   polar::vmapi::out() << args.at<StringVariant>(0) << std::flush;
 }
 
-void print_sum(NumericVariant argQuantity, ...)
+void print_sum(Parameters &args)
 {
-   va_list args;
-   va_start(args, argQuantity);
    NumericVariant result;
-   for (int i = 0; i < argQuantity; ++i) {
-      result += NumericVariant(va_arg(args, polar::vmapi::VmApiVaridicItemType), false);
+   for (size_t i = 0; i < args.size(); ++i) {
+      result += args.at<NumericVariant>(i);
    }
    polar::vmapi::out() << result << std::flush;
 }
 
-Variant calculate_sum(NumericVariant argQuantity, ...)
+Variant calculate_sum(Parameters &args)
 {
-   va_list args;
-   va_start(args, argQuantity);
    NumericVariant result;
-   for (int i = 0; i < argQuantity; ++i) {
-      result += NumericVariant(va_arg(args, polar::vmapi::VmApiVaridicItemType), false);
+   for (size_t i = 0; i < args.size(); ++i) {
+      result += args.at<NumericVariant>(i);
    }
    return result;
 }
 
-void print_name_and_age(const StringVariant &name, const NumericVariant &age)
+void print_name_and_age(Parameters &args)
 {
-   polar::vmapi::out() << "name: " << name << " age: " << age << std::flush;
+   polar::vmapi::out() << "name: " << args.at<StringVariant>(0)
+                       << " age: " << args.at<NumericVariant>(1) << std::flush;
 }
 
-Variant add_two_number(const NumericVariant &num1, const NumericVariant &num2)
+Variant add_two_number(Parameters &args)
 {
+   NumericVariant &num1 = args.at<NumericVariant>(0);
+   NumericVariant &num2 = args.at<NumericVariant>(1);
    return num1 + num2;
 }
 
-void say_hello(StringVariant name)
+void say_hello(Parameters &args)
 {
-   if (name.getSize() == 0) {
+   std::string name;
+   if (args.size() == 0) {
       name = "polarphp";
+   } else {
+      name = args.at<StringVariant>(0).toString();
    }
    polar::vmapi::out() << "hello, " << name << std::endl;
 }
 
-Variant return_arg(Variant &value)
+Variant return_arg(Parameters &args)
 {
-   return value;
+   return args.retrieveAsVariant(0);
 }
 
 // for test closure
@@ -96,13 +98,13 @@ Variant print_something()
    return "print_some";
 }
 
-Variant have_ret_and_have_arg(Parameters &params)
+Variant have_ret_and_have_arg(Parameters &args)
 {
    polar::vmapi::out() << "have_ret_and_have_arg called" << std::endl;
-   if (params.empty()) {
+   if (args.empty()) {
       return "have_ret_and_have_arg";
    } else {
-      return params.at(0);
+      return args.retrieveAsVariant(0);
    }
 }
 
