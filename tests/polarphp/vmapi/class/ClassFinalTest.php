@@ -19,3 +19,8 @@ if (class_exists("\VisibilityClass")) {
 // class xx extends FinalTestClass
 // {}
 // // PHP Fatal error:  Class xx may not inherit from final class (FinalTestClass)
+
+// CHECK: FinalTestClass exists
+// CHECK: class FinalTestClass is final
+// CHECK: VisibilityClass exists
+// CHECK: method VisibilityClass::finalMethod is final
