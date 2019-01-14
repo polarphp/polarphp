@@ -14,6 +14,7 @@
 #include "polarphp/runtime/langsupport/VariableFuncs.h"
 #include "polarphp/runtime/langsupport/ArrayFuncs.h"
 #include "polarphp/runtime/langsupport/AssertFuncs.h"
+#include "polarphp/runtime/langsupport/Reflection.h"
 
 namespace polar {
 namespace runtime {
@@ -762,12 +763,26 @@ PHP_RSHUTDOWN_FUNCTION(Runtime)
    return SUCCESS;
 }
 
-bool register_lang_support_funcs()
+namespace {
+inline bool register_basic_lang_support_module()
 {
    g_langSupportModule.type = MODULE_PERSISTENT;
    g_langSupportModule.module_number = zend_next_free_module();
    g_langSupportModule.handle = nullptr;
-   if ((EG(current_module) = zend_register_module_ex(&g_langSupportModule)) == NULL) {
+   if ((EG(current_module) = zend_register_module_ex(&g_langSupportModule)) == nullptr) {
+      return false;
+   }
+   return true;
+}
+} // anonymous namespace
+
+bool register_lang_support_funcs()
+{
+   if (!register_basic_lang_support_module()){
+      return false;
+   }
+   /// register reflection module
+   if (!register_reflection_module()) {
       return false;
    }
    return true;

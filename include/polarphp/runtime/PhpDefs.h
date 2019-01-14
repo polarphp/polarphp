@@ -16,6 +16,7 @@
 #include "polarphp/global/SystemDetection.h"
 #include "polarphp/global/Config.h"
 #include "polarphp/global/PolarVersion.h"
+#include "polarphp/runtime/internal/ZendMacros.h"
 
 POLAR_BEGIN_DISABLE_ZENDVM_WARNING()
 #include "polarphp/vm/zend/zend_portability.h"
@@ -361,15 +362,6 @@ void cli_ini_defaults(HashTable *configuration_hash);
 #endif /* !XtOffsetOf */
 
 #define POLAR_LITERAL_STR(str) const_cast<char *>((str))
-
 #define PHP_STDIN_FILENAME_MARK const_cast<char *>("Standard input code")
-
-/// use cpp cast
-///
-#define POLAR_ZVAL_EMPTY_ARRAY(z) do {						\
-      zval *__z = (z);								\
-      Z_ARR_P(__z) = const_cast<zend_array*>(&zend_empty_array);	\
-      Z_TYPE_INFO_P(__z) = IS_ARRAY; \
-   } while (0)
 
 #endif // POLARPHP_RUNTIME_PHPDEFS_H

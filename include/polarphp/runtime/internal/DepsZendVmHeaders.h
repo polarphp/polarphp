@@ -44,6 +44,10 @@ extern "C" {
 #include "polarphp/vm/zend/zend_smart_string_public.h"
 #include "polarphp/vm/zend/zend_smart_string.h"
 #include "polarphp/vm/zend/zend_smart_str.h"
+#include "polarphp/vm/zend/zend_operators.h"
+#include "polarphp/vm/zend/zend_closures.h"
+#include "polarphp/vm/zend/zend_generators.h"
+#include "polarphp/vm/zend/zend_builtin_functions.h"
 #include "polarphp/vm/tsrm/tsrm.h"
 #include "polarphp/global/php_stdint.h"
 
