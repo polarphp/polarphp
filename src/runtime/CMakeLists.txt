@@ -20,6 +20,8 @@ polar_add_library(PolarRuntime SHARED
    ${POLARPHP_RUNTIME_SOURCES}
    LINK_LIBS PolarUtils ZendVM)
 
+set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
+
 set_target_properties(
    PolarRuntime
    PROPERTIES
