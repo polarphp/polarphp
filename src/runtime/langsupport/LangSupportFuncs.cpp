@@ -15,6 +15,7 @@
 #include "polarphp/runtime/langsupport/ArrayFuncs.h"
 #include "polarphp/runtime/langsupport/AssertFuncs.h"
 #include "polarphp/runtime/langsupport/Reflection.h"
+#include "polarphp/runtime/langsupport/StdExceptions.h"
 #include "polarphp/runtime/langsupport/ClassLoader.h"
 
 namespace polar {
@@ -214,6 +215,7 @@ PHP_MINIT_FUNCTION(Runtime)
    REGISTER_DOUBLE_CONSTANT("NAN", ZEND_NAN, CONST_CS | CONST_PERSISTENT);
    RUNTIME_MINIT_SUBMODULE(array);
    RUNTIME_MINIT_SUBMODULE(assert);
+   RUNTIME_MINIT_SUBMODULE(stdexceptions);
    RUNTIME_MINIT_SUBMODULE(classloader);
    return SUCCESS;
 }

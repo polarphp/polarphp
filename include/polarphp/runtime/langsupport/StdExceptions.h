@@ -17,6 +17,8 @@
 namespace polar {
 namespace runtime {
 
+PHP_MINIT_FUNCTION(stdexceptions);
+
 extern POLAR_DECL_EXPORT zend_class_entry *g_logicExceptionClass;
 extern POLAR_DECL_EXPORT zend_class_entry *g_badFunctionCallExceptionClass;
 extern POLAR_DECL_EXPORT zend_class_entry *g_badMethodCallExceptionClass;

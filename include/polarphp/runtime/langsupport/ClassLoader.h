@@ -21,28 +21,28 @@ namespace runtime {
 #define CLASS_LOADER_G(v) retrieve_classloader_module_data().v
 
 #define RT_REGISTER_STD_CLASS(class_name, obj_ctor) \
-   register_std_class(&spl_ce_ ## class_name, # class_name, obj_ctor, NULL);
+   register_std_class(&g_ ## class_name, const_cast<char *>(# class_name), obj_ctor, NULL);
 
 #define RT_REGISTER_STD_CLASS_EX(class_name, obj_ctor, funcs) \
-   register_std_class(&spl_ce_ ## class_name, # class_name, obj_ctor, funcs);
+   register_std_class(&g_ ## class_name,const_cast<char *>(# class_name), obj_ctor, funcs);
 
 #define RT_REGISTER_SUB_CLASS_EX(class_name, parent_class_name, obj_ctor, funcs) \
-   register_sub_class(&spl_ce_ ## class_name, g_ ## parent_class_name, # class_name, obj_ctor, funcs);
+   register_sub_class(&g_ ## class_name, g_ ## parent_class_name, const_cast<char *>(# class_name), obj_ctor, funcs);
 
 #define RT_REGISTER_INTERFACE(class_name) \
-   register_interface(&spl_ce_ ## class_name, # class_name, spl_funcs_ ## class_name);
+   register_interface(&g_ ## class_name, const_cast<char *>(# class_name), spl_funcs_ ## class_name);
 
 #define RT_REGISTER_IMPLEMENTS(class_name, interface_name) \
-   zend_class_implements(spl_ce_ ## class_name, 1, spl_ce_ ## interface_name);
+   zend_class_implements(g_ ## class_name, 1, spl_ce_ ## interface_name);
 
 #define RT_REGISTER_ITERATOR(class_name) \
-   zend_class_implements(spl_ce_ ## class_name, 1, zend_ce_iterator);
+   zend_class_implements(g_ ## class_name, 1, zend_ce_iterator);
 
 #define RT_REGISTER_PROPERTY(class_name, prop_name, prop_flags) \
-   register_property(spl_ce_ ## class_name, prop_name, sizeof(prop_name)-1, prop_flags);
+   register_property(g_ ## class_name, prop_name, sizeof(prop_name)-1, prop_flags);
 
 #define RT_REGISTER_CLASS_CONST_LONG(class_name, const_name, value) \
-   zend_declare_class_constant_long(spl_ce_ ## class_name, const_name, sizeof(const_name)-1, (zend_long)value);
+   zend_declare_class_constant_long(g_ ## class_name, const_name, sizeof(const_name)-1, (zend_long)value);
 
 struct ClassLoaderModuleData
 {
