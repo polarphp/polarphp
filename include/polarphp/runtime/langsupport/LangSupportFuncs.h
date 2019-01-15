@@ -36,8 +36,8 @@ struct RuntimeModuleData
 RuntimeModuleData &retrieve_runtime_module_data();
 bool register_lang_support_funcs();
 POLAR_DECL_EXPORT int prefix_varname(zval *result, const zval *prefix,
-                                         const char *var_name, size_t var_name_len,
-                                         zend_bool add_underscore);
+                                     const char *var_name, size_t var_name_len,
+                                     zend_bool add_underscore);
 
 } // runtime
 } // polar

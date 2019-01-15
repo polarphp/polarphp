@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2019/02/09.
+// Created by polarboy on 2019/01/09.
 
 #include "polarphp/runtime/langsupport/LangSupportFuncs.h"
 #include "polarphp/runtime/langsupport/TypeFuncs.h"
@@ -15,6 +15,7 @@
 #include "polarphp/runtime/langsupport/ArrayFuncs.h"
 #include "polarphp/runtime/langsupport/AssertFuncs.h"
 #include "polarphp/runtime/langsupport/Reflection.h"
+#include "polarphp/runtime/langsupport/ClassLoader.h"
 
 namespace polar {
 namespace runtime {
@@ -176,11 +177,6 @@ zend_module_entry g_langSupportModule = {
    PHP_RINIT(module)(INIT_FUNC_ARGS_PASSTHRU); \
 }
 
-#define RUNTIME_MINFO_SUBMODULE(module) \
-   if (zend_hash_str_exists(&sg_RuntimeSubmodules, #module, strlen(#module))) { \
-   PHP_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU); \
-}
-
 #define RUNTIME_RSHUTDOWN_SUBMODULE(module) \
    if (zend_hash_str_exists(&sg_RuntimeSubmodules, #module, strlen(#module))) { \
    PHP_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS_PASSTHRU); \
@@ -218,6 +214,7 @@ PHP_MINIT_FUNCTION(Runtime)
    REGISTER_DOUBLE_CONSTANT("NAN", ZEND_NAN, CONST_CS | CONST_PERSISTENT);
    RUNTIME_MINIT_SUBMODULE(array);
    RUNTIME_MINIT_SUBMODULE(assert);
+   RUNTIME_MINIT_SUBMODULE(classloader);
    return SUCCESS;
 }
 
@@ -225,6 +222,7 @@ PHP_MSHUTDOWN_FUNCTION(Runtime)
 {
    RUNTIME_MSHUTDOWN_SUBMODULE(array);
    RUNTIME_MSHUTDOWN_SUBMODULE(assert);
+   RUNTIME_MSHUTDOWN_SUBMODULE(classloader);
    zend_hash_destroy(&sg_RuntimeSubmodules);
    return SUCCESS;
 }
@@ -236,6 +234,7 @@ PHP_RINIT_FUNCTION(Runtime)
    rdata.arrayWalkFciCache = empty_fcall_info_cache;
    rdata.userCompareFci = empty_fcall_info;
    rdata.userCompareFciCache = empty_fcall_info_cache;
+   RUNTIME_RINIT_SUBMODULE(classloader);
    return SUCCESS;
 }
 
@@ -247,6 +246,7 @@ PHP_RSHUTDOWN_FUNCTION(Runtime)
       efree(rdata.userTickFunctions);
       rdata.userTickFunctions = nullptr;
    }
+   RUNTIME_RSHUTDOWN_SUBMODULE(classloader);
    RUNTIME_RSHUTDOWN_SUBMODULE(assert);
    return SUCCESS;
 }
