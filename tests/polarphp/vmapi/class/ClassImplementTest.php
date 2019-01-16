@@ -18,3 +18,11 @@ if (class_exists("C") && interface_exists("InterfaceA") && interface_exists("Int
        echo "method C::privateMethodOfA exists\n";
     }
 }
+// CHECK: array(1) {
+// CHECK:   ["InterfaceA"]=>
+// CHECK:  string(10) "InterfaceA"
+// CHECK: }
+// CHECK: $obj instanceof InterfaceA
+// CHECK: method C::methodOfA exists
+// CHECK: method C::protectedMethodOfA exists
+// CHECK: method C::privateMethodOfA exists
