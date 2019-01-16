@@ -27,7 +27,6 @@ IteratorBridge::~IteratorBridge()
 {
    invalidate();
    zval_ptr_dtor(&m_iterator.data);
-   zend_iterator_dtor(&m_iterator);
 }
 
 zend_object_iterator *IteratorBridge::getZendIterator()
