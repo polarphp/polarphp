@@ -19,20 +19,20 @@ namespace runtime {
 
 PHP_MINIT_FUNCTION(stdexceptions);
 
-extern POLAR_DECL_EXPORT zend_class_entry *g_logicExceptionClass;
-extern POLAR_DECL_EXPORT zend_class_entry *g_badFunctionCallExceptionClass;
-extern POLAR_DECL_EXPORT zend_class_entry *g_badMethodCallExceptionClass;
-extern POLAR_DECL_EXPORT zend_class_entry *g_domainExceptionClass;
-extern POLAR_DECL_EXPORT zend_class_entry *g_invalidArgumentExceptionClass;
-extern POLAR_DECL_EXPORT zend_class_entry *g_lengthExceptionClass;
-extern POLAR_DECL_EXPORT zend_class_entry *g_outOfRangeExceptionClass;
+extern POLAR_DECL_EXPORT zend_class_entry *g_LogicException;
+extern POLAR_DECL_EXPORT zend_class_entry *g_BadFunctionCallException;
+extern POLAR_DECL_EXPORT zend_class_entry *g_BadMethodCallException;
+extern POLAR_DECL_EXPORT zend_class_entry *g_DomainException;
+extern POLAR_DECL_EXPORT zend_class_entry *g_InvalidArgumentException;
+extern POLAR_DECL_EXPORT zend_class_entry *g_LengthException;
+extern POLAR_DECL_EXPORT zend_class_entry *g_OutOfRangeException;
 
-extern POLAR_DECL_EXPORT zend_class_entry *g_runtimeExceptionClass;
-extern POLAR_DECL_EXPORT zend_class_entry *g_outOfBoundsExceptionClass;
-extern POLAR_DECL_EXPORT zend_class_entry *g_overflowExceptionClass;
-extern POLAR_DECL_EXPORT zend_class_entry *g_rangeExceptionClass;
-extern POLAR_DECL_EXPORT zend_class_entry *g_underflowExceptionClass;
-extern POLAR_DECL_EXPORT zend_class_entry *g_unexpectedValueExceptionClass;
+extern POLAR_DECL_EXPORT zend_class_entry *g_RuntimeException;
+extern POLAR_DECL_EXPORT zend_class_entry *g_OutOfBoundsException;
+extern POLAR_DECL_EXPORT zend_class_entry *g_OverflowException;
+extern POLAR_DECL_EXPORT zend_class_entry *g_RangeException;
+extern POLAR_DECL_EXPORT zend_class_entry *g_UnderflowException;
+extern POLAR_DECL_EXPORT zend_class_entry *g_UnexpectedValueException;
 
 } // runtime
 } // polar

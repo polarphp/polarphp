@@ -14,8 +14,10 @@
 
 #include <ctime>
 #include <cstdio>
+#include <random>
 
 #include "polarphp/global/CompilerFeature.h"
+#include "polarphp/vm/zend/zend_long.h"
 
 struct _zend_string;
 
@@ -45,6 +47,9 @@ POLAR_DECL_EXPORT _zend_string *php_str_to_str(const char *haystack, size_t leng
 POLAR_DECL_EXPORT _zend_string *php_string_toupper(_zend_string *s);
 POLAR_DECL_EXPORT _zend_string *php_string_tolower(_zend_string *s);
 POLAR_DECL_EXPORT int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, int fold_case);
+POLAR_DECL_EXPORT zend_long mt_rand_range(zend_long min, zend_long max);
+POLAR_DECL_EXPORT std::uint32_t mt_rand_32();
+POLAR_DECL_EXPORT std::uint64_t mt_rand_64();
 
 } // runtime
 } // polar

@@ -13,8 +13,6 @@
 #include "polarphp/runtime/langsupport/ArrayFuncs.h"
 #include "polarphp/runtime/Utils.h"
 
-#include <random>
-
 namespace polar {
 namespace runtime {
 
@@ -2975,22 +2973,6 @@ err:
 #undef RANGE_CHECK_LONG_INIT_ARRAY
 
 namespace {
-
-zend_long mt_rand_range(zend_long min, zend_long max)
-{
-   zend_ulong umax = max - min;
-   std::random_device rd;
-#if ZEND_ULONG_MAX > UINT32_MAX
-   if (umax > UINT32_MAX) {
-      std::mt19937_64 gen(rd());
-      std::uniform_int_distribution<uint64_t> dis(min, max);
-      return static_cast<zend_long>(dis(gen));
-   }
-#endif
-   std::mt19937 gen(rd());
-   std::uniform_int_distribution<uint32_t> dis(min, max);
-   return static_cast<zend_long>(dis(gen));
-}
 
 void array_data_shuffle(zval *array)
 {

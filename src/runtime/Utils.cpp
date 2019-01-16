@@ -636,32 +636,32 @@ zend_string *php_str_to_str(const char *haystack, size_t length, const char *nee
 
 zend_string *php_string_toupper(zend_string *s)
 {
-  unsigned char *c;
-  const unsigned char *e;
+   unsigned char *c;
+   const unsigned char *e;
 
-  c = (unsigned char *)ZSTR_VAL(s);
-  e = c + ZSTR_LEN(s);
+   c = (unsigned char *)ZSTR_VAL(s);
+   e = c + ZSTR_LEN(s);
 
-  while (c < e) {
-     if (islower(*c)) {
-        unsigned char *r;
-        zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
+   while (c < e) {
+      if (islower(*c)) {
+         unsigned char *r;
+         zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
-        if (c != (unsigned char*)ZSTR_VAL(s)) {
-           memcpy(ZSTR_VAL(res), ZSTR_VAL(s), c - (unsigned char*)ZSTR_VAL(s));
-        }
-        r = c + (ZSTR_VAL(res) - ZSTR_VAL(s));
-        while (c < e) {
-           *r = toupper(*c);
-           r++;
-           c++;
-        }
-        *r = '\0';
-        return res;
-     }
-     c++;
-  }
-  return zend_string_copy(s);
+         if (c != (unsigned char*)ZSTR_VAL(s)) {
+            memcpy(ZSTR_VAL(res), ZSTR_VAL(s), c - (unsigned char*)ZSTR_VAL(s));
+         }
+         r = c + (ZSTR_VAL(res) - ZSTR_VAL(s));
+         while (c < e) {
+            *r = toupper(*c);
+            r++;
+            c++;
+         }
+         *r = '\0';
+         return res;
+      }
+      c++;
+   }
+   return zend_string_copy(s);
 }
 
 zend_string *php_string_tolower(zend_string *s)
@@ -708,7 +708,7 @@ int compare_right(char const **a, char const *aend, char const **b, char const *
           (*b == bend || !isdigit((int)(unsigned char)**b))) {
          return bias;
       } else if (*a == aend || !isdigit((int)(unsigned char)**a)) {
-          return -1;
+         return -1;
       } else if (*b == bend || !isdigit((int)(unsigned char)**b)) {
          return +1;
       } else if (**a < **b) {
@@ -815,7 +815,7 @@ int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, int f
       }
 
       if (ca < cb) {
-          return -1;
+         return -1;
       } else if (ca > cb) {
          return +1;
       }
@@ -831,6 +831,36 @@ int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, int f
          return 1;
       }
    }
+}
+
+zend_long mt_rand_range(zend_long min, zend_long max)
+{
+   zend_ulong umax = max - min;
+   std::random_device rd;
+#if ZEND_ULONG_MAX > UINT32_MAX
+   if (umax > UINT32_MAX) {
+      std::mt19937_64 gen(rd());
+      std::uniform_int_distribution<uint64_t> dis(min, max);
+      return static_cast<zend_long>(dis(gen));
+   }
+#endif
+   std::mt19937 gen(rd());
+   std::uniform_int_distribution<uint32_t> dis(min, max);
+   return static_cast<zend_long>(dis(gen));
+}
+
+std::uint32_t mt_rand_32()
+{
+   std::random_device rd;
+   std::mt19937 gen(rd());
+   return gen();
+}
+
+std::uint64_t mt_rand_64()
+{
+   std::random_device rd;
+   std::mt19937_64 gen(rd());
+   return gen();
 }
 
 } // runtime

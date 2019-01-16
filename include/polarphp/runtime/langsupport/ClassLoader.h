@@ -46,28 +46,31 @@ namespace runtime {
 
 struct ClassLoaderModuleData
 {
-   zend_string *autoloadExtensions;
-   HashTable   *autoloadFunctions;
+   bool         hashMaskInit;
    bool         autoloadRunning;
+   intptr_t     hashMaskHandle;
+   intptr_t     hashMaskHandlers;
+   zend_string  *autoloadExtensions;
+   HashTable    *autoloadFunctions;
 };
 
 using CreateObjectFuncType = zend_object* (*)(zend_class_entry *classType);
 
 extern zend_module_entry g_classLoaderModuleEntry;
 
-void register_std_class(zend_class_entry ** ppce, char * className, CreateObjectFuncType ctor,
-                        const zend_function_entry * functionList);
-void register_sub_class(zend_class_entry ** ppce, zend_class_entry * parentClassEntry, char * className,
-                        CreateObjectFuncType ctor, const zend_function_entry * functionList);
-void register_interface(zend_class_entry ** ppce, char * className, const zend_function_entry *functions);
-void register_property( zend_class_entry * classEntry, char *propName, int propNameLen, int propFlags);
-void add_class_name(zval * list, zend_class_entry * pce, int allow, int classEntryFlags);
-void add_interfaces(zval * list, zend_class_entry * pce, int allow, int classEntryFlags);
-void add_traits(zval * list, zend_class_entry * pce, int allow, int classEntryFlags);
-int add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int classEntryFlags);
+POLAR_DECL_EXPORT void register_std_class(zend_class_entry ** ppce, char * className, CreateObjectFuncType ctor,
+                                          const zend_function_entry * functionList);
+POLAR_DECL_EXPORT void register_sub_class(zend_class_entry ** ppce, zend_class_entry * parentClassEntry, char * className,
+                                          CreateObjectFuncType ctor, const zend_function_entry * functionList);
+POLAR_DECL_EXPORT void register_interface(zend_class_entry ** ppce, char * className, const zend_function_entry *functions);
+POLAR_DECL_EXPORT void register_property( zend_class_entry * classEntry, char *propName, int propNameLen, int propFlags);
+POLAR_DECL_EXPORT void add_class_name(zval * list, zend_class_entry * pce, int allow, int classEntryFlags);
+POLAR_DECL_EXPORT void add_interfaces(zval * list, zend_class_entry * pce, int allow, int classEntryFlags);
+POLAR_DECL_EXPORT void add_traits(zval * list, zend_class_entry * pce, int allow, int classEntryFlags);
+POLAR_DECL_EXPORT int add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int classEntryFlags);
+POLAR_DECL_EXPORT _zend_string *php_object_hash(zval *obj);
 
 PHP_MINIT_FUNCTION(classloader);
-PHP_MSHUTDOWN_FUNCTION(classloader);
 PHP_RINIT_FUNCTION(classloader);
 PHP_RSHUTDOWN_FUNCTION(classloader);
 
@@ -80,6 +83,8 @@ PHP_FUNCTION(retrieve_registered_class_loaders);
 PHP_FUNCTION(load_class);
 PHP_FUNCTION(register_class_loader);
 PHP_FUNCTION(unregister_class_loader);
+PHP_FUNCTION(object_hash);
+PHP_FUNCTION(object_id);
 
 ClassLoaderModuleData &retrieve_classloader_module_data();
 

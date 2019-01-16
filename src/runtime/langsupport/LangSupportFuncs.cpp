@@ -146,9 +146,23 @@ static const zend_function_entry sg_langSupportFunctions[] = {
    PHP_FE(array_chunk,													arginfo_array_chunk)
    PHP_FE(array_combine,												arginfo_array_combine)
    PHP_FE(array_key_exists,											arginfo_array_key_exists)
+
    /// aseert
    PHP_FE(assert,                                           arginfo_assert)
    PHP_FE(assert_options,                                   arginfo_assert_options)
+
+   /// class loader
+   PHP_FE(default_class_loader,                             arginfo_default_class_loader)
+   PHP_FE(set_autoload_file_extensions,                     arginfo_set_autoload_file_extensions)
+   PHP_FE(register_class_loader,                            arginfo_register_class_loader)
+   PHP_FE(unregister_class_loader,                          arginfo_unregister_class_loader)
+   PHP_FE(retrieve_registered_class_loaders,                arginfo_retrieve_registered_class_loaders)
+   PHP_FE(load_class,                                       arginfo_load_class)
+   PHP_FE(class_parents,                                    arginfo_class_parents)
+   PHP_FE(class_implements,                                 arginfo_class_implements)
+   PHP_FE(class_uses,                                       arginfo_class_uses)
+   PHP_FE(object_hash,                                      arginfo_object_hash)
+   PHP_FE(object_id,                                        arginfo_object_id)
    ZEND_FE_END
 };
 
@@ -224,7 +238,6 @@ PHP_MSHUTDOWN_FUNCTION(Runtime)
 {
    RUNTIME_MSHUTDOWN_SUBMODULE(array);
    RUNTIME_MSHUTDOWN_SUBMODULE(assert);
-   RUNTIME_MSHUTDOWN_SUBMODULE(classloader);
    zend_hash_destroy(&sg_RuntimeSubmodules);
    return SUCCESS;
 }
