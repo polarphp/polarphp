@@ -23,14 +23,13 @@ NullMember::NullMember(StringRef name, Modifier flags)
 
 void NullMember::setupConstant(zend_class_entry *entry)
 {
-
    zend_declare_class_constant_null(entry, m_implPtr->m_name.c_str(), m_implPtr->m_name.size());
 }
 
 void NullMember::setupProperty(zend_class_entry *entry)
 {
    zend_declare_property_null(entry, m_implPtr->m_name.c_str(), m_implPtr->m_name.size(),
-                              static_cast<int>(m_implPtr->m_flags));
+                              static_cast<unsigned long>(m_implPtr->m_flags));
 }
 
 NullMember::~NullMember()

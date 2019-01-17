@@ -249,7 +249,6 @@ void register_props_test_classes(Module &module)
    propsTestClass.registerProperty("doubleProp", 3.1415);
    propsTestClass.registerProperty("strProp", "polarphp");
    propsTestClass.registerProperty("str1Prop", std::string("polarphp"));
-
    propsTestClass.registerProperty("staticNullProp", nullptr, Modifier::Static);
    propsTestClass.registerProperty("staticTrueProp", true, Modifier::Static);
    propsTestClass.registerProperty("staticFalseProp", false, Modifier::Static);

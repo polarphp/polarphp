@@ -24,9 +24,7 @@ ObjectBinder::ObjectBinder(zend_class_entry *entry, std::shared_ptr<StdClass> na
                            const zend_object_handlers *objectHandlers, uint32_t refCount)
    : m_nativeObject(nativeObject)
 {
-   ssize_t psize = zend_object_properties_size(entry);
-   psize = psize < 0 ? 0 : psize;
-   m_container = static_cast<Container *>(ecalloc(1, sizeof(Container) + psize));
+   m_container = static_cast<Container *>(ecalloc(1, sizeof(Container) + zend_object_properties_size(entry)));
    m_container->m_self = this;
    m_container->m_zendObject.ce = entry;
    zend_object_std_init(&m_container->m_zendObject, entry);

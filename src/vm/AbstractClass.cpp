@@ -181,7 +181,7 @@ zend_class_entry *AbstractClassPrivate::initialize(AbstractClass *cls, const std
    } else {
       m_classEntry = zend_register_internal_class(&entry);
    }
-   m_classEntry->ce_flags = static_cast<uint32_t>(m_type);
+   m_classEntry->ce_flags = static_cast<uint32_t>(m_type) | ZEND_ACC_CONSTANTS_UPDATED;
    // register the interfaces of the class
    for (std::shared_ptr<AbstractClass> &interface : m_interfaces) {
       if (interface->m_implPtr->m_classEntry) {

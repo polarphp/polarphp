@@ -37,3 +37,16 @@ if (class_exists("PropsTestClass")) {
         echo "PropsTestClass::strProp1 value : {$object->strProp1}\n";
     }
 }
+
+// CHECK: PropsTestClass::nullProp is exist
+// CHECK: PropsTestClass::nullProp value : null
+// CHECK: PropsTestClass::trueProp is exist
+// CHECK: PropsTestClass::trueProp value : true
+// CHECK: PropsTestClass::falseProp is exist
+// CHECK: PropsTestClass::falseProp value : false
+// CHECK: PropsTestClass::numProp is exist
+// CHECK: PropsTestClass::numProp value : 2017
+// CHECK: PropsTestClass::doubleProp is exist
+// CHECK: PropsTestClass::doubleProp value : 3.1415
+// CHECK: PropsTestClass::strProp is exist
+// CHECK: PropsTestClass::strProp value : polarphp
