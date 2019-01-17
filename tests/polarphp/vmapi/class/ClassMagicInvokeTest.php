@@ -11,3 +11,7 @@ if (class_exists("\NonMagicMethodClass") && class_exists("\MagicMethodClass")) {
     $sum = $magicMethodClass(1, 2, 3, 4);
     echo "the sum of \$magicMethodClass() is " . $sum ."\n";
 }
+// CHECK: MagicMethodClass::__invoke is called
+// CHECK: the sum of $magicMethodClass() is 0
+// CHECK: MagicMethodClass::__invoke is called
+// CHECK: the sum of $magicMethodClass() is 10

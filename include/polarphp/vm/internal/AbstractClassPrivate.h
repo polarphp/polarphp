@@ -105,6 +105,9 @@ public:
    std::list<std::shared_ptr<Method>> m_methods;
    std::list<std::shared_ptr<AbstractMember>> m_members;
    std::map<std::string, std::shared_ptr<Property>> m_properties;
+   ///
+   /// Review thread safe
+   ///
    static ContextMapType sm_contextPtrs;
 };
 } // internal

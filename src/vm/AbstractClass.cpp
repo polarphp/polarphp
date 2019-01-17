@@ -761,6 +761,9 @@ int AbstractClassPrivate::getClosure(zval *object, zend_class_entry **entry, zen
    std::string contextKey(defClassEntry->name->val, defClassEntry->name->len);
    contextKey.append("::__invoke");
    CallContext *callContext  = nullptr;
+   ///
+   /// Review thread safe
+   ///
    auto targetContext = sm_contextPtrs.find(contextKey);
    if (targetContext != sm_contextPtrs.end()) {
       callContext = targetContext->second.get();
@@ -783,7 +786,7 @@ int AbstractClassPrivate::getClosure(zval *object, zend_class_entry **entry, zen
    }
    *retFunc = reinterpret_cast<zend_function *>(callContext);
    *objectPtr = Z_OBJ_P(object);
-   return true;
+   return VMAPI_SUCCESS;
 }
 
 class ScopedFree
