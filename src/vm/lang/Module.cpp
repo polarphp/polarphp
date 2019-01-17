@@ -470,7 +470,6 @@ int ModulePrivate::processRequestShutdown(SHUTDOWN_FUNC_ARGS)
       extension->m_implPtr->m_requestShutdownHandler();
    }
    // release call context
-   AbstractClassPrivate::sm_contextPtrs.clear();
    return BOOL2SUCCESS(true);
 }
 

@@ -51,9 +51,11 @@
 
 namespace polar {
 namespace vmapi {
-
 namespace internal
 {
+
+thread_local ContextMapType sg_contextPtrs{};
+
 namespace
 {
 AbstractClassPrivate *retrieve_acp_ptr_from_cls_entry(zend_class_entry *entry)
@@ -131,8 +133,6 @@ void verify_abstract_class(zend_class_entry *ce)
 }
 
 } // anonymous namespace
-
-ContextMapType AbstractClassPrivate::sm_contextPtrs;
 
 AbstractClassPrivate::AbstractClassPrivate(StringRef className, ClassType type)
    : m_type(type),
@@ -552,7 +552,7 @@ zval *AbstractClassPrivate::readProperty(zval *object, zval *name, int type, voi
    // from PHP. If someone wants to get a reference to such an internal variable,
    // that is in most cases simply impossible.
    // retrieve the object and class
-
+   zval *retval;
    try {
       ObjectBinder *objectBinder = ObjectBinder::retrieveSelfPtr(object);
       AbstractClassPrivate *selfPtr = retrieve_acp_ptr_from_cls_entry(Z_OBJCE_P(object));
@@ -562,21 +562,24 @@ zval *AbstractClassPrivate::readProperty(zval *object, zval *name, int type, voi
       auto iter = selfPtr->m_properties.find(key);
       if (iter != selfPtr->m_properties.end()) {
          // self defined getter method
-         return toZval(iter->second->get(nativeObject), type, rv);
+         retval = toZval(iter->second->get(nativeObject), type, rv);
       } else {
-         return toZval(meta->callGet(nativeObject, key), type, rv);
+         retval = toZval(meta->callGet(nativeObject, key), type, rv);
       }
+      return retval;
    } catch (const NotImplemented &) {
       if (!std_object_handlers.read_property) {
-         // TODO here maybe problems
-         return nullptr;
+         retval = &EG(uninitialized_zval);
+         return retval;
       }
       return std_object_handlers.read_property(object, name, type, cacheSlot, rv);
    } catch (Exception &exception) {
       process_exception(exception);
       // this statement will never execute
-      return nullptr;
+   } catch(...) {
+      retval = &EG(uninitialized_zval);
    }
+   return retval;
 }
 
 void AbstractClassPrivate::writeProperty(zval *object, zval *name, zval *value, void **cacheSlot)
@@ -608,7 +611,6 @@ void AbstractClassPrivate::writeProperty(zval *object, zval *name, zval *value, 
 
 int AbstractClassPrivate::hasProperty(zval *object, zval *name, int hasSetExists, void **cacheSlot)
 {
-
    try {
       ObjectBinder *objectBinder = ObjectBinder::retrieveSelfPtr(object);
       AbstractClassPrivate *selfPtr = retrieve_acp_ptr_from_cls_entry(Z_OBJCE_P(object));
@@ -622,13 +624,14 @@ int AbstractClassPrivate::hasProperty(zval *object, zval *name, int hasSetExists
       if (!meta->callIsset(nativeObject, key)) {
          return false;
       }
-      if (2 == hasSetExists) {
+      if (ZEND_PROPERTY_EXISTS == hasSetExists) {
          return true;
       }
       Variant value = meta->callGet(nativeObject, key);
-      if (0 == hasSetExists) {
+      if (ZEND_PROPERTY_ISSET == hasSetExists) {
          return value.getType() != Type::Null;
       } else {
+         ZEND_ASSERT(ZEND_PROPERTY_NOT_EMPTY == hasSetExists);
          return value.toBoolean();
       }
    } catch (const NotImplemented &) {
@@ -686,13 +689,12 @@ zend_function *AbstractClassPrivate::getMethod(zend_object **object, zend_string
    contextKey.append("::");
    contextKey.append(methodName->val, methodName->len);
    CallContext *callContext  = nullptr;
-   auto targetContext = sm_contextPtrs.find(contextKey);
-   if (targetContext != sm_contextPtrs.end()) {
+   auto targetContext = sg_contextPtrs.find(contextKey);
+   if (targetContext != sg_contextPtrs.end()) {
       callContext = targetContext->second.get();
    } else {
-      std::shared_ptr<CallContext> targetContext(reinterpret_cast<CallContext *>(emalloc(sizeof(CallContext))), std_php_memory_deleter);
+      std::shared_ptr<CallContext> targetContext(new CallContext);
       callContext = targetContext.get();
-      std::memset(callContext, 0, sizeof(CallContext));
       zend_internal_function *func = &callContext->m_func;
       func->type = ZEND_INTERNAL_FUNCTION;
       func->module = nullptr;
@@ -704,7 +706,7 @@ zend_function *AbstractClassPrivate::getMethod(zend_object **object, zend_string
       func->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
       func->function_name = methodName;
       callContext->m_selfPtr = retrieve_acp_ptr_from_cls_entry(defClassEntry);
-      sm_contextPtrs[contextKey] = std::move(targetContext);
+      sg_contextPtrs[contextKey] = std::move(targetContext);
    }
    return reinterpret_cast<zend_function *>(callContext);
 }
@@ -721,13 +723,12 @@ zend_function *AbstractClassPrivate::getStaticMethod(zend_class_entry *entry, ze
    contextKey.append(methodName->val, methodName->len);
    contextKey.append("static");
    CallContext *callContext  = nullptr;
-   auto targetContext = sm_contextPtrs.find(contextKey);
-   if (targetContext != sm_contextPtrs.end()) {
+   auto targetContext = sg_contextPtrs.find(contextKey);
+   if (targetContext != sg_contextPtrs.end()) {
       callContext = targetContext->second.get();
    } else {
-      std::shared_ptr<CallContext> targetContext(reinterpret_cast<CallContext *>(emalloc(sizeof(CallContext))), std_php_memory_deleter);
+      std::shared_ptr<CallContext> targetContext(new CallContext);
       callContext = targetContext.get();
-      std::memset(callContext, 0, sizeof(CallContext));
       zend_internal_function *func = &callContext->m_func;
       func->type = ZEND_INTERNAL_FUNCTION;
       func->module = nullptr;
@@ -739,7 +740,7 @@ zend_function *AbstractClassPrivate::getStaticMethod(zend_class_entry *entry, ze
       func->fn_flags = ZEND_ACC_CALL_VIA_HANDLER | ZEND_ACC_STATIC;
       func->function_name = methodName;
       callContext->m_selfPtr = retrieve_acp_ptr_from_cls_entry(entry);
-      sm_contextPtrs[contextKey] = std::move(targetContext);
+      sg_contextPtrs[contextKey] = std::move(targetContext);
    }
    return reinterpret_cast<zend_function *>(callContext);
 }
@@ -761,16 +762,12 @@ int AbstractClassPrivate::getClosure(zval *object, zend_class_entry **entry, zen
    std::string contextKey(defClassEntry->name->val, defClassEntry->name->len);
    contextKey.append("::__invoke");
    CallContext *callContext  = nullptr;
-   ///
-   /// Review thread safe
-   ///
-   auto targetContext = sm_contextPtrs.find(contextKey);
-   if (targetContext != sm_contextPtrs.end()) {
+   auto targetContext = sg_contextPtrs.find(contextKey);
+   if (targetContext != sg_contextPtrs.end()) {
       callContext = targetContext->second.get();
    } else {
-      std::shared_ptr<CallContext> targetContext(reinterpret_cast<CallContext *>(emalloc(sizeof(CallContext))), std_php_memory_deleter);
+      std::shared_ptr<CallContext> targetContext(new CallContext);
       callContext = targetContext.get();
-      std::memset(callContext, 0, sizeof(CallContext));
       zend_internal_function *func = &callContext->m_func;
       func->type = ZEND_INTERNAL_FUNCTION;
       func->module = nullptr;
@@ -782,28 +779,12 @@ int AbstractClassPrivate::getClosure(zval *object, zend_class_entry **entry, zen
       func->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
       func->function_name = nullptr;
       callContext->m_selfPtr = retrieve_acp_ptr_from_cls_entry(Z_OBJCE_P(object));
-      sm_contextPtrs[contextKey] = std::move(targetContext);
+      sg_contextPtrs[contextKey] = std::move(targetContext);
    }
    *retFunc = reinterpret_cast<zend_function *>(callContext);
    *objectPtr = Z_OBJ_P(object);
    return VMAPI_SUCCESS;
 }
-
-class ScopedFree
-{
-public:
-   ScopedFree(ContextMapType &map, const std::string &key)
-      : m_key(key),
-        m_map(map)
-   {}
-   ~ScopedFree()
-   {
-      m_map.erase(m_key);
-   }
-private:
-   std::string m_key;
-   ContextMapType &m_map;
-};
 
 void AbstractClassPrivate::magicCallForwarder(INTERNAL_FUNCTION_PARAMETERS)
 {
@@ -820,7 +801,6 @@ void AbstractClassPrivate::magicCallForwarder(INTERNAL_FUNCTION_PARAMETERS)
    if (!func->scope) {
       contextKey.append("static");
    }
-   ScopedFree scopeFree(sm_contextPtrs, contextKey);
    const char *name = ZSTR_VAL(funcName);
    try {
       Parameters params(getThis(), ZEND_NUM_ARGS());
@@ -853,7 +833,6 @@ void AbstractClassPrivate::magicInvokeForwarder(INTERNAL_FUNCTION_PARAMETERS)
    assert(defClassEntry);
    std::string contextKey(defClassEntry->name->val, defClassEntry->name->len);
    contextKey.append("::__invoke");
-   ScopedFree scopeFree(sm_contextPtrs, contextKey);
    try {
       Parameters params(getThis(), ZEND_NUM_ARGS());
       StdClass *nativeObject = params.getObject();
