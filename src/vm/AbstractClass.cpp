@@ -655,8 +655,9 @@ void AbstractClassPrivate::unsetProperty(zval *object, zval *name, void **cacheS
       std::string key(Z_STRVAL_P(name), Z_STRLEN_P(name));
       if (selfPtr->m_properties.find(key) == selfPtr->m_properties.end()) {
          meta->callUnset(nativeObject, key);
+      } else {
+         zend_error(E_ERROR, "Property %s can not be unset", key.c_str());
       }
-      zend_error(E_ERROR, "Property %s can not be unset", key.c_str());
    } catch (const NotImplemented &) {
       if (!std_object_handlers.unset_property) {
          return;
@@ -789,7 +790,7 @@ int AbstractClassPrivate::getClosure(zval *object, zend_class_entry **entry, zen
 void AbstractClassPrivate::magicCallForwarder(INTERNAL_FUNCTION_PARAMETERS)
 {
    CallContext *callContext = reinterpret_cast<CallContext *>(execute_data->func);
-   assert(callContext);
+   ZEND_ASSERT(callContext);
    bool isStatic = false;
    AbstractClass *meta = callContext->m_selfPtr->m_apiPtr;
    zend_class_entry *defClassEntry = callContext->m_selfPtr->m_classEntry;
@@ -827,7 +828,7 @@ void AbstractClassPrivate::magicCallForwarder(INTERNAL_FUNCTION_PARAMETERS)
 void AbstractClassPrivate::magicInvokeForwarder(INTERNAL_FUNCTION_PARAMETERS)
 {
    CallContext *callContext = reinterpret_cast<CallContext *>(execute_data->func);
-   assert(callContext);
+   ZEND_ASSERT(callContext);
    AbstractClass *meta = callContext->m_selfPtr->m_apiPtr;
    zend_class_entry *defClassEntry = callContext->m_selfPtr->m_classEntry;
    assert(defClassEntry);

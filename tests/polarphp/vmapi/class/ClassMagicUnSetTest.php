@@ -8,6 +8,8 @@ if (class_exists("\NonMagicMethodClass") && class_exists("\MagicMethodClass")) {
     if (!property_exists($nonMagicMethodObject, "teamName")) {
         echo "\$nonMagicMethodObject->teamName is not exist\n";
     }
+    /// echo nothing
+    unset($nonMagicMethodObject->notExist);
     $magicMethodObject = new MagicMethodClass();
     if (property_exists($magicMethodObject, "teamName")) {
         echo "\$magicMethodObject->teamName is exist\n";
@@ -16,4 +18,16 @@ if (class_exists("\NonMagicMethodClass") && class_exists("\MagicMethodClass")) {
     if (!property_exists($magicMethodObject, "teamName")) {
         echo "\$magicMethodObject->teamName is not exist\n";
     }
+    /// dynamic property
+    unset($magicMethodObject->notExist);
+    ///  Fatal error: Property address can not be unset
+    // unset($magicMethodObject->address);
 }
+
+// CHECK: $nonMagicMethodObject->teamName is not exist
+// CHECK: MagicMethodClass::__isset is called
+// CHECK: $magicMethodObject->teamName is exist
+// CHECK: MagicMethodClass::__unset is called
+// CHECK: MagicMethodClass::__isset is called
+// CHECK: $magicMethodObject->teamName is not exist
+// CHECK: MagicMethodClass::__unset is called

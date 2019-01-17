@@ -18,7 +18,6 @@
 #include <string>
 #include <list>
 #include <map>
-#include <iostream>
 
 namespace polar {
 namespace vmapi {
@@ -43,10 +42,6 @@ struct CallContext
 {
    zend_internal_function m_func;
    AbstractClassPrivate *m_selfPtr;
-   ~CallContext()
-   {
-      std::cout << "ccccc" << std::endl;
-   }
 };
 
 using ContextMapType = std::map<std::string, std::shared_ptr<CallContext>>;
