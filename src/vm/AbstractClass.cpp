@@ -892,15 +892,15 @@ int AbstractClassPrivate::cast(zval *object, zval *retValue, int type)
          break;
       }
       ZVAL_COPY(retValue, &temp);
-      return true;
+      return VMAPI_SUCCESS;
    } catch (const NotImplemented &) {
       if (!std_object_handlers.cast_object) {
-         return false;
+         return VMAPI_FAILURE;
       }
       return std_object_handlers.cast_object(object, retValue, type);
    } catch (Exception &exception) {
       process_exception(exception);
-      return false;
+      return VMAPI_FAILURE;
    }
 }
 
