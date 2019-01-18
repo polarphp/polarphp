@@ -37,3 +37,18 @@ if (class_exists("PropsTestClass")) {
         echo "PropsTestClass::MATH_PI value : ". PropsTestClass::MATH_PI ."\n";
     }
 }
+
+// CHECK: PropsTestClass::staticNullProp is exist
+// CHECK: PropsTestClass::staticNullProp value : null
+// CHECK: PropsTestClass::staticTrueProp is exist
+// CHECK: PropsTestClass::staticTrueProp value : true
+// CHECK: PropsTestClass::staticFalseProp is exist
+// CHECK: PropsTestClass::staticFalseProp value : false
+// CHECK: PropsTestClass::staticNumProp is exist
+// CHECK: PropsTestClass::staticNumProp value : 2012
+// CHECK: PropsTestClass::staticDoubleProp is exist
+// CHECK: PropsTestClass::staticDoubleProp value : 3.1415
+// CHECK: PropsTestClass::staticStrProp is exist
+// CHECK: PropsTestClass::staticStrProp value : static polarphp
+// CHECK: PropsTestClass::MATH_PI is exist
+// CHECK: PropsTestClass::MATH_PI value : 3.14

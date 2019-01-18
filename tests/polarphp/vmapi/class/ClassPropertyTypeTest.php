@@ -123,3 +123,20 @@ if (class_exists("PropsTestClass")) {
     }
 }
 
+// CHECK: the type of PropsTestClass::nullProp is null
+// CHECK: the type of PropsTestClass::trueProp is : boolean
+// CHECK: the type of PropsTestClass::falseProp is : boolean
+// CHECK: the type of PropsTestClass::numProp is : int
+// CHECK: the type of PropsTestClass::strProp is : string
+// CHECK: the type of PropsTestClass::nullProp is null
+// CHECK: the type of PropsTestClass::trueProp is : boolean
+// CHECK: the type of PropsTestClass::falseProp is : boolean
+// CHECK: the type of PropsTestClass::numProp is : int
+// CHECK: the type of PropsTestClass::strProp is : string
+// CHECK: the type of PropsTestClass::staticNullProp is null
+// CHECK: the type of PropsTestClass::staticTrueProp is boolean
+// CHECK: the type of PropsTestClass::staticFalseProp is boolean
+// CHECK: the type of PropsTestClass::staticNumProp is int
+// CHECK: the type of PropsTestClass::staticDoubleProp is double
+// CHECK: the type of PropsTestClass::staticStrProp is string
+// CHECK: the type of PropsTestClass::MATH_PI is double
