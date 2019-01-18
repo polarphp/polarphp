@@ -234,7 +234,7 @@ void register_magic_method_test_classes(Module &module)
 {
    Class<NonMagicMethodClass> nonMagicMethodClass("NonMagicMethodClass");
    Class<MagicMethodClass> magicMethodClass("MagicMethodClass");
-   magicMethodClass.registerProperty("address", &MagicMethodClass::getAddress);
+   magicMethodClass.registerProperty("teamWebsite", &MagicMethodClass::getTeamWebsite);
    module.registerClass(nonMagicMethodClass);
    module.registerClass(magicMethodClass);
 }

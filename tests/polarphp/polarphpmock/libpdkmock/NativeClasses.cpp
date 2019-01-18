@@ -571,9 +571,9 @@ void MagicMethodClass::__clone()
    polar::vmapi::out() << "MagicMethodClass::__clone is called" << std::endl;
 }
 
-Variant MagicMethodClass::getAddress()
+Variant MagicMethodClass::getTeamWebsite()
 {
-   return "polarphp";
+   return "polarphp.org";
 }
 
 Variant MagicMethodClass::__callStatic(const std::string &method, Parameters &params)

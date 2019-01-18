@@ -357,6 +357,9 @@ int AbstractClassPrivate::countElements(zval *object, zend_long *count)
    }
 }
 
+///
+/// review
+///
 zval *AbstractClassPrivate::readDimension(zval *object, zval *offset, int type, zval *returnValue)
 {
    // what to do with the type?

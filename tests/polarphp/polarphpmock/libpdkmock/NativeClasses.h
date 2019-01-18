@@ -207,7 +207,7 @@ public:
    ArrayVariant __debugInfo() const;
    int __compare(const MagicMethodClass &object) const;
    void __clone();
-   Variant getAddress();
+   Variant getTeamWebsite();
    static Variant __callStatic(const std::string &method, Parameters &params);
    virtual std::string serialize();
    virtual void unserialize(const char *input, size_t size);
