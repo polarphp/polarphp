@@ -13,13 +13,28 @@
 #define POLARPHP_VMAPI_LANG_PARAMETER_H
 
 #include "polarphp/vm/ZendApi.h"
-#include <any>
+#include "polarphp/vm/ds/ArrayVariant.h"
+#include "polarphp/vm/ds/StringVariant.h"
+#include "polarphp/vm/ds/BooleanVariant.h"
+#include "polarphp/vm/ds/DoubleVariant.h"
+#include "polarphp/vm/ds/NumericVariant.h"
+#include "polarphp/vm/ds/ObjectVariant.h"
+#include "polarphp/vm/ds/CallableVariant.h"
 #include <vector>
+#include <any>
 
 namespace polar {
 namespace vmapi {
 
 class StdClass;
+
+using polar::vmapi::StringVariant;
+using polar::vmapi::ArrayVariant;
+using polar::vmapi::BooleanVariant;
+using polar::vmapi::DoubleVariant;
+using polar::vmapi::NumericVariant;
+using polar::vmapi::ObjectVariant;
+using polar::vmapi::CallableVariant;
 
 /**
  * now this is very bad implemention of parameters class, but it works
@@ -44,6 +59,8 @@ public:
    Parameters(const Parameters &other)
       : m_object(other.m_object), m_data(other.m_data)
    {
+      std::cout << "copy" << std::endl;
+      std::cout << "copy" << std::endl;
    }
 
    Parameters(const ParamCollectionType::iterator begin,
@@ -68,14 +85,32 @@ public:
       return m_object;
    }
 
-   template <typename T>
+   template <typename T,
+             typename DecayVariantType = typename std::decay<T>::type,
+             typename std::enable_if<std::is_same<T, Variant>::value ||
+                                     std::is_same<T, StringVariant>::value ||
+                                     std::is_same<T, NumericVariant>::value ||
+                                     std::is_same<T, BooleanVariant>::value ||
+                                     std::is_same<T, ObjectVariant>::value ||
+                                     std::is_same<T, DoubleVariant>::value ||
+                                     std::is_same<T, ArrayVariant>::value ||
+                                     std::is_same<T, CallableVariant>::value, T>::type * = nullptr>
    T &at(SizeType pos)
    {
       std::any &arg = m_data.at(pos);
       return std::any_cast<T &>(arg);
    }
 
-   template <typename T>
+   template <typename T,
+             typename DecayVariantType = typename std::decay<T>::type,
+             typename std::enable_if<std::is_same<T, Variant>::value ||
+                                     std::is_same<T, StringVariant>::value ||
+                                     std::is_same<T, NumericVariant>::value ||
+                                     std::is_same<T, BooleanVariant>::value ||
+                                     std::is_same<T, ObjectVariant>::value ||
+                                     std::is_same<T, DoubleVariant>::value ||
+                                     std::is_same<T, ArrayVariant>::value ||
+                                     std::is_same<T, CallableVariant>::value, T>::type * = nullptr>
    const T &at(SizeType pos) const
    {
       const std::any &arg = m_data.at(pos);

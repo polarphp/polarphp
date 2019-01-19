@@ -230,13 +230,8 @@ zval *StdClass::doCallParent(const char *name, const int argc, Variant *argv, zv
    zval retval;
    HashTable *funcTable;
    std::unique_ptr<zval[]> params(new zval[argc]);
-   zval *curArgPtr = nullptr;
    for (int i = 0; i < argc; i++) {
       params[i] = *argv[i].getUnDerefZvalPtr();
-      curArgPtr = &params[i];
-      if (Z_TYPE_P(curArgPtr) == IS_REFERENCE && Z_REFCOUNTED_P(Z_REFVAL_P(curArgPtr))) {
-         Z_TRY_ADDREF_P(&params[i]); // _call_user_function_ex free call stack will decrease 1
-      }
    }
    fci.size = sizeof(fci);
    fci.object = object;
@@ -249,8 +244,6 @@ zval *StdClass::doCallParent(const char *name, const int argc, Variant *argv, zv
 
    // setup cache
    zend_fcall_info_cache fcic;
-   /// TODO REVIEW
-   /// fcic.initialized = 1;
    zend_class_entry *parentClassType = object->ce->parent;
    if (parentClassType) {
       funcTable = &parentClassType->function_table;
@@ -267,7 +260,6 @@ zval *StdClass::doCallParent(const char *name, const int argc, Variant *argv, zv
       fcic.called_scope = object->ce;
    } else {
       zend_class_entry *calledScope = zend_get_called_scope(EG(current_execute_data));
-
       if (parentClassType &&
           (!calledScope ||
            !instanceof_function(calledScope, parentClassType))) {

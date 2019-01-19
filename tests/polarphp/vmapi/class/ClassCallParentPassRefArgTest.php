@@ -13,7 +13,7 @@ if (class_exists("A") && class_exists("B") && class_exists("C")) {
 // CHECK: before call changeNameByRef : xxxx
 // CHECK: A::changeNameByRef been called
 // CHECK: get ref arg
-// CHECK: after call changeNameByRef : hello, zapi
+// CHECK: after call changeNameByRef : hello, polarphp
 // CHECK: before call calculateSumByRef : 0
 // CHECK: C::calculateSumByRef been called
 // CHECK: got 4 args

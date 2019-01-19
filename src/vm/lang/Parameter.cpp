@@ -11,14 +11,6 @@
 
 #include "polarphp/vm/lang/Parameter.h"
 #include "polarphp/vm/ObjectBinder.h"
-#include "polarphp/vm/ds/Variant.h"
-#include "polarphp/vm/ds/NumericVariant.h"
-#include "polarphp/vm/ds/StringVariant.h"
-#include "polarphp/vm/ds/ObjectVariant.h"
-#include "polarphp/vm/ds/BooleanVariant.h"
-#include "polarphp/vm/ds/CallableVariant.h"
-#include "polarphp/vm/ds/ArrayVariant.h"
-#include "polarphp/vm/ds/DoubleVariant.h"
 
 namespace polar {
 namespace vmapi {
@@ -37,28 +29,27 @@ Parameters::Parameters(zval *thisPtr, uint32_t argc)
       zval *arg = &arguments[i];
       zend_uchar type = Z_TYPE_P(arg);
       if (type == IS_REFERENCE) {
-         ZVAL_DEREF(arg);
-         type = Z_TYPE_P(arg);
+         type = Z_TYPE_P(Z_REFVAL_P(arg));
          isRef = true;
       } else {
          isRef = false;
       }
       if (type == IS_LONG) {
-         m_data.emplace_back(NumericVariant(arg, isRef));
+         m_data.push_back(NumericVariant(arg, isRef));
       } else if (type == IS_ARRAY) {
-         m_data.emplace_back(ArrayVariant(arg, isRef));
+         m_data.push_back(ArrayVariant(arg, isRef));
       } else if (type == IS_DOUBLE) {
-         m_data.emplace_back(DoubleVariant(arg, isRef));
+         m_data.push_back(DoubleVariant(arg, isRef));
       } else if (type == IS_STRING) {
-         m_data.emplace_back(StringVariant(arg, isRef));
+         m_data.push_back(StringVariant(arg, isRef));
       } else if (type == IS_TRUE || type == IS_FALSE) {
-         m_data.emplace_back(BooleanVariant(arg, isRef));
+         m_data.push_back(BooleanVariant(arg, isRef));
       } else if (type == IS_CALLABLE) {
-         m_data.emplace_back(CallableVariant(arg));
+         m_data.push_back(CallableVariant(arg));
       } else if (type == IS_OBJECT) {
-         m_data.emplace_back(ObjectVariant(arg));
+         m_data.push_back(ObjectVariant(arg));
       } else {
-         m_data.emplace_back(Variant(arg, isRef));
+         m_data.push_back(Variant(arg, isRef));
       }
    }
 }

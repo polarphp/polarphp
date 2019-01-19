@@ -23,10 +23,9 @@
 #include "polarphp/vm/utils/Funcs.h"
 #include "polarphp/vm/utils/CallableTraits.h"
 
-#include <ostream>
-#include <list>
 #include <type_traits>
 #include <tuple>
+#include <functional>
 
 struct _zend_execute_data;
 struct _zval_struct;
@@ -126,7 +125,7 @@ template <typename Class, typename ReturnType>
 struct callable_prototype_checker <ReturnType (Class::*)() &&> : public std::true_type
 {};
 
-POLAR_DECL_UNUSED void yield(_zval_struct *return_value, const Variant &value)
+POLAR_DECL_UNUSED void yield(_zval_struct *return_value, Variant &&value)
 {
    RETVAL_ZVAL(static_cast<zval *>(value), 1, 0);
 }
@@ -193,7 +192,7 @@ public:
          } else {
             const size_t argNumber = ZEND_NUM_ARGS();
             Parameters arguments(nullptr, argNumber);
-            std::invoke(callable, arguments);
+            std::invoke(callable, std::ref(arguments));
          }
          yield(return_value, nullptr);
       } catch (Exception &exception) {
@@ -219,7 +218,7 @@ public:
          } else {
             const size_t argNumber = ZEND_NUM_ARGS();
             Parameters arguments(nullptr, argNumber);
-            yield(return_value, std::invoke(callable, arguments));
+            yield(return_value, std::invoke(callable, std::ref(arguments)));
          }
       } catch (Exception &exception) {
          process_exception(exception);
@@ -247,8 +246,7 @@ public:
             const size_t argNumber = ZEND_NUM_ARGS();
             Parameters arguments(getThis(), argNumber);
             // for class object
-            auto tuple = std::make_tuple<ClassType *, Parameters&>(static_cast<ClassType *>(nativeObject), arguments);
-            std::apply(callable, tuple);
+            std::apply(callable, std::make_tuple(static_cast<ClassType *>(nativeObject), std::ref(arguments)));
          }
          yield(return_value, nullptr);
       } catch (Exception &exception) {
@@ -277,7 +275,7 @@ public:
             const size_t argNumber = ZEND_NUM_ARGS();
             Parameters arguments(getThis(), argNumber);
             // for class object
-            auto tuple = std::make_tuple<ClassType *, Parameters&>(static_cast<ClassType *>(nativeObject), arguments);
+            auto tuple = std::make_tuple(static_cast<ClassType *>(nativeObject), std::ref(arguments));
             yield(return_value, std::apply(callable, tuple));
          }
       } catch (Exception &exception) {

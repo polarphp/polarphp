@@ -46,7 +46,7 @@ public:
    StringVariant();
    StringVariant(const Variant &other);
    StringVariant(const StringVariant &other);
-   StringVariant(const StringVariant &other, bool isRef);
+   StringVariant(StringVariant &other, bool isRef);
    StringVariant(Variant &&other);
    StringVariant(StringVariant &&other) noexcept;
    StringVariant(const std::string &value);

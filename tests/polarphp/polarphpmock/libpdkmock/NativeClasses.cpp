@@ -204,7 +204,7 @@ void C::testCallParentPassRefArg()
    polar::vmapi::out() << "C::testCallParentPassRefArg been called" << std::endl;
    Variant str("xxxx");
    polar::vmapi::out() << "before call changeNameByRef : " << str << std::endl;
-   callParent("changeNameByRef", str.makeReferenceByZval());
+   callParent("changeNameByRef", Variant(str, true));
    polar::vmapi::out() << "after call changeNameByRef : " << str << std::endl;
    // pass arg when variant args
    NumericVariant ret(0);

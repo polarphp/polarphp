@@ -64,16 +64,16 @@ StringVariant::StringVariant(const StringVariant &other)
 {
 }
 
-StringVariant::StringVariant(const StringVariant &other, bool isRef)
+StringVariant::StringVariant(StringVariant &other, bool isRef)
 {
    zval *self = getUnDerefZvalPtr();
    if (!isRef) {
       /// we don't pass through refrence relationship
-      zval *otherPtr = const_cast<zval *>(other.getZvalPtr());
+      zval *otherPtr = other.getZvalPtr();
       stdCopyZval(self, otherPtr);
    } else {
       ZEND_ASSERT(!ZSTR_IS_INTERNED(Z_STR_P(other.getZvalPtr())));
-      zval *source = const_cast<zval *>(other.getUnDerefZvalPtr());
+      zval *source = other.getUnDerefZvalPtr();
       if (!Z_OPT_ISREF_P(source)) {
          ZVAL_MAKE_REF(source);
       }
@@ -88,7 +88,7 @@ StringVariant::StringVariant(Variant &&other)
    if (getType() != Type::String) {
       convert_to_string(getUnDerefZvalPtr());
    }
-   setCapacity(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(Z_STRLEN_P(getZvalPtr()))));
+   setCapacity(Z_STRLEN_P(getZvalPtr()));
 }
 
 StringVariant::StringVariant(StringVariant &&other) noexcept
