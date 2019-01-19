@@ -2,11 +2,11 @@
 // RUN: %{polarphp} %s 1> %t.out 2>&1
 // RUN: filechecker --input-file %t.out %s
 
-if (class_exists("\ZapiClosure")) {
-    echo "internal class ZapiClosure exists\n";
-    $refl = new ReflectionClass("ZapiClosure");
+if (class_exists("\VmApiClosure")) {
+    echo "internal class VmApiClosure exists\n";
+    $refl = new ReflectionClass("VmApiClosure");
     if ($refl->isFinal()) {
-        echo "class ZapiClosure is final\n";
+        echo "class VmApiClosure is final\n";
     }
 }
 if (class_exists("\ClosureTestClass")) {
@@ -32,3 +32,19 @@ if (class_exists("\ClosureTestClass")) {
         echo "the return of hasParamCallable is " . $ret."\n";
     }
 }
+
+// CHECK: internal class VmApiClosure exists
+// CHECK: class VmApiClosure is final
+// CHECK: internal class ClosureTestClass exists
+// CHECK: $callable is callable
+// CHECK: print_something called
+// CHECK: the return of callable is print_some
+// CHECK: $hasParamCallable is callable
+// CHECK: have_ret_and_have_arg called
+// CHECK: the return of hasParamCallable is have_ret_and_have_arg
+// CHECK: have_ret_and_have_arg called
+// CHECK: the return of hasParamCallable is 123
+// CHECK: have_ret_and_have_arg called
+// CHECK: the return of hasParamCallable is 3.14
+// CHECK: have_ret_and_have_arg called
+// CHECK: the return of hasParamCallable is 1

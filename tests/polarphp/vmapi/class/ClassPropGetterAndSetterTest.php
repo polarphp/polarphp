@@ -22,3 +22,9 @@ if (class_exists("PropsTestClass")) {
     }
 }
 
+// CHECK: PropsTestClass::name is exist
+// CHECK: PropsTestClass::name value : 
+// CHECK: PropsTestClass::name value : polarphp:unicornteam
+// CHECK: PropsTestClass::notExistsProp is not exist
+// CHECK: PropsTestClass::notExistsProp is exist
+// CHECK: PropsTestClass::notExistsProp value : 123
