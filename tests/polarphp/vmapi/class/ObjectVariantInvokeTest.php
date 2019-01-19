@@ -7,3 +7,6 @@ if (class_exists("ObjectVariantClass")) {
     $object->forwardInvoke();
 }
 
+// CHECK: begin invoke ObjectVariant::classInvoke : the text is xxx
+// CHECK: ObjectVariantClass::__invoke invoked
+// CHECK: after invoke ObjectVariant::classInvoke : this text is polarphp

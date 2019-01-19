@@ -71,7 +71,7 @@ private:
    ObjectVariant(StdClass *nativeObject);
    Variant exec(const char *name, int argc, Variant *argv);
    Variant exec(const char *name, int argc, Variant *argv) const;
-   bool doClassInvoke(int argc, Variant *argv, zval *retval);
+   void doClassInvoke(int argc, Variant *argv, zval *retval);
    friend class StdClass;
 };
 
@@ -94,12 +94,10 @@ Variant ObjectVariant::operator ()(Args&&... args)
    Variant vargs[] = { Variant(std::forward<Args>(args))... };
    zval result;
    std::memset(&result, 0, sizeof(result));
-   if (doClassInvoke(sizeof...(Args), vargs, &result)) {
-      Variant ret(&result);
-      zval_dtor(&result);
-      return ret;
-   }
-   return nullptr;
+   doClassInvoke(sizeof...(Args), vargs, &result);
+   Variant ret(&result);
+   zval_ptr_dtor(&result);
+   return std::move(ret);
 }
 
 } // vmapi

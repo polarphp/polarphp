@@ -652,7 +652,7 @@ void ObjectVariantClass::forwardInvoke()
    Variant result = obj(str.makeReferenceByZval(), 123, 456, 222);
    polar::vmapi::out() << "after invoke ObjectVariant::classInvoke : this text is " << result << std::endl;
    ObjectVariant obj1("NonMagicMethodClass", std::make_shared<NonMagicMethodClass>());
-   // obj1(1, 2); // Fatal error: Function name must be a string
+  ///  obj1(1, 2); // Fatal error: Function name must be a string
 }
 
 void ObjectVariantClass::testInstanceOf()

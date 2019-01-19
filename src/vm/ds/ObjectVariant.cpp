@@ -25,16 +25,15 @@ namespace vmapi {
 
 namespace
 {
-Variant do_execute(const zval *object, zval *method, int argc, zval *argv)
+void do_execute(const zval *object, zval *method, int argc, zval *argv, zval *retval)
 {
-   zval retval;
    zend_object *oldException = EG(exception);
-   if (VMAPI_SUCCESS != call_user_function_ex(CG(function_table), const_cast<zval *>(object), method, &retval,
+   if (VMAPI_SUCCESS != call_user_function_ex(CG(function_table), const_cast<zval *>(object), method, retval,
                                               argc, argv, 1, nullptr)) {
       std::string msg("Invalid call to ");
       msg.append(Z_STRVAL_P(method), Z_STRLEN_P(method));
       throw Exception(std::move(msg));
-      return nullptr; // just for prevent some compiler warnings
+      return; // just for prevent some compiler warnings
    } else {
       // detect whether has exception throw from PHP code, if we got,
       // we throw an native c++ exception, let's c++ code can
@@ -42,18 +41,47 @@ Variant do_execute(const zval *object, zval *method, int argc, zval *argv)
       if (oldException != EG(exception) && EG(exception)) {
          throw OrigException(EG(exception));
       }
-      if (Z_ISUNDEF(retval)) {
-         return nullptr;
+   }
+}
+
+void do_invoke_class_closure_method(zval *self, int argc, zval *argv, zval *retval)
+{
+   zend_fcall_info fci;
+   zend_fcall_info_cache fciCache;
+   fci.size = sizeof(fci);
+   fci.retval = retval;
+   fci.param_count = argc;
+   fci.params = argv;
+   fci.no_separation = (zend_bool) 1;
+   zend_class_entry *calledScope = Z_OBJCE_P(self);
+   zend_function *func;
+   zend_object *object;
+
+   if (!EXPECTED(Z_OBJ_HANDLER_P(self, get_closure)) ||
+       !EXPECTED(Z_OBJ_HANDLER_P(self, get_closure)(self, &calledScope, &func, &object) == VMAPI_SUCCESS)) {
+      throw Exception("Function name must be a string" );
+   }
+
+   fciCache.called_scope = calledScope;
+   fciCache.function_handler = func;
+   fciCache.object = object;
+
+   zend_object *oldException = EG(exception);
+   if (VMAPI_SUCCESS != zend_call_function(&fci, &fciCache)) {
+      std::string msg("Invalid call to ");
+      msg.append("__invoke");
+      throw Exception(std::move(msg));
+      return; // just for prevent some compiler warnings
+   } else {
+      // detect whether has exception throw from PHP code, if we got,
+      // we throw an native c++ exception, let's c++ code can
+      // handle it
+      if (oldException != EG(exception) && EG(exception)) {
+         throw OrigException(EG(exception));
       }
-      // wrap the retval into Variant
-      Variant result(&retval);
-      // here we decrease the refcounter
-      zval_ptr_dtor(&retval);
-      return result;
    }
 }
 } // anonymous namespace
-
 
 using GuardStrType = std::unique_ptr<zend_string, std::function<void(zend_string *)>>;
 using internal::AbstractClassPrivate;
@@ -292,7 +320,13 @@ Variant ObjectVariant::call(const char *name)
 Variant ObjectVariant::call(const char *name) const
 {
    Variant method(name);
-   return do_execute(getZvalPtr(), method.getZvalPtr(), 0, nullptr);
+   zval retval;
+   do_execute(getZvalPtr(), method.getZvalPtr(), 0, nullptr, &retval);
+   Variant ret(retval);
+   if (!Z_ISUNDEF(retval) && Z_REFCOUNTED(retval)) {
+      zval_ptr_dtor(&retval);
+   }
+   return std::move(ret);
 }
 
 bool ObjectVariant::instanceOf(const char *className, size_t size) const
@@ -396,128 +430,30 @@ Variant ObjectVariant::exec(const char *name, int argc, Variant *argv) const
 {
    Variant methodName(name);
    std::unique_ptr<zval[]> params(new zval[argc]);
-   zval *curArgPtr = nullptr;
+//   zval *curArgPtr = nullptr;
    for (int i = 0; i < argc; i++) {
       params[i] = *argv[i].getUnDerefZvalPtr();
-      curArgPtr = &params[i];
-      if (Z_TYPE_P(curArgPtr) == IS_REFERENCE && Z_REFCOUNTED_P(Z_REFVAL_P(curArgPtr))) {
-         Z_TRY_ADDREF_P(&params[i]); // _call_user_function_ex free call stack will decrease 1
-      }
+//      curArgPtr = &params[i];
+//      if (Z_TYPE_P(curArgPtr) == IS_REFERENCE && Z_REFCOUNTED_P(Z_REFVAL_P(curArgPtr))) {
+//         Z_TRY_ADDREF_P(&params[i]); // _call_user_function_ex free call stack will decrease 1
+//      }
    }
-   return do_execute(getZvalPtr(), methodName.getZvalPtr(), argc, params.get());
+   zval retval;
+   do_execute(getZvalPtr(), methodName.getZvalPtr(), argc, params.get(), &retval);
+   Variant ret(retval);
+   if (!Z_ISUNDEF(retval) && Z_REFCOUNTED(retval)) {
+      zval_ptr_dtor(&retval);
+   }
+   return std::move(ret);
 }
 
-bool ObjectVariant::doClassInvoke(int argc, Variant *argv, zval *retval)
+void ObjectVariant::doClassInvoke(int argc, Variant *argv, zval *retval)
 {
-   zval *self = getUnDerefZvalPtr();
-   zend_execute_data *call;
-   zend_execute_data dummy_execute_data;
-   zend_function *func;
-   if (!EG(active)) {
-      return false; /* executor is already inactive */
+   std::unique_ptr<zval[]> params(new zval[argc]);
+   for (int i = 0; i < argc; i++) {
+      params[i] = *argv[i].getUnDerefZvalPtr();
    }
-   if (EG(exception)) {
-      return false; /* we would result in an instable executor otherwise */
-   }
-   if (!EG(current_execute_data)) {
-      /* This only happens when we're called outside any execute()'s
-          * It shouldn't be strictly necessary to NULL execute_data out,
-          * but it may make bugs easier to spot
-          */
-      memset(&dummy_execute_data, 0, sizeof(zend_execute_data));
-      EG(current_execute_data) = &dummy_execute_data;
-   } else if (EG(current_execute_data)->func &&
-              ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
-              EG(current_execute_data)->opline->opcode != ZEND_DO_FCALL &&
-              EG(current_execute_data)->opline->opcode != ZEND_DO_ICALL &&
-              EG(current_execute_data)->opline->opcode != ZEND_DO_UCALL &&
-              EG(current_execute_data)->opline->opcode != ZEND_DO_FCALL_BY_NAME) {
-      /* Insert fake frame in case of include or magic calls */
-      dummy_execute_data = *EG(current_execute_data);
-      dummy_execute_data.prev_execute_data = EG(current_execute_data);
-      dummy_execute_data.call = NULL;
-      dummy_execute_data.opline = NULL;
-      dummy_execute_data.func = NULL;
-      EG(current_execute_data) = &dummy_execute_data;
-   }
-   zend_class_entry *calledScope = Z_OBJCE_P(self);
-   zend_object *object;
-#if ZEND_MODULE_API_NO >= 20160303 // imported after php-7.1.0
-   uint32_t callInfo = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
-#else
-   uint32_t callInfo = ZEND_CALL_NESTED_FUNCTION;
-#endif
-
-   if (EXPECTED(Z_OBJ_HANDLER_P(self, get_closure)) &&
-       EXPECTED(Z_OBJ_HANDLER_P(self, get_closure)(self, &calledScope, &func, &object) == VMAPI_SUCCESS)) {
-      if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
-         /* Delay closure destruction until its invocation */
-         ZEND_ASSERT(GC_TYPE((zend_object*)func->common.prototype) == IS_OBJECT);
-         GC_ADDREF((zend_object*)func->common.prototype);
-         callInfo |= ZEND_CALL_CLOSURE;
-      } else if (object) {
-         callInfo |= ZEND_CALL_RELEASE_THIS;
-      }
-   } else {
-      vmapi::error() << "Function name must be a string" << std::endl;
-      return false;
-   }
-   call = zend_vm_stack_push_call_frame(callInfo, func, argc, calledScope, object);
-
-   for (int i = 0; i< argc; i++) {
-      zval *param;
-      zval *arg = argv[i].getUnDerefZvalPtr();
-      Z_TRY_ADDREF_P(arg);
-      if (ARG_SHOULD_BE_SENT_BY_REF(func, i + 1)) {
-         if (UNEXPECTED(!Z_ISREF_P(arg))) {
-            if (!ARG_MAY_BE_SENT_BY_REF(func, i + 1)) {
-               /* By-value send is not allowed -- emit a warning,
-                   * but still perform the call with a by-value send. */
-               zend_error(E_WARNING,
-                          "Parameter %d to %s%s%s() expected to be a reference, value given", i+1,
-                          func->common.scope ? ZSTR_VAL(func->common.scope->name) : "",
-                          func->common.scope ? "::" : "",
-                          ZSTR_VAL(func->common.function_name));
-            } else {
-               ZVAL_NEW_REF(arg, arg);
-            }
-         }
-      } else {
-         if (Z_ISREF_P(arg) &&
-             !(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-            /* don't separate references for __call */
-            arg = Z_REFVAL_P(arg);
-         }
-      }
-
-      param = ZEND_CALL_ARG(call, i+1);
-      ZVAL_COPY(param, arg);
-   }
-
-   assert(func->type == ZEND_INTERNAL_FUNCTION);
-   ZVAL_NULL(retval);
-   call->prev_execute_data = EG(current_execute_data);
-   call->return_value = nullptr; /* this is not a constructor call */
-   EG(current_execute_data) = call;
-   if (EXPECTED(zend_execute_internal == nullptr)) {
-      /* saves one function call if zend_execute_internal is not used */
-      func->internal_function.handler(call, retval);
-   } else {
-      zend_execute_internal(call, retval);
-   }
-   EG(current_execute_data) = call->prev_execute_data;
-   zend_vm_stack_free_args(call);
-   if (EG(exception)) {
-      zval_ptr_dtor(retval);
-      ZVAL_UNDEF(retval);
-   }
-   if (EG(current_execute_data) == &dummy_execute_data) {
-      EG(current_execute_data) = dummy_execute_data.prev_execute_data;
-   }
-   if (EG(exception)) {
-      zend_throw_exception_internal(nullptr);
-   }
-   return true;
+   do_invoke_class_closure_method(getUnDerefZvalPtr(), argc, params.get(), retval);
 }
 
 } // vmapi
