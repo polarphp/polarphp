@@ -383,6 +383,8 @@ ObjectVariant::ObjectVariant(StdClass *nativeObject)
    assert(zobject);
    zval *self = getUnDerefZvalPtr();
    ZVAL_OBJ(self, zobject);
+   Z_ADDREF_P(self);
+   getUnDerefZvalPtr();
 }
 
 Variant ObjectVariant::exec(const char *name, int argc, Variant *argv)
