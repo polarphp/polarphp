@@ -56,8 +56,7 @@ public:
    ArrayVariant(const Variant &other);
    ArrayVariant(Variant &&other);
    ArrayVariant(const std::initializer_list<Variant> &list);
-   ArrayVariant(const std::initializer_list<std::pair<Variant, Variant>> &list);
-   ArrayVariant(const std::map<Variant, Variant, VariantKeyLess> &map);
+   explicit ArrayVariant(const std::map<Variant, Variant, VariantKeyLess> &map);
    // operators
    ArrayItemProxy operator [](vmapi_ulong index);
    template <typename T,

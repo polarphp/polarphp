@@ -106,7 +106,8 @@ Variant::Variant()
  *
  * @param value
  */
-Variant::Variant(const std::nullptr_t value) : Variant()
+Variant::Variant(const std::nullptr_t)
+   : Variant()
 {}
 
 /**
@@ -233,6 +234,7 @@ Variant::Variant(const StdClass &nativeObject)
 Variant::Variant(const Variant &other)
    : m_implPtr(new VariantPrivate, std_zval_deleter)
 {
+   /// here we don't passby reference relationship
    stdCopyZval(getUnDerefZvalPtr(), const_cast<zval *>(other.getZvalPtr()));
 }
 
@@ -248,6 +250,8 @@ Variant::Variant(zval *value, bool isRef)
    zval *self = getUnDerefZvalPtr();
    if (nullptr != value) {
       if (!isRef) {
+         /// here we don't passby reference relationship
+         ZVAL_DEREF(value);
          ZVAL_COPY(self, value);
       } else {
          ZVAL_MAKE_REF(value);
@@ -268,14 +272,15 @@ Variant::Variant(zval &&value, bool isRef)
    :Variant(&value, isRef)
 {}
 
-Variant::Variant(Variant &other, bool isRef)
+Variant::Variant(const Variant &other, bool isRef)
    : m_implPtr(new VariantPrivate, std_zval_deleter)
 {
    zval *self = getUnDerefZvalPtr();
    if (!isRef) {
+      /// here we don't passby reference relationship
       stdCopyZval(self, const_cast<zval *>(other.getZvalPtr()));
    } else {
-      zval *source = other.getUnDerefZvalPtr();
+      zval *source = const_cast<zval *>(other.getUnDerefZvalPtr());
       ZVAL_MAKE_REF(source);
       ZVAL_COPY(self, source);
    }
@@ -325,6 +330,7 @@ Variant::Variant(StringVariant &value, bool isRef)
 {
    zval *self = getUnDerefZvalPtr();
    if (!isRef) {
+      /// here we don't passby reference relationship
       stdCopyZval(self, const_cast<zval *>(value.getZvalPtr()));
    } else {
       zval *source = value.getUnDerefZvalPtr();
@@ -338,6 +344,7 @@ Variant::Variant(ArrayVariant &value, bool isRef)
 {
    zval *self = getUnDerefZvalPtr();
    if (!isRef) {
+      /// here we don't passby reference relationship
       stdCopyZval(self, const_cast<zval *>(value.getZvalPtr()));
    } else {
       zval *source = value.getUnDerefZvalPtr();

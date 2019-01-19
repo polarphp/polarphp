@@ -181,22 +181,6 @@ ArrayVariant::ArrayVariant(const std::initializer_list<Variant> &list)
    }
 }
 
-ArrayVariant::ArrayVariant(const std::initializer_list<std::pair<Variant, Variant>> &list)
-   : ArrayVariant()
-{
-   for(auto &item : list) {
-      Type type = item.first.getType();
-      if (type != Type::Long && type != Type::String) {
-         continue;
-      }
-      if (type == Type::Long) {
-         insert(Z_LVAL_P(item.first.getZvalPtr()), item.second);
-      } else {
-         insert(Z_STRVAL_P(item.first.getZvalPtr()), item.second);
-      }
-   }
-}
-
 ArrayVariant::ArrayVariant(const std::map<Variant, Variant, VariantKeyLess> &map)
    : ArrayVariant()
 {

@@ -68,7 +68,7 @@ public:
     * @param  value
     */
    Variant(const Variant &other);
-   Variant(Variant &other, bool isRef);
+   Variant(const Variant &other, bool isRef);
    Variant(BooleanVariant &value, bool isRef);
    Variant(NumericVariant &value, bool isRef);
    Variant(DoubleVariant &value, bool isRef);

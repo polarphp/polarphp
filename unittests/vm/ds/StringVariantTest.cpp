@@ -21,6 +21,24 @@ using polar::vmapi::StringVariant;
 using polar::vmapi::Variant;
 using polar::vmapi::Type;
 
+
+namespace {
+class ScopeZvalDeleter
+{
+public:
+   ScopeZvalDeleter(zval *data)
+      : m_zval(data)
+   {
+   }
+   ~ScopeZvalDeleter()
+   {
+      zval_ptr_dtor(m_zval);
+   }
+private:
+   zval *m_zval;
+};
+}
+
 TEST(StringVariantTest, testConstructors)
 {
    StringVariant str("polarboy");
@@ -32,14 +50,14 @@ TEST(StringVariantTest, testConstructors)
    //   //std::cout << emptyStr << std::endl;
    emptyStr.append('C');
    ASSERT_EQ(emptyStr.getSize(), 2);
-   ASSERT_EQ(emptyStr.getCapacity(), 256);
+   ASSERT_EQ(emptyStr.getCapacity(), 191);
    ASSERT_EQ(emptyStr.at(0), '1');
    emptyStr.clear();
    ASSERT_EQ(emptyStr.getSize(), 0);
    ASSERT_EQ(emptyStr.getCapacity(), 0);
    emptyStr = str;
    ASSERT_EQ(emptyStr.getSize(), 8);
-   ASSERT_EQ(emptyStr.getCapacity(), 256);
+   ASSERT_EQ(emptyStr.getCapacity(), 8);
    ASSERT_EQ(emptyStr.getRefCount(), 2);
    ASSERT_EQ(str.getRefCount(), 2);
    emptyStr.clear();
@@ -47,13 +65,13 @@ TEST(StringVariantTest, testConstructors)
    ASSERT_EQ(emptyStr.getCapacity(), 0);
    emptyStr = Variant("polarphp");
    ASSERT_EQ(emptyStr.getSize(), 8);
-   ASSERT_EQ(emptyStr.getCapacity(), 40);
+   ASSERT_EQ(emptyStr.getCapacity(), 8);
    ASSERT_EQ(emptyStr.getRefCount(), 1);
    emptyStr.clear();
    Variant gvar("polarphp");
    emptyStr = gvar;
    ASSERT_EQ(emptyStr.getSize(), 8);
-   ASSERT_EQ(emptyStr.getCapacity(), 40);
+   ASSERT_EQ(emptyStr.getCapacity(), 8);
    ASSERT_EQ(emptyStr.getRefCount(), 2);
 }
 
@@ -62,13 +80,20 @@ TEST(StringVariantTest, testRefConstruct)
    {
       zval rawStrVar;
       ZVAL_STRING(&rawStrVar, "polarphp");
+      zend_string *rawZendString = Z_STR(rawStrVar);
+      ASSERT_EQ(zend_string_refcount(rawZendString), 1);
+      ScopeZvalDeleter deleter(&rawStrVar);
       ASSERT_STREQ(Z_STRVAL_P(&rawStrVar), "polarphp");
       StringVariant strVariant(rawStrVar, false);
+      ASSERT_EQ(zend_string_refcount(rawZendString), 2);
+      ASSERT_EQ(strVariant.getCapacity(), 8);
       ASSERT_EQ(strVariant.getLength(), 8);
       ASSERT_EQ(strVariant.getRefCount(), 2);
       ASSERT_TRUE(strVariant.getUnDerefType() == Type::String);
       ASSERT_TRUE(strVariant.getType() == Type::String);
       StringVariant refStrVariant(rawStrVar, true);
+      ASSERT_EQ(zend_string_refcount(rawZendString), 1);
+      ASSERT_EQ(strVariant.getRefCount(), 1);
       zval *rval = &rawStrVar;
       ZVAL_DEREF(rval);
       ASSERT_TRUE(Z_TYPE_P(rval) == IS_STRING);
@@ -77,12 +102,13 @@ TEST(StringVariantTest, testRefConstruct)
       ASSERT_TRUE(refStrVariant.getType() == Type::String);
       ASSERT_EQ(refStrVariant.getRefCount(), 2);
       ASSERT_STREQ(refStrVariant.getCStr(), "polarphp");
-      ASSERT_EQ(refStrVariant.getCapacity(), 40);
+
+      ASSERT_EQ(refStrVariant.getCapacity(), 8);
       ASSERT_EQ(refStrVariant.getSize(), 8);
       refStrVariant += "x";
+      ASSERT_STREQ(strVariant.getCStr(), "polarphp");
       ASSERT_STREQ(refStrVariant.getCStr(), "polarphpx");
       ASSERT_STREQ(Z_STRVAL_P(rval), "polarphpx");
-      zval_dtor(&rawStrVar);
    }
    {
       zval rawVar;
@@ -122,10 +148,10 @@ TEST(StringVariantTest, testRefConstruct)
          ASSERT_EQ(str1.getRefCount(), 3);
          ASSERT_EQ(str2.getRefCount(), 3);
          StringVariant str4(str3, false);
-         ASSERT_EQ(str4.getRefCount(), 1);
-         StringVariant str5(str4);
          ASSERT_EQ(str4.getRefCount(), 2);
-         ASSERT_EQ(str5.getRefCount(), 2);
+         StringVariant str5(str4);
+         ASSERT_EQ(str4.getRefCount(), 3);
+         ASSERT_EQ(str5.getRefCount(), 3);
          ASSERT_EQ(str3.getSize(), 8);
          ASSERT_EQ(str4.getSize(), 8);
          ASSERT_EQ(str5.getSize(), 8);
@@ -147,6 +173,19 @@ TEST(StringVariantTest, testRefConstruct)
       StringVariant str2(str1, true);
       StringVariant str3(str2, true);
       StringVariant str4(str3, true);
+      ASSERT_EQ(str1.getRefCount(), 4);
+      ASSERT_EQ(str2.getRefCount(), 4);
+      ASSERT_EQ(str3.getRefCount(), 4);
+      ASSERT_EQ(str4.getRefCount(), 4);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str1.getZvalPtr())), 1);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str2.getZvalPtr())), 1);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str3.getZvalPtr())), 1);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str4.getZvalPtr())), 1);
+
+      ASSERT_EQ(str1.getUnDerefType(), Type::Reference);
+      ASSERT_EQ(str2.getUnDerefType(), Type::Reference);
+      ASSERT_EQ(str3.getUnDerefType(), Type::Reference);
+      ASSERT_EQ(str4.getUnDerefType(), Type::Reference);
       ASSERT_EQ(Z_REFCOUNT_P(str1.getZvalPtr()), 1);
       ASSERT_EQ(Z_REFCOUNT_P(str2.getZvalPtr()), 1);
       ASSERT_EQ(Z_REFCOUNT_P(str3.getZvalPtr()), 1);
@@ -155,28 +194,20 @@ TEST(StringVariantTest, testRefConstruct)
       ASSERT_EQ(str2.getZvalPtr(), str3.getZvalPtr());
       StringVariant str5(str4, false);
       StringVariant str6(str5, false);
-      ASSERT_EQ(Z_REFCOUNT_P(str1.getZvalPtr()), 1);
-      ASSERT_EQ(Z_REFCOUNT_P(str2.getZvalPtr()), 1);
-      ASSERT_EQ(Z_REFCOUNT_P(str3.getZvalPtr()), 1);
-      ASSERT_EQ(Z_REFCOUNT_P(str4.getZvalPtr()), 1);
+      ASSERT_EQ(Z_REFCOUNT_P(str1.getZvalPtr()), 3);
+      ASSERT_EQ(Z_REFCOUNT_P(str2.getZvalPtr()), 3);
+      ASSERT_EQ(Z_REFCOUNT_P(str3.getZvalPtr()), 3);
+      ASSERT_EQ(Z_REFCOUNT_P(str4.getZvalPtr()), 3);
       ASSERT_EQ(str1.getZvalPtr(), str2.getZvalPtr());
       ASSERT_EQ(str2.getZvalPtr(), str3.getZvalPtr());
       ASSERT_EQ(str3.getZvalPtr(), str4.getZvalPtr());
 
       ASSERT_NE(str4.getZvalPtr(), str5.getZvalPtr());
-      ASSERT_EQ(Z_REFCOUNT_P(str5.getZvalPtr()), 2);
-      ASSERT_EQ(Z_REFCOUNT_P(str6.getZvalPtr()), 2);
+      ASSERT_EQ(Z_REFCOUNT_P(str5.getZvalPtr()), 3);
+      ASSERT_EQ(Z_REFCOUNT_P(str6.getZvalPtr()), 3);
       ASSERT_NE(str5.getZvalPtr(), str6.getZvalPtr());
       ASSERT_EQ(str5.getCStr(), str6.getCStr());
 
-      ASSERT_EQ(str1.getRefCount(), 4);
-      ASSERT_EQ(str2.getRefCount(), 4);
-      ASSERT_EQ(str3.getRefCount(), 4);
-      ASSERT_EQ(str4.getRefCount(), 4);
-      ASSERT_EQ(str1.getUnDerefType(), Type::Reference);
-      ASSERT_EQ(str2.getUnDerefType(), Type::Reference);
-      ASSERT_EQ(str3.getUnDerefType(), Type::Reference);
-      ASSERT_EQ(str4.getUnDerefType(), Type::Reference);
       ASSERT_EQ(str5.getUnDerefType(), Type::String);
       ASSERT_EQ(str6.getUnDerefType(), Type::String);
    }
@@ -184,14 +215,89 @@ TEST(StringVariantTest, testRefConstruct)
       // test raw zval string separate
       zval rawStrVar;
       ZVAL_STRING(&rawStrVar, "polarphp");
+      ScopeZvalDeleter deleter1(&rawStrVar);
       zval anotherStr;
       ZVAL_COPY(&anotherStr, &rawStrVar);
+      ScopeZvalDeleter deleter2(&anotherStr);
       StringVariant str(rawStrVar, true);
       zval *rval = &rawStrVar;
       ZVAL_DEREF(rval);
       ASSERT_EQ(Z_STRVAL_P(str.getZvalPtr()), Z_STRVAL_P(rval));
-      zval_dtor(&rawStrVar);
-      zval_dtor(&anotherStr);
+   }
+   {
+      StringVariant str1("polarphp");
+      StringVariant str2(str1, true);
+      StringVariant str3(str2, true);
+      StringVariant str4(str3);
+      StringVariant str5(str4);
+      StringVariant str6(str5, true);
+      ASSERT_EQ(str1.getRefCount(), 3);
+      ASSERT_EQ(str2.getRefCount(), 3);
+      ASSERT_EQ(str3.getRefCount(), 3);
+      ASSERT_EQ(str4.getRefCount(), 3);
+      ASSERT_EQ(str5.getRefCount(), 2);
+      ASSERT_EQ(str6.getRefCount(), 2);
+
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str1.getZvalPtr())), 3);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str2.getZvalPtr())), 3);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str3.getZvalPtr())), 3);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str4.getZvalPtr())), 3);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str5.getZvalPtr())), 3);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str6.getZvalPtr())), 3);
+
+      ASSERT_STREQ(str1.getCStr(), "polarphp");
+      ASSERT_STREQ(str2.getCStr(), "polarphp");
+      ASSERT_STREQ(str3.getCStr(), "polarphp");
+      ASSERT_STREQ(str4.getCStr(), "polarphp");
+      ASSERT_STREQ(str5.getCStr(), "polarphp");
+      ASSERT_STREQ(str6.getCStr(), "polarphp");
+      str1 += 'x';
+
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str1.getZvalPtr())), 1);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str2.getZvalPtr())), 1);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str3.getZvalPtr())), 1);
+
+      ASSERT_EQ(str1.getZvalPtr(), str2.getZvalPtr());
+      ASSERT_EQ(str2.getZvalPtr(), str3.getZvalPtr());
+      ASSERT_EQ(Z_STR_P(str1.getZvalPtr()), Z_STR_P(str2.getZvalPtr()));
+      ASSERT_EQ(Z_STR_P(str2.getZvalPtr()), Z_STR_P(str3.getZvalPtr()));
+
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str4.getZvalPtr())), 2);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str5.getZvalPtr())), 2);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str6.getZvalPtr())), 2);
+
+      ASSERT_STREQ(str1.getCStr(), "polarphpx");
+      ASSERT_STREQ(str2.getCStr(), "polarphpx");
+      ASSERT_STREQ(str3.getCStr(), "polarphpx");
+      ASSERT_STREQ(str4.getCStr(), "polarphp");
+      ASSERT_STREQ(str5.getCStr(), "polarphp");
+      ASSERT_STREQ(str6.getCStr(), "polarphp");
+      str4 = "beijing";
+
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str1.getZvalPtr())), 1);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str2.getZvalPtr())), 1);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str3.getZvalPtr())), 1);
+
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str4.getZvalPtr())), 1);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str5.getZvalPtr())), 1);
+      ASSERT_EQ(zend_string_refcount(Z_STR_P(str6.getZvalPtr())), 1);
+
+      ASSERT_NE(Z_STR_P(str4.getZvalPtr()), Z_STR_P(str5.getZvalPtr()));
+      ASSERT_EQ(Z_STR_P(str5.getZvalPtr()), Z_STR_P(str6.getZvalPtr()));
+
+      ASSERT_STREQ(str1.getCStr(), "polarphpx");
+      ASSERT_STREQ(str2.getCStr(), "polarphpx");
+      ASSERT_STREQ(str3.getCStr(), "polarphpx");
+      ASSERT_STREQ(str4.getCStr(), "beijing");
+      ASSERT_STREQ(str5.getCStr(), "polarphp");
+      ASSERT_STREQ(str6.getCStr(), "polarphp");
+      str6 = "polarboy";
+      ASSERT_STREQ(str1.getCStr(), "polarphpx");
+      ASSERT_STREQ(str2.getCStr(), "polarphpx");
+      ASSERT_STREQ(str3.getCStr(), "polarphpx");
+      ASSERT_STREQ(str4.getCStr(), "beijing");
+      ASSERT_STREQ(str5.getCStr(), "polarboy");
+      ASSERT_STREQ(str6.getCStr(), "polarboy");
    }
 }
 
@@ -531,25 +637,67 @@ TEST(StringVariantTest, testAccessOperators)
 
 TEST(StringVariantTest, testClear)
 {
-   StringVariant str("0123456789a123456789b1234A56789c");
-   ASSERT_STREQ(str.getCStr(), "0123456789a123456789b1234A56789c");
-   str.clear();
-   ASSERT_EQ(str.getLength(), 0);
-   ASSERT_EQ(str.getCapacity(), 0);
-   str.append('c');
-   ASSERT_STREQ(str.getCStr(), "c");
-   ASSERT_EQ(str.getLength(), 1);
-   ASSERT_EQ(str.getCapacity(), 256);
+   {
+      StringVariant str("0123456789a123456789b1234A56789c");
+      ASSERT_STREQ(str.getCStr(), "0123456789a123456789b1234A56789c");
+      str.clear();
+      ASSERT_EQ(str.getLength(), 0);
+      ASSERT_EQ(str.getCapacity(), 0);
+      str.append('c');
+      ASSERT_STREQ(str.getCStr(), "c");
+      ASSERT_EQ(str.getLength(), 1);
+      ASSERT_EQ(str.getCapacity(), 191);
+   }
+   {
+      StringVariant str("polarphp");
+      StringVariant refStr(str, true);
+      StringVariant refStr1(refStr, true);
+      StringVariant anotherStr(str);
+      ASSERT_STREQ(str.getCStr(), "polarphp");
+      ASSERT_STREQ(refStr.getCStr(), "polarphp");
+      ASSERT_STREQ(refStr1.getCStr(), "polarphp");
+      ASSERT_STREQ(anotherStr.getCStr(), "polarphp");
+      ASSERT_EQ(str.getRefCount(), 3);
+      ASSERT_EQ(refStr.getRefCount(), 3);
+      ASSERT_EQ(anotherStr.getRefCount(), 1);
+      refStr.clear();
+      ASSERT_TRUE(str.isEmpty());
+      ASSERT_TRUE(refStr.isEmpty());
+      ASSERT_STREQ(anotherStr.getCStr(), "polarphp");
+   }
+   {
+      StringVariant str1("polarphp");
+      StringVariant str2(str1);
+      StringVariant str3(str2);
+      ASSERT_EQ(str1.getRefCount(), 3);
+      ASSERT_EQ(str2.getRefCount(), 3);
+      ASSERT_EQ(str3.getRefCount(), 3);
+      ASSERT_STREQ(str1.getCStr(), "polarphp");
+      ASSERT_STREQ(str2.getCStr(), "polarphp");
+      ASSERT_STREQ(str3.getCStr(), "polarphp");
+      str1.clear();
+      ASSERT_TRUE(str1.isEmpty());
+      ASSERT_FALSE(str2.isEmpty());
+      ASSERT_FALSE(str3.isEmpty());
+      str2.clear();
+      ASSERT_TRUE(str1.isEmpty());
+      ASSERT_TRUE(str2.isEmpty());
+      ASSERT_FALSE(str3.isEmpty());
+      str3.clear();
+      ASSERT_TRUE(str1.isEmpty());
+      ASSERT_TRUE(str2.isEmpty());
+      ASSERT_TRUE(str3.isEmpty());
+   }
 }
 
 TEST(StringVariantTest, testResize)
 {
    {
       StringVariant str("my name is polarboy, i think php is the best programming language in the world. php is the best!");
-      ASSERT_EQ(str.getCapacity(), 256);
+      ASSERT_EQ(str.getCapacity(), 96);
       ASSERT_EQ(str.getSize(), 96);
       str.resize(32);
-      ASSERT_EQ(str.getCapacity(), 64);
+      ASSERT_EQ(str.getCapacity(), 32);
       ASSERT_EQ(str.getSize(), 32);
       StringVariant str1 = "polarphp";
       ASSERT_EQ(str1.getRefCount(), 1);
@@ -566,10 +714,10 @@ TEST(StringVariantTest, testResize)
       ASSERT_EQ(str.getCapacity(), 0);
       ASSERT_EQ(str.getSize(), 0);
       str.resize(12);
-      ASSERT_EQ(str.getCapacity(), 40);
+      ASSERT_EQ(str.getCapacity(), 12);
       ASSERT_EQ(str.getSize(), 12);
       str = "polarphp";
-      ASSERT_EQ(str.getCapacity(), 40);
+      ASSERT_EQ(str.getCapacity(), 8);
       ASSERT_EQ(str.getSize(), 8);
       str.resize(12, '-');
       ASSERT_STREQ(str.getCStr(), "polarphp----");
@@ -593,26 +741,26 @@ TEST(StringVariantTest, testResize)
       ASSERT_EQ(str4.getUnDerefType(), Type::Reference);
       ASSERT_EQ(str5.getUnDerefType(), Type::String);
       ASSERT_EQ(str6.getUnDerefType(), Type::String);
-      ASSERT_EQ(str1.getCapacity(), 256);
+      ASSERT_EQ(str1.getCapacity(), 96);
       ASSERT_EQ(str1.getSize(), 96);
-      ASSERT_EQ(str2.getCapacity(), 256);
+      ASSERT_EQ(str2.getCapacity(), 96);
       ASSERT_EQ(str2.getSize(), 96);
-      ASSERT_EQ(str3.getCapacity(), 256);
+      ASSERT_EQ(str3.getCapacity(), 96);
       ASSERT_EQ(str3.getSize(), 96);
-      ASSERT_EQ(str4.getCapacity(), 256);
+      ASSERT_EQ(str4.getCapacity(), 96);
       ASSERT_EQ(str4.getSize(), 96);
-      ASSERT_EQ(str5.getCapacity(), 256);
+      ASSERT_EQ(str5.getCapacity(), 96);
       ASSERT_EQ(str5.getSize(), 96);
-      ASSERT_EQ(str6.getCapacity(), 256);
+      ASSERT_EQ(str6.getCapacity(), 96);
       ASSERT_EQ(str6.getSize(), 96);
       str1.resize(32);
-      ASSERT_EQ(str1.getCapacity(), 64);
+      ASSERT_EQ(str1.getCapacity(), 32);
       ASSERT_EQ(str1.getSize(), 32);
-      ASSERT_EQ(str2.getCapacity(), 64);
-      ASSERT_EQ(str2.getSize(), 32);
-      ASSERT_EQ(str5.getCapacity(), 256);
+      ASSERT_EQ(str2.getCapacity(), 96);
+      ASSERT_EQ(str2.getSize(), 96);
+      ASSERT_EQ(str5.getCapacity(), 96);
       ASSERT_EQ(str5.getSize(), 96);
-      ASSERT_EQ(str6.getCapacity(), 256);
+      ASSERT_EQ(str6.getCapacity(), 96);
       ASSERT_EQ(str6.getSize(), 96);
    }
 }

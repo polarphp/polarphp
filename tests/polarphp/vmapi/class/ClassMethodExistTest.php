@@ -20,3 +20,8 @@ if (class_exists("Person")) {
     }
 }
 
+// CHECK: method Person::showName exists
+// CHECK: method Person::print_sum exists
+// CHECK: method Person::setAge exists
+// CHECK: method Person::addTwoNum exists
+// CHECK: method Person::addSum exists

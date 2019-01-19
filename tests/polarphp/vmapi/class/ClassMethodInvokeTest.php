@@ -40,7 +40,7 @@ if (class_exists("\Person")) {
     }
 }
 
-// CHECK: my name is zapi
+// CHECK: my name is polarphp
 // CHECK: the sum is 11
 // CHECK: the original age is 0
 // CHECK: the new age is 27
@@ -48,5 +48,5 @@ if (class_exists("\Person")) {
 // CHECK: the sum of 1 and 99 is 100
 // CHECK: the sum of 1, 2, 3, 4, 5, 6, 7 is 28
 // CHECK: the sum of 1, 2, 3 is 6
-// CHECK: static my name is zapi
+// CHECK: static my name is polarphp
 // CHECK: the concat of abc and def is abcdef

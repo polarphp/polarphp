@@ -222,6 +222,7 @@ struct _zend_refcounted {
 struct _zend_string {
 	zend_refcounted_h gc;
 	zend_ulong        h;                /* hash value */
+	size_t            capacity;         /* for smart string support */
 	size_t            len;
 	char              val[1];
 };

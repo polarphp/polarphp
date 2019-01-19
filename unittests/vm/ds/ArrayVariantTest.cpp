@@ -27,6 +27,7 @@ using polar::vmapi::StringVariant;
 using polar::vmapi::BooleanVariant;
 using polar::vmapi::DoubleVariant;
 using KeyType = ArrayVariant::KeyType;
+using polar::vmapi::VariantKeyLess;
 
 TEST(ArrayVariantTest, testConstructor)
 {
@@ -196,7 +197,7 @@ TEST(ArrayVariantTest, testCopyFromInitList)
       arrVal.insert("name", "polarphp");
       arrVal.insert("age", 11);
       ASSERT_EQ(arrVal.getRefCount(), 1);
-      ArrayVariant array({
+      ArrayVariant array(std::map<Variant, Variant, VariantKeyLess>{
                             {0, 1.2},
                             {1, "polarphp"},
                             {2, true},

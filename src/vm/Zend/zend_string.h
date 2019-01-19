@@ -53,6 +53,7 @@ END_EXTERN_C()
 #define ZSTR_VAL(zstr)  (zstr)->val
 #define ZSTR_LEN(zstr)  (zstr)->len
 #define ZSTR_H(zstr)    (zstr)->h
+#define ZSTR_CAPACITY(zstr)    (zstr)->capacity
 #define ZSTR_HASH(zstr) zend_string_hash_val(zstr)
 
 /* Compatibility macros */

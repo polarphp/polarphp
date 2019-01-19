@@ -23,18 +23,10 @@ namespace vmapi {
 
 using internal::VariantPrivate;
 
-const size_t STR_VARIANT_OVERHEAD = ZEND_MM_OVERHEAD + _ZSTR_HEADER_SIZE;
-#ifdef SMART_STR_PAGE
-const size_t STR_VARIANT_PAGE_SIZE = SMART_STR_PAGE; // just use zend default now
-#else
-const size_t STR_VARIANT_PAGE_SIZE = 4096;
-#endif
-
-#ifdef SMART_STR_START_SIZE
-const size_t STR_VARIANT_START_SIZE = SMART_STR_START_SIZE;
-#else
-const size_t STR_VARIANT_START_SIZE = 256;
-#endif
+#define STR_VARIANT_OVERHEAD   (ZEND_MM_OVERHEAD + _ZSTR_HEADER_SIZE + 1)
+#define STR_VARIANT_START_SIZE 256
+#define STR_VARIANT_START_LEN  (STR_VARIANT_START_SIZE - STR_VARIANT_OVERHEAD)
+#define STR_VARIANT_PAGE       4096
 
 StringVariant::StringVariant()
 {
@@ -60,35 +52,32 @@ StringVariant::StringVariant(const Variant &other)
       ZVAL_COPY_VALUE(self, &temp);
    }
    // we just set the capacity equal to default allocator algorithm
-   // ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len))
-   getZendStringPtr()->h = ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(Z_STRLEN_P(self)));
+   setCapacity(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(Z_STRLEN_P(self))));
 }
 
+///
+/// Review here wether copy under zend_string or just c++ object
+/// TODO
+///
 StringVariant::StringVariant(const StringVariant &other)
-   : Variant(other)
+   : StringVariant(other, false)
 {
-   if (other.getUnDerefType() == Type::Reference) {
-      SEPARATE_STRING(getUnDerefZvalPtr());
-   }
-   setCapacity(other.getCapacity());
 }
 
-StringVariant::StringVariant(StringVariant &other, bool isRef)
+StringVariant::StringVariant(const StringVariant &other, bool isRef)
 {
    zval *self = getUnDerefZvalPtr();
    if (!isRef) {
-      zval *otherPtr = other.getUnDerefZvalPtr();
-      stdCopyZval(self, const_cast<zval *>(otherPtr));
-      if (Z_TYPE_P(otherPtr) == IS_REFERENCE) {
-         SEPARATE_STRING(self);
-      }
+      /// we don't pass through refrence relationship
+      zval *otherPtr = const_cast<zval *>(other.getZvalPtr());
+      stdCopyZval(self, otherPtr);
    } else {
-      zval *source = other.getUnDerefZvalPtr();
-      ZVAL_MAKE_REF(source);
+      ZEND_ASSERT(!ZSTR_IS_INTERNED(Z_STR_P(other.getZvalPtr())));
+      zval *source = const_cast<zval *>(other.getUnDerefZvalPtr());
+      if (!Z_OPT_ISREF_P(source)) {
+         ZVAL_MAKE_REF(source);
+      }
       ZVAL_COPY(self, source);
-      // if the reference string reference count > 1
-      // separate here
-      SEPARATE_STRING(getZvalPtr());
    }
    setCapacity(other.getCapacity());
 }
@@ -112,15 +101,9 @@ StringVariant::StringVariant(const std::string &value)
 
 StringVariant::StringVariant(const char *value, size_t length)
 {
-   // we alloc memory here
-   // we don't use default ZVAL_STRINGL to setup ourser zval
-   zend_string *strPtr = nullptr;
-   strAlloc(strPtr, length, false);
-   ZVAL_NEW_STR(getUnDerefZvalPtr(), strPtr);
-   // we need copy memory ourself
-   memcpy(ZSTR_VAL(strPtr), value, length);
-   ZSTR_VAL(strPtr)[length] = '\0';
-   ZSTR_LEN(strPtr) = length;
+   zval *self = getZvalPtr();
+   ZVAL_NEW_STR(self, zend_string_init(value, length, 0));
+   ZSTR_CAPACITY(Z_STR_P(self)) = length;
 }
 
 StringVariant::StringVariant(const char *value)
@@ -137,66 +120,81 @@ StringVariant::StringVariant(zval &&other, bool isRef)
 
 StringVariant::StringVariant(zval *other, bool isRef)
 {
+   /// we don't accept refence to interned string
+   ZEND_ASSERT(!isRef || !(Z_OPT_ISREF_P(other) && Z_TYPE_P(Z_REFVAL_P(other)) == IS_STRING &&
+                           ZSTR_IS_INTERNED(Z_STR_P(Z_REFVAL_P(other)))));
    zval *self = getUnDerefZvalPtr();
    if (nullptr != other && Z_TYPE_P(other) != IS_NULL) {
-      if ((isRef && (Z_TYPE_P(other) == IS_STRING ||
-                     (Z_TYPE_P(other) == IS_REFERENCE && Z_TYPE_P(Z_REFVAL_P(other)) == IS_STRING))) ||
-          (!isRef && (Z_TYPE_P(other) == IS_REFERENCE && Z_TYPE_P(Z_REFVAL_P(other)) == IS_STRING))) {
-         SEPARATE_STRING(other);
-         ZVAL_MAKE_REF(other);
-         zend_reference *ref = Z_REF_P(other);
-         GC_ADDREF(ref);
-         ZVAL_REF(self, ref);
-      } else if ((Z_TYPE_P(other) == IS_STRING ||
-                  (Z_TYPE_P(other) == IS_REFERENCE && Z_TYPE_P(Z_REFVAL_P(other)) == IS_STRING))) {
-         ZVAL_DEREF(other);
-         ZVAL_COPY(self, other);
-      }else {
+      if ((Z_TYPE_P(other) == IS_STRING) ||
+          (Z_OPT_ISREF_P(other) && Z_TYPE_P(Z_REFVAL_P(other)) == IS_STRING)) {
+         if (Z_OPT_ISREF_P(other)) {
+            if (isRef) {
+               ZVAL_COPY(self, other);
+            } else {
+               ZVAL_COPY(self, Z_REFVAL_P(other));
+            }
+         } else {
+            if (ZSTR_IS_INTERNED(Z_STR_P(other))) {
+               ZVAL_COPY_VALUE(self, other);
+            } else {
+               if (isRef) {
+                  // refcount > 1
+                  if (Z_REFCOUNT_P(other) > 1) {
+                     SEPARATE_STRING(other);
+                  }
+                  ZVAL_MAKE_REF(other);
+                  ZVAL_COPY(self, other);
+               } else {
+                  ZVAL_COPY(self, other);
+               }
+            }
+         }
+      } else {
+         /// not string type, we don't consider isRef = true
          ZVAL_DUP(self, other);
          convert_to_string(self);
       }
-      setCapacity(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(Z_STRLEN_P(getZvalPtr()))));
+      setCapacity(Z_STRLEN_P(getZvalPtr()));
    } else {
-      Z_STR_P(self) = nullptr;
-      Z_TYPE_INFO_P(self) = IS_STRING_EX;
+      ZVAL_EMPTY_STRING(self);
    }
 }
 
+///
+/// we don't pass through reference relationship
+///
 StringVariant &StringVariant::operator =(const StringVariant &other)
 {
    if (this != &other) {
-      zval *from = const_cast<zval *>(other.getZvalPtr());
-      if (getUnDerefType() != Type::Reference && nullptr != getZendStringPtr()) {
-         SEPARATE_STRING(getUnDerefZvalPtr());
+      zval *self = getZvalPtr();
+      if (nullptr != getZendStringPtr() && !ZSTR_IS_INTERNED(Z_STR_P(self))) {
+         zval_ptr_dtor_str(self);
       }
-      Variant::operator =(from);
-      setCapacity(getCapacity());
+      ZVAL_COPY(self, other.getZvalPtr());
+      setCapacity(other.getSize());
    }
    return *this;
 }
 
+///
+/// we don't pass through reference relationship
+///
 StringVariant &StringVariant::operator =(const Variant &other)
 {
    zval *self = getZvalPtr();
-   if (getUnDerefType() != Type::Reference && nullptr != getZendStringPtr()) {
-      SEPARATE_STRING(self);
+   if (nullptr != getZendStringPtr() && !ZSTR_IS_INTERNED(Z_STR_P(self))) {
+      zval_ptr_dtor_str(self);
    }
-   zval *from = const_cast<zval *>(other.getZvalPtr());
-   // need set gc info
    if (other.getType() == Type::String) {
-      // standard copy
-      Variant::operator =(from);
+      ZVAL_COPY(self, other.getZvalPtr());
    } else {
+      zval *from = const_cast<zval *>(other.getZvalPtr());
       zval temp;
-      // will increase 1 to gc refcount
       ZVAL_DUP(&temp, from);
-      // will decrease 1 to gc refcount
       convert_to_string(&temp);
-      // we need free original zend_string memory
-      zend_string_free(Z_STR_P(self));
       ZVAL_COPY_VALUE(self, &temp);
    }
-   setCapacity(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(Z_STRLEN_P(self))));
+   setCapacity(getSize());
    return *this;
 }
 
@@ -219,19 +217,12 @@ StringVariant &StringVariant::operator =(const std::string &value)
 StringVariant &StringVariant::operator =(const char *value)
 {
    zval *self = getZvalPtr();
-   zend_string *strPtr = getZendStringPtr();
-   if (getUnDerefType() != Type::Reference && nullptr != strPtr) {
-      SEPARATE_STRING(self);
-      strPtr = getZendStringPtr();
+   if (nullptr != getZendStringPtr() && !ZSTR_IS_INTERNED(Z_STR_P(self))) {
+      zval_ptr_dtor_str(self);
    }
-   size_t length = std::strlen(value);
-   strReAlloc(strPtr, length, 0);
-   ConstPointer sourcePtr = value;
-   Pointer destPtr = ZSTR_VAL(strPtr);
-   std::memcpy(destPtr, sourcePtr, length);
-   destPtr[length] = '\0';
-   ZSTR_LEN(strPtr) = length;
-   Z_STR_P(self) = strPtr;
+   size_t len = std::strlen(value);
+   ZVAL_NEW_STR(self, zend_string_init(value, len, 0));
+   setCapacity(len);
    return *this;
 }
 
@@ -475,7 +466,7 @@ StringVariant::ConstReverseIterator StringVariant::crend() const noexcept
 }
 
 vmapi_long StringVariant::indexOf(const char *needle, vmapi_long offset,
-                                 bool caseSensitive) const noexcept
+                                  bool caseSensitive) const noexcept
 {
    if (isEmpty()) {
       return -1;
@@ -515,26 +506,26 @@ vmapi_long StringVariant::indexOf(const char *needle, vmapi_long offset,
 }
 
 vmapi_long StringVariant::indexOf(const StringVariant &needle, vmapi_long offset,
-                                 bool caseSensitive) const noexcept
+                                  bool caseSensitive) const noexcept
 {
    return indexOf(needle.getCStr(), offset, caseSensitive);
 }
 
 vmapi_long StringVariant::indexOf(const std::string &needle, vmapi_long offset,
-                                 bool caseSensitive) const noexcept
+                                  bool caseSensitive) const noexcept
 {
    return indexOf(needle.c_str(), offset, caseSensitive);
 }
 
 vmapi_long StringVariant::indexOf(const char needle, vmapi_long offset,
-                                 bool caseSensitive) const noexcept
+                                  bool caseSensitive) const noexcept
 {
    ValueType buffer[2] = {needle, '\0'};
    return indexOf(reinterpret_cast<Pointer>(buffer), offset, caseSensitive);
 }
 
 vmapi_long StringVariant::lastIndexOf(const char *needle, vmapi_long offset,
-                                     bool caseSensitive) const noexcept
+                                      bool caseSensitive) const noexcept
 {
    if (isEmpty()) {
       return -1;
@@ -586,19 +577,19 @@ vmapi_long StringVariant::lastIndexOf(const char *needle, vmapi_long offset,
 }
 
 vmapi_long StringVariant::lastIndexOf(const StringVariant &needle, vmapi_long offset,
-                                     bool caseSensitive) const noexcept
+                                      bool caseSensitive) const noexcept
 {
    return lastIndexOf(needle.getCStr(), offset, caseSensitive);
 }
 
 vmapi_long StringVariant::lastIndexOf(const std::string &needle, vmapi_long offset,
-                                     bool caseSensitive) const noexcept
+                                      bool caseSensitive) const noexcept
 {
    return lastIndexOf(needle.c_str(), offset, caseSensitive);
 }
 
 vmapi_long StringVariant::lastIndexOf(const char needle, vmapi_long offset,
-                                     bool caseSensitive) const noexcept
+                                      bool caseSensitive) const noexcept
 {
    ValueType buffer[2] = {needle, '\0'};
    return lastIndexOf(reinterpret_cast<Pointer>(buffer), offset, caseSensitive);
@@ -712,20 +703,24 @@ bool StringVariant::endsWith(char c, bool caseSensitive) const noexcept
 
 StringVariant &StringVariant::prepend(const char *str)
 {
-   zval *self = getZvalPtr();
-   zend_string *destStrPtr = getZendStringPtr();
-   if (getUnDerefType() != Type::Reference && nullptr != destStrPtr) {
-      SEPARATE_STRING(self);
-      destStrPtr = getZendStringPtr();
-   }
+   zval *self = getUnDerefZvalPtr();
+   size_t newLength;
    size_t length = std::strlen(str);
-   size_t selfLength = getSize();
-   size_t newLength = strAlloc(destStrPtr, length, 0);
+   size_t requestLength = length + getLength();
+   zend_string *destStrPtr = getZendStringPtr();
+   if (!Z_OPT_ISREF_P(self)) {
+      if (destStrPtr && !ZSTR_IS_INTERNED(destStrPtr)) {
+         SEPARATE_STRING(self);
+      }
+   }
+   self = getZvalPtr();
+   destStrPtr = getZendStringPtr();
+   size_t origLength = getSize();
+   newLength = strReAlloc(destStrPtr, requestLength, 0);
    Pointer newRawStr = ZSTR_VAL(destStrPtr);
    // copy backward
-   size_t iterator = selfLength;
-   while (iterator--) {
-      *(newRawStr + iterator + length) = *(newRawStr + iterator);
+   while (origLength--) {
+      *(newRawStr + origLength + length) = *(newRawStr + origLength);
    }
    // copy prepend
    std::memcpy(newRawStr, str, length);
@@ -754,15 +749,26 @@ StringVariant &StringVariant::prepend(const StringVariant &str)
 
 StringVariant &StringVariant::append(const char *str)
 {
-   zval *self = getZvalPtr();
-   zend_string *destStrPtr = getZendStringPtr();
-   if (getUnDerefType() != Type::Reference && nullptr != destStrPtr) {
-      SEPARATE_STRING(self);
-      destStrPtr = getZendStringPtr();
-   }
+   zval *self = getUnDerefZvalPtr();
+   size_t newLength;
    size_t length = std::strlen(str);
-   size_t newLength = strAlloc(destStrPtr, length, 0);
-   std::memcpy(ZSTR_VAL(destStrPtr) + getLength(), str, length);
+   size_t origLength = getLength();
+   size_t requestLength = length + origLength;
+   zend_string *destStrPtr = getZendStringPtr();
+   if (!Z_OPT_ISREF_P(self)) {
+      if (destStrPtr && !ZSTR_IS_INTERNED(destStrPtr)) {
+         SEPARATE_STRING(self);
+      }
+   } else {
+      zval *refZval = getZvalPtr();
+      if (Z_REFCOUNT_P(refZval) > 1) {
+         SEPARATE_STRING(refZval);
+      }
+   }
+   self = getZvalPtr();
+   destStrPtr = getZendStringPtr();
+   newLength = strReAlloc(destStrPtr, requestLength, 0);
+   std::memcpy(ZSTR_VAL(destStrPtr) + origLength, str, length);
    // set self state
    ZSTR_VAL(destStrPtr)[newLength] = '\0';
    ZSTR_LEN(destStrPtr) = newLength;
@@ -792,10 +798,15 @@ StringVariant &StringVariant::remove(size_t pos, size_t length)
    if (pos > selfLength) {
       throw std::out_of_range("string pos out of range");
    }
+   zval *self = getUnDerefZvalPtr();
+   zend_string *destStrPtr = getZendStringPtr();
    // implement php copy on write idiom
-   if (getUnDerefType() != Type::Reference) {
-      SEPARATE_STRING(getUnDerefZvalPtr());
+   if (!Z_OPT_ISREF_P(self)) {
+      if (destStrPtr && !ZSTR_IS_INTERNED(destStrPtr)) {
+         SEPARATE_STRING(self);
+      }
    }
+
    Pointer strPtr = getRawStrPtr();
    if (pos + length < selfLength) {
       size_t needCopy = selfLength - pos - length;
@@ -835,20 +846,28 @@ StringVariant &StringVariant::remove(const StringVariant &str, bool caseSensitiv
 
 StringVariant &StringVariant::insert(size_t pos, const char *str)
 {
-   zval *self = getZvalPtr();
-   zend_string *destStrPtr = getZendStringPtr();
-   if (getUnDerefType() != Type::Reference && nullptr != destStrPtr) {
-      SEPARATE_ZVAL_NOREF(self);
-      destStrPtr = getZendStringPtr();
-   }
-   size_t selfLength = getLength();
-   if (pos > selfLength) {
+   size_t origLength = getLength();
+   if (pos > origLength) {
       throw std::out_of_range("string pos out of range");
    }
+
+   zval *self = getUnDerefZvalPtr();
+   zend_string *destStrPtr = getZendStringPtr();
+   // implement php copy on write idiom
+   if (!Z_OPT_ISREF_P(self)) {
+      if (destStrPtr && !ZSTR_IS_INTERNED(destStrPtr)) {
+         SEPARATE_STRING(self);
+      }
+   }
+
+   self = getZvalPtr();
+   destStrPtr = getZendStringPtr();
    size_t length = std::strlen(str);
-   size_t newLength = strAlloc(destStrPtr, length, 0);
+   size_t requestLength = origLength + length;
+   size_t newLength = strReAlloc(destStrPtr, requestLength, 0);
+
    Pointer dataPtr = ZSTR_VAL(destStrPtr);
-   size_t iterator = selfLength - pos;
+   size_t iterator = origLength - pos;
    Pointer newDataEnd = dataPtr + newLength;
    while (iterator--) {
       *(--newDataEnd) = *(dataPtr + pos + iterator);
@@ -988,16 +1007,21 @@ StringVariant &StringVariant::clear()
 {
    // here we release zend_string memory
    // and set capacity to zero
-   zval *self = getZvalPtr();
-   if (nullptr == getZendStringPtr()) {
+   zend_string *destStrPtr = getZendStringPtr();
+   if (!destStrPtr) {
       return *this;
    }
-   if (getUnDerefType() != Type::Reference) {
-      SEPARATE_STRING(self);
+   if (!ZSTR_IS_INTERNED(destStrPtr)) {
+      if (Z_OPT_ISREF_P(getUnDerefZvalPtr())) {
+         zend_string_release(Z_STR_P(getZvalPtr()));
+         ZVAL_EMPTY_STRING(getZvalPtr());
+      } else {
+         zend_string_release(Z_STR_P(getUnDerefZvalPtr()));
+         Z_STR_P(getUnDerefZvalPtr()) = nullptr;
+      }
+   } else {
+      Z_STR_P(getUnDerefZvalPtr()) = nullptr;
    }
-   Z_STR_P(self)->h = 0; // for dirty memory
-   zend_string_release(Z_STR_P(self));
-   Z_STR_P(self) = nullptr;
    return *this;
 }
 
@@ -1006,25 +1030,26 @@ void StringVariant::resize(SizeType size)
    if (size == getCapacity()) {
       return;
    }
-   zval *self = getZvalPtr();
-   if (getUnDerefType() != Type::Reference && nullptr != getZendStringPtr()) {
-      SEPARATE_STRING(self);
+
+   zval *self = getUnDerefZvalPtr();
+   zend_string *destStrPtr = getZendStringPtr();
+   // implement php copy on write idiom
+   if (!Z_OPT_ISREF_P(self)) {
+      if (destStrPtr && !ZSTR_IS_INTERNED(destStrPtr)) {
+         SEPARATE_STRING(self);
+      }
    }
-   // here we use std string alloc
-   zend_string *newStr = zend_string_alloc(size, 0);
-   zend_string *oldStr = getZendStringPtr();
-   if (oldStr) {
-      // we need copy the org content
-      size_t needCopyLength = std::min(size, getSize());
-      std::memcpy(ZSTR_VAL(newStr), ZSTR_VAL(oldStr), needCopyLength);
-      // release old resource
-      zend_string_free(oldStr);
+   destStrPtr = getZendStringPtr();
+   zend_string *newStr = nullptr;
+   if (!destStrPtr) {
+      newStr = zend_string_alloc(size, 0);
    } else {
-      std::memset(ZSTR_VAL(newStr), '\0', size);
+      newStr = zend_string_realloc(destStrPtr, size, 0);
    }
+
    ZSTR_VAL(newStr)[size] = '\0';
-   Z_STR_P(self) = newStr;
-   setCapacity(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(Z_STRLEN_P(self))));
+   Z_STR_P(getZvalPtr()) = newStr;
+   setCapacity(size);
 }
 
 void StringVariant::resize(SizeType size, char fillChar)
@@ -1264,18 +1289,11 @@ StringVariant::SizeType StringVariant::getCapacity() const noexcept
    if (!strPtr) {
       return 0;
    }
-   return static_cast<SizeType>(strPtr->h);
+   return static_cast<SizeType>(strPtr->capacity);
 }
 
 StringVariant::~StringVariant() noexcept
 {
-   // @TODO really need this ?
-   if (nullptr != m_implPtr && getUnDerefType() != Type::Reference) {
-      zend_string *str = getZendStringPtr();
-      if (str) {
-         str->h = 0;
-      }
-   }
 }
 
 zend_string *StringVariant::getZendStringPtr() const
@@ -1285,44 +1303,40 @@ zend_string *StringVariant::getZendStringPtr() const
 
 size_t StringVariant::calculateNewStrSize(size_t length) noexcept
 {
-   return ZEND_MM_ALIGNED_SIZE_EX(length + STR_VARIANT_OVERHEAD, STR_VARIANT_PAGE_SIZE) - STR_VARIANT_OVERHEAD;
+   return ZEND_MM_ALIGNED_SIZE_EX(length + STR_VARIANT_OVERHEAD, STR_VARIANT_PAGE) - STR_VARIANT_OVERHEAD;
 }
 
 void StringVariant::strStdRealloc(zend_string *&str, size_t length)
 {
-   if (UNEXPECTED(!str)) {
-      size_t newCapacity = length < STR_VARIANT_START_SIZE
-            ? STR_VARIANT_START_SIZE
-            : calculateNewStrSize(length);
+   size_t newCapacity = length < STR_VARIANT_START_SIZE
+         ? STR_VARIANT_START_LEN
+         : calculateNewStrSize(length);
+   if (UNEXPECTED(!str) || ZSTR_IS_INTERNED(str)) {
       str = zend_string_alloc(newCapacity, 0);
-      str->h = newCapacity;
       ZSTR_LEN(str) = 0;
    } else {
-      size_t newCapacity = calculateNewStrSize(length);
-      zend_string *newStr = reinterpret_cast<zend_string *>(erealloc2(str, _ZSTR_HEADER_SIZE + newCapacity + 1,
-                                                                 _ZSTR_HEADER_SIZE + ZSTR_LEN(str)));
+      zend_string *newStr = reinterpret_cast<zend_string *>(erealloc2(str, _ZSTR_STRUCT_SIZE(newCapacity),
+                                                                      _ZSTR_HEADER_SIZE + ZSTR_LEN(str)));
       VMAPI_ASSERT_X(newStr, "StringVariant::strStdRealloc", "realloc memory error");
       str = newStr;
-      str->h = newCapacity;
    }
+   str->capacity = newCapacity;
 }
 
 void StringVariant::strPersistentRealloc(zend_string *&str, size_t length)
 {
-   if (UNEXPECTED(!str)) {
-      size_t newCapacity = length < STR_VARIANT_START_SIZE
-            ? STR_VARIANT_START_SIZE
-            : calculateNewStrSize(length);
+   size_t newCapacity = length < STR_VARIANT_START_SIZE
+         ? STR_VARIANT_START_LEN
+         : calculateNewStrSize(length);
+   if (UNEXPECTED(!str) || ZSTR_IS_INTERNED(str)) {
       str = zend_string_alloc(newCapacity, 1);
-      str->h = newCapacity;
       ZSTR_LEN(str) = 0;
    } else {
-      size_t newCapacity = calculateNewStrSize(length);
-      zend_string *newStr = reinterpret_cast<zend_string *>(perealloc(str, _ZSTR_HEADER_SIZE + newCapacity + 1, 1));
+      zend_string *newStr = reinterpret_cast<zend_string *>(perealloc(str, _ZSTR_STRUCT_SIZE(newCapacity), 1));
       VMAPI_ASSERT_X(newStr, "StringVariant::strPersistentRealloc", "realloc memory error");
       str = newStr;
-      str->h = newCapacity;
    }
+   str->capacity = newCapacity;
 }
 
 StringVariant::SizeType StringVariant::strAlloc(zend_string *&str, size_t length, bool persistent)
@@ -1331,7 +1345,7 @@ StringVariant::SizeType StringVariant::strAlloc(zend_string *&str, size_t length
       goto do_smart_str_realloc;
    } else {
       length += ZSTR_LEN(str);
-      if (UNEXPECTED(length >= str->h)) {
+      if (UNEXPECTED(length >= ZSTR_CAPACITY(str))) {
 do_smart_str_realloc:
          if (persistent) {
             strPersistentRealloc(str, length);
@@ -1348,7 +1362,7 @@ StringVariant::SizeType StringVariant::strReAlloc(zend_string *&str, size_t leng
    if (UNEXPECTED(!str)) {
       goto do_smart_str_realloc;
    } else {
-      if (UNEXPECTED(length >= str->h)) {
+      if (UNEXPECTED(length >= ZSTR_CAPACITY(str))) {
 do_smart_str_realloc:
          if (persistent) {
             strPersistentRealloc(str, length);
@@ -1364,7 +1378,7 @@ void StringVariant::setCapacity(SizeType capacity)
 {
    zend_string *strPtr = getZendStringPtr();
    VMAPI_ASSERT(strPtr);
-   strPtr->h = capacity;
+   strPtr->capacity = capacity;
 }
 
 bool operator ==(const char *lhs, const StringVariant &rhs)

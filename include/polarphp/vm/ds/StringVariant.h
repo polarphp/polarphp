@@ -46,7 +46,7 @@ public:
    StringVariant();
    StringVariant(const Variant &other);
    StringVariant(const StringVariant &other);
-   StringVariant(StringVariant &other, bool isRef);
+   StringVariant(const StringVariant &other, bool isRef);
    StringVariant(Variant &&other);
    StringVariant(StringVariant &&other) noexcept;
    StringVariant(const std::string &value);
@@ -355,6 +355,7 @@ public:
    bool isEmpty() const noexcept;
    SizeType getCapacity() const noexcept;
    virtual ~StringVariant() noexcept;
+
 private:
    zend_string *getZendStringPtr() const;
    char *getRawStrPtr() const noexcept;
