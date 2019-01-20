@@ -85,6 +85,9 @@ public:
       return m_object;
    }
 
+   ///
+   /// TODO add debug bad cast string
+   ///
    template <typename T,
              typename DecayVariantType = typename std::decay<T>::type,
              typename std::enable_if<std::is_same<T, Variant>::value ||
