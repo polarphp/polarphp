@@ -31,6 +31,17 @@ struct RuntimeModuleData
    zend_fcall_info userCompareFci;
    zend_fcall_info_cache userCompareFciCache;
    zend_llist *userTickFunctions = nullptr;
+   zend_class_entry *incompleteClass;
+
+   unsigned serializeLock; /* whether to use the locally supplied var_hash instead (__sleep/__wakeup) */
+   struct {
+      struct SerializeData *data;
+      unsigned level;
+   } serialize;
+   struct {
+      struct UnserializeData *data;
+      unsigned level;
+   } unserialize;
 };
 
 RuntimeModuleData &retrieve_runtime_module_data();

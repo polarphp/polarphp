@@ -18,13 +18,12 @@ namespace polar {
 namespace runtime {
 
 #define PHP_IC_ENTRY \
-   BG(incomplete_class)
-
+   retrieve_runtime_module_data().incompleteClass
 
 #define PHP_SET_CLASS_ATTRIBUTES(struc) \
    /* OBJECTS_FIXME: Fix for new object model */	\
-   if (Z_OBJCE_P(struc) == BG(incomplete_class)) {	\
-      class_name = php_lookup_class_name(struc); \
+   if (Z_OBJCE_P(struc) == PHP_IC_ENTRY) {	\
+      class_name = lookup_class_name(struc); \
       if (!class_name) { \
          class_name = zend_string_init(INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS) - 1, 0); \
       } \

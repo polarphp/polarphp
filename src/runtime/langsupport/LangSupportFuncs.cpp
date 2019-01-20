@@ -17,6 +17,7 @@
 #include "polarphp/runtime/langsupport/Reflection.h"
 #include "polarphp/runtime/langsupport/StdExceptions.h"
 #include "polarphp/runtime/langsupport/ClassLoader.h"
+#include "polarphp/runtime/langsupport/SerializeFuncs.h"
 
 namespace polar {
 namespace runtime {
@@ -59,6 +60,12 @@ static const zend_function_entry sg_langSupportFunctions[] = {
    PHP_FE(is_callable,     arginfo_is_callable)
    PHP_FE(is_iterable,     arginfo_is_iterable)
    PHP_FE(is_countable,    arginfo_is_countable)
+
+   ///
+   /// functions for serialize and unserialize
+   ///
+   PHP_FE(serialize,       arginfo_serialize)
+   PHP_FE(unserialize,		arginfo_unserialize)
    ///
    /// functions for variables
    ///
