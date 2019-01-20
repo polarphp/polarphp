@@ -491,9 +491,9 @@ int AbstractClassPrivate::serialize(zval *object, unsigned char **buffer, size_t
       *bufLength = value.length();
    } catch (Exception &exception) {
       process_exception(exception);
-      return false; // unreachable, prevent some compiler warning
+      return VMAPI_FAILURE; // unreachable, prevent some compiler warning
    }
-   return true;
+   return VMAPI_SUCCESS;
 }
 
 int AbstractClassPrivate::unserialize(zval *object, zend_class_entry *entry, const unsigned char *buffer,
@@ -509,9 +509,9 @@ int AbstractClassPrivate::unserialize(zval *object, zend_class_entry *entry, con
       // implementation, send it to user space
       // process_exception(exception);
       php_error_docref(nullptr, E_NOTICE, "Error while unserializing");
-      return false;
+      return VMAPI_FAILURE;
    }
-   return true;
+   return VMAPI_SUCCESS;
 }
 
 HashTable *AbstractClassPrivate::debugInfo(zval *object, int *isTemp)

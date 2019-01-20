@@ -7,3 +7,8 @@ if (class_exists("\MagicMethodClass")) {
     echo $str."\n";
     unserialize($str);
 }
+
+// CHECK: MagicMethodClass::serialize is called
+// CHECK: C:16:"MagicMethodClass":14:{serialize data}
+// CHECK: MagicMethodClass::unserialize is called
+// CHECK: serialize data : serialize data}
