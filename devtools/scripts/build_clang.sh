@@ -7,8 +7,35 @@ if [ ! "${currentDir}" = "${rootDir}" ]
 then
     echo "you must run script at root directory of polarphp project"
 fi
+
 installDir=/usr/local/clang-7.0
 buildVersion=release_70
+
+nproc=4
+osname="unknown"
+case "$OSTYPE" in
+  solaris*) 
+    osname=SOLARIS
+    ;;
+  darwin*)  
+    osname=OSX
+    nproc=`sysctl -n hw.ncpu`
+    ;; 
+  linux*)   
+    osname=LINUX
+    ;;
+  bsd*)
+    osname=BSD
+    ;;
+  msys*)
+    osname=WINDOWS
+    ;;
+  *)       
+    echo "unknown: $OSTYPE"
+    osname=${OSTYPE}
+    ;;
+esac
+
 # if we don't specify version, we build newest version
 while (( "$#" )); do
   case "$1" in
@@ -64,7 +91,7 @@ tempDir=${rootDir}/temp/clang_build
 if [ ! -d ${tempDir} ] 
 then
     echo "create ${tempDir} error"
-    exist 1
+    exit 1
 fi
 
 baseRepo=https://github.com/llvm-mirror
@@ -147,4 +174,4 @@ cmake -Wno-dev -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=${installDir} \
                                    -DLLVM_ENABLE_EH=ON\
                                    -DLLVM_ENABLE_RTTI=ON\
                                    -DCMAKE_BUILD_TYPE=Release ../llvm
-make -j4 && make install
+make -j${nproc} && make install
