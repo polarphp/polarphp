@@ -7,7 +7,7 @@ if [ ! "${currentDir}" = "${rootDir}" ]
 then
     echo "you must run script at root directory of polarphp project"
 fi
-installDir=/usr/local
+installDir=/usr/local/clang-7.0
 buildVersion=release_70
 # if we don't specify version, we build newest version
 while (( "$#" )); do
@@ -68,65 +68,83 @@ then
 fi
 
 baseRepo=https://github.com/llvm-mirror
-llvmRepo=${baseRepo}/llvm/archive/release_70.zip
-clangRepo=${baseRepo}/clang/archive/release_70.zip
-libcxxRepo=${baseRepo}/libcxx/archive/release_70.zip
-clangToolsExtra=${baseRepo}/clang-tools-extra/archive/release_70.zip
-compilerRt=${baseRepo}/compiler-rt/archive/release_70.zip
+llvmZip=${baseRepo}/llvm/archive/${buildVersion}.zip
+clangZip=${baseRepo}/clang/archive/${buildVersion}.zip
+libcxxZip=${baseRepo}/libcxx/archive/${buildVersion}.zip
+libcxxabiZip=${baseRepo}/libcxxabi/archive/${buildVersion}.zip
+clangToolsExtraZip=${baseRepo}/clang-tools-extra/archive/${buildVersion}.zip
+compilerRtZip=${baseRepo}/compiler-rt/archive/${buildVersion}.zip
 
-[ ! -f ${llvmRepo} ] && wget ${llvmRepo} -O ${tempDir}/llvm.zip
-[ ! -f ${clangRepo} ] && wget ${clangRepo} -O ${tempDir}/clang.zip
-[ ! -f ${libcxxRepo} ] && wget ${libcxxRepo} -O ${tempDir}/llcxx.zip
-[ ! -f ${clangToolsExtra} ] && wget ${clangToolsExtra} -O ${tempDir}/clang-tools-extra.zip
-[ ! -f ${compilerRt} ] && wget ${compilerRt} -O ${tempDir}/compiler-rt.zip
+[ ! -f ${tempDir}/llvm.zip ] && wget ${llvmZip} -O ${tempDir}/llvm.zip
+[ ! -f ${tempDir}/clang.zip ] && wget ${clangZip} -O ${tempDir}/clang.zip
+[ ! -f ${tempDir}/libcxx.zip ] && wget ${libcxxZip} -O ${tempDir}/libcxx.zip
+[ ! -f ${tempDir}/libcxxabi.zip ] && wget ${libcxxabiZip} -O ${tempDir}/libcxxabi.zip
+[ ! -f ${tempDir}/clang-tools-extra.zip ] && wget ${clangToolsExtraZip} -O ${tempDir}/clang-tools-extra.zip
+[ ! -f ${tempDir}/compiler-rt.zip ] && wget ${compilerRtZip} -O ${tempDir}/compiler-rt.zip
 
+echo "cd ${tempDir}"
+cd ${tempDir} || exit 1
 llvmDir=${tempDir}/llvm
 if [ ! -d ${llvmDir} ]
 then
-# create compile structure
-    
+    echo "unzip llvm.zip ..."
+    unzip -q ${tempDir}/llvm.zip || exit 1
+    echo "rename llvm directory ..."
+    mv llvm-${buildVersion} llvm || exit 1
 fi
 
-# if [ ! -d ${clangDir} ]
-# then
-#     clangDir=${llvmDir}/tools/clang
-#     git clone --depth 1 -b ${buildVersion} ${clangRepo} ${llvmDir}/tools
-#     if [ ! -d ${clangDir} ]
-#     then
-#         echo "clone clang repo error"
-#         exit 1
-#     fi
-# fi 
+clangDir=${llvmDir}/tools/clang
+if [ ! -d ${clangDir} ]
+then
+    echo "unzip clang.zip ..."
+    unzip -q ${tempDir}/clang.zip || exit 1
+    echo "rename clang directory ..."
+    mv clang-${buildVersion} ${clangDir} || exit 1
+fi
 
-# if [ ! -d ${clangToolsExtra} ]
-# then
-#     clangToolsExtra=${clangDir}/tools/clang-tools-extra
-#     git clone --depth 1 -b ${buildVersion} ${clangToolsExtra} ${clangDir}/tools
-#     if [ ! -d ${clangToolsExtra} ]
-#     then
-#         echo "clone clang-tools-extra repo error"
-#         exit 1
-#     fi
-# fi
+clangToolsExtraDir=${clangDir}/tools/clang-tools-extra
+if [ ! -d ${clangToolsExtraDir} ]
+then
+    echo "unzip clang-tools-extra.zip ..."
+    unzip -q ${tempDir}/clang-tools-extra.zip || exit 1
+    echo "rename clang-tools-extra directory ..."
+    mv clang-tools-extra-${buildVersion} ${clangToolsExtraDir} || exit 1
+fi
 
-# if [ ! -d ${compilerRtDir} ]
-# then
-#     compilerRtDir=${llvmDir}/projects/compiler-rt
-#     git clone --depth 1 -b ${buildVersion} ${compilerRt} ${llvmDir}/projects
-#     if [ ! -d ${compilerRtDir} ]
-#     then
-#         echo "clone compiler-rt repo error"
-#         exit 1
-#     fi
-# fi
+compilerRtDir=${llvmDir}/projects/compiler-rt
+if [ ! -d ${compilerRtDir} ]
+then
+    echo "unzip compiler-rt.zip ..."
+    unzip -q ${tempDir}/compiler-rt.zip || exit 1
+    echo "rename compiler-rt directory ..."
+    mv compiler-rt-${buildVersion} ${compilerRtDir} || exit 1
+fi
 
-# if [ ! -d ${libcxxDir} ]
-# then 
-#     libcxxDir=${llvmDir}/projects/libcxx
-#     git clone --depth 1 -b ${buildVersion} ${libcxxRepo} ${llvmDir}/projects
-#     if [ ! -d ${libcxxDir} ]
-#     then
-#         echo "clone libcxx repo error"
-#         exit 1
-#     fi
-# fi
+libcxxDir=${llvmDir}/projects/libcxx
+if [ ! -d ${libcxxDir} ]
+then
+    echo "unzip libcxx.zip ..."
+    unzip -q ${tempDir}/libcxx.zip || exit 1
+    echo "rename libcxx directory ..."
+    mv libcxx-${buildVersion} ${libcxxDir} || exit 1
+fi
+
+libcxxabiDir=${llvmDir}/projects/libcxxabi
+if [ ! -d ${libcxxabiDir} ]
+then
+    echo "unzip libcxxabi.zip ..."
+    unzip -q ${tempDir}/libcxxabi.zip || exit 1
+    echo "rename libcxxabi directory ..."
+    mv libcxxabi-${buildVersion} ${libcxxabiDir} || exit 1
+fi
+
+mkdir build
+cd build
+cmake -Wno-dev -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=${installDir} \
+                                   -DLLVM_INCLUDE_TESTS=OFF\
+                                   -DLLVM_INCLUDE_EXAMPLES=OFF\
+                                   -DLLVM_INCLUDE_BENCHMARKS=OFF\
+                                   -DLLVM_ENABLE_EH=ON\
+                                   -DLLVM_ENABLE_RTTI=ON\
+                                   -DCMAKE_BUILD_TYPE=Release ../llvm
+make -j4 && make install
