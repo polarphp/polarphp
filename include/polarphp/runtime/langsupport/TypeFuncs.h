@@ -12,7 +12,7 @@
 #ifndef POLARPHP_RUNTIME_LANG_SUPPORT_TYPE_FUNCS_H
 #define POLARPHP_RUNTIME_LANG_SUPPORT_TYPE_FUNCS_H
 
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 
 namespace polar {
 namespace runtime {

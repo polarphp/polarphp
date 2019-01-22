@@ -12,7 +12,7 @@
 #include "polarphp/vm/ds/StringVariant.h"
 #include "polarphp/vm/ds/internal/VariantPrivate.h"
 #include "polarphp/vm/ds/ArrayItemProxy.h"
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 
 #include <cstring>
 #include <stdexcept>

@@ -17,7 +17,7 @@
 #endif
 
 #include "polarphp/runtime/Output.h"
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 #include "polarphp/runtime/ExecEnv.h"
 
 namespace polar {

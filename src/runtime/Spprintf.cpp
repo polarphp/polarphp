@@ -70,8 +70,8 @@
  */
 
 #include "polarphp/runtime/internal/DepsZendVmHeaders.h"
-#include "polarphp/runtime/PhpSpprintf.h"
-#include "polarphp/runtime/PhpSnprintf.h"
+#include "polarphp/runtime/Spprintf.h"
+#include "polarphp/runtime/Snprintf.h"
 
 #define _GNU_SOURCE
 

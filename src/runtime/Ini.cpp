@@ -15,7 +15,7 @@
 #include "polarphp/runtime/Output.h"
 #include "polarphp/runtime/ExecEnv.h"
 #include "polarphp/runtime/internal/DepsZendVmHeaders.h"
-#include "polarphp/runtime/PhpSpprintf.h"
+#include "polarphp/runtime/Spprintf.h"
 #include "polarphp/runtime/Utils.h"
 #include "polarphp/runtime/ScanDir.h"
 

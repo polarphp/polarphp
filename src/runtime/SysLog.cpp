@@ -16,7 +16,7 @@
 
 #include "polarphp/runtime/SysLog.h"
 #include "polarphp/runtime/ExecEnv.h"
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 #include "polarphp/runtime/internal/DepsZendVmHeaders.h"
 
 /*

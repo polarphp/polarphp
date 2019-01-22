@@ -13,10 +13,10 @@
 #include "polarphp/runtime/LifeCycle.h"
 #include "polarphp/runtime/ExecEnv.h"
 #include "polarphp/runtime/Output.h"
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 #include "polarphp/runtime/Ini.h"
 #include "polarphp/runtime/Reentrancy.h"
-#include "polarphp/runtime/PhpSpprintf.h"
+#include "polarphp/runtime/Spprintf.h"
 
 #include "polarphp/runtime/Ticks.h"
 #include "polarphp/global/Config.h"

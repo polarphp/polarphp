@@ -11,7 +11,7 @@
 
 #include "polarphp/runtime/internal/DepsZendVmHeaders.h"
 #include "polarphp/runtime/langsupport/LangSupportFuncs.h"
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 #include "polarphp/vm/Callable.h"
 
 namespace polar {

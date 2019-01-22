@@ -12,7 +12,7 @@
 #ifndef POLARPHP_ARTIFACTS_DEFS_H
 #define POLARPHP_ARTIFACTS_DEFS_H
 
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 
 // forward declare with namespace
 namespace CLI {

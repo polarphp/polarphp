@@ -11,7 +11,7 @@
 
 #include "polarphp/runtime/langsupport/ClassLoader.h"
 #include "polarphp/runtime/langsupport/StdExceptions.h"
-#include "polarphp/runtime/PhpSpprintf.h"
+#include "polarphp/runtime/Spprintf.h"
 #include "polarphp/runtime/Utils.h"
 
 namespace polar {

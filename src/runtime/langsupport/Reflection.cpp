@@ -10,7 +10,7 @@
 // Created by polarboy on 2019/02/11.
 
 #include "polarphp/runtime/langsupport/Reflection.h"
-#include "polarphp/runtime/PhpSpprintf.h"
+#include "polarphp/runtime/Spprintf.h"
 
 #include <cstdarg>
 

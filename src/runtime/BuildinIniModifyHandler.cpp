@@ -10,7 +10,7 @@
 // Created by polarboy on 2018/12/25.
 
 #include "polarphp/runtime/BuildinIniModifyHandler.h"
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 #include "polarphp/runtime/Ini.h"
 #include "polarphp/runtime/Output.h"
 #include "polarphp/runtime/ExecEnv.h"

@@ -13,7 +13,7 @@
 #include "polarphp/runtime/langsupport/IncompeleteClass.h"
 #include "polarphp/runtime/langsupport/LangSupportFuncs.h"
 #include "polarphp/runtime/ExecEnv.h"
-#include "polarphp/runtime/PhpSnprintf.h"
+#include "polarphp/runtime/Snprintf.h"
 
 namespace polar {
 namespace runtime {

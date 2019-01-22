@@ -20,7 +20,7 @@
 #include <iostream>
 
 #include "polarphp/runtime/internal/DepsZendVmHeaders.h"
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 
 /* Error display modes */
 #define PHP_DISPLAY_ERRORS_STDOUT	1

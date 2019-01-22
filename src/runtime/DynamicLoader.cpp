@@ -10,7 +10,7 @@
 // Created by polarboy on 2018/12/26.
 
 #include "polarphp/runtime/DynamicLoader.h"
-#include "polarphp/runtime/PhpSpprintf.h"
+#include "polarphp/runtime/Spprintf.h"
 #include "polarphp/runtime/ExecEnv.h"
 #include "polarphp/runtime/internal/DepsZendVmHeaders.h"
 #include "polarphp/basic/adt/Twine.h"

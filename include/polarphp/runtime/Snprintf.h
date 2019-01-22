@@ -12,7 +12,7 @@
 #ifndef POLARPHP_RUNTIME_PHP_SNPRINTF_H
 #define POLARPHP_RUNTIME_PHP_SNPRINTF_H
 
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 
 // forward declare
 struct lconv;

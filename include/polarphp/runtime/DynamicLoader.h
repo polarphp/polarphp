@@ -12,7 +12,7 @@
 #ifndef POLARPHP_RUNTIME_DYNAMIC_LOADER_H
 #define POLARPHP_RUNTIME_DYNAMIC_LOADER_H
 
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 #include "polarphp/basic/adt/StringRef.h"
 
 namespace polar {

@@ -11,7 +11,7 @@
 
 #include "polarphp/runtime/ScanDir.h"
 #include "polarphp/runtime/Reentrancy.h"
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 
 namespace polar {
 

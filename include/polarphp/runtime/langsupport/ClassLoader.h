@@ -12,7 +12,7 @@
 #ifndef POLARPHP_RUNTIME_LANG_SUPPORT_CLASS_LOADER_H
 #define POLARPHP_RUNTIME_LANG_SUPPORT_CLASS_LOADER_H
 
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 #include "polarphp/runtime/internal/DepsZendVmHeaders.h"
 
 namespace polar {

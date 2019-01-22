@@ -44,7 +44,7 @@
 #include "polarphp/vm/utils/Funcs.h"
 #include "polarphp/vm/utils/UserspaceFuncs.h"
 
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 
 #include <iostream>
 #include <cstring>

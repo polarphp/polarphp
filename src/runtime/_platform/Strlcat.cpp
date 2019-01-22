@@ -9,7 +9,7 @@
 //
 // Created by polarboy on 2018/01/22.
 
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 
 #ifdef USE_STRLCAT_PHP_IMPL
 

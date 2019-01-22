@@ -10,7 +10,7 @@
 // Created by polarboy on 2018/12/25.
 
 #include "polarphp/runtime/internal/DepsZendVmHeaders.h"
-#include "polarphp/runtime/PhpSnprintf.h"
+#include "polarphp/runtime/Snprintf.h"
 
 #include <zend_strtod.h>
 #include <mutex>

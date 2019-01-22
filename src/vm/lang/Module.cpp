@@ -20,7 +20,7 @@
 #include "polarphp/vm/lang/Constant.h"
 #include "polarphp/vm/lang/Namespace.h"
 #include "polarphp/vm/Closure.h"
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 
 #include <ostream>
 #include <map>

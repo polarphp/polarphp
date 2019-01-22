@@ -10,7 +10,7 @@
 // Created by polarboy on 2018/12/25.
 
 #include "polarphp/runtime/Reentrancy.h"
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 
 #include <sys/types.h>
 #include <string.h>

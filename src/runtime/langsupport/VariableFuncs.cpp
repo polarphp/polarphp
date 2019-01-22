@@ -10,11 +10,11 @@
 // Created by polarboy on 2019/02/09.
 
 #include "polarphp/runtime/langsupport/VariableFuncs.h"
-#include "polarphp/runtime/PhpDefs.h"
+#include "polarphp/runtime/RtDefs.h"
 #include "polarphp/runtime/Output.h"
 #include "polarphp/runtime/ExecEnv.h"
-#include "polarphp/runtime/PhpSpprintf.h"
-#include "polarphp/runtime/PhpSnprintf.h"
+#include "polarphp/runtime/Spprintf.h"
+#include "polarphp/runtime/Snprintf.h"
 #include "polarphp/runtime/Utils.h"
 
 #define COMMON (is_ref ? "&" : "")
