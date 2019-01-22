@@ -16,6 +16,14 @@ polar_collect_files(
 
 polar_merge_list(POLARPHP_RUNTIME_SOURCES POLAR_HEADERS)
 
+if (NOT HAVE_STRLCAT)
+   list(APPEND POLARPHP_RUNTIME_SOURCES _platform/Strlcat.cpp)
+endif()
+
+if (NOT HAVE_STRLCPY)
+   list(APPEND POLARPHP_RUNTIME_SOURCES _platform/Strlcopy.cpp)
+endif()
+
 polar_add_library(PolarRuntime SHARED
    ${POLARPHP_RUNTIME_SOURCES}
    LINK_LIBS PolarUtils ZendVM)

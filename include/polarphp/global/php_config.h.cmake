@@ -1251,10 +1251,10 @@
 #cmakedefine01 HAVE_STRING_H
 
 /* Define to 1 if you have the `strlcat' function. */
-#cmakedefine01 HAVE_STRLCAT
+#cmakedefine HAVE_STRLCAT
 
 /* Define to 1 if you have the `strlcpy' function. */
-#cmakedefine01 HAVE_STRLCPY
+#cmakedefine HAVE_STRLCPY
 
 /* Define to 1 if you have the `strndup' function. */
 #cmakedefine01 HAVE_STRNDUP

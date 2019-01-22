@@ -313,7 +313,7 @@ TEST(StringVariantTest, testRefMidify)
       ASSERT_EQ(str3.getRefCount(), 2);
       ASSERT_EQ(str4.getRefCount(), 2);
       StringVariant str5(str4);
-      ASSERT_EQ(str5.getRefCount(), 1);
+      ASSERT_EQ(str5.getRefCount(), 3);
       ASSERT_TRUE(str1 == "polarphp");
       ASSERT_TRUE(str2 == "polarphp");
       ASSERT_TRUE(str3 == "polarphp");
@@ -340,7 +340,7 @@ TEST(StringVariantTest, testRefMidify)
       ASSERT_EQ(str1.getRefCount(), 2);
       ASSERT_EQ(str2.getRefCount(), 2);
       StringVariant str3(str2);
-      ASSERT_EQ(str3.getRefCount(), 1);
+      ASSERT_EQ(str3.getRefCount(), 2);
       str1.append("x");
       ASSERT_TRUE(str1 == "polarphpx");
       ASSERT_TRUE(str2 == "polarphpx");
@@ -659,7 +659,7 @@ TEST(StringVariantTest, testClear)
       ASSERT_STREQ(anotherStr.getCStr(), "polarphp");
       ASSERT_EQ(str.getRefCount(), 3);
       ASSERT_EQ(refStr.getRefCount(), 3);
-      ASSERT_EQ(anotherStr.getRefCount(), 1);
+      ASSERT_EQ(anotherStr.getRefCount(), 2);
       refStr.clear();
       ASSERT_TRUE(str.isEmpty());
       ASSERT_TRUE(refStr.isEmpty());
@@ -756,8 +756,8 @@ TEST(StringVariantTest, testResize)
       str1.resize(32);
       ASSERT_EQ(str1.getCapacity(), 32);
       ASSERT_EQ(str1.getSize(), 32);
-      ASSERT_EQ(str2.getCapacity(), 96);
-      ASSERT_EQ(str2.getSize(), 96);
+      ASSERT_EQ(str2.getCapacity(), 32);
+      ASSERT_EQ(str2.getSize(), 32);
       ASSERT_EQ(str5.getCapacity(), 96);
       ASSERT_EQ(str5.getSize(), 96);
       ASSERT_EQ(str6.getCapacity(), 96);

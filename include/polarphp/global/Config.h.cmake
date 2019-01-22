@@ -108,7 +108,7 @@ don't. */
 #cmakedefine HAVE_MALLINFO
 
 /* Define to 1 if you have the <malloc.h> header file. */
-#cmakedefine HAVE_MALLOC_H
+#cmakedefine POLAR_HAVE_MALLOC_H
 
 /* Define to 1 if you have the <malloc/malloc.h> header file. */
 #cmakedefine HAVE_MALLOC_MALLOC_H

@@ -24,8 +24,9 @@
 
    All other licensing and usage conditions are those of the PHP Group.
 */
-
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <string.h>
 
 #include "zend.h"

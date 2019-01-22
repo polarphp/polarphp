@@ -474,16 +474,17 @@ int php_execute_simple_script(zend_file_handle *primaryFile, zval *ret)
 namespace {
 inline int cli_select(php_socket_t fd)
 {
-   fd_set wfd, dfd;
+   fd_set wfd, dfd, efd;
    struct timeval tv;
    int ret;
    ExecEnvInfo &execEnvInfo = retrieve_global_execenv_runtime_info();
    FD_ZERO(&wfd);
    FD_ZERO(&dfd);
+   FD_ZERO(&efd);
    PHP_SAFE_FD_SET(fd, &wfd);
    tv.tv_sec = (long)execEnvInfo.defaultSocketTimeout;
    tv.tv_usec = 0;
-   ret = php_select(fd+1, &dfd, &wfd, &dfd, &tv);
+   ret = php_select(fd+1, &dfd, &wfd, &efd, &tv);
    return ret != -1;
 }
 }
@@ -649,7 +650,7 @@ ZEND_COLD void php_verror(const char *docref, const char *params,
 
    /* origin and buffer available, so lets come up with the error message */
    if (docref && docref[0] == '#') {
-      docref_target = strchr(docref, '#');
+      docref_target = const_cast<char *>(strchr(docref, '#'));
       docref = nullptr;
    }
 

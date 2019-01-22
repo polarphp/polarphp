@@ -22,7 +22,9 @@
 POLAR_BEGIN_DISABLE_ZENDVM_WARNING()
 #include "polarphp/global/php_config.h"
 POLAR_END_DISABLE_ZENDVM_WARNING()
+extern "C" {
 extern char **environ;
+}
 #endif
 
 #include <cstdio>
@@ -45,7 +47,6 @@ extern char **environ;
 #if defined(DARWIN)
 #include <crt_externs.h>
 #endif
-
 
 /*
  * Ways of updating ps display:

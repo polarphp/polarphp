@@ -45,7 +45,7 @@
 #endif
 // DragonFlyBSD, and OpenBSD have deprecated <malloc.h> for
 // <stdlib.h> instead. Unix.h includes this for us already.
-#if defined(HAVE_MALLOC_H) && !defined(__DragonFly__) && \
+#if defined(POLAR_HAVE_MALLOC_H) && !defined(__DragonFly__) && \
    !defined(__OpenBSD__)
 #include <malloc.h>
 #endif

@@ -43,7 +43,6 @@ POLAR_END_DISABLE_ZENDVM_WARNING()
 
 #define PHP_RAND_MAX PHP_MT_RAND_MAX
 
-
 /* Windows specific defines */
 #ifdef POLAR_OS_WIN32
 # define HAVE_DECLARED_TIMEZONE
@@ -174,6 +173,26 @@ typedef int pid_t;
 # else
 #  define MAXPATHLEN 256    /* Should be safe for any weird systems that do not define it */
 # endif
+#endif
+
+#ifndef HAVE_STRLCPY
+namespace polar {
+POLAR_DECL_EXPORT size_t stringlcpy(char *dst, const char *src, size_t siz);
+} // polar
+#undef strlcpy
+#define strlcpy ::polar::stringlcpy
+#define HAVE_STRLCPY 1
+#define USE_STRLCPY_PHP_IMPL 1
+#endif
+
+#ifndef HAVE_STRLCAT
+namespace polar {
+POLAR_DECL_EXPORT size_t stringlcat(char *dst, const char *src, size_t siz);
+}
+#undef strlcat
+#define strlcat ::polar::stringlcat
+#define HAVE_STRLCAT 1
+#define USE_STRLCAT_PHP_IMPL 1
 #endif
 
 #undef ZEND_IGNORE_VALUE

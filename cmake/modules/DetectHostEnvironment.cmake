@@ -216,6 +216,7 @@ polar_check_headers(
    stdarg.h
    stdlib.h
    string.h
+   strings.h
    syslog.h
    sysexits.h
    sys/param.h
