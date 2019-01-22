@@ -524,7 +524,7 @@ PHP_FUNCTION(unserialize)
    if (!var_unserialize(retval, &p, p + buf_len, &var_hash)) {
       if (!EG(exception)) {
          php_error_docref(nullptr, E_NOTICE, "Error at offset " ZEND_LONG_FMT " of %zd bytes",
-                          (zend_long)((char*)p - buf), buf_len);
+                          (zend_long)(const_cast<char *>(reinterpret_cast<const char *>(p)) - buf), buf_len);
       }
       RETVAL_FALSE;
    } else {
