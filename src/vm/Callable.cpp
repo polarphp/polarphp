@@ -130,7 +130,7 @@ void CallablePrivate::initialize(const std::string &prefix, zend_function_entry 
       m_name = prefix + '\\' + m_name;
    }
    // call base initialize
-   CallablePrivate::initialize(entry, "", flags);
+   CallablePrivate::initialize(entry, false, flags);
 }
 
 void CallablePrivate::setupCallableArgInfo(zend_internal_arg_info *info, const Argument &arg) const

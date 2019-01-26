@@ -76,6 +76,7 @@ public:
    Module &registerInterface(const Interface &interface);
    Module &registerInterface(Interface &&interface);
 
+   Module &registerNamespace(std::shared_ptr<Namespace> ns);
    Module &registerNamespace(const Namespace &ns);
    Module &registerNamespace(Namespace &&ns);
 

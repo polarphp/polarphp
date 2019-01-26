@@ -33,7 +33,7 @@ void FunctionPrivate::initialize(const std::string &prefix, zend_function_entry 
 
 void FunctionPrivate::initialize(zend_function_entry *entry)
 {
-   CallablePrivate::initialize(entry, "", static_cast<int>(m_flags));
+   CallablePrivate::initialize("", entry, static_cast<int>(m_flags));
 }
 
 } // internal

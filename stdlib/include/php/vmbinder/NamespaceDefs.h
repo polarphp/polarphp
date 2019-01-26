@@ -7,27 +7,25 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2018/12/26.
+// Created by polarboy on 2019/01/26.
 
-#include "polarphp/vm/lang/Module.h"
-#include "php/vmbinder/StdlibExports.h"
-#include "php/vmbinder/kernel/KernelExporter.h"
-#include "php/kernel/Utils.h"
+#ifndef POLARPHP_STDLIB_VMBINDER_NAMESPACE_DEFS_H
+#define POLARPHP_STDLIB_VMBINDER_NAMESPACE_DEFS_H
+
+namespace polar {
+namespace vmapi {
+class Module;
+} // vmapi
+} // polar
 
 namespace php {
 namespace vmbinder {
 
 using polar::vmapi::Module;
 
-Module sg_kernelModule("StdlibKernel");
-
-bool export_stdlib_to_zendvm()
-{
-   if (!export_stdlib_kernel_module(sg_kernelModule)) {
-      return false;
-   }
-   return true;
-}
+void register_stdlib_namespaces(Module &module);
 
 } // vmbinder
 } // php
+
+#endif // POLARPHP_STDLIB_VMBINDER_NAMESPACE_DEFS_H

@@ -168,6 +168,16 @@ Module &Module::registerInterface(Interface &&interface)
    return *this;
 }
 
+Module &Module::registerNamespace(std::shared_ptr<Namespace> ns)
+{
+   VMAPI_D(Module);
+   if (implPtr->m_locked) {
+      return *this;
+   }
+   implPtr->m_namespaces.push_back(ns);
+   return *this;
+}
+
 Module &Module::registerNamespace(const Namespace &ns)
 {
    VMAPI_D(Module);

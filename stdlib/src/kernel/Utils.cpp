@@ -17,7 +17,7 @@ namespace kernel {
 
 std::string retrieve_version_str()
 {
-   return POLARPHP_PACKAGE_BUGREPORT;
+   return POLARPHP_PACKAGE_STRING;
 }
 
 int retrieve_major_version()

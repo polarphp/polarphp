@@ -10,11 +10,16 @@
 // Created by polarboy on 2018/01/26.
 
 #include "polarphp/vm/lang/Module.h"
+#include "polarphp/vm/lang/Namespace.h"
+
 #include "php/kernel/Utils.h"
 #include "php/vmbinder/kernel/KernelExporter.h"
+#include "php/vmbinder/NamespaceDefs.h"
 
 namespace php {
 namespace vmbinder {
+
+using polar::vmapi::Namespace;
 
 namespace {
 void export_stdlib_kernel_funcs(Module &module);
@@ -22,6 +27,7 @@ void export_stdlib_kernel_funcs(Module &module);
 
 bool export_stdlib_kernel_module(Module &module)
 {
+   register_stdlib_namespaces(module);
    export_stdlib_kernel_funcs(module);
    return module.registerToVM();
 }
@@ -29,7 +35,12 @@ bool export_stdlib_kernel_module(Module &module)
 namespace {
 void export_stdlib_kernel_funcs(Module &module)
 {
-   //module.registerFunction<decltype(&php::kernel::retrieve_version_str), &php::kernel::retrieve_version_str>("show_something");
+   Namespace *php = module.findNamespace("php");
+   php->registerFunction<decltype(php::kernel::retrieve_version_str), php::kernel::retrieve_version_str>("retrieve_version_str");
+   php->registerFunction<decltype(php::kernel::retrieve_major_version), php::kernel::retrieve_major_version>("retrieve_major_version");
+   php->registerFunction<decltype(php::kernel::retrieve_minor_version), php::kernel::retrieve_minor_version>("retrieve_minor_version");
+   php->registerFunction<decltype(php::kernel::retrieve_patch_version), php::kernel::retrieve_patch_version>("retrieve_patch_version");
+   php->registerFunction<decltype(php::kernel::retrieve_version_id), php::kernel::retrieve_version_id>("retrieve_version_id");
 }
 } // anonymous namespace
 
