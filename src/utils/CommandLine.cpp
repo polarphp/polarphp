@@ -30,7 +30,6 @@
 #include "polarphp/basic/adt/StringMap.h"
 #include "polarphp/basic/adt/Triple.h"
 #include "polarphp/basic/adt/Twine.h"
-#include "polarphp/global/Config.h"
 #include "polarphp/utils/ConvertUtf.h"
 #include "polarphp/utils/Debug.h"
 #include "polarphp/utils/ErrorHandling.h"
@@ -2304,15 +2303,8 @@ class VersionPrinter
 public:
    void print() {
       RawOutStream &outstream = out_stream();
-#ifdef POLAR_PACKAGE_VENDOR
-      outstream << PACKAGE_VENDOR << " ";
-#else
       outstream << "polarphp (https://polarphp.org/):\n  ";
-#endif
-      outstream << POLAR_PACKAGE_NAME << " version " << POLAR_VERSION;
-#ifdef POLAR_VERSION_STRING
-      outstream << " " << POLAR_VERSION_STRING;
-#endif
+      outstream << POLARPHP_PACKAGE_NAME << " version " << POLARPHP_VERSION;
       outstream << "\n  ";
 #ifndef __OPTIMIZE__
       outstream << "DEBUG build";

@@ -24,7 +24,7 @@
 #include "config.w32.h"
 #include "win32/readdir.h"
 #else
-#include <php_config.h>
+#include "polarphp/global/php_config.h"
 #endif
 
 #ifdef HAVE_DIRENT_H

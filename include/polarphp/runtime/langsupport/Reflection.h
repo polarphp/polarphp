@@ -17,7 +17,7 @@
 namespace polar {
 namespace runtime {
 
-#define PHP_REFLECTION_VERSION POLAR_VERSION
+#define PHP_REFLECTION_VERSION POLARPHP_VERSION
 
 extern zend_module_entry g_reflectionModuleEntry;
 extern POLAR_DECL_EXPORT zend_class_entry *g_reflectorPtr;

@@ -7,29 +7,8 @@
 # See https://polarphp.org/LICENSE.txt for license information
 # See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
-# Created by polarboy on 2018/12/26.
+# Created by polarboy on 2018/01/25.
 
-set(STDLIB_HEADERS "")
-
-polar_collect_files(
-   TYPE_HEADER
-   DIR php/global
-   OUTPUT_VAR POLAR_GLOBAL_HEADERS)
-
-polar_merge_list(STDLIB_HEADERS POLAR_GLOBAL_HEADERS)
-
-polar_collect_files(
-   TYPE_HEADER
-   DIR php/base
-   OUTPUT_VAR POLAR_MODULE_BASE_HEADERS)
-
-polar_merge_list(STDLIB_HEADERS POLAR_MODULE_BASE_HEADERS)
-
-polar_collect_files(
-   TYPE_HEADER
-   DIR php/vmbinder
-   OUTPUT_VAR POLAR_VMBINDER_HEADERS)
-
-polar_merge_list(STDLIB_HEADERS POLAR_VMBINDER_HEADERS)
+add_subdirectory(php)
 
 set(STDLIB_HEADERS ${STDLIB_HEADERS} PARENT_SCOPE)

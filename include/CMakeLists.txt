@@ -10,3 +10,4 @@
 # Created by polarboy on 2018/08/26.
 
 add_subdirectory(polarphp)
+set(POLAR_HEADERS ${POLAR_HEADERS} PARENT_SCOPE)

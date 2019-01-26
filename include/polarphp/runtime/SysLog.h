@@ -17,7 +17,7 @@
 #ifdef POLAR_OS_WIN32
 #include "win32/syslog.h"
 #else
-#include <php_config.h>
+#include "polarphp/global/php_config.h"
 #ifdef HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
