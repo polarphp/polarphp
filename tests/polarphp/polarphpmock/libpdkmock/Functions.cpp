@@ -25,38 +25,38 @@ using polar::vmapi::Type;
 
 void register_functions_hook(Module &module)
 {
-   module.registerFunction<decltype(&php::show_something), &php::show_something>("show_something");
-   module.registerFunction<decltype(&php::get_name), &php::get_name>("get_name");
-   module.registerFunction<decltype(&php::print_name), &php::print_name>
+   module.registerFunction<decltype(php::show_something), php::show_something>("show_something");
+   module.registerFunction<decltype(php::get_name), php::get_name>("get_name");
+   module.registerFunction<decltype(php::print_name), php::print_name>
          ("print_name", {
              ValueArgument("name", Type::String)
           });
-   module.registerFunction<decltype(&php::print_name_and_age), &php::print_name_and_age>
+   module.registerFunction<decltype(php::print_name_and_age), php::print_name_and_age>
          ("print_name_and_age", {
              ValueArgument("name", Type::String),
              ValueArgument("age", Type::Long)
           });
-   module.registerFunction<decltype(&php::add_two_number), &php::add_two_number>
+   module.registerFunction<decltype(php::add_two_number), php::add_two_number>
          ("add_two_number", {
              ValueArgument("num1", Type::Long),
              ValueArgument("num2", Type::Long)
           });
-   module.registerFunction<decltype(&php::return_arg), &php::return_arg>
+   module.registerFunction<decltype(php::return_arg), php::return_arg>
          ("return_arg", {
              ValueArgument("number1"),
           });
    // for passby value and reference test
-   module.registerFunction<decltype(&php::get_value_ref), &php::get_value_ref>
+   module.registerFunction<decltype(php::get_value_ref), php::get_value_ref>
          ("get_value_ref", {
              RefArgument("number", Type::Numeric),
           });
-   module.registerFunction<decltype(&php::passby_value), &php::passby_value>
+   module.registerFunction<decltype(php::passby_value), php::passby_value>
          ("passby_value", {
              ValueArgument("number", Type::Numeric),
           });
 
    // test for default arguments
-   module.registerFunction<decltype(&php::say_hello), &php::say_hello>
+   module.registerFunction<decltype(php::say_hello), php::say_hello>
          ("say_hello", {
              ValueArgument("name", Type::String, false)
           });
@@ -65,25 +65,25 @@ void register_functions_hook(Module &module)
    Namespace *php = module.findNamespace("php");
    Namespace *io = php->findNamespace("io");
 
-   php->registerFunction<decltype(&php::get_name), &php::get_name>("get_name");
-   php->registerFunction<decltype(&php::show_something), &php::show_something>("show_something");
+   php->registerFunction<decltype(php::get_name), php::get_name>("get_name");
+   php->registerFunction<decltype(php::show_something), php::show_something>("show_something");
 
-   io->registerFunction<decltype(&php::calculate_sum), &php::calculate_sum>
+   io->registerFunction<decltype(php::calculate_sum), php::calculate_sum>
          ("calculate_sum", {
              VariadicArgument("numbers")
           });
-   io->registerFunction<decltype(&php::print_name), &php::print_name>
+   io->registerFunction<decltype(php::print_name), php::print_name>
          ("print_name", {
              ValueArgument("name", Type::String)
           });
 
    // for test varidic
-   io->registerFunction<decltype(&php::print_sum), &php::print_sum>
+   io->registerFunction<decltype(php::print_sum), php::print_sum>
          ("print_sum", {
              VariadicArgument("numbers")
           });
-   io->registerFunction<decltype(&php::show_something), &php::show_something>("show_something");
-   io->registerFunction<decltype(&php::print_something), &php::print_something>("print_something");
+   io->registerFunction<decltype(php::show_something), php::show_something>("show_something");
+   io->registerFunction<decltype(php::print_something), php::print_something>("print_something");
 }
 
 } // php

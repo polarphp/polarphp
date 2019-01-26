@@ -162,6 +162,15 @@ struct is_trivially_move_constructible<T &> : std::true_type {};
 template <typename T>
 struct is_trivially_move_constructible<T &&> : std::true_type {};
 
+template <typename FuncType>
+struct is_function_ptr
+      : std::integral_constant<bool, std::is_pointer<FuncType>::value
+      && std::is_function<
+      typename std::remove_pointer<FuncType>::type
+      >::value>
+{
+};
+
 } // utils
 } // polar
 

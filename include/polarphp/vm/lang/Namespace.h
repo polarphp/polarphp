@@ -16,6 +16,7 @@
 #include "polarphp/vm/InvokeBridge.h"
 #include "polarphp/vm/lang/Class.h"
 #include "polarphp/vm/lang/internal/NamespacePrivate.h"
+#include "polarphp/utils/TypeTraits.h"
 
 namespace polar {
 namespace vmapi {
@@ -27,6 +28,7 @@ class ModulePrivate;
 
 class Constant;
 using internal::ModulePrivate;
+using polar::utils::is_function_ptr;
 
 class VMAPI_DECL_EXPORT Namespace final
 {
@@ -39,7 +41,11 @@ public:
    Namespace &operator=(Namespace &&other) noexcept;
    virtual ~Namespace();
 public:
-   template <typename CallableType, typename std::decay<CallableType>::type callable>
+   template <typename CallableType,
+             typename std::decay<CallableType>::type callable,
+             typename DecayCallableType = typename std::decay<CallableType>::type,
+             typename std::enable_if<is_function_ptr<DecayCallableType>::value &&
+                                     callable_prototype_checker<DecayCallableType>::value, DecayCallableType>::type * = nullptr>
    Namespace &registerFunction(const char *name, const Arguments &args = {});
 
    Namespace &registerNamespace(const Namespace &ns);
@@ -87,7 +93,11 @@ Namespace &Namespace::registerClass(Class<T> &&nativeClass)
    return *this;
 }
 
-template <typename CallableType, typename std::decay<CallableType>::type callable>
+template <typename CallableType,
+          typename std::decay<CallableType>::type callable,
+          typename DecayCallableType = typename std::decay<CallableType>::type,
+          typename std::enable_if<is_function_ptr<DecayCallableType>::value &&
+                                  callable_prototype_checker<DecayCallableType>::value, DecayCallableType>::type * = nullptr>
 Namespace &Namespace::registerFunction(const char *name, const Arguments &args)
 {
    return registerFunction(name, &InvokeBridge<CallableType, callable>::invoke, args);

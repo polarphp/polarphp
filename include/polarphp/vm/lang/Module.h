@@ -18,6 +18,7 @@
 #include "polarphp/vm/lang/internal/ModulePrivate.h"
 #include "polarphp/vm/InvokeBridge.h"
 #include "polarphp/vm/AbstractClass.h"
+#include "polarphp/utils/TypeTraits.h"
 
 #include <list>
 
@@ -31,13 +32,14 @@ class Constant;
 class Namespace;
 class Ini;
 template <typename> class Class;
+using polar::utils::is_function_ptr;
 
 using internal::ModulePrivate;
 
 class VMAPI_DECL_EXPORT Module
 {
 public:
-  /**
+   /**
    * Constructor that defines a number of functions right away
    *
    * The first two parameters should be filled by the extension programmer with the
@@ -56,7 +58,11 @@ public:
    Module(Module &&extension) = delete;
    virtual ~Module();
 public:
-   template <typename T, typename std::decay<T>::type callable>
+   template <typename CallableType,
+             typename std::decay<CallableType>::type callable,
+             typename DecayCallableType = typename std::decay<CallableType>::type,
+             typename std::enable_if<is_function_ptr<DecayCallableType>::value &&
+                                     callable_prototype_checker<DecayCallableType>::value, DecayCallableType>::type * = nullptr>
    Module &registerFunction(const char *name, const Arguments &args = {});
 
    Module &registerIni(const Ini &entry);
@@ -92,7 +98,7 @@ public:
       return getModule();
    }
 
-  /**
+   /**
    * Register a function to be called when the PHP engine is ready
    *
    * The callback will be called after all extensions are loaded, and all
@@ -105,7 +111,7 @@ public:
    */
    Module &setStartupHandler(const Callback &callback);
 
-  /**
+   /**
    * Register a function to be called when the PHP engine is going to stop
    *
    * The callback will be called right before the process is going to stop.
@@ -116,7 +122,7 @@ public:
    */
    Module &setShutdownHandler(const Callback &callback);
 
-  /**
+   /**
    * Register a callback that is called at the beginning of each pageview/request
    *
    * You can register a callback if you want to initialize certain things
@@ -129,7 +135,7 @@ public:
    */
    Module &setRequestStartupHandler(const Callback &callback);
 
-  /**
+   /**
    * Register a callback that is called to cleanup things after a pageview/request
    *
    * The callback will be called after _each_ request, so that you can clean up
@@ -144,7 +150,7 @@ public:
 
    Module &setInfoHandler(const Callback &callback);
 
-  /**
+   /**
    * Retrieve the module pointer
    *
    * This is the memory address that should be exported by the get_module()
@@ -162,7 +168,7 @@ private:
    bool initialize(int moduleNumber);
 private:
    VMAPI_DECLARE_PRIVATE(Module);
-  /**
+   /**
    * The implementation object
    *
    * @var std::unique_ptr<ModulePrivate> m_implPtr
@@ -193,10 +199,14 @@ Module &Module::registerClass(Class<T> &&nativeClass)
    return *this;
 }
 
-template <typename T, typename std::decay<T>::type callable>
+template <typename CallableType,
+          typename std::decay<CallableType>::type callable,
+          typename DecayCallableType = typename std::decay<CallableType>::type,
+          typename std::enable_if<is_function_ptr<DecayCallableType>::value &&
+                                  callable_prototype_checker<DecayCallableType>::value, DecayCallableType>::type * = nullptr>
 Module &Module::registerFunction(const char *name, const Arguments &args)
 {
-   return registerFunction(name, &InvokeBridge<T, callable>::invoke, args);
+   return registerFunction(name, &InvokeBridge<CallableType, callable>::invoke, args);
 }
 
 } // vmapi

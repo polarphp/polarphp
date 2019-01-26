@@ -22,8 +22,8 @@
 #include "polarphp/vm/ObjectBinder.h"
 #include "polarphp/vm/utils/Funcs.h"
 #include "polarphp/vm/utils/CallableTraits.h"
+#include "polarphp/vm/utils/ZendVMInvokerTypeTrait.h"
 
-#include <type_traits>
 #include <tuple>
 #include <functional>
 
@@ -35,95 +35,10 @@ namespace vmapi {
 
 /// forward declare class
 class Variant;
-class Parameters;
 class StdClass;
 
 namespace
 {
-
-template <typename CallableType>
-struct callable_prototype_checker : public std::false_type
-{};
-
-template <typename ReturnType>
-struct callable_prototype_checker <ReturnType (*)(Parameters &)> : public std::true_type
-{};
-
-template <typename ReturnType>
-struct callable_prototype_checker <ReturnType (*)()> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)(Parameters &)> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) const> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) volatile> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) const volatile> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) &> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) const &> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) volatile &> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) const volatile &> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)(Parameters &) &&> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)()> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)() const> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)() volatile> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)() const volatile> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)() &> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)() const &> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)() volatile &> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)() const volatile &> : public std::true_type
-{};
-
-template <typename Class, typename ReturnType>
-struct callable_prototype_checker <ReturnType (Class::*)() &&> : public std::true_type
-{};
 
 POLAR_DECL_UNUSED void yield(_zval_struct *return_value, Variant &&value)
 {
@@ -290,7 +205,7 @@ public:
 template <typename CallableType,
           typename std::decay<CallableType>::type callable,
           typename DecayCallableType = typename std::decay<CallableType>::type,
-          typename std::enable_if<callable_prototype_checker<DecayCallableType>::value, DecayCallableType>::type * = nullptr>
+          typename std::enable_if<method_callable_prototype_checker<DecayCallableType>::value, DecayCallableType>::type * = nullptr>
 class InvokeBridge : public InvokeBridgePrivate<DecayCallableType, callable,
       CallableInfoTrait<DecayCallableType>::isMemberCallable,
       CallableHasReturn<DecayCallableType>::value>

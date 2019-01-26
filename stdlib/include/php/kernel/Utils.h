@@ -17,8 +17,11 @@
 namespace php {
 namespace kernel {
 
-std::string polarphp_version_str();
-
+std::string retrieve_version_str();
+int retrieve_major_version();
+int retrieve_minor_version();
+int retrieve_patch_version();
+int retrieve_version_id();
 
 } // kernel
 } // php

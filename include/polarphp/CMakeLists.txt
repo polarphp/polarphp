@@ -46,6 +46,11 @@ polar_collect_files(
    DIR runtime
    OUTPUT_VAR POLAR_RUNTIME_HEADERS)
 
+polar_collect_files(
+   TYPE_HEADER
+   DIR vm
+   OUTPUT_VAR POLAR_ZENDVM_ZEND_HEADERS)
+
 polar_merge_list(POLAR_HEADERS POLAR_GLOBAL_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_AST_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_BASIC_HEADERS)
@@ -53,11 +58,7 @@ polar_merge_list(POLAR_HEADERS POLAR_PARSER_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_SYNTAX_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_UTILS_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_RUNTIME_HEADERS)
-
-polar_collect_files(
-   TYPE_HEADER
-   DIR vm
-   OUTPUT_VAR POLAR_ZENDVM_ZEND_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_ZENDVM_ZEND_HEADERS)
 
 configure_file(global/php_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/polarphp/global/php_config.h
    @ONLY)
