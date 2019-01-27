@@ -22,6 +22,7 @@
 #include "polarphp/global/Config.h"
 
 #include <cstring>
+#include <sys/wait.h>
 
 namespace polar {
 namespace runtime {

@@ -38,8 +38,10 @@ buildDir=build/polarphp
 if [ "${isDebugBuild}" = "yes" ]
 then
     buildDir="${buildDir}/debug"
+    imageDockerFile=debug_image_dockerfile
 else
     buildDir="${buildDir}/release"
+    imageDockerFile=release_image_dockerfile
 fi
 
 if [ ! -d ${buildDir} ]
@@ -49,6 +51,11 @@ fi
 cd ${buildDir} || exit 1
 
 polarphpBaseEnv=polarphp_base_env
+polarphpImageName=polarphp
+if [ "${isDebugBuild}" = "yes" ]
+then
+    polarphpImageName="${polarphpImageName}_debug"
+fi
 
 echo "copying docker files ..."
 
@@ -70,6 +77,7 @@ then
     mkdir polarphp || exit
 else
     rm -Rf polarphp/*
+    [ -f polarphp.tar.gz ] && rm polarphp.tar.gz
 fi
 
 mkdir polarphp/assets || exit 1
@@ -78,8 +86,26 @@ cp -Rf ${rootDir}/src polarphp/ || exit 1
 cp -Rf ${rootDir}/stdlib polarphp/ || exit 1
 cp -Rf ${rootDir}/cmake polarphp/ || exit 1
 cp -Rf ${rootDir}/thirdparty polarphp/ || exit 1
+# delete unused files
+rm -Rf polarphp/thirdparty/googletest
+rm -Rf polarphp/thirdparty/json/benchmarks polarphp/thirdparty/json/doc polarphp/thirdparty/json/doc polarphp/thirdparty/json/test
 cp -Rf ${rootDir}/tools polarphp || exit 1
 cp -Rf ${rootDir}/artifacts polarphp/ || exit 1
 cp -Rf ${rootDir}/CMakeLists.txt ${rootDir}/configure.ac polarphp/ || exit 1
 cp -Rf ${rootDir}/assets/CMakeLists.txt ${rootDir}/assets/php.ini-development ${rootDir}/assets/php.ini-production polarphp/assets || exit 1
+
+echo "tar project files ... "
+tar -zcf polarphp.tar.gz polarphp && rm -Rf polarphp
+
+# delete old images
+hasPolarphpImage=`docker images | grep "^${polarphpImageName}\s"`
+
+if [ ! -z "$hasPolarphpImage" ]
+then
+    echo "remove old polarphp image ... "
+    docker rmi ${polarphpImageName}
+fi
+
+echo "building polarphp image ... "
+docker build -t ${polarphpImageName}:latest --file ${imageDockerFile} .
 

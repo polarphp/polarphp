@@ -170,3 +170,4 @@ CMakeLists.txt.user*
 temp
 **/CMakeLists.txt.autosave
 !cmake/Config.guess
+build/
