@@ -78,6 +78,7 @@ then
 else
     rm -Rf polarphp/*
     [ -f polarphp.tar.gz ] && rm polarphp.tar.gz
+    rm main.cpp
 fi
 
 mkdir polarphp/assets || exit 1
@@ -93,6 +94,8 @@ cp -Rf ${rootDir}/tools polarphp || exit 1
 cp -Rf ${rootDir}/artifacts polarphp/ || exit 1
 cp -Rf ${rootDir}/CMakeLists.txt ${rootDir}/configure.ac polarphp/ || exit 1
 cp -Rf ${rootDir}/assets/CMakeLists.txt ${rootDir}/assets/php.ini-development ${rootDir}/assets/php.ini-production polarphp/assets || exit 1
+
+cp -Rf ${rootDir}/assets/dockertestscripts/main.php main.php || exit 1
 
 echo "tar project files ... "
 tar -zcf polarphp.tar.gz polarphp && rm -Rf polarphp

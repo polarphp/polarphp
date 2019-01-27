@@ -1,39 +1,107 @@
 <img width="350" src ="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/polarphp.png?sanitize=true"/>
 
-Read this in other languages: [English](REAMD.md), [简体中文](README.zh_CN.md).
+阅读本文档其他语言版本: [English](README.en_US.md), **简体中文**.
 
-## Why did I launch the `polarphp` project?
+## 为什么要做 polarphp 项目
 
-With the strong rise of `Go` and `NodeJS`, the market share of `PHP` has gradually been eroded, and the `PHP` official still sticks to the Web programming field. The more things you want to keep, the more you can't keep it. `polarphp` draws on the related features of `NodeJS` and `Go` to repackage `zendVM`, remove some of the old deprecated features and strong `Web` attributes of `PHP`, by implementing a new set of runtime framework `libpdk` , the `PHP` language is built into a true universal scripting language, empower `PHP`, let it have asynchronous programming, coroutine, thread, built-in `unicode` support, standard file `IO` and so on. So that the `PHP` programmer can not only do the `web` application, but also face the real server application. `polarphp` is not a new language, but a runtime container for the `PHP` language.
+随着`Go`和`NodeJS`的强势崛起，`PHP`的市场份额逐渐被蚕食，而`PHP`官方仍然坚守在`Web`编程领域，有些东西越是想守住就越守不住。`polarphp`借鉴`NodeJS`和`Go`的相关特性对`zendVM`重新封装，去掉`PHP`一些古老弃用的特性和强`Web`属性，通过实现一套新的运行时框架`libpdk`，将`PHP`语言打造成为一门真正的通用性脚本语言，赋能`PHP`，让其拥有异步编程，协程，线程，内置的`unicode`支持，标准的文件`IO`等等特性，让`PHP`程序员不仅仅能做`web`应用，也能从容面对真正的服务端应用。`polarphp`不是一门新的语言，而是`PHP`语言的一种运行时容器。
 
-## Main features
+## 主要特性
 
-- [ ] Compatible with the latest `PHP` language standard, removing obsolete language features
-- [ ] Built-in unicode standard support
-- [ ] Full-featured runtime library support, support for asynchronous programming, multi-threading and coroutine, etc.
-- [ ] Built-in package manager
-- [ ] Built-in document generator
+- [ ] 兼容最新的`PHP`语言标准，移除废弃语言特性
+- [ ] 内置`unicode`字符标准支持
+- [ ] 全功能型运行时库支持，支持异步编程，多线程和协程等等编程模式
+- [ ] 内置包管理器
+- [ ] 内置文档生成器
 
-## Development plan
+## 开发计划
 
-Due to limited development resources, the development plan is tentatively scheduled as follows:
+因为开发资源有限，开发计划暂定如下：
 
-1. Compile `zend VM` with `cmake` to generate `polarphp` custom version of `PHP` language virtual machine
-2. Language support project, language testing framework, porting `lit` test framework for `LLVM` project
-3. Implement `polarphp` driver to implement `PHP` code from the command line
-4. Regression testing of the `polarphp` virtual machine, tentatively running the language virtual machine related regression test of `PHP`
-5. Implement the built-in function of `polarphp`
-6. Publish the `docker` image of the core virtual machine
-7. Integrate the `libpdk` runtime framework
-8. Achieve user-friendly installation, try to install `polarphp` in a minimum of steps
-9. Implementation package manager
-10. Implement language widgets such as document generation tools, etc.
+1. 使用`cmake`对`zend VM`进行编译，生成`polarphp`定制版的`PHP`语言虚拟机
+2. 语言支持项目，语言测试框架，移植`LLVM`项目的`lit`测试框架
+3. 实现`polarphp`驱动程序，实现从命令行执行`PHP`代码
+4. 对`polarphp`虚拟机进行回归测试，暂定跑通`PHP`的语言虚拟机相关回归测试
+5. 实现`polarphp`的内置函数
+6. 发布核心虚拟机的`docker`镜像
+7. 整合`libpdk`运行时框架
+8. 实现人性化安装，尽量以最少的步骤进行`polarphp`的安装
+9. 实现包管理器
+10. 实现语言配套小工具，比如文档生成工具等等
 
-## Community
+## 开始体验
 
-At present, we only target Chinese users for the time being, so we use the communication method of WeChat and `QQ` group. The following is the QR code. Interested students can scan the code to join:
+### 克隆`polarphp`项目库
+```
+git clone https://github.com/polarphp/polarphp.git
+cd polarphp
+git submodule init
+git submodule update
+git checkout v0.0.1-alpha
+```
+### 运行脚本
+```
+./devtools/scripts/build_polarphp.sh
+```
+这个时候脚本开始编译相关镜像，耗时比较长，请您耐心等待。等待编译完成，您运行：
+```
+docker images
+```
+这个时候请确认在输出中有如下镜像：
+1. polarphp_base_env
+2. polarphp_debug
 
-> PS:Please indicate the scan code, for example: learn `polarphp` or `PHP` enthusiasts
+如果没有问题，我们开始测试`polarphp`是否在镜像中正常运行。
+```
+docker run --rm -it polarphp_debug
+```
+进入镜像后，输入我们的`polarphp`命令行程序
+```
+polar --version
+```
+如果您得到下面的输出：
+```
+polarphp 0.0.1-git (built: 2019-01-27 12:22)
+Copyright (c) 2016-2018 The polarphp foundation (https://polar.foundation)
+Zend Engine v3.3.0-dev, Copyright (c) 1998-2018 Zend Technologies
+```
+恭喜您，您已经成功编译了`polarphp`运行时环境。
+在编译镜像的时候，我们在`~/temp/`文件夹中放入了一个测试脚本
+```php
+if (function_exists('\php\retrieve_version_str')) {
+    echo "version str: " . \php\retrieve_version_str() . "\n";
+}
+
+if (function_exists('\php\retrieve_major_version')) {
+    echo "major version: " . \php\retrieve_major_version() . "\n";
+}
+
+if (function_exists('\php\retrieve_minor_version')) {
+    echo "minor version: " . \php\retrieve_minor_version() . "\n";
+}
+
+if (function_exists('\php\retrieve_patch_version')) {
+    echo "patch version: " . \php\retrieve_patch_version() . "\n";
+}
+
+```
+您可以运行一下命名：
+```
+polar ~/temp/main.php
+```
+如果没有错误，您将得到下面的输出：
+```
+version str: polarphp 0.0.1-git
+major version: 0
+minor version: 0
+patch version: 1
+```
+感谢您测试`polarphp`，有什么问题，请扫描下面的微信二维码进群交流。
+
+## 社区
+目前我们暂时只针对中国的用户，所以采用了微信和`QQ`群的交流方式，下面是二维码，有兴趣的同学可以扫码加入：
+
+> PS：扫码请注明来意，比如：学习`polarphp`或者`PHP`爱好者
 
 </div>
 <table>
@@ -53,27 +121,27 @@ At present, we only target Chinese users for the time being, so we use the commu
   </tbody>
 </table>
 
-## Currently has the following working groups
+### 目前有以下工作组
 
-1. Language core team
-2. Standard library team
-3. Ecosystem project team
-4. Document team
-5. Official website maintenance team
+1. 语言核心团队
+2. 标准库团队
+3. 生态链项目团队
+4. 文档团队
+5. 官方网站维护团队
 
-## License
+## 授权协议
 
-`polarphp` is redeveloped on top of the `php` language project, following the agreement of the `php` project. For details, please see: [Project Agreement](/LICENSE)
+`polarphp`在`php`语言项目之上进行二次开发，遵守`php`项目的协议，详情请看：[项目协议](/LICENSE)
 
-## Contribution code guidance
+## 贡献代码引导
 ===========================
 - [CODING_STANDARDS](docs/CODING_STANDARDS)
 - [README.GIT-RULES](docs/README.GIT-RULES)
 - [README.MAILINGLIST_RULES](docs/README.MAILINGLIST_RULES)
 - [README.RELEASE_PROCESS](docs/README.RELEASE_PROCESS)
 
-## Acknowledgement
-<!--Acknowledgement begin-->
+## 特别感谢
+<!--特别感谢开始-->
 <table>
   <tbody>
     <tr>
@@ -95,4 +163,4 @@ At present, we only target Chinese users for the time being, so we use the commu
     </tr><tr></tr>
   </tbody>
 </table>
-<!--Acknowledgement end-->
+<!--特别感谢结束-->

@@ -73,7 +73,9 @@
 #include "polarphp/runtime/Spprintf.h"
 #include "polarphp/runtime/Snprintf.h"
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 
 #include <stddef.h>
 #include <stdio.h>
