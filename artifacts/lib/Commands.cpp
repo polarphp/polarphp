@@ -25,7 +25,6 @@
 /// defined in main.cpp
 extern std::vector<std::string> sg_defines;
 extern bool sg_showVersion;
-extern bool sg_showVersion;
 extern bool sg_showNgInfo;
 extern bool sg_interactive;
 extern bool sg_generateExtendInfo;
@@ -222,7 +221,7 @@ void reflection_show_ini_cfg_opt_setter(int)
 void print_polar_version()
 {
    std::cout << POLARPHP_PACKAGE_STRING << " (built: "<< BUILD_TIME <<  ") "<< std::endl
-             << "Copyright (c) 2016-2018 The polarphp Foundation" << std::endl
+             << "Copyright (c) 2016-2018 The polarphp foundation (https://polar.foundation)" << std::endl
              << get_zend_version();
 }
 
@@ -254,6 +253,12 @@ int dispatch_cli_command()
 {
    ExecEnv &execEnv = retrieve_global_execenv();
    ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
+
+   if (sg_showVersion) {
+      print_polar_version();
+      return 0;
+   }
+
    int interactive = 0;
    if (interactive) {
 #if (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)) && !defined(COMPILE_DL_READLINE)
