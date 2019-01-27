@@ -73,7 +73,7 @@ set(POLAR_CMAKE_TEST_CODE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake/codes)
 set(POLAR_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_NAME})
 string(TOLOWER ${POLAR_SYSTEM_NAME} POLAR_SYSTEM_NORMAL_NAME)
 set(POLAR_CONFIGURE_TEMP_DIR ${POLAR_BINARY_DIR}/conf_temp)
-set(POLAR_HEADER_INSTALL_DIR ${CMAKE_PREFIX_PATH}/include/php)
+set(POLAR_HEADER_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/php)
 
 # for test only
 set(POLAR_REGRESSION_TEST_BINARY_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/tests/bin")
@@ -300,7 +300,7 @@ option(POLAR_EXTERNALIZE_DEBUGINFO
 
 option(POLAR_BUILD_TESTS
    "Build polarphp unit tests. If OFF, just generate build targets." OFF)
-option(POLAR_INCLUDE_TESTS "Generate build targets for the polarphp unit tests." ON)
+option(POLAR_BUILD_UNITTESTS "Generate build targets for the polarphp unit tests." ON)
 
 option(POLAR_ENABLE_TERMINFO "Use terminfo database if available." ON)
 option(POLAR_ENABLE_ZLIB "Use zlib for compression/decompression if available." ON)
@@ -502,7 +502,7 @@ add_subdirectory(tools)
 add_subdirectory(thirdparty)
 add_subdirectory(artifacts)
 
-if (POLAR_INCLUDE_TESTS)
+if (POLAR_BUILD_TESTS)
    polar_check_headers(glob)
    include(LitUtils)
    #setup some important lit path

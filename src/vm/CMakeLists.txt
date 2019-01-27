@@ -72,3 +72,8 @@ target_link_libraries(ZendApi PUBLIC PolarRuntime PolarGlobal)
 set_target_properties(ZendApi
    PROPERTIES
    INTERFACE_INCLUDE_DIRECTORIES "${POLAR_ZENDVM_INCLUDE_DIRS}")
+set(lib${POLAR_LIBDIR_SUFFIX})
+
+install(TARGETS ZendApi LIBRARY
+   DESTINATION lib${POLAR_LIBDIR_SUFFIX}
+   COMPONENT corelibs)

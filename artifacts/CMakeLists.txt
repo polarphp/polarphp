@@ -17,7 +17,8 @@ polar_collect_files(
 string(TIMESTAMP _buildDate "%Y-%m-%d %H:%M")
 
 polar_add_executable(polar main.cpp ${POLAR_MAIN_LIB_SOURCES})
-
 set_target_properties(polar PROPERTIES COMPILE_DEFINITIONS "BUILD_TIME=\"${_buildDate}\"")
-
 target_link_libraries(polar PUBLIC PolarRuntime Stdlib CLI11::CLI11)
+install(TARGETS polar RUNTIME
+   DESTINATION bin
+   COMPONENT corebins)

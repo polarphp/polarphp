@@ -1,0 +1,7 @@
+FROM gcc:8.2.0
+RUN apt-get -y update
+RUN mkdir polarphp_build && cd polarphp_build &&\
+wget https://github.com/Kitware/CMake/releases/download/v3.13.3/cmake-3.13.3.tar.gz &&\
+tar -xvzf cmake-3.13.3.tar.gz && cd cmake-3.13.3 && ./configure && make -j4 && make install &&\
+cd ../ && rm -Rf cmake-3.13.3 && rm cmake-3.13.3.tar.gz
+
