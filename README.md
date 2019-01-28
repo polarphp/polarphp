@@ -58,7 +58,7 @@ docker images
 ```
 docker run --rm -it polarphp_debug
 ```
-进入镜像后，输入我们的`polarphp`命令行程序
+进入容器后，输入我们的`polarphp`命令行程序
 ```
 polar --version
 ```
