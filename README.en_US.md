@@ -29,6 +29,77 @@ Due to limited development resources, the development plan is tentatively schedu
 9. Implementation package manager
 10. Implement language widgets such as document generation tools, etc.
 
+## Start the experience
+
+> current we just test at macOS platform and you need run system in docker system.
+
+### clone polarphp repository
+```
+git clone https://github.com/polarphp/polarphp.git
+cd polarphp
+git submodule init
+git submodule update
+git checkout v0.0.1-alpha
+```
+### run build script
+```
+./devtools/scripts/build_polarphp.sh
+```
+At this time, the script starts compiling the relevant image, which takes a long time. Please wait patiently. Wait for the compilation to complete, you run:
+```
+docker images
+```
+At this time, please confirm that there is the following docker image in the output:
+1. polarphp_base_env
+2. polarphp_debug
+
+If there are no problems, we start testing whether polarphp is working properly in docker image.
+```
+docker run --rm -it polarphp_debug
+```
+After entering the container, enter our polarphp command line program:
+```
+polar --version
+```
+If you get the following output:
+```
+polarphp 0.0.1-git (built: 2019-01-27 12:22)
+Copyright (c) 2016-2018 The polarphp foundation (https://polar.foundation)
+Zend Engine v3.3.0-dev, Copyright (c) 1998-2018 Zend Technologies
+```
+
+Congratulations, you have successfully compiled the polarphp runtime environment. When compiling the image, we put a test script in the ~/temp/ folder.
+```
+if (function_exists('\php\retrieve_version_str')) {
+    echo "version str: " . \php\retrieve_version_str() . "\n";
+}
+
+if (function_exists('\php\retrieve_major_version')) {
+    echo "major version: " . \php\retrieve_major_version() . "\n";
+}
+
+if (function_exists('\php\retrieve_minor_version')) {
+    echo "minor version: " . \php\retrieve_minor_version() . "\n";
+}
+
+if (function_exists('\php\retrieve_patch_version')) {
+    echo "patch version: " . \php\retrieve_patch_version() . "\n";
+}
+```
+You can run the following command:
+```
+polar ~/temp/main.php
+```
+If there are no errors, you will get the following output:
+
+```
+version str: polarphp 0.0.1-git
+major version: 0
+minor version: 0
+patch version: 1
+```
+Thank you for testing polarphp, what is the problem, you can put it in the github issue list
+
 ## Community
 
 At present, we only target Chinese users for the time being, so we use the communication method of WeChat and `QQ` group. The following is the QR code. Interested students can scan the code to join:

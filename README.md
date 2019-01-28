@@ -1,5 +1,8 @@
 <img width="350" src ="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/polarphp.png?sanitize=true"/>
 
+
+Read the English version of this document: [English version Readme](README.en_US.md)
+
 阅读本文档其他语言版本: [English](README.en_US.md), **简体中文**.
 
 ## 为什么要做 polarphp 项目
@@ -85,7 +88,7 @@ if (function_exists('\php\retrieve_patch_version')) {
 }
 
 ```
-您可以运行一下命名：
+您可以运行一下命令：
 ```
 polar ~/temp/main.php
 ```
