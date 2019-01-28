@@ -1,0 +1,23 @@
+; RUN: filechecker --input-file %s %s
+; RUN: filechecker --check-prefixes CHECK --check-prefixes GLOBAL --input-file %s %s
+; RUN: filechecker --check-prefixes CHECK --check-prefixes LOCAL --input-file %s %s
+; RUN: filechecker --check-prefixes CHECK --check-prefixes GLOBAL --enable-var-scope --input-file %s %s
+; RUN: not filechecker --check-prefixes CHECK --check-prefixes LOCAL --enable-var-scope --input-file %s %s
+
+local
+global
+; CHECK: [[LOCAL:loc.*]]
+; CHECK: [[$GLOBAL:glo.*]]
+
+local2
+global2
+; CHECK: [[LOCAL]]2
+; CHECK: [[$GLOBAL]]2
+
+barrier:
+; CHECK-LABEL: barrier
+
+local3
+global3
+; LOCAL: [[LOCAL]]3
+; GLOBAL: [[$GLOBAL]]3

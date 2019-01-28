@@ -4,8 +4,8 @@
 # Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
-# See http://polarphp.org/LICENSE.txt for license information
-# See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+# See https://polarphp.org/LICENSE.txt for license information
+# See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 
 include(CMakeParseArguments)
 include(CheckIncludeFiles)
@@ -140,6 +140,14 @@ function(polar_add_flag_or_print_warning flag name)
    endif()
 endfunction()
 
+function(polar_add_files target)
+   list(REMOVE_AT ARGV 0)
+   foreach(file ${ARGV})
+      list(APPEND ${target} ${CMAKE_CURRENT_SOURCE_DIR}/${file})
+   endforeach()
+   set(${target} ${${target}} PARENT_SCOPE)
+endfunction(polar_add_files)
+
 function(polar_collect_files)
    cmake_parse_arguments(ARG "TYPE_HEADER;TYPE_SOURCE;TYPE_BOTH;OVERWRITE;RELATIVE" "OUTPUT_VAR;DIR;SKIP_DIR" "" ${ARGN})
    set(GLOB ${ARG_DIR})
@@ -230,4 +238,39 @@ function(polar_libgcc_path path)
    get_filename_component(libdir ${_output} DIRECTORY)
    set(${path} ${libdir} PARENT_SCOPE)
 endfunction()
+
+macro(polar_find_parent_dir path output)
+   get_filename_component(${output} ${path} ABSOLUTE)
+   get_filename_component(${output} ${${output}} DIRECTORY)
+endmacro()
+
+macro(polar_merge_list target list)
+   foreach(_listItem ${${list}})
+      list(APPEND ${target} ${_listItem})
+   endforeach()
+   if (target)
+      list(REMOVE_DUPLICATES ${target})
+   endif()
+endmacro()
+
+macro(polar_add_rt_require_lib name)
+   list(APPEND POLAR_RT_REQUIRE_LIBS ${name})
+   if (NOT ${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+      set(POLAR_RT_REQUIRE_LIBS ${POLAR_RT_REQUIRE_LIBS} PARENT_SCOPE)
+   endif()
+endmacro()
+
+macro(polar_check_library_exists library function location variable)
+   check_library_exists("${library}" "${function}" "${location}" "${variable}")
+   if (${${variable}})
+      set(POLAR_${variable} ON)
+   endif()
+endmacro()
+
+macro(polar_check_symbol_exists symbol files variable)
+   check_symbol_exists("${symbol}" "${files}" "${variable}")
+   if (${${variable}})
+      set(POLAR_${variable} ON)
+   endif()
+endmacro()
 

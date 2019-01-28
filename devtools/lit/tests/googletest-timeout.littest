@@ -1,0 +1,12 @@
+# Check that the per test timeout is enforced when running GTest tests.
+#
+# RUN: not %{lit} -j 1 -v %{inputs}/googletest-timeout --timeout 1 > %t.cmd.out
+# RUN: filechecker < %t.cmd.out %s
+
+# CHECK: -- Testing:
+
+# CHECK: PASS: googletest-timeout :: LittestTimeoutGoogleTest/FirstTest.subTestA
+# CHECK: TIMEOUT: googletest-timeout :: LittestTimeoutGoogleTest/FirstTest.subTestB
+# CHECK: TIMEOUT: googletest-timeout :: LittestTimeoutGoogleTest/FirstTest.subTestC
+# CHECK: Expected Passes    : 1
+# CHECK: Individual Timeouts: 2

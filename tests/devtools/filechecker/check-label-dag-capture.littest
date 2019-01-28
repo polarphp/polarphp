@@ -1,0 +1,11 @@
+; RUN: filechecker --input-file %s %s
+
+bar
+foo
+foo
+zed
+
+CHECK-LABEL: {{^}}bar
+CHECK: {{^}}[[FOO:foo]]
+CHECK-DAG: {{^}}[[FOO]]
+CHECK-LABEL: {{^}}zed

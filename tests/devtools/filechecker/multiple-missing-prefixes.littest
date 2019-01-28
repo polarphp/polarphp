@@ -1,0 +1,10 @@
+// RUN: filechecker --check-prefix ANOTHER-PREFIX --input-file %s %s
+// RUN: not filechecker --check-prefix PREFIX1 --check-prefix PREFIX2 --input-file %s %s 2>&1 | filechecker --strict-whitespace --check-prefix CHECK-NONEXISTENT-PREFIX --check-prefix ALSO-NONEXISTENT %s
+// RUN: not filechecker --check-prefixes PREFIX1 --check-prefixes PREFIX2 --input-file %s %s 2>&1 | filechecker --strict-whitespace --check-prefixes CHECK-NONEXISTENT-PREFIX --check-prefixes ALSO-NONEXISTENT %s
+
+foobar
+; ANOTHER-PREFIX: foobar
+
+; We use regex to match the colon so that filechecker won't think it is a check
+; prefix.
+; CHECK-NONEXISTENT-PREFIX: error: no check strings found with prefixes 'PREFIX1{{:}}', 'PREFIX2{{:}}'

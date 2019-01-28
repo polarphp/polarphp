@@ -4,8 +4,8 @@
 # Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
-# See http://polarphp.org/LICENSE.txt for license information
-# See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+# See https://polarphp.org/LICENSE.txt for license information
+# See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 
 macro(polar_setup_php_version)
    find_file(configureAcFilePath configure.ac PATHS ${POLAR_SOURCE_DIR})
@@ -22,21 +22,12 @@ macro(polar_setup_php_version)
       string(REPLACE "PHP_EXTRA_VERSION=" "" matchExtraVersion ${matchExtraVersion})
       string(REPLACE "\"" "" matchExtraVersion ${matchExtraVersion})
 
-      set(POLAR_VERSION_MAJOR ${matchMajorVersion})
-      set(POLAR_VERSION_MINOR ${matchMinorVersion})
-      set(POLAR_VERSION_RELEASE ${matchReleaseVersion})
-      set(POLAR_VERSION_EXTRA ${matchExtraVersion})
+      set(PHP_VERSION_MAJOR ${matchMajorVersion})
+      set(PHP_VERSION_MINOR ${matchMinorVersion})
+      set(PHP_VERSION_RELEASE ${matchReleaseVersion})
+      set(PHP_VERSION_EXTRA ${matchExtraVersion})
 
-      set(POLAR_PACKAGE_VERSION "${POLAR_VERSION_MAJOR}.${POLAR_VERSION_MINOR}.${POLAR_VERSION_RELEASE}${POLAR_VERSION_EXTRA}")
-      math(EXPR POLAR_VERSION_ID ${POLAR_VERSION_MAJOR}*10000+${POLAR_VERSION_MINOR}*100+${POLAR_VERSION_RELEASE})
-
-      set(PHP_VERSION_MAJOR ${POLAR_VERSION_MAJOR})
-      set(PHP_VERSION_MINOR ${POLAR_VERSION_MINOR})
-      set(PHP_VERSION_RELEASE ${POLAR_VERSION_RELEASE})
-      set(PHP_VERSION_EXTRA ${POLAR_VERSION_EXTRA})
-
-      set(PHP_PACKAGE_VERSION ${POLAR_PACKAGE_VERSION})
-      set(PHP_VERSION_ID ${POLAR_VERSION_ID})
-
+      set(PHP_PACKAGE_VERSION "${PHP_VERSION_MAJOR}.${PHP_VERSION_MINOR}.${PHP_VERSION_RELEASE}${PHP_VERSION_EXTRA}")
+      math(EXPR PHP_VERSION_ID ${PHP_VERSION_MAJOR}*10000+${PHP_VERSION_MINOR}*100+${PHP_VERSION_RELEASE})
    endif()
 endmacro()

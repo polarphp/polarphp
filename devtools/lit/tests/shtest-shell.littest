@@ -1,0 +1,324 @@
+# Check the internal shell handling component of the ShTest format.
+#
+# RUN: not %{lit} -j 1 -v %{inputs}/shtest-shell > %t.out
+# FIXME: Temporarily dump test output so we can debug failing tests on
+# buildbots.
+# RUN: cat %t.out
+# RUN: filechecker --input-file %t.out %s
+#
+# END.
+
+# CHECK: -- Testing:
+# CHECK: FAIL: shtest-shell :: cat-error-0.littest
+# CHECK: ******************** TEST 'shtest-shell :: cat-error-0.littest' FAILED ********************
+# CHECK: $ cat -b temp1.txt
+# CHECK: The following argument was not expected: -b
+# CHECK: Run with --help for more information.
+# CHECK: error: command failed with exit status: 109
+# CHECK: ********************
+
+# CHECK: FAIL: shtest-shell :: cat-error-1.littest
+# CHECK: ******************** TEST 'shtest-shell :: cat-error-1.littest' FAILED ********************
+# CHECK: $ cat temp1.txt
+# CHECK: Command Output (stderr):
+# CHECK: # command stderr:
+# CHECK: No such file or directory: temp1.txt
+# CHECK: error: command failed with exit status: 1
+# CHECK: ********************
+
+# CHECK: FAIL: shtest-shell :: colon-error.littest
+# CHECK: ******************** TEST 'shtest-shell :: colon-error.littest' FAILED ********************
+# CHECK: $ :
+# CHECK: Unsupported: ':' cannot be part of a pipeline
+# CHECK: error: command failed with exit status: 127
+# CHECK: ********************
+
+# CHECK: PASS: shtest-shell :: dev-null.littest
+
+# CHECK: FAIL: shtest-shell :: diff-error-0.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-error-0.littest' FAILED ********************
+# CHECK: $ diff diff-error-0.txt diff-error-0.txt
+# CHECK: # command stderr:
+# CHECK: Command(["diff", "diff-error-0.txt", "diff-error-0.txt"], []): Unsupported: 'diff' cannot be part of a pipeline
+# CHECK: error: command failed with exit status: 127
+
+# CHECK: FAIL: shtest-shell :: diff-error-1.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-error-1.littest' FAILED ********************
+# CHECK: Exit Code: 127
+# CHECK: $ : RUN: at line 3
+# CHECK: $ diff -B temp1.txt temp2.txt
+# CHECK: # command stderr:
+# CHECK: Command(["diff", "-B", "temp1.txt", "temp2.txt"], []): Unsupported: 'diff': The following argument was not expected: -B
+# CHECK: error: command failed with exit status: 127
+
+# CHECK: FAIL: shtest-shell :: diff-error-2.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-error-2.littest' FAILED ********************
+# CHECK: Exit Code: 127
+# CHECK: $ : RUN: at line 3
+# CHECK: $ diff temp.txt
+# CHECK: # command stderr:
+# CHECK: Command(["diff", "temp.txt"], []): Error:  missing or extra operand
+# CHECK: error: command failed with exit status: 127
+
+# CHECK: FAIL: shtest-shell :: diff-error-3.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-error-3.littest' FAILED ********************
+# CHECK: Exit Code: 1
+# CHECK: $ : RUN: at line 3
+# CHECK: $ diff temp.txt temp1.txt
+# CHECK: # command stderr:
+# CHECK: Error: 'diff' command failed, filesystem error: cannot make canonical path: No such file or directory [{{.*}}temp.txt]
+# CHECK: error: command failed with exit status: 1
+
+# CHECK: FAIL: shtest-shell :: diff-error-4.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-error-4.littest' FAILED ********************
+# CHECK: : 'RUN: at line 3';   echo "hello-first" > {{.*}}/diff-error-4.littest.temp
+# CHECK: : 'RUN: at line 4';   echo "hello-second" > {{.*}}/diff-error-4.littest.temp1
+# CHECK: : 'RUN: at line 5';   diff {{.*}}/diff-error-4.littest.temp {{.*}}/diff-error-4.littest.temp1
+# CHECK: Exit Code: 1
+# CHECK: $ : RUN: at line 3
+# CHECK: $ echo hello-first
+# CHECK: $ : RUN: at line 4
+# CHECK: $ echo hello-second
+# CHECK: $ : RUN: at line 5
+# CHECK: $ diff {{.*}}/diff-error-4.littest.temp {{.*}}/diff-error-4.littest.temp1
+# CHECK: # command output:
+# CHECK: --- {{.*}}/diff-error-4.littest.temp
+# CHECK: +++ {{.*}}/diff-error-4.littest.temp1
+# CHECK: @@ -1,2 +1,2 @@
+# CHECK: -hello-first
+# CHECK: +hello-second
+
+# CHECK: FAIL: shtest-shell :: diff-error-5.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-error-5.littest' FAILED ********************
+# CHECK: Exit Code: 127
+# CHECK: Command Output (stdout):
+# CHECK: $ : RUN: at line 3
+# CHECK: $ diff -u
+# CHECK: # command stderr:
+# CHECK: Command(["diff", "-u"], []): Unsupported: 'diff': paths: At least 1 required
+# CHECK: error: command failed with exit status: 127
+
+# CHECK: FAIL: shtest-shell :: diff-error-6.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-error-6.littest' FAILED ********************
+# CHECK: Exit Code: 127
+# CHECK: Command Output (stdout):
+# CHECK: $ : RUN: at line 3
+# CHECK: $ diff -u a.txt b.txt c.txt
+# CHECK: # command stderr:
+# CHECK: Command(["diff", "-u", "a.txt", "b.txt", "c.txt"], []): Error:  missing or extra operand
+# CHECK: error: command failed with exit status: 127
+
+# CHECK: FAIL: shtest-shell :: diff-r-error-0.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-r-error-0.littest' FAILED ********************
+# CHECK: # command output:
+# CHECK: Only in {{.*}}/dir1: dir1unique
+# CHECK: Only in {{.*}}/dir2: dir2unique
+# CHECK: Command Output (stderr):
+# CHECK: error: command failed with exit status: 1
+
+# CHECK: FAIL: shtest-shell :: diff-r-error-1.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-r-error-1.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Exit Code: 1
+# CHECK: $ : RUN: at line 2
+# CHECK: $ rm -rf {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 3
+# CHECK: $ mkdir -p {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 6
+# CHECK: $ mkdir -p {{.*}}/dir1/subdir {{.*}}/dir2/subdir
+# CHECK: $ : RUN: at line 7
+# CHECK: $ echo 12345
+# CHECK: $ : RUN: at line 8
+# CHECK: $ echo 00000
+# CHECK: $ : RUN: at line 9
+# CHECK: $ diff -r {{.*}}/dir1 {{.*}}/dir2
+# CHECK: # command output:
+# CHECK: --- {{.*}}/dir1/subdir/f01
+# CHECK: +++ {{.*}}/dir2/subdir/f01
+# CHECK: @@ -1,2 +1,2 @@
+# CHECK: -12345
+# CHECK: +00000
+# CHECK: Command Output (stderr):
+# CHECK: error: command failed with exit status: 1
+
+# CHECK: FAIL: shtest-shell :: diff-r-error-2.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-r-error-2.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Exit Code: 1
+# CHECK: Command Output (stdout):
+# CHECK: $ : RUN: at line 2
+# CHECK: $ rm -rf {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 3
+# CHECK: $ mkdir -p {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 6
+# CHECK: $ echo extra
+# CHECK: $ : RUN: at line 7
+# CHECK: $ diff -r {{.*}}/dir1 {{.*}}/dir2
+# CHECK: # command output:
+# CHECK: Only in {{.*}}/dir2: extrafile
+
+# CHECK: FAIL: shtest-shell :: diff-r-error-3.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-r-error-3.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Exit Code: 1
+
+# CHECK: Command Output (stdout):
+# CHECK: $ : RUN: at line 2
+# CHECK: $ rm -rf {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 3
+# CHECK: $ mkdir -p {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 6
+# CHECK: $ mkdir -p {{.*}}/dir1/extra_subdir
+# CHECK: $ : RUN: at line 7
+# CHECK: $ diff -r {{.*}}/dir1 {{.*}}/dir2
+# CHECK: # command output:
+# CHECK: Only in {{.*}}/dir1: extra_subdir
+# CHECK: Command Output (stderr):
+# CHECK: error: command failed with exit status: 1
+
+# CHECK: FAIL: shtest-shell :: diff-r-error-4.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-r-error-4.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Exit Code: 1
+# CHECK: Command Output (stdout):
+# CHECK: $ : RUN: at line 2
+# CHECK: $ rm -rf {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 3
+# CHECK: $ mkdir -p {{.*}}/dir1 {{.*}}/dir2
+# CHECK: $ : RUN: at line 6
+# CHECK: $ mkdir -p {{.*}}/extra_subdir
+# CHECK: $ : RUN: at line 7
+# CHECK: $ echo ZYX
+# CHECK: $ : RUN: at line 8
+# CHECK: $ diff -r {{.*}}/dir1 {{.*}}/dir2
+# CHECK: # command output:
+# CHECK: Only in {{.*}}/dir2: extra_subdir
+# CHECK: Only in {{.*}}/dir1: extra_subdir
+# CHECK: Command Output (stderr):
+# CHECK: error: command failed with exit status: 1
+
+# CHECK: FAIL: shtest-shell :: diff-r-error-5.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-r-error-5.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Exit Code: 1
+# CHECK: Command Output (stdout):
+# CHECK: $ diff -r {{.*}}/dir1 {{.*}}/dir2
+# CHECK: # command output:
+# CHECK: Only in {{.*}}/dir1/extra_subdir: extra_file
+# CHECK: Command Output (stderr):
+# CHECK: error: command failed with exit status: 1
+
+# CHECK: FAIL: shtest-shell :: diff-r-error-6.littest
+# CHECK: ******************** TEST 'shtest-shell :: diff-r-error-6.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Exit Code: 1
+# CHECK: Command Output (stdout):
+# CHECK: $ diff -r {{.*}}/dir1 {{.*}}/dir2
+# CHECK: # command output:
+# CHECK: Only in {{.*}}/dir1: extra_file
+# CHECK: Only in {{.*}}/dir2: extra_file
+# CHECK: Command Output (stderr):
+# CHECK: error: command failed with exit status: 1
+
+# CHECK: PASS: shtest-shell :: diff-r.littest
+
+# CHECK: FAIL: shtest-shell :: error-0.littest
+# CHECK: ******************** TEST 'shtest-shell :: error-0.littest' FAILED ********************
+# CHECK: $ not-a-real-command
+
+# CHECK: # command stderr:
+# CHECK: Command(["not-a-real-command"], []): not-a-real-command: command not found
+# CHECK: error: command failed with exit status: 127
+
+# FIXME: The output here sucks.
+
+# CHECK: FAIL: shtest-shell :: error-1.littest
+# CHECK: ******************** TEST 'shtest-shell :: error-1.littest' FAILED ********************
+# CHECK: shell parser error on: : 'RUN: at line 3';   echo "missing quote
+# CHECK: ********************
+
+# CHECK: FAIL: shtest-shell :: error-2.littest
+# CHECK: ******************** TEST 'shtest-shell :: error-2.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: : 'RUN: at line 3';   echo "hello" 3>&1
+# CHECK: Exit Code: 127
+# CHECK: $ : RUN: at line 3
+# CHECK: $ echo hello
+# CHECK: # command stderr:
+# CHECK: Command(["echo", "hello"], [((>&, 3), 1)]): Unsupported redirect: (>&, 3)
+# CHECK: error: command failed with exit status: 127
+
+# CHECK: FAIL: shtest-shell :: mkdir-error-0.littest
+# CHECK: ******************** TEST 'shtest-shell :: mkdir-error-0.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: $ : RUN: at line 3
+# CHECK: $ mkdir -p temp
+# CHECK: Command Output (stderr):
+# CHECK: # command stderr:
+# CHECK: Command(["mkdir", "-p", "temp"], []): Unsupported: 'mkdir' cannot be part of a pipeline
+# CHECK: error: command failed with exit status: 127
+
+# CHECK: FAIL: shtest-shell :: mkdir-error-1.littest
+# CHECK: ******************** TEST 'shtest-shell :: mkdir-error-1.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: $ : RUN: at line 3
+# CHECK: $ mkdir -p -m 777 temp
+# CHECK: Command Output (stderr):
+# CHECK: # command stderr:
+# CHECK: Command(["mkdir", "-p", "-m", "777", "temp"], []): Unsupported: 'rm': The following argument was not expected: -m
+# CHECK: error: command failed with exit status: 127
+
+# CHECK: FAIL: shtest-shell :: mkdir-error-2.littest
+# CHECK: ******************** TEST 'shtest-shell :: mkdir-error-2.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: $ : RUN: at line 3
+# CHECK: $ mkdir -p
+# CHECK: # command stderr:
+# CHECK: Command(["mkdir", "-p"], []): Unsupported: 'rm': paths: At least 1 required
+# CHECK: error: command failed with exit status: 127
+
+# CHECK: PASS: shtest-shell :: redirects.littest
+
+# CHECK: FAIL: shtest-shell :: rm-error-0.littest
+# CHECK: ******************** TEST 'shtest-shell :: rm-error-0.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Command Output (stdout):
+# CHECK: $ : RUN: at line 3
+# CHECK: $ rm -rf temp
+# CHECK: Command Output (stderr):
+# CHECK: # command stderr:
+# CHECK: Command(["rm", "-rf", "temp"], []): Unsupported: 'rm' cannot be part of a pipeline
+# CHECK: error: command failed with exit status: 127
+
+# CHECK: FAIL: shtest-shell :: rm-error-1.littest
+# CHECK: ******************** TEST 'shtest-shell :: rm-error-1.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: $ : RUN: at line 3
+# CHECK: $ rm -f -v temp
+# CHECK: # command stderr:
+# CHECK: Command(["rm", "-f", "-v", "temp"], []): Unsupported: 'rm':  The following argument was not expected: -v
+# CHECK: error: command failed with exit status: 127
+
+# CHECK: FAIL: shtest-shell :: rm-error-2.littest
+# CHECK: ******************** TEST 'shtest-shell :: rm-error-2.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: $ : RUN: at line 3
+# CHECK: $ rm -r hello
+# CHECK: # command stderr:
+# CHECK: Error: 'rm' command failed, No such file or directory: {{.*}}/hello
+# CHECK: error: command failed with exit status: 1
+
+# CHECK: FAIL: shtest-shell :: rm-error-3.littest
+# CHECK: ******************** TEST 'shtest-shell :: rm-error-3.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: $ : RUN: at line 3
+# CHECK: $ mkdir -p test
+# CHECK: $ : RUN: at line 4
+# CHECK: $ rm -f test
+# CHECK: # command stderr:
+# CHECK: Error: {{.*}}/test is a directory
+# CHECK: error: command failed with exit status: 1
+
+# CHECK: PASS: shtest-shell :: sequencing-0.littest
+# CHECK: XFAIL: shtest-shell :: sequencing-1.littest
+# CHECK: PASS: shtest-shell :: valid-shell.littest

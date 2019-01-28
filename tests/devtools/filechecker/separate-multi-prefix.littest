@@ -1,0 +1,7 @@
+// RUN: not filechecker --check-prefix SOMEPREFIX --input-file %s %s
+// RUN: filechecker --check-prefix ANOTHER --input-file %s %s
+
+asdf
+; SOMEPREFIX: {{t}}his_is_not_asdf
+; ANOTHER: {{a}}sdf
+

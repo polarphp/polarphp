@@ -4,10 +4,16 @@
 # Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
-# See http://polarphp.org/LICENSE.txt for license information
-# See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+# See https://polarphp.org/LICENSE.txt for license information
+# See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
 # Created by polarboy on 2018/08/26.
 
-add_subdirectory(TSRM)
-add_subdirectory(Zend)
+add_subdirectory(ast)
+add_subdirectory(parser)
+add_subdirectory(syntax)
+add_subdirectory(basic)
+add_subdirectory(utils)
+add_subdirectory(vm)
+add_subdirectory(runtime)
+add_subdirectory(global)

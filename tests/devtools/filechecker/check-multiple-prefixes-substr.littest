@@ -1,0 +1,5 @@
+# RUN: filechecker --check-prefix CHECKER  --check-prefix CHECK --input-file %s %s
+# RUN: filechecker --check-prefix CHECK --check-prefix CHECKER --input-file %s %s
+
+foo
+# CHECKER: fo{{o}}

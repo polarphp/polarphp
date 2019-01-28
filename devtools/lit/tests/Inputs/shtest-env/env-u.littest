@@ -1,0 +1,1 @@
+# RUN: env -u FOO -u BAR %{print_env}

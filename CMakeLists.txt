@@ -4,8 +4,8 @@
 # Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
-# See http://polarphp.org/LICENSE.txt for license information
-# See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+# See https://polarphp.org/LICENSE.txt for license information
+# See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
 # Created by polarboy on 2018/08/17.
 
@@ -16,7 +16,40 @@ if(POLICY CMP0068)
    set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
 endif()
 
-project(polarphp C CXX)
+if(NOT DEFINED POLAR_VERSION_MAJOR)
+   set(POLAR_VERSION_MAJOR 0)
+endif()
+if(NOT DEFINED POLAR_VERSION_MINOR)
+   set(POLAR_VERSION_MINOR 0)
+endif()
+if(NOT DEFINED POLAR_VERSION_PATCH)
+   set(POLAR_VERSION_PATCH 1)
+endif()
+if(NOT DEFINED POLAR_VERSION_SUFFIX)
+   set(POLAR_VERSION_SUFFIX git)
+endif()
+
+if (NOT POLAR_PACKAGE_VERSION)
+   set(POLAR_PACKAGE_VERSION
+      "${POLAR_VERSION_MAJOR}.${POLAR_VERSION_MINOR}.${POLAR_VERSION_PATCH}-${POLAR_VERSION_SUFFIX}")
+endif()
+
+if (NOT POLAR_VERSION)
+   set(POLAR_VERSION
+      "${POLAR_VERSION_MAJOR}.${POLAR_VERSION_MINOR}.${POLAR_VERSION_PATCH}")
+endif()
+
+math(EXPR POLAR_VERSION_ID ${POLAR_VERSION_MAJOR}*10000+${POLAR_VERSION_MINOR}*100+${POLAR_VERSION_PATCH})
+
+set(POLAR_PACKAGE_NAME polarphp)
+set(POLAR_PACKAGE_STRING "${POLAR_PACKAGE_NAME} ${POLAR_PACKAGE_VERSION}")
+set(POLAR_PACKAGE_BUGREPORT "https://polarphp.org/bugs/")
+
+set(POLAR_BUG_REPORT_URL "${POLAR_PACKAGE_BUGREPORT}" CACHE STRING
+   "Default URL where bug reports are to be submitted.")
+
+project(${POLAR_PACKAGE_NAME} LANGUAGES C CXX
+   VERSION ${POLAR_VERSION_MAJOR}.${POLAR_VERSION_MINOR}.${POLAR_VERSION_PATCH})
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
    message(STATUS "No build type selected, default to Debug")
@@ -27,6 +60,7 @@ endif()
 
 set(POLAR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}") # --src-root
 set(POLAR_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}") # --prefix
+
 set(POLAR_THIRDPARTY_DIR "${POLAR_SOURCE_DIR}/thirdparty")
 set(POLAR_DEPS_INSTALL_DIR "${POLAR_BINARY_DIR}/depslibs")
 set(POLAR_CMAKE_MODULES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
@@ -34,11 +68,18 @@ set(POLAR_MAIN_INCLUDE_DIR "${POLAR_SOURCE_DIR}/include")
 set(POLAR_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include") # --includedir
 set(POLAR_MAIN_INCLUDE_DIR "${POLAR_SOURCE_DIR}/include")
 set(POLAR_TEST_DIR "${POLAR_SOURCE_DIR}/tests")
+set(POLAR_ASSET_DIR "${POLAR_SOURCE_DIR}/assets")
 set(POLAR_CMAKE_TEST_CODE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake/codes)
 set(POLAR_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_NAME})
 string(TOLOWER ${POLAR_SYSTEM_NAME} POLAR_SYSTEM_NORMAL_NAME)
 set(POLAR_CONFIGURE_TEMP_DIR ${POLAR_BINARY_DIR}/conf_temp)
-set(POLAR_HEADER_INSTALL_DIR ${CMAKE_PREFIX_PATH}/include/php)
+set(POLAR_HEADER_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/php)
+
+# for test only
+set(POLAR_REGRESSION_TEST_BINARY_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/tests/bin")
+set(POLAR_REGRESSION_LIB_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/tests/lib")
+set(POLAR_UNITTEST_TEST_BINARY_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/unittests/bin")
+set(POLAR_UNITTEST_LIB_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/unittests/lib")
 
 # Add path for custom CMake modules.
 list(APPEND CMAKE_MODULE_PATH
@@ -160,12 +201,12 @@ option(POLAR_DISABLE_INLINE_OPTIMIZATION
    "If building zend_execute.lo fails, try this switch"
    OFF)
 
-set(POLAR_CONFIG_FILE_PATH "Default" CACHE string "Set the path in which to look for php.ini")
-set(POLAR_CONFIG_FILE_SCAN_DIR "Default" CACHE string "Set the path where to scan for configuration files")
+set(POLARPHP_CONFIG_FILE_PATH "Default" CACHE string "Set the path in which to look for php.ini")
+set(POLARPHP_CONFIG_FILE_SCAN_DIR "Default" CACHE string "Set the path where to scan for configuration files")
 
 option(POLAR_ENABLE_SIGCHILD
    "whether to enable PHP's own SIGCHLD handler"
-   OFF)
+   ON)
 
 option(POLAR_ENABLE_DMALLOC
    "whether to enable dmalloc"
@@ -209,18 +250,20 @@ if (POLAR_USE_FOLDERS)
    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
 
+option(POLAR_ENABLE_BACKTRACES "Enable embedding backtraces on crash." ON)
+if(POLAR_ENABLE_BACKTRACES)
+   set(ENABLE_BACKTRACES 1)
+endif()
+
 set(POLAR_WITH_TSRM_PTH_CONFIG "pth-config" CACHE FILEPATH "Use GNU Pth")
 
 set(POLAR_LIBDIR_SUFFIX "" CACHE STRING "Define suffix of library directory name (32/64)" )
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+   set(POLAR_LIBDIR_SUFFIX 64)
+endif()
 
 set(POLAR_TOOLS_INSTALL_DIR "bin" CACHE STRING "Path for binary subdirectory (defaults to 'bin')")
-mark_as_advanced(LLVM_TOOLS_INSTALL_DIR)
-
-option(POLAR_ENABLE_FFI "Use libffi to call external functions from the interpreter" OFF)
-set(FFI_LIBRARY_DIR "" CACHE PATH "Additional directory, where CMake should search for libffi.so")
-set(FFI_INCLUDE_DIR "" CACHE PATH "Additional directory, where CMake should search for ffi.h or ffi/ffi.h")
-
-option(POLAR_ENABLE_TERMINFO "Use terminfo database if available." ON)
+mark_as_advanced(POLAR_TOOLS_INSTALL_DIR)
 
 option(POLAR_ENABLE_PIC "Build Position-Independent Code" ON)
 option(POLAR_ENABLE_WARNINGS "Enable compiler warnings." ON)
@@ -233,6 +276,7 @@ else()
    option(POLAR_ENABLE_LOCAL_SUBMODULE_VISIBILITY "Compile with -fmodules-local-submodule-visibility." ON)
 endif()
 
+option(POLAR_ENABLE_EXPENSIVE_CHECKS "Enable expensive checks" OFF)
 option(POLAR_ENABLE_LLD "Use lld as C and C++ linker." OFF)
 option(POLAR_ENABLE_PEDANTIC "Compile with pedantic enabled." ON)
 option(POLAR_ENABLE_WERROR "Fail and stop if a warning is triggered." OFF)
@@ -243,16 +287,62 @@ else()
    option(POLAR_ENABLE_ASSERTIONS "Enable assertions" ON)
 endif()
 
+set(POLAR_ABI_BREAKING_CHECKS "WITH_ASSERTS" CACHE STRING
+   "Enable abi-breaking checks.  Can be WITH_ASSERTS, FORCE_ON or FORCE_OFF.")
+
+option(POLAR_ENABLE_CRASH_OVERRIDES "Enable crash overrides." ON)
+if(POLAR_ENABLE_CRASH_OVERRIDES)
+   set(ENABLE_CRASH_OVERRIDES 1)
+endif()
+
 option(POLAR_EXTERNALIZE_DEBUGINFO
    "Generate dSYM files and strip executables and libraries (Darwin Only)" OFF)
 
 option(POLAR_BUILD_TESTS
    "Build polarphp unit tests. If OFF, just generate build targets." OFF)
-option(POLAR_INCLUDE_TESTS "Generate build targets for the polarphp unit tests." ON)
+option(POLAR_BUILD_UNITTESTS "Generate build targets for the polarphp unit tests." ON)
+
+option(POLAR_ENABLE_TERMINFO "Use terminfo database if available." ON)
+option(POLAR_ENABLE_ZLIB "Use zlib for compression/decompression if available." ON)
+# Override the default target with an environment variable named by POLAR_TARGET_TRIPLE_ENV.
+set(POLAR_TARGET_TRIPLE_ENV CACHE STRING "The name of environment variable to override default target. Disabled by blank.")
+mark_as_advanced(POLAR_TARGET_TRIPLE_ENV)
+
+# devel options
+option(POLAR_DEV_BUILD_DEVTOOLS_TESTS "turn on to build tests of devtools" OFF)
+option(POLAR_DEV_BUILD_POLARPHP_TESTS "turn on to build tests of devtools" ON)
+option(POLAR_DEV_BUILD_LLVM_UNITTEST "turn on llvm support libraries unitests" OFF)
+option(POLAR_DEV_BUILD_VMAPI_UNITEST "turn on to build unittests of vmapi" ON)
+
+# install dir setup options
+set(POLAR_INSTALL_BIN_DIR "" CACHE STRING
+   "Custom install bin directory of polarphp.")
+set(POLAR_INSTALL_LIB_DIR "" CACHE STRING
+   "Custom install lib directory of polarphp.")
+set(POLAR_INSTALL_DATA_DIR "" CACHE STRING
+   "Custom install data directory of polarphp.")
+set(POLAR_INSTALL_CFG_DIR "" CACHE STRING
+   "Custom install config directory of polarphp.")
+set(POLAR_INSTALL_LOCAL_STATE_DIR "" CACHE STRING
+   "Custom install local state directory of polarphp.")
+set(POLAR_DEFAULT_INCLUDE_DIR "" CACHE STRING
+   "Custom default include directory of polarphp.")
+
+mark_as_advanced(POLAR_INSTALL_BIN_DIR)
+mark_as_advanced(POLAR_INSTALL_LIB_DIR)
+mark_as_advanced(POLAR_INSTALL_DATA_DIR)
+mark_as_advanced(POLAR_INSTALL_CFG_DIR)
+mark_as_advanced(POLAR_INSTALL_LOCAL_STATE_DIR)
+
+if (POLAR_BUILD_TYPE STREQUAL "debug")
+   set(POLAR_DEBUG_BUILD ON)
+endif()
 
 # They are used as destination of target generators.
 set(POLAR_RUNTIME_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/bin)
 set(POLAR_LIBRARY_OUTPUT_INTDIR ${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/lib${POLAR_LIBDIR_SUFFIX})
+get_filename_component(POLAR_RUNTIME_OUTPUT_INTDIR ${POLAR_RUNTIME_OUTPUT_INTDIR} ABSOLUTE)
+get_filename_component(POLAR_LIBRARY_OUTPUT_INTDIR ${POLAR_LIBRARY_OUTPUT_INTDIR} ABSOLUTE)
 set(POLAR_TOOLS_BINARY_DIR ${POLAR_RUNTIME_OUTPUT_INTDIR}) # --bindir
 set(POLAR_LIBRARY_DIR      ${POLAR_LIBRARY_OUTPUT_INTDIR}) # --libdir
 
@@ -270,6 +360,8 @@ else()
    set(POLAR_SHLIB_OUTPUT_INTDIR ${POLAR_LIBRARY_OUTPUT_INTDIR})
 endif()
 
+file(TO_NATIVE_PATH "/" DIR_SEPARATOR)
+
 # Sanity check our source directory to make sure that we are not trying to
 # generate an in-source build (unless on MSVC_IDE, where it is ok), and to make
 # sure that we don't have any stray generated files lying around in the tree
@@ -286,20 +378,65 @@ endif()
 set(POLAR_COMPILE_DEFINITIONS "")
 set(POLAR_COMPILE_FLAGS "")
 set(POLAR_COMMON_DEPENDS "")
+set(POLAR_RT_REQUIRE_LIBS "")
 
 # setup php version info
 polar_setup_php_version()
 
+# setup polarphp env const
+
+string(STRIP "${POLAR_INSTALL_BIN_DIR}"         POLAR_INSTALL_BIN_DIR)
+string(STRIP "${POLAR_INSTALL_LIB_DIR}"         POLAR_INSTALL_LIB_DIR)
+string(STRIP "${POLAR_INSTALL_DATA_DIR}"        POLAR_INSTALL_DATA_DIR)
+string(STRIP "${POLAR_INSTALL_CFG_DIR}"         POLAR_INSTALL_CFG_DIR)
+string(STRIP "${POLAR_INSTALL_LOCAL_STATE_DIR}" POLAR_INSTALL_LOCAL_STATE_DIR)
+string(STRIP "${POLAR_DEFAULT_INCLUDE_DIR}"     POLAR_DEFAULT_INCLUDE_DIR)
+
+if (POLAR_INSTALL_BIN_DIR STREQUAL "")
+   set(POLAR_INSTALL_BIN_DIR "${POLAR_RUNTIME_OUTPUT_INTDIR}")
+endif()
+
+if (POLAR_INSTALL_LIB_DIR STREQUAL "")
+   set(POLAR_INSTALL_LIB_DIR "${POLAR_LIBRARY_OUTPUT_INTDIR}")
+endif()
+
+if (POLAR_INSTALL_DATA_DIR STREQUAL "")
+   set(POLAR_INSTALL_DATA_DIR "${POLAR_BINARY_DIR}/share/polarphp")
+endif()
+
+if (POLAR_INSTALL_CFG_DIR STREQUAL "")
+   set(POLAR_INSTALL_CFG_DIR "${POLAR_BINARY_DIR}/etc")
+endif()
+
+if (POLAR_INSTALL_LOCAL_STATE_DIR STREQUAL "")
+   set(POLAR_INSTALL_LOCAL_STATE_DIR "${POLAR_BINARY_DIR}/var")
+endif()
+
+if (POLAR_DEFAULT_INCLUDE_DIR STREQUAL "")
+   set(POLAR_DEFAULT_INCLUDE_DIR ".:${POLAR_INSTALL_DATA_DIR}/include")
+endif()
+
+set(POLAR_INSTALL_MAN_DIR ${POLAR_BINARY_DIR}/share/man)
+set(POLAR_EXECUTABLE_FILEPATH ${POLAR_RUNTIME_OUTPUT_INTDIR}/polar)
+
+# processing php.ini paths
+# TODO at unix system, when build in release mode
+# we need put php.ini int /etc directory
+if (POLARPHP_CONFIG_FILE_PATH STREQUAL "Default")
+   set(POLARPHP_CONFIG_FILE_PATH ${POLAR_INSTALL_CFG_DIR}/polarphp)
+   if (NOT EXISTS ${POLARPHP_CONFIG_FILE_PATH})
+      file(MAKE_DIRECTORY ${POLARPHP_CONFIG_FILE_PATH})
+   endif()
+endif()
+if (POLARPHP_CONFIG_FILE_SCAN_DIR STREQUAL "Default")
+   set(POLARPHP_CONFIG_FILE_SCAN_DIR ${POLARPHP_CONFIG_FILE_PATH}/conf.d)
+   if (NOT EXISTS ${POLARPHP_CONFIG_FILE_SCAN_DIR})
+      file(MAKE_DIRECTORY ${POLARPHP_CONFIG_FILE_SCAN_DIR})
+   endif()
+endif()
+
 message("build polarphp version: ${POLAR_PACKAGE_VERSION}")
 message("build polarphp version id: ${POLAR_VERSION_ID}")
-
-set(POLAR_PACKAGE_NAME polarphp)
-set(POLAR_PACKAGE_STRING "${POLAR_PACKAGE_NAME} ${POLAR_PACKAGE_VERSION}")
-set(POLAR_BUG_REPORT_URL "http://polarphp.org/bugs/")
-set(PACKAGE_NAME ${POLAR_PACKAGE_NAME})
-set(PACKAGE_STRING ${POLAR_PACKAGE_STRING})
-set(PACKAGE_BUGREPORT ${POLAR_BUG_REPORT_URL})
-set(PACKAGE_VERSION ${POLAR_PACKAGE_VERSION})
 
 # add /usr/local/bin to PATH Env var
 set(ENV{PATH} "/usr/local/bin:$ENV{PATH}")
@@ -310,24 +447,35 @@ endif()
 
 include(CheckCompilerVersion)
 include(DetermineGCCCompatible)
+include(DetectHostEnvironment)
+
+# set compiler info
+set(POLAR_COMPILER_NAME ${CMAKE_CXX_COMPILER_ID})
+set(POLAR_COMPILER_VERSION ${CMAKE_CXX_COMPILER_VERSION})
+
+# By default, we target the host, but this can be overridden at CMake
+# invocation time.
+set(POLAR_DEFAULT_TARGET_TRIPLE "${POLAR_HOST_TRIPLE}" CACHE STRING
+   "Default target for which LLVM will generate code." )
+set(TARGET_TRIPLE "${POLAR_DEFAULT_TARGET_TRIPLE}")
+message(STATUS "polarphp host triple: ${POLAR_HOST_TRIPLE}")
+message(STATUS "polarphp default target triple: ${POLAR_DEFAULT_TARGET_TRIPLE}")
 include(HandlePolarOptions)
 include(ProcesseRequirePackages)
-include(DetectHostEnvironment)
 
 # Configuring Zend and TSRM.
 include(CheckTsrm)
 include(CheckZend)
 
-message("${POLAR_COMPILE_DEFINITIONS}")
-#add_compile_definitions(${POLAR_COMPILE_DEFINITIONS})
-
 string(TIMESTAMP _buildDate "%Y-%m-%d %H:%M")
 
 if (POLAR_BUILD_TYPE STREQUAL "debug")
-   if (NOT PHP_BUILD_DATE)
-      set(PHP_BUILD_DATE "${_buildDate}" CACHE STRING "polarphp build date")
-      mark_as_advanced(PHP_BUILD_DATE)
-   endif()
+   #   if (NOT PHP_BUILD_DATE)
+   #      set(PHP_BUILD_DATE "${_buildDate}" CACHE STRING "polarphp build date")
+   #      mark_as_advanced(PHP_BUILD_DATE)
+   #   endif()
+   # the birthday of PHP language
+   set(PHP_BUILD_DATE "1995/06/08")
 else()
    set(PHP_BUILD_DATE ${_buildDate})
 endif()
@@ -335,29 +483,32 @@ endif()
 set(PHP_OS ${POLAR_SYSTEM_NAME})
 set(POLAR_OS ${POLAR_SYSTEM_NAME})
 
+# setup default build rpath
+set(CMAKE_BUILD_RPATH "${POLAR_DEPS_INSTALL_DIR}/lib")
+
 include_directories(${POLAR_SOURCE_DIR}
    ${POLAR_MAIN_INCLUDE_DIR}
-   ${POLAR_MAIN_INCLUDE_DIR}/php
-   ${POLAR_MAIN_INCLUDE_DIR}/php/global
-   ${POLAR_MAIN_INCLUDE_DIR}/php/zend
-   ${POLAR_MAIN_INCLUDE_DIR}/php/tsrm
-   ${POLAR_SOURCE_DIR}/src/Zend
-   ${POLAR_SOURCE_DIR}/src/TSRM
+   ${POLAR_MAIN_INCLUDE_DIR}/polarphp
    ${POLAR_INCLUDE_DIR}
-   ${POLAR_INCLUDE_DIR}/php
-   ${POLAR_INCLUDE_DIR}/php/global
-   ${POLAR_INCLUDE_DIR}/php/vm/zend
-   ${POLAR_INCLUDE_DIR}/php/vm/tsrm)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+   ${POLAR_INCLUDE_DIR}/polarphp)
 
 include(ImportThirdparty)
 
-add_subdirectory(main)
-add_subdirectory(src)
+add_subdirectory(assets)
 add_subdirectory(include)
+add_subdirectory(src)
+add_subdirectory(stdlib)
 add_subdirectory(tools)
+add_subdirectory(thirdparty)
+add_subdirectory(artifacts)
 
-if (POLAR_INCLUDE_TESTS)
+if (POLAR_BUILD_TESTS)
+   polar_check_headers(glob)
+   include(LitUtils)
+   #setup some important lit path
+   set(POLAR_LIT_RUNTIME_DIR ${POLAR_BINARY_DIR}/litruntime)
+   set(POLAR_LIT_TEST_BIN_DIR ${POLAR_LIT_RUNTIME_DIR}/bin)
+   set(POLAR_LIT_TEST_LIB_DIR ${POLAR_LIT_RUNTIME_DIR}/lib)
    add_subdirectory(devtools)
    add_subdirectory(unittests)
    add_subdirectory(tests)

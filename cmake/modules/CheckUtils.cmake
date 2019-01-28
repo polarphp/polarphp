@@ -4,8 +4,8 @@
 # Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
-# See http://polarphp.org/LICENSE.txt for license information
-# See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+# See https://polarphp.org/LICENSE.txt for license information
+# See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 
 include(CheckCSourceRuns)
 include(CheckFunctionExists)
@@ -117,6 +117,9 @@ macro(polar_check_headers)
    foreach(_filename ${ARGV})
       polar_generate_header_guard(${_filename} _guardName)
       check_include_file(${_filename} ${_guardName})
+      if (${${_guardName}})
+         set(POLAR_${_guardName} ON)
+      endif()
    endforeach()
 endmacro()
 
@@ -663,6 +666,9 @@ macro(polar_check_funcs)
    foreach(_func ${ARGV})
       string(TOUPPER ${_func} upcase)
       check_function_exists(${_func} HAVE_${upcase})
+      if (${HAVE_${upcase}})
+         set(POLAR_HAVE_${upcase} ON)
+      endif()
    endforeach()
 endmacro()
 

@@ -1,0 +1,12 @@
+// RUN: filechecker --check-prefix B --check-prefix BOTH --input-file %s %s
+// RUN: filechecker --check-prefix A --check-prefix BOTH --input-file %s %s
+// RUN: filechecker --check-prefixes B --check-prefixes BOTH --input-file %s %s
+// RUN: filechecker --check-prefixes A --check-prefixes BOTH --input-file %s %s
+
+; A: {{a}}aaaaa
+; B: {{b}}bbbb
+; BOTH: {{q}}qqqqq
+aaaaaa
+bbbbb
+qqqqqq
+ccccc

@@ -4,8 +4,8 @@
 # Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
-# See http://polarphp.org/LICENSE.txt for license information
-# See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+# See https://polarphp.org/LICENSE.txt for license information
+# See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 
 macro(polar_check_libzend_bison)
    # we only support certain bison versions;
@@ -14,11 +14,19 @@ macro(polar_check_libzend_bison)
    set(bsionVersionExclude "")
    set(bisonVersion "none")
    string(REPLACE "." ";" _versionParts ${BISON_VERSION})
+   list(LENGTH _versionParts _bisonVersionPartsLen)
+
    list(GET _versionParts 0 _majorVersion)
    list(GET _versionParts 1 _minorVersion)
-   list(GET _versionParts 2 _patchVersion)
+   if (_bisonVersionPartsLen EQUAL 3)
+      list(GET _versionParts 2 _patchVersion)
+   else()
+      set(_patchVersion 0)
+   endif()
+
    math(EXPR BSION_VERSION_NUM "${_majorVersion} * 100 + ${_minorVersion} * 10 + ${_patchVersion}")
    if (BSION_VERSION_NUM GREATER_EQUAL bisonVersionMin)
+      message("${BSION_VERSION_NUM}xxxxxxx")
       set(bisonVersion "${BISON_VERSION} (ok)")
       foreach(excludeVersion ${bsionVersionExclude})
          if (excludeVersion STREQUAL BISON_VERSION)
@@ -193,9 +201,9 @@ macro(polar_check_libzend_basic_requires)
    polar_check_funcs(memcpy strdup getpid kill strtod strtol finite fpclass sigsetjmp)
    polar_check_broken_sprintf()
 
-   check_symbol_exists(isfinite math.h HAVE_DECL_ISFINITE)
-   check_symbol_exists(isnan math.h HAVE_DECL_ISNAN)
-   check_symbol_exists(isinf math.h HAVE_DECL_ISINF)
+   polar_check_symbol_exists(isfinite math.h HAVE_DECL_ISFINITE)
+   polar_check_symbol_exists(isnan math.h HAVE_DECL_ISNAN)
+   polar_check_symbol_exists(isinf math.h HAVE_DECL_ISINF)
 
    polar_check_zend_fp_except()
    polar_check_zend_float_precision()
@@ -224,17 +232,6 @@ macro(polar_check_libzend_basic_requires)
       " checkDvalToLvalCastOK)
    if (checkDvalToLvalCastOK)
       set(ZEND_DVAL_TO_LVAL_CAST_OK ON)
-   endif()
-endmacro()
-
-macro(polar_check_libzend_libdl)
-   check_library_exists(dl dlopen "" HAVE_DL)
-   check_function_exists(dlopen HAVE_DLOPEN)
-   if (HAVE_DL)
-      polar_append_flag(-ldl CMAKE_EXE_LINKER_FLAGS CMAKE_SHARED_LINKER_FLAGS)
-   endif()
-   if (HAVE_DLOPEN)
-      set(HAVE_LIBDL ON)
    endif()
 endmacro()
 

@@ -1,0 +1,7 @@
+FROM polarphp_base_env:latest
+COPY polarphp.tar.gz polarphp.tar.gz
+COPY main.php main.php
+RUN mkdir ~/temp/ && mv main.php ~/temp
+RUN tar -xzf polarphp.tar.gz && mkdir build && cd build && \
+cmake -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Debug -DPOLAR_BUILD_TESTS=OFF ../polarphp && \ 
+make -j4 && make install && cd ../ && rm polarphp.tar.gz && rm -Rf polarphp && rm -Rf build

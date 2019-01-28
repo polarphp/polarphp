@@ -4,8 +4,8 @@
 # Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
-# See http://polarphp.org/LICENSE.txt for license information
-# See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+# See https://polarphp.org/LICENSE.txt for license information
+# See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
 # Created by polarboy on 2018/08/22.
 
@@ -100,6 +100,23 @@ endif()
 if(POLAR_ENABLE_EXPENSIVE_CHECKS)
    add_definitions(-DEXPENSIVE_CHECKS)
    add_definitions(-D_GLIBCXX_DEBUG)
+endif()
+
+string(TOUPPER "${POLAR_ABI_BREAKING_CHECKS}" uppercase_POLAR_ABI_BREAKING_CHECKS)
+
+if(uppercase_POLAR_ABI_BREAKING_CHECKS STREQUAL "WITH_ASSERTS")
+   if( POLAR_ENABLE_ASSERTIONS)
+      set( POLAR_ENABLE_ABI_BREAKING_CHECKS 1)
+   endif()
+elseif(uppercase_POLAR_ABI_BREAKING_CHECKS STREQUAL "FORCE_ON")
+   set(POLAR_ENABLE_ABI_BREAKING_CHECKS 1 )
+elseif(uppercase_POLAR_ABI_BREAKING_CHECKS STREQUAL "FORCE_OFF")
+   # We don't need to do anything special to turn off ABI breaking checks.
+elseif(NOT DEFINED POLAR_ABI_BREAKING_CHECKS)
+   # Treat POLAR_ABI_BREAKING_CHECKS like "FORCE_OFF" when it has not been
+   # defined.
+else()
+   message(FATAL_ERROR "Unknown value for POLAR_ABI_BREAKING_CHECKS: \"${POLAR_ABI_BREAKING_CHECKS}\"!")
 endif()
 
 if(WIN32)

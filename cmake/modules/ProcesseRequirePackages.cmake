@@ -4,13 +4,13 @@
 # Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
-# See http://polarphp.org/LICENSE.txt for license information
-# See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+# See https://polarphp.org/LICENSE.txt for license information
+# See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
 # Created by polarboy on 2018/08/22.
 
 # find dependence package
-find_package(RE2C)
+find_package(Re2c)
 if (${RE2C_FOUND})
    message("using re2c version: ${RE2C_VERSION}")
 endif()
@@ -57,3 +57,38 @@ if (NOT POLAR_PROG_SED)
 endif()
 
 find_package(UUID)
+
+if (POLAR_INCLUDE_TESTS)
+   find_package(Curses REQUIRED)
+endif()
+
+find_package(Backtrace)
+set(HAVE_BACKTRACE ${Backtrace_FOUND})
+set(BACKTRACE_HEADER ${Backtrace_HEADER})
+
+# Don't look for these libraries on Windows.
+if (NOT PURE_WINDOWS)
+   if(POLAR_ENABLE_TERMINFO)
+      set(HAVE_TERMINFO 0)
+      foreach(library tinfo terminfo curses ncurses ncursesw)
+         string(TOUPPER ${library} library_suffix)
+         polar_check_library_exists(${library} setupterm "" HAVE_TERMINFO_${library_suffix})
+         if(HAVE_TERMINFO_${library_suffix})
+            set(HAVE_TERMINFO 1)
+            set(TERMINFO_LIBS "${library}")
+            break()
+         endif()
+      endforeach()
+   else()
+      set(HAVE_TERMINFO 0)
+   endif()
+endif()
+
+# find icu package for unicode
+# for macos install icu by brew
+if (APPLE)
+   list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/icu4c)
+endif()
+find_package(ICU COMPONENTS data i18n io tu uc REQUIRED)
+message("found icu version: ${ICU_VERSION}")
+include_directories(${ICU_INCLUDE_DIRS})

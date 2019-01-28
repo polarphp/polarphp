@@ -1,6 +1,6 @@
-<p align="center">
-   <img width="350" src ="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/polarphp.png?sanitize=true"/>
-</p>
+<img width="350" src ="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/polarphp.png?sanitize=true"/>
+
+阅读本文档其他语言版本: [English](README.en_US.md), **简体中文**.
 
 ## 为什么要做 polarphp 项目
 
@@ -21,13 +21,82 @@
 1. 使用`cmake`对`zend VM`进行编译，生成`polarphp`定制版的`PHP`语言虚拟机
 2. 语言支持项目，语言测试框架，移植`LLVM`项目的`lit`测试框架
 3. 实现`polarphp`驱动程序，实现从命令行执行`PHP`代码
-4. 对`polarphp`虚拟机进行回归测试，暂定跑通`PHP`官网跟语言虚拟机相关的测试
+4. 对`polarphp`虚拟机进行回归测试，暂定跑通`PHP`的语言虚拟机相关回归测试
 5. 实现`polarphp`的内置函数
-6. 发布核心虚拟机的`docker`容器
+6. 发布核心虚拟机的`docker`镜像
 7. 整合`libpdk`运行时框架
 8. 实现人性化安装，尽量以最少的步骤进行`polarphp`的安装
 9. 实现包管理器
 10. 实现语言配套小工具，比如文档生成工具等等
+
+## 开始体验
+
+### 克隆`polarphp`项目库
+```
+git clone https://github.com/polarphp/polarphp.git
+cd polarphp
+git submodule init
+git submodule update
+git checkout v0.0.1-alpha
+```
+### 运行脚本
+```
+./devtools/scripts/build_polarphp.sh
+```
+这个时候脚本开始编译相关镜像，耗时比较长，请您耐心等待。等待编译完成，您运行：
+```
+docker images
+```
+这个时候请确认在输出中有如下镜像：
+1. polarphp_base_env
+2. polarphp_debug
+
+如果没有问题，我们开始测试`polarphp`是否在镜像中正常运行。
+```
+docker run --rm -it polarphp_debug
+```
+进入容器后，输入我们的`polarphp`命令行程序
+```
+polar --version
+```
+如果您得到下面的输出：
+```
+polarphp 0.0.1-git (built: 2019-01-27 12:22)
+Copyright (c) 2016-2018 The polarphp foundation (https://polar.foundation)
+Zend Engine v3.3.0-dev, Copyright (c) 1998-2018 Zend Technologies
+```
+恭喜您，您已经成功编译了`polarphp`运行时环境。
+在编译镜像的时候，我们在`~/temp/`文件夹中放入了一个测试脚本
+```php
+if (function_exists('\php\retrieve_version_str')) {
+    echo "version str: " . \php\retrieve_version_str() . "\n";
+}
+
+if (function_exists('\php\retrieve_major_version')) {
+    echo "major version: " . \php\retrieve_major_version() . "\n";
+}
+
+if (function_exists('\php\retrieve_minor_version')) {
+    echo "minor version: " . \php\retrieve_minor_version() . "\n";
+}
+
+if (function_exists('\php\retrieve_patch_version')) {
+    echo "patch version: " . \php\retrieve_patch_version() . "\n";
+}
+
+```
+您可以运行一下命名：
+```
+polar ~/temp/main.php
+```
+如果没有错误，您将得到下面的输出：
+```
+version str: polarphp 0.0.1-git
+major version: 0
+minor version: 0
+patch version: 1
+```
+感谢您测试`polarphp`，有什么问题，请扫描下面的微信二维码进群交流。
 
 ## 社区
 目前我们暂时只针对中国的用户，所以采用了微信和`QQ`群的交流方式，下面是二维码，有兴趣的同学可以扫码加入：
@@ -78,17 +147,17 @@
     <tr>
       <td align="center" valign="middle">
         <a href="https://www.oschina.net/" target="_blank">
-          <img width="177px" src="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/osc.svg?sanitize=true">
+          <img width="177px" src="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/osc.svg?sanitize=true">
         </a>
       </td>
       <td align="center" valign="middle">
         <a href="https://gitee.com/?from=polarphp.org" target="_blank">
-          <img width="177px" src="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/gitee.svg?sanitize=true">
+          <img width="177px" src="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/gitee.svg?sanitize=true">
         </a>
       </td>
       <td align="center" valign="middle">
         <a href="http://www.hacknown.com/" target="_blank">
-          <img width="177px" src="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/hacknown.svg?sanitize=true">
+          <img width="177px" src="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/hacknown.svg?sanitize=true">
         </a>
       </td>
     </tr><tr></tr>

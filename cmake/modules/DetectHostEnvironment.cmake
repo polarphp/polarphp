@@ -4,8 +4,8 @@
 # Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
-# See http://polarphp.org/LICENSE.txt for license information
-# See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+# See https://polarphp.org/LICENSE.txt for license information
+# See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 
 include(CheckIncludeFiles)
 include(CheckTypeSize)
@@ -43,9 +43,16 @@ elseif(${_hostProcessor} MATCHES sparc.*)
    endif()
 endif()
 
+if(WIN32 AND NOT CYGWIN )
+   # We consider Cygwin as another Unix
+   set(PURE_WINDOWS 1)
+endif()
+
 # Mark symbols hidden by default if the compiler (for example, gcc >= 4)
 # supports it. This can help reduce the binary size and startup time.
-polar_add_flag_if_supported(-fvisibility=hidden VISIBILITY_HIDDEN)
+# use it just for compile zendVM
+check_c_compiler_flag("-Werror -fvisibility=hidden" "C_SUPPORTS_VISIBILITY_HIDDEN")
+polar_append_flag_if("C_SUPPORTS_VISIBILITY_HIDDEN" "-fvisibility=hidden" CMAKE_C_FLAGS)
 
 if (CMAKE_HOST_SOLARIS)
    set(_POSIX_PTHREAD_SEMANTICS ON)
@@ -114,28 +121,64 @@ endif()
 # to avoid -lnsl checks, if we already have the functions which
 # are usually in libnsl
 # Also, uClibc will bark at linking with glibc's libnsl.
-check_library_exists(socket socket "" HAVE_SOCKET)
-check_library_exists(socket socketpair "" HAVE_SOCKETPAIR)
-check_library_exists(socket htonl "" HAVE_HTONL)
-check_library_exists(nsl gethostname "" HAVE_GETHOSTNAME)
-check_library_exists(nsl gethostbyaddr "" HAVE_GETHOSTBYADDR)
-check_library_exists(nsl yp_get_default_domain "" HAVE_YP_GET_DEFAULT_DOMAIN)
-check_library_exists(dl dlopen "" HAVE_DLOPEN)
+polar_check_library_exists(socket socket "" HAVE_SOCKET)
+polar_check_library_exists(socket socketpair "" HAVE_SOCKETPAIR)
+polar_check_library_exists(socket htonl "" HAVE_HTONL)
+polar_check_library_exists(nsl gethostname "" HAVE_GETHOSTNAME)
+polar_check_library_exists(nsl gethostbyaddr "" HAVE_GETHOSTBYADDR)
+polar_check_library_exists(nsl yp_get_default_domain "" HAVE_YP_GET_DEFAULT_DOMAIN)
+polar_check_library_exists(dl dlopen "" HAVE_DLOPEN)
 
-if (HAVE_DLOPEN)
-   set(HAVE_LIBDL ON)
+if(POLAR_ENABLE_ZLIB)
+   foreach(library z zlib_static zlib)
+      string(TOUPPER ${library} library_suffix)
+      polar_check_library_exists(${library} compress2 "" HAVE_LIBZ_${library_suffix})
+      if(HAVE_LIBZ_${library_suffix})
+         set(HAVE_LIBZ 1)
+         set(ZLIB_LIBRARIES "${library}")
+         break()
+      endif()
+   endforeach()
 endif()
 
-check_library_exists(m sin "" HAVE_SIN)
-check_library_exists(c inet_aton "" HAVE_INET_ATON)
+# library checks
+if(NOT PURE_WINDOWS)
+   polar_check_library_exists(pthread pthread_create "" HAVE_LIBPTHREAD)
+   if (HAVE_LIBPTHREAD)
+      polar_check_library_exists(pthread pthread_getspecific "" HAVE_PTHREAD_GETSPECIFIC)
+      polar_check_library_exists(pthread pthread_rwlock_init "" HAVE_PTHREAD_RWLOCK_INIT)
+      polar_check_library_exists(pthread pthread_mutex_lock "" HAVE_PTHREAD_MUTEX_LOCK)
+   else()
+      # this could be Android
+      polar_check_library_exists(c pthread_create "" PTHREAD_IN_LIBC)
+      if (PTHREAD_IN_LIBC)
+         polar_check_library_exists(c pthread_getspecific "" HAVE_PTHREAD_GETSPECIFIC)
+         polar_check_library_exists(c pthread_rwlock_init "" HAVE_PTHREAD_RWLOCK_INIT)
+         polar_check_library_exists(c pthread_mutex_lock "" HAVE_PTHREAD_MUTEX_LOCK)
+      endif()
+   endif()
+   polar_check_library_exists(dl dlopen "" HAVE_LIBDL)
+   polar_check_library_exists(rt clock_gettime "" HAVE_LIBRT)
+   # we require dl library
+   polar_add_rt_require_lib(dl)
+endif()
+
+polar_check_library_exists(m sin "" HAVE_LIBM)
+if (NOT HAVE_LIBM)
+   message(FATAL_ERROR "m library is require by polarphp")
+endif()
+
+polar_add_rt_require_lib(m)
+
+polar_check_library_exists(c inet_aton "" HAVE_INET_ATON)
 if (NOT HAVE_INET_ATON)
    unset(HAVE_INET_ATON CACHE)
 endif()
-check_library_exists(resolv inet_aton "" HAVE_INET_ATON)
+polar_check_library_exists(resolv inet_aton "" HAVE_INET_ATON)
 if (NOT HAVE_INET_ATON)
    unset(HAVE_INET_ATON CACHE)
 endif()
-check_library_exists(bind inet_aton "" HAVE_INET_ATON)
+polar_check_library_exists(bind inet_aton "" HAVE_INET_ATON)
 
 # Then headers.
 # -------------------------------------------------------------------------
@@ -149,10 +192,8 @@ polar_check_headers(
    inttypes.h
    stdint.h
    dirent.h
+   link.h
    ApplicationServices/ApplicationServices.h
-   sys/param.h
-   sys/types.h
-   sys/time.h
    netinet/in.h
    alloca.h
    arpa/inet.h
@@ -175,8 +216,12 @@ polar_check_headers(
    stdarg.h
    stdlib.h
    string.h
+   strings.h
    syslog.h
    sysexits.h
+   sys/param.h
+   sys/types.h
+   sys/time.h
    sys/ioctl.h
    sys/file.h
    sys/mman.h
@@ -193,14 +238,20 @@ polar_check_headers(
    sys/varargs.h
    sys/wait.h
    sys/loadavg.h
+   sys/utsname.h
+   sys/ipc.h
    termios.h
    unistd.h
    unix.h
    utime.h
-   sys/utsname.h
-   sys/ipc.h
+   valgrind/valgrind.h
    dlfcn.h
-   assert.h)
+   assert.h
+   malloc.h
+   malloc/malloc.h
+   errno.h
+   mach/mach.h
+   zlib.h)
 
 polar_check_c_const()
 polar_check_fopen_cookie()
@@ -305,7 +356,6 @@ polar_check_funcs(
    getservbyname
    getservbyport
    gethostname
-   getrusage
    gettimeofday
    gmtime_r
    getpwnam_r
@@ -368,18 +418,80 @@ polar_check_funcs(
    vsnprintf
    vasprintf
    asprintf
-   nanosleep)
+   nanosleep
+   setproctitle
+   setproctitle_fast)
+
+# TODO use polar_check_symbol_exists or polar_check_funcs ?
+polar_check_symbol_exists(arc4random "stdlib.h" HAVE_DECL_ARC4RANDOM)
+polar_check_symbol_exists(_Unwind_Backtrace "unwind.h" HAVE__UNWIND_BACKTRACE)
+polar_check_symbol_exists(getpagesize unistd.h HAVE_GETPAGESIZE)
+polar_check_symbol_exists(sysconf unistd.h HAVE_SYSCONF)
+polar_check_symbol_exists(getrusage sys/resource.h HAVE_GETRUSAGE)
+polar_check_symbol_exists(setrlimit sys/resource.h HAVE_SETRLIMIT)
+polar_check_symbol_exists(isatty unistd.h HAVE_ISATTY)
+polar_check_symbol_exists(futimens sys/stat.h HAVE_FUTIMENS)
+polar_check_symbol_exists(futimes sys/time.h HAVE_FUTIMES)
+polar_check_symbol_exists(posix_fallocate fcntl.h HAVE_POSIX_FALLOCATE)
+polar_check_symbol_exists(malloc_zone_statistics malloc/malloc.h
+   HAVE_MALLOC_ZONE_STATISTICS)
+polar_check_symbol_exists(posix_spawn spawn.h HAVE_POSIX_SPAWN)
+polar_check_symbol_exists(pread unistd.h HAVE_PREAD)
+polar_check_symbol_exists(realpath stdlib.h HAVE_REALPATH)
+polar_check_symbol_exists(getrlimit "sys/types.h;sys/time.h;sys/resource.h" HAVE_GETRLIMIT)
+polar_check_symbol_exists(sbrk unistd.h HAVE_SBRK)
+polar_check_symbol_exists(strerror_r string.h HAVE_STRERROR_R)
+polar_check_symbol_exists(strerror_s string.h HAVE_DECL_STRERROR_S)
+# AddressSanitizer conflicts with lib/Support/Unix/Signals.inc
+# Avoid sigaltstack on Apple platforms, where backtrace() cannot handle it
+# (rdar://7089625) and _Unwind_Backtrace is unusable because it cannot unwind
+# past the signal handler after an assertion failure (rdar://29866587).
+if(HAVE_SIGNAL_H AND NOT APPLE)
+   polar_check_symbol_exists(sigaltstack signal.h HAVE_SIGALTSTACK)
+endif()
+set(CMAKE_REQUIRED_DEFINITIONS "-D_LARGEFILE64_SOURCE")
+polar_check_symbol_exists(lseek64 "sys/types.h;unistd.h" HAVE_LSEEK64)
+set(CMAKE_REQUIRED_DEFINITIONS "")
+polar_check_symbol_exists(mallctl malloc_np.h HAVE_MALLCTL)
+polar_check_symbol_exists(mallinfo malloc.h HAVE_MALLINFO)
+polar_check_symbol_exists(malloc_zone_statistics malloc/malloc.h
+   HAVE_MALLOC_ZONE_STATISTICS)
+
+if(HAVE_DLFCN_H)
+   if(HAVE_LIBDL)
+      list(APPEND CMAKE_REQUIRED_LIBRARIES dl)
+   endif()
+   polar_check_symbol_exists(dlopen dlfcn.h HAVE_DLOPEN)
+   polar_check_symbol_exists(dladdr dlfcn.h HAVE_DLADDR)
+   if(HAVE_LIBDL)
+      list(REMOVE_ITEM CMAKE_REQUIRED_LIBRARIES dl)
+   endif()
+endif()
+
+CHECK_STRUCT_HAS_MEMBER("struct stat" st_mtimespec.tv_nsec
+    "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC)
+CHECK_STRUCT_HAS_MEMBER("struct stat" st_mtim.tv_nsec
+    "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC)
+
+polar_check_symbol_exists(__GLIBC__ stdio.h POLAR_USING_GLIBC)
+if(POLAR_USING_GLIBC)
+   add_definitions(-D_GNU_SOURCE)
+   list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")
+endif()
+# This check requires _GNU_SOURCE
+polar_check_symbol_exists(sched_getaffinity sched.h HAVE_SCHED_GETAFFINITY)
+polar_check_symbol_exists(CPU_COUNT sched.h HAVE_CPU_COUNT)
 
 # Some systems (like OpenSolaris) do not have nanosleep in libc
 
-check_library_exists(rt nanosleep "" POLAR_HAVE_RT)
+polar_check_library_exists(rt nanosleep "" HAVE_RT)
 if (POLAR_HAVE_RT)
    set(HAVE_RT ON)
    set(HAVE_NANOSLEEP ON)
    set(POLAR_HAVE_NANOSLEEP ON)
-    polar_append_flag(-lrt CMAKE_EXE_LINKER_FLAGS)
-    set(HAVE_RT ON)
-    set(HAVE_NANOSLEEP ON)
+   polar_append_flag(-lrt CMAKE_EXE_LINKER_FLAGS)
+   set(HAVE_RT ON)
+   set(HAVE_NANOSLEEP ON)
 endif()
 
 # Check for getaddrinfo, should be a better way, but...
@@ -387,8 +499,8 @@ endif()
 check_c_source_runs(
    "#include <netdb.h>
    int main(){
-      struct addrinfo *g,h;g=&h;getaddrinfo(\"\",\"\",g,&g);
-      return 0;
+   struct addrinfo *g,h;g=&h;getaddrinfo(\"\",\"\",g,&g);
+   return 0;
    }" checkLinkGetAddrInfo)
 
 if(checkLinkGetAddrInfo)
@@ -401,33 +513,34 @@ if(checkLinkGetAddrInfo)
       int main(){
       struct addrinfo *ai, *pai, hints;
 
-        memset(&hints, 0, sizeof(hints));
-        hints.ai_flags = AI_NUMERICHOST;
+      memset(&hints, 0, sizeof(hints));
+      hints.ai_flags = AI_NUMERICHOST;
 
-        if (getaddrinfo(\"127.0.0.1\", 0, &hints, &ai) < 0) {
-          exit(1);
-        }
+      if (getaddrinfo(\"127.0.0.1\", 0, &hints, &ai) < 0) {
+         exit(1);
+         }
 
-        if (ai == 0) {
-          exit(1);
-        }
-
-        pai = ai;
-
-        while (pai) {
-          if (pai->ai_family != AF_INET) {
-            /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
+         if (ai == 0) {
             exit(1);
-          }
-          if (pai->ai_addr->sa_family != AF_INET) {
-            /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
-            exit(1);
-          }
-          pai = pai->ai_next;
-        }
-        freeaddrinfo(ai);
-        exit(0);
-      }" checkHaveGetAddrInfo)
+            }
+
+            pai = ai;
+
+            while (pai) {
+               if (pai->ai_family != AF_INET) {
+                  /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
+                  exit(1);
+                  }
+                  if (pai->ai_addr->sa_family != AF_INET) {
+                     /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
+                     exit(1);
+                     }
+                     pai = pai->ai_next;
+                     }
+                     freeaddrinfo(ai);
+                     exit(0);
+                     }"
+                     checkHaveGetAddrInfo)
    if (checkHaveGetAddrInfo)
       set(HAVE_GETADDRINFO ON)
    endif()
@@ -437,8 +550,8 @@ endif()
 check_c_source_runs(
    "#include <netdb.h>
    int main(){
-      int x;__sync_fetch_and_add(&x,1);
-      return 0;
+   int x;__sync_fetch_and_add(&x,1);
+   return 0;
    }" checkSyncFetchAndAdd)
 
 if (checkSyncFetchAndAdd)
@@ -540,18 +653,18 @@ if(POLAR_ENABLE_GCOV)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fprofile-arcs -ftest-coverage")
 endif()
 
-if(POLAR_CONFIG_FILE_PATH STREQUAL "Default")
+if(POLARPHP_CONFIG_FILE_PATH STREQUAL "Default")
    # if config path is default, we install php.ini in install_prefix/etc directory
    # wether we need a global variable ?
    set(PHP_CONFIG_FILE_PATH ${CMAKE_INSTALL_PREFIX}/etc)
 endif()
 
 message("checking where to scan for configuration files")
-if (POLAR_CONFIG_FILE_SCAN_DIR STREQUAL "Default")
-   set(POLAR_CONFIG_FILE_SCAN_DIR "")
+if (POLARPHP_CONFIG_FILE_SCAN_DIR STREQUAL "Default")
+   set(POLARPHP_CONFIG_FILE_SCAN_DIR "")
 endif()
-if (POLAR_CONFIG_FILE_SCAN_DIR)
-   message("using directory ${POLAR_CONFIG_FILE_SCAN_DIR} for scan configuration files")
+if (POLARPHP_CONFIG_FILE_SCAN_DIR)
+   message("using directory ${POLARPHP_CONFIG_FILE_SCAN_DIR} for scan configuration files")
 endif()
 
 if (POLAR_ENABLE_SIGCHILD)
@@ -609,46 +722,57 @@ endif()
 # invocation time.
 polar_get_host_triple(POLAR_INFERRED_HOST_TRIPLE)
 set(POLAR_HOST_TRIPLE "${POLAR_INFERRED_HOST_TRIPLE}" CACHE STRING
-    "Host on which polarphp binaries will run")
+   "Host on which polarphp binaries will run")
 
 string(REGEX MATCH "^[^-]*" POLAR_NATIVE_ARCH ${POLAR_HOST_TRIPLE})
 
 if (POLAR_NATIVE_ARCH MATCHES "i[2-6]86")
-  set(POLAR_NATIVE_ARCH X86)
+   set(POLAR_NATIVE_ARCH X86)
 elseif (POLAR_NATIVE_ARCH STREQUAL "x86")
-  set(POLAR_NATIVE_ARCH X86)
+   set(POLAR_NATIVE_ARCH X86)
 elseif (POLAR_NATIVE_ARCH STREQUAL "amd64")
-  set(POLAR_NATIVE_ARCH X86)
+   set(POLAR_NATIVE_ARCH X86)
 elseif (POLAR_NATIVE_ARCH STREQUAL "x86_64")
-  set(POLAR_NATIVE_ARCH X86)
+   set(POLAR_NATIVE_ARCH X86)
 elseif (POLAR_NATIVE_ARCH MATCHES "sparc")
-  set(POLAR_NATIVE_ARCH Sparc)
+   set(POLAR_NATIVE_ARCH Sparc)
 elseif (POLAR_NATIVE_ARCH MATCHES "powerpc")
-  set(POLAR_NATIVE_ARCH PowerPC)
+   set(POLAR_NATIVE_ARCH PowerPC)
 elseif (POLAR_NATIVE_ARCH MATCHES "aarch64")
-  set(POLAR_NATIVE_ARCH AArch64)
+   set(POLAR_NATIVE_ARCH AArch64)
 elseif (POLAR_NATIVE_ARCH MATCHES "arm64")
-  set(POLAR_NATIVE_ARCH AArch64)
+   set(POLAR_NATIVE_ARCH AArch64)
 elseif (POLAR_NATIVE_ARCH MATCHES "arm")
-  set(POLAR_NATIVE_ARCH ARM)
+   set(POLAR_NATIVE_ARCH ARM)
 elseif (POLAR_NATIVE_ARCH MATCHES "mips")
-  set(POLAR_NATIVE_ARCH Mips)
+   set(POLAR_NATIVE_ARCH Mips)
 elseif (POLAR_NATIVE_ARCH MATCHES "xcore")
-  set(POLAR_NATIVE_ARCH XCore)
+   set(POLAR_NATIVE_ARCH XCore)
 elseif (POLAR_NATIVE_ARCH MATCHES "msp430")
-  set(POLAR_NATIVE_ARCH MSP430)
+   set(POLAR_NATIVE_ARCH MSP430)
 elseif (POLAR_NATIVE_ARCH MATCHES "hexagon")
-  set(POLAR_NATIVE_ARCH Hexagon)
+   set(POLAR_NATIVE_ARCH Hexagon)
 elseif (POLAR_NATIVE_ARCH MATCHES "s390x")
-  set(POLAR_NATIVE_ARCH SystemZ)
+   set(POLAR_NATIVE_ARCH SystemZ)
 elseif (POLAR_NATIVE_ARCH MATCHES "wasm32")
-  set(POLAR_NATIVE_ARCH WebAssembly)
+   set(POLAR_NATIVE_ARCH WebAssembly)
 elseif (POLAR_NATIVE_ARCH MATCHES "wasm64")
-  set(POLAR_NATIVE_ARCH WebAssembly)
+   set(POLAR_NATIVE_ARCH WebAssembly)
 elseif (POLAR_NATIVE_ARCH MATCHES "riscv32")
-  set(POLAR_NATIVE_ARCH RISCV)
+   set(POLAR_NATIVE_ARCH RISCV)
 elseif (POLAR_NATIVE_ARCH MATCHES "riscv64")
-  set(POLAR_NATIVE_ARCH RISCV)
+   set(POLAR_NATIVE_ARCH RISCV)
 else ()
-  message(FATAL_ERROR "Unknown architecture ${POLAR_NATIVE_ARCH}")
+   message(FATAL_ERROR "Unknown architecture ${POLAR_NATIVE_ARCH}")
 endif ()
+
+# check asm_goto
+try_run(retCode compileResult
+   ${CMAKE_CURRENT_BINARY_DIR} ${POLAR_CMAKE_TEST_CODE_DIR}/test_asm_goto.c
+   COMPILE_DEFINITIONS ${POLAR_COMPILE_DEFINITIONS}
+   COMPILE_OUTPUT_VARIABLE compileOutput
+   RUN_OUTPUT_VARIABLE runOutput)
+
+if (retCode EQUAL 0)
+   set(HAVE_ASM_GOTO ON)
+endif()

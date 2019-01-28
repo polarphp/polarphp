@@ -1,0 +1,132 @@
+# Check the various features of the ShTest format.
+#
+# RUN: rm -f %t.xml
+# RUN: not %{lit} -j 1 -v %{inputs}/shtest-format --xunit-xml-output %t.xml > %t.out
+# RUN: filechecker < %t.out %s
+
+# RUN: filechecker --check-prefix XUNIT < %t.xml %s
+
+# END.
+
+# CHECK: -- Testing:
+# CHECK: PASS: top-level-suite :: argv0.littest
+# CHECK: FAIL: top-level-suite :: external_shell/fail.littest
+# CHECK-NEXT: ******************** TEST 'top-level-suite :: external_shell/fail.littest' FAILED ********************
+# CHECK: --
+# CHECK-NEXT:  echo "line 1: failed test output on stdout"
+# CHECK-NEXT:  echo "line 2: failed test output on stdout"
+# CHECK-NEXT:  cat "does-not-exist"
+# CHECK-NEXT: --
+# CHECK: cat: does-not-exist: No such file or directory
+
+# CHECK: PASS: top-level-suite :: external_shell/pass.littest
+
+# CHECK: FAIL: top-level-suite :: fail.littest
+# CHECK-NEXT: ******************** TEST 'top-level-suite :: fail.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Exit Code: 1
+
+# CHECK: Command Output (stdout):
+# CHECK: $ : RUN: at line 1
+# CHECK-NEXT: $ printf line 1: failed test output on stdout\nline 2: failed test output on stdout
+# CHECK: # command output:
+# CHECK: line 1: failed test output on stdout
+# CHECK-NEXT: line 2: failed test output on stdout
+# CHECK-NEXT: $ : RUN: at line 2
+# CHECK-NEXT: $ false
+# CHECK: note: command had no output on stdout or stderr
+# CHECK: error: command failed with exit status: 1
+
+# CHECK: UNRESOLVED: top-level-suite :: no-test-line.littest
+# CHECK: PASS: top-level-suite :: pass.littest
+# CHECK: UNSUPPORTED: top-level-suite :: requires-any-missing.littest
+# CHECK: PASS: top-level-suite :: requires-any-present.littest
+# CHECK: UNSUPPORTED: top-level-suite :: requires-missing.littest
+# CHECK: PASS: top-level-suite :: requires-present.littest
+# CHECK: UNRESOLVED: top-level-suite :: requires-star.littest
+
+# CHECK: UNSUPPORTED: top-level-suite :: requires-triple.littest
+# CHECK: PASS: top-level-suite :: unsupported-expr-false.littest
+# CHECK: UNSUPPORTED: top-level-suite :: unsupported-expr-true.littest
+# CHECK: UNRESOLVED: top-level-suite :: unsupported-star.littest
+# CHECK: UNSUPPORTED: top-level-suite :: unsupported_dir/some_test.littest
+# CHECK: PASS: top-level-suite :: xfail-expr-false.littest
+# CHECK: XFAIL: top-level-suite :: xfail-expr-true.littest
+# CHECK: XFAIL: top-level-suite :: xfail-feature.littest
+# CHECK: XFAIL: top-level-suite :: xfail-target.littest
+# CHECK: XFAIL: top-level-suite :: xfail.littest
+# CHECK: XPASS: top-level-suite :: xpass.littest
+
+# CHECK: ******************** TEST 'top-level-suite :: xpass.littest' FAILED ********************
+# CHECK: Script:
+# CHECK: Exit Code: 0
+# CHECK: Command Output (stdout):
+# CHECK: $ : RUN: at line 1
+# CHECK: $ true
+
+# CHECK: Failing Tests (2):
+# CHECK: top-level-suite :: external_shell/fail.littest
+# CHECK: top-level-suite :: fail.littest
+
+# CHECK: Unresolved Tests (3):
+# CHECK: top-level-suite :: no-test-line.littest
+# CHECK: top-level-suite :: requires-star.littest
+# CHECK: top-level-suite :: unsupported-star.littest
+
+# CHECK: Expected Passes    : 7
+# CHECK: Expected Failures  : 4
+# CHECK: Unsupported Tests  : 5
+# CHECK: Unresolved Tests   : 3
+# CHECK: Unexpected Passes  : 1
+# CHECK: Unexpected Failures: 2
+
+# XUNIT: <?xml version="1.0" encoding="UTF-8" ?>
+# XUNIT-NEXT: <testsuites>
+# XUNIT-NEXT: <testsuite name="top-level-suite"  tests="22" failures="6" skipped="5">
+# XUNIT: <testcase classname="top-level-suite" name="argv0.littest" time="0.00"/>
+# XUNIT: <testcase classname="top-level-suite.external_shell" name="fail.littest" time="0.00">
+# XUNIT-NEXT: <failure{{[ ]*}}>
+# XUNIT: </failure>
+# XUNIT-NEXT: </testcase>
+# XUNIT: <testcase classname="top-level-suite.external_shell" name="pass.littest" time="0.00"/>
+# XUNIT: <testcase classname="top-level-suite" name="fail.littest" time="0.00">
+# XUNIT-NEXT: <failure{{[ ]*}}>
+# XUNIT: </failure>
+# XUNIT-NEXT: </testcase>
+# XUNIT: <testcase classname="top-level-suite" name="no-test-line.littest" time="0.00">
+# XUNIT-NEXT: <failure{{[ ]*}}>
+# XUNIT-NEXT: </testcase>
+
+# XUNIT: <testcase classname="top-level-suite" name="pass.littest" time="0.00"/>
+# XUNIT: <testcase classname="top-level-suite" name="requires-any-missing.littest" time="0.00">
+# XUNIT-NEXT: <skipped message="{{.*}}" />
+# XUNIT-NEXT: </testcase>
+
+# XUNIT: <testcase classname="top-level-suite" name="requires-any-present.littest" time="0.00"/>
+# XUNIT: <testcase classname="top-level-suite" name="requires-missing.littest" time="0.00">
+# XUNIT-NEXT: <skipped message="{{.*}}" />
+# XUNIT-NEXT: </testcase>
+
+# XUNIT: <testcase classname="top-level-suite" name="requires-present.littest" time="0.00"/>
+# XUNIT: <testcase classname="top-level-suite" name="requires-star.littest" time="0.00">
+# XUNIT-NEXT: <failure{{[ ]*}}>
+# XUNIT: </failure>
+# XUNIT-NEXT: </testcase>
+# XUNIT: <testcase classname="top-level-suite" name="requires-triple.littest" time="0.00">
+# XUNIT-NEXT: <skipped message="Skipping because of: x86_64" />
+# XUNIT-NEXT: </testcase>
+
+# XUNIT: <testcase classname="top-level-suite.unsupported_dir" name="some_test.littest" time="0.00">
+# XUNIT-NEXT: <skipped message="Skipping because of configuration." />
+# XUNIT-NEXT: </testcase>
+
+# XUNIT: <testcase classname="top-level-suite" name="xfail-expr-false.littest" time="0.00"/>
+# XUNIT: <testcase classname="top-level-suite" name="xfail-expr-true.littest" time="0.00"/>
+# XUNIT: <testcase classname="top-level-suite" name="xfail-feature.littest" time="0.00"/>
+# XUNIT: <testcase classname="top-level-suite" name="xfail-target.littest" time="0.00"/>
+# XUNIT: <testcase classname="top-level-suite" name="xfail.littest" time="0.00"/>
+# XUNIT: <testcase classname="top-level-suite" name="xpass.littest" time="0.00">
+# XUNIT-NEXT: <failure{{[ ]*}}>
+# XUNIT: </failure>
+# XUNIT-NEXT: </testcase>
+# XUNIT: </testsuites>

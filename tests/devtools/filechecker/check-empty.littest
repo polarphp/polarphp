@@ -1,0 +1,12 @@
+# RUN: not filechecker --check-prefix FOO %s </dev/null 2>&1 | filechecker --check-prefix EMPTY-ERR %s
+# RUN: not filechecker --check-prefix NOFOO %s </dev/null 2>&1 | filechecker --check-prefix EMPTY-ERR %s
+# RUN: not filechecker --check-prefix FOO --allow-empty %s </dev/null 2>&1 | filechecker --check-prefix NO-EMPTY-ERR --check-prefix NOT-FOUND %s
+# RUN: filechecker --check-prefix NOFOO --allow-empty %s </dev/null 2>&1 | filechecker --allow-empty --check-prefix NO-EMPTY-ERR %s
+
+# FOO: foo
+# NOFOO-NOT: foo
+
+# EMPTY-ERR: filechecker error: '-' is empty.
+# EMPTY-ERR-NEXT: filechecker command line: {{.*}}filechecker{{.*}}--check-prefix {{.*}}FOO {{.*}}check-empty.littest
+# NO-EMPTY-ERR-NOT: filechecker error: '-' is empty.
+# NOT-FOUND: error: FOO: expected string not found in input

@@ -1,0 +1,12 @@
+; RUN: not filechecker --input-file %s %s --check-prefix FOO --check-prefix=BAR 2>&1 | filechecker %s
+; RUN: not filechecker --input-file %s %s --check-prefixes FOO --check-prefixes BAR 2>&1 | filechecker %s
+; RUN: not filechecker --input-file %s %s --check-prefixes BAR --check-prefixes FOO 2>&1 | filechecker %s
+
+BAR
+bar
+foo
+; BAR: ba{{z}}
+; FOO: fo{{o}}
+
+; CHECK: {{error: BAR: expected string not found in input}}
+; CHECK-NEXT: {{B}}AR: ba{{[{][{]z[}][}]}}

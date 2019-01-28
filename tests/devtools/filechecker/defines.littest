@@ -1,0 +1,18 @@
+; RUN: filechecker -D VALUE=10 --input-file %s %s
+; RUN: not filechecker -D VALUE=20 --input-file %s %s 2>&1 | filechecker %s --check-prefix ERRMSG
+;
+; RUN: not filechecker -D VALUE=10 --check-prefix NOT --input-file %s %s 2>&1 | filechecker %s --check-prefix NOT-ERRMSG
+; RUN: filechecker -D VALUE=20 --check-prefix NOT --input-file %s %s
+
+Value = 10
+; CHECK: Value = [[VALUE]]
+; NOT-NOT: Value = [[VALUE]]
+
+; ERRMSG: defines.littest:8:10: error: CHECK: expected string not found in input
+; ERRMSG: defines.littest:1:1: note: scanning from here
+; ERRMSG: defines.littest:1:1: note: with variable "VALUE" equal to "20"
+; ERRMSG: defines.littest:7:1: note: possible intended match here
+
+; NOT-ERRMSG: defines.littest:9:12: error: {{NOT}}-NOT: excluded string found in input
+; NOT-ERRMSG: defines.littest:7:1: note: found here
+; NOT-ERRMSG: defines.littest:7:1: note: with variable "VALUE" equal to "10"

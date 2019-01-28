@@ -4,8 +4,8 @@
 # Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
-# See http://polarphp.org/LICENSE.txt for license information
-# See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+# See https://polarphp.org/LICENSE.txt for license information
+# See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
 # Created by polarboy on 2018/08/22.
 
@@ -410,11 +410,12 @@ function(polar_add_library_internal name)
       # We can use PRIVATE since SO knows its dependent libs.
       set(libtype PRIVATE)
    endif()
-
    target_link_libraries(${name} ${libtype}
       ${ARG_LINK_LIBS}
       ${lib_deps}
       ${polar_libs}
+      ${POLAR_THREADS_LIBRARY}
+      ${POLAR_RT_REQUIRE_LIBS}
       )
 
    if(POLAR_COMMON_DEPENDS)
@@ -466,7 +467,7 @@ macro(polar_add_library name)
    if(BUILD_SHARED_LIBS OR ARG_SHARED)
       polar_add_library_internal(${name} SHARED ${ARG_UNPARSED_ARGUMENTS})
    else()
-      polar_add_library_internal(${name} ${ARG_UNPARSED_ARGUMENTS})
+      polar_add_library_internal(${name} STATIC ${ARG_UNPARSED_ARGUMENTS})
    endif()
 
    # Libraries that are meant to only be exposed via the build tree only are
@@ -553,7 +554,7 @@ endmacro(polar_add_loadable_module)
 
 macro(polar_add_executable name)
    cmake_parse_arguments(ARG "DISABLE_POLAR_LINK_POLAR_DYLIB;IGNORE_EXTERNALIZE_DEBUGINFO;NO_INSTALL_RPATH" "" "DEPENDS" ${ARGN})
-   polar_process_sources(ALL_FILES ${ARG_UNPARSED_ARGUMENTS} )
+   polar_process_sources(ALL_FILES ${ARG_UNPARSED_ARGUMENTS})
    list(APPEND POLAR_COMMON_DEPENDS ${ARG_DEPENDS})
    # Generate objlib
    if(POLAR_ENABLE_OBJLIB)
@@ -771,7 +772,7 @@ function(polar_setup_rpath name)
    if(POLAR_INSTALL_PREFIX AND NOT (POLAR_INSTALL_PREFIX STREQUAL CMAKE_INSTALL_PREFIX))
       set(extra_libdir ${POLAR_LIBRARY_DIR})
    elseif(POLAR_BUILD_LIBRARY_DIR)
-      set(extra_libdir ${POLAR_LIBRARY_DIR})
+      set(extra_libdir ${POLAR_BUILD_LIBRARY_DIR})
    endif()
 
    if (APPLE)
@@ -792,7 +793,7 @@ function(polar_setup_rpath name)
    endif()
 
    set_target_properties(${name} PROPERTIES
-      BUILD_WITH_INSTALL_RPATH On
+      BUILD_WITH_INSTALL_RPATH ON
       INSTALL_RPATH "${_install_rpath}"
       ${_install_name_dir})
 

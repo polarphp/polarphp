@@ -1,0 +1,15 @@
+FROM gcc:8.2.0
+RUN apt-get -y update
+
+RUN mkdir polarphp_build && cd polarphp_build &&\
+wget https://github.com/Kitware/CMake/releases/download/v3.13.3/cmake-3.13.3.tar.gz && \
+tar -xzf cmake-3.13.3.tar.gz && cd cmake-3.13.3 && ./configure && make -j4 && make install && \
+cd ../ && rm -Rf cmake-3.13.3 && rm cmake-3.13.3.tar.gz
+
+RUN wget https://github.com/skvadrik/re2c/releases/download/1.1.1/re2c-1.1.1.tar.gz && \
+tar xf re2c-1.1.1.tar.gz && cd re2c-1.1.1 && ./configure && make -j4 && make install && \
+cd ../ && rm -Rf re2c-1.1.1 && rm re2c-1.1.1.tar.gz
+
+RUN wget https://mirrors.ustc.edu.cn/gnu/bison/bison-3.3.tar.gz && \
+tar xf bison-3.3.tar.gz && cd bison-3.3 && ./configure && make -j4 && make install && \
+cd ../ && rm -Rf bison-3.3 && rm bison-3.3.tar.gz
