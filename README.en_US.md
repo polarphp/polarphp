@@ -1,6 +1,6 @@
 <img width="350" src ="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/polarphp.png?sanitize=true"/>
 
-Read this in other languages: **English**, [简体中文](README.zh_CN.md).
+Read this in other languages: **English**, [简体中文](README.md).
 
 ## Why did I launch the `polarphp` project?
 
@@ -138,7 +138,7 @@ At present, we only target Chinese users for the time being, so we use the commu
 
 ## Contribution code guidance
 ===========================
-- [CODING_STANDARDS](docs/CODING_STANDARDS)
+- [CODING_STANDARDS](CODING_STANDARDS)
 - [README.GIT-RULES](docs/README.GIT-RULES)
 - [README.MAILINGLIST_RULES](docs/README.MAILINGLIST_RULES)
 - [README.RELEASE_PROCESS](docs/README.RELEASE_PROCESS)
