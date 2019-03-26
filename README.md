@@ -1,4 +1,4 @@
-<img width="350" src ="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/polarphp.png?sanitize=true"/>
+<img width="350" src ="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/polarphp.png"/>
 
 
 Read the English version of this document: [English version Readme](README.en_US.md)
