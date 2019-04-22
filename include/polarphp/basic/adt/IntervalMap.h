@@ -1,3 +1,11 @@
+//===- llvm/ADT/IntervalMap.h - A sorted interval map -----------*- C++ -*-===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphpath.org open source project
 //
 // Copyright (c) 2017 - 2018  polarphp software foundation
@@ -1347,6 +1355,20 @@ public:
       Iterator iter(*this);
       iter.find(value);
       return iter;
+   }
+
+   /// overlaps(a, b) - Return true if the intervals in this map overlap with the
+   /// interval [a;b].
+   bool overlaps(KeyT a, KeyT b)
+   {
+      assert(Traits::nonEmpty(a, b));
+      ConstIterator iter = find(a);
+      if (!iter.valid())
+         return false;
+      // [a;b] and [x;y] overlap iff x<=b and a<=y. The find() call guarantees the
+      // second part (y = find(a).stop()), so it is sufficient to check the first
+      // one.
+      return !Traits::stopLess(b, iter.start());
    }
 };
 

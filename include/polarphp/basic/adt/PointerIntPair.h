@@ -1,3 +1,11 @@
+//===- llvm/ADT/PointerIntPair.h - Pair for pointer and int -----*- C++ -*-===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -42,6 +50,8 @@ template <typename PointerTypeype, unsigned IntBits, typename IntType = unsigned
           typename Info = PointerIntPairInfo<PointerTypeype, IntBits, PtrTraits>>
 class PointerIntPair
 {
+   // Used by MSVC visualizer and generally helpful for debugging/visualizing.
+   using InfoType = Info;
    intptr_t m_value = 0;
 
 public:

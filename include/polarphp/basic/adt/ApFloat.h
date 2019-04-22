@@ -1,3 +1,12 @@
+//===- llvm/ADT/APFloat.h - Arbitrary Precision Floating Point ---*- C++ -*-==//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -997,14 +1006,14 @@ public:
    /// Factory for NaN values.
    ///
    /// \param Negative - True iff the NaN generated should be negative.
-   /// \param type - The unspecified fill bits for creating the NaN, 0 by
+   /// \param payload - The unspecified fill bits for creating the NaN, 0 by
    /// default.  The value is truncated as necessary.
    static ApFloat getNaN(const FltSemantics &semantic, bool negative = false,
-                         unsigned type = 0)
+                         uint64_t payload = 0)
    {
-      if (type) {
-         ApInt fill(64, type);
-         return getQNaN(semantic, negative, &fill);
+      if (payload) {
+         ApInt intPayload(64, payload);
+         return getQNaN(semantic, negative, &intPayload);
       } else {
          return getQNaN(semantic, negative, nullptr);
       }
