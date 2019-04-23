@@ -73,6 +73,9 @@ public:
    SMLocation m_end;
 
    SMRange() = default;
+   SMRange(std::nullopt_t)
+   {}
+
    SMRange(SMLocation start, SMLocation end)
       : m_start(start),
         m_end(end)
