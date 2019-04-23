@@ -78,6 +78,8 @@ AARCH64_ARCH_EXT_NAME("rcpc",     aarch64::AEK_RCPC,     "+rcpc", "-rcpc")
 AARCH64_ARCH_EXT_NAME("rng",      aarch64::AEK_RAND,     "+rand",  "-rand")
 AARCH64_ARCH_EXT_NAME("memtag",   aarch64::AEK_MTE,      "+mte",   "-mte")
 AARCH64_ARCH_EXT_NAME("ssbs",     aarch64::AEK_SSBS,     "+ssbs",  "-ssbs")
+AARCH64_ARCH_EXT_NAME("sb",       aarch64::AEK_SB,       "+sb",    "-sb")
+AARCH64_ARCH_EXT_NAME("predres",  aarch64::AEK_PREDRES,  "+predres", "-predres")
 #undef AARCH64_ARCH_EXT_NAME
 
 #ifndef AARCH64_CPU_NAME
@@ -105,8 +107,8 @@ AARCH64_CPU_NAME("exynos-m2", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
                 (aarch64::AEK_CRC))
 AARCH64_CPU_NAME("exynos-m3", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
                 (aarch64::AEK_CRC))
-AARCH64_CPU_NAME("exynos-m4", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
-                (aarch64::AEK_CRC))
+AARCH64_CPU_NAME("exynos-m4", ARMV8_2A, FK_CRYPTO_NEON_FP_ARMV8, false,
+                (aarch64::AEK_FP16 | aarch64::AEK_DOTPROD))
 AARCH64_CPU_NAME("falkor", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false,
                 (aarch64::AEK_CRC | aarch64::AEK_RDM))
 AARCH64_CPU_NAME("saphira", ARMV8_3A, FK_CRYPTO_NEON_FP_ARMV8, false,
