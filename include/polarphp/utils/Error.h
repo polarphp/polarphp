@@ -1,3 +1,15 @@
+//===- llvm/Support/Error.h - Recoverable error handling --------*- C++ -*-===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+//
+// This file defines an API used to report recoverable errors.
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -1251,7 +1263,7 @@ private:
 class EcError : public ErrorInfo<EcError>
 {
    friend Error error_code_to_error(std::error_code);
-
+   virtual void getAnchor() override;
 public:
    void setErrorCode(std::error_code errorCode)
    {

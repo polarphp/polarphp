@@ -1,3 +1,11 @@
+//===----- lib/Support/Error.cpp - Error and associated utilities ---------===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -63,6 +71,7 @@ namespace utils {
 void ErrorInfoBase::getAnchor() {}
 char ErrorInfoBase::sm_id = 0;
 char ErrorList::sm_id = 0;
+void EcError::getAnchor() {}
 char EcError::sm_id = 0;
 char StringError::sm_id = 0;
 char FileError::sm_id = 0;
