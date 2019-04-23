@@ -1,3 +1,11 @@
+//===- llvm/Support/CommandLine.h - Command line handler --------*- C++ -*-===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -177,6 +185,9 @@ enum OptionHidden
 // enabled, and used, the value for the flag comes from the suffix of the
 // argument.
 //
+// AlwaysPrefix - Only allow the behavior enabled by the Prefix flag and reject
+// the Option=Value form.
+//
 // Grouping - With this option enabled, multiple letter options are allowed to
 // bunch together with only a single hyphen for the whole group.  This allows
 // emulation of the behavior that ls uses for example: ls -la === ls -l -a
@@ -187,7 +198,8 @@ enum FormattingFlags
    NormalFormatting = 0x00, // Nothing special
    Positional = 0x01,       // Is a positional argument, no '-' required
    Prefix = 0x02,           // Can this option directly prefix its value?
-   Grouping = 0x03          // Can this option group with other options?
+   AlwaysPrefix = 0x03,     // Can this option only directly prefix its value?
+   Grouping = 0x04          // Can this option group with other options?
 };
 
 enum MiscFlags
@@ -309,6 +321,7 @@ class Option
    unsigned m_value : 2;
    unsigned m_hiddenFlag : 2; // enum OptionHidden
    unsigned m_formatting : 2; // enum FormattingFlags
+   unsigned Formatting : 3; // enum FormattingFlags
    unsigned m_misc : 3;
    unsigned m_position = 0;       // Position of last occurrence of the option
    unsigned m_additionalVals = 0; // Greater than 0 for multi-valued option.

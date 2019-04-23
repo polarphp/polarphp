@@ -1,3 +1,11 @@
+//===- BinaryStreamReader.h - Reads objects from a binary stream *- C++ -*-===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -217,13 +225,14 @@ public:
    /// \returns a success error code if the data was successfully read, otherwise
    /// returns an appropriate error code.
    template <typename T, typename U>
-   Error readArray(VarStreamArray<T, U> &array, uint32_t size)
+   Error readArray(VarStreamArray<T, U> &array, uint32_t size,
+                   uint32_t skew = 0)
    {
       BinaryStreamRef stream;
       if (auto errorCode = readStreamRef(stream, size)) {
          return errorCode;
       }
-      array.setUnderlyingStream(stream);
+      array.setUnderlyingStream(stream, skew);
       return Error::getSuccess();
    }
 

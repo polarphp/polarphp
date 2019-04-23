@@ -1,3 +1,20 @@
+//===-- CommandLine.cpp - Command line parser implementation --------------===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+//
+// This class implements a command line argument processor that is useful when
+// creating a tool.  It provides a simple, minimalistic interface that is easily
+// extensible and supports nonlocal (library) command line options.
+//
+// Note that rather than trying to figure out what this code does, you could try
+// reading the library documentation located in docs/CommandLine.html
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -514,15 +531,20 @@ Option *CommandLineParser::lookupOption(SubCommand &subcommand, StringRef &arg,
       return inter != subcommand.m_optionsMap.end() ? inter->m_second : nullptr;
    }
 
-   // If the argument before the = is a valid option name, we match.  If not,
-   // return Arg unmolested.
-   auto inter = subcommand.m_optionsMap.find(arg.substr(0, equalPos));
-   if (inter == subcommand.m_optionsMap.end()) {
+   // If the argument before the = is a valid option name and the option allows
+   // non-prefix form (ie is not AlwaysPrefix), we match.  If not, signal match
+   // failure by returning nullptr.
+   auto iter = subcommand.m_optionsMap.find(arg.substr(0, equalPos));
+   if (iter == subcommand.m_optionsMap.end()) {
+      return nullptr;
+   }
+   auto opt = iter->m_second;
+   if (opt->getFormattingFlag() == cmd::AlwaysPrefix) {
       return nullptr;
    }
    value = arg.substr(equalPos + 1);
    arg = arg.substr(0, equalPos);
-   return inter->m_second;
+   return iter->m_second;
 }
 
 SubCommand *CommandLineParser::lookupSubCommand(StringRef name)
@@ -638,7 +660,9 @@ inline bool provide_option(Option *handler, StringRef argName,
    switch (handler->getValueExpectedFlag()) {
    case ValueRequired:
       if (!value.getData()) { // No value specified?
-         if (i + 1 >= argc) {
+         // If no other argument or the option only supports prefix form, we
+         // cannot look at the next argument.
+         if (i + 1 >= argc || handler->getFormattingFlag() == cmd::AlwaysPrefix) {
             return handler->error("requires a value!");
          }
          // Steal the next argument, like for '-o filename'
@@ -705,7 +729,8 @@ inline bool is_grouping(const Option *option)
 
 inline bool is_prefixed_or_grouping(const Option *option)
 {
-   return is_grouping(option) || option->getFormattingFlag() == cmd::Prefix;
+   return is_grouping(option) || option->getFormattingFlag() == cmd::Prefix ||
+         option->getFormattingFlag() == cmd::AlwaysPrefix;
 }
 
 // get_option_pred - Check to see if there are any options that satisfy the
@@ -756,7 +781,8 @@ Option *handle_prefixed_or_grouped_option(StringRef &arg, StringRef &value,
    // If the option is a prefixed option, then the value is simply the
    // rest of the name...  so fall through to later processing, by
    // setting up the argument name flags and value fields.
-   if (pgOpt->getFormattingFlag() == cmd::Prefix) {
+   if (pgOpt->getFormattingFlag() == cmd::Prefix ||
+       pgOpt->getFormattingFlag() == cmd::AlwaysPrefix) {
       value = arg.substr(length);
       arg = arg.substr(0, length);
       assert(optionsMap.count(arg) && optionsMap.find(arg)->m_second == pgOpt);
