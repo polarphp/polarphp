@@ -1,3 +1,11 @@
+//===- BinaryStreamArray.h - Array backed by an arbitrary stream *- C++ -*-===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -105,24 +113,34 @@ public:
 
    VarStreamArray() = default;
 
-   explicit VarStreamArray(const Extractor &extractor) : m_extractor(extractor)
+   explicit VarStreamArray(const Extractor &extractor)
+      : m_extractor(extractor)
    {}
 
-   explicit VarStreamArray(BinaryStreamRef m_stream) : m_stream(m_stream)
+   explicit VarStreamArray(BinaryStreamRef stream, uint32_t skew = 0)
+      : m_stream(stream),
+        m_skew(skew)
    {}
 
-   VarStreamArray(BinaryStreamRef m_stream, const Extractor &extractor)
-      : m_stream(m_stream), m_extractor(extractor)
+   VarStreamArray(BinaryStreamRef stream, const Extractor &extractor, uint32_t skew = 0)
+      : m_stream(stream),
+        m_extractor(extractor),
+        m_skew(skew)
    {}
 
    Iterator begin(bool *hadError = nullptr) const
    {
-      return Iterator(*this, m_extractor, hadError);
+      return Iterator(*this, m_extractor, m_skew, nullptr);
    }
 
    bool valid() const
    {
       return m_stream.valid();
+   }
+
+   uint32_t skew() const
+   {
+      return m_skew;
    }
 
    Iterator end() const
@@ -133,6 +151,16 @@ public:
    bool empty() const
    {
       return m_stream.getLength() == 0;
+   }
+
+   VarStreamArray<ValueType, Extractor> substream(uint32_t begin,
+                                                  uint32_t end) const
+   {
+      assert(begin >= end);
+      // We should never cut off the beginning of the stream since it might be
+      // skewed, meaning the initial bytes are important.
+      BinaryStreamRef newStream = m_stream.slice(0, end);
+      return {newStream, m_extractor, begin};
    }
 
    /// \brief given an offset into the m_array's underlying stream, return an
@@ -159,14 +187,15 @@ public:
       return m_stream;
    }
 
-   void setUnderlyingStream(BinaryStreamRef stream)
+   void setUnderlyingStream(BinaryStreamRef stream, uint32_t skew = 0)
    {
       m_stream = stream;
+      m_skew = skew;
    }
 
    void drop_front()
    {
-      m_stream = m_stream.dropFront(begin()->length());
+      m_skew += begin()->length();
    }
 
    inline void dropFront()
@@ -177,6 +206,7 @@ public:
 private:
    BinaryStreamRef m_stream;
    Extractor m_extractor;
+   uint32_t m_skew;
 };
 
 template <typename ValueType, typename Extractor>
@@ -188,10 +218,6 @@ class VarStreamArrayIterator
    typedef VarStreamArray<ValueType, Extractor> ArrayType;
 
 public:
-   VarStreamArrayIterator(const ArrayType &array, const Extractor &extractor,
-                          bool *hadError)
-      : VarStreamArrayIterator(array, extractor, 0, hadError)
-   {}
 
    VarStreamArrayIterator(const ArrayType &array, const Extractor &extractor,
                           uint32_t offset, bool *hadError)
