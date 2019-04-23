@@ -1,3 +1,11 @@
+//===--- raw_ostream.h - Raw output stream ----------------------*- C++ -*-===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -637,7 +645,7 @@ class BufferOstream : public RawSvectorOutStream
 {
    RawOutStream &m_outStream;
    SmallVector<char, 0> m_buffer;
-
+   virtual void anchor() override;
 public:
    BufferOstream(RawOutStream &outStream)
       : RawSvectorOutStream(m_buffer), m_outStream(outStream)

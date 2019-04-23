@@ -1,3 +1,11 @@
+//===--- raw_ostream.cpp - Implement the raw_ostream classes --------------===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -1009,6 +1017,9 @@ void RawNullOutStream::pwriteImpl(const char *ptr, size_t size,
 {}
 
 void RawPwriteStream::anchor()
+{}
+
+void BufferOstream::anchor()
 {}
 
 } // utils
