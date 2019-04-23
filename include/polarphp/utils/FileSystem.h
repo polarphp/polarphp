@@ -1,3 +1,11 @@
+//===- llvm/Support/FileSystem.h - File System OS Concept -------*- C++ -*-===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -384,10 +392,7 @@ public:
 /// relative/../path => <current-directory>/relative/../path
 ///
 /// @param path A path that is modified to be an absolute path.
-/// @returns errc::success if \a path has been made absolute, otherwise a
-///          platform-specific error_code.
-std::error_code make_absolute(const Twine &currentDirectory,
-                              SmallVectorImpl<char> &path);
+void make_absolute(const Twine &currentDirectory, SmallVectorImpl<char> &path);
 
 /// Make \a path an absolute path.
 ///

@@ -1,3 +1,10 @@
+//===- FormatVariadic.cpp - Format string parsing and analysis ----*-C++-*-===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -172,6 +179,9 @@ FormatvObjectBase::parseFormatString(StringRef fmt)
    }
    return replacements;
 }
+
+void internal::FormatAdapterImpl::anchor()
+{}
 
 } // utils
 } // polar
