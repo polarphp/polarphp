@@ -169,6 +169,7 @@ ARM_ARCH_EXT_NAME("iwmmxt2",  arm::AEK_IWMMXT2,  nullptr,  nullptr)
 ARM_ARCH_EXT_NAME("maverick", arm::AEK_MAVERICK, nullptr,  nullptr)
 ARM_ARCH_EXT_NAME("xscale",   arm::AEK_XSCALE,   nullptr,  nullptr)
 ARM_ARCH_EXT_NAME("fp16fml",  arm::AEK_FP16FML,  "+fp16fml", "-fp16fml")
+ARM_ARCH_EXT_NAME("sb",       arm::AEK_SB,       "+sb",      "-sb")
 #undef ARM_ARCH_EXT_NAME
 
 #ifndef ARM_HW_DIV_NAME
@@ -276,7 +277,8 @@ ARM_CPU_NAME("cyclone", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
 ARM_CPU_NAME("exynos-m1", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
 ARM_CPU_NAME("exynos-m2", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
 ARM_CPU_NAME("exynos-m3", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
-ARM_CPU_NAME("exynos-m4", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
+ARM_CPU_NAME("exynos-m4", ARMV8_2A, FK_CRYPTO_NEON_FP_ARMV8, false,
+            (arm::AEK_FP16 | arm::AEK_DOTPROD))
 ARM_CPU_NAME("kryo", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
 // Non-standard Arch names.
 ARM_CPU_NAME("iwmmxt", IWMMXT, FK_NONE, true, arm::AEK_NONE)
