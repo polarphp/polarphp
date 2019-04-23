@@ -771,7 +771,7 @@ inline QuotingType needs_quotes(StringRef str)
 }
 
 template <typename T, typename Context>
-struct missingTraits
+struct MissingTraits
       : public std::integral_constant<bool,
       !HasScalarEnumerationTraits<T>::value &&
       !HasScalarBitSetTraits<T>::value &&
@@ -786,14 +786,14 @@ struct missingTraits
 {};
 
 template <typename T, typename Context>
-struct validatedMappingTraits
+struct ValidatedMappingTraits
       : public std::integral_constant<
       bool, HasMappingTraits<T, Context>::value &&
       HasMappingValidateTraits<T, Context>::value>
 {};
 
 template <typename T, typename Context>
-struct unvalidatedMappingTraits
+struct UnvalidatedMappingTraits
       : public std::integral_constant<
       bool, HasMappingTraits<T, Context>::value &&
       !HasMappingValidateTraits<T, Context>::value>
@@ -1139,7 +1139,7 @@ yamlize(IO &io, T &value, bool, EmptyContext &)
 }
 
 template <typename T, typename Context>
-typename std::enable_if<validatedMappingTraits<T, Context>::value, void>::type
+typename std::enable_if<ValidatedMappingTraits<T, Context>::value, void>::type
 yamlize(IO &io, T &value, bool, Context &context)
 {
    if (HasFlowTraits<MappingTraits<T>>::value) {
@@ -1169,7 +1169,7 @@ yamlize(IO &io, T &value, bool, Context &context)
 }
 
 template <typename T, typename Context>
-typename std::enable_if<unvalidatedMappingTraits<T, Context>::value, void>::type
+typename std::enable_if<UnvalidatedMappingTraits<T, Context>::value, void>::type
 yamlize(IO &io, T &value, bool, Context &context)
 {
    if (HasFlowTraits<MappingTraits<T>>::value) {
@@ -1215,7 +1215,7 @@ yamlize(IO &io, T &value, bool, EmptyContext &ctx)
 }
 
 template <typename T>
-typename std::enable_if<missingTraits<T, EmptyContext>::value, void>::type
+typename std::enable_if<MissingTraits<T, EmptyContext>::value, void>::type
 yamlize(IO &, T &, bool, EmptyContext &)
 {
    char missing_yaml_trait_for_type[sizeof(MissingTrait<T>)];
@@ -1939,7 +1939,7 @@ operator>>(Input &input, T &value)
 
 // Provide better error message about types missing a trait specialization
 template <typename T>
-inline typename std::enable_if<missingTraits<T, EmptyContext>::value,
+inline typename std::enable_if<MissingTraits<T, EmptyContext>::value,
 Input &>::type
 operator>>(Input &yin, T &docSeq)
 {
@@ -2052,7 +2052,7 @@ operator<<(Output &out, T &value)
 
 // Provide better error message about types missing a trait specialization
 template <typename T>
-inline typename std::enable_if<missingTraits<T, EmptyContext>::value,
+inline typename std::enable_if<MissingTraits<T, EmptyContext>::value,
 Output &>::type
 operator<<(Output &yout, T &seq)
 {
