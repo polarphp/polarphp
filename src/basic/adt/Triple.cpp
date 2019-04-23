@@ -42,7 +42,6 @@ StringRef Triple::getArchTypeName(Triple::ArchType kind)
    case ArchType::mips64:         return "mips64";
    case ArchType::mips64el:       return "mips64el";
    case ArchType::msp430:         return "msp430";
-   case ArchType::nios2:          return "nios2";
    case ArchType::ppc64:          return "powerpc64";
    case ArchType::ppc64le:        return "powerpc64le";
    case ArchType::ppc:            return "powerpc";
@@ -108,8 +107,6 @@ StringRef Triple::getArchTypePrefix(ArchType kind)
    case ArchType::mipsel:
    case ArchType::mips64:
    case ArchType::mips64el:    return "mips";
-
-   case ArchType::nios2:       return "nios2";
 
    case ArchType::hexagon:     return "hexagon";
 
@@ -219,6 +216,7 @@ StringRef Triple::getOSTypeName(OSType kind)
    case OSType::AMDPAL: return "amdpal";
    case OSType::HermitCore: return "hermit";
    case OSType::Hurd: return "hurd";
+   case OSType::WASI: return "wasi";
    }
 
    polar_unreachable("Invalid OSType");
@@ -289,7 +287,6 @@ Triple::ArchType Triple::getArchTypeForPolarName(StringRef name)
          .cond("mips64", ArchType::mips64)
          .cond("mips64el", ArchType::mips64el)
          .cond("msp430", ArchType::msp430)
-         .cond("nios2", ArchType::nios2)
          .cond("ppc64", ArchType::ppc64)
          .cond("ppc32", ArchType::ppc)
          .cond("ppc", ArchType::ppc)
@@ -429,7 +426,6 @@ Triple::ArchType parse_arch(StringRef archName)
                 "mips64r6", "mipsn32r6", Triple::ArchType::mips64)
          .conds("mips64el", "mipsn32el", "mipsisa64r6el", "mips64r6el",
                 "mipsn32r6el", Triple::ArchType::mips64el)
-         .cond("nios2", Triple::ArchType::nios2)
          .cond("r600", Triple::ArchType::r600)
          .cond("amdgcn", Triple::ArchType::amdgcn)
          .cond("riscv32", Triple::ArchType::riscv32)
@@ -534,6 +530,7 @@ Triple::OSType parse_os(StringRef osName)
          .startsWith("amdpal", Triple::OSType::AMDPAL)
          .startsWith("hermit", Triple::OSType::HermitCore)
          .startsWith("hurd", Triple::OSType::Hurd)
+         .startsWith("wasi", Triple::OSType::WASI)
          .defaultCond(Triple::OSType::UnknownOS);
 }
 
@@ -696,7 +693,6 @@ Triple::ObjectFormatType get_default_format(const Triple &triple)
    case Triple::ArchType::mips64el:
    case Triple::ArchType::mipsel:
    case Triple::ArchType::msp430:
-   case Triple::ArchType::nios2:
    case Triple::ArchType::nvptx:
    case Triple::ArchType::nvptx64:
    case Triple::ArchType::ppc64le:
@@ -1302,7 +1298,6 @@ unsigned get_arch_pointer_bit_width(Triple::ArchType arch)
    case Triple::ArchType::le32:
    case Triple::ArchType::mips:
    case Triple::ArchType::mipsel:
-   case Triple::ArchType::nios2:
    case Triple::ArchType::nvptx:
    case Triple::ArchType::ppc:
    case Triple::ArchType::r600:
@@ -1392,7 +1387,6 @@ Triple Triple::get32BitArchVariant() const
    case ArchType::le32:
    case ArchType::mips:
    case ArchType::mipsel:
-   case ArchType::nios2:
    case ArchType::nvptx:
    case ArchType::ppc:
    case ArchType::r600:
@@ -1442,7 +1436,6 @@ Triple Triple::get64BitArchVariant() const
    case ArchType::kalimba:
    case ArchType::lanai:
    case ArchType::msp430:
-   case ArchType::nios2:
    case ArchType::r600:
    case ArchType::tce:
    case ArchType::tcele:
@@ -1517,7 +1510,6 @@ Triple Triple::getBigEndianArchVariant() const
    case ArchType::le32:
    case ArchType::le64:
    case ArchType::msp430:
-   case ArchType::nios2:
    case ArchType::nvptx64:
    case ArchType::nvptx:
    case ArchType::r600:
@@ -1606,7 +1598,6 @@ bool Triple::isLittleEndian() const
    case ArchType::mips64el:
    case ArchType::mipsel:
    case ArchType::msp430:
-   case ArchType::nios2:
    case ArchType::nvptx64:
    case ArchType::nvptx:
    case ArchType::ppc64le:
