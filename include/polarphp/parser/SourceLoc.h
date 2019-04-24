@@ -44,6 +44,7 @@ namespace parser {
 class SourceManager;
 using polar::utils::RawOutStream;
 using BasicSMLoc = polar::utils::SMLocation;
+using polar::basic::StringRef;
 
 /// SourceLoc in parser namespace is just an polar::utils::SMLocation.
 /// We define it as a different type
@@ -90,7 +91,7 @@ public:
    SourceLoc getAdvancedLocOrInvalid(int byteOffset) const
    {
       if (isValid()) {
-          return getAdvancedLoc(byteOffset);
+         return getAdvancedLoc(byteOffset);
       }
       return SourceLoc();
    }
@@ -126,6 +127,191 @@ private:
    friend class SourceRange;
    friend class CharSourceRange;
    friend class DiagnosticConsumer;
+};
+
+/// SourceRange in swift is a pair of locations.  However, note that the end
+/// location is the start of the last token in the range, not the last character
+/// in the range.  This is unlike SMRange, so we use a distinct type to make
+/// sure that proper conversions happen where important.
+class SourceRange
+{
+public:
+   SourceRange() {}
+   SourceRange(SourceLoc loc)
+      : m_start(loc),
+        m_end(loc)
+   {}
+
+   SourceRange(SourceLoc start, SourceLoc end)
+      : m_start(start),
+        m_end(End)
+   {
+      assert(m_start.isValid() == m_end.isValid() &&
+             "m_start and end should either both be valid or both be invalid!");
+   }
+
+   bool isValid() const
+   {
+      return m_start.isValid();
+   }
+
+   bool isInvalid() const
+   {
+      return !isValid();
+   }
+
+   /// Extend this SourceRange to the smallest continuous SourceRange that
+   /// includes both this range and the other one.
+   void widen(SourceRange other);
+
+   bool operator==(const SourceRange &other) const
+   {
+      return m_start == other.m_start && m_end == other.m_end;
+   }
+
+   bool operator!=(const SourceRange &other) const
+   {
+      return !operator==(other);
+   }
+
+   /// Print out the SourceRange.  If the locations are in the same buffer
+   /// as specified by LastBufferID, then we don't print the filename.  If not,
+   /// we do print the filename, and then update LastBufferID with the BufferID
+   /// printed.
+   void print(RawOutStream &outStream, const SourceManager &sourceMgr,
+              unsigned &lastBufferID, bool PrintText = true) const;
+
+   void print(RawOutStream &outStream, const SourceManager &sourceMgr,
+              bool printText = true) const
+   {
+      unsigned temp = ~0U;
+      print(outStream, sourceMgr, temp, printText);
+   }
+
+   void dump(const SourceManager &sourceMgr) const;
+
+public:
+   SourceLoc m_start;
+   SourceLoc m_end;
+};
+
+/// A half-open character-based source range.
+class CharSourceRange
+{
+   SourceLoc m_start;
+   unsigned m_byteLength;
+
+public:
+   /// Constructs an invalid range.
+   CharSourceRange() = default;
+
+   CharSourceRange(SourceLoc start, unsigned byteLength)
+      : m_start(start),
+        m_byteLength(byteLength)
+   {}
+
+   /// Constructs a character range which starts and ends at the
+   /// specified character locations.
+   CharSourceRange(const SourceManager &sourceMgr, SourceLoc start, SourceLoc end);
+
+   /// Use Lexer::getCharSourceRangeFromSourceRange() instead.
+   CharSourceRange(const SourceManager &sourceMgr, SourceRange range) = delete;
+
+   bool isValid() const
+   {
+      return m_start.isValid();
+   }
+
+   bool isInvalid() const
+   {
+      return !isValid();
+   }
+
+   bool operator==(const CharSourceRange &other) const
+   {
+      return m_start == other.m_start && m_byteLength == other.m_byteLength;
+   }
+   bool operator!=(const CharSourceRange &other) const
+   {
+      return !operator==(other);
+   }
+
+   SourceLoc getStart() const
+   {
+      return m_start;
+   }
+
+   SourceLoc getEnd() const
+   {
+      return m_start.getAdvancedLocOrInvalid(m_byteLength);
+   }
+
+   /// Returns true if the given source location is contained in the range.
+   bool contains(SourceLoc loc) const
+   {
+      auto less = std::less<const char *>();
+      auto less_equal = std::less_equal<const char *>();
+      return less_equal(getStart().m_loc.getPointer(), loc.m_loc.getPointer()) &&
+            less(loc.m_loc.getPointer(), getEnd().m_loc.getPointer());
+   }
+
+   bool contains(CharSourceRange other) const
+   {
+      auto less_equal = std::less_equal<const char *>();
+      return contains(other.getStart()) &&
+            less_equal(other.getEnd().m_loc.getPointer(), getEnd().m_loc.getPointer());
+   }
+
+   /// expands *this to cover other
+   void widen(CharSourceRange other)
+   {
+      auto diff = other.getEnd().Value.getPointer() - getEnd().Value.getPointer();
+      if (diff > 0) {
+         m_byteLength += diff;
+      }
+      const auto myStartPtr = getStart().m_loc.getPointer();
+      diff = myStartPtr - other.getStart().m_loc.getPointer();
+      if (diff > 0) {
+         m_byteLength += diff;
+         m_start = SourceLoc(BasicSMLoc::getFromPointer(myStartPtr - diff));
+      }
+   }
+
+   bool overlaps(CharSourceRange other) const
+   {
+      if (getByteLength() == 0 || other.getByteLength() == 0) {
+         return false;
+      }
+      return contains(other.getStart()) || other.contains(getStart());
+   }
+
+   StringRef str() const
+   {
+      return StringRef(m_start.m_loc.getPointer(), m_byteLength);
+   }
+
+   /// Return the length of this valid range in bytes.  Can be zero.
+   unsigned getByteLength() const
+   {
+      assert(isValid() && "length does not make sense for an invalid range");
+      return m_byteLength;
+   }
+
+   /// Print out the CharSourceRange.  If the locations are in the same buffer
+   /// as specified by LastBufferID, then we don't print the filename.  If not,
+   /// we do print the filename, and then update LastBufferID with the BufferID
+   /// printed.
+   void print(RawOutStream &outStream, const SourceManager &sourceMgr,
+              unsigned &lastBufferID, bool printText = true) const;
+
+   void print(RawOutStream &outStream, const SourceManager &sourceMgr,
+              bool printText = true) const
+   {
+      unsigned temp = ~0U;
+      print(outStream, sourceMgr, temp, printText);
+   }
+
+   void dump(const SourceManager &sourceMgr) const;
 };
 
 } // parser
