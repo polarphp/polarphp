@@ -10,10 +10,17 @@
 # Created by polarboy on 2018/08/26.
 
 add_subdirectory(ast)
+add_subdirectory(bytecode)
+add_subdirectory(codegen)
 add_subdirectory(parser)
 add_subdirectory(syntax)
+add_subdirectory(global)
 add_subdirectory(basic)
+add_subdirectory(kernel)
 add_subdirectory(utils)
 add_subdirectory(vm)
 add_subdirectory(runtime)
-add_subdirectory(global)
+add_subdirectory(sema)
+add_subdirectory(driver)
+add_subdirectory(serialization)
+add_subdirectory(reflection)

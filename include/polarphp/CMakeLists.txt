@@ -23,13 +23,48 @@ polar_collect_files(
 
 polar_collect_files(
    TYPE_HEADER
+   DIR bytecode
+   OUTPUT_VAR POLAR_BYTECODE_HEADERS)
+
+polar_collect_files(
+   TYPE_HEADER
+   DIR codegen
+   OUTPUT_VAR POLAR_CODEGEN_HEADERS)
+
+polar_collect_files(
+   TYPE_HEADER
+   DIR driver
+   OUTPUT_VAR POLAR_DRIVER_HEADERS)
+
+polar_collect_files(
+   TYPE_HEADER
    DIR basic
    OUTPUT_VAR POLAR_BASIC_HEADERS)
 
 polar_collect_files(
    TYPE_HEADER
+   DIR kernel
+   OUTPUT_VAR POLAR_KERNEL_HEADERS)
+
+polar_collect_files(
+   TYPE_HEADER
    DIR parser
    OUTPUT_VAR POLAR_PARSER_HEADERS)
+
+polar_collect_files(
+   TYPE_HEADER
+   DIR reflection
+   OUTPUT_VAR POLAR_REFLECTION_HEADERS)
+
+polar_collect_files(
+   TYPE_HEADER
+   DIR sema
+   OUTPUT_VAR POLAR_SEMA_HEADERS)
+
+polar_collect_files(
+   TYPE_HEADER
+   DIR serialization
+   OUTPUT_VAR POLAR_SERIALIZATION_HEADERS)
 
 polar_collect_files(
    TYPE_HEADER
@@ -53,8 +88,15 @@ polar_collect_files(
 
 polar_merge_list(POLAR_HEADERS POLAR_GLOBAL_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_AST_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_BYTECODE_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_CODEGEN_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_DRIVER_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_BASIC_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_KERNEL_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_PARSER_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_REFLECTION_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_SEMA_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_SERIALIZATION_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_SYNTAX_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_UTILS_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_RUNTIME_HEADERS)
