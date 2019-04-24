@@ -15,12 +15,12 @@
 //===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarPHP software foundation
+// Copyright (c) 2017 - 2018 polarphp software foundation
 // Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarPHP project authors
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/04/24.
 
@@ -144,7 +144,7 @@ public:
 
    SourceRange(SourceLoc start, SourceLoc end)
       : m_start(start),
-        m_end(End)
+        m_end(end)
    {
       assert(m_start.isValid() == m_end.isValid() &&
              "m_start and end should either both be valid or both be invalid!");
@@ -265,7 +265,7 @@ public:
    /// expands *this to cover other
    void widen(CharSourceRange other)
    {
-      auto diff = other.getEnd().Value.getPointer() - getEnd().Value.getPointer();
+      auto diff = other.getEnd().m_loc.getPointer() - getEnd().m_loc.getPointer();
       if (diff > 0) {
          m_byteLength += diff;
       }
@@ -317,7 +317,77 @@ public:
 } // parser
 } // polar
 
+namespace polar::basic {
+
+using polar::parser::SourceLoc;
+using polar::parser::BasicSMLoc;
+using polar::parser::SourceRange;
+
+template <typename T>
+struct DenseMapInfo;
+
+template <>
+struct DenseMapInfo<SourceLoc>
+{
+   static SourceLoc getEmptyKey()
+   {
+      return SourceLoc(
+               BasicSMLoc::getFromPointer(DenseMapInfo<const char *>::getEmptyKey()));
+   }
+
+   static SourceLoc getTombstoneKey()
+   {
+      // Make this different from empty key. See for context:
+      // http://lists.llvm.org/pipermail/llvm-dev/2015-July/088744.html
+      return SourceLoc(
+               BasicSMLoc::getFromPointer(DenseMapInfo<const char *>::getTombstoneKey()));
+   }
+
+   static unsigned getHashValue(const SourceLoc &loc)
+   {
+      return DenseMapInfo<const void *>::getHashValue(
+               loc.getOpaquePointerValue());
+   }
+
+   static bool isEqual(const SourceLoc &lhs,
+                       const SourceLoc &rhs)
+   {
+      return lhs == rhs;
+   }
+};
+
+template <>
+struct DenseMapInfo<SourceRange>
+{
+   static SourceRange getEmptyKey()
+   {
+      return SourceRange(SourceLoc(
+                                   BasicSMLoc::getFromPointer(DenseMapInfo<const char *>::getEmptyKey())));
+   }
+
+   static SourceRange getTombstoneKey()
+   {
+      // Make this different from empty key. See for context:
+      // http://lists.llvm.org/pipermail/llvm-dev/2015-July/088744.html
+      return SourceRange(SourceLoc(
+                                   BasicSMLoc::getFromPointer(DenseMapInfo<const char *>::getTombstoneKey())));
+   }
+
+   static unsigned getHashValue(const SourceRange &loc)
+   {
+      return hash_combine(DenseMapInfo<const void *>::getHashValue(
+                             loc.m_start.getOpaquePointerValue()),
+                          DenseMapInfo<const void *>::getHashValue(
+                             loc.m_end.getOpaquePointerValue()));
+   }
+
+   static bool isEqual(const SourceRange &lhs,
+                       const SourceRange &rhs)
+   {
+      return lhs == rhs;
+   }
+};
+
+} // polar::basic
+
 #endif // POLARPHP_PARSER_SOURCE_LOC_H
-
-
-

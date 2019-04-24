@@ -612,7 +612,8 @@ public:
 /// The result is suitable for returning from a user's hash_value
 /// *implementation* for their user-defined type. Consumers of a type should
 /// *not* call this routine, they should instead call 'hash_value'.
-template <typename ...Ts> HashCode hash_combine(const Ts &...args)
+template <typename ...Ts>
+HashCode hash_combine(const Ts &...args)
 {
    // Recursively hash each argument using a helper class.
    ::polar::basic::hashing::internal::HashCombineRecursiveHelper helper;
