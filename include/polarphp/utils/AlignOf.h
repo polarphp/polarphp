@@ -7,7 +7,7 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2018/10/08.
+// Created by polarboy on 2019/04/24.
 
 #ifndef POLARPHP_UTILS_ALIGN_OF_H
 #define POLARPHP_UTILS_ALIGN_OF_H
