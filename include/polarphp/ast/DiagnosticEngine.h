@@ -81,7 +81,7 @@ struct Diag
    DiagID id;
 };
 
-namespace internl {
+namespace internal {
 /// Describes how to pass a diagnostic argument of the given type.
 ///
 /// By default, diagnostic arguments are passed by value, because they
@@ -340,7 +340,7 @@ public:
    // All constructors are intentionally implicit.
    template<typename ...ArgTypes>
    Diagnostic(Diag<ArgTypes...> id,
-              typename internl::PassArgument<ArgTypes>::type... vArgs)
+              typename internal::PassArgument<ArgTypes>::type... vArgs)
       : m_id(id.id)
    {
       DiagnosticArgument diagArgs[] = {
@@ -792,7 +792,7 @@ public:
    template<typename ...ArgTypes>
    InFlightDiagnostic
    diagnose(SourceLoc loc, Diag<ArgTypes...> id,
-            typename internl::PassArgument<ArgTypes>::type... args)
+            typename internal::PassArgument<ArgTypes>::type... args)
    {
       return diagnose(loc, Diagnostic(id, std::move(args)...));
    }
@@ -801,7 +801,7 @@ public:
    template<typename ...ArgTypes>
    InFlightDiagnostic
    diagnose(Diag<ArgTypes...> id,
-            typename internl::PassArgument<ArgTypes>::type... args) = delete;
+            typename internal::PassArgument<ArgTypes>::type... args) = delete;
 
    /// Emit a diagnostic with the given set of diagnostic arguments.
    ///
@@ -815,7 +815,7 @@ public:
    template<typename ...ArgTypes>
    InFlightDiagnostic
    diagnose(DeclNameLoc loc, Diag<ArgTypes...> id,
-            typename internl::PassArgument<ArgTypes>::type... args)
+            typename internal::PassArgument<ArgTypes>::type... args)
    {
       return diagnose(loc.getBaseNameLoc(), Diagnostic(id, std::move(args)...));
    }
@@ -869,7 +869,7 @@ public:
    template<typename ...ArgTypes>
    InFlightDiagnostic
    diagnose(const Decl *decl, Diag<ArgTypes...> id,
-            typename internl::PassArgument<ArgTypes>::type... args)
+            typename internal::PassArgument<ArgTypes>::type... args)
    {
       return diagnose(decl, Diagnostic(id, std::move(args)...));
    }

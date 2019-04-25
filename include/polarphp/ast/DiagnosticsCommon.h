@@ -37,7 +37,7 @@ namespace polar::ast {
 template<typename ...ArgTypes>
 struct Diag;
 
-namespace internl
+namespace internal
 {
   template<typename T>
   struct DiagWithArguments;
@@ -59,7 +59,7 @@ namespace diag {
 
 // Declare common diagnostics objects with their appropriate types.
 #define DIAG(KIND, ID, Options, Text, Signature) \
-  extern internl::DiagWithArguments<void Signature>::type ID;
+  extern internal::DiagWithArguments<void Signature>::type ID;
 #include "DiagnosticsCommonDefs.h"
 }
 
