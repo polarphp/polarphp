@@ -63,19 +63,26 @@
 #include <sys/stat.h>
 #endif
 
+/// forward declare class with namespace
+namespace polar::utils {
+class RawPwriteStream;
+class MemoryBuffer;
+} // polar::utils
+
 namespace polar {
 namespace fs {
 
 using polar::basic::Twine;
 using polar::basic::SmallVectorImpl;
-using polar::utils::OptionalError;
 using polar::basic::SmallString;
-using polar::utils::TimePoint;
 using polar::basic::StringRef;
+using polar::basic::FunctionRef;
+using polar::utils::OptionalError;
+using polar::utils::TimePoint;
 using polar::utils::Expected;
 using polar::utils::Error;
 using polar::utils::Md5;
-using polar::basic::FunctionRef;
+using polar::utils::RawPwriteStream;
 
 // forward declare class
 class DirectoryEntry;
@@ -1440,7 +1447,7 @@ public:
             // Resolve the symlink: is it a directory to recurse into?
             OptionalError<BasicFileStatus> status = m_state->m_stack.top()->getStatus();
             if (status) {
-                type = status->getType();
+               type = status->getType();
             }
             // Otherwise broken symlink, and we'll continue.
          }
@@ -1532,9 +1539,46 @@ public:
    }
 };
 
-/// @}
+/// Invokes \p action with a raw_ostream that refers to a temporary file,
+/// which is then renamed into place as \p outputPath when the action
+/// completes.
+///
+/// If a temporary file cannot be created for whatever reason, \p action will
+/// be invoked with a stream directly opened at \p outputPath. Otherwise, if
+/// there is already a file at \p outputPath, it will not be overwritten if
+/// the new contents are identical.
+///
+/// If the process is interrupted with a signal, any temporary file will be
+/// removed.
+///
+/// As a special case, an output path of "-" is treated as referring to
+/// stdout.
+std::error_code atomically_writing_to_file(
+      StringRef outputPath,
+      FunctionRef<void(RawPwriteStream &)> action);
 
+/// Moves a file from \p source to \p destination, unless there is already
+/// a file at \p destination that contains the same data as \p source.
+///
+/// In the latter case, the file at \p source is deleted. If an error occurs,
+/// the file at \p source will still be present at \p source.
+std::error_code move_file_if_different(const Twine &source,
+                                       const Twine &destination);
 } // fs
+
+namespace vfs {
+
+using polar::basic::Twine;
+using polar::utils::OptionalError;
+using polar::utils::MemoryBuffer;
+
+class FileSystem;
+
+OptionalError<std::unique_ptr<MemoryBuffer>>
+get_file_or_stdin(FileSystem &fs,
+                  const Twine &name, int64_t fileSize = -1,
+                  bool requiresNullTerminator = true, bool isVolatile = false);
+} // vfs
 } // polar
 
 #endif // POLARPHP_UTILS_ERROR_FILESYSTEM_H

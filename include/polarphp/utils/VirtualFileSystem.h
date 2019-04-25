@@ -970,7 +970,7 @@ public:
    void write(RawOutStream &outStream);
 };
 
-} // vsf
+} // vfs
 } // polar
 
 #endif // POLARPHP_UTILS_VIRTUAL_FILESYSTEM_H
