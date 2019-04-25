@@ -21,8 +21,7 @@
 #define __has_feature(x) 0
 #endif
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 /// IsPodLike - This is a type trait that is used to determine whether a given
 /// type can be copied around with memcpy instead of running ctors etc.
@@ -168,11 +167,53 @@ struct is_function_ptr
       && std::is_function<
       typename std::remove_pointer<FuncType>::type
       >::value>
+{};
+
+/// Same as \c std::is_trivially_copyable, which we cannot use directly
+/// because it is not implemented yet in all C++11 standard libraries.
+///
+/// Unlike \c llvm::isPodLike, this trait should produce a precise result and
+/// is not intended to be specialized.
+template<typename T>
+struct IsTriviallyCopyable
 {
+#if defined(_LIBCPP_VERSION) || POLAR_CC_MSVC
+   // libc++ and MSVC implement is_trivially_copyable.
+   static const bool value = std::is_trivially_copyable<T>::value;
+#elif __has_feature(is_trivially_copyable) || __GNUC__ >= 5
+   static const bool value = __is_trivially_copyable(T);
+#else
+#  error "Not implemented"
+#endif
 };
 
-} // utils
-} // polar
+template<typename T>
+struct IsTriviallyConstructible
+{
+#if defined(_LIBCPP_VERSION) || POLAR_CC_MSVC
+   // libc++ and MSVC implement is_trivially_constructible.
+   static const bool value = std::is_trivially_constructible<T>::value;
+#elif __has_feature(has_trivial_constructor) || __GNUC__ >= 5
+   static const bool value = __has_trivial_constructor(T);
+#else
+#  error "Not implemented"
+#endif
+};
+
+template<typename T>
+struct IsTriviallyDestructible
+{
+#if defined(_LIBCPP_VERSION) || POLAR_CC_MSVC
+   // libc++ and MSVC implement is_trivially_destructible.
+   static const bool value = std::is_trivially_destructible<T>::value;
+#elif __has_feature(has_trivial_destructor) || __GNUC__ >= 5
+   static const bool value = __has_trivial_destructor(T);
+#else
+#  error "Not implemented"
+#endif
+};
+
+} // polar::utils
 
 // If the compiler supports detecting whether a class is final, define
 // an POLAR_IS_FINAL macro. If it cannot be defined properly, this
