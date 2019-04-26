@@ -36,6 +36,9 @@
 namespace polar::utils {
 class RawOutStream;
 }
+namespace polar::ast {
+class DiagnosticConsumer;
+}
 
 namespace polar {
 namespace parser {
@@ -45,6 +48,7 @@ class SourceManager;
 using polar::utils::RawOutStream;
 using BasicSMLoc = polar::utils::SMLocation;
 using polar::basic::StringRef;
+using polar::ast::DiagnosticConsumer;
 
 /// SourceLoc in parser namespace is just an polar::utils::SMLocation.
 /// We define it as a different type

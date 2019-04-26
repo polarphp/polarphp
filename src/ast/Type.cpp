@@ -1,8 +1,8 @@
-//===--- DiagnosticEngine.cpp - Diagnostic Display Engine -----------------===//
+//===--- Type.cpp - Swift Language Type ASTs ------------------------------===//
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Copyright (c) 2014 - 2018 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -20,22 +20,34 @@
 //
 // Created by polarboy on 2019/04/25.
 //===----------------------------------------------------------------------===//
-//  This file defines the DiagnosticEngine class, which manages any diagnostics
-//  emitted by Swift.
+//
+//  This file implements the Type class and subclasses.
 //
 //===----------------------------------------------------------------------===//
 
-#include "polarphp/ast/DiagnosticEngine.h"
+#include "polarphp/ast/Types.h"
 //#include "polarphp/ast/AstContext.h"
-//#include "polarphp/ast/AstPrinter.h"
+//#include "polarphp/ast/GenericSignatureBuilder.h"
+//#include "polarphp/ast/ReferenceCounting.h"
+#include "polarphp/ast/TypeVisitor.h"
+#include "polarphp/ast/TypeWalker.h"
 #include "polarphp/ast/Decl.h"
-#include "polarphp/ast/DiagnosticSuppression.h"
-#include "polarphp/ast/PrintOptions.h"
-#include "polarphp/ast/TypeRepr.h"
-#include "polarphp/parser/SourceMgr.h"
-#include "polarphp/parser/Lexer.h" // bad dependency
+//#include "polarphp/ast/GenericEnvironment.h"
+//#include "polarphp/ast/LazyResolver.h"
+//#include "polarphp/ast/ParameterList.h"
+//#include "polarphp/ast/ProtocolConformance.h"
+//#include "polarphp/ast/SubstitutionMap.h"
+#include "polarphp/ast/TypeLoc.h"
+//#include "polarphp/ast/TypeRepr.h"
+#include "polarphp/basic/adt/APFloat.h"
+#include "polarphp/basic/adt/SmallPtrSet.h"
 #include "polarphp/basic/adt/SmallString.h"
-#include "polarphp/basic/adt/Twine.h"
-#include "polarphp/utils/CommandLine.h"
-#include "polarphp/utils/Format.h"
+#include "polarphp/basic/adt/StlExtras.h"
 #include "polarphp/utils/RawOutStream.h"
+#include <algorithm>
+#include <functional>
+#include <iterator>
+
+namespace polar::ast {
+
+} // polar::ast

@@ -42,6 +42,12 @@
 
 namespace polar::ast {
 
+DiagnosticConsumer::~DiagnosticConsumer()
+{}
 
+SMLocation DiagnosticConsumer::getRawLoc(SourceLoc loc)
+{
+   return loc.m_loc;
+}
 
 } // polar::ast
