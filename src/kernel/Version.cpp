@@ -66,9 +66,9 @@ using polar::basic::SmallString;
 
 /// Print a string of the form "LLVM xxxxx, Clang yyyyy, Swift zzzzz",
 /// where each placeholder is the revision for the associated repository.
-static void print_full_revision_string(RawOutStream &out)
-{
-}
+//static void print_full_revision_string(RawOutStream &out)
+//{
+//}
 
 static void split_version_components(
       SmallVectorImpl<std::pair<StringRef, SourceRange>> &splitComponents,
@@ -185,7 +185,7 @@ std::optional<Version> Version::parseVersionString(StringRef versionString,
 
    split_version_components(splitComponents, versionString, loc, diags);
 
-   uint64_t componentNumber;
+//   uint64_t componentNumber;
    bool isValidVersion = true;
 
 //   for (size_t i = 0; i < splitComponents.size(); ++i) {

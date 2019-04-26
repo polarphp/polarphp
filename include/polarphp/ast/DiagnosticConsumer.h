@@ -34,6 +34,11 @@
 #include "polarphp/parser/SourceLoc.h"
 #include "polarphp/utils/SourceMgr.h"
 
+/// forward declare class with namespace
+namespace polar::parser {
+class SourceManager;
+}
+
 namespace polar::ast {
 
 using polar::basic::ArrayRef;
@@ -42,6 +47,7 @@ using polar::basic::SmallVectorImpl;
 using polar::basic::SmallVector;
 using polar::parser::CharSourceRange;
 using polar::parser::SourceLoc;
+using polar::parser::SourceManager;
 using polar::utils::SMLocation;
 using polar::utils::SMFixIt;
 using polar::utils::SMRange;
@@ -49,7 +55,7 @@ using polar::utils::SMRange;
 /// forward declare class
 class DiagnosticArgument;
 class DiagnosticEngine;
-class SourceManager;
+
 enum class DiagID : uint32_t;
 
 /// Describes the kind of diagnostic.
@@ -212,12 +218,12 @@ public:
    public:
       std::string getInputFileName() const
       {
-         return inputFileName;
+         return m_inputFileName;
       }
 
       DiagnosticConsumer *getConsumer() const
       {
-         return consumer.get();
+         return m_consumer.get();
       }
 
       Subconsumer(std::string inputFileName,
@@ -242,7 +248,7 @@ public:
 
       void informDriverOfIncompleteBatchModeCompilation()
       {
-         if (!hasAnErrorBeenConsumed && getConsumer()) {
+         if (!m_hasAnErrorBeenConsumed && getConsumer()) {
             getConsumer()->informDriverOfIncompleteBatchModeCompilation();
          }
       }
@@ -302,7 +308,7 @@ public:
       /// Overlaps by range:
       bool overlaps(const ConsumerAndRange &other) const
       {
-         return m_range.overlaps(other.range);
+         return m_range.overlaps(other.m_range);
       }
 
       /// Does my range end after \p loc?

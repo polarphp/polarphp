@@ -73,14 +73,14 @@ struct conjunction<B1, Bn...>
 
 template <typename T> struct make_const_ptr
 {
-  using type =
-      typename std::add_pointer<typename std::add_const<T>::type>::type;
+   using type =
+   typename std::add_pointer<typename std::add_const<T>::type>::type;
 };
 
 template <typename T> struct make_const_ref
 {
-  using type = typename std::add_lvalue_reference<
-      typename std::add_const<T>::type>::type;
+   using type = typename std::add_lvalue_reference<
+   typename std::add_const<T>::type>::type;
 };
 
 //===----------------------------------------------------------------------===//
@@ -798,9 +798,9 @@ typename std::remove_reference<decltype(*iter)>::type>::type>
 
 template <typename Iter> struct ZipLongestItemType
 {
-  using type =
-      std::optional<typename std::remove_const<typename std::remove_reference<
-          decltype(*std::declval<Iter>())>::type>::type>;
+   using type =
+   std::optional<typename std::remove_const<typename std::remove_reference<
+   decltype(*std::declval<Iter>())>::type>::type>;
 };
 
 template <typename... Iters> struct ZipLongestTupleType
@@ -1580,12 +1580,12 @@ struct FreeDeleter
    }
 };
 
-template<typename First, typename Second>
+template<typename m_first, typename Second>
 struct PairHash
 {
-   size_t operator()(const std::pair<First, Second> &pred) const
+   size_t operator()(const std::pair<m_first, Second> &pred) const
    {
-      return std::hash<First>()(pred.first) * 31 + std::hash<Second>()(pred.second);
+      return std::hash<m_first>()(pred.first) * 31 + std::hash<Second>()(pred.second);
    }
 };
 
@@ -1830,6 +1830,346 @@ bool has_n_items_or_more(
       }
    }
    return true;
+}
+
+//===----------------------------------------------------------------------===//
+//                              Function Traits
+//===----------------------------------------------------------------------===//
+
+template <class T>
+struct function_traits : function_traits<decltype(&T::operator())>
+{};
+
+// function
+template <class R, class... Args> struct function_traits<R(Args...)>
+{
+   using result_type = R;
+   using argument_types = std::tuple<Args...>;
+};
+
+// function pointer
+template <class R, class... Args> struct function_traits<R (*)(Args...)>
+{
+   using result_type = R;
+   using argument_types = std::tuple<Args...>;
+};
+
+// std::function
+template <class R, class... Args>
+struct function_traits<std::function<R(Args...)>>
+{
+                                                  using result_type = R;
+                                                  using argument_types = std::tuple<Args...>;
+};
+
+// pointer-to-member-function (i.e., operator()'s)
+template <class T, class R, class... Args>
+struct function_traits<R (T::*)(Args...)>
+{
+   using result_type = R;
+   using argument_types = std::tuple<Args...>;
+};
+
+template <class T, class R, class... Args>
+struct function_traits<R (T::*)(Args...) const>
+{
+   using result_type = R;
+   using argument_types = std::tuple<Args...>;
+};
+
+/// An iterator that transforms the result of an underlying bidirectional
+/// iterator with a given operation.
+///
+/// \tparam Iterator the underlying iterator.
+///
+/// \tparam Operation A function object that transforms the underlying
+/// sequence's values into the new sequence's values.
+template<typename Iterator, typename Operation>
+class TransformIterator
+{
+   Iterator m_current;
+
+   /// FIXME: Could optimize away this storage with EBCO tricks.
+   Operation m_op;
+
+   /// The underlying reference type, which will be passed to the
+   /// operation.
+   using OpTraits = function_traits<Operation>;
+
+public:
+   using iterator_category = std::bidirectional_iterator_tag;
+   using value_type = typename OpTraits::result_type;
+   using reference = value_type;
+   using pointer = void; // FIXME: Should provide a pointer proxy.
+   using difference_type =
+   typename std::iterator_traits<Iterator>::difference_type;
+
+   /// Construct a new transforming iterator for the given iterator
+   /// and operation.
+   TransformIterator(Iterator current, Operation op)
+      : m_current(current), m_op(op)
+   {}
+
+   reference operator*() const
+   {
+      return m_op(*m_current);
+   }
+
+   TransformIterator &operator++()
+   {
+      ++m_current;
+      return *this;
+   }
+
+   TransformIterator operator++(int)
+   {
+      TransformIterator old = *this;
+      ++*this;
+      return old;
+   }
+
+   TransformIterator &operator--()
+   {
+      --m_current;
+      return *this;
+   }
+
+   TransformIterator operator--(int)
+   {
+      TransformIterator old = *this;
+      --*this;
+      return old;
+   }
+
+   friend bool operator==(TransformIterator lhs, TransformIterator rhs)
+   {
+      return lhs.m_current == rhs.m_current;
+   }
+
+   friend bool operator!=(TransformIterator lhs, TransformIterator rhs)
+   {
+      return !(lhs == rhs);
+   }
+};
+
+/// Create a new transform iterator.
+template<typename Iterator, typename Operation>
+inline TransformIterator<Iterator, Operation>
+make_transform_iterator(Iterator current, Operation op)
+{
+   return TransformIterator<Iterator, Operation>(current, op);
+}
+
+/// A range transformed by a specific predicate.
+template<typename Range, typename Operation>
+class TransformRange
+{
+   Range m_range;
+   Operation m_op;
+
+public:
+   using iterator = TransformIterator<typename Range::iterator, Operation>;
+
+   TransformRange(Range range, Operation op)
+      : m_range(range), m_op(op)
+   {}
+
+   iterator begin() const
+   {
+      return iterator(m_range.begin(), m_op);
+   }
+
+   iterator end() const
+   {
+      return iterator(m_range.end(), m_op);
+   }
+
+   bool empty() const
+   {
+      return begin() == end();
+   }
+
+   typename std::iterator_traits<iterator>::value_type front() const
+   {
+      assert(!empty() && "Front of empty range");
+      return *begin();
+   }
+};
+
+/// Create a new transform range.
+template<typename Range, typename Operation>
+inline TransformRange<Range, Operation>
+make_transform_range(Range range, Operation op)
+{
+   return TransformRange<Range, Operation>(range, op);
+}
+
+/// An iterator that filters and transforms the results of an
+/// underlying forward iterator based on a transformation from the underlying
+/// value type to an optional result type.
+///
+/// \tparam Iterator the underlying iterator.
+///
+/// \tparam OptionalTransform A function object that maps a value of
+/// the underlying iterator type to an optional containing a value of
+/// the resulting sequence, or an empty optional if this item should
+/// be skipped.
+template<typename Iterator, typename OptionalTransform>
+class OptionalTransformIterator
+{
+   Iterator m_current;
+   Iterator m_end;
+
+   /// FIXME: Could optimize away this storage with EBCO tricks.
+   OptionalTransform m_op;
+
+   /// Skip any non-matching elements.
+   void skipNonMatching()
+   {
+      while (m_current != m_end && !m_op(*m_current)) {
+          ++m_current;
+      }
+   }
+
+   using UnderlyingReference =
+   typename std::iterator_traits<Iterator>::reference;
+
+   using ResultReference =
+   typename std::result_of<OptionalTransform(UnderlyingReference)>::type;
+
+public:
+   /// Used to indicate when the current iterator has already been
+   /// "primed", meaning that it's at the end or points to a value that
+   /// satisfies the transform.
+   enum PrimedT { Primed };
+
+   using iterator_category = std::forward_iterator_tag;
+   using reference = typename ResultReference::value_type;
+   using value_type = typename ResultReference::value_type;
+   using pointer = void; // FIXME: should add a proxy here.
+   using difference_type =
+   typename std::iterator_traits<Iterator>::difference_type;
+
+   /// Construct a new optional transform iterator for the given
+   /// iterator range and operation.
+   OptionalTransformIterator(Iterator current, Iterator end,
+                             OptionalTransform op)
+      : m_current(current),
+        m_end(end),
+        m_op(op)
+   {
+      // Prime the iterator.
+      skipNonMatching();
+   }
+
+   /// Construct a new optional transform iterator for the given iterator range
+   /// and operation, where the iterator range has already been
+   /// "primed" by ensuring that it is empty or the current iterator
+   /// points to something that matches the operation.
+   OptionalTransformIterator(Iterator current, Iterator end,
+                             OptionalTransform op, PrimedT)
+      : m_current(current),
+        m_end(end),
+        m_op(op)
+   {
+      // Assert that the iterators have already been primed.
+      assert((m_current == m_end || m_op(*m_current)) && "Not primed!");
+   }
+
+   reference operator*() const
+   {
+      return *m_op(*m_current);
+   }
+
+   OptionalTransformIterator &operator++()
+   {
+      ++m_current;
+      skipNonMatching();
+      return *this;
+   }
+
+   OptionalTransformIterator operator++(int)
+   {
+      OptionalTransformIterator old = *this;
+      ++*this;
+      return old;
+   }
+
+   friend bool operator==(OptionalTransformIterator lhs,
+                          OptionalTransformIterator rhs)
+   {
+      return lhs.m_current == rhs.m_current;
+   }
+
+   friend bool operator!=(OptionalTransformIterator lhs,
+                          OptionalTransformIterator rhs)
+   {
+      return !(lhs == rhs);
+   }
+};
+
+/// Create a new filter iterator.
+template<typename Iterator, typename OptionalTransform>
+inline OptionalTransformIterator<Iterator, OptionalTransform>
+make_optional_transform_iterator(Iterator current, Iterator end,
+                              OptionalTransform op)
+{
+   return OptionalTransformIterator<Iterator, OptionalTransform>(current, end,
+                                                                 op);
+}
+
+/// A range filtered and transformed by the optional transform.
+template <typename Range, typename OptionalTransform,
+          typename Iterator = typename Range::iterator>
+class OptionalTransformRange
+{
+
+   Iterator m_first;
+   Iterator m_last;
+   OptionalTransform m_op;
+
+public:
+   using iterator = OptionalTransformIterator<Iterator, OptionalTransform>;
+
+   OptionalTransformRange(Range range, OptionalTransform op)
+      : m_first(range.begin()),
+        m_last(range.end()),
+        m_op(op)
+   {
+      // Prime the sequence.
+      while (m_first != m_last && !m_op(*m_first)) {
+         ++m_first;
+      }
+   }
+
+   iterator begin() const
+   {
+      return iterator(m_first, m_last, m_op, iterator::Primed);
+   }
+
+   iterator end() const
+   {
+      return iterator(m_last, m_last, m_op, iterator::Primed);
+   }
+
+   bool empty() const
+   {
+      return m_first == m_last;
+   }
+
+   typename std::iterator_traits<iterator>::value_type front() const
+   {
+      assert(!empty() && "Front of empty range");
+      return *begin();
+   }
+};
+
+/// Create a new filter range.
+template<typename Range, typename OptionalTransform>
+inline OptionalTransformRange<Range, OptionalTransform>
+make_optional_transform_range(Range range, OptionalTransform op)
+{
+   return OptionalTransformRange<Range, OptionalTransform>(range, op);
 }
 
 } // basic

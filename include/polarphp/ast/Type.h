@@ -36,7 +36,7 @@
 #include "polarphp/basic/adt/ArrayRefView.h"
 #include "polarphp/basic/adt/OptionSet.h"
 #include "polarphp/utils/Casting.h"
-//#include "polarphp/ast/PrintOptions.h"
+#include "polarphp/ast/PrintOptions.h"
 #include "polarphp/ast/TypeAlignments.h"
 
 #include <functional>
@@ -89,7 +89,7 @@ using TypeSubstitutionMap = DenseMap<SubstitutableType *, Type>;
 ///
 /// Returns a null \c Type to indicate that there is no substitution for
 /// this substitutable type; otherwise, the replacement type.
-using TypeSubstitutionFunc = function<Type(SubstitutableType *dependentType)>;
+using TypeSubstitutionFunc = FunctionRef<Type(SubstitutableType *dependentType)>;
 
 /// A function object suitable for use as a \c TypeSubstitutionFn that
 /// replaces archetypes with their interface types.
@@ -290,7 +290,7 @@ public:
    /// Look through the given type and its children and apply fn to them.
    void visit(FunctionRef<void (Type)> func) const
    {
-      findIf([&fn](Type t) -> bool {
+      findIf([&func](Type t) -> bool {
          func(t);
          return false;
       });
@@ -697,24 +697,9 @@ operator<<(RawOutStream &outStream, AstType type)
    return outStream;
 }
 
-// A Type casts like a TypeBase*.
-template<>
-struct SimplifyType<const AstType>
-{
-   typedef AstBaseType *SimpleType;
-   static SimpleType getSimplifiedValue(const AstType &value)
-   {
-      return value.getPointer();
-   }
-};
-
-template<>
-struct SimplifyType<AstType>
-      : public SimplifyType<const AstType>
-{};
-
 // Type hashes just like pointers.
-template<> struct DenseMapInfo<AstType>
+template<>
+struct DenseMapInfo<AstType>
 {
    static AstType getEmptyKey()
    {
@@ -751,6 +736,28 @@ struct DenseMapInfo<CanType>
    }
 };
 } // polar::basic
+
+namespace polar::utils {
+
+using AstType = polar::ast::Type;
+using AstBaseType = polar::ast::TypeBase;
+
+// A Type casts like a TypeBase*.
+template<>
+struct SimplifyType<const AstType>
+{
+   typedef AstBaseType *SimpleType;
+   static SimpleType getSimplifiedValue(const AstType &value)
+   {
+      return value.getPointer();
+   }
+};
+
+template<>
+struct SimplifyType<AstType>
+      : public SimplifyType<const AstType>
+{};
+} // polar::utils
 
 namespace polar::utils {
 

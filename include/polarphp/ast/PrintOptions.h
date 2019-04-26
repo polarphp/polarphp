@@ -48,6 +48,8 @@ enum DeclAttrKind : unsigned;
 class SynthesizedExtensionAnalyzer;
 struct PrintOptions;
 
+using polar::basic::DenseMap;
+
 /// Necessary information for archetype transformation during printing.
 struct TypeTransformContext
 {
@@ -434,7 +436,6 @@ struct PrintOptions
       result.typeDefinitions = true;
       result.varInitializers = true;
       result.printDocumentationComments = true;
-      result.printRegularClangComments = true;
       result.printLongAttrsOnSeparateLines = true;
       return result;
    }
@@ -468,7 +469,6 @@ struct PrintOptions
       PrintOptions result = printForDiagnostics();
       result.skipUnavailable = true;
       result.skipImplicit = true;
-      result.skipPrivateStdlibDecls = true;
       result.skipUnderscoredStdlibProtocols = true;
       result.skipDeinit = true;
       result.excludeAttrList.push_back(DAK_DiscardableResult);

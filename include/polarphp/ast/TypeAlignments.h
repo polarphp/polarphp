@@ -129,8 +129,6 @@ POLAR_DECLARE_TYPE_ALIGNMENT(polar::ast::AbstractClosureExpr, polar::ast::ExprAl
 POLAR_DECLARE_TYPE_ALIGNMENT(polar::ast::ProtocolConformance, polar::ast::DeclAlignInBits)
 POLAR_DECLARE_TYPE_ALIGNMENT(polar::ast::NormalProtocolConformance, polar::ast::DeclAlignInBits)
 POLAR_DECLARE_TYPE_ALIGNMENT(polar::ast::GenericEnvironment, polar::ast::DeclAlignInBits)
-POLAR_DECLARE_TYPE_ALIGNMENT(polar::ast::Pattern, polar::ast::PatternAlignInBits)
-POLAR_DECLARE_TYPE_ALIGNMENT(polar::ast::SILFunction, polar::ast::SILFunctionAlignInBits)
 
 static_assert(alignof(void*) >= 2, "pointer alignment is too small");
 

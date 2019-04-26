@@ -31,6 +31,9 @@
 #include "polarphp/ast/DiagnosticConsumer.h"
 #include "polarphp/utils/VersionTuple.h"
 #include "polarphp/basic/adt/DenseMap.h"
+#include "polarphp/ast/Identifier.h"
+#include "polarphp/ast/Attr.h"
+#include "polarphp/ast/Type.h"
 
 /// forward declare with namespace
 namespace polar::parser {
@@ -39,15 +42,7 @@ class SourceManager;
 
 namespace polar::ast {
 
-class Identifier;
-class DeclBaseName;
-class DeclName;
 class Decl;
-class DeclAttribute;
-class Type;
-class TypeRepr;
-class TypeLoc;
-class DeclNameLoc;
 class ReferenceOwnership;
 class DiagnosticEngine;
 class ValueDecl;
@@ -131,7 +126,6 @@ class DiagnosticArgument
       ValueDecl *m_theValueDecl;
       Type m_typeVal;
       TypeRepr *m_typeRepr;
-      ReferenceOwnership m_referenceOwnershipVal;
       StaticSpellingKind m_staticSpellingKindVal;
       DescriptiveDeclKind m_descriptiveDeclKindVal;
       const DeclAttribute *m_declAttributeVal;
@@ -194,11 +188,6 @@ public:
          m_typeVal = typeLoc.getType();
       }
    }
-
-   DiagnosticArgument(ReferenceOwnership refOwner)
-      : m_kind(DiagnosticArgumentKind::ReferenceOwnership),
-        m_referenceOwnershipVal(refOwner)
-   {}
 
    DiagnosticArgument(StaticSpellingKind ssk)
       : m_kind(DiagnosticArgumentKind::StaticSpellingKind),
@@ -275,12 +264,6 @@ public:
    {
       assert(m_kind == DiagnosticArgumentKind::TypeRepr);
       return m_typeRepr;
-   }
-
-   ReferenceOwnership getAsReferenceOwnership() const
-   {
-      assert(m_kind == DiagnosticArgumentKind::ReferenceOwnership);
-      return m_referenceOwnershipVal;
    }
 
    StaticSpellingKind getAsStaticSpellingKind() const
