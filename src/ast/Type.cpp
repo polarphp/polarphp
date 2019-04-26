@@ -31,7 +31,7 @@
 //#include "polarphp/ast/ReferenceCounting.h"
 #include "polarphp/ast/TypeVisitor.h"
 #include "polarphp/ast/TypeWalker.h"
-#include "polarphp/ast/Decl.h"
+//#include "polarphp/ast/Decl.h"
 //#include "polarphp/ast/GenericEnvironment.h"
 //#include "polarphp/ast/LazyResolver.h"
 //#include "polarphp/ast/ParameterList.h"

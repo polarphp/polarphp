@@ -98,26 +98,29 @@ void AstNode::walk(AstWalker &walker)
 
 bool AstNode::isStmt(StmtKind kind) const
 {
-   if (!is<Stmt*>()) {
-      return false;
-   }
-   return get<Stmt *>()->getKind() == kind;
+//   if (!is<Stmt*>()) {
+//      return false;
+//   }
+//   return get<Stmt *>()->getKind() == kind;
+   return false;
 }
 
 bool AstNode::isDecl(DeclKind kind) const
 {
-   if (!is<Decl *>()) {
-      return false;
-   }
-   return get<Decl*>()->getKind() == kind;
+//   if (!is<Decl *>()) {
+//      return false;
+//   }
+//   return get<Decl*>()->getKind() == kind;
+   return false;
 }
 
 bool AstNode::isExpr(ExprKind kind) const
 {
-   if (!is<Expr *>()) {
-      return false;
-   }
-   return get<Expr *>()->getKind() == kind;
+//   if (!is<Expr *>()) {
+//      return false;
+//   }
+//   return get<Expr *>()->getKind() == kind;
+   return false;
 }
 
 } // polar::ast
