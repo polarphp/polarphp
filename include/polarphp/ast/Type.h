@@ -602,6 +602,7 @@ inline bool isa(CanTypeWrapper<P> type)
 {
    return isa<X>(type.getPointer());
 }
+
 template <typename X, typename P>
 inline CanTypeWrapper<X> cast(CanTypeWrapper<P> type)
 {
