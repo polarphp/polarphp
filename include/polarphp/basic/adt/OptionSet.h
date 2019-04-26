@@ -60,11 +60,13 @@ class OptionSet
 
 public:
    /// Create an empty option set.
-   OptionSet() : m_storage()
+   OptionSet()
+      : m_storage()
    {}
 
    /// Create an empty option set.
-   OptionSet(llvm::NoneType) : m_storage()
+   OptionSet(std::nullopt_t)
+      : m_storage()
    {}
 
    /// Create an option set with only the given option set.
@@ -74,7 +76,8 @@ public:
 
    /// Create an option set from raw storage.
    explicit OptionSet(StorageType storage)
-      : m_storage(storage) {}
+      : m_storage(storage)
+   {}
 
    /// Check whether an option set is non-empty.
    explicit operator bool() const

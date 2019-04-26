@@ -46,13 +46,6 @@ enum {
 };
 } // charinfo
 
-
-/// Returns true if this is an ASCII character.
-POLAR_READNONE inline bool is_ascii(char c)
-{
-   return static_cast<unsigned char>(c) <= 127;
-}
-
 /// Returns true if this is a valid first character of a C identifier,
 /// which is [a-zA-Z_].
 POLAR_READONLY inline bool is_identifier_head(unsigned char c,

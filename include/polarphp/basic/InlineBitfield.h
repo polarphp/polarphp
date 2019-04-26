@@ -88,7 +88,7 @@ namespace polar::basic {
     enum { NumPadBits = 64 - (Num##U##Bits + (C)) }; \
     uint64_t : Num##U##Bits, __VA_ARGS__; \
   } T; \
-  POLAR__PACKED_END \
+  POLAR_PACKED_END \
   static_assert(sizeof(T##Bitfield) <= 8, "Bitfield overflow")
 
 /// Define an empty bitfield for type 'T'.

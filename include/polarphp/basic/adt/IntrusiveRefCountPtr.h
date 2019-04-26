@@ -328,7 +328,10 @@ bool operator!=(const IntrusiveRefCountPtr<T> &lhs, std::nullptr_t rhs)
 {
    return !(lhs == rhs);
 }
+} // basic
 
+namespace utils {
+using polar::basic::IntrusiveRefCountPtr;
 // Make IntrusiveRefCountPtr work with dyn_cast, isa, and the other idioms from
 // Casting.h.
 template <typename From>
@@ -355,8 +358,7 @@ struct SimplifyType<const IntrusiveRefCountPtr<T>>
       return value.get();
    }
 };
-
-} // basic
+} // utils
 } // polar
 
 #endif // POLARPHP_BASIC_ADT_INTRUSIVE_REF_COUNT_PTR_H

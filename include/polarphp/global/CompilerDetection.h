@@ -195,7 +195,6 @@
 #   define POLAR_REQUIRED_RESULT __attribute__ ((__warn_unused_result__))
 #   define POLAR_DECL_PURE_FUNCTION __attribute__((pure))
 #   define POLAR_DECL_CONST_FUNCTION __attribute__((const))
-#   define POLAR_PACKED __attribute__ ((__packed__))
 #   ifndef __ARM_EABI__
 #      define POLAR_NO_ARM_EABI
 #   endif
@@ -230,7 +229,6 @@
 #      define POLAR_ALGINOF(type) __alignof__(type)
 #      define POLAR_TYPEOF __typeof__(expr)
 #      define POLAR_DECL_ALIGN(n) __attribute__((__aligned__(n)))
-#      define POLAR_PACKED __attribute__((__packed__))
 #   endif
 
 /* Older versions of DEC C++ do not define __EDG__ or __EDG - observed

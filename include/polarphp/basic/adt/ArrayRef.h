@@ -246,11 +246,22 @@ public:
       return slice(size, getSize() - size);
    }
 
+   /// \brief Drop the first \p N elements of the array.
+   ArrayRef<T> drop_front(size_t size = 1) const
+   {
+      return dropFront(size);
+   }
+
    /// \brief Drop the last \p N elements of the array.
    ArrayRef<T> dropBack(size_t size = 1) const
    {
       assert(getSize() >= size && "Dropping more elements than exist");
       return slice(0, getSize() - size);
+   }
+
+   ArrayRef<T> drop_back(size_t size = 1) const
+   {
+      return dropBack(size);
    }
 
    /// \brief Return a copy of *this with the first N elements satisfying the

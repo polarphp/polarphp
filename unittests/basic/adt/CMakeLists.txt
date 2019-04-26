@@ -58,7 +58,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    SimpleIntrusiveListTest.cpp
    StringRefTest.cpp
    StringExtrasTest.cpp
-   STLExtrasTest.cpp
+   StlExtrasTest.cpp
    StringMapTest.cpp
    SmallStringTest.cpp
    SmallVectorTest.cpp

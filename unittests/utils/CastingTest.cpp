@@ -92,7 +92,7 @@ foo *bar::naz()
 bar *fub();
 
 template <>
-struct SmplifyType<foo>
+struct SimplifyType<foo>
 {
    typedef int SimpleType;
    static SimpleType getSimplifiedValue(foo &Val) { return 0; }
@@ -105,10 +105,10 @@ using namespace polar::basic;
 using namespace polar::utils;
 
 // Test that a regular class behaves as expected.
-static_assert(std::is_same<SmplifyType<foo>::SimpleType, int>::value,
-              "Unexpected SmplifyType result!");
-static_assert(std::is_same<SmplifyType<foo *>::SimpleType, foo *>::value,
-              "Unexpected SmplifyType result!");
+static_assert(std::is_same<SimplifyType<foo>::SimpleType, int>::value,
+              "Unexpected SimplifyType result!");
+static_assert(std::is_same<SimplifyType<foo *>::SimpleType, foo *>::value,
+              "Unexpected SimplifyType result!");
 
 namespace {
 
@@ -345,7 +345,7 @@ public:
 namespace polar {
 namespace utils {
 
-template <> struct SmplifyType<pointer_wrappers::PTy>
+template <> struct SimplifyType<pointer_wrappers::PTy>
 {
    typedef pointer_wrappers::Base *SimpleType;
    static SimpleType getSimplifiedValue(pointer_wrappers::PTy &P) {
@@ -353,7 +353,7 @@ template <> struct SmplifyType<pointer_wrappers::PTy>
    }
 };
 
-template <> struct SmplifyType<const pointer_wrappers::PTy>
+template <> struct SimplifyType<const pointer_wrappers::PTy>
 {
    typedef pointer_wrappers::Base *SimpleType;
    static SimpleType getSimplifiedValue(const pointer_wrappers::PTy &P) {
