@@ -37,8 +37,7 @@
 #include <optional>
 #include <array>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 using polar::utils::RawOutStream;
 
@@ -140,7 +139,6 @@ struct DenseMapInfo<UUID>
    }
 };
 
-} // basic
 } // polar
 
 #endif // POLARPHP_BASIC_UUID_H
