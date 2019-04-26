@@ -9,7 +9,6 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -20,7 +19,6 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/04/25.
-//
 //===----------------------------------------------------------------------===//
 //
 // This file defines the TypeLoc struct and related structs.
