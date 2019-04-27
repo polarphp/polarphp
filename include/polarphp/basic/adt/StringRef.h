@@ -153,6 +153,15 @@ public:
       return m_data;
    }
 
+   /// data - Get a pointer to the start of the string (which may not be null
+   /// terminated).
+   POLAR_NODISCARD
+   POLAR_ATTRIBUTE_ALWAYS_INLINE
+   const char *data() const
+   {
+      return m_data;
+   }
+
    /// empty - Check if the string is empty.
    POLAR_NODISCARD
    POLAR_ATTRIBUTE_ALWAYS_INLINE

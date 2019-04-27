@@ -176,8 +176,19 @@ public:
       return m_data;
    }
 
+   const T *data() const
+   {
+      return m_data;
+   }
+
    /// size - Get the array size.
    size_t getSize() const
+   {
+      return m_length;
+   }
+
+   /// size - Get the array size.
+   size_t size() const
    {
       return m_length;
    }
