@@ -134,13 +134,12 @@ private:
 
 namespace polar::basic {
 
-using polar::ast::CapturedValue;
 using polar::ast::ValueDecl;
 
 template <>
-struct DenseMapInfo<CapturedValue>
+struct DenseMapInfo<polar::ast::CapturedValue>
 {
-   using CapturedValue = CapturedValue;
+   using CapturedValue = polar::ast::CapturedValue;
 
    using PtrIntPairDenseMapInfo =
    DenseMapInfo<PointerIntPair<ValueDecl *, 2, unsigned>>;
@@ -155,9 +154,9 @@ struct DenseMapInfo<CapturedValue>
       return CapturedValue{PtrIntPairDenseMapInfo::getTombstoneKey()};
    }
 
-   static unsigned getHashValue(const CapturedValue &Val)
+   static unsigned getHashValue(const CapturedValue &value)
    {
-      return PtrIntPairDenseMapInfo::getHashValue(Val.Value);
+      return PtrIntPairDenseMapInfo::getHashValue(value.m_value);
    }
 
    static bool isEqual(const CapturedValue &lhs, const CapturedValue &rhs)
