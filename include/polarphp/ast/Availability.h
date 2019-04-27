@@ -262,7 +262,7 @@ public:
    const VersionRange &getRequiredOSVersionRange() const
    {
       assert(getReasonKind() == Kind::RequiresOSVersionRange);
-      return m_requiredDeploymentRange.getValue();
+      return m_requiredDeploymentRange.value();
    }
 };
 
