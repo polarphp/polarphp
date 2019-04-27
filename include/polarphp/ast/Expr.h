@@ -28,6 +28,18 @@
 #ifndef POLARPHP_AST_EXPR_H
 #define POLARPHP_AST_EXPR_H
 
+//#include "polarphp/ast/CaptureInfo.h"
+//#include "polarphp/ast/ConcreteDeclRef.h"
+#include "polarphp/ast/DeclNameLoc.h"
+//#include "polarphp/ast/FunctionRefKind.h"
+#include "polarphp/ast/TypeAlignments.h"
+#include "polarphp/ast/TypeLoc.h"
+#include "polarphp/ast/TypeRepr.h"
+#include "polarphp/ast/Availability.h"
+#include "polarphp/basic/InlineBitfield.h"
+#include "polarphp/utils/TrailingObjects.h"
+#include <utility>
+
 namespace polar::ast {
 
 } // polar::ast
