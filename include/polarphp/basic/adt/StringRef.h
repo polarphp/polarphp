@@ -751,6 +751,13 @@ public:
       return substr(size);
    }
 
+   POLAR_NODISCARD
+   POLAR_ATTRIBUTE_ALWAYS_INLINE
+   StringRef drop_front(size_t size = 1) const
+   {
+      return dropFront(size);
+   }
+
    /// Return a StringRef equal to 'this' but with the last \p N elements
    /// dropped.
    POLAR_NODISCARD
@@ -759,6 +766,15 @@ public:
    {
       assert(getSize() >= size && "Dropping more elements than exist");
       return substr(0, getSize() - size);
+   }
+
+   /// Return a StringRef equal to 'this' but with the last \p N elements
+   /// dropped.
+   POLAR_NODISCARD
+   POLAR_ATTRIBUTE_ALWAYS_INLINE
+   StringRef drop_back(size_t size = 1) const
+   {
+      return dropBack(size);
    }
 
    /// Return a StringRef equal to 'this', but with all characters satisfying
