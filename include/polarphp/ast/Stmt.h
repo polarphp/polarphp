@@ -1645,7 +1645,7 @@ public:
 
    void setFallthroughSource(CaseStmt *context)
    {
-      assert(!FallthroughSource && "fallthrough source already set?!");
+      assert(!m_fallthroughSource && "fallthrough source already set?!");
       m_fallthroughSource = context;
    }
 
@@ -1755,7 +1755,7 @@ class PoundAssertStmt : public Stmt
 public:
    PoundAssertStmt(SourceRange range, Expr *condition, StringRef message)
       : Stmt(StmtKind::PoundAssert, /*implicit=*/false),
-        m_range(Range),
+        m_range(range),
         m_condition(condition),
         m_message(message) {}
 
