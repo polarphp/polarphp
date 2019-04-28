@@ -28,7 +28,15 @@
 #ifndef POLARPHP_AST_STMT_H
 #define POLARPHP_AST_STMT_H
 
+#include "polarphp/ast/Availability.h"
+#include "polarphp/ast/AvailabilitySpec.h"
+#include "polarphp/ast/AstNode.h"
+#include "polarphp/ast/TypeAlignments.h"
+#include "polarphp/basic/NullablePtr.h"
+#include "polarphp/utils/TrailingObjects.h"
+
 namespace polar::ast {
+
 
 } // polar::ast
 
