@@ -435,6 +435,11 @@ public:
       return const_cast<T*>(ArrayRef<T>::getData());
    }
 
+   T *data() const
+   {
+      return const_cast<T*>(ArrayRef<T>::getData());
+   }
+
    iterator begin() const
    {
       return getData();
