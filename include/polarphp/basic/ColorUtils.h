@@ -18,6 +18,49 @@
 #ifndef POLARPHP_BASIC_COLORUTILS_H
 #define POLARPHP_BASIC_COLORUTILS_H
 
+#include "polarphp/utils/RawOutStream.h"
 
+namespace polar::basic {
+
+using polar::utils::RawOutStream;
+
+/// RAII class for setting a color for a raw_ostream and resetting when it goes
+/// out-of-scope.
+class OsColor
+{
+public:
+   OsColor(RawOutStream &outStream, RawOutStream::Colors color)
+      : m_outStream(outStream)
+   {
+      m_hasColors = m_outStream.hasColors();
+      if (m_hasColors) {
+         m_outStream.changeColor(color);
+      }
+   }
+
+   ~OsColor()
+   {
+      if (m_hasColors) {
+         m_outStream.resetColor();
+      }
+   }
+
+   OsColor &operator<<(char c)
+   {
+      m_outStream << C; return *this;
+   }
+
+   OsColor &operator<<(StringRef str)
+   {
+      m_outStream << str;
+      return *this;
+   }
+
+private:
+   RawOutStream &m_outStream;
+   bool m_hasColors;
+};
+
+} // polar::basic
 
 #endif // POLARPHP_BASIC_COLORUTILS_H
