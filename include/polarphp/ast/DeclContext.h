@@ -30,6 +30,7 @@
 #ifndef POLARPHP_Ast_DECL_CONTEXT_H
 #define POLARPHP_Ast_DECL_CONTEXT_H
 
+#include "polarphp/ast/TypeAlignments.h"
 #include "polarphp/basic/adt/PointerEmbeddedInt.h"
 #include "polarphp/basic/adt/PointerIntPair.h"
 #include "polarphp/basic/adt/PointerUnion.h"

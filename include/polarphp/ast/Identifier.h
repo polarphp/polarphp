@@ -309,11 +309,11 @@ private:
    /// is used as the data of the base name identifier.
    /// This is an implementation detail that should never leak outside of
    /// DeclName.
-   static void *m_subscriptIdentifierData;
+   static void *sm_subscriptIdentifierData;
    /// As above, for special constructor DeclNames.
-   static void *m_constructorIdentifierData;
+   static void *sm_constructorIdentifierData;
    /// As above, for special destructor DeclNames.
-   static void *m_destructorIdentifierData;
+   static void *sm_destructorIdentifierData;
 
    Identifier m_identifier;
 
@@ -328,26 +328,26 @@ public:
 
    static DeclBaseName createSubscript()
    {
-      return DeclBaseName(Identifier((const char *)m_subscriptIdentifierData));
+      return DeclBaseName(Identifier((const char *)sm_subscriptIdentifierData));
    }
 
    static DeclBaseName createConstructor()
    {
-      return DeclBaseName(Identifier((const char *)m_constructorIdentifierData));
+      return DeclBaseName(Identifier((const char *)sm_constructorIdentifierData));
    }
 
    static DeclBaseName createDestructor()
    {
-      return DeclBaseName(Identifier((const char *)m_destructorIdentifierData));
+      return DeclBaseName(Identifier((const char *)sm_destructorIdentifierData));
    }
 
    Kind getKind() const
    {
-      if (m_identifier.get() == m_subscriptIdentifierData) {
+      if (m_identifier.get() == sm_subscriptIdentifierData) {
          return Kind::Subscript;
-      } else if (m_identifier.get() == m_constructorIdentifierData) {
+      } else if (m_identifier.get() == sm_constructorIdentifierData) {
          return Kind::Constructor;
-      } else if (m_identifier.get() == m_destructorIdentifierData) {
+      } else if (m_identifier.get() == sm_destructorIdentifierData) {
          return Kind::Destructor;
       } else {
          return Kind::Normal;

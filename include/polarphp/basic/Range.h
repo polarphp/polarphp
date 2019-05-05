@@ -119,13 +119,19 @@ template <class T = unsigned, class Traits = IntRangeTraits<T>>
 class IntRange
 {
 public:
-   IntRange() : begin(0), end(0)
+   IntRange()
+      : m_begin(0),
+        m_end(0)
    {}
 
-   IntRange(T end) : begin(0), end(end)
+   IntRange(T end)
+      : m_begin(0),
+        m_end(end)
    {}
 
-   IntRange(T begin, T end) : begin(begin), end(end)
+   IntRange(T begin, T end)
+      : m_begin(begin),
+        m_end(end)
    {
       assert(begin <= end);
    }

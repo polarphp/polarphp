@@ -73,25 +73,25 @@ public:
       return polar::basic::make_array_ref(m_parts.Tags.begin(), m_parts.Tags.end());
    }
 
-   std::optional<const Paragraph *> getBrief() const
-   {
-      return m_parts.brief;
-   }
+//   std::optional<const Paragraph *> getBrief() const
+//   {
+//      return m_parts.brief;
+//   }
 
-   std::optional<const ReturnsField * >getReturnsField() const
-   {
-      return m_parts.returnsField;
-   }
+//   std::optional<const ReturnsField * >getReturnsField() const
+//   {
+//      return m_parts.returnsField;
+//   }
 
-   std::optional<const ThrowsField*> getThrowsField() const
-   {
-      return m_parts.throwsField;
-   }
+//   std::optional<const ThrowsField*> getThrowsField() const
+//   {
+//      return m_parts.throwsField;
+//   }
 
-   ArrayRef<const ParamField *> getParamFields() const
-   {
-      return m_parts.paramFields;
-   }
+//   ArrayRef<const ParamField *> getParamFields() const
+//   {
+//      return m_parts.paramFields;
+//   }
 
    ArrayRef<const MarkupAstNode *> getBodyNodes() const
    {

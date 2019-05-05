@@ -49,6 +49,11 @@
 #include <utility>
 #include <vector>
 
+namespace polar::parser {
+class SourceManager;
+class SourceLoc;
+}
+
 namespace polar::ast {
 
 class AstContext;
@@ -63,7 +68,6 @@ class GenericContext;
 class InFlightDiagnostic;
 class IterableDeclContext;
 class SourceFile;
-class SourceLoc;
 class Type;
 class TypeVariableType;
 class TupleType;
@@ -79,7 +83,6 @@ class TupleTypeElt;
 class EnumElementDecl;
 class ProtocolDecl;
 class SubstitutableType;
-class SourceManager;
 class ValueDecl;
 class DiagnosticEngine;
 struct RawComment;
@@ -94,6 +97,7 @@ using polar::basic::LangOptions;
 using polar::basic::SetVector;
 using polar::basic::StringMap;
 using polar::utils::BumpPtrAllocator;
+using polar::parser::SourceManager;
 
 /// The arena in which a particular AstContext allocation will go.
 enum class AllocationArena

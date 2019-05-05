@@ -231,6 +231,18 @@ public:
       return const_pointer(begin());
    }
 
+   /// Return a pointer to the vector's buffer, even if empty().
+   pointer data()
+   {
+      return pointer(begin());
+   }
+
+   /// Return a pointer to the vector's buffer, even if empty().
+   const_pointer data() const
+   {
+      return const_pointer(begin());
+   }
+
    POLAR_ATTRIBUTE_ALWAYS_INLINE
    reference operator[](size_type idx)
    {

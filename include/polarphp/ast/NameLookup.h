@@ -36,7 +36,7 @@
 
 namespace polar::ast {
 
-class ASTContext;
+class AstContext;
 class DeclContext;
 class DeclName;
 class Expr;
@@ -301,14 +301,14 @@ public:
 
    virtual void foundDecl(ValueDecl *valueDecl, DeclVisibilityKind reason) override
    {
-      // Give clients an opportunity to filter out non-type declarations early,
-      // to avoid circular validation.
-      if (isTypeLookup && !isa<TypeDecl>(valueDecl)) {
-         return;
-      }
-      if (valueDecl->getFullName().matchesRef(name)) {
-         results.push_back(LookupResultEntry(valueDecl));
-      }
+//      // Give clients an opportunity to filter out non-type declarations early,
+//      // to avoid circular validation.
+//      if (isTypeLookup && !isa<TypeDecl>(valueDecl)) {
+//         return;
+//      }
+//      if (valueDecl->getFullName().matchesRef(name)) {
+//         results.push_back(LookupResultEntry(valueDecl));
+//      }
    }
 };
 
@@ -419,7 +419,7 @@ public:
 private:
    bool isReferencePointInRange(SourceRange range)
    {
-      return m_sm.rangeContainsTokenLoc(range, loc);
+      //return m_sm.rangeContainsTokenLoc(range, m_loc);
    }
 
    void visitBreakStmt(BreakStmt *)

@@ -31,7 +31,7 @@
 
 // MARKUP_SIMPLE_FIELD(Id, Keyword, XMLKind)
 
-#ifndef
+#ifndef MARKUP_SIMPLE_FIELD
 # define MARKUP_SIMPLE_FIELD(Id, Keyword, XMLKind)
 #endif
 

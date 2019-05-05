@@ -34,7 +34,7 @@
 #include "polarphp/basic/adt/ArrayRef.h"
 #include "polarphp/utils/Debug.h"
 #include "polarphp/utils/RawOutStream.h"
-#include "polarphp/utils/Defer.h"
+#include "polarphp/basic/Defer.h"
 
 #include "polarphp/ast/DiagnosticConsumer.h"
 #include "polarphp/ast/DiagnosticEngine.h"

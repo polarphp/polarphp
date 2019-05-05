@@ -50,7 +50,7 @@ public:
    Line(StringRef text, SourceRange range)
       : m_text(text),
         m_range(range),
-        m_firstNonspaceOffset(measureIndentation(text))
+        m_firstNonspaceOffset(measure_indentation(text))
    {}
 
    void dropFront(size_t amount)

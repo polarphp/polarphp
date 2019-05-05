@@ -1533,7 +1533,6 @@ inline bool TypeRepr::isSimple() const
    case TypeReprKind::Tuple:
    case TypeReprKind::Fixed:
    case TypeReprKind::Array:
-   case TypeReprKind::SILBox:
    case TypeReprKind::Shared:
    case TypeReprKind::Owned:
       return true;

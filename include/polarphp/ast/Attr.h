@@ -235,48 +235,56 @@ protected:
    union {
       uint64_t OpaqueBits;
 
-      POLAR_INLINE_BITFIELD_BASE(DeclAttribute, bitmax(NumDeclAttrKindBits,8)+1+1,
-                                 Kind : bitmax(NumDeclAttrKindBits,8),
-                                 // Whether this attribute was implicitly added.
-                                 implicit : 1,
+      POLAR_INLINE_BITFIELD_BASE(
+            DeclAttribute, bitmax(NumDeclAttrKindBits,8)+1+1,
+            Kind : bitmax(NumDeclAttrKindBits,8),
+            // Whether this attribute was implicitly added.
+            implicit : 1,
 
-                                 Invalid : 1
-                                 );
+            Invalid : 1
+            );
 
-      POLAR_INLINE_BITFIELD(DynamicReplacementAttr, DeclAttribute, 1,
-                            /// Whether this attribute has location information that trails the main
-                            /// record, which contains the locations of the parentheses and any names.
-                            HasTrailingLocationInfo : 1
-                            );
+      POLAR_INLINE_BITFIELD(
+            DynamicReplacementAttr, DeclAttribute, 1,
+            /// Whether this attribute has location information that trails the main
+            /// record, which contains the locations of the parentheses and any names.
+            HasTrailingLocationInfo : 1
+            );
 
-      POLAR_INLINE_BITFIELD(AbstractAccessControlAttr, DeclAttribute, 3,
-                            AccessLevel : 3
-                            );
+      POLAR_INLINE_BITFIELD(
+            AbstractAccessControlAttr, DeclAttribute, 3,
+            AccessLevel : 3
+            );
 
-      POLAR_INLINE_BITFIELD_FULL(AlignmentAttr, DeclAttribute, 32,
-                                 : NumPadBits,
-                                 // The alignment value.
-                                 Value : 32
-                                 );
+      POLAR_INLINE_BITFIELD_FULL(
+            AlignmentAttr, DeclAttribute, 32,
+            : NumPadBits,
+            // The alignment value.
+            Value : 32
+            );
 
-      POLAR_INLINE_BITFIELD(EffectsAttr, DeclAttribute, NumEffectsKindBits,
-                            kind : NumEffectsKindBits
-                            );
+      POLAR_INLINE_BITFIELD(
+            EffectsAttr, DeclAttribute, NumEffectsKindBits,
+            kind : NumEffectsKindBits
+            );
 
-      POLAR_INLINE_BITFIELD(InlineAttr, DeclAttribute, NumInlineKindBits,
-                            kind : NumInlineKindBits
-                            );
+      POLAR_INLINE_BITFIELD(
+            InlineAttr, DeclAttribute, NumInlineKindBits,
+            kind : NumInlineKindBits
+            );
 
-      POLAR_INLINE_BITFIELD(OptimizeAttr, DeclAttribute, NumOptimizationModeBits,
-                            mode : NumOptimizationModeBits
-                            );
+      POLAR_INLINE_BITFIELD(
+            OptimizeAttr, DeclAttribute, NumOptimizationModeBits,
+            mode : NumOptimizationModeBits
+            );
 
-      POLAR_INLINE_BITFIELD_FULL(SpecializeAttr, DeclAttribute, 1+1+32,
-                                 exported : 1,
-                                 kind : 1,
-                                 : NumPadBits,
-                                 numRequirements : 32
-                                 );
+      POLAR_INLINE_BITFIELD_FULL(
+            SpecializeAttr, DeclAttribute, 1+1+32,
+            exported : 1,
+            kind : 1,
+            : NumPadBits,
+            numRequirements : 32
+            );
    } m_bits;
 
    DeclAttribute *m_next = nullptr;
@@ -524,7 +532,6 @@ public:
    static DeclAttrKind getAttrKindFromString(StringRef str);
 };
 
-
 /// Describes a "simple" declaration attribute that carries no data.
 template<DeclAttrKind kind>
 class SimpleDeclAttr : public DeclAttribute
@@ -553,7 +560,7 @@ public:
 
 // Declare typedefs for all of the simple declaration attributes.
 #define SIMPLE_DECL_ATTR(_, CLASS, ...) \
-   typedef SimpleDeclAttr<DAK_##CLASS> CLASS##attr;
+ typedef SimpleDeclAttr<DAK_##CLASS> CLASS##Attr;
 #include "polarphp/ast/AttrDefs.h"
 
 /// Determine the result of comparing an availability attribute to a specific
@@ -950,16 +957,16 @@ public:
    }
 
    /// If this attribute set has a prefix/postfix attribute on it, return this.
-//   UnaryOperatorKind getUnaryOperatorKind() const
-//   {
-//      if (hasAttribute<PrefixAttr>()) {
-//         return UnaryOperatorKind::Prefix;
-//      }
-//      if (hasAttribute<PostfixAttr>()) {
-//         return UnaryOperatorKind::Postfix;
-//      }
-//      return UnaryOperatorKind::None;
-//   }
+   //   UnaryOperatorKind getUnaryOperatorKind() const
+   //   {
+   //      if (hasAttribute<PrefixAttr>()) {
+   //         return UnaryOperatorKind::Prefix;
+   //      }
+   //      if (hasAttribute<PostfixAttr>()) {
+   //         return UnaryOperatorKind::Postfix;
+   //      }
+   //      return UnaryOperatorKind::None;
+   //   }
 
    bool isUnavailable(const AstContext &ctx) const
    {
@@ -1073,13 +1080,13 @@ public:
    template <typename ATTR>
    ATTR *getAttribute(bool allowInvalid = false)
    {
-      for (auto attr : *this) {
-         if (auto *specificAttr = dyn_cast<ATTR>(attr)) {
-            if (specificAttr->isValid() || allowInvalid) {
-               return specificAttr;
-            }
-         }
-      }
+//      for (auto attr : *this) {
+//         if (auto *specificAttr = dyn_cast<ATTR>(attr)) {
+//            if (specificAttr->isValid() || allowInvalid) {
+//               return specificAttr;
+//            }
+//         }
+//      }
       return nullptr;
    }
 
@@ -1091,7 +1098,8 @@ public:
 
    /// Retrieve the first attribute with the given kind.
    const DeclAttribute *getAttribute(DeclAttrKind DK,
-                                     bool allowInvalid = false) const {
+                                     bool allowInvalid = false) const
+   {
       for (auto attr : *this)
          if (attr->getKind() == DK && (attr->isValid() || allowInvalid))
             return attr;

@@ -52,8 +52,6 @@ using polar::utils::SMRange;
 /// This class manages and owns source buffers.
 class SourceManager
 {
-
-
    // \c #sourceLocation directive handling.
    struct VirtualFile
    {

@@ -358,7 +358,7 @@ struct is_pointerunion<PointerUnion<T, U>> : std::true_type
 template <typename T, typename U>
 FrontendStatsTracer make_tracer_pointerunion(UnifiedStatsReporter *reporter,
                                              StringRef name,
-                                             llvm::PointerUnion<T, U> value)
+                                             PointerUnion<T, U> value)
 {
    if (value.template is<T>()) {
       return make_tracer_direct(reporter, name, value.template get<T>());

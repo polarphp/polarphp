@@ -58,7 +58,7 @@ constexpr uint64_t form_type_id(uint8_t zone, uint8_t type)
 
 // Define the C type zone (zone 0).
 #define POLAR_TYPEID_ZONE 0
-#define POLAR_TYPEID_HEADER "polar/basic/CTypeIdZoneDefs.h"
+#define POLAR_TYPEID_HEADER "polarphp/basic/CTypeIdZoneDefs.h"
 #include "polarphp/basic/DefineTypeIdZone.h"
 
 } // polar::basic

@@ -1,18 +1,13 @@
-//===--- NameLookupRequests.h - Name Lookup Requests ------------*- C++ -*-===//
+//===--- AccessTypeIDZone.def -----------------------------------*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2014 - 2018 Apple Inc. and the Swift project authors
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
-//===----------------------------------------------------------------------===//
-//
-//  This file defines name-lookup requests.
-//
-//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -22,13 +17,18 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2019/04/29.
+// Created by polarboy on 2019/05/05.
+//===----------------------------------------------------------------------===//
+//
+//  This definition file describes the types in the access-control
+//  TypeID zone, for use with the TypeID template.
+//
+//===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_NAME_LOOKUP_REQUESTS_H
-#define POLARPHP_NAME_LOOKUP_REQUESTS_H
+#ifndef
+# define POLAR_TYPEID(RequestType)
+#endif
 
-//#include "swift/AST/SimpleRequest.h"
-//#include "swift/Basic/Statistic.h"
-//#include "llvm/ADT/TinyPtrVector.h"
-
-#endif // POLARPHP_NAME_LOOKUP_REQUESTS_H
+POLAR_TYPEID(AccessLevelRequest)
+POLAR_TYPEID(SetterAccessLevelRequest)
+POLAR_TYPEID(DefaultAndMaxAccessLevelRequest)

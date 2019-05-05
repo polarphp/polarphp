@@ -163,8 +163,6 @@ public:
    /// \param name the name to be printed.
    virtual void printTypeRef(Type type, const TypeDecl *refTo, Identifier name);
 
-   /// Called when printing the referenced name of a module.
-   virtual void printModuleRef(ModuleEntity module, Identifier name);
 
    //   /// Called before printing a synthesized extension.
    //   virtual void printSynthesizedExtensionPre(const ExtensionDecl *extensionDecl,

@@ -60,9 +60,9 @@ struct CommentParts
 
    bool isEmpty() const
    {
-      return !brief.hasValue() &&
-            !returnsField.hasValue() &&
-            !throwsField.hasValue() &&
+      return !brief.has_value() &&
+            !returnsField.has_value() &&
+            !throwsField.has_value() &&
             bodyNodes.empty() &&
             paramFields.empty();
    }
@@ -70,8 +70,8 @@ struct CommentParts
    bool hasFunctionDocumentation() const
    {
       return !paramFields.empty() ||
-            returnsField.hasValue() ||
-            throwsField.hasValue();
+            returnsField.has_value() ||
+            throwsField.has_value();
    }
 };
 
@@ -778,7 +778,7 @@ public:
       if (!m_parts.has_value()) {
          return false;
       }
-      return m_parts.getValue().hasFunctionDocumentation();
+      return m_parts.value().hasFunctionDocumentation();
    }
 
    ArrayRef<MarkupAstNode *> getChildren()
@@ -893,16 +893,16 @@ class MarkupAstVisitor
 public:
    RetTy visit(const MarkupAstNode *node, Args... args)
    {
-      switch (node->getKind()) {
-#define MARKUP_AST_NODE(Id, Parent) \
-      case AstNodeKind::Id: \
-   return static_cast<ImplClass*>(this) \
-   ->visit##Id(cast<const Id>(node), \
-   ::std::forward<Args>(args)...);
-#define ABSTRACT_MARKUP_AST_NODE(Id, Parent)
-#define MARKUP_AST_NODE_RANGE(Id, FirstId, LastId)
-#include "polarphp/markup/AstNodesDefs.h"
-      }
+//      switch (node->getKind()) {
+//#define MARKUP_AST_NODE(Id, Parent) \
+//      case AstNodeKind::Id: \
+//   return static_cast<ImplClass*>(this) \
+//   ->visit##Id(cast<const Id>(node), \
+//   ::std::forward<Args>(args)...);
+//#define ABSTRACT_MARKUP_AST_NODE(Id, Parent)
+//#define MARKUP_AST_NODE_RANGE(Id, FirstId, LastId)
+//#include "polarphp/markup/AstNodesDefs.h"
+//      }
    }
    virtual ~MarkupAstVisitor() {}
 };

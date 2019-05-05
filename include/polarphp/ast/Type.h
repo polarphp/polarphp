@@ -540,7 +540,7 @@ struct CanTypeWrapperTraits<Type>
 };                                                                  \
    template <> struct CanTypeWrapperTraits<TYPE> {                     \
    typedef Can##TYPE type;                                           \
-};
+}
 
 #define DEFINE_EMPTY_CAN_TYPE_WRAPPER(TYPE, BASE)                   \
    BEGIN_CAN_TYPE_WRAPPER(TYPE, BASE)                                  \
@@ -572,7 +572,7 @@ inline bool isa(CanType type)
 template <typename X>
 inline CanTypeWrapper<X> cast(CanType type)
 {
-   return CanTypeWrapper<X>(cast<X>(type.getPointer()));
+   //return CanTypeWrapper<X>(cast<X>(type.getPointer()));
 }
 
 template <typename X>

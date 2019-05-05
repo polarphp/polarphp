@@ -118,10 +118,7 @@ TYPE_ATTR(thick)
 // - Please sort attributes by serialization number.
 // - Please create a "NOTE" comment if a unique number is skipped.
 
-DECL_ATTR(_silgen_name, SILGenName,
-          OnAbstractFunction |
-          LongAttribute | UserInaccessible,
-          0)
+
 DECL_ATTR(available, Available,
           OnAbstractFunction | OnGenericType | OnVar | OnSubscript | OnEnumElement |
           OnExtension | OnGenericTypeParam |
@@ -131,10 +128,7 @@ CONTEXTUAL_SIMPLE_DECL_ATTR(final, Final,
                             OnClass | OnFunc | OnAccessor | OnVar | OnSubscript |
                             DeclModifier,
                             2)
-DECL_ATTR(objc, ObjC,
-          OnAbstractFunction | OnClass | OnProtocol | OnExtension | OnVar |
-          OnSubscript | OnEnum | OnEnumElement,
-          3)
+
 CONTEXTUAL_SIMPLE_DECL_ATTR(required, Required,
                             OnConstructor |
                             DeclModifier,
@@ -191,10 +185,7 @@ SIMPLE_DECL_ATTR(unsafe_no_objc_tagged_pointer, UnsafeNoObjCTaggedPointer,
 DECL_ATTR(inline, Inline,
           OnVar | OnSubscript | OnAbstractFunction,
           20)
-DECL_ATTR(_semantics, Semantics,
-          OnAbstractFunction | OnSubscript |
-          AllowMultipleAttributes | UserInaccessible,
-          21)
+
 CONTEXTUAL_SIMPLE_DECL_ATTR(dynamic, Dynamic,
                             OnFunc | OnAccessor | OnVar | OnSubscript | OnConstructor |
                             DeclModifier,
@@ -227,10 +218,7 @@ SIMPLE_DECL_ATTR(_fixed_layout, FixedLayout,
 SIMPLE_DECL_ATTR(inlinable, Inlinable,
                  OnVar | OnSubscript | OnAbstractFunction,
                  32)
-DECL_ATTR(_specialize, Specialize,
-          OnConstructor | OnFunc | OnAccessor |
-          AllowMultipleAttributes | LongAttribute | UserInaccessible,
-          33)
+
 SIMPLE_DECL_ATTR(objcMembers, ObjCMembers,
                  OnClass,
                  34)
@@ -276,19 +264,13 @@ DECL_ATTR(__raw_doc_comment, RawDocComment,
           OnAnyDecl |
           RejectByParser |
           NotSerialized, 48)
-CONTEXTUAL_DECL_ATTR(weak, ReferenceOwnership,
-                     OnVar |
-                     DeclModifier |
-                     NotSerialized, 49)
+
 CONTEXTUAL_DECL_ATTR_ALIAS(unowned, ReferenceOwnership)
 DECL_ATTR(_effects, Effects,
           OnAbstractFunction |
           UserInaccessible,
           50)
-DECL_ATTR(__objc_bridged, ObjCBridged,
-          OnClass |
-          RejectByParser |
-          NotSerialized, 51)
+
 SIMPLE_DECL_ATTR(NSApplicationMain, NSApplicationMain,
                  OnClass,
                  52)
@@ -296,26 +278,17 @@ SIMPLE_DECL_ATTR(_objc_non_lazy_realization, ObjCNonLazyRealization,
                  OnClass |
                  UserInaccessible,
                  53)
-DECL_ATTR(__synthesized_protocol, SynthesizedProtocol,
-          OnConcreteNominalType |
-          RejectByParser |
-          NotSerialized, 54)
+
 SIMPLE_DECL_ATTR(testable, Testable,
                  OnImport |
                  UserInaccessible |
                  NotSerialized, 55)
-DECL_ATTR(_alignment, Alignment,
-          OnStruct | OnEnum |
-          UserInaccessible,
-          56)
+
 SIMPLE_DECL_ATTR(rethrows, Rethrows,
                  OnFunc | OnAccessor | OnConstructor |
                  RejectByParser,
                  57)
-DECL_ATTR(_swift_native_objc_runtime_base, SwiftNativeObjCRuntimeBase,
-          OnClass |
-          UserInaccessible,
-          59)
+
 CONTEXTUAL_SIMPLE_DECL_ATTR(indirect, Indirect, DeclModifier |
                             OnEnum | OnEnumElement,
                             60)
@@ -327,10 +300,7 @@ SIMPLE_DECL_ATTR(_show_in_interface, ShowInInterface,
                  OnProtocol |
                  UserInaccessible,
                  62)
-DECL_ATTR(_cdecl, CDecl,
-          OnFunc | OnAccessor |
-          LongAttribute | UserInaccessible,
-          63)
+
 SIMPLE_DECL_ATTR(usableFromInline, UsableFromInline,
                  OnAbstractFunction | OnVar | OnSubscript | OnNominalType | OnTypeAlias |
                  LongAttribute,
@@ -346,17 +316,11 @@ DECL_ATTR(_implements, Implements,
           OnFunc | OnAccessor | OnVar | OnSubscript | OnTypeAlias |
           UserInaccessible |
           NotSerialized, 67)
-DECL_ATTR(_objcRuntimeName, ObjCRuntimeName,
-          OnClass |
-          UserInaccessible |
-          NotSerialized, 68)
+
 SIMPLE_DECL_ATTR(_staticInitializeObjCMetadata, StaticInitializeObjCMetadata,
                  OnClass | LongAttribute | RejectByParser |
                  NotSerialized, 69)
-DECL_ATTR(_restatedObjCConformance, RestatedObjCConformance,
-          OnProtocol |
-          LongAttribute | RejectByParser |
-          NotSerialized, 70)
+
 // NOTE: 71 is unused
 SIMPLE_DECL_ATTR(_implicitly_unwrapped_optional, ImplicitlyUnwrappedOptional,
                  OnFunc | OnAccessor | OnVar | OnParam | OnSubscript | OnConstructor |
@@ -366,10 +330,7 @@ DECL_ATTR(_optimize, Optimize,
           OnAbstractFunction | OnSubscript | OnVar |
           UserInaccessible,
           73)
-DECL_ATTR(_clangImporterSynthesizedType, ClangImporterSynthesizedType,
-          OnGenericType |
-          LongAttribute | RejectByParser | UserInaccessible |
-          NotSerialized, 74)
+
 SIMPLE_DECL_ATTR(_weakLinked, WeakLinked,
                  OnNominalType | OnAssociatedType | OnFunc | OnAccessor | OnVar |
                  OnSubscript | OnConstructor | OnEnumElement | OnExtension | UserInaccessible,
@@ -390,16 +351,11 @@ SIMPLE_DECL_ATTR(_nonoverride, NonOverride,
                  OnFunc | OnAccessor | OnVar | OnSubscript | OnConstructor | OnAssociatedType |
                  UserInaccessible | NotSerialized,
                  79)
-DECL_ATTR(_dynamicReplacement, DynamicReplacement,
-          OnAbstractFunction | OnVar | OnSubscript | UserInaccessible,
-          80)
+
 SIMPLE_DECL_ATTR(_borrowed, Borrowed,
                  OnVar | OnSubscript | UserInaccessible |
                  NotSerialized, 81)
-DECL_ATTR(_private, PrivateImport,
-          OnImport |
-          UserInaccessible |
-          NotSerialized, 82)
+
 
 #undef TYPE_ATTR
 #undef DECL_ATTR_ALIAS

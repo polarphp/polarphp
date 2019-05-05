@@ -56,31 +56,31 @@ public:
 
    DeclRetType visit(Decl *decl, Args... args)
    {
-      switch (decl->getKind())
-      {
-#define DECL(CLASS, PARENT) \
-      case DeclKind::CLASS: \
-   return static_cast<ImplClass*>(this) \
-   ->visit##CLASS##Decl(static_cast<CLASS##Decl*>(decl), \
-   ::std::forward<Args>(args)...);
-#include "polarphp/ast/DeclNodesDefs.h"
-      }
-      polar_unreachable("Not reachable, all cases handled");
+//      switch (decl->getKind())
+//      {
+//#define DECL(CLASS, PARENT) \
+//      case DeclKind::CLASS: \
+//   return static_cast<ImplClass*>(this) \
+//   ->visit##CLASS##Decl(static_cast<CLASS##Decl*>(decl), \
+//   ::std::forward<Args>(args)...);
+//#include "polarphp/ast/DeclNodesDefs.h"
+//      }
+//      polar_unreachable("Not reachable, all cases handled");
    }
 
    ExprRetType visit(Expr *expr, Args... args)
    {
-      switch (expr->getKind()) {
+//      switch (expr->getKind()) {
 
-#define EXPR(CLASS, PARENT) \
-      case ExprKind::CLASS: \
-   return static_cast<ImplClass*>(this) \
-   ->visit##CLASS##Expr(static_cast<CLASS##Expr*>(E), \
-   ::std::forward<Args>(args)...);
-#include "polarphp/ast/DeclNodesDefs.h"
+//#define EXPR(CLASS, PARENT) \
+//      case ExprKind::CLASS: \
+//   return static_cast<ImplClass*>(this) \
+//   ->visit##CLASS##Expr(static_cast<CLASS##Expr*>(E), \
+//   ::std::forward<Args>(args)...);
+//#include "polarphp/ast/DeclNodesDefs.h"
 
-      }
-      polar_unreachable("Not reachable, all cases handled");
+//      }
+//      polar_unreachable("Not reachable, all cases handled");
    }
 
    // Provide default implementations of abstract "visit" implementations that
@@ -93,22 +93,22 @@ public:
    return static_cast<ImplClass*>(this)->visit##PARENT(expr, \
    ::std::forward<Args>(args)...);  \
 }
-#define EXPR(CLASS, PARENT) ABSTRACT_EXPR(CLASS, PARENT)
-#include "polarphp/ast/DeclNodesDefs.h"
+//#define EXPR(CLASS, PARENT) ABSTRACT_EXPR(CLASS, PARENT)
+//#include "polarphp/ast/DeclNodesDefs.h"
 
    StmtRetType visit(Stmt *stmt, Args... args)
    {
-      switch (stmt->getKind()) {
+//      switch (stmt->getKind()) {
 
-#define STMT(CLASS, PARENT) \
-      case StmtKind::CLASS: \
-   return static_cast<ImplClass*>(this) \
-   ->visit##CLASS##Stmt(static_cast<CLASS##Stmt*>(S), \
-   ::std::forward<Args>(args)...);
-#include "polarphp/ast/DeclNodesDefs.h"
+//#define STMT(CLASS, PARENT) \
+//      case StmtKind::CLASS: \
+//   return static_cast<ImplClass*>(this) \
+//   ->visit##CLASS##Stmt(static_cast<CLASS##Stmt*>(S), \
+//   ::std::forward<Args>(args)...);
+//#include "polarphp/ast/DeclNodesDefs.h"
 
-      }
-      polar_unreachable("Not reachable, all cases handled");
+//      }
+//      polar_unreachable("Not reachable, all cases handled");
    }
 
 #define DECL(CLASS, PARENT) \
@@ -116,19 +116,19 @@ public:
    return static_cast<ImplClass*>(this)->visit##PARENT(decl, \
    ::std::forward<Args>(args)...); \
 }
-#define ABSTRACT_DECL(CLASS, PARENT) DECL(CLASS, PARENT)
-#include "polarphp/ast/DeclNodesDefs.h"
+//#define ABSTRACT_DECL(CLASS, PARENT) DECL(CLASS, PARENT)
+//#include "polarphp/ast/DeclNodesDefs.h"
 
    TypeReprRetType visit(TypeRepr *typeRepr, Args... args)
    {
-      switch (T->getKind()) {
-#define TYPEREPR(CLASS, PARENT) \
-      case TypeReprKind::CLASS: \
-   return static_cast<ImplClass*>(this) \
-   ->visit##CLASS##TypeRepr(static_cast<CLASS##TypeRepr*>(typeRepr), \
-   ::std::forward<Args>(args)...);
-#include "polarphp/ast/TypeReprNodesDefs.h"
-      }
+//      switch (T->getKind()) {
+//#define TYPEREPR(CLASS, PARENT) \
+//      case TypeReprKind::CLASS: \
+//   return static_cast<ImplClass*>(this) \
+//   ->visit##CLASS##TypeRepr(static_cast<CLASS##TypeRepr*>(typeRepr), \
+//   ::std::forward<Args>(args)...);
+//#include "polarphp/ast/TypeReprNodesDefs.h"
+//      }
       polar_unreachable("Not reachable, all cases handled");
    }
 
@@ -142,21 +142,21 @@ public:
    return static_cast<ImplClass*>(this)->visit##PARENT(T, \
    ::std::forward<Args>(args)...); \
 }
-#define ABSTRACT_TYPEREPR(CLASS, PARENT) TYPEREPR(CLASS, PARENT)
-#include "polarphp/ast/TypeReprNodesDefs.h"
+//#define ABSTRACT_TYPEREPR(CLASS, PARENT) TYPEREPR(CLASS, PARENT)
+//#include "polarphp/ast/TypeReprNodesDefs.h"
 
    AttributeRetType visit(DeclAttribute *A, Args... args) {
-      switch (A->getKind()) {
-#define DECL_ATTR(_, CLASS, ...)                           \
-      case DAK_##CLASS:                                              \
-   return static_cast<ImplClass*>(this)                        \
-   ->visit##CLASS##Attr(static_cast<CLASS##Attr*>(A), \
-   ::std::forward<Args>(args)...);
-#include "polarphp/ast/AttrDefs.h"
+//      switch (A->getKind()) {
+//#define DECL_ATTR(_, CLASS, ...)                           \
+//      case DAK_##CLASS:                                              \
+//   return static_cast<ImplClass*>(this)                        \
+//   ->visit##CLASS##Attr(static_cast<CLASS##Attr*>(A), \
+//   ::std::forward<Args>(args)...);
+//#include "polarphp/ast/AttrDefs.h"
 
-      case DAK_Count:
-         polar_unreachable("Not an attribute kind");
-      }
+//      case DAK_Count:
+//         polar_unreachable("Not an attribute kind");
+//      }
    }
 
 #define DECL_ATTR(NAME,CLASS,...) \

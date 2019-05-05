@@ -25,7 +25,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef
+#ifndef POLAR_TYPEID_NAMED
 # define POLAR_TYPEID_NAMED(ctype, polarType)
 #endif
 
