@@ -55,6 +55,194 @@ SyntaxNode make(RefCountPtr<RawSyntax> raw)
    return { data, data.get() };
 }
 
+const auto cg_noParent = std::nullopt;
+
+/// The main handle for syntax nodes - subclasses contain all public
+/// structured editing APIs.
+///
+/// This opaque structure holds two pieces of data: a strong reference to a
+/// root node and a weak reference to the node itself. The node of interest can
+/// be weakly held because the data nodes contain strong references to
+/// their children.
+class Syntax
+{
+   friend struct SyntaxFactory;
+   friend class SyntaxAstMap;
+
+protected:
+   /// A strong reference to the root node of the tree in which this piece of
+   /// syntax resides.
+   const RefCountPtr<SyntaxData> m_root;
+
+   /// A raw pointer to the data representing this syntax node.
+   ///
+   /// This is mutable for being able to set cached child members, which are
+   /// lazily created.
+   mutable const SyntaxData *m_data;
+
+public:
+   Syntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : m_root(root),
+        m_data(data)
+   {
+      assert(m_data != nullptr);
+   }
+
+   virtual ~Syntax() {}
+
+   /// Get the kind of syntax.
+   SyntaxKind getKind() const;
+
+   /// Get the shared raw syntax.
+   RefCountPtr<RawSyntax> getRaw() const;
+
+   /// Get an ID for this node that is stable across incremental parses
+   SyntaxNodeId getId() const
+   {
+      return getRaw()->getId();
+   }
+
+   /// Get the number of child nodes in this piece of syntax, not including
+   /// tokens.
+   size_t getNumChildren() const;
+
+   /// Get the Nth child of this piece of syntax.
+   std::optional<Syntax> getChild(const size_t n) const;
+
+   /// Returns true if the syntax node is of the given type.
+   template <typename T>
+   bool is() const
+   {
+      return T::classof(this);
+   }
+
+   /// Get the m_data for this Syntax node.
+   const SyntaxData &getData() const
+   {
+      return *m_data;
+   }
+
+   const SyntaxData *getDataPointer() const
+   {
+      return m_data;
+   }
+
+   /// Cast this Syntax node to a more specific type, asserting it's of the
+   /// right kind.
+   template <typename T>
+   T castTo() const
+   {
+      assert(is<T>() && "castTo<T>() node of incompatible type!");
+      return T { m_root, m_data };
+   }
+
+   /// If this Syntax node is of the right kind, cast and return it,
+   /// otherwise return None.
+   template <typename T>
+   std::optional<T> getAs() const
+   {
+      if (is<T>()) {
+         return castTo<T>();
+      }
+      return llvm::None;
+   }
+
+   /// Return the parent of this node, if it has one.
+   std::optional<Syntax> getParent() const;
+
+   /// Return the root syntax of this node.
+   Syntax getRoot() const;
+
+   /// Returns the child index of this node in its parent,
+   /// if it has one, otherwise 0.
+   CursorIndex getIndexInParent() const
+   {
+      return getData().getIndexInParent();
+   }
+
+   /// Return the number of bytes this node takes when spelled out in the source
+   size_t getTextLength() const
+   {
+      return getRaw()->getTextLength();
+   }
+
+   /// Returns true if this syntax node represents a token.
+   bool isToken() const;
+
+   /// Returns true if this syntax node represents a statement.
+   bool isStmt() const;
+
+   /// Returns true if this syntax node represents a declaration.
+   bool isDecl() const;
+
+   /// Returns true if this syntax node represents an expression.
+   bool isExpr() const;
+
+   /// Returns true if this syntax node represents a type.
+   bool isType() const;
+
+   /// Returns true if this syntax is of some "unknown" kind.
+   bool isUnknown() const;
+
+   /// Returns true if the node is "missing" in the source (i.e. it was
+   /// expected (or optional) but not written.
+   bool isMissing() const;
+
+   /// Returns true if the node is "present" in the source.
+   bool isPresent() const;
+
+   /// Print the syntax node with full fidelity to the given output stream.
+   void print(RawOutStream &outStream, SyntaxPrintOptions opts = SyntaxPrintOptions()) const;
+
+   /// Print a debug representation of the syntax node to the given output stream
+   /// and indentation level.
+   void dump(RawOutStream &outStream, unsigned indent = 0) const;
+
+   /// Print a debug representation of the syntax node to standard error.
+   void dump() const;
+
+   bool hasSameIdentityAs(const Syntax &other) const
+   {
+      return m_root == other.m_root && m_data == other.m_data;
+   }
+
+   static bool kindof(SyntaxKind kind)
+   {
+      return true;
+   }
+
+   static bool classof(const Syntax *synax)
+   {
+      // Trivially true.
+      return true;
+   }
+
+   /// Recursively visit this node.
+   void accept(SyntaxVisitor &visitor);
+
+   /// Get the absolute position of this raw syntax: its offset, line,
+   /// and column.
+   AbsolutePosition getAbsolutePosition() const
+   {
+      return m_data->getAbsolutePosition();
+   }
+
+   /// Get the absolute end position (exclusively) where the trailing trivia of
+   /// this node ends.
+   AbsolutePosition getAbsoluteEndPositionAfterTrailingTrivia() const
+   {
+      return m_data->getAbsoluteEndPositionAfterTrailingTrivia();
+   }
+
+   /// Get the absolute position at which the leading trivia of this node starts.
+   AbsolutePosition getAbsolutePositionBeforeLeadingTrivia() const
+   {
+      return m_data->getAbsolutePositionBeforeLeadingTrivia();
+   }
+
+   // TODO: hasSameStructureAs ?
+};
+
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_SYNTAX_H
