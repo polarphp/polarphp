@@ -24,7 +24,7 @@ namespace polar::syntax {
 
 #define POLAR_DEFAULT_TOKEN_ID -1
 
-using TokenKind = int;
+using TokenKindType = int;
 using polar::basic::StringRef;
 
 /// Token - This structure provides full information about a lexed token.
@@ -38,7 +38,7 @@ public:
 
 private:
    /// Kind - The actual flavor of token this is.
-   TokenKind m_kind;
+   TokenKindType m_kind;
 
    /// Whether this token is the first token on the line.
    unsigned m_atStartOfLine : 1;
@@ -68,7 +68,7 @@ private:
    }
 
 public:
-   Token(TokenKind kind, StringRef text, unsigned commentLength = 0)
+   Token(TokenKindType kind, StringRef text, unsigned commentLength = 0)
       : m_kind(kind),
         m_atStartOfLine(false),
         m_escapedIdentifier(false),
@@ -82,12 +82,12 @@ public:
       : Token(POLAR_DEFAULT_TOKEN_ID, {}, 0)
    {}
 
-   TokenKind getKind() const
+   TokenKindType getKind() const
    {
       return m_kind;
    }
 
-   void setKind(TokenKind kind)
+   void setKind(TokenKindType kind)
    {
       m_kind = kind;
    }
@@ -97,24 +97,24 @@ public:
       m_commentLength = 0;
    }
 
-   bool is(TokenKind kind)
+   bool is(TokenKindType kind)
    {
       return m_kind = kind;
    }
 
-   bool isNot(TokenKind kind)
+   bool isNot(TokenKindType kind)
    {
       return m_kind != kind;
    }
 
    // Predicates to check to see if the token is any of a list of tokens.
-   bool isAny(TokenKind kind)
+   bool isAny(TokenKindType kind)
    {
       return is(kind);
    }
 
    template <typename ...T>
-   bool isAny(TokenKind token1, TokenKind token2, T... tokens) const
+   bool isAny(TokenKindType token1, TokenKindType token2, T... tokens) const
    {
       if (is(token1)) {
          return true;
@@ -123,7 +123,7 @@ public:
    }
 
    template <typename ...T>
-   bool isNot(TokenKind token1, T... tokens) const
+   bool isNot(TokenKindType token1, T... tokens) const
    {
       return isAny(token1, tokens...);
    }
