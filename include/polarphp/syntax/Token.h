@@ -20,12 +20,18 @@
 
 #include "polarphp/basic/adt/StringRef.h"
 
+/// forward declare class with namespace
+namespace polar::utils {
+class RawOutStream;
+}
+
 namespace polar::syntax {
 
 #define POLAR_DEFAULT_TOKEN_ID -1
 
 using TokenKindType = int;
 using polar::basic::StringRef;
+using polar::utils::RawOutStream;
 
 /// Token - This structure provides full information about a lexed token.
 /// It is not intended to be space efficient, it is intended to return as much
@@ -129,6 +135,14 @@ public:
    }
 };
 
-} // polar::parser
+/// Check whether a token kind is known to have any specific text content.
+/// e.g., tol::l_paren has determined text however tok::identifier doesn't.
+bool is_token_text_determined(TokenKindType kind);
+
+/// If a token kind has determined text, return the text; otherwise assert.
+StringRef get_token_text(TokenKindType kind);
+void dump_token_kind(RawOutStream &outStream, TokenKindType kind);
+
+} // polar::syntax
 
 #endif // POLAR_SYNTAX_TOKEN_H
