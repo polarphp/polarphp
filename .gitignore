@@ -75,3 +75,4 @@ temp
 build/
 **/.idea
 devtools/gyb/vendor/
+include/polarphp/syntax/TokenIdDefs.h

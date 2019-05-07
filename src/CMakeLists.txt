@@ -40,6 +40,8 @@ polar_collect_files(
 polar_merge_list(POLAR_COMPILER_SOURCES POLAR_PARSER_SOURCES)
 polar_merge_list(POLAR_COMPILER_SOURCES POLAR_HEADERS)
 
+# generate lex and parser files
+
 polar_add_library(PolarCompiler SHARED BUILDTREE_ONLY
    ${POLAR_COMPILER_SOURCES}
    LINK_LIBS PolarUtils PolarBasic)
