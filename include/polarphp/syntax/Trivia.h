@@ -154,6 +154,80 @@ bool is_comment_trivia_kind(TriviaKind kind);
 class TriviaPiece
 {
 public:
+
+   /// single char trivia
+   ///
+   static TriviaPiece getSpace(const OwnedString text)
+   {
+      return {TriviaKind::Space, text};
+   }
+
+   static TriviaPiece getTab(const OwnedString text)
+   {
+      return {TriviaKind::Tab, text};
+   }
+
+   static TriviaPiece getVerticalTab(const OwnedString text)
+   {
+      return {TriviaKind::VerticalTab, text};
+   }
+
+   static TriviaPiece getFormfeed(const OwnedString text)
+   {
+      return {TriviaKind::Formfeed, text};
+   }
+
+   static TriviaPiece getNewline(const OwnedString text)
+   {
+      return {TriviaKind::Newline, text};
+   }
+
+   static TriviaPiece getCarriageReturn(const OwnedString text)
+   {
+      return {TriviaKind::CarriageReturn, text};
+   }
+
+   static TriviaPiece getBacktick(const OwnedString text)
+   {
+      return {TriviaKind::Backtick, text};
+   }
+
+   static TriviaPiece getLineComment(const OwnedString text)
+   {
+      return {TriviaKind::LineComment, text};
+   }
+
+   static TriviaPiece getBlockComment(const OwnedString text)
+   {
+      return {TriviaKind::BlockComment, text};
+   }
+
+   static TriviaPiece getDocLineComment(const OwnedString text)
+   {
+      return {TriviaKind::DocLineComment, text};
+   }
+
+   static TriviaPiece getDocBlockComment(const OwnedString text)
+   {
+      return {TriviaKind::DocBlockComment, text};
+   }
+
+   static TriviaPiece getGarbageText(const OwnedString text)
+   {
+      return {TriviaKind::GarbageText, text};
+   }
+
+   /// multi char trivia
+   static TriviaPiece getCarriageReturnLineFeeds(unsigned count)
+   {
+      return {TriviaKind::CarriageReturnLineFeed, count};
+   }
+
+   static TriviaPiece getCarriageReturnLineFeed()
+   {
+      return getCarriageReturnLineFeeds(1);
+   }
+
    static TriviaPiece fromText(TriviaKind kind, StringRef text);
 
    /// Return kind of the trivia.
@@ -178,6 +252,18 @@ public:
    size_t getTextLength() const
    {
       switch (m_kind) {
+      case TriviaKind::Backtick:
+      case TriviaKind::BlockComment:
+      case TriviaKind::CarriageReturn:
+      case TriviaKind::DocBlockComment:
+      case TriviaKind::DocLineComment:
+      case TriviaKind::Formfeed:
+      case TriviaKind::GarbageText:
+      case TriviaKind::LineComment:
+      case TriviaKind::Newline:
+         return m_text.getSize();
+      case TriviaKind::CarriageReturnLineFeed:
+         return m_count * 2;
       }
       polar_unreachable("unhandled kind");
    }
@@ -216,6 +302,20 @@ public:
    {
       id.addInteger(unsigned(m_kind));
       switch (m_kind) {
+      case TriviaKind::Backtick:
+      case TriviaKind::BlockComment:
+      case TriviaKind::CarriageReturn:
+      case TriviaKind::DocBlockComment:
+      case TriviaKind::DocLineComment:
+      case TriviaKind::Formfeed:
+      case TriviaKind::GarbageText:
+      case TriviaKind::LineComment:
+      case TriviaKind::Newline:
+         id.addString(m_text.getStr());
+         break;
+      case TriviaKind::CarriageReturnLineFeed:
+         id.addInteger(m_count);
+         break;
       }
    }
 
