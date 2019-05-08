@@ -110,7 +110,6 @@ private:
    polar::utils::Endianness m_endian;
 };
 
-
 } // polar::basic
 
 #endif // POLARPHP_BASIC_EXPONENTIALGROWTHAPPENDINGBINARYBYTESTREAM_H
