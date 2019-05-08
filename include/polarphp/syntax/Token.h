@@ -138,7 +138,6 @@ public:
 /// Check whether a token kind is known to have any specific text content.
 /// e.g., tol::l_paren has determined text however tok::identifier doesn't.
 bool is_token_text_determined(TokenKindType kind);
-
 /// If a token kind has determined text, return the text; otherwise assert.
 StringRef get_token_text(TokenKindType kind);
 void dump_token_kind(RawOutStream &outStream, TokenKindType kind);
