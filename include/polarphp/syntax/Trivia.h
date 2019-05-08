@@ -654,7 +654,7 @@ struct MappingTraits<polar::syntax::TriviaPiece>
    static polar::syntax::TriviaPiece mapping(IO &in)
    {
       using polar::syntax::TriviaKind;
-      polar::syntax::TriviaKind kind;
+      TriviaKind kind;
       in.mapRequired("kind", kind);
       switch (kind) {
       case TriviaKind::Space:

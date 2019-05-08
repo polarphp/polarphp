@@ -1,4 +1,4 @@
-//===--- UnknownSyntax.h - Swift Unknown Syntax Interface -------*- C++ -*-===//
+//===--- UnknownSyntax.cpp - Swift Unknown  Syntax Implementation ---------===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -19,37 +19,16 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2019/05/07.
+// Created by polarboy on 2019/05/08.
 
-#ifndef POLARPHP_SYNTAX_UNKNOWNSYNTAX_H
-#define POLARPHP_SYNTAX_UNKNOWNSYNTAX_H
-
-#include "polarphp/syntax/SyntaxData.h"
-#include "polarphp/syntax/Syntax.h"
+#include "polarphp/syntax/TokenSyntax.h"
+#include "polarphp/syntax/UnknownSyntax.h"
 
 namespace polar::syntax {
 
-#pragma mark unknown-syntax API
-
-/// A chunk of "unknown" syntax.
-///
-/// Effectively wraps a tree of RawSyntax.
-///
-/// This should not be vended by SyntaxFactory.
-class UnknownSyntax : public Syntax
+void UnknownSyntax::validate() const
 {
-   void validate() const;
-public:
-   UnknownSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : Syntax(root, data)
-   {}
-
-   static bool classof(const Syntax *syntax)
-   {
-      return syntax->isUnknown();
-   }
-};
+  assert(m_data->getRaw()->isUnknown());
+}
 
 } // polar::syntax
-
-#endif // POLARPHP_SYNTAX_UNKNOWNSYNTAX_H
