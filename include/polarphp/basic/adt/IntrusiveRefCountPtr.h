@@ -244,7 +244,7 @@ public:
       m_obj = nullptr;
    }
 
-   void resetWithoutrelease()
+   void resetWithoutRelease()
    {
       m_obj = nullptr;
    }

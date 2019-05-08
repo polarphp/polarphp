@@ -56,9 +56,11 @@ bool is_unknown_kind(SyntaxKind kind);
 SyntaxKind get_unknown_kind(SyntaxKind kind);
 bool parser_shall_omit_when_no_children(SyntaxKind kind);
 
-namespace bytetree {
+} // polar::syntax
 
-using polar::basic::ByteTreeWriter;
+namespace polar::basic::bytetree {
+
+using polar::syntax::SyntaxKind;
 
 template <>
 struct WrapperTypeTraits<syntax::SyntaxKind>
@@ -83,8 +85,7 @@ struct WrapperTypeTraits<syntax::SyntaxKind>
    }
 };
 
-} // bytetree
-} // polar::syntax
+} // polar::basic::bytetree
 
 namespace polar::yaml {
 

@@ -29,7 +29,7 @@
 #ifndef POLARPHP_SYNTAX_SYNTAXARENA_H
 #define POLARPHP_SYNTAX_SYNTAXARENA_H
 
-#include "polarphp/basic/adt/IntrusiveRefCountPtr.h".h"
+#include "polarphp/basic/adt/IntrusiveRefCountPtr.h"
 #include "polarphp/utils/Allocator.h"
 
 namespace polar::syntax {

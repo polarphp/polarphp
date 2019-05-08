@@ -33,9 +33,8 @@
 #include "polarphp/syntax/References.h"
 #include "polarphp/syntax/SyntaxArena.h"
 #include "polarphp/syntax/SyntaxKind.h"
-#include "polarphp/Syntax/TokenKinds.h"
-#include "polarphp/Syntax/Trivia.h"
-#include "polarphp/syntax/token.h"
+#include "polarphp/Syntax/TokenIdDefs.h"
+#include "polarphp/syntax/Trivia.h"
 #include "polarphp/basic/adt/FoldingSet.h"
 #include "polarphp/basic/adt/IntrusiveRefCountPtr.h"
 #include "polarphp/basic/adt/PointerUnion.h"
@@ -123,6 +122,7 @@ using polar::basic::FoldingSetNodeId;
 
 class SyntaxArena;
 using CursorIndex = size_t;
+using TokenKindType = int;
 
 /// Get a numeric index suitable for array/vector indexing
 /// from a syntax node's Cursor enum value.
@@ -340,7 +340,7 @@ public:
    /// Get an id for this node that is stable across incremental parses
    SyntaxNodeId getId() const
    {
-      return nodeId;
+      return m_nodeId;
    }
 
    /// Returns true if the node is "missing" in the source (i.e. it was
@@ -359,37 +359,37 @@ public:
    /// Returns true if this raw syntax node is some kind of declaration.
    bool isDecl() const
    {
-      return isDeclKind(getKind());
+      return is_decl_kind(getKind());
    }
 
    /// Returns true if this raw syntax node is some kind of type syntax.
    bool isType() const
    {
-      return isTypeKind(getKind());
+      return is_type_kind(getKind());
    }
 
    /// Returns true if this raw syntax node is some kind of statement.
    bool isStmt() const
    {
-      return isStmtKind(getKind());
+      return is_stmt_kind(getKind());
    }
 
    /// Returns true if this raw syntax node is some kind of expression.
    bool isExpr() const
    {
-      return isExprKind(getKind());
+      return is_expr_kind(getKind());
    }
 
    /// Return true is this raw syntax node is a unknown node.
    bool isUnknown() const
    {
-      return isUnknownKind(getKind());
+      return is_unknown_kind(getKind());
    }
 
    /// Return true if this raw syntax node is a token.
    bool isToken() const
    {
-      return isTokenKind(getKind());
+      return is_token_kind(getKind());
    }
 
    /// \name Getter routines for SyntaxKind::token.
@@ -454,7 +454,7 @@ public:
 
    RefCountPtr<RawSyntax> withLeadingTrivia(Trivia newLeadingTrivia) const
    {
-      return withLeadingTrivia(newLeadingTrivia.Pieces);
+      return withLeadingTrivia(newLeadingTrivia.pieces);
    }
 
    /// Return a new token like this one, but with the given trailing
@@ -468,7 +468,7 @@ public:
 
    RefCountPtr<RawSyntax> withTrailingTrivia(Trivia newTrailingTrivia) const
    {
-      return withTrailingTrivia(newTrailingTrivia.Pieces);
+      return withTrailingTrivia(newTrailingTrivia.pieces);
    }
 
    /// @}
@@ -549,13 +549,13 @@ public:
    bool accumulateLeadingTrivia(AbsolutePosition &pos) const;
 
    /// Print this piece of syntax recursively.
-   void print(std::optional &outStream, SyntaxPrintOptions opts) const;
+   void print(RawOutStream &outStream, SyntaxPrintOptions opts) const;
 
    /// Dump this piece of syntax recursively for debugging or testing.
    void dump() const;
 
    /// Dump this piece of syntax recursively.
-   void dump(std::optional &outStream, unsigned indent = 0) const;
+   void dump(RawOutStream &outStream, unsigned indent = 0) const;
 
    static void Profile(FoldingSetNodeId &id, TokenKindType tokenKind, OwnedString text,
                        ArrayRef<TriviaPiece> leadingTrivia,
@@ -565,10 +565,10 @@ private:
 
    /// The id that shall be used for the next node that is created and does not
    /// have a manually specified id
-   static SyntaxNodeId nextFreeNodeId;
+   static SyntaxNodeId sm_nextFreeNodeId;
 
    /// An id of this node that is stable across incremental parses
-   SyntaxNodeId nodeId;
+   SyntaxNodeId m_nodeId;
 
    /// If this node was allocated using a \c SyntaxArena's bump allocator, a
    /// reference to the arena to keep the underlying memory buffer of this node
@@ -612,17 +612,17 @@ private:
       } token;
    } m_bits;
 
-   size_t numTrailingObjects(OverloadToken<RefCountPtr<RawSyntax>>) const
+   size_t getNumTrailingObjects(OverloadToken<RefCountPtr<RawSyntax>>) const
    {
       return isToken() ? 0 : m_bits.layout.numChildren;
    }
 
-   size_t numTrailingObjects(OverloadToken<OwnedString>) const
+   size_t getNumTrailingObjects(OverloadToken<OwnedString>) const
    {
       return isToken() ? 1 : 0;
    }
 
-   size_t numTrailingObjects(OverloadToken<TriviaPiece>) const
+   size_t getNumTrailingObjects(OverloadToken<TriviaPiece>) const
    {
       return isToken()
             ? m_bits.token.numLeadingTrivia + m_bits.token.numTrailingTrivia

@@ -273,7 +273,7 @@ public:
 
    bool isComment() const
    {
-      return isCommentTriviaKind(getKind());
+      return is_comment_trivia_kind(getKind());
    }
 
    void accumulateAbsolutePosition(AbsolutePosition &pos) const;
@@ -578,12 +578,16 @@ private:
          return !text.empty();
       case TriviaKind::CarriageReturnLineFeed:
          return true;
+      default:
+         polar_unreachable("unexcepted kind");
       }
    }
 };
 } // polar::syntax
 
 namespace polar::basic::bytetree {
+
+using polar::syntax::TriviaKind;
 
 template <>
 struct WrapperTypeTraits<syntax::TriviaKind>

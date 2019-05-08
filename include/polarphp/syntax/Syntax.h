@@ -144,7 +144,7 @@ public:
       if (is<T>()) {
          return castTo<T>();
       }
-      return llvm::None;
+      return std::nullopt;
    }
 
    /// Return the parent of this node, if it has one.

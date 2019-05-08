@@ -33,7 +33,6 @@
 #include "polarphp/syntax/RawSyntax.h"
 #include "polarphp/syntax/References.h"
 #include "polarphp/syntax/Syntax.h"
-#include "polarphp/syntax/Token.h"
 #include "polarphp/syntax/Trivia.h"
 
 namespace polar::syntax {
@@ -58,24 +57,24 @@ public:
 
    Trivia getLeadingTrivia() const
    {
-      return Trivia { getRaw()->getLeadingTrivia().vec() };
+      return Trivia { getRaw()->getLeadingTrivia().getVector() };
    }
 
    Trivia getTrailingTrivia() const
    {
-      return Trivia { getRaw()->getTrailingTrivia().vec() };
+      return Trivia { getRaw()->getTrailingTrivia().getVector() };
    }
 
    TokenSyntax withLeadingTrivia(const Trivia &trivia) const
    {
-      auto newRaw = getRaw()->withLeadingTrivia(trivia.Pieces);
-      return data->replaceSelf<TokenSyntax>(newRaw);
+      auto newRaw = getRaw()->withLeadingTrivia(trivia.pieces);
+      return m_data->replaceSelf<TokenSyntax>(newRaw);
    }
 
    TokenSyntax withTrailingTrivia(const Trivia &trivia) const
    {
-      auto newRaw = getRaw()->withTrailingTrivia(trivia.Pieces);
-      return data->replaceSelf<TokenSyntax>(newRaw);
+      auto newRaw = getRaw()->withTrailingTrivia(trivia.pieces);
+      return m_data->replaceSelf<TokenSyntax>(newRaw);
    }
 
    /* TODO: If we really need them.
@@ -105,7 +104,7 @@ public:
 
    static bool kindof(SyntaxKind kind)
    {
-      return isTokenKind(kind);
+      return is_token_kind(kind);
    }
 
    static bool classof(const Syntax *syntax)
