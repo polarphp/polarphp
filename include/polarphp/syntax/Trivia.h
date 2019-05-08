@@ -95,6 +95,7 @@
 #include "polarphp/basic/adt/FoldingSet.h"
 #include "polarphp/utils/RawOutStream.h"
 #include "polarphp/utils/yaml/YamlTraits.h"
+#include "polarphp/global/Global.h"
 
 #include <vector>
 
@@ -108,7 +109,7 @@ using polar::basic::OwnedString;
 using polar::utils::RawOutStream;
 
 /// The kind of source trivia, such as spaces, newlines, or comments.
-enum class TriviaKind
+enum class TriviaKind : uint8_t
 {
    // A space ' ' character.
    Space,
@@ -156,7 +157,6 @@ class TriviaPiece
 public:
 
    /// single char trivia
-   ///
    static TriviaPiece getSpace(const OwnedString text)
    {
       return {TriviaKind::Space, text};
@@ -252,15 +252,18 @@ public:
    size_t getTextLength() const
    {
       switch (m_kind) {
-      case TriviaKind::Backtick:
-      case TriviaKind::BlockComment:
-      case TriviaKind::CarriageReturn:
-      case TriviaKind::DocBlockComment:
-      case TriviaKind::DocLineComment:
+      case TriviaKind::Space:
+      case TriviaKind::Tab:
+      case TriviaKind::VerticalTab:
       case TriviaKind::Formfeed:
-      case TriviaKind::GarbageText:
-      case TriviaKind::LineComment:
       case TriviaKind::Newline:
+      case TriviaKind::CarriageReturn:
+      case TriviaKind::Backtick:
+      case TriviaKind::LineComment:
+      case TriviaKind::BlockComment:
+      case TriviaKind::DocLineComment:
+      case TriviaKind::DocBlockComment:
+      case TriviaKind::GarbageText:
          return m_text.getSize();
       case TriviaKind::CarriageReturnLineFeed:
          return m_count * 2;
@@ -298,19 +301,22 @@ public:
       return !(*this == other);
    }
 
-   void profile(FoldingSetNodeId &id) const
+   void getProfile(FoldingSetNodeId &id) const
    {
       id.addInteger(unsigned(m_kind));
       switch (m_kind) {
-      case TriviaKind::Backtick:
-      case TriviaKind::BlockComment:
-      case TriviaKind::CarriageReturn:
-      case TriviaKind::DocBlockComment:
-      case TriviaKind::DocLineComment:
+      case TriviaKind::Space:
+      case TriviaKind::Tab:
+      case TriviaKind::VerticalTab:
       case TriviaKind::Formfeed:
-      case TriviaKind::GarbageText:
-      case TriviaKind::LineComment:
       case TriviaKind::Newline:
+      case TriviaKind::CarriageReturn:
+      case TriviaKind::Backtick:
+      case TriviaKind::LineComment:
+      case TriviaKind::BlockComment:
+      case TriviaKind::DocLineComment:
+      case TriviaKind::DocBlockComment:
+      case TriviaKind::GarbageText:
          id.addString(m_text.getStr());
          break;
       case TriviaKind::CarriageReturnLineFeed:
@@ -484,6 +490,78 @@ struct Trivia
       return !(*this == other);
    }
 
+   /// single char trivia
+   static Trivia getSpace(const OwnedString text)
+   {
+      return {{TriviaPiece::getSpace(text)}};
+   }
+
+   static Trivia getTab(const OwnedString text)
+   {
+      return {{TriviaPiece::getTab(text)}};
+   }
+
+   static Trivia getVerticalTab(const OwnedString text)
+   {
+      return {{TriviaPiece::getVerticalTab(text)}};
+   }
+
+   static Trivia getFormfeed(const OwnedString text)
+   {
+      return {{TriviaPiece::getFormfeed(text)}};
+   }
+
+   static Trivia getNewline(const OwnedString text)
+   {
+      return {{TriviaPiece::getNewline(text)}};
+   }
+
+   static Trivia getCarriageReturn(const OwnedString text)
+   {
+      return {{TriviaPiece::getCarriageReturn(text)}};
+   }
+
+   static Trivia getBacktick(const OwnedString text)
+   {
+      return {{TriviaPiece::getBacktick(text)}};
+   }
+
+   static Trivia getLineComment(const OwnedString text)
+   {
+      return {{TriviaPiece::getLineComment(text)}};
+   }
+
+   static Trivia getBlockComment(const OwnedString text)
+   {
+      return {{TriviaPiece::getBlockComment(text)}};
+   }
+
+   static Trivia getDocLineComment(const OwnedString text)
+   {
+      return {{TriviaPiece::getDocLineComment(text)}};
+   }
+
+   static Trivia getDocBlockComment(const OwnedString text)
+   {
+      return {{TriviaPiece::getDocBlockComment(text)}};
+   }
+
+   static Trivia getGarbageText(const OwnedString text)
+   {
+      return {{TriviaPiece::getGarbageText(text)}};
+   }
+
+   /// multi char trivia
+   static Trivia getCarriageReturnLineFeeds(unsigned count)
+   {
+      return {{TriviaPiece::getCarriageReturnLineFeeds(count)}};
+   }
+
+   static Trivia getCarriageReturnLineFeed()
+   {
+      return {{TriviaPiece::getCarriageReturnLineFeeds(1)}};
+   }
+
 private:
    static bool checkTriviaText(StringRef text, TriviaKind kind)
    {
@@ -498,6 +576,8 @@ private:
          return text.startsWith("/**") && text.endsWith("*/");
       case TriviaKind::GarbageText:
          return !text.empty();
+      case TriviaKind::CarriageReturnLineFeed:
+         return true;
       }
    }
 };
@@ -510,9 +590,7 @@ struct WrapperTypeTraits<syntax::TriviaKind>
 {
    static uint8_t numericValue(const syntax::TriviaKind &kind)
    {
-      switch (kind) {
-      }
-      polar_unreachable("unhandled kind");
+      return polar::as_integer<TriviaKind>(kind);
    }
 
    static void write(ByteTreeWriter &writer, const syntax::TriviaKind &kind,
@@ -534,9 +612,27 @@ struct ObjectTraits<syntax::TriviaPiece>
    static void write(ByteTreeWriter &writer, const syntax::TriviaPiece &trivia,
                      UserInfoMap &userInfo)
    {
+      using polar::syntax::TriviaKind;
       writer.write(trivia.getKind(), /*index=*/0);
       // Write the trivia's text or count depending on its kind
       switch (trivia.getKind()) {
+      case TriviaKind::Space:
+      case TriviaKind::Tab:
+      case TriviaKind::VerticalTab:
+      case TriviaKind::Formfeed:
+      case TriviaKind::Newline:
+      case TriviaKind::CarriageReturn:
+      case TriviaKind::Backtick:
+      case TriviaKind::LineComment:
+      case TriviaKind::BlockComment:
+      case TriviaKind::DocLineComment:
+      case TriviaKind::DocBlockComment:
+      case TriviaKind::GarbageText:
+         writer.write(trivia.getText(), /*Index=*/ 1);
+         break;
+      case TriviaKind::CarriageReturnLineFeed:
+         writer.write(static_cast<uint32_t>(trivia.getCount()), /*Index=*/1);
+         break;
       }
    }
 };
@@ -557,11 +653,37 @@ struct MappingTraits<polar::syntax::TriviaPiece>
 {
    static polar::syntax::TriviaPiece mapping(IO &in)
    {
+      using polar::syntax::TriviaKind;
       polar::syntax::TriviaKind kind;
       in.mapRequired("kind", kind);
       switch (kind) {
-
-
+      case TriviaKind::Space:
+      case TriviaKind::Tab:
+      case TriviaKind::VerticalTab:
+      case TriviaKind::Formfeed:
+      case TriviaKind::Newline:
+      case TriviaKind::CarriageReturn:
+      case TriviaKind::Backtick:
+      case TriviaKind::LineComment:
+      case TriviaKind::BlockComment:
+      case TriviaKind::DocLineComment:
+      case TriviaKind::DocBlockComment:
+      case TriviaKind::GarbageText: {
+         StringRef text;
+         in.mapRequired("value", text);
+         return polar::syntax::TriviaPiece(
+                  kind, polar::basic::OwnedString::makeRefCounted(text));
+      }
+      case TriviaKind::CarriageReturnLineFeed:
+      {
+         /// FIXME: This is a workaround for existing bug from llvm yaml parser
+         /// which would raise error when deserializing number with trailing character
+         /// like "1\n". See https://bugs.llvm.org/show_bug.cgi?id=15505
+         StringRef str;
+         in.mapRequired("value", str);
+         unsigned count = std::atoi(str.data());
+         return polar::syntax::TriviaPiece(kind, count);
+      }
       }
    }
 };
@@ -572,6 +694,19 @@ struct ScalarEnumerationTraits<polar::syntax::TriviaKind>
 {
    static void enumeration(IO &in, polar::syntax::TriviaKind &value)
    {
+      in.enumCase(value, "Space", polar::syntax::TriviaKind::Space);
+      in.enumCase(value, "Tab", polar::syntax::TriviaKind::Tab);
+      in.enumCase(value, "VerticalTab", polar::syntax::TriviaKind::VerticalTab);
+      in.enumCase(value, "Formfeed", polar::syntax::TriviaKind::Formfeed);
+      in.enumCase(value, "Newline", polar::syntax::TriviaKind::Newline);
+      in.enumCase(value, "CarriageReturn", polar::syntax::TriviaKind::CarriageReturn);
+      in.enumCase(value, "Backtick", polar::syntax::TriviaKind::Backtick);
+      in.enumCase(value, "LineComment", polar::syntax::TriviaKind::LineComment);
+      in.enumCase(value, "BlockComment", polar::syntax::TriviaKind::BlockComment);
+      in.enumCase(value, "DocLineComment", polar::syntax::TriviaKind::DocLineComment);
+      in.enumCase(value, "DocBlockComment", polar::syntax::TriviaKind::DocBlockComment);
+      in.enumCase(value, "GarbageText", polar::syntax::TriviaKind::GarbageText);
+      in.enumCase(value, "CarriageReturnLineFeed", polar::syntax::TriviaKind::CarriageReturnLineFeed);
    }
 };
 
