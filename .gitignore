@@ -76,3 +76,5 @@ build/
 **/.idea
 devtools/gyb/vendor/
 include/polarphp/syntax/TokenIdDefs.h
+include/polarphp/parser/internal/YYLexerDefs.h
+src/parser/impl/YYLexer.cpp

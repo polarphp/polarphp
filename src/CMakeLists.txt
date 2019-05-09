@@ -26,6 +26,10 @@ add_subdirectory(reflection)
 
 # setup compiler sources
 set(POLAR_COMPILER_SOURCES)
+
+# process language grammer files
+include(GenerateLangGrammer)
+
 polar_collect_files(
    TYPE_BOTH
    DIR ast
@@ -44,7 +48,8 @@ polar_merge_list(POLAR_COMPILER_SOURCES POLAR_HEADERS)
 
 polar_add_library(PolarCompiler SHARED BUILDTREE_ONLY
    ${POLAR_COMPILER_SOURCES}
-   LINK_LIBS PolarUtils PolarBasic)
+   LINK_LIBS PolarUtils PolarBasic
+   DEPENDS PolarLangLexer)
 
 set(POLAR_COMPILER_INTERFACE_INCLUDE_DIRECTORIES)
 list(APPEND POLAR_COMPILER_INTERFACE_INCLUDE_DIRECTORIES
