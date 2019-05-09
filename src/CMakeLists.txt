@@ -39,7 +39,7 @@ polar_collect_files(
 set(POLAR_COMPILER_SOURCES)
 
 # process language grammer files
-include(GenerateLangGrammer)
+include(ProcessLangGrammer)
 
 polar_merge_list(POLAR_COMPILER_SOURCES POLAR_PARSER_SOURCES)
 polar_merge_list(POLAR_COMPILER_SOURCES POLAR_HEADERS)
