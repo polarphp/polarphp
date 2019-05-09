@@ -12,16 +12,24 @@
 
 #include "polarphp/parser/Parser.h"
 #include "polarphp/parser/Lexer.h"
+#include "polarphp/syntax/TokenKinds.h"
 
 #define YYERROR_VERBOSE
 #define YYSTYPE polar::parser::ParserStackElement
 #define polar_error polar::parser::parse_error
 
 %}
+
 %pure-parser
 %expect 0
 
 %code requires {
+}
+
+%code provides {
+namespace polar::syntax{
+   using TokenKindType = yytokentype;
+} // polar::syntax
 }
 
 %destructor { delete $$; } <ast>
@@ -59,6 +67,7 @@
 %precedence T_ELSEIF
 %precedence T_ELSE
 
+/* token define start */
 %token <ast> T_LNUMBER   "integer number (T_LNUMBER)"
 %token <ast> T_DNUMBER   "floating-point number (T_DNUMBER)"
 %token <ast> T_STRING    "identifier (T_STRING)"
@@ -70,6 +79,16 @@
 %token <ast> T_NUM_STRING "number (T_NUM_STRING)"
 
 %token END 0 "end of file"
+
+%token T_KEYWORD_START
+%token T_LINE            "__LINE__ (T_LINE)"
+%token T_FILE            "__FILE__ (T_FILE)"
+%token T_DIR             "__DIR__ (T_DIR)"
+%token T_CLASS_C         "__CLASS__ (T_CLASS_C)"
+%token T_TRAIT_C         "__TRAIT__ (T_TRAIT_C)"
+%token T_METHOD_C        "__METHOD__ (T_METHOD_C)"
+%token T_FUNC_C          "__FUNCTION__ (T_FUNC_C)"
+
 %token T_INCLUDE      "include (T_INCLUDE)"
 %token T_INCLUDE_ONCE "include_once (T_INCLUDE_ONCE)"
 %token T_EVAL         "eval (T_EVAL)"
@@ -170,13 +189,6 @@
 %token T_LIST            "list (T_LIST)"
 %token T_ARRAY           "array (T_ARRAY)"
 %token T_CALLABLE        "callable (T_CALLABLE)"
-%token T_LINE            "__LINE__ (T_LINE)"
-%token T_FILE            "__FILE__ (T_FILE)"
-%token T_DIR             "__DIR__ (T_DIR)"
-%token T_CLASS_C         "__CLASS__ (T_CLASS_C)"
-%token T_TRAIT_C         "__TRAIT__ (T_TRAIT_C)"
-%token T_METHOD_C        "__METHOD__ (T_METHOD_C)"
-%token T_FUNC_C          "__FUNCTION__ (T_FUNC_C)"
 %token T_COMMENT         "comment (T_COMMENT)"
 %token T_DOC_COMMENT     "doc comment (T_DOC_COMMENT)"
 %token T_OPEN_TAG        "open tag (T_OPEN_TAG)"
@@ -195,9 +207,11 @@
 %token T_COALESCE        "?? (T_COALESCE)"
 %token T_POW             "** (T_POW)"
 %token T_POW_EQUAL       "**= (T_POW_EQUAL)"
-
 /* Token used to force a parse error from the lexer */
 %token T_ERROR
+/* Token used to mark the end of Token Enum */
+%token T_NUM_TOKENS
+/* token define end */
 
 %type <ast> top_statement namespace_name name statement function_declaration_statement
 %type <ast> class_declaration_statement trait_declaration_statement
@@ -237,7 +251,23 @@
 %% /* Rules */
 
 start:
-      %empty
+      %empty |
+      reserved_non_modifiers 
+;
+
+reserved_non_modifiers:
+	  T_INCLUDE | T_INCLUDE_ONCE | T_EVAL | T_REQUIRE | T_REQUIRE_ONCE | T_LOGICAL_OR | T_LOGICAL_XOR | T_LOGICAL_AND
+	| T_INSTANCEOF | T_NEW | T_CLONE | T_EXIT | T_IF | T_ELSEIF | T_ELSE | T_ENDIF | T_ECHO | T_DO | T_WHILE | T_ENDWHILE
+	| T_FOR | T_ENDFOR | T_FOREACH | T_ENDFOREACH | T_DECLARE | T_ENDDECLARE | T_AS | T_TRY | T_CATCH | T_FINALLY
+	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
+	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
+	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
+	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C
+;
+
+semi_reserved:
+	  reserved_non_modifiers
+	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
 ;
 
 %%

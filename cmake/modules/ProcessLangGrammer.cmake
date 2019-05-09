@@ -25,7 +25,7 @@ re2c_target(NAME PolarRe2cLangLexer
    OPTIONS --no-generation-date --case-inverted -cbdFt ${POLAR_GENERATED_LEX_HEADER_FILE})
 
 bison_target(PolarLalrLangParser ${POLAR_PARSER_INCLUDE_DIR}/LangGrammer.y ${POLAR_GENERATED_PARSER_IMPL_FILE}
-   COMPILE_FLAGS "-p polar_"
+   COMPILE_FLAGS "-p polar_ -d"
    DEFINES_FILE ${POLAR_GENERATED_PARSER_HEADER_FILE})
 
 include(GenerateTokenDescMap)
