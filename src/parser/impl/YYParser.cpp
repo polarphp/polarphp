@@ -83,13 +83,14 @@
 
 #include "polarphp/parser/Parser.h"
 #include "polarphp/parser/Lexer.h"
+#include "polarphp/syntax/TokenKinds.h"
 
 #define YYERROR_VERBOSE
 #define YYSTYPE polar::parser::ParserStackElement
 #define polar_error polar::parser::parse_error
 
 
-#line 93 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:339  */
+#line 94 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -119,10 +120,10 @@
 extern int polar_debug;
 #endif
 /* "%code requires" blocks.  */
-#line 24 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:355  */
+#line 26 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:355  */
 
 
-#line 126 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:355  */
+#line 127 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:355  */
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -191,81 +192,83 @@ extern int polar_debug;
     T_CONSTANT_ENCAPSED_STRING = 316,
     T_STRING_VARNAME = 317,
     T_NUM_STRING = 318,
-    T_EVAL = 319,
-    T_EXIT = 320,
-    T_IF = 321,
-    T_ENDIF = 322,
-    T_ECHO = 323,
-    T_DO = 324,
-    T_WHILE = 325,
-    T_ENDWHILE = 326,
-    T_FOR = 327,
-    T_ENDFOR = 328,
-    T_FOREACH = 329,
-    T_ENDFOREACH = 330,
-    T_DECLARE = 331,
-    T_ENDDECLARE = 332,
-    T_AS = 333,
-    T_SWITCH = 334,
-    T_ENDSWITCH = 335,
-    T_CASE = 336,
-    T_DEFAULT = 337,
-    T_BREAK = 338,
-    T_CONTINUE = 339,
-    T_GOTO = 340,
-    T_FUNCTION = 341,
-    T_CONST = 342,
-    T_RETURN = 343,
-    T_TRY = 344,
-    T_CATCH = 345,
-    T_FINALLY = 346,
-    T_THROW = 347,
-    T_USE = 348,
-    T_INSTEADOF = 349,
-    T_GLOBAL = 350,
-    T_STATIC = 351,
-    T_ABSTRACT = 352,
-    T_FINAL = 353,
-    T_PRIVATE = 354,
-    T_PROTECTED = 355,
-    T_PUBLIC = 356,
-    T_VAR = 357,
-    T_UNSET = 358,
-    T_ISSET = 359,
-    T_EMPTY = 360,
-    T_HALT_COMPILER = 361,
-    T_CLASS = 362,
-    T_TRAIT = 363,
-    T_INTERFACE = 364,
-    T_EXTENDS = 365,
-    T_IMPLEMENTS = 366,
-    T_OBJECT_OPERATOR = 367,
-    T_LIST = 368,
-    T_ARRAY = 369,
-    T_CALLABLE = 370,
-    T_LINE = 371,
-    T_FILE = 372,
-    T_DIR = 373,
-    T_CLASS_C = 374,
-    T_TRAIT_C = 375,
-    T_METHOD_C = 376,
-    T_FUNC_C = 377,
-    T_COMMENT = 378,
-    T_DOC_COMMENT = 379,
-    T_OPEN_TAG = 380,
-    T_OPEN_TAG_WITH_ECHO = 381,
-    T_CLOSE_TAG = 382,
-    T_WHITESPACE = 383,
-    T_START_HEREDOC = 384,
-    T_END_HEREDOC = 385,
-    T_DOLLAR_OPEN_CURLY_BRACES = 386,
-    T_CURLY_OPEN = 387,
-    T_PAAMAYIM_NEKUDOTAYIM = 388,
-    T_NAMESPACE = 389,
-    T_NS_C = 390,
-    T_NS_SEPARATOR = 391,
-    T_ELLIPSIS = 392,
-    T_ERROR = 393
+    T_KEYWORD_START = 319,
+    T_LINE = 320,
+    T_FILE = 321,
+    T_DIR = 322,
+    T_CLASS_C = 323,
+    T_TRAIT_C = 324,
+    T_METHOD_C = 325,
+    T_FUNC_C = 326,
+    T_EVAL = 327,
+    T_EXIT = 328,
+    T_IF = 329,
+    T_ENDIF = 330,
+    T_ECHO = 331,
+    T_DO = 332,
+    T_WHILE = 333,
+    T_ENDWHILE = 334,
+    T_FOR = 335,
+    T_ENDFOR = 336,
+    T_FOREACH = 337,
+    T_ENDFOREACH = 338,
+    T_DECLARE = 339,
+    T_ENDDECLARE = 340,
+    T_AS = 341,
+    T_SWITCH = 342,
+    T_ENDSWITCH = 343,
+    T_CASE = 344,
+    T_DEFAULT = 345,
+    T_BREAK = 346,
+    T_CONTINUE = 347,
+    T_GOTO = 348,
+    T_FUNCTION = 349,
+    T_CONST = 350,
+    T_RETURN = 351,
+    T_TRY = 352,
+    T_CATCH = 353,
+    T_FINALLY = 354,
+    T_THROW = 355,
+    T_USE = 356,
+    T_INSTEADOF = 357,
+    T_GLOBAL = 358,
+    T_STATIC = 359,
+    T_ABSTRACT = 360,
+    T_FINAL = 361,
+    T_PRIVATE = 362,
+    T_PROTECTED = 363,
+    T_PUBLIC = 364,
+    T_VAR = 365,
+    T_UNSET = 366,
+    T_ISSET = 367,
+    T_EMPTY = 368,
+    T_HALT_COMPILER = 369,
+    T_CLASS = 370,
+    T_TRAIT = 371,
+    T_INTERFACE = 372,
+    T_EXTENDS = 373,
+    T_IMPLEMENTS = 374,
+    T_OBJECT_OPERATOR = 375,
+    T_LIST = 376,
+    T_ARRAY = 377,
+    T_CALLABLE = 378,
+    T_COMMENT = 379,
+    T_DOC_COMMENT = 380,
+    T_OPEN_TAG = 381,
+    T_OPEN_TAG_WITH_ECHO = 382,
+    T_CLOSE_TAG = 383,
+    T_WHITESPACE = 384,
+    T_START_HEREDOC = 385,
+    T_END_HEREDOC = 386,
+    T_DOLLAR_OPEN_CURLY_BRACES = 387,
+    T_CURLY_OPEN = 388,
+    T_PAAMAYIM_NEKUDOTAYIM = 389,
+    T_NAMESPACE = 390,
+    T_NS_C = 391,
+    T_NS_SEPARATOR = 392,
+    T_ELLIPSIS = 393,
+    T_ERROR = 394,
+    T_NUM_TOKENS = 395
   };
 #endif
 
@@ -274,12 +277,20 @@ extern int polar_debug;
 
 
 int polar_parse (void);
+/* "%code provides" blocks.  */
+#line 29 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:355  */
+
+namespace polar::syntax{
+   using TokenKindType = yytokentype;
+} // polar::syntax
+
+#line 288 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:355  */
 
 #endif /* !YY_POLAR_VOLUMES_DATA_PROJECTS_POLARPHP_INCLUDE_POLARPHP_SYNTAX_INTERNAL_YYPARSERDEFS_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
-#line 283 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:358  */
+#line 294 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -519,23 +530,23 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  2
+#define YYFINAL  70
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   0
+#define YYLAST   150
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  156
+#define YYNTOKENS  158
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  2
+#define YYNNTS  3
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  2
+#define YYNRULES  70
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  3
+#define YYNSTATES  71
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   393
+#define YYMAXUTOK   395
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -583,14 +594,21 @@ static const yytype_uint8 yytranslate[] =
      122,   123,   124,   125,   126,   127,   128,   129,   130,   131,
      132,   133,   134,   135,   136,   137,   138,   139,   140,   141,
      142,   143,   144,   145,   146,   147,   148,   149,   150,   151,
-     152,   153,   154,   155
+     152,   153,   154,   155,   156,   157
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_uint16 yyrline[] =
 {
-       0,   240,   240
+       0,   254,   254,   255,   259,   259,   259,   259,   259,   259,
+     259,   259,   260,   260,   260,   260,   260,   260,   260,   260,
+     260,   260,   260,   260,   261,   261,   261,   261,   261,   261,
+     261,   261,   261,   261,   262,   262,   262,   262,   262,   262,
+     262,   262,   262,   262,   263,   263,   263,   263,   263,   263,
+     263,   263,   263,   263,   263,   264,   264,   264,   264,   264,
+     264,   264,   264,   265,   265,   265,   265,   265,   265,   265,
+     265
 };
 #endif
 
@@ -629,10 +647,13 @@ static const char *const yytname[] =
   "\"quoted-string and whitespace (T_ENCAPSED_AND_WHITESPACE)\"",
   "\"quoted-string (T_CONSTANT_ENCAPSED_STRING)\"",
   "\"variable name (T_STRING_VARNAME)\"", "\"number (T_NUM_STRING)\"",
-  "\"eval (T_EVAL)\"", "\"exit (T_EXIT)\"", "\"if (T_IF)\"",
-  "\"endif (T_ENDIF)\"", "\"echo (T_ECHO)\"", "\"do (T_DO)\"",
-  "\"while (T_WHILE)\"", "\"endwhile (T_ENDWHILE)\"", "\"for (T_FOR)\"",
-  "\"endfor (T_ENDFOR)\"", "\"foreach (T_FOREACH)\"",
+  "T_KEYWORD_START", "\"__LINE__ (T_LINE)\"", "\"__FILE__ (T_FILE)\"",
+  "\"__DIR__ (T_DIR)\"", "\"__CLASS__ (T_CLASS_C)\"",
+  "\"__TRAIT__ (T_TRAIT_C)\"", "\"__METHOD__ (T_METHOD_C)\"",
+  "\"__FUNCTION__ (T_FUNC_C)\"", "\"eval (T_EVAL)\"", "\"exit (T_EXIT)\"",
+  "\"if (T_IF)\"", "\"endif (T_ENDIF)\"", "\"echo (T_ECHO)\"",
+  "\"do (T_DO)\"", "\"while (T_WHILE)\"", "\"endwhile (T_ENDWHILE)\"",
+  "\"for (T_FOR)\"", "\"endfor (T_ENDFOR)\"", "\"foreach (T_FOREACH)\"",
   "\"endforeach (T_ENDFOREACH)\"", "\"declare (T_DECLARE)\"",
   "\"enddeclare (T_ENDDECLARE)\"", "\"as (T_AS)\"",
   "\"switch (T_SWITCH)\"", "\"endswitch (T_ENDSWITCH)\"",
@@ -651,9 +672,6 @@ static const char *const yytname[] =
   "\"interface (T_INTERFACE)\"", "\"extends (T_EXTENDS)\"",
   "\"implements (T_IMPLEMENTS)\"", "\"-> (T_OBJECT_OPERATOR)\"",
   "\"list (T_LIST)\"", "\"array (T_ARRAY)\"", "\"callable (T_CALLABLE)\"",
-  "\"__LINE__ (T_LINE)\"", "\"__FILE__ (T_FILE)\"", "\"__DIR__ (T_DIR)\"",
-  "\"__CLASS__ (T_CLASS_C)\"", "\"__TRAIT__ (T_TRAIT_C)\"",
-  "\"__METHOD__ (T_METHOD_C)\"", "\"__FUNCTION__ (T_FUNC_C)\"",
   "\"comment (T_COMMENT)\"", "\"doc comment (T_DOC_COMMENT)\"",
   "\"open tag (T_OPEN_TAG)\"",
   "\"open tag with echo (T_OPEN_TAG_WITH_ECHO)\"",
@@ -662,7 +680,8 @@ static const char *const yytname[] =
   "\"${ (T_DOLLAR_OPEN_CURLY_BRACES)\"", "\"{$ (T_CURLY_OPEN)\"",
   "\":: (T_PAAMAYIM_NEKUDOTAYIM)\"", "\"namespace (T_NAMESPACE)\"",
   "\"__NAMESPACE__ (T_NS_C)\"", "\"\\\\ (T_NS_SEPARATOR)\"",
-  "\"... (T_ELLIPSIS)\"", "T_ERROR", "$accept", "start", YY_NULLPTR
+  "\"... (T_ELLIPSIS)\"", "T_ERROR", "T_NUM_TOKENS", "$accept", "start",
+  "reserved_non_modifiers", YY_NULLPTR
 };
 #endif
 
@@ -686,14 +705,14 @@ static const yytype_uint16 yytoknum[] =
      358,   359,   360,   361,   362,   363,   364,   365,   366,   367,
      368,   369,   370,   371,   372,   373,   374,   375,   376,   377,
      378,   379,   380,   381,   382,   383,   384,   385,   386,   387,
-     388,   389,   390,   391,   392,   393
+     388,   389,   390,   391,   392,   393,   394,   395
 };
 # endif
 
-#define YYPACT_NINF -1
+#define YYPACT_NINF -4
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-1)))
+  (!!((Yystate) == (-4)))
 
 #define YYTABLE_NINF -1
 
@@ -704,7 +723,14 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -1,     0,    -1
+      -3,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+      -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,     9,    -4,
+      -4
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -712,19 +738,26 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       2,     0,     1
+       2,     4,     5,     7,     8,     9,    10,    11,    47,    48,
+      12,    13,    14,    17,    18,    67,    68,    69,    63,    64,
+      66,    65,     6,    15,    16,    19,    20,    21,    22,    23,
+      24,    25,    26,    27,    28,    29,    30,    50,    51,    52,
+      53,    54,    42,    43,    44,    45,    46,    31,    32,    33,
+      34,    35,    36,    37,    38,    39,    40,    41,    62,    60,
+      61,    57,    58,    49,    55,    56,    59,    70,     0,     3,
+       1
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -1,    -1
+      -4,    -4,    -4
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     1
+      -1,    68,    69
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -732,31 +765,82 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-       2
+       1,     2,     3,     4,     5,     6,     7,     8,     9,    70,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,    10,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,    11,    12,     0,    13,    14,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,    15,
+      16,    17,    18,    19,    20,    21,    22,    23,    24,    25,
+      26,    27,    28,    29,    30,    31,    32,    33,    34,    35,
+      36,    37,    38,    39,    40,    41,    42,    43,    44,    45,
+      46,    47,    48,    49,    50,    51,    52,    53,     0,     0,
+       0,     0,     0,     0,    54,    55,    56,    57,     0,    58,
+      59,    60,    61,    62,     0,    63,    64,    65,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,    66,
+      67
 };
 
-static const yytype_uint8 yycheck[] =
+static const yytype_int16 yycheck[] =
 {
-       0
+       3,     4,     5,     6,     7,     8,     9,    10,    11,     0,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    54,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    67,    68,    -1,    70,    71,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    82,
+      83,    84,    85,    86,    87,    88,    89,    90,    91,    92,
+      93,    94,    95,    96,    97,    98,    99,   100,   101,   102,
+     103,   104,   105,   106,   107,   108,   109,   110,   111,   112,
+     113,   114,   115,   116,   117,   118,   119,   120,    -1,    -1,
+      -1,    -1,    -1,    -1,   127,   128,   129,   130,    -1,   132,
+     133,   134,   135,   136,    -1,   138,   139,   140,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,   152,
+     153
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,   157,     0
+       0,     3,     4,     5,     6,     7,     8,     9,    10,    11,
+      54,    67,    68,    70,    71,    82,    83,    84,    85,    86,
+      87,    88,    89,    90,    91,    92,    93,    94,    95,    96,
+      97,    98,    99,   100,   101,   102,   103,   104,   105,   106,
+     107,   108,   109,   110,   111,   112,   113,   114,   115,   116,
+     117,   118,   119,   120,   127,   128,   129,   130,   132,   133,
+     134,   135,   136,   138,   139,   140,   152,   153,   159,   160,
+       0
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,   156,   157
+       0,   158,   159,   159,   160,   160,   160,   160,   160,   160,
+     160,   160,   160,   160,   160,   160,   160,   160,   160,   160,
+     160,   160,   160,   160,   160,   160,   160,   160,   160,   160,
+     160,   160,   160,   160,   160,   160,   160,   160,   160,   160,
+     160,   160,   160,   160,   160,   160,   160,   160,   160,   160,
+     160,   160,   160,   160,   160,   160,   160,   160,   160,   160,
+     160,   160,   160,   160,   160,   160,   160,   160,   160,   160,
+     160
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     0
+       0,     2,     0,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1
 };
 
 
@@ -1181,57 +1265,57 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep)
   switch (yytype)
     {
           case 72: /* "integer number (T_LNUMBER)"  */
-#line 27 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
+#line 35 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
       { delete ((*yyvaluep).ast); }
-#line 1187 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
+#line 1271 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
         break;
 
     case 73: /* "floating-point number (T_DNUMBER)"  */
-#line 27 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
+#line 35 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
       { delete ((*yyvaluep).ast); }
-#line 1193 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
+#line 1277 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
         break;
 
     case 74: /* "identifier (T_STRING)"  */
-#line 27 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
+#line 35 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
       { delete ((*yyvaluep).ast); }
-#line 1199 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
+#line 1283 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
         break;
 
     case 75: /* "variable (T_VARIABLE)"  */
-#line 27 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
+#line 35 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
       { delete ((*yyvaluep).ast); }
-#line 1205 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
+#line 1289 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
         break;
 
     case 76: /* T_INLINE_HTML  */
-#line 27 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
+#line 35 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
       { delete ((*yyvaluep).ast); }
-#line 1211 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
+#line 1295 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
         break;
 
     case 77: /* "quoted-string and whitespace (T_ENCAPSED_AND_WHITESPACE)"  */
-#line 27 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
+#line 35 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
       { delete ((*yyvaluep).ast); }
-#line 1217 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
+#line 1301 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
         break;
 
     case 78: /* "quoted-string (T_CONSTANT_ENCAPSED_STRING)"  */
-#line 27 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
+#line 35 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
       { delete ((*yyvaluep).ast); }
-#line 1223 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
+#line 1307 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
         break;
 
     case 79: /* "variable name (T_STRING_VARNAME)"  */
-#line 27 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
+#line 35 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
       { delete ((*yyvaluep).ast); }
-#line 1229 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
+#line 1313 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
         break;
 
     case 80: /* "number (T_NUM_STRING)"  */
-#line 27 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
+#line 35 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1258  */
       { delete ((*yyvaluep).ast); }
-#line 1235 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
+#line 1319 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1258  */
         break;
 
 
@@ -1497,7 +1581,7 @@ yyreduce:
   switch (yyn)
     {
       
-#line 1501 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1663  */
+#line 1585 "/Volumes/data/projects/polarphp/src/parser/impl/YYParser.cpp" /* yacc.c:1663  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1725,5 +1809,5 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 243 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1907  */
+#line 273 "/Volumes/data/projects/polarphp/include/polarphp/parser/LangGrammer.y" /* yacc.c:1907  */
 

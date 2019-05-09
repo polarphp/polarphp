@@ -33,7 +33,6 @@
 #include "polarphp/syntax/References.h"
 #include "polarphp/syntax/SyntaxArena.h"
 #include "polarphp/syntax/SyntaxKind.h"
-#include "polarphp/Syntax/TokenIdDefs.h"
 #include "polarphp/syntax/Trivia.h"
 #include "polarphp/basic/adt/FoldingSet.h"
 #include "polarphp/basic/adt/IntrusiveRefCountPtr.h"
