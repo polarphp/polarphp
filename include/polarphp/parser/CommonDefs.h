@@ -9,21 +9,22 @@
 //
 // Created by polarboy on 2019/05/09.
 
-#ifndef POLARPHP_PARSER_PARSER_H
-#define POLARPHP_PARSER_PARSER_H
+#ifndef POLARPHP_PARSER_COMMON_DEFS_H
+#define POLARPHP_PARSER_COMMON_DEFS_H
 
-#include "polarphp/basic/adt/StringRef.h"
-#include "polarphp/parser/CommonDefs.h"
+#include <string>
 
 namespace polar::parser {
 
-using polar::basic::StringRef;
+class AstNode;
 
-class AstNode
-{};
-
-void parse_error(StringRef msg);
+union ParserStackElement
+{
+   AstNode *ast;
+   std::string *str;
+   unsigned long num;
+};
 
 } // polar::parser
 
-#endif // POLARPHP_PARSER_PARSER_H
+#endif // POLARPHP_PARSER_COMMON_DEFS_H

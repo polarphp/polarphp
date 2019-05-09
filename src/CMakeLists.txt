@@ -24,12 +24,6 @@ add_subdirectory(driver)
 add_subdirectory(serialization)
 add_subdirectory(reflection)
 
-# setup compiler sources
-set(POLAR_COMPILER_SOURCES)
-
-# process language grammer files
-include(GenerateLangGrammer)
-
 polar_collect_files(
    TYPE_BOTH
    DIR ast
@@ -41,6 +35,12 @@ polar_collect_files(
    DIR parser
    OUTPUT_VAR POLAR_PARSER_SOURCES)
 
+# setup compiler sources
+set(POLAR_COMPILER_SOURCES)
+
+# process language grammer files
+include(GenerateLangGrammer)
+
 polar_merge_list(POLAR_COMPILER_SOURCES POLAR_PARSER_SOURCES)
 polar_merge_list(POLAR_COMPILER_SOURCES POLAR_HEADERS)
 
@@ -49,7 +49,7 @@ polar_merge_list(POLAR_COMPILER_SOURCES POLAR_HEADERS)
 polar_add_library(PolarCompiler SHARED BUILDTREE_ONLY
    ${POLAR_COMPILER_SOURCES}
    LINK_LIBS PolarUtils PolarBasic
-   DEPENDS PolarLangLexer)
+   DEPENDS PolarRe2cLangLexer)
 
 set(POLAR_COMPILER_INTERFACE_INCLUDE_DIRECTORIES)
 list(APPEND POLAR_COMPILER_INTERFACE_INCLUDE_DIRECTORIES
@@ -63,3 +63,4 @@ set_target_properties(
    PROPERTIES
    INTERFACE_INCLUDE_DIRECTORIES "${POLAR_COMPILER_INTERFACE_INCLUDE_DIRECTORIES}"
    )
+
