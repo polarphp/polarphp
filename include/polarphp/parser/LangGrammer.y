@@ -68,6 +68,9 @@ namespace polar::syntax{
 %precedence T_ELSE
 
 /* token define start */
+
+%token END 0 "end of file"
+
 %token <ast> T_LNUMBER   "integer number (T_LNUMBER)"
 %token <ast> T_DNUMBER   "floating-point number (T_DNUMBER)"
 %token <ast> T_STRING    "identifier (T_STRING)"
@@ -78,9 +81,7 @@ namespace polar::syntax{
 %token <ast> T_STRING_VARNAME "variable name (T_STRING_VARNAME)"
 %token <ast> T_NUM_STRING "number (T_NUM_STRING)"
 
-%token END 0 "end of file"
-
-%token T_KEYWORD_START
+%token T_KEYWORD_START_MARK
 %token T_LINE            "__LINE__ (T_LINE)"
 %token T_FILE            "__FILE__ (T_FILE)"
 %token T_DIR             "__DIR__ (T_DIR)"
@@ -210,7 +211,8 @@ namespace polar::syntax{
 /* Token used to force a parse error from the lexer */
 %token T_ERROR
 /* Token used to mark the end of Token Enum */
-%token T_NUM_TOKENS
+%token T_NUM_TOKENS_MARK
+%token T_UNKOWN_MARK "unkonw token"
 /* token define end */
 
 %type <ast> top_statement namespace_name name statement function_declaration_statement

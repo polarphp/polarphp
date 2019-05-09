@@ -9,17 +9,18 @@
 //
 // Created by polarboy on 2019/05/09.
 
+#include "polarphp/syntax/TokenKinds.h"
 #include "polarphp/syntax/internal/YYParserDefs.h"
-#include "polarphp/basic/adt/StringRef"
+#include "polarphp/basic/adt/StringRef.h"
 #include <map>
 
 namespace polar::syntax {
 namespace {
-    static const std::map<int, std::string> scg_tokenDescTable{
+    static const std::map<TokenKindType, const std::string> scg_tokenDescTable{
         __TOKEN_RECORDS__
     };
 }
 
-StringRef retrieve_token_desc(TokenKindType kind);
+const StringRef retrieve_token_desc(TokenKindType kind);
 
 } // polar::syntax
