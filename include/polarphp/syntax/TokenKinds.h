@@ -23,6 +23,7 @@ namespace polar::syntax {
 
 using polar::basic::StringRef;
 using polar::utils::RawOutStream;
+using TokenDescItemType = const std::tuple<const std::string, const std::string, const std::string>;
 
 /// Check whether a token kind is known to have any specific text content.
 /// e.g., tol::l_paren has determined text however tok::identifier doesn't.
@@ -30,7 +31,7 @@ bool is_token_text_determined(TokenKindType kind);
 /// If a token kind has determined text, return the text; otherwise assert.
 StringRef get_token_text(TokenKindType kind);
 void dump_token_kind(RawOutStream &outStream, TokenKindType kind);
-const StringRef retrieve_token_desc(TokenKindType kind);
+TokenDescItemType retrieve_token_desc_entry(TokenKindType kind);
 
 } // polar::syntax
 
