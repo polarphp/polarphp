@@ -16,7 +16,8 @@
 
 namespace polar::syntax {
 namespace {
-static const std::map<TokenKindType, const std::string> scg_tokenDescTable{
+using TokenDescItemType = const std::tuple<const std::string, const std::string, const std::string>;
+static const std::map<TokenKindType, TokenDescItemType> scg_tokenDescTable{
    __TOKEN_RECORDS__
 };
 } // anonymous namespace
@@ -24,9 +25,10 @@ static const std::map<TokenKindType, const std::string> scg_tokenDescTable{
 const StringRef retrieve_token_desc(TokenKindType kind) 
 {
    if (scg_tokenDescTable.find(kind) == scg_tokenDescTable.end()) {
-      return scg_tokenDescTable[TokenKindType::T_UNKOWN_MARK];
+      kind = TokenKindType::T_UNKOWN_MARK;
    }
-   return scg_tokenDescTable[kind];
+   TokenDescItemType &item = scg_tokenDescTable.at(kind);
+   return std::get<2>(item);
 }
 
 } // polar::syntax
