@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library endxception
 //
 // See https://polarphp.org/LiterCendNSend.txt for license information
