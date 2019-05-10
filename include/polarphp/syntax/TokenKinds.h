@@ -30,6 +30,7 @@ bool is_token_text_determined(TokenKindType kind);
 /// If a token kind has determined text, return the text; otherwise assert.
 StringRef get_token_text(TokenKindType kind);
 void dump_token_kind(RawOutStream &outStream, TokenKindType kind);
+const StringRef retrieve_token_desc(TokenKindType kind);
 
 } // polar::syntax
 

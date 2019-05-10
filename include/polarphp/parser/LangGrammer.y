@@ -112,7 +112,7 @@ namespace polar::syntax{
 %token T_XOR_EQUAL    "^= (T_XOR_EQUAL)"
 %token T_SL_EQUAL     "<<= (T_SL_EQUAL)"
 %token T_SR_EQUAL     ">>= (T_SR_EQUAL)"
-%token T_COALESCE_EQUAL "??= (T_COALESCE_EQUAL)"
+%token T_COALESCE_EQUAL "\?\?= (T_COALESCE_EQUAL)"
 %token T_BOOLEAN_OR   "|| (T_BOOLEAN_OR)"
 %token T_BOOLEAN_AND  "&& (T_BOOLEAN_AND)"
 %token T_IS_EQUAL     "== (T_IS_EQUAL)"
