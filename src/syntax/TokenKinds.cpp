@@ -10,6 +10,7 @@
 // Created by polarboy on 2019/05/10.
 
 #include "polarphp/syntax/TokenKinds.h"
+#include "polarphp/utils/RawOutStream.h"
 
 namespace polar::syntax {
 
@@ -31,7 +32,9 @@ StringRef get_token_text(TokenKindType kind)
 
 void dump_token_kind(RawOutStream &outStream, TokenKindType kind)
 {
-
+   auto entry = find_token_desc_entry(kind);
+   assert(entry != token_desc_map_end() && "token kind cannot be determined");
+   outStream << std::get<0>(entry->second);
 }
 
 } // polar::syntax
