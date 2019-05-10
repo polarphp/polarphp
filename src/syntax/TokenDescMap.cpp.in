@@ -30,4 +30,9 @@ TokenDescItemType retrieve_token_desc_entry(TokenKindType kind)
    return scg_tokenDescTable.at(kind);
 }
 
+TokenDescMap::iterator find_token_desc_entry(TokenKindType kind)
+{
+   return scg_tokenDescTable.find(kind);
+}
+
 } // polar::syntax
