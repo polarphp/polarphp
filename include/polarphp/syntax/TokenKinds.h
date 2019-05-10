@@ -34,7 +34,8 @@ bool is_token_text_determined(TokenKindType kind);
 StringRef get_token_text(TokenKindType kind);
 void dump_token_kind(RawOutStream &outStream, TokenKindType kind);
 TokenDescItemType retrieve_token_desc_entry(TokenKindType kind);
-TokenDescMap::iterator find_token_desc_entry(TokenKindType kind);
+TokenDescMap::const_iterator find_token_desc_entry(TokenKindType kind);
+TokenDescMap::const_iterator token_desc_map_end();
 
 } // polar::syntax
 

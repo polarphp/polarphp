@@ -12,7 +12,6 @@
 #include "polarphp/syntax/TokenKinds.h"
 #include "polarphp/syntax/internal/YYParserDefs.h"
 #include "polarphp/basic/adt/StringRef.h"
-#include <map>
 
 namespace polar::syntax {
 namespace {
@@ -30,9 +29,14 @@ TokenDescItemType retrieve_token_desc_entry(TokenKindType kind)
    return scg_tokenDescTable.at(kind);
 }
 
-TokenDescMap::iterator find_token_desc_entry(TokenKindType kind)
+TokenDescMap::const_iterator find_token_desc_entry(TokenKindType kind)
 {
    return scg_tokenDescTable.find(kind);
+}
+
+TokenDescMap::const_iterator token_desc_map_end()
+{
+   return scg_tokenDescTable.end();
 }
 
 } // polar::syntax

@@ -13,6 +13,25 @@
 
 namespace polar::syntax {
 
+bool is_token_text_determined(TokenKindType kind)
+{
+   auto entry = find_token_desc_entry(kind);
+   if (entry == token_desc_map_end()) {
+      return false;
+   }
+   return true;
+}
 
+StringRef get_token_text(TokenKindType kind)
+{
+   auto entry = find_token_desc_entry(kind);
+   assert(entry != token_desc_map_end() && "token kind cannot be determined");
+   return std::get<1>(entry->second);
+}
+
+void dump_token_kind(RawOutStream &outStream, TokenKindType kind)
+{
+
+}
 
 } // polar::syntax

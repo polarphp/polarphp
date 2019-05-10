@@ -62,3 +62,5 @@ if ((NOT EXISTS ${POLAR_TOKEN_DESC_MAP_FILE}) OR
    set(POLAR_GRAMMER_FILE_MD5 ${grammerFileHash} CACHE STRING "language grammer file md5 value" FORCE)
    mark_as_advanced(POLAR_GRAMMER_FILE_MD5)
 endif()
+
+list(APPEND POLAR_COMPILER_SOURCES ${POLAR_TOKEN_DESC_MAP_FILE})
