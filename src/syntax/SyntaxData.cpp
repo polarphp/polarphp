@@ -13,7 +13,6 @@
 
 namespace polar::syntax {
 
-
 RefCountPtr<SyntaxData> SyntaxData::make(RefCountPtr<RawSyntax> raw,
                                          const SyntaxData *parent,
                                          CursorIndex indexInParent)
@@ -58,7 +57,6 @@ void SyntaxData::dump() const
 {
    dump(polar::utils::error_stream());
 }
-
 
 RefCountPtr<SyntaxData> SyntaxData::getPreviousNode() const
 {

@@ -33,6 +33,7 @@
 #include "polarphp/syntax/References.h"
 #include "polarphp/syntax/SyntaxArena.h"
 #include "polarphp/syntax/SyntaxKind.h"
+#include "polarphp/syntax/TokenKinds.h"
 #include "polarphp/syntax/Trivia.h"
 #include "polarphp/basic/adt/FoldingSet.h"
 #include "polarphp/basic/adt/IntrusiveRefCountPtr.h"
@@ -121,7 +122,6 @@ using polar::basic::FoldingSetNodeId;
 
 class SyntaxArena;
 using CursorIndex = size_t;
-using TokenKindType = int;
 
 /// Get a numeric index suitable for array/vector indexing
 /// from a syntax node's Cursor enum value.
@@ -556,7 +556,7 @@ public:
    /// Dump this piece of syntax recursively.
    void dump(RawOutStream &outStream, unsigned indent = 0) const;
 
-   static void Profile(FoldingSetNodeId &id, TokenKindType tokenKind, OwnedString text,
+   static void profile(FoldingSetNodeId &id, TokenKindType tokenKind, OwnedString text,
                        ArrayRef<TriviaPiece> leadingTrivia,
                        ArrayRef<TriviaPiece> trailingTrivia);
 private:
