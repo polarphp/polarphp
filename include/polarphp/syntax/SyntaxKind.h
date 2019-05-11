@@ -31,6 +31,7 @@
 namespace polar::syntax {
 
 using polar::basic::count_bits_used;
+using polar::basic::StringRef;
 using polar::utils::RawOutStream;
 
 enum class SyntaxKind {
@@ -55,6 +56,7 @@ bool is_token_kind(SyntaxKind kind);
 bool is_unknown_kind(SyntaxKind kind);
 SyntaxKind get_unknown_kind(SyntaxKind kind);
 bool parser_shall_omit_when_no_children(SyntaxKind kind);
+StringRef retrieve_syntax_kind_text(SyntaxKind kind);
 
 } // polar::syntax
 
