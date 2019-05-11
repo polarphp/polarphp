@@ -72,8 +72,9 @@ struct WrapperTypeTraits<syntax::SyntaxKind>
          return 0;
       case syntax::SyntaxKind::Unknown:
          return 1;
+      default:
+         polar_unreachable("unhandled kind");
       }
-      polar_unreachable("unhandled kind");
    }
 
    static void write(ByteTreeWriter &writer, const SyntaxKind &kind,

@@ -134,7 +134,7 @@ public:
    {
       assert(index < size());
       assert(!empty());
-      return { root, m_data->getChild(index).get() };
+      return { m_root, m_data->getChild(index).get() };
    }
 
    /// Return a new collection with the given element added to the end.

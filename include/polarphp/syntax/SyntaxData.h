@@ -343,8 +343,8 @@ struct DenseMapInfo<RCSD>
    static unsigned getHashValue(const RCSD value)
    {
       unsigned H = 0;
-      H ^= DenseMapInfo<uintptr_t>::getHashValue(reinterpret_cast<const uintptr_t>(value->getRaw().get()));
-      H ^= DenseMapInfo<uintptr_t>::getHashValue(reinterpret_cast<const uintptr_t>(value->getParent()));
+      H ^= DenseMapInfo<uintptr_t>::getHashValue(reinterpret_cast<uintptr_t>(value->getRaw().get()));
+      H ^= DenseMapInfo<uintptr_t>::getHashValue(reinterpret_cast<uintptr_t>(value->getParent()));
       H ^= DenseMapInfo<polar::syntax::CursorIndex>::getHashValue(value->getIndexInParent());
       return H;
    }

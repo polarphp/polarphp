@@ -107,7 +107,7 @@ public:
    size_t getNumChildren() const;
 
    /// Get the Nth child of this piece of syntax.
-   std::optional<Syntax> getChild(const size_t n) const;
+   std::optional<Syntax> getChild(const size_t index) const;
 
    /// Returns true if the syntax node is of the given type.
    template <typename T>
