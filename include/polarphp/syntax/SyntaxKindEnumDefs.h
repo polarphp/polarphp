@@ -28,6 +28,16 @@ enum class SyntaxKind {
    CodeBlockItem,
    CodeBlockItemList,
    CodeBlock,
+
+   FirstDecl,
+   LastDecl,
+   FirstExpr,
+   LastExpr,
+   FirstStmt,
+   LastStmt,
+   FirstType,
+   LastType,
+
    // NOTE: Unknown must be the last kind.
    Unknown,
 };

@@ -13,8 +13,7 @@
 
 namespace polar::syntax {
 
-static const std::map<SyntaxKind, std::string> scg_syntaxKindTable {
-
+static const std::map<SyntaxKind, std::tuple<std::string, int>> scg_syntaxKindTable {
 };
 
 StringRef retrieve_syntax_kind_text(SyntaxKind kind)
@@ -23,7 +22,16 @@ StringRef retrieve_syntax_kind_text(SyntaxKind kind)
    if (iter == scg_syntaxKindTable.end()) {
       return StringRef();
    }
-   return iter->second;
+   return std::get<0>(iter->second);
+}
+
+int retrieve_syntax_kind_serialization_code(SyntaxKind kind)
+{
+   auto iter = scg_syntaxKindTable.find(kind);
+   if (iter == scg_syntaxKindTable.end()) {
+      return -1;
+   }
+   return std::get<1>(iter->second);
 }
 
 } // polar::syntax
