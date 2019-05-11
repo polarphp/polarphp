@@ -15,14 +15,14 @@ namespace polar::syntax {
 
 void dump_syntax_kind(RawOutStream &outStream, const SyntaxKind kind)
 {
-  switch (kind) {
-  case SyntaxKind::Token:
-    outStream << "Token";
-    break;
-  case SyntaxKind::Unknown:
-    outStream << "Unknown";
-    break;
-  }
+   switch (kind) {
+   case SyntaxKind::Token:
+      outStream << "Token";
+      break;
+   case SyntaxKind::Unknown:
+      outStream << "Unknown";
+      break;
+   }
 }
 
 bool is_collection_kind(SyntaxKind kind)
@@ -52,12 +52,12 @@ bool is_expr_kind(SyntaxKind kind)
 
 bool is_token_kind(SyntaxKind kind)
 {
-   return false;
+   return kind == SyntaxKind::Token;
 }
 
 bool is_unknown_kind(SyntaxKind kind)
 {
-   return false;
+   return kind == SyntaxKind::Unknown;
 }
 
 SyntaxKind get_unknown_kind(SyntaxKind kind)
@@ -71,3 +71,18 @@ bool parser_shall_omit_when_no_children(SyntaxKind kind)
 }
 
 } // polar::syntax
+
+namespace polar::utils {
+RawOutStream &operator<<(RawOutStream &outStream, polar::syntax::SyntaxKind kind)
+{
+   switch (kind) {
+   case polar::syntax::SyntaxKind::Token:
+      outStream << "TokenSyntax";
+      break;
+   case polar::syntax::SyntaxKind::Unknown:
+      outStream << "UnknownSyntax";
+      break;
+   }
+   return outStream;
+}
+} // polar::utils
