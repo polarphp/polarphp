@@ -27,18 +27,13 @@
 #include "polarphp/basic/InlineBitfield.h"
 #include "polarphp/basic/ByteTreeSerialization.h"
 #include "polarphp/utils/yaml/YamlTraits.h"
+#include "polarphp/syntax/SyntaxKindEnumDefs.h"
 
 namespace polar::syntax {
 
 using polar::basic::count_bits_used;
 using polar::basic::StringRef;
 using polar::utils::RawOutStream;
-
-enum class SyntaxKind {
-   Token,
-   // NOTE: Unknown must be the last kind.
-   Unknown,
-};
 
 enum : unsigned {
    NumSyntaxKindBits = count_bits_used(static_cast<unsigned>(SyntaxKind::Unknown))
