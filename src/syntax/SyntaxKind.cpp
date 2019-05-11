@@ -75,14 +75,7 @@ bool parser_shall_omit_when_no_children(SyntaxKind kind)
 namespace polar::utils {
 RawOutStream &operator<<(RawOutStream &outStream, polar::syntax::SyntaxKind kind)
 {
-   switch (kind) {
-   case polar::syntax::SyntaxKind::Token:
-      outStream << "TokenSyntax";
-      break;
-   case polar::syntax::SyntaxKind::Unknown:
-      outStream << "UnknownSyntax";
-      break;
-   }
+   outStream << polar::syntax::retrieve_syntax_kind_text(kind);
    return outStream;
 }
 } // polar::utils
