@@ -15,39 +15,35 @@ namespace polar::syntax {
 
 void dump_syntax_kind(RawOutStream &outStream, const SyntaxKind kind)
 {
-   switch (kind) {
-   case SyntaxKind::Token:
-      outStream << "Token";
-      break;
-   case SyntaxKind::Unknown:
-      outStream << "Unknown";
-      break;
-   }
+   outStream << retrieve_syntax_kind_text(kind);
 }
 
 bool is_collection_kind(SyntaxKind kind)
 {
-   return false;
+   switch (kind) {
+   default:
+      return false;
+   }
 }
 
 bool is_decl_kind(SyntaxKind kind)
 {
-   return false;
+   return kind >= SyntaxKind::FirstDecl && kind <= SyntaxKind::LastDecl;
 }
 
 bool is_type_kind(SyntaxKind kind)
 {
-   return false;
+   return kind >= SyntaxKind::FirstType && kind <= SyntaxKind::LastType;
 }
 
 bool is_stmt_kind(SyntaxKind kind)
 {
-   return false;
+   return kind >= SyntaxKind::FirstStmt && kind <= SyntaxKind::LastStmt;
 }
 
 bool is_expr_kind(SyntaxKind kind)
 {
-   return false;
+   return kind >= SyntaxKind::FirstExpr && kind <= SyntaxKind::LastExpr;
 }
 
 bool is_token_kind(SyntaxKind kind)
@@ -57,17 +53,36 @@ bool is_token_kind(SyntaxKind kind)
 
 bool is_unknown_kind(SyntaxKind kind)
 {
-   return kind == SyntaxKind::Unknown;
+   return kind == SyntaxKind::Unknown ||
+         kind == SyntaxKind::UnknownDecl ||
+         kind == SyntaxKind::UnknownExpr ||
+         kind == SyntaxKind::UnknownStmt ||
+         kind == SyntaxKind::UnknownType;
 }
 
 SyntaxKind get_unknown_kind(SyntaxKind kind)
 {
-   return kind;
+   if (is_expr_kind(kind)) {
+      return SyntaxKind::UnknownExpr;
+   }
+   if (is_stmt_kind(kind)) {
+      return SyntaxKind::UnknownStmt;
+   }
+   if (is_decl_kind(kind)) {
+      return SyntaxKind::UnknownDecl;
+   }
+   if (is_type_kind(kind)) {
+      return SyntaxKind::UnknownType;
+   }
+   return SyntaxKind::Unknown;
 }
 
 bool parser_shall_omit_when_no_children(SyntaxKind kind)
 {
-   return false;
+   switch (kind) {
+   default:
+      return false;
+   }
 }
 
 } // polar::syntax
