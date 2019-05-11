@@ -10,8 +10,45 @@
 // Created by polarboy on 2019/05/09.
 
 #include "polarphp/syntax/RawSyntax.h"
+#include "polarphp/basic/ColorUtils.h"
 
 namespace polar::syntax {
+
+namespace {
+
+bool is_trivial_syntax_kind(SyntaxKind kind)
+{
+   if (is_unknown_kind(kind)) {
+      return true;
+   }
+   if (is_collection_kind(kind)) {
+      return true;
+   }
+   switch(kind) {
+   return true;
+   default:
+      return false;
+   }
+}
+
+void print_syntax_kind(SyntaxKind kind, RawOutStream &outStream,
+                       SyntaxPrintOptions opts, bool open)
+{
+   std::unique_ptr<polar::basic::OsColor> color;
+   if (opts.visual) {
+      color.reset(new polar::basic::OsColor(outStream, RawOutStream::Colors::GREEN));
+   }
+   outStream << "<";
+   if (!open) {
+      outStream << "/";
+   }
+   dump_syntax_kind(outStream, kind);
+   outStream << ">";
+}
+
+}
+
+
 
 RawSyntax::~RawSyntax()
 {

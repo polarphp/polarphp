@@ -13,6 +13,18 @@
 
 namespace polar::syntax {
 
+void dump_syntax_kind(RawOutStream &outStream, const SyntaxKind kind)
+{
+  switch (kind) {
+  case SyntaxKind::Token:
+    outStream << "Token";
+    break;
+  case SyntaxKind::Unknown:
+    outStream << "Unknown";
+    break;
+  }
+}
+
 bool is_collection_kind(SyntaxKind kind)
 {
    return false;

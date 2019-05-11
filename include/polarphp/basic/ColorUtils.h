@@ -58,7 +58,7 @@ public:
 
    OsColor &operator<<(char c)
    {
-      m_outStream << C; return *this;
+      m_outStream << c; return *this;
    }
 
    OsColor &operator<<(StringRef str)

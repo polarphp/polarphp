@@ -16,7 +16,6 @@
 #include "polarphp/syntax/SyntaxKind.h"
 #include "polarphp/syntax/TokenSyntax.h"
 #include "polarphp/syntax/Trivia.h"
-#include "polarphp/syntax/TokenIdDefs.h"
 #include "polarphp/basic/adt/ArrayRef.h"
 
 #include <vector>
