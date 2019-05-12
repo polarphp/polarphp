@@ -159,6 +159,30 @@ bool TriviaPiece::trySquash(const TriviaPiece &next)
 void TriviaPiece::print(RawOutStream &outStream) const
 {
    switch (m_kind) {
+   case TriviaKind::Space:
+   case TriviaKind::Tab:
+   case TriviaKind::VerticalTab:
+   case TriviaKind::Formfeed:
+   case TriviaKind::Newline:
+   case TriviaKind::CarriageReturn:
+   case TriviaKind::Backtick:
+   case TriviaKind::LineComment:
+   case TriviaKind::BlockComment:
+   case TriviaKind::DocLineComment:
+   case TriviaKind::DocBlockComment:
+   case TriviaKind::GarbageText: {
+      outStream << m_text.getStr();
+      break;
+   }
+   case TriviaKind::CarriageReturnLineFeed: {
+      StringRef chars = retrieve_trivia_kind_characters(m_kind);
+      for (uint i = 0; i < m_count; ++i) {
+         outStream << chars;
+      }
+      break;
+   }
+   default:
+      polar_unreachable("unknown kind");
    }
 }
 
