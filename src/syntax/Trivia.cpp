@@ -54,6 +54,27 @@ void TriviaPiece::dump(RawOutStream &outStream, unsigned indent) const
    }
    outStream << "(trivia ";
    switch (m_kind) {
+   case TriviaKind::Space:
+   case TriviaKind::Tab:
+   case TriviaKind::VerticalTab:
+   case TriviaKind::Formfeed:
+   case TriviaKind::Newline:
+   case TriviaKind::CarriageReturn:
+   case TriviaKind::Backtick:
+   case TriviaKind::LineComment:
+   case TriviaKind::BlockComment:
+   case TriviaKind::DocLineComment:
+   case TriviaKind::DocBlockComment:
+   case TriviaKind::GarbageText:
+      retrieve_trivia_kind_name(m_kind);
+      outStream.writeEscaped(m_text.getStr());
+      break;
+   case TriviaKind::CarriageReturnLineFeed:
+      retrieve_trivia_kind_name(m_kind);
+      outStream << m_count;
+      break;
+   default:
+      polar_unreachable("unknown kind");
    }
    outStream << ')';
 }

@@ -648,6 +648,8 @@ struct ObjectTraits<syntax::TriviaPiece>
 
 namespace polar::yaml {
 
+using polar::syntax::retrieve_trivia_kind_name;
+
 /// Deserialization traits for TriviaPiece.
 /// - All trivia pieces will have a "kind" key that contains the serialized
 ///   name of the trivia kind.
@@ -701,19 +703,20 @@ struct ScalarEnumerationTraits<polar::syntax::TriviaKind>
 {
    static void enumeration(IO &in, polar::syntax::TriviaKind &value)
    {
-      in.enumCase(value, "Space", polar::syntax::TriviaKind::Space);
-      in.enumCase(value, "Tab", polar::syntax::TriviaKind::Tab);
-      in.enumCase(value, "VerticalTab", polar::syntax::TriviaKind::VerticalTab);
-      in.enumCase(value, "Formfeed", polar::syntax::TriviaKind::Formfeed);
-      in.enumCase(value, "Newline", polar::syntax::TriviaKind::Newline);
-      in.enumCase(value, "CarriageReturn", polar::syntax::TriviaKind::CarriageReturn);
-      in.enumCase(value, "Backtick", polar::syntax::TriviaKind::Backtick);
-      in.enumCase(value, "LineComment", polar::syntax::TriviaKind::LineComment);
-      in.enumCase(value, "BlockComment", polar::syntax::TriviaKind::BlockComment);
-      in.enumCase(value, "DocLineComment", polar::syntax::TriviaKind::DocLineComment);
-      in.enumCase(value, "DocBlockComment", polar::syntax::TriviaKind::DocBlockComment);
-      in.enumCase(value, "GarbageText", polar::syntax::TriviaKind::GarbageText);
-      in.enumCase(value, "CarriageReturnLineFeed", polar::syntax::TriviaKind::CarriageReturnLineFeed);
+      using polar::syntax::TriviaKind;
+      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::Space).getData(), TriviaKind::Space);
+      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::Tab).getData(), TriviaKind::Tab);
+      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::VerticalTab).getData(), TriviaKind::VerticalTab);
+      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::Formfeed).getData(), TriviaKind::Formfeed);
+      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::Newline).getData(), TriviaKind::Newline);
+      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::CarriageReturn).getData(), TriviaKind::CarriageReturn);
+      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::Backtick).getData(), TriviaKind::Backtick);
+      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::LineComment).getData(), TriviaKind::LineComment);
+      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::BlockComment).getData(), TriviaKind::BlockComment);
+      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::DocLineComment).getData(), TriviaKind::DocLineComment);
+      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::DocBlockComment).getData(), TriviaKind::DocBlockComment);
+      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::GarbageText).getData(), TriviaKind::GarbageText);
+      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::CarriageReturnLineFeed).getData(), TriviaKind::CarriageReturnLineFeed);
    }
 };
 

@@ -15,6 +15,19 @@ namespace polar::syntax {
 
 namespace {
 static const std::map<TriviaKind, std::string> scg_triviaKindTable {
+   {TriviaKind::Space, "Space"},
+   {TriviaKind::Tab, "Tab"},
+   {TriviaKind::VerticalTab, "VerticalTab"},
+   {TriviaKind::Formfeed, "Formfeed"},
+   {TriviaKind::Newline, "Newline"},
+   {TriviaKind::CarriageReturn, "CarriageReturn"},
+   {TriviaKind::Backtick, "Backtick"},
+   {TriviaKind::LineComment, "LineComment"},
+   {TriviaKind::BlockComment, "BlockComment"},
+   {TriviaKind::DocLineComment, "DocLineComment"},
+   {TriviaKind::DocBlockComment, "DocBlockComment"},
+   {TriviaKind::GarbageText, "GarbageText"},
+   {TriviaKind::CarriageReturnLineFeed, "CarriageReturnLineFeed"}
 };
 } // anonymous namespace
 
