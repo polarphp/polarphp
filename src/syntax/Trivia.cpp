@@ -25,7 +25,8 @@
 
 namespace polar::syntax {
 
-TriviaPiece TriviaPiece::fromText(TriviaKind kind, StringRef text) {
+TriviaPiece TriviaPiece::fromText(TriviaKind kind, StringRef text)
+{
    switch (kind) {
    case TriviaKind::Space:
    case TriviaKind::Tab:
@@ -82,8 +83,25 @@ void TriviaPiece::dump(RawOutStream &outStream, unsigned indent) const
 bool is_comment_trivia_kind(TriviaKind kind)
 {
    switch (kind) {
+   case TriviaKind::Space:
+   case TriviaKind::Tab:
+   case TriviaKind::VerticalTab:
+   case TriviaKind::Formfeed:
+   case TriviaKind::Newline:
+   case TriviaKind::CarriageReturn:
+   case TriviaKind::Backtick:
+   case TriviaKind::GarbageText:
+   case TriviaKind::CarriageReturnLineFeed:
+      return false;
+   case TriviaKind::LineComment:
+   case TriviaKind::BlockComment:
+   case TriviaKind::DocLineComment:
+   case TriviaKind::DocBlockComment:
+      return true;
+   default:
+      polar_unreachable("unknown kind");
    }
-   polar_unreachable("unknown kind");
+
 }
 
 void TriviaPiece::accumulateAbsolutePosition(AbsolutePosition &pos) const
