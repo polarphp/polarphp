@@ -107,15 +107,53 @@ bool is_comment_trivia_kind(TriviaKind kind)
 void TriviaPiece::accumulateAbsolutePosition(AbsolutePosition &pos) const
 {
    switch (m_kind) {
+   case TriviaKind::Newline:
+   case TriviaKind::CarriageReturn:
+   case TriviaKind::Space:
+   case TriviaKind::Tab:
+   case TriviaKind::VerticalTab:
+   case TriviaKind::Formfeed:
+   case TriviaKind::Backtick:
+   case TriviaKind::GarbageText:
+   case TriviaKind::LineComment:
+   case TriviaKind::BlockComment:
+   case TriviaKind::DocLineComment:
+   case TriviaKind::DocBlockComment:
+      pos.addText(m_text.getStr());
+      break;
+   case TriviaKind::CarriageReturnLineFeed:
+      pos.addNewlines(m_count, 2);
+      break;
+   default:
+      polar_unreachable("unknown kind");
    }
 }
 
 bool TriviaPiece::trySquash(const TriviaPiece &next)
 {
-   if (m_kind != next.m_kind) { return false; }
-   switch (m_kind) {
+   if (m_kind != next.m_kind) {
+      return false;
    }
-   polar_unreachable("unknown kind");
+   switch (m_kind) {
+   case TriviaKind::Space:
+   case TriviaKind::Tab:
+   case TriviaKind::VerticalTab:
+   case TriviaKind::Formfeed:
+   case TriviaKind::Newline:
+   case TriviaKind::CarriageReturn:
+   case TriviaKind::Backtick:
+   case TriviaKind::LineComment:
+   case TriviaKind::BlockComment:
+   case TriviaKind::DocLineComment:
+   case TriviaKind::DocBlockComment:
+   case TriviaKind::GarbageText:
+      return false;
+   case TriviaKind::CarriageReturnLineFeed:
+      m_count += next.m_count;
+      return true;
+   default:
+      polar_unreachable("unknown kind");
+   }
 }
 
 void TriviaPiece::print(RawOutStream &outStream) const

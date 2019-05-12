@@ -585,6 +585,7 @@ private:
 };
 
 StringRef retrieve_trivia_kind_name(TriviaKind kind);
+StringRef retrieve_trivia_kind_characters(TriviaKind kind);
 
 } // polar::syntax
 
