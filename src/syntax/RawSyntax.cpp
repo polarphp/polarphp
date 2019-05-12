@@ -334,7 +334,21 @@ void AbsolutePosition::dump(RawOutStream &outStream) const
 
 void RawSyntax::profile(FoldingSetNodeId &id, TokenKindType tokenKind,
                         OwnedString text, ArrayRef<TriviaPiece> leadingTrivia,
-                        ArrayRef<TriviaPiece> trailingTrivia) {
+                        ArrayRef<TriviaPiece> trailingTrivia)
+{
+   id.addInteger(unsigned(tokenKind));
+     switch (tokenKind) {
+       break;
+     default:
+       id.addString(text.str());
+       break;
+     }
+   for (auto &piece : leadingTrivia) {
+      piece.profile(id);
+   }
+   for (auto &piece : trailingTrivia) {
+      piece.profile(id);
+   }
 }
 
 } // polar::syntax

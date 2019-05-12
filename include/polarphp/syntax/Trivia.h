@@ -301,7 +301,7 @@ public:
       return !(*this == other);
    }
 
-   void getProfile(FoldingSetNodeId &id) const
+   void profile(FoldingSetNodeId &id) const
    {
       id.addInteger(unsigned(m_kind));
       switch (m_kind) {
