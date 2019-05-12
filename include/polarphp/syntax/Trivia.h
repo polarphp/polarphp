@@ -583,6 +583,9 @@ private:
       }
    }
 };
+
+StringRef retrieve_trivia_kind_name(TriviaKind kind);
+
 } // polar::syntax
 
 namespace polar::basic::bytetree {

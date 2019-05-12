@@ -13,6 +13,7 @@
 
 namespace polar::syntax {
 
+/// name - serialization_code
 static const std::map<SyntaxKind, std::tuple<std::string, int>> scg_syntaxKindTable {
 };
 
