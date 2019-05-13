@@ -12,7 +12,42 @@
 #ifndef POLARPHP_SYNTAX_SYNTAX_NODE_COMMON_NODES_H
 #define POLARPHP_SYNTAX_SYNTAX_NODE_COMMON_NODES_H
 
+#include "polarphp/syntax/Syntax.h"
+#include "polarphp/syntax/SyntaxCollection.h"
+#include "polarphp/syntax/TokenSyntax.h"
+#include "polarphp/syntax/UnknownSyntax.h"
+
 namespace polar::syntax {
+
+class DeclSyntax;
+class ExprSyntax;
+class StmtSyntax;
+class UnknownDeclSyntax;
+class UnknownExprSyntax;
+class UnknownStmtSyntax;
+class CodeBlockItemSyntax;
+class CodeBlockItemListSyntax;
+class CodeBlockSyntax;
+
+using CodeBlockItemList = SyntaxCollection<SyntaxKind::CodeBlockItemList, CodeBlockItemSyntax>;
+
+class DeclSyntax : public Syntax
+{
+public:
+   DeclSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {}
+
+   static bool kindof(SyntaxKind kind)
+   {
+      return is_decl_kind(kind);
+   }
+
+   static bool classof(const Syntax *syntax)
+   {
+      return kindof(syntax->getKind());
+   }
+};
 
 } // polar::syntax
 
