@@ -206,7 +206,7 @@ public:
       return m_root == other.m_root && m_data == other.m_data;
    }
 
-   static bool kindof(SyntaxKind kind)
+   static bool kindOf(SyntaxKind kind)
    {
       return true;
    }

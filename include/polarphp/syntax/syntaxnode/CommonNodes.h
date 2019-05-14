@@ -152,6 +152,11 @@ class CodeBlockItemSyntax final : public Syntax
 {
 public:
    enum Cursor : uint32_t {
+      /// node choices
+      /// name: Decl kind: Decl
+      /// name: Stmt kind: Stmt
+      /// name: TokenList kind: TokenList
+      /// name: NonEmptyTokenList kind: NonEmptyTokenList
       Item,
       Semicolon,
       ErrorTokens
@@ -160,7 +165,9 @@ public:
 public:
    CodeBlockItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    /// The underlying node inside the code block.
    Syntax getItem();
@@ -185,6 +192,9 @@ public:
    {
       return kindOf(syntax->getKind());
    }
+private:
+   friend class CodeBlockItemSyntaxBuilder;
+   void validate();
 };
 
 class CodeBlockSyntax final : public Syntax
@@ -199,7 +209,9 @@ public:
 public:
    CodeBlockSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    TokenSyntax getLeftBrace();
    TokenSyntax getRightBrace();
@@ -226,6 +238,10 @@ public:
    {
       return kindOf(syntax->getKind());
    }
+
+private:
+   friend class CodeBlockSyntaxBuilder;
+   void validate();
 };
 
 } // polar::syntax

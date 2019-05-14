@@ -223,14 +223,14 @@ public:
       return m_data->replaceSelf<SyntaxCollection<collectionKind, Element>>(raw);
    }
 
-   static bool kindof(SyntaxKind kind)
+   static bool kindOf(SyntaxKind kind)
    {
       return kind == collectionKind;
    }
 
    static bool classof(const Syntax *syntax)
    {
-      return kindof(syntax->getKind());
+      return kindOf(syntax->getKind());
    }
 };
 

@@ -102,14 +102,14 @@ public:
       return getRaw()->getTokenText();
    }
 
-   static bool kindof(SyntaxKind kind)
+   static bool kindOf(SyntaxKind kind)
    {
       return is_token_kind(kind);
    }
 
    static bool classof(const Syntax *syntax)
    {
-      return kindof(syntax->getKind());
+      return kindOf(syntax->getKind());
    }
 };
 
