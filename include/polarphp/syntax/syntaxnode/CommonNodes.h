@@ -152,13 +152,20 @@ class CodeBlockItemSyntax final : public Syntax
 {
 public:
    enum Cursor : uint32_t {
+      /// type
+      /// Syntax
+      ///
       /// node choices
       /// name: Decl kind: Decl
       /// name: Stmt kind: Stmt
       /// name: TokenList kind: TokenList
       /// name: NonEmptyTokenList kind: NonEmptyTokenList
       Item,
+      /// type
+      /// TokenSyntax
       Semicolon,
+      /// type
+      /// Syntax
       ErrorTokens
    };
 

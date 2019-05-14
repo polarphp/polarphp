@@ -13,11 +13,31 @@
 #define POLARPHP_SYNTAX_BUILDER_COMMON_SYNTAX_NODE_BUILDERS_H
 
 #include "polarphp/syntax/RawSyntax.h"
-#include "polarphp/syntax/SyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/CommonNodes.h"
 
 namespace polar::syntax {
 
+class SyntaxArena;
 
+class CodeBlockItemSyntaxBuilder
+{
+public:
+   CodeBlockItemSyntaxBuilder() = default;
+   CodeBlockItemSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   CodeBlockItemSyntaxBuilder &useItem(Syntax item);
+   CodeBlockItemSyntaxBuilder &useSemicolon(TokenSyntax semicolon);
+   CodeBlockItemSyntaxBuilder &useErrorTokens(Syntax errorTokens);
+
+   CodeBlockItemSyntax build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[3] = {
+      nullptr, nullptr, nullptr
+   };
+};
 
 } // polar::syntax
 
