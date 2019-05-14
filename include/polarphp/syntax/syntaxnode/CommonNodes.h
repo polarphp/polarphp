@@ -151,21 +151,19 @@ public:
 class CodeBlockItemSyntax final : public Syntax
 {
 public:
-   enum Cursor : uint32_t {
-      /// type
-      /// Syntax
-      ///
+   enum Cursor : uint32_t
+   {
+      /// type: Syntax
+      /// ------------
       /// node choices
       /// name: Decl kind: Decl
       /// name: Stmt kind: Stmt
       /// name: TokenList kind: TokenList
       /// name: NonEmptyTokenList kind: NonEmptyTokenList
       Item,
-      /// type
-      /// TokenSyntax
+      /// type: TokenSyntax
       Semicolon,
-      /// type
-      /// Syntax
+      /// type: Syntax
       ErrorTokens
    };
 
@@ -207,9 +205,13 @@ private:
 class CodeBlockSyntax final : public Syntax
 {
 public:
-   enum Cursor : uint32_t {
+   enum Cursor : uint32_t
+   {
+      /// type: TokenSyntax
       LeftBrace,
+      /// type: CodeBlockItemListSyntax
       Statements,
+      /// type: TokenSyntax
       RightBrace
    };
 

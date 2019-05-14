@@ -39,6 +39,26 @@ private:
    };
 };
 
+class CodeBlockSyntaxBuilder
+{
+public:
+   CodeBlockItemSyntaxBuilder() = default;
+   CodeBlockItemSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   CodeBlockSyntaxBuilder &useLeftBrace(TokenSyntax leftBrace);
+   CodeBlockSyntaxBuilder &useRightBrace(TokenSyntax rightBrace);
+   CodeBlockSyntaxBuilder &useStatements(CodeBlockItemListSyntax stmts);
+   CodeBlockSyntaxBuilder &addCodeBlockItem(CodeBlockItemSyntax stmt);
+   CodeBlockSyntax build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[3] = {
+      nullptr, nullptr, nullptr
+   };
+};
+
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_BUILDER_COMMON_SYNTAX_NODE_BUILDERS_H
