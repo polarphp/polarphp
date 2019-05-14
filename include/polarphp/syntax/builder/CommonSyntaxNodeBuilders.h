@@ -42,8 +42,8 @@ private:
 class CodeBlockSyntaxBuilder
 {
 public:
-   CodeBlockItemSyntaxBuilder() = default;
-   CodeBlockItemSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+   CodeBlockSyntaxBuilder() = default;
+   CodeBlockSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
       : m_arena(arena)
    {}
 

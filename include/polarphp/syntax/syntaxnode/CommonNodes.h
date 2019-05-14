@@ -154,6 +154,7 @@ public:
    enum Cursor : uint32_t
    {
       /// type: Syntax
+      /// optional: false
       /// ------------
       /// node choices
       /// name: Decl kind: Decl
@@ -162,8 +163,10 @@ public:
       /// name: NonEmptyTokenList kind: NonEmptyTokenList
       Item,
       /// type: TokenSyntax
+      /// optional: false
       Semicolon,
       /// type: Syntax
+      /// optional: true
       ErrorTokens
    };
 
@@ -208,10 +211,13 @@ public:
    enum Cursor : uint32_t
    {
       /// type: TokenSyntax
+      /// optional: false
       LeftBrace,
       /// type: CodeBlockItemListSyntax
+      /// optional: false
       Statements,
       /// type: TokenSyntax
+      /// optional: false
       RightBrace
    };
 
