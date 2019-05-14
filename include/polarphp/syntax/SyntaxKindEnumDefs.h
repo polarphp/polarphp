@@ -16,27 +16,39 @@ namespace polar::syntax {
 
 enum class SyntaxKind {
    Token,
+
    /// common syntax node
    Decl,
    Expr,
    Stmt,
    Type,
-   UnknownDecl,
-   UnknownExpr,
-   UnknownStmt,
-   UnknownType,
    CodeBlockItem,
-   CodeBlockItemList,
    CodeBlock,
 
+   /// decl syntax node
    FirstDecl,
+   UnknownDecl,
    LastDecl,
+
+   /// expr syntax node
    FirstExpr,
+   UnknownExpr,
    LastExpr,
+
+   /// stmt syntax node
    FirstStmt,
+   UnknownStmt,
    LastStmt,
+
+   /// type syntax node
    FirstType,
+   UnknownType,
    LastType,
+
+   /// collection syntax node
+   CodeBlockItemList,
+   TokenList,
+   NonEmptyTokenList,
 
    // NOTE: Unknown must be the last kind.
    Unknown,

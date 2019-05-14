@@ -19,6 +19,8 @@
 
 namespace polar::syntax {
 
+/// common syntex nodes
+/// normal node
 class DeclSyntax;
 class ExprSyntax;
 class StmtSyntax;
@@ -26,10 +28,15 @@ class UnknownDeclSyntax;
 class UnknownExprSyntax;
 class UnknownStmtSyntax;
 class CodeBlockItemSyntax;
-class CodeBlockItemListSyntax;
 class CodeBlockSyntax;
 
-using CodeBlockItemList = SyntaxCollection<SyntaxKind::CodeBlockItemList, CodeBlockItemSyntax>;
+/// collection node
+using CodeBlockItemListSyntax = SyntaxCollection<SyntaxKind::CodeBlockItemList, CodeBlockItemSyntax>;
+
+/// attribute syntax nodes
+/// collection node
+using TokenListSyntax = SyntaxCollection<SyntaxKind::TokenList, TokenSyntax>;
+using NonEmptyTokenListSyntax = SyntaxCollection<SyntaxKind::NonEmptyTokenList, TokenSyntax>;
 
 class DeclSyntax : public Syntax
 {
@@ -38,14 +45,14 @@ public:
       : Syntax(root, data)
    {}
 
-   static bool kindof(SyntaxKind kind)
+   static bool kindOf(SyntaxKind kind)
    {
       return is_decl_kind(kind);
    }
 
-   static bool classof(const Syntax *syntax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindof(syntax->getKind());
+      return kindOf(syntax->getKind());
    }
 };
 
@@ -56,14 +63,14 @@ public:
       : Syntax(root, data)
    {}
 
-   static bool kindof(SyntaxKind kind)
+   static bool kindOf(SyntaxKind kind)
    {
       return is_stmt_kind(kind);
    }
 
-   static bool classof(const Syntax *syntax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindof(syntax->getKind());
+      return kindOf(syntax->getKind());
    }
 };
 
@@ -74,14 +81,14 @@ public:
       : Syntax(root, data)
    {}
 
-   static bool kindof(SyntaxKind kind)
+   static bool kindOf(SyntaxKind kind)
    {
       return is_expr_kind(kind);
    }
 
-   static bool classof(const Syntax *syntax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindof(syntax->getKind());
+      return kindOf(syntax->getKind());
    }
 };
 
@@ -92,14 +99,14 @@ public:
       : Syntax(root, data)
    {}
 
-   static bool kindof(SyntaxKind kind)
+   static bool kindOf(SyntaxKind kind)
    {
       return SyntaxKind::UnknownDecl == kind;
    }
 
-   static bool classof(const Syntax *syntax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindof(syntax->getKind());
+      return kindOf(syntax->getKind());
    }
 };
 
@@ -110,14 +117,14 @@ public:
       : Syntax(root, data)
    {}
 
-   static bool kindof(SyntaxKind kind)
+   static bool kindOf(SyntaxKind kind)
    {
       return SyntaxKind::UnknownExpr == kind;
    }
 
-   static bool classof(const Syntax *syntax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindof(syntax->getKind());
+      return kindOf(syntax->getKind());
    }
 };
 
@@ -128,14 +135,14 @@ public:
       : Syntax(root, data)
    {}
 
-   static bool kindof(SyntaxKind kind)
+   static bool kindOf(SyntaxKind kind)
    {
       return SyntaxKind::UnknownStmt == kind;
    }
 
-   static bool classof(const Syntax *syntax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindof(syntax->getKind());
+      return kindOf(syntax->getKind());
    }
 };
 
