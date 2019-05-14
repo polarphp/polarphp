@@ -92,11 +92,11 @@ public:
    }
 };
 
-class UnknownDeclSyntax : public Syntax
+class UnknownDeclSyntax final : public DeclSyntax
 {
 public:
    UnknownDeclSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : Syntax(root, data)
+      : DeclSyntax(root, data)
    {}
 
    static bool kindOf(SyntaxKind kind)
@@ -110,11 +110,11 @@ public:
    }
 };
 
-class UnknownExprSyntax : public Syntax
+class UnknownExprSyntax final : public ExprSyntax
 {
 public:
    UnknownExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : Syntax(root, data)
+      : ExprSyntax(root, data)
    {}
 
    static bool kindOf(SyntaxKind kind)
@@ -128,16 +128,98 @@ public:
    }
 };
 
-class UnknownStmtSyntax : public Syntax
+class UnknownStmtSyntax final : public StmtSyntax
 {
 public:
    UnknownStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : Syntax(root, data)
+      : StmtSyntax(root, data)
    {}
 
    static bool kindOf(SyntaxKind kind)
    {
       return SyntaxKind::UnknownStmt == kind;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+};
+
+/// A CodeBlockItem is any Syntax node that appears on its own line inside
+/// a CodeBlock.
+class CodeBlockItemSyntax final : public Syntax
+{
+public:
+   enum Cursor : uint32_t {
+      Item,
+      Semicolon,
+      ErrorTokens
+   };
+
+public:
+   CodeBlockItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {}
+
+   /// The underlying node inside the code block.
+   Syntax getItem();
+   TokenSyntax getSemicolon();
+   std::optional<Syntax> getErrorTokens();
+
+   /// Returns a copy of the receiver with its `${child.name}` replaced.
+   /// - param newChild: The new `Item` to replace the node's
+   ///                   current `Item`, if present.
+   CodeBlockItemSyntax withItem(std::optional<Syntax> item);
+
+   /// the trailing semicolon at the end of the item.
+   CodeBlockItemSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
+   CodeBlockItemSyntax withErrorTokens(std::optional<Syntax> errorTokens);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::CodeBlockItem == kind;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+};
+
+class CodeBlockSyntax final : public Syntax
+{
+public:
+   enum Cursor : uint32_t {
+      LeftBrace,
+      Statements,
+      RightBrace
+   };
+
+public:
+   CodeBlockSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {}
+
+   TokenSyntax getLeftBrace();
+   TokenSyntax getRightBrace();
+   CodeBlockItemListSyntax getStatements();
+
+   /// Adds the provided `CodeBlockItem` to the node's `Statements`
+    /// collection.
+    /// - param element: The new `CodeBlockItem` to add to the node's
+    ///                  `Statements` collection.
+    /// - returns: A copy of the receiver with the provided `CodeBlockItem
+    ///            appended to its `Statements` collection.
+   CodeBlockSyntax addCodeBlockItem(CodeBlockItemSyntax codeBlockItem);
+
+   CodeBlockSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
+   CodeBlockSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
+   CodeBlockSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::CodeBlock == kind;
    }
 
    static bool classOf(const Syntax *syntax)
