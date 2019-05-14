@@ -15,7 +15,7 @@ namespace polar::syntax {
 
 const char* get_syntax_structure_versioning_identifier()
 {
-
+   return nullptr;
 }
 
 } // polar::syntax

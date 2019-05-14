@@ -49,6 +49,96 @@ public:
    }
 };
 
+class StmtSyntax : public Syntax
+{
+public:
+   StmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {}
+
+   static bool kindof(SyntaxKind kind)
+   {
+      return is_stmt_kind(kind);
+   }
+
+   static bool classof(const Syntax *syntax)
+   {
+      return kindof(syntax->getKind());
+   }
+};
+
+class ExprSyntax : public Syntax
+{
+public:
+   ExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {}
+
+   static bool kindof(SyntaxKind kind)
+   {
+      return is_expr_kind(kind);
+   }
+
+   static bool classof(const Syntax *syntax)
+   {
+      return kindof(syntax->getKind());
+   }
+};
+
+class UnknownDeclSyntax : public Syntax
+{
+public:
+   UnknownDeclSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {}
+
+   static bool kindof(SyntaxKind kind)
+   {
+      return SyntaxKind::UnknownDecl == kind;
+   }
+
+   static bool classof(const Syntax *syntax)
+   {
+      return kindof(syntax->getKind());
+   }
+};
+
+class UnknownExprSyntax : public Syntax
+{
+public:
+   UnknownExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {}
+
+   static bool kindof(SyntaxKind kind)
+   {
+      return SyntaxKind::UnknownExpr == kind;
+   }
+
+   static bool classof(const Syntax *syntax)
+   {
+      return kindof(syntax->getKind());
+   }
+};
+
+class UnknownStmtSyntax : public Syntax
+{
+public:
+   UnknownStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {}
+
+   static bool kindof(SyntaxKind kind)
+   {
+      return SyntaxKind::UnknownStmt == kind;
+   }
+
+   static bool classof(const Syntax *syntax)
+   {
+      return kindof(syntax->getKind());
+   }
+};
+
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_SYNTAX_NODE_COMMON_NODES_H
