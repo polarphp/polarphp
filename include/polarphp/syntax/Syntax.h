@@ -66,19 +66,9 @@ const auto cg_noParent = std::nullopt;
 /// their children.
 class Syntax
 {
-   friend struct SyntaxFactory;
-   friend class SyntaxAstMap;
-
-protected:
-   /// A strong reference to the root node of the tree in which this piece of
-   /// syntax resides.
-   const RefCountPtr<SyntaxData> m_root;
-
-   /// A raw pointer to the data representing this syntax node.
-   ///
-   /// This is mutable for being able to set cached child members, which are
-   /// lazily created.
-   mutable const SyntaxData *m_data;
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 0;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 0;
 
 public:
    Syntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
@@ -241,6 +231,20 @@ public:
    }
 
    // TODO: hasSameStructureAs ?
+
+protected:
+   /// A strong reference to the root node of the tree in which this piece of
+   /// syntax resides.
+   const RefCountPtr<SyntaxData> m_root;
+
+   /// A raw pointer to the data representing this syntax node.
+   ///
+   /// This is mutable for being able to set cached child members, which are
+   /// lazily created.
+   mutable const SyntaxData *m_data;
+private:
+   friend struct SyntaxFactory;
+   friend class SyntaxAstMap;
 };
 
 } // polar::syntax

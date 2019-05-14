@@ -12,9 +12,12 @@
 #ifndef POLARPHP_SYNTAX_KIND_ENUM_DEFS_H
 #define POLARPHP_SYNTAX_KIND_ENUM_DEFS_H
 
+#include <cstdint>
+
 namespace polar::syntax {
 
-enum class SyntaxKind {
+enum class SyntaxKind : std::uint32_t
+{
    Token,
 
    /// common syntax node

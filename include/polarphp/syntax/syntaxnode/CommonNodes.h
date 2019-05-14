@@ -32,7 +32,6 @@ class CodeBlockSyntax;
 
 /// collection node
 using CodeBlockItemListSyntax = SyntaxCollection<SyntaxKind::CodeBlockItemList, CodeBlockItemSyntax>;
-
 /// attribute syntax nodes
 /// collection node
 using TokenListSyntax = SyntaxCollection<SyntaxKind::TokenList, TokenSyntax>;
@@ -40,9 +39,6 @@ using NonEmptyTokenListSyntax = SyntaxCollection<SyntaxKind::NonEmptyTokenList, 
 
 class DeclSyntax : public Syntax
 {
-public:
-   constexpr static unsigned int CHILDREN_COUNT = 0;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 0;
 public:
    DeclSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
@@ -62,9 +58,6 @@ public:
 class StmtSyntax : public Syntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 0;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 0;
-public:
    StmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {}
@@ -83,9 +76,6 @@ public:
 class ExprSyntax : public Syntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 0;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 0;
-public:
    ExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {}
@@ -101,11 +91,26 @@ public:
    }
 };
 
-class UnknownDeclSyntax final : public DeclSyntax
+class TypeSyntax : public Syntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 0;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 0;
+   TypeSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {}
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return is_type_kind(kind);
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+};
+
+class UnknownDeclSyntax final : public DeclSyntax
+{
 public:
    UnknownDeclSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : DeclSyntax(root, data)
@@ -125,9 +130,6 @@ public:
 class UnknownExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 0;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 0;
-public:
    UnknownExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {}
@@ -145,9 +147,6 @@ public:
 
 class UnknownStmtSyntax final : public StmtSyntax
 {
-public:
-   constexpr static unsigned int CHILDREN_COUNT = 0;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 0;
 public:
    UnknownStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : StmtSyntax(root, data)
@@ -171,6 +170,7 @@ class CodeBlockItemSyntax final : public Syntax
 public:
    constexpr static unsigned int CHILDREN_COUNT = 3;
    constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
+
 public:
    enum Cursor : uint32_t
    {
@@ -231,6 +231,7 @@ class CodeBlockSyntax final : public Syntax
 public:
    constexpr static unsigned int CHILDREN_COUNT = 3;
    constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 3;
+
 public:
    enum Cursor : uint32_t
    {
@@ -263,7 +264,6 @@ public:
    /// - returns: A copy of the receiver with the provided `CodeBlockItem
    ///            appended to its `Statements` collection.
    CodeBlockSyntax addCodeBlockItem(CodeBlockItemSyntax codeBlockItem);
-
    CodeBlockSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
    CodeBlockSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
    CodeBlockSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);

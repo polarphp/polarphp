@@ -39,12 +39,6 @@ namespace polar::syntax {
 
 class TokenSyntax final : public Syntax
 {
-protected:
-   void validate() const
-   {
-      assert(getRaw()->isToken());
-   }
-
 public:
    TokenSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
@@ -110,6 +104,11 @@ public:
    static bool classof(const Syntax *syntax)
    {
       return kindOf(syntax->getKind());
+   }
+protected:
+   void validate() const
+   {
+      assert(getRaw()->isToken());
    }
 };
 

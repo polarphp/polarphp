@@ -67,9 +67,6 @@ struct SyntaxCollectionIterator
 template <SyntaxKind collectionKind, typename Element>
 class SyntaxCollection : public Syntax
 {
-   friend struct SyntaxFactory;
-   friend class Syntax;
-
 private:
    static RefCountPtr<SyntaxData>
    makeData(std::initializer_list<Element> &elements)
@@ -232,6 +229,9 @@ public:
    {
       return kindOf(syntax->getKind());
    }
+private:
+   friend struct SyntaxFactory;
+   friend class Syntax;
 };
 
 } // polar::syntax

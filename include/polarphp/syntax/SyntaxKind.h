@@ -53,7 +53,7 @@ SyntaxKind get_unknown_kind(SyntaxKind kind);
 bool parser_shall_omit_when_no_children(SyntaxKind kind);
 StringRef retrieve_syntax_kind_text(SyntaxKind kind);
 int retrieve_syntax_kind_serialization_code(SyntaxKind kind);
-
+std::pair<std::uint32_t, std::uint32_t> retrieve_syntax_kind_child_count(SyntaxKind kind);
 } // polar::syntax
 
 namespace polar::basic::bytetree {

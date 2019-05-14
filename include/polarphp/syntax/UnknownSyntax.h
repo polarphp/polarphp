@@ -38,7 +38,6 @@ namespace polar::syntax {
 /// This should not be vended by SyntaxFactory.
 class UnknownSyntax : public Syntax
 {
-   void validate() const;
 public:
    UnknownSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
@@ -48,6 +47,8 @@ public:
    {
       return syntax->isUnknown();
    }
+private:
+   void validate() const;
 };
 
 } // polar::syntax
