@@ -63,6 +63,11 @@ public:
    /// Whether a node `member` can serve as a member in a syntax collection of
    /// the given syntax collection kind.
    static bool canServeAsCollectionMember(SyntaxKind collectionKind, Syntax member);
+
+   /// make keyword token utils methods
+   static TokenSyntax makeLineKeyword(const Trivia &leadingTrivia,
+                                      const Trivia &trailingTrivia,
+                                      RefCountPtr<SyntaxArena> arena = nullptr);
 };
 
 } // polar::syntax

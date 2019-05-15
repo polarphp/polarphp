@@ -123,4 +123,12 @@ bool AbstractFactory::canServeAsCollectionMember(SyntaxKind collectionKind, Synt
    return canServeAsCollectionMemberRaw(collectionKind, member.getRaw());
 }
 
+/// make keyword token methods
+TokenSyntax AbstractFactory::makeLineKeyword(const Trivia &leadingTrivia,
+                                             const Trivia &trailingTrivia,
+                                             RefCountPtr<SyntaxArena> arena)
+{
+
+}
+
 } // polar::syntax
