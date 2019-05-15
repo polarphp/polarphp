@@ -14,6 +14,14 @@
 
 namespace polar::syntax {
 
+const std::set<SyntaxKind> CodeBlockItemSyntax::CHILD_NODE_CHOICES{
+         SyntaxKind::Decl,
+         SyntaxKind::Expr,
+         SyntaxKind::Stmt,
+         SyntaxKind::TokenList,
+         SyntaxKind::NonEmptyTokenList
+};
+
 void CodeBlockItemSyntax::validate()
 {
    auto raw = m_data->getRaw();

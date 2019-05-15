@@ -29,7 +29,8 @@ namespace basic {
 template <typename T, unsigned N, typename C>
 class SmallSetIterator
       : public IteratorFacadeBase<SmallSetIterator<T, N, C>,
-      std::forward_iterator_tag, T> {
+      std::forward_iterator_tag, T>
+{
 private:
    using SetIterType = typename std::set<T, C>::const_iterator;
    using VecIterType = typename SmallVector<T, N>::const_iterator;

@@ -40,6 +40,10 @@
 #include "polarphp/basic/adt/IntrusiveRefCountPtr.h"
 #include "polarphp/utils/RawOutStream.h"
 
+#ifdef POLAR_DEBUG_BUILD
+#  include <set>
+#endif
+
 #include <optional>
 
 namespace polar::syntax {
@@ -69,6 +73,13 @@ class Syntax
 public:
    constexpr static unsigned int CHILDREN_COUNT = 0;
    constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 0;
+
+#ifdef POLAR_DEBUG_BUILD
+   /// meta info
+   static const std::set<std::string> CHILD_TOKEN_TEXT_CHOICES;
+   static const std::set<TokenKindType> CHILD_TOKEN_CHOICES;
+   static const std::set<SyntaxKind> CHILD_NODE_CHOICES;
+#endif
 
 public:
    Syntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)

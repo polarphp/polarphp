@@ -173,7 +173,6 @@ class CodeBlockItemSyntax final : public Syntax
 public:
    constexpr static unsigned int CHILDREN_COUNT = 3;
    constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
-
 public:
    enum Cursor : uint32_t
    {
@@ -193,6 +192,10 @@ public:
       /// optional: true
       ErrorTokens
    };
+
+#ifdef POLAR_DEBUG_BUILD
+   static const std::set<SyntaxKind> CHILD_NODE_CHOICES;
+#endif
 
 public:
    CodeBlockItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
@@ -224,6 +227,7 @@ public:
    {
       return kindOf(syntax->getKind());
    }
+
 private:
    friend class CodeBlockItemSyntaxBuilder;
    void validate();
