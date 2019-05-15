@@ -13,4 +13,9 @@
 
 namespace polar::syntax {
 
+Syntax ExprSyntaxNodeFactory::makeBlankCollectionSyntax(SyntaxKind kind)
+{
+
+}
+
 } // polar::syntax

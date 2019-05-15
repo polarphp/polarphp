@@ -39,9 +39,17 @@ bool check_non_empty_token_list(SyntaxKind memberKind);
 } // canserveascollectionmemberraw
 
 namespace abstractfactorycreateraw {
+bool need_invoke_create_raw_func(SyntaxKind kind);
+/// common syntax nodes
+RefCountPtr<RawSyntax> create_code_block_item_list_raw(ArrayRef<RefCountPtr<RawSyntax>> elements,
+                                                       RefCountPtr<SyntaxArena> arena);
+RefCountPtr<RawSyntax> create_non_empty_token_list_raw(ArrayRef<RefCountPtr<RawSyntax>> elements,
+                                                       RefCountPtr<SyntaxArena> arena);
+RefCountPtr<RawSyntax> create_token_list_raw(ArrayRef<RefCountPtr<RawSyntax>> elements,
+                                             RefCountPtr<SyntaxArena> arena);
+RefCountPtr<RawSyntax> create_code_block_item_raw(ArrayRef<RefCountPtr<RawSyntax>> elements,
+                                                  RefCountPtr<SyntaxArena> arena);
 
-RefCountPtr<RawSyntax> create_decl_raw(ArrayRef<RefCountPtr<RawSyntax>> elements,
-                                       RefCountPtr<SyntaxArena> arena);
 } // abstractfactorycreateraw
 
 } // polar::syntax::internal

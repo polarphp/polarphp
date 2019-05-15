@@ -60,9 +60,18 @@ RefCountPtr<RawSyntax> AbstractFactory::createRaw(SyntaxKind kind,
                                                   RefCountPtr<SyntaxArena> arena)
 {
    using namespace internal::abstractfactorycreateraw;
+   if (!need_invoke_create_raw_func(kind)) {
+      return nullptr;
+   }
    switch (kind) {
-   case SyntaxKind::Decl:
-      return create_decl_raw(elements, arena);
+   case SyntaxKind::CodeBlockItemList:
+      return create_code_block_item_list_raw(elements, arena);
+   case SyntaxKind::TokenList:
+      return create_token_list_raw(elements, arena);
+   case SyntaxKind::NonEmptyTokenList:
+      return create_non_empty_token_list_raw(elements, arena);
+   case SyntaxKind::CodeBlockItem:
+      return create_code_block_item_raw(elements, arena);
    default:
       return nullptr;
    }
@@ -79,15 +88,6 @@ std::pair<unsigned, unsigned> AbstractFactory::countChildren(SyntaxKind kind)
       polar_unreachable("bad syntax kind.");
    }
    return countPair;
-}
-
-Syntax AbstractFactory::makeBlankCollectionSyntax(SyntaxKind kind)
-{
-   switch(kind) {
-   //   case SyntaxKind::CodeBlockItemList: return makeBlankCodeBlockItemList();
-   default: break;
-   }
-   polar_unreachable("not collection kind.");
 }
 
 /// Whether a raw node kind `memberKind` can serve as a member in a syntax

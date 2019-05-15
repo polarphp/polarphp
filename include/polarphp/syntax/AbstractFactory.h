@@ -50,9 +50,6 @@ public:
    /// between these two numbers is the number of optional children.
    static std::pair<unsigned, unsigned> countChildren(SyntaxKind kind);
 
-   static Syntax
-   makeBlankCollectionSyntax(SyntaxKind kind);
-
    /// Whether a raw node kind `memberKind` can serve as a member in a syntax
    /// collection of the given syntax collection kind.
    static bool canServeAsCollectionMemberRaw(SyntaxKind collectionKind,

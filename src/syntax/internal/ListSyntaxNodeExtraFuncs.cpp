@@ -10,36 +10,70 @@
 // Created by polarboy on 2019/05/15.
 
 #include "polarphp/syntax/internal/ListSyntaxNodeExtraFuncs.h"
+#include "polarphp/basic/adt/ArrayRef.h"
+#include "polarphp/syntax/SyntaxNodes.h"
 #include "polarphp/syntax/SyntaxKind.h"
 #include "polarphp/syntax/SyntaxArena.h"
 #include "polarphp/syntax/RawSyntax.h"
-#include "polarphp/basic/adt/ArrayRef.h"
+
 
 namespace polar::syntax::internal {
 namespace canserveascollectionmemberraw {
 
 bool check_code_block_item_list(SyntaxKind memberKind)
 {
-   return true;
+   return CodeBlockItemSyntax::kindOf(memberKind);
 }
 
 bool check_token_list(SyntaxKind memberKind)
 {
-   return true;
+   return TokenSyntax::kindOf(memberKind);
 }
 
 bool check_non_empty_token_list(SyntaxKind memberKind)
 {
-   return true;
+   return TokenSyntax::kindOf(memberKind);
 }
 
 } // canserveascollectionmemberraw
 
 namespace abstractfactorycreateraw {
 
-RefCountPtr<RawSyntax> create_decl_raw(ArrayRef<RefCountPtr<RawSyntax>> elements,
-                                       RefCountPtr<SyntaxArena> arena)
+bool need_invoke_create_raw_func(SyntaxKind kind)
 {
+   switch (kind) {
+   case SyntaxKind::CodeBlockItemList:
+   case SyntaxKind::TokenList:
+   case SyntaxKind::NonEmptyTokenList:
+   case SyntaxKind::CodeBlockItem:
+      return true;
+   default:
+      return false;
+   }
+}
+
+RefCountPtr<RawSyntax> create_code_block_item_list_raw(ArrayRef<RefCountPtr<RawSyntax>> elements,
+                                                       RefCountPtr<SyntaxArena> arena)
+{
+
+}
+
+RefCountPtr<RawSyntax> create_non_empty_token_list_raw(ArrayRef<RefCountPtr<RawSyntax>> elements,
+                                                       RefCountPtr<SyntaxArena> arena)
+{
+
+}
+
+RefCountPtr<RawSyntax> create_token_list_raw(ArrayRef<RefCountPtr<RawSyntax>> elements,
+                                             RefCountPtr<SyntaxArena> arena)
+{
+
+}
+
+RefCountPtr<RawSyntax> create_code_block_item_raw(ArrayRef<RefCountPtr<RawSyntax>> elements,
+                                                  RefCountPtr<SyntaxArena> arena)
+{
+
 }
 
 } // abstractfactorycreateraw

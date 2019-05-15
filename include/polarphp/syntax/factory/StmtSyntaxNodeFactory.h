@@ -18,7 +18,8 @@ namespace polar::syntax {
 
 class StmtSyntaxNodeFactory final : public AbstractFactory
 {
-
+public:
+   static Syntax makeBlankCollectionSyntax(SyntaxKind kind);
 };
 
 } // polar::syntax
