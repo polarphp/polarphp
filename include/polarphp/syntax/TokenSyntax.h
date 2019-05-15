@@ -101,7 +101,7 @@ public:
       return is_token_kind(kind);
    }
 
-   static bool classof(const Syntax *syntax)
+   static bool classOf(const Syntax *syntax)
    {
       return kindOf(syntax->getKind());
    }

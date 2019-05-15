@@ -552,7 +552,7 @@ public:
                       /*implicit=*/false)
    {}
 
-   static bool classof(const DeclAttribute *deeclAttribute)
+   static bool classOf(const DeclAttribute *deeclAttribute)
    {
       return deeclAttribute->getKind() == kind;
    }
@@ -731,7 +731,7 @@ public:
                           VersionTuple obsoleted
                           = VersionTuple());
 
-   static bool classof(const DeclAttribute *declAttr)
+   static bool classOf(const DeclAttribute *declAttr)
    {
       return declAttr->getKind() == DAK_Available;
    }
@@ -756,7 +756,7 @@ public:
       return static_cast<AccessLevel>(m_bits.AbstractAccessControlAttr.AccessLevel);
    }
 
-   static bool classof(const DeclAttribute *declAttr)
+   static bool classOf(const DeclAttribute *declAttr)
    {
       return declAttr->getKind() == DAK_AccessControl ||
             declAttr->getKind() == DAK_SetterAccess;
@@ -773,7 +773,7 @@ public:
                                   implicit)
    {}
 
-   static bool classof(const DeclAttribute *declAttr)
+   static bool classOf(const DeclAttribute *declAttr)
    {
       return declAttr->getKind() == DAK_AccessControl;
    }
@@ -790,7 +790,7 @@ public:
                                   implicit)
    {}
 
-   static bool classof(const DeclAttribute *declAttr)
+   static bool classOf(const DeclAttribute *declAttr)
    {
       return declAttr->getKind() == DAK_SetterAccess;
    }
@@ -815,7 +815,7 @@ public:
       return InlineKind(m_bits.InlineAttr.kind);
    }
 
-   static bool classof(const DeclAttribute *declAttr)
+   static bool classOf(const DeclAttribute *declAttr)
    {
       return declAttr->getKind() == DAK_Inline;
    }
@@ -840,7 +840,7 @@ public:
       return OptimizationMode(m_bits.OptimizeAttr.mode);
    }
 
-   static bool classof(const DeclAttribute *declAttr)
+   static bool classOf(const DeclAttribute *declAttr)
    {
       return declAttr->getKind() == DAK_Optimize;
    }
@@ -865,7 +865,7 @@ public:
       return EffectsKind(m_bits.EffectsAttr.kind);
    }
 
-   static bool classof(const DeclAttribute *declAttr)
+   static bool classOf(const DeclAttribute *declAttr)
    {
       return declAttr->getKind() == DAK_Effects;
    }
@@ -886,7 +886,7 @@ public:
 
    CharSourceRange getCommentRange() const { return CommentRange; }
 
-   static bool classof(const DeclAttribute *DA) {
+   static bool classOf(const DeclAttribute *DA) {
       return DA->getKind() == DAK_RawDocComment;
    }
 };
@@ -924,7 +924,7 @@ public:
       return m_memberNameLoc;
    }
 
-   static bool classof(const DeclAttribute *declAttr)
+   static bool classOf(const DeclAttribute *declAttr)
    {
       return declAttr->getKind() == DAK_Implements;
    }

@@ -142,7 +142,7 @@ public:
       return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::Document;
    }
@@ -168,7 +168,7 @@ public:
       return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::BlockQuote;
    }
@@ -209,7 +209,7 @@ public:
       return m_ordered;
    }
 
-   static bool classof(const MarkupAstNode *node) {
+   static bool classOf(const MarkupAstNode *node) {
       return node->getKind() == AstNodeKind::List;
    }
 
@@ -242,7 +242,7 @@ public:
       return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::Item;
    }
@@ -274,7 +274,7 @@ public:
       return {};
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::CodeBlock;
    }
@@ -303,7 +303,7 @@ public:
       return m_literalContent;
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::HTML;
    }
@@ -326,7 +326,7 @@ public:
       return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::Paragraph;
    }
@@ -359,7 +359,7 @@ public:
       return m_level;
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::Header;
    }
@@ -387,7 +387,7 @@ public:
       return {};
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::HRule;
    }
@@ -409,7 +409,7 @@ public:
       return {};
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() >= AstNodeKind::First_Inline &&
             node->getKind() <= AstNodeKind::Last_Inline;
@@ -445,7 +445,7 @@ public:
       return m_literalContent;
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::Text;
    }
@@ -479,7 +479,7 @@ public:
       return "\n";
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::SoftBreak;
    }
@@ -508,7 +508,7 @@ public:
       return "\n";
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::LineBreak;
    }
@@ -539,7 +539,7 @@ public:
       return m_literalContent;
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::Code;
    }
@@ -576,7 +576,7 @@ public:
       return m_literalContent;
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::InlineHTML;
    }
@@ -605,7 +605,7 @@ public:
       return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::Emphasis;
    }
@@ -632,7 +632,7 @@ public:
       return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::Strong;
    }
@@ -665,7 +665,7 @@ public:
       return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::Link;
    }
@@ -710,7 +710,7 @@ public:
       return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::Image;
    }
@@ -744,7 +744,7 @@ public:
       return {};
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() >= AstNodeKind::First_Private &&
             node->getKind() <= AstNodeKind::Last_Private;
@@ -791,7 +791,7 @@ public:
       return {getTrailingObjects<MarkupAstNode *>(), m_numChildren};
    }
 
-   static bool classof(const MarkupAstNode *node)
+   static bool classOf(const MarkupAstNode *node)
    {
       return node->getKind() == AstNodeKind::ParamField;
    }
@@ -825,7 +825,7 @@ private:
    return {getTrailingObjects<MarkupAstNode *>(), m_numChildren}; \
 } \
    \
-   static bool classof(const MarkupAstNode *node) { \
+   static bool classOf(const MarkupAstNode *node) { \
    return node->getKind() == AstNodeKind::Id; \
 } \
 };

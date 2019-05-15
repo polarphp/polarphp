@@ -171,7 +171,7 @@ class alignas(8) TypeRepr
    /// Is this type grammatically a type-simple?
    inline bool isSimple() const; // bottom of this file
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return true;
    }
@@ -229,12 +229,12 @@ public:
         m_range(range)
    {}
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::Error;
    }
 
-   static bool classof(const ErrorTypeRepr *type)
+   static bool classOf(const ErrorTypeRepr *type)
    {
       return true;
    }
@@ -289,12 +289,12 @@ public:
    void printAttrs(RawOutStream &outStream) const;
    void printAttrs(AstPrinter &printer, const PrintOptions &options) const;
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::Attributed;
    }
 
-   static bool classof(const AttributedTypeRepr *type)
+   static bool classOf(const AttributedTypeRepr *type)
    {
       return true;
    }
@@ -339,13 +339,13 @@ public:
    class ComponentRange;
    inline ComponentRange getComponentRange();
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::SimpleIdent  ||
             type->getKind() == TypeReprKind::GenericIdent ||
             type->getKind() == TypeReprKind::CompoundIdent;
    }
-   static bool classof(const IdentTypeRepr *type)
+   static bool classOf(const IdentTypeRepr *type)
    {
       return true;
    }
@@ -412,13 +412,13 @@ public:
       this->m_dc = dc;
    }
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::SimpleIdent ||
             type->getKind() == TypeReprKind::GenericIdent;
    }
 
-   static bool classof(const ComponentIdentTypeRepr *type)
+   static bool classOf(const ComponentIdentTypeRepr *type)
    {
       return true;
    }
@@ -450,11 +450,11 @@ public:
       polar_unreachable("should not be called dynamically");
    }
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::SimpleIdent;
    }
-   static bool classof(const SimpleIdentTypeRepr *type) { return true; }
+   static bool classOf(const SimpleIdentTypeRepr *type) { return true; }
 
 private:
    SourceLoc getStartLocImpl() const
@@ -515,12 +515,12 @@ public:
       return m_angleBrackets;
    }
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::GenericIdent;
    }
 
-   static bool classof(const GenericIdentTypeRepr *type)
+   static bool classOf(const GenericIdentTypeRepr *type)
    {
       return true;
    }
@@ -569,12 +569,12 @@ public:
                bits.CompoundIdentTypeRepr.NumComponents};
    }
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::CompoundIdent;
    }
 
-   static bool classof(const CompoundIdentTypeRepr *type)
+   static bool classOf(const CompoundIdentTypeRepr *type)
    {
       return true;
    }
@@ -717,12 +717,12 @@ public:
       return m_throwsLoc;
    }
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::Function;
    }
 
-   static bool classof(const FunctionTypeRepr *type)
+   static bool classOf(const FunctionTypeRepr *type)
    {
       return true;
    }
@@ -769,12 +769,12 @@ public:
       return m_m_brackets;
    }
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::Array;
    }
 
-   static bool classof(const ArrayTypeRepr *type)
+   static bool classOf(const ArrayTypeRepr *type)
    {
       return true;
    }
@@ -834,12 +834,12 @@ public:
       return m_colonLoc;
    }
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::Dictionary;
    }
 
-   static bool classof(const DictionaryTypeRepr *type)
+   static bool classOf(const DictionaryTypeRepr *type)
    {
       return true;
    }
@@ -886,7 +886,7 @@ public:
       return m_questionLoc;
    }
 
-   static bool classof(const TypeRepr *type) {
+   static bool classOf(const TypeRepr *type) {
       return type->getKind() == TypeReprKind::Optional;
    }
 
@@ -936,7 +936,7 @@ public:
       return m_exclamationLoc;
    }
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::ImplicitlyUnwrappedOptional;
    }
@@ -1120,12 +1120,12 @@ public:
 
    static TupleTypeRepr *createEmpty(const AstContext &context, SourceRange m_parens);
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::Tuple;
    }
 
-   static bool classof(const TupleTypeRepr *type)
+   static bool classOf(const TupleTypeRepr *type)
    {
       return true;
    }
@@ -1194,12 +1194,12 @@ public:
       return CompositionTypeRepr::create(context, {}, anyLoc, {anyLoc, anyLoc});
    }
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::Composition;
    }
 
-   static bool classof(const CompositionTypeRepr *type)
+   static bool classOf(const CompositionTypeRepr *type)
    {
       return true;
    }
@@ -1249,12 +1249,12 @@ public:
       return m_metaLoc;
    }
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::Metatype;
    }
 
-   static bool classof(const MetatypeTypeRepr *type)
+   static bool classOf(const MetatypeTypeRepr *type)
    {
       return true;
    }
@@ -1306,12 +1306,12 @@ public:
       return m_protocolLoc;
    }
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::Protocol;
    }
 
-   static bool classof(const ProtocolTypeRepr *type)
+   static bool classOf(const ProtocolTypeRepr *type)
    {
       return true;
    }
@@ -1359,12 +1359,12 @@ public:
       return m_specifierLoc;
    }
 
-   static bool classof(const TypeRepr *type) {
+   static bool classOf(const TypeRepr *type) {
       return type->getKind() == TypeReprKind::InOut ||
             type->getKind() == TypeReprKind::Shared ||
             type->getKind() == TypeReprKind::Owned;
    }
-   static bool classof(const SpecifierTypeRepr *type)
+   static bool classOf(const SpecifierTypeRepr *type)
    {
       return true;
    }
@@ -1395,12 +1395,12 @@ public:
       : SpecifierTypeRepr(TypeReprKind::InOut, m_base, inOutLoc)
    {}
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::InOut;
    }
 
-   static bool classof(const InOutTypeRepr *type)
+   static bool classOf(const InOutTypeRepr *type)
    {
       return true;
    }
@@ -1417,12 +1417,12 @@ public:
       : SpecifierTypeRepr(TypeReprKind::Shared, m_base, sharedLoc)
    {}
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::Shared;
    }
 
-   static bool classof(const SharedTypeRepr *type)
+   static bool classOf(const SharedTypeRepr *type)
    {
       return true;
    }
@@ -1439,12 +1439,12 @@ public:
       : SpecifierTypeRepr(TypeReprKind::Owned, m_base, OwnedLoc)
    {}
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::Owned;
    }
 
-   static bool classof(const OwnedTypeRepr *type)
+   static bool classOf(const OwnedTypeRepr *type)
    {
       return true;
    }
@@ -1487,12 +1487,12 @@ public:
       return m_type;
    }
 
-   static bool classof(const TypeRepr *type)
+   static bool classOf(const TypeRepr *type)
    {
       return type->getKind() == TypeReprKind::Fixed;
    }
 
-   static bool classof(const FixedTypeRepr *type)
+   static bool classOf(const FixedTypeRepr *type)
    {
       return true;
    }

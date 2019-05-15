@@ -761,7 +761,7 @@ public:
       return m_range;
    }
 
-   static bool classof(const Expr *expr)
+   static bool classOf(const Expr *expr)
    {
       return expr->getKind() == ExprKind::Error;
    }

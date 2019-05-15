@@ -239,7 +239,7 @@ public:
       : Node(NK_Null, doc, StringRef(), StringRef())
    {}
 
-   static bool classof(const Node *node)
+   static bool classOf(const Node *node)
    {
       return node->getType() == NK_Null;
    }
@@ -279,7 +279,7 @@ public:
    ///        This happens with escaped characters and multi-line literals.
    StringRef getValue(SmallVectorImpl<char> &Storage) const;
 
-   static bool classof(const Node *N) {
+   static bool classOf(const Node *N) {
       return N->getType() == NK_Scalar;
    }
 
@@ -318,7 +318,7 @@ public:
       return m_value;
    }
 
-   static bool classof(const Node *node)
+   static bool classOf(const Node *node)
    {
       return node->getType() == NK_BlockScalar;
    }
@@ -367,7 +367,7 @@ public:
       }
    }
 
-   static bool classof(const Node *node)
+   static bool classOf(const Node *node)
    {
       return node->getType() == NK_KeyValue;
    }
@@ -515,7 +515,7 @@ public:
       yaml::skip(*this);
    }
 
-   static bool classof(const Node *node)
+   static bool classOf(const Node *node)
    {
       return node->getType() == NK_Mapping;
    }
@@ -584,7 +584,7 @@ public:
       yaml::skip(*this);
    }
 
-   static bool classof(const Node *node)
+   static bool classOf(const Node *node)
    {
       return node->getType() == NK_Sequence;
    }
@@ -617,7 +617,7 @@ public:
 
    Node *getTarget();
 
-   static bool classof(const Node *node)
+   static bool classOf(const Node *node)
    {
       return node->getType() == NK_Alias;
    }

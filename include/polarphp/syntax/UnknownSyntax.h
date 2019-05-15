@@ -43,7 +43,7 @@ public:
       : Syntax(root, data)
    {}
 
-   static bool classof(const Syntax *syntax)
+   static bool classOf(const Syntax *syntax)
    {
       return syntax->isUnknown();
    }

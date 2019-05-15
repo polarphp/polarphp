@@ -124,42 +124,133 @@ bool AbstractFactory::canServeAsCollectionMember(SyntaxKind collectionKind, Synt
 }
 
 /// make syntax node utils methods
-DeclSyntax AbstractFactory::makeBlankDeclSyntax(RefCountPtr<SyntaxArena> arena)
+DeclSyntax AbstractFactory::makeBlankDecl(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::Decl, {}, SourcePresence::Present, arena);
+   return make<DeclSyntax>(raw);
+}
+
+ExprSyntax AbstractFactory::makeBlankExpr(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::Expr, {}, SourcePresence::Present, arena);
+   return make<ExprSyntax>(raw);
+}
+
+StmtSyntax AbstractFactory::makeBlankStmt(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::Stmt, {}, SourcePresence::Present, arena);
+   return make<StmtSyntax>(raw);
+}
+
+TypeSyntax AbstractFactory::makeBlankType(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::Type, {}, SourcePresence::Present, arena);
+   return make<TypeSyntax>(raw);
+}
+
+TokenSyntax AbstractFactory::makeToken(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::Token, {}, SourcePresence::Present, arena);
+   return make<TokenSyntax>(raw);
+}
+
+UnknownSyntax AbstractFactory::makeBlankUnknown(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::Unknown, {}, SourcePresence::Present, arena);
+   return make<UnknownSyntax>(raw);
+}
+
+UnknownDeclSyntax AbstractFactory::makeBlankUnknownDecl(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::UnknownDecl, {}, SourcePresence::Present, arena);
+   return make<UnknownDeclSyntax>(raw);
+}
+
+UnknownExprSyntax AbstractFactory::makeBlankUnknownExpr(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::UnknownExpr, {}, SourcePresence::Present, arena);
+   return make<UnknownExprSyntax>(raw);
+}
+
+UnknownStmtSyntax AbstractFactory::makeBlankUnknownStmt(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::UnknownStmt, {}, SourcePresence::Present, arena);
+   return make<UnknownStmtSyntax>(raw);
+}
+
+UnknownTypeSyntax AbstractFactory::makeBlankUnknownType(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::UnknownType, {}, SourcePresence::Present, arena);
+   return make<UnknownTypeSyntax>(raw);
+}
+
+CodeBlockItemSyntax AbstractFactory::makeBlankCodeBlockItem(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::CodeBlockItem, {
+                                 RawSyntax::missing(SyntaxKind::Unknown),
+                                 RawSyntax::missing(TokenKindType::T_SEMICOLON, OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON))),
+                                 nullptr
+                              }, SourcePresence::Present, arena);
+   return make<CodeBlockItemSyntax>(raw);
+}
+
+CodeBlockSyntax AbstractFactory::makeBlankCodeBlock(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::CodeBlock, {
+                                 RawSyntax::missing(TokenKindType::T_LEFT_BRACE, OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE))),
+                                 RawSyntax::missing(SyntaxKind::CodeBlockItemList),
+                                 RawSyntax::missing(TokenKindType::T_RIGHT_BRACE, OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)))
+                              }, SourcePresence::Present, arena);
+   return make<CodeBlockSyntax>(raw);
+}
+
+CodeBlockItemListSyntax AbstractFactory::makeBlankCodeBlockItemList(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::CodeBlockItemList, {}, SourcePresence::Present, arena);
+   return make<CodeBlockItemListSyntax>(raw);
+}
+
+TokenListSyntax AbstractFactory::makeBlankTokenList(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::TokenList, {}, SourcePresence::Present, arena);
+   return make<TokenListSyntax>(raw);
+}
+
+NonEmptyTokenListSyntax AbstractFactory::makeBlankNonEmptyTokenList(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::NonEmptyTokenList, {}, SourcePresence::Present, arena);
+   return make<NonEmptyTokenListSyntax>(raw);
+}
+
+/// make syntax collection node
+CodeBlockItemListSyntax AbstractFactory::makeCodeBlockItemList(const std::vector<CodeBlockItemSyntax> &elements,
+                                                               RefCountPtr<SyntaxArena> arena)
 {
 
 }
 
-ExprSyntax AbstractFactory::makeBlankExprSyntax(RefCountPtr<SyntaxArena> arena)
+TokenListSyntax AbstractFactory::makeTokenList(const std::vector<TokenSyntax> &elements,
+                                               RefCountPtr<SyntaxArena> arena)
 {
 
 }
 
-StmtSyntax AbstractFactory::makeBlankStmtSyntax(RefCountPtr<SyntaxArena> arena)
+NonEmptyTokenListSyntax AbstractFactory::makeNonEmptyTokenList(const std::vector<TokenSyntax> &elements,
+                                                               RefCountPtr<SyntaxArena> arena)
 {
 
 }
 
-TypeSyntax AbstractFactory::makeBlankTypeSyntax(RefCountPtr<SyntaxArena> arena)
+/// make has children syntax node
+
+CodeBlockItemSyntax AbstractFactory::makeCodeBlockItem(Syntax item, TokenSyntax semicolon,
+                                                       std::optional<TokenSyntax> errorTokens, RefCountPtr<SyntaxArena> arena)
 {
 
 }
 
-UnknownSyntax AbstractFactory::makeBlankUnknownSyntax(RefCountPtr<SyntaxArena> arena)
-{
-
-}
-
-UnknownDeclSyntax AbstractFactory::makeBlankUnknownDeclSyntax(RefCountPtr<SyntaxArena> arena)
-{
-
-}
-
-UnknownExprSyntax AbstractFactory::makeBlankUnknownExprSyntax(RefCountPtr<SyntaxArena> arena)
-{
-
-}
-
-UnknownStmtSyntax AbstractFactory::makeBlankUnknownStmtSyntax(RefCountPtr<SyntaxArena> arena)
+CodeBlockSyntax AbstractFactory::makeCodeBlock(TokenSyntax leftBrace, CodeBlockItemListSyntax statements,
+                                               TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena)
 {
 
 }

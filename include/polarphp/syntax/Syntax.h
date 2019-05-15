@@ -114,7 +114,7 @@ public:
    template <typename T>
    bool is() const
    {
-      return T::classof(this);
+      return T::classOf(this);
    }
 
    /// Get the m_data for this Syntax node.
@@ -212,7 +212,7 @@ public:
       return true;
    }
 
-   static bool classof(const Syntax *synax)
+   static bool classOf(const Syntax *synax)
    {
       // Trivially true.
       return true;

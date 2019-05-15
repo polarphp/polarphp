@@ -231,7 +231,7 @@ public:
       return {getTrailingObjects<AstNode>(), bits.BraceStmt.NumElements};
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::Brace;
    }
@@ -281,7 +281,7 @@ public:
       m_result = e;
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::Return;
    }
@@ -322,7 +322,7 @@ public:
       return {getTrailingObjects<Expr*>(), bits.YieldStmt.NumYields};
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::Yield;
    }
@@ -399,7 +399,7 @@ public:
    /// Dig the original user's body of the defer out for AST fidelity.
    BraceStmt *getBodyAsWritten() const;
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::Defer;
    }
@@ -657,7 +657,7 @@ public:
    /// similar to context's switch to allow different behavior for "break".
    bool requiresLabelOnJump() const;
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() >= StmtKind::First_LabeledStmt &&
             stmt->getKind() <= StmtKind::Last_LabeledStmt;
@@ -711,7 +711,7 @@ public:
       m_body = stmt;
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::Do;
    }
@@ -784,7 +784,7 @@ public:
       m_guardExpr = guard;
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::Catch;
    }
@@ -849,7 +849,7 @@ public:
    /// errors out of its catch block(s).
    bool isSyntacticallyExhaustive() const;
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::DoCatch;
    }
@@ -894,7 +894,7 @@ public:
 
    void setCond(StmtCondition e);
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() >= StmtKind::First_LabeledConditionalStmt &&
             stmt->getKind() <= StmtKind::Last_LabeledConditionalStmt;
@@ -967,7 +967,7 @@ public:
    }
 
    // Implement isa/cast/dyncast/etc.
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::If;
    }
@@ -1023,7 +1023,7 @@ public:
    }
 
    // Implement isa/cast/dyncast/etc.
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::Guard;
    }
@@ -1066,7 +1066,7 @@ public:
       m_body = stmt;
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::While;
    }
@@ -1119,7 +1119,7 @@ public:
       m_cond = expr;
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::RepeatWhile;
    }
@@ -1208,7 +1208,7 @@ public:
       return m_body->getEndLoc();
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::ForEach;
    }
@@ -1350,7 +1350,7 @@ public:
       return m_unknownAttrLoc.isValid();
    }
 
-   static bool classof(const Stmt *S) { return S->getKind() == StmtKind::Case; }
+   static bool classOf(const Stmt *S) { return S->getKind() == StmtKind::Case; }
 private:
    friend class TrailingObjects;
    SourceLoc m_unknownAttrLoc;
@@ -1449,7 +1449,7 @@ public:
       return AsCaseStmtRange(getRawCases(), AsCaseStmtWithSkippingNonCaseStmts());
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::Switch;
    }
@@ -1533,7 +1533,7 @@ public:
       return (m_targetLoc.isValid() ? m_targetLoc : m_loc);
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::Break;
    }
@@ -1603,7 +1603,7 @@ public:
       return (m_targetLoc.isValid() ? m_targetLoc : m_loc);
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::Continue;
    }
@@ -1663,7 +1663,7 @@ public:
       m_fallthroughDest = context;
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::Fallthrough;
    }
@@ -1695,7 +1695,7 @@ public:
       return SourceRange(m_returnLoc, m_nilLoc);
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::Fail;
    }
@@ -1740,7 +1740,7 @@ public:
       m_subExpr = subExpr;
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::Throw;
    }
@@ -1779,7 +1779,7 @@ public:
       m_condition = condition;
    }
 
-   static bool classof(const Stmt *stmt)
+   static bool classOf(const Stmt *stmt)
    {
       return stmt->getKind() == StmtKind::PoundAssert;
    }

@@ -785,7 +785,7 @@ public:
          return m_contents.end();
       }
 
-      static bool classof(const Entry *entry)
+      static bool classOf(const Entry *entry)
       {
          return entry->getKind() == EK_Directory;
       }
@@ -823,7 +823,7 @@ public:
          return m_useName;
       }
 
-      static bool classof(const Entry *entry)
+      static bool classOf(const Entry *entry)
       {
          return entry->getKind() == EK_File;
       }

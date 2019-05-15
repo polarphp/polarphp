@@ -259,7 +259,7 @@ bool IterableDeclContext::wasDeserialized() const
    return false;
 }
 
-bool IterableDeclContext::classof(const Decl *D)
+bool IterableDeclContext::classOf(const Decl *D)
 {
    return false;
 }

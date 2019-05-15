@@ -1574,7 +1574,7 @@ private:
       {}
       virtual ~HNode() = default;
 
-      static bool classof(const HNode *)
+      static bool classOf(const HNode *)
       {
          return true;
       }
@@ -1590,12 +1590,12 @@ private:
       EmptyHNode(Node *node) : HNode(node)
       {}
 
-      static bool classof(const HNode *node)
+      static bool classOf(const HNode *node)
       {
-         return NullNode::classof(node->m_node);
+         return NullNode::classOf(node->m_node);
       }
 
-      static bool classof(const EmptyHNode *)
+      static bool classOf(const EmptyHNode *)
       {
          return true;
       }
@@ -1611,13 +1611,13 @@ private:
 
       StringRef value() const { return m_value; }
 
-      static bool classof(const HNode *node)
+      static bool classOf(const HNode *node)
       {
-         return ScalarNode::classof(node->m_node) ||
-               BlockScalarNode::classof(node->m_node);
+         return ScalarNode::classOf(node->m_node) ||
+               BlockScalarNode::classOf(node->m_node);
       }
 
-      static bool classof(const ScalarHNode *)
+      static bool classOf(const ScalarHNode *)
       {
          return true;
       }
@@ -1634,12 +1634,12 @@ private:
       MapHNode(Node *node) : HNode(node)
       {}
 
-      static bool classof(const HNode *node)
+      static bool classOf(const HNode *node)
       {
-         return MappingNode::classof(node->m_node);
+         return MappingNode::classOf(node->m_node);
       }
 
-      static bool classof(const MapHNode *)
+      static bool classOf(const MapHNode *)
       {
          return true;
       }
@@ -1658,12 +1658,12 @@ private:
       SequenceHNode(Node *node) : HNode(node)
       {}
 
-      static bool classof(const HNode *node)
+      static bool classOf(const HNode *node)
       {
-         return SequenceNode::classof(node->m_node);
+         return SequenceNode::classOf(node->m_node);
       }
 
-      static bool classof(const SequenceHNode *)
+      static bool classOf(const SequenceHNode *)
       {
          return true;
       }

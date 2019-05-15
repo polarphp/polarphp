@@ -650,7 +650,7 @@ public:
       return (std::string(indent, ' ') + m_stat.getName() + "\n").getStr();
    }
 
-   static bool classof(const InMemoryNode *N)
+   static bool classOf(const InMemoryNode *N)
    {
       return N->getKind() == IME_File;
    }
@@ -679,7 +679,7 @@ public:
             m_resolvedFile.toString(0);
    }
 
-   static bool classof(const InMemoryNode *node)
+   static bool classOf(const InMemoryNode *node)
    {
       return node->getKind() == IME_HardLink;
    }
@@ -777,7 +777,7 @@ public:
       return result;
    }
 
-   static bool classof(const InMemoryNode *N)
+   static bool classOf(const InMemoryNode *N)
    {
       return N->getKind() == IME_Directory;
    }

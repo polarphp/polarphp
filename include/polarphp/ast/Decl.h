@@ -1692,7 +1692,7 @@ public:
       return m_kindLoc;
    }
 
-   static bool classof(const Decl *decl)
+   static bool classOf(const Decl *decl)
    {
       return decl->getKind() == DeclKind::Import;
    }
@@ -1732,15 +1732,15 @@ public:
 
    SourceRange getSourceRange() const;
 
-   static bool classof(const Decl *decl)
+   static bool classOf(const Decl *decl)
    {
       return decl->getKind() == DeclKind::TopLevelCode;
    }
 
-   static bool classof(const DeclContext *context)
+   static bool classOf(const DeclContext *context)
    {
       if (auto decl = context->getAsDecl()) {
-         return classof(decl);
+         return classOf(decl);
       }
       return false;
    }
@@ -1761,7 +1761,7 @@ public:
                                    parent)
    {}
 
-   static bool classof(const DeclContext *declContext)
+   static bool classOf(const DeclContext *declContext)
    {
       //      if (auto ldc = dyn_cast<SerializedLocalDeclContext>(declContext)) {
       //         return ldc->getLocalDeclContextKind() ==
@@ -2117,7 +2117,7 @@ public:
    /// modifier.
    SourceLoc getAttributeInsertionLoc(bool forModifier) const;
 
-   static bool classof(const Decl *decl)
+   static bool classOf(const Decl *decl)
    {
       return decl->getKind() >= DeclKind::First_ValueDecl &&
             decl->getKind() <= DeclKind::Last_ValueDecl;
@@ -2509,7 +2509,7 @@ public:
 //   bool exportsPropertyDescriptor() const;
 
 //   // Implement isa/cast/dyncast/etc.
-//   static bool classof(const Decl *D) {
+//   static bool classOf(const Decl *D) {
 //      return D->getKind() >= DeclKind::First_AbstractStorageDecl &&
 //            D->getKind() <= DeclKind::Last_AbstractStorageDecl;
 //   }
@@ -2792,7 +2792,7 @@ public:
    bool isSelfParameter() const;
 
    // Implement isa/cast/dyncast/etc.
-   static bool classof(const Decl *D)
+   static bool classOf(const Decl *D)
    {
       return D->getKind() == DeclKind::Var || D->getKind() == DeclKind::Param;
    }
@@ -2940,7 +2940,7 @@ public:
    SourceRange getSourceRange() const;
 
    // Implement isa/cast/dyncast/etc.
-   static bool classof(const Decl *D) {
+   static bool classOf(const Decl *D) {
       return D->getKind() == DeclKind::Param;
    }
 };

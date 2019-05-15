@@ -1195,7 +1195,7 @@ public:
    }
 
    // Implement isa/cast/dyncast/etc.
-   static bool classof(const TypeBase *type)
+   static bool classOf(const TypeBase *type)
    {
       return type->getKind() >= TypeKind::First_AnyGenericType &&
             type->getKind() <= TypeKind::Last_AnyGenericType;
@@ -1225,7 +1225,7 @@ public:
    }
 
    // Implement isa/cast/dyncast/etc.
-   static bool classof(const TypeBase *type)
+   static bool classOf(const TypeBase *type)
    {
       return type->getKind() >= TypeKind::First_NominalOrBoundGenericNominalType &&
             type->getKind() <= TypeKind::Last_NominalOrBoundGenericNominalType;
@@ -1272,7 +1272,7 @@ public:
    }
 
    // Implement isa/cast/dyncast/etc.
-   static bool classof(const TypeBase *type)
+   static bool classOf(const TypeBase *type)
    {
       return type->getKind() == TypeKind::Error;
    }
@@ -1295,7 +1295,7 @@ class UnresolvedType : public TypeBase
 
 public:
    // Implement isa/cast/dyncast/etc.
-   static bool classof(const TypeBase *type)
+   static bool classOf(const TypeBase *type)
    {
       return type->getKind() == TypeKind::Unresolved;
    }
@@ -1313,7 +1313,7 @@ protected:
    {}
 
 public:
-   static bool classof(const TypeBase *type)
+   static bool classOf(const TypeBase *type)
    {
       return type->getKind() >= TypeKind::First_BuiltinType &&
             type->getKind() <= TypeKind::Last_BuiltinType;
@@ -1782,7 +1782,7 @@ public:
    void printParams(AstPrinter &printer, const PrintOptions &printOpts) const;
 
    // Implement isa/cast/dyncast/etc.
-   static bool classof(const TypeBase *T)
+   static bool classOf(const TypeBase *T)
    {
       return T->getKind() >= TypeKind::First_AnyFunctionType &&
             T->getKind() <= TypeKind::Last_AnyFunctionType;
@@ -1844,7 +1844,7 @@ public:
                        ExtInfo info);
 
    // Implement isa/cast/dyncast/etc.
-   static bool classof(const TypeBase *T)
+   static bool classOf(const TypeBase *T)
    {
       return T->getKind() == TypeKind::Function;
    }
@@ -1942,7 +1942,7 @@ public:
                        ExtInfo info);
 
    // Implement isa/cast/dyncast/etc.
-   static bool classof(const TypeBase *T)
+   static bool classOf(const TypeBase *T)
    {
       return T->getKind() == TypeKind::GenericFunction;
    }

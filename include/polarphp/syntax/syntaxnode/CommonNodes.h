@@ -24,9 +24,11 @@ namespace polar::syntax {
 class DeclSyntax;
 class ExprSyntax;
 class StmtSyntax;
+class TypeSyntax;
 class UnknownDeclSyntax;
 class UnknownExprSyntax;
 class UnknownStmtSyntax;
+class UnknowTypeSyntax;
 class CodeBlockItemSyntax;
 class CodeBlockSyntax;
 
@@ -158,6 +160,24 @@ public:
    static bool kindOf(SyntaxKind kind)
    {
       return SyntaxKind::UnknownStmt == kind;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+};
+
+class UnknownTypeSyntax final : public TypeSyntax
+{
+public:
+   UnknownTypeSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : TypeSyntax(root, data)
+   {}
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::UnknownType == kind;
    }
 
    static bool classOf(const Syntax *syntax)

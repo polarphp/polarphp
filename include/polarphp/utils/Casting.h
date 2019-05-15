@@ -71,7 +71,7 @@ struct IsaImpl
 {
    static inline bool doit(const From &value)
    {
-      return To::classof(&value);
+      return To::classOf(&value);
    }
 };
 

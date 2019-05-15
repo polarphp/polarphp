@@ -225,7 +225,7 @@ public:
       return kind == collectionKind;
    }
 
-   static bool classof(const Syntax *syntax)
+   static bool classOf(const Syntax *syntax)
    {
       return kindOf(syntax->getKind());
    }

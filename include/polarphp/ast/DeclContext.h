@@ -580,7 +580,7 @@ class alignas(1 << DeclContextAlignInBits) DeclContext
                       unsigned Alignment = alignof(DeclContext));
 
    // Some Decls are DeclContexts, but not all. See swift/Ast/Decl.h
-   static bool classof(const Decl *D);
+   static bool classOf(const Decl *D);
 };
 
 /// SerializedLocalDeclContext - the base class for DeclContexts that were
@@ -606,7 +606,7 @@ public:
       return static_cast<LocalDeclContextKind>(m_localKind);
    }
 
-   static bool classof(const DeclContext *DC)
+   static bool classOf(const DeclContext *DC)
    {
       return DC->getContextKind() == DeclContextKind::SerializedLocal;
    }
@@ -778,7 +778,7 @@ public:
    }
 
    // Some Decls are IterableDeclContexts, but not all.
-   static bool classof(const Decl *D);
+   static bool classOf(const Decl *D);
 
 private:
    /// Add a member to the list for iteration purposes, but do not notify the

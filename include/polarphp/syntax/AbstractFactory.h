@@ -65,14 +65,36 @@ public:
    static bool canServeAsCollectionMember(SyntaxKind collectionKind, Syntax member);
 
    /// make syntax node utils methods
-   static DeclSyntax makeBlankDeclSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ExprSyntax makeBlankExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static StmtSyntax makeBlankStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static TypeSyntax makeBlankTypeSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static UnknownSyntax makeBlankUnknownSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static UnknownDeclSyntax makeBlankUnknownDeclSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static UnknownExprSyntax makeBlankUnknownExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static UnknownStmtSyntax makeBlankUnknownStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
+   ///
+   static DeclSyntax makeBlankDecl(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ExprSyntax makeBlankExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static StmtSyntax makeBlankStmt(RefCountPtr<SyntaxArena> arena = nullptr);
+   static TypeSyntax makeBlankType(RefCountPtr<SyntaxArena> arena = nullptr);
+   static TokenSyntax makeToken(RefCountPtr<SyntaxArena> arena = nullptr);
+   static UnknownSyntax makeBlankUnknown(RefCountPtr<SyntaxArena> arena = nullptr);
+   static UnknownDeclSyntax makeBlankUnknownDecl(RefCountPtr<SyntaxArena> arena = nullptr);
+   static UnknownExprSyntax makeBlankUnknownExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static UnknownStmtSyntax makeBlankUnknownStmt(RefCountPtr<SyntaxArena> arena = nullptr);
+   static UnknownTypeSyntax makeBlankUnknownType(RefCountPtr<SyntaxArena> arena = nullptr);
+   static CodeBlockItemSyntax makeBlankCodeBlockItem(RefCountPtr<SyntaxArena> arena = nullptr);
+   static CodeBlockSyntax makeBlankCodeBlock(RefCountPtr<SyntaxArena> arena = nullptr);
+   static CodeBlockItemListSyntax makeBlankCodeBlockItemList(RefCountPtr<SyntaxArena> arena = nullptr);
+   static TokenListSyntax makeBlankTokenList(RefCountPtr<SyntaxArena> arena = nullptr);
+   static NonEmptyTokenListSyntax makeBlankNonEmptyTokenList(RefCountPtr<SyntaxArena> arena = nullptr);
+
+   /// make syntax collection node
+   ///
+   static CodeBlockItemListSyntax makeCodeBlockItemList(const std::vector<CodeBlockItemSyntax> &elements,
+                                                        RefCountPtr<SyntaxArena> arena = nullptr);
+   static TokenListSyntax makeTokenList(const std::vector<TokenSyntax> &elements,
+                                        RefCountPtr<SyntaxArena> arena = nullptr);
+   static NonEmptyTokenListSyntax makeNonEmptyTokenList(const std::vector<TokenSyntax> &elements,
+                                                        RefCountPtr<SyntaxArena> arena = nullptr);
+
+   static CodeBlockItemSyntax makeCodeBlockItem(Syntax item, TokenSyntax semicolon,
+                                                std::optional<TokenSyntax> errorTokens, RefCountPtr<SyntaxArena> arena = nullptr);
+   static CodeBlockSyntax makeCodeBlock(TokenSyntax leftBrace, CodeBlockItemListSyntax statements,
+                                        TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);
 
    /// make keyword token utils methods
    static TokenSyntax makeLineKeyword(const Trivia &leadingTrivia,

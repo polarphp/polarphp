@@ -128,7 +128,7 @@ public:
 
    void print(RawOutStream &outStream, unsigned indent) const;
 
-   static bool classof(const AvailabilitySpec *spec)
+   static bool classOf(const AvailabilitySpec *spec)
    {
       return spec->getKind() == AvailabilitySpecKind::PlatformVersionConstraint;
    }
@@ -191,7 +191,7 @@ public:
 
    void print(RawOutStream &outStream, unsigned indent) const;
 
-   static bool classof(const AvailabilitySpec *spec)
+   static bool classOf(const AvailabilitySpec *spec)
    {
       return spec->getKind() == AvailabilitySpecKind::LanguageVersionConstraint ||
             spec->getKind() == AvailabilitySpecKind::PackageDescriptionVersionConstraint;
@@ -235,7 +235,7 @@ public:
 
    void print(RawOutStream &outStream, unsigned indent) const;
 
-   static bool classof(const AvailabilitySpec *spec)
+   static bool classOf(const AvailabilitySpec *spec)
    {
       return spec->getKind() == AvailabilitySpecKind::OtherPlatform;
    }

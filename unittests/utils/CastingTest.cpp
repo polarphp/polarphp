@@ -39,7 +39,7 @@ private:
 struct foo
 {
    void ext() const;
-   /*  static bool classof(const bar *X) {
+   /*  static bool classOf(const bar *X) {
     cerr << "Classof: " << X << "\n";
     return true;
     }*/
@@ -52,7 +52,7 @@ struct base
 
 struct derived : public base
 {
-   static bool classof(const base *B) { return true; }
+   static bool classOf(const base *B) { return true; }
 };
 
 template <> struct IsaImpl<foo, bar>
@@ -273,7 +273,7 @@ namespace inferred_upcasting {
 
 class Base {
 public:
-   // No classof. We are testing that the upcast is inferred.
+   // No classOf. We are testing that the upcast is inferred.
    Base() {}
 };
 
@@ -282,7 +282,7 @@ public:
    Derived() {}
 };
 
-// Even with no explicit classof() in Base, we should still be able to cast
+// Even with no explicit classOf() in Base, we should still be able to cast
 // Derived to its base class.
 TEST(CastingTest, testUpcastIsInferred) {
    Derived D;
@@ -298,14 +298,14 @@ TEST(CastingTest, testUpcastIsInferred) {
 class UseInferredUpcast {
 public:
    int Dummy;
-   static bool classof(const UseInferredUpcast *) {
+   static bool classOf(const UseInferredUpcast *) {
       return false;
    }
 };
 
 TEST(CastingTest, testInferredUpcastTakesPrecedence) {
    UseInferredUpcast UIU;
-   // Since the explicit classof() returns false, this will fail if the
+   // Since the explicit classOf() returns false, this will fail if the
    // explicit one is used.
    EXPECT_TRUE(isa<UseInferredUpcast>(&UIU));
 }
@@ -328,7 +328,7 @@ struct Base {
 
 struct Derived : Base {
    Derived() : Base(true) {}
-   static bool classof(const Base *B) { return B->IsDerived; }
+   static bool classOf(const Base *B) { return B->IsDerived; }
 };
 
 class PTy {

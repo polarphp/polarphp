@@ -2751,20 +2751,20 @@ struct Scalar : Poly {
    Scalar(bool BoolValue)
       : Poly(NK_Scalar), SKind(SK_Bool), BoolValue(BoolValue) {}
 
-   static bool classof(const Poly *N) { return N->getKind() == NK_Scalar; }
+   static bool classOf(const Poly *N) { return N->getKind() == NK_Scalar; }
 };
 
 struct Seq : Poly, std::vector<std::unique_ptr<Poly>> {
    Seq() : Poly(NK_Seq) {}
 
-   static bool classof(const Poly *N) { return N->getKind() == NK_Seq; }
+   static bool classOf(const Poly *N) { return N->getKind() == NK_Seq; }
 };
 
 struct Map : Poly, StringMap<std::unique_ptr<Poly>>
 {
    Map() : Poly(NK_Map) {}
 
-   static bool classof(const Poly *N) { return N->getKind() == NK_Map; }
+   static bool classOf(const Poly *N) { return N->getKind() == NK_Map; }
 };
 
 namespace polar {
