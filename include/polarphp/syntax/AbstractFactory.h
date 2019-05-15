@@ -64,6 +64,16 @@ public:
    /// the given syntax collection kind.
    static bool canServeAsCollectionMember(SyntaxKind collectionKind, Syntax member);
 
+   /// make syntax node utils methods
+   static DeclSyntax makeBlankDeclSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ExprSyntax makeBlankExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
+   static StmtSyntax makeBlankStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
+   static TypeSyntax makeBlankTypeSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
+   static UnknownSyntax makeBlankUnknownSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
+   static UnknownDeclSyntax makeBlankUnknownDeclSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
+   static UnknownExprSyntax makeBlankUnknownExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
+   static UnknownStmtSyntax makeBlankUnknownStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
+
    /// make keyword token utils methods
    static TokenSyntax makeLineKeyword(const Trivia &leadingTrivia,
                                       const Trivia &trailingTrivia,

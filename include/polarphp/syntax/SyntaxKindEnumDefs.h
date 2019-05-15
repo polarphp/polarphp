@@ -57,7 +57,6 @@ enum class SyntaxKind : std::uint32_t
    Unknown,
 };
 
-
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_KIND_ENUM_DEFS_H

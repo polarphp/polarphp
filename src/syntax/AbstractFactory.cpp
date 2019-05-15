@@ -123,7 +123,49 @@ bool AbstractFactory::canServeAsCollectionMember(SyntaxKind collectionKind, Synt
    return canServeAsCollectionMemberRaw(collectionKind, member.getRaw());
 }
 
+/// make syntax node utils methods
+DeclSyntax AbstractFactory::makeBlankDeclSyntax(RefCountPtr<SyntaxArena> arena)
+{
+
+}
+
+ExprSyntax AbstractFactory::makeBlankExprSyntax(RefCountPtr<SyntaxArena> arena)
+{
+
+}
+
+StmtSyntax AbstractFactory::makeBlankStmtSyntax(RefCountPtr<SyntaxArena> arena)
+{
+
+}
+
+TypeSyntax AbstractFactory::makeBlankTypeSyntax(RefCountPtr<SyntaxArena> arena)
+{
+
+}
+
+UnknownSyntax AbstractFactory::makeBlankUnknownSyntax(RefCountPtr<SyntaxArena> arena)
+{
+
+}
+
+UnknownDeclSyntax AbstractFactory::makeBlankUnknownDeclSyntax(RefCountPtr<SyntaxArena> arena)
+{
+
+}
+
+UnknownExprSyntax AbstractFactory::makeBlankUnknownExprSyntax(RefCountPtr<SyntaxArena> arena)
+{
+
+}
+
+UnknownStmtSyntax AbstractFactory::makeBlankUnknownStmtSyntax(RefCountPtr<SyntaxArena> arena)
+{
+
+}
+
 /// make keyword token methods
+///
 TokenSyntax AbstractFactory::makeLineKeyword(const Trivia &leadingTrivia,
                                              const Trivia &trailingTrivia,
                                              RefCountPtr<SyntaxArena> arena)
