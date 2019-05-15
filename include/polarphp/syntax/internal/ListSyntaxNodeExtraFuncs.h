@@ -13,21 +13,37 @@
 #define POLARPHP_INTERNAL_LIST_SYNTAX_NODE_EXTRA_FUNCS_H
 
 #include <cstdint>
+#include "polarphp/syntax/References.h"
 
 namespace polar::syntax {
 enum class SyntaxKind : std::uint32_t;
+class RawSyntax;
+class SyntaxArena;
 } // polar::syntax
 
-namespace polar::syntax::internal {
-namespace canserveascollectionmemberraw {
+namespace polar::basic {
+template<typename T>
+class ArrayRef;
+} // polar::basic
 
-using polar::syntax::SyntaxKind;
+namespace polar::syntax::internal {
+
+using polar::basic::ArrayRef;
+
+namespace canserveascollectionmemberraw {
 
 bool check_code_block_item_list(SyntaxKind memberKind);
 bool check_token_list(SyntaxKind memberKind);
 bool check_non_empty_token_list(SyntaxKind memberKind);
 
-}
+} // canserveascollectionmemberraw
+
+namespace abstractfactorycreateraw {
+
+RefCountPtr<RawSyntax> create_decl_raw(ArrayRef<RefCountPtr<RawSyntax>> elements,
+                                       RefCountPtr<SyntaxArena> arena);
+} // abstractfactorycreateraw
+
 } // polar::syntax::internal
 
 #endif // POLARPHP_INTERNAL_LIST_SYNTAX_NODE_EXTRA_FUNCS_H

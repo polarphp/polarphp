@@ -10,6 +10,10 @@
 // Created by polarboy on 2019/05/15.
 
 #include "polarphp/syntax/internal/ListSyntaxNodeExtraFuncs.h"
+#include "polarphp/syntax/SyntaxKind.h"
+#include "polarphp/syntax/SyntaxArena.h"
+#include "polarphp/syntax/RawSyntax.h"
+#include "polarphp/basic/adt/ArrayRef.h"
 
 namespace polar::syntax::internal {
 namespace canserveascollectionmemberraw {
@@ -30,4 +34,13 @@ bool check_non_empty_token_list(SyntaxKind memberKind)
 }
 
 } // canserveascollectionmemberraw
+
+namespace abstractfactorycreateraw {
+
+RefCountPtr<RawSyntax> create_decl_raw(ArrayRef<RefCountPtr<RawSyntax>> elements,
+                                       RefCountPtr<SyntaxArena> arena)
+{
+}
+
+} // abstractfactorycreateraw
 } // polar::syntax::internal

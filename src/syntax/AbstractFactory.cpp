@@ -43,14 +43,29 @@ std::optional<Syntax> AbstractFactory::createSyntax(SyntaxKind kind,
                                                     ArrayRef<Syntax> elements,
                                                     RefCountPtr<SyntaxArena> arena)
 {
-
+   std::vector<RefCountPtr<RawSyntax>> layout;
+   layout.reserve(elements.size());
+   for (auto &e : elements) {
+      layout.emplace_back(e.getRaw());
+   }
+   if (auto raw = createRaw(kind, layout, arena)) {
+      return make<Syntax>(raw);
+   } else {
+      return std::nullopt;
+   }
 }
 
 RefCountPtr<RawSyntax> AbstractFactory::createRaw(SyntaxKind kind,
                                                   ArrayRef<RefCountPtr<RawSyntax>> elements,
                                                   RefCountPtr<SyntaxArena> arena)
 {
-
+   using namespace internal::abstractfactorycreateraw;
+   switch (kind) {
+   case SyntaxKind::Decl:
+      return create_decl_raw(elements, arena);
+   default:
+      return nullptr;
+   }
 }
 
 /// Count the number of children for a given syntax node kind,
@@ -89,7 +104,7 @@ bool AbstractFactory::canServeAsCollectionMemberRaw(SyntaxKind collectionKind,
    case SyntaxKind::NonEmptyTokenList:
       return check_non_empty_token_list(memberKind);
    default:
-     polar_unreachable("Not collection kind.");
+      polar_unreachable("Not collection kind.");
    }
 }
 
