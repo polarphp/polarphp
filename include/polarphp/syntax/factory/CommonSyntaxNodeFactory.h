@@ -12,13 +12,14 @@
 #ifndef POLARPHP_SYNTAX_FACTORY_COMMON_SYNTAX_NODE_FACTORY_H
 #define POLARPHP_SYNTAX_FACTORY_COMMON_SYNTAX_NODE_FACTORY_H
 
-#include "polarphp/syntax/SyntaxNodes.h"
-#include "polarphp/syntax/Trivia.h"
-#include "polarphp/basic/adt/ArrayRef.h"
-
-#include <vector>
+#include "polarphp/syntax/AbstractFactory.h"
 
 namespace polar::syntax {
+
+class CommonSyntaxNodeFactory final : public AbstractFactory
+{
+
+};
 
 } // polar::syntax
 

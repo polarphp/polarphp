@@ -17,7 +17,7 @@
 
 namespace polar::syntax {
 
-
+class SyntaxArena;
 
 } // polar::syntax
 

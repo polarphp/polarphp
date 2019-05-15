@@ -103,7 +103,7 @@ void CodeBlockSyntax::validate()
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == 3);
+   assert(raw->getLayout().size() == CodeBlockSyntax::CHILDREN_COUNT);
 }
 
 TokenSyntax CodeBlockSyntax::getLeftBrace()
