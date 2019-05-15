@@ -30,11 +30,14 @@ class UnknownStmtSyntax;
 class CodeBlockItemSyntax;
 class CodeBlockSyntax;
 
-/// collection node
+/// type: SyntaxCollection
+/// element type: CodeBlockItem
 using CodeBlockItemListSyntax = SyntaxCollection<SyntaxKind::CodeBlockItemList, CodeBlockItemSyntax>;
-/// attribute syntax nodes
-/// collection node
+/// type: SyntaxCollection
+/// element type: Token
 using TokenListSyntax = SyntaxCollection<SyntaxKind::TokenList, TokenSyntax>;
+/// type: SyntaxCollection
+/// element type: Token
 using NonEmptyTokenListSyntax = SyntaxCollection<SyntaxKind::NonEmptyTokenList, TokenSyntax>;
 
 class DeclSyntax : public Syntax

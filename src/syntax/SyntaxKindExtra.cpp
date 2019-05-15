@@ -54,12 +54,14 @@ int retrieve_syntax_kind_serialization_code(SyntaxKind kind)
    return std::get<1>(iter->second);
 }
 
-std::pair<std::uint32_t, std::uint32_t> retrieve_syntax_kind_child_count(SyntaxKind kind)
+std::pair<std::uint32_t, std::uint32_t> retrieve_syntax_kind_child_count(SyntaxKind kind, bool &exist)
 {
    auto iter = scg_syntaxKindTable.find(kind);
    if (iter == scg_syntaxKindTable.end()) {
+      exist = false;
       return {-1, -1};
    }
+   exist = true;
    return {std::get<2>(iter->second), std::get<3>(iter->second)};
 }
 

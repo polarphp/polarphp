@@ -10,6 +10,7 @@
 // Created by polarboy on 2019/05/14.
 
 #include "polarphp/syntax/AbstractFactory.h"
+#include "polarphp/syntax/internal/ListSyntaxNodeExtraFuncs.h"
 
 namespace polar::syntax {
 
@@ -57,20 +58,54 @@ RefCountPtr<RawSyntax> AbstractFactory::createRaw(SyntaxKind kind,
 /// between these two numbers is the number of optional children.
 std::pair<unsigned, unsigned> AbstractFactory::countChildren(SyntaxKind kind)
 {
-   switch(kind) {
-//   case SyntaxKind:::
-   default:
-   polar_unreachable("bad syntax kind.");
+   bool exist = false;
+   auto countPair = retrieve_syntax_kind_child_count(kind, exist);
+   if (!exist) {
+      polar_unreachable("bad syntax kind.");
    }
+   return countPair;
 }
 
 Syntax AbstractFactory::makeBlankCollectionSyntax(SyntaxKind kind)
 {
    switch(kind) {
-//   case SyntaxKind::CodeBlockItemList: return makeBlankCodeBlockItemList();
+   //   case SyntaxKind::CodeBlockItemList: return makeBlankCodeBlockItemList();
    default: break;
    }
    polar_unreachable("not collection kind.");
+}
+
+/// Whether a raw node kind `memberKind` can serve as a member in a syntax
+/// collection of the given syntax collection kind.
+bool AbstractFactory::canServeAsCollectionMemberRaw(SyntaxKind collectionKind,
+                                                    SyntaxKind memberKind)
+{
+   using namespace internal::canserveascollectionmemberraw;
+   switch (collectionKind) {
+   case SyntaxKind::CodeBlockItemList:
+      return check_code_block_item_list(memberKind);
+   case SyntaxKind::TokenList:
+      return check_token_list(memberKind);
+   case SyntaxKind::NonEmptyTokenList:
+      return check_non_empty_token_list(memberKind);
+   default:
+     polar_unreachable("Not collection kind.");
+   }
+}
+
+/// Whether a raw node `member` can serve as a member in a syntax collection
+/// of the given syntax collection kind.
+bool AbstractFactory::canServeAsCollectionMemberRaw(SyntaxKind collectionKind,
+                                                    const RefCountPtr<RawSyntax> &member)
+{
+   return canServeAsCollectionMemberRaw(collectionKind, member->getKind());
+}
+
+/// Whether a node `member` can serve as a member in a syntax collection of
+/// the given syntax collection kind.
+bool AbstractFactory::canServeAsCollectionMember(SyntaxKind collectionKind, Syntax member)
+{
+   return canServeAsCollectionMemberRaw(collectionKind, member.getRaw());
 }
 
 } // polar::syntax

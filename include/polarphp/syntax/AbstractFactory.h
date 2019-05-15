@@ -52,6 +52,20 @@ public:
 
    static Syntax
    makeBlankCollectionSyntax(SyntaxKind kind);
+
+   /// Whether a raw node kind `memberKind` can serve as a member in a syntax
+   /// collection of the given syntax collection kind.
+   static bool canServeAsCollectionMemberRaw(SyntaxKind collectionKind,
+                                             SyntaxKind memberKind);
+
+   /// Whether a raw node `member` can serve as a member in a syntax collection
+   /// of the given syntax collection kind.
+   static bool canServeAsCollectionMemberRaw(SyntaxKind collectionKind,
+                                             const RefCountPtr<RawSyntax> &member);
+
+   /// Whether a node `member` can serve as a member in a syntax collection of
+   /// the given syntax collection kind.
+   static bool canServeAsCollectionMember(SyntaxKind collectionKind, Syntax member);
 };
 
 } // polar::syntax
