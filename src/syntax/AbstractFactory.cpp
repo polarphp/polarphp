@@ -226,19 +226,40 @@ NonEmptyTokenListSyntax AbstractFactory::makeBlankNonEmptyTokenList(RefCountPtr<
 CodeBlockItemListSyntax AbstractFactory::makeCodeBlockItemList(const std::vector<CodeBlockItemSyntax> &elements,
                                                                RefCountPtr<SyntaxArena> arena)
 {
-
+   std::vector<RefCountPtr<RawSyntax>> layout;
+   layout.reserve(elements.size());
+   for (auto &element : elements) {
+      layout.push_back(element.getRaw());
+   }
+   auto raw = RawSyntax::make(SyntaxKind::CodeBlockItemList,
+                              layout, SourcePresence::Present, arena);
+   return make<CodeBlockItemListSyntax>(raw);
 }
 
 TokenListSyntax AbstractFactory::makeTokenList(const std::vector<TokenSyntax> &elements,
                                                RefCountPtr<SyntaxArena> arena)
 {
-
+   std::vector<RefCountPtr<RawSyntax>> layout;
+   layout.reserve(elements.size());
+   for (auto &element : elements) {
+      layout.push_back(element.getRaw());
+   }
+   auto raw = RawSyntax::make(SyntaxKind::TokenList,
+                              layout, SourcePresence::Present, arena);
+   return make<TokenListSyntax>(raw);
 }
 
 NonEmptyTokenListSyntax AbstractFactory::makeNonEmptyTokenList(const std::vector<TokenSyntax> &elements,
                                                                RefCountPtr<SyntaxArena> arena)
 {
-
+   std::vector<RefCountPtr<RawSyntax>> layout;
+   layout.reserve(elements.size());
+   for (auto &element : elements) {
+      layout.push_back(element.getRaw());
+   }
+   auto raw = RawSyntax::make(SyntaxKind::NonEmptyTokenList,
+                              layout, SourcePresence::Present, arena);
+   return make<NonEmptyTokenListSyntax>(raw);
 }
 
 /// make has children syntax node
@@ -246,13 +267,23 @@ NonEmptyTokenListSyntax AbstractFactory::makeNonEmptyTokenList(const std::vector
 CodeBlockItemSyntax AbstractFactory::makeCodeBlockItem(Syntax item, TokenSyntax semicolon,
                                                        std::optional<TokenSyntax> errorTokens, RefCountPtr<SyntaxArena> arena)
 {
-
+   auto raw = RawSyntax::make(SyntaxKind::CodeBlockItem, {
+                                 item.getRaw(),
+                                 semicolon.getRaw(),
+                                 errorTokens.has_value() ? errorTokens->getRaw() : nullptr
+                              }, SourcePresence::Present, arena);
+   return make<CodeBlockItemSyntax>(raw);
 }
 
 CodeBlockSyntax AbstractFactory::makeCodeBlock(TokenSyntax leftBrace, CodeBlockItemListSyntax statements,
                                                TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena)
 {
-
+   auto raw = RawSyntax::make(SyntaxKind::CodeBlock, {
+                                 leftBrace.getRaw(),
+                                 statements.getRaw(),
+                                 rightBrace.getRaw()
+                              }, SourcePresence::Present, arena);
+   return make<CodeBlockSyntax>(raw);
 }
 
 /// make keyword token methods
