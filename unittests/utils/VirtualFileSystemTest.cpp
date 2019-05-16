@@ -18,6 +18,7 @@
 #include "polarphp/utils/MemoryBuffer.h"
 #include "polarphp/utils/Path.h"
 #include "polarphp/utils/SourceMgr.h"
+#include "polarphp/basic/adt/IntrusiveRefCountPtr.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include <map>
@@ -768,6 +769,45 @@ TEST(VirtualFileSystemTest, testHiddenInIteration)
    }
 }
 
+
+TEST(VirtualFileSystemTest, testBasicProxy) {
+   IntrusiveRefCountPtr<vfs::InMemoryFileSystem> Base(
+            new vfs::InMemoryFileSystem());
+   vfs::ProxyFileSystem PFS(Base);
+
+   Base->addFile("/a", 0, MemoryBuffer::getMemBuffer("test"));
+
+   auto Stat = PFS.getStatus("/a");
+   ASSERT_FALSE(Stat.getError());
+
+   auto File = PFS.openFileForRead("/a");
+   ASSERT_FALSE(File.getError());
+   EXPECT_EQ("test", (*(*File)->getBuffer("ignored"))->getBuffer());
+
+   std::error_code EC;
+   vfs::DirectoryIterator I = PFS.dirBegin("/", EC);
+   ASSERT_FALSE(EC);
+   ASSERT_EQ("/a", I->path());
+   I.increment(EC);
+   ASSERT_FALSE(EC);
+   ASSERT_EQ(vfs::DirectoryIterator(), I);
+
+   ASSERT_FALSE(PFS.setCurrentWorkingDirectory("/"));
+
+   auto PWD = PFS.getCurrentWorkingDirectory();
+   ASSERT_FALSE(PWD.getError());
+   ASSERT_EQ("/", *PWD);
+
+   SmallString<16> Path;
+   ASSERT_FALSE(PFS.getRealPath("a", Path));
+   ASSERT_EQ("/a", Path);
+
+   bool Local = true;
+   ASSERT_FALSE(PFS.isLocal("/a", Local));
+   ASSERT_EQ(false, Local);
+}
+
+
 class InMemoryFileSystemTest : public ::testing::Test
 {
 protected:
@@ -1210,7 +1250,7 @@ public:
                         IntrusiveRefCountPtr<vfs::FileSystem> ExternalFS) {
       std::unique_ptr<MemoryBuffer> Buffer = MemoryBuffer::getMemBuffer(Content);
       return vfs::get_vfs_from_yaml(std::move(Buffer), CountingDiagHandler, "", this,
-                            ExternalFS);
+                                    ExternalFS);
    }
 
    IntrusiveRefCountPtr<vfs::FileSystem> getFromYAMLString(
