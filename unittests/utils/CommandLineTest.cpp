@@ -858,4 +858,80 @@ TEST(CommandLineTest, testGetCommandLineArguments) {
 }
 #endif
 
+
+TEST(CommandLineTest, PrefixOptions) {
+   cmd::reset_command_line_parser();
+
+   StackOption<std::string, cmd::List<std::string>> IncludeDirs(
+            "I", cmd::Prefix, cmd::Desc("Declare an include directory"));
+
+   // Test non-prefixed variant works with cmd::Prefix options.
+   EXPECT_TRUE(IncludeDirs.empty());
+   const char *args[] = {"prog", "-I=/usr/include"};
+   EXPECT_TRUE(
+            cmd::parse_commandline_options(2, args, StringRef(), &polar::utils::null_stream()));
+   EXPECT_TRUE(IncludeDirs.getSize() == 1);
+   EXPECT_TRUE(IncludeDirs.front().compare("/usr/include") == 0);
+
+   IncludeDirs.erase(IncludeDirs.begin());
+   cmd::reset_all_option_occurrences();
+
+   // Test non-prefixed variant works with cmd::Prefix options when value is
+   // passed in following argument.
+   EXPECT_TRUE(IncludeDirs.empty());
+   const char *args2[] = {"prog", "-I", "/usr/include"};
+   EXPECT_TRUE(
+            cmd::parse_commandline_options(3, args2, StringRef(), &polar::utils::null_stream()));
+   EXPECT_TRUE(IncludeDirs.getSize() == 1);
+   EXPECT_TRUE(IncludeDirs.front().compare("/usr/include") == 0);
+
+   IncludeDirs.erase(IncludeDirs.begin());
+   cmd::reset_all_option_occurrences();
+
+   // Test prefixed variant works with cmd::Prefix options.
+   EXPECT_TRUE(IncludeDirs.empty());
+   const char *args3[] = {"prog", "-I/usr/include"};
+   EXPECT_TRUE(
+            cmd::parse_commandline_options(2, args3, StringRef(), &polar::utils::null_stream()));
+   EXPECT_TRUE(IncludeDirs.getSize() == 1);
+   EXPECT_TRUE(IncludeDirs.front().compare("/usr/include") == 0);
+
+   StackOption<std::string, cmd::List<std::string>> MacroDefs(
+            "D", cmd::AlwaysPrefix, cmd::Desc("Define a macro"),
+            cmd::ValueDesc("MACRO[=VALUE]"));
+
+   cmd::reset_all_option_occurrences();
+
+   // Test non-prefixed variant does not work with cmd::AlwaysPrefix options:
+   // equal sign is part of the value.
+   EXPECT_TRUE(MacroDefs.empty());
+   const char *args4[] = {"prog", "-D=HAVE_FOO"};
+   EXPECT_TRUE(
+            cmd::parse_commandline_options(2, args4, StringRef(), &polar::utils::null_stream()));
+   EXPECT_TRUE(MacroDefs.getSize() == 1);
+   EXPECT_TRUE(MacroDefs.front().compare("=HAVE_FOO") == 0);
+
+   MacroDefs.erase(MacroDefs.begin());
+   cmd::reset_all_option_occurrences();
+
+   // Test non-prefixed variant does not allow value to be passed in following
+   // argument with cmd::AlwaysPrefix options.
+   EXPECT_TRUE(MacroDefs.empty());
+   const char *args5[] = {"prog", "-D", "HAVE_FOO"};
+   EXPECT_FALSE(
+            cmd::parse_commandline_options(3, args5, StringRef(), &polar::utils::null_stream()));
+   EXPECT_TRUE(MacroDefs.empty());
+
+   cmd::reset_all_option_occurrences();
+
+   // Test prefixed variant works with cmd::AlwaysPrefix options.
+   EXPECT_TRUE(MacroDefs.empty());
+   const char *args6[] = {"prog", "-DHAVE_FOO"};
+   EXPECT_TRUE(
+            cmd::parse_commandline_options(2, args6, StringRef(), &polar::utils::null_stream()));
+   EXPECT_TRUE(MacroDefs.getSize() == 1);
+   EXPECT_TRUE(MacroDefs.front().compare("HAVE_FOO") == 0);
+}
+
+
 } // anonymous namespace
