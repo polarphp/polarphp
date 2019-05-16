@@ -12,6 +12,7 @@
 #include "polarphp/basic/adt/Iterator.h"
 #include "polarphp/basic/adt/StlExtras.h"
 #include "polarphp/basic/adt/ArrayRef.h"
+#include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/basic/adt/SmallVector.h"
 #include "polarphp/basic/adt/IntrusiveList.h"
 #include "gtest/gtest.h"
@@ -329,6 +330,41 @@ TEST(IteratorTest, testZipFirstBasic)
    }
 
    EXPECT_EQ(iters, 4u);
+}
+
+TEST(IteratorTest, testZipLongestBasic)
+{
+   using namespace std;
+   const vector<unsigned> pi{3, 1, 4, 1, 5, 9};
+   const vector<StringRef> e{"2", "7", "1", "8"};
+
+   {
+      // Check left range longer than right.
+      const vector<tuple<std::optional<unsigned>, std::optional<StringRef>>> expected{
+         make_tuple(3, StringRef("2")), make_tuple(1, StringRef("7")),
+               make_tuple(4, StringRef("1")), make_tuple(1, StringRef("8")),
+               make_tuple(5, std::nullopt),           make_tuple(9, std::nullopt)};
+      size_t iters = 0;
+      for (auto tup : zip_longest(pi, e)) {
+         EXPECT_EQ(tup, expected[iters]);
+         iters += 1;
+      }
+      EXPECT_EQ(iters, expected.size());
+   }
+
+   {
+      // Check right range longer than left.
+      const vector<tuple<std::optional<StringRef>, std::optional<unsigned>>> expected{
+         make_tuple(StringRef("2"), 3), make_tuple(StringRef("7"), 1),
+               make_tuple(StringRef("1"), 4), make_tuple(StringRef("8"), 1),
+               make_tuple(std::nullopt, 5),           make_tuple(std::nullopt, 9)};
+      size_t iters = 0;
+      for (auto tup : zip_longest(e, pi)) {
+         EXPECT_EQ(tup, expected[iters]);
+         iters += 1;
+      }
+      EXPECT_EQ(iters, expected.size());
+   }
 }
 
 TEST(IteratorTest, testMutability)
