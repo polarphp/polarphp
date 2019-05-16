@@ -194,7 +194,7 @@ TEST(PathTest, testPath)
    }
 
    SmallString<32> Relative("foo.cpp");
-//   ASSERT_NO_ERROR(fs::make_absolute("/root", Relative));
+   fs::make_absolute("/root", Relative);
    Relative[5] = '/'; // Fix up windows paths.
    ASSERT_EQ("/root/foo.cpp", Relative);
 }
@@ -1717,7 +1717,9 @@ TEST_F(FileSystemTest, testGetPermissions)
    EXPECT_TRUE(CheckgetPermissions(fs::set_gid_on_exe));
 
    // Modern BSDs require root to set the sticky bit on files.
-#if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__)
+   // AIX without root will mask off (i.e., lose) the sticky bit on files.
+ #if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) &&  \
+     !defined(_AIX)
    EXPECT_EQ(fs::set_permissions(TempPath, fs::sticky_bit), NoError);
    EXPECT_TRUE(CheckgetPermissions(fs::sticky_bit));
 
@@ -1737,7 +1739,7 @@ TEST_F(FileSystemTest, testGetPermissions)
 
    EXPECT_EQ(fs::set_permissions(TempPath, fs::all_perms), NoError);
    EXPECT_TRUE(CheckgetPermissions(fs::all_perms));
-#endif // !FreeBSD && !NetBSD && !OpenBSD
+#endif // !FreeBSD && !NetBSD && !OpenBSD && !AIX
 
    EXPECT_EQ(fs::set_permissions(TempPath, fs::all_perms & ~fs::sticky_bit),
              NoError);
