@@ -257,11 +257,23 @@ TEST(TripleTest, testParsedIDs)
    EXPECT_EQ(Triple::OSType::UnknownOS, T.getOS());
    EXPECT_EQ(Triple::EnvironmentType::UnknownEnvironment, T.getEnvironment());
 
+   T = Triple("wasm32-unknown-wasi-musl");
+   EXPECT_EQ(Triple::ArchType::wasm32, T.getArch());
+   EXPECT_EQ(Triple::VendorType::UnknownVendor, T.getVendor());
+   EXPECT_EQ(Triple::OSType::WASI, T.getOS());
+   EXPECT_EQ(Triple::EnvironmentType::Musl, T.getEnvironment());
+
    T = Triple("wasm64-unknown-unknown");
    EXPECT_EQ(Triple::ArchType::wasm64, T.getArch());
    EXPECT_EQ(Triple::VendorType::UnknownVendor, T.getVendor());
    EXPECT_EQ(Triple::OSType::UnknownOS, T.getOS());
    EXPECT_EQ(Triple::EnvironmentType::UnknownEnvironment, T.getEnvironment());
+
+   T = Triple("wasm64-unknown-wasi-musl");
+   EXPECT_EQ(Triple::ArchType::wasm64, T.getArch());
+   EXPECT_EQ(Triple::VendorType::UnknownVendor, T.getVendor());
+   EXPECT_EQ(Triple::OSType::WASI, T.getOS());
+   EXPECT_EQ(Triple::EnvironmentType::Musl, T.getEnvironment());
 
    T = Triple("avr-unknown-unknown");
    EXPECT_EQ(Triple::ArchType::avr, T.getArch());
@@ -1249,10 +1261,18 @@ TEST(TripleTest, testFileFormat)
    EXPECT_EQ(Triple::ObjectFormatType::Wasm, Triple("wasm32-unknown-unknown").getObjectFormat());
    EXPECT_EQ(Triple::ObjectFormatType::Wasm, Triple("wasm64-unknown-unknown").getObjectFormat());
 
+   EXPECT_EQ(Triple::ObjectFormatType::Wasm, Triple("wasm32-unknown-wasi-musl").getObjectFormat());
+   EXPECT_EQ(Triple::ObjectFormatType::Wasm, Triple("wasm64-unknown-wasi-musl").getObjectFormat());
+
    EXPECT_EQ(Triple::ObjectFormatType::Wasm,
              Triple("wasm32-unknown-unknown-wasm").getObjectFormat());
    EXPECT_EQ(Triple::ObjectFormatType::Wasm,
              Triple("wasm64-unknown-unknown-wasm").getObjectFormat());
+
+   EXPECT_EQ(Triple::ObjectFormatType::Wasm,
+             Triple("wasm32-unknown-wasi-musl-wasm").getObjectFormat());
+   EXPECT_EQ(Triple::ObjectFormatType::Wasm,
+             Triple("wasm64-unknown-wasi-musl-wasm").getObjectFormat());
 
    Triple MSVCNormalized(Triple::normalize("i686-pc-windows-msvc-elf"));
    EXPECT_EQ(Triple::ObjectFormatType::ELF, MSVCNormalized.getObjectFormat());
