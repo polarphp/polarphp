@@ -28,7 +28,7 @@ class TypeSyntax;
 class UnknownDeclSyntax;
 class UnknownExprSyntax;
 class UnknownStmtSyntax;
-class UnknowTypeSyntax;
+class UnknownTypeSyntax;
 class CodeBlockItemSyntax;
 class CodeBlockSyntax;
 

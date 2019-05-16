@@ -258,9 +258,9 @@ void RawSyntax::print(RawOutStream &outStream, SyntaxPrintOptions opts) const
       if (printKind) {
          print_syntax_kind(kind, outStream, opts, true);
       }
-      for (const auto &LE : getLayout()) {
-         if (LE) {
-            LE->print(outStream, opts);
+      for (const auto &layout : getLayout()) {
+         if (layout) {
+            layout->print(outStream, opts);
          }
       }
       if (printKind) {

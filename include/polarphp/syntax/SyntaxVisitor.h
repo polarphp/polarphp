@@ -32,8 +32,9 @@
 
 namespace polar::syntax {
 
-struct SyntaxVisitor
+class SyntaxVisitor
 {
+public:
    virtual ~SyntaxVisitor()
    {}
 
@@ -47,6 +48,7 @@ struct SyntaxVisitor
    {}
 
    virtual void visit(Syntax node);
+
    void visitChildren(Syntax node)
    {
       for (unsigned i = 0, e = node.getNumChildren(); i != e; ++i) {
@@ -55,6 +57,18 @@ struct SyntaxVisitor
          }
       }
    }
+
+   /// syntax node visit methods
+   virtual void visit(UnknownSyntax node);
+   virtual void visit(UnknownDeclSyntax node);
+   virtual void visit(UnknownExprSyntax node);
+   virtual void visit(UnknownStmtSyntax node);
+   virtual void visit(UnknownTypeSyntax node);
+   virtual void visit(CodeBlockItemSyntax node);
+   virtual void visit(CodeBlockSyntax node);
+   virtual void visit(CodeBlockItemListSyntax node);
+   virtual void visit(TokenListSyntax node);
+   virtual void visit(NonEmptyTokenListSyntax node);
 };
 
 } // polar::syntax
