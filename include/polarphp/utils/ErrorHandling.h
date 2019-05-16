@@ -161,8 +161,8 @@ void report_bad_alloc_error(std::string_view reason, bool genCrashDiag = true);
 /// Use the llvm_unreachable macro (that adds location info), instead of
 /// calling this function directly.
 POLAR_ATTRIBUTE_NORETURN void
-polar_unreachable_internal(const char *msg = nullptr, const char *file = nullptr,
-                           unsigned line = 0);
+unreachable_internal(const char *msg = nullptr, const char *file = nullptr,
+                     unsigned line = 0);
 
 } // utils
 } // polar
@@ -177,11 +177,11 @@ polar_unreachable_internal(const char *msg = nullptr, const char *file = nullptr
 /// allows compilers to omit some unnecessary code.
 #ifndef NDEBUG
 #define polar_unreachable(msg) \
-   ::polar::utils::polar_unreachable_internal(msg, __FILE__, __LINE__)
+   ::polar::utils::unreachable_internal(msg, __FILE__, __LINE__)
 #elif defined(POLAR_BUILTIN_UNREACHABLE)
 #define polar_unreachable(msg) POLAR_BUILTIN_UNREACHABLE
 #else
-#define polar_unreachable(msg) ::polar::utils::polar_unreachable_internal()
+#define polar_unreachable(msg) ::polar::utils::unreachable_internal()
 #endif
 
 #endif // POLARPHP_UTILS_ERROR_HANDLING_H

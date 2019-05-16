@@ -148,7 +148,7 @@ void report_bad_alloc_error(std::string_view reason, bool genCrashDiag)
    throw std::bad_alloc();
 }
 
-void polar_unreachable_internal(const char *msg, const char *file, unsigned line)
+void unreachable_internal(const char *msg, const char *file, unsigned line)
 {
    // This code intentionally doesn't call the ErrorHandler callback, because
    // llvm_unreachable is intended to be used to indicate "impossible"

@@ -11,7 +11,6 @@
 
 #include <gtest/gtest.h>
 #include "Utils.h"
-#include "Config.h"
 #include <string>
 #include <filesystem>
 

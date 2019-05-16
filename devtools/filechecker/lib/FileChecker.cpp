@@ -52,7 +52,7 @@ using polar::utils::RawSvectorOutStream;
 bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
                                     SourceMgr &sourceMgr, unsigned lineNumber,
                                     const FileCheckRequest &req) {
-   bool matchFullLinesHere = req.matchFullLines && m_checkType != FileCheckKind::CheckNot;
+   bool matchFullLinesHere = req.matchFullLines && checkType != FileCheckKind::CheckNot;
 
    this->m_lineNumber = lineNumber;
    m_patternLoc = SMLocation::getFromPointer(patternStr.getData());
@@ -64,13 +64,13 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
          patternStr = patternStr.substr(0, patternStr.size() - 1);
 
    // Check that there is something on the line.
-   if (patternStr.empty() && m_checkType != FileCheckKind::CheckEmpty) {
+   if (patternStr.empty() && checkType != FileCheckKind::CheckEmpty) {
       sourceMgr.printMessage(m_patternLoc, SourceMgr::DK_Error,
                              "found empty check string with prefix '" + prefix + ":'");
       return true;
    }
 
-   if (!patternStr.empty() && m_checkType == FileCheckKind::CheckEmpty) {
+   if (!patternStr.empty() && checkType == FileCheckKind::CheckEmpty) {
       sourceMgr.printMessage(
                m_patternLoc, SourceMgr::DK_Error,
                "found non-empty check string for empty check with prefix '" + prefix +
@@ -78,7 +78,7 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
       return true;
    }
 
-   if (m_checkType == FileCheckKind::CheckEmpty) {
+   if (checkType == FileCheckKind::CheckEmpty) {
       m_regExStr = "(\n$)";
       return false;
    }
@@ -303,7 +303,7 @@ size_t FileCheckPattern::match(StringRef buffer, size_t &matchLen,
                                StringMap<std::string> &variableTable) const
 {
    // If this is the EOF pattern, match it immediately.
-   if (m_checkType == FileCheckKind::CheckEOF) {
+   if (checkType == FileCheckKind::CheckEOF) {
       matchLen = 0;
       return buffer.size();
    }
@@ -370,7 +370,7 @@ size_t FileCheckPattern::match(StringRef buffer, size_t &matchLen,
    // Like CHECK-NEXT, CHECK-EMPTY's match range is considered to start after
    // the required preceding newline, which is consumed by the pattern in the
    // case of CHECK-EMPTY but not CHECK-NEXT.
-   size_t matchStartSkip = m_checkType == FileCheckKind::CheckEmpty;
+   size_t matchStartSkip = checkType == FileCheckKind::CheckEmpty;
    matchLen = fullMatch.size() - matchStartSkip;
    return fullMatch.getData() - buffer.getData() + matchStartSkip;
 }
@@ -456,7 +456,7 @@ static SMRange process_match_result(FileCheckDiag::MatchType matchType,
    SMRange range(start, end);
    if (diags) {
       if (adjustPrevDiag) {
-         diags->rbegin()->m_matchType = matchType;
+         diags->rbegin()->matchType = matchType;
       } else {
          diags->emplace_back(sourceMgr, checkType, loc, matchType, range);
       }
@@ -592,18 +592,18 @@ FileCheckDiag::FileCheckDiag(const SourceMgr &sourceMgr,
                              const FileCheckType &checkType,
                              SMLocation checkLoc, MatchType matchType,
                              SMRange inputRange)
-   : m_checkType(checkType),
-     m_matchType(matchType)
+   : checkType(checkType),
+     matchType(matchType)
 {
    auto start = sourceMgr.getLineAndColumn(inputRange.m_start);
    auto end = sourceMgr.getLineAndColumn(inputRange.m_end);
-   m_inputStartLine = start.first;
-   m_inputStartCol = start.second;
-   m_inputEndLine = end.first;
-   m_inputEndCol = end.second;
+   inputStartLine = start.first;
+   inputStartCol = start.second;
+   inputEndLine = end.first;
+   inputEndCol = end.second;
    start = sourceMgr.getLineAndColumn(checkLoc);
-   m_checkLine = start.first;
-   m_checkCol = start.second;
+   checkLine = start.first;
+   checkCol = start.second;
 }
 
 static bool is_part_of_word(char c)
@@ -742,7 +742,7 @@ static size_t skip_word(StringRef str, size_t loc)
 ///
 /// If this routine returns a valid prefix, it will also shrink \p buffer to
 /// start at the beginning of the returned prefix, increment \p lineNumber for
-/// each new line consumed from \p buffer, and set \p m_checkType to the type of
+/// each new line consumed from \p buffer, and set \p checkType to the type of
 /// check found by examining the suffix.
 ///
 /// If no valid prefix is found, the state of buffer, lineNumber, and checkType
@@ -993,7 +993,7 @@ static void print_match(bool expectedMatch, const SourceMgr &sourceMgr,
                         size_t matchPos, size_t matchLen, FileCheckRequest &req,
                         std::vector<FileCheckDiag> *diags)
 {
-   print_match(expectedMatch, sourceMgr, checkStr.m_prefix, checkStr.m_loc, checkStr.m_pattern,
+   print_match(expectedMatch, sourceMgr, checkStr.prefix, checkStr.loc, checkStr.pattern,
                matchedCount, buffer, variableTable, matchPos, matchLen, req,
                diags);
 }
@@ -1042,7 +1042,7 @@ static void print_no_match(bool expectedMatch, const SourceMgr &sourceMgr,
                            bool verboseVerbose,
                            std::vector<FileCheckDiag> *diags)
 {
-   print_no_match(expectedMatch, sourceMgr, checkStr.m_prefix, checkStr.m_loc, checkStr.m_pattern,
+   print_no_match(expectedMatch, sourceMgr, checkStr.prefix, checkStr.loc, checkStr.pattern,
                   matchedCount, buffer, variableTable, verboseVerbose, diags);
 }
 
@@ -1099,12 +1099,12 @@ size_t FileCheckString::check(const SourceMgr &sourceMgr, StringRef buffer,
    size_t firstMatchPos = 0;
    // Go match the pattern count times. Majority of patterns only match with
    // count 1 though.
-   assert(m_pattern.getCount() != 0 && "pattern count can not be zero");
-   for (int i = 1; i <= m_pattern.getCount(); i++) {
+   assert(pattern.getCount() != 0 && "pattern count can not be zero");
+   for (int i = 1; i <= pattern.getCount(); i++) {
       StringRef matchBuffer = buffer.substr(lastMatchEnd);
       size_t currentMatchLen;
       // get a match at current start point
-      size_t matchPos = m_pattern.match(matchBuffer, currentMatchLen, variableTable);
+      size_t matchPos = pattern.match(matchBuffer, currentMatchLen, variableTable);
       if (i == 1) {
          firstMatchPos = lastPos + matchPos;
       }
@@ -1134,8 +1134,8 @@ size_t FileCheckString::check(const SourceMgr &sourceMgr, StringRef buffer,
       // If this check is a "CHECK-NEXT", verify that the previous match was on
       // the previous line (i.e. that there is one newline between them).
       if (checkNext(sourceMgr, skippedRegion)) {
-         process_match_result(FileCheckDiag::MatchFoundButWrongLine, sourceMgr, m_loc,
-                              m_pattern.getCheckType(), matchBuffer, matchPos, matchLen,
+         process_match_result(FileCheckDiag::MatchFoundButWrongLine, sourceMgr, loc,
+                              pattern.getCheckType(), matchBuffer, matchPos, matchLen,
                               diags, req.verbose);
          return StringRef::npos;
       }
@@ -1143,8 +1143,8 @@ size_t FileCheckString::check(const SourceMgr &sourceMgr, StringRef buffer,
       // If this check is a "CHECK-SAME", verify that the previous match was on
       // the same line (i.e. that there is no newline between them).
       if (checkSame(sourceMgr, skippedRegion)) {
-         process_match_result(FileCheckDiag::MatchFoundButWrongLine, sourceMgr, m_loc,
-                              m_pattern.getCheckType(), matchBuffer, matchPos, matchLen,
+         process_match_result(FileCheckDiag::MatchFoundButWrongLine, sourceMgr, loc,
+                              pattern.getCheckType(), matchBuffer, matchPos, matchLen,
                               diags, req.verbose);
          return StringRef::npos;
       }
@@ -1162,13 +1162,13 @@ size_t FileCheckString::check(const SourceMgr &sourceMgr, StringRef buffer,
 /// Verify there is a single line in the given buffer.
 bool FileCheckString::checkNext(const SourceMgr &sourceMgr, StringRef buffer) const
 {
-   if (m_pattern.getCheckType() != FileCheckKind::CheckNext &&
-       m_pattern.getCheckType() != FileCheckKind::CheckEmpty) {
+   if (pattern.getCheckType() != FileCheckKind::CheckNext &&
+       pattern.getCheckType() != FileCheckKind::CheckEmpty) {
       return false;
    }
    Twine checkName =
-         m_prefix +
-         Twine(m_pattern.getCheckType() == FileCheckKind::CheckEmpty ? "-EMPTY" : "-NEXT");
+         prefix +
+         Twine(pattern.getCheckType() == FileCheckKind::CheckEmpty ? "-EMPTY" : "-NEXT");
 
    // count the number of newlines between the previous match and this one.
    assert(buffer.getData() !=
@@ -1181,7 +1181,7 @@ bool FileCheckString::checkNext(const SourceMgr &sourceMgr, StringRef buffer) co
    unsigned numNewLines = count_num_newlines_between(buffer, firstNewLine);
 
    if (numNewLines == 0) {
-      sourceMgr.printMessage(m_loc, SourceMgr::DK_Error,
+      sourceMgr.printMessage(loc, SourceMgr::DK_Error,
                              checkName + ": is on the same line as previous match");
       sourceMgr.printMessage(SMLocation::getFromPointer(buffer.end()), SourceMgr::DK_Note,
                              "'next' match was here");
@@ -1191,7 +1191,7 @@ bool FileCheckString::checkNext(const SourceMgr &sourceMgr, StringRef buffer) co
    }
 
    if (numNewLines != 1) {
-      sourceMgr.printMessage(m_loc, SourceMgr::DK_Error,
+      sourceMgr.printMessage(loc, SourceMgr::DK_Error,
                              checkName +
                              ": is not on the line after the previous match");
       sourceMgr.printMessage(SMLocation::getFromPointer(buffer.end()), SourceMgr::DK_Note,
@@ -1209,7 +1209,7 @@ bool FileCheckString::checkNext(const SourceMgr &sourceMgr, StringRef buffer) co
 /// Verify there is no newline in the given buffer.
 bool FileCheckString::checkSame(const SourceMgr &sourceMgr, StringRef buffer) const
 {
-   if (m_pattern.getCheckType() != FileCheckKind::CheckSame) {
+   if (pattern.getCheckType() != FileCheckKind::CheckSame) {
       return false;
    }
 
@@ -1224,8 +1224,8 @@ bool FileCheckString::checkSame(const SourceMgr &sourceMgr, StringRef buffer) co
    unsigned numNewLines = count_num_newlines_between(buffer, firstNewLine);
 
    if (numNewLines != 0) {
-      sourceMgr.printMessage(m_loc, SourceMgr::DK_Error,
-                             m_prefix +
+      sourceMgr.printMessage(loc, SourceMgr::DK_Error,
+                             prefix +
                              "-SAME: is not on the same line as the previous match");
       sourceMgr.printMessage(SMLocation::getFromPointer(buffer.end()), SourceMgr::DK_Note,
                              "'next' match was here");
@@ -1249,11 +1249,11 @@ bool FileCheckString::checkNot(
       size_t matchLen = 0;
       size_t pos = pattern->match(buffer, matchLen, variableTable);
       if (pos == StringRef::npos) {
-         print_no_match(false, sourceMgr, m_prefix, pattern->getLoc(), *pattern, 1, buffer,
+         print_no_match(false, sourceMgr, prefix, pattern->getLoc(), *pattern, 1, buffer,
                         variableTable, req.verboseVerbose, diags);
          continue;
       }
-      print_match(false, sourceMgr, m_prefix, pattern->getLoc(), *pattern, 1, buffer, variableTable,
+      print_match(false, sourceMgr, prefix, pattern->getLoc(), *pattern, 1, buffer, variableTable,
                   pos, matchLen, req, diags);
       return true;
    }
@@ -1309,14 +1309,14 @@ FileCheckString::checkDag(const SourceMgr &sourceMgr, StringRef buffer,
          // With a group of CHECK-DAGs, a single mismatching means the match on
          // that group of CHECK-DAGs fails immediately.
          if (matchPosBuf == StringRef::npos) {
-            print_no_match(true, sourceMgr, m_prefix, pattern.getLoc(), pattern, 1, matchBuffer,
+            print_no_match(true, sourceMgr, prefix, pattern.getLoc(), pattern, 1, matchBuffer,
                            variableTable, req.verboseVerbose, diags);
             return StringRef::npos;
          }
          // Re-calc it as the offset relative to the start of the original string.
          matchPos += matchPosBuf;
          if (req.verboseVerbose) {
-            print_match(true, sourceMgr, m_prefix, pattern.getLoc(), pattern, 1, buffer,
+            print_match(true, sourceMgr, prefix, pattern.getLoc(), pattern, 1, buffer,
                         variableTable, matchPos, matchLen, req, diags);
          }
 
@@ -1361,13 +1361,13 @@ FileCheckString::checkDag(const SourceMgr &sourceMgr, StringRef buffer,
                                    "match discarded, overlaps earlier DAG match here",
             {oldRange});
             if (diags) {
-               diags->rbegin()->m_matchType = FileCheckDiag::MatchFoundButDiscarded;
+               diags->rbegin()->matchType = FileCheckDiag::MatchFoundButDiscarded;
             }
          }
          matchPos = miter->end;
       }
       if (!req.verboseVerbose) {
-         print_match(true, sourceMgr, m_prefix, pattern.getLoc(), pattern, 1, buffer, variableTable,
+         print_match(true, sourceMgr, prefix, pattern.getLoc(), pattern, 1, buffer, variableTable,
                      matchPos, matchLen, req, diags);
       }
 
@@ -1486,7 +1486,7 @@ bool FileCheck::checkInput(SourceMgr &sourceMgr, StringRef buffer,
          checkRegion = buffer;
       } else {
          const FileCheckString &checkLabelStr = checkStrings[j];
-         if (checkLabelStr.m_pattern.getCheckType() != FileCheckKind::CheckLabel) {
+         if (checkLabelStr.pattern.getCheckType() != FileCheckKind::CheckLabel) {
             ++j;
             continue;
          }

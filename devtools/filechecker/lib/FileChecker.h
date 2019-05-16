@@ -134,14 +134,14 @@ class FileCheckPattern
    /// 1.
    std::map<StringRef, unsigned> m_variableDefs;
 
-   FileCheckType m_checkType;
+   FileCheckType checkType;
 
    /// Contains the number of line this pattern is in.
    unsigned m_lineNumber;
 
 public:
    explicit FileCheckPattern(FileCheckType type)
-      : m_checkType(type)
+      : checkType(type)
    {}
 
    /// Returns the location in source code.
@@ -168,12 +168,12 @@ public:
 
    FileCheckType getCheckType() const
    {
-      return m_checkType;
+      return checkType;
    }
 
    int getCount() const
    {
-      return m_checkType.getCount();
+      return checkType.getCount();
    }
 
 private:
@@ -193,10 +193,10 @@ private:
 struct FileCheckDiag
 {
    /// What is the FileCheck directive for this diagnostic?
-   FileCheckType m_checkType;
+   FileCheckType checkType;
    /// Where is the FileCheck directive for this diagnostic?
-   unsigned m_checkLine;
-   unsigned m_checkCol;
+   unsigned checkLine;
+   unsigned checkCol;
    /// What type of match result does this diagnostic describe?
    ///
    /// A directive's supplied pattern is said to be either expected or excluded
@@ -231,13 +231,13 @@ struct FileCheckDiag
       /// Indicates a fuzzy match that serves as a suggestion for the next
       /// intended match for an expected pattern with too few or no good matches.
       MatchFuzzy,
-   } m_matchType;
+   } matchType;
    /// The search range if MatchTy is MatchNoneAndExcluded or
    /// MatchNoneButExpected, or the match range otherwise.
-   unsigned m_inputStartLine;
-   unsigned m_inputStartCol;
-   unsigned m_inputEndLine;
-   unsigned m_inputEndCol;
+   unsigned inputStartLine;
+   unsigned inputStartCol;
+   unsigned inputEndLine;
+   unsigned inputEndCol;
 
    FileCheckDiag(const SourceMgr &sourceMgr, const FileCheckType &checkType,
                  SMLocation checkLoc, MatchType matchType, SMRange inputRange);
@@ -251,22 +251,22 @@ struct FileCheckDiag
 struct FileCheckString
 {
    /// The pattern to match.
-   FileCheckPattern m_pattern;
+   FileCheckPattern pattern;
 
    /// Which prefix name this check matched.
-   StringRef m_prefix;
+   StringRef prefix;
 
    /// The location in the match file that the check string was specified.
-   SMLocation m_loc;
+   SMLocation loc;
 
    /// All of the strings that are disallowed from occurring between this match
    /// string and the previous one (or start of file).
    std::vector<FileCheckPattern> m_dagNotStrings;
 
    FileCheckString(const FileCheckPattern &pattern, StringRef str, SMLocation loc)
-      : m_pattern(pattern),
-        m_prefix(str),
-        m_loc(loc)
+      : pattern(pattern),
+        prefix(str),
+        loc(loc)
    {}
 
    size_t check(const SourceMgr &sourceMgr, StringRef buffer, bool isLabelScanMode,

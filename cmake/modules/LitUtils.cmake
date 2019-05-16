@@ -84,8 +84,6 @@ function(polar_add_lit_cfg_setter)
       set(headerTplFilename ${headerFilename}.in)
       set(headerFilename ${setterModuleDir}/${headerFilename})
       if (EXISTS ${headerTplFilename})
-         message("${headerTplFilename}")
-         message("${headerFilename}")
          configure_file(${headerTplFilename} ${headerFilename}
             @ONLY)
          list(APPEND POLAR_CFG_SETTER_SRCS ${sourceFilename})

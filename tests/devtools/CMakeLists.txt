@@ -12,6 +12,7 @@
 polar_setup_lit_cfg_setters(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    OUTPUT_NAME devtools_tests
    SKIP_DIRS "Inputs")
+
 set_target_properties(devtools_tests
    PROPERTIES
    COMPILE_DEFINITIONS "${REGRESSION_TEST_DEFS}")
