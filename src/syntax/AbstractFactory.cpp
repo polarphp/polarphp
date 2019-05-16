@@ -148,7 +148,7 @@ TypeSyntax AbstractFactory::makeBlankType(RefCountPtr<SyntaxArena> arena)
    return make<TypeSyntax>(raw);
 }
 
-TokenSyntax AbstractFactory::makeToken(RefCountPtr<SyntaxArena> arena)
+TokenSyntax AbstractFactory::makeBlankToken(RefCountPtr<SyntaxArena> arena)
 {
    auto raw = RawSyntax::make(SyntaxKind::Token, {}, SourcePresence::Present, arena);
    return make<TokenSyntax>(raw);
@@ -292,7 +292,10 @@ TokenSyntax AbstractFactory::makeLineKeyword(const Trivia &leadingTrivia,
                                              const Trivia &trailingTrivia,
                                              RefCountPtr<SyntaxArena> arena)
 {
-
+   return makeToken(TokenKindType::T_LINE,
+                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_LINE)),
+                    leadingTrivia, trailingTrivia,
+                    SourcePresence::Present, arena);
 }
 
 } // polar::syntax
