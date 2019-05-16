@@ -336,6 +336,7 @@ mark_as_advanced(POLAR_INSTALL_LOCAL_STATE_DIR)
 
 if (POLAR_BUILD_TYPE STREQUAL "debug")
    set(POLAR_DEBUG_BUILD ON)
+   set(POLAR_DEBUG_MODE ON)
 endif()
 
 # They are used as destination of target generators.

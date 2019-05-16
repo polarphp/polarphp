@@ -35,8 +35,7 @@ function(polar_update_compile_flags name)
       set_property(TARGET ${name} APPEND_STRING PROPERTY
          COMPILE_FLAGS "${target_compile_flags}")
    endif()
-
-   set_property(TARGET ${name} APPEND PROPERTY COMPILE_DEFINITIONS ${POLAR_COMPILE_DEFINITIONS})
+#   set_property(TARGET ${name} APPEND PROPERTY COMPILE_DEFINITIONS "${POLAR_COMPILE_DEFINITIONS}")
 endfunction()
 
 function(polar_add_symbol_exports target_name export_file)

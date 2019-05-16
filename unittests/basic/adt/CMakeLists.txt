@@ -10,6 +10,10 @@
 # Created by polarboy on 2018/10/18.
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+if (POLAR_DEBUG_MODE)
+   polar_add_definitions(-DPOLAR_DEBUG_MODE)
+endif()
+
 polar_add_unittest(PolarBaseLibTests BasicAdtTest
    ../../TestEntry.cpp
    ApIntTest.cpp

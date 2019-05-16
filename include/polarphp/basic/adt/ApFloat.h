@@ -164,10 +164,10 @@ struct ApFloatBase
    /// \name Floating Point Semantics.
    /// @{
 
-   static const FltSemantics &getIEEEhalf() POLAR_READNONE;
-   static const FltSemantics &getIEEEsingle() POLAR_READNONE;
-   static const FltSemantics &getIEEEdouble() POLAR_READNONE;
-   static const FltSemantics &getIEEEquad() POLAR_READNONE;
+   static const FltSemantics &getIEEEHalf() POLAR_READNONE;
+   static const FltSemantics &getIEEESingle() POLAR_READNONE;
+   static const FltSemantics &getIEEEDouble() POLAR_READNONE;
+   static const FltSemantics &getIEEEQuad() POLAR_READNONE;
    static const FltSemantics &getPPCDoubleDouble() POLAR_READNONE;
    static const FltSemantics &getX87DoubleExtended() POLAR_READNONE;
 
@@ -636,7 +636,7 @@ IEEEFloat frexp(const IEEEFloat &value, int &exp, IEEEFloat::RoundingMode rmode)
 // This mode implements more precise float in terms of two ApFloats.
 // The interface and layout is designed for arbitray underlying semantics,
 // though currently only getPPCDoubleDouble semantics are supported, whose
-// corresponding underlying semantics are getIEEEdouble.
+// corresponding underlying semantics are getIEEEDouble.
 class DoubleApFloat final : public ApFloatBase
 {
    // Note: this must be the first data member.
@@ -929,7 +929,7 @@ class ApFloat : public ApFloatBase
    // FIXME: This is due to clang 3.3 (or older version) always checks for the
    // default constructor in an array aggregate initialization, even if no
    // elements in the array is default initialized.
-   ApFloat() : m_storage(getIEEEdouble())
+   ApFloat() : m_storage(getIEEEDouble())
    {
       polar_unreachable("This is a workaround for old clang.");
    }
@@ -967,10 +967,10 @@ public:
 
    ApFloat(const FltSemantics &semantics, const ApInt &ivalue) : m_storage(semantics, ivalue)
    {}
-   explicit ApFloat(double dvalue) : m_storage(IEEEFloat(dvalue), getIEEEdouble())
+   explicit ApFloat(double dvalue) : m_storage(IEEEFloat(dvalue), getIEEEDouble())
    {}
 
-   explicit ApFloat(float fvalue) : m_storage(IEEEFloat(fvalue), getIEEEsingle())
+   explicit ApFloat(float fvalue) : m_storage(IEEEFloat(fvalue), getIEEESingle())
    {}
 
    ApFloat(const ApFloat &other) = default;

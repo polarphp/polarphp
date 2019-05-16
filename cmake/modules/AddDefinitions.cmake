@@ -18,7 +18,7 @@ macro(polar_add_definitions)
    # We don't want no semicolons on POLAR_DEFINITIONS:
    foreach(arg ${ARGN})
       if(DEFINED POLAR_COMPILE_DEFINITIONS)
-         set(POLAR_COMPILE_DEFINITIONS "${POLAR_DEFINITIONS} ${arg}")
+         set(POLAR_COMPILE_DEFINITIONS "${POLAR_COMPILE_DEFINITIONS} ${arg}")
       else()
          set(POLAR_COMPILE_DEFINITIONS ${arg})
       endif()

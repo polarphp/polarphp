@@ -115,22 +115,22 @@ static const FltSemantics sg_semPPCDoubleDouble = {-1, 0, 0, 0};
 static const FltSemantics sg_semPPCDoubleDoubleLegacy = {1023, -1022 + 53,
                                                          53 + 53, 128};
 
-const FltSemantics &ApFloatBase::getIEEEhalf()
+const FltSemantics &ApFloatBase::getIEEEHalf()
 {
    return sg_semIEEEhalf;
 }
 
-const FltSemantics &ApFloatBase::getIEEEsingle()
+const FltSemantics &ApFloatBase::getIEEESingle()
 {
    return sg_semIEEEsingle;
 }
 
-const FltSemantics &ApFloatBase::getIEEEdouble()
+const FltSemantics &ApFloatBase::getIEEEDouble()
 {
    return sg_semIEEEdouble;
 }
 
-const FltSemantics &ApFloatBase::getIEEEquad()
+const FltSemantics &ApFloatBase::getIEEEQuad()
 {
    return sg_semIEEEquad;
 }
@@ -3154,7 +3154,7 @@ ApInt IEEEFloat::bitcastToApInt() const
 float IEEEFloat::convertToFloat() const
 {
    assert(m_semantics == (const FltSemantics*)&sg_semIEEEsingle &&
-          "Float semantics are not IEEEsingle");
+          "Float semantics are not IEEESingle");
    ApInt api = bitcastToApInt();
    return api.bitsToFloat();
 }
@@ -3162,7 +3162,7 @@ float IEEEFloat::convertToFloat() const
 double IEEEFloat::convertToDouble() const
 {
    assert(m_semantics == (const FltSemantics*)&sg_semIEEEdouble &&
-          "Float semantics are not IEEEdouble");
+          "Float semantics are not IEEEDouble");
    ApInt api = bitcastToApInt();
    return api.bitsToDouble();
 }
