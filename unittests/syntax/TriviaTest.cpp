@@ -21,10 +21,60 @@ using polar::utils::RawSvectorOutStream;
 TEST(TriviaTest, testEmpty)
 {
    {
-//      SmallString<1> scratch;
-//      RawSvectorOutStream outStream(scratch);
-//      Trivia::getSpace(0).print(outStream);
-//      ASSERT_EQ(outStream.getStr(), "");
+      SmallString<1> scratch;
+      RawSvectorOutStream outStream(scratch);
+      Trivia::getSpace(0).print(outStream);
+      ASSERT_EQ(outStream.getStr(), "");
+   }
+   {
+      SmallString<1> scratch;
+      RawSvectorOutStream outStream(scratch);
+      Trivia::getTab(0).print(outStream);
+      ASSERT_EQ(outStream.getStr(), "");
+   }
+   {
+      SmallString<1> scratch;
+      RawSvectorOutStream outStream(scratch);
+      Trivia::getNewline(0).print(outStream);
+      ASSERT_EQ(outStream.getStr(), "");
+   }
+#ifdef POLAR_DEBUG_BUILD
+   {
+      SmallString<1> scratch;
+      RawSvectorOutStream outStream(scratch);
+      Trivia::getLineComment("").print(outStream);
+      ASSERT_EQ(outStream.getStr(), "");
+   }
+   {
+      SmallString<1> scratch;
+      RawSvectorOutStream outStream(scratch);
+      Trivia::getBlockComment("").print(outStream);
+      ASSERT_EQ(outStream.getStr(), "");
+   }
+   {
+      SmallString<1> scratch;
+      RawSvectorOutStream outStream(scratch);
+      Trivia::getDocLineComment("").print(outStream);
+      ASSERT_EQ(outStream.getStr(), "");
+   }
+   {
+      SmallString<1> scratch;
+      RawSvectorOutStream outStream(scratch);
+      Trivia::getDocBlockComment("").print(outStream);
+      ASSERT_EQ(outStream.getStr(), "");
+   }
+   {
+      SmallString<1> scratch;
+      RawSvectorOutStream outStream(scratch);
+      Trivia::getGarbageText("").print(outStream);
+      ASSERT_EQ(outStream.getStr(), "");
+   }
+#endif
+   {
+      SmallString<1> scratch;
+      RawSvectorOutStream outStream(scratch);
+      Trivia().print(outStream);
+      ASSERT_EQ(outStream.getStr(), "");
    }
 }
 
