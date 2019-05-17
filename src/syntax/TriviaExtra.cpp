@@ -53,4 +53,13 @@ StringRef retrieve_trivia_kind_characters(TriviaKind kind)
    return std::get<1>(iter->second).getStr();
 }
 
+uint32_t retrieve_trivia_kind_characters_count(TriviaKind kind)
+{
+   auto iter = scg_triviaKindTable.find(kind);
+   if (iter == scg_triviaKindTable.end()) {
+      return 0;
+   }
+   return std::get<1>(iter->second).getStr().getSize();
+}
+
 } // polar::syntax

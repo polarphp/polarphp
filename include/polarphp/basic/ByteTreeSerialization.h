@@ -60,7 +60,7 @@ struct ObjectTraits
    /// \p object gets serialized. \p m_userInfo can contain arbitrary values that
    /// can modify the serialization behaviour and gets passed down from the
    /// serialization invocation.
-   // static unsigned numFields(const T &object, UserInfoMap &m_userInfo);
+   // static unsigned getNumFields(const T &object, UserInfoMap &m_userInfo);
 
    /// Serialize \p object by calling \c writer.write for all the fields of
    /// \p object. \p m_userInfo can contain arbitrary values that can modify the
@@ -121,7 +121,7 @@ struct HasObjectTraits
    UserInfoMap &m_userInfo);
 
    template <typename U>
-   static char test(SameType<Signature_numFields, &U::numFields> *,
+   static char test(SameType<Signature_numFields, &U::getNumFields> *,
                     SameType<SignatureWrite, &U::write> *);
 
    template <typename U>
@@ -217,24 +217,24 @@ private:
 
    /// Set the expected number of fields the object written by this writer is
    /// expected to have.
-   void setNumFields(uint32_t numFields) {
-      assert(numFields != UINT_MAX &&
-            "numFields may not be reset since it has already been written to "
+   void setNumFields(uint32_t getNumFields) {
+      assert(getNumFields != UINT_MAX &&
+            "getNumFields may not be reset since it has already been written to "
             "the byte m_stream");
       assert((m_numFields == UINT_MAX) && "m_numFields has already been set");
       // Num fields cannot exceed (1 << 31) since it would otherwise interfere
       // with the bitflag that indicates if the next construct in the tree is an
       // object or a scalar.
-      assert((numFields & ((uint32_t)1 << 31)) == 0 && "Field size too large");
+      assert((getNumFields & ((uint32_t)1 << 31)) == 0 && "Field size too large");
 
       // Set the most significant bit to indicate that the next construct is an
       // object and not a scalar.
-      uint32_t toWrite = numFields | (1 << 31);
+      uint32_t toWrite = getNumFields | (1 << 31);
       auto error = writeRaw(toWrite);
       (void)error;
       assert(!error);
 
-      this->m_numFields = numFields;
+      this->m_numFields = getNumFields;
    }
 
    /// Validate that \p index is the next field that is expected to be written,
@@ -285,7 +285,7 @@ public:
    {
       validateAndIncreaseFieldIndex(index);
       auto objectWriter = ByteTreeWriter(m_stream, m_streamWriter, m_userInfo);
-      objectWriter.setNumFields(ObjectTraits<T>::numFields(object, m_userInfo));
+      objectWriter.setNumFields(ObjectTraits<T>::getNumFields(object, m_userInfo));
 
       ObjectTraits<T>::write(objectWriter, object, m_userInfo);
    }
@@ -388,7 +388,7 @@ template <>
 struct ObjectTraits<std::nullopt_t>
 {
    // Serialize llvm::None as an object without any elements
-   static unsigned numFields(const std::nullopt_t &object,
+   static unsigned getNumFields(const std::nullopt_t &object,
                              UserInfoMap &userInfo)
    {
       return 0;

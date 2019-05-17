@@ -35,15 +35,18 @@ TriviaPiece TriviaPiece::fromText(TriviaKind kind, StringRef text)
    case TriviaKind::Newline:
    case TriviaKind::CarriageReturn:
    case TriviaKind::Backtick:
+   case TriviaKind::CarriageReturnLineFeed:
+   {
+      unsigned charCount = retrieve_trivia_kind_characters_count(kind);
+      assert(text.size() % charCount == 0);
+      return TriviaPiece(kind, text.size() / charCount);
+   }
    case TriviaKind::LineComment:
    case TriviaKind::BlockComment:
    case TriviaKind::DocLineComment:
    case TriviaKind::DocBlockComment:
    case TriviaKind::GarbageText:
       return TriviaPiece(kind, OwnedString::makeRefCounted(text));
-   case TriviaKind::CarriageReturnLineFeed:
-      assert(text.size() % 2 == 0);
-      return TriviaPiece(kind, text.size() / 2);
    }
    polar_unreachable("unknown kind");
 }
@@ -54,6 +57,7 @@ void TriviaPiece::dump(RawOutStream &outStream, unsigned indent) const
       outStream << ' ';
    }
    outStream << "(trivia ";
+   outStream << retrieve_trivia_kind_name(m_kind);
    switch (m_kind) {
    case TriviaKind::Space:
    case TriviaKind::Tab:
@@ -62,24 +66,31 @@ void TriviaPiece::dump(RawOutStream &outStream, unsigned indent) const
    case TriviaKind::Newline:
    case TriviaKind::CarriageReturn:
    case TriviaKind::Backtick:
+   case TriviaKind::CarriageReturnLineFeed:
+   {
+      outStream << m_count;
+      break;
+   }
    case TriviaKind::LineComment:
    case TriviaKind::BlockComment:
    case TriviaKind::DocLineComment:
    case TriviaKind::DocBlockComment:
    case TriviaKind::GarbageText:
-      retrieve_trivia_kind_name(m_kind);
+   {
       outStream.writeEscaped(m_text.getStr());
       break;
-   case TriviaKind::CarriageReturnLineFeed:
-      retrieve_trivia_kind_name(m_kind);
-      outStream << m_count;
-      break;
+   }
    default:
       polar_unreachable("unknown kind");
    }
    outStream << ')';
 }
 
+///
+/// \brief is_comment_trivia_kind
+/// \param kind
+/// \return
+///
 bool is_comment_trivia_kind(TriviaKind kind)
 {
    switch (kind) {
@@ -109,21 +120,32 @@ void TriviaPiece::accumulateAbsolutePosition(AbsolutePosition &pos) const
    switch (m_kind) {
    case TriviaKind::Newline:
    case TriviaKind::CarriageReturn:
+   case TriviaKind::CarriageReturnLineFeed:
+   {
+      /// newline
+      pos.addNewlines(m_count, retrieve_trivia_kind_characters_count(m_kind));
+      break;
+   }
    case TriviaKind::Space:
    case TriviaKind::Tab:
    case TriviaKind::VerticalTab:
    case TriviaKind::Formfeed:
    case TriviaKind::Backtick:
+
+   {
+      /// collection
+      pos.addColumns(m_count);
+      break;
+   }
    case TriviaKind::GarbageText:
    case TriviaKind::LineComment:
    case TriviaKind::BlockComment:
    case TriviaKind::DocLineComment:
    case TriviaKind::DocBlockComment:
+   {
       pos.addText(m_text.getStr());
       break;
-   case TriviaKind::CarriageReturnLineFeed:
-      pos.addNewlines(m_count, 2);
-      break;
+   }
    default:
       polar_unreachable("unknown kind");
    }
@@ -142,15 +164,19 @@ bool TriviaPiece::trySquash(const TriviaPiece &next)
    case TriviaKind::Newline:
    case TriviaKind::CarriageReturn:
    case TriviaKind::Backtick:
+   case TriviaKind::CarriageReturnLineFeed:
+   {
+      m_count += next.m_count;
+      return true;
+   }
    case TriviaKind::LineComment:
    case TriviaKind::BlockComment:
    case TriviaKind::DocLineComment:
    case TriviaKind::DocBlockComment:
    case TriviaKind::GarbageText:
+   {
       return false;
-   case TriviaKind::CarriageReturnLineFeed:
-      m_count += next.m_count;
-      return true;
+   }
    default:
       polar_unreachable("unknown kind");
    }
@@ -166,19 +192,21 @@ void TriviaPiece::print(RawOutStream &outStream) const
    case TriviaKind::Newline:
    case TriviaKind::CarriageReturn:
    case TriviaKind::Backtick:
-   case TriviaKind::LineComment:
-   case TriviaKind::BlockComment:
-   case TriviaKind::DocLineComment:
-   case TriviaKind::DocBlockComment:
-   case TriviaKind::GarbageText: {
-      outStream << m_text.getStr();
-      break;
-   }
-   case TriviaKind::CarriageReturnLineFeed: {
+   case TriviaKind::CarriageReturnLineFeed:
+   {
       StringRef chars = retrieve_trivia_kind_characters(m_kind);
       for (uint i = 0; i < m_count; ++i) {
          outStream << chars;
       }
+      break;
+   }
+   case TriviaKind::LineComment:
+   case TriviaKind::BlockComment:
+   case TriviaKind::DocLineComment:
+   case TriviaKind::DocBlockComment:
+   case TriviaKind::GarbageText:
+   {
+      outStream << m_text.getStr();
       break;
    }
    default:

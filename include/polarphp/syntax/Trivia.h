@@ -128,18 +128,23 @@ enum class TriviaKind : uint8_t
    // A backtick '`' character, used to escape identifiers.
    Backtick,
    // A developer line comment, starting with "//"
+   // is_comment: true
    LineComment,
    // A developer block comment, starting with "/*" and ending with "*/".
+   // is_comment: true
    BlockComment,
    // A documentation line comment, starting with "///".
+   // is_comment: true
    DocLineComment,
    // A documentation block comment, starting with "/**" and ending with "*/".
+   // is_comment: true
    DocBlockComment,
    // Any skipped garbage text.
    GarbageText
 };
 
 bool is_comment_trivia_kind(TriviaKind kind);
+uint32_t retrieve_trivia_kind_characters_count(TriviaKind kind);
 
 /// A contiguous stretch of a single kind of trivia. The constituent part of
 /// a `trivia` collection.
@@ -157,39 +162,85 @@ class TriviaPiece
 public:
 
    /// single char trivia
-   static TriviaPiece getSpace(const OwnedString text)
+   static TriviaPiece getSpaces(unsigned count)
    {
-      return {TriviaKind::Space, text};
+      return {TriviaKind::Space, count};
    }
 
-   static TriviaPiece getTab(const OwnedString text)
+   static TriviaPiece getSpace(unsigned count)
    {
-      return {TriviaKind::Tab, text};
+      return getSpaces(1);
    }
 
-   static TriviaPiece getVerticalTab(const OwnedString text)
+   static TriviaPiece getTabs(unsigned count)
    {
-      return {TriviaKind::VerticalTab, text};
+      return {TriviaKind::Tab, count};
    }
 
-   static TriviaPiece getFormfeed(const OwnedString text)
+   static TriviaPiece getTab()
    {
-      return {TriviaKind::Formfeed, text};
+      return getTabs(1);
    }
 
-   static TriviaPiece getNewline(const OwnedString text)
+   static TriviaPiece getVerticalTabs(unsigned count)
    {
-      return {TriviaKind::Newline, text};
+      return {TriviaKind::VerticalTab, count};
    }
 
-   static TriviaPiece getCarriageReturn(const OwnedString text)
+   static TriviaPiece getVerticalTab()
    {
-      return {TriviaKind::CarriageReturn, text};
+      return getVerticalTabs(1);
    }
 
-   static TriviaPiece getBacktick(const OwnedString text)
+   static TriviaPiece getFormfeeds(unsigned count)
    {
-      return {TriviaKind::Backtick, text};
+      return {TriviaKind::Formfeed, count};
+   }
+
+   static TriviaPiece getFormfeed()
+   {
+      return getFormfeeds(1);
+   }
+
+   static TriviaPiece getNewlines(unsigned count)
+   {
+      return {TriviaKind::Newline, count};
+   }
+
+   static TriviaPiece getNewline()
+   {
+      return getNewlines(1);
+   }
+
+   static TriviaPiece getCarriageReturns(unsigned count)
+   {
+      return {TriviaKind::CarriageReturn, count};
+   }
+
+   static TriviaPiece getCarriageReturn()
+   {
+      return getCarriageReturns(1);
+   }
+
+   static TriviaPiece getBackticks(unsigned count)
+   {
+      return {TriviaKind::Backtick, count};
+   }
+
+   static TriviaPiece getBacktick()
+   {
+      return getBackticks(1);
+   }
+
+   /// multi char trivia
+   static TriviaPiece getCarriageReturnLineFeeds(unsigned count)
+   {
+      return {TriviaKind::CarriageReturnLineFeed, count};
+   }
+
+   static TriviaPiece getCarriageReturnLineFeed()
+   {
+      return getCarriageReturnLineFeeds(1);
    }
 
    static TriviaPiece getLineComment(const OwnedString text)
@@ -215,17 +266,6 @@ public:
    static TriviaPiece getGarbageText(const OwnedString text)
    {
       return {TriviaKind::GarbageText, text};
-   }
-
-   /// multi char trivia
-   static TriviaPiece getCarriageReturnLineFeeds(unsigned count)
-   {
-      return {TriviaKind::CarriageReturnLineFeed, count};
-   }
-
-   static TriviaPiece getCarriageReturnLineFeed()
-   {
-      return getCarriageReturnLineFeeds(1);
    }
 
    static TriviaPiece fromText(TriviaKind kind, StringRef text);
@@ -259,14 +299,14 @@ public:
       case TriviaKind::Newline:
       case TriviaKind::CarriageReturn:
       case TriviaKind::Backtick:
+      case TriviaKind::CarriageReturnLineFeed:
+         return m_count * retrieve_trivia_kind_characters_count(m_kind);
       case TriviaKind::LineComment:
       case TriviaKind::BlockComment:
       case TriviaKind::DocLineComment:
       case TriviaKind::DocBlockComment:
       case TriviaKind::GarbageText:
          return m_text.getSize();
-      case TriviaKind::CarriageReturnLineFeed:
-         return m_count * 2;
       }
       polar_unreachable("unhandled kind");
    }
@@ -305,13 +345,6 @@ public:
    {
       id.addInteger(unsigned(m_kind));
       switch (m_kind) {
-      case TriviaKind::Space:
-      case TriviaKind::Tab:
-      case TriviaKind::VerticalTab:
-      case TriviaKind::Formfeed:
-      case TriviaKind::Newline:
-      case TriviaKind::CarriageReturn:
-      case TriviaKind::Backtick:
       case TriviaKind::LineComment:
       case TriviaKind::BlockComment:
       case TriviaKind::DocLineComment:
@@ -319,6 +352,13 @@ public:
       case TriviaKind::GarbageText:
          id.addString(m_text.getStr());
          break;
+      case TriviaKind::Space:
+      case TriviaKind::Tab:
+      case TriviaKind::VerticalTab:
+      case TriviaKind::Formfeed:
+      case TriviaKind::Newline:
+      case TriviaKind::CarriageReturn:
+      case TriviaKind::Backtick:
       case TriviaKind::CarriageReturnLineFeed:
          id.addInteger(m_count);
          break;
@@ -491,39 +531,88 @@ struct Trivia
    }
 
    /// single char trivia
-   static Trivia getSpace(const OwnedString text)
+
+   static Trivia getSpaces(unsigned count)
    {
-      return {{TriviaPiece::getSpace(text)}};
+      if (0 == count) {
+         return {};
+      }
+      return {{TriviaPiece::getSpaces(count)}};
    }
 
-   static Trivia getTab(const OwnedString text)
+   static Trivia getSpace()
    {
-      return {{TriviaPiece::getTab(text)}};
+      return {{TriviaPiece::getSpaces(1)}};
    }
 
-   static Trivia getVerticalTab(const OwnedString text)
+   static Trivia getTabs(unsigned count)
    {
-      return {{TriviaPiece::getVerticalTab(text)}};
+      return {{TriviaPiece::getTabs(count)}};
    }
 
-   static Trivia getFormfeed(const OwnedString text)
+   static Trivia getTab()
    {
-      return {{TriviaPiece::getFormfeed(text)}};
+      return {{TriviaPiece::getTabs(1)}};
    }
 
-   static Trivia getNewline(const OwnedString text)
+   static Trivia getVerticalTabs(unsigned count)
    {
-      return {{TriviaPiece::getNewline(text)}};
+      return {{TriviaPiece::getVerticalTabs(count)}};
    }
 
-   static Trivia getCarriageReturn(const OwnedString text)
+   static Trivia getVerticalTab()
    {
-      return {{TriviaPiece::getCarriageReturn(text)}};
+      return {{TriviaPiece::getVerticalTabs(1)}};
    }
 
-   static Trivia getBacktick(const OwnedString text)
+   static Trivia getFormfeeds(unsigned count)
    {
-      return {{TriviaPiece::getBacktick(text)}};
+      return {{TriviaPiece::getFormfeeds(count)}};
+   }
+
+   static Trivia getFormfeed()
+   {
+      return {{TriviaPiece::getFormfeeds(1)}};
+   }
+
+   static Trivia getNewlines(unsigned count)
+   {
+      return {{TriviaPiece::getNewlines(count)}};
+   }
+
+   static Trivia getNewline()
+   {
+      return {{TriviaPiece::getNewlines(1)}};
+   }
+
+   static Trivia getCarriageReturns(unsigned count)
+   {
+      return {{TriviaPiece::getCarriageReturns(count)}};
+   }
+
+   static Trivia getCarriageReturn()
+   {
+      return {{TriviaPiece::getCarriageReturns(1)}};
+   }
+
+   static Trivia getBackticks(unsigned count)
+   {
+      return {{TriviaPiece::getBackticks(count)}};
+   }
+
+   static Trivia getBacktick()
+   {
+      return {{TriviaPiece::getBackticks(1)}};
+   }
+
+   static Trivia getCarriageReturnLineFeeds(unsigned count)
+   {
+      return {{TriviaPiece::getCarriageReturnLineFeeds(count)}};
+   }
+
+   static Trivia getCarriageReturnLineFeed()
+   {
+      return {{TriviaPiece::getCarriageReturnLineFeeds(1)}};
    }
 
    static Trivia getLineComment(const OwnedString text)
@@ -550,18 +639,6 @@ struct Trivia
    {
       return {{TriviaPiece::getGarbageText(text)}};
    }
-
-   /// multi char trivia
-   static Trivia getCarriageReturnLineFeeds(unsigned count)
-   {
-      return {{TriviaPiece::getCarriageReturnLineFeeds(count)}};
-   }
-
-   static Trivia getCarriageReturnLineFeed()
-   {
-      return {{TriviaPiece::getCarriageReturnLineFeeds(1)}};
-   }
-
 private:
    static bool checkTriviaText(StringRef text, TriviaKind kind)
    {
@@ -611,8 +688,8 @@ struct WrapperTypeTraits<syntax::TriviaKind>
 template <>
 struct ObjectTraits<syntax::TriviaPiece>
 {
-   static unsigned numFields(const syntax::TriviaPiece &trivia,
-                             UserInfoMap &userInfo)
+   static unsigned getNumFields(const syntax::TriviaPiece &trivia,
+                                UserInfoMap &userInfo)
    {
       return 2;
    }
@@ -631,15 +708,15 @@ struct ObjectTraits<syntax::TriviaPiece>
       case TriviaKind::Newline:
       case TriviaKind::CarriageReturn:
       case TriviaKind::Backtick:
+      case TriviaKind::CarriageReturnLineFeed:
+         writer.write(static_cast<uint32_t>(trivia.getCount()), /*Index=*/1);
+         break;
       case TriviaKind::LineComment:
       case TriviaKind::BlockComment:
       case TriviaKind::DocLineComment:
       case TriviaKind::DocBlockComment:
       case TriviaKind::GarbageText:
          writer.write(trivia.getText(), /*Index=*/ 1);
-         break;
-      case TriviaKind::CarriageReturnLineFeed:
-         writer.write(static_cast<uint32_t>(trivia.getCount()), /*Index=*/1);
          break;
       }
    }
@@ -674,16 +751,6 @@ struct MappingTraits<polar::syntax::TriviaPiece>
       case TriviaKind::Newline:
       case TriviaKind::CarriageReturn:
       case TriviaKind::Backtick:
-      case TriviaKind::LineComment:
-      case TriviaKind::BlockComment:
-      case TriviaKind::DocLineComment:
-      case TriviaKind::DocBlockComment:
-      case TriviaKind::GarbageText: {
-         StringRef text;
-         in.mapRequired("value", text);
-         return polar::syntax::TriviaPiece(
-                  kind, polar::basic::OwnedString::makeRefCounted(text));
-      }
       case TriviaKind::CarriageReturnLineFeed:
       {
          /// FIXME: This is a workaround for existing bug from llvm yaml parser
@@ -693,6 +760,16 @@ struct MappingTraits<polar::syntax::TriviaPiece>
          in.mapRequired("value", str);
          unsigned count = std::atoi(str.data());
          return polar::syntax::TriviaPiece(kind, count);
+      }
+      case TriviaKind::LineComment:
+      case TriviaKind::BlockComment:
+      case TriviaKind::DocLineComment:
+      case TriviaKind::DocBlockComment:
+      case TriviaKind::GarbageText: {
+         StringRef text;
+         in.mapRequired("value", text);
+         return polar::syntax::TriviaPiece(
+                  kind, polar::basic::OwnedString::makeRefCounted(text));
       }
       }
    }
