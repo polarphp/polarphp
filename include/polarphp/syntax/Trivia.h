@@ -547,6 +547,9 @@ struct Trivia
 
    static Trivia getTabs(unsigned count)
    {
+      if (0 == count) {
+         return {};
+      }
       return {{TriviaPiece::getTabs(count)}};
    }
 
@@ -557,6 +560,9 @@ struct Trivia
 
    static Trivia getVerticalTabs(unsigned count)
    {
+      if (0 == count) {
+         return {};
+      }
       return {{TriviaPiece::getVerticalTabs(count)}};
    }
 
@@ -567,6 +573,9 @@ struct Trivia
 
    static Trivia getFormfeeds(unsigned count)
    {
+      if (0 == count) {
+         return {};
+      }
       return {{TriviaPiece::getFormfeeds(count)}};
    }
 
@@ -577,6 +586,9 @@ struct Trivia
 
    static Trivia getNewlines(unsigned count)
    {
+      if (0 == count) {
+         return {};
+      }
       return {{TriviaPiece::getNewlines(count)}};
    }
 
@@ -587,6 +599,9 @@ struct Trivia
 
    static Trivia getCarriageReturns(unsigned count)
    {
+      if (0 == count) {
+         return {};
+      }
       return {{TriviaPiece::getCarriageReturns(count)}};
    }
 
@@ -597,6 +612,9 @@ struct Trivia
 
    static Trivia getBackticks(unsigned count)
    {
+      if (0 == count) {
+         return {};
+      }
       return {{TriviaPiece::getBackticks(count)}};
    }
 
@@ -607,6 +625,9 @@ struct Trivia
 
    static Trivia getCarriageReturnLineFeeds(unsigned count)
    {
+      if (0 == count) {
+         return {};
+      }
       return {{TriviaPiece::getCarriageReturnLineFeeds(count)}};
    }
 

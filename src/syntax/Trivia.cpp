@@ -131,7 +131,6 @@ void TriviaPiece::accumulateAbsolutePosition(AbsolutePosition &pos) const
    case TriviaKind::VerticalTab:
    case TriviaKind::Formfeed:
    case TriviaKind::Backtick:
-
    {
       /// collection
       pos.addColumns(m_count);
