@@ -17,10 +17,5 @@ polar_merge_list(POLAR_SYNTAX_SOURCES POLAR_HEADERS)
 
 polar_add_library(PolarSyntax SHARED BUILDTREE_ONLY
    ${POLAR_SYNTAX_SOURCES}
-   LINK_LIBS PolarUtils PolarBasic)
+   LINK_LIBS PolarUtils)
 
-#set_target_properties(
-#   PolarAst
-#   PROPERTIES
-#   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR};"
-#   )

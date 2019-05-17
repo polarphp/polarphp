@@ -44,19 +44,17 @@ namespace cmd = polar::cmd;
 using polar::utils::TimerGroup;
 using polar::utils::ManagedStatic;
 
-namespace {
 /// -stats - Command line option to cause transformations to emit stats about
 /// what they did.
 ///
-cmd::Opt<bool> sg_stats(
+static cmd::Opt<bool> sg_stats(
       "stats",
       cmd::Desc("Enable statistics output from program (available with Asserts)"),
       cmd::Hidden);
 
-cmd::Opt<bool> sg_statsAsJson("stats-json",
+static cmd::Opt<bool> sg_statsAsJson("stats-json",
                               cmd::Desc("Display statistics as json data"),
                               cmd::Hidden);
-} // anonymous namespace
 
 static bool sg_enabled;
 static bool sg_printOnExit;

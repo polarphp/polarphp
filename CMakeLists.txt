@@ -312,6 +312,7 @@ mark_as_advanced(POLAR_TARGET_TRIPLE_ENV)
 option(POLAR_DEV_BUILD_DEVTOOLS_TESTS "turn on to build tests of devtools" OFF)
 option(POLAR_DEV_BUILD_POLARPHP_TESTS "turn on to build tests of devtools" ON)
 option(POLAR_DEV_BUILD_LLVM_UNITTEST "turn on llvm support libraries unitests" OFF)
+option(POLAR_DEV_BUILD_POLARPHP_UNITTEST "turn on polarphp libraries unitests" ON)
 option(POLAR_DEV_BUILD_VMAPI_UNITEST "turn on to build unittests of vmapi" ON)
 
 # install dir setup options

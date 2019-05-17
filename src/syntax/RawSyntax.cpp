@@ -25,6 +25,7 @@ bool is_trivial_syntax_kind(SyntaxKind kind)
       return true;
    }
    switch(kind) {
+   case SyntaxKind::CodeBlockItem:
    return true;
    default:
       return false;

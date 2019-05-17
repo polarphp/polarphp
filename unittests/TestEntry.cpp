@@ -10,7 +10,6 @@
 // Created by polarboy on 2018/10/12.
 
 #include "polarphp/utils/Signals.h"
-#include "polarphp/utils/CommandLine.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
