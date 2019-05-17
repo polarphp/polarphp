@@ -13,7 +13,7 @@
 #define POLARPHP_SYNTAX_BUILDER_COMMON_SYNTAX_NODE_BUILDERS_H
 
 #include "polarphp/syntax/RawSyntax.h"
-#include "polarphp/syntax/syntaxnode/CommonNodes.h"
+#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
 
 namespace polar::syntax {
 

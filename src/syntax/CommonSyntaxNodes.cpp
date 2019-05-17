@@ -9,7 +9,7 @@
 //
 // Created by polarboy on 2019/05/14.
 
-#include "polarphp/syntax/syntaxnode/CommonNodes.h"
+#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
 #include "polarphp/syntax/TokenKinds.h"
 
 namespace polar::syntax {

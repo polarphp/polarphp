@@ -13,6 +13,7 @@
 #define POLARPHP_SYNTAX_BUILDERS_H
 
 #include "polarphp/syntax/builder/CommonSyntaxNodeBuilders.h"
+#include "polarphp/syntax/builder/DeclSyntaxNodeBuilders.h"
 #include "polarphp/syntax/builder/ExprSyntaxNodeBuilders.h"
 #include "polarphp/syntax/builder/StmtSyntaxNodeBuilders.h"
 

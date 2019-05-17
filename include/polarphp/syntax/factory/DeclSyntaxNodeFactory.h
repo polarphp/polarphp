@@ -7,21 +7,21 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2019/05/08.
+// Created by polarboy on 2019/05/17.
 
-#ifndef POLARPHP_SYNTAX_NODES_H
-#define POLARPHP_SYNTAX_NODES_H
+#ifndef POLARPHP_SYNTAX_FACTORY_DECL_SYNTAX_NODE_FACTORY_H
+#define POLARPHP_SYNTAX_FACTORY_DECL_SYNTAX_NODE_FACTORY_H
 
-#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
-#include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
-#include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
+#include "polarphp/syntax/AbstractFactory.h"
 
 namespace polar::syntax {
 
-/// Calculating an identifier for all syntax nodes' structures for verification
-/// purposes.
-const char* get_syntax_structure_versioning_identifier();
+class DeclSyntaxNodeFactory final : public AbstractFactory
+{
+public:
+   static Syntax makeBlankCollectionSyntax(SyntaxKind kind);
+};
 
 } // polar::syntax
 
-#endif // POLARPHP_SYNTAX_NODES_H
+#endif // POLARPHP_SYNTAX_FACTORY_DECL_SYNTAX_NODE_FACTORY_H
