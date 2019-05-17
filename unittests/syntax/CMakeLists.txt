@@ -9,9 +9,10 @@
 #
 # Created by polarboy on 2019/05/17.
 
-polar_add_unittest(PolarCompilerTests SynyaxTest
+polar_add_unittest(PolarCompilerTests SyntaxTest
    ../TestEntry.cpp
-   TriviaTest.cpp)
+   TriviaTest.cpp
+   AbsolutePositionTest.cpp)
 
-target_link_libraries(SynyaxTest PRIVATE PolarSyntax)
+target_link_libraries(SyntaxTest PRIVATE PolarSyntax)
 
