@@ -292,6 +292,17 @@ public:
       /// optional: false
       Boolean,
    };
+
+#ifdef POLAR_DEBUG_BUILD
+   ///
+   /// Child name: Boolean
+   /// Choices:
+   /// TokenKindType::T_TRUE
+   /// TokenKindType::T_FALSE
+   ///
+   static const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> CHILD_TOKEN_CHOICES;
+#endif
+
 public:
    BooleanLiteralExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)

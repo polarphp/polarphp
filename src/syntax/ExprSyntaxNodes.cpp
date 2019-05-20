@@ -195,4 +195,44 @@ StringLiteralExprSyntax StringLiteralExprSyntax::withString(std::optional<TokenS
    return m_data->replaceChild<StringLiteralExprSyntax>(raw, Cursor::String);
 }
 
+const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> BooleanLiteralExprSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      BooleanLiteralExprSyntax::Boolean, {
+         TokenKindType::T_FALSE,
+               TokenKindType::T_TRUE
+      }
+   }
+};
+
+void BooleanLiteralExprSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   ///
+   /// check Boolean token choice
+   ///
+   syntax_assert_child_token(raw, Boolean, CHILD_TOKEN_CHOICES.at(Boolean));
+   assert(raw->getLayout().size() == BooleanLiteralExprSyntax::CHILDREN_COUNT);
+}
+
+TokenSyntax BooleanLiteralExprSyntax::getBooleanValue()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::Boolean).get()};
+}
+
+BooleanLiteralExprSyntax BooleanLiteralExprSyntax::withBooleanValue(std::optional<TokenSyntax> booleanValue)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (booleanValue.has_value()) {
+      raw = booleanValue->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_TRUE,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_TRUE)));
+   }
+   return m_data->replaceChild<BooleanLiteralExprSyntax>(raw, Cursor::Boolean);
+}
+
 } // polar::syntax

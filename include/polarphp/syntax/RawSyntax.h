@@ -57,20 +57,24 @@
 #endif
 
 #ifndef NDEBUG
-#define syntax_assert_child_token(raw, cursorName, ...)                        \
+#define syntax_assert_child_token(raw, cursorName, choices)                        \
    do {                                                                         \
-      bool __found = false;                                                      \
-      if (auto &__token = raw->getChild(cursor::cursorName)) {                   \
+      bool __found = false;                                                     \
+      std::string errorMsg;                                                   \
+      if (auto &__token = raw->getChild(Cursor::cursorName)) {                   \
          assert(__token->isToken());                                              \
          if (__token->isPresent()) {                                              \
-            for (auto token : {__VA_ARGS__}) {                                     \
-               if (__token->getTokenKind() == token) {                              \
-                  __found = true;                                                    \
-                  break;                                                             \
-               }                                                                    \
-            }                                                                      \
-            assert(__found && "invalid token supplied for " #cursorName            \
-             ", expected one of {" #__VA_ARGS__ "}");             \
+            if (choices.find(__token->getTokenKind()) != choices.end()) {       \
+               __found = true;                                                  \
+            } else {                                                             \
+               errorMsg = "invalid token supplied for " #cursorName             \
+               ", expected one of {";                                            \
+               for (TokenKindType kind : choices) {                              \
+                  errorMsg += get_token_text(kind).getStr();                   \
+               }                                                                \
+               errorMsg += "}";                                                  \
+            }                                                                   \
+            assert(__found && errorMsg.c_str());                                         \
          }                                                                        \
       }                                                                          \
    } while (false)
