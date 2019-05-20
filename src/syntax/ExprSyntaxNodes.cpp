@@ -19,7 +19,7 @@ void NullExpr::validate()
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == 1);
+   assert(raw->getLayout().size() == NullExpr::CHILDREN_COUNT);
 }
 
 TokenSyntax NullExpr::getNullKeyword()
@@ -45,7 +45,7 @@ void ClassRefParentExpr::validate()
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == 1);
+   assert(raw->getLayout().size() == ClassRefParentExpr::CHILDREN_COUNT);
 }
 
 TokenSyntax ClassRefParentExpr::getParentKeyword()
@@ -71,7 +71,7 @@ void ClassRefSelfExpr::validate()
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == 1);
+   assert(raw->getLayout().size() == ClassRefSelfExpr::CHILDREN_COUNT);
 }
 
 TokenSyntax ClassRefSelfExpr::getSelfKeyword()
@@ -91,6 +91,15 @@ ClassRefSelfExpr ClassRefSelfExpr::withSelfKeyword(std::optional<TokenSyntax> se
    return m_data->replaceChild<ClassRefSelfExpr>(raw, Cursor::SelfKeyword);
 }
 
+void ClassRefStaticExpr::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ClassRefStaticExpr::CHILDREN_COUNT);
+}
+
 TokenSyntax ClassRefStaticExpr::getStaticKeyword()
 {
    return TokenSyntax{m_root, m_data->getChild(Cursor::StaticKeyword).get()};
@@ -106,6 +115,32 @@ ClassRefStaticExpr ClassRefStaticExpr::withStaticKeyword(std::optional<TokenSynt
                                OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_STATIC)));
    }
    return m_data->replaceChild<ClassRefStaticExpr>(raw, Cursor::StaticKeyword);
+}
+
+void IntegerLiteralExprSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == IntegerLiteralExprSyntax::CHILDREN_COUNT);
+}
+
+TokenSyntax IntegerLiteralExprSyntax::getDigits()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::Digits).get()};
+}
+
+IntegerLiteralExprSyntax IntegerLiteralExprSyntax::withDigits(std::optional<TokenSyntax> digits)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (digits.has_value()) {
+      raw = digits->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_LNUMBER,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_LNUMBER)));
+   }
+   return m_data->replaceChild<IntegerLiteralExprSyntax>(raw, Cursor::Digits);
 }
 
 } // polar::syntax

@@ -30,7 +30,7 @@ void CodeBlockItemSyntax::validate()
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == 3);
+   assert(raw->getLayout().size() == CodeBlockItemSyntax::CHILDREN_COUNT);
    /// validate every child token choices
    /// validate every child token text choices
    /// validate every child node choices
