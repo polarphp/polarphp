@@ -161,7 +161,7 @@ public:
    {}
 
    TokenSyntax getStaticKeyword();
-   ClassRefSelfExpr withStaticKeyword(std::optional<TokenSyntax> staticKeyword);
+   ClassRefStaticExpr withStaticKeyword(std::optional<TokenSyntax> staticKeyword);
 
    static bool kindOf(SyntaxKind kind)
    {

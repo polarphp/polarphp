@@ -177,6 +177,7 @@ namespace polar::syntax{
 %token T_OBJ_REF "this (T_OBJ_REF)"
 %token T_TRUE "true (T_TRUE)"
 %token T_FALSE "false (T_FALSE)"
+%token T_NULL "null (T_NULL)"
 %token T_INSTEADOF  "insteadof (T_INSTEADOF)"
 
 %token T_PUNCTUATOR_START_MARK "punctuator start mark (T_PUNCTUATOR_START_MARK)"

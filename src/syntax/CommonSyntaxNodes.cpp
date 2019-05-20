@@ -83,7 +83,8 @@ CodeBlockItemSyntax CodeBlockItemSyntax::withSemicolon(std::optional<TokenSyntax
    if (semicolon.has_value()) {
       raw = semicolon->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_SEMICOLON, get_token_text(TokenKindType::T_SEMICOLON));
+      raw = RawSyntax::missing(TokenKindType::T_SEMICOLON,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
    }
    return m_data->replaceChild<CodeBlockItemSyntax>(raw, Cursor::Item);
 }
@@ -140,7 +141,8 @@ CodeBlockSyntax CodeBlockSyntax::withLeftBrace(std::optional<TokenSyntax> leftBr
    if (leftBrace.has_value()) {
       raw = leftBrace->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_LEFT_BRACE, get_token_text(TokenKindType::T_LEFT_BRACE));
+      raw = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE)));
    }
    return m_data->replaceChild<CodeBlockSyntax>(raw, Cursor::LeftBrace);
 }
@@ -151,7 +153,8 @@ CodeBlockSyntax CodeBlockSyntax::withRightBrace(std::optional<TokenSyntax> right
    if (rightBrace.has_value()) {
       raw = rightBrace->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE, get_token_text(TokenKindType::T_RIGHT_BRACE));
+      raw = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)));
    }
    return m_data->replaceChild<CodeBlockSyntax>(raw, Cursor::RightBrace);
 }
