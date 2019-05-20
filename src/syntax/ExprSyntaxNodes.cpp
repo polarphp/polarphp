@@ -143,4 +143,56 @@ IntegerLiteralExprSyntax IntegerLiteralExprSyntax::withDigits(std::optional<Toke
    return m_data->replaceChild<IntegerLiteralExprSyntax>(raw, Cursor::Digits);
 }
 
+void FloatLiteralExprSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == FloatLiteralExprSyntax::CHILDREN_COUNT);
+}
+
+TokenSyntax FloatLiteralExprSyntax::getFloatDigits()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::FloatDigits).get()};
+}
+
+FloatLiteralExprSyntax FloatLiteralExprSyntax::withFloatDigits(std::optional<TokenSyntax> digits)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (digits.has_value()) {
+      raw = digits->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_DNUMBER,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_DNUMBER)));
+   }
+   return m_data->replaceChild<FloatLiteralExprSyntax>(raw, Cursor::FloatDigits);
+}
+
+void StringLiteralExprSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == StringLiteralExprSyntax::CHILDREN_COUNT);
+}
+
+TokenSyntax StringLiteralExprSyntax::getString()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::String).get()};
+}
+
+StringLiteralExprSyntax StringLiteralExprSyntax::withString(std::optional<TokenSyntax> str)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (str.has_value()) {
+      raw = str->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_STRING,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_STRING)));
+   }
+   return m_data->replaceChild<StringLiteralExprSyntax>(raw, Cursor::String);
+}
+
 } // polar::syntax

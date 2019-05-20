@@ -230,7 +230,7 @@ public:
    {}
 
    TokenSyntax getFloatDigits();
-   FloatLiteralExprSyntax withFloatDigits();
+   FloatLiteralExprSyntax withFloatDigits(std::optional<TokenSyntax> digits);
 
    static bool kindOf(SyntaxKind kind)
    {
