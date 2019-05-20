@@ -20,20 +20,20 @@
 
 namespace polar::syntax {
 
-class NullExpr;
-class ClassRefParentExpr;
-class ClassRefStaticExpr;
-class ClassRefSelfExpr;
-class IntegerLiteralExpr;
-class FloatLiteralExpr;
-class StringLiteralExpr;
-class BooleanLiteralExpr;
-class TernaryExpr;
-class AssignmentExpr;
-class SequenceExpr;
-class PrefixOperatorExpr;
-class PostfixOperatorExpr;
-class BinaryOperatorExpr;
+class NullExprSyntax;
+class ClassRefParentExprSyntax;
+class ClassRefStaticExprSyntax;
+class ClassRefSelfExprSyntax;
+class IntegerLiteralExprSyntax;
+class FloatLiteralExprSyntax;
+class StringLiteralExprSyntax;
+class BooleanLiteralExprSyntax;
+class TernaryExprSyntax;
+class AssignmentExprSyntax;
+class SequenceExprSyntax;
+class PrefixOperatorExprSyntax;
+class PostfixOperatorExprSyntax;
+class BinaryOperatorExprSyntax;
 
 /// type: SyntaxCollection
 /// element type: ExprSyntax
@@ -337,19 +337,19 @@ public:
    constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 5;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: Expr
+      /// type: ExprSyntax
       /// optional: false
       ConditionExpr,
       /// type: TokenSyntax
       /// optional: false
       QuestionMark,
-      /// type: Expr
+      /// type: ExprSyntax
       /// optional: false
       FirstChoice,
       /// type: TokenSyntax
       /// optional: false
       ColonMark,
-      /// type: Expr
+      /// type: ExprSyntax
       /// optional: false
       SecondChoice
    };
@@ -388,7 +388,7 @@ public:
    /// Returns a copy of the receiver with its `SecondChoice` replaced.
    /// - param newChild: The new `SecondChoice` to replace the node's
    ///                   current `SecondChoice`, if present.
-   TernaryExprSyntax withSecondChoice(std::optional<TokenSyntax> secondChoice);
+   TernaryExprSyntax withSecondChoice(std::optional<ExprSyntax> secondChoice);
 
    static bool kindOf(SyntaxKind kind)
    {

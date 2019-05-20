@@ -235,4 +235,95 @@ BooleanLiteralExprSyntax BooleanLiteralExprSyntax::withBooleanValue(std::optiona
    return m_data->replaceChild<BooleanLiteralExprSyntax>(raw, Cursor::Boolean);
 }
 
+void TernaryExprSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == TernaryExprSyntax::CHILDREN_COUNT);
+}
+
+ExprSyntax TernaryExprSyntax::getConditionExpr()
+{
+   return ExprSyntax{m_root, m_data->getChild(Cursor::ConditionExpr).get()};
+}
+
+TokenSyntax TernaryExprSyntax::getQuestionMark()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::QuestionMark).get()};
+}
+
+ExprSyntax TernaryExprSyntax::getFirstChoice()
+{
+   return ExprSyntax{m_root, m_data->getChild(Cursor::FirstChoice).get()};
+}
+
+TokenSyntax TernaryExprSyntax::getColonMark()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::ColonMark).get()};
+}
+
+ExprSyntax TernaryExprSyntax::getSecondChoice()
+{
+   return ExprSyntax{m_root, m_data->getChild(Cursor::SecondChoice).get()};
+}
+
+TernaryExprSyntax TernaryExprSyntax::withConditionExpr(std::optional<ExprSyntax> conditionExpr)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (conditionExpr.has_value()) {
+      raw = conditionExpr->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<TernaryExprSyntax>(raw, Cursor::ConditionExpr);
+}
+
+TernaryExprSyntax TernaryExprSyntax::withQuestionMark(std::optional<TokenSyntax> questionMark)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (questionMark.has_value()) {
+      raw = questionMark->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_INFIX_QUESTION_MARK,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_INFIX_QUESTION_MARK)));
+   }
+   return m_data->replaceChild<TernaryExprSyntax>(raw, Cursor::QuestionMark);
+}
+
+TernaryExprSyntax TernaryExprSyntax::withFirstChoice(std::optional<ExprSyntax> firstChoice)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (firstChoice.has_value()) {
+      raw = firstChoice->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<TernaryExprSyntax>(raw, Cursor::FirstChoice);
+}
+
+TernaryExprSyntax TernaryExprSyntax::withColonMark(std::optional<TokenSyntax> colonMark)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (colonMark.has_value()) {
+      raw = colonMark->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_COLON,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+   }
+   return m_data->replaceChild<TernaryExprSyntax>(raw, Cursor::ColonMark);
+}
+
+TernaryExprSyntax TernaryExprSyntax::withSecondChoice(std::optional<ExprSyntax> secondChoice)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (secondChoice.has_value()) {
+      raw = secondChoice->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<TernaryExprSyntax>(raw, Cursor::SecondChoice);
+}
+
 } // polar::syntax
