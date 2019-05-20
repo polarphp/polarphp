@@ -42,6 +42,7 @@
 
 #ifdef POLAR_DEBUG_BUILD
 #  include <set>
+#  include <map>
 #endif
 
 #include <optional>
@@ -60,6 +61,7 @@ SyntaxNode make(RefCountPtr<RawSyntax> raw)
 }
 
 const auto cg_noParent = std::nullopt;
+using SyntaxChildrenCountType = uint32_t;
 
 /// The main handle for syntax nodes - subclasses contain all public
 /// structured editing APIs.
@@ -76,9 +78,9 @@ public:
 
 #ifdef POLAR_DEBUG_BUILD
    /// meta info
-   static const std::set<std::string> CHILD_TOKEN_TEXT_CHOICES;
-   static const std::set<TokenKindType> CHILD_TOKEN_CHOICES;
-   static const std::set<SyntaxKind> CHILD_NODE_CHOICES;
+   static const std::map<SyntaxChildrenCountType, std::set<std::string>> CHILD_TOKEN_TEXT_CHOICES;
+   static const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> CHILD_TOKEN_CHOICES;
+   static const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> CHILD_NODE_CHOICES;
 #endif
 
 public:

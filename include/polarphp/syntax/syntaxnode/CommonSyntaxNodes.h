@@ -193,8 +193,7 @@ class CodeBlockItemSyntax final : public Syntax
 public:
    constexpr static unsigned int CHILDREN_COUNT = 3;
    constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
-public:
-   enum Cursor : uint32_t
+   enum Cursor : SyntaxChildrenCountType
    {
       /// type: Syntax
       /// optional: false
@@ -214,7 +213,7 @@ public:
    };
 
 #ifdef POLAR_DEBUG_BUILD
-   static const std::set<SyntaxKind> CHILD_NODE_CHOICES;
+   static const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> CHILD_NODE_CHOICES;
 #endif
 
 public:
@@ -258,9 +257,7 @@ class CodeBlockSyntax final : public Syntax
 public:
    constexpr static unsigned int CHILDREN_COUNT = 3;
    constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 3;
-
-public:
-   enum Cursor : uint32_t
+   enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
       /// optional: false

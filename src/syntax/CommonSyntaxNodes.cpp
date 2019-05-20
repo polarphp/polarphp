@@ -14,12 +14,14 @@
 
 namespace polar::syntax {
 
-const std::set<SyntaxKind> CodeBlockItemSyntax::CHILD_NODE_CHOICES{
+const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> CodeBlockItemSyntax::CHILD_NODE_CHOICES{
+   {CodeBlockItemSyntax::Cursor::Item, {
          SyntaxKind::Decl,
-         SyntaxKind::Expr,
-         SyntaxKind::Stmt,
-         SyntaxKind::TokenList,
-         SyntaxKind::NonEmptyTokenList
+               SyntaxKind::Expr,
+               SyntaxKind::Stmt,
+               SyntaxKind::TokenList,
+               SyntaxKind::NonEmptyTokenList
+      }}
 };
 
 void CodeBlockItemSyntax::validate()

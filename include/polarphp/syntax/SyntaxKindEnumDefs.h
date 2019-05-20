@@ -35,6 +35,20 @@ enum class SyntaxKind : std::uint32_t
 
    /// expr syntax node
    FirstExpr,
+   NullExpr,
+   FloatLiteralExpr,
+   IntegerLiteralExpr,
+   StringLiteralExpr,
+   BooleanLiteralExpr,
+   TernaryExpr,
+   AssignmentExpr,
+   SequenceExpr,
+   ClassRefParentExpr,
+   ClassRefStaticExpr,
+   ClassRefSelfExpr,
+   PrefixOperatorExpr,
+   PostfixOperatorExpr,
+   BinaryOperatorExpr,
    UnknownExpr,
    LastExpr,
 
@@ -50,6 +64,7 @@ enum class SyntaxKind : std::uint32_t
 
    /// collection syntax node
    CodeBlockItemList,
+   ExprList,
    TokenList,
    NonEmptyTokenList,
 

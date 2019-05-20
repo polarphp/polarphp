@@ -18,7 +18,7 @@
 
 namespace polar::utils {
 class RawOutStream;
-}
+} // polar::utils
 
 namespace polar::syntax {
 
