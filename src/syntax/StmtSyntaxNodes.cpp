@@ -13,6 +13,53 @@
 
 namespace polar::syntax {
 
+void ContinueStmtSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ContinueStmtSyntax::CHILDREN_COUNT);
+}
+
+TokenSyntax ContinueStmtSyntax::getContinueKeyword()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::ContinueKeyword).get()};
+}
+
+std::optional<TokenSyntax> ContinueStmtSyntax::getLNumberToken()
+{
+   RefCountPtr<SyntaxData> childData = m_data->getChild(Cursor::LNumberToken);
+   if (!childData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, childData.get()};
+}
+
+ContinueStmtSyntax ContinueStmtSyntax::withContinueKeyword(std::optional<TokenSyntax> continueKeyword)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (continueKeyword.has_value()) {
+      raw = continueKeyword->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_CONTINUE,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_CONTINUE)));
+   }
+   return m_data->replaceChild<ContinueStmtSyntax>(raw, Cursor::ContinueKeyword);
+}
+
+ContinueStmtSyntax ContinueStmtSyntax::withLNumberToken(std::optional<TokenSyntax> numberToken)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (numberToken.has_value()) {
+      raw = numberToken->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_LNUMBER,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_LNUMBER)));
+   }
+   return m_data->replaceChild<ContinueStmtSyntax>(raw, Cursor::LNumberToken);
+}
+
 void ThrowStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = getRaw();

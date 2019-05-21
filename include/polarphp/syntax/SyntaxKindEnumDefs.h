@@ -54,7 +54,12 @@ enum class SyntaxKind : std::uint32_t
 
    /// stmt syntax node
    FirstStmt,
+   ContinueStmt,
+   WhileStmt,
+   DeferStmt,
+   ExpressionStmt,
    ThrowStmt,
+   ReturnStmt,
    UnknownStmt,
    LastStmt,
 

@@ -20,14 +20,58 @@
 
 namespace polar::syntax {
 
+class ContinueStmtSyntax;
+class WhileStmtSyntax;
+class DeferStmtSyntax;
+class ExpressionStmtSyntax;
 class ThrowStmtSyntax;
 class ReturnStmtSyntax;
+
+class ContinueStmtSyntax : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 2;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: false
+      ContinueKeyword,
+      /// type: TokenSyntax
+      /// optional: true
+      LNumberToken,
+   };
+public:
+   ContinueStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : StmtSyntax(parent, data)
+   {}
+
+   TokenSyntax getContinueKeyword();
+   std::optional<TokenSyntax> getLNumberToken();
+
+   ContinueStmtSyntax withContinueKeyword(std::optional<TokenSyntax> continueKeyword);
+   ContinueStmtSyntax withLNumberToken(std::optional<TokenSyntax> numberToken);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ContinueStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class ContinueStmtSyntaxBuilder;
+   void validate();
+};
 
 class ThrowStmtSyntax : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static unsigned int CHILDREN_COUNT = 2;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
 
    enum Cursor : SyntaxChildrenCountType
    {
@@ -39,7 +83,7 @@ public:
       Expr
    };
 public:
-   ThrowStmtSyntax(RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+   ThrowStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
       : StmtSyntax(parent, data)
    {
       this->validate();
@@ -69,7 +113,7 @@ private:
 class ReturnStmtSyntax : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
+   constexpr static unsigned int CHILDREN_COUNT = 2;
    constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
 
    enum Cursor : SyntaxChildrenCountType
@@ -82,7 +126,7 @@ public:
       Expr
    };
 public:
-   ReturnStmtSyntax(RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+   ReturnStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
       : StmtSyntax(parent, data)
    {}
 
@@ -90,6 +134,16 @@ public:
    ExprSyntax getExpr();
    ReturnStmtSyntax withReturnKeyword(std::optional<TokenSyntax> returnKeyword);
    ReturnStmtSyntax withExpr(std::optional<ExprSyntax> expr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ReturnStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
 
 private:
    friend class ReturnStmtSyntaxBuilder;
