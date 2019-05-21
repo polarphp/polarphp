@@ -13,21 +13,21 @@
 
 namespace polar::syntax {
 
-void NullExpr::validate()
+void NullExprSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == NullExpr::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == NullExprSyntax::CHILDREN_COUNT);
 }
 
-TokenSyntax NullExpr::getNullKeyword()
+TokenSyntax NullExprSyntax::getNullKeyword()
 {
    return TokenSyntax{m_root, m_data->getChild(Cursor::NulllKeyword).get()};
 }
 
-NullExpr NullExpr::withNullKeyword(std::optional<TokenSyntax> keyword)
+NullExprSyntax NullExprSyntax::withNullKeyword(std::optional<TokenSyntax> keyword)
 {
    RefCountPtr<RawSyntax> raw;
    if (keyword.has_value()) {
@@ -36,24 +36,24 @@ NullExpr NullExpr::withNullKeyword(std::optional<TokenSyntax> keyword)
       raw = RawSyntax::missing(TokenKindType::T_NULL,
                                OwnedString::makeUnowned((get_token_text(TokenKindType::T_NULL))));
    }
-   return m_data->replaceChild<NullExpr>(raw, Cursor::NulllKeyword);
+   return m_data->replaceChild<NullExprSyntax>(raw, Cursor::NulllKeyword);
 }
 
-void ClassRefParentExpr::validate()
+void ClassRefParentExprSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == ClassRefParentExpr::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == ClassRefParentExprSyntax::CHILDREN_COUNT);
 }
 
-TokenSyntax ClassRefParentExpr::getParentKeyword()
+TokenSyntax ClassRefParentExprSyntax::getParentKeyword()
 {
    return TokenSyntax{m_root, m_data->getChild(Cursor::ParentKeyword).get()};
 }
 
-ClassRefParentExpr ClassRefParentExpr::withParentKeyword(std::optional<TokenSyntax> parentKeyword)
+ClassRefParentExprSyntax ClassRefParentExprSyntax::withParentKeyword(std::optional<TokenSyntax> parentKeyword)
 {
    RefCountPtr<RawSyntax> raw;
    if (parentKeyword.has_value()) {
@@ -62,24 +62,24 @@ ClassRefParentExpr ClassRefParentExpr::withParentKeyword(std::optional<TokenSynt
       raw = RawSyntax::missing(TokenKindType::T_CLASS_REF_PARENT,
                                OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_PARENT)));
    }
-   return m_data->replaceChild<ClassRefParentExpr>(raw, Cursor::ParentKeyword);
+   return m_data->replaceChild<ClassRefParentExprSyntax>(raw, Cursor::ParentKeyword);
 }
 
-void ClassRefSelfExpr::validate()
+void ClassRefSelfExprSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == ClassRefSelfExpr::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == ClassRefSelfExprSyntax::CHILDREN_COUNT);
 }
 
-TokenSyntax ClassRefSelfExpr::getSelfKeyword()
+TokenSyntax ClassRefSelfExprSyntax::getSelfKeyword()
 {
    return TokenSyntax{m_root, m_data->getChild(Cursor::SelfKeyword).get()};
 }
 
-ClassRefSelfExpr ClassRefSelfExpr::withSelfKeyword(std::optional<TokenSyntax> selfKeyword)
+ClassRefSelfExprSyntax ClassRefSelfExprSyntax::withSelfKeyword(std::optional<TokenSyntax> selfKeyword)
 {
    RefCountPtr<RawSyntax> raw;
    if (selfKeyword.has_value()) {
@@ -88,24 +88,24 @@ ClassRefSelfExpr ClassRefSelfExpr::withSelfKeyword(std::optional<TokenSyntax> se
       raw = RawSyntax::missing(TokenKindType::T_CLASS_REF_SELF,
                                OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_SELF)));
    }
-   return m_data->replaceChild<ClassRefSelfExpr>(raw, Cursor::SelfKeyword);
+   return m_data->replaceChild<ClassRefSelfExprSyntax>(raw, Cursor::SelfKeyword);
 }
 
-void ClassRefStaticExpr::validate()
+void ClassRefStaticExprSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == ClassRefStaticExpr::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == ClassRefStaticExprSyntax::CHILDREN_COUNT);
 }
 
-TokenSyntax ClassRefStaticExpr::getStaticKeyword()
+TokenSyntax ClassRefStaticExprSyntax::getStaticKeyword()
 {
    return TokenSyntax{m_root, m_data->getChild(Cursor::StaticKeyword).get()};
 }
 
-ClassRefStaticExpr ClassRefStaticExpr::withStaticKeyword(std::optional<TokenSyntax> staticKeyword)
+ClassRefStaticExprSyntax ClassRefStaticExprSyntax::withStaticKeyword(std::optional<TokenSyntax> staticKeyword)
 {
    RefCountPtr<RawSyntax> raw;
    if (staticKeyword.has_value()) {
@@ -114,7 +114,7 @@ ClassRefStaticExpr ClassRefStaticExpr::withStaticKeyword(std::optional<TokenSynt
       raw = RawSyntax::missing(TokenKindType::T_CLASS_REF_STATIC,
                                OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_STATIC)));
    }
-   return m_data->replaceChild<ClassRefStaticExpr>(raw, Cursor::StaticKeyword);
+   return m_data->replaceChild<ClassRefStaticExprSyntax>(raw, Cursor::StaticKeyword);
 }
 
 void IntegerLiteralExprSyntax::validate()
@@ -423,6 +423,74 @@ PrefixOperatorExprSyntax PrefixOperatorExprSyntax::withExpr(std::optional<TokenS
       raw = RawSyntax::missing(SyntaxKind::Expr);
    }
    return m_data->replaceChild<PrefixOperatorExprSyntax>(raw, Cursor::Expr);
+}
+
+void PostfixOperatorExprSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == PostfixOperatorExprSyntax::CHILDREN_COUNT);
+}
+
+ExprSyntax PostfixOperatorExprSyntax::getExpr()
+{
+   return ExprSyntax{m_root, m_data->getChild(Cursor::Expr).get()};
+}
+
+TokenSyntax PostfixOperatorExprSyntax::getOperatorToken()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::OperatorToken).get()};
+}
+
+PostfixOperatorExprSyntax PostfixOperatorExprSyntax::withExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (expr.has_value()) {
+      raw = expr->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<PostfixOperatorExprSyntax>(raw, Cursor::Expr);
+}
+
+PostfixOperatorExprSyntax PostfixOperatorExprSyntax::withOperatorToken(std::optional<TokenSyntax> operatorToken)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (operatorToken.has_value()) {
+      raw = operatorToken->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_POSTFIX_OPERATOR,
+                               OwnedString::makeUnowned(""));
+   }
+   return m_data->replaceChild<PostfixOperatorExprSyntax>(raw, Cursor::OperatorToken);
+}
+
+void BinaryOperatorExprSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == BinaryOperatorExprSyntax::CHILDREN_COUNT);
+}
+
+TokenSyntax BinaryOperatorExprSyntax::getOperatorToken()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::OperatorToken).get()};
+}
+
+BinaryOperatorExprSyntax BinaryOperatorExprSyntax::withOperatorToken(std::optional<TokenSyntax> operatorToken)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (operatorToken.has_value()) {
+      raw = operatorToken->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_BINARY_OPERATOR,
+                               OwnedString::makeUnowned(""));
+   }
+   return m_data->replaceChild<BinaryOperatorExprSyntax>(raw, TokenKindType::T_BINARY_OPERATOR);
 }
 
 } // polar::syntax

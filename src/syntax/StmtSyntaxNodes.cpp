@@ -13,4 +13,29 @@
 
 namespace polar::syntax {
 
+void ThrowStmtSyntax::validate()
+{
+
+}
+
+TokenSyntax ThrowStmtSyntax::getThrowKeyword()
+{
+
+}
+
+ExprSyntax ThrowStmtSyntax::getExpr()
+{
+
+}
+
+ThrowStmtSyntax ThrowStmtSyntax::withThrowKeyword(std::optional<TokenSyntax> throwKeyword)
+{
+
+}
+
+ThrowStmtSyntax ThrowStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
+{
+
+}
+
 } // polar::syntax

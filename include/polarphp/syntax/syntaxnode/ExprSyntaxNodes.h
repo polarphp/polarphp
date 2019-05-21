@@ -39,7 +39,7 @@ class BinaryOperatorExprSyntax;
 /// element type: ExprSyntax
 using ExprListSyntax = SyntaxCollection<SyntaxKind::ExprList, ExprSyntax>;
 
-class NullExpr : public ExprSyntax
+class NullExprSyntax : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -51,12 +51,14 @@ public:
       NulllKeyword,
    };
 public:
-   NullExpr(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   NullExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    TokenSyntax getNullKeyword();
-   NullExpr withNullKeyword(std::optional<TokenSyntax> keyword);
+   NullExprSyntax withNullKeyword(std::optional<TokenSyntax> keyword);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -73,7 +75,7 @@ private:
    void validate();
 };
 
-class ClassRefParentExpr : public ExprSyntax
+class ClassRefParentExprSyntax : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -87,12 +89,14 @@ public:
    };
 
 public:
-   ClassRefParentExpr(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   ClassRefParentExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    TokenSyntax getParentKeyword();
-   ClassRefParentExpr withParentKeyword(std::optional<TokenSyntax> parentKeyword);
+   ClassRefParentExprSyntax withParentKeyword(std::optional<TokenSyntax> parentKeyword);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -109,7 +113,7 @@ private:
    void validate();
 };
 
-class ClassRefSelfExpr : public ExprSyntax
+class ClassRefSelfExprSyntax : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -122,12 +126,14 @@ public:
    };
 
 public:
-   ClassRefSelfExpr(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   ClassRefSelfExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    TokenSyntax getSelfKeyword();
-   ClassRefSelfExpr withSelfKeyword(std::optional<TokenSyntax> selfKeyword);
+   ClassRefSelfExprSyntax withSelfKeyword(std::optional<TokenSyntax> selfKeyword);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -144,7 +150,7 @@ private:
    void validate();
 };
 
-class ClassRefStaticExpr : public ExprSyntax
+class ClassRefStaticExprSyntax : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -156,12 +162,14 @@ public:
       StaticKeyword,
    };
 public:
-   ClassRefStaticExpr(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   ClassRefStaticExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    TokenSyntax getStaticKeyword();
-   ClassRefStaticExpr withStaticKeyword(std::optional<TokenSyntax> staticKeyword);
+   ClassRefStaticExprSyntax withStaticKeyword(std::optional<TokenSyntax> staticKeyword);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -192,7 +200,9 @@ public:
 public:
    IntegerLiteralExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    TokenSyntax getDigits();
    IntegerLiteralExprSyntax withDigits(std::optional<TokenSyntax> digits);
@@ -227,7 +237,9 @@ public:
 public:
    FloatLiteralExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    TokenSyntax getFloatDigits();
    FloatLiteralExprSyntax withFloatDigits(std::optional<TokenSyntax> digits);
@@ -261,7 +273,9 @@ public:
 public:
    StringLiteralExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    TokenSyntax getString();
    StringLiteralExprSyntax withString(std::optional<TokenSyntax> str);
@@ -306,7 +320,9 @@ public:
 public:
    BooleanLiteralExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    TokenSyntax getBooleanValue();
 
@@ -357,7 +373,9 @@ public:
 public:
    TernaryExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    ExprSyntax getConditionExpr();
    TokenSyntax getQuestionMark();
@@ -419,7 +437,9 @@ public:
 public:
    AssignmentExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    TokenSyntax getAssignToken();
 
@@ -458,7 +478,9 @@ public:
 public:
    SequenceExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    ExprListSyntax getElements();
 
@@ -508,7 +530,9 @@ public:
 public:
    PrefixOperatorExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    std::optional<TokenSyntax> getOperatorToken();
    ExprSyntax getExpr();
@@ -548,7 +572,9 @@ public:
 public:
    PostfixOperatorExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    ExprSyntax getExpr();
    TokenSyntax getOperatorToken();
@@ -578,14 +604,16 @@ public:
    constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: Expr
+      /// type: TokenSyntax
       /// optional: false
       OperatorToken
    };
 public:
    BinaryOperatorExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
-   {}
+   {
+      this->validate();
+   }
 
    TokenSyntax getOperatorToken();
    BinaryOperatorExprSyntax withOperatorToken(std::optional<TokenSyntax> operatorToken);

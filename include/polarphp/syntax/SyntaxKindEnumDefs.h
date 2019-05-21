@@ -54,6 +54,7 @@ enum class SyntaxKind : std::uint32_t
 
    /// stmt syntax node
    FirstStmt,
+   ThrowStmt,
    UnknownStmt,
    LastStmt,
 
