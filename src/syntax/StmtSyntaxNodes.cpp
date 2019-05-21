@@ -15,27 +15,44 @@ namespace polar::syntax {
 
 void ThrowStmtSyntax::validate()
 {
-
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ThrowStmtSyntax::CHILDREN_COUNT);
 }
 
 TokenSyntax ThrowStmtSyntax::getThrowKeyword()
 {
-
+   return TokenSyntax{m_root, m_data->getChild(Cursor::ThrowKeyword).get()};
 }
 
 ExprSyntax ThrowStmtSyntax::getExpr()
 {
-
+   return ExprSyntax{m_root, m_data->getChild(Cursor::Expr).get()};
 }
 
 ThrowStmtSyntax ThrowStmtSyntax::withThrowKeyword(std::optional<TokenSyntax> throwKeyword)
 {
-
+   RefCountPtr<RawSyntax> raw;
+   if (throwKeyword.has_value()) {
+      raw = throwKeyword->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_THROW,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_THROW)));
+   }
+   return m_data->replaceChild<ThrowStmtSyntax>(raw, TokenKindType::T_THROW);
 }
 
 ThrowStmtSyntax ThrowStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
 {
-
+   RefCountPtr<RawSyntax> raw;
+   if (expr.has_value()) {
+      raw = expr->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<ThrowStmtSyntax>(raw, Cursor::Expr);
 }
 
 } // polar::syntax

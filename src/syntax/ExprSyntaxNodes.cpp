@@ -352,6 +352,15 @@ AssignmentExprSyntax AssignmentExprSyntax::withAssignToken(std::optional<TokenSy
    return m_data->replaceChild<AssignmentExprSyntax>(raw, Cursor::AssignToken);
 }
 
+void SequenceExprSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == SequenceExprSyntax::CHILDREN_COUNT);
+}
+
 ExprListSyntax SequenceExprSyntax::getElements()
 {
    return ExprListSyntax{m_root, m_data->getChild(Cursor::Elements).get()};
