@@ -1,6 +1,6 @@
 <img width="350" src ="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/polarphp.png?sanitize=true"/>
 
-Read this in other languages: **English**, [简体中文](README.md).
+## Let the PHP language be great again 
 
 ## Why did I launch the `polarphp` project?
 

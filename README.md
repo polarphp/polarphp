@@ -1,7 +1,10 @@
 <img width="350" src ="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/polarphp.png"/>
 
+## 让 PHP 语言变得更加美好
 
-Read the English version of this document: [English version Readme](README.en_US.md)
+<br/>
+
+Read the English version of this document: [English](README.en_US.md)
 
 阅读本文档其他语言版本: [English](README.en_US.md), **简体中文**.
 
