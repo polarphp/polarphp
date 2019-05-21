@@ -130,17 +130,17 @@ RawSyntax::~RawSyntax()
    }
 }
 
-RefCountPtr<RawSyntax> RawSyntax::make(SyntaxKind kind, ArrayRef<RefCountPtr<RawSyntax>> Layout,
+RefCountPtr<RawSyntax> RawSyntax::make(SyntaxKind kind, ArrayRef<RefCountPtr<RawSyntax>> layout,
                                        SourcePresence presence,
                                        const RefCountPtr<SyntaxArena> &arena,
                                        std::optional<unsigned> nodeId)
 {
    auto size = totalSizeToAlloc<RefCountPtr<RawSyntax>, OwnedString, TriviaPiece>(
-            Layout.size(), 0, 0);
+            layout.size(), 0, 0);
    void *data = arena ? arena->allocate(size, alignof(RawSyntax))
                       : ::operator new(size);
    return RefCountPtr<RawSyntax>(
-            new (data) RawSyntax(kind, Layout, presence, arena, nodeId));
+            new (data) RawSyntax(kind, layout, presence, arena, nodeId));
 }
 
 RefCountPtr<RawSyntax> RawSyntax::make(TokenKindType tokenKind, OwnedString text,
@@ -161,10 +161,10 @@ RefCountPtr<RawSyntax> RawSyntax::make(TokenKindType tokenKind, OwnedString text
 
 RefCountPtr<RawSyntax> RawSyntax::append(RefCountPtr<RawSyntax> newLayoutElement) const
 {
-   auto Layout = getLayout();
+   auto layout = getLayout();
    std::vector<RefCountPtr<RawSyntax>> newLayout;
-   newLayout.reserve(Layout.size() + 1);
-   std::copy(Layout.begin(), Layout.end(), std::back_inserter(newLayout));
+   newLayout.reserve(layout.size() + 1);
+   std::copy(layout.begin(), layout.end(), std::back_inserter(newLayout));
    newLayout.push_back(newLayoutElement);
    return RawSyntax::make(getKind(), newLayout, SourcePresence::Present);
 }
@@ -172,16 +172,16 @@ RefCountPtr<RawSyntax> RawSyntax::append(RefCountPtr<RawSyntax> newLayoutElement
 RefCountPtr<RawSyntax> RawSyntax::replaceChild(CursorIndex index,
                                                RefCountPtr<RawSyntax> newLayoutElement) const
 {
-   auto Layout = getLayout();
+   auto layout = getLayout();
    std::vector<RefCountPtr<RawSyntax>> newLayout;
-   newLayout.reserve(Layout.size());
+   newLayout.reserve(layout.size());
 
-   std::copy(Layout.begin(), Layout.begin() + index,
+   std::copy(layout.begin(), layout.begin() + index,
              std::back_inserter(newLayout));
 
    newLayout.push_back(newLayoutElement);
 
-   std::copy(Layout.begin() + index + 1, Layout.end(),
+   std::copy(layout.begin() + index + 1, layout.end(),
              std::back_inserter(newLayout));
 
    return RawSyntax::make(getKind(), newLayout, getPresence());

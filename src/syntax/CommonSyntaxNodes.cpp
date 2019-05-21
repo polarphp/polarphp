@@ -130,7 +130,7 @@ CodeBlockSyntax CodeBlockSyntax::addCodeBlockItem(CodeBlockItemSyntax codeBlockI
    if (raw) {
       raw = raw->append(codeBlockItem.getRaw());
    } else {
-      raw = RawSyntax::make(SyntaxKind::CodeBlockItemList, codeBlockItem.getRaw(), SourcePresence::Present);
+      raw = RawSyntax::make(SyntaxKind::CodeBlockItemList, {codeBlockItem.getRaw()}, SourcePresence::Present);
    }
    return m_data->replaceChild<CodeBlockSyntax>(raw, Cursor::Statements);
 }

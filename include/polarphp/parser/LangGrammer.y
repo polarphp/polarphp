@@ -250,6 +250,8 @@ namespace polar::syntax{
 %token T_WHITESPACE      "whitespace (T_WHITESPACE)"
 
 %token T_MISC_START_MARK "misc start mark (T_MISC_START_MARK)"
+%token T_PREFIX_OPERATOR "prefix operator (T_PREFIX_OPERATOR)"
+%token T_POSTFIX_OPERATOR "postfix operator (T_POSTFIX_OPERATOR)"
 %token T_COMMENT         "comment (T_COMMENT)"
 %token T_DOC_COMMENT     "doc comment (T_DOC_COMMENT)"
 %token T_OPEN_TAG        "open tag (T_OPEN_TAG)"

@@ -326,4 +326,103 @@ TernaryExprSyntax TernaryExprSyntax::withSecondChoice(std::optional<ExprSyntax> 
    return m_data->replaceChild<TernaryExprSyntax>(raw, Cursor::SecondChoice);
 }
 
+void AssignmentExprSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == AssignmentExprSyntax::CHILDREN_COUNT);
+}
+
+TokenSyntax AssignmentExprSyntax::getAssignToken()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::AssignToken).get()};
+}
+
+AssignmentExprSyntax AssignmentExprSyntax::withAssignToken(std::optional<TokenSyntax> assignToken)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (assignToken.has_value()) {
+      raw = assignToken->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_EQUAL,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_EQUAL)));
+   }
+   return m_data->replaceChild<AssignmentExprSyntax>(raw, Cursor::AssignToken);
+}
+
+ExprListSyntax SequenceExprSyntax::getElements()
+{
+   return ExprListSyntax{m_root, m_data->getChild(Cursor::Elements).get()};
+}
+
+SequenceExprSyntax SequenceExprSyntax::withElements(std::optional<ExprListSyntax> elements)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (elements.has_value()) {
+      raw = elements->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::ExprList);
+   }
+   return m_data->replaceChild<SequenceExprSyntax>(raw, Cursor::Elements);
+}
+
+SequenceExprSyntax SequenceExprSyntax::addElement(ExprSyntax expr)
+{
+   RefCountPtr<RawSyntax> raw = getRaw()->getChild(Cursor::Elements);
+   if (raw) {
+      raw->append(expr.getRaw());
+   } else {
+      raw = RawSyntax::make(SyntaxKind::ExprList, {expr.getRaw()}, SourcePresence::Present);
+   }
+   return m_data->replaceChild<SequenceExprSyntax>(raw, Cursor::Elements);
+}
+
+void PrefixOperatorExprSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == PrefixOperatorExprSyntax::CHILDREN_COUNT);
+}
+
+std::optional<TokenSyntax> PrefixOperatorExprSyntax::getOperatorToken()
+{
+   auto childData = m_data->getChild(Cursor::OperatorToken);
+   if (childData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, childData.get()};
+}
+
+ExprSyntax PrefixOperatorExprSyntax::getExpr()
+{
+   return ExprSyntax{m_root, m_data->getChild(Cursor::Expr).get()};
+}
+
+PrefixOperatorExprSyntax PrefixOperatorExprSyntax::withOperatorToken(std::optional<TokenSyntax> operatorToken)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (operatorToken.has_value()) {
+      raw = operatorToken->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_PREFIX_OPERATOR,
+                               OwnedString::makeUnowned(""));
+   }
+   return m_data->replaceChild<PrefixOperatorExprSyntax>(raw, Cursor::OperatorToken);
+}
+
+PrefixOperatorExprSyntax PrefixOperatorExprSyntax::withExpr(std::optional<TokenSyntax> expr)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (expr.has_value()) {
+      raw = expr->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<PrefixOperatorExprSyntax>(raw, Cursor::Expr);
+}
+
 } // polar::syntax

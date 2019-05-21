@@ -451,6 +451,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: ExprListSyntax
+      /// is_syntax_collection: true
       /// optional: false
       Elements
    };
@@ -492,7 +493,7 @@ private:
 class PrefixOperatorExprSyntax : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
+   constexpr static unsigned int CHILDREN_COUNT = 2;
    constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
@@ -532,8 +533,8 @@ private:
 class PostfixOperatorExprSyntax : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static unsigned int CHILDREN_COUNT = 2;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: Expr
