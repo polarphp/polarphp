@@ -55,4 +55,46 @@ ThrowStmtSyntax ThrowStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
    return m_data->replaceChild<ThrowStmtSyntax>(raw, Cursor::Expr);
 }
 
+void ReturnStmtSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ReturnStmtSyntax::CHILDREN_COUNT);
+}
+
+TokenSyntax ReturnStmtSyntax::getReturnKeyword()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::ReturnKeyword).get()};
+}
+
+ExprSyntax ReturnStmtSyntax::getExpr()
+{
+   return ExprSyntax{m_root, m_data->getChild(Cursor::Expr).get()};
+}
+
+ReturnStmtSyntax ReturnStmtSyntax::withReturnKeyword(std::optional<TokenSyntax> returnKeyword)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (returnKeyword.has_value()) {
+      raw = returnKeyword->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_RETURN,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_RETURN)));
+   }
+   return m_data->replaceChild<ReturnStmtSyntax>(raw, Cursor::ReturnKeyword);
+}
+
+ReturnStmtSyntax ReturnStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (expr.has_value()) {
+      raw = expr->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<ReturnStmtSyntax>(raw, Cursor::Expr);
+}
+
 } // polar::syntax

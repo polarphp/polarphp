@@ -21,6 +21,7 @@
 namespace polar::syntax {
 
 class ThrowStmtSyntax;
+class ReturnStmtSyntax;
 
 class ThrowStmtSyntax : public StmtSyntax
 {
@@ -62,6 +63,36 @@ public:
 
 private:
    friend class ThrowStmtSyntaxBuilder;
+   void validate();
+};
+
+class ReturnStmtSyntax : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 1;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: false
+      ReturnKeyword,
+      /// type: ExprSyntax
+      /// optional: true
+      Expr
+   };
+public:
+   ReturnStmtSyntax(RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : StmtSyntax(parent, data)
+   {}
+
+   TokenSyntax getReturnKeyword();
+   ExprSyntax getExpr();
+   ReturnStmtSyntax withReturnKeyword(std::optional<TokenSyntax> returnKeyword);
+   ReturnStmtSyntax withExpr(std::optional<ExprSyntax> expr);
+
+private:
+   friend class ReturnStmtSyntaxBuilder;
    void validate();
 };
 
