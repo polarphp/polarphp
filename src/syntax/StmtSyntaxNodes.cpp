@@ -344,6 +344,65 @@ SwitchDefaultLabelSyntax SwitchDefaultLabelSyntax::withColon(std::optional<Token
    return m_data->replaceChild<SwitchDefaultLabelSyntax>(raw, Cursor::Colon);
 }
 
+void SwitchCaseLabelSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == SwitchCaseLabelSyntax::CHILDREN_COUNT);
+}
+
+TokenSyntax SwitchCaseLabelSyntax::getCaseKeyword()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::CaseKeyword).get()};
+}
+
+ExprSyntax SwitchCaseLabelSyntax::getExpr()
+{
+   return ExprSyntax{m_root, m_data->getChild(Cursor::Expr).get()};
+}
+
+TokenSyntax SwitchCaseLabelSyntax::getColon()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::Colon).get()};
+}
+
+SwitchCaseLabelSyntax SwitchCaseLabelSyntax::withCaseKeyword(std::optional<TokenSyntax> caseKeyword)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (caseKeyword.has_value()) {
+      raw = caseKeyword->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_CASE,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_CASE)));
+   }
+   return m_data->replaceChild<SwitchCaseLabelSyntax>(raw, Cursor::CaseKeyword);
+}
+
+SwitchCaseLabelSyntax SwitchCaseLabelSyntax::withExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (expr.has_value()) {
+      raw = expr->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<SwitchCaseLabelSyntax>(raw, Cursor::Expr);
+}
+
+SwitchCaseLabelSyntax SwitchCaseLabelSyntax::withColon(std::optional<TokenSyntax> colon)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (colon.has_value()) {
+      raw = colon->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_COLON,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+   }
+   return m_data->replaceChild<SwitchCaseLabelSyntax>(raw, Cursor::Colon);
+}
+
 void DeferStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();

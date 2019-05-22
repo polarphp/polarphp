@@ -315,7 +315,39 @@ private:
 ///
 class SwitchCaseLabelSyntax : public StmtSyntax
 {
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 3;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: false
+      CaseKeyword,
+      /// type: ExprSyntax
+      /// optional: false
+      Expr,
+      /// type: TokenSyntax
+      /// optional: false
+      Colon
+   };
+public:
+   SwitchCaseLabelSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : StmtSyntax(parent, data)
+   {
+      validate();
+   }
 
+   TokenSyntax getCaseKeyword();
+   ExprSyntax getExpr();
+   TokenSyntax getColon();
+
+   SwitchCaseLabelSyntax withCaseKeyword(std::optional<TokenSyntax> caseKeyword);
+   SwitchCaseLabelSyntax withExpr(std::optional<ExprSyntax> expr);
+   SwitchCaseLabelSyntax withColon(std::optional<TokenSyntax> colon);
+
+private:
+   friend class SwitchCaseLabelSyntaxBuilder;
+   void validate();
 };
 
 ///
