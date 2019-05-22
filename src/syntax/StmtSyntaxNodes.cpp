@@ -218,6 +218,17 @@ WhileStmtSyntax WhileStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
    return m_data->replaceChild<WhileStmtSyntax>(raw, Cursor::Body);
 }
 
+WhileStmtSyntax WhileStmtSyntax::addCondition(ConditionElementSyntax condition)
+{
+   RefCountPtr<RawSyntax> raw = getRaw()->getChild(Cursor::Conditions);
+   if (raw) {
+      raw->append(condition.getRaw());
+   } else {
+      raw = RawSyntax::make(SyntaxKind::ConditionElementList, {condition.getRaw()}, SourcePresence::Present);
+   }
+   return m_data->replaceChild<WhileStmtSyntax>(raw, Cursor::Conditions);
+}
+
 void ThrowStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = getRaw();
