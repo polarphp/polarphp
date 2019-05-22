@@ -220,7 +220,7 @@ public:
    CodeBlockItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    /// The underlying node inside the code block.

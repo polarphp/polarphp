@@ -33,7 +33,6 @@ class DeferStmtSyntax;
 class ExpressionStmtSyntax;
 class ThrowStmtSyntax;
 class ReturnStmtSyntax;
-class CodeBlockSyntax;
 
 // condition-list -> condition
 //                 | condition-list, condition ','?
@@ -358,7 +357,43 @@ private:
 ///
 class SwitchCaseSyntax : public StmtSyntax
 {
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 2;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: Syntax
+      /// optional: false
+      /// node choices
+      /// name: Default kind: SwitchDefaultLabelSyntax
+      /// name: Case kind: SwitchCaseLabelSyntax
+      Label,
+      /// type: CodeBlockItemListSyntax
+      /// optional: false
+      Statements
+   };
 
+#ifdef POLAR_DEBUG_BUILD
+   static const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> CHILD_NODE_CHOICES;
+#endif
+
+public:
+   SwitchCaseSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : StmtSyntax(parent, data)
+   {
+      validate();
+   }
+
+   Syntax getLabel();
+   CodeBlockItemListSyntax getStatements();
+
+   SwitchCaseSyntax withLabel(std::optional<Syntax> label);
+   SwitchCaseSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);
+   SwitchCaseSyntax addStatement(CodeBlockItemSyntax statement);
+
+private:
+   friend class SwitchCaseSyntaxBuilder;
+   void validate();
 };
 
 ///

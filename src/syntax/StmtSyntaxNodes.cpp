@@ -403,6 +403,75 @@ SwitchCaseLabelSyntax SwitchCaseLabelSyntax::withColon(std::optional<TokenSyntax
    return m_data->replaceChild<SwitchCaseLabelSyntax>(raw, Cursor::Colon);
 }
 
+#ifdef POLAR_DEBUG_BUILD
+const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> SwitchCaseSyntax::CHILD_NODE_CHOICES
+{
+   {
+      SwitchCaseSyntax::Cursor::Statements,{
+         SyntaxKind::SwitchDefaultLabel,
+               SyntaxKind::SwitchCaseLabel
+      }
+   }
+};
+#endif
+
+void SwitchCaseSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == SwitchCaseSyntax::CHILDREN_COUNT);
+   if (const RefCountPtr<RawSyntax> &statements = raw->getChild(Cursor::Statements)) {
+      bool isDefaultLabel = statements->kindOf(SyntaxKind::SwitchDefaultLabel);
+      bool isCaseLabel = statements->kindOf(SyntaxKind::SwitchCaseLabel);
+      assert(isDefaultLabel || isCaseLabel);
+   }
+}
+
+Syntax SwitchCaseSyntax::getLabel()
+{
+   return Syntax{m_root, m_data->getChild(Cursor::Label).get()};
+}
+
+CodeBlockItemListSyntax SwitchCaseSyntax::getStatements()
+{
+   return CodeBlockItemListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
+}
+
+SwitchCaseSyntax SwitchCaseSyntax::withLabel(std::optional<Syntax> label)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (label.has_value()) {
+      raw = label->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::SwitchDefaultLabel);
+   }
+   return m_data->replaceChild<SwitchCaseSyntax>(raw, Cursor::Label);
+}
+
+SwitchCaseSyntax SwitchCaseSyntax::withStatements(std::optional<CodeBlockItemListSyntax> statements)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (statements.has_value()) {
+      raw = statements->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
+   }
+   return m_data->replaceChild<SwitchCaseSyntax>(raw, Cursor::Statements);
+}
+
+SwitchCaseSyntax SwitchCaseSyntax::addStatement(CodeBlockItemSyntax statement)
+{
+   RefCountPtr<RawSyntax> statements = getRaw()->getChild(Cursor::Statements);
+   if (statements) {
+      statements->append(statement.getRaw());
+   } else {
+      statements = RawSyntax::make(SyntaxKind::CodeBlockItemList, {statement.getRaw()}, SourcePresence::Present);
+   }
+   return m_data->replaceChild<SwitchCaseSyntax>(statements, Cursor::Statements);
+}
+
 void DeferStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
