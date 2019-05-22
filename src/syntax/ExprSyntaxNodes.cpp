@@ -195,6 +195,7 @@ StringLiteralExprSyntax StringLiteralExprSyntax::withString(std::optional<TokenS
    return m_data->replaceChild<StringLiteralExprSyntax>(raw, Cursor::String);
 }
 
+#ifdef POLAR_DEBUG_BUILD
 const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> BooleanLiteralExprSyntax::CHILD_TOKEN_CHOICES
 {
    {
@@ -204,6 +205,7 @@ const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> BooleanLiteralE
       }
    }
 };
+#endif
 
 void BooleanLiteralExprSyntax::validate()
 {
@@ -400,7 +402,7 @@ void PrefixOperatorExprSyntax::validate()
 std::optional<TokenSyntax> PrefixOperatorExprSyntax::getOperatorToken()
 {
    auto childData = m_data->getChild(Cursor::OperatorToken);
-   if (childData) {
+   if (!childData) {
       return std::nullopt;
    }
    return TokenSyntax{m_root, childData.get()};
@@ -417,8 +419,7 @@ PrefixOperatorExprSyntax PrefixOperatorExprSyntax::withOperatorToken(std::option
    if (operatorToken.has_value()) {
       raw = operatorToken->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_PREFIX_OPERATOR,
-                               OwnedString::makeUnowned(""));
+      raw = nullptr;
    }
    return m_data->replaceChild<PrefixOperatorExprSyntax>(raw, Cursor::OperatorToken);
 }

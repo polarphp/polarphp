@@ -20,12 +20,66 @@
 
 namespace polar::syntax {
 
+class ConditionElementSyntax;
 class ContinueStmtSyntax;
 class WhileStmtSyntax;
 class DeferStmtSyntax;
 class ExpressionStmtSyntax;
 class ThrowStmtSyntax;
 class ReturnStmtSyntax;
+
+// condition-list -> condition
+//                 | condition-list, condition ','?
+using ConditionElementList = SyntaxCollection<SyntaxKind::ConditionElementList, ConditionElementSyntax>;
+
+///
+/// \brief The ConditionElementSyntax class
+///
+///  condition -> expression
+///
+class ConditionElementSyntax : public Syntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 2;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: Syntax
+      /// optional: false
+      /// ------------
+      /// node choices
+      /// name: Expr kind: Expr
+      Condition,
+      /// type: TokenSyntax
+      /// optional: true
+      TrailingComma,
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   ///
+   /// child name: Condition
+   /// choices:
+   /// SyntaxKind::Expr
+   ///
+   static const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> CHILD_NODE_CHOICES;
+#endif
+public:
+   ConditionElementSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : Syntax(parent, data)
+   {
+      validate();
+   }
+
+   Syntax getCondition();
+   std::optional<TokenSyntax> getTrailingComma();
+
+   ConditionElementSyntax withCondition(std::optional<Syntax> condition);
+   ConditionElementSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
+
+private:
+   friend class ConditionElementSyntaxBuilder;
+   void validate();
+};
 
 class ContinueStmtSyntax : public StmtSyntax
 {
@@ -45,7 +99,9 @@ public:
 public:
    ContinueStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
       : StmtSyntax(parent, data)
-   {}
+   {
+      validate();
+   }
 
    TokenSyntax getContinueKeyword();
    std::optional<TokenSyntax> getLNumberToken();
@@ -64,6 +120,52 @@ public:
    }
 private:
    friend class ContinueStmtSyntaxBuilder;
+   void validate();
+};
+
+class WhileStmtSyntax : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 2;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: true
+      LabelName,
+      /// type: TokenSyntax
+      /// optional: true
+      LabelColon,
+      /// type: TokenSyntax
+      /// optional: false
+      WhileKeyword,
+      /// type: ConditionElementListSyntax
+      /// optional: false
+      Conditions,
+      /// type: CodeBlockSyntax
+      /// optional: false
+      Body
+   };
+
+public:
+   WhileStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : StmtSyntax(parent, data)
+   {
+      validate();
+   }
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::WhileStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class WhileStmtSyntaxBuilder;
    void validate();
 };
 

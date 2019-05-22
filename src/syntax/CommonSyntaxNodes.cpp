@@ -34,16 +34,12 @@ void CodeBlockItemSyntax::validate()
    /// validate every child token choices
    /// validate every child token text choices
    /// validate every child node choices
-   if (auto &__child = raw->getChild(Cursor::Item)) {
-      auto checker = [](const RefCountPtr<RawSyntax> &raw) {
-         // check Item
-         bool declStatus = DeclSyntax::kindOf(raw->getKind());
-         bool stmtStatus = StmtSyntax::kindOf(raw->getKind());
-         bool tokenListStatus = TokenListSyntax::kindOf(raw->getKind());
-         bool nonEmptyTokenListStatus = NonEmptyTokenListSyntax::kindOf(raw->getKind());
-         return declStatus || stmtStatus || tokenListStatus || nonEmptyTokenListStatus;
-      };
-      assert(checker(__child));
+   if (auto &item = raw->getChild(Cursor::Item)) {
+      bool declStatus = DeclSyntax::kindOf(item->getKind());
+      bool stmtStatus = StmtSyntax::kindOf(item->getKind());
+      bool tokenListStatus = TokenListSyntax::kindOf(item->getKind());
+      bool nonEmptyTokenListStatus = NonEmptyTokenListSyntax::kindOf(item->getKind());
+      assert(declStatus || stmtStatus || tokenListStatus || nonEmptyTokenListStatus);
    }
 }
 

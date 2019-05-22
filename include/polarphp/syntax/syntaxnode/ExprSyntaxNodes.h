@@ -54,7 +54,7 @@ public:
    NullExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    TokenSyntax getNullKeyword();
@@ -92,7 +92,7 @@ public:
    ClassRefParentExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    TokenSyntax getParentKeyword();
@@ -129,7 +129,7 @@ public:
    ClassRefSelfExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    TokenSyntax getSelfKeyword();
@@ -165,7 +165,7 @@ public:
    ClassRefStaticExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    TokenSyntax getStaticKeyword();
@@ -201,7 +201,7 @@ public:
    IntegerLiteralExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    TokenSyntax getDigits();
@@ -238,7 +238,7 @@ public:
    FloatLiteralExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    TokenSyntax getFloatDigits();
@@ -274,7 +274,7 @@ public:
    StringLiteralExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    TokenSyntax getString();
@@ -321,7 +321,7 @@ public:
    BooleanLiteralExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    TokenSyntax getBooleanValue();
@@ -374,7 +374,7 @@ public:
    TernaryExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    ExprSyntax getConditionExpr();
@@ -438,7 +438,7 @@ public:
    AssignmentExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    TokenSyntax getAssignToken();
@@ -479,7 +479,7 @@ public:
    SequenceExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    ExprListSyntax getElements();
@@ -531,7 +531,7 @@ public:
    PrefixOperatorExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    std::optional<TokenSyntax> getOperatorToken();
@@ -573,7 +573,7 @@ public:
    PostfixOperatorExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    ExprSyntax getExpr();
@@ -612,7 +612,7 @@ public:
    BinaryOperatorExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    TokenSyntax getOperatorToken();

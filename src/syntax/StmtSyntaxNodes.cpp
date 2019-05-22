@@ -13,6 +13,67 @@
 
 namespace polar::syntax {
 
+///
+/// current only support expr condition
+///
+const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> ConditionElementSyntax::CHILD_NODE_CHOICES
+{
+   {
+      ConditionElementSyntax::Cursor::Condition, {
+         SyntaxKind::Expr
+      }
+   }
+};
+
+void ConditionElementSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ConditionElementSyntax::CHILDREN_COUNT);
+   // check condition child node choices
+   if (const RefCountPtr<RawSyntax> &condition = raw->getChild(Cursor::Condition)) {
+      assert(condition->kindOf(SyntaxKind::Expr));
+   }
+}
+
+Syntax ConditionElementSyntax::getCondition()
+{
+   return Syntax{m_root, m_data->getChild(Cursor::Condition).get()};
+}
+
+std::optional<TokenSyntax> ConditionElementSyntax::getTrailingComma()
+{
+   RefCountPtr<SyntaxData> childData = m_data->getChild(Cursor::TrailingComma);
+   if (!childData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, childData.get()};
+}
+
+ConditionElementSyntax ConditionElementSyntax::withCondition(std::optional<Syntax> condition)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (condition.has_value()) {
+      raw = condition->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<ConditionElementSyntax>(raw, Cursor::Condition);
+}
+
+ConditionElementSyntax ConditionElementSyntax::withTrailingComma(std::optional<TokenSyntax> trailingComma)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (trailingComma.has_value()) {
+      raw = trailingComma->getRaw();
+   } else {
+      raw = nullptr;
+   }
+   return m_data->replaceChild<ConditionElementSyntax>(raw, Cursor::TrailingComma);
+}
+
 void ContinueStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = getRaw();
@@ -54,8 +115,7 @@ ContinueStmtSyntax ContinueStmtSyntax::withLNumberToken(std::optional<TokenSynta
    if (numberToken.has_value()) {
       raw = numberToken->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_LNUMBER,
-                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_LNUMBER)));
+      raw = nullptr;
    }
    return m_data->replaceChild<ContinueStmtSyntax>(raw, Cursor::LNumberToken);
 }
@@ -139,7 +199,7 @@ ReturnStmtSyntax ReturnStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
    if (expr.has_value()) {
       raw = expr->getRaw();
    } else {
-      raw = RawSyntax::missing(SyntaxKind::Expr);
+      raw = nullptr;
    }
    return m_data->replaceChild<ReturnStmtSyntax>(raw, Cursor::Expr);
 }

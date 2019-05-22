@@ -340,6 +340,11 @@ public:
       return static_cast<SyntaxKind>(m_bits.common.kind);
    }
 
+   bool kindOf(SyntaxKind kind) const
+   {
+      return getKind() == kind;
+   }
+
    /// Get an id for this node that is stable across incremental parses
    SyntaxNodeId getId() const
    {
