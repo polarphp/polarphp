@@ -120,6 +120,104 @@ ContinueStmtSyntax ContinueStmtSyntax::withLNumberToken(std::optional<TokenSynta
    return m_data->replaceChild<ContinueStmtSyntax>(raw, Cursor::LNumberToken);
 }
 
+void WhileStmtSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == WhileStmtSyntax::CHILDREN_COUNT);
+}
+
+std::optional<TokenSyntax> WhileStmtSyntax::getLabelName()
+{
+   RefCountPtr<SyntaxData> childData = m_data->getChild(Cursor::LabelName);
+   if (!childData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, childData.get()};
+}
+
+std::optional<TokenSyntax> WhileStmtSyntax::getLabelColon()
+{
+   RefCountPtr<SyntaxData> childData = m_data->getChild(Cursor::LabelColon);
+   if (!childData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, childData.get()};
+}
+
+TokenSyntax WhileStmtSyntax::getWhileKeyword()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::WhileKeyword).get()};
+}
+
+ConditionElementListSyntax WhileStmtSyntax::getConditions()
+{
+   return ConditionElementListSyntax{m_root, m_data->getChild(Cursor::Conditions).get()};
+}
+
+CodeBlockSyntax WhileStmtSyntax::getBody()
+{
+   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+}
+
+WhileStmtSyntax WhileStmtSyntax::withLabelName(std::optional<TokenSyntax> labelName)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (labelName.has_value()) {
+      raw = labelName->getRaw();
+   } else {
+      raw = nullptr;
+   }
+   return m_data->replaceChild<WhileStmtSyntax>(raw, Cursor::LabelName);
+}
+
+WhileStmtSyntax WhileStmtSyntax::withLabelColon(std::optional<TokenSyntax> labelColon)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (labelColon.has_value()) {
+      raw = labelColon->getRaw();
+   } else {
+      raw = nullptr;
+   }
+   return m_data->replaceChild<WhileStmtSyntax>(raw, Cursor::LabelColon);
+}
+
+WhileStmtSyntax WhileStmtSyntax::withWhileKeyword(std::optional<TokenSyntax> whileKeyword)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (whileKeyword.has_value()) {
+      raw = whileKeyword->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_WHILE,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_WHILE)));
+   }
+   return m_data->replaceChild<WhileStmtSyntax>(raw, Cursor::WhileKeyword);
+}
+
+WhileStmtSyntax WhileStmtSyntax::withConditions(std::optional<ConditionElementListSyntax> conditions)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (conditions.has_value()) {
+      raw = conditions->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::ConditionElementList);
+   }
+   return m_data->replaceChild<WhileStmtSyntax>(raw, Cursor::Conditions);
+}
+
+WhileStmtSyntax WhileStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (body.has_value()) {
+      raw = body->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   return m_data->replaceChild<WhileStmtSyntax>(raw, Cursor::Body);
+}
+
 void ThrowStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = getRaw();

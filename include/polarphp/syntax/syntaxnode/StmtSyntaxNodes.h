@@ -27,10 +27,11 @@ class DeferStmtSyntax;
 class ExpressionStmtSyntax;
 class ThrowStmtSyntax;
 class ReturnStmtSyntax;
+class CodeBlockSyntax;
 
 // condition-list -> condition
 //                 | condition-list, condition ','?
-using ConditionElementList = SyntaxCollection<SyntaxKind::ConditionElementList, ConditionElementSyntax>;
+using ConditionElementListSyntax = SyntaxCollection<SyntaxKind::ConditionElementList, ConditionElementSyntax>;
 
 ///
 /// \brief The ConditionElementSyntax class
@@ -126,8 +127,8 @@ private:
 class WhileStmtSyntax : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 2;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static unsigned int CHILDREN_COUNT = 5;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 3;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -153,6 +154,26 @@ public:
    {
       validate();
    }
+
+   std::optional<TokenSyntax> getLabelName();
+   std::optional<TokenSyntax> getLabelColon();
+   TokenSyntax getWhileKeyword();
+   ConditionElementListSyntax getConditions();
+   CodeBlockSyntax getBody();
+
+   WhileStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
+   WhileStmtSyntax withLabelColon(std::optional<TokenSyntax> labelColon);
+   WhileStmtSyntax withWhileKeyword(std::optional<TokenSyntax> whileKeyword);
+   WhileStmtSyntax withConditions(std::optional<ConditionElementListSyntax> conditions);
+   WhileStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+
+   /// Adds the provided `condition` to the node's `Conditions`
+   /// collection.
+   /// - param element: The new `condition` to add to the node's
+   ///                  `Conditions` collection.
+   /// - returns: A copy of the receiver with the provided `condition`
+   ///            appended to its `Conditions` collection.
+   WhileStmtSyntax addCondition(ConditionElementSyntax condition);
 
    static bool kindOf(SyntaxKind kind)
    {
