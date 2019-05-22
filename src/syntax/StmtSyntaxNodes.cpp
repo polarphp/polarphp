@@ -27,7 +27,7 @@ const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> ConditionElementSy
 
 void ConditionElementSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -76,7 +76,7 @@ ConditionElementSyntax ConditionElementSyntax::withTrailingComma(std::optional<T
 
 void ContinueStmtSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -120,9 +120,81 @@ ContinueStmtSyntax ContinueStmtSyntax::withLNumberToken(std::optional<TokenSynta
    return m_data->replaceChild<ContinueStmtSyntax>(raw, Cursor::LNumberToken);
 }
 
+void BreakStmtSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == BreakStmtSyntax::CHILDREN_COUNT);
+}
+
+TokenSyntax BreakStmtSyntax::getBreakKeyword()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::BreakKeyword).get()};
+}
+
+std::optional<TokenSyntax> BreakStmtSyntax::getLNumberToken()
+{
+   RefCountPtr<SyntaxData> childData = m_data->getChild(Cursor::LNumberToken);
+   if (!childData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, childData.get()};
+}
+
+BreakStmtSyntax BreakStmtSyntax::withBreakKeyword(std::optional<TokenSyntax> breakKeyword)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (breakKeyword.has_value()) {
+      raw = breakKeyword->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_BREAK,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_BREAK)));
+   }
+   return m_data->replaceChild<BreakStmtSyntax>(raw, Cursor::BreakKeyword);
+}
+
+BreakStmtSyntax BreakStmtSyntax::withLNumberToken(std::optional<TokenSyntax> numberToken)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (numberToken.has_value()) {
+      raw = numberToken->getRaw();
+   } else {
+      raw = nullptr;
+   }
+   return m_data->replaceChild<BreakStmtSyntax>(raw, Cursor::LNumberToken);
+}
+
+void FallthroughStmtSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if(isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == FallthroughStmtSyntax::CHILDREN_COUNT);
+}
+
+TokenSyntax FallthroughStmtSyntax::getFallthroughKeyword()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::FallthroughKeyword).get()};
+}
+
+FallthroughStmtSyntax FallthroughStmtSyntax::withFallthroughStmtSyntax(std::optional<TokenSyntax> fallthroughKeyword)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (fallthroughKeyword.has_value()) {
+      raw = fallthroughKeyword->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_FALLTHROUGH,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_FALLTHROUGH)));
+   }
+   return m_data->replaceChild<FallthroughStmtSyntax>(raw, TokenKindType::T_FALLTHROUGH);
+}
+
 void WhileStmtSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -229,9 +301,119 @@ WhileStmtSyntax WhileStmtSyntax::addCondition(ConditionElementSyntax condition)
    return m_data->replaceChild<WhileStmtSyntax>(raw, Cursor::Conditions);
 }
 
+TokenSyntax SwitchDefaultLabelSyntax::getDefaultKeyword()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::DefaultKeyword).get()};
+}
+
+TokenSyntax SwitchDefaultLabelSyntax::getColon()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::Colon).get()};
+}
+
+void SwitchDefaultLabelSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == SwitchDefaultLabelSyntax::CHILDREN_COUNT);
+}
+
+SwitchDefaultLabelSyntax SwitchDefaultLabelSyntax::withDefaultKeyword(std::optional<TokenSyntax> defaultKeyword)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (defaultKeyword.has_value()) {
+      raw = defaultKeyword->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_DEFAULT,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_DEFAULT)));
+   }
+   return m_data->replaceChild<SwitchDefaultLabelSyntax>(raw, Cursor::DefaultKeyword);
+}
+
+SwitchDefaultLabelSyntax SwitchDefaultLabelSyntax::withColon(std::optional<TokenSyntax> colon)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (colon.has_value()) {
+      raw = colon->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_COLON,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+   }
+   return m_data->replaceChild<SwitchDefaultLabelSyntax>(raw, Cursor::Colon);
+}
+
+void DeferStmtSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == DeferStmtSyntax::CHILDREN_COUNT);
+}
+
+TokenSyntax DeferStmtSyntax::getDeferKeyword()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::DeferKeyword).get()};
+}
+
+CodeBlockSyntax DeferStmtSyntax::getBody()
+{
+   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+}
+
+DeferStmtSyntax DeferStmtSyntax::withDeferKeyword(std::optional<TokenSyntax> deferKeyword)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (deferKeyword.has_value()) {
+      raw = deferKeyword->getRaw();
+   } else {
+      raw = RawSyntax::missing(TokenKindType::T_DEFER,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_DEFER)));
+   }
+   return m_data->replaceChild<DeferStmtSyntax>(raw, Cursor::DeferKeyword);
+}
+
+DeferStmtSyntax DeferStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (body.has_value()) {
+      raw = body->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   return m_data->replaceChild<DeferStmtSyntax>(raw, Cursor::Body);
+}
+
+void ExpressionStmtSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ExpressionStmtSyntax::CHILDREN_COUNT);
+}
+
+ExprSyntax ExpressionStmtSyntax::getExpr()
+{
+   return ExprSyntax{m_root, m_data->getChild(Cursor::Expr).get()};
+}
+
+ExpressionStmtSyntax ExpressionStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (expr.has_value()) {
+      raw = expr->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<ExpressionStmtSyntax>(raw, Cursor::Expr);
+}
+
 void ThrowStmtSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -273,7 +455,7 @@ ThrowStmtSyntax ThrowStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
 
 void ReturnStmtSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }

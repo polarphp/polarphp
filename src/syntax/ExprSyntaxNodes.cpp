@@ -41,7 +41,7 @@ NullExprSyntax NullExprSyntax::withNullKeyword(std::optional<TokenSyntax> keywor
 
 void ClassRefParentExprSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -67,7 +67,7 @@ ClassRefParentExprSyntax ClassRefParentExprSyntax::withParentKeyword(std::option
 
 void ClassRefSelfExprSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -93,7 +93,7 @@ ClassRefSelfExprSyntax ClassRefSelfExprSyntax::withSelfKeyword(std::optional<Tok
 
 void ClassRefStaticExprSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -119,7 +119,7 @@ ClassRefStaticExprSyntax ClassRefStaticExprSyntax::withStaticKeyword(std::option
 
 void IntegerLiteralExprSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -145,7 +145,7 @@ IntegerLiteralExprSyntax IntegerLiteralExprSyntax::withDigits(std::optional<Toke
 
 void FloatLiteralExprSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -171,7 +171,7 @@ FloatLiteralExprSyntax FloatLiteralExprSyntax::withFloatDigits(std::optional<Tok
 
 void StringLiteralExprSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -209,7 +209,7 @@ const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> BooleanLiteralE
 
 void BooleanLiteralExprSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -239,7 +239,7 @@ BooleanLiteralExprSyntax BooleanLiteralExprSyntax::withBooleanValue(std::optiona
 
 void TernaryExprSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -330,7 +330,7 @@ TernaryExprSyntax TernaryExprSyntax::withSecondChoice(std::optional<ExprSyntax> 
 
 void AssignmentExprSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -356,7 +356,7 @@ AssignmentExprSyntax AssignmentExprSyntax::withAssignToken(std::optional<TokenSy
 
 void SequenceExprSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -392,7 +392,7 @@ SequenceExprSyntax SequenceExprSyntax::addElement(ExprSyntax expr)
 
 void PrefixOperatorExprSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -437,7 +437,7 @@ PrefixOperatorExprSyntax PrefixOperatorExprSyntax::withExpr(std::optional<TokenS
 
 void PostfixOperatorExprSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -479,7 +479,7 @@ PostfixOperatorExprSyntax PostfixOperatorExprSyntax::withOperatorToken(std::opti
 
 void BinaryOperatorExprSyntax::validate()
 {
-   RefCountPtr<RawSyntax> raw = getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }

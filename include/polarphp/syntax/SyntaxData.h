@@ -116,7 +116,6 @@ public:
       };
    }
 
-
    static RefCountPtr<SyntaxData> make(RefCountPtr<RawSyntax> m_raw,
                                        const SyntaxData *m_parent = nullptr,
                                        CursorIndex m_indexInParent = 0);

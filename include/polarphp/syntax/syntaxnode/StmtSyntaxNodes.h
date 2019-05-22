@@ -22,7 +22,13 @@ namespace polar::syntax {
 
 class ConditionElementSyntax;
 class ContinueStmtSyntax;
+class BreakStmtSyntax;
+class FallthroughStmtSyntax;
 class WhileStmtSyntax;
+class SwitchCaseSyntax;
+class SwitchDefaultLabelSyntax;
+class SwitchCaseLabelSyntax;
+class SwitchStmtSyntax;
 class DeferStmtSyntax;
 class ExpressionStmtSyntax;
 class ThrowStmtSyntax;
@@ -32,6 +38,10 @@ class CodeBlockSyntax;
 // condition-list -> condition
 //                 | condition-list, condition ','?
 using ConditionElementListSyntax = SyntaxCollection<SyntaxKind::ConditionElementList, ConditionElementSyntax>;
+
+// switch-case-list ->  switch-case
+//                    | switch-case-list switch-case
+using SwitchCaseListSyntax = SyntaxCollection<SyntaxKind::SwitchCaseList, SwitchCaseSyntax>;
 
 ///
 /// \brief The ConditionElementSyntax class
@@ -124,6 +134,76 @@ private:
    void validate();
 };
 
+class BreakStmtSyntax : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 2;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: false
+      BreakKeyword,
+      /// type: TokenSyntax
+      /// optional: true
+      LNumberToken,
+   };
+public:
+   BreakStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : StmtSyntax(parent, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getBreakKeyword();
+   std::optional<TokenSyntax> getLNumberToken();
+
+   BreakStmtSyntax withBreakKeyword(std::optional<TokenSyntax> breakKeyword);
+   BreakStmtSyntax withLNumberToken(std::optional<TokenSyntax> numberToken);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::BreakStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class BreakStmtSyntaxBuilder;
+   void validate();
+};
+
+class FallthroughStmtSyntax : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 1;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: false
+      FallthroughKeyword
+   };
+
+public:
+   FallthroughStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : StmtSyntax(parent, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getFallthroughKeyword();
+   FallthroughStmtSyntax withFallthroughStmtSyntax(std::optional<TokenSyntax> fallthroughKeyword);
+
+private:
+   friend class FallthroughStmtSyntaxBuilder;
+   void validate();
+};
+
 class WhileStmtSyntax : public StmtSyntax
 {
 public:
@@ -190,6 +270,144 @@ private:
    void validate();
 };
 
+///
+/// \brief The SwitchDefaultLabelSyntax class
+///
+/// switch-default-label -> 'default' ':'
+///
+class SwitchDefaultLabelSyntax : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 2;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: false
+      DefaultKeyword,
+      /// type: TokenSyntax
+      /// optional: false
+      Colon,
+   };
+
+public:
+   SwitchDefaultLabelSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : StmtSyntax(parent, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getDefaultKeyword();
+   TokenSyntax getColon();
+
+   SwitchDefaultLabelSyntax withDefaultKeyword(std::optional<TokenSyntax> defaultKeyword);
+   SwitchDefaultLabelSyntax withColon(std::optional<TokenSyntax> colon);
+
+private:
+   friend class SwitchDefaultLabelSyntaxBuilder;
+   void validate();
+};
+
+///
+/// \brief The SwitchCaseLabelSyntax class
+///
+/// switch-case-label -> 'case' case-item-list ':'
+///
+class SwitchCaseLabelSyntax : public StmtSyntax
+{
+
+};
+
+///
+/// \brief The SwitchCaseSyntax class
+///
+/// switch-case -> switch-case-label stmt-list
+///              | switch-default-label stmt-list
+///
+class SwitchCaseSyntax : public StmtSyntax
+{
+
+};
+
+///
+/// \brief The SwitchStmtSyntax class
+///
+/// switch-stmt -> identifier? ':'? 'switch' '(' expr ')' '{'
+///    switch-case-list '}'
+///
+class SwitchStmtSyntax : public StmtSyntax
+{
+
+};
+
+///
+/// \brief The DeferStmtSyntax class
+///
+/// defer-stmt -> 'defer' code-block
+///
+class DeferStmtSyntax : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 2;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: false
+      DeferKeyword,
+      /// type: CodeBlock
+      /// optional: false
+      Body
+   };
+
+public:
+   DeferStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : StmtSyntax(parent, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getDeferKeyword();
+   CodeBlockSyntax getBody();
+   DeferStmtSyntax withDeferKeyword(std::optional<TokenSyntax> deferKeyword);
+   DeferStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+
+private:
+   friend class DeferStmtSyntaxBuilder;
+   void validate();
+};
+
+///
+/// \brief The ExpressionStmtSyntax class
+///
+/// expr-stmt -> expression ';'
+///
+class ExpressionStmtSyntax : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 1;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: ExprSyntax
+      /// optional: false
+      Expr
+   };
+public:
+   ExpressionStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : StmtSyntax(parent, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getExpr();
+   ExpressionStmtSyntax withExpr(std::optional<ExprSyntax> expr);
+
+private:
+   friend class ExpressionStmtSyntaxBuilder;
+   void validate();
+};
+
 class ThrowStmtSyntax : public StmtSyntax
 {
 public:
@@ -209,7 +427,7 @@ public:
    ThrowStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
       : StmtSyntax(parent, data)
    {
-      this->validate();
+      validate();
    }
 
    TokenSyntax getThrowKeyword();

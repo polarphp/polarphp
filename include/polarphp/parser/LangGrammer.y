@@ -135,6 +135,7 @@ namespace polar::syntax{
 %token T_DEFAULT    "default (T_DEFAULT)"
 %token T_BREAK      "break (T_BREAK)"
 %token T_CONTINUE   "continue (T_CONTINUE)"
+%token T_FALLTHROUGH "fallthrough (T_FALLTHROUGH)"
 %token T_GOTO       "goto (T_GOTO)"
 %token T_RETURN     "return (T_RETURN)"
 %token T_TRY        "try (T_TRY)"
