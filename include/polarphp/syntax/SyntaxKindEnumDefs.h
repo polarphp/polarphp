@@ -59,6 +59,7 @@ enum class SyntaxKind : std::uint32_t
    BreakStmt,
    FallthroughStmt,
    WhileStmt,
+   DoWhileStmt,
    SwitchCase,
    SwitchDefaultLabel,
    SwitchCaseLabel,

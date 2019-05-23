@@ -25,6 +25,7 @@ class ContinueStmtSyntax;
 class BreakStmtSyntax;
 class FallthroughStmtSyntax;
 class WhileStmtSyntax;
+class DoWhileStmtSyntax;
 class SwitchCaseSyntax;
 class SwitchDefaultLabelSyntax;
 class SwitchCaseLabelSyntax;
@@ -266,6 +267,69 @@ public:
 
 private:
    friend class WhileStmtSyntaxBuilder;
+   void validate();
+};
+
+class DoWhileStmtSyntax : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 6;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 4;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: true
+      LabelName,
+      /// type: TokenSyntax
+      /// optional: true
+      LabelColon,
+      /// type: TokenSyntax
+      /// optional: false
+      DoKeyword,
+      /// type: CodeBlockSyntax
+      /// optional: false
+      Body,
+      /// type: TokenSyntax
+      /// optional: false
+      WhileKeyword,
+      /// type: TokenSyntax
+      /// optional: false
+      LeftParen,
+      /// type: ExprSyntax
+      /// optional: false
+      Condition,
+      /// type: TokenSyntax
+      /// optional: false
+      RightParen
+   };
+
+public:
+   DoWhileStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : StmtSyntax(parent, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getLabelName();
+   std::optional<TokenSyntax> getLabelColon();
+   TokenSyntax getDoKeyword();
+   CodeBlockSyntax getBody();
+   TokenSyntax getWhileKeyword();
+   TokenSyntax getLeftParen();
+   ExprSyntax getCondition();
+   TokenSyntax getRightParen();
+
+   DoWhileStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
+   DoWhileStmtSyntax withLabelColon(std::optional<TokenSyntax> labelColon);
+   DoWhileStmtSyntax withDoKeyword(std::optional<TokenSyntax> doKeyword);
+   DoWhileStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+   DoWhileStmtSyntax withWhileKeyword(std::optional<TokenSyntax> whileKeyword);
+   DoWhileStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
+   DoWhileStmtSyntax withCondition(std::optional<ExprSyntax> condition);
+   DoWhileStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
+
+private:
+   friend class DoWhileStmtSyntaxBuilder;
    void validate();
 };
 

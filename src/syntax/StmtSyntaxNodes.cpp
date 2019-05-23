@@ -14,6 +14,7 @@
 namespace polar::syntax {
 
 ///
+/// ConditionElementSyntax
 /// current only support expr condition
 ///
 const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> ConditionElementSyntax::CHILD_NODE_CHOICES
@@ -74,6 +75,10 @@ ConditionElementSyntax ConditionElementSyntax::withTrailingComma(std::optional<T
    return m_data->replaceChild<ConditionElementSyntax>(rawTrailingComma, Cursor::TrailingComma);
 }
 
+///
+/// ContinueStmtSyntax
+///
+
 void ContinueStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
@@ -120,6 +125,9 @@ ContinueStmtSyntax ContinueStmtSyntax::withLNumberToken(std::optional<TokenSynta
    return m_data->replaceChild<ContinueStmtSyntax>(rawNumberToken, Cursor::LNumberToken);
 }
 
+///
+/// BreakStmtSyntax
+///
 void BreakStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
@@ -166,6 +174,9 @@ BreakStmtSyntax BreakStmtSyntax::withLNumberToken(std::optional<TokenSyntax> num
    return m_data->replaceChild<BreakStmtSyntax>(rawNumberToken, Cursor::LNumberToken);
 }
 
+///
+/// FallthroughStmtSyntax
+///
 void FallthroughStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
@@ -192,6 +203,9 @@ FallthroughStmtSyntax FallthroughStmtSyntax::withFallthroughStmtSyntax(std::opti
    return m_data->replaceChild<FallthroughStmtSyntax>(rawFallthroughKeyword, TokenKindType::T_FALLTHROUGH);
 }
 
+///
+/// WhileStmtSyntax
+///
 void WhileStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
@@ -301,6 +315,170 @@ WhileStmtSyntax WhileStmtSyntax::addCondition(ConditionElementSyntax condition)
    return m_data->replaceChild<WhileStmtSyntax>(conditions, Cursor::Conditions);
 }
 
+///
+/// DoWhileStmtSyntax
+///
+void DoWhileStmtSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == DoWhileStmtSyntax::CHILDREN_COUNT);
+}
+
+std::optional<TokenSyntax> DoWhileStmtSyntax::getLabelName()
+{
+   RefCountPtr<SyntaxData> labelNameData = m_data->getChild(Cursor::LabelName);
+   if (!labelNameData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, labelNameData.get()};
+}
+
+std::optional<TokenSyntax> DoWhileStmtSyntax::getLabelColon()
+{
+   RefCountPtr<SyntaxData> labelColonData = m_data->getChild(Cursor::LabelColon);
+   if (!labelColonData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, labelColonData.get()};
+}
+
+TokenSyntax DoWhileStmtSyntax::getDoKeyword()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::DoKeyword).get()};
+}
+
+CodeBlockSyntax DoWhileStmtSyntax::getBody()
+{
+   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+}
+
+TokenSyntax DoWhileStmtSyntax::getWhileKeyword()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::WhileKeyword).get()};
+}
+
+TokenSyntax DoWhileStmtSyntax::getLeftParen()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::LeftParen).get()};
+}
+
+ExprSyntax DoWhileStmtSyntax::getCondition()
+{
+   return ExprSyntax{m_root, m_data->getChild(Cursor::Condition).get()};
+}
+
+TokenSyntax DoWhileStmtSyntax::getRightParen()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::RightParen).get()};
+}
+
+DoWhileStmtSyntax DoWhileStmtSyntax::withLabelName(std::optional<TokenSyntax> labelName)
+{
+   RefCountPtr<RawSyntax> rawLabelName;
+   if (labelName.has_value()) {
+      rawLabelName = labelName->getRaw();
+   } else {
+      rawLabelName = nullptr;
+   }
+   return m_data->replaceChild<DoWhileStmtSyntax>(rawLabelName, Cursor::LabelName);
+}
+
+DoWhileStmtSyntax DoWhileStmtSyntax::withLabelColon(std::optional<TokenSyntax> labelColon)
+{
+   RefCountPtr<RawSyntax> rawLabelName;
+   if (labelColon.has_value()) {
+      rawLabelName = labelColon->getRaw();
+   } else {
+      rawLabelName = nullptr;
+   }
+   return m_data->replaceChild<DoWhileStmtSyntax>(rawLabelName, Cursor::LabelColon);
+}
+
+DoWhileStmtSyntax DoWhileStmtSyntax::withDoKeyword(std::optional<TokenSyntax> doKeyword)
+{
+   RefCountPtr<RawSyntax> rawDoKeyword;
+   if (doKeyword.has_value()) {
+      rawDoKeyword = doKeyword->getRaw();
+   } else {
+      rawDoKeyword = RawSyntax::missing(TokenKindType::T_DO,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_DO)));
+   }
+   return m_data->replaceChild<DoWhileStmtSyntax>(rawDoKeyword, Cursor::DoKeyword);
+}
+
+DoWhileStmtSyntax DoWhileStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
+{
+   RefCountPtr<RawSyntax> rawBody;
+   if (body.has_value()) {
+      rawBody = body->getRaw();
+   } else {
+      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   return m_data->replaceChild<DoWhileStmtSyntax>(rawBody, Cursor::Body);
+}
+
+DoWhileStmtSyntax DoWhileStmtSyntax::withWhileKeyword(std::optional<TokenSyntax> whileKeyword)
+{
+   RefCountPtr<RawSyntax> rawWhileKeyword;
+   if (whileKeyword.has_value()) {
+      rawWhileKeyword = whileKeyword->getRaw();
+   } else {
+      rawWhileKeyword = RawSyntax::missing(TokenKindType::T_WHILE,
+                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_WHILE)));
+   }
+   return m_data->replaceChild<DoWhileStmtSyntax>(rawWhileKeyword, Cursor::WhileKeyword);
+}
+
+DoWhileStmtSyntax DoWhileStmtSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> rawLeftParen;
+   if (leftParen.has_value()) {
+      rawLeftParen = leftParen->getRaw();
+   } else {
+      rawLeftParen = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+   }
+   return m_data->replaceChild<DoWhileStmtSyntax>(rawLeftParen, Cursor::LeftParen);
+}
+
+DoWhileStmtSyntax DoWhileStmtSyntax::withCondition(std::optional<ExprSyntax> condition)
+{
+   RefCountPtr<RawSyntax> rawCondition;
+   if (condition.has_value()) {
+      rawCondition = condition->getRaw();
+   } else {
+      rawCondition = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<DoWhileStmtSyntax>(rawCondition, Cursor::Condition);
+}
+
+DoWhileStmtSyntax DoWhileStmtSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rawRightParen;
+   if (rightParen.has_value()) {
+      rawRightParen = rightParen->getRaw();
+   } else {
+      rawRightParen = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+   }
+   return m_data->replaceChild<DoWhileStmtSyntax>(rawRightParen, Cursor::RightParen);
+}
+
+///
+/// SwitchDefaultLabelSyntax
+///
+void SwitchDefaultLabelSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == SwitchDefaultLabelSyntax::CHILDREN_COUNT);
+}
+
 TokenSyntax SwitchDefaultLabelSyntax::getDefaultKeyword()
 {
    return TokenSyntax{m_root, m_data->getChild(Cursor::DefaultKeyword).get()};
@@ -309,15 +487,6 @@ TokenSyntax SwitchDefaultLabelSyntax::getDefaultKeyword()
 TokenSyntax SwitchDefaultLabelSyntax::getColon()
 {
    return TokenSyntax{m_root, m_data->getChild(Cursor::Colon).get()};
-}
-
-void SwitchDefaultLabelSyntax::validate()
-{
-   RefCountPtr<RawSyntax> raw = m_data->getRaw();
-   if (isMissing()) {
-      return;
-   }
-   assert(raw->getLayout().size() == SwitchDefaultLabelSyntax::CHILDREN_COUNT);
 }
 
 SwitchDefaultLabelSyntax SwitchDefaultLabelSyntax::withDefaultKeyword(std::optional<TokenSyntax> defaultKeyword)
@@ -344,6 +513,9 @@ SwitchDefaultLabelSyntax SwitchDefaultLabelSyntax::withColon(std::optional<Token
    return m_data->replaceChild<SwitchDefaultLabelSyntax>(rawColon, Cursor::Colon);
 }
 
+///
+/// SwitchCaseLabelSyntax
+///
 void SwitchCaseLabelSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
@@ -402,6 +574,10 @@ SwitchCaseLabelSyntax SwitchCaseLabelSyntax::withColon(std::optional<TokenSyntax
    }
    return m_data->replaceChild<SwitchCaseLabelSyntax>(rawColon, Cursor::Colon);
 }
+
+///
+/// SwitchCaseSyntax
+///
 
 #ifdef POLAR_DEBUG_BUILD
 const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> SwitchCaseSyntax::CHILD_NODE_CHOICES
@@ -472,6 +648,9 @@ SwitchCaseSyntax SwitchCaseSyntax::addStatement(CodeBlockItemSyntax statement)
    return m_data->replaceChild<SwitchCaseSyntax>(statements, Cursor::Statements);
 }
 
+///
+/// SwitchStmtSyntax
+///
 void SwitchStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
@@ -649,6 +828,9 @@ SwitchStmtSyntax SwitchStmtSyntax::addCase(SwitchCaseSyntax switchCase)
    return m_data->replaceChild<SwitchStmtSyntax>(cases, Cursor::Cases);
 }
 
+///
+/// DeferStmtSyntax
+///
 void DeferStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
@@ -691,6 +873,9 @@ DeferStmtSyntax DeferStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
    return m_data->replaceChild<DeferStmtSyntax>(rawBody, Cursor::Body);
 }
 
+///
+/// ExpressionStmtSyntax
+///
 void ExpressionStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
@@ -716,6 +901,9 @@ ExpressionStmtSyntax ExpressionStmtSyntax::withExpr(std::optional<ExprSyntax> ex
    return m_data->replaceChild<ExpressionStmtSyntax>(rawExpr, Cursor::Expr);
 }
 
+///
+/// ThrowStmtSyntax
+///
 void ThrowStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
@@ -758,6 +946,9 @@ ThrowStmtSyntax ThrowStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
    return m_data->replaceChild<ThrowStmtSyntax>(rawExpr, Cursor::Expr);
 }
 
+///
+/// ReturnStmtSyntax
+///
 void ReturnStmtSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
