@@ -29,14 +29,14 @@ TokenSyntax NullExprSyntax::getNullKeyword()
 
 NullExprSyntax NullExprSyntax::withNullKeyword(std::optional<TokenSyntax> keyword)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawKeyword;
    if (keyword.has_value()) {
-      raw = keyword->getRaw();
+      rawKeyword = keyword->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_NULL,
-                               OwnedString::makeUnowned((get_token_text(TokenKindType::T_NULL))));
+      rawKeyword = RawSyntax::missing(TokenKindType::T_NULL,
+                                      OwnedString::makeUnowned((get_token_text(TokenKindType::T_NULL))));
    }
-   return m_data->replaceChild<NullExprSyntax>(raw, Cursor::NulllKeyword);
+   return m_data->replaceChild<NullExprSyntax>(rawKeyword, Cursor::NulllKeyword);
 }
 
 void ClassRefParentExprSyntax::validate()
@@ -55,14 +55,14 @@ TokenSyntax ClassRefParentExprSyntax::getParentKeyword()
 
 ClassRefParentExprSyntax ClassRefParentExprSyntax::withParentKeyword(std::optional<TokenSyntax> parentKeyword)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawParentKeyword;
    if (parentKeyword.has_value()) {
-      raw = parentKeyword->getRaw();
+      rawParentKeyword = parentKeyword->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_CLASS_REF_PARENT,
-                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_PARENT)));
+      rawParentKeyword = RawSyntax::missing(TokenKindType::T_CLASS_REF_PARENT,
+                                            OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_PARENT)));
    }
-   return m_data->replaceChild<ClassRefParentExprSyntax>(raw, Cursor::ParentKeyword);
+   return m_data->replaceChild<ClassRefParentExprSyntax>(rawParentKeyword, Cursor::ParentKeyword);
 }
 
 void ClassRefSelfExprSyntax::validate()
@@ -81,14 +81,14 @@ TokenSyntax ClassRefSelfExprSyntax::getSelfKeyword()
 
 ClassRefSelfExprSyntax ClassRefSelfExprSyntax::withSelfKeyword(std::optional<TokenSyntax> selfKeyword)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawSelfKeyword;
    if (selfKeyword.has_value()) {
-      raw = selfKeyword->getRaw();
+      rawSelfKeyword = selfKeyword->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_CLASS_REF_SELF,
-                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_SELF)));
+      rawSelfKeyword = RawSyntax::missing(TokenKindType::T_CLASS_REF_SELF,
+                                          OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_SELF)));
    }
-   return m_data->replaceChild<ClassRefSelfExprSyntax>(raw, Cursor::SelfKeyword);
+   return m_data->replaceChild<ClassRefSelfExprSyntax>(rawSelfKeyword, Cursor::SelfKeyword);
 }
 
 void ClassRefStaticExprSyntax::validate()
@@ -107,14 +107,14 @@ TokenSyntax ClassRefStaticExprSyntax::getStaticKeyword()
 
 ClassRefStaticExprSyntax ClassRefStaticExprSyntax::withStaticKeyword(std::optional<TokenSyntax> staticKeyword)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawStaticKeyword;
    if (staticKeyword.has_value()) {
-      raw = staticKeyword->getRaw();
+      rawStaticKeyword = staticKeyword->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_CLASS_REF_STATIC,
-                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_STATIC)));
+      rawStaticKeyword = RawSyntax::missing(TokenKindType::T_CLASS_REF_STATIC,
+                                            OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_STATIC)));
    }
-   return m_data->replaceChild<ClassRefStaticExprSyntax>(raw, Cursor::StaticKeyword);
+   return m_data->replaceChild<ClassRefStaticExprSyntax>(rawStaticKeyword, Cursor::StaticKeyword);
 }
 
 void IntegerLiteralExprSyntax::validate()
@@ -133,14 +133,14 @@ TokenSyntax IntegerLiteralExprSyntax::getDigits()
 
 IntegerLiteralExprSyntax IntegerLiteralExprSyntax::withDigits(std::optional<TokenSyntax> digits)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawDigits;
    if (digits.has_value()) {
-      raw = digits->getRaw();
+      rawDigits = digits->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_LNUMBER,
-                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_LNUMBER)));
+      rawDigits = RawSyntax::missing(TokenKindType::T_LNUMBER,
+                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_LNUMBER)));
    }
-   return m_data->replaceChild<IntegerLiteralExprSyntax>(raw, Cursor::Digits);
+   return m_data->replaceChild<IntegerLiteralExprSyntax>(rawDigits, Cursor::Digits);
 }
 
 void FloatLiteralExprSyntax::validate()
@@ -159,14 +159,14 @@ TokenSyntax FloatLiteralExprSyntax::getFloatDigits()
 
 FloatLiteralExprSyntax FloatLiteralExprSyntax::withFloatDigits(std::optional<TokenSyntax> digits)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawDigits;
    if (digits.has_value()) {
-      raw = digits->getRaw();
+      rawDigits = digits->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_DNUMBER,
-                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_DNUMBER)));
+      rawDigits = RawSyntax::missing(TokenKindType::T_DNUMBER,
+                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_DNUMBER)));
    }
-   return m_data->replaceChild<FloatLiteralExprSyntax>(raw, Cursor::FloatDigits);
+   return m_data->replaceChild<FloatLiteralExprSyntax>(rawDigits, Cursor::FloatDigits);
 }
 
 void StringLiteralExprSyntax::validate()
@@ -185,14 +185,14 @@ TokenSyntax StringLiteralExprSyntax::getString()
 
 StringLiteralExprSyntax StringLiteralExprSyntax::withString(std::optional<TokenSyntax> str)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawStr;
    if (str.has_value()) {
-      raw = str->getRaw();
+      rawStr = str->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_STRING,
-                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_STRING)));
+      rawStr = RawSyntax::missing(TokenKindType::T_STRING,
+                                  OwnedString::makeUnowned(get_token_text(TokenKindType::T_STRING)));
    }
-   return m_data->replaceChild<StringLiteralExprSyntax>(raw, Cursor::String);
+   return m_data->replaceChild<StringLiteralExprSyntax>(rawStr, Cursor::String);
 }
 
 #ifdef POLAR_DEBUG_BUILD
@@ -227,14 +227,14 @@ TokenSyntax BooleanLiteralExprSyntax::getBooleanValue()
 
 BooleanLiteralExprSyntax BooleanLiteralExprSyntax::withBooleanValue(std::optional<TokenSyntax> booleanValue)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawBooleanValue;
    if (booleanValue.has_value()) {
-      raw = booleanValue->getRaw();
+      rawBooleanValue = booleanValue->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_TRUE,
-                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_TRUE)));
+      rawBooleanValue = RawSyntax::missing(TokenKindType::T_TRUE,
+                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_TRUE)));
    }
-   return m_data->replaceChild<BooleanLiteralExprSyntax>(raw, Cursor::Boolean);
+   return m_data->replaceChild<BooleanLiteralExprSyntax>(rawBooleanValue, Cursor::Boolean);
 }
 
 void TernaryExprSyntax::validate()
@@ -273,59 +273,59 @@ ExprSyntax TernaryExprSyntax::getSecondChoice()
 
 TernaryExprSyntax TernaryExprSyntax::withConditionExpr(std::optional<ExprSyntax> conditionExpr)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawConditionExpr;
    if (conditionExpr.has_value()) {
-      raw = conditionExpr->getRaw();
+      rawConditionExpr = conditionExpr->getRaw();
    } else {
-      raw = RawSyntax::missing(SyntaxKind::Expr);
+      rawConditionExpr = RawSyntax::missing(SyntaxKind::Expr);
    }
-   return m_data->replaceChild<TernaryExprSyntax>(raw, Cursor::ConditionExpr);
+   return m_data->replaceChild<TernaryExprSyntax>(rawConditionExpr, Cursor::ConditionExpr);
 }
 
 TernaryExprSyntax TernaryExprSyntax::withQuestionMark(std::optional<TokenSyntax> questionMark)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawQuestionMark;
    if (questionMark.has_value()) {
-      raw = questionMark->getRaw();
+      rawQuestionMark = questionMark->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_INFIX_QUESTION_MARK,
-                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_INFIX_QUESTION_MARK)));
+      rawQuestionMark = RawSyntax::missing(TokenKindType::T_INFIX_QUESTION_MARK,
+                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_INFIX_QUESTION_MARK)));
    }
-   return m_data->replaceChild<TernaryExprSyntax>(raw, Cursor::QuestionMark);
+   return m_data->replaceChild<TernaryExprSyntax>(rawQuestionMark, Cursor::QuestionMark);
 }
 
 TernaryExprSyntax TernaryExprSyntax::withFirstChoice(std::optional<ExprSyntax> firstChoice)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawFirstChoice;
    if (firstChoice.has_value()) {
-      raw = firstChoice->getRaw();
+      rawFirstChoice = firstChoice->getRaw();
    } else {
-      raw = RawSyntax::missing(SyntaxKind::Expr);
+      rawFirstChoice = RawSyntax::missing(SyntaxKind::Expr);
    }
-   return m_data->replaceChild<TernaryExprSyntax>(raw, Cursor::FirstChoice);
+   return m_data->replaceChild<TernaryExprSyntax>(rawFirstChoice, Cursor::FirstChoice);
 }
 
 TernaryExprSyntax TernaryExprSyntax::withColonMark(std::optional<TokenSyntax> colonMark)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawColonMark;
    if (colonMark.has_value()) {
-      raw = colonMark->getRaw();
+      rawColonMark = colonMark->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_COLON,
-                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+      rawColonMark = RawSyntax::missing(TokenKindType::T_COLON,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
    }
-   return m_data->replaceChild<TernaryExprSyntax>(raw, Cursor::ColonMark);
+   return m_data->replaceChild<TernaryExprSyntax>(rawColonMark, Cursor::ColonMark);
 }
 
 TernaryExprSyntax TernaryExprSyntax::withSecondChoice(std::optional<ExprSyntax> secondChoice)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawSecondChoice;
    if (secondChoice.has_value()) {
-      raw = secondChoice->getRaw();
+      rawSecondChoice = secondChoice->getRaw();
    } else {
-      raw = RawSyntax::missing(SyntaxKind::Expr);
+      rawSecondChoice = RawSyntax::missing(SyntaxKind::Expr);
    }
-   return m_data->replaceChild<TernaryExprSyntax>(raw, Cursor::SecondChoice);
+   return m_data->replaceChild<TernaryExprSyntax>(rawSecondChoice, Cursor::SecondChoice);
 }
 
 void AssignmentExprSyntax::validate()
@@ -344,14 +344,14 @@ TokenSyntax AssignmentExprSyntax::getAssignToken()
 
 AssignmentExprSyntax AssignmentExprSyntax::withAssignToken(std::optional<TokenSyntax> assignToken)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawAssignToken;
    if (assignToken.has_value()) {
-      raw = assignToken->getRaw();
+      rawAssignToken = assignToken->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_EQUAL,
-                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_EQUAL)));
+      rawAssignToken = RawSyntax::missing(TokenKindType::T_EQUAL,
+                                          OwnedString::makeUnowned(get_token_text(TokenKindType::T_EQUAL)));
    }
-   return m_data->replaceChild<AssignmentExprSyntax>(raw, Cursor::AssignToken);
+   return m_data->replaceChild<AssignmentExprSyntax>(rawAssignToken, Cursor::AssignToken);
 }
 
 void SequenceExprSyntax::validate()
@@ -370,24 +370,24 @@ ExprListSyntax SequenceExprSyntax::getElements()
 
 SequenceExprSyntax SequenceExprSyntax::withElements(std::optional<ExprListSyntax> elements)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawElements;
    if (elements.has_value()) {
-      raw = elements->getRaw();
+      rawElements = elements->getRaw();
    } else {
-      raw = RawSyntax::missing(SyntaxKind::ExprList);
+      rawElements = RawSyntax::missing(SyntaxKind::ExprList);
    }
-   return m_data->replaceChild<SequenceExprSyntax>(raw, Cursor::Elements);
+   return m_data->replaceChild<SequenceExprSyntax>(rawElements, Cursor::Elements);
 }
 
 SequenceExprSyntax SequenceExprSyntax::addElement(ExprSyntax expr)
 {
-   RefCountPtr<RawSyntax> raw = getRaw()->getChild(Cursor::Elements);
-   if (raw) {
-      raw->append(expr.getRaw());
+   RefCountPtr<RawSyntax> elements = getRaw()->getChild(Cursor::Elements);
+   if (elements) {
+      elements = elements->append(expr.getRaw());
    } else {
-      raw = RawSyntax::make(SyntaxKind::ExprList, {expr.getRaw()}, SourcePresence::Present);
+      elements = RawSyntax::make(SyntaxKind::ExprList, {expr.getRaw()}, SourcePresence::Present);
    }
-   return m_data->replaceChild<SequenceExprSyntax>(raw, Cursor::Elements);
+   return m_data->replaceChild<SequenceExprSyntax>(elements, Cursor::Elements);
 }
 
 void PrefixOperatorExprSyntax::validate()
@@ -415,24 +415,24 @@ ExprSyntax PrefixOperatorExprSyntax::getExpr()
 
 PrefixOperatorExprSyntax PrefixOperatorExprSyntax::withOperatorToken(std::optional<TokenSyntax> operatorToken)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawOperatorToken;
    if (operatorToken.has_value()) {
-      raw = operatorToken->getRaw();
+      rawOperatorToken = operatorToken->getRaw();
    } else {
-      raw = nullptr;
+      rawOperatorToken = nullptr;
    }
-   return m_data->replaceChild<PrefixOperatorExprSyntax>(raw, Cursor::OperatorToken);
+   return m_data->replaceChild<PrefixOperatorExprSyntax>(rawOperatorToken, Cursor::OperatorToken);
 }
 
 PrefixOperatorExprSyntax PrefixOperatorExprSyntax::withExpr(std::optional<TokenSyntax> expr)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawExpr;
    if (expr.has_value()) {
-      raw = expr->getRaw();
+      rawExpr = expr->getRaw();
    } else {
-      raw = RawSyntax::missing(SyntaxKind::Expr);
+      rawExpr = RawSyntax::missing(SyntaxKind::Expr);
    }
-   return m_data->replaceChild<PrefixOperatorExprSyntax>(raw, Cursor::Expr);
+   return m_data->replaceChild<PrefixOperatorExprSyntax>(rawExpr, Cursor::Expr);
 }
 
 void PostfixOperatorExprSyntax::validate()
@@ -456,25 +456,25 @@ TokenSyntax PostfixOperatorExprSyntax::getOperatorToken()
 
 PostfixOperatorExprSyntax PostfixOperatorExprSyntax::withExpr(std::optional<ExprSyntax> expr)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawExpr;
    if (expr.has_value()) {
-      raw = expr->getRaw();
+      rawExpr = expr->getRaw();
    } else {
-      raw = RawSyntax::missing(SyntaxKind::Expr);
+      rawExpr = RawSyntax::missing(SyntaxKind::Expr);
    }
-   return m_data->replaceChild<PostfixOperatorExprSyntax>(raw, Cursor::Expr);
+   return m_data->replaceChild<PostfixOperatorExprSyntax>(rawExpr, Cursor::Expr);
 }
 
 PostfixOperatorExprSyntax PostfixOperatorExprSyntax::withOperatorToken(std::optional<TokenSyntax> operatorToken)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawOperatorToken;
    if (operatorToken.has_value()) {
-      raw = operatorToken->getRaw();
+      rawOperatorToken = operatorToken->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_POSTFIX_OPERATOR,
-                               OwnedString::makeUnowned(""));
+      rawOperatorToken = RawSyntax::missing(TokenKindType::T_POSTFIX_OPERATOR,
+                                            OwnedString::makeUnowned(""));
    }
-   return m_data->replaceChild<PostfixOperatorExprSyntax>(raw, Cursor::OperatorToken);
+   return m_data->replaceChild<PostfixOperatorExprSyntax>(rawOperatorToken, Cursor::OperatorToken);
 }
 
 void BinaryOperatorExprSyntax::validate()
