@@ -404,7 +404,73 @@ private:
 ///
 class SwitchStmtSyntax : public StmtSyntax
 {
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 9;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 7;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: true
+      LabelName,
+      /// type: TokenSyntax
+      /// optional: true
+      LabelColon,
+      /// type: TokenSyntax
+      /// optional: false
+      SwitchKeyword,
+      /// type: TokenSyntax
+      /// optional: false
+      LeftParen,
+      /// type: Expr
+      /// optional: false
+      ConditionExpr,
+      /// type: TokenSyntax
+      /// optional: false
+      RightParen,
+      /// type: TokenSyntax
+      /// optional: false
+      LeftBrace,
+      /// is_syntax_collection: true
+      /// type: SwitchCaseListSyntax
+      /// optional: false
+      Cases,
+      /// type: TokenSyntax
+      /// optional: false
+      RightBrace
+   };
 
+public:
+   SwitchStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : StmtSyntax(parent, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getLabelName();
+   std::optional<TokenSyntax> getLabelColon();
+   TokenSyntax getSwitchKeyword();
+   TokenSyntax getLeftParen();
+   ExprSyntax getConditionExpr();
+   TokenSyntax getRightParen();
+   TokenSyntax getLeftBrace();
+   SwitchCaseListSyntax getCases();
+   TokenSyntax getRightBrace();
+
+   SwitchStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
+   SwitchStmtSyntax withLabelColon(std::optional<TokenSyntax> labelColon);
+   SwitchStmtSyntax withSwitchKeyword(std::optional<TokenSyntax> switchKeyword);
+   SwitchStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
+   SwitchStmtSyntax withConditionExpr(std::optional<ExprSyntax> conditionExpr);
+   SwitchStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
+   SwitchStmtSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
+   SwitchStmtSyntax withCases(std::optional<SwitchCaseListSyntax> cases);
+   SwitchStmtSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
+
+   SwitchStmtSyntax addCase(SwitchCaseSyntax switchCase);
+
+private:
+   friend class SwitchStmtSyntaxBuilder;
+   void validate();
 };
 
 ///

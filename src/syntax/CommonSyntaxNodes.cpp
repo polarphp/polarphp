@@ -55,11 +55,11 @@ TokenSyntax CodeBlockItemSyntax::getSemicolon()
 
 std::optional<Syntax> CodeBlockItemSyntax::getErrorTokens()
 {
-   auto childData = m_data->getChild(Cursor::ErrorTokens);
-   if (!childData) {
+   RefCountPtr<SyntaxData> errorTokensData = m_data->getChild(Cursor::ErrorTokens);
+   if (!errorTokensData) {
       return std::nullopt;
    }
-   return Syntax{m_root, childData.get()};
+   return Syntax{m_root, errorTokensData.get()};
 }
 
 CodeBlockItemSyntax CodeBlockItemSyntax::withItem(std::optional<Syntax> item)

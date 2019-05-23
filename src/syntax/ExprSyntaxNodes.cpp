@@ -401,11 +401,11 @@ void PrefixOperatorExprSyntax::validate()
 
 std::optional<TokenSyntax> PrefixOperatorExprSyntax::getOperatorToken()
 {
-   auto childData = m_data->getChild(Cursor::OperatorToken);
-   if (!childData) {
+   RefCountPtr<SyntaxData> operatorTokenData = m_data->getChild(Cursor::OperatorToken);
+   if (!operatorTokenData) {
       return std::nullopt;
    }
-   return TokenSyntax{m_root, childData.get()};
+   return TokenSyntax{m_root, operatorTokenData.get()};
 }
 
 ExprSyntax PrefixOperatorExprSyntax::getExpr()
