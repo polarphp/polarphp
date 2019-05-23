@@ -493,14 +493,14 @@ TokenSyntax BinaryOperatorExprSyntax::getOperatorToken()
 
 BinaryOperatorExprSyntax BinaryOperatorExprSyntax::withOperatorToken(std::optional<TokenSyntax> operatorToken)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawOperatorToken;
    if (operatorToken.has_value()) {
-      raw = operatorToken->getRaw();
+      rawOperatorToken = operatorToken->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_BINARY_OPERATOR,
-                               OwnedString::makeUnowned(""));
+      rawOperatorToken = RawSyntax::missing(TokenKindType::T_BINARY_OPERATOR,
+                                            OwnedString::makeUnowned(""));
    }
-   return m_data->replaceChild<BinaryOperatorExprSyntax>(raw, TokenKindType::T_BINARY_OPERATOR);
+   return m_data->replaceChild<BinaryOperatorExprSyntax>(rawOperatorToken, TokenKindType::T_BINARY_OPERATOR);
 }
 
 } // polar::syntax
