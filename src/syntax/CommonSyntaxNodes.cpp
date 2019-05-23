@@ -64,36 +64,36 @@ std::optional<Syntax> CodeBlockItemSyntax::getErrorTokens()
 
 CodeBlockItemSyntax CodeBlockItemSyntax::withItem(std::optional<Syntax> item)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawItem;
    if (item.has_value()) {
-      raw = item->getRaw();
+      rawItem = item->getRaw();
    } else {
-      raw = RawSyntax::missing(SyntaxKind::Decl);
+      rawItem = RawSyntax::missing(SyntaxKind::Decl);
    }
-   return m_data->replaceChild<CodeBlockItemSyntax>(raw, Cursor::Item);
+   return m_data->replaceChild<CodeBlockItemSyntax>(rawItem, Cursor::Item);
 }
 
 CodeBlockItemSyntax CodeBlockItemSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawSemicolon;
    if (semicolon.has_value()) {
-      raw = semicolon->getRaw();
+      rawSemicolon = semicolon->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_SEMICOLON,
+      rawSemicolon = RawSyntax::missing(TokenKindType::T_SEMICOLON,
                                OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
    }
-   return m_data->replaceChild<CodeBlockItemSyntax>(raw, Cursor::Item);
+   return m_data->replaceChild<CodeBlockItemSyntax>(rawSemicolon, Cursor::Item);
 }
 
 CodeBlockItemSyntax CodeBlockItemSyntax::withErrorTokens(std::optional<Syntax> errorTokens)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawErrorTokens;
    if (errorTokens.has_value()) {
-      raw = errorTokens->getRaw();
+      rawErrorTokens = errorTokens->getRaw();
    } else {
-      raw = nullptr;
+      rawErrorTokens = nullptr;
    }
-   return m_data->replaceChild<CodeBlockItemSyntax>(raw, Cursor::ErrorTokens);
+   return m_data->replaceChild<CodeBlockItemSyntax>(rawErrorTokens, Cursor::ErrorTokens);
 }
 
 void CodeBlockSyntax::validate()
@@ -122,48 +122,48 @@ CodeBlockItemListSyntax CodeBlockSyntax::getStatements()
 
 CodeBlockSyntax CodeBlockSyntax::addCodeBlockItem(CodeBlockItemSyntax codeBlockItem)
 {
-   RefCountPtr<RawSyntax> raw = getRaw()->getChild(Cursor::Statements);
-   if (raw) {
-      raw = raw->append(codeBlockItem.getRaw());
+   RefCountPtr<RawSyntax> statements = getRaw()->getChild(Cursor::Statements);
+   if (statements) {
+      statements = statements->append(codeBlockItem.getRaw());
    } else {
-      raw = RawSyntax::make(SyntaxKind::CodeBlockItemList, {codeBlockItem.getRaw()}, SourcePresence::Present);
+      statements = RawSyntax::make(SyntaxKind::CodeBlockItemList, {codeBlockItem.getRaw()}, SourcePresence::Present);
    }
-   return m_data->replaceChild<CodeBlockSyntax>(raw, Cursor::Statements);
+   return m_data->replaceChild<CodeBlockSyntax>(statements, Cursor::Statements);
 }
 
 CodeBlockSyntax CodeBlockSyntax::withLeftBrace(std::optional<TokenSyntax> leftBrace)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawLeftBrace;
    if (leftBrace.has_value()) {
-      raw = leftBrace->getRaw();
+      rawLeftBrace = leftBrace->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
+      rawLeftBrace = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
                                OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE)));
    }
-   return m_data->replaceChild<CodeBlockSyntax>(raw, Cursor::LeftBrace);
+   return m_data->replaceChild<CodeBlockSyntax>(rawLeftBrace, Cursor::LeftBrace);
 }
 
 CodeBlockSyntax CodeBlockSyntax::withRightBrace(std::optional<TokenSyntax> rightBrace)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawRightBrace;
    if (rightBrace.has_value()) {
-      raw = rightBrace->getRaw();
+      rawRightBrace = rightBrace->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
+      rawRightBrace = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
                                OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)));
    }
-   return m_data->replaceChild<CodeBlockSyntax>(raw, Cursor::RightBrace);
+   return m_data->replaceChild<CodeBlockSyntax>(rawRightBrace, Cursor::RightBrace);
 }
 
 CodeBlockSyntax CodeBlockSyntax::withStatements(std::optional<CodeBlockItemListSyntax> statements)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> rawStatements;
    if (statements.has_value()) {
-      raw = statements->getRaw();
+      rawStatements = statements->getRaw();
    } else {
-      raw = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
+      rawStatements = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
    }
-   return m_data->replaceChild<CodeBlockSyntax>(raw, Cursor::Statements);
+   return m_data->replaceChild<CodeBlockSyntax>(rawStatements, Cursor::Statements);
 }
 
 } // polar::syntax
