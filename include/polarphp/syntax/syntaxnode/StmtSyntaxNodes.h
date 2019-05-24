@@ -24,6 +24,8 @@ class ConditionElementSyntax;
 class ContinueStmtSyntax;
 class BreakStmtSyntax;
 class FallthroughStmtSyntax;
+class ElseIfClauseSyntax;
+class IfStmtSyntax;
 class WhileStmtSyntax;
 class DoWhileStmtSyntax;
 class SwitchCaseSyntax;
@@ -42,6 +44,10 @@ using ConditionElementListSyntax = SyntaxCollection<SyntaxKind::ConditionElement
 // switch-case-list ->  switch-case
 //                    | switch-case-list switch-case
 using SwitchCaseListSyntax = SyntaxCollection<SyntaxKind::SwitchCaseList, SwitchCaseSyntax>;
+
+// elseif-list ->  elseif-clause
+//                | elseif-list elseif-clause
+using ElseIfListSyntax = SyntaxCollection<SyntaxKind::ElseIfList, ElseIfClauseSyntax>;
 
 ///
 /// \brief The ConditionElementSyntax class
@@ -204,6 +210,55 @@ private:
    void validate();
 };
 
+class ElseIfClauseSyntax : public Syntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 5;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 5;
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: false
+      ElseIfKeyword,
+      /// type: TokenSyntax
+      /// optional: false
+      LeftParen,
+      /// type: ExprSyntax
+      /// optional: false
+      Condition,
+      /// type: TokenSyntax
+      /// optional: false
+      RightParen,
+      /// type: CodeBlockSyntax
+      /// optional: false
+      Body
+   };
+
+public:
+   ElseIfClauseSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : Syntax(parent, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getElseIfKeyword();
+   TokenSyntax getLeftParen();
+   ExprSyntax getCondition();
+   TokenSyntax getRightParen();
+   CodeBlockSyntax getBody();
+
+   ElseIfClauseSyntax withElseIfKeyword(std::optional<TokenSyntax> elseIfKeyword);
+   ElseIfClauseSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
+   ElseIfClauseSyntax withCondition(std::optional<ExprSyntax> condition);
+   ElseIfClauseSyntax withRightParen(std::optional<TokenSyntax> rightParen);
+   ElseIfClauseSyntax withBody(std::optional<CodeBlockSyntax> body);
+
+private:
+   friend class ElseIfClauseSyntaxBuilder;
+   void validate();
+};
+
 class WhileStmtSyntax : public StmtSyntax
 {
 public:
@@ -338,7 +393,7 @@ private:
 ///
 /// switch-default-label -> 'default' ':'
 ///
-class SwitchDefaultLabelSyntax : public StmtSyntax
+class SwitchDefaultLabelSyntax : public Syntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 2;
@@ -355,7 +410,7 @@ public:
 
 public:
    SwitchDefaultLabelSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : StmtSyntax(parent, data)
+      : Syntax(parent, data)
    {
       validate();
    }
@@ -376,7 +431,7 @@ private:
 ///
 /// switch-case-label -> 'case' case-item-list ':'
 ///
-class SwitchCaseLabelSyntax : public StmtSyntax
+class SwitchCaseLabelSyntax : public Syntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 3;
@@ -395,7 +450,7 @@ public:
    };
 public:
    SwitchCaseLabelSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : StmtSyntax(parent, data)
+      : Syntax(parent, data)
    {
       validate();
    }
@@ -419,7 +474,7 @@ private:
 /// switch-case -> switch-case-label stmt-list
 ///              | switch-default-label stmt-list
 ///
-class SwitchCaseSyntax : public StmtSyntax
+class SwitchCaseSyntax : public Syntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 2;
@@ -443,7 +498,7 @@ public:
 
 public:
    SwitchCaseSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : StmtSyntax(parent, data)
+      : Syntax(parent, data)
    {
       validate();
    }

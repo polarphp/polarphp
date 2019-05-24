@@ -204,6 +204,101 @@ FallthroughStmtSyntax FallthroughStmtSyntax::withFallthroughStmtSyntax(std::opti
 }
 
 ///
+/// ElseIfClauseSyntax
+///
+void ElseIfClauseSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ElseIfClauseSyntax::CHILDREN_COUNT);
+}
+
+TokenSyntax ElseIfClauseSyntax::getElseIfKeyword()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::ElseIfKeyword).get()};
+}
+
+TokenSyntax ElseIfClauseSyntax::getLeftParen()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::LeftParen).get()};
+}
+
+ExprSyntax ElseIfClauseSyntax::getCondition()
+{
+   return ExprSyntax{m_root, m_data->getChild(Cursor::Condition).get()};
+}
+
+TokenSyntax ElseIfClauseSyntax::getRightParen()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::RightParen).get()};
+}
+
+CodeBlockSyntax ElseIfClauseSyntax::getBody()
+{
+   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+}
+
+ElseIfClauseSyntax ElseIfClauseSyntax::withElseIfKeyword(std::optional<TokenSyntax> elseIfKeyword)
+{
+   RefCountPtr<RawSyntax> rawElseIfKeyword;
+   if (elseIfKeyword.has_value()) {
+      rawElseIfKeyword = elseIfKeyword->getRaw();
+   } else {
+      rawElseIfKeyword = RawSyntax::missing(TokenKindType::T_ELSEIF,
+                                            OwnedString::makeUnowned(get_token_text(TokenKindType::T_ELSEIF)));
+   }
+   return m_data->replaceChild<ElseIfClauseSyntax>(rawElseIfKeyword, Cursor::ElseIfKeyword);
+}
+
+ElseIfClauseSyntax ElseIfClauseSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> rawLeftParen;
+   if (leftParen.has_value()) {
+      rawLeftParen = leftParen->getRaw();
+   } else {
+      rawLeftParen = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+   }
+   return m_data->replaceChild<ElseIfClauseSyntax>(rawLeftParen, Cursor::LeftParen);
+}
+
+ElseIfClauseSyntax ElseIfClauseSyntax::withCondition(std::optional<ExprSyntax> condition)
+{
+   RefCountPtr<RawSyntax> rawCondition;
+   if (condition.has_value()) {
+      rawCondition = condition->getRaw();
+   } else {
+      rawCondition = RawSyntax::missing(SyntaxKind::UnknownExpr);
+   }
+   return m_data->replaceChild<ElseIfClauseSyntax>(rawCondition, Cursor::Condition);
+}
+
+ElseIfClauseSyntax ElseIfClauseSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rawRightParen;
+   if (rightParen.has_value()) {
+      rawRightParen = rightParen->getRaw();
+   } else {
+      rawRightParen = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+   }
+   return m_data->replaceChild<ElseIfClauseSyntax>(rawRightParen, Cursor::LeftParen);
+}
+
+ElseIfClauseSyntax ElseIfClauseSyntax::withBody(std::optional<CodeBlockSyntax> body)
+{
+   RefCountPtr<RawSyntax> rawBody;
+   if (body.has_value()) {
+      rawBody = body->getRaw();
+   } else {
+      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   return m_data->replaceChild<ElseIfClauseSyntax>(rawBody, Cursor::Body);
+}
+
+///
 /// WhileStmtSyntax
 ///
 void WhileStmtSyntax::validate()

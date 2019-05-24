@@ -64,6 +64,8 @@ enum class SyntaxKind : std::uint32_t
    SwitchDefaultLabel,
    SwitchCaseLabel,
    SwitchStmt,
+   ElseIfClause,
+   IfStmt,
    DeferStmt,
    ExpressionStmt,
    ThrowStmt,
@@ -79,6 +81,7 @@ enum class SyntaxKind : std::uint32_t
    /// collection syntax node
    ConditionElementList,
    SwitchCaseList,
+   ElseIfList,
    CodeBlockItemList,
    ExprList,
    TokenList,
