@@ -99,4 +99,26 @@ ClassRefStaticExprSyntax ClassRefStaticExprSyntaxBuilder::build()
    return make<ClassRefStaticExprSyntax>(rawParentKeyword);
 }
 
+///
+/// IntegerLiteralExprSyntax
+///
+
+IntegerLiteralExprSyntaxBuilder &IntegerLiteralExprSyntaxBuilder::useDigits(TokenSyntax digits)
+{
+   m_layout[cursor_index(Cursor::Digits)] = digits.getRaw();
+   return *this;
+}
+
+IntegerLiteralExprSyntax IntegerLiteralExprSyntaxBuilder::build()
+{
+   CursorIndex digitsIndex = cursor_index(Cursor::Digits);
+   if (!m_layout[digitsIndex]) {
+      m_layout[digitsIndex] = RawSyntax::missing(TokenKindType::T_LNUMBER,
+                                                 OwnedString::makeUnowned(get_token_text(TokenKindType::T_LNUMBER)));
+   }
+   RefCountPtr<RawSyntax> rawDigits = RawSyntax::make(SyntaxKind::IntegerLiteralExpr, m_layout, SourcePresence::Present,
+                                                      m_arena);
+   return make<IntegerLiteralExprSyntax>(rawDigits);
+}
+
 } // polar::syntax
