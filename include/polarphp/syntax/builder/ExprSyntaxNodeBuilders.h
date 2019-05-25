@@ -119,6 +119,7 @@ class FloatLiteralExprSyntaxBuilder
 {
 public:
    using Cursor = FloatLiteralExprSyntax::Cursor;
+
 public:
    FloatLiteralExprSyntaxBuilder() = default;
    FloatLiteralExprSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
@@ -127,9 +128,31 @@ public:
 
    FloatLiteralExprSyntaxBuilder &useFloatDigits(TokenSyntax digits);
    FloatLiteralExprSyntax build();
+
 private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[FloatLiteralExprSyntax::CHILDREN_COUNT] = {
+      nullptr
+   };
+};
+
+class StringLiteralExprSyntaxBuilder
+{
+public:
+   using Cursor = StringLiteralExprSyntax::Cursor;
+
+public:
+   StringLiteralExprSyntaxBuilder() = default;
+   StringLiteralExprSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   StringLiteralExprSyntaxBuilder &useString(TokenSyntax str);
+   StringLiteralExprSyntax build();
+
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[StringLiteralExprSyntax::CHILDREN_COUNT] = {
       nullptr
    };
 };
