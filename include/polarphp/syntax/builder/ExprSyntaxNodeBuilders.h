@@ -157,6 +157,27 @@ private:
    };
 };
 
+class BooleanLiteralExprSyntaxBuilder
+{
+public:
+   using Cursor = BooleanLiteralExprSyntax::Cursor;
+
+public:
+   BooleanLiteralExprSyntaxBuilder() = default;
+   BooleanLiteralExprSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   BooleanLiteralExprSyntaxBuilder &useBoolean(TokenSyntax booleanValue);
+   BooleanLiteralExprSyntax build();
+
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[BooleanLiteralExprSyntax::CHILDREN_COUNT] = {
+      nullptr
+   };
+};
+
 } // polar::syntax
 
 

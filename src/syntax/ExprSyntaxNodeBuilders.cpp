@@ -164,4 +164,25 @@ StringLiteralExprSyntax StringLiteralExprSyntaxBuilder::build()
    return make<StringLiteralExprSyntax>(rawDigits);
 }
 
+///
+/// BooleanLiteralExprSyntax
+///
+BooleanLiteralExprSyntaxBuilder &BooleanLiteralExprSyntaxBuilder::useBoolean(TokenSyntax booleanValue)
+{
+   m_layout[cursor_index(Cursor::Boolean)] = booleanValue.getRaw();
+   return *this;
+}
+
+BooleanLiteralExprSyntax BooleanLiteralExprSyntaxBuilder::build()
+{
+   CursorIndex booleanIndex = cursor_index(Cursor::Boolean);
+   if (!m_layout[booleanIndex]) {
+      m_layout[booleanIndex] = RawSyntax::missing(TokenKindType::T_TRUE,
+                                                  OwnedString::makeUnowned(get_token_text(TokenKindType::T_TRUE)));
+   }
+   RefCountPtr<RawSyntax> rawDigits = RawSyntax::make(SyntaxKind::BooleanLiteralExpr, m_layout, SourcePresence::Present,
+                                                      m_arena);
+   return make<BooleanLiteralExprSyntax>(rawDigits);
+}
+
 } // polar::syntax
