@@ -299,6 +299,228 @@ ElseIfClauseSyntax ElseIfClauseSyntax::withBody(std::optional<CodeBlockSyntax> b
 }
 
 ///
+/// IfStmtSyntax
+///
+
+#ifdef POLAR_DEBUG_BUILD
+const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> IfStmtSyntax::CHILD_NODE_CHOICES
+{
+   {IfStmtSyntax::ElseBody, {
+         SyntaxKind::IfStmt,
+               SyntaxKind::CodeBlock
+      }}
+};
+#endif
+
+void IfStmtSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   if (const RefCountPtr<RawSyntax> &elseBody = raw->getChild(Cursor::ElseBody)) {
+      bool isIfStmt = elseBody->kindOf(SyntaxKind::IfStmt);
+      bool isCodeBlock = elseBody->kindOf(SyntaxKind::CodeBlock);
+      assert(isIfStmt || isCodeBlock);
+   }
+   assert(raw->getLayout().size() == IfStmtSyntax::CHILDREN_COUNT);
+}
+
+std::optional<TokenSyntax> IfStmtSyntax::getLabelName()
+{
+   RefCountPtr<SyntaxData> labelNameData = m_data->getChild(Cursor::LabelName);
+   if (!labelNameData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, labelNameData.get()};
+}
+
+std::optional<TokenSyntax> IfStmtSyntax::getLabelColon()
+{
+   RefCountPtr<SyntaxData> labelColonData = m_data->getChild(Cursor::LabelColon);
+   if (!labelColonData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, labelColonData.get()};
+}
+
+TokenSyntax IfStmtSyntax::getIfKeyword()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::IfKeyword).get()};
+}
+
+TokenSyntax IfStmtSyntax::getLeftParen()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::LeftParen).get()};
+}
+
+ExprSyntax IfStmtSyntax::getCondition()
+{
+   return ExprSyntax{m_root, m_data->getChild(Cursor::Condition).get()};
+}
+
+TokenSyntax IfStmtSyntax::getRightParen()
+{
+   return TokenSyntax(m_root, m_data->getChild(Cursor::RightParen).get());
+}
+
+CodeBlockSyntax IfStmtSyntax::getBody()
+{
+   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+}
+
+std::optional<ElseIfListSyntax> IfStmtSyntax::getElseIfClauses()
+{
+   RefCountPtr<SyntaxData> elseIfClausesData = m_data->getChild(Cursor::ElseIfClauses);
+   if (!elseIfClausesData) {
+      return std::nullopt;
+   }
+   return ElseIfListSyntax{m_root, elseIfClausesData.get()};
+}
+
+std::optional<TokenSyntax> IfStmtSyntax::getElseKeyword()
+{
+   RefCountPtr<SyntaxData> elseKeywordData = m_data->getChild(Cursor::ElseKeyword);
+   if (!elseKeywordData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, elseKeywordData.get()};
+}
+
+std::optional<Syntax> IfStmtSyntax::getElseBody()
+{
+   RefCountPtr<SyntaxData> elseBodyData = m_data->getChild(Cursor::ElseBody);
+   if (!elseBodyData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, elseBodyData.get()};
+}
+
+IfStmtSyntax IfStmtSyntax::withLabelName(std::optional<TokenSyntax> labelName)
+{
+   RefCountPtr<RawSyntax> rawLabelName;
+   if (labelName.has_value()) {
+      rawLabelName = labelName->getRaw();
+   } else {
+      rawLabelName = nullptr;
+   }
+   return m_data->replaceChild<IfStmtSyntax>(rawLabelName, Cursor::LabelName);
+}
+
+IfStmtSyntax IfStmtSyntax::withLabelColon(std::optional<TokenSyntax> labelColon)
+{
+   RefCountPtr<RawSyntax> rawLabelColon;
+   if (labelColon.has_value()) {
+      rawLabelColon = labelColon->getRaw();
+   } else {
+      rawLabelColon = nullptr;
+   }
+   return m_data->replaceChild<IfStmtSyntax>(rawLabelColon, Cursor::LabelColon);
+}
+
+IfStmtSyntax IfStmtSyntax::withIfKeyword(std::optional<TokenSyntax> ifKeyword)
+{
+   RefCountPtr<RawSyntax> rawIfKeyword;
+   if (ifKeyword.has_value()) {
+      rawIfKeyword = ifKeyword->getRaw();
+   } else {
+      rawIfKeyword = RawSyntax::missing(TokenKindType::T_IF,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_IF)));
+   }
+   return m_data->replaceChild<IfStmtSyntax>(rawIfKeyword, Cursor::IfKeyword);
+}
+
+IfStmtSyntax IfStmtSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> rawLeftParen;
+   if (leftParen.has_value()) {
+      rawLeftParen = leftParen->getRaw();
+   } else {
+      rawLeftParen = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+   }
+   return m_data->replaceChild<IfStmtSyntax>(rawLeftParen, Cursor::LeftParen);
+}
+
+IfStmtSyntax IfStmtSyntax::withCondition(std::optional<ExprSyntax> condition)
+{
+   RefCountPtr<RawSyntax> rawCondition;
+   if (condition.has_value()) {
+      rawCondition = condition->getRaw();
+   } else {
+      rawCondition = RawSyntax::missing(SyntaxKind::UnknownExpr);
+   }
+   return m_data->replaceChild<IfStmtSyntax>(rawCondition, Cursor::Condition);
+}
+
+IfStmtSyntax IfStmtSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rawRightParen;
+   if (rightParen.has_value()) {
+      rawRightParen = rightParen->getRaw();
+   } else {
+      rawRightParen = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+   }
+   return m_data->replaceChild<IfStmtSyntax>(rawRightParen, Cursor::LeftParen);
+}
+
+IfStmtSyntax IfStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
+{
+   RefCountPtr<RawSyntax> rawBody;
+   if (body.has_value()) {
+      rawBody = body->getRaw();
+   } else {
+      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   return m_data->replaceChild<IfStmtSyntax>(rawBody, Cursor::Body);
+}
+
+IfStmtSyntax IfStmtSyntax::withElseIfClauses(std::optional<ElseIfListSyntax> elseIfClauses)
+{
+   RefCountPtr<RawSyntax> rawElseIfClauses;
+   if (elseIfClauses.has_value()) {
+      rawElseIfClauses = elseIfClauses->getRaw();
+   } else {
+      rawElseIfClauses = nullptr;
+   }
+   return m_data->replaceChild<IfStmtSyntax>(rawElseIfClauses, Cursor::ElseIfClauses);
+}
+
+IfStmtSyntax IfStmtSyntax::withElseKeyword(std::optional<TokenSyntax> elseKeyword)
+{
+   RefCountPtr<RawSyntax> rawElseKeyword;
+   if (elseKeyword.has_value()) {
+      rawElseKeyword = elseKeyword->getRaw();
+   } else {
+      rawElseKeyword = nullptr;
+   }
+   return m_data->replaceChild<IfStmtSyntax>(rawElseKeyword, Cursor::ElseKeyword);
+}
+
+IfStmtSyntax IfStmtSyntax::withElseBody(std::optional<Syntax> elseBody)
+{
+   RefCountPtr<RawSyntax> rawElseBody;
+   if (elseBody.has_value()) {
+      rawElseBody = elseBody->getRaw();
+   } else {
+      rawElseBody = nullptr;
+   }
+   return m_data->replaceChild<IfStmtSyntax>(rawElseBody, Cursor::ElseBody);
+}
+
+IfStmtSyntax IfStmtSyntax::addElseIfClause(ElseIfClauseSyntax elseIfClause)
+{
+   RefCountPtr<RawSyntax> elseIfClauses = getRaw()->getChild(Cursor::ElseIfClauses);
+   if (elseIfClauses) {
+      elseIfClauses = elseIfClauses->append(elseIfClause.getRaw());
+   } else {
+      elseIfClauses = RawSyntax::make(SyntaxKind::ElseIfList, {elseIfClause.getRaw()}, SourcePresence::Present);
+   }
+   return m_data->replaceChild<IfStmtSyntax>(elseIfClauses, Cursor::ElseIfClauses);
+}
+
+///
 /// WhileStmtSyntax
 ///
 void WhileStmtSyntax::validate()

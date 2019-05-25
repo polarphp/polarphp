@@ -259,6 +259,90 @@ private:
    void validate();
 };
 
+class IfStmtSyntax : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 10;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 5;
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: true
+      LabelName,
+      /// type: TokenSyntax
+      /// optional: true
+      LabelColon,
+      /// type: TokenSyntax
+      /// optional: false
+      IfKeyword,
+      /// type: TokenSyntax
+      /// optional: false
+      LeftParen,
+      /// type: ExprSyntax
+      /// optional: false
+      Condition,
+      /// type: TokenSyntax
+      /// optional: false
+      RightParen,
+      /// type: CodeBlockSyntax
+      /// optional: false
+      Body,
+      /// type: ElseIfListSyntax
+      /// is_syntax_collection: true
+      /// optional: true
+      ElseIfClauses,
+      /// type: TokenSyntax
+      /// optional: true
+      ElseKeyword,
+      /// type: Syntax
+      /// optional: true
+      /// --------------
+      /// node choices
+      /// name: IfStmt kind: IfStmt
+      /// name: CodeBlock kind: CodeBlock
+      ElseBody
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   static const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> CHILD_NODE_CHOICES;
+#endif
+
+public:
+   IfStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
+      : StmtSyntax(parent, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getLabelName();
+   std::optional<TokenSyntax> getLabelColon();
+   TokenSyntax getIfKeyword();
+   TokenSyntax getLeftParen();
+   ExprSyntax getCondition();
+   TokenSyntax getRightParen();
+   CodeBlockSyntax getBody();
+   std::optional<ElseIfListSyntax> getElseIfClauses();
+   std::optional<TokenSyntax> getElseKeyword();
+   std::optional<Syntax> getElseBody();
+
+   IfStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
+   IfStmtSyntax withLabelColon(std::optional<TokenSyntax> labelColon);
+   IfStmtSyntax withIfKeyword(std::optional<TokenSyntax> ifKeyword);
+   IfStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
+   IfStmtSyntax withCondition(std::optional<ExprSyntax> condition);
+   IfStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
+   IfStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+   IfStmtSyntax withElseIfClauses(std::optional<ElseIfListSyntax> elseIfClauses);
+   IfStmtSyntax withElseKeyword(std::optional<TokenSyntax> elseKeyword);
+   IfStmtSyntax withElseBody(std::optional<Syntax> elseBody);
+
+   IfStmtSyntax addElseIfClause(ElseIfClauseSyntax elseIfClause);
+private:
+   friend class IfStmtSyntaxBuilder;
+   void validate();
+};
+
 class WhileStmtSyntax : public StmtSyntax
 {
 public:
