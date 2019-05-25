@@ -121,4 +121,26 @@ IntegerLiteralExprSyntax IntegerLiteralExprSyntaxBuilder::build()
    return make<IntegerLiteralExprSyntax>(rawDigits);
 }
 
+///
+/// FloatLiteralExprSyntax
+///
+
+FloatLiteralExprSyntaxBuilder &FloatLiteralExprSyntaxBuilder::useFloatDigits(TokenSyntax digits)
+{
+   m_layout[cursor_index(Cursor::FloatDigits)] = digits.getRaw();
+   return *this;
+}
+
+FloatLiteralExprSyntax FloatLiteralExprSyntaxBuilder::build()
+{
+   CursorIndex digitsIndex = cursor_index(Cursor::FloatDigits);
+   if (!m_layout[digitsIndex]) {
+      m_layout[digitsIndex] = RawSyntax::missing(TokenKindType::T_DNUMBER,
+                                                 OwnedString::makeUnowned(get_token_text(TokenKindType::T_DNUMBER)));
+   }
+   RefCountPtr<RawSyntax> rawDigits = RawSyntax::make(SyntaxKind::FloatLiteralExpr, m_layout, SourcePresence::Present,
+                                                      m_arena);
+   return make<FloatLiteralExprSyntax>(rawDigits);
+}
+
 } // polar::syntax
