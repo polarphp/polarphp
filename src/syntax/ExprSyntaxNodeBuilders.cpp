@@ -57,4 +57,46 @@ ClassRefParentExprSyntax ClassRefParentExprSyntaxBuilder::build()
    return make<ClassRefParentExprSyntax>(rawParentKeyword);
 }
 
+///
+/// ClassRefSelfExprSyntax
+///
+ClassRefSelfExprSyntaxBuilder &ClassRefSelfExprSyntaxBuilder::useSelfKeyword(TokenSyntax selfKeyword)
+{
+   m_layout[cursor_index(Cursor::SelfKeyword)] = selfKeyword.getRaw();
+   return *this;
+}
+
+ClassRefSelfExprSyntax ClassRefSelfExprSyntaxBuilder::build()
+{
+   CursorIndex selfKeywordIndex = cursor_index(Cursor::SelfKeyword);
+   if (!m_layout[selfKeywordIndex]) {
+      m_layout[selfKeywordIndex] = RawSyntax::missing(TokenKindType::T_CLASS_REF_SELF,
+                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_SELF)));
+   }
+   RefCountPtr<RawSyntax> rawParentKeyword = RawSyntax::make(SyntaxKind::ClassRefSelfExpr, m_layout, SourcePresence::Present,
+                                                             m_arena);
+   return make<ClassRefSelfExprSyntax>(rawParentKeyword);
+}
+
+///
+/// ClassRefStaticExprSyntax
+///
+ClassRefStaticExprSyntaxBuilder &ClassRefStaticExprSyntaxBuilder::useStaticKeyword(TokenSyntax staticKeyword)
+{
+   m_layout[cursor_index(Cursor::StaticKeyword)] = staticKeyword.getRaw();
+   return *this;
+}
+
+ClassRefStaticExprSyntax ClassRefStaticExprSyntaxBuilder::build()
+{
+   CursorIndex staticKeywordIndex = cursor_index(Cursor::StaticKeyword);
+   if (!m_layout[staticKeywordIndex]) {
+      m_layout[staticKeywordIndex] = RawSyntax::missing(TokenKindType::T_CLASS_REF_STATIC,
+                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_STATIC)));
+   }
+   RefCountPtr<RawSyntax> rawParentKeyword = RawSyntax::make(SyntaxKind::ClassRefStaticExpr, m_layout, SourcePresence::Present,
+                                                             m_arena);
+   return make<ClassRefStaticExprSyntax>(rawParentKeyword);
+}
+
 } // polar::syntax

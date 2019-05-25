@@ -58,6 +58,44 @@ private:
    };
 };
 
+class ClassRefSelfExprSyntaxBuilder
+{
+public:
+   using Cursor = ClassRefSelfExprSyntax::Cursor;
+public:
+   ClassRefSelfExprSyntaxBuilder() = default;
+   ClassRefSelfExprSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   ClassRefSelfExprSyntaxBuilder &useSelfKeyword(TokenSyntax selfKeyword);
+   ClassRefSelfExprSyntax build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[ClassRefSelfExprSyntax::CHILDREN_COUNT] = {
+      nullptr
+   };
+};
+
+class ClassRefStaticExprSyntaxBuilder
+{
+public:
+   using Cursor = ClassRefStaticExprSyntax::Cursor;
+public:
+   ClassRefStaticExprSyntaxBuilder() = default;
+   ClassRefStaticExprSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   ClassRefStaticExprSyntaxBuilder &useStaticKeyword(TokenSyntax staticKeyword);
+   ClassRefStaticExprSyntax build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[ClassRefStaticExprSyntax::CHILDREN_COUNT] = {
+      nullptr
+   };
+};
+
 } // polar::syntax
 
 
