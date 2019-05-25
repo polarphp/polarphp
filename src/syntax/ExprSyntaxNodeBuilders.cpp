@@ -58,7 +58,7 @@ ClassRefParentExprSyntax ClassRefParentExprSyntaxBuilder::build()
 }
 
 ///
-/// ClassRefSelfExprSyntax
+/// ClassRefSelfExprSyntaxBuilder
 ///
 ClassRefSelfExprSyntaxBuilder &ClassRefSelfExprSyntaxBuilder::useSelfKeyword(TokenSyntax selfKeyword)
 {
@@ -79,7 +79,7 @@ ClassRefSelfExprSyntax ClassRefSelfExprSyntaxBuilder::build()
 }
 
 ///
-/// ClassRefStaticExprSyntax
+/// ClassRefStaticExprSyntaxBuilder
 ///
 ClassRefStaticExprSyntaxBuilder &ClassRefStaticExprSyntaxBuilder::useStaticKeyword(TokenSyntax staticKeyword)
 {
@@ -100,7 +100,7 @@ ClassRefStaticExprSyntax ClassRefStaticExprSyntaxBuilder::build()
 }
 
 ///
-/// IntegerLiteralExprSyntax
+/// IntegerLiteralExprSyntaxBuilder
 ///
 
 IntegerLiteralExprSyntaxBuilder &IntegerLiteralExprSyntaxBuilder::useDigits(TokenSyntax digits)
@@ -122,7 +122,7 @@ IntegerLiteralExprSyntax IntegerLiteralExprSyntaxBuilder::build()
 }
 
 ///
-/// FloatLiteralExprSyntax
+/// FloatLiteralExprSyntaxBuilder
 ///
 
 FloatLiteralExprSyntaxBuilder &FloatLiteralExprSyntaxBuilder::useFloatDigits(TokenSyntax digits)
@@ -144,7 +144,7 @@ FloatLiteralExprSyntax FloatLiteralExprSyntaxBuilder::build()
 }
 
 ///
-/// StringLiteralExprSyntax
+/// StringLiteralExprSyntaxBuilder
 ///
 StringLiteralExprSyntaxBuilder &StringLiteralExprSyntaxBuilder::useString(TokenSyntax str)
 {
@@ -165,7 +165,7 @@ StringLiteralExprSyntax StringLiteralExprSyntaxBuilder::build()
 }
 
 ///
-/// BooleanLiteralExprSyntax
+/// BooleanLiteralExprSyntaxBuilder
 ///
 BooleanLiteralExprSyntaxBuilder &BooleanLiteralExprSyntaxBuilder::useBoolean(TokenSyntax booleanValue)
 {
@@ -183,6 +183,69 @@ BooleanLiteralExprSyntax BooleanLiteralExprSyntaxBuilder::build()
    RefCountPtr<RawSyntax> rawDigits = RawSyntax::make(SyntaxKind::BooleanLiteralExpr, m_layout, SourcePresence::Present,
                                                       m_arena);
    return make<BooleanLiteralExprSyntax>(rawDigits);
+}
+
+///
+/// TernaryExprSyntaxBuilder
+///
+
+TernaryExprSyntaxBuilder &TernaryExprSyntaxBuilder::useConditionExpr(ExprSyntax conditionExpr)
+{
+   m_layout[cursor_index(Cursor::ConditionExpr)] = conditionExpr.getRaw();
+   return *this;
+}
+
+TernaryExprSyntaxBuilder &TernaryExprSyntaxBuilder::useQuestionMark(TokenSyntax questionMark)
+{
+   m_layout[cursor_index(Cursor::QuestionMark)] = questionMark.getRaw();
+   return *this;
+}
+
+TernaryExprSyntaxBuilder &TernaryExprSyntaxBuilder::useFirstChoice(ExprSyntax firstChoice)
+{
+   m_layout[cursor_index(Cursor::FirstChoice)] = firstChoice.getRaw();
+   return *this;
+}
+
+TernaryExprSyntaxBuilder &TernaryExprSyntaxBuilder::useColonMark(TokenSyntax colonMark)
+{
+   m_layout[cursor_index(Cursor::ColonMark)] = colonMark.getRaw();
+   return *this;
+}
+
+TernaryExprSyntaxBuilder &TernaryExprSyntaxBuilder::useSecondChoice(ExprSyntax secondChoice)
+{
+   m_layout[cursor_index(Cursor::SecondChoice)] = secondChoice.getRaw();
+   return *this;
+}
+
+TernaryExprSyntax TernaryExprSyntaxBuilder::build()
+{
+   CursorIndex conditionExprIndex = cursor_index(Cursor::ConditionExpr);
+   CursorIndex questionMarkIndex = cursor_index(Cursor::QuestionMark);
+   CursorIndex firstChoiceIndex = cursor_index(Cursor::FirstChoice);
+   CursorIndex colonMarkIndex = cursor_index(Cursor::ColonMark);
+   CursorIndex secondChoiceIndex = cursor_index(Cursor::SecondChoice);
+   if (!m_layout[conditionExprIndex]) {
+      m_layout[conditionExprIndex] = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   if (!m_layout[questionMarkIndex]) {
+      m_layout[questionMarkIndex] = RawSyntax::missing(TokenKindType::T_INFIX_QUESTION_MARK,
+                                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_INFIX_QUESTION_MARK)));
+   }
+   if (!m_layout[firstChoiceIndex]) {
+      m_layout[firstChoiceIndex] = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   if (!m_layout[colonMarkIndex]) {
+      m_layout[colonMarkIndex] = RawSyntax::missing(TokenKindType::T_COLON,
+                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+   }
+   if (!m_layout[secondChoiceIndex]) {
+      m_layout[secondChoiceIndex] = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   RefCountPtr<RawSyntax> rawTernaryExprSyntax = RawSyntax::make(SyntaxKind::TernaryExpr, m_layout, SourcePresence::Present,
+                                                                 m_arena);
+   return make<TernaryExprSyntax>(rawTernaryExprSyntax);
 }
 
 } // polar::syntax

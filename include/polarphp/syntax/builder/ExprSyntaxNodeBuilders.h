@@ -178,6 +178,31 @@ private:
    };
 };
 
+class TernaryExprSyntaxBuilder
+{
+public:
+   using Cursor = TernaryExprSyntax::Cursor;
+
+public:
+   TernaryExprSyntaxBuilder() = default;
+   TernaryExprSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   TernaryExprSyntaxBuilder &useConditionExpr(ExprSyntax conditionExpr);
+   TernaryExprSyntaxBuilder &useQuestionMark(TokenSyntax questionMark);
+   TernaryExprSyntaxBuilder &useFirstChoice(ExprSyntax firstChoice);
+   TernaryExprSyntaxBuilder &useColonMark(TokenSyntax colonMark);
+   TernaryExprSyntaxBuilder &useSecondChoice(ExprSyntax secondChoice);
+
+   TernaryExprSyntax build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[TernaryExprSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr, nullptr, nullptr, nullptr
+   };
+};
+
 } // polar::syntax
 
 
