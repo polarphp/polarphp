@@ -13,6 +13,10 @@
 
 namespace polar::syntax {
 
+///
+/// NullExprSyntaxBuilder
+///
+
 NullExprSyntaxBuilder &NullExprSyntaxBuilder::useNullKeyword(TokenSyntax nullKeyword)
 {
    m_layout[cursor_index(Cursor::NulllKeyword)] = nullKeyword.getRaw();
@@ -29,6 +33,28 @@ NullExprSyntax NullExprSyntaxBuilder::build()
    RefCountPtr<RawSyntax> rawNullExpr = RawSyntax::make(SyntaxKind::NullExpr, m_layout,
                                                         SourcePresence::Present, m_arena);
    return make<NullExprSyntax>(rawNullExpr);
+}
+
+///
+/// ClassRefParentExprSyntaxBuilder
+///
+
+ClassRefParentExprSyntaxBuilder &ClassRefParentExprSyntaxBuilder::useParentKeyword(TokenSyntax parentKeyword)
+{
+   m_layout[cursor_index(Cursor::ParentKeyword)] = parentKeyword.getRaw();
+   return *this;
+}
+
+ClassRefParentExprSyntax ClassRefParentExprSyntaxBuilder::build()
+{
+   CursorIndex parentKeywordIndex = cursor_index(Cursor::ParentKeyword);
+   if (!m_layout[parentKeywordIndex]) {
+      m_layout[parentKeywordIndex] = RawSyntax::missing(TokenKindType::T_CLASS_REF_PARENT,
+                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_PARENT)));
+   }
+   RefCountPtr<RawSyntax> rawParentKeyword = RawSyntax::make(SyntaxKind::ClassRefParentExpr, m_layout, SourcePresence::Present,
+                                                             m_arena);
+   return make<ClassRefParentExprSyntax>(rawParentKeyword);
 }
 
 } // polar::syntax

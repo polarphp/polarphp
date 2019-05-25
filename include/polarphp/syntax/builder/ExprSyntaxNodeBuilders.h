@@ -39,6 +39,25 @@ private:
    };
 };
 
+class ClassRefParentExprSyntaxBuilder
+{
+public:
+   using Cursor = ClassRefParentExprSyntax::Cursor;
+public:
+   ClassRefParentExprSyntaxBuilder() = default;
+   ClassRefParentExprSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   ClassRefParentExprSyntaxBuilder &useParentKeyword(TokenSyntax parentKeyword);
+   ClassRefParentExprSyntax build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[ClassRefParentExprSyntax::CHILDREN_COUNT] = {
+      nullptr
+   };
+};
+
 } // polar::syntax
 
 
