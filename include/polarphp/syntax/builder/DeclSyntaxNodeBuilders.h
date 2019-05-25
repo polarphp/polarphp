@@ -12,6 +12,9 @@
 #ifndef POLARPHP_SYNTAX_BUILDER_DECL_SYNTAX_NODE_BUILDERS_H
 #define POLARPHP_SYNTAX_BUILDER_DECL_SYNTAX_NODE_BUILDERS_H
 
+#include "polarphp/syntax/RawSyntax.h"
+#include "polarphp/syntax/syntaxnode/DeclSyntaxNodes.h"
+
 namespace polar::syntax {
 
 

@@ -13,6 +13,22 @@
 
 namespace polar::syntax {
 
+NullExprSyntaxBuilder &NullExprSyntaxBuilder::useNullKeyword(TokenSyntax nullKeyword)
+{
+   m_layout[cursor_index(Cursor::NulllKeyword)] = nullKeyword.getRaw();
+   return *this;
+}
 
+NullExprSyntax NullExprSyntaxBuilder::build()
+{
+   CursorIndex nullKeywordIndex = cursor_index(Cursor::NulllKeyword);
+   if (!m_layout[nullKeywordIndex]) {
+      m_layout[nullKeywordIndex] = RawSyntax::missing(TokenKindType::T_NULL,
+                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_NULL)));
+   }
+   RefCountPtr<RawSyntax> rawNullExpr = RawSyntax::make(SyntaxKind::NullExpr, m_layout,
+                                                        SourcePresence::Present, m_arena);
+   return make<NullExprSyntax>(rawNullExpr);
+}
 
 } // polar::syntax

@@ -15,27 +15,27 @@ namespace polar::syntax {
 
 CodeBlockItemSyntaxBuilder &CodeBlockItemSyntaxBuilder::useItem(Syntax item)
 {
-   m_layout[cursorIndex(CodeBlockItemSyntax::Cursor::Item)] = item.getRaw();
+   m_layout[cursor_index(Cursor::Item)] = item.getRaw();
    return *this;
 }
 
 CodeBlockItemSyntaxBuilder &CodeBlockItemSyntaxBuilder::useSemicolon(TokenSyntax semicolon)
 {
-   m_layout[cursorIndex(CodeBlockItemSyntax::Cursor::Semicolon)] = semicolon.getRaw();
+   m_layout[cursor_index(Cursor::Semicolon)] = semicolon.getRaw();
    return *this;
 }
 
 CodeBlockItemSyntaxBuilder &CodeBlockItemSyntaxBuilder::useErrorTokens(Syntax errorTokens)
 {
-   m_layout[cursorIndex(CodeBlockItemSyntax::Cursor::ErrorTokens)] = errorTokens.getRaw();
+   m_layout[cursor_index(Cursor::ErrorTokens)] = errorTokens.getRaw();
    return *this;
 }
 
 CodeBlockItemSyntax CodeBlockItemSyntaxBuilder::build()
 {
    /// ensure node exist
-   int itemNodeIndex = cursorIndex(CodeBlockItemSyntax::Cursor::Item);
-   int semicolonIndex = cursorIndex(CodeBlockItemSyntax::Cursor::Semicolon);
+   int itemNodeIndex = cursor_index(Cursor::Item);
+   int semicolonIndex = cursor_index(Cursor::Semicolon);
    if (!m_layout[itemNodeIndex]) {
       m_layout[itemNodeIndex] = RawSyntax::missing(SyntaxKind::Unknown);
    }
@@ -50,25 +50,25 @@ CodeBlockItemSyntax CodeBlockItemSyntaxBuilder::build()
 
 CodeBlockSyntaxBuilder &CodeBlockSyntaxBuilder::useLeftBrace(TokenSyntax leftBrace)
 {
-   m_layout[cursorIndex(CodeBlockSyntax::Cursor::LeftBrace)] = leftBrace.getRaw();
+   m_layout[cursor_index(Cursor::LeftBrace)] = leftBrace.getRaw();
    return *this;
 }
 
 CodeBlockSyntaxBuilder &CodeBlockSyntaxBuilder::useRightBrace(TokenSyntax rightBrace)
 {
-   m_layout[cursorIndex(CodeBlockSyntax::Cursor::RightBrace)] = rightBrace.getRaw();
+   m_layout[cursor_index(Cursor::RightBrace)] = rightBrace.getRaw();
    return *this;
 }
 
 CodeBlockSyntaxBuilder &CodeBlockSyntaxBuilder::useStatements(CodeBlockItemListSyntax stmts)
 {
-   m_layout[cursorIndex(CodeBlockSyntax::Cursor::Statements)] = stmts.getRaw();
+   m_layout[cursor_index(Cursor::Statements)] = stmts.getRaw();
    return *this;
 }
 
 CodeBlockSyntaxBuilder &CodeBlockSyntaxBuilder::addCodeBlockItem(CodeBlockItemSyntax stmt)
 {
-   auto &raw = m_layout[cursorIndex(CodeBlockSyntax::Cursor::Statements)];
+   auto &raw = m_layout[cursor_index(Cursor::Statements)];
    if (!raw) {
       raw = RawSyntax::make(SyntaxKind::CodeBlockItemList, stmt.getRaw(), SourcePresence::Present, m_arena);
    } else {
@@ -80,9 +80,9 @@ CodeBlockSyntaxBuilder &CodeBlockSyntaxBuilder::addCodeBlockItem(CodeBlockItemSy
 CodeBlockSyntax CodeBlockSyntaxBuilder::build()
 {
    /// ensure node exist
-   int leftBraceIndex = cursorIndex(CodeBlockSyntax::Cursor::LeftBrace);
-   int stmtsIndex = cursorIndex(CodeBlockSyntax::Cursor::Statements);
-   int rightBraceIndex = cursorIndex(CodeBlockSyntax::Cursor::RightBrace);
+   int leftBraceIndex = cursor_index(Cursor::LeftBrace);
+   int stmtsIndex = cursor_index(Cursor::Statements);
+   int rightBraceIndex = cursor_index(Cursor::RightBrace);
    if (!m_layout[leftBraceIndex]) {
       m_layout[leftBraceIndex] = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE)));

@@ -22,6 +22,8 @@ class SyntaxArena;
 class CodeBlockItemSyntaxBuilder
 {
 public:
+   using Cursor = CodeBlockItemSyntax::Cursor;
+public:
    CodeBlockItemSyntaxBuilder() = default;
    CodeBlockItemSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
       : m_arena(arena)
@@ -34,13 +36,15 @@ public:
    CodeBlockItemSyntax build();
 private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
-   RefCountPtr<RawSyntax> m_layout[3] = {
+   RefCountPtr<RawSyntax> m_layout[CodeBlockItemSyntax::CHILDREN_COUNT] = {
       nullptr, nullptr, nullptr
    };
 };
 
 class CodeBlockSyntaxBuilder
 {
+public:
+   using Cursor = CodeBlockSyntax::Cursor;
 public:
    CodeBlockSyntaxBuilder() = default;
    CodeBlockSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
@@ -54,7 +58,7 @@ public:
    CodeBlockSyntax build();
 private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
-   RefCountPtr<RawSyntax> m_layout[3] = {
+   RefCountPtr<RawSyntax> m_layout[CodeBlockSyntax::CHILDREN_COUNT] = {
       nullptr, nullptr, nullptr
    };
 };

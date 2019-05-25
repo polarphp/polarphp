@@ -162,7 +162,7 @@ public:
    template <typename CursorType>
    RefCountPtr<SyntaxData> getChild(CursorType Cursor) const
    {
-      return getChild((size_t)cursorIndex(Cursor));
+      return getChild((size_t)cursor_index(Cursor));
    }
 
    /// Gets the child at the specified index in this data's children array.

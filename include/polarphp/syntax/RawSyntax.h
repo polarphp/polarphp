@@ -50,7 +50,7 @@
 #define syntax_assert_child_kind(raw, cursor, expectedKind)                    \
    do {                                                                         \
       if (auto &__child = raw->getChild(cursor))                                 \
-      assert(__child->getKind() == expectedKind);                              \
+         assert(__child->getKind() == expectedKind);                              \
    } while (false)
 #else
 #define syntax_assert_child_kind(raw, cursor, expectedKind)
@@ -90,14 +90,14 @@
          assert(__child->isToken());                                              \
          if (__child->isPresent()) {                                              \
             assert(__child->getTokenKind() == tokenKind);                          \
-            for (auto __text : {__VA_ARGS__}) {                                    \
-               if (__child->getTokenText() == __text) {                             \
+         for (auto __text : {__VA_ARGS__}) {                                    \
+            if (__child->getTokenText() == __text) {                             \
                __found = true;                                                    \
                break;                                                             \
-               }                                                                    \
-            }                                                                      \
-            assert(__found && "invalid text supplied for " #cursorName             \
-            ", expected one of {" #__VA_ARGS__ "}");             \
+            }                                                                    \
+         }                                                                      \
+         assert(__found && "invalid text supplied for " #cursorName             \
+         ", expected one of {" #__VA_ARGS__ "}");             \
          }                                                                        \
       }                                                                          \
    } while (false)
@@ -108,8 +108,8 @@
 #ifndef NDEBUG
 #define syntax_assert_token_is(token, kind, text)                                \
    do {                                                                         \
-      assert(token.getTokenKind() == kind);                                        \
-      assert(token.getText() == text);                                             \
+   assert(token.getTokenKind() == kind);                                        \
+   assert(token.getText() == text);                                             \
    } while (false)
 #else
 #define syntax_assert_token_is(token, kind, text)
@@ -130,7 +130,7 @@ using CursorIndex = size_t;
 /// Get a numeric index suitable for array/vector indexing
 /// from a syntax node's Cursor enum value.
 template <typename CursorType>
-constexpr CursorIndex cursorIndex(CursorType cursor)
+constexpr CursorIndex cursor_index(CursorType cursor)
 {
    return static_cast<CursorIndex>(cursor);
 }

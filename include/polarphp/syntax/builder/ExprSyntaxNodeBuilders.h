@@ -13,11 +13,31 @@
 #define POLARPHP_SYNTAX_BUILDER_EXPR_SYNTAX_NODE_BUILDERS_H
 
 #include "polarphp/syntax/RawSyntax.h"
-#include "polarphp/syntax/SyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
 
 namespace polar::syntax {
 
 class SyntaxArena;
+
+class NullExprSyntaxBuilder
+{
+public:
+   using Cursor = NullExprSyntax::Cursor;
+public:
+   NullExprSyntaxBuilder() = default;
+   NullExprSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   NullExprSyntaxBuilder &useNullKeyword(TokenSyntax nullKeyword);
+   NullExprSyntax build();
+
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[NullExprSyntax::CHILDREN_COUNT] = {
+      nullptr
+   };
+};
 
 } // polar::syntax
 

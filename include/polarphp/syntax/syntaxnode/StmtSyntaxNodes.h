@@ -81,8 +81,8 @@ public:
    static const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> CHILD_NODE_CHOICES;
 #endif
 public:
-   ConditionElementSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : Syntax(parent, data)
+   ConditionElementSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
    {
       validate();
    }
@@ -114,8 +114,8 @@ public:
       LNumberToken,
    };
 public:
-   ContinueStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : StmtSyntax(parent, data)
+   ContinueStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
    {
       validate();
    }
@@ -156,8 +156,8 @@ public:
       LNumberToken,
    };
 public:
-   BreakStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : StmtSyntax(parent, data)
+   BreakStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
    {
       validate();
    }
@@ -196,8 +196,8 @@ public:
    };
 
 public:
-   FallthroughStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : StmtSyntax(parent, data)
+   FallthroughStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
    {
       validate();
    }
@@ -236,8 +236,8 @@ public:
    };
 
 public:
-   ElseIfClauseSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : Syntax(parent, data)
+   ElseIfClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
    {
       validate();
    }
@@ -309,8 +309,8 @@ public:
 #endif
 
 public:
-   IfStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : StmtSyntax(parent, data)
+   IfStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
    {
       validate();
    }
@@ -368,8 +368,8 @@ public:
    };
 
 public:
-   WhileStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : StmtSyntax(parent, data)
+   WhileStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
    {
       validate();
    }
@@ -443,8 +443,8 @@ public:
    };
 
 public:
-   DoWhileStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : StmtSyntax(parent, data)
+   DoWhileStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
    {
       validate();
    }
@@ -493,8 +493,8 @@ public:
    };
 
 public:
-   SwitchDefaultLabelSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : Syntax(parent, data)
+   SwitchDefaultLabelSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
    {
       validate();
    }
@@ -533,8 +533,8 @@ public:
       Colon
    };
 public:
-   SwitchCaseLabelSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : Syntax(parent, data)
+   SwitchCaseLabelSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
    {
       validate();
    }
@@ -581,8 +581,8 @@ public:
 #endif
 
 public:
-   SwitchCaseSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : Syntax(parent, data)
+   SwitchCaseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
    {
       validate();
    }
@@ -643,8 +643,8 @@ public:
    };
 
 public:
-   SwitchStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : StmtSyntax(parent, data)
+   SwitchStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
    {
       validate();
    }
@@ -697,8 +697,8 @@ public:
    };
 
 public:
-   DeferStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : StmtSyntax(parent, data)
+   DeferStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
    {
       validate();
    }
@@ -730,8 +730,8 @@ public:
       Expr
    };
 public:
-   ExpressionStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : StmtSyntax(parent, data)
+   ExpressionStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
    {
       validate();
    }
@@ -760,8 +760,8 @@ public:
       Expr
    };
 public:
-   ThrowStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : StmtSyntax(parent, data)
+   ThrowStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
    {
       validate();
    }
@@ -803,8 +803,8 @@ public:
       Expr
    };
 public:
-   ReturnStmtSyntax(const RefCountPtr<SyntaxData> parent, const SyntaxData *data)
-      : StmtSyntax(parent, data)
+   ReturnStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
    {}
 
    TokenSyntax getReturnKeyword();
