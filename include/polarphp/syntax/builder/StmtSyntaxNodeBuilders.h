@@ -39,6 +39,27 @@ private:
    };
 };
 
+class ContinueStmtSyntaxBuilder
+{
+public:
+   using Cursor = ContinueStmtSyntax::Cursor;
+public:
+   ContinueStmtSyntaxBuilder() = default;
+   ContinueStmtSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   ContinueStmtSyntaxBuilder &useContinueKeyword(TokenSyntax continueKeyword);
+   ContinueStmtSyntaxBuilder &useLNumberToken(TokenSyntax numberToken);
+
+   ContinueStmtSyntax build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[ContinueStmtSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr
+   };
+};
+
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_BUILDER_STMT_SYNTAX_NODE_BUILDERS_H
