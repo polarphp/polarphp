@@ -246,6 +246,69 @@ private:
    };
 };
 
+class PrefixOperatorExprSyntaxBuilder
+{
+public:
+   using Cursor = PrefixOperatorExprSyntax::Cursor;
+
+public:
+   PrefixOperatorExprSyntaxBuilder() = default;
+   PrefixOperatorExprSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   PrefixOperatorExprSyntaxBuilder &useOperatorToken(TokenSyntax operatorToken);
+   PrefixOperatorExprSyntaxBuilder &useExpr(ExprSyntax expr);
+   PrefixOperatorExprSyntax build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[PrefixOperatorExprSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr
+   };
+};
+
+class PostfixOperatorExprSyntaxBuilder
+{
+public:
+   using Cursor = PostfixOperatorExprSyntax::Cursor;
+
+public:
+   PostfixOperatorExprSyntaxBuilder() = default;
+   PostfixOperatorExprSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   PostfixOperatorExprSyntaxBuilder &useExpr(ExprSyntax expr);
+   PostfixOperatorExprSyntaxBuilder &useOperatorToken(TokenSyntax operatorToken);
+   PostfixOperatorExprSyntax build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[PostfixOperatorExprSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr
+   };
+};
+
+class BinaryOperatorExprSyntaxBuilder
+{
+public:
+   using Cursor = BinaryOperatorExprSyntax::Cursor;
+
+public:
+   BinaryOperatorExprSyntaxBuilder() = default;
+   BinaryOperatorExprSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+  BinaryOperatorExprSyntaxBuilder &useOperatorToken(TokenSyntax operatorToken);
+  BinaryOperatorExprSyntax build();
+
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[BinaryOperatorExprSyntax::CHILDREN_COUNT] = {
+      nullptr
+   };
+};
+
 } // polar::syntax
 
 

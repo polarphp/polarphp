@@ -302,4 +302,90 @@ SequenceExprSyntax SequenceExprSyntaxBuilder::build()
    return make<SequenceExprSyntax>(rawSequenceExprSyntax);
 }
 
+///
+/// PrefixOperatorExprSyntaxBuilder
+///
+
+PrefixOperatorExprSyntaxBuilder &PrefixOperatorExprSyntaxBuilder::useOperatorToken(TokenSyntax operatorToken)
+{
+   m_layout[cursor_index(Cursor::OperatorToken)] = operatorToken.getRaw();
+   return *this;
+}
+
+PrefixOperatorExprSyntaxBuilder &PrefixOperatorExprSyntaxBuilder::useExpr(ExprSyntax expr)
+{
+   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
+   return *this;
+}
+
+PrefixOperatorExprSyntax PrefixOperatorExprSyntaxBuilder::build()
+{
+   CursorIndex operatorTokenIndex = cursor_index(Cursor::OperatorToken);
+   CursorIndex exprIndex = cursor_index(Cursor::Expr);
+   if (!m_layout[operatorTokenIndex]) {
+      m_layout[operatorTokenIndex] = RawSyntax::missing(TokenKindType::T_PREFIX_OPERATOR,
+                                                        OwnedString::makeUnowned(""));
+   }
+   if (!m_layout[exprIndex]) {
+      m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   RefCountPtr<RawSyntax> rawPrefixOperatorExpr = RawSyntax::make(SyntaxKind::PrefixOperatorExpr, m_layout, SourcePresence::Present,
+                                                                  m_arena);
+   return make<PrefixOperatorExprSyntax>(rawPrefixOperatorExpr);
+}
+
+///
+/// PostfixOperatorExprSyntaxBuilder
+///
+
+PostfixOperatorExprSyntaxBuilder &PostfixOperatorExprSyntaxBuilder::useExpr(ExprSyntax expr)
+{
+   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
+   return *this;
+}
+
+PostfixOperatorExprSyntaxBuilder &PostfixOperatorExprSyntaxBuilder::useOperatorToken(TokenSyntax operatorToken)
+{
+   m_layout[cursor_index(Cursor::OperatorToken)] = operatorToken.getRaw();
+   return *this;
+}
+
+PostfixOperatorExprSyntax PostfixOperatorExprSyntaxBuilder::build()
+{
+   CursorIndex operatorTokenIndex = cursor_index(Cursor::OperatorToken);
+   CursorIndex exprIndex = cursor_index(Cursor::Expr);
+   if (!m_layout[operatorTokenIndex]) {
+      m_layout[operatorTokenIndex] = RawSyntax::missing(TokenKindType::T_POSTFIX_OPERATOR,
+                                                        OwnedString::makeUnowned(""));
+   }
+   if (!m_layout[exprIndex]) {
+      m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   RefCountPtr<RawSyntax> rawPostfixOperatorExpr = RawSyntax::make(SyntaxKind::PostfixOperatorExpr, m_layout, SourcePresence::Present,
+                                                                  m_arena);
+   return make<PostfixOperatorExprSyntax>(rawPostfixOperatorExpr);
+}
+
+///
+/// BinaryOperatorExprSyntaxBuilder
+///
+
+BinaryOperatorExprSyntaxBuilder &BinaryOperatorExprSyntaxBuilder::useOperatorToken(TokenSyntax operatorToken)
+{
+   m_layout[cursor_index(Cursor::OperatorToken)] = operatorToken.getRaw();
+   return *this;
+}
+
+BinaryOperatorExprSyntax BinaryOperatorExprSyntaxBuilder::build()
+{
+   CursorIndex operatorTokenIndex = cursor_index(Cursor::OperatorToken);
+   if (!m_layout[operatorTokenIndex]) {
+      m_layout[operatorTokenIndex] = RawSyntax::missing(TokenKindType::T_BINARY_OPERATOR,
+                                                        OwnedString::makeUnowned(""));
+   }
+   RefCountPtr<RawSyntax> rawBinaryOperatorExprSyntax = RawSyntax::make(SyntaxKind::BinaryOperatorExpr, m_layout, SourcePresence::Present,
+                                                                        m_arena);
+   return make<BinaryOperatorExprSyntax>(rawBinaryOperatorExprSyntax);
+}
+
 } // polar::syntax
