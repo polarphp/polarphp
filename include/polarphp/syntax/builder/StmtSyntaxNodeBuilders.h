@@ -19,6 +19,26 @@ namespace polar::syntax {
 
 class SyntaxArena;
 
+class ConditionElementSyntaxBuilder
+{
+public:
+   using Cursor = ConditionElementSyntax::Cursor;
+public:
+   ConditionElementSyntaxBuilder() = default;
+   ConditionElementSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   ConditionElementSyntaxBuilder &useCondition(Syntax condition);
+   ConditionElementSyntaxBuilder &useTrailingComma(TokenSyntax trailingComma);
+   ConditionElementSyntax build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[ConditionElementSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr
+   };
+};
+
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_BUILDER_STMT_SYNTAX_NODE_BUILDERS_H
