@@ -248,4 +248,58 @@ TernaryExprSyntax TernaryExprSyntaxBuilder::build()
    return make<TernaryExprSyntax>(rawTernaryExprSyntax);
 }
 
+///
+/// AssignmentExprSyntax
+///
+
+AssignmentExprSyntaxBuilder &AssignmentExprSyntaxBuilder::useAssignToken(TokenSyntax assignToken)
+{
+   m_layout[cursor_index(Cursor::AssignToken)] = assignToken.getRaw();
+   return *this;
+}
+
+AssignmentExprSyntax AssignmentExprSyntaxBuilder::build()
+{
+   CursorIndex assignTokenIndex = cursor_index(Cursor::AssignToken);
+   if (!m_layout[assignTokenIndex]) {
+      m_layout[assignTokenIndex] = RawSyntax::missing(TokenKindType::T_EQUAL,
+                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_EQUAL)));
+   }
+   RefCountPtr<RawSyntax> rawAssignTokenSyntax = RawSyntax::make(SyntaxKind::AssignmentExpr, m_layout, SourcePresence::Present,
+                                                                 m_arena);
+   return make<AssignmentExprSyntax>(rawAssignTokenSyntax);
+}
+
+///
+/// SequenceExprSyntax
+///
+
+SequenceExprSyntaxBuilder &SequenceExprSyntaxBuilder::useElements(ExprListSyntax elements)
+{
+   m_layout[cursor_index(Cursor::Elements)] = elements.getRaw();
+   return *this;
+}
+
+SequenceExprSyntaxBuilder &SequenceExprSyntaxBuilder::addElement(ExprSyntax element)
+{
+   RefCountPtr<RawSyntax> rawElements = m_layout[cursor_index(Cursor::Elements)];
+   if (!rawElements) {
+      rawElements = RawSyntax::make(SyntaxKind::ExprList, {element.getRaw()}, SourcePresence::Present, m_arena);
+   } else {
+      rawElements = rawElements->append(element.getRaw());
+   }
+   return *this;
+}
+
+SequenceExprSyntax SequenceExprSyntaxBuilder::build()
+{
+   CursorIndex elementsIndex = cursor_index(Cursor::Elements);
+   if (!m_layout[elementsIndex]) {
+      m_layout[elementsIndex] = RawSyntax::missing(SyntaxKind::ExprList);
+   }
+   RefCountPtr<RawSyntax> rawSequenceExprSyntax = RawSyntax::make(SyntaxKind::SequenceExpr, m_layout,
+                                                                  SourcePresence::Present, m_arena);
+   return make<SequenceExprSyntax>(rawSequenceExprSyntax);
+}
+
 } // polar::syntax

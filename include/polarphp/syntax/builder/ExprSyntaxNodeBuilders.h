@@ -203,6 +203,49 @@ private:
    };
 };
 
+class AssignmentExprSyntaxBuilder
+{
+public:
+   using Cursor = AssignmentExprSyntax::Cursor;
+
+public:
+   AssignmentExprSyntaxBuilder() = default;
+   AssignmentExprSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   AssignmentExprSyntaxBuilder &useAssignToken(TokenSyntax assignToken);
+   AssignmentExprSyntax build();
+
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[AssignmentExprSyntax::CHILDREN_COUNT] = {
+      nullptr
+   };
+};
+
+class SequenceExprSyntaxBuilder
+{
+public:
+   using Cursor = SequenceExprSyntax::Cursor;
+
+public:
+   SequenceExprSyntaxBuilder() = default;
+   SequenceExprSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   SequenceExprSyntaxBuilder &useElements(ExprListSyntax elements);
+   SequenceExprSyntaxBuilder &addElement(ExprSyntax element);
+   SequenceExprSyntax build();
+
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[SequenceExprSyntax::CHILDREN_COUNT] = {
+      nullptr
+   };
+};
+
 } // polar::syntax
 
 

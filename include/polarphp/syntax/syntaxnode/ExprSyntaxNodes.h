@@ -475,6 +475,7 @@ public:
       /// optional: false
       Elements
    };
+
 public:
    SequenceExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
