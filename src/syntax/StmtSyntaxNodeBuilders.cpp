@@ -48,6 +48,7 @@ ConditionElementSyntax ConditionElementSyntaxBuilder::build()
 ///
 /// ConditionElementSyntaxBuilder
 ///
+
 ContinueStmtSyntaxBuilder &ContinueStmtSyntaxBuilder::useContinueKeyword(TokenSyntax continueKeyword)
 {
    m_layout[cursor_index(Cursor::ContinueKeyword)] = continueKeyword.getRaw();
@@ -75,6 +76,39 @@ ContinueStmtSyntax ContinueStmtSyntaxBuilder::build()
    RefCountPtr<RawSyntax> rawContinueStmtSyntax = RawSyntax::make(SyntaxKind::ContinueStmt, m_layout, SourcePresence::Present,
                                                                   m_arena);
    return make<ContinueStmtSyntax>(rawContinueStmtSyntax);
+}
+
+///
+/// ContinueStmtSyntaxBuilder
+///
+///
+BreakStmtSyntaxBuilder &BreakStmtSyntaxBuilder::useBreakKeyword(TokenSyntax breakKeyword)
+{
+   m_layout[cursor_index(Cursor::BreakKeyword)] = breakKeyword.getRaw();
+   return *this;
+}
+
+BreakStmtSyntaxBuilder &BreakStmtSyntaxBuilder::useLNumberToken(TokenSyntax numberToken)
+{
+   m_layout[cursor_index(Cursor::LNumberToken)] = numberToken.getRaw();
+   return *this;
+}
+
+BreakStmtSyntax BreakStmtSyntaxBuilder::build()
+{
+   CursorIndex breakKeywordIndex = cursor_index(Cursor::BreakKeyword);
+   CursorIndex numberTokenIndex = cursor_index(Cursor::LNumberToken);
+   if (!m_layout[breakKeywordIndex]) {
+      m_layout[breakKeywordIndex] = RawSyntax::missing(TokenKindType::T_BREAK,
+                                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_BREAK)));
+   }
+   if (!m_layout[numberTokenIndex]) {
+      m_layout[numberTokenIndex] = RawSyntax::missing(TokenKindType::T_LNUMBER,
+                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_LNUMBER)));
+   }
+   RefCountPtr<RawSyntax> rawBreakStmtSyntax = RawSyntax::make(SyntaxKind::BreakStmt, m_layout, SourcePresence::Present,
+                                                               m_arena);
+   return make<BreakStmtSyntax>(rawBreakStmtSyntax);
 }
 
 } // polar::syntax

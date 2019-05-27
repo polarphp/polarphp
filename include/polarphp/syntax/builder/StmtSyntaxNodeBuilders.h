@@ -60,6 +60,29 @@ private:
    };
 };
 
+class BreakStmtSyntaxBuilder
+{
+public:
+   using Cursor = BreakStmtSyntax::Cursor;
+
+public:
+   BreakStmtSyntaxBuilder() = default;
+   BreakStmtSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   BreakStmtSyntaxBuilder &useBreakKeyword(TokenSyntax breakKeyword);
+   BreakStmtSyntaxBuilder &useLNumberToken(TokenSyntax numberToken);
+
+   BreakStmtSyntax build();
+
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[BreakStmtSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr
+   };
+};
+
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_BUILDER_STMT_SYNTAX_NODE_BUILDERS_H
