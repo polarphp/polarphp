@@ -115,7 +115,7 @@ BreakStmtSyntax BreakStmtSyntaxBuilder::build()
 /// FallthroughStmtSyntaxBuilder
 ///
 
-FallthroughStmtSyntaxBuilder FallthroughStmtSyntaxBuilder::useFallthroughKeyword(TokenSyntax fallthroughKeyword)
+FallthroughStmtSyntaxBuilder &FallthroughStmtSyntaxBuilder::useFallthroughKeyword(TokenSyntax fallthroughKeyword)
 {
    m_layout[cursor_index(Cursor::FallthroughKeyword)] = fallthroughKeyword.getRaw();
    return *this;
@@ -131,6 +131,199 @@ FallthroughStmtSyntax FallthroughStmtSyntaxBuilder::build()
    RefCountPtr<RawSyntax> rawFallthroughKeyword = RawSyntax::make(SyntaxKind::FallthroughStmt, m_layout, SourcePresence::Present,
                                                                   m_arena);
    return make<FallthroughStmtSyntax>(rawFallthroughKeyword);
+}
+
+///
+/// FallthroughStmtSyntaxBuilder
+///
+
+ElseIfClauseSyntaxBuilder &ElseIfClauseSyntaxBuilder::useElseIfKeyword(TokenSyntax elseIfKeyword)
+{
+   m_layout[cursor_index(Cursor::ElseIfKeyword)] = elseIfKeyword.getRaw();
+   return *this;
+}
+
+ElseIfClauseSyntaxBuilder &ElseIfClauseSyntaxBuilder::useLeftParen(TokenSyntax leftParen)
+{
+   m_layout[cursor_index(Cursor::LeftParen)] = leftParen.getRaw();
+   return *this;
+}
+
+ElseIfClauseSyntaxBuilder &ElseIfClauseSyntaxBuilder::useCondition(ExprSyntax condition)
+{
+   m_layout[cursor_index(Cursor::Condition)] = condition.getRaw();
+   return *this;
+}
+
+ElseIfClauseSyntaxBuilder &ElseIfClauseSyntaxBuilder::useRightParen(TokenSyntax rightParen)
+{
+   m_layout[cursor_index(Cursor::RightParen)] = rightParen.getRaw();
+   return *this;
+}
+
+ElseIfClauseSyntaxBuilder &ElseIfClauseSyntaxBuilder::useBody(CodeBlockSyntax body)
+{
+   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
+   return *this;
+}
+
+ElseIfClauseSyntax ElseIfClauseSyntaxBuilder::build()
+{
+   CursorIndex elseIfKeywordIndex = cursor_index(Cursor::ElseIfKeyword);
+   CursorIndex leftParenIndex = cursor_index(Cursor::LeftParen);
+   CursorIndex conditionIndex = cursor_index(Cursor::Condition);
+   CursorIndex rightParenIndex = cursor_index(Cursor::RightParen);
+   CursorIndex bodyIndex = cursor_index(Cursor::Body);
+   if (!m_layout[elseIfKeywordIndex]) {
+      m_layout[elseIfKeywordIndex] = RawSyntax::missing(TokenKindType::T_ELSEIF,
+                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_ELSEIF)));
+   }
+   if (!m_layout[leftParenIndex]) {
+      m_layout[leftParenIndex] = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+   }
+   if (!m_layout[conditionIndex]) {
+      m_layout[conditionIndex] = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   if (!m_layout[rightParenIndex]) {
+      m_layout[rightParenIndex] = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
+                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+   }
+   if (!m_layout[bodyIndex]) {
+      m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   RefCountPtr<RawSyntax> rawElseIfClauseSyntax = RawSyntax::make(SyntaxKind::ElseIfClause, m_layout, SourcePresence::Present,
+                                                                  m_arena);
+   return make<ElseIfClauseSyntax>(rawElseIfClauseSyntax);
+}
+
+///
+/// IfStmtSyntaxBuilder
+///
+
+IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useLabelName(TokenSyntax labelName)
+{
+   m_layout[cursor_index(Cursor::LabelName)] = labelName.getRaw();
+   return *this;
+}
+
+IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useLabelColon(TokenSyntax labelColon)
+{
+   m_layout[cursor_index(Cursor::LabelColon)] = labelColon.getRaw();
+   return *this;
+}
+
+IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useIfKeyword(TokenSyntax ifKeyword)
+{
+   m_layout[cursor_index(Cursor::IfKeyword)] = ifKeyword.getRaw();
+   return *this;
+}
+
+IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useLeftParen(TokenSyntax leftParen)
+{
+   m_layout[cursor_index(Cursor::LeftParen)] = leftParen.getRaw();
+   return *this;
+}
+
+IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useCondition(ExprSyntax condition)
+{
+   m_layout[cursor_index(Cursor::Condition)] = condition.getRaw();
+   return *this;
+}
+
+IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useRightParen(TokenSyntax rightParen)
+{
+   m_layout[cursor_index(Cursor::RightParen)] = rightParen.getRaw();
+   return *this;
+}
+
+IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
+{
+   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
+   return *this;
+}
+
+IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useElseIfClauses(ElseIfListSyntax elseIfClauses)
+{
+   m_layout[cursor_index(Cursor::ElseIfClauses)] = elseIfClauses.getRaw();
+   return *this;
+}
+
+IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useElseKeyword(TokenSyntax elseKeyword)
+{
+   m_layout[cursor_index(Cursor::ElseKeyword)] = elseKeyword.getRaw();
+   return *this;
+}
+
+IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useElseBody(Syntax elseBody)
+{
+   m_layout[cursor_index(Cursor::ElseBody)] = elseBody.getRaw();
+   return *this;
+}
+
+IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::addElseIfClause(ElseIfClauseSyntax elseIfClause)
+{
+   RefCountPtr<RawSyntax> clauses = m_layout[cursor_index(Cursor::ElseIfClauses)];
+   if (!clauses) {
+      clauses = RawSyntax::make(SyntaxKind::ElseIfList, {elseIfClause.getRaw()}, SourcePresence::Present,
+                                m_arena);
+   } else {
+      clauses = clauses->append(elseIfClause.getRaw());
+   }
+   return *this;
+}
+
+IfStmtSyntax IfStmtSyntaxBuilder::build()
+{
+   CursorIndex labelNameIndex = cursor_index(Cursor::LabelName);
+   CursorIndex labelColonIndex = cursor_index(Cursor::LabelColon);
+   CursorIndex ifKeywordIndex = cursor_index(Cursor::IfKeyword);
+   CursorIndex leftParenIndex = cursor_index(Cursor::LeftParen);
+   CursorIndex conditionIndex = cursor_index(Cursor::Condition);
+   CursorIndex rightParenIndex = cursor_index(Cursor::RightParen);
+   CursorIndex bodyIndex = cursor_index(Cursor::Body);
+   CursorIndex elseIfClausesIndex = cursor_index(Cursor::ElseIfClauses);
+   CursorIndex elseKeywordIndex = cursor_index(Cursor::ElseKeyword);
+   CursorIndex elseBodyIndex = cursor_index(Cursor::ElseBody);
+   if (!m_layout[labelNameIndex]) {
+      m_layout[labelNameIndex] = RawSyntax::missing(TokenKindType::T_STRING,
+                                                    OwnedString::makeUnowned(""));
+   }
+   if (!m_layout[labelColonIndex]) {
+      m_layout[labelColonIndex] = RawSyntax::missing(TokenKindType::T_COLON,
+                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+   }
+   if (!m_layout[ifKeywordIndex]) {
+      m_layout[ifKeywordIndex] = RawSyntax::missing(TokenKindType::T_IF,
+                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_IF)));
+   }
+   if (!m_layout[leftParenIndex]) {
+      m_layout[leftParenIndex] = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+   }
+   if (!m_layout[conditionIndex]) {
+      m_layout[conditionIndex] = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   if (!m_layout[rightParenIndex]) {
+      m_layout[rightParenIndex] = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
+                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+   }
+   if (!m_layout[bodyIndex]) {
+      m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   if (!m_layout[elseIfClausesIndex]) {
+      m_layout[elseIfClausesIndex] = RawSyntax::missing(SyntaxKind::ElseIfList);
+   }
+   if (!m_layout[elseKeywordIndex]) {
+      m_layout[elseKeywordIndex] = RawSyntax::missing(TokenKindType::T_ELSEIF,
+                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_ELSEIF)));
+   }
+   if (!m_layout[elseBodyIndex]) {
+      m_layout[elseBodyIndex] = RawSyntax::missing(SyntaxKind::IfStmt);
+   }
+   RefCountPtr<RawSyntax> rawIfStmtSytax = RawSyntax::make(SyntaxKind::IfStmt, m_layout, SourcePresence::Present,
+                                                           m_arena);
+   return make<IfStmtSyntax>(rawIfStmtSytax);
 }
 
 } // polar::syntax

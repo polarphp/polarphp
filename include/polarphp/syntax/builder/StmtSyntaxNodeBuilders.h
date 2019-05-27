@@ -94,13 +94,71 @@ public:
       : m_arena(arena)
    {}
 
-   FallthroughStmtSyntaxBuilder useFallthroughKeyword(TokenSyntax fallthroughKeyword);
+   FallthroughStmtSyntaxBuilder &useFallthroughKeyword(TokenSyntax fallthroughKeyword);
    FallthroughStmtSyntax build();
 
 private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[FallthroughStmtSyntax::CHILDREN_COUNT] = {
       nullptr
+   };
+};
+
+class ElseIfClauseSyntaxBuilder
+{
+public:
+   using Cursor =  ElseIfClauseSyntax::Cursor;
+
+public:
+   ElseIfClauseSyntaxBuilder() = default;
+   ElseIfClauseSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   ElseIfClauseSyntaxBuilder &useElseIfKeyword(TokenSyntax elseIfKeyword);
+   ElseIfClauseSyntaxBuilder &useLeftParen(TokenSyntax leftParen);
+   ElseIfClauseSyntaxBuilder &useCondition(ExprSyntax condition);
+   ElseIfClauseSyntaxBuilder &useRightParen(TokenSyntax rightParen);
+   ElseIfClauseSyntaxBuilder &useBody(CodeBlockSyntax body);
+
+   ElseIfClauseSyntax build();
+
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[ElseIfClauseSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr, nullptr, nullptr, nullptr
+   };
+};
+
+class IfStmtSyntaxBuilder
+{
+public:
+   using Cursor =  IfStmtSyntax::Cursor;
+public:
+   IfStmtSyntaxBuilder() = default;
+   IfStmtSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   IfStmtSyntaxBuilder &useLabelName(TokenSyntax labelName);
+   IfStmtSyntaxBuilder &useLabelColon(TokenSyntax labelColon);
+   IfStmtSyntaxBuilder &useIfKeyword(TokenSyntax ifKeyword);
+   IfStmtSyntaxBuilder &useLeftParen(TokenSyntax leftParen);
+   IfStmtSyntaxBuilder &useCondition(ExprSyntax condition);
+   IfStmtSyntaxBuilder &useRightParen(TokenSyntax rightParen);
+   IfStmtSyntaxBuilder &useBody(CodeBlockSyntax body);
+   IfStmtSyntaxBuilder &useElseIfClauses(ElseIfListSyntax elseIfClauses);
+   IfStmtSyntaxBuilder &useElseKeyword(TokenSyntax elseKeyword);
+   IfStmtSyntaxBuilder &useElseBody(Syntax elseBody);
+
+   IfStmtSyntaxBuilder &addElseIfClause(ElseIfClauseSyntax elseIfClause);
+
+   IfStmtSyntax build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[IfStmtSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr, nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr, nullptr, nullptr
    };
 };
 
