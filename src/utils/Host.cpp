@@ -36,10 +36,15 @@
 #include <intrin.h>
 #endif
 #if defined(__APPLE__) && (defined(__ppc__) || defined(__powerpc__))
-#include <mach/host_info.h>
-#include <mach/mach.h>
-#include <mach/mach_host.h>
-#include <mach/machine.h>
+#  include <mach/host_info.h>
+#  include <mach/mach.h>
+#  include <mach/mach_host.h>
+#  include <mach/machine.h>
+#endif
+
+#if defined(__APPLE__) && defined(__x86_64__)
+#  include <sys/param.h>
+#  include <sys/sysctl.h>
 #endif
 
 #define DEBUG_TYPE "host-detection"
@@ -1278,11 +1283,9 @@ int compute_host_num_physical_cores()
    return UniqueItems.size();
 }
 #elif defined(__APPLE__) && defined(__x86_64__)
-#include <sys/param.h>
-#include <sys/sysctl.h>
-
 // Gets the number of *physical cores* on the machine.
-int compute_host_num_physical_cores() {
+int compute_host_num_physical_cores()
+{
    uint32_t count;
    size_t len = sizeof(count);
    sysctlbyname("hw.physicalcpu", &count, &len, NULL, 0);
