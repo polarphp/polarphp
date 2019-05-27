@@ -40,11 +40,12 @@ int execute_and_wait(StringRef program, ArrayRef<StringRef> args,
                      unsigned secondsToWait, unsigned memoryLimit,
                      std::string *errMsg, bool *executionFailed)
 {
-   ArrayRef<std::optional<int>> openModes{
+
+   std::optional<int> initOpenModes[3] = {
       std::nullopt,
-            std::nullopt,
-            std::nullopt
-   };
+      std::nullopt,
+      std::nullopt};
+   ArrayRef<std::optional<int>> openModes(initOpenModes);
    return execute_and_wait(program, args, cwd, envp, redirects, openModes, secondsToWait,
                            memoryLimit, errMsg, executionFailed);
 }
@@ -82,11 +83,11 @@ ProcessInfo execute_no_wait(StringRef program, ArrayRef<StringRef> args,
                             unsigned memoryLimit, std::string *errMsg,
                             bool *executionFailed)
 {
-   ArrayRef<std::optional<int>> openModes{
+   std::optional<int> initOpenModes[3] = {
       std::nullopt,
-            std::nullopt,
-            std::nullopt
-   };
+      std::nullopt,
+      std::nullopt};
+   ArrayRef<std::optional<int>> openModes(initOpenModes);
    return execute_no_wait(program, args, cwd, envp, redirects, openModes,
                           memoryLimit, errMsg, executionFailed);
 }
