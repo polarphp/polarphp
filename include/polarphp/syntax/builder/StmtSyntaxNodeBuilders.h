@@ -162,6 +162,32 @@ private:
    };
 };
 
+class WhileStmtSyntaxBuilder
+{
+public:
+   using Cursor =  WhileStmtSyntax::Cursor;
+public:
+   WhileStmtSyntaxBuilder() = default;
+   WhileStmtSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   WhileStmtSyntaxBuilder &useLabelName(TokenSyntax labelName);
+   WhileStmtSyntaxBuilder &useLabelColon(TokenSyntax labelColon);
+   WhileStmtSyntaxBuilder &useWhileKeyword(TokenSyntax whileKeyword);
+   WhileStmtSyntaxBuilder &useConditions(ConditionElementListSyntax conditions);
+   WhileStmtSyntaxBuilder &useBody(CodeBlockSyntax body);
+   WhileStmtSyntaxBuilder &addCondition(ConditionElementSyntax condition);
+
+   WhileStmtSyntax build();
+
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[WhileStmtSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr, nullptr, nullptr, nullptr
+   };
+};
+
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_BUILDER_STMT_SYNTAX_NODE_BUILDERS_H

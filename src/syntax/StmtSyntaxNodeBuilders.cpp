@@ -291,7 +291,7 @@ IfStmtSyntax IfStmtSyntaxBuilder::build()
    }
    if (!m_layout[labelColonIndex]) {
       m_layout[labelColonIndex] = RawSyntax::missing(TokenKindType::T_COLON,
-                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
    }
    if (!m_layout[ifKeywordIndex]) {
       m_layout[ifKeywordIndex] = RawSyntax::missing(TokenKindType::T_IF,
@@ -306,7 +306,7 @@ IfStmtSyntax IfStmtSyntaxBuilder::build()
    }
    if (!m_layout[rightParenIndex]) {
       m_layout[rightParenIndex] = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
    }
    if (!m_layout[bodyIndex]) {
       m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::CodeBlock);
@@ -316,7 +316,7 @@ IfStmtSyntax IfStmtSyntaxBuilder::build()
    }
    if (!m_layout[elseKeywordIndex]) {
       m_layout[elseKeywordIndex] = RawSyntax::missing(TokenKindType::T_ELSEIF,
-                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_ELSEIF)));
+                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_ELSEIF)));
    }
    if (!m_layout[elseBodyIndex]) {
       m_layout[elseBodyIndex] = RawSyntax::missing(SyntaxKind::IfStmt);
@@ -324,6 +324,82 @@ IfStmtSyntax IfStmtSyntaxBuilder::build()
    RefCountPtr<RawSyntax> rawIfStmtSytax = RawSyntax::make(SyntaxKind::IfStmt, m_layout, SourcePresence::Present,
                                                            m_arena);
    return make<IfStmtSyntax>(rawIfStmtSytax);
+}
+
+///
+/// WhileStmtSyntaxBuilder
+///
+
+WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useLabelName(TokenSyntax labelName)
+{
+   m_layout[cursor_index(Cursor::LabelName)] = labelName.getRaw();
+   return *this;
+}
+
+WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useLabelColon(TokenSyntax labelColon)
+{
+   m_layout[cursor_index(Cursor::LabelColon)] = labelColon.getRaw();
+   return *this;
+}
+
+WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useWhileKeyword(TokenSyntax whileKeyword)
+{
+   m_layout[cursor_index(Cursor::WhileKeyword)] = whileKeyword.getRaw();
+   return *this;
+}
+
+WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useConditions(ConditionElementListSyntax conditions)
+{
+   m_layout[cursor_index(Cursor::Conditions)] = conditions.getRaw();
+   return *this;
+}
+
+WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
+{
+   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
+   return *this;
+}
+
+WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::addCondition(ConditionElementSyntax condition)
+{
+   RefCountPtr<RawSyntax> conditions = m_layout[cursor_index(Cursor::Conditions)];
+   if (!conditions) {
+      conditions = RawSyntax::make(SyntaxKind::ConditionElementList, {condition.getRaw()}, SourcePresence::Present,
+                                   m_arena);
+   } else {
+      conditions = conditions->append(condition.getRaw());
+   }
+   return *this;
+}
+
+WhileStmtSyntax WhileStmtSyntaxBuilder::build()
+{
+   CursorIndex labelNameIndex = cursor_index(Cursor::LabelName);
+   CursorIndex labelColonIndex = cursor_index(Cursor::LabelColon);
+   CursorIndex whileKeywordIndex = cursor_index(Cursor::WhileKeyword);
+   CursorIndex conditionsIndex = cursor_index(Cursor::Conditions);
+   CursorIndex bodyIndex = cursor_index(Cursor::Body);
+   if (!m_layout[labelNameIndex]) {
+      m_layout[labelNameIndex] = RawSyntax::missing(TokenKindType::T_STRING,
+                                                    OwnedString::makeUnowned(""));
+   }
+   if (!m_layout[labelColonIndex]) {
+      m_layout[labelColonIndex] = RawSyntax::missing(TokenKindType::T_COLON,
+                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+   }
+   if (!m_layout[whileKeywordIndex]) {
+      m_layout[whileKeywordIndex] = RawSyntax::missing(TokenKindType::T_WHILE,
+                                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_WHILE)));
+   }
+   if (!m_layout[conditionsIndex]) {
+      m_layout[conditionsIndex] = RawSyntax::missing(SyntaxKind::ConditionElementList);
+   }
+   if (!m_layout[bodyIndex]) {
+      m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   RefCountPtr<RawSyntax> rawWhileStmt = RawSyntax::make(SyntaxKind::WhileStmt, m_layout, SourcePresence::Present,
+                                                         m_arena);
+   return make<WhileStmtSyntax>(rawWhileStmt);
 }
 
 } // polar::syntax
