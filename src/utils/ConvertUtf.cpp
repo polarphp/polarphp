@@ -319,10 +319,28 @@ ConversionResult convert_utf16_to_utf8 (
          break;
       }
       switch (bytesToWrite) { /* note: everything falls through. */
-      case 4: *--target = static_cast<Utf8>((ch | byteMark) & byteMask); ch >>= 6;POLAR_FALLTHROUGH;
-      case 3: *--target = static_cast<Utf8>((ch | byteMark) & byteMask); ch >>= 6;POLAR_FALLTHROUGH;
-      case 2: *--target = static_cast<Utf8>((ch | byteMark) & byteMask); ch >>= 6;POLAR_FALLTHROUGH;
-      case 1: *--target = static_cast<Utf8>(ch | sg_firstByteMark[bytesToWrite]);POLAR_FALLTHROUGH;
+      case 4:
+      {
+         *--target = static_cast<Utf8>((ch | byteMark) & byteMask);
+         ch >>= 6;
+         [[fallthrough]];
+      }
+      case 3:
+      {
+         *--target = static_cast<Utf8>((ch | byteMark) & byteMask);
+         ch >>= 6;
+         [[fallthrough]];
+      }
+      case 2:
+      {
+          *--target = static_cast<Utf8>((ch | byteMark) & byteMask);
+         ch >>= 6;
+         [[fallthrough]];
+      }
+      case 1:
+      {
+         *--target = static_cast<Utf8>(ch | sg_firstByteMark[bytesToWrite]);
+      }
       }
       target += bytesToWrite;
    }
