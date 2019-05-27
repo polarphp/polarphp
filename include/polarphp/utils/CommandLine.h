@@ -638,7 +638,7 @@ protected:
    GenericOptionValue() = default;
    GenericOptionValue(const GenericOptionValue&) = default;
    GenericOptionValue &operator=(const GenericOptionValue &) = default;
-   ~GenericOptionValue() = default;
+   virtual ~GenericOptionValue() = default;
 
 private:
    virtual void anchor();
@@ -1106,7 +1106,7 @@ public:
    virtual void anchor();
 
 protected:
-   ~BasicParserImpl() = default;
+   virtual ~BasicParserImpl() = default;
 
    // A helper for BasicParser::printOptionDiff.
    void printOptionName(const Option &option, size_t globalWidth) const;

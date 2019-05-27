@@ -1315,7 +1315,7 @@
 #   if defined(POLAR_CC_GNU) && POLAR_CC_GNU >= 700
 #      define POLAR_FALLTHROUGH __attribute__((fallthrough))
 #   else
-#      define POLAR_FALLTHROUGH (void)0
+#      define POLAR_FALLTHROUGH (void) 0
 #   endif
 #endif
 
