@@ -16,6 +16,7 @@
 #include "polarphp/basic/adt/StringRef.h"
 #include <assert.h>
 #include <boost/regex.hpp>
+#include <ncurses.h>
 
 namespace polar {
 namespace lit {

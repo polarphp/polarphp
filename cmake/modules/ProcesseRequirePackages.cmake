@@ -58,7 +58,7 @@ endif()
 
 find_package(UUID)
 
-if (POLAR_INCLUDE_TESTS)
+if (POLAR_BUILD_TESTS)
    find_package(Curses REQUIRED)
 endif()
 

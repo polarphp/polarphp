@@ -402,4 +402,52 @@ WhileStmtSyntax WhileStmtSyntaxBuilder::build()
    return make<WhileStmtSyntax>(rawWhileStmt);
 }
 
+///
+/// DoWhileStmtSyntaxBuilder
+///
+DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useLabelName(TokenSyntax labelName)
+{
+
+}
+
+DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useLabelColon(TokenSyntax labelColon)
+{
+
+}
+
+DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useDoKeyword(TokenSyntax doKeyword)
+{
+
+}
+
+DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
+{
+
+}
+
+DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useWhileKeyword(TokenSyntax whileKeyword)
+{
+
+}
+
+DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useLeftParen(TokenSyntax leftParen)
+{
+
+}
+
+DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useCondition(ExprSyntax condition)
+{
+
+}
+
+DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useRightParen(TokenSyntax rightParen)
+{
+
+}
+
+DoWhileStmtSyntax DoWhileStmtSyntaxBuilder::build()
+{
+
+}
+
 } // polar::syntax

@@ -188,6 +188,35 @@ private:
    };
 };
 
+class DoWhileStmtSyntaxBuilder
+{
+public:
+   using Cursor =  WhileStmtSyntax::Cursor;
+public:
+   DoWhileStmtSyntaxBuilder() = default;
+   DoWhileStmtSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   DoWhileStmtSyntaxBuilder &useLabelName(TokenSyntax labelName);
+   DoWhileStmtSyntaxBuilder &useLabelColon(TokenSyntax labelColon);
+   DoWhileStmtSyntaxBuilder &useDoKeyword(TokenSyntax doKeyword);
+   DoWhileStmtSyntaxBuilder &useBody(CodeBlockSyntax body);
+   DoWhileStmtSyntaxBuilder &useWhileKeyword(TokenSyntax whileKeyword);
+   DoWhileStmtSyntaxBuilder &useLeftParen(TokenSyntax leftParen);
+   DoWhileStmtSyntaxBuilder &useCondition(ExprSyntax condition);
+   DoWhileStmtSyntaxBuilder &useRightParen(TokenSyntax rightParen);
+
+   DoWhileStmtSyntax build();
+
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[DoWhileStmtSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr, nullptr
+   };
+};
+
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_BUILDER_STMT_SYNTAX_NODE_BUILDERS_H

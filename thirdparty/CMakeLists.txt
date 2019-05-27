@@ -11,6 +11,6 @@
 
 add_subdirectory(boost)
 
-if (POLAR_INCLUDE_TESTS)
+if (POLAR_BUILD_TESTS)
    add_subdirectory(cppdiff)
 endif()

@@ -412,8 +412,8 @@ private:
 class DoWhileStmtSyntax : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 6;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 4;
+   constexpr static unsigned int CHILDREN_COUNT = 8;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 6;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax

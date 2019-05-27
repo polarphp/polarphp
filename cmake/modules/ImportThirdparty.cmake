@@ -53,7 +53,7 @@ find_package(nlohmann_json CONFIG REQUIRED
    PATHS ${POLAR_CMAKE_MODULES_DIR}/json)
 message(STATUS "found json parser version: ${nlohmann_json_VERSION}")
 
-if(POLAR_INCLUDE_TESTS)
+if(POLAR_BUILD_TESTS)
    ExternalProject_Add(thirdparty_gtest
       PREFIX thirdparty
       SOURCE_DIR "${POLAR_THIRDPARTY_DIR}/googletest"

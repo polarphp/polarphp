@@ -326,7 +326,7 @@ Variant ObjectVariant::call(const char *name) const
    if (!Z_ISUNDEF(retval) && Z_REFCOUNTED(retval)) {
       zval_ptr_dtor(&retval);
    }
-   return std::move(ret);
+   return ret;
 }
 
 bool ObjectVariant::instanceOf(const char *className, size_t size) const
@@ -439,7 +439,7 @@ Variant ObjectVariant::exec(const char *name, int argc, Variant *argv) const
    if (!Z_ISUNDEF(retval) && Z_REFCOUNTED(retval)) {
       zval_ptr_dtor(&retval);
    }
-   return std::move(ret);
+   return ret;
 }
 
 void ObjectVariant::doClassInvoke(int argc, Variant *argv, zval *retval)

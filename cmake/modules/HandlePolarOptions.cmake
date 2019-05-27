@@ -527,6 +527,9 @@ if (POLAR_ENABLE_WARNINGS AND (POLAR_COMPILER_IS_GCC_COMPATIBLE OR CLANG_CL))
    endif()
 
    polar_add_flag_if_supported("-Wcovered-switch-default" COVERED_SWITCH_DEFAULT_FLAG)
+   polar_append_flag("-Wno-init-list-lifetime" CMAKE_CXX_FLAGS)
+   polar_append_flag("-Wno-redundant-move" CMAKE_CXX_FLAGS)
+
    polar_append_flag_if(USE_NO_UNINITIALIZED "-Wno-uninitialized" CMAKE_CXX_FLAGS)
    polar_append_flag_if(USE_NO_MAYBE_UNINITIALIZED "-Wno-maybe-uninitialized" CMAKE_CXX_FLAGS)
 
