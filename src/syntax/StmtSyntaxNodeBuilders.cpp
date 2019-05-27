@@ -79,9 +79,9 @@ ContinueStmtSyntax ContinueStmtSyntaxBuilder::build()
 }
 
 ///
-/// ContinueStmtSyntaxBuilder
+/// BreakStmtSyntaxBuilder
 ///
-///
+
 BreakStmtSyntaxBuilder &BreakStmtSyntaxBuilder::useBreakKeyword(TokenSyntax breakKeyword)
 {
    m_layout[cursor_index(Cursor::BreakKeyword)] = breakKeyword.getRaw();
@@ -109,6 +109,28 @@ BreakStmtSyntax BreakStmtSyntaxBuilder::build()
    RefCountPtr<RawSyntax> rawBreakStmtSyntax = RawSyntax::make(SyntaxKind::BreakStmt, m_layout, SourcePresence::Present,
                                                                m_arena);
    return make<BreakStmtSyntax>(rawBreakStmtSyntax);
+}
+
+///
+/// FallthroughStmtSyntaxBuilder
+///
+
+FallthroughStmtSyntaxBuilder FallthroughStmtSyntaxBuilder::useFallthroughKeyword(TokenSyntax fallthroughKeyword)
+{
+   m_layout[cursor_index(Cursor::FallthroughKeyword)] = fallthroughKeyword.getRaw();
+   return *this;
+}
+
+FallthroughStmtSyntax FallthroughStmtSyntaxBuilder::build()
+{
+   CursorIndex fallthroughKeywordIndex = cursor_index(Cursor::FallthroughKeyword);
+   if (!m_layout[fallthroughKeywordIndex]) {
+      m_layout[fallthroughKeywordIndex] = RawSyntax::missing(TokenKindType::T_FALLTHROUGH,
+                                                             OwnedString::makeUnowned(get_token_text(TokenKindType::T_FALLTHROUGH)));
+   }
+   RefCountPtr<RawSyntax> rawFallthroughKeyword = RawSyntax::make(SyntaxKind::FallthroughStmt, m_layout, SourcePresence::Present,
+                                                                  m_arena);
+   return make<FallthroughStmtSyntax>(rawFallthroughKeyword);
 }
 
 } // polar::syntax
