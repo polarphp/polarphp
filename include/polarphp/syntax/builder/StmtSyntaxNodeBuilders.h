@@ -319,7 +319,7 @@ private:
 class DeferStmtSyntaxBuilder
 {
 public:
-   using Cursor =  DeferStmtSyntax::Cursor;
+   using Cursor = DeferStmtSyntax::Cursor;
 
 public:
    DeferStmtSyntaxBuilder() = default;
@@ -336,6 +336,68 @@ private:
    RefCountPtr<RawSyntax> m_layout[DeferStmtSyntax::CHILDREN_COUNT] = {
       nullptr, nullptr,
    };
+};
+
+class ExpressionStmtSyntaxBuilder
+{
+public:
+   using Cursor = ExpressionStmtSyntax::Cursor;
+public:
+   ExpressionStmtSyntaxBuilder() = default;
+   ExpressionStmtSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   ExpressionStmtSyntaxBuilder &useExpr(ExprSyntax expr);
+   ExpressionStmtSyntax build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[ExpressionStmtSyntax::CHILDREN_COUNT] = {
+      nullptr,
+   };
+};
+
+class ThrowStmtSyntaxBuilder
+{
+public:
+   using Cursor = ThrowStmtSyntax::Cursor;
+public:
+   ThrowStmtSyntaxBuilder() = default;
+   ThrowStmtSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   ThrowStmtSyntaxBuilder &useThrowKeyword(TokenSyntax throwKeyword);
+   ThrowStmtSyntaxBuilder &useExpr(ExprSyntax expr);
+   ThrowStmtSyntax build();
+
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[ThrowStmtSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr,
+   };
+};
+
+class ReturnStmtSyntaxBuilder
+{
+public:
+   using Cursor = ReturnStmtSyntax::Cursor;
+
+public:
+   ReturnStmtSyntaxBuilder() = default;
+   ReturnStmtSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   ReturnStmtSyntaxBuilder &useReturnKeyword(TokenSyntax returnKeyword);
+   ReturnStmtSyntaxBuilder &useExpr(ExprSyntax expr);
+   ReturnStmtSyntax build();
+
+   private:
+      RefCountPtr<SyntaxArena> m_arena = nullptr;
+      RefCountPtr<RawSyntax> m_layout[ReturnStmtSyntax::CHILDREN_COUNT] = {
+         nullptr, nullptr,
+      };
 };
 
 } // polar::syntax

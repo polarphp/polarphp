@@ -769,4 +769,92 @@ DeferStmtSyntax DeferStmtSyntaxBuilder::build()
    return make<DeferStmtSyntax>(rawDeferStmtSyntax);
 }
 
+///
+/// ExpressionStmtSyntaxBuilder
+///
+ExpressionStmtSyntaxBuilder &ExpressionStmtSyntaxBuilder::useExpr(ExprSyntax expr)
+{
+   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
+   return *this;
+}
+
+ExpressionStmtSyntax ExpressionStmtSyntaxBuilder::build()
+{
+   CursorIndex exprIndex = cursor_index(Cursor::Expr);
+   if (!m_layout[exprIndex]) {
+      m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   RefCountPtr<RawSyntax> rawExpressionStmtSyntax = RawSyntax::make(SyntaxKind::ExpressionStmt, m_layout, SourcePresence::Present,
+                                                                    m_arena);
+   return make<ExpressionStmtSyntax>(rawExpressionStmtSyntax);
+}
+
+///
+/// ThrowStmtSyntaxBuilder
+///
+
+ThrowStmtSyntaxBuilder &ThrowStmtSyntaxBuilder::useThrowKeyword(TokenSyntax throwKeyword)
+{
+   m_layout[cursor_index(Cursor::ThrowKeyword)] = throwKeyword.getRaw();
+   return *this;
+}
+
+ThrowStmtSyntaxBuilder &ThrowStmtSyntaxBuilder::useExpr(ExprSyntax expr)
+{
+   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
+   return *this;
+}
+
+ThrowStmtSyntax ThrowStmtSyntaxBuilder::build()
+{
+   CursorIndex throwKeywordIndex = cursor_index(Cursor::ThrowKeyword);
+   CursorIndex exprIndex = cursor_index(Cursor::Expr);
+
+   if (!m_layout[throwKeywordIndex]) {
+      m_layout[throwKeywordIndex] = RawSyntax::missing(TokenKindType::T_THROW,
+                                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_THROW)));
+   }
+
+   if (!m_layout[exprIndex]) {
+      m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
+   }
+
+   RefCountPtr<RawSyntax> rawThrowStmtSyntax = RawSyntax::make(SyntaxKind::ThrowStmt, m_layout, SourcePresence::Present,
+                                                               m_arena);
+   return make<ThrowStmtSyntax>(rawThrowStmtSyntax);
+}
+
+///
+/// ReturnStmtSyntaxBuilder
+///
+ReturnStmtSyntaxBuilder &ReturnStmtSyntaxBuilder::useReturnKeyword(TokenSyntax returnKeyword)
+{
+   m_layout[cursor_index(Cursor::ReturnKeyword)] = returnKeyword.getRaw();
+   return *this;
+}
+
+ReturnStmtSyntaxBuilder &ReturnStmtSyntaxBuilder::useExpr(ExprSyntax expr)
+{
+   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
+   return *this;
+}
+
+ReturnStmtSyntax ReturnStmtSyntaxBuilder::build()
+{
+   CursorIndex returnKeywordIndex = cursor_index(Cursor::ReturnKeyword);
+   CursorIndex exprIndex = cursor_index(Cursor::Expr);
+
+   if (!m_layout[returnKeywordIndex]) {
+      m_layout[returnKeywordIndex] = RawSyntax::missing(TokenKindType::T_RETURN,
+                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_RETURN)));
+   }
+
+   if (!m_layout[exprIndex]) {
+      m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   RefCountPtr<RawSyntax> rawReturnStmtSyntax = RawSyntax::make(SyntaxKind::ThrowStmt, m_layout, SourcePresence::Present,
+                                                               m_arena);
+   return make<ReturnStmtSyntax>(rawReturnStmtSyntax);
+}
+
 } // polar::syntax
