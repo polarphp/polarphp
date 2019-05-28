@@ -503,7 +503,7 @@ DoWhileStmtSyntax DoWhileStmtSyntaxBuilder::build()
 
 
 ///
-/// DoWhileStmtSyntaxBuilder
+/// SwitchDefaultLabelSyntaxBuilder
 ///
 
 SwitchDefaultLabelSyntaxBuilder &SwitchDefaultLabelSyntaxBuilder::useDefaultKeyword(TokenSyntax defaultKeyword)
@@ -533,6 +533,49 @@ SwitchDefaultLabelSyntax SwitchDefaultLabelSyntaxBuilder::build()
    RefCountPtr<RawSyntax> rawSwitchDefaultLabelSyntax = RawSyntax::make(SyntaxKind::SwitchDefaultLabel, m_layout, SourcePresence::Present,
                                                                         m_arena);
    return make<SwitchDefaultLabelSyntax>(rawSwitchDefaultLabelSyntax);
+}
+
+///
+/// SwitchDefaultLabelSyntaxBuilder
+///
+
+SwitchCaseLabelSyntaxBuilder &SwitchCaseLabelSyntaxBuilder::useCaseKeyword(TokenSyntax caseKeyword)
+{
+   m_layout[cursor_index(Cursor::CaseKeyword)] = caseKeyword.getRaw();
+   return *this;
+}
+
+SwitchCaseLabelSyntaxBuilder &SwitchCaseLabelSyntaxBuilder::useExpr(ExprSyntax expr)
+{
+   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
+   return *this;
+}
+
+SwitchCaseLabelSyntaxBuilder &SwitchCaseLabelSyntaxBuilder::useColon(TokenSyntax colon)
+{
+   m_layout[cursor_index(Cursor::Colon)] = colon.getRaw();
+   return *this;
+}
+
+SwitchCaseLabelSyntax SwitchCaseLabelSyntaxBuilder::build()
+{
+   CursorIndex caseKeywordIndex = cursor_index(Cursor::CaseKeyword);
+   CursorIndex exprIndex = cursor_index(Cursor::Expr);
+   CursorIndex colonIndex = cursor_index(Cursor::Colon);
+   if (!m_layout[caseKeywordIndex]) {
+      m_layout[caseKeywordIndex] = RawSyntax::missing(TokenKindType::T_CASE,
+                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_CASE)));
+   }
+   if (!m_layout[exprIndex]) {
+      m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   if (!m_layout[colonIndex]) {
+      m_layout[colonIndex] = RawSyntax::missing(TokenKindType::T_COLON,
+                                                OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+   }
+   RefCountPtr<RawSyntax> rawSwitchCaseLabelSyntax = RawSyntax::make(SyntaxKind::SwitchCaseLabel, m_layout, SourcePresence::Present,
+                                                                     m_arena);
+   return make<SwitchCaseLabelSyntax>(rawSwitchCaseLabelSyntax);
 }
 
 } // polar::syntax

@@ -221,6 +221,7 @@ class SwitchDefaultLabelSyntaxBuilder
 {
 public:
    using Cursor =  SwitchDefaultLabelSyntax::Cursor;
+
 public:
    SwitchDefaultLabelSyntaxBuilder() = default;
    SwitchDefaultLabelSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
@@ -234,6 +235,29 @@ private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[SwitchDefaultLabelSyntax::CHILDREN_COUNT] = {
       nullptr, nullptr
+   };
+};
+
+class SwitchCaseLabelSyntaxBuilder
+{
+public:
+   using Cursor =  SwitchCaseLabelSyntax::Cursor;
+
+public:
+   SwitchCaseLabelSyntaxBuilder() = default;
+   SwitchCaseLabelSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   SwitchCaseLabelSyntaxBuilder &useCaseKeyword(TokenSyntax caseKeyword);
+   SwitchCaseLabelSyntaxBuilder &useExpr(ExprSyntax expr);
+   SwitchCaseLabelSyntaxBuilder &useColon(TokenSyntax colon);
+   SwitchCaseLabelSyntax build();
+
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[SwitchCaseLabelSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr, nullptr
    };
 };
 
