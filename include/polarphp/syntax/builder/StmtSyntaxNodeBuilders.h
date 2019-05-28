@@ -191,7 +191,7 @@ private:
 class DoWhileStmtSyntaxBuilder
 {
 public:
-   using Cursor =  WhileStmtSyntax::Cursor;
+   using Cursor =  DoWhileStmtSyntax::Cursor;
 public:
    DoWhileStmtSyntaxBuilder() = default;
    DoWhileStmtSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
@@ -214,6 +214,26 @@ private:
    RefCountPtr<RawSyntax> m_layout[DoWhileStmtSyntax::CHILDREN_COUNT] = {
       nullptr, nullptr, nullptr, nullptr,
       nullptr, nullptr, nullptr, nullptr
+   };
+};
+
+class SwitchDefaultLabelSyntaxBuilder
+{
+public:
+   using Cursor =  SwitchDefaultLabelSyntax::Cursor;
+public:
+   SwitchDefaultLabelSyntaxBuilder() = default;
+   SwitchDefaultLabelSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   SwitchDefaultLabelSyntaxBuilder &useDefaultKeyword(TokenSyntax defaultKeyword);
+   SwitchDefaultLabelSyntaxBuilder &useColon(TokenSyntax colon);
+   SwitchDefaultLabelSyntax build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[SwitchDefaultLabelSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr
    };
 };
 
