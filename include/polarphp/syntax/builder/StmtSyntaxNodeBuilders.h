@@ -126,7 +126,7 @@ public:
 private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[ElseIfClauseSyntax::CHILDREN_COUNT] = {
-      nullptr, nullptr, nullptr, nullptr, nullptr
+      nullptr, nullptr, nullptr, nullptr, nullptr,
    };
 };
 
@@ -158,7 +158,7 @@ private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[IfStmtSyntax::CHILDREN_COUNT] = {
       nullptr, nullptr, nullptr, nullptr, nullptr,
-      nullptr, nullptr, nullptr, nullptr, nullptr
+      nullptr, nullptr, nullptr, nullptr, nullptr,
    };
 };
 
@@ -213,7 +213,7 @@ private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[DoWhileStmtSyntax::CHILDREN_COUNT] = {
       nullptr, nullptr, nullptr, nullptr,
-      nullptr, nullptr, nullptr, nullptr
+      nullptr, nullptr, nullptr, nullptr,
    };
 };
 
@@ -234,7 +234,7 @@ public:
 private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[SwitchDefaultLabelSyntax::CHILDREN_COUNT] = {
-      nullptr, nullptr
+      nullptr, nullptr,
    };
 };
 
@@ -258,6 +258,61 @@ private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[SwitchCaseLabelSyntax::CHILDREN_COUNT] = {
       nullptr, nullptr, nullptr
+   };
+};
+
+class SwitchCaseSyntaxBuilder
+{
+public:
+   using Cursor =  SwitchCaseSyntax::Cursor;
+
+public:
+   SwitchCaseSyntaxBuilder() = default;
+   SwitchCaseSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   SwitchCaseSyntaxBuilder &useLabel(Syntax label);
+   SwitchCaseSyntaxBuilder &useStatements(CodeBlockItemListSyntax statements);
+   SwitchCaseSyntax build();
+
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[SwitchCaseSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr
+   };
+};
+
+class SwitchStmtSyntaxBuilder
+{
+public:
+   using Cursor =  SwitchStmtSyntax::Cursor;
+
+public:
+   SwitchStmtSyntaxBuilder() = default;
+   SwitchStmtSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+
+   SwitchStmtSyntaxBuilder &useLabelName(TokenSyntax labelName);
+   SwitchStmtSyntaxBuilder &useLabelColon(TokenSyntax colon);
+   SwitchStmtSyntaxBuilder &useSwitchKeyword(TokenSyntax switchKeyword);
+   SwitchStmtSyntaxBuilder &useLeftParen(TokenSyntax leftParen);
+   SwitchStmtSyntaxBuilder &useConditionExpr(ExprSyntax condition);
+   SwitchStmtSyntaxBuilder &useRightParen(TokenSyntax rightParen);
+   SwitchStmtSyntaxBuilder &useLeftBrace(TokenSyntax leftBrace);
+   SwitchStmtSyntaxBuilder &useCases(SwitchCaseListSyntax cases);
+   SwitchStmtSyntaxBuilder &useRightBrace(TokenSyntax rightBrace);
+
+   SwitchStmtSyntaxBuilder &addCase(SwitchCaseSyntax caseItem);
+   SwitchStmtSyntax build();
+
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[SwitchStmtSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr,
    };
 };
 

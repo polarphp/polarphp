@@ -578,4 +578,163 @@ SwitchCaseLabelSyntax SwitchCaseLabelSyntaxBuilder::build()
    return make<SwitchCaseLabelSyntax>(rawSwitchCaseLabelSyntax);
 }
 
+///
+/// SwitchDefaultLabelSyntaxBuilder
+///
+SwitchCaseSyntaxBuilder &SwitchCaseSyntaxBuilder::useLabel(Syntax label)
+{
+   m_layout[cursor_index(Cursor::Label)] = label.getRaw();
+   return *this;
+}
+
+SwitchCaseSyntaxBuilder &SwitchCaseSyntaxBuilder::useStatements(CodeBlockItemListSyntax statements)
+{
+   m_layout[cursor_index(Cursor::Statements)] = statements.getRaw();
+   return *this;
+}
+
+SwitchCaseSyntax SwitchCaseSyntaxBuilder::build()
+{
+   CursorIndex labelIndex = cursor_index(Cursor::Label);
+   CursorIndex statementsIndex = cursor_index(Cursor::Statements);
+   if (!m_layout[labelIndex]) {
+      m_layout[labelIndex] = RawSyntax::missing(SyntaxKind::SwitchDefaultLabel);
+   }
+   if (!m_layout[statementsIndex]) {
+      m_layout[statementsIndex] = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
+   }
+   RefCountPtr<RawSyntax> rawSwitchCaseSyntax = RawSyntax::make(SyntaxKind::SwitchCase, m_layout, SourcePresence::Present,
+                                                                m_arena);
+   return make<SwitchCaseSyntax>(rawSwitchCaseSyntax);
+}
+
+///
+/// SwitchDefaultLabelSyntaxBuilder
+///
+
+SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useLabelName(TokenSyntax labelName)
+{
+   m_layout[cursor_index(Cursor::LabelName)] = labelName.getRaw();
+   return *this;
+}
+
+SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useLabelColon(TokenSyntax colon)
+{
+   m_layout[cursor_index(Cursor::LabelColon)] = colon.getRaw();
+   return *this;
+}
+
+SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useSwitchKeyword(TokenSyntax switchKeyword)
+{
+   m_layout[cursor_index(Cursor::SwitchKeyword)] = switchKeyword.getRaw();
+   return *this;
+}
+
+SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useLeftParen(TokenSyntax leftParen)
+{
+   m_layout[cursor_index(Cursor::LeftParen)] = leftParen.getRaw();
+   return *this;
+}
+
+SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useConditionExpr(ExprSyntax condition)
+{
+   m_layout[cursor_index(Cursor::ConditionExpr)] = condition.getRaw();
+   return *this;
+}
+
+SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useRightParen(TokenSyntax rightParen)
+{
+   m_layout[cursor_index(Cursor::RightParen)] = rightParen.getRaw();
+   return *this;
+}
+
+SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useLeftBrace(TokenSyntax leftBrace)
+{
+   m_layout[cursor_index(Cursor::LeftBrace)] = leftBrace.getRaw();
+   return *this;
+}
+
+SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useCases(SwitchCaseListSyntax cases)
+{
+   m_layout[cursor_index(Cursor::Cases)] = cases.getRaw();
+   return *this;
+}
+
+SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::addCase(SwitchCaseSyntax caseItem)
+{
+   RefCountPtr<RawSyntax> cases = m_layout[Cursor::Cases];
+   if (!cases) {
+      cases = RawSyntax::make(SyntaxKind::SwitchCaseList, {caseItem.getRaw()}, SourcePresence::Present,
+                              m_arena);
+   } else {
+      cases = cases->append(caseItem.getRaw());
+   }
+   return *this;
+}
+
+SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useRightBrace(TokenSyntax rightBrace)
+{
+   m_layout[cursor_index(Cursor::RightBrace)] = rightBrace.getRaw();
+   return *this;
+}
+
+SwitchStmtSyntax SwitchStmtSyntaxBuilder::build()
+{
+   CursorIndex labelNameIndex = cursor_index(Cursor::LabelName);
+   CursorIndex labelColonIndex = cursor_index(Cursor::LabelColon);
+   CursorIndex switchKeywordIndex = cursor_index(Cursor::SwitchKeyword);
+   CursorIndex leftParenIndex = cursor_index(Cursor::LeftParen);
+   CursorIndex conditionExprIndex = cursor_index(Cursor::ConditionExpr);
+   CursorIndex rightParenIndex = cursor_index(Cursor::RightParen);
+   CursorIndex leftBraceIndex = cursor_index(Cursor::LeftBrace);
+   CursorIndex casesIndex = cursor_index(Cursor::Cases);
+   CursorIndex rightBraceIndex = cursor_index(Cursor::RightBrace);
+   if (!m_layout[labelNameIndex]) {
+      m_layout[labelNameIndex] = RawSyntax::missing(TokenKindType::T_STRING,
+                                                    OwnedString::makeUnowned(""));
+   }
+
+   if (!m_layout[labelColonIndex]) {
+      m_layout[labelColonIndex] = RawSyntax::missing(TokenKindType::T_COLON,
+                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+   }
+
+   if (!m_layout[switchKeywordIndex]) {
+      m_layout[switchKeywordIndex] = RawSyntax::missing(TokenKindType::T_SWITCH,
+                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_SWITCH)));
+   }
+
+   if (!m_layout[leftParenIndex]) {
+      m_layout[leftParenIndex] = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+   }
+
+   if (!m_layout[conditionExprIndex]) {
+      m_layout[conditionExprIndex] = RawSyntax::missing(SyntaxKind::Expr);
+   }
+
+   if (!m_layout[rightParenIndex]) {
+      m_layout[rightParenIndex] = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
+                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+   }
+
+   if (!m_layout[leftBraceIndex]) {
+      m_layout[leftBraceIndex] = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
+                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE)));
+   }
+
+   if (!m_layout[casesIndex]) {
+      m_layout[casesIndex] = RawSyntax::missing(SyntaxKind::SwitchCaseList);
+   }
+
+   if (!m_layout[rightBraceIndex]) {
+      m_layout[rightBraceIndex] = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
+                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)));
+   }
+
+   RefCountPtr<RawSyntax> rawSwitchStmtSyntax = RawSyntax::make(SyntaxKind::SwitchStmt, m_layout, SourcePresence::Present,
+                                                                m_arena);
+   return make<SwitchStmtSyntax>(rawSwitchStmtSyntax);
+}
+
 } // polar::syntax
