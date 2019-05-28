@@ -609,7 +609,7 @@ SwitchCaseSyntax SwitchCaseSyntaxBuilder::build()
 }
 
 ///
-/// SwitchDefaultLabelSyntaxBuilder
+/// SwitchStmtSyntaxBuilder
 ///
 
 SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useLabelName(TokenSyntax labelName)
@@ -735,6 +735,38 @@ SwitchStmtSyntax SwitchStmtSyntaxBuilder::build()
    RefCountPtr<RawSyntax> rawSwitchStmtSyntax = RawSyntax::make(SyntaxKind::SwitchStmt, m_layout, SourcePresence::Present,
                                                                 m_arena);
    return make<SwitchStmtSyntax>(rawSwitchStmtSyntax);
+}
+
+///
+/// DeferStmtSyntaxBuilder
+///
+
+DeferStmtSyntaxBuilder &DeferStmtSyntaxBuilder::useDeferKeyword(TokenSyntax deferKeyword)
+{
+   m_layout[cursor_index(Cursor::DeferKeyword)] = deferKeyword.getRaw();
+   return *this;
+}
+
+DeferStmtSyntaxBuilder &DeferStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
+{
+   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
+   return *this;
+}
+
+DeferStmtSyntax DeferStmtSyntaxBuilder::build()
+{
+   CursorIndex deferKeywordIndex = cursor_index(Cursor::DeferKeyword);
+   CursorIndex bodyIndex = cursor_index(Cursor::Body);
+   if (!m_layout[deferKeywordIndex]) {
+      m_layout[deferKeywordIndex] = RawSyntax::missing(TokenKindType::T_DEFER,
+                                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_DEFER)));
+   }
+   if (!m_layout[bodyIndex]) {
+      m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   RefCountPtr<RawSyntax> rawDeferStmtSyntax = RawSyntax::make(SyntaxKind::DeferStmt, m_layout, SourcePresence::Present,
+                                                               m_arena);
+   return make<DeferStmtSyntax>(rawDeferStmtSyntax);
 }
 
 } // polar::syntax
