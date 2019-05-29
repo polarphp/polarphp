@@ -174,7 +174,7 @@ public:
    static TokenSyntax makeRightAngleToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> &arena);
    static TokenSyntax makeCommaToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> &arena);
    static TokenSyntax makeColonToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> &arena);
-   static TokenSyntax makeSimiColonToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> &arena);
+   static TokenSyntax makeSemiColonToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> &arena);
    static TokenSyntax makeBacktickToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> &arena);
    static TokenSyntax makeSingleStrQuoteToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> &arena);
    static TokenSyntax makeDoubleStrQuoteToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> &arena);
