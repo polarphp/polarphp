@@ -71,16 +71,6 @@ namespace polar::syntax{
 
 %token END 0 "end of file (END)"
 
-%token <ast> T_LNUMBER   "integer number (T_LNUMBER)"
-%token <ast> T_DNUMBER   "floating-point number (T_DNUMBER)"
-%token <ast> T_STRING    "identifier (T_STRING)"
-%token <ast> T_VARIABLE  "variable (T_VARIABLE)"
-%token <ast> T_INLINE_HTML
-%token <ast> T_ENCAPSED_AND_WHITESPACE  "quoted-string and whitespace (T_ENCAPSED_AND_WHITESPACE)"
-%token <ast> T_CONSTANT_ENCAPSED_STRING "quoted-string (T_CONSTANT_ENCAPSED_STRING)"
-%token <ast> T_STRING_VARNAME "variable name (T_STRING_VARNAME)"
-%token <ast> T_NUM_STRING "number (T_NUM_STRING)"
-
 %token T_KEYWORD_START_MARK "keyword start mark (T_KEYWORD_START_MARK)"
 %token T_LINE            "__LINE__ (T_LINE)"
 %token T_FILE            "__FILE__ (T_FILE)"
@@ -102,6 +92,7 @@ namespace polar::syntax{
 %token T_CONST      "const (T_CONST)"
 %token T_VAR        "var (T_VAR)"
 %token T_USE        "use (T_USE)"
+%token T_INSTEADOF  "insteadof (T_INSTEADOF)"
 %token T_AS         "as (T_AS)"
 %token T_GLOBAL     "global (T_GLOBAL)"
 %token T_STATIC     "static (T_STATIC)"
@@ -114,23 +105,22 @@ namespace polar::syntax{
 %token T_ARRAY           "array (T_ARRAY)"
 %token T_CALLABLE        "callable (T_CALLABLE)"
 %token T_THREAD_LOCAL    "thread_local (T_THREAD_LOCAL)"
+%token T_MODULE "module (T_MODULE)"
+%token T_PACKAGE "package (T_PACKAGE)"
+%token T_ASYNC "async (T_ASYNC)"
+%token T_EXPORT "export (T_EXPORT)"
 
 %token T_STMT_KEYWORD_STRAT_MARK "stmt keyword start mark (T_STMT_KEYWORD_STRAT_MARK)"
 %token T_DEFER     "defer (T_DEFER)"
 %token T_IF        "if (T_IF)"
 %token T_ELSEIF    "elseif (T_ELSEIF)"
 %token T_ELSE      "else (T_ELSE)"
-%token T_ENDIF     "endif (T_ENDIF)"
 %token T_ECHO       "echo (T_ECHO)"
 %token T_DO         "do (T_DO)"
 %token T_WHILE      "while (T_WHILE)"
-%token T_ENDWHILE   "endwhile (T_ENDWHILE)"
 %token T_FOR        "for (T_FOR)"
-%token T_ENDFOR     "endfor (T_ENDFOR)"
 %token T_FOREACH    "foreach (T_FOREACH)"
-%token T_ENDFOREACH "endforeach (T_ENDFOREACH)"
 %token T_SWITCH     "switch (T_SWITCH)"
-%token T_ENDSWITCH  "endswitch (T_ENDSWITCH)"
 %token T_CASE       "case (T_CASE)"
 %token T_DEFAULT    "default (T_DEFAULT)"
 %token T_BREAK      "break (T_BREAK)"
@@ -179,7 +169,7 @@ namespace polar::syntax{
 %token T_TRUE "true (T_TRUE)"
 %token T_FALSE "false (T_FALSE)"
 %token T_NULL "null (T_NULL)"
-%token T_INSTEADOF  "insteadof (T_INSTEADOF)"
+%token T_AWAIT "await (T_AWAIT)"
 
 %token T_PUNCTUATOR_START_MARK "punctuator start mark (T_PUNCTUATOR_START_MARK)"
 %token T_PLUS_SIGN "+ (T_PLUS_SIGN)"
@@ -248,9 +238,19 @@ namespace polar::syntax{
 %token T_INFIX_QUESTION_MARK "? (T_INFIX_QUESTION_MARK)"
 %token T_ERROR_SUPPRESS_SIGN "@ (T_ERROR_SUPPRESS_SIGN)"
 %token T_PREFIX_AMPERSAND "& (T_PREFIX_AMPERSAND)"
-%token T_WHITESPACE      "whitespace (T_WHITESPACE)"
 
 %token T_MISC_START_MARK "misc start mark (T_MISC_START_MARK)"
+%token <ast> T_LNUMBER   "integer number (T_LNUMBER)"
+%token <ast> T_DNUMBER   "floating-point number (T_DNUMBER)"
+%token <ast> T_STRING    "identifier (T_STRING)"
+%token <ast> T_VARIABLE  "variable (T_VARIABLE)"
+%token <ast> T_INLINE_HTML "inline html (T_INLINE_HTML)"
+%token <ast> T_ENCAPSED_AND_WHITESPACE  "quoted-string and whitespace (T_ENCAPSED_AND_WHITESPACE)"
+%token <ast> T_CONSTANT_ENCAPSED_STRING "quoted-string (T_CONSTANT_ENCAPSED_STRING)"
+%token <ast> T_STRING_VARNAME "variable name (T_STRING_VARNAME)"
+%token <ast> T_NUM_STRING "number (T_NUM_STRING)"
+
+%token T_WHITESPACE      "whitespace (T_WHITESPACE)"
 %token T_PREFIX_OPERATOR "prefix operator (T_PREFIX_OPERATOR)"
 %token T_POSTFIX_OPERATOR "postfix operator (T_POSTFIX_OPERATOR)"
 %token T_BINARY_OPERATOR "binary operator (T_BINARY_OPERATOR)"
@@ -313,10 +313,10 @@ start:
 
 reserved_non_modifiers:
 	  T_INCLUDE | T_INCLUDE_ONCE | T_EVAL | T_REQUIRE | T_REQUIRE_ONCE | T_LOGICAL_OR | T_LOGICAL_XOR | T_LOGICAL_AND
-	| T_INSTANCEOF | T_NEW | T_CLONE | T_EXIT | T_IF | T_ELSEIF | T_ELSE | T_ENDIF | T_ECHO | T_DO | T_WHILE | T_ENDWHILE
-	| T_FOR | T_ENDFOR | T_FOREACH | T_ENDFOREACH | T_DECLARE | T_ENDDECLARE | T_AS | T_TRY | T_CATCH | T_FINALLY
+	| T_INSTANCEOF | T_NEW | T_CLONE | T_EXIT | T_IF | T_ELSEIF | T_ELSE | T_ECHO | T_DO | T_WHILE
+	| T_FOR | T_FOREACH | T_DECLARE | T_ENDDECLARE | T_AS | T_TRY | T_CATCH | T_FINALLY
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
-	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
+	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
 	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C
 ;
