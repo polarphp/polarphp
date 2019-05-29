@@ -76,30 +76,6 @@ public:
    static UnknownExprSyntax makeBlankUnknownExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static UnknownStmtSyntax makeBlankUnknownStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static UnknownTypeSyntax makeBlankUnknownType(RefCountPtr<SyntaxArena> arena = nullptr);
-   static CodeBlockItemSyntax makeBlankCodeBlockItem(RefCountPtr<SyntaxArena> arena = nullptr);
-   static CodeBlockSyntax makeBlankCodeBlock(RefCountPtr<SyntaxArena> arena = nullptr);
-   static CodeBlockItemListSyntax makeBlankCodeBlockItemList(RefCountPtr<SyntaxArena> arena = nullptr);
-   static TokenListSyntax makeBlankTokenList(RefCountPtr<SyntaxArena> arena = nullptr);
-   static NonEmptyTokenListSyntax makeBlankNonEmptyTokenList(RefCountPtr<SyntaxArena> arena = nullptr);
-
-   /// make syntax collection node
-   ///
-   static CodeBlockItemListSyntax makeCodeBlockItemList(const std::vector<CodeBlockItemSyntax> &elements,
-                                                        RefCountPtr<SyntaxArena> arena = nullptr);
-   static TokenListSyntax makeTokenList(const std::vector<TokenSyntax> &elements,
-                                        RefCountPtr<SyntaxArena> arena = nullptr);
-   static NonEmptyTokenListSyntax makeNonEmptyTokenList(const std::vector<TokenSyntax> &elements,
-                                                        RefCountPtr<SyntaxArena> arena = nullptr);
-
-   static CodeBlockItemSyntax makeCodeBlockItem(Syntax item, TokenSyntax semicolon,
-                                                std::optional<TokenSyntax> errorTokens, RefCountPtr<SyntaxArena> arena = nullptr);
-   static CodeBlockSyntax makeCodeBlock(TokenSyntax leftBrace, CodeBlockItemListSyntax statements,
-                                        TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);
-
-   /// make keyword token utils methods
-   static TokenSyntax makeLineKeyword(const Trivia &leadingTrivia,
-                                      const Trivia &trailingTrivia,
-                                      RefCountPtr<SyntaxArena> arena = nullptr);
 };
 
 } // polar::syntax
