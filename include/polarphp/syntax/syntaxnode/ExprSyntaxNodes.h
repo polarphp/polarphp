@@ -48,7 +48,7 @@ public:
    {
       /// type: TokenSyntax
       /// optional: false
-      NulllKeyword,
+      NullKeyword,
    };
 public:
    NullExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)

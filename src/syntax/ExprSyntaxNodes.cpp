@@ -24,7 +24,7 @@ void NullExprSyntax::validate()
 
 TokenSyntax NullExprSyntax::getNullKeyword()
 {
-   return TokenSyntax{m_root, m_data->getChild(Cursor::NulllKeyword).get()};
+   return TokenSyntax{m_root, m_data->getChild(Cursor::NullKeyword).get()};
 }
 
 NullExprSyntax NullExprSyntax::withNullKeyword(std::optional<TokenSyntax> keyword)
@@ -36,7 +36,7 @@ NullExprSyntax NullExprSyntax::withNullKeyword(std::optional<TokenSyntax> keywor
       rawKeyword = RawSyntax::missing(TokenKindType::T_NULL,
                                       OwnedString::makeUnowned((get_token_text(TokenKindType::T_NULL))));
    }
-   return m_data->replaceChild<NullExprSyntax>(rawKeyword, Cursor::NulllKeyword);
+   return m_data->replaceChild<NullExprSyntax>(rawKeyword, Cursor::NullKeyword);
 }
 
 void ClassRefParentExprSyntax::validate()
