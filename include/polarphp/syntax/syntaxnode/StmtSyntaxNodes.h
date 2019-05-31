@@ -65,7 +65,7 @@ public:
       /// optional: false
       /// ------------
       /// node choices
-      /// name: Expr kind: Expr
+      /// name: Expr kind: ExprSyntax
       Condition,
       /// type: TokenSyntax
       /// optional: true
