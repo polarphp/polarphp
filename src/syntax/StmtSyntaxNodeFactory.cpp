@@ -343,47 +343,116 @@ IfStmtSyntax StmtSyntaxNodeFactory::makeBlankIfStmtSyntax(RefCountPtr<SyntaxAren
 
 WhileStmtSyntax StmtSyntaxNodeFactory::makeBlankWhileStmtSyntax(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> rawWhileStmtSyntax = RawSyntax::make(SyntaxKind::WhileStmt, {
+                                                                  nullptr,
+                                                                  nullptr,
+                                                                  RawSyntax::missing(TokenKindType::T_WHILE,
+                                                                  OwnedString::makeUnowned(get_token_text(TokenKindType::T_WHILE))),
+                                                                  RawSyntax::missing(SyntaxKind::ConditionElementList),
+                                                                  RawSyntax::missing(SyntaxKind::CodeBlock)
+                                                               }, SourcePresence::Present, arena);
+   return make<WhileStmtSyntax>(rawWhileStmtSyntax);
 }
 
 DoWhileStmtSyntax StmtSyntaxNodeFactory::makeBlankDoWhileStmtSyntax(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> rawDoWhileStmtSyntax = RawSyntax::make(SyntaxKind::DoWhileStmt, {
+                                                                    nullptr,
+                                                                    nullptr,
+                                                                    RawSyntax::missing(TokenKindType::T_DO,
+                                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_DO))),
+                                                                    RawSyntax::missing(SyntaxKind::CodeBlock),
+                                                                    RawSyntax::missing(TokenKindType::T_WHILE,
+                                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_WHILE))),
+                                                                    RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN))),
+                                                                    RawSyntax::missing(SyntaxKind::Expr),
+                                                                    RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
+                                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN))),
+                                                                 }, SourcePresence::Present, arena);
+   return make<DoWhileStmtSyntax>(rawDoWhileStmtSyntax);
 }
 
 SwitchDefaultLabelSyntax StmtSyntaxNodeFactory::makeBlankSwitchDefaultLabelSyntax(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> rawSwitchDefaultLabelSyntax = RawSyntax::make(SyntaxKind::SwitchDefaultLabel, {
+                                                                           RawSyntax::missing(TokenKindType::T_DEFAULT,
+                                                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_DEFAULT))),\
+                                                                           RawSyntax::missing(TokenKindType::T_COLON,
+                                                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON))),
+                                                                        }, SourcePresence::Present, arena);
+   return make<SwitchDefaultLabelSyntax>(rawSwitchDefaultLabelSyntax);
 }
 
 SwitchCaseLabelSyntax StmtSyntaxNodeFactory::makeBlankSwitchCaseLabelSyntax(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> rawSwitchCaseLabelSyntax = RawSyntax::make(SyntaxKind::SwitchCaseLabel, {
+                                                                        RawSyntax::missing(TokenKindType::T_CASE,
+                                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_CASE))),
+                                                                        RawSyntax::missing(SyntaxKind::Expr),
+                                                                        RawSyntax::missing(TokenKindType::T_COLON,
+                                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON))),
+                                                                     }, SourcePresence::Present, arena);
+   return make<SwitchCaseLabelSyntax>(rawSwitchCaseLabelSyntax);
 }
 
 SwitchCaseSyntax StmtSyntaxNodeFactory::makeBlankSwitchCaseSyntax(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> rawSwitchCaseSyntax = RawSyntax::make(SyntaxKind::SwitchCase, {
+                                                                   RawSyntax::missing(SyntaxKind::SwitchDefaultLabel),
+                                                                   RawSyntax::missing(TokenKindType::T_COLON,
+                                                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON))),
+                                                                }, SourcePresence::Present, arena);
+   return make<SwitchCaseSyntax>(rawSwitchCaseSyntax);
 }
 
 SwitchStmtSyntax StmtSyntaxNodeFactory::makeBlankSwitchStmtSyntax(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> rawSwitchStmtSyntax = RawSyntax::make(SyntaxKind::SwitchCaseLabel, {
+                                                                   nullptr,
+                                                                   nullptr,
+                                                                   RawSyntax::missing(TokenKindType::T_SWITCH,
+                                                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_SWITCH))),
+                                                                   RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN))),
+                                                                   RawSyntax::missing(SyntaxKind::Expr),
+                                                                   RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
+                                                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN))),
+                                                                   RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
+                                                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE))),
+                                                                   RawSyntax::missing(SyntaxKind::SwitchCaseList),
+                                                                   RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
+                                                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE))),
+                                                                }, SourcePresence::Present, arena);
+   return make<SwitchStmtSyntax>(rawSwitchStmtSyntax);
 }
 
 DeferStmtSyntax StmtSyntaxNodeFactory::makeBlankDeferStmtSyntax(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> rawDeferStmtSyntax = RawSyntax::make(SyntaxKind::DeferStmt, {
+                                                                  RawSyntax::missing(TokenKindType::T_DEFER,
+                                                                  OwnedString::makeUnowned(get_token_text(TokenKindType::T_DEFER))),
+                                                                  RawSyntax::missing(SyntaxKind::CodeBlock)
+                                                               }, SourcePresence::Present, arena);
+   return make<DeferStmtSyntax>(rawDeferStmtSyntax);
 }
 
 ExpressionStmtSyntax StmtSyntaxNodeFactory::makeBlankExpressionStmtSyntax(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> rawExpressionStmtSyntax = RawSyntax::make(SyntaxKind::ExpressionStmt, {
+                                                                       RawSyntax::missing(SyntaxKind::Expr)
+                                                                    }, SourcePresence::Present, arena);
+   return make<ExpressionStmtSyntax>(rawExpressionStmtSyntax);
 }
 
 ThrowStmtSyntax StmtSyntaxNodeFactory::makeBlankThrowStmtSyntax(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> rawThrowStmtSyntax = RawSyntax::make(SyntaxKind::ThrowStmt, {
+                                                                  RawSyntax::missing(TokenKindType::T_THROW,
+                                                                  OwnedString::makeUnowned(get_token_text(TokenKindType::T_THROW))),
+                                                                  RawSyntax::missing(SyntaxKind::Expr)
+                                                               }, SourcePresence::Present, arena);
+   return make<ThrowStmtSyntax>(rawThrowStmtSyntax);
 }
 
 } // polar::syntax

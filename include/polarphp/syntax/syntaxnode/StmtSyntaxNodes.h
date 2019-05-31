@@ -624,7 +624,7 @@ public:
       /// type: TokenSyntax
       /// optional: false
       LeftParen,
-      /// type: Expr
+      /// type: ExprSyntax
       /// optional: false
       ConditionExpr,
       /// type: TokenSyntax
