@@ -48,7 +48,7 @@ polar_merge_list(POLAR_COMPILER_SOURCES POLAR_HEADERS)
 
 polar_add_library(PolarCompiler SHARED BUILDTREE_ONLY
    ${POLAR_COMPILER_SOURCES}
-   LINK_LIBS PolarUtils PolarBasic
+   LINK_LIBS PolarUtils PolarBasic PolarSyntax
    DEPENDS PolarRe2cLangLexer)
 
 set(POLAR_COMPILER_INTERFACE_INCLUDE_DIRECTORIES)
