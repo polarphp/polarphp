@@ -30,8 +30,6 @@ class RawOutStream;
 
 namespace polar::parser {
 
-#define POLAR_DEFAULT_TOKEN_ID -1
-
 using polar::basic::StringRef;
 using polar::utils::RawOutStream;
 using polar::syntax::TokenKindType;
@@ -88,7 +86,7 @@ public:
    {}
 
    Token()
-      : Token(POLAR_DEFAULT_TOKEN_ID, {}, 0)
+      : Token(T_UNKOWN_MARK, {}, 0)
    {}
 
    TokenKindType getKind() const
@@ -106,18 +104,18 @@ public:
       m_commentLength = 0;
    }
 
-   bool is(TokenKindType kind)
+   bool is(TokenKindType kind) const
    {
       return m_kind == kind;
    }
 
-   bool isNot(TokenKindType kind)
+   bool isNot(TokenKindType kind) const
    {
       return m_kind != kind;
    }
 
    // Predicates to check to see if the token is any of a list of tokens.
-   bool isAny(TokenKindType kind)
+   bool isAny(TokenKindType kind) const
    {
       return is(kind);
    }
@@ -193,7 +191,7 @@ public:
    {
    }
 
-   bool isContextualPunctuator(StringRef ontextPunc) const
+   bool isContextualPunctuator(StringRef contextPunc) const
    {
       return isAnyOperator() && m_text == contextPunc;
    }
@@ -286,18 +284,20 @@ public:
 
    bool hasComment() const
    {
-      return CommentLength != 0;
+      return m_commentLength != 0;
    }
 
    CharSourceRange getCommentRange() const
    {
-      if (CommentLength == 0)
-         return CharSourceRange(SourceLoc(llvm::SMLoc::getFromPointer(Text.begin())),
+      if (m_commentLength == 0) {
+         return CharSourceRange(SourceLoc(polar::utils::SMLocation::getFromPointer(m_text.begin())),
                                 0);
-      auto TrimedComment = trimComment();
+      }
+
+      auto trimedComment = trimComment();
       return CharSourceRange(
-               SourceLoc(llvm::SMLoc::getFromPointer(TrimedComment.begin())),
-               TrimedComment.size());
+               SourceLoc(polar::utils::SMLocation::getFromPointer(trimedComment.begin())),
+               trimedComment.size());
    }
 
    SourceLoc getCommentStart() const
@@ -305,7 +305,7 @@ public:
       if (m_commentLength == 0) {
          return SourceLoc();
       }
-      return SourceLoc(polar::utils::SMLoc::getFromPointer(trimComment().begin()));
+      return SourceLoc(polar::utils::SMLocation::getFromPointer(trimComment().begin()));
    }
 
    StringRef getRawText() const
