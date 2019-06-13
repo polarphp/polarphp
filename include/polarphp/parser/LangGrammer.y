@@ -20,7 +20,6 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/05/09.
-#include <any>
 #define YYERROR_VERBOSE
 #define polar_error polar::syntax::parse_error
 }
@@ -31,7 +30,8 @@ namespace polar::syntax {
 using TokenKindType = polar::syntax::internal::YYParser::token::yytokentype;
 
 namespace internal {
-	int token_lex(std::any a, std::any b);
+int token_lex(int a, int b);
+using ParserSemantic = YYParser::semantic_type;
 } // internal
 } // polar::syntax
 }

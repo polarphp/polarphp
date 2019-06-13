@@ -17,7 +17,7 @@
 
 namespace polar::syntax::internal {
 
-int token_lex(std::any a, std::any b);
+int token_lex(ParserSemantic *value, location *loc);
 
 } // polar::syntax::internal
 
