@@ -45,16 +45,4 @@ polar_merge_list(POLAR_COMPILER_SOURCES POLAR_HEADERS)
 
 polar_add_library(PolarCompiler SHARED
    ${POLAR_COMPILER_SOURCES}
-   LINK_LIBS PolarUtils PolarBasic PolarSyntax)
-
-set(POLAR_COMPILER_INTERFACE_INCLUDE_DIRECTORIES)
-list(APPEND POLAR_COMPILER_INTERFACE_INCLUDE_DIRECTORIES
-   ${POLAR_MAIN_INCLUDE_DIR}/polarphp/ast
-   ${POLAR_MAIN_INCLUDE_DIR}/polarphp/parser
-   ${POLAR_MAIN_INCLUDE_DIR}/polarphp/syntax)
-
-set_target_properties(
-   PolarCompiler
-   PROPERTIES
-   INTERFACE_INCLUDE_DIRECTORIES "${POLAR_COMPILER_INTERFACE_INCLUDE_DIRECTORIES}"
-   )
+   LINK_LIBS PolarUtils PolarKernel PolarSyntax)

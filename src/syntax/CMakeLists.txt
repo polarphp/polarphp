@@ -20,7 +20,7 @@ include(ProcessLangGrammer)
 
 polar_add_library(PolarSyntax SHARED
    ${POLAR_SYNTAX_SOURCES}
-   LINK_LIBS PolarUtils
+   LINK_LIBS PolarUtils PolarKernel
    DEPENDS PolarRe2cLangLexer)
 
 # for YYParserDefs.h
