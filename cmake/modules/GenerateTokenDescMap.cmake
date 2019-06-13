@@ -11,10 +11,7 @@
 
 set(POLAR_PARSER_INCLUDE_DIR ${POLAR_MAIN_INCLUDE_DIR}/polarphp/parser)
 set(POLAR_SYNTAX_SRC_DIR ${POLAR_SOURCE_DIR}/src/syntax)
-set(POLAR_GRAMMER_FILE ${POLAR_PARSER_INCLUDE_DIR}/LangGrammer.y)
 set(POLAR_TOKEN_DESC_MAP_FILE ${POLAR_SYNTAX_SRC_DIR}/TokenDescMap.cpp)
-
-file(MD5 ${POLAR_GRAMMER_FILE} grammerFileHash)
 
 macro(polar_generate_token_desc_source)
    file(STRINGS ${POLAR_GRAMMER_FILE} _fileLines
@@ -59,7 +56,6 @@ macro(polar_generate_token_desc_source)
          math(EXPR _startQuote "${_startQuote} + 1")
          math(EXPR _stopQuote "${_stopQuote} - 1")
          string(SUBSTRING "${_desc}" ${_startQuote} ${_stopQuote} _desc)
-         message("${_desc}")
       endif()
       # get token text and token string
       string(REGEX MATCH "[(](.+)[)]" _tokenStr "${_desc}")
@@ -87,10 +83,10 @@ macro(polar_generate_token_desc_source)
 endmacro()
 
 if ((NOT EXISTS ${POLAR_TOKEN_DESC_MAP_FILE}) OR
-      (NOT (POLAR_GRAMMER_FILE_MD5 AND POLAR_GRAMMER_FILE_MD5 STREQUAL grammerFileHash)))
+      (NOT (POLAR_GRAMMER_FILE_MD5_FOR_TOKEN_DESC_MAP AND POLAR_GRAMMER_FILE_MD5_FOR_TOKEN_DESC_MAP STREQUAL grammerFileHash)))
    polar_generate_token_desc_source()
-   set(POLAR_GRAMMER_FILE_MD5 ${grammerFileHash} CACHE STRING "language grammer file md5 value" FORCE)
-   mark_as_advanced(POLAR_GRAMMER_FILE_MD5)
+   set(POLAR_GRAMMER_FILE_MD5_FOR_TOKEN_DESC_MAP ${grammerFileHash} CACHE STRING "language grammer file md5 value" FORCE)
+   mark_as_advanced(POLAR_GRAMMER_FILE_MD5_FOR_TOKEN_DESC_MAP)
 endif()
 
 list(APPEND POLAR_COMPILER_SOURCES ${POLAR_TOKEN_DESC_MAP_FILE})

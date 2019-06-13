@@ -11,7 +11,6 @@
 
 add_subdirectory(bytecode)
 add_subdirectory(codegen)
-add_subdirectory(syntax)
 add_subdirectory(global)
 add_subdirectory(basic)
 add_subdirectory(markup)
@@ -23,6 +22,10 @@ add_subdirectory(sema)
 add_subdirectory(driver)
 add_subdirectory(serialization)
 add_subdirectory(reflection)
+add_subdirectory(syntax)
+
+# setup compiler sources
+set(POLAR_COMPILER_SOURCES)
 
 polar_collect_files(
    TYPE_BOTH
@@ -35,32 +38,23 @@ polar_collect_files(
    DIR parser
    OUTPUT_VAR POLAR_PARSER_SOURCES)
 
-# setup compiler sources
-set(POLAR_COMPILER_SOURCES)
-
-# process language grammer files
-include(ProcessLangGrammer)
-
 polar_merge_list(POLAR_COMPILER_SOURCES POLAR_PARSER_SOURCES)
 polar_merge_list(POLAR_COMPILER_SOURCES POLAR_HEADERS)
 
 # generate lex and parser files
 
-polar_add_library(PolarCompiler SHARED BUILDTREE_ONLY
+polar_add_library(PolarCompiler SHARED
    ${POLAR_COMPILER_SOURCES}
-   LINK_LIBS PolarUtils PolarBasic PolarSyntax
-   DEPENDS PolarRe2cLangLexer)
+   LINK_LIBS PolarUtils PolarBasic PolarSyntax)
 
 set(POLAR_COMPILER_INTERFACE_INCLUDE_DIRECTORIES)
 list(APPEND POLAR_COMPILER_INTERFACE_INCLUDE_DIRECTORIES
-   ${CMAKE_CURRENT_SOURCE_DIR}/ast
-   ${CMAKE_CURRENT_SOURCE_DIR}/parser
-   ${CMAKE_CURRENT_BINARY_DIR}/ast
-   ${CMAKE_CURRENT_BINARY_DIR}/parser)
+   ${POLAR_MAIN_INCLUDE_DIR}/polarphp/ast
+   ${POLAR_MAIN_INCLUDE_DIR}/polarphp/parser
+   ${POLAR_MAIN_INCLUDE_DIR}/polarphp/syntax)
 
 set_target_properties(
    PolarCompiler
    PROPERTIES
    INTERFACE_INCLUDE_DIRECTORIES "${POLAR_COMPILER_INTERFACE_INCLUDE_DIRECTORIES}"
    )
-

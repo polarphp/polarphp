@@ -17,20 +17,20 @@
 #include "polarphp/parser/SourceMgr.h"
 #include "polarphp/parser/Token.h"
 #include "polarphp/parser/ParsedTrivia.h"
+#include "polarphp/parser/LexerState.h"
 #include "polarphp/basic/adt/SmallVector.h"
 #include "polarphp/utils/SaveAndRestore.h"
 
-#define polar_lex polar::parser::token_lex
-
 namespace polar::parser {
 
+using polar::ast::Diagnostic;
 using polar::ast::DiagnosticEngine;
 using polar::ast::InFlightDiagnostic;
 using polar::ast::Diag;
 using polar::basic::LangOptions;
 union ParserStackElement;
 
-int token_lex(ParserStackElement *element);
+int token_lex();
 
 /// Given a pointer to the starting byte of a UTF8 character, validate it and
 /// advance the lexer past it.  This returns the encoded character or ~0U if
@@ -51,11 +51,360 @@ enum class TriviaRetentionMode
    WithTrivia
 };
 
-enum class HashbangMode : bool
+class Lexer
 {
-   Disallowed,
-   Allowed
+private:
+
+   using State = LexerState;
+   struct PrincipalTag {};
+
+   /// Nul character meaning kind.
+   enum class NullCharacterKind
+   {
+      /// String buffer terminator.
+      BufferEnd,
+      /// Embedded nul character.
+      Embedded,
+      /// Code completion marker.
+      CodeCompletion
+   };
+
+public:
+   /// Create a normal lexer that scans the whole source buffer.
+   ///
+   /// \param Options - the language options under which to lex.  By
+   ///   design, language options only affect whether a token is valid
+   ///   and/or the exact token kind produced (e.g. keyword or
+   ///   identifier), but not things like how many characters are
+   ///   consumed.  If that changes, APIs like getLocForEndOfToken will
+   ///   need to take a LangOptions explicitly.
+   Lexer(
+         const LangOptions &options, const SourceManager &sourceMgr,
+         unsigned bufferId, DiagnosticEngine *diags,
+         CommentRetentionMode commentRetention = CommentRetentionMode::None,
+         TriviaRetentionMode triviaRetention = TriviaRetentionMode::WithoutTrivia);
+
+   /// Create a lexer that scans a subrange of the source buffer.
+   Lexer(const LangOptions &options, const SourceManager &sourceMgr,
+         unsigned bufferId, DiagnosticEngine *diags,
+         CommentRetentionMode commentRetention,
+         TriviaRetentionMode triviaRetention, unsigned offset,
+         unsigned endOffset);
+
+   /// Create a sub-lexer that lexes from the same buffer, but scans
+   /// a subrange of the buffer.
+   ///
+   /// \param Parent the parent lexer that scans the whole buffer
+   /// \param BeginState start of the subrange
+   /// \param EndState end of the subrange
+   Lexer(Lexer &parent, State beginState, State endState);
+
+   /// Returns true if this lexer will produce a code completion token.
+   bool isCodeCompletion() const
+   {
+      return m_codeCompletionPtr != nullptr;
+   }
+
+   /// Lex a token. If \c TriviaRetentionMode is \c WithTrivia, passed pointers
+   /// to trivias are populated.
+   void lex(Token &result, ParsedTrivia &leadingTriviaResult, ParsedTrivia &trailingTrivialResult)
+   {
+      result = m_nextToken;
+      if (m_triviaRetention == TriviaRetentionMode::WithTrivia) {
+         leadingTriviaResult = {m_leadingTrivia};
+         trailingTrivialResult = {m_trailingTrivia};
+      }
+      if (result.isNot(TokenKindType::END)) {
+         lexImpl();
+      }
+   }
+
+   /// Reset the lexer's buffer pointer to \p Offset bytes after the buffer
+   /// start.
+   void resetToOffset(size_t offset)
+   {
+      assert(m_bufferStart + offset <= m_bufferEnd && "offset after buffer end");
+      m_curPtr = m_bufferStart + offset;
+      lexImpl();
+   }
+
+   bool isKeepingComments() const
+   {
+      return m_commentRetention == CommentRetentionMode::ReturnAsTokens;
+   }
+
+   unsigned getBufferId() const
+   {
+      return m_bufferId;
+   }
+
+   /// peekNextToken - Return the next token to be returned by Lex without
+   /// actually lexing it.
+   const Token &peekNextToken() const
+   {
+      return m_nextToken;
+   }
+
+   /// Returns the lexer state for the beginning of the given token
+   /// location. After restoring the state, lexer will return this token and
+   /// continue from there.
+   State getStateForBeginningOfTokenLoc(SourceLoc sourceLoc) const;
+
+   /// Returns the lexer state for the beginning of the given token.
+   /// After restoring the state, lexer will return this token and continue from
+   /// there.
+   State getStateForBeginningOfToken(const Token &token, const ParsedTrivia &leadingTrivia = {}) const
+   {
+      // If the token has a comment attached to it, rewind to before the comment,
+      // not just the start of the token.  This ensures that we will re-lex and
+      // reattach the comment to the token if rewound to this state.
+      SourceLoc tokenStart = token.getCommentStart();
+      if (tokenStart.isInvalid()) {
+         tokenStart = token.getLoc();
+      }
+      State state = getStateForBeginningOfTokenLoc(tokenStart);
+      if (m_triviaRetention == TriviaRetentionMode::WithTrivia) {
+         state.m_leadingTrivia = leadingTrivia;
+      }
+      return state;
+   }
+
+   State getStateForEndOfTokenLoc(SourceLoc loc) const
+   {
+      return State(getLocForEndOfToken(m_sourceMgr, loc));
+   }
+
+   bool isStateForCurrentBuffer(LexerState state)
+   {
+      return m_sourceMgr.findBufferContainingLoc(state.m_loc) == getBufferId();
+   }
+
+   /// Restore the lexer state to a given one, that can be located either
+   /// before or after the current position.
+   void restoreState(State state, bool enableDiagnostics = false)
+   {
+      assert(state.isValid());
+      m_curPtr = getBufferPtrForSourceLoc(state.m_loc);
+      // Don't reemit diagnostics while readvancing the lexer.
+      polar::utils::SaveAndRestore<DiagnosticEngine *> diag(m_diags, enableDiagnostics ? m_diags : nullptr);
+      lexImpl();
+      // Restore Trivia.
+      if (m_triviaRetention == TriviaRetentionMode::WithTrivia) {
+         if (auto &ltrivia = state.m_leadingTrivia) {
+            m_leadingTrivia = std::move(*ltrivia);
+         }
+      }
+   }
+
+   /// Restore the lexer state to a given state that is located before
+   /// current position.
+   void backtrackToState(State state)
+   {
+      assert(getBufferPtrForSourceLoc(state.m_loc) <= m_curPtr && "can't backtrack forward");
+      restoreState(state);
+   }
+
+   /// Retrieve the Token referred to by \c Loc.
+   ///
+   /// \param SM The source manager in which the given source location
+   /// resides.
+   ///
+   /// \param Loc The source location of the beginning of a token.
+   static Token getTokenAtLocation(const SourceManager &sourceMgr, SourceLoc loc);
+
+   /// Retrieve the source location that points just past the
+   /// end of the token referred to by \c Loc.
+   ///
+   /// \param SM The source manager in which the given source location
+   /// resides.
+   ///
+   /// \param Loc The source location of the beginning of a token.
+
+   static SourceLoc getLocForEndOfToken(const SourceManager &sourceMgr, SourceLoc loc);
+
+   /// Convert a SourceRange to the equivalent CharSourceRange
+   ///
+   /// \param SM The source manager in which the given source range
+   /// resides.
+   ///
+   /// \param SR The source range
+   static CharSourceRange getCharSourceRangeFromSourceRange(const SourceManager &sourceMgr, const SourceRange &range)
+   {
+      return CharSourceRange(sourceMgr, range.m_start, getLocForEndOfToken(sourceMgr, range.m_end));
+   }
+
+   /// Return the start location of the token that the offset in the given buffer
+   /// points to.
+   ///
+   /// Note that this is more expensive than \c getLocForEndOfToken because it
+   /// finds and re-lexes from the beginning of the line.
+   ///
+   /// Due to the parser splitting tokens the adjustment may be incorrect, e.g:
+   ///
+   /// The start of the '<' token is '<', but the lexer will produce "+<" before
+   /// the parser splits it up.
+   ////
+   /// If the offset points to whitespace the returned source location will point
+   /// to the whitespace offset.
+   static SourceLoc getLocForStartOfToken(SourceManager &sourceMgr, unsigned bufferId,
+                                          unsigned offset);
+   static SourceLoc getLocForStartOfToken(SourceManager &sourceMgr, SourceLoc loc);
+
+   /// Retrieve the start location of the line containing the given location.
+   /// the given location.
+   static SourceLoc getLocForStartOfLine(SourceManager &sourceMgr, SourceLoc loc);
+
+   /// Retrieve the source location for the end of the line containing the
+   /// given token, which is the location of the start of the next line.
+   static SourceLoc getLocForEndOfLine(SourceManager &sourceMgr, SourceLoc loc);
+
+   /// Retrieve the string used to indent the line that contains the given
+   /// source location.
+   ///
+   /// If \c ExtraIndentation is not null, it will be set to an appropriate
+   /// additional intendation for adding code in a smaller scope "within" \c Loc.
+   static StringRef getIndentationForLine(SourceManager &sourceMgr, SourceLoc loc,
+                                          StringRef *extraIndentation = nullptr);
+
+   /// Determines if the given string is a valid non-operator
+   /// identifier, without escaping characters.
+   static bool isIdentifier(StringRef identifier);
+
+   /// Determines if the given string is a valid operator identifier,
+   /// without escaping characters.
+   static bool isOperator(StringRef string);
+
+   SourceLoc getLocForStartOfBuffer() const
+   {
+      return SourceLoc(polar::utils::SMLocation::getFromPointer(m_bufferStart));
+   }
+
+   static SourceLoc getSourceLoc(const char *loc)
+   {
+      return SourceLoc(polar::utils::SMLocation::getFromPointer(loc));
+   }
+
+   /// Get the token that starts at the given location.
+   Token getTokenAt(SourceLoc Loc);
+private:
+   Lexer(const Lexer&) = delete;
+   void operator=(const Lexer&) = delete;
+   /// The principal constructor used by public constructors below.
+   /// Don't use this constructor for other purposes, it does not initialize
+   /// everything.
+   Lexer(const PrincipalTag &, const LangOptions &langOpts,
+         const SourceManager &sourceMgr, unsigned bufferId,
+         DiagnosticEngine *diags, CommentRetentionMode commentRetention,
+         TriviaRetentionMode triviaRetention);
+   void initialize(unsigned offset, unsigned endOffset);
+   void lexImpl();
+
+   /// For a source location in the current buffer, returns the corresponding
+   /// pointer.
+   const char *getBufferPtrForSourceLoc(SourceLoc loc) const
+   {
+      return m_bufferStart + m_sourceMgr.getLocOffsetInBuffer(loc, m_bufferId);
+   }
+
+   InFlightDiagnostic diagnose(const char *loc, Diagnostic diag);
+
+   template<typename ...DiagArgTypes, typename ...ArgTypes>
+   InFlightDiagnostic diagnose(const char *loc, Diag<DiagArgTypes...> diagId,
+                               ArgTypes &&...args)
+   {
+      return diagnose(loc, Diagnostic(diagId, std::forward<ArgTypes>(args)...));
+   }
+
+   void formToken(TokenKindType kind, const char *tokenStart);
+   void formEscapedIdentifierToken(const char *tokenStart);
+   void formStringLiteralToken(const char *tokenStart, bool isMultilineString,
+                               unsigned customDelimiterLen);
+   /// Advance to the end of the line.
+   /// If EatNewLine is true, CurPtr will be at end of newline character.
+   /// Otherwise, CurPtr will be at newline character.
+   void skipToEndOfLine(bool eatNewline);
+
+   /// Skip to the end of the line of a // comment.
+   void skipSlashSlashComment(bool eatNewline);
+
+   void skipSlashStarComment();
+   void lexIdentifier();
+   void lexDollarIdent();
+   void lexOperatorIdentifier();
+   void lexHexNumber();
+   void lexNumber();
+   void lexTrivia(ParsedTrivia &trivia, bool isForTrailingTrivia);
+   static unsigned lexUnicodeEscape(const char *&curPtr, Lexer *diags);
+
+   unsigned lexCharacter(const char *&curPtr, char stopQuote,
+                         bool emitDiagnostics, bool isMultilineString = false,
+                         unsigned customDelimiterLen = 0);
+   void lexStringLiteral(unsigned customDelimiterLen = 0);
+   void lexEscapedIdentifier();
+
+   /// Returns it should be tokenize.
+   bool lexUnknown(bool emitDiagnosticsIfToken);
+   NullCharacterKind getNullCharacterKind(const char *ptr) const;
+private:
+   const LangOptions &m_langOpts;
+   const SourceManager &m_sourceMgr;
+   const unsigned m_bufferId;
+   DiagnosticEngine *m_diags;
+   /// Pointer to the first character of the buffer, even in a lexer that
+   /// scans a subrange of the buffer.
+   const char *m_bufferStart;
+
+   /// Pointer to one past the end character of the buffer, even in a lexer
+   /// that scans a subrange of the buffer.  Because the buffer is always
+   /// NUL-terminated, this points to the NUL terminator.
+   const char *m_bufferEnd;
+
+   /// Pointer to the artificial EOF that is located before BufferEnd.  Useful
+   /// for lexing subranges of a buffer.
+   const char *m_artificialEof = nullptr;
+
+   /// If non-null, points to the '\0' character in the buffer where we should
+   /// produce a code completion token.
+   const char *m_codeCompletionPtr = nullptr;
+
+   /// Points to BufferStart or past the end of UTF-8 BOM sequence if it exists.
+   const char *m_contentStart;
+
+   /// Pointer to the next not consumed character.
+   const char *m_curPtr;
+   Token m_nextToken;
+
+   const CommentRetentionMode m_commentRetention;
+   const TriviaRetentionMode m_triviaRetention;
+
+   /// The current leading trivia for the next token.
+   ///
+   /// This is only preserved if this Lexer was constructed with
+   /// `TriviaRetentionMode::WithTrivia`.
+   ParsedTrivia m_leadingTrivia;
+
+   /// The current trailing trivia for the next token.
+   ///
+   /// This is only preserved if this Lexer was constructed with
+   /// `TriviaRetentionMode::WithTrivia`.
+   ParsedTrivia m_trailingTrivia;
 };
+
+/// Given an ordered token \param Array , get the iterator pointing to the first
+/// token that is not before \param Loc .
+template<typename ArrayTy, typename Iterator = typename ArrayTy::iterator>
+Iterator token_lower_bound(ArrayTy &array, SourceLoc loc)
+{
+   return std::lower_bound(array.begin(), array.end(), loc,
+                           [](const Token &t, SourceLoc l) {
+      return t.getLoc().getOpaquePointerValue() < l.getOpaquePointerValue();
+   });
+}
+
+/// Given an ordered token array \param AllTokens , get the slice of the array
+/// where front() locates at \param StartLoc and back() locates at \param EndLoc .
+ArrayRef<Token> slice_token_array(ArrayRef<Token> allTokens, SourceLoc startLoc,
+                                  SourceLoc endLoc);
 
 } // polar::parser
 

@@ -7,7 +7,7 @@
 # See http://polarphp.org/LICENSE.txt for license information
 # See http://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
-# Created by polarboy on 2018/12/04.
+# Created by polarboy on 2018/12/04
 
 polar_collect_files(
    TYPE_BOTH
@@ -15,7 +15,13 @@ polar_collect_files(
    OUTPUT_VAR POLAR_SYNTAX_SOURCES)
 polar_merge_list(POLAR_SYNTAX_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarSyntax SHARED BUILDTREE_ONLY
-   ${POLAR_SYNTAX_SOURCES}
-   LINK_LIBS PolarUtils)
+# process language grammer files
+include(ProcessLangGrammer)
 
+polar_add_library(PolarSyntax SHARED
+   ${POLAR_SYNTAX_SOURCES}
+   LINK_LIBS PolarUtils
+   DEPENDS PolarRe2cLangLexer)
+
+# for YYParserDefs.h
+target_include_directories(PolarSyntax PRIVATE ${POLAR_MAIN_INCLUDE_DIR}/polarphp/syntax/internal)

@@ -1,4 +1,15 @@
-%{
+%require "3.3"
+%language "c++"
+%expect 0
+%locations
+%define api.prefix {polar_}
+%define api.namespace{polar::syntax::internal}
+%define api.value.type variant
+%define api.parser.class{YYParser}
+%define api.location.file "../../../include/polarphp/syntax/internal/YYLocation.h"
+%define api.location.include{"polarphp/syntax/internal/YYLocation.h"}
+
+%code requires{
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2018 polarphp software foundation
@@ -9,31 +20,24 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/05/09.
-
-#include "polarphp/parser/Parser.h"
-#include "polarphp/parser/Lexer.h"
-#include "polarphp/syntax/TokenKinds.h"
-
+#include <any>
 #define YYERROR_VERBOSE
-#define YYSTYPE polar::parser::ParserStackElement
-#define polar_error polar::parser::parse_error
-
-%}
-
-%pure-parser
-%expect 0
-
-%code requires {
+#define polar_error polar::syntax::parse_error
 }
 
 %code provides {
-namespace polar::syntax{
-   using TokenKindType = yytokentype;
+#define polar_lex polar::syntax::internal::token_lex
+namespace polar::syntax {
+using TokenKindType = polar::syntax::internal::YYParser::token::yytokentype;
+
+namespace internal {
+	int token_lex(std::any a, std::any b);
+} // internal
 } // polar::syntax
 }
 
-%destructor { delete $$; } <ast>
-%destructor { if ($$) delete $$; } <str>
+// %destructor { delete $$; } <ast>
+// %destructor { if ($$) delete $$; } <str>
 
 %precedence T_INCLUDE T_INCLUDE_ONCE T_REQUIRE T_REQUIRE_ONCE
 %left T_LOGICAL_OR
@@ -240,15 +244,15 @@ namespace polar::syntax{
 %token T_PREFIX_AMPERSAND "& (T_PREFIX_AMPERSAND)"
 
 %token T_MISC_START_MARK "misc start mark (T_MISC_START_MARK)"
-%token <ast> T_LNUMBER   "integer number (T_LNUMBER)"
-%token <ast> T_DNUMBER   "floating-point number (T_DNUMBER)"
-%token <ast> T_STRING    "identifier (T_STRING)"
-%token <ast> T_VARIABLE  "variable (T_VARIABLE)"
-%token <ast> T_INLINE_HTML "inline html (T_INLINE_HTML)"
-%token <ast> T_ENCAPSED_AND_WHITESPACE  "quoted-string and whitespace (T_ENCAPSED_AND_WHITESPACE)"
-%token <ast> T_CONSTANT_ENCAPSED_STRING "quoted-string (T_CONSTANT_ENCAPSED_STRING)"
-%token <ast> T_STRING_VARNAME "variable name (T_STRING_VARNAME)"
-%token <ast> T_NUM_STRING "number (T_NUM_STRING)"
+%token T_LNUMBER   "integer number (T_LNUMBER)"
+%token T_DNUMBER   "floating-point number (T_DNUMBER)"
+%token T_STRING    "identifier (T_STRING)"
+%token T_VARIABLE  "variable (T_VARIABLE)"
+%token T_INLINE_HTML "inline html (T_INLINE_HTML)"
+%token T_ENCAPSED_AND_WHITESPACE  "quoted-string and whitespace (T_ENCAPSED_AND_WHITESPACE)"
+%token T_CONSTANT_ENCAPSED_STRING "quoted-string (T_CONSTANT_ENCAPSED_STRING)"
+%token T_STRING_VARNAME "variable name (T_STRING_VARNAME)"
+%token T_NUM_STRING "number (T_NUM_STRING)"
 
 %token T_WHITESPACE      "whitespace (T_WHITESPACE)"
 %token T_PREFIX_OPERATOR "prefix operator (T_PREFIX_OPERATOR)"
@@ -269,38 +273,38 @@ namespace polar::syntax{
 %token T_UNKOWN_MARK "unkonw token (T_UNKOWN_MARK)"
 /* token define end */
 
-%type <ast> top_statement namespace_name name statement function_declaration_statement
-%type <ast> class_declaration_statement trait_declaration_statement
-%type <ast> interface_declaration_statement interface_extends_list
-%type <ast> group_use_declaration inline_use_declarations inline_use_declaration
-%type <ast> mixed_group_use_declaration use_declaration unprefixed_use_declaration
-%type <ast> unprefixed_use_declarations const_decl inner_statement
-%type <ast> expr optional_expr while_statement for_statement foreach_variable
-%type <ast> foreach_statement declare_statement finally_statement unset_variable variable
-%type <ast> extends_from parameter optional_type argument global_var
-%type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
-%type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
-%type <ast> new_expr anonymous_class class_name class_name_reference simple_variable
-%type <ast> internal_functions_in_yacc
-%type <ast> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
-%type <ast> variable_class_name dereferencable_scalar constant dereferencable
-%type <ast> callable_expr callable_variable static_member new_variable
-%type <ast> encaps_var encaps_var_offset isset_variables
-%type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
-%type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
-%type <ast> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
-%type <ast> implements_list case_list if_stmt_without_else
-%type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
-%type <ast> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
-%type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
-%type <ast> lexical_var_list encaps_list
-%type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
-%type <ast> isset_variable type return_type type_expr
-%type <ast> identifier
+%type <std::string> top_statement namespace_name name statement function_declaration_statement
+%type <std::string> class_declaration_statement trait_declaration_statement
+%type <std::string> interface_declaration_statement interface_extends_list
+%type <std::string> group_use_declaration inline_use_declarations inline_use_declaration
+%type <std::string> mixed_group_use_declaration use_declaration unprefixed_use_declaration
+%type <std::string> unprefixed_use_declarations const_decl inner_statement
+%type <std::string> expr optional_expr while_statement for_statement foreach_variable
+%type <std::string> foreach_statement declare_statement finally_statement unset_variable variable
+%type <std::string> extends_from parameter optional_type argument global_var
+%type <std::string> static_var class_statement trait_adaptation trait_precedence trait_alias
+%type <std::string> absolute_trait_method_reference trait_method_reference property echo_expr
+%type <std::string> new_expr anonymous_class class_name class_name_reference simple_variable
+%type <std::string> internal_functions_in_yacc
+%type <std::string> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
+%type <std::string> variable_class_name dereferencable_scalar constant dereferencable
+%type <std::string> callable_expr callable_variable static_member new_variable
+%type <std::string> encaps_var encaps_var_offset isset_variables
+%type <std::string> top_statement_list use_declarations const_list inner_statement_list if_stmt
+%type <std::string> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
+%type <std::string> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
+%type <std::string> implements_list case_list if_stmt_without_else
+%type <std::string> non_empty_parameter_list argument_list non_empty_argument_list property_list
+%type <std::string> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
+%type <std::string> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
+%type <std::string> lexical_var_list encaps_list
+%type <std::string> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
+%type <std::string> isset_variable type return_type type_expr
+%type <std::string> identifier
 
-%type <num> returns_ref function is_reference is_variadic variable_modifiers
-%type <num> method_modifiers non_empty_member_modifiers member_modifier
-%type <num> class_modifiers class_modifier use_type backup_fn_flags
+%type <int> returns_ref function is_reference is_variadic variable_modifiers
+%type <int> method_modifiers non_empty_member_modifiers member_modifier
+%type <int> class_modifiers class_modifier use_type backup_fn_flags
 
 %type <str> backup_doc_comment
 
