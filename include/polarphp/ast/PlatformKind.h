@@ -31,14 +31,14 @@
 #include "polarphp/basic/adt/StringRef.h"
 
 /// forward declare class with namespace
-namespace polar::basic {
+namespace polar::kernel {
 class LangOptions;
 }
 
 namespace polar::ast {
 
 using polar::basic::StringRef;
-using polar::basic::LangOptions;
+using polar::kernel::LangOptions;
 
 /// Available platforms for the availability attribute.
 enum class PlatformKind

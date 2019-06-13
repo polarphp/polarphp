@@ -15,8 +15,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_BASIC_LANGOPTIONS_H
-#define POLARPHP_BASIC_LANGOPTIONS_H
+#ifndef POLARPHP_KERNEL_LANGOPTIONS_H
+#define POLARPHP_KERNEL_LANGOPTIONS_H
 
 #include "polarphp/basic/CycleDiagnosticKind.h"
 #include "polarphp/kernel/Version.h"
@@ -31,9 +31,14 @@
 #include <string>
 #include <vector>
 
-namespace polar::basic {
+namespace polar::kernel {
 
 using polar::utils::VersionTuple;
+using polar::basic::Triple;
+using polar::basic::StringRef;
+using polar::basic::ArrayRef;
+using polar::basic::SmallVector;
+using polar::basic::CycleDiagnosticKind;
 
 /// Kind of implicit platform conditions.
 enum class PlatformConditionKind
@@ -339,6 +344,6 @@ private:
    SmallVector<std::string, 2> m_customConditionalCompilationFlags;
 };
 
-} // polar::basic
+} // polar::kernel
 
-#endif // POLARPHP_BASIC_LANGOPTIONS_H
+#endif // POLARPHP_KERNEL_LANGOPTIONS_H

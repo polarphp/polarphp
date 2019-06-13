@@ -32,8 +32,8 @@
 #include "polarphp/ast/Identifier.h"
 #include "polarphp/ast/Type.h"
 #include "polarphp/ast/TypeAlignments.h"
+#include "polarphp/kernel/LangOptions.h"
 #include "polarphp/basic/SearchPathOptions.h"
-#include "polarphp/basic/LangOptions.h"
 #include "polarphp/basic/Malloc.h"
 #include "polarphp/basic/adt/ArrayRef.h"
 #include "polarphp/basic/adt/DenseMap.h"
@@ -92,12 +92,12 @@ class VarDecl;
 class UnifiedStatsReporter;
 enum class KnownProtocolKind : uint8_t;
 
+using polar::kernel::LangOptions;
 using polar::basic::SearchPathOptions;
-using polar::basic::LangOptions;
 using polar::basic::SetVector;
 using polar::basic::StringMap;
-using polar::utils::BumpPtrAllocator;
 using polar::parser::SourceManager;
+using polar::utils::BumpPtrAllocator;
 
 /// The arena in which a particular AstContext allocation will go.
 enum class AllocationArena
