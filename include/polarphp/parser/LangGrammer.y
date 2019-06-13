@@ -30,8 +30,8 @@ namespace polar::syntax {
 using TokenKindType = polar::syntax::internal::YYParser::token::yytokentype;
 
 namespace internal {
-int token_lex(int a, int b);
 using ParserSemantic = YYParser::semantic_type;
+int token_lex(ParserSemantic *value, location *loc);
 } // internal
 } // polar::syntax
 }
@@ -268,9 +268,9 @@ using ParserSemantic = YYParser::semantic_type;
 
 /* Token used to force a parse error from the lexer */
 %token T_ERROR          "error (T_ERROR)"
+%token T_UNKOWN_MARK "unkonw token (T_UNKOWN_MARK)"
 /* Token used to mark the end of Token Enum */
 %token T_NUM_TOKENS_MARK "token number mark (T_NUM_TOKENS_MARK)"
-%token T_UNKOWN_MARK "unkonw token (T_UNKOWN_MARK)"
 /* token define end */
 
 %type <std::string> top_statement namespace_name name statement function_declaration_statement

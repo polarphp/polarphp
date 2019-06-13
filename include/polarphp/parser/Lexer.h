@@ -27,7 +27,7 @@ using polar::ast::Diagnostic;
 using polar::ast::DiagnosticEngine;
 using polar::ast::InFlightDiagnostic;
 using polar::ast::Diag;
-using polar::basic::LangOptions;
+using polar::kernel::LangOptions;
 union ParserStackElement;
 
 int token_lex();
@@ -117,6 +117,13 @@ public:
       if (result.isNot(TokenKindType::END)) {
          lexImpl();
       }
+   }
+
+   void lex(Token &result)
+   {
+      ParsedTrivia leadingTrivia;
+      ParsedTrivia trailingTrivia;
+      lex(result, leadingTrivia, trailingTrivia);
    }
 
    /// Reset the lexer's buffer pointer to \p Offset bytes after the buffer

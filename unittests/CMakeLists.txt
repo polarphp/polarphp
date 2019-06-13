@@ -23,6 +23,7 @@ endif()
 
 if (POLAR_DEV_BUILD_POLARPHP_UNITTEST)
    add_subdirectory(syntax)
+   add_subdirectory(parser)
 endif()
 
 if (POLAR_DEV_BUILD_VMAPI_UNITEST)
