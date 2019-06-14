@@ -75,9 +75,9 @@ temp
 build/
 **/.idea
 devtools/gyb/vendor/
-include/polarphp/syntax/internal/YYParserDefs.h
-include/polarphp/syntax/internal/YYLexerDefs.h
-include/polarphp/syntax/internal/YYLocation.h
-src/syntax/impl/YYLexer.cpp
-src/syntax/impl/YYParser.cpp
+include/polarphp/parser/internal/YYParserDefs.h
+include/polarphp/parser/internal/YYLexerDefs.h
+include/polarphp/parser/internal/YYLocation.h
+src/parser/impl/YYLexer.cpp
+src/parser/impl/YYParser.cpp
 src/syntax/TokenDescMap.cpp

@@ -36,7 +36,7 @@ endif()
 
 if (NOT EXISTS ${POLAR_SOURCE_DIR}/Zend/zend_language_parser.h OR NOT EXISTS ${POLAR_SOURCE_DIR}/Zend/zend_language_parser.c)
    if (NOT RE2C_FOUND)
-      message(FATAL_ERROR "re2c is required to build PHP/Zend when building a GIT checkout!")
+      message(FATAL_ERROR "re2c is required to build polarphp")
    endif()
 endif()
 
@@ -44,10 +44,14 @@ find_package(BISON)
 if (BISON_FOUND)
    message("using bison version: ${BISON_VERSION}")
 else()
-   if (NOT EXISTS ${POLAR_SOURCE_DIR}/Zend/zend_language_parser.h OR
-         NOT EXISTS ${POLAR_SOURCE_DIR}/Zend/zend_language_parser.c)
-      message(FATAL_ERROR "bison is required to build PHP/Zend when building a GIT checkout!")
-   endif()
+   message(FATAL_ERROR "bison is required to build polarphp")
+endif()
+
+find_package(PHP)
+if (PHP_FOUND)
+   message("using php interpreter version: ${PHP_VERSION_STRING}")
+else()
+   message(FATAL_ERROR "php interpreter is required to build polarphp")
 endif()
 
 polar_check_prog_awk()

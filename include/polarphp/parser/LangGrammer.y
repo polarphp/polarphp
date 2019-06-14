@@ -6,8 +6,8 @@
 %define api.namespace{polar::syntax::internal}
 %define api.value.type variant
 %define api.parser.class {YYParser}
-%define api.location.file "../../../include/polarphp/syntax/internal/YYLocation.h"
-%define api.location.include{"polarphp/syntax/internal/YYLocation.h"}
+%define api.location.file "../../../include/polarphp/parser/internal/YYLocation.h"
+%define api.location.include{"polarphp/parser/internal/YYLocation.h"}
 %parse-param {polar::parser::Parser *parser}
 %parse-param {polar::parser::Lexer *lexer}
 %lex-param {polar::parser::Lexer *lexer}
@@ -84,7 +84,7 @@ int token_lex(ParserSemantic *value, location *loc);
 
 %token END 0 "end of file (END)"
 
-%token T_KEYWORD_START_MARK "keyword start mark (T_KEYWORD_START_MARK)"
+/* KEYWORD_MARK_START */
 %token T_LINE            "__LINE__ (T_LINE)"
 %token T_FILE            "__FILE__ (T_FILE)"
 %token T_DIR             "__DIR__ (T_DIR)"
@@ -93,8 +93,9 @@ int token_lex(ParserSemantic *value, location *loc);
 %token T_METHOD_C        "__METHOD__ (T_METHOD_C)"
 %token T_FUNC_C          "__FUNCTION__ (T_FUNC_C)"
 %token T_NS_C            "__NAMESPACE__ (T_NS_C)"
+/* KEYWORD_MARK_END */
 
-%token T_DECL_KEYWORD_START_MARK "decl keyword start mark (T_DECL_KEYWORD_START_MARK)"
+/* DECL_KEYWORD_MARK_START */
 %token T_NAMESPACE       "namespace (T_NAMESPACE)"
 %token T_CLASS      "class (T_CLASS)"
 %token T_TRAIT      "trait (T_TRAIT)"
@@ -122,8 +123,9 @@ int token_lex(ParserSemantic *value, location *loc);
 %token T_PACKAGE "package (T_PACKAGE)"
 %token T_ASYNC "async (T_ASYNC)"
 %token T_EXPORT "export (T_EXPORT)"
+/* DECL_KEYWORD_MARK_END */
 
-%token T_STMT_KEYWORD_STRAT_MARK "stmt keyword start mark (T_STMT_KEYWORD_STRAT_MARK)"
+/* STMT_KEYWORD_MARK_STRAT */
 %token T_DEFER     "defer (T_DEFER)"
 %token T_IF        "if (T_IF)"
 %token T_ELSEIF    "elseif (T_ELSEIF)"
@@ -145,8 +147,9 @@ int token_lex(ParserSemantic *value, location *loc);
 %token T_CATCH      "catch (T_CATCH)"
 %token T_FINALLY    "finally (T_FINALLY)"
 %token T_THROW      "throw (T_THROW)"
+/* STMT_KEYWORD_MARK_END */
 
-%token T_EXPR_KEYWORD_STRAT_MARK "expr keyword start mark (T_EXPR_KEYWORD_STRAT_MARK)"
+/* EXPR_KEYWORD_MARK_START */
 %token T_UNSET      "unset (T_UNSET)"
 %token T_ISSET      "isset (T_ISSET)"
 %token T_EMPTY      "empty (T_EMPTY)"
@@ -183,8 +186,9 @@ int token_lex(ParserSemantic *value, location *loc);
 %token T_FALSE "false (T_FALSE)"
 %token T_NULL "null (T_NULL)"
 %token T_AWAIT "await (T_AWAIT)"
+/* EXPR_KEYWORD_MARK_END */
 
-%token T_PUNCTUATOR_START_MARK "punctuator start mark (T_PUNCTUATOR_START_MARK)"
+/* PUNCTUATOR_MARK_START */
 %token T_PLUS_SIGN "+ (T_PLUS_SIGN)"
 %token T_MINUS_SIGN "- (T_MINUS_SIGN)"
 %token T_MUL_SIGN "* (T_MUL_SIGN)"
@@ -251,17 +255,18 @@ int token_lex(ParserSemantic *value, location *loc);
 %token T_INFIX_QUESTION_MARK "? (T_INFIX_QUESTION_MARK)"
 %token T_ERROR_SUPPRESS_SIGN "@ (T_ERROR_SUPPRESS_SIGN)"
 %token T_PREFIX_AMPERSAND "& (T_PREFIX_AMPERSAND)"
+/* PUNCTUATOR_MARK_END */
 
-%token T_MISC_START_MARK "misc start mark (T_MISC_START_MARK)"
-%token T_LNUMBER   "integer number (T_LNUMBER)"
-%token T_DNUMBER   "floating-point number (T_DNUMBER)"
-%token T_STRING    "identifier (T_STRING)"
-%token T_VARIABLE  "variable (T_VARIABLE)"
-%token T_INLINE_HTML "inline html (T_INLINE_HTML)"
-%token T_ENCAPSED_AND_WHITESPACE  "quoted-string and whitespace (T_ENCAPSED_AND_WHITESPACE)"
-%token T_CONSTANT_ENCAPSED_STRING "quoted-string (T_CONSTANT_ENCAPSED_STRING)"
-%token T_STRING_VARNAME "variable name (T_STRING_VARNAME)"
-%token T_NUM_STRING "number (T_NUM_STRING)"
+/* MISC_MARK_START */
+%token <std::string> T_LNUMBER   "integer number (T_LNUMBER)"
+%token <std::string> T_DNUMBER   "floating-point number (T_DNUMBER)"
+%token <std::string> T_STRING    "identifier (T_STRING)"
+%token <std::string> T_VARIABLE  "variable (T_VARIABLE)"
+%token <std::string> T_INLINE_HTML "inline html (T_INLINE_HTML)"
+%token <std::string> T_ENCAPSED_AND_WHITESPACE  "quoted-string and whitespace (T_ENCAPSED_AND_WHITESPACE)"
+%token <std::string> T_CONSTANT_ENCAPSED_STRING "quoted-string (T_CONSTANT_ENCAPSED_STRING)"
+%token <std::string> T_STRING_VARNAME "variable name (T_STRING_VARNAME)"
+%token <std::string> T_NUM_STRING "number (T_NUM_STRING)"
 
 %token T_WHITESPACE      "whitespace (T_WHITESPACE)"
 %token T_PREFIX_OPERATOR "prefix operator (T_PREFIX_OPERATOR)"
@@ -278,8 +283,7 @@ int token_lex(ParserSemantic *value, location *loc);
 /* Token used to force a parse error from the lexer */
 %token T_ERROR          "error (T_ERROR)"
 %token T_UNKOWN_MARK "unkonw token (T_UNKOWN_MARK)"
-/* Token used to mark the end of Token Enum */
-%token T_NUM_TOKENS_MARK "token number mark (T_NUM_TOKENS_MARK)"
+/* MISC_MARK_END */
 /* token define end */
 
 %type <std::string> top_statement namespace_name name statement function_declaration_statement
