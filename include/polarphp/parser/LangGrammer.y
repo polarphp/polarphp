@@ -3,7 +3,7 @@
 %expect 0
 %locations
 %define api.prefix {polar_}
-%define api.namespace{polar::syntax::internal}
+%define api.namespace{polar::parser::internal}
 %define api.value.type variant
 %define api.parser.class {YYParser}
 %define api.location.file "../../../include/polarphp/parser/internal/YYLocation.h"
@@ -30,19 +30,14 @@ namespace polar::parser {
 class Parser;
 class Lexer;
 } // polar::parser
-
 }
 
 %code provides {
-#define polar_lex polar::syntax::internal::token_lex
-namespace polar::syntax {
-using TokenKindType = polar::syntax::internal::YYParser::token::yytokentype;
-
-namespace internal {
+#define polar_lex polar::parser::internal::token_lex
+namespace polar::parser::internal {
 using ParserSemantic = YYParser::semantic_type;
-int token_lex(ParserSemantic *value, location *loc);
-} // internal
-} // polar::syntax
+int token_lex(ParserSemantic *value, location *loc, Lexer *lexer);
+} // polar::parser::internal
 }
 
 // %destructor { delete $$; } <ast>

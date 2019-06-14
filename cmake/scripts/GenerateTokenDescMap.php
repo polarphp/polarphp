@@ -86,6 +86,16 @@ foreach($tokenInfoMap as $type => $tokens) {
    }
 }
 
+if (!file_exists($tokenDescMapTplFile)) {
+   exit("$tokenDescMapTplFile is not exist");
+}
+
 $fileContent = file_get_contents($tokenDescMapTplFile);
 $fileContent = str_replace("__TOKEN_RECORDS__", implode("\n      ", $tokenDescItems), $fileContent);
-echo $fileContent;
+
+$oldMd5 = md5_file($tokenDescMapFile);
+$newMd5 = md5($fileContent);
+
+if ($oldMd5 != $newMd5) {
+   file_put_contents($tokenDescMapFile, $fileContent);
+}

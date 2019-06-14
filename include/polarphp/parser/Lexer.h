@@ -20,7 +20,7 @@
 #include "polarphp/parser/LexerState.h"
 #include "polarphp/basic/adt/SmallVector.h"
 #include "polarphp/utils/SaveAndRestore.h"
-#include "polarphp/syntax/internal/YYLexerBridge.h"
+#include "polarphp/parser/internal/YYLexerBridge.h"
 
 namespace polar::parser {
 
@@ -353,8 +353,9 @@ private:
    NullCharacterKind getNullCharacterKind(const char *ptr) const;
 
 private:
-   friend int polar::syntax::internal::token_lex(polar::syntax::internal::ParserSemantic *value,
-                                                 polar::syntax::internal::location *loc);
+   friend int internal::token_lex(internal::ParserSemantic *value,
+                                  internal::location *loc,
+                                  Lexer *lexer);
 
 private:
    const LangOptions &m_langOpts;

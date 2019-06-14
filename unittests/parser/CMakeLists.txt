@@ -13,4 +13,4 @@ polar_add_unittest(PolarCompilerTests ParserTest
    ../TestEntry.cpp
    LexerTest.cpp)
 
-target_link_libraries(ParserTest PRIVATE PolarCompiler)
+target_link_libraries(ParserTest PRIVATE PolarParser)

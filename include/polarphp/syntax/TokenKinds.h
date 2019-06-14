@@ -13,7 +13,7 @@
 #define POLAR_SYNTAX_TOKEN_KINDS_H
 
 #include "polarphp/basic/adt/StringRef.h"
-#include "polarphp/syntax/internal/YYParserDefs.h"
+#include "polarphp/syntax/internal/TokenEnumDefs.h"
 #include <map>
 
 namespace polar::utils {
@@ -22,9 +22,10 @@ class RawOutStream;
 
 namespace polar::syntax {
 
+using internal::TokenKindType;
 using polar::basic::StringRef;
 using polar::utils::RawOutStream;
-using TokenDescItemType = const std::tuple<const std::string, const std::string, const std::string>;
+using TokenDescItemType = const std::tuple<const std::string, const std::string>;
 using TokenDescMap = const std::map<TokenKindType, TokenDescItemType>;
 
 /// Check whether a token kind is known to have any specific text content.

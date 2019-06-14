@@ -7,15 +7,16 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2019/06/06.
+// Created by polarboy on 2019/06/14.
 
-#include "polarphp/parser/internal/YYParserDefs.h"
+#ifndef POLARPHP_SYNTAX_INTERNAL_TOKEN_ENUM_DEFS_H
+#define POLARPHP_SYNTAX_INTERNAL_TOKEN_ENUM_DEFS_H
 
-namespace polar::parser::internal {
-
-void YYParser::error(const location_type &loc, const std::string &msg)
+namespace polar::syntax::internal {
+enum TokenKindType
 {
+   __TOKEN_DEFS__
+};
+} // namespace polar::syntax::internal
 
-}
-
-} // polar::parser::internal
+#endif // POLARPHP_SYNTAX_INTERNAL_TOKEN_ENUM_DEFS_H

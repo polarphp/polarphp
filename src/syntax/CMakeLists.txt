@@ -15,13 +15,8 @@ polar_collect_files(
    OUTPUT_VAR POLAR_SYNTAX_SOURCES)
 polar_merge_list(POLAR_SYNTAX_SOURCES POLAR_HEADERS)
 
-# process language grammer files
-include(ProcessLangGrammer)
 
 polar_add_library(PolarSyntax SHARED
    ${POLAR_SYNTAX_SOURCES}
    LINK_LIBS PolarUtils PolarKernel
    DEPENDS PolarRe2cLangLexer)
-
-# for YYParserDefs.h
-target_include_directories(PolarSyntax PRIVATE ${POLAR_MAIN_INCLUDE_DIR}/polarphp/syntax/internal)

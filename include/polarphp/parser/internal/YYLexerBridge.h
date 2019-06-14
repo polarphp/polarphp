@@ -7,15 +7,18 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2019/06/13.
+// Created by polarboy on 2019/06/06.
 
-#include "polarphp/syntax/internal/YYLexerBridge.h"
+#ifndef POLARPHP_SYNTAX_INTERNAL_LEXER_BRIDGE_H
+#define POLARPHP_SYNTAX_INTERNAL_LEXER_BRIDGE_H
 
-namespace polar::syntax::internal {
+#include "polarphp/parser/internal/YYLocation.h"
+#include "polarphp/parser/internal/YYParserDefs.h"
 
-int token_lex(ParserSemantic *value, location *loc)
-{
+namespace polar::parser::internal {
 
-}
+int token_lex(ParserSemantic *value, location *loc, Lexer *lexer);
 
-} // polar::syntax::internal
+} // polar::parser::internal
+
+#endif // POLARPHP_SYNTAX_INTERNAL_LEXER_BRIDGE_H

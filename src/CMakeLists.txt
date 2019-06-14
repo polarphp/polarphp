@@ -25,24 +25,28 @@ add_subdirectory(reflection)
 add_subdirectory(syntax)
 
 # setup compiler sources
-set(POLAR_COMPILER_SOURCES)
+set(POLAR_PARSER_SOURCES)
+
+# process language grammer files
+include(ProcessLangGrammer)
 
 polar_collect_files(
    TYPE_BOTH
    DIR ast
    OUTPUT_VAR POLAR_AST_SOURCES)
-polar_merge_list(POLAR_COMPILER_SOURCES POLAR_AST_SOURCES)
+polar_merge_list(POLAR_PARSER_SOURCES POLAR_AST_SOURCES)
 
 polar_collect_files(
    TYPE_BOTH
    DIR parser
    OUTPUT_VAR POLAR_PARSER_SOURCES)
 
-polar_merge_list(POLAR_COMPILER_SOURCES POLAR_PARSER_SOURCES)
-polar_merge_list(POLAR_COMPILER_SOURCES POLAR_HEADERS)
+polar_merge_list(POLAR_PARSER_SOURCES POLAR_PARSER_SOURCES)
+polar_merge_list(POLAR_PARSER_SOURCES POLAR_HEADERS)
 
-# generate lex and parser files
-
-polar_add_library(PolarCompiler SHARED
-   ${POLAR_COMPILER_SOURCES}
+polar_add_library(PolarParser SHARED
+   ${POLAR_PARSER_SOURCES}
    LINK_LIBS PolarUtils PolarKernel PolarSyntax)
+
+# for YYParserDefs.h
+target_include_directories(PolarParser PRIVATE ${POLAR_MAIN_INCLUDE_DIR}/polarphp/parser/internal)

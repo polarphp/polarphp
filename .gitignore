@@ -78,6 +78,7 @@ devtools/gyb/vendor/
 include/polarphp/parser/internal/YYParserDefs.h
 include/polarphp/parser/internal/YYLexerDefs.h
 include/polarphp/parser/internal/YYLocation.h
+include/polarphp/syntax/internal/TokenEnumDefs.h
 src/parser/impl/YYLexer.cpp
 src/parser/impl/YYParser.cpp
 src/syntax/TokenDescMap.cpp

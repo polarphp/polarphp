@@ -10,7 +10,9 @@
 # Created by polarboy on 2019/05/09.
 
 set(POLAR_PARSER_INCLUDE_DIR ${POLAR_MAIN_INCLUDE_DIR}/polarphp/parser)
+set(POLAR_SYNTAX_INCLUDE_DIR ${POLAR_MAIN_INCLUDE_DIR}/polarphp/syntax)
 set(POLAR_PARSER_SRC_DIR ${POLAR_SOURCE_DIR}/src/parser)
+set(POLAR_SYNTAX_SRC_DIR ${POLAR_SOURCE_DIR}/src/syntax)
 
 set(POLAR_GENERATED_LEX_IMPL_FILE ${POLAR_PARSER_SRC_DIR}/impl/YYLexer.cpp)
 set(POLAR_GENERATED_LEX_HEADER_FILE ${POLAR_PARSER_INCLUDE_DIR}/internal/YYLexerDefs.h)
@@ -44,12 +46,50 @@ if ((NOT EXISTS ${POLAR_GENERATED_PARSER_IMPL_FILE} OR
    mark_as_advanced(POLAR_GRAMMER_FILE_MD5)
 endif()
 
-include(GenerateTokenDescMap)
+set(POLAR_TOKEN_ENUM_DEF_FILE ${POLAR_SYNTAX_INCLUDE_DIR}/TokenEnumDefs.h)
+set(POLAR_TOKEN_DESC_MAP_FILE ${POLAR_SYNTAX_SRC_DIR}/TokenDescMap.cpp)
+set(POLAR_GENERATE_TOKEN_DESC_MAP_SCRIPT ${POLAR_CMAKE_SCRIPTS_DIR}/GenerateTokenDescMap.php)
+set(POLAR_GENERATE_TOKEN_ENUM_DEF_SCRIPT ${POLAR_CMAKE_SCRIPTS_DIR}/GenerateTokenEnumDefs.php)
+
+if ((NOT EXISTS ${POLAR_TOKEN_DESC_MAP_FILE} OR NOT EXISTS ${POLAR_TOKEN_ENUM_DEF_FILE}) OR
+      (NOT (POLAR_GRAMMER_FILE_MD5_FOR_TOKEN_DESC_MAP AND POLAR_GRAMMER_FILE_MD5_FOR_TOKEN_DESC_MAP STREQUAL grammerFileHash)))
+   # generate token desc map
+   execute_process(COMMAND ${PHP_EXECUTABLE}
+      ${POLAR_GENERATE_TOKEN_ENUM_DEF_SCRIPT}
+      OUTPUT_VARIABLE _output
+      RESULT_VARIABLE _result
+      ERROR_VARIABLE _error
+      WORKING_DIRECTORY ${POLAR_SOURCE_DIR})
+   if (NOT _result EQUAL 0)
+      message(FATAL_ERROR "${_output}")
+   else()
+      message("${_output}")
+   endif()
+
+   # generate token enum defs
+   execute_process(COMMAND ${PHP_EXECUTABLE}
+      ${POLAR_GENERATE_TOKEN_DESC_MAP_SCRIPT}
+      OUTPUT_VARIABLE _output
+      RESULT_VARIABLE _result
+      ERROR_VARIABLE _error
+      WORKING_DIRECTORY ${POLAR_SOURCE_DIR})
+   if (NOT _result EQUAL 0)
+      message(FATAL_ERROR ${_output})
+   else()
+      message("${_output}")
+   endif()
+   set(POLAR_GRAMMER_FILE_MD5_FOR_TOKEN_DESC_MAP ${grammerFileHash} CACHE STRING "language grammer file md5 value" FORCE)
+   mark_as_advanced(POLAR_GRAMMER_FILE_MD5_FOR_TOKEN_DESC_MAP)
+endif()
+
+
+
 
 list(APPEND POLAR_PARSER_SOURCES
    ${POLAR_GENERATED_LEX_IMPL_FILE}
    ${POLAR_GENERATED_PARSER_IMPL_FILE}
    ${POLAR_GENERATED_PARSER_HEADER_FILE}
+   ${POLAR_TOKEN_DESC_MAP_FILE}
    )
 
 list(APPEND POLAR_HEADERS
