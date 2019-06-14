@@ -5,9 +5,12 @@
 %define api.prefix {polar_}
 %define api.namespace{polar::syntax::internal}
 %define api.value.type variant
-%define api.parser.class{YYParser}
+%define api.parser.class {YYParser}
 %define api.location.file "../../../include/polarphp/syntax/internal/YYLocation.h"
 %define api.location.include{"polarphp/syntax/internal/YYLocation.h"}
+%parse-param {polar::parser::Parser *parser}
+%parse-param {polar::parser::Lexer *lexer}
+%lex-param {polar::parser::Lexer *lexer}
 
 %code requires{
 // This source file is part of the polarphp.org open source project
@@ -22,6 +25,12 @@
 // Created by polarboy on 2019/05/09.
 #define YYERROR_VERBOSE
 #define polar_error polar::syntax::parse_error
+
+namespace polar::parser {
+class Parser;
+class Lexer;
+} // polar::parser
+
 }
 
 %code provides {

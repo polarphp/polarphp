@@ -32,7 +32,10 @@ using polar::syntax::TokenKindType;
 using polar::parser::SourceManager;
 using polar::parser::SourceLoc;
 using polar::parser::Lexer;
+using polar::parser::tokenize;
 using polar::parser::Token;
+using polar::basic::StringRef;
+using polar::basic::ArrayRef;
 
 // The test fixture.
 class LexerTest : public ::testing::Test
@@ -49,6 +52,25 @@ public:
       return tokens;
    }
 
+   std::vector<Token> checkLex(StringRef source,
+                               ArrayRef<TokenKindType> expectedTokens,
+                               bool keepComments = false,
+                               bool keepEOF = false)
+   {
+      unsigned bufId = sourceMgr.addMemBufferCopy(source);
+      std::vector<Token> tokens;
+      if (keepEOF) {
+         tokens = tokenizeAndKeepEOF(bufId);
+      } else {
+         tokens = tokenize(langOpts, sourceMgr, bufId, 0, 0, /*Diags=*/nullptr, keepComments);
+      }
+      EXPECT_EQ(expectedTokens.size(), tokens.size());
+      for (unsigned i = 0, e = expectedTokens.size(); i != e; ++i) {
+         EXPECT_EQ(expectedTokens[i], tokens[i].getKind()) << "i = " << i;
+      }
+      return tokens;
+   }
+
    SourceLoc getLocForEndOfToken(SourceLoc loc)
    {
       return Lexer::getLocForEndOfToken(sourceMgr, loc);
@@ -60,5 +82,4 @@ public:
 
 TEST_F(LexerTest, testTokenizeSkipComments)
 {
-
 }

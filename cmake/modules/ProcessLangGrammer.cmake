@@ -26,25 +26,6 @@ re2c_target(NAME PolarRe2cLangLexer
    INPUT ${POLAR_PARSER_INCLUDE_DIR}/LexicalRule.l
    OPTIONS --no-generation-date --case-inverted -cbdFt ${POLAR_GENERATED_LEX_HEADER_FILE})
 
-#file(MD5 ${POLAR_GRAMMER_FILE} grammerFileHash)
-
-#if ((NOT EXISTS ${POLAR_GENERATED_PARSER_IMPL_FILE} OR
-#      NOT EXISTS ${POLAR_GENERATED_PARSER_HEADER_FILE} OR
-#      NOT EXISTS ${POLAR_GENERATED_PARSER_LOC_HEADER_FILE})
-#      OR (NOT (POLAR_GRAMMER_FILE_MD5 AND POLAR_GRAMMER_FILE_MD5 STREQUAL grammerFileHash)))
-#   execute_process(COMMAND ${BISON_EXECUTABLE}
-#      "-d" ${POLAR_PARSER_INCLUDE_DIR}/LangGrammer.y
-#      "-o" ${POLAR_GENERATED_PARSER_IMPL_FILE}
-#      "--defines=${POLAR_GENERATED_PARSER_HEADER_FILE}"
-#      RESULT_VARIABLE _bisonResult
-#      ERROR_VARIABLE _bisonError)
-#   if (NOT _bisonResult EQUAL 0)
-#      message(FATAL_ERROR ${_bisonError})
-#   endif()
-#   set(POLAR_GRAMMER_FILE_MD5 ${grammerFileHash} CACHE STRING "language grammer file md5 value" FORCE)
-#   mark_as_advanced(POLAR_GRAMMER_FILE_MD5)
-#endif()
-
 bison_target(PolarLalrLangParser ${POLAR_PARSER_INCLUDE_DIR}/LangGrammer.y ${POLAR_GENERATED_PARSER_IMPL_FILE}
    COMPILE_FLAGS "-d"
    DEFINES_FILE ${POLAR_GENERATED_PARSER_HEADER_FILE})

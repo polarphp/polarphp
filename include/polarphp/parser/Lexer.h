@@ -20,6 +20,7 @@
 #include "polarphp/parser/LexerState.h"
 #include "polarphp/basic/adt/SmallVector.h"
 #include "polarphp/utils/SaveAndRestore.h"
+#include "polarphp/syntax/internal/YYLexerBridge.h"
 
 namespace polar::parser {
 
@@ -29,8 +30,6 @@ using polar::ast::InFlightDiagnostic;
 using polar::ast::Diag;
 using polar::kernel::LangOptions;
 union ParserStackElement;
-
-int token_lex();
 
 /// Given a pointer to the starting byte of a UTF8 character, validate it and
 /// advance the lexer past it.  This returns the encoded character or ~0U if
@@ -352,6 +351,11 @@ private:
    /// Returns it should be tokenize.
    bool lexUnknown(bool emitDiagnosticsIfToken);
    NullCharacterKind getNullCharacterKind(const char *ptr) const;
+
+private:
+   friend int polar::syntax::internal::token_lex(polar::syntax::internal::ParserSemantic *value,
+                                                 polar::syntax::internal::location *loc);
+
 private:
    const LangOptions &m_langOpts;
    const SourceManager &m_sourceMgr;
@@ -412,6 +416,15 @@ Iterator token_lower_bound(ArrayTy &array, SourceLoc loc)
 /// where front() locates at \param StartLoc and back() locates at \param EndLoc .
 ArrayRef<Token> slice_token_array(ArrayRef<Token> allTokens, SourceLoc startLoc,
                                   SourceLoc endLoc);
+
+/// Lex and return a vector of tokens for the given buffer.
+std::vector<Token> tokenize(const LangOptions &langOpts,
+                            const SourceManager &sourceMgr, unsigned bufferId,
+                            unsigned offset = 0, unsigned endOffset = 0,
+                            DiagnosticEngine *diags = nullptr,
+                            bool keepComments = true,
+                            bool tokenizeInterpolatedString = true,
+                            ArrayRef<Token> splitTokens = ArrayRef<Token>());
 
 } // polar::parser
 

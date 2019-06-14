@@ -18,6 +18,8 @@
 #include "polarphp/utils/MathExtras.h"
 #include "polarphp/kernel/LangOptions.h"
 
+#include <set>
+
 namespace polar::parser {
 
 using polar::basic::SmallVectorImpl;
@@ -434,9 +436,9 @@ bool skip_to_end_of_slash_star_comment(const char *&curPtr,
          // If this is a "high" UTF-8 character, validate it.
          if (diags && (signed char)(curPtr[-1]) < 0) {
             --curPtr;
-            const char *CharStart = curPtr;
+            const char *charStart = curPtr;
             if (validate_utf8_character_and_advance(curPtr, bufferEnd) == ~0U) {
-               //               diags->diagnose(Lexer::getSourceLoc(CharStart),
+               //               diags->diagnose(Lexer::getSourceLoc(charStart),
                //                               diag::lex_invalid_utf8);
             }
          }
@@ -664,7 +666,7 @@ void Lexer::lexImpl()
       if (m_bufferStart < m_contentStart) {
          size_t BOMLen = m_contentStart - m_bufferStart;
          assert(BOMLen == 3 && "UTF-8 BOM is 3 bytes");
-         // Add UTF-8 BOM to LeadingTrivia.
+         // Add UTF-8 BOM to leadingTrivia.
          m_leadingTrivia.push_back(TriviaKind::GarbageText, BOMLen);
          m_curPtr += BOMLen;
       }
@@ -715,7 +717,7 @@ SourceLoc get_loc_for_start_of_token_in_buffer(SourceManager &sourceMgr,
          // Current token encompasses our source location.
          if (token.is(TokenKindType::T_STRING)) {
             //            SmallVector<Lexer::StringSegment, 4> Segments;
-            //            Lexer::getStringLiteralSegments(token, Segments, /*Diags=*/nullptr);
+            //            Lexer::getStringLiteralSegments(token, Segments, /*diags=*/nullptr);
             //            for (auto &Seg : Segments) {
             //               unsigned SegOffs = sourceMgr.getLocOffsetInBuffer(Seg.loc, bufferId);
             //               unsigned SegEnd = SegOffs+Seg.Length;
@@ -891,6 +893,85 @@ ArrayRef<Token> slice_token_array(ArrayRef<Token> allTokens, SourceLoc startLoc,
    auto endIt = token_lower_bound(allTokens, endLoc);
    assert(startIt->getLoc() == startLoc && endIt->getLoc() == endLoc);
    return allTokens.slice(startIt - allTokens.begin(), endIt - startIt + 1);
+}
+
+template <typename DF>
+void tokenize(const LangOptions &langOpts, const SourceManager &sourceMgr,
+              unsigned bufferId, unsigned offset, unsigned endOffset,
+              DiagnosticEngine * diags,
+              CommentRetentionMode commentRetention,
+              TriviaRetentionMode triviaRetention,
+              bool tokenizeInterpolatedString, ArrayRef<Token> splitTokens,
+              DF &&destFunc)
+{
+   assert((triviaRetention != TriviaRetentionMode::WithTrivia ||
+         !tokenizeInterpolatedString) &&
+          "string interpolation with trivia is not implemented yet");
+
+   if (offset == 0 && endOffset == 0) {
+      endOffset = sourceMgr.getRangeForBuffer(bufferId).getByteLength();
+   }
+
+   Lexer lexer(langOpts, sourceMgr, bufferId, diags, commentRetention, triviaRetention, offset,
+               endOffset);
+
+   auto tokenComp = [&](const Token &lhs, const Token &rhs) {
+      return sourceMgr.isBeforeInBuffer(lhs.getLoc(), rhs.getLoc());
+   };
+
+   std::set<Token, decltype(tokenComp)> resetTokens(tokenComp);
+   for (auto iter = splitTokens.begin(), end = splitTokens.end(); iter != end; ++iter) {
+      resetTokens.insert(*iter);
+   }
+
+   Token token;
+   ParsedTrivia leadingTrivia;
+   ParsedTrivia trailingTrivia;
+   do {
+      lexer.lex(token, leadingTrivia, trailingTrivia);
+      // If the token has the same location as a reset location,
+      // reset the token stream
+      auto iter = resetTokens.find(token);
+      if (iter != resetTokens.end()) {
+         assert(iter->isNot(TokenKindType::T_STRING));
+         destFunc(*iter, ParsedTrivia(), ParsedTrivia());
+         auto newState = lexer.getStateForBeginningOfTokenLoc(
+                  iter->getLoc().getAdvancedLoc(iter->getLength()));
+         lexer.restoreState(newState);
+         continue;
+      }
+      //      if (token.is(tok::string_literal) && tokenizeInterpolatedString) {
+      //         std::vector<Token> StrTokens;
+      //         getStringPartTokens(token, langOpts, sourceMgr, bufferId, StrTokens);
+      //         for (auto &StrTok : StrTokens) {
+      //            destFunc(StrTok, ParsedTrivia(), ParsedTrivia());
+      //         }
+      //      } else {
+      //         destFunc(token, leadingTrivia, trailingTrivia);
+      //      }
+   } while (token.getKind() != TokenKindType::END);
+}
+
+std::vector<Token> tokenize(const LangOptions &langOpts,
+                            const SourceManager &sourceMgr, unsigned bufferId,
+                            unsigned offset, unsigned endOffset,
+                            DiagnosticEngine *diags,
+                            bool keepComments,
+                            bool tokenizeInterpolatedString,
+                            ArrayRef<Token> splitTokens)
+{
+   std::vector<Token> tokens;
+   tokenize(langOpts, sourceMgr, bufferId, offset, endOffset,
+            diags,
+            keepComments ? CommentRetentionMode::ReturnAsTokens
+                         : CommentRetentionMode::AttachToNextToken,
+            TriviaRetentionMode::WithoutTrivia, tokenizeInterpolatedString,
+            splitTokens,
+            [&](const Token &token, const ParsedTrivia &leadingTrivia,
+            const ParsedTrivia &trailingTrivia) { tokens.push_back(token); });
+   assert(tokens.back().is(TokenKindType::END));
+   tokens.pop_back(); // Remove EOF.
+   return tokens;
 }
 
 } // polar::parser
