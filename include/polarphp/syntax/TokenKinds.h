@@ -22,10 +22,21 @@ class RawOutStream;
 
 namespace polar::syntax {
 
+enum class TokenCategory
+{
+   Internal,
+   Keyword,
+   DeclKeyword,
+   StmtKeyword,
+   ExprKeyword,
+   Punctuator,
+   Misc
+};
+
 using internal::TokenKindType;
 using polar::basic::StringRef;
 using polar::utils::RawOutStream;
-using TokenDescItemType = const std::tuple<const std::string, const std::string>;
+using TokenDescItemType = const std::tuple<const std::string, const std::string, TokenCategory>;
 using TokenDescMap = const std::map<TokenKindType, TokenDescItemType>;
 
 /// Check whether a token kind is known to have any specific text content.
@@ -37,6 +48,14 @@ void dump_token_kind(RawOutStream &outStream, TokenKindType kind);
 TokenDescItemType retrieve_token_desc_entry(TokenKindType kind);
 TokenDescMap::const_iterator find_token_desc_entry(TokenKindType kind);
 TokenDescMap::const_iterator token_desc_map_end();
+bool is_internal_token(TokenKindType kind);
+bool is_keyword_token(TokenKindType kind);
+bool is_decl_keyword_token(TokenKindType kind);
+bool is_stmt_keyword_token(TokenKindType kind);
+bool is_expr_keyword_token(TokenKindType kind);
+bool is_punctuator_token(TokenKindType kind);
+bool is_misc_token(TokenKindType kind);
+TokenCategory get_token_category(TokenKindType kind);
 
 } // polar::syntax
 

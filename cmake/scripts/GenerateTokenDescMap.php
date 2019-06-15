@@ -70,19 +70,19 @@ if (!file_exists($tokenDescMapTplFile)) {
 }
 
 $tokenTypeMap = array(
-   "internal" => "",
-   "keyword" => "",
-   "declKeyword" => "",
-   "stmtKeyword" => "",
-   "exprKeyword" => "",
-   "punctuator" => "",
-   "misc" => ""
+   "internal" => "TokenCategory::Internal",
+   "keyword" => "TokenCategory::Keyword",
+   "declKeyword" => "TokenCategory::DeclKeyword",
+   "stmtKeyword" => "TokenCategory::StmtKeyword",
+   "exprKeyword" => "TokenCategory::ExprKeyword",
+   "punctuator" => "TokenCategory::Punctuator",
+   "misc" => "TokenCategory::Misc"
 );
 
 $tokenDescItems = array();
 foreach($tokenInfoMap as $type => $tokens) {
    foreach($tokens as $token) {
-      $tokenDescItems[] = "{TokenKindType::$token[0], {\"$token[0]\", \"$token[1]\"}},";
+      $tokenDescItems[] = "{TokenKindType::$token[0], {\"$token[0]\", \"$token[1]\", $tokenTypeMap[$type]}},";
    }
 }
 
