@@ -13,9 +13,4 @@
 
 namespace polar::parser {
 
-void parse_error(StringRef msg)
-{
-
-}
-
 } // polar::parser
