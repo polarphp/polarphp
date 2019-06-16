@@ -33,6 +33,7 @@ namespace polar::parser {
 
 typedef void *OpaqueSyntaxNode;
 class SyntaxParsingContext;
+using polar::syntax::SyntaxKind;
 
 /// Represents a raw syntax node formed by the parser.
 ///
@@ -51,7 +52,8 @@ class SyntaxParsingContext;
 ///
 class ParsedRawSyntaxNode
 {
-   enum class DataKind: uint8_t {
+   enum class DataKind: uint8_t
+   {
       Null,
       Recorded,
       deferredLayout,
@@ -100,7 +102,7 @@ class ParsedRawSyntaxNode
       assert(getKind() == k && "Syntax kind with too large value!");
    }
 
-   ParsedRawSyntaxNode(tok tokenKind, SourceLoc tokenLoc, unsigned tokenLength,
+   ParsedRawSyntaxNode(TokenKindType tokenKind, SourceLoc tokenLoc, unsigned tokenLength,
                        const ParsedTriviaPiece *triviaPieces,
                        unsigned numLeadingTrivia,
                        unsigned numTrailingTrivia)
@@ -108,7 +110,7 @@ class ParsedRawSyntaxNode
                       tokenLoc, tokenLength,
                       uint16_t(numLeadingTrivia),
                       uint16_t(numTrailingTrivia)},
-        m_syntaxKind(uint16_t(syntax::m_syntaxKind::Token)),
+        m_syntaxKind(uint16_t(SyntaxKind::Token)),
         m_tokenKind(uint16_t(tokenKind)),
         m_dataKind(DataKind::deferredToken)
    {
@@ -233,12 +235,12 @@ public:
    //==========================================================================//
 
    /// Form a deferred syntax layout node.
-   static ParsedRawSyntaxNode makeDeferred(syntax::m_syntaxKind k,
+   static ParsedRawSyntaxNode makeDeferred(SyntaxKind k,
                                            ArrayRef<ParsedRawSyntaxNode> deferredNodes,
                                            SyntaxParsingContext &ctx);
 
    /// Form a deferred token node.
-   static ParsedRawSyntaxNode makeDeferred(Token tok,
+   static ParsedRawSyntaxNode makeDeferred(Token token,
                                            const ParsedTrivia &leadingTrivia,
                                            const ParsedTrivia &trailingTrivia,
                                            SyntaxParsingContext &ctx);

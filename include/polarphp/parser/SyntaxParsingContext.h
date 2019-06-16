@@ -28,10 +28,6 @@
 #include "polarphp/parser/ParsedRawSyntaxNode.h"
 #include "polarphp/parser/ParsedRawSyntaxRecorder.h"
 
-namespace polar::syntax {
-enum class TokenKindType;
-} // polar::syntax
-
 namespace polar::ast {
 class DiagnosticEngine;
 } // polar::ast
@@ -43,9 +39,8 @@ class ParsedTokenSyntax;
 struct ParsedTrivia;
 class Token;
 
-using polar::syntax::TokenKindType;
+using polar::syntax::internal::TokenKindType;
 using polar::ast::DiagnosticEngine;
-
 
 enum class SyntaxContextKind
 {
@@ -55,7 +50,6 @@ enum class SyntaxContextKind
    Type,
    Syntax,
 };
-
 
 enum class SyntaxNodeCreationKind
 {
@@ -198,7 +192,7 @@ private:
    ParsedRawSyntaxNode createSyntaxAs(SyntaxKind kind,
                                       ArrayRef<ParsedRawSyntaxNode> parts,
                                       SyntaxNodeCreationKind nodeCreateK);
-   Optional<ParsedRawSyntaxNode> bridgeAs(SyntaxContextKind kind,
+   std::optional<ParsedRawSyntaxNode> bridgeAs(SyntaxContextKind kind,
                                           ArrayRef<ParsedRawSyntaxNode> parts);
 
 public:

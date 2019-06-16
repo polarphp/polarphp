@@ -30,11 +30,11 @@
 #define POLARPHP_PARSER_PARSED_RAW_SYNTAX_RECORDEDR_H
 
 #include "polarphp/basic/adt/ArrayRef.h"
+#include "polarphp/syntax/internal/TokenEnumDefs.h"
 #include <memory>
 
 namespace polar::syntax {
-enum class SyntaxKind;
-enum class TokenKindType;
+enum class SyntaxKind : std::uint32_t;
 } // polar::syntax
 
 namespace polar::parser {
@@ -48,7 +48,7 @@ class SourceLoc;
 class Token;
 
 using polar::syntax::SyntaxKind;
-using polar::syntax::TokenKindType;
+using polar::syntax::internal::TokenKindType;
 using polar::basic::ArrayRef;
 
 class ParsedRawSyntaxRecorder {
