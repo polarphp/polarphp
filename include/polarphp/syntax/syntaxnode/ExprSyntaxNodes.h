@@ -523,7 +523,7 @@ public:
       /// type: TokenSyntax
       /// optional: true
       OperatorToken,
-      /// type: Expr
+      /// type: ExprSyntax
       /// optional: false
       Expr
    };

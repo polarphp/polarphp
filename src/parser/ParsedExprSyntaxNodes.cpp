@@ -107,4 +107,58 @@ ParsedTokenSyntax ParsedTernaryExprSyntax::getDeferredSecondChoice()
    return ParsedTokenSyntax{getRaw().getDeferredChildren()[TernaryExprSyntax::Cursor::SecondChoice]};
 }
 
+///
+/// ParsedAssignmentExprSyntax
+///
+ParsedTokenSyntax ParsedAssignmentExprSyntax::getDeferredAssignToken()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[AssignmentExprSyntax::Cursor::AssignToken]};
+}
+
+///
+/// ParsedSequenceExprSyntax
+///
+ParsedTokenSyntax ParsedSequenceExprSyntax::getDeferredElements()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[SequenceExprSyntax::Cursor::Elements]};
+}
+
+///
+/// ParsedPrefixOperatorExprSyntax
+///
+std::optional<ParsedTokenSyntax> ParsedPrefixOperatorExprSyntax::getDeferredOperatorToken()
+{
+   ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[PrefixOperatorExprSyntax::Cursor::OperatorToken];
+   if (!rawChild.isNull()) {
+      return std::nullopt;
+   }
+   return ParsedTokenSyntax{rawChild};
+}
+
+ParsedSyntax ParsedPrefixOperatorExprSyntax::getDeferredExpr()
+{
+   return ParsedSyntax{getRaw().getDeferredChildren()[PrefixOperatorExprSyntax::Cursor::Expr]};
+}
+
+///
+/// ParsedPostfixOperatorExprSyntax
+///
+ParsedSyntax ParsedPostfixOperatorExprSyntax::getDeferredExpr()
+{
+   return ParsedSyntax{getRaw().getDeferredChildren()[PostfixOperatorExprSyntax::Cursor::Expr]};
+}
+
+ParsedTokenSyntax ParsedPostfixOperatorExprSyntax::getDeferredOperatorToken()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[PostfixOperatorExprSyntax::Cursor::OperatorToken]};
+}
+
+///
+/// ParsedBinaryOperatorExprSyntax
+///
+ParsedTokenSyntax ParsedBinaryOperatorExprSyntax::getDeferredOperatorToken()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[BinaryOperatorExprSyntax::Cursor::OperatorToken]};
+}
+
 } // polar::parser

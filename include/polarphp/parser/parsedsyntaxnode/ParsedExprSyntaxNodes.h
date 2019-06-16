@@ -245,6 +245,123 @@ private:
    friend class ParsedTernaryExprSyntaxBuilder;
 };
 
+class ParsedAssignmentExprSyntax final : public ParsedExprSyntax
+{
+public:
+   explicit ParsedAssignmentExprSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedExprSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredAssignToken();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::AssignmentExpr;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedAssignmentExprSyntaxBuilder;
+};
+
+class ParsedSequenceExprSyntax final : public ParsedExprSyntax
+{
+public:
+   explicit ParsedSequenceExprSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedExprSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredElements();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::AssignmentExpr;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedSequenceExprSyntaxBuilder;
+};
+
+class ParsedPrefixOperatorExprSyntax final : public ParsedExprSyntax
+{
+public:
+   explicit ParsedPrefixOperatorExprSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedExprSyntax(std::move(rawNode))
+   {}
+
+   std::optional<ParsedTokenSyntax> getDeferredOperatorToken();
+   ParsedSyntax getDeferredExpr();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::PrefixOperatorExpr;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedPrefixOperatorExprSyntaxBuilder;
+};
+
+class ParsedPostfixOperatorExprSyntax final : public ParsedExprSyntax
+{
+public:
+   explicit ParsedPostfixOperatorExprSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedExprSyntax(std::move(rawNode))
+   {}
+
+   ParsedSyntax getDeferredExpr();
+   ParsedTokenSyntax getDeferredOperatorToken();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::PrefixOperatorExpr;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedPostfixOperatorExprSyntaxBuilder;
+};
+
+class ParsedBinaryOperatorExprSyntax final : public ParsedExprSyntax
+{
+public:
+   explicit ParsedBinaryOperatorExprSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedExprSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredOperatorToken();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::BinaryOperatorExpr;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedBinaryOperatorExprSyntaxBuilder;
+};
+
 } // polar::parser
 
 #endif // POLARPHP_PARSER_PARSED_SYNTAX_NODE_PARSED_EXPR_SYNTAX_NODES_H
