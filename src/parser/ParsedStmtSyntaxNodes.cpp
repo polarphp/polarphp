@@ -101,4 +101,196 @@ ParsedCodeBlockSyntax ParsedElseIfClauseSyntax::getDeferredBody()
    return ParsedCodeBlockSyntax{getRaw().getDeferredChildren()[ElseIfClauseSyntax::Cursor::Body]};
 }
 
+///
+/// IfStmtSyntax
+///
+std::optional<ParsedTokenSyntax> ParsedIfStmtSyntax::getDeferredLabelName()
+{
+   ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[IfStmtSyntax::Cursor::LabelName];
+   if (rawChild.isNull()) {
+      return std::nullopt;
+   }
+   return ParsedTokenSyntax{rawChild};
+}
+
+std::optional<ParsedTokenSyntax> ParsedIfStmtSyntax::getDeferredLabelColon()
+{
+   ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[IfStmtSyntax::Cursor::LabelColon];
+   if (rawChild.isNull()) {
+      return std::nullopt;
+   }
+   return ParsedTokenSyntax{rawChild};
+}
+
+ParsedTokenSyntax ParsedIfStmtSyntax::getDeferredIfKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[IfStmtSyntax::Cursor::IfKeyword]};
+}
+
+ParsedTokenSyntax ParsedIfStmtSyntax::getDeferredLeftParen()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[IfStmtSyntax::Cursor::LeftParen]};
+}
+
+ParsedExprSyntax ParsedIfStmtSyntax::getDeferredCondition()
+{
+   return ParsedExprSyntax{getRaw().getDeferredChildren()[IfStmtSyntax::Cursor::Condition]};
+}
+
+ParsedTokenSyntax ParsedIfStmtSyntax::getDeferredRightParen()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[IfStmtSyntax::Cursor::RightParen]};
+}
+
+ParsedCodeBlockSyntax ParsedIfStmtSyntax::getDeferredBody()
+{
+   return ParsedCodeBlockSyntax{getRaw().getDeferredChildren()[IfStmtSyntax::Cursor::Body]};
+}
+
+std::optional<ParsedElseIfListSyntax> ParsedIfStmtSyntax::getDeferredElseIfClauses()
+{
+   ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[IfStmtSyntax::Cursor::ElseIfClauses];
+   if (rawChild.isNull()) {
+      return std::nullopt;
+   }
+   return ParsedElseIfListSyntax{rawChild};
+}
+
+std::optional<ParsedTokenSyntax> ParsedIfStmtSyntax::getDeferredElseKeyword()
+{
+   ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[IfStmtSyntax::Cursor::ElseKeyword];
+   if (rawChild.isNull()) {
+      return std::nullopt;
+   }
+   return ParsedTokenSyntax{rawChild};
+}
+
+std::optional<ParsedSyntax> ParsedIfStmtSyntax::getDeferredElseBody()
+{
+   ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[IfStmtSyntax::Cursor::ElseBody];
+   if (rawChild.isNull()) {
+      return std::nullopt;
+   }
+   return ParsedSyntax{rawChild};
+}
+
+///
+/// ParsedWhileStmtSyntax
+///
+
+std::optional<ParsedTokenSyntax> ParsedWhileStmtSyntax::getDeferredLabelName()
+{
+   ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[WhileStmtSyntax::Cursor::LabelName];
+   if (rawChild.isNull()) {
+      return std::nullopt;
+   }
+   return ParsedTokenSyntax{rawChild};
+}
+
+std::optional<ParsedTokenSyntax> ParsedWhileStmtSyntax::getDeferredLabelColon()
+{
+   ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[WhileStmtSyntax::Cursor::LabelColon];
+   if (rawChild.isNull()) {
+      return std::nullopt;
+   }
+   return ParsedTokenSyntax{rawChild};
+}
+
+ParsedTokenSyntax ParsedWhileStmtSyntax::getDeferredWhileKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[WhileStmtSyntax::Cursor::WhileKeyword]};
+}
+
+ParsedConditionElementListSyntax ParsedWhileStmtSyntax::getDeferredConditions()
+{
+   return ParsedConditionElementListSyntax{getRaw().getDeferredChildren()[WhileStmtSyntax::Cursor::Conditions]};
+}
+
+ParsedCodeBlockSyntax ParsedWhileStmtSyntax::getDeferredBody()
+{
+   return ParsedCodeBlockSyntax{getRaw().getDeferredChildren()[WhileStmtSyntax::Cursor::Body]};
+}
+
+///
+/// ParsedDoWhileStmtSyntax
+///
+std::optional<ParsedTokenSyntax> ParsedDoWhileStmtSyntax::getDeferredLabelName()
+{
+   ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[DoWhileStmtSyntax::Cursor::LabelName];
+   if (rawChild.isNull()) {
+      return std::nullopt;
+   }
+   return ParsedTokenSyntax{rawChild};
+}
+
+std::optional<ParsedTokenSyntax> ParsedDoWhileStmtSyntax::getDeferredLabelColon()
+{
+   ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[DoWhileStmtSyntax::Cursor::LabelColon];
+   if (rawChild.isNull()) {
+      return std::nullopt;
+   }
+   return ParsedTokenSyntax{rawChild};
+}
+
+ParsedTokenSyntax ParsedDoWhileStmtSyntax::getDeferredDoKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[DoWhileStmtSyntax::Cursor::DoKeyword]};
+}
+
+ParsedCodeBlockSyntax ParsedDoWhileStmtSyntax::getDeferredBody()
+{
+   return ParsedCodeBlockSyntax{getRaw().getDeferredChildren()[DoWhileStmtSyntax::Cursor::Body]};
+}
+
+ParsedTokenSyntax ParsedDoWhileStmtSyntax::getDeferredWhileKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[DoWhileStmtSyntax::Cursor::WhileKeyword]};
+}
+
+ParsedTokenSyntax ParsedDoWhileStmtSyntax::getDeferredLeftParen()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[DoWhileStmtSyntax::Cursor::LeftParen]};
+}
+
+ParsedExprSyntax ParsedDoWhileStmtSyntax::getDeferredCondition()
+{
+   return ParsedExprSyntax{getRaw().getDeferredChildren()[DoWhileStmtSyntax::Cursor::Condition]};
+}
+
+ParsedTokenSyntax ParsedDoWhileStmtSyntax::getDeferredRightParen()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[DoWhileStmtSyntax::Cursor::RightParen]};
+}
+
+///
+/// ParsedSwitchDefaultLabelSyntax
+///
+ParsedTokenSyntax ParsedSwitchDefaultLabelSyntax::getDeferredDefaultKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[SwitchDefaultLabelSyntax::Cursor::DefaultKeyword]};
+}
+
+ParsedTokenSyntax ParsedSwitchDefaultLabelSyntax::getDeferredColon()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[SwitchDefaultLabelSyntax::Cursor::Colon]};
+}
+
+///
+/// ParsedSwitchCaseLabelSyntax
+///
+ParsedTokenSyntax ParsedSwitchCaseLabelSyntax::getDeferredCaseKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[SwitchCaseLabelSyntax::Cursor::CaseKeyword]};
+}
+
+ParsedExprSyntax ParsedSwitchCaseLabelSyntax::getDeferredExpr()
+{
+   return ParsedExprSyntax{getRaw().getDeferredChildren()[SwitchCaseLabelSyntax::Cursor::Expr]};
+}
+
+ParsedTokenSyntax ParsedSwitchCaseLabelSyntax::getDeferredColon()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[SwitchCaseLabelSyntax::Cursor::Colon]};
+}
+
 } // polar::parser

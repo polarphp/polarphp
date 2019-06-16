@@ -161,6 +161,144 @@ private:
    friend class ParsedElseIfClauseSyntaxBuilder;
 };
 
+class ParsedIfStmtSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedIfStmtSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   std::optional<ParsedTokenSyntax> getDeferredLabelName();
+   std::optional<ParsedTokenSyntax> getDeferredLabelColon();
+   ParsedTokenSyntax getDeferredIfKeyword();
+   ParsedTokenSyntax getDeferredLeftParen();
+   ParsedExprSyntax getDeferredCondition();
+   ParsedTokenSyntax getDeferredRightParen();
+   ParsedCodeBlockSyntax getDeferredBody();
+   std::optional<ParsedElseIfListSyntax> getDeferredElseIfClauses();
+   std::optional<ParsedTokenSyntax> getDeferredElseKeyword();
+   std::optional<ParsedSyntax> getDeferredElseBody();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::IfStmt;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedIfStmtSyntaxBuilder;
+};
+
+class ParsedWhileStmtSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedWhileStmtSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   std::optional<ParsedTokenSyntax> getDeferredLabelName();
+   std::optional<ParsedTokenSyntax> getDeferredLabelColon();
+   ParsedTokenSyntax getDeferredWhileKeyword();
+   ParsedConditionElementListSyntax getDeferredConditions();
+   ParsedCodeBlockSyntax getDeferredBody();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::WhileStmt;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedWhileStmtSyntaxBuilder;
+};
+
+class ParsedDoWhileStmtSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedDoWhileStmtSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   std::optional<ParsedTokenSyntax> getDeferredLabelName();
+   std::optional<ParsedTokenSyntax> getDeferredLabelColon();
+   ParsedTokenSyntax getDeferredDoKeyword();
+   ParsedCodeBlockSyntax getDeferredBody();
+   ParsedTokenSyntax getDeferredWhileKeyword();
+   ParsedTokenSyntax getDeferredLeftParen();
+   ParsedExprSyntax getDeferredCondition();
+   ParsedTokenSyntax getDeferredRightParen();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::DoWhileStmt;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedDoWhileStmtSyntaxBuilder;
+};
+
+class ParsedSwitchDefaultLabelSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedSwitchDefaultLabelSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredDefaultKeyword();
+   ParsedTokenSyntax getDeferredColon();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SwitchDefaultLabel;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedSwitchDefaultLabelSyntaxBuilder;
+};
+
+class ParsedSwitchCaseLabelSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedSwitchCaseLabelSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredCaseKeyword();
+   ParsedExprSyntax getDeferredExpr();
+   ParsedTokenSyntax getDeferredColon();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SwitchCaseLabel;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedSwitchCaseLabelSyntaxBuilder;
+};
+
 
 } // polar::parser
 
