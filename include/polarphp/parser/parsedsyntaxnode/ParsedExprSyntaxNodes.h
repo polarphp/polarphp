@@ -57,6 +57,75 @@ private:
    friend class ParsedNullExprSyntaxBuilder;
 };
 
+class ParsedClassRefParentExprSyntax final : public ParsedExprSyntax
+{
+public:
+   explicit ParsedClassRefParentExprSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedExprSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredParentKeyword();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassRefParentExpr;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedClassRefParentExprSyntaxBuilder;
+};
+
+class ParsedClassRefSelfExprSyntax final : public ParsedExprSyntax
+{
+public:
+   explicit ParsedClassRefSelfExprSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedExprSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredSelfKeyword();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassRefSelfExpr;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedClassRefSelfExprSyntaxBuilder;
+};
+
+class ParsedClassRefStaticExprSyntax final : public ParsedExprSyntax
+{
+public:
+   explicit ParsedClassRefStaticExprSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedExprSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredStaticKeyword();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassRefStaticExpr;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedClassRefStaticExprSyntaxBuilder;
+};
+
 } // polar::parser
 
 #endif // POLARPHP_PARSER_PARSED_SYNTAX_NODE_PARSED_EXPR_SYNTAX_NODES_H

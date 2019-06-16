@@ -25,4 +25,25 @@ ParsedTokenSyntax ParsedNullExprSyntax::getDeferredNullKeyword()
    return ParsedTokenSyntax{getRaw().getDeferredChildren()[NullExprSyntax::Cursor::NullKeyword]};
 }
 
+///
+/// ParsedClassRefParentExprSyntax
+///
+ParsedTokenSyntax ParsedClassRefParentExprSyntax::getDeferredParentKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[ClassRefParentExprSyntax::Cursor::ParentKeyword]};
+}
+///
+/// ParsedClassRefSelfExprSyntax
+///
+ParsedTokenSyntax ParsedClassRefSelfExprSyntax::getDeferredSelfKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[ClassRefSelfExprSyntax::Cursor::SelfKeyword]};
+}
+///
+/// ParsedClassRefStaticExprSyntax
+///
+ParsedTokenSyntax ParsedClassRefStaticExprSyntax::getDeferredStaticKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[ClassRefStaticExprSyntax::Cursor::StaticKeyword]};
+}
 } // polar::parser
