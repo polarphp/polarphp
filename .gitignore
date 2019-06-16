@@ -74,6 +74,7 @@ temp
 !cmake/Config.guess
 build/
 **/.idea
+**/.vscode
 devtools/gyb/vendor/
 include/polarphp/parser/internal/YYParserDefs.h
 include/polarphp/parser/internal/YYLexerDefs.h

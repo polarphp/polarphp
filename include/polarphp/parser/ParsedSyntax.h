@@ -76,12 +76,12 @@ public:
       return std::nullopt;
    }
 
-   static bool kindof(syntax::SyntaxKind kind)
+   static bool kindOf(syntax::SyntaxKind kind)
    {
       return true;
    }
 
-   static bool classof(const ParsedSyntax *syntax)
+   static bool classOf(const ParsedSyntax *syntax)
    {
       // Trivially true.
       return true;
@@ -103,14 +103,14 @@ public:
       return getRaw().getTokenKind();
    }
 
-   static bool kindof(syntax::SyntaxKind kind)
+   static bool kindOf(SyntaxKind kind)
    {
-      return isTokenKind(kind);
+      return polar::syntax::is_token_kind(kind);
    }
 
-   static bool classof(const ParsedSyntax *syntax)
+   static bool classOf(const ParsedSyntax *syntax)
    {
-      return kindof(syntax->getKind());
+      return kindOf(syntax->getKind());
    }
 };
 
@@ -124,14 +124,14 @@ public:
       : ParsedSyntax(std::move(rawNode))
    {}
 
-   static bool kindof(syntax::SyntaxKind kind)
+   static bool kindOf(syntax::SyntaxKind kind)
    {
       return kind == CollectionKind;
    }
 
-   static bool classof(const ParsedSyntax *syntax)
+   static bool classOf(const ParsedSyntax *syntax)
    {
-      return kindof(syntax->getKind());
+      return kindOf(syntax->getKind());
    }
 };
 

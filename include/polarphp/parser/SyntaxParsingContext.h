@@ -198,8 +198,8 @@ private:
 public:
    /// Construct root context.
    SyntaxParsingContext(SyntaxParsingContext *&ctxtHolder,
-                        unsigned bufferId,
-                        std::shared_ptr<SyntaxParseActions> actions);
+                        DiagnosticEngine &diags, SourceManager &sourceMgr,
+                        unsigned bufferId, std::shared_ptr<SyntaxParseActions> actions);
 
    /// Designated constructor for child context.
    SyntaxParsingContext(SyntaxParsingContext *&ctxtHolder)
@@ -312,7 +312,7 @@ public:
    {
       auto &storage = getStorage();
       assert(storage.size() > m_offset);
-      if (SyntaxNode::kindof(storage.back().getKind())) {
+      if (SyntaxNode::kindOf(storage.back().getKind())) {
          auto rawNode = std::move(storage.back());
          storage.pop_back();
          return SyntaxNode(rawNode);
