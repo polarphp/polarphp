@@ -129,7 +129,7 @@ ParsedTokenSyntax ParsedSequenceExprSyntax::getDeferredElements()
 std::optional<ParsedTokenSyntax> ParsedPrefixOperatorExprSyntax::getDeferredOperatorToken()
 {
    ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[PrefixOperatorExprSyntax::Cursor::OperatorToken];
-   if (!rawChild.isNull()) {
+   if (rawChild.isNull()) {
       return std::nullopt;
    }
    return ParsedTokenSyntax{rawChild};

@@ -14,8 +14,54 @@
 
 #include "polarphp/parser/ParsedSyntax.h"
 #include "polarphp/syntax/SyntaxKind.h"
+#include "polarphp/parser/parsedsyntaxnode/ParsedCommonSyntaxNodes.h"
 
 namespace polar::parser {
+
+class ParsedConditionElementSyntax;
+class ParsedContinueStmtSyntax;
+class ParsedBreakStmtSyntax;
+class ParsedFallthroughStmtSyntax;
+class ParsedElseIfClauseSyntax;
+class ParsedIfStmtSyntax;
+class ParsedWhileStmtSyntax;
+class ParsedDoWhileStmtSyntax;
+class ParsedSwitchCaseSyntax;
+class ParsedSwitchDefaultLabelSyntax;
+class ParsedSwitchCaseLabelSyntax;
+class ParsedSwitchStmtSyntax;
+class ParsedDeferStmtSyntax;
+class ParsedExpressionStmtSyntax;
+class ParsedThrowStmtSyntax;
+class ParsedReturnStmtSyntax;
+
+using ParsedConditionElementListSyntax = ParsedSyntaxCollection<SyntaxKind::ConditionElementList>;
+using ParsedSwitchCaseListSyntax = ParsedSyntaxCollection<SyntaxKind::SwitchCaseList>;
+using ParsedElseIfListSyntax = ParsedSyntaxCollection<SyntaxKind::ElseIfList>;
+
+class ParsedConditionElementSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedConditionElementSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   ParsedSyntax getDeferredCondition();
+   std::optional<ParsedTokenSyntax> getDeferredTrailingComma();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ConditionElement;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedConditionElementSyntaxBuilder;
+};
 
 } // polar::parser
 
