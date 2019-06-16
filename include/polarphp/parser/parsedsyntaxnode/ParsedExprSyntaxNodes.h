@@ -126,6 +126,125 @@ private:
    friend class ParsedClassRefStaticExprSyntaxBuilder;
 };
 
+class ParsedIntegerLiteralExprSyntax final : public ParsedExprSyntax
+{
+public:
+   explicit ParsedIntegerLiteralExprSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedExprSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredDigits();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::IntegerLiteralExpr;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedIntegerLiteralExprSyntaxBuilder;
+};
+
+class ParsedFloatLiteralExprSyntax final : public ParsedExprSyntax
+{
+public:
+   explicit ParsedFloatLiteralExprSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedExprSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredFloatDigits();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::FloatLiteralExpr;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedFloatLiteralExprSyntaxBuilder;
+};
+
+class ParsedStringLiteralExprSyntax final : public ParsedExprSyntax
+{
+public:
+   explicit ParsedStringLiteralExprSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedExprSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredString();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::StringLiteralExpr;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedStringLiteralExprSyntaxBuilder;
+};
+
+class ParsedBooleanLiteralExprSyntax final : public ParsedExprSyntax
+{
+public:
+   explicit ParsedBooleanLiteralExprSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedExprSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredBoolean();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::BooleanLiteralExpr;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedBooleanLiteralExprSyntaxBuilder;
+};
+
+class ParsedTernaryExprSyntax final : public ParsedExprSyntax
+{
+public:
+   explicit ParsedTernaryExprSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedExprSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredConditionExpr();
+   ParsedTokenSyntax getDeferredQuestionMark();
+   ParsedTokenSyntax getDeferredFirstChoice();
+   ParsedTokenSyntax getDeferredColonMark();
+   ParsedTokenSyntax getDeferredSecondChoice();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::BooleanLiteralExpr;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedTernaryExprSyntaxBuilder;
+};
+
 } // polar::parser
 
 #endif // POLARPHP_PARSER_PARSED_SYNTAX_NODE_PARSED_EXPR_SYNTAX_NODES_H

@@ -46,4 +46,65 @@ ParsedTokenSyntax ParsedClassRefStaticExprSyntax::getDeferredStaticKeyword()
 {
    return ParsedTokenSyntax{getRaw().getDeferredChildren()[ClassRefStaticExprSyntax::Cursor::StaticKeyword]};
 }
+
+///
+/// ParsedIntegerLiteralExprSyntax
+///
+ParsedTokenSyntax ParsedIntegerLiteralExprSyntax::getDeferredDigits()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[IntegerLiteralExprSyntax::Cursor::Digits]};
+}
+
+///
+/// ParsedFloatLiteralExprSyntax
+///
+ParsedTokenSyntax ParsedFloatLiteralExprSyntax::getDeferredFloatDigits()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[FloatLiteralExprSyntax::Cursor::FloatDigits]};
+}
+
+///
+/// ParsedStringLiteralExprSyntax
+///
+ParsedTokenSyntax ParsedStringLiteralExprSyntax::getDeferredString()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[StringLiteralExprSyntax::Cursor::String]};
+}
+
+///
+/// ParsedBooleanLiteralExprSyntax
+///
+ParsedTokenSyntax ParsedBooleanLiteralExprSyntax::getDeferredBoolean()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[BooleanLiteralExprSyntax::Cursor::Boolean]};
+}
+
+///
+/// ParsedTernaryExprSyntax
+///
+ParsedTokenSyntax ParsedTernaryExprSyntax::getDeferredConditionExpr()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[TernaryExprSyntax::Cursor::ConditionExpr]};
+}
+
+ParsedTokenSyntax ParsedTernaryExprSyntax::getDeferredQuestionMark()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[TernaryExprSyntax::Cursor::QuestionMark]};
+}
+
+ParsedTokenSyntax ParsedTernaryExprSyntax::getDeferredFirstChoice()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[TernaryExprSyntax::Cursor::FirstChoice]};
+}
+
+ParsedTokenSyntax ParsedTernaryExprSyntax::getDeferredColonMark()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[TernaryExprSyntax::Cursor::ColonMark]};
+}
+
+ParsedTokenSyntax ParsedTernaryExprSyntax::getDeferredSecondChoice()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[TernaryExprSyntax::Cursor::SecondChoice]};
+}
+
 } // polar::parser
