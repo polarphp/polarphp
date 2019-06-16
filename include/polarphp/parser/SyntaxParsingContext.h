@@ -83,7 +83,7 @@ constexpr size_t SyntaxAlignInBits = 3;
 ///     // Now the context holds { '(' Expr ')' }.
 ///     // From these parts, it creates ParenExpr node and add it to the parent.
 ///   }
-class /*alignas(1 << SyntaxAlignInBits)*/ SyntaxParsingContext
+class alignas(1 << SyntaxAlignInBits) SyntaxParsingContext
 {
 public:
    /// The shared data for all syntax parsing contexts with the same root.

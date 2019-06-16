@@ -16,8 +16,44 @@
 #include "polarphp/syntax/SyntaxCollection.h"
 #include "polarphp/syntax/TokenSyntax.h"
 #include "polarphp/syntax/UnknownSyntax.h"
+#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
 
 namespace polar::syntax {
+
+class SourceFileSyntax;
+
+class SourceFileSyntax : public Syntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 2;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: CodeBlockItemListSyntax
+      /// optional: false
+      Statements,
+      /// type: TokenSyntax
+      /// optional: false
+      EOFToken
+   };
+
+public:
+   SourceFileSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getEofToken();
+   CodeBlockItemListSyntax getStatements();
+   SourceFileSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);
+   SourceFileSyntax addStatement(CodeBlockItemSyntax statement);
+   SourceFileSyntax withEofToken(std::optional<TokenSyntax> eofToken);
+
+private:
+   friend class SourceFileSyntaxBuilder;
+   void validate();
+};
 
 } // polar::syntax
 
