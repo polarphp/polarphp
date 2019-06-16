@@ -31,4 +31,74 @@ std::optional<ParsedTokenSyntax> ParsedConditionElementSyntax::getDeferredTraili
    return ParsedTokenSyntax{rawChild};
 }
 
+///
+/// ParsedContinueStmtSyntax
+///
+ParsedTokenSyntax ParsedContinueStmtSyntax::getDeferredContinueKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[ContinueStmtSyntax::Cursor::ContinueKeyword]};
+}
+
+std::optional<ParsedTokenSyntax> ParsedContinueStmtSyntax::getDeferredLNumberToken()
+{
+   ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[ContinueStmtSyntax::Cursor::LNumberToken];
+   if (rawChild.isNull()) {
+      return std::nullopt;
+   }
+   return ParsedTokenSyntax{rawChild};
+}
+
+///
+/// ParsedBreakStmtSyntax
+///
+ParsedTokenSyntax ParsedBreakStmtSyntax::getDeferredBreakKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[BreakStmtSyntax::Cursor::BreakKeyword]};
+}
+
+std::optional<ParsedTokenSyntax> ParsedBreakStmtSyntax::getDeferredLNumberToken()
+{
+   ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[BreakStmtSyntax::Cursor::LNumberToken];
+   if (rawChild.isNull()) {
+      return std::nullopt;
+   }
+   return ParsedTokenSyntax{rawChild};
+}
+
+///
+/// ParsedFallthroughStmtSyntax
+///
+ParsedTokenSyntax ParsedFallthroughStmtSyntax::getDeferredFallthroughKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[FallthroughStmtSyntax::Cursor::FallthroughKeyword]};
+}
+
+///
+/// ParsedElseIfClauseSyntax
+///
+ParsedTokenSyntax ParsedElseIfClauseSyntax::getDeferredElseIfKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[ElseIfClauseSyntax::Cursor::ElseIfKeyword]};
+}
+
+ParsedTokenSyntax ParsedElseIfClauseSyntax::getDeferredLeftParen()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[ElseIfClauseSyntax::Cursor::LeftParen]};
+}
+
+ParsedExprSyntax ParsedElseIfClauseSyntax::getDeferredCondition()
+{
+   return ParsedExprSyntax{getRaw().getDeferredChildren()[ElseIfClauseSyntax::Cursor::Condition]};
+}
+
+ParsedTokenSyntax ParsedElseIfClauseSyntax::getDeferredRightParen()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[ElseIfClauseSyntax::Cursor::RightParen]};
+}
+
+ParsedCodeBlockSyntax ParsedElseIfClauseSyntax::getDeferredBody()
+{
+   return ParsedCodeBlockSyntax{getRaw().getDeferredChildren()[ElseIfClauseSyntax::Cursor::Body]};
+}
+
 } // polar::parser

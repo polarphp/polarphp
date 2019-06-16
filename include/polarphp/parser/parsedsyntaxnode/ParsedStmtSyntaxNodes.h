@@ -63,6 +63,105 @@ private:
    friend class ParsedConditionElementSyntaxBuilder;
 };
 
+class ParsedContinueStmtSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedContinueStmtSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredContinueKeyword();
+   std::optional<ParsedTokenSyntax> getDeferredLNumberToken();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ContinueStmt;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedContinueStmtSyntaxBuilder;
+};
+
+class ParsedBreakStmtSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedBreakStmtSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredBreakKeyword();
+   std::optional<ParsedTokenSyntax> getDeferredLNumberToken();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::BreakStmt;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedBreakStmtSyntaxBuilder;
+};
+
+class ParsedFallthroughStmtSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedFallthroughStmtSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredFallthroughKeyword();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::FallthroughStmt;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedFallthroughStmtSyntaxBuilder;
+};
+
+class ParsedElseIfClauseSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedElseIfClauseSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredElseIfKeyword();
+   ParsedTokenSyntax getDeferredLeftParen();
+   ParsedExprSyntax getDeferredCondition();
+   ParsedTokenSyntax getDeferredRightParen();
+   ParsedCodeBlockSyntax getDeferredBody();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ElseIfClause;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedElseIfClauseSyntaxBuilder;
+};
+
+
 } // polar::parser
 
 #endif // POLARPHP_PARSER_PARSED_SYNTAX_NODE_PARSED_STMT_SYNTAX_NODES_H
