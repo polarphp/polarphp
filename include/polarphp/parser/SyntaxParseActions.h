@@ -29,10 +29,10 @@
 #define POLARPHP_PARSER_SYNTAX_PARSE_ACTIONS_H
 
 #include "polarphp/basic/adt/ArrayRef.h"
+#include "polarphp/syntax/internal/TokenEnumDefs.h"
 
 namespace polar::syntax {
-enum class SyntaxKind;
-enum class TokenKindType;
+enum class SyntaxKind : std::uint32_t;
 } // polar::syntax
 
 namespace polar::parser {
@@ -41,7 +41,7 @@ class CharSourceRange;
 class ParsedTriviaPiece;
 class SourceLoc;
 using polar::basic::ArrayRef;
-using polar::syntax::TokenKindType;
+using polar::syntax::internal::TokenKindType;
 using polar::syntax::SyntaxKind;
 using OpaqueSyntaxNode = void *;
 
@@ -62,13 +62,13 @@ public:
    /// The provided \c elements are an exact layout appropriate for the syntax
    /// \c kind. Missing optional elements are represented with a null
    /// OpaqueSyntaxNode object.
-   virtual OpaqueSyntaxNode recordRawSyntax(syntax::SyntaxKind kind,
+   virtual OpaqueSyntaxNode recordRawSyntax(SyntaxKind kind,
                                             ArrayRef<OpaqueSyntaxNode> elements,
                                             CharSourceRange range) = 0;
 
    /// Used for incremental re-parsing.
    virtual std::pair<size_t, OpaqueSyntaxNode>
-   lookupNode(size_t lexerOffset, syntax::SyntaxKind kind)
+   lookupNode(size_t lexerOffset, SyntaxKind kind)
    {
       return std::make_pair(0, nullptr);
    }
