@@ -299,6 +299,155 @@ private:
    friend class ParsedSwitchCaseLabelSyntaxBuilder;
 };
 
+class ParsedSwitchCaseSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedSwitchCaseSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   ParsedSyntax getDeferredLabel();
+   ParsedCodeBlockItemListSyntax getDeferredStatements();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SwitchCase;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedSwitchCaseSyntaxBuilder;
+};
+
+class ParsedSwitchStmtSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedSwitchStmtSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   std::optional<ParsedTokenSyntax> getDeferredLabelName();
+   std::optional<ParsedTokenSyntax> getDeferredLabelColon();
+   ParsedTokenSyntax getDeferredSwitchKeyword();
+   ParsedTokenSyntax getDeferredLeftParen();
+   ParsedExprSyntax getDeferredConditionExpr();
+   ParsedTokenSyntax getDeferredRightParen();
+   ParsedTokenSyntax getDeferredLeftBrace();
+   ParsedSwitchCaseListSyntax getDeferredCases();
+   ParsedTokenSyntax getDeferredRightBrace();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SwitchStmt;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedSwitchCaseSyntaxBuilder;
+};
+
+class ParsedDeferStmtSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedDeferStmtSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredDeferKeyword();
+   ParsedCodeBlockSyntax getDeferredBody();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SwitchStmt;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedDeferStmtSyntaxBuilder;
+};
+
+class ParsedExpressionStmtSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedExpressionStmtSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   ParsedExprSyntax getDeferredExpr();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ExpressionStmt;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedExpressionStmtSyntaxBuilder;
+};
+
+class ParsedThrowStmtSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedThrowStmtSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredThrowKeyword();
+   ParsedExprSyntax getDeferredExpr();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ThrowStmt;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedThrowStmtSyntaxBuilder;
+};
+
+class ParsedReturnStmtSyntax final : public ParsedStmtSyntax
+{
+public:
+   explicit ParsedReturnStmtSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedStmtSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredReturnKeyword();
+   ParsedExprSyntax getDeferredExpr();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ReturnStmt;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedReturnStmtSyntaxBuilder;
+};
 
 } // polar::parser
 

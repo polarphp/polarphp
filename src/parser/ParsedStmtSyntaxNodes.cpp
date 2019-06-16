@@ -293,4 +293,121 @@ ParsedTokenSyntax ParsedSwitchCaseLabelSyntax::getDeferredColon()
    return ParsedTokenSyntax{getRaw().getDeferredChildren()[SwitchCaseLabelSyntax::Cursor::Colon]};
 }
 
+///
+/// ParsedSwitchCaseSyntax
+///
+ParsedSyntax ParsedSwitchCaseSyntax::getDeferredLabel()
+{
+   return ParsedSyntax{getRaw().getDeferredChildren()[SwitchCaseSyntax::Cursor::Label]};
+}
+
+ParsedCodeBlockItemListSyntax ParsedSwitchCaseSyntax::getDeferredStatements()
+{
+   return ParsedCodeBlockItemListSyntax{getRaw().getDeferredChildren()[SwitchCaseSyntax::Cursor::Statements]};
+}
+
+///
+/// ParsedSwitchStmtSyntax
+///
+std::optional<ParsedTokenSyntax> ParsedSwitchStmtSyntax::getDeferredLabelName()
+{
+   ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[SwitchStmtSyntax::Cursor::LabelName];
+   if (rawChild.isNull()) {
+      return std::nullopt;
+   }
+   return ParsedTokenSyntax{rawChild};
+}
+
+std::optional<ParsedTokenSyntax> ParsedSwitchStmtSyntax::getDeferredLabelColon()
+{
+   ParsedRawSyntaxNode rawChild = getRaw().getDeferredChildren()[SwitchStmtSyntax::Cursor::LabelColon];
+   if (rawChild.isNull()) {
+      return std::nullopt;
+   }
+   return ParsedTokenSyntax{rawChild};
+}
+
+ParsedTokenSyntax ParsedSwitchStmtSyntax::getDeferredSwitchKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[SwitchStmtSyntax::Cursor::SwitchKeyword]};
+}
+
+ParsedTokenSyntax ParsedSwitchStmtSyntax::getDeferredLeftParen()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[SwitchStmtSyntax::Cursor::LeftParen]};
+}
+
+ParsedExprSyntax ParsedSwitchStmtSyntax::getDeferredConditionExpr()
+{
+   return ParsedExprSyntax{getRaw().getDeferredChildren()[SwitchStmtSyntax::Cursor::ConditionExpr]};
+}
+
+ParsedTokenSyntax ParsedSwitchStmtSyntax::getDeferredRightParen()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[SwitchStmtSyntax::Cursor::RightParen]};
+}
+
+ParsedTokenSyntax ParsedSwitchStmtSyntax::getDeferredLeftBrace()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[SwitchStmtSyntax::Cursor::LeftBrace]};
+}
+
+ParsedSwitchCaseListSyntax ParsedSwitchStmtSyntax::getDeferredCases()
+{
+   return ParsedSwitchCaseListSyntax{getRaw().getDeferredChildren()[SwitchStmtSyntax::Cursor::Cases]};
+}
+
+ParsedTokenSyntax ParsedSwitchStmtSyntax::getDeferredRightBrace()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[SwitchStmtSyntax::Cursor::RightBrace]};
+}
+
+///
+/// ParsedDeferStmtSyntax
+///
+
+ParsedTokenSyntax ParsedDeferStmtSyntax::getDeferredDeferKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[DeferStmtSyntax::Cursor::DeferKeyword]};
+}
+
+ParsedCodeBlockSyntax ParsedDeferStmtSyntax::getDeferredBody()
+{
+   return ParsedCodeBlockSyntax{getRaw().getDeferredChildren()[DeferStmtSyntax::Cursor::Body]};
+}
+
+///
+/// ParsedExpressionStmtSyntax
+///
+ParsedExprSyntax ParsedExpressionStmtSyntax::getDeferredExpr()
+{
+   return ParsedExprSyntax{getRaw().getDeferredChildren()[ExpressionStmtSyntax::Cursor::Expr]};
+}
+
+///
+/// ParsedThrowStmtSyntax
+///
+ParsedTokenSyntax ParsedThrowStmtSyntax::getDeferredThrowKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[ThrowStmtSyntax::Cursor::ThrowKeyword]};
+}
+
+ParsedExprSyntax ParsedThrowStmtSyntax::getDeferredExpr()
+{
+   return ParsedExprSyntax{getRaw().getDeferredChildren()[ThrowStmtSyntax::Cursor::Expr]};
+}
+
+///
+/// ParsedReturnStmtSyntax
+///
+ParsedTokenSyntax ParsedReturnStmtSyntax::getDeferredReturnKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[ReturnStmtSyntax::Cursor::ReturnKeyword]};
+}
+
+ParsedExprSyntax ParsedReturnStmtSyntax::getDeferredExpr()
+{
+   return ParsedExprSyntax{getRaw().getDeferredChildren()[ReturnStmtSyntax::Cursor::Expr]};
+}
+
 } // polar::parser
