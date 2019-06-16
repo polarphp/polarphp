@@ -12,6 +12,9 @@
 #ifndef POLARPHP_PARSER_PARSED_SYNTAX_NODE_PARSED_EXPR_SYNTAX_NODES_H
 #define POLARPHP_PARSER_PARSED_SYNTAX_NODE_PARSED_EXPR_SYNTAX_NODES_H
 
+#include "polarphp/parser/ParsedSyntax.h"
+#include "polarphp/syntax/SyntaxKind.h"
+
 namespace polar::parser {
 
 } // polar::parser
