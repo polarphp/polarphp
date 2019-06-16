@@ -53,6 +53,9 @@ enum class SyntaxKind : std::uint32_t
    UnknownExpr,
    LastExpr,
 
+   /// decl syntax node
+   SourceFile,
+
    /// stmt syntax node
    FirstStmt,
    ContinueStmt,

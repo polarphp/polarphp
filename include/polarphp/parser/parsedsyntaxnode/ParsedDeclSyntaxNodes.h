@@ -14,8 +14,32 @@
 
 #include "polarphp/parser/ParsedSyntax.h"
 #include "polarphp/syntax/SyntaxKind.h"
+#include "polarphp/parser/parsedsyntaxnode/ParsedCommonSyntaxNodes.h"
 
 namespace polar::parser {
+
+class ParsedSourceFileSyntax;
+
+class ParsedSourceFileSyntax final : ParsedSyntax
+{
+public:
+   explicit ParsedSourceFileSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedSyntax(std::move(rawNode))
+   {}
+
+   ParsedCodeBlockItemListSyntax getDeferredStatements();
+   ParsedTokenSyntax getDeferredEofToken();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::SourceFile == kind;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+};
 
 } // polar::parser
 
