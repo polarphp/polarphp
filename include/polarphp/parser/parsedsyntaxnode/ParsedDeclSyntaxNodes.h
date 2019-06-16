@@ -20,7 +20,7 @@ namespace polar::parser {
 
 class ParsedSourceFileSyntax;
 
-class ParsedSourceFileSyntax final : ParsedSyntax
+class ParsedSourceFileSyntax final : public ParsedSyntax
 {
 public:
    explicit ParsedSourceFileSyntax(ParsedRawSyntaxNode rawNode)

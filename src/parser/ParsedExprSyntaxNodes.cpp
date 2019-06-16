@@ -8,3 +8,21 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/06/16.
+
+#include "polarphp/parser/parsedsyntaxnode/ParsedExprSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
+
+namespace polar::parser {
+
+using namespace polar::syntax;
+
+///
+/// ParsedNullExprSyntax
+///
+ParsedTokenSyntax ParsedNullExprSyntax::getDeferredNullKeyword()
+{
+   return ParsedTokenSyntax{getRaw().getDeferredChildren()[NullExprSyntax::Cursor::NullKeyword]};
+}
+
+} // polar::parser

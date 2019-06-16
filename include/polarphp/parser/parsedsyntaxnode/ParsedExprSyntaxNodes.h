@@ -14,8 +14,48 @@
 
 #include "polarphp/parser/ParsedSyntax.h"
 #include "polarphp/syntax/SyntaxKind.h"
+#include "polarphp/parser/parsedsyntaxnode/ParsedCommonSyntaxNodes.h"
 
 namespace polar::parser {
+
+class ParsedNullExprSyntax;
+class ParsedClassRefParentExprSyntax;
+class ParsedClassRefStaticExprSyntax;
+class ParsedClassRefSelfExprSyntax;
+class ParsedIntegerLiteralExprSyntax;
+class ParsedFloatLiteralExprSyntax;
+class ParsedStringLiteralExprSyntax;
+class ParsedBooleanLiteralExprSyntax;
+class ParsedTernaryExprSyntax;
+class ParsedAssignmentExprSyntax;
+class ParsedSequenceExprSyntax;
+class ParsedPrefixOperatorExprSyntax;
+class ParsedPostfixOperatorExprSyntax;
+class ParsedBinaryOperatorExprSyntax;
+using ParsedExprListSyntax = ParsedSyntaxCollection<SyntaxKind::ExprList>;
+
+class ParsedNullExprSyntax final : public ParsedExprSyntax
+{
+public:
+   explicit ParsedNullExprSyntax(ParsedRawSyntaxNode rawNode)
+      : ParsedExprSyntax(std::move(rawNode))
+   {}
+
+   ParsedTokenSyntax getDeferredNullKeyword();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::NullExpr;
+   }
+
+   static bool classOf(const ParsedSyntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParsedNullExprSyntaxBuilder;
+};
 
 } // polar::parser
 
