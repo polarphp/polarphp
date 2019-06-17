@@ -202,4 +202,145 @@ void ParsedClassRefStaticExprSyntaxBuilder::finishLayout(bool deferred)
    }
 }
 
+///
+/// ParsedIntegerLiteralExprSyntaxBuilder
+///
+ParsedIntegerLiteralExprSyntaxBuilder
+&ParsedIntegerLiteralExprSyntaxBuilder::useDigits(ParsedTokenSyntax digits)
+{
+   m_layout[cursor_index(Cursor::Digits)] = digits.getRaw();
+   return *this;
+}
+
+ParsedIntegerLiteralExprSyntax ParsedIntegerLiteralExprSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()) {
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedIntegerLiteralExprSyntax ParsedIntegerLiteralExprSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::IntegerLiteralExpr, m_layout, m_context);
+   return ParsedIntegerLiteralExprSyntax(std::move(rawNode));
+}
+
+ParsedIntegerLiteralExprSyntax ParsedIntegerLiteralExprSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::IntegerLiteralExpr, m_layout);
+   return ParsedIntegerLiteralExprSyntax(std::move(rawNode));
+}
+
+void ParsedIntegerLiteralExprSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex digitsIndex = cursor_index(Cursor::Digits);
+   if (m_layout[digitsIndex].isNull()) {
+      if (deferred) {
+         m_layout[digitsIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_LNUMBER, SourceLoc());
+      } else {
+         m_layout[digitsIndex] = recorder.recordMissingToken(TokenKindType::T_LNUMBER, SourceLoc());
+      }
+   }
+}
+
+///
+/// FloatLiteralExprSyntax
+///
+ParsedFloatLiteralExprSyntaxBuilder
+&ParsedFloatLiteralExprSyntaxBuilder::useDigits(ParsedTokenSyntax floatDigits)
+{
+   m_layout[cursor_index(Cursor::FloatDigits)] = floatDigits.getRaw();
+   return *this;
+}
+
+ParsedFloatLiteralExprSyntax ParsedFloatLiteralExprSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()) {
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedFloatLiteralExprSyntax ParsedFloatLiteralExprSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::FloatLiteralExpr, m_layout, m_context);
+   return ParsedFloatLiteralExprSyntax(std::move(rawNode));
+}
+
+ParsedFloatLiteralExprSyntax ParsedFloatLiteralExprSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::FloatLiteralExpr, m_layout);
+   return ParsedFloatLiteralExprSyntax(std::move(rawNode));
+}
+
+void ParsedFloatLiteralExprSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex floatDigitsIndex = cursor_index(Cursor::FloatDigits);
+   if (m_layout[floatDigitsIndex].isNull()) {
+      if (deferred) {
+         m_layout[floatDigitsIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_DNUMBER, SourceLoc());
+      } else {
+         m_layout[floatDigitsIndex] = recorder.recordMissingToken(TokenKindType::T_DNUMBER, SourceLoc());
+      }
+   }
+}
+
+///
+/// ParsedStringLiteralExprSyntaxBuilder
+///
+ParsedStringLiteralExprSyntaxBuilder
+&ParsedStringLiteralExprSyntaxBuilder::useString(ParsedTokenSyntax str)
+{
+   m_layout[cursor_index(Cursor::String)] = str.getRaw();
+   return *this;
+}
+
+ParsedStringLiteralExprSyntax ParsedStringLiteralExprSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()) {
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedStringLiteralExprSyntax ParsedStringLiteralExprSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::StringLiteralExpr, m_layout, m_context);
+   return ParsedStringLiteralExprSyntax(std::move(rawNode));
+}
+
+ParsedStringLiteralExprSyntax ParsedStringLiteralExprSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::StringLiteralExpr, m_layout);
+   return ParsedStringLiteralExprSyntax(std::move(rawNode));
+}
+
+void ParsedStringLiteralExprSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex strIndex = cursor_index(Cursor::String);
+   if (m_layout[strIndex].isNull()) {
+      if (deferred) {
+         m_layout[strIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_STRING, SourceLoc());
+      } else {
+         m_layout[strIndex] = recorder.recordMissingToken(TokenKindType::T_STRING, SourceLoc());
+      }
+   }
+}
+
 } // polar::parser

@@ -109,6 +109,60 @@ private:
    ParsedRawSyntaxNode m_layout[ClassRefStaticExprSyntax::CHILDREN_COUNT];
 };
 
+class ParsedIntegerLiteralExprSyntaxBuilder
+{
+public:
+   using Cursor = IntegerLiteralExprSyntax::Cursor;
+public:
+   ParsedIntegerLiteralExprSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+   ParsedIntegerLiteralExprSyntaxBuilder &useDigits(ParsedTokenSyntax digits);
+   ParsedIntegerLiteralExprSyntax build();
+   ParsedIntegerLiteralExprSyntax makeDeferred();
+private:
+   ParsedIntegerLiteralExprSyntax record();
+   void finishLayout(bool deferred);
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[IntegerLiteralExprSyntax::CHILDREN_COUNT];
+};
+
+class ParsedFloatLiteralExprSyntaxBuilder
+{
+public:
+   using Cursor = FloatLiteralExprSyntax::Cursor;
+public:
+   ParsedFloatLiteralExprSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+   ParsedFloatLiteralExprSyntaxBuilder &useDigits(ParsedTokenSyntax floatDigits);
+   ParsedFloatLiteralExprSyntax build();
+   ParsedFloatLiteralExprSyntax makeDeferred();
+private:
+   ParsedFloatLiteralExprSyntax record();
+   void finishLayout(bool deferred);
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[FloatLiteralExprSyntax::CHILDREN_COUNT];
+};
+
+class ParsedStringLiteralExprSyntaxBuilder
+{
+public:
+   using Cursor = StringLiteralExprSyntax::Cursor;
+public:
+   ParsedStringLiteralExprSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+   ParsedStringLiteralExprSyntaxBuilder &useString(ParsedTokenSyntax str);
+   ParsedStringLiteralExprSyntax build();
+   ParsedStringLiteralExprSyntax makeDeferred();
+private:
+   ParsedStringLiteralExprSyntax record();
+   void finishLayout(bool deferred);
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[StringLiteralExprSyntax::CHILDREN_COUNT];
+};
+
 } // polar::parser
 
 #endif // POLARPHP_PARSER_PARSED_EXPR_SYNTAX_NODE_BUILDERS_H
