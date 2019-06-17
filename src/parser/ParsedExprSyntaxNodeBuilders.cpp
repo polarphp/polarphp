@@ -110,4 +110,49 @@ void ParsedClassRefParentExprSyntaxBuilder::finishLayout(bool deferred)
    }
 }
 
+///
+/// ParsedClassRefSelfExprSyntaxBuilder
+///
+ParsedClassRefSelfExprSyntaxBuilder &ParsedClassRefSelfExprSyntaxBuilder::useSelfKeyword(ParsedTokenSyntax selfKeyword)
+{
+   m_layout[cursor_index(Cursor::SelfKeyword)] = selfKeyword.getRaw();
+   return *this;
+}
+
+ParsedClassRefSelfExprSyntax ParsedClassRefSelfExprSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()) {
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedClassRefSelfExprSyntax ParsedClassRefSelfExprSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode raw = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::ClassRefParentExpr, m_layout, m_context);
+   return ParsedClassRefSelfExprSyntax(std::move(raw));
+}
+ParsedClassRefSelfExprSyntax ParsedClassRefSelfExprSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode raw = recorder.recordRawSyntax(SyntaxKind::ClassRefParentExpr, m_layout);
+   return ParsedClassRefSelfExprSyntax(std::move(raw));
+}
+
+void ParsedClassRefSelfExprSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex selfExprIndex = cursor_index(Cursor::SelfKeyword);
+   if (m_layout[selfExprIndex].isNull()) {
+      if (deferred) {
+         m_layout[selfExprIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_CLASS_REF_SELF, SourceLoc());
+      } else {
+         m_layout[selfExprIndex] = recorder.recordMissingToken(TokenKindType::T_CLASS_REF_SELF, SourceLoc());
+      }
+   }
+}
+
 } // polar::parser
