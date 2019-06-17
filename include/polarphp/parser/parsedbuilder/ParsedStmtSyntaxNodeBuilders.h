@@ -12,6 +12,13 @@
 #ifndef POLARPHP_PARSER_PARSED_STMT_SYNTAX_NODE_BUILDERS_H
 #define POLARPHP_PARSER_PARSED_STMT_SYNTAX_NODE_BUILDERS_H
 
+#include "polarphp/parser/ParsedRawSyntaxNode.h"
+#include "polarphp/parser/ParsedSyntaxNodes.h"
+#include "polarphp/parser/SyntaxParsingContext.h"
+#include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
 
+namespace polar::parser {
+
+} // polar::parser
 
 #endif // POLARPHP_PARSER_PARSED_STMT_SYNTAX_NODE_BUILDERS_H

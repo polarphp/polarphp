@@ -54,7 +54,7 @@ using ElseIfListSyntax = SyntaxCollection<SyntaxKind::ElseIfList, ElseIfClauseSy
 ///
 ///  condition -> expression
 ///
-class ConditionElementSyntax : public Syntax
+class ConditionElementSyntax final : public Syntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 2;
@@ -98,7 +98,7 @@ private:
    void validate();
 };
 
-class ContinueStmtSyntax : public StmtSyntax
+class ContinueStmtSyntax final : public StmtSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 2;
@@ -140,7 +140,7 @@ private:
    void validate();
 };
 
-class BreakStmtSyntax : public StmtSyntax
+class BreakStmtSyntax final : public StmtSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 2;
@@ -182,7 +182,7 @@ private:
    void validate();
 };
 
-class FallthroughStmtSyntax : public StmtSyntax
+class FallthroughStmtSyntax final : public StmtSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -210,7 +210,7 @@ private:
    void validate();
 };
 
-class ElseIfClauseSyntax : public Syntax
+class ElseIfClauseSyntax final : public Syntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 5;
@@ -259,7 +259,7 @@ private:
    void validate();
 };
 
-class IfStmtSyntax : public StmtSyntax
+class IfStmtSyntax final : public StmtSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 10;
@@ -343,7 +343,7 @@ private:
    void validate();
 };
 
-class WhileStmtSyntax : public StmtSyntax
+class WhileStmtSyntax final : public StmtSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 5;
@@ -409,7 +409,7 @@ private:
    void validate();
 };
 
-class DoWhileStmtSyntax : public StmtSyntax
+class DoWhileStmtSyntax final : public StmtSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 8;
@@ -477,7 +477,7 @@ private:
 ///
 /// switch-default-label -> 'default' ':'
 ///
-class SwitchDefaultLabelSyntax : public Syntax
+class SwitchDefaultLabelSyntax final : public Syntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 2;
@@ -515,7 +515,7 @@ private:
 ///
 /// switch-case-label -> 'case' case-item-list ':'
 ///
-class SwitchCaseLabelSyntax : public Syntax
+class SwitchCaseLabelSyntax final : public Syntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 3;
@@ -558,7 +558,7 @@ private:
 /// switch-case -> switch-case-label stmt-list
 ///              | switch-default-label stmt-list
 ///
-class SwitchCaseSyntax : public Syntax
+class SwitchCaseSyntax final : public Syntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 2;
@@ -605,7 +605,7 @@ private:
 /// switch-stmt -> identifier? ':'? 'switch' '(' expr ')' '{'
 ///    switch-case-list '}'
 ///
-class SwitchStmtSyntax : public StmtSyntax
+class SwitchStmtSyntax final : public StmtSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 9;
@@ -681,7 +681,7 @@ private:
 ///
 /// defer-stmt -> 'defer' code-block
 ///
-class DeferStmtSyntax : public StmtSyntax
+class DeferStmtSyntax final : public StmtSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 2;
@@ -718,7 +718,7 @@ private:
 ///
 /// expr-stmt -> expression ';'
 ///
-class ExpressionStmtSyntax : public StmtSyntax
+class ExpressionStmtSyntax final : public StmtSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -744,7 +744,7 @@ private:
    void validate();
 };
 
-class ThrowStmtSyntax : public StmtSyntax
+class ThrowStmtSyntax final : public StmtSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 2;
@@ -787,7 +787,7 @@ private:
    void validate();
 };
 
-class ReturnStmtSyntax : public StmtSyntax
+class ReturnStmtSyntax final : public StmtSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 2;

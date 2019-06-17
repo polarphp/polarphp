@@ -12,6 +12,7 @@
 #include "polarphp/parser/parsedbuilder/ParsedCommonSyntaxNodeBuilders.h"
 #include "polarphp/parser/ParsedRawSyntaxRecorder.h"
 #include "polarphp/parser/SyntaxParsingContext.h"
+#include "polarphp/parser/parsedsyntaxnode/ParsedCommonSyntaxNodes.h"
 #include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
 
 namespace polar::parser {
@@ -19,7 +20,6 @@ namespace polar::parser {
 ///
 /// ParsedCodeBlockItemSyntaxBuilder
 ///
-
 ParsedCodeBlockItemSyntaxBuilder &ParsedCodeBlockItemSyntaxBuilder::useItem(ParsedSyntax item)
 {
    m_layout[cursor_index(Cursor::Item)] = item.getRaw();
@@ -91,8 +91,16 @@ ParsedCodeBlockSyntaxBuilder &ParsedCodeBlockSyntaxBuilder::useLeftBrace(ParsedT
 
 ParsedCodeBlockSyntaxBuilder &ParsedCodeBlockSyntaxBuilder::useStatements(ParsedCodeBlockItemListSyntax statements)
 {
+   assert(m_statementsMembers.empty() && "use either 'use' function or 'add', not both");
    m_layout[Cursor::Statements] = statements.getRaw();
    return *this;
+}
+
+ParsedCodeBlockSyntaxBuilder &ParsedCodeBlockSyntaxBuilder::addStatementMember(ParsedCodeBlockItemSyntax statemenet)
+{
+    assert(m_layout[cursor_index(Cursor::Statements)].isNull() && "use either 'use' function or 'add', not both");
+    m_statementsMembers.pushBack(std::move(statemenet.getRaw()));
+    return *this;
 }
 
 ParsedCodeBlockSyntaxBuilder &ParsedCodeBlockSyntaxBuilder::useRightBrace(ParsedTokenSyntax rightBrace)

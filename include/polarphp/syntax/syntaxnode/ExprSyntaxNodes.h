@@ -39,7 +39,7 @@ class BinaryOperatorExprSyntax;
 /// element type: ExprSyntax
 using ExprListSyntax = SyntaxCollection<SyntaxKind::ExprList, ExprSyntax>;
 
-class NullExprSyntax : public ExprSyntax
+class NullExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -75,7 +75,7 @@ private:
    void validate();
 };
 
-class ClassRefParentExprSyntax : public ExprSyntax
+class ClassRefParentExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -113,7 +113,7 @@ private:
    void validate();
 };
 
-class ClassRefSelfExprSyntax : public ExprSyntax
+class ClassRefSelfExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -150,7 +150,7 @@ private:
    void validate();
 };
 
-class ClassRefStaticExprSyntax : public ExprSyntax
+class ClassRefStaticExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -186,7 +186,7 @@ private:
    void validate();
 };
 
-class IntegerLiteralExprSyntax : public ExprSyntax
+class IntegerLiteralExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -222,7 +222,7 @@ private:
    void validate();
 };
 
-class FloatLiteralExprSyntax : public ExprSyntax
+class FloatLiteralExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -259,7 +259,7 @@ private:
    void validate();
 };
 
-class StringLiteralExprSyntax : public ExprSyntax
+class StringLiteralExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -295,7 +295,7 @@ private:
    void validate();
 };
 
-class BooleanLiteralExprSyntax : public ExprSyntax
+class BooleanLiteralExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -346,7 +346,7 @@ private:
    void validate();
 };
 
-class TernaryExprSyntax : public ExprSyntax
+class TernaryExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 5;
@@ -423,7 +423,7 @@ private:
    void validate();
 };
 
-class AssignmentExprSyntax : public ExprSyntax
+class AssignmentExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -463,7 +463,7 @@ private:
    void validate();
 };
 
-class SequenceExprSyntax : public ExprSyntax
+class SequenceExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;
@@ -513,7 +513,7 @@ private:
    void validate();
 };
 
-class PrefixOperatorExprSyntax : public ExprSyntax
+class PrefixOperatorExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 2;
@@ -555,7 +555,7 @@ private:
    void validate();
 };
 
-class PostfixOperatorExprSyntax : public ExprSyntax
+class PostfixOperatorExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 2;
@@ -598,7 +598,7 @@ private:
    void validate();
 };
 
-class BinaryOperatorExprSyntax : public ExprSyntax
+class BinaryOperatorExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 1;

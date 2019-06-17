@@ -17,7 +17,26 @@
 
 namespace polar::syntax {
 
+class SourceFileSyntaxBuilder
+{
+public:
+   using Cursor = SourceFileSyntax::Cursor;
+public:
+   SourceFileSyntaxBuilder() = default;
+   SourceFileSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
 
+   SourceFileSyntaxBuilder &useStatements(CodeBlockItemListSyntax statements);
+   SourceFileSyntaxBuilder &addStatement(CodeBlockItemSyntax statement);
+   SourceFileSyntaxBuilder &useEofToken(TokenSyntax eofToken);
+   SourceFileSyntax build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[SourceFileSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr
+   };
+};
 
 } // polar::syntax
 

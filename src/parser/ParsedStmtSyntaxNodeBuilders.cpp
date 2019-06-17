@@ -8,3 +8,12 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/06/17.
+
+#include "polarphp/parser/parsedbuilder/ParsedStmtSyntaxNodeBuilders.h"
+#include "polarphp/parser/ParsedRawSyntaxRecorder.h"
+#include "polarphp/parser/SyntaxParsingContext.h"
+#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
+
+namespace polar::parser {
+
+} // polar::parser

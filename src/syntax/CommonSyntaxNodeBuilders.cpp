@@ -43,8 +43,8 @@ CodeBlockItemSyntax CodeBlockItemSyntaxBuilder::build()
       m_layout[itemNodeIndex] = RawSyntax::missing(TokenKindType::T_SEMICOLON,
                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
    }
-   auto raw = RawSyntax::make(SyntaxKind::CodeBlockItem,
-                              m_layout, SourcePresence::Present, m_arena);
+   RefCountPtr<RawSyntax> raw = RawSyntax::make(SyntaxKind::CodeBlockItem,
+                                                m_layout, SourcePresence::Present, m_arena);
    return make<CodeBlockItemSyntax>(raw);
 }
 
@@ -68,9 +68,9 @@ CodeBlockSyntaxBuilder &CodeBlockSyntaxBuilder::useStatements(CodeBlockItemListS
 
 CodeBlockSyntaxBuilder &CodeBlockSyntaxBuilder::addCodeBlockItem(CodeBlockItemSyntax stmt)
 {
-   auto &raw = m_layout[cursor_index(Cursor::Statements)];
+   RefCountPtr<RawSyntax> &raw = m_layout[cursor_index(Cursor::Statements)];
    if (!raw) {
-      raw = RawSyntax::make(SyntaxKind::CodeBlockItemList, stmt.getRaw(), SourcePresence::Present, m_arena);
+      raw = RawSyntax::make(SyntaxKind::CodeBlockItemList, {stmt.getRaw()}, SourcePresence::Present, m_arena);
    } else {
       raw = raw->append(stmt.getRaw());
    }
@@ -95,8 +95,8 @@ CodeBlockSyntax CodeBlockSyntaxBuilder::build()
       m_layout[stmtsIndex] = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
    }
 
-   auto raw = RawSyntax::make(SyntaxKind::CodeBlock,
-                              m_layout, SourcePresence::Present, m_arena);
+   RefCountPtr<RawSyntax> raw = RawSyntax::make(SyntaxKind::CodeBlock,
+                                                m_layout, SourcePresence::Present, m_arena);
    return make<CodeBlockSyntax>(raw);
 }
 
