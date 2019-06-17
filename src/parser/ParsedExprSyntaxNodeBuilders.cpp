@@ -598,4 +598,55 @@ void ParsedSequenceExprSyntaxBuilder::finishLayout(bool deferred)
    }
 }
 
+///
+/// ParsedPrefixOperatorExprSyntaxBuilder
+///
+ParsedPrefixOperatorExprSyntaxBuilder
+&ParsedPrefixOperatorExprSyntaxBuilder::useOperatorToken(ParsedTokenSyntax operatorToken)
+{
+   m_layout[cursor_index(Cursor::OperatorToken)] = operatorToken.getRaw();
+   return *this;
+}
+
+ParsedPrefixOperatorExprSyntaxBuilder
+&ParsedPrefixOperatorExprSyntaxBuilder::useExpr(ParsedExprSyntax expr)
+{
+   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
+   return *this;
+}
+
+ParsedPrefixOperatorExprSyntax ParsedPrefixOperatorExprSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()){
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedPrefixOperatorExprSyntax ParsedPrefixOperatorExprSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::PrefixOperatorExpr, m_layout, m_context);
+   return ParsedPrefixOperatorExprSyntax(std::move(rawNode));
+}
+
+ParsedPrefixOperatorExprSyntax ParsedPrefixOperatorExprSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::PrefixOperatorExpr, m_layout);
+   return ParsedPrefixOperatorExprSyntax(std::move(rawNode));
+}
+
+void ParsedPrefixOperatorExprSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   (void) deferred;
+   CursorIndex exprIndex = cursor_index(Cursor::Expr);
+   if (m_layout[exprIndex].isNull()) {
+      polar_unreachable("need missing non-token nodes ?");
+   }
+}
+
 } // polar::parser

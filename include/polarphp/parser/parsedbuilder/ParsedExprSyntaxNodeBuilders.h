@@ -247,6 +247,28 @@ private:
    SmallVector<ParsedRawSyntaxNode, 8> m_statementMembers;
 };
 
+class ParsedPrefixOperatorExprSyntaxBuilder
+{
+public:
+   using Cursor = PrefixOperatorExprSyntax::Cursor;
+public:
+   ParsedPrefixOperatorExprSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedPrefixOperatorExprSyntaxBuilder &useOperatorToken(ParsedTokenSyntax operatorToken);
+   ParsedPrefixOperatorExprSyntaxBuilder &useExpr(ParsedExprSyntax expr);
+
+   ParsedPrefixOperatorExprSyntax build();
+   ParsedPrefixOperatorExprSyntax makeDeferred();
+private:
+   ParsedPrefixOperatorExprSyntax record();
+   void finishLayout(bool deferred);
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[PrefixOperatorExprSyntax::CHILDREN_COUNT];
+   SmallVector<ParsedRawSyntaxNode, 8> m_statementMembers;
+};
+
 
 } // polar::parser
 
