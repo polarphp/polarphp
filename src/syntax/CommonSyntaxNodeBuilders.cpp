@@ -34,8 +34,8 @@ CodeBlockItemSyntaxBuilder &CodeBlockItemSyntaxBuilder::useErrorTokens(Syntax er
 CodeBlockItemSyntax CodeBlockItemSyntaxBuilder::build()
 {
    /// ensure node exist
-   int itemNodeIndex = cursor_index(Cursor::Item);
-   int semicolonIndex = cursor_index(Cursor::Semicolon);
+   CursorIndex itemNodeIndex = cursor_index(Cursor::Item);
+   CursorIndex semicolonIndex = cursor_index(Cursor::Semicolon);
    if (!m_layout[itemNodeIndex]) {
       m_layout[itemNodeIndex] = RawSyntax::missing(SyntaxKind::Unknown);
    }
@@ -80,9 +80,9 @@ CodeBlockSyntaxBuilder &CodeBlockSyntaxBuilder::addCodeBlockItem(CodeBlockItemSy
 CodeBlockSyntax CodeBlockSyntaxBuilder::build()
 {
    /// ensure node exist
-   int leftBraceIndex = cursor_index(Cursor::LeftBrace);
-   int stmtsIndex = cursor_index(Cursor::Statements);
-   int rightBraceIndex = cursor_index(Cursor::RightBrace);
+   CursorIndex leftBraceIndex = cursor_index(Cursor::LeftBrace);
+   CursorIndex stmtsIndex = cursor_index(Cursor::Statements);
+   CursorIndex rightBraceIndex = cursor_index(Cursor::RightBrace);
    if (!m_layout[leftBraceIndex]) {
       m_layout[leftBraceIndex] = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE)));
