@@ -279,7 +279,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::AssignmentExpr;
+      return kind == SyntaxKind::SequenceExpr;
    }
 
    static bool classOf(const ParsedSyntax *syntax)

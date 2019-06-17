@@ -205,6 +205,47 @@ private:
    ParsedRawSyntaxNode m_layout[TernaryExprSyntax::CHILDREN_COUNT];
 };
 
+class ParsedAssignmentExprSyntaxBuilder
+{
+public:
+   using Cursor = AssignmentExprSyntax::Cursor;
+public:
+   ParsedAssignmentExprSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedAssignmentExprSyntaxBuilder &useAssignToken(ParsedTokenSyntax assignToken);
+
+   ParsedAssignmentExprSyntax build();
+   ParsedAssignmentExprSyntax makeDeferred();
+private:
+   ParsedAssignmentExprSyntax record();
+   void finishLayout(bool deferred);
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[AssignmentExprSyntax::CHILDREN_COUNT];
+};
+
+class ParsedSequenceExprSyntaxBuilder
+{
+public:
+   using Cursor = SequenceExprSyntax::Cursor;
+public:
+   ParsedSequenceExprSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedSequenceExprSyntaxBuilder &useElemenets(ParsedExprListSyntax elements);
+   ParsedSequenceExprSyntaxBuilder &addElementsMember(ParsedExprSyntax element);
+
+   ParsedSequenceExprSyntax build();
+   ParsedSequenceExprSyntax makeDeferred();
+private:
+   ParsedSequenceExprSyntax record();
+   void finishLayout(bool deferred);
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[SequenceExprSyntax::CHILDREN_COUNT];
+   SmallVector<ParsedRawSyntaxNode, 8> m_statementMembers;
+};
 
 
 } // polar::parser

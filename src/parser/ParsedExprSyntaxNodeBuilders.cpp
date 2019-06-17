@@ -487,4 +487,115 @@ void ParsedTernaryExprSyntaxBuilder::finishLayout(bool deferred)
    }
 }
 
+///
+/// ParsedAssignmentExprSyntaxBuilder
+///
+ParsedAssignmentExprSyntaxBuilder
+&ParsedAssignmentExprSyntaxBuilder::useAssignToken(ParsedTokenSyntax assignToken)
+{
+   m_layout[cursor_index(Cursor::AssignToken)] = assignToken.getRaw();
+   return *this;
+}
+
+ParsedAssignmentExprSyntax ParsedAssignmentExprSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()) {
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedAssignmentExprSyntax ParsedAssignmentExprSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::AssignmentExpr, m_layout, m_context);
+   return ParsedAssignmentExprSyntax(std::move(rawNode));
+}
+
+ParsedAssignmentExprSyntax ParsedAssignmentExprSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::AssignmentExpr, m_layout);
+   return ParsedAssignmentExprSyntax(std::move(rawNode));
+}
+
+void ParsedAssignmentExprSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex assignmentExprIndex = cursor_index(Cursor::AssignToken);
+   if (m_layout[assignmentExprIndex].isNull()) {
+      if (deferred) {
+         m_layout[assignmentExprIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_EQUAL, SourceLoc());
+      } else {
+         m_layout[assignmentExprIndex] = recorder.recordMissingToken(TokenKindType::T_EQUAL, SourceLoc());
+      }
+   }
+}
+
+///
+/// ParsedSequenceExprSyntaxBuilder
+///
+ParsedSequenceExprSyntaxBuilder
+&ParsedSequenceExprSyntaxBuilder::useElemenets(ParsedExprListSyntax elements)
+{
+   assert(m_statementMembers.empty() && "use either 'use' function or 'add', not both");
+   m_layout[cursor_index(Cursor::Elements)] = elements.getRaw();
+   return *this;
+}
+
+ParsedSequenceExprSyntaxBuilder
+&ParsedSequenceExprSyntaxBuilder::addElementsMember(ParsedExprSyntax statement)
+{
+   assert(m_layout[cursor_index(Cursor::Elements)].isNull() &&
+         "use either 'use' function or 'add', not both");
+   m_statementMembers.push_back(std::move(statement.getRaw()));
+   return *this;
+}
+
+ParsedSequenceExprSyntax ParsedSequenceExprSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()){
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedSequenceExprSyntax ParsedSequenceExprSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::SequenceExpr, m_layout, m_context);
+   return ParsedSequenceExprSyntax(std::move(rawNode));
+}
+
+ParsedSequenceExprSyntax ParsedSequenceExprSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::SequenceExpr, m_layout);
+   return ParsedSequenceExprSyntax(std::move(rawNode));
+}
+
+void ParsedSequenceExprSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex sequenceExprIndex = cursor_index(Cursor::Elements);
+   if (!m_statementMembers.empty()) {
+      if (deferred) {
+         m_layout[sequenceExprIndex] = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::SequenceExpr, m_statementMembers, m_context);
+      } else {
+         m_layout[sequenceExprIndex] = recorder.recordRawSyntax(SyntaxKind::SequenceExpr, m_statementMembers);
+      }
+   }
+   if (m_layout[sequenceExprIndex].isNull()) {
+      if (deferred) {
+         m_layout[sequenceExprIndex] = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::SequenceExpr, {}, m_context);
+      } else {
+         m_layout[sequenceExprIndex] = recorder.recordRawSyntax(SyntaxKind::SequenceExpr, {});
+      }
+   }
+}
+
 } // polar::parser
