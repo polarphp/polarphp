@@ -391,4 +391,100 @@ void ParsedBooleanLiteralExprSyntaxBuilder::finishLayout(bool deferred)
    }
 }
 
+///
+/// ParsedTernaryExprSyntaxBuilder
+///
+
+ParsedTernaryExprSyntaxBuilder
+&ParsedTernaryExprSyntaxBuilder::useConditionExpr(ParsedExprSyntax conditionExpr)
+{
+   m_layout[cursor_index(Cursor::ConditionExpr)] = conditionExpr.getRaw();
+   return *this;
+}
+
+ParsedTernaryExprSyntaxBuilder
+&ParsedTernaryExprSyntaxBuilder::useQuestionMark(ParsedTokenSyntax questionMark)
+{
+   m_layout[cursor_index(Cursor::QuestionMark)] = questionMark.getRaw();
+   return *this;
+}
+
+ParsedTernaryExprSyntaxBuilder
+&ParsedTernaryExprSyntaxBuilder::useFirstChoice(ParsedExprSyntax firstChoice)
+{
+   m_layout[cursor_index(Cursor::FirstChoice)] = firstChoice.getRaw();
+   return *this;
+}
+
+ParsedTernaryExprSyntaxBuilder
+&ParsedTernaryExprSyntaxBuilder::useColonMark(ParsedTokenSyntax colonMark)
+{
+   m_layout[cursor_index(Cursor::ColonMark)] = colonMark.getRaw();
+   return *this;
+}
+
+ParsedTernaryExprSyntaxBuilder
+&ParsedTernaryExprSyntaxBuilder::useSecondChoice(ParsedExprSyntax secondChoice)
+{
+   m_layout[cursor_index(Cursor::SecondChoice)] = secondChoice.getRaw();
+   return *this;
+}
+
+ParsedTernaryExprSyntax ParsedTernaryExprSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()) {
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedTernaryExprSyntax ParsedTernaryExprSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::TernaryExpr, m_layout, m_context);
+   return ParsedTernaryExprSyntax(std::move(rawNode));
+}
+
+ParsedTernaryExprSyntax ParsedTernaryExprSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::TernaryExpr, m_layout);
+   return ParsedTernaryExprSyntax(std::move(rawNode));
+}
+
+void ParsedTernaryExprSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex conditionExprIndex = cursor_index(Cursor::ConditionExpr);
+   CursorIndex questionMarkIndex = cursor_index(Cursor::QuestionMark);
+   CursorIndex firstChoiceIndex = cursor_index(Cursor::FirstChoice);
+   CursorIndex colonMarkIndex = cursor_index(Cursor::ColonMark);
+   CursorIndex secondChoiceIndex = cursor_index(Cursor::SecondChoice);
+   if (m_layout[conditionExprIndex].isNull()) {
+      polar_unreachable("need missing non-token nodes ?");
+   }
+   if (m_layout[questionMarkIndex].isNull()) {
+      if (deferred) {
+         m_layout[questionMarkIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_INFIX_QUESTION_MARK, SourceLoc());
+      } else {
+         m_layout[questionMarkIndex] = recorder.recordMissingToken(TokenKindType::T_INFIX_QUESTION_MARK, SourceLoc());
+      }
+   }
+   if (m_layout[firstChoiceIndex].isNull()) {
+      polar_unreachable("need missing non-token nodes ?");
+   }
+   if (m_layout[colonMarkIndex].isNull()) {
+      if (deferred) {
+         m_layout[colonMarkIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_COLON, SourceLoc());
+      } else {
+         m_layout[colonMarkIndex] = recorder.recordMissingToken(TokenKindType::T_COLON, SourceLoc());
+      }
+   }
+   if (m_layout[secondChoiceIndex].isNull()) {
+      polar_unreachable("need missing non-token nodes ?");
+   }
+}
+
 } // polar::parser

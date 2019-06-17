@@ -181,6 +181,32 @@ private:
    ParsedRawSyntaxNode m_layout[BooleanLiteralExprSyntax::CHILDREN_COUNT];
 };
 
+class ParsedTernaryExprSyntaxBuilder
+{
+public:
+   using Cursor = TernaryExprSyntax::Cursor;
+public:
+   ParsedTernaryExprSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedTernaryExprSyntaxBuilder &useConditionExpr(ParsedExprSyntax conditionExpr);
+   ParsedTernaryExprSyntaxBuilder &useQuestionMark(ParsedTokenSyntax questionMark);
+   ParsedTernaryExprSyntaxBuilder &useFirstChoice(ParsedExprSyntax firstChoice);
+   ParsedTernaryExprSyntaxBuilder &useColonMark(ParsedTokenSyntax colonMark);
+   ParsedTernaryExprSyntaxBuilder &useSecondChoice(ParsedExprSyntax secondChoice);
+
+   ParsedTernaryExprSyntax build();
+   ParsedTernaryExprSyntax makeDeferred();
+private:
+   ParsedTernaryExprSyntax record();
+   void finishLayout(bool deferred);
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[TernaryExprSyntax::CHILDREN_COUNT];
+};
+
+
+
 } // polar::parser
 
 #endif // POLARPHP_PARSER_PARSED_EXPR_SYNTAX_NODE_BUILDERS_H
