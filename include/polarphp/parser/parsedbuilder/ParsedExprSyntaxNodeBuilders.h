@@ -88,6 +88,27 @@ private:
    ParsedRawSyntaxNode m_layout[ClassRefSelfExprSyntax::CHILDREN_COUNT];
 };
 
+class ParsedClassRefStaticExprSyntaxBuilder
+{
+public:
+   using Cursor = ClassRefStaticExprSyntax::Cursor;
+public:
+   ParsedClassRefStaticExprSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedClassRefStaticExprSyntaxBuilder &useStaticKeyword(ParsedTokenSyntax staticKeyword);
+
+   ParsedClassRefStaticExprSyntax build();
+   ParsedClassRefStaticExprSyntax makeDeferred();
+
+private:
+   ParsedClassRefStaticExprSyntax record();
+   void finishLayout(bool deferred);
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[ClassRefStaticExprSyntax::CHILDREN_COUNT];
+};
+
 } // polar::parser
 
 #endif // POLARPHP_PARSER_PARSED_EXPR_SYNTAX_NODE_BUILDERS_H

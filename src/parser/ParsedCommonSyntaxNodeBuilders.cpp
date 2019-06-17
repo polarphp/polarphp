@@ -49,17 +49,17 @@ ParsedCodeBlockItemSyntax ParsedCodeBlockItemSyntaxBuilder::build()
 ParsedCodeBlockItemSyntax ParsedCodeBlockItemSyntaxBuilder::makeDeferred()
 {
    finishLayout(/*deferred=*/true);
-   ParsedRawSyntaxNode raw = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::CodeBlockItem,
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::CodeBlockItem,
                                                                m_layout, m_context);
-   return ParsedCodeBlockItemSyntax(std::move(raw));
+   return ParsedCodeBlockItemSyntax(std::move(rawNode));
 }
 
 ParsedCodeBlockItemSyntax ParsedCodeBlockItemSyntaxBuilder::record()
 {
    finishLayout(/*deferred=*/false);
    ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
-   ParsedRawSyntaxNode raw = recorder.recordRawSyntax(SyntaxKind::CodeBlockItem, m_layout);
-   return ParsedCodeBlockItemSyntax(std::move(raw));
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::CodeBlockItem, m_layout);
+   return ParsedCodeBlockItemSyntax(std::move(rawNode));
 }
 
 void ParsedCodeBlockItemSyntaxBuilder::finishLayout(bool deferred)
@@ -120,16 +120,16 @@ ParsedCodeBlockSyntax ParsedCodeBlockSyntaxBuilder::build()
 ParsedCodeBlockSyntax ParsedCodeBlockSyntaxBuilder::makeDeferred()
 {
    finishLayout(/*deferred=*/true);
-   ParsedRawSyntaxNode raw = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::CodeBlock, m_layout, m_context);
-   return ParsedCodeBlockSyntax(std::move(raw));
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::CodeBlock, m_layout, m_context);
+   return ParsedCodeBlockSyntax(std::move(rawNode));
 }
 
 ParsedCodeBlockSyntax ParsedCodeBlockSyntaxBuilder::record()
 {
    finishLayout(/*deferred=*/false);
    ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
-   ParsedRawSyntaxNode raw = recorder.recordRawSyntax(SyntaxKind::CodeBlock, m_layout);
-   return ParsedCodeBlockSyntax(std::move(raw));
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::CodeBlock, m_layout);
+   return ParsedCodeBlockSyntax(std::move(rawNode));
 }
 
 void ParsedCodeBlockSyntaxBuilder::finishLayout(bool deferred)

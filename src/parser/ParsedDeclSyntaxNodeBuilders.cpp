@@ -51,16 +51,16 @@ ParsedSourceFileSyntax ParsedSourceFileSyntaxBuilder::build()
 ParsedSourceFileSyntax ParsedSourceFileSyntaxBuilder::makeDeferred()
 {
    finishLayout(true);
-   ParsedRawSyntaxNode raw = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::SourceFile, m_layout, m_context);
-   return ParsedSourceFileSyntax(std::move(raw));
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::SourceFile, m_layout, m_context);
+   return ParsedSourceFileSyntax(std::move(rawNode));
 }
 
 ParsedSourceFileSyntax ParsedSourceFileSyntaxBuilder::record()
 {
    finishLayout(false);
    ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
-   ParsedRawSyntaxNode raw = recorder.recordRawSyntax(SyntaxKind::SourceFile, m_layout);
-   return ParsedSourceFileSyntax(std::move(raw));
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::SourceFile, m_layout);
+   return ParsedSourceFileSyntax(std::move(rawNode));
 }
 
 void ParsedSourceFileSyntaxBuilder::finishLayout(bool deferred)
