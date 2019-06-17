@@ -20,6 +20,7 @@
 namespace polar::parser {
 
 using namespace polar::syntax;
+using polar::basic::SmallVector;
 
 class ParsedRawSyntaxRecorder;
 class SyntaxParsingContext;
@@ -47,6 +48,32 @@ private:
 
    SyntaxParsingContext &m_context;
    ParsedRawSyntaxNode m_layout[CodeBlockItemSyntax::CHILDREN_COUNT];
+};
+
+class ParsedCodeBlockSyntaxBuilder
+{
+public:
+   using Cursor = CodeBlockSyntax::Cursor;
+
+public:
+   explicit ParsedCodeBlockSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedCodeBlockSyntaxBuilder &useLeftBrace(ParsedTokenSyntax leftBrace);
+   ParsedCodeBlockSyntaxBuilder &useStatements(ParsedCodeBlockItemListSyntax statements);
+   ParsedCodeBlockSyntaxBuilder &addStatementMember(ParsedCodeBlockItemSyntax statemenet);
+   ParsedCodeBlockSyntaxBuilder &useRightBrace(ParsedTokenSyntax rightBrace);
+
+   ParsedCodeBlockSyntax build();
+   ParsedCodeBlockSyntax makeDeferred();
+private:
+   ParsedCodeBlockSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[CodeBlockSyntax::CHILDREN_COUNT];
+   SmallVector<ParsedRawSyntaxNode, 8> m_statementsMembers;
 };
 
 } // polar::parser
