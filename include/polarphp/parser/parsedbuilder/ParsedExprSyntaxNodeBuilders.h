@@ -163,6 +163,24 @@ private:
    ParsedRawSyntaxNode m_layout[StringLiteralExprSyntax::CHILDREN_COUNT];
 };
 
+class ParsedBooleanLiteralExprSyntaxBuilder
+{
+public:
+   using Cursor = BooleanLiteralExprSyntax::Cursor;
+public:
+   ParsedBooleanLiteralExprSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+   ParsedBooleanLiteralExprSyntaxBuilder &useBoolean(ParsedTokenSyntax booleanToken);
+   ParsedBooleanLiteralExprSyntax build();
+   ParsedBooleanLiteralExprSyntax makeDeferred();
+private:
+   ParsedBooleanLiteralExprSyntax record();
+   void finishLayout(bool deferred);
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[BooleanLiteralExprSyntax::CHILDREN_COUNT];
+};
+
 } // polar::parser
 
 #endif // POLARPHP_PARSER_PARSED_EXPR_SYNTAX_NODE_BUILDERS_H

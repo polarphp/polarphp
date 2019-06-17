@@ -343,4 +343,52 @@ void ParsedStringLiteralExprSyntaxBuilder::finishLayout(bool deferred)
    }
 }
 
+///
+/// ParsedBooleanLiteralExprSyntaxBuilder
+///
+
+ParsedBooleanLiteralExprSyntaxBuilder
+&ParsedBooleanLiteralExprSyntaxBuilder::useBoolean(ParsedTokenSyntax booleanToken)
+{
+   m_layout[cursor_index(Cursor::Boolean)] = booleanToken.getRaw();
+   return *this;
+}
+
+ParsedBooleanLiteralExprSyntax ParsedBooleanLiteralExprSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()) {
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedBooleanLiteralExprSyntax ParsedBooleanLiteralExprSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::BooleanLiteralExpr, m_layout, m_context);
+   return ParsedBooleanLiteralExprSyntax(std::move(rawNode));
+}
+
+ParsedBooleanLiteralExprSyntax ParsedBooleanLiteralExprSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::BooleanLiteralExpr, m_layout);
+   return ParsedBooleanLiteralExprSyntax(std::move(rawNode));
+}
+
+void ParsedBooleanLiteralExprSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex booleanIndex = cursor_index(Cursor::Boolean);
+   if (m_layout[booleanIndex].isNull()) {
+      if (deferred) {
+         m_layout[booleanIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_TRUE, SourceLoc());
+      } else {
+         m_layout[booleanIndex] = recorder.recordMissingToken(TokenKindType::T_TRUE, SourceLoc());
+      }
+   }
+}
+
 } // polar::parser
