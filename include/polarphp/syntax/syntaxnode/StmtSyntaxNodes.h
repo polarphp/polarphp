@@ -367,7 +367,7 @@ public:
       Conditions,
       /// type: TokenSyntax
       /// optional: false
-      rightParen,
+      RightParen,
       /// type: CodeBlockSyntax
       /// optional: false
       Body

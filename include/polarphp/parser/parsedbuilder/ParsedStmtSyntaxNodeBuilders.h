@@ -207,32 +207,15 @@ public:
       : m_context(context)
    {}
 
-   //   /// type: TokenSyntax
-   //   /// optional: false
-   //   DoKeyword,
-   //   /// type: CodeBlockSyntax
-   //   /// optional: false
-   //   Body,
-   //   /// type: TokenSyntax
-   //   /// optional: false
-   //   WhileKeyword,
-   //   /// type: TokenSyntax
-   //   /// optional: false
-   //   LeftParen,
-   //   /// type: ExprSyntax
-   //   /// optional: false
-   //   Condition,
-   //   /// type: TokenSyntax
-   //   /// optional: false
-   //   RightParen
    ParsedDoWhileStmtSyntaxBuilder &useLabelName(ParsedTokenSyntax labelName);
    ParsedDoWhileStmtSyntaxBuilder &useLabelColon(ParsedTokenSyntax labelColon);
    ParsedDoWhileStmtSyntaxBuilder &useDoKeyword(ParsedTokenSyntax doKeyword);
    ParsedDoWhileStmtSyntaxBuilder &useBody(ParsedCodeBlockSyntax body);
    ParsedDoWhileStmtSyntaxBuilder &useWhileKeyword(ParsedTokenSyntax whileKeyword);
-   ParsedDoWhileStmtSyntaxBuilder &useConditions(ParsedConditionElementListSyntax conditions);
+   ParsedDoWhileStmtSyntaxBuilder &useLeftParen(ParsedTokenSyntax leftParen);
+   ParsedDoWhileStmtSyntaxBuilder &useCondition(ParsedExprSyntax condition);
+   ParsedDoWhileStmtSyntaxBuilder &useRightParen(ParsedTokenSyntax rightParen);
    ParsedDoWhileStmtSyntaxBuilder &addConditionsMember(ParsedConditionElementSyntax condition);
-
 
    ParsedDoWhileStmtSyntax build();
    ParsedDoWhileStmtSyntax makeDeferred();
@@ -242,7 +225,6 @@ private:
 
    SyntaxParsingContext &m_context;
    ParsedRawSyntaxNode m_layout[DoWhileStmtSyntax::CHILDREN_COUNT];
-   SmallVector<ParsedRawSyntaxNode, 8> m_conditionsMembers;
 };
 
 } // polar::parser

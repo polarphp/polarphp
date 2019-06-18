@@ -362,7 +362,7 @@ WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useConditions(ConditionElementLi
 
 WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useRightParen(TokenSyntax rightParen)
 {
-   m_layout[cursor_index(Cursor::rightParen)] = rightParen.getRaw();
+   m_layout[cursor_index(Cursor::RightParen)] = rightParen.getRaw();
    return *this;
 }
 
@@ -391,7 +391,7 @@ WhileStmtSyntax WhileStmtSyntaxBuilder::build()
    CursorIndex whileKeywordIndex = cursor_index(Cursor::WhileKeyword);
    CursorIndex leftParenIndex = cursor_index(Cursor::LeftParen);
    CursorIndex conditionsIndex = cursor_index(Cursor::Conditions);
-   CursorIndex rightParenIndex = cursor_index(Cursor::rightParen);
+   CursorIndex rightParenIndex = cursor_index(Cursor::RightParen);
    CursorIndex bodyIndex = cursor_index(Cursor::Body);
    if (!m_layout[labelNameIndex]) {
       m_layout[labelNameIndex] = RawSyntax::missing(TokenKindType::T_STRING,

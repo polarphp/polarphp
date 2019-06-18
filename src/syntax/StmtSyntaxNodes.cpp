@@ -567,7 +567,7 @@ ConditionElementListSyntax WhileStmtSyntax::getConditions()
 
 TokenSyntax WhileStmtSyntax::getRightParen()
 {
-   return TokenSyntax{m_root, m_data->getChild(Cursor::rightParen).get()};
+   return TokenSyntax{m_root, m_data->getChild(Cursor::RightParen).get()};
 }
 
 CodeBlockSyntax WhileStmtSyntax::getBody()
@@ -641,7 +641,7 @@ WhileStmtSyntax WhileStmtSyntax::withRightParen(std::optional<TokenSyntax> right
       rawRightParen = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
                                          OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
    }
-   return m_data->replaceChild<WhileStmtSyntax>(rawRightParen, Cursor::rightParen);
+   return m_data->replaceChild<WhileStmtSyntax>(rawRightParen, Cursor::RightParen);
 }
 
 WhileStmtSyntax WhileStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)

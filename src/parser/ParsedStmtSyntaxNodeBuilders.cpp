@@ -534,7 +534,7 @@ ParsedWhileStmtSyntaxBuilder
 ParsedWhileStmtSyntaxBuilder
 &ParsedWhileStmtSyntaxBuilder::useRightParen(ParsedTokenSyntax rightParen)
 {
-   m_layout[cursor_index(Cursor::rightParen)] = rightParen.getRaw();
+   m_layout[cursor_index(Cursor::RightParen)] = rightParen.getRaw();
    return *this;
 }
 
@@ -583,7 +583,7 @@ void ParsedWhileStmtSyntaxBuilder::finishLayout(bool deferred)
    CursorIndex whileKeywordIndex = cursor_index(Cursor::WhileKeyword);
    CursorIndex leftParenIndex = cursor_index(Cursor::LeftParen);
    CursorIndex conditionsIndex = cursor_index(Cursor::Conditions);
-   CursorIndex rightParenIndex = cursor_index(Cursor::rightParen);
+   CursorIndex rightParenIndex = cursor_index(Cursor::RightParen);
    CursorIndex bodyIndex = cursor_index(Cursor::Body);
    if (!m_conditionsMembers.empty()) {
       if (deferred) {
@@ -619,6 +619,140 @@ void ParsedWhileStmtSyntaxBuilder::finishLayout(bool deferred)
 
    if (m_layout[bodyIndex].isNull()) {
       polar_unreachable("need missing non-token nodes ?");
+   }
+}
+
+///
+/// ParsedDoWhileStmtSyntaxBuilder
+///
+ParsedDoWhileStmtSyntaxBuilder
+&ParsedDoWhileStmtSyntaxBuilder::useLabelName(ParsedTokenSyntax labelName)
+{
+   m_layout[cursor_index(Cursor::LabelName)] = labelName.getRaw();
+   return *this;
+}
+
+ParsedDoWhileStmtSyntaxBuilder
+&ParsedDoWhileStmtSyntaxBuilder::useLabelColon(ParsedTokenSyntax labelColon)
+{
+   m_layout[cursor_index(Cursor::LabelColon)] = labelColon.getRaw();
+   return *this;
+}
+
+ParsedDoWhileStmtSyntaxBuilder
+&ParsedDoWhileStmtSyntaxBuilder::useDoKeyword(ParsedTokenSyntax doKeyword)
+{
+   m_layout[cursor_index(Cursor::DoKeyword)] = doKeyword.getRaw();
+   return *this;
+}
+
+ParsedDoWhileStmtSyntaxBuilder
+&ParsedDoWhileStmtSyntaxBuilder::useBody(ParsedCodeBlockSyntax body)
+{
+   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
+   return *this;
+}
+
+ParsedDoWhileStmtSyntaxBuilder
+&ParsedDoWhileStmtSyntaxBuilder::useWhileKeyword(ParsedTokenSyntax whileKeyword)
+{
+   m_layout[cursor_index(Cursor::WhileKeyword)] = whileKeyword.getRaw();
+   return *this;
+}
+
+ParsedDoWhileStmtSyntaxBuilder
+&ParsedDoWhileStmtSyntaxBuilder::useLeftParen(ParsedTokenSyntax leftParen)
+{
+   m_layout[cursor_index(Cursor::LeftParen)] = leftParen.getRaw();
+   return *this;
+}
+
+ParsedDoWhileStmtSyntaxBuilder
+&ParsedDoWhileStmtSyntaxBuilder::useCondition(ParsedExprSyntax condition)
+{
+   m_layout[cursor_index(Cursor::Condition)] = condition.getRaw();
+   return *this;
+}
+
+ParsedDoWhileStmtSyntaxBuilder
+&ParsedDoWhileStmtSyntaxBuilder::useRightParen(ParsedTokenSyntax rightParen)
+{
+   m_layout[cursor_index(Cursor::RightParen)] = rightParen.getRaw();
+   return *this;
+}
+
+ParsedDoWhileStmtSyntax ParsedDoWhileStmtSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()){
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedDoWhileStmtSyntax ParsedDoWhileStmtSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::DoWhileStmt, m_layout, m_context);
+   return ParsedDoWhileStmtSyntax(std::move(rawNode));
+}
+
+ParsedDoWhileStmtSyntax ParsedDoWhileStmtSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::DoWhileStmt, m_layout);
+   return ParsedDoWhileStmtSyntax(std::move(rawNode));
+}
+
+void ParsedDoWhileStmtSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex doKeywordIndex = cursor_index(Cursor::DoKeyword);
+   CursorIndex bodyIndex = cursor_index(Cursor::Body);
+   CursorIndex whileKeywordIndex = cursor_index(Cursor::WhileKeyword);
+   CursorIndex leftParenIndex = cursor_index(Cursor::LeftParen);
+   CursorIndex conditionsIndex = cursor_index(Cursor::Condition);
+   CursorIndex rightParenIndex = cursor_index(Cursor::RightParen);
+
+   if (m_layout[doKeywordIndex].isNull()) {
+      if (deferred) {
+         m_layout[doKeywordIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_DO, SourceLoc());
+      } else {
+         m_layout[doKeywordIndex] = recorder.recordMissingToken(TokenKindType::T_DO, SourceLoc());
+      }
+   }
+
+   if (m_layout[bodyIndex].isNull()) {
+      polar_unreachable("need missing non-token nodes ?");
+   }
+
+   if (m_layout[whileKeywordIndex].isNull()) {
+      if (deferred) {
+         m_layout[whileKeywordIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_WHILE, SourceLoc());
+      } else {
+         m_layout[whileKeywordIndex] = recorder.recordMissingToken(TokenKindType::T_WHILE, SourceLoc());
+      }
+   }
+
+   if (m_layout[leftParenIndex].isNull()) {
+      if (deferred) {
+         m_layout[leftParenIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_LEFT_PAREN, SourceLoc());
+      } else {
+         m_layout[leftParenIndex] = recorder.recordMissingToken(TokenKindType::T_LEFT_PAREN, SourceLoc());
+      }
+   }
+
+   if (m_layout[conditionsIndex].isNull()) {
+      polar_unreachable("need missing non-token nodes ?");
+   }
+
+   if (m_layout[rightParenIndex].isNull()) {
+      if (deferred) {
+         m_layout[rightParenIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_RIGHT_PAREN, SourceLoc());
+      } else {
+         m_layout[rightParenIndex] = recorder.recordMissingToken(TokenKindType::T_RIGHT_PAREN, SourceLoc());
+      }
    }
 }
 
