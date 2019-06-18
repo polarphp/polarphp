@@ -112,6 +112,32 @@ private:
    ParsedRawSyntaxNode m_layout[FallthroughStmtSyntax::CHILDREN_COUNT];
 };
 
+class ParsedElseIfClauseSyntaxBuilder
+{
+public:
+   using Cursor = ElseIfClauseSyntax::Cursor;
+public:
+   explicit ParsedElseIfClauseSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedElseIfClauseSyntaxBuilder &useElseIfKeyword(ParsedTokenSyntax elseIfKeyword);
+   ParsedElseIfClauseSyntaxBuilder &useLeftParen(ParsedTokenSyntax leftParen);
+   ParsedElseIfClauseSyntaxBuilder &useCondition(ParsedSyntax condition);
+   ParsedElseIfClauseSyntaxBuilder &useRightParen(ParsedTokenSyntax rightParen);
+   ParsedElseIfClauseSyntaxBuilder &useBody(ParsedCodeBlockSyntax body);
+
+   ParsedElseIfClauseSyntax build();
+   ParsedElseIfClauseSyntax makeDeferred();
+private:
+   ParsedElseIfClauseSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[ElseIfClauseSyntax::CHILDREN_COUNT];
+};
+
+
 } // polar::parser
 
 #endif // POLARPHP_PARSER_PARSED_STMT_SYNTAX_NODE_BUILDERS_H
