@@ -137,6 +137,64 @@ private:
    ParsedRawSyntaxNode m_layout[ElseIfClauseSyntax::CHILDREN_COUNT];
 };
 
+class ParsedIfStmtSyntaxBuilder
+{
+public:
+   using Cursor = IfStmtSyntax::Cursor;
+public:
+   explicit ParsedIfStmtSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedIfStmtSyntaxBuilder &useLabelName(ParsedTokenSyntax labelName);
+   ParsedIfStmtSyntaxBuilder &useLabelColon(ParsedTokenSyntax labelColon);
+   ParsedIfStmtSyntaxBuilder &useIfKeyword(ParsedTokenSyntax ifKeyword);
+   ParsedIfStmtSyntaxBuilder &useLeftParen(ParsedTokenSyntax leftParen);
+   ParsedIfStmtSyntaxBuilder &useCondition(ParsedExprSyntax condition);
+   ParsedIfStmtSyntaxBuilder &useRightParen(ParsedTokenSyntax rightParen);
+   ParsedIfStmtSyntaxBuilder &useBody(ParsedCodeBlockSyntax body);
+   ParsedIfStmtSyntaxBuilder &useElseIfClauses(ParsedElseIfListSyntax elseIfClauses);
+   ParsedIfStmtSyntaxBuilder &addElseIfClausesMember(ParsedElseIfClauseSyntax elseIfClause);
+   ParsedIfStmtSyntaxBuilder &useElseKeyword(ParsedTokenSyntax elseKeyword);
+   ParsedIfStmtSyntaxBuilder &useElseBody(ParsedSyntax elseBody);
+
+   ParsedIfStmtSyntax build();
+   ParsedIfStmtSyntax makeDeferred();
+private:
+   ParsedIfStmtSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[IfStmtSyntax::CHILDREN_COUNT];
+   SmallVector<ParsedRawSyntaxNode, 8> m_elseIfClausesMembers;
+};
+
+class ParsedWhileStmtSyntaxBuilder
+{
+public:
+   using Cursor = WhileStmtSyntax::Cursor;
+public:
+   explicit ParsedWhileStmtSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedWhileStmtSyntaxBuilder &useLabelName(ParsedTokenSyntax labelName);
+   ParsedWhileStmtSyntaxBuilder &useLabelColon(ParsedTokenSyntax labelColon);
+   ParsedWhileStmtSyntaxBuilder &useWhileKeyword(ParsedTokenSyntax whileKeyword);
+   ParsedWhileStmtSyntaxBuilder &useConditions(ParsedConditionElementListSyntax conditions);
+   ParsedWhileStmtSyntaxBuilder &addConditionsMember(ParsedConditionElementSyntax condition);
+   ParsedWhileStmtSyntaxBuilder &useBody(ParsedCodeBlockSyntax body);
+
+   ParsedWhileStmtSyntax build();
+   ParsedWhileStmtSyntax makeDeferred();
+private:
+   ParsedWhileStmtSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[WhileStmtSyntax::CHILDREN_COUNT];
+   SmallVector<ParsedRawSyntaxNode, 8> m_conditionsMembers;
+};
 
 } // polar::parser
 
