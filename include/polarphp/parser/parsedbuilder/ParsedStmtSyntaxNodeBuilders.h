@@ -19,6 +19,99 @@
 
 namespace polar::parser {
 
+using namespace polar::syntax;
+using polar::basic::SmallVector;
+
+class ParsedRawSyntaxRecorder;
+class SyntaxParsingContext;
+
+class ParsedConditionElementSyntaxBuilder
+{
+public:
+   using Cursor = ConditionElementSyntax::Cursor;
+public:
+   explicit ParsedConditionElementSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedConditionElementSyntaxBuilder &useCondition(ParsedSyntax condition);
+   ParsedConditionElementSyntaxBuilder &useTrailingComma(ParsedTokenSyntax trailingComma);
+
+   ParsedConditionElementSyntax build();
+   ParsedConditionElementSyntax makeDeferred();
+private:
+   ParsedConditionElementSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[ConditionElementSyntax::CHILDREN_COUNT];
+};
+
+class ParsedContinueStmtSyntaxBuilder
+{
+public:
+   using Cursor = ContinueStmtSyntax::Cursor;
+public:
+   explicit ParsedContinueStmtSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedContinueStmtSyntaxBuilder &useContinueKeyword(ParsedTokenSyntax continueKeyword);
+   ParsedContinueStmtSyntaxBuilder &useLNumberToken(ParsedTokenSyntax numberToken);
+
+   ParsedContinueStmtSyntax build();
+   ParsedContinueStmtSyntax makeDeferred();
+private:
+   ParsedContinueStmtSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[ContinueStmtSyntax::CHILDREN_COUNT];
+};
+
+class ParsedBreakStmtSyntaxBuilder
+{
+public:
+   using Cursor = BreakStmtSyntax::Cursor;
+public:
+   explicit ParsedBreakStmtSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedBreakStmtSyntaxBuilder &useBreakKeyword(ParsedTokenSyntax breakKeyword);
+   ParsedBreakStmtSyntaxBuilder &useLNumberToken(ParsedTokenSyntax numberToken);
+
+   ParsedBreakStmtSyntax build();
+   ParsedBreakStmtSyntax makeDeferred();
+private:
+   ParsedBreakStmtSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[BreakStmtSyntax::CHILDREN_COUNT];
+};
+
+class ParsedFallthroughStmtSyntaxBuilder
+{
+public:
+   using Cursor = FallthroughStmtSyntax::Cursor;
+public:
+   explicit ParsedFallthroughStmtSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedFallthroughStmtSyntaxBuilder &useFallthroughKeyword(ParsedTokenSyntax fallthroughKeyword);
+
+   ParsedFallthroughStmtSyntax build();
+   ParsedFallthroughStmtSyntax makeDeferred();
+private:
+   ParsedFallthroughStmtSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[FallthroughStmtSyntax::CHILDREN_COUNT];
+};
+
 } // polar::parser
 
 #endif // POLARPHP_PARSER_PARSED_STMT_SYNTAX_NODE_BUILDERS_H
