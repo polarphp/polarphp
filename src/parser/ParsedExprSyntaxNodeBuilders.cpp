@@ -649,4 +649,109 @@ void ParsedPrefixOperatorExprSyntaxBuilder::finishLayout(bool deferred)
    }
 }
 
+///
+/// ParsedPostfixOperatorExprSyntaxBuilder
+///
+ParsedPostfixOperatorExprSyntaxBuilder
+&ParsedPostfixOperatorExprSyntaxBuilder::useExpr(ParsedExprSyntax expr)
+{
+   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
+   return *this;
+}
+
+ParsedPostfixOperatorExprSyntaxBuilder
+&ParsedPostfixOperatorExprSyntaxBuilder::useOperatorToken(ParsedTokenSyntax operatorToken)
+{
+   m_layout[cursor_index(Cursor::OperatorToken)] = operatorToken.getRaw();
+   return *this;
+}
+
+ParsedPostfixOperatorExprSyntax ParsedPostfixOperatorExprSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()){
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedPostfixOperatorExprSyntax ParsedPostfixOperatorExprSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::PostfixOperatorExpr, m_layout, m_context);
+   return ParsedPostfixOperatorExprSyntax(std::move(rawNode));
+}
+
+ParsedPostfixOperatorExprSyntax ParsedPostfixOperatorExprSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::PostfixOperatorExpr, m_layout);
+   return ParsedPostfixOperatorExprSyntax(std::move(rawNode));
+}
+
+void ParsedPostfixOperatorExprSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex operatorTokenIndex = cursor_index(Cursor::OperatorToken);
+   CursorIndex exprIndex = cursor_index(Cursor::Expr);
+   if (m_layout[operatorTokenIndex].isNull()) {
+      if (deferred) {
+         m_layout[operatorTokenIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_POSTFIX_OPERATOR, SourceLoc());
+      } else {
+         m_layout[operatorTokenIndex] = recorder.recordMissingToken(TokenKindType::T_POSTFIX_OPERATOR, SourceLoc());
+      }
+   }
+   if (m_layout[exprIndex].isNull()) {
+      polar_unreachable("need missing non-token nodes ?");
+   }
+}
+
+///
+/// ParsedBinaryOperatorExprSyntaxBuilder
+///
+ParsedBinaryOperatorExprSyntaxBuilder
+&ParsedBinaryOperatorExprSyntaxBuilder::useOperatorToken(ParsedTokenSyntax operatorToken)
+{
+   m_layout[cursor_index(Cursor::OperatorToken)] = operatorToken.getRaw();
+   return *this;
+}
+
+ParsedBinaryOperatorExprSyntax ParsedBinaryOperatorExprSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()){
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedBinaryOperatorExprSyntax ParsedBinaryOperatorExprSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::BinaryOperatorExpr, m_layout, m_context);
+   return ParsedBinaryOperatorExprSyntax(std::move(rawNode));
+}
+
+ParsedBinaryOperatorExprSyntax ParsedBinaryOperatorExprSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::BinaryOperatorExpr, m_layout);
+   return ParsedBinaryOperatorExprSyntax(std::move(rawNode));
+}
+
+void ParsedBinaryOperatorExprSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex operatorTokenIndex = cursor_index(Cursor::OperatorToken);
+   if (m_layout[operatorTokenIndex].isNull()) {
+      if (deferred) {
+         m_layout[operatorTokenIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_BINARY_OPERATOR, SourceLoc());
+      } else {
+         m_layout[operatorTokenIndex] = recorder.recordMissingToken(TokenKindType::T_BINARY_OPERATOR, SourceLoc());
+      }
+   }
+}
+
 } // polar::parser

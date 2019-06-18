@@ -269,6 +269,48 @@ private:
    SmallVector<ParsedRawSyntaxNode, 8> m_statementMembers;
 };
 
+class ParsedPostfixOperatorExprSyntaxBuilder
+{
+public:
+   using Cursor = PostfixOperatorExprSyntax::Cursor;
+public:
+   ParsedPostfixOperatorExprSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedPostfixOperatorExprSyntaxBuilder &useExpr(ParsedExprSyntax expr);
+   ParsedPostfixOperatorExprSyntaxBuilder &useOperatorToken(ParsedTokenSyntax operatorToken);
+
+   ParsedPostfixOperatorExprSyntax build();
+   ParsedPostfixOperatorExprSyntax makeDeferred();
+private:
+   ParsedPostfixOperatorExprSyntax record();
+   void finishLayout(bool deferred);
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[PostfixOperatorExprSyntax::CHILDREN_COUNT];
+   SmallVector<ParsedRawSyntaxNode, 8> m_statementMembers;
+};
+
+class ParsedBinaryOperatorExprSyntaxBuilder
+{
+public:
+   using Cursor = BinaryOperatorExprSyntax::Cursor;
+public:
+   ParsedBinaryOperatorExprSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedBinaryOperatorExprSyntaxBuilder &useOperatorToken(ParsedTokenSyntax operatorToken);
+
+   ParsedBinaryOperatorExprSyntax build();
+   ParsedBinaryOperatorExprSyntax makeDeferred();
+private:
+   ParsedBinaryOperatorExprSyntax record();
+   void finishLayout(bool deferred);
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[BinaryOperatorExprSyntax::CHILDREN_COUNT];
+   SmallVector<ParsedRawSyntaxNode, 8> m_statementMembers;
+};
 
 } // polar::parser
 
