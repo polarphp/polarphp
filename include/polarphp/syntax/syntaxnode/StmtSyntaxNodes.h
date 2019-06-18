@@ -346,8 +346,8 @@ private:
 class WhileStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 5;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 3;
+   constexpr static unsigned int CHILDREN_COUNT = 7;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 5;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -359,9 +359,15 @@ public:
       /// type: TokenSyntax
       /// optional: false
       WhileKeyword,
+      /// type: TokenSyntax
+      /// optional: false
+      LeftParen,
       /// type: ConditionElementListSyntax
       /// optional: false
       Conditions,
+      /// type: TokenSyntax
+      /// optional: false
+      rightParen,
       /// type: CodeBlockSyntax
       /// optional: false
       Body
@@ -377,13 +383,17 @@ public:
    std::optional<TokenSyntax> getLabelName();
    std::optional<TokenSyntax> getLabelColon();
    TokenSyntax getWhileKeyword();
+   TokenSyntax getLeftParen();
    ConditionElementListSyntax getConditions();
+   TokenSyntax getRightParen();
    CodeBlockSyntax getBody();
 
    WhileStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
    WhileStmtSyntax withLabelColon(std::optional<TokenSyntax> labelColon);
    WhileStmtSyntax withWhileKeyword(std::optional<TokenSyntax> whileKeyword);
+   WhileStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
    WhileStmtSyntax withConditions(std::optional<ConditionElementListSyntax> conditions);
+   WhileStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
    WhileStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
 
    /// Adds the provided `condition` to the node's `Conditions`

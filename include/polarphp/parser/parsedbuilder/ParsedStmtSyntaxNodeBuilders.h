@@ -181,7 +181,9 @@ public:
    ParsedWhileStmtSyntaxBuilder &useLabelName(ParsedTokenSyntax labelName);
    ParsedWhileStmtSyntaxBuilder &useLabelColon(ParsedTokenSyntax labelColon);
    ParsedWhileStmtSyntaxBuilder &useWhileKeyword(ParsedTokenSyntax whileKeyword);
+   ParsedWhileStmtSyntaxBuilder &useLeftParen(ParsedTokenSyntax leftParen);
    ParsedWhileStmtSyntaxBuilder &useConditions(ParsedConditionElementListSyntax conditions);
+   ParsedWhileStmtSyntaxBuilder &useRightParen(ParsedTokenSyntax rightParen);
    ParsedWhileStmtSyntaxBuilder &addConditionsMember(ParsedConditionElementSyntax condition);
    ParsedWhileStmtSyntaxBuilder &useBody(ParsedCodeBlockSyntax body);
 
@@ -193,6 +195,53 @@ private:
 
    SyntaxParsingContext &m_context;
    ParsedRawSyntaxNode m_layout[WhileStmtSyntax::CHILDREN_COUNT];
+   SmallVector<ParsedRawSyntaxNode, 8> m_conditionsMembers;
+};
+
+class ParsedDoWhileStmtSyntaxBuilder
+{
+public:
+   using Cursor = DoWhileStmtSyntax::Cursor;
+public:
+   explicit ParsedDoWhileStmtSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   //   /// type: TokenSyntax
+   //   /// optional: false
+   //   DoKeyword,
+   //   /// type: CodeBlockSyntax
+   //   /// optional: false
+   //   Body,
+   //   /// type: TokenSyntax
+   //   /// optional: false
+   //   WhileKeyword,
+   //   /// type: TokenSyntax
+   //   /// optional: false
+   //   LeftParen,
+   //   /// type: ExprSyntax
+   //   /// optional: false
+   //   Condition,
+   //   /// type: TokenSyntax
+   //   /// optional: false
+   //   RightParen
+   ParsedDoWhileStmtSyntaxBuilder &useLabelName(ParsedTokenSyntax labelName);
+   ParsedDoWhileStmtSyntaxBuilder &useLabelColon(ParsedTokenSyntax labelColon);
+   ParsedDoWhileStmtSyntaxBuilder &useDoKeyword(ParsedTokenSyntax doKeyword);
+   ParsedDoWhileStmtSyntaxBuilder &useBody(ParsedCodeBlockSyntax body);
+   ParsedDoWhileStmtSyntaxBuilder &useWhileKeyword(ParsedTokenSyntax whileKeyword);
+   ParsedDoWhileStmtSyntaxBuilder &useConditions(ParsedConditionElementListSyntax conditions);
+   ParsedDoWhileStmtSyntaxBuilder &addConditionsMember(ParsedConditionElementSyntax condition);
+
+
+   ParsedDoWhileStmtSyntax build();
+   ParsedDoWhileStmtSyntax makeDeferred();
+private:
+   ParsedDoWhileStmtSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[DoWhileStmtSyntax::CHILDREN_COUNT];
    SmallVector<ParsedRawSyntaxNode, 8> m_conditionsMembers;
 };
 

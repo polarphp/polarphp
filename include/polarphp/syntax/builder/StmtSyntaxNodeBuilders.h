@@ -175,7 +175,9 @@ public:
    WhileStmtSyntaxBuilder &useLabelName(TokenSyntax labelName);
    WhileStmtSyntaxBuilder &useLabelColon(TokenSyntax labelColon);
    WhileStmtSyntaxBuilder &useWhileKeyword(TokenSyntax whileKeyword);
+   WhileStmtSyntaxBuilder &useLeftParen(TokenSyntax leftParen);
    WhileStmtSyntaxBuilder &useConditions(ConditionElementListSyntax conditions);
+   WhileStmtSyntaxBuilder &useRightParen(TokenSyntax rightParen);
    WhileStmtSyntaxBuilder &useBody(CodeBlockSyntax body);
    WhileStmtSyntaxBuilder &addCondition(ConditionElementSyntax condition);
 
@@ -184,7 +186,7 @@ public:
 private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[WhileStmtSyntax::CHILDREN_COUNT] = {
-      nullptr, nullptr, nullptr, nullptr, nullptr
+      nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
    };
 };
 

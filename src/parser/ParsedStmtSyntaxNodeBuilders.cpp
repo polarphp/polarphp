@@ -517,10 +517,24 @@ ParsedWhileStmtSyntaxBuilder
 }
 
 ParsedWhileStmtSyntaxBuilder
+&ParsedWhileStmtSyntaxBuilder::useLeftParen(ParsedTokenSyntax leftParen)
+{
+   m_layout[cursor_index(Cursor::LeftParen)] = leftParen.getRaw();
+   return *this;
+}
+
+ParsedWhileStmtSyntaxBuilder
 &ParsedWhileStmtSyntaxBuilder::useConditions(ParsedConditionElementListSyntax conditions)
 {
    assert(m_conditionsMembers.empty() && "use either 'use' function or 'add', not both");
    m_layout[cursor_index(Cursor::Conditions)] = conditions.getRaw();
+   return *this;
+}
+
+ParsedWhileStmtSyntaxBuilder
+&ParsedWhileStmtSyntaxBuilder::useRightParen(ParsedTokenSyntax rightParen)
+{
+   m_layout[cursor_index(Cursor::rightParen)] = rightParen.getRaw();
    return *this;
 }
 
@@ -567,13 +581,23 @@ void ParsedWhileStmtSyntaxBuilder::finishLayout(bool deferred)
    ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
    (void) recorder;
    CursorIndex whileKeywordIndex = cursor_index(Cursor::WhileKeyword);
+   CursorIndex leftParenIndex = cursor_index(Cursor::LeftParen);
    CursorIndex conditionsIndex = cursor_index(Cursor::Conditions);
+   CursorIndex rightParenIndex = cursor_index(Cursor::rightParen);
    CursorIndex bodyIndex = cursor_index(Cursor::Body);
    if (!m_conditionsMembers.empty()) {
       if (deferred) {
          m_layout[conditionsIndex] = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::ConditionElementList, m_layout, m_context);
       } else {
          m_layout[conditionsIndex] = recorder.recordRawSyntax(SyntaxKind::ConditionElementList, m_layout);
+      }
+   }
+
+   if (m_layout[leftParenIndex].isNull()) {
+      if (deferred) {
+         m_layout[leftParenIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_LEFT_PAREN, SourceLoc());
+      } else {
+         m_layout[leftParenIndex] = recorder.recordMissingToken(TokenKindType::T_LEFT_PAREN, SourceLoc());
       }
    }
 
@@ -584,6 +608,15 @@ void ParsedWhileStmtSyntaxBuilder::finishLayout(bool deferred)
          m_layout[whileKeywordIndex] = recorder.recordMissingToken(TokenKindType::T_WHILE, SourceLoc());
       }
    }
+
+   if (m_layout[rightParenIndex].isNull()) {
+      if (deferred) {
+         m_layout[rightParenIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_RIGHT_PAREN, SourceLoc());
+      } else {
+         m_layout[rightParenIndex] = recorder.recordMissingToken(TokenKindType::T_RIGHT_PAREN, SourceLoc());
+      }
+   }
+
    if (m_layout[bodyIndex].isNull()) {
       polar_unreachable("need missing non-token nodes ?");
    }

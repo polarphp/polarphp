@@ -555,9 +555,19 @@ TokenSyntax WhileStmtSyntax::getWhileKeyword()
    return TokenSyntax{m_root, m_data->getChild(Cursor::WhileKeyword).get()};
 }
 
+TokenSyntax WhileStmtSyntax::getLeftParen()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::LeftParen).get()};
+}
+
 ConditionElementListSyntax WhileStmtSyntax::getConditions()
 {
    return ConditionElementListSyntax{m_root, m_data->getChild(Cursor::Conditions).get()};
+}
+
+TokenSyntax WhileStmtSyntax::getRightParen()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::rightParen).get()};
 }
 
 CodeBlockSyntax WhileStmtSyntax::getBody()
@@ -599,6 +609,18 @@ WhileStmtSyntax WhileStmtSyntax::withWhileKeyword(std::optional<TokenSyntax> whi
    return m_data->replaceChild<WhileStmtSyntax>(rawWhileKeyword, Cursor::WhileKeyword);
 }
 
+WhileStmtSyntax WhileStmtSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> rawLeftParen;
+   if (leftParen.has_value()) {
+      rawLeftParen = leftParen->getRaw();
+   } else {
+      rawLeftParen = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+   }
+   return m_data->replaceChild<WhileStmtSyntax>(rawLeftParen, Cursor::LeftParen);
+}
+
 WhileStmtSyntax WhileStmtSyntax::withConditions(std::optional<ConditionElementListSyntax> conditions)
 {
    RefCountPtr<RawSyntax> rawConditions;
@@ -608,6 +630,18 @@ WhileStmtSyntax WhileStmtSyntax::withConditions(std::optional<ConditionElementLi
       rawConditions = RawSyntax::missing(SyntaxKind::ConditionElementList);
    }
    return m_data->replaceChild<WhileStmtSyntax>(rawConditions, Cursor::Conditions);
+}
+
+WhileStmtSyntax WhileStmtSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rawRightParen;
+   if (rightParen.has_value()) {
+      rawRightParen = rightParen->getRaw();
+   } else {
+      rawRightParen = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+   }
+   return m_data->replaceChild<WhileStmtSyntax>(rawRightParen, Cursor::rightParen);
 }
 
 WhileStmtSyntax WhileStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)

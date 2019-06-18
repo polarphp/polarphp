@@ -348,9 +348,21 @@ WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useWhileKeyword(TokenSyntax whil
    return *this;
 }
 
+WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useLeftParen(TokenSyntax leftParen)
+{
+   m_layout[cursor_index(Cursor::LeftParen)] = leftParen.getRaw();
+   return *this;
+}
+
 WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useConditions(ConditionElementListSyntax conditions)
 {
    m_layout[cursor_index(Cursor::Conditions)] = conditions.getRaw();
+   return *this;
+}
+
+WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useRightParen(TokenSyntax rightParen)
+{
+   m_layout[cursor_index(Cursor::rightParen)] = rightParen.getRaw();
    return *this;
 }
 
@@ -377,7 +389,9 @@ WhileStmtSyntax WhileStmtSyntaxBuilder::build()
    CursorIndex labelNameIndex = cursor_index(Cursor::LabelName);
    CursorIndex labelColonIndex = cursor_index(Cursor::LabelColon);
    CursorIndex whileKeywordIndex = cursor_index(Cursor::WhileKeyword);
+   CursorIndex leftParenIndex = cursor_index(Cursor::LeftParen);
    CursorIndex conditionsIndex = cursor_index(Cursor::Conditions);
+   CursorIndex rightParenIndex = cursor_index(Cursor::rightParen);
    CursorIndex bodyIndex = cursor_index(Cursor::Body);
    if (!m_layout[labelNameIndex]) {
       m_layout[labelNameIndex] = RawSyntax::missing(TokenKindType::T_STRING,
@@ -391,8 +405,16 @@ WhileStmtSyntax WhileStmtSyntaxBuilder::build()
       m_layout[whileKeywordIndex] = RawSyntax::missing(TokenKindType::T_WHILE,
                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_WHILE)));
    }
+   if (!m_layout[leftParenIndex]) {
+      m_layout[leftParenIndex] = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+   }
    if (!m_layout[conditionsIndex]) {
       m_layout[conditionsIndex] = RawSyntax::missing(SyntaxKind::ConditionElementList);
+   }
+   if (!m_layout[rightParenIndex]) {
+      m_layout[rightParenIndex] = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
+                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
    }
    if (!m_layout[bodyIndex]) {
       m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::CodeBlock);
@@ -853,7 +875,7 @@ ReturnStmtSyntax ReturnStmtSyntaxBuilder::build()
       m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
    }
    RefCountPtr<RawSyntax> rawReturnStmtSyntax = RawSyntax::make(SyntaxKind::ThrowStmt, m_layout, SourcePresence::Present,
-                                                               m_arena);
+                                                                m_arena);
    return make<ReturnStmtSyntax>(rawReturnStmtSyntax);
 }
 
