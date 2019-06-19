@@ -19,9 +19,25 @@
 
 namespace polar::parser {
 
-struct ParsedDeclSyntaxNodeRecorder : AbstractSyntaxNodeRecorder
-{
+class ParsedRawSyntaxRecorder;
+class SyntaxParsingContext;
 
+class ParsedDeclSyntaxNodeRecorder : AbstractSyntaxNodeRecorder
+{
+public:
+   ///
+   /// normal nodes
+   ///
+   static ParsedSourceFileSyntax deferSourceFile(ParsedCodeBlockItemListSyntax statements, ParsedTokenSyntax eofToken,
+                                                 SyntaxParsingContext &context);
+   static ParsedSourceFileSyntax makeSourceFile(ParsedCodeBlockItemListSyntax statements, ParsedTokenSyntax eofToken,
+                                                SyntaxParsingContext &context);
+private:
+   ///
+   /// normal nodes
+   ///
+   static ParsedSourceFileSyntax recordSourceFile(ParsedCodeBlockItemListSyntax statements, ParsedTokenSyntax eofToken,
+                                                  ParsedRawSyntaxRecorder &recorder);
 };
 
 } // polar::parser
