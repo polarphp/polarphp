@@ -593,6 +593,14 @@ void ParsedWhileStmtSyntaxBuilder::finishLayout(bool deferred)
       }
    }
 
+   if (m_layout[whileKeywordIndex].isNull()) {
+      if (deferred) {
+         m_layout[whileKeywordIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_WHILE, SourceLoc());
+      } else {
+         m_layout[whileKeywordIndex] = recorder.recordMissingToken(TokenKindType::T_WHILE, SourceLoc());
+      }
+   }
+
    if (m_layout[leftParenIndex].isNull()) {
       if (deferred) {
          m_layout[leftParenIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_LEFT_PAREN, SourceLoc());
@@ -601,11 +609,11 @@ void ParsedWhileStmtSyntaxBuilder::finishLayout(bool deferred)
       }
    }
 
-   if (m_layout[whileKeywordIndex].isNull()) {
+   if (!m_conditionsMembers.empty()) {
       if (deferred) {
-         m_layout[whileKeywordIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_WHILE, SourceLoc());
+         m_layout[conditionsIndex] = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::ConditionElementList, {}, m_context);
       } else {
-         m_layout[whileKeywordIndex] = recorder.recordMissingToken(TokenKindType::T_WHILE, SourceLoc());
+         m_layout[conditionsIndex] = recorder.recordRawSyntax(SyntaxKind::ConditionElementList, {});
       }
    }
 
@@ -752,6 +760,220 @@ void ParsedDoWhileStmtSyntaxBuilder::finishLayout(bool deferred)
          m_layout[rightParenIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_RIGHT_PAREN, SourceLoc());
       } else {
          m_layout[rightParenIndex] = recorder.recordMissingToken(TokenKindType::T_RIGHT_PAREN, SourceLoc());
+      }
+   }
+}
+
+///
+/// ParsedSwitchDefaultLabelSyntaxBuilder
+///
+ParsedSwitchDefaultLabelSyntaxBuilder
+&ParsedSwitchDefaultLabelSyntaxBuilder::useDefaultKeyword(ParsedTokenSyntax defaultKeyword)
+{
+   m_layout[cursor_index(Cursor::DefaultKeyword)] = defaultKeyword.getRaw();
+   return *this;
+}
+
+ParsedSwitchDefaultLabelSyntaxBuilder
+&ParsedSwitchDefaultLabelSyntaxBuilder::useColon(ParsedTokenSyntax colon)
+{
+   m_layout[cursor_index(Cursor::Colon)] = colon.getRaw();
+   return *this;
+}
+
+ParsedSwitchDefaultLabelSyntax ParsedSwitchDefaultLabelSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()){
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedSwitchDefaultLabelSyntax ParsedSwitchDefaultLabelSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::SwitchDefaultLabel, m_layout, m_context);
+   return ParsedSwitchDefaultLabelSyntax(std::move(rawNode));
+}
+
+ParsedSwitchDefaultLabelSyntax ParsedSwitchDefaultLabelSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::SwitchDefaultLabel, m_layout);
+   return ParsedSwitchDefaultLabelSyntax(std::move(rawNode));
+}
+
+void ParsedSwitchDefaultLabelSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex defaultKeywordIndex = cursor_index(Cursor::DefaultKeyword);
+   CursorIndex colonIndex = cursor_index(Cursor::Colon);
+   if (m_layout[defaultKeywordIndex].isNull()) {
+      if (deferred) {
+         m_layout[defaultKeywordIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_DEFAULT, SourceLoc());
+      } else {
+         m_layout[defaultKeywordIndex] = recorder.recordMissingToken(TokenKindType::T_DEFAULT, SourceLoc());
+      }
+   }
+   if (m_layout[colonIndex].isNull()) {
+      if (deferred) {
+         m_layout[colonIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_COLON, SourceLoc());
+      } else {
+         m_layout[colonIndex] = recorder.recordMissingToken(TokenKindType::T_COLON, SourceLoc());
+      }
+   }
+}
+
+///
+/// ParsedSwitchCaseLabelSyntaxBuilder
+///
+
+ParsedSwitchCaseLabelSyntaxBuilder
+&ParsedSwitchCaseLabelSyntaxBuilder::useCaseKeyword(ParsedTokenSyntax caseKeyword)
+{
+   m_layout[cursor_index(Cursor::CaseKeyword)] = caseKeyword.getRaw();
+   return *this;
+}
+
+ParsedSwitchCaseLabelSyntaxBuilder
+&ParsedSwitchCaseLabelSyntaxBuilder::useExpr(ParsedExprSyntax expr)
+{
+   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
+   return *this;
+}
+
+ParsedSwitchCaseLabelSyntaxBuilder
+&ParsedSwitchCaseLabelSyntaxBuilder::useColon(ParsedTokenSyntax colon)
+{
+   m_layout[cursor_index(Cursor::Colon)] = colon.getRaw();
+   return *this;
+}
+
+ParsedSwitchCaseLabelSyntax
+ParsedSwitchCaseLabelSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()){
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedSwitchCaseLabelSyntax
+ParsedSwitchCaseLabelSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::SwitchCaseLabel, m_layout, m_context);
+   return ParsedSwitchCaseLabelSyntax(std::move(rawNode));
+}
+
+ParsedSwitchCaseLabelSyntax ParsedSwitchCaseLabelSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::SwitchCaseLabel, m_layout);
+   return ParsedSwitchCaseLabelSyntax(std::move(rawNode));
+}
+
+void ParsedSwitchCaseLabelSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex defaultCaseIndex = cursor_index(Cursor::CaseKeyword);
+   CursorIndex exprInex = cursor_index(Cursor::Expr);
+   CursorIndex colonIndex = cursor_index(Cursor::Colon);
+   if (m_layout[defaultCaseIndex].isNull()) {
+      if (deferred) {
+         m_layout[defaultCaseIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_CASE, SourceLoc());
+      } else {
+         m_layout[defaultCaseIndex] = recorder.recordMissingToken(TokenKindType::T_CASE, SourceLoc());
+      }
+   }
+
+   if (m_layout[exprInex].isNull()) {
+      polar_unreachable("need missing non-token nodes ?");
+   }
+
+   if (m_layout[colonIndex].isNull()) {
+      if (deferred) {
+         m_layout[colonIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_COLON, SourceLoc());
+      } else {
+         m_layout[colonIndex] = recorder.recordMissingToken(TokenKindType::T_COLON, SourceLoc());
+      }
+   }
+}
+
+///
+/// ParsedSwitchCaseSyntaxBuilder
+///
+ParsedSwitchCaseSyntaxBuilder
+&ParsedSwitchCaseSyntaxBuilder::useLabel(ParsedSyntax label)
+{
+   m_layout[cursor_index(Cursor::Label)] = label.getRaw();
+   return *this;
+}
+
+ParsedSwitchCaseSyntaxBuilder
+&ParsedSwitchCaseSyntaxBuilder::useStatements(ParsedCodeBlockItemListSyntax statements)
+{
+   assert(m_statementsMembers.empty() && "use either 'use' function or 'add', not both");
+   m_layout[cursor_index(Cursor::Statements)] = statements.getRaw();
+   return *this;
+}
+
+ParsedSwitchCaseSyntaxBuilder
+&ParsedSwitchCaseSyntaxBuilder::addStatement(ParsedCodeBlockItemSyntax statement)
+{
+   assert(m_layout[cursor_index(Cursor::Statements)].isNull() && "use either 'use' function or 'add', not both");
+   m_statementsMembers.push_back(std::move(statement.getRaw()));
+   return *this;
+}
+
+ParsedSwitchCaseSyntax ParsedSwitchCaseSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()){
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedSwitchCaseSyntax ParsedSwitchCaseSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::SwitchCase, m_layout, m_context);
+   return ParsedSwitchCaseSyntax(std::move(rawNode));
+}
+
+ParsedSwitchCaseSyntax ParsedSwitchCaseSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::SwitchCase, m_layout);
+   return ParsedSwitchCaseSyntax(std::move(rawNode));
+}
+
+void ParsedSwitchCaseSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex labelIndex = cursor_index(Cursor::Label);
+   CursorIndex statementsIndex = cursor_index(Cursor::Statements);
+   if (!m_statementsMembers.empty()) {
+      if (deferred) {
+         m_layout[statementsIndex] = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::CodeBlockItemList, m_layout, m_context);
+      } else {
+         m_layout[statementsIndex] = recorder.recordRawSyntax(SyntaxKind::CodeBlockItemList, m_layout);
+      }
+   }
+   if (m_layout[labelIndex].isNull()) {
+      polar_unreachable("need missing non-token nodes ?");
+   }
+   if (m_layout[statementsIndex].isNull()) {
+      if (deferred) {
+         m_layout[statementsIndex] = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::CodeBlockItemList, {}, m_context);
+      } else {
+         m_layout[statementsIndex] = recorder.recordRawSyntax(SyntaxKind::CodeBlockItemList, {});
       }
    }
 }

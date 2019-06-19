@@ -227,6 +227,76 @@ private:
    ParsedRawSyntaxNode m_layout[DoWhileStmtSyntax::CHILDREN_COUNT];
 };
 
+class ParsedSwitchDefaultLabelSyntaxBuilder
+{
+public:
+   using Cursor = SwitchDefaultLabelSyntax::Cursor;
+public:
+   explicit ParsedSwitchDefaultLabelSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedSwitchDefaultLabelSyntaxBuilder &useDefaultKeyword(ParsedTokenSyntax defaultKeyword);
+   ParsedSwitchDefaultLabelSyntaxBuilder &useColon(ParsedTokenSyntax colon);
+
+   ParsedSwitchDefaultLabelSyntax build();
+   ParsedSwitchDefaultLabelSyntax makeDeferred();
+private:
+   ParsedSwitchDefaultLabelSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[SwitchDefaultLabelSyntax::CHILDREN_COUNT];
+};
+
+class ParsedSwitchCaseLabelSyntaxBuilder
+{
+public:
+   using Cursor = SwitchCaseLabelSyntax::Cursor;
+public:
+   explicit ParsedSwitchCaseLabelSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedSwitchCaseLabelSyntaxBuilder &useCaseKeyword(ParsedTokenSyntax caseKeyword);
+   ParsedSwitchCaseLabelSyntaxBuilder &useExpr(ParsedExprSyntax expr);
+   ParsedSwitchCaseLabelSyntaxBuilder &useColon(ParsedTokenSyntax colon);
+
+   ParsedSwitchCaseLabelSyntax build();
+   ParsedSwitchCaseLabelSyntax makeDeferred();
+private:
+   ParsedSwitchCaseLabelSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[SwitchCaseLabelSyntax::CHILDREN_COUNT];
+};
+
+
+class ParsedSwitchCaseSyntaxBuilder
+{
+public:
+   using Cursor = SwitchCaseSyntax::Cursor;
+public:
+   explicit ParsedSwitchCaseSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedSwitchCaseSyntaxBuilder &useLabel(ParsedSyntax label);
+   ParsedSwitchCaseSyntaxBuilder &useStatements(ParsedCodeBlockItemListSyntax statements);
+   ParsedSwitchCaseSyntaxBuilder &addStatement(ParsedCodeBlockItemSyntax statement);
+
+   ParsedSwitchCaseSyntax build();
+   ParsedSwitchCaseSyntax makeDeferred();
+private:
+   ParsedSwitchCaseSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[SwitchCaseSyntax::CHILDREN_COUNT];
+   SmallVector<ParsedRawSyntaxNode, 8> m_statementsMembers;
+};
+
 } // polar::parser
 
 #endif // POLARPHP_PARSER_PARSED_STMT_SYNTAX_NODE_BUILDERS_H
