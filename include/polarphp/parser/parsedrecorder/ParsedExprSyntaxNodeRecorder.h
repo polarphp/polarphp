@@ -12,9 +12,14 @@
 #ifndef POLARPHP_PARSER_PARSED_RECORDER_PARSED_EXPR_SYNTAX_NODE_RECORDER_H
 #define POLARPHP_PARSER_PARSED_RECORDER_PARSED_EXPR_SYNTAX_NODE_RECORDER_H
 
+#include "polarphp/parser/parsedsyntaxnode/ParsedCommonSyntaxNodes.h"
+#include "polarphp/parser/parsedsyntaxnode/ParsedExprSyntaxNodes.h"
+#include "polarphp/parser/ParsedAbstractSyntaxNodeRecorder.h"
+#include "polarphp/syntax/SyntaxKind.h"
+
 namespace polar::parser {
 
-struct ParsedExprSyntaxNodeRecorder
+struct ParsedExprSyntaxNodeRecorder : public AbstractSyntaxNodeRecorder
 {
 
 };

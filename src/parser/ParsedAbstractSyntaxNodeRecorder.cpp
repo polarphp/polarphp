@@ -9,21 +9,14 @@
 //
 // Created by polarboy on 2019/06/19.
 
-#ifndef POLARPHP_PARSER_PARSED_RECORDER_PARSED_STMT_SYNTAX_NODE_RECORDER_H
-#define POLARPHP_PARSER_PARSED_RECORDER_PARSED_STMT_SYNTAX_NODE_RECORDER_H
-
-#include "polarphp/parser/parsedsyntaxnode/ParsedCommonSyntaxNodes.h"
-#include "polarphp/parser/parsedsyntaxnode/ParsedStmtSyntaxNodes.h"
 #include "polarphp/parser/ParsedAbstractSyntaxNodeRecorder.h"
-#include "polarphp/syntax/SyntaxKind.h"
 
 namespace polar::parser {
 
-struct ParsedStmtSyntaxNodeRecorder : public AbstractSyntaxNodeRecorder
+bool AbstractSyntaxNodeRecorder::formExactLayoutFor(syntax::SyntaxKind kind, ArrayRef<ParsedRawSyntaxNode> elements,
+                                                    FunctionRef<void (syntax::SyntaxKind, ArrayRef<ParsedRawSyntaxNode>)> receiver)
 {
-
-};
+   return false;
+}
 
 } // polar::parser
-
-#endif // POLARPHP_PARSER_PARSED_RECORDER_PARSED_STMT_SYNTAX_NODE_RECORDER_H

@@ -13,6 +13,7 @@
 #define POLARPHP_PARSER_PARSED_RECORDER_PARSED_COMMON_SYNTAX_NODE_RECORDER_H
 
 #include "polarphp/parser/parsedsyntaxnode/ParsedCommonSyntaxNodes.h"
+#include "polarphp/parser/ParsedAbstractSyntaxNodeRecorder.h"
 #include "polarphp/syntax/SyntaxKind.h"
 
 namespace polar::parser {
@@ -20,35 +21,60 @@ namespace polar::parser {
 class ParsedRawSyntaxRecorder;
 class SyntaxParsingContext;
 
-class ParsedCommonSyntaxNodeRecorder
+class ParsedCommonSyntaxNodeRecorder : public AbstractSyntaxNodeRecorder
 {
 public:
    ///
    /// normal nodes
    ///
-   static ParsedCodeBlockItemSyntax deferSyntax(ParsedSyntax item, ParsedTokenSyntax semicolon,
-                                                std::optional<ParsedSyntax> errorTokens, SyntaxParsingContext &context);
-   static ParsedCodeBlockItemSyntax makeSyntax(ParsedSyntax item, ParsedTokenSyntax semicolon,
-                                               std::optional<ParsedSyntax> errorTokens, SyntaxParsingContext &context);
+   static ParsedCodeBlockItemSyntax deferCodeBlockItem(ParsedSyntax item, ParsedTokenSyntax semicolon,
+                                                       std::optional<ParsedSyntax> errorTokens, SyntaxParsingContext &context);
+   static ParsedCodeBlockItemSyntax makeCodeBlockItem(ParsedSyntax item, ParsedTokenSyntax semicolon,
+                                                      std::optional<ParsedSyntax> errorTokens, SyntaxParsingContext &context);
 
-   static ParsedCodeBlockSyntax deferSyntax(ParsedTokenSyntax leftBrace, ParsedCodeBlockItemListSyntax statements,
-                                            ParsedTokenSyntax rightBrace, SyntaxParsingContext &context);
-   static ParsedCodeBlockSyntax makeSyntax(ParsedTokenSyntax leftBrace, ParsedCodeBlockItemListSyntax statements,
-                                           ParsedTokenSyntax rightBrace, SyntaxParsingContext &context);
+   static ParsedCodeBlockSyntax deferCodeBlock(ParsedTokenSyntax leftBrace, ParsedCodeBlockItemListSyntax statements,
+                                               ParsedTokenSyntax rightBrace, SyntaxParsingContext &context);
+   static ParsedCodeBlockSyntax makeCodeBlock(ParsedTokenSyntax leftBrace, ParsedCodeBlockItemListSyntax statements,
+                                              ParsedTokenSyntax rightBrace, SyntaxParsingContext &context);
    ///
    /// collection nodes
    ///
+   static ParsedCodeBlockItemListSyntax deferCodeBlockItemList(ArrayRef<ParsedCodeBlockItemSyntax> elements,
+                                                               SyntaxParsingContext &context);
+   static ParsedCodeBlockItemListSyntax makeCodeBlockItemList(ArrayRef<ParsedCodeBlockItemSyntax> elements,
+                                                              SyntaxParsingContext &context);
+   static ParsedCodeBlockItemListSyntax makeBlankCodeBlockItemList(SourceLoc loc, SyntaxParsingContext &context);
+
+   static ParsedTokenListSyntax deferTokenList(ArrayRef<ParsedTokenSyntax> elements,
+                                               SyntaxParsingContext &context);
+   static ParsedTokenListSyntax makeTokenList(ArrayRef<ParsedTokenSyntax> elements,
+                                              SyntaxParsingContext &context);
+   static ParsedTokenListSyntax makeBlankTokenList(SourceLoc loc, SyntaxParsingContext &context);
+
+   static ParsedNonEmptyTokenListSyntax deferNonEmptyTokenList(ArrayRef<ParsedTokenSyntax> elements,
+                                                               SyntaxParsingContext &context);
+   static ParsedNonEmptyTokenListSyntax makeNonEmptyTokenList(ArrayRef<ParsedTokenSyntax> elements,
+                                                              SyntaxParsingContext &context);
+   static ParsedNonEmptyTokenListSyntax makeBlankNonEmptyTokenList(SourceLoc loc, SyntaxParsingContext &context);
+
 private:
    ///
    /// normal nodes
    ///
-   static ParsedCodeBlockItemSyntax recordSyntax(ParsedSyntax item, ParsedTokenSyntax semicolon,
-                                                 std::optional<ParsedSyntax> errorTokens, ParsedRawSyntaxRecorder &recorder);
-   static ParsedCodeBlockSyntax recordSyntax(ParsedTokenSyntax leftBrace, ParsedCodeBlockItemListSyntax statements,
-                                             ParsedTokenSyntax rightBrace, ParsedRawSyntaxRecorder &recorder);
+   static ParsedCodeBlockItemSyntax recordCodeBlockItem(ParsedSyntax item, ParsedTokenSyntax semicolon,
+                                                        std::optional<ParsedSyntax> errorTokens, ParsedRawSyntaxRecorder &recorder);
+   static ParsedCodeBlockSyntax recordCodeBlock(ParsedTokenSyntax leftBrace, ParsedCodeBlockItemListSyntax statements,
+                                                ParsedTokenSyntax rightBrace, ParsedRawSyntaxRecorder &recorder);
    ///
    /// collection nodes
    ///
+   static ParsedCodeBlockItemListSyntax recordCodeBlockItemList(ArrayRef<ParsedCodeBlockItemSyntax> elements,
+                                                                ParsedRawSyntaxRecorder &recorder);
+   static ParsedTokenListSyntax recordTokenList(ArrayRef<ParsedTokenSyntax> elements,
+                                                ParsedRawSyntaxRecorder &recorder);
+   static ParsedNonEmptyTokenListSyntax recordNonEmptyTokenList(ArrayRef<ParsedTokenSyntax> elements,
+                                                                ParsedRawSyntaxRecorder &recorder);
+
 };
 
 } // polar::parser
