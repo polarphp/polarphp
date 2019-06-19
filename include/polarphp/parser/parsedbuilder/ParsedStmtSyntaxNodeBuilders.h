@@ -297,6 +297,38 @@ private:
    SmallVector<ParsedRawSyntaxNode, 8> m_statementsMembers;
 };
 
+class ParsedSwitchStmtSyntaxBuilder
+{
+public:
+   using Cursor = SwitchStmtSyntax::Cursor;
+public:
+   explicit ParsedSwitchStmtSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedSwitchStmtSyntaxBuilder &useLabelName(ParsedTokenSyntax labelName);
+   ParsedSwitchStmtSyntaxBuilder &useLabelColon(ParsedTokenSyntax labelColon);
+   ParsedSwitchStmtSyntaxBuilder &useSwitchKeyword(ParsedTokenSyntax switchKeyword);
+   ParsedSwitchStmtSyntaxBuilder &useLeftParen(ParsedTokenSyntax leftParen);
+   ParsedSwitchStmtSyntaxBuilder &useConditionExpr(ParsedExprSyntax conditionExpr);
+   ParsedSwitchStmtSyntaxBuilder &useRightParen(ParsedTokenSyntax rightParen);
+   ParsedSwitchStmtSyntaxBuilder &useLeftBrace(ParsedTokenSyntax leftBrace);
+   ParsedSwitchStmtSyntaxBuilder &useCases(ParsedSwitchCaseListSyntax cases);
+   ParsedSwitchStmtSyntaxBuilder &addCase(ParsedSwitchCaseSyntax caseItem);
+   ParsedSwitchStmtSyntaxBuilder &useRightBrace(ParsedTokenSyntax rightBrace);
+
+   ParsedSwitchStmtSyntax build();
+   ParsedSwitchStmtSyntax makeDeferred();
+private:
+   ParsedSwitchStmtSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[SwitchStmtSyntax::CHILDREN_COUNT];
+   SmallVector<ParsedRawSyntaxNode, 8> m_casesMembers;
+};
+
+
 } // polar::parser
 
 #endif // POLARPHP_PARSER_PARSED_STMT_SYNTAX_NODE_BUILDERS_H

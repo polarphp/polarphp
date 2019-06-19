@@ -978,4 +978,167 @@ void ParsedSwitchCaseSyntaxBuilder::finishLayout(bool deferred)
    }
 }
 
+ParsedSwitchStmtSyntaxBuilder
+&ParsedSwitchStmtSyntaxBuilder::useLabelName(ParsedTokenSyntax labelName)
+{
+   m_layout[cursor_index(Cursor::LabelName)] = labelName.getRaw();
+   return *this;
+}
+
+ParsedSwitchStmtSyntaxBuilder
+&ParsedSwitchStmtSyntaxBuilder::useLabelColon(ParsedTokenSyntax labelColon)
+{
+   m_layout[cursor_index(Cursor::LabelColon)] = labelColon.getRaw();
+   return *this;
+}
+
+ParsedSwitchStmtSyntaxBuilder
+&ParsedSwitchStmtSyntaxBuilder::useSwitchKeyword(ParsedTokenSyntax switchKeyword)
+{
+   m_layout[cursor_index(Cursor::SwitchKeyword)] = switchKeyword.getRaw();
+   return *this;
+}
+
+ParsedSwitchStmtSyntaxBuilder
+&ParsedSwitchStmtSyntaxBuilder::useLeftParen(ParsedTokenSyntax leftParen)
+{
+   m_layout[cursor_index(Cursor::LeftParen)] = leftParen.getRaw();
+   return *this;
+}
+
+ParsedSwitchStmtSyntaxBuilder
+&ParsedSwitchStmtSyntaxBuilder::useConditionExpr(ParsedExprSyntax conditionExpr)
+{
+   m_layout[cursor_index(Cursor::ConditionExpr)] = conditionExpr.getRaw();
+   return *this;
+}
+
+ParsedSwitchStmtSyntaxBuilder
+&ParsedSwitchStmtSyntaxBuilder::useRightParen(ParsedTokenSyntax rightParen)
+{
+   m_layout[cursor_index(Cursor::RightParen)] = rightParen.getRaw();
+   return *this;
+}
+
+ParsedSwitchStmtSyntaxBuilder
+&ParsedSwitchStmtSyntaxBuilder::useLeftBrace(ParsedTokenSyntax leftBrace)
+{
+   m_layout[cursor_index(Cursor::LeftBrace)] = leftBrace.getRaw();
+   return *this;
+}
+
+ParsedSwitchStmtSyntaxBuilder
+&ParsedSwitchStmtSyntaxBuilder::useCases(ParsedSwitchCaseListSyntax cases)
+{
+   assert(m_casesMembers.empty() && "use either 'use' function or 'add', not both");
+   m_layout[cursor_index(Cursor::Cases)] = cases.getRaw();
+   return *this;
+}
+
+ParsedSwitchStmtSyntaxBuilder
+&ParsedSwitchStmtSyntaxBuilder::addCase(ParsedSwitchCaseSyntax caseItem)
+{
+   assert(m_layout[cursor_index(Cursor::Cases)].isNull() && "use either 'use' function or 'add', not both");
+   m_casesMembers.push_back(std::move(caseItem.getRaw()));
+   return *this;
+}
+
+ParsedSwitchStmtSyntaxBuilder
+&ParsedSwitchStmtSyntaxBuilder::useRightBrace(ParsedTokenSyntax rightBrace)
+{
+   m_layout[cursor_index(Cursor::RightBrace)] = rightBrace.getRaw();
+   return *this;
+}
+
+ParsedSwitchStmtSyntax ParsedSwitchStmtSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()){
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedSwitchStmtSyntax ParsedSwitchStmtSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::SwitchStmt, m_layout, m_context);
+   return ParsedSwitchStmtSyntax(std::move(rawNode));
+}
+
+ParsedSwitchStmtSyntax ParsedSwitchStmtSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::SwitchStmt, m_layout);
+   return ParsedSwitchStmtSyntax(std::move(rawNode));
+}
+
+void ParsedSwitchStmtSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex switchKeywordIndex = cursor_index(Cursor::SwitchKeyword);
+   CursorIndex leftParenIndex = cursor_index(Cursor::LeftParen);
+   CursorIndex conditionExprIndex = cursor_index(Cursor::ConditionExpr);
+   CursorIndex rightParenIndex = cursor_index(Cursor::RightParen);
+   CursorIndex leftBraceIndex = cursor_index(Cursor::LeftBrace);
+   CursorIndex casesIndex = cursor_index(Cursor::Cases);
+   CursorIndex rightBraceIndex = cursor_index(Cursor::RightBrace);
+
+   if (!m_casesMembers.empty()) {
+      if (deferred) {
+         m_layout[casesIndex] = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::SwitchCaseList, m_layout, m_context);
+      } else {
+         m_layout[casesIndex] = recorder.recordRawSyntax(SyntaxKind::SwitchCaseList, m_layout);
+      }
+   }
+
+   if (m_layout[switchKeywordIndex].isNull()) {
+      if (deferred) {
+         m_layout[switchKeywordIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_SWITCH, SourceLoc());
+      } else {
+         m_layout[switchKeywordIndex] = recorder.recordMissingToken(TokenKindType::T_SWITCH, SourceLoc());
+      }
+   }
+   if (m_layout[leftParenIndex].isNull()) {
+      if (deferred) {
+         m_layout[leftParenIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_LEFT_PAREN, SourceLoc());
+      } else {
+         m_layout[leftParenIndex] = recorder.recordMissingToken(TokenKindType::T_LEFT_PAREN, SourceLoc());
+      }
+   }
+
+   if (m_layout[conditionExprIndex].isNull()) {
+      polar_unreachable("need missing non-token nodes ?");
+   }
+   if (m_layout[rightParenIndex].isNull()) {
+      if (deferred) {
+         m_layout[rightParenIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_RIGHT_PAREN, SourceLoc());
+      } else {
+         m_layout[rightParenIndex] = recorder.recordMissingToken(TokenKindType::T_RIGHT_PAREN, SourceLoc());
+      }
+   }
+   if (m_layout[leftBraceIndex].isNull()) {
+      if (deferred) {
+         m_layout[leftBraceIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_LEFT_BRACE, SourceLoc());
+      } else {
+         m_layout[leftBraceIndex] = recorder.recordMissingToken(TokenKindType::T_LEFT_BRACE, SourceLoc());
+      }
+   }
+   if (m_layout[casesIndex].isNull()) {
+      if (deferred) {
+         m_layout[casesIndex] = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::SwitchCaseList, {}, m_context);
+      } else {
+         m_layout[casesIndex] = recorder.recordRawSyntax(SyntaxKind::SwitchCaseList, {});
+      }
+   }
+   if (m_layout[rightBraceIndex].isNull()) {
+      if (deferred) {
+         m_layout[rightBraceIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_RIGHT_BRACE, SourceLoc());
+      } else {
+         m_layout[rightBraceIndex] = recorder.recordMissingToken(TokenKindType::T_RIGHT_BRACE, SourceLoc());
+      }
+   }
+}
+
 } // polar::parser
