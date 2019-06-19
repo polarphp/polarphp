@@ -106,4 +106,31 @@ ParsedExprSyntaxNodeRecorder::makeClassRefSelfExpr(ParsedTokenSyntax selfKeyword
    return recordClassRefSelfExpr(selfKeyword, context.getRecorder());
 }
 
+ParsedClassRefStaticExprSyntax
+ParsedExprSyntaxNodeRecorder::recordClassRefStaticExpr(ParsedTokenSyntax staticKeyword, ParsedRawSyntaxRecorder &recorder)
+{
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::ClassRefStaticExpr, {
+                                                             staticKeyword.getRaw()
+                                                          });
+   return ParsedClassRefStaticExprSyntax(std::move(rawNode));
+}
+
+ParsedClassRefStaticExprSyntax
+ParsedExprSyntaxNodeRecorder::deferClassRefStaticExpr(ParsedTokenSyntax staticKeyword, SyntaxParsingContext &context)
+{
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::ClassRefStaticExpr, {
+                                                                      staticKeyword.getRaw()
+                                                                   }, context);
+   return ParsedClassRefStaticExprSyntax(std::move(rawNode));
+}
+
+ParsedClassRefStaticExprSyntax
+ParsedExprSyntaxNodeRecorder::makeClassRefStaticExpr(ParsedTokenSyntax staticKeyword, SyntaxParsingContext &context)
+{
+   if (context.isBacktracking()) {
+      return deferClassRefStaticExpr(staticKeyword, context);
+   }
+   return recordClassRefStaticExpr(staticKeyword, context.getRecorder());
+}
+
 } // polar::parser
