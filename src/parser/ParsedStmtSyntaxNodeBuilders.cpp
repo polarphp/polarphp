@@ -1141,4 +1141,221 @@ void ParsedSwitchStmtSyntaxBuilder::finishLayout(bool deferred)
    }
 }
 
+///
+/// ParsedDeferStmtSyntaxBuilder
+///
+ParsedDeferStmtSyntaxBuilder
+&ParsedDeferStmtSyntaxBuilder::useDeferKeyword(ParsedTokenSyntax deferKeyword)
+{
+   m_layout[cursor_index(Cursor::DeferKeyword)] = deferKeyword.getRaw();
+   return *this;
+}
+
+ParsedDeferStmtSyntaxBuilder
+&ParsedDeferStmtSyntaxBuilder::useBody(ParsedCodeBlockSyntax body)
+{
+   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
+   return *this;
+}
+
+ParsedDeferStmtSyntax ParsedDeferStmtSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()){
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedDeferStmtSyntax ParsedDeferStmtSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::DeferStmt, m_layout, m_context);
+   return ParsedDeferStmtSyntax(std::move(rawNode));
+}
+
+ParsedDeferStmtSyntax ParsedDeferStmtSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::DeferStmt, m_layout);
+   return ParsedDeferStmtSyntax(std::move(rawNode));
+}
+
+void ParsedDeferStmtSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void)recorder;
+   CursorIndex deferIndex = cursor_index(Cursor::DeferKeyword);
+   CursorIndex bodyIndex = cursor_index(Cursor::Body);
+   if (m_layout[deferIndex].isNull()) {
+      if (deferred) {
+         m_layout[deferIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_DEFER, SourceLoc());
+      } else {
+         m_layout[deferIndex] = recorder.recordMissingToken(TokenKindType::T_DEFER, SourceLoc());
+      }
+   }
+   if (m_layout[bodyIndex].isNull()) {
+      polar_unreachable("need missing non-token nodes ?");
+   }
+}
+
+///
+/// ParsedExpressionStmtSyntaxBuilder
+///
+ParsedExpressionStmtSyntaxBuilder
+&ParsedExpressionStmtSyntaxBuilder::useExpr(ParsedExprSyntax expr)
+{
+   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
+   return *this;
+}
+
+ParsedExpressionStmtSyntax ParsedExpressionStmtSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()){
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedExpressionStmtSyntax ParsedExpressionStmtSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::ExpressionStmt, m_layout, m_context);
+   return ParsedExpressionStmtSyntax(std::move(rawNode));
+}
+
+ParsedExpressionStmtSyntax ParsedExpressionStmtSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::ExpressionStmt, m_layout);
+   return ParsedExpressionStmtSyntax(std::move(rawNode));
+}
+
+void ParsedExpressionStmtSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex exprIndex = cursor_index(Cursor::Expr);
+   if (m_layout[exprIndex].isNull()) {
+      polar_unreachable("need missing non-token nodes ?");
+   }
+}
+
+///
+/// ParsedThrowStmtSyntaxBuilder
+///
+ParsedThrowStmtSyntaxBuilder
+&ParsedThrowStmtSyntaxBuilder::useThrowKeyword(ParsedTokenSyntax throwKeyword)
+{
+   m_layout[cursor_index(Cursor::ThrowKeyword)] = throwKeyword.getRaw();
+   return *this;
+}
+
+ParsedThrowStmtSyntaxBuilder
+&ParsedThrowStmtSyntaxBuilder::useExpr(ParsedExprSyntax expr)
+{
+   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
+   return *this;
+}
+
+ParsedThrowStmtSyntax ParsedThrowStmtSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()){
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedThrowStmtSyntax ParsedThrowStmtSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::ThrowStmt, m_layout, m_context);
+   return ParsedThrowStmtSyntax(std::move(rawNode));
+}
+
+ParsedThrowStmtSyntax ParsedThrowStmtSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::ThrowStmt, m_layout);
+   return ParsedThrowStmtSyntax(std::move(rawNode));
+}
+
+void ParsedThrowStmtSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex throwKeywordIndex = cursor_index(Cursor::ThrowKeyword);
+   CursorIndex exprIndex = cursor_index(Cursor::Expr);
+   if (m_layout[throwKeywordIndex].isNull()) {
+      if (deferred) {
+         m_layout[throwKeywordIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_THROW, SourceLoc());
+      } else {
+         m_layout[throwKeywordIndex] = recorder.recordMissingToken(TokenKindType::T_THROW, SourceLoc());
+      }
+   }
+   if (m_layout[exprIndex].isNull()) {
+      polar_unreachable("need missing non-token nodes ?");
+   }
+}
+
+///
+/// ParsedReturnStmtSyntaxBuilder
+///
+ParsedReturnStmtSyntaxBuilder
+&ParsedReturnStmtSyntaxBuilder::useReturnKeyword(ParsedTokenSyntax returnKeyword)
+{
+   m_layout[cursor_index(Cursor::ReturnKeyword)] = returnKeyword.getRaw();
+   return *this;
+}
+
+ParsedReturnStmtSyntaxBuilder
+&ParsedReturnStmtSyntaxBuilder::useExpr(ParsedExprSyntax expr)
+{
+   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
+   return *this;
+}
+
+ParsedReturnStmtSyntax ParsedReturnStmtSyntaxBuilder::build()
+{
+   if (m_context.isBacktracking()){
+      return makeDeferred();
+   }
+   return record();
+}
+
+ParsedReturnStmtSyntax ParsedReturnStmtSyntaxBuilder::makeDeferred()
+{
+   finishLayout(true);
+   ParsedRawSyntaxNode rawNode = ParsedRawSyntaxNode::makeDeferred(SyntaxKind::ReturnStmt, m_layout, m_context);
+   return ParsedReturnStmtSyntax(std::move(rawNode));
+}
+
+ParsedReturnStmtSyntax ParsedReturnStmtSyntaxBuilder::record()
+{
+   finishLayout(false);
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   ParsedRawSyntaxNode rawNode = recorder.recordRawSyntax(SyntaxKind::ReturnStmt, m_layout);
+   return ParsedReturnStmtSyntax(std::move(rawNode));
+}
+
+void ParsedReturnStmtSyntaxBuilder::finishLayout(bool deferred)
+{
+   ParsedRawSyntaxRecorder &recorder = m_context.getRecorder();
+   (void) recorder;
+   CursorIndex returnKeywordIndex = cursor_index(Cursor::ReturnKeyword);
+   CursorIndex exprIndex = cursor_index(Cursor::Expr);
+   if (m_layout[returnKeywordIndex].isNull()) {
+      if (deferred) {
+         m_layout[returnKeywordIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_RETURN, SourceLoc());
+      } else {
+         m_layout[returnKeywordIndex] = recorder.recordMissingToken(TokenKindType::T_RETURN, SourceLoc());
+      }
+   }
+   if (m_layout[exprIndex].isNull()) {
+      polar_unreachable("need missing non-token nodes ?");
+   }
+}
+
 } // polar::parser

@@ -272,7 +272,6 @@ private:
    ParsedRawSyntaxNode m_layout[SwitchCaseLabelSyntax::CHILDREN_COUNT];
 };
 
-
 class ParsedSwitchCaseSyntaxBuilder
 {
 public:
@@ -328,6 +327,92 @@ private:
    SmallVector<ParsedRawSyntaxNode, 8> m_casesMembers;
 };
 
+class ParsedDeferStmtSyntaxBuilder
+{
+public:
+   using Cursor = DeferStmtSyntax::Cursor;
+public:
+   explicit ParsedDeferStmtSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedDeferStmtSyntaxBuilder &useDeferKeyword(ParsedTokenSyntax deferKeyword);
+   ParsedDeferStmtSyntaxBuilder &useBody(ParsedCodeBlockSyntax body);
+
+   ParsedDeferStmtSyntax build();
+   ParsedDeferStmtSyntax makeDeferred();
+private:
+   ParsedDeferStmtSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[DeferStmtSyntax::CHILDREN_COUNT];
+};
+
+class ParsedExpressionStmtSyntaxBuilder
+{
+public:
+   using Cursor = ExpressionStmtSyntax::Cursor;
+public:
+   explicit ParsedExpressionStmtSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedExpressionStmtSyntaxBuilder &useExpr(ParsedExprSyntax expr);
+
+   ParsedExpressionStmtSyntax build();
+   ParsedExpressionStmtSyntax makeDeferred();
+private:
+   ParsedExpressionStmtSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[ExpressionStmtSyntax::CHILDREN_COUNT];
+};
+
+class ParsedThrowStmtSyntaxBuilder
+{
+public:
+   using Cursor = ThrowStmtSyntax::Cursor;
+public:
+   explicit ParsedThrowStmtSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedThrowStmtSyntaxBuilder &useThrowKeyword(ParsedTokenSyntax throwKeyword);
+   ParsedThrowStmtSyntaxBuilder &useExpr(ParsedExprSyntax expr);
+
+   ParsedThrowStmtSyntax build();
+   ParsedThrowStmtSyntax makeDeferred();
+private:
+   ParsedThrowStmtSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[ThrowStmtSyntax::CHILDREN_COUNT];
+};
+
+class ParsedReturnStmtSyntaxBuilder
+{
+public:
+   using Cursor = ReturnStmtSyntax::Cursor;
+public:
+   explicit ParsedReturnStmtSyntaxBuilder(SyntaxParsingContext &context)
+      : m_context(context)
+   {}
+
+   ParsedReturnStmtSyntaxBuilder &useReturnKeyword(ParsedTokenSyntax returnKeyword);
+   ParsedReturnStmtSyntaxBuilder &useExpr(ParsedExprSyntax expr);
+
+   ParsedReturnStmtSyntax build();
+   ParsedReturnStmtSyntax makeDeferred();
+private:
+   ParsedReturnStmtSyntax record();
+   void finishLayout(bool deferred);
+
+   SyntaxParsingContext &m_context;
+   ParsedRawSyntaxNode m_layout[ReturnStmtSyntax::CHILDREN_COUNT];
+};
 
 } // polar::parser
 
