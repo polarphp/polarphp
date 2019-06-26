@@ -13,6 +13,7 @@
 #define POLARPHP_PARSER_LEXER_H
 
 #include <variant>
+#include <stack>
 
 #include "polarphp/ast/DiagnosticEngine.h"
 #include "polarphp/parser/SourceLoc.h"
@@ -32,6 +33,8 @@ using polar::ast::InFlightDiagnostic;
 using polar::ast::Diag;
 using polar::kernel::LangOptions;
 union ParserStackElement;
+
+class Parser;
 
 /// Given a pointer to the starting byte of a UTF8 character, validate it and
 /// advance the lexer past it.  This returns the encoded character or ~0U if
@@ -295,6 +298,33 @@ public:
 
    /// Get the token that starts at the given location.
    Token getTokenAt(SourceLoc Loc);
+
+   /// re2c interface methods
+   const unsigned char *getYYCursor()
+   {
+      return m_yyCursor;
+   }
+
+   const unsigned char *getYYLimit()
+   {
+      return m_bufferEnd;
+   }
+
+   const unsigned char *getYYMarker()
+   {
+      return m_yyMarker;
+   }
+
+   int getYYCondState()
+   {
+      return m_yyState;
+   }
+
+   Lexer &setYYCondState(int state)
+   {
+      m_yyState = state;
+      return *this;
+   }
 private:
    Lexer(const Lexer&) = delete;
    void operator=(const Lexer&) = delete;
@@ -355,6 +385,11 @@ private:
    bool lexUnknown(bool emitDiagnosticsIfToken);
    NullCharacterKind getNullCharacterKind(const char *ptr) const;
 
+   bool isLabelStart(unsigned char c)
+   {
+      return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c >= 0x80;
+   }
+
 private:
    friend int internal::token_lex(internal::ParserSemantic *value,
                                   internal::location *loc,
@@ -365,6 +400,7 @@ private:
    const SourceManager &m_sourceMgr;
    const unsigned m_bufferId;
    DiagnosticEngine *m_diags;
+
    /// Pointer to the first character of the buffer, even in a lexer that
    /// scans a subrange of the buffer.
    const unsigned char *m_bufferStart;
@@ -399,6 +435,17 @@ private:
 
    /// backup pointer
    const unsigned char *m_yyMarker;
+
+   bool m_heredocScanAhead;
+   bool m_heredocIndentationUsesSpaces;
+   int m_yyState;
+   int m_heredocIndentation;
+   /// initial string length after scanning to first variable
+   /// used in lex string literal which has ${var} or $var in it
+   int m_scannedStringLen;
+
+   std::stack<int> m_stateStack;
+   std::stack<const unsigned char *> m_heredocLabelStack;
 
    Token m_nextToken;
 
