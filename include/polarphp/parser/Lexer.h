@@ -12,6 +12,8 @@
 #ifndef POLARPHP_PARSER_LEXER_H
 #define POLARPHP_PARSER_LEXER_H
 
+#include <variant>
+
 #include "polarphp/ast/DiagnosticEngine.h"
 #include "polarphp/parser/SourceLoc.h"
 #include "polarphp/parser/SourceMgr.h"
@@ -35,7 +37,7 @@ union ParserStackElement;
 /// advance the lexer past it.  This returns the encoded character or ~0U if
 /// the encoding is invalid.
 ///
-uint32_t validate_utf8_character_and_advance(const char *&ptr, const char *end);
+uint32_t validate_utf8_character_and_advance(const unsigned char *&ptr, const unsigned char *end);
 
 enum class CommentRetentionMode
 {
@@ -52,8 +54,9 @@ enum class TriviaRetentionMode
 
 class Lexer
 {
+public:
+   using LexerEventHandler = void (*)(int context);
 private:
-
    using State = LexerState;
    struct PrincipalTag {};
 
@@ -130,7 +133,7 @@ public:
    void resetToOffset(size_t offset)
    {
       assert(m_bufferStart + offset <= m_bufferEnd && "offset after buffer end");
-      m_curPtr = m_bufferStart + offset;
+      m_yyCursor = m_bufferStart + offset;
       lexImpl();
    }
 
@@ -190,7 +193,7 @@ public:
    void restoreState(State state, bool enableDiagnostics = false)
    {
       assert(state.isValid());
-      m_curPtr = getBufferPtrForSourceLoc(state.m_loc);
+      m_yyCursor = getBufferPtrForSourceLoc(state.m_loc);
       // Don't reemit diagnostics while readvancing the lexer.
       polar::utils::SaveAndRestore<DiagnosticEngine *> diag(m_diags, enableDiagnostics ? m_diags : nullptr);
       lexImpl();
@@ -206,7 +209,7 @@ public:
    /// current position.
    void backtrackToState(State state)
    {
-      assert(getBufferPtrForSourceLoc(state.m_loc) <= m_curPtr && "can't backtrack forward");
+      assert(getBufferPtrForSourceLoc(state.m_loc) <= m_yyCursor && "can't backtrack forward");
       restoreState(state);
    }
 
@@ -282,12 +285,12 @@ public:
 
    SourceLoc getLocForStartOfBuffer() const
    {
-      return SourceLoc(polar::utils::SMLocation::getFromPointer(m_bufferStart));
+      return SourceLoc(polar::utils::SMLocation::getFromPointer(reinterpret_cast<const char *>(m_bufferStart)));
    }
 
-   static SourceLoc getSourceLoc(const char *loc)
+   static SourceLoc getSourceLoc(const unsigned char *loc)
    {
-      return SourceLoc(polar::utils::SMLocation::getFromPointer(loc));
+      return SourceLoc(polar::utils::SMLocation::getFromPointer(reinterpret_cast<const char *>(loc)));
    }
 
    /// Get the token that starts at the given location.
@@ -307,23 +310,23 @@ private:
 
    /// For a source location in the current buffer, returns the corresponding
    /// pointer.
-   const char *getBufferPtrForSourceLoc(SourceLoc loc) const
+   const unsigned char *getBufferPtrForSourceLoc(SourceLoc loc) const
    {
       return m_bufferStart + m_sourceMgr.getLocOffsetInBuffer(loc, m_bufferId);
    }
 
-   InFlightDiagnostic diagnose(const char *loc, Diagnostic diag);
+   InFlightDiagnostic diagnose(const unsigned char *loc, Diagnostic diag);
 
    template<typename ...DiagArgTypes, typename ...ArgTypes>
-   InFlightDiagnostic diagnose(const char *loc, Diag<DiagArgTypes...> diagId,
+   InFlightDiagnostic diagnose(const unsigned char *loc, Diag<DiagArgTypes...> diagId,
                                ArgTypes &&...args)
    {
       return diagnose(loc, Diagnostic(diagId, std::forward<ArgTypes>(args)...));
    }
 
-   void formToken(TokenKindType kind, const char *tokenStart);
-   void formEscapedIdentifierToken(const char *tokenStart);
-   void formStringLiteralToken(const char *tokenStart, bool isMultilineString,
+   void formToken(TokenKindType kind, const unsigned char *tokenStart);
+   void formEscapedIdentifierToken(const unsigned char *tokenStart);
+   void formStringLiteralToken(const unsigned char *tokenStart, bool isMultilineString,
                                unsigned customDelimiterLen);
    /// Advance to the end of the line.
    /// If EatNewLine is true, CurPtr will be at end of newline character.
@@ -364,26 +367,39 @@ private:
    DiagnosticEngine *m_diags;
    /// Pointer to the first character of the buffer, even in a lexer that
    /// scans a subrange of the buffer.
-   const char *m_bufferStart;
+   const unsigned char *m_bufferStart;
 
    /// Pointer to one past the end character of the buffer, even in a lexer
    /// that scans a subrange of the buffer.  Because the buffer is always
    /// NUL-terminated, this points to the NUL terminator.
-   const char *m_bufferEnd;
+   const unsigned char *m_bufferEnd;
 
    /// Pointer to the artificial EOF that is located before BufferEnd.  Useful
    /// for lexing subranges of a buffer.
-   const char *m_artificialEof = nullptr;
+   const unsigned char *m_artificialEof = nullptr;
 
    /// If non-null, points to the '\0' character in the buffer where we should
    /// produce a code completion token.
-   const char *m_codeCompletionPtr = nullptr;
+   const unsigned char *m_codeCompletionPtr = nullptr;
 
    /// Points to BufferStart or past the end of UTF-8 BOM sequence if it exists.
-   const char *m_contentStart;
+   const unsigned char *m_contentStart;
+
+   /// current token length
+   unsigned int m_yyLength;
+
+   /// current token start pointer
+   const unsigned char *m_yyStart;
+
+    /// current token text
+   const unsigned char *m_yyText;
 
    /// Pointer to the next not consumed character.
-   const char *m_curPtr;
+   const unsigned char *m_yyCursor;
+
+   /// backup pointer
+   const unsigned char *m_yyMarker;
+
    Token m_nextToken;
 
    const CommentRetentionMode m_commentRetention;
@@ -400,6 +416,8 @@ private:
    /// This is only preserved if this Lexer was constructed with
    /// `TriviaRetentionMode::WithTrivia`.
    ParsedTrivia m_trailingTrivia;
+
+   LexerEventHandler m_eventHandler = nullptr;
 };
 
 /// Given an ordered token \param Array , get the iterator pointing to the first

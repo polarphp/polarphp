@@ -86,13 +86,18 @@ bool is_start_of_utf8_character(unsigned char c)
    return c > 0x80 && (c < 0xC2 || c >= 0xF5);
 }
 
+inline void handle_newline()
+{
+
+}
+
 } // anonymous namespace
 
 /// validateUTF8CharacterAndAdvance - Given a pointer to the starting byte of a
 /// UTF8 character, validate it and advance the lexer past it.  This returns the
 /// encoded character or ~0U if the encoding is invalid.
-uint32_t validate_utf8_character_and_advance(const char *&ptr,
-                                             const char *end)
+uint32_t validate_utf8_character_and_advance(const unsigned char *&ptr,
+                                             const unsigned char *end)
 {
    if (ptr >= end) {
       return ~0U;
@@ -204,8 +209,8 @@ void Lexer::initialize(unsigned offset, unsigned endOffset)
    // Initialize buffer pointers.
    StringRef contents =
          m_sourceMgr.extractText(m_sourceMgr.getRangeForBuffer(m_bufferId));
-   m_bufferStart = contents.data();
-   m_bufferEnd = contents.data() + contents.size();
+   m_bufferStart = reinterpret_cast<const unsigned char *>(contents.data());
+   m_bufferEnd = reinterpret_cast<const unsigned char *>(contents.data() + contents.size());
    assert(*m_bufferEnd == 0);
    assert(m_bufferStart + offset <= m_bufferEnd);
    assert(m_bufferStart + endOffset <= m_bufferEnd);
@@ -216,22 +221,22 @@ void Lexer::initialize(unsigned offset, unsigned endOffset)
    m_contentStart = m_bufferStart + BOMLength;
    // Initialize code completion.
    if (m_bufferId == m_sourceMgr.getCodeCompletionBufferID()) {
-      const char *ptr = m_bufferStart + m_sourceMgr.getCodeCompletionOffset();
+      const unsigned char *ptr = m_bufferStart + m_sourceMgr.getCodeCompletionOffset();
       if (ptr >= m_bufferStart && ptr <= m_bufferEnd) {
          m_codeCompletionPtr = ptr;
       }
    }
    m_artificialEof = m_bufferStart + endOffset;
-   m_curPtr = m_bufferStart + offset;
+   m_yyCursor = m_bufferStart + offset;
 
    assert(m_nextToken.is(TokenKindType::T_UNKOWN_MARK));
    lexImpl();
-   assert((m_nextToken.isAtStartOfLine() || m_curPtr != m_bufferStart) &&
+   assert((m_nextToken.isAtStartOfLine() || m_yyCursor != m_bufferStart) &&
           "The token should be at the beginning of the line, "
           "or we should be lexing from the middle of the buffer");
 }
 
-InFlightDiagnostic Lexer::diagnose(const char *loc, ast::Diagnostic diag)
+InFlightDiagnostic Lexer::diagnose(const unsigned char *loc, ast::Diagnostic diag)
 {
    if (m_diags) {
       return m_diags->diagnose(getSourceLoc(loc), diag);
@@ -251,10 +256,10 @@ Token Lexer::getTokenAt(SourceLoc loc)
    return lexer.peekNextToken();
 }
 
-void Lexer::formToken(syntax::TokenKindType kind, const char *tokenStart)
+void Lexer::formToken(syntax::TokenKindType kind, const unsigned char *tokenStart)
 {
-   assert(m_curPtr >= m_bufferStart &&
-          m_curPtr <= m_bufferEnd && "Current pointer out of range!");
+   assert(m_yyCursor >= m_bufferStart &&
+          m_yyCursor <= m_bufferEnd && "Current pointer out of range!");
    // When we are lexing a subrange from the middle of a file buffer, we will
    // run past the end of the range, but will stay within the file.  Check if
    // we are past the imaginary EOF, and synthesize a tok::eof in this case.
@@ -278,7 +283,7 @@ void Lexer::formToken(syntax::TokenKindType kind, const char *tokenStart)
       }
    }
 
-   StringRef tokenText { tokenStart, static_cast<size_t>(m_curPtr - tokenStart) };
+   StringRef tokenText { reinterpret_cast<const char *>(tokenStart), static_cast<size_t>(m_yyCursor - tokenStart) };
    if (m_triviaRetention == TriviaRetentionMode::WithTrivia) {
       lexTrivia(m_trailingTrivia, /* IsForTrailingTrivia */ true);
    }
@@ -289,7 +294,7 @@ namespace {
 void validate_multiline_indents(const Token &str, DiagnosticEngine *diags);
 } // anonymous namespace
 
-void Lexer::formStringLiteralToken(const char *tokenStart,
+void Lexer::formStringLiteralToken(const unsigned char *tokenStart,
                                    bool isMultilineString,
                                    unsigned customDelimiterLen)
 {
@@ -311,7 +316,7 @@ void Lexer::lexTrivia(ParsedTrivia &trivia, bool isForTrailingTrivia)
 
 Lexer::State Lexer::getStateForBeginningOfTokenLoc(SourceLoc sourceLoc) const
 {
-   const char *ptr = getBufferPtrForSourceLoc(sourceLoc);
+   const unsigned char *ptr = getBufferPtrForSourceLoc(sourceLoc);
    // Skip whitespace backwards until we hit a newline.  This is needed to
    // correctly lex the token if it is at the beginning of the line.
    while (ptr >= m_contentStart + 1) {
@@ -335,12 +340,12 @@ Lexer::State Lexer::getStateForBeginningOfTokenLoc(SourceLoc sourceLoc) const
       }
       break;
    }
-   return State(SourceLoc(polar::utils::SMLocation::getFromPointer(ptr)));
+   return State(SourceLoc(polar::utils::SMLocation::getFromPointer(reinterpret_cast<const char *>(ptr))));
 }
 
 namespace {
 
-void diagnose_embedded_null(DiagnosticEngine *diags, const char *ptr)
+void diagnose_embedded_null(DiagnosticEngine *diags, const unsigned char *ptr)
 {
    assert(ptr && "invalid source location");
    assert(*ptr == '\0' && "not an embedded null");
@@ -357,8 +362,8 @@ void diagnose_embedded_null(DiagnosticEngine *diags, const char *ptr)
 
 /// Advance \p curPtr to the end of line or the end of file. Returns \c true
 /// if it stopped at the end of line, \c false if it stopped at the end of file.
-bool advance_to_end_of_line(const char *&curPtr, const char *bufferEnd,
-                            const char *codeCompletionPtr = nullptr,
+bool advance_to_end_of_line(const unsigned char *&curPtr, const unsigned char *bufferEnd,
+                            const unsigned char *codeCompletionPtr = nullptr,
                             DiagnosticEngine *diags = nullptr) {
    while (1) {
       switch (*curPtr++) {
@@ -370,7 +375,7 @@ bool advance_to_end_of_line(const char *&curPtr, const char *bufferEnd,
          // If this is a "high" UTF-8 character, validate it.
          if (diags && (signed char)(curPtr[-1]) < 0) {
             --curPtr;
-            const char *charStart = curPtr;
+            const unsigned char *charStart = curPtr;
             if (validate_utf8_character_and_advance(curPtr, bufferEnd) == ~0U) {
                //               diags->diagnose(Lexer::getSourceLoc(charStart),
                //                               diag::lex_invalid_utf8);
@@ -394,12 +399,12 @@ bool advance_to_end_of_line(const char *&curPtr, const char *bufferEnd,
    }
 }
 
-bool skip_to_end_of_slash_star_comment(const char *&curPtr,
-                                       const char *bufferEnd,
-                                       const char *codeCompletionPtr = nullptr,
+bool skip_to_end_of_slash_star_comment(const unsigned char *&curPtr,
+                                       const unsigned char *bufferEnd,
+                                       const unsigned char *codeCompletionPtr = nullptr,
                                        DiagnosticEngine *diags = nullptr)
 {
-   const char *startPtr = curPtr - 1;
+   const unsigned char *startPtr = curPtr - 1;
    assert(curPtr[-1] == '/' && curPtr[0] == '*' && "Not a /* comment");
    // Make sure to advance over the * so that we don't incorrectly handle /*/ as
    // the beginning and end of the comment.
@@ -436,7 +441,7 @@ bool skip_to_end_of_slash_star_comment(const char *&curPtr,
          // If this is a "high" UTF-8 character, validate it.
          if (diags && (signed char)(curPtr[-1]) < 0) {
             --curPtr;
-            const char *charStart = curPtr;
+            const unsigned char *charStart = curPtr;
             if (validate_utf8_character_and_advance(curPtr, bufferEnd) == ~0U) {
                //               diags->diagnose(Lexer::getSourceLoc(charStart),
                //                               diag::lex_invalid_utf8);
@@ -461,7 +466,7 @@ bool skip_to_end_of_slash_star_comment(const char *&curPtr,
             SmallString<8> terminator("*/");
             while (--depth != 0)
                terminator += "*/";
-            const char *EOL = (curPtr[-1] == '\n') ? (curPtr - 1) : curPtr;
+            const unsigned char *EOL = (curPtr[-1] == '\n') ? (curPtr - 1) : curPtr;
             //            diags
             //                  ->diagnose(Lexer::getSourceLoc(EOL),
             //                             diag::lex_unterminated_block_comment)
@@ -549,10 +554,10 @@ bool is_valid_identifier_start_code_point(uint32_t c)
    return true;
 }
 
-bool advance_if(char const *&ptr, char const *end,
+bool advance_if(const unsigned char *&ptr, const unsigned char *end,
                 bool (*predicate)(uint32_t))
 {
-   char const *next = ptr;
+   const unsigned char *next = ptr;
    uint32_t c = validate_utf8_character_and_advance(next, end);
    if (c == ~0U) {
       return false;
@@ -565,26 +570,26 @@ bool advance_if(char const *&ptr, char const *end,
 }
 
 
-bool advance_if_valid_start_of_identifier(char const *&ptr,
-                                          char const *end)
+bool advance_if_valid_start_of_identifier(const unsigned char *&ptr,
+                                          const unsigned char *end)
 {
    return advance_if(ptr, end, is_valid_identifier_start_code_point);
 }
 
-bool advance_if_valid_continuation_of_identifier(char const *&ptr,
-                                                 char const *end)
+bool advance_if_valid_continuation_of_identifier(const unsigned char *&ptr,
+                                                 const unsigned char *end)
 {
    return advance_if(ptr, end, is_valid_identifier_continuation_code_point);
 }
 
-bool advance_if_valid_start_of_operator(char const *&ptr,
-                                        char const *end)
+bool advance_if_valid_start_of_operator(const unsigned char *&ptr,
+                                        const unsigned char *end)
 {
    return advance_if(ptr, end, Identifier::isOperatorStartCodePoint);
 }
 
-bool advance_if_valid_continuation_of_operator(char const *&ptr,
-                                               char const *end)
+bool advance_if_valid_continuation_of_operator(const unsigned char *&ptr,
+                                               const unsigned char *end)
 {
    return advance_if(ptr, end, Identifier::isOperatorContinuationCodePoint);
 }
@@ -593,16 +598,16 @@ bool advance_if_valid_continuation_of_operator(char const *&ptr,
 
 void Lexer::skipToEndOfLine(bool eatNewline)
 {
-   bool isEOL = advance_to_end_of_line(m_curPtr, m_bufferEnd, m_codeCompletionPtr, m_diags);
+   bool isEOL = advance_to_end_of_line(m_yyCursor, m_bufferEnd, m_codeCompletionPtr, m_diags);
    if (eatNewline && isEOL) {
-      ++m_curPtr;
+      ++m_yyCursor;
       m_nextToken.setAtStartOfLine(true);
    }
 }
 
 void Lexer::skipSlashSlashComment(bool eatNewline)
 {
-   assert(m_curPtr[-1] == '/' && m_curPtr[0] == '/' && "Not a // comment");
+   assert(m_yyCursor[-1] == '/' && m_yyCursor[0] == '/' && "Not a // comment");
    skipToEndOfLine(eatNewline);
 }
 
@@ -611,7 +616,7 @@ void Lexer::skipSlashSlashComment(bool eatNewline)
 void Lexer::skipSlashStarComment()
 {
    bool isMultiline =
-         skip_to_end_of_slash_star_comment(m_curPtr, m_bufferEnd, m_codeCompletionPtr, m_diags);
+         skip_to_end_of_slash_star_comment(m_yyCursor, m_bufferEnd, m_codeCompletionPtr, m_diags);
    if (isMultiline) {
       m_nextToken.setAtStartOfLine(true);
    }
@@ -622,7 +627,8 @@ bool Lexer::isIdentifier(StringRef string)
    if (string.empty()) {
       return false;
    }
-   char const *p = string.data(), *end = string.end();
+   const unsigned char *p = reinterpret_cast<const unsigned char *>(string.data());
+   const unsigned char *end = reinterpret_cast<const unsigned char *>(string.end());
    if (!advance_if_valid_start_of_identifier(p, end)) {
       return false;
    }
@@ -637,7 +643,8 @@ bool Lexer::isOperator(StringRef string)
    if (string.empty()) {
       return false;
    }
-   char const *p = string.data(), *end = string.end();
+   const unsigned char *p = reinterpret_cast<const unsigned char *>(string.data());
+   const unsigned char *end = reinterpret_cast<const unsigned char *>(string.end());
    if (!advance_if_valid_start_of_operator(p, end)) {
       return false;
    }
@@ -658,17 +665,17 @@ void validate_multiline_indents(const Token &str,
 //===----------------------------------------------------------------------===//
 void Lexer::lexImpl()
 {
-   assert(m_curPtr >= m_bufferStart &&
-          m_curPtr <= m_bufferEnd && "Current pointer out of range!");
+   assert(m_yyCursor >= m_bufferStart &&
+          m_yyCursor <= m_bufferEnd && "Current pointer out of range!");
    m_leadingTrivia.clear();
    m_trailingTrivia.clear();
-   if (m_curPtr == m_bufferStart) {
+   if (m_yyCursor == m_bufferStart) {
       if (m_bufferStart < m_contentStart) {
          size_t BOMLen = m_contentStart - m_bufferStart;
          assert(BOMLen == 3 && "UTF-8 BOM is 3 bytes");
          // Add UTF-8 BOM to leadingTrivia.
          m_leadingTrivia.push_back(TriviaKind::GarbageText, BOMLen);
-         m_curPtr += BOMLen;
+         m_yyCursor += BOMLen;
       }
       m_nextToken.setAtStartOfLine(true);
    } else {
@@ -679,7 +686,7 @@ void Lexer::lexImpl()
 namespace {
 
 // Find the start of the given line.
-const char *find_start_of_line(const char *bufStart, const char *current)
+const unsigned char *find_start_of_line(const unsigned char *bufStart, const unsigned char *current)
 {
    while (current != bufStart) {
       if (current[0] == '\n' || current[0] == '\r') {
@@ -786,11 +793,11 @@ SourceLoc Lexer::getLocForStartOfToken(SourceManager &sourceMgr, unsigned buffer
    CharSourceRange entireRange = sourceMgr.getRangeForBuffer(bufferId);
    StringRef buffer = sourceMgr.extractText(entireRange);
 
-   const char *bufStart = buffer.data();
-   if (offset > buffer.size())
+   const unsigned char *bufStart = reinterpret_cast<const unsigned char *>(buffer.data());
+   if (offset > buffer.size()) {
       return SourceLoc();
-
-   const char *strData = bufStart + offset;
+   }
+   const unsigned char *strData = bufStart + offset;
    // If it points to whitespace return the SourceLoc for it.
    if (strData[0] == '\n' || strData[0] == '\r' ||
        strData[0] == ' ' || strData[0] == '\t') {
@@ -798,7 +805,7 @@ SourceLoc Lexer::getLocForStartOfToken(SourceManager &sourceMgr, unsigned buffer
    }
    // Back up from the current location until we hit the beginning of a line
    // (or the buffer). We'll relex from that point.
-   const char *lexStart = find_start_of_line(bufStart, strData);
+   const unsigned char *lexStart = find_start_of_line(bufStart, strData);
    return get_loc_for_start_of_token_in_buffer(sourceMgr, bufferId, offset,
                                                /*bufferStart=*/lexStart - bufStart,
                                                /*bufferEnd=*/buffer.size());
@@ -817,9 +824,9 @@ SourceLoc Lexer::getLocForStartOfLine(SourceManager &sourceMgr, SourceLoc loc)
    }
    CharSourceRange entireRange = sourceMgr.getRangeForBuffer(bufferId);
    StringRef buffer = sourceMgr.extractText(entireRange);
-   const char *bufStart = buffer.data();
+   const unsigned char *bufStart = reinterpret_cast<const unsigned char *>(buffer.data());
    unsigned offset = sourceMgr.getLocOffsetInBuffer(loc, bufferId);
-   const char *startOfLine = find_start_of_line(bufStart, bufStart + offset);
+   const unsigned char *startOfLine = find_start_of_line(bufStart, bufStart + offset);
    return getSourceLoc(startOfLine);
 }
 
@@ -846,7 +853,7 @@ SourceLoc Lexer::getLocForEndOfLine(SourceManager &sourceMgr, SourceLoc loc)
    Lexer lexer(fakeLangOpts, sourceMgr, bufferId, nullptr, CommentRetentionMode::ReturnAsTokens);
    lexer.restoreState(State(loc));
    lexer.skipToEndOfLine(/*EatNewline=*/true);
-   return getSourceLoc(lexer.m_curPtr);
+   return getSourceLoc(lexer.m_yyCursor);
 }
 
 StringRef Lexer::getIndentationForLine(SourceManager &sourceMgr, SourceLoc loc,
@@ -875,15 +882,15 @@ StringRef Lexer::getIndentationForLine(SourceManager &sourceMgr, SourceLoc loc,
    CharSourceRange entireRange = sourceMgr.getRangeForBuffer(bufferId);
    StringRef buffer = sourceMgr.extractText(entireRange);
 
-   const char *bufStart = buffer.data();
+   const unsigned char *bufStart = reinterpret_cast<const unsigned char *>(buffer.data());
    unsigned offset = sourceMgr.getLocOffsetInBuffer(loc, bufferId);
 
-   const char *startOfLine = find_start_of_line(bufStart, bufStart + offset);
-   const char *endOfIndentation = startOfLine;
+   const unsigned char *startOfLine = find_start_of_line(bufStart, bufStart + offset);
+   const unsigned char *endOfIndentation = startOfLine;
    while (*endOfIndentation && is_horizontal_whitespace(*endOfIndentation)) {
       ++endOfIndentation;
    }
-   return StringRef(startOfLine, endOfIndentation - startOfLine);
+   return StringRef(reinterpret_cast<const char *>(startOfLine), endOfIndentation - startOfLine);
 }
 
 ArrayRef<Token> slice_token_array(ArrayRef<Token> allTokens, SourceLoc startLoc, SourceLoc endLoc)
