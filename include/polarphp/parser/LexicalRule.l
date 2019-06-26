@@ -9,50 +9,23 @@
 //
 // Created by polarboy on 2019/05/09.
 
-#if 0
-# define YYDEBUG(s, c) printf("state: %d char: %c\n", s, c)
-#else
-# define YYDEBUG(s, c)
-#endif
-
-#define YYCTYPE   unsigned char
-#define YYFILL(n)
-#define YYCURSOR source
-#define YYLIMIT
-#define YYMARKER marker
-
-#define YYGETCONDITION() state
-#define YYSETCONDITION(s) state = s
-
-#define STATE(name)  yyc##name
-
-/* emulate flex constructs */
-#define BEGIN(state) YYSETCONDITION(STATE(state))
-#define YYSTATE      YYGETCONDITION()
-#define yytext
-#define yyleng
-#define yyless(x)    do { YYCURSOR = (unsigned char*)yytext + x; \
-                          yyleng   = (unsigned int)x; } while(0)
-#define yymore()     goto yymore_restart
-
-/* perform sanity check. If this message is triggered you should
-   increase the ZEND_MMAP_AHEAD value in the zend_streams.h file */
-/*!max:re2c */
+#include "polarphp/parser/internal/YYLexerDefs.h"
+#include "polarphp/parser/Parser.h"
+#include "polarphp/parser/Lexer.h"
 
 #include <stdarg.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 
-#define BOM_UTF32_BE	"\x00\x00\xfe\xff"
-#define	BOM_UTF32_LE	"\xff\xfe\x00\x00"
-#define	BOM_UTF16_BE	"\xfe\xff"
-#define	BOM_UTF16_LE	"\xff\xfe"
-#define	BOM_UTF8		"\xef\xbb\xbf"
+/*!max:re2c */
 
-int yy_lex_scan()
+namespace polar::parser::internal {
+int token_lex(ParserSemantic *value, location *loc, Lexer *lexer)
 {
    int token;
    int offset;
    int start_line = 0;
-   int state = -1;
    char *source;
    char *marker;
 
@@ -725,4 +698,5 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 */
+}
 }
