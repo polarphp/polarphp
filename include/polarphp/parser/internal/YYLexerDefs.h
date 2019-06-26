@@ -13,11 +13,39 @@
 #define POLARPHP_SYNTAX_INTERNAL_LEXER_DEFS_H
 
 #include "polarphp/parser/internal/YYLexerConditionDefs.h"
+#include "polarphp/parser/internal/YYLocation.h"
+#include "polarphp/parser/internal/YYParserDefs.h"
+#include "polarphp/parser/internal/YYLexerDefs.h"
+
+namespace polar::parser {
+using YYLexerCondType = YYCONDTYPE;
+
+namespace internal {
+int token_lex(ParserSemantic *value, location *loc, Lexer *lexer);
+} // internal
+} // polar::parser
+
+#if 0
+# define YYDEBUG(s, c) printf("state: %d char: %c\n", s, c)
+#else
+# define YYDEBUG(s, c)
+#endif
 
 /// for utf8 encoding
 #define YYCTYPE   unsigned char
-#define YYGETCONDITION() lexer->getCondState()
-#define YYSETCONDITION(state) lexer->setCondState(state)
-#define COND_NAME(name) yyc##name
+#define YYCURSOR                   lexer->getYYCursor()
+#define YYLIMIT                    lexer->getYYLimit()
+#define YYMARKER                   lexer->getYYMarker()
+#define YYGETCONDITION()           lexer->getYYCondition()
+#define YYSETCONDITION(cond)      lexer->setYYCondition(cond)
+#define YYFILL(n) { if ((YYCURSOR + n) >= (YYLIMIT)) { return 0; } }
+#define COND_NAME(name)            yyc##name
+#define polar_yy_push_state(name)  lexer->pushYYCondition(YYCONDTYPE::yyc##name)
+
+#define BOM_UTF32_BE	"\x00\x00\xfe\xff"
+#define BOM_UTF32_LE	"\xff\xfe\x00\x00"
+#define BOM_UTF16_BE	"\xfe\xff"
+#define BOM_UTF16_LE	"\xff\xfe"
+#define BOM_UTF8		"\xef\xbb\xbf"
 
 #endif // POLARPHP_SYNTAX_INTERNAL_LEXER_DEFS_H
