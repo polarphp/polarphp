@@ -10,7 +10,32 @@
 // Created by polarboy on 2019/05/09.
 
 #include "polarphp/parser/Parser.h"
+#include "polarphp/kernel/LangOptions.h"
+#include "polarphp/parser/Lexer.h"
 
 namespace polar::parser {
+
+Parser::Parser(const LangOptions &langOpts, unsigned bufferId,
+               SourceManager &sourceMgr, DiagnosticEngine &diags)
+   : Parser(sourceMgr, diags,
+            std::unique_ptr<Lexer>(new Lexer(langOpts, sourceMgr, bufferId,
+                                             &diags, langOpts.attachCommentsToDecls ?
+                                                CommentRetentionMode::AttachToNextToken : CommentRetentionMode::None,
+                                             TriviaRetentionMode::WithTrivia)))
+{}
+
+Parser::Parser(SourceManager &sourceMgr, DiagnosticEngine &diags,
+               std::unique_ptr<Lexer> lexer)
+   : m_sourceMgr(sourceMgr),
+     m_diags(diags),
+     m_lexer(lexer.release())
+{
+   m_token.setKind(TokenKindType::T_UNKOWN_MARK);
+}
+
+Parser::~Parser()
+{
+   delete m_lexer;
+}
 
 } // polar::parser

@@ -9,8 +9,8 @@
 //
 // Created by polarboy on 2019/06/26.
 
-#ifndef POLARPHP_SYNTAX_INTERNAL_LEXER_DEFS_H
-#define POLARPHP_SYNTAX_INTERNAL_LEXER_DEFS_H
+#ifndef POLARPHP_PARSER_INTERNAL_YY_LEXER_DEFS_H
+#define POLARPHP_PARSER_INTERNAL_YY_LEXER_DEFS_H
 
 #include "polarphp/parser/internal/YYLexerConditionDefs.h"
 #include "polarphp/parser/internal/YYLocation.h"
@@ -48,4 +48,4 @@ int token_lex(ParserSemantic *value, location *loc, Lexer *lexer);
 #define BOM_UTF16_LE	"\xff\xfe"
 #define BOM_UTF8		"\xef\xbb\xbf"
 
-#endif // POLARPHP_SYNTAX_INTERNAL_LEXER_DEFS_H
+#endif // POLARPHP_PARSER_INTERNAL_YY_LEXER_DEFS_H

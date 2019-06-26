@@ -55,6 +55,13 @@ enum class TriviaRetentionMode
    WithTrivia
 };
 
+struct HereDocLabel
+{
+   bool intentationUseSpaces;
+   int indentation;
+   std::string label;
+};
+
 class Lexer
 {
 public:
@@ -83,8 +90,7 @@ public:
    ///   identifier), but not things like how many characters are
    ///   consumed.  If that changes, APIs like getLocForEndOfToken will
    ///   need to take a LangOptions explicitly.
-   Lexer(
-         const LangOptions &options, const SourceManager &sourceMgr,
+   Lexer(const LangOptions &options, const SourceManager &sourceMgr,
          unsigned bufferId, DiagnosticEngine *diags,
          CommentRetentionMode commentRetention = CommentRetentionMode::None,
          TriviaRetentionMode triviaRetention = TriviaRetentionMode::WithoutTrivia);
@@ -443,7 +449,7 @@ private:
    /// current token start pointer
    const unsigned char *m_yyStart;
 
-    /// current token text
+   /// current token text
    const unsigned char *m_yyText;
 
    /// Pointer to the next not consumed character.
@@ -452,7 +458,7 @@ private:
    /// backup pointer
    const unsigned char *m_yyMarker;
 
-   bool m_heredocScanAhead;
+   bool m_heredocScanAhead = false;
    bool m_heredocIndentationUsesSpaces;
    YYLexerCondType m_yyCondition = YYLexerCondType::yycINITIAL;
    int m_heredocIndentation;

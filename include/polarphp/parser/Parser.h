@@ -14,24 +14,25 @@
 
 #include <list>
 #include <string>
+#include <memory>
 
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/parser/CommonDefs.h"
 #include "polarphp/parser/Token.h"
 
-namespace polar::syntax {
-class SourceFile;
-} // polar::syntax
-
 namespace polar::ast {
 class DiagnosticEngine;
 } // polar::ast
 
+namespace polar::kernel {
+class LangOptions;
+} // polar::kernel
+
 namespace polar::parser {
 
 using polar::basic::StringRef;
-using polar::syntax::SourceFile;
 using polar::ast::DiagnosticEngine;
+using polar::kernel::LangOptions;
 
 class SourceManager;
 class Lexer;
@@ -44,6 +45,9 @@ void parse_error(StringRef msg);
 class Parser
 {
 public:
+   Parser(const LangOptions &langOpts, unsigned bufferId, SourceManager &sourceMgr,
+          DiagnosticEngine &diags);
+   Parser(SourceManager &sourceMgr, DiagnosticEngine &diags, std::unique_ptr<Lexer> lexer);
    Parser(const Parser &) = delete;
    Parser &operator =(const Parser &) = delete;
 
@@ -52,17 +56,21 @@ public:
       m_lineNumber += count;
    }
 
+   ~Parser();
+
 private:
    /// info properties
-   bool m_incrementLineNumber;
+   bool m_parserError = false;
+   bool m_inCompilation = false;
+   bool m_incrementLineNumber = false;
    int m_lineNumber;
    uint32_t m_startLineNumber;
 
    SourceManager &m_sourceMgr;
    DiagnosticEngine &m_diags;
-   SourceFile &m_sourceFile;
    Lexer *m_lexer;
 
+   Token m_token;
    std::string m_docComment;
    std::list<std::string> m_openFiles;
 };
