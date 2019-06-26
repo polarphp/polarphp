@@ -23,14 +23,18 @@ namespace polar::syntax {
 class SourceFile;
 } // polar::syntax
 
+namespace polar::ast {
+class DiagnosticEngine;
+} // polar::ast
+
 namespace polar::parser {
 
 using polar::basic::StringRef;
 using polar::syntax::SourceFile;
+using polar::ast::DiagnosticEngine;
 
 class SourceManager;
 class Lexer;
-class DiagnosticEngine;
 
 class AstNode
 {};

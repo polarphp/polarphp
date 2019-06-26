@@ -23,7 +23,7 @@
 #include "polarphp/parser/LexerState.h"
 #include "polarphp/basic/adt/SmallVector.h"
 #include "polarphp/utils/SaveAndRestore.h"
-#include "polarphp/parser/internal/YYLexerBridge.h"
+#include "polarphp/parser/internal/YYLexerDefs.h"
 
 namespace polar::parser {
 
@@ -300,31 +300,47 @@ public:
    Token getTokenAt(SourceLoc Loc);
 
    /// re2c interface methods
-   const unsigned char *getYYCursor()
+   const unsigned char *&getYYCursor()
    {
       return m_yyCursor;
    }
 
-   const unsigned char *getYYLimit()
+   const unsigned char *&getYYLimit()
    {
       return m_bufferEnd;
    }
 
-   const unsigned char *getYYMarker()
+   const unsigned char *&getYYMarker()
    {
       return m_yyMarker;
    }
 
-   int getYYCondState()
+   int getYYCondition()
    {
-      return m_yyState;
+      return m_yyCondition;
    }
 
-   Lexer &setYYCondState(int state)
+   Lexer &setYYCondition(YYLexerCondType cond)
    {
-      m_yyState = state;
+      m_yyCondition = cond;
       return *this;
    }
+
+   Lexer &pushYYCondition(YYLexerCondType cond)
+   {
+      m_yyConditionStack.push(m_yyCondition);
+      m_yyCondition = cond;
+      return *this;
+   }
+
+   Lexer &popYYCondtion()
+   {
+      YYLexerCondType cond = m_yyConditionStack.top();
+      m_yyCondition = cond;
+      m_yyConditionStack.pop();
+      return *this;
+   }
+
 private:
    Lexer(const Lexer&) = delete;
    void operator=(const Lexer&) = delete;
@@ -438,13 +454,13 @@ private:
 
    bool m_heredocScanAhead;
    bool m_heredocIndentationUsesSpaces;
-   int m_yyState;
+   YYLexerCondType m_yyCondition = YYLexerCondType::yycINITIAL;
    int m_heredocIndentation;
    /// initial string length after scanning to first variable
    /// used in lex string literal which has ${var} or $var in it
    int m_scannedStringLen;
 
-   std::stack<int> m_stateStack;
+   std::stack<YYLexerCondType> m_yyConditionStack;
    std::stack<const unsigned char *> m_heredocLabelStack;
 
    Token m_nextToken;
