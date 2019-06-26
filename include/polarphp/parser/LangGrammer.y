@@ -2,7 +2,7 @@
 %language "c++"
 %expect 0
 %locations
-%define api.prefix {polar_}
+%define api.prefix {polar_yy_}
 %define api.namespace{polar::parser::internal}
 %define api.value.type variant
 %define api.parser.class {YYParser}
@@ -33,7 +33,7 @@ class Lexer;
 }
 
 %code provides {
-#define polar_lex polar::parser::internal::token_lex
+#define polar_yy_lex polar::parser::internal::token_lex
 namespace polar::parser::internal {
 using ParserSemantic = YYParser::semantic_type;
 int token_lex(ParserSemantic *value, location *loc, Lexer *lexer);
