@@ -12,7 +12,7 @@
 #ifndef POLARPHP_PARSER_LEXER_H
 #define POLARPHP_PARSER_LEXER_H
 
-#include <variant>
+#include <any>
 #include <stack>
 
 #include "polarphp/ast/DiagnosticEngine.h"
@@ -65,7 +65,7 @@ struct HereDocLabel
 class Lexer
 {
 public:
-   using LexerEventHandler = void (*)(int context);
+   using LexerEventHandler = void (*)(std::any context);
 private:
    using State = LexerState;
    struct PrincipalTag {};
@@ -214,6 +214,9 @@ public:
       }
    }
 
+   Lexer &saveYYState(State state);
+   Lexer &restoreYYState();
+
    /// Restore the lexer state to a given state that is located before
    /// current position.
    void backtrackToState(State state)
@@ -313,7 +316,7 @@ public:
 
    const unsigned char *&getYYLimit()
    {
-      return m_bufferEnd;
+      return m_yyLimit;
    }
 
    const unsigned char *&getYYMarker()
@@ -344,6 +347,12 @@ public:
       YYLexerCondType cond = m_yyConditionStack.top();
       m_yyCondition = cond;
       m_yyConditionStack.pop();
+      return *this;
+   }
+
+   Lexer &setParser(Parser *parser)
+   {
+      m_parser = parser;
       return *this;
    }
 
@@ -418,10 +427,14 @@ private:
                                   Lexer *lexer);
 
 private:
+   bool m_heredocScanAhead = false;
+   bool m_heredocIndentationUsesSpaces;
+
    const LangOptions &m_langOpts;
    const SourceManager &m_sourceMgr;
-   const unsigned m_bufferId;
+   const unsigned int m_bufferId;
    DiagnosticEngine *m_diags;
+   Parser *m_parser = nullptr;
 
    /// Pointer to the first character of the buffer, even in a lexer that
    /// scans a subrange of the buffer.
@@ -447,27 +460,26 @@ private:
    unsigned int m_yyLength;
 
    /// current token start pointer
-   const unsigned char *m_yyStart;
+   const unsigned char *m_yyStart = nullptr;
 
    /// current token text
-   const unsigned char *m_yyText;
+   const unsigned char *m_yyText = nullptr;
 
    /// Pointer to the next not consumed character.
-   const unsigned char *m_yyCursor;
+   const unsigned char *m_yyCursor = nullptr;
 
    /// backup pointer
-   const unsigned char *m_yyMarker;
+   const unsigned char *m_yyMarker = nullptr;
 
-   bool m_heredocScanAhead = false;
-   bool m_heredocIndentationUsesSpaces;
+   const unsigned char *m_yyLimit;
+
    YYLexerCondType m_yyCondition = YYLexerCondType::yycINITIAL;
    int m_heredocIndentation;
    /// initial string length after scanning to first variable
    /// used in lex string literal which has ${var} or $var in it
    int m_scannedStringLen;
 
-   std::stack<YYLexerCondType> m_yyConditionStack;
-   std::stack<const unsigned char *> m_heredocLabelStack;
+   LexerEventHandler m_eventHandler = nullptr;
 
    Token m_nextToken;
 
@@ -486,7 +498,8 @@ private:
    /// `TriviaRetentionMode::WithTrivia`.
    ParsedTrivia m_trailingTrivia;
 
-   LexerEventHandler m_eventHandler = nullptr;
+   std::stack<YYLexerCondType> m_yyConditionStack;
+   std::stack<const unsigned char *> m_heredocLabelStack;
 };
 
 /// Given an ordered token \param Array , get the iterator pointing to the first
