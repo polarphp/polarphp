@@ -214,7 +214,7 @@ public:
       }
    }
 
-   Lexer &saveYYState(State state);
+   Lexer &saveYYState();
    Lexer &restoreYYState();
 
    /// Restore the lexer state to a given state that is located before
@@ -473,7 +473,7 @@ private:
 
    const unsigned char *m_yyLimit;
 
-   YYLexerCondType m_yyCondition = YYLexerCondType::yycINITIAL;
+   YYLexerCondType m_yyCondition = COND_NAME(ST_IN_SCRIPTING);
    int m_heredocIndentation;
    /// initial string length after scanning to first variable
    /// used in lex string literal which has ${var} or $var in it
@@ -500,6 +500,7 @@ private:
 
    std::stack<YYLexerCondType> m_yyConditionStack;
    std::stack<const unsigned char *> m_heredocLabelStack;
+   std::stack<State> m_yyStateStack;
 };
 
 /// Given an ordered token \param Array , get the iterator pointing to the first

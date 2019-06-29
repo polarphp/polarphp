@@ -12,6 +12,7 @@
 #include "polarphp/parser/Lexer.h"
 #include "polarphp/parser/Parser.h"
 #include "polarphp/parser/CommonDefs.h"
+#include "polarphp/parser/internal/YYLexerDefs.h"
 #include "polarphp/basic/adt/SmallVector.h"
 #include "polarphp/basic/adt/SmallString.h"
 #include "polarphp/basic/CharInfo.h"
@@ -27,6 +28,8 @@ using polar::basic::SmallVectorImpl;
 using polar::basic::SmallString;
 using namespace polar::syntax;
 using namespace polar::basic;
+using internal::YYLocation;
+using internal::ParserSemantic;
 
 namespace {
 
@@ -721,6 +724,10 @@ void Lexer::lexImpl()
    } else {
       m_nextToken.setAtStartOfLine(false);
    }
+   // invoke yylexer
+   YYLocation tokenLoc;
+   ParserSemantic tokenValue;
+   TokenKindType token = static_cast<TokenKindType>(internal::token_lex(&tokenValue, &tokenLoc, this));
 }
 
 namespace {
@@ -787,7 +794,7 @@ SourceLoc get_loc_for_start_of_token_in_buffer(SourceManager &sourceMgr,
 
 } // anonymous namespace
 
-Lexer &Lexer::saveYYState(State state)
+Lexer &Lexer::saveYYState()
 {
 
 }
@@ -988,15 +995,15 @@ void tokenize(const LangOptions &langOpts, const SourceManager &sourceMgr,
       lexer.lex(token, leadingTrivia, trailingTrivia);
       // If the token has the same location as a reset location,
       // reset the token stream
-      auto iter = resetTokens.find(token);
-      if (iter != resetTokens.end()) {
-         assert(iter->isNot(TokenKindType::T_STRING));
-         destFunc(*iter, ParsedTrivia(), ParsedTrivia());
-         auto newState = lexer.getStateForBeginningOfTokenLoc(
-                  iter->getLoc().getAdvancedLoc(iter->getLength()));
-         lexer.restoreState(newState);
-         continue;
-      }
+//      auto iter = resetTokens.find(token);
+//      if (iter != resetTokens.end()) {
+//         assert(iter->isNot(TokenKindType::T_STRING));
+//         destFunc(*iter, ParsedTrivia(), ParsedTrivia());
+//         auto newState = lexer.getStateForBeginningOfTokenLoc(
+//                  iter->getLoc().getAdvancedLoc(iter->getLength()));
+//         lexer.restoreState(newState);
+//         continue;
+//      }
       //      if (token.is(tok::string_literal) && tokenizeInterpolatedString) {
       //         std::vector<Token> StrTokens;
       //         getStringPartTokens(token, langOpts, sourceMgr, bufferId, StrTokens);

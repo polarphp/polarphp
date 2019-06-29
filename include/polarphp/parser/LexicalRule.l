@@ -23,12 +23,6 @@
 namespace polar::parser::internal {
 int token_lex(ParserSemantic *value, location *loc, Lexer *lexer)
 {
-   int token;
-   int offset;
-   int start_line = 0;
-   char *source;
-   char *marker;
-
 /*!re2c
 re2c:yyfill:check = 0;
 LNUM	[0-9]+
@@ -566,26 +560,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>"__NAMESPACE__" {
 
 }
-
-
-<INITIAL>"<?=" {
-
-}
-
-
-<INITIAL>"<?php"([ \t]|{NEWLINE}) {
-
-}
-
-
-<INITIAL>"<?" {
-
-}
-
-<INITIAL>{ANY_CHAR} {
-
-}
-
 
 /* Make sure a label character follows "->", otherwise there is no property
  * and "->" will be taken literally

@@ -56,6 +56,9 @@ public:
       m_lineNumber += count;
    }
 
+   void parse();
+   void getSyntaxTree();
+
    ~Parser();
 
 private:

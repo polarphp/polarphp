@@ -21,7 +21,8 @@ namespace polar::parser {
 using YYLexerCondType = YYCONDTYPE;
 
 namespace internal {
-int token_lex(ParserSemantic *value, location *loc, Lexer *lexer);
+using YYLocation = location;
+int token_lex(ParserSemantic *value, YYLocation *loc, Lexer *lexer);
 } // internal
 } // polar::parser
 
@@ -39,8 +40,9 @@ int token_lex(ParserSemantic *value, location *loc, Lexer *lexer);
 #define YYGETCONDITION()           lexer->getYYCondition()
 #define YYSETCONDITION(cond)      lexer->setYYCondition(cond)
 #define YYFILL(n) { if ((YYCURSOR + n) >= (YYLIMIT)) { return 0; } }
-#define COND_NAME(name)            yyc##name
-#define polar_yy_push_state(name)  lexer->pushYYCondition(YYCONDTYPE::yyc##name)
+#define COND_NAME(name)            YYLexerCondType::yyc##name
+#define GOTO_CONDITION(name) YYSETCONDITION(COND_NAME(name))
+#define polar_yy_push_condition(name)  lexer->pushYYCondition(YYCONDTYPE::yyc##name)
 
 #define BOM_UTF32_BE	"\x00\x00\xfe\xff"
 #define BOM_UTF32_LE	"\xff\xfe\x00\x00"

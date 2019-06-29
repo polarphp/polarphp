@@ -14,6 +14,8 @@
 
 namespace polar::parser::internal {
 
+
+
 } // polar::parser::internal
 
 #endif // POLARPHP_PARSER_INTERNAL_YY_LEXER_EXTRAS_H
