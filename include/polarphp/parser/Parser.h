@@ -51,11 +51,6 @@ public:
    Parser(const Parser &) = delete;
    Parser &operator =(const Parser &) = delete;
 
-   void incLineNumber(int count = 1)
-   {
-      m_lineNumber += count;
-   }
-
    void parse();
    void getSyntaxTree();
 
@@ -65,9 +60,6 @@ private:
    /// info properties
    bool m_parserError = false;
    bool m_inCompilation = false;
-   bool m_incrementLineNumber = false;
-   int m_lineNumber;
-   uint32_t m_startLineNumber;
 
    SourceManager &m_sourceMgr;
    DiagnosticEngine &m_diags;

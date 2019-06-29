@@ -33,10 +33,10 @@ class Lexer;
 }
 
 %code provides {
-#define polar_yy_lex polar::parser::internal::token_lex
+#define polar_yy_lex polar::parser::internal::token_lex_wrapper
 namespace polar::parser::internal {
 using ParserSemantic = YYParser::semantic_type;
-int token_lex(ParserSemantic *value, location *loc, Lexer *lexer);
+int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer);
 } // polar::parser::internal
 }
 

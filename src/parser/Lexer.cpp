@@ -104,16 +104,16 @@ inline size_t count_str_newline(const unsigned char *str, size_t length)
    return count;
 }
 
-inline void handle_newlines(Parser &parser, const unsigned char *str, size_t length)
+inline void handle_newlines(Lexer &lexer, const unsigned char *str, size_t length)
 {
    size_t count = count_str_newline(str, length);
-   parser.incLineNumber(count);
+   lexer.incLineNumber(count);
 }
 
-inline void handle_newline(Parser &parser, unsigned char c)
+inline void handle_newline(Lexer &lexer, unsigned char c)
 {
    if (c == '\n' || c == '\r') {
-      parser.incLineNumber();
+      lexer.incLineNumber();
    }
 }
 
@@ -725,9 +725,10 @@ void Lexer::lexImpl()
       m_nextToken.setAtStartOfLine(false);
    }
    // invoke yylexer
-   YYLocation tokenLoc;
-   ParserSemantic tokenValue;
-   TokenKindType token = static_cast<TokenKindType>(internal::token_lex(&tokenValue, &tokenLoc, this));
+   if (m_incrementLineNumber) {
+      incLineNumber();
+   }
+   TokenKindType token = static_cast<TokenKindType>(internal::yy_token_lex(this));
 }
 
 namespace {

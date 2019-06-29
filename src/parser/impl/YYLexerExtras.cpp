@@ -15,4 +15,9 @@
 namespace polar::parser::internal {
 
 
+int token_lex_wrapper(ParserSemantic *value, YYLocation *loc, Lexer *lexer)
+{
+
+}
+
 } // polar::parser::internal

@@ -22,7 +22,10 @@ using YYLexerCondType = YYCONDTYPE;
 
 namespace internal {
 using YYLocation = location;
-int token_lex(ParserSemantic *value, YYLocation *loc, Lexer *lexer);
+/// bison -> polar lexer
+int token_lex_wrapper(ParserSemantic *value, YYLocation *loc, Lexer *lexer);
+/// polar lexer -> yy lexer
+int yy_token_lex(Lexer *lexer);
 } // internal
 } // polar::parser
 
@@ -34,15 +37,20 @@ int token_lex(ParserSemantic *value, YYLocation *loc, Lexer *lexer);
 
 /// for utf8 encoding
 #define YYCTYPE   unsigned char
-#define YYCURSOR                   lexer->getYYCursor()
-#define YYLIMIT                    lexer->getYYLimit()
-#define YYMARKER                   lexer->getYYMarker()
-#define YYGETCONDITION()           lexer->getYYCondition()
-#define YYSETCONDITION(cond)      lexer->setYYCondition(cond)
-#define YYFILL(n) { if ((YYCURSOR + n) >= (YYLIMIT)) { return 0; } }
+#define YYCURSOR                   lexer.getYYCursor()
+#define YYLIMIT                    lexer.getYYLimit()
+#define YYMARKER                   lexer.getYYMarker()
+#define YYGETCONDITION()           lexer.getYYCondition()
+#define YYSETCONDITION(cond)      lexer.setYYCondition(cond)
+//#define YYFILL(n) { if ((YYCURSOR + n) >= (YYLIMIT)) { return 0; } }
 #define COND_NAME(name)            YYLexerCondType::yyc##name
 #define GOTO_CONDITION(name) YYSETCONDITION(COND_NAME(name))
-#define polar_yy_push_condition(name)  lexer->pushYYCondition(YYCONDTYPE::yyc##name)
+#define polar_yy_push_condition(name)  lexer.pushYYCondition(YYCONDTYPE::yyc##name)
+
+#define polar_yy_less(offset)  do { YYCURSOR = lexer.getYYText() + offset; \
+                                    lexer.setYYLength(static_cast<unsigned int>(offset)) } while(0)
+
+#define PARSER_MODE() value != nullptr;
 
 #define BOM_UTF32_BE	"\x00\x00\xfe\xff"
 #define BOM_UTF32_LE	"\xff\xfe\x00\x00"

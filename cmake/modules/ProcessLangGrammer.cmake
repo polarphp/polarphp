@@ -25,7 +25,7 @@ set(POLAR_GRAMMER_FILE ${POLAR_PARSER_INCLUDE_DIR}/LangGrammer.y)
 re2c_target(NAME PolarRe2cLangLexer
    OUTPUT ${POLAR_GENERATED_LEX_IMPL_FILE}
    INPUT ${POLAR_PARSER_INCLUDE_DIR}/LexicalRule.l
-   OPTIONS --no-generation-date --case-inverted -cbdFt ${POLAR_GENERATED_LEX_HEADER_FILE})
+   OPTIONS --no-generation-date --case-inverted -Wundefined-control-flow -cbdFt ${POLAR_GENERATED_LEX_HEADER_FILE})
 
 file(MD5 ${POLAR_GRAMMER_FILE} grammerFileHash)
 

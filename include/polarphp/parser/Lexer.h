@@ -308,7 +308,39 @@ public:
    /// Get the token that starts at the given location.
    Token getTokenAt(SourceLoc Loc);
 
+   void incLineNumber(int count = 1)
+   {
+      m_lineNumber += count;
+   }
+
+   int getLineNumber()
+   {
+      return m_lineNumber;
+   }
+
+   unsigned int getYYLength()
+   {
+      return m_yyLength;
+   }
+
+   Lexer &setYYLength(unsigned int length)
+   {
+      m_yyLength = length;
+      return *this;
+   }
+
    /// re2c interface methods
+   const unsigned char *&getYYText()
+   {
+      return m_yyText;
+   }
+
+   Lexer &setYYText(const unsigned char *text)
+   {
+      m_yyText = text;
+      return *this;
+   }
+
    const unsigned char *&getYYCursor()
    {
       return m_yyCursor;
@@ -422,12 +454,11 @@ private:
    }
 
 private:
-   friend int internal::token_lex(internal::ParserSemantic *value,
-                                  internal::location *loc,
-                                  Lexer *lexer);
+   friend int internal::yy_token_lex(Lexer *lexer);
 
 private:
    bool m_heredocScanAhead = false;
+   bool m_incrementLineNumber = false;
    bool m_heredocIndentationUsesSpaces;
 
    const LangOptions &m_langOpts;
@@ -478,6 +509,7 @@ private:
    /// initial string length after scanning to first variable
    /// used in lex string literal which has ${var} or $var in it
    int m_scannedStringLen;
+   int m_lineNumber;
 
    LexerEventHandler m_eventHandler = nullptr;
 
