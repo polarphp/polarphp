@@ -430,6 +430,7 @@ private:
    void skipSlashSlashComment(bool eatNewline);
 
    void skipSlashStarComment();
+   void skipHashbang(bool eatNewline);
    void lexIdentifier();
    void lexDollarIdent();
    void lexOperatorIdentifier();
@@ -446,7 +447,7 @@ private:
 
    /// Returns it should be tokenize.
    bool lexUnknown(bool emitDiagnosticsIfToken);
-   NullCharacterKind getNullCharacterKind(const char *ptr) const;
+   NullCharacterKind getNullCharacterKind(const unsigned char *ptr) const;
 
    bool isLabelStart(unsigned char c)
    {

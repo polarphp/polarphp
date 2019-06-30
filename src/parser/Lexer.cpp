@@ -13,6 +13,7 @@
 #include "polarphp/parser/Parser.h"
 #include "polarphp/parser/CommonDefs.h"
 #include "polarphp/parser/internal/YYLexerDefs.h"
+#include "polarphp/parser/Confusables.h"
 #include "polarphp/basic/adt/SmallVector.h"
 #include "polarphp/basic/adt/SmallString.h"
 #include "polarphp/basic/CharInfo.h"
@@ -335,6 +336,13 @@ void Lexer::formToken(syntax::TokenKindType kind, const unsigned char *tokenStar
 
 namespace {
 void validate_multiline_indents(const Token &str, DiagnosticEngine *diags);
+void diagnose_embedded_null(DiagnosticEngine *diags, const unsigned char *ptr);
+bool advance_if_valid_start_of_identifier(const unsigned char *&ptr,
+                                          const unsigned char *end);
+bool advance_if_valid_start_of_operator(const unsigned char *&ptr,
+                                        const unsigned char *end);
+bool advance_if_valid_continuation_of_identifier(const unsigned char *&ptr,
+                                                 const unsigned char *end);
 } // anonymous namespace
 
 void Lexer::formStringLiteralToken(const unsigned char *tokenStart,
@@ -354,7 +362,202 @@ void Lexer::formStringLiteralToken(const unsigned char *tokenStart,
 
 void Lexer::lexTrivia(ParsedTrivia &trivia, bool isForTrailingTrivia)
 {
+restart:
+   const unsigned char *triviaStart = m_yyCursor;
+   switch (*triviaStart++) {
+   case '\n':
+      if (isForTrailingTrivia) {
+         break;
+      }
+      m_nextToken.setAtStartOfLine(true);
+      trivia.appendOrSquash(TriviaKind::Newline, 1);
+      goto restart;
+   case '\r':
+      if (isForTrailingTrivia) {
+         break;
+      }
+      m_nextToken.setAtStartOfLine(true);
+      if (m_yyCursor[0] == '\n') {
+         trivia.appendOrSquash(TriviaKind::CarriageReturnLineFeed, 2);
+         ++m_yyCursor;
+      } else {
+         trivia.appendOrSquash(TriviaKind::CarriageReturn, 1);
+      }
+      goto restart;
+   case ' ':
+      trivia.appendOrSquash(TriviaKind::Space, 1);
+      goto restart;
+   case '\t':
+      trivia.appendOrSquash(TriviaKind::Tab, 1);
+      goto restart;
+   case '\v':
+      trivia.appendOrSquash(TriviaKind::VerticalTab, 1);
+      goto restart;
+   case '\f':
+      trivia.appendOrSquash(TriviaKind::Formfeed, 1);
+      goto restart;
+   case '/':
+      if (isForTrailingTrivia || isKeepingComments()) {
+         // Don't lex comments as trailing trivias (for now).
+         // Don't try to lex comments here if we are lexing comments as Tokens.
+         break;
+      } else if (*m_yyCursor == '/') {
+         bool isDocComment = m_yyCursor[1] == '/';
+         skipSlashSlashComment(/*EatNewline=*/false);
+         size_t length = m_yyCursor - triviaStart;
+         trivia.push_back(isDocComment ? TriviaKind::DocLineComment
+                                       : TriviaKind::LineComment, length);
+         goto restart;
+      } else if (*m_yyCursor == '*') {
+         // '/* ... */' comment.
+         bool isDocComment = m_yyCursor[1] == '*';
+         skipSlashStarComment();
+         size_t length = m_yyCursor - triviaStart;
+         trivia.push_back(isDocComment ? TriviaKind::DocBlockComment
+                                       : TriviaKind::BlockComment, length);
+         goto restart;
+      }
+      break;
+   case '#':
+      if (triviaStart == m_contentStart && *m_yyCursor == '!') {
+         // Hashbang '#!/path/to/polarphp'.
+         --m_yyCursor;
+         skipHashbang(/*EatNewline=*/false);
+         size_t length = m_yyCursor - triviaStart;
+         trivia.push_back(TriviaKind::GarbageText, length);
+         goto restart;
+      }
+      break;
+   case 0:
+      switch (getNullCharacterKind(m_yyCursor - 1)) {
+      case NullCharacterKind::Embedded:
+      {
+         diagnose_embedded_null(m_diags, m_yyCursor - 1);
+         size_t length = m_yyCursor - triviaStart;
+         trivia.push_back(TriviaKind::GarbageText, length);
+         goto restart;
+      }
+      case NullCharacterKind::CodeCompletion:
+      case NullCharacterKind::BufferEnd:
+         break;
+      }
+      break;
+      // Start character of tokens.
+   case '@': case '{': case '[': case '(': case '}': case ']': case ')':
+   case ',': case ';': case ':': case '\\': case '$':
+   case '0': case '1': case '2': case '3': case '4':
+   case '5': case '6': case '7': case '8': case '9':
+   case '"': case '\'': case '`':
+      // Start of identifiers.
+   case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'G':
+   case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N':
+   case 'O': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U':
+   case 'V': case 'W': case 'X': case 'Y': case 'Z':
+   case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':
+   case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n':
+   case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u':
+   case 'v': case 'w': case 'x': case 'y': case 'z':
+   case '_':
+      // Start of operators.
+   case '%': case '!': case '?': case '=':
+   case '-': case '+': case '*':
+   case '&': case '|': case '^': case '~': case '.':
+   case '<': case '>':
+      break;
+   default:
+      const unsigned char *temp = m_yyCursor - 1;
+      if (advance_if_valid_start_of_identifier(temp, m_bufferEnd)) {
+         break;
+      }
+      if (advance_if_valid_start_of_operator(temp, m_bufferEnd)) {
+         break;
+      }
+      bool shouldTokenize = lexUnknown(/*EmitDiagnosticsIfToken=*/false);
+      if (shouldTokenize) {
+         m_yyCursor = temp;
+         return;
+      }
+      size_t length = m_yyCursor - triviaStart;
+      trivia.push_back(TriviaKind::GarbageText, length);
+      goto restart;
+   }
+   // Reset the cursor.
+   --m_yyCursor;
+}
 
+bool Lexer::lexUnknown(bool emitDiagnosticsIfToken)
+{
+   const unsigned char *temp = m_yyCursor - 1;
+   if (advance_if_valid_continuation_of_identifier(temp, m_bufferEnd)) {
+      // If this is a valid identifier continuation, but not a valid identifier
+      // start, attempt to recover by eating more continuation characters.
+      if (emitDiagnosticsIfToken) {
+         //         diagnose(m_yyCursor - 1, diag::lex_invalid_identifier_start_character);
+      }
+      while (advance_if_valid_continuation_of_identifier(temp, m_bufferEnd));
+      m_yyCursor = temp;
+      return true;
+   }
+   // This character isn't allowed in polarphp source.
+   uint32_t codepoint = validate_utf8_character_and_advance(temp, m_bufferEnd);
+   if (codepoint == ~0U) {
+//      diagnose(m_yyCursor - 1, diag::lex_invalid_utf8)
+//            .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp), " ");
+      m_yyCursor = temp;
+      return false;// Skip presumed whitespace.
+   } else if (codepoint == 0x000000A0) {
+      // Non-breaking whitespace (U+00A0)
+      while (reinterpret_cast<const char *>(temp)[0] == '\xC2' &&
+             reinterpret_cast<const char *>(temp)[1] == '\xA0') {
+         temp += 2;
+      }
+      SmallString<8> spaces;
+      spaces.assign((temp - m_yyCursor + 1) / 2, ' ');
+      //      diagnose(m_yyCursor - 1, diag::lex_nonbreaking_space)
+      //            .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp),
+      //                               spaces);
+      m_yyCursor = temp;
+      return false;// Skip presumed whitespace.
+   } else if (codepoint == 0x0000201D) {
+      // If this is an end curly quote, just diagnose it with a fixit hint.
+      if (emitDiagnosticsIfToken) {
+         //         diagnose(m_yyCursor - 1, diag::lex_invalid_curly_quote)
+         //               .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp), "\"");
+      }
+      m_yyCursor = temp;
+      return true;
+   }
+   //   diagnose(m_yyCursor - 1, diag::lex_invalid_character)
+   //         .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp), " ");
+
+   char expectedCodepoint;
+   if ((expectedCodepoint =
+        try_convert_confusable_character_to_ascii(codepoint))) {
+
+      SmallString<4> confusedChar;
+      encode_to_utf8(codepoint, confusedChar);
+      SmallString<1> expectedChar;
+      expectedChar += expectedCodepoint;
+//      diagnose(m_yyCursor - 1, diag::lex_confusable_character, confusedChar,
+//               expectedChar)
+//            .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp),
+//                               expectedChar);
+   }
+
+   m_yyCursor = temp;
+   return false; // Skip presumed whitespace.
+}
+
+Lexer::NullCharacterKind Lexer::getNullCharacterKind(const unsigned char *ptr) const
+{
+   assert(ptr != nullptr && *ptr == 0);
+   if (ptr == m_codeCompletionPtr) {
+      return NullCharacterKind::CodeCompletion;
+   }
+   if (ptr == m_bufferEnd) {
+      return NullCharacterKind::BufferEnd;
+   }
+   return NullCharacterKind::Embedded;
 }
 
 Lexer::State Lexer::getStateForBeginningOfTokenLoc(SourceLoc sourceLoc) const
@@ -403,23 +606,23 @@ void diagnose_embedded_null(DiagnosticEngine *diags, const unsigned char *ptr)
    //         .fixItRemoveChars(nullLoc, nullEndLoc);
 }
 
-/// Advance \p curPtr to the end of line or the end of file. Returns \c true
+/// Advance \p m_yyCursor to the end of line or the end of file. Returns \c true
 /// if it stopped at the end of line, \c false if it stopped at the end of file.
-bool advance_to_end_of_line(const unsigned char *&curPtr, const unsigned char *bufferEnd,
+bool advance_to_end_of_line(const unsigned char *&m_yyCursor, const unsigned char *bufferEnd,
                             const unsigned char *codeCompletionPtr = nullptr,
                             DiagnosticEngine *diags = nullptr) {
    while (1) {
-      switch (*curPtr++) {
+      switch (*m_yyCursor++) {
       case '\n':
       case '\r':
-         --curPtr;
+         --m_yyCursor;
          return true; // If we found the end of the line, return.
       default:
          // If this is a "high" UTF-8 character, validate it.
-         if (diags && (signed char)(curPtr[-1]) < 0) {
-            --curPtr;
-            const unsigned char *charStart = curPtr;
-            if (validate_utf8_character_and_advance(curPtr, bufferEnd) == ~0U) {
+         if (diags && (signed char)(m_yyCursor[-1]) < 0) {
+            --m_yyCursor;
+            const unsigned char *charStart = m_yyCursor;
+            if (validate_utf8_character_and_advance(m_yyCursor, bufferEnd) == ~0U) {
                //               diags->diagnose(Lexer::getSourceLoc(charStart),
                //                               diag::lex_invalid_utf8);
             }
@@ -427,50 +630,50 @@ bool advance_to_end_of_line(const unsigned char *&curPtr, const unsigned char *b
          }
          break;   // Otherwise, eat other characters.
       case 0:
-         if (curPtr - 1 != bufferEnd) {
-            if (diags && curPtr - 1 != codeCompletionPtr) {
+         if (m_yyCursor - 1 != bufferEnd) {
+            if (diags && m_yyCursor - 1 != codeCompletionPtr) {
                // If this is a random nul character in the middle of a buffer, skip
                // it as whitespace.
-               diagnose_embedded_null(diags, curPtr - 1);
+               diagnose_embedded_null(diags, m_yyCursor - 1);
             }
             continue;
          }
          // Otherwise, the last line of the file does not have a newline.
-         --curPtr;
+         --m_yyCursor;
          return false;
       }
    }
 }
 
-bool skip_to_end_of_slash_star_comment(const unsigned char *&curPtr,
+bool skip_to_end_of_slash_star_comment(const unsigned char *&m_yyCursor,
                                        const unsigned char *bufferEnd,
                                        const unsigned char *codeCompletionPtr = nullptr,
                                        DiagnosticEngine *diags = nullptr)
 {
-   const unsigned char *startPtr = curPtr - 1;
-   assert(curPtr[-1] == '/' && curPtr[0] == '*' && "Not a /* comment");
+   const unsigned char *startPtr = m_yyCursor - 1;
+   assert(m_yyCursor[-1] == '/' && m_yyCursor[0] == '*' && "Not a /* comment");
    // Make sure to advance over the * so that we don't incorrectly handle /*/ as
    // the beginning and end of the comment.
-   ++curPtr;
+   ++m_yyCursor;
 
    // /**/ comments can be nested, keep track of how deep we've gone.
    unsigned depth = 1;
    bool isMultiline = false;
 
    while (1) {
-      switch (*curPtr++) {
+      switch (*m_yyCursor++) {
       case '*':
          // Check for a '*/'
-         if (*curPtr == '/') {
-            ++curPtr;
+         if (*m_yyCursor == '/') {
+            ++m_yyCursor;
             if (--depth == 0)
                return isMultiline;
          }
          break;
       case '/':
          // Check for a '/*'
-         if (*curPtr == '*') {
-            ++curPtr;
+         if (*m_yyCursor == '*') {
+            ++m_yyCursor;
             ++depth;
          }
          break;
@@ -482,10 +685,10 @@ bool skip_to_end_of_slash_star_comment(const unsigned char *&curPtr,
 
       default:
          // If this is a "high" UTF-8 character, validate it.
-         if (diags && (signed char)(curPtr[-1]) < 0) {
-            --curPtr;
-            const unsigned char *charStart = curPtr;
-            if (validate_utf8_character_and_advance(curPtr, bufferEnd) == ~0U) {
+         if (diags && (signed char)(m_yyCursor[-1]) < 0) {
+            --m_yyCursor;
+            const unsigned char *charStart = m_yyCursor;
+            if (validate_utf8_character_and_advance(m_yyCursor, bufferEnd) == ~0U) {
                //               diags->diagnose(Lexer::getSourceLoc(charStart),
                //                               diag::lex_invalid_utf8);
             }
@@ -493,23 +696,23 @@ bool skip_to_end_of_slash_star_comment(const unsigned char *&curPtr,
 
          break;   // Otherwise, eat other characters.
       case 0:
-         if (curPtr - 1 != bufferEnd) {
-            if (diags && curPtr - 1 != codeCompletionPtr) {
+         if (m_yyCursor - 1 != bufferEnd) {
+            if (diags && m_yyCursor - 1 != codeCompletionPtr) {
                // If this is a random nul character in the middle of a buffer, skip
                // it as whitespace.
-               diagnose_embedded_null(diags, curPtr - 1);
+               diagnose_embedded_null(diags, m_yyCursor - 1);
             }
             continue;
          }
          // Otherwise, we have an unterminated /* comment.
-         --curPtr;
+         --m_yyCursor;
 
          if (diags) {
             // Count how many levels deep we are.
             SmallString<8> terminator("*/");
             while (--depth != 0)
                terminator += "*/";
-            const unsigned char *EOL = (curPtr[-1] == '\n') ? (curPtr - 1) : curPtr;
+            const unsigned char *EOL = (m_yyCursor[-1] == '\n') ? (m_yyCursor - 1) : m_yyCursor;
             //            diags
             //                  ->diagnose(Lexer::getSourceLoc(EOL),
             //                             diag::lex_unterminated_block_comment)
@@ -665,6 +868,13 @@ void Lexer::skipSlashStarComment()
    }
 }
 
+void Lexer::skipHashbang(bool eatNewline)
+{
+   assert(m_yyCursor == m_contentStart && m_yyCursor[0] == '#' && m_yyCursor[1] == '!' &&
+         "Not a hashbang");
+   skipToEndOfLine(eatNewline);
+}
+
 bool Lexer::isIdentifier(StringRef string)
 {
    if (string.empty()) {
@@ -724,11 +934,12 @@ void Lexer::lexImpl()
    } else {
       m_nextToken.setAtStartOfLine(false);
    }
+   lexTrivia(m_leadingTrivia, /* IsForTrailingTrivia */ false);
    // invoke yylexer
    if (m_incrementLineNumber) {
       incLineNumber();
    }
-   TokenKindType token = static_cast<TokenKindType>(internal::yy_token_lex(this));
+   internal::yy_token_lex(this);
 }
 
 namespace {
@@ -996,15 +1207,15 @@ void tokenize(const LangOptions &langOpts, const SourceManager &sourceMgr,
       lexer.lex(token, leadingTrivia, trailingTrivia);
       // If the token has the same location as a reset location,
       // reset the token stream
-//      auto iter = resetTokens.find(token);
-//      if (iter != resetTokens.end()) {
-//         assert(iter->isNot(TokenKindType::T_STRING));
-//         destFunc(*iter, ParsedTrivia(), ParsedTrivia());
-//         auto newState = lexer.getStateForBeginningOfTokenLoc(
-//                  iter->getLoc().getAdvancedLoc(iter->getLength()));
-//         lexer.restoreState(newState);
-//         continue;
-//      }
+      //      auto iter = resetTokens.find(token);
+      //      if (iter != resetTokens.end()) {
+      //         assert(iter->isNot(TokenKindType::T_STRING));
+      //         destFunc(*iter, ParsedTrivia(), ParsedTrivia());
+      //         auto newState = lexer.getStateForBeginningOfTokenLoc(
+      //                  iter->getLoc().getAdvancedLoc(iter->getLength()));
+      //         lexer.restoreState(newState);
+      //         continue;
+      //      }
       //      if (token.is(tok::string_literal) && tokenizeInterpolatedString) {
       //         std::vector<Token> StrTokens;
       //         getStringPartTokens(token, langOpts, sourceMgr, bufferId, StrTokens);
