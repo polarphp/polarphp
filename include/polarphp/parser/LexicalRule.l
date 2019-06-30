@@ -622,11 +622,6 @@ int do_token_lex(int &token, int &offset, int &startLine,
 
 }
 
-<ST_IN_SCRIPTING> "?>"{NEWLINE}? {
-
-}
-
-
 <ST_IN_SCRIPTING> b?['] {
 
 }
