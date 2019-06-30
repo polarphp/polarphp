@@ -501,8 +501,8 @@ bool Lexer::lexUnknown(bool emitDiagnosticsIfToken)
    // This character isn't allowed in polarphp source.
    uint32_t codepoint = validate_utf8_character_and_advance(temp, m_bufferEnd);
    if (codepoint == ~0U) {
-//      diagnose(m_yyCursor - 1, diag::lex_invalid_utf8)
-//            .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp), " ");
+      //      diagnose(m_yyCursor - 1, diag::lex_invalid_utf8)
+      //            .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp), " ");
       m_yyCursor = temp;
       return false;// Skip presumed whitespace.
    } else if (codepoint == 0x000000A0) {
@@ -538,10 +538,10 @@ bool Lexer::lexUnknown(bool emitDiagnosticsIfToken)
       encode_to_utf8(codepoint, confusedChar);
       SmallString<1> expectedChar;
       expectedChar += expectedCodepoint;
-//      diagnose(m_yyCursor - 1, diag::lex_confusable_character, confusedChar,
-//               expectedChar)
-//            .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp),
-//                               expectedChar);
+      //      diagnose(m_yyCursor - 1, diag::lex_confusable_character, confusedChar,
+      //               expectedChar)
+      //            .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp),
+      //                               expectedChar);
    }
 
    m_yyCursor = temp;
@@ -934,7 +934,9 @@ void Lexer::lexImpl()
    } else {
       m_nextToken.setAtStartOfLine(false);
    }
+
    lexTrivia(m_leadingTrivia, /* IsForTrailingTrivia */ false);
+
    // invoke yylexer
    if (m_incrementLineNumber) {
       incLineNumber();
@@ -957,11 +959,12 @@ const unsigned char *find_start_of_line(const unsigned char *bufStart, const uns
    return current;
 }
 
-SourceLoc get_loc_for_start_of_token_in_buffer(SourceManager &sourceMgr,
-                                               unsigned bufferId,
-                                               unsigned offset,
-                                               unsigned bufferStart,
-                                               unsigned bufferEnd)
+SourceLoc get_loc_for_start_of_token_in_buffer(
+      SourceManager &sourceMgr,
+      unsigned bufferId,
+      unsigned offset,
+      unsigned bufferStart,
+      unsigned bufferEnd)
 {
    // Use fake language options; language options only affect validity
    // and the exact token produced.

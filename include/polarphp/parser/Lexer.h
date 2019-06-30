@@ -388,6 +388,12 @@ public:
       return *this;
    }
 
+   Lexer &setSemanticValueContainer(ParserSemantic *container)
+   {
+      m_valueContainer = container;
+      return *this;
+   }
+
 private:
    Lexer(const Lexer&) = delete;
    void operator=(const Lexer&) = delete;
@@ -504,6 +510,9 @@ private:
    const unsigned char *m_yyMarker = nullptr;
 
    const unsigned char *m_yyLimit;
+
+   /// The token semantic value
+   ParserSemantic *m_valueContainer = nullptr;
 
    YYLexerCondType m_yyCondition = COND_NAME(ST_IN_SCRIPTING);
    int m_heredocIndentation;

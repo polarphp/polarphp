@@ -22,6 +22,7 @@
 #include "polarphp/utils/SourceLocation.h"
 #include "polarphp/parser/SourceLoc.h"
 #include "polarphp/syntax/TokenKinds.h"
+#include "polarphp/parser/internal/YYParserDefs.h"
 
 /// forward declare class with namespace
 namespace polar::utils {
@@ -33,6 +34,7 @@ namespace polar::parser {
 using polar::basic::StringRef;
 using polar::utils::RawOutStream;
 using polar::syntax::TokenKindType;
+using polar::parser::internal::ParserSemantic;
 
 /// Token - This structure provides full information about a lexed token.
 /// It is not intended to be space efficient, it is intended to return as much
@@ -41,39 +43,6 @@ using polar::syntax::TokenKindType;
 ///
 class Token
 {
-public:
-
-private:
-   /// Kind - The actual flavor of token this is.
-   TokenKindType m_kind;
-
-   /// Whether this token is the first token on the line.
-   unsigned m_atStartOfLine : 1;
-
-   /// Whether this token is an escaped `identifier` token.
-   unsigned m_escapedIdentifier : 1;
-
-   /// Modifiers for string literals
-   unsigned m_multilineString : 1;
-
-   /// Length of custom delimiter of "raw" string literals
-   unsigned m_customDelimiterLen : 8;
-
-   // Padding bits == 32 - 11;
-
-   /// The length of the comment that precedes the token.
-   unsigned m_commentLength;
-
-   /// Text - The actual string covered by the token in the source buffer.
-   StringRef m_text;
-
-   StringRef trimComment() const
-   {
-      assert(hasComment() && "Has no comment to trim.");
-      StringRef raw(m_text.begin() - m_commentLength, m_commentLength);
-      return raw.trim();
-   }
-
 public:
    Token(TokenKindType kind, StringRef text, unsigned commentLength = 0)
       : m_kind(kind),
@@ -257,7 +226,7 @@ public:
    /// offset in the current file.
    SourceLoc getLoc() const
    {
-//      return SourceLoc(llvm::SMLoc::getFromPointer(Text.begin()));
+      //      return SourceLoc(llvm::SMLoc::getFromPointer(Text.begin()));
    }
 
    unsigned getLength() const
@@ -323,16 +292,73 @@ public:
       return m_text;
    }
 
-   void setText(StringRef text)
+   Token &setText(StringRef text)
    {
       m_text = text;
    }
 
    /// Set the token to the specified kind and source range.
-   void setToken(TokenKindType kind, StringRef text, unsigned commentLength = 0)
+   Token &setToken(TokenKindType kind, StringRef text, unsigned commentLength = 0)
    {
 
    }
+
+   template <typename T>
+   Token &setSemanticValue(const T &value)
+   {
+      assert(m_valueContainer != nullptr && "semantic value container can not be nullptr");
+      m_valueContainer->emplace(value);
+      return *this;
+   }
+
+   template <typename T>
+   Token &setSemanticValue(T &&value)
+   {
+      assert(m_valueContainer != nullptr && "semantic value container can not be nullptr");
+      m_valueContainer->emplace(std::move(value));
+      return *this;
+   }
+
+   Token &setSemanticValueContainer(ParserSemantic *container)
+   {
+      m_valueContainer = container;
+      return *this;
+   }
+
+private:
+   StringRef trimComment() const
+   {
+      assert(hasComment() && "Has no comment to trim.");
+      StringRef raw(m_text.begin() - m_commentLength, m_commentLength);
+      return raw.trim();
+   }
+
+private:
+   /// Kind - The actual flavor of token this is.
+   TokenKindType m_kind;
+
+   /// Whether this token is the first token on the line.
+   unsigned m_atStartOfLine : 1;
+
+   /// Whether this token is an escaped `identifier` token.
+   unsigned m_escapedIdentifier : 1;
+
+   /// Modifiers for string literals
+   unsigned m_multilineString : 1;
+
+   /// Length of custom delimiter of "raw" string literals
+   unsigned m_customDelimiterLen : 8;
+
+   // Padding bits == 32 - 11;
+
+   /// The length of the comment that precedes the token.
+   unsigned m_commentLength;
+
+   /// The token semantic value
+   ParserSemantic *m_valueContainer = nullptr;
+
+   /// Text - The actual string covered by the token in the source buffer.
+   StringRef m_text;
 };
 
 } // polar::syntax
