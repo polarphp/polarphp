@@ -91,348 +91,433 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING> "yield" {
+   lexer.formToken(TokenKindType::T_YIELD, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "try" {
+   lexer.formToken(TokenKindType::T_TRY, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "catch" {
-
+   lexer.formToken(TokenKindType::T_CATCH, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "finally" {
+   lexer.formToken(TokenKindType::T_FINALLY, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "throw" {
+   lexer.formToken(TokenKindType::T_THROW, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "if" {
+   lexer.formToken(TokenKindType::T_IF, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "elseif" {
-}
-
-<ST_IN_SCRIPTING> "endif" {
-
+   lexer.formToken(TokenKindType::T_ELSEIF, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "else" {
-
+   lexer.formToken(TokenKindType::T_ELSE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "while" {
-
+   lexer.formToken(TokenKindType::T_WHILE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "do" {
-
+   lexer.formToken(TokenKindType::T_DO, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "for" {
-
+   lexer.formToken(TokenKindType::T_FOR, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "foreach" {
-
+   lexer.formToken(TokenKindType::T_FOREACH, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "declare" {
-
+   lexer.formToken(TokenKindType::T_DECLARE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "enddeclare" {
-
+   lexer.formToken(TokenKindType::T_ENDDECLARE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "instanceof" {
-
+   lexer.formToken(TokenKindType::T_INSTANCEOF, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "as" {
-
+   lexer.formToken(TokenKindType::T_AS, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "switch" {
-
-}
-
-<ST_IN_SCRIPTING> "endswitch" {
-
+   lexer.formToken(TokenKindType::T_SWITCH, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "case" {
-
+   lexer.formToken(TokenKindType::T_CASE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "default" {
-
+   lexer.formToken(TokenKindType::T_DEFAULT, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "break" {
-
+   lexer.formToken(TokenKindType::T_BREAK, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "continue" {
-
+   lexer.formToken(TokenKindType::T_CONTINUE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "goto" {
-
+   lexer.formToken(TokenKindType::T_GOTO, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "echo" {
-
+   lexer.formToken(TokenKindType::T_ECHO, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "print" {
-
+   lexer.formToken(TokenKindType::T_PRINT, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "class" {
+   lexer.formToken(TokenKindType::T_CLASS, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "interface" {
-
+   lexer.formToken(TokenKindType::T_INTERFACE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "trait" {
-
+   lexer.formToken(TokenKindType::T_TRAIT, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "extends" {
-
+   lexer.formToken(TokenKindType::T_EXTENDS, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "implements" {
-
+   lexer.formToken(TokenKindType::T_IMPLEMENTS, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "->" {
-
-}
-
-<ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY> {WHITESPACE}+ {
-
+   polar_yy_push_condition(ST_LOOKING_FOR_PROPERTY);
+   lexer.formToken(TokenKindType::T_OBJECT_OPERATOR, lexer.getYYText());
+   return;
 }
 
 <ST_LOOKING_FOR_PROPERTY> "->" {
-
+   lexer.formToken(TokenKindType::T_OBJECT_OPERATOR, lexer.getYYText());
+   return;
 }
 
 <ST_LOOKING_FOR_PROPERTY> {LABEL} {
-
+   lexer.popYYCondtion();
+   /// TODO
 }
 
 <ST_LOOKING_FOR_PROPERTY> * {
-
+   /// where print diagnostic here ?
+   polar_yyless(0);
+   lexer.popYYCondtion();
+   lexer.formToken(TokenKindType::T_OBJECT_OPERATOR, lexer.getYYText());
+   INVOKE_SELF();
+   return;
 }
 
 <ST_IN_SCRIPTING> "::" {
-
+   lexer.formToken(TokenKindType::T_PAAMAYIM_NEKUDOTAYIM, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "\\" {
-
+   lexer.formToken(TokenKindType::T_NS_SEPARATOR, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "..." {
-
+   lexer.formToken(TokenKindType::T_ELLIPSIS, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "??" {
-
+   lexer.formToken(TokenKindType::T_COALESCE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "new" {
-
+   lexer.formToken(TokenKindType::T_NEW, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "clone" {
-
+   lexer.formToken(TokenKindType::T_CLONE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "var" {
-
+   lexer.formToken(TokenKindType::T_VAR, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
-
+   lexer.formToken(TokenKindType::T_INT_CAST, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "("{TABS_AND_SPACES}("real"|"double"|"float"){TABS_AND_SPACES}")" {
-
+   lexer.formToken(TokenKindType::T_DOUBLE_CAST, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "("{TABS_AND_SPACES}("string"|"binary"){TABS_AND_SPACES}")" {
-
+   lexer.formToken(TokenKindType::T_STRING_CAST, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
-
+   lexer.formToken(TokenKindType::T_ARRAY_CAST, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "("{TABS_AND_SPACES}"object"{TABS_AND_SPACES}")" {
-
+   lexer.formToken(TokenKindType::T_OBJECT_CAST, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "("{TABS_AND_SPACES}("bool"|"boolean"){TABS_AND_SPACES}")" {
-
+   lexer.formToken(TokenKindType::T_BOOL_CAST, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "("{TABS_AND_SPACES}("unset"){TABS_AND_SPACES}")" {
-
+   lexer.formToken(TokenKindType::T_UNSET_CAST, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "eval" {
-
+   lexer.formToken(TokenKindType::T_EVAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "include" {
-
+   lexer.formToken(TokenKindType::T_INCLUDE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "include_once" {
-
+   lexer.formToken(TokenKindType::T_INCLUDE_ONCE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "require" {
-
+   lexer.formToken(TokenKindType::T_REQUIRE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "require_once" {
-
+   lexer.formToken(TokenKindType::T_REQUIRE_ONCE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "namespace" {
-
+   lexer.formToken(TokenKindType::T_NAMESPACE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "use" {
-
+   lexer.formToken(TokenKindType::T_USE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "insteadof" {
-
+   lexer.formToken(TokenKindType::T_INSTEADOF, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "global" {
-
+   lexer.formToken(TokenKindType::T_GLOBAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "isset" {
-
+   lexer.formToken(TokenKindType::T_ISSET, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "empty" {
-
+   lexer.formToken(TokenKindType::T_EMPTY, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "__halt_compiler" {
-
+   lexer.formToken(TokenKindType::T_HALT_COMPILER, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "static" {
-
+   lexer.formToken(TokenKindType::T_STATIC, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "abstract" {
-
+   lexer.formToken(TokenKindType::T_ABSTRACT, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "final" {
-
+   lexer.formToken(TokenKindType::T_FINAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "private" {
-
+   lexer.formToken(TokenKindType::T_PRIVATE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "protected" {
-
+   lexer.formToken(TokenKindType::T_PROTECTED, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "public" {
-
+   lexer.formToken(TokenKindType::T_PUBLIC, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "unset" {
-
+   lexer.formToken(TokenKindType::T_UNSET, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "=>" {
-
+   lexer.formToken(TokenKindType::T_DOUBLE_ARROW, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "list" {
-
+   lexer.formToken(TokenKindType::T_LIST, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "array" {
-
+   lexer.formToken(TokenKindType::T_ARRAY, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "callable" {
-
+   lexer.formToken(TokenKindType::T_CALLABLE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "++" {
-
+   lexer.formToken(TokenKindType::T_INC, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "--" {
-
+   lexer.formToken(TokenKindType::T_DEC, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "===" {
-
+   lexer.formToken(TokenKindType::T_IS_IDENTICAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "!==" {
-
+   lexer.formToken(TokenKindType::T_IS_NOT_IDENTICAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "==" {
-
+   lexer.formToken(TokenKindType::T_IS_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "!="|"<>" {
-
+   lexer.formToken(TokenKindType::T_IS_NOT_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "<=>" {
-
+   lexer.formToken(TokenKindType::T_SPACESHIP, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "<=" {
-
+   lexer.formToken(TokenKindType::T_IS_SMALLER_OR_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> ">=" {
-
+   lexer.formToken(TokenKindType::T_IS_GREATER_OR_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "+=" {
-
+   lexer.formToken(TokenKindType::T_PLUS_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "-=" {
-
+   lexer.formToken(TokenKindType::T_MINUS_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "*=" {
-
+   lexer.formToken(TokenKindType::T_MUL_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "*\*" {
-
+   lexer.formToken(TokenKindType::T_POW, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "*\*=" {
-
+   lexer.formToken(TokenKindType::T_POW_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "/=" {
-
+   lexer.formToken(TokenKindType::T_DIV_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> ".=" {
