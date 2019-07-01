@@ -12,9 +12,17 @@
 #ifndef POLARPHP_PARSER_INTERNAL_YY_LEXER_EXTRAS_H
 #define POLARPHP_PARSER_INTERNAL_YY_LEXER_EXTRAS_H
 
+#include <cstddef>
+
+namespace polar::parser {
+class Lexer;
+}
+
 namespace polar::parser::internal {
 
-
+size_t count_str_newline(const unsigned char *str, size_t length);
+void handle_newlines(Lexer &lexer, const unsigned char *str, size_t length);
+void handle_newline(Lexer &lexer, unsigned char c);
 
 } // polar::parser::internal
 

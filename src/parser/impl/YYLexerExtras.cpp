@@ -26,4 +26,31 @@ int token_lex_wrapper(ParserSemantic *value, YYLocation *loc, Lexer *lexer)
    return token.getKind();
 }
 
+size_t count_str_newline(const unsigned char *str, size_t length)
+{
+   const unsigned char *p = str;
+   const unsigned char *boundary = p + length;
+   size_t count = 0;
+   while (p < boundary) {
+      if (*p == '\n' || (*p == '\r' && (*(p+1) != '\n'))) {
+         ++count;
+      }
+      p++;
+   }
+   return count;
+}
+
+void handle_newlines(Lexer &lexer, const unsigned char *str, size_t length)
+{
+   size_t count = count_str_newline(str, length);
+   lexer.incLineNumber(count);
+}
+
+void handle_newline(Lexer &lexer, unsigned char c)
+{
+   if (c == '\n' || c == '\r') {
+      lexer.incLineNumber();
+   }
+}
+
 } // polar::parser::internal

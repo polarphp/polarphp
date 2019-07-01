@@ -50,8 +50,8 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 #define GOTO_CONDITION(name) YYSETCONDITION(COND_NAME(name))
 #define polar_yy_push_condition(name)  lexer.pushYYCondition(YYCONDTYPE::yyc##name)
 
-#define polar_yy_less(offset)  do { YYCURSOR = lexer.getYYText() + offset; \
-   lexer.setYYLength(static_cast<unsigned int>(offset)) } while(0)
+#define polar_yyless(offset)  do { YYCURSOR = lexer.getYYText() + offset; \
+   lexer.setYYLength(static_cast<unsigned int>(offset)); } while(0)
 
 #define PARSER_MODE() value != nullptr;
 

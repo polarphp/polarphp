@@ -82,8 +82,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING> "yield"{WHITESPACE}"from"[^a-zA-Z0-9_\x80-\xff] {
-   yyless(lexer.getYYLength() - 1);
-   
+   polar_yyless(lexer.getYYLength() - 1);
    lexer.formToken(TokenKindType::T_YIELD_FROM, lexer.getYYText());
    return;
 }
