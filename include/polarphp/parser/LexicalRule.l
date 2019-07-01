@@ -42,7 +42,6 @@ namespace {
 int do_token_lex(int &token, int &offset, int &startLine,
                  Lexer &lexer)
 {
-   lexer.setYYText(lexer.getYYCursor());
 /*!re2c
    re2c:yyfill:check = 0;
    re2c:yyfill:enable = 0;

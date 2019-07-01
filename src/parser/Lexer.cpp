@@ -935,6 +935,8 @@ void Lexer::lexImpl()
       m_nextToken.setAtStartOfLine(false);
    }
 
+   /// here we want keep comment for next token
+   m_yyText = m_yyCursor;
    lexTrivia(m_leadingTrivia, /* IsForTrailingTrivia */ false);
 
    // invoke yylexer
