@@ -348,7 +348,7 @@ public:
 
    const unsigned char *&getYYLimit()
    {
-      return m_yyLimit;
+      return m_artificialEof;
    }
 
    const unsigned char *&getYYMarker()
@@ -508,8 +508,6 @@ private:
 
    /// backup pointer
    const unsigned char *m_yyMarker = nullptr;
-
-   const unsigned char *m_yyLimit;
 
    /// The token semantic value
    ParserSemantic *m_valueContainer = nullptr;

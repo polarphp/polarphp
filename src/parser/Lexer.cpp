@@ -254,7 +254,6 @@ void Lexer::initialize(unsigned offset, unsigned endOffset)
          m_sourceMgr.extractText(m_sourceMgr.getRangeForBuffer(m_bufferId));
    m_bufferStart = reinterpret_cast<const unsigned char *>(contents.data());
    m_bufferEnd = reinterpret_cast<const unsigned char *>(contents.data() + contents.size());
-   m_yyLimit = m_bufferEnd;
    assert(*m_bufferEnd == 0);
    assert(m_bufferStart + offset <= m_bufferEnd);
    assert(m_bufferStart + endOffset <= m_bufferEnd);
