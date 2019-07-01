@@ -83,7 +83,8 @@ public:
 TEST_F(LexerTest, testTokenizeSkipComments)
 {
    const char *source =
-         "// Blah\n";
+         "// Blah\n"
+         "class Person {}";
    std::vector<TokenKindType> expectedTokens{};
    checkLex(source, expectedTokens, /*KeepComments=*/false);
 }

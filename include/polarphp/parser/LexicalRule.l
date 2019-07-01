@@ -32,8 +32,8 @@ int do_token_lex(int &token, int &offset, int &startLine,
 
 int yy_token_lex(Lexer *lexer)
 {
-   int token;
-   int offset;
+   int token = TokenKindType::T_UNKOWN_MARK;
+   int offset = 0;
    int startLine = lexer->getLineNumber();
    return do_token_lex(token, offset, startLine, *lexer);
 }
@@ -42,6 +42,7 @@ namespace {
 int do_token_lex(int &token, int &offset, int &startLine,
                  Lexer &lexer)
 {
+   lexer.setYYText(lexer.getYYCursor());
 /*!re2c
    re2c:yyfill:check = 0;
    re2c:yyfill:enable = 0;
@@ -57,7 +58,7 @@ int do_token_lex(int &token, int &offset, int &startLine,
    NEWLINE ("\r"|"\n"|"\r\n")
 
 /* compute yyleng before each rule */
-<!*> := lexer.setYYLength(YYCURSOR - lexer.getYYText());
+<!*> := lexer.setYYLength(lexer.getYYCursor() - lexer.getYYText());
 
 <ST_IN_SCRIPTING> "exit" {
 
@@ -124,15 +125,7 @@ int do_token_lex(int &token, int &offset, int &startLine,
 
 }
 
-<ST_IN_SCRIPTING> "endfor" {
-
-}
-
 <ST_IN_SCRIPTING> "foreach" {
-
-}
-
-<ST_IN_SCRIPTING> "endforeach" {
 
 }
 
@@ -189,7 +182,6 @@ int do_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING> "class" {
-
 }
 
 <ST_IN_SCRIPTING> "interface" {
