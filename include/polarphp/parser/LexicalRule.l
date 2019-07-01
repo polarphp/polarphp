@@ -10,6 +10,7 @@
 // Created by polarboy on 2019/05/09.
 
 #include "polarphp/parser/internal/YYLexerDefs.h"
+#include "polarphp/parser/internal/YYLexerExtras.h"
 #include "polarphp/parser/Parser.h"
 #include "polarphp/parser/Lexer.h"
 
@@ -20,6 +21,7 @@
 #include <iostream>
 
 #define INVOKE_SELF() do_yy_token_lex(token, offset, startLine, lexer)
+#define HANDLE_NEWLINES() handle_newlines(lexer, lexer.getYYText(), lexer.getYYLength())
 
 /*!max:re2c */
 
@@ -83,6 +85,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 
 <ST_IN_SCRIPTING> "yield"{WHITESPACE}"from"[^a-zA-Z0-9_\x80-\xff] {
    polar_yyless(lexer.getYYLength() - 1);
+   HANDLE_NEWLINES();
    lexer.formToken(TokenKindType::T_YIELD_FROM, lexer.getYYText());
    return;
 }
