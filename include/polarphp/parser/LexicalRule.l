@@ -19,27 +19,24 @@
 #endif
 #include <iostream>
 
-#define INVOKE_SELF() do_token_lex(token, offset, startLine, lexer)
+#define INVOKE_SELF() do_yy_token_lex(token, offset, startLine, lexer)
 
 /*!max:re2c */
 
 namespace polar::parser::internal {
 
-namespace {
-int do_token_lex(int &token, int &offset, int &startLine,
+void do_yy_token_lex(int &token, int &offset, int &startLine,
                  Lexer &lexer);
-} // anonymous namespace
 
-int yy_token_lex(Lexer *lexer)
+void yy_token_lex(Lexer &lexer)
 {
    int token = TokenKindType::T_UNKOWN_MARK;
    int offset = 0;
-   int startLine = lexer->getLineNumber();
-   return do_token_lex(token, offset, startLine, *lexer);
+   int startLine = lexer.getLineNumber();
+   do_yy_token_lex(token, offset, startLine, lexer);
 }
 
-namespace {
-int do_token_lex(int &token, int &offset, int &startLine,
+void do_yy_token_lex(int &token, int &offset, int &startLine,
                  Lexer &lexer)
 {
 /*!re2c
@@ -60,22 +57,35 @@ int do_token_lex(int &token, int &offset, int &startLine,
 <!*> := lexer.setYYLength(lexer.getYYCursor() - lexer.getYYText());
 
 <ST_IN_SCRIPTING> "exit" {
-
+   lexer.formToken(TokenKindType::T_EXIT, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "die" {
+   lexer.formToken(TokenKindType::T_EXIT, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "function" {
+   lexer.formToken(TokenKindType::T_FUNCTION, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "const" {
+   lexer.formToken(TokenKindType::T_CONST, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "return" {
+   lexer.formToken(TokenKindType::T_RETURN, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "yield"{WHITESPACE}"from"[^a-zA-Z0-9_\x80-\xff] {
+   yyless(lexer.getYYLength() - 1);
+   
+   lexer.formToken(TokenKindType::T_YIELD_FROM, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "yield" {
@@ -109,10 +119,6 @@ int do_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING> "while" {
-
-}
-
-<ST_IN_SCRIPTING> "endwhile" {
 
 }
 
@@ -669,13 +675,13 @@ int do_token_lex(int &token, int &offset, int &startLine,
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET> * {
    if (YYCURSOR > YYLIMIT) {
-      return 0;
+      return;
    }
    /// print warning info
    /// lexing recursive
-   return INVOKE_SELF();
+   INVOKE_SELF();
+   return;
 }
 */
 }
-} // anonymous namespace
 } // polar::parser::internal

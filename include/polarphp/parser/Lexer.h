@@ -461,7 +461,8 @@ private:
    }
 
 private:
-   friend int internal::yy_token_lex(Lexer *lexer);
+   friend void internal::do_yy_token_lex(int &token, int &offset, int &startLine,
+                                         Lexer &lexer);
 
 private:
    bool m_heredocScanAhead = false;

@@ -25,7 +25,9 @@ using YYLocation = location;
 /// bison -> polar lexer
 int token_lex_wrapper(ParserSemantic *value, YYLocation *loc, Lexer *lexer);
 /// polar lexer -> yy lexer
-int yy_token_lex(Lexer *lexer);
+void yy_token_lex(Lexer &lexer);
+void do_yy_token_lex(int &token, int &offset, int &startLine,
+                     Lexer &lexer);
 } // internal
 } // polar::parser
 
@@ -39,6 +41,7 @@ int yy_token_lex(Lexer *lexer);
 #define YYCTYPE   unsigned char
 #define YYCURSOR                   lexer.getYYCursor()
 #define YYLIMIT                    lexer.getYYLimit()
+#define YYTEXT                     lexer.getYYText()
 #define YYMARKER                   lexer.getYYMarker()
 #define YYGETCONDITION()           lexer.getYYCondition()
 #define YYSETCONDITION(cond)      lexer.setYYCondition(cond)
@@ -48,7 +51,7 @@ int yy_token_lex(Lexer *lexer);
 #define polar_yy_push_condition(name)  lexer.pushYYCondition(YYCONDTYPE::yyc##name)
 
 #define polar_yy_less(offset)  do { YYCURSOR = lexer.getYYText() + offset; \
-                                    lexer.setYYLength(static_cast<unsigned int>(offset)) } while(0)
+   lexer.setYYLength(static_cast<unsigned int>(offset)) } while(0)
 
 #define PARSER_MODE() value != nullptr;
 

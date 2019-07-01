@@ -942,7 +942,7 @@ void Lexer::lexImpl()
    if (m_incrementLineNumber) {
       incLineNumber();
    }
-   internal::yy_token_lex(this);
+   internal::yy_token_lex(*this);
 }
 
 namespace {
