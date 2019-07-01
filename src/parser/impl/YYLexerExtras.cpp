@@ -11,13 +11,19 @@
 
 #include "polarphp/parser/internal/YYLexerExtras.h"
 #include "polarphp/parser/internal/YYLexerDefs.h"
+#include "polarphp/parser/Token.h"
+#include "polarphp/parser/Lexer.h"
 
 namespace polar::parser::internal {
 
 
 int token_lex_wrapper(ParserSemantic *value, YYLocation *loc, Lexer *lexer)
 {
-
+   Token token;
+   lexer->setSemanticValueContainer(value);
+   lexer->lex(token);
+   // setup values that parser need
+   return token.getKind();
 }
 
 } // polar::parser::internal
