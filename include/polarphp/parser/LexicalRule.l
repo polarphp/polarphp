@@ -521,63 +521,78 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING> ".=" {
-
+   lexer.formToken(TokenKindType::T_STR_CONCAT_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "%=" {
-
+   lexer.formToken(TokenKindType::T_MOD_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "<<=" {
-
+   lexer.formToken(TokenKindType::T_SL_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> ">>=" {
-
+   lexer.formToken(TokenKindType::T_SR_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "&=" {
-
+   lexer.formToken(TokenKindType::T_AND_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "|=" {
-
+   lexer.formToken(TokenKindType::T_OR_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "^=" {
-
+   lexer.formToken(TokenKindType::T_XOR_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "??=" {
-
+   lexer.formToken(TokenKindType::T_COALESCE_EQUAL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "||" {
-
+   lexer.formToken(TokenKindType::T_BOOLEAN_OR, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "&&" {
-
+   lexer.formToken(TokenKindType::T_BOOLEAN_AND, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "OR" {
-
+   lexer.formToken(TokenKindType::T_LOGICAL_OR, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "AND" {
-
+   lexer.formToken(TokenKindType::T_LOGICAL_AND, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "XOR" {
-
+   lexer.formToken(TokenKindType::T_LOGICAL_XOR, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "<<" {
-
+   lexer.formToken(TokenKindType::T_SL, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> ">>" {
-
+   lexer.formToken(TokenKindType::T_SR, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> {TOKENS} {

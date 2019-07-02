@@ -1105,7 +1105,7 @@ TokenSyntax TokenSyntaxNodeFactory::makePrefixQuestionMarkToken(const Trivia &le
 TokenSyntax TokenSyntaxNodeFactory::makeInfixQuestionMarkToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                                RefCountPtr<SyntaxArena> &arena)
 {
-   return makeToken(TokenKindType::T_INFIX_QUESTION_MARK, OwnedString::makeUnowned(get_token_text(TokenKindType::T_INFIX_QUESTION_MARK)),
+   return makeToken(TokenKindType::T_QUESTION_MARK, OwnedString::makeUnowned(get_token_text(TokenKindType::T_QUESTION_MARK)),
                     leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 
@@ -1119,7 +1119,7 @@ TokenSyntax TokenSyntaxNodeFactory::makeErrorSuppressSignToken(const Trivia &lea
 TokenSyntax TokenSyntaxNodeFactory::makePrefixAmpersandToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                              RefCountPtr<SyntaxArena> &arena)
 {
-   return makeToken(TokenKindType::T_PREFIX_AMPERSAND, OwnedString::makeUnowned(get_token_text(TokenKindType::T_PREFIX_AMPERSAND)),
+   return makeToken(TokenKindType::T_AMPERSAND, OwnedString::makeUnowned(get_token_text(TokenKindType::T_AMPERSAND)),
                     leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 

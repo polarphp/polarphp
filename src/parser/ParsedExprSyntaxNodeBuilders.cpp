@@ -467,9 +467,9 @@ void ParsedTernaryExprSyntaxBuilder::finishLayout(bool deferred)
    }
    if (m_layout[questionMarkIndex].isNull()) {
       if (deferred) {
-         m_layout[questionMarkIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_INFIX_QUESTION_MARK, SourceLoc());
+         m_layout[questionMarkIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_QUESTION_MARK, SourceLoc());
       } else {
-         m_layout[questionMarkIndex] = recorder.recordMissingToken(TokenKindType::T_INFIX_QUESTION_MARK, SourceLoc());
+         m_layout[questionMarkIndex] = recorder.recordMissingToken(TokenKindType::T_QUESTION_MARK, SourceLoc());
       }
    }
    if (m_layout[firstChoiceIndex].isNull()) {

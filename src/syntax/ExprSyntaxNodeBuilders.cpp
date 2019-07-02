@@ -230,8 +230,8 @@ TernaryExprSyntax TernaryExprSyntaxBuilder::build()
       m_layout[conditionExprIndex] = RawSyntax::missing(SyntaxKind::Expr);
    }
    if (!m_layout[questionMarkIndex]) {
-      m_layout[questionMarkIndex] = RawSyntax::missing(TokenKindType::T_INFIX_QUESTION_MARK,
-                                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_INFIX_QUESTION_MARK)));
+      m_layout[questionMarkIndex] = RawSyntax::missing(TokenKindType::T_QUESTION_MARK,
+                                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_QUESTION_MARK)));
    }
    if (!m_layout[firstChoiceIndex]) {
       m_layout[firstChoiceIndex] = RawSyntax::missing(SyntaxKind::Expr);

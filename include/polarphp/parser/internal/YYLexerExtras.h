@@ -13,6 +13,7 @@
 #define POLARPHP_PARSER_INTERNAL_YY_LEXER_EXTRAS_H
 
 #include <cstddef>
+#include "polarphp/syntax/internal/TokenEnumDefs.h"
 
 namespace polar::parser {
 class Lexer;
@@ -20,9 +21,12 @@ class Lexer;
 
 namespace polar::parser::internal {
 
+using polar::syntax::internal::TokenKindType;
+
 size_t count_str_newline(const unsigned char *str, size_t length);
 void handle_newlines(Lexer &lexer, const unsigned char *str, size_t length);
 void handle_newline(Lexer &lexer, unsigned char c);
+TokenKindType token_kind_map(unsigned char c);
 
 } // polar::parser::internal
 

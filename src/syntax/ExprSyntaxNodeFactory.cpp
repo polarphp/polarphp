@@ -249,8 +249,8 @@ TernaryExprSyntax ExprSyntaxNodeFactory::makeBlankTernaryExprSyntax(RefCountPtr<
 {
    RefCountPtr<RawSyntax> rawTernaryExprSyntax = RawSyntax::make(SyntaxKind::TernaryExpr, {
                                                                     RawSyntax::missing(SyntaxKind::Expr),
-                                                                    RawSyntax::missing(TokenKindType::T_INFIX_QUESTION_MARK,
-                                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_INFIX_QUESTION_MARK))),
+                                                                    RawSyntax::missing(TokenKindType::T_QUESTION_MARK,
+                                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_QUESTION_MARK))),
                                                                     RawSyntax::missing(SyntaxKind::Expr),
                                                                     RawSyntax::missing(TokenKindType::T_COLON,
                                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON))),

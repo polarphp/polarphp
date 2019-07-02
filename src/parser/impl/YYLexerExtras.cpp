@@ -16,7 +16,6 @@
 
 namespace polar::parser::internal {
 
-
 int token_lex_wrapper(ParserSemantic *value, YYLocation *loc, Lexer *lexer)
 {
    Token token;
@@ -51,6 +50,86 @@ void handle_newline(Lexer &lexer, unsigned char c)
    if (c == '\n' || c == '\r') {
       lexer.incLineNumber();
    }
+}
+
+TokenKindType token_kind_map(unsigned char c)
+{
+   TokenKindType token;
+   switch (c) {
+   case ';':
+      token = TokenKindType::T_SEMICOLON;
+      break;
+   case ':':
+      token = TokenKindType::T_COLON;
+      break;
+   case ',':
+      token = TokenKindType::T_COMMA;
+      break;
+   case '[':
+      token = TokenKindType::T_LEFT_SQUARE_BRACKET;
+      break;
+   case ']':
+      token = TokenKindType::T_RIGHT_SQUARE_BRACKET;
+      break;
+   case '(':
+      token = TokenKindType::T_LEFT_PAREN;
+      break;
+   case ')':
+      token = TokenKindType::T_RIGHT_PAREN;
+      break;
+   case '|':
+      token = TokenKindType::T_VBAR;
+      break;
+   case '^':
+      token = TokenKindType::T_CARET;
+      break;
+   case '&':
+      token = TokenKindType::T_AMPERSAND;
+      break;
+   case '+':
+      token = TokenKindType::T_PLUS_SIGN;
+      break;
+   case '-':
+      token = TokenKindType::T_MINUS_SIGN;
+      break;
+   case '/':
+      token = TokenKindType::T_DIV_SIGN;
+      break;
+   case '*':
+      token = TokenKindType::T_MUL_SIGN;
+      break;
+   case '=':
+      token = TokenKindType::T_EQUAL;
+      break;
+   case '%':
+      token = TokenKindType::T_MOD_SIGN;
+      break;
+   case '!':
+      token = TokenKindType::T_EXCLAMATION_MARK;
+      break;
+   case '~':
+      token = TokenKindType::T_TILDE;
+      break;
+   case '$':
+      token = TokenKindType::T_DOLLAR_SIGN;
+      break;
+   case '<':
+      token = TokenKindType::T_LEFT_ANGLE;
+      break;
+   case '>':
+      token = TokenKindType::T_RIGHT_ANGLE;
+      break;
+   case '?':
+      token = TokenKindType::T_QUESTION_MARK;
+      break;
+   case '@':
+      token = TokenKindType::T_ERROR_SUPPRESS_SIGN;
+      break;
+   default:
+      token = TokenKindType::T_UNKOWN_MARK;
+      break;
+   }
+   return token;
 }
 
 } // polar::parser::internal

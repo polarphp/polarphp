@@ -288,8 +288,8 @@ TernaryExprSyntax TernaryExprSyntax::withQuestionMark(std::optional<TokenSyntax>
    if (questionMark.has_value()) {
       rawQuestionMark = questionMark->getRaw();
    } else {
-      rawQuestionMark = RawSyntax::missing(TokenKindType::T_INFIX_QUESTION_MARK,
-                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_INFIX_QUESTION_MARK)));
+      rawQuestionMark = RawSyntax::missing(TokenKindType::T_QUESTION_MARK,
+                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_QUESTION_MARK)));
    }
    return m_data->replaceChild<TernaryExprSyntax>(rawQuestionMark, Cursor::QuestionMark);
 }
