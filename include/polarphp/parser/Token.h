@@ -304,18 +304,10 @@ public:
    }
 
    template <typename T>
-   Token &setSemanticValue(const T &value)
-   {
-      assert(m_valueContainer != nullptr && "semantic value container can not be nullptr");
-      m_valueContainer->emplace(value);
-      return *this;
-   }
-
-   template <typename T>
    Token &setSemanticValue(T &&value)
    {
       assert(m_valueContainer != nullptr && "semantic value container can not be nullptr");
-      m_valueContainer->emplace(std::move(value));
+      m_valueContainer->emplace<T>(std::move(value));
       return *this;
    }
 

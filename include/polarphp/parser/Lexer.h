@@ -346,6 +346,12 @@ public:
       return m_yyCursor;
    }
 
+   Lexer &setYYCursor(const unsigned char *cursor)
+   {
+      m_yyCursor = cursor;
+      return *this;
+   }
+
    const unsigned char *&getYYLimit()
    {
       return m_artificialEof;
@@ -380,6 +386,11 @@ public:
       m_yyCondition = cond;
       m_yyConditionStack.pop();
       return *this;
+   }
+
+   bool yyConditonStackEmpty()
+   {
+      return m_yyConditionStack.empty();
    }
 
    Lexer &setParser(Parser *parser)
@@ -438,10 +449,10 @@ private:
    void skipSlashStarComment();
    void skipHashbang(bool eatNewline);
    void lexIdentifier();
-   void lexDollarIdent();
-   void lexOperatorIdentifier();
    void lexHexNumber();
    void lexNumber();
+   void lexSingleQuoteString();
+   void lexDoubleQuoteString();
    void lexTrivia(ParsedTrivia &trivia, bool isForTrailingTrivia);
    static unsigned lexUnicodeEscape(const char *&curPtr, Lexer *diags);
 

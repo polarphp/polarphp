@@ -83,8 +83,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
    return;
 }
 
-<ST_IN_SCRIPTING> "yield"{WHITESPACE}"from"[^a-zA-Z0-9_\x80-\xff] {
-   polar_yyless(lexer.getYYLength() - 1);
+<ST_IN_SCRIPTING> "yield"{WHITESPACE}"from" / [^a-zA-Z0-9_\x80-\xff] {
    HANDLE_NEWLINES();
    lexer.formToken(TokenKindType::T_YIELD_FROM, lexer.getYYText());
    return;
@@ -248,14 +247,13 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 
 <ST_LOOKING_FOR_PROPERTY> {LABEL} {
    lexer.popYYCondtion();
-   /// TODO
+   lexer.formToken(TokenKindType::T_STRING, lexer.getYYText());
 }
 
 <ST_LOOKING_FOR_PROPERTY> * {
-   /// where print diagnostic here ?
-   polar_yyless(0);
+   lexer.setYYCursor(lexer.getYYText());
+   lexer.setYYLength(0);
    lexer.popYYCondtion();
-   lexer.formToken(TokenKindType::T_OBJECT_OPERATOR, lexer.getYYText());
    INVOKE_SELF();
    return;
 }
@@ -596,32 +594,46 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING> {TOKENS} {
-
+   lexer.formToken(token_kind_map(lexer.getYYText()[0]), lexer.getYYText());
+   return;
 }
-
 
 <ST_IN_SCRIPTING> "{" {
-
+   polar_yy_push_condition(ST_IN_SCRIPTING);
+   lexer.formToken(TokenKindType::T_LEFT_BRACE, lexer.getYYText());
+   return;
 }
-
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC> "${" {
-
+   polar_yy_push_condition(ST_LOOKING_FOR_VARNAME);
+   lexer.formToken(TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, lexer.getYYText());
+   return;
 }
-
 
 <ST_IN_SCRIPTING> "}" {
-
+   /// RESET_DOC_COMMENT();
+   lexer.formToken(TokenKindType::T_RIGHT_BRACE, lexer.getYYText());
+   if (!lexer.yyConditonStackEmpty()) {
+      lexer.popYYCondtion();
+   }
+   lexer.formToken(TokenKindType::T_RIGHT_BRACE, lexer.getYYText());
+   return;
 }
 
-
-<ST_LOOKING_FOR_VARNAME> {LABEL}[[}] {
-
+<ST_LOOKING_FOR_VARNAME> {LABEL} / [[}] {
+   lexer.popYYCondtion();
+   polar_yy_push_condition(ST_IN_SCRIPTING);
+   lexer.formToken(TokenKindType::T_STRING_VARNAME, lexer.getYYText());
+   return;
 }
-
 
 <ST_LOOKING_FOR_VARNAME> * {
-
+   lexer.setYYCursor(lexer.getYYText());
+   lexer.setYYLength(0);
+   lexer.popYYCondtion();
+   polar_yy_push_condition(ST_IN_SCRIPTING);
+   INVOKE_SELF();
+   return;
 }
 
 <ST_IN_SCRIPTING> {BNUM} {
@@ -648,70 +660,91 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING> "__CLASS__" {
-
+   lexer.formToken(TokenKindType::T_CLASS_C, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "__TRAIT__" {
-
+   lexer.formToken(TokenKindType::T_TRAIT_C, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "__FUNCTION__" {
-
+   lexer.formToken(TokenKindType::T_FUNC_C, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "__METHOD__" {
-
+   lexer.formToken(TokenKindType::T_METHOD_C, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "__LINE__" {
-
+   lexer.formToken(TokenKindType::T_LINE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "__FILE__" {
-
+   lexer.formToken(TokenKindType::T_FILE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "__DIR__" {
-
+   lexer.formToken(TokenKindType::T_FILE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> "__NAMESPACE__" {
-
+   lexer.formToken(TokenKindType::T_NS_C, lexer.getYYText());
+   return;
 }
 
 /* Make sure a label character follows "->", otherwise there is no property
  * and "->" will be taken literally
  */
-<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE> "$"{LABEL}"->"[a-zA-Z_\x80-\xff] {
-
+<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE> "$"{LABEL} / "->"[a-zA-Z_\x80-\xff] {
+   polar_yy_push_condition(ST_LOOKING_FOR_PROPERTY);
+   lexer.formToken(TokenKindType::T_VARIABLE, lexer.getYYText());
+   return;
 }
 
 /* A [ always designates a variable offset, regardless of what follows
  */
-<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE> "$"{LABEL}"[" {
-
+<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE> "$"{LABEL} / "[" {
+   polar_yy_push_condition(ST_VAR_OFFSET);
+   lexer.formToken(TokenKindType::T_VARIABLE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET> "$"{LABEL} {
-
+   lexer.formToken(TokenKindType::T_VARIABLE, lexer.getYYText());
+   return;
 }
 
 <ST_VAR_OFFSET> "]" {
-
+   lexer.popYYCondtion();
+   lexer.formToken(TokenKindType::T_RIGHT_SQUARE_BRACKET, lexer.getYYText());
+   return;
 }
 
 <ST_VAR_OFFSET> {TOKENS}|[{}"`] {
-
+   /// Only '[' or '-' can be valid, but returning other tokens will allow a more explicit parse error
+   lexer.formToken(token_kind_map(lexer.getYYText()[0]), lexer.getYYText());
+   return;
 }
 
-<ST_VAR_OFFSET> [ \n\r\t\\'#] {
-
+<ST_VAR_OFFSET> [\\'#] {
+   /// Invalid rule to return a more explicit parse error with proper line number
+   lexer.setYYCursor(lexer.getYYText());
+   lexer.popYYCondtion();
+   lexer.formToken(token_kind_map(lexer.getYYText()[0]), lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET> {LABEL} {
-
+   lexer.formToken(TokenKindType::T_STRING, lexer.getYYText());
+   return;
 }
-
 
 <ST_IN_SCRIPTING> "#"|"//" {
 
@@ -725,32 +758,36 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 
 }
 
-
 <ST_IN_SCRIPTING> b?["] {
 
 }
-
 
 <ST_IN_SCRIPTING> b?"<<<"{TABS_AND_SPACES}({LABEL}|([']{LABEL}['])|(["]{LABEL}["])){NEWLINE} {
 
 }
 
-
 <ST_IN_SCRIPTING> [`] {
-
+   GOTO_CONDITION(ST_BACKQUOTE);
+   lexer.formToken(TokenKindType::T_BACKTICK, lexer.getYYText());
+   return;
 }
-
 
 <ST_END_HEREDOC> * {
 
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC> "{$" {
-
+   polar_yy_push_condition(ST_IN_SCRIPTING);
+   lexer.setYYCursor(lexer.getYYText() + 1);
+   lexer.setYYLength(1);
+   lexer.formToken(TokenKindType::T_CURLY_OPEN, lexer.getYYText());
+   return;
 }
 
 <ST_DOUBLE_QUOTES> ["] {
-
+   GOTO_CONDITION(ST_IN_SCRIPTING);
+   lexer.formToken(TokenKindType::T_DOUBLE_STR_QUOTE, lexer.getYYText());
+   return;
 }
 
 <ST_BACKQUOTE> [`] {
@@ -761,11 +798,9 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 
 }
 
-
 <ST_BACKQUOTE> * {
 
 }
-
 
 <ST_HEREDOC> * {
 
@@ -779,7 +814,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
    if (YYCURSOR > YYLIMIT) {
       return;
    }
-   /// print warning info
+   /// zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
    /// lexing recursive
    INVOKE_SELF();
    return;

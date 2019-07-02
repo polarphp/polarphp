@@ -22,6 +22,7 @@
 #include "polarphp/kernel/LangOptions.h"
 
 #include <set>
+#include <string>
 
 namespace polar::parser {
 
@@ -845,6 +846,62 @@ void Lexer::skipHashbang(bool eatNewline)
    assert(m_yyCursor == m_contentStart && m_yyCursor[0] == '#' && m_yyCursor[1] == '!' &&
          "Not a hashbang");
    skipToEndOfLine(eatNewline);
+}
+
+namespace {
+
+} // anonymous namespace
+
+void Lexer::lexSingleQuoteString()
+{
+   const unsigned char *str = nullptr;
+   const unsigned char *target = nullptr;
+   const unsigned char *yytext = m_yyText;
+   const unsigned char *&yycursor = m_yyCursor;
+   const unsigned char *yylimit = m_artificialEof;
+   int bprefix = yytext[0] != '\'' ? 1 : 0;
+
+   /// find full single quote string
+   while (true) {
+      if (yycursor < yylimit) {
+         if (*yycursor == '\'') {
+            ++yycursor;
+            m_yyLength = yycursor - yytext;
+            break;
+         } else if (*yycursor++ == '\\' && yycursor < yylimit) {
+            ++yycursor;
+         }
+      } else {
+         m_yyLength = yylimit - yytext;
+         /// Unclosed single quotes; treat similar to double quotes, but without a separate token
+         /// for ' (unrecognized by parser), instead of old flex fallback to "Unexpected character..."
+         /// rule, which continued in ST_IN_SCRIPTING state after the quote
+         formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, m_yyText);
+         return;
+      }
+   }
+   std::string strValue;
+   if (m_yyLength - bprefix - 2 <= 1) {
+      if (m_yyLength - bprefix - 2 == 1) {
+         unsigned char c = *(yytext + bprefix + 1);
+         if (c == '\n' || c == '\r') {
+            incLineNumber();
+         }
+         /// TODO
+         /// ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
+         strValue.push_back(c);
+      }
+   } else {
+
+   }
+   formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, m_yyText);
+   m_nextToken.setSemanticValue(std::move(strValue));
+   return;
+}
+
+void Lexer::lexDoubleQuoteString()
+{
+
 }
 
 bool Lexer::isIdentifier(StringRef string)

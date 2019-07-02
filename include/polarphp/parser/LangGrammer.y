@@ -257,7 +257,6 @@ int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer);
 %token <std::string> T_DNUMBER   "floating-point number (T_DNUMBER)"
 %token <std::string> T_STRING    "identifier (T_STRING)"
 %token <std::string> T_VARIABLE  "variable (T_VARIABLE)"
-%token <std::string> T_INLINE_HTML "inline html (T_INLINE_HTML)"
 %token <std::string> T_ENCAPSED_AND_WHITESPACE  "quoted-string and whitespace (T_ENCAPSED_AND_WHITESPACE)"
 %token <std::string> T_CONSTANT_ENCAPSED_STRING "quoted-string (T_CONSTANT_ENCAPSED_STRING)"
 %token <std::string> T_STRING_VARNAME "variable name (T_STRING_VARNAME)"
