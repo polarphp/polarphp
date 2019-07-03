@@ -888,10 +888,11 @@ void Lexer::lexSingleQuoteString()
          /// ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
          strValue.push_back(c);
       }
-   } else {
-      size_t filteredLength = convert_single_escape_sequences(strValue.data(), strValue.data() + strValue.length(), * this);
-      strValue.reserve(filteredLength);
+      return;
    }
+   strValue.append(reinterpret_cast<const char *>(m_yyText + bprefix + 1), m_yyLength - bprefix - 2);
+   size_t filteredLength = convert_single_quote_str_escape_sequences(strValue.data(), strValue.data() + strValue.length(), * this);
+   strValue.reserve(filteredLength);
    /// TODO
    /// add output filter support ?
    formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, m_yyText);

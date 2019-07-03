@@ -13,6 +13,8 @@
 #define POLARPHP_PARSER_INTERNAL_YY_LEXER_EXTRAS_H
 
 #include <cstddef>
+#include <string>
+
 #include "polarphp/syntax/internal/TokenEnumDefs.h"
 
 namespace polar::parser {
@@ -27,8 +29,9 @@ size_t count_str_newline(const unsigned char *str, size_t length);
 void handle_newlines(Lexer &lexer, const unsigned char *str, size_t length);
 void handle_newline(Lexer &lexer, unsigned char c);
 TokenKindType token_kind_map(unsigned char c);
-size_t convert_single_escape_sequences(char *iter, char *endMark, Lexer &lexer);
-
+size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexer &lexer);
+bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, char *iter,
+                                               char *endMark, Lexer &lexer);
 } // polar::parser::internal
 
 #endif // POLARPHP_PARSER_INTERNAL_YY_LEXER_EXTRAS_H
