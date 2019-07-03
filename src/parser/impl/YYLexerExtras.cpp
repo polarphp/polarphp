@@ -177,11 +177,10 @@ size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexe
    return iter - origIter;
 }
 
-bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, char *iter,
-                                               char *endMark, Lexer &lexer)
+bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const unsigned char *iter,
+                                               const unsigned char *endMark, Lexer &lexer)
 {
-   char *origIter = iter;
-   size_t origLength = endMark - origIter;
+   size_t origLength = endMark - iter;
    if (origLength <= 1) {
       if (origLength == 1) {
          char c = *iter;
@@ -194,7 +193,7 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
       }
       return true;
    }
-   filteredStr.append(iter, origLength);
+   filteredStr.append(reinterpret_cast<const char *>(iter), origLength);
    /// convert escape sequences
    auto fiter = filteredStr.begin();
    auto fendMark = filteredStr.end();

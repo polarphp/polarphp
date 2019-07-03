@@ -405,6 +405,16 @@ public:
       return *this;
    }
 
+   ParserSemantic *getSemanticValueContainer()
+   {
+      return m_valueContainer;
+   }
+
+   bool isInParseMode()
+   {
+      return m_valueContainer != nullptr;
+   }
+
    Lexer &setScannedStringLength(int length)
    {
       m_scannedStringLength = length;
@@ -562,7 +572,7 @@ private:
    ParsedTrivia m_trailingTrivia;
 
    std::stack<YYLexerCondType> m_yyConditionStack;
-   std::stack<const unsigned char *> m_heredocLabelStack;
+   std::stack<std::string> m_heredocLabelStack;
    std::stack<State> m_yyStateStack;
 };
 

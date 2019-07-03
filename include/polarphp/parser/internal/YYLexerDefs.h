@@ -50,8 +50,6 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 #define GOTO_CONDITION(name) YYSETCONDITION(COND_NAME(name))
 #define polar_yy_push_condition(name)  lexer.pushYYCondition(YYCONDTYPE::yyc##name)
 
-#define PARSER_MODE() value != nullptr;
-
 #define BOM_UTF32_BE	"\x00\x00\xfe\xff"
 #define BOM_UTF32_LE	"\xff\xfe\x00\x00"
 #define BOM_UTF16_BE	"\xfe\xff"

@@ -34,6 +34,8 @@ using namespace internal;
 using namespace polar::syntax;
 using namespace polar::basic;
 
+#define IS_LABEL_START(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || (c) == '_' || (c) >= 0x80)
+
 namespace {
 
 bool encode_to_utf8(unsigned c,
@@ -789,7 +791,6 @@ bool advance_if(const unsigned char *&ptr, const unsigned char *end,
    return false;
 }
 
-
 bool advance_if_valid_start_of_identifier(const unsigned char *&ptr,
                                           const unsigned char *end)
 {
@@ -851,8 +852,6 @@ void Lexer::skipHashbang(bool eatNewline)
 
 void Lexer::lexSingleQuoteString()
 {
-   const unsigned char *str = nullptr;
-   const unsigned char *target = nullptr;
    const unsigned char *yytext = m_yyText;
    const unsigned char *&yycursor = m_yyCursor;
    const unsigned char *yylimit = m_artificialEof;
@@ -902,7 +901,48 @@ void Lexer::lexSingleQuoteString()
 
 void Lexer::lexDoubleQuoteString()
 {
-
+   const unsigned char *yytext = m_yyText;
+   const unsigned char *&yycursor = m_yyCursor;
+   const unsigned char *yylimit = m_artificialEof;
+   int bprefix = yytext[0] != '\'' ? 1 : 0;
+   std::string filteredStr;
+   while (yycursor < yylimit) {
+      switch (*yycursor++) {
+      case '"':
+         m_yyLength = yycursor - m_yyText;
+         if (convert_double_quote_str_escape_sequences(filteredStr, '"', yytext + bprefix + 1, yycursor - 1, *this) ||
+             !isInParseMode()) {
+            formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, m_yyText);
+         } else {
+            formToken(TokenKindType::T_ERROR, m_yyText);
+         }
+         return;
+      case '$':
+         if (IS_LABEL_START(*yycursor) || *yycursor == '{') {
+            break;
+         }
+         continue;
+      case '{':
+         if (*yycursor == '$') {
+            break;
+         }
+         continue;
+      case '\\':
+         if (yycursor < yylimit) {
+            ++yycursor;
+         }
+         /* fall through */
+      default:
+         continue;
+      }
+      yycursor--;
+      break;
+   }
+   /// Remember how much was scanned to save rescanning
+   m_scannedStringLength = yycursor - yytext - m_yyLength;
+   yycursor = yytext + m_yyLength;
+   m_yyCondition = COND_NAME(ST_DOUBLE_QUOTES);
+   formToken(TokenKindType::T_DOUBLE_STR_QUOTE, m_yyText);
 }
 
 bool Lexer::isIdentifier(StringRef string)
