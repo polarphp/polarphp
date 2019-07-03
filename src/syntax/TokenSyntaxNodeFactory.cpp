@@ -1152,13 +1152,6 @@ TokenSyntax TokenSyntaxNodeFactory::makeVariable(OwnedString text, const Trivia 
                     leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 
-TokenSyntax TokenSyntaxNodeFactory::makeInlineHtml(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia,
-                                                   RefCountPtr<SyntaxArena> &arena)
-{
-   return makeToken(TokenKindType::T_INLINE_HTML, text,
-                    leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
-}
-
 TokenSyntax TokenSyntaxNodeFactory::makeEncapsedAndWhitespace(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                               RefCountPtr<SyntaxArena> &arena)
 {

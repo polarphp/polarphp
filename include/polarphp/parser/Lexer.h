@@ -405,6 +405,17 @@ public:
       return *this;
    }
 
+   Lexer &setScannedStringLength(int length)
+   {
+      m_scannedStringLength = length;
+      return *this;
+   }
+
+   int getScannedStringLength()
+   {
+      return m_scannedStringLength;
+   }
+
 private:
    Lexer(const Lexer&) = delete;
    void operator=(const Lexer&) = delete;
@@ -528,7 +539,7 @@ private:
    int m_heredocIndentation;
    /// initial string length after scanning to first variable
    /// used in lex string literal which has ${var} or $var in it
-   int m_scannedStringLen;
+   int m_scannedStringLength;
    int m_lineNumber;
 
    LexerEventHandler m_eventHandler = nullptr;

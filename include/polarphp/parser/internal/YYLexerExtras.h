@@ -27,6 +27,7 @@ size_t count_str_newline(const unsigned char *str, size_t length);
 void handle_newlines(Lexer &lexer, const unsigned char *str, size_t length);
 void handle_newline(Lexer &lexer, unsigned char c);
 TokenKindType token_kind_map(unsigned char c);
+size_t convert_single_escape_sequences(char *iter, char *endMark, Lexer &lexer);
 
 } // polar::parser::internal
 

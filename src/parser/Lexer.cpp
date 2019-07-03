@@ -13,6 +13,7 @@
 #include "polarphp/parser/Parser.h"
 #include "polarphp/parser/CommonDefs.h"
 #include "polarphp/parser/internal/YYLexerDefs.h"
+#include "polarphp/parser/internal/YYLexerExtras.h"
 #include "polarphp/parser/Confusables.h"
 #include "polarphp/basic/adt/SmallVector.h"
 #include "polarphp/basic/adt/SmallString.h"
@@ -28,10 +29,10 @@ namespace polar::parser {
 
 using polar::basic::SmallVectorImpl;
 using polar::basic::SmallString;
+
+using namespace internal;
 using namespace polar::syntax;
 using namespace polar::basic;
-using internal::YYLocation;
-using internal::ParserSemantic;
 
 namespace {
 
@@ -848,10 +849,6 @@ void Lexer::skipHashbang(bool eatNewline)
    skipToEndOfLine(eatNewline);
 }
 
-namespace {
-
-} // anonymous namespace
-
 void Lexer::lexSingleQuoteString()
 {
    const unsigned char *str = nullptr;
@@ -892,8 +889,11 @@ void Lexer::lexSingleQuoteString()
          strValue.push_back(c);
       }
    } else {
-
+      size_t filteredLength = convert_single_escape_sequences(strValue.data(), strValue.data() + strValue.length(), * this);
+      strValue.reserve(filteredLength);
    }
+   /// TODO
+   /// add output filter support ?
    formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, m_yyText);
    m_nextToken.setSemanticValue(std::move(strValue));
    return;

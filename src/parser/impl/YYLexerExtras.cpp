@@ -132,4 +132,41 @@ TokenKindType token_kind_map(unsigned char c)
    return token;
 }
 
+size_t convert_single_escape_sequences(char *iter, char *endMark, Lexer &lexer)
+{
+   char *origIter = iter;
+   /// find first '\'
+   while(true) {
+      if (*iter == '\\') {
+         break;
+      }
+      if (*iter == '\n' || (*iter == '\r' && (*(iter + 1) != '\n'))) {
+         lexer.incLineNumber();
+      }
+      ++iter;
+      if (iter == endMark) {
+         return iter - origIter;
+      }
+   }
+   char *targetStr = iter;
+   while (targetStr < endMark) {
+      if (*iter == '\\') {
+         ++iter;
+         if (*iter == '\\' || *iter == '\'') {
+            *targetStr++ = *iter;
+         } else {
+            *targetStr++ = '\\';
+            *targetStr++ = *iter;
+         }
+      } else {
+         *targetStr = *iter;
+      }
+      if (*iter == '\n' || (*iter == '\r' && (*(iter + 1) != '\n'))) {
+         lexer.incLineNumber();
+      }
+      ++iter;
+   }
+   return iter - origIter;
+}
+
 } // polar::parser::internal
