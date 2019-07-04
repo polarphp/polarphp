@@ -850,6 +850,26 @@ void Lexer::skipHashbang(bool eatNewline)
    skipToEndOfLine(eatNewline);
 }
 
+void Lexer::lexBinaryNumber()
+{
+
+}
+
+void Lexer::lexHexNumber()
+{
+
+}
+
+void Lexer::lexLongNumber()
+{
+
+}
+
+void Lexer::lexDoubleNumber()
+{
+
+}
+
 void Lexer::lexSingleQuoteString()
 {
    const unsigned char *yytext = m_yyText;

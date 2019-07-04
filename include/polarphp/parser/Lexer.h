@@ -483,8 +483,10 @@ private:
    void skipSlashStarComment();
    void skipHashbang(bool eatNewline);
    void lexIdentifier();
+   void lexBinaryNumber();
    void lexHexNumber();
-   void lexNumber();
+   void lexLongNumber();
+   void lexDoubleNumber();
    void lexSingleQuoteString();
    void lexDoubleQuoteStringStart();
    void lexDoubleQuoteStringBody();

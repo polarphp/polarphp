@@ -23,6 +23,9 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/05/09.
+
+#include <cstdint>
+
 #define YYERROR_VERBOSE
 #define polar_error polar::syntax::parse_error
 
@@ -253,8 +256,8 @@ int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer);
 /* PUNCTUATOR_MARK_END */
 
 /* MISC_MARK_START */
-%token <std::string> T_LNUMBER   "integer number (T_LNUMBER)"
-%token <std::string> T_DNUMBER   "floating-point number (T_DNUMBER)"
+%token <std::int64_t> T_LNUMBER   "integer number (T_LNUMBER)"
+%token <double> T_DNUMBER   "floating-point number (T_DNUMBER)"
 %token <std::string> T_STRING    "identifier (T_STRING)"
 %token <std::string> T_VARIABLE  "variable (T_VARIABLE)"
 %token <std::string> T_ENCAPSED_AND_WHITESPACE  "quoted-string and whitespace (T_ENCAPSED_AND_WHITESPACE)"
