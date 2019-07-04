@@ -35,6 +35,8 @@ using namespace polar::syntax;
 using namespace polar::basic;
 
 #define IS_LABEL_START(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || (c) == '_' || (c) >= 0x80)
+#define HEREDOC_USING_SPACES 1
+#define HEREDOC_USING_TABS 2
 
 namespace {
 
@@ -321,15 +323,13 @@ bool advance_if_valid_continuation_of_identifier(const unsigned char *&ptr,
                                                  const unsigned char *end);
 } // anonymous namespace
 
-void Lexer::formStringLiteralToken(const unsigned char *tokenStart,
-                                   bool isMultilineString,
-                                   unsigned customDelimiterLen)
+void Lexer::formStringLiteralToken(const unsigned char *tokenStart, bool isMultilineString)
 {
    formToken(TokenKindType::T_STRING, tokenStart);
    if (m_nextToken.is(TokenKindType::END)) {
       return;
    }
-   m_nextToken.setStringLiteral(isMultilineString, customDelimiterLen);
+   m_nextToken.setStringLiteral(isMultilineString);
 
    if (isMultilineString && m_diags) {
       validate_multiline_indents(m_nextToken, m_diags);
@@ -899,7 +899,7 @@ void Lexer::lexSingleQuoteString()
    return;
 }
 
-void Lexer::lexDoubleQuoteString()
+void Lexer::lexDoubleQuoteStringStart()
 {
    const unsigned char *yytext = m_yyText;
    const unsigned char *&yycursor = m_yyCursor;
@@ -913,6 +913,7 @@ void Lexer::lexDoubleQuoteString()
          if (convert_double_quote_str_escape_sequences(filteredStr, '"', yytext + bprefix + 1, yycursor - 1, *this) ||
              !isInParseMode()) {
             formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, m_yyText);
+            m_nextToken.setSemanticValue(std::move(filteredStr));
          } else {
             formToken(TokenKindType::T_ERROR, m_yyText);
          }
@@ -931,7 +932,7 @@ void Lexer::lexDoubleQuoteString()
          if (yycursor < yylimit) {
             ++yycursor;
          }
-         /* fall through */
+         [[fallthrough]];
       default:
          continue;
       }
@@ -942,7 +943,188 @@ void Lexer::lexDoubleQuoteString()
    m_scannedStringLength = yycursor - yytext - m_yyLength;
    yycursor = yytext + m_yyLength;
    m_yyCondition = COND_NAME(ST_DOUBLE_QUOTES);
-   formToken(TokenKindType::T_DOUBLE_STR_QUOTE, m_yyText);
+   formToken(TokenKindType::T_DOUBLE_STR_QUOTE, yytext);
+}
+
+void Lexer::lexDoubleQuoteStringBody()
+{
+   const unsigned char *&yycursor = m_yyCursor;
+   const unsigned char *yytext = m_yyText;
+   const unsigned char *yylimit = m_artificialEof;
+   if (m_scannedStringLength) {
+      yycursor += m_scannedStringLength - 1;
+      m_scannedStringLength = 0;
+   } else {
+      if (yycursor > yylimit) {
+         formToken(TokenKindType::T_ERROR, yytext);
+         return;
+      }
+      while (yycursor < yylimit) {
+         switch (*yycursor++) {
+         case '"':
+            break;
+         case '$':
+            if (IS_LABEL_START(*yycursor) || *yycursor == '{') {
+               break;
+            }
+            continue;
+         case '{':
+            if (*yycursor == '$') {
+               break;
+            }
+            continue;
+         case '\\':
+            if (yycursor < yylimit) {
+               ++yycursor;
+            }
+            [[fallthrough]];
+         default:
+            continue;
+         }
+         --yycursor;
+         break;
+      }
+   }
+   m_yyLength = yycursor - yytext;
+   std::string filteredStr;
+   if (convert_double_quote_str_escape_sequences(filteredStr, '"', yytext, yycursor, *this) ||
+       !isInParseMode()) {
+      formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, yytext);
+      m_nextToken.setSemanticValue(std::move(filteredStr));
+   } else {
+      formToken(TokenKindType::T_ERROR, yytext);
+   }
+   return;
+}
+
+void Lexer::lexBackquote()
+{
+   const unsigned char *yytext = m_yyText;
+   const unsigned char *&yycursor = m_yyCursor;
+   const unsigned char *yylimit = m_artificialEof;
+
+   if (yycursor > yylimit) {
+      formToken(TokenKindType::END, yytext);
+      return;
+   }
+
+   if (yytext[0] == '\\' && yycursor < yylimit) {
+      ++yycursor;
+   }
+   while (yycursor < yylimit) {
+      switch (*yycursor++) {
+      case '`':
+         break;
+      case '$':
+         if (IS_LABEL_START(*yycursor) || *yycursor == '{') {
+            break;
+         }
+         continue;
+      case '{':
+         if (*yycursor == '$') {
+            break;
+         }
+         continue;
+      case '\\':
+         if (yycursor < yylimit) {
+            ++yycursor;
+         }
+         [[fallthrough]];
+      default:
+         continue;
+      }
+      --yycursor;
+      break;
+   }
+   std::string filteredStr;
+   m_yyLength = yycursor - yytext;
+   if (convert_double_quote_str_escape_sequences(filteredStr, '`', yytext, yycursor, *this) ||
+       !isInParseMode()) {
+      formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, yytext);
+      m_nextToken.setSemanticValue(std::move(filteredStr));
+   } else {
+      formToken(TokenKindType::T_ERROR, yytext);
+   }
+}
+
+void Lexer::lexHeredocStart()
+{
+   const unsigned char *iter = nullptr;
+   const unsigned char *savedCursor = nullptr;
+   const unsigned char *yytext = m_yyText;
+   const unsigned char *&yycursor = m_yyCursor;
+   const unsigned char *yylimit = m_artificialEof;
+   int bprefix = (yytext[0] != '<') ? 1 : 0;
+   int spacing = 0;
+   int indentation = 0;
+   std::string heredocLabel;
+   bool isHeredoc = true;
+   incLineNumber();
+   int hereDocLabelLength = m_yyLength - bprefix - 3 - 1 - (yytext[m_yyLength - 2] == '\r' ? 1 : 0);
+   iter = yytext + bprefix + 3;
+   if ((*iter == ' ') || (*iter == '\t')) {
+      ++iter;
+      --hereDocLabelLength;
+   }
+   if (*iter == '\'') {
+      ++iter;
+      hereDocLabelLength -= 2;
+      isHeredoc = false;
+      m_yyCondition = COND_NAME(ST_NOWDOC);
+   } else {
+      if (*iter == '"') {
+         ++iter;
+         hereDocLabelLength -= 2;
+      }
+      m_yyCondition = COND_NAME(ST_HEREDOC);
+   }
+   heredocLabel.append(reinterpret_cast<const char *>(iter), hereDocLabelLength);
+   std::shared_ptr<HereDocLabel> label = std::make_shared<HereDocLabel>();
+   label->label = heredocLabel;
+   label->indentation = 0;
+   savedCursor = yycursor;
+   m_heredocLabelStack.push(label);
+
+   while (yycursor < yylimit && (*yycursor == ' ' || *yycursor == '\t')) {
+      if (*yycursor == '\t') {
+         spacing |= HEREDOC_USING_TABS;
+      } else {
+         spacing |= HEREDOC_USING_SPACES;
+      }
+      ++yycursor;
+      ++indentation;
+   }
+   if (yycursor == yylimit) {
+      yycursor = savedCursor;
+      formToken(TokenKindType::T_START_HEREDOC, yytext);
+      return;
+   }
+   /// Check for ending label on the next line
+   /// optimzed for empty heredoc
+   if (hereDocLabelLength < yylimit - yycursor &&
+       StringRef(reinterpret_cast<const char *>(yycursor), hereDocLabelLength) == heredocLabel) {
+      if (!IS_LABEL_START(yycursor[hereDocLabelLength])) {
+         if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
+            /// TODO
+   //         zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
+         }
+         yycursor = savedCursor;
+         label->indentation = indentation;
+         m_yyCondition = COND_NAME(ST_END_HEREDOC);
+         formToken(TokenKindType::T_START_HEREDOC, yytext);
+         return;
+      }
+   }
+
+   yycursor = savedCursor;
+   if (isHeredoc && !m_heredocScanAhead) {
+
+   }
+}
+
+void Lexer::lexHeredocBody()
+{
+
 }
 
 bool Lexer::isIdentifier(StringRef string)

@@ -49,7 +49,6 @@ public:
         m_atStartOfLine(false),
         m_escapedIdentifier(false),
         m_multilineString(false),
-        m_customDelimiterLen(0),
         m_commentLength(commentLength),
         m_text(text)
    {}
@@ -212,13 +211,9 @@ public:
    {
       return m_multilineString;
    }
-   /// Count of extending escaping '#'.
-   unsigned getCustomDelimiterLen() const
-   {
-      return m_customDelimiterLen;
-   }
+
    /// Set characteristics of string literal token.
-   void setStringLiteral(bool IsMultilineString, unsigned CustomDelimiterLen)
+   void setStringLiteral(bool IsMultilineString)
    {
    }
 
@@ -295,12 +290,18 @@ public:
    Token &setText(StringRef text)
    {
       m_text = text;
+      return *this;
    }
 
    /// Set the token to the specified kind and source range.
    Token &setToken(TokenKindType kind, StringRef text, unsigned commentLength = 0)
    {
-
+      m_kind = kind;
+      m_text = text;
+      m_commentLength = commentLength;
+      m_escapedIdentifier = false;
+      m_multilineString = false;
+      return *this;
    }
 
    template <typename T>
@@ -337,9 +338,6 @@ private:
 
    /// Modifiers for string literals
    unsigned m_multilineString : 1;
-
-   /// Length of custom delimiter of "raw" string literals
-   unsigned m_customDelimiterLen : 8;
 
    // Padding bits == 32 - 11;
 

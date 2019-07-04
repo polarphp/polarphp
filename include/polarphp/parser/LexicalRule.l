@@ -795,7 +795,8 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_DOUBLE_QUOTES> * {
-
+   lexer.lexDoubleQuoteStringBody();
+   return;
 }
 
 <ST_BACKQUOTE> * {
@@ -810,8 +811,13 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 
 }
 
-<ST_IN_SCRIPTING,ST_VAR_OFFSET> * {
+<ST_VAR_OFFSET> * {
+
+}
+
+<ST_IN_SCRIPTING> * {
    if (YYCURSOR > YYLIMIT) {
+      lexer.formToken(TokenKindType::END, lexer.getYYText());
       return;
    }
    /// zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);

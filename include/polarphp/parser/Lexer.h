@@ -393,6 +393,31 @@ public:
       return m_yyConditionStack.empty();
    }
 
+   Lexer &setScannedStringLength(int length)
+   {
+      m_scannedStringLength = length;
+      return *this;
+   }
+
+   int getScannedStringLength()
+   {
+      return m_scannedStringLength;
+   }
+
+   Lexer &pushHeredocLabel(std::shared_ptr<HereDocLabel> label)
+   {
+      m_heredocLabelStack.push(label);
+      return *this;
+   }
+
+   std::shared_ptr<HereDocLabel> popHeredocLabel()
+   {
+      assert(!m_heredocLabelStack.empty() && "heredoc stack is empty");
+      std::shared_ptr<HereDocLabel> label = m_heredocLabelStack.top();
+      m_heredocLabelStack.pop();
+      return label;
+   }
+
    Lexer &setParser(Parser *parser)
    {
       m_parser = parser;
@@ -413,17 +438,6 @@ public:
    bool isInParseMode()
    {
       return m_valueContainer != nullptr;
-   }
-
-   Lexer &setScannedStringLength(int length)
-   {
-      m_scannedStringLength = length;
-      return *this;
-   }
-
-   int getScannedStringLength()
-   {
-      return m_scannedStringLength;
    }
 
 private:
@@ -457,8 +471,7 @@ private:
 
    void formToken(TokenKindType kind, const unsigned char *tokenStart);
    void formEscapedIdentifierToken(const unsigned char *tokenStart);
-   void formStringLiteralToken(const unsigned char *tokenStart, bool isMultilineString,
-                               unsigned customDelimiterLen);
+   void formStringLiteralToken(const unsigned char *tokenStart, bool isMultilineString);
    /// Advance to the end of the line.
    /// If EatNewLine is true, CurPtr will be at end of newline character.
    /// Otherwise, CurPtr will be at newline character.
@@ -473,7 +486,12 @@ private:
    void lexHexNumber();
    void lexNumber();
    void lexSingleQuoteString();
-   void lexDoubleQuoteString();
+   void lexDoubleQuoteStringStart();
+   void lexDoubleQuoteStringBody();
+   void lexBackquote();
+   void lexHeredocStart();
+   void lexHeredocBody();
+   void lexNowdocBody();
    void lexTrivia(ParsedTrivia &trivia, bool isForTrailingTrivia);
    static unsigned lexUnicodeEscape(const char *&curPtr, Lexer *diags);
 
@@ -549,7 +567,7 @@ private:
    int m_heredocIndentation;
    /// initial string length after scanning to first variable
    /// used in lex string literal which has ${var} or $var in it
-   int m_scannedStringLength;
+   int m_scannedStringLength = 0;
    int m_lineNumber;
 
    LexerEventHandler m_eventHandler = nullptr;
@@ -572,7 +590,7 @@ private:
    ParsedTrivia m_trailingTrivia;
 
    std::stack<YYLexerCondType> m_yyConditionStack;
-   std::stack<std::string> m_heredocLabelStack;
+   std::stack<std::shared_ptr<HereDocLabel>> m_heredocLabelStack;
    std::stack<State> m_yyStateStack;
 };
 
