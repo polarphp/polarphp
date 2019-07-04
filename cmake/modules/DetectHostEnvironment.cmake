@@ -18,16 +18,7 @@ include(CheckCSourceCompiles)
 include(TestBigEndian)
 include(CheckLibraryExists)
 include(CheckTypeSize)
-
-# get system uname -a
-execute_process(COMMAND uname -a
-   RESULT_VARIABLE _retCode
-   OUTPUT_VARIABLE _output
-   ERROR_VARIABLE _errorMsg)
-if (NOT _retCode EQUAL 0)
-   message(FATAL_ERROR "run shell command uname -a error: ${_errorMsg}")
-endif()
-string(STRIP "${_output}" PHP_UNAME)
+include(CheckStructHasMember)
 
 # Platform-specific compile settings.
 string(TOLOWER ${CMAKE_HOST_SYSTEM_PROCESSOR} _hostProcessor)
@@ -82,15 +73,8 @@ elseif(POLAR_SYSTEM_NORMAL_NAME MATCHES ".*hpux.*")
    endif()
 endif()
 
-# Include Zend and TSRM configurations.
-
-polar_pthreads_check()
-
 # Starting system checks.
 # -------------------------------------------------------------------------
-# Check whether the system uses EBCDIC (not ASCII) as its native codeset
-polar_check_ebcdic()
-
 # Check whether the system byte ordering is bigendian
 test_big_endian(WORDS_BIGENDIAN)
 if (WORDS_BIGENDIAN)
@@ -99,9 +83,6 @@ if (WORDS_BIGENDIAN)
 else()
    set(PHP_PROCESSOR_LITTLEENDIAN)
 endif()
-
-# Check whether writing to stdout works
-polar_check_write_stdout()
 
 # Check for /usr/pkg/{lib,include} which is where NetBSD puts binary
 # and source packages.  This should be harmless on other OSs.
@@ -116,17 +97,6 @@ endif()
 
 # First, library checks.
 # -------------------------------------------------------------------------
-
-# Some systems (OpenServer 5) dislike -lsocket -lnsl, so we try
-# to avoid -lnsl checks, if we already have the functions which
-# are usually in libnsl
-# Also, uClibc will bark at linking with glibc's libnsl.
-polar_check_library_exists(socket socket "" HAVE_SOCKET)
-polar_check_library_exists(socket socketpair "" HAVE_SOCKETPAIR)
-polar_check_library_exists(socket htonl "" HAVE_HTONL)
-polar_check_library_exists(nsl gethostname "" HAVE_GETHOSTNAME)
-polar_check_library_exists(nsl gethostbyaddr "" HAVE_GETHOSTBYADDR)
-polar_check_library_exists(nsl yp_get_default_domain "" HAVE_YP_GET_DEFAULT_DOMAIN)
 polar_check_library_exists(dl dlopen "" HAVE_DLOPEN)
 
 if(POLAR_ENABLE_ZLIB)
@@ -169,16 +139,6 @@ if (NOT HAVE_LIBM)
 endif()
 
 polar_add_rt_require_lib(m)
-
-polar_check_library_exists(c inet_aton "" HAVE_INET_ATON)
-if (NOT HAVE_INET_ATON)
-   unset(HAVE_INET_ATON CACHE)
-endif()
-polar_check_library_exists(resolv inet_aton "" HAVE_INET_ATON)
-if (NOT HAVE_INET_ATON)
-   unset(HAVE_INET_ATON CACHE)
-endif()
-polar_check_library_exists(bind inet_aton "" HAVE_INET_ATON)
 
 # Then headers.
 # -------------------------------------------------------------------------
@@ -253,21 +213,9 @@ polar_check_headers(
    mach/mach.h
    zlib.h)
 
-polar_check_c_const()
-polar_check_fopen_cookie()
-polar_check_broken_getcwd()
-polar_check_broken_glic_fopen_append()
 
 # Checks for typedefs, structures, and compiler characteristics.
 # -------------------------------------------------------------------------
-
-polar_check_type_struct_tm()
-polar_check_type_struct_timezone()
-polar_check_missing_time_r_decl()
-polar_check_missing_fclose_decl()
-polar_check_tm_gmtoff()
-polar_check_struct_flock()
-polar_check_socklen_type()
 
 check_type_size(size_t SIZEOF_SIZE_T)
 check_type_size("long long" SIZEOF_LONG_LONG)
@@ -282,60 +230,16 @@ check_type_size(ssize_t SIZEOF_SSIZE_T)
 check_type_size(off_t SIZEOF_OFF_T)
 check_type_size(ptrdiff_t SIZEOF_PTRDIFF_T)
 
-# Check stdint types (must be after header check)
-polar_check_stdint_types()
-polar_check_builtin_expect()
-polar_check_builtin_clz()
-polar_check_builtin_ctzl()
-polar_check_builtin_ctzll()
-polar_check_builtin_smull_overflow()
-polar_check_builtin_smulll_overflow()
-polar_check_builtin_saddl_overflow()
-polar_check_builtin_saddll_overflow()
-polar_check_builtin_ssubl_overflow()
-polar_check_builtin_ssubll_overflow()
-
 # Check for members of the stat structure
-check_struct_has_member("struct stat" st_blksize "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_BLKSIZE LANGUAGE C)
 if (HAVE_STRUCT_STAT_ST_BLKSIZE)
    set(HAVE_ST_BLKSIZE ON)
 endif()
 
-# AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exists
-# The WARNING_LEVEL required because cc in QNX hates -w option without an argument
-if (NOT POLAR_SYSTEM_NORMAL_NAME STREQUAL "qnx")
-   # If `struct stat' contains an `st_blocks' member, define
-   # HAVE_STRUCT_STAT_ST_BLOCKS.  Otherwise, add `fileblocks.o' to the
-   # output variable LIBOBJS.  We still define HAVE_ST_BLOCKS for backward
-   # compatibility.  In the future, we will activate specializations for
-   # this macro, so don't obsolete it right now.
-   check_struct_has_member("struct stat" st_blocks "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_BLOCKS LANGUAGE C)
-   if (HAVE_STRUCT_STAT_ST_BLOCKS)
-      set(HAVE_ST_BLOCKS ON)
-   endif()
-else()
-   set(POLAR_WARNING_LEVEL 0)
-   message(WARNING "warnings level for cc set to 0")
-endif()
 
 check_struct_has_member("struct stat" st_rdev "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_RDEV LANGUAGE C)
 if (HAVE_STRUCT_STAT_ST_RDEV)
    set(HAVE_ST_RDEV ON)
 endif()
-
-# Checks for types
-polar_check_type_size_t()
-polar_check_type_uid_type()
-
-# Checks for sockaddr_storage and sockaddr.sa_len
-polar_check_sockaddr()
-
-# Check for IPv6 support
-polar_check_have_ipv6_support()
-
-# Checks for library functions.
-# -------------------------------------------------------------------------
-polar_check_func_vprintf()
 
 polar_check_funcs(
    alphasort
@@ -558,21 +462,6 @@ if (checkSyncFetchAndAdd)
    set(HAVE_SYNC_FETCH_AND_ADD ON)
 endif()
 
-# todo
-# AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
-polar_check_func_utime_null()
-polar_check_func_alloca()
-polar_check_declare_timezone()
-polar_check_time_r_type()
-polar_check_readdir_r_type()
-polar_check_in_addr_t()
-
-check_function_exists(crypt_r checkFuncCryptR)
-
-if (checkFuncCryptR)
-   polar_crypt_r_style()
-endif()
-
 if (POLAR_WITH_VALGRIND)
    message("checking for vargrind support")
    set(_searchPath "")
@@ -667,36 +556,6 @@ if (POLARPHP_CONFIG_FILE_SCAN_DIR)
    message("using directory ${POLARPHP_CONFIG_FILE_SCAN_DIR} for scan configuration files")
 endif()
 
-if (POLAR_ENABLE_SIGCHILD)
-   set(PHP_SIGCHILD ON)
-   set(POLAR_SIGCHILD ON)
-endif()
-
-if(POLAR_ENABLE_LIBGCC)
-   polar_libgcc_path(POLAR_LIBGCC_LIBPATH)
-   if (NOT POLAR_LIBGCC_LIBPATH)
-      message(FATAL_ERROR "Cannot locate libgcc. Make sure that gcc is in your path")
-   endif()
-   link_directories(${POLAR_LIBGCC_LIBPATH})
-   polar_append_flag(-lgcc CMAKE_EXE_LINKER_FLAGS CMAKE_SHARED_LINKER_FLAGS)
-endif()
-
-# we disable short open tag
-set(DEFAULT_SHORT_OPEN_TAG OFF)
-if (POLAR_ENABLE_DMALLOC)
-   check_library_exists(dmalloc dmalloc_error "" checkDMallocExist)
-   if(checkDMallocExist)
-      polar_append_flag(-ldmalloc CMAKE_EXE_LINKER_FLAGS CMAKE_SHARED_LINKER_FLAGS)
-      set(DMALLOC_FUNC_CHECK ON)
-   else()
-      message(FATAL_ERROR "Problem with enabling dmalloc. ")
-   endif()
-endif()
-
-if (POLAR_ENABLE_IPV6 AND HAVE_IPV6_SUPPORT)
-   set(HAVE_IPV6_SUPPORT ON)
-   set(HAVE_IPV6 ON)
-endif()
 
 # TODO I don't understand very well about this
 # I need read some article about dtrace
@@ -765,14 +624,3 @@ elseif (POLAR_NATIVE_ARCH MATCHES "riscv64")
 else ()
    message(FATAL_ERROR "Unknown architecture ${POLAR_NATIVE_ARCH}")
 endif ()
-
-# check asm_goto
-try_run(retCode compileResult
-   ${CMAKE_CURRENT_BINARY_DIR} ${POLAR_CMAKE_TEST_CODE_DIR}/test_asm_goto.c
-   COMPILE_DEFINITIONS ${POLAR_COMPILE_DEFINITIONS}
-   COMPILE_OUTPUT_VARIABLE compileOutput
-   RUN_OUTPUT_VARIABLE runOutput)
-
-if (retCode EQUAL 0)
-   set(HAVE_ASM_GOTO ON)
-endif()

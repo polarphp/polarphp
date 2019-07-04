@@ -164,8 +164,6 @@ endif()
 # First include general CMake utilities.
 include(PolarUtils)
 include(SummaryOutput)
-include(ProcessPhpVersion)
-include(ThreadUtils)
 include(CheckUtils)
 include(AddDefinitions)
 include(AddUnittests)
@@ -181,9 +179,6 @@ option(BUILD_SHARED_LIBS
    "Build all libraries as shared libraries instead of static" ON)
 
 # setup options
-option(POLAR_ENABLE_RE2C_CGOTO
-   "re2c-cgoto, whether to enable computed goto gcc extension with re2c"
-   OFF)
 
 option(POLAR_ENABLE_LIBGCC
    "Enable explicitly linking against libgcc"
@@ -198,24 +193,8 @@ option(POLAR_ENABLE_GCOV
    "Enable GCOV code coverage (requires LTP) - FOR DEVELOPERS ONLY!!"
    OFF)
 
-option(POLAR_DISABLE_INLINE_OPTIMIZATION
-   "If building zend_execute.lo fails, try this switch"
-   OFF)
-
 set(POLARPHP_CONFIG_FILE_PATH "Default" CACHE string "Set the path in which to look for php.ini")
 set(POLARPHP_CONFIG_FILE_SCAN_DIR "Default" CACHE string "Set the path where to scan for configuration files")
-
-option(POLAR_ENABLE_SIGCHILD
-   "whether to enable PHP's own SIGCHLD handler"
-   ON)
-
-option(POLAR_ENABLE_DMALLOC
-   "whether to enable dmalloc"
-   OFF)
-
-option(POLAR_ENABLE_IPV6
-   "whether to enable IPv6 support"
-   OFF)
 
 ##
 ## DTRACE CHECKS
@@ -228,23 +207,7 @@ option(POLAR_ENABLE_FD_SETSIZE
    "how big to make fd sets"
    OFF)
 
-option(POLAR_DISABLE_ZEND_SIGNALS
-   "whether to enable zend signal handling"
-   OFF)
-
 set(POLAR_FD_SETSIZE 7168 CACHE STRING "how big to make fd sets")
-
-option(POLAR_TSRM_USE_PTH
-   "Use GNU Pth"
-   OFF)
-
-option(POLAR_TSRM_USE_PTHREADS
-   "Use pthread implementation"
-   ON)
-
-option(POLAR_DISABLE_GCC_GLOABL_REGS
-   "whether to enable GCC global register variables"
-   OFF)
 
 option(POLAR_USE_FOLDERS "Enable solution folders in Visual Studio. Disable for Express versions." ON)
 if (POLAR_USE_FOLDERS)
@@ -255,8 +218,6 @@ option(POLAR_ENABLE_BACKTRACES "Enable embedding backtraces on crash." ON)
 if(POLAR_ENABLE_BACKTRACES)
    set(ENABLE_BACKTRACES 1)
 endif()
-
-set(POLAR_WITH_TSRM_PTH_CONFIG "pth-config" CACHE FILEPATH "Use GNU Pth")
 
 set(POLAR_LIBDIR_SUFFIX "" CACHE STRING "Define suffix of library directory name (32/64)" )
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
@@ -383,9 +344,6 @@ set(POLAR_COMPILE_FLAGS "")
 set(POLAR_COMMON_DEPENDS "")
 set(POLAR_RT_REQUIRE_LIBS "")
 
-# setup php version info
-polar_setup_php_version()
-
 # setup polarphp env const
 
 string(STRIP "${POLAR_INSTALL_BIN_DIR}"         POLAR_INSTALL_BIN_DIR)
@@ -465,10 +423,6 @@ message(STATUS "polarphp host triple: ${POLAR_HOST_TRIPLE}")
 message(STATUS "polarphp default target triple: ${POLAR_DEFAULT_TARGET_TRIPLE}")
 include(HandlePolarOptions)
 include(ProcesseRequirePackages)
-
-# Configuring Zend and TSRM.
-include(CheckTsrm)
-include(CheckZend)
 
 string(TIMESTAMP _buildDate "%Y-%m-%d %H:%M")
 
