@@ -59,6 +59,79 @@ void handle_newline(Lexer &lexer, unsigned char c)
    }
 }
 
+bool encode_to_utf8(unsigned c,
+                    SmallVectorImpl<char> &result)
+{
+   // Number of bits in the value, ignoring leading zeros.
+   unsigned numBits = 32 - polar::utils::count_leading_zeros(c);
+   // Handle the leading byte, based on the number of bits in the value.
+   unsigned numTrailingBytes;
+   if (numBits <= 5 + 6) {
+      // Encoding is 0x110aaaaa 10bbbbbb
+      result.push_back(char(0xC0 | (c >> 6)));
+      numTrailingBytes = 1;
+   } else if(numBits <= 4 + 6 + 6) {
+      // Encoding is 0x1110aaaa 10bbbbbb 10cccccc
+      result.push_back(char(0xE0 | (c >> (6 + 6))));
+      numTrailingBytes = 2;
+
+      // UTF-16 surrogate pair values are not valid code points.
+      if (c >= 0xD800 && c <= 0xDFFF) {
+         return false;
+      }
+      // U+FDD0...U+FDEF are also reserved
+      if (c >= 0xFDD0 && c <= 0xFDEF) {
+         return false;
+      }
+   } else if (numBits <= 3 + 6 + 6 + 6) {
+      // Encoding is 0x11110aaa 10bbbbbb 10cccccc 10dddddd
+      result.push_back(char(0xF0 | (c >> (6 + 6 + 6))));
+      numTrailingBytes = 3;
+      // Reject over-large code points.  These cannot be encoded as UTF-16
+      // surrogate pairs, so UTF-32 doesn't allow them.
+      if (c > 0x10FFFF) {
+         return false;
+      }
+   } else {
+      return false;  // UTF8 can encode these, but they aren't valid code points.
+   }
+   // Emit all of the trailing bytes.
+   while (numTrailingBytes--) {
+      result.push_back(char(0x80 | (0x3F & (c >> (numTrailingBytes * 6)))));
+   }
+   return true;
+}
+
+unsigned count_leading_ones(unsigned char c)
+{
+   return polar::utils::count_leading_ones(uint32_t(c) << 24);
+}
+
+/// isStartOfUTF8Character - Return true if this isn't a UTF8 continuation
+/// character, which will be of the form 0b10XXXXXX
+bool is_start_of_utf8_character(unsigned char c)
+{
+   // RFC 2279: The octet values FE and FF never appear.
+   // RFC 3629: The octet values C0, C1, F5 to FF never appear.
+   return c > 0x80 && (c < 0xC2 || c >= 0xF5);
+}
+
+void strip_underscores(unsigned char *str, int &length)
+{
+   unsigned char *src = str;
+   unsigned char *dest = str;
+   while (*src != '\0') {
+      if (*src != '_') {
+         *dest = *src;
+         dest++;
+      } else {
+         --length;
+      }
+      src++;
+   }
+   *dest = '\0';
+}
+
 TokenKindType token_kind_map(unsigned char c)
 {
    TokenKindType token;
@@ -366,3 +439,72 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
 }
 
 } // polar::parser::internal
+
+namespace polar::parser {
+
+using namespace internal;
+
+/// validate_utf8_character_and_advance - Given a pointer to the starting byte of a
+/// UTF8 character, validate it and advance the lexer past it.  This returns the
+/// encoded character or ~0U if the encoding is invalid.
+uint32_t validate_utf8_character_and_advance(const unsigned char *&ptr,
+                                             const unsigned char *end)
+{
+   if (ptr >= end) {
+      return ~0U;
+   }
+   unsigned char curByte = *ptr++;
+   if (curByte < 0x80) {
+      return curByte;
+   }
+   // Read the number of high bits set, which indicates the number of bytes in
+   // the character.
+   unsigned encodedBytes = count_leading_ones(curByte);
+   // If this is 0b10XXXXXX, then it is a continuation character.
+   if (encodedBytes == 1 ||
+       is_start_of_utf8_character(curByte)) {
+      // Skip until we get the start of another character.  This is guaranteed to
+      // at least stop at the nul at the end of the buffer.
+      while (ptr < end && is_start_of_utf8_character(*ptr)) {
+         ++ptr;
+      }
+      return ~0U;
+   }
+   // Drop the high bits indicating the # bytes of the result.
+   unsigned c = (unsigned char)(curByte << encodedBytes) >> encodedBytes;
+
+   // Read and validate the continuation bytes.
+   for (unsigned i = 1; i != encodedBytes; ++i) {
+      if (ptr >= end) {
+         return ~0U;
+      }
+      curByte = *ptr;
+      // If the high bit isn't set or the second bit isn't clear, then this is not
+      // a continuation byte!
+      if (curByte < 0x80 || curByte >= 0xC0) {
+         return ~0U;
+      }
+      // Accumulate our result.
+      c <<= 6;
+      c |= curByte & 0x3F;
+      ++ptr;
+   }
+
+   // UTF-16 surrogate pair values are not valid code points.
+   if (c >= 0xD800 && c <= 0xDFFF) {
+      return ~0U;
+   }
+
+   // If we got here, we read the appropriate number of accumulated bytes.
+   // Verify that the encoding was actually minimal.
+   // Number of bits in the value, ignoring leading zeros.
+   unsigned numBits = 32 - polar::utils::count_leading_zeros(c);
+   if (numBits <= 5 + 6) {
+      return encodedBytes == 2 ? c : ~0U;
+   }
+   if (numBits <= 4 + 6 + 6) {
+      return encodedBytes == 3 ? c : ~0U;
+   }
+   return encodedBytes == 4 ? c : ~0U;
+}
+} // polar::parser
