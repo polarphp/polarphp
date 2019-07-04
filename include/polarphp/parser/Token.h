@@ -116,16 +116,6 @@ public:
       return !isAnyOperator();
    }
 
-   bool isEllipsis() const
-   {
-      return isAnyOperator() && m_text == "...";
-   }
-
-   bool isNotEllipsis() const
-   {
-      return !isEllipsis();
-   }
-
    /// Determine whether this token occurred at the start of a line.
    bool isAtStartOfLine() const
    {
@@ -164,29 +154,10 @@ public:
       return isAnyOperator() && m_text == contextPunc;
    }
 
-   /// Determine whether the token can be an argument label.
-   ///
-   /// This covers all identifiers and keywords except those keywords
-   /// used
-   bool canBeArgumentLabel() const
-   {
-   }
-
    /// True if the token is an identifier or '_'.
    bool isIdentifierOrUnderscore() const
    {
 
-   }
-
-   /// True if the token is an l_paren token that does not start a new line.
-   bool isFollowingLParen() const
-   {
-
-   }
-
-   /// True if the token is an l_square token that does not start a new line.
-   bool isFollowingLSquare() const
-   {
    }
 
    /// True if the token is any keyword.
