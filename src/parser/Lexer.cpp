@@ -37,6 +37,7 @@ using namespace polar::basic;
 #define IS_LABEL_START(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || (c) == '_' || (c) >= 0x80)
 #define HEREDOC_USING_SPACES 1
 #define HEREDOC_USING_TABS 2
+#define MAX_LENGTH_OF_INT64 19
 
 Lexer::Lexer(const PrincipalTag &, const LangOptions &langOpts,
              const SourceManager &sourceMgr, unsigned bufferId,

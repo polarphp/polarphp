@@ -18,7 +18,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-#include <iostream>
 
 #define INVOKE_SELF() do_yy_token_lex(token, offset, startLine, lexer)
 #define HANDLE_NEWLINES() handle_newlines(lexer, lexer.getYYText(), lexer.getYYLength())
