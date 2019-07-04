@@ -30,8 +30,7 @@
 .libs
 .DS_Store
 
-**/tests/**/*.db
-**/tests/**/*.tmp
+**/tests/**/*
 
 CMakeLists.txt.user*
 temp

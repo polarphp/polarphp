@@ -116,7 +116,8 @@ public:
       }
    }
 
-   ApSInt extOrTrunc(uint32_t width) const {
+   ApSInt extOrTrunc(uint32_t width) const
+   {
       if (m_isUnsigned) {
          return ApSInt(zextOrTrunc(width), m_isUnsigned);
       } else {

@@ -612,7 +612,6 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 
 <ST_IN_SCRIPTING> "}" {
    /// RESET_DOC_COMMENT();
-   lexer.formToken(TokenKindType::T_RIGHT_BRACE, lexer.getYYText());
    if (!lexer.yyConditonStackEmpty()) {
       lexer.popYYCondtion();
    }
