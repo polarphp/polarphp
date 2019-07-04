@@ -20,6 +20,7 @@
 #include "polarphp/syntax/Trivia.h"
 #include "polarphp/utils/MathExtras.h"
 #include "polarphp/kernel/LangOptions.h"
+#include "polarphp/utils/MathExtras.h"
 
 #include <set>
 #include <string>
@@ -711,19 +712,32 @@ void Lexer::skipHashbang(bool eatNewline)
 void Lexer::lexBinaryNumber()
 {
    /// The +/- 2 skips "0b"
-   const unsigned char *yytext = m_yyText;
-   const unsigned char *bnumStr = yytext + 2;
-   const unsigned char *bnumStrEnd = nullptr;
-   int numLength = m_yyLength - 2;
+   char *yytext = reinterpret_cast<char *>(const_cast<unsigned char *>(m_yyText));
+   char *bnumStr = yytext + 2;
+   char *bnumStrEnd = nullptr;
+   size_t numLength = m_yyLength - 2;
    /// Skip any leading 0s
-   while (*bnumStr == '0' || *bnumStr == '_') {
+   while (*bnumStr == '0') {
       ++bnumStr;
       --numLength;
    }
-   StringRef bnumStrRef(reinterpret_cast<const char *>(bnumStr), numLength);
-   std::string filteredNumStr;
-   bool containsUnderscores = bnumStrRef.findFirstOf('_') != StringRef::npos;
-   if (containsUnderscores) {
+   if (numLength < sizeof(std::int64_t) * CHAR_BIT) {
+      std::int64_t numValue = 0;
+      if (numLength > 0) {
+         errno = 0;
+         numValue = std::strtoll(bnumStr, &bnumStrEnd, 2);
+         assert(!errno && bnumStrEnd == yytext + m_yyLength);
+      }
+      formToken(TokenKindType::T_LNUMBER, m_yyText);
+      m_nextToken.setSemanticValue(std::move(numValue));
+   } else {
+      double numValue = 0;
+      const char *tempPtr = reinterpret_cast<const char *>(bnumStrEnd);
+      numValue = polar::utils::bstr_to_double(bnumStr, &tempPtr);
+      /// errno isn't checked since we allow HUGE_VAL/INF overflow
+      assert(bnumStrEnd == yytext + m_yyLength);
+      formToken(TokenKindType::T_DNUMBER, m_yyText);
+      m_nextToken.setSemanticValue(std::move(numValue));
    }
 }
 

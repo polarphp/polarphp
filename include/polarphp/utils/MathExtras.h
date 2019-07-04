@@ -969,6 +969,8 @@ saturating_multiply_add(T X, T Y, T A, bool *resultOverflowed = nullptr)
 /// Use this rather than HUGE_VALF; the latter causes warnings on MSVC.
 extern const float huge_valf;
 
+double bstr_to_double(const char *str, const char **endptr);
+
 } // utils
 } // polar
 

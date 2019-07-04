@@ -44,15 +44,16 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 /*!re2c
    re2c:yyfill:check = 0;
    re2c:yyfill:enable = 0;
-   LNUM	[0-9]+(_[0-9]+)*
-   DNUM	({LNUM}?"."{LNUM})|({LNUM}"."{LNUM}?)
+   LNUM	[0-9]+
+   DNUM	([0-9]*"."[0-9]+)|([0-9]+"."[0-9]*)
    EXPONENT_DNUM	(({LNUM}|{DNUM})[eE][+-]?{LNUM})
-   HNUM	"0x"[0-9a-fA-F]+(_[0-9a-fA-F]+)*
-   BNUM	"0b"[01]+(_[01]+)*
+   HNUM	"0x"[0-9a-fA-F]+
+   BNUM	"0b"[01]+
    LABEL	[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*
    WHITESPACE [ \n\r\t]+
    TABS_AND_SPACES [ \t]*
    TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
+   ANY_CHAR [^]
    NEWLINE ("\r"|"\n"|"\r\n")
 
 /* compute yyleng before each rule */
