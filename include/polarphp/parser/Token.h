@@ -192,7 +192,7 @@ public:
    /// offset in the current file.
    SourceLoc getLoc() const
    {
-      //      return SourceLoc(llvm::SMLoc::getFromPointer(Text.begin()));
+      return SourceLoc(polar::utils::SMLocation::getFromPointer(m_text.begin()));
    }
 
    unsigned getLength() const
