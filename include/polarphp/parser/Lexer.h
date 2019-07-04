@@ -612,9 +612,7 @@ std::vector<Token> tokenize(const LangOptions &langOpts,
                             const SourceManager &sourceMgr, unsigned bufferId,
                             unsigned offset = 0, unsigned endOffset = 0,
                             DiagnosticEngine *diags = nullptr,
-                            bool keepComments = true,
-                            bool tokenizeInterpolatedString = true,
-                            ArrayRef<Token> splitTokens = ArrayRef<Token>());
+                            bool keepComments = true);
 
 } // polar::parser
 

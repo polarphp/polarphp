@@ -1435,9 +1435,7 @@ void tokenize(const LangOptions &langOpts, const SourceManager &sourceMgr,
               CommentRetentionMode commentRetention,
               TriviaRetentionMode triviaRetention, DF &&destFunc)
 {
-   assert((triviaRetention != TriviaRetentionMode::WithTrivia ||
-         !tokenizeInterpolatedString) &&
-          "string interpolation with trivia is not implemented yet");
+   assert(triviaRetention != TriviaRetentionMode::WithTrivia && "string interpolation with trivia is not implemented yet");
 
    if (offset == 0 && endOffset == 0) {
       endOffset = sourceMgr.getRangeForBuffer(bufferId).getByteLength();
@@ -1445,15 +1443,6 @@ void tokenize(const LangOptions &langOpts, const SourceManager &sourceMgr,
 
    Lexer lexer(langOpts, sourceMgr, bufferId, diags, commentRetention, triviaRetention, offset,
                endOffset);
-
-   auto tokenComp = [&](const Token &lhs, const Token &rhs) {
-      return sourceMgr.isBeforeInBuffer(lhs.getLoc(), rhs.getLoc());
-   };
-
-   std::set<Token, decltype(tokenComp)> resetTokens(tokenComp);
-   for (auto iter = splitTokens.begin(), end = splitTokens.end(); iter != end; ++iter) {
-      resetTokens.insert(*iter);
-   }
 
    Token token;
    ParsedTrivia leadingTrivia;

@@ -13,9 +13,6 @@
 #include "polarphp/utils/InitPolar.h"
 #include "polarphp/global/CompilerFeature.h"
 #include "polarphp/global/Config.h"
-#include "polarphp/runtime/ExecEnv.h"
-#include "polarphp/runtime/LifeCycle.h"
-#include "php/global/Defs.h"
 
 #include "CLI/CLI.hpp"
 #include "lib/Defs.h"
@@ -29,7 +26,7 @@ using polar::basic::StringRef;
 
 void setup_command_opts(CLI::App &parser);
 
-int sg_exitStatus = SUCCESS;
+int sg_exitStatus = 0;
 std::string sg_errorMsg;
 bool sg_showVersion;
 bool sg_showNgInfo;
@@ -54,10 +51,8 @@ std::string sg_reflectWhat{};
 
 int main(int argc, char *argv[])
 {
-   polar::InitPolar polarInitializer(argc, argv);
    CLI::App cmdParser;
    cmdParser.formatter(std::make_shared<polar::PhpOptFormatter>());
-   polarInitializer.initNgOpts(cmdParser);
    setup_command_opts(cmdParser);
    CLI11_PARSE(cmdParser, argc, argv);
    /// check command semantic error
@@ -65,103 +60,7 @@ int main(int argc, char *argv[])
       std::cerr << sg_errorMsg << std::endl;
       exit(sg_exitStatus);
    }
-   polar::runtime::ExecEnv &execEnv = polar::runtime::retrieve_global_execenv();
-   polar::runtime::ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
-   execEnv.setContainerArgc(argc);
-   execEnv.setContainerArgv(argv);
-#if defined(POLAR_OS_WIN32)
-# ifdef PHP_CLI_WIN32_NO_CONSOLE
-   int argc = __argc;
-   char **argv = __argv;
-# endif
-   int num_args;
-   wchar_t **argv_wide;
-   char **argv_save = argv;
-   BOOL using_wide_argv = 0;
-#endif
-   std::string iniEntries;
-   /*
-    * Do not move this initialization. It needs to happen before argv is used
-    * in any way.
-    */
-   argv = polar::save_ps_args(argc, argv);
-#if defined(POLAR_OS_WIN32) && !defined(POLAR_CLI_WIN32_NO_CONSOLE)
-   php_win32_console_fileno_set_vt100(STDOUT_FILENO, TRUE);
-   php_win32_console_fileno_set_vt100(STDERR_FILENO, TRUE);
-#endif
-#if defined(POLAR_OS_WIN32) && defined(_DEBUG) && defined(POLAR_WIN32_DEBUG_HEAP)
-   {
-      int tmp_flag;
-      _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
-      _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
-      _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
-      _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
-      _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
-      _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
-      tmp_flag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
-      tmp_flag |= _CRTDBG_DELAY_FREE_MEM_DF;
-      tmp_flag |= _CRTDBG_LEAK_CHECK_DF;
-      _CrtSetDbgFlag(tmp_flag);
-   }
-#endif
-#ifdef POLAR_OS_WIN32
-   _fmode = _O_BINARY;			/*sets default for file streams to binary */
-   setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
-   setmode(_fileno(stdout), O_BINARY);		/* make the stdio mode be binary */
-   setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
-#endif
-   /// processing pre module init command options
-   if (!sg_defines.empty()) {
-      polar::setup_init_entries_commands(sg_defines, iniEntries);
-   }
-   /// processing ini definitions
-   ///
-   execEnvInfo.iniDefaultInitHandler = polar::runtime::cli_ini_defaults;
-   execEnvInfo.phpIniPathOverride = sg_configPath;
-   execEnvInfo.phpIniIgnoreCwd = true;
-   execEnvInfo.phpIniIgnore = sg_ignoreIni;
-   iniEntries += polar::runtime::HARDCODED_INI;
-   execEnvInfo.iniEntries = iniEntries;
-#if defined(POLAR_OS_WIN32)
-   php_win32_cp_cli_setup();
-   orig_cp = (php_win32_cp_get_orig())->id;
-   /* Ignore the delivered argv and argc, read from W API. This place
-      might be too late though, but this is the earliest place ATW
-      we can access the internal charset information from PHP. */
-   argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
-   PHP_WIN32_CP_W_TO_ANY_ARRAY(argv_wide, num_args, argv, argc)
-         using_wide_argv = 1;
-   SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
-#endif
-   /// processing options
-   /* -e option */
-   if (sg_generateExtendInfo) {
-      uint32_t copts = execEnv.getCompileOptions();
-      copts |= ZEND_COMPILE_EXTENDED_INFO;
-      execEnv.setCompileOptions(copts);
-   }
-   polar::runtime::sg_vmExtensionInitHook = php::stdlib_init_entry;
-   if (!execEnv.bootup()) {
-      sg_exitStatus = 1;
-      exit(sg_exitStatus);
-   }
-   try {
-       sg_exitStatus = polar::dispatch_cli_command();
-   } catch(std::exception &e) {
-      std::cerr << e.what() << std::endl;
-   }
-#if defined(POLAR_OS_WIN32)
-   (void)php_win32_cp_cli_restore();
-   if (using_wide_argv) {
-      PHP_WIN32_CP_FREE_ARRAY(argv, argc);
-      LocalFree(argv_wide);
-   }
-   argv = argv_save;
-#endif
-   /// Do not move this de-initialization. It needs to happen right before
-   /// exiting.
-   polar::cleanup_ps_args(argv);
-   exit(sg_exitStatus);
+   return 0;
 }
 
 void setup_command_opts(CLI::App &parser)
@@ -196,3 +95,5 @@ void setup_command_opts(CLI::App &parser)
 
    parser.add_option("args", sg_scriptArgs, "Arguments passed to script. Use -- args when first argument.")->type_name("string");
 }
+
+int polar::EnableABIBreakingChecks = 1;

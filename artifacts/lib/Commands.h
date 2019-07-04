@@ -12,8 +12,6 @@
 #ifndef POLARPHP_ARTIFACTS_COMMANDS_H
 #define POLARPHP_ARTIFACTS_COMMANDS_H
 
-#include "polarphp/runtime/internal/DepsZendVmHeaders.h"
-
 #include <string>
 #include <vector>
 #include <CLI/Option.hpp>
@@ -37,7 +35,6 @@ private:
 };
 
 void print_polar_version();
-POLAR_DECL_EXPORT int php_lint_script(zend_file_handle *file);
 void setup_init_entries_commands(const std::vector<std::string> defines, std::string &iniEntries);
 int dispatch_cli_command();
 

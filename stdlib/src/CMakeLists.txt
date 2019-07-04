@@ -41,8 +41,7 @@ polar_merge_list(STDLIB_SOURCES STDLIB_VM_BINDER_SOURCES)
 polar_merge_list(STDLIB_SOURCES STDLIB_HEADERS)
 
 polar_add_library(Stdlib SHARED
-   ${STDLIB_SOURCES}
-   LINK_LIBS ZendApi)
+   ${STDLIB_SOURCES})
 
 set_target_properties(
    Stdlib
