@@ -548,9 +548,6 @@ private:
    /// current token length
    unsigned int m_yyLength;
 
-   /// current token start pointer
-   const unsigned char *m_yyStart = nullptr;
-
    /// current token text
    const unsigned char *m_yyText = nullptr;
 

@@ -1433,9 +1433,7 @@ void tokenize(const LangOptions &langOpts, const SourceManager &sourceMgr,
               unsigned bufferId, unsigned offset, unsigned endOffset,
               DiagnosticEngine * diags,
               CommentRetentionMode commentRetention,
-              TriviaRetentionMode triviaRetention,
-              bool tokenizeInterpolatedString, ArrayRef<Token> splitTokens,
-              DF &&destFunc)
+              TriviaRetentionMode triviaRetention, DF &&destFunc)
 {
    assert((triviaRetention != TriviaRetentionMode::WithTrivia ||
          !tokenizeInterpolatedString) &&
@@ -1462,26 +1460,7 @@ void tokenize(const LangOptions &langOpts, const SourceManager &sourceMgr,
    ParsedTrivia trailingTrivia;
    do {
       lexer.lex(token, leadingTrivia, trailingTrivia);
-      // If the token has the same location as a reset location,
-      // reset the token stream
-      //      auto iter = resetTokens.find(token);
-      //      if (iter != resetTokens.end()) {
-      //         assert(iter->isNot(TokenKindType::T_STRING));
-      //         destFunc(*iter, ParsedTrivia(), ParsedTrivia());
-      //         auto newState = lexer.getStateForBeginningOfTokenLoc(
-      //                  iter->getLoc().getAdvancedLoc(iter->getLength()));
-      //         lexer.restoreState(newState);
-      //         continue;
-      //      }
-      //      if (token.is(tok::string_literal) && tokenizeInterpolatedString) {
-      //         std::vector<Token> StrTokens;
-      //         getStringPartTokens(token, langOpts, sourceMgr, bufferId, StrTokens);
-      //         for (auto &StrTok : StrTokens) {
-      //            destFunc(StrTok, ParsedTrivia(), ParsedTrivia());
-      //         }
-      //      } else {
-      //         destFunc(token, leadingTrivia, trailingTrivia);
-      //      }
+      destFunc(token, leadingTrivia, trailingTrivia);
    } while (token.getKind() != TokenKindType::END);
 }
 
@@ -1489,17 +1468,14 @@ std::vector<Token> tokenize(const LangOptions &langOpts,
                             const SourceManager &sourceMgr, unsigned bufferId,
                             unsigned offset, unsigned endOffset,
                             DiagnosticEngine *diags,
-                            bool keepComments,
-                            bool tokenizeInterpolatedString,
-                            ArrayRef<Token> splitTokens)
+                            bool keepComments)
 {
    std::vector<Token> tokens;
    tokenize(langOpts, sourceMgr, bufferId, offset, endOffset,
             diags,
             keepComments ? CommentRetentionMode::ReturnAsTokens
                          : CommentRetentionMode::AttachToNextToken,
-            TriviaRetentionMode::WithoutTrivia, tokenizeInterpolatedString,
-            splitTokens,
+            TriviaRetentionMode::WithoutTrivia,
             [&](const Token &token, const ParsedTrivia &leadingTrivia,
             const ParsedTrivia &trailingTrivia) { tokens.push_back(token); });
    assert(tokens.back().is(TokenKindType::END));

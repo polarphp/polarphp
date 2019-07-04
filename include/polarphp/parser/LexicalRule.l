@@ -816,7 +816,8 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING> * {
-   if (YYCURSOR > YYLIMIT) {
+   if (YYCURSOR >= YYLIMIT) {
+      lexer.setYYCursor(lexer.getYYLimit());
       lexer.formToken(TokenKindType::END, lexer.getYYText());
       return;
    }

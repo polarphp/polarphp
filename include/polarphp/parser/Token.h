@@ -265,7 +265,7 @@ public:
    }
 
    /// Set the token to the specified kind and source range.
-   Token &setToken(TokenKindType kind, StringRef text, unsigned commentLength = 0)
+   Token &setToken(TokenKindType kind, StringRef text = StringRef(), unsigned commentLength = 0)
    {
       m_kind = kind;
       m_text = text;
