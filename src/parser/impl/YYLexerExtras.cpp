@@ -19,7 +19,7 @@
 
 namespace polar::parser::internal {
 
-using polar::basic::is_hex_digit;
+using namespace polar::basic;
 
 #define POLAR_IS_OCT(c)  ((c)>='0' && (c)<='7')
 
@@ -130,6 +130,256 @@ void strip_underscores(unsigned char *str, int &length)
       src++;
    }
    *dest = '\0';
+}
+
+void diagnose_embedded_null(DiagnosticEngine *diags, const unsigned char *ptr)
+{
+   assert(ptr && "invalid source location");
+   assert(*ptr == '\0' && "not an embedded null");
+
+   if (!diags) {
+      return;
+   }
+
+   SourceLoc nullLoc = Lexer::getSourceLoc(ptr);
+   SourceLoc nullEndLoc = Lexer::getSourceLoc(ptr+1);
+   //   diags->diagnose(nullLoc, diag::lex_nul_character)
+   //         .fixItRemoveChars(nullLoc, nullEndLoc);
+}
+
+/// Advance \p m_yyCursor to the end of line or the end of file. Returns \c true
+/// if it stopped at the end of line, \c false if it stopped at the end of file.
+bool advance_to_end_of_line(const unsigned char *&m_yyCursor, const unsigned char *bufferEnd,
+                            const unsigned char *codeCompletionPtr, DiagnosticEngine *diags) {
+   while (1) {
+      switch (*m_yyCursor++) {
+      case '\n':
+      case '\r':
+         --m_yyCursor;
+         return true; // If we found the end of the line, return.
+      default:
+         // If this is a "high" UTF-8 character, validate it.
+         if (diags && (signed char)(m_yyCursor[-1]) < 0) {
+            --m_yyCursor;
+            const unsigned char *charStart = m_yyCursor;
+            if (validate_utf8_character_and_advance(m_yyCursor, bufferEnd) == ~0U) {
+               //               diags->diagnose(Lexer::getSourceLoc(charStart),
+               //                               diag::lex_invalid_utf8);
+            }
+
+         }
+         break;   // Otherwise, eat other characters.
+      case 0:
+         if (m_yyCursor - 1 != bufferEnd) {
+            if (diags && m_yyCursor - 1 != codeCompletionPtr) {
+               // If this is a random nul character in the middle of a buffer, skip
+               // it as whitespace.
+               diagnose_embedded_null(diags, m_yyCursor - 1);
+            }
+            continue;
+         }
+         // Otherwise, the last line of the file does not have a newline.
+         --m_yyCursor;
+         return false;
+      }
+   }
+}
+
+bool skip_to_end_of_slash_star_comment(const unsigned char *&m_yyCursor, const unsigned char *bufferEnd,
+                                       const unsigned char *codeCompletionPtr, DiagnosticEngine *diags)
+{
+   const unsigned char *startPtr = m_yyCursor - 1;
+   assert(m_yyCursor[-1] == '/' && m_yyCursor[0] == '*' && "Not a /* comment");
+   // Make sure to advance over the * so that we don't incorrectly handle /*/ as
+   // the beginning and end of the comment.
+   ++m_yyCursor;
+
+   // /**/ comments can be nested, keep track of how deep we've gone.
+   unsigned depth = 1;
+   bool isMultiline = false;
+
+   while (1) {
+      switch (*m_yyCursor++) {
+      case '*':
+         // Check for a '*/'
+         if (*m_yyCursor == '/') {
+            ++m_yyCursor;
+            if (--depth == 0)
+               return isMultiline;
+         }
+         break;
+      case '/':
+         // Check for a '/*'
+         if (*m_yyCursor == '*') {
+            ++m_yyCursor;
+            ++depth;
+         }
+         break;
+
+      case '\n':
+      case '\r':
+         isMultiline = true;
+         break;
+
+      default:
+         // If this is a "high" UTF-8 character, validate it.
+         if (diags && (signed char)(m_yyCursor[-1]) < 0) {
+            --m_yyCursor;
+            const unsigned char *charStart = m_yyCursor;
+            if (validate_utf8_character_and_advance(m_yyCursor, bufferEnd) == ~0U) {
+               //               diags->diagnose(Lexer::getSourceLoc(charStart),
+               //                               diag::lex_invalid_utf8);
+            }
+         }
+
+         break;   // Otherwise, eat other characters.
+      case 0:
+         if (m_yyCursor - 1 != bufferEnd) {
+            if (diags && m_yyCursor - 1 != codeCompletionPtr) {
+               // If this is a random nul character in the middle of a buffer, skip
+               // it as whitespace.
+               diagnose_embedded_null(diags, m_yyCursor - 1);
+            }
+            continue;
+         }
+         // Otherwise, we have an unterminated /* comment.
+         --m_yyCursor;
+
+         if (diags) {
+            // Count how many levels deep we are.
+            SmallString<8> terminator("*/");
+            while (--depth != 0)
+               terminator += "*/";
+            const unsigned char *EOL = (m_yyCursor[-1] == '\n') ? (m_yyCursor - 1) : m_yyCursor;
+            //            diags
+            //                  ->diagnose(Lexer::getSourceLoc(EOL),
+            //                             diag::lex_unterminated_block_comment)
+            //                  .fixItInsert(Lexer::getSourceLoc(EOL), terminator);
+            //            diags->diagnose(Lexer::getSourceLoc(StartPtr), diag::lex_comment_start);
+         }
+         return isMultiline;
+      }
+   }
+}
+
+bool is_valid_identifier_continuation_code_point(uint32_t c)
+{
+   if (c < 0x80) {
+      return polar::basic::is_identifier_body(c, true);
+   }
+   // N1518: Recommendations for extended identifier characters for C and C++
+   // Proposed Annex X.1: Ranges of characters allowed
+   return c == 0x00A8 || c == 0x00AA || c == 0x00AD || c == 0x00AF
+         || (c >= 0x00B2 && c <= 0x00B5) || (c >= 0x00B7 && c <= 0x00BA)
+         || (c >= 0x00BC && c <= 0x00BE) || (c >= 0x00C0 && c <= 0x00D6)
+         || (c >= 0x00D8 && c <= 0x00F6) || (c >= 0x00F8 && c <= 0x00FF)
+
+         || (c >= 0x0100 && c <= 0x167F)
+         || (c >= 0x1681 && c <= 0x180D)
+         || (c >= 0x180F && c <= 0x1FFF)
+
+         || (c >= 0x200B && c <= 0x200D)
+         || (c >= 0x202A && c <= 0x202E)
+         || (c >= 0x203F && c <= 0x2040)
+         || c == 0x2054
+         || (c >= 0x2060 && c <= 0x206F)
+
+         || (c >= 0x2070 && c <= 0x218F)
+         || (c >= 0x2460 && c <= 0x24FF)
+         || (c >= 0x2776 && c <= 0x2793)
+         || (c >= 0x2C00 && c <= 0x2DFF)
+         || (c >= 0x2E80 && c <= 0x2FFF)
+
+         || (c >= 0x3004 && c <= 0x3007)
+         || (c >= 0x3021 && c <= 0x302F)
+         || (c >= 0x3031 && c <= 0x303F)
+
+         || (c >= 0x3040 && c <= 0xD7FF)
+
+         || (c >= 0xF900 && c <= 0xFD3D)
+         || (c >= 0xFD40 && c <= 0xFDCF)
+         || (c >= 0xFDF0 && c <= 0xFE44)
+         || (c >= 0xFE47 && c <= 0xFFF8)
+
+         || (c >= 0x10000 && c <= 0x1FFFD)
+         || (c >= 0x20000 && c <= 0x2FFFD)
+         || (c >= 0x30000 && c <= 0x3FFFD)
+         || (c >= 0x40000 && c <= 0x4FFFD)
+         || (c >= 0x50000 && c <= 0x5FFFD)
+         || (c >= 0x60000 && c <= 0x6FFFD)
+         || (c >= 0x70000 && c <= 0x7FFFD)
+         || (c >= 0x80000 && c <= 0x8FFFD)
+         || (c >= 0x90000 && c <= 0x9FFFD)
+         || (c >= 0xA0000 && c <= 0xAFFFD)
+         || (c >= 0xB0000 && c <= 0xBFFFD)
+         || (c >= 0xC0000 && c <= 0xCFFFD)
+         || (c >= 0xD0000 && c <= 0xDFFFD)
+         || (c >= 0xE0000 && c <= 0xEFFFD);
+}
+
+bool is_valid_identifier_start_code_point(uint32_t c)
+{
+   if (!is_valid_identifier_continuation_code_point(c)) {
+      return false;
+   }
+
+   if (c < 0x80 && (is_digit(static_cast<unsigned char>(c)) || c == '$')) {
+      return false;
+   }
+
+   // N1518: Recommendations for extended identifier characters for C and C++
+   // Proposed Annex X.2: Ranges of characters disallowed initially
+   if ((c >= 0x0300 && c <= 0x036F) ||
+       (c >= 0x1DC0 && c <= 0x1DFF) ||
+       (c >= 0x20D0 && c <= 0x20FF) ||
+       (c >= 0xFE20 && c <= 0xFE2F)) {
+      return false;
+   }
+   return true;
+}
+
+bool advance_if(const unsigned char *&ptr, const unsigned char *end,
+                bool (*predicate)(uint32_t))
+{
+   const unsigned char *next = ptr;
+   uint32_t c = validate_utf8_character_and_advance(next, end);
+   if (c == ~0U) {
+      return false;
+   }
+   if (predicate(c)) {
+      ptr = next;
+      return true;
+   }
+   return false;
+}
+
+bool advance_if_valid_start_of_identifier(const unsigned char *&ptr,
+                                          const unsigned char *end)
+{
+   return advance_if(ptr, end, is_valid_identifier_start_code_point);
+}
+
+bool advance_if_valid_continuation_of_identifier(const unsigned char *&ptr,
+                                                 const unsigned char *end)
+{
+   return advance_if(ptr, end, is_valid_identifier_continuation_code_point);
+}
+
+bool advance_if_valid_start_of_operator(const unsigned char *&ptr,
+                                        const unsigned char *end)
+{
+   return advance_if(ptr, end, Identifier::isOperatorStartCodePoint);
+}
+
+bool advance_if_valid_continuation_of_operator(const unsigned char *&ptr,
+                                               const unsigned char *end)
+{
+   return advance_if(ptr, end, Identifier::isOperatorContinuationCodePoint);
+}
+
+void validate_multiline_indents(const Token &str, DiagnosticEngine *diags)
+{
+
 }
 
 TokenKindType token_kind_map(unsigned char c)

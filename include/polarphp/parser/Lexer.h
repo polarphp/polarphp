@@ -21,7 +21,6 @@
 #include "polarphp/parser/Token.h"
 #include "polarphp/parser/ParsedTrivia.h"
 #include "polarphp/parser/LexerState.h"
-#include "polarphp/basic/adt/SmallVector.h"
 #include "polarphp/utils/SaveAndRestore.h"
 #include "polarphp/parser/internal/YYLexerDefs.h"
 

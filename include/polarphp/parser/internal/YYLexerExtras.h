@@ -18,14 +18,21 @@
 #include "polarphp/syntax/internal/TokenEnumDefs.h"
 #include "polarphp/basic/adt/SmallVector.h"
 
+/// forward declare class
 namespace polar::parser {
 class Lexer;
-}
+class Token;
+} // polar::parser
+
+namespace polar::ast {
+class DiagnosticEngine;
+} // polar::ast
 
 namespace polar::parser::internal {
 
 using polar::syntax::internal::TokenKindType;
 using polar::basic::SmallVectorImpl;
+using polar::ast::DiagnosticEngine;
 
 bool encode_to_utf8(unsigned c,
                     SmallVectorImpl<char> &result);
@@ -39,7 +46,28 @@ TokenKindType token_kind_map(unsigned char c);
 size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexer &lexer);
 bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const unsigned char *iter,
                                                const unsigned char *endMark, Lexer &lexer);
-
+void diagnose_embedded_null(DiagnosticEngine *diags, const unsigned char *ptr);
+void validate_multiline_indents(const Token &str,
+                                DiagnosticEngine *diags);
+bool advance_to_end_of_line(const unsigned char *&m_yyCursor, const unsigned char *bufferEnd,
+                            const unsigned char *codeCompletionPtr = nullptr,
+                            DiagnosticEngine *diags = nullptr);
+bool skip_to_end_of_slash_star_comment(const unsigned char *&m_yyCursor,
+                                       const unsigned char *bufferEnd,
+                                       const unsigned char *codeCompletionPtr = nullptr,
+                                       DiagnosticEngine *diags = nullptr);
+bool is_valid_identifier_continuation_code_point(uint32_t c);
+bool is_valid_identifier_start_code_point(uint32_t c);
+bool advance_if(const unsigned char *&ptr, const unsigned char *end,
+                bool (*predicate)(uint32_t));
+bool advance_if_valid_start_of_identifier(const unsigned char *&ptr,
+                                          const unsigned char *end);
+bool advance_if_valid_continuation_of_identifier(const unsigned char *&ptr,
+                                                 const unsigned char *end);
+bool advance_if_valid_start_of_operator(const unsigned char *&ptr,
+                                        const unsigned char *end);
+bool advance_if_valid_continuation_of_operator(const unsigned char *&ptr,
+                                               const unsigned char *end);
 } // polar::parser::internal
 
 #endif // POLARPHP_PARSER_INTERNAL_YY_LEXER_EXTRAS_H
