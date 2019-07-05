@@ -12,20 +12,30 @@
 #ifndef POLARPHP_KERNEL_EXCEPTIONS_H
 #define POLARPHP_KERNEL_EXCEPTIONS_H
 
-#include <exception>
+#include <stdexcept>
 
 namespace polar {
 
-class CompileException : public std::exception
+class CompileException : public std::runtime_error
 {
 public:
+   CompileException(const char *msg, int code)
+      : std::runtime_error(msg),
+        m_code(code)
+   {}
    virtual const char* what() const noexcept;
+   int getCode() const
+   {
+      return m_code;
+   }
+private:
+   int m_code;
 };
 
 class ParseException : public CompileException
 {
 public:
-   virtual const char* what() const noexcept;
+   using CompileException::CompileException;
 };
 
 } // polar

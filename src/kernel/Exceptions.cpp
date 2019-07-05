@@ -18,9 +18,4 @@ const char* CompileException::what() const noexcept
    return std::exception::what();
 }
 
-const char* ParseException::what() const noexcept
-{
-   return CompileException::what();
-}
-
 } // polar
