@@ -21,6 +21,7 @@
 #include "polarphp/utils/MathExtras.h"
 #include "polarphp/kernel/LangOptions.h"
 #include "polarphp/utils/MathExtras.h"
+#include "polarphp/kernel/Exceptions.h"
 
 #include <set>
 #include <string>
@@ -396,6 +397,13 @@ Lexer::NullCharacterKind Lexer::getNullCharacterKind(const unsigned char *ptr) c
    return NullCharacterKind::Embedded;
 }
 
+void Lexer::notifyLexicalException(StringRef msg, int code)
+{
+   if (m_lexicalExceptionHandler != nullptr) {
+      m_lexicalExceptionHandler(msg, code);
+   }
+}
+
 Lexer::State Lexer::getStateForBeginningOfTokenLoc(SourceLoc sourceLoc) const
 {
    const unsigned char *ptr = getBufferPtrForSourceLoc(sourceLoc);
@@ -744,7 +752,20 @@ void Lexer::lexBinaryNumber()
 
 void Lexer::lexHexNumber()
 {
-
+   char *end;
+   char *yytext = reinterpret_cast<char *>(const_cast<unsigned char *>(m_yyText));
+   std::int64_t lval = 0;
+   if (m_yyLength < MAX_LENGTH_OF_INT64) {
+      /// Won't overflow
+      errno = 0;
+      /// base must be passed explicitly for correct parse error on Windows
+      lval = std::strtoll(yytext, &end, yytext[0] == '0' ? 8 : 10);
+      /// This isn't an assert, we need to ensure 019 isn't valid octal
+      /// Because the lexing itself doesn't do that for us
+      if (end != yytext + m_yyLength) {
+         notifyLexicalException("Invalid numeric literal", 0);
+      }
+   }
 }
 
 void Lexer::lexLongNumber()

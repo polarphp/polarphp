@@ -62,10 +62,11 @@ struct HereDocLabel
    std::string label;
 };
 
-class Lexer
+class Lexer final
 {
 public:
-   using LexerEventHandler = void (*)(std::any context);
+   using EventHandler = void (*)(std::any context);
+   using LexicalExceptionHandler = void (*)(StringRef msg, int code);
 private:
    using State = LexerState;
    struct PrincipalTag {};
@@ -440,6 +441,12 @@ public:
       return m_valueContainer != nullptr;
    }
 
+   Lexer &registerLexicalExceptionHandler(LexicalExceptionHandler handler)
+   {
+      m_lexicalExceptionHandler = handler;
+      return *this;
+   }
+
 private:
    Lexer(const Lexer&) = delete;
    void operator=(const Lexer&) = delete;
@@ -512,6 +519,8 @@ private:
       return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c >= 0x80;
    }
 
+   void notifyLexicalException(StringRef msg, int code);
+
 private:
    friend void internal::do_yy_token_lex(int &token, int &offset, int &startLine,
                                          Lexer &lexer);
@@ -569,7 +578,8 @@ private:
    int m_scannedStringLength = 0;
    int m_lineNumber;
 
-   LexerEventHandler m_eventHandler = nullptr;
+   EventHandler m_eventHandler = nullptr;
+   LexicalExceptionHandler m_lexicalExceptionHandler = nullptr;
 
    Token m_nextToken;
 
