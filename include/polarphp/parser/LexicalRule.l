@@ -636,14 +636,23 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING> {BNUM} {
+   lexer.lexBinaryNumber();
+   return;
 }
 
 <ST_IN_SCRIPTING> {LNUM} {
-
+   lexer.lexLongNumber();
+   return;
 }
 
 <ST_IN_SCRIPTING> {HNUM} {
+   lexer.lexHexNumber();
+   return;
+}
 
+<ST_IN_SCRIPTING> {DNUM}|{EXPONENT_DNUM} {
+   lexer.lexDoubleNumber();
+   return;
 }
 
 <ST_VAR_OFFSET> [0]|([1-9][0-9]*) { /* Offset could be treated as a long */
@@ -651,10 +660,6 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_VAR_OFFSET> {LNUM}|{HNUM}|{BNUM} { /* Offset must be treated as a string */
-
-}
-
-<ST_IN_SCRIPTING> {DNUM}|{EXPONENT_DNUM} {
 
 }
 
@@ -754,7 +759,8 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING> b?['] {
-
+   lexer.lexSingleQuoteString();
+   return;
 }
 
 <ST_IN_SCRIPTING> b?["] {

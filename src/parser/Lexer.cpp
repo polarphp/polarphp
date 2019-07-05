@@ -474,7 +474,7 @@ void Lexer::lexBinaryNumber()
          assert(!errno && bnumStrEnd == yytext + m_yyLength);
       }
       formToken(TokenKindType::T_LNUMBER, m_yyText);
-      m_nextToken.setSemanticValue(std::move(numValue));
+      m_nextToken.setValue(numValue);
    } else {
       double numValue = 0;
       const char *tempPtr = reinterpret_cast<const char *>(bnumStrEnd);
@@ -482,7 +482,7 @@ void Lexer::lexBinaryNumber()
       /// errno isn't checked since we allow HUGE_VAL/INF overflow
       assert(tempPtr == yytext + m_yyLength);
       formToken(TokenKindType::T_DNUMBER, m_yyText);
-      m_nextToken.setSemanticValue(std::move(numValue));
+      m_nextToken.setValue(numValue);
    }
 }
 
@@ -506,27 +506,27 @@ void Lexer::lexHexNumber()
          assert(!errno && end == hexStr + length);
       }
       formToken(TokenKindType::T_LNUMBER, m_yyText);
-      m_nextToken.setSemanticValue(std::move(lvalue));
+      m_nextToken.setValue(lvalue);
    } else {
       const char *tempPtr = reinterpret_cast<const char *>(end);
       double dvalue = polar::utils::hexstr_to_double(yytext, &tempPtr);
       /// errno isn't checked since we allow HUGE_VAL/INF overflow
       assert(end == hexStr + length);
       formToken(TokenKindType::T_DNUMBER, m_yyText);
-      m_nextToken.setSemanticValue(std::move(dvalue));
+      m_nextToken.setValue(dvalue);
    }
 }
 
 void Lexer::lexLongNumber()
 {
-   char *end;
+   char *end = nullptr;
    char *yytext = reinterpret_cast<char *>(const_cast<unsigned char *>(m_yyText));
-   std::int64_t lval = 0;
+   std::int64_t lvalue = 0;
    if (m_yyLength < MAX_LENGTH_OF_INT64) {
       /// Won't overflow
       errno = 0;
       /// base must be passed explicitly for correct parse error on Windows
-      lval = std::strtoll(yytext, &end, yytext[0] == '0' ? 8 : 10);
+      lvalue = std::strtoll(yytext, &end, yytext[0] == '0' ? 8 : 10);
       /// This isn't an assert, we need to ensure 019 isn't valid octal
       /// Because the lexing itself doesn't do that for us
       if (end != yytext + m_yyLength) {
@@ -541,7 +541,7 @@ void Lexer::lexLongNumber()
       }
    } else {
       errno = 0;
-      lval = std::strtoll(yytext, &end, yytext[0] == '0' ? 8 : 10);
+      lvalue = std::strtoll(yytext, &end, yytext[0] == '0' ? 8 : 10);
       if (errno == ERANGE) {
          double dvalue = 0.0;
          if (yytext[0] == '0') {
@@ -561,7 +561,7 @@ void Lexer::lexLongNumber()
             }
          }
          formToken(TokenKindType::T_DNUMBER, m_yyText);
-         m_nextToken.setSemanticValue(std::move(dvalue));
+         m_nextToken.setValue(dvalue);
          return;
       }
       /// handle integer literal format error
@@ -577,7 +577,7 @@ void Lexer::lexLongNumber()
    }
    assert(!errno);
    formToken(TokenKindType::T_LNUMBER, m_yyText);
-   m_nextToken.setSemanticValue(std::move(lval));
+   m_nextToken.setValue(lvalue);
 }
 
 void Lexer::lexDoubleNumber()
@@ -588,7 +588,7 @@ void Lexer::lexDoubleNumber()
    /// errno isn't checked since we allow HUGE_VAL/INF overflow
    assert(end == yytext + m_yyLength);
    formToken(TokenKindType::T_DNUMBER, m_yyText);
-   m_nextToken.setSemanticValue(std::move(dvalue));
+   m_nextToken.setValue(dvalue);
 }
 
 void Lexer::lexSingleQuoteString()
@@ -628,15 +628,13 @@ void Lexer::lexSingleQuoteString()
          /// ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
          strValue.push_back(c);
       }
-      return;
+   } else {
+      strValue.append(reinterpret_cast<const char *>(m_yyText + bprefix + 1), m_yyLength - bprefix - 2);
+      size_t filteredLength = convert_single_quote_str_escape_sequences(strValue.data(), strValue.data() + strValue.length(), *this);
+      strValue.reserve(filteredLength);
    }
-   strValue.append(reinterpret_cast<const char *>(m_yyText + bprefix + 1), m_yyLength - bprefix - 2);
-   size_t filteredLength = convert_single_quote_str_escape_sequences(strValue.data(), strValue.data() + strValue.length(), * this);
-   strValue.reserve(filteredLength);
-   /// TODO
-   /// add output filter support ?
    formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, m_yyText);
-   m_nextToken.setSemanticValue(std::move(strValue));
+   m_nextToken.setValue(strValue);
    return;
 }
 
@@ -654,7 +652,7 @@ void Lexer::lexDoubleQuoteStringStart()
          if (convert_double_quote_str_escape_sequences(filteredStr, '"', yytext + bprefix + 1, yycursor - 1, *this) ||
              !isInParseMode()) {
             formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, m_yyText);
-            m_nextToken.setSemanticValue(std::move(filteredStr));
+            m_nextToken.setValue(filteredStr);
          } else {
             formToken(TokenKindType::T_ERROR, m_yyText);
          }
@@ -731,7 +729,7 @@ void Lexer::lexDoubleQuoteStringBody()
    if (convert_double_quote_str_escape_sequences(filteredStr, '"', yytext, yycursor, *this) ||
        !isInParseMode()) {
       formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, yytext);
-      m_nextToken.setSemanticValue(std::move(filteredStr));
+      m_nextToken.setValue(filteredStr);
    } else {
       formToken(TokenKindType::T_ERROR, yytext);
    }
@@ -782,7 +780,7 @@ void Lexer::lexBackquote()
    if (convert_double_quote_str_escape_sequences(filteredStr, '`', yytext, yycursor, *this) ||
        !isInParseMode()) {
       formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, yytext);
-      m_nextToken.setSemanticValue(std::move(filteredStr));
+      m_nextToken.setValue(filteredStr);
    } else {
       formToken(TokenKindType::T_ERROR, yytext);
    }
@@ -919,6 +917,7 @@ void Lexer::lexImpl()
    } else {
       m_nextToken.setAtStartOfLine(false);
    }
+   m_nextToken.resetValueType();
 
    /// here we want keep comment for next token
    m_yyText = m_yyCursor;

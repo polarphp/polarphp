@@ -82,8 +82,12 @@ public:
 
 TEST_F(LexerTest, testTokenizeSkipComments)
 {
-   const char *source =
-         "class Person {};";
+//   const char *source =
+//         R"('pola\^
+//\asa\\sa\'
+//rphp')";
+      const char *source =
+            R"('s')";
    std::vector<TokenKindType> expectedTokens{};
    checkLex(source, expectedTokens, /*KeepComments=*/false);
 }

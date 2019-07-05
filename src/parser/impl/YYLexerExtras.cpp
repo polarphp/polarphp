@@ -479,7 +479,7 @@ size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexe
       }
    }
    char *targetStr = iter;
-   while (targetStr < endMark) {
+   while (iter < endMark) {
       if (*iter == '\\') {
          ++iter;
          if (*iter == '\\' || *iter == '\'') {
@@ -489,7 +489,7 @@ size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexe
             *targetStr++ = *iter;
          }
       } else {
-         *targetStr = *iter;
+         *targetStr++ = *iter;
       }
       if (*iter == '\n' || (*iter == '\r' && (*(iter + 1) != '\n'))) {
          lexer.incLineNumber();

@@ -24,6 +24,8 @@
 #include "polarphp/syntax/TokenKinds.h"
 #include "polarphp/parser/internal/YYParserDefs.h"
 
+#include <any>
+
 /// forward declare class with namespace
 namespace polar::utils {
 class RawOutStream;
@@ -44,13 +46,21 @@ using polar::parser::internal::ParserSemantic;
 class Token
 {
 public:
+   enum class ValueType
+   {
+      Unknown,
+      LongLong,
+      String,
+      Double
+   };
+
    Token(TokenKindType kind, StringRef text, unsigned commentLength = 0)
-      : m_kind(kind),
-        m_atStartOfLine(false),
+      : m_atStartOfLine(false),
         m_escapedIdentifier(false),
         m_multilineString(false),
-        m_hasSemanticValue(false),
+        m_kind(kind),
         m_commentLength(commentLength),
+        m_valueType(ValueType::Unknown),
         m_text(text)
    {}
 
@@ -184,9 +194,9 @@ public:
       return m_multilineString;
    }
 
-   bool hasSemanticValue() const
+   bool hasValue() const
    {
-      return m_hasSemanticValue;
+      return m_value.has_value();
    }
 
    /// Set characteristics of string literal token.
@@ -270,6 +280,56 @@ public:
       return *this;
    }
 
+   Token &setValue(StringRef value)
+   {
+      m_valueType = ValueType::String;
+      m_value.emplace<std::string>(value.data(), value.getSize());
+      return *this;
+   }
+
+   Token &setValue(std::int64_t value)
+   {
+      m_valueType = ValueType::LongLong;
+      m_value.emplace<std::int64_t>(value);
+      return *this;
+   }
+
+   Token &setValue(double value)
+   {
+      m_valueType = ValueType::Double;
+      m_value.emplace<double>(value);
+      return *this;
+   }
+
+   template <typename T,
+             typename std::enable_if_t<std::disjunction_v<std::is_same_v<T, std::string>,
+                                                          std::is_same_v<T, double>,
+                                                          std::is_same_v<T, std::int64_t>>>>
+   const T &getValue()
+   {
+      assert(m_value.has_value());
+      return std::any_cast<const T &>(m_value);
+   }
+
+   ValueType getValueType() const
+   {
+      return m_valueType;
+   }
+
+   Token &setValueType(ValueType type)
+   {
+      m_valueType = type;
+      m_value.reset();
+      return *this;
+   }
+
+   Token &resetValueType()
+   {
+      m_valueType = ValueType::Unknown;
+      m_value.reset();
+      return *this;
+   }
+
    /// Set the token to the specified kind and source range.
    Token &setToken(TokenKindType kind, StringRef text = StringRef(), unsigned commentLength = 0)
    {
@@ -280,22 +340,6 @@ public:
       m_multilineString = false;
       return *this;
    }
-
-   template <typename T>
-   Token &setSemanticValue(T &&value)
-   {
-      assert(m_valueContainer != nullptr && "semantic value container can not be nullptr");
-      m_valueContainer->emplace<T>(std::move(value));
-      m_hasSemanticValue = true;
-      return *this;
-   }
-
-   Token &setSemanticValueContainer(ParserSemantic *container)
-   {
-      m_valueContainer = container;
-      return *this;
-   }
-
 private:
    StringRef trimComment() const
    {
@@ -305,9 +349,6 @@ private:
    }
 
 private:
-   /// Kind - The actual flavor of token this is.
-   TokenKindType m_kind;
-
    /// Whether this token is the first token on the line.
    unsigned m_atStartOfLine : 1;
 
@@ -316,18 +357,20 @@ private:
 
    /// Modifiers for string literals
    unsigned m_multilineString : 1;
-   unsigned m_hasSemanticValue : 1;
 
-   // Padding bits == 32 - 11;
+   /// Kind - The actual flavor of token this is.
+   TokenKindType m_kind;
 
    /// The length of the comment that precedes the token.
-   unsigned m_commentLength;
+   unsigned int m_commentLength;
 
-   /// The token semantic value
-   ParserSemantic *m_valueContainer = nullptr;
+   ValueType m_valueType;
 
    /// Text - The actual string covered by the token in the source buffer.
    StringRef m_text;
+
+   /// The token value
+   std::any m_value;
 };
 
 } // polar::syntax
