@@ -488,6 +488,33 @@ void Lexer::lexBinaryNumber()
 
 void Lexer::lexHexNumber()
 {
+   /// Skip "0x"
+   char *yytext = reinterpret_cast<char *>(const_cast<unsigned char *>(m_yyText));
+   char *hexStr = yytext + 2;
+   int length = m_yyLength - 2;
+   char *end = nullptr;
+   std::int64_t lvalue = 0;
+   while (*hexStr == '0') {
+      ++hexStr;
+      --length;
+   }
+   constexpr int maxWidth = sizeof(std::int64_t) * 2;
+   if (length < maxWidth || (length == maxWidth && *hexStr <= '7')) {
+      if (length > 0) {
+         errno = 0;
+         lvalue = std::strtoll(yytext, &end, 16);
+         assert(!errno && end == hexStr + length);
+      }
+      formToken(TokenKindType::T_LNUMBER, m_yyText);
+      m_nextToken.setSemanticValue(std::move(lvalue));
+   } else {
+      const char *tempPtr = reinterpret_cast<const char *>(end);
+      double dvalue = polar::utils::hexstr_to_double(yytext, &tempPtr);
+      /// errno isn't checked since we allow HUGE_VAL/INF overflow
+      assert(end == hexStr + length);
+      formToken(TokenKindType::T_DNUMBER, m_yyText);
+      m_nextToken.setSemanticValue(std::move(dvalue));
+   }
 }
 
 void Lexer::lexLongNumber()
