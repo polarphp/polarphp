@@ -555,7 +555,13 @@ void Lexer::lexLongNumber()
 
 void Lexer::lexDoubleNumber()
 {
-
+   char *end = nullptr;
+   char *yytext = reinterpret_cast<char *>(const_cast<unsigned char *>(m_yyText));
+   double dvalue = std::strtod(yytext, &end);
+   /// errno isn't checked since we allow HUGE_VAL/INF overflow
+   assert(end == yytext + m_yyLength);
+   formToken(TokenKindType::T_DNUMBER, m_yyText);
+   m_nextToken.setSemanticValue(std::move(dvalue));
 }
 
 void Lexer::lexSingleQuoteString()
