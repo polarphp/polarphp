@@ -480,13 +480,17 @@ void Lexer::lexBinaryNumber()
       const char *tempPtr = reinterpret_cast<const char *>(bnumStrEnd);
       numValue = polar::utils::bstr_to_double(bnumStr, &tempPtr);
       /// errno isn't checked since we allow HUGE_VAL/INF overflow
-      assert(bnumStrEnd == yytext + m_yyLength);
+      assert(tempPtr == yytext + m_yyLength);
       formToken(TokenKindType::T_DNUMBER, m_yyText);
       m_nextToken.setSemanticValue(std::move(numValue));
    }
 }
 
 void Lexer::lexHexNumber()
+{
+}
+
+void Lexer::lexLongNumber()
 {
    char *end;
    char *yytext = reinterpret_cast<char *>(const_cast<unsigned char *>(m_yyText));
@@ -500,13 +504,53 @@ void Lexer::lexHexNumber()
       /// Because the lexing itself doesn't do that for us
       if (end != yytext + m_yyLength) {
          notifyLexicalException("Invalid numeric literal", 0);
+         if (isInParseMode()) {
+            formToken(TokenKindType::T_ERROR, m_yyText);
+            return;
+         }
+         /// here we does not set semantic value
+         formToken(TokenKindType::T_LNUMBER, m_yyText);
+         return;
+      }
+   } else {
+      errno = 0;
+      lval = std::strtoll(yytext, &end, yytext[0] == '0' ? 8 : 10);
+      if (errno == ERANGE) {
+         double dvalue = 0.0;
+         if (yytext[0] == '0') {
+            /// octal overflow
+            const char *tempPtr = reinterpret_cast<const char *>(end);
+            dvalue = polar::utils::octstr_to_double(yytext, &tempPtr);
+         } else {
+            dvalue = std::strtod(yytext, &end);
+         }
+         /// handle double literal format error
+         /// Also not an assert for the same reason
+         if (end != yytext + m_yyLength) {
+            notifyLexicalException("Invalid numeric literal", 0);
+            if (isInParseMode()) {
+               formToken(TokenKindType::T_ERROR, m_yyText);
+               return;
+            }
+         }
+         formToken(TokenKindType::T_DNUMBER, m_yyText);
+         m_nextToken.setSemanticValue(std::move(dvalue));
+         return;
+      }
+      /// handle integer literal format error
+      if (end != yytext + m_yyLength) {
+         notifyLexicalException("Invalid numeric literal", 0);
+         if (isInParseMode()) {
+            formToken(TokenKindType::T_ERROR, m_yyText);
+            return;
+         }
+         formToken(TokenKindType::T_LNUMBER, m_yyText);
+         return;
       }
    }
-}
-
-void Lexer::lexLongNumber()
-{
-
+   assert(!errno);
+   formToken(TokenKindType::T_LNUMBER, m_yyText);
+   m_nextToken.setSemanticValue(std::move(lval));
 }
 
 void Lexer::lexDoubleNumber()
@@ -770,7 +814,7 @@ void Lexer::lexHeredocStart()
       if (!IS_LABEL_START(yycursor[hereDocLabelLength])) {
          if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
             /// TODO
-   //         zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
+            //         zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
          }
          yycursor = savedCursor;
          label->indentation = indentation;
