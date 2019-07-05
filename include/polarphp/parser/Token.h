@@ -49,6 +49,7 @@ public:
         m_atStartOfLine(false),
         m_escapedIdentifier(false),
         m_multilineString(false),
+        m_hasSemanticValue(false),
         m_commentLength(commentLength),
         m_text(text)
    {}
@@ -183,6 +184,11 @@ public:
       return m_multilineString;
    }
 
+   bool hasSemanticValue() const
+   {
+      return m_hasSemanticValue;
+   }
+
    /// Set characteristics of string literal token.
    void setStringLiteral(bool IsMultilineString)
    {
@@ -280,6 +286,7 @@ public:
    {
       assert(m_valueContainer != nullptr && "semantic value container can not be nullptr");
       m_valueContainer->emplace<T>(std::move(value));
+      m_hasSemanticValue = true;
       return *this;
    }
 
@@ -309,6 +316,7 @@ private:
 
    /// Modifiers for string literals
    unsigned m_multilineString : 1;
+   unsigned m_hasSemanticValue : 1;
 
    // Padding bits == 32 - 11;
 
