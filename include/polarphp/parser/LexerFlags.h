@@ -13,9 +13,28 @@
 #define POLARPHP_PARSER_LEXER_FLAGS_H
 
 #include "polarphp/basic/FlagSet.h"
+#include <cstdint>
 
 namespace polar::parser {
 
+using polar::basic::FlagSet;
+
+class LexerFlags final : public FlagSet<std::uint16_t>
+{
+protected:
+   enum {
+      LexingBinaryString
+   };
+public:
+   explicit LexerFlags(std::uint16_t bits)
+      : FlagSet(bits)
+   {}
+   constexpr LexerFlags()
+   {}
+
+   FLAGSET_DEFINE_FLAG_ACCESSORS(LexingBinaryString, isLexingBinaryString, setLexingBinaryString)
+   FLAGSET_DEFINE_EQUALITY(LexerFlags)
+};
 
 } // polar::parser
 

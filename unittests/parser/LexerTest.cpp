@@ -87,7 +87,7 @@ TEST_F(LexerTest, testTokenizeSkipComments)
    //\asa\\sa\'
    //rphp')";
    const char *source =
-         R"($name[213];)";
+         R"("polarphp")";
    std::vector<TokenKindType> expectedTokens{};
    checkLex(source, expectedTokens, /*KeepComments=*/false);
 }

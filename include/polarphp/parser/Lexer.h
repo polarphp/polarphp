@@ -23,6 +23,7 @@
 #include "polarphp/parser/LexerState.h"
 #include "polarphp/utils/SaveAndRestore.h"
 #include "polarphp/parser/internal/YYLexerDefs.h"
+#include "polarphp/parser/LexerFlags.h"
 
 namespace polar::parser {
 
@@ -151,7 +152,23 @@ public:
       return m_commentRetention == CommentRetentionMode::ReturnAsTokens;
    }
 
-   unsigned getBufferId() const
+   const LexerFlags &getFlags() const
+   {
+      return m_flags;
+   }
+
+   Lexer &setLexingBinaryStrFlag(bool value)
+   {
+      m_flags.setLexingBinaryString(value);
+      return *this;
+   }
+
+   bool isLexingBinaryStr() const
+   {
+      return m_flags.isLexingBinaryString();
+   }
+
+   unsigned int getBufferId() const
    {
       return m_bufferId;
    }
@@ -529,7 +546,7 @@ private:
    bool m_heredocScanAhead = false;
    bool m_incrementLineNumber = false;
    bool m_heredocIndentationUsesSpaces;
-
+   LexerFlags m_flags;
    const LangOptions &m_langOpts;
    const SourceManager &m_sourceMgr;
    const unsigned int m_bufferId;

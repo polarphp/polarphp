@@ -759,13 +759,20 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING> b?['] {
+   if (lexer.getYYText()[0] == 'b') {
+      lexer.setLexingBinaryStrFlag(true);
+   }
    lexer.lexSingleQuoteString();
    return;
 }
 
 <ST_IN_SCRIPTING> b?["] {
-   GOTO_CONDITION(ST_BACKQUOTE);
-   lexer.formToken(TokenKindType::T_DOUBLE_STR_QUOTE, lexer.getYYText());
+   const unsigned char *yytext = lexer.getYYText();
+   if (yytext[0] == 'b') {
+      lexer.setLexingBinaryStrFlag(true);
+   }
+   GOTO_CONDITION(ST_DOUBLE_QUOTES);
+   lexer.formToken(TokenKindType::T_DOUBLE_STR_QUOTE, yytext);
    return;
 }
 
