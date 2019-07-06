@@ -156,8 +156,8 @@ StringLiteralExprSyntax StringLiteralExprSyntaxBuilder::build()
 {
    CursorIndex strIndex = cursor_index(Cursor::String);
    if (!m_layout[strIndex]) {
-      m_layout[strIndex] = RawSyntax::missing(TokenKindType::T_STRING,
-                                              OwnedString::makeUnowned(get_token_text(TokenKindType::T_STRING)));
+      m_layout[strIndex] = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
+                                              OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
    }
    RefCountPtr<RawSyntax> rawDigits = RawSyntax::make(SyntaxKind::StringLiteralExpr, m_layout, SourcePresence::Present,
                                                       m_arena);

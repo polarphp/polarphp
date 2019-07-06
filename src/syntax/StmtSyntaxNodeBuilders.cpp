@@ -286,7 +286,7 @@ IfStmtSyntax IfStmtSyntaxBuilder::build()
    CursorIndex elseKeywordIndex = cursor_index(Cursor::ElseKeyword);
    CursorIndex elseBodyIndex = cursor_index(Cursor::ElseBody);
    if (!m_layout[labelNameIndex]) {
-      m_layout[labelNameIndex] = RawSyntax::missing(TokenKindType::T_STRING,
+      m_layout[labelNameIndex] = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
                                                     OwnedString::makeUnowned(""));
    }
    if (!m_layout[labelColonIndex]) {
@@ -394,7 +394,7 @@ WhileStmtSyntax WhileStmtSyntaxBuilder::build()
    CursorIndex rightParenIndex = cursor_index(Cursor::RightParen);
    CursorIndex bodyIndex = cursor_index(Cursor::Body);
    if (!m_layout[labelNameIndex]) {
-      m_layout[labelNameIndex] = RawSyntax::missing(TokenKindType::T_STRING,
+      m_layout[labelNameIndex] = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
                                                     OwnedString::makeUnowned(""));
    }
    if (!m_layout[labelColonIndex]) {
@@ -490,7 +490,7 @@ DoWhileStmtSyntax DoWhileStmtSyntaxBuilder::build()
                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
    }
    if (!m_layout[labelName]) {
-      m_layout[labelName] = RawSyntax::missing(TokenKindType::T_STRING,
+      m_layout[labelName] = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
                                                OwnedString::makeUnowned(""));
    }
    if (!m_layout[doKeywordIndex]) {
@@ -712,7 +712,7 @@ SwitchStmtSyntax SwitchStmtSyntaxBuilder::build()
    CursorIndex casesIndex = cursor_index(Cursor::Cases);
    CursorIndex rightBraceIndex = cursor_index(Cursor::RightBrace);
    if (!m_layout[labelNameIndex]) {
-      m_layout[labelNameIndex] = RawSyntax::missing(TokenKindType::T_STRING,
+      m_layout[labelNameIndex] = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
                                                     OwnedString::makeUnowned(""));
    }
 

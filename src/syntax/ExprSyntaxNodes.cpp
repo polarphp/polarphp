@@ -189,8 +189,8 @@ StringLiteralExprSyntax StringLiteralExprSyntax::withString(std::optional<TokenS
    if (str.has_value()) {
       rawStr = str->getRaw();
    } else {
-      rawStr = RawSyntax::missing(TokenKindType::T_STRING,
-                                  OwnedString::makeUnowned(get_token_text(TokenKindType::T_STRING)));
+      rawStr = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
+                                  OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
    }
    return m_data->replaceChild<StringLiteralExprSyntax>(rawStr, Cursor::String);
 }

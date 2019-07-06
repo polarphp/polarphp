@@ -57,7 +57,6 @@ public:
    Token(TokenKindType kind, StringRef text, unsigned commentLength = 0)
       : m_atStartOfLine(false),
         m_escapedIdentifier(false),
-        m_multilineString(false),
         m_kind(kind),
         m_commentLength(commentLength),
         m_valueType(ValueType::Unknown),
@@ -165,8 +164,8 @@ public:
       return isAnyOperator() && m_text == contextPunc;
    }
 
-   /// True if the token is an identifier or '_'.
-   bool isIdentifierOrUnderscore() const
+   /// True if the token is an identifier
+   bool isIdentifier() const
    {
 
    }
@@ -188,20 +187,9 @@ public:
       return false;
    }
 
-   /// True if the string literal token is multiline.
-   bool isMultilineString() const
-   {
-      return m_multilineString;
-   }
-
    bool hasValue() const
    {
       return m_value.has_value();
-   }
-
-   /// Set characteristics of string literal token.
-   void setStringLiteral(bool IsMultilineString)
-   {
    }
 
    /// getLoc - Return a source location identifier for the specified
@@ -337,7 +325,6 @@ public:
       m_text = text;
       m_commentLength = commentLength;
       m_escapedIdentifier = false;
-      m_multilineString = false;
       return *this;
    }
 private:
@@ -354,9 +341,6 @@ private:
 
    /// Whether this token is an escaped `identifier` token.
    unsigned m_escapedIdentifier : 1;
-
-   /// Modifiers for string literals
-   unsigned m_multilineString : 1;
 
    /// Kind - The actual flavor of token this is.
    TokenKindType m_kind;

@@ -247,7 +247,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 
 <ST_LOOKING_FOR_PROPERTY> {LABEL} {
    lexer.popYYCondtion();
-   lexer.formToken(TokenKindType::T_STRING, lexer.getYYText());
+   lexer.formToken(TokenKindType::T_IDENTIFIER_STRING, lexer.getYYText());
 }
 
 <ST_LOOKING_FOR_PROPERTY> * {
@@ -746,7 +746,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET> {LABEL} {
-   lexer.formToken(TokenKindType::T_STRING, lexer.getYYText());
+   lexer.formToken(TokenKindType::T_IDENTIFIER_STRING, lexer.getYYText());
    return;
 }
 

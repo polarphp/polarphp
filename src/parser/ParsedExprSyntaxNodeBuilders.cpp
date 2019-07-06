@@ -336,9 +336,9 @@ void ParsedStringLiteralExprSyntaxBuilder::finishLayout(bool deferred)
    CursorIndex strIndex = cursor_index(Cursor::String);
    if (m_layout[strIndex].isNull()) {
       if (deferred) {
-         m_layout[strIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_STRING, SourceLoc());
+         m_layout[strIndex] = ParsedRawSyntaxNode::makeDeferredMissing(TokenKindType::T_IDENTIFIER_STRING, SourceLoc());
       } else {
-         m_layout[strIndex] = recorder.recordMissingToken(TokenKindType::T_STRING, SourceLoc());
+         m_layout[strIndex] = recorder.recordMissingToken(TokenKindType::T_IDENTIFIER_STRING, SourceLoc());
       }
    }
 }

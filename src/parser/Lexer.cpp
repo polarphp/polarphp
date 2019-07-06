@@ -172,19 +172,6 @@ void Lexer::formToken(syntax::TokenKindType kind, const unsigned char *tokenStar
    m_nextToken.setToken(kind, tokenText, commentLength);
 }
 
-void Lexer::formStringLiteralToken(const unsigned char *tokenStart, bool isMultilineString)
-{
-   formToken(TokenKindType::T_STRING, tokenStart);
-   if (m_nextToken.is(TokenKindType::END)) {
-      return;
-   }
-   m_nextToken.setStringLiteral(isMultilineString);
-
-   if (isMultilineString && m_diags) {
-      validate_multiline_indents(m_nextToken, m_diags);
-   }
-}
-
 void Lexer::lexTrivia(ParsedTrivia &trivia, bool isForTrailingTrivia)
 {
 restart:
@@ -970,7 +957,7 @@ SourceLoc get_loc_for_start_of_token_in_buffer(
       }
       if (offset < tokenOffsets + token.getLength()) {
          // Current token encompasses our source location.
-         if (token.is(TokenKindType::T_STRING)) {
+         if (token.is(TokenKindType::T_IDENTIFIER_STRING)) {
             //            SmallVector<Lexer::StringSegment, 4> Segments;
             //            Lexer::getStringLiteralSegments(token, Segments, /*diags=*/nullptr);
             //            for (auto &Seg : Segments) {

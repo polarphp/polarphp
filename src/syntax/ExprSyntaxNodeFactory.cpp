@@ -230,8 +230,8 @@ FloatLiteralExprSyntax ExprSyntaxNodeFactory::makeBlankFloatLiteralExprSyntax(Re
 StringLiteralExprSyntax ExprSyntaxNodeFactory::makeBlankStringLiteralExprSyntax(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawStringLiteralExprSyntax = RawSyntax::make(SyntaxKind::StringLiteralExpr, {
-                                                                          RawSyntax::missing(TokenKindType::T_STRING,
-                                                                          OwnedString::makeUnowned(get_token_text(TokenKindType::T_STRING)))
+                                                                          RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
+                                                                          OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)))
                                                                        }, SourcePresence::Present, arena);
    return make<StringLiteralExprSyntax>(rawStringLiteralExprSyntax);
 }
