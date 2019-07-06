@@ -721,7 +721,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET> "$"{LABEL} {
-   lexer.formToken(TokenKindType::T_VARIABLE, lexer.getYYText());
+   lexer.formVariableToken(lexer.getYYText());
    return;
 }
 

@@ -149,37 +149,22 @@ public:
    {
    }
 
-   bool isContextualKeyword(StringRef contextKW) const
-   {
-   }
-
-   /// Return true if this is a contextual keyword that could be the start of a
-   /// decl.
-   bool isContextualDeclKeyword() const
-   {
-   }
-
-   bool isContextualPunctuator(StringRef contextPunc) const
-   {
-      return isAnyOperator() && m_text == contextPunc;
-   }
-
    /// True if the token is an identifier
    bool isIdentifier() const
    {
-
+      return false;
    }
 
    /// True if the token is any keyword.
    bool isKeyword() const
    {
-
+      return false;
    }
 
    /// True if the token is any literal.
    bool isLiteral() const
    {
-
+      return false;
    }
 
    bool isPunctuation() const
