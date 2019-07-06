@@ -637,25 +637,22 @@ void Lexer::lexSingleQuoteString()
    return;
 }
 
-void Lexer::lexDoubleQuoteStringStart()
+void Lexer::lexDoubleQuoteString()
 {
-   const unsigned char *yytext = m_yyText;
    const unsigned char *&yycursor = m_yyCursor;
+   const unsigned char *yytext = m_yyText;
    const unsigned char *yylimit = m_artificialEof;
-   int bprefix = yytext[0] != '\'' ? 1 : 0;
-   std::string filteredStr;
+   if (yycursor >= yylimit) {
+      /// TODO
+      /// need guard here ?
+      yycursor = yylimit;
+      formToken(TokenKindType::T_ERROR, yytext);
+      return;
+   }
    while (yycursor < yylimit) {
       switch (*yycursor++) {
       case '"':
-         m_yyLength = yycursor - m_yyText;
-         if (convert_double_quote_str_escape_sequences(filteredStr, '"', yytext + bprefix + 1, yycursor - 1, *this) ||
-             !isInParseMode()) {
-            formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, m_yyText);
-            m_nextToken.setValue(filteredStr);
-         } else {
-            formToken(TokenKindType::T_ERROR, m_yyText);
-         }
-         return;
+         break;
       case '$':
          if (IS_LABEL_START(*yycursor) || *yycursor == '{') {
             break;
@@ -674,54 +671,8 @@ void Lexer::lexDoubleQuoteStringStart()
       default:
          continue;
       }
-      yycursor--;
+      --yycursor;
       break;
-   }
-   /// Remember how much was scanned to save rescanning
-   m_scannedStringLength = yycursor - yytext - m_yyLength;
-   yycursor = yytext + m_yyLength;
-   m_yyCondition = COND_NAME(ST_DOUBLE_QUOTES);
-   formToken(TokenKindType::T_DOUBLE_STR_QUOTE, yytext);
-}
-
-void Lexer::lexDoubleQuoteStringBody()
-{
-   const unsigned char *&yycursor = m_yyCursor;
-   const unsigned char *yytext = m_yyText;
-   const unsigned char *yylimit = m_artificialEof;
-   if (m_scannedStringLength) {
-      yycursor += m_scannedStringLength - 1;
-      m_scannedStringLength = 0;
-   } else {
-      if (yycursor > yylimit) {
-         formToken(TokenKindType::T_ERROR, yytext);
-         return;
-      }
-      while (yycursor < yylimit) {
-         switch (*yycursor++) {
-         case '"':
-            break;
-         case '$':
-            if (IS_LABEL_START(*yycursor) || *yycursor == '{') {
-               break;
-            }
-            continue;
-         case '{':
-            if (*yycursor == '$') {
-               break;
-            }
-            continue;
-         case '\\':
-            if (yycursor < yylimit) {
-               ++yycursor;
-            }
-            [[fallthrough]];
-         default:
-            continue;
-         }
-         --yycursor;
-         break;
-      }
    }
    m_yyLength = yycursor - yytext;
    std::string filteredStr;
@@ -741,7 +692,10 @@ void Lexer::lexBackquote()
    const unsigned char *&yycursor = m_yyCursor;
    const unsigned char *yylimit = m_artificialEof;
 
-   if (yycursor > yylimit) {
+   if (yycursor >= yylimit) {
+      /// TODO
+      /// really need this guard
+      m_yyCursor = yylimit;
       formToken(TokenKindType::END, yytext);
       return;
    }

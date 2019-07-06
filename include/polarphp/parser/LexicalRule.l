@@ -800,6 +800,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 
 <ST_DOUBLE_QUOTES> ["] {
    GOTO_CONDITION(ST_IN_SCRIPTING);
+   lexer.setLexingBinaryStrFlag(false);
    lexer.formToken(TokenKindType::T_DOUBLE_STR_QUOTE, lexer.getYYText());
    return;
 }
@@ -809,7 +810,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_DOUBLE_QUOTES> * {
-   lexer.lexDoubleQuoteStringBody();
+   lexer.lexDoubleQuoteString();
    return;
 }
 

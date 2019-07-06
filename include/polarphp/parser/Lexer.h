@@ -512,8 +512,7 @@ private:
    void lexLongNumber();
    void lexDoubleNumber();
    void lexSingleQuoteString();
-   void lexDoubleQuoteStringStart();
-   void lexDoubleQuoteStringBody();
+   void lexDoubleQuoteString();
    void lexBackquote();
    void lexHeredocStart();
    void lexHeredocBody();
