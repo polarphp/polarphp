@@ -764,7 +764,9 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING> b?["] {
-
+   GOTO_CONDITION(ST_BACKQUOTE);
+   lexer.formToken(TokenKindType::T_DOUBLE_STR_QUOTE, lexer.getYYText());
+   return;
 }
 
 <ST_IN_SCRIPTING> b?"<<<"{TABS_AND_SPACES}({LABEL}|([']{LABEL}['])|(["]{LABEL}["])){NEWLINE} {
