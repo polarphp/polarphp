@@ -178,7 +178,7 @@ void Lexer::formVariableToken(const unsigned char *tokenStart)
    m_nextToken.setValue(StringRef(reinterpret_cast<const char *>(tokenStart), m_yyLength - 1));
 }
 
-void Lexer::formIdentiferToken(const unsigned char *tokenStart)
+void Lexer::formIdentifierToken(const unsigned char *tokenStart)
 {
    formToken(TokenKindType::T_IDENTIFIER_STRING, tokenStart);
    m_nextToken.setValue(StringRef(reinterpret_cast<const char *>(tokenStart), m_yyLength));

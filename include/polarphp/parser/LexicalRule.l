@@ -708,7 +708,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
  */
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE> "$"{LABEL} / "->"[a-zA-Z_\x80-\xff] {
    polar_yy_push_condition(ST_LOOKING_FOR_PROPERTY);
-   lexer.formToken(TokenKindType::T_VARIABLE, lexer.getYYText());
+   lexer.formVariableToken(lexer.getYYText());
    return;
 }
 
@@ -716,7 +716,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
  */
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE> "$"{LABEL} / "[" {
    polar_yy_push_condition(ST_VAR_OFFSET);
-   lexer.formToken(TokenKindType::T_VARIABLE, lexer.getYYText());
+   lexer.formVariableToken(lexer.getYYText());
    return;
 }
 
@@ -746,7 +746,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET> {LABEL} {
-   lexer.formToken(TokenKindType::T_IDENTIFIER_STRING, lexer.getYYText());
+   lexer.formIdentifierToken(lexer.getYYText());
    return;
 }
 
