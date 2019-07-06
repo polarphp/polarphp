@@ -538,8 +538,7 @@ private:
    void notifyLexicalException(StringRef msg, int code);
 
 private:
-   friend void internal::do_yy_token_lex(int &token, int &offset, int &startLine,
-                                         Lexer &lexer);
+   friend void internal::yy_token_lex(Lexer &lexer);
 
 private:
    bool m_heredocScanAhead = false;

@@ -19,27 +19,19 @@
 # include <unistd.h>
 #endif
 
-#define INVOKE_SELF() do_yy_token_lex(token, offset, startLine, lexer)
+#define RESTART_LEX() goto restart_lex
 #define HANDLE_NEWLINES() handle_newlines(lexer, lexer.getYYText(), lexer.getYYLength())
 
 /*!max:re2c */
 
 namespace polar::parser::internal {
 
-void do_yy_token_lex(int &token, int &offset, int &startLine,
-                 Lexer &lexer);
-
 void yy_token_lex(Lexer &lexer)
 {
    int token = TokenKindType::T_UNKOWN_MARK;
    int offset = 0;
    int startLine = lexer.getLineNumber();
-   do_yy_token_lex(token, offset, startLine, lexer);
-}
-
-void do_yy_token_lex(int &token, int &offset, int &startLine,
-                 Lexer &lexer)
-{
+restart_lex:
 /*!re2c
    re2c:yyfill:check = 0;
    re2c:yyfill:enable = 0;
@@ -254,7 +246,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
    lexer.setYYCursor(lexer.getYYText());
    lexer.setYYLength(0);
    lexer.popYYCondtion();
-   INVOKE_SELF();
+   RESTART_LEX();
    return;
 }
 
@@ -620,8 +612,6 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
 }
 
 <ST_LOOKING_FOR_VARNAME> {LABEL} / [[}] {
-   lexer.popYYCondtion();
-   polar_yy_push_condition(ST_IN_SCRIPTING);
    lexer.formToken(TokenKindType::T_STRING_VARNAME, lexer.getYYText());
    return;
 }
@@ -631,7 +621,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
    lexer.setYYLength(0);
    lexer.popYYCondtion();
    polar_yy_push_condition(ST_IN_SCRIPTING);
-   INVOKE_SELF();
+   RESTART_LEX();
    return;
 }
 
@@ -838,7 +828,7 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
    }
    /// zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
    /// lexing recursive
-   INVOKE_SELF();
+   RESTART_LEX();
    return;
 }
 */
