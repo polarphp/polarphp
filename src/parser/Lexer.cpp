@@ -649,6 +649,9 @@ void Lexer::lexDoubleQuoteString()
       formToken(TokenKindType::T_ERROR, yytext);
       return;
    }
+   if (yytext[0] == '\\' && yycursor < yylimit) {
+      ++yycursor;
+   }
    while (yycursor < yylimit) {
       switch (*yycursor++) {
       case '"':
@@ -695,11 +698,10 @@ void Lexer::lexBackquote()
    if (yycursor >= yylimit) {
       /// TODO
       /// really need this guard
-      m_yyCursor = yylimit;
+      yycursor = yylimit;
       formToken(TokenKindType::END, yytext);
       return;
    }
-
    if (yytext[0] == '\\' && yycursor < yylimit) {
       ++yycursor;
    }
