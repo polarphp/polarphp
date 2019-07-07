@@ -240,6 +240,7 @@ restart_lex:
 <ST_LOOKING_FOR_PROPERTY> {LABEL} {
    lexer.popYYCondtion();
    lexer.formToken(TokenKindType::T_IDENTIFIER_STRING, lexer.getYYText());
+   return;
 }
 
 <ST_LOOKING_FOR_PROPERTY> * {
