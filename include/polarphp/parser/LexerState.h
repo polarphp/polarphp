@@ -43,18 +43,226 @@ public:
       return LexerState(m_loc.getAdvancedLoc(offset));
    }
 
+   LexerState &setYYLength(unsigned int length)
+   {
+      m_yyLength = length;
+      return *this;
+   }
+
+   unsigned int getYYLength()
+   {
+      return m_yyLength;
+   }
+
+   LexerState &setLineNumber(unsigned int number)
+   {
+      m_lineNumber = number;
+      return *this;
+   }
+
+   unsigned int getLineNumber()
+   {
+      return m_lineNumber;
+   }
+
+   LexerState &setBufferStart(const unsigned char *start)
+   {
+      m_bufferStart = start;
+      return *this;
+   }
+
+   const unsigned char *getBufferStart() const
+   {
+      return m_bufferStart;
+   }
+
+   LexerState &setBufferEnd(const unsigned char *end)
+   {
+      m_bufferEnd = end;
+      return *this;
+   }
+
+   const unsigned char *getBufferEnd() const
+   {
+      return m_bufferEnd;
+   }
+
+   LexerState &setYYLimit(const unsigned char *limit)
+   {
+      m_artificialEof = limit;
+      return *this;
+   }
+
+   const unsigned char *getYYLimit() const
+   {
+      return m_artificialEof;
+   }
+
+   LexerState &setCodeCompletionPtr(const unsigned char *ptr)
+   {
+      m_codeCompletionPtr = ptr;
+      return *this;
+   }
+
+   const unsigned char *getCodeCompletionPtr() const
+   {
+      return m_codeCompletionPtr;
+   }
+
+   LexerState &setContentStart(const unsigned char *start)
+   {
+      m_contentStart = start;
+      return *this;
+   }
+
+   const unsigned char *getContentStart() const
+   {
+      return m_contentStart;
+   }
+
+   LexerState &setYYText(const unsigned char *text)
+   {
+      m_yyText = text;
+      return *this;
+   }
+
+   const unsigned char *getYYText() const
+   {
+      return m_yyText;
+   }
+
+   LexerState &setYYCursor(const unsigned char *cursor)
+   {
+      m_yyCursor = cursor;
+      return *this;
+   }
+
+   const unsigned char *getYYCursor() const
+   {
+      return m_yyCursor;
+   }
+
+   LexerState &setYYMarker(const unsigned char *marker)
+   {
+      m_yyMarker = marker;
+      return *this;
+   }
+
+   const unsigned char *getYYMarker() const
+   {
+      return m_yyMarker;
+   }
+
+   LexerState &setCondition(YYLexerCondType cond)
+   {
+      m_yyCondition = cond;
+      return *this;
+   }
+
+   YYLexerCondType getCondition() const
+   {
+      return m_yyCondition;
+   }
+
+   LexerState &setLexerFlags(LexerFlags flags)
+   {
+      m_flags = flags;
+      return *this;
+   }
+
+   LexerFlags getLexerFlags() const
+   {
+      return m_flags;
+   }
+
+   LexerState &setLexicalEventHandler(LexicalEventHandler handler)
+   {
+      m_eventHandler = handler;
+      return *this;
+   }
+
+   LexicalEventHandler getLexicalEventHandler() const
+   {
+      return m_eventHandler;
+   }
+
+   LexerState &setLexicalExceptionHandler(LexicalExceptionHandler handler)
+   {
+      m_lexicalExceptionHandler = handler;
+      return *this;
+   }
+
+   LexicalExceptionHandler getLexicalExceptionHandler() const
+   {
+      return m_lexicalExceptionHandler;
+   }
+
+   LexerState &setCommentRetentionMode(CommentRetentionMode mode)
+   {
+      m_commentRetention = mode;
+      return *this;
+   }
+
+   CommentRetentionMode getCommentRetentionMode() const
+   {
+      return m_commentRetention;
+   }
+
+   LexerState &setTriviaRetentionMode(TriviaRetentionMode mode)
+   {
+      m_triviaRetention = mode;
+      return *this;
+   }
+
+   TriviaRetentionMode getTriviaRetentionMode() const
+   {
+      return m_triviaRetention;
+   }
+
+   LexerState &setConditionStack(std::stack<YYLexerCondType> &&stack)
+   {
+      m_yyConditionStack = std::move(stack);
+      return *this;
+   }
+
+   const std::stack<YYLexerCondType> &getConditionStack() const
+   {
+      return m_yyConditionStack;
+   }
+
+   LexerState &setHeredocLabelStack(std::stack<std::shared_ptr<HereDocLabel>> &&stack)
+   {
+      m_heredocLabelStack = std::move(stack);
+      return *this;
+   }
+
+   const std::stack<std::shared_ptr<HereDocLabel>> &getHeredocLabelStack() const
+   {
+      return m_heredocLabelStack;
+   }
+
+   LexerState &setYYStateStack(std::stack<LexerState> &&stack)
+   {
+      m_yyStateStack = std::move(stack);
+      return *this;
+   }
+
+   const std::stack<LexerState> &getYYStateStack()
+   {
+      return m_yyStateStack;
+   }
 private:
    explicit LexerState(SourceLoc loc)
       : m_loc(loc)
    {}
 
+   unsigned int m_yyLength;
+   unsigned int m_lineNumber;
    const unsigned char *m_bufferStart;
    const unsigned char *m_bufferEnd;
    const unsigned char *m_artificialEof;
    const unsigned char *m_codeCompletionPtr;
    const unsigned char *m_contentStart;
-   unsigned int m_yyLength;
-   unsigned int m_lineNumber;
    const unsigned char *m_yyText;
    const unsigned char *m_yyCursor;
    const unsigned char *m_yyMarker;

@@ -535,8 +535,7 @@ private:
    /// Points to BufferStart or past the end of UTF-8 BOM sequence if it exists.
    const unsigned char *m_contentStart;
 
-   /// current token length
-   unsigned int m_yyLength;
+
 
    /// current token text
    const unsigned char *m_yyText = nullptr;
@@ -551,7 +550,9 @@ private:
    ParserSemantic *m_valueContainer = nullptr;
 
    YYLexerCondType m_yyCondition = COND_NAME(ST_IN_SCRIPTING);
-   int m_heredocIndentation;
+   unsigned m_heredocIndentation;
+   /// current token length
+   unsigned int m_yyLength;
    unsigned int m_lineNumber;
 
    LexicalEventHandler m_eventHandler = nullptr;
