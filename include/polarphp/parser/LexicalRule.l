@@ -645,14 +645,6 @@ restart_lex:
    return;
 }
 
-<ST_VAR_OFFSET> [0]|([1-9][0-9]*) { /* Offset could be treated as a long */
-
-}
-
-<ST_VAR_OFFSET> {LNUM}|{HNUM}|{BNUM} { /* Offset must be treated as a string */
-
-}
-
 <ST_IN_SCRIPTING> "__CLASS__" {
    lexer.formToken(TokenKindType::T_CLASS_C, lexer.getYYText());
    return;
@@ -702,40 +694,12 @@ restart_lex:
    return;
 }
 
-/* A [ always designates a variable offset, regardless of what follows
- */
-<ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE> "$"{LABEL} / "[" {
-   polar_yy_push_condition(ST_VAR_OFFSET);
+<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE> "$"{LABEL} {
    lexer.formVariableToken(lexer.getYYText());
    return;
 }
 
-<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET> "$"{LABEL} {
-   lexer.formVariableToken(lexer.getYYText());
-   return;
-}
-
-<ST_VAR_OFFSET> "]" {
-   lexer.popYYCondtion();
-   lexer.formToken(TokenKindType::T_RIGHT_SQUARE_BRACKET, lexer.getYYText());
-   return;
-}
-
-<ST_VAR_OFFSET> {TOKENS}|[{}"`] {
-   /// Only '[' or '-' can be valid, but returning other tokens will allow a more explicit parse error
-   lexer.formToken(token_kind_map(lexer.getYYText()[0]), lexer.getYYText());
-   return;
-}
-
-<ST_VAR_OFFSET> [\\'#] {
-   /// Invalid rule to return a more explicit parse error with proper line number
-   lexer.setYYCursor(lexer.getYYText());
-   lexer.popYYCondtion();
-   lexer.formToken(token_kind_map(lexer.getYYText()[0]), lexer.getYYText());
-   return;
-}
-
-<ST_IN_SCRIPTING,ST_VAR_OFFSET> {LABEL} {
+<ST_IN_SCRIPTING> {LABEL} {
    lexer.formIdentifierToken(lexer.getYYText());
    return;
 }
@@ -796,7 +760,9 @@ restart_lex:
 }
 
 <ST_BACKQUOTE> [`] {
-
+   GOTO_CONDITION(ST_IN_SCRIPTING);
+   lexer.formToken(TokenKindType::T_BACKTICK, lexer.getYYText());
+   return;
 }
 
 <ST_DOUBLE_QUOTES> * {
@@ -805,7 +771,8 @@ restart_lex:
 }
 
 <ST_BACKQUOTE> * {
-
+   lexer.lexBackquote();
+   return;
 }
 
 <ST_HEREDOC> * {
@@ -813,10 +780,6 @@ restart_lex:
 }
 
 <ST_NOWDOC> * {
-
-}
-
-<ST_VAR_OFFSET> * {
 
 }
 
