@@ -535,8 +535,6 @@ private:
    /// Points to BufferStart or past the end of UTF-8 BOM sequence if it exists.
    const unsigned char *m_contentStart;
 
-
-
    /// current token text
    const unsigned char *m_yyText = nullptr;
 

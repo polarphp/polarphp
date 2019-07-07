@@ -952,12 +952,60 @@ SourceLoc get_loc_for_start_of_token_in_buffer(
 
 Lexer &Lexer::saveYYState()
 {
+   LexerState state;
+   state.setYYLength(m_yyLength);
+   state.setBufferStart(m_bufferStart);
+   state.setBufferEnd(m_bufferEnd);
+   state.setContentStart(m_contentStart);
+   state.setYYText(m_yyText);
+   state.setYYCursor(m_yyCursor);
+   state.setYYMarker(m_yyMarker);
+   state.setYYLimit(m_artificialEof);
 
+   state.setCondition(m_yyCondition);
+   state.setLineNumber(m_lineNumber);
+   state.setLexerFlags(m_flags);
+   state.setLexicalEventHandler(m_eventHandler);
+   state.setLexicalExceptionHandler(m_lexicalExceptionHandler);
+
+   std::stack<std::shared_ptr<HereDocLabel>> heredocLabelStack;
+   m_heredocLabelStack.swap(heredocLabelStack);
+   state.setHeredocLabelStack(std::move(heredocLabelStack));
+
+   std::stack<YYLexerCondType> condState;
+   m_yyConditionStack.swap(condState);
+   state.setConditionStack(std::move(condState));
+
+   m_yyStateStack.push(std::move(state));
+   return *this;
 }
 
 Lexer &Lexer::restoreYYState()
 {
+   LexerState &state = m_yyStateStack.top();
+   m_yyLength = state.getYYLength();
+   m_bufferStart = state.getBufferStart();
+   m_bufferEnd = state.getBufferEnd();
+   m_contentStart = state.getContentStart();
+   m_yyText = state.getYYText();
+   m_yyCursor = state.getYYCursor();
+   m_yyMarker = state.getYYMarker();
+   m_artificialEof = state.getYYLimit();
 
+   m_yyCondition = state.getCondition();
+   m_lineNumber = state.getLineNumber();
+   m_flags = state.getLexerFlags();
+   m_eventHandler = state.getLexicalEventHandler();
+   m_lexicalExceptionHandler = state.getLexicalExceptionHandler();
+
+   std::stack<std::shared_ptr<HereDocLabel>> &heredocLabelStack = state.getHeredocLabelStack();
+   m_heredocLabelStack.swap(heredocLabelStack);
+   std::stack<YYLexerCondType> &condState = state.getConditionStack();
+   m_yyConditionStack.swap(condState);
+
+   m_yyStateStack.pop();
+
+   return *this;
 }
 
 Token Lexer::getTokenAtLocation(const SourceManager &sourceMgr, SourceLoc loc)

@@ -49,7 +49,7 @@ public:
       return *this;
    }
 
-   unsigned int getYYLength()
+   unsigned int getYYLength() const
    {
       return m_yyLength;
    }
@@ -60,7 +60,7 @@ public:
       return *this;
    }
 
-   unsigned int getLineNumber()
+   unsigned int getLineNumber() const
    {
       return m_lineNumber;
    }
@@ -197,35 +197,13 @@ public:
       return m_lexicalExceptionHandler;
    }
 
-   LexerState &setCommentRetentionMode(CommentRetentionMode mode)
-   {
-      m_commentRetention = mode;
-      return *this;
-   }
-
-   CommentRetentionMode getCommentRetentionMode() const
-   {
-      return m_commentRetention;
-   }
-
-   LexerState &setTriviaRetentionMode(TriviaRetentionMode mode)
-   {
-      m_triviaRetention = mode;
-      return *this;
-   }
-
-   TriviaRetentionMode getTriviaRetentionMode() const
-   {
-      return m_triviaRetention;
-   }
-
    LexerState &setConditionStack(std::stack<YYLexerCondType> &&stack)
    {
       m_yyConditionStack = std::move(stack);
       return *this;
    }
 
-   const std::stack<YYLexerCondType> &getConditionStack() const
+   std::stack<YYLexerCondType> &getConditionStack()
    {
       return m_yyConditionStack;
    }
@@ -236,20 +214,9 @@ public:
       return *this;
    }
 
-   const std::stack<std::shared_ptr<HereDocLabel>> &getHeredocLabelStack() const
+   std::stack<std::shared_ptr<HereDocLabel>> &getHeredocLabelStack()
    {
       return m_heredocLabelStack;
-   }
-
-   LexerState &setYYStateStack(std::stack<LexerState> &&stack)
-   {
-      m_yyStateStack = std::move(stack);
-      return *this;
-   }
-
-   const std::stack<LexerState> &getYYStateStack()
-   {
-      return m_yyStateStack;
    }
 private:
    explicit LexerState(SourceLoc loc)
@@ -273,12 +240,8 @@ private:
    LexicalEventHandler m_eventHandler;
    LexicalExceptionHandler m_lexicalExceptionHandler;
 
-   CommentRetentionMode m_commentRetention;
-   TriviaRetentionMode m_triviaRetention;
-
    std::stack<YYLexerCondType> m_yyConditionStack;
    std::stack<std::shared_ptr<HereDocLabel>> m_heredocLabelStack;
-   std::stack<LexerState> m_yyStateStack;
 
    friend class Lexer;
 };
