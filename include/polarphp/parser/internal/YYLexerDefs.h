@@ -17,8 +17,15 @@
 #include "polarphp/parser/internal/YYParserDefs.h"
 #include "polarphp/parser/internal/YYLexerDefs.h"
 
+#include <any>
+
+namespace polar::basic {
+class StringRef;
+}
+
 namespace polar::parser {
 using YYLexerCondType = YYCONDTYPE;
+using polar::basic::StringRef;
 
 namespace internal {
 using YYLocation = location;
@@ -29,6 +36,30 @@ void yy_token_lex(Lexer &lexer);
 void do_yy_token_lex(int &token, int &offset, int &startLine,
                      Lexer &lexer);
 } // internal
+
+using LexicalEventHandler = void (*)(std::any context);
+using LexicalExceptionHandler = void (*)(StringRef msg, int code);
+
+enum class CommentRetentionMode
+{
+   None,
+   AttachToNextToken,
+   ReturnAsTokens
+};
+
+enum class TriviaRetentionMode
+{
+   WithoutTrivia,
+   WithTrivia
+};
+
+struct HereDocLabel
+{
+   bool intentationUseSpaces;
+   int indentation;
+   std::string label;
+};
+
 } // polar::parser
 
 #if 0

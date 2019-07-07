@@ -12,9 +12,6 @@
 #ifndef POLARPHP_PARSER_LEXER_H
 #define POLARPHP_PARSER_LEXER_H
 
-#include <any>
-#include <stack>
-
 #include "polarphp/ast/DiagnosticEngine.h"
 #include "polarphp/parser/SourceLoc.h"
 #include "polarphp/parser/SourceMgr.h"
@@ -24,6 +21,8 @@
 #include "polarphp/utils/SaveAndRestore.h"
 #include "polarphp/parser/internal/YYLexerDefs.h"
 #include "polarphp/parser/LexerFlags.h"
+
+#include <stack>
 
 namespace polar::parser {
 
@@ -42,33 +41,9 @@ class Parser;
 ///
 uint32_t validate_utf8_character_and_advance(const unsigned char *&ptr, const unsigned char *end);
 
-enum class CommentRetentionMode
-{
-   None,
-   AttachToNextToken,
-   ReturnAsTokens
-};
-
-enum class TriviaRetentionMode
-{
-   WithoutTrivia,
-   WithTrivia
-};
-
-struct HereDocLabel
-{
-   bool intentationUseSpaces;
-   int indentation;
-   std::string label;
-};
-
 class Lexer final
 {
-public:
-   using EventHandler = void (*)(std::any context);
-   using LexicalExceptionHandler = void (*)(StringRef msg, int code);
 private:
-   using State = LexerState;
    struct PrincipalTag {};
 
    /// Nul character meaning kind.
@@ -109,7 +84,7 @@ public:
    /// \param Parent the parent lexer that scans the whole buffer
    /// \param BeginState start of the subrange
    /// \param EndState end of the subrange
-   Lexer(Lexer &parent, State beginState, State endState);
+   Lexer(Lexer &parent, LexerState beginState, LexerState endState);
 
    /// Returns true if this lexer will produce a code completion token.
    bool isCodeCompletion() const
@@ -180,52 +155,52 @@ public:
       return m_nextToken;
    }
 
-   /// Returns the lexer state for the beginning of the given token
-   /// location. After restoring the state, lexer will return this token and
+   /// Returns the lexer LexerState for the beginning of the given token
+   /// location. After restoring the LexerState, lexer will return this token and
    /// continue from there.
-   State getStateForBeginningOfTokenLoc(SourceLoc sourceLoc) const;
+   LexerState getStateForBeginningOfTokenLoc(SourceLoc sourceLoc) const;
 
-   /// Returns the lexer state for the beginning of the given token.
-   /// After restoring the state, lexer will return this token and continue from
+   /// Returns the lexer LexerState for the beginning of the given token.
+   /// After restoring the LexerState, lexer will return this token and continue from
    /// there.
-   State getStateForBeginningOfToken(const Token &token, const ParsedTrivia &leadingTrivia = {}) const
+   LexerState getStateForBeginningOfToken(const Token &token, const ParsedTrivia &leadingTrivia = {}) const
    {
       // If the token has a comment attached to it, rewind to before the comment,
       // not just the start of the token.  This ensures that we will re-lex and
-      // reattach the comment to the token if rewound to this state.
+      // reattach the comment to the token if rewound to this LexerState.
       SourceLoc tokenStart = token.getCommentStart();
       if (tokenStart.isInvalid()) {
          tokenStart = token.getLoc();
       }
-      State state = getStateForBeginningOfTokenLoc(tokenStart);
+      LexerState LexerState = getStateForBeginningOfTokenLoc(tokenStart);
       if (m_triviaRetention == TriviaRetentionMode::WithTrivia) {
-         state.m_leadingTrivia = leadingTrivia;
+         LexerState.m_leadingTrivia = leadingTrivia;
       }
-      return state;
+      return LexerState;
    }
 
-   State getStateForEndOfTokenLoc(SourceLoc loc) const
+   LexerState getStateForEndOfTokenLoc(SourceLoc loc) const
    {
-      return State(getLocForEndOfToken(m_sourceMgr, loc));
+      return LexerState(getLocForEndOfToken(m_sourceMgr, loc));
    }
 
-   bool isStateForCurrentBuffer(LexerState state)
+   bool isStateForCurrentBuffer(LexerState LexerState)
    {
-      return m_sourceMgr.findBufferContainingLoc(state.m_loc) == getBufferId();
+      return m_sourceMgr.findBufferContainingLoc(LexerState.m_loc) == getBufferId();
    }
 
-   /// Restore the lexer state to a given one, that can be located either
+   /// Restore the lexer LexerState to a given one, that can be located either
    /// before or after the current position.
-   void restoreState(State state, bool enableDiagnostics = false)
+   void restoreState(LexerState LexerState, bool enableDiagnostics = false)
    {
-      assert(state.isValid());
-      m_yyCursor = getBufferPtrForSourceLoc(state.m_loc);
+      assert(LexerState.isValid());
+      m_yyCursor = getBufferPtrForSourceLoc(LexerState.m_loc);
       // Don't reemit diagnostics while readvancing the lexer.
       polar::utils::SaveAndRestore<DiagnosticEngine *> diag(m_diags, enableDiagnostics ? m_diags : nullptr);
       lexImpl();
       // Restore Trivia.
       if (m_triviaRetention == TriviaRetentionMode::WithTrivia) {
-         if (auto &ltrivia = state.m_leadingTrivia) {
+         if (auto &ltrivia = LexerState.m_leadingTrivia) {
             m_leadingTrivia = std::move(*ltrivia);
          }
       }
@@ -234,12 +209,12 @@ public:
    Lexer &saveYYState();
    Lexer &restoreYYState();
 
-   /// Restore the lexer state to a given state that is located before
+   /// Restore the lexer LexerState to a given LexerState that is located before
    /// current position.
-   void backtrackToState(State state)
+   void backtrackToState(LexerState LexerState)
    {
-      assert(getBufferPtrForSourceLoc(state.m_loc) <= m_yyCursor && "can't backtrack forward");
-      restoreState(state);
+      assert(getBufferPtrForSourceLoc(LexerState.m_loc) <= m_yyCursor && "can't backtrack forward");
+      restoreState(LexerState);
    }
 
    /// Retrieve the Token referred to by \c Loc.
@@ -410,17 +385,6 @@ public:
       return m_yyConditionStack.empty();
    }
 
-   Lexer &setScannedStringLength(int length)
-   {
-      m_scannedStringLength = length;
-      return *this;
-   }
-
-   int getScannedStringLength()
-   {
-      return m_scannedStringLength;
-   }
-
    Lexer &pushHeredocLabel(std::shared_ptr<HereDocLabel> label)
    {
       m_heredocLabelStack.push(label);
@@ -588,12 +552,9 @@ private:
 
    YYLexerCondType m_yyCondition = COND_NAME(ST_IN_SCRIPTING);
    int m_heredocIndentation;
-   /// initial string length after scanning to first variable
-   /// used in lex string literal which has ${var} or $var in it
-   int m_scannedStringLength = 0;
-   int m_lineNumber;
+   unsigned int m_lineNumber;
 
-   EventHandler m_eventHandler = nullptr;
+   LexicalEventHandler m_eventHandler = nullptr;
    LexicalExceptionHandler m_lexicalExceptionHandler = nullptr;
 
    Token m_nextToken;
@@ -615,7 +576,7 @@ private:
 
    std::stack<YYLexerCondType> m_yyConditionStack;
    std::stack<std::shared_ptr<HereDocLabel>> m_heredocLabelStack;
-   std::stack<State> m_yyStateStack;
+   std::stack<LexerState> m_yyStateStack;
 };
 
 /// Given an ordered token \param Array , get the iterator pointing to the first

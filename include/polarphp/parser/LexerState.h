@@ -12,9 +12,13 @@
 #ifndef POLARPHP_PARSER_LEXER_STATE_H
 #define POLARPHP_PARSER_LEXER_STATE_H
 
-#include <optional>
 #include "polarphp/parser/SourceLoc.h"
 #include "polarphp/parser/ParsedTrivia.h"
+#include "polarphp/parser/LexerFlags.h"
+#include "polarphp/parser/internal/YYLexerDefs.h"
+
+#include <stack>
+#include <optional>
 
 namespace polar::parser {
 
@@ -44,8 +48,30 @@ private:
       : m_loc(loc)
    {}
 
+   const unsigned char *m_bufferStart;
+   const unsigned char *m_bufferEnd;
+   const unsigned char *m_artificialEof;
+   const unsigned char *m_codeCompletionPtr;
+   const unsigned char *m_contentStart;
+   unsigned int m_yyLength;
+   unsigned int m_lineNumber;
+   const unsigned char *m_yyText;
+   const unsigned char *m_yyCursor;
+   const unsigned char *m_yyMarker;
+   YYLexerCondType m_yyCondition;
+   LexerFlags m_flags;
    SourceLoc m_loc;
    std::optional<ParsedTrivia> m_leadingTrivia;
+   LexicalEventHandler m_eventHandler;
+   LexicalExceptionHandler m_lexicalExceptionHandler;
+
+   CommentRetentionMode m_commentRetention;
+   TriviaRetentionMode m_triviaRetention;
+
+   std::stack<YYLexerCondType> m_yyConditionStack;
+   std::stack<std::shared_ptr<HereDocLabel>> m_heredocLabelStack;
+   std::stack<LexerState> m_yyStateStack;
+
    friend class Lexer;
 };
 

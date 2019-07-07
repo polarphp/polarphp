@@ -87,7 +87,7 @@ TEST_F(LexerTest, testTokenizeSkipComments)
    //\asa\\sa\'
    //rphp')";
    const char *source =
-         R"("polarphp is $version["name"])";
+         R"("polarphp: $info->age")";
    std::vector<TokenKindType> expectedTokens{};
    checkLex(source, expectedTokens, /*KeepComments=*/false);
 }

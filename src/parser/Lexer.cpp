@@ -70,15 +70,15 @@ Lexer::Lexer(const LangOptions &options, const SourceManager &sourceMgr,
    initialize(offset, endOffset);
 }
 
-Lexer::Lexer(Lexer &parent, State beginState, State endState)
+Lexer::Lexer(Lexer &parent, LexerState beginState, LexerState endState)
    : Lexer(PrincipalTag(), parent.m_langOpts, parent.m_sourceMgr,
            parent.m_bufferId, parent.m_diags, parent.m_commentRetention,
            parent.m_triviaRetention)
 {
    assert(m_bufferId == m_sourceMgr.findBufferContainingLoc(beginState.m_loc) &&
-          "state for the wrong buffer");
+          "LexerState for the wrong buffer");
    assert(m_bufferId == m_sourceMgr.findBufferContainingLoc(endState.m_loc) &&
-          "state for the wrong buffer");
+          "LexerState for the wrong buffer");
 
    unsigned offset = m_sourceMgr.getLocOffsetInBuffer(beginState.m_loc, m_bufferId);
    unsigned endOffset = m_sourceMgr.getLocOffsetInBuffer(endState.m_loc, m_bufferId);
@@ -134,7 +134,7 @@ Token Lexer::getTokenAt(SourceLoc loc)
    Lexer lexer(m_langOpts, m_sourceMgr, m_bufferId, m_diags,
                CommentRetentionMode::None,
                TriviaRetentionMode::WithoutTrivia);
-   lexer.restoreState(State(loc));
+   lexer.restoreState(LexerState(loc));
    return lexer.peekNextToken();
 }
 
@@ -391,7 +391,7 @@ void Lexer::notifyLexicalException(StringRef msg, int code)
    }
 }
 
-Lexer::State Lexer::getStateForBeginningOfTokenLoc(SourceLoc sourceLoc) const
+LexerState Lexer::getStateForBeginningOfTokenLoc(SourceLoc sourceLoc) const
 {
    const unsigned char *ptr = getBufferPtrForSourceLoc(sourceLoc);
    // Skip whitespace backwards until we hit a newline.  This is needed to
@@ -417,7 +417,7 @@ Lexer::State Lexer::getStateForBeginningOfTokenLoc(SourceLoc sourceLoc) const
       }
       break;
    }
-   return State(SourceLoc(polar::utils::SMLocation::getFromPointer(reinterpret_cast<const char *>(ptr))));
+   return LexerState(SourceLoc(polar::utils::SMLocation::getFromPointer(reinterpret_cast<const char *>(ptr))));
 }
 
 void Lexer::skipToEndOfLine(bool eatNewline)
@@ -611,7 +611,7 @@ void Lexer::lexSingleQuoteString()
          m_yyLength = yylimit - yytext;
          /// Unclosed single quotes; treat similar to double quotes, but without a separate token
          /// for ' (unrecognized by parser), instead of old flex fallback to "Unexpected character..."
-         /// rule, which continued in ST_IN_SCRIPTING state after the quote
+         /// rule, which continued in ST_IN_SCRIPTING LexerState after the quote
          formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, m_yyText);
          return;
       }
@@ -982,7 +982,7 @@ Token Lexer::getTokenAtLocation(const SourceManager &sourceMgr, SourceLoc loc)
    // (making this option irrelevant), or the caller lexed comments and
    // we need to lex just the comment token.
    Lexer lexer(fakeLangOpts, sourceMgr, bufferId, nullptr, CommentRetentionMode::ReturnAsTokens);
-   lexer.restoreState(State(loc));
+   lexer.restoreState(LexerState(loc));
    return lexer.peekNextToken();
 }
 
@@ -1064,7 +1064,7 @@ SourceLoc Lexer::getLocForEndOfLine(SourceManager &sourceMgr, SourceLoc loc)
    // (making this option irrelevant), or the caller lexed comments and
    // we need to lex just the comment token.
    Lexer lexer(fakeLangOpts, sourceMgr, bufferId, nullptr, CommentRetentionMode::ReturnAsTokens);
-   lexer.restoreState(State(loc));
+   lexer.restoreState(LexerState(loc));
    lexer.skipToEndOfLine(/*EatNewline=*/true);
    return getSourceLoc(lexer.m_yyCursor);
 }
