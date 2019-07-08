@@ -456,7 +456,7 @@ TokenKindType token_kind_map(unsigned char c)
       token = TokenKindType::T_ERROR_SUPPRESS_SIGN;
       break;
    default:
-      token = TokenKindType::T_UNKOWN_MARK;
+      token = TokenKindType::T_UNKNOWN_MARK;
       break;
    }
    return token;

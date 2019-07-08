@@ -111,7 +111,7 @@ void Lexer::initialize(unsigned offset, unsigned endOffset)
    m_artificialEof = m_bufferStart + endOffset;
    m_yyCursor = m_bufferStart + offset;
 
-   assert(m_nextToken.is(TokenKindType::T_UNKOWN_MARK));
+   assert(m_nextToken.is(TokenKindType::T_UNKNOWN_MARK));
    lexImpl();
    assert((m_nextToken.isAtStartOfLine() || m_yyCursor != m_bufferStart) &&
           "The token should be at the beginning of the line, "
@@ -827,14 +827,43 @@ void Lexer::lexHeredocHeader()
       /// recursive lex heredoc
       /// at lex stage recursive heredoc is legal，but at parse stage it is illegal
       int heredocNestingLevel = 1;
-      TokenKindType firstToken = TokenKindType::T_UNKOWN_MARK;
+      TokenKindType firstToken = TokenKindType::T_UNKNOWN_MARK;
       saveYYState();
       m_flags.setHeredocScanAhead(true);
       m_flags.setHeredocIndentationUsesSpaces(false);
       m_heredocIndentation = 0;
       m_eventHandler = nullptr;
+      // zend_exception_save();
       while (heredocNestingLevel > 0) {
-
+         Token token;
+         lex(token);
+         TokenKindType tokenKind = token.getKind();
+         if (isLexExceptionOccurred()) {
+            clearExceptionFlag();
+            break;
+         }
+         if (firstToken == TokenKindType::T_UNKNOWN_MARK) {
+            firstToken = tokenKind;
+         }
+         switch (tokenKind) {
+         case TokenKindType::T_START_HEREDOC:
+            ++heredocNestingLevel;
+            break;
+         case TokenKindType::T_END_HEREDOC:
+            --heredocNestingLevel;
+            break;
+         case TokenKindType::END:
+            heredocNestingLevel = 0;
+            break;
+         default:
+            continue;
+         }
+      }
+      // zend_exception_restore();
+      if ((firstToken == TokenKindType::T_VARIABLE ||
+           firstToken == TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES ||
+           firstToken == TokenKindType::T_CURLY_OPEN) && m_heredocIndentation) {
+         notifyLexicalException(0, "Invalid body indentation level (expecting an indentation level of at least %d)", m_heredocIndentation);
       }
    }
 }

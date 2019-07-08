@@ -64,7 +64,7 @@ public:
    {}
 
    Token()
-      : Token(TokenKindType::T_UNKOWN_MARK, {}, 0)
+      : Token(TokenKindType::T_UNKNOWN_MARK, {}, 0)
    {}
 
    TokenKindType getKind() const

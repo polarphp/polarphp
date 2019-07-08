@@ -732,7 +732,7 @@ restart_lex:
 }
 
 <ST_IN_SCRIPTING> b?"<<<"{TABS_AND_SPACES}({LABEL}|([']{LABEL}['])|(["]{LABEL}["])){NEWLINE} {
-
+   
 }
 
 <ST_IN_SCRIPTING> [`] {

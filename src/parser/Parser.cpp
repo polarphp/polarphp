@@ -30,7 +30,7 @@ Parser::Parser(SourceManager &sourceMgr, DiagnosticEngine &diags,
      m_diags(diags),
      m_lexer(lexer.release())
 {
-   m_token.setKind(TokenKindType::T_UNKOWN_MARK);
+   m_token.setKind(TokenKindType::T_UNKNOWN_MARK);
 }
 
 Parser::~Parser()

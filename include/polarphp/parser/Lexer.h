@@ -12,6 +12,7 @@
 #ifndef POLARPHP_PARSER_LEXER_H
 #define POLARPHP_PARSER_LEXER_H
 
+#include "polarphp/basic/adt/StringExtras.h"
 #include "polarphp/ast/DiagnosticEngine.h"
 #include "polarphp/parser/SourceLoc.h"
 #include "polarphp/parser/SourceMgr.h"
@@ -500,10 +501,21 @@ private:
    }
 
    void notifyLexicalException(StringRef msg, int code);
+   template <typename... ArgTypes>
+   void notifyLexicalException(int code, StringRef format, const ArgTypes&... arg)
+   {
+      using polar::basic::sprintable;
+      size_t length = std::snprintf(nullptr, 0, format.data(), sprintable(arg)...) + 1;
+      std::unique_ptr<char[]> buffer(new char[length]);
+      std::snprintf(buffer.get(), length, format.data(), sprintable(arg)...);
+      notifyLexicalException(StringRef(buffer.get(), length - 1), code);
+   }
+
    bool isLexExceptionOccurred() const
    {
-      m_flags.isLexExceptionOccurred();
+      return m_flags.isLexExceptionOccurred();
    }
+
    void clearExceptionFlag()
    {
        m_flags.setLexExceptionOccurred(false);

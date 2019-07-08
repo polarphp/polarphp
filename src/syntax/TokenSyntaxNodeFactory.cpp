@@ -1267,7 +1267,7 @@ TokenSyntax TokenSyntaxNodeFactory::makeError(OwnedString text, const Trivia &le
 TokenSyntax TokenSyntaxNodeFactory::makeUnknown(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                 RefCountPtr<SyntaxArena> &arena)
 {
-   return makeToken(TokenKindType::T_UNKOWN_MARK, OwnedString(),
+   return makeToken(TokenKindType::T_UNKNOWN_MARK, OwnedString(),
                     leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 

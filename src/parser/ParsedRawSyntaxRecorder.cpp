@@ -116,7 +116,7 @@ ParsedRawSyntaxRecorder::recordRawSyntax(SyntaxKind kind,
       range = CharSourceRange{offset, length};
    }
    OpaqueSyntaxNode n = m_actions->recordRawSyntax(kind, subnodes, range);
-   return ParsedRawSyntaxNode{kind, TokenKindType::T_UNKOWN_MARK, range, n};
+   return ParsedRawSyntaxNode{kind, TokenKindType::T_UNKNOWN_MARK, range, n};
 }
 
 ParsedRawSyntaxNode
@@ -125,7 +125,7 @@ ParsedRawSyntaxRecorder::recordEmptyRawSyntaxCollection(SyntaxKind kind,
 {
    CharSourceRange range{loc, 0};
    OpaqueSyntaxNode n = m_actions->recordRawSyntax(kind, {}, range);
-   return ParsedRawSyntaxNode{kind, TokenKindType::T_UNKOWN_MARK, range, n};
+   return ParsedRawSyntaxNode{kind, TokenKindType::T_UNKNOWN_MARK, range, n};
 }
 
 ParsedRawSyntaxNode
@@ -139,7 +139,7 @@ ParsedRawSyntaxRecorder::lookupNode(size_t lexerOffset, SourceLoc loc,
       return ParsedRawSyntaxNode::null();
    }
    CharSourceRange range{loc, unsigned(length)};
-   return ParsedRawSyntaxNode{kind, TokenKindType::T_UNKOWN_MARK, range, n};
+   return ParsedRawSyntaxNode{kind, TokenKindType::T_UNKNOWN_MARK, range, n};
 }
 
 } // polar::parser

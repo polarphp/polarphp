@@ -96,7 +96,7 @@ class ParsedRawSyntaxNode
                        ArrayRef<ParsedRawSyntaxNode> deferredNodes)
       : deferredLayout{deferredNodes},
         m_syntaxKind(uint16_t(k)),
-        m_tokenKind(uint16_t(TokenKindType::T_UNKOWN_MARK)),
+        m_tokenKind(uint16_t(TokenKindType::T_UNKNOWN_MARK)),
         m_dataKind(DataKind::deferredLayout)
    {
       assert(getKind() == k && "Syntax kind with too large value!");
@@ -125,7 +125,7 @@ public:
    ParsedRawSyntaxNode()
       : recordedData{},
         m_syntaxKind(uint16_t(syntax::SyntaxKind::Unknown)),
-        m_tokenKind(uint16_t(TokenKindType::T_UNKOWN_MARK)),
+        m_tokenKind(uint16_t(TokenKindType::T_UNKNOWN_MARK)),
         m_dataKind(DataKind::Null)
    {
    }
