@@ -478,7 +478,7 @@ private:
    void lexSingleQuoteString();
    void lexDoubleQuoteString();
    void lexBackquote();
-   void lexHeredocStart();
+   void lexHeredocHeader();
    void lexHeredocBody();
    void lexNowdocBody();
    void lexTrivia(ParsedTrivia &trivia, bool isForTrailingTrivia);
@@ -505,9 +505,6 @@ private:
    friend void internal::yy_token_lex(Lexer &lexer);
 
 private:
-   bool m_heredocScanAhead = false;
-   bool m_incrementLineNumber = false;
-   bool m_heredocIndentationUsesSpaces;
    LexerFlags m_flags;
    const LangOptions &m_langOpts;
    const SourceManager &m_sourceMgr;

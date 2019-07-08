@@ -603,6 +603,7 @@ void Lexer::lexSingleQuoteString()
          if (*yycursor == '\'') {
             ++yycursor;
             m_yyLength = yycursor - yytext;
+            setLexingBinaryStrFlag(false);
             break;
          } else if (*yycursor++ == '\\' && yycursor < yylimit) {
             ++yycursor;
@@ -741,14 +742,19 @@ void Lexer::lexBackquote()
    }
 }
 
-void Lexer::lexHeredocStart()
+void Lexer::lexHeredocHeader()
 {
    const unsigned char *iter = nullptr;
    const unsigned char *savedCursor = nullptr;
    const unsigned char *yytext = m_yyText;
    const unsigned char *&yycursor = m_yyCursor;
    const unsigned char *yylimit = m_artificialEof;
-   int bprefix = (yytext[0] != '<') ? 1 : 0;
+   LexerFlags &flags = m_flags;
+   int bprefix = 0;
+   if (yytext[0] != '<') {
+      setLexingBinaryStrFlag(true);
+      bprefix = 1;
+   }
    int spacing = 0;
    int indentation = 0;
    std::string heredocLabel;
@@ -756,6 +762,7 @@ void Lexer::lexHeredocStart()
    incLineNumber();
    int hereDocLabelLength = m_yyLength - bprefix - 3 - 1 - (yytext[m_yyLength - 2] == '\r' ? 1 : 0);
    iter = yytext + bprefix + 3;
+   /// trim leader spaces and tabs
    if ((*iter == ' ') || (*iter == '\t')) {
       ++iter;
       --hereDocLabelLength;
@@ -779,6 +786,7 @@ void Lexer::lexHeredocStart()
    savedCursor = yycursor;
    m_heredocLabelStack.push(label);
 
+   /// calculate indentation and space char type
    while (yycursor < yylimit && (*yycursor == ' ' || *yycursor == '\t')) {
       if (*yycursor == '\t') {
          spacing |= HEREDOC_USING_TABS;
@@ -788,6 +796,8 @@ void Lexer::lexHeredocStart()
       ++yycursor;
       ++indentation;
    }
+   ///
+   /// just empty heredoc
    if (yycursor == yylimit) {
       yycursor = savedCursor;
       formToken(TokenKindType::T_START_HEREDOC, yytext);
@@ -798,9 +808,10 @@ void Lexer::lexHeredocStart()
    if (hereDocLabelLength < yylimit - yycursor &&
        StringRef(reinterpret_cast<const char *>(yycursor), hereDocLabelLength) == heredocLabel) {
       if (!IS_LABEL_START(yycursor[hereDocLabelLength])) {
+         ///
+         /// detect heredoc end mark sequence
          if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
-            /// TODO
-            //         zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
+            notifyLexicalException("Invalid indentation - tabs and spaces cannot be mixed", 0);
          }
          yycursor = savedCursor;
          label->indentation = indentation;
@@ -811,7 +822,7 @@ void Lexer::lexHeredocStart()
    }
 
    yycursor = savedCursor;
-   if (isHeredoc && !m_heredocScanAhead) {
+   if (isHeredoc && !flags.isHeredocScanAhead()) {
 
    }
 }
@@ -879,7 +890,7 @@ void Lexer::lexImpl()
    lexTrivia(m_leadingTrivia, /* IsForTrailingTrivia */ false);
 
    // invoke yylexer
-   if (m_incrementLineNumber) {
+   if (m_flags.isIncrementLineNumber()) {
       incLineNumber();
    }
    internal::yy_token_lex(*this);
