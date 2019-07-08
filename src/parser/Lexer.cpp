@@ -865,7 +865,14 @@ void Lexer::lexHeredocHeader()
            firstToken == TokenKindType::T_CURLY_OPEN) && m_heredocIndentation) {
          notifyLexicalException(0, "Invalid body indentation level (expecting an indentation level of at least %d)", m_heredocIndentation);
       }
+
+      label->indentation = m_heredocIndentation;
+      label->intentationUseSpaces = m_flags.isHeredocIndentationUsesSpaces();
+      restoreYYState();
+      m_flags.setHeredocScanAhead(false);
+      m_flags.setIncrementLineNumber(false);
    }
+   formToken(TokenKindType::T_START_HEREDOC, yytext);
 }
 
 void Lexer::lexHeredocBody()

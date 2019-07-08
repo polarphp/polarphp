@@ -28,7 +28,7 @@ namespace polar::parser::internal {
 
 void yy_token_lex(Lexer &lexer)
 {
-   int token = TokenKindType::T_UNKOWN_MARK;
+   int token = TokenKindType::T_UNKNOWN_MARK;
    int offset = 0;
    int startLine = lexer.getLineNumber();
 restart_lex:
@@ -732,7 +732,8 @@ restart_lex:
 }
 
 <ST_IN_SCRIPTING> b?"<<<"{TABS_AND_SPACES}({LABEL}|([']{LABEL}['])|(["]{LABEL}["])){NEWLINE} {
-   
+   lexer.lexHeredocHeader();
+   return;
 }
 
 <ST_IN_SCRIPTING> [`] {
