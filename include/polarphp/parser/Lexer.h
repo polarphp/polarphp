@@ -500,6 +500,14 @@ private:
    }
 
    void notifyLexicalException(StringRef msg, int code);
+   bool isLexExceptionOccurred() const
+   {
+      m_flags.isLexExceptionOccurred();
+   }
+   void clearExceptionFlag()
+   {
+       m_flags.setLexExceptionOccurred(false);
+   }
 
 private:
    friend void internal::yy_token_lex(Lexer &lexer);

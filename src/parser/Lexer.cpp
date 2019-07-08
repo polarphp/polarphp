@@ -386,6 +386,7 @@ Lexer::NullCharacterKind Lexer::getNullCharacterKind(const unsigned char *ptr) c
 
 void Lexer::notifyLexicalException(StringRef msg, int code)
 {
+   m_flags.setLexExceptionOccurred(true);
    if (m_lexicalExceptionHandler != nullptr) {
       m_lexicalExceptionHandler(msg, code);
    }
@@ -823,7 +824,18 @@ void Lexer::lexHeredocHeader()
 
    yycursor = savedCursor;
    if (isHeredoc && !flags.isHeredocScanAhead()) {
+      /// recursive lex heredoc
+      /// at lex stage recursive heredoc is legal，but at parse stage it is illegal
+      int heredocNestingLevel = 1;
+      TokenKindType firstToken = TokenKindType::T_UNKOWN_MARK;
+      saveYYState();
+      m_flags.setHeredocScanAhead(true);
+      m_flags.setHeredocIndentationUsesSpaces(false);
+      m_heredocIndentation = 0;
+      m_eventHandler = nullptr;
+      while (heredocNestingLevel > 0) {
 
+      }
    }
 }
 
