@@ -83,14 +83,18 @@ public:
    SourceManager sourceMgr;
 };
 
-TEST_F(LexerTest, testTokenizeSkipComments)
+TEST_F(LexerTest, testSimpleToken)
 {
-   //   const char *source =
-   //         R"('pola\^
-   //\asa\\sa\'
-   //rphp')";
-   const char *source =
-         R"("polarphp: $info->age")";
-   std::vector<TokenKindType> expectedTokens{};
+   const char *source = "+-*/%{}->";
+   std::vector<TokenKindType> expectedTokens{
+      TokenKindType::T_PLUS_SIGN,
+            TokenKindType::T_MINUS_SIGN,
+            TokenKindType::T_MUL_SIGN,
+            TokenKindType::T_DIV_SIGN,
+            TokenKindType::T_MOD_SIGN,
+            TokenKindType::T_LEFT_BRACE,
+            TokenKindType::T_RIGHT_BRACE,
+            TokenKindType::T_OBJECT_OPERATOR
+   };
    checkLex(source, expectedTokens, /*KeepComments=*/false);
 }
