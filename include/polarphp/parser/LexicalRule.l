@@ -743,7 +743,8 @@ restart_lex:
 }
 
 <ST_END_HEREDOC> * {
-
+   lexer.lexHereAndNowDocEnd();
+   return;
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC> "{$" {
@@ -778,11 +779,13 @@ restart_lex:
 }
 
 <ST_HEREDOC> * {
-
+   lexer.lexHeredocBody();
+   return;
 }
 
 <ST_NOWDOC> * {
-
+   lexer.lexNowdocBody();
+   return;
 }
 
 <ST_IN_SCRIPTING> * {

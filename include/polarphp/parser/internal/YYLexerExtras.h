@@ -24,6 +24,10 @@ class Lexer;
 class Token;
 } // polar::parser
 
+namespace polar::basic {
+class StringRef;
+} // polar::basic
+
 namespace polar::ast {
 class DiagnosticEngine;
 } // polar::ast
@@ -32,6 +36,7 @@ namespace polar::parser::internal {
 
 using polar::syntax::internal::TokenKindType;
 using polar::basic::SmallVectorImpl;
+using polar::basic::StringRef;
 using polar::ast::DiagnosticEngine;
 
 bool encode_to_utf8(unsigned c,
@@ -47,8 +52,6 @@ size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexe
 bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const unsigned char *iter,
                                                const unsigned char *endMark, Lexer &lexer);
 void diagnose_embedded_null(DiagnosticEngine *diags, const unsigned char *ptr);
-void validate_multiline_indents(const Token &str,
-                                DiagnosticEngine *diags);
 bool advance_to_end_of_line(const unsigned char *&m_yyCursor, const unsigned char *bufferEnd,
                             const unsigned char *codeCompletionPtr = nullptr,
                             DiagnosticEngine *diags = nullptr);
@@ -68,6 +71,9 @@ bool advance_if_valid_start_of_operator(const unsigned char *&ptr,
                                         const unsigned char *end);
 bool advance_if_valid_continuation_of_operator(const unsigned char *&ptr,
                                                const unsigned char *end);
+const char *next_newline(const char *str, const char *end, size_t &newlineLen);
+bool strip_multiline_string_indentation(Lexer &lexer, std::string &str, int indentation, bool usingSpaces,
+                                        bool newlineAtStart, bool newlineAtEnd);
 } // polar::parser::internal
 
 #endif // POLARPHP_PARSER_INTERNAL_YY_LEXER_EXTRAS_H

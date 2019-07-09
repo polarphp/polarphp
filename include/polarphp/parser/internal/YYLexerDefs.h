@@ -57,7 +57,7 @@ struct HereDocLabel
 {
    bool intentationUseSpaces;
    int indentation;
-   std::string label;
+   std::string name;
 };
 
 } // polar::parser

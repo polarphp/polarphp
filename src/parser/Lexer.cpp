@@ -34,7 +34,6 @@ using namespace internal;
 using namespace polar::syntax;
 using namespace polar::basic;
 
-#define IS_LABEL_START(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || (c) == '_' || (c) >= 0x80)
 #define HEREDOC_USING_SPACES 1
 #define HEREDOC_USING_TABS 2
 #define MAX_LENGTH_OF_INT64 19
@@ -659,7 +658,7 @@ void Lexer::lexDoubleQuoteString()
       case '"':
          break;
       case '$':
-         if (IS_LABEL_START(*yycursor) || *yycursor == '{') {
+         if (isLabelStart(*yycursor) || *yycursor == '{') {
             break;
          }
          continue;
@@ -712,7 +711,7 @@ void Lexer::lexBackquote()
       case '`':
          break;
       case '$':
-         if (IS_LABEL_START(*yycursor) || *yycursor == '{') {
+         if (isLabelStart(*yycursor) || *yycursor == '{') {
             break;
          }
          continue;
@@ -736,7 +735,7 @@ void Lexer::lexBackquote()
    m_yyLength = yycursor - yytext;
    if (convert_double_quote_str_escape_sequences(filteredStr, '`', yytext, yycursor, *this) ||
        !isInParseMode()) {
-      formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, yytext);
+      formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
       m_nextToken.setValue(filteredStr);
    } else {
       formToken(TokenKindType::T_ERROR, yytext);
@@ -760,10 +759,18 @@ void Lexer::lexHeredocHeader()
    int indentation = 0;
    std::string heredocLabel;
    bool isHeredoc = true;
+   /// header include a newline
    incLineNumber();
-   int hereDocLabelLength = m_yyLength - bprefix - 3 - 1 - (yytext[m_yyLength - 2] == '\r' ? 1 : 0);
+   int newlineLength = 1;
+   if (yytext[m_yyLength - 2] == 'r') {
+      // \r\n
+      ++newlineLength;
+   }
+   int hereDocLabelLength = m_yyLength - bprefix - 3 - newlineLength;
    iter = yytext + bprefix + 3;
    /// trim leader spaces and tabs
+   /// recalculate header length
+   ///
    if ((*iter == ' ') || (*iter == '\t')) {
       ++iter;
       --hereDocLabelLength;
@@ -781,9 +788,13 @@ void Lexer::lexHeredocHeader()
       m_yyCondition = COND_NAME(ST_HEREDOC);
    }
    heredocLabel.append(reinterpret_cast<const char *>(iter), hereDocLabelLength);
+   heredocLabel.reserve(hereDocLabelLength);
    std::shared_ptr<HereDocLabel> label = std::make_shared<HereDocLabel>();
-   label->label = heredocLabel;
+   label->name = heredocLabel;
    label->indentation = 0;
+   /// current position is first column of first line after header
+   /// if we found end marker, we use this point to restore yycursor
+   /// and goto ST_END_HEREDOC condition
    savedCursor = yycursor;
    m_heredocLabelStack.push(label);
 
@@ -795,10 +806,11 @@ void Lexer::lexHeredocHeader()
          spacing |= HEREDOC_USING_SPACES;
       }
       ++yycursor;
+      /// precalculate indentation for empty heredoc
       ++indentation;
    }
-   ///
-   /// just empty heredoc
+
+   /// just empty heredoc with no end mark because it reach eof
    if (yycursor == yylimit) {
       yycursor = savedCursor;
       formToken(TokenKindType::T_START_HEREDOC, yytext);
@@ -808,8 +820,7 @@ void Lexer::lexHeredocHeader()
    /// optimzed for empty heredoc
    if (hereDocLabelLength < yylimit - yycursor &&
        StringRef(reinterpret_cast<const char *>(yycursor), hereDocLabelLength) == heredocLabel) {
-      if (!IS_LABEL_START(yycursor[hereDocLabelLength])) {
-         ///
+      if (!isLabelStart(yycursor[hereDocLabelLength])) {
          /// detect heredoc end mark sequence
          if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
             notifyLexicalException("Invalid indentation - tabs and spaces cannot be mixed", 0);
@@ -823,6 +834,16 @@ void Lexer::lexHeredocHeader()
    }
 
    yycursor = savedCursor;
+
+   /// scan ahead to get right intentation
+   /// because at lex stage heredoc can nest in {$xxx = <<<XXX
+   ///  XXX;
+   /// } something like this
+   ///
+   /// but we only need scan ahead at top level
+   ///
+   /// note when we scan ahead, we don't care about intentation
+   ///
    if (isHeredoc && !flags.isHeredocScanAhead()) {
       /// recursive lex heredoc
       /// at lex stage recursive heredoc is legal，but at parse stage it is illegal
@@ -863,7 +884,8 @@ void Lexer::lexHeredocHeader()
       if ((firstToken == TokenKindType::T_VARIABLE ||
            firstToken == TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES ||
            firstToken == TokenKindType::T_CURLY_OPEN) && m_heredocIndentation) {
-         notifyLexicalException(0, "Invalid body indentation level (expecting an indentation level of at least %d)", m_heredocIndentation);
+         notifyLexicalException(0, "Invalid body indentation level (expecting an indentation level of at least %d)",
+                                m_heredocIndentation);
       }
 
       label->indentation = m_heredocIndentation;
@@ -877,7 +899,226 @@ void Lexer::lexHeredocHeader()
 
 void Lexer::lexHeredocBody()
 {
+   const unsigned char *yytext = m_yyText;
+   const unsigned char *&yycursor = m_yyCursor;
+   const unsigned char *yylimit = m_artificialEof;
+   std::size_t &yylength = m_yyLength;
+   std::shared_ptr<HereDocLabel> label = m_heredocLabelStack.top();
+   int newlineLength = 0;
+   int indentation = 0;
+   int spacing = 0;
+   bool foundEndMarker = false;
+   /// lex until we meet end mark or '${' or '{$'
+   if (yycursor > yylimit) {
+      yycursor = yylimit;
+      formToken(TokenKindType::END, yytext);
+      return;
+   }
+   /// before control get here, re2c already increment yycursor
+   --yycursor;
+   while (yycursor < yylimit) {
+      switch (*yycursor++) {
+      case '\r':
+         if (*yycursor == '\n') {
+            ++yycursor;
+         }
+         [[fallthrough]];
+      case '\n':
+         /// check wehther this line have end marker
+         indentation = spacing = 0;
+         while (yycursor < yylimit && (*yycursor == ' ' || *yycursor == '\t')) {
+            if (*yycursor == ' ') {
+               spacing |= HEREDOC_USING_SPACES;
+            } else {
+               spacing |= HEREDOC_USING_TABS;
+            }
+            ++yycursor;
+            ++indentation;
+         }
 
+         if (yycursor == yylimit) {
+            yylength = yycursor - yytext;
+            handle_newlines(*this, yytext, yylength);
+            formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
+            /// TODO
+            /// set empty str or just nothing
+            return;
+         }
+         /// Check for ending label on the next line
+         if (isFoundHeredocEndMarker(label)) {
+            if (isLabelStart(yycursor[label->name.size()])) {
+               /// just normal string
+               continue;
+            }
+            if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
+               notifyLexicalException("Invalid indentation - tabs and spaces cannot be mixed", 0);
+            }
+            /// newline before label will be subtracted from returned text, but
+            /// yyleng/yytext will include it
+            if (yycursor[-indentation - 2] == '\r' && yycursor[-indentation - 1] == '\n') {
+               newlineLength = 2;
+            } else {
+               newlineLength = 1;
+            }
+            /// For newline before label
+            m_flags.setIncrementLineNumber(true);
+
+            if (m_flags.isHeredocScanAhead()) {
+               /// in scan ahead mode, we don't care about indentation
+               /// just record it
+               m_heredocIndentation = indentation;
+               m_flags.setHeredocIndentationUsesSpaces(spacing == HEREDOC_USING_SPACES);
+            } else {
+               yycursor -= indentation;
+            }
+            m_yyCondition = COND_NAME(ST_END_HEREDOC);
+            foundEndMarker = true;
+            break;
+         }
+         continue;
+      case '$':
+         if (isLabelStart(*yycursor) || *yycursor == '{') {
+            break;
+         }
+         continue;
+      case '{':
+         if (*yycursor == '$') {
+            break;
+         }
+         continue;
+      case '\\':
+         if (yycursor < yylimit && *yycursor != '\n' && *yycursor != '\r') {
+            ++yycursor;
+         }
+         [[fallthrough]];
+      default:
+         continue;
+      }
+      if (!foundEndMarker) {
+         --yycursor;
+      }
+      break;
+   }
+   yylength = yycursor - yytext;
+   /// scan ahead and normal mode both need exclude newline
+   std::string filteredStr(reinterpret_cast<const char *>(yytext), yylength - newlineLength);
+   if (!m_flags.isHeredocScanAhead() && !m_flags.isLexExceptionOccurred() && isInParseMode()) {
+      /// TODO
+      /// need review here
+      bool newlineAtStart = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
+      if (!strip_multiline_string_indentation(*this, filteredStr, label->indentation, label->intentationUseSpaces,
+                                              newlineAtStart, newlineLength != 0)) {
+         formToken(TokenKindType::T_ERROR, yytext);
+         return;
+      }
+      const unsigned char *ptr = reinterpret_cast<const unsigned char *>(filteredStr.data());
+      if (!convert_double_quote_str_escape_sequences(filteredStr, 0, ptr, ptr + filteredStr.size(), *this)) {
+         formToken(TokenKindType::T_ERROR, yytext);
+         return;
+      }
+   } else {
+      /// just handle newline
+      handle_newlines(*this, yytext, yylength - newlineLength);
+   }
+   formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
+   m_nextToken.setValue(filteredStr);
+}
+
+void Lexer::lexNowdocBody()
+{
+   const unsigned char *yytext = m_yyText;
+   const unsigned char *&yycursor = m_yyCursor;
+   const unsigned char *yylimit = m_artificialEof;
+   std::size_t &yylength = m_yyLength;
+   std::shared_ptr<HereDocLabel> label = m_heredocLabelStack.top();
+   int newlineLength = 0;
+   int indentation = 0;
+   int spacing = 0;
+   bool foundEndMarker = false;
+   if (yycursor > yylimit) {
+      yycursor = yylimit;
+      formToken(TokenKindType::END, yytext);
+      return;
+   }
+   --yycursor;
+   while (yycursor < yylimit) {
+      switch (*yycursor++) {
+      case '\r':
+         if (*yycursor == '\n') {
+            ++yycursor;
+         }
+         [[fallthrough]];
+      case '\n':
+         indentation = spacing = 0;
+         while (yycursor < yylimit && (*yycursor == ' ' || *yycursor == '\t')) {
+            if (*yycursor == '\t') {
+               spacing |= HEREDOC_USING_TABS;
+            } else {
+               spacing |= HEREDOC_USING_SPACES;
+            }
+            ++yycursor;
+            ++indentation;
+         }
+         if (yycursor == yylimit) {
+            m_yyLength = yycursor - yytext;
+            handle_newlines(*this, yytext, m_yyLength);
+            formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
+            return;
+         }
+         /// Check for ending label on the next line
+         if (isFoundHeredocEndMarker(label)) {
+            if (isLabelStart(yycursor[label->name.size()])) {
+               continue;
+            }
+            if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
+               notifyLexicalException(0, "Invalid indentation - tabs and spaces cannot be mixed");
+            }
+            /// newline before label will be subtracted from returned text, but
+            /// yyleng/yytext will include it
+            if (yycursor[-indentation - 2] == '\r' && yycursor[-indentation - 1] == '\n') {
+               newlineLength = 2;
+            } else {
+               newlineLength = 1;
+            }
+            /// For newline before label
+            m_flags.setIncrementLineNumber(true);
+            yycursor -= indentation;
+            label->indentation = indentation;
+            m_yyCondition = COND_NAME(ST_END_HEREDOC);
+            foundEndMarker = true;
+            break;
+         }
+         [[fallthrough]];
+      default:
+         continue;
+      }
+      if (foundEndMarker) {
+         break;
+      }
+   }
+   yylength = yycursor - yytext;
+   std::string filteredStr(reinterpret_cast<const char *>(yytext), yylength - newlineLength);
+   if (!m_flags.isLexExceptionOccurred() && spacing != 0 && isInParseMode()) {
+      bool newlineAtStart = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
+      if (!strip_multiline_string_indentation(*this, filteredStr, label->indentation, label->intentationUseSpaces,
+                                              newlineAtStart, newlineLength != 0)) {
+         formToken(TokenKindType::T_ERROR, yytext);
+         return;
+      }
+   }
+   handle_newlines(*this, yytext, yylength - newlineLength);
+   formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
+   m_nextToken.setValue(filteredStr);
+}
+
+void Lexer::lexHereAndNowDocEnd()
+{
+   std::shared_ptr<HereDocLabel> label = m_heredocLabelStack.top();
+   m_heredocLabelStack.pop();
+   m_yyLength = label->indentation + label->name.size();
+   m_yyCursor += m_yyLength - 1;
+   m_yyCondition = COND_NAME(ST_IN_SCRIPTING);
+   formToken(TokenKindType::T_END_HEREDOC, m_yyText);
 }
 
 bool Lexer::isIdentifier(StringRef string)

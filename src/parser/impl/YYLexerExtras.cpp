@@ -377,9 +377,75 @@ bool advance_if_valid_continuation_of_operator(const unsigned char *&ptr,
    return advance_if(ptr, end, Identifier::isOperatorContinuationCodePoint);
 }
 
-void validate_multiline_indents(const Token &str, DiagnosticEngine *diags)
+const char *next_newline(const char *str, const char *end, size_t &newlineLen)
 {
+   for (; str < end; ++str) {
+      if (*str == '\r') {
+         newlineLen = str + 1 < end && *(str + 1) == '\n' ? 2 : 1;
+      } else if (*str == '\n') {
+         newlineLen = 1;
+         return str;
+      }
+   }
+   newlineLen = 0;
+   return nullptr;
+}
 
+bool strip_multiline_string_indentation(Lexer &lexer, std::string &str, int indentation, bool usingSpaces,
+                                        bool newlineAtStart, bool newlineAtEnd)
+{
+   const char *cursor = str.data();
+   const char *end = cursor + str.size();
+   char *copy = str.data();
+   int newLineCount = 0;
+   size_t newlineLen;
+   const char *newLine;
+   if (!newlineAtStart) {
+      newLine = next_newline(cursor, end, newlineLen);
+      if (nullptr == newLine) {
+         return false;
+      }
+      cursor = newLine + newlineLen;
+      copy = const_cast<char *>(newLine) + newlineLen;
+      ++newLineCount;
+   } else {
+      newLine = cursor;
+   }
+   // intentional
+   while (cursor <= end && newLine) {
+      int skip;
+      newLine = next_newline(cursor, end, newlineLen);
+      if (nullptr == newLine && newlineAtEnd) {
+         newLine = end;
+      }
+      // Try to skip indentation
+      for (skip = 0; skip < indentation; skip++) {
+         if (cursor == newLine) {
+            // Don't require full indentation on whitespace-only lines
+            break;
+         }
+         if (cursor == end || (*cursor != ' ' && *cursor != '\t')) {
+            lexer.incLineNumber(newLineCount);
+            lexer.notifyLexicalException(0, "Invalid body indentation level (expecting an indentation level of at least %d)",
+                                         indentation);
+            return false;
+         }
+         if ((!usingSpaces && *cursor == ' ') || (usingSpaces && *cursor == '\t')) {
+            lexer.incLineNumber(newLineCount);
+            lexer.notifyLexicalException("Invalid indentation - tabs and spaces cannot be mixed", 0);
+         }
+      }
+      if (cursor == end) {
+         break;
+      }
+      size_t len = newLine ? (newLine - cursor + newlineLen) : (end - cursor);
+      std::memmove(copy, cursor, len);
+      cursor += len;
+      copy += len;
+      ++newLineCount;
+   }
+   str.reserve(copy - str.data());
+   return true;
 }
 
 TokenKindType token_kind_map(unsigned char c)

@@ -27,6 +27,11 @@
 
 namespace polar::parser {
 
+namespace internal {
+bool strip_multiline_string_indentation(Lexer &lexer, std::string &str, int indentation, bool usingSpaces,
+                                        bool newlineAtStart, bool newlineAtEnd);
+}
+
 using polar::ast::Diagnostic;
 using polar::ast::DiagnosticEngine;
 using polar::ast::InFlightDiagnostic;
@@ -461,6 +466,7 @@ private:
    void formEscapedIdentifierToken(const unsigned char *tokenStart);
    void formVariableToken(const unsigned char *tokenStart);
    void formIdentifierToken(const unsigned char *tokenStart);
+
    /// Advance to the end of the line.
    /// If EatNewLine is true, CurPtr will be at end of newline character.
    /// Otherwise, CurPtr will be at newline character.
@@ -468,7 +474,6 @@ private:
 
    /// Skip to the end of the line of a // comment.
    void skipSlashSlashComment(bool eatNewline);
-
    void skipSlashStarComment();
    void skipHashbang(bool eatNewline);
    void lexIdentifier();
@@ -482,7 +487,9 @@ private:
    void lexHeredocHeader();
    void lexHeredocBody();
    void lexNowdocBody();
+   void lexHereAndNowDocEnd();
    void lexTrivia(ParsedTrivia &trivia, bool isForTrailingTrivia);
+
    static unsigned lexUnicodeEscape(const char *&curPtr, Lexer *diags);
 
    unsigned lexCharacter(const char *&curPtr, char stopQuote,
@@ -495,7 +502,15 @@ private:
    bool lexUnknown(bool emitDiagnosticsIfToken);
    NullCharacterKind getNullCharacterKind(const unsigned char *ptr) const;
 
-   bool isLabelStart(unsigned char c)
+   bool isFoundHeredocEndMarker(std::shared_ptr<HereDocLabel> label) const
+   {
+      long int labelLength = label->name.size();
+      return isLabelStart(*m_yyCursor) &&
+            (labelLength < m_artificialEof - m_yyCursor) &&
+            (StringRef(reinterpret_cast<const char *>(m_yyCursor), labelLength) == label->name);
+   }
+
+   bool isLabelStart(unsigned char c) const
    {
       return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c >= 0x80;
    }
@@ -518,12 +533,13 @@ private:
 
    void clearExceptionFlag()
    {
-       m_flags.setLexExceptionOccurred(false);
+      m_flags.setLexExceptionOccurred(false);
    }
 
 private:
    friend void internal::yy_token_lex(Lexer &lexer);
-
+   friend bool internal::strip_multiline_string_indentation(Lexer &lexer, std::string &str, int indentation, bool usingSpaces,
+                                                            bool newlineAtStart, bool newlineAtEnd);
 private:
    LexerFlags m_flags;
    const LangOptions &m_langOpts;
@@ -567,7 +583,7 @@ private:
    YYLexerCondType m_yyCondition = COND_NAME(ST_IN_SCRIPTING);
    unsigned m_heredocIndentation;
    /// current token length
-   unsigned int m_yyLength;
+   std::size_t m_yyLength;
    unsigned int m_lineNumber;
 
    LexicalEventHandler m_eventHandler = nullptr;
