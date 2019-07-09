@@ -19,6 +19,8 @@
 #include "polarphp/ast/DiagnosticEngine.h"
 #include "polarphp/utils/MemoryBuffer.h"
 
+#include <thread>
+
 #if __has_include(<sys/mman.h>)
 # include <sys/mman.h>
 # define HAS_MMAP 1
@@ -64,9 +66,6 @@ public:
       } else {
          tokens = tokenize(langOpts, sourceMgr, bufId, 0, 0, /*Diags=*/nullptr, keepComments);
       }
-      for (const Token &token : tokens) {
-         token.dump();
-      }
       EXPECT_EQ(expectedTokens.size(), tokens.size());
       for (unsigned i = 0, e = expectedTokens.size(); i != e; ++i) {
          EXPECT_EQ(expectedTokens[i], tokens[i].getKind()) << "i = " << i;
@@ -95,6 +94,37 @@ TEST_F(LexerTest, testSimpleToken)
             TokenKindType::T_LEFT_BRACE,
             TokenKindType::T_RIGHT_BRACE,
             TokenKindType::T_OBJECT_OPERATOR
+   };
+   checkLex(source, expectedTokens, /*KeepComments=*/false);
+}
+
+TEST_F(LexerTest, testSimpleKeyword)
+{
+   const char *source = R"(
+         true false this self static parent for while foreach
+if else elseif include namespace use
+         include_once static:: require thread_local
+         yield __halt_compiler parent module package
+         yield from await (double) new null async
+
+)";
+   std::vector<TokenKindType> expectedTokens{
+      TokenKindType::T_TRUE, TokenKindType::T_FALSE,
+            TokenKindType::T_OBJ_REF, TokenKindType::T_CLASS_REF_SELF,
+            TokenKindType::T_STATIC, TokenKindType::T_CLASS_REF_PARENT,
+            TokenKindType::T_FOR, TokenKindType::T_WHILE,
+            TokenKindType::T_FOREACH, TokenKindType::T_IF,
+            TokenKindType::T_ELSE, TokenKindType::T_ELSEIF,
+            TokenKindType::T_INCLUDE, TokenKindType::T_NAMESPACE,
+            TokenKindType::T_USE, TokenKindType::T_INCLUDE_ONCE,
+            TokenKindType::T_CLASS_REF_STATIC, TokenKindType::T_PAAMAYIM_NEKUDOTAYIM,
+            TokenKindType::T_REQUIRE, TokenKindType::T_THREAD_LOCAL,
+            TokenKindType::T_YIELD, TokenKindType::T_HALT_COMPILER,
+            TokenKindType::T_CLASS_REF_PARENT, TokenKindType::T_MODULE,
+            TokenKindType::T_PACKAGE, TokenKindType::T_YIELD_FROM,
+            TokenKindType::T_AWAIT, TokenKindType::T_DOUBLE_CAST,
+            TokenKindType::T_NEW, TokenKindType::T_NULL,
+            TokenKindType::T_ASYNC
    };
    checkLex(source, expectedTokens, /*KeepComments=*/false);
 }

@@ -50,6 +50,16 @@ restart_lex:
 /* compute yyleng before each rule */
 <!*> := lexer.setYYLength(lexer.getYYCursor() - lexer.getYYText());
 
+<ST_IN_SCRIPTING> "true" {
+   lexer.formToken(TokenKindType::T_TRUE, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "false" {
+   lexer.formToken(TokenKindType::T_FALSE, lexer.getYYText());
+   return;
+}
+
 <ST_IN_SCRIPTING> "exit" {
    lexer.formToken(TokenKindType::T_EXIT, lexer.getYYText());
    return;
@@ -62,6 +72,11 @@ restart_lex:
 
 <ST_IN_SCRIPTING> "function" {
    lexer.formToken(TokenKindType::T_FUNCTION, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "await" {
+   lexer.formToken(TokenKindType::T_AWAIT, lexer.getYYText());
    return;
 }
 
@@ -186,6 +201,11 @@ restart_lex:
    return;
 }
 
+<ST_IN_SCRIPTING> "fallthrough" {
+   lexer.formToken(TokenKindType::T_FALLTHROUGH, lexer.getYYText());
+   return;
+}
+
 <ST_IN_SCRIPTING> "goto" {
    lexer.formToken(TokenKindType::T_GOTO, lexer.getYYText());
    return;
@@ -273,6 +293,11 @@ restart_lex:
 
 <ST_IN_SCRIPTING> "new" {
    lexer.formToken(TokenKindType::T_NEW, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "null" {
+   lexer.formToken(TokenKindType::T_NULL, lexer.getYYText());
    return;
 }
 
@@ -411,13 +436,28 @@ restart_lex:
    return;
 }
 
-<ST_IN_SCRIPTING> "unset" {
-   lexer.formToken(TokenKindType::T_UNSET, lexer.getYYText());
+<ST_IN_SCRIPTING> "this" {
+   lexer.formToken(TokenKindType::T_OBJ_REF, lexer.getYYText());
    return;
 }
 
-<ST_IN_SCRIPTING> "=>" {
-   lexer.formToken(TokenKindType::T_DOUBLE_ARROW, lexer.getYYText());
+<ST_IN_SCRIPTING> "self" {
+   lexer.formToken(TokenKindType::T_CLASS_REF_SELF, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "static" / "::" {
+   lexer.formToken(TokenKindType::T_CLASS_REF_STATIC, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "parent" {
+   lexer.formToken(TokenKindType::T_CLASS_REF_PARENT, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "unset" {
+   lexer.formToken(TokenKindType::T_UNSET, lexer.getYYText());
    return;
 }
 
@@ -433,6 +473,81 @@ restart_lex:
 
 <ST_IN_SCRIPTING> "callable" {
    lexer.formToken(TokenKindType::T_CALLABLE, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "thread_local" {
+   lexer.formToken(TokenKindType::T_THREAD_LOCAL, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "module" {
+   lexer.formToken(TokenKindType::T_MODULE, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "package" {
+   lexer.formToken(TokenKindType::T_PACKAGE, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "async" {
+   lexer.formToken(TokenKindType::T_ASYNC, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "export" {
+   lexer.formToken(TokenKindType::T_EXPORT, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "defer" {
+   lexer.formToken(TokenKindType::T_DEFER, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "__CLASS__" {
+   lexer.formToken(TokenKindType::T_CLASS_C, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "__TRAIT__" {
+   lexer.formToken(TokenKindType::T_TRAIT_C, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "__FUNCTION__" {
+   lexer.formToken(TokenKindType::T_FUNC_C, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "__METHOD__" {
+   lexer.formToken(TokenKindType::T_METHOD_C, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "__LINE__" {
+   lexer.formToken(TokenKindType::T_LINE, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "__FILE__" {
+   lexer.formToken(TokenKindType::T_FILE, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "__DIR__" {
+   lexer.formToken(TokenKindType::T_FILE, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "__NAMESPACE__" {
+   lexer.formToken(TokenKindType::T_NS_C, lexer.getYYText());
+   return;
+}
+
+<ST_IN_SCRIPTING> "=>" {
+   lexer.formToken(TokenKindType::T_DOUBLE_ARROW, lexer.getYYText());
    return;
 }
 
@@ -643,46 +758,6 @@ restart_lex:
 
 <ST_IN_SCRIPTING> {DNUM}|{EXPONENT_DNUM} {
    lexer.lexDoubleNumber();
-   return;
-}
-
-<ST_IN_SCRIPTING> "__CLASS__" {
-   lexer.formToken(TokenKindType::T_CLASS_C, lexer.getYYText());
-   return;
-}
-
-<ST_IN_SCRIPTING> "__TRAIT__" {
-   lexer.formToken(TokenKindType::T_TRAIT_C, lexer.getYYText());
-   return;
-}
-
-<ST_IN_SCRIPTING> "__FUNCTION__" {
-   lexer.formToken(TokenKindType::T_FUNC_C, lexer.getYYText());
-   return;
-}
-
-<ST_IN_SCRIPTING> "__METHOD__" {
-   lexer.formToken(TokenKindType::T_METHOD_C, lexer.getYYText());
-   return;
-}
-
-<ST_IN_SCRIPTING> "__LINE__" {
-   lexer.formToken(TokenKindType::T_LINE, lexer.getYYText());
-   return;
-}
-
-<ST_IN_SCRIPTING> "__FILE__" {
-   lexer.formToken(TokenKindType::T_FILE, lexer.getYYText());
-   return;
-}
-
-<ST_IN_SCRIPTING> "__DIR__" {
-   lexer.formToken(TokenKindType::T_FILE, lexer.getYYText());
-   return;
-}
-
-<ST_IN_SCRIPTING> "__NAMESPACE__" {
-   lexer.formToken(TokenKindType::T_NS_C, lexer.getYYText());
    return;
 }
 
