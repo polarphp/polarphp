@@ -64,6 +64,9 @@ public:
       } else {
          tokens = tokenize(langOpts, sourceMgr, bufId, 0, 0, /*Diags=*/nullptr, keepComments);
       }
+      for (const Token &token : tokens) {
+         token.dump();
+      }
       EXPECT_EQ(expectedTokens.size(), tokens.size());
       for (unsigned i = 0, e = expectedTokens.size(); i != e; ++i) {
          EXPECT_EQ(expectedTokens[i], tokens[i].getKind()) << "i = " << i;

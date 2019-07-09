@@ -275,10 +275,10 @@ public:
    }
 
    template <typename T,
-             typename std::enable_if_t<std::disjunction_v<std::is_same_v<T, std::string>,
-                                                          std::is_same_v<T, double>,
-                                                          std::is_same_v<T, std::int64_t>>>>
-   const T &getValue()
+             typename std::enable_if<std::is_same<T, std::string>::value ||
+                                       std::is_same<T, double>::value ||
+                                       std::is_same<T, std::int64_t>::value, void *>::type = nullptr>
+   const T &getValue() const
    {
       assert(m_value.has_value());
       return std::any_cast<const T &>(m_value);
@@ -312,6 +312,11 @@ public:
       m_escapedIdentifier = false;
       return *this;
    }
+
+   void dump() const;
+
+   /// Dump this piece of syntax recursively.
+   void dump(RawOutStream &outStream) const;
 private:
    StringRef trimComment() const
    {
