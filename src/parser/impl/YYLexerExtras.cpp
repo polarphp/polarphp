@@ -687,8 +687,7 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
                valid = false;
             }
             if (!valid) {
-               // zend_throw_exception(zend_ce_parse_error,
-               //                      "Invalid UTF-8 codepoint escape sequence", 0);
+               lexer.notifyLexicalException("Invalid UTF-8 codepoint escape sequence", 0);
                return false;
             }
             errno = 0;
@@ -696,8 +695,7 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
             codePoint = strtoul(codePointStr.getData(), nullptr, 16);
             /// per RFC 3629, UTF-8 can only represent 21 bits
             if (codePoint > 0x10FFFF || errno) {
-               //               zend_throw_exception(zend_ce_parse_error,
-               //                                    "Invalid UTF-8 codepoint escape sequence: Codepoint too large", 0);
+               lexer.notifyLexicalException("Invalid UTF-8 codepoint escape sequence: Codepoint too large", 0);
                return false;
             }
             /// based on https://en.wikipedia.org/wiki/UTF-8#Sample_code
@@ -730,8 +728,7 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
                   }
                }
                if (octalBuf[2] && (octalBuf[0] > '3')) {
-                  /// 3 octit values must not overflow 0xFF (\377)
-                  /// zend_error(E_COMPILE_WARNING, "Octal escape sequence overflow \\%s is greater than \\377", octal_buf);
+                  lexer.notifyLexicalException(0, "Octal escape sequence overflow \\%s is greater than \\377", octalBuf);
                }
                *targetIter++ = static_cast<char>(std::strtol(octalBuf, nullptr, 8));
             } else {

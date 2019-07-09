@@ -30,6 +30,8 @@ namespace polar::parser {
 namespace internal {
 bool strip_multiline_string_indentation(Lexer &lexer, std::string &str, int indentation, bool usingSpaces,
                                         bool newlineAtStart, bool newlineAtEnd);
+bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const unsigned char *iter,
+                                               const unsigned char *endMark, Lexer &lexer);
 }
 
 using polar::ast::Diagnostic;
@@ -490,12 +492,6 @@ private:
    void lexHereAndNowDocEnd();
    void lexTrivia(ParsedTrivia &trivia, bool isForTrailingTrivia);
 
-   static unsigned lexUnicodeEscape(const char *&curPtr, Lexer *diags);
-
-   unsigned lexCharacter(const char *&curPtr, char stopQuote,
-                         bool emitDiagnostics, bool isMultilineString = false,
-                         unsigned customDelimiterLen = 0);
-   void lexStringLiteral(unsigned customDelimiterLen = 0);
    void lexEscapedIdentifier();
 
    /// Returns it should be tokenize.
@@ -540,6 +536,8 @@ private:
    friend void internal::yy_token_lex(Lexer &lexer);
    friend bool internal::strip_multiline_string_indentation(Lexer &lexer, std::string &str, int indentation, bool usingSpaces,
                                                             bool newlineAtStart, bool newlineAtEnd);
+   friend bool internal::convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const unsigned char *iter,
+                                                                   const unsigned char *endMark, Lexer &lexer);
 private:
    LexerFlags m_flags;
    const LangOptions &m_langOpts;
