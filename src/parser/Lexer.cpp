@@ -1175,9 +1175,8 @@ void Lexer::lexImpl()
    m_nextToken.resetValueType();
 
    /// here we want keep comment for next token
-   m_yyText = m_yyCursor;
    lexTrivia(m_leadingTrivia, /* IsForTrailingTrivia */ false);
-
+   m_yyText = m_yyCursor;
    // invoke yylexer
    if (m_flags.isIncrementLineNumber()) {
       incLineNumber();
