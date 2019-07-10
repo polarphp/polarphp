@@ -41,6 +41,12 @@ void Token::dump(RawOutStream &outStream) const
          outStream << '$';
       }
       outStream << getValue<std::string>() << "\n";
+   } else if (m_kind == TokenKindType::T_LNUMBER) {
+      outStream << "value: ";
+      outStream << getValue<std::int64_t>() << "\n";
+   } else if (m_kind == TokenKindType::T_DNUMBER) {
+      outStream << "value: ";
+      outStream << getValue<double>() << "\n";
    }
 }
 

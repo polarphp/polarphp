@@ -301,3 +301,41 @@ TEST_F(LexerTest, testLexLabelString)
       }
    }
 }
+
+TEST_F(LexerTest, testLexNumber)
+{
+   {
+      const char *source =
+            R"(
+            2018 -2019
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_LNUMBER, TokenKindType::T_MINUS_SIGN,
+               TokenKindType::T_LNUMBER,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      {
+         Token token = tokens.at(0);
+         ASSERT_EQ(token.getValueType(), Token::ValueType::LongLong);
+         ASSERT_EQ(token.getValue<std::int64_t>(), 2018);
+      }
+      {
+         Token token = tokens.at(2);
+         ASSERT_EQ(token.getValueType(), Token::ValueType::LongLong);
+         ASSERT_EQ(token.getValue<std::int64_t>(), 2019);
+      }
+   }
+   {
+      /// test max and min value
+      const char *source =
+            R"(
+            -9223372036854775808
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_LNUMBER, TokenKindType::T_MINUS_SIGN,
+               TokenKindType::T_LNUMBER,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+   }
+   std::cout << std::numeric_limits<std::int64_t>::min() << " " << std::numeric_limits<std::int64_t>::max();
+}

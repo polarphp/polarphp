@@ -279,7 +279,7 @@ int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer);
 
 /* Token used to force a parse error from the lexer */
 %token T_ERROR          "error (T_ERROR)"
-%token T_UNKOWN_MARK "unkonw token (T_UNKOWN_MARK)"
+%token T_UNKNOWN_MARK "unknown token (T_UNKNOWN_MARK)"
 /* MISC_MARK_END */
 /* token define end */
 
