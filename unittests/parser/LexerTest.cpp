@@ -251,3 +251,53 @@ TEST_F(LexerTest, testSingleQuoteStr)
       ASSERT_FALSE(token.hasValue());
    }
 }
+
+TEST_F(LexerTest, testLexLabelString)
+{
+   {
+      const char *source =
+            R"(
+            RestartLabel:
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_IDENTIFIER_STRING, TokenKindType::T_COLON
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token = tokens.at(0);
+      ASSERT_EQ(token.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token.getValue<std::string>(), "RestartLabel");
+   }
+
+   {
+      const char *source =
+            R"(
+            ->someLabel
+            "${name} ${arr[2]}"
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_OBJECT_OPERATOR, TokenKindType::T_IDENTIFIER_STRING,
+               TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES,
+               TokenKindType::T_STRING_VARNAME, TokenKindType::T_RIGHT_BRACE,
+               TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_STRING_VARNAME,
+               TokenKindType::T_LEFT_SQUARE_BRACKET, TokenKindType::T_LNUMBER,
+               TokenKindType::T_RIGHT_SQUARE_BRACKET, TokenKindType::T_RIGHT_BRACE,
+               TokenKindType::T_DOUBLE_STR_QUOTE
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      {
+         Token token = tokens.at(1);
+         ASSERT_EQ(token.getValueType(), Token::ValueType::String);
+         ASSERT_EQ(token.getValue<std::string>(), "someLabel");
+      }
+      {
+         Token token = tokens.at(4);
+         ASSERT_EQ(token.getValueType(), Token::ValueType::String);
+         ASSERT_EQ(token.getValue<std::string>(), "name");
+      }
+      {
+         Token token = tokens.at(7);
+         ASSERT_EQ(token.getValueType(), Token::ValueType::String);
+         ASSERT_EQ(token.getValue<std::string>(), "arr");
+      }
+   }
+}
