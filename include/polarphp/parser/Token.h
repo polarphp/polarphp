@@ -171,12 +171,23 @@ public:
    }
 
    /// Set whether this token is an escaped identifier token.
-   Token & setEscapedIdentifier(bool value)
+   Token &setEscapedIdentifier(bool value)
    {
       assert((!value || m_kind == TokenKindType::T_IDENTIFIER_STRING || m_kind == TokenKindType::T_STRING_VARNAME) &&
              "only identifiers can be escaped identifiers");
       m_flags.setEscapedIdentifier(value);
       return *this;
+   }
+
+   Token &setNeedCorrectLNumberOverflow(bool value)
+   {
+      m_flags.setNeedCorrectLNumberOverflow(value);
+      return *this;
+   }
+
+   bool isNeedCorrectLNumberOverflow() const
+   {
+      return m_flags.isNeedCorrectLNumberOverflow();
    }
 
    /// True if the token is an identifier

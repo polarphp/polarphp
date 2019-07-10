@@ -25,6 +25,7 @@
 #include <set>
 #include <string>
 #include <cstdint>
+#include <iostream>
 
 namespace polar::parser {
 
@@ -547,7 +548,16 @@ void Lexer::lexLongNumber()
    } else {
       errno = 0;
       lvalue = std::strtoll(yytext, &end, yytext[0] == '0' ? 8 : 10);
+      /// overflow is undefined behavior
+      /// we just handle -9223372036854775808
       if (errno == ERANGE) {
+         bool needCorrectOverflow = false;
+         if (m_nextToken.getKind() == TokenKindType::T_MINUS_SIGN) {
+            std::string minStr = std::to_string(std::numeric_limits<std::int64_t>::min());
+            if (StringRef(minStr.data() + 1, minStr.size() - 1) == StringRef(reinterpret_cast<const char *>(m_yyText), m_yyLength)) {
+               needCorrectOverflow = true;
+            }
+         }
          double dvalue = 0.0;
          if (yytext[0] == '0') {
             /// octal overflow
@@ -567,6 +577,7 @@ void Lexer::lexLongNumber()
          }
          formToken(TokenKindType::T_DNUMBER, m_yyText);
          m_nextToken.setValue(dvalue);
+         m_nextToken.setNeedCorrectLNumberOverflow(needCorrectOverflow);
          return;
       }
       /// handle integer literal format error
