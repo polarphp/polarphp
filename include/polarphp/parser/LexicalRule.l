@@ -725,7 +725,7 @@ restart_lex:
 }
 
 <ST_LOOKING_FOR_VARNAME> {LABEL} / [[}] {
-   lexer.formToken(TokenKindType::T_STRING_VARNAME, lexer.getYYText());
+   lexer.formStringVariableToken(lexer.getYYText());
    return;
 }
 

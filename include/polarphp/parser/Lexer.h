@@ -468,6 +468,7 @@ private:
    void formEscapedIdentifierToken(const unsigned char *tokenStart);
    void formVariableToken(const unsigned char *tokenStart);
    void formIdentifierToken(const unsigned char *tokenStart);
+   void formStringVariableToken(const unsigned char *tokenStart);
 
    /// Advance to the end of the line.
    /// If EatNewLine is true, CurPtr will be at end of newline character.

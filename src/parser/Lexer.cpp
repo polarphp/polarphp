@@ -183,6 +183,12 @@ void Lexer::formIdentifierToken(const unsigned char *tokenStart)
    m_nextToken.setValue(StringRef(reinterpret_cast<const char *>(tokenStart), m_yyLength));
 }
 
+void Lexer::formStringVariableToken(const unsigned char *tokenStart)
+{
+   formToken(TokenKindType::T_STRING_VARNAME, tokenStart);
+   m_nextToken.setValue(StringRef(reinterpret_cast<const char *>(tokenStart), m_yyLength));
+}
+
 void Lexer::lexTrivia(ParsedTrivia &trivia, bool isForTrailingTrivia)
 {
 restart:

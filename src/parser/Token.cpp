@@ -33,7 +33,9 @@ void Token::dump(RawOutStream &outStream) const
    if (is_keyword_token(m_kind) || is_punctuator_token(m_kind)) {
       outStream << "text: " << getText() << "\n";
    }
-   if (m_kind == TokenKindType::T_VARIABLE || m_kind == TokenKindType::T_IDENTIFIER_STRING) {
+   if (m_kind == TokenKindType::T_VARIABLE ||
+       m_kind == TokenKindType::T_IDENTIFIER_STRING ||
+       m_kind == TokenKindType::T_STRING_VARNAME) {
       outStream << "value: ";
       if (m_kind == TokenKindType::T_VARIABLE){
          outStream << '$';
