@@ -631,7 +631,7 @@ void Lexer::lexSingleQuoteString()
    } else {
       strValue.append(reinterpret_cast<const char *>(m_yyText + bprefix + 1), m_yyLength - bprefix - 2);
       size_t filteredLength = convert_single_quote_str_escape_sequences(strValue.data(), strValue.data() + strValue.length(), *this);
-      strValue.reserve(filteredLength);
+      strValue.resize(filteredLength);
    }
    formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, m_yyText);
    m_nextToken.setValue(strValue);
@@ -788,7 +788,7 @@ void Lexer::lexHeredocHeader()
       m_yyCondition = COND_NAME(ST_HEREDOC);
    }
    heredocLabel.append(reinterpret_cast<const char *>(iter), hereDocLabelLength);
-   heredocLabel.reserve(hereDocLabelLength);
+   heredocLabel.resize(hereDocLabelLength);
    std::shared_ptr<HereDocLabel> label = std::make_shared<HereDocLabel>();
    label->name = heredocLabel;
    label->indentation = 0;

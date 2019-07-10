@@ -20,6 +20,7 @@
 #include "polarphp/utils/MemoryBuffer.h"
 
 #include <thread>
+#include <iostream>
 
 #if __has_include(<sys/mman.h>)
 # include <sys/mman.h>
@@ -203,4 +204,36 @@ TEST_F(LexerTest, testPreDefineLiteralTokens)
             TokenKindType::T_DIR, TokenKindType::T_NS_CONST,
    };
    checkLex(source, expectedTokens, /*KeepComments=*/false);
+}
+
+TEST_F(LexerTest, testSingleQuoteStr)
+{
+   {
+      const char *source =
+            R"(
+            'polarphp is very good'
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_CONSTANT_ENCAPSED_STRING
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token = tokens.at(0);
+      ASSERT_EQ(token.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token.getValue<std::string>(), "polarphp is very good");
+   }
+   {
+      /// test escape
+      const char *source =
+            R"(
+            'polarphp \r\n \n \t is very good, version is $version, develop by \'Chinese coder\'. \\ hahaha'
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_CONSTANT_ENCAPSED_STRING
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token = tokens.at(0);
+      ASSERT_EQ(token.getValueType(), Token::ValueType::String);
+      std::string expectStr = R"(polarphp \r\n \n \t is very good, version is $version, develop by 'Chinese coder'. \ hahaha)";
+      ASSERT_EQ(token.getValue<std::string>(), expectStr);
+   }
 }

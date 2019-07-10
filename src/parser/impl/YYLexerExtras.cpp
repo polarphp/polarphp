@@ -565,8 +565,7 @@ size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexe
       }
       ++iter;
    }
-   *targetStr = 0;
-   return iter - origIter;
+   return targetStr - origIter;
 }
 
 bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const unsigned char *iter,
