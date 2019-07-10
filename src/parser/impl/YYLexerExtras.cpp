@@ -461,6 +461,9 @@ TokenKindType token_kind_map(unsigned char c)
    case ',':
       token = TokenKindType::T_COMMA;
       break;
+   case '.':
+      token = TokenKindType::T_STR_CONCAT;
+      break;
    case '[':
       token = TokenKindType::T_LEFT_SQUARE_BRACKET;
       break;

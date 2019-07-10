@@ -28,9 +28,6 @@ namespace polar::parser::internal {
 
 void yy_token_lex(Lexer &lexer)
 {
-   int token = TokenKindType::T_UNKNOWN_MARK;
-   int offset = 0;
-   int startLine = lexer.getLineNumber();
 restart_lex:
 /*!re2c
    re2c:yyfill:check = 0;

@@ -73,6 +73,13 @@ public:
       return tokens;
    }
 
+   void dumpTokens(const std::vector<Token> tokens) const
+   {
+      for (auto &token : tokens) {
+         token.dump();
+      }
+   }
+
    SourceLoc getLocForEndOfToken(SourceLoc loc)
    {
       return Lexer::getLocForEndOfToken(sourceMgr, loc);
@@ -125,6 +132,28 @@ if else elseif include namespace use
             TokenKindType::T_AWAIT, TokenKindType::T_DOUBLE_CAST,
             TokenKindType::T_NEW, TokenKindType::T_NULL,
             TokenKindType::T_ASYNC
+   };
+   checkLex(source, expectedTokens, /*KeepComments=*/false);
+}
+
+TEST_F(LexerTest, testSimpleOperatorTokens)
+{
+   const char *source = R"(
+      ; : , . [ ] ( ) | ^ & + - / * = % ! ~ $ < > ? @
+   )";
+   std::vector<TokenKindType> expectedTokens{
+      TokenKindType::T_SEMICOLON, TokenKindType::T_COLON,
+            TokenKindType::T_COMMA, TokenKindType::T_STR_CONCAT,
+            TokenKindType::T_LEFT_SQUARE_BRACKET, TokenKindType::T_RIGHT_SQUARE_BRACKET,
+            TokenKindType::T_LEFT_PAREN, TokenKindType::T_RIGHT_PAREN,
+            TokenKindType::T_VBAR, TokenKindType::T_CARET,
+            TokenKindType::T_AMPERSAND, TokenKindType::T_PLUS_SIGN,
+            TokenKindType::T_MINUS_SIGN, TokenKindType::T_DIV_SIGN,
+            TokenKindType::T_MUL_SIGN, TokenKindType::T_EQUAL,
+            TokenKindType::T_MOD_SIGN, TokenKindType::T_EXCLAMATION_MARK,
+            TokenKindType::T_TILDE, TokenKindType::T_DOLLAR_SIGN,
+            TokenKindType::T_LEFT_ANGLE, TokenKindType::T_RIGHT_ANGLE,
+            TokenKindType::T_QUESTION_MARK, TokenKindType::T_ERROR_SUPPRESS_SIGN,
    };
    checkLex(source, expectedTokens, /*KeepComments=*/false);
 }
