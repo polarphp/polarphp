@@ -302,40 +302,51 @@ TEST_F(LexerTest, testLexLabelString)
    }
 }
 
-TEST_F(LexerTest, testLexNumber)
+TEST_F(LexerTest, testLexLNumber)
 {
-//   {
-//      const char *source =
-//            R"(
-//            2018 -2019
-//            )";
-//      std::vector<TokenKindType> expectedTokens{
-//         TokenKindType::T_LNUMBER, TokenKindType::T_MINUS_SIGN,
-//               TokenKindType::T_LNUMBER,
-//      };
-//      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
-//      {
-//         Token token = tokens.at(0);
-//         ASSERT_EQ(token.getValueType(), Token::ValueType::LongLong);
-//         ASSERT_EQ(token.getValue<std::int64_t>(), 2018);
-//      }
-//      {
-//         Token token = tokens.at(2);
-//         ASSERT_EQ(token.getValueType(), Token::ValueType::LongLong);
-//         ASSERT_EQ(token.getValue<std::int64_t>(), 2019);
-//      }
-//   }
    {
-      /// test max and min value
       const char *source =
             R"(
-            -9223372036854775808
+            2018 -2019
             )";
       std::vector<TokenKindType> expectedTokens{
          TokenKindType::T_LNUMBER, TokenKindType::T_MINUS_SIGN,
                TokenKindType::T_LNUMBER,
       };
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      {
+         Token token = tokens.at(0);
+         ASSERT_EQ(token.getValueType(), Token::ValueType::LongLong);
+         ASSERT_EQ(token.getValue<std::int64_t>(), 2018);
+      }
+      {
+         Token token = tokens.at(2);
+         ASSERT_EQ(token.getValueType(), Token::ValueType::LongLong);
+         ASSERT_EQ(token.getValue<std::int64_t>(), 2019);
+      }
    }
-   std::cout << std::numeric_limits<std::int64_t>::min() << " " << std::numeric_limits<std::int64_t>::max();
+   {
+      /// test max and min value
+      const char *source =
+            R"(
+            -9223372036854775808
+            9223372036854775808
+            --9223372036854775808
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_MINUS_SIGN, TokenKindType::T_DNUMBER,
+               TokenKindType::T_DNUMBER,TokenKindType::T_DEC,
+               TokenKindType::T_DNUMBER
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      Token token2 = tokens.at(2);
+      Token token3 = tokens.at(4);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::Double);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::Double);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::Double);
+      ASSERT_TRUE(token1.isNeedCorrectLNumberOverflow());
+      ASSERT_FALSE(token2.isNeedCorrectLNumberOverflow());
+      ASSERT_FALSE(token3.isNeedCorrectLNumberOverflow());
+   }
 }
