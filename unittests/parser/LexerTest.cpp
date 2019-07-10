@@ -188,3 +188,19 @@ TEST_F(LexerTest, testCompoundOperatorTokens)
    };
    checkLex(source, expectedTokens, /*KeepComments=*/false);
 }
+
+TEST_F(LexerTest, testPreDefineLiteralTokens)
+{
+   const char *source =
+         R"(
+         __CLASS__ __TRAIT__ __FUNCTION__ __METHOD__ __LINE__ __FILE__ __DIR__
+         __NAMESPACE__
+         )";
+   std::vector<TokenKindType> expectedTokens{
+      TokenKindType::T_CLASS_CONST, TokenKindType::T_TRAIT_CONST,
+            TokenKindType::T_FUNC_CONST, TokenKindType::T_METHOD_CONST,
+            TokenKindType::T_LINE, TokenKindType::T_FILE,
+            TokenKindType::T_DIR, TokenKindType::T_NS_CONST,
+   };
+   checkLex(source, expectedTokens, /*KeepComments=*/false);
+}

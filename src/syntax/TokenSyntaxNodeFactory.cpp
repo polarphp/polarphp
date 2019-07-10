@@ -37,35 +37,35 @@ TokenSyntax TokenSyntaxNodeFactory::makeDirKeyword(const Trivia &leadingTrivia, 
 TokenSyntax TokenSyntaxNodeFactory::makeClassConstKeyword(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                           RefCountPtr<SyntaxArena> &arena)
 {
-   return makeToken(TokenKindType::T_CLASS_C, OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_C)),
+   return makeToken(TokenKindType::T_CLASS_CONST, OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_CONST)),
                     leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 
 TokenSyntax TokenSyntaxNodeFactory::makeTraitConstKeyword(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                           RefCountPtr<SyntaxArena> &arena)
 {
-   return makeToken(TokenKindType::T_TRAIT_C, OwnedString::makeUnowned(get_token_text(TokenKindType::T_TRAIT_C)),
+   return makeToken(TokenKindType::T_TRAIT_CONST, OwnedString::makeUnowned(get_token_text(TokenKindType::T_TRAIT_CONST)),
                     leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 
 TokenSyntax TokenSyntaxNodeFactory::makeMethodConstKeyword(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                            RefCountPtr<SyntaxArena> &arena)
 {
-   return makeToken(TokenKindType::T_METHOD_C, OwnedString::makeUnowned(get_token_text(TokenKindType::T_METHOD_C)),
+   return makeToken(TokenKindType::T_METHOD_CONST, OwnedString::makeUnowned(get_token_text(TokenKindType::T_METHOD_CONST)),
                     leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 
 TokenSyntax TokenSyntaxNodeFactory::makeFuncConstKeyword(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                          RefCountPtr<SyntaxArena> &arena)
 {
-   return makeToken(TokenKindType::T_FUNC_C, OwnedString::makeUnowned(get_token_text(TokenKindType::T_FUNC_C)),
+   return makeToken(TokenKindType::T_FUNC_CONST, OwnedString::makeUnowned(get_token_text(TokenKindType::T_FUNC_CONST)),
                     leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 
 TokenSyntax TokenSyntaxNodeFactory::makeNamespaceConstKeyword(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                               RefCountPtr<SyntaxArena> &arena)
 {
-   return makeToken(TokenKindType::T_NS_C, OwnedString::makeUnowned(get_token_text(TokenKindType::T_NS_C)),
+   return makeToken(TokenKindType::T_NS_CONST, OwnedString::makeUnowned(get_token_text(TokenKindType::T_NS_CONST)),
                     leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 

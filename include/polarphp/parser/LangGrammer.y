@@ -86,11 +86,11 @@ int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer);
 %token T_LINE            "__LINE__ (T_LINE)"
 %token T_FILE            "__FILE__ (T_FILE)"
 %token T_DIR             "__DIR__ (T_DIR)"
-%token T_CLASS_C         "__CLASS__ (T_CLASS_C)"
-%token T_TRAIT_C         "__TRAIT__ (T_TRAIT_C)"
-%token T_METHOD_C        "__METHOD__ (T_METHOD_C)"
-%token T_FUNC_C          "__FUNCTION__ (T_FUNC_C)"
-%token T_NS_C            "__NAMESPACE__ (T_NS_C)"
+%token T_CLASS_CONST         "__CLASS__ (T_CLASS_CONST)"
+%token T_TRAIT_CONST         "__TRAIT__ (T_TRAIT_CONST)"
+%token T_METHOD_CONST        "__METHOD__ (T_METHOD_CONST)"
+%token T_FUNC_CONST          "__FUNCTION__ (T_FUNC_CONST)"
+%token T_NS_CONST            "__NAMESPACE__ (T_NS_CONST)"
 /* KEYWORD_MARK_END */
 
 /* DECL_KEYWORD_MARK_START */
@@ -332,7 +332,7 @@ reserved_non_modifiers:
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
-	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C
+	| T_CLASS_CONST | T_TRAIT_CONST | T_FUNC_CONST | T_METHOD_CONST | T_LINE | T_FILE | T_DIR | T_NS_CONST
 ;
 
 semi_reserved:

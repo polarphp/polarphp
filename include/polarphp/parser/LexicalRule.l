@@ -504,22 +504,22 @@ restart_lex:
 }
 
 <ST_IN_SCRIPTING> "__CLASS__" {
-   lexer.formToken(TokenKindType::T_CLASS_C, lexer.getYYText());
+   lexer.formToken(TokenKindType::T_CLASS_CONST, lexer.getYYText());
    return;
 }
 
 <ST_IN_SCRIPTING> "__TRAIT__" {
-   lexer.formToken(TokenKindType::T_TRAIT_C, lexer.getYYText());
+   lexer.formToken(TokenKindType::T_TRAIT_CONST, lexer.getYYText());
    return;
 }
 
 <ST_IN_SCRIPTING> "__FUNCTION__" {
-   lexer.formToken(TokenKindType::T_FUNC_C, lexer.getYYText());
+   lexer.formToken(TokenKindType::T_FUNC_CONST, lexer.getYYText());
    return;
 }
 
 <ST_IN_SCRIPTING> "__METHOD__" {
-   lexer.formToken(TokenKindType::T_METHOD_C, lexer.getYYText());
+   lexer.formToken(TokenKindType::T_METHOD_CONST, lexer.getYYText());
    return;
 }
 
@@ -534,12 +534,12 @@ restart_lex:
 }
 
 <ST_IN_SCRIPTING> "__DIR__" {
-   lexer.formToken(TokenKindType::T_FILE, lexer.getYYText());
+   lexer.formToken(TokenKindType::T_DIR, lexer.getYYText());
    return;
 }
 
 <ST_IN_SCRIPTING> "__NAMESPACE__" {
-   lexer.formToken(TokenKindType::T_NS_C, lexer.getYYText());
+   lexer.formToken(TokenKindType::T_NS_CONST, lexer.getYYText());
    return;
 }
 
