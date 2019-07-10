@@ -19,6 +19,7 @@
 #define POLAR_PARSER_TOKEN_H
 
 #include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/basic/FlagSet.h"
 #include "polarphp/utils/SourceLocation.h"
 #include "polarphp/parser/SourceLoc.h"
 #include "polarphp/syntax/TokenKinds.h"
@@ -34,9 +35,32 @@ class RawOutStream;
 namespace polar::parser {
 
 using polar::basic::StringRef;
+using polar::basic::FlagSet;
 using polar::utils::RawOutStream;
 using polar::syntax::TokenKindType;
 using polar::parser::internal::ParserSemantic;
+
+class TokenFlags final : public FlagSet<std::uint8_t>
+{
+protected:
+   enum {
+      NeedCorrectLNumberOverflow,
+      AtStartOfLine,
+      EscapedIdentifier
+   };
+
+public:
+   explicit TokenFlags(std::uint16_t bits)
+      : FlagSet(bits)
+   {}
+   constexpr TokenFlags()
+   {}
+
+   FLAGSET_DEFINE_FLAG_ACCESSORS(NeedCorrectLNumberOverflow, isNeedCorrectLNumberOverflow, setNeedCorrectLNumberOverflow)
+   FLAGSET_DEFINE_FLAG_ACCESSORS(AtStartOfLine, isAtStartOfLine, setAtStartOfLine)
+   FLAGSET_DEFINE_FLAG_ACCESSORS(EscapedIdentifier, isEscapedIdentifier, setEscapedIdentifier)
+   FLAGSET_DEFINE_EQUALITY(TokenFlags)
+};
 
 /// Token - This structure provides full information about a lexed token.
 /// It is not intended to be space efficient, it is intended to return as much
@@ -55,8 +79,7 @@ public:
    };
 
    Token(TokenKindType kind, StringRef text, unsigned commentLength = 0)
-      : m_atStartOfLine(false),
-        m_escapedIdentifier(false),
+      : m_flags(0),
         m_kind(kind),
         m_commentLength(commentLength),
         m_valueType(ValueType::Unknown),
@@ -72,14 +95,16 @@ public:
       return m_kind;
    }
 
-   void setKind(TokenKindType kind)
+   Token &setKind(TokenKindType kind)
    {
       m_kind = kind;
+      return *this;
    }
 
-   void clearCommentLegth()
+   Token & clearCommentLegth()
    {
       m_commentLength = 0;
+      return *this;
    }
 
    bool is(TokenKindType kind) const
@@ -129,24 +154,29 @@ public:
    /// Determine whether this token occurred at the start of a line.
    bool isAtStartOfLine() const
    {
-      return m_atStartOfLine;
+      return m_flags.isAtStartOfLine();
    }
 
    /// Set whether this token occurred at the start of a line.
-   void setAtStartOfLine(bool value)
+   Token &setAtStartOfLine(bool value)
    {
-      m_atStartOfLine = value;
+      m_flags.setAtStartOfLine(value);
+      return *this;
    }
 
    /// True if this token is an escaped identifier token.
    bool isEscapedIdentifier() const
    {
-      return m_escapedIdentifier;
+      return m_flags.isEscapedIdentifier();
    }
 
    /// Set whether this token is an escaped identifier token.
-   void setEscapedIdentifier(bool value)
+   Token & setEscapedIdentifier(bool value)
    {
+      assert((!value || m_kind == TokenKindType::T_IDENTIFIER_STRING || m_kind == TokenKindType::T_STRING_VARNAME) &&
+             "only identifiers can be escaped identifiers");
+      m_flags.setEscapedIdentifier(value);
+      return *this;
    }
 
    /// True if the token is an identifier
@@ -239,7 +269,7 @@ public:
 
    StringRef getText() const
    {
-      if (m_escapedIdentifier) {
+      if (m_flags.isEscapedIdentifier()) {
          // Strip off the backticks on either side.
          assert(m_text.front() == '`' && m_text.back() == '`');
          return m_text.slice(1, m_text.size() - 1);
@@ -276,8 +306,8 @@ public:
 
    template <typename T,
              typename std::enable_if<std::is_same<T, std::string>::value ||
-                                       std::is_same<T, double>::value ||
-                                       std::is_same<T, std::int64_t>::value, void *>::type = nullptr>
+                                     std::is_same<T, double>::value ||
+                                     std::is_same<T, std::int64_t>::value, void *>::type = nullptr>
    const T &getValue() const
    {
       assert(m_value.has_value());
@@ -309,7 +339,7 @@ public:
       m_kind = kind;
       m_text = text;
       m_commentLength = commentLength;
-      m_escapedIdentifier = false;
+      m_flags.setEscapedIdentifier(false);
       return *this;
    }
 
@@ -326,11 +356,7 @@ private:
    }
 
 private:
-   /// Whether this token is the first token on the line.
-   unsigned m_atStartOfLine : 1;
-
-   /// Whether this token is an escaped `identifier` token.
-   unsigned m_escapedIdentifier : 1;
+   TokenFlags m_flags;
 
    /// Kind - The actual flavor of token this is.
    TokenKindType m_kind;
