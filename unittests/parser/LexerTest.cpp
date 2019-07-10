@@ -107,14 +107,15 @@ TEST_F(LexerTest, testSimpleToken)
 
 TEST_F(LexerTest, testSimpleKeyword)
 {
-   const char *source = R"(
+   const char *source =
+         R"(
          true false this self static parent for while foreach
-if else elseif include namespace use
+         if else elseif include namespace use
          include_once static:: require thread_local
          yield __halt_compiler parent module package
          yield from await (double) new null async
 
-)";
+         )";
    std::vector<TokenKindType> expectedTokens{
       TokenKindType::T_TRUE, TokenKindType::T_FALSE,
             TokenKindType::T_OBJ_REF, TokenKindType::T_CLASS_REF_SELF,
@@ -138,9 +139,10 @@ if else elseif include namespace use
 
 TEST_F(LexerTest, testSimpleOperatorTokens)
 {
-   const char *source = R"(
-      ; : , . [ ] ( ) | ^ & + - / * = % ! ~ $ < > ? @
-   )";
+   const char *source =
+         R"(
+         ; : , . [ ] ( ) | ^ & + - / * = % ! ~ $ < > ? @ \
+         )";
    std::vector<TokenKindType> expectedTokens{
       TokenKindType::T_SEMICOLON, TokenKindType::T_COLON,
             TokenKindType::T_COMMA, TokenKindType::T_STR_CONCAT,
@@ -154,6 +156,35 @@ TEST_F(LexerTest, testSimpleOperatorTokens)
             TokenKindType::T_TILDE, TokenKindType::T_DOLLAR_SIGN,
             TokenKindType::T_LEFT_ANGLE, TokenKindType::T_RIGHT_ANGLE,
             TokenKindType::T_QUESTION_MARK, TokenKindType::T_ERROR_SUPPRESS_SIGN,
+            TokenKindType::T_NS_SEPARATOR
+   };
+   checkLex(source, expectedTokens, /*KeepComments=*/false);
+}
+
+TEST_F(LexerTest, testCompoundOperatorTokens)
+{
+   const char *source =
+         R"(
+         => ++ -- === !== != <> <=> <= >= += -=
+         *= ** /= .= %= <<= >>= &= ^= ??= && || << >>
+         -> :: ?? ...
+         )";
+   std::vector<TokenKindType> expectedTokens{
+      TokenKindType::T_DOUBLE_ARROW, TokenKindType::T_INC,
+            TokenKindType::T_DEC, TokenKindType::T_IS_IDENTICAL,
+            TokenKindType::T_IS_NOT_IDENTICAL, TokenKindType::T_IS_NOT_EQUAL,
+            TokenKindType::T_IS_NOT_EQUAL,TokenKindType::T_SPACESHIP,
+            TokenKindType::T_IS_SMALLER_OR_EQUAL, TokenKindType::T_IS_GREATER_OR_EQUAL,
+            TokenKindType::T_PLUS_EQUAL, TokenKindType::T_MINUS_EQUAL,
+            TokenKindType::T_MUL_EQUAL, TokenKindType::T_POW,
+            TokenKindType::T_DIV_EQUAL, TokenKindType::T_STR_CONCAT_EQUAL,
+            TokenKindType::T_MOD_EQUAL, TokenKindType::T_SL_EQUAL,
+            TokenKindType::T_SR_EQUAL, TokenKindType::T_AND_EQUAL,
+            TokenKindType::T_XOR_EQUAL, TokenKindType::T_COALESCE_EQUAL,
+            TokenKindType::T_BOOLEAN_AND, TokenKindType::T_BOOLEAN_OR,
+            TokenKindType::T_SL, TokenKindType::T_SR,
+            TokenKindType::T_OBJECT_OPERATOR, TokenKindType::T_PAAMAYIM_NEKUDOTAYIM,
+            TokenKindType::T_COALESCE, TokenKindType::T_ELLIPSIS,
    };
    checkLex(source, expectedTokens, /*KeepComments=*/false);
 }
