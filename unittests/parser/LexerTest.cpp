@@ -236,4 +236,18 @@ TEST_F(LexerTest, testSingleQuoteStr)
       std::string expectStr = R"(polarphp \r\n \n \t is very good, version is $version, develop by 'Chinese coder'. \ hahaha)";
       ASSERT_EQ(token.getValue<std::string>(), expectStr);
    }
+   {
+      /// test unclose string
+      const char *source =
+            R"(
+            'polarphp \r\n \n \t is very good,
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_ENCAPSED_AND_WHITESPACE
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token = tokens.at(0);
+      ASSERT_EQ(token.getValueType(), Token::ValueType::Unknown);
+      ASSERT_FALSE(token.hasValue());
+   }
 }
