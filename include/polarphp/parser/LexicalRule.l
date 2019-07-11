@@ -795,6 +795,9 @@ restart_lex:
 
 <ST_IN_SCRIPTING> b?["] {
    const unsigned char *yytext = lexer.getYYText();
+   const unsigned char *yycursor = lexer.getYYCursor();
+   unsigned int yylength = lexer.getYYLength();
+
    if (yytext[0] == 'b') {
       lexer.setLexingBinaryStrFlag(true);
    }
@@ -828,6 +831,16 @@ restart_lex:
 }
 
 <ST_DOUBLE_QUOTES> ["] {
+   if (lexer.m_nextToken.getKind() == TokenKindType::T_DOUBLE_STR_QUOTE) {
+       /// check whether is empty string
+       lexer.setYYLength(0);
+       lexer.formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, lexer.getYYText() - 1);
+       /// TODO
+       /// use some flag to represent empty string
+       lexer.m_nextToken.setValue("");
+       lexer.setYYCursor(lexer.getYYText());
+       return;
+   }
    GOTO_CONDITION(ST_IN_SCRIPTING);
    lexer.setLexingBinaryStrFlag(false);
    lexer.formToken(TokenKindType::T_DOUBLE_STR_QUOTE, lexer.getYYText());
