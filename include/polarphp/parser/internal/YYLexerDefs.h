@@ -18,6 +18,7 @@
 #include "polarphp/parser/internal/YYLexerDefs.h"
 
 #include <any>
+#include <functional>
 
 namespace polar::basic {
 class StringRef;
@@ -37,8 +38,8 @@ void do_yy_token_lex(int &token, int &offset, int &startLine,
                      Lexer &lexer);
 } // internal
 
-using LexicalEventHandler = void (*)(std::any context);
-using LexicalExceptionHandler = void (*)(StringRef msg, int code);
+using LexicalEventHandler = std::function<void (std::any context)>;
+using LexicalExceptionHandler = std::function<void (StringRef msg, int code)>;
 
 enum class CommentRetentionMode
 {

@@ -140,10 +140,12 @@ public:
 
    bool isBinaryOperator() const
    {
+      return false;
    }
 
    bool isAnyOperator() const
    {
+      return false;
    }
 
    bool isNotAnyOperator() const

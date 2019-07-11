@@ -1479,31 +1479,6 @@ ArrayRef<Token> slice_token_array(ArrayRef<Token> allTokens, SourceLoc startLoc,
    return allTokens.slice(startIt - allTokens.begin(), endIt - startIt + 1);
 }
 
-template <typename DF>
-void tokenize(const LangOptions &langOpts, const SourceManager &sourceMgr,
-              unsigned bufferId, unsigned offset, unsigned endOffset,
-              DiagnosticEngine * diags,
-              CommentRetentionMode commentRetention,
-              TriviaRetentionMode triviaRetention, DF &&destFunc)
-{
-   assert(triviaRetention != TriviaRetentionMode::WithTrivia && "string interpolation with trivia is not implemented yet");
-
-   if (offset == 0 && endOffset == 0) {
-      endOffset = sourceMgr.getRangeForBuffer(bufferId).getByteLength();
-   }
-
-   Lexer lexer(langOpts, sourceMgr, bufferId, diags, commentRetention, triviaRetention, offset,
-               endOffset);
-
-   Token token;
-   ParsedTrivia leadingTrivia;
-   ParsedTrivia trailingTrivia;
-   do {
-      lexer.lex(token, leadingTrivia, trailingTrivia);
-      destFunc(token, leadingTrivia, trailingTrivia);
-   } while (token.getKind() != TokenKindType::END);
-}
-
 std::vector<Token> tokenize(const LangOptions &langOpts,
                             const SourceManager &sourceMgr, unsigned bufferId,
                             unsigned offset, unsigned endOffset,
@@ -1516,7 +1491,7 @@ std::vector<Token> tokenize(const LangOptions &langOpts,
             keepComments ? CommentRetentionMode::ReturnAsTokens
                          : CommentRetentionMode::AttachToNextToken,
             TriviaRetentionMode::WithoutTrivia,
-            [&](const Token &token, const ParsedTrivia &leadingTrivia,
+            [&](const Lexer &lexer, const Token &token, const ParsedTrivia &leadingTrivia,
             const ParsedTrivia &trailingTrivia) { tokens.push_back(token); });
    assert(tokens.back().is(TokenKindType::END));
    tokens.pop_back(); // Remove EOF.

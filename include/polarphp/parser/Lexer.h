@@ -431,8 +431,18 @@ public:
 
    Lexer &registerLexicalExceptionHandler(LexicalExceptionHandler handler)
    {
-      m_lexicalExceptionHandler = handler;
+      m_lexicalExceptionHandler = std::move(handler);
       return *this;
+   }
+
+   bool isLexExceptionOccurred() const
+   {
+      return m_flags.isLexExceptionOccurred();
+   }
+
+   void clearExceptionFlag()
+   {
+      m_flags.setLexExceptionOccurred(false);
    }
 
 private:
@@ -521,16 +531,6 @@ private:
       std::unique_ptr<char[]> buffer(new char[length]);
       std::snprintf(buffer.get(), length, format.data(), sprintable(arg)...);
       notifyLexicalException(StringRef(buffer.get(), length - 1), code);
-   }
-
-   bool isLexExceptionOccurred() const
-   {
-      return m_flags.isLexExceptionOccurred();
-   }
-
-   void clearExceptionFlag()
-   {
-      m_flags.setLexExceptionOccurred(false);
    }
 
 private:
@@ -625,6 +625,31 @@ Iterator token_lower_bound(ArrayTy &array, SourceLoc loc)
 /// where front() locates at \param StartLoc and back() locates at \param EndLoc .
 ArrayRef<Token> slice_token_array(ArrayRef<Token> allTokens, SourceLoc startLoc,
                                   SourceLoc endLoc);
+
+template <typename DF>
+void tokenize(const LangOptions &langOpts, const SourceManager &sourceMgr,
+              unsigned bufferId, unsigned offset, unsigned endOffset,
+              DiagnosticEngine * diags,
+              CommentRetentionMode commentRetention,
+              TriviaRetentionMode triviaRetention, DF &&destFunc)
+{
+   assert(triviaRetention != TriviaRetentionMode::WithTrivia && "string interpolation with trivia is not implemented yet");
+
+   if (offset == 0 && endOffset == 0) {
+      endOffset = sourceMgr.getRangeForBuffer(bufferId).getByteLength();
+   }
+
+   Lexer lexer(langOpts, sourceMgr, bufferId, diags, commentRetention, triviaRetention, offset,
+               endOffset);
+
+   Token token;
+   ParsedTrivia leadingTrivia;
+   ParsedTrivia trailingTrivia;
+   do {
+      lexer.lex(token, leadingTrivia, trailingTrivia);
+      destFunc(lexer, token, leadingTrivia, trailingTrivia);
+   } while (token.getKind() != TokenKindType::END);
+}
 
 /// Lex and return a vector of tokens for the given buffer.
 std::vector<Token> tokenize(const LangOptions &langOpts,

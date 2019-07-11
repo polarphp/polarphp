@@ -635,6 +635,7 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
                *targetIter++ = *fiter;
                break;
             }
+            [[fallthrough]];
          case '\\':
          case '$':
             *targetIter++ = *fiter;

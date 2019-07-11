@@ -21,6 +21,7 @@
 #include "polarphp/utils/MemoryBuffer.h"
 
 #include <iostream>
+#include <vector>
 
 #if __has_include(<sys/mman.h>)
 # include <sys/mman.h>
@@ -40,6 +41,10 @@ using polar::parser::Token;
 using polar::basic::StringRef;
 using polar::basic::ArrayRef;
 
+using polar::parser::ParsedTrivia;
+using polar::parser::TriviaRetentionMode;
+using polar::parser::CommentRetentionMode;
+
 // The test fixture.
 class LexerTest : public ::testing::Test
 {
@@ -55,6 +60,32 @@ public:
       return tokens;
    }
 
+   std::vector<Token> tokenizeWithLexer(const LangOptions &langOpts,
+                                        const SourceManager &sourceMgr, unsigned bufferId,
+                                        bool keepComments)
+   {
+      std::vector<Token> tokens;
+      bool exceptionHandlerBinded = false;
+      tokenize(langOpts, sourceMgr, bufferId, 0, 0,
+               nullptr,
+               (keepComments ? CommentRetentionMode::ReturnAsTokens
+                             : CommentRetentionMode::AttachToNextToken),
+               TriviaRetentionMode::WithoutTrivia,
+               [&](Lexer &lexer, const Token &token, const ParsedTrivia &leadingTrivia,
+               const ParsedTrivia &trailingTrivia) mutable
+      {
+         if (!exceptionHandlerBinded) {
+            lexer.registerLexicalExceptionHandler([&](StringRef msg, int code) mutable {
+               this->m_exceptionMsgs.push_back(msg.getStr());
+            });
+         }
+         tokens.push_back(token);
+      });
+      assert(tokens.back().is(TokenKindType::END));
+      tokens.pop_back(); // Remove EOF.
+      return tokens;
+   }
+
    std::vector<Token> checkLex(StringRef source,
                                ArrayRef<TokenKindType> expectedTokens,
                                bool keepComments = false,
@@ -65,7 +96,7 @@ public:
       if (keepEOF) {
          tokens = tokenizeAndKeepEOF(bufId);
       } else {
-         tokens = tokenize(langOpts, sourceMgr, bufId, 0, 0, /*Diags=*/nullptr, keepComments);
+         tokens = tokenizeWithLexer(langOpts, sourceMgr, bufId, keepComments);
       }
       EXPECT_EQ(expectedTokens.size(), tokens.size());
       for (unsigned i = 0, e = expectedTokens.size(); i != e; ++i) {
@@ -88,6 +119,7 @@ public:
 
    LangOptions langOpts;
    SourceManager sourceMgr;
+   std::vector<std::string> m_exceptionMsgs;
 };
 
 TEST_F(LexerTest, testSimpleToken)
@@ -348,5 +380,26 @@ TEST_F(LexerTest, testLexLNumber)
       ASSERT_TRUE(token1.isNeedCorrectLNumberOverflow());
       ASSERT_FALSE(token2.isNeedCorrectLNumberOverflow());
       ASSERT_FALSE(token3.isNeedCorrectLNumberOverflow());
+   }
+   {
+      /// test octal number
+      const char *source =
+            R"(
+            0777777777777777777777
+            -01000000000000000000000
+            01000000000000000000000
+            --01000000000000000000000
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_MINUS_SIGN, TokenKindType::T_DNUMBER,
+               TokenKindType::T_DNUMBER,TokenKindType::T_DEC,
+               TokenKindType::T_DNUMBER
+      };
+
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      dumpTokens(tokens);
+      //      Token token1 = tokens.at(1);
+      //      Token token2 = tokens.at(2);
+      //      Token token3 = tokens.at(4);
    }
 }
