@@ -46,19 +46,22 @@ protected:
    enum {
       NeedCorrectLNumberOverflow,
       AtStartOfLine,
-      EscapedIdentifier
+      EscapedIdentifier,
+      InvalidLexValue
    };
 
 public:
    explicit TokenFlags(std::uint16_t bits)
       : FlagSet(bits)
    {}
+
    constexpr TokenFlags()
    {}
 
    FLAGSET_DEFINE_FLAG_ACCESSORS(NeedCorrectLNumberOverflow, isNeedCorrectLNumberOverflow, setNeedCorrectLNumberOverflow)
    FLAGSET_DEFINE_FLAG_ACCESSORS(AtStartOfLine, isAtStartOfLine, setAtStartOfLine)
    FLAGSET_DEFINE_FLAG_ACCESSORS(EscapedIdentifier, isEscapedIdentifier, setEscapedIdentifier)
+   FLAGSET_DEFINE_FLAG_ACCESSORS(InvalidLexValue, isInvalidLexValue, setInvalidLexValue)
    FLAGSET_DEFINE_EQUALITY(TokenFlags)
 };
 
@@ -178,6 +181,17 @@ public:
       assert((!value || m_kind == TokenKindType::T_IDENTIFIER_STRING || m_kind == TokenKindType::T_STRING_VARNAME) &&
              "only identifiers can be escaped identifiers");
       m_flags.setEscapedIdentifier(value);
+      return *this;
+   }
+
+   bool isInvalidLexValue() const
+   {
+      return m_flags.isInvalidLexValue();
+   }
+
+   Token &setInvalidLexValue(bool value)
+   {
+      m_flags.setInvalidLexValue(value);
       return *this;
    }
 

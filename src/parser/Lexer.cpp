@@ -112,10 +112,6 @@ void Lexer::initialize(unsigned offset, unsigned endOffset)
    m_yyCursor = m_bufferStart + offset;
 
    assert(m_nextToken.is(TokenKindType::T_UNKNOWN_MARK));
-   lexImpl();
-   assert((m_nextToken.isAtStartOfLine() || m_yyCursor != m_bufferStart) &&
-          "The token should be at the beginning of the line, "
-          "or we should be lexing from the middle of the buffer");
 }
 
 InFlightDiagnostic Lexer::diagnose(const unsigned char *loc, ast::Diagnostic diag)
@@ -393,7 +389,7 @@ Lexer::NullCharacterKind Lexer::getNullCharacterKind(const unsigned char *ptr) c
 void Lexer::notifyLexicalException(StringRef msg, int code)
 {
    m_flags.setLexExceptionOccurred(true);
-   if (m_lexicalExceptionHandler != nullptr) {
+   if (m_lexicalExceptionHandler) {
       m_lexicalExceptionHandler(msg, code);
    }
 }
@@ -543,18 +539,37 @@ void Lexer::lexLongNumber()
          }
          /// here we does not set semantic value
          formToken(TokenKindType::T_LNUMBER, m_yyText);
+         m_nextToken.setInvalidLexValue(true);
          return;
       }
    } else {
       errno = 0;
-      lvalue = std::strtoll(yytext, &end, yytext[0] == '0' ? 8 : 10);
+      const char *numStr = yytext;
+      int numLength = m_yyLength;
+      int base = 10;
+      if (numStr[0] == '0') {
+         base = 8;
+         int numWide = m_yyLength;
+         while (numWide-- > 0 && *(numStr + 1) == '0') {
+            ++numStr;
+            --numLength;
+         }
+      }
+      lvalue = std::strtoll(numStr, &end, base);
       /// overflow is undefined behavior
       /// we just handle -9223372036854775808
       if (errno == ERANGE) {
          bool needCorrectOverflow = false;
          if (m_nextToken.getKind() == TokenKindType::T_MINUS_SIGN) {
-            std::string minStr = std::to_string(std::numeric_limits<std::int64_t>::min());
-            if (StringRef(minStr.data() + 1, minStr.size() - 1) == StringRef(reinterpret_cast<const char *>(m_yyText), m_yyLength)) {
+            std::string minStr;
+            if (numStr[0] == '0') {
+               char buff[24];
+               std::sprintf(buff, "-0%llo", std::numeric_limits<std::int64_t>::min());
+               minStr.append(buff, 24);
+            } else {
+               minStr = std::to_string(std::numeric_limits<std::int64_t>::min());
+            }
+            if (StringRef(minStr.data() + 1, minStr.size() - 1) == StringRef(reinterpret_cast<const char *>(numStr), numLength)) {
                needCorrectOverflow = true;
             }
          }
@@ -562,9 +577,9 @@ void Lexer::lexLongNumber()
          if (yytext[0] == '0') {
             /// octal overflow
             const char *tempPtr = reinterpret_cast<const char *>(end);
-            dvalue = polar::utils::octstr_to_double(yytext, &tempPtr);
+            dvalue = polar::utils::octstr_to_double(numStr, &tempPtr);
          } else {
-            dvalue = std::strtod(yytext, &end);
+            dvalue = std::strtod(numStr, &end);
          }
          /// handle double literal format error
          /// Also not an assert for the same reason
@@ -588,6 +603,7 @@ void Lexer::lexLongNumber()
             return;
          }
          formToken(TokenKindType::T_LNUMBER, m_yyText);
+         m_nextToken.setInvalidLexValue(true);
          return;
       }
    }

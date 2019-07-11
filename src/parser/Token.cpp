@@ -33,20 +33,24 @@ void Token::dump(RawOutStream &outStream) const
    if (is_keyword_token(m_kind) || is_punctuator_token(m_kind)) {
       outStream << "text: " << getText() << "\n";
    }
-   if (m_kind == TokenKindType::T_VARIABLE ||
-       m_kind == TokenKindType::T_IDENTIFIER_STRING ||
-       m_kind == TokenKindType::T_STRING_VARNAME) {
-      outStream << "value: ";
-      if (m_kind == TokenKindType::T_VARIABLE){
-         outStream << '$';
+   if (!isInvalidLexValue()) {
+      if (m_kind == TokenKindType::T_VARIABLE ||
+          m_kind == TokenKindType::T_IDENTIFIER_STRING ||
+          m_kind == TokenKindType::T_STRING_VARNAME) {
+         outStream << "value: ";
+         if (m_kind == TokenKindType::T_VARIABLE){
+            outStream << '$';
+         }
+         outStream << getValue<std::string>() << "\n";
+      } else if (m_kind == TokenKindType::T_LNUMBER) {
+         outStream << "value: ";
+         outStream << getValue<std::int64_t>() << "\n";
+      } else if (m_kind == TokenKindType::T_DNUMBER) {
+         outStream << "value: ";
+         outStream << getValue<double>() << "\n";
       }
-      outStream << getValue<std::string>() << "\n";
-   } else if (m_kind == TokenKindType::T_LNUMBER) {
-      outStream << "value: ";
-      outStream << getValue<std::int64_t>() << "\n";
-   } else if (m_kind == TokenKindType::T_DNUMBER) {
-      outStream << "value: ";
-      outStream << getValue<double>() << "\n";
+   } else {
+      outStream << "value: invalid lex value" << "\n";
    }
 }
 

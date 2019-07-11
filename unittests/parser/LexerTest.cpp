@@ -65,7 +65,6 @@ public:
                                         bool keepComments)
    {
       std::vector<Token> tokens;
-      bool exceptionHandlerBinded = false;
       tokenize(langOpts, sourceMgr, bufferId, 0, 0,
                nullptr,
                (keepComments ? CommentRetentionMode::ReturnAsTokens
@@ -74,12 +73,11 @@ public:
                [&](Lexer &lexer, const Token &token, const ParsedTrivia &leadingTrivia,
                const ParsedTrivia &trailingTrivia) mutable
       {
-         if (!exceptionHandlerBinded) {
-            lexer.registerLexicalExceptionHandler([&](StringRef msg, int code) mutable {
-               this->m_exceptionMsgs.push_back(msg.getStr());
-            });
-         }
          tokens.push_back(token);
+      }, [&](Lexer &lexer) {
+         lexer.registerLexicalExceptionHandler([&](StringRef msg, int code){
+            m_exceptionMsgs.push_back(msg.getStr());
+         });
       });
       assert(tokens.back().is(TokenKindType::END));
       tokens.pop_back(); // Remove EOF.
@@ -115,6 +113,11 @@ public:
    SourceLoc getLocForEndOfToken(SourceLoc loc)
    {
       return Lexer::getLocForEndOfToken(sourceMgr, loc);
+   }
+
+   void SetUp()
+   {
+      m_exceptionMsgs.clear();
    }
 
    LangOptions langOpts;
@@ -391,15 +394,75 @@ TEST_F(LexerTest, testLexLNumber)
             --01000000000000000000000
             )";
       std::vector<TokenKindType> expectedTokens{
-         TokenKindType::T_MINUS_SIGN, TokenKindType::T_DNUMBER,
-               TokenKindType::T_DNUMBER,TokenKindType::T_DEC,
-               TokenKindType::T_DNUMBER
+         TokenKindType::T_LNUMBER, TokenKindType::T_MINUS_SIGN,
+               TokenKindType::T_DNUMBER,TokenKindType::T_DNUMBER,
+               TokenKindType::T_DEC, TokenKindType::T_DNUMBER
       };
 
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
-      dumpTokens(tokens);
-      //      Token token1 = tokens.at(1);
-      //      Token token2 = tokens.at(2);
-      //      Token token3 = tokens.at(4);
+      Token token1 = tokens.at(0);
+      Token token2 = tokens.at(2);
+      Token token3 = tokens.at(3);
+      Token token4 = tokens.at(5);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::LongLong);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::Double);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::Double);
+      ASSERT_EQ(token4.getValueType(), Token::ValueType::Double);
+
+      ASSERT_EQ(token1.getValue<std::int64_t>(), std::numeric_limits<std::int64_t>::max());
+      ASSERT_TRUE(token2.isNeedCorrectLNumberOverflow());
+      ASSERT_FALSE(token3.isNeedCorrectLNumberOverflow());
+      ASSERT_FALSE(token4.isNeedCorrectLNumberOverflow());
+   }
+   {
+      /// multi prefix '0' chars
+      /// test octal number
+      const char *source =
+            R"(
+            0000000007
+            00000000000777777777777777777777
+            00000000000000000000000000000000
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_LNUMBER, TokenKindType::T_LNUMBER,
+               TokenKindType::T_LNUMBER,
+      };
+
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(0);
+      Token token2 = tokens.at(1);
+      Token token3 = tokens.at(2);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::LongLong);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::LongLong);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::LongLong);
+      ASSERT_FALSE(token1.isNeedCorrectLNumberOverflow());
+      ASSERT_FALSE(token2.isNeedCorrectLNumberOverflow());
+      ASSERT_FALSE(token3.isNeedCorrectLNumberOverflow());
+      ASSERT_EQ(token1.getValue<std::int64_t>(), 7);
+      ASSERT_EQ(token2.getValue<std::int64_t>(), std::numeric_limits<std::int64_t>::max());
+      ASSERT_EQ(token3.getValue<std::int64_t>(), 0);
+   }
+   {
+      /// test illform octal number
+      const char *source =
+            R"(
+            08123
+            0071239
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_LNUMBER, TokenKindType::T_LNUMBER,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(0);
+      Token token2 = tokens.at(1);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::Unknown);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::Unknown);
+      ASSERT_TRUE(token1.isInvalidLexValue());
+      ASSERT_TRUE(token2.isInvalidLexValue());
+      std::vector<std::string> expectExceptionMsgs{
+         "Invalid numeric literal",
+         "Invalid numeric literal"
+      };
+      ASSERT_EQ(m_exceptionMsgs, expectExceptionMsgs);
    }
 }

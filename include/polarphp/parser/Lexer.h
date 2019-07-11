@@ -104,13 +104,14 @@ public:
    /// to trivias are populated.
    void lex(Token &result, ParsedTrivia &leadingTriviaResult, ParsedTrivia &trailingTrivialResult)
    {
+      lexImpl();
+      assert((m_nextToken.isAtStartOfLine() || m_yyCursor != m_bufferStart) &&
+             "The token should be at the beginning of the line, "
+             "or we should be lexing from the middle of the buffer");
       result = m_nextToken;
       if (m_triviaRetention == TriviaRetentionMode::WithTrivia) {
          leadingTriviaResult = {m_leadingTrivia};
          trailingTrivialResult = {m_trailingTrivia};
-      }
-      if (result.isNot(TokenKindType::END)) {
-         lexImpl();
       }
    }
 
@@ -631,7 +632,7 @@ void tokenize(const LangOptions &langOpts, const SourceManager &sourceMgr,
               unsigned bufferId, unsigned offset, unsigned endOffset,
               DiagnosticEngine * diags,
               CommentRetentionMode commentRetention,
-              TriviaRetentionMode triviaRetention, DF &&destFunc)
+              TriviaRetentionMode triviaRetention, DF &&destFunc, std::function<void(Lexer &)> prepareLexFunc = nullptr)
 {
    assert(triviaRetention != TriviaRetentionMode::WithTrivia && "string interpolation with trivia is not implemented yet");
 
@@ -641,6 +642,10 @@ void tokenize(const LangOptions &langOpts, const SourceManager &sourceMgr,
 
    Lexer lexer(langOpts, sourceMgr, bufferId, diags, commentRetention, triviaRetention, offset,
                endOffset);
+
+   if (prepareLexFunc) {
+      prepareLexFunc(lexer);
+   }
 
    Token token;
    ParsedTrivia leadingTrivia;
