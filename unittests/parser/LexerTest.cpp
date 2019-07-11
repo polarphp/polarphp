@@ -466,3 +466,87 @@ TEST_F(LexerTest, testLexLNumber)
       ASSERT_EQ(m_exceptionMsgs, expectExceptionMsgs);
    }
 }
+
+TEST_F(LexerTest, testLexHexNumber)
+{
+   {
+      const char *source =
+            R"(
+            0x10
+            -0xaf2
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_LNUMBER, TokenKindType::T_MINUS_SIGN,
+               TokenKindType::T_LNUMBER,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(0);
+      Token token2 = tokens.at(2);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::LongLong);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::LongLong);
+      ASSERT_EQ(token1.getValue<std::int64_t>(), 16);
+      ASSERT_EQ(token2.getValue<std::int64_t>(), 2802);
+      ASSERT_FALSE(token1.isInvalidLexValue());
+      ASSERT_FALSE(token2.isInvalidLexValue());
+   }
+   {
+      /// test multi prefix '0' chars
+      const char *source =
+            R"(
+            0x010
+            0x00000000000000000000000000000000000001
+            0x0000000000000000000000000000000000000
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_LNUMBER, TokenKindType::T_LNUMBER,
+               TokenKindType::T_LNUMBER,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(0);
+      Token token2 = tokens.at(1);
+      Token token3 = tokens.at(2);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::LongLong);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::LongLong);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::LongLong);
+      ASSERT_EQ(token1.getValue<std::int64_t>(), 16);
+      ASSERT_EQ(token2.getValue<std::int64_t>(), 1);
+      ASSERT_EQ(token3.getValue<std::int64_t>(), 0);
+      ASSERT_FALSE(token1.isInvalidLexValue());
+      ASSERT_FALSE(token2.isInvalidLexValue());
+      ASSERT_FALSE(token3.isInvalidLexValue());
+   }
+   {
+      /// test overflow
+      /// max:  7fffffffffffffff
+      /// min: -8000000000000000
+      const char *source =
+            R"(
+            0x7fffffffffffffff
+            0x8000000000000000
+            -0x8000000000000000
+            --0x8000000000000000
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_LNUMBER, TokenKindType::T_DNUMBER,
+               TokenKindType::T_MINUS_SIGN, TokenKindType::T_DNUMBER,
+               TokenKindType::T_DEC, TokenKindType::T_DNUMBER,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(0);
+      Token token2 = tokens.at(1);
+      Token token3 = tokens.at(3);
+      Token token4 = tokens.at(5);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::LongLong);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::Double);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::Double);
+      ASSERT_EQ(token4.getValueType(), Token::ValueType::Double);
+      ASSERT_FALSE(token1.isNeedCorrectLNumberOverflow());
+      ASSERT_FALSE(token2.isNeedCorrectLNumberOverflow());
+      ASSERT_TRUE(token3.isNeedCorrectLNumberOverflow());
+      ASSERT_FALSE(token4.isNeedCorrectLNumberOverflow());
+   }
+}
+
+TEST_F(LexerTest, testLexDNumber)
+{
+}

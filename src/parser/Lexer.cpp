@@ -507,7 +507,6 @@ void Lexer::lexHexNumber()
    char *yytext = reinterpret_cast<char *>(const_cast<unsigned char *>(m_yyText));
    char *hexStr = yytext + 2;
    int length = m_yyLength - 2;
-   char *end = nullptr;
    std::int64_t lvalue = 0;
    while (*hexStr == '0') {
       ++hexStr;
@@ -515,6 +514,7 @@ void Lexer::lexHexNumber()
    }
    constexpr int maxWidth = sizeof(std::int64_t) * 2;
    if (length < maxWidth || (length == maxWidth && *hexStr <= '7')) {
+      char *end = nullptr;
       if (length > 0) {
          errno = 0;
          lvalue = std::strtoll(yytext, &end, 16);
@@ -523,11 +523,21 @@ void Lexer::lexHexNumber()
       formToken(TokenKindType::T_LNUMBER, m_yyText);
       m_nextToken.setValue(lvalue);
    } else {
-      const char *tempPtr = reinterpret_cast<const char *>(end);
+      /// overflow
+      bool needCorrectOverflow = false;
+      if (m_nextToken.getKind() == TokenKindType::T_MINUS_SIGN) {
+         char buff[maxWidth];
+         std::sprintf(buff, "%llx\n ", std::numeric_limits<std::int64_t>::min());
+         if (StringRef(buff, maxWidth) == StringRef(hexStr, length)) {
+            needCorrectOverflow = true;
+         }
+      }
+      const char *tempPtr = nullptr;
       double dvalue = polar::utils::hexstr_to_double(yytext, &tempPtr);
       /// errno isn't checked since we allow HUGE_VAL/INF overflow
-      assert(end == hexStr + length);
+      assert(tempPtr == hexStr + length);
       formToken(TokenKindType::T_DNUMBER, m_yyText);
+      m_nextToken.setNeedCorrectLNumberOverflow(needCorrectOverflow);
       m_nextToken.setValue(dvalue);
    }
 }
