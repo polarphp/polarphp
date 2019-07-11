@@ -586,18 +586,35 @@ TEST_F(LexerTest, testLexDNumber)
 TEST_F(LexerTest, testLexDoubleQuoteString)
 {
    {
+      /// test normal string
       const char *source =
             R"(
             ""
+            "polarphp is developed by Chinese Ma Nong"
+            "polarphp is
+            develop by
+            Chinese Ma Nong"
             )";
       std::vector<TokenKindType> expectedTokens {
          TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
-               TokenKindType::T_DOUBLE_STR_QUOTE, /*TokenKindType::T_DOUBLE_STR_QUOTE,
-                                 TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_STR_QUOTE,*/
+               TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_DOUBLE_STR_QUOTE,
       };
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
       Token token1 = tokens.at(1);
+      Token token2 = tokens.at(4);
+      Token token3 = tokens.at(7);
       ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
       ASSERT_EQ(token1.getValue<std::string>(), "");
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token2.getValue<std::string>(), "polarphp is developed by Chinese Ma Nong");
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::String);
+      std::string expected =
+            R"(polarphp is
+            develop by
+            Chinese Ma Nong)";
+      ASSERT_EQ(token3.getValue<std::string>(), expected);
    }
 }
