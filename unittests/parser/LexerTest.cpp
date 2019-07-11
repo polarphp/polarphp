@@ -22,6 +22,8 @@
 
 #include <iostream>
 #include <vector>
+#include <cstdlib>
+
 
 #if __has_include(<sys/mman.h>)
 # include <sys/mman.h>
@@ -549,4 +551,36 @@ TEST_F(LexerTest, testLexHexNumber)
 
 TEST_F(LexerTest, testLexDNumber)
 {
+   {
+      const char *source =
+            R"(
+            0.0
+            1.2e2
+            3.2e-2
+            2E2
+            1.79769e+309
+            )";
+      std::vector<TokenKindType> expectedTokens{
+         TokenKindType::T_DNUMBER, TokenKindType::T_DNUMBER,
+               TokenKindType::T_DNUMBER, TokenKindType::T_DNUMBER,
+               TokenKindType::T_DNUMBER,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(0);
+      Token token2 = tokens.at(1);
+      Token token3 = tokens.at(2);
+      Token token4 = tokens.at(3);
+      Token token5 = tokens.at(4);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::Double);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::Double);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::Double);
+      ASSERT_EQ(token4.getValueType(), Token::ValueType::Double);
+      ASSERT_EQ(token5.getValueType(), Token::ValueType::Double);
+      ASSERT_DOUBLE_EQ(token1.getValue<double>(), 0);
+      ASSERT_DOUBLE_EQ(token2.getValue<double>(), 1.2e2);
+      ASSERT_DOUBLE_EQ(token3.getValue<double>(), 3.2e-2);
+      ASSERT_DOUBLE_EQ(token4.getValue<double>(), 2E2);
+      ASSERT_EQ(token5.getValue<double>(), INFINITY);
+      dumpTokens(tokens);
+   }
 }
