@@ -102,19 +102,7 @@ public:
 
    /// Lex a token. If \c TriviaRetentionMode is \c WithTrivia, passed pointers
    /// to trivias are populated.
-   void lex(Token &result, ParsedTrivia &leadingTriviaResult, ParsedTrivia &trailingTrivialResult)
-   {
-      lexImpl();
-      assert((m_nextToken.isAtStartOfLine() || m_yyCursor != m_bufferStart) &&
-             "The token should be at the beginning of the line, "
-             "or we should be lexing from the middle of the buffer");
-      result = m_nextToken;
-      if (m_triviaRetention == TriviaRetentionMode::WithTrivia) {
-         leadingTriviaResult = {m_leadingTrivia};
-         trailingTrivialResult = {m_trailingTrivia};
-      }
-   }
-
+   void lex(Token &result, ParsedTrivia &leadingTriviaResult, ParsedTrivia &trailingTrivialResult);
    void lex(Token &result)
    {
       ParsedTrivia leadingTrivia;

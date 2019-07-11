@@ -114,6 +114,19 @@ void Lexer::initialize(unsigned offset, unsigned endOffset)
    assert(m_nextToken.is(TokenKindType::T_UNKNOWN_MARK));
 }
 
+void Lexer::lex(Token &result, ParsedTrivia &leadingTriviaResult, ParsedTrivia &trailingTrivialResult)
+{
+   lexImpl();
+   assert((m_nextToken.isAtStartOfLine() || m_yyCursor != m_bufferStart) &&
+          "The token should be at the beginning of the line, "
+          "or we should be lexing from the middle of the buffer");
+   result = m_nextToken;
+   if (m_triviaRetention == TriviaRetentionMode::WithTrivia) {
+      leadingTriviaResult = {m_leadingTrivia};
+      trailingTrivialResult = {m_trailingTrivia};
+   }
+}
+
 InFlightDiagnostic Lexer::diagnose(const unsigned char *loc, ast::Diagnostic diag)
 {
    if (m_diags) {
