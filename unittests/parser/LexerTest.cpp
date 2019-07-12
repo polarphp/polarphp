@@ -1033,4 +1033,82 @@ TEST_F(LexerTest, testLexBackquoteString)
       ASSERT_EQ(token3.getValue<std::string>(), "name");
       ASSERT_EQ(token4.getValue<std::string>(), ".");
    }
+   {
+      /// test unclosed string
+      /// TODO
+      const char *source =
+            R"(
+            `polarphp is very good
+
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_BACKTICK, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      std::string expected =
+            R"(polarphp is very good
+
+            )";
+      ASSERT_EQ(token1.getValue<std::string>(), expected);
+   }
 }
+
+TEST_F(LexerTest, testLexNowDoc)
+{
+   {
+      /// test empty now doc
+      const char *source =
+            R"(
+            <<<'POLARPHP'
+            POLARPHP;
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+               TokenKindType::T_END_HEREDOC,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token1.getValue<std::string>(), "");
+   }
+   {
+      /// test normal nowdoc
+      const char *source =
+            R"(
+            <<<'POLARPHP'
+            polarphp is developed by Chinese Ma Nong
+            POLARPHP;
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+               TokenKindType::T_END_HEREDOC,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      dumpTokens(tokens);
+   }
+
+   {
+      /// test escape chars
+      const char *source =
+            R"(
+            <<<'POLARPHP'
+            'polarphp \r\n \n \t is very good, version is $version,
+            develop by \'Chinese coder\'. \\ hahaha'
+            POLARPHP;
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+               TokenKindType::T_END_HEREDOC,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      std::string expected =
+            R"('polarphp \r\n \n \t is very good, version is $version,
+            develop by \'Chinese coder\'. \\ hahaha')";
+      Token token1 = tokens.at(1);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token1.getValue<std::string>(), expected);
+   }
+}
+
