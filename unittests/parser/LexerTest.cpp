@@ -764,4 +764,34 @@ TEST_F(LexerTest, testLexDoubleQuoteString)
       ASSERT_EQ(token3.getValue<std::string>(), "name");
       ASSERT_EQ(token4.getValue<std::string>(), ".");
    }
+   {
+      /// "name is ${info->name}."
+      /// lex stage is valid but at parse stage is invalid
+      const char *source =
+            R"(
+            "name is ${info->name}."
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_IDENTIFIER_STRING,
+               TokenKindType::T_OBJECT_OPERATOR, TokenKindType::T_IDENTIFIER_STRING,
+               TokenKindType::T_RIGHT_BRACE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_DOUBLE_STR_QUOTE,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      Token token2 = tokens.at(3);
+      Token token3 = tokens.at(5);
+      Token token4 = tokens.at(7);
+
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token4.getValueType(), Token::ValueType::String);
+
+      ASSERT_EQ(token1.getValue<std::string>(), "name is ");
+      ASSERT_EQ(token2.getValue<std::string>(), "info");
+      ASSERT_EQ(token3.getValue<std::string>(), "name");
+      ASSERT_EQ(token4.getValue<std::string>(), ".");
+   }
 }
