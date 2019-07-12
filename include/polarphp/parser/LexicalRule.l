@@ -830,14 +830,14 @@ restart_lex:
 
 <ST_DOUBLE_QUOTES> ["] {
    if (lexer.m_nextToken.getKind() == TokenKindType::T_DOUBLE_STR_QUOTE) {
-       /// check whether is empty string
-       lexer.setYYLength(0);
-       lexer.formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, lexer.getYYText() - 1);
-       /// TODO
-       /// use some flag to represent empty string
-       lexer.m_nextToken.setValue("");
-       lexer.setYYCursor(lexer.getYYText());
-       return;
+      /// check whether is empty string
+      lexer.setYYLength(0);
+      lexer.formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, lexer.getYYText() - 1);
+      /// TODO
+      /// use some flag to represent empty string
+      lexer.m_nextToken.setValue("");
+      lexer.setYYCursor(lexer.getYYText());
+      return;
    }
    GOTO_CONDITION(ST_IN_SCRIPTING);
    lexer.setLexingBinaryStrFlag(false);
@@ -846,6 +846,16 @@ restart_lex:
 }
 
 <ST_BACKQUOTE> [`] {
+   if (lexer.m_nextToken.getKind() == TokenKindType::T_BACKTICK) {
+      /// check whether is empty string
+      lexer.setYYLength(0);
+      lexer.formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, lexer.getYYText() - 1);
+      /// TODO
+      /// use some flag to represent empty string
+      lexer.m_nextToken.setValue("");
+      lexer.setYYCursor(lexer.getYYText());
+      return;
+   }
    GOTO_CONDITION(ST_IN_SCRIPTING);
    lexer.formToken(TokenKindType::T_BACKTICK, lexer.getYYText());
    return;
