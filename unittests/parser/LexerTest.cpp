@@ -794,4 +794,25 @@ TEST_F(LexerTest, testLexDoubleQuoteString)
       ASSERT_EQ(token3.getValue<std::string>(), "name");
       ASSERT_EQ(token4.getValue<std::string>(), ".");
    }
+   {
+      /// test unclosed string
+      /// TODO
+      const char *source =
+            R"(
+            "polarphp is very good
+
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      std::string expected =
+            R"(polarphp is very good
+
+            )";
+      ASSERT_EQ(token1.getValue<std::string>(), expected);
+   }
 }
+

@@ -795,8 +795,6 @@ restart_lex:
 
 <ST_IN_SCRIPTING> b?["] {
    const unsigned char *yytext = lexer.getYYText();
-   const unsigned char *yycursor = lexer.getYYCursor();
-   unsigned int yylength = lexer.getYYLength();
 
    if (yytext[0] == 'b') {
       lexer.setLexingBinaryStrFlag(true);
