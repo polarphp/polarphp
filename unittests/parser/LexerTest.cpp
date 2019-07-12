@@ -580,7 +580,6 @@ TEST_F(LexerTest, testLexDNumber)
    ASSERT_DOUBLE_EQ(token3.getValue<double>(), 3.2e-2);
    ASSERT_DOUBLE_EQ(token4.getValue<double>(), 2E2);
    ASSERT_EQ(token5.getValue<double>(), INFINITY);
-   dumpTokens(tokens);
 }
 
 TEST_F(LexerTest, testLexDoubleQuoteString)
@@ -616,5 +615,153 @@ TEST_F(LexerTest, testLexDoubleQuoteString)
             develop by
             Chinese Ma Nong)";
       ASSERT_EQ(token3.getValue<std::string>(), expected);
+   }
+   {
+      /// test $varname
+      const char *source =
+            R"(
+            "polarphp version: $version, very welcome."
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_VARIABLE,  TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_DOUBLE_STR_QUOTE,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      Token token2 = tokens.at(2);
+      Token token3 = tokens.at(3);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token1.getValue<std::string>(), "polarphp version: ");
+      ASSERT_EQ(token2.getValue<std::string>(), "version");
+      ASSERT_EQ(token3.getValue<std::string>(), ", very welcome.");
+   }
+   {
+      const char *source =
+            R"(
+            "name is $info[123]"
+            "name is $info->name."
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_VARIABLE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_DOUBLE_STR_QUOTE,
+
+               TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_VARIABLE, TokenKindType::T_OBJECT_OPERATOR,
+               TokenKindType::T_IDENTIFIER_STRING, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_DOUBLE_STR_QUOTE,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      Token token2 = tokens.at(2);
+      Token token3 = tokens.at(3);
+
+      Token token4 = tokens.at(6);
+      Token token5 = tokens.at(7);
+      Token token6 = tokens.at(9);
+      Token token7 = tokens.at(10);
+
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token1.getValue<std::string>(), "name is ");
+      ASSERT_EQ(token2.getValue<std::string>(), "info");
+      ASSERT_EQ(token3.getValue<std::string>(), "[123]");
+
+      ASSERT_EQ(token4.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token5.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token6.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token7.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token4.getValue<std::string>(), "name is ");
+      ASSERT_EQ(token5.getValue<std::string>(), "info");
+      ASSERT_EQ(token6.getValue<std::string>(), "name");
+      ASSERT_EQ(token7.getValue<std::string>(), ".");
+   }
+   {
+      /// test ${xxx}
+      const char *source =
+            R"(
+            "name is ${info}."
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_STRING_VARNAME,
+               TokenKindType::T_RIGHT_BRACE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_DOUBLE_STR_QUOTE,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      Token token2 = tokens.at(3);
+      Token token3 = tokens.at(5);
+
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::String);
+
+      ASSERT_EQ(token1.getValue<std::string>(), "name is ");
+      ASSERT_EQ(token2.getValue<std::string>(), "info");
+      ASSERT_EQ(token3.getValue<std::string>(), ".");
+   }
+   {
+      /// ${info[1]}
+      const char *source =
+            R"(
+            "name is ${info[1]}."
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_STRING_VARNAME,
+               TokenKindType::T_LEFT_SQUARE_BRACKET, TokenKindType::T_LNUMBER,
+               TokenKindType::T_RIGHT_SQUARE_BRACKET, TokenKindType::T_RIGHT_BRACE,
+               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_STR_QUOTE,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      Token token2 = tokens.at(3);
+      Token token3 = tokens.at(5);
+      Token token4 = tokens.at(8);
+
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::LongLong);
+      ASSERT_EQ(token4.getValueType(), Token::ValueType::String);
+
+      ASSERT_EQ(token1.getValue<std::string>(), "name is ");
+      ASSERT_EQ(token2.getValue<std::string>(), "info");
+      ASSERT_EQ(token3.getValue<std::int64_t>(), 1);
+      ASSERT_EQ(token4.getValue<std::string>(), ".");
+   }
+   {
+      /// ${info["name"]}
+      const char *source =
+            R"(
+            "name is ${info["name"]}."
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_STRING_VARNAME,
+               TokenKindType::T_LEFT_SQUARE_BRACKET, TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_RIGHT_SQUARE_BRACKET, TokenKindType::T_RIGHT_BRACE,
+               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_STR_QUOTE,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      Token token2 = tokens.at(3);
+      Token token3 = tokens.at(6);
+      Token token4 = tokens.at(10);
+
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token4.getValueType(), Token::ValueType::String);
+
+      ASSERT_EQ(token1.getValue<std::string>(), "name is ");
+      ASSERT_EQ(token2.getValue<std::string>(), "info");
+      ASSERT_EQ(token3.getValue<std::string>(), "name");
+      ASSERT_EQ(token4.getValue<std::string>(), ".");
    }
 }
