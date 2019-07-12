@@ -874,8 +874,7 @@ void Lexer::lexHeredocHeader()
    }
    /// Check for ending label on the next line
    /// optimzed for empty heredoc
-   if (hereDocLabelLength < yylimit - yycursor &&
-       StringRef(reinterpret_cast<const char *>(yycursor), hereDocLabelLength) == heredocLabel) {
+   if (isFoundHeredocEndMarker(label)) {
       if (!isLabelStart(yycursor[hereDocLabelLength])) {
          /// detect heredoc end mark sequence
          if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
@@ -1119,6 +1118,7 @@ void Lexer::lexNowdocBody()
             m_yyLength = yycursor - yytext;
             handle_newlines(*this, yytext, m_yyLength);
             formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
+            m_nextToken.setValue(StringRef(reinterpret_cast<const char *>(yytext), yylength));
             return;
          }
          /// Check for ending label on the next line
@@ -1169,6 +1169,16 @@ void Lexer::lexNowdocBody()
 
 void Lexer::lexHereAndNowDocEnd()
 {
+   /// handle empty nowdoc and heredoc
+   if (m_nextToken.getKind() == TokenKindType::T_START_HEREDOC) {
+      /// TODO
+      /// use some flag to represent empty string
+      setYYLength(0);
+      formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, getYYText() - 1);
+      m_nextToken.setValue("");
+      setYYCursor(getYYText());
+      return;
+   }
    std::shared_ptr<HereDocLabel> label = m_heredocLabelStack.top();
    m_heredocLabelStack.pop();
    m_yyLength = label->indentation + label->name.size();

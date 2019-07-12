@@ -48,7 +48,8 @@ void Token::dump(RawOutStream &outStream) const
       } else if (m_kind == TokenKindType::T_DNUMBER) {
          outStream << "value: ";
          outStream << getValue<double>() << "\n";
-      } else if (m_kind == TokenKindType::T_CONSTANT_ENCAPSED_STRING) {
+      } else if (m_kind == TokenKindType::T_CONSTANT_ENCAPSED_STRING ||
+                 m_kind == TokenKindType::T_ENCAPSED_AND_WHITESPACE) {
          const std::string &text = getValue<std::string>();
          outStream << "length: " << text.size() << "\n";
          outStream << "value: " << text << "\n";
