@@ -27,6 +27,7 @@ protected:
       HeredocScanAhead,
       IncrementLineNumber,
       HeredocIndentationUsesSpaces,
+      ReserveHeredocSpaces,
       LexExceptionOccurred
    };
 public:
@@ -41,6 +42,7 @@ public:
    FLAGSET_DEFINE_FLAG_ACCESSORS(IncrementLineNumber, isIncrementLineNumber, setIncrementLineNumber)
    FLAGSET_DEFINE_FLAG_ACCESSORS(HeredocIndentationUsesSpaces, isHeredocIndentationUsesSpaces, setHeredocIndentationUsesSpaces)
    FLAGSET_DEFINE_FLAG_ACCESSORS(LexExceptionOccurred, isLexExceptionOccurred, setLexExceptionOccurred)
+   FLAGSET_DEFINE_FLAG_ACCESSORS(ReserveHeredocSpaces, isReserveHeredocSpaces, setReserveHeredocSpaces)
    FLAGSET_DEFINE_EQUALITY(LexerFlags)
 };
 
