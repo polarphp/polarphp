@@ -278,7 +278,7 @@ int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer);
 %token T_END_HEREDOC     "heredoc end (T_END_HEREDOC)"
 
 /* Token used to force a parse error from the lexer */
-%token T_ERROR          "error (T_ERROR)"
+%token <std::string> T_ERROR          "error (T_ERROR)"
 %token T_UNKNOWN_MARK "unknown token (T_UNKNOWN_MARK)"
 /* MISC_MARK_END */
 /* token define end */

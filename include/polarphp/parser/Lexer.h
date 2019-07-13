@@ -434,6 +434,11 @@ public:
       m_flags.setLexExceptionOccurred(false);
    }
 
+   const std::string getCurrentExceptionMsg() const
+   {
+      return m_currentExceptionMsg;
+   }
+
 private:
    Lexer(const Lexer&) = delete;
    void operator=(const Lexer&) = delete;
@@ -468,6 +473,7 @@ private:
    void formVariableToken(const unsigned char *tokenStart);
    void formIdentifierToken(const unsigned char *tokenStart);
    void formStringVariableToken(const unsigned char *tokenStart);
+   void formErrorToken(const unsigned char *tokenStart);
 
    /// Advance to the end of the line.
    /// If EatNewLine is true, CurPtr will be at end of newline character.
@@ -491,7 +497,6 @@ private:
    void lexNowdocBody();
    void lexHereAndNowDocEnd();
    void lexTrivia(ParsedTrivia &trivia, bool isForTrailingTrivia);
-
    void lexEscapedIdentifier();
 
    /// Returns it should be tokenize.
@@ -593,7 +598,7 @@ private:
    /// This is only preserved if this Lexer was constructed with
    /// `TriviaRetentionMode::WithTrivia`.
    ParsedTrivia m_trailingTrivia;
-
+   std::string m_currentExceptionMsg;
    std::stack<YYLexerCondType> m_yyConditionStack;
    std::stack<std::shared_ptr<HereDocLabel>> m_heredocLabelStack;
    std::stack<LexerState> m_yyStateStack;
