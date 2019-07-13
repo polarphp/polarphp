@@ -419,7 +419,7 @@ bool strip_multiline_string_indentation(Lexer &lexer, std::string &str, int inde
          newLine = end;
       }
       // Try to skip indentation
-      for (skip = 0; skip < indentation; skip++) {
+      for (skip = 0; skip < indentation; skip++, cursor++) {
          if (cursor == newLine) {
             // Don't require full indentation on whitespace-only lines
             break;
@@ -433,6 +433,7 @@ bool strip_multiline_string_indentation(Lexer &lexer, std::string &str, int inde
          if ((!usingSpaces && *cursor == ' ') || (usingSpaces && *cursor == '\t')) {
             lexer.incLineNumber(newLineCount);
             lexer.notifyLexicalException("Invalid indentation - tabs and spaces cannot be mixed", 0);
+            return false;
          }
       }
       if (cursor == end) {
