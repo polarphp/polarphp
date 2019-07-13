@@ -199,6 +199,14 @@ void Lexer::formStringVariableToken(const unsigned char *tokenStart)
    m_nextToken.setValue(StringRef(reinterpret_cast<const char *>(tokenStart), m_yyLength));
 }
 
+void Lexer::formErrorToken(const unsigned char *tokenStart)
+{
+   formToken(TokenKindType::T_ERROR, tokenStart);
+   if (!m_currentExceptionMsg.empty()) {
+      m_nextToken.setValue(m_currentExceptionMsg);
+   }
+}
+
 void Lexer::lexTrivia(ParsedTrivia &trivia, bool isForTrailingTrivia)
 {
 restart:
@@ -402,6 +410,7 @@ Lexer::NullCharacterKind Lexer::getNullCharacterKind(const unsigned char *ptr) c
 void Lexer::notifyLexicalException(StringRef msg, int code)
 {
    m_flags.setLexExceptionOccurred(true);
+   m_currentExceptionMsg = std::move(msg.getStr());
    if (m_lexicalExceptionHandler) {
       m_lexicalExceptionHandler(msg, code);
    }
@@ -883,6 +892,7 @@ void Lexer::lexHeredocHeader()
          yycursor = savedCursor;
          label->indentation = indentation;
          m_yyCondition = COND_NAME(ST_END_HEREDOC);
+         m_flags.setReserveHeredocSpaces(true);
          formToken(TokenKindType::T_START_HEREDOC, yytext);
          return;
       }
@@ -950,6 +960,9 @@ void Lexer::lexHeredocHeader()
       m_flags.setIncrementLineNumber(false);
    }
    formToken(TokenKindType::T_START_HEREDOC, yytext);
+   ///
+   /// reserve spaces after header
+   m_flags.setReserveHeredocSpaces(true);
 }
 
 void Lexer::lexHeredocBody()
@@ -1026,6 +1039,7 @@ void Lexer::lexHeredocBody()
             } else {
                yycursor -= indentation;
             }
+            m_flags.setReserveHeredocSpaces(true);
             m_yyCondition = COND_NAME(ST_END_HEREDOC);
             foundEndMarker = true;
             break;
@@ -1138,6 +1152,7 @@ void Lexer::lexNowdocBody()
             }
             /// For newline before label
             m_flags.setIncrementLineNumber(true);
+            m_flags.setReserveHeredocSpaces(true);
             yycursor -= indentation;
             label->indentation = indentation;
             m_yyCondition = COND_NAME(ST_END_HEREDOC);
@@ -1154,11 +1169,11 @@ void Lexer::lexNowdocBody()
    }
    yylength = yycursor - yytext;
    std::string filteredStr(reinterpret_cast<const char *>(yytext), yylength - newlineLength);
-   if (!m_flags.isLexExceptionOccurred() && spacing != 0 && isInParseMode()) {
+   if (!m_flags.isLexExceptionOccurred() && spacing != 0 /*&& isInParseMode()*/) {
       bool newlineAtStart = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
-      if (!strip_multiline_string_indentation(*this, filteredStr, label->indentation, label->intentationUseSpaces,
+      if (!strip_multiline_string_indentation(*this, filteredStr, indentation, spacing == HEREDOC_USING_SPACES,
                                               newlineAtStart, newlineLength != 0)) {
-         formToken(TokenKindType::T_ERROR, yytext);
+         formErrorToken(yytext);
          return;
       }
    }
@@ -1241,7 +1256,11 @@ void Lexer::lexImpl()
    m_nextToken.resetValueType();
 
    /// here we want keep comment for next token
-   lexTrivia(m_leadingTrivia, /* IsForTrailingTrivia */ false);
+   if (!m_flags.isReserveHeredocSpaces()) {
+      lexTrivia(m_leadingTrivia, /* IsForTrailingTrivia */ false);
+   } else {
+      m_flags.setReserveHeredocSpaces(false);
+   }
    m_yyText = m_yyCursor;
    // invoke yylexer
    if (m_flags.isIncrementLineNumber()) {
