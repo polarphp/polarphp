@@ -28,7 +28,8 @@ protected:
       IncrementLineNumber,
       HeredocIndentationUsesSpaces,
       ReserveHeredocSpaces,
-      LexExceptionOccurred
+      LexExceptionOccurred,
+      CheckHeredocIndentation
    };
 public:
    explicit LexerFlags(std::uint16_t bits)
@@ -43,6 +44,7 @@ public:
    FLAGSET_DEFINE_FLAG_ACCESSORS(HeredocIndentationUsesSpaces, isHeredocIndentationUsesSpaces, setHeredocIndentationUsesSpaces)
    FLAGSET_DEFINE_FLAG_ACCESSORS(LexExceptionOccurred, isLexExceptionOccurred, setLexExceptionOccurred)
    FLAGSET_DEFINE_FLAG_ACCESSORS(ReserveHeredocSpaces, isReserveHeredocSpaces, setReserveHeredocSpaces)
+   FLAGSET_DEFINE_FLAG_ACCESSORS(CheckHeredocIndentation, isCheckHeredocIndentation, setCheckHeredocIndentation)
    FLAGSET_DEFINE_EQUALITY(LexerFlags)
 };
 
