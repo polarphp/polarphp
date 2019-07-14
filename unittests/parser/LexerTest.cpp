@@ -1139,5 +1139,27 @@ develop by \'Chinese coder\'. \\ hahaha')";
       ASSERT_EQ(token1.getValue<std::string>(), "Invalid body indentation level (expecting an indentation level of at least 15)");
       ASSERT_EQ(token2.getValue<std::string>(), "name");
    }
+   {
+      /// test unclosed nowdoc
+      const char *source =
+            R"(
+            <<<'POLARPHP'
+            'polarphp \r\n \n \t is very good, version is $version,
+            develop by \'Chinese coder\'. \\ hahaha'
+
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      std::string expected =
+            R"(            'polarphp \r\n \n \t is very good, version is $version,
+            develop by \'Chinese coder\'. \\ hahaha'
+
+            )";
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token1.getValue<std::string>(), expected);
+   }
 }
 
