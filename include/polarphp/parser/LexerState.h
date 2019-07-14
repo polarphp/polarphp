@@ -208,6 +208,12 @@ public:
       return m_yyConditionStack;
    }
 
+   LexerState &setHeredocLabelStack(const std::stack<std::shared_ptr<HereDocLabel>> &stack)
+   {
+      m_heredocLabelStack = stack;
+      return *this;
+   }
+
    LexerState &setHeredocLabelStack(std::stack<std::shared_ptr<HereDocLabel>> &&stack)
    {
       m_heredocLabelStack = std::move(stack);

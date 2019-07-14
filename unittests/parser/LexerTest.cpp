@@ -1163,3 +1163,38 @@ develop by \'Chinese coder\'. \\ hahaha')";
    }
 }
 
+TEST_F(LexerTest, testLexHereDoc)
+{
+//   {
+//      /// test empty heredoc
+//      const char *source =
+//            R"(
+//            <<<POLARPHP
+//            POLARPHP;
+//            )";
+//      std::vector<TokenKindType> expectedTokens {
+//         TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+//               TokenKindType::T_END_HEREDOC,
+//      };
+//      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+//      Token token1 = tokens.at(1);
+//      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+//      ASSERT_EQ(token1.getValue<std::string>(), "");
+//   }
+   /// test normal heredoc
+   const char *source =
+         R"(
+         <<<POLARPHP
+         polarphp is developed by Chinese Ma Nong
+         POLARPHP;
+         )";
+   std::vector<TokenKindType> expectedTokens {
+      TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+            TokenKindType::T_END_HEREDOC, TokenKindType::T_SEMICOLON,
+   };
+   std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+   Token token1 = tokens.at(1);
+   std::string expected = "polarphp is developed by Chinese Ma Nong";
+   ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+   ASSERT_EQ(token1.getValue<std::string>(), expected);
+}

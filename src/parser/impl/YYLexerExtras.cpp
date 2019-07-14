@@ -585,7 +585,6 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
       }
       return true;
    }
-   filteredStr.append(reinterpret_cast<const char *>(iter), origLength);
    /// convert escape sequences
    auto fiter = filteredStr.begin();
    auto fendMark = filteredStr.end();
@@ -749,7 +748,7 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
       }
       ++fiter;
    }
-   filteredStr.reserve(targetIter - filteredStr.begin());
+   filteredStr.resize(targetIter - filteredStr.begin());
    /// TODO
    /// output filtered
    return true;

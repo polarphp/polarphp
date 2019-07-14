@@ -1352,9 +1352,7 @@ Lexer &Lexer::saveYYState()
    state.setLexicalEventHandler(m_eventHandler);
    state.setLexicalExceptionHandler(m_lexicalExceptionHandler);
 
-   std::stack<std::shared_ptr<HereDocLabel>> heredocLabelStack;
-   m_heredocLabelStack.swap(heredocLabelStack);
-   state.setHeredocLabelStack(std::move(heredocLabelStack));
+   state.setHeredocLabelStack(m_heredocLabelStack);
 
    std::stack<YYLexerCondType> condState;
    m_yyConditionStack.swap(condState);
@@ -1384,6 +1382,7 @@ Lexer &Lexer::restoreYYState()
 
    std::stack<std::shared_ptr<HereDocLabel>> &heredocLabelStack = state.getHeredocLabelStack();
    m_heredocLabelStack.swap(heredocLabelStack);
+
    std::stack<YYLexerCondType> &condState = state.getConditionStack();
    m_yyConditionStack.swap(condState);
 
