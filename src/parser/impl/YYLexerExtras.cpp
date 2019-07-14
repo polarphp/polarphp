@@ -569,8 +569,8 @@ size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexe
    return targetStr - origIter;
 }
 
-bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const unsigned char *iter,
-                                               const unsigned char *endMark, Lexer &lexer)
+bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const char *iter,
+                                               const char *endMark, Lexer &lexer)
 {
    size_t origLength = endMark - iter;
    if (origLength <= 1) {
@@ -581,7 +581,6 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
          }
          /// TODO
          /// ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
-         filteredStr.push_back(c);
       }
       return true;
    }
@@ -625,9 +624,9 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
          case 'v':
             *targetIter++ = '\v';
             break;
-         case 'e':
-            *targetIter++ = '\e';
-            break;
+//         case 'e':
+//            *targetIter++ = '\e';
+//            break;
          case '"':
          case '`':
             if (*fiter != quoteType) {

@@ -744,8 +744,9 @@ void Lexer::lexDoubleQuoteString()
       break;
    }
    m_yyLength = yycursor - yytext;
-   std::string filteredStr;
-   if (convert_double_quote_str_escape_sequences(filteredStr, '"', yytext, yycursor, *this) ||
+   std::string filteredStr(reinterpret_cast<const char *>(yytext), m_yyLength);
+   if (convert_double_quote_str_escape_sequences(filteredStr, '"', filteredStr.data(),
+                                                 filteredStr.data() + m_yyLength, *this) ||
        !isInParseMode()) {
       formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, yytext);
       m_nextToken.setValue(filteredStr);
@@ -796,9 +797,10 @@ void Lexer::lexBackquote()
       --yycursor;
       break;
    }
-   std::string filteredStr;
+
    m_yyLength = yycursor - yytext;
-   if (convert_double_quote_str_escape_sequences(filteredStr, '`', yytext, yycursor, *this) ||
+   std::string filteredStr(reinterpret_cast<const char *>(yytext), m_yyLength);
+   if (convert_double_quote_str_escape_sequences(filteredStr, '`', filteredStr.data(), filteredStr.data() + m_yyLength, *this) ||
        !isInParseMode()) {
       formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
       m_nextToken.setValue(filteredStr);
@@ -1080,8 +1082,8 @@ void Lexer::lexHeredocBody()
          formErrorToken(yytext);
          return;
       }
-      const unsigned char *ptr = reinterpret_cast<const unsigned char *>(filteredStr.data());
-      if (!convert_double_quote_str_escape_sequences(filteredStr, 0, ptr, ptr + filteredStr.size(), *this)) {
+      if (!convert_double_quote_str_escape_sequences(filteredStr, 0, filteredStr.data(),
+                                                     filteredStr.data() + filteredStr.size(), *this)) {
          formToken(TokenKindType::T_ERROR, yytext);
          return;
       }

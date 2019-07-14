@@ -49,8 +49,8 @@ void handle_newlines(Lexer &lexer, const unsigned char *str, size_t length);
 void handle_newline(Lexer &lexer, unsigned char c);
 TokenKindType token_kind_map(unsigned char c);
 size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexer &lexer);
-bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const unsigned char *iter,
-                                               const unsigned char *endMark, Lexer &lexer);
+bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const char *iter,
+                                               const char *endMark, Lexer &lexer);
 void diagnose_embedded_null(DiagnosticEngine *diags, const unsigned char *ptr);
 bool advance_to_end_of_line(const unsigned char *&m_yyCursor, const unsigned char *bufferEnd,
                             const unsigned char *codeCompletionPtr = nullptr,
