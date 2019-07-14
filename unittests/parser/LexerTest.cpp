@@ -77,6 +77,7 @@ public:
       {
          tokens.push_back(token);
       }, [&](Lexer &lexer) {
+         lexer.setCheckHeredocIndentation(true);
          lexer.registerLexicalExceptionHandler([&](StringRef msg, int code){
             m_exceptionMsgs.push_back(msg.getStr());
          });
@@ -1083,10 +1084,13 @@ TEST_F(LexerTest, testLexNowDoc)
             )";
       std::vector<TokenKindType> expectedTokens {
          TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
-               TokenKindType::T_END_HEREDOC,
+               TokenKindType::T_END_HEREDOC, TokenKindType::T_SEMICOLON,
       };
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
-      dumpTokens(tokens);
+      Token token1 = tokens.at(1);
+      std::string expected = "polarphp is developed by Chinese Ma Nong";
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token1.getValue<std::string>(), expected);
    }
 
    {
@@ -1100,15 +1104,40 @@ TEST_F(LexerTest, testLexNowDoc)
             )";
       std::vector<TokenKindType> expectedTokens {
          TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
-               TokenKindType::T_END_HEREDOC,
+               TokenKindType::T_END_HEREDOC, TokenKindType::T_SEMICOLON,
       };
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
       std::string expected =
             R"('polarphp \r\n \n \t is very good, version is $version,
-            develop by \'Chinese coder\'. \\ hahaha')";
+develop by \'Chinese coder\'. \\ hahaha')";
       Token token1 = tokens.at(1);
       ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
       ASSERT_EQ(token1.getValue<std::string>(), expected);
+   }
+
+   {
+      /// test indentation
+      const char *source =
+            R"(
+            <<<'POLARPHP'
+            'polarphp \r\n \n \t is very good, version is $version,
+            develop by \'Chinese coder\'. \\ hahaha'
+               POLARPHP;+'name';
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_START_HEREDOC, TokenKindType::T_ERROR,
+               TokenKindType::T_END_HEREDOC, TokenKindType::T_SEMICOLON,
+               TokenKindType::T_PLUS_SIGN, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_SEMICOLON,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      Token token2 = tokens.at(5);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::String);
+
+      ASSERT_EQ(token1.getValue<std::string>(), "Invalid body indentation level (expecting an indentation level of at least 15)");
+      ASSERT_EQ(token2.getValue<std::string>(), "name");
    }
 }
 

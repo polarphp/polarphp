@@ -445,7 +445,7 @@ bool strip_multiline_string_indentation(Lexer &lexer, std::string &str, int inde
       copy += len;
       ++newLineCount;
    }
-   str.reserve(copy - str.data());
+   str.resize(copy - str.data());
    return true;
 }
 

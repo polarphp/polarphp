@@ -140,6 +140,17 @@ public:
       return m_flags.isLexingBinaryString();
    }
 
+   Lexer &setCheckHeredocIndentation(bool value)
+   {
+      m_flags.setCheckHeredocIndentation(value);
+      return *this;
+   }
+
+   bool isCheckHeredocIndentation()
+   {
+      return m_flags.isCheckHeredocIndentation();
+   }
+
    unsigned int getBufferId() const
    {
       return m_bufferId;

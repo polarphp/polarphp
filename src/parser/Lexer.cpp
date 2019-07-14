@@ -1071,13 +1071,13 @@ void Lexer::lexHeredocBody()
    yylength = yycursor - yytext;
    /// scan ahead and normal mode both need exclude newline
    std::string filteredStr(reinterpret_cast<const char *>(yytext), yylength - newlineLength);
-   if (!m_flags.isHeredocScanAhead() && !m_flags.isLexExceptionOccurred() && isInParseMode()) {
+   if (!m_flags.isHeredocScanAhead() && !m_flags.isLexExceptionOccurred() && (isInParseMode() || m_flags.isCheckHeredocIndentation())) {
       /// TODO
       /// need review here
       bool newlineAtStart = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
       if (!strip_multiline_string_indentation(*this, filteredStr, label->indentation, label->intentationUseSpaces,
                                               newlineAtStart, newlineLength != 0)) {
-         formToken(TokenKindType::T_ERROR, yytext);
+         formErrorToken(yytext);
          return;
       }
       const unsigned char *ptr = reinterpret_cast<const unsigned char *>(filteredStr.data());
@@ -1169,7 +1169,7 @@ void Lexer::lexNowdocBody()
    }
    yylength = yycursor - yytext;
    std::string filteredStr(reinterpret_cast<const char *>(yytext), yylength - newlineLength);
-   if (!m_flags.isLexExceptionOccurred() && spacing != 0 /*&& isInParseMode()*/) {
+   if (!m_flags.isLexExceptionOccurred() && spacing != 0 && (isInParseMode() || m_flags.isCheckHeredocIndentation())) {
       bool newlineAtStart = *(yytext - 1) == '\n' || *(yytext - 1) == '\r';
       if (!strip_multiline_string_indentation(*this, filteredStr, indentation, spacing == HEREDOC_USING_SPACES,
                                               newlineAtStart, newlineLength != 0)) {
