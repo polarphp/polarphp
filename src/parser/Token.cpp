@@ -53,6 +53,9 @@ void Token::dump(RawOutStream &outStream) const
          const std::string &text = getValue<std::string>();
          outStream << "length: " << text.size() << "\n";
          outStream << "value: " << text << "\n";
+      } else if (m_kind == TokenKindType::T_ERROR && hasValue()) {
+         outStream << "error: ";
+         outStream << getValue<std::string>() << "\n";
       }
    } else {
       outStream << "value: invalid lex value" << "\n";
