@@ -403,7 +403,7 @@ bool strip_multiline_string_indentation(Lexer &lexer, std::string &str, int inde
    if (!newlineAtStart) {
       newLine = next_newline(cursor, end, newlineLen);
       if (nullptr == newLine) {
-         return false;
+         return true;
       }
       cursor = newLine + newlineLen;
       copy = const_cast<char *>(newLine) + newlineLen;

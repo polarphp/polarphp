@@ -514,6 +514,7 @@ private:
    bool lexUnknown(bool emitDiagnosticsIfToken);
    NullCharacterKind getNullCharacterKind(const unsigned char *ptr) const;
 
+   bool nextLineHasHeredocEndMarker();
    bool isFoundHeredocEndMarker(std::shared_ptr<HereDocLabel> label) const
    {
       long int labelLength = label->name.size();

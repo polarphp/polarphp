@@ -1263,6 +1263,167 @@ TEST_F(LexerTest, testLexHereDoc)
    }
 
    {
+      /// test $info[123] and $info->name
+      const char *source =
+            R"(
+            <<<POLARPHP
+            name is $info[123]
+            name is $info->name.
+            POLARPHP;
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+               TokenKindType::T_VARIABLE, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+               TokenKindType::T_VARIABLE, TokenKindType::T_OBJECT_OPERATOR,
+               TokenKindType::T_IDENTIFIER_STRING, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+               TokenKindType::T_END_HEREDOC, TokenKindType::T_SEMICOLON,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+
+      Token token1 = tokens.at(1);
+      Token token2 = tokens.at(2);
+      Token token3 = tokens.at(3);
+
+      Token token4 = tokens.at(4);
+      Token token5 = tokens.at(6);
+      Token token6 = tokens.at(7);
+
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token1.getValue<std::string>(), "name is ");
+      ASSERT_EQ(token2.getValue<std::string>(), "info");
+      std::string expected = "[123]\nname is ";
+      ASSERT_EQ(token3.getValue<std::string>(), expected);
+
+      ASSERT_EQ(token4.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token5.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token6.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token4.getValue<std::string>(), "info");
+      ASSERT_EQ(token5.getValue<std::string>(), "name");
+      ASSERT_EQ(token6.getValue<std::string>(), ".");
+   }
+
+   {
+      /// name is ${info}.
+      const char *source =
+            R"(
+            <<<POLARPHP
+            name is ${info}.
+            POLARPHP;
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+               TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_STRING_VARNAME,
+               TokenKindType::T_RIGHT_BRACE, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+               TokenKindType::T_END_HEREDOC, TokenKindType::T_SEMICOLON,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      Token token2 = tokens.at(3);
+      Token token3 = tokens.at(5);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token1.getValue<std::string>(), "name is ");
+      ASSERT_EQ(token2.getValue<std::string>(), "info");
+      ASSERT_EQ(token3.getValue<std::string>(), ".");
+   }
+
+   {
+      /// name is ${info[1]}.
+      const char *source =
+            R"(
+            <<<POLARPHP
+            name is ${info[1]}.
+            POLARPHP;
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+               TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_STRING_VARNAME,
+               TokenKindType::T_LEFT_SQUARE_BRACKET, TokenKindType::T_LNUMBER,
+               TokenKindType::T_RIGHT_SQUARE_BRACKET, TokenKindType::T_RIGHT_BRACE,
+               TokenKindType::T_ENCAPSED_AND_WHITESPACE, TokenKindType::T_END_HEREDOC,
+               TokenKindType::T_SEMICOLON,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      Token token2 = tokens.at(3);
+      Token token3 = tokens.at(5);
+      Token token4 = tokens.at(8);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::LongLong);
+      ASSERT_EQ(token4.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token1.getValue<std::string>(), "name is ");
+      ASSERT_EQ(token2.getValue<std::string>(), "info");
+      ASSERT_EQ(token3.getValue<std::int64_t>(), 1);
+      ASSERT_EQ(token4.getValue<std::string>(), ".");
+   }
+
+   {
+      /// name is ${info["name"]}.
+      const char *source =
+            R"(
+            <<<POLARPHP
+            name is ${info["name"]}.
+            POLARPHP;
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+               TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_STRING_VARNAME,
+               TokenKindType::T_LEFT_SQUARE_BRACKET, TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_RIGHT_SQUARE_BRACKET, TokenKindType::T_RIGHT_BRACE,
+               TokenKindType::T_ENCAPSED_AND_WHITESPACE, TokenKindType::T_END_HEREDOC,
+               TokenKindType::T_SEMICOLON,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      Token token2 = tokens.at(3);
+      Token token3 = tokens.at(6);
+      Token token4 = tokens.at(10);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token4.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token1.getValue<std::string>(), "name is ");
+      ASSERT_EQ(token2.getValue<std::string>(), "info");
+      ASSERT_EQ(token3.getValue<std::string>(), "name");
+      ASSERT_EQ(token4.getValue<std::string>(), ".");
+   }
+
+   {
+      /// name is ${info["name"]}.
+      const char *source =
+            R"(
+            <<<POLARPHP
+            name is ${info->name}.
+            POLARPHP;
+            )";
+      std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+               TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_IDENTIFIER_STRING,
+               TokenKindType::T_OBJECT_OPERATOR, TokenKindType::T_IDENTIFIER_STRING,
+               TokenKindType::T_RIGHT_BRACE, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+               TokenKindType::T_END_HEREDOC, TokenKindType::T_SEMICOLON,
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      Token token1 = tokens.at(1);
+      Token token2 = tokens.at(3);
+      Token token3 = tokens.at(5);
+      Token token4 = tokens.at(7);
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token4.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token1.getValue<std::string>(), "name is ");
+      ASSERT_EQ(token2.getValue<std::string>(), "info");
+      ASSERT_EQ(token3.getValue<std::string>(), "name");
+      ASSERT_EQ(token4.getValue<std::string>(), ".");
+   }
+
+   {
       /// test unclosed nowdoc
       const char *source =
             R"(
@@ -1284,4 +1445,22 @@ TEST_F(LexerTest, testLexHereDoc)
       ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
       ASSERT_EQ(token1.getValue<std::string>(), expected);
    }
+
+   {
+      /// test nested heredoc, note this only allowed at lex stage, not allowed at parse stage
+      const char *source =
+            R"(
+            <<<POLARPHP
+            polarphp version: ${version->name;<<<XXX
+               some text here
+               XXX;
+            }
+            POLARPHP;
+            )";
+      std::vector<TokenKindType> expectedTokens {
+      };
+      std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
+      dumpTokens(tokens);
+   }
+
 }

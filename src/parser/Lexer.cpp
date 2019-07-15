@@ -407,6 +407,36 @@ Lexer::NullCharacterKind Lexer::getNullCharacterKind(const unsigned char *ptr) c
    return NullCharacterKind::Embedded;
 }
 
+bool Lexer::nextLineHasHeredocEndMarker()
+{
+   if (m_heredocLabelStack.empty()) {
+      return false;
+   }
+   const unsigned char *savedCursor = m_yyCursor;
+   const unsigned char *&cursor = m_yyCursor;
+   const unsigned char *yylimit = m_artificialEof;
+   std::shared_ptr<HereDocLabel> label = m_heredocLabelStack.top();
+   /// trim
+   while (cursor < yylimit) {
+      switch (*cursor++) {
+      case '\n':
+      case '\t':
+      case ' ':
+         continue;
+      default:
+         --cursor;
+         break;
+      }
+      break;
+   }
+   bool found = false;
+   if (isFoundHeredocEndMarker(label) && !isLabelStart(cursor[label->name.size()])) {
+       found = true;
+   }
+   cursor = savedCursor;
+   return found;
+}
+
 void Lexer::notifyLexicalException(StringRef msg, int code)
 {
    m_flags.setLexExceptionOccurred(true);

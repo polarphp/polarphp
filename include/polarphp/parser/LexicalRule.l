@@ -720,6 +720,10 @@ restart_lex:
    if (!lexer.yyConditonStackEmpty()) {
       lexer.popYYCondtion();
    }
+   if (lexer.m_yyCondition == COND_NAME(ST_HEREDOC) && lexer.nextLineHasHeredocEndMarker()) {
+      /// check next line is heredoc endmarker
+      lexer.m_flags.setReserveHeredocSpaces(true);
+   }
    lexer.formToken(TokenKindType::T_RIGHT_BRACE, lexer.getYYText());
    return;
 }
