@@ -1458,9 +1458,32 @@ TEST_F(LexerTest, testLexHereDoc)
             POLARPHP;
             )";
       std::vector<TokenKindType> expectedTokens {
+         TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
+               TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_IDENTIFIER_STRING,
+               TokenKindType::T_OBJECT_OPERATOR, TokenKindType::T_IDENTIFIER_STRING,
+               TokenKindType::T_SEMICOLON, TokenKindType::T_START_HEREDOC,
+               TokenKindType::T_ENCAPSED_AND_WHITESPACE, TokenKindType::T_END_HEREDOC,
+               TokenKindType::T_SEMICOLON, TokenKindType::T_RIGHT_BRACE,
+               TokenKindType::T_ENCAPSED_AND_WHITESPACE, TokenKindType::T_END_HEREDOC,
+               TokenKindType::T_SEMICOLON,
       };
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
-      dumpTokens(tokens);
-   }
+      Token token1 = tokens.at(1);
+      Token token2 = tokens.at(3);
+      Token token3 = tokens.at(5);
+      Token token4 = tokens.at(8);
+      Token token5 = tokens.at(12);
 
+      ASSERT_EQ(token1.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token2.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token3.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token4.getValueType(), Token::ValueType::String);
+      ASSERT_EQ(token5.getValueType(), Token::ValueType::String);
+
+      ASSERT_EQ(token1.getValue<std::string>(), "polarphp version: ");
+      ASSERT_EQ(token2.getValue<std::string>(), "version");
+      ASSERT_EQ(token3.getValue<std::string>(), "name");
+      ASSERT_EQ(token4.getValue<std::string>(), "some text here");
+      ASSERT_EQ(token5.getValue<std::string>(), "");
+   }
 }
