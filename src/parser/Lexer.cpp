@@ -1010,8 +1010,8 @@ void Lexer::lexHeredocBody()
             yylength = yycursor - yytext;
             handle_newlines(*this, yytext, yylength);
             formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
-            /// TODO
-            /// set empty str or just nothing
+            /// save unclosed string into token
+            m_nextToken.setValue(StringRef(reinterpret_cast<const char *>(yytext), yylength));
             return;
          }
          /// Check for ending label on the next line

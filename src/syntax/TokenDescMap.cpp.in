@@ -23,7 +23,7 @@ static const std::map<TokenKindType, TokenDescItemType> scg_tokenDescTable{
 TokenDescItemType retrieve_token_desc_entry(TokenKindType kind)
 {
    if (scg_tokenDescTable.find(kind) == scg_tokenDescTable.end()) {
-      kind = TokenKindType::T_UNKOWN_MARK;
+      kind = TokenKindType::T_UNKNOWN_MARK;
    }
    return scg_tokenDescTable.at(kind);
 }
