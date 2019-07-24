@@ -25,8 +25,9 @@
 
 #include "polarphp/basic/adt/PointerUnion.h"
 #include "polarphp/parser/SourceLoc.h"
-#include "polarphp/parser/ParsedRawSyntaxNode.h"
-#include "polarphp/parser/ParsedRawSyntaxRecorder.h"
+#include "polarphp/syntax/TokenKinds.h"
+#include "polarphp/utils/Allocator.h"
+#include "polarphp/syntax/SyntaxKind.h"
 
 namespace polar::ast {
 class DiagnosticEngine;
@@ -39,6 +40,7 @@ class ParsedTokenSyntax;
 struct ParsedTrivia;
 class Token;
 
+using polar::syntax::SyntaxKind;
 using polar::syntax::internal::TokenKindType;
 using polar::ast::DiagnosticEngine;
 
@@ -97,20 +99,13 @@ public:
 
       unsigned bufferId;
 
-      // storage for Collected parts.
-      std::vector<ParsedRawSyntaxNode> storage;
-
-      ParsedRawSyntaxRecorder recorder;
-
       polar::utils::BumpPtrAllocator scratchAlloc;
 
       RootContextData(DiagnosticEngine &diags,
-                      SourceManager &sourceMgr, unsigned bufferId,
-                      std::shared_ptr<SyntaxParseActions> spActions)
+                      SourceManager &sourceMgr, unsigned bufferId)
          : diags(diags),
            sourceMgr(sourceMgr),
-           bufferId(bufferId),
-           recorder(std::move(spActions))
+           bufferId(bufferId)
       {}
    };
 
@@ -147,19 +142,6 @@ private:
       NotSet,
    };
 
-   // When this context is a root, this points to an instance of RootContextData;
-   // When this context isn't a root, this points to the parent context.
-   const polar::utils::PointerUnion<RootContextData *, SyntaxParsingContext *>
-   m_rootDataOrParent;
-
-   // Reference to the
-   SyntaxParsingContext *&m_ctxtHolder;
-
-   RootContextData *m_rootData;
-
-   // Offet for 'storage' this context owns from.
-   const size_t m_offset;
-
    // Operation on destruction.
    AccumulationMode m_mode = AccumulationMode::NotSet;
 
@@ -177,41 +159,17 @@ private:
    // If false, context does nothing.
    bool m_enabled;
 
-   /// Create a syntax node using the tail \c N elements of collected parts and
-   /// replace those parts with the single result.
-   void createNodeInPlace(SyntaxKind kind, size_t N,
-                          SyntaxNodeCreationKind nodeCreateK);
-
-   ArrayRef<ParsedRawSyntaxNode> getParts() const
-   {
-      return polar::basic::make_array_ref(getStorage()).drop_front(m_offset);
-   }
-
-   ParsedRawSyntaxNode makeUnknownSyntax(SyntaxKind kind,
-                                         ArrayRef<ParsedRawSyntaxNode> parts);
-   ParsedRawSyntaxNode createSyntaxAs(SyntaxKind kind,
-                                      ArrayRef<ParsedRawSyntaxNode> parts,
-                                      SyntaxNodeCreationKind nodeCreateK);
-   std::optional<ParsedRawSyntaxNode> bridgeAs(SyntaxContextKind kind,
-                                          ArrayRef<ParsedRawSyntaxNode> parts);
-
 public:
    /// Construct root context.
    SyntaxParsingContext(SyntaxParsingContext *&ctxtHolder,
                         DiagnosticEngine &diags, SourceManager &sourceMgr,
-                        unsigned bufferId, std::shared_ptr<SyntaxParseActions> actions);
+                        unsigned bufferId);
 
    /// Designated constructor for child context.
    SyntaxParsingContext(SyntaxParsingContext *&ctxtHolder)
-      : m_rootDataOrParent(ctxtHolder),
-        m_ctxtHolder(ctxtHolder),
-        m_rootData(ctxtHolder->m_rootData),
-        m_offset(m_rootData->storage.size()),
-        m_isBacktracking(ctxtHolder->m_isBacktracking),
+      : m_isBacktracking(ctxtHolder->m_isBacktracking),
         m_enabled(ctxtHolder->isEnabled())
    {
-      assert(ctxtHolder->isTopOfContextStack() &&
-             "SyntaxParsingContext cannot have multiple children");
       assert(ctxtHolder->m_mode != AccumulationMode::SkippedForIncrementalUpdate &&
             "Cannot create child context for a node loaded from the cache");
       ctxtHolder = this;
@@ -220,13 +178,11 @@ public:
    SyntaxParsingContext(SyntaxParsingContext *&ctxtHolder, SyntaxContextKind kind)
       : SyntaxParsingContext(ctxtHolder)
    {
-      setCoerceKind(kind);
    }
 
    SyntaxParsingContext(SyntaxParsingContext *&ctxtHolder, SyntaxKind kind)
       : SyntaxParsingContext(ctxtHolder)
    {
-      setCreateSyntax(kind);
    }
 
    ~SyntaxParsingContext();
@@ -248,141 +204,6 @@ public:
    {
       return m_enabled;
    }
-
-   bool isRoot() const
-   {
-      return m_rootDataOrParent.is<RootContextData*>();
-   }
-
-   bool isTopOfContextStack() const
-   {
-      return this == m_ctxtHolder;
-   }
-
-   SyntaxParsingContext *getParent() const
-   {
-      return m_rootDataOrParent.get<SyntaxParsingContext*>();
-   }
-
-   RootContextData *getRootData()
-   {
-      return m_rootData;
-   }
-
-   const RootContextData *getRootData() const
-   {
-      return m_rootData;
-   }
-
-   std::vector<ParsedRawSyntaxNode> &getStorage()
-   {
-      return getRootData()->storage;
-   }
-
-   const std::vector<ParsedRawSyntaxNode> &getStorage() const
-   {
-      return getRootData()->storage;
-   }
-
-   const SyntaxParsingContext *getRoot() const;
-
-   ParsedRawSyntaxRecorder &getRecorder()
-   {
-      return getRootData()->recorder;
-   }
-
-   polar::utils::BumpPtrAllocator &getScratchAlloc()
-   {
-      return getRootData()->scratchAlloc;
-   }
-
-   /// Add RawSyntax to the parts.
-   void addRawSyntax(ParsedRawSyntaxNode raw);
-
-   /// Add Token with Trivia to the parts.
-   void addToken(Token &token, const ParsedTrivia &leadingTrivia,
-                 const ParsedTrivia &trailingTrivia);
-
-   /// Add Syntax to the parts.
-   void addSyntax(ParsedSyntax node);
-
-
-   template<typename SyntaxNode>
-   std::optional<SyntaxNode> popIf()
-   {
-      auto &storage = getStorage();
-      assert(storage.size() > m_offset);
-      if (SyntaxNode::kindOf(storage.back().getKind())) {
-         auto rawNode = std::move(storage.back());
-         storage.pop_back();
-         return SyntaxNode(rawNode);
-      }
-      return std::nullopt;
-   }
-
-   ParsedTokenSyntax popToken();
-
-   /// Create a node using the tail of the collected parts. The number of parts
-   /// is automatically determined from \c kind. Node: limited number of \c kind
-   /// are supported. See the implementation.
-   void createNodeInPlace(SyntaxKind kind,
-                          SyntaxNodeCreationKind nodeCreateK = SyntaxNodeCreationKind::Recorded);
-
-   /// Squashing nodes from the back of the pending syntax list to a given syntax
-   /// collection kind. If there're no nodes that can fit into the collection kind,
-   /// this function does nothing. Otherwise, it creates a collection node in place
-   /// to contain all sequential suitable nodes from back.
-   void collectNodesInPlace(SyntaxKind colletionKind,
-                            SyntaxNodeCreationKind nodeCreateK = SyntaxNodeCreationKind::Recorded);
-
-   /// On destruction, construct a specified kind of syntax node consuming the
-   /// collected parts, then append it to the parent context.
-   void setCreateSyntax(SyntaxKind kind)
-   {
-      m_mode = AccumulationMode::CreateSyntax;
-      m_synKind = kind;
-   }
-
-   /// Same as \c setCreateSyntax but create a deferred node instead of a
-   /// recorded one.
-   void setDeferSyntax(SyntaxKind kind)
-   {
-      m_mode = AccumulationMode::DeferSyntax;
-      m_synKind = kind;
-   }
-
-   /// On destruction, if the parts size is 1 and it's kind of \c kind, just
-   /// append it to the parent context. Otherwise, create Unknown{kind} node from
-   /// the collected parts.
-   void setCoerceKind(SyntaxContextKind kind)
-   {
-      m_mode = AccumulationMode::CoerceKind;
-      m_ctxtKind = kind;
-   }
-
-   /// Move the collected parts to the tail of parent context.
-   void setTransparent()
-   {
-      m_mode = AccumulationMode::Transparent;
-   }
-
-   /// This context is a back tracking context, so we should discard collected
-   /// parts on this context.
-   void setBackTracking() {
-      m_mode = AccumulationMode::Discard;
-      m_isBacktracking = true;
-   }
-
-   bool isBacktracking() const
-   {
-      return m_isBacktracking;
-   }
-
-   /// Explicitly finalizing syntax tree creation.
-   /// This function will be called during the destroying of a root syntax
-   /// parsing context. However, we can explicitly call this function to get
-   /// the syntax tree before closing the root context.
-   ParsedRawSyntaxNode finalizeRoot();
 
    /// Make a missing node corresponding to the given token kind and
    /// push this node into the context. The synthesized node can help
