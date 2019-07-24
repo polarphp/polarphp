@@ -24,7 +24,6 @@
 #include <vector>
 #include <cstdlib>
 
-
 #if __has_include(<sys/mman.h>)
 # include <sys/mman.h>
 # define HAS_MMAP 1

@@ -18,7 +18,8 @@ add_library(AbstractParserSupport SHARED
    AbstractParserTestCase.h
    AbstractParserTestCase.cpp)
 
-target_link_libraries(AbstractParserSupport PUBLIC PolarParser)
+target_include_directories(AbstractParserSupport PRIVATE ${POLAR_THIRDPARTY_DIR}/googletest/googletest/include)
+target_link_libraries(AbstractParserSupport PUBLIC PolarParser PolarUtils ${POLAR_TEMP_GTEST_LIBS})
 
 add_subdirectory(commonsyntaxnode)
 add_subdirectory(declsyntaxnode)

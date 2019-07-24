@@ -8,3 +8,11 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/07/24.
+
+#include "AbstractParserTestCase.h"
+
+namespace polar::uittest {
+
+
+
+} // polar::uittest

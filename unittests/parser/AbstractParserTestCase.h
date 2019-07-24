@@ -8,3 +8,27 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/07/24.
+
+#ifndef UNITTEST_PARSER_ABSTRACT_PARSER_TESTCASE_H
+#define UNITTEST_PARSER_ABSTRACT_PARSER_TESTCASE_H
+
+#include "gtest/gtest.h"
+#include "polarphp/kernel/LangOptions.h"
+#include "polarphp/syntax/Trivia.h"
+#include "polarphp/parser/SourceMgr.h"
+#include "polarphp/parser/Lexer.h"
+#include "polarphp/parser/Token.h"
+#include "polarphp/ast/DiagnosticConsumer.h"
+#include "polarphp/ast/DiagnosticEngine.h"
+#include "polarphp/utils/MemoryBuffer.h"
+
+namespace polar::unittest {
+
+class AbstractParserTestCase : public ::testing::Test
+{
+
+};
+
+} // polar::uittest
+
+#endif // UNITTEST_PARSER_ABSTRACT_PARSER_TESTCASE_H
