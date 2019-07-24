@@ -13,4 +13,9 @@ polar_add_unittest(PolarCompilerTests ParserTest
    ../TestEntry.cpp
    LexerTest.cpp)
 
+add_subdirectory(commonsyntaxnode)
+add_subdirectory(declsyntaxnode)
+add_subdirectory(exprsyntaxnode)
+add_subdirectory(stmtsyntaxnode)
+
 target_link_libraries(ParserTest PRIVATE PolarParser)
