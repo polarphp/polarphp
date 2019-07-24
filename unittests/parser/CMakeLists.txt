@@ -9,13 +9,20 @@
 #
 # Created by polarboy on 2019/06/14.
 
-polar_add_unittest(PolarCompilerTests ParserTest
+polar_add_unittest(PolarCompilerTests ParserLexerTest
    ../TestEntry.cpp
    LexerTest.cpp)
+target_link_libraries(ParserLexerTest PRIVATE PolarParser)
+
+add_library(AbstractParserSupport SHARED
+   AbstractParserTestCase.h
+   AbstractParserTestCase.cpp)
+
+target_link_libraries(AbstractParserSupport PUBLIC PolarParser)
 
 add_subdirectory(commonsyntaxnode)
 add_subdirectory(declsyntaxnode)
 add_subdirectory(exprsyntaxnode)
 add_subdirectory(stmtsyntaxnode)
 
-target_link_libraries(ParserTest PRIVATE PolarParser)
+
