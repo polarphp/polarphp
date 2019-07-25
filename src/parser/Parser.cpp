@@ -31,13 +31,16 @@ Parser::Parser(SourceManager &sourceMgr, std::shared_ptr<DiagnosticEngine> diags
      m_diags(diags),
      m_lexer(lexer.release())
 {
+   m_yyParser = std::make_unique<internal::YYParser>(this, m_lexer);
    m_token.setKind(TokenKindType::T_UNKNOWN_MARK);
 }
 
-void Parser::parse()
+bool Parser::parse()
 {
    m_inCompilation = true;
+   int status = m_yyParser->parse();
    m_inCompilation = false;
+   return status;
 }
 
 std::shared_ptr<Syntax> Parser::getSyntaxTree()

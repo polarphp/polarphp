@@ -23,7 +23,7 @@ using namespace polar::basic;
 
 #define POLAR_IS_OCT(c)  ((c)>='0' && (c)<='7')
 
-int token_lex_wrapper(ParserSemantic *value, YYLocation *loc, Lexer *lexer)
+int token_lex_wrapper(ParserSemantic *value, YYLocation *loc, Lexer *lexer, Parser *parser)
 {
    Token token;
    lexer->setSemanticValueContainer(value);
@@ -36,6 +36,7 @@ size_t count_str_newline(const unsigned char *str, size_t length)
 {
    const unsigned char *p = str;
    const unsigned char *boundary = p + length;
+
    size_t count = 0;
    while (p < boundary) {
       if (*p == '\n' || (*p == '\r' && (*(p+1) != '\n'))) {

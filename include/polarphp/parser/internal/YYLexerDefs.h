@@ -31,7 +31,7 @@ using polar::basic::StringRef;
 namespace internal {
 using YYLocation = location;
 /// bison -> polar lexer
-int token_lex_wrapper(ParserSemantic *value, YYLocation *loc, Lexer *lexer);
+int token_lex_wrapper(ParserSemantic *value, YYLocation *loc, Lexer *lexer, Parser *parser);
 /// polar lexer -> yy lexer
 void yy_token_lex(Lexer &lexer);
 void do_yy_token_lex(int &token, int &offset, int &startLine,

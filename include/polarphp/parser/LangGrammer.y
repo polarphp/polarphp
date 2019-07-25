@@ -2,6 +2,7 @@
 %language "c++"
 %expect 0
 %locations
+
 %define api.prefix {polar_yy_}
 %define api.namespace{polar::parser::internal}
 %define api.value.type variant
@@ -13,6 +14,7 @@
 %parse-param {polar::parser::Parser *parser}
 %parse-param {polar::parser::Lexer *lexer}
 %lex-param {polar::parser::Lexer *lexer}
+%lex-param {polar::parser::Parser *parser}
 
 %code requires{
 // This source file is part of the polarphp.org open source project
@@ -41,7 +43,7 @@ class Lexer;
 #define polar_yy_lex polar::parser::internal::token_lex_wrapper
 namespace polar::parser::internal {
 using ParserSemantic = YYParser::semantic_type;
-int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer);
+int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer, Parser *parser);
 } // polar::parser::internal
 }
 

@@ -58,7 +58,7 @@ public:
    Parser(const Parser &) = delete;
    Parser &operator =(const Parser &) = delete;
 
-   void parse();
+   bool parse();
    std::shared_ptr<Syntax> getSyntaxTree();
 
    ///
@@ -78,7 +78,7 @@ private:
 
    SourceManager &m_sourceMgr;
    Lexer *m_lexer;
-   internal::YYParser *m_yyParser;
+   std::unique_ptr<internal::YYParser> m_yyParser;
 
    /// The location of the previous token.
    SourceLoc m_previousLoc;
