@@ -21,12 +21,37 @@
 #include "polarphp/ast/DiagnosticConsumer.h"
 #include "polarphp/ast/DiagnosticEngine.h"
 #include "polarphp/utils/MemoryBuffer.h"
+#include "polarphp/syntax/Syntax.h"
 
 namespace polar::unittest {
 
+using polar::kernel::LangOptions;
+using polar::syntax::TriviaKind;
+using polar::syntax::TokenKindType;
+using polar::syntax::RefCountPtr;
+using polar::syntax::Syntax;
+using polar::parser::SourceManager;
+using polar::parser::SourceLoc;
+using polar::parser::Lexer;
+using polar::parser::Token;
+using polar::basic::StringRef;
+using polar::basic::ArrayRef;
+using polar::parser::ParsedTrivia;
+using polar::parser::TriviaRetentionMode;
+using polar::parser::CommentRetentionMode;
+
 class AbstractParserTestCase : public ::testing::Test
 {
+public:
+   void SetUp()
+   {
+   }
 
+   RefCountPtr<Syntax> parseSource(StringRef source);
+
+private:
+   LangOptions m_langOpts;
+   SourceManager m_sourceMgr;
 };
 
 } // polar::uittest

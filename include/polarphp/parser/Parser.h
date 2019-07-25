@@ -19,6 +19,7 @@
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/parser/CommonDefs.h"
 #include "polarphp/parser/Token.h"
+#include "polarphp/parser/ParsedTrivia.h"
 
 namespace polar::ast {
 class DiagnosticEngine;
@@ -28,17 +29,19 @@ namespace polar::kernel {
 class LangOptions;
 } // polar::kernel
 
+namespace polar::syntax {
+class Syntax;
+} // polar::syntax
+
 namespace polar::parser {
 
 using polar::basic::StringRef;
 using polar::ast::DiagnosticEngine;
 using polar::kernel::LangOptions;
+using polar::syntax::Syntax;
 
 class SourceManager;
 class Lexer;
-
-class AstNode
-{};
 
 void parse_error(StringRef msg);
 
@@ -52,7 +55,14 @@ public:
    Parser &operator =(const Parser &) = delete;
 
    void parse();
-   void getSyntaxTree();
+   std::shared_ptr<Syntax> getSyntaxTree();
+   const Token &peekToken();
+   SourceLoc getEndOfPreviousLoc();
+
+   ///
+   /// TODO
+   /// state manage methods
+   ///
 
    ~Parser();
 
@@ -65,9 +75,22 @@ private:
    DiagnosticEngine &m_diags;
    Lexer *m_lexer;
 
+   /// The location of the previous token.
+   SourceLoc m_previousLoc;
+
    Token m_token;
+
+   /// leading trivias for \c Token.
+   /// Always empty if not shouldBuildSyntaxTree.
+   ParsedTrivia m_leadingTrivia;
+
+   /// trailing trivias for \c Token.
+   /// Always empty if not shouldBuildSyntaxTree.
+   ParsedTrivia m_trailingTrivia;
+
    std::string m_docComment;
    std::list<std::string> m_openFiles;
+   std::shared_ptr<Syntax> m_ast;
 };
 
 } // polar::parser

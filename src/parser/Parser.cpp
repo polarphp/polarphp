@@ -9,9 +9,10 @@
 //
 // Created by polarboy on 2019/05/09.
 
-#include "polarphp/parser/Parser.h"
 #include "polarphp/kernel/LangOptions.h"
+#include "polarphp/parser/Parser.h"
 #include "polarphp/parser/Lexer.h"
+#include "polarphp/syntax/Syntax.h"
 
 namespace polar::parser {
 
@@ -31,6 +32,17 @@ Parser::Parser(SourceManager &sourceMgr, DiagnosticEngine &diags,
      m_lexer(lexer.release())
 {
    m_token.setKind(TokenKindType::T_UNKNOWN_MARK);
+}
+
+void Parser::parse()
+{
+
+}
+
+std::shared_ptr<Syntax> Parser::getSyntaxTree()
+{
+   assert(m_token.is(TokenKindType::END) && "not done parsing yet");
+   return m_ast;
 }
 
 Parser::~Parser()

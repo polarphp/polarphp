@@ -10,9 +10,15 @@
 // Created by polarboy on 2019/07/24.
 
 #include "AbstractParserTestCase.h"
+#include "polarphp/parser/Parser.h"
 
-namespace polar::uittest {
+namespace polar::unittest {
 
+using polar::parser::Parser;
 
+RefCountPtr<Syntax> AbstractParserTestCase::parseSource(StringRef source)
+{
+
+}
 
 } // polar::uittest
