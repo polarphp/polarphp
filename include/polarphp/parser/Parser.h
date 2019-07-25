@@ -37,6 +37,9 @@ namespace polar::parser {
 
 namespace internal {
 class YYParser;
+using YYLocation = location;
+int token_lex_wrapper(ParserSemantic *value, YYLocation *loc,
+                      Lexer *lexer, Parser *parser);
 } // internal
 
 using polar::basic::StringRef;
@@ -72,6 +75,10 @@ protected:
    SourceLoc getEndOfPreviousLoc();
 
 private:
+   friend int internal::token_lex_wrapper(ParserSemantic *value, internal::YYLocation *loc,
+                                          Lexer *lexer, Parser *parser);
+private:
+
    /// info properties
    bool m_parserError = false;
    bool m_inCompilation = false;

@@ -72,6 +72,11 @@ restart_lex:
    return;
 }
 
+<ST_IN_SCRIPTING> "fn" {
+   lexer.formToken(TokenKindType::T_FN, lexer.getYYText());
+   return;
+}
+
 <ST_IN_SCRIPTING> "await" {
    lexer.formToken(TokenKindType::T_AWAIT, lexer.getYYText());
    return;

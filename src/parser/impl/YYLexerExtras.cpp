@@ -14,6 +14,7 @@
 #include "polarphp/basic/CharInfo.h"
 #include "polarphp/parser/Token.h"
 #include "polarphp/parser/Lexer.h"
+#include "polarphp/parser/Parser.h"
 
 #include <string>
 
@@ -29,6 +30,7 @@ int token_lex_wrapper(ParserSemantic *value, YYLocation *loc, Lexer *lexer, Pars
    lexer->setSemanticValueContainer(value);
    lexer->lex(token);
    // setup values that parser need
+   parser->m_token = token;
    return token.getKind();
 }
 

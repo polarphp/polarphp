@@ -16,19 +16,14 @@
 %lex-param {polar::parser::Lexer *lexer}
 %lex-param {polar::parser::Parser *parser}
 
-%code requires{
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/05/09.
-
+%code top {
 #include <cstdint>
+#include <memory>
+
+#include "polarphp/syntax/Syntax.h"
+}
+
+%code requires {
 
 #define YYERROR_VERBOSE
 #define polar_error polar::syntax::parse_error
@@ -47,7 +42,11 @@ int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer, Parser
 } // polar::parser::internal
 }
 
-// %destructor { delete $$; } <ast>
+%code {
+using polar::syntax::Syntax;
+}
+
+// %destructor { delete $$; } <std::shared_ptr<Syntax>>
 // %destructor { if ($$) delete $$; } <str>
 
 %precedence T_INCLUDE T_INCLUDE_ONCE T_REQUIRE T_REQUIRE_ONCE
@@ -105,6 +104,7 @@ int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer, Parser
 %token T_EXTENDS    "extends (T_EXTENDS)"
 %token T_IMPLEMENTS "implements (T_IMPLEMENTS)"
 %token T_FUNCTION   "function (T_FUNCTION)"
+%token T_FN         "fn (T_FN)"
 %token T_CONST      "const (T_CONST)"
 %token T_VAR        "var (T_VAR)"
 %token T_USE        "use (T_USE)"
@@ -287,40 +287,42 @@ int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer, Parser
 /* MISC_MARK_END */
 /* token define end */
 
-%type <std::string> top_statement namespace_name name statement function_declaration_statement
-%type <std::string> class_declaration_statement trait_declaration_statement
-%type <std::string> interface_declaration_statement interface_extends_list
-%type <std::string> group_use_declaration inline_use_declarations inline_use_declaration
-%type <std::string> mixed_group_use_declaration use_declaration unprefixed_use_declaration
-%type <std::string> unprefixed_use_declarations const_decl inner_statement
-%type <std::string> expr optional_expr while_statement for_statement foreach_variable
-%type <std::string> foreach_statement declare_statement finally_statement unset_variable variable
-%type <std::string> extends_from parameter optional_type argument global_var
-%type <std::string> static_var class_statement trait_adaptation trait_precedence trait_alias
-%type <std::string> absolute_trait_method_reference trait_method_reference property echo_expr
-%type <std::string> new_expr anonymous_class class_name class_name_reference simple_variable
-%type <std::string> internal_functions_in_yacc
-%type <std::string> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
-%type <std::string> variable_class_name dereferencable_scalar constant dereferencable
-%type <std::string> callable_expr callable_variable static_member new_variable
-%type <std::string> encaps_var encaps_var_offset isset_variables
-%type <std::string> top_statement_list use_declarations const_list inner_statement_list if_stmt
-%type <std::string> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
-%type <std::string> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
-%type <std::string> implements_list case_list if_stmt_without_else
-%type <std::string> non_empty_parameter_list argument_list non_empty_argument_list property_list
-%type <std::string> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
-%type <std::string> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
-%type <std::string> lexical_var_list encaps_list
-%type <std::string> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
-%type <std::string> isset_variable type return_type type_expr
-%type <std::string> identifier
+%type <std::shared_ptr<Syntax>> top_statement namespace_name name statement function_declaration_statement
+%type <std::shared_ptr<Syntax>> class_declaration_statement trait_declaration_statement
+%type <std::shared_ptr<Syntax>> interface_declaration_statement interface_extends_list
+%type <std::shared_ptr<Syntax>> group_use_declaration inline_use_declarations inline_use_declaration
+%type <std::shared_ptr<Syntax>> mixed_group_use_declaration use_declaration unprefixed_use_declaration
+%type <std::shared_ptr<Syntax>> unprefixed_use_declarations const_decl inner_statement
+%type <std::shared_ptr<Syntax>> expr optional_expr while_statement for_statement foreach_variable
+%type <std::shared_ptr<Syntax>> foreach_statement declare_statement finally_statement unset_variable variable
+%type <std::shared_ptr<Syntax>> extends_from parameter optional_type argument global_var
+%type <std::shared_ptr<Syntax>> static_var class_statement trait_adaptation trait_precedence trait_alias
+%type <std::shared_ptr<Syntax>> absolute_trait_method_reference trait_method_reference property echo_expr
+%type <std::shared_ptr<Syntax>> new_expr anonymous_class class_name class_name_reference simple_variable
+%type <std::shared_ptr<Syntax>> internal_functions_in_yacc
+%type <std::shared_ptr<Syntax>> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
+%type <std::shared_ptr<Syntax>> variable_class_name dereferencable_scalar constant dereferencable
+%type <std::shared_ptr<Syntax>> callable_expr callable_variable static_member new_variable
+%type <std::shared_ptr<Syntax>> encaps_var encaps_var_offset isset_variables
+%type <std::shared_ptr<Syntax>> top_statement_list use_declarations const_list inner_statement_list if_stmt
+%type <std::shared_ptr<Syntax>> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
+%type <std::shared_ptr<Syntax>> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
+%type <std::shared_ptr<Syntax>> implements_list case_list if_stmt_without_else
+%type <std::shared_ptr<Syntax>> non_empty_parameter_list argument_list non_empty_argument_list property_list
+%type <std::shared_ptr<Syntax>> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
+%type <std::shared_ptr<Syntax>> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
+%type <std::shared_ptr<Syntax>> lexical_var_list encaps_list
+%type <std::shared_ptr<Syntax>> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
+%type <std::shared_ptr<Syntax>> isset_variable type return_type type_expr
+%type <std::shared_ptr<Syntax>> identifier
+%type <std::shared_ptr<Syntax>> inline_function
 
-%type <int> returns_ref function is_reference is_variadic variable_modifiers
-%type <int> method_modifiers non_empty_member_modifiers member_modifier
-%type <int> class_modifiers class_modifier use_type backup_fn_flags
+%type <std::uint64_t> returns_ref function fn is_reference is_variadic variable_modifiers
+%type <std::uint64_t> method_modifiers non_empty_member_modifiers member_modifier
+%type <std::uint64_t> class_modifiers class_modifier use_type backup_fn_flags
 
-%type <str> backup_doc_comment
+%type <unsigned char *> backup_lex_pos
+%type <std::string> backup_doc_comment
 
 %% /* Rules */
 
