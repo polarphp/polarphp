@@ -17,15 +17,15 @@
 namespace polar::parser {
 
 Parser::Parser(const LangOptions &langOpts, unsigned bufferId,
-               SourceManager &sourceMgr, DiagnosticEngine &diags)
+               SourceManager &sourceMgr, std::shared_ptr<DiagnosticEngine> diags)
    : Parser(sourceMgr, diags,
             std::unique_ptr<Lexer>(new Lexer(langOpts, sourceMgr, bufferId,
-                                             &diags, langOpts.attachCommentsToDecls ?
+                                             diags.get(), langOpts.attachCommentsToDecls ?
                                                 CommentRetentionMode::AttachToNextToken : CommentRetentionMode::None,
                                              TriviaRetentionMode::WithTrivia)))
 {}
 
-Parser::Parser(SourceManager &sourceMgr, DiagnosticEngine &diags,
+Parser::Parser(SourceManager &sourceMgr, std::shared_ptr<DiagnosticEngine> diags,
                std::unique_ptr<Lexer> lexer)
    : m_sourceMgr(sourceMgr),
      m_diags(diags),
@@ -36,7 +36,8 @@ Parser::Parser(SourceManager &sourceMgr, DiagnosticEngine &diags,
 
 void Parser::parse()
 {
-
+   m_inCompilation = true;
+   m_inCompilation = false;
 }
 
 std::shared_ptr<Syntax> Parser::getSyntaxTree()

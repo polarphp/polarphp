@@ -35,6 +35,10 @@ class Syntax;
 
 namespace polar::parser {
 
+namespace internal {
+class YYParser;
+} // internal
+
 using polar::basic::StringRef;
 using polar::ast::DiagnosticEngine;
 using polar::kernel::LangOptions;
@@ -49,22 +53,23 @@ class Parser
 {
 public:
    Parser(const LangOptions &langOpts, unsigned bufferId, SourceManager &sourceMgr,
-          DiagnosticEngine &diags);
-   Parser(SourceManager &sourceMgr, DiagnosticEngine &diags, std::unique_ptr<Lexer> lexer);
+          std::shared_ptr<DiagnosticEngine> diags);
+   Parser(SourceManager &sourceMgr, std::shared_ptr<DiagnosticEngine> diags, std::unique_ptr<Lexer> lexer);
    Parser(const Parser &) = delete;
    Parser &operator =(const Parser &) = delete;
 
    void parse();
    std::shared_ptr<Syntax> getSyntaxTree();
-   const Token &peekToken();
-   SourceLoc getEndOfPreviousLoc();
 
    ///
    /// TODO
    /// state manage methods
    ///
-
    ~Parser();
+
+protected:
+   const Token &peekToken();
+   SourceLoc getEndOfPreviousLoc();
 
 private:
    /// info properties
@@ -72,8 +77,8 @@ private:
    bool m_inCompilation = false;
 
    SourceManager &m_sourceMgr;
-   DiagnosticEngine &m_diags;
    Lexer *m_lexer;
+   internal::YYParser *m_yyParser;
 
    /// The location of the previous token.
    SourceLoc m_previousLoc;
@@ -89,8 +94,10 @@ private:
    ParsedTrivia m_trailingTrivia;
 
    std::string m_docComment;
-   std::list<std::string> m_openFiles;
    std::shared_ptr<Syntax> m_ast;
+   std::shared_ptr<DiagnosticEngine> m_diags;
+   std::list<std::string> m_openFiles;
+
 };
 
 } // polar::parser

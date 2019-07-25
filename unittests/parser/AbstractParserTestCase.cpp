@@ -16,9 +16,12 @@ namespace polar::unittest {
 
 using polar::parser::Parser;
 
-RefCountPtr<Syntax> AbstractParserTestCase::parseSource(StringRef source)
+std::shared_ptr<Syntax> AbstractParserTestCase::parseSource(StringRef source)
 {
-
+   unsigned bufferId = m_sourceMgr.addMemBufferCopy(source);
+   Parser parser(m_langOpts, bufferId, m_sourceMgr, nullptr);
+   parser.parse();
+   return parser.getSyntaxTree();
 }
 
 } // polar::uittest

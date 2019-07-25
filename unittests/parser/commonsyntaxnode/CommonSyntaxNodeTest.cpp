@@ -10,15 +10,24 @@
 // Created by polarboy on 2019/07/24.
 
 #include "../AbstractParserTestCase.h"
+#include <string>
 
 using polar::unittest::AbstractParserTestCase;
+using polar::syntax::Syntax;
 
 class CommonSyntaxNodeTest : public AbstractParserTestCase
 {
-
+public:
+   void SetUp()
+   {
+   }
 };
 
 TEST_F(CommonSyntaxNodeTest, testBasic)
 {
-
+   std::string source =
+         R"(
+         $name = "polarphp";
+         )";
+   std::shared_ptr<Syntax> ast = parseSource(source);
 }

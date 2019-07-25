@@ -5,9 +5,11 @@
 %define api.prefix {polar_yy_}
 %define api.namespace{polar::parser::internal}
 %define api.value.type variant
+%define api.token.constructor false
 %define api.parser.class {YYParser}
 %define api.location.file "../../../include/polarphp/parser/internal/YYLocation.h"
 %define api.location.include{"polarphp/parser/internal/YYLocation.h"}
+
 %parse-param {polar::parser::Parser *parser}
 %parse-param {polar::parser::Lexer *lexer}
 %lex-param {polar::parser::Lexer *lexer}
