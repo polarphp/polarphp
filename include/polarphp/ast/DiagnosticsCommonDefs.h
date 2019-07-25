@@ -67,9 +67,6 @@ ERROR(error_opening_output, none,
 ERROR(error_no_group_info, none,
       "no group info found for file: '%0'", (StringRef))
 
-NOTE(previous_decldef,none,
-     "previous definition of %0 is here", (DeclBaseName))
-
 NOTE(brace_stmt_suggest_do, none,
      "did you mean to use a 'do' statement?", ())
 
@@ -143,12 +140,6 @@ ERROR(redundant_type_alias_define, none,
 
 NOTE(circular_reference_through, none,
      "through reference here", ())
-
-ERROR(circular_class_inheritance,none,
-      "%0 inherits from itself", (Identifier))
-
-ERROR(circular_enum_inheritance, none,
-      "%0 has a raw type that depends on itself", (Identifier))
 
 #ifndef DIAG_NO_UNDEF
 # if defined(DIAG)

@@ -31,9 +31,6 @@
 #include "polarphp/ast/DiagnosticConsumer.h"
 #include "polarphp/utils/VersionTuple.h"
 #include "polarphp/basic/adt/DenseMap.h"
-#include "polarphp/ast/Identifier.h"
-#include "polarphp/ast/Attr.h"
-#include "polarphp/ast/Type.h"
 
 /// forward declare with namespace
 namespace polar::parser {
@@ -42,10 +39,8 @@ class SourceManager;
 
 namespace polar::ast {
 
-class Decl;
 class ReferenceOwnership;
 class DiagnosticEngine;
-class ValueDecl;
 
 using polar::basic::DenseMap;
 using polar::parser::SourceManager;
@@ -122,13 +117,8 @@ class DiagnosticArgument
       int m_integerVal;
       unsigned m_unsignedVal;
       StringRef m_stringVal;
-      DeclName m_identifierVal;
-      ValueDecl *m_theValueDecl;
-      Type m_typeVal;
-      TypeRepr *m_typeRepr;
       StaticSpellingKind m_staticSpellingKindVal;
       DescriptiveDeclKind m_descriptiveDeclKindVal;
-      const DeclAttribute *m_declAttributeVal;
       VersionTuple m_versionVal;
    };
 
@@ -148,47 +138,6 @@ public:
         m_unsignedVal(uintVal)
    {}
 
-   DiagnosticArgument(DeclName declName)
-      : m_kind(DiagnosticArgumentKind::Identifier),
-        m_identifierVal(declName)
-   {}
-
-   DiagnosticArgument(DeclBaseName declBaseName)
-      : m_kind(DiagnosticArgumentKind::Identifier),
-        m_identifierVal(declBaseName)
-   {}
-
-   DiagnosticArgument(Identifier identifier)
-      : m_kind(DiagnosticArgumentKind::Identifier),
-        m_identifierVal(identifier)
-   {}
-
-   DiagnosticArgument(ValueDecl *valueDecl)
-      : m_kind(DiagnosticArgumentKind::ValueDecl),
-        m_theValueDecl(valueDecl)
-   {}
-
-   DiagnosticArgument(Type type)
-      : m_kind(DiagnosticArgumentKind::Type),
-        m_typeVal(type)
-   {}
-
-   DiagnosticArgument(TypeRepr *typeRepr)
-      : m_kind(DiagnosticArgumentKind::TypeRepr),
-        m_typeRepr(typeRepr)
-   {}
-
-   DiagnosticArgument(const TypeLoc &typeLoc)
-   {
-      if (TypeRepr *typeRepr = typeLoc.getTypeRepr()) {
-         m_kind = DiagnosticArgumentKind::TypeRepr;
-         m_typeRepr = typeRepr;
-      } else {
-         m_kind = DiagnosticArgumentKind::Type;
-         m_typeVal = typeLoc.getType();
-      }
-   }
-
    DiagnosticArgument(StaticSpellingKind ssk)
       : m_kind(DiagnosticArgumentKind::StaticSpellingKind),
         m_staticSpellingKindVal(ssk)
@@ -197,11 +146,6 @@ public:
    DiagnosticArgument(DescriptiveDeclKind ddk)
       : m_kind(DiagnosticArgumentKind::DescriptiveDeclKind),
         m_descriptiveDeclKindVal(ddk)
-   {}
-
-   DiagnosticArgument(const DeclAttribute *attr)
-      : m_kind(DiagnosticArgumentKind::DeclAttribute),
-        m_declAttributeVal(attr)
    {}
 
    DiagnosticArgument(VersionTuple version)
@@ -242,30 +186,6 @@ public:
       return m_unsignedVal;
    }
 
-   DeclName getAsIdentifier() const
-   {
-      assert(m_kind == DiagnosticArgumentKind::Identifier);
-      return m_identifierVal;
-   }
-
-   ValueDecl *getAsValueDecl() const
-   {
-      assert(m_kind == DiagnosticArgumentKind::ValueDecl);
-      return m_theValueDecl;
-   }
-
-   Type getAsType() const
-   {
-      assert(m_kind == DiagnosticArgumentKind::Type);
-      return m_typeVal;
-   }
-
-   TypeRepr *getAsTypeRepr() const
-   {
-      assert(m_kind == DiagnosticArgumentKind::TypeRepr);
-      return m_typeRepr;
-   }
-
    StaticSpellingKind getAsStaticSpellingKind() const
    {
       assert(m_kind == DiagnosticArgumentKind::StaticSpellingKind);
@@ -276,12 +196,6 @@ public:
    {
       assert(m_kind == DiagnosticArgumentKind::DescriptiveDeclKind);
       return m_descriptiveDeclKindVal;
-   }
-
-   const DeclAttribute *getAsDeclAttribute() const
-   {
-      assert(m_kind == DiagnosticArgumentKind::DeclAttribute);
-      return m_declAttributeVal;
    }
 
    VersionTuple getAsVersionTuple() const
@@ -363,19 +277,9 @@ public:
       return m_loc;
    }
 
-   const class Decl *getDecl() const
-   {
-      return m_decl;
-   }
-
    void setLoc(SourceLoc loc)
    {
       m_loc = loc;
-   }
-
-   void setDecl(const class Decl *decl)
-   {
-      m_decl = decl;
    }
 
    /// Returns true if this object represents a particular diagnostic.
@@ -406,7 +310,6 @@ private:
    SmallVector<CharSourceRange, 2> m_ranges;
    SmallVector<FixIt, 2> m_fixIts;
    SourceLoc m_loc;
-   const Decl *m_decl = nullptr;
 };
 
 /// Describes an in-flight diagnostic, which is currently active
@@ -727,25 +630,6 @@ public:
       return diagnose(loc, Diagnostic(id, args));
    }
 
-   /// Emit a diagnostic using a preformatted array of diagnostic
-   /// arguments.
-   ///
-   /// \param loc The declaration name location to which the
-   /// diagnostic refers in the source code.
-   ///
-   /// \param id The diagnostic id.
-   ///
-   /// \param args The preformatted set of diagnostic arguments. The caller
-   /// must ensure that the diagnostic arguments have the appropriate type.
-   ///
-   /// \returns An in-flight diagnostic, to which additional information can
-   /// be attached.
-   InFlightDiagnostic diagnose(DeclNameLoc loc, DiagID id,
-                               ArrayRef<DiagnosticArgument> args)
-   {
-      return diagnose(loc.getBaseNameLoc(), Diagnostic(id, args));
-   }
-
    /// Emit an already-constructed diagnostic at the given location.
    ///
    /// \param loc The location to which the diagnostic refers in the source
@@ -785,77 +669,6 @@ public:
    InFlightDiagnostic
    diagnose(Diag<ArgTypes...> id,
             typename internal::PassArgument<ArgTypes>::type... args) = delete;
-
-   /// Emit a diagnostic with the given set of diagnostic arguments.
-   ///
-   /// \param loc The declaration name location to which the
-   /// diagnostic refers in the source code.
-   ///
-   /// \param id The diagnostic to be emitted.
-   ///
-   /// \param args The diagnostic arguments, which will be converted to
-   /// the types expected by the diagnostic \p id.
-   template<typename ...ArgTypes>
-   InFlightDiagnostic
-   diagnose(DeclNameLoc loc, Diag<ArgTypes...> id,
-            typename internal::PassArgument<ArgTypes>::type... args)
-   {
-      return diagnose(loc.getBaseNameLoc(), Diagnostic(id, std::move(args)...));
-   }
-
-   /// Emit a diagnostic using a preformatted array of diagnostic
-   /// arguments.
-   ///
-   /// \param decl The declaration to which this diagnostic refers, which
-   /// may or may not have associated source-location information.
-   ///
-   /// \param id The diagnostic id.
-   ///
-   /// \param args The preformatted set of diagnostic arguments. The caller
-   /// must ensure that the diagnostic arguments have the appropriate type.
-   ///
-   /// \returns An in-flight diagnostic, to which additional information can
-   /// be attached.
-   InFlightDiagnostic diagnose(const Decl *decl, DiagID id,
-                               ArrayRef<DiagnosticArgument> args)
-   {
-      return diagnose(decl, Diagnostic(id, args));
-   }
-
-   /// Emit an already-constructed diagnostic referencing the given
-   /// declaration.
-   ///
-   /// \param decl The declaration to which this diagnostic refers, which
-   /// may or may not have associated source-location information.
-   ///
-   /// \param diag The diagnostic.
-   ///
-   /// \returns An in-flight diagnostic, to which additional information can
-   /// be attached.
-   InFlightDiagnostic diagnose(const Decl *decl, const Diagnostic &diag)
-   {
-      assert(!m_activeDiagnostic && "Already have an active diagnostic");
-      m_activeDiagnostic = diag;
-      m_activeDiagnostic->setDecl(decl);
-      return InFlightDiagnostic(*this);
-   }
-
-   /// Emit a diagnostic with the given set of diagnostic arguments.
-   ///
-   /// \param decl The declaration to which this diagnostic refers, which
-   /// may or may not have associated source-location information.
-   ///
-   /// \param id The diagnostic to be emitted.
-   ///
-   /// \param args The diagnostic arguments, which will be converted to
-   /// the types expected by the diagnostic \p id.
-   template<typename ...ArgTypes>
-   InFlightDiagnostic
-   diagnose(const Decl *decl, Diag<ArgTypes...> id,
-            typename internal::PassArgument<ArgTypes>::type... args)
-   {
-      return diagnose(decl, Diagnostic(id, std::move(args)...));
-   }
 
    /// \returns true if diagnostic is marked with PointsToFirstBadToken
    /// option.
@@ -910,10 +723,6 @@ private:
    /// All diagnostics that have are no longer active but have not yet
    /// been emitted due to an open transaction.
    SmallVector<Diagnostic, 4> m_tentativeDiagnostics;
-
-   /// The set of declarations for which we have pretty-printed
-   /// results that we can point to on the command line.
-   DenseMap<const Decl *, SourceLoc> m_prettyPrintedDeclarations;
 
    /// The number of open diagnostic transactions. Diagnostics are only
    /// emitted once all transactions have closed.

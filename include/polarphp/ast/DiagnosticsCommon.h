@@ -55,8 +55,6 @@ namespace diag {
 
   enum class RequirementKind : uint8_t;
 
-  using DeclAttribute = const DeclAttribute *;
-
 // Declare common diagnostics objects with their appropriate types.
 #define DIAG(KIND, ID, Options, Text, Signature) \
   extern internal::DiagWithArguments<void Signature>::type ID;

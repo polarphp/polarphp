@@ -368,13 +368,15 @@ bool advance_if_valid_continuation_of_identifier(const unsigned char *&ptr,
 bool advance_if_valid_start_of_operator(const unsigned char *&ptr,
                                         const unsigned char *end)
 {
-   return advance_if(ptr, end, Identifier::isOperatorStartCodePoint);
+   return true;
+//   return advance_if(ptr, end, Identifier::isOperatorStartCodePoint);
 }
 
 bool advance_if_valid_continuation_of_operator(const unsigned char *&ptr,
                                                const unsigned char *end)
 {
-   return advance_if(ptr, end, Identifier::isOperatorContinuationCodePoint);
+   return true;
+//   return advance_if(ptr, end, Identifier::isOperatorContinuationCodePoint);
 }
 
 const char *next_newline(const char *str, const char *end, size_t &newlineLen)

@@ -22,6 +22,7 @@
 #include "polarphp/utils/SaveAndRestore.h"
 #include "polarphp/parser/internal/YYLexerDefs.h"
 #include "polarphp/parser/LexerFlags.h"
+#include "polarphp/kernel/LangOptions.h"
 
 #include <stack>
 

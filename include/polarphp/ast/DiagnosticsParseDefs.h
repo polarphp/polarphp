@@ -216,8 +216,6 @@ ERROR(lex_conflict_marker_in_file,none,
 // MARK: Declaration parsing diagnostics
 //------------------------------------------------------------------------------
 
-NOTE(note_in_decl_extension,none,
-     "in %select{declaration|extension}0 of %1", (bool, Identifier))
 ERROR(line_directive_style_deprecated,none,
       "#line directive was renamed to #sourceLocation",
       ())
@@ -440,8 +438,6 @@ ERROR(operator_decl_inner_scope,none,
       "'operator' may only be declared at file scope", ())
 ERROR(expected_operator_name_after_operator,PointsToFirstBadToken,
       "expected operator name in operator declaration", ())
-ERROR(identifier_when_expecting_operator,PointsToFirstBadToken,
-      "%0 is considered to be an identifier, not an operator", (Identifier))
 
 ERROR(deprecated_operator_body,PointsToFirstBadToken,
       "operator should no longer be declared with body", ())
@@ -481,234 +477,6 @@ ERROR(expected_precedencegroup_relation,none,
       "expected name of related precedence group after '%0'",
       (StringRef))
 
-// SIL
-ERROR(inout_not_attribute, none,
-      "@inout is no longer an attribute", ())
-ERROR(only_allowed_in_sil,none,
-      "'%0' only allowed in SIL modules", (StringRef))
-ERROR(expected_sil_type,none,
-      "expected type in SIL code", ())
-ERROR(expected_sil_colon_value_ref,none,
-      "expected ':' before type in SIL value reference", ())
-ERROR(expected_sil_value_name,none,
-      "expected SIL value name", ())
-ERROR(expected_sil_type_kind,none,
-      "expected SIL type to %0", (StringRef))
-ERROR(expected_sil_constant,none,
-      "expected constant in SIL code", ())
-ERROR(referenced_value_no_accessor,none,
-      "referenced declaration has no %select{getter|setter}0", (unsigned))
-ERROR(expected_sil_value_ownership_kind,none,
-      "expected value ownership kind in SIL code", ())
-ERROR(expected_sil_colon,none,
-      "expected ':' before %0", (StringRef))
-
-// SIL Values
-ERROR(sil_value_redefinition,none,
-      "redefinition of value '%0'", (StringRef))
-ERROR(sil_value_use_type_mismatch,none,
-      "value '%0' defined with mismatching type %1 (expected %2)", (StringRef, Type, Type))
-ERROR(sil_value_def_type_mismatch,none,
-      "value '%0' used with mismatching type %1 (expected %2)", (StringRef, Type, Type))
-ERROR(sil_use_of_undefined_value,none,
-      "use of undefined value '%0'", (StringRef))
-NOTE(sil_prior_reference,none,
-     "prior reference was here", ())
-
-// SIL Locations
-ERROR(expected_colon_in_sil_location,none,
-      "expected ':' in SIL location", ())
-ERROR(sil_invalid_line_in_sil_location,none,
-      "line number must be a positive integer", ())
-ERROR(sil_invalid_column_in_sil_location,none,
-      "column number must be a positive integer", ())
-ERROR(sil_invalid_scope_slot,none,
-      "scope number must be a positive integer ", ())
-ERROR(sil_scope_undeclared,none,
-      "scope number %0 needs to be declared before first use", (unsigned))
-ERROR(sil_scope_redefined,none,
-      "scope number %0 is already defined", (unsigned))
-
-// SIL Instructions
-ERROR(expected_sil_instr_start_of_line,none,
-      "SIL instructions must be at the start of a line", ())
-ERROR(expected_equal_in_sil_instr,none,
-      "expected '=' in SIL instruction", ())
-ERROR(wrong_result_count_in_sil_instr,none,
-      "wrong number of results for SIL instruction, expected %0", (unsigned))
-ERROR(expected_sil_instr_opcode,none,
-      "expected SIL instruction opcode", ())
-ERROR(expected_tok_in_sil_instr,none,
-      "expected '%0' in SIL instruction", (StringRef))
-ERROR(sil_property_generic_signature_mismatch,none,
-      "sil_property generic signature must match original declaration", ())
-ERROR(sil_string_no_encoding,none,
-      "string_literal instruction requires an encoding", ())
-ERROR(sil_string_invalid_encoding,none,
-      "unknown string literal encoding '%0'", (StringRef))
-ERROR(expected_tuple_type_in_tuple,none,
-      "tuple instruction requires a tuple type", ())
-ERROR(sil_tuple_inst_wrong_value_count,none,
-      "tuple instruction requires %0 values", (unsigned))
-ERROR(sil_tuple_inst_wrong_field,none,
-      "tuple instruction requires a field number", ())
-ERROR(sil_struct_inst_wrong_field,none,
-      "struct instruction requires a field name", ())
-ERROR(sil_ref_inst_wrong_field,none,
-      "ref_element_addr instruction requires a field name", ())
-ERROR(sil_invalid_instr_operands,none,
-      "invalid instruction operands", ())
-ERROR(sil_operand_not_address,none,
-      "%0 operand of '%1' must have address type", (StringRef, StringRef))
-ERROR(sil_operand_not_ref_storage_address,none,
-      "%0 operand of '%1' must have address of %2 type",
-      (StringRef, StringRef, ReferenceOwnership))
-ERROR(sil_integer_literal_not_integer_type,none,
-      "integer_literal instruction requires a 'Builtin.Int<n>' type", ())
-ERROR(sil_integer_literal_not_well_formed,none,
-      "integer_literal value not well-formed for type %0", (Type))
-ERROR(sil_float_literal_not_float_type,none,
-      "float_literal instruction requires a 'Builtin.FP<n>' type", ())
-ERROR(sil_substitutions_on_non_polymorphic_type,none,
-      "apply of non-polymorphic function cannot have substitutions", ())
-ERROR(sil_witness_method_not_protocol,none,
-      "witness_method is not a protocol method", ())
-ERROR(sil_witness_method_type_does_not_conform,none,
-      "witness_method type does not conform to protocol", ())
-ERROR(sil_member_decl_not_found,none, "member not found", ())
-ERROR(sil_named_member_decl_not_found,none,
-      "member %0 not found in type %1", (DeclName, Type))
-ERROR(sil_member_lookup_bad_type,none,
-      "cannot lookup member %0 in non-nominal, non-module type %1",
-      (DeclName, Type))
-ERROR(sil_member_decl_type_mismatch,none,
-      "member defined with mismatching type %0 (expected %1)", (Type, Type))
-ERROR(sil_substitution_mismatch,none,
-      "substitution replacement type %0 does not conform to protocol %1",
-      (Type, Type))
-ERROR(sil_not_class,none,
-      "substitution replacement type %0 is not a class type",
-      (Type))
-ERROR(sil_missing_substitutions,none,
-      "missing substitutions", ())
-ERROR(sil_too_many_substitutions,none,
-      "too many substitutions", ())
-ERROR(sil_dbg_unknown_key,none,
-      "unknown key '%0' in debug variable declaration", (StringRef))
-ERROR(sil_objc_with_tail_elements,none,
-      "alloc_ref [objc] cannot have tail allocated elements", ())
-ERROR(found_unqualified_instruction_in_qualified_function,none,
-      "found unqualified instruction in qualified function '%0'", (StringRef))
-ERROR(sil_expected_access_kind,none,
-      "%0 instruction must have explicit access kind", (StringRef))
-ERROR(sil_expected_access_enforcement,none,
-      "%0 instruction must have explicit access enforcement", (StringRef))
-
-ERROR(sil_keypath_expected_component_kind,none,
-      "expected keypath component kind", ())
-ERROR(sil_keypath_unknown_component_kind,none,
-      "unknown keypath component kind %0", (Identifier))
-ERROR(sil_keypath_computed_property_missing_part,none,
-      "keypath %select{gettable|settable}0_property component needs an "
-      "%select{id and getter|id, getter, and setter}0", (bool))
-ERROR(sil_keypath_external_missing_part,none,
-      "keypath external component with indices needs an indices_equals and "
-      "indices_hash function", ())
-ERROR(sil_keypath_no_root,none,
-      "keypath must have a root component declared",())
-ERROR(sil_keypath_index_not_hashable,none,
-      "key path index type %0 does not conform to Hashable", (Type))
-ERROR(sil_keypath_index_operand_type_conflict,none,
-      "conflicting types for key path operand %0: %1 vs. %2",
-      (unsigned, Type, Type))
-ERROR(sil_keypath_no_use_of_operand_in_pattern,none,
-      "operand %0 is not referenced by any component in the pattern",
-      (unsigned))
-
-// SIL Basic Blocks
-ERROR(expected_sil_block_name,none,
-      "expected basic block name or '}'", ())
-ERROR(expected_sil_block_colon,none,
-      "expected ':' after basic block name", ())
-ERROR(sil_undefined_basicblock_use,none,
-      "use of undefined basic block %0", (Identifier))
-ERROR(sil_basicblock_redefinition,none,
-      "redefinition of basic block %0", (Identifier))
-ERROR(sil_basicblock_arg_rparen,none,
-      "expected ')' in basic block argument list", ())
-
-// SIL Functions
-ERROR(expected_sil_function_name,none,
-      "expected SIL function name", ())
-ERROR(expected_sil_rbrace,none,
-      "expected '}' at the end of a sil body", ())
-ERROR(expected_sil_function_type, none,
-      "sil function expected to have SIL function type", ())
-ERROR(sil_dynamically_replaced_func_not_found,none,
-      "dynamically replaced function not found %0", (Identifier))
-
-// SIL Stage
-ERROR(expected_sil_stage_name, none,
-      "expected 'raw' or 'canonical' after 'sil_stage'", ())
-ERROR(multiple_sil_stage_decls, none,
-      "sil_stage declared multiple times", ())
-
-// SIL VTable
-ERROR(expected_sil_vtable_colon,none,
-      "expected ':' in a vtable entry", ())
-ERROR(sil_vtable_func_not_found,none,
-      "sil function not found %0", (Identifier))
-ERROR(sil_vtable_class_not_found,none,
-      "sil class not found %0", (Identifier))
-ERROR(sil_vtable_bad_entry_kind,none,
-      "expected 'inherited' or 'override'", ())
-ERROR(sil_vtable_expect_rsquare,none,
-      "expected ']' after vtable entry kind", ())
-
-// SIL Global
-ERROR(sil_global_variable_not_found,none,
-      "sil global not found %0", (Identifier))
-
-// SIL Witness Table
-ERROR(expected_sil_witness_colon,none,
-      "expected ':' in a witness table", ())
-ERROR(expected_sil_witness_lparen,none,
-      "expected '(' in a witness table", ())
-ERROR(expected_sil_witness_rparen,none,
-      "expected ')' in a witness table", ())
-ERROR(sil_witness_func_not_found,none,
-      "sil function not found %0", (Identifier))
-ERROR(sil_witness_protocol_not_found,none,
-      "sil protocol not found %0", (Identifier))
-ERROR(sil_witness_assoc_not_found,none,
-      "sil associated type decl not found %0", (Identifier))
-ERROR(sil_witness_assoc_conf_not_found,none,
-      "sil associated type path for conformance not found %0", (StringRef))
-ERROR(sil_witness_protocol_conformance_not_found,none,
-      "sil protocol conformance not found", ())
-
-// SIL Coverage Map
-ERROR(sil_coverage_func_not_found, none,
-      "sil function not found %0", (Identifier))
-ERROR(sil_coverage_invalid_hash, none,
-      "expected coverage hash", ())
-ERROR(sil_coverage_expected_lbrace, none,
-      "expected '{' in coverage map", ())
-ERROR(sil_coverage_expected_loc, none,
-      "expected line:column pair", ())
-ERROR(sil_coverage_expected_arrow, none,
-      "expected '->' after start location", ())
-ERROR(sil_coverage_expected_colon, none,
-      "expected ':' after source range", ())
-ERROR(sil_coverage_invalid_counter, none,
-      "expected counter expression, id, or 'zero'", ())
-ERROR(sil_coverage_expected_rparen, none,
-      "expected ')' to end counter expression", ())
-ERROR(sil_coverage_expected_quote, none,
-      "expected quotes surrounding PGO function name", ())
-ERROR(sil_coverage_invalid_operator, none,
-      "expected '+' or '-'", ())
-
 //------------------------------------------------------------------------------
 // MARK: Type parsing diagnostics
 //------------------------------------------------------------------------------
@@ -745,10 +513,6 @@ ERROR(expected_type_before_arrow,none,
       "expected type before '->'", ())
 ERROR(expected_type_after_arrow,none,
       "expected type after '->'", ())
-ERROR(function_type_argument_label,none,
-      "function types cannot have argument labels; use '_' before %0",
-      (Identifier))
-
 // Enum Types
 ERROR(expected_expr_enum_case_raw_value,PointsToFirstBadToken,
       "expected expression after '=' in 'case'", ())
@@ -845,8 +609,6 @@ ERROR(no_default_arg_enum_elt,none,
 ERROR(var_pattern_in_var,none,
       "'%select{var|let}0' cannot appear nested inside another 'var' or "
       "'let' pattern", (unsigned))
-ERROR(extra_var_in_multiple_pattern_list,none,
-      "%0 must be bound in every pattern", (Identifier))
 ERROR(let_pattern_in_immutable_context,none,
       "'let' pattern cannot appear nested in an already immutable context", ())
 ERROR(specifier_must_have_type,none,
@@ -875,10 +637,6 @@ ERROR(parameter_let_var_as_attr,none,
       "'%0' as a parameter attribute is not allowed",
       (StringRef))
 
-
-WARNING(parameter_extraneous_double_up,none,
-        "extraneous duplicate parameter name; %0 already has an argument "
-        "label", (Identifier))
 ERROR(parameter_operator_keyword_argument,none,
       "%select{operator|closure|enum case}0 cannot have keyword arguments",
       (unsigned))
@@ -1245,8 +1003,6 @@ NOTE(string_interpolation_list_insert_parens,none,
      "insert parentheses to keep current behavior", ())
 WARNING(string_interpolation_label_changing,none,
         "labeled interpolations will not be ignored in Swift 5", ())
-NOTE(string_interpolation_remove_label,none,
-     "remove %0 label to keep current behavior", (Identifier))
 
 // Keypath expressions.
 ERROR(expr_keypath_expected_lparen,PointsToFirstBadToken,
@@ -1527,9 +1283,7 @@ ERROR(unexpected_class_constraint,none,
       "'class' constraint can only appear on protocol declarations", ())
 NOTE(suggest_anyobject,none,
      "did you mean to write an 'AnyObject' constraint?", ())
-ERROR(expected_generics_type_restriction,none,
-      "expected a class type or protocol-constrained type restricting %0",
-      (Identifier))
+
 ERROR(requires_single_equal,none,
       "use '==' for same-type requirements rather than '='", ())
 ERROR(expected_requirement_delim,none,
@@ -1605,9 +1359,6 @@ ERROR(avail_query_expected_version_number,PointsToFirstBadToken,
       "expected version number", ())
 ERROR(avail_query_expected_rparen,PointsToFirstBadToken,
       "expected ')' in availability query", ())
-
-ERROR(avail_query_unrecognized_platform_name,
-      PointsToFirstBadToken, "unrecognized platform name %0", (Identifier))
 
 ERROR(avail_query_disallowed_operator, PointsToFirstBadToken,
       "'%0' cannot be used in an availability condition", (StringRef))

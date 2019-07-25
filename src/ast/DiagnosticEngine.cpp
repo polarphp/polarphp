@@ -26,13 +26,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "polarphp/ast/DiagnosticEngine.h"
-#include "polarphp/ast/AstContext.h"
-#include "polarphp/ast/AstPrinter.h"
-#include "polarphp/ast/Decl.h"
 #include "polarphp/ast/DiagnosticSuppression.h"
-#include "polarphp/ast/PrintOptions.h"
-#include "polarphp/ast/TypeRepr.h"
-#include "polarphp/ast/Type.h"
 #include "polarphp/parser/SourceMgr.h"
 #include "polarphp/parser/Lexer.h" // bad dependency
 #include "polarphp/basic/adt/SmallString.h"
@@ -375,70 +369,6 @@ static void formatSelectionArgument(StringRef modifierArguments,
 
 }
 
-static bool is_interesting_typealias(Type type)
-{
-   // Dig out the typealias declaration, if there is one.
-   //   TypeAliasDecl *aliasDecl = nullptr;
-   //   if (auto aliasTy = dyn_cast<TypeAliasType>(type.getPointer())) {
-   //      aliasDecl = aliasTy->getDecl();
-   //   } else {
-   //      return false;
-   //   }
-
-   //   if (aliasDecl == type->getASTContext().getVoidDecl()) {
-   //      return false;
-   //   }
-
-   //   // The 'polar.AnyObject' typealias is not 'interesting'.
-   //   if (aliasDecl->getName() ==
-   //       aliasDecl->getASTContext().getIdentifier("AnyObject") &&
-   //       (aliasDecl->getParentModule()->isStdlibModule() ||
-   //        aliasDecl->getParentModule()->isBuiltinModule())) {
-   //      return false;
-   //   }
-
-   //   // Compatibility aliases are only interesting insofar as their underlying
-   //   // types are interesting.
-   //   if (aliasDecl->isCompatibilityAlias()) {
-   //      auto underlyingTy = aliasDecl->getUnderlyingTypeLoc().getType();
-   //      return is_interesting_typealias(underlyingTy);
-   //   }
-
-   //   // Builtin types are never interesting typealiases.
-   //   if (type->is<BuiltinType>()) {
-   //      return false;
-   //   }
-
-   return true;
-}
-
-/// Decide whether to show the desugared type or not.  We filter out some
-/// cases to avoid too much noise.
-static bool should_show_aka(Type type, StringRef typeName)
-{
-   // Canonical types are already desugared.
-   //   if (type->isCanonical()) {
-   //      return false;
-   //   }
-   //   // Don't show generic type parameters.
-   //   if (type->hasTypeParameter()) {
-   //      return false;
-   //   }
-   //   // Only show 'aka' if there's a typealias involved; other kinds of sugar
-   //   // are easy enough for people to read on their own.
-   //   if (!type.findIf(is_interesting_typealias)) {
-   //      return false;
-   //   }
-
-   //   // If they are textually the same, don't show them.  This can happen when
-   //   // they are actually different types, because they exist in different scopes
-   //   // (e.g. everyone names their type parameters 'T').
-   //   if (typeName == type->getCanonicalType()->getString()) {
-   //      return false;
-   //   }
-   return true;
-}
-
 /// Format a single diagnostic argument and write it to the given
 /// stream.
 static void format_diagnostic_argument(StringRef modifier,
@@ -448,126 +378,126 @@ static void format_diagnostic_argument(StringRef modifier,
                                        DiagnosticFormatOptions formatOpts,
                                        RawOutStream &out)
 {
-   const DiagnosticArgument &arg = args[argIndex];
-   switch (arg.getKind()) {
-   case DiagnosticArgumentKind::Integer:
-      if (modifier == "select") {
-         assert(arg.getAsInteger() >= 0 && "Negative selection index");
-         formatSelectionArgument(modifierArguments, args, arg.getAsInteger(),
-                                 formatOpts, out);
-      } else if (modifier == "s") {
-         if (arg.getAsInteger() != 1)
-            out << 's';
-      } else {
-         assert(modifier.empty() && "Improper modifier for integer argument");
-         out << arg.getAsInteger();
-      }
-      break;
-
-   case DiagnosticArgumentKind::Unsigned:
-      if (modifier == "select") {
-         formatSelectionArgument(modifierArguments, args, arg.getAsUnsigned(),
-                                 formatOpts, out);
-      } else if (modifier == "s") {
-         if (arg.getAsUnsigned() != 1) {
-            out << 's';
-         }
-      } else {
-         assert(modifier.empty() && "Improper modifier for unsigned argument");
-         out << arg.getAsUnsigned();
-      }
-      break;
-
-   case DiagnosticArgumentKind::String:
-      assert(modifier.empty() && "Improper modifier for string argument");
-      out << arg.getAsString();
-      break;
-
-   case DiagnosticArgumentKind::Identifier:
-      assert(modifier.empty() && "Improper modifier for identifier argument");
-      out << formatOpts.openingQuotationMark;
-      arg.getAsIdentifier().printPretty(out);
-      out << formatOpts.closingQuotationMark;
-      break;
-
-   case DiagnosticArgumentKind::ValueDecl:
-      out << formatOpts.openingQuotationMark;
-      //      arg.getAsValueDecl()->getFullName().printPretty(out);
-      out << formatOpts.closingQuotationMark;
-      break;
-
-   case DiagnosticArgumentKind::Type: {
-      assert(modifier.empty() && "Improper modifier for Type argument");
-
-      // Strip extraneous parentheses; they add no value.
-      //      auto type = arg.getAsType()->getWithoutParens();
-      //      std::string typeName = type->getString();
-//      std::string typeName;
-//      if (should_show_aka(type, typeName)) {
-//         SmallString<256> akaText;
-//         RawSvectorOutStream OutAka(akaText);
-//         OutAka << type->getCanonicalType();
-//         out << polar::utils::format(formatOpts.akaFormatString.c_str(), typeName.c_str(),
-//                                     akaText.getCStr());
+//   const DiagnosticArgument &arg = args[argIndex];
+//   switch (arg.getKind()) {
+//   case DiagnosticArgumentKind::Integer:
+//      if (modifier == "select") {
+//         assert(arg.getAsInteger() >= 0 && "Negative selection index");
+//         formatSelectionArgument(modifierArguments, args, arg.getAsInteger(),
+//                                 formatOpts, out);
+//      } else if (modifier == "s") {
+//         if (arg.getAsInteger() != 1)
+//            out << 's';
 //      } else {
-//         out << formatOpts.openingQuotationMark << typeName
-//             << formatOpts.closingQuotationMark;
+//         assert(modifier.empty() && "Improper modifier for integer argument");
+//         out << arg.getAsInteger();
 //      }
-      break;
-   }
-   case DiagnosticArgumentKind::TypeRepr:
-      assert(modifier.empty() && "Improper modifier for TypeRepr argument");
-      out << formatOpts.openingQuotationMark << arg.getAsTypeRepr()
-          << formatOpts.closingQuotationMark;
-      break;
+//      break;
 
-   case DiagnosticArgumentKind::ReferenceOwnership:
-      //      if (modifier == "select") {
-      //         formatSelectionArgument(modifierArguments, args,
-      //                                 unsigned(arg.getAsReferenceOwnership()),
-      //                                 formatOpts, out);
-      //      } else {
-      //         assert(modifier.empty() &&
-      //                "Improper modifier for ReferenceOwnership argument");
-      //         out << arg.getAsReferenceOwnership();
-      //      }
-      break;
+//   case DiagnosticArgumentKind::Unsigned:
+//      if (modifier == "select") {
+//         formatSelectionArgument(modifierArguments, args, arg.getAsUnsigned(),
+//                                 formatOpts, out);
+//      } else if (modifier == "s") {
+//         if (arg.getAsUnsigned() != 1) {
+//            out << 's';
+//         }
+//      } else {
+//         assert(modifier.empty() && "Improper modifier for unsigned argument");
+//         out << arg.getAsUnsigned();
+//      }
+//      break;
 
-   case DiagnosticArgumentKind::StaticSpellingKind:
-      if (modifier == "select") {
-         formatSelectionArgument(modifierArguments, args,
-                                 unsigned(arg.getAsStaticSpellingKind()),
-                                 formatOpts, out);
-      } else {
-         assert(modifier.empty() &&
-                "Improper modifier for StaticSpellingKind argument");
-         out << arg.getAsStaticSpellingKind();
-      }
-      break;
+//   case DiagnosticArgumentKind::String:
+//      assert(modifier.empty() && "Improper modifier for string argument");
+//      out << arg.getAsString();
+//      break;
 
-   case DiagnosticArgumentKind::DescriptiveDeclKind:
-      assert(modifier.empty() &&
-             "Improper modifier for DescriptiveDeclKind argument");
-      out << Decl::getDescriptiveKindName(arg.getAsDescriptiveDeclKind());
-      break;
+//   case DiagnosticArgumentKind::Identifier:
+//      assert(modifier.empty() && "Improper modifier for identifier argument");
+//      out << formatOpts.openingQuotationMark;
+//      arg.getAsIdentifier().printPretty(out);
+//      out << formatOpts.closingQuotationMark;
+//      break;
 
-   case DiagnosticArgumentKind::DeclAttribute:
-      assert(modifier.empty() &&
-             "Improper modifier for DeclAttribute argument");
-      if (arg.getAsDeclAttribute()->isDeclModifier())
-         out << formatOpts.openingQuotationMark
-             << arg.getAsDeclAttribute()->getAttrName()
-             << formatOpts.closingQuotationMark;
-      else
-         out << '@' << arg.getAsDeclAttribute()->getAttrName();
-      break;
+//   case DiagnosticArgumentKind::ValueDecl:
+//      out << formatOpts.openingQuotationMark;
+//      //      arg.getAsValueDecl()->getFullName().printPretty(out);
+//      out << formatOpts.closingQuotationMark;
+//      break;
 
-   case DiagnosticArgumentKind::VersionTuple:
-      assert(modifier.empty() &&
-             "Improper modifier for VersionTuple argument");
-      out << arg.getAsVersionTuple().getAsString();
-      break;
-   }
+//   case DiagnosticArgumentKind::Type: {
+//      assert(modifier.empty() && "Improper modifier for Type argument");
+
+//      // Strip extraneous parentheses; they add no value.
+//      //      auto type = arg.getAsType()->getWithoutParens();
+//      //      std::string typeName = type->getString();
+////      std::string typeName;
+////      if (should_show_aka(type, typeName)) {
+////         SmallString<256> akaText;
+////         RawSvectorOutStream OutAka(akaText);
+////         OutAka << type->getCanonicalType();
+////         out << polar::utils::format(formatOpts.akaFormatString.c_str(), typeName.c_str(),
+////                                     akaText.getCStr());
+////      } else {
+////         out << formatOpts.openingQuotationMark << typeName
+////             << formatOpts.closingQuotationMark;
+////      }
+//      break;
+//   }
+//   case DiagnosticArgumentKind::TypeRepr:
+//      assert(modifier.empty() && "Improper modifier for TypeRepr argument");
+//      out << formatOpts.openingQuotationMark << arg.getAsTypeRepr()
+//          << formatOpts.closingQuotationMark;
+//      break;
+
+//   case DiagnosticArgumentKind::ReferenceOwnership:
+//      //      if (modifier == "select") {
+//      //         formatSelectionArgument(modifierArguments, args,
+//      //                                 unsigned(arg.getAsReferenceOwnership()),
+//      //                                 formatOpts, out);
+//      //      } else {
+//      //         assert(modifier.empty() &&
+//      //                "Improper modifier for ReferenceOwnership argument");
+//      //         out << arg.getAsReferenceOwnership();
+//      //      }
+//      break;
+
+//   case DiagnosticArgumentKind::StaticSpellingKind:
+//      if (modifier == "select") {
+//         formatSelectionArgument(modifierArguments, args,
+//                                 unsigned(arg.getAsStaticSpellingKind()),
+//                                 formatOpts, out);
+//      } else {
+//         assert(modifier.empty() &&
+//                "Improper modifier for StaticSpellingKind argument");
+//         out << arg.getAsStaticSpellingKind();
+//      }
+//      break;
+
+//   case DiagnosticArgumentKind::DescriptiveDeclKind:
+//      assert(modifier.empty() &&
+//             "Improper modifier for DescriptiveDeclKind argument");
+//      out << Decl::getDescriptiveKindName(arg.getAsDescriptiveDeclKind());
+//      break;
+
+//   case DiagnosticArgumentKind::DeclAttribute:
+//      assert(modifier.empty() &&
+//             "Improper modifier for DeclAttribute argument");
+//      if (arg.getAsDeclAttribute()->isDeclModifier())
+//         out << formatOpts.openingQuotationMark
+//             << arg.getAsDeclAttribute()->getAttrName()
+//             << formatOpts.closingQuotationMark;
+//      else
+//         out << '@' << arg.getAsDeclAttribute()->getAttrName();
+//      break;
+
+//   case DiagnosticArgumentKind::VersionTuple:
+//      assert(modifier.empty() &&
+//             "Improper modifier for VersionTuple argument");
+//      out << arg.getAsVersionTuple().getAsString();
+//      break;
+//   }
 }
 
 /// Format the given diagnostic text and place the result in the given
@@ -753,138 +683,138 @@ void DiagnosticEngine::emitTentativeDiagnostics()
 
 void DiagnosticEngine::emitDiagnostic(const Diagnostic &diagnostic)
 {
-   auto behavior = m_state.determineBehavior(diagnostic.getID());
-   if (behavior == DiagnosticState::Behavior::Ignore) {
-      return;
-   }
-   // Figure out the source location.
-   SourceLoc loc = diagnostic.getLoc();
-   if (loc.isInvalid() && diagnostic.getDecl()) {
-      const Decl *decl = diagnostic.getDecl();
-      // If a declaration was provided instead of a location, and that declaration
-      // has a location we can point to, use that location.
-      loc = decl->getLoc();
-      if (loc.isInvalid()) {
-         // There is no location we can point to. Pretty-print the declaration
-         // so we can point to it.
-         SourceLoc ppLoc = m_prettyPrintedDeclarations[decl];
-         if (ppLoc.isInvalid()) {
-            class TrackingPrinter : public StreamPrinter
-            {
-               SmallVectorImpl<std::pair<const Decl *, uint64_t>> &m_entries;
+//   auto behavior = m_state.determineBehavior(diagnostic.getID());
+//   if (behavior == DiagnosticState::Behavior::Ignore) {
+//      return;
+//   }
+//   // Figure out the source location.
+//   SourceLoc loc = diagnostic.getLoc();
+//   if (loc.isInvalid() && diagnostic.getDecl()) {
+//      const Decl *decl = diagnostic.getDecl();
+//      // If a declaration was provided instead of a location, and that declaration
+//      // has a location we can point to, use that location.
+//      loc = decl->getLoc();
+//      if (loc.isInvalid()) {
+//         // There is no location we can point to. Pretty-print the declaration
+//         // so we can point to it.
+//         SourceLoc ppLoc = m_prettyPrintedDeclarations[decl];
+//         if (ppLoc.isInvalid()) {
+//            class TrackingPrinter : public StreamPrinter
+//            {
+//               SmallVectorImpl<std::pair<const Decl *, uint64_t>> &m_entries;
 
-            public:
-               TrackingPrinter(
-                        SmallVectorImpl<std::pair<const Decl *, uint64_t>> &entries,
-                        RawOutStream &outStream) :
-                  StreamPrinter(outStream),
-                  m_entries(entries)
-               {}
+//            public:
+//               TrackingPrinter(
+//                        SmallVectorImpl<std::pair<const Decl *, uint64_t>> &entries,
+//                        RawOutStream &outStream) :
+//                  StreamPrinter(outStream),
+//                  m_entries(entries)
+//               {}
 
-               void printDeclLoc(const Decl *decl) override
-               {
-                  m_entries.push_back({ decl, m_outStream.tell() });
-               }
-            };
-            SmallVector<std::pair<const Decl *, uint64_t>, 8> entries;
-            SmallString<128> buffer;
-            SmallString<128> bufferName;
-            {
-               // Figure out which declaration to print. It's the top-most
-               // declaration (not a module).
-               const Decl *ppDecl = decl;
-               auto dc = decl->getDeclContext();
+//               void printDeclLoc(const Decl *decl) override
+//               {
+//                  m_entries.push_back({ decl, m_outStream.tell() });
+//               }
+//            };
+//            SmallVector<std::pair<const Decl *, uint64_t>, 8> entries;
+//            SmallString<128> buffer;
+//            SmallString<128> bufferName;
+//            {
+//               // Figure out which declaration to print. It's the top-most
+//               // declaration (not a module).
+//               const Decl *ppDecl = decl;
+//               auto dc = decl->getDeclContext();
 
-               // FIXME: Horrible, horrible hackaround. We're not getting a
-               // DeclContext everywhere we should.
-               if (!dc) {
-                  return;
-               }
-
-//               while (!dc->isModuleContext()) {
-//                  switch (dc->getContextKind()) {
-//                  case DeclContextKind::Module:
-//                     polar_unreachable("Not in a module context!");
-//                     break;
-
-//                  case DeclContextKind::FileUnit:
-//                  case DeclContextKind::TopLevelCodeDecl:
-//                     break;
-
-//                  case DeclContextKind::ExtensionDecl:
-//                     //ppDecl = cast<ExtensionDecl>(dc);
-//                     break;
-
-//                  case DeclContextKind::GenericTypeDecl:
-//                     //ppDecl = cast<GenericTypeDecl>(dc);
-//                     break;
-
-//                  case DeclContextKind::SerializedLocal:
-//                  case DeclContextKind::Initializer:
-//                  case DeclContextKind::AbstractClosureExpr:
-//                  case DeclContextKind::AbstractFunctionDecl:
-//                  case DeclContextKind::SubscriptDecl:
-//                  case DeclContextKind::EnumElementDecl:
-//                     break;
-//                  }
-//                  dc = dc->getParent();
+//               // FIXME: Horrible, horrible hackaround. We're not getting a
+//               // DeclContext everywhere we should.
+//               if (!dc) {
+//                  return;
 //               }
 
-               // Build the module name path (in reverse), which we use to
-               // build the name of the buffer.
-               SmallVector<StringRef, 4> nameComponents;
-               //               while (dc) {
-               //                  nameComponents.push_back(cast<ModuleDecl>(dc)->getName().str());
-               //                  dc = dc->getParent();
-               //               }
+////               while (!dc->isModuleContext()) {
+////                  switch (dc->getContextKind()) {
+////                  case DeclContextKind::Module:
+////                     polar_unreachable("Not in a module context!");
+////                     break;
 
-               for (unsigned i = nameComponents.size(); i; --i) {
-                  bufferName += nameComponents[i-1];
-                  bufferName += '.';
-               }
+////                  case DeclContextKind::FileUnit:
+////                  case DeclContextKind::TopLevelCodeDecl:
+////                     break;
 
-//               if (auto value = dyn_cast<ValueDecl>(ppDecl)) {
-//                  bufferName += value->getBaseName().userFacingName();
-//               } else if (auto ext = dyn_cast<ExtensionDecl>(ppDecl)) {
-//                  bufferName += ext->getExtendedType().getString();
+////                  case DeclContextKind::ExtensionDecl:
+////                     //ppDecl = cast<ExtensionDecl>(dc);
+////                     break;
+
+////                  case DeclContextKind::GenericTypeDecl:
+////                     //ppDecl = cast<GenericTypeDecl>(dc);
+////                     break;
+
+////                  case DeclContextKind::SerializedLocal:
+////                  case DeclContextKind::Initializer:
+////                  case DeclContextKind::AbstractClosureExpr:
+////                  case DeclContextKind::AbstractFunctionDecl:
+////                  case DeclContextKind::SubscriptDecl:
+////                  case DeclContextKind::EnumElementDecl:
+////                     break;
+////                  }
+////                  dc = dc->getParent();
+////               }
+
+//               // Build the module name path (in reverse), which we use to
+//               // build the name of the buffer.
+//               SmallVector<StringRef, 4> nameComponents;
+//               //               while (dc) {
+//               //                  nameComponents.push_back(cast<ModuleDecl>(dc)->getName().str());
+//               //                  dc = dc->getParent();
+//               //               }
+
+//               for (unsigned i = nameComponents.size(); i; --i) {
+//                  bufferName += nameComponents[i-1];
+//                  bufferName += '.';
 //               }
 
-               // Pretty-print the declaration we've picked.
-               RawSvectorOutStream out(buffer);
-               TrackingPrinter printer(entries, out);
-               ppDecl->print(printer, PrintOptions::printForDiagnostics());
-            }
+////               if (auto value = dyn_cast<ValueDecl>(ppDecl)) {
+////                  bufferName += value->getBaseName().userFacingName();
+////               } else if (auto ext = dyn_cast<ExtensionDecl>(ppDecl)) {
+////                  bufferName += ext->getExtendedType().getString();
+////               }
 
-            // Build a buffer with the pretty-printed declaration.
-            auto bufferID = m_sourceMgr.addMemBufferCopy(buffer, bufferName);
-            auto memBufferStartLoc = m_sourceMgr.getLocForBufferStart(bufferID);
+//               // Pretty-print the declaration we've picked.
+//               RawSvectorOutStream out(buffer);
+//               TrackingPrinter printer(entries, out);
+//               ppDecl->print(printer, PrintOptions::printForDiagnostics());
+//            }
 
-            // Go through all of the pretty-printed entries and record their
-            // locations.
-            for (auto entry : entries) {
-               m_prettyPrintedDeclarations[entry.first] =
-                     memBufferStartLoc.getAdvancedLoc(entry.second);
-            }
+//            // Build a buffer with the pretty-printed declaration.
+//            auto bufferID = m_sourceMgr.addMemBufferCopy(buffer, bufferName);
+//            auto memBufferStartLoc = m_sourceMgr.getLocForBufferStart(bufferID);
 
-            // Grab the pretty-printed location.
-            ppLoc = m_prettyPrintedDeclarations[decl];
-         }
+//            // Go through all of the pretty-printed entries and record their
+//            // locations.
+//            for (auto entry : entries) {
+//               m_prettyPrintedDeclarations[entry.first] =
+//                     memBufferStartLoc.getAdvancedLoc(entry.second);
+//            }
 
-         loc = ppLoc;
-      }
-   }
+//            // Grab the pretty-printed location.
+//            ppLoc = m_prettyPrintedDeclarations[decl];
+//         }
 
-   // Pass the diagnostic off to the consumer.
-   DiagnosticInfo Info;
-   Info.id = diagnostic.getID();
-   Info.ranges = diagnostic.getRanges();
-   Info.fixIts = diagnostic.getFixIts();
-   for (auto &consumer : m_consumers)
-   {
-      consumer->handleDiagnostic(m_sourceMgr, loc, toDiagnosticKind(behavior),
-                                 diagnosticStringFor(Info.id),
-                                 diagnostic.getArgs(), Info);
-   }
+//         loc = ppLoc;
+//      }
+//   }
+
+//   // Pass the diagnostic off to the consumer.
+//   DiagnosticInfo Info;
+//   Info.id = diagnostic.getID();
+//   Info.ranges = diagnostic.getRanges();
+//   Info.fixIts = diagnostic.getFixIts();
+//   for (auto &consumer : m_consumers)
+//   {
+//      consumer->handleDiagnostic(m_sourceMgr, loc, toDiagnosticKind(behavior),
+//                                 diagnosticStringFor(Info.id),
+//                                 diagnostic.getArgs(), Info);
+//   }
 }
 
 const char *DiagnosticEngine::diagnosticStringFor(const DiagID id)
