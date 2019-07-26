@@ -46,6 +46,9 @@ if ((NOT EXISTS ${POLAR_GENERATED_PARSER_IMPL_FILE} OR
    mark_as_advanced(POLAR_GRAMMER_FILE_MD5)
 endif()
 
+add_custom_target(LanguageGrammerDef
+   SOURCES ${POLAR_PARSER_INCLUDE_DIR}/LangGrammer.y)
+
 set(POLAR_TOKEN_ENUM_DEF_FILE ${POLAR_SYNTAX_INCLUDE_DIR}/internal/TokenEnumDefs.h)
 set(POLAR_TOKEN_DESC_MAP_FILE ${POLAR_SYNTAX_SRC_DIR}/TokenDescMap.cpp)
 set(POLAR_GENERATE_TOKEN_DESC_MAP_SCRIPT ${POLAR_CMAKE_SCRIPTS_DIR}/GenerateTokenDescMap.php)

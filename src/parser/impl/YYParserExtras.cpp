@@ -10,12 +10,13 @@
 // Created by polarboy on 2019/06/06.
 
 #include "polarphp/parser/internal/YYParserDefs.h"
+#include <iostream>
 
 namespace polar::parser::internal {
 
 void YYParser::error(const location_type &loc, const std::string &msg)
 {
-
+   std::cout << msg << std::endl;
 }
 
 } // polar::parser::internal

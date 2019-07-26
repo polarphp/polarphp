@@ -392,7 +392,7 @@ name:
 
 top_statement:
    statement {
-
+      
    }
 |  function_declaration_statement {
 
@@ -1408,7 +1408,7 @@ expr:
 |  scalar {
 
    }
-|  '`' backticks_expr '`' {
+|  T_BACKTICK backticks_expr T_BACKTICK {
 
    }
 |  T_PRINT expr {
@@ -1581,7 +1581,10 @@ dereferencable_scalar:
 |  T_LEFT_SQUARE_BRACKET array_pair_list T_RIGHT_SQUARE_BRACKET {
 
    }
-|  T_CONSTANT_ENCAPSED_STRING {
+|  T_DOUBLE_QUOTE T_CONSTANT_ENCAPSED_STRING T_DOUBLE_QUOTE {
+
+   }
+|  T_SINGLE_QUOTE T_CONSTANT_ENCAPSED_STRING T_SINGLE_QUOTE {
 
    }
 ;

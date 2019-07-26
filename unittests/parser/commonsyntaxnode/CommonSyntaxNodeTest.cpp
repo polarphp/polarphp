@@ -28,6 +28,10 @@ TEST_F(CommonSyntaxNodeTest, testBasic)
    std::string source =
          R"(
          $name = "polarphp";
+         function name ($name, $version)
+         {
+
+         }
          )";
    std::shared_ptr<Syntax> ast = parseSource(source);
 }
