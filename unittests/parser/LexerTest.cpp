@@ -313,12 +313,12 @@ TEST_F(LexerTest, testLexLabelString)
             )";
       std::vector<TokenKindType> expectedTokens{
          TokenKindType::T_OBJECT_OPERATOR, TokenKindType::T_IDENTIFIER_STRING,
-               TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES,
+               TokenKindType::T_DOUBLE_QUOTE, TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES,
                TokenKindType::T_STRING_VARNAME, TokenKindType::T_RIGHT_BRACE,
                TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_STRING_VARNAME,
                TokenKindType::T_LEFT_SQUARE_BRACKET, TokenKindType::T_LNUMBER,
                TokenKindType::T_RIGHT_SQUARE_BRACKET, TokenKindType::T_RIGHT_BRACE,
-               TokenKindType::T_DOUBLE_STR_QUOTE
+               TokenKindType::T_DOUBLE_QUOTE
       };
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
       {
@@ -595,11 +595,11 @@ TEST_F(LexerTest, testLexDoubleQuoteString)
             Chinese Ma Nong"
             )";
       std::vector<TokenKindType> expectedTokens {
-         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
-               TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_DOUBLE_STR_QUOTE,
-               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_STR_QUOTE,
-               TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
-               TokenKindType::T_DOUBLE_STR_QUOTE,
+         TokenKindType::T_DOUBLE_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_DOUBLE_QUOTE, TokenKindType::T_DOUBLE_QUOTE,
+               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_QUOTE,
+               TokenKindType::T_DOUBLE_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_DOUBLE_QUOTE,
       };
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
       Token token1 = tokens.at(1);
@@ -623,9 +623,9 @@ TEST_F(LexerTest, testLexDoubleQuoteString)
             "polarphp version: $version, very welcome."
             )";
       std::vector<TokenKindType> expectedTokens {
-         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+         TokenKindType::T_DOUBLE_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
                TokenKindType::T_VARIABLE,  TokenKindType::T_CONSTANT_ENCAPSED_STRING,
-               TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_DOUBLE_QUOTE,
       };
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
       Token token1 = tokens.at(1);
@@ -645,14 +645,14 @@ TEST_F(LexerTest, testLexDoubleQuoteString)
             "name is $info->name."
             )";
       std::vector<TokenKindType> expectedTokens {
-         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+         TokenKindType::T_DOUBLE_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
                TokenKindType::T_VARIABLE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
-               TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_DOUBLE_QUOTE,
 
-               TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+               TokenKindType::T_DOUBLE_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
                TokenKindType::T_VARIABLE, TokenKindType::T_OBJECT_OPERATOR,
                TokenKindType::T_IDENTIFIER_STRING, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
-               TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_DOUBLE_QUOTE,
       };
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
       Token token1 = tokens.at(1);
@@ -687,10 +687,10 @@ TEST_F(LexerTest, testLexDoubleQuoteString)
             "name is ${info}."
             )";
       std::vector<TokenKindType> expectedTokens {
-         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+         TokenKindType::T_DOUBLE_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
                TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_STRING_VARNAME,
                TokenKindType::T_RIGHT_BRACE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
-               TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_DOUBLE_QUOTE,
       };
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
       Token token1 = tokens.at(1);
@@ -712,11 +712,11 @@ TEST_F(LexerTest, testLexDoubleQuoteString)
             "name is ${info[1]}."
             )";
       std::vector<TokenKindType> expectedTokens {
-         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+         TokenKindType::T_DOUBLE_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
                TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_STRING_VARNAME,
                TokenKindType::T_LEFT_SQUARE_BRACKET, TokenKindType::T_LNUMBER,
                TokenKindType::T_RIGHT_SQUARE_BRACKET, TokenKindType::T_RIGHT_BRACE,
-               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_QUOTE,
       };
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
       Token token1 = tokens.at(1);
@@ -741,12 +741,12 @@ TEST_F(LexerTest, testLexDoubleQuoteString)
             "name is ${info["name"]}."
             )";
       std::vector<TokenKindType> expectedTokens {
-         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+         TokenKindType::T_DOUBLE_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
                TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_STRING_VARNAME,
-               TokenKindType::T_LEFT_SQUARE_BRACKET, TokenKindType::T_DOUBLE_STR_QUOTE,
-               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_LEFT_SQUARE_BRACKET, TokenKindType::T_DOUBLE_QUOTE,
+               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_QUOTE,
                TokenKindType::T_RIGHT_SQUARE_BRACKET, TokenKindType::T_RIGHT_BRACE,
-               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_QUOTE,
       };
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
       Token token1 = tokens.at(1);
@@ -772,11 +772,11 @@ TEST_F(LexerTest, testLexDoubleQuoteString)
             "name is ${info->name}."
             )";
       std::vector<TokenKindType> expectedTokens {
-         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+         TokenKindType::T_DOUBLE_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
                TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_IDENTIFIER_STRING,
                TokenKindType::T_OBJECT_OPERATOR, TokenKindType::T_IDENTIFIER_STRING,
                TokenKindType::T_RIGHT_BRACE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
-               TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_DOUBLE_QUOTE,
       };
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
       Token token1 = tokens.at(1);
@@ -803,7 +803,7 @@ TEST_F(LexerTest, testLexDoubleQuoteString)
 
             )";
       std::vector<TokenKindType> expectedTokens {
-         TokenKindType::T_DOUBLE_STR_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+         TokenKindType::T_DOUBLE_QUOTE, TokenKindType::T_CONSTANT_ENCAPSED_STRING,
       };
       std::vector<Token> tokens = checkLex(source, expectedTokens, /*KeepComments=*/false);
       Token token1 = tokens.at(1);
@@ -982,8 +982,8 @@ TEST_F(LexerTest, testLexBackquoteString)
       std::vector<TokenKindType> expectedTokens {
          TokenKindType::T_BACKTICK, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
                TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_STRING_VARNAME,
-               TokenKindType::T_LEFT_SQUARE_BRACKET, TokenKindType::T_DOUBLE_STR_QUOTE,
-               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_LEFT_SQUARE_BRACKET, TokenKindType::T_DOUBLE_QUOTE,
+               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_QUOTE,
                TokenKindType::T_RIGHT_SQUARE_BRACKET, TokenKindType::T_RIGHT_BRACE,
                TokenKindType::T_ENCAPSED_AND_WHITESPACE, TokenKindType::T_BACKTICK,
       };
@@ -1371,8 +1371,8 @@ TEST_F(LexerTest, testLexHereDoc)
       std::vector<TokenKindType> expectedTokens {
          TokenKindType::T_START_HEREDOC, TokenKindType::T_ENCAPSED_AND_WHITESPACE,
                TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES, TokenKindType::T_STRING_VARNAME,
-               TokenKindType::T_LEFT_SQUARE_BRACKET, TokenKindType::T_DOUBLE_STR_QUOTE,
-               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_STR_QUOTE,
+               TokenKindType::T_LEFT_SQUARE_BRACKET, TokenKindType::T_DOUBLE_QUOTE,
+               TokenKindType::T_CONSTANT_ENCAPSED_STRING, TokenKindType::T_DOUBLE_QUOTE,
                TokenKindType::T_RIGHT_SQUARE_BRACKET, TokenKindType::T_RIGHT_BRACE,
                TokenKindType::T_ENCAPSED_AND_WHITESPACE, TokenKindType::T_END_HEREDOC,
                TokenKindType::T_SEMICOLON,

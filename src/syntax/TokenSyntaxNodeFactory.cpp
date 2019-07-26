@@ -1056,14 +1056,14 @@ TokenSyntax TokenSyntaxNodeFactory::makeBacktickToken(const Trivia &leadingTrivi
 TokenSyntax TokenSyntaxNodeFactory::makeSingleStrQuoteToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                             RefCountPtr<SyntaxArena> &arena)
 {
-   return makeToken(TokenKindType::T_SINGLE_STR_QUOTE, OwnedString::makeUnowned(get_token_text(TokenKindType::T_SINGLE_STR_QUOTE)),
+   return makeToken(TokenKindType::T_SINGLE_QUOTE, OwnedString::makeUnowned(get_token_text(TokenKindType::T_SINGLE_QUOTE)),
                     leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 
 TokenSyntax TokenSyntaxNodeFactory::makeDoubleStrQuoteToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                             RefCountPtr<SyntaxArena> &arena)
 {
-   return makeToken(TokenKindType::T_DOUBLE_STR_QUOTE, OwnedString::makeUnowned(get_token_text(TokenKindType::T_DOUBLE_STR_QUOTE)),
+   return makeToken(TokenKindType::T_DOUBLE_QUOTE, OwnedString::makeUnowned(get_token_text(TokenKindType::T_DOUBLE_QUOTE)),
                     leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 

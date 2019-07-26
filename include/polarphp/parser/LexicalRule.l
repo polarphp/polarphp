@@ -809,7 +809,7 @@ restart_lex:
       lexer.setLexingBinaryStrFlag(true);
    }
    GOTO_CONDITION(ST_DOUBLE_QUOTES);
-   lexer.formToken(TokenKindType::T_DOUBLE_STR_QUOTE, yytext);
+   lexer.formToken(TokenKindType::T_DOUBLE_QUOTE, yytext);
    return;
 }
 
@@ -838,7 +838,7 @@ restart_lex:
 }
 
 <ST_DOUBLE_QUOTES> ["] {
-   if (lexer.m_nextToken.getKind() == TokenKindType::T_DOUBLE_STR_QUOTE) {
+   if (lexer.m_nextToken.getKind() == TokenKindType::T_DOUBLE_QUOTE) {
       /// check whether is empty string
       lexer.setYYLength(0);
       lexer.formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, lexer.getYYText() - 1);
@@ -850,7 +850,7 @@ restart_lex:
    }
    GOTO_CONDITION(ST_IN_SCRIPTING);
    lexer.setLexingBinaryStrFlag(false);
-   lexer.formToken(TokenKindType::T_DOUBLE_STR_QUOTE, lexer.getYYText());
+   lexer.formToken(TokenKindType::T_DOUBLE_QUOTE, lexer.getYYText());
    return;
 }
 

@@ -251,8 +251,8 @@ using polar::syntax::Syntax;
 %token T_COLON ": (T_COLON)"
 %token T_SEMICOLON "; (T_SEMICOLON)"
 %token T_BACKTICK "` (T_BACKTICK)"
-%token T_SINGLE_STR_QUOTE "' (T_SINGLE_STR_QUOTE)"
-%token T_DOUBLE_STR_QUOTE "\" (T_SINGLE_STR_QUOTE)"
+%token T_SINGLE_QUOTE "' (T_SINGLE_QUOTE)"
+%token T_DOUBLE_QUOTE "\" (T_SINGLE_QUOTE)"
 %token T_VBAR "| (T_VBAR)"
 %token T_CARET "^ (T_CARET)"
 %token T_EXCLAMATION_MARK "! (T_EXCLAMATION_MARK)"
@@ -297,8 +297,8 @@ using polar::syntax::Syntax;
 %type <std::shared_ptr<Syntax>> group_use_declaration inline_use_declarations inline_use_declaration
 %type <std::shared_ptr<Syntax>> mixed_group_use_declaration use_declaration unprefixed_use_declaration
 %type <std::shared_ptr<Syntax>> unprefixed_use_declarations const_decl inner_statement
-%type <std::shared_ptr<Syntax>> expr optional_expr while_statement for_statement foreach_variable
-%type <std::shared_ptr<Syntax>> foreach_statement declare_statement finally_statement unset_variable variable
+%type <std::shared_ptr<Syntax>> expr optional_expr foreach_variable
+%type <std::shared_ptr<Syntax>> finally_statement unset_variable variable
 %type <std::shared_ptr<Syntax>> extends_from parameter optional_type argument global_var
 %type <std::shared_ptr<Syntax>> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <std::shared_ptr<Syntax>> absolute_trait_method_reference trait_method_reference property echo_expr
@@ -567,13 +567,13 @@ statement:
 |  if_stmt {
 
    }
-|  T_WHILE T_LEFT_PAREN expr T_RIGHT_PAREN while_statement {
+|  T_WHILE T_LEFT_PAREN expr T_RIGHT_PAREN statement {
 
    }
 |  T_DO statement T_WHILE T_LEFT_PAREN expr T_RIGHT_PAREN T_SEMICOLON {
 
    }
-|  T_FOR T_LEFT_PAREN for_exprs T_SEMICOLON for_exprs T_SEMICOLON for_exprs T_RIGHT_PAREN for_statement {
+|  T_FOR T_LEFT_PAREN for_exprs T_SEMICOLON for_exprs T_SEMICOLON for_exprs T_RIGHT_PAREN statement {
 
    }
 |  T_SWITCH T_LEFT_PAREN expr T_RIGHT_PAREN switch_case_list {
@@ -606,14 +606,14 @@ statement:
 |  T_UNSET T_LEFT_PAREN unset_variables possible_comma T_RIGHT_PAREN T_SEMICOLON {
 
    }
-|  T_FOREACH T_LEFT_PAREN expr T_AS foreach_variable T_RIGHT_PAREN foreach_statement {
+|  T_FOREACH T_LEFT_PAREN expr T_AS foreach_variable T_RIGHT_PAREN statement {
 
    }
-|  T_FOREACH T_LEFT_PAREN expr T_AS foreach_variable T_DOUBLE_ARROW foreach_variable T_RIGHT_PAREN foreach_statement {
+|  T_FOREACH T_LEFT_PAREN expr T_AS foreach_variable T_DOUBLE_ARROW foreach_variable T_RIGHT_PAREN statement {
 
    }
 |  T_DECLARE T_LEFT_PAREN const_list T_RIGHT_PAREN {}
-   declare_statement {
+   statement {
 
    }
 |  T_SEMICOLON {
@@ -785,24 +785,6 @@ foreach_variable:
    }
 ;
 
-for_statement:
-   statement {
-
-   }
-;
-
-foreach_statement:
-   statement {
-
-   }
-;
-
-declare_statement:
-   statement {
-
-   }
-;
-
 switch_case_list:
    T_LEFT_BRACE case_list T_RIGHT_BRACE {
 
@@ -826,12 +808,6 @@ case_list:
 
 case_separator:
    T_COLON
-;
-
-while_statement:
-   statement {
-
-   }
 ;
 
 if_stmt_without_else:
@@ -1647,7 +1623,7 @@ scalar:
 |  T_START_HEREDOC T_END_HEREDOC {
 
    }
-|  '"' encaps_list '"' {
+|  T_DOUBLE_QUOTE encaps_list T_DOUBLE_QUOTE {
 
    }
 |  T_START_HEREDOC encaps_list T_END_HEREDOC {
@@ -1905,7 +1881,7 @@ encaps_var_offset:
 |  T_NUM_STRING {
 
    }
-|  '-' T_NUM_STRING {
+|  T_MINUS_SIGN T_NUM_STRING {
 
    }
 |  T_VARIABLE {
