@@ -104,6 +104,22 @@ void SemiReservedSytnax::validate()
    }
 }
 
+Syntax SemiReservedSytnax::getModifier()
+{
+   return Syntax{m_root, m_data->getChild(Cursor::Modifier).get()};
+}
+
+SemiReservedSytnax SemiReservedSytnax::withModifier(std::optional<Syntax> modifier)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (modifier.has_value()) {
+      raw = modifier->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<SemiReservedSytnax>(raw, Cursor::Modifier);
+}
+
 ///
 /// SourceFileSyntax
 ///
