@@ -166,8 +166,59 @@ public:
    Syntax getNameItem();
    IdentifierSyntax withNameItem(std::optional<Syntax> item);
 
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::Identifier;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
 private:
    friend class IdentifierSyntaxBuilder;
+   void validate();
+};
+
+class NamespacePartSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: true
+      NsSeparator,
+      /// type: TokenSyntax
+      /// optional: false
+      Name
+   };
+
+public:
+   NamespacePartSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getNsSeparator();
+   TokenSyntax getName();
+   NamespacePartSyntax withNsSeparator(std::optional<TokenSyntax> separator);
+   NamespacePartSyntax withName(std::optional<TokenSyntax> name);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::NamespacePart;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class NamespacePartSyntaxBuilder;
    void validate();
 };
 
