@@ -31,6 +31,8 @@ enum class SyntaxKind : std::uint32_t
 
    /// decl syntax node
    FirstDecl,
+   ReservedNonModifier,
+   SemiReserved,
    UnknownDecl,
    LastDecl,
 

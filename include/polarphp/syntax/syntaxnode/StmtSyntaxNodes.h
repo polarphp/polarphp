@@ -57,8 +57,8 @@ using ElseIfListSyntax = SyntaxCollection<SyntaxKind::ElseIfList, ElseIfClauseSy
 class ConditionElementSyntax final : public Syntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 2;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: Syntax
@@ -101,8 +101,8 @@ private:
 class ContinueStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 2;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
 
    enum Cursor : SyntaxChildrenCountType
    {
@@ -143,8 +143,8 @@ private:
 class BreakStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 2;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
 
    enum Cursor : SyntaxChildrenCountType
    {
@@ -185,8 +185,8 @@ private:
 class FallthroughStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
 
    enum Cursor : SyntaxChildrenCountType
    {
@@ -213,8 +213,8 @@ private:
 class ElseIfClauseSyntax final : public Syntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 5;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 5;
+   constexpr static std::uint8_t CHILDREN_COUNT = 5;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 5;
 
    enum Cursor : SyntaxChildrenCountType
    {
@@ -262,8 +262,8 @@ private:
 class IfStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 10;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 5;
+   constexpr static std::uint8_t CHILDREN_COUNT = 10;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 5;
 
    enum Cursor : SyntaxChildrenCountType
    {
@@ -346,8 +346,8 @@ private:
 class WhileStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 7;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 5;
+   constexpr static std::uint8_t CHILDREN_COUNT = 7;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 5;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -422,8 +422,8 @@ private:
 class DoWhileStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 8;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 6;
+   constexpr static std::uint8_t CHILDREN_COUNT = 8;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 6;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -490,8 +490,8 @@ private:
 class SwitchDefaultLabelSyntax final : public Syntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 2;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -528,8 +528,8 @@ private:
 class SwitchCaseLabelSyntax final : public Syntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 3;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -571,8 +571,8 @@ private:
 class SwitchCaseSyntax final : public Syntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 2;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: Syntax
@@ -618,8 +618,8 @@ private:
 class SwitchStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 9;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 7;
+   constexpr static std::uint8_t CHILDREN_COUNT = 9;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 7;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -694,8 +694,8 @@ private:
 class DeferStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 2;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -731,8 +731,8 @@ private:
 class ExpressionStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: ExprSyntax
@@ -757,8 +757,8 @@ private:
 class ThrowStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 2;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
 
    enum Cursor : SyntaxChildrenCountType
    {
@@ -800,8 +800,8 @@ private:
 class ReturnStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 2;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
 
    enum Cursor : SyntaxChildrenCountType
    {

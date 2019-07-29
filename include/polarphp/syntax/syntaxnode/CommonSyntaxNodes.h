@@ -191,8 +191,8 @@ public:
 class CodeBlockItemSyntax final : public Syntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 3;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: Syntax
@@ -255,8 +255,8 @@ private:
 class CodeBlockSyntax final : public Syntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 3;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax

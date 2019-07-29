@@ -26,8 +26,8 @@ class ReservedNonModifierSyntax;
 class ReservedNonModifierSyntax : public Syntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
 
    enum Cursor : SyntaxChildrenCountType
    {
@@ -39,7 +39,7 @@ public:
 
 #ifdef POLAR_DEBUG_BUILD
    ///
-   /// child name: Boolean
+   /// child index: Modifier
    /// token choices:
    /// T_INCLUDE | T_INCLUDE_ONCE | T_EVAL | T_REQUIRE | T_REQUIRE_ONCE | T_LOGICAL_OR | T_LOGICAL_XOR | T_LOGICAL_AND
    /// T_INSTANCEOF | T_NEW | T_CLONE | T_EXIT | T_IF | T_ELSEIF | T_ELSE | T_ECHO | T_DO | T_WHILE
@@ -60,18 +60,80 @@ public:
    }
 
    TokenSyntax getModifier();
-   ReservedNonModifierSyntax with(std::optional<TokenSyntax> modifier);
+   ReservedNonModifierSyntax withModifier(std::optional<TokenSyntax> modifier);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ReservedNonModifier;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
 
 private:
    friend class ReservedNonModifierSyntaxBuilder;
    void validate();
 };
 
+class SemiReservedSytnax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// -----------------
+      /// choice type: ReservedNonModifierSyntax
+      /// -----------------
+      /// choice type: TokenSyntax
+      /// token choices: true
+      Modifier,
+      ModifierChoiceToken
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   ///
+   /// child index: ModifierChoiceToken
+   /// token choices:
+   /// T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
+   static const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> CHILD_TOKEN_CHOICES;
+#endif
+
+public:
+   SemiReservedSytnax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getModifier();
+   SemiReservedSytnax withModifier(std::optional<Syntax> modifier);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SemiReserved;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class SemiReservedSytnaxBuilder;
+   void validate();
+};
+
 class SourceFileSyntax : public Syntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 2;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: CodeBlockItemListSyntax

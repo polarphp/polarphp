@@ -13,13 +13,16 @@
 
 namespace polar::syntax {
 
+///
+/// ReservedNonModifierSyntax
+///
 void ReservedNonModifierSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == SourceFileSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == ReservedNonModifierSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, Modifier, CHILD_TOKEN_CHOICES.at(Cursor::Modifier));
 }
 
@@ -55,7 +58,7 @@ TokenSyntax ReservedNonModifierSyntax::getModifier()
    return TokenSyntax{m_root, m_data->getChild(Cursor::Modifier).get()};
 }
 
-ReservedNonModifierSyntax ReservedNonModifierSyntax::with(std::optional<TokenSyntax> modifier)
+ReservedNonModifierSyntax ReservedNonModifierSyntax::withModifier(std::optional<TokenSyntax> modifier)
 {
    RefCountPtr<RawSyntax> raw;
    if (modifier.has_value()) {
@@ -68,6 +71,42 @@ ReservedNonModifierSyntax ReservedNonModifierSyntax::with(std::optional<TokenSyn
    return m_data->replaceChild<ReservedNonModifierSyntax>(raw, Cursor::Modifier);
 }
 
+///
+/// SemiReservedSytnax
+///
+#ifdef POLAR_DEBUG_BUILD
+const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> SemiReservedSytnax::CHILD_TOKEN_CHOICES
+{
+   {
+      SemiReservedSytnax::Cursor::ModifierChoiceToken, {
+         TokenKindType::T_STATIC, TokenKindType::T_ABSTRACT, TokenKindType::T_FINAL,
+               TokenKindType::T_PRIVATE, TokenKindType::T_PROTECTED, TokenKindType::T_PUBLIC
+      }
+   }
+};
+#endif
+
+void SemiReservedSytnax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == SemiReservedSytnax::CHILDREN_COUNT);
+   // check node choices
+   if (const RefCountPtr<RawSyntax> &modifierChild = raw->getChild(Cursor::Modifier)) {
+      if (modifierChild->isToken()) {
+         syntax_assert_child_token(raw, ModifierChoiceToken,
+                                   CHILD_TOKEN_CHOICES.at(SemiReservedSytnax::ModifierChoiceToken));
+         return;
+      }
+      assert(modifierChild->kindOf(SyntaxKind::ReservedNonModifier));
+   }
+}
+
+///
+/// SourceFileSyntax
+///
 void SourceFileSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();

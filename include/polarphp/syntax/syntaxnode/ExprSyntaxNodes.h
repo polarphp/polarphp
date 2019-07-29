@@ -42,8 +42,8 @@ using ExprListSyntax = SyntaxCollection<SyntaxKind::ExprList, ExprSyntax>;
 class NullExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -78,8 +78,8 @@ private:
 class ClassRefParentExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
 
    enum Cursor : SyntaxChildrenCountType
    {
@@ -116,8 +116,8 @@ private:
 class ClassRefSelfExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -153,8 +153,8 @@ private:
 class ClassRefStaticExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -189,8 +189,8 @@ private:
 class IntegerLiteralExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -225,8 +225,8 @@ private:
 class FloatLiteralExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -262,8 +262,8 @@ private:
 class StringLiteralExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -298,8 +298,8 @@ private:
 class BooleanLiteralExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -349,8 +349,8 @@ private:
 class TernaryExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 5;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 5;
+   constexpr static std::uint8_t CHILDREN_COUNT = 5;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 5;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: ExprSyntax
@@ -426,8 +426,8 @@ private:
 class AssignmentExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -466,8 +466,8 @@ private:
 class SequenceExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: ExprListSyntax
@@ -516,8 +516,8 @@ private:
 class PrefixOperatorExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 2;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
@@ -558,8 +558,8 @@ private:
 class PostfixOperatorExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 2;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: Expr
@@ -601,8 +601,8 @@ private:
 class BinaryOperatorExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static unsigned int CHILDREN_COUNT = 1;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax
