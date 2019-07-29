@@ -129,6 +129,39 @@ private:
    void validate();
 };
 
+class IdentifierSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// -----------------
+      /// choice type: TokenSyntax
+      /// -----------------
+      /// choice type: SemiReservedSytnax
+      NameItem
+   };
+
+public:
+   IdentifierSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getNameItem();
+   IdentifierSyntax withNameItem(std::optional<Syntax> item);
+
+private:
+   friend class IdentifierSyntaxBuilder;
+   void validate();
+};
+
 class SourceFileSyntax : public Syntax
 {
 public:

@@ -121,6 +121,41 @@ SemiReservedSytnax SemiReservedSytnax::withModifier(std::optional<Syntax> modifi
 }
 
 ///
+/// IdentifierSyntax
+///
+void IdentifierSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == IdentifierSyntax::CHILDREN_COUNT);
+   if (const RefCountPtr<RawSyntax> &itemChild = raw->getChild(Cursor::NameItem)) {
+      if (itemChild->isToken()) {
+         syntax_assert_child_token(raw, NameItem, std::set<TokenKindType>{TokenKindType::T_IDENTIFIER_STRING});
+         return;
+      }
+      assert(itemChild->kindOf(SyntaxKind::SemiReserved));
+   }
+}
+
+Syntax IdentifierSyntax::getNameItem()
+{
+   return Syntax{m_root, m_data->getChild(Cursor::NameItem).get()};
+}
+
+IdentifierSyntax IdentifierSyntax::withNameItem(std::optional<Syntax> item)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (item.has_value()) {
+      raw = item->getRaw();
+   } else {
+      raw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<IdentifierSyntax>(raw, Cursor::NameItem);
+}
+
+///
 /// SourceFileSyntax
 ///
 void SourceFileSyntax::validate()
