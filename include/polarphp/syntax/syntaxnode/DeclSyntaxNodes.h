@@ -23,13 +23,14 @@ namespace polar::syntax {
 class ReservedNonModifierSyntax;
 class SemiReservedSytnax;
 class IdentifierSyntax;
+class NamespacePartSyntax;
 class SourceFileSyntax;
 
 ///
 /// type: SyntaxCollection
 /// element type: TokenSyntax
 ///
-using NamespacePartListSyntax = SyntaxCollection<SyntaxKind::NamespacePartList, TokenSyntax>;
+using NamespacePartListSyntax = SyntaxCollection<SyntaxKind::NamespacePartList, NamespacePartSyntax>;
 
 class ReservedNonModifierSyntax : public Syntax
 {
