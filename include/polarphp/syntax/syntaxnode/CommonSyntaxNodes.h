@@ -33,13 +33,13 @@ class CodeBlockItemSyntax;
 class CodeBlockSyntax;
 
 /// type: SyntaxCollection
-/// element type: CodeBlockItem
+/// element type: CodeBlockItemSyntax
 using CodeBlockItemListSyntax = SyntaxCollection<SyntaxKind::CodeBlockItemList, CodeBlockItemSyntax>;
 /// type: SyntaxCollection
-/// element type: Token
+/// element type: TokenSyntax
 using TokenListSyntax = SyntaxCollection<SyntaxKind::TokenList, TokenSyntax>;
 /// type: SyntaxCollection
-/// element type: Token
+/// element type: TokenSyntax
 using NonEmptyTokenListSyntax = SyntaxCollection<SyntaxKind::NonEmptyTokenList, TokenSyntax>;
 
 class DeclSyntax : public Syntax

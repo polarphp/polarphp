@@ -20,8 +20,16 @@
 
 namespace polar::syntax {
 
-class SourceFileSyntax;
 class ReservedNonModifierSyntax;
+class SemiReservedSytnax;
+class IdentifierSyntax;
+class SourceFileSyntax;
+
+///
+/// type: SyntaxCollection
+/// element type: TokenSyntax
+///
+using NamespacePartListSyntax = SyntaxCollection<SyntaxKind::NamespacePartList, TokenSyntax>;
 
 class ReservedNonModifierSyntax : public Syntax
 {

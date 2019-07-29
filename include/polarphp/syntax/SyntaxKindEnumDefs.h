@@ -91,6 +91,7 @@ enum class SyntaxKind : std::uint32_t
    ExprList,
    TokenList,
    NonEmptyTokenList,
+   NamespacePartList,
 
    // NOTE: Unknown must be the last kind.
    Unknown,
