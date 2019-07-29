@@ -13,6 +13,61 @@
 
 namespace polar::syntax {
 
+void ReservedNonModifierSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == SourceFileSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Modifier, CHILD_TOKEN_CHOICES.at(Cursor::Modifier));
+}
+
+#ifdef POLAR_DEBUG_BUILD
+const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> ReservedNonModifierSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      ReservedNonModifierSyntax::Modifier, {
+         TokenKindType::T_INCLUDE, TokenKindType::T_INCLUDE_ONCE, TokenKindType::T_EVAL,
+               TokenKindType::T_REQUIRE, TokenKindType::T_REQUIRE_ONCE, TokenKindType::T_LOGICAL_OR,
+               TokenKindType::T_LOGICAL_XOR, TokenKindType::T_LOGICAL_AND, TokenKindType::T_INSTANCEOF,
+               TokenKindType::T_NEW, TokenKindType::T_CLONE, TokenKindType::T_EXIT,
+               TokenKindType::T_IF, TokenKindType::T_ELSEIF, TokenKindType::T_ELSE, TokenKindType::T_ECHO,
+               TokenKindType::T_DO, TokenKindType::T_WHILE, TokenKindType::T_FOR, TokenKindType::T_FOREACH,
+               TokenKindType::T_DECLARE, TokenKindType::T_AS, TokenKindType::T_TRY, TokenKindType::T_CATCH,
+               TokenKindType::T_FINALLY, TokenKindType::T_THROW, TokenKindType::T_USE, TokenKindType::T_INSTEADOF,
+               TokenKindType::T_GLOBAL, TokenKindType::T_VAR, TokenKindType::T_UNSET, TokenKindType::T_ISSET,
+               TokenKindType::T_EMPTY, TokenKindType::T_CONTINUE, TokenKindType::T_GOTO, TokenKindType::T_FUNCTION,
+               TokenKindType::T_CONST, TokenKindType::T_RETURN, TokenKindType::T_PRINT, TokenKindType::T_YIELD,
+               TokenKindType::T_LIST, TokenKindType::T_SWITCH, TokenKindType::T_CASE, TokenKindType::T_DEFAULT,
+               TokenKindType::T_BREAK, TokenKindType::T_ARRAY, TokenKindType::T_CALLABLE, TokenKindType::T_EXTENDS,
+               TokenKindType::T_IMPLEMENTS, TokenKindType::T_NAMESPACE, TokenKindType::T_TRAIT, TokenKindType::T_INTERFACE,
+               TokenKindType::T_CLASS, TokenKindType::T_CLASS_CONST, TokenKindType::T_TRAIT_CONST, TokenKindType::T_FUNC_CONST,
+               TokenKindType::T_METHOD_CONST, TokenKindType::T_LINE, TokenKindType::T_FILE, TokenKindType::T_DIR, TokenKindType::T_NS_CONST,
+               TokenKindType::T_FN
+      }
+   }
+};
+#endif
+
+TokenSyntax ReservedNonModifierSyntax::getModifier()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::Modifier).get()};
+}
+
+ReservedNonModifierSyntax ReservedNonModifierSyntax::with(std::optional<TokenSyntax> modifier)
+{
+   RefCountPtr<RawSyntax> raw;
+   if (modifier.has_value()) {
+      raw = modifier->getRaw();
+   } else {
+      /// not very good
+      raw = RawSyntax::missing(TokenKindType::T_INCLUDE,
+                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_INCLUDE)));
+   }
+   return m_data->replaceChild<ReservedNonModifierSyntax>(raw, Cursor::Modifier);
+}
+
 void SourceFileSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
