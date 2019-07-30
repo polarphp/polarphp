@@ -24,6 +24,7 @@ class ReservedNonModifierSyntax;
 class SemiReservedSytnax;
 class IdentifierSyntax;
 class NamespacePartSyntax;
+class NameSyntax;
 class SourceFileSyntax;
 
 ///
@@ -219,6 +220,52 @@ public:
    }
 private:
    friend class NamespacePartSyntaxBuilder;
+   void validate();
+};
+
+class NameSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: true
+      NsToken,
+      /// type: TokenSyntax
+      /// optional: true
+      NsSeparator,
+      /// type: SyntaxCollection
+      /// name: NamespacePartListSyntax
+      /// optional: false
+      Namespace
+   };
+public:
+   NameSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {}
+
+   std::optional<TokenSyntax> getNsToken();
+   std::optional<TokenSyntax> getNsSeparator();
+   NamespacePartListSyntax getNamespace();
+   NameSyntax withNsToken(std::optional<TokenSyntax> nsToken);
+   NameSyntax withNsSeparator(std::optional<TokenSyntax> separatorToken);
+   NameSyntax withNamespace(std::optional<NamespacePartListSyntax> ns);
+   NameSyntax addNamespacePart(NamespacePartSyntax namespacePart);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::Name;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class NameSyntaxBuilder;
    void validate();
 };
 
