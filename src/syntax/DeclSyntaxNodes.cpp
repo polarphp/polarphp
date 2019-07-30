@@ -332,6 +332,91 @@ NamespaceUseTypeSyntax NamespaceUseTypeSyntax::withTypeToken(std::optional<Token
 }
 
 ///
+/// UnprefixedUseDeclarationSyntax
+///
+void UnprefixedUseDeclarationSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == UnprefixedUseDeclarationSyntax::CHILDREN_COUNT);
+   if (const RefCountPtr<RawSyntax> &nsChild = raw->getChild(Cursor::Namespace)) {
+      assert(nsChild->kindOf(SyntaxKind::NamespacePartList));
+   }
+   syntax_assert_child_token(raw, AsToken, std::set<TokenKindType>{TokenKindType::T_AS});
+   syntax_assert_child_token(raw, IdentifierToken, std::set<TokenKindType>{TokenKindType::T_IDENTIFIER_STRING});
+}
+
+NamespacePartListSyntax UnprefixedUseDeclarationSyntax::getNamespace()
+{
+   return NamespacePartListSyntax{m_root, m_data->getChild(Cursor::Namespace).get()};
+}
+
+std::optional<TokenSyntax> UnprefixedUseDeclarationSyntax::getAsToken()
+{
+   RefCountPtr<SyntaxData> asTokenData = m_data->getChild(Cursor::AsToken);
+   if (!asTokenData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, asTokenData.get()};
+}
+
+std::optional<TokenSyntax> UnprefixedUseDeclarationSyntax::getIdentifierToken()
+{
+   RefCountPtr<SyntaxData> identifierData = m_data->getChild(Cursor::IdentifierToken);
+   if (!identifierData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, identifierData.get()};
+}
+
+UnprefixedUseDeclarationSyntax UnprefixedUseDeclarationSyntax::addNamespacePart(NamespacePartSyntax namespacePart)
+{
+   RefCountPtr<RawSyntax> namespacesRaw = getRaw()->getChild(Cursor::Namespace);
+   if (namespacesRaw) {
+      namespacesRaw = namespacesRaw->append(namespacePart.getRaw());
+   } else {
+      namespacesRaw = RawSyntax::make(SyntaxKind::NamespacePartList, {namespacePart.getRaw()},
+                                   SourcePresence::Present);
+   }
+   return m_data->replaceChild<UnprefixedUseDeclarationSyntax>(namespacesRaw, Cursor::Namespace);
+}
+
+UnprefixedUseDeclarationSyntax UnprefixedUseDeclarationSyntax::withNamespace(std::optional<NamespacePartListSyntax> ns)
+{
+   RefCountPtr<RawSyntax> nsRaw;
+   if (ns.has_value()) {
+      nsRaw = ns->getRaw();
+   } else {
+      nsRaw = RawSyntax::missing(SyntaxKind::NamespacePartList);
+   }
+   return m_data->replaceChild<UnprefixedUseDeclarationSyntax>(nsRaw, Cursor::Namespace);
+}
+
+UnprefixedUseDeclarationSyntax UnprefixedUseDeclarationSyntax::withAsToken(std::optional<TokenSyntax> asToken)
+{
+   RefCountPtr<RawSyntax> asTokenRaw;
+   if (asToken.has_value()) {
+      asTokenRaw = asToken->getRaw();
+   } else {
+      asTokenRaw = nullptr;
+   }
+   return m_data->replaceChild<UnprefixedUseDeclarationSyntax>(asTokenRaw, Cursor::AsToken);
+}
+
+UnprefixedUseDeclarationSyntax UnprefixedUseDeclarationSyntax::withIdentifierToken(std::optional<TokenSyntax> identifierToken)
+{
+   RefCountPtr<RawSyntax> identifierTokenRaw;
+   if (identifierToken.has_value()) {
+      identifierTokenRaw = identifierToken->getRaw();
+   } else {
+      identifierTokenRaw = nullptr;
+   }
+   return m_data->replaceChild<UnprefixedUseDeclarationSyntax>(identifierTokenRaw, Cursor::IdentifierToken);
+}
+
+///
 /// SourceFileSyntax
 ///
 void SourceFileSyntax::validate()

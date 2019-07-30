@@ -315,6 +315,54 @@ private:
    void validate();
 };
 
+class UnprefixedUseDeclarationSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: SyntaxCollection
+      /// optional: false
+      Namespace,
+      /// type: TokenSyntax
+      /// opttional: true
+      AsToken,
+      /// type: TokenSyntax
+      /// optional: true
+      IdentifierToken
+   };
+
+public:
+   UnprefixedUseDeclarationSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   NamespacePartListSyntax getNamespace();
+   std::optional<TokenSyntax> getAsToken();
+   std::optional<TokenSyntax> getIdentifierToken();
+   UnprefixedUseDeclarationSyntax addNamespacePart(NamespacePartSyntax namespacePart);
+   UnprefixedUseDeclarationSyntax withNamespace(std::optional<NamespacePartListSyntax> ns);
+   UnprefixedUseDeclarationSyntax withAsToken(std::optional<TokenSyntax> asToken);
+   UnprefixedUseDeclarationSyntax withIdentifierToken(std::optional<TokenSyntax> identifierToken);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::NamespaceUseType;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class UnprefixedUseDeclarationSyntaxBuilder;
+   void validate();
+};
+
 class SourceFileSyntax : public Syntax
 {
 public:
