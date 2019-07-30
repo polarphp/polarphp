@@ -378,7 +378,7 @@ UnprefixedUseDeclarationSyntax UnprefixedUseDeclarationSyntax::addNamespacePart(
       namespacesRaw = namespacesRaw->append(namespacePart.getRaw());
    } else {
       namespacesRaw = RawSyntax::make(SyntaxKind::NamespacePartList, {namespacePart.getRaw()},
-                                   SourcePresence::Present);
+                                      SourcePresence::Present);
    }
    return m_data->replaceChild<UnprefixedUseDeclarationSyntax>(namespacesRaw, Cursor::Namespace);
 }
@@ -414,6 +414,58 @@ UnprefixedUseDeclarationSyntax UnprefixedUseDeclarationSyntax::withIdentifierTok
       identifierTokenRaw = nullptr;
    }
    return m_data->replaceChild<UnprefixedUseDeclarationSyntax>(identifierTokenRaw, Cursor::IdentifierToken);
+}
+
+///
+/// UseDeclarationSyntax
+///
+void UseDeclarationSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == UseDeclarationSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, NsSeparator, std::set<TokenKindType>{TokenKindType::T_NS_SEPARATOR});
+   if (const RefCountPtr<RawSyntax> &declarationChild = raw->getChild(Cursor::UnprefixedUseDeclaration)) {
+      assert(declarationChild->kindOf(SyntaxKind::UnprefixedUseDeclaration));
+   }
+}
+
+std::optional<TokenSyntax> UseDeclarationSyntax::getNsSeparator()
+{
+   RefCountPtr<SyntaxData> separatorData = m_data->getChild(Cursor::NsSeparator);
+   if (!separatorData) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, separatorData.get()};
+}
+
+UnprefixedUseDeclarationSyntax UseDeclarationSyntax::getUnprefixedUseDeclaration()
+{
+   return UnprefixedUseDeclarationSyntax{m_root, m_data->getChild(Cursor::UnprefixedUseDeclaration).get()};
+}
+
+UseDeclarationSyntax UseDeclarationSyntax::withNsSeparator(std::optional<TokenSyntax> nsSeparator)
+{
+   RefCountPtr<RawSyntax> nsSeparatorRaw;
+   if (nsSeparator.has_value()) {
+      nsSeparatorRaw = nsSeparator->getRaw();
+   } else {
+      nsSeparatorRaw = nullptr;
+   }
+   return m_data->replaceChild<UseDeclarationSyntax>(nsSeparatorRaw, Cursor::NsSeparator);
+}
+
+UseDeclarationSyntax UseDeclarationSyntax::withUnprefixedUseDeclaration(std::optional<UnprefixedUseDeclarationSyntax> declaration)
+{
+   RefCountPtr<RawSyntax> declarationRaw;
+   if (declaration.has_value()) {
+      declarationRaw = declaration->getRaw();
+   } else {
+      declarationRaw = RawSyntax::missing(SyntaxKind::UnprefixedUseDeclaration);
+   }
+   return m_data->replaceChild<UseDeclarationSyntax>(declarationRaw, Cursor::UnprefixedUseDeclaration);
 }
 
 ///

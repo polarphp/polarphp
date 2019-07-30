@@ -25,6 +25,9 @@ class SemiReservedSytnax;
 class IdentifierSyntax;
 class NamespacePartSyntax;
 class NameSyntax;
+class NamespaceUseTypeSyntax;
+class UnprefixedUseDeclarationSyntax;
+class UseDeclarationSyntax;
 class SourceFileSyntax;
 
 ///
@@ -360,6 +363,48 @@ public:
 
 private:
    friend class UnprefixedUseDeclarationSyntaxBuilder;
+   void validate();
+};
+
+class UseDeclarationSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: true
+      NsSeparator,
+      /// type: UnprefixedUseDeclarationSyntax
+      /// optional: false
+      UnprefixedUseDeclaration
+   };
+
+public:
+   UseDeclarationSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getNsSeparator();
+   UnprefixedUseDeclarationSyntax getUnprefixedUseDeclaration();
+   UseDeclarationSyntax withNsSeparator(std::optional<TokenSyntax> nsSeparator);
+   UseDeclarationSyntax withUnprefixedUseDeclaration(std::optional<UnprefixedUseDeclarationSyntax> declaration);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::NamespaceUseType;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class UseDeclarationSyntaxBuilder;
    void validate();
 };
 
