@@ -36,6 +36,7 @@ enum class SyntaxKind : std::uint32_t
    Identifier,
    NamespacePart,
    Name,
+   NamespaceUseType,
    UnknownDecl,
    LastDecl,
 

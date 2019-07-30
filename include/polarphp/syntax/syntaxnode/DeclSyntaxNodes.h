@@ -269,6 +269,52 @@ private:
    void validate();
 };
 
+class NamespaceUseTypeSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: false
+      /// token choices: true
+      TypeToken
+   };
+#ifdef POLAR_DEBUG_BUILD
+   ///
+   /// child index: TypeToken
+   /// token choices:
+   /// T_FUNCTION | T_CONST
+   ///
+   static const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> CHILD_TOKEN_CHOICES;
+#endif
+
+public:
+   NamespaceUseTypeSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getTypeToken();
+   NamespaceUseTypeSyntax withTypeToken(std::optional<TokenSyntax> typeToken);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::NamespaceUseType;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class NamespaceUseTypeSyntaxBuilder;
+   void validate();
+};
+
 class SourceFileSyntax : public Syntax
 {
 public:
