@@ -99,6 +99,9 @@ enum class SyntaxKind : std::uint32_t
    TokenList,
    NonEmptyTokenList,
    NamespacePartList,
+   NamespaceUseDeclarationList,
+   NamespaceInlineUseDeclarationList,
+   NamespaceUnprefixedUseDeclarationList,
 
    // NOTE: Unknown must be the last kind.
    Unknown,

@@ -332,15 +332,15 @@ NamespaceUseTypeSyntax NamespaceUseTypeSyntax::withTypeToken(std::optional<Token
 }
 
 ///
-/// UnprefixedUseDeclarationSyntax
+/// NamespaceUnprefixedUseDeclarationSyntax
 ///
-void UnprefixedUseDeclarationSyntax::validate()
+void NamespaceUnprefixedUseDeclarationSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == UnprefixedUseDeclarationSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == NamespaceUnprefixedUseDeclarationSyntax::CHILDREN_COUNT);
    if (const RefCountPtr<RawSyntax> &nsChild = raw->getChild(Cursor::Namespace)) {
       assert(nsChild->kindOf(SyntaxKind::NamespacePartList));
    }
@@ -348,12 +348,12 @@ void UnprefixedUseDeclarationSyntax::validate()
    syntax_assert_child_token(raw, IdentifierToken, std::set<TokenKindType>{TokenKindType::T_IDENTIFIER_STRING});
 }
 
-NamespacePartListSyntax UnprefixedUseDeclarationSyntax::getNamespace()
+NamespacePartListSyntax NamespaceUnprefixedUseDeclarationSyntax::getNamespace()
 {
    return NamespacePartListSyntax{m_root, m_data->getChild(Cursor::Namespace).get()};
 }
 
-std::optional<TokenSyntax> UnprefixedUseDeclarationSyntax::getAsToken()
+std::optional<TokenSyntax> NamespaceUnprefixedUseDeclarationSyntax::getAsToken()
 {
    RefCountPtr<SyntaxData> asTokenData = m_data->getChild(Cursor::AsToken);
    if (!asTokenData) {
@@ -362,7 +362,7 @@ std::optional<TokenSyntax> UnprefixedUseDeclarationSyntax::getAsToken()
    return TokenSyntax{m_root, asTokenData.get()};
 }
 
-std::optional<TokenSyntax> UnprefixedUseDeclarationSyntax::getIdentifierToken()
+std::optional<TokenSyntax> NamespaceUnprefixedUseDeclarationSyntax::getIdentifierToken()
 {
    RefCountPtr<SyntaxData> identifierData = m_data->getChild(Cursor::IdentifierToken);
    if (!identifierData) {
@@ -371,7 +371,8 @@ std::optional<TokenSyntax> UnprefixedUseDeclarationSyntax::getIdentifierToken()
    return TokenSyntax{m_root, identifierData.get()};
 }
 
-UnprefixedUseDeclarationSyntax UnprefixedUseDeclarationSyntax::addNamespacePart(NamespacePartSyntax namespacePart)
+NamespaceUnprefixedUseDeclarationSyntax
+NamespaceUnprefixedUseDeclarationSyntax::addNamespacePart(NamespacePartSyntax namespacePart)
 {
    RefCountPtr<RawSyntax> namespacesRaw = getRaw()->getChild(Cursor::Namespace);
    if (namespacesRaw) {
@@ -380,10 +381,11 @@ UnprefixedUseDeclarationSyntax UnprefixedUseDeclarationSyntax::addNamespacePart(
       namespacesRaw = RawSyntax::make(SyntaxKind::NamespacePartList, {namespacePart.getRaw()},
                                       SourcePresence::Present);
    }
-   return m_data->replaceChild<UnprefixedUseDeclarationSyntax>(namespacesRaw, Cursor::Namespace);
+   return m_data->replaceChild<NamespaceUnprefixedUseDeclarationSyntax>(namespacesRaw, Cursor::Namespace);
 }
 
-UnprefixedUseDeclarationSyntax UnprefixedUseDeclarationSyntax::withNamespace(std::optional<NamespacePartListSyntax> ns)
+NamespaceUnprefixedUseDeclarationSyntax
+NamespaceUnprefixedUseDeclarationSyntax::withNamespace(std::optional<NamespacePartListSyntax> ns)
 {
    RefCountPtr<RawSyntax> nsRaw;
    if (ns.has_value()) {
@@ -391,10 +393,11 @@ UnprefixedUseDeclarationSyntax UnprefixedUseDeclarationSyntax::withNamespace(std
    } else {
       nsRaw = RawSyntax::missing(SyntaxKind::NamespacePartList);
    }
-   return m_data->replaceChild<UnprefixedUseDeclarationSyntax>(nsRaw, Cursor::Namespace);
+   return m_data->replaceChild<NamespaceUnprefixedUseDeclarationSyntax>(nsRaw, Cursor::Namespace);
 }
 
-UnprefixedUseDeclarationSyntax UnprefixedUseDeclarationSyntax::withAsToken(std::optional<TokenSyntax> asToken)
+NamespaceUnprefixedUseDeclarationSyntax
+NamespaceUnprefixedUseDeclarationSyntax::withAsToken(std::optional<TokenSyntax> asToken)
 {
    RefCountPtr<RawSyntax> asTokenRaw;
    if (asToken.has_value()) {
@@ -402,10 +405,11 @@ UnprefixedUseDeclarationSyntax UnprefixedUseDeclarationSyntax::withAsToken(std::
    } else {
       asTokenRaw = nullptr;
    }
-   return m_data->replaceChild<UnprefixedUseDeclarationSyntax>(asTokenRaw, Cursor::AsToken);
+   return m_data->replaceChild<NamespaceUnprefixedUseDeclarationSyntax>(asTokenRaw, Cursor::AsToken);
 }
 
-UnprefixedUseDeclarationSyntax UnprefixedUseDeclarationSyntax::withIdentifierToken(std::optional<TokenSyntax> identifierToken)
+NamespaceUnprefixedUseDeclarationSyntax
+NamespaceUnprefixedUseDeclarationSyntax::withIdentifierToken(std::optional<TokenSyntax> identifierToken)
 {
    RefCountPtr<RawSyntax> identifierTokenRaw;
    if (identifierToken.has_value()) {
@@ -413,26 +417,26 @@ UnprefixedUseDeclarationSyntax UnprefixedUseDeclarationSyntax::withIdentifierTok
    } else {
       identifierTokenRaw = nullptr;
    }
-   return m_data->replaceChild<UnprefixedUseDeclarationSyntax>(identifierTokenRaw, Cursor::IdentifierToken);
+   return m_data->replaceChild<NamespaceUnprefixedUseDeclarationSyntax>(identifierTokenRaw, Cursor::IdentifierToken);
 }
 
 ///
-/// UseDeclarationSyntax
+/// NamespaceUseDeclarationSyntax
 ///
-void UseDeclarationSyntax::validate()
+void NamespaceUseDeclarationSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == UseDeclarationSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == NamespaceUseDeclarationSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, NsSeparator, std::set<TokenKindType>{TokenKindType::T_NS_SEPARATOR});
    if (const RefCountPtr<RawSyntax> &declarationChild = raw->getChild(Cursor::UnprefixedUseDeclaration)) {
       assert(declarationChild->kindOf(SyntaxKind::UnprefixedUseDeclaration));
    }
 }
 
-std::optional<TokenSyntax> UseDeclarationSyntax::getNsSeparator()
+std::optional<TokenSyntax> NamespaceUseDeclarationSyntax::getNsSeparator()
 {
    RefCountPtr<SyntaxData> separatorData = m_data->getChild(Cursor::NsSeparator);
    if (!separatorData) {
@@ -441,12 +445,14 @@ std::optional<TokenSyntax> UseDeclarationSyntax::getNsSeparator()
    return TokenSyntax{m_root, separatorData.get()};
 }
 
-UnprefixedUseDeclarationSyntax UseDeclarationSyntax::getUnprefixedUseDeclaration()
+NamespaceUnprefixedUseDeclarationSyntax
+NamespaceUseDeclarationSyntax::getUnprefixedUseDeclaration()
 {
-   return UnprefixedUseDeclarationSyntax{m_root, m_data->getChild(Cursor::UnprefixedUseDeclaration).get()};
+   return NamespaceUnprefixedUseDeclarationSyntax{m_root, m_data->getChild(Cursor::UnprefixedUseDeclaration).get()};
 }
 
-UseDeclarationSyntax UseDeclarationSyntax::withNsSeparator(std::optional<TokenSyntax> nsSeparator)
+NamespaceUseDeclarationSyntax
+NamespaceUseDeclarationSyntax::withNsSeparator(std::optional<TokenSyntax> nsSeparator)
 {
    RefCountPtr<RawSyntax> nsSeparatorRaw;
    if (nsSeparator.has_value()) {
@@ -454,10 +460,11 @@ UseDeclarationSyntax UseDeclarationSyntax::withNsSeparator(std::optional<TokenSy
    } else {
       nsSeparatorRaw = nullptr;
    }
-   return m_data->replaceChild<UseDeclarationSyntax>(nsSeparatorRaw, Cursor::NsSeparator);
+   return m_data->replaceChild<NamespaceUseDeclarationSyntax>(nsSeparatorRaw, Cursor::NsSeparator);
 }
 
-UseDeclarationSyntax UseDeclarationSyntax::withUnprefixedUseDeclaration(std::optional<UnprefixedUseDeclarationSyntax> declaration)
+NamespaceUseDeclarationSyntax
+NamespaceUseDeclarationSyntax::withUnprefixedUseDeclaration(std::optional<NamespaceUnprefixedUseDeclarationSyntax> declaration)
 {
    RefCountPtr<RawSyntax> declarationRaw;
    if (declaration.has_value()) {
@@ -465,13 +472,13 @@ UseDeclarationSyntax UseDeclarationSyntax::withUnprefixedUseDeclaration(std::opt
    } else {
       declarationRaw = RawSyntax::missing(SyntaxKind::UnprefixedUseDeclaration);
    }
-   return m_data->replaceChild<UseDeclarationSyntax>(declarationRaw, Cursor::UnprefixedUseDeclaration);
+   return m_data->replaceChild<NamespaceUseDeclarationSyntax>(declarationRaw, Cursor::UnprefixedUseDeclaration);
 }
 
 ///
-/// InlineUseDeclarationSyntax
+/// NamespaceInlineUseDeclarationSyntax
 ///
-void InlineUseDeclarationSyntax::validate()
+void NamespaceInlineUseDeclarationSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
@@ -485,7 +492,7 @@ void InlineUseDeclarationSyntax::validate()
    }
 }
 
-std::optional<NamespaceUseTypeSyntax> InlineUseDeclarationSyntax::getUseType()
+std::optional<NamespaceUseTypeSyntax> NamespaceInlineUseDeclarationSyntax::getUseType()
 {
    RefCountPtr<SyntaxData> useTypeData = m_data->getChild(Cursor::UseType);
    if (!useTypeData) {
@@ -494,12 +501,14 @@ std::optional<NamespaceUseTypeSyntax> InlineUseDeclarationSyntax::getUseType()
    return NamespaceUseTypeSyntax{m_root, useTypeData.get()};
 }
 
-UnprefixedUseDeclarationSyntax InlineUseDeclarationSyntax::getUnprefixedUseDeclaration()
+NamespaceUnprefixedUseDeclarationSyntax
+NamespaceInlineUseDeclarationSyntax::getUnprefixedUseDeclaration()
 {
-   return UnprefixedUseDeclarationSyntax{m_root, m_data->getChild(Cursor::UnprefixedUseDeclaration).get()};
+   return NamespaceUnprefixedUseDeclarationSyntax{m_root, m_data->getChild(Cursor::UnprefixedUseDeclaration).get()};
 }
 
-InlineUseDeclarationSyntax InlineUseDeclarationSyntax::withUseType(std::optional<NamespaceUseTypeSyntax> useType)
+NamespaceInlineUseDeclarationSyntax
+NamespaceInlineUseDeclarationSyntax::withUseType(std::optional<NamespaceUseTypeSyntax> useType)
 {
    RefCountPtr<RawSyntax> useTypeRaw;
    if (useType.has_value()) {
@@ -507,10 +516,11 @@ InlineUseDeclarationSyntax InlineUseDeclarationSyntax::withUseType(std::optional
    } else {
       useTypeRaw = nullptr;
    }
-   return m_data->replaceChild<InlineUseDeclarationSyntax>(useTypeRaw, Cursor::UseType);
+   return m_data->replaceChild<NamespaceInlineUseDeclarationSyntax>(useTypeRaw, Cursor::UseType);
 }
 
-InlineUseDeclarationSyntax InlineUseDeclarationSyntax::withUnprefixedUseDeclaration(std::optional<UnprefixedUseDeclarationSyntax> declaration)
+NamespaceInlineUseDeclarationSyntax
+NamespaceInlineUseDeclarationSyntax::withUnprefixedUseDeclaration(std::optional<NamespaceUnprefixedUseDeclarationSyntax> declaration)
 {
    RefCountPtr<RawSyntax> declarationRaw;
    if (declaration.has_value()) {
@@ -518,7 +528,7 @@ InlineUseDeclarationSyntax InlineUseDeclarationSyntax::withUnprefixedUseDeclarat
    } else {
       declarationRaw = RawSyntax::missing(SyntaxKind::UnprefixedUseDeclaration);
    }
-   return m_data->replaceChild<InlineUseDeclarationSyntax>(declarationRaw, Cursor::UnprefixedUseDeclaration);
+   return m_data->replaceChild<NamespaceInlineUseDeclarationSyntax>(declarationRaw, Cursor::UnprefixedUseDeclaration);
 }
 
 ///

@@ -26,16 +26,50 @@ class IdentifierSyntax;
 class NamespacePartSyntax;
 class NameSyntax;
 class NamespaceUseTypeSyntax;
-class UnprefixedUseDeclarationSyntax;
-class UseDeclarationSyntax;
-class InlineUseDeclarationSyntax;
+class NamespaceUnprefixedUseDeclarationSyntax;
+class NamespaceUseDeclarationSyntax;
+class NamespaceInlineUseDeclarationSyntax;
 class SourceFileSyntax;
 
 ///
 /// type: SyntaxCollection
 /// element type: TokenSyntax
 ///
+/// namespace_name:
+///   T_IDENTIFIER_STRING
+/// | namespace_name T_NS_SEPARATOR T_IDENTIFIER_STRING
+///
 using NamespacePartListSyntax = SyntaxCollection<SyntaxKind::NamespacePartList, NamespacePartSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: NamespaceUseDeclarationSyntax
+///
+/// use_declarations:
+///   use_declarations ',' use_declaration
+/// | use_declaration
+///
+using NamespaceUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUseDeclarationList, NamespaceUseDeclarationSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: NamespaceInlineUseDeclarationSyntax
+///
+/// inline_use_declarations:
+///   inline_use_declarations ',' inline_use_declaration
+/// | inline_use_declaration
+///
+using NamespaceInlineUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceInlineUseDeclarationList, NamespaceInlineUseDeclarationSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: NamespaceInlineUseDeclarationSyntax
+///
+/// unprefixed_use_declarations:
+///   unprefixed_use_declarations ',' unprefixed_use_declaration
+/// | unprefixed_use_declaration
+///
+using NamespaceUnprefixedUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUnprefixedUseDeclarationList, NamespaceUnprefixedUseDeclarationSyntax>;
 
 class ReservedNonModifierSyntax : public Syntax
 {
@@ -91,6 +125,12 @@ private:
    void validate();
 };
 
+///
+/// semi_reserved:
+///   reserved_non_modifiers
+/// | T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
+///
+///
 class SemiReservedSytnax : public Syntax
 {
 public:
@@ -143,6 +183,11 @@ private:
    void validate();
 };
 
+///
+/// identifier:
+///    T_IDENTIFIER_STRING
+///  | semi_reserved
+///
 class IdentifierSyntax : public Syntax
 {
 public:
@@ -186,6 +231,11 @@ private:
    void validate();
 };
 
+///
+/// namespace_name:
+///   T_IDENTIFIER_STRING
+/// | namespace_name T_NS_SEPARATOR T_IDENTIFIER_STRING
+///
 class NamespacePartSyntax : public Syntax
 {
 public:
@@ -227,6 +277,12 @@ private:
    void validate();
 };
 
+///
+/// name:
+///   namespace_name
+/// | T_NAMESPACE T_NS_SEPARATOR namespace_name
+/// | T_NS_SEPARATOR namespace_name
+///
 class NameSyntax : public Syntax
 {
 public:
@@ -273,6 +329,9 @@ private:
    void validate();
 };
 
+/// use_type:
+///   T_FUNCTION
+/// | T_CONST
 class NamespaceUseTypeSyntax : public Syntax
 {
 public:
@@ -319,7 +378,11 @@ private:
    void validate();
 };
 
-class UnprefixedUseDeclarationSyntax : public Syntax
+/// unprefixed_use_declaration:
+///   namespace_name
+/// | namespace_name T_AS T_IDENTIFIER_STRING
+///
+class NamespaceUnprefixedUseDeclarationSyntax : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 3;
@@ -338,7 +401,7 @@ public:
    };
 
 public:
-   UnprefixedUseDeclarationSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   NamespaceUnprefixedUseDeclarationSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
@@ -347,10 +410,10 @@ public:
    NamespacePartListSyntax getNamespace();
    std::optional<TokenSyntax> getAsToken();
    std::optional<TokenSyntax> getIdentifierToken();
-   UnprefixedUseDeclarationSyntax addNamespacePart(NamespacePartSyntax namespacePart);
-   UnprefixedUseDeclarationSyntax withNamespace(std::optional<NamespacePartListSyntax> ns);
-   UnprefixedUseDeclarationSyntax withAsToken(std::optional<TokenSyntax> asToken);
-   UnprefixedUseDeclarationSyntax withIdentifierToken(std::optional<TokenSyntax> identifierToken);
+   NamespaceUnprefixedUseDeclarationSyntax addNamespacePart(NamespacePartSyntax namespacePart);
+   NamespaceUnprefixedUseDeclarationSyntax withNamespace(std::optional<NamespacePartListSyntax> ns);
+   NamespaceUnprefixedUseDeclarationSyntax withAsToken(std::optional<TokenSyntax> asToken);
+   NamespaceUnprefixedUseDeclarationSyntax withIdentifierToken(std::optional<TokenSyntax> identifierToken);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -367,7 +430,12 @@ private:
    void validate();
 };
 
-class UseDeclarationSyntax : public Syntax
+///
+/// use_declaration:
+///   unprefixed_use_declaration
+/// | T_NS_SEPARATOR unprefixed_use_declaration
+///
+class NamespaceUseDeclarationSyntax : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -377,22 +445,22 @@ public:
       /// type: TokenSyntax
       /// optional: true
       NsSeparator,
-      /// type: UnprefixedUseDeclarationSyntax
+      /// type: NamespaceUnprefixedUseDeclarationSyntax
       /// optional: false
       UnprefixedUseDeclaration
    };
 
 public:
-   UseDeclarationSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   NamespaceUseDeclarationSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
    }
 
    std::optional<TokenSyntax> getNsSeparator();
-   UnprefixedUseDeclarationSyntax getUnprefixedUseDeclaration();
-   UseDeclarationSyntax withNsSeparator(std::optional<TokenSyntax> nsSeparator);
-   UseDeclarationSyntax withUnprefixedUseDeclaration(std::optional<UnprefixedUseDeclarationSyntax> declaration);
+   NamespaceUnprefixedUseDeclarationSyntax getUnprefixedUseDeclaration();
+   NamespaceUseDeclarationSyntax withNsSeparator(std::optional<TokenSyntax> nsSeparator);
+   NamespaceUseDeclarationSyntax withUnprefixedUseDeclaration(std::optional<NamespaceUnprefixedUseDeclarationSyntax> declaration);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -409,7 +477,12 @@ private:
    void validate();
 };
 
-class InlineUseDeclarationSyntax : public Syntax
+///
+/// inline_use_declaration:
+///   unprefixed_use_declaration
+/// | use_type unprefixed_use_declaration
+///
+class NamespaceInlineUseDeclarationSyntax : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -419,21 +492,21 @@ public:
       /// type: NamespaceUseTypeSyntax
       /// optional: true
       UseType,
-      /// type: UnprefixedUseDeclarationSyntax
+      /// type: NamespaceUnprefixedUseDeclarationSyntax
       /// optional: false
       UnprefixedUseDeclaration
    };
 public:
-   InlineUseDeclarationSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   NamespaceInlineUseDeclarationSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
    }
 
    std::optional<NamespaceUseTypeSyntax> getUseType();
-   UnprefixedUseDeclarationSyntax getUnprefixedUseDeclaration();
-   InlineUseDeclarationSyntax withUseType(std::optional<NamespaceUseTypeSyntax> useType);
-   InlineUseDeclarationSyntax withUnprefixedUseDeclaration(std::optional<UnprefixedUseDeclarationSyntax> declaration);
+   NamespaceUnprefixedUseDeclarationSyntax getUnprefixedUseDeclaration();
+   NamespaceInlineUseDeclarationSyntax withUseType(std::optional<NamespaceUseTypeSyntax> useType);
+   NamespaceInlineUseDeclarationSyntax withUnprefixedUseDeclaration(std::optional<NamespaceUnprefixedUseDeclarationSyntax> declaration);
 
    static bool kindOf(SyntaxKind kind)
    {
