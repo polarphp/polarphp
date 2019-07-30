@@ -212,7 +212,7 @@ NamespacePartSyntax NamespacePartSyntax::withName(std::optional<TokenSyntax> nam
 void NameSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
-   if (raw->isMissing()) {
+   if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == NameSyntax::CHILDREN_COUNT);
@@ -288,6 +288,47 @@ NameSyntax NameSyntax::addNamespacePart(NamespacePartSyntax namespacePart)
       namespaces = RawSyntax::make(SyntaxKind::NamespacePartList, {namespacePart.getRaw()}, SourcePresence::Present);
    }
    return m_data->replaceChild<NameSyntax>(namespaces, Cursor::Namespace);
+}
+
+///
+/// NamespaceUseTypeSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> NamespaceUseTypeSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      NamespaceUseTypeSyntax::TypeToken, {
+         TokenKindType::T_FUNCTION, TokenKindType::T_CONST
+      }
+   }
+};
+#endif
+
+void NamespaceUseTypeSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == NamespaceUseTypeSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, TypeToken, CHILD_TOKEN_CHOICES.at(Cursor::TypeToken));
+}
+
+TokenSyntax NamespaceUseTypeSyntax::getTypeToken()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::TypeToken).get()};
+}
+
+NamespaceUseTypeSyntax NamespaceUseTypeSyntax::withTypeToken(std::optional<TokenSyntax> typeToken)
+{
+   RefCountPtr<RawSyntax> typeTokenRaw;
+   if (typeToken.has_value()) {
+      typeTokenRaw = typeToken->getRaw();
+   } else {
+      typeTokenRaw = RawSyntax::missing(TokenKindType::T_FUNCTION,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_FUNCTION)));
+   }
+   return m_data->replaceChild<NamespaceUseTypeSyntax>(typeTokenRaw, Cursor::TypeToken);
 }
 
 ///
