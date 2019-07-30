@@ -60,15 +60,15 @@ TokenSyntax ReservedNonModifierSyntax::getModifier()
 
 ReservedNonModifierSyntax ReservedNonModifierSyntax::withModifier(std::optional<TokenSyntax> modifier)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> modifierRaw;
    if (modifier.has_value()) {
-      raw = modifier->getRaw();
+      modifierRaw = modifier->getRaw();
    } else {
       /// not very good
-      raw = RawSyntax::missing(TokenKindType::T_INCLUDE,
-                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_INCLUDE)));
+      modifierRaw = RawSyntax::missing(TokenKindType::T_INCLUDE,
+                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_INCLUDE)));
    }
-   return m_data->replaceChild<ReservedNonModifierSyntax>(raw, Cursor::Modifier);
+   return m_data->replaceChild<ReservedNonModifierSyntax>(modifierRaw, Cursor::Modifier);
 }
 
 ///
@@ -111,13 +111,13 @@ Syntax SemiReservedSytnax::getModifier()
 
 SemiReservedSytnax SemiReservedSytnax::withModifier(std::optional<Syntax> modifier)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> modifierRaw;
    if (modifier.has_value()) {
-      raw = modifier->getRaw();
+      modifierRaw = modifier->getRaw();
    } else {
-      raw = RawSyntax::missing(SyntaxKind::Unknown);
+      modifierRaw = RawSyntax::missing(SyntaxKind::Unknown);
    }
-   return m_data->replaceChild<SemiReservedSytnax>(raw, Cursor::Modifier);
+   return m_data->replaceChild<SemiReservedSytnax>(modifierRaw, Cursor::Modifier);
 }
 
 ///
@@ -146,13 +146,64 @@ Syntax IdentifierSyntax::getNameItem()
 
 IdentifierSyntax IdentifierSyntax::withNameItem(std::optional<Syntax> item)
 {
-   RefCountPtr<RawSyntax> raw;
+   RefCountPtr<RawSyntax> nameItemRaw;
    if (item.has_value()) {
-      raw = item->getRaw();
+      nameItemRaw = item->getRaw();
    } else {
-      raw = RawSyntax::missing(SyntaxKind::Unknown);
+      nameItemRaw = RawSyntax::missing(SyntaxKind::Unknown);
    }
-   return m_data->replaceChild<IdentifierSyntax>(raw, Cursor::NameItem);
+   return m_data->replaceChild<IdentifierSyntax>(nameItemRaw, Cursor::NameItem);
+}
+
+///
+/// NamespacePartSyntax
+///
+void NamespacePartSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == CHILDREN_COUNT);
+   syntax_assert_child_token(raw, NsSeparator, std::set<TokenKindType>{TokenKindType::T_NS_SEPARATOR});
+   syntax_assert_child_token(raw, NsSeparator, std::set<TokenKindType>{TokenKindType::T_IDENTIFIER_STRING});
+}
+
+std::optional<TokenSyntax> NamespacePartSyntax::getNsSeparator()
+{
+   RefCountPtr<SyntaxData> separator = m_data->getChild(Cursor::NsSeparator);
+   if (!separator) {
+      return std::nullopt;
+   }
+   return TokenSyntax{m_root, separator.get()};
+}
+
+TokenSyntax NamespacePartSyntax::getName()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::Name).get()};
+}
+
+NamespacePartSyntax NamespacePartSyntax::withNsSeparator(std::optional<TokenSyntax> separator)
+{
+   RefCountPtr<RawSyntax> separatorRaw;
+   if (separator.has_value()) {
+      separatorRaw = separator->getRaw();
+   } else {
+      separatorRaw = nullptr;
+   }
+   return m_data->replaceChild<NamespacePartSyntax>(separatorRaw, Cursor::Name);
+}
+
+NamespacePartSyntax NamespacePartSyntax::withName(std::optional<TokenSyntax> name)
+{
+   RefCountPtr<RawSyntax> nameRaw;
+   if (name.has_value()) {
+      nameRaw = name->getRaw();
+   } else {
+      nameRaw = RawSyntax::missing(TokenKindType::T_NS_SEPARATOR,
+                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_NS_SEPARATOR)));
+   }
+   return m_data->replaceChild<NamespacePartSyntax>(nameRaw, Cursor::NsSeparator);
 }
 
 ///
