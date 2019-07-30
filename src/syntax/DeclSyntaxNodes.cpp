@@ -469,6 +469,59 @@ UseDeclarationSyntax UseDeclarationSyntax::withUnprefixedUseDeclaration(std::opt
 }
 
 ///
+/// InlineUseDeclarationSyntax
+///
+void InlineUseDeclarationSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   if (const RefCountPtr<RawSyntax> &useTypeChild = raw->getChild(Cursor::UseType)) {
+      assert(useTypeChild->kindOf(SyntaxKind::NamespaceUseType));
+   }
+   if (const RefCountPtr<RawSyntax> &declarationChild = raw->getChild(Cursor::UnprefixedUseDeclaration)) {
+      assert(declarationChild->kindOf(SyntaxKind::UnprefixedUseDeclaration));
+   }
+}
+
+std::optional<NamespaceUseTypeSyntax> InlineUseDeclarationSyntax::getUseType()
+{
+   RefCountPtr<SyntaxData> useTypeData = m_data->getChild(Cursor::UseType);
+   if (!useTypeData) {
+      return std::nullopt;
+   }
+   return NamespaceUseTypeSyntax{m_root, useTypeData.get()};
+}
+
+UnprefixedUseDeclarationSyntax InlineUseDeclarationSyntax::getUnprefixedUseDeclaration()
+{
+   return UnprefixedUseDeclarationSyntax{m_root, m_data->getChild(Cursor::UnprefixedUseDeclaration).get()};
+}
+
+InlineUseDeclarationSyntax InlineUseDeclarationSyntax::withUseType(std::optional<NamespaceUseTypeSyntax> useType)
+{
+   RefCountPtr<RawSyntax> useTypeRaw;
+   if (useType.has_value()) {
+      useTypeRaw = useType->getRaw();
+   } else {
+      useTypeRaw = nullptr;
+   }
+   return m_data->replaceChild<InlineUseDeclarationSyntax>(useTypeRaw, Cursor::UseType);
+}
+
+InlineUseDeclarationSyntax InlineUseDeclarationSyntax::withUnprefixedUseDeclaration(std::optional<UnprefixedUseDeclarationSyntax> declaration)
+{
+   RefCountPtr<RawSyntax> declarationRaw;
+   if (declaration.has_value()) {
+      declarationRaw = declaration->getRaw();
+   } else {
+      declarationRaw = RawSyntax::missing(SyntaxKind::UnprefixedUseDeclaration);
+   }
+   return m_data->replaceChild<InlineUseDeclarationSyntax>(declarationRaw, Cursor::UnprefixedUseDeclaration);
+}
+
+///
 /// SourceFileSyntax
 ///
 void SourceFileSyntax::validate()

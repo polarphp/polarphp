@@ -28,6 +28,7 @@ class NameSyntax;
 class NamespaceUseTypeSyntax;
 class UnprefixedUseDeclarationSyntax;
 class UseDeclarationSyntax;
+class InlineUseDeclarationSyntax;
 class SourceFileSyntax;
 
 ///
@@ -405,6 +406,46 @@ public:
 
 private:
    friend class UseDeclarationSyntaxBuilder;
+   void validate();
+};
+
+class InlineUseDeclarationSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: NamespaceUseTypeSyntax
+      /// optional: true
+      UseType,
+      /// type: UnprefixedUseDeclarationSyntax
+      /// optional: false
+      UnprefixedUseDeclaration
+   };
+public:
+   InlineUseDeclarationSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<NamespaceUseTypeSyntax> getUseType();
+   UnprefixedUseDeclarationSyntax getUnprefixedUseDeclaration();
+   InlineUseDeclarationSyntax withUseType(std::optional<NamespaceUseTypeSyntax> useType);
+   InlineUseDeclarationSyntax withUnprefixedUseDeclaration(std::optional<UnprefixedUseDeclarationSyntax> declaration);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::NamespaceUseType;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+private:
+   friend class InlineUseDeclarationSyntaxBuilder;
    void validate();
 };
 
