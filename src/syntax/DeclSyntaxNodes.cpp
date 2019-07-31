@@ -1013,6 +1013,54 @@ InitializeClauseSyntax InitializeClauseSyntax::withValueExpr(std::optional<ExprS
 }
 
 ///
+/// ConstDeclareItemSyntax
+///
+void ConstDeclareItemSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
+   if (const RefCountPtr<RawSyntax> &initializerChild = raw->getChild(Cursor::InitializerClause)) {
+      initializerChild->kindOf(SyntaxKind::InitializeClause);
+   }
+}
+
+TokenSyntax ConstDeclareItemSyntax::getName()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Name).get()};
+}
+
+InitializeClauseSyntax ConstDeclareItemSyntax::getInitializer()
+{
+   return InitializeClauseSyntax {m_root, m_data->getChild(Cursor::InitializerClause).get()};
+}
+
+ConstDeclareItemSyntax ConstDeclareItemSyntax::withName(std::optional<TokenSyntax> name)
+{
+   RefCountPtr<RawSyntax> nameRaw;
+   if (name.has_value()) {
+      nameRaw = name->getRaw();
+   } else {
+      nameRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
+                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
+   }
+   return m_data->replaceChild<ConstDeclareItemSyntax>(nameRaw, Cursor::Name);
+}
+
+ConstDeclareItemSyntax ConstDeclareItemSyntax::withIntializer(std::optional<InitializeClauseSyntax> initializer)
+{
+   RefCountPtr<RawSyntax> initializerRaw;
+   if (initializer.has_value()) {
+      initializerRaw = initializer->getRaw();
+   } else {
+      initializerRaw = RawSyntax::missing(SyntaxKind::InitializeClause);
+   }
+   return m_data->replaceChild<ConstDeclareItemSyntax>(initializerRaw, Cursor::InitializerClause);
+}
+
+///
 /// SourceFileSyntax
 ///
 void SourceFileSyntax::validate()

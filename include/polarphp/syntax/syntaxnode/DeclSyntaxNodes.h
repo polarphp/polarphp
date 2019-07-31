@@ -32,6 +32,7 @@ class NamespaceInlineUseDeclarationSyntax;
 class NamespaceGroupUseDeclarationSyntax;
 class NamespaceMixedGroupUseDeclarationSyntax;
 class NamespaceUseSyntax;
+class ConstDeclareItemSyntax;
 class SourceFileSyntax;
 
 ///
@@ -73,6 +74,16 @@ using NamespaceInlineUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::Nam
 /// | unprefixed_use_declaration
 ///
 using NamespaceUnprefixedUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUnprefixedUseDeclarationList, NamespaceUnprefixedUseDeclarationSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: ConstDeclareItemSyntax
+///
+/// const_list:
+///   const_list ',' const_decl
+/// | const_decl
+///
+using ConstDefinitionListSyntax = SyntaxCollection<SyntaxKind::ConstDefinitionList, ConstDeclareItemSyntax>;
 
 class ReservedNonModifierSyntax : public Syntax
 {
@@ -766,6 +777,9 @@ private:
    void validate();
 };
 
+///
+/// = expr
+///
 class InitializeClauseSyntax : public Syntax
 {
 public:
@@ -808,6 +822,49 @@ public:
 
 private:
    friend class InitializeClauseSyntaxBuilder;
+   void validate();
+};
+
+///
+/// const_decl:
+/// T_IDENTIFIER_STRING '=' expr
+///
+class ConstDeclareItemSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      Name,
+      InitializerClause
+   };
+
+public:
+   ConstDeclareItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getName();
+   InitializeClauseSyntax getInitializer();
+
+   ConstDeclareItemSyntax withName(std::optional<TokenSyntax> name);
+   ConstDeclareItemSyntax withIntializer(std::optional<InitializeClauseSyntax> initializer);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ConstDeclareItem;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class ConstDeclareItemSyntaxBuilder;
    void validate();
 };
 
