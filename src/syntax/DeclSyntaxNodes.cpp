@@ -1061,6 +1061,72 @@ ConstDeclareItemSyntax ConstDeclareItemSyntax::withIntializer(std::optional<Init
 }
 
 ///
+/// ConstDefinitionSyntax
+///
+void ConstDefinitionSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   syntax_assert_child_token(raw, ConstToken, std::set{TokenKindType::T_CONST});
+   syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
+   if (const RefCountPtr<RawSyntax> &declarations = raw->getChild(Cursor::Declarations)) {
+      assert(declarations->kindOf(SyntaxKind::ConstDeclareItemList));
+   }
+}
+
+TokenSyntax ConstDefinitionSyntax::getConstToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::ConstToken).get()};
+}
+
+ConstDeclareItemListSyntax ConstDefinitionSyntax::getDeclarations()
+{
+   return ConstDeclareItemListSyntax {m_root, m_data->getChild(Cursor::Declarations).get()};
+}
+
+TokenSyntax ConstDefinitionSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
+}
+
+ConstDefinitionSyntax ConstDefinitionSyntax::withConstToken(std::optional<TokenSyntax> constToken)
+{
+   RefCountPtr<RawSyntax> constTokenRaw;
+   if (constToken.has_value()) {
+      constTokenRaw = constToken->getRaw();
+   } else {
+      constTokenRaw = RawSyntax::missing(TokenKindType::T_CONST,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_CONST)));
+   }
+   return m_data->replaceChild<ConstDefinitionSyntax>(constTokenRaw, Cursor::ConstToken);
+}
+
+ConstDefinitionSyntax ConstDefinitionSyntax::withDeclarations(std::optional<ConstDeclareItemListSyntax> declarations)
+{
+   RefCountPtr<RawSyntax> declarationsRaw;
+   if (declarations.has_value()) {
+      declarationsRaw = declarations->getRaw();
+   } else {
+      declarationsRaw = RawSyntax::missing(SyntaxKind::ConstDeclareItemList);
+   }
+   return m_data->replaceChild<ConstDefinitionSyntax>(declarationsRaw, Cursor::Declarations);
+}
+
+ConstDefinitionSyntax ConstDefinitionSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> semicolonRaw;
+   if (semicolon.has_value()) {
+      semicolonRaw = semicolon->getRaw();
+   } else {
+      semicolonRaw = RawSyntax::missing(TokenKindType::T_SEMICOLON,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
+   }
+   return m_data->replaceChild<ConstDefinitionSyntax>(semicolonRaw, Cursor::Semicolon);
+}
+
+///
 /// SourceFileSyntax
 ///
 void SourceFileSyntax::validate()

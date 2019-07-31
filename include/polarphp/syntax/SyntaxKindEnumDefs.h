@@ -108,7 +108,7 @@ enum class SyntaxKind : std::uint32_t
    NamespaceUseDeclarationList,
    NamespaceInlineUseDeclarationList,
    NamespaceUnprefixedUseDeclarationList,
-   ConstDefinitionList,
+   ConstDeclareItemList,
 
    // NOTE: Unknown must be the last kind.
    Unknown,
