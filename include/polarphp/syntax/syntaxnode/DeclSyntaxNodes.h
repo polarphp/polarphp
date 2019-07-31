@@ -63,7 +63,7 @@ using NamespaceInlineUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::Nam
 
 ///
 /// type: SyntaxCollection
-/// element type: NamespaceInlineUseDeclarationSyntax
+/// element type: NamespaceUnprefixedUseDeclarationSyntax
 ///
 /// unprefixed_use_declarations:
 ///   unprefixed_use_declarations ',' unprefixed_use_declaration
@@ -595,6 +595,15 @@ public:
    NamespaceGroupUseDeclarationSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
    NamespaceGroupUseDeclarationSyntax addUnprefixedUseDeclaration(NamespaceUnprefixedUseDeclarationSyntax declaration);
 
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::NamespaceUseType;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
 private:
    friend class NamespaceGroupUseDeclarationSyntaxBuilder;
    void validate();
@@ -669,8 +678,88 @@ public:
 
    NamespaceGroupUseDeclarationSyntax addInlineUseDeclaration(NamespaceInlineUseDeclarationSyntax declaration);
 
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::NamespaceUseType;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
 private:
    friend class NamespaceMixedGroupUseDeclarationSyntaxBuilder;
+   void validate();
+};
+
+///
+/// top_statement:
+///   T_USE mixed_group_use_declaration ';'
+/// |	T_USE use_type group_use_declaration ';'
+/// |	T_USE use_declarations ';'
+/// |	T_USE use_type use_declarations ';'
+///
+class NamespaceUseSyntax : public DeclSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 4;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      UseToken,
+      ///
+      /// type: NamespaceUseTypeSyntax
+      /// optional: true
+      ///
+      UseType,
+      ///
+      /// type: Syntax
+      /// optional: true
+      /// node choices: false
+      /// ------------------
+      /// node choice: NamespaceMixedGroupUseDeclarationSyntax
+      /// ------------------
+      /// node choice: NamespaceGroupUseDeclarationSyntax
+      /// ------------------
+      /// node choice: NamespaceUseDeclarationListSyntax
+      ///
+      Declarations,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      SemicolonToken
+   };
+public:
+   NamespaceUseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : DeclSyntax(root, data)
+   {}
+
+   TokenSyntax getUseToken();
+   std::optional<NamespaceUseTypeSyntax> getUseType();
+   Syntax getDeclarations();
+   TokenSyntax getSemicolon();
+
+   NamespaceUseSyntax withUseToken(std::optional<TokenSyntax> useToken);
+   NamespaceUseSyntax withUseType(std::optional<NamespaceUseTypeSyntax> useType);
+   NamespaceUseSyntax withDeclarations(std::optional<Syntax> declarations);
+   NamespaceUseSyntax withSemicolonToken(std::optional<TokenSyntax> semicolon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::NamespaceUseType;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+private:
+   friend class NamespaceUseSyntaxBuilder;
    void validate();
 };
 
