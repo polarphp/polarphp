@@ -721,7 +721,7 @@ public:
       UseType,
       ///
       /// type: Syntax
-      /// optional: true
+      /// optional: false
       /// node choices: false
       /// ------------------
       /// node choice: NamespaceMixedGroupUseDeclarationSyntax

@@ -870,6 +870,99 @@ NamespaceMixedGroupUseDeclarationSyntax::addInlineUseDeclaration(NamespaceInline
 ///
 /// NamespaceUseSyntax
 ///
+void NamespaceUseSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   syntax_assert_child_token(raw, UseToken, std::set{TokenKindType::T_USE});
+   syntax_assert_child_token(raw, SemicolonToken, std::set{TokenKindType::T_SEMICOLON});
+   if (const RefCountPtr<RawSyntax> &useTypeChild = raw->getChild(Cursor::UseType)) {
+      assert(useTypeChild->kindOf(SyntaxKind::NamespaceUseType));
+   }
+   if (const RefCountPtr<RawSyntax> &declarationsChild = raw->getChild(Cursor::Declarations)) {
+      bool isMixGroupUseDeclarations = declarationsChild->kindOf(SyntaxKind::NamespacemixedGroupUseDeclaration);
+      bool isGroupUseDeclarations = declarationsChild->kindOf(SyntaxKind::NamespaceGroupUseDeclaration);
+      bool isUseDeclarations = declarationsChild->kindOf(SyntaxKind::NamespaceUseDeclarationList);
+      assert(isMixGroupUseDeclarations || isGroupUseDeclarations || isUseDeclarations);
+   }
+}
+
+TokenSyntax NamespaceUseSyntax::getUseToken()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::UseToken).get()};
+}
+
+std::optional<NamespaceUseTypeSyntax>
+NamespaceUseSyntax::getUseType()
+{
+   RefCountPtr<SyntaxData> useTypeData = m_data->getChild(Cursor::UseType);
+   if (!useTypeData) {
+      return std::nullopt;
+   }
+   return NamespaceUseTypeSyntax{m_root, useTypeData.get()};
+}
+
+Syntax NamespaceUseSyntax::getDeclarations()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Declarations).get()};
+}
+
+TokenSyntax NamespaceUseSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::SemicolonToken).get()};
+}
+
+NamespaceUseSyntax
+NamespaceUseSyntax::withUseToken(std::optional<TokenSyntax> useToken)
+{
+   RefCountPtr<RawSyntax> useTokenRaw;
+   if (useToken.has_value()) {
+      useTokenRaw = useToken->getRaw();
+   } else {
+      useTokenRaw = RawSyntax::missing(TokenKindType::T_USE,
+                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_USE)));
+   }
+   return m_data->replaceChild<NamespaceUseSyntax>(useTokenRaw, Cursor::UseToken);
+}
+
+NamespaceUseSyntax
+NamespaceUseSyntax::withUseType(std::optional<NamespaceUseTypeSyntax> useType)
+{
+   RefCountPtr<RawSyntax> useTypeRaw;
+   if (useType.has_value()) {
+      useTypeRaw = useType->getRaw();
+   } else {
+      useTypeRaw = nullptr;
+   }
+   return m_data->replaceChild<NamespaceUseSyntax>(useTypeRaw, Cursor::UseType);
+}
+
+NamespaceUseSyntax
+NamespaceUseSyntax::withDeclarations(std::optional<Syntax> declarations)
+{
+   RefCountPtr<RawSyntax> declarationsRaw;
+   if (declarations.has_value()) {
+      declarationsRaw = declarations->getRaw();
+   } else {
+      declarationsRaw = RawSyntax::missing(SyntaxKind::NamespaceUseDeclarationList);
+   }
+   return m_data->replaceChild<NamespaceUseSyntax>(declarationsRaw, Cursor::Declarations);
+}
+
+NamespaceUseSyntax
+NamespaceUseSyntax::withSemicolonToken(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> tokenRaw;
+   if (semicolon.has_value()) {
+      tokenRaw = semicolon->getRaw();
+   } else {
+      tokenRaw = RawSyntax::missing(TokenKindType::T_SEMICOLON,
+                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
+   }
+   return m_data->replaceChild<NamespaceUseSyntax>(tokenRaw, Cursor::SemicolonToken);
+}
 
 ///
 /// SourceFileSyntax
