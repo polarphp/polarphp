@@ -522,6 +522,158 @@ private:
    void validate();
 };
 
+///
+/// group_use_declaration:
+///   namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
+/// | T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
+///
+class NamespaceGroupUseDeclarationSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 7;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 6;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      FirstNsSeparator,
+      ///
+      /// type: NamespacePartListSyntax
+      /// optional: false
+      ///
+      Namespace,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      SecondNsSeparator,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      LeftBrace,
+      ///
+      /// type: NamespaceUnprefixedUseDeclarationListSyntax
+      /// optional: false
+      ///
+      UnprefixedUseDeclarations,
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      CommaToken,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      RightBrace
+   };
+
+public:
+   NamespaceGroupUseDeclarationSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getFirstNsSeparator();
+   NamespacePartListSyntax getNamespace();
+   TokenSyntax getSecondNsSeparator();
+   TokenSyntax getLeftBrace();
+   NamespaceUnprefixedUseDeclarationListSyntax getUnprefixedUseDeclarations();
+   std::optional<TokenSyntax> getCommaToken();
+   TokenSyntax getRightBrace();
+
+   NamespaceGroupUseDeclarationSyntax withFirstNsSeparator(std::optional<TokenSyntax> separator);
+   NamespaceGroupUseDeclarationSyntax withNamespace(std::optional<NamespacePartListSyntax> ns);
+   NamespaceGroupUseDeclarationSyntax withSecondNsSeparator(std::optional<TokenSyntax> separator);
+   NamespaceGroupUseDeclarationSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
+   NamespaceGroupUseDeclarationSyntax withUnprefixedUseDeclarations(std::optional<NamespaceUnprefixedUseDeclarationListSyntax> declarations);
+   NamespaceGroupUseDeclarationSyntax withCommaToken(std::optional<TokenSyntax> comma);
+   NamespaceGroupUseDeclarationSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
+   NamespaceGroupUseDeclarationSyntax addUnprefixedUseDeclaration(NamespaceUnprefixedUseDeclarationSyntax declaration);
+
+private:
+   friend class NamespaceGroupUseDeclarationSyntaxBuilder;
+   void validate();
+};
+
+class NamespaceMixedGroupUseDeclarationSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 7;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 6;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      FirstNsSeparator,
+      ///
+      /// type: NamespacePartListSyntax
+      /// optional: false
+      ///
+      Namespace,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      SecondNsSeparator,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      LeftBrace,
+      ///
+      /// type: NamespaceInlineUseDeclarationListSyntax
+      /// optional: false
+      ///
+      InlineUseDeclarations,
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      CommaToken,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      RightBrace
+   };
+
+public:
+   NamespaceMixedGroupUseDeclarationSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getFirstNsSeparator();
+   NamespacePartListSyntax getNamespace();
+   TokenSyntax getSecondNsSeparator();
+   TokenSyntax getLeftBrace();
+   NamespaceUnprefixedUseDeclarationListSyntax getInlineUseDeclarations();
+   std::optional<TokenSyntax> getCommaToken();
+   TokenSyntax getRightBrace();
+
+   NamespaceGroupUseDeclarationSyntax withFirstNsSeparator(std::optional<TokenSyntax> separator);
+   NamespaceGroupUseDeclarationSyntax withNamespace(std::optional<NamespacePartListSyntax> ns);
+   NamespaceGroupUseDeclarationSyntax withSecondNsSeparator(std::optional<TokenSyntax> separator);
+   NamespaceGroupUseDeclarationSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
+   NamespaceGroupUseDeclarationSyntax withInlineUseDeclarations(std::optional<NamespaceInlineUseDeclarationListSyntax> declarations);
+   NamespaceGroupUseDeclarationSyntax withCommaToken(std::optional<TokenSyntax> comma);
+   NamespaceGroupUseDeclarationSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
+
+   NamespaceGroupUseDeclarationSyntax addInlineUseDeclaration(NamespaceInlineUseDeclarationSyntax declaration);
+
+private:
+   friend class NamespaceMixedGroupUseDeclarationSyntaxBuilder;
+   void validate();
+};
+
 class SourceFileSyntax : public Syntax
 {
 public:
