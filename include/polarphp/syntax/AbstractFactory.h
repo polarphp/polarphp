@@ -12,7 +12,7 @@
 #ifndef POLARPHP_SYNTAX_ABSTRACT_FACTORY_H
 #define POLARPHP_SYNTAX_ABSTRACT_FACTORY_H
 
-#include "polarphp/syntax/SyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
 #include "polarphp/syntax/Trivia.h"
 #include "polarphp/basic/adt/ArrayRef.h"
 

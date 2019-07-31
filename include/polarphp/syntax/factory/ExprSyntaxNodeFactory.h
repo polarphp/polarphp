@@ -13,6 +13,7 @@
 #define POLARPHP_SYNTAX_FACTORY_EXPR_SYNTAX_NODE_FACTORY_H
 
 #include "polarphp/syntax/AbstractFactory.h"
+#include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
 #include <optional>
 
 namespace polar::syntax {

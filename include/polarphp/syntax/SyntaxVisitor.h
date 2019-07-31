@@ -28,7 +28,7 @@
 #include "polarphp/syntax/SyntaxCollection.h"
 #include "polarphp/syntax/TokenSyntax.h"
 #include "polarphp/syntax/UnknownSyntax.h"
-#include "polarphp/syntax/SyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
 
 namespace polar::syntax {
 

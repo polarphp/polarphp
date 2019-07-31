@@ -13,7 +13,7 @@
 #define POLARPHP_SYNTAX_BUILDER_STMT_SYNTAX_NODE_BUILDERS_H
 
 #include "polarphp/syntax/RawSyntax.h"
-#include "polarphp/syntax/SyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
 
 namespace polar::syntax {
 
