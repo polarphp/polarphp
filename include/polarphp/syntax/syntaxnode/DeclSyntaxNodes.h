@@ -420,7 +420,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::NamespaceUseType;
+      return kind == SyntaxKind::NamespaceUnprefixedUseDeclaration;
    }
 
    static bool classOf(const Syntax *synax)
@@ -467,7 +467,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::NamespaceUseType;
+      return kind == SyntaxKind::NamespaceUseDeclaration;
    }
 
    static bool classOf(const Syntax *synax)
@@ -513,7 +513,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::NamespaceUseType;
+      return kind == SyntaxKind::NamespaceInlineUseDeclaration;
    }
 
    static bool classOf(const Syntax *synax)
@@ -600,7 +600,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::NamespaceUseType;
+      return kind == SyntaxKind::NamespaceGroupUseDeclaration;
    }
 
    static bool classOf(const Syntax *synax)
@@ -683,7 +683,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::NamespaceUseType;
+      return kind == SyntaxKind::NamespacemixedGroupUseDeclaration;
    }
 
    static bool classOf(const Syntax *synax)
@@ -763,6 +763,51 @@ public:
    }
 private:
    friend class NamespaceUseSyntaxBuilder;
+   void validate();
+};
+
+class InitializeClauseSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      EqualToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      ValueExpr
+   };
+
+public:
+   InitializeClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {}
+
+   TokenSyntax getEqualToken();
+   ExprSyntax getValueExpr();
+
+   InitializeClauseSyntax withEqualToken(std::optional<TokenSyntax> equalToken);
+   InitializeClauseSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::InitializeClause;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class InitializeClauseSyntaxBuilder;
    void validate();
 };
 

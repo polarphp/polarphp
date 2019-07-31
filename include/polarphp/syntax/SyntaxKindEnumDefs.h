@@ -42,6 +42,9 @@ enum class SyntaxKind : std::uint32_t
    NamespaceInlineUseDeclaration,
    NamespaceGroupUseDeclaration,
    NamespacemixedGroupUseDeclaration,
+   ConstDeclareItem,
+   ConstDefinition,
+   InitializeClause, // for variable assign or initialize
 
    UnknownDecl,
    LastDecl,

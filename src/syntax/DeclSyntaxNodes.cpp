@@ -693,8 +693,8 @@ NamespaceGroupUseDeclarationSyntax::addUnprefixedUseDeclaration(NamespaceUnprefi
       declarationsRaw = declarationsRaw->append(declaration.getRaw());
    } else {
       declarationsRaw = RawSyntax::make(SyntaxKind::NamespaceUnprefixedUseDeclarationList, {
-                                        declaration.getRaw()
-                                     }, SourcePresence::Present);
+                                           declaration.getRaw()
+                                        }, SourcePresence::Present);
    }
    return m_data->replaceChild<NamespaceGroupUseDeclarationSyntax>(declarationsRaw, Cursor::UnprefixedUseDeclarations);
 }
@@ -861,8 +861,8 @@ NamespaceMixedGroupUseDeclarationSyntax::addInlineUseDeclaration(NamespaceInline
       declarationsRaw = declarationsRaw->append(declaration.getRaw());
    } else {
       declarationsRaw = RawSyntax::make(SyntaxKind::NamespaceUnprefixedUseDeclarationList, {
-                                        declaration.getRaw()
-                                     }, SourcePresence::Present);
+                                           declaration.getRaw()
+                                        }, SourcePresence::Present);
    }
    return m_data->replaceChild<NamespaceMixedGroupUseDeclarationSyntax>(declarationsRaw, Cursor::InlineUseDeclarations);
 }
@@ -962,6 +962,54 @@ NamespaceUseSyntax::withSemicolonToken(std::optional<TokenSyntax> semicolon)
                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
    }
    return m_data->replaceChild<NamespaceUseSyntax>(tokenRaw, Cursor::SemicolonToken);
+}
+
+///
+/// InitializeClauseSyntax
+///
+void InitializeClauseSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   syntax_assert_child_token(raw, EqualToken, std::set{TokenKindType::T_EQUAL});
+   if (const RefCountPtr<RawSyntax> valueExpr = raw->getChild(Cursor::ValueExpr)) {
+      valueExpr->kindOf(SyntaxKind::Expr);
+   }
+}
+
+TokenSyntax InitializeClauseSyntax::getEqualToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::EqualToken).get()};
+}
+
+ExprSyntax InitializeClauseSyntax::getValueExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::ValueExpr).get()};
+}
+
+InitializeClauseSyntax InitializeClauseSyntax::withEqualToken(std::optional<TokenSyntax> equalToken)
+{
+   RefCountPtr<RawSyntax> equalTokenRaw;
+   if (equalToken.has_value()) {
+      equalTokenRaw = equalToken->getRaw();
+   } else {
+      equalTokenRaw = RawSyntax::missing(TokenKindType::T_EQUAL,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_EQUAL)));
+   }
+   return m_data->replaceChild<InitializeClauseSyntax>(equalTokenRaw, Cursor::EqualToken);
+}
+
+InitializeClauseSyntax InitializeClauseSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
+{
+   RefCountPtr<RawSyntax> valueExprRaw;
+   if (valueExpr.has_value()) {
+      valueExprRaw = valueExpr->getRaw();
+   } else {
+      valueExprRaw = RawSyntax::missing(SyntaxKind::UnknownExpr);
+   }
+   return m_data->replaceChild<InitializeClauseSyntax>(valueExprRaw, Cursor::ValueExpr);
 }
 
 ///
