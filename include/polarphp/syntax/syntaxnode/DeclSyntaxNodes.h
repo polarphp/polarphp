@@ -29,6 +29,9 @@ class NamespaceUseTypeSyntax;
 class NamespaceUnprefixedUseDeclarationSyntax;
 class NamespaceUseDeclarationSyntax;
 class NamespaceInlineUseDeclarationSyntax;
+class NamespaceGroupUseDeclarationSyntax;
+class NamespaceMixedGroupUseDeclarationSyntax;
+class NamespaceUseSyntax;
 class SourceFileSyntax;
 
 ///
@@ -664,19 +667,19 @@ public:
    NamespacePartListSyntax getNamespace();
    TokenSyntax getSecondNsSeparator();
    TokenSyntax getLeftBrace();
-   NamespaceUnprefixedUseDeclarationListSyntax getInlineUseDeclarations();
+   NamespaceInlineUseDeclarationListSyntax getInlineUseDeclarations();
    std::optional<TokenSyntax> getCommaToken();
    TokenSyntax getRightBrace();
 
-   NamespaceGroupUseDeclarationSyntax withFirstNsSeparator(std::optional<TokenSyntax> separator);
-   NamespaceGroupUseDeclarationSyntax withNamespace(std::optional<NamespacePartListSyntax> ns);
-   NamespaceGroupUseDeclarationSyntax withSecondNsSeparator(std::optional<TokenSyntax> separator);
-   NamespaceGroupUseDeclarationSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
-   NamespaceGroupUseDeclarationSyntax withInlineUseDeclarations(std::optional<NamespaceInlineUseDeclarationListSyntax> declarations);
-   NamespaceGroupUseDeclarationSyntax withCommaToken(std::optional<TokenSyntax> comma);
-   NamespaceGroupUseDeclarationSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
+   NamespaceMixedGroupUseDeclarationSyntax withFirstNsSeparator(std::optional<TokenSyntax> separator);
+   NamespaceMixedGroupUseDeclarationSyntax withNamespace(std::optional<NamespacePartListSyntax> ns);
+   NamespaceMixedGroupUseDeclarationSyntax withSecondNsSeparator(std::optional<TokenSyntax> separator);
+   NamespaceMixedGroupUseDeclarationSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
+   NamespaceMixedGroupUseDeclarationSyntax withInlineUseDeclarations(std::optional<NamespaceInlineUseDeclarationListSyntax> declarations);
+   NamespaceMixedGroupUseDeclarationSyntax withCommaToken(std::optional<TokenSyntax> comma);
+   NamespaceMixedGroupUseDeclarationSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
 
-   NamespaceGroupUseDeclarationSyntax addInlineUseDeclaration(NamespaceInlineUseDeclarationSyntax declaration);
+   NamespaceMixedGroupUseDeclarationSyntax addInlineUseDeclaration(NamespaceInlineUseDeclarationSyntax declaration);
 
    static bool kindOf(SyntaxKind kind)
    {
