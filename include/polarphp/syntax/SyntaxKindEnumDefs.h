@@ -49,6 +49,8 @@ enum class SyntaxKind : std::uint32_t
    ReturnTypeClause,
    InitializeClause, // for variable assign or initialize
    Parameter,
+   LexicalVarItem,
+   FunctionDefinition,
 
    UnknownDecl,
    LastDecl,
@@ -112,6 +114,7 @@ enum class SyntaxKind : std::uint32_t
    NamespaceUnprefixedUseDeclarationList,
    ConstDeclareItemList,
    ParameterList,
+   LexicalVarList,
 
    // NOTE: Unknown must be the last kind.
    Unknown,

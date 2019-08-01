@@ -1071,13 +1071,13 @@ public:
       validate();
    }
 
-   std::optional<TokenSyntax> getTypeHint();
+   std::optional<TypeExprClauseSyntax> getTypeHint();
    std::optional<TokenSyntax> getReferenceMark();
    std::optional<TokenSyntax> getVariadicMark();
    TokenSyntax getVariable();
    std::optional<InitializeClauseSyntax> getInitializer();
 
-   ParameterSyntax withTypeHint(std::optional<TokenSyntax> typeHint);
+   ParameterSyntax withTypeHint(std::optional<TypeExprClauseSyntax> typeHint);
    ParameterSyntax withReferenceMark(std::optional<TokenSyntax> referenceMark);
    ParameterSyntax withVariadicMark(std::optional<TokenSyntax> variadicMark);
    ParameterSyntax withVariable(std::optional<TokenSyntax> variable);
@@ -1098,11 +1098,92 @@ private:
    void validate();
 };
 
+class LexicalVarItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      ReferenceToken,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      Variable
+   };
+public:
+   LexicalVarItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getReferenceToken();
+   TokenSyntax getVariable();
+   LexicalVarItemSyntax withReferenceToken(std::optional<TokenSyntax> referenceToken);
+   LexicalVarItemSyntax withVariable(std::optional<TokenSyntax> variable);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::LexicalVarItem;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+private:
+   friend class LexicalVarItemSyntaxBuilder;
+   void validate();
+};
+
+///
+/// function_declaration_statement:
+///   function returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
+///   backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
+///
 class FunctionDefinitionSyntax final : public DeclSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 10;
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 6;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      FuncToken,
+      ReturnRefFlagToken,
+      LeftParen,
+      Parameters,
+      RightParen,
+      LexicalVars,
+      ReturnType,
+      Body
+   };
+
+public:
+   FunctionDefinitionSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : DeclSyntax(root, data)
+   {
+      validate();
+   }
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::FunctionDefinition;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class FunctionDefinitionSyntaxBuilder;
+   void validate();
 };
 
 class SourceFileSyntax final : public Syntax

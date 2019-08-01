@@ -35,6 +35,8 @@ class TypeExprClauseSyntax;
 class ReturnTypeClauseSyntax;
 class ParameterSyntax;
 class FunctionDefinitionSyntax;
+class UseLexicalVarClauseSyntax;
+class LexicalVarItemSyntax;
 class SourceFileSyntax;
 
 ///
@@ -99,6 +101,16 @@ using ParameterListSyntax = SyntaxCollection<SyntaxKind::ParameterList, Paramete
 /// | const_decl
 ///
 using ConstDeclareItemListSyntax = SyntaxCollection<SyntaxKind::ConstDeclareItemList, ConstDeclareItemSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: LexicalVarItemSyntax
+///
+/// lexical_var_list:
+///   lexical_var_list ',' lexical_var
+/// | lexical_var
+///
+using LexicalVarListSyntax = SyntaxCollection<SyntaxKind::LexicalVarList, LexicalVarItemSyntax>;
 
 ///
 /// reference to stmt syntax nodes

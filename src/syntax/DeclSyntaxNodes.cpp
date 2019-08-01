@@ -164,7 +164,7 @@ void NamespacePartSyntax::validate()
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().getSize() == CHILDREN_COUNT);
+   assert(raw->getLayout().getSize() == NamespacePartSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, NsSeparator, std::set{TokenKindType::T_NS_SEPARATOR});
    syntax_assert_child_token(raw, NsSeparator, std::set{TokenKindType::T_IDENTIFIER_STRING});
 }
@@ -484,6 +484,7 @@ void NamespaceInlineUseDeclarationSyntax::validate()
    if (isMissing()) {
       return;
    }
+   assert(raw->getLayout().getSize() == NamespaceInlineUseDeclarationSyntax::CHILDREN_COUNT);
    if (const RefCountPtr<RawSyntax> &useTypeChild = raw->getChild(Cursor::UseType)) {
       assert(useTypeChild->kindOf(SyntaxKind::NamespaceUseType));
    }
@@ -540,6 +541,7 @@ void NamespaceGroupUseDeclarationSyntax::validate()
    if (isMissing()) {
       return;
    }
+   assert(raw->getLayout().getSize() == NamespaceGroupUseDeclarationSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, FirstNsSeparator, std::set{TokenKindType::T_NS_SEPARATOR});
    syntax_assert_child_token(raw, SecondNsSeparator, std::set{TokenKindType::T_NS_SEPARATOR});
    syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_BRACE});
@@ -708,6 +710,7 @@ void NamespaceMixedGroupUseDeclarationSyntax::validate()
    if (isMissing()) {
       return;
    }
+   assert(raw->getLayout().getSize() == NamespaceMixedGroupUseDeclarationSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, FirstNsSeparator, std::set{TokenKindType::T_NS_SEPARATOR});
    syntax_assert_child_token(raw, SecondNsSeparator, std::set{TokenKindType::T_NS_SEPARATOR});
    syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_BRACE});
@@ -876,6 +879,7 @@ void NamespaceUseSyntax::validate()
    if (isMissing()) {
       return;
    }
+   assert(raw->getLayout().getSize() == NamespaceUseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, UseToken, std::set{TokenKindType::T_USE});
    syntax_assert_child_token(raw, SemicolonToken, std::set{TokenKindType::T_SEMICOLON});
    if (const RefCountPtr<RawSyntax> &useTypeChild = raw->getChild(Cursor::UseType)) {
@@ -973,6 +977,7 @@ void InitializeClauseSyntax::validate()
    if (isMissing()) {
       return;
    }
+   assert(raw->getLayout().getSize() == InitializeClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, EqualToken, std::set{TokenKindType::T_EQUAL});
    if (const RefCountPtr<RawSyntax> valueExpr = raw->getChild(Cursor::ValueExpr)) {
       valueExpr->kindOf(SyntaxKind::Expr);
@@ -1021,6 +1026,7 @@ void ConstDeclareItemSyntax::validate()
    if (isMissing()) {
       return;
    }
+   assert(raw->getLayout().getSize() == ConstDeclareItemSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
    if (const RefCountPtr<RawSyntax> &initializerChild = raw->getChild(Cursor::InitializerClause)) {
       initializerChild->kindOf(SyntaxKind::InitializeClause);
@@ -1069,6 +1075,7 @@ void ConstDefinitionSyntax::validate()
    if (isMissing()) {
       return;
    }
+   assert(raw->getLayout().getSize() == ConstDefinitionSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ConstToken, std::set{TokenKindType::T_CONST});
    syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
    if (const RefCountPtr<RawSyntax> &declarations = raw->getChild(Cursor::Declarations)) {
@@ -1148,6 +1155,7 @@ void TypeClauseSyntax::validate()
    if (isMissing()) {
       return;
    }
+   assert(raw->getLayout().getSize() == TypeClauseSyntax::CHILDREN_COUNT);
    if (const RefCountPtr<RawSyntax> &typeChild = raw->getChild(Cursor::Type)) {
       if (typeChild->isToken()) {
          syntax_assert_child_token(raw, Type, CHILD_TOKEN_CHOICES.at(Cursor::Type));
@@ -1182,6 +1190,7 @@ void TypeExprClauseSyntax::validate()
    if (isMissing()) {
       return;
    }
+   assert(raw->getLayout().getSize() == TypeExprClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, QuestionToken, std::set{TokenKindType::T_QUESTION_MARK});
    if (const RefCountPtr<RawSyntax> &typeChild = raw->getChild(Cursor::TypeClause)) {
       assert(typeChild->kindOf(SyntaxKind::TypeClause));
@@ -1233,6 +1242,7 @@ void ReturnTypeClauseSyntax::validate()
    if (isMissing()) {
       return;
    }
+   assert(raw->getLayout().getSize() == ReturnTypeClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ColonToken, std::set{TokenKindType::T_COLON});
    if (const RefCountPtr<RawSyntax> &typeExprChild = raw->getChild(Cursor::TypeExpr)) {
       assert(typeExprChild->kindOf(SyntaxKind::TypeExprClause));
@@ -1281,15 +1291,25 @@ void ParameterSyntax::validate()
    if (isMissing()) {
       return;
    }
+   assert(raw->getLayout().getSize() == ParameterSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ReferenceMark, std::set{TokenKindType::T_AMPERSAND});
+   syntax_assert_child_token(raw, VariadicMark, std::set{TokenKindType::T_ELLIPSIS});
+   syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
+   if (const RefCountPtr<RawSyntax> &typeHintChild = raw->getChild(Cursor::TypeHint)) {
+      assert(typeHintChild->kindOf(SyntaxKind::TypeExprClause));
+   }
+   if (const RefCountPtr<RawSyntax> &initializerChild = raw->getChild(Cursor::Initializer)) {
+      assert(initializerChild->kindOf(SyntaxKind::InitializeClause));
+   }
 }
 
-std::optional<TokenSyntax> ParameterSyntax::getTypeHint()
+std::optional<TypeExprClauseSyntax> ParameterSyntax::getTypeHint()
 {
    RefCountPtr<SyntaxData> typeHintData = m_data->getChild(Cursor::TypeHint);
    if (!typeHintData) {
       return std::nullopt;
    }
-   return TokenSyntax {m_root, typeHintData.get()};
+   return TypeExprClauseSyntax {m_root, typeHintData.get()};
 }
 
 std::optional<TokenSyntax> ParameterSyntax::getReferenceMark()
@@ -1324,7 +1344,7 @@ std::optional<InitializeClauseSyntax> ParameterSyntax::getInitializer()
     return InitializeClauseSyntax {m_root, initializerData.get()};
 }
 
-ParameterSyntax ParameterSyntax::withTypeHint(std::optional<TokenSyntax> typeHint)
+ParameterSyntax ParameterSyntax::withTypeHint(std::optional<TypeExprClauseSyntax> typeHint)
 {
    RefCountPtr<RawSyntax> typeHintRaw;
    if (typeHint.has_value()) {
