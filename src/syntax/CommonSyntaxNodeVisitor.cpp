@@ -33,11 +33,6 @@ void SyntaxVisitor::visit(UnknownStmtSyntax node)
    visitChildren(node);
 }
 
-void SyntaxVisitor::visit(UnknownTypeSyntax node)
-{
-   visitChildren(node);
-}
-
 void SyntaxVisitor::visit(CodeBlockItemSyntax node)
 {
    visitChildren(node);

@@ -91,11 +91,6 @@ enum class SyntaxKind : std::uint32_t
    UnknownStmt,
    LastStmt,
 
-   /// type syntax node
-   FirstType,
-   UnknownType,
-   LastType,
-
    /// collection syntax node
    ConditionElementList,
    SwitchCaseList,

@@ -178,10 +178,4 @@ UnknownStmtSyntax AbstractFactory::makeBlankUnknownStmt(RefCountPtr<SyntaxArena>
    return make<UnknownStmtSyntax>(raw);
 }
 
-UnknownTypeSyntax AbstractFactory::makeBlankUnknownType(RefCountPtr<SyntaxArena> arena)
-{
-   auto raw = RawSyntax::make(SyntaxKind::UnknownType, {}, SourcePresence::Present, arena);
-   return make<UnknownTypeSyntax>(raw);
-}
-
 } // polar::syntax

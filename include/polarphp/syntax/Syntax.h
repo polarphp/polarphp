@@ -181,9 +181,6 @@ public:
    /// Returns true if this syntax node represents an expression.
    bool isExpr() const;
 
-   /// Returns true if this syntax node represents a type.
-   bool isType() const;
-
    /// Returns true if this syntax is of some "unknown" kind.
    bool isUnknown() const;
 

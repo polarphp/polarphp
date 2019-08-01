@@ -34,6 +34,9 @@ class NamespaceMixedGroupUseDeclarationSyntax;
 class NamespaceUseSyntax;
 class ConstDeclareItemSyntax;
 class ConstDefinitionSyntax;
+class TypeSyntax;
+class TypeExprSyntax;
+class ReturnTypeSyntax;
 class SourceFileSyntax;
 
 ///

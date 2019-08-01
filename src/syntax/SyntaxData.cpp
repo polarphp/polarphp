@@ -22,11 +22,6 @@ RefCountPtr<SyntaxData> SyntaxData::make(RefCountPtr<RawSyntax> raw,
    return RefCountPtr<SyntaxData>{new (data) SyntaxData(raw, parent, indexInParent)};
 }
 
-bool SyntaxData::isType() const
-{
-   return getRaw()->isType();
-}
-
 bool SyntaxData::isStmt() const
 {
    return getRaw()->isStmt();

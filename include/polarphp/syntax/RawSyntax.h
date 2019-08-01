@@ -370,12 +370,6 @@ public:
       return is_decl_kind(getKind());
    }
 
-   /// Returns true if this raw syntax node is some kind of type syntax.
-   bool isType() const
-   {
-      return is_type_kind(getKind());
-   }
-
    /// Returns true if this raw syntax node is some kind of statement.
    bool isStmt() const
    {

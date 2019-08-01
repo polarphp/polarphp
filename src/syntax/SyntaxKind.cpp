@@ -31,11 +31,6 @@ bool is_decl_kind(SyntaxKind kind)
    return kind >= SyntaxKind::FirstDecl && kind <= SyntaxKind::LastDecl;
 }
 
-bool is_type_kind(SyntaxKind kind)
-{
-   return kind >= SyntaxKind::FirstType && kind <= SyntaxKind::LastType;
-}
-
 bool is_stmt_kind(SyntaxKind kind)
 {
    return kind >= SyntaxKind::FirstStmt && kind <= SyntaxKind::LastStmt;
@@ -56,8 +51,7 @@ bool is_unknown_kind(SyntaxKind kind)
    return kind == SyntaxKind::Unknown ||
          kind == SyntaxKind::UnknownDecl ||
          kind == SyntaxKind::UnknownExpr ||
-         kind == SyntaxKind::UnknownStmt ||
-         kind == SyntaxKind::UnknownType;
+         kind == SyntaxKind::UnknownStmt;
 }
 
 SyntaxKind get_unknown_kind(SyntaxKind kind)
@@ -70,9 +64,6 @@ SyntaxKind get_unknown_kind(SyntaxKind kind)
    }
    if (is_decl_kind(kind)) {
       return SyntaxKind::UnknownDecl;
-   }
-   if (is_type_kind(kind)) {
-      return SyntaxKind::UnknownType;
    }
    return SyntaxKind::Unknown;
 }

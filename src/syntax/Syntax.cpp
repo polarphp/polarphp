@@ -59,11 +59,6 @@ void Syntax::dump(utils::RawOutStream &outStream, unsigned indent) const
    return getRaw()->dump(outStream, 0);
 }
 
-bool Syntax::isType() const
-{
-  return m_data->isType();
-}
-
 bool Syntax::isDecl() const
 {
   return m_data->isDecl();

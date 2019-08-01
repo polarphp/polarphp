@@ -168,24 +168,6 @@ public:
    }
 };
 
-class UnknownTypeSyntax final : public TypeSyntax
-{
-public:
-   UnknownTypeSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : TypeSyntax(root, data)
-   {}
-
-   static bool kindOf(SyntaxKind kind)
-   {
-      return SyntaxKind::UnknownType == kind;
-   }
-
-   static bool classOf(const Syntax *syntax)
-   {
-      return kindOf(syntax->getKind());
-   }
-};
-
 /// A CodeBlockItem is any Syntax node that appears on its own line inside
 /// a CodeBlock.
 class CodeBlockItemSyntax final : public Syntax

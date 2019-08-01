@@ -214,9 +214,6 @@ public:
    /// node.
    AbsolutePosition getAbsolutePositionBeforeLeadingTrivia() const;
 
-   /// Returns true if the data node represents type syntax.
-   bool isType() const;
-
    /// Returns true if the data node represents statement syntax.
    bool isStmt() const;
 
