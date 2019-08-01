@@ -21,6 +21,54 @@
 namespace polar::syntax {
 
 ///
+/// inner_statement:
+///   statement
+/// | function_declaration_statement
+/// | class_declaration_statement
+/// | trait_declaration_statement
+/// | interface_declaration_statement
+/// | T_HALT_COMPILER '(' ')' ';'
+///
+class InnerStmtSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      ///
+      Stmt
+   };
+
+public:
+   InnerStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getStmt();
+   InnerStmtSyntax withStmt();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::InnerStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class InnerStmtSyntaxBuilder;
+   void validate();
+};
+
+///
 /// The ConditionElementSyntax class
 ///
 ///  condition -> expression
@@ -805,54 +853,6 @@ public:
 
 private:
    friend class ReturnStmtSyntaxBuilder;
-   void validate();
-};
-
-///
-/// inner_statement:
-///   statement
-/// | function_declaration_statement
-/// | class_declaration_statement
-/// | trait_declaration_statement
-/// | interface_declaration_statement
-/// | T_HALT_COMPILER '(' ')' ';'
-///
-class InnerStatementSyntax final : public Syntax
-{
-public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 1;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
-   enum Cursor : SyntaxChildrenCountType
-   {
-      ///
-      /// type: Syntax
-      /// optional: false
-      ///
-      Stmt
-   };
-
-public:
-   InnerStatementSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : Syntax(root, data)
-   {
-      validate();
-   }
-
-   Syntax getStmt();
-   InnerStatementSyntax withStmt();
-
-   static bool kindOf(SyntaxKind kind)
-   {
-      return kind == SyntaxKind::InnerStatement;
-   }
-
-   static bool classOf(const Syntax *syntax)
-   {
-      return kindOf(syntax->getKind());
-   }
-
-private:
-   friend class InnerStatementSyntaxBuilder;
    void validate();
 };
 

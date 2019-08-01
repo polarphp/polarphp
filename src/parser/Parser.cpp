@@ -28,8 +28,8 @@ Parser::Parser(const LangOptions &langOpts, unsigned bufferId,
 Parser::Parser(SourceManager &sourceMgr, std::shared_ptr<DiagnosticEngine> diags,
                std::unique_ptr<Lexer> lexer)
    : m_sourceMgr(sourceMgr),
-     m_diags(diags),
-     m_lexer(lexer.release())
+     m_lexer(lexer.release()),
+     m_diags(diags)
 {
    m_yyParser = std::make_unique<internal::YYParser>(this, m_lexer);
    m_token.setKind(TokenKindType::T_UNKNOWN_MARK);

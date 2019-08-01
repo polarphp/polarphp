@@ -63,18 +63,18 @@ RefCountPtr<RawSyntax> AbstractFactory::createRaw(SyntaxKind kind,
    if (!need_invoke_create_raw_func(kind)) {
       return nullptr;
    }
-   switch (kind) {
-   case SyntaxKind::CodeBlockItemList:
-      return create_code_block_item_list_raw(elements, arena);
-   case SyntaxKind::TokenList:
-      return create_token_list_raw(elements, arena);
-   case SyntaxKind::NonEmptyTokenList:
-      return create_non_empty_token_list_raw(elements, arena);
-   case SyntaxKind::CodeBlockItem:
-      return create_code_block_item_raw(elements, arena);
-   default:
-      return nullptr;
-   }
+//   switch (kind) {
+//   case SyntaxKind::CodeBlockItemList:
+//      return create_code_block_item_list_raw(elements, arena);
+//   case SyntaxKind::TokenList:
+//      return create_token_list_raw(elements, arena);
+//   case SyntaxKind::NonEmptyTokenList:
+//      return create_non_empty_token_list_raw(elements, arena);
+//   case SyntaxKind::CodeBlockItem:
+//      return create_code_block_item_raw(elements, arena);
+//   default:
+//      return nullptr;
+//   }
 }
 
 /// Count the number of children for a given syntax node kind,

@@ -40,9 +40,9 @@ SourceFileSyntax SourceFileSyntaxBuilder::build()
 {
    CursorIndex statementsIndex = cursor_index(Cursor::Statements);
    CursorIndex eofTokenIndex = cursor_index(Cursor::EOFToken);
-   if (!m_layout[statementsIndex]) {
-      m_layout[statementsIndex] = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
-   }
+//   if (!m_layout[statementsIndex]) {
+//      m_layout[statementsIndex] = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
+//   }
    if (!m_layout[eofTokenIndex]) {
       m_layout[eofTokenIndex] = RawSyntax::missing(TokenKindType::END, OwnedString::makeUnowned(""));
    }

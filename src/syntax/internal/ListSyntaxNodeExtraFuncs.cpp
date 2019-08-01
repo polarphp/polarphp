@@ -41,15 +41,15 @@ namespace abstractfactorycreateraw {
 
 bool need_invoke_create_raw_func(SyntaxKind kind)
 {
-   switch (kind) {
-   case SyntaxKind::CodeBlockItemList:
-   case SyntaxKind::TokenList:
-   case SyntaxKind::NonEmptyTokenList:
-   case SyntaxKind::CodeBlockItem:
-      return true;
-   default:
-      return false;
-   }
+//   switch (kind) {
+//   case SyntaxKind::CodeBlockItemList:
+//   case SyntaxKind::TokenList:
+//   case SyntaxKind::NonEmptyTokenList:
+//   case SyntaxKind::CodeBlockItem:
+//      return true;
+//   default:
+//      return false;
+//   }
 }
 
 RefCountPtr<RawSyntax> create_code_block_item_list_raw(ArrayRef<RefCountPtr<RawSyntax>> elements,

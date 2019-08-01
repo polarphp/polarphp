@@ -16,6 +16,7 @@
 
 namespace polar::syntax {
 
+class CommonStmtSyntax;
 class ConditionElementSyntax;
 class ContinueStmtSyntax;
 class BreakStmtSyntax;
@@ -32,7 +33,8 @@ class DeferStmtSyntax;
 class ExpressionStmtSyntax;
 class ThrowStmtSyntax;
 class ReturnStmtSyntax;
-class InnerStatementSyntax;
+class InnerStmtSyntax;
+class TopStmtSyntax;
 
 ///
 /// type: SyntaxCollection
@@ -65,7 +67,16 @@ using ElseIfListSyntax = SyntaxCollection<SyntaxKind::ElseIfList, ElseIfClauseSy
 /// inner_statement_list:
 ///   inner_statement_list inner_statement
 ///
-using InnerStatementListSyntax = SyntaxCollection<SyntaxKind::InnerStatementList, InnerStatementSyntax>;
+using InnerStatementListSyntax = SyntaxCollection<SyntaxKind::InnerStmtList, InnerStmtSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: ElseIfClauseSyntax
+///
+/// top_statement_list:
+///   top_statement_list top_statement
+///
+using TopStatementListSyntax = SyntaxCollection<SyntaxKind::TopStmtList, TopStmtSyntax>;
 
 } // polar::syntax
 

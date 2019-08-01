@@ -103,8 +103,8 @@ using ConstDeclareItemListSyntax = SyntaxCollection<SyntaxKind::ConstDeclareItem
 ///
 /// reference to stmt syntax nodes
 ///
-class InnerStatementSyntax;
-using InnerStatementListSyntax = SyntaxCollection<SyntaxKind::InnerStatementList, InnerStatementSyntax>;
+class InnerStmtSyntax;
+using InnerStmtListSyntax = SyntaxCollection<SyntaxKind::InnerStmtList, InnerStmtSyntax>;
 
 } // polar::syntax
 

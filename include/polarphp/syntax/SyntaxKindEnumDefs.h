@@ -77,7 +77,9 @@ enum class SyntaxKind : std::uint32_t
 
    /// stmt syntax node
    FirstStmt,
-   InnerStatement,
+   CommonStmt,
+   InnerStmt,
+   TopStmt,
    ContinueStmt,
    BreakStmt,
    FallthroughStmt,
@@ -100,8 +102,8 @@ enum class SyntaxKind : std::uint32_t
    ConditionElementList,
    SwitchCaseList,
    ElseIfList,
-   CodeBlockItemList,
-   InnerStatementList,
+   InnerStmtList,
+   TopStmtList,
    ExprList,
    TokenList,
    NonEmptyTokenList,
