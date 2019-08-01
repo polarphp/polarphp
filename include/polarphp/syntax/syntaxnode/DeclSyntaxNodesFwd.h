@@ -1,0 +1,111 @@
+// This source file is part of the polarphp.org open source project
+//
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://polarphp.org/LICENSE.txt for license information
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+//
+// Created by polarboy on 2019/08/01.
+
+#ifndef POLARPHP_SYNTAX_SYNTAX_NODE_DECL_NODES_FWD_H
+#define POLARPHP_SYNTAX_SYNTAX_NODE_DECL_NODES_FWD_H
+
+#include "polarphp/syntax/SyntaxCollection.h"
+
+namespace polar::syntax {
+
+class ReservedNonModifierSyntax;
+class SemiReservedSytnax;
+class IdentifierSyntax;
+class NamespacePartSyntax;
+class NameSyntax;
+class NamespaceUseTypeSyntax;
+class NamespaceUnprefixedUseDeclarationSyntax;
+class NamespaceUseDeclarationSyntax;
+class NamespaceInlineUseDeclarationSyntax;
+class NamespaceGroupUseDeclarationSyntax;
+class NamespaceMixedGroupUseDeclarationSyntax;
+class NamespaceUseSyntax;
+class ConstDeclareItemSyntax;
+class ConstDefinitionSyntax;
+class TypeClauseSyntax;
+class TypeExprClauseSyntax;
+class ReturnTypeClauseSyntax;
+class ParameterSyntax;
+class FunctionDefinitionSyntax;
+class SourceFileSyntax;
+
+///
+/// type: SyntaxCollection
+/// element type: TokenSyntax
+///
+/// namespace_name:
+///   T_IDENTIFIER_STRING
+/// | namespace_name T_NS_SEPARATOR T_IDENTIFIER_STRING
+///
+using NamespacePartListSyntax = SyntaxCollection<SyntaxKind::NamespacePartList, NamespacePartSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: NamespaceUseDeclarationSyntax
+///
+/// use_declarations:
+///   use_declarations ',' use_declaration
+/// | use_declaration
+///
+using NamespaceUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUseDeclarationList, NamespaceUseDeclarationSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: NamespaceInlineUseDeclarationSyntax
+///
+/// inline_use_declarations:
+///   inline_use_declarations ',' inline_use_declaration
+/// | inline_use_declaration
+///
+using NamespaceInlineUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceInlineUseDeclarationList, NamespaceInlineUseDeclarationSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: NamespaceUnprefixedUseDeclarationSyntax
+///
+/// unprefixed_use_declarations:
+///   unprefixed_use_declarations ',' unprefixed_use_declaration
+/// | unprefixed_use_declaration
+///
+using NamespaceUnprefixedUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUnprefixedUseDeclarationList, NamespaceUnprefixedUseDeclarationSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: ParameterSyntax
+///
+/// parameter_list:
+///   non_empty_parameter_list
+/// |	/* empty */
+/// non_empty_parameter_list:
+///   parameter
+/// |	non_empty_parameter_list ',' parameter
+///
+using ParameterListSyntax = SyntaxCollection<SyntaxKind::ParameterList, ParameterSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: ConstDeclareItemSyntax
+///
+/// const_list:
+///   const_list ',' const_decl
+/// | const_decl
+///
+using ConstDeclareItemListSyntax = SyntaxCollection<SyntaxKind::ConstDeclareItemList, ConstDeclareItemSyntax>;
+
+///
+/// reference to stmt syntax nodes
+///
+class InnerStatementSyntax;
+using InnerStatementListSyntax = SyntaxCollection<SyntaxKind::InnerStatementList, InnerStatementSyntax>;
+
+} // polar::syntax
+
+#endif // POLARPHP_SYNTAX_SYNTAX_NODE_DECL_NODES_FWD_H

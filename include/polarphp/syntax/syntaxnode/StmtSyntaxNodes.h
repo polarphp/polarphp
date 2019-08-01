@@ -13,44 +13,15 @@
 #define POLARPHP_SYNTAX_SYNTAX_NODE_STMT_NODES_H
 
 #include "polarphp/syntax/Syntax.h"
-#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
-#include "polarphp/syntax/SyntaxCollection.h"
 #include "polarphp/syntax/TokenSyntax.h"
 #include "polarphp/syntax/UnknownSyntax.h"
+#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/StmtSyntaxNodesFwd.h"
 
 namespace polar::syntax {
 
-class ConditionElementSyntax;
-class ContinueStmtSyntax;
-class BreakStmtSyntax;
-class FallthroughStmtSyntax;
-class ElseIfClauseSyntax;
-class IfStmtSyntax;
-class WhileStmtSyntax;
-class DoWhileStmtSyntax;
-class SwitchCaseSyntax;
-class SwitchDefaultLabelSyntax;
-class SwitchCaseLabelSyntax;
-class SwitchStmtSyntax;
-class DeferStmtSyntax;
-class ExpressionStmtSyntax;
-class ThrowStmtSyntax;
-class ReturnStmtSyntax;
-
-// condition-list -> condition
-//                 | condition-list, condition ','?
-using ConditionElementListSyntax = SyntaxCollection<SyntaxKind::ConditionElementList, ConditionElementSyntax>;
-
-// switch-case-list ->  switch-case
-//                    | switch-case-list switch-case
-using SwitchCaseListSyntax = SyntaxCollection<SyntaxKind::SwitchCaseList, SwitchCaseSyntax>;
-
-// elseif-list ->  elseif-clause
-//                | elseif-list elseif-clause
-using ElseIfListSyntax = SyntaxCollection<SyntaxKind::ElseIfList, ElseIfClauseSyntax>;
-
 ///
-/// \brief The ConditionElementSyntax class
+/// The ConditionElementSyntax class
 ///
 ///  condition -> expression
 ///
@@ -246,13 +217,13 @@ public:
    TokenSyntax getLeftParen();
    ExprSyntax getCondition();
    TokenSyntax getRightParen();
-   CodeBlockSyntax getBody();
+//   CodeBlockSyntax getBody();
 
    ElseIfClauseSyntax withElseIfKeyword(std::optional<TokenSyntax> elseIfKeyword);
    ElseIfClauseSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
    ElseIfClauseSyntax withCondition(std::optional<ExprSyntax> condition);
    ElseIfClauseSyntax withRightParen(std::optional<TokenSyntax> rightParen);
-   ElseIfClauseSyntax withBody(std::optional<CodeBlockSyntax> body);
+//   ElseIfClauseSyntax withBody(std::optional<CodeBlockSyntax> body);
 
 private:
    friend class ElseIfClauseSyntaxBuilder;
@@ -321,7 +292,7 @@ public:
    TokenSyntax getLeftParen();
    ExprSyntax getCondition();
    TokenSyntax getRightParen();
-   CodeBlockSyntax getBody();
+//   CodeBlockSyntax getBody();
    std::optional<ElseIfListSyntax> getElseIfClauses();
    std::optional<TokenSyntax> getElseKeyword();
    std::optional<Syntax> getElseBody();
@@ -332,7 +303,7 @@ public:
    IfStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
    IfStmtSyntax withCondition(std::optional<ExprSyntax> condition);
    IfStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
-   IfStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+//   IfStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
    IfStmtSyntax withElseIfClauses(std::optional<ElseIfListSyntax> elseIfClauses);
    IfStmtSyntax withElseKeyword(std::optional<TokenSyntax> elseKeyword);
    IfStmtSyntax withElseBody(std::optional<Syntax> elseBody);
@@ -386,7 +357,7 @@ public:
    TokenSyntax getLeftParen();
    ConditionElementListSyntax getConditions();
    TokenSyntax getRightParen();
-   CodeBlockSyntax getBody();
+//   CodeBlockSyntax getBody();
 
    WhileStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
    WhileStmtSyntax withLabelColon(std::optional<TokenSyntax> labelColon);
@@ -394,7 +365,7 @@ public:
    WhileStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
    WhileStmtSyntax withConditions(std::optional<ConditionElementListSyntax> conditions);
    WhileStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
-   WhileStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+//   WhileStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
 
    /// Adds the provided `condition` to the node's `Conditions`
    /// collection.
@@ -462,7 +433,7 @@ public:
    std::optional<TokenSyntax> getLabelName();
    std::optional<TokenSyntax> getLabelColon();
    TokenSyntax getDoKeyword();
-   CodeBlockSyntax getBody();
+//   CodeBlockSyntax getBody();
    TokenSyntax getWhileKeyword();
    TokenSyntax getLeftParen();
    ExprSyntax getCondition();
@@ -471,7 +442,7 @@ public:
    DoWhileStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
    DoWhileStmtSyntax withLabelColon(std::optional<TokenSyntax> labelColon);
    DoWhileStmtSyntax withDoKeyword(std::optional<TokenSyntax> doKeyword);
-   DoWhileStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+//   DoWhileStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
    DoWhileStmtSyntax withWhileKeyword(std::optional<TokenSyntax> whileKeyword);
    DoWhileStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
    DoWhileStmtSyntax withCondition(std::optional<ExprSyntax> condition);
@@ -598,11 +569,11 @@ public:
    }
 
    Syntax getLabel();
-   CodeBlockItemListSyntax getStatements();
+//   CodeBlockItemListSyntax getStatements();
 
    SwitchCaseSyntax withLabel(std::optional<Syntax> label);
-   SwitchCaseSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);
-   SwitchCaseSyntax addStatement(CodeBlockItemSyntax statement);
+//   SwitchCaseSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);
+//   SwitchCaseSyntax addStatement(CodeBlockItemSyntax statement);
 
 private:
    friend class SwitchCaseSyntaxBuilder;
@@ -714,9 +685,9 @@ public:
    }
 
    TokenSyntax getDeferKeyword();
-   CodeBlockSyntax getBody();
+//   CodeBlockSyntax getBody();
    DeferStmtSyntax withDeferKeyword(std::optional<TokenSyntax> deferKeyword);
-   DeferStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+//   DeferStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
 
 private:
    friend class DeferStmtSyntaxBuilder;
@@ -834,6 +805,54 @@ public:
 
 private:
    friend class ReturnStmtSyntaxBuilder;
+   void validate();
+};
+
+///
+/// inner_statement:
+///   statement
+/// | function_declaration_statement
+/// | class_declaration_statement
+/// | trait_declaration_statement
+/// | interface_declaration_statement
+/// | T_HALT_COMPILER '(' ')' ';'
+///
+class InnerStatementSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      ///
+      Stmt
+   };
+
+public:
+   InnerStatementSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getStmt();
+   InnerStatementSyntax withStmt();
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::InnerStatement;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class InnerStatementSyntaxBuilder;
    void validate();
 };
 

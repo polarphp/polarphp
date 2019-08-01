@@ -27,8 +27,8 @@ public:
       : m_arena(arena)
    {}
 
-   SourceFileSyntaxBuilder &useStatements(CodeBlockItemListSyntax statements);
-   SourceFileSyntaxBuilder &addStatement(CodeBlockItemSyntax statement);
+//   SourceFileSyntaxBuilder &useStatements(CodeBlockItemListSyntax statements);
+//   SourceFileSyntaxBuilder &addStatement(CodeBlockItemSyntax statement);
    SourceFileSyntaxBuilder &useEofToken(TokenSyntax eofToken);
    SourceFileSyntax build();
 private:

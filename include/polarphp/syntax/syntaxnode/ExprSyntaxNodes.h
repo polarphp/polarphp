@@ -13,31 +13,12 @@
 #define POLARPHP_SYNTAX_SYNTAX_NODE_EXPR_NODES_H
 
 #include "polarphp/syntax/Syntax.h"
-#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
-#include "polarphp/syntax/SyntaxCollection.h"
 #include "polarphp/syntax/TokenSyntax.h"
 #include "polarphp/syntax/UnknownSyntax.h"
+#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/ExprSyntaxNodesFwd.h"
 
 namespace polar::syntax {
-
-class NullExprSyntax;
-class ClassRefParentExprSyntax;
-class ClassRefStaticExprSyntax;
-class ClassRefSelfExprSyntax;
-class IntegerLiteralExprSyntax;
-class FloatLiteralExprSyntax;
-class StringLiteralExprSyntax;
-class BooleanLiteralExprSyntax;
-class TernaryExprSyntax;
-class AssignmentExprSyntax;
-class SequenceExprSyntax;
-class PrefixOperatorExprSyntax;
-class PostfixOperatorExprSyntax;
-class BinaryOperatorExprSyntax;
-
-/// type: SyntaxCollection
-/// element type: ExprSyntax
-using ExprListSyntax = SyntaxCollection<SyntaxKind::ExprList, ExprSyntax>;
 
 class NullExprSyntax final : public ExprSyntax
 {

@@ -161,11 +161,11 @@ ElseIfClauseSyntaxBuilder &ElseIfClauseSyntaxBuilder::useRightParen(TokenSyntax 
    return *this;
 }
 
-ElseIfClauseSyntaxBuilder &ElseIfClauseSyntaxBuilder::useBody(CodeBlockSyntax body)
-{
-   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
-   return *this;
-}
+//ElseIfClauseSyntaxBuilder &ElseIfClauseSyntaxBuilder::useBody(CodeBlockSyntax body)
+//{
+//   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
+//   return *this;
+//}
 
 ElseIfClauseSyntax ElseIfClauseSyntaxBuilder::build()
 {
@@ -237,11 +237,11 @@ IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useRightParen(TokenSyntax rightParen)
    return *this;
 }
 
-IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
-{
-   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
-   return *this;
-}
+//IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
+//{
+//   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
+//   return *this;
+//}
 
 IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useElseIfClauses(ElseIfListSyntax elseIfClauses)
 {
@@ -366,11 +366,11 @@ WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useRightParen(TokenSyntax rightP
    return *this;
 }
 
-WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
-{
-   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
-   return *this;
-}
+//WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
+//{
+//   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
+//   return *this;
+//}
 
 WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::addCondition(ConditionElementSyntax condition)
 {
@@ -445,11 +445,11 @@ DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useDoKeyword(TokenSyntax doK
    return *this;
 }
 
-DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
-{
-   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
-   return *this;
-}
+//DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
+//{
+//   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
+//   return *this;
+//}
 
 DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useWhileKeyword(TokenSyntax whileKeyword)
 {
@@ -609,11 +609,11 @@ SwitchCaseSyntaxBuilder &SwitchCaseSyntaxBuilder::useLabel(Syntax label)
    return *this;
 }
 
-SwitchCaseSyntaxBuilder &SwitchCaseSyntaxBuilder::useStatements(CodeBlockItemListSyntax statements)
-{
-   m_layout[cursor_index(Cursor::Statements)] = statements.getRaw();
-   return *this;
-}
+//SwitchCaseSyntaxBuilder &SwitchCaseSyntaxBuilder::useStatements(CodeBlockItemListSyntax statements)
+//{
+//   m_layout[cursor_index(Cursor::Statements)] = statements.getRaw();
+//   return *this;
+//}
 
 SwitchCaseSyntax SwitchCaseSyntaxBuilder::build()
 {
@@ -769,11 +769,11 @@ DeferStmtSyntaxBuilder &DeferStmtSyntaxBuilder::useDeferKeyword(TokenSyntax defe
    return *this;
 }
 
-DeferStmtSyntaxBuilder &DeferStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
-{
-   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
-   return *this;
-}
+//DeferStmtSyntaxBuilder &DeferStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
+//{
+//   m_layout[cursor_index(Cursor::Body)] = body.getRaw();
+//   return *this;
+//}
 
 DeferStmtSyntax DeferStmtSyntaxBuilder::build()
 {

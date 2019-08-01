@@ -19,50 +19,6 @@ namespace polar::syntax {
 
 class SyntaxArena;
 
-class CodeBlockItemSyntaxBuilder
-{
-public:
-   using Cursor = CodeBlockItemSyntax::Cursor;
-public:
-   CodeBlockItemSyntaxBuilder() = default;
-   CodeBlockItemSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
-      : m_arena(arena)
-   {}
-
-   CodeBlockItemSyntaxBuilder &useItem(Syntax item);
-   CodeBlockItemSyntaxBuilder &useSemicolon(TokenSyntax semicolon);
-   CodeBlockItemSyntaxBuilder &useErrorTokens(Syntax errorTokens);
-
-   CodeBlockItemSyntax build();
-private:
-   RefCountPtr<SyntaxArena> m_arena = nullptr;
-   RefCountPtr<RawSyntax> m_layout[CodeBlockItemSyntax::CHILDREN_COUNT] = {
-      nullptr, nullptr, nullptr
-   };
-};
-
-class CodeBlockSyntaxBuilder
-{
-public:
-   using Cursor = CodeBlockSyntax::Cursor;
-public:
-   CodeBlockSyntaxBuilder() = default;
-   CodeBlockSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
-      : m_arena(arena)
-   {}
-
-   CodeBlockSyntaxBuilder &useLeftBrace(TokenSyntax leftBrace);
-   CodeBlockSyntaxBuilder &useRightBrace(TokenSyntax rightBrace);
-   CodeBlockSyntaxBuilder &useStatements(CodeBlockItemListSyntax stmts);
-   CodeBlockSyntaxBuilder &addCodeBlockItem(CodeBlockItemSyntax stmt);
-   CodeBlockSyntax build();
-private:
-   RefCountPtr<SyntaxArena> m_arena = nullptr;
-   RefCountPtr<RawSyntax> m_layout[CodeBlockSyntax::CHILDREN_COUNT] = {
-      nullptr, nullptr, nullptr
-   };
-};
-
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_BUILDER_COMMON_SYNTAX_NODE_BUILDERS_H

@@ -41,31 +41,31 @@ public:
    static BreakStmtSyntax makeBreakStmtSyntax(TokenSyntax breakKeyword, std::optional<TokenSyntax> numberToken,
                                               RefCountPtr<SyntaxArena> arena = nullptr);
    static FallthroughStmtSyntax makeFallthroughStmtSyntax(TokenSyntax fallthroughKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ElseIfClauseSyntax makeElseIfClauseSyntax(TokenSyntax elseIfKeyword, TokenSyntax leftParen,
-                                                    ExprSyntax condition, TokenSyntax rightParen,
-                                                    CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
-   static IfStmtSyntax makeIfStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
-                                        TokenSyntax ifKeyword, TokenSyntax leftParen, ExprSyntax condition,
-                                        TokenSyntax rightParen, CodeBlockSyntax body, std::optional<ElseIfListSyntax> elseIfClauses,
-                                        std::optional<TokenSyntax> elseKeyword, std::optional<Syntax> elseBody,
-                                        RefCountPtr<SyntaxArena> arena = nullptr);
-   static WhileStmtSyntax makeWhileStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
-                                              TokenSyntax whileKeyword, ConditionElementListSyntax conditions,
-                                              CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
-   static DoWhileStmtSyntax makeDoWhileStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
-                                                  TokenSyntax doKeyword, CodeBlockSyntax body, TokenSyntax whileKeyword,
-                                                  TokenSyntax leftParen, ExprSyntax condition, TokenSyntax rightParen,
-                                                  RefCountPtr<SyntaxArena> arena = nullptr);
+//   static ElseIfClauseSyntax makeElseIfClauseSyntax(TokenSyntax elseIfKeyword, TokenSyntax leftParen,
+//                                                    ExprSyntax condition, TokenSyntax rightParen,
+//                                                    CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
+//   static IfStmtSyntax makeIfStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
+//                                        TokenSyntax ifKeyword, TokenSyntax leftParen, ExprSyntax condition,
+//                                        TokenSyntax rightParen, CodeBlockSyntax body, std::optional<ElseIfListSyntax> elseIfClauses,
+//                                        std::optional<TokenSyntax> elseKeyword, std::optional<Syntax> elseBody,
+//                                        RefCountPtr<SyntaxArena> arena = nullptr);
+//   static WhileStmtSyntax makeWhileStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
+//                                              TokenSyntax whileKeyword, ConditionElementListSyntax conditions,
+//                                              CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
+//   static DoWhileStmtSyntax makeDoWhileStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
+//                                                  TokenSyntax doKeyword, CodeBlockSyntax body, TokenSyntax whileKeyword,
+//                                                  TokenSyntax leftParen, ExprSyntax condition, TokenSyntax rightParen,
+//                                                  RefCountPtr<SyntaxArena> arena = nullptr);
    static SwitchDefaultLabelSyntax makeSwitchDefaultLabelSyntax(TokenSyntax defaultKeyword, TokenSyntax colon,
                                                                 RefCountPtr<SyntaxArena> arena = nullptr);
    static SwitchCaseLabelSyntax makeSwitchCaseLabelSyntax(TokenSyntax caseKeyword, ExprSyntax expr, TokenSyntax colon,
                                                           RefCountPtr<SyntaxArena> arena = nullptr);
-   static SwitchCaseSyntax makeSwitchCaseSyntax(Syntax label, CodeBlockItemListSyntax statements, RefCountPtr<SyntaxArena> arena = nullptr);
+//   static SwitchCaseSyntax makeSwitchCaseSyntax(Syntax label, CodeBlockItemListSyntax statements, RefCountPtr<SyntaxArena> arena = nullptr);
    static SwitchStmtSyntax makeSwitchStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                                 TokenSyntax switchKeyword, TokenSyntax leftParen, ExprSyntax conditionExpr,
                                                 TokenSyntax rightParen, TokenSyntax leftBrace, SwitchCaseListSyntax cases,
                                                 TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);
-   static DeferStmtSyntax makeDeferStmtSyntax(TokenSyntax deferKeyword, CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
+//   static DeferStmtSyntax makeDeferStmtSyntax(TokenSyntax deferKeyword, CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
    static ExpressionStmtSyntax makeExpressionStmtSyntax(ExprSyntax expr, RefCountPtr<SyntaxArena> arena = nullptr);
    static ThrowStmtSyntax makeThrowStmtSyntax(TokenSyntax throwKeyword, ExprSyntax expr, RefCountPtr<SyntaxArena> arena = nullptr);
 

@@ -33,29 +33,4 @@ void SyntaxVisitor::visit(UnknownStmtSyntax node)
    visitChildren(node);
 }
 
-void SyntaxVisitor::visit(CodeBlockItemSyntax node)
-{
-   visitChildren(node);
-}
-
-void SyntaxVisitor::visit(CodeBlockSyntax node)
-{
-   visitChildren(node);
-}
-
-void SyntaxVisitor::visit(CodeBlockItemListSyntax node)
-{
-   visitChildren(node);
-}
-
-void SyntaxVisitor::visit(TokenListSyntax node)
-{
-   visitChildren(node);
-}
-
-void SyntaxVisitor::visit(NonEmptyTokenListSyntax node)
-{
-   visitChildren(node);
-}
-
 } // polar::syntax

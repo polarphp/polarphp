@@ -63,11 +63,6 @@ public:
    virtual void visit(UnknownDeclSyntax node);
    virtual void visit(UnknownExprSyntax node);
    virtual void visit(UnknownStmtSyntax node);
-   virtual void visit(CodeBlockItemSyntax node);
-   virtual void visit(CodeBlockSyntax node);
-   virtual void visit(CodeBlockItemListSyntax node);
-   virtual void visit(TokenListSyntax node);
-   virtual void visit(NonEmptyTokenListSyntax node);
 };
 
 } // polar::syntax

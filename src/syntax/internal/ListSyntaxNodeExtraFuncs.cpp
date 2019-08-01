@@ -20,20 +20,20 @@
 namespace polar::syntax::internal {
 namespace canserveascollectionmemberraw {
 
-bool check_code_block_item_list(SyntaxKind memberKind)
-{
-   return CodeBlockItemSyntax::kindOf(memberKind);
-}
+//bool check_code_block_item_list(SyntaxKind memberKind)
+//{
+//   return CodeBlockItemSyntax::kindOf(memberKind);
+//}
 
-bool check_token_list(SyntaxKind memberKind)
-{
-   return TokenSyntax::kindOf(memberKind);
-}
+//bool check_token_list(SyntaxKind memberKind)
+//{
+//   return TokenSyntax::kindOf(memberKind);
+//}
 
-bool check_non_empty_token_list(SyntaxKind memberKind)
-{
-   return TokenSyntax::kindOf(memberKind);
-}
+//bool check_non_empty_token_list(SyntaxKind memberKind)
+//{
+//   return TokenSyntax::kindOf(memberKind);
+//}
 
 } // canserveascollectionmemberraw
 

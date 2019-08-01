@@ -96,16 +96,16 @@ bool AbstractFactory::canServeAsCollectionMemberRaw(SyntaxKind collectionKind,
                                                     SyntaxKind memberKind)
 {
    using namespace internal::canserveascollectionmemberraw;
-   switch (collectionKind) {
-   case SyntaxKind::CodeBlockItemList:
-      return check_code_block_item_list(memberKind);
-   case SyntaxKind::TokenList:
-      return check_token_list(memberKind);
-   case SyntaxKind::NonEmptyTokenList:
-      return check_non_empty_token_list(memberKind);
-   default:
-      polar_unreachable("Not collection kind.");
-   }
+//   switch (collectionKind) {
+//   case SyntaxKind::CodeBlockItemList:
+//      return check_code_block_item_list(memberKind);
+//   case SyntaxKind::TokenList:
+//      return check_token_list(memberKind);
+//   case SyntaxKind::NonEmptyTokenList:
+//      return check_non_empty_token_list(memberKind);
+//   default:
+//      polar_unreachable("Not collection kind.");
+//   }
 }
 
 /// Whether a raw node `member` can serve as a member in a syntax collection
