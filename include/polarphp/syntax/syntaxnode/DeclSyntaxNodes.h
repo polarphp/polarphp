@@ -994,6 +994,62 @@ private:
    void validate();
 };
 
+///
+/// type_expr:
+///   type
+/// | '?' type
+///
+class TypeExprClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      QuestionToken,
+      ///
+      /// type: TypeClauseSyntax
+      /// optional: false
+      ///
+      TypeClause
+   };
+
+public:
+   TypeExprClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getQuestionToken();
+   TypeClauseSyntax getTypeClause();
+   TypeExprClauseSyntax withQuestionToken(std::optional<TokenSyntax> questionToken);
+   TypeExprClauseSyntax withType(std::optional<TypeClauseSyntax> type);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::TypeExprClause;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class TypeExprClauseSyntaxBuilder;
+   void validate();
+};
+
+///
+/// type_expr:
+///   type
+/// | '?' type
+///
 class SourceFileSyntax final : public Syntax
 {
 public:

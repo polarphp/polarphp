@@ -1174,6 +1174,57 @@ TypeClauseSyntax TypeClauseSyntax::withType(std::optional<Syntax> type)
 }
 
 ///
+/// TypeExprClauseSyntax
+///
+void TypeExprClauseSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   syntax_assert_child_token(raw, QuestionToken, std::set{TokenKindType::T_QUESTION_MARK});
+   if (const RefCountPtr<RawSyntax> &typeChild = raw->getChild(Cursor::TypeClause)) {
+      assert(typeChild->kindOf(SyntaxKind::TypeClause));
+   }
+}
+
+std::optional<TokenSyntax> TypeExprClauseSyntax::getQuestionToken()
+{
+   RefCountPtr<SyntaxData> questionTokenData = m_data->getChild(Cursor::QuestionToken);
+   if (!questionTokenData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, questionTokenData.get()};
+}
+
+TypeClauseSyntax TypeExprClauseSyntax::getTypeClause()
+{
+   return TypeClauseSyntax {m_root, m_data->getChild(Cursor::TypeClause).get()};
+}
+
+TypeExprClauseSyntax TypeExprClauseSyntax::withQuestionToken(std::optional<TokenSyntax> questionToken)
+{
+   RefCountPtr<RawSyntax> questionTokenRaw;
+   if (questionToken.has_value()) {
+      questionTokenRaw = questionToken->getRaw();
+   } else {
+      questionTokenRaw = nullptr;
+   }
+   return m_data->replaceChild<TypeExprClauseSyntax>(questionTokenRaw, Cursor::QuestionToken);
+}
+
+TypeExprClauseSyntax TypeExprClauseSyntax::withType(std::optional<TypeClauseSyntax> type)
+{
+   RefCountPtr<RawSyntax> typeRaw;
+   if (type.has_value()) {
+      typeRaw = type->getRaw();
+   } else {
+      typeRaw = nullptr;
+   }
+   return m_data->replaceChild<TypeExprClauseSyntax>(typeRaw, Cursor::TypeClause);
+}
+
+///
 /// SourceFileSyntax
 ///
 void SourceFileSyntax::validate()
