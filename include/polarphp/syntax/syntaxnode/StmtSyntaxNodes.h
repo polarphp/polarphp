@@ -78,7 +78,7 @@ public:
    /// choices:
    /// SyntaxKind::Expr
    ///
-   static const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> CHILD_NODE_CHOICES;
+   static const NodeChoicesType CHILD_NODE_CHOICES;
 #endif
 public:
    ConditionElementSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
@@ -305,7 +305,7 @@ public:
    };
 
 #ifdef POLAR_DEBUG_BUILD
-   static const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> CHILD_NODE_CHOICES;
+   static const NodeChoicesType CHILD_NODE_CHOICES;
 #endif
 
 public:
@@ -587,7 +587,7 @@ public:
    };
 
 #ifdef POLAR_DEBUG_BUILD
-   static const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> CHILD_NODE_CHOICES;
+   static const NodeChoicesType CHILD_NODE_CHOICES;
 #endif
 
 public:

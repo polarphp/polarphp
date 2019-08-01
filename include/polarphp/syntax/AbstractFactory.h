@@ -69,7 +69,6 @@ public:
    static DeclSyntax makeBlankDecl(RefCountPtr<SyntaxArena> arena = nullptr);
    static ExprSyntax makeBlankExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static StmtSyntax makeBlankStmt(RefCountPtr<SyntaxArena> arena = nullptr);
-   static TypeSyntax makeBlankType(RefCountPtr<SyntaxArena> arena = nullptr);
    static TokenSyntax makeBlankToken(RefCountPtr<SyntaxArena> arena = nullptr);
    static UnknownSyntax makeBlankUnknown(RefCountPtr<SyntaxArena> arena = nullptr);
    static UnknownDeclSyntax makeBlankUnknownDecl(RefCountPtr<SyntaxArena> arena = nullptr);

@@ -26,7 +26,6 @@ static const std::map<SyntaxKind, SyntaxKindEntryType> scg_syntaxKindTable
    {SyntaxKind::Decl, SYNTAX_TABLE_ENTRY(Decl)},
    {SyntaxKind::Expr, SYNTAX_TABLE_ENTRY(Expr)},
    {SyntaxKind::Stmt, SYNTAX_TABLE_ENTRY(Stmt)},
-   {SyntaxKind::Type, SYNTAX_TABLE_ENTRY(Type)},
    {SyntaxKind::Token, SYNTAX_TABLE_ENTRY(Token)},
    {SyntaxKind::Unknown, SYNTAX_TABLE_ENTRY(Unknown)},
    {SyntaxKind::CodeBlockItem, SYNTAX_TABLE_ENTRY(CodeBlockItem)},

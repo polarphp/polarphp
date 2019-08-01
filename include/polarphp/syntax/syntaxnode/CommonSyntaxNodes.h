@@ -24,7 +24,6 @@ namespace polar::syntax {
 class DeclSyntax;
 class ExprSyntax;
 class StmtSyntax;
-class TypeSyntax;
 class UnknownDeclSyntax;
 class UnknownExprSyntax;
 class UnknownStmtSyntax;
@@ -88,24 +87,6 @@ public:
    static bool kindOf(SyntaxKind kind)
    {
       return is_expr_kind(kind);
-   }
-
-   static bool classOf(const Syntax *syntax)
-   {
-      return kindOf(syntax->getKind());
-   }
-};
-
-class TypeSyntax : public Syntax
-{
-public:
-   TypeSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : Syntax(root, data)
-   {}
-
-   static bool kindOf(SyntaxKind kind)
-   {
-      return is_type_kind(kind);
    }
 
    static bool classOf(const Syntax *syntax)
@@ -195,7 +176,7 @@ public:
    };
 
 #ifdef POLAR_DEBUG_BUILD
-   static const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> CHILD_NODE_CHOICES;
+   static const NodeChoicesType CHILD_NODE_CHOICES;
 #endif
 
 public:

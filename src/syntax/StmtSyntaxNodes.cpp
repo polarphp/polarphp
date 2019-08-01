@@ -17,7 +17,7 @@ namespace polar::syntax {
 /// ConditionElementSyntax
 /// current only support expr condition
 ///
-const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> ConditionElementSyntax::CHILD_NODE_CHOICES
+const NodeChoicesType ConditionElementSyntax::CHILD_NODE_CHOICES
 {
    {
       ConditionElementSyntax::Cursor::Condition, {
@@ -303,7 +303,7 @@ ElseIfClauseSyntax ElseIfClauseSyntax::withBody(std::optional<CodeBlockSyntax> b
 ///
 
 #ifdef POLAR_DEBUG_BUILD
-const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> IfStmtSyntax::CHILD_NODE_CHOICES
+const NodeChoicesType IfStmtSyntax::CHILD_NODE_CHOICES
 {
    {IfStmtSyntax::ElseBody, {
          SyntaxKind::IfStmt,
@@ -931,7 +931,7 @@ SwitchCaseLabelSyntax SwitchCaseLabelSyntax::withColon(std::optional<TokenSyntax
 ///
 
 #ifdef POLAR_DEBUG_BUILD
-const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> SwitchCaseSyntax::CHILD_NODE_CHOICES
+const NodeChoicesType SwitchCaseSyntax::CHILD_NODE_CHOICES
 {
    {
       SwitchCaseSyntax::Cursor::Statements,{

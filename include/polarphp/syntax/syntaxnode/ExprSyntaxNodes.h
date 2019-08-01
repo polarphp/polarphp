@@ -314,7 +314,7 @@ public:
    /// TokenKindType::T_TRUE
    /// TokenKindType::T_FALSE
    ///
-   static const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> CHILD_TOKEN_CHOICES;
+   static const TokenChoicesType CHILD_TOKEN_CHOICES;
 #endif
 
 public:

@@ -196,7 +196,7 @@ StringLiteralExprSyntax StringLiteralExprSyntax::withString(std::optional<TokenS
 }
 
 #ifdef POLAR_DEBUG_BUILD
-const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> BooleanLiteralExprSyntax::CHILD_TOKEN_CHOICES
+const TokenChoicesType BooleanLiteralExprSyntax::CHILD_TOKEN_CHOICES
 {
    {
       BooleanLiteralExprSyntax::Boolean, {

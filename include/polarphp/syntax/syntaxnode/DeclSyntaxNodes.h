@@ -34,9 +34,9 @@ class NamespaceMixedGroupUseDeclarationSyntax;
 class NamespaceUseSyntax;
 class ConstDeclareItemSyntax;
 class ConstDefinitionSyntax;
-class TypeSyntax;
-class TypeExprSyntax;
-class ReturnTypeSyntax;
+class TypeClauseSyntax;
+class TypeExprClauseSyntax;
+class ReturnTypeClauseSyntax;
 class SourceFileSyntax;
 
 ///
@@ -115,7 +115,7 @@ public:
    /// T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
    /// T_CLASS_CONST | T_TRAIT_CONST | T_FUNC_CONST | T_METHOD_CONST | T_LINE | T_FILE | T_DIR | T_NS_CONST | T_FN
    ///
-   static const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> CHILD_TOKEN_CHOICES;
+   static const TokenChoicesType CHILD_TOKEN_CHOICES;
 #endif
 
 public:
@@ -173,7 +173,7 @@ public:
    /// child index: ModifierChoiceToken
    /// token choices:
    /// T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
-   static const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> CHILD_TOKEN_CHOICES;
+   static const TokenChoicesType CHILD_TOKEN_CHOICES;
 #endif
 
 public:
@@ -368,7 +368,7 @@ public:
    /// token choices:
    /// T_FUNCTION | T_CONST
    ///
-   static const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> CHILD_TOKEN_CHOICES;
+   static const TokenChoicesType CHILD_TOKEN_CHOICES;
 #endif
 
 public:
@@ -935,6 +935,56 @@ public:
 
 private:
    friend class ConstDefinitionSyntaxBuilder;
+   void validate();
+};
+
+class TypeClauseSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ------------------
+      /// node choice: TokenSyntax
+      /// token choices: true
+      /// T_ARRAY | T_CALLABLE
+      /// ------------------
+      /// node choice: NameSyntax
+      ///
+      Type
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+
+#endif
+
+public:
+   TypeClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getType();
+   TypeClauseSyntax withType(std::optional<Syntax> type);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::TypeClause;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class TypeClauseSyntaxBuilder;
    void validate();
 };
 

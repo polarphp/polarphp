@@ -14,7 +14,7 @@
 
 namespace polar::syntax {
 
-const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> CodeBlockItemSyntax::CHILD_NODE_CHOICES{
+const NodeChoicesType CodeBlockItemSyntax::CHILD_NODE_CHOICES{
    {CodeBlockItemSyntax::Cursor::Item, {
          SyntaxKind::Decl,
                SyntaxKind::Expr,

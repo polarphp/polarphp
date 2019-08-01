@@ -28,9 +28,9 @@
 
 namespace polar::syntax {
 
-const std::map<SyntaxChildrenCountType, std::set<std::string>> Syntax::CHILD_TOKEN_TEXT_CHOICES{};
-const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> Syntax::CHILD_TOKEN_CHOICES{};
-const std::map<SyntaxChildrenCountType, std::set<SyntaxKind>> Syntax::CHILD_NODE_CHOICES{};
+const TokenTextChoicesType Syntax::CHILD_TOKEN_TEXT_CHOICES{};
+const TokenChoicesType Syntax::CHILD_TOKEN_CHOICES{};
+const NodeChoicesType Syntax::CHILD_NODE_CHOICES{};
 
 RefCountPtr<RawSyntax> Syntax::getRaw() const
 {

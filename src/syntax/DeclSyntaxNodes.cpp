@@ -27,7 +27,7 @@ void ReservedNonModifierSyntax::validate()
 }
 
 #ifdef POLAR_DEBUG_BUILD
-const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> ReservedNonModifierSyntax::CHILD_TOKEN_CHOICES
+const TokenChoicesType ReservedNonModifierSyntax::CHILD_TOKEN_CHOICES
 {
    {
       ReservedNonModifierSyntax::Modifier, {
@@ -75,7 +75,7 @@ ReservedNonModifierSyntax ReservedNonModifierSyntax::withModifier(std::optional<
 /// SemiReservedSytnax
 ///
 #ifdef POLAR_DEBUG_BUILD
-const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> SemiReservedSytnax::CHILD_TOKEN_CHOICES
+const TokenChoicesType SemiReservedSytnax::CHILD_TOKEN_CHOICES
 {
    {
       SemiReservedSytnax::Cursor::ModifierChoiceToken, {
@@ -294,7 +294,7 @@ NameSyntax NameSyntax::addNamespacePart(NamespacePartSyntax namespacePart)
 /// NamespaceUseTypeSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
-const std::map<SyntaxChildrenCountType, std::set<TokenKindType>> NamespaceUseTypeSyntax::CHILD_TOKEN_CHOICES
+const TokenChoicesType NamespaceUseTypeSyntax::CHILD_TOKEN_CHOICES
 {
    {
       NamespaceUseTypeSyntax::TypeToken, {
@@ -1124,6 +1124,33 @@ ConstDefinitionSyntax ConstDefinitionSyntax::withSemicolon(std::optional<TokenSy
                                          OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
    }
    return m_data->replaceChild<ConstDefinitionSyntax>(semicolonRaw, Cursor::Semicolon);
+}
+
+///
+/// TypeClauseSyntax
+///
+void TypeClauseSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   if (const RefCountPtr<RawSyntax> &typeChild = raw->getChild(Cursor::Type)) {
+      if (typeChild->isToken()) {
+//         syntax_assert_child_token(raw, Type, );
+      }
+
+   }
+}
+
+Syntax TypeClauseSyntax::getType()
+{
+
+}
+
+TypeClauseSyntax TypeClauseSyntax::withType(std::optional<Syntax> type)
+{
+
 }
 
 ///

@@ -142,12 +142,6 @@ StmtSyntax AbstractFactory::makeBlankStmt(RefCountPtr<SyntaxArena> arena)
    return make<StmtSyntax>(raw);
 }
 
-TypeSyntax AbstractFactory::makeBlankType(RefCountPtr<SyntaxArena> arena)
-{
-   auto raw = RawSyntax::make(SyntaxKind::Type, {}, SourcePresence::Present, arena);
-   return make<TypeSyntax>(raw);
-}
-
 TokenSyntax AbstractFactory::makeBlankToken(RefCountPtr<SyntaxArena> arena)
 {
    auto raw = RawSyntax::make(SyntaxKind::Token, {}, SourcePresence::Present, arena);

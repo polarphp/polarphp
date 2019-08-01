@@ -35,6 +35,8 @@ enum class SyntaxKind : std::uint32_t
    SemiReserved,
    Identifier,
    NamespacePart,
+   TypeClause,
+   TypeExprClause,
    Name,
    NamespaceUseType,
    NamespaceUnprefixedUseDeclaration,
@@ -44,6 +46,7 @@ enum class SyntaxKind : std::uint32_t
    NamespacemixedGroupUseDeclaration,
    ConstDeclareItem,
    ConstDefinition,
+   ReturnTypeClause,
    InitializeClause, // for variable assign or initialize
 
    UnknownDecl,
