@@ -1225,6 +1225,162 @@ TypeExprClauseSyntax TypeExprClauseSyntax::withType(std::optional<TypeClauseSynt
 }
 
 ///
+/// ReturnTypeClauseSyntax
+///
+void ReturnTypeClauseSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   syntax_assert_child_token(raw, ColonToken, std::set{TokenKindType::T_COLON});
+   if (const RefCountPtr<RawSyntax> &typeExprChild = raw->getChild(Cursor::TypeExpr)) {
+      assert(typeExprChild->kindOf(SyntaxKind::TypeExprClause));
+   }
+}
+
+TokenSyntax ReturnTypeClauseSyntax::getColon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::ColonToken).get()};
+}
+
+TypeExprClauseSyntax ReturnTypeClauseSyntax::getType()
+{
+   return TypeExprClauseSyntax {m_root, m_data->getChild(Cursor::TypeExpr).get()};
+}
+
+ReturnTypeClauseSyntax ReturnTypeClauseSyntax::withColon(std::optional<TokenSyntax> colon)
+{
+   RefCountPtr<RawSyntax> colonRaw;
+   if (colon.has_value()) {
+      colonRaw = colon->getRaw();
+   } else {
+      colonRaw = RawSyntax::missing(TokenKindType::T_COLON,
+                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+   }
+   return m_data->replaceChild<ReturnTypeClauseSyntax>(colonRaw, Cursor::ColonToken);
+}
+
+ReturnTypeClauseSyntax ReturnTypeClauseSyntax::withType(std::optional<TypeExprClauseSyntax> type)
+{
+   RefCountPtr<RawSyntax> typeRaw;
+   if (type.has_value()) {
+      typeRaw = type->getRaw();
+   } else {
+      typeRaw = RawSyntax::missing(SyntaxKind::TypeExprClause);
+   }
+   return m_data->replaceChild<ReturnTypeClauseSyntax>(typeRaw, Cursor::TypeExpr);
+}
+
+///
+/// ParameterSyntax
+///
+void ParameterSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+}
+
+std::optional<TokenSyntax> ParameterSyntax::getTypeHint()
+{
+   RefCountPtr<SyntaxData> typeHintData = m_data->getChild(Cursor::TypeHint);
+   if (!typeHintData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, typeHintData.get()};
+}
+
+std::optional<TokenSyntax> ParameterSyntax::getReferenceMark()
+{
+   RefCountPtr<SyntaxData> referenceData = m_data->getChild(Cursor::ReferenceMark);
+   if (!referenceData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, referenceData.get()};
+}
+
+std::optional<TokenSyntax> ParameterSyntax::getVariadicMark()
+{
+   RefCountPtr<SyntaxData> variadicData = m_data->getChild(Cursor::VariadicMark);
+   if (!variadicData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, variadicData.get()};
+}
+
+TokenSyntax ParameterSyntax::getVariable()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
+}
+
+std::optional<InitializeClauseSyntax> ParameterSyntax::getInitializer()
+{
+    RefCountPtr<SyntaxData> initializerData = m_data->getChild(Cursor::Initializer);
+    if (!initializerData) {
+       return std::nullopt;
+    }
+    return InitializeClauseSyntax {m_root, initializerData.get()};
+}
+
+ParameterSyntax ParameterSyntax::withTypeHint(std::optional<TokenSyntax> typeHint)
+{
+   RefCountPtr<RawSyntax> typeHintRaw;
+   if (typeHint.has_value()) {
+      typeHintRaw = typeHint->getRaw();
+   } else {
+      typeHintRaw = nullptr;
+   }
+   return m_data->replaceChild<ParameterSyntax>(typeHintRaw, Cursor::TypeHint);
+}
+
+ParameterSyntax ParameterSyntax::withReferenceMark(std::optional<TokenSyntax> referenceMark)
+{
+   RefCountPtr<RawSyntax> referenceMarkRaw;
+   if (referenceMark.has_value()) {
+      referenceMarkRaw = referenceMark->getRaw();
+   } else {
+      referenceMarkRaw = nullptr;
+   }
+   return m_data->replaceChild<ParameterSyntax>(referenceMarkRaw, Cursor::ReferenceMark);
+}
+
+ParameterSyntax ParameterSyntax::withVariadicMark(std::optional<TokenSyntax> variadicMark)
+{
+   RefCountPtr<RawSyntax> variadicMarkRaw;
+   if (variadicMark.has_value()) {
+      variadicMarkRaw = variadicMark->getRaw();
+   } else {
+      variadicMarkRaw = nullptr;
+   }
+   return m_data->replaceChild<ParameterSyntax>(variadicMarkRaw, Cursor::VariadicMark);
+}
+
+ParameterSyntax ParameterSyntax::withVariable(std::optional<TokenSyntax> variable)
+{
+   RefCountPtr<RawSyntax> variableRaw;
+   if (variable.has_value()) {
+      variableRaw = variable->getRaw();
+   } else {
+      variableRaw = RawSyntax::missing(TokenKindType::T_VARIABLE,
+                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_VARIABLE)));
+   }
+   return m_data->replaceChild<ParameterSyntax>(variableRaw, Cursor::Variable);
+}
+
+ParameterSyntax ParameterSyntax::withInitializer(std::optional<InitializeClauseSyntax> initializer)
+{
+   RefCountPtr<RawSyntax> initializerRaw;
+   if (initializer.has_value()) {
+      initializerRaw = initializer->getRaw();
+   } else {
+      initializerRaw = RawSyntax::missing(SyntaxKind::InitializeClause);
+   }
+   return m_data->replaceChild<ParameterSyntax>(initializerRaw, Cursor::Initializer);
+}
+
+///
 /// SourceFileSyntax
 ///
 void SourceFileSyntax::validate()

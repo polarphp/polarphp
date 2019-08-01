@@ -37,6 +37,7 @@ class ConstDefinitionSyntax;
 class TypeClauseSyntax;
 class TypeExprClauseSyntax;
 class ReturnTypeClauseSyntax;
+class ParameterSyntax;
 class SourceFileSyntax;
 
 ///
@@ -78,6 +79,19 @@ using NamespaceInlineUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::Nam
 /// | unprefixed_use_declaration
 ///
 using NamespaceUnprefixedUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUnprefixedUseDeclarationList, NamespaceUnprefixedUseDeclarationSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: ParameterSyntax
+///
+/// parameter_list:
+///   non_empty_parameter_list
+/// |	/* empty */
+/// non_empty_parameter_list:
+///   parameter
+/// |	non_empty_parameter_list ',' parameter
+///
+using ParameterListSyntax = SyntaxCollection<SyntaxKind::ParameterList, ParameterSyntax>;
 
 ///
 /// type: SyntaxCollection
@@ -1046,10 +1060,127 @@ private:
 };
 
 ///
-/// type_expr:
-///   type
-/// | '?' type
+/// return_type:
+///   ':' type_expr
 ///
+class ReturnTypeClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      ColonToken,
+      ///
+      /// type: TypeExprClauseSyntax
+      /// optional: false
+      ///
+      TypeExpr
+   };
+public:
+   ReturnTypeClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getColon();
+   TypeExprClauseSyntax getType();
+   ReturnTypeClauseSyntax withColon(std::optional<TokenSyntax> colon);
+   ReturnTypeClauseSyntax withType(std::optional<TypeExprClauseSyntax> type);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ReturnTypeClause;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class ReturnTypeClauseSyntaxBuilder;
+   void validate();
+};
+
+///
+/// parameter:
+///   optional_type is_reference is_variadic T_VARIABLE
+/// | optional_type is_reference is_variadic T_VARIABLE '=' expr
+///
+class ParameterSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 5;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TypeExprClauseSyntax
+      /// optional: true
+      ///
+      TypeHint,
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      ReferenceMark,
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      VariadicMark,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      Variable,
+      ///
+      /// type: InitializeClauseSyntax
+      /// optional: true
+      ///
+      Initializer
+   };
+
+public:
+   ParameterSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getTypeHint();
+   std::optional<TokenSyntax> getReferenceMark();
+   std::optional<TokenSyntax> getVariadicMark();
+   TokenSyntax getVariable();
+   std::optional<InitializeClauseSyntax> getInitializer();
+
+   ParameterSyntax withTypeHint(std::optional<TokenSyntax> typeHint);
+   ParameterSyntax withReferenceMark(std::optional<TokenSyntax> referenceMark);
+   ParameterSyntax withVariadicMark(std::optional<TokenSyntax> variadicMark);
+   ParameterSyntax withVariable(std::optional<TokenSyntax> variable);
+   ParameterSyntax withInitializer(std::optional<InitializeClauseSyntax> initializer);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::Parameter;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class ParameterSyntaxBuilder;
+   void validate();
+};
+
 class SourceFileSyntax final : public Syntax
 {
 public:
@@ -1077,6 +1208,16 @@ public:
    SourceFileSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);
    SourceFileSyntax addStatement(CodeBlockItemSyntax statement);
    SourceFileSyntax withEofToken(std::optional<TokenSyntax> eofToken);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SourceFile;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
 
 private:
    friend class SourceFileSyntaxBuilder;

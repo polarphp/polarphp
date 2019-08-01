@@ -48,6 +48,7 @@ enum class SyntaxKind : std::uint32_t
    ConstDefinition,
    ReturnTypeClause,
    InitializeClause, // for variable assign or initialize
+   Parameter,
 
    UnknownDecl,
    LastDecl,
@@ -107,6 +108,7 @@ enum class SyntaxKind : std::uint32_t
    NamespaceInlineUseDeclarationList,
    NamespaceUnprefixedUseDeclarationList,
    ConstDeclareItemList,
+   ParameterList,
 
    // NOTE: Unknown must be the last kind.
    Unknown,
