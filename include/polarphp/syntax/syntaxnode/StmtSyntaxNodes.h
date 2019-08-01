@@ -332,13 +332,13 @@ public:
    TokenSyntax getLeftParen();
    ExprSyntax getCondition();
    TokenSyntax getRightParen();
-//   CodeBlockSyntax getBody();
+   CodeBlockSyntax getBody();
 
    ElseIfClauseSyntax withElseIfKeyword(std::optional<TokenSyntax> elseIfKeyword);
    ElseIfClauseSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
    ElseIfClauseSyntax withCondition(std::optional<ExprSyntax> condition);
    ElseIfClauseSyntax withRightParen(std::optional<TokenSyntax> rightParen);
-//   ElseIfClauseSyntax withBody(std::optional<CodeBlockSyntax> body);
+   ElseIfClauseSyntax withBody(std::optional<CodeBlockSyntax> body);
 
 private:
    friend class ElseIfClauseSyntaxBuilder;
@@ -407,7 +407,7 @@ public:
    TokenSyntax getLeftParen();
    ExprSyntax getCondition();
    TokenSyntax getRightParen();
-//   CodeBlockSyntax getBody();
+   CodeBlockSyntax getBody();
    std::optional<ElseIfListSyntax> getElseIfClauses();
    std::optional<TokenSyntax> getElseKeyword();
    std::optional<Syntax> getElseBody();
@@ -418,7 +418,7 @@ public:
    IfStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
    IfStmtSyntax withCondition(std::optional<ExprSyntax> condition);
    IfStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
-//   IfStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+   IfStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
    IfStmtSyntax withElseIfClauses(std::optional<ElseIfListSyntax> elseIfClauses);
    IfStmtSyntax withElseKeyword(std::optional<TokenSyntax> elseKeyword);
    IfStmtSyntax withElseBody(std::optional<Syntax> elseBody);
@@ -472,7 +472,7 @@ public:
    TokenSyntax getLeftParen();
    ConditionElementListSyntax getConditions();
    TokenSyntax getRightParen();
-//   CodeBlockSyntax getBody();
+   CodeBlockSyntax getBody();
 
    WhileStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
    WhileStmtSyntax withLabelColon(std::optional<TokenSyntax> labelColon);
@@ -480,7 +480,7 @@ public:
    WhileStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
    WhileStmtSyntax withConditions(std::optional<ConditionElementListSyntax> conditions);
    WhileStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
-//   WhileStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+   WhileStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
 
    /// Adds the provided `condition` to the node's `Conditions`
    /// collection.
@@ -548,7 +548,7 @@ public:
    std::optional<TokenSyntax> getLabelName();
    std::optional<TokenSyntax> getLabelColon();
    TokenSyntax getDoKeyword();
-//   CodeBlockSyntax getBody();
+   CodeBlockSyntax getBody();
    TokenSyntax getWhileKeyword();
    TokenSyntax getLeftParen();
    ExprSyntax getCondition();
@@ -557,7 +557,7 @@ public:
    DoWhileStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
    DoWhileStmtSyntax withLabelColon(std::optional<TokenSyntax> labelColon);
    DoWhileStmtSyntax withDoKeyword(std::optional<TokenSyntax> doKeyword);
-//   DoWhileStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+   DoWhileStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
    DoWhileStmtSyntax withWhileKeyword(std::optional<TokenSyntax> whileKeyword);
    DoWhileStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
    DoWhileStmtSyntax withCondition(std::optional<ExprSyntax> condition);
@@ -684,11 +684,11 @@ public:
    }
 
    Syntax getLabel();
-//   CodeBlockItemListSyntax getStatements();
+   CodeBlockItemListSyntax getStatements();
 
    SwitchCaseSyntax withLabel(std::optional<Syntax> label);
-//   SwitchCaseSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);
-//   SwitchCaseSyntax addStatement(CodeBlockItemSyntax statement);
+   SwitchCaseSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);
+   SwitchCaseSyntax addStatement(CodeBlockItemSyntax statement);
 
 private:
    friend class SwitchCaseSyntaxBuilder;
@@ -800,9 +800,9 @@ public:
    }
 
    TokenSyntax getDeferKeyword();
-//   CodeBlockSyntax getBody();
+   CodeBlockSyntax getBody();
    DeferStmtSyntax withDeferKeyword(std::optional<TokenSyntax> deferKeyword);
-//   DeferStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+   DeferStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
 
 private:
    friend class DeferStmtSyntaxBuilder;

@@ -235,10 +235,10 @@ TokenSyntax ElseIfClauseSyntax::getRightParen()
    return TokenSyntax{m_root, m_data->getChild(Cursor::RightParen).get()};
 }
 
-//CodeBlockSyntax ElseIfClauseSyntax::getBody()
-//{
-//   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
-//}
+CodeBlockSyntax ElseIfClauseSyntax::getBody()
+{
+   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+}
 
 ElseIfClauseSyntax ElseIfClauseSyntax::withElseIfKeyword(std::optional<TokenSyntax> elseIfKeyword)
 {
@@ -287,16 +287,16 @@ ElseIfClauseSyntax ElseIfClauseSyntax::withRightParen(std::optional<TokenSyntax>
    return m_data->replaceChild<ElseIfClauseSyntax>(rawRightParen, Cursor::LeftParen);
 }
 
-//ElseIfClauseSyntax ElseIfClauseSyntax::withBody(std::optional<CodeBlockSyntax> body)
-//{
-//   RefCountPtr<RawSyntax> rawBody;
-//   if (body.has_value()) {
-//      rawBody = body->getRaw();
-//   } else {
-//      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
-//   }
-//   return m_data->replaceChild<ElseIfClauseSyntax>(rawBody, Cursor::Body);
-//}
+ElseIfClauseSyntax ElseIfClauseSyntax::withBody(std::optional<CodeBlockSyntax> body)
+{
+   RefCountPtr<RawSyntax> rawBody;
+   if (body.has_value()) {
+      rawBody = body->getRaw();
+   } else {
+      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   return m_data->replaceChild<ElseIfClauseSyntax>(rawBody, Cursor::Body);
+}
 
 ///
 /// IfStmtSyntax
@@ -364,10 +364,10 @@ TokenSyntax IfStmtSyntax::getRightParen()
    return TokenSyntax(m_root, m_data->getChild(Cursor::RightParen).get());
 }
 
-//CodeBlockSyntax IfStmtSyntax::getBody()
-//{
-//   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
-//}
+CodeBlockSyntax IfStmtSyntax::getBody()
+{
+   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+}
 
 std::optional<ElseIfListSyntax> IfStmtSyntax::getElseIfClauses()
 {
@@ -465,16 +465,16 @@ IfStmtSyntax IfStmtSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
    return m_data->replaceChild<IfStmtSyntax>(rawRightParen, Cursor::LeftParen);
 }
 
-//IfStmtSyntax IfStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
-//{
-//   RefCountPtr<RawSyntax> rawBody;
-//   if (body.has_value()) {
-//      rawBody = body->getRaw();
-//   } else {
-//      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
-//   }
-//   return m_data->replaceChild<IfStmtSyntax>(rawBody, Cursor::Body);
-//}
+IfStmtSyntax IfStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
+{
+   RefCountPtr<RawSyntax> rawBody;
+   if (body.has_value()) {
+      rawBody = body->getRaw();
+   } else {
+      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   return m_data->replaceChild<IfStmtSyntax>(rawBody, Cursor::Body);
+}
 
 IfStmtSyntax IfStmtSyntax::withElseIfClauses(std::optional<ElseIfListSyntax> elseIfClauses)
 {
@@ -570,10 +570,10 @@ TokenSyntax WhileStmtSyntax::getRightParen()
    return TokenSyntax{m_root, m_data->getChild(Cursor::RightParen).get()};
 }
 
-//CodeBlockSyntax WhileStmtSyntax::getBody()
-//{
-//   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
-//}
+CodeBlockSyntax WhileStmtSyntax::getBody()
+{
+   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+}
 
 WhileStmtSyntax WhileStmtSyntax::withLabelName(std::optional<TokenSyntax> labelName)
 {
@@ -644,16 +644,16 @@ WhileStmtSyntax WhileStmtSyntax::withRightParen(std::optional<TokenSyntax> right
    return m_data->replaceChild<WhileStmtSyntax>(rawRightParen, Cursor::RightParen);
 }
 
-//WhileStmtSyntax WhileStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
-//{
-//   RefCountPtr<RawSyntax> rawBody;
-//   if (body.has_value()) {
-//      rawBody = body->getRaw();
-//   } else {
-//      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
-//   }
-//   return m_data->replaceChild<WhileStmtSyntax>(rawBody, Cursor::Body);
-//}
+WhileStmtSyntax WhileStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
+{
+   RefCountPtr<RawSyntax> rawBody;
+   if (body.has_value()) {
+      rawBody = body->getRaw();
+   } else {
+      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   return m_data->replaceChild<WhileStmtSyntax>(rawBody, Cursor::Body);
+}
 
 WhileStmtSyntax WhileStmtSyntax::addCondition(ConditionElementSyntax condition)
 {
@@ -701,10 +701,10 @@ TokenSyntax DoWhileStmtSyntax::getDoKeyword()
    return TokenSyntax{m_root, m_data->getChild(Cursor::DoKeyword).get()};
 }
 
-//CodeBlockSyntax DoWhileStmtSyntax::getBody()
-//{
-//   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
-//}
+CodeBlockSyntax DoWhileStmtSyntax::getBody()
+{
+   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+}
 
 TokenSyntax DoWhileStmtSyntax::getWhileKeyword()
 {
@@ -760,16 +760,16 @@ DoWhileStmtSyntax DoWhileStmtSyntax::withDoKeyword(std::optional<TokenSyntax> do
    return m_data->replaceChild<DoWhileStmtSyntax>(rawDoKeyword, Cursor::DoKeyword);
 }
 
-//DoWhileStmtSyntax DoWhileStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
-//{
-//   RefCountPtr<RawSyntax> rawBody;
-//   if (body.has_value()) {
-//      rawBody = body->getRaw();
-//   } else {
-//      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
-//   }
-//   return m_data->replaceChild<DoWhileStmtSyntax>(rawBody, Cursor::Body);
-//}
+DoWhileStmtSyntax DoWhileStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
+{
+   RefCountPtr<RawSyntax> rawBody;
+   if (body.has_value()) {
+      rawBody = body->getRaw();
+   } else {
+      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   return m_data->replaceChild<DoWhileStmtSyntax>(rawBody, Cursor::Body);
+}
 
 DoWhileStmtSyntax DoWhileStmtSyntax::withWhileKeyword(std::optional<TokenSyntax> whileKeyword)
 {
@@ -1196,10 +1196,10 @@ TokenSyntax DeferStmtSyntax::getDeferKeyword()
    return TokenSyntax{m_root, m_data->getChild(Cursor::DeferKeyword).get()};
 }
 
-//CodeBlockSyntax DeferStmtSyntax::getBody()
-//{
-//   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
-//}
+CodeBlockSyntax DeferStmtSyntax::getBody()
+{
+   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+}
 
 DeferStmtSyntax DeferStmtSyntax::withDeferKeyword(std::optional<TokenSyntax> deferKeyword)
 {
@@ -1213,16 +1213,16 @@ DeferStmtSyntax DeferStmtSyntax::withDeferKeyword(std::optional<TokenSyntax> def
    return m_data->replaceChild<DeferStmtSyntax>(rawDeferKeyword, Cursor::DeferKeyword);
 }
 
-//DeferStmtSyntax DeferStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
-//{
-//   RefCountPtr<RawSyntax> rawBody;
-//   if (body.has_value()) {
-//      rawBody = body->getRaw();
-//   } else {
-//      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
-//   }
-//   return m_data->replaceChild<DeferStmtSyntax>(rawBody, Cursor::Body);
-//}
+DeferStmtSyntax DeferStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
+{
+   RefCountPtr<RawSyntax> rawBody;
+   if (body.has_value()) {
+      rawBody = body->getRaw();
+   } else {
+      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   return m_data->replaceChild<DeferStmtSyntax>(rawBody, Cursor::Body);
+}
 
 ///
 /// ExpressionStmtSyntax

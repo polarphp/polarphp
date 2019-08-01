@@ -13,21 +13,11 @@
 #define POLARPHP_SYNTAX_SYNTAX_NODE_COMMON_NODES_H
 
 #include "polarphp/syntax/Syntax.h"
-#include "polarphp/syntax/SyntaxCollection.h"
 #include "polarphp/syntax/TokenSyntax.h"
 #include "polarphp/syntax/UnknownSyntax.h"
+#include "polarphp/syntax/syntaxnode/CommonSyntaxNodesFwd.h"
 
 namespace polar::syntax {
-
-/// common syntex nodes
-/// normal node
-class DeclSyntax;
-class ExprSyntax;
-class StmtSyntax;
-class UnknownDeclSyntax;
-class UnknownExprSyntax;
-class UnknownStmtSyntax;
-class UnknownTypeSyntax;
 
 class DeclSyntax : public Syntax
 {
@@ -135,6 +125,127 @@ public:
    {
       return kindOf(syntax->getKind());
    }
+};
+
+/// A CodeBlockItem is any Syntax node that appears on its own line inside
+/// a CodeBlock.
+class CodeBlockItemSyntax final : public Syntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 3;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// -------------------------
+      /// node choice: StmtSyntax
+      /// -------------------------
+      /// node choice: DeclSyntax
+      /// -------------------------
+      /// node choice: ExprSyntax
+      ///
+      Item,
+      /// type: TokenSyntax
+      /// optional: true
+      Semicolon,
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   static const NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   CodeBlockItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   /// The underlying node inside the code block.
+   Syntax getItem();
+   TokenSyntax getSemicolon();
+
+   /// Returns a copy of the receiver with its `${child.name}` replaced.
+   /// - param newChild: The new `Item` to replace the node's
+   ///                   current `Item`, if present.
+   CodeBlockItemSyntax withItem(std::optional<Syntax> item);
+
+   /// the trailing semicolon at the end of the item.
+   CodeBlockItemSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::CodeBlockItem == kind;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class CodeBlockItemSyntaxBuilder;
+   void validate();
+};
+
+///
+/// code-block -> '{' stmt-list '}'
+///
+class CodeBlockSyntax final : public Syntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 3;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: false
+      LeftBrace,
+      /// type: CodeBlockItemListSyntax
+      /// optional: false
+      Statements,
+      /// type: TokenSyntax
+      /// optional: false
+      RightBrace
+   };
+
+public:
+   CodeBlockSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      this->validate();
+   }
+
+   TokenSyntax getLeftBrace();
+   TokenSyntax getRightBrace();
+   CodeBlockItemListSyntax getStatements();
+
+   /// Adds the provided `CodeBlockItem` to the node's `Statements`
+   /// collection.
+   /// - param element: The new `CodeBlockItem` to add to the node's
+   ///                  `Statements` collection.
+   /// - returns: A copy of the receiver with the provided `CodeBlockItem
+   ///            appended to its `Statements` collection.
+   CodeBlockSyntax addCodeBlockItem(CodeBlockItemSyntax codeBlockItem);
+   CodeBlockSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
+   CodeBlockSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
+   CodeBlockSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::CodeBlock == kind;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class CodeBlockSyntaxBuilder;
+   void validate();
 };
 
 } // polar::syntax

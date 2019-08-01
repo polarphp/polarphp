@@ -13,22 +13,22 @@
 
 namespace polar::syntax {
 
-//SourceFileSyntaxBuilder &SourceFileSyntaxBuilder::useStatements(CodeBlockItemListSyntax statements)
-//{
-//   m_layout[cursor_index(Cursor::Statements)] = statements.getRaw();
-//   return *this;
-//}
+SourceFileSyntaxBuilder &SourceFileSyntaxBuilder::useStatements(CodeBlockItemListSyntax statements)
+{
+   m_layout[cursor_index(Cursor::Statements)] = statements.getRaw();
+   return *this;
+}
 
-//SourceFileSyntaxBuilder &SourceFileSyntaxBuilder::addStatement(CodeBlockItemSyntax statement)
-//{
-//   RefCountPtr<RawSyntax> &rawStatemens = m_layout[cursor_index(Cursor::Statements)];
-//   if (!rawStatemens) {
-//      rawStatemens = RawSyntax::make(SyntaxKind::CodeBlockItemList, {statement.getRaw()}, SourcePresence::Present, m_arena);
-//   } else {
-//      rawStatemens = rawStatemens->append(statement.getRaw());
-//   }
-//   return *this;
-//}
+SourceFileSyntaxBuilder &SourceFileSyntaxBuilder::addStatement(CodeBlockItemSyntax statement)
+{
+   RefCountPtr<RawSyntax> &rawStatemens = m_layout[cursor_index(Cursor::Statements)];
+   if (!rawStatemens) {
+      rawStatemens = RawSyntax::make(SyntaxKind::CodeBlockItemList, {statement.getRaw()}, SourcePresence::Present, m_arena);
+   } else {
+      rawStatemens = rawStatemens->append(statement.getRaw());
+   }
+   return *this;
+}
 
 SourceFileSyntaxBuilder &SourceFileSyntaxBuilder::useEofToken(TokenSyntax eofToken)
 {
@@ -40,9 +40,9 @@ SourceFileSyntax SourceFileSyntaxBuilder::build()
 {
    CursorIndex statementsIndex = cursor_index(Cursor::Statements);
    CursorIndex eofTokenIndex = cursor_index(Cursor::EOFToken);
-//   if (!m_layout[statementsIndex]) {
-//      m_layout[statementsIndex] = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
-//   }
+   if (!m_layout[statementsIndex]) {
+      m_layout[statementsIndex] = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
+   }
    if (!m_layout[eofTokenIndex]) {
       m_layout[eofTokenIndex] = RawSyntax::missing(TokenKindType::END, OwnedString::makeUnowned(""));
    }

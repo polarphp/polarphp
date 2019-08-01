@@ -1128,9 +1128,9 @@ public:
    }
 
    TokenSyntax getEofToken();
-//   CodeBlockItemListSyntax getStatements();
-//   SourceFileSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);
-//   SourceFileSyntax addStatement(CodeBlockItemSyntax statement);
+   CodeBlockItemListSyntax getStatements();
+   SourceFileSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);
+   SourceFileSyntax addStatement(CodeBlockItemSyntax statement);
    SourceFileSyntax withEofToken(std::optional<TokenSyntax> eofToken);
 
    static bool kindOf(SyntaxKind kind)

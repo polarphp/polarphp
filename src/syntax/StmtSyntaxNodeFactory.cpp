@@ -101,71 +101,71 @@ FallthroughStmtSyntax StmtSyntaxNodeFactory::makeFallthroughStmtSyntax(TokenSynt
    return make<FallthroughStmtSyntax>(rawFallthroughStmtSyntax);
 }
 
-//ElseIfClauseSyntax StmtSyntaxNodeFactory::makeElseIfClauseSyntax(TokenSyntax elseIfKeyword, TokenSyntax leftParen,
-//                                                                 ExprSyntax condition, TokenSyntax rightParen,
-//                                                                 CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena)
-//{
-//   RefCountPtr<RawSyntax> rawElseIfClauseSyntax = RawSyntax::make(SyntaxKind::ElseIfClause, {
-//                                                                     elseIfKeyword.getRaw(),
-//                                                                     leftParen.getRaw(),
-//                                                                     condition.getRaw(),
-//                                                                     rightParen.getRaw(),
-//                                                                     body.getRaw(),
-//                                                                  }, SourcePresence::Present, arena);
-//   return make<ElseIfClauseSyntax>(rawElseIfClauseSyntax);
-//}
+ElseIfClauseSyntax StmtSyntaxNodeFactory::makeElseIfClauseSyntax(TokenSyntax elseIfKeyword, TokenSyntax leftParen,
+                                                                 ExprSyntax condition, TokenSyntax rightParen,
+                                                                 CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> rawElseIfClauseSyntax = RawSyntax::make(SyntaxKind::ElseIfClause, {
+                                                                     elseIfKeyword.getRaw(),
+                                                                     leftParen.getRaw(),
+                                                                     condition.getRaw(),
+                                                                     rightParen.getRaw(),
+                                                                     body.getRaw(),
+                                                                  }, SourcePresence::Present, arena);
+   return make<ElseIfClauseSyntax>(rawElseIfClauseSyntax);
+}
 
-//IfStmtSyntax StmtSyntaxNodeFactory::makeIfStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
-//                                                     TokenSyntax ifKeyword, TokenSyntax leftParen, ExprSyntax condition,
-//                                                     TokenSyntax rightParen, CodeBlockSyntax body, std::optional<ElseIfListSyntax> elseIfClauses,
-//                                                     std::optional<TokenSyntax> elseKeyword, std::optional<Syntax> elseBody,
-//                                                     RefCountPtr<SyntaxArena> arena)
-//{
-//   RefCountPtr<RawSyntax> rawIfStmtSyntax = RawSyntax::make(SyntaxKind::IfStmt, {
-//                                                               labelName.has_value() ? labelName->getRaw() : nullptr,
-//                                                               labelColon.has_value() ? labelColon->getRaw() : nullptr,
-//                                                               ifKeyword.getRaw(),
-//                                                               leftParen.getRaw(),
-//                                                               condition.getRaw(),
-//                                                               rightParen.getRaw(),
-//                                                               body.getRaw(),
-//                                                               elseKeyword.has_value() ? elseKeyword->getRaw() : nullptr,
-//                                                               elseBody.has_value() ? elseBody->getRaw() : nullptr,
-//                                                            }, SourcePresence::Present, arena);
-//   return make<IfStmtSyntax>(rawIfStmtSyntax);
-//}
+IfStmtSyntax StmtSyntaxNodeFactory::makeIfStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
+                                                     TokenSyntax ifKeyword, TokenSyntax leftParen, ExprSyntax condition,
+                                                     TokenSyntax rightParen, CodeBlockSyntax body, std::optional<ElseIfListSyntax> elseIfClauses,
+                                                     std::optional<TokenSyntax> elseKeyword, std::optional<Syntax> elseBody,
+                                                     RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> rawIfStmtSyntax = RawSyntax::make(SyntaxKind::IfStmt, {
+                                                               labelName.has_value() ? labelName->getRaw() : nullptr,
+                                                               labelColon.has_value() ? labelColon->getRaw() : nullptr,
+                                                               ifKeyword.getRaw(),
+                                                               leftParen.getRaw(),
+                                                               condition.getRaw(),
+                                                               rightParen.getRaw(),
+                                                               body.getRaw(),
+                                                               elseKeyword.has_value() ? elseKeyword->getRaw() : nullptr,
+                                                               elseBody.has_value() ? elseBody->getRaw() : nullptr,
+                                                            }, SourcePresence::Present, arena);
+   return make<IfStmtSyntax>(rawIfStmtSyntax);
+}
 
-//WhileStmtSyntax StmtSyntaxNodeFactory::makeWhileStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
-//                                                           TokenSyntax whileKeyword, ConditionElementListSyntax conditions,
-//                                                           CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena)
-//{
-//   RefCountPtr<RawSyntax> rawWhileStmtSyntax = RawSyntax::make(SyntaxKind::WhileStmt, {
-//                                                                  labelName.has_value() ? labelName->getRaw() : nullptr,
-//                                                                  labelColon.has_value() ? labelColon->getRaw() : nullptr,
-//                                                                  whileKeyword.getRaw(),
-//                                                                  conditions.getRaw(),
-//                                                                  body.getRaw()
-//                                                               }, SourcePresence::Present, arena);
-//   return make<WhileStmtSyntax>(rawWhileStmtSyntax);
-//}
+WhileStmtSyntax StmtSyntaxNodeFactory::makeWhileStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
+                                                           TokenSyntax whileKeyword, ConditionElementListSyntax conditions,
+                                                           CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> rawWhileStmtSyntax = RawSyntax::make(SyntaxKind::WhileStmt, {
+                                                                  labelName.has_value() ? labelName->getRaw() : nullptr,
+                                                                  labelColon.has_value() ? labelColon->getRaw() : nullptr,
+                                                                  whileKeyword.getRaw(),
+                                                                  conditions.getRaw(),
+                                                                  body.getRaw()
+                                                               }, SourcePresence::Present, arena);
+   return make<WhileStmtSyntax>(rawWhileStmtSyntax);
+}
 
-//DoWhileStmtSyntax StmtSyntaxNodeFactory::makeDoWhileStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
-//                                                               TokenSyntax doKeyword, CodeBlockSyntax body, TokenSyntax whileKeyword,
-//                                                               TokenSyntax leftParen, ExprSyntax condition, TokenSyntax rightParen,
-//                                                               RefCountPtr<SyntaxArena> arena)
-//{
-//   RefCountPtr<RawSyntax> rawDoWhileStmtSyntax = RawSyntax::make(SyntaxKind::DoWhileStmt, {
-//                                                                    labelName.has_value() ? labelName->getRaw() : nullptr,
-//                                                                    labelColon.has_value() ? labelColon->getRaw() : nullptr,
-//                                                                    doKeyword.getRaw(),
-//                                                                    body.getRaw(),
-//                                                                    whileKeyword.getRaw(),
-//                                                                    leftParen.getRaw(),
-//                                                                    condition.getRaw(),
-//                                                                    rightParen.getRaw(),
-//                                                                 }, SourcePresence::Present, arena);
-//   return make<DoWhileStmtSyntax>(rawDoWhileStmtSyntax);
-//}
+DoWhileStmtSyntax StmtSyntaxNodeFactory::makeDoWhileStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
+                                                               TokenSyntax doKeyword, CodeBlockSyntax body, TokenSyntax whileKeyword,
+                                                               TokenSyntax leftParen, ExprSyntax condition, TokenSyntax rightParen,
+                                                               RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> rawDoWhileStmtSyntax = RawSyntax::make(SyntaxKind::DoWhileStmt, {
+                                                                    labelName.has_value() ? labelName->getRaw() : nullptr,
+                                                                    labelColon.has_value() ? labelColon->getRaw() : nullptr,
+                                                                    doKeyword.getRaw(),
+                                                                    body.getRaw(),
+                                                                    whileKeyword.getRaw(),
+                                                                    leftParen.getRaw(),
+                                                                    condition.getRaw(),
+                                                                    rightParen.getRaw(),
+                                                                 }, SourcePresence::Present, arena);
+   return make<DoWhileStmtSyntax>(rawDoWhileStmtSyntax);
+}
 
 SwitchDefaultLabelSyntax StmtSyntaxNodeFactory::makeSwitchDefaultLabelSyntax(TokenSyntax defaultKeyword, TokenSyntax colon,
                                                                              RefCountPtr<SyntaxArena> arena)
@@ -188,15 +188,15 @@ SwitchCaseLabelSyntax StmtSyntaxNodeFactory::makeSwitchCaseLabelSyntax(TokenSynt
    return make<SwitchCaseLabelSyntax>(rawSwitchCaseLabelSyntax);
 }
 
-//SwitchCaseSyntax StmtSyntaxNodeFactory::makeSwitchCaseSyntax(Syntax label, CodeBlockItemListSyntax statements,
-//                                                             RefCountPtr<SyntaxArena> arena)
-//{
-//   RefCountPtr<RawSyntax> rawSwitchCaseSyntax = RawSyntax::make(SyntaxKind::SwitchCase, {
-//                                                                   label.getRaw(),
-//                                                                   statements.getRaw()
-//                                                                }, SourcePresence::Present, arena);
-//   return make<SwitchCaseSyntax>(rawSwitchCaseSyntax);
-//}
+SwitchCaseSyntax StmtSyntaxNodeFactory::makeSwitchCaseSyntax(Syntax label, CodeBlockItemListSyntax statements,
+                                                             RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> rawSwitchCaseSyntax = RawSyntax::make(SyntaxKind::SwitchCase, {
+                                                                   label.getRaw(),
+                                                                   statements.getRaw()
+                                                                }, SourcePresence::Present, arena);
+   return make<SwitchCaseSyntax>(rawSwitchCaseSyntax);
+}
 
 SwitchStmtSyntax StmtSyntaxNodeFactory::makeSwitchStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                                              TokenSyntax switchKeyword, TokenSyntax leftParen, ExprSyntax conditionExpr,
@@ -217,15 +217,15 @@ SwitchStmtSyntax StmtSyntaxNodeFactory::makeSwitchStmtSyntax(std::optional<Token
    return make<SwitchStmtSyntax>(rawSwitchStmtSyntax);
 }
 
-//DeferStmtSyntax StmtSyntaxNodeFactory::makeDeferStmtSyntax(TokenSyntax deferKeyword, CodeBlockSyntax body,
-//                                                           RefCountPtr<SyntaxArena> arena)
-//{
-//   RefCountPtr<RawSyntax> rawDeferStmtSyntax = RawSyntax::make(SyntaxKind::DeferStmt, {
-//                                                                  deferKeyword.getRaw(),
-//                                                                  body.getRaw()
-//                                                               }, SourcePresence::Present, arena);
-//   return make<DeferStmtSyntax>(rawDeferStmtSyntax);
-//}
+DeferStmtSyntax StmtSyntaxNodeFactory::makeDeferStmtSyntax(TokenSyntax deferKeyword, CodeBlockSyntax body,
+                                                           RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> rawDeferStmtSyntax = RawSyntax::make(SyntaxKind::DeferStmt, {
+                                                                  deferKeyword.getRaw(),
+                                                                  body.getRaw()
+                                                               }, SourcePresence::Present, arena);
+   return make<DeferStmtSyntax>(rawDeferStmtSyntax);
+}
 
 ExpressionStmtSyntax StmtSyntaxNodeFactory::makeExpressionStmtSyntax(ExprSyntax expr, RefCountPtr<SyntaxArena> arena)
 {

@@ -1397,32 +1397,32 @@ TokenSyntax SourceFileSyntax::getEofToken()
    return TokenSyntax{m_root, m_data->getChild(Cursor::EOFToken).get()};
 }
 
-//CodeBlockItemListSyntax SourceFileSyntax::getStatements()
-//{
-//   return CodeBlockItemListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
-//}
+CodeBlockItemListSyntax SourceFileSyntax::getStatements()
+{
+   return CodeBlockItemListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
+}
 
-//SourceFileSyntax SourceFileSyntax::withStatements(std::optional<CodeBlockItemListSyntax> statements)
-//{
-//   RefCountPtr<RawSyntax> rawStatements;
-//   if (statements.has_value()) {
-//      rawStatements = statements->getRaw();
-//   } else {
-//      rawStatements = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
-//   }
-//   return m_data->replaceChild<SourceFileSyntax>(rawStatements, Cursor::Statements);
-//}
+SourceFileSyntax SourceFileSyntax::withStatements(std::optional<CodeBlockItemListSyntax> statements)
+{
+   RefCountPtr<RawSyntax> rawStatements;
+   if (statements.has_value()) {
+      rawStatements = statements->getRaw();
+   } else {
+      rawStatements = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
+   }
+   return m_data->replaceChild<SourceFileSyntax>(rawStatements, Cursor::Statements);
+}
 
-//SourceFileSyntax SourceFileSyntax::addStatement(CodeBlockItemSyntax statement)
-//{
-//   RefCountPtr<RawSyntax> rawStatements = getRaw()->getChild(Cursor::Statements);
-//   if (rawStatements) {
-//      rawStatements->append(statement.getRaw());
-//   } else {
-//      rawStatements = RawSyntax::make(SyntaxKind::CodeBlockItemList, {statement.getRaw()}, SourcePresence::Present);
-//   }
-//   return m_data->replaceChild<SourceFileSyntax>(rawStatements, Cursor::Statements);
-//}
+SourceFileSyntax SourceFileSyntax::addStatement(CodeBlockItemSyntax statement)
+{
+   RefCountPtr<RawSyntax> rawStatements = getRaw()->getChild(Cursor::Statements);
+   if (rawStatements) {
+      rawStatements->append(statement.getRaw());
+   } else {
+      rawStatements = RawSyntax::make(SyntaxKind::CodeBlockItemList, {statement.getRaw()}, SourcePresence::Present);
+   }
+   return m_data->replaceChild<SourceFileSyntax>(rawStatements, Cursor::Statements);
+}
 
 SourceFileSyntax SourceFileSyntax::withEofToken(std::optional<TokenSyntax> eofToken)
 {
