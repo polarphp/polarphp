@@ -960,7 +960,7 @@ public:
    };
 
 #ifdef POLAR_DEBUG_BUILD
-
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
 #endif
 
 public:

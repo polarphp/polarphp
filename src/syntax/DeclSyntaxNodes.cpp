@@ -1121,7 +1121,7 @@ ConstDefinitionSyntax ConstDefinitionSyntax::withSemicolon(std::optional<TokenSy
       semicolonRaw = semicolon->getRaw();
    } else {
       semicolonRaw = RawSyntax::missing(TokenKindType::T_SEMICOLON,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
    }
    return m_data->replaceChild<ConstDefinitionSyntax>(semicolonRaw, Cursor::Semicolon);
 }
@@ -1129,6 +1129,19 @@ ConstDefinitionSyntax ConstDefinitionSyntax::withSemicolon(std::optional<TokenSy
 ///
 /// TypeClauseSyntax
 ///
+
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType TypeClauseSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      TypeClauseSyntax::Type, {
+         TokenKindType::T_ARRAY,
+               TokenKindType::T_CALLABLE
+      }
+   }
+};
+#endif
+
 void TypeClauseSyntax::validate()
 {
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
@@ -1137,20 +1150,27 @@ void TypeClauseSyntax::validate()
    }
    if (const RefCountPtr<RawSyntax> &typeChild = raw->getChild(Cursor::Type)) {
       if (typeChild->isToken()) {
-//         syntax_assert_child_token(raw, Type, );
+         syntax_assert_child_token(raw, Type, CHILD_TOKEN_CHOICES.at(Cursor::Type));
+         return;
       }
-
+      assert(typeChild->kindOf(SyntaxKind::Name));
    }
 }
 
 Syntax TypeClauseSyntax::getType()
 {
-
+   return Syntax {m_root, m_data->getChild(Cursor::Type).get()};
 }
 
 TypeClauseSyntax TypeClauseSyntax::withType(std::optional<Syntax> type)
 {
-
+   RefCountPtr<RawSyntax> typeRaw;
+   if (type.has_value()) {
+      typeRaw = type->getRaw();
+   } else {
+      typeRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<TypeClauseSyntax>(typeRaw, Cursor::Type);
 }
 
 ///
