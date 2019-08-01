@@ -503,4 +503,55 @@ BinaryOperatorExprSyntax BinaryOperatorExprSyntax::withOperatorToken(std::option
    return m_data->replaceChild<BinaryOperatorExprSyntax>(rawOperatorToken, TokenKindType::T_BINARY_OPERATOR);
 }
 
+///
+/// LexicalVarItemSyntax
+///
+void LexicalVarItemSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == LexicalVarItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ReferenceToken, std::set{TokenKindType::T_AMPERSAND});
+   syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
+}
+
+std::optional<TokenSyntax> LexicalVarItemSyntax::getReferenceToken()
+{
+   RefCountPtr<SyntaxData> refData = m_data->getChild(Cursor::ReferenceToken);
+   if (!refData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, refData.get()};
+}
+
+TokenSyntax LexicalVarItemSyntax::getVariable()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
+}
+
+LexicalVarItemSyntax LexicalVarItemSyntax::withReferenceToken(std::optional<TokenSyntax> referenceToken)
+{
+   RefCountPtr<RawSyntax> referenceTokenRaw;
+   if (referenceToken.has_value()) {
+      referenceTokenRaw = referenceToken->getRaw();
+   } else {
+      referenceTokenRaw = nullptr;
+   }
+   return m_data->replaceChild<LexicalVarItemSyntax>(referenceTokenRaw, Cursor::ReferenceToken);
+}
+
+LexicalVarItemSyntax LexicalVarItemSyntax::withVariable(std::optional<TokenSyntax> variable)
+{
+   RefCountPtr<RawSyntax> variableRaw;
+   if (variable.has_value()) {
+      variableRaw = variable->getRaw();
+   } else {
+      variableRaw = RawSyntax::missing(TokenKindType::T_VARIABLE,
+                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_VARIABLE)));
+   }
+   return m_data->replaceChild<LexicalVarItemSyntax>(variableRaw, Cursor::Variable);
+}
+
 } // polar::syntax

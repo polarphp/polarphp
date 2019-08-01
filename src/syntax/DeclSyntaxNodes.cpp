@@ -1283,6 +1283,74 @@ ReturnTypeClauseSyntax ReturnTypeClauseSyntax::withType(std::optional<TypeExprCl
 }
 
 ///
+/// ParameterClauseSyntax
+///
+
+void ParameterClauseSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ParameterClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
+   if (const RefCountPtr<RawSyntax> &parametersChild = raw->getChild(Cursor::Parameters)) {
+      assert(parametersChild->kindOf(SyntaxKind::ParameterList));
+   }
+}
+
+TokenSyntax ParameterClauseSyntax::getLeftParen()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParen).get()};
+}
+
+ParameterListSyntax ParameterClauseSyntax::getParameters()
+{
+   return ParameterListSyntax {m_root, m_data->getChild(Cursor::Parameters).get()};
+}
+
+TokenSyntax ParameterClauseSyntax::getRightParen()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParen).get()};
+}
+
+ParameterClauseSyntax ParameterClauseSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> leftParenRaw;
+   if (leftParen.has_value()) {
+      leftParenRaw = leftParen->getRaw();
+   } else {
+      leftParenRaw = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+   }
+   return m_data->replaceChild<ParameterClauseSyntax>(leftParenRaw, Cursor::LeftParen);
+}
+
+ParameterClauseSyntax ParameterClauseSyntax::withParameters(std::optional<ParameterListSyntax> parameters)
+{
+   RefCountPtr<RawSyntax> parametersRaw;
+   if (parameters.has_value()) {
+      parametersRaw = parameters->getRaw();
+   } else {
+      parametersRaw = RawSyntax::missing(SyntaxKind::ParameterList);
+   }
+   return m_data->replaceChild<ParameterClauseSyntax>(parametersRaw, Cursor::Parameters);
+}
+
+ParameterClauseSyntax ParameterClauseSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rightParenRaw;
+   if (rightParen.has_value()) {
+      rightParenRaw = rightParen->getRaw();
+   } else {
+      rightParenRaw = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+   }
+   return m_data->replaceChild<ParameterClauseSyntax>(rightParenRaw, Cursor::RightParen);
+}
+
+///
 /// ParameterSyntax
 ///
 void ParameterSyntax::validate()
@@ -1337,11 +1405,11 @@ TokenSyntax ParameterSyntax::getVariable()
 
 std::optional<InitializeClauseSyntax> ParameterSyntax::getInitializer()
 {
-    RefCountPtr<SyntaxData> initializerData = m_data->getChild(Cursor::Initializer);
-    if (!initializerData) {
-       return std::nullopt;
-    }
-    return InitializeClauseSyntax {m_root, initializerData.get()};
+   RefCountPtr<SyntaxData> initializerData = m_data->getChild(Cursor::Initializer);
+   if (!initializerData) {
+      return std::nullopt;
+   }
+   return InitializeClauseSyntax {m_root, initializerData.get()};
 }
 
 ParameterSyntax ParameterSyntax::withTypeHint(std::optional<TypeExprClauseSyntax> typeHint)
@@ -1398,57 +1466,6 @@ ParameterSyntax ParameterSyntax::withInitializer(std::optional<InitializeClauseS
       initializerRaw = RawSyntax::missing(SyntaxKind::InitializeClause);
    }
    return m_data->replaceChild<ParameterSyntax>(initializerRaw, Cursor::Initializer);
-}
-
-///
-/// LexicalVarItemSyntax
-///
-void LexicalVarItemSyntax::validate()
-{
-   RefCountPtr<RawSyntax> raw = m_data->getRaw();
-   if (isMissing()) {
-      return;
-   }
-   assert(raw->getLayout().getSize() == LexicalVarItemSyntax::CHILDREN_COUNT);
-   syntax_assert_child_token(raw, ReferenceToken, std::set{TokenKindType::T_AMPERSAND});
-   syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
-}
-
-std::optional<TokenSyntax> LexicalVarItemSyntax::getReferenceToken()
-{
-   RefCountPtr<SyntaxData> refData = m_data->getChild(Cursor::ReferenceToken);
-   if (!refData) {
-      return std::nullopt;
-   }
-   return TokenSyntax {m_root, refData.get()};
-}
-
-TokenSyntax LexicalVarItemSyntax::getVariable()
-{
-   return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
-}
-
-LexicalVarItemSyntax LexicalVarItemSyntax::withReferenceToken(std::optional<TokenSyntax> referenceToken)
-{
-   RefCountPtr<RawSyntax> referenceTokenRaw;
-   if (referenceToken.has_value()) {
-      referenceTokenRaw = referenceToken->getRaw();
-   } else {
-      referenceTokenRaw = nullptr;
-   }
-   return m_data->replaceChild<LexicalVarItemSyntax>(referenceTokenRaw, Cursor::ReferenceToken);
-}
-
-LexicalVarItemSyntax LexicalVarItemSyntax::withVariable(std::optional<TokenSyntax> variable)
-{
-   RefCountPtr<RawSyntax> variableRaw;
-   if (variable.has_value()) {
-      variableRaw = variable->getRaw();
-   } else {
-      variableRaw = RawSyntax::missing(TokenKindType::T_VARIABLE,
-                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_VARIABLE)));
-   }
-   return m_data->replaceChild<LexicalVarItemSyntax>(variableRaw, Cursor::Variable);
 }
 
 ///

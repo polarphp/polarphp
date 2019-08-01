@@ -1085,7 +1085,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::Parameter;
+      return kind == SyntaxKind::ParameterItem;
    }
 
    static bool classOf(const Syntax *synax)
@@ -1098,47 +1098,61 @@ private:
    void validate();
 };
 
-class LexicalVarItemSyntax final : public Syntax
+///
+/// parameter_clause:
+///   '(' parameter_list ')'
+///
+class ParameterClauseSyntax final : public Syntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 2;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
    enum Cursor : SyntaxChildrenCountType
    {
       ///
       /// type: TokenSyntax
-      /// optional: true
+      /// optional: false
       ///
-      ReferenceToken,
+      LeftParen,
+      ///
+      /// type: ParameterListSyntax
+      /// optional: false
+      ///
+      Parameters,
       ///
       /// type: TokenSyntax
       /// optional: false
       ///
-      Variable
+      RightParen
    };
+
 public:
-   LexicalVarItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   ParameterClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
    }
 
-   std::optional<TokenSyntax> getReferenceToken();
-   TokenSyntax getVariable();
-   LexicalVarItemSyntax withReferenceToken(std::optional<TokenSyntax> referenceToken);
-   LexicalVarItemSyntax withVariable(std::optional<TokenSyntax> variable);
+   TokenSyntax getLeftParen();
+   ParameterListSyntax getParameters();
+   TokenSyntax getRightParen();
+
+   ParameterClauseSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
+   ParameterClauseSyntax withParameters(std::optional<ParameterListSyntax> parameters);
+   ParameterClauseSyntax withRightParen(std::optional<TokenSyntax> rightParen);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::LexicalVarItem;
+      return kind == SyntaxKind::FunctionDefinition;
    }
 
    static bool classOf(const Syntax *synax)
    {
       return kindOf(synax->getKind());
    }
+
 private:
-   friend class LexicalVarItemSyntaxBuilder;
+   friend class FunctionDefinitionSyntaxBuilder;
    void validate();
 };
 
@@ -1154,13 +1168,35 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 6;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
       FuncToken,
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
       ReturnRefFlagToken,
-      LeftParen,
-      Parameters,
-      RightParen,
-      LexicalVars,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      FuncName,
+      ///
+      /// type: ParameterClauseSyntax
+      /// optional: false
+      ///
+      ParameterClause,
+      ///
+      /// type: ReturnTypeClauseSyntax
+      /// optional: true
+      ///
       ReturnType,
+      ///
+      /// type: CodeBlockSyntax
+      /// optional: false
+      ///
       Body
    };
 
@@ -1170,6 +1206,20 @@ public:
    {
       validate();
    }
+
+   TokenSyntax getFuncToken();
+   std::optional<TokenSyntax> getReturnRefFlagToken();
+   TokenSyntax getFuncName();
+   ParameterClauseSyntax getParameterClause();
+   std::optional<TokenSyntax> getReturnType();
+   CodeBlockSyntax getBody();
+
+   FunctionDefinitionSyntax withFuncToken(std::optional<TokenSyntax> funcToken);
+   FunctionDefinitionSyntax withReturnRefFlagToken(std::optional<TokenSyntax> returnRefFlagToken);
+   FunctionDefinitionSyntax withFuncName(std::optional<TokenSyntax> funcName);
+   FunctionDefinitionSyntax withParameterClause(std::optional<ParameterClauseSyntax> parameterClause);
+   FunctionDefinitionSyntax withReturnType(std::optional<TokenSyntax> returnType);
+   FunctionDefinitionSyntax withBody(std::optional<CodeBlockSyntax> body);
 
    static bool kindOf(SyntaxKind kind)
    {

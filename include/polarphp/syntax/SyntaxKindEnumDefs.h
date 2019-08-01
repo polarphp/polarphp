@@ -48,7 +48,8 @@ enum class SyntaxKind : std::uint32_t
    ConstDefinition,
    ReturnTypeClause,
    InitializeClause, // for variable assign or initialize
-   Parameter,
+   ParameterItem,
+   ParameterClauseSyntax,
    LexicalVarItem,
    FunctionDefinition,
 

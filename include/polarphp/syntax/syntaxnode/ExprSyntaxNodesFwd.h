@@ -31,10 +31,22 @@ class SequenceExprSyntax;
 class PrefixOperatorExprSyntax;
 class PostfixOperatorExprSyntax;
 class BinaryOperatorExprSyntax;
+class UseLexicalVarClauseSyntax;
+class LexicalVarItemSyntax;
 
 /// type: SyntaxCollection
 /// element type: ExprSyntax
 using ExprListSyntax = SyntaxCollection<SyntaxKind::ExprList, ExprSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: LexicalVarItemSyntax
+///
+/// lexical_var_list:
+///   lexical_var_list ',' lexical_var
+/// | lexical_var
+///
+using LexicalVarListSyntax = SyntaxCollection<SyntaxKind::LexicalVarList, LexicalVarItemSyntax>;
 
 } // polar::syntax
 

@@ -615,6 +615,55 @@ private:
    void validate();
 };
 
+///
+/// lexical_var:
+///   T_VARIABLE
+/// | '&' T_VARIABLE
+///
+class LexicalVarItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      ReferenceToken,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      Variable
+   };
+public:
+   LexicalVarItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getReferenceToken();
+   TokenSyntax getVariable();
+   LexicalVarItemSyntax withReferenceToken(std::optional<TokenSyntax> referenceToken);
+   LexicalVarItemSyntax withVariable(std::optional<TokenSyntax> variable);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::LexicalVarItem;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+private:
+   friend class LexicalVarItemSyntaxBuilder;
+   void validate();
+};
+
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_SYNTAX_NODE_EXPR_NODES_H
