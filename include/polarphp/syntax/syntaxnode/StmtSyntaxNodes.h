@@ -21,6 +21,73 @@
 namespace polar::syntax {
 
 ///
+/// statement:
+/// '{' inner_statement_list '}'
+/// |	if_stmt
+/// |	alt_if_stmt
+/// | T_WHILE '(' expr ')' while_statement
+/// | T_DO statement T_WHILE '(' expr ')' ';'
+/// | T_FOR '(' for_exprs ';' for_exprs ';' for_exprs ')' for_statement
+/// | T_SWITCH '(' expr ')' switch_case_list
+/// | T_BREAK optional_expr ';'
+/// | T_CONTINUE optional_expr ';'
+/// |	T_RETURN optional_expr ';'
+/// |	T_GLOBAL global_var_list ';'
+/// | T_STATIC static_var_list ';'
+/// | T_ECHO echo_expr_list ';'
+/// |	expr ';' { $$ = $1; }
+/// | T_UNSET '(' unset_variables possible_comma ')' ';'
+/// | T_FOREACH '(' expr T_AS foreach_variable ')' foreach_statement
+/// | T_FOREACH '(' expr T_AS foreach_variable T_DOUBLE_ARROW foreach_variable ')'
+/// foreach_statement
+/// | T_DECLARE '(' const_list ')'
+/// declare_statement
+/// |	';'	/* empty statement */
+/// |	T_TRY '{' inner_statement_list '}' catch_list finally_statement
+/// |	T_THROW expr ';'
+/// |	T_GOTO T_STRING ';'
+/// |	T_STRING ':'
+///
+class CommonStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Stmt
+      /// optional: false
+      ///
+      Stmt
+   };
+
+public:
+   CommonStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   StmtSyntax getStmt();
+   CommonStmtSyntax withStmt(std::optional<StmtSyntax> stmt);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::CommonStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class CommonStmtSyntaxBuilder;
+   void validate();
+};
+
+///
 /// inner_statement:
 ///   statement
 /// | function_declaration_statement
@@ -29,7 +96,7 @@ namespace polar::syntax {
 /// | interface_declaration_statement
 /// | T_HALT_COMPILER '(' ')' ';'
 ///
-class InnerStmtSyntax final : public Syntax
+class InnerStmtSyntax final : public StmtSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 1;
@@ -45,7 +112,7 @@ public:
 
 public:
    InnerStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : Syntax(root, data)
+      : StmtSyntax(root, data)
    {
       validate();
    }

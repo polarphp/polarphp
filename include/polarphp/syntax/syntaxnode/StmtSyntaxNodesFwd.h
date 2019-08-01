@@ -16,6 +16,7 @@
 
 namespace polar::syntax {
 
+class EmptyStmtSyntax;
 class CommonStmtSyntax;
 class ConditionElementSyntax;
 class ContinueStmtSyntax;
