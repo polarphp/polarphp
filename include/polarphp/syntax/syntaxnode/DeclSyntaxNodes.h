@@ -89,7 +89,7 @@ using NamespaceUnprefixedUseDeclarationListSyntax = SyntaxCollection<SyntaxKind:
 ///
 using ConstDeclareItemListSyntax = SyntaxCollection<SyntaxKind::ConstDeclareItemList, ConstDeclareItemSyntax>;
 
-class ReservedNonModifierSyntax : public Syntax
+class ReservedNonModifierSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 1;
@@ -149,7 +149,7 @@ private:
 /// | T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
 ///
 ///
-class SemiReservedSytnax : public Syntax
+class SemiReservedSytnax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 1;
@@ -206,7 +206,7 @@ private:
 ///    T_IDENTIFIER_STRING
 ///  | semi_reserved
 ///
-class IdentifierSyntax : public Syntax
+class IdentifierSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 1;
@@ -254,7 +254,7 @@ private:
 ///   T_IDENTIFIER_STRING
 /// | namespace_name T_NS_SEPARATOR T_IDENTIFIER_STRING
 ///
-class NamespacePartSyntax : public Syntax
+class NamespacePartSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -301,7 +301,7 @@ private:
 /// | T_NAMESPACE T_NS_SEPARATOR namespace_name
 /// | T_NS_SEPARATOR namespace_name
 ///
-class NameSyntax : public Syntax
+class NameSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 3;
@@ -350,7 +350,7 @@ private:
 /// use_type:
 ///   T_FUNCTION
 /// | T_CONST
-class NamespaceUseTypeSyntax : public Syntax
+class NamespaceUseTypeSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 1;
@@ -400,7 +400,7 @@ private:
 ///   namespace_name
 /// | namespace_name T_AS T_IDENTIFIER_STRING
 ///
-class NamespaceUnprefixedUseDeclarationSyntax : public Syntax
+class NamespaceUnprefixedUseDeclarationSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 3;
@@ -453,7 +453,7 @@ private:
 ///   unprefixed_use_declaration
 /// | T_NS_SEPARATOR unprefixed_use_declaration
 ///
-class NamespaceUseDeclarationSyntax : public Syntax
+class NamespaceUseDeclarationSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -500,7 +500,7 @@ private:
 ///   unprefixed_use_declaration
 /// | use_type unprefixed_use_declaration
 ///
-class NamespaceInlineUseDeclarationSyntax : public Syntax
+class NamespaceInlineUseDeclarationSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -545,7 +545,7 @@ private:
 ///   namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
 /// | T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
 ///
-class NamespaceGroupUseDeclarationSyntax : public Syntax
+class NamespaceGroupUseDeclarationSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 7;
@@ -627,7 +627,7 @@ private:
    void validate();
 };
 
-class NamespaceMixedGroupUseDeclarationSyntax : public Syntax
+class NamespaceMixedGroupUseDeclarationSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 7;
@@ -717,7 +717,7 @@ private:
 /// |	T_USE use_declarations ';'
 /// |	T_USE use_type use_declarations ';'
 ///
-class NamespaceUseSyntax : public DeclSyntax
+class NamespaceUseSyntax final : public DeclSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 4;
@@ -784,7 +784,7 @@ private:
 ///
 /// = expr
 ///
-class InitializeClauseSyntax : public Syntax
+class InitializeClauseSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -833,7 +833,7 @@ private:
 /// const_decl:
 /// T_IDENTIFIER_STRING '=' expr
 ///
-class ConstDeclareItemSyntax : public Syntax
+class ConstDeclareItemSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -884,7 +884,7 @@ private:
 /// top_statement:
 ///   T_CONST const_list ';'
 ///
-class ConstDefinitionSyntax : public DeclSyntax
+class ConstDefinitionSyntax final : public DeclSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 3;
@@ -938,7 +938,13 @@ private:
    void validate();
 };
 
-class TypeClauseSyntax : public Syntax
+///
+/// type:
+///   T_ARRAY
+/// | T_CALLABLE
+/// | name
+///
+class TypeClauseSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 1;
@@ -988,7 +994,7 @@ private:
    void validate();
 };
 
-class SourceFileSyntax : public Syntax
+class SourceFileSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
