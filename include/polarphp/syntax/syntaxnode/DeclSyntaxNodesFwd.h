@@ -38,7 +38,8 @@ class ParameterClauseSyntax;
 class FunctionDefinitionSyntax;
 class ClassModifierSyntax;
 class ExtendsFromClauseSyntax;
-class ImplementsListClauseSyntax;
+class ImplementClauseSyntax;
+class InterfaceExtendsClauseSyntax;
 class SourceFileSyntax;
 
 ///

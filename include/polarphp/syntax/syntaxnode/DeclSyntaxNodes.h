@@ -1339,6 +1339,57 @@ private:
    void validate();
 };
 
+///
+/// implements_list:
+///   T_IMPLEMENTS name_list
+///
+class ImplementClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      ImplementToken,
+      ///
+      /// type: NameListSyntax
+      /// optional: false
+      ///
+      Interfaces
+   };
+
+public:
+   ImplementClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getImplementToken();
+   NameListSyntax getInterfaces();
+
+   ImplementClauseSyntax withImplementToken(std::optional<TokenSyntax> implementToken);
+   ImplementClauseSyntax withInterfaces(std::optional<NameListSyntax> interfaces);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ImplementsListClause;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class ImplementClauseSyntaxBuilder;
+   void validate();
+};
+
 class SourceFileSyntax final : public Syntax
 {
 public:
