@@ -28,6 +28,7 @@ const NodeChoicesType ConditionElementSyntax::CHILD_NODE_CHOICES
 
 void ConditionElementSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -37,6 +38,7 @@ void ConditionElementSyntax::validate()
    if (const RefCountPtr<RawSyntax> &condition = raw->getChild(Cursor::Condition)) {
       assert(condition->kindOf(SyntaxKind::Expr));
    }
+#endif
 }
 
 Syntax ConditionElementSyntax::getCondition()
@@ -81,11 +83,13 @@ ConditionElementSyntax ConditionElementSyntax::withTrailingComma(std::optional<T
 
 void ContinueStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == ContinueStmtSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax ContinueStmtSyntax::getContinueKeyword()
@@ -130,11 +134,13 @@ ContinueStmtSyntax ContinueStmtSyntax::withLNumberToken(std::optional<TokenSynta
 ///
 void BreakStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == BreakStmtSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax BreakStmtSyntax::getBreakKeyword()
@@ -179,11 +185,13 @@ BreakStmtSyntax BreakStmtSyntax::withLNumberToken(std::optional<TokenSyntax> num
 ///
 void FallthroughStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if(isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == FallthroughStmtSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax FallthroughStmtSyntax::getFallthroughKeyword()
@@ -208,11 +216,13 @@ FallthroughStmtSyntax FallthroughStmtSyntax::withFallthroughStmtSyntax(std::opti
 ///
 void ElseIfClauseSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == ElseIfClauseSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax ElseIfClauseSyntax::getElseIfKeyword()
@@ -314,6 +324,7 @@ const NodeChoicesType IfStmtSyntax::CHILD_NODE_CHOICES
 
 void IfStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -324,6 +335,7 @@ void IfStmtSyntax::validate()
       assert(isIfStmt || isCodeBlock);
    }
    assert(raw->getLayout().size() == IfStmtSyntax::CHILDREN_COUNT);
+#endif
 }
 
 std::optional<TokenSyntax> IfStmtSyntax::getLabelName()
@@ -525,11 +537,13 @@ IfStmtSyntax IfStmtSyntax::addElseIfClause(ElseIfClauseSyntax elseIfClause)
 ///
 void WhileStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == WhileStmtSyntax::CHILDREN_COUNT);
+#endif
 }
 
 std::optional<TokenSyntax> WhileStmtSyntax::getLabelName()
@@ -671,11 +685,13 @@ WhileStmtSyntax WhileStmtSyntax::addCondition(ConditionElementSyntax condition)
 ///
 void DoWhileStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == DoWhileStmtSyntax::CHILDREN_COUNT);
+#endif
 }
 
 std::optional<TokenSyntax> DoWhileStmtSyntax::getLabelName()
@@ -823,11 +839,13 @@ DoWhileStmtSyntax DoWhileStmtSyntax::withRightParen(std::optional<TokenSyntax> r
 ///
 void SwitchDefaultLabelSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == SwitchDefaultLabelSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax SwitchDefaultLabelSyntax::getDefaultKeyword()
@@ -869,11 +887,13 @@ SwitchDefaultLabelSyntax SwitchDefaultLabelSyntax::withColon(std::optional<Token
 ///
 void SwitchCaseLabelSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == SwitchCaseLabelSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax SwitchCaseLabelSyntax::getCaseKeyword()
@@ -944,6 +964,7 @@ const NodeChoicesType SwitchCaseSyntax::CHILD_NODE_CHOICES
 
 void SwitchCaseSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -954,6 +975,7 @@ void SwitchCaseSyntax::validate()
       bool isCaseLabel = statements->kindOf(SyntaxKind::SwitchCaseLabel);
       assert(isDefaultLabel || isCaseLabel);
    }
+#endif
 }
 
 Syntax SwitchCaseSyntax::getLabel()
@@ -961,10 +983,10 @@ Syntax SwitchCaseSyntax::getLabel()
    return Syntax{m_root, m_data->getChild(Cursor::Label).get()};
 }
 
-//CodeBlockItemListSyntax SwitchCaseSyntax::getStatements()
-//{
-//   return CodeBlockItemListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
-//}
+CodeBlockItemListSyntax SwitchCaseSyntax::getStatements()
+{
+   return CodeBlockItemListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
+}
 
 SwitchCaseSyntax SwitchCaseSyntax::withLabel(std::optional<Syntax> label)
 {
@@ -977,38 +999,40 @@ SwitchCaseSyntax SwitchCaseSyntax::withLabel(std::optional<Syntax> label)
    return m_data->replaceChild<SwitchCaseSyntax>(rawLabel, Cursor::Label);
 }
 
-//SwitchCaseSyntax SwitchCaseSyntax::withStatements(std::optional<CodeBlockItemListSyntax> statements)
-//{
-//   RefCountPtr<RawSyntax> rawStatements;
-//   if (statements.has_value()) {
-//      rawStatements = statements->getRaw();
-//   } else {
-//      rawStatements = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
-//   }
-//   return m_data->replaceChild<SwitchCaseSyntax>(rawStatements, Cursor::Statements);
-//}
+SwitchCaseSyntax SwitchCaseSyntax::withStatements(std::optional<CodeBlockItemListSyntax> statements)
+{
+   RefCountPtr<RawSyntax> rawStatements;
+   if (statements.has_value()) {
+      rawStatements = statements->getRaw();
+   } else {
+      rawStatements = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
+   }
+   return m_data->replaceChild<SwitchCaseSyntax>(rawStatements, Cursor::Statements);
+}
 
-//SwitchCaseSyntax SwitchCaseSyntax::addStatement(CodeBlockItemSyntax statement)
-//{
-//   RefCountPtr<RawSyntax> statements = getRaw()->getChild(Cursor::Statements);
-//   if (statements) {
-//      statements->append(statement.getRaw());
-//   } else {
-//      statements = RawSyntax::make(SyntaxKind::CodeBlockItemList, {statement.getRaw()}, SourcePresence::Present);
-//   }
-//   return m_data->replaceChild<SwitchCaseSyntax>(statements, Cursor::Statements);
-//}
+SwitchCaseSyntax SwitchCaseSyntax::addStatement(CodeBlockItemSyntax statement)
+{
+   RefCountPtr<RawSyntax> statements = getRaw()->getChild(Cursor::Statements);
+   if (statements) {
+      statements->append(statement.getRaw());
+   } else {
+      statements = RawSyntax::make(SyntaxKind::CodeBlockItemList, {statement.getRaw()}, SourcePresence::Present);
+   }
+   return m_data->replaceChild<SwitchCaseSyntax>(statements, Cursor::Statements);
+}
 
 ///
 /// SwitchStmtSyntax
 ///
 void SwitchStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == SwitchStmtSyntax::CHILDREN_COUNT);
+#endif
 }
 
 std::optional<TokenSyntax> SwitchStmtSyntax::getLabelName()
@@ -1184,11 +1208,13 @@ SwitchStmtSyntax SwitchStmtSyntax::addCase(SwitchCaseSyntax switchCase)
 ///
 void DeferStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == DeferStmtSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax DeferStmtSyntax::getDeferKeyword()
@@ -1229,11 +1255,13 @@ DeferStmtSyntax DeferStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
 ///
 void ExpressionStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == ExpressionStmtSyntax::CHILDREN_COUNT);
+#endif
 }
 
 ExprSyntax ExpressionStmtSyntax::getExpr()
@@ -1257,11 +1285,13 @@ ExpressionStmtSyntax ExpressionStmtSyntax::withExpr(std::optional<ExprSyntax> ex
 ///
 void ThrowStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == ThrowStmtSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax ThrowStmtSyntax::getThrowKeyword()
@@ -1302,11 +1332,13 @@ ThrowStmtSyntax ThrowStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
 ///
 void ReturnStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == ReturnStmtSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax ReturnStmtSyntax::getReturnKeyword()

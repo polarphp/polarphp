@@ -18,12 +18,14 @@ namespace polar::syntax {
 ///
 void ReservedNonModifierSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == ReservedNonModifierSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, Modifier, CHILD_TOKEN_CHOICES.at(Cursor::Modifier));
+#endif
 }
 
 #ifdef POLAR_DEBUG_BUILD
@@ -88,6 +90,7 @@ const TokenChoicesType SemiReservedSytnax::CHILD_TOKEN_CHOICES
 
 void SemiReservedSytnax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -102,6 +105,7 @@ void SemiReservedSytnax::validate()
       }
       assert(modifierChild->kindOf(SyntaxKind::ReservedNonModifier));
    }
+#endif
 }
 
 Syntax SemiReservedSytnax::getModifier()
@@ -125,6 +129,7 @@ SemiReservedSytnax SemiReservedSytnax::withModifier(std::optional<Syntax> modifi
 ///
 void IdentifierSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -137,6 +142,7 @@ void IdentifierSyntax::validate()
       }
       assert(itemChild->kindOf(SyntaxKind::SemiReserved));
    }
+#endif
 }
 
 Syntax IdentifierSyntax::getNameItem()
@@ -160,6 +166,7 @@ IdentifierSyntax IdentifierSyntax::withNameItem(std::optional<Syntax> item)
 ///
 void NamespacePartSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -167,6 +174,7 @@ void NamespacePartSyntax::validate()
    assert(raw->getLayout().getSize() == NamespacePartSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, NsSeparator, std::set{TokenKindType::T_NS_SEPARATOR});
    syntax_assert_child_token(raw, NsSeparator, std::set{TokenKindType::T_IDENTIFIER_STRING});
+#endif
 }
 
 std::optional<TokenSyntax> NamespacePartSyntax::getNsSeparator()
@@ -211,6 +219,7 @@ NamespacePartSyntax NamespacePartSyntax::withName(std::optional<TokenSyntax> nam
 ///
 void NameSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -221,6 +230,7 @@ void NameSyntax::validate()
    if (const RefCountPtr<RawSyntax> &nsChild = raw->getChild(Cursor::Namespace)) {
       assert(nsChild->kindOf(SyntaxKind::NamespacePartList));
    }
+#endif
 }
 
 std::optional<TokenSyntax> NameSyntax::getNsToken()
@@ -306,12 +316,14 @@ const TokenChoicesType NamespaceUseTypeSyntax::CHILD_TOKEN_CHOICES
 
 void NamespaceUseTypeSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().getSize() == NamespaceUseTypeSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, TypeToken, CHILD_TOKEN_CHOICES.at(Cursor::TypeToken));
+#endif
 }
 
 TokenSyntax NamespaceUseTypeSyntax::getTypeToken()
@@ -336,6 +348,7 @@ NamespaceUseTypeSyntax NamespaceUseTypeSyntax::withTypeToken(std::optional<Token
 ///
 void NamespaceUnprefixedUseDeclarationSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -346,6 +359,7 @@ void NamespaceUnprefixedUseDeclarationSyntax::validate()
    }
    syntax_assert_child_token(raw, AsToken, std::set{TokenKindType::T_AS});
    syntax_assert_child_token(raw, IdentifierToken, std::set{TokenKindType::T_IDENTIFIER_STRING});
+#endif
 }
 
 NamespacePartListSyntax NamespaceUnprefixedUseDeclarationSyntax::getNamespace()
@@ -425,6 +439,7 @@ NamespaceUnprefixedUseDeclarationSyntax::withIdentifierToken(std::optional<Token
 ///
 void NamespaceUseDeclarationSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -434,6 +449,7 @@ void NamespaceUseDeclarationSyntax::validate()
    if (const RefCountPtr<RawSyntax> &declarationChild = raw->getChild(Cursor::UnprefixedUseDeclaration)) {
       assert(declarationChild->kindOf(SyntaxKind::NamespaceUnprefixedUseDeclaration));
    }
+#endif
 }
 
 std::optional<TokenSyntax> NamespaceUseDeclarationSyntax::getNsSeparator()
@@ -480,6 +496,7 @@ NamespaceUseDeclarationSyntax::withUnprefixedUseDeclaration(std::optional<Namesp
 ///
 void NamespaceInlineUseDeclarationSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -491,6 +508,7 @@ void NamespaceInlineUseDeclarationSyntax::validate()
    if (const RefCountPtr<RawSyntax> &declarationChild = raw->getChild(Cursor::UnprefixedUseDeclaration)) {
       assert(declarationChild->kindOf(SyntaxKind::NamespaceUnprefixedUseDeclaration));
    }
+#endif
 }
 
 std::optional<NamespaceUseTypeSyntax> NamespaceInlineUseDeclarationSyntax::getUseType()
@@ -537,6 +555,7 @@ NamespaceInlineUseDeclarationSyntax::withUnprefixedUseDeclaration(std::optional<
 ///
 void NamespaceGroupUseDeclarationSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -553,6 +572,7 @@ void NamespaceGroupUseDeclarationSyntax::validate()
    if (const RefCountPtr<RawSyntax> &declarationsChild = raw->getChild(Cursor::UnprefixedUseDeclarations)) {
       assert(declarationsChild->kindOf(SyntaxKind::NamespaceUnprefixedUseDeclarationList));
    }
+#endif
 }
 
 std::optional<TokenSyntax> NamespaceGroupUseDeclarationSyntax::getFirstNsSeparator()
@@ -706,6 +726,7 @@ NamespaceGroupUseDeclarationSyntax::addUnprefixedUseDeclaration(NamespaceUnprefi
 ///
 void NamespaceMixedGroupUseDeclarationSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -722,6 +743,7 @@ void NamespaceMixedGroupUseDeclarationSyntax::validate()
    if (const RefCountPtr<RawSyntax> &declarationsChild = raw->getChild(Cursor::InlineUseDeclarations)) {
       assert(declarationsChild->kindOf(SyntaxKind::NamespaceInlineUseDeclarationList));
    }
+#endif
 }
 
 std::optional<TokenSyntax> NamespaceMixedGroupUseDeclarationSyntax::getFirstNsSeparator()
@@ -875,6 +897,7 @@ NamespaceMixedGroupUseDeclarationSyntax::addInlineUseDeclaration(NamespaceInline
 ///
 void NamespaceUseSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -891,6 +914,7 @@ void NamespaceUseSyntax::validate()
       bool isUseDeclarations = declarationsChild->kindOf(SyntaxKind::NamespaceUseDeclarationList);
       assert(isMixGroupUseDeclarations || isGroupUseDeclarations || isUseDeclarations);
    }
+#endif
 }
 
 TokenSyntax NamespaceUseSyntax::getUseToken()
@@ -973,6 +997,7 @@ NamespaceUseSyntax::withSemicolonToken(std::optional<TokenSyntax> semicolon)
 ///
 void InitializeClauseSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -982,6 +1007,7 @@ void InitializeClauseSyntax::validate()
    if (const RefCountPtr<RawSyntax> valueExpr = raw->getChild(Cursor::ValueExpr)) {
       valueExpr->kindOf(SyntaxKind::Expr);
    }
+#endif
 }
 
 TokenSyntax InitializeClauseSyntax::getEqualToken()
@@ -1022,6 +1048,7 @@ InitializeClauseSyntax InitializeClauseSyntax::withValueExpr(std::optional<ExprS
 ///
 void ConstDeclareItemSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -1031,6 +1058,7 @@ void ConstDeclareItemSyntax::validate()
    if (const RefCountPtr<RawSyntax> &initializerChild = raw->getChild(Cursor::InitializerClause)) {
       initializerChild->kindOf(SyntaxKind::InitializeClause);
    }
+#endif
 }
 
 TokenSyntax ConstDeclareItemSyntax::getName()
@@ -1071,6 +1099,7 @@ ConstDeclareItemSyntax ConstDeclareItemSyntax::withIntializer(std::optional<Init
 ///
 void ConstDefinitionSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -1081,6 +1110,7 @@ void ConstDefinitionSyntax::validate()
    if (const RefCountPtr<RawSyntax> &declarations = raw->getChild(Cursor::Declarations)) {
       assert(declarations->kindOf(SyntaxKind::ConstDeclareItemList));
    }
+#endif
 }
 
 TokenSyntax ConstDefinitionSyntax::getConstToken()
@@ -1151,6 +1181,7 @@ const TokenChoicesType TypeClauseSyntax::CHILD_TOKEN_CHOICES
 
 void TypeClauseSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -1163,6 +1194,7 @@ void TypeClauseSyntax::validate()
       }
       assert(typeChild->kindOf(SyntaxKind::Name));
    }
+#endif
 }
 
 Syntax TypeClauseSyntax::getType()
@@ -1186,6 +1218,7 @@ TypeClauseSyntax TypeClauseSyntax::withType(std::optional<Syntax> type)
 ///
 void TypeExprClauseSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -1195,6 +1228,7 @@ void TypeExprClauseSyntax::validate()
    if (const RefCountPtr<RawSyntax> &typeChild = raw->getChild(Cursor::TypeClause)) {
       assert(typeChild->kindOf(SyntaxKind::TypeClause));
    }
+#endif
 }
 
 std::optional<TokenSyntax> TypeExprClauseSyntax::getQuestionToken()
@@ -1238,6 +1272,7 @@ TypeExprClauseSyntax TypeExprClauseSyntax::withType(std::optional<TypeClauseSynt
 ///
 void ReturnTypeClauseSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -1247,6 +1282,7 @@ void ReturnTypeClauseSyntax::validate()
    if (const RefCountPtr<RawSyntax> &typeExprChild = raw->getChild(Cursor::TypeExpr)) {
       assert(typeExprChild->kindOf(SyntaxKind::TypeExprClause));
    }
+#endif
 }
 
 TokenSyntax ReturnTypeClauseSyntax::getColon()
@@ -1287,6 +1323,7 @@ ReturnTypeClauseSyntax ReturnTypeClauseSyntax::withType(std::optional<TypeExprCl
 ///
 void ParameterSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -1301,6 +1338,7 @@ void ParameterSyntax::validate()
    if (const RefCountPtr<RawSyntax> &initializerChild = raw->getChild(Cursor::Initializer)) {
       assert(initializerChild->kindOf(SyntaxKind::InitializeClause));
    }
+#endif
 }
 
 std::optional<TypeExprClauseSyntax> ParameterSyntax::getTypeHint()
@@ -1405,6 +1443,7 @@ ParameterSyntax ParameterSyntax::withInitializer(std::optional<InitializeClauseS
 ///
 void ParameterClauseSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -1415,6 +1454,7 @@ void ParameterClauseSyntax::validate()
    if (const RefCountPtr<RawSyntax> &parametersChild = raw->getChild(Cursor::Parameters)) {
       assert(parametersChild->kindOf(SyntaxKind::ParameterList));
    }
+#endif
 }
 
 TokenSyntax ParameterClauseSyntax::getLeftParen()
@@ -1472,6 +1512,7 @@ ParameterClauseSyntax ParameterClauseSyntax::withRightParen(std::optional<TokenS
 ///
 void FunctionDefinitionSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -1489,6 +1530,7 @@ void FunctionDefinitionSyntax::validate()
    if (const RefCountPtr<RawSyntax> &body = raw->getChild(Cursor::Body)) {
       assert(body->kindOf(SyntaxKind::CodeBlock));
    }
+#endif
 }
 
 TokenSyntax FunctionDefinitionSyntax::getFuncToken()
@@ -1608,11 +1650,13 @@ FunctionDefinitionSyntax::withBody(std::optional<CodeBlockSyntax> body)
 ///
 void SourceFileSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == SourceFileSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax SourceFileSyntax::getEofToken()

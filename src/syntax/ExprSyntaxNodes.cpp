@@ -15,11 +15,13 @@ namespace polar::syntax {
 
 void NullExprSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == NullExprSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax NullExprSyntax::getNullKeyword()
@@ -41,11 +43,13 @@ NullExprSyntax NullExprSyntax::withNullKeyword(std::optional<TokenSyntax> keywor
 
 void ClassRefParentExprSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == ClassRefParentExprSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax ClassRefParentExprSyntax::getParentKeyword()
@@ -67,11 +71,13 @@ ClassRefParentExprSyntax ClassRefParentExprSyntax::withParentKeyword(std::option
 
 void ClassRefSelfExprSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == ClassRefSelfExprSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax ClassRefSelfExprSyntax::getSelfKeyword()
@@ -93,11 +99,13 @@ ClassRefSelfExprSyntax ClassRefSelfExprSyntax::withSelfKeyword(std::optional<Tok
 
 void ClassRefStaticExprSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == ClassRefStaticExprSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax ClassRefStaticExprSyntax::getStaticKeyword()
@@ -119,11 +127,13 @@ ClassRefStaticExprSyntax ClassRefStaticExprSyntax::withStaticKeyword(std::option
 
 void IntegerLiteralExprSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == IntegerLiteralExprSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax IntegerLiteralExprSyntax::getDigits()
@@ -145,11 +155,13 @@ IntegerLiteralExprSyntax IntegerLiteralExprSyntax::withDigits(std::optional<Toke
 
 void FloatLiteralExprSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == FloatLiteralExprSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax FloatLiteralExprSyntax::getFloatDigits()
@@ -171,11 +183,13 @@ FloatLiteralExprSyntax FloatLiteralExprSyntax::withFloatDigits(std::optional<Tok
 
 void StringLiteralExprSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == StringLiteralExprSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax StringLiteralExprSyntax::getString()
@@ -209,6 +223,7 @@ const TokenChoicesType BooleanLiteralExprSyntax::CHILD_TOKEN_CHOICES
 
 void BooleanLiteralExprSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -218,6 +233,7 @@ void BooleanLiteralExprSyntax::validate()
    ///
    syntax_assert_child_token(raw, Boolean, CHILD_TOKEN_CHOICES.at(Boolean));
    assert(raw->getLayout().size() == BooleanLiteralExprSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax BooleanLiteralExprSyntax::getBooleanValue()
@@ -239,11 +255,13 @@ BooleanLiteralExprSyntax BooleanLiteralExprSyntax::withBooleanValue(std::optiona
 
 void TernaryExprSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == TernaryExprSyntax::CHILDREN_COUNT);
+#endif
 }
 
 ExprSyntax TernaryExprSyntax::getConditionExpr()
@@ -330,11 +348,13 @@ TernaryExprSyntax TernaryExprSyntax::withSecondChoice(std::optional<ExprSyntax> 
 
 void AssignmentExprSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == AssignmentExprSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax AssignmentExprSyntax::getAssignToken()
@@ -356,11 +376,13 @@ AssignmentExprSyntax AssignmentExprSyntax::withAssignToken(std::optional<TokenSy
 
 void SequenceExprSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == SequenceExprSyntax::CHILDREN_COUNT);
+#endif
 }
 
 ExprListSyntax SequenceExprSyntax::getElements()
@@ -392,11 +414,13 @@ SequenceExprSyntax SequenceExprSyntax::addElement(ExprSyntax expr)
 
 void PrefixOperatorExprSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == PrefixOperatorExprSyntax::CHILDREN_COUNT);
+#endif
 }
 
 std::optional<TokenSyntax> PrefixOperatorExprSyntax::getOperatorToken()
@@ -437,11 +461,13 @@ PrefixOperatorExprSyntax PrefixOperatorExprSyntax::withExpr(std::optional<TokenS
 
 void PostfixOperatorExprSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == PostfixOperatorExprSyntax::CHILDREN_COUNT);
+#endif
 }
 
 ExprSyntax PostfixOperatorExprSyntax::getExpr()
@@ -479,11 +505,13 @@ PostfixOperatorExprSyntax PostfixOperatorExprSyntax::withOperatorToken(std::opti
 
 void BinaryOperatorExprSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
    assert(raw->getLayout().size() == BinaryOperatorExprSyntax::CHILDREN_COUNT);
+#endif
 }
 
 TokenSyntax BinaryOperatorExprSyntax::getOperatorToken()
@@ -508,6 +536,7 @@ BinaryOperatorExprSyntax BinaryOperatorExprSyntax::withOperatorToken(std::option
 ///
 void LexicalVarItemSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -515,6 +544,7 @@ void LexicalVarItemSyntax::validate()
    assert(raw->getLayout().getSize() == LexicalVarItemSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ReferenceToken, std::set{TokenKindType::T_AMPERSAND});
    syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
+#endif
 }
 
 std::optional<TokenSyntax> LexicalVarItemSyntax::getReferenceToken()
