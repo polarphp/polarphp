@@ -52,6 +52,8 @@ enum class SyntaxKind : std::uint32_t
    ParameterClauseSyntax,
    LexicalVarItem,
    FunctionDefinition,
+   /// for class definition
+   ClassModifier,
 
    UnknownDecl,
    LastDecl,
@@ -116,6 +118,7 @@ enum class SyntaxKind : std::uint32_t
    ConstDeclareItemList,
    ParameterList,
    LexicalVarList,
+   ClassModifierList,
 
    // NOTE: Unknown must be the last kind.
    Unknown,

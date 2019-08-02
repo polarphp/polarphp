@@ -1236,6 +1236,58 @@ private:
    void validate();
 };
 
+///
+/// class_modifier:
+///   T_ABSTRACT
+/// | T_FINAL
+///
+class ClassModifierSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      /// token choices: true
+      /// -------------------------
+      /// token choice: T_ABSTRACT
+      /// -------------------------
+      /// token choice: T_FINAL
+      ///
+      Modifier
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
+public:
+   ClassModifierSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getModifier();
+   ClassModifierSyntax withModifier(std::optional<TokenSyntax> modifier);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassModifier;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class ClassModifierSyntaxBuilder;
+   void validate();
+};
+
 class SourceFileSyntax final : public Syntax
 {
 public:

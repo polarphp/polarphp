@@ -36,6 +36,7 @@ class ReturnTypeClauseSyntax;
 class ParameterSyntax;
 class ParameterClauseSyntax;
 class FunctionDefinitionSyntax;
+class ClassModifierSyntax;
 class SourceFileSyntax;
 
 ///
@@ -100,6 +101,16 @@ using ParameterListSyntax = SyntaxCollection<SyntaxKind::ParameterList, Paramete
 /// | const_decl
 ///
 using ConstDeclareItemListSyntax = SyntaxCollection<SyntaxKind::ConstDeclareItemList, ConstDeclareItemSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: ClassModififerListSyntax
+///
+/// class_modifiers:
+///   class_modifier
+/// | class_modifiers class_modifier
+///
+using ClassModififerListSyntax = SyntaxCollection<SyntaxKind::ClassModifierList, ClassModifierSyntax>;
 
 ///
 /// reference to stmt syntax nodes

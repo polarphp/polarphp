@@ -1604,7 +1604,7 @@ FunctionDefinitionSyntax::withFuncName(std::optional<TokenSyntax> funcName)
       funcNameRaw = funcName->getRaw();
    } else {
       funcNameRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
+                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
    }
    return m_data->replaceChild<FunctionDefinitionSyntax>(funcNameRaw, Cursor::FuncName);
 }
@@ -1643,6 +1643,50 @@ FunctionDefinitionSyntax::withBody(std::optional<CodeBlockSyntax> body)
       bodyRaw = RawSyntax::missing(SyntaxKind::CodeBlock);
    }
    return m_data->replaceChild<FunctionDefinitionSyntax>(bodyRaw, Cursor::Body);
+}
+
+///
+/// ClassModifierSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType ClassModifierSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      ClassModifierSyntax::Modifier, {
+         TokenKindType::T_ABSTRACT,
+               TokenKindType::T_FINAL,
+      }
+   }
+};
+#endif
+
+void ClassModifierSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassModifierSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Modifier, CHILD_TOKEN_CHOICES.at(Cursor::Modifier));
+#endif
+}
+
+TokenSyntax ClassModifierSyntax::getModifier()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Modifier).get()};
+}
+
+ClassModifierSyntax ClassModifierSyntax::withModifier(std::optional<TokenSyntax> modifier)
+{
+   RefCountPtr<RawSyntax> modifierRaw;
+   if (modifier.has_value()) {
+      modifierRaw = modifier->getRaw();
+   } else {
+      modifierRaw = RawSyntax::missing(TokenKindType::T_ABSTRACT,
+                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_ABSTRACT)));
+   }
+   return m_data->replaceChild<ClassModifierSyntax>(modifierRaw, Cursor::Modifier);
 }
 
 ///
