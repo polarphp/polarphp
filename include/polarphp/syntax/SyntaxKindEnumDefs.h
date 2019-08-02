@@ -55,6 +55,7 @@ enum class SyntaxKind : std::uint32_t
    /// for class definition
    ClassModifier,
    ImplementsListClause,
+   InterfaceExtendsClause,
    ExtendsFromClause,
 
    UnknownDecl,

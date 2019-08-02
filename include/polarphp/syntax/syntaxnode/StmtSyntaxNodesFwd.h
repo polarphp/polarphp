@@ -34,8 +34,6 @@ class DeferStmtSyntax;
 class ExpressionStmtSyntax;
 class ThrowStmtSyntax;
 class ReturnStmtSyntax;
-class InnerStmtSyntax;
-class TopStmtSyntax;
 
 ///
 /// type: SyntaxCollection
@@ -60,24 +58,6 @@ using SwitchCaseListSyntax = SyntaxCollection<SyntaxKind::SwitchCaseList, Switch
 /// elseif-list ->  elseif-clause
 ///                | elseif-list elseif-clause
 using ElseIfListSyntax = SyntaxCollection<SyntaxKind::ElseIfList, ElseIfClauseSyntax>;
-
-///
-/// type: SyntaxCollection
-/// element type: ElseIfClauseSyntax
-///
-/// inner_statement_list:
-///   inner_statement_list inner_statement
-///
-using InnerStatementListSyntax = SyntaxCollection<SyntaxKind::InnerStmtList, InnerStmtSyntax>;
-
-///
-/// type: SyntaxCollection
-/// element type: ElseIfClauseSyntax
-///
-/// top_statement_list:
-///   top_statement_list top_statement
-///
-using TopStatementListSyntax = SyntaxCollection<SyntaxKind::TopStmtList, TopStmtSyntax>;
 
 } // polar::syntax
 

@@ -1390,6 +1390,53 @@ private:
    void validate();
 };
 
+class InterfaceExtendsClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      ExtendsToken,
+      ///
+      /// type: NameListSyntax
+      /// optional: false
+      ///
+      Interfaces
+   };
+
+public:
+   InterfaceExtendsClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getExtendsToken();
+   NameListSyntax getInterfaces();
+
+   InterfaceExtendsClauseSyntax withExtendsToken(std::optional<TokenSyntax> extendsToken);
+   InterfaceExtendsClauseSyntax withInterfaces(std::optional<NameListSyntax> interfaces);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::InterfaceExtendsClause;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class ImplementClauseSyntaxBuilder;
+   void validate();
+};
+
 class SourceFileSyntax final : public Syntax
 {
 public:

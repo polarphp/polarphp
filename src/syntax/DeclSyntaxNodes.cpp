@@ -1792,6 +1792,57 @@ ImplementClauseSyntax ImplementClauseSyntax::withInterfaces(std::optional<NameLi
 }
 
 ///
+/// ImplementClauseSyntax
+///
+void InterfaceExtendsClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ImplementClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ExtendsToken, std::set{TokenKindType::T_EXTENDS});
+   if (const RefCountPtr<RawSyntax> interfaceChild = raw->getChild(Cursor::Interfaces)) {
+      assert(interfaceChild->kindOf(SyntaxKind::ImplementsListClause));
+   }
+#endif
+}
+
+TokenSyntax InterfaceExtendsClauseSyntax::getExtendsToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::ExtendsToken).get()};
+}
+
+NameListSyntax InterfaceExtendsClauseSyntax::getInterfaces()
+{
+   return NameListSyntax {m_root, m_data->getChild(Cursor::Interfaces).get()};
+}
+
+InterfaceExtendsClauseSyntax InterfaceExtendsClauseSyntax::withExtendsToken(std::optional<TokenSyntax> extendsToken)
+{
+   RefCountPtr<RawSyntax> extendsTokenRaw;
+   if (extendsToken.has_value()) {
+      extendsTokenRaw = extendsToken->getRaw();
+   } else {
+      extendsTokenRaw = RawSyntax::missing(TokenKindType::T_EXTENDS,
+                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_EXTENDS)));
+   }
+   return m_data->replaceChild<InterfaceExtendsClauseSyntax>(extendsTokenRaw, Cursor::ExtendsToken);
+}
+
+InterfaceExtendsClauseSyntax InterfaceExtendsClauseSyntax::withInterfaces(std::optional<NameListSyntax> interfaces)
+{
+   RefCountPtr<RawSyntax> interfacesRaw;
+   if (interfaces.has_value()) {
+      interfacesRaw = interfaces->getRaw();
+   } else {
+      interfacesRaw = RawSyntax::missing(SyntaxKind::NameList);
+   }
+   return m_data->replaceChild<InterfaceExtendsClauseSyntax>(interfacesRaw, Cursor::Interfaces);
+}
+
+///
 /// SourceFileSyntax
 ///
 void SourceFileSyntax::validate()

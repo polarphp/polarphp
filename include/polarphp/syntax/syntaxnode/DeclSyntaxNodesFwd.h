@@ -125,12 +125,6 @@ using ConstDeclareItemListSyntax = SyntaxCollection<SyntaxKind::ConstDeclareItem
 ///
 using ClassModififerListSyntax = SyntaxCollection<SyntaxKind::ClassModifierList, ClassModifierSyntax>;
 
-///
-/// reference to stmt syntax nodes
-///
-class InnerStmtSyntax;
-using InnerStmtListSyntax = SyntaxCollection<SyntaxKind::InnerStmtList, InnerStmtSyntax>;
-
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_SYNTAX_NODE_DECL_NODES_FWD_H
