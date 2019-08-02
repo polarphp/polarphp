@@ -54,6 +54,8 @@ enum class SyntaxKind : std::uint32_t
    FunctionDefinition,
    /// for class definition
    ClassModifier,
+   ImplementsListClause,
+   ExtendsFromClause,
 
    UnknownDecl,
    LastDecl,
@@ -111,6 +113,7 @@ enum class SyntaxKind : std::uint32_t
    InnerStmtList,
    TopStmtList,
    ExprList,
+   NameList,
    NamespacePartList,
    NamespaceUseDeclarationList,
    NamespaceInlineUseDeclarationList,

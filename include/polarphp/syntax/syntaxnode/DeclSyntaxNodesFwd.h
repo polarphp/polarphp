@@ -37,7 +37,19 @@ class ParameterSyntax;
 class ParameterClauseSyntax;
 class FunctionDefinitionSyntax;
 class ClassModifierSyntax;
+class ExtendsFromClauseSyntax;
+class ImplementsListClauseSyntax;
 class SourceFileSyntax;
+
+///
+/// type: SyntaxCollection
+/// element type: NameSyntax
+///
+/// name_list:
+///   name
+/// |	name_list ',' name
+///
+using NameListSyntax = SyntaxCollection<SyntaxKind::NameList, NameSyntax>;
 
 ///
 /// type: SyntaxCollection

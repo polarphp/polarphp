@@ -1690,6 +1690,57 @@ ClassModifierSyntax ClassModifierSyntax::withModifier(std::optional<TokenSyntax>
 }
 
 ///
+/// ExtendsFromClauseSyntax
+///
+void ExtendsFromClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ExtendsFromClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ExtendToken, std::set{TokenKindType::T_EXTENDS});
+   if (const RefCountPtr<RawSyntax> nameChild = raw->getChild(Cursor::Name)) {
+      assert(nameChild->kindOf(SyntaxKind::Name));
+   }
+#endif
+}
+
+TokenSyntax ExtendsFromClauseSyntax::getExtendToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::ExtendToken).get()};
+}
+
+NameSyntax ExtendsFromClauseSyntax::getName()
+{
+   return NameSyntax {m_root, m_data->getChild(Cursor::Name).get()};
+}
+
+ExtendsFromClauseSyntax ExtendsFromClauseSyntax::withExtendToken(std::optional<TokenSyntax> extendToken)
+{
+   RefCountPtr<RawSyntax> extendTokenRaw;
+   if (extendToken.has_value()) {
+      extendTokenRaw = extendToken->getRaw();
+   } else {
+      extendTokenRaw = RawSyntax::missing(TokenKindType::T_EXTENDS,
+                                          OwnedString::makeUnowned(get_token_text(TokenKindType::T_EXTENDS)));
+   }
+   return m_data->replaceChild<ExtendsFromClauseSyntax>(extendTokenRaw, Cursor::ExtendToken);
+}
+
+ExtendsFromClauseSyntax ExtendsFromClauseSyntax::withName(std::optional<NameSyntax> name)
+{
+   RefCountPtr<RawSyntax> nameRaw;
+   if (name.has_value()) {
+      nameRaw = name->getRaw();
+   } else {
+      nameRaw = RawSyntax::missing(SyntaxKind::Name);
+   }
+   return m_data->replaceChild<ExtendsFromClauseSyntax>(nameRaw, Cursor::Name);
+}
+
+///
 /// SourceFileSyntax
 ///
 void SourceFileSyntax::validate()

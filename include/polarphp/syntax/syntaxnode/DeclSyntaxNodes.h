@@ -1288,6 +1288,57 @@ private:
    void validate();
 };
 
+///
+/// extends_from:
+///   T_EXTENDS name
+///
+class ExtendsFromClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      ExtendToken,
+      ///
+      /// type: NameSyntax
+      /// optional: false
+      ///
+      Name
+   };
+
+public:
+   ExtendsFromClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getExtendToken();
+   NameSyntax getName();
+
+   ExtendsFromClauseSyntax withExtendToken(std::optional<TokenSyntax> extendToken);
+   ExtendsFromClauseSyntax withName(std::optional<NameSyntax> name);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SourceFile;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class ExtendsFromClauseSyntaxBuilder;
+   void validate();
+};
+
 class SourceFileSyntax final : public Syntax
 {
 public:
