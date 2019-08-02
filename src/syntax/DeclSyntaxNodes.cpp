@@ -1283,74 +1283,6 @@ ReturnTypeClauseSyntax ReturnTypeClauseSyntax::withType(std::optional<TypeExprCl
 }
 
 ///
-/// ParameterClauseSyntax
-///
-
-void ParameterClauseSyntax::validate()
-{
-   RefCountPtr<RawSyntax> raw = m_data->getRaw();
-   if (isMissing()) {
-      return;
-   }
-   assert(raw->getLayout().getSize() == ParameterClauseSyntax::CHILDREN_COUNT);
-   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
-   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
-   if (const RefCountPtr<RawSyntax> &parametersChild = raw->getChild(Cursor::Parameters)) {
-      assert(parametersChild->kindOf(SyntaxKind::ParameterList));
-   }
-}
-
-TokenSyntax ParameterClauseSyntax::getLeftParen()
-{
-   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParen).get()};
-}
-
-ParameterListSyntax ParameterClauseSyntax::getParameters()
-{
-   return ParameterListSyntax {m_root, m_data->getChild(Cursor::Parameters).get()};
-}
-
-TokenSyntax ParameterClauseSyntax::getRightParen()
-{
-   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParen).get()};
-}
-
-ParameterClauseSyntax ParameterClauseSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
-{
-   RefCountPtr<RawSyntax> leftParenRaw;
-   if (leftParen.has_value()) {
-      leftParenRaw = leftParen->getRaw();
-   } else {
-      leftParenRaw = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
-   }
-   return m_data->replaceChild<ParameterClauseSyntax>(leftParenRaw, Cursor::LeftParen);
-}
-
-ParameterClauseSyntax ParameterClauseSyntax::withParameters(std::optional<ParameterListSyntax> parameters)
-{
-   RefCountPtr<RawSyntax> parametersRaw;
-   if (parameters.has_value()) {
-      parametersRaw = parameters->getRaw();
-   } else {
-      parametersRaw = RawSyntax::missing(SyntaxKind::ParameterList);
-   }
-   return m_data->replaceChild<ParameterClauseSyntax>(parametersRaw, Cursor::Parameters);
-}
-
-ParameterClauseSyntax ParameterClauseSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
-{
-   RefCountPtr<RawSyntax> rightParenRaw;
-   if (rightParen.has_value()) {
-      rightParenRaw = rightParen->getRaw();
-   } else {
-      rightParenRaw = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
-   }
-   return m_data->replaceChild<ParameterClauseSyntax>(rightParenRaw, Cursor::RightParen);
-}
-
-///
 /// ParameterSyntax
 ///
 void ParameterSyntax::validate()
@@ -1466,6 +1398,209 @@ ParameterSyntax ParameterSyntax::withInitializer(std::optional<InitializeClauseS
       initializerRaw = RawSyntax::missing(SyntaxKind::InitializeClause);
    }
    return m_data->replaceChild<ParameterSyntax>(initializerRaw, Cursor::Initializer);
+}
+
+///
+/// ParameterClauseSyntax
+///
+void ParameterClauseSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ParameterClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
+   if (const RefCountPtr<RawSyntax> &parametersChild = raw->getChild(Cursor::Parameters)) {
+      assert(parametersChild->kindOf(SyntaxKind::ParameterList));
+   }
+}
+
+TokenSyntax ParameterClauseSyntax::getLeftParen()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParen).get()};
+}
+
+ParameterListSyntax ParameterClauseSyntax::getParameters()
+{
+   return ParameterListSyntax {m_root, m_data->getChild(Cursor::Parameters).get()};
+}
+
+TokenSyntax ParameterClauseSyntax::getRightParen()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParen).get()};
+}
+
+ParameterClauseSyntax ParameterClauseSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> leftParenRaw;
+   if (leftParen.has_value()) {
+      leftParenRaw = leftParen->getRaw();
+   } else {
+      leftParenRaw = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+   }
+   return m_data->replaceChild<ParameterClauseSyntax>(leftParenRaw, Cursor::LeftParen);
+}
+
+ParameterClauseSyntax ParameterClauseSyntax::withParameters(std::optional<ParameterListSyntax> parameters)
+{
+   RefCountPtr<RawSyntax> parametersRaw;
+   if (parameters.has_value()) {
+      parametersRaw = parameters->getRaw();
+   } else {
+      parametersRaw = RawSyntax::missing(SyntaxKind::ParameterList);
+   }
+   return m_data->replaceChild<ParameterClauseSyntax>(parametersRaw, Cursor::Parameters);
+}
+
+ParameterClauseSyntax ParameterClauseSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rightParenRaw;
+   if (rightParen.has_value()) {
+      rightParenRaw = rightParen->getRaw();
+   } else {
+      rightParenRaw = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+   }
+   return m_data->replaceChild<ParameterClauseSyntax>(rightParenRaw, Cursor::RightParen);
+}
+
+///
+/// FunctionDefinitionSyntax
+///
+void FunctionDefinitionSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == FunctionDefinitionSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, FuncToken, std::set{TokenKindType::T_FUNCTION});
+   syntax_assert_child_token(raw, ReturnRefFlagToken, std::set{TokenKindType::T_AMPERSAND});
+   syntax_assert_child_token(raw, FuncName, std::set{TokenKindType::T_IDENTIFIER_STRING});
+   if (const RefCountPtr<RawSyntax> &parameterClause = raw->getChild(Cursor::ParameterClause)) {
+      assert(parameterClause->kindOf(SyntaxKind::ParameterClauseSyntax));
+   }
+   if (const RefCountPtr<RawSyntax> &returnTypeClause = raw->getChild(Cursor::ReturnType)) {
+      assert(returnTypeClause->kindOf(SyntaxKind::ReturnTypeClause));
+   }
+   if (const RefCountPtr<RawSyntax> &body = raw->getChild(Cursor::Body)) {
+      assert(body->kindOf(SyntaxKind::CodeBlock));
+   }
+}
+
+TokenSyntax FunctionDefinitionSyntax::getFuncToken()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::FuncToken).get()};
+}
+
+std::optional<TokenSyntax> FunctionDefinitionSyntax::getReturnRefFlagToken()
+{
+   RefCountPtr<SyntaxData> returnRefFlagTokenData = m_data->getChild(Cursor::ReturnRefFlagToken);
+   if (!returnRefFlagTokenData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, returnRefFlagTokenData.get()};
+}
+
+TokenSyntax FunctionDefinitionSyntax::getFuncName()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::FuncName).get()};
+}
+
+ParameterClauseSyntax FunctionDefinitionSyntax::getParameterClause()
+{
+   return ParameterClauseSyntax {m_root, m_data->getChild(Cursor::ParameterClause).get()};
+}
+
+std::optional<TokenSyntax> FunctionDefinitionSyntax::getReturnType()
+{
+   RefCountPtr<SyntaxData> returnTypeData = m_data->getChild(Cursor::ReturnType);
+   if (!returnTypeData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, returnTypeData.get()};
+}
+
+CodeBlockSyntax FunctionDefinitionSyntax::getBody()
+{
+   return CodeBlockSyntax {m_root, m_data->getChild(Cursor::Body).get()};
+}
+
+FunctionDefinitionSyntax
+FunctionDefinitionSyntax::withFuncToken(std::optional<TokenSyntax> funcToken)
+{
+   RefCountPtr<RawSyntax> funcTokenRaw;
+   if (funcToken.has_value()) {
+      funcTokenRaw = funcToken->getRaw();
+   } else {
+      funcTokenRaw = RawSyntax::missing(TokenKindType::T_FUNCTION,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_FUNCTION)));
+   }
+   return m_data->replaceChild<FunctionDefinitionSyntax>(funcTokenRaw, Cursor::FuncToken);
+}
+
+FunctionDefinitionSyntax
+FunctionDefinitionSyntax::withReturnRefFlagToken(std::optional<TokenSyntax> returnRefFlagToken)
+{
+   RefCountPtr<RawSyntax> returnRefFlagTokenRaw;
+   if (returnRefFlagToken.has_value()) {
+      returnRefFlagTokenRaw = returnRefFlagToken->getRaw();
+   } else {
+      returnRefFlagTokenRaw = nullptr;
+   }
+   return m_data->replaceChild<FunctionDefinitionSyntax>(returnRefFlagTokenRaw, Cursor::ReturnRefFlagToken);
+}
+
+FunctionDefinitionSyntax
+FunctionDefinitionSyntax::withFuncName(std::optional<TokenSyntax> funcName)
+{
+   RefCountPtr<RawSyntax> funcNameRaw;
+   if (funcName.has_value()) {
+      funcNameRaw = funcName->getRaw();
+   } else {
+      funcNameRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
+   }
+   return m_data->replaceChild<FunctionDefinitionSyntax>(funcNameRaw, Cursor::FuncName);
+}
+
+FunctionDefinitionSyntax
+FunctionDefinitionSyntax::withParameterClause(std::optional<ParameterClauseSyntax> parameterClause)
+{
+   RefCountPtr<RawSyntax> parameterClauseRaw;
+   if (parameterClause.has_value()) {
+      parameterClauseRaw = parameterClause->getRaw();
+   } else {
+      parameterClauseRaw = RawSyntax::missing(SyntaxKind::ParameterClauseSyntax);
+   }
+   return m_data->replaceChild<FunctionDefinitionSyntax>(parameterClauseRaw, Cursor::ParameterClause);
+}
+
+FunctionDefinitionSyntax
+FunctionDefinitionSyntax::withReturnType(std::optional<TokenSyntax> returnType)
+{
+   RefCountPtr<RawSyntax> returnTypeRaw;
+   if (returnType.has_value()) {
+      returnTypeRaw = returnType->getRaw();
+   } else {
+      returnTypeRaw = nullptr;
+   }
+   return m_data->replaceChild<FunctionDefinitionSyntax>(returnTypeRaw, Cursor::ReturnType);
+}
+
+FunctionDefinitionSyntax
+FunctionDefinitionSyntax::withBody(std::optional<CodeBlockSyntax> body)
+{
+   RefCountPtr<RawSyntax> bodyRaw;
+   if (body.has_value()) {
+      bodyRaw = body->getRaw();
+   } else {
+      bodyRaw = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   return m_data->replaceChild<FunctionDefinitionSyntax>(bodyRaw, Cursor::Body);
 }
 
 ///
