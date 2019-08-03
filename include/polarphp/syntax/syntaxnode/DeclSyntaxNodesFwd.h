@@ -40,6 +40,8 @@ class ClassModifierSyntax;
 class ExtendsFromClauseSyntax;
 class ImplementClauseSyntax;
 class InterfaceExtendsClauseSyntax;
+class MemberDeclBlockSyntax;
+class MemberDeclListItemSyntax;
 class SourceFileSyntax;
 
 ///
@@ -124,6 +126,15 @@ using ConstDeclareItemListSyntax = SyntaxCollection<SyntaxKind::ConstDeclareItem
 /// | class_modifiers class_modifier
 ///
 using ClassModififerListSyntax = SyntaxCollection<SyntaxKind::ClassModifierList, ClassModifierSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: MemberDeclListItemSyntax
+///
+/// class_statement_list:
+///   class_statement_list class_statement
+///
+using MemberDeclListSyntax = SyntaxCollection<SyntaxKind::MemberDeclList, MemberDeclListItemSyntax>;
 
 } // polar::syntax
 

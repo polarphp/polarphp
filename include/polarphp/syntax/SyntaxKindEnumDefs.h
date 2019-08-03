@@ -57,6 +57,8 @@ enum class SyntaxKind : std::uint32_t
    ImplementsListClause,
    InterfaceExtendsClause,
    ExtendsFromClause,
+   MemberDeclBlock,
+   MemberDeclListItem,
 
    UnknownDecl,
    LastDecl,
@@ -123,6 +125,7 @@ enum class SyntaxKind : std::uint32_t
    ParameterList,
    LexicalVarList,
    ClassModifierList,
+   MemberDeclList,
 
    // NOTE: Unknown must be the last kind.
    Unknown,

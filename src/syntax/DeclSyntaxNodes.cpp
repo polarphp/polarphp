@@ -1843,6 +1843,57 @@ InterfaceExtendsClauseSyntax InterfaceExtendsClauseSyntax::withInterfaces(std::o
 }
 
 ///
+/// MemberDeclListItemSyntax
+///
+void MemberDeclListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == MemberDeclListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
+   if (const RefCountPtr<RawSyntax> &declChild = raw->getChild(Cursor::Decl)) {
+      assert(declChild->kindOf(SyntaxKind::Decl));
+   }
+#endif
+}
+
+DeclSyntax MemberDeclListItemSyntax::getDecl()
+{
+   return DeclSyntax {m_root, m_data->getChild(Cursor::Decl).get()};
+}
+
+TokenSyntax MemberDeclListItemSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
+}
+
+MemberDeclListItemSyntax MemberDeclListItemSyntax::withDecl(std::optional<DeclSyntax> decl)
+{
+   RefCountPtr<RawSyntax> declRaw;
+   if (decl.has_value()) {
+      declRaw = decl->getRaw();
+   } else {
+      declRaw = RawSyntax::missing(SyntaxKind::Decl);
+   }
+   return m_data->replaceChild<MemberDeclListItemSyntax>(declRaw, Cursor::Decl);
+}
+
+MemberDeclListItemSyntax MemberDeclListItemSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> semicolonRaw;
+   if (semicolon.has_value()) {
+      semicolonRaw = semicolon->getRaw();
+   } else {
+      semicolonRaw = RawSyntax::missing(TokenKindType::T_SEMICOLON,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
+   }
+   return m_data->replaceChild<MemberDeclListItemSyntax>(semicolonRaw, Cursor::Semicolon);
+}
+
+///
 /// SourceFileSyntax
 ///
 void SourceFileSyntax::validate()

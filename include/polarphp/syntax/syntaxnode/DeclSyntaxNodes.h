@@ -1390,6 +1390,10 @@ private:
    void validate();
 };
 
+///
+/// interface_extends_list:
+///   T_EXTENDS name_list
+///
 class InterfaceExtendsClauseSyntax final : public Syntax
 {
 public:
@@ -1434,6 +1438,56 @@ public:
 
 private:
    friend class ImplementClauseSyntaxBuilder;
+   void validate();
+};
+
+///
+/// member-decl:
+///   decl ';'?
+///
+class MemberDeclListItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: DeclSyntax
+      /// optional: false
+      ///
+      Decl,
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      Semicolon
+   };
+
+public:
+   MemberDeclListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   DeclSyntax getDecl();
+   TokenSyntax getSemicolon();
+   MemberDeclListItemSyntax withDecl(std::optional<DeclSyntax> decl);
+   MemberDeclListItemSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::MemberDeclListItem;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class MemberDeclListItemSyntaxBuilder;
    void validate();
 };
 
