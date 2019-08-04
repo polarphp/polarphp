@@ -1630,6 +1630,61 @@ private:
    void validate();
 };
 
+///
+/// interface_declaration_statement:
+///   T_INTERFACE T_IDENTIFIER_STRING interface_extends_list backup_doc_comment '{' class_statement_list '}'
+///
+class InterfaceDefinitionSyntax final : public DeclSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 6;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 6;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      InterfaceToken,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      Name,
+      ///
+      /// type: InterfaceExtendsClauseSyntax
+      /// optional: false
+      ///
+      ExtendsFrom,
+      ///
+      /// type: MemberDeclBlockSyntax
+      /// optional: false
+      ///
+      Members
+   };
+
+public:
+   InterfaceDefinitionSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : DeclSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getInterfaceToken();
+   TokenSyntax getName();
+   InterfaceExtendsClauseSyntax getExtendsFrom();
+   MemberDeclBlockSyntax getMembers();
+
+   InterfaceDefinitionSyntax withInterfaceToken(std::optional<TokenSyntax> interfaceToken);
+   InterfaceDefinitionSyntax withName(std::optional<TokenSyntax> name);
+   InterfaceDefinitionSyntax withExtendsFrom(std::optional<InterfaceExtendsClauseSyntax> extendsFrom);
+   InterfaceDefinitionSyntax withMembers(std::optional<MemberDeclBlockSyntax> members);
+
+private:
+   friend class InterfaceDefinitionSyntaxBuilder;
+   void validate();
+};
+
 class SourceFileSyntax final : public Syntax
 {
 public:

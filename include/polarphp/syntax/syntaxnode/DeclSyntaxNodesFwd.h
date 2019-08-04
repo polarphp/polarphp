@@ -43,6 +43,7 @@ class InterfaceExtendsClauseSyntax;
 class MemberDeclBlockSyntax;
 class MemberDeclListItemSyntax;
 class ClassDefinitionSyntax;
+class InterfaceDefinitionSyntax;
 class SourceFileSyntax;
 
 ///

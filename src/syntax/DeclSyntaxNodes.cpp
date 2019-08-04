@@ -2093,6 +2093,94 @@ ClassDefinitionSyntax ClassDefinitionSyntax::withMembers(std::optional<MemberDec
 }
 
 ///
+/// InterfaceDefinitionSyntax
+///
+void InterfaceDefinitionSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == InterfaceDefinitionSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, InterfaceToken, std::set{TokenKindType::T_INTERFACE});
+   syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
+   if (const RefCountPtr<RawSyntax> extendsChild = raw->getChild(Cursor::ExtendsFrom)) {
+      assert(extendsChild->kindOf(SyntaxKind::InterfaceExtendsClause));
+   }
+   if (const RefCountPtr<RawSyntax> membersChild = raw->getChild(Cursor::Members)) {
+      assert(membersChild->kindOf(SyntaxKind::MemberDeclBlock));
+   }
+#endif
+}
+
+TokenSyntax InterfaceDefinitionSyntax::getInterfaceToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::InterfaceToken).get()};
+}
+
+TokenSyntax InterfaceDefinitionSyntax::getName()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Name).get()};
+}
+
+InterfaceExtendsClauseSyntax InterfaceDefinitionSyntax::getExtendsFrom()
+{
+   return InterfaceExtendsClauseSyntax {m_root, m_data->getChild(Cursor::ExtendsFrom).get()};
+}
+
+MemberDeclBlockSyntax InterfaceDefinitionSyntax::getMembers()
+{
+   return MemberDeclBlockSyntax {m_root, m_data->getChild(Cursor::Members).get()};
+}
+
+InterfaceDefinitionSyntax InterfaceDefinitionSyntax::withInterfaceToken(std::optional<TokenSyntax> interfaceToken)
+{
+   RefCountPtr<RawSyntax> interfaceTokenRaw;
+   if (interfaceToken.has_value()) {
+      interfaceTokenRaw = interfaceToken->getRaw();
+   } else {
+      interfaceTokenRaw = RawSyntax::missing(TokenKindType::T_INTERFACE,
+                                             OwnedString::makeUnowned(get_token_text(TokenKindType::T_INTERFACE)));
+   }
+   return m_data->replaceChild<InterfaceDefinitionSyntax>(interfaceTokenRaw, Cursor::InterfaceToken);
+}
+
+InterfaceDefinitionSyntax InterfaceDefinitionSyntax::withName(std::optional<TokenSyntax> name)
+{
+   RefCountPtr<RawSyntax> nameRaw;
+   if (name.has_value()) {
+      nameRaw = name->getRaw();
+   } else {
+      nameRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
+                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
+   }
+   return m_data->replaceChild<InterfaceDefinitionSyntax>(nameRaw, Cursor::Name);
+}
+
+InterfaceDefinitionSyntax InterfaceDefinitionSyntax::withExtendsFrom(std::optional<InterfaceExtendsClauseSyntax> extendsFrom)
+{
+   RefCountPtr<RawSyntax> extendsFromRaw;
+   if (extendsFrom.has_value()) {
+      extendsFromRaw = extendsFrom->getRaw();
+   } else {
+      extendsFromRaw = RawSyntax::missing(SyntaxKind::InterfaceExtendsClause);
+   }
+   return m_data->replaceChild<InterfaceDefinitionSyntax>(extendsFromRaw, Cursor::ExtendsFrom);
+}
+
+InterfaceDefinitionSyntax InterfaceDefinitionSyntax::withMembers(std::optional<MemberDeclBlockSyntax> members)
+{
+   RefCountPtr<RawSyntax> membersRaw;
+   if (members.has_value()) {
+      membersRaw = members->getRaw();
+   } else {
+      membersRaw = RawSyntax::missing(SyntaxKind::MemberDeclBlock);
+   }
+   return m_data->replaceChild<InterfaceDefinitionSyntax>(membersRaw, Cursor::Members);
+}
+
+///
 /// SourceFileSyntax
 ///
 void SourceFileSyntax::validate()

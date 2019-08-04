@@ -60,6 +60,7 @@ enum class SyntaxKind : std::uint32_t
    MemberDeclBlock,
    MemberDeclListItem,
    ClassDefinition,
+   InterfaceDefinition,
 
    UnknownDecl,
    LastDecl,
