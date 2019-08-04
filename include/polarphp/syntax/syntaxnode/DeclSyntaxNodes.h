@@ -1685,6 +1685,54 @@ private:
    void validate();
 };
 
+///
+/// trait_declaration_statement:
+/// T_TRAIT T_IDENTIFIER_STRING backup_doc_comment '{' class_statement_list '}'
+///
+class TraitDefinitionSyntax final : public DeclSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 5;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 5;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      TraitToken,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      Name,
+      ///
+      /// type: MemberDeclBlockSyntax
+      /// optional: false
+      ///
+      Members
+   };
+
+public:
+   TraitDefinitionSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : DeclSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getTraitToken();
+   TokenSyntax getName();
+   MemberDeclBlockSyntax getMembers();
+
+   TraitDefinitionSyntax withTraitToken(std::optional<TokenSyntax> traitToken);
+   TraitDefinitionSyntax withName(std::optional<TokenSyntax> name);
+   TraitDefinitionSyntax withMembers(std::optional<MemberDeclBlockSyntax> members);
+
+private:
+   friend class TraitDefinitionSyntaxBuilder;
+   void validate();
+};
+
 class SourceFileSyntax final : public Syntax
 {
 public:

@@ -2181,6 +2181,75 @@ InterfaceDefinitionSyntax InterfaceDefinitionSyntax::withMembers(std::optional<M
 }
 
 ///
+/// TraitDefinitionSyntax
+///
+void TraitDefinitionSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == TraitDefinitionSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, TraitToken, std::set{TokenKindType::T_TRAIT});
+   syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
+   if (const RefCountPtr<RawSyntax> membersChild = raw->getChild(Cursor::Members)) {
+      assert(membersChild->kindOf(SyntaxKind::MemberDeclBlock));
+   }
+#endif
+}
+
+TokenSyntax TraitDefinitionSyntax::getTraitToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::TraitToken).get()};
+}
+
+TokenSyntax TraitDefinitionSyntax::getName()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Name).get()};
+}
+
+MemberDeclBlockSyntax TraitDefinitionSyntax::getMembers()
+{
+   return MemberDeclBlockSyntax {m_root, m_data->getChild(Cursor::Members).get()};
+}
+
+TraitDefinitionSyntax TraitDefinitionSyntax::withTraitToken(std::optional<TokenSyntax> traitToken)
+{
+   RefCountPtr<RawSyntax> traitTokenRaw;
+   if (traitToken.has_value()) {
+      traitTokenRaw = traitToken->getRaw();
+   } else {
+      traitTokenRaw = RawSyntax::missing(TokenKindType::T_TRAIT,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_TRAIT)));
+   }
+   return m_data->replaceChild<TraitDefinitionSyntax>(traitTokenRaw, Cursor::TraitToken);
+}
+
+TraitDefinitionSyntax TraitDefinitionSyntax::withName(std::optional<TokenSyntax> name)
+{
+   RefCountPtr<RawSyntax> nameRaw;
+   if (name.has_value()) {
+      nameRaw = name->getRaw();
+   } else {
+      nameRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
+   }
+   return m_data->replaceChild<TraitDefinitionSyntax>(nameRaw, Cursor::TraitToken);
+}
+
+TraitDefinitionSyntax TraitDefinitionSyntax::withMembers(std::optional<MemberDeclBlockSyntax> members)
+{
+   RefCountPtr<RawSyntax> membersRaw;
+   if (members.has_value()) {
+      membersRaw = members->getRaw();
+   } else {
+      membersRaw = RawSyntax::missing(SyntaxKind::MemberDeclBlock);
+   }
+   return m_data->replaceChild<TraitDefinitionSyntax>(membersRaw, Cursor::Members);
+}
+
+///
 /// SourceFileSyntax
 ///
 void SourceFileSyntax::validate()

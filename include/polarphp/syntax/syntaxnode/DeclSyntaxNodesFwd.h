@@ -44,6 +44,7 @@ class MemberDeclBlockSyntax;
 class MemberDeclListItemSyntax;
 class ClassDefinitionSyntax;
 class InterfaceDefinitionSyntax;
+class TraitDefinitionSyntax;
 class SourceFileSyntax;
 
 ///
