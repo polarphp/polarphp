@@ -1491,6 +1491,145 @@ private:
    void validate();
 };
 
+///
+/// member_decl_block:
+/// '{' class_statement_list '}'
+///
+class MemberDeclBlockSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional；false
+      ///
+      LeftBrace,
+      ///
+      /// type: MemberDeclListSyntax
+      /// optional: false
+      ///
+      Members,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      RightBrace
+   };
+
+public:
+   MemberDeclBlockSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getLeftBrace();
+   MemberDeclListSyntax getMembers();
+   TokenSyntax getRightBrace();
+
+   MemberDeclBlockSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
+   MemberDeclBlockSyntax withMembers(std::optional<MemberDeclListSyntax> members);
+   MemberDeclBlockSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::MemberDeclBlock;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class MemberDeclListItemSyntaxBuilder;
+   void validate();
+};
+
+///
+/// class_declaration_statement:
+///   class_modifiers T_CLASS T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+/// | T_CLASS T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+///
+class ClassDefinitionSyntax final : public DeclSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 9;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 8;
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ClassModififerListSyntax
+      /// optional: true
+      ///
+      Modififers,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      ClassToken,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      Name,
+      ///
+      /// type: ExtendsFromClauseSyntax
+      /// optional: false
+      ///
+      ExtendsFrom,
+      ///
+      /// type: ImplementClauseSyntax
+      /// optional: false
+      ///
+      ImplementsList,
+      ///
+      /// type: MemberDeclBlockSyntax
+      /// optional: false
+      ///
+      Members
+   };
+
+public:
+   ClassDefinitionSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : DeclSyntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<ClassModififerListSyntax> getModififers();
+   TokenSyntax getClassToken();
+   TokenSyntax getName();
+   ExtendsFromClauseSyntax getExtendsFrom();
+   ImplementClauseSyntax getImplementsList();
+   MemberDeclBlockSyntax getMembers();
+
+   ClassDefinitionSyntax withModifiers(std::optional<ClassModififerListSyntax> modifiers);
+   ClassDefinitionSyntax withClassToken(std::optional<TokenSyntax> classToken);
+   ClassDefinitionSyntax withName(std::optional<TokenSyntax> name);
+   ClassDefinitionSyntax withExtendsFrom(std::optional<ExtendsFromClauseSyntax> extends);
+   ClassDefinitionSyntax withImplementsList(std::optional<ImplementClauseSyntax> implements);
+   ClassDefinitionSyntax withMembers(std::optional<MemberDeclBlockSyntax> members);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassDefinition;
+   }
+
+   static bool classOf(const Syntax *synax)
+   {
+      return kindOf(synax->getKind());
+   }
+
+private:
+   friend class ClassDefinitionSyntaxBuilder;
+   void validate();
+};
+
 class SourceFileSyntax final : public Syntax
 {
 public:

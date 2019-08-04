@@ -59,6 +59,7 @@ enum class SyntaxKind : std::uint32_t
    ExtendsFromClause,
    MemberDeclBlock,
    MemberDeclListItem,
+   ClassDefinition,
 
    UnknownDecl,
    LastDecl,

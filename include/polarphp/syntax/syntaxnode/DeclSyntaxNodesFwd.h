@@ -42,6 +42,7 @@ class ImplementClauseSyntax;
 class InterfaceExtendsClauseSyntax;
 class MemberDeclBlockSyntax;
 class MemberDeclListItemSyntax;
+class ClassDefinitionSyntax;
 class SourceFileSyntax;
 
 ///

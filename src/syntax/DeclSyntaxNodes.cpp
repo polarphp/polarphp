@@ -1894,6 +1894,205 @@ MemberDeclListItemSyntax MemberDeclListItemSyntax::withSemicolon(std::optional<T
 }
 
 ///
+/// MemberDeclBlockSyntax
+///
+void MemberDeclBlockSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == MemberDeclBlockSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_BRACE});
+   syntax_assert_child_token(raw, RightBrace, std::set{TokenKindType::T_RIGHT_BRACE});
+   if (const RefCountPtr<RawSyntax> membersChild = raw->getChild(Cursor::Members)) {
+      assert(membersChild->kindOf(SyntaxKind::MemberDeclList));
+   }
+#endif
+}
+
+TokenSyntax MemberDeclBlockSyntax::getLeftBrace()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftBrace).get()};
+}
+
+MemberDeclListSyntax MemberDeclBlockSyntax::getMembers()
+{
+   return MemberDeclListSyntax {m_root, m_data->getChild(Cursor::Members).get()};
+}
+
+TokenSyntax MemberDeclBlockSyntax::getRightBrace()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightBrace).get()};
+}
+
+MemberDeclBlockSyntax MemberDeclBlockSyntax::withLeftBrace(std::optional<TokenSyntax> leftBrace)
+{
+   RefCountPtr<RawSyntax> leftBraceRaw;
+   if (leftBrace.has_value()) {
+      leftBraceRaw = leftBrace->getRaw();
+   } else {
+      leftBraceRaw = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE)));
+   }
+   return m_data->replaceChild<MemberDeclBlockSyntax>(leftBraceRaw, Cursor::LeftBrace);
+}
+
+MemberDeclBlockSyntax MemberDeclBlockSyntax::withMembers(std::optional<MemberDeclListSyntax> members)
+{
+   RefCountPtr<RawSyntax> membersRaw;
+   if (members.has_value()) {
+      membersRaw = members->getRaw();
+   } else {
+      membersRaw = RawSyntax::missing(SyntaxKind::MemberDeclList);
+   }
+   return m_data->replaceChild<MemberDeclBlockSyntax>(membersRaw, Cursor::Members);
+}
+
+MemberDeclBlockSyntax MemberDeclBlockSyntax::withRightBrace(std::optional<TokenSyntax> rightBrace)
+{
+   RefCountPtr<RawSyntax> rightBraceRaw;
+   if (rightBrace.has_value()) {
+      rightBraceRaw = rightBrace->getRaw();
+   } else {
+      rightBraceRaw = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)));
+   }
+   return m_data->replaceChild<MemberDeclBlockSyntax>(rightBraceRaw, Cursor::RightBrace);
+}
+
+///
+/// ClassDefinitionSyntax
+///
+void ClassDefinitionSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassDefinitionSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ClassToken, std::set{TokenKindType::T_CLASS});
+   syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
+   if (const RefCountPtr<RawSyntax> modifierChild = raw->getChild(Cursor::Modififers)) {
+      assert(modifierChild->kindOf(SyntaxKind::ClassModifierList));
+   }
+   if (const RefCountPtr<RawSyntax> extendsFromChild = raw->getChild(Cursor::ExtendsFrom)) {
+      assert(extendsFromChild->kindOf(SyntaxKind::ExtendsFromClause));
+   }
+   if (const RefCountPtr<RawSyntax> implementsChild = raw->getChild(Cursor::ImplementsList)) {
+      assert(implementsChild->kindOf(SyntaxKind::ImplementsListClause));
+   }
+   if (const RefCountPtr<RawSyntax> membersChild = raw->getChild(Cursor::Members)) {
+      assert(membersChild->kindOf(SyntaxKind::MemberDeclBlock));
+   }
+#endif
+}
+
+std::optional<ClassModififerListSyntax> ClassDefinitionSyntax::getModififers()
+{
+   RefCountPtr<SyntaxData> modifiersData = m_data->getChild(Cursor::Modififers);
+   if (!modifiersData) {
+      return std::nullopt;
+   }
+   return ClassModififerListSyntax {m_root, modifiersData.get()};
+}
+
+TokenSyntax ClassDefinitionSyntax::getClassToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::ClassToken).get()};
+}
+
+TokenSyntax ClassDefinitionSyntax::getName()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Name).get()};
+}
+
+ExtendsFromClauseSyntax ClassDefinitionSyntax::getExtendsFrom()
+{
+   return ExtendsFromClauseSyntax {m_root, m_data->getChild(Cursor::ExtendsFrom).get()};
+}
+
+ImplementClauseSyntax ClassDefinitionSyntax::getImplementsList()
+{
+   return ImplementClauseSyntax {m_root, m_data->getChild(Cursor::ImplementsList).get()};
+}
+
+MemberDeclBlockSyntax ClassDefinitionSyntax::getMembers()
+{
+   return MemberDeclBlockSyntax {m_root, m_data->getChild(Cursor::Members).get()};
+}
+
+ClassDefinitionSyntax ClassDefinitionSyntax::withModifiers(std::optional<ClassModififerListSyntax> modifiers)
+{
+   RefCountPtr<RawSyntax> modifiersRaw;
+   if (modifiers.has_value()) {
+      modifiersRaw = modifiers->getRaw();
+   } else {
+      modifiersRaw = nullptr;
+   }
+   return m_data->replaceChild<ClassDefinitionSyntax>(modifiersRaw, Cursor::Modififers);
+}
+
+ClassDefinitionSyntax ClassDefinitionSyntax::withClassToken(std::optional<TokenSyntax> classToken)
+{
+   RefCountPtr<RawSyntax> classTokenRaw;
+   if (classToken.has_value()) {
+      classTokenRaw = classToken->getRaw();
+   } else {
+      classTokenRaw = RawSyntax::missing(TokenKindType::T_CLASS,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS)));
+   }
+   return m_data->replaceChild<ClassDefinitionSyntax>(classTokenRaw, Cursor::ClassToken);
+}
+
+ClassDefinitionSyntax ClassDefinitionSyntax::withName(std::optional<TokenSyntax> name)
+{
+   RefCountPtr<RawSyntax> nameRaw;
+   if (name.has_value()) {
+      nameRaw = name->getRaw();
+   } else {
+      nameRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
+                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
+   }
+   return m_data->replaceChild<ClassDefinitionSyntax>(nameRaw, Cursor::Name);
+}
+
+ClassDefinitionSyntax ClassDefinitionSyntax::withExtendsFrom(std::optional<ExtendsFromClauseSyntax> extends)
+{
+   RefCountPtr<RawSyntax> extendsRaw;
+   if (extends.has_value()) {
+      extendsRaw = extends->getRaw();
+   } else {
+      extendsRaw = RawSyntax::missing(SyntaxKind::ExtendsFromClause);
+   }
+   return m_data->replaceChild<ClassDefinitionSyntax>(extendsRaw, Cursor::ExtendsFrom);
+}
+
+ClassDefinitionSyntax ClassDefinitionSyntax::withImplementsList(std::optional<ImplementClauseSyntax> implements)
+{
+   RefCountPtr<RawSyntax> implementsRaw;
+   if (implements.has_value()) {
+      implementsRaw = implements->getRaw();
+   } else {
+      implementsRaw = RawSyntax::missing(SyntaxKind::ImplementsListClause);
+   }
+   return m_data->replaceChild<ClassDefinitionSyntax>(implementsRaw, Cursor::ImplementsList);
+}
+
+ClassDefinitionSyntax ClassDefinitionSyntax::withMembers(std::optional<MemberDeclBlockSyntax> members)
+{
+   RefCountPtr<RawSyntax> membersRaw;
+   if (members.has_value()) {
+      membersRaw = members->getRaw();
+   } else {
+      membersRaw = RawSyntax::missing(SyntaxKind::MemberDeclBlock);
+   }
+   return m_data->replaceChild<ClassDefinitionSyntax>(membersRaw, Cursor::Members);
+}
+
+///
 /// SourceFileSyntax
 ///
 void SourceFileSyntax::validate()
