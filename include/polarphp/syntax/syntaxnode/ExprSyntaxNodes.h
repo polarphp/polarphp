@@ -655,9 +655,9 @@ public:
       return kind == SyntaxKind::LexicalVarItem;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 private:
    friend class LexicalVarItemSyntaxBuilder;

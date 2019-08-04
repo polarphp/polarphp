@@ -317,9 +317,9 @@ public:
       return kind == SyntaxKind::NamespaceUseType;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -369,9 +369,9 @@ public:
       return kind == SyntaxKind::NamespaceUnprefixedUseDeclaration;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -416,9 +416,9 @@ public:
       return kind == SyntaxKind::NamespaceUseDeclaration;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -462,9 +462,9 @@ public:
       return kind == SyntaxKind::NamespaceInlineUseDeclaration;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 private:
    friend class InlineUseDeclarationSyntaxBuilder;
@@ -549,9 +549,9 @@ public:
       return kind == SyntaxKind::NamespaceGroupUseDeclaration;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 private:
    friend class NamespaceGroupUseDeclarationSyntaxBuilder;
@@ -632,9 +632,9 @@ public:
       return kind == SyntaxKind::NamespacemixedGroupUseDeclaration;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 private:
    friend class NamespaceMixedGroupUseDeclarationSyntaxBuilder;
@@ -703,9 +703,9 @@ public:
       return kind == SyntaxKind::NamespaceUseType;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 private:
    friend class NamespaceUseSyntaxBuilder;
@@ -750,9 +750,9 @@ public:
       return kind == SyntaxKind::InitializeClause;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -801,9 +801,9 @@ public:
       return kind == SyntaxKind::ConstDeclareItem;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -859,9 +859,9 @@ public:
       return kind == SyntaxKind::ConstDefinition;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -915,9 +915,9 @@ public:
       return kind == SyntaxKind::TypeClause;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -966,9 +966,9 @@ public:
       return kind == SyntaxKind::TypeExprClause;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -1015,9 +1015,9 @@ public:
       return kind == SyntaxKind::ReturnTypeClause;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -1088,9 +1088,9 @@ public:
       return kind == SyntaxKind::ParameterItem;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -1146,9 +1146,9 @@ public:
       return kind == SyntaxKind::FunctionDefinition;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -1226,9 +1226,9 @@ public:
       return kind == SyntaxKind::FunctionDefinition;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -1278,9 +1278,9 @@ public:
       return kind == SyntaxKind::ClassModifier;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -1329,9 +1329,9 @@ public:
       return kind == SyntaxKind::SourceFile;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -1377,12 +1377,12 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::ImplementsListClause;
+      return kind == SyntaxKind::ImplementsClause;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -1431,13 +1431,69 @@ public:
       return kind == SyntaxKind::InterfaceExtendsClause;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
    friend class ImplementClauseSyntaxBuilder;
+   void validate();
+};
+
+///
+/// member_modifier:
+///   T_PUBLIC
+/// | T_PROTECTED
+/// | T_PRIVATE
+/// | T_STATIC
+/// | T_ABSTRACT
+/// | T_FINAL
+///
+class MemberModifierSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      /// token choices: true
+      /// --------------------
+      /// T_PUBLIC | T_PROTECTED | T_PRIVATE
+      /// T_STATIC | T_ABSTRACT  | T_FINAL
+      ///
+      Modifier
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
+
+public:
+   MemberModifierSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getModifier();
+   MemberModifierSyntax withModifier(std::optional<TokenSyntax> modifier);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::MemberModifier;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class MemberModifierSyntaxBuilder;
    void validate();
 };
 
@@ -1481,9 +1537,9 @@ public:
       return kind == SyntaxKind::MemberDeclListItem;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -1539,9 +1595,9 @@ public:
       return kind == SyntaxKind::MemberDeclBlock;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -1620,9 +1676,9 @@ public:
       return kind == SyntaxKind::ClassDefinition;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:
@@ -1766,9 +1822,9 @@ public:
       return kind == SyntaxKind::SourceFile;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
-      return kindOf(synax->getKind());
+      return kindOf(syntax->getKind());
    }
 
 private:

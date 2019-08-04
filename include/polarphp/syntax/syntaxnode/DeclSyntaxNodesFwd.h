@@ -40,6 +40,7 @@ class ClassModifierSyntax;
 class ExtendsFromClauseSyntax;
 class ImplementClauseSyntax;
 class InterfaceExtendsClauseSyntax;
+class MemberModifierSyntax;
 class MemberDeclBlockSyntax;
 class MemberDeclListItemSyntax;
 class ClassDefinitionSyntax;

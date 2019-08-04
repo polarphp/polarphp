@@ -54,9 +54,10 @@ enum class SyntaxKind : std::uint32_t
    FunctionDefinition,
    /// for class definition
    ClassModifier,
-   ImplementsListClause,
+   ImplementsClause,
    InterfaceExtendsClause,
    ExtendsFromClause,
+   MemberModifier,
    MemberDeclBlock,
    MemberDeclListItem,
    ClassDefinition,

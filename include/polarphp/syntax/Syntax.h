@@ -217,7 +217,7 @@ public:
       return true;
    }
 
-   static bool classOf(const Syntax *synax)
+   static bool classOf(const Syntax *syntax)
    {
       // Trivially true.
       return true;

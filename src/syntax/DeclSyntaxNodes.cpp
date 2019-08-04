@@ -1753,7 +1753,7 @@ void ImplementClauseSyntax::validate()
    assert(raw->getLayout().getSize() == ImplementClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ImplementToken, std::set{TokenKindType::T_IMPLEMENTS});
    if (const RefCountPtr<RawSyntax> interfaceChild = raw->getChild(Cursor::Interfaces)) {
-      assert(interfaceChild->kindOf(SyntaxKind::ImplementsListClause));
+      assert(interfaceChild->kindOf(SyntaxKind::ImplementsClause));
    }
 #endif
 }
@@ -1792,6 +1792,51 @@ ImplementClauseSyntax ImplementClauseSyntax::withInterfaces(std::optional<NameLi
 }
 
 ///
+/// MemberModifierSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType MemberModifierSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      MemberModifierSyntax::Modifier, {
+         TokenKindType::T_PUBLIC, TokenKindType::T_PROTECTED,
+               TokenKindType::T_PRIVATE, TokenKindType::T_STATIC,
+               TokenKindType::T_ABSTRACT, TokenKindType::T_FINAL,
+      }
+   }
+};
+#endif
+
+void MemberModifierSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == MemberModifierSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Modifier, CHILD_TOKEN_CHOICES.at(Cursor::Modifier));
+#endif
+}
+
+TokenSyntax MemberModifierSyntax::getModifier()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Modifier).get()};
+}
+
+MemberModifierSyntax MemberModifierSyntax::withModifier(std::optional<TokenSyntax> modifier)
+{
+   RefCountPtr<RawSyntax> modifierRaw;
+   if (modifier.has_value()) {
+      modifierRaw = modifier->getRaw();
+   } else {
+      modifierRaw = RawSyntax::missing(TokenKindType::T_PUBLIC,
+                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_PUBLIC)));
+   }
+   return m_data->replaceChild<MemberModifierSyntax>(modifierRaw, Cursor::Modifier);
+}
+
+///
 /// ImplementClauseSyntax
 ///
 void InterfaceExtendsClauseSyntax::validate()
@@ -1804,7 +1849,7 @@ void InterfaceExtendsClauseSyntax::validate()
    assert(raw->getLayout().getSize() == ImplementClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ExtendsToken, std::set{TokenKindType::T_EXTENDS});
    if (const RefCountPtr<RawSyntax> interfaceChild = raw->getChild(Cursor::Interfaces)) {
-      assert(interfaceChild->kindOf(SyntaxKind::ImplementsListClause));
+      assert(interfaceChild->kindOf(SyntaxKind::ImplementsClause));
    }
 #endif
 }
@@ -1982,7 +2027,7 @@ void ClassDefinitionSyntax::validate()
       assert(extendsFromChild->kindOf(SyntaxKind::ExtendsFromClause));
    }
    if (const RefCountPtr<RawSyntax> implementsChild = raw->getChild(Cursor::ImplementsList)) {
-      assert(implementsChild->kindOf(SyntaxKind::ImplementsListClause));
+      assert(implementsChild->kindOf(SyntaxKind::ImplementsClause));
    }
    if (const RefCountPtr<RawSyntax> membersChild = raw->getChild(Cursor::Members)) {
       assert(membersChild->kindOf(SyntaxKind::MemberDeclBlock));
@@ -2076,7 +2121,7 @@ ClassDefinitionSyntax ClassDefinitionSyntax::withImplementsList(std::optional<Im
    if (implements.has_value()) {
       implementsRaw = implements->getRaw();
    } else {
-      implementsRaw = RawSyntax::missing(SyntaxKind::ImplementsListClause);
+      implementsRaw = RawSyntax::missing(SyntaxKind::ImplementsClause);
    }
    return m_data->replaceChild<ClassDefinitionSyntax>(implementsRaw, Cursor::ImplementsList);
 }
@@ -2233,7 +2278,7 @@ TraitDefinitionSyntax TraitDefinitionSyntax::withName(std::optional<TokenSyntax>
       nameRaw = name->getRaw();
    } else {
       nameRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
+                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
    }
    return m_data->replaceChild<TraitDefinitionSyntax>(nameRaw, Cursor::TraitToken);
 }
