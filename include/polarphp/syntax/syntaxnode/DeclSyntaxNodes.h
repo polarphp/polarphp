@@ -1442,6 +1442,56 @@ private:
 };
 
 ///
+/// property:
+///   T_VARIABLE backup_doc_comment
+/// | T_VARIABLE '=' expr backup_doc_comment
+///
+class ClassPropertySyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      Variable,
+      ///
+      /// type: InitializeClauseSyntax
+      /// optional: true
+      ///
+      Initializer
+   };
+
+public:
+   ClassPropertySyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getVariable();
+   std::optional<InitializeClauseSyntax> getInitializer();
+   ClassPropertySyntax withVariable(std::optional<TokenSyntax> variable);
+   ClassPropertySyntax withInitializer(std::optional<InitializeClauseSyntax> initializer);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassProperty;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class ClassPropertySyntaxBuilder;
+   void validate();
+};
+
+///
 /// member_modifier:
 ///   T_PUBLIC
 /// | T_PROTECTED

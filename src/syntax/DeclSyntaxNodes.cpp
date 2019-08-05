@@ -1846,7 +1846,7 @@ void InterfaceExtendsClauseSyntax::validate()
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().getSize() == ImplementClauseSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().getSize() == InterfaceExtendsClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ExtendsToken, std::set{TokenKindType::T_EXTENDS});
    if (const RefCountPtr<RawSyntax> interfaceChild = raw->getChild(Cursor::Interfaces)) {
       assert(interfaceChild->kindOf(SyntaxKind::ImplementsClause));
@@ -1885,6 +1885,61 @@ InterfaceExtendsClauseSyntax InterfaceExtendsClauseSyntax::withInterfaces(std::o
       interfacesRaw = RawSyntax::missing(SyntaxKind::NameList);
    }
    return m_data->replaceChild<InterfaceExtendsClauseSyntax>(interfacesRaw, Cursor::Interfaces);
+}
+
+///
+/// ClassPropertySyntax
+///
+void ClassPropertySyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassPropertySyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
+   if (const RefCountPtr<RawSyntax> initializerChild = raw->getChild(Cursor::Initializer)) {
+      assert(initializerChild->kindOf(SyntaxKind::InitializeClause));
+   }
+#endif
+}
+
+TokenSyntax ClassPropertySyntax::getVariable()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
+}
+
+std::optional<InitializeClauseSyntax> ClassPropertySyntax::getInitializer()
+{
+   RefCountPtr<SyntaxData> initializerData = m_data->getChild(Cursor::Initializer);
+   if (!initializerData) {
+      return std::nullopt;
+   }
+   return InitializeClauseSyntax {m_root, initializerData.get()};
+}
+
+ClassPropertySyntax ClassPropertySyntax::withVariable(std::optional<TokenSyntax> variable)
+{
+   RefCountPtr<RawSyntax> variableRaw;
+   if (variable.has_value()) {
+      variableRaw = variable->getRaw();
+   } else {
+      variableRaw = RawSyntax::missing(TokenKindType::T_VARIABLE,
+                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_VARIABLE)));
+   }
+   return m_data->replaceChild<ClassPropertySyntax>(variableRaw, Cursor::Variable);
+}
+
+ClassPropertySyntax ClassPropertySyntax::withInitializer(std::optional<InitializeClauseSyntax> initializer)
+{
+   RefCountPtr<RawSyntax> initializerRaw;
+   if (initializer.has_value()) {
+      initializerRaw = initializer->getRaw();
+   } else {
+      initializerRaw = nullptr;
+   }
+   return m_data->replaceChild<ClassPropertySyntax>(initializerRaw, Cursor::Initializer);
 }
 
 ///
