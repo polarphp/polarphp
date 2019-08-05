@@ -1996,11 +1996,21 @@ public:
       ///
       /// type: Syntax
       /// optional: true
+      /// node choices: true
+      /// --------------------------------------
+      /// node choice: ReservedNonModifierSyntax
+      /// --------------------------------------
+      /// node choice: MemberModifierSyntax
       ///
       Modifier,
       ///
       /// type: Syntax
       /// optional: true
+      /// node choices: true
+      /// ------------------------------
+      /// node choice: TokenSyntax
+      /// ------------------------------
+      /// node choice: IdentifierSyntax
       ///
       AliasName
    };
@@ -2038,6 +2048,66 @@ public:
 
 private:
    friend class ClassTraitAliasSyntaxBuilder;
+   void validate();
+};
+
+///
+/// trait_adaptation:
+///   trait_precedence ';'
+/// | trait_alias ';'
+///
+class ClassTraitAdaptationSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optiona: false
+      /// node choices: true
+      /// -----------------------------------------
+      /// node choice: ClassTraitPrecedenceSyntax
+      /// -----------------------------------------
+      /// node choice: ClassTraitAliasSyntax
+      ///
+      Adaptation,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      Semicolon
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+public:
+   ClassTraitAdaptationSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getAdaptation();
+   TokenSyntax getSemicolon();
+
+   ClassTraitAdaptationSyntax withAdaptation(std::optional<Syntax> adaptation);
+   ClassTraitAdaptationSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassTraitAdaptation;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassTraitAdaptationSyntaxBuilder;
    void validate();
 };
 

@@ -2444,6 +2444,66 @@ ClassTraitAliasSyntax ClassTraitAliasSyntax::withAliasName(std::optional<Syntax>
 }
 
 ///
+/// ClassTraitAdaptationSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType ClassTraitAdaptationSyntax::CHILD_NODE_CHOICES
+{
+   {
+      ClassTraitAdaptationSyntax::Adaptation, {
+         SyntaxKind::ClassTraitPrecedence, SyntaxKind::ClassTraitAlias,
+      }
+   }
+};
+#endif
+
+void ClassTraitAdaptationSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassTraitAdaptationSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Adaptation, CHILD_NODE_CHOICES.at(Cursor::Adaptation));
+   syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
+#endif
+}
+
+Syntax ClassTraitAdaptationSyntax::getAdaptation()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Adaptation).get()};
+}
+
+TokenSyntax ClassTraitAdaptationSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
+}
+
+ClassTraitAdaptationSyntax ClassTraitAdaptationSyntax::withAdaptation(std::optional<Syntax> adaptation)
+{
+   RefCountPtr<RawSyntax> adaptationRaw;
+   if (adaptation.has_value()) {
+      adaptationRaw = adaptation->getRaw();
+   } else {
+      adaptationRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<ClassTraitAdaptationSyntax>(adaptationRaw, Cursor::Adaptation);
+}
+
+ClassTraitAdaptationSyntax ClassTraitAdaptationSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> semicolonRaw;
+   if (semicolon.has_value()) {
+      semicolonRaw = semicolon->getRaw();
+   } else {
+      semicolonRaw = RawSyntax::missing(TokenKindType::T_SEMICOLON,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
+   }
+   return m_data->replaceChild<ClassTraitAdaptationSyntax>(semicolonRaw, Cursor::Semicolon);
+}
+
+///
 /// ImplementClauseSyntax
 ///
 void InterfaceExtendsClauseSyntax::validate()
