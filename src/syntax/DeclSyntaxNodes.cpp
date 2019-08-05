@@ -2504,6 +2504,76 @@ ClassTraitAdaptationSyntax ClassTraitAdaptationSyntax::withSemicolon(std::option
 }
 
 ///
+/// ClassTraitAdaptationBlockSyntax
+///
+void ClassTraitAdaptationBlockSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassTraitAdaptationBlockSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_BRACE});
+   syntax_assert_child_token(raw, RightBrace, std::set{TokenKindType::T_RIGHT_BRACE});
+   if (const RefCountPtr<RawSyntax> &adaptationChild = raw->getChild(Cursor::AdaptationList)) {
+      assert(adaptationChild->kindOf(SyntaxKind::ClassTraitAdaptationList));
+   }
+#endif
+}
+
+TokenSyntax ClassTraitAdaptationBlockSyntax::getLeftBrace()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftBrace).get()};
+}
+
+ClassTraitAdaptationListSyntax ClassTraitAdaptationBlockSyntax::getAdaptaionList()
+{
+   return ClassTraitAdaptationListSyntax {m_root, m_data->getChild(Cursor::AdaptationList).get()};
+}
+
+TokenSyntax ClassTraitAdaptationBlockSyntax::getRightBrace()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightBrace).get()};
+}
+
+ClassTraitAdaptationBlockSyntax ClassTraitAdaptationBlockSyntax::withLeftBrace(std::optional<TokenSyntax> leftBrace)
+{
+   RefCountPtr<RawSyntax> leftBraceRaw;
+   if (leftBrace.has_value()) {
+      leftBraceRaw = leftBrace->getRaw();
+   } else {
+      leftBraceRaw = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE)));
+   }
+   return m_data->replaceChild<ClassTraitAdaptationBlockSyntax>(leftBraceRaw, Cursor::LeftBrace);
+}
+
+ClassTraitAdaptationBlockSyntax
+ClassTraitAdaptationBlockSyntax::withAdaptationList(std::optional<ClassTraitAdaptationListSyntax> adaptaionList)
+{
+   RefCountPtr<RawSyntax> adaptaionListRaw;
+   if (adaptaionList.has_value()) {
+      adaptaionListRaw = adaptaionList->getRaw();
+   } else {
+      adaptaionListRaw = RawSyntax::missing(SyntaxKind::ClassTraitAdaptationList);
+   }
+   return m_data->replaceChild<ClassTraitAdaptationBlockSyntax>(adaptaionListRaw, Cursor::AdaptationList);
+}
+
+ClassTraitAdaptationBlockSyntax ClassTraitAdaptationBlockSyntax::withRightBrace(std::optional<TokenSyntax> rightBrace)
+{
+   RefCountPtr<RawSyntax> rightBraceRaw;
+   if (rightBrace.has_value()) {
+      rightBraceRaw = rightBrace->getRaw();
+   } else {
+      rightBraceRaw = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)));
+   }
+   return m_data->replaceChild<ClassTraitAdaptationBlockSyntax>(rightBraceRaw, Cursor::RightBrace);
+}
+
+///
 /// ImplementClauseSyntax
 ///
 void InterfaceExtendsClauseSyntax::validate()

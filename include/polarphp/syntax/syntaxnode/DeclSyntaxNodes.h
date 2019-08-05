@@ -2112,6 +2112,66 @@ private:
 };
 
 ///
+/// trait_adaptations:
+/// ';'
+/// | '{' '}'
+/// | '{' trait_adaptation_list '}'
+///
+class ClassTraitAdaptationBlockSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      LeftBrace,
+      ///
+      /// type: ClassTraitAdaptationListSyntax
+      /// optional: false
+      ///
+      AdaptationList,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      RightBrace
+   };
+
+public:
+   ClassTraitAdaptationBlockSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getLeftBrace();
+   ClassTraitAdaptationListSyntax getAdaptaionList();
+   TokenSyntax getRightBrace();
+
+   ClassTraitAdaptationBlockSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
+   ClassTraitAdaptationBlockSyntax withAdaptationList(std::optional<ClassTraitAdaptationListSyntax> adaptaionList);
+   ClassTraitAdaptationBlockSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassTraitAdaptationBlock;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassTraitAdaptationBlockSyntaxBuilder;
+   void validate();
+};
+
+///
 /// member-decl:
 ///   decl ';'?
 ///
