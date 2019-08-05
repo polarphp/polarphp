@@ -1446,7 +1446,7 @@ private:
 ///   T_VARIABLE backup_doc_comment
 /// | T_VARIABLE '=' expr backup_doc_comment
 ///
-class ClassPropertySyntax final : public Syntax
+class ClassPropertyClauseSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -1466,7 +1466,7 @@ public:
    };
 
 public:
-   ClassPropertySyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   ClassPropertyClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
@@ -1474,12 +1474,12 @@ public:
 
    TokenSyntax getVariable();
    std::optional<InitializeClauseSyntax> getInitializer();
-   ClassPropertySyntax withVariable(std::optional<TokenSyntax> variable);
-   ClassPropertySyntax withInitializer(std::optional<InitializeClauseSyntax> initializer);
+   ClassPropertyClauseSyntax withVariable(std::optional<TokenSyntax> variable);
+   ClassPropertyClauseSyntax withInitializer(std::optional<InitializeClauseSyntax> initializer);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::ClassProperty;
+      return kind == SyntaxKind::ClassPropertyClause;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -1487,7 +1487,57 @@ public:
       return kindOf(syntax->getKind());
    }
 private:
-   friend class ClassPropertySyntaxBuilder;
+   friend class ClassPropertyClauseSyntaxBuilder;
+   void validate();
+};
+
+///
+/// class_const_decl:
+///   identifier '=' expr backup_doc_comment
+///
+class ClassConstClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: IdentifierSyntax
+      /// optional: false
+      ///
+      Identifier,
+      ///
+      /// type: InitializeClauseSyntax
+      /// optional: true
+      ///
+      Initializer
+   };
+
+public:
+   ClassConstClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   IdentifierSyntax getIdentifier();
+   std::optional<InitializeClauseSyntax> getInitializer();
+   ClassConstClauseSyntax withIdentifier(std::optional<IdentifierSyntax> identifier);
+   ClassConstClauseSyntax withInitializer(std::optional<InitializeClauseSyntax> initializer);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassConstClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassConstClauseSyntaxBuilder;
    void validate();
 };
 
@@ -1544,6 +1594,209 @@ public:
 
 private:
    friend class MemberModifierSyntaxBuilder;
+   void validate();
+};
+
+///
+/// class_statement:
+///    member_modifiers optional_type property_list
+///
+class ClassPropertyDeclSyntax final : public DeclSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: MemberModifierListSyntax
+      /// optional: false
+      ///
+      Modifiers,
+      ///
+      /// type: TypeExprClauseSyntax
+      /// optional: true
+      ///
+      TypeHint,
+      ///
+      /// type: ClassPropertyListSyntax
+      /// optional: false
+      ///
+      PropertyList
+   };
+
+public:
+   ClassPropertyDeclSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : DeclSyntax(root, data)
+   {
+      validate();
+   }
+
+   MemberModifierListSyntax getModifiers();
+   std::optional<TypeExprClauseSyntax> getTypeHint();
+   ClassPropertyListSyntax getPropertyList();
+
+   ClassPropertyDeclSyntax withModifiers(std::optional<MemberModifierListSyntax> modifiers);
+   ClassPropertyDeclSyntax withTypeHint(std::optional<TypeExprClauseSyntax> typeHint);
+   ClassPropertyDeclSyntax withPropertyList(std::optional<ClassPropertyListSyntax> propertyList);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassPropertyDecl;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class MemberDeclListItemSyntaxBuilder;
+   void validate();
+};
+
+///
+/// class_statement:
+///   member_modifiers T_CONST class_const_list
+///
+class ClassConstDeclSyntax final : public DeclSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: MemberModifierListSyntax
+      /// optional: false
+      ///
+      Modifiers,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      ConstToken,
+      ///
+      /// type: ClassConstListSyntax
+      /// optional: false
+      ///
+      ConstList
+   };
+
+public:
+   ClassConstDeclSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : DeclSyntax(root, data)
+   {
+      validate();
+   }
+
+   MemberModifierListSyntax getModifiers();
+   std::optional<TokenSyntax> getConstToken();
+   ClassPropertyListSyntax getConstList();
+
+   ClassConstDeclSyntax withModifiers(std::optional<MemberModifierListSyntax> modifiers);
+   ClassConstDeclSyntax withConstToken(std::optional<TokenSyntax> constToken);
+   ClassConstDeclSyntax withConstList(std::optional<ClassConstListSyntax> constList);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassConstList;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassConstDeclSyntaxBuilder;
+   void validate();
+};
+
+///
+/// class_statement:
+///   method_modifiers function returns_ref identifier backup_doc_comment '(' parameter_list ')'
+///   return_type backup_fn_flags method_body backup_fn_flags
+///
+class ClassMethodDeclSyntax final : public DeclSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 7;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: MemberModifierListSyntax
+      /// optional: false
+      ///
+      Modifiers,
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      FunctionToken,
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      ReturnRefToken,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      FuncName,
+      ///
+      /// type: ParameterListSyntax
+      /// optional: false
+      ///
+      Parameters,
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      ReturnTypeToken,
+      ///
+      /// type: MemberDeclBlockSyntax
+      /// optional: true
+      ///
+      Body
+   };
+
+public:
+   ClassMethodDeclSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   MemberModifierListSyntax getModifiers();
+   std::optional<TokenSyntax> getFunctionToken();
+   std::optional<TokenSyntax> getReturnRefToken();
+   TokenSyntax getFuncName();
+   ParameterListSyntax getParameters();
+   std::optional<TokenSyntax> getReturnTypeToken();
+   std::optional<MemberDeclBlockSyntax> getBody();
+
+   ClassMethodDeclSyntax withModifiers(std::optional<MemberModifierListSyntax> modifiers);
+   ClassMethodDeclSyntax withFunctionToken(std::optional<TokenSyntax> functionToken);
+   ClassMethodDeclSyntax withReturnRefToken(std::optional<TokenSyntax> returnRefToken);
+   ClassMethodDeclSyntax withFuncName(std::optional<TokenSyntax> funcName);
+   ClassMethodDeclSyntax withParameters(std::optional<ParameterListSyntax> parameters);
+   ClassMethodDeclSyntax withReturnTypeToken(std::optional<TokenSyntax> returnTypeToken);
+   ClassMethodDeclSyntax withBody(std::optional<MemberDeclBlockSyntax> body);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassMethodDecl;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassMethodDeclSyntaxBuilder;
    void validate();
 };
 

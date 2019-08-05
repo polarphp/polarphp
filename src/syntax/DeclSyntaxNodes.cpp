@@ -1837,6 +1837,155 @@ MemberModifierSyntax MemberModifierSyntax::withModifier(std::optional<TokenSynta
 }
 
 ///
+/// ClassPropertyDeclSyntax
+///
+void ClassPropertyDeclSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassPropertyDeclSyntax::CHILDREN_COUNT);
+   if (const RefCountPtr<RawSyntax> modifiersChild = raw->getChild(Cursor::Modifiers)) {
+      assert(modifiersChild->kindOf(SyntaxKind::ClassModifierList));
+   }
+   if (const RefCountPtr<RawSyntax> typeHintChild = raw->getChild(Cursor::TypeHint)) {
+      assert(typeHintChild->kindOf(SyntaxKind::TypeExprClause));
+   }
+   if (const RefCountPtr<RawSyntax> propertyListChild = raw->getChild(Cursor::PropertyList)) {
+      assert(propertyListChild->kindOf(SyntaxKind::ClassPropertyList));
+   }
+#endif
+}
+
+MemberModifierListSyntax ClassPropertyDeclSyntax::getModifiers()
+{
+   return MemberModifierListSyntax {m_root, m_data->getChild(Cursor::Modifiers).get()};
+}
+
+std::optional<TypeExprClauseSyntax> ClassPropertyDeclSyntax::getTypeHint()
+{
+   RefCountPtr<SyntaxData> typeHintData = m_data->getChild(Cursor::TypeHint);
+   if (!typeHintData) {
+      return std::nullopt;
+   }
+   return TypeExprClauseSyntax {m_root, typeHintData.get()};
+}
+
+ClassPropertyListSyntax ClassPropertyDeclSyntax::getPropertyList()
+{
+   return ClassPropertyListSyntax {m_root, m_data->getChild(Cursor::PropertyList).get()};
+}
+
+ClassPropertyDeclSyntax ClassPropertyDeclSyntax::withModifiers(std::optional<MemberModifierListSyntax> modifiers)
+{
+   RefCountPtr<RawSyntax> modifiersRaw;
+   if (modifiers.has_value()) {
+      modifiersRaw = modifiers->getRaw();
+   } else {
+      modifiersRaw = RawSyntax::missing(SyntaxKind::ClassModifierList);
+   }
+   return m_data->replaceChild<ClassPropertyDeclSyntax>(modifiersRaw, Cursor::Modifiers);
+}
+
+ClassPropertyDeclSyntax ClassPropertyDeclSyntax::withTypeHint(std::optional<TypeExprClauseSyntax> typeHint)
+{
+   RefCountPtr<RawSyntax> typeHintRaw;
+   if (typeHint.has_value()) {
+      typeHintRaw = typeHint->getRaw();
+   } else {
+      typeHintRaw = nullptr;
+   }
+   return m_data->replaceChild<ClassPropertyDeclSyntax>(typeHintRaw, Cursor::TypeHint);
+}
+
+ClassPropertyDeclSyntax ClassPropertyDeclSyntax::withPropertyList(std::optional<ClassPropertyListSyntax> propertyList)
+{
+   RefCountPtr<RawSyntax> propertyListRaw;
+   if (propertyList.has_value()) {
+      propertyListRaw = propertyList->getRaw();
+   } else {
+      propertyListRaw = RawSyntax::missing(SyntaxKind::ClassPropertyList);
+   }
+   return m_data->replaceChild<ClassPropertyDeclSyntax>(propertyListRaw, Cursor::PropertyList);
+}
+
+///
+/// ClassConstDeclSyntax
+///
+void ClassConstDeclSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassConstDeclSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ConstToken, std::set{TokenKindType::T_CONST});
+   if (const RefCountPtr<RawSyntax> modifiersChild = raw->getChild(Cursor::Modifiers)) {
+      assert(modifiersChild->kindOf(SyntaxKind::ClassModifierList));
+   }
+   if (const RefCountPtr<RawSyntax> constListChild = raw->getChild(Cursor::ConstList)) {
+      assert(constListChild->kindOf(SyntaxKind::ClassConstList));
+   }
+#endif
+}
+
+MemberModifierListSyntax ClassConstDeclSyntax::getModifiers()
+{
+   return MemberModifierListSyntax {m_root, m_data->getChild(Cursor::Modifiers).get()};
+}
+
+std::optional<TokenSyntax> ClassConstDeclSyntax::getConstToken()
+{
+   RefCountPtr<SyntaxData> constTokenData = m_data->getChild(Cursor::ConstToken);
+   if (!constTokenData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, constTokenData.get()};
+}
+
+ClassPropertyListSyntax ClassConstDeclSyntax::getConstList()
+{
+   return ClassPropertyListSyntax {m_root, m_data->getChild(Cursor::ConstList).get()};
+}
+
+ClassConstDeclSyntax ClassConstDeclSyntax::withModifiers(std::optional<MemberModifierListSyntax> modifiers)
+{
+   RefCountPtr<RawSyntax> modifiersRaw;
+   if (modifiers.has_value()) {
+      modifiersRaw = modifiers->getRaw();
+   } else {
+      modifiersRaw = RawSyntax::missing(SyntaxKind::ClassModifierList);
+   }
+   return m_data->replaceChild<ClassConstDeclSyntax>(modifiersRaw, Cursor::Modifiers);
+}
+
+ClassConstDeclSyntax ClassConstDeclSyntax::withConstToken(std::optional<TokenSyntax> constToken)
+{
+   RefCountPtr<RawSyntax> constTokenRaw;
+   if (constToken.has_value()) {
+      constTokenRaw = constToken->getRaw();
+   } else {
+      constTokenRaw = RawSyntax::missing(TokenKindType::T_CONST,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_CONST)));
+   }
+   return m_data->replaceChild<ClassConstDeclSyntax>(constTokenRaw, Cursor::ConstToken);
+}
+
+ClassConstDeclSyntax ClassConstDeclSyntax::withConstList(std::optional<ClassConstListSyntax> constList)
+{
+   RefCountPtr<RawSyntax> constListRaw;
+   if (constList.has_value()) {
+      constListRaw = constList->getRaw();
+   } else {
+      constListRaw = RawSyntax::missing(SyntaxKind::ClassConstList);
+   }
+   return m_data->replaceChild<ClassConstDeclSyntax>(constListRaw, Cursor::ConstList);
+}
+
+///
 /// ImplementClauseSyntax
 ///
 void InterfaceExtendsClauseSyntax::validate()
@@ -1888,16 +2037,16 @@ InterfaceExtendsClauseSyntax InterfaceExtendsClauseSyntax::withInterfaces(std::o
 }
 
 ///
-/// ClassPropertySyntax
+/// ClassPropertyClauseSyntax
 ///
-void ClassPropertySyntax::validate()
+void ClassPropertyClauseSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().getSize() == ClassPropertySyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().getSize() == ClassPropertyClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
    if (const RefCountPtr<RawSyntax> initializerChild = raw->getChild(Cursor::Initializer)) {
       assert(initializerChild->kindOf(SyntaxKind::InitializeClause));
@@ -1905,12 +2054,12 @@ void ClassPropertySyntax::validate()
 #endif
 }
 
-TokenSyntax ClassPropertySyntax::getVariable()
+TokenSyntax ClassPropertyClauseSyntax::getVariable()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
 }
 
-std::optional<InitializeClauseSyntax> ClassPropertySyntax::getInitializer()
+std::optional<InitializeClauseSyntax> ClassPropertyClauseSyntax::getInitializer()
 {
    RefCountPtr<SyntaxData> initializerData = m_data->getChild(Cursor::Initializer);
    if (!initializerData) {
@@ -1919,7 +2068,7 @@ std::optional<InitializeClauseSyntax> ClassPropertySyntax::getInitializer()
    return InitializeClauseSyntax {m_root, initializerData.get()};
 }
 
-ClassPropertySyntax ClassPropertySyntax::withVariable(std::optional<TokenSyntax> variable)
+ClassPropertyClauseSyntax ClassPropertyClauseSyntax::withVariable(std::optional<TokenSyntax> variable)
 {
    RefCountPtr<RawSyntax> variableRaw;
    if (variable.has_value()) {
@@ -1928,10 +2077,10 @@ ClassPropertySyntax ClassPropertySyntax::withVariable(std::optional<TokenSyntax>
       variableRaw = RawSyntax::missing(TokenKindType::T_VARIABLE,
                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_VARIABLE)));
    }
-   return m_data->replaceChild<ClassPropertySyntax>(variableRaw, Cursor::Variable);
+   return m_data->replaceChild<ClassPropertyClauseSyntax>(variableRaw, Cursor::Variable);
 }
 
-ClassPropertySyntax ClassPropertySyntax::withInitializer(std::optional<InitializeClauseSyntax> initializer)
+ClassPropertyClauseSyntax ClassPropertyClauseSyntax::withInitializer(std::optional<InitializeClauseSyntax> initializer)
 {
    RefCountPtr<RawSyntax> initializerRaw;
    if (initializer.has_value()) {
@@ -1939,7 +2088,63 @@ ClassPropertySyntax ClassPropertySyntax::withInitializer(std::optional<Initializ
    } else {
       initializerRaw = nullptr;
    }
-   return m_data->replaceChild<ClassPropertySyntax>(initializerRaw, Cursor::Initializer);
+   return m_data->replaceChild<ClassPropertyClauseSyntax>(initializerRaw, Cursor::Initializer);
+}
+
+///
+/// ClassConstClauseSyntax
+///
+void ClassConstClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassPropertyClauseSyntax::CHILDREN_COUNT);
+   if (const RefCountPtr<RawSyntax> identifierChild = raw->getChild(Cursor::Identifier)) {
+      assert(identifierChild->kindOf(SyntaxKind::Identifier));
+   }
+   if (const RefCountPtr<RawSyntax> initializerChild = raw->getChild(Cursor::Initializer)) {
+      assert(initializerChild->kindOf(SyntaxKind::InitializeClause));
+   }
+#endif
+}
+
+IdentifierSyntax ClassConstClauseSyntax::getIdentifier()
+{
+   return IdentifierSyntax {m_root, m_data->getChild(Cursor::Identifier).get()};
+}
+
+std::optional<InitializeClauseSyntax> ClassConstClauseSyntax::getInitializer()
+{
+   RefCountPtr<SyntaxData> initializerData = m_data->getChild(Cursor::Initializer);
+   if (!initializerData) {
+      return std::nullopt;
+   }
+   return InitializeClauseSyntax {m_root, initializerData.get()};
+}
+
+ClassConstClauseSyntax ClassConstClauseSyntax::withIdentifier(std::optional<IdentifierSyntax> identifier)
+{
+   RefCountPtr<RawSyntax> identifierRaw;
+   if (identifier.has_value()) {
+      identifierRaw = identifier->getRaw();
+   } else {
+      identifierRaw = RawSyntax::missing(SyntaxKind::Identifier);
+   }
+   return m_data->replaceChild<ClassConstClauseSyntax>(identifierRaw, Cursor::Identifier);
+}
+
+ClassConstClauseSyntax ClassConstClauseSyntax::withInitializer(std::optional<InitializeClauseSyntax> initializer)
+{
+   RefCountPtr<RawSyntax> initializerRaw;
+   if (initializer.has_value()) {
+      initializerRaw = initializer->getRaw();
+   } else {
+      initializerRaw = RawSyntax::missing(SyntaxKind::Identifier);
+   }
+   return m_data->replaceChild<ClassConstClauseSyntax>(initializerRaw, Cursor::Initializer);
 }
 
 ///

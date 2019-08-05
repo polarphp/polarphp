@@ -41,8 +41,12 @@ class ClassModifierSyntax;
 class ExtendsFromClauseSyntax;
 class ImplementClauseSyntax;
 class InterfaceExtendsClauseSyntax;
-class ClassPropertySyntax;
+class ClassPropertyClauseSyntax;
+class ClassConstClauseSyntax;
 class MemberModifierSyntax;
+class ClassPropertyDeclSyntax;
+class ClassConstDeclSyntax;
+class ClassMethodDeclSyntax;
 class MemberDeclBlockSyntax;
 class MemberDeclListItemSyntax;
 class ClassDefinitionSyntax;
@@ -160,7 +164,17 @@ using MemberModifierListSyntax = SyntaxCollection<SyntaxKind::MemberModifierList
 ///   property_list ',' property
 /// | property
 ///
-using ClassPropertyListSyntax = SyntaxCollection<SyntaxKind::ParameterList, ClassPropertySyntax>;
+using ClassPropertyListSyntax = SyntaxCollection<SyntaxKind::ClassPropertyList, ClassPropertyClauseSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: ClassConstClauseSyntax
+///
+/// class_const_list:
+///   class_const_list ',' class_const_decl
+///   | class_const_decl
+///
+using ClassConstListSyntax = SyntaxCollection<SyntaxKind::ClassConstList, ClassConstClauseSyntax>;
 
 } // polar::syntax
 
