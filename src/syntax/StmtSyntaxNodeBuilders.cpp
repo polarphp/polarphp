@@ -81,7 +81,6 @@ ContinueStmtSyntax ContinueStmtSyntaxBuilder::build()
 ///
 /// BreakStmtSyntaxBuilder
 ///
-
 BreakStmtSyntaxBuilder &BreakStmtSyntaxBuilder::useBreakKeyword(TokenSyntax breakKeyword)
 {
    m_layout[cursor_index(Cursor::BreakKeyword)] = breakKeyword.getRaw();
@@ -609,11 +608,11 @@ SwitchCaseSyntaxBuilder &SwitchCaseSyntaxBuilder::useLabel(Syntax label)
    return *this;
 }
 
-//SwitchCaseSyntaxBuilder &SwitchCaseSyntaxBuilder::useStatements(CodeBlockItemListSyntax statements)
-//{
-//   m_layout[cursor_index(Cursor::Statements)] = statements.getRaw();
-//   return *this;
-//}
+SwitchCaseSyntaxBuilder &SwitchCaseSyntaxBuilder::useStatements(CodeBlockItemListSyntax statements)
+{
+   m_layout[cursor_index(Cursor::Statements)] = statements.getRaw();
+   return *this;
+}
 
 SwitchCaseSyntax SwitchCaseSyntaxBuilder::build()
 {
@@ -622,9 +621,9 @@ SwitchCaseSyntax SwitchCaseSyntaxBuilder::build()
    if (!m_layout[labelIndex]) {
       m_layout[labelIndex] = RawSyntax::missing(SyntaxKind::SwitchDefaultLabel);
    }
-//   if (!m_layout[statementsIndex]) {
-//      m_layout[statementsIndex] = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
-//   }
+   if (!m_layout[statementsIndex]) {
+      m_layout[statementsIndex] = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
+   }
    RefCountPtr<RawSyntax> rawSwitchCaseSyntax = RawSyntax::make(SyntaxKind::SwitchCase, m_layout, SourcePresence::Present,
                                                                 m_arena);
    return make<SwitchCaseSyntax>(rawSwitchCaseSyntax);

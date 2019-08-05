@@ -275,7 +275,7 @@ public:
    {}
 
    SwitchCaseSyntaxBuilder &useLabel(Syntax label);
-//   SwitchCaseSyntaxBuilder &useStatements(CodeBlockItemListSyntax statements);
+   SwitchCaseSyntaxBuilder &useStatements(CodeBlockItemListSyntax statements);
    SwitchCaseSyntax build();
 
 private:

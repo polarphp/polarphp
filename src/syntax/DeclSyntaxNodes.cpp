@@ -909,7 +909,7 @@ void NamespaceUseSyntax::validate()
       assert(useTypeChild->kindOf(SyntaxKind::NamespaceUseType));
    }
    if (const RefCountPtr<RawSyntax> &declarationsChild = raw->getChild(Cursor::Declarations)) {
-      bool isMixGroupUseDeclarations = declarationsChild->kindOf(SyntaxKind::NamespacemixedGroupUseDeclaration);
+      bool isMixGroupUseDeclarations = declarationsChild->kindOf(SyntaxKind::NamespaceMixedGroupUseDeclaration);
       bool isGroupUseDeclarations = declarationsChild->kindOf(SyntaxKind::NamespaceGroupUseDeclaration);
       bool isUseDeclarations = declarationsChild->kindOf(SyntaxKind::NamespaceUseDeclarationList);
       assert(isMixGroupUseDeclarations || isGroupUseDeclarations || isUseDeclarations);
@@ -2140,6 +2140,194 @@ ClassMethodDeclSyntax ClassMethodDeclSyntax::withBody(std::optional<MemberDeclBl
       bodyRaw = RawSyntax::missing(SyntaxKind::MemberDeclBlock);
    }
    return m_data->replaceChild<ClassMethodDeclSyntax>(bodyRaw, Cursor::Body);
+}
+
+///
+/// ClassTraitMethodReferenceSyntax
+///
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType ClassTraitMethodReferenceSyntax::CHILD_NODE_CHOICES
+{
+   {
+      ClassTraitMethodReferenceSyntax::Reference, {
+         SyntaxKind::Identifier,
+               SyntaxKind::ClassAbsoluteTraitMethodReference
+      }
+   }
+};
+#endif
+
+void ClassTraitMethodReferenceSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassTraitMethodReferenceSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Reference, CHILD_NODE_CHOICES.at(Cursor::Reference));
+#endif
+}
+
+Syntax ClassTraitMethodReferenceSyntax::getReference()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Reference).get()};
+}
+
+ClassTraitMethodReferenceSyntax ClassTraitMethodReferenceSyntax::withReference(std::optional<Syntax> reference)
+{
+   RefCountPtr<RawSyntax> referenceRaw;
+   if (reference.has_value()) {
+      referenceRaw = reference->getRaw();
+   } else {
+      referenceRaw = RawSyntax::missing(SyntaxKind::Identifier);
+   }
+   return m_data->replaceChild<ClassTraitMethodReferenceSyntax>(referenceRaw, Cursor::Reference);
+}
+
+///
+/// ClassAbsoluteTraitMethodReferenceSyntax
+///
+void ClassAbsoluteTraitMethodReferenceSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassAbsoluteTraitMethodReferenceSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Separator, std::set{TokenKindType::T_PAAMAYIM_NEKUDOTAYIM});
+   if (const RefCountPtr<RawSyntax> baseNameChild = raw->getChild(Cursor::BaseName)) {
+      assert(baseNameChild->kindOf(SyntaxKind::Name));
+   }
+   if (const RefCountPtr<RawSyntax> memberNameChild = raw->getChild(Cursor::MemberName)) {
+      assert(memberNameChild->kindOf(SyntaxKind::Identifier));
+   }
+#endif
+}
+
+NameSyntax ClassAbsoluteTraitMethodReferenceSyntax::getBaseName()
+{
+   return NameSyntax {m_root, m_data->getChild(Cursor::BaseName).get()};
+}
+
+TokenSyntax ClassAbsoluteTraitMethodReferenceSyntax::getSeparator()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Separator).get()};
+}
+
+IdentifierSyntax ClassAbsoluteTraitMethodReferenceSyntax::getMemberName()
+{
+   return IdentifierSyntax {m_root, m_data->getChild(Cursor::MemberName).get()};
+}
+
+ClassAbsoluteTraitMethodReferenceSyntax
+ClassAbsoluteTraitMethodReferenceSyntax::withBaseName(std::optional<NameSyntax> baseName)
+{
+   RefCountPtr<RawSyntax> baseNameRaw;
+   if (baseName.has_value()) {
+      baseNameRaw = baseName->getRaw();
+   } else {
+      baseNameRaw = RawSyntax::missing(SyntaxKind::Name);
+   }
+   return m_data->replaceChild<ClassAbsoluteTraitMethodReferenceSyntax>(baseNameRaw, Cursor::BaseName);
+}
+
+ClassAbsoluteTraitMethodReferenceSyntax
+ClassAbsoluteTraitMethodReferenceSyntax::withSeparator(std::optional<TokenSyntax> separator)
+{
+   RefCountPtr<RawSyntax> separatorRaw;
+   if (separator.has_value()) {
+      separatorRaw = separator->getRaw();
+   } else {
+      separatorRaw = RawSyntax::missing(TokenKindType::T_PAAMAYIM_NEKUDOTAYIM,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_PAAMAYIM_NEKUDOTAYIM)));
+   }
+   return m_data->replaceChild<ClassAbsoluteTraitMethodReferenceSyntax>(separatorRaw, Cursor::Separator);
+}
+
+ClassAbsoluteTraitMethodReferenceSyntax
+ClassAbsoluteTraitMethodReferenceSyntax::withMemberName(std::optional<IdentifierSyntax> memberName)
+{
+   RefCountPtr<RawSyntax> memberNameRaw;
+   if (memberName.has_value()) {
+      memberNameRaw = memberName->getRaw();
+   } else {
+      memberNameRaw = RawSyntax::missing(SyntaxKind::Identifier);
+   }
+   return m_data->replaceChild<ClassAbsoluteTraitMethodReferenceSyntax>(memberNameRaw, Cursor::MemberName);
+}
+
+///
+/// ClassTraitPrecedenceSyntax
+///
+void ClassTraitPrecedenceSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassTraitPrecedenceSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, InsteadOfToken, std::set{TokenKindType::T_INSTEADOF});
+   if (const RefCountPtr<RawSyntax> methodReferenceChild = raw->getChild(Cursor::MethodReference)) {
+      assert(methodReferenceChild->kindOf(SyntaxKind::ClassAbsoluteTraitMethodReference));
+   }
+   if (const RefCountPtr<RawSyntax> nameListChild = raw->getChild(Cursor::Names)) {
+      assert(nameListChild->kindOf(SyntaxKind::NameList));
+   }
+#endif
+}
+
+ClassAbsoluteTraitMethodReferenceSyntax ClassTraitPrecedenceSyntax::getMethodReference()
+{
+   return ClassAbsoluteTraitMethodReferenceSyntax {m_root, m_data->getChild(Cursor::MethodReference).get()};
+}
+
+TokenSyntax ClassTraitPrecedenceSyntax::getInsteadOfToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::InsteadOfToken).get()};
+}
+
+NameListSyntax ClassTraitPrecedenceSyntax::getNames()
+{
+   return NameListSyntax {m_root, m_data->getChild(Cursor::Names).get()};
+}
+
+ClassTraitPrecedenceSyntax
+ClassTraitPrecedenceSyntax::withMethodReference(std::optional<ClassAbsoluteTraitMethodReferenceSyntax> methodReference)
+{
+   RefCountPtr<RawSyntax> methodReferenceRaw;
+   if (methodReference.has_value()) {
+      methodReferenceRaw = methodReference->getRaw();
+   } else {
+      methodReferenceRaw = RawSyntax::missing(SyntaxKind::ClassAbsoluteTraitMethodReference);
+   }
+   return m_data->replaceChild<ClassTraitPrecedenceSyntax>(methodReferenceRaw, Cursor::MethodReference);
+}
+
+ClassTraitPrecedenceSyntax ClassTraitPrecedenceSyntax::withInsteadOfToken(std::optional<TokenSyntax> insteadOfToken)
+{
+   RefCountPtr<RawSyntax> insteadOfTokenRaw;
+   if (insteadOfToken.has_value()) {
+      insteadOfTokenRaw = insteadOfToken->getRaw();
+   } else {
+      insteadOfTokenRaw = RawSyntax::missing(TokenKindType::T_INSTEADOF,
+                                             OwnedString::makeUnowned(get_token_text(TokenKindType::T_INSTEADOF)));
+   }
+   return m_data->replaceChild<ClassTraitPrecedenceSyntax>(insteadOfTokenRaw, Cursor::InsteadOfToken);
+}
+
+ClassTraitPrecedenceSyntax ClassTraitPrecedenceSyntax::withNames(std::optional<NameListSyntax> names)
+{
+   RefCountPtr<RawSyntax> namesRaw;
+   if (names.has_value()) {
+      namesRaw = names->getRaw();
+   } else {
+      namesRaw = RawSyntax::missing(SyntaxKind::NameList);
+   }
+   return m_data->replaceChild<ClassTraitPrecedenceSyntax>(namesRaw, Cursor::Names);
 }
 
 ///

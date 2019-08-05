@@ -47,58 +47,67 @@
 #include <atomic>
 
 #ifndef NDEBUG
-#define syntax_assert_child_kind(raw, cursor, expectedKind)                    \
-   do {                                                                         \
-      if (auto &__child = raw->getChild(cursor))                                 \
-         assert(__child->getKind() == expectedKind);                              \
+#define syntax_assert_child_kind(raw, cursorName, choices)                   \
+   do {                                                                      \
+      if (auto &__child = raw->getChild(cursorName)) {                       \
+         bool __found = false;                                               \
+         std::string errorMsg;                                               \
+         if (choices.find(__child->getKind()) != choices.end()) {            \
+            __found = true;                                                  \
+         } else {                                                            \
+            errorMsg = "invalid syntax node type supplied for " #cursorName  \
+            ", please check";                                                \
+         }                                                                   \
+         assert(__found && errorMsg.c_str());                                \
+      }                                                                      \
    } while (false)
 #else
-#define syntax_assert_child_kind(raw, cursor, expectedKind)
+#define syntax_assert_child_kind(raw, cursorName, expectedKind)
 #endif
 
 #ifndef NDEBUG
-#define syntax_assert_child_token(raw, cursorName, choices)                        \
-   do {                                                                         \
-      bool __found = false;                                                     \
-      std::string errorMsg;                                                   \
-      if (auto &__token = raw->getChild(Cursor::cursorName)) {                   \
-         assert(__token->isToken());                                              \
-         if (__token->isPresent()) {                                              \
-            if (choices.find(__token->getTokenKind()) != choices.end()) {       \
-               __found = true;                                                  \
-            } else {                                                             \
-               errorMsg = "invalid token supplied for " #cursorName             \
-               ", expected one of {";                                            \
-               for (TokenKindType kind : choices) {                              \
+#define syntax_assert_child_token(raw, cursorName, choices)                    \
+   do {                                                                        \
+      bool __found = false;                                                    \
+      std::string errorMsg;                                                    \
+      if (auto &__token = raw->getChild(Cursor::cursorName)) {                 \
+         assert(__token->isToken());                                           \
+         if (__token->isPresent()) {                                           \
+            if (choices.find(__token->getTokenKind()) != choices.end()) {      \
+               __found = true;                                                 \
+            } else {                                                           \
+               errorMsg = "invalid token supplied for " #cursorName            \
+               ", expected one of {";                                          \
+               for (TokenKindType kind : choices) {                            \
                   errorMsg += get_token_text(kind).getStr();                   \
-               }                                                                \
-               errorMsg += "}";                                                  \
-            }                                                                   \
-            assert(__found && errorMsg.c_str());                                         \
-         }                                                                        \
-      }                                                                          \
+               }                                                               \
+               errorMsg += "}";                                                \
+            }                                                                  \
+            assert(__found && errorMsg.c_str());                               \
+         }                                                                     \
+      }                                                                        \
    } while (false)
 #else
 #define syntax_assert_child_token(raw, cursorName, ...)
 #endif
 
 #ifndef NDEBUG
-#define syntax_assert_child_token_text(raw, cursorName, tokenKind, ...)        \
-   do {                                                                         \
+#define syntax_assert_child_token_text(raw, cursorName, tokenKind, ...)          \
+   do {                                                                          \
       bool __found = false;                                                      \
       if (auto &__child = raw->getChild(cursor::cursorName)) {                   \
-         assert(__child->isToken());                                              \
-         if (__child->isPresent()) {                                              \
-            assert(__child->getTokenKind() == tokenKind);                          \
-         for (auto __text : {__VA_ARGS__}) {                                    \
+         assert(__child->isToken());                                             \
+         if (__child->isPresent()) {                                             \
+            assert(__child->getTokenKind() == tokenKind);                        \
+         for (auto __text : {__VA_ARGS__}) {                                     \
             if (__child->getTokenText() == __text) {                             \
-               __found = true;                                                    \
-               break;                                                             \
+               __found = true;                                                   \
+               break;                                                            \
             }                                                                    \
-         }                                                                      \
-         assert(__found && "invalid text supplied for " #cursorName             \
-         ", expected one of {" #__VA_ARGS__ "}");             \
-         }                                                                        \
+         }                                                                       \
+         assert(__found && "invalid text supplied for " #cursorName              \
+         ", expected one of {" #__VA_ARGS__ "}");                                \
+         }                                                                       \
       }                                                                          \
    } while (false)
 #else
@@ -106,7 +115,7 @@
 #endif
 
 #ifndef NDEBUG
-#define syntax_assert_token_is(token, kind, text)                                \
+#define syntax_assert_token_is(token, kind, text)                               \
    do {                                                                         \
    assert(token.getTokenKind() == kind);                                        \
    assert(token.getText() == text);                                             \

@@ -47,6 +47,13 @@ class MemberModifierSyntax;
 class ClassPropertyDeclSyntax;
 class ClassConstDeclSyntax;
 class ClassMethodDeclSyntax;
+class ClassTraitMethodReferenceSyntax;
+class ClassAbsoluteTraitMethodReferenceSyntax;
+class ClassTraitPrecedenceSyntax;
+class ClassTraitAliasSyntax;
+class ClassTraitAdaptationSyntax;
+class ClassTraitAdaptationBlockSyntax;
+class ClassTraitDeclSyntax;
 class MemberDeclBlockSyntax;
 class MemberDeclListItemSyntax;
 class ClassDefinitionSyntax;
@@ -175,6 +182,16 @@ using ClassPropertyListSyntax = SyntaxCollection<SyntaxKind::ClassPropertyList, 
 ///   | class_const_decl
 ///
 using ClassConstListSyntax = SyntaxCollection<SyntaxKind::ClassConstList, ClassConstClauseSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: ClassTraitAdaptationSyntax
+///
+/// trait_adaptation_list:
+///   trait_adaptation
+/// | trait_adaptation_list trait_adaptation
+///
+using ClassTraitAdaptationListSyntax = SyntaxCollection<SyntaxKind::ClassTraitAdaptationList, ClassTraitAdaptationSyntax>;
 
 } // polar::syntax
 

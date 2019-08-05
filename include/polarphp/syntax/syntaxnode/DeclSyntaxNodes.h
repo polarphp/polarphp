@@ -629,7 +629,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::NamespacemixedGroupUseDeclaration;
+      return kind == SyntaxKind::NamespaceMixedGroupUseDeclaration;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -700,7 +700,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::NamespaceUseType;
+      return kind == SyntaxKind::NamespaceUse;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -1143,7 +1143,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::FunctionDefinition;
+      return kind == SyntaxKind::ParameterClauseSyntax;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -1326,7 +1326,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::SourceFile;
+      return kind == SyntaxKind::ExtendsFromClause;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -1700,7 +1700,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::ClassConstList;
+      return kind == SyntaxKind::ClassConstDecl;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -1797,6 +1797,242 @@ public:
 
 private:
    friend class ClassMethodDeclSyntaxBuilder;
+   void validate();
+};
+
+///
+/// trait_method_reference:
+///   identifier
+/// | absolute_trait_method_reference
+///
+class ClassTraitMethodReferenceSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ------------------------------
+      /// node choice: IdentifierSyntax
+      /// ------------------------------
+      /// node choice: ClassAbsoluteTraitMethodReferenceSyntax
+      ///
+      Reference
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   ClassTraitMethodReferenceSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getReference();
+   ClassTraitMethodReferenceSyntax withReference(std::optional<Syntax> reference);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassTraitMethodReference;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassTraitMethodReferenceSyntaxBuilder;
+   void validate();
+};
+
+///
+/// absolute_trait_method_reference:
+///   name T_PAAMAYIM_NEKUDOTAYIM identifier
+///
+class ClassAbsoluteTraitMethodReferenceSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: NameSyntax
+      /// optional: false
+      ///
+      BaseName,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      Separator,
+      ///
+      /// type: IdentifierSyntax
+      /// optional: false
+      ///
+      MemberName
+   };
+
+public:
+   ClassAbsoluteTraitMethodReferenceSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   NameSyntax getBaseName();
+   TokenSyntax getSeparator();
+   IdentifierSyntax getMemberName();
+
+   ClassAbsoluteTraitMethodReferenceSyntax withBaseName(std::optional<NameSyntax> baseName);
+   ClassAbsoluteTraitMethodReferenceSyntax withSeparator(std::optional<TokenSyntax> separator);
+   ClassAbsoluteTraitMethodReferenceSyntax withMemberName(std::optional<IdentifierSyntax> memberName);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassAbsoluteTraitMethodReference;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassAbsoluteTraitMethodReferenceSyntaxBuilder;
+   void validate();
+};
+
+///
+/// trait_precedence:
+///    absolute_trait_method_reference T_INSTEADOF name_list
+///
+class ClassTraitPrecedenceSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ClassAbsoluteTraitMethodReferenceSyntax
+      /// optional: false
+      ///
+      MethodReference,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      InsteadOfToken,
+      ///
+      /// type: NameListSyntax
+      /// optional: false
+      ///
+      Names
+   };
+
+public:
+   ClassTraitPrecedenceSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   ClassAbsoluteTraitMethodReferenceSyntax getMethodReference();
+   TokenSyntax getInsteadOfToken();
+   NameListSyntax getNames();
+
+   ClassTraitPrecedenceSyntax withMethodReference(std::optional<ClassAbsoluteTraitMethodReferenceSyntax> methodReference);
+   ClassTraitPrecedenceSyntax withInsteadOfToken(std::optional<TokenSyntax> insteadOfToken);
+   ClassTraitPrecedenceSyntax withNames(std::optional<NameListSyntax> names);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassTraitPrecedence;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassTraitPrecedenceSyntaxBuilder;
+   void validate();
+};
+
+///
+/// trait_alias:
+///   trait_method_reference T_AS T_IDENTIFIER_STRING
+/// | trait_method_reference T_AS reserved_non_modifiers
+/// | trait_method_reference T_AS member_modifier identifier
+/// | trait_method_reference T_AS member_modifier
+///
+class ClassTraitAliasSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 4;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ClassTraitMethodReferenceSyntax
+      /// optional: false
+      ///
+      MethodReference,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      AsToken,
+      ///
+      /// type: Syntax
+      /// optional: true
+      ///
+      Modifier,
+      ///
+      /// type: Syntax
+      /// optional: true
+      ///
+      AliasName
+   };
+
+public:
+   ClassTraitAliasSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   ClassTraitMethodReferenceSyntax getMethodReference();
+   TokenSyntax getAsToken();
+   std::optional<Syntax> getModifier();
+   std::optional<Syntax> getAliasName();
+
+   ClassTraitAliasSyntax withMethodReference(std::optional<ClassTraitMethodReferenceSyntax> methodReference);
+   ClassTraitAliasSyntax withModifier(std::optional<Syntax> modifier);
+   ClassTraitAliasSyntax withAliasName(std::optional<Syntax> aliasName);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassTraitAlias;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassTraitAliasSyntaxBuilder;
    void validate();
 };
 
@@ -2039,6 +2275,15 @@ public:
    InterfaceDefinitionSyntax withExtendsFrom(std::optional<InterfaceExtendsClauseSyntax> extendsFrom);
    InterfaceDefinitionSyntax withMembers(std::optional<MemberDeclBlockSyntax> members);
 
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::InterfaceDefinition;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
 private:
    friend class InterfaceDefinitionSyntaxBuilder;
    void validate();
@@ -2087,6 +2332,15 @@ public:
    TraitDefinitionSyntax withName(std::optional<TokenSyntax> name);
    TraitDefinitionSyntax withMembers(std::optional<MemberDeclBlockSyntax> members);
 
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::TraitDefinition;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
 private:
    friend class TraitDefinitionSyntaxBuilder;
    void validate();
