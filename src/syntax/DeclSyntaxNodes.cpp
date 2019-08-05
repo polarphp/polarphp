@@ -2574,6 +2574,80 @@ ClassTraitAdaptationBlockSyntax ClassTraitAdaptationBlockSyntax::withRightBrace(
 }
 
 ///
+/// ClassTraitDeclSyntax
+///
+void ClassTraitDeclSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassTraitDeclSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, UseToken, std::set{TokenKindType::T_USE});
+   if (const RefCountPtr<RawSyntax> &nameListChild = raw->getChild(Cursor::NameList)) {
+      assert(nameListChild->kindOf(SyntaxKind::NameList));
+   }
+   if (const RefCountPtr<RawSyntax> &adaptationBlockChild = raw->getChild(Cursor::AdaptationBlock)) {
+      assert(adaptationBlockChild->kindOf(SyntaxKind::ClassTraitAdaptationBlock));
+   }
+#endif
+}
+
+TokenSyntax ClassTraitDeclSyntax::getUseToken()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::UseToken).get()};
+}
+
+NameListSyntax ClassTraitDeclSyntax::getNameList()
+{
+   return NameListSyntax {m_root, m_data->getChild(Cursor::NameList).get()};
+}
+
+std::optional<ClassTraitAdaptationBlockSyntax> ClassTraitDeclSyntax::getAdaptationBlock()
+{
+   RefCountPtr<SyntaxData> adaptationBlockData = m_data->getChild(Cursor::AdaptationBlock);
+   if (!adaptationBlockData) {
+      return std::nullopt;
+   }
+   return ClassTraitAdaptationBlockSyntax {m_root, adaptationBlockData.get()};
+}
+
+ClassTraitDeclSyntax ClassTraitDeclSyntax::withUseToken(std::optional<TokenSyntax> useToken)
+{
+   RefCountPtr<RawSyntax> useTokenRaw;
+   if (useToken.has_value()) {
+      useTokenRaw = useToken->getRaw();
+   } else {
+      useTokenRaw = RawSyntax::missing(TokenKindType::T_USE,
+                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_USE)));
+   }
+   return m_data->replaceChild<ClassTraitDeclSyntax>(useTokenRaw, Cursor::UseToken);
+}
+
+ClassTraitDeclSyntax ClassTraitDeclSyntax::withNameList(std::optional<NameListSyntax> nameList)
+{
+   RefCountPtr<RawSyntax> nameListRaw;
+   if (nameList.has_value()) {
+      nameListRaw = nameList->getRaw();
+   } else {
+      nameListRaw = RawSyntax::missing(SyntaxKind::NameList);
+   }
+   return m_data->replaceChild<ClassTraitDeclSyntax>(nameListRaw, Cursor::NameList);
+}
+
+ClassTraitDeclSyntax ClassTraitDeclSyntax::withAdaptationBlock(std::optional<ClassTraitAdaptationBlockSyntax> adaptationBlock)
+{
+   RefCountPtr<RawSyntax> adaptationBlockRaw;
+   if (adaptationBlock.has_value()) {
+      adaptationBlockRaw = adaptationBlock->getRaw();
+   } else {
+      adaptationBlockRaw = nullptr;
+   }
+   return m_data->replaceChild<ClassTraitDeclSyntax>(adaptationBlockRaw, Cursor::AdaptationBlock);
+}
+
+///
 /// ImplementClauseSyntax
 ///
 void InterfaceExtendsClauseSyntax::validate()

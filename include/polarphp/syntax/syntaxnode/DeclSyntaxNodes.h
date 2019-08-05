@@ -2172,6 +2172,64 @@ private:
 };
 
 ///
+/// class_statement:
+///   T_USE name_list trait_adaptations
+///
+class ClassTraitDeclSyntax final : public DeclSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      UseToken,
+      ///
+      /// type: NameListSyntax
+      /// optional: false
+      ///
+      NameList,
+      ///
+      /// type: ClassTraitAdaptationBlockSyntax
+      /// optional: true
+      ///
+      AdaptationBlock
+   };
+
+public:
+   ClassTraitDeclSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : DeclSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getUseToken();
+   NameListSyntax getNameList();
+   std::optional<ClassTraitAdaptationBlockSyntax> getAdaptationBlock();
+
+   ClassTraitDeclSyntax withUseToken(std::optional<TokenSyntax> useToken);
+   ClassTraitDeclSyntax withNameList(std::optional<NameListSyntax> nameList);
+   ClassTraitDeclSyntax withAdaptationBlock(std::optional<ClassTraitAdaptationBlockSyntax> adaptationBlock);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassTraitDecl;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassTraitDeclSyntaxBuilder;
+   void validate();
+};
+
+///
 /// member-decl:
 ///   decl ';'?
 ///
