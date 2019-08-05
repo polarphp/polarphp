@@ -2005,6 +2005,10 @@ public:
       AliasName
    };
 
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
 public:
    ClassTraitAliasSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
@@ -2018,6 +2022,7 @@ public:
    std::optional<Syntax> getAliasName();
 
    ClassTraitAliasSyntax withMethodReference(std::optional<ClassTraitMethodReferenceSyntax> methodReference);
+   ClassTraitAliasSyntax withAsToken(std::optional<TokenSyntax> asToken);
    ClassTraitAliasSyntax withModifier(std::optional<Syntax> modifier);
    ClassTraitAliasSyntax withAliasName(std::optional<Syntax> aliasName);
 

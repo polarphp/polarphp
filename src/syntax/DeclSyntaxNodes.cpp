@@ -2331,6 +2331,119 @@ ClassTraitPrecedenceSyntax ClassTraitPrecedenceSyntax::withNames(std::optional<N
 }
 
 ///
+/// ClassTraitAliasSyntax
+///
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType ClassTraitAliasSyntax::CHILD_NODE_CHOICES
+{
+   {
+      ClassTraitAliasSyntax::Modifier, {
+         SyntaxKind::ReservedNonModifier,
+               SyntaxKind::MemberModifier
+      }
+   }
+};
+#endif
+
+void ClassTraitAliasSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassTraitAliasSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, AsToken, std::set{TokenKindType::T_AS});
+   if (const RefCountPtr<RawSyntax> &methodRefChild = raw->getChild(Cursor::MethodReference)) {
+      assert(methodRefChild->kindOf(SyntaxKind::ClassTraitMethodReference));
+   }
+   syntax_assert_child_kind(raw, Modifier, CHILD_NODE_CHOICES.at(Cursor::Modifier));
+   if (const RefCountPtr<RawSyntax> &aliasName = raw->getChild(Cursor::AliasName)) {
+      if (aliasName->isToken()) {
+         syntax_assert_child_token(raw, AliasName, std::set{TokenKindType::T_IDENTIFIER_STRING});
+      } else {
+         assert(aliasName->kindOf(SyntaxKind::Identifier));
+      }
+   }
+   assert(raw->getChild(Cursor::AliasName) || raw->getChild(Cursor::AliasName));
+#endif
+}
+
+ClassTraitMethodReferenceSyntax ClassTraitAliasSyntax::getMethodReference()
+{
+   return ClassTraitMethodReferenceSyntax {m_root, m_data->getChild(Cursor::MethodReference).get()};
+}
+
+TokenSyntax ClassTraitAliasSyntax::getAsToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::AsToken).get()};
+}
+
+std::optional<Syntax> ClassTraitAliasSyntax::getModifier()
+{
+   RefCountPtr<SyntaxData> modifierData = m_data->getChild(Cursor::Modifier);
+   if (!modifierData) {
+      return std::nullopt;
+   }
+   return Syntax {m_root, modifierData.get()};
+}
+
+std::optional<Syntax> ClassTraitAliasSyntax::getAliasName()
+{
+   RefCountPtr<SyntaxData> aliasData = m_data->getChild(Cursor::AliasName);
+   if (!aliasData) {
+      return std::nullopt;
+   }
+   return Syntax {m_root, aliasData.get()};
+}
+
+ClassTraitAliasSyntax ClassTraitAliasSyntax::withMethodReference(std::optional<ClassTraitMethodReferenceSyntax> methodReference)
+{
+   RefCountPtr<RawSyntax> methodReferenceRaw;
+   if (methodReference.has_value()) {
+      methodReferenceRaw = methodReference->getRaw();
+   } else {
+      methodReferenceRaw = RawSyntax::missing(SyntaxKind::ClassTraitMethodReference);
+   }
+   return m_data->replaceChild<ClassTraitAliasSyntax>(methodReferenceRaw, Cursor::MethodReference);
+}
+
+ClassTraitAliasSyntax ClassTraitAliasSyntax::withAsToken(std::optional<TokenSyntax> asToken)
+{
+   RefCountPtr<RawSyntax> asTokenRaw;
+   if (asToken.has_value()) {
+      asTokenRaw = asToken->getRaw();
+   } else {
+      asTokenRaw = RawSyntax::missing(TokenKindType::T_AS,
+                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_AS)));
+   }
+   return m_data->replaceChild<ClassTraitAliasSyntax>(asTokenRaw, Cursor::AsToken);
+}
+
+ClassTraitAliasSyntax ClassTraitAliasSyntax::withModifier(std::optional<Syntax> modifier)
+{
+   RefCountPtr<RawSyntax> modifierRaw;
+   if (modifier.has_value()) {
+      modifierRaw = modifier->getRaw();
+   } else {
+      modifierRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<ClassTraitAliasSyntax>(modifierRaw, Cursor::Modifier);
+}
+
+ClassTraitAliasSyntax ClassTraitAliasSyntax::withAliasName(std::optional<Syntax> aliasName)
+{
+   RefCountPtr<RawSyntax> aliasNameRaw;
+   if (aliasName.has_value()) {
+      aliasNameRaw = aliasName->getRaw();
+   } else {
+      aliasNameRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<ClassTraitAliasSyntax>(aliasNameRaw, Cursor::AliasName);
+}
+
+///
 /// ImplementClauseSyntax
 ///
 void InterfaceExtendsClauseSyntax::validate()
