@@ -1722,7 +1722,7 @@ class ClassMethodDeclSyntax final : public DeclSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 7;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 4;
    enum Cursor : SyntaxChildrenCountType
    {
       ///
@@ -1732,7 +1732,7 @@ public:
       Modifiers,
       ///
       /// type: TokenSyntax
-      /// optional: true
+      /// optional: false
       ///
       FunctionToken,
       ///
@@ -1741,20 +1741,20 @@ public:
       ///
       ReturnRefToken,
       ///
-      /// type: TokenSyntax
+      /// type: IdentifierSyntax
       /// optional: false
       ///
       FuncName,
       ///
-      /// type: ParameterListSyntax
+      /// type: ParameterClauseSyntax
       /// optional: false
       ///
-      Parameters,
+      ParameterClause,
       ///
-      /// type: TokenSyntax
+      /// type: ReturnTypeClauseSyntax
       /// optional: true
       ///
-      ReturnTypeToken,
+      ReturnType,
       ///
       /// type: MemberDeclBlockSyntax
       /// optional: true
@@ -1764,25 +1764,25 @@ public:
 
 public:
    ClassMethodDeclSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : Syntax(root, data)
+      : DeclSyntax(root, data)
    {
       validate();
    }
 
    MemberModifierListSyntax getModifiers();
-   std::optional<TokenSyntax> getFunctionToken();
+   TokenSyntax getFunctionToken();
    std::optional<TokenSyntax> getReturnRefToken();
-   TokenSyntax getFuncName();
-   ParameterListSyntax getParameters();
-   std::optional<TokenSyntax> getReturnTypeToken();
+   IdentifierSyntax getFuncName();
+   ParameterClauseSyntax getParameterClause();
+   std::optional<ReturnTypeClauseSyntax> getReturnType();
    std::optional<MemberDeclBlockSyntax> getBody();
 
    ClassMethodDeclSyntax withModifiers(std::optional<MemberModifierListSyntax> modifiers);
    ClassMethodDeclSyntax withFunctionToken(std::optional<TokenSyntax> functionToken);
    ClassMethodDeclSyntax withReturnRefToken(std::optional<TokenSyntax> returnRefToken);
-   ClassMethodDeclSyntax withFuncName(std::optional<TokenSyntax> funcName);
-   ClassMethodDeclSyntax withParameters(std::optional<ParameterListSyntax> parameters);
-   ClassMethodDeclSyntax withReturnTypeToken(std::optional<TokenSyntax> returnTypeToken);
+   ClassMethodDeclSyntax withFuncName(std::optional<IdentifierSyntax> funcName);
+   ClassMethodDeclSyntax withParameterClause(std::optional<ParameterClauseSyntax> parameterClause);
+   ClassMethodDeclSyntax withReturnType(std::optional<ReturnTypeClauseSyntax> returnType);
    ClassMethodDeclSyntax withBody(std::optional<MemberDeclBlockSyntax> body);
 
    static bool kindOf(SyntaxKind kind)

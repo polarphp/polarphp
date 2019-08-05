@@ -1986,6 +1986,163 @@ ClassConstDeclSyntax ClassConstDeclSyntax::withConstList(std::optional<ClassCons
 }
 
 ///
+/// ClassMethodDeclSyntax
+///
+void ClassMethodDeclSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassMethodDeclSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, FunctionToken, std::set{TokenKindType::T_FUNCTION});
+   syntax_assert_child_token(raw, ReturnRefToken, std::set{TokenKindType::T_AMPERSAND});
+   if (const RefCountPtr<RawSyntax> modifiersChild = raw->getChild(Cursor::Modifiers)) {
+      assert(modifiersChild->kindOf(SyntaxKind::ClassModifierList));
+   }
+   if (const RefCountPtr<RawSyntax> funcNameChild = raw->getChild(Cursor::FuncName)) {
+      assert(funcNameChild->kindOf(SyntaxKind::Identifier));
+   }
+   if (const RefCountPtr<RawSyntax> parameterClauseChild = raw->getChild(Cursor::ParameterClause)) {
+      assert(parameterClauseChild->kindOf(SyntaxKind::ParameterClauseSyntax));
+   }
+   if (const RefCountPtr<RawSyntax> returnTypeChild = raw->getChild(Cursor::ReturnType)) {
+      assert(returnTypeChild->kindOf(SyntaxKind::ReturnTypeClause));
+   }
+   if (const RefCountPtr<RawSyntax> bodyChild = raw->getChild(Cursor::Body)) {
+      assert(bodyChild->kindOf(SyntaxKind::MemberDeclBlock));
+   }
+#endif
+}
+
+MemberModifierListSyntax ClassMethodDeclSyntax::getModifiers()
+{
+   return MemberModifierListSyntax {m_root, m_data->getChild(Cursor::Modifiers).get()};
+}
+
+TokenSyntax ClassMethodDeclSyntax::getFunctionToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::FunctionToken).get()};
+}
+
+std::optional<TokenSyntax> ClassMethodDeclSyntax::getReturnRefToken()
+{
+   RefCountPtr<SyntaxData> returnRefData = m_data->getChild(Cursor::ReturnRefToken);
+   if (!returnRefData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, returnRefData.get()};
+}
+
+IdentifierSyntax ClassMethodDeclSyntax::getFuncName()
+{
+   return IdentifierSyntax {m_root, m_data->getChild(Cursor::FuncName).get()};
+}
+
+ParameterClauseSyntax ClassMethodDeclSyntax::getParameterClause()
+{
+   return ParameterClauseSyntax {m_root, m_data->getChild(Cursor::ParameterClause).get()};
+}
+
+std::optional<ReturnTypeClauseSyntax> ClassMethodDeclSyntax::getReturnType()
+{
+   RefCountPtr<SyntaxData> returnTypeData = m_data->getChild(Cursor::ReturnType);
+   if (!returnTypeData) {
+      return std::nullopt;
+   }
+   return ReturnTypeClauseSyntax {m_root, returnTypeData.get()};
+}
+
+std::optional<MemberDeclBlockSyntax> ClassMethodDeclSyntax::getBody()
+{
+   RefCountPtr<SyntaxData> bodyData = m_data->getChild(Cursor::Body);
+   if (!bodyData) {
+      return std::nullopt;
+   }
+   return MemberDeclBlockSyntax {m_root, bodyData.get()};
+}
+
+ClassMethodDeclSyntax ClassMethodDeclSyntax::withModifiers(std::optional<MemberModifierListSyntax> modifiers)
+{
+   RefCountPtr<RawSyntax> modifiersRaw;
+   if (modifiers.has_value()) {
+      modifiersRaw = modifiers->getRaw();
+   } else {
+      modifiersRaw = RawSyntax::missing(SyntaxKind::MemberModifierList);
+   }
+   return m_data->replaceChild<ClassMethodDeclSyntax>(modifiersRaw, Cursor::Modifiers);
+}
+
+ClassMethodDeclSyntax ClassMethodDeclSyntax::withFunctionToken(std::optional<TokenSyntax> functionToken)
+{
+   RefCountPtr<RawSyntax> functionTokenRaw;
+   if (functionToken.has_value()) {
+      functionTokenRaw = functionToken->getRaw();
+   } else {
+      functionTokenRaw = RawSyntax::missing(TokenKindType::T_FUNCTION,
+                                            OwnedString::makeUnowned(get_token_text(TokenKindType::T_FUNCTION)));
+   }
+   return m_data->replaceChild<ClassMethodDeclSyntax>(functionTokenRaw, Cursor::FunctionToken);
+}
+
+ClassMethodDeclSyntax ClassMethodDeclSyntax::withReturnRefToken(std::optional<TokenSyntax> returnRefToken)
+{
+   RefCountPtr<RawSyntax> returnRefTokenRaw;
+   if (returnRefToken.has_value()) {
+      returnRefTokenRaw = returnRefToken->getRaw();
+   } else {
+      returnRefTokenRaw = RawSyntax::missing(TokenKindType::T_AMPERSAND,
+                                             OwnedString::makeUnowned(get_token_text(TokenKindType::T_AMPERSAND)));
+   }
+   return m_data->replaceChild<ClassMethodDeclSyntax>(returnRefTokenRaw, Cursor::ReturnRefToken);
+}
+
+ClassMethodDeclSyntax ClassMethodDeclSyntax::withFuncName(std::optional<IdentifierSyntax> funcName)
+{
+   RefCountPtr<RawSyntax> funcNameRaw;
+   if (funcName.has_value()) {
+      funcNameRaw = funcName->getRaw();
+   } else {
+      funcNameRaw = RawSyntax::missing(SyntaxKind::Identifier);
+   }
+   return m_data->replaceChild<ClassMethodDeclSyntax>(funcNameRaw, Cursor::FuncName);
+}
+
+ClassMethodDeclSyntax ClassMethodDeclSyntax::withParameterClause(std::optional<ParameterClauseSyntax> parameterClause)
+{
+   RefCountPtr<RawSyntax> parameterClauseRaw;
+   if (parameterClause.has_value()) {
+      parameterClauseRaw = parameterClause->getRaw();
+   } else {
+      parameterClauseRaw = RawSyntax::missing(SyntaxKind::ParameterClauseSyntax);
+   }
+   return m_data->replaceChild<ClassMethodDeclSyntax>(parameterClauseRaw, Cursor::ParameterClause);
+}
+
+ClassMethodDeclSyntax ClassMethodDeclSyntax::withReturnType(std::optional<ReturnTypeClauseSyntax> returnType)
+{
+   RefCountPtr<RawSyntax> returnTypeRaw;
+   if (returnType.has_value()) {
+      returnTypeRaw = returnType->getRaw();
+   } else {
+      returnTypeRaw = RawSyntax::missing(SyntaxKind::ReturnTypeClause);
+   }
+   return m_data->replaceChild<ClassMethodDeclSyntax>(returnTypeRaw, Cursor::ReturnType);
+}
+
+ClassMethodDeclSyntax ClassMethodDeclSyntax::withBody(std::optional<MemberDeclBlockSyntax> body)
+{
+   RefCountPtr<RawSyntax> bodyRaw;
+   if (body.has_value()) {
+      bodyRaw = body->getRaw();
+   } else {
+      bodyRaw = RawSyntax::missing(SyntaxKind::MemberDeclBlock);
+   }
+   return m_data->replaceChild<ClassMethodDeclSyntax>(bodyRaw, Cursor::Body);
+}
+
+///
 /// ImplementClauseSyntax
 ///
 void InterfaceExtendsClauseSyntax::validate()
