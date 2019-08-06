@@ -13,6 +13,9 @@
 
 namespace polar::syntax {
 
+///
+/// NullExprSyntax
+///
 void NullExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
@@ -39,6 +42,56 @@ NullExprSyntax NullExprSyntax::withNullKeyword(std::optional<TokenSyntax> keywor
                                       OwnedString::makeUnowned((get_token_text(TokenKindType::T_NULL))));
    }
    return m_data->replaceChild<NullExprSyntax>(rawKeyword, Cursor::NullKeyword);
+}
+
+///
+/// BraceDecoratedExprClauseSyntax
+///
+void BraceDecoratedExprClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+//   RefCountPtr<RawSyntax> raw = getRaw();
+//   if (isMissing()) {
+//      return;
+//   }
+//   assert(raw->getLayout().size() == BraceDecoratedExprClauseSyntax::CHILDREN_COUNT);
+//   syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_BRACE});
+//   syntax_assert_child_token(raw, RightBrace, std::set{TokenKindType::T_RIGHT_BRACE});
+//   if (const RefCountPtr<ExprSyntax> &exprChild = raw->getChild(Cursor::Expr)) {
+//      assert(exprChild->kindOf(SyntaxKind::Expr));
+//   }
+#endif
+}
+
+TokenSyntax BraceDecoratedExprClauseSyntax::getLeftBrace()
+{
+
+}
+
+ExprSyntax BraceDecoratedExprClauseSyntax::getExpr()
+{
+
+}
+
+TokenSyntax BraceDecoratedExprClauseSyntax::getRightBrace()
+{
+
+}
+
+BraceDecoratedExprClauseSyntax BraceDecoratedExprClauseSyntax::withLeftBrace(std::optional<TokenSyntax> leftBrace)
+{
+
+}
+
+BraceDecoratedExprClauseSyntax BraceDecoratedExprClauseSyntax::withExpr(std::optional<ExprSyntax> expr)
+{
+
+}
+
+BraceDecoratedExprClauseSyntax BraceDecoratedExprClauseSyntax::withRightBrace(std::optional<TokenSyntax> rightBrace)
+{
+
+
 }
 
 void ClassRefParentExprSyntax::validate()

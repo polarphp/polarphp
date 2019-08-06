@@ -1004,7 +1004,7 @@ void InitializeClauseSyntax::validate()
    }
    assert(raw->getLayout().getSize() == InitializeClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, EqualToken, std::set{TokenKindType::T_EQUAL});
-   if (const RefCountPtr<RawSyntax> valueExpr = raw->getChild(Cursor::ValueExpr)) {
+   if (const RefCountPtr<RawSyntax> &valueExpr = raw->getChild(Cursor::ValueExpr)) {
       valueExpr->kindOf(SyntaxKind::Expr);
    }
 #endif
@@ -1701,7 +1701,7 @@ void ExtendsFromClauseSyntax::validate()
    }
    assert(raw->getLayout().getSize() == ExtendsFromClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ExtendToken, std::set{TokenKindType::T_EXTENDS});
-   if (const RefCountPtr<RawSyntax> nameChild = raw->getChild(Cursor::Name)) {
+   if (const RefCountPtr<RawSyntax> &nameChild = raw->getChild(Cursor::Name)) {
       assert(nameChild->kindOf(SyntaxKind::Name));
    }
 #endif
@@ -1752,7 +1752,7 @@ void ImplementClauseSyntax::validate()
    }
    assert(raw->getLayout().getSize() == ImplementClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ImplementToken, std::set{TokenKindType::T_IMPLEMENTS});
-   if (const RefCountPtr<RawSyntax> interfaceChild = raw->getChild(Cursor::Interfaces)) {
+   if (const RefCountPtr<RawSyntax> &interfaceChild = raw->getChild(Cursor::Interfaces)) {
       assert(interfaceChild->kindOf(SyntaxKind::ImplementsClause));
    }
 #endif
@@ -1847,13 +1847,13 @@ void ClassPropertyDeclSyntax::validate()
       return;
    }
    assert(raw->getLayout().getSize() == ClassPropertyDeclSyntax::CHILDREN_COUNT);
-   if (const RefCountPtr<RawSyntax> modifiersChild = raw->getChild(Cursor::Modifiers)) {
+   if (const RefCountPtr<RawSyntax> &modifiersChild = raw->getChild(Cursor::Modifiers)) {
       assert(modifiersChild->kindOf(SyntaxKind::ClassModifierList));
    }
-   if (const RefCountPtr<RawSyntax> typeHintChild = raw->getChild(Cursor::TypeHint)) {
+   if (const RefCountPtr<RawSyntax> &typeHintChild = raw->getChild(Cursor::TypeHint)) {
       assert(typeHintChild->kindOf(SyntaxKind::TypeExprClause));
    }
-   if (const RefCountPtr<RawSyntax> propertyListChild = raw->getChild(Cursor::PropertyList)) {
+   if (const RefCountPtr<RawSyntax> &propertyListChild = raw->getChild(Cursor::PropertyList)) {
       assert(propertyListChild->kindOf(SyntaxKind::ClassPropertyList));
    }
 #endif
@@ -1923,10 +1923,10 @@ void ClassConstDeclSyntax::validate()
    }
    assert(raw->getLayout().getSize() == ClassConstDeclSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ConstToken, std::set{TokenKindType::T_CONST});
-   if (const RefCountPtr<RawSyntax> modifiersChild = raw->getChild(Cursor::Modifiers)) {
+   if (const RefCountPtr<RawSyntax> &modifiersChild = raw->getChild(Cursor::Modifiers)) {
       assert(modifiersChild->kindOf(SyntaxKind::ClassModifierList));
    }
-   if (const RefCountPtr<RawSyntax> constListChild = raw->getChild(Cursor::ConstList)) {
+   if (const RefCountPtr<RawSyntax> &constListChild = raw->getChild(Cursor::ConstList)) {
       assert(constListChild->kindOf(SyntaxKind::ClassConstList));
    }
 #endif
@@ -1998,19 +1998,19 @@ void ClassMethodDeclSyntax::validate()
    assert(raw->getLayout().getSize() == ClassMethodDeclSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, FunctionToken, std::set{TokenKindType::T_FUNCTION});
    syntax_assert_child_token(raw, ReturnRefToken, std::set{TokenKindType::T_AMPERSAND});
-   if (const RefCountPtr<RawSyntax> modifiersChild = raw->getChild(Cursor::Modifiers)) {
+   if (const RefCountPtr<RawSyntax> &modifiersChild = raw->getChild(Cursor::Modifiers)) {
       assert(modifiersChild->kindOf(SyntaxKind::ClassModifierList));
    }
-   if (const RefCountPtr<RawSyntax> funcNameChild = raw->getChild(Cursor::FuncName)) {
+   if (const RefCountPtr<RawSyntax> &funcNameChild = raw->getChild(Cursor::FuncName)) {
       assert(funcNameChild->kindOf(SyntaxKind::Identifier));
    }
-   if (const RefCountPtr<RawSyntax> parameterClauseChild = raw->getChild(Cursor::ParameterClause)) {
+   if (const RefCountPtr<RawSyntax> &parameterClauseChild = raw->getChild(Cursor::ParameterClause)) {
       assert(parameterClauseChild->kindOf(SyntaxKind::ParameterClauseSyntax));
    }
-   if (const RefCountPtr<RawSyntax> returnTypeChild = raw->getChild(Cursor::ReturnType)) {
+   if (const RefCountPtr<RawSyntax> &returnTypeChild = raw->getChild(Cursor::ReturnType)) {
       assert(returnTypeChild->kindOf(SyntaxKind::ReturnTypeClause));
    }
-   if (const RefCountPtr<RawSyntax> bodyChild = raw->getChild(Cursor::Body)) {
+   if (const RefCountPtr<RawSyntax> &bodyChild = raw->getChild(Cursor::Body)) {
       assert(bodyChild->kindOf(SyntaxKind::MemberDeclBlock));
    }
 #endif
@@ -2198,10 +2198,10 @@ void ClassAbsoluteTraitMethodReferenceSyntax::validate()
    }
    assert(raw->getLayout().getSize() == ClassAbsoluteTraitMethodReferenceSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, Separator, std::set{TokenKindType::T_PAAMAYIM_NEKUDOTAYIM});
-   if (const RefCountPtr<RawSyntax> baseNameChild = raw->getChild(Cursor::BaseName)) {
+   if (const RefCountPtr<RawSyntax> &baseNameChild = raw->getChild(Cursor::BaseName)) {
       assert(baseNameChild->kindOf(SyntaxKind::Name));
    }
-   if (const RefCountPtr<RawSyntax> memberNameChild = raw->getChild(Cursor::MemberName)) {
+   if (const RefCountPtr<RawSyntax> &memberNameChild = raw->getChild(Cursor::MemberName)) {
       assert(memberNameChild->kindOf(SyntaxKind::Identifier));
    }
 #endif
@@ -2271,10 +2271,10 @@ void ClassTraitPrecedenceSyntax::validate()
    }
    assert(raw->getLayout().getSize() == ClassTraitPrecedenceSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, InsteadOfToken, std::set{TokenKindType::T_INSTEADOF});
-   if (const RefCountPtr<RawSyntax> methodReferenceChild = raw->getChild(Cursor::MethodReference)) {
+   if (const RefCountPtr<RawSyntax> &methodReferenceChild = raw->getChild(Cursor::MethodReference)) {
       assert(methodReferenceChild->kindOf(SyntaxKind::ClassAbsoluteTraitMethodReference));
    }
-   if (const RefCountPtr<RawSyntax> nameListChild = raw->getChild(Cursor::Names)) {
+   if (const RefCountPtr<RawSyntax> &nameListChild = raw->getChild(Cursor::Names)) {
       assert(nameListChild->kindOf(SyntaxKind::NameList));
    }
 #endif
@@ -2659,7 +2659,7 @@ void InterfaceExtendsClauseSyntax::validate()
    }
    assert(raw->getLayout().getSize() == InterfaceExtendsClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ExtendsToken, std::set{TokenKindType::T_EXTENDS});
-   if (const RefCountPtr<RawSyntax> interfaceChild = raw->getChild(Cursor::Interfaces)) {
+   if (const RefCountPtr<RawSyntax> &interfaceChild = raw->getChild(Cursor::Interfaces)) {
       assert(interfaceChild->kindOf(SyntaxKind::ImplementsClause));
    }
 #endif
@@ -2710,7 +2710,7 @@ void ClassPropertyClauseSyntax::validate()
    }
    assert(raw->getLayout().getSize() == ClassPropertyClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
-   if (const RefCountPtr<RawSyntax> initializerChild = raw->getChild(Cursor::Initializer)) {
+   if (const RefCountPtr<RawSyntax> &initializerChild = raw->getChild(Cursor::Initializer)) {
       assert(initializerChild->kindOf(SyntaxKind::InitializeClause));
    }
 #endif
@@ -2764,10 +2764,10 @@ void ClassConstClauseSyntax::validate()
       return;
    }
    assert(raw->getLayout().getSize() == ClassPropertyClauseSyntax::CHILDREN_COUNT);
-   if (const RefCountPtr<RawSyntax> identifierChild = raw->getChild(Cursor::Identifier)) {
+   if (const RefCountPtr<RawSyntax> &identifierChild = raw->getChild(Cursor::Identifier)) {
       assert(identifierChild->kindOf(SyntaxKind::Identifier));
    }
-   if (const RefCountPtr<RawSyntax> initializerChild = raw->getChild(Cursor::Initializer)) {
+   if (const RefCountPtr<RawSyntax> &initializerChild = raw->getChild(Cursor::Initializer)) {
       assert(initializerChild->kindOf(SyntaxKind::InitializeClause));
    }
 #endif
@@ -2873,7 +2873,7 @@ void MemberDeclBlockSyntax::validate()
    assert(raw->getLayout().getSize() == MemberDeclBlockSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_BRACE});
    syntax_assert_child_token(raw, RightBrace, std::set{TokenKindType::T_RIGHT_BRACE});
-   if (const RefCountPtr<RawSyntax> membersChild = raw->getChild(Cursor::Members)) {
+   if (const RefCountPtr<RawSyntax> &membersChild = raw->getChild(Cursor::Members)) {
       assert(membersChild->kindOf(SyntaxKind::MemberDeclList));
    }
 #endif
@@ -2942,16 +2942,16 @@ void ClassDefinitionSyntax::validate()
    assert(raw->getLayout().getSize() == ClassDefinitionSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ClassToken, std::set{TokenKindType::T_CLASS});
    syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
-   if (const RefCountPtr<RawSyntax> modifierChild = raw->getChild(Cursor::Modififers)) {
+   if (const RefCountPtr<RawSyntax> &modifierChild = raw->getChild(Cursor::Modififers)) {
       assert(modifierChild->kindOf(SyntaxKind::ClassModifierList));
    }
-   if (const RefCountPtr<RawSyntax> extendsFromChild = raw->getChild(Cursor::ExtendsFrom)) {
+   if (const RefCountPtr<RawSyntax> &extendsFromChild = raw->getChild(Cursor::ExtendsFrom)) {
       assert(extendsFromChild->kindOf(SyntaxKind::ExtendsFromClause));
    }
-   if (const RefCountPtr<RawSyntax> implementsChild = raw->getChild(Cursor::ImplementsList)) {
+   if (const RefCountPtr<RawSyntax> &implementsChild = raw->getChild(Cursor::ImplementsList)) {
       assert(implementsChild->kindOf(SyntaxKind::ImplementsClause));
    }
-   if (const RefCountPtr<RawSyntax> membersChild = raw->getChild(Cursor::Members)) {
+   if (const RefCountPtr<RawSyntax> &membersChild = raw->getChild(Cursor::Members)) {
       assert(membersChild->kindOf(SyntaxKind::MemberDeclBlock));
    }
 #endif
@@ -3072,10 +3072,10 @@ void InterfaceDefinitionSyntax::validate()
    assert(raw->getLayout().getSize() == InterfaceDefinitionSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, InterfaceToken, std::set{TokenKindType::T_INTERFACE});
    syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
-   if (const RefCountPtr<RawSyntax> extendsChild = raw->getChild(Cursor::ExtendsFrom)) {
+   if (const RefCountPtr<RawSyntax> &extendsChild = raw->getChild(Cursor::ExtendsFrom)) {
       assert(extendsChild->kindOf(SyntaxKind::InterfaceExtendsClause));
    }
-   if (const RefCountPtr<RawSyntax> membersChild = raw->getChild(Cursor::Members)) {
+   if (const RefCountPtr<RawSyntax> &membersChild = raw->getChild(Cursor::Members)) {
       assert(membersChild->kindOf(SyntaxKind::MemberDeclBlock));
    }
 #endif
@@ -3160,7 +3160,7 @@ void TraitDefinitionSyntax::validate()
    assert(raw->getLayout().getSize() == TraitDefinitionSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, TraitToken, std::set{TokenKindType::T_TRAIT});
    syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
-   if (const RefCountPtr<RawSyntax> membersChild = raw->getChild(Cursor::Members)) {
+   if (const RefCountPtr<RawSyntax> &membersChild = raw->getChild(Cursor::Members)) {
       assert(membersChild->kindOf(SyntaxKind::MemberDeclBlock));
    }
 #endif
