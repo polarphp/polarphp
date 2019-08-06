@@ -113,12 +113,126 @@ private:
    void validate();
 };
 
+///
+/// expr:
+///   '$' '{' expr '}'
+///
+class BraceDecoratedVariableExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      DollarSign,
+      ///
+      /// type: BraceDecoratedExprClauseSyntax
+      /// optional: false
+      ///
+      DecoratedExpr
+   };
+
+public:
+   BraceDecoratedVariableExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getDollarSign();
+   BraceDecoratedExprClauseSyntax getDecoratedExpr();
+
+   BraceDecoratedVariableExprSyntax withDollarSign(std::optional<TokenSyntax> dollarSign);
+   BraceDecoratedVariableExprSyntax withDecoratedExpr(std::optional<BraceDecoratedExprClauseSyntax> decoratedExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::BraceDecoratedVariableExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class BraceDecoratedVariableExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// simple_variable:
+/// T_VARIABLE
+/// |	'$' '{' expr '}'	{ $$ = $3; }
+/// |	'$' simple_variable	{ $$ = zend_ast_create(ZEND_AST_VAR, $2); }
+///
+class SimpleVariableExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ----------------------------------------------
+      /// node choice: TokenSyntax
+      /// token choices: T_VARIABLE | T_VARIABLE
+      /// ----------------------------------------------
+      /// node choice: BraceDecoratedVariableExprSyntax
+      ///
+      Variable,
+      ///
+      /// type: SimpleVariableExprSyntax
+      /// optional: true
+      ///
+      RecursiveRef
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
+
+public:
+   SimpleVariableExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getVariable();
+   std::optional<SimpleVariableExprSyntax> getRecursiveRef();
+
+   SimpleVariableExprSyntax withVariable(std::optional<Syntax> variable);
+   SimpleVariableExprSyntax withRecursiveRef(std::optional<SimpleVariableExprSyntax> recursiveRef);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SimpleVariableExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class SimpleVariableExprSyntaxBuilder;
+   void validate();
+};
+
 class ClassRefParentExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 1;
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
-
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: TokenSyntax

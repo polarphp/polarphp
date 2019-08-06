@@ -85,6 +85,8 @@ enum class SyntaxKind : std::uint32_t
    FirstExpr,
    NullExpr,
    BraceDecoratedExprClause,
+   BraceDecoratedVariableExpr,
+   SimpleVariableExpr,
    FloatLiteralExpr,
    IntegerLiteralExpr,
    StringLiteralExpr,

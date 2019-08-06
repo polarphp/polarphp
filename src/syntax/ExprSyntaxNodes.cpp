@@ -108,9 +108,143 @@ BraceDecoratedExprClauseSyntax BraceDecoratedExprClauseSyntax::withRightBrace(st
       rightBraceRaw = rightBrace->getRaw();
    } else {
       rightBraceRaw = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)));
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)));
    }
    return m_data->replaceChild<BraceDecoratedExprClauseSyntax>(rightBraceRaw, Cursor::RightBrace);
+}
+
+///
+/// BraceDecoratedVariableExprSyntax
+///
+void BraceDecoratedVariableExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == BraceDecoratedVariableExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, DollarSign, std::set{TokenKindType::T_DOLLAR_SIGN});
+   if (const RefCountPtr<RawSyntax> &exprChild = raw->getChild(Cursor::DecoratedExpr)) {
+      assert(exprChild->kindOf(SyntaxKind::BraceDecoratedExprClause));
+   }
+#endif
+}
+
+TokenSyntax BraceDecoratedVariableExprSyntax::getDollarSign()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::DollarSign).get()};
+}
+
+BraceDecoratedExprClauseSyntax BraceDecoratedVariableExprSyntax::getDecoratedExpr()
+{
+   return BraceDecoratedExprClauseSyntax{m_root, m_data->getChild(Cursor::DecoratedExpr).get()};
+}
+
+BraceDecoratedVariableExprSyntax
+BraceDecoratedVariableExprSyntax::withDollarSign(std::optional<TokenSyntax> dollarSign)
+{
+   RefCountPtr<RawSyntax> dollarSignRaw;
+   if (dollarSign.has_value()) {
+      dollarSignRaw = dollarSign->getRaw();
+   } else {
+      dollarSignRaw = RawSyntax::missing(TokenKindType::T_DOLLAR_SIGN,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_DOLLAR_SIGN)));
+   }
+   return m_data->replaceChild<BraceDecoratedVariableExprSyntax>(dollarSignRaw, Cursor::DollarSign);
+}
+
+BraceDecoratedVariableExprSyntax
+BraceDecoratedVariableExprSyntax::withDecoratedExpr(std::optional<BraceDecoratedExprClauseSyntax> decoratedExpr)
+{
+   RefCountPtr<RawSyntax> decoratedExprRaw;
+   if (decoratedExpr.has_value()) {
+      decoratedExprRaw = decoratedExpr->getRaw();
+   } else {
+      decoratedExprRaw = RawSyntax::missing(SyntaxKind::BraceDecoratedExprClause);
+   }
+   return m_data->replaceChild<BraceDecoratedVariableExprSyntax>(decoratedExprRaw, Cursor::DecoratedExpr);
+}
+
+///
+/// SimpleVariableExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType SimpleVariableExprSyntax::CHILD_NODE_CHOICES
+{
+   {
+      SimpleVariableExprSyntax::Variable, {
+         SyntaxKind::BraceDecoratedVariableExpr
+      }
+   }
+};
+const TokenChoicesType SimpleVariableExprSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      SimpleVariableExprSyntax::Variable, {
+         TokenKindType::T_VARIABLE, TokenKindType::T_DOLLAR_SIGN
+      }
+   }
+};
+#endif
+
+void SimpleVariableExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == SimpleVariableExprSyntax::CHILDREN_COUNT);
+   if (const RefCountPtr<RawSyntax> &variableChild = raw->getChild(Cursor::Variable)) {
+      if (variableChild->isToken()) {
+         syntax_assert_child_token(raw, Variable, CHILD_TOKEN_CHOICES.at(Cursor::Variable));
+      } else {
+         syntax_assert_child_kind(raw, Variable, CHILD_NODE_CHOICES.at(Cursor::Variable));
+      }
+   }
+   if (const RefCountPtr<RawSyntax> &recursiveRefChild = raw->getChild(Cursor::RecursiveRef)) {
+      assert(recursiveRefChild->kindOf(SyntaxKind::SimpleVariableExpr) &&
+             raw->getChild(Cursor::Variable) &&
+             raw->getChild(Cursor::Variable)->isToken());
+   }
+#endif
+}
+
+Syntax SimpleVariableExprSyntax::getVariable()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Variable).get()};
+}
+
+std::optional<SimpleVariableExprSyntax> SimpleVariableExprSyntax::getRecursiveRef()
+{
+   RefCountPtr<SyntaxData> recursiveRefData = m_data->getChild(Cursor::RecursiveRef);
+   if (!recursiveRefData) {
+      return std::nullopt;
+   }
+   return SimpleVariableExprSyntax {m_root, recursiveRefData.get()};
+}
+
+SimpleVariableExprSyntax SimpleVariableExprSyntax::withVariable(std::optional<Syntax> variable)
+{
+   RefCountPtr<RawSyntax> variableRaw;
+   if (variable.has_value()) {
+      variableRaw = variable->getRaw();
+   } else {
+      variableRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<SimpleVariableExprSyntax>(variableRaw, Cursor::Variable);
+}
+
+SimpleVariableExprSyntax SimpleVariableExprSyntax::withRecursiveRef(std::optional<SimpleVariableExprSyntax> recursiveRef)
+{
+   RefCountPtr<RawSyntax> recursiveRefRaw;
+   if (recursiveRef.has_value()) {
+      recursiveRefRaw = recursiveRef->getRaw();
+   } else {
+      recursiveRefRaw = nullptr;
+   }
+   return m_data->replaceChild<SimpleVariableExprSyntax>(recursiveRefRaw, Cursor::RecursiveRef);
 }
 
 ///

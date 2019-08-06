@@ -19,6 +19,8 @@ namespace polar::syntax {
 class ExprSyntax;
 class NullExprSyntax;
 class BraceDecoratedExprClauseSyntax;
+class BraceDecoratedVariableExprSyntax;
+class SimpleVariableExprSyntax;
 class ClassRefParentExprSyntax;
 class ClassRefStaticExprSyntax;
 class ClassRefSelfExprSyntax;
