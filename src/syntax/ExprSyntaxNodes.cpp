@@ -50,50 +50,72 @@ NullExprSyntax NullExprSyntax::withNullKeyword(std::optional<TokenSyntax> keywor
 void BraceDecoratedExprClauseSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
-//   RefCountPtr<RawSyntax> raw = getRaw();
-//   if (isMissing()) {
-//      return;
-//   }
-//   assert(raw->getLayout().size() == BraceDecoratedExprClauseSyntax::CHILDREN_COUNT);
-//   syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_BRACE});
-//   syntax_assert_child_token(raw, RightBrace, std::set{TokenKindType::T_RIGHT_BRACE});
-//   if (const RefCountPtr<ExprSyntax> &exprChild = raw->getChild(Cursor::Expr)) {
-//      assert(exprChild->kindOf(SyntaxKind::Expr));
-//   }
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == BraceDecoratedExprClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_BRACE});
+   syntax_assert_child_token(raw, RightBrace, std::set{TokenKindType::T_RIGHT_BRACE});
+   if (const RefCountPtr<RawSyntax> &exprChild = raw->getChild(Cursor::Expr)) {
+      assert(exprChild->kindOf(SyntaxKind::Expr));
+   }
 #endif
 }
 
 TokenSyntax BraceDecoratedExprClauseSyntax::getLeftBrace()
 {
-
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftBrace).get()};
 }
 
 ExprSyntax BraceDecoratedExprClauseSyntax::getExpr()
 {
-
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Expr).get()};
 }
 
 TokenSyntax BraceDecoratedExprClauseSyntax::getRightBrace()
 {
-
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightBrace).get()};
 }
 
 BraceDecoratedExprClauseSyntax BraceDecoratedExprClauseSyntax::withLeftBrace(std::optional<TokenSyntax> leftBrace)
 {
-
+   RefCountPtr<RawSyntax> leftBraceRaw;
+   if (leftBrace.has_value()) {
+      leftBraceRaw = leftBrace->getRaw();
+   } else {
+      leftBraceRaw = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE)));
+   }
+   return m_data->replaceChild<BraceDecoratedExprClauseSyntax>(leftBraceRaw, Cursor::LeftBrace);
 }
 
 BraceDecoratedExprClauseSyntax BraceDecoratedExprClauseSyntax::withExpr(std::optional<ExprSyntax> expr)
 {
-
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
+   } else {
+      exprRaw = RawSyntax::missing(SyntaxKind::UnknownExpr);
+   }
+   return m_data->replaceChild<BraceDecoratedExprClauseSyntax>(exprRaw, Cursor::Expr);
 }
 
 BraceDecoratedExprClauseSyntax BraceDecoratedExprClauseSyntax::withRightBrace(std::optional<TokenSyntax> rightBrace)
 {
-
-
+   RefCountPtr<RawSyntax> rightBraceRaw;
+   if (rightBrace.has_value()) {
+      rightBraceRaw = rightBrace->getRaw();
+   } else {
+      rightBraceRaw = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)));
+   }
+   return m_data->replaceChild<BraceDecoratedExprClauseSyntax>(rightBraceRaw, Cursor::RightBrace);
 }
 
+///
+/// ClassRefParentExprSyntax
+///
 void ClassRefParentExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
