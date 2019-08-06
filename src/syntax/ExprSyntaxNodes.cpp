@@ -334,6 +334,9 @@ ClassRefStaticExprSyntax ClassRefStaticExprSyntax::withStaticKeyword(std::option
    return m_data->replaceChild<ClassRefStaticExprSyntax>(rawStaticKeyword, Cursor::StaticKeyword);
 }
 
+///
+/// IntegerLiteralExprSyntax
+///
 void IntegerLiteralExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
@@ -362,6 +365,9 @@ IntegerLiteralExprSyntax IntegerLiteralExprSyntax::withDigits(std::optional<Toke
    return m_data->replaceChild<IntegerLiteralExprSyntax>(rawDigits, Cursor::Digits);
 }
 
+///
+/// FloatLiteralExprSyntax
+///
 void FloatLiteralExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
@@ -390,6 +396,101 @@ FloatLiteralExprSyntax FloatLiteralExprSyntax::withFloatDigits(std::optional<Tok
    return m_data->replaceChild<FloatLiteralExprSyntax>(rawDigits, Cursor::FloatDigits);
 }
 
+///
+/// StringLiteralExprSyntax
+///
+
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType StringLiteralExprSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      StringLiteralExprSyntax::LeftQuote, {
+         TokenKindType::T_SINGLE_QUOTE, TokenKindType::T_DOUBLE_QUOTE
+      }
+   },
+   {
+      StringLiteralExprSyntax::RightQuote, {
+         TokenKindType::T_SINGLE_QUOTE, TokenKindType::T_DOUBLE_QUOTE
+      }
+   }
+};
+#endif
+
+void StringLiteralExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == StringLiteralExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftQuote, CHILD_TOKEN_CHOICES.at(Cursor::LeftQuote));
+   syntax_assert_child_token(raw, RightQuote, CHILD_TOKEN_CHOICES.at(Cursor::RightQuote));
+   assert(raw->getChild(Cursor::LeftQuote)->getTokenKind() == raw->getChild(Cursor::RightQuote)->getTokenKind());
+#endif
+}
+
+TokenSyntax StringLiteralExprSyntax::getLeftQuote()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftQuote).get()};
+}
+
+TokenSyntax StringLiteralExprSyntax::getText()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Text).get()};
+}
+
+TokenSyntax StringLiteralExprSyntax::getRightQuote()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightQuote).get()};
+}
+
+StringLiteralExprSyntax StringLiteralExprSyntax::withLeftQuote(std::optional<TokenSyntax> leftQuote)
+{
+   RefCountPtr<RawSyntax> leftQuoteRaw;
+   if (leftQuote.has_value()) {
+      leftQuoteRaw = leftQuote->getRaw();
+   } else {
+      leftQuoteRaw = RawSyntax::missing(TokenKindType::T_DOUBLE_QUOTE,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_DOUBLE_QUOTE)));
+   }
+   return m_data->replaceChild<StringLiteralExprSyntax>(leftQuoteRaw, Cursor::LeftQuote);
+}
+
+StringLiteralExprSyntax StringLiteralExprSyntax::withText(std::optional<TokenSyntax> text)
+{
+   RefCountPtr<RawSyntax> textRaw;
+   if (text.has_value()) {
+      textRaw = text->getRaw();
+   } else {
+      textRaw = RawSyntax::missing(TokenKindType::T_CONSTANT_ENCAPSED_STRING,
+                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_CONSTANT_ENCAPSED_STRING)));
+   }
+   return m_data->replaceChild<StringLiteralExprSyntax>(textRaw, Cursor::Text);
+}
+
+StringLiteralExprSyntax StringLiteralExprSyntax::withRightQuote(std::optional<TokenSyntax> rightQuote)
+{
+   RefCountPtr<RawSyntax> rightQuoteRaw;
+   if (rightQuote.has_value()) {
+      rightQuoteRaw = rightQuote->getRaw();
+   } else {
+      RefCountPtr<RawSyntax> leftQuote = getRaw()->getChild(Cursor::LeftQuote);
+      if (leftQuote) {
+         TokenKindType leftQuoteKind = leftQuote->getTokenKind();
+         rightQuoteRaw = RawSyntax::missing(leftQuoteKind,
+                                            OwnedString::makeUnowned(get_token_text(leftQuoteKind)));
+      } else {
+         rightQuoteRaw = RawSyntax::missing(TokenKindType::T_DOUBLE_QUOTE,
+                                            OwnedString::makeUnowned(get_token_text(TokenKindType::T_DOUBLE_QUOTE)));
+      }
+   }
+   return m_data->replaceChild<StringLiteralExprSyntax>(rightQuoteRaw, Cursor::LeftQuote);
+}
+
+///
+/// BooleanLiteralExprSyntax
+///
 #ifdef POLAR_DEBUG_BUILD
 const TokenChoicesType BooleanLiteralExprSyntax::CHILD_TOKEN_CHOICES
 {

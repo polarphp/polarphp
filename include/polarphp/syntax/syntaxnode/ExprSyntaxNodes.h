@@ -411,6 +411,69 @@ private:
    void validate();
 };
 
+///
+/// string_literal:
+///   '"' T_CONSTANT_ENCAPSED_STRING '"'
+/// | '\'' T_CONSTANT_ENCAPSED_STRING '\''
+///
+class StringLiteralExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_SINGLE_QUOTE|T_DOUBLE_QUOTE)
+      /// optional: false
+      ///
+      LeftQuote,
+      ///
+      /// type: TokenSyntax (T_CONSTANT_ENCAPSED_STRING)
+      /// optional: false
+      ///
+      Text,
+      ///
+      /// type: TokenSyntax (T_SINGLE_QUOTE|T_DOUBLE_QUOTE)
+      /// optional: false
+      ///
+      RightQuote
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
+
+public:
+   StringLiteralExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getLeftQuote();
+   TokenSyntax getText();
+   TokenSyntax getRightQuote();
+
+   StringLiteralExprSyntax withLeftQuote(std::optional<TokenSyntax> leftQuote);
+   StringLiteralExprSyntax withText(std::optional<TokenSyntax> text);
+   StringLiteralExprSyntax withRightQuote(std::optional<TokenSyntax> rightQuote);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::StringLiteralExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class StringLiteralExprSyntaxBuilder;
+   void validate();
+};
+
 class BooleanLiteralExprSyntax final : public ExprSyntax
 {
 public:
