@@ -181,34 +181,6 @@ FloatLiteralExprSyntax FloatLiteralExprSyntax::withFloatDigits(std::optional<Tok
    return m_data->replaceChild<FloatLiteralExprSyntax>(rawDigits, Cursor::FloatDigits);
 }
 
-void StringLiteralExprSyntax::validate()
-{
-#ifdef POLAR_DEBUG_BUILD
-   RefCountPtr<RawSyntax> raw = m_data->getRaw();
-   if (isMissing()) {
-      return;
-   }
-   assert(raw->getLayout().size() == StringLiteralExprSyntax::CHILDREN_COUNT);
-#endif
-}
-
-TokenSyntax StringLiteralExprSyntax::getString()
-{
-   return TokenSyntax{m_root, m_data->getChild(Cursor::String).get()};
-}
-
-StringLiteralExprSyntax StringLiteralExprSyntax::withString(std::optional<TokenSyntax> str)
-{
-   RefCountPtr<RawSyntax> rawStr;
-   if (str.has_value()) {
-      rawStr = str->getRaw();
-   } else {
-      rawStr = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
-                                  OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
-   }
-   return m_data->replaceChild<StringLiteralExprSyntax>(rawStr, Cursor::String);
-}
-
 #ifdef POLAR_DEBUG_BUILD
 const TokenChoicesType BooleanLiteralExprSyntax::CHILD_TOKEN_CHOICES
 {

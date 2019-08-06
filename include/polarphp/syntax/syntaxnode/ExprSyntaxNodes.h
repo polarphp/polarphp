@@ -56,6 +56,63 @@ private:
    void validate();
 };
 
+///
+/// brace_decorated_expr_clause:
+///   '{' expr '}'
+///
+class BraceDecoratedExprClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      LeftBrace,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Expr,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      RightBrace
+   };
+
+public:
+   BraceDecoratedExprClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getLeftBrace();
+   ExprSyntax getExpr();
+   TokenSyntax getRightBrace();
+
+   BraceDecoratedExprClauseSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
+   BraceDecoratedExprClauseSyntax withExpr(std::optional<ExprSyntax> expr);
+   BraceDecoratedExprClauseSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::BraceDecoratedExprClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class BraceDecoratedExprClauseSyntaxBuilder;
+   void validate();
+};
+
 class ClassRefParentExprSyntax final : public ExprSyntax
 {
 public:
@@ -237,42 +294,6 @@ public:
 
 private:
    friend class FloatLiteralExprSyntaxBuilder;
-   void validate();
-};
-
-class StringLiteralExprSyntax final : public ExprSyntax
-{
-public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 1;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
-   enum Cursor : SyntaxChildrenCountType
-   {
-      /// type: TokenSyntax
-      /// optional: false
-      String,
-   };
-public:
-   StringLiteralExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : ExprSyntax(root, data)
-   {
-      validate();
-   }
-
-   TokenSyntax getString();
-   StringLiteralExprSyntax withString(std::optional<TokenSyntax> str);
-
-   static bool kindOf(SyntaxKind kind)
-   {
-      return kind == SyntaxKind::StringLiteralExpr;
-   }
-
-   static bool classOf(const Syntax *syntax)
-   {
-      return kindOf(syntax->getKind());
-   }
-
-private:
-   friend class StringLiteralExprSyntaxBuilder;
    void validate();
 };
 

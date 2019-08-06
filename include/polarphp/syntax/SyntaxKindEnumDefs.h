@@ -84,6 +84,7 @@ enum class SyntaxKind : std::uint32_t
    /// expr syntax node
    FirstExpr,
    NullExpr,
+   BraceDecoratedExprClause,
    FloatLiteralExpr,
    IntegerLiteralExpr,
    StringLiteralExpr,

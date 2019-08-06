@@ -86,15 +86,6 @@ FloatLiteralExprSyntax ExprSyntaxNodeFactory::makeFloatLiteralExprSyntax(TokenSy
    return make<FloatLiteralExprSyntax>(rawFloatLiteralExprSyntax);
 }
 
-StringLiteralExprSyntax ExprSyntaxNodeFactory::makeStringLiteralExprSyntax(TokenSyntax str,
-                                                                           RefCountPtr<SyntaxArena> arena)
-{
-   RefCountPtr<RawSyntax> rawStringLiteralExprSyntax = RawSyntax::make(SyntaxKind::StringLiteralExpr, {
-                                                                          str.getRaw()
-                                                                       }, SourcePresence::Present, arena);
-   return make<StringLiteralExprSyntax>(rawStringLiteralExprSyntax);
-}
-
 BooleanLiteralExprSyntax ExprSyntaxNodeFactory::makeBooleanLiteralExprSyntax(TokenSyntax boolean,
                                                                              RefCountPtr<SyntaxArena> arena)
 {
@@ -222,18 +213,6 @@ FloatLiteralExprSyntax ExprSyntaxNodeFactory::makeBlankFloatLiteralExprSyntax(Re
                                                                          OwnedString::makeUnowned(get_token_text(TokenKindType::T_DNUMBER)))
                                                                       }, SourcePresence::Present, arena);
    return make<FloatLiteralExprSyntax>(rawFloatLiteralExprSyntax);
-}
-
-///
-/// TODO
-///
-StringLiteralExprSyntax ExprSyntaxNodeFactory::makeBlankStringLiteralExprSyntax(RefCountPtr<SyntaxArena> arena)
-{
-   RefCountPtr<RawSyntax> rawStringLiteralExprSyntax = RawSyntax::make(SyntaxKind::StringLiteralExpr, {
-                                                                          RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
-                                                                          OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)))
-                                                                       }, SourcePresence::Present, arena);
-   return make<StringLiteralExprSyntax>(rawStringLiteralExprSyntax);
 }
 
 BooleanLiteralExprSyntax ExprSyntaxNodeFactory::makeBlankBooleanLiteralExprSyntax(RefCountPtr<SyntaxArena> arena)

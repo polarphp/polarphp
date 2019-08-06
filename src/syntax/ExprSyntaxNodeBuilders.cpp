@@ -144,27 +144,6 @@ FloatLiteralExprSyntax FloatLiteralExprSyntaxBuilder::build()
 }
 
 ///
-/// StringLiteralExprSyntaxBuilder
-///
-StringLiteralExprSyntaxBuilder &StringLiteralExprSyntaxBuilder::useString(TokenSyntax str)
-{
-   m_layout[cursor_index(Cursor::String)] = str.getRaw();
-   return *this;
-}
-
-StringLiteralExprSyntax StringLiteralExprSyntaxBuilder::build()
-{
-   CursorIndex strIndex = cursor_index(Cursor::String);
-   if (!m_layout[strIndex]) {
-      m_layout[strIndex] = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
-                                              OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
-   }
-   RefCountPtr<RawSyntax> rawDigits = RawSyntax::make(SyntaxKind::StringLiteralExpr, m_layout, SourcePresence::Present,
-                                                      m_arena);
-   return make<StringLiteralExprSyntax>(rawDigits);
-}
-
-///
 /// BooleanLiteralExprSyntaxBuilder
 ///
 BooleanLiteralExprSyntaxBuilder &BooleanLiteralExprSyntaxBuilder::useBoolean(TokenSyntax booleanValue)
