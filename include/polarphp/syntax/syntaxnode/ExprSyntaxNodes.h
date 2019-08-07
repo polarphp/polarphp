@@ -165,6 +165,134 @@ private:
 };
 
 ///
+/// array_key_value_pair_item:
+///   expr T_DOUBLE_ARROW expr
+/// | expr
+/// | expr T_DOUBLE_ARROW '&' variable
+/// | '&' variable
+///
+class ArrayKeyValuePairItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 4;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: true
+      ///
+      KeyExpr,
+      ///
+      /// type: TokenSyntax (T_DOUBLE_ARROW)
+      /// optional: true
+      ///
+      DoubleArrowToken,
+      ///
+      /// type: TokenSyntax (T_AMPERSAND)
+      /// optional: true
+      ///
+      ReferenceToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      /// node choices: true
+      /// --------------------------------
+      /// node choice: VariableExprSyntax
+      /// --------------------------------
+      /// node choice: ExprSyntax
+      ///
+      Value
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   ArrayKeyValuePairItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<ExprSyntax> getKeyExpr();
+   std::optional<TokenSyntax> getDoubleArrowToken();
+   std::optional<TokenSyntax> getReferenceToken();
+   ExprSyntax getValue();
+
+   ArrayKeyValuePairItemSyntax withKeyExpr(std::optional<ExprSyntax> keyExpr);
+   ArrayKeyValuePairItemSyntax withDoubleArrowToken(std::optional<TokenSyntax> doubleArrowToken);
+   ArrayKeyValuePairItemSyntax withReferenceToken(std::optional<TokenSyntax> referenceToken);
+   ArrayKeyValuePairItemSyntax withValue(std::optional<ExprSyntax> value);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ArrayKeyValuePairItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ArrayKeyValuePairItemSyntaxBuilder;
+   void validate();
+};
+
+///
+/// array_unpack_pair_item:
+///   T_ELLIPSIS expr
+///
+class ArrayUnpackPairItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_ELLIPSIS)
+      /// optional: false
+      ///
+      EllipsisToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      UnpackExpr
+   };
+
+public:
+   ArrayUnpackPairItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getEllipsisToken();
+   ExprSyntax getUnpackExpr();
+
+   ArrayUnpackPairItemSyntax withEllipsisToken(std::optional<TokenSyntax> ellipsisToken);
+   ArrayUnpackPairItemSyntax withUnpackExpr(std::optional<ExprSyntax> unpackExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ArrayUnpackPairItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ArrayUnpackPairItemSyntaxBuilder;
+   void validate();
+};
+
+///
 /// simple_variable:
 /// T_VARIABLE
 /// |	'$' '{' expr '}'	{ $$ = $3; }

@@ -167,6 +167,111 @@ BraceDecoratedVariableExprSyntax::withDecoratedExpr(std::optional<BraceDecorated
 }
 
 ///
+/// ArrayKeyValuePairItemSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType ArrayKeyValuePairItemSyntax::CHILD_NODE_CHOICES
+{
+   {
+      ArrayKeyValuePairItemSyntax::Value, {
+         SyntaxKind::Expr, SyntaxKind::VariableExpr
+      }
+   }
+};
+#endif
+
+void ArrayKeyValuePairItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ArrayKeyValuePairItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, KeyExpr, std::set{TokenKindType::T_DOUBLE_ARROW});
+   syntax_assert_child_token(raw, DoubleArrowToken, std::set{TokenKindType::T_DOUBLE_ARROW});
+   syntax_assert_child_token(raw, ReferenceToken, std::set{TokenKindType::T_AMPERSAND});
+   syntax_assert_child_kind(raw, Value, CHILD_NODE_CHOICES.at(Cursor::Value));
+#endif
+}
+
+std::optional<ExprSyntax> ArrayKeyValuePairItemSyntax::getKeyExpr()
+{
+   RefCountPtr<SyntaxData> keyExprData = m_data->getChild(Cursor::KeyExpr);
+   if (!keyExprData) {
+      return std::nullopt;
+   }
+   return ExprSyntax {m_root, keyExprData.get()};
+}
+
+std::optional<TokenSyntax> ArrayKeyValuePairItemSyntax::getDoubleArrowToken()
+{
+   RefCountPtr<SyntaxData> doubleArrowTokenData = m_data->getChild(Cursor::DoubleArrowToken);
+   if (!doubleArrowTokenData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, doubleArrowTokenData.get()};
+}
+
+std::optional<TokenSyntax> ArrayKeyValuePairItemSyntax::getReferenceToken()
+{
+   RefCountPtr<SyntaxData> referenceTokenData;
+   if (!referenceTokenData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, referenceTokenData.get()};
+}
+
+ExprSyntax ArrayKeyValuePairItemSyntax::getValue()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Value).get()};
+}
+
+ArrayKeyValuePairItemSyntax ArrayKeyValuePairItemSyntax::withKeyExpr(std::optional<ExprSyntax> keyExpr)
+{
+   RefCountPtr<RawSyntax> keyExprRaw;
+   if (keyExpr.has_value()) {
+      keyExprRaw = keyExpr->getRaw();
+   } else {
+      keyExprRaw = nullptr;
+   }
+   return m_data->replaceChild<ArrayKeyValuePairItemSyntax>(keyExprRaw, Cursor::KeyExpr);
+}
+
+ArrayKeyValuePairItemSyntax ArrayKeyValuePairItemSyntax::withDoubleArrowToken(std::optional<TokenSyntax> doubleArrowToken)
+{
+   RefCountPtr<RawSyntax> doubleArrowTokenRaw;
+   if (doubleArrowToken.has_value()) {
+      doubleArrowTokenRaw = doubleArrowToken->getRaw();
+   } else {
+      doubleArrowTokenRaw = nullptr;
+   }
+   return m_data->replaceChild<ArrayKeyValuePairItemSyntax>(doubleArrowTokenRaw, Cursor::DoubleArrowToken);
+}
+
+ArrayKeyValuePairItemSyntax ArrayKeyValuePairItemSyntax::withReferenceToken(std::optional<TokenSyntax> referenceToken)
+{
+   RefCountPtr<RawSyntax> referenceTokenRaw;
+   if (referenceToken.has_value()) {
+      referenceTokenRaw = referenceToken->getRaw();
+   } else {
+      referenceTokenRaw = nullptr;
+   }
+   return m_data->replaceChild<ArrayKeyValuePairItemSyntax>(referenceTokenRaw, Cursor::ReferenceToken);
+}
+
+ArrayKeyValuePairItemSyntax ArrayKeyValuePairItemSyntax::withValue(std::optional<ExprSyntax> value)
+{
+   RefCountPtr<RawSyntax> valueRaw;
+   if (value.has_value()) {
+      valueRaw = value->getRaw();
+   } else {
+      valueRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<ArrayKeyValuePairItemSyntax>(valueRaw, Cursor::Value);
+}
+
+///
 /// SimpleVariableExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
