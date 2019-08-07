@@ -552,16 +552,121 @@ private:
 ///
 class ArrayExprSyntax final : public ExprSyntax
 {
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 4;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 4;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_ARRAY)
+      /// optional: false
+      ///
+      ArrayToken,
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optional: false
+      ///
+      LeftParen,
+      ///
+      /// type: ArrayPairItemListSyntax
+      /// optional: false
+      ///
+      PairItemList,
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
+      /// optional: false
+      ///
+      RightParen
+   };
 
+public:
+   ArrayExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getArrayToken();
+   TokenSyntax getLeftParen();
+   ArrayPairItemListSyntax getPairItemList();
+   TokenSyntax getRightParen();
+
+   ArrayExprSyntax withArrayToken(std::optional<TokenSyntax> arrayToken);
+   ArrayExprSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
+   ArrayExprSyntax withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList);
+   ArrayExprSyntax withRightParen(std::optional<TokenSyntax> rightParen);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ArrayExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ArrayExprSyntaxBuilder;
+   void validate();
 };
 
 ///
 /// simplified_array_expr:
-/// '[' array_pair_list ']'
+///   '[' array_pair_list ']'
 ///
 class SimplifiedArrayExprSyntax final : public ExprSyntax
 {
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_LEFT_SQUARE_BRACKET)
+      /// optional: false
+      ///
+      LeftSquareBracket,
+      ///
+      /// type: ArrayPairItemListSyntax
+      /// optional: false
+      ///
+      PairItemList,
+      ///
+      /// type: TokenSyntax (T_RIGHT_SQUARE_BRACKET)
+      /// optional: false
+      ///
+      RightSquareBracket
+   };
 
+public:
+   SimplifiedArrayExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getLeftSquareBracket();
+   ArrayPairItemListSyntax getPairItemList();
+   TokenSyntax getRightSquareBracket();
+
+   SimplifiedArrayExprSyntax withLeftSquareBracket(std::optional<TokenSyntax> leftSquareBracket);
+   SimplifiedArrayExprSyntax withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList);
+   SimplifiedArrayExprSyntax withRightSquareBracket(std::optional<TokenSyntax> rightSquareBracket);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SimplifiedArrayExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class SimplifiedArrayExprSyntaxBuilder;
+   void validate();
 };
 
 class ClassRefParentExprSyntax final : public ExprSyntax

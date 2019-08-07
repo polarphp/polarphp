@@ -652,6 +652,132 @@ SimpleVariableExprSyntax SimpleVariableExprSyntax::withVariable(std::optional<Sy
 }
 
 ///
+/// ArrayExprSyntax
+///
+void ArrayExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ArrayExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ArrayToken, std::set{TokenKindType::T_ARRAY});
+   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
+   syntax_assert_child_kind(raw, PairItemList, std::set{SyntaxKind::ArrayPairItemList});
+#endif
+}
+
+TokenSyntax ArrayExprSyntax::getArrayToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::ArrayToken).get()};
+}
+
+TokenSyntax ArrayExprSyntax::getLeftParen()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParen).get()};
+}
+
+ArrayPairItemListSyntax ArrayExprSyntax::getPairItemList()
+{
+   return ArrayPairItemListSyntax {m_root, m_data->getChild(Cursor::PairItemList).get()};
+}
+
+TokenSyntax ArrayExprSyntax::getRightParen()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParen).get()};
+}
+
+ArrayExprSyntax ArrayExprSyntax::withArrayToken(std::optional<TokenSyntax> arrayToken)
+{
+   RefCountPtr<RawSyntax> arrayTokenRaw;
+   if (arrayToken.has_value()) {
+      arrayTokenRaw = arrayToken->getRaw();
+   } else {
+      arrayTokenRaw = RawSyntax::missing(TokenKindType::T_ARRAY,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_ARRAY)));
+   }
+   return m_data->replaceChild<ArrayExprSyntax>(arrayTokenRaw, Cursor::ArrayToken);
+}
+
+ArrayExprSyntax ArrayExprSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> leftParanRaw;
+   if (leftParen.has_value()) {
+      leftParanRaw = leftParen->getRaw();
+   } else {
+      leftParanRaw = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+   }
+   return m_data->replaceChild<ArrayExprSyntax>(leftParanRaw, Cursor::LeftParen);
+}
+
+ArrayExprSyntax ArrayExprSyntax::withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList)
+{
+   RefCountPtr<RawSyntax> pairItemListRaw;
+   if (pairItemList.has_value()) {
+      pairItemListRaw = pairItemList->getRaw();
+   } else {
+      pairItemListRaw = RawSyntax::missing(SyntaxKind::ArrayPairItemList);
+   }
+   return m_data->replaceChild<ArrayExprSyntax>(pairItemListRaw, Cursor::PairItemList);
+}
+
+ArrayExprSyntax ArrayExprSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rightParenRaw;
+   if (rightParen.has_value()) {
+      rightParenRaw = rightParen->getRaw();
+   } else {
+      rightParenRaw = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+   }
+   return m_data->replaceChild<ArrayExprSyntax>(rightParenRaw, Cursor::RightParen);
+}
+
+///
+/// SimplifiedArrayExprSyntax
+///
+void SimplifiedArrayExprSyntax::validate()
+{
+
+}
+
+TokenSyntax SimplifiedArrayExprSyntax::getLeftSquareBracket()
+{
+
+}
+
+ArrayPairItemListSyntax SimplifiedArrayExprSyntax::getPairItemList()
+{
+
+}
+
+TokenSyntax SimplifiedArrayExprSyntax::getRightSquareBracket()
+{
+
+}
+
+SimplifiedArrayExprSyntax
+SimplifiedArrayExprSyntax::withLeftSquareBracket(std::optional<TokenSyntax> leftSquareBracket)
+{
+
+}
+
+SimplifiedArrayExprSyntax
+SimplifiedArrayExprSyntax::withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList)
+{
+
+}
+
+SimplifiedArrayExprSyntax
+SimplifiedArrayExprSyntax::withRightSquareBracket(std::optional<TokenSyntax> rightSquareBracket)
+{
+
+}
+
+///
 /// ClassRefParentExprSyntax
 ///
 void ClassRefParentExprSyntax::validate()
