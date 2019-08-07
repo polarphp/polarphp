@@ -741,40 +741,69 @@ ArrayExprSyntax ArrayExprSyntax::withRightParen(std::optional<TokenSyntax> right
 ///
 void SimplifiedArrayExprSyntax::validate()
 {
-
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == SimplifiedArrayExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftSquareBracket, std::set{TokenKindType::T_LEFT_SQUARE_BRACKET});
+   syntax_assert_child_token(raw, RightSquareBracket, std::set{TokenKindType::T_RIGHT_SQUARE_BRACKET});
+   syntax_assert_child_kind(raw, PairItemList, std::set{SyntaxKind::ArrayPairItemList});
+#endif
 }
 
 TokenSyntax SimplifiedArrayExprSyntax::getLeftSquareBracket()
 {
-
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftSquareBracket).get()};
 }
 
 ArrayPairItemListSyntax SimplifiedArrayExprSyntax::getPairItemList()
 {
-
+   return ArrayPairItemListSyntax {m_root, m_data->getChild(Cursor::PairItemList).get()};
 }
 
 TokenSyntax SimplifiedArrayExprSyntax::getRightSquareBracket()
 {
-
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightSquareBracket).get()};
 }
 
 SimplifiedArrayExprSyntax
 SimplifiedArrayExprSyntax::withLeftSquareBracket(std::optional<TokenSyntax> leftSquareBracket)
 {
-
+   RefCountPtr<RawSyntax> leftSquareBracketRaw;
+   if (leftSquareBracket.has_value()) {
+      leftSquareBracketRaw = leftSquareBracket->getRaw();
+   } else {
+      leftSquareBracketRaw = RawSyntax::missing(TokenKindType::T_LEFT_SQUARE_BRACKET,
+                                                OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_SQUARE_BRACKET)));
+   }
+   return m_data->replaceChild<SimplifiedArrayExprSyntax>(leftSquareBracketRaw, Cursor::LeftSquareBracket);
 }
 
 SimplifiedArrayExprSyntax
 SimplifiedArrayExprSyntax::withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList)
 {
-
+   RefCountPtr<RawSyntax> pairItemListRaw;
+   if (pairItemList.has_value()) {
+      pairItemListRaw = pairItemList->getRaw();
+   } else {
+      pairItemListRaw = RawSyntax::missing(SyntaxKind::ArrayPairItemList);
+   }
+   return m_data->replaceChild<SimplifiedArrayExprSyntax>(pairItemListRaw, Cursor::PairItemList);
 }
 
 SimplifiedArrayExprSyntax
 SimplifiedArrayExprSyntax::withRightSquareBracket(std::optional<TokenSyntax> rightSquareBracket)
 {
-
+   RefCountPtr<RawSyntax> rightSquareBracketRaw;
+   if (rightSquareBracket.has_value()) {
+      rightSquareBracketRaw = rightSquareBracket->getRaw();
+   } else {
+      rightSquareBracketRaw = RawSyntax::missing(TokenKindType::T_RIGHT_SQUARE_BRACKET,
+                                                OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_SQUARE_BRACKET)));
+   }
+   return m_data->replaceChild<SimplifiedArrayExprSyntax>(rightSquareBracketRaw, Cursor::RightSquareBracket);
 }
 
 ///
