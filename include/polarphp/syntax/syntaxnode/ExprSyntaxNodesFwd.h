@@ -20,7 +20,14 @@ class ExprSyntax;
 class NullExprSyntax;
 class BraceDecoratedExprClauseSyntax;
 class BraceDecoratedVariableExprSyntax;
+class ArrayKeyValuePairItemSyntax;
+class ArrayUnpackPairItemSyntax;
+class ArrayPairItemSyntax;
+class ListRecursivePairItemSyntax;
+class ListPairItemSyntax;
 class SimpleVariableExprSyntax;
+class ArrayExprSyntax;
+class SimplifiedArrayExprSyntax;
 class ClassRefParentExprSyntax;
 class ClassRefStaticExprSyntax;
 class ClassRefSelfExprSyntax;
@@ -50,6 +57,26 @@ using ExprListSyntax = SyntaxCollection<SyntaxKind::ExprList, ExprSyntax>;
 /// | lexical_var
 ///
 using LexicalVarListSyntax = SyntaxCollection<SyntaxKind::LexicalVarList, LexicalVarItemSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: ArrayPairItemSyntax
+///
+/// array_pair_item_list:
+///   array_pair_item_list ',' array_pair_item
+/// | array_pair_item
+///
+using ArrayPairItemListSyntax = SyntaxCollection<SyntaxKind::ArrayPairItemList, ArrayPairItemSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: ListPairItemSyntax
+///
+/// list_pair_item_list:
+///   list_pair_item_list ',' array_pair_item
+/// | list_pair_item_list
+///
+using ListPairItemListSyntax = SyntaxCollection<SyntaxKind::ListPairItemList, ListPairItemSyntax>;
 
 } // polar::syntax
 

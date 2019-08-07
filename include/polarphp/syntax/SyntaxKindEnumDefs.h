@@ -87,6 +87,8 @@ enum class SyntaxKind : std::uint32_t
    BraceDecoratedExprClause,
    BraceDecoratedVariableExpr,
    SimpleVariableExpr,
+   ArrayExpr,
+   SimplifiedArrayExpr,
    FloatLiteralExpr,
    IntegerLiteralExpr,
    StringLiteralExpr,
@@ -149,6 +151,12 @@ enum class SyntaxKind : std::uint32_t
    ClassConstList,
    ClassModifierList,
    ClassTraitAdaptationList,
+   /// for array
+   ArrayKeyValuePairItem,
+   ArrayUnpackPairItem,
+   ArrayPairItemList,
+   ListRecursivePairItem,
+   ListPairItemList,
    MemberModifierList,
    MemberDeclList,
 

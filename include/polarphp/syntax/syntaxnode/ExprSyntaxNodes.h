@@ -228,6 +228,24 @@ private:
    void validate();
 };
 
+///
+/// array_expr:
+///   T_ARRAY '(' array_pair_list ')'
+///
+class ArrayExprSyntax final : public ExprSyntax
+{
+
+};
+
+///
+/// simplified_array_expr:
+/// '[' array_pair_list ']'
+///
+class SimplifiedArrayExprSyntax final : public ExprSyntax
+{
+
+};
+
 class ClassRefParentExprSyntax final : public ExprSyntax
 {
 public:
