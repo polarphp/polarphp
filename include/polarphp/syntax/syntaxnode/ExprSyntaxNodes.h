@@ -915,6 +915,69 @@ private:
    void validate();
 };
 
+///
+/// encaps_var_offset:
+///   T_IDENTIFIER_STRING
+/// | T_NUM_STRING
+/// | '-' T_NUM_STRING
+/// | T_VARIABLE
+///
+class EncapsVarOffsetSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_MINUS_SIGN)
+      /// optional: true
+      ///
+      MinusSign,
+      ///
+      /// type: TokenSynax
+      /// optional: false
+      /// token choices: true
+      /// ---------------------------------
+      /// T_IDENTIFIER_STRING
+      /// T_NUM_STRING
+      /// T_VARIABLE
+      ///
+      Offset
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
+
+public:
+   EncapsVarOffsetSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getMinusSign();
+   TokenSyntax getOffset();
+
+   EncapsVarOffsetSyntax withMinusSign(std::optional<TokenSyntax> minusSign);
+   EncapsVarOffsetSyntax withOffset(std::optional<TokenSyntax> offset);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EncapsVarOffset;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EncapsVarOffsetSyntaxBuilder;
+   void validate();
+};
+
 class BooleanLiteralExprSyntax final : public ExprSyntax
 {
 public:

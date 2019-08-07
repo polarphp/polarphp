@@ -731,7 +731,7 @@ ArrayExprSyntax ArrayExprSyntax::withRightParen(std::optional<TokenSyntax> right
       rightParenRaw = rightParen->getRaw();
    } else {
       rightParenRaw = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
    }
    return m_data->replaceChild<ArrayExprSyntax>(rightParenRaw, Cursor::RightParen);
 }
@@ -801,7 +801,7 @@ SimplifiedArrayExprSyntax::withRightSquareBracket(std::optional<TokenSyntax> rig
       rightSquareBracketRaw = rightSquareBracket->getRaw();
    } else {
       rightSquareBracketRaw = RawSyntax::missing(TokenKindType::T_RIGHT_SQUARE_BRACKET,
-                                                OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_SQUARE_BRACKET)));
+                                                 OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_SQUARE_BRACKET)));
    }
    return m_data->replaceChild<SimplifiedArrayExprSyntax>(rightSquareBracketRaw, Cursor::RightSquareBracket);
 }
@@ -1045,6 +1045,68 @@ StringLiteralExprSyntax StringLiteralExprSyntax::withRightQuote(std::optional<To
       }
    }
    return m_data->replaceChild<StringLiteralExprSyntax>(rightQuoteRaw, Cursor::LeftQuote);
+}
+
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType EncapsVarOffsetSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      EncapsVarOffsetSyntax::Offset, {
+         TokenKindType::T_IDENTIFIER_STRING, TokenKindType::T_NUM_STRING,
+               TokenKindType::T_VARIABLE
+      }
+   }
+};
+#endif
+
+void EncapsVarOffsetSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == EncapsVarOffsetSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, MinusSign, std::set{TokenKindType::T_MINUS_SIGN});
+   syntax_assert_child_token(raw, Offset, CHILD_TOKEN_CHOICES.at(Cursor::Offset));
+#endif
+}
+
+std::optional<TokenSyntax> EncapsVarOffsetSyntax::getMinusSign()
+{
+   RefCountPtr<SyntaxData> minusSignData = m_data->getChild(Cursor::MinusSign);
+   if (!minusSignData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, minusSignData.get()};
+}
+
+TokenSyntax EncapsVarOffsetSyntax::getOffset()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Offset).get()};
+}
+
+EncapsVarOffsetSyntax EncapsVarOffsetSyntax::withMinusSign(std::optional<TokenSyntax> minusSign)
+{
+   RefCountPtr<RawSyntax> minusSignRaw;
+   if (minusSign.has_value()) {
+      minusSignRaw = minusSign->getRaw();
+   } else {
+      minusSignRaw = nullptr;
+   }
+   return m_data->replaceChild<EncapsVarOffsetSyntax>(minusSignRaw, Cursor::MinusSign);
+}
+
+EncapsVarOffsetSyntax EncapsVarOffsetSyntax::withOffset(std::optional<TokenSyntax> offset)
+{
+   RefCountPtr<RawSyntax> offsetRaw;
+   if (offset.has_value()) {
+      offsetRaw = offset->getRaw();
+   } else {
+      offsetRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
+                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
+   }
+   return m_data->replaceChild<EncapsVarOffsetSyntax>(offsetRaw, Cursor::Offset);
 }
 
 ///
