@@ -321,6 +321,264 @@ ArrayUnpackPairItemSyntax ArrayUnpackPairItemSyntax::withUnpackExpr(std::optiona
 }
 
 ///
+/// ArrayPairItemSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType ArrayPairItemSyntax::CHILD_NODE_CHOICES
+{
+   {
+      ArrayPairItemSyntax::Item, {
+         SyntaxKind::ArrayKeyValuePairItem,
+               SyntaxKind::ArrayUnpackPairItem
+      }
+   }
+};
+#endif
+
+void ArrayPairItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ArrayPairItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Item, CHILD_NODE_CHOICES.at(Cursor::Item));
+#endif
+}
+
+Syntax ArrayPairItemSyntax::getItem()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Item).get()};
+}
+
+std::optional<TokenSyntax> ArrayPairItemSyntax::getTrailingComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::TrailingComma);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+ArrayPairItemSyntax ArrayPairItemSyntax::withItem(std::optional<Syntax> item)
+{
+   RefCountPtr<RawSyntax> itemRaw;
+   if (item.has_value()) {
+      itemRaw = item->getRaw();
+   } else {
+      itemRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<ArrayPairItemSyntax>(itemRaw, Cursor::Item);
+}
+
+ArrayPairItemSyntax ArrayPairItemSyntax::withTrailingComma(std::optional<TokenSyntax> trailingComma)
+{
+   RefCountPtr<RawSyntax> trailingCommaRaw;
+   if (trailingComma.has_value()) {
+      trailingCommaRaw = trailingComma->getRaw();
+   } else {
+      trailingCommaRaw = nullptr;
+   }
+   return m_data->replaceChild<ArrayPairItemSyntax>(trailingCommaRaw, Cursor::TrailingComma);
+}
+
+///
+/// ArrayKeyValuePairItemSyntax
+///
+void ListRecursivePairItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ListRecursivePairItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, KeyExpr, std::set{SyntaxKind::Expr});
+   syntax_assert_child_kind(raw, ListPairItemList, std::set{SyntaxKind::ListPairItemList});
+   syntax_assert_child_token(raw, DoubleArrowToken, std::set{TokenKindType::T_DOUBLE_ARROW});
+   syntax_assert_child_token(raw, ListToken, std::set{TokenKindType::T_LIST});
+   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
+#endif
+}
+
+std::optional<ExprSyntax> ListRecursivePairItemSyntax::getKeyExpr()
+{
+   RefCountPtr<SyntaxData> keyExprData = m_data->getChild(Cursor::KeyExpr);
+   if (!keyExprData) {
+      return std::nullopt;
+   }
+   return ExprSyntax {m_root, keyExprData.get()};
+}
+
+std::optional<TokenSyntax> ListRecursivePairItemSyntax::getDoubleArrowToken()
+{
+   RefCountPtr<SyntaxData> arrowData = m_data->getChild(Cursor::DoubleArrowToken);
+   if (!arrowData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, arrowData.get()};
+}
+
+TokenSyntax ListRecursivePairItemSyntax::getListToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::ListToken).get()};
+}
+
+TokenSyntax ListRecursivePairItemSyntax::getLeftParen()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParen).get()};
+}
+
+ListPairItemListSyntax ListRecursivePairItemSyntax::getListPairItemList()
+{
+   return ListPairItemListSyntax {m_root, m_data->getChild(Cursor::ListPairItemList).get()};
+}
+
+TokenSyntax ListRecursivePairItemSyntax::getRightParen()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParen).get()};
+}
+
+ListRecursivePairItemSyntax
+ListRecursivePairItemSyntax::withKeyExpr(std::optional<ExprSyntax> keyExpr)
+{
+   RefCountPtr<RawSyntax> keyExprRaw;
+   if (keyExpr.has_value()) {
+      keyExprRaw = keyExpr->getRaw();
+   } else {
+      keyExprRaw = nullptr;
+   }
+   return m_data->replaceChild<ListRecursivePairItemSyntax>(keyExprRaw, Cursor::KeyExpr);
+}
+
+ListRecursivePairItemSyntax
+ListRecursivePairItemSyntax::withDoubleArrowToken(std::optional<TokenSyntax> doubleArrowToken)
+{
+   RefCountPtr<RawSyntax> doubleArrowTokenRaw;
+   if (doubleArrowToken.has_value()) {
+      doubleArrowTokenRaw = doubleArrowToken->getRaw();
+   } else {
+      doubleArrowTokenRaw = nullptr;
+   }
+   return m_data->replaceChild<ListRecursivePairItemSyntax>(doubleArrowTokenRaw, Cursor::DoubleArrowToken);
+}
+
+ListRecursivePairItemSyntax
+ListRecursivePairItemSyntax::withListToken(std::optional<TokenSyntax> listToken)
+{
+   RefCountPtr<RawSyntax> listTokenRaw;
+   if (listToken.has_value()) {
+      listTokenRaw = listToken->getRaw();
+   } else {
+      listTokenRaw = RawSyntax::missing(TokenKindType::T_LIST,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LIST)));
+   }
+   return m_data->replaceChild<ListRecursivePairItemSyntax>(listTokenRaw, Cursor::ListPairItemList);
+}
+
+ListRecursivePairItemSyntax
+ListRecursivePairItemSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> leftParenRaw;
+   if (leftParen.has_value()) {
+      leftParenRaw = leftParen->getRaw();
+   } else {
+      leftParenRaw = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
+                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+   }
+   return m_data->replaceChild<ListRecursivePairItemSyntax>(leftParenRaw, Cursor::LeftParen);
+}
+
+ListRecursivePairItemSyntax
+ListRecursivePairItemSyntax::withListPairItemList(std::optional<ListPairItemListSyntax> pairItemList)
+{
+   RefCountPtr<RawSyntax> pairItemListRaw;
+   if (pairItemList.has_value()) {
+      pairItemListRaw = pairItemList->getRaw();
+   } else {
+      pairItemListRaw = RawSyntax::missing(SyntaxKind::ListPairItemList);
+   }
+   return m_data->replaceChild<ListRecursivePairItemSyntax>(pairItemListRaw, Cursor::ListPairItemList);
+}
+
+ListRecursivePairItemSyntax ListRecursivePairItemSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rightParenRaw;
+   if (rightParen.has_value()) {
+      rightParenRaw = rightParen->getRaw();
+   } else {
+      rightParenRaw = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+   }
+   return m_data->replaceChild<ListRecursivePairItemSyntax>(rightParenRaw, Cursor::RightParen);
+}
+
+///
+/// ListPairItemSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType ListPairItemSyntax::CHILD_NODE_CHOICES
+{
+   {
+      ListPairItemSyntax::Item, {
+         SyntaxKind::ArrayPairItem, SyntaxKind::ListRecursivePairItem
+      }
+   }
+};
+#endif
+
+void ListPairItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ListPairItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Item, CHILD_NODE_CHOICES.at(Cursor::Item));
+   syntax_assert_child_token(raw, TrailingComma, std::set{TokenKindType::T_COMMA});
+#endif
+}
+
+Syntax ListPairItemSyntax::getItem()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Item).get()};
+}
+
+std::optional<TokenSyntax> ListPairItemSyntax::getTrailingComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::TrailingComma);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+ListPairItemSyntax ListPairItemSyntax::withItem(std::optional<Syntax> item)
+{
+   RefCountPtr<RawSyntax> itemRaw;
+   if (item.has_value()) {
+      itemRaw = item->getRaw();
+   } else {
+      itemRaw = RawSyntax::missing(SyntaxKind::ArrayPairItem);
+   }
+   return m_data->replaceChild<ListPairItemSyntax>(itemRaw, Cursor::Item);
+}
+
+ListPairItemSyntax ListPairItemSyntax::withTrailingComma(std::optional<TokenSyntax> trailingComma)
+{
+   RefCountPtr<RawSyntax> trailingCommaRaw;
+   if (trailingComma.has_value()) {
+      trailingCommaRaw = trailingComma->getRaw();
+   } else {
+      trailingCommaRaw = nullptr;
+   }
+   return m_data->replaceChild<ListPairItemSyntax>(trailingCommaRaw, Cursor::TrailingComma);
+}
+
+///
 /// SimpleVariableExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

@@ -300,12 +300,186 @@ private:
 class ArrayPairItemSyntax final : public Syntax
 {
 public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// -----------------------------------------
+      /// node choice: ArrayKeyValuePairItemSyntax
+      /// -----------------------------------------
+      /// node choice: ArrayUnpackPairItemSyntax
+      ///
+      Item,
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      ///
+      TrailingComma
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   ArrayPairItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getItem();
+   std::optional<TokenSyntax> getTrailingComma();
+
+   ArrayPairItemSyntax withItem(std::optional<Syntax> item);
+   ArrayPairItemSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ArrayPairItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ArrayPairItemSyntaxBuilder;
+   void validate();
+};
+
+///
+/// list_recursive_pair_item:
+///   expr T_DOUBLE_ARROW T_LIST '(' list_pair_item_list ')'
+/// | T_LIST '(' list_pair_item_list ')'
+///
+class ListRecursivePairItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 6;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 4;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: true
+      ///
+      KeyExpr,
+      ///
+      /// type: TokenSyntax (T_DOUBLE_ARROW)
+      /// optional: true
+      ///
+      DoubleArrowToken,
+      ///
+      /// type: TokenSyntax (T_LIST)
+      /// optional: false
+      ///
+      ListToken,
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optional: false
+      ///
+      LeftParen,
+      ///
+      /// type: ListPairItemListSyntax
+      /// optional: false
+      ///
+      ListPairItemList,
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
+      /// optional: false
+      ///
+      RightParen
+   };
+
+public:
+   ListRecursivePairItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<ExprSyntax> getKeyExpr();
+   std::optional<TokenSyntax> getDoubleArrowToken();
+   TokenSyntax getListToken();
+   TokenSyntax getLeftParen();
+   ListPairItemListSyntax getListPairItemList();
+   TokenSyntax getRightParen();
+
+   ListRecursivePairItemSyntax withKeyExpr(std::optional<ExprSyntax> keyExpr);
+   ListRecursivePairItemSyntax withDoubleArrowToken(std::optional<TokenSyntax> doubleArrowToken);
+   ListRecursivePairItemSyntax withListToken(std::optional<TokenSyntax> listToken);
+   ListRecursivePairItemSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
+   ListRecursivePairItemSyntax withListPairItemList(std::optional<ListPairItemListSyntax> pairItemList);
+   ListRecursivePairItemSyntax withRightParen(std::optional<TokenSyntax> rightParen);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ListRecursivePairItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ListRecursivePairItemSyntaxBuilder;
+   void validate();
+};
+
+///
+/// list_pair_item:
+///   array_pair_item
+/// | list_recursive_pair_item
+///
+class ListPairItemSyntax final : public Syntax
+{
+public:
    constexpr static std::uint8_t CHILDREN_COUNT = 1;
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
-
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ------------------------------------------
+      /// node choice: ArrayPairItemSyntax
+      /// ------------------------------------------
+      /// node choice: ListRecursivePairItemSyntax
+      ///
+      Item,
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      ///
+      TrailingComma
    };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   ListPairItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getItem();
+   std::optional<TokenSyntax> getTrailingComma();
+
+   ListPairItemSyntax withItem(std::optional<Syntax> item);
+   ListPairItemSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
+
+private:
+   friend class ListPairItemSyntaxBuilder;
+   void validate();
 };
 
 ///
