@@ -272,6 +272,55 @@ ArrayKeyValuePairItemSyntax ArrayKeyValuePairItemSyntax::withValue(std::optional
 }
 
 ///
+/// ArrayUnpackPairItemSyntax
+///
+void ArrayUnpackPairItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ArrayUnpackPairItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, EllipsisToken, std::set{TokenKindType::T_ELLIPSIS});
+   syntax_assert_child_kind(raw, UnpackExpr, std::set{SyntaxKind::Expr});
+#endif
+}
+
+TokenSyntax ArrayUnpackPairItemSyntax::getEllipsisToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::EllipsisToken).get()};
+}
+
+ExprSyntax ArrayUnpackPairItemSyntax::getUnpackExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::UnpackExpr).get()};
+}
+
+ArrayUnpackPairItemSyntax ArrayUnpackPairItemSyntax::withEllipsisToken(std::optional<TokenSyntax> ellipsisToken)
+{
+   RefCountPtr<RawSyntax> ellipsisTokenRaw;
+   if (ellipsisToken.has_value()) {
+      ellipsisTokenRaw = ellipsisToken->getRaw();
+   } else {
+      ellipsisTokenRaw = RawSyntax::missing(TokenKindType::T_ELLIPSIS,
+                                            OwnedString::makeUnowned(get_token_text(TokenKindType::T_ELLIPSIS)));
+   }
+   return m_data->replaceChild<ArrayUnpackPairItemSyntax>(ellipsisTokenRaw, Cursor::EllipsisToken);
+}
+
+ArrayUnpackPairItemSyntax ArrayUnpackPairItemSyntax::withUnpackExpr(std::optional<ExprSyntax> unpackExpr)
+{
+   RefCountPtr<RawSyntax> unpackExprRaw;
+   if (unpackExpr.has_value()) {
+      unpackExprRaw = unpackExpr->getRaw();
+   } else {
+      unpackExprRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<ArrayUnpackPairItemSyntax>(unpackExprRaw, Cursor::UnpackExpr);
+}
+
+///
 /// SimpleVariableExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
@@ -279,15 +328,8 @@ const NodeChoicesType SimpleVariableExprSyntax::CHILD_NODE_CHOICES
 {
    {
       SimpleVariableExprSyntax::Variable, {
-         SyntaxKind::BraceDecoratedVariableExpr
-      }
-   }
-};
-const TokenChoicesType SimpleVariableExprSyntax::CHILD_TOKEN_CHOICES
-{
-   {
-      SimpleVariableExprSyntax::Variable, {
-         TokenKindType::T_VARIABLE, TokenKindType::T_DOLLAR_SIGN
+         SyntaxKind::BraceDecoratedVariableExpr,
+               SyntaxKind::SimpleVariableExpr
       }
    }
 };
@@ -301,19 +343,27 @@ void SimpleVariableExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == SimpleVariableExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, DollarSign, std::set{TokenKindType::T_DOLLAR_SIGN});
    if (const RefCountPtr<RawSyntax> &variableChild = raw->getChild(Cursor::Variable)) {
       if (variableChild->isToken()) {
-         syntax_assert_child_token(raw, Variable, CHILD_TOKEN_CHOICES.at(Cursor::Variable));
+         syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
       } else {
          syntax_assert_child_kind(raw, Variable, CHILD_NODE_CHOICES.at(Cursor::Variable));
       }
-   }
-   if (const RefCountPtr<RawSyntax> &recursiveRefChild = raw->getChild(Cursor::RecursiveRef)) {
-      assert(recursiveRefChild->kindOf(SyntaxKind::SimpleVariableExpr) &&
-             raw->getChild(Cursor::Variable) &&
-             raw->getChild(Cursor::Variable)->isToken());
+      if (variableChild->kindOf(SyntaxKind::SimpleVariableExpr)) {
+         assert(raw->getChild(Cursor::DollarSign));
+      }
    }
 #endif
+}
+
+std::optional<TokenSyntax> SimpleVariableExprSyntax::getDollarSign()
+{
+   RefCountPtr<SyntaxData> dollarSignData = m_data->getChild(Cursor::DollarSign);
+   if (!dollarSignData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, dollarSignData.get()};
 }
 
 Syntax SimpleVariableExprSyntax::getVariable()
@@ -321,13 +371,15 @@ Syntax SimpleVariableExprSyntax::getVariable()
    return Syntax {m_root, m_data->getChild(Cursor::Variable).get()};
 }
 
-std::optional<SimpleVariableExprSyntax> SimpleVariableExprSyntax::getRecursiveRef()
+SimpleVariableExprSyntax SimpleVariableExprSyntax::withDollarSign(std::optional<TokenSyntax> dollarSign)
 {
-   RefCountPtr<SyntaxData> recursiveRefData = m_data->getChild(Cursor::RecursiveRef);
-   if (!recursiveRefData) {
-      return std::nullopt;
+   RefCountPtr<RawSyntax> dollarSignRaw;
+   if (dollarSign.has_value()) {
+      dollarSignRaw = dollarSign->getRaw();
+   } else {
+      dollarSignRaw = nullptr;
    }
-   return SimpleVariableExprSyntax {m_root, recursiveRefData.get()};
+   return m_data->replaceChild<SimpleVariableExprSyntax>(dollarSignRaw, Cursor::DollarSign);
 }
 
 SimpleVariableExprSyntax SimpleVariableExprSyntax::withVariable(std::optional<Syntax> variable)
@@ -339,17 +391,6 @@ SimpleVariableExprSyntax SimpleVariableExprSyntax::withVariable(std::optional<Sy
       variableRaw = RawSyntax::missing(SyntaxKind::Unknown);
    }
    return m_data->replaceChild<SimpleVariableExprSyntax>(variableRaw, Cursor::Variable);
-}
-
-SimpleVariableExprSyntax SimpleVariableExprSyntax::withRecursiveRef(std::optional<SimpleVariableExprSyntax> recursiveRef)
-{
-   RefCountPtr<RawSyntax> recursiveRefRaw;
-   if (recursiveRef.has_value()) {
-      recursiveRefRaw = recursiveRef->getRaw();
-   } else {
-      recursiveRefRaw = nullptr;
-   }
-   return m_data->replaceChild<SimpleVariableExprSyntax>(recursiveRefRaw, Cursor::RecursiveRef);
 }
 
 ///

@@ -120,8 +120,8 @@ private:
 class BraceDecoratedVariableExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 1;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
       ///
@@ -293,39 +293,55 @@ private:
 };
 
 ///
-/// simple_variable:
-/// T_VARIABLE
-/// |	'$' '{' expr '}'	{ $$ = $3; }
-/// |	'$' simple_variable	{ $$ = zend_ast_create(ZEND_AST_VAR, $2); }
+/// array_pair_item:
+///   array_key_value_pair_item
+/// | array_unpack_pair_item
 ///
-class SimpleVariableExprSyntax final : public ExprSyntax
+class ArrayPairItemSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 1;
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+
+   };
+};
+
+///
+/// simple_variable:
+///   T_VARIABLE
+/// | brace_decorated_variable_expr
+/// | '$' simple_variable
+///
+class SimpleVariableExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      DollarSign,
       ///
       /// type: Syntax
       /// optional: false
       /// node choices: true
       /// ----------------------------------------------
-      /// node choice: TokenSyntax
-      /// token choices: T_VARIABLE | T_VARIABLE
+      /// node choice: TokenSyntax (T_VARIABLE)
       /// ----------------------------------------------
       /// node choice: BraceDecoratedVariableExprSyntax
+      /// ----------------------------------------------
+      /// node choice: SimpleVariableExprSyntax
       ///
       Variable,
-      ///
-      /// type: SimpleVariableExprSyntax
-      /// optional: true
-      ///
-      RecursiveRef
    };
 
 #ifdef POLAR_DEBUG_BUILD
    const static NodeChoicesType CHILD_NODE_CHOICES;
-   const static TokenChoicesType CHILD_TOKEN_CHOICES;
 #endif
 
 public:
@@ -335,11 +351,11 @@ public:
       validate();
    }
 
+   std::optional<TokenSyntax> getDollarSign();
    Syntax getVariable();
-   std::optional<SimpleVariableExprSyntax> getRecursiveRef();
 
+   SimpleVariableExprSyntax withDollarSign(std::optional<TokenSyntax> dollarSign);
    SimpleVariableExprSyntax withVariable(std::optional<Syntax> variable);
-   SimpleVariableExprSyntax withRecursiveRef(std::optional<SimpleVariableExprSyntax> recursiveRef);
 
    static bool kindOf(SyntaxKind kind)
    {
