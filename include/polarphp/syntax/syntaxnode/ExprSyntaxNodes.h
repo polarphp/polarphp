@@ -978,6 +978,129 @@ private:
    void validate();
 };
 
+///
+/// encaps_var:
+///   T_VARIABLE '[' encaps_var_offset ']'
+///
+class EncapsArrayVarSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 4;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 4;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_VARIABLE)
+      /// optional: false
+      ///
+      VarToken,
+      ///
+      /// type: TokenSyntax (T_LEFT_SQUARE_BRACKET)
+      /// optional: false
+      ///
+      LeftSquareBracket,
+      ///
+      /// type: EncapsVarOffsetSyntax
+      /// optional: false
+      ///
+      Offset,
+      ///
+      /// type: TokenSyntax (T_RIGHT_SQUARE_BRACKET)
+      /// optional: false
+      ///
+      RightSquareBracket
+   };
+
+public:
+   EncapsArrayVarSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getVarToken();
+   TokenSyntax getLeftSquareBracket();
+   EncapsVarOffsetSyntax getOffset();
+   TokenSyntax getRightSquareBracket();
+
+   EncapsArrayVarSyntax withVarToken(std::optional<TokenSyntax> varToken);
+   EncapsArrayVarSyntax withLeftSquareBracket(std::optional<TokenSyntax> leftSquareBracket);
+   EncapsArrayVarSyntax withOffset(std::optional<EncapsVarOffsetSyntax> offset);
+   EncapsArrayVarSyntax withRightSquareBracket(std::optional<TokenSyntax> rightSquareBracket);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EncapsArrayVarSyntax;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EncapsArrayVarSyntaxBuilder;
+   void validate();
+};
+
+///
+/// encaps_var:
+///   T_VARIABLE T_OBJECT_OPERATOR T_IDENTIFIER_STRING
+///
+class EncapsObjPropSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_VARIABLE)
+      /// optional: false
+      ///
+      VarToken,
+      ///
+      /// type: TokenSyntax (T_OBJECT_OPERATOR)
+      /// optional: false
+      ///
+      ObjOperatorToken,
+      ///
+      /// type: TokenSyntax (T_IDENTIFIER_STRING)
+      /// optional: false
+      ///
+      IdentifierToken
+   };
+
+public:
+   EncapsObjPropSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getVarToken();
+   TokenSyntax getObjOperatorToken();
+   TokenSyntax getIdentifierToken();
+
+   EncapsObjPropSyntax withVarToken(std::optional<TokenSyntax> varToken);
+   EncapsObjPropSyntax withObjOperatorToken(std::optional<TokenSyntax> objOperatorToken);
+   EncapsObjPropSyntax withIdentifierToken(std::optional<TokenSyntax> identifierToken);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EncapsObjPropSyntax;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EncapsObjPropSyntaxBuilder;
+   void validate();
+};
+
 class BooleanLiteralExprSyntax final : public ExprSyntax
 {
 public:

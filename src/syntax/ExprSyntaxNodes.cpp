@@ -1110,6 +1110,159 @@ EncapsVarOffsetSyntax EncapsVarOffsetSyntax::withOffset(std::optional<TokenSynta
 }
 
 ///
+/// EncapsArrayVarSyntax
+///
+void EncapsArrayVarSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == EncapsArrayVarSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, VarToken, std::set{TokenKindType::T_VARIABLE});
+   syntax_assert_child_token(raw, LeftSquareBracket, std::set{TokenKindType::T_LEFT_SQUARE_BRACKET});
+   syntax_assert_child_token(raw, RightSquareBracket, std::set{TokenKindType::T_RIGHT_SQUARE_BRACKET});
+   syntax_assert_child_kind(raw, Offset, std::set{SyntaxKind::EncapsVarOffset});
+#endif
+}
+
+TokenSyntax EncapsArrayVarSyntax::getVarToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::VarToken).get()};
+}
+
+TokenSyntax EncapsArrayVarSyntax::getLeftSquareBracket()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftSquareBracket).get()};
+}
+
+EncapsVarOffsetSyntax EncapsArrayVarSyntax::getOffset()
+{
+   return EncapsVarOffsetSyntax {m_root, m_data->getChild(Cursor::Offset).get()};
+}
+
+TokenSyntax EncapsArrayVarSyntax::getRightSquareBracket()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightSquareBracket).get()};
+}
+
+EncapsArrayVarSyntax EncapsArrayVarSyntax::withVarToken(std::optional<TokenSyntax> varToken)
+{
+   RefCountPtr<RawSyntax> varTokenRaw;
+   if (varToken.has_value()) {
+      varTokenRaw = varToken->getRaw();
+   } else {
+      varTokenRaw = RawSyntax::missing(TokenKindType::T_VARIABLE,
+                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_VARIABLE)));
+   }
+   return m_data->replaceChild<EncapsArrayVarSyntax>(varTokenRaw, Cursor::VarToken);
+}
+
+EncapsArrayVarSyntax EncapsArrayVarSyntax::withLeftSquareBracket(std::optional<TokenSyntax> leftSquareBracket)
+{
+   RefCountPtr<RawSyntax> leftSquareBracketRaw;
+   if (leftSquareBracket.has_value()) {
+      leftSquareBracketRaw = leftSquareBracket->getRaw();
+   } else {
+      leftSquareBracketRaw = RawSyntax::missing(TokenKindType::T_LEFT_SQUARE_BRACKET,
+                                                OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_SQUARE_BRACKET)));
+   }
+   return m_data->replaceChild<EncapsArrayVarSyntax>(leftSquareBracketRaw, Cursor::LeftSquareBracket);
+}
+
+EncapsArrayVarSyntax EncapsArrayVarSyntax::withOffset(std::optional<EncapsVarOffsetSyntax> offset)
+{
+   RefCountPtr<RawSyntax> offsetRaw;
+   if (offset.has_value()) {
+      offsetRaw = offset->getRaw();
+   } else {
+      offsetRaw = RawSyntax::missing(SyntaxKind::EncapsVarOffset);
+   }
+   return m_data->replaceChild<EncapsArrayVarSyntax>(offsetRaw, Cursor::Offset);
+}
+
+EncapsArrayVarSyntax EncapsArrayVarSyntax::withRightSquareBracket(std::optional<TokenSyntax> rightSquareBracket)
+{
+   RefCountPtr<RawSyntax> rightSquareBracketRaw;
+   if (rightSquareBracket.has_value()) {
+      rightSquareBracketRaw = rightSquareBracket->getRaw();
+   } else {
+      rightSquareBracketRaw = RawSyntax::missing(TokenKindType::T_RIGHT_SQUARE_BRACKET,
+                                                 OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_SQUARE_BRACKET)));
+   }
+   return m_data->replaceChild<EncapsArrayVarSyntax>(rightSquareBracketRaw, Cursor::RightSquareBracket);
+}
+
+///
+/// EncapsObjPropSyntax
+///
+void EncapsObjPropSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == EncapsObjPropSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, VarToken, std::set{TokenKindType::T_VARIABLE});
+   syntax_assert_child_token(raw, ObjOperatorToken, std::set{TokenKindType::T_OBJECT_OPERATOR});
+   syntax_assert_child_token(raw, IdentifierToken, std::set{TokenKindType::T_IDENTIFIER_STRING});
+#endif
+}
+
+TokenSyntax EncapsObjPropSyntax::getVarToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::VarToken).get()};
+}
+
+TokenSyntax EncapsObjPropSyntax::getObjOperatorToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::ObjOperatorToken).get()};
+}
+
+TokenSyntax EncapsObjPropSyntax::getIdentifierToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::IdentifierToken).get()};
+}
+
+EncapsObjPropSyntax EncapsObjPropSyntax::withVarToken(std::optional<TokenSyntax> varToken)
+{
+   RefCountPtr<RawSyntax> varTokenRaw;
+   if (varToken.has_value()) {
+      varTokenRaw = varToken->getRaw();
+   } else {
+      varTokenRaw = RawSyntax::missing(TokenKindType::T_VARIABLE,
+                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_VARIABLE)));
+   }
+   return m_data->replaceChild<EncapsObjPropSyntax>(varTokenRaw, Cursor::VarToken);
+}
+
+EncapsObjPropSyntax EncapsObjPropSyntax::withObjOperatorToken(std::optional<TokenSyntax> objOperatorToken)
+{
+   RefCountPtr<RawSyntax> objOperatorTokenRaw;
+   if (objOperatorToken.has_value()) {
+      objOperatorTokenRaw = objOperatorToken->getRaw();
+   } else {
+      objOperatorTokenRaw = RawSyntax::missing(TokenKindType::T_OBJECT_OPERATOR,
+                                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_OBJECT_OPERATOR)));
+   }
+   return m_data->replaceChild<EncapsObjPropSyntax>(objOperatorTokenRaw, Cursor::ObjOperatorToken);
+}
+
+EncapsObjPropSyntax EncapsObjPropSyntax::withIdentifierToken(std::optional<TokenSyntax> identifierToken)
+{
+   RefCountPtr<RawSyntax> identifierTokenRaw;
+   if (identifierToken.has_value()) {
+      identifierTokenRaw = identifierToken->getRaw();
+   } else {
+      identifierTokenRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
+                                              OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
+   }
+   return m_data->replaceChild<EncapsObjPropSyntax>(identifierTokenRaw, Cursor::IdentifierToken);
+}
+
+///
 /// BooleanLiteralExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

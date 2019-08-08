@@ -35,7 +35,17 @@ class ClassRefSelfExprSyntax;
 class IntegerLiteralExprSyntax;
 class FloatLiteralExprSyntax;
 class StringLiteralExprSyntax;
+
+/// for encaps var syntax
 class EncapsVarOffsetSyntax;
+class EncapsArrayVarSyntax;
+class EncapsObjPropSyntax;
+class EncapsDollarCurlyExprSyntax;
+class EncapsDollarCurlyVarSyntax;
+class EncapsDollarCurlyArraySyntax;
+class EncapsCurlyVarSyntax;
+class EncapsVarSyntax;
+
 class HeredocExprSyntax;
 class EncapsListStringExprSyntax;
 class BooleanLiteralExprSyntax;
