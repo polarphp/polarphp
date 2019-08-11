@@ -124,6 +124,10 @@
 #define syntax_assert_token_is(token, kind, text)
 #endif
 
+#define make_missing_token(token) \
+   RawSyntax::missing(TokenKindType::token, \
+                     OwnedString::makeUnowned(get_token_text(TokenKindType::token)));
+
 namespace polar::syntax {
 
 using polar::utils::RawOutStream;

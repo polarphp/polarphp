@@ -1030,7 +1030,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::EncapsArrayVarSyntax;
+      return kind == SyntaxKind::EncapsArrayVar;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -1088,7 +1088,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::EncapsObjPropSyntax;
+      return kind == SyntaxKind::EncapsObjProp;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -1098,6 +1098,64 @@ public:
 
 private:
    friend class EncapsObjPropSyntaxBuilder;
+   void validate();
+};
+
+///
+/// encaps_var:
+///   T_DOLLAR_OPEN_CURLY_BRACES expr '}'
+///
+class EncapsDollarCurlyExprSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_DOLLAR_OPEN_CURLY_BRACES)
+      /// optional: false
+      ///
+      DollarOpenCurlyToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Expr,
+      ///
+      /// type: TokenSyntax (T_RIGHT_BRACE)
+      /// optional: false
+      ///
+      CloseCurlyToken
+   };
+
+public:
+   EncapsDollarCurlyExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getDollarOpenCurlyToken();
+   ExprSyntax getExpr();
+   TokenSyntax getCloseCurlyToken();
+
+   EncapsDollarCurlyExprSyntax withDollarOpenCurlyToken(std::optional<TokenSyntax> dollarOpenCurlyToken);
+   EncapsDollarCurlyExprSyntax withExpr(std::optional<ExprSyntax> expr);
+   EncapsDollarCurlyExprSyntax withCloseCurlyToken(std::optional<TokenSyntax> closeCurlyToken);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EncapsDollarCurlyExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EncapsDollarCurlyExprSyntaxBuilder;
    void validate();
 };
 

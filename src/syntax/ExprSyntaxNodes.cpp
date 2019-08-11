@@ -1263,6 +1263,72 @@ EncapsObjPropSyntax EncapsObjPropSyntax::withIdentifierToken(std::optional<Token
 }
 
 ///
+/// EncapsDollarCurlyExprSyntax
+///
+void EncapsDollarCurlyExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == EncapsDollarCurlyExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, DollarOpenCurlyToken, std::set{TokenKindType::T_DOLLAR_OPEN_CURLY_BRACES});
+   syntax_assert_child_token(raw, CloseCurlyToken, std::set{TokenKindType::T_RIGHT_BRACE});
+   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
+#endif
+}
+
+TokenSyntax EncapsDollarCurlyExprSyntax::getDollarOpenCurlyToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(DollarOpenCurlyToken).get()};
+}
+
+ExprSyntax EncapsDollarCurlyExprSyntax::getExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Expr).get()};
+}
+
+TokenSyntax EncapsDollarCurlyExprSyntax::getCloseCurlyToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(CloseCurlyToken).get()};
+}
+
+EncapsDollarCurlyExprSyntax
+EncapsDollarCurlyExprSyntax::withDollarOpenCurlyToken(std::optional<TokenSyntax> dollarOpenCurlyToken)
+{
+   RefCountPtr<RawSyntax> dollarOpenCurlyTokenRaw;
+   if (dollarOpenCurlyToken.has_value()) {
+      dollarOpenCurlyTokenRaw = dollarOpenCurlyToken->getRaw();
+   } else {
+      dollarOpenCurlyTokenRaw = make_missing_token(T_DOLLAR_OPEN_CURLY_BRACES);
+   }
+   return m_data->replaceChild<EncapsDollarCurlyExprSyntax>(dollarOpenCurlyTokenRaw, Cursor::DollarOpenCurlyToken);
+}
+
+EncapsDollarCurlyExprSyntax EncapsDollarCurlyExprSyntax::withExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
+   } else {
+      exprRaw = RawSyntax::missing(SyntaxKind::UnknownExpr);
+   }
+   return m_data->replaceChild<EncapsDollarCurlyExprSyntax>(exprRaw, Cursor::Expr);
+}
+
+EncapsDollarCurlyExprSyntax EncapsDollarCurlyExprSyntax::withCloseCurlyToken(std::optional<TokenSyntax> closeCurlyToken)
+{
+   RefCountPtr<RawSyntax> closeCurlyTokenRaw;
+   if (closeCurlyToken.has_value()) {
+      closeCurlyTokenRaw = closeCurlyToken->getRaw();
+   } else {
+      closeCurlyTokenRaw = make_missing_token(T_RIGHT_BRACE);
+   }
+   return m_data->replaceChild<EncapsDollarCurlyExprSyntax>(closeCurlyTokenRaw, Cursor::CloseCurlyToken);
+}
+
+///
 /// BooleanLiteralExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
