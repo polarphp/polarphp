@@ -1217,6 +1217,81 @@ private:
    void validate();
 };
 
+class EncapsDollarCurlyArraySyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 6;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 6;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_DOLLAR_OPEN_CURLY_BRACES)
+      /// optional: false
+      ///
+      DollarOpenCurlyToken,
+      ///
+      /// type: TokenSyntax (T_IDENTIFIER_STRING)
+      /// optional: false
+      ///
+      Varname,
+      ///
+      /// type: TokenSyntax (T_LEFT_SQUARE_BRACKET)
+      /// optional: false
+      ///
+      LeftSquareBracketToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      IndexExpr,
+      ///
+      /// type: TokenSyntax (T_RIGHT_SQUARE_BRACKET)
+      /// optional: false
+      ///
+      RightSquareBracketToken,
+      ///
+      /// type: TokenSyntax (T_RIGHT_BRACE)
+      /// optional: false
+      ///
+      CloseCurlyToken
+   };
+
+public:
+   EncapsDollarCurlyArraySyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getDollarOpenCurlyToken();
+   TokenSyntax getVarname();
+   TokenSyntax getLeftSquareBracketToken();
+   ExprSyntax getIndexExpr();
+   TokenSyntax getRightSquareBracketToken();
+   TokenSyntax getCloseCurlyToken();
+
+   EncapsDollarCurlyArraySyntax withDollarOpenCurlyToken(std::optional<TokenSyntax> dollarOpenCurlyToken);
+   EncapsDollarCurlyArraySyntax withVarname(std::optional<TokenSyntax> varname);
+   EncapsDollarCurlyArraySyntax withLeftSquareBracketToken(std::optional<TokenSyntax> leftSquareBracketToken);
+   EncapsDollarCurlyArraySyntax withIndexExpr(std::optional<ExprSyntax> indexExpr);
+   EncapsDollarCurlyArraySyntax withRightSquareBracketToken(std::optional<TokenSyntax> rightSquareBracketToken);
+   EncapsDollarCurlyArraySyntax withCloseCurlyToken(std::optional<TokenSyntax> closeCurlyToken);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EncapsDollarCurlyArray;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EncapsDollarCurlyVarSyntaxBuilder;
+   void validate();
+};
+
 class BooleanLiteralExprSyntax final : public ExprSyntax
 {
 public:
