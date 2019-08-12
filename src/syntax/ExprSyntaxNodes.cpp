@@ -1770,6 +1770,74 @@ HeredocExprSyntax HeredocExprSyntax::withEndHeredocToken(std::optional<TokenSynt
 }
 
 ///
+/// EncapsListStringExprSyntax
+///
+void EncapsListStringExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == EncapsListStringExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftQuoteToken, std::set{TokenKindType::T_DOUBLE_QUOTE});
+   syntax_assert_child_token(raw, RightQuoteToken, std::set{TokenKindType::T_DOUBLE_QUOTE});
+   syntax_assert_child_kind(raw, EncapsList, std::set{SyntaxKind::EncapsList});
+#endif
+}
+
+TokenSyntax EncapsListStringExprSyntax::getLeftQuoteToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftQuoteToken).get()};
+}
+
+EncapsItemListSyntax EncapsListStringExprSyntax::getEncapsList()
+{
+   return EncapsItemListSyntax {m_root, m_data->getChild(Cursor::EncapsList).get()};
+}
+
+TokenSyntax EncapsListStringExprSyntax::getRightQuoteToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightQuoteToken).get()};
+}
+
+EncapsListStringExprSyntax
+EncapsListStringExprSyntax::withLeftQuoteToken(std::optional<TokenSyntax> leftQuoteToken)
+{
+   RefCountPtr<RawSyntax> leftQuoteTokenRaw;
+   if (leftQuoteToken.has_value()) {
+      leftQuoteTokenRaw = leftQuoteToken->getRaw();
+   } else {
+      leftQuoteTokenRaw = make_missing_token(T_DOUBLE_QUOTE);
+   }
+   return m_data->replaceChild<EncapsListStringExprSyntax>(leftQuoteTokenRaw, Cursor::LeftQuoteToken);
+}
+
+EncapsListStringExprSyntax
+EncapsListStringExprSyntax::withEncapsList(std::optional<EncapsItemListSyntax> encapsList)
+{
+   RefCountPtr<RawSyntax> encapsListRaw;
+   if (encapsList.has_value()) {
+      encapsListRaw = encapsList->getRaw();
+   } else {
+      encapsListRaw = RawSyntax::missing(SyntaxKind::EncapsList);
+   }
+   return m_data->replaceChild<EncapsListStringExprSyntax>(encapsListRaw, Cursor::EncapsList);
+}
+
+EncapsListStringExprSyntax
+EncapsListStringExprSyntax::withRightQuoteToken(std::optional<TokenSyntax> rightQuoteToken)
+{
+   RefCountPtr<RawSyntax> rightQuoteTokenRaw;
+   if (rightQuoteToken.has_value()) {
+      rightQuoteTokenRaw = rightQuoteToken->getRaw();
+   } else {
+      rightQuoteTokenRaw = make_missing_token(T_DOUBLE_QUOTE);
+   }
+   return m_data->replaceChild<EncapsListStringExprSyntax>(rightQuoteTokenRaw, Cursor::RightQuoteToken);
+}
+
+///
 /// BooleanLiteralExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

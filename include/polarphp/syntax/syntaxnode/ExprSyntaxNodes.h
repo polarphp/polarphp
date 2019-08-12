@@ -1540,6 +1540,63 @@ private:
    void validate();
 };
 
+///
+/// encaps_list_str:
+///   '"' encaps_list '"'
+///
+class EncapsListStringExprSyntax final : ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_DOUBLE_QUOTE)
+      /// optional: false
+      ///
+      LeftQuoteToken,
+      ///
+      /// type: EncapsItemListSyntax
+      /// optional: false
+      ///
+      EncapsList,
+      ///
+      /// type: TokenSyntax (T_DOUBLE_QUOTE)
+      /// optional: false
+      ///
+      RightQuoteToken
+   };
+public:
+   EncapsListStringExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getLeftQuoteToken();
+   EncapsItemListSyntax getEncapsList();
+   TokenSyntax getRightQuoteToken();
+
+   EncapsListStringExprSyntax withLeftQuoteToken(std::optional<TokenSyntax> leftQuoteToken);
+   EncapsListStringExprSyntax withEncapsList(std::optional<EncapsItemListSyntax> encapsList);
+   EncapsListStringExprSyntax withRightQuoteToken(std::optional<TokenSyntax> rightQuoteToken);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EncapsListStringExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EncapsListStringExprSyntaxBuilder;
+   void validate();
+};
+
 class BooleanLiteralExprSyntax final : public ExprSyntax
 {
 public:
