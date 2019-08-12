@@ -93,6 +93,18 @@ using ArrayPairItemListSyntax = SyntaxCollection<SyntaxKind::ArrayPairItemList, 
 ///
 using ListPairItemListSyntax = SyntaxCollection<SyntaxKind::ListPairItemList, ListPairItemSyntax>;
 
+///
+/// type: SyntaxCollection
+/// element type: EncapsListItemSyntax
+///
+/// encaps_list:
+///   encaps_list encaps_var
+/// | encaps_list T_ENCAPSED_AND_WHITESPACE
+/// | encaps_var
+/// | T_ENCAPSED_AND_WHITESPACE encaps_var
+///
+using EncapsItemListSyntax = SyntaxCollection<SyntaxKind::EncapsListItem, EncapsListItemSyntax>;
+
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_SYNTAX_NODE_EXPR_NODES_FWD_H
