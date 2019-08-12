@@ -1217,6 +1217,10 @@ private:
    void validate();
 };
 
+///
+/// encaps_var:
+///   T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '[' expr ']' '}'
+///
 class EncapsDollarCurlyArraySyntax final : public Syntax
 {
 public:
@@ -1289,6 +1293,64 @@ public:
 
 private:
    friend class EncapsDollarCurlyVarSyntaxBuilder;
+   void validate();
+};
+
+///
+/// encaps_var:
+///   T_CURLY_OPEN variable '}'
+///
+class EncapsCurlyVarSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_CURLY_OPEN)
+      /// optional: false
+      ///
+      CurlyOpen,
+      ///
+      /// type: TokenSyntax (T_VARIABLE)
+      /// optional: false
+      ///
+      Variable,
+      ///
+      /// type: TokenSyntax (T_RIGHT_BRACE)
+      /// optional: false
+      ///
+      CloseCurlyToken
+   };
+
+public:
+   EncapsCurlyVarSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getCurlyOpen();
+   TokenSyntax getVariable();
+   TokenSyntax getCloseCurlyToken();
+
+   EncapsCurlyVarSyntax withCurlyOpen(std::optional<TokenSyntax> curlyOpen);
+   EncapsCurlyVarSyntax withVariable(std::optional<TokenSyntax> variable);
+   EncapsCurlyVarSyntax withCloseCurlyToken(std::optional<TokenSyntax> closeCurlyToken);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EncapsCurlyVar;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EncapsCurlyVarSyntaxBuilder;
    void validate();
 };
 
