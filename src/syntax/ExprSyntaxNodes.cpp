@@ -1695,6 +1695,81 @@ EncapsListItemSyntax EncapsListItemSyntax::withEncapsVar(std::optional<EncapsVar
 }
 
 ///
+/// HeredocExprSyntax
+///
+void HeredocExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == HeredocExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, StartHeredocToken, std::set{TokenKindType::T_START_HEREDOC});
+   syntax_assert_child_token(raw, EndHeredocToken, std::set{TokenKindType::T_END_HEREDOC});
+   if (const RefCountPtr<RawSyntax> &textClauseChild = raw->getChild(Cursor::TextClause)) {
+      if (textClauseChild->isToken()) {
+         syntax_assert_child_token(raw, TextClause, std::set{TokenKindType::T_ENCAPSED_AND_WHITESPACE});
+      } else {
+         syntax_assert_child_kind(raw, TextClause, std::set{SyntaxKind::EncapsList});
+      }
+   }
+#endif
+}
+
+TokenSyntax HeredocExprSyntax::getStartHeredocToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::StartHeredocToken).get()};
+}
+
+std::optional<Syntax> HeredocExprSyntax::getTextClause()
+{
+   RefCountPtr<SyntaxData> textClauseData = m_data->getChild(Cursor::TextClause);
+   if (!textClauseData) {
+      return std::nullopt;
+   }
+   return Syntax {m_root, textClauseData.get()};
+}
+
+TokenSyntax HeredocExprSyntax::getEndHeredocToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::EndHeredocToken).get()};
+}
+
+HeredocExprSyntax HeredocExprSyntax::withStartHeredocToken(std::optional<TokenSyntax> startHeredocToken)
+{
+   RefCountPtr<RawSyntax> startHeredocTokenRaw;
+   if (startHeredocToken.has_value()) {
+      startHeredocTokenRaw = startHeredocToken->getRaw();
+   } else {
+      startHeredocTokenRaw = make_missing_token(T_START_HEREDOC);
+   }
+   return m_data->replaceChild<HeredocExprSyntax>(startHeredocTokenRaw, Cursor::StartHeredocToken);
+}
+
+HeredocExprSyntax HeredocExprSyntax::withTextClause(std::optional<Syntax> textClause)
+{
+   RefCountPtr<RawSyntax> textClauseRaw;
+   if (textClause.has_value()) {
+      textClauseRaw = textClause->getRaw();
+   } else {
+      textClauseRaw = nullptr;
+   }
+   return m_data->replaceChild<HeredocExprSyntax>(textClauseRaw, Cursor::TextClause);
+}
+
+HeredocExprSyntax HeredocExprSyntax::withEndHeredocToken(std::optional<TokenSyntax> endHeredocToken)
+{
+   RefCountPtr<RawSyntax> endHeredocTokenRaw;
+   if (endHeredocToken.has_value()) {
+      endHeredocTokenRaw = endHeredocToken->getRaw();
+   } else {
+      endHeredocTokenRaw = make_missing_token(T_END_HEREDOC);
+   }
+   return m_data->replaceChild<HeredocExprSyntax>(endHeredocTokenRaw, Cursor::EndHeredocToken);
+}
+
+///
 /// BooleanLiteralExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

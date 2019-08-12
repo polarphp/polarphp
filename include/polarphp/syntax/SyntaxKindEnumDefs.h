@@ -173,6 +173,7 @@ enum class SyntaxKind : std::uint32_t
    ListPairItemList,
    MemberModifierList,
    MemberDeclList,
+   EncapsList,
 
    // NOTE: Unknown must be the last kind.
    Unknown,

@@ -1475,6 +1475,71 @@ private:
    void validate();
 };
 
+///
+/// heredoc_expr:
+///   T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC
+/// | T_START_HEREDOC encaps_list T_END_HEREDOC
+/// | T_START_HEREDOC T_END_HEREDOC
+///
+class HeredocExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_START_HEREDOC)
+      /// optional: false
+      ///
+      StartHeredocToken,
+      ///
+      /// type: Syntax
+      /// node choices: true
+      /// optional: true
+      /// ----------------------------------------------------------
+      /// node choice: TokenSyntax (T_ENCAPSED_AND_WHITESPACE)
+      /// ----------------------------------------------------------
+      /// node choice: EncapsItemListSyntax
+      ///
+      TextClause,
+      ///
+      /// type: TokenSyntax (T_START_HEREDOC)
+      /// optional: false
+      ///
+      EndHeredocToken
+   };
+
+public:
+   HeredocExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getStartHeredocToken();
+   std::optional<Syntax> getTextClause();
+   TokenSyntax getEndHeredocToken();
+
+   HeredocExprSyntax withStartHeredocToken(std::optional<TokenSyntax> startHeredocToken);
+   HeredocExprSyntax withTextClause(std::optional<Syntax> textClause);
+   HeredocExprSyntax withEndHeredocToken(std::optional<TokenSyntax> endHeredocToken);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::HeredocExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class HeredocExprSyntaxBuilder;
+   void validate();
+};
+
 class BooleanLiteralExprSyntax final : public ExprSyntax
 {
 public:
