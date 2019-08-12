@@ -1421,6 +1421,60 @@ private:
    void validate();
 };
 
+///
+/// TODO
+/// encaps_list_item:
+///   encaps_var
+/// | T_ENCAPSED_AND_WHITESPACE
+/// | T_ENCAPSED_AND_WHITESPACE encaps_var
+///
+class EncapsListItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_ENCAPSED_AND_WHITESPACE)
+      /// optional: true
+      ///
+      StrLiteral,
+      ///
+      /// type: EncapsVarSyntax
+      /// optional: true
+      ///
+      EncapsVar
+   };
+
+public:
+   EncapsListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getStrLiteral();
+   std::optional<EncapsVarSyntax> getEncapsVar();
+
+   EncapsListItemSyntax withEncapsListItemSyntax(std::optional<TokenSyntax> strLiteral);
+   EncapsListItemSyntax withEncapsVar(std::optional<EncapsVarSyntax> encapsVar);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EncapsListItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EncapsListItemSyntaxBuilder;
+   void validate();
+};
+
 class BooleanLiteralExprSyntax final : public ExprSyntax
 {
 public:

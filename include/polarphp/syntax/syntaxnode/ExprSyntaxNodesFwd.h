@@ -45,6 +45,7 @@ class EncapsDollarCurlyVarSyntax;
 class EncapsDollarCurlyArraySyntax;
 class EncapsCurlyVarSyntax;
 class EncapsVarSyntax;
+class EncapsListItemSyntax;
 
 class HeredocExprSyntax;
 class EncapsListStringExprSyntax;

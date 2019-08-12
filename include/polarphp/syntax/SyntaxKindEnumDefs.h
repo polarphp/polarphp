@@ -106,6 +106,7 @@ enum class SyntaxKind : std::uint32_t
    EncapsDollarCurlyArray,
    EncapsCurlyVar,
    EncapsVar,
+   EncapsListItem,
    HeredocExpr,
    EncapsListStringExpr,
    BooleanLiteralExpr,

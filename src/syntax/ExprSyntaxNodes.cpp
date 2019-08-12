@@ -1638,6 +1638,63 @@ EncapsVarSyntax EncapsVarSyntax::withVar(std::optional<Syntax> var)
 }
 
 ///
+/// EncapsListItemSyntax
+///
+void EncapsListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == EncapsListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, EncapsVar, std::set{SyntaxKind::EncapsVar});
+   syntax_assert_child_token(raw, StrLiteral, std::set{TokenKindType::T_ENCAPSED_AND_WHITESPACE});
+   assert(raw->getChild(Cursor::EncapsVar) || raw->getChild(Cursor::StrLiteral));
+#endif
+}
+
+std::optional<TokenSyntax> EncapsListItemSyntax::getStrLiteral()
+{
+   RefCountPtr<SyntaxData> strLiteralData = m_data->getChild(Cursor::StrLiteral);
+   if (!strLiteralData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, strLiteralData.get()};
+}
+
+std::optional<EncapsVarSyntax> EncapsListItemSyntax::getEncapsVar()
+{
+   RefCountPtr<SyntaxData> encapsVarData = m_data->getChild(Cursor::EncapsVar);
+   if (!encapsVarData) {
+      return std::nullopt;
+   }
+   return EncapsVarSyntax {m_root, encapsVarData.get()};
+}
+
+EncapsListItemSyntax EncapsListItemSyntax::withEncapsListItemSyntax(std::optional<TokenSyntax> strLiteral)
+{
+   RefCountPtr<RawSyntax> strLiteralRaw;
+   if (strLiteral.has_value()) {
+      strLiteralRaw = strLiteral->getRaw();
+   } else {
+      strLiteralRaw = make_missing_token(T_ENCAPSED_AND_WHITESPACE);
+   }
+   return m_data->replaceChild<EncapsListItemSyntax>(strLiteralRaw, Cursor::StrLiteral);
+}
+
+EncapsListItemSyntax EncapsListItemSyntax::withEncapsVar(std::optional<EncapsVarSyntax> encapsVar)
+{
+   RefCountPtr<RawSyntax> encapsVarRaw;
+   if (encapsVar.has_value()) {
+      encapsVarRaw = encapsVar->getRaw();
+   } else {
+      encapsVarRaw = RawSyntax::missing(SyntaxKind::EncapsVar);
+   }
+   return m_data->replaceChild<EncapsListItemSyntax>(encapsVarRaw, Cursor::EncapsVar);
+}
+
+///
 /// BooleanLiteralExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
