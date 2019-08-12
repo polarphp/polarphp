@@ -29,6 +29,7 @@ class ListPairItemSyntax;
 class SimpleVariableExprSyntax;
 class ArrayExprSyntax;
 class SimplifiedArrayExprSyntax;
+class DereferencableScalarSyntax;
 class ClassRefParentExprSyntax;
 class ClassRefStaticExprSyntax;
 class ClassRefSelfExprSyntax;

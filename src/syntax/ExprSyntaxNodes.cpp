@@ -807,6 +807,56 @@ SimplifiedArrayExprSyntax::withRightSquareBracket(std::optional<TokenSyntax> rig
 }
 
 ///
+/// DereferencableScalarExprSyntax
+///
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType DereferencableScalarExprSyntax::CHILD_NODE_CHOICES
+{
+   {
+      DereferencableScalarExprSyntax::ScalarValue, {
+         SyntaxKind::ArrayExpr, SyntaxKind::SimplifiedArrayExpr,
+      }
+   }
+};
+#endif
+
+void DereferencableScalarExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == DereferencableScalarExprSyntax::CHILDREN_COUNT);
+   if (const RefCountPtr<RawSyntax> &valueChild = raw->getChild(Cursor::ScalarValue)) {
+      if (valueChild->isToken()) {
+         syntax_assert_child_token(raw, ScalarValue, std::set{TokenKindType::T_CONSTANT_ENCAPSED_STRING});
+      } else {
+         syntax_assert_child_kind(raw, ScalarValue, CHILD_NODE_CHOICES.at(Cursor::ScalarValue));
+      }
+   }
+#endif
+}
+
+Syntax DereferencableScalarExprSyntax::getScalarValue()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::ScalarValue).get()};
+}
+
+DereferencableScalarExprSyntax
+DereferencableScalarExprSyntax::withScalarValue(std::optional<Syntax> scalarValue)
+{
+   RefCountPtr<RawSyntax> scalarValueRaw;
+   if (scalarValue.has_value()) {
+      scalarValueRaw = scalarValue->getRaw();
+   } else {
+      scalarValueRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<DereferencableScalarExprSyntax>(scalarValueRaw, Cursor::ScalarValue);
+}
+
+///
 /// ClassRefParentExprSyntax
 ///
 void ClassRefParentExprSyntax::validate()

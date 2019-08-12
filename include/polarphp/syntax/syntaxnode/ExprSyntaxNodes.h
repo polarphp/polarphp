@@ -669,6 +669,62 @@ private:
    void validate();
 };
 
+///
+/// dereferencable_scalar:
+///   T_ARRAY '(' array_pair_list ')'
+/// | '[' array_pair_list ']'
+/// | T_CONSTANT_ENCAPSED_STRING
+///
+class DereferencableScalarExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ---------------------------------------------
+      /// node choice: ArrayExprSyntax
+      /// ---------------------------------------------
+      /// node choice: SimplifiedArrayExprSyntax
+      /// ---------------------------------------------
+      /// node choice: TokenSyntax (T_CONSTANT_ENCAPSED_STRING)
+      ///
+      ScalarValue
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   DereferencableScalarExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getScalarValue();
+   DereferencableScalarExprSyntax withScalarValue(std::optional<Syntax> scalarValue);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::DereferencableScalarExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class DereferencableScalarExprSyntaxBuilder;
+   void validate();
+};
+
 class ClassRefParentExprSyntax final : public ExprSyntax
 {
 public:
