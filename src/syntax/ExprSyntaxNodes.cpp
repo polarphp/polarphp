@@ -1586,6 +1586,58 @@ EncapsCurlyVarSyntax::withCloseCurlyToken(std::optional<TokenSyntax> closeCurlyT
 }
 
 ///
+/// EncapsVarSyntax
+///
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType EncapsVarSyntax::CHILD_NODE_CHOICES
+{
+   {
+      EncapsVarSyntax::Var, {
+         SyntaxKind::EncapsArrayVar, SyntaxKind::EncapsObjProp,
+               SyntaxKind::EncapsDollarCurlyExpr, SyntaxKind::EncapsDollarCurlyVar,
+               SyntaxKind::EncapsDollarCurlyArray, SyntaxKind::EncapsCurlyVar
+
+      }
+   }
+};
+#endif
+
+void EncapsVarSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == EncapsVarSyntax::CHILDREN_COUNT);
+   if (const RefCountPtr<RawSyntax> &varChild = raw->getChild(Cursor::Var)) {
+      if (varChild->isToken()) {
+         syntax_assert_child_token(raw, Var, std::set{TokenKindType::T_IDENTIFIER_STRING});
+      } else {
+         syntax_assert_child_kind(raw, Var, CHILD_NODE_CHOICES.at(Cursor::Var));
+      }
+   }
+#endif
+}
+
+Syntax EncapsVarSyntax::getVar()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Var).get()};
+}
+
+EncapsVarSyntax EncapsVarSyntax::withVar(std::optional<Syntax> var)
+{
+   RefCountPtr<RawSyntax> varRaw;
+   if (var.has_value()) {
+      varRaw = var->getRaw();
+   } else {
+      varRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<EncapsVarSyntax>(varRaw, Cursor::Var);
+}
+
+///
 /// BooleanLiteralExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

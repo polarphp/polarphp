@@ -1354,6 +1354,73 @@ private:
    void validate();
 };
 
+///
+/// encaps_var:
+///   T_VARIABLE
+/// | T_VARIABLE '[' encaps_var_offset ']'
+/// | T_VARIABLE T_OBJECT_OPERATOR T_STRING
+/// | T_DOLLAR_OPEN_CURLY_BRACES expr '}'
+/// | T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '}'
+/// | T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '[' expr ']' '}'
+/// | T_CURLY_OPEN variable '}'
+///
+class EncapsVarSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ------------------------------------------
+      /// node choice: TokenSyntax (T_VARIABLE)
+      /// ------------------------------------------
+      /// node choice: EncapsArrayVarSyntax
+      /// ------------------------------------------
+      /// node choice: EncapsObjPropSyntax
+      /// ------------------------------------------
+      /// node choice: EncapsDollarCurlyExprSyntax
+      /// ------------------------------------------
+      /// node choice: EncapsDollarCurlyVarSyntax
+      /// ------------------------------------------
+      /// node choice: EncapsDollarCurlyArraySyntax
+      /// ------------------------------------------
+      /// node choice: EncapsCurlyVarSyntax
+      ///
+      Var,
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   EncapsVarSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getVar();
+   EncapsVarSyntax withVar(std::optional<Syntax> var);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EncapsVar;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EncapsVarSyntaxBuilder;
+   void validate();
+};
+
 class BooleanLiteralExprSyntax final : public ExprSyntax
 {
 public:
