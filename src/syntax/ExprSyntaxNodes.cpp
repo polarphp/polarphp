@@ -25,12 +25,37 @@ void ParenDecoratedExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == ParenDecoratedExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftParenToken, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_token(raw, RightParenToken, std::set{TokenKindType::T_RIGHT_PAREN});
+   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
 #endif
+}
+
+TokenSyntax ParenDecoratedExprSyntax::getLeftParenToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParenToken).get()};
 }
 
 ExprSyntax ParenDecoratedExprSyntax::getExpr()
 {
    return ExprSyntax {m_root, m_data->getChild(Cursor::Expr).get()};
+}
+
+TokenSyntax ParenDecoratedExprSyntax::getRightParenToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParenToken).get()};
+}
+
+ParenDecoratedExprSyntax
+ParenDecoratedExprSyntax::withLeftParenToken(std::optional<TokenSyntax> leftParenToken)
+{
+   RefCountPtr<RawSyntax> leftParenTokenRaw;
+   if (leftParenToken.has_value()) {
+      leftParenTokenRaw = leftParenToken->getRaw();
+   } else {
+      leftParenTokenRaw = make_missing_token(T_LEFT_PAREN);
+   }
+   return m_data->replaceChild<ParenDecoratedExprSyntax>(leftParenTokenRaw, Cursor::LeftParenToken);
 }
 
 ParenDecoratedExprSyntax ParenDecoratedExprSyntax::withExpr(std::optional<ExprSyntax> expr)
@@ -42,6 +67,18 @@ ParenDecoratedExprSyntax ParenDecoratedExprSyntax::withExpr(std::optional<ExprSy
       exprRaw = RawSyntax::missing(SyntaxKind::UnknownExpr);
    }
    return m_data->replaceChild<ParenDecoratedExprSyntax>(exprRaw, Cursor::Expr);
+}
+
+ParenDecoratedExprSyntax
+ParenDecoratedExprSyntax::withRightParenToken(std::optional<TokenSyntax> rightParenToken)
+{
+   RefCountPtr<RawSyntax> rightParenTokenRaw;
+   if (rightParenToken.has_value()) {
+      rightParenTokenRaw = rightParenToken->getRaw();
+   } else {
+      rightParenTokenRaw = make_missing_token(T_LEFT_PAREN);
+   }
+   return m_data->replaceChild<ParenDecoratedExprSyntax>(rightParenTokenRaw, Cursor::RightParenToken);
 }
 
 ///
@@ -73,6 +110,83 @@ NullExprSyntax NullExprSyntax::withNullKeyword(std::optional<TokenSyntax> keywor
                                       OwnedString::makeUnowned((get_token_text(TokenKindType::T_NULL))));
    }
    return m_data->replaceChild<NullExprSyntax>(rawKeyword, Cursor::NullKeyword);
+}
+
+///
+/// DereferencableClauseSyntax
+///
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType DereferencableClauseSyntax::CHILD_NODE_CHOICES
+{
+   {
+      DereferencableClauseSyntax::DereferencableExpr, {
+         SyntaxKind::VariableExpr, SyntaxKind::ParenDecoratedExpr,
+               SyntaxKind::DereferencableScalarExpr
+      }
+   }
+};
+#endif
+
+void DereferencableClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == DereferencableClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, DereferencableExpr, CHILD_NODE_CHOICES.at(Cursor::DereferencableExpr));
+#endif
+}
+
+ExprSyntax DereferencableClauseSyntax::getDereferencableExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::DereferencableExpr).get()};
+}
+
+DereferencableClauseSyntax
+DereferencableClauseSyntax::withDereferencableExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
+   } else {
+      exprRaw = RawSyntax::missing(SyntaxKind::UnknownExpr);
+   }
+   return m_data->replaceChild<DereferencableClauseSyntax>(exprRaw, Cursor::DereferencableExpr);
+}
+
+///
+/// VariableClassNameClauseSyntax
+///
+void VariableClassNameClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == VariableClassNameClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, DereferencableExpr, std::set{SyntaxKind::Expr});
+#endif
+}
+
+ExprSyntax VariableClassNameClauseSyntax::getDereferencableExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::DereferencableExpr).get()};
+}
+
+VariableClassNameClauseSyntax
+VariableClassNameClauseSyntax::withDereferencableExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
+   } else {
+      exprRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<VariableClassNameClauseSyntax>(exprRaw, Cursor::DereferencableExpr);
 }
 
 ///

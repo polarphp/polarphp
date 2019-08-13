@@ -20,6 +20,10 @@
 
 namespace polar::syntax {
 
+///
+/// paren_decorated_expr：
+///   '(' expr ')'
+///
 class ParenDecoratedExprSyntax final : public ExprSyntax
 {
 public:
@@ -28,10 +32,20 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optional: false
+      ///
+      LeftParenToken,
+      ///
       /// type: ExprSyntax
       /// optional: false
       ///
-      Expr
+      Expr,
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
+      /// optional: false
+      ///
+      RightParenToken
    };
 
 public:
@@ -41,8 +55,13 @@ public:
       validate();
    }
 
+   TokenSyntax getLeftParenToken();
    ExprSyntax getExpr();
+   TokenSyntax getRightParenToken();
+
+   ParenDecoratedExprSyntax withLeftParenToken(std::optional<TokenSyntax> leftParenToken);
    ParenDecoratedExprSyntax withExpr(std::optional<ExprSyntax> expr);
+   ParenDecoratedExprSyntax withRightParenToken(std::optional<TokenSyntax> rightParenToken);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -132,9 +151,102 @@ private:
    void validate();
 };
 
+///
+/// dereferencable_clause:
+///   variable
+/// | '(' expr ')'
+/// | dereferencable_scalar
+///
 class DereferencableClauseSyntax final : public Syntax
 {
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      /// node choices: true
+      /// ---------------------------------------------
+      /// node choice: VariableExprSyntax
+      /// ---------------------------------------------
+      /// node choice: ParenDecoratedExprSyntax
+      /// ---------------------------------------------
+      /// node choice: DereferencableScalarExprSyntax
+      ///
+      DereferencableExpr
+   };
 
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   DereferencableClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getDereferencableExpr();
+   DereferencableClauseSyntax withDereferencableExpr(std::optional<ExprSyntax> expr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::DereferencableClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class DereferencableClauseSyntaxBuilder;
+   void validate();
+};
+
+///
+/// variable_class_name:
+///   dereferencable
+///
+class VariableClassNameClauseSyntax final : Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      DereferencableExpr
+   };
+
+public:
+   VariableClassNameClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getDereferencableExpr();
+   VariableClassNameClauseSyntax withDereferencableExpr(std::optional<ExprSyntax> expr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::VariableClassNameClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class VariableClassNameClauseSyntaxBuilder;
+   void validate();
 };
 
 ///
