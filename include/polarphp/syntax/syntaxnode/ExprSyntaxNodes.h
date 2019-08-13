@@ -272,6 +272,20 @@ private:
 };
 
 ///
+/// new_variable:
+///   simple_variable
+/// | new_variable '[' optional_expr ']'
+/// | new_variable '{' expr '}'
+/// | new_variable T_OBJECT_OPERATOR property_name
+/// | class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
+/// | new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable
+///
+class NewVariableSyntax final : public Syntax
+{
+
+};
+
+///
 /// callable_variable:
 ///   simple_variable
 /// | dereferencable '[' optional_expr ']'
@@ -338,6 +352,82 @@ public:
 
 private:
    friend class PropertyNameClauseSyntaxBuilder;
+   void validate();
+};
+
+///
+/// object_property_access:
+///   new_variable T_OBJECT_OPERATOR property_name
+/// | dereferencable T_OBJECT_OPERATOR property_name
+/// | T_VARIABLE T_OBJECT_OPERATOR T_IDENTIFIER_STRING
+///
+class ObjectPropertyAccessExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ----------------------------------------
+      /// node choice: TokenSyntax (T_VARIABLE)
+      /// ----------------------------------------
+      /// node choice: NewVariableSyntax
+      /// ----------------------------------------
+      /// node choice: DereferencableClauseSyntax
+      ///
+      ObjectRef,
+      ///
+      /// type: TokenSyntax (T_OBJECT_OPERATOR)
+      /// optional: false
+      ///
+      Separator,
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ------------------------------------------------
+      /// node choice: TokenSyntax (T_IDENTIFIER_STRING)
+      /// ------------------------------------------------
+      /// node choice: PropertyNameClauseSyntax
+      ///
+      PropertyName
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   ObjectPropertyAccessExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getObjectRef();
+   TokenSyntax getSeparator();
+   Syntax getPropertyName();
+
+   ObjectPropertyAccessExprSyntax withObjectRef(std::optional<Syntax> objectRef);
+   ObjectPropertyAccessExprSyntax withSeparator(std::optional<TokenSyntax> separator);
+   ObjectPropertyAccessExprSyntax withPropertyName(std::optional<Syntax> propertyName);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ObjectPropertyAccessExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ObjectPropertyAccessExprSyntaxBuilder;
    void validate();
 };
 

@@ -24,7 +24,7 @@ class VariableExprSyntax;
 class ClassConstIdentifierExprSyntax;
 class ConstExprSyntax;
 class StaticMemberExprSyntax;
-class NewVariableSyntax;
+class NewVariableClauseSyntax;
 class CallableVariableExprSyntax;
 class PropertyNameClauseSyntax;
 class ObjectPropertyAccessExprSyntax;

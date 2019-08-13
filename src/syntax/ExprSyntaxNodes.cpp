@@ -274,6 +274,92 @@ PropertyNameClauseSyntax PropertyNameClauseSyntax::withName(std::optional<Syntax
 }
 
 ///
+/// ObjectPropertyAccessExprSyntax
+///
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType ObjectPropertyAccessExprSyntax::CHILD_NODE_CHOICES
+{
+   {
+      ObjectPropertyAccessExprSyntax::ObjectRef, {
+         SyntaxKind::NewVariableClause, SyntaxKind::DereferencableClause
+      }
+   }
+};
+#endif
+
+void ObjectPropertyAccessExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ObjectPropertyAccessExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, ObjectRef, CHILD_NODE_CHOICES.at(Cursor::ObjectRef));
+   syntax_assert_child_token(raw, Separator, std::set{TokenKindType::T_OBJECT_OPERATOR});
+   if (const RefCountPtr<RawSyntax> &propertyChild = raw->getChild(Cursor::PropertyName)) {
+      if (propertyChild->isToken()) {
+         syntax_assert_child_token(raw, PropertyName, std::set{TokenKindType::T_IDENTIFIER_STRING});
+      } else {
+         syntax_assert_child_kind(raw, PropertyName, std::set{SyntaxKind::PropertyNameClause});
+      }
+   }
+#endif
+}
+
+Syntax ObjectPropertyAccessExprSyntax::getObjectRef()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::ObjectRef).get()};
+}
+
+TokenSyntax ObjectPropertyAccessExprSyntax::getSeparator()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Separator).get()};
+}
+
+Syntax ObjectPropertyAccessExprSyntax::getPropertyName()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::PropertyName).get()};
+}
+
+ObjectPropertyAccessExprSyntax
+ObjectPropertyAccessExprSyntax::withObjectRef(std::optional<Syntax> objectRef)
+{
+   RefCountPtr<RawSyntax> objectRefRaw;
+   if (objectRef.has_value()) {
+      objectRefRaw = objectRef->getRaw();
+   } else {
+      objectRefRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<ObjectPropertyAccessExprSyntax>(objectRefRaw, Cursor::ObjectRef);
+}
+
+ObjectPropertyAccessExprSyntax
+ObjectPropertyAccessExprSyntax::withSeparator(std::optional<TokenSyntax> separator)
+{
+    RefCountPtr<RawSyntax> separatorRaw;
+    if (separator.has_value()) {
+       separatorRaw = separator->getRaw();
+    } else {
+       separatorRaw = make_missing_token(T_OBJECT_OPERATOR);
+    }
+    return m_data->replaceChild<ObjectPropertyAccessExprSyntax>(separatorRaw, Cursor::Separator);
+}
+
+ObjectPropertyAccessExprSyntax
+ObjectPropertyAccessExprSyntax::withPropertyName(std::optional<Syntax> propertyName)
+{
+   RefCountPtr<RawSyntax> propertyNameRaw;
+   if (propertyName.has_value()) {
+      propertyNameRaw = propertyName->getRaw();
+   } else {
+      propertyNameRaw = RawSyntax::missing(SyntaxKind::PropertyNameClause);
+   }
+   return m_data->replaceChild<ObjectPropertyAccessExprSyntax>(propertyNameRaw, Cursor::PropertyName);
+}
+
+///
 /// DereferencableClauseSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
