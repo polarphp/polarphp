@@ -10,6 +10,7 @@
 // Created by polarboy on 2019/05/17.
 
 #include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/DeclSyntaxNodes.h"
 
 namespace polar::syntax {
 
@@ -113,9 +114,84 @@ NullExprSyntax NullExprSyntax::withNullKeyword(std::optional<TokenSyntax> keywor
 }
 
 ///
+/// ClassConstIdentifierExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType ClassConstIdentifierExprSyntax::CHILD_NODE_CHOICES
+{
+   {
+      ClassConstIdentifierExprSyntax::ClassName, {
+         SyntaxKind::VariableClassNameClause, SyntaxKind::ClassNameClause
+      }
+   }
+};
+#endif
+
+void ClassConstIdentifierExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ClassConstIdentifierExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, ClassName, CHILD_NODE_CHOICES.at(Cursor::ClassName));
+   syntax_assert_child_token(raw, SeparatorToken, std::set{TokenKindType::T_PAAMAYIM_NEKUDOTAYIM});
+   syntax_assert_child_kind(raw, Identifier, std::set{SyntaxKind::Identifier});
+#endif
+}
+
+Syntax ClassConstIdentifierExprSyntax::getClassName()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::ClassName).get()};
+}
+
+TokenSyntax ClassConstIdentifierExprSyntax::getSeparatorToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::SeparatorToken).get()};
+}
+
+IdentifierSyntax ClassConstIdentifierExprSyntax::getIdentifier()
+{
+   return IdentifierSyntax {m_root, m_data->getChild(Cursor::Identifier).get()};
+}
+
+ClassConstIdentifierExprSyntax ClassConstIdentifierExprSyntax::withClassName(std::optional<Syntax> className)
+{
+   RefCountPtr<RawSyntax> classNameRaw;
+   if (className.has_value()) {
+      classNameRaw = className->getRaw();
+   } else {
+      classNameRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<ClassConstIdentifierExprSyntax>(classNameRaw, Cursor::ClassName);
+}
+
+ClassConstIdentifierExprSyntax ClassConstIdentifierExprSyntax::withSeparatorToken(std::optional<TokenSyntax> separator)
+{
+   RefCountPtr<RawSyntax> separatorRaw;
+   if (separator.has_value()) {
+      separatorRaw = separator->getRaw();
+   } else {
+      separatorRaw = make_missing_token(T_PAAMAYIM_NEKUDOTAYIM);
+   }
+   return m_data->replaceChild<ClassConstIdentifierExprSyntax>(separatorRaw, Cursor::SeparatorToken);
+}
+
+ClassConstIdentifierExprSyntax ClassConstIdentifierExprSyntax::withIdentifier(std::optional<TokenSyntax> identifier)
+{
+   RefCountPtr<RawSyntax> identifierRaw;
+   if (identifier.has_value()) {
+      identifierRaw = identifier->getRaw();
+   } else {
+      identifierRaw = RawSyntax::missing(SyntaxKind::Identifier);
+   }
+   return m_data->replaceChild<ClassConstIdentifierExprSyntax>(identifierRaw, Cursor::Identifier);
+}
+
+///
 /// DereferencableClauseSyntax
 ///
-
 #ifdef POLAR_DEBUG_BUILD
 const NodeChoicesType DereferencableClauseSyntax::CHILD_NODE_CHOICES
 {

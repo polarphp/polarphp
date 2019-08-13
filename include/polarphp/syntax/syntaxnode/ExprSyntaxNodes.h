@@ -152,6 +152,73 @@ private:
 };
 
 ///
+/// class_const_identifier:
+///   class_name T_PAAMAYIM_NEKUDOTAYIM identifier
+/// | variable_class_name T_PAAMAYIM_NEKUDOTAYIM identifier
+///
+class ClassConstIdentifierExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ----------------------------------------
+      /// node choice: VariableClassNameClauseSyntax
+      /// ----------------------------------------
+      /// node choice: ClassNameClauseSyntax
+      ///
+      ClassName,
+      ///
+      /// type: TokenSyntax (T_PAAMAYIM_NEKUDOTAYIM)
+      ///
+      SeparatorToken,
+      ///
+      /// type: IdentifierSyntax
+      /// optional: false
+      ///
+      Identifier
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   ClassConstIdentifierExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getClassName();
+   TokenSyntax getSeparatorToken();
+   IdentifierSyntax getIdentifier();
+
+   ClassConstIdentifierExprSyntax withClassName(std::optional<Syntax> className);
+   ClassConstIdentifierExprSyntax withSeparatorToken(std::optional<TokenSyntax> separator);
+   ClassConstIdentifierExprSyntax withIdentifier(std::optional<TokenSyntax> identifier);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassConstIdentifierExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassConstIdentifierExprSyntaxBuilder;
+   void validate();
+};
+
+///
 /// dereferencable_clause:
 ///   variable
 /// | '(' expr ')'

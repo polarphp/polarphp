@@ -20,6 +20,7 @@ class ExprSyntax;
 class ParenDecoratedExprSyntax;
 class NullExprSyntax;
 class VariableExprSyntax;
+class ClassConstIdentifierExprSyntax;
 class DereferencableClauseSyntax;
 class VariableClassNameClauseSyntax;
 class ClassNameClauseSyntax;
@@ -63,6 +64,10 @@ class PostfixOperatorExprSyntax;
 class BinaryOperatorExprSyntax;
 class UseLexicalVarClauseSyntax;
 class LexicalVarItemSyntax;
+
+/// Decl Syntax nodes forward declares
+class NameSyntax;
+class IdentifierSyntax;
 
 /// type: SyntaxCollection
 /// element type: ExprSyntax
