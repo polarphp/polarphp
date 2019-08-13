@@ -250,6 +250,55 @@ private:
 };
 
 ///
+/// class_name:
+///   T_STATIC
+/// | name
+///
+class ClassNameClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ---------------------------------------
+      /// node choice: TokenSyntax (T_STATIC)
+      /// ---------------------------------------
+      /// node choice: NameExprSyntax
+      ///
+      Name
+   };
+
+public:
+   ClassNameClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getName();
+   ClassNameClauseSyntax withName(std::optional<Syntax> name);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassNameClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassNameClauseSyntaxBuilder;
+   void validate();
+};
+
+///
 /// brace_decorated_expr_clause:
 ///   '{' expr '}'
 ///

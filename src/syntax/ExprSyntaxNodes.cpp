@@ -190,6 +190,38 @@ VariableClassNameClauseSyntax::withDereferencableExpr(std::optional<ExprSyntax> 
 }
 
 ///
+/// ClassNameClauseSyntax
+///
+void ClassNameClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ClassNameClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Name, std::set{SyntaxKind::Name});
+   syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_STATIC});
+#endif
+}
+
+Syntax ClassNameClauseSyntax::getName()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Name).get()};
+}
+
+ClassNameClauseSyntax ClassNameClauseSyntax::withName(std::optional<Syntax> name)
+{
+   RefCountPtr<RawSyntax> nameRaw;
+   if (name.has_value()) {
+      nameRaw = name->getRaw();
+   } else {
+      nameRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<ClassNameClauseSyntax>(nameRaw, Cursor::Name);
+}
+
+///
 /// BraceDecoratedExprClauseSyntax
 ///
 void BraceDecoratedExprClauseSyntax::validate()
