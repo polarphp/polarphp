@@ -1087,6 +1087,85 @@ private:
    void validate();
 };
 
+///
+/// scalar:
+///   T_LNUMBER
+/// | T_DNUMBER
+/// | T_LINE
+/// | T_FILE
+/// | T_DIR
+/// | T_TRAIT_CONST
+/// | T_METHOD_CONST
+/// | T_FUNC_CONST
+/// | T_NS_CONST
+/// | T_CLASS_CONST
+/// | T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC
+/// | T_START_HEREDOC encaps_list T_END_HEREDOC
+/// | T_START_HEREDOC T_END_HEREDOC
+/// | '"' encaps_list '"'
+/// | dereferencable_scalar
+/// | constant
+///
+class ScalarExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ScalarExpr;
+   }
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// --------------------------------------------
+      /// node choice: TokenSyntax
+      /// token choices:
+      /// T_LNUMBER | T_DNUMBER | T_LINE
+      /// T_FILE | T_DIR | T_TRAIT_CONST
+      /// T_METHOD_CONST | T_FUNC_CONST | T_NS_CONST
+      /// T_CLASS_CONST
+      /// --------------------------------------------
+      /// node choice: HeredocExprSyntax
+      /// --------------------------------------------
+      /// node choice: EncapsListStringExprSyntax
+      /// --------------------------------------------
+      /// node choice: DereferencableScalarExprSyntax
+      /// --------------------------------------------
+      /// node choice: ConstExprSyntax
+      ///
+      Value
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   ScalarExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getValue();
+   ScalarExprSyntax withValue(std::optional<Syntax> value);
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ScalarExprSyntaxBuilder;
+   void validate();
+};
+
 class ClassRefParentExprSyntax final : public ExprSyntax
 {
 public:

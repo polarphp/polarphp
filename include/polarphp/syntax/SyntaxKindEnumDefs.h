@@ -116,6 +116,7 @@ enum class SyntaxKind : std::uint32_t
    HeredocExpr,
    EncapsListStringExpr,
    DereferencableScalarExpr,
+   ScalarExpr,
    BooleanLiteralExpr,
    TernaryExpr,
    AssignmentExpr,

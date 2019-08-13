@@ -1152,6 +1152,67 @@ DereferencableScalarExprSyntax::withScalarValue(std::optional<Syntax> scalarValu
 }
 
 ///
+/// ScalarExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType ScalarExprSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      ScalarExprSyntax::Value, {
+         TokenKindType::T_LNUMBER, TokenKindType::T_DNUMBER,
+               TokenKindType::T_LINE, TokenKindType::T_FILE,
+               TokenKindType::T_DIR, TokenKindType::T_TRAIT_CONST,
+               TokenKindType::T_METHOD_CONST, TokenKindType::T_FUNC_CONST,
+               TokenKindType::T_NS_CONST, TokenKindType::T_CLASS_CONST,
+      }
+   }
+};
+const NodeChoicesType ScalarExprSyntax::CHILD_NODE_CHOICES
+{
+   {
+      ScalarExprSyntax::Value, {
+         SyntaxKind::HeredocExpr, SyntaxKind::EncapsListStringExpr,
+               SyntaxKind::DereferencableScalarExpr, SyntaxKind::ConstExpr
+      }
+   }
+};
+#endif
+
+void ScalarExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ScalarExprSyntax::CHILDREN_COUNT);
+   if (const RefCountPtr<RawSyntax> &valueChild = raw->getChild(Cursor::Value)) {
+      if (valueChild->isToken()) {
+         syntax_assert_child_token(raw, Value, CHILD_TOKEN_CHOICES.at(Cursor::Value));
+      } else {
+         syntax_assert_child_kind(raw, Value, CHILD_NODE_CHOICES.at(Cursor::Value));
+      }
+   }
+#endif
+}
+
+Syntax ScalarExprSyntax::getValue()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Value).get()};
+}
+
+ScalarExprSyntax ScalarExprSyntax::withValue(std::optional<Syntax> value)
+{
+   RefCountPtr<RawSyntax> valueRaw;
+   if (value.has_value()) {
+      valueRaw = value->getRaw();
+   } else {
+      valueRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<ScalarExprSyntax>(valueRaw, Cursor::Value);
+}
+
+///
 /// ClassRefParentExprSyntax
 ///
 void ClassRefParentExprSyntax::validate()
