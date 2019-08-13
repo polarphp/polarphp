@@ -20,6 +20,45 @@
 
 namespace polar::syntax {
 
+class ParenDecoratedExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Expr
+   };
+
+public:
+   ParenDecoratedExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getExpr();
+   ParenDecoratedExprSyntax withExpr(std::optional<ExprSyntax> expr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ParenDecoratedExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParenDecoratedExprSyntaxBuilder;
+   void validate();
+};
+
 class NullExprSyntax final : public ExprSyntax
 {
 public:
@@ -54,6 +93,48 @@ public:
 private:
    friend class NullExprSyntaxBuilder;
    void validate();
+};
+
+///
+/// variable:
+///   callable_variable
+/// | static_member
+/// | dereferencable T_OBJECT_OPERATOR property_name
+///
+class VariableExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+   };
+
+public:
+   VariableExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::VariableExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class VariableExprSyntaxBuilder;
+   void validate();
+};
+
+class DereferencableClauseSyntax final : public Syntax
+{
+
 };
 
 ///

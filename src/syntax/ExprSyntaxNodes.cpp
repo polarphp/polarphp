@@ -14,6 +14,37 @@
 namespace polar::syntax {
 
 ///
+/// ParenDecoratedExprSyntax
+///
+
+void ParenDecoratedExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ParenDecoratedExprSyntax::CHILDREN_COUNT);
+#endif
+}
+
+ExprSyntax ParenDecoratedExprSyntax::getExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Expr).get()};
+}
+
+ParenDecoratedExprSyntax ParenDecoratedExprSyntax::withExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
+   } else {
+      exprRaw = RawSyntax::missing(SyntaxKind::UnknownExpr);
+   }
+   return m_data->replaceChild<ParenDecoratedExprSyntax>(exprRaw, Cursor::Expr);
+}
+
+///
 /// NullExprSyntax
 ///
 void NullExprSyntax::validate()
