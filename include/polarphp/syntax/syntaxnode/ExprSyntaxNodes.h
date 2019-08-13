@@ -912,7 +912,7 @@ private:
 /// array_expr:
 ///   T_ARRAY '(' array_pair_list ')'
 ///
-class ArrayExprSyntax final : public ExprSyntax
+class ArrayCreateExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 4;
@@ -942,7 +942,7 @@ public:
    };
 
 public:
-   ArrayExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   ArrayCreateExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
       validate();
@@ -953,10 +953,10 @@ public:
    ArrayPairItemListSyntax getPairItemList();
    TokenSyntax getRightParen();
 
-   ArrayExprSyntax withArrayToken(std::optional<TokenSyntax> arrayToken);
-   ArrayExprSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
-   ArrayExprSyntax withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList);
-   ArrayExprSyntax withRightParen(std::optional<TokenSyntax> rightParen);
+   ArrayCreateExprSyntax withArrayToken(std::optional<TokenSyntax> arrayToken);
+   ArrayCreateExprSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
+   ArrayCreateExprSyntax withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList);
+   ArrayCreateExprSyntax withRightParen(std::optional<TokenSyntax> rightParen);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -977,7 +977,7 @@ private:
 /// simplified_array_expr:
 ///   '[' array_pair_list ']'
 ///
-class SimplifiedArrayExprSyntax final : public ExprSyntax
+class SimplifiedArrayCreateExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 3;
@@ -1002,7 +1002,7 @@ public:
    };
 
 public:
-   SimplifiedArrayExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   SimplifiedArrayCreateExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
       validate();
@@ -1012,9 +1012,9 @@ public:
    ArrayPairItemListSyntax getPairItemList();
    TokenSyntax getRightSquareBracket();
 
-   SimplifiedArrayExprSyntax withLeftSquareBracket(std::optional<TokenSyntax> leftSquareBracket);
-   SimplifiedArrayExprSyntax withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList);
-   SimplifiedArrayExprSyntax withRightSquareBracket(std::optional<TokenSyntax> rightSquareBracket);
+   SimplifiedArrayCreateExprSyntax withLeftSquareBracket(std::optional<TokenSyntax> leftSquareBracket);
+   SimplifiedArrayCreateExprSyntax withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList);
+   SimplifiedArrayCreateExprSyntax withRightSquareBracket(std::optional<TokenSyntax> rightSquareBracket);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -1049,9 +1049,9 @@ public:
       /// optional: false
       /// node choices: true
       /// ---------------------------------------------
-      /// node choice: ArrayExprSyntax
+      /// node choice: ArrayCreateExprSyntax
       /// ---------------------------------------------
-      /// node choice: SimplifiedArrayExprSyntax
+      /// node choice: SimplifiedArrayCreateExprSyntax
       /// ---------------------------------------------
       /// node choice: TokenSyntax (T_CONSTANT_ENCAPSED_STRING)
       ///

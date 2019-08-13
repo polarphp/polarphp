@@ -947,16 +947,16 @@ SimpleVariableExprSyntax SimpleVariableExprSyntax::withVariable(std::optional<Sy
 }
 
 ///
-/// ArrayExprSyntax
+/// ArrayCreateExprSyntax
 ///
-void ArrayExprSyntax::validate()
+void ArrayCreateExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == ArrayExprSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == ArrayCreateExprSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ArrayToken, std::set{TokenKindType::T_ARRAY});
    syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
    syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
@@ -964,27 +964,27 @@ void ArrayExprSyntax::validate()
 #endif
 }
 
-TokenSyntax ArrayExprSyntax::getArrayToken()
+TokenSyntax ArrayCreateExprSyntax::getArrayToken()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::ArrayToken).get()};
 }
 
-TokenSyntax ArrayExprSyntax::getLeftParen()
+TokenSyntax ArrayCreateExprSyntax::getLeftParen()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParen).get()};
 }
 
-ArrayPairItemListSyntax ArrayExprSyntax::getPairItemList()
+ArrayPairItemListSyntax ArrayCreateExprSyntax::getPairItemList()
 {
    return ArrayPairItemListSyntax {m_root, m_data->getChild(Cursor::PairItemList).get()};
 }
 
-TokenSyntax ArrayExprSyntax::getRightParen()
+TokenSyntax ArrayCreateExprSyntax::getRightParen()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::RightParen).get()};
 }
 
-ArrayExprSyntax ArrayExprSyntax::withArrayToken(std::optional<TokenSyntax> arrayToken)
+ArrayCreateExprSyntax ArrayCreateExprSyntax::withArrayToken(std::optional<TokenSyntax> arrayToken)
 {
    RefCountPtr<RawSyntax> arrayTokenRaw;
    if (arrayToken.has_value()) {
@@ -993,10 +993,10 @@ ArrayExprSyntax ArrayExprSyntax::withArrayToken(std::optional<TokenSyntax> array
       arrayTokenRaw = RawSyntax::missing(TokenKindType::T_ARRAY,
                                          OwnedString::makeUnowned(get_token_text(TokenKindType::T_ARRAY)));
    }
-   return m_data->replaceChild<ArrayExprSyntax>(arrayTokenRaw, Cursor::ArrayToken);
+   return m_data->replaceChild<ArrayCreateExprSyntax>(arrayTokenRaw, Cursor::ArrayToken);
 }
 
-ArrayExprSyntax ArrayExprSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
+ArrayCreateExprSyntax ArrayCreateExprSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
 {
    RefCountPtr<RawSyntax> leftParanRaw;
    if (leftParen.has_value()) {
@@ -1005,10 +1005,10 @@ ArrayExprSyntax ArrayExprSyntax::withLeftParen(std::optional<TokenSyntax> leftPa
       leftParanRaw = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
    }
-   return m_data->replaceChild<ArrayExprSyntax>(leftParanRaw, Cursor::LeftParen);
+   return m_data->replaceChild<ArrayCreateExprSyntax>(leftParanRaw, Cursor::LeftParen);
 }
 
-ArrayExprSyntax ArrayExprSyntax::withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList)
+ArrayCreateExprSyntax ArrayCreateExprSyntax::withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList)
 {
    RefCountPtr<RawSyntax> pairItemListRaw;
    if (pairItemList.has_value()) {
@@ -1016,10 +1016,10 @@ ArrayExprSyntax ArrayExprSyntax::withPairItemList(std::optional<ArrayPairItemLis
    } else {
       pairItemListRaw = RawSyntax::missing(SyntaxKind::ArrayPairItemList);
    }
-   return m_data->replaceChild<ArrayExprSyntax>(pairItemListRaw, Cursor::PairItemList);
+   return m_data->replaceChild<ArrayCreateExprSyntax>(pairItemListRaw, Cursor::PairItemList);
 }
 
-ArrayExprSyntax ArrayExprSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
+ArrayCreateExprSyntax ArrayCreateExprSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
 {
    RefCountPtr<RawSyntax> rightParenRaw;
    if (rightParen.has_value()) {
@@ -1028,43 +1028,43 @@ ArrayExprSyntax ArrayExprSyntax::withRightParen(std::optional<TokenSyntax> right
       rightParenRaw = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
                                          OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
    }
-   return m_data->replaceChild<ArrayExprSyntax>(rightParenRaw, Cursor::RightParen);
+   return m_data->replaceChild<ArrayCreateExprSyntax>(rightParenRaw, Cursor::RightParen);
 }
 
 ///
-/// SimplifiedArrayExprSyntax
+/// SimplifiedArrayCreateExprSyntax
 ///
-void SimplifiedArrayExprSyntax::validate()
+void SimplifiedArrayCreateExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == SimplifiedArrayExprSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == SimplifiedArrayCreateExprSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, LeftSquareBracket, std::set{TokenKindType::T_LEFT_SQUARE_BRACKET});
    syntax_assert_child_token(raw, RightSquareBracket, std::set{TokenKindType::T_RIGHT_SQUARE_BRACKET});
    syntax_assert_child_kind(raw, PairItemList, std::set{SyntaxKind::ArrayPairItemList});
 #endif
 }
 
-TokenSyntax SimplifiedArrayExprSyntax::getLeftSquareBracket()
+TokenSyntax SimplifiedArrayCreateExprSyntax::getLeftSquareBracket()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::LeftSquareBracket).get()};
 }
 
-ArrayPairItemListSyntax SimplifiedArrayExprSyntax::getPairItemList()
+ArrayPairItemListSyntax SimplifiedArrayCreateExprSyntax::getPairItemList()
 {
    return ArrayPairItemListSyntax {m_root, m_data->getChild(Cursor::PairItemList).get()};
 }
 
-TokenSyntax SimplifiedArrayExprSyntax::getRightSquareBracket()
+TokenSyntax SimplifiedArrayCreateExprSyntax::getRightSquareBracket()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::RightSquareBracket).get()};
 }
 
-SimplifiedArrayExprSyntax
-SimplifiedArrayExprSyntax::withLeftSquareBracket(std::optional<TokenSyntax> leftSquareBracket)
+SimplifiedArrayCreateExprSyntax
+SimplifiedArrayCreateExprSyntax::withLeftSquareBracket(std::optional<TokenSyntax> leftSquareBracket)
 {
    RefCountPtr<RawSyntax> leftSquareBracketRaw;
    if (leftSquareBracket.has_value()) {
@@ -1073,11 +1073,11 @@ SimplifiedArrayExprSyntax::withLeftSquareBracket(std::optional<TokenSyntax> left
       leftSquareBracketRaw = RawSyntax::missing(TokenKindType::T_LEFT_SQUARE_BRACKET,
                                                 OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_SQUARE_BRACKET)));
    }
-   return m_data->replaceChild<SimplifiedArrayExprSyntax>(leftSquareBracketRaw, Cursor::LeftSquareBracket);
+   return m_data->replaceChild<SimplifiedArrayCreateExprSyntax>(leftSquareBracketRaw, Cursor::LeftSquareBracket);
 }
 
-SimplifiedArrayExprSyntax
-SimplifiedArrayExprSyntax::withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList)
+SimplifiedArrayCreateExprSyntax
+SimplifiedArrayCreateExprSyntax::withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList)
 {
    RefCountPtr<RawSyntax> pairItemListRaw;
    if (pairItemList.has_value()) {
@@ -1085,11 +1085,11 @@ SimplifiedArrayExprSyntax::withPairItemList(std::optional<ArrayPairItemListSynta
    } else {
       pairItemListRaw = RawSyntax::missing(SyntaxKind::ArrayPairItemList);
    }
-   return m_data->replaceChild<SimplifiedArrayExprSyntax>(pairItemListRaw, Cursor::PairItemList);
+   return m_data->replaceChild<SimplifiedArrayCreateExprSyntax>(pairItemListRaw, Cursor::PairItemList);
 }
 
-SimplifiedArrayExprSyntax
-SimplifiedArrayExprSyntax::withRightSquareBracket(std::optional<TokenSyntax> rightSquareBracket)
+SimplifiedArrayCreateExprSyntax
+SimplifiedArrayCreateExprSyntax::withRightSquareBracket(std::optional<TokenSyntax> rightSquareBracket)
 {
    RefCountPtr<RawSyntax> rightSquareBracketRaw;
    if (rightSquareBracket.has_value()) {
@@ -1098,7 +1098,7 @@ SimplifiedArrayExprSyntax::withRightSquareBracket(std::optional<TokenSyntax> rig
       rightSquareBracketRaw = RawSyntax::missing(TokenKindType::T_RIGHT_SQUARE_BRACKET,
                                                  OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_SQUARE_BRACKET)));
    }
-   return m_data->replaceChild<SimplifiedArrayExprSyntax>(rightSquareBracketRaw, Cursor::RightSquareBracket);
+   return m_data->replaceChild<SimplifiedArrayCreateExprSyntax>(rightSquareBracketRaw, Cursor::RightSquareBracket);
 }
 
 ///
