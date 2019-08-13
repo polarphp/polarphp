@@ -190,6 +190,48 @@ ClassConstIdentifierExprSyntax ClassConstIdentifierExprSyntax::withIdentifier(st
 }
 
 ///
+/// ConstExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType ConstExprSyntax::CHILD_NODE_CHOICES
+{
+   {
+      ConstExprSyntax::Identifier, {
+         SyntaxKind::Name, SyntaxKind::ClassConstIdentifierExpr
+      }
+   }
+};
+#endif
+
+void ConstExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ConstExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Identifier, CHILD_NODE_CHOICES.at(Cursor::Identifier));
+#endif
+}
+
+Syntax ConstExprSyntax::getIdentifier()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Identifier).get()};
+}
+
+ConstExprSyntax ConstExprSyntax::withIdentifier(std::optional<Syntax> identifier)
+{
+   RefCountPtr<RawSyntax> identifierRaw;
+   if (identifier.has_value()) {
+      identifierRaw = identifier->getRaw();
+   } else {
+      identifierRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<ConstExprSyntax>(identifierRaw, Cursor::Identifier);
+}
+
+///
 /// DereferencableClauseSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

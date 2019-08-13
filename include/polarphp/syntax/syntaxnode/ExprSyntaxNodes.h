@@ -219,6 +219,59 @@ private:
 };
 
 ///
+/// constant:
+///   name
+/// | class_name T_PAAMAYIM_NEKUDOTAYIM identifier
+/// | variable_class_name T_PAAMAYIM_NEKUDOTAYIM identifier
+///
+class ConstExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ---------------------------------------
+      /// node choice: NameSyntax
+      /// ---------------------------------------
+      /// node choice: ClassConstIdentifierExprSyntax
+      Identifier
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   ConstExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getIdentifier();
+   ConstExprSyntax withIdentifier(std::optional<Syntax> identifier);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ConstExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ConstExprSyntaxBuilder;
+   void validate();
+};
+
+///
 /// dereferencable_clause:
 ///   variable
 /// | '(' expr ')'

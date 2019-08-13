@@ -87,6 +87,7 @@ enum class SyntaxKind : std::uint32_t
    NullExpr,
    VariableExpr,
    ClassConstIdentifierExpr,
+   ConstExpr,
    DereferencableClause,
    VariableClassNameClause,
    ClassNameClause,
