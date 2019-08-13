@@ -272,6 +272,76 @@ private:
 };
 
 ///
+/// callable_variable:
+///   simple_variable
+/// | dereferencable '[' optional_expr ']'
+/// | constant '[' optional_expr ']'
+/// | dereferencable '{' expr '}'
+/// | dereferencable T_OBJECT_OPERATOR property_name argument_list
+/// | function_call
+///
+class CallableVariableExprSyntax final : public ExprSyntax
+{
+
+};
+
+///
+/// property_name:
+///   T_IDENTIFIER_STRING
+/// | '{' expr '}'
+/// | simple_variable
+///
+class PropertyNameClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ------------------------------------------------
+      /// node choice: TokenSyntax (T_IDENTIFIER_STRING)
+      /// ------------------------------------------------
+      /// node choice: BraceDecoratedExprClauseSyntax
+      /// ------------------------------------------------
+      /// node choice: SimpleVariableExprSyntax
+      ///
+      Name
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   PropertyNameClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getName();
+   PropertyNameClauseSyntax withName(std::optional<Syntax> name);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::PropertyNameClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class PropertyNameClauseSyntaxBuilder;
+   void validate();
+};
+
+///
 /// dereferencable_clause:
 ///   variable
 /// | '(' expr ')'
@@ -960,7 +1030,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::ArrayExpr;
+      return kind == SyntaxKind::ArrayCreateExpr;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -1018,7 +1088,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::SimplifiedArrayExpr;
+      return kind == SyntaxKind::SimplifiedArrayCreateExpr;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -1029,6 +1099,30 @@ public:
 private:
    friend class SimplifiedArrayExprSyntaxBuilder;
    void validate();
+};
+
+///
+/// array_access:
+///   T_VARIABLE '[' encaps_var_offset ']'
+/// | new_variable '[' optional_expr ']'
+/// | constant '[' optional_expr ']'
+/// | dereferencable '[' optional_expr ']'
+///
+class ArrayAccessExprSyntax final : public ExprSyntax
+{
+
+};
+
+///
+/// function_call:
+///   name argument_list
+/// | class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
+/// | variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
+/// | callable_expr argument_list
+///
+class FunctionCallExprSyntax final : public ExprListSyntax
+{
+
 };
 
 ///

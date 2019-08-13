@@ -19,9 +19,16 @@ namespace polar::syntax {
 class ExprSyntax;
 class ParenDecoratedExprSyntax;
 class NullExprSyntax;
+
 class VariableExprSyntax;
 class ClassConstIdentifierExprSyntax;
 class ConstExprSyntax;
+class StaticMemberExprSyntax;
+class NewVariableSyntax;
+class CallableVariableExprSyntax;
+class PropertyNameClauseSyntax;
+class ObjectPropertyAccessExprSyntax;
+
 class DereferencableClauseSyntax;
 class VariableClassNameClauseSyntax;
 class ClassNameClauseSyntax;
@@ -35,6 +42,8 @@ class ListPairItemSyntax;
 class SimpleVariableExprSyntax;
 class ArrayCreateExprSyntax;
 class SimplifiedArrayCreateExprSyntax;
+class ArrayAccessExprSyntax;
+class FunctionCallExprSyntax;
 class DereferencableScalarExprSyntax;
 class ScalarExprSyntax;
 class ClassRefParentExprSyntax;

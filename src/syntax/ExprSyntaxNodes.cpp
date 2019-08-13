@@ -232,6 +232,48 @@ ConstExprSyntax ConstExprSyntax::withIdentifier(std::optional<Syntax> identifier
 }
 
 ///
+/// PropertyNameClauseSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType PropertyNameClauseSyntax::CHILD_NODE_CHOICES
+{
+   {
+      PropertyNameClauseSyntax::Name, {
+         SyntaxKind::BraceDecoratedExprClause, SyntaxKind::SimpleVariableExpr
+      }
+   }
+};
+#endif
+
+void PropertyNameClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ConstExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Name, CHILD_NODE_CHOICES.at(Cursor::Name));
+#endif
+}
+
+Syntax PropertyNameClauseSyntax::getName()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Name).get()};
+}
+
+PropertyNameClauseSyntax PropertyNameClauseSyntax::withName(std::optional<Syntax> name)
+{
+   RefCountPtr<RawSyntax> nameRaw;
+   if (name.has_value()) {
+      nameRaw = name->getRaw();
+   } else {
+      nameRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<PropertyNameClauseSyntax>(nameRaw, Cursor::Name);
+}
+
+///
 /// DereferencableClauseSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
@@ -1110,7 +1152,7 @@ const NodeChoicesType DereferencableScalarExprSyntax::CHILD_NODE_CHOICES
 {
    {
       DereferencableScalarExprSyntax::ScalarValue, {
-         SyntaxKind::ArrayExpr, SyntaxKind::SimplifiedArrayExpr,
+         SyntaxKind::ArrayCreateExpr, SyntaxKind::SimplifiedArrayCreateExpr,
       }
    }
 };
