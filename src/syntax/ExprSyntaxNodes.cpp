@@ -498,6 +498,75 @@ ArgumentListItemSyntax ArgumentListItemSyntax::withTrailingComma(std::optional<T
 }
 
 ///
+/// ArgumentListClauseSyntax
+///
+void ArgumentListClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ArgumentListClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftParenToken, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_kind(raw, Arguments, std::set{SyntaxKind::ArgumentList});
+   syntax_assert_child_token(raw, RightParenToken, std::set{TokenKindType::T_RIGHT_PAREN});
+#endif
+}
+
+TokenSyntax ArgumentListClauseSyntax::getLeftParenToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParenToken).get()};
+}
+
+std::optional<ArgumentListSyntax> ArgumentListClauseSyntax::getArguments()
+{
+   RefCountPtr<SyntaxData> argumentsData = m_data->getChild(Cursor::Arguments);
+   if (!argumentsData) {
+      return std::nullopt;
+   }
+   return ArgumentListSyntax {m_root, argumentsData.get()};
+}
+
+TokenSyntax ArgumentListClauseSyntax::getRightParenToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParenToken).get()};
+}
+
+ArgumentListClauseSyntax ArgumentListClauseSyntax::withLeftParenToken(std::optional<TokenSyntax> leftParenToken)
+{
+   RefCountPtr<RawSyntax> leftParenTokenRaw;
+   if (leftParenToken.has_value()) {
+      leftParenTokenRaw = leftParenToken->getRaw();
+   } else {
+      leftParenTokenRaw = make_missing_token(T_LEFT_PAREN);
+   }
+   return m_data->replaceChild<ArgumentListClauseSyntax>(leftParenTokenRaw, Cursor::LeftParenToken);
+}
+
+ArgumentListClauseSyntax ArgumentListClauseSyntax::withArguments(std::optional<ArgumentListSyntax> arguments)
+{
+   RefCountPtr<RawSyntax> argumentsRaw;
+   if (arguments.has_value()) {
+      argumentsRaw = arguments->getRaw();
+   } else {
+      argumentsRaw = nullptr;
+   }
+   return m_data->replaceChild<ArgumentListClauseSyntax>(argumentsRaw, Cursor::Arguments);
+}
+
+ArgumentListClauseSyntax ArgumentListClauseSyntax::withRightParenToken(std::optional<TokenSyntax> rightParenToken)
+{
+   RefCountPtr<RawSyntax> rightParenTokenRaw;
+   if (rightParenToken.has_value()) {
+      rightParenTokenRaw = rightParenToken->getRaw();
+   } else {
+      rightParenTokenRaw = make_missing_token(T_RIGHT_PAREN);
+   }
+   return m_data->replaceChild<ArgumentListClauseSyntax>(rightParenTokenRaw, Cursor::RightParenToken);
+}
+
+///
 /// DereferencableClauseSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

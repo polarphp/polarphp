@@ -582,7 +582,56 @@ private:
 ///
 class ArgumentListClauseSyntax final : public Syntax
 {
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optional: false
+      ///
+      LeftParenToken,
+      ///
+      /// type: ArgumentListSyntax
+      /// optional: true
+      ///
+      Arguments,
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
+      /// optional: false
+      ///
+      RightParenToken
+   };
 
+public:
+   ArgumentListClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getLeftParenToken();
+   std::optional<ArgumentListSyntax> getArguments();
+   TokenSyntax getRightParenToken();
+
+   ArgumentListClauseSyntax withLeftParenToken(std::optional<TokenSyntax> leftParenToken);
+   ArgumentListClauseSyntax withArguments(std::optional<ArgumentListSyntax> arguments);
+   ArgumentListClauseSyntax withRightParenToken(std::optional<TokenSyntax> rightParenToken);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ArgumentListClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ArgumentListClauseSyntaxBuilder;
+   void validate();
 };
 
 ///

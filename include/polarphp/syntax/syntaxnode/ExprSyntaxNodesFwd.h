@@ -141,7 +141,7 @@ using EncapsItemListSyntax = SyntaxCollection<SyntaxKind::EncapsListItem, Encaps
 ///   argument
 /// | non_empty_argument_list ',' argument
 ///
-using ArumentListSyntax = SyntaxCollection<SyntaxKind::ArgumentList, ArgumentListItemSyntax>;
+using ArgumentListSyntax = SyntaxCollection<SyntaxKind::ArgumentList, ArgumentListItemSyntax>;
 
 } // polar::syntax
 
