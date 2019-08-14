@@ -474,6 +474,57 @@ private:
 };
 
 ///
+/// argument:
+///   expr
+/// | T_ELLIPSIS expr
+///
+class ArgumentSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_ELLIPSIS)
+      /// optional: true
+      ///
+      EllipsisToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Expr
+   };
+
+public:
+   ArgumentSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getEllipsisToken();
+   ExprSyntax getExpr();
+   ArgumentSyntax withEllipsisToken(std::optional<TokenSyntax> ellipsisToken);
+   ArgumentSyntax withExpr(std::optional<ExprSyntax> expr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::Argument;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ArgumentSyntaxBuilder;
+   void validate();
+};
+
+///
 /// dereferencable_clause:
 ///   variable
 /// | '(' expr ')'

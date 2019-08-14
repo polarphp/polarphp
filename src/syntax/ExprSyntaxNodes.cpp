@@ -394,6 +394,58 @@ ObjectPropertyAccessExprSyntax::withPropertyName(std::optional<Syntax> propertyN
 }
 
 ///
+/// ArgumentSyntax
+///
+void ArgumentSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ArgumentSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, EllipsisToken, std::set{TokenKindType::T_ELLIPSIS});
+   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
+#endif
+}
+
+std::optional<TokenSyntax> ArgumentSyntax::getEllipsisToken()
+{
+   RefCountPtr<SyntaxData> ellipsisTokenData = m_data->getChild(Cursor::EllipsisToken);
+   if (!ellipsisTokenData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, ellipsisTokenData.get()};
+}
+
+ExprSyntax ArgumentSyntax::getExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Expr).get()};
+}
+
+ArgumentSyntax ArgumentSyntax::withEllipsisToken(std::optional<TokenSyntax> ellipsisToken)
+{
+   RefCountPtr<RawSyntax> ellipsisTokenRaw;
+   if (ellipsisToken.has_value()) {
+      ellipsisTokenRaw = ellipsisToken->getRaw();
+   } else {
+      ellipsisTokenRaw = nullptr;
+   }
+   return m_data->replaceChild<ArgumentSyntax>(ellipsisTokenRaw, Cursor::EllipsisToken);
+}
+
+ArgumentSyntax ArgumentSyntax::withExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
+   } else {
+      exprRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<ArgumentSyntax>(exprRaw, Cursor::Expr);
+}
+
+///
 /// DereferencableClauseSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
