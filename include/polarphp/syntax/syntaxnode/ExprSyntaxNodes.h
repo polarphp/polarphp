@@ -525,7 +525,77 @@ public:
    }
 
 private:
-   friend class ObjectPropertyAccessExprSyntaxBuilder;
+   friend class InstancePropertyExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// static_member:
+///   class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
+/// | variable_class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
+///
+class StaticPropertyExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// --------------------------------------------
+      /// node choice: ClassNameClauseSyntax
+      /// --------------------------------------------
+      /// node choice: VariableClassNameClauseSyntax
+      /// --------------------------------------------
+      /// node choice: NewVariableClauseSyntax
+      ///
+      ClassName,
+      ///
+      /// type: TokenSyntax (T_PAAMAYIM_NEKUDOTAYIM)
+      /// optional: false
+      ///
+      Separator,
+      ///
+      /// type: SimpleVariableExprSyntax
+      /// optional: false
+      ///
+      MemberName
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   StaticPropertyExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getClassName();
+   TokenSyntax getSeparator();
+   SimpleVariableExprSyntax getMemberName();
+
+   StaticPropertyExprSyntax withClassName(std::optional<Syntax> className);
+   StaticPropertyExprSyntax withSeparator(std::optional<TokenSyntax> separator);
+   StaticPropertyExprSyntax withMemberName(std::optional<SimpleVariableExprSyntax> memberName);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::StaticPropertyExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class StaticPropertyExprSyntaxBuilder;
    void validate();
 };
 

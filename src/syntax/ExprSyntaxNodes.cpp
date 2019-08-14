@@ -274,8 +274,8 @@ const NodeChoicesType MemberNameClauseSyntax::CHILD_NODE_CHOICES
 {
    {
       MemberNameClauseSyntax::Name, {
-          SyntaxKind::Identifier,  SyntaxKind::BraceDecoratedExprClause,
-                SyntaxKind::SimpleVariableExpr
+         SyntaxKind::Identifier,  SyntaxKind::BraceDecoratedExprClause,
+               SyntaxKind::SimpleVariableExpr
       }
    }
 };
@@ -435,6 +435,81 @@ InstancePropertyExprSyntax::withPropertyName(std::optional<Syntax> propertyName)
       propertyNameRaw = RawSyntax::missing(SyntaxKind::PropertyNameClause);
    }
    return m_data->replaceChild<InstancePropertyExprSyntax>(propertyNameRaw, Cursor::PropertyName);
+}
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType StaticPropertyExprSyntax::CHILD_NODE_CHOICES
+{
+   {
+      StaticPropertyExprSyntax::ClassName, {
+         SyntaxKind::ClassNameClause, SyntaxKind::VariableClassNameClause,
+               SyntaxKind::NewVariableClause
+      }
+   }
+};
+#endif
+
+void StaticPropertyExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == StaticPropertyExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, ClassName, CHILD_NODE_CHOICES.at(Cursor::ClassName));
+   syntax_assert_child_token(raw, Separator, std::set{TokenKindType::T_OBJECT_OPERATOR});
+   syntax_assert_child_kind(raw, MemberName, std::set{SyntaxKind::SimpleVariableExpr});
+#endif
+}
+
+Syntax StaticPropertyExprSyntax::getClassName()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::ClassName).get()};
+}
+
+TokenSyntax StaticPropertyExprSyntax::getSeparator()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Separator).get()};
+}
+
+SimpleVariableExprSyntax StaticPropertyExprSyntax::getMemberName()
+{
+   return SimpleVariableExprSyntax {m_root, m_data->getChild(Cursor::MemberName).get()};
+}
+
+StaticPropertyExprSyntax StaticPropertyExprSyntax::withClassName(std::optional<Syntax> className)
+{
+   RefCountPtr<RawSyntax> classNameRaw;
+   if (className.has_value()) {
+      classNameRaw = className->getRaw();
+   } else {
+      classNameRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<StaticPropertyExprSyntax>(classNameRaw, Cursor::ClassName);
+}
+
+StaticPropertyExprSyntax StaticPropertyExprSyntax::withSeparator(std::optional<TokenSyntax> separator)
+{
+   RefCountPtr<RawSyntax> separatorRaw;
+   if (separator.has_value()) {
+      separatorRaw = separator->getRaw();
+   } else {
+      separatorRaw = make_missing_token(T_PAAMAYIM_NEKUDOTAYIM);
+   }
+   return m_data->replaceChild<StaticPropertyExprSyntax>(separatorRaw, Cursor::Separator);
+}
+
+StaticPropertyExprSyntax
+StaticPropertyExprSyntax::withMemberName(std::optional<SimpleVariableExprSyntax> memberName)
+{
+   RefCountPtr<RawSyntax> memberNameRaw;
+   if (memberName.has_value()) {
+      memberNameRaw = memberName->getRaw();
+   } else {
+      memberNameRaw = RawSyntax::missing(SyntaxKind::SimpleVariableExpr);
+   }
+   return m_data->replaceChild<StaticPropertyExprSyntax>(memberNameRaw, Cursor::MemberName);
 }
 
 ///
