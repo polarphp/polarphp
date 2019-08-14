@@ -446,6 +446,58 @@ ArgumentSyntax ArgumentSyntax::withExpr(std::optional<ExprSyntax> expr)
 }
 
 ///
+/// ArgumentListItemSyntax
+///
+void ArgumentListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ArgumentListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Argument, std::set{SyntaxKind::Argument});
+   syntax_assert_child_token(raw, TrailingComma, std::set{TokenKindType::T_COMMA});
+#endif
+}
+
+ArgumentSyntax ArgumentListItemSyntax::getArgument()
+{
+   return ArgumentSyntax {m_root, m_data->getChild(Cursor::Argument).get()};
+}
+
+std::optional<TokenSyntax> ArgumentListItemSyntax::getTokenSyntax()
+{
+   RefCountPtr<SyntaxData> tokenSyntaxData = m_data->getChild(Cursor::Argument);
+   if (!tokenSyntaxData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, tokenSyntaxData.get()};
+}
+
+ArgumentListItemSyntax ArgumentListItemSyntax::withArgument(std::optional<ArgumentSyntax> argument)
+{
+   RefCountPtr<RawSyntax> argumentRaw;
+   if (argument.has_value()) {
+      argumentRaw = argument->getRaw();
+   } else {
+      argumentRaw = RawSyntax::missing(SyntaxKind::Argument);
+   }
+   return m_data->replaceChild<ArgumentListItemSyntax>(argumentRaw, Cursor::Argument);
+}
+
+ArgumentListItemSyntax ArgumentListItemSyntax::withTrailingComma(std::optional<TokenSyntax> comma)
+{
+   RefCountPtr<RawSyntax> commaRaw;
+   if (comma.has_value()) {
+      commaRaw = comma->getRaw();
+   } else {
+      commaRaw = nullptr;
+   }
+   return m_data->replaceChild<ArgumentListItemSyntax>(commaRaw, Cursor::TrailingComma);
+}
+
+///
 /// DereferencableClauseSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

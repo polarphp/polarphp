@@ -98,6 +98,7 @@ enum class SyntaxKind : std::uint32_t
 
    // argument clauses
    Argument,
+   ArgumentListItem,
    ArgumentListClause,
 
    DereferencableClause,

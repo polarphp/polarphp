@@ -32,6 +32,7 @@ class ObjectPropertyAccessExprSyntax;
 
 // argument clauses
 class ArgumentSyntax;
+class ArgumentListItemSyntax;
 class ArgumentListClauseSyntax;
 
 class DereferencableClauseSyntax;
@@ -140,7 +141,7 @@ using EncapsItemListSyntax = SyntaxCollection<SyntaxKind::EncapsListItem, Encaps
 ///   argument
 /// | non_empty_argument_list ',' argument
 ///
-using ArumentListSyntax = SyntaxCollection<SyntaxKind::ArgumentList, ArgumentSyntax>;
+using ArumentListSyntax = SyntaxCollection<SyntaxKind::ArgumentList, ArgumentListItemSyntax>;
 
 } // polar::syntax
 

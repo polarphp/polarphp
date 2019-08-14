@@ -525,6 +525,67 @@ private:
 };
 
 ///
+/// argument_list_item:
+///   argument ','
+///
+class ArgumentListItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ArgumentSyntax
+      /// optional: false
+      ///
+      Argument,
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: true
+      ///
+      TrailingComma
+   };
+
+public:
+   ArgumentListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   ArgumentSyntax getArgument();
+   std::optional<TokenSyntax> getTokenSyntax();
+
+   ArgumentListItemSyntax withArgument(std::optional<ArgumentSyntax> argument);
+   ArgumentListItemSyntax withTrailingComma(std::optional<TokenSyntax> comma);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ArgumentListItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ArgumentListItemSyntaxBuilder;
+   void validate();
+};
+
+///
+/// argument_list:
+///   '(' ')'
+/// | '(' non_empty_argument_list possible_comma ')'
+///
+class ArgumentListClauseSyntax final : public Syntax
+{
+
+};
+
+///
 /// dereferencable_clause:
 ///   variable
 /// | '(' expr ')'
