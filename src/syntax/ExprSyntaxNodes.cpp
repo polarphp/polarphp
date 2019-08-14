@@ -266,6 +266,50 @@ ConstExprSyntax ConstExprSyntax::withIdentifier(std::optional<Syntax> identifier
 }
 
 ///
+/// MemberNameClauseSyntax
+///
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType MemberNameClauseSyntax::CHILD_NODE_CHOICES
+{
+   {
+      MemberNameClauseSyntax::Name, {
+          SyntaxKind::Identifier,  SyntaxKind::BraceDecoratedExprClause,
+                SyntaxKind::SimpleVariableExpr
+      }
+   }
+};
+#endif
+
+void MemberNameClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == MemberNameClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Name, CHILD_NODE_CHOICES.at(Cursor::Name));
+#endif
+}
+
+Syntax MemberNameClauseSyntax::getName()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Name).get()};
+}
+
+MemberNameClauseSyntax MemberNameClauseSyntax::withName(std::optional<Syntax> name)
+{
+   RefCountPtr<RawSyntax> nameRaw;
+   if (name.has_value()) {
+      nameRaw = name->getRaw();
+   } else {
+      nameRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<MemberNameClauseSyntax>(nameRaw, Cursor::Name);
+}
+
+///
 /// PropertyNameClauseSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
@@ -1450,7 +1494,7 @@ const NodeChoicesType ArrayAccessExprSyntax::CHILD_NODE_CHOICES
    },
    {
       ArrayAccessExprSyntax::Offset, {
-          SyntaxKind::EncapsVarOffset, SyntaxKind::OptionalExpr,
+         SyntaxKind::EncapsVarOffset, SyntaxKind::OptionalExpr,
       }
    }
 };
@@ -1607,33 +1651,33 @@ BraceDecoratedArrayAccessExpr::withOffsetExpr(std::optional<BraceDecoratedExprCl
 }
 
 ///
-/// InstanceMethodCallExperSyntax
+/// InstanceMethodCallExprSyntax
 ///
-void InstanceMethodCallExperSyntax::validate()
+void InstanceMethodCallExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == InstanceMethodCallExperSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == InstanceMethodCallExprSyntax::CHILDREN_COUNT);
    syntax_assert_child_kind(raw, QualifiedMethodName, std::set{SyntaxKind::ObjectPropertyAccessExpr});
    syntax_assert_child_kind(raw, ArgumentListClause, std::set{SyntaxKind::ArgumentListClause});
 #endif
 }
 
-ObjectPropertyAccessExprSyntax InstanceMethodCallExperSyntax::getQualifiedMethodName()
+ObjectPropertyAccessExprSyntax InstanceMethodCallExprSyntax::getQualifiedMethodName()
 {
    return ObjectPropertyAccessExprSyntax {m_root, m_data->getChild(Cursor::QualifiedMethodName).get()};
 }
 
-ArgumentListClauseSyntax InstanceMethodCallExperSyntax::getArgumentListClause()
+ArgumentListClauseSyntax InstanceMethodCallExprSyntax::getArgumentListClause()
 {
    return ArgumentListClauseSyntax {m_root, m_data->getChild(Cursor::ArgumentListClause).get()};
 }
 
-InstanceMethodCallExperSyntax
-InstanceMethodCallExperSyntax::withQualifiedMethodName(std::optional<ObjectPropertyAccessExprSyntax> methodName)
+InstanceMethodCallExprSyntax
+InstanceMethodCallExprSyntax::withQualifiedMethodName(std::optional<ObjectPropertyAccessExprSyntax> methodName)
 {
    RefCountPtr<RawSyntax> methodNameRaw;
    if (methodName.has_value()) {
@@ -1641,11 +1685,11 @@ InstanceMethodCallExperSyntax::withQualifiedMethodName(std::optional<ObjectPrope
    } else {
       methodNameRaw = RawSyntax::missing(SyntaxKind::ObjectPropertyAccessExpr);
    }
-   return m_data->replaceChild<InstanceMethodCallExperSyntax>(methodNameRaw, Cursor::QualifiedMethodName);
+   return m_data->replaceChild<InstanceMethodCallExprSyntax>(methodNameRaw, Cursor::QualifiedMethodName);
 }
 
-InstanceMethodCallExperSyntax
-InstanceMethodCallExperSyntax::withArgumentListClause(std::optional<ArgumentListClauseSyntax> arguments)
+InstanceMethodCallExprSyntax
+InstanceMethodCallExprSyntax::withArgumentListClause(std::optional<ArgumentListClauseSyntax> arguments)
 {
    RefCountPtr<RawSyntax> argumentsRaw;
    if (arguments.has_value()) {
@@ -1653,7 +1697,7 @@ InstanceMethodCallExperSyntax::withArgumentListClause(std::optional<ArgumentList
    } else {
       argumentsRaw = RawSyntax::missing(SyntaxKind::ArgumentListClause);
    }
-   return m_data->replaceChild<InstanceMethodCallExperSyntax>(argumentsRaw, Cursor::ArgumentListClause);
+   return m_data->replaceChild<InstanceMethodCallExprSyntax>(argumentsRaw, Cursor::ArgumentListClause);
 }
 
 ///

@@ -342,6 +342,62 @@ class CallableVariableExprSyntax final : public ExprSyntax
 };
 
 ///
+/// member_name:
+///   identifier
+/// | '{' expr '}'
+/// | simple_variable
+///
+class MemberNameClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ---------------------------------------------
+      /// node choice: IdentifierSyntax
+      /// ---------------------------------------------
+      /// node choice: BraceDecoratedExprClauseSyntax
+      /// ---------------------------------------------
+      /// node choice: SimpleVariableExprSyntax
+      ///
+      Name
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   MemberNameClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getName();
+   MemberNameClauseSyntax withName(std::optional<Syntax> name);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::MemberNameClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class PropertyNameClauseSyntaxBuilder;
+   void validate();
+};
+
+///
 /// property_name:
 ///   T_IDENTIFIER_STRING
 /// | '{' expr '}'
@@ -1556,7 +1612,7 @@ class FunctionCallExprSyntax final : public ExprListSyntax
 /// instance_method_call:
 ///   dereferencable T_OBJECT_OPERATOR property_name argument_list
 ///
-class InstanceMethodCallExperSyntax final : public ExprSyntax
+class InstanceMethodCallExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -1576,7 +1632,7 @@ public:
    };
 
 public:
-   InstanceMethodCallExperSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   InstanceMethodCallExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
       validate();
@@ -1585,12 +1641,12 @@ public:
    ObjectPropertyAccessExprSyntax getQualifiedMethodName();
    ArgumentListClauseSyntax getArgumentListClause();
 
-   InstanceMethodCallExperSyntax withQualifiedMethodName(std::optional<ObjectPropertyAccessExprSyntax> methodName);
-   InstanceMethodCallExperSyntax withArgumentListClause(std::optional<ArgumentListClauseSyntax> arguments);
+   InstanceMethodCallExprSyntax withQualifiedMethodName(std::optional<ObjectPropertyAccessExprSyntax> methodName);
+   InstanceMethodCallExprSyntax withArgumentListClause(std::optional<ArgumentListClauseSyntax> arguments);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::InstanceMethodCallExper;
+      return kind == SyntaxKind::InstanceMethodCallExpr;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -1600,6 +1656,62 @@ public:
 
 private:
    friend class InstanceMethodCallExperSyntaxBuilder;
+   void validate();
+};
+
+///
+/// static_method_call:
+///   class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
+/// | variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
+///
+class StaticMethodCallExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 4;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 4;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// --------------------------------------------
+      /// node choice: ClassNameClauseSyntax
+      /// --------------------------------------------
+      /// node choice: VariableClassNameClauseSyntax
+      ///
+      ClassName,
+      ///
+      /// type: TokenSyntax (T_PAAMAYIM_NEKUDOTAYIM)
+      /// optional: false
+      ///
+      Separator,
+      ///
+      ///
+      ///
+      MethodName,
+      Arguments
+   };
+
+public:
+   StaticMethodCallExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::StaticMethodCallExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class DereferencableScalarExprSyntaxBuilder;
    void validate();
 };
 

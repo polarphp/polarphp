@@ -27,6 +27,7 @@ class ConstExprSyntax;
 class StaticMemberExprSyntax;
 class NewVariableClauseSyntax;
 class CallableVariableExprSyntax;
+class MemberNameClauseSyntax;
 class PropertyNameClauseSyntax;
 class ObjectPropertyAccessExprSyntax;
 
@@ -51,7 +52,8 @@ class SimplifiedArrayCreateExprSyntax;
 class ArrayAccessExprSyntax;
 class BraceDecoratedArrayAccessExpr;
 class FunctionCallExprSyntax;
-class InstanceMethodCallExperSyntax;
+class InstanceMethodCallExprSyntax;
+class StaticMethodCallExprSyntax;
 class DereferencableScalarExprSyntax;
 class ScalarExprSyntax;
 class ClassRefParentExprSyntax;

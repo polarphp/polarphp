@@ -93,6 +93,7 @@ enum class SyntaxKind : std::uint32_t
    StaticMemberExpr,
    NewVariableClause,
    CallableVariableExpr,
+   MemberNameClause,
    PropertyNameClause,
    ObjectPropertyAccessExpr,
 
@@ -119,7 +120,8 @@ enum class SyntaxKind : std::uint32_t
    ArrayAccessExpr,
    BraceDecoratedArrayAccessExpr,
    FunctionCallExpr,
-   InstanceMethodCallExper,
+   InstanceMethodCallExpr,
+   StaticMethodCallExpr,
    FloatLiteralExpr,
    IntegerLiteralExpr,
    StringLiteralExpr,
