@@ -115,6 +115,48 @@ private:
 };
 
 ///
+/// optional_expr:
+///   %empty
+/// | expr
+///
+class OptionalExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 0;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: ExprSyntax
+      /// optional: true
+      Expr,
+   };
+
+public:
+   OptionalExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<ExprSyntax> getExpr();
+   OptionalExprSyntax withExpr(std::optional<ExprSyntax> expr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::OptionalExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class OptionalExprSyntaxBuilder;
+   void validate();
+};
+
+///
 /// variable:
 ///   callable_variable
 /// | static_member

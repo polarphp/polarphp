@@ -114,6 +114,40 @@ NullExprSyntax NullExprSyntax::withNullKeyword(std::optional<TokenSyntax> keywor
 }
 
 ///
+/// OptionalExprSyntax
+///
+void OptionalExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == OptionalExprSyntax::CHILDREN_COUNT);
+#endif
+}
+
+std::optional<ExprSyntax> OptionalExprSyntax::getExpr()
+{
+   RefCountPtr<SyntaxData> exprData = m_data->getChild(Cursor::Expr);
+   if (!exprData) {
+      return std::nullopt;
+   }
+   return ExprSyntax {m_root, exprData.get()};
+}
+
+OptionalExprSyntax OptionalExprSyntax::withExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
+   } else {
+      exprRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<OptionalExprSyntax>(exprRaw, Cursor::Expr);
+}
+
+///
 /// ClassConstIdentifierExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

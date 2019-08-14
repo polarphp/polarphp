@@ -85,6 +85,7 @@ enum class SyntaxKind : std::uint32_t
    FirstExpr,
    ParenDecoratedExpr,
    NullExpr,
+   OptionalExpr,
    VariableExpr,
    ClassConstIdentifierExpr,
 
