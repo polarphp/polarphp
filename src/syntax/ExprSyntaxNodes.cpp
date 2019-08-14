@@ -338,13 +338,13 @@ ObjectPropertyAccessExprSyntax::withObjectRef(std::optional<Syntax> objectRef)
 ObjectPropertyAccessExprSyntax
 ObjectPropertyAccessExprSyntax::withSeparator(std::optional<TokenSyntax> separator)
 {
-    RefCountPtr<RawSyntax> separatorRaw;
-    if (separator.has_value()) {
-       separatorRaw = separator->getRaw();
-    } else {
-       separatorRaw = make_missing_token(T_OBJECT_OPERATOR);
-    }
-    return m_data->replaceChild<ObjectPropertyAccessExprSyntax>(separatorRaw, Cursor::Separator);
+   RefCountPtr<RawSyntax> separatorRaw;
+   if (separator.has_value()) {
+      separatorRaw = separator->getRaw();
+   } else {
+      separatorRaw = make_missing_token(T_OBJECT_OPERATOR);
+   }
+   return m_data->replaceChild<ObjectPropertyAccessExprSyntax>(separatorRaw, Cursor::Separator);
 }
 
 ObjectPropertyAccessExprSyntax
@@ -1227,6 +1227,68 @@ SimplifiedArrayCreateExprSyntax::withRightSquareBracket(std::optional<TokenSynta
                                                  OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_SQUARE_BRACKET)));
    }
    return m_data->replaceChild<SimplifiedArrayCreateExprSyntax>(rightSquareBracketRaw, Cursor::RightSquareBracket);
+}
+
+///
+/// BraceDecoratedArrayAccessExpr
+///
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType BraceDecoratedArrayAccessExpr::CHILD_NODE_CHOICES
+{
+   {
+      BraceDecoratedArrayAccessExpr::ArrayRef, {
+         SyntaxKind::NewVariableClause, SyntaxKind::DereferencableClause
+      }
+   }
+};
+#endif
+
+void BraceDecoratedArrayAccessExpr::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == BraceDecoratedArrayAccessExpr::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, ArrayRef, CHILD_NODE_CHOICES.at(Cursor::ArrayRef));
+   syntax_assert_child_kind(raw, OffsetExpr, std::set{SyntaxKind::BraceDecoratedExprClause});
+#endif
+}
+
+Syntax BraceDecoratedArrayAccessExpr::getArrayRef()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::ArrayRef).get()};
+}
+
+BraceDecoratedExprClauseSyntax BraceDecoratedArrayAccessExpr::getOffsetExpr()
+{
+   return BraceDecoratedExprClauseSyntax {m_root, m_data->getChild(Cursor::OffsetExpr).get()};
+}
+
+BraceDecoratedArrayAccessExpr
+BraceDecoratedArrayAccessExpr::withArrayRef(std::optional<Syntax> arrayRef)
+{
+   RefCountPtr<RawSyntax> arrayRefRaw;
+   if (arrayRef.has_value()) {
+      arrayRefRaw = arrayRef->getRaw();
+   } else {
+      arrayRefRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<BraceDecoratedArrayAccessExpr>(arrayRefRaw, Cursor::ArrayRef);
+}
+
+BraceDecoratedArrayAccessExpr
+BraceDecoratedArrayAccessExpr::withOffsetExpr(std::optional<BraceDecoratedExprClauseSyntax> offsetExpr)
+{
+   RefCountPtr<RawSyntax> offsetExprRaw;
+   if (offsetExpr.has_value()) {
+      offsetExprRaw = offsetExpr->getRaw();
+   } else {
+      offsetExprRaw = RawSyntax::missing(SyntaxKind::BraceDecoratedExprClause);
+   }
+   return m_data->replaceChild<BraceDecoratedArrayAccessExpr>(offsetExprRaw, Cursor::OffsetExpr);
 }
 
 ///

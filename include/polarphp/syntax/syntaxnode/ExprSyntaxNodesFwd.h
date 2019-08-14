@@ -43,6 +43,7 @@ class SimpleVariableExprSyntax;
 class ArrayCreateExprSyntax;
 class SimplifiedArrayCreateExprSyntax;
 class ArrayAccessExprSyntax;
+class BraceDecoratedArrayAccessExpr;
 class FunctionCallExprSyntax;
 class DereferencableScalarExprSyntax;
 class ScalarExprSyntax;

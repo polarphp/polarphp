@@ -280,7 +280,7 @@ private:
 /// | class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
 /// | new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable
 ///
-class NewVariableSyntax final : public Syntax
+class NewVariableClauseSyntax final : public Syntax
 {
 
 };
@@ -1201,6 +1201,67 @@ private:
 class ArrayAccessExprSyntax final : public ExprSyntax
 {
 
+};
+
+///
+/// brace_decorated_array_access:
+///   new_variable '{' expr '}'
+/// | dereferencable '{' expr '}'
+///
+class BraceDecoratedArrayAccessExpr final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// -----------------------------------------
+      /// node choice: NewVariableClauseSyntax
+      /// -----------------------------------------
+      /// node choice: DereferencableClauseSyntax
+      ///
+      ArrayRef,
+      ///
+      /// type: BraceDecoratedExprClauseSyntax
+      /// optional: false
+      ///
+      OffsetExpr
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   BraceDecoratedArrayAccessExpr(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getArrayRef();
+   BraceDecoratedExprClauseSyntax getOffsetExpr();
+
+   BraceDecoratedArrayAccessExpr withArrayRef(std::optional<Syntax> arrayRef);
+   BraceDecoratedArrayAccessExpr withOffsetExpr(std::optional<BraceDecoratedExprClauseSyntax> offsetExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::BraceDecoratedArrayAccessExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class BraceDecoratedArrayAccessExprBuilder;
+   void validate();
 };
 
 ///
