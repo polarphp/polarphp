@@ -119,6 +119,7 @@ enum class SyntaxKind : std::uint32_t
    ArrayAccessExpr,
    BraceDecoratedArrayAccessExpr,
    FunctionCallExpr,
+   InstanceMethodCallExper,
    FloatLiteralExpr,
    IntegerLiteralExpr,
    StringLiteralExpr,

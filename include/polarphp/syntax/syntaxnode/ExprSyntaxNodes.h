@@ -1553,6 +1553,57 @@ class FunctionCallExprSyntax final : public ExprListSyntax
 };
 
 ///
+/// instance_method_call:
+///   dereferencable T_OBJECT_OPERATOR property_name argument_list
+///
+class InstanceMethodCallExperSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ObjectPropertyAccessExprSyntax
+      /// optional: false
+      ///
+      QualifiedMethodName,
+      ///
+      /// type: ArgumentListClauseSyntax
+      /// optional: false
+      ///
+      ArgumentListClause
+   };
+
+public:
+   InstanceMethodCallExperSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   ObjectPropertyAccessExprSyntax getQualifiedMethodName();
+   ArgumentListClauseSyntax getArgumentListClause();
+
+   InstanceMethodCallExperSyntax withQualifiedMethodName(std::optional<ObjectPropertyAccessExprSyntax> methodName);
+   InstanceMethodCallExperSyntax withArgumentListClause(std::optional<ArgumentListClauseSyntax> arguments);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::InstanceMethodCallExper;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class InstanceMethodCallExperSyntaxBuilder;
+   void validate();
+};
+
+///
 /// dereferencable_scalar:
 ///   T_ARRAY '(' array_pair_list ')'
 /// | '[' array_pair_list ']'

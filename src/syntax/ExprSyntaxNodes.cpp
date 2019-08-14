@@ -1607,6 +1607,56 @@ BraceDecoratedArrayAccessExpr::withOffsetExpr(std::optional<BraceDecoratedExprCl
 }
 
 ///
+/// InstanceMethodCallExperSyntax
+///
+void InstanceMethodCallExperSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == InstanceMethodCallExperSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, QualifiedMethodName, std::set{SyntaxKind::ObjectPropertyAccessExpr});
+   syntax_assert_child_kind(raw, ArgumentListClause, std::set{SyntaxKind::ArgumentListClause});
+#endif
+}
+
+ObjectPropertyAccessExprSyntax InstanceMethodCallExperSyntax::getQualifiedMethodName()
+{
+   return ObjectPropertyAccessExprSyntax {m_root, m_data->getChild(Cursor::QualifiedMethodName).get()};
+}
+
+ArgumentListClauseSyntax InstanceMethodCallExperSyntax::getArgumentListClause()
+{
+   return ArgumentListClauseSyntax {m_root, m_data->getChild(Cursor::ArgumentListClause).get()};
+}
+
+InstanceMethodCallExperSyntax
+InstanceMethodCallExperSyntax::withQualifiedMethodName(std::optional<ObjectPropertyAccessExprSyntax> methodName)
+{
+   RefCountPtr<RawSyntax> methodNameRaw;
+   if (methodName.has_value()) {
+      methodNameRaw = methodName->getRaw();
+   } else {
+      methodNameRaw = RawSyntax::missing(SyntaxKind::ObjectPropertyAccessExpr);
+   }
+   return m_data->replaceChild<InstanceMethodCallExperSyntax>(methodNameRaw, Cursor::QualifiedMethodName);
+}
+
+InstanceMethodCallExperSyntax
+InstanceMethodCallExperSyntax::withArgumentListClause(std::optional<ArgumentListClauseSyntax> arguments)
+{
+   RefCountPtr<RawSyntax> argumentsRaw;
+   if (arguments.has_value()) {
+      argumentsRaw = arguments->getRaw();
+   } else {
+      argumentsRaw = RawSyntax::missing(SyntaxKind::ArgumentListClause);
+   }
+   return m_data->replaceChild<InstanceMethodCallExperSyntax>(argumentsRaw, Cursor::ArgumentListClause);
+}
+
+///
 /// DereferencableScalarExprSyntax
 ///
 

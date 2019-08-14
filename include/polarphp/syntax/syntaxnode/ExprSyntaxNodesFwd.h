@@ -51,6 +51,7 @@ class SimplifiedArrayCreateExprSyntax;
 class ArrayAccessExprSyntax;
 class BraceDecoratedArrayAccessExpr;
 class FunctionCallExprSyntax;
+class InstanceMethodCallExperSyntax;
 class DereferencableScalarExprSyntax;
 class ScalarExprSyntax;
 class ClassRefParentExprSyntax;
