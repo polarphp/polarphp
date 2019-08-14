@@ -352,28 +352,28 @@ PropertyNameClauseSyntax PropertyNameClauseSyntax::withName(std::optional<Syntax
 }
 
 ///
-/// ObjectPropertyAccessExprSyntax
+/// InstancePropertyExprSyntax
 ///
 
 #ifdef POLAR_DEBUG_BUILD
-const NodeChoicesType ObjectPropertyAccessExprSyntax::CHILD_NODE_CHOICES
+const NodeChoicesType InstancePropertyExprSyntax::CHILD_NODE_CHOICES
 {
    {
-      ObjectPropertyAccessExprSyntax::ObjectRef, {
+      InstancePropertyExprSyntax::ObjectRef, {
          SyntaxKind::NewVariableClause, SyntaxKind::DereferencableClause
       }
    }
 };
 #endif
 
-void ObjectPropertyAccessExprSyntax::validate()
+void InstancePropertyExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == ObjectPropertyAccessExprSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == InstancePropertyExprSyntax::CHILDREN_COUNT);
    syntax_assert_child_kind(raw, ObjectRef, CHILD_NODE_CHOICES.at(Cursor::ObjectRef));
    syntax_assert_child_token(raw, Separator, std::set{TokenKindType::T_OBJECT_OPERATOR});
    if (const RefCountPtr<RawSyntax> &propertyChild = raw->getChild(Cursor::PropertyName)) {
@@ -386,23 +386,23 @@ void ObjectPropertyAccessExprSyntax::validate()
 #endif
 }
 
-Syntax ObjectPropertyAccessExprSyntax::getObjectRef()
+Syntax InstancePropertyExprSyntax::getObjectRef()
 {
    return Syntax {m_root, m_data->getChild(Cursor::ObjectRef).get()};
 }
 
-TokenSyntax ObjectPropertyAccessExprSyntax::getSeparator()
+TokenSyntax InstancePropertyExprSyntax::getSeparator()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::Separator).get()};
 }
 
-Syntax ObjectPropertyAccessExprSyntax::getPropertyName()
+Syntax InstancePropertyExprSyntax::getPropertyName()
 {
    return Syntax {m_root, m_data->getChild(Cursor::PropertyName).get()};
 }
 
-ObjectPropertyAccessExprSyntax
-ObjectPropertyAccessExprSyntax::withObjectRef(std::optional<Syntax> objectRef)
+InstancePropertyExprSyntax
+InstancePropertyExprSyntax::withObjectRef(std::optional<Syntax> objectRef)
 {
    RefCountPtr<RawSyntax> objectRefRaw;
    if (objectRef.has_value()) {
@@ -410,11 +410,11 @@ ObjectPropertyAccessExprSyntax::withObjectRef(std::optional<Syntax> objectRef)
    } else {
       objectRefRaw = RawSyntax::missing(SyntaxKind::Unknown);
    }
-   return m_data->replaceChild<ObjectPropertyAccessExprSyntax>(objectRefRaw, Cursor::ObjectRef);
+   return m_data->replaceChild<InstancePropertyExprSyntax>(objectRefRaw, Cursor::ObjectRef);
 }
 
-ObjectPropertyAccessExprSyntax
-ObjectPropertyAccessExprSyntax::withSeparator(std::optional<TokenSyntax> separator)
+InstancePropertyExprSyntax
+InstancePropertyExprSyntax::withSeparator(std::optional<TokenSyntax> separator)
 {
    RefCountPtr<RawSyntax> separatorRaw;
    if (separator.has_value()) {
@@ -422,11 +422,11 @@ ObjectPropertyAccessExprSyntax::withSeparator(std::optional<TokenSyntax> separat
    } else {
       separatorRaw = make_missing_token(T_OBJECT_OPERATOR);
    }
-   return m_data->replaceChild<ObjectPropertyAccessExprSyntax>(separatorRaw, Cursor::Separator);
+   return m_data->replaceChild<InstancePropertyExprSyntax>(separatorRaw, Cursor::Separator);
 }
 
-ObjectPropertyAccessExprSyntax
-ObjectPropertyAccessExprSyntax::withPropertyName(std::optional<Syntax> propertyName)
+InstancePropertyExprSyntax
+InstancePropertyExprSyntax::withPropertyName(std::optional<Syntax> propertyName)
 {
    RefCountPtr<RawSyntax> propertyNameRaw;
    if (propertyName.has_value()) {
@@ -434,7 +434,7 @@ ObjectPropertyAccessExprSyntax::withPropertyName(std::optional<Syntax> propertyN
    } else {
       propertyNameRaw = RawSyntax::missing(SyntaxKind::PropertyNameClause);
    }
-   return m_data->replaceChild<ObjectPropertyAccessExprSyntax>(propertyNameRaw, Cursor::PropertyName);
+   return m_data->replaceChild<InstancePropertyExprSyntax>(propertyNameRaw, Cursor::PropertyName);
 }
 
 ///
@@ -1661,14 +1661,14 @@ void InstanceMethodCallExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == InstanceMethodCallExprSyntax::CHILDREN_COUNT);
-   syntax_assert_child_kind(raw, QualifiedMethodName, std::set{SyntaxKind::ObjectPropertyAccessExpr});
+   syntax_assert_child_kind(raw, QualifiedMethodName, std::set{SyntaxKind::InstancePropertyExpr});
    syntax_assert_child_kind(raw, ArgumentListClause, std::set{SyntaxKind::ArgumentListClause});
 #endif
 }
 
-ObjectPropertyAccessExprSyntax InstanceMethodCallExprSyntax::getQualifiedMethodName()
+InstancePropertyExprSyntax InstanceMethodCallExprSyntax::getQualifiedMethodName()
 {
-   return ObjectPropertyAccessExprSyntax {m_root, m_data->getChild(Cursor::QualifiedMethodName).get()};
+   return InstancePropertyExprSyntax {m_root, m_data->getChild(Cursor::QualifiedMethodName).get()};
 }
 
 ArgumentListClauseSyntax InstanceMethodCallExprSyntax::getArgumentListClause()
@@ -1677,13 +1677,13 @@ ArgumentListClauseSyntax InstanceMethodCallExprSyntax::getArgumentListClause()
 }
 
 InstanceMethodCallExprSyntax
-InstanceMethodCallExprSyntax::withQualifiedMethodName(std::optional<ObjectPropertyAccessExprSyntax> methodName)
+InstanceMethodCallExprSyntax::withQualifiedMethodName(std::optional<InstancePropertyExprSyntax> methodName)
 {
    RefCountPtr<RawSyntax> methodNameRaw;
    if (methodName.has_value()) {
       methodNameRaw = methodName->getRaw();
    } else {
-      methodNameRaw = RawSyntax::missing(SyntaxKind::ObjectPropertyAccessExpr);
+      methodNameRaw = RawSyntax::missing(SyntaxKind::InstancePropertyExpr);
    }
    return m_data->replaceChild<InstanceMethodCallExprSyntax>(methodNameRaw, Cursor::QualifiedMethodName);
 }

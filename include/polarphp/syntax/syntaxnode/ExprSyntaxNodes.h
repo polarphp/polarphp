@@ -459,7 +459,7 @@ private:
 /// | dereferencable T_OBJECT_OPERATOR property_name
 /// | T_VARIABLE T_OBJECT_OPERATOR T_IDENTIFIER_STRING
 ///
-class ObjectPropertyAccessExprSyntax final : public ExprSyntax
+class InstancePropertyExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 3;
@@ -500,7 +500,7 @@ public:
 #endif
 
 public:
-   ObjectPropertyAccessExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   InstancePropertyExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
       validate();
@@ -510,13 +510,13 @@ public:
    TokenSyntax getSeparator();
    Syntax getPropertyName();
 
-   ObjectPropertyAccessExprSyntax withObjectRef(std::optional<Syntax> objectRef);
-   ObjectPropertyAccessExprSyntax withSeparator(std::optional<TokenSyntax> separator);
-   ObjectPropertyAccessExprSyntax withPropertyName(std::optional<Syntax> propertyName);
+   InstancePropertyExprSyntax withObjectRef(std::optional<Syntax> objectRef);
+   InstancePropertyExprSyntax withSeparator(std::optional<TokenSyntax> separator);
+   InstancePropertyExprSyntax withPropertyName(std::optional<Syntax> propertyName);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::ObjectPropertyAccessExpr;
+      return kind == SyntaxKind::InstancePropertyExpr;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -1620,7 +1620,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: ObjectPropertyAccessExprSyntax
+      /// type: InstancePropertyExprSyntax
       /// optional: false
       ///
       QualifiedMethodName,
@@ -1638,10 +1638,10 @@ public:
       validate();
    }
 
-   ObjectPropertyAccessExprSyntax getQualifiedMethodName();
+   InstancePropertyExprSyntax getQualifiedMethodName();
    ArgumentListClauseSyntax getArgumentListClause();
 
-   InstanceMethodCallExprSyntax withQualifiedMethodName(std::optional<ObjectPropertyAccessExprSyntax> methodName);
+   InstanceMethodCallExprSyntax withQualifiedMethodName(std::optional<InstancePropertyExprSyntax> methodName);
    InstanceMethodCallExprSyntax withArgumentListClause(std::optional<ArgumentListClauseSyntax> arguments);
 
    static bool kindOf(SyntaxKind kind)

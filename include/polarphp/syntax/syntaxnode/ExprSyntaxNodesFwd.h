@@ -29,7 +29,8 @@ class NewVariableClauseSyntax;
 class CallableVariableExprSyntax;
 class MemberNameClauseSyntax;
 class PropertyNameClauseSyntax;
-class ObjectPropertyAccessExprSyntax;
+class InstancePropertyExprSyntax;
+class StaticPropertyExprSyntax;
 
 // argument clauses
 class ArgumentSyntax;
