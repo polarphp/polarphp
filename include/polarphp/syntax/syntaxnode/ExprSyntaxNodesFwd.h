@@ -30,6 +30,10 @@ class CallableVariableExprSyntax;
 class PropertyNameClauseSyntax;
 class ObjectPropertyAccessExprSyntax;
 
+// argument clauses
+class ArgumentSyntax;
+class ArgumentListClauseSyntax;
+
 class DereferencableClauseSyntax;
 class VariableClassNameClauseSyntax;
 class ClassNameClauseSyntax;
@@ -55,7 +59,7 @@ class IntegerLiteralExprSyntax;
 class FloatLiteralExprSyntax;
 class StringLiteralExprSyntax;
 
-/// for encaps var syntax
+// for encaps var syntax
 class EncapsVarOffsetSyntax;
 class EncapsArrayVarSyntax;
 class EncapsObjPropSyntax;
@@ -78,7 +82,7 @@ class BinaryOperatorExprSyntax;
 class UseLexicalVarClauseSyntax;
 class LexicalVarItemSyntax;
 
-/// Decl Syntax nodes forward declares
+// Decl Syntax nodes forward declares
 class NameSyntax;
 class IdentifierSyntax;
 
@@ -127,6 +131,16 @@ using ListPairItemListSyntax = SyntaxCollection<SyntaxKind::ListPairItemList, Li
 /// | T_ENCAPSED_AND_WHITESPACE encaps_var
 ///
 using EncapsItemListSyntax = SyntaxCollection<SyntaxKind::EncapsListItem, EncapsListItemSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: ArgumentSyntax
+///
+/// non_empty_argument_list:
+///   argument
+/// | non_empty_argument_list ',' argument
+///
+using ArumentListSyntax = SyntaxCollection<SyntaxKind::ArgumentList, ArgumentSyntax>;
 
 } // polar::syntax
 

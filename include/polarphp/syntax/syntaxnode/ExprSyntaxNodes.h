@@ -1242,7 +1242,80 @@ private:
 ///
 class ArrayAccessExprSyntax final : public ExprSyntax
 {
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 4;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 4;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ----------------------------------------
+      /// node choice: TokenSyntax (T_VARIABLE)
+      /// ----------------------------------------
+      /// node choice: NewVariableClauseSyntax
+      /// ----------------------------------------
+      /// node choice: DereferencableClauseSyntax
+      /// ----------------------------------------
+      /// node choice: ConstExprSyntax
+      ///
+      ArrayRef,
+      ///
+      /// type: TokenSyntax (T_LEFT_SQUARE_BRACKET)
+      /// optional: false
+      ///
+      LeftSquareBracket,
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ----------------------------------------
+      /// node choice: EncapsVarOffsetSyntax
+      /// ----------------------------------------
+      /// node choice: OptionalExprSyntax
+      ///
+      Offset,
+      ///
+      /// type: TokenSyntax (T_RIGHT_SQUARE_BRACKET)
+      /// optional: false
+      ///
+      RightSquareBracket
+   };
 
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   ArrayAccessExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getArrayRef();
+   TokenSyntax getLeftSquareBracket();
+   Syntax getOffset();
+   TokenSyntax getRightSquareBracket();
+
+   ArrayAccessExprSyntax withArrayRef(std::optional<Syntax> arrayRef);
+   ArrayAccessExprSyntax withLeftSquareBracket(std::optional<TokenSyntax> leftSquareBracket);
+   ArrayAccessExprSyntax withOffset(std::optional<Syntax> offset);
+   ArrayAccessExprSyntax withRightSquareBracket(std::optional<TokenSyntax> rightSquareBracket);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ArrayAccessExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class ArrayAccessExprSyntaxBuilder;
+   void validate();
 };
 
 ///

@@ -96,6 +96,10 @@ enum class SyntaxKind : std::uint32_t
    PropertyNameClause,
    ObjectPropertyAccessExpr,
 
+   // argument clauses
+   Argument,
+   ArgumentListClause,
+
    DereferencableClause,
    VariableClassNameClause,
    ClassNameClause,
@@ -195,6 +199,7 @@ enum class SyntaxKind : std::uint32_t
    MemberModifierList,
    MemberDeclList,
    EncapsList,
+   ArgumentList,
 
    // NOTE: Unknown must be the last kind.
    Unknown,
