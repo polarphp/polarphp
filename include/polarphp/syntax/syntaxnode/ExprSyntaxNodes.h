@@ -324,7 +324,56 @@ private:
 ///
 class NewVariableClauseSyntax final : public Syntax
 {
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      /// node choices: true
+      /// --------------------------------------------------
+      /// node choice: SimpleVariableExprSyntax
+      /// --------------------------------------------------
+      /// node choice: ArrayAccessExprSyntax
+      /// --------------------------------------------------
+      /// node choice: BraceDecoratedArrayAccessExprSyntax
+      /// --------------------------------------------------
+      /// node choice: InstancePropertyExprSyntax
+      /// --------------------------------------------------
+      /// node choice: StaticPropertyExprSyntax
+      ///
+      VarNode
+   };
 
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   NewVariableClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getVar();
+   NewVariableClauseSyntax withVar(std::optional<ExprSyntax> var);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::NewVariableClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class NewVariableClauseSyntaxBuilder;
+   void validate();
 };
 
 ///
@@ -1610,7 +1659,7 @@ private:
 ///   new_variable '{' expr '}'
 /// | dereferencable '{' expr '}'
 ///
-class BraceDecoratedArrayAccessExpr final : public ExprSyntax
+class BraceDecoratedArrayAccessExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -1639,7 +1688,7 @@ public:
 #endif
 
 public:
-   BraceDecoratedArrayAccessExpr(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   BraceDecoratedArrayAccessExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
       validate();
@@ -1648,8 +1697,8 @@ public:
    Syntax getArrayRef();
    BraceDecoratedExprClauseSyntax getOffsetExpr();
 
-   BraceDecoratedArrayAccessExpr withArrayRef(std::optional<Syntax> arrayRef);
-   BraceDecoratedArrayAccessExpr withOffsetExpr(std::optional<BraceDecoratedExprClauseSyntax> offsetExpr);
+   BraceDecoratedArrayAccessExprSyntax withArrayRef(std::optional<Syntax> arrayRef);
+   BraceDecoratedArrayAccessExprSyntax withOffsetExpr(std::optional<BraceDecoratedExprClauseSyntax> offsetExpr);
 
    static bool kindOf(SyntaxKind kind)
    {
