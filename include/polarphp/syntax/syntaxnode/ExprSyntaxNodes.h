@@ -2268,8 +2268,8 @@ private:
 class SimpleInstanceCreateExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 1;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
       ///
@@ -2298,7 +2298,7 @@ public:
 
    TokenSyntax getNewToken();
    ClassNameRefClauseSyntax getClassName();
-   ArgumentListClauseSyntax getCtorArgsClause();
+   std::optional<ArgumentListClauseSyntax> getCtorArgsClause();
 
    SimpleInstanceCreateExprSyntax withNewToken(std::optional<TokenSyntax> newToken);
    SimpleInstanceCreateExprSyntax withClassName(std::optional<ClassNameRefClauseSyntax> className);
@@ -2316,6 +2316,57 @@ public:
 
 private:
    friend class SimpleInstanceCreateExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// anonymous_instance_create:
+///   T_NEW anonymous_class
+///
+class AnonymousInstanceCreateExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_NEW)
+      /// optional: false
+      ///
+      NewToken,
+      ///
+      /// type: AnonymousClassDefinitionClauseSyntax
+      /// optional: false
+      ///
+      AnonymousClassDef
+   };
+
+public:
+   AnonymousInstanceCreateExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getNewToken();
+   AnonymousClassDefinitionClauseSyntax getAnonymousClassDef();
+
+   AnonymousInstanceCreateExprSyntax withNewToken(std::optional<TokenSyntax> newToken);
+   AnonymousInstanceCreateExprSyntax withAnonymousClassDef(std::optional<AnonymousClassDefinitionClauseSyntax> classDef);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::AnonymousInstanceCreateExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class AnonymousInstanceCreateExprSyntaxBuilder;
    void validate();
 };
 

@@ -2375,9 +2375,13 @@ ClassNameRefClauseSyntax SimpleInstanceCreateExprSyntax::getClassName()
    return ClassNameRefClauseSyntax {m_root, m_data->getChild(Cursor::ClassName).get()};
 }
 
-ArgumentListClauseSyntax SimpleInstanceCreateExprSyntax::getCtorArgsClause()
+std::optional<ArgumentListClauseSyntax> SimpleInstanceCreateExprSyntax::getCtorArgsClause()
 {
-   return ArgumentListClauseSyntax {m_root, m_data->getChild(Cursor::CtorArgsClause).get()};
+   RefCountPtr<SyntaxData> argsData = m_data->getChild(Cursor::CtorArgsClause);
+   if (!argsData) {
+      return std::nullopt;
+   }
+   return ArgumentListClauseSyntax {m_root, argsData.get()};
 }
 
 SimpleInstanceCreateExprSyntax
@@ -2411,9 +2415,59 @@ SimpleInstanceCreateExprSyntax::withCtorArgsClause(std::optional<ArgumentListCla
    if (argsClause.has_value()) {
       argsClauseRaw = argsClause->getRaw();
    } else {
-      argsClauseRaw = RawSyntax::missing(SyntaxKind::ArgumentListClause);
+      argsClauseRaw = nullptr;
    }
    return m_data->replaceChild<SimpleInstanceCreateExprSyntax>(argsClauseRaw, Cursor::CtorArgsClause);
+}
+
+///
+/// AnonymousInstanceCreateExprSyntax
+///
+void AnonymousInstanceCreateExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == AnonymousInstanceCreateExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, NewToken, std::set{TokenKindType::T_NEW});
+   syntax_assert_child_kind(raw, AnonymousClassDef, std::set{SyntaxKind::AnonymousClassDefinitionClause});
+#endif
+}
+
+TokenSyntax AnonymousInstanceCreateExprSyntax::getNewToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::NewToken).get()};
+}
+
+AnonymousClassDefinitionClauseSyntax AnonymousInstanceCreateExprSyntax::getAnonymousClassDef()
+{
+   return AnonymousClassDefinitionClauseSyntax {m_root, m_data->getChild(Cursor::AnonymousClassDef).get()};
+}
+
+AnonymousInstanceCreateExprSyntax
+AnonymousInstanceCreateExprSyntax::withNewToken(std::optional<TokenSyntax> newToken)
+{
+   RefCountPtr<RawSyntax> newTokenRaw;
+   if (newToken.has_value()) {
+      newTokenRaw = newToken->getRaw();
+   } else {
+      newTokenRaw = make_missing_token(T_NEW);
+   }
+   return m_data->replaceChild<AnonymousInstanceCreateExprSyntax>(newTokenRaw, Cursor::NewToken);
+}
+
+AnonymousInstanceCreateExprSyntax
+AnonymousInstanceCreateExprSyntax::withAnonymousClassDef(std::optional<AnonymousClassDefinitionClauseSyntax> classDef)
+{
+   RefCountPtr<RawSyntax> classDefRaw;
+   if (classDef.has_value()) {
+      classDefRaw = classDef->getRaw();
+   } else {
+      classDefRaw = RawSyntax::missing(SyntaxKind::AnonymousClassDefinitionClause);
+   }
+   return m_data->replaceChild<AnonymousInstanceCreateExprSyntax>(classDefRaw, Cursor::AnonymousClassDef);
 }
 
 ///
