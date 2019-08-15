@@ -1873,6 +1873,48 @@ SimpleFunctionCallExprSyntax::withArgumentsClause(std::optional<ArgumentListClau
 }
 
 ///
+/// FunctionCallExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType FunctionCallExprSyntax::CHILD_NODE_CHOICES
+{
+   {
+      FunctionCallExprSyntax::Callable, {
+         SyntaxKind::SimpleFunctionCallExpr, SyntaxKind::StaticMethodCallExpr
+      }
+   }
+};
+#endif
+
+void FunctionCallExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == FunctionCallExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Callable, CHILD_NODE_CHOICES.at(Cursor::Callable));
+#endif
+}
+
+ExprSyntax FunctionCallExprSyntax::getCallable()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Callable).get()};
+}
+
+FunctionCallExprSyntax FunctionCallExprSyntax::withCallable(std::optional<ExprSyntax> callable)
+{
+   RefCountPtr<RawSyntax> callableRaw;
+   if (callable.has_value()) {
+      callableRaw = callable->getRaw();
+   } else {
+      callableRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<FunctionCallExprSyntax>(callableRaw, Cursor::Callable);
+}
+
+///
 /// InstanceMethodCallExprSyntax
 ///
 void InstanceMethodCallExprSyntax::validate()

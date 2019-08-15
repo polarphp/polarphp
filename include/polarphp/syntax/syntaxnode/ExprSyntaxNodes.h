@@ -1839,8 +1839,51 @@ private:
 /// | variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
 /// | callable_expr argument_list
 ///
-class FunctionCallExprSyntax final : public ExprListSyntax
+class FunctionCallExprSyntax final : public ExprSyntax
 {
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      /// node choices: true
+      /// -------------------------------------------
+      /// node choice: SimpleFunctionCallExprSyntax
+      /// -------------------------------------------
+      /// node choice: StaticMethodCallExprSyntax
+      ///
+      Callable
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   FunctionCallExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getCallable();
+   FunctionCallExprSyntax withCallable(std::optional<ExprSyntax> callable);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::FunctionCallExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class FunctionCallExprSyntaxBuilder;
+   void validate();
 };
 
 ///
