@@ -1082,6 +1082,58 @@ private:
 };
 
 ///
+/// class_name_reference:
+///   class_name
+/// | new_variable
+///
+class ClassNameRefClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ------------------------------------------
+      /// node choice: ClassNameClauseSyntax
+      /// ------------------------------------------
+      /// node choice: NewVariableClauseSyntax
+      ///
+      Name
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   ClassNameRefClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getName();
+   ClassNameRefClauseSyntax withName(std::optional<Syntax> name);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassNameRefClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class ClassNameRefClauseSyntaxBuilder;
+   void validate();
+};
+
+///
 /// brace_decorated_expr_clause:
 ///   '{' expr '}'
 ///
@@ -2133,6 +2185,79 @@ public:
 
 private:
    friend class DereferencableScalarExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// anonymous_class:
+///   T_CLASS ctor_arguments
+///   extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+///
+class AnonymousClassDefinitionClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_CLASS)
+      /// optional: false
+      ///
+      ClassToken,
+      ///
+      /// type: ArgumentListClauseSyntax
+      /// optional: true
+      ///
+      CtorArguments,
+      ///
+      /// type: ExtendsFromClauseSyntax
+      /// optional: false
+      ///
+      ExtendsFrom,
+      ///
+      /// type: ImplementClauseSyntax
+      /// optional: false
+      ///
+      ImplementsList,
+      ///
+      /// type: MemberDeclBlockSyntax
+      /// optional: false
+      ///
+      Members
+   };
+
+public:
+   AnonymousClassDefinitionClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getClassToken();
+   std::optional<ArgumentListClauseSyntax> getCtorArguments();
+   ExtendsFromClauseSyntax getExtendsFrom();
+   ImplementClauseSyntax getImplementsList();
+   MemberDeclBlockSyntax getMembers();
+
+   AnonymousClassDefinitionClauseSyntax withClassToken(std::optional<TokenSyntax> classToken);
+   AnonymousClassDefinitionClauseSyntax withCtorArguments(std::optional<ArgumentListClauseSyntax> ctorArguments);
+   AnonymousClassDefinitionClauseSyntax withExtendsFrom(std::optional<ExtendsFromClauseSyntax> extends);
+   AnonymousClassDefinitionClauseSyntax withImplementsList(std::optional<ImplementClauseSyntax> implements);
+   AnonymousClassDefinitionClauseSyntax withMembers(std::optional<MemberDeclBlockSyntax> members);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::AnonymousClassDefinitionClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class AnonymousClassDefinitionSyntaxBuilder;
    void validate();
 };
 

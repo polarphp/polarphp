@@ -967,6 +967,49 @@ ClassNameClauseSyntax ClassNameClauseSyntax::withName(std::optional<Syntax> name
 }
 
 ///
+/// ClassNameRefClauseSyntax
+///
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType ClassNameRefClauseSyntax::CHILD_NODE_CHOICES
+{
+   {
+      ClassNameRefClauseSyntax::Name, {
+         SyntaxKind::ClassNameClause, SyntaxKind::NewVariableClause,
+      }
+   }
+};
+#endif
+
+void ClassNameRefClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ClassNameRefClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Name, CHILD_NODE_CHOICES.at(Cursor::Name));
+#endif
+}
+
+Syntax ClassNameRefClauseSyntax::getName()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Name).get()};
+}
+
+ClassNameRefClauseSyntax ClassNameRefClauseSyntax::withName(std::optional<Syntax> name)
+{
+   RefCountPtr<RawSyntax> nameRaw;
+   if (name.has_value()) {
+      nameRaw = name->getRaw();
+   } else {
+      nameRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<ClassNameRefClauseSyntax>(nameRaw, Cursor::Name);
+}
+
+///
 /// BraceDecoratedExprClauseSyntax
 ///
 void BraceDecoratedExprClauseSyntax::validate()
@@ -2194,6 +2237,115 @@ DereferencableScalarExprSyntax::withScalarValue(std::optional<Syntax> scalarValu
       scalarValueRaw = RawSyntax::missing(SyntaxKind::Unknown);
    }
    return m_data->replaceChild<DereferencableScalarExprSyntax>(scalarValueRaw, Cursor::ScalarValue);
+}
+
+///
+/// AnonymousClassDefinitionClauseSyntax
+///
+void AnonymousClassDefinitionClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == AnonymousClassDefinitionClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ClassToken, std::set{TokenKindType::T_CLASS});
+   syntax_assert_child_kind(raw, CtorArguments, std::set{SyntaxKind::ArgumentListClause});
+   syntax_assert_child_kind(raw, ExtendsFrom, std::set{SyntaxKind::ExtendsFromClause});
+   syntax_assert_child_kind(raw, ImplementsList, std::set{SyntaxKind::ImplementsClause});
+   syntax_assert_child_kind(raw, Members, std::set{SyntaxKind::MemberDeclBlock});
+#endif
+}
+
+TokenSyntax AnonymousClassDefinitionClauseSyntax::getClassToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::ClassToken).get()};
+}
+
+std::optional<ArgumentListClauseSyntax> AnonymousClassDefinitionClauseSyntax::getCtorArguments()
+{
+   RefCountPtr<SyntaxData> ctorArgsData = m_data->getChild(Cursor::CtorArguments);
+   if (!ctorArgsData) {
+      return std::nullopt;
+   }
+   return ArgumentListClauseSyntax {m_root, ctorArgsData.get()};
+}
+
+ExtendsFromClauseSyntax AnonymousClassDefinitionClauseSyntax::getExtendsFrom()
+{
+   return ExtendsFromClauseSyntax {m_root, m_data->getChild(Cursor::ExtendsFrom).get()};
+}
+
+ImplementClauseSyntax AnonymousClassDefinitionClauseSyntax::getImplementsList()
+{
+   return ImplementClauseSyntax {m_root, m_data->getChild(Cursor::ImplementsList).get()};
+}
+
+MemberDeclBlockSyntax AnonymousClassDefinitionClauseSyntax::getMembers()
+{
+   return MemberDeclBlockSyntax {m_root, m_data->getChild(Cursor::Members).get()};
+}
+
+AnonymousClassDefinitionClauseSyntax
+AnonymousClassDefinitionClauseSyntax::withClassToken(std::optional<TokenSyntax> classToken)
+{
+   RefCountPtr<RawSyntax> classTokenRaw;
+   if (classToken.has_value()) {
+      classTokenRaw = classToken->getRaw();
+   } else {
+      classTokenRaw = RawSyntax::missing(TokenKindType::T_CLASS,
+                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS)));
+   }
+   return m_data->replaceChild<AnonymousClassDefinitionClauseSyntax>(classTokenRaw, Cursor::ClassToken);
+}
+
+AnonymousClassDefinitionClauseSyntax
+AnonymousClassDefinitionClauseSyntax::withCtorArguments(std::optional<ArgumentListClauseSyntax> ctorArguments)
+{
+   RefCountPtr<RawSyntax> ctorArgumentsRaw;
+   if (ctorArguments.has_value()) {
+      ctorArgumentsRaw = ctorArguments->getRaw();
+   } else {
+      ctorArgumentsRaw = RawSyntax::missing(SyntaxKind::ArgumentListClause);
+   }
+   return m_data->replaceChild<AnonymousClassDefinitionClauseSyntax>(ctorArgumentsRaw, Cursor::CtorArguments);
+}
+
+AnonymousClassDefinitionClauseSyntax
+AnonymousClassDefinitionClauseSyntax::withExtendsFrom(std::optional<ExtendsFromClauseSyntax> extends)
+{
+   RefCountPtr<RawSyntax> extendsRaw;
+   if (extends.has_value()) {
+      extendsRaw = extends->getRaw();
+   } else {
+      extendsRaw = RawSyntax::missing(SyntaxKind::ExtendsFromClause);
+   }
+   return m_data->replaceChild<AnonymousClassDefinitionClauseSyntax>(extendsRaw, Cursor::ExtendsFrom);
+}
+
+AnonymousClassDefinitionClauseSyntax
+AnonymousClassDefinitionClauseSyntax::withImplementsList(std::optional<ImplementClauseSyntax> implements)
+{
+   RefCountPtr<RawSyntax> implementsRaw;
+   if (implements.has_value()) {
+      implementsRaw = implements->getRaw();
+   } else {
+      implementsRaw = RawSyntax::missing(SyntaxKind::ImplementsClause);
+   }
+   return m_data->replaceChild<AnonymousClassDefinitionClauseSyntax>(implementsRaw, Cursor::ImplementsList);
+}
+
+AnonymousClassDefinitionClauseSyntax
+AnonymousClassDefinitionClauseSyntax::withMembers(std::optional<MemberDeclBlockSyntax> members)
+{
+   RefCountPtr<RawSyntax> membersRaw;
+   if (members.has_value()) {
+      membersRaw = members->getRaw();
+   } else {
+      membersRaw = RawSyntax::missing(SyntaxKind::MemberDeclBlock);
+   }
+   return m_data->replaceChild<AnonymousClassDefinitionClauseSyntax>(membersRaw, Cursor::Members);
 }
 
 ///

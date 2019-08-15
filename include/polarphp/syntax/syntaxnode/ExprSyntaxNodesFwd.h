@@ -41,6 +41,7 @@ class ArgumentListClauseSyntax;
 class DereferencableClauseSyntax;
 class VariableClassNameClauseSyntax;
 class ClassNameClauseSyntax;
+class ClassNameRefClauseSyntax;
 class BraceDecoratedExprClauseSyntax;
 class BraceDecoratedVariableExprSyntax;
 class ArrayKeyValuePairItemSyntax;
@@ -58,6 +59,10 @@ class FunctionCallExprSyntax;
 class InstanceMethodCallExprSyntax;
 class StaticMethodCallExprSyntax;
 class DereferencableScalarExprSyntax;
+class AnonymousClassDefinitionClauseSyntax;
+class SimpleInstanceCreateExprSyntax;
+class AnonymousInstanceCreateExprSyntax;
+class InstanceCreateExprSyntax;
 class ScalarExprSyntax;
 class ClassRefParentExprSyntax;
 class ClassRefStaticExprSyntax;
@@ -92,6 +97,10 @@ class LexicalVarItemSyntax;
 // Decl Syntax nodes forward declares
 class NameSyntax;
 class IdentifierSyntax;
+
+class ExtendsFromClauseSyntax;
+class ImplementClauseSyntax;
+class MemberDeclBlockSyntax;
 
 /// type: SyntaxCollection
 /// element type: ExprSyntax

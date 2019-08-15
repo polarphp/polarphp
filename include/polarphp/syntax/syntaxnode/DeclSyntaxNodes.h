@@ -2356,7 +2356,7 @@ public:
       ///
       Modififers,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_CLASS)
       /// optional: false
       ///
       ClassToken,

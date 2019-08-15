@@ -2942,18 +2942,10 @@ void ClassDefinitionSyntax::validate()
    assert(raw->getLayout().getSize() == ClassDefinitionSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ClassToken, std::set{TokenKindType::T_CLASS});
    syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
-   if (const RefCountPtr<RawSyntax> &modifierChild = raw->getChild(Cursor::Modififers)) {
-      assert(modifierChild->kindOf(SyntaxKind::ClassModifierList));
-   }
-   if (const RefCountPtr<RawSyntax> &extendsFromChild = raw->getChild(Cursor::ExtendsFrom)) {
-      assert(extendsFromChild->kindOf(SyntaxKind::ExtendsFromClause));
-   }
-   if (const RefCountPtr<RawSyntax> &implementsChild = raw->getChild(Cursor::ImplementsList)) {
-      assert(implementsChild->kindOf(SyntaxKind::ImplementsClause));
-   }
-   if (const RefCountPtr<RawSyntax> &membersChild = raw->getChild(Cursor::Members)) {
-      assert(membersChild->kindOf(SyntaxKind::MemberDeclBlock));
-   }
+   syntax_assert_child_kind(raw, Modififers, std::set{SyntaxKind::ClassModifierList});
+   syntax_assert_child_kind(raw, ExtendsFrom, std::set{SyntaxKind::ExtendsFromClause});
+   syntax_assert_child_kind(raw, ImplementsList, std::set{SyntaxKind::ImplementsClause});
+   syntax_assert_child_kind(raw, Members, std::set{SyntaxKind::MemberDeclBlock});
 #endif
 }
 
