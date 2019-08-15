@@ -307,7 +307,7 @@ NewVariableClauseSyntax NewVariableClauseSyntax::withVar(std::optional<ExprSynta
    } else {
       varRaw = RawSyntax::missing(SyntaxKind::UnknownExpr);
    }
-   m_data->replaceChild<NewVariableClauseSyntax>(varRaw, Cursor::VarNode);
+   return m_data->replaceChild<NewVariableClauseSyntax>(varRaw, Cursor::VarNode);
 }
 
 ///
@@ -1818,6 +1818,104 @@ InstanceMethodCallExprSyntax::withArgumentListClause(std::optional<ArgumentListC
       argumentsRaw = RawSyntax::missing(SyntaxKind::ArgumentListClause);
    }
    return m_data->replaceChild<InstanceMethodCallExprSyntax>(argumentsRaw, Cursor::ArgumentListClause);
+}
+
+///
+/// StaticMethodCallExprSyntax
+///
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType StaticMethodCallExprSyntax::CHILD_NODE_CHOICES
+{
+   {
+      StaticMethodCallExprSyntax::ClassName, {
+         SyntaxKind::ClassNameClause, SyntaxKind::VariableClassNameClause,
+      }
+   }
+};
+#endif
+
+void StaticMethodCallExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == StaticMethodCallExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, ClassName, CHILD_NODE_CHOICES.at(Cursor::ClassName));
+   syntax_assert_child_token(raw, Separator, std::set{TokenKindType::T_PAAMAYIM_NEKUDOTAYIM});
+   syntax_assert_child_kind(raw, MethodName, std::set{SyntaxKind::MemberNameClause});
+   syntax_assert_child_kind(raw, Arguments, std::set{SyntaxKind::ArgumentListClause});
+#endif
+}
+
+Syntax StaticMethodCallExprSyntax::getClassName()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::ClassName).get()};
+}
+
+TokenSyntax StaticMethodCallExprSyntax::getSeparator()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Separator).get()};
+}
+
+MemberNameClauseSyntax StaticMethodCallExprSyntax::getMethodName()
+{
+   return MemberNameClauseSyntax {m_root, m_data->getChild(Cursor::MethodName).get()};
+}
+
+ArgumentListClauseSyntax StaticMethodCallExprSyntax::getArguments()
+{
+   return ArgumentListClauseSyntax {m_root, m_data->getChild(Cursor::Arguments).get()};
+}
+
+StaticMethodCallExprSyntax
+StaticMethodCallExprSyntax::withClassName(std::optional<Syntax> className)
+{
+   RefCountPtr<RawSyntax> classNameRaw;
+   if (className.has_value()) {
+      classNameRaw = className->getRaw();
+   } else {
+      classNameRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<StaticMethodCallExprSyntax>(classNameRaw, Cursor::ClassName);
+}
+
+StaticMethodCallExprSyntax
+StaticMethodCallExprSyntax::withSeparator(std::optional<TokenSyntax> separator)
+{
+   RefCountPtr<RawSyntax> separatorRaw;
+   if (separator.has_value()) {
+      separatorRaw = separator->getRaw();
+   } else {
+      separatorRaw = make_missing_token(T_PAAMAYIM_NEKUDOTAYIM);
+   }
+   return m_data->replaceChild<StaticMethodCallExprSyntax>(separatorRaw, Cursor::Separator);
+}
+
+StaticMethodCallExprSyntax
+StaticMethodCallExprSyntax::withMethodName(std::optional<MemberNameClauseSyntax> methodName)
+{
+   RefCountPtr<RawSyntax> methodNameRaw;
+   if (methodName.has_value()) {
+      methodNameRaw = methodName->getRaw();
+   } else {
+      methodNameRaw = RawSyntax::missing(SyntaxKind::MemberNameClause);
+   }
+   return m_data->replaceChild<StaticMethodCallExprSyntax>(methodNameRaw, Cursor::MethodName);
+}
+
+StaticMethodCallExprSyntax
+StaticMethodCallExprSyntax::withArguments(std::optional<ArgumentListClauseSyntax> arguments)
+{
+   RefCountPtr<RawSyntax> argumentsRaw;
+   if (arguments.has_value()) {
+      argumentsRaw = arguments->getRaw();
+   } else {
+      argumentsRaw = RawSyntax::missing(SyntaxKind::ArgumentListClause);
+   }
+   return m_data->replaceChild<StaticMethodCallExprSyntax>(argumentsRaw, Cursor::Arguments);
 }
 
 ///

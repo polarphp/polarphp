@@ -582,6 +582,7 @@ private:
 /// static_member:
 ///   class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
 /// | variable_class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
+/// | new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable
 ///
 class StaticPropertyExprSyntax final : public ExprSyntax
 {
@@ -1806,11 +1807,20 @@ public:
       ///
       Separator,
       ///
-      ///
+      /// type: MemberNameClauseSyntax
+      /// optional: false
       ///
       MethodName,
+      ///
+      /// type: ArgumentListClauseSyntax
+      /// optional: false
+      ///
       Arguments
    };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
 
 public:
    StaticMethodCallExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
@@ -1818,6 +1828,16 @@ public:
    {
       validate();
    }
+
+   Syntax getClassName();
+   TokenSyntax getSeparator();
+   MemberNameClauseSyntax getMethodName();
+   ArgumentListClauseSyntax getArguments();
+
+   StaticMethodCallExprSyntax withClassName(std::optional<Syntax> className);
+   StaticMethodCallExprSyntax withSeparator(std::optional<TokenSyntax> separator);
+   StaticMethodCallExprSyntax withMethodName(std::optional<MemberNameClauseSyntax> methodName);
+   StaticMethodCallExprSyntax withArguments(std::optional<ArgumentListClauseSyntax> arguments);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -1830,7 +1850,7 @@ public:
    }
 
 private:
-   friend class DereferencableScalarExprSyntaxBuilder;
+   friend class StaticMethodCallExprSyntaxBuilder;
    void validate();
 };
 

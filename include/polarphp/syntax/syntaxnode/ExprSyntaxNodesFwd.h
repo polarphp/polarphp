@@ -27,6 +27,7 @@ class ConstExprSyntax;
 class StaticMemberExprSyntax;
 class NewVariableClauseSyntax;
 class CallableVariableExprSyntax;
+class CallableFuncNameClauseSyntax;
 class MemberNameClauseSyntax;
 class PropertyNameClauseSyntax;
 class InstancePropertyExprSyntax;
