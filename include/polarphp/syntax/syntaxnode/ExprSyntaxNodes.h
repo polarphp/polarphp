@@ -169,7 +169,23 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      /// node choices: true
+      /// -------------------------------------------
+      /// node choice: CallableVariableExprSyntax
+      /// -------------------------------------------
+      /// node choice: StaticPropertyExprSyntax
+      /// -------------------------------------------
+      /// node choice: InstancePropertyExprSyntax
+      ///
+      Var
    };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
 
 public:
    VariableExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
@@ -177,6 +193,9 @@ public:
    {
       validate();
    }
+
+   ExprSyntax getVar();
+   VariableExprSyntax withVar(std::optional<ExprSyntax> var);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -387,7 +406,56 @@ private:
 ///
 class CallableVariableExprSyntax final : public ExprSyntax
 {
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      /// node choices: true
+      /// ----------------------------------------------------
+      /// node choice: SimpleVariableExprSyntax
+      /// ----------------------------------------------------
+      /// node choice: ArrayAccessExprSyntax
+      /// ----------------------------------------------------
+      /// node choice: BraceDecoratedArrayAccessExprSyntax
+      /// ----------------------------------------------------
+      /// node choice: InstanceMethodCallExprSyntax
+      /// ----------------------------------------------------
+      /// node choice: FunctionCallExprSyntax
+      ///
+      Var
+   };
 
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   CallableVariableExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getVar();
+   CallableVariableExprSyntax withVar(std::optional<ExprSyntax> var);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::CallableVariableExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class CallableVariableExprSyntaxBuilder;
+   void validate();
 };
 
 ///
@@ -442,7 +510,7 @@ public:
    }
 
 private:
-   friend class PropertyNameClauseSyntaxBuilder;
+   friend class CallableFuncNameClauseSyntaxBuilder;
    void validate();
 };
 
@@ -498,7 +566,7 @@ public:
    }
 
 private:
-   friend class PropertyNameClauseSyntaxBuilder;
+   friend class MemberNameClauseSyntaxBuilder;
    void validate();
 };
 
@@ -1564,7 +1632,7 @@ public:
    }
 
 private:
-   friend class ArrayExprSyntaxBuilder;
+   friend class ArrayCreateExprSyntaxBuilder;
    void validate();
 };
 
@@ -1622,7 +1690,7 @@ public:
    }
 
 private:
-   friend class SimplifiedArrayExprSyntaxBuilder;
+   friend class SimplifiedArrayCreateExprSyntaxBuilder;
    void validate();
 };
 
@@ -2770,7 +2838,7 @@ public:
    }
 
 private:
-   friend class EncapsDollarCurlyVarSyntaxBuilder;
+   friend class EncapsDollarCurlyArraySyntaxBuilder;
    void validate();
 };
 

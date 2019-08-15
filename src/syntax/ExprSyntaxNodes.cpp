@@ -148,6 +148,49 @@ OptionalExprSyntax OptionalExprSyntax::withExpr(std::optional<ExprSyntax> expr)
 }
 
 ///
+/// VariableExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType VariableExprSyntax::CHILD_NODE_CHOICES
+{
+   {
+      VariableExprSyntax::Var, {
+         SyntaxKind::CallableVariableExpr, SyntaxKind::StaticPropertyExpr,
+               SyntaxKind::InstancePropertyExpr
+      }
+   }
+};
+#endif
+
+void VariableExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == VariableExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Var, CHILD_NODE_CHOICES.at(Cursor::Var));
+#endif
+}
+
+ExprSyntax VariableExprSyntax::getVar()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Var).get()};
+}
+
+VariableExprSyntax VariableExprSyntax::withVar(std::optional<ExprSyntax> var)
+{
+   RefCountPtr<RawSyntax> varRaw;
+   if (var.has_value()) {
+      varRaw = var->getRaw();
+   } else {
+      varRaw = RawSyntax::missing(SyntaxKind::UnknownExpr);
+   }
+   return m_data->replaceChild<VariableExprSyntax>(varRaw, Cursor::Var);
+}
+
+///
 /// ClassConstIdentifierExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
@@ -308,6 +351,47 @@ NewVariableClauseSyntax NewVariableClauseSyntax::withVar(std::optional<ExprSynta
       varRaw = RawSyntax::missing(SyntaxKind::UnknownExpr);
    }
    return m_data->replaceChild<NewVariableClauseSyntax>(varRaw, Cursor::VarNode);
+}
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType CallableVariableExprSyntax::CHILD_NODE_CHOICES
+{
+   {
+      CallableVariableExprSyntax::Var, {
+         SyntaxKind::SimpleVariableExpr, SyntaxKind::ArrayAccessExpr,
+               SyntaxKind::BraceDecoratedArrayAccessExpr, SyntaxKind::InstanceMethodCallExpr,
+               SyntaxKind::FunctionCallExpr
+      }
+   }
+};
+#endif
+
+void CallableVariableExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == CallableVariableExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Var, CHILD_NODE_CHOICES.at(Cursor::Var));
+#endif
+}
+
+ExprSyntax CallableVariableExprSyntax::getVar()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Var).get()};
+}
+
+CallableVariableExprSyntax CallableVariableExprSyntax::withVar(std::optional<ExprSyntax> var)
+{
+   RefCountPtr<RawSyntax> varRaw;
+   if (var.has_value()) {
+      varRaw = var->getRaw();
+   } else {
+      varRaw = RawSyntax::missing(SyntaxKind::UnknownExpr);
+   }
+   return m_data->replaceChild<CallableVariableExprSyntax>(varRaw, Cursor::Var);
 }
 
 ///
