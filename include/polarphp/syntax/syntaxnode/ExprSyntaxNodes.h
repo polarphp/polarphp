@@ -2262,6 +2262,64 @@ private:
 };
 
 ///
+/// simple_instance_create_expr:
+///   T_NEW class_name_reference ctor_arguments
+///
+class SimpleInstanceCreateExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_NEW)
+      /// optional: false
+      ///
+      NewToken,
+      ///
+      /// type: ClassNameRefClauseSyntax
+      /// optional: false
+      ///
+      ClassName,
+      ///
+      /// type: ArgumentListClauseSyntax
+      /// optional: true
+      ///
+      CtorArgsClause
+   };
+
+public:
+   SimpleInstanceCreateExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getNewToken();
+   ClassNameRefClauseSyntax getClassName();
+   ArgumentListClauseSyntax getCtorArgsClause();
+
+   SimpleInstanceCreateExprSyntax withNewToken(std::optional<TokenSyntax> newToken);
+   SimpleInstanceCreateExprSyntax withClassName(std::optional<ClassNameRefClauseSyntax> className);
+   SimpleInstanceCreateExprSyntax withCtorArgsClause(std::optional<ArgumentListClauseSyntax> argsClause);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SimpleInstanceCreateExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class SimpleInstanceCreateExprSyntaxBuilder;
+   void validate();
+};
+
+///
 /// scalar:
 ///   T_LNUMBER
 /// | T_DNUMBER

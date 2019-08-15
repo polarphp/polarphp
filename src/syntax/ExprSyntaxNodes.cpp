@@ -2349,6 +2349,74 @@ AnonymousClassDefinitionClauseSyntax::withMembers(std::optional<MemberDeclBlockS
 }
 
 ///
+/// SimpleInstanceCreateExprSyntax
+///
+void SimpleInstanceCreateExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == SimpleInstanceCreateExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, NewToken, std::set{TokenKindType::T_NEW});
+   syntax_assert_child_kind(raw, ClassName, std::set{SyntaxKind::ClassNameRefClause});
+   syntax_assert_child_kind(raw, CtorArgsClause, std::set{SyntaxKind::ArgumentListClause});
+#endif
+}
+
+TokenSyntax SimpleInstanceCreateExprSyntax::getNewToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::NewToken).get()};
+}
+
+ClassNameRefClauseSyntax SimpleInstanceCreateExprSyntax::getClassName()
+{
+   return ClassNameRefClauseSyntax {m_root, m_data->getChild(Cursor::ClassName).get()};
+}
+
+ArgumentListClauseSyntax SimpleInstanceCreateExprSyntax::getCtorArgsClause()
+{
+   return ArgumentListClauseSyntax {m_root, m_data->getChild(Cursor::CtorArgsClause).get()};
+}
+
+SimpleInstanceCreateExprSyntax
+SimpleInstanceCreateExprSyntax::withNewToken(std::optional<TokenSyntax> newToken)
+{
+   RefCountPtr<RawSyntax> newTokenRaw;
+   if (newToken.has_value()) {
+      newTokenRaw = newToken->getRaw();
+   } else {
+      newTokenRaw = make_missing_token(T_NEW);
+   }
+   return m_data->replaceChild<SimpleInstanceCreateExprSyntax>(newTokenRaw, Cursor::NewToken);
+}
+
+SimpleInstanceCreateExprSyntax
+SimpleInstanceCreateExprSyntax::withClassName(std::optional<ClassNameRefClauseSyntax> className)
+{
+   RefCountPtr<RawSyntax> classNameRaw;
+   if (className.has_value()) {
+      classNameRaw = className->getRaw();
+   } else {
+      classNameRaw = RawSyntax::missing(SyntaxKind::ClassNameRefClause);
+   }
+   return m_data->replaceChild<SimpleInstanceCreateExprSyntax>(classNameRaw, Cursor::ClassName);
+}
+
+SimpleInstanceCreateExprSyntax
+SimpleInstanceCreateExprSyntax::withCtorArgsClause(std::optional<ArgumentListClauseSyntax> argsClause)
+{
+   RefCountPtr<RawSyntax> argsClauseRaw;
+   if (argsClause.has_value()) {
+      argsClauseRaw = argsClause->getRaw();
+   } else {
+      argsClauseRaw = RawSyntax::missing(SyntaxKind::ArgumentListClause);
+   }
+   return m_data->replaceChild<SimpleInstanceCreateExprSyntax>(argsClauseRaw, Cursor::CtorArgsClause);
+}
+
+///
 /// ScalarExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
