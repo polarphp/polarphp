@@ -311,6 +311,50 @@ NewVariableClauseSyntax NewVariableClauseSyntax::withVar(std::optional<ExprSynta
 }
 
 ///
+/// CallableFuncNameClauseSyntax
+///
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType CallableFuncNameClauseSyntax::CHILD_NODE_CHOICES
+{
+   {
+      CallableFuncNameClauseSyntax::FuncName, {
+         SyntaxKind::CallableVariableExpr, SyntaxKind::ParenDecoratedExpr,
+               SyntaxKind::DereferencableScalarExpr,
+      }
+   }
+};
+#endif
+
+void CallableFuncNameClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == CallableFuncNameClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, FuncName, CHILD_NODE_CHOICES.at(Cursor::FuncName));
+#endif
+}
+
+Syntax CallableFuncNameClauseSyntax::getFuncName()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::FuncName).get()};
+}
+
+CallableFuncNameClauseSyntax CallableFuncNameClauseSyntax::withFuncName(std::optional<Syntax> funcName)
+{
+   RefCountPtr<RawSyntax> funcNameRaw;
+   if (funcName.has_value()) {
+      funcNameRaw = funcName->getRaw();
+   } else {
+      funcNameRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<CallableFuncNameClauseSyntax>(funcNameRaw, Cursor::FuncName);
+}
+
+///
 /// MemberNameClauseSyntax
 ///
 
@@ -1768,6 +1812,64 @@ BraceDecoratedArrayAccessExprSyntax::withOffsetExpr(std::optional<BraceDecorated
       offsetExprRaw = RawSyntax::missing(SyntaxKind::BraceDecoratedExprClause);
    }
    return m_data->replaceChild<BraceDecoratedArrayAccessExprSyntax>(offsetExprRaw, Cursor::OffsetExpr);
+}
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType SimpleFunctionCallExprSyntax::CHILD_NODE_CHOICES
+{
+   {
+      SimpleFunctionCallExprSyntax::FuncName, {
+         SyntaxKind::Name, SyntaxKind::CallableFuncNameClause
+      }
+   }
+};
+#endif
+
+void SimpleFunctionCallExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == SimpleFunctionCallExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, FuncName, CHILD_NODE_CHOICES.at(Cursor::FuncName));
+   syntax_assert_child_kind(raw, ArgumentsClause, std::set{SyntaxKind::ArgumentListClause});
+#endif
+}
+
+Syntax SimpleFunctionCallExprSyntax::getFuncName()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::FuncName).get()};
+}
+
+ArgumentListClauseSyntax SimpleFunctionCallExprSyntax::getArgumentsClause()
+{
+   return ArgumentListClauseSyntax {m_root, m_data->getChild(Cursor::ArgumentsClause).get()};
+}
+
+SimpleFunctionCallExprSyntax
+SimpleFunctionCallExprSyntax::withFuncName(std::optional<Syntax> funcName)
+{
+   RefCountPtr<RawSyntax> funcNameRaw;
+   if (funcName.has_value()) {
+      funcNameRaw = funcName->getRaw();
+   } else {
+      funcNameRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<SimpleFunctionCallExprSyntax>(funcNameRaw, Cursor::FuncName);
+}
+
+SimpleFunctionCallExprSyntax
+SimpleFunctionCallExprSyntax::withArgumentsClause(std::optional<ArgumentListClauseSyntax> argumentsClause)
+{
+   RefCountPtr<RawSyntax> argumentsClauseRaw;
+   if (argumentsClause.has_value()) {
+      argumentsClauseRaw = argumentsClause->getRaw();
+   } else {
+      argumentsClauseRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<SimpleFunctionCallExprSyntax>(argumentsClauseRaw, Cursor::ArgumentsClause);
 }
 
 ///

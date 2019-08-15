@@ -53,6 +53,7 @@ class ArrayCreateExprSyntax;
 class SimplifiedArrayCreateExprSyntax;
 class ArrayAccessExprSyntax;
 class BraceDecoratedArrayAccessExprSyntax;
+class SimpleFunctionCallExprSyntax;
 class FunctionCallExprSyntax;
 class InstanceMethodCallExprSyntax;
 class StaticMethodCallExprSyntax;

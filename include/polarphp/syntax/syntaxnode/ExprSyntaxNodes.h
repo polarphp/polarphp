@@ -391,6 +391,62 @@ class CallableVariableExprSyntax final : public ExprSyntax
 };
 
 ///
+/// callable_expr:
+///   callable_variable
+/// | '(' expr ')'
+/// | dereferencable_scalar
+///
+class CallableFuncNameClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// -----------------------------------------------
+      /// node choice: CallableVariableExprSyntax
+      /// -----------------------------------------------
+      /// node choice: ParenDecoratedExprSyntax
+      /// -----------------------------------------------
+      /// node choice: DereferencableScalarExprSyntax
+      ///
+      FuncName
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   CallableFuncNameClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getFuncName();
+   CallableFuncNameClauseSyntax withFuncName(std::optional<Syntax> funcName);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::CallableFuncNameClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class PropertyNameClauseSyntaxBuilder;
+   void validate();
+};
+
+///
 /// member_name:
 ///   identifier
 /// | '{' expr '}'
@@ -1717,6 +1773,66 @@ private:
 };
 
 ///
+/// simple_function_call:
+///   name argument_list
+/// | callable_expr argument_list
+///
+class SimpleFunctionCallExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// --------------------------------------------
+      /// node choice: NameSyntax
+      /// --------------------------------------------
+      /// node choice: CallableFuncNameClauseSyntax
+      ///
+      FuncName,
+      ///
+      /// type: ArgumentListClauseSyntax
+      /// optional: false
+      ///
+      ArgumentsClause
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   SimpleFunctionCallExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getFuncName();
+   ArgumentListClauseSyntax getArgumentsClause();
+
+   SimpleFunctionCallExprSyntax withFuncName(std::optional<Syntax> funcName);
+   SimpleFunctionCallExprSyntax withArgumentsClause(std::optional<ArgumentListClauseSyntax> argumentsClause);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SimpleFunctionCallExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class SimpleFunctionCallExprSyntaxBuilder;
+   void validate();
+};
+
+///
 /// function_call:
 ///   name argument_list
 /// | class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
@@ -1725,7 +1841,6 @@ private:
 ///
 class FunctionCallExprSyntax final : public ExprListSyntax
 {
-
 };
 
 ///
