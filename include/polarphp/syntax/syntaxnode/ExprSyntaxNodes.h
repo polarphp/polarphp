@@ -160,7 +160,7 @@ private:
 /// echo_expr:
 ///   expr
 ///
-class EchoExprSyntax final : public ExprSyntax
+class EchoExprSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 1;
@@ -176,7 +176,7 @@ public:
 
 public:
    EchoExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : ExprSyntax(root, data)
+      : Syntax(root, data)
    {
       validate();
    }
@@ -195,7 +195,60 @@ public:
    }
 
 private:
-   friend class VariableExprSyntaxBuilder;
+   friend class EchoExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// echo_expr_list_item:
+///   echo_expr ','
+/// | echo_expr
+///
+class EchoExprListItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: EchoExprSyntax
+      /// optional: false
+      ///
+      EchoExpr,
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: true
+      ///
+      TrailingComma,
+   };
+
+
+public:
+   EchoExprListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   EchoExprSyntax getEchoExpr();
+   std::optional<TokenSyntax> getTrailingComma();
+
+   EchoExprListItemSyntax withEchoExpr(std::optional<EchoExprSyntax> echoExpr);
+   EchoExprListItemSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EchoExprListItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EchoExprListItemSyntaxBuilder;
    void validate();
 };
 

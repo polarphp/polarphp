@@ -179,6 +179,58 @@ EchoExprSyntax EchoExprSyntax::withExpr(std::optional<ExprSyntax> expr)
 }
 
 ///
+/// EchoExprListItemSyntax
+///
+void EchoExprListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == EchoExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, EchoExpr, std::set{SyntaxKind::EchoExpr});
+   syntax_assert_child_token(raw, TrailingComma, std::set{TokenKindType::T_COMMA});
+#endif
+}
+
+EchoExprSyntax EchoExprListItemSyntax::getEchoExpr()
+{
+   return EchoExprSyntax{m_root, m_data->getChild(Cursor::EchoExpr).get()};
+}
+
+std::optional<TokenSyntax> EchoExprListItemSyntax::getTrailingComma()
+{
+   RefCountPtr<SyntaxData> trailingCommaData = m_data->getChild(Cursor::TrailingComma);
+   if (!trailingCommaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, trailingCommaData.get()};
+}
+
+EchoExprListItemSyntax EchoExprListItemSyntax::withEchoExpr(std::optional<EchoExprSyntax> echoExpr)
+{
+   RefCountPtr<RawSyntax> echoExprRaw;
+   if (echoExpr.has_value()) {
+      echoExprRaw = echoExpr->getRaw();
+   } else {
+      echoExprRaw = RawSyntax::missing(SyntaxKind::EchoExpr);
+   }
+   return m_data->replaceChild<EchoExprListItemSyntax>(echoExprRaw, Cursor::EchoExpr);
+}
+
+EchoExprListItemSyntax EchoExprListItemSyntax::withTrailingComma(std::optional<TokenSyntax> trailingComma)
+{
+   RefCountPtr<RawSyntax> trailingCommaRaw;
+   if (trailingComma.has_value()) {
+      trailingCommaRaw = trailingComma->getRaw();
+   } else {
+      trailingCommaRaw = nullptr;
+   }
+   return m_data->replaceChild<EchoExprListItemSyntax>(trailingCommaRaw, Cursor::TrailingComma);
+}
+
+///
 /// VariableExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

@@ -88,6 +88,7 @@ enum class SyntaxKind : std::uint32_t
    NullExpr,
    OptionalExpr,
    EchoExpr,
+   EchoExprListItem,
 
    VariableExpr,
    ClassConstIdentifierExpr,
@@ -197,6 +198,7 @@ enum class SyntaxKind : std::uint32_t
    InnerStmtList,
    TopStmtList,
    ExprList,
+   EchoExprList,
    NameList,
    NamespacePartList,
    NamespaceUseDeclarationList,

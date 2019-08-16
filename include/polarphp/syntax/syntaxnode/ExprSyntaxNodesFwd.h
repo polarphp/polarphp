@@ -21,6 +21,7 @@ class ParenDecoratedExprSyntax;
 class NullExprSyntax;
 class OptionalExprSyntax;
 class EchoExprSyntax;
+class EchoExprListItemSyntax;
 
 class VariableExprSyntax;
 class ClassConstIdentifierExprSyntax;
@@ -108,9 +109,21 @@ class MemberDeclBlockSyntax;
 class ParameterClauseSyntax;
 class ReturnTypeClauseSyntax;
 
+///
 /// type: SyntaxCollection
 /// element type: ExprSyntax
+///
 using ExprListSyntax = SyntaxCollection<SyntaxKind::ExprList, ExprSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: EchoExprListItemSyntax
+///
+/// echo_expr_list:
+///   echo_expr_list ',' echo_expr
+/// | echo_expr
+///
+using EchoExprListSyntax = SyntaxCollection<SyntaxKind::EchoExprList, EchoExprListItemSyntax>;
 
 ///
 /// type: SyntaxCollection
