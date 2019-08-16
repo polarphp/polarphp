@@ -2371,6 +2371,59 @@ private:
 };
 
 ///
+/// new_expr:
+///   T_NEW class_name_reference ctor_arguments
+/// | T_NEW anonymous_class
+///
+class InstanceCreateExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      /// node choices: true
+      /// --------------------------------------------------------
+      /// node choice: AnonymousClassDefinitionClauseSyntax
+      /// --------------------------------------------------------
+      /// node choice: SimpleInstanceCreateExprSyntax
+      ///
+      CreateExpr
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   InstanceCreateExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getCreateExpr();
+   InstanceCreateExprSyntax withCreateExpr(std::optional<ExprSyntax> expr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::InstanceCreateExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class InstanceCreateExprSyntaxBuilder;
+   void validate();
+};
+
+///
 /// scalar:
 ///   T_LNUMBER
 /// | T_DNUMBER

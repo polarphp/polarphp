@@ -2471,6 +2471,50 @@ AnonymousInstanceCreateExprSyntax::withAnonymousClassDef(std::optional<Anonymous
 }
 
 ///
+/// InstanceCreateExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType CHILD_NODE_CHOICES
+{
+   {
+      InstanceCreateExprSyntax::CreateExpr, {
+         SyntaxKind::AnonymousClassDefinitionClause,
+               SyntaxKind::SimpleInstanceCreateExpr
+      }
+   }
+};
+#endif
+
+void InstanceCreateExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == InstanceCreateExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, CreateExpr, std::set{SyntaxKind::AnonymousClassDefinitionClause});
+#endif
+}
+
+ExprSyntax InstanceCreateExprSyntax::getCreateExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::CreateExpr).get()};
+}
+
+InstanceCreateExprSyntax
+InstanceCreateExprSyntax::withCreateExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
+   } else {
+      exprRaw = RawSyntax::missing(SyntaxKind::UnknownExpr);
+   }
+   return m_data->replaceChild<InstanceCreateExprSyntax>(exprRaw, Cursor::CreateExpr);
+}
+
+///
 /// ScalarExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
