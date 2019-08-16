@@ -2391,7 +2391,7 @@ public:
       /// type: TokenSyntax (T_AMPERSAND)
       /// optional: true
       ///
-      ReturnRefFlagToken,
+      ReturnRefToken,
       ///
       /// type: ParameterClauseSyntax
       /// optional: false
@@ -2423,14 +2423,14 @@ public:
    }
 
    TokenSyntax getFuncToken();
-   std::optional<TokenSyntax> getReturnRefFlagToken();
+   std::optional<TokenSyntax> getReturnRefToken();
    ParameterClauseSyntax getParameterListClause();
    std::optional<UseLexicalVarClauseSyntax> getLexicalVarsClause();
    std::optional<ReturnTypeClauseSyntax> getReturnType();
    CodeBlockSyntax getBody();
 
    ClassicLambdaExprSyntax withFuncToken(std::optional<TokenSyntax> funcToken);
-   ClassicLambdaExprSyntax withReturnRefFlagToken(std::optional<TokenSyntax> returnRefToken);
+   ClassicLambdaExprSyntax withReturnRefToken(std::optional<TokenSyntax> returnRefToken);
    ClassicLambdaExprSyntax withParameterListClause(std::optional<ParameterClauseSyntax> parameterListClause);
    ClassicLambdaExprSyntax withLexicalVarsClause(std::optional<UseLexicalVarClauseSyntax> lexicalVars);
    ClassicLambdaExprSyntax withReturnType(std::optional<ReturnTypeClauseSyntax> returnType);
@@ -2458,7 +2458,139 @@ private:
 ///
 class SimplifiedLambdaExprSyntax final : public ExprSyntax
 {
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 6;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 4;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_AMPERSAND)
+      /// optional: false
+      ///
+      FnToken,
+      ///
+      /// type: TokenSyntax (T_AMPERSAND)
+      /// optional: true
+      ///
+      ReturnRefToken,
+      ///
+      /// type: ParameterClauseSyntax
+      /// optional: false
+      ///
+      ParameterListClause,
+      ///
+      /// type: ReturnTypeClauseSyntax
+      /// optional: true
+      ///
+      ReturnType,
+      ///
+      /// type: TokenSyntax (T_DOUBLE_ARROW)
+      /// optional: false
+      ///
+      DoubleArrowToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Body
+   };
 
+public:
+   SimplifiedLambdaExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getFnToken();
+   std::optional<TokenSyntax> getReturnRefToken();
+   ParameterClauseSyntax getParameterListClause();
+   std::optional<ReturnTypeClauseSyntax> getReturnType();
+   TokenSyntax getDoubleArrowToken();
+   ExprSyntax getBody();
+
+   SimplifiedLambdaExprSyntax withFnToken(std::optional<TokenSyntax> fnToken);
+   SimplifiedLambdaExprSyntax withReturnRefToken(std::optional<TokenSyntax> returnRefToken);
+   SimplifiedLambdaExprSyntax withParameterListClause(std::optional<ParameterClauseSyntax> parameterListClause);
+   SimplifiedLambdaExprSyntax withReturnType(std::optional<ReturnTypeClauseSyntax> returnType);
+   SimplifiedLambdaExprSyntax withDoubleArrowToken(std::optional<TokenSyntax> doubleArrow);
+   SimplifiedLambdaExprSyntax withBody(std::optional<ExprSyntax> body);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SimplifiedLambdaExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class SimplifiedLambdaExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// lambda_expr:
+///   function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
+///   backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
+/// | fn returns_ref '(' parameter_list ')' return_type backup_doc_comment T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
+///
+class LambdaExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_STATIC)
+      /// optional: true
+      ///
+      StaticToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: true
+      /// node choices: true
+      /// ------------------------------------------
+      /// node choice: ClassicLambdaExprSyntax
+      /// ------------------------------------------
+      /// node choice: SimplifiedLambdaExprSyntax
+      ///
+      LambdaExpr
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   LambdaExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getStaticToken();
+   ExprSyntax getLambdaExpr();
+
+   LambdaExprSyntax withStaticToken(std::optional<TokenSyntax> staticToken);
+   LambdaExprSyntax withLambdaExpr(std::optional<ExprSyntax> lambdaExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::LambdaExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class LambdaExprSyntaxBuilder;
+   void validate();
 };
 
 ///

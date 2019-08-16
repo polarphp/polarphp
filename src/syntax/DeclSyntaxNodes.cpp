@@ -1519,7 +1519,7 @@ void FunctionDefinitionSyntax::validate()
    }
    assert(raw->getLayout().getSize() == FunctionDefinitionSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, FuncToken, std::set{TokenKindType::T_FUNCTION});
-   syntax_assert_child_token(raw, ReturnRefFlagToken, std::set{TokenKindType::T_AMPERSAND});
+   syntax_assert_child_token(raw, ReturnRefToken, std::set{TokenKindType::T_AMPERSAND});
    syntax_assert_child_token(raw, FuncName, std::set{TokenKindType::T_IDENTIFIER_STRING});
    if (const RefCountPtr<RawSyntax> &parameterClause = raw->getChild(Cursor::ParameterListClause)) {
       assert(parameterClause->kindOf(SyntaxKind::ParameterListClause));
@@ -1538,9 +1538,9 @@ TokenSyntax FunctionDefinitionSyntax::getFuncToken()
    return TokenSyntax{m_root, m_data->getChild(Cursor::FuncToken).get()};
 }
 
-std::optional<TokenSyntax> FunctionDefinitionSyntax::getReturnRefFlagToken()
+std::optional<TokenSyntax> FunctionDefinitionSyntax::getReturnRefToken()
 {
-   RefCountPtr<SyntaxData> returnRefFlagTokenData = m_data->getChild(Cursor::ReturnRefFlagToken);
+   RefCountPtr<SyntaxData> returnRefFlagTokenData = m_data->getChild(Cursor::ReturnRefToken);
    if (!returnRefFlagTokenData) {
       return std::nullopt;
    }
@@ -1585,7 +1585,7 @@ FunctionDefinitionSyntax::withFuncToken(std::optional<TokenSyntax> funcToken)
 }
 
 FunctionDefinitionSyntax
-FunctionDefinitionSyntax::withReturnRefFlagToken(std::optional<TokenSyntax> returnRefFlagToken)
+FunctionDefinitionSyntax::withReturnRefToken(std::optional<TokenSyntax> returnRefFlagToken)
 {
    RefCountPtr<RawSyntax> returnRefFlagTokenRaw;
    if (returnRefFlagToken.has_value()) {
@@ -1593,7 +1593,7 @@ FunctionDefinitionSyntax::withReturnRefFlagToken(std::optional<TokenSyntax> retu
    } else {
       returnRefFlagTokenRaw = nullptr;
    }
-   return m_data->replaceChild<FunctionDefinitionSyntax>(returnRefFlagTokenRaw, Cursor::ReturnRefFlagToken);
+   return m_data->replaceChild<FunctionDefinitionSyntax>(returnRefFlagTokenRaw, Cursor::ReturnRefToken);
 }
 
 FunctionDefinitionSyntax

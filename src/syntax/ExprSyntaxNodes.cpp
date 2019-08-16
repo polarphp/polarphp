@@ -2482,7 +2482,7 @@ void ClassicLambdaExprSyntax::validate()
    }
    assert(raw->getLayout().size() == ClassicLambdaExprSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, FuncToken, std::set{TokenKindType::T_FUNCTION});
-   syntax_assert_child_token(raw, ReturnRefFlagToken, std::set{TokenKindType::T_AMPERSAND});
+   syntax_assert_child_token(raw, ReturnRefToken, std::set{TokenKindType::T_AMPERSAND});
    syntax_assert_child_kind(raw, ParameterListClause, std::set{SyntaxKind::ParameterListClause});
    syntax_assert_child_kind(raw, LexicalVarsClause, std::set{SyntaxKind::UseLexicalVarClause});
    syntax_assert_child_kind(raw, ReturnType, std::set{SyntaxKind::ReturnTypeClause});
@@ -2495,9 +2495,9 @@ TokenSyntax ClassicLambdaExprSyntax::getFuncToken()
    return TokenSyntax {m_root, m_data->getChild(Cursor::FuncToken).get()};
 }
 
-std::optional<TokenSyntax> ClassicLambdaExprSyntax::getReturnRefFlagToken()
+std::optional<TokenSyntax> ClassicLambdaExprSyntax::getReturnRefToken()
 {
-   RefCountPtr<SyntaxData> returnRefFlagData = m_data->getChild(Cursor::ReturnRefFlagToken);
+   RefCountPtr<SyntaxData> returnRefFlagData = m_data->getChild(Cursor::ReturnRefToken);
    if (!returnRefFlagData) {
       return std::nullopt;
    }
@@ -2545,7 +2545,7 @@ ClassicLambdaExprSyntax::withFuncToken(std::optional<TokenSyntax> funcToken)
 }
 
 ClassicLambdaExprSyntax
-ClassicLambdaExprSyntax::withReturnRefFlagToken(std::optional<TokenSyntax> returnRefToken)
+ClassicLambdaExprSyntax::withReturnRefToken(std::optional<TokenSyntax> returnRefToken)
 {
    RefCountPtr<RawSyntax> returnRefTokenRaw;
    if (returnRefToken.has_value()) {
@@ -2553,7 +2553,7 @@ ClassicLambdaExprSyntax::withReturnRefFlagToken(std::optional<TokenSyntax> retur
    } else {
       returnRefTokenRaw = make_missing_token(T_AMPERSAND);
    }
-   return m_data->replaceChild<ClassicLambdaExprSyntax>(returnRefTokenRaw, Cursor::ReturnRefFlagToken);
+   return m_data->replaceChild<ClassicLambdaExprSyntax>(returnRefTokenRaw, Cursor::ReturnRefToken);
 }
 
 ClassicLambdaExprSyntax
@@ -2602,6 +2602,195 @@ ClassicLambdaExprSyntax::withBody(std::optional<CodeBlockSyntax> body)
       bodyRaw = RawSyntax::missing(SyntaxKind::CodeBlock);
    }
    return m_data->replaceChild<ClassicLambdaExprSyntax>(bodyRaw, Cursor::Body);
+}
+
+///
+/// SimplifiedLambdaExprSyntax
+///
+void SimplifiedLambdaExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == SimplifiedLambdaExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, FnToken, std::set{TokenKindType::T_FUNCTION});
+   syntax_assert_child_token(raw, ReturnRefToken, std::set{TokenKindType::T_AMPERSAND});
+   syntax_assert_child_token(raw, DoubleArrowToken, std::set{TokenKindType::T_DOUBLE_ARROW});
+   syntax_assert_child_kind(raw, ParameterListClause, std::set{SyntaxKind::ParameterListClause});
+   syntax_assert_child_kind(raw, ReturnType, std::set{SyntaxKind::ReturnTypeClause});
+   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::Expr});
+#endif
+}
+
+TokenSyntax SimplifiedLambdaExprSyntax::getFnToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::FnToken).get()};
+}
+
+std::optional<TokenSyntax> SimplifiedLambdaExprSyntax::getReturnRefToken()
+{
+   RefCountPtr<SyntaxData> returnRefData = m_data->getChild(Cursor::ReturnRefToken);
+   if (!returnRefData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, returnRefData.get()};
+}
+
+ParameterClauseSyntax SimplifiedLambdaExprSyntax::getParameterListClause()
+{
+   return ParameterClauseSyntax {m_root, m_data->getChild(Cursor::ParameterListClause).get()};
+}
+
+std::optional<ReturnTypeClauseSyntax> SimplifiedLambdaExprSyntax::getReturnType()
+{
+   RefCountPtr<SyntaxData> returnTypeData = m_data->getChild(Cursor::ReturnType);
+   if (!returnTypeData) {
+      return std::nullopt;
+   }
+   return ReturnTypeClauseSyntax {m_root, returnTypeData.get()};
+}
+
+TokenSyntax SimplifiedLambdaExprSyntax::getDoubleArrowToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::DoubleArrowToken).get()};
+}
+
+ExprSyntax SimplifiedLambdaExprSyntax::getBody()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Body).get()};
+}
+
+SimplifiedLambdaExprSyntax
+SimplifiedLambdaExprSyntax::withFnToken(std::optional<TokenSyntax> fnToken)
+{
+   RefCountPtr<RawSyntax> fnTokenRaw;
+   if (fnToken.has_value()) {
+      fnTokenRaw = fnToken->getRaw();
+   } else {
+      fnTokenRaw = make_missing_token(T_FN);
+   }
+   return m_data->replaceChild<SimplifiedLambdaExprSyntax>(fnTokenRaw, Cursor::FnToken);
+}
+
+SimplifiedLambdaExprSyntax
+SimplifiedLambdaExprSyntax::withReturnRefToken(std::optional<TokenSyntax> returnRefToken)
+{
+   RefCountPtr<RawSyntax> returnRefTokenRaw;
+   if (returnRefToken.has_value()) {
+      returnRefTokenRaw = returnRefToken->getRaw();
+   } else {
+      returnRefTokenRaw = nullptr;
+   }
+   return m_data->replaceChild<SimplifiedLambdaExprSyntax>(returnRefTokenRaw, Cursor::ReturnRefToken);
+}
+
+SimplifiedLambdaExprSyntax
+SimplifiedLambdaExprSyntax::withParameterListClause(std::optional<ParameterClauseSyntax> parameterListClause)
+{
+   RefCountPtr<RawSyntax> parameterListClauseRaw;
+   if (parameterListClause.has_value()) {
+      parameterListClauseRaw = parameterListClause->getRaw();
+   } else {
+      parameterListClauseRaw = RawSyntax::missing(SyntaxKind::ParameterListClause);
+   }
+   return m_data->replaceChild<SimplifiedLambdaExprSyntax>(parameterListClauseRaw, Cursor::ParameterListClause);
+}
+
+SimplifiedLambdaExprSyntax
+SimplifiedLambdaExprSyntax::withReturnType(std::optional<ReturnTypeClauseSyntax> returnType)
+{
+   RefCountPtr<RawSyntax> returnTypeRaw;
+   if (returnType.has_value()) {
+      returnTypeRaw = returnType->getRaw();
+   } else {
+      returnTypeRaw = nullptr;
+   }
+   return m_data->replaceChild<SimplifiedLambdaExprSyntax>(returnTypeRaw, Cursor::ReturnType);
+}
+
+SimplifiedLambdaExprSyntax
+SimplifiedLambdaExprSyntax::withDoubleArrowToken(std::optional<TokenSyntax> doubleArrow)
+{
+   RefCountPtr<RawSyntax> doubleArrowRaw;
+   if (doubleArrow.has_value()) {
+      doubleArrowRaw = doubleArrow->getRaw();
+   } else {
+      doubleArrowRaw = make_missing_token(T_DOUBLE_ARROW);
+   }
+   return m_data->replaceChild<SimplifiedLambdaExprSyntax>(doubleArrowRaw, Cursor::DoubleArrowToken);
+}
+
+SimplifiedLambdaExprSyntax
+SimplifiedLambdaExprSyntax::withBody(std::optional<ExprSyntax> body)
+{
+   RefCountPtr<RawSyntax> bodyRaw;
+   if (body.has_value()) {
+      bodyRaw = body->getRaw();
+   } else {
+      bodyRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<SimplifiedLambdaExprSyntax>(bodyRaw, Cursor::Body);
+}
+
+///
+/// LambdaExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType LambdaExprSyntax::CHILD_NODE_CHOICES
+{
+   {
+      LambdaExprSyntax::LambdaExpr, {
+         SyntaxKind::ClassicLambdaExpr, SyntaxKind::SimplifiedLambdaExpr
+      }
+   }
+};
+#endif
+
+void LambdaExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == SimplifiedLambdaExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, StaticToken, std::set{TokenKindType::T_STATIC});
+   syntax_assert_child_kind(raw, LambdaExpr, CHILD_NODE_CHOICES.at(Cursor::LambdaExpr));
+#endif
+}
+
+TokenSyntax LambdaExprSyntax::getStaticToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::StaticToken).get()};
+}
+
+ExprSyntax LambdaExprSyntax::getLambdaExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::LambdaExpr).get()};
+}
+
+LambdaExprSyntax LambdaExprSyntax::withStaticToken(std::optional<TokenSyntax> staticToken)
+{
+   RefCountPtr<RawSyntax> staticTokenRaw;
+   if (staticToken.has_value()) {
+      staticTokenRaw = staticToken->getRaw();
+   } else {
+      staticTokenRaw = make_missing_token(T_STATIC);
+   }
+   return m_data->replaceChild<LambdaExprSyntax>(staticTokenRaw, Cursor::StaticToken);
+}
+
+LambdaExprSyntax LambdaExprSyntax::withLambdaExpr(std::optional<ExprSyntax> lambdaExpr)
+{
+   RefCountPtr<RawSyntax> lambdaExprRaw;
+   if (lambdaExpr.has_value()) {
+      lambdaExprRaw = lambdaExpr->getRaw();
+   } else {
+      lambdaExprRaw = RawSyntax::missing(SyntaxKind::LambdaExpr);
+   }
+   return m_data->replaceChild<LambdaExprSyntax>(lambdaExprRaw, Cursor::LambdaExpr);
 }
 
 ///

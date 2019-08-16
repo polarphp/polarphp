@@ -1177,7 +1177,7 @@ public:
       /// type: TokenSyntax (T_AMPERSAND)
       /// optional: true
       ///
-      ReturnRefFlagToken,
+      ReturnRefToken,
       ///
       /// type: TokenSyntax (T_IDENTIFIER_STRING)
       /// optional: false
@@ -1208,14 +1208,14 @@ public:
    }
 
    TokenSyntax getFuncToken();
-   std::optional<TokenSyntax> getReturnRefFlagToken();
+   std::optional<TokenSyntax> getReturnRefToken();
    TokenSyntax getFuncName();
    ParameterClauseSyntax getParameterClause();
    std::optional<TokenSyntax> getReturnType();
    CodeBlockSyntax getBody();
 
    FunctionDefinitionSyntax withFuncToken(std::optional<TokenSyntax> funcToken);
-   FunctionDefinitionSyntax withReturnRefFlagToken(std::optional<TokenSyntax> returnRefFlagToken);
+   FunctionDefinitionSyntax withReturnRefToken(std::optional<TokenSyntax> returnRefFlagToken);
    FunctionDefinitionSyntax withFuncName(std::optional<TokenSyntax> funcName);
    FunctionDefinitionSyntax withParameterClause(std::optional<ParameterClauseSyntax> parameterClause);
    FunctionDefinitionSyntax withReturnType(std::optional<TokenSyntax> returnType);
