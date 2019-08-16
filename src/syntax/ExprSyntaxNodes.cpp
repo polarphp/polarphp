@@ -148,6 +148,37 @@ OptionalExprSyntax OptionalExprSyntax::withExpr(std::optional<ExprSyntax> expr)
 }
 
 ///
+/// EchoExprSyntax
+///
+void EchoExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == EchoExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
+#endif
+}
+
+ExprSyntax EchoExprSyntax::getExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Expr).get()};
+}
+
+EchoExprSyntax EchoExprSyntax::withExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
+   } else {
+      exprRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<EchoExprSyntax>(exprRaw, Cursor::Expr);
+}
+
+///
 /// VariableExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

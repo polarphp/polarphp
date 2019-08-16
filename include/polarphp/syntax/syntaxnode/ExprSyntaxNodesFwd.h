@@ -20,6 +20,7 @@ class ExprSyntax;
 class ParenDecoratedExprSyntax;
 class NullExprSyntax;
 class OptionalExprSyntax;
+class EchoExprSyntax;
 
 class VariableExprSyntax;
 class ClassConstIdentifierExprSyntax;
