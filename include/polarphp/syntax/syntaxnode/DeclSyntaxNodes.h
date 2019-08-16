@@ -1169,17 +1169,17 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_FUNCTION)
       /// optional: false
       ///
       FuncToken,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_AMPERSAND)
       /// optional: true
       ///
       ReturnRefFlagToken,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_IDENTIFIER_STRING)
       /// optional: false
       ///
       FuncName,

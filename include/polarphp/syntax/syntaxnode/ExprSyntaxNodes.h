@@ -2371,6 +2371,53 @@ private:
 };
 
 ///
+/// inline_function:
+///   function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
+///   backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
+///
+class ClassicLambdaExprSyntax final : public ExprSyntax
+{
+public:
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_FUNCTION)
+      /// optional: false
+      ///
+      FuncToken,
+      ///
+      /// type: TokenSyntax (T_AMPERSAND)
+      /// optional: true
+      ///
+      ReturnRefFlagToken,
+      ///
+      /// type: ParameterClauseSyntax
+      /// optional: false
+      ///
+      ParameterClause,
+      ///
+      /// type: ReturnTypeClauseSyntax
+      /// optional: true
+      ///
+      ReturnType,
+      ///
+      /// type: CodeBlockSyntax
+      /// optional: false
+      ///
+      Body
+   };
+};
+
+///
+/// inline_function:
+///   fn returns_ref '(' parameter_list ')' return_type backup_doc_comment T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
+///
+class SimplifiedLambdaExprSyntax final : public ExprSyntax
+{
+
+};
+
+///
 /// new_expr:
 ///   T_NEW class_name_reference ctor_arguments
 /// | T_NEW anonymous_class
@@ -3770,6 +3817,72 @@ private:
 };
 
 ///
+///
+/// lexical_vars:
+///   /* empty */
+/// | T_USE '(' lexical_var_list ')'
+///
+class UseLexicalVarClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 4;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 4;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_USE)
+      /// optional: false
+      ///
+      UseToken,
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optional: false
+      ///
+      LeftParenToken,
+      ///
+      /// type: LexicalVarListSyntax
+      /// optional: false
+      ///
+      LexicalVars,
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
+      /// optional: false
+      ///
+      RightParenToken
+   };
+
+public:
+   UseLexicalVarClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getUseToken();
+   TokenSyntax getLeftParenToken();
+   LexicalVarListSyntax getLexicalVars();
+   TokenSyntax getRightParenToken();
+
+   UseLexicalVarClauseSyntax withUseToken(std::optional<TokenSyntax> useToken);
+   UseLexicalVarClauseSyntax withLeftParenToken(std::optional<TokenSyntax> leftParen);
+   UseLexicalVarClauseSyntax withLexicalVars(std::optional<LexicalVarListSyntax> lexicalVars);
+   UseLexicalVarClauseSyntax withRightParenToken(std::optional<TokenSyntax> rightParen);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::UseLexicalVarClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class LexicalVarItemSyntaxBuilder;
+   void validate();
+};
+
+///
 /// lexical_var:
 ///   T_VARIABLE
 /// | '&' T_VARIABLE
@@ -3782,15 +3895,20 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_AMPERSAND)
       /// optional: true
       ///
       ReferenceToken,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_VARIABLE)
       /// optional: false
       ///
-      Variable
+      Variable,
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: true
+      ///
+      TrailingComma,
    };
 public:
    LexicalVarItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
@@ -3801,8 +3919,11 @@ public:
 
    std::optional<TokenSyntax> getReferenceToken();
    TokenSyntax getVariable();
+   std::optional<TokenSyntax> getTrailingComma();
+
    LexicalVarItemSyntax withReferenceToken(std::optional<TokenSyntax> referenceToken);
    LexicalVarItemSyntax withVariable(std::optional<TokenSyntax> variable);
+   LexicalVarItemSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
 
    static bool kindOf(SyntaxKind kind)
    {

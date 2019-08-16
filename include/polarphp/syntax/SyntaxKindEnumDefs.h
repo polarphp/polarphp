@@ -52,6 +52,7 @@ enum class SyntaxKind : std::uint32_t
    ParameterItem,
    ParameterClauseSyntax,
    LexicalVarItem,
+   UseLexicalVarClause,
    FunctionDefinition,
    /// for class definition
    ClassModifier,
@@ -143,6 +144,9 @@ enum class SyntaxKind : std::uint32_t
    AnonymousClassDefinitionClause,
    SimpleInstanceCreateExpr,
    AnonymousInstanceCreateExpr,
+   ClassicLambdaExpr,
+   SimplifiedLambdaExpr,
+   LambdaExpr,
    InstanceCreateExpr,
    ScalarExpr,
    BooleanLiteralExpr,

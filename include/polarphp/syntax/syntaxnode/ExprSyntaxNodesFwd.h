@@ -62,6 +62,9 @@ class DereferencableScalarExprSyntax;
 class AnonymousClassDefinitionClauseSyntax;
 class SimpleInstanceCreateExprSyntax;
 class AnonymousInstanceCreateExprSyntax;
+class ClassicLambdaExprSyntax;
+class SimplifiedLambdaExprSyntax;
+class LambdaExprSyntax;
 class InstanceCreateExprSyntax;
 class ScalarExprSyntax;
 class ClassRefParentExprSyntax;
@@ -101,6 +104,7 @@ class IdentifierSyntax;
 class ExtendsFromClauseSyntax;
 class ImplementClauseSyntax;
 class MemberDeclBlockSyntax;
+class ParameterClauseSyntax;
 
 /// type: SyntaxCollection
 /// element type: ExprSyntax

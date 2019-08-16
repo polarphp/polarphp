@@ -3903,6 +3903,9 @@ PostfixOperatorExprSyntax PostfixOperatorExprSyntax::withOperatorToken(std::opti
    return m_data->replaceChild<PostfixOperatorExprSyntax>(rawOperatorToken, Cursor::OperatorToken);
 }
 
+///
+/// BinaryOperatorExprSyntax
+///
 void BinaryOperatorExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
@@ -3929,6 +3932,92 @@ BinaryOperatorExprSyntax BinaryOperatorExprSyntax::withOperatorToken(std::option
                                             OwnedString::makeUnowned(""));
    }
    return m_data->replaceChild<BinaryOperatorExprSyntax>(rawOperatorToken, TokenKindType::T_BINARY_OPERATOR);
+}
+
+///
+/// UseLexicalVarClauseSyntax
+///
+void UseLexicalVarClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == UseLexicalVarClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, UseToken, std::set{TokenKindType::T_USE});
+   syntax_assert_child_token(raw, LeftParenToken, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_kind(raw, LexicalVars, std::set{SyntaxKind::LexicalVarList});
+   syntax_assert_child_token(raw, RightParenToken, std::set{TokenKindType::T_RIGHT_PAREN});
+#endif
+}
+
+TokenSyntax UseLexicalVarClauseSyntax::getUseToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::UseToken).get()};
+}
+
+TokenSyntax UseLexicalVarClauseSyntax::getLeftParenToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParenToken).get()};
+}
+
+LexicalVarListSyntax UseLexicalVarClauseSyntax::getLexicalVars()
+{
+   return LexicalVarListSyntax {m_root, m_data->getChild(Cursor::LexicalVars).get()};
+}
+
+TokenSyntax UseLexicalVarClauseSyntax::getRightParenToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParenToken).get()};
+}
+
+UseLexicalVarClauseSyntax
+UseLexicalVarClauseSyntax::withUseToken(std::optional<TokenSyntax> useToken)
+{
+   RefCountPtr<RawSyntax> useTokenRaw;
+   if (useToken.has_value()) {
+      useTokenRaw = useToken->getRaw();
+   } else {
+      useTokenRaw = make_missing_token(T_USE);
+   }
+   return m_data->replaceChild<UseLexicalVarClauseSyntax>(useTokenRaw, Cursor::UseToken);
+}
+
+UseLexicalVarClauseSyntax
+UseLexicalVarClauseSyntax::withLeftParenToken(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> leftParenRaw;
+   if (leftParen.has_value()) {
+      leftParenRaw = leftParen->getRaw();
+   } else {
+      leftParenRaw = make_missing_token(T_LEFT_PAREN);
+   }
+   return m_data->replaceChild<UseLexicalVarClauseSyntax>(leftParenRaw, Cursor::UseToken);
+}
+
+UseLexicalVarClauseSyntax
+UseLexicalVarClauseSyntax::withLexicalVars(std::optional<LexicalVarListSyntax> lexicalVars)
+{
+   RefCountPtr<RawSyntax> lexicalVarsRaw;
+   if (lexicalVars.has_value()) {
+      lexicalVarsRaw = lexicalVars->getRaw();
+   } else {
+      lexicalVarsRaw = RawSyntax::missing(SyntaxKind::LexicalVarList);
+   }
+   return m_data->replaceChild<UseLexicalVarClauseSyntax>(lexicalVarsRaw, Cursor::LexicalVars);
+}
+
+UseLexicalVarClauseSyntax
+UseLexicalVarClauseSyntax::withRightParenToken(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rightParenRaw;
+   if (rightParen.has_value()) {
+      rightParenRaw = rightParen->getRaw();
+   } else {
+      rightParenRaw = make_missing_token(T_RIGHT_PAREN);
+   }
+   return m_data->replaceChild<UseLexicalVarClauseSyntax>(rightParenRaw, Cursor::UseToken);
 }
 
 ///
@@ -3961,6 +4050,15 @@ TokenSyntax LexicalVarItemSyntax::getVariable()
    return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
 }
 
+std::optional<TokenSyntax> LexicalVarItemSyntax::getTrailingComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::TrailingComma);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
 LexicalVarItemSyntax LexicalVarItemSyntax::withReferenceToken(std::optional<TokenSyntax> referenceToken)
 {
    RefCountPtr<RawSyntax> referenceTokenRaw;
@@ -3982,6 +4080,17 @@ LexicalVarItemSyntax LexicalVarItemSyntax::withVariable(std::optional<TokenSynta
                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_VARIABLE)));
    }
    return m_data->replaceChild<LexicalVarItemSyntax>(variableRaw, Cursor::Variable);
+}
+
+LexicalVarItemSyntax LexicalVarItemSyntax::withTrailingComma(std::optional<TokenSyntax> trailingComma)
+{
+   RefCountPtr<RawSyntax> trailingCommaRaw;
+   if (trailingComma.has_value()) {
+      trailingCommaRaw = trailingComma->getRaw();
+   } else {
+      trailingCommaRaw = make_missing_token(T_COMMA);
+   }
+   return m_data->replaceChild<LexicalVarItemSyntax>(trailingCommaRaw, Cursor::TrailingComma);
 }
 
 } // polar::syntax
