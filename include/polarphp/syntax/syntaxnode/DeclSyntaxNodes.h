@@ -1143,7 +1143,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::ParameterClauseSyntax;
+      return kind == SyntaxKind::ParameterListClause;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -1187,7 +1187,7 @@ public:
       /// type: ParameterClauseSyntax
       /// optional: false
       ///
-      ParameterClause,
+      ParameterListClause,
       ///
       /// type: ReturnTypeClauseSyntax
       /// optional: true
@@ -1749,7 +1749,7 @@ public:
       /// type: ParameterClauseSyntax
       /// optional: false
       ///
-      ParameterClause,
+      ParameterListClause,
       ///
       /// type: ReturnTypeClauseSyntax
       /// optional: true

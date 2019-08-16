@@ -2378,6 +2378,8 @@ private:
 class ClassicLambdaExprSyntax final : public ExprSyntax
 {
 public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 6;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
    enum Cursor : SyntaxChildrenCountType
    {
       ///
@@ -2394,7 +2396,12 @@ public:
       /// type: ParameterClauseSyntax
       /// optional: false
       ///
-      ParameterClause,
+      ParameterListClause,
+      ///
+      /// type: UseLexicalVarClauseSyntax
+      /// optional: true
+      ///
+      LexicalVarsClause,
       ///
       /// type: ReturnTypeClauseSyntax
       /// optional: true
@@ -2406,7 +2413,44 @@ public:
       ///
       Body
    };
+
+
+public:
+   ClassicLambdaExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getFuncToken();
+   std::optional<TokenSyntax> getReturnRefFlagToken();
+   ParameterClauseSyntax getParameterListClause();
+   std::optional<UseLexicalVarClauseSyntax> getLexicalVarsClause();
+   std::optional<ReturnTypeClauseSyntax> getReturnType();
+   CodeBlockSyntax getBody();
+
+   ClassicLambdaExprSyntax withFuncToken(std::optional<TokenSyntax> funcToken);
+   ClassicLambdaExprSyntax withReturnRefFlagToken(std::optional<TokenSyntax> returnRefToken);
+   ClassicLambdaExprSyntax withParameterListClause(std::optional<ParameterClauseSyntax> parameterListClause);
+   ClassicLambdaExprSyntax withLexicalVarsClause(std::optional<UseLexicalVarClauseSyntax> lexicalVars);
+   ClassicLambdaExprSyntax withReturnType(std::optional<ReturnTypeClauseSyntax> returnType);
+   ClassicLambdaExprSyntax withBody(std::optional<CodeBlockSyntax> body);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassicLambdaExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassicLambdaExprSyntaxBuilder;
+   void validate();
 };
+
 
 ///
 /// inline_function:

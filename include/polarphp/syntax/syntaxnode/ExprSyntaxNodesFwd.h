@@ -105,6 +105,7 @@ class ExtendsFromClauseSyntax;
 class ImplementClauseSyntax;
 class MemberDeclBlockSyntax;
 class ParameterClauseSyntax;
+class ReturnTypeClauseSyntax;
 
 /// type: SyntaxCollection
 /// element type: ExprSyntax

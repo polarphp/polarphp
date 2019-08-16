@@ -2471,6 +2471,140 @@ AnonymousInstanceCreateExprSyntax::withAnonymousClassDef(std::optional<Anonymous
 }
 
 ///
+/// ClassicLambdaExprSyntax
+///
+void ClassicLambdaExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ClassicLambdaExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, FuncToken, std::set{TokenKindType::T_FUNCTION});
+   syntax_assert_child_token(raw, ReturnRefFlagToken, std::set{TokenKindType::T_AMPERSAND});
+   syntax_assert_child_kind(raw, ParameterListClause, std::set{SyntaxKind::ParameterListClause});
+   syntax_assert_child_kind(raw, LexicalVarsClause, std::set{SyntaxKind::UseLexicalVarClause});
+   syntax_assert_child_kind(raw, ReturnType, std::set{SyntaxKind::ReturnTypeClause});
+   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::CodeBlock});
+#endif
+}
+
+TokenSyntax ClassicLambdaExprSyntax::getFuncToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::FuncToken).get()};
+}
+
+std::optional<TokenSyntax> ClassicLambdaExprSyntax::getReturnRefFlagToken()
+{
+   RefCountPtr<SyntaxData> returnRefFlagData = m_data->getChild(Cursor::ReturnRefFlagToken);
+   if (!returnRefFlagData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, returnRefFlagData.get()};
+}
+
+ParameterClauseSyntax ClassicLambdaExprSyntax::getParameterListClause()
+{
+   return ParameterClauseSyntax {m_root, m_data->getChild(Cursor::ParameterListClause).get()};
+}
+
+std::optional<UseLexicalVarClauseSyntax> ClassicLambdaExprSyntax::getLexicalVarsClause()
+{
+   RefCountPtr<SyntaxData> lexicalVarsData = m_data->getChild(Cursor::LexicalVarsClause);
+   if (!lexicalVarsData) {
+      return std::nullopt;
+   }
+   return UseLexicalVarClauseSyntax {m_root, lexicalVarsData.get()};
+}
+
+std::optional<ReturnTypeClauseSyntax> ClassicLambdaExprSyntax::getReturnType()
+{
+   RefCountPtr<SyntaxData> returnTypeData = m_data->getChild(Cursor::ReturnType);
+   if (!returnTypeData) {
+      return std::nullopt;
+   }
+   return ReturnTypeClauseSyntax {m_root, returnTypeData.get()};
+}
+
+CodeBlockSyntax ClassicLambdaExprSyntax::getBody()
+{
+   return CodeBlockSyntax {m_root, m_data->getChild(Cursor::Body).get()};
+}
+
+ClassicLambdaExprSyntax
+ClassicLambdaExprSyntax::withFuncToken(std::optional<TokenSyntax> funcToken)
+{
+   RefCountPtr<RawSyntax> funcTokenRaw;
+   if (funcToken.has_value()) {
+      funcTokenRaw = funcToken->getRaw();
+   } else {
+      funcTokenRaw = make_missing_token(T_FUNCTION);
+   }
+   return m_data->replaceChild<ClassicLambdaExprSyntax>(funcTokenRaw, Cursor::FuncToken);
+}
+
+ClassicLambdaExprSyntax
+ClassicLambdaExprSyntax::withReturnRefFlagToken(std::optional<TokenSyntax> returnRefToken)
+{
+   RefCountPtr<RawSyntax> returnRefTokenRaw;
+   if (returnRefToken.has_value()) {
+      returnRefTokenRaw = returnRefToken->getRaw();
+   } else {
+      returnRefTokenRaw = make_missing_token(T_AMPERSAND);
+   }
+   return m_data->replaceChild<ClassicLambdaExprSyntax>(returnRefTokenRaw, Cursor::ReturnRefFlagToken);
+}
+
+ClassicLambdaExprSyntax
+ClassicLambdaExprSyntax::withParameterListClause(std::optional<ParameterClauseSyntax> parameterListClause)
+{
+   RefCountPtr<RawSyntax> parameterListClauseRaw;
+   if (parameterListClause.has_value()) {
+      parameterListClauseRaw = parameterListClause->getRaw();
+   } else {
+      parameterListClauseRaw = RawSyntax::missing(SyntaxKind::ParameterListClause);
+   }
+   return m_data->replaceChild<ClassicLambdaExprSyntax>(parameterListClauseRaw, Cursor::ParameterListClause);
+}
+
+ClassicLambdaExprSyntax
+ClassicLambdaExprSyntax::withLexicalVarsClause(std::optional<UseLexicalVarClauseSyntax> lexicalVars)
+{
+   RefCountPtr<RawSyntax> lexicalVarsRaw;
+   if (lexicalVars.has_value()) {
+      lexicalVarsRaw = lexicalVars->getRaw();
+   } else {
+      lexicalVarsRaw = RawSyntax::missing(SyntaxKind::UseLexicalVarClause);
+   }
+   return m_data->replaceChild<ClassicLambdaExprSyntax>(lexicalVarsRaw, Cursor::LexicalVarsClause);
+}
+
+ClassicLambdaExprSyntax
+ClassicLambdaExprSyntax::withReturnType(std::optional<ReturnTypeClauseSyntax> returnType)
+{
+   RefCountPtr<RawSyntax> returnTypeRaw;
+   if (returnType.has_value()) {
+      returnTypeRaw = returnType->getRaw();
+   } else {
+      returnTypeRaw = RawSyntax::missing(SyntaxKind::ReturnTypeClause);
+   }
+   return m_data->replaceChild<ClassicLambdaExprSyntax>(returnTypeRaw, Cursor::ReturnType);
+}
+
+ClassicLambdaExprSyntax
+ClassicLambdaExprSyntax::withBody(std::optional<CodeBlockSyntax> body)
+{
+   RefCountPtr<RawSyntax> bodyRaw;
+   if (body.has_value()) {
+      bodyRaw = body->getRaw();
+   } else {
+      bodyRaw = RawSyntax::missing(SyntaxKind::CodeBlock);
+   }
+   return m_data->replaceChild<ClassicLambdaExprSyntax>(bodyRaw, Cursor::Body);
+}
+
+///
 /// InstanceCreateExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

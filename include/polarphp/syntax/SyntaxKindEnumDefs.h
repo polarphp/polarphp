@@ -50,7 +50,7 @@ enum class SyntaxKind : std::uint32_t
    ReturnTypeClause,
    InitializeClause, // for variable assign or initialize
    ParameterItem,
-   ParameterClauseSyntax,
+   ParameterListClause,
    LexicalVarItem,
    UseLexicalVarClause,
    FunctionDefinition,

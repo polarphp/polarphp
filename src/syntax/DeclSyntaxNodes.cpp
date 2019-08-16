@@ -1521,8 +1521,8 @@ void FunctionDefinitionSyntax::validate()
    syntax_assert_child_token(raw, FuncToken, std::set{TokenKindType::T_FUNCTION});
    syntax_assert_child_token(raw, ReturnRefFlagToken, std::set{TokenKindType::T_AMPERSAND});
    syntax_assert_child_token(raw, FuncName, std::set{TokenKindType::T_IDENTIFIER_STRING});
-   if (const RefCountPtr<RawSyntax> &parameterClause = raw->getChild(Cursor::ParameterClause)) {
-      assert(parameterClause->kindOf(SyntaxKind::ParameterClauseSyntax));
+   if (const RefCountPtr<RawSyntax> &parameterClause = raw->getChild(Cursor::ParameterListClause)) {
+      assert(parameterClause->kindOf(SyntaxKind::ParameterListClause));
    }
    if (const RefCountPtr<RawSyntax> &returnTypeClause = raw->getChild(Cursor::ReturnType)) {
       assert(returnTypeClause->kindOf(SyntaxKind::ReturnTypeClause));
@@ -1554,7 +1554,7 @@ TokenSyntax FunctionDefinitionSyntax::getFuncName()
 
 ParameterClauseSyntax FunctionDefinitionSyntax::getParameterClause()
 {
-   return ParameterClauseSyntax {m_root, m_data->getChild(Cursor::ParameterClause).get()};
+   return ParameterClauseSyntax {m_root, m_data->getChild(Cursor::ParameterListClause).get()};
 }
 
 std::optional<TokenSyntax> FunctionDefinitionSyntax::getReturnType()
@@ -1616,9 +1616,9 @@ FunctionDefinitionSyntax::withParameterClause(std::optional<ParameterClauseSynta
    if (parameterClause.has_value()) {
       parameterClauseRaw = parameterClause->getRaw();
    } else {
-      parameterClauseRaw = RawSyntax::missing(SyntaxKind::ParameterClauseSyntax);
+      parameterClauseRaw = RawSyntax::missing(SyntaxKind::ParameterListClause);
    }
-   return m_data->replaceChild<FunctionDefinitionSyntax>(parameterClauseRaw, Cursor::ParameterClause);
+   return m_data->replaceChild<FunctionDefinitionSyntax>(parameterClauseRaw, Cursor::ParameterListClause);
 }
 
 FunctionDefinitionSyntax
@@ -2004,8 +2004,8 @@ void ClassMethodDeclSyntax::validate()
    if (const RefCountPtr<RawSyntax> &funcNameChild = raw->getChild(Cursor::FuncName)) {
       assert(funcNameChild->kindOf(SyntaxKind::Identifier));
    }
-   if (const RefCountPtr<RawSyntax> &parameterClauseChild = raw->getChild(Cursor::ParameterClause)) {
-      assert(parameterClauseChild->kindOf(SyntaxKind::ParameterClauseSyntax));
+   if (const RefCountPtr<RawSyntax> &parameterClauseChild = raw->getChild(Cursor::ParameterListClause)) {
+      assert(parameterClauseChild->kindOf(SyntaxKind::ParameterListClause));
    }
    if (const RefCountPtr<RawSyntax> &returnTypeChild = raw->getChild(Cursor::ReturnType)) {
       assert(returnTypeChild->kindOf(SyntaxKind::ReturnTypeClause));
@@ -2042,7 +2042,7 @@ IdentifierSyntax ClassMethodDeclSyntax::getFuncName()
 
 ParameterClauseSyntax ClassMethodDeclSyntax::getParameterClause()
 {
-   return ParameterClauseSyntax {m_root, m_data->getChild(Cursor::ParameterClause).get()};
+   return ParameterClauseSyntax {m_root, m_data->getChild(Cursor::ParameterListClause).get()};
 }
 
 std::optional<ReturnTypeClauseSyntax> ClassMethodDeclSyntax::getReturnType()
@@ -2115,9 +2115,9 @@ ClassMethodDeclSyntax ClassMethodDeclSyntax::withParameterClause(std::optional<P
    if (parameterClause.has_value()) {
       parameterClauseRaw = parameterClause->getRaw();
    } else {
-      parameterClauseRaw = RawSyntax::missing(SyntaxKind::ParameterClauseSyntax);
+      parameterClauseRaw = RawSyntax::missing(SyntaxKind::ParameterListClause);
    }
-   return m_data->replaceChild<ClassMethodDeclSyntax>(parameterClauseRaw, Cursor::ParameterClause);
+   return m_data->replaceChild<ClassMethodDeclSyntax>(parameterClauseRaw, Cursor::ParameterListClause);
 }
 
 ClassMethodDeclSyntax ClassMethodDeclSyntax::withReturnType(std::optional<ReturnTypeClauseSyntax> returnType)
