@@ -3180,7 +3180,7 @@ private:
 /// isset_expr:
 ///   T_ISSET '(' isset_variables possible_comma ')'
 ///
-class IsSetExprSyntax final : public ExprSyntax
+class IsSetFuncExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -3200,7 +3200,7 @@ public:
    };
 
 public:
-   IsSetExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   IsSetFuncExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
       validate();
@@ -3209,12 +3209,12 @@ public:
    TokenSyntax getIsSetToken();
    IsSetVariablesClauseSyntax getIsSetVariablesClause();
 
-   IsSetExprSyntax withIsSetToken(std::optional<TokenSyntax> issetToken);
-   IsSetExprSyntax withIsSetVariablesClause(std::optional<IsSetVariablesClauseSyntax> isSetVariablesClause);
+   IsSetFuncExprSyntax withIsSetToken(std::optional<TokenSyntax> issetToken);
+   IsSetFuncExprSyntax withIsSetVariablesClause(std::optional<IsSetVariablesClauseSyntax> isSetVariablesClause);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::IsSetExpr;
+      return kind == SyntaxKind::IsSetFuncExpr;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -3231,7 +3231,7 @@ private:
 /// empty_expr:
 ///   T_EMPTY '(' expr ')'
 ///
-class EmptyExprSyntax final : public ExprSyntax
+class EmptyFuncExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -3251,7 +3251,7 @@ public:
    };
 
 public:
-   EmptyExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   EmptyFuncExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
       validate();
@@ -3260,12 +3260,12 @@ public:
    TokenSyntax getEmptyToken();
    ParenDecoratedExprSyntax getArgumentsClause();
 
-   EmptyExprSyntax withEmptyToken(std::optional<TokenSyntax> emptyToken);
-   EmptyExprSyntax withArgumentsClause(std::optional<ParenDecoratedExprSyntax> argumentsClause);
+   EmptyFuncExprSyntax withEmptyToken(std::optional<TokenSyntax> emptyToken);
+   EmptyFuncExprSyntax withArgumentsClause(std::optional<ParenDecoratedExprSyntax> argumentsClause);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::EmptyExpr;
+      return kind == SyntaxKind::EmptyFuncExpr;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -3404,7 +3404,7 @@ private:
 /// eval_expr:
 ///   T_EVAL '(' expr ')'
 ///
-class EvalExprSyntax final : public ExprSyntax
+class EvalFuncExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -3424,7 +3424,7 @@ public:
    };
 
 public:
-   EvalExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   EvalFuncExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
       validate();
@@ -3433,12 +3433,115 @@ public:
    TokenSyntax getEvalToken();
    ParenDecoratedExprSyntax getArgumentsClause();
 
-   EvalExprSyntax withEvalToken(std::optional<TokenSyntax> evalToken);
-   EvalExprSyntax withArgumentsClause(std::optional<ParenDecoratedExprSyntax> argumentsClause);
+   EvalFuncExprSyntax withEvalToken(std::optional<TokenSyntax> evalToken);
+   EvalFuncExprSyntax withArgumentsClause(std::optional<ParenDecoratedExprSyntax> argumentsClause);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::EvalExpr;
+      return kind == SyntaxKind::EvalFuncExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EvalExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// echo_func:
+///   T_ECHO expr
+///
+class EchoFuncExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_ECHO)
+      /// optional: false
+      ///
+      EchoToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      ArgsExpr
+   };
+
+public:
+
+   EchoFuncExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getEchoToken();
+   ExprSyntax getArgsExpr();
+
+   EchoFuncExprSyntax withEchoToken(std::optional<TokenSyntax> echoToken);
+   EchoFuncExprSyntax withArgsExpr(std::optional<ExprSyntax> expr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EchoFuncExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EvalExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// print_func:
+///   T_PRINT expr
+///
+class PrintFuncExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_PRINT)
+      /// optional: false
+      ///
+      PrintToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      ArgsExpr
+   };
+
+public:
+   PrintFuncExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getPrintToken();
+   ExprSyntax getArgsExpr();
+
+   PrintFuncExprSyntax withPrintToken(std::optional<TokenSyntax> printToken);
+   PrintFuncExprSyntax withArgsExpr(std::optional<ExprSyntax> expr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::PrintFuncExpr;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -3473,15 +3576,15 @@ public:
       /// optional: false
       /// node choices: true
       /// -------------------------------------------
-      /// node choice: IsSetExprSyntax
+      /// node choice: IsSetFuncExprSyntax
       /// -------------------------------------------
-      /// node choice: EmptyExprSyntax
+      /// node choice: EmptyFuncExprSyntax
       /// -------------------------------------------
       /// node choice: IncludeExprSyntax
       /// -------------------------------------------
       /// node choice: RequireExprSyntax
       /// -------------------------------------------
-      /// node choice: EvalExprSyntax
+      /// node choice: EvalFuncExprSyntax
       ///
       FuncLikeExpr
    };
@@ -4415,6 +4518,16 @@ private:
    void validate();
 };
 
+///
+/// prefix_operator_expr:
+///   '+' expr %prec T_INC
+/// | '-' expr %prec T_INC
+/// | '!' expr
+/// | '~' expr
+/// | '@' expr
+/// | T_INC variable
+/// | T_DEC variable
+///
 class PrefixOperatorExprSyntax final : public ExprSyntax
 {
 public:
@@ -4429,6 +4542,10 @@ public:
       /// optional: false
       Expr
    };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
 
 public:
    PrefixOperatorExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)

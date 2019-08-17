@@ -135,11 +135,13 @@ enum class SyntaxKind : std::uint32_t
    // function like lang structure
    IsSetVarItem,
    IsSetVariablesClause,
-   IsSetExpr,
-   EmptyExpr,
+   IsSetFuncExpr,
+   EmptyFuncExpr,
    IncludeExpr,
    RequireExpr,
-   EvalExpr,
+   EvalFuncExpr,
+   EchoFuncExpr,
+   PrintFuncExpr,
    FuncLikeExpr,
 
    EncapsVarOffset,

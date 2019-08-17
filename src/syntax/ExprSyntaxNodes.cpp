@@ -3343,33 +3343,33 @@ IsSetVariablesClauseSyntax::withRightParenToken(std::optional<TokenSyntax> right
 }
 
 ///
-/// IsSetExprSyntax
+/// IsSetFuncExprSyntax
 ///
-void IsSetExprSyntax::validate()
+void IsSetFuncExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == IsSetExprSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == IsSetFuncExprSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, IsSetToken, std::set{TokenKindType::T_ISSET});
    syntax_assert_child_kind(raw, IsSetVariablesClause, std::set{SyntaxKind::IsSetVariablesClause});
 #endif
 }
 
-TokenSyntax IsSetExprSyntax::getIsSetToken()
+TokenSyntax IsSetFuncExprSyntax::getIsSetToken()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::IsSetToken).get()};
 }
 
-IsSetVariablesClauseSyntax IsSetExprSyntax::getIsSetVariablesClause()
+IsSetVariablesClauseSyntax IsSetFuncExprSyntax::getIsSetVariablesClause()
 {
    return IsSetVariablesClauseSyntax {m_root, m_data->getChild(Cursor::IsSetVariablesClause).get()};
 }
 
-IsSetExprSyntax
-IsSetExprSyntax::withIsSetToken(std::optional<TokenSyntax> issetToken)
+IsSetFuncExprSyntax
+IsSetFuncExprSyntax::withIsSetToken(std::optional<TokenSyntax> issetToken)
 {
    RefCountPtr<RawSyntax> issetTokenRaw;
    if (issetToken.has_value()) {
@@ -3377,11 +3377,11 @@ IsSetExprSyntax::withIsSetToken(std::optional<TokenSyntax> issetToken)
    } else {
       issetTokenRaw = make_missing_token(T_ISSET);
    }
-   return m_data->replaceChild<IsSetExprSyntax>(issetTokenRaw, Cursor::IsSetToken);
+   return m_data->replaceChild<IsSetFuncExprSyntax>(issetTokenRaw, Cursor::IsSetToken);
 }
 
-IsSetExprSyntax
-IsSetExprSyntax::withIsSetVariablesClause(std::optional<IsSetVariablesClauseSyntax> isSetVariablesClause)
+IsSetFuncExprSyntax
+IsSetFuncExprSyntax::withIsSetVariablesClause(std::optional<IsSetVariablesClauseSyntax> isSetVariablesClause)
 {
    RefCountPtr<RawSyntax> isSetVariablesClauseRaw;
    if (isSetVariablesClause.has_value()) {
@@ -3389,38 +3389,38 @@ IsSetExprSyntax::withIsSetVariablesClause(std::optional<IsSetVariablesClauseSynt
    } else {
       isSetVariablesClauseRaw = RawSyntax::missing(SyntaxKind::IsSetVariablesClause);
    }
-   return m_data->replaceChild<IsSetExprSyntax>(isSetVariablesClauseRaw, Cursor::IsSetVariablesClause);
+   return m_data->replaceChild<IsSetFuncExprSyntax>(isSetVariablesClauseRaw, Cursor::IsSetVariablesClause);
 }
 
 ///
-/// EmptyExprSyntax
+/// EmptyFuncExprSyntax
 ///
-void EmptyExprSyntax::validate()
+void EmptyFuncExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == EmptyExprSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == EmptyFuncExprSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, EmptyToken, std::set{TokenKindType::T_EMPTY});
    syntax_assert_child_kind(raw, ArgumentsClause, std::set{SyntaxKind::ParenDecoratedExpr});
 #endif
 }
 
-TokenSyntax EmptyExprSyntax::getEmptyToken()
+TokenSyntax EmptyFuncExprSyntax::getEmptyToken()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::EmptyToken).get()};
 }
 
 ParenDecoratedExprSyntax
-EmptyExprSyntax::getArgumentsClause()
+EmptyFuncExprSyntax::getArgumentsClause()
 {
    return ParenDecoratedExprSyntax {m_root, m_data->getChild(Cursor::ArgumentsClause).get()};
 }
 
-EmptyExprSyntax
-EmptyExprSyntax::withEmptyToken(std::optional<TokenSyntax> emptyToken)
+EmptyFuncExprSyntax
+EmptyFuncExprSyntax::withEmptyToken(std::optional<TokenSyntax> emptyToken)
 {
    RefCountPtr<RawSyntax> emptyTokenRaw;
    if (emptyToken.has_value()) {
@@ -3428,11 +3428,11 @@ EmptyExprSyntax::withEmptyToken(std::optional<TokenSyntax> emptyToken)
    } else {
       emptyTokenRaw = make_missing_token(T_EMPTY);
    }
-   return m_data->replaceChild<EmptyExprSyntax>(emptyTokenRaw, Cursor::EmptyToken);
+   return m_data->replaceChild<EmptyFuncExprSyntax>(emptyTokenRaw, Cursor::EmptyToken);
 }
 
-EmptyExprSyntax
-EmptyExprSyntax::withArgumentsClause(std::optional<ParenDecoratedExprSyntax> argumentsClause)
+EmptyFuncExprSyntax
+EmptyFuncExprSyntax::withArgumentsClause(std::optional<ParenDecoratedExprSyntax> argumentsClause)
 {
    RefCountPtr<RawSyntax> argumentsClauseRaw;
    if (argumentsClause.has_value()) {
@@ -3440,7 +3440,7 @@ EmptyExprSyntax::withArgumentsClause(std::optional<ParenDecoratedExprSyntax> arg
    } else {
       argumentsClauseRaw = RawSyntax::missing(SyntaxKind::ArgumentListClause);
    }
-   return m_data->replaceChild<EmptyExprSyntax>(argumentsClauseRaw, Cursor::ArgumentsClause);
+   return m_data->replaceChild<EmptyFuncExprSyntax>(argumentsClauseRaw, Cursor::ArgumentsClause);
 }
 
 ///
@@ -3564,33 +3564,33 @@ RequireExprSyntax::withArgExpr(std::optional<ExprSyntax> argExpr)
 }
 
 ///
-/// EmptyExprSyntax
+/// EmptyFuncExprSyntax
 ///
-void EvalExprSyntax::validate()
+void EvalFuncExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == EmptyExprSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == EmptyFuncExprSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, EvalToken, std::set{TokenKindType::T_EVAL});
    syntax_assert_child_kind(raw, ArgumentsClause, std::set{SyntaxKind::ParenDecoratedExpr});
 #endif
 }
 
-TokenSyntax EvalExprSyntax::getEvalToken()
+TokenSyntax EvalFuncExprSyntax::getEvalToken()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::EvalToken).get()};
 }
 
-ParenDecoratedExprSyntax EvalExprSyntax::getArgumentsClause()
+ParenDecoratedExprSyntax EvalFuncExprSyntax::getArgumentsClause()
 {
    return ParenDecoratedExprSyntax{m_root, m_data->getChild(Cursor::ArgumentsClause).get()};
 }
 
-EvalExprSyntax
-EvalExprSyntax::withEvalToken(std::optional<TokenSyntax> evalToken)
+EvalFuncExprSyntax
+EvalFuncExprSyntax::withEvalToken(std::optional<TokenSyntax> evalToken)
 {
    RefCountPtr<RawSyntax> evalTokenRaw;
    if (evalToken.has_value()) {
@@ -3598,11 +3598,11 @@ EvalExprSyntax::withEvalToken(std::optional<TokenSyntax> evalToken)
    } else {
       evalTokenRaw = make_missing_token(T_EVAL);
    }
-   return m_data->replaceChild<EvalExprSyntax>(evalTokenRaw, Cursor::EvalToken);
+   return m_data->replaceChild<EvalFuncExprSyntax>(evalTokenRaw, Cursor::EvalToken);
 }
 
-EvalExprSyntax
-EvalExprSyntax::withArgumentsClause(std::optional<ParenDecoratedExprSyntax> argumentsClause)
+EvalFuncExprSyntax
+EvalFuncExprSyntax::withArgumentsClause(std::optional<ParenDecoratedExprSyntax> argumentsClause)
 {
    RefCountPtr<RawSyntax> argumentsClauseRaw;
    if (argumentsClause.has_value()) {
@@ -3610,7 +3610,103 @@ EvalExprSyntax::withArgumentsClause(std::optional<ParenDecoratedExprSyntax> argu
    } else {
       argumentsClauseRaw = RawSyntax::missing(SyntaxKind::ArgumentListClause);
    }
-   return m_data->replaceChild<EvalExprSyntax>(argumentsClauseRaw, Cursor::ArgumentsClause);
+   return m_data->replaceChild<EvalFuncExprSyntax>(argumentsClauseRaw, Cursor::ArgumentsClause);
+}
+
+///
+/// EchoFuncExprSyntax
+///
+void EchoFuncExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == EchoFuncExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, EchoToken, std::set{TokenKindType::T_ECHO});
+   syntax_assert_child_kind(raw, ArgsExpr, std::set{SyntaxKind::Expr});
+#endif
+}
+
+TokenSyntax EchoFuncExprSyntax::getEchoToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::EchoToken).get()};
+}
+
+ExprSyntax EchoFuncExprSyntax::getArgsExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::ArgsExpr).get()};
+}
+
+EchoFuncExprSyntax EchoFuncExprSyntax::withEchoToken(std::optional<TokenSyntax> echoToken)
+{
+   RefCountPtr<RawSyntax> echoTokenRaw;
+   if (echoToken.has_value()) {
+      echoTokenRaw = echoToken->getRaw();
+   } else {
+      echoTokenRaw = make_missing_token(T_ECHO);
+   }
+   return m_data->replaceChild<EchoFuncExprSyntax>(echoTokenRaw, Cursor::EchoToken);
+}
+
+EchoFuncExprSyntax EchoFuncExprSyntax::withArgsExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
+   } else {
+      exprRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<EchoFuncExprSyntax>(exprRaw, Cursor::ArgsExpr);
+}
+
+///
+/// PrintFuncExprSyntax
+///
+void PrintFuncExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == PrintFuncExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, PrintToken, std::set{TokenKindType::T_PRINT});
+   syntax_assert_child_kind(raw, ArgsExpr, std::set{SyntaxKind::Expr});
+#endif
+}
+
+TokenSyntax PrintFuncExprSyntax::getPrintToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::PrintToken).get()};
+}
+
+ExprSyntax PrintFuncExprSyntax::getArgsExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::ArgsExpr).get()};
+}
+
+PrintFuncExprSyntax PrintFuncExprSyntax::withPrintToken(std::optional<TokenSyntax> printToken)
+{
+   RefCountPtr<RawSyntax> printTokenRaw;
+   if (printToken.has_value()) {
+      printTokenRaw = printToken->getRaw();
+   } else {
+      printTokenRaw = make_missing_token(T_PRINT);
+   }
+   return m_data->replaceChild<PrintFuncExprSyntax>(printTokenRaw, Cursor::PrintToken);
+}
+
+PrintFuncExprSyntax PrintFuncExprSyntax::withArgsExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
+   } else {
+      exprRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<PrintFuncExprSyntax>(exprRaw, Cursor::ArgsExpr);
 }
 
 ///
@@ -3621,9 +3717,9 @@ const NodeChoicesType FuncLikeExprSyntax::CHILD_NODE_CHOICES
 {
    {
       FuncLikeExprSyntax::FuncLikeExpr, {
-         SyntaxKind::IsSetExpr, SyntaxKind::EmptyExpr,
+         SyntaxKind::IsSetFuncExpr, SyntaxKind::EmptyFuncExpr,
                SyntaxKind::IncludeExpr, SyntaxKind::RequireExpr,
-               SyntaxKind::EvalExpr,
+               SyntaxKind::EvalFuncExpr,
       }
    }
 };

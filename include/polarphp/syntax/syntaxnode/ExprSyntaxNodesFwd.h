@@ -79,11 +79,13 @@ class StringLiteralExprSyntax;
 // function like lang structure
 class IsSetVarItemSyntax;
 class IsSetVariablesClauseSyntax;
-class IsSetExprSyntax;
-class EmptyExprSyntax;
+class IsSetFuncExprSyntax;
+class EmptyFuncExprSyntax;
 class IncludeExprSyntax;
 class RequireExprSyntax;
-class EvalExprSyntax;
+class EvalFuncExprSyntax;
+class EchoFuncExprSyntax;
+class PrintFuncExprSyntax;
 class FuncLikeExprSyntax;
 
 // for encaps var syntax
