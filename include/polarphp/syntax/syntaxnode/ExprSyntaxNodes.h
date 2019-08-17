@@ -3307,6 +3307,10 @@ public:
       ArgExpr,
    };
 
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
+
 public:
    IncludeExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
@@ -3364,6 +3368,10 @@ public:
       ArgExpr,
    };
 
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
+
 public:
    RequireExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
@@ -3374,8 +3382,8 @@ public:
    TokenSyntax getRequireToken();
    ExprSyntax getArgExpr();
 
-   IncludeExprSyntax withRequireToken(std::optional<TokenSyntax> requireToken);
-   IncludeExprSyntax withArgExpr(std::optional<ExprSyntax> argExpr);
+   RequireExprSyntax withRequireToken(std::optional<TokenSyntax> requireToken);
+   RequireExprSyntax withArgExpr(std::optional<ExprSyntax> argExpr);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -3425,8 +3433,8 @@ public:
    TokenSyntax getEvalToken();
    ParenDecoratedExprSyntax getArgumentsClause();
 
-   EmptyExprSyntax withEvalToken(std::optional<TokenSyntax> evalToken);
-   EmptyExprSyntax withArgumentsClause(std::optional<ParenDecoratedExprSyntax> argumentsClause);
+   EvalExprSyntax withEvalToken(std::optional<TokenSyntax> evalToken);
+   EvalExprSyntax withArgumentsClause(std::optional<ParenDecoratedExprSyntax> argumentsClause);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -3477,6 +3485,10 @@ public:
       ///
       FuncLikeExpr
    };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
 
 public:
    FuncLikeExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
