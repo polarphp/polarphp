@@ -4537,6 +4537,12 @@ public:
    {
       /// type: TokenSyntax
       /// optional: true
+      /// token choices: true
+      /// ---------------------------------------------------
+      /// T_PLUS_SIGN | T_MINUS_SIGN | T_EXCLAMATION_MARK
+      /// T_TILDE     | T_ERROR_SUPPRESS_SIGN | T_INC
+      /// T_DEC
+      ///
       OperatorToken,
       /// type: ExprSyntax
       /// optional: false

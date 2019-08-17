@@ -4753,6 +4753,23 @@ SequenceExprSyntax SequenceExprSyntax::addElement(ExprSyntax expr)
    return m_data->replaceChild<SequenceExprSyntax>(elements, Cursor::Elements);
 }
 
+///
+/// PrefixOperatorExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType PrefixOperatorExprSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      PrefixOperatorExprSyntax::OperatorToken, {
+         TokenKindType::T_PLUS_SIGN, TokenKindType::T_MINUS_SIGN,
+               TokenKindType::T_EXCLAMATION_MARK, TokenKindType::T_TILDE,
+               TokenKindType::T_ERROR_SUPPRESS_SIGN, TokenKindType::T_INC,
+               TokenKindType::T_DEC
+      }
+   }
+};
+#endif
+
 void PrefixOperatorExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
@@ -4761,6 +4778,7 @@ void PrefixOperatorExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == PrefixOperatorExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, OperatorToken, CHILD_TOKEN_CHOICES.at(Cursor::OperatorToken));
 #endif
 }
 
