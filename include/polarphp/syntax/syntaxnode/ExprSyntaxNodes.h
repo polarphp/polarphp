@@ -4580,6 +4580,11 @@ private:
    void validate();
 };
 
+///
+/// postfix_operator_expr:
+///   variable T_INC
+/// | variable T_DEC
+///
 class PostfixOperatorExprSyntax final : public ExprSyntax
 {
 public:
@@ -4592,8 +4597,16 @@ public:
       Expr,
       /// type: TokenSyntax
       /// optional: false
+      /// token choices: true
+      /// ----------------------------------
+      /// T_INC | T_DEC
+      ///
       OperatorToken
    };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
 
 public:
    PostfixOperatorExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)

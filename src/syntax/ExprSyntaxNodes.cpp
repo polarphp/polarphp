@@ -4779,6 +4779,13 @@ void PrefixOperatorExprSyntax::validate()
    }
    assert(raw->getLayout().size() == PrefixOperatorExprSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, OperatorToken, CHILD_TOKEN_CHOICES.at(Cursor::OperatorToken));
+   const RefCountPtr<RawSyntax> &operatorToken = raw->getChild(Cursor::OperatorToken);
+   TokenKindType operatorKind = operatorToken->getTokenKind();
+   if (operatorKind == TokenKindType::T_INC || operatorKind == TokenKindType::T_DEC) {
+      assert(raw->getChild(Cursor::Expr)->kindOf(SyntaxKind::VariableExpr));
+   } else {
+      syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
+   }
 #endif
 }
 
@@ -4818,6 +4825,20 @@ PrefixOperatorExprSyntax PrefixOperatorExprSyntax::withExpr(std::optional<TokenS
    return m_data->replaceChild<PrefixOperatorExprSyntax>(rawExpr, Cursor::Expr);
 }
 
+///
+/// PostfixOperatorExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType PostfixOperatorExprSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      PrefixOperatorExprSyntax::OperatorToken, {
+          TokenKindType::T_INC, TokenKindType::T_DEC
+      }
+   }
+};
+#endif
+
 void PostfixOperatorExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
@@ -4826,6 +4847,14 @@ void PostfixOperatorExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == PostfixOperatorExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, OperatorToken, CHILD_TOKEN_CHOICES.at(Cursor::OperatorToken));
+   const RefCountPtr<RawSyntax> &operatorToken = raw->getChild(Cursor::OperatorToken);
+   TokenKindType operatorKind = operatorToken->getTokenKind();
+   if (operatorKind == TokenKindType::T_INC || operatorKind == TokenKindType::T_DEC) {
+      assert(raw->getChild(Cursor::Expr)->kindOf(SyntaxKind::VariableExpr));
+   } else {
+      syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
+   }
 #endif
 }
 
