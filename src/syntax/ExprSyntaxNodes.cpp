@@ -3343,6 +3343,56 @@ IsSetVariablesClauseSyntax::withRightParenToken(std::optional<TokenSyntax> right
 }
 
 ///
+/// IsSetExprSyntax
+///
+void IsSetExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == IsSetExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, IsSetToken, std::set{TokenKindType::T_ISSET});
+   syntax_assert_child_kind(raw, IsSetVariablesClause, std::set{SyntaxKind::IsSetVariablesClause});
+#endif
+}
+
+TokenSyntax IsSetExprSyntax::getIsSetToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::IsSetToken).get()};
+}
+
+IsSetVariablesClauseSyntax IsSetExprSyntax::getIsSetVariablesClause()
+{
+   return IsSetVariablesClauseSyntax {m_root, m_data->getChild(Cursor::IsSetVariablesClause).get()};
+}
+
+IsSetExprSyntax
+IsSetExprSyntax::withIsSetToken(std::optional<TokenSyntax> issetToken)
+{
+   RefCountPtr<RawSyntax> issetTokenRaw;
+   if (issetToken.has_value()) {
+      issetTokenRaw = issetToken->getRaw();
+   } else {
+      issetTokenRaw = make_missing_token(T_ISSET);
+   }
+   return m_data->replaceChild<IsSetExprSyntax>(issetTokenRaw, Cursor::IsSetToken);
+}
+
+IsSetExprSyntax
+IsSetExprSyntax::withIsSetVariablesClause(std::optional<IsSetVariablesClauseSyntax> isSetVariablesClause)
+{
+   RefCountPtr<RawSyntax> isSetVariablesClauseRaw;
+   if (isSetVariablesClause.has_value()) {
+      isSetVariablesClauseRaw = isSetVariablesClause->getRaw();
+   } else {
+      isSetVariablesClauseRaw = RawSyntax::missing(SyntaxKind::IsSetVariablesClause);
+   }
+   return m_data->replaceChild<IsSetExprSyntax>(isSetVariablesClauseRaw, Cursor::IsSetVariablesClause);
+}
+
+///
 /// EncapsVarOffsetSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
