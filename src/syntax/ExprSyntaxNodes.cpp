@@ -3222,6 +3222,61 @@ StringLiteralExprSyntax StringLiteralExprSyntax::withRightQuote(std::optional<To
    return m_data->replaceChild<StringLiteralExprSyntax>(rightQuoteRaw, Cursor::LeftQuote);
 }
 
+///
+/// IsSetVarItemSyntax
+///
+void IsSetVarItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == IsSetVarItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, TrailingComma, std::set{TokenKindType::T_COMMA});
+#endif
+}
+
+ExprSyntax IsSetVarItemSyntax::getExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Expr).get()};
+}
+
+std::optional<TokenSyntax> IsSetVarItemSyntax::getTrailingComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::TrailingComma);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+IsSetVarItemSyntax IsSetVarItemSyntax::withExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
+   } else {
+      exprRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<IsSetVarItemSyntax>(exprRaw, Cursor::Expr);
+}
+
+IsSetVarItemSyntax IsSetVarItemSyntax::withTrailingComma(std::optional<TokenSyntax> comma)
+{
+   RefCountPtr<RawSyntax> commaRaw;
+   if (comma.has_value()) {
+      commaRaw = comma->getRaw();
+   } else {
+      commaRaw = make_missing_token(T_COMMA);
+   }
+   return m_data->replaceChild<IsSetVarItemSyntax>(commaRaw, Cursor::TrailingComma);
+}
+
+///
+/// EncapsVarOffsetSyntax
+///
 #ifdef POLAR_DEBUG_BUILD
 const TokenChoicesType EncapsVarOffsetSyntax::CHILD_TOKEN_CHOICES
 {

@@ -3068,6 +3068,442 @@ private:
 };
 
 ///
+/// isset_var_item:
+///   expr ','
+///
+class IsSetVarItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Expr,
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: true
+      ///
+      TrailingComma,
+   };
+
+public:
+   IsSetVarItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getExpr();
+   std::optional<TokenSyntax> getTrailingComma();
+
+   IsSetVarItemSyntax withExpr(std::optional<ExprSyntax> expr);
+   IsSetVarItemSyntax withTrailingComma(std::optional<TokenSyntax> comma);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::IsSetVarItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class IsSetVarItemSyntaxBuilder;
+   void validate();
+};
+
+///
+/// isset_vars_clause:
+///   '(' isset_variables_list ')'
+///
+class IsSetVariablesClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optional: false
+      ///
+      LeftParenToken,
+      ///
+      /// type: IssetVariablesListSyntax
+      /// optional: false
+      ///
+      IsSetVariablesList,
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
+      /// optional: false
+      ///
+      RightParenToken
+   };
+
+public:
+   IsSetVariablesClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getLeftParenToken();
+   IssetVariablesListSyntax getIsSetVariablesList();
+   TokenSyntax getRightParenToken();
+
+   IsSetVariablesClauseSyntax withLeftParenToken(std::optional<TokenSyntax> leftParenToken);
+   IsSetVariablesClauseSyntax withIsSetVariablesList(std::optional<IssetVariablesListSyntax> issetVariablesList);
+   IsSetVariablesClauseSyntax withRightParenToken(std::optional<TokenSyntax> rightParenToken);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::IsSetVariablesClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class IsSetVariablesClauseSyntaxBuilder;
+   void validate();
+};
+
+///
+/// isset_expr:
+///   T_ISSET '(' isset_variables possible_comma ')'
+///
+class IsSetExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_ISSET)
+      /// optional: false
+      ///
+      IsSetToken,
+      ///
+      /// type: IsSetVariablesClauseSyntax
+      /// optional: false
+      ///
+      IsSetVariablesClause,
+   };
+
+public:
+   IsSetExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getIsSetToken();
+   IsSetVariablesClauseSyntax getIsSetVariablesClause();
+
+   IsSetExprSyntax withIsSetToken(std::optional<TokenSyntax> issetToken);
+   IsSetExprSyntax withIsSetVariablesClause(std::optional<IsSetVariablesClauseSyntax> isSetVariablesClause);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::IsSetExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class IsSetExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// empty_expr:
+///   T_EMPTY '(' expr ')'
+///
+class EmptyExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_EMPTY)
+      /// optional: false
+      ///
+      EmptyToken,
+      ///
+      /// type: ParenDecoratedExprSyntax
+      /// optional: false
+      ///
+      ArgumentsClause
+   };
+
+public:
+   EmptyExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getEmptyToken();
+   ParenDecoratedExprSyntax getArgumentsClause();
+
+   EmptyExprSyntax withEmptyToken(std::optional<TokenSyntax> emptyToken);
+   EmptyExprSyntax withArgumentsClause(std::optional<ParenDecoratedExprSyntax> argumentsClause);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EmptyExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EmptyExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// inlcude_expr:
+///   T_INCLUDE expr
+/// | T_INCLUDE_ONCE expr
+///
+class IncludeExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      /// token choices: true
+      /// ---------------------------------------
+      /// token choice: T_INCLUDE
+      /// ---------------------------------------
+      /// token choice: T_INCLUDE_ONCE
+      ///
+      IncludeToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      ArgExpr,
+   };
+
+public:
+   IncludeExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getIncludeToken();
+   ExprSyntax getArgExpr();
+
+   IncludeExprSyntax withIncludeToken(std::optional<TokenSyntax> includeToken);
+   IncludeExprSyntax withArgExpr(std::optional<ExprSyntax> argExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::IncludeExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class IncludeExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// require_expr:
+///   T_REQUIRE expr
+/// | T_REQUIRE_ONCE expr
+///
+class RequireExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      /// token choices: true
+      /// ---------------------------------------
+      /// token choice: T_REQUIRE
+      /// ---------------------------------------
+      /// token choice: T_REQUIRE_ONCE
+      ///
+      RequireToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      ArgExpr,
+   };
+
+public:
+   RequireExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getRequireToken();
+   ExprSyntax getArgExpr();
+
+   IncludeExprSyntax withRequireToken(std::optional<TokenSyntax> requireToken);
+   IncludeExprSyntax withArgExpr(std::optional<ExprSyntax> argExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::RequireExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class RequireExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// eval_expr:
+///   T_EVAL '(' expr ')'
+///
+class EvalExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_EVAL)
+      /// optional: false
+      ///
+      EvalToken,
+      ///
+      /// type: ParenDecoratedExprSyntax
+      /// optional: false
+      ///
+      ArgumentsClause
+   };
+
+public:
+   EvalExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getEvalToken();
+   ParenDecoratedExprSyntax getArgumentsClause();
+
+   EmptyExprSyntax withEvalToken(std::optional<TokenSyntax> evalToken);
+   EmptyExprSyntax withArgumentsClause(std::optional<ParenDecoratedExprSyntax> argumentsClause);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EvalExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EvalExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// func_like_expr:
+///   T_ISSET '(' isset_variables possible_comma ')'
+/// | T_EMPTY '(' expr ')'
+/// | T_INCLUDE expr
+/// | T_INCLUDE_ONCE expr
+/// | T_EVAL '(' expr ')'
+/// | T_REQUIRE expr
+/// | _REQUIRE_ONCE expr
+///
+class FuncLikeExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      /// node choices: true
+      /// -------------------------------------------
+      /// node choice: IsSetExprSyntax
+      /// -------------------------------------------
+      /// node choice: EmptyExprSyntax
+      /// -------------------------------------------
+      /// node choice: IncludeExprSyntax
+      /// -------------------------------------------
+      /// node choice: RequireExprSyntax
+      /// -------------------------------------------
+      /// node choice: EvalExprSyntax
+      ///
+      FuncLikeExpr
+   };
+
+public:
+   FuncLikeExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getFuncLikeExpr();
+   FuncLikeExprSyntax withFuncLikeExpr(std::optional<ExprSyntax> funcLikeExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::FuncLikeExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class FuncLikeExprSyntaxBuilder;
+   void validate();
+};
+
+///
 /// encaps_var_offset:
 ///   T_IDENTIFIER_STRING
 /// | T_NUM_STRING

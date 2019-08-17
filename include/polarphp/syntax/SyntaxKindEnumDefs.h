@@ -131,6 +131,17 @@ enum class SyntaxKind : std::uint32_t
    FloatLiteralExpr,
    IntegerLiteralExpr,
    StringLiteralExpr,
+
+   // function like lang structure
+   IsSetVarItem,
+   IsSetVariablesClause,
+   IsSetExpr,
+   EmptyExpr,
+   IncludeExpr,
+   RequireExpr,
+   EvalExpr,
+   FuncLikeExpr,
+
    EncapsVarOffset,
    EncapsArrayVar,
    EncapsObjProp,
@@ -218,6 +229,7 @@ enum class SyntaxKind : std::uint32_t
    MemberDeclList,
    EncapsList,
    ArgumentList,
+   IsSetVariablesList,
 
    // NOTE: Unknown must be the last kind.
    Unknown,

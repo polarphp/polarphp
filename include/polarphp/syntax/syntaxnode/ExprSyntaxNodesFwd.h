@@ -76,6 +76,16 @@ class IntegerLiteralExprSyntax;
 class FloatLiteralExprSyntax;
 class StringLiteralExprSyntax;
 
+// function like lang structure
+class IsSetVarItemSyntax;
+class IsSetVariablesClauseSyntax;
+class IsSetExprSyntax;
+class EmptyExprSyntax;
+class IncludeExprSyntax;
+class RequireExprSyntax;
+class EvalExprSyntax;
+class FuncLikeExprSyntax;
+
 // for encaps var syntax
 class EncapsVarOffsetSyntax;
 class EncapsArrayVarSyntax;
@@ -176,6 +186,16 @@ using EncapsItemListSyntax = SyntaxCollection<SyntaxKind::EncapsListItem, Encaps
 /// | non_empty_argument_list ',' argument
 ///
 using ArgumentListSyntax = SyntaxCollection<SyntaxKind::ArgumentList, ArgumentListItemSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: IsSetVarItemSyntax
+///
+/// isset_variables:
+///   isset_variable
+/// | isset_variables ',' isset_variable
+///
+using IssetVariablesListSyntax = SyntaxCollection<SyntaxKind::IsSetVariablesList, IsSetVarItemSyntax>;
 
 } // polar::syntax
 
