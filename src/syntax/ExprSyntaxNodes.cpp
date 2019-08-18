@@ -3937,6 +3937,140 @@ CompoundAssignExprSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
 }
 
 ///
+/// LogicalExprSyntax
+///
+void LogicalExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == LogicalExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Lhs, std::set{SyntaxKind::VariableExpr});
+   syntax_assert_child_token(raw, LogicalOperator, CHILD_TOKEN_CHOICES.at(Cursor::LogicalOperator));
+   syntax_assert_child_kind(raw, Rhs, std::set{SyntaxKind::Expr});
+#endif
+}
+
+ExprSyntax LogicalExprSyntax::getLhs()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Lhs).get()};
+}
+
+TokenSyntax LogicalExprSyntax::getLogicalOperator()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LogicalOperator).get()};
+}
+
+ExprSyntax LogicalExprSyntax::getRhs()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Rhs).get()};
+}
+
+LogicalExprSyntax LogicalExprSyntax::withLhs(std::optional<ExprSyntax> lhs)
+{
+   RefCountPtr<RawSyntax> lhsRaw;
+   if (lhs.has_value()) {
+      lhsRaw = lhs->getRaw();
+   } else {
+      lhsRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<LogicalExprSyntax>(lhsRaw, Cursor::Lhs);
+}
+
+LogicalExprSyntax
+LogicalExprSyntax::withLogicalOperator(std::optional<TokenSyntax> logicalOperator)
+{
+   RefCountPtr<RawSyntax> logicalOperatorRaw;
+   if (logicalOperator.has_value()) {
+      logicalOperatorRaw = logicalOperator->getRaw();
+   } else {
+      logicalOperatorRaw = make_missing_token(T_BOOLEAN_AND);
+   }
+   return m_data->replaceChild<LogicalExprSyntax>(logicalOperatorRaw, Cursor::LogicalOperator);
+}
+
+LogicalExprSyntax
+LogicalExprSyntax::withRhs(std::optional<ExprSyntax> rhs)
+{
+   RefCountPtr<RawSyntax> rhsRaw;
+   if (rhs.has_value()) {
+      rhsRaw = rhs->getRaw();
+   } else {
+      rhsRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<LogicalExprSyntax>(rhsRaw, Cursor::Rhs);
+}
+
+///
+/// RelationExprSyntax
+///
+void RelationExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == RelationExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Lhs, std::set{SyntaxKind::VariableExpr});
+   syntax_assert_child_token(raw, RelationOperator, CHILD_TOKEN_CHOICES.at(Cursor::RelationOperator));
+   syntax_assert_child_kind(raw, Rhs, std::set{SyntaxKind::Expr});
+#endif
+}
+
+ExprSyntax RelationExprSyntax::RelationExprSyntax::getLhs()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Lhs).get()};
+}
+
+TokenSyntax RelationExprSyntax::getRelationOperator()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RelationOperator).get()};
+}
+
+ExprSyntax RelationExprSyntax::getRhs()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Rhs).get()};
+}
+
+RelationExprSyntax RelationExprSyntax::withLhs(std::optional<ExprSyntax> lhs)
+{
+   RefCountPtr<RawSyntax> lhsRaw;
+   if (lhs.has_value()) {
+      lhsRaw = lhs->getRaw();
+   } else {
+      lhsRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<RelationExprSyntax>(lhsRaw, Cursor::Lhs);
+}
+
+RelationExprSyntax
+RelationExprSyntax::withRelationOperator(std::optional<TokenSyntax> relationOperator)
+{
+   RefCountPtr<RawSyntax> relationOperatorRaw;
+   if (relationOperator.has_value()) {
+      relationOperatorRaw = relationOperator->getRaw();
+   } else {
+      relationOperatorRaw = make_missing_token(T_BOOLEAN_AND);
+   }
+   return m_data->replaceChild<RelationExprSyntax>(relationOperatorRaw, Cursor::RelationOperator);
+}
+
+RelationExprSyntax
+RelationExprSyntax::withRhs(std::optional<ExprSyntax> rhs)
+{
+   RefCountPtr<RawSyntax> rhsRaw;
+   if (rhs.has_value()) {
+      rhsRaw = rhs->getRaw();
+   } else {
+      rhsRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<RelationExprSyntax>(rhsRaw, Cursor::Rhs);
+}
+
+///
 /// EncapsVarOffsetSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

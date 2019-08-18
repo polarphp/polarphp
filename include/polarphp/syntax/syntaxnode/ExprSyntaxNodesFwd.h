@@ -90,6 +90,8 @@ class FuncLikeExprSyntax;
 
 class AssignExprSyntax;
 class CompoundAssignExprSyntax;
+class LogicalExprSyntax;
+class RelationExprSyntax;
 
 // for encaps var syntax
 class EncapsVarOffsetSyntax;

@@ -3779,6 +3779,141 @@ private:
 };
 
 ///
+/// logical_expr:
+///   expr T_BOOLEAN_OR expr
+/// | expr T_BOOLEAN_AND expr
+/// | expr T_LOGICAL_OR expr
+/// | expr T_LOGICAL_AND expr
+/// | expr T_LOGICAL_XOR expr
+///
+class LogicalExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Lhs,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      /// token choices: true
+      /// -----------------------------------------------
+      /// T_BOOLEAN_OR | T_BOOLEAN_AND | T_LOGICAL_OR
+      /// T_LOGICAL_AND | T_LOGICAL_XOR
+      ///
+      LogicalOperator,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Rhs
+   };
+
+public:
+   LogicalExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getLhs();
+   TokenSyntax getLogicalOperator();
+   ExprSyntax getRhs();
+
+   LogicalExprSyntax withLhs(std::optional<ExprSyntax> lhs);
+   LogicalExprSyntax withLogicalOperator(std::optional<TokenSyntax> logicalOperator);
+   LogicalExprSyntax withRhs(std::optional<ExprSyntax> rhs);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::LogicalExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class LogicalExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// relation_expr:
+///   expr T_IS_IDENTICAL expr
+/// | expr T_IS_NOT_IDENTICAL expr
+/// | expr T_IS_EQUAL expr
+/// | expr T_IS_NOT_EQUAL expr
+/// | expr '<' expr
+/// | expr T_IS_SMALLER_OR_EQUAL expr
+/// | expr '>' expr
+/// | expr T_IS_GREATER_OR_EQUAL expr
+/// | expr T_SPACESHIP expr
+///
+class RelationExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Lhs,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      /// token choices: true
+      /// -----------------------------------------------
+      /// T_BOOLEAN_OR | T_BOOLEAN_AND | T_LOGICAL_OR
+      /// T_LOGICAL_AND | T_LOGICAL_XOR
+      ///
+      RelationOperator,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Rhs
+   };
+public:
+   RelationExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getLhs();
+   TokenSyntax getRelationOperator();
+   ExprSyntax getRhs();
+
+   RelationExprSyntax withLhs(std::optional<ExprSyntax> lhs);
+   RelationExprSyntax withRelationOperator(std::optional<TokenSyntax> relationOperator);
+   RelationExprSyntax withRhs(std::optional<ExprSyntax> rhs);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::RelationExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class RelationExprSyntaxBuilder;
+   void validate();
+};
+
+///
 /// encaps_var_offset:
 ///   T_IDENTIFIER_STRING
 /// | T_NUM_STRING
