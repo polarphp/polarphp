@@ -3619,6 +3619,166 @@ private:
 };
 
 ///
+/// assign_expr:
+///   variable '=' expr
+/// | variable '=' '&' variable
+///
+class AssignExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 4;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: VariableExprSyntax
+      /// optional: false
+      ///
+      Target,
+      ///
+      /// type: TokenSyntax (T_EQUAL)
+      /// optional: false
+      ///
+      AssignToken,
+      ///
+      /// type: TokenSyntax (T_AMPERSAND)
+      /// optional: true
+      ///
+      RefToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      /// node choices: true
+      /// -----------------------------
+      /// node choice: ExprSyntax
+      /// -----------------------------
+      /// node choice: VariableExprSyntax
+      ///
+      ValueExpr
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   AssignExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   VariableExprSyntax getTarget();
+   TokenSyntax getAssignToken();
+   std::optional<TokenSyntax> getRefToken();
+   ExprSyntax getValueExpr();
+
+   AssignExprSyntax withTarget(std::optional<VariableExprSyntax> target);
+   AssignExprSyntax withAssignToken(std::optional<TokenSyntax> assignToken);
+   AssignExprSyntax withRefToken(std::optional<TokenSyntax> refToken);
+   AssignExprSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::AssignExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class AssignExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// compound_assign_expr:
+///   variable T_PLUS_EQUAL expr
+/// | variable T_MINUS_EQUAL expr
+/// | variable T_MUL_EQUAL expr
+/// | variable T_POW_EQUAL expr
+/// | variable T_DIV_EQUAL expr
+/// | variable T_CONCAT_EQUAL expr
+/// | variable T_MOD_EQUAL expr
+/// | variable T_AND_EQUAL expr
+/// | variable T_OR_EQUAL expr
+/// | variable T_XOR_EQUAL expr
+/// | variable T_SL_EQUAL expr
+/// | variable T_SR_EQUAL expr
+/// | variable T_COALESCE_EQUAL expr
+///
+class CompoundAssignExprSyntax : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: VariableExprSyntax
+      /// optional: false
+      ///
+      Target,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      /// token choices: true
+      /// -----------------------------------------------
+      /// T_PLUS_EQUAL | T_MINUS_EQUAL | T_MUL_EQUAL
+      /// -----------------------------------------------
+      /// T_POW_EQUAL | T_DIV_EQUAL | T_CONCAT_EQUAL
+      /// -----------------------------------------------
+      /// T_MOD_EQUAL | T_AND_EQUAL | T_OR_EQUAL
+      /// -----------------------------------------------
+      /// T_XOR_EQUAL | T_SL_EQUAL | T_SR_EQUAL
+      /// -----------------------------------------------
+      /// T_COALESCE_EQUAL
+      ///
+      CompoundAssignToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      ValueExpr
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
+
+public:
+   CompoundAssignExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   VariableExprSyntax getTarget();
+   TokenSyntax getCompoundAssignToken();
+   ExprSyntax getValueExpr();
+
+   CompoundAssignExprSyntax withTarget(std::optional<VariableExprSyntax> target);
+   CompoundAssignExprSyntax withCompoundAssignToken(std::optional<TokenSyntax> compoundAssignToken);
+   CompoundAssignExprSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::CompoundAssignExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class CompoundAssignExprSyntaxBuilder;
+   void validate();
+};
+
+///
 /// encaps_var_offset:
 ///   T_IDENTIFIER_STRING
 /// | T_NUM_STRING

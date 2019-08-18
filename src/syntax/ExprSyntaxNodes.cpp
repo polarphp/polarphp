@@ -3755,6 +3755,188 @@ FuncLikeExprSyntax::withFuncLikeExpr(std::optional<ExprSyntax> funcLikeExpr)
 }
 
 ///
+/// AssignExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType AssignExprSyntax::CHILD_NODE_CHOICES
+{
+   {
+      AssignExprSyntax::ValueExpr, {
+         SyntaxKind::Expr, SyntaxKind::VariableExpr,
+      }
+   }
+};
+#endif
+
+void AssignExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == AssignExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Target, std::set{SyntaxKind::VariableExpr});
+   syntax_assert_child_token(raw, AssignToken, std::set{TokenKindType::T_EQUAL});
+   syntax_assert_child_token(raw, RefToken, std::set{TokenKindType::T_AMPERSAND});
+   syntax_assert_child_kind(raw, ValueExpr, CHILD_NODE_CHOICES.at(Cursor::ValueExpr));
+#endif
+}
+
+VariableExprSyntax AssignExprSyntax::getTarget()
+{
+   return VariableExprSyntax {m_root, m_data->getChild(Cursor::Target).get()};
+}
+
+TokenSyntax AssignExprSyntax::getAssignToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::AssignToken).get()};
+}
+
+std::optional<TokenSyntax> AssignExprSyntax::getRefToken()
+{
+   RefCountPtr<SyntaxData> refTokenData = m_data->getChild(Cursor::RefToken);
+   if (!refTokenData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, refTokenData.get()};
+}
+
+ExprSyntax AssignExprSyntax::getValueExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::ValueExpr).get()};
+}
+
+AssignExprSyntax AssignExprSyntax::withTarget(std::optional<VariableExprSyntax> target)
+{
+   RefCountPtr<RawSyntax> targetRaw;
+   if (target.has_value()) {
+      targetRaw = target->getRaw();
+   } else {
+      targetRaw = RawSyntax::missing(SyntaxKind::VariableExpr);
+   }
+   return m_data->replaceChild<AssignExprSyntax>(targetRaw, Cursor::Target);
+}
+
+AssignExprSyntax AssignExprSyntax::withAssignToken(std::optional<TokenSyntax> assignToken)
+{
+   RefCountPtr<RawSyntax> assignTokenRaw;
+   if (assignToken.has_value()) {
+      assignTokenRaw = assignToken->getRaw();
+   } else {
+      assignTokenRaw = make_missing_token(T_EQUAL);
+   }
+   return m_data->replaceChild<AssignExprSyntax>(assignTokenRaw, Cursor::AssignToken);
+}
+
+AssignExprSyntax AssignExprSyntax::withRefToken(std::optional<TokenSyntax> refToken)
+{
+   RefCountPtr<RawSyntax> refTokenRaw;
+   if (refToken.has_value()) {
+      refTokenRaw = refToken->getRaw();
+   } else {
+      refTokenRaw = nullptr;
+   }
+   return m_data->replaceChild<AssignExprSyntax>(refTokenRaw, Cursor::RefToken);
+}
+
+AssignExprSyntax AssignExprSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
+{
+   RefCountPtr<RawSyntax> valueExprRaw;
+   if (valueExpr.has_value()) {
+      valueExprRaw = valueExpr->getRaw();
+   } else {
+      valueExprRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<AssignExprSyntax>(valueExprRaw, Cursor::ValueExpr);
+}
+
+///
+/// CompoundAssignExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType CompoundAssignExprSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      CompoundAssignExprSyntax::CompoundAssignToken, {
+         TokenKindType::T_PLUS_EQUAL, TokenKindType::T_MINUS_EQUAL,
+               TokenKindType::T_MUL_EQUAL, TokenKindType::T_POW_EQUAL,
+               TokenKindType::T_DIV_EQUAL, TokenKindType::T_STR_CONCAT_EQUAL,
+               TokenKindType::T_MOD_EQUAL, TokenKindType::T_AND_EQUAL,
+               TokenKindType::T_OR_EQUAL, TokenKindType::T_XOR_EQUAL,
+               TokenKindType::T_SL_EQUAL, TokenKindType::T_SR_EQUAL,
+               TokenKindType::T_COALESCE_EQUAL
+      }
+   }
+};
+#endif
+
+void CompoundAssignExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == CompoundAssignExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Target, std::set{SyntaxKind::VariableExpr});
+   syntax_assert_child_token(raw, CompoundAssignToken, CHILD_TOKEN_CHOICES.at(Cursor::CompoundAssignToken));
+   syntax_assert_child_kind(raw, ValueExpr, std::set{SyntaxKind::Expr});
+#endif
+}
+
+VariableExprSyntax CompoundAssignExprSyntax::getTarget()
+{
+   return VariableExprSyntax {m_root, m_data->getChild(Cursor::Target).get()};
+}
+
+TokenSyntax CompoundAssignExprSyntax::getCompoundAssignToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::CompoundAssignToken).get()};
+}
+
+ExprSyntax CompoundAssignExprSyntax::getValueExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::ValueExpr).get()};
+}
+
+CompoundAssignExprSyntax
+CompoundAssignExprSyntax::withTarget(std::optional<VariableExprSyntax> target)
+{
+   RefCountPtr<RawSyntax> targetRaw;
+   if (target.has_value()) {
+      targetRaw = target->getRaw();
+   } else {
+      targetRaw = RawSyntax::missing(SyntaxKind::VariableExpr);
+   }
+   return m_data->replaceChild<CompoundAssignExprSyntax>(targetRaw, Cursor::Target);
+}
+
+CompoundAssignExprSyntax
+CompoundAssignExprSyntax::withCompoundAssignToken(std::optional<TokenSyntax> compoundAssignToken)
+{
+   RefCountPtr<RawSyntax> compoundAssignTokenRaw;
+   if (compoundAssignToken.has_value()) {
+      compoundAssignTokenRaw = compoundAssignToken->getRaw();
+   } else {
+      compoundAssignTokenRaw = make_missing_token(T_PLUS_EQUAL);
+   }
+   return m_data->replaceChild<CompoundAssignExprSyntax>(compoundAssignTokenRaw, Cursor::CompoundAssignToken);
+}
+
+CompoundAssignExprSyntax
+CompoundAssignExprSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
+{
+   RefCountPtr<RawSyntax> valueExprRaw;
+   if (valueExpr.has_value()) {
+      valueExprRaw = valueExpr->getRaw();
+   } else {
+      valueExprRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<CompoundAssignExprSyntax>(valueExprRaw, Cursor::ValueExpr);
+}
+
+///
 /// EncapsVarOffsetSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
@@ -4833,7 +5015,7 @@ const TokenChoicesType PostfixOperatorExprSyntax::CHILD_TOKEN_CHOICES
 {
    {
       PrefixOperatorExprSyntax::OperatorToken, {
-          TokenKindType::T_INC, TokenKindType::T_DEC
+         TokenKindType::T_INC, TokenKindType::T_DEC
       }
    }
 };

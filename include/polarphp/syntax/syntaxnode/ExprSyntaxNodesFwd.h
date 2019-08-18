@@ -88,6 +88,9 @@ class EchoFuncExprSyntax;
 class PrintFuncExprSyntax;
 class FuncLikeExprSyntax;
 
+class AssignExprSyntax;
+class CompoundAssignExprSyntax;
+
 // for encaps var syntax
 class EncapsVarOffsetSyntax;
 class EncapsArrayVarSyntax;

@@ -144,6 +144,9 @@ enum class SyntaxKind : std::uint32_t
    PrintFuncExpr,
    FuncLikeExpr,
 
+   AssignExpr,
+   CompoundAssignExpr,
+
    EncapsVarOffset,
    EncapsArrayVar,
    EncapsObjProp,
