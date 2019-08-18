@@ -88,8 +88,8 @@ class EchoFuncExprSyntax;
 class PrintFuncExprSyntax;
 class FuncLikeExprSyntax;
 
-class AssignExprSyntax;
-class CompoundAssignExprSyntax;
+class AssignmentExprSyntax;
+class CompoundAssignmentExprSyntax;
 class LogicalExprSyntax;
 class RelationExprSyntax;
 
@@ -108,7 +108,6 @@ class HeredocExprSyntax;
 class EncapsListStringExprSyntax;
 class BooleanLiteralExprSyntax;
 class TernaryExprSyntax;
-class AssignmentExprSyntax;
 class SequenceExprSyntax;
 class PrefixOperatorExprSyntax;
 class PostfixOperatorExprSyntax;

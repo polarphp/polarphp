@@ -144,8 +144,8 @@ enum class SyntaxKind : std::uint32_t
    PrintFuncExpr,
    FuncLikeExpr,
 
-   AssignExpr,
-   CompoundAssignExpr,
+   AssignmentExpr,
+   CompoundAssignmentExpr,
    LogicalExpr,
    RelationExpr,
 
@@ -171,7 +171,6 @@ enum class SyntaxKind : std::uint32_t
    ScalarExpr,
    BooleanLiteralExpr,
    TernaryExpr,
-   AssignmentExpr,
    SequenceExpr,
    ClassRefParentExpr,
    ClassRefStaticExpr,

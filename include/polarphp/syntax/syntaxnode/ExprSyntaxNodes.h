@@ -3623,7 +3623,7 @@ private:
 ///   variable '=' expr
 /// | variable '=' '&' variable
 ///
-class AssignExprSyntax final : public ExprSyntax
+class AssignmentExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 4;
@@ -3662,7 +3662,7 @@ public:
 #endif
 
 public:
-   AssignExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   AssignmentExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
       validate();
@@ -3673,14 +3673,14 @@ public:
    std::optional<TokenSyntax> getRefToken();
    ExprSyntax getValueExpr();
 
-   AssignExprSyntax withTarget(std::optional<VariableExprSyntax> target);
-   AssignExprSyntax withAssignToken(std::optional<TokenSyntax> assignToken);
-   AssignExprSyntax withRefToken(std::optional<TokenSyntax> refToken);
-   AssignExprSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
+   AssignmentExprSyntax withTarget(std::optional<VariableExprSyntax> target);
+   AssignmentExprSyntax withAssignToken(std::optional<TokenSyntax> assignToken);
+   AssignmentExprSyntax withRefToken(std::optional<TokenSyntax> refToken);
+   AssignmentExprSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::AssignExpr;
+      return kind == SyntaxKind::AssignmentExpr;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -3689,7 +3689,7 @@ public:
    }
 
 private:
-   friend class AssignExprSyntaxBuilder;
+   friend class AssignmentExprSyntaxBuilder;
    void validate();
 };
 
@@ -3709,7 +3709,7 @@ private:
 /// | variable T_SR_EQUAL expr
 /// | variable T_COALESCE_EQUAL expr
 ///
-class CompoundAssignExprSyntax : public ExprSyntax
+class CompoundAssignmentExprSyntax : public ExprSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 3;
@@ -3749,7 +3749,7 @@ public:
 #endif
 
 public:
-   CompoundAssignExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   CompoundAssignmentExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
       validate();
@@ -3759,13 +3759,13 @@ public:
    TokenSyntax getCompoundAssignToken();
    ExprSyntax getValueExpr();
 
-   CompoundAssignExprSyntax withTarget(std::optional<VariableExprSyntax> target);
-   CompoundAssignExprSyntax withCompoundAssignToken(std::optional<TokenSyntax> compoundAssignToken);
-   CompoundAssignExprSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
+   CompoundAssignmentExprSyntax withTarget(std::optional<VariableExprSyntax> target);
+   CompoundAssignmentExprSyntax withCompoundAssignToken(std::optional<TokenSyntax> compoundAssignToken);
+   CompoundAssignmentExprSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::CompoundAssignExpr;
+      return kind == SyntaxKind::CompoundAssignmentExpr;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -3774,7 +3774,7 @@ public:
    }
 
 private:
-   friend class CompoundAssignExprSyntaxBuilder;
+   friend class CompoundAssignmentExprSyntaxBuilder;
    void validate();
 };
 
@@ -4725,46 +4725,6 @@ public:
 
 private:
    friend class TernaryExprSyntaxBuilder;
-   void validate();
-};
-
-class AssignmentExprSyntax final : public ExprSyntax
-{
-public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 1;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
-   enum Cursor : SyntaxChildrenCountType
-   {
-      /// type: TokenSyntax
-      /// optional: false
-      AssignToken
-   };
-public:
-   AssignmentExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : ExprSyntax(root, data)
-   {
-      validate();
-   }
-
-   TokenSyntax getAssignToken();
-
-   /// Returns a copy of the receiver with its `AssignToken` replaced.
-   /// - param newChild: The new `AssignToken` to replace the node's
-   ///                   current `AssignToken`, if present.
-   AssignmentExprSyntax withAssignToken(std::optional<TokenSyntax> assignToken);
-
-   static bool kindOf(SyntaxKind kind)
-   {
-      return kind == SyntaxKind::AssignmentExpr;
-   }
-
-   static bool classOf(const Syntax *syntax)
-   {
-      return kindOf(syntax->getKind());
-   }
-
-private:
-   friend class AssignmentExprSyntaxBuilder;
    void validate();
 };
 
