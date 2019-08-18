@@ -4646,6 +4646,11 @@ private:
    void validate();
 };
 
+///
+/// ternary_expr:
+/// 	expr '?' expr ':' expr
+/// | expr '?' ':' expr
+///
 class TernaryExprSyntax final : public ExprSyntax
 {
 public:
@@ -4656,13 +4661,13 @@ public:
       /// type: ExprSyntax
       /// optional: false
       ConditionExpr,
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_QUESTION_MARK)
       /// optional: false
       QuestionMark,
       /// type: ExprSyntax
-      /// optional: false
+      /// optional: true
       FirstChoice,
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_COLON)
       /// optional: false
       ColonMark,
       /// type: ExprSyntax
@@ -4679,7 +4684,7 @@ public:
 
    ExprSyntax getConditionExpr();
    TokenSyntax getQuestionMark();
-   ExprSyntax getFirstChoice();
+   std::optional<ExprSyntax> getFirstChoice();
    TokenSyntax getColonMark();
    ExprSyntax getSecondChoice();
 
@@ -4931,6 +4936,21 @@ private:
    void validate();
 };
 
+///
+/// binary_expr:
+///   expr '|' expr
+/// | expr '&' expr
+/// | expr '^' expr
+/// | expr '.' expr
+/// |	expr '+' expr
+/// | expr '-' expr
+/// | expr '*' expr
+/// | expr T_POW expr
+/// | expr '/' expr
+/// | expr '%' expr
+/// | expr T_SL expr
+/// | expr T_SR expr
+///
 class BinaryOperatorExprSyntax final : public ExprSyntax
 {
 public:
@@ -4938,10 +4958,21 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Lhs,
       /// type: TokenSyntax
       /// optional: false
-      OperatorToken
+      OperatorToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Rhs
    };
+
 public:
    BinaryOperatorExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
@@ -4949,8 +4980,13 @@ public:
       validate();
    }
 
+   ExprSyntax getLhs();
    TokenSyntax getOperatorToken();
+   ExprSyntax getRhs();
+
+   BinaryOperatorExprSyntax withLhs(std::optional<ExprSyntax> lhs);
    BinaryOperatorExprSyntax withOperatorToken(std::optional<TokenSyntax> operatorToken);
+   BinaryOperatorExprSyntax withRhs(std::optional<ExprSyntax> rhs);
 
    static bool kindOf(SyntaxKind kind)
    {

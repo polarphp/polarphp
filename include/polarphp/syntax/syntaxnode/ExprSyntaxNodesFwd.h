@@ -112,6 +112,7 @@ class AssignmentExprSyntax;
 class SequenceExprSyntax;
 class PrefixOperatorExprSyntax;
 class PostfixOperatorExprSyntax;
+class TernaryExprSyntax;
 class BinaryOperatorExprSyntax;
 class UseLexicalVarClauseSyntax;
 class LexicalVarItemSyntax;

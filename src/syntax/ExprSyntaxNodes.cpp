@@ -4910,6 +4910,9 @@ BooleanLiteralExprSyntax BooleanLiteralExprSyntax::withBooleanValue(std::optiona
    return m_data->replaceChild<BooleanLiteralExprSyntax>(rawBooleanValue, Cursor::Boolean);
 }
 
+///
+/// TernaryExprSyntax
+///
 void TernaryExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
@@ -4918,6 +4921,12 @@ void TernaryExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == TernaryExprSyntax::CHILDREN_COUNT);
+
+   syntax_assert_child_kind(raw, ConditionExpr, std::set{SyntaxKind::Expr});
+   syntax_assert_child_kind(raw, FirstChoice, std::set{SyntaxKind::Expr});
+   syntax_assert_child_kind(raw, SecondChoice, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, QuestionMark, std::set{TokenKindType::T_QUESTION_MARK});
+   syntax_assert_child_token(raw, ColonMark, std::set{TokenKindType::T_COLON});
 #endif
 }
 
@@ -4931,9 +4940,13 @@ TokenSyntax TernaryExprSyntax::getQuestionMark()
    return TokenSyntax{m_root, m_data->getChild(Cursor::QuestionMark).get()};
 }
 
-ExprSyntax TernaryExprSyntax::getFirstChoice()
+std::optional<ExprSyntax> TernaryExprSyntax::getFirstChoice()
 {
-   return ExprSyntax{m_root, m_data->getChild(Cursor::FirstChoice).get()};
+   RefCountPtr<SyntaxData> firstChoiceData = m_data->getChild(Cursor::FirstChoice);
+   if (!firstChoiceData) {
+      return std::nullopt;
+   }
+   return ExprSyntax{m_root, firstChoiceData.get()};
 }
 
 TokenSyntax TernaryExprSyntax::getColonMark()
