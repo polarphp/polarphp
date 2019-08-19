@@ -2828,7 +2828,7 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_CLASS_REF_PARENT)
       /// optional: false
       ParentKeyword,
    };
@@ -2865,7 +2865,7 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_CLASS_REF_SELF)
       /// optional: false
       SelfKeyword,
    };
@@ -2902,7 +2902,7 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_CLASS_REF_STATIC)
       /// optional: false
       StaticKeyword,
    };
@@ -2938,7 +2938,7 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_LNUMBER)
       /// optional: false
       Digits,
    };
@@ -2974,7 +2974,7 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_DNUMBER)
       /// optional: false
       FloatDigits,
    };

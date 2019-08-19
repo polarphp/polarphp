@@ -2992,6 +2992,7 @@ void ClassRefParentExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == ClassRefParentExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ParentKeyword, std::set{TokenKindType::T_CLASS_REF_PARENT});
 #endif
 }
 
@@ -3020,6 +3021,7 @@ void ClassRefSelfExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == ClassRefSelfExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, SelfKeyword, std::set{TokenKindType::T_CLASS_REF_SELF});
 #endif
 }
 
@@ -3048,6 +3050,7 @@ void ClassRefStaticExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == ClassRefStaticExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, StaticKeyword, std::set{TokenKindType::T_CLASS_REF_STATIC});
 #endif
 }
 
