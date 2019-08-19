@@ -85,7 +85,7 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_NULL)
       /// optional: false
       NullKeyword,
    };
@@ -3814,6 +3814,10 @@ public:
       Rhs
    };
 
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
+
 public:
    LogicalExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
@@ -3853,7 +3857,63 @@ private:
 ///
 class BitLogicalExprSyntax final : public ExprSyntax
 {
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Lhs,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      /// token choices: true
+      /// -----------------------------------------------
+      /// T_VBAR | T_AMPERSAND | T_CARET
+      ///
+      BitLogicalOperator,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Rhs
+   };
 
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
+
+public:
+   BitLogicalExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getLhs();
+   TokenSyntax getBitLogicalOperator();
+   ExprSyntax getRhs();
+
+   BitLogicalExprSyntax withLhs(std::optional<ExprSyntax> lhs);
+   BitLogicalExprSyntax withBitLogicalOperator(std::optional<TokenSyntax> bitLogicalOperator);
+   BitLogicalExprSyntax withRhs(std::optional<ExprSyntax> rhs);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::BitLogicalExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class LogicalExprSyntaxBuilder;
+   void validate();
 };
 
 ///
@@ -3885,8 +3945,9 @@ public:
       /// optional: false
       /// token choices: true
       /// -----------------------------------------------
-      /// T_BOOLEAN_OR | T_BOOLEAN_AND | T_LOGICAL_OR
-      /// T_LOGICAL_AND | T_LOGICAL_XOR
+      /// T_IS_IDENTICAL | T_IS_NOT_IDENTICAL | T_IS_EQUAL
+      /// T_IS_NOT_EQUAL | T_LEFT_ANGLE | T_IS_SMALLER_OR_EQUAL
+      /// T_RIGHT_ANGLE | T_IS_GREATER_OR_EQUAL | T_SPACESHIP
       ///
       RelationOperator,
       ///
@@ -3895,6 +3956,11 @@ public:
       ///
       Rhs
    };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
+
 public:
    RelationExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)

@@ -93,6 +93,7 @@ void NullExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == NullExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, NullKeyword, std::set{TokenKindType::T_NULL});
 #endif
 }
 
@@ -124,6 +125,7 @@ void OptionalExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == OptionalExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
 #endif
 }
 
@@ -3082,6 +3084,7 @@ void IntegerLiteralExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == IntegerLiteralExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Digits, std::set{TokenKindType::T_LNUMBER});
 #endif
 }
 
@@ -3113,6 +3116,7 @@ void FloatLiteralExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == FloatLiteralExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, FloatDigits, std::set{TokenKindType::T_DNUMBER});
 #endif
 }
 
@@ -3942,6 +3946,19 @@ CompoundAssignmentExprSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
 ///
 /// LogicalExprSyntax
 ///
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType LogicalExprSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      LogicalExprSyntax::LogicalOperator, {
+         TokenKindType::T_BOOLEAN_OR, TokenKindType::T_BOOLEAN_AND,
+               TokenKindType::T_LOGICAL_OR, TokenKindType::T_LOGICAL_AND,
+               TokenKindType::T_LOGICAL_OR, TokenKindType::T_LOGICAL_XOR,
+      }
+   }
+};
+#endif
+
 void LogicalExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
@@ -3950,7 +3967,7 @@ void LogicalExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == LogicalExprSyntax::CHILDREN_COUNT);
-   syntax_assert_child_kind(raw, Lhs, std::set{SyntaxKind::VariableExpr});
+   syntax_assert_child_kind(raw, Lhs, std::set{SyntaxKind::Expr});
    syntax_assert_child_token(raw, LogicalOperator, CHILD_TOKEN_CHOICES.at(Cursor::LogicalOperator));
    syntax_assert_child_kind(raw, Rhs, std::set{SyntaxKind::Expr});
 #endif
@@ -4007,8 +4024,103 @@ LogicalExprSyntax::withRhs(std::optional<ExprSyntax> rhs)
 }
 
 ///
+/// BitLogicalExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType BitLogicalExprSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      BitLogicalExprSyntax::BitLogicalOperator, {
+         TokenKindType::T_VBAR, TokenKindType::T_AMPERSAND,
+               TokenKindType::T_CARET, TokenKindType::T_LOGICAL_AND,
+               TokenKindType::T_LOGICAL_XOR,
+      }
+   }
+};
+#endif
+
+void BitLogicalExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == BitLogicalExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Lhs, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, BitLogicalOperator, CHILD_TOKEN_CHOICES.at(Cursor::BitLogicalOperator));
+   syntax_assert_child_kind(raw, Rhs, std::set{SyntaxKind::Expr});
+#endif
+}
+
+ExprSyntax BitLogicalExprSyntax::getLhs()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Lhs).get()};
+}
+
+TokenSyntax BitLogicalExprSyntax::getBitLogicalOperator()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::BitLogicalOperator).get()};
+}
+
+ExprSyntax BitLogicalExprSyntax::getRhs()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Rhs).get()};
+}
+
+BitLogicalExprSyntax BitLogicalExprSyntax::withLhs(std::optional<ExprSyntax> lhs)
+{
+   RefCountPtr<RawSyntax> lhsRaw;
+   if (lhs.has_value()) {
+      lhsRaw = lhs->getRaw();
+   } else {
+      lhsRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<BitLogicalExprSyntax>(lhsRaw, Cursor::Lhs);
+}
+
+BitLogicalExprSyntax
+BitLogicalExprSyntax::withBitLogicalOperator(std::optional<TokenSyntax> bitLogicalOperator)
+{
+   RefCountPtr<RawSyntax> bitLogicalOperatorRaw;
+   if (bitLogicalOperator.has_value()) {
+      bitLogicalOperatorRaw = bitLogicalOperator->getRaw();
+   } else {
+      bitLogicalOperatorRaw = make_missing_token(T_AMPERSAND);
+   }
+   return m_data->replaceChild<BitLogicalExprSyntax>(bitLogicalOperatorRaw, Cursor::BitLogicalOperator);
+}
+
+BitLogicalExprSyntax
+BitLogicalExprSyntax::withRhs(std::optional<ExprSyntax> rhs)
+{
+   RefCountPtr<RawSyntax> rhsRaw;
+   if (rhs.has_value()) {
+      rhsRaw = rhs->getRaw();
+   } else {
+      rhsRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<BitLogicalExprSyntax>(rhsRaw, Cursor::Rhs);
+}
+
+///
 /// RelationExprSyntax
 ///
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType RelationExprSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      RelationExprSyntax::RelationOperator, {
+         TokenKindType::T_IS_IDENTICAL, TokenKindType::T_IS_NOT_IDENTICAL,
+               TokenKindType::T_IS_EQUAL, TokenKindType::T_IS_NOT_EQUAL,
+               TokenKindType::T_LEFT_ANGLE, TokenKindType::T_IS_SMALLER_OR_EQUAL,
+               TokenKindType::T_RIGHT_ANGLE, TokenKindType::T_IS_GREATER_OR_EQUAL,
+               TokenKindType::T_SPACESHIP,
+      }
+   }
+};
+#endif
+
 void RelationExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
@@ -4888,11 +5000,11 @@ void BooleanLiteralExprSyntax::validate()
    if (isMissing()) {
       return;
    }
+   assert(raw->getLayout().size() == BooleanLiteralExprSyntax::CHILDREN_COUNT);
    ///
    /// check Boolean token choice
    ///
    syntax_assert_child_token(raw, Boolean, CHILD_TOKEN_CHOICES.at(Boolean));
-   assert(raw->getLayout().size() == BooleanLiteralExprSyntax::CHILDREN_COUNT);
 #endif
 }
 
@@ -5027,6 +5139,7 @@ void SequenceExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == SequenceExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Elements, std::set{SyntaxKind::ExprList});
 #endif
 }
 

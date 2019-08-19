@@ -65,6 +65,8 @@ class AnonymousClassDefinitionClauseSyntax;
 class SimpleInstanceCreateExprSyntax;
 class AnonymousInstanceCreateExprSyntax;
 class ClassicLambdaExprSyntax;
+class UseLexicalVarClauseSyntax;
+class LexicalVarItemSyntax;
 class SimplifiedLambdaExprSyntax;
 class LambdaExprSyntax;
 class InstanceCreateExprSyntax;
@@ -114,8 +116,6 @@ class PrefixOperatorExprSyntax;
 class PostfixOperatorExprSyntax;
 class TernaryExprSyntax;
 class BinaryOperatorExprSyntax;
-class UseLexicalVarClauseSyntax;
-class LexicalVarItemSyntax;
 
 // Decl Syntax nodes forward declares
 class NameSyntax;

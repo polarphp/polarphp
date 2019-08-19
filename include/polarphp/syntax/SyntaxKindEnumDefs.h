@@ -146,6 +146,7 @@ enum class SyntaxKind : std::uint32_t
 
    AssignmentExpr,
    CompoundAssignmentExpr,
+   BitLogicalExpr,
    LogicalExpr,
    RelationExpr,
 
