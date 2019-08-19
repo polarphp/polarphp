@@ -3845,6 +3845,18 @@ private:
 };
 
 ///
+/// bit_logical_expr:
+///   expr '|' expr
+/// | expr '&' expr
+/// | expr '^' expr
+///
+///
+class BitLogicalExprSyntax final : public ExprSyntax
+{
+
+};
+
+///
 /// relation_expr:
 ///   expr T_IS_IDENTICAL expr
 /// | expr T_IS_NOT_IDENTICAL expr
@@ -4898,9 +4910,6 @@ private:
 
 ///
 /// binary_expr:
-///   expr '|' expr
-/// | expr '&' expr
-/// | expr '^' expr
 /// | expr '.' expr
 /// |	expr '+' expr
 /// | expr '-' expr
@@ -4923,8 +4932,15 @@ public:
       /// optional: false
       ///
       Lhs,
+      ///
       /// type: TokenSyntax
       /// optional: false
+      /// token choices: true
+      /// --------------------------------
+      /// T_STR_CONCAT | T_PLUS_SIGN | T_MINUS_SIGN
+      /// T_MUL_SIGN | T_DIV_SIGN | T_POW
+      /// T_MOD_SIGN | T_SL | T_SR
+      ///
       OperatorToken,
       ///
       /// type: ExprSyntax
@@ -4932,6 +4948,10 @@ public:
       ///
       Rhs
    };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
 
 public:
    BinaryOperatorExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)

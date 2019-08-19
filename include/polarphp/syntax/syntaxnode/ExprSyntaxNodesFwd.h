@@ -91,6 +91,7 @@ class FuncLikeExprSyntax;
 class AssignmentExprSyntax;
 class CompoundAssignmentExprSyntax;
 class LogicalExprSyntax;
+class BitLogicalExprSyntax;
 class RelationExprSyntax;
 
 // for encaps var syntax

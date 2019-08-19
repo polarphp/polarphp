@@ -5186,8 +5186,7 @@ PostfixOperatorExprSyntax PostfixOperatorExprSyntax::withOperatorToken(std::opti
    if (operatorToken.has_value()) {
       rawOperatorToken = operatorToken->getRaw();
    } else {
-      rawOperatorToken = RawSyntax::missing(TokenKindType::T_POSTFIX_OPERATOR,
-                                            OwnedString::makeUnowned(""));
+      rawOperatorToken = make_missing_token(T_INC);
    }
    return m_data->replaceChild<PostfixOperatorExprSyntax>(rawOperatorToken, Cursor::OperatorToken);
 }
@@ -5195,6 +5194,21 @@ PostfixOperatorExprSyntax PostfixOperatorExprSyntax::withOperatorToken(std::opti
 ///
 /// BinaryOperatorExprSyntax
 ///
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType BinaryOperatorExprSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      BinaryOperatorExprSyntax::OperatorToken, {
+         TokenKindType::T_STR_CONCAT, TokenKindType::T_PLUS_SIGN,
+               TokenKindType::T_MINUS_SIGN,TokenKindType::T_MUL_SIGN,
+               TokenKindType::T_DIV_SIGN,TokenKindType::T_POW,
+               TokenKindType::T_MOD_SIGN,TokenKindType::T_SL,
+               TokenKindType::T_SR
+      }
+   }
+};
+#endif
+
 void BinaryOperatorExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
@@ -5203,6 +5217,9 @@ void BinaryOperatorExprSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == BinaryOperatorExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Lhs, std::set{SyntaxKind::Expr});
+   syntax_assert_child_kind(raw, Rhs, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, OperatorToken, CHILD_TOKEN_CHOICES.at(Cursor::OperatorToken));
 #endif
 }
 
@@ -5217,10 +5234,9 @@ BinaryOperatorExprSyntax BinaryOperatorExprSyntax::withOperatorToken(std::option
    if (operatorToken.has_value()) {
       rawOperatorToken = operatorToken->getRaw();
    } else {
-      rawOperatorToken = RawSyntax::missing(TokenKindType::T_BINARY_OPERATOR,
-                                            OwnedString::makeUnowned(""));
+      rawOperatorToken = make_missing_token(T_PLUS_SIGN);
    }
-   return m_data->replaceChild<BinaryOperatorExprSyntax>(rawOperatorToken, TokenKindType::T_BINARY_OPERATOR);
+   return m_data->replaceChild<BinaryOperatorExprSyntax>(rawOperatorToken, Cursor::OperatorToken);
 }
 
 ///

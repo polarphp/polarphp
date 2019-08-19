@@ -199,7 +199,7 @@ public:
 private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[AssignmentExprSyntax::CHILDREN_COUNT] = {
-      nullptr
+      nullptr, nullptr, nullptr, nullptr
    };
 };
 
