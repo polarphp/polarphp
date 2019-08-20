@@ -5275,6 +5275,63 @@ private:
 };
 
 ///
+/// shell_cmd_expr:
+///   '`' backticks_expr '`'
+///
+class ShellCmdExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_BACKTICK)
+      /// optional: false
+      ///
+      LeftBacktick,
+      ///
+      /// type: BackticksClauseSyntax
+      /// optional: true
+      ///
+      BackticksExpr,
+      ///
+      /// type: TokenSyntax (T_BACKTICK)
+      /// optional: false
+      ///
+      RightBacktick
+   };
+public:
+   ShellCmdExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getLeftBacktick();
+   std::optional<BackticksClauseSyntax> getBackticksExpr();
+   TokenSyntax getRightBacktick();
+
+   ShellCmdExprSyntax withLeftBacktick(std::optional<TokenSyntax> leftBacktick);
+   ShellCmdExprSyntax withBackticksExpr(std::optional<BackticksClauseSyntax> backticksExpr);
+   ShellCmdExprSyntax withRightBacktick(std::optional<TokenSyntax> rightBacktick);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ShellCmdExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class BinaryOperatorExprSyntaxBuilder;
+   void validate();
+};
+
+///
 ///
 /// lexical_vars:
 ///   /* empty */

@@ -5580,6 +5580,75 @@ BinaryOperatorExprSyntax BinaryOperatorExprSyntax::withOperatorToken(std::option
 }
 
 ///
+/// ShellCmdExprSyntax
+///
+void ShellCmdExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ShellCmdExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftBacktick, std::set{TokenKindType::T_BACKTICK});
+   syntax_assert_child_kind(raw, BackticksExpr, std::set{SyntaxKind::BackticksClause});
+   syntax_assert_child_token(raw, RightBacktick, std::set{TokenKindType::T_BACKTICK});
+#endif
+}
+
+TokenSyntax ShellCmdExprSyntax::getLeftBacktick()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftBacktick).get()};
+}
+
+std::optional<BackticksClauseSyntax> ShellCmdExprSyntax::getBackticksExpr()
+{
+   RefCountPtr<SyntaxData> exprData = m_data->getChild(Cursor::BackticksExpr);
+   if (!exprData) {
+      return std::nullopt;
+   }
+   return BackticksClauseSyntax {m_root, exprData.get()};
+}
+
+TokenSyntax ShellCmdExprSyntax::getRightBacktick()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightBacktick).get()};
+}
+
+ShellCmdExprSyntax ShellCmdExprSyntax::withLeftBacktick(std::optional<TokenSyntax> leftBacktick)
+{
+   RefCountPtr<RawSyntax> leftBacktickRaw;
+   if (leftBacktick.has_value()) {
+      leftBacktickRaw = leftBacktick->getRaw();
+   } else {
+      leftBacktickRaw = make_missing_token(T_BACKTICK);
+   }
+   return m_data->replaceChild<ShellCmdExprSyntax>(leftBacktickRaw, Cursor::LeftBacktick);
+}
+
+ShellCmdExprSyntax ShellCmdExprSyntax::withBackticksExpr(std::optional<BackticksClauseSyntax> backticksExpr)
+{
+   RefCountPtr<RawSyntax> backticksExprRaw;
+   if (backticksExpr.has_value()) {
+      backticksExprRaw = backticksExpr->getRaw();
+   } else {
+      backticksExprRaw = nullptr;
+   }
+   return m_data->replaceChild<ShellCmdExprSyntax>(backticksExprRaw, Cursor::BackticksExpr);
+}
+
+ShellCmdExprSyntax ShellCmdExprSyntax::withRightBacktick(std::optional<TokenSyntax> rightBacktick)
+{
+   RefCountPtr<RawSyntax> rightBacktickRaw;
+   if (rightBacktick.has_value()) {
+      rightBacktickRaw = rightBacktick->getRaw();
+   } else {
+      rightBacktickRaw = make_missing_token(T_BACKTICK);
+   }
+   return m_data->replaceChild<ShellCmdExprSyntax>(rightBacktickRaw, Cursor::RightBacktick);
+}
+
+///
 /// UseLexicalVarClauseSyntax
 ///
 void UseLexicalVarClauseSyntax::validate()
