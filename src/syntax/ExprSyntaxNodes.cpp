@@ -4320,6 +4320,58 @@ ExitExprArgClauseSyntax::getRightParenToken(std::optional<TokenSyntax> rightPare
 }
 
 ///
+/// ExitExprSyntax
+///
+void ExitExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ExitExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ExitToken, std::set{TokenKindType::T_EXIT});
+   syntax_assert_child_kind(raw, ArgClause, std::set{SyntaxKind::ExitExprArgClause});
+#endif
+}
+
+TokenSyntax ExitExprSyntax::getExitToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::ExitToken).get()};
+}
+
+std::optional<ExitExprArgClauseSyntax> ExitExprSyntax::getArgClause()
+{
+   RefCountPtr<SyntaxData> argClauseData = m_data->getChild(Cursor::ArgClause);
+   if (!argClauseData) {
+      return std::nullopt;
+   }
+   return ExitExprArgClauseSyntax {m_root, argClauseData.get()};
+}
+
+ExitExprSyntax ExitExprSyntax::withExitToken(std::optional<TokenSyntax> exitToken)
+{
+   RefCountPtr<RawSyntax> exitTokenRaw;
+   if (exitToken.has_value()) {
+      exitTokenRaw = exitToken->getRaw();
+   } else {
+      exitTokenRaw = make_missing_token(T_EXIT);
+   }
+   return m_data->replaceChild<ExitExprSyntax>(exitTokenRaw, Cursor::ExitToken);
+}
+
+ExitExprSyntax ExitExprSyntax::withArgClause(std::optional<ExitExprArgClauseSyntax> argClause)
+{
+   RefCountPtr<RawSyntax> argClauseRaw;
+   if (argClause.has_value()) {
+      argClauseRaw = argClause->getRaw();
+   } else {
+      argClauseRaw = nullptr;
+   }
+   return m_data->replaceChild<ExitExprSyntax>(argClauseRaw, Cursor::ArgClause);
+}
+
+///
 /// EncapsVarOffsetSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

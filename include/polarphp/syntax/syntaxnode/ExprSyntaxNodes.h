@@ -4117,6 +4117,57 @@ private:
 };
 
 ///
+/// exit_expr:
+///   T_EXIT exit_expr
+///
+class ExitExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_EXIT)
+      /// optional: false
+      ///
+      ExitToken,
+      ///
+      /// type: ExitExprArgClauseSyntax
+      /// optional: false
+      ///
+      ArgClause
+   };
+
+public:
+   ExitExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getExitToken();
+   std::optional<ExitExprArgClauseSyntax> getArgClause();
+
+   ExitExprSyntax withExitToken(std::optional<TokenSyntax> exitToken);
+   ExitExprSyntax withArgClause(std::optional<ExitExprArgClauseSyntax> argClause);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ExitExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ExitExprSyntaxBuilder;
+   void validate();
+};
+
+///
 /// encaps_var_offset:
 ///   T_IDENTIFIER_STRING
 /// | T_NUM_STRING
