@@ -4059,6 +4059,64 @@ private:
 };
 
 ///
+/// exit_expr:
+///   '(' optional_expr ')'
+///
+class ExitExprArgClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optional: false
+      ///
+      LeftParenToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: true
+      ///
+      Expr,
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
+      /// optional: false
+      ///
+      RightParenToken
+   };
+
+public:
+   ExitExprArgClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getLeftParenToken();
+   std::optional<ExprSyntax> getExpr();
+   TokenSyntax getRightParenToken();
+
+   ExitExprArgClauseSyntax getLeftParenToken(std::optional<TokenSyntax> leftParentToken);
+   ExitExprArgClauseSyntax getExpr(std::optional<ExprSyntax> expr);
+   ExitExprArgClauseSyntax getRightParenToken(std::optional<TokenSyntax> rightParentToken);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ExitExprArgClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ExitExprArgClauseSyntaxBuilder;
+   void validate();
+};
+
+///
 /// encaps_var_offset:
 ///   T_IDENTIFIER_STRING
 /// | T_NUM_STRING

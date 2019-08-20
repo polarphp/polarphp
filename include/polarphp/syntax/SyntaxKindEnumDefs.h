@@ -150,6 +150,8 @@ enum class SyntaxKind : std::uint32_t
    LogicalExpr,
    RelationExpr,
    CastExpr,
+   ExitExprArgClause,
+   ExitExpr,
 
    EncapsVarOffset,
    EncapsArrayVar,

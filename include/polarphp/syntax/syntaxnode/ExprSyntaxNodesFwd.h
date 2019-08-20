@@ -96,6 +96,8 @@ class LogicalExprSyntax;
 class BitLogicalExprSyntax;
 class RelationExprSyntax;
 class CastExprSyntax;
+class ExitExprArgClauseSyntax;
+class ExitExprSyntax;
 
 // for encaps var syntax
 class EncapsVarOffsetSyntax;

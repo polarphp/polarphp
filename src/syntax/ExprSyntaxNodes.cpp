@@ -4248,6 +4248,78 @@ CastExprSyntax CastExprSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr
 }
 
 ///
+/// ExitExprArgClauseSyntax
+///
+void ExitExprArgClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ExitExprArgClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftParenToken, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, RightParenToken, std::set{TokenKindType::T_LEFT_PAREN});
+#endif
+}
+
+TokenSyntax ExitExprArgClauseSyntax::getLeftParenToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParenToken).get()};
+}
+
+std::optional<ExprSyntax> ExitExprArgClauseSyntax::getExpr()
+{
+   RefCountPtr<SyntaxData> exprData = m_data->getChild(Cursor::Expr);
+   if (!exprData) {
+      return std::nullopt;
+   }
+   return ExprSyntax {m_root, exprData.get()};
+}
+
+TokenSyntax ExitExprArgClauseSyntax::getRightParenToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParenToken).get()};
+}
+
+ExitExprArgClauseSyntax
+ExitExprArgClauseSyntax::getLeftParenToken(std::optional<TokenSyntax> leftParentToken)
+{
+   RefCountPtr<RawSyntax> leftParentTokenRaw;
+   if (leftParentToken.has_value()) {
+      leftParentTokenRaw = leftParentToken->getRaw();
+   } else {
+      leftParentTokenRaw = make_missing_token(T_LEFT_PAREN);
+   }
+   return m_data->replaceChild<ExitExprArgClauseSyntax>(leftParentTokenRaw, Cursor::LeftParenToken);
+}
+
+ExitExprArgClauseSyntax
+ExitExprArgClauseSyntax::getExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
+   } else {
+      exprRaw = nullptr;
+   }
+   return m_data->replaceChild<ExitExprArgClauseSyntax>(exprRaw, Cursor::Expr);
+}
+
+ExitExprArgClauseSyntax
+ExitExprArgClauseSyntax::getRightParenToken(std::optional<TokenSyntax> rightParentToken)
+{
+   RefCountPtr<RawSyntax> rightParentTokenRaw;
+   if (rightParentToken.has_value()) {
+      rightParentTokenRaw = rightParentToken->getRaw();
+   } else {
+      rightParentTokenRaw = make_missing_token(T_RIGHT_PAREN);
+   }
+   return m_data->replaceChild<ExitExprArgClauseSyntax>(rightParentTokenRaw, Cursor::RightParenToken);
+}
+
+///
 /// EncapsVarOffsetSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
