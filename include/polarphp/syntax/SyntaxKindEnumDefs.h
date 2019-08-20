@@ -162,6 +162,8 @@ enum class SyntaxKind : std::uint32_t
    EncapsCurlyVar,
    EncapsVar,
    EncapsListItem,
+   BackticksClause,
+
    HeredocExpr,
    EncapsListStringExpr,
    DereferencableScalarExpr,
@@ -182,6 +184,7 @@ enum class SyntaxKind : std::uint32_t
    PrefixOperatorExpr,
    PostfixOperatorExpr,
    BinaryOperatorExpr,
+   ShellCmdExpr,
    UnknownExpr,
    LastExpr,
 

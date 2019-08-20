@@ -110,6 +110,7 @@ class EncapsCurlyVarSyntax;
 class EncapsVarSyntax;
 class EncapsListItemSyntax;
 
+class BackticksClauseSyntax;
 class HeredocExprSyntax;
 class EncapsListStringExprSyntax;
 class BooleanLiteralExprSyntax;
@@ -119,6 +120,7 @@ class PrefixOperatorExprSyntax;
 class PostfixOperatorExprSyntax;
 class TernaryExprSyntax;
 class BinaryOperatorExprSyntax;
+class ShellCmdExprSyntax;
 
 // Decl Syntax nodes forward declares
 class NameSyntax;

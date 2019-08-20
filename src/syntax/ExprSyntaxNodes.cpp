@@ -5022,6 +5022,44 @@ EncapsListItemSyntax EncapsListItemSyntax::withEncapsVar(std::optional<EncapsVar
 }
 
 ///
+/// BackticksClauseSyntax
+///
+
+void BackticksClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == BackticksClauseSyntax::CHILDREN_COUNT);
+   if (const RefCountPtr<RawSyntax> &backticksChild = raw->getChild(Cursor::Backticks)) {
+      if (backticksChild->isToken()) {
+         syntax_assert_child_token(raw, Backticks, std::set{TokenKindType::T_ENCAPSED_AND_WHITESPACE});
+      } else {
+         syntax_assert_child_kind(raw, Backticks, std::set{SyntaxKind::EncapsList});
+      }
+   }
+#endif
+}
+
+Syntax BackticksClauseSyntax::getBackticks()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Backticks).get()};
+}
+
+BackticksClauseSyntax BackticksClauseSyntax::withBackticks(std::optional<Syntax> backticks)
+{
+   RefCountPtr<RawSyntax> backticksRaw;
+   if (backticks.has_value()) {
+      backticksRaw = backticks->getRaw();
+   } else {
+      backticksRaw = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<BackticksClauseSyntax>(backticksRaw, Cursor::Backticks);
+}
+
+///
 /// HeredocExprSyntax
 ///
 void HeredocExprSyntax::validate()

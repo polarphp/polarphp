@@ -4728,6 +4728,55 @@ private:
 };
 
 ///
+/// backticks_expr:
+///   T_ENCAPSED_AND_WHITESPACE
+/// | encaps_list
+///
+class BackticksClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: true
+      /// node choices: true
+      /// --------------------------------------------------------
+      /// node choice: TokenSyntax (T_ENCAPSED_AND_WHITESPACE)
+      /// --------------------------------------------------------
+      /// node choice: EncapsItemListSyntax
+      ///
+      Backticks,
+   };
+
+public:
+   BackticksClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getBackticks();
+   BackticksClauseSyntax withBackticks(std::optional<Syntax> backticks);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::BackticksClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class BackticksClauseSyntaxBuilder;
+   void validate();
+};
+
+///
 /// heredoc_expr:
 ///   T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC
 /// | T_START_HEREDOC encaps_list T_END_HEREDOC
