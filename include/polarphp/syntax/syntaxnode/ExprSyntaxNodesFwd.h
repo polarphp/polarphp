@@ -95,6 +95,7 @@ class CompoundAssignmentExprSyntax;
 class LogicalExprSyntax;
 class BitLogicalExprSyntax;
 class RelationExprSyntax;
+class CastExprSyntax;
 
 // for encaps var syntax
 class EncapsVarOffsetSyntax;

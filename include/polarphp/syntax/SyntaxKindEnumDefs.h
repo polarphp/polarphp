@@ -149,6 +149,7 @@ enum class SyntaxKind : std::uint32_t
    BitLogicalExpr,
    LogicalExpr,
    RelationExpr,
+   CastExpr,
 
    EncapsVarOffset,
    EncapsArrayVar,

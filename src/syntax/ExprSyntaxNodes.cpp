@@ -4186,6 +4186,68 @@ RelationExprSyntax::withRhs(std::optional<ExprSyntax> rhs)
 }
 
 ///
+/// CastExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType CastExprSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      CastExprSyntax::CastOperator, {
+         TokenKindType::T_INT_CAST, TokenKindType::T_DOUBLE_CAST,
+               TokenKindType::T_STRING_CAST, TokenKindType::T_ARRAY_CAST,
+               TokenKindType::T_OBJECT_CAST, TokenKindType::T_BOOL_CAST,
+               TokenKindType::T_UNSET_CAST,
+      }
+   }
+};
+#endif
+
+void CastExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == CastExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, CastOperator, CHILD_TOKEN_CHOICES.at(Cursor::CastOperator));
+   syntax_assert_child_kind(raw, ValueExpr, std::set{SyntaxKind::Expr});
+#endif
+}
+
+TokenSyntax CastExprSyntax::getCastOperator()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::CastOperator).get()};
+}
+
+ExprSyntax CastExprSyntax::getValueExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::ValueExpr).get()};
+}
+
+CastExprSyntax CastExprSyntax::withCastOperator(std::optional<TokenSyntax> castOperator)
+{
+   RefCountPtr<RawSyntax> castOperatorRaw;
+   if (castOperator.has_value()) {
+      castOperatorRaw = castOperator->getRaw();
+   } else {
+      castOperatorRaw = make_missing_token(T_INT_CAST);
+   }
+   return m_data->replaceChild<CastExprSyntax>(castOperatorRaw, Cursor::CastOperator);
+}
+
+CastExprSyntax CastExprSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
+{
+   RefCountPtr<RawSyntax> valueExprRaw;
+   if (valueExpr.has_value()) {
+      valueExprRaw = valueExpr->getRaw();
+   } else {
+      valueExprRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<CastExprSyntax>(valueExprRaw, Cursor::ValueExpr);
+}
+
+///
 /// EncapsVarOffsetSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

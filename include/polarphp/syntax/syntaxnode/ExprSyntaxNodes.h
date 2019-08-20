@@ -3992,6 +3992,73 @@ private:
 };
 
 ///
+/// cast_expr:
+/// | T_INT_CAST expr
+/// | T_DOUBLE_CAST expr
+/// | T_STRING_CAST expr
+/// | T_ARRAY_CAST expr
+/// | T_OBJECT_CAST expr
+/// | T_BOOL_CAST expr
+/// | T_UNSET_CAST expr
+///
+class CastExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      /// token choices: true
+      /// ---------------------------------------------
+      /// T_INT_CAST | T_DOUBLE_CAST | T_STRING_CAST
+      /// T_ARRAY_CAST | T_OBJECT_CAST | T_BOOL_CAST
+      /// T_UNSET_CAST
+      ///
+      CastOperator,
+
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      ValueExpr
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
+
+public:
+   CastExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getCastOperator();
+   ExprSyntax getValueExpr();
+
+   CastExprSyntax withCastOperator(std::optional<TokenSyntax> castOperator);
+   CastExprSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::CastExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class CastExprSyntaxBuilder;
+   void validate();
+};
+
+///
 /// encaps_var_offset:
 ///   T_IDENTIFIER_STRING
 /// | T_NUM_STRING
