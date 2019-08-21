@@ -152,6 +152,8 @@ enum class SyntaxKind : std::uint32_t
    CastExpr,
    ExitExprArgClause,
    ExitExpr,
+   YieldExpr,
+   YieldFromExpr,
 
    EncapsVarOffset,
    EncapsArrayVar,

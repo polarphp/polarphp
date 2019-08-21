@@ -98,6 +98,8 @@ class RelationExprSyntax;
 class CastExprSyntax;
 class ExitExprArgClauseSyntax;
 class ExitExprSyntax;
+class YieldExprSyntax;
+class YieldFromExprSyntax;
 
 // for encaps var syntax
 class EncapsVarOffsetSyntax;

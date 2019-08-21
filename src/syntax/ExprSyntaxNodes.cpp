@@ -4372,6 +4372,153 @@ ExitExprSyntax ExitExprSyntax::withArgClause(std::optional<ExitExprArgClauseSynt
 }
 
 ///
+/// YieldExprSyntax
+///
+void YieldExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == YieldExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, YieldToken, std::set{TokenKindType::T_YIELD});
+   syntax_assert_child_token(raw, DoubleArrowToken, std::set{TokenKindType::T_DOUBLE_ARROW});
+   syntax_assert_child_kind(raw, KeyExpr, std::set{SyntaxKind::Expr});
+   syntax_assert_child_kind(raw, ValueExpr, std::set{SyntaxKind::Expr});
+   if (raw->getChild(Cursor::ValueExpr)) {
+      assert(raw->getChild(Cursor::KeyExpr) &&
+             raw->getChild(Cursor::DoubleArrowToken) &&
+             raw->getChild(Cursor::ValueExpr));
+   }
+#endif
+}
+
+TokenSyntax YieldExprSyntax::getYieldToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::YieldToken).get()};
+}
+
+std::optional<ExprSyntax> YieldExprSyntax::getKeyExpr()
+{
+   RefCountPtr<SyntaxData> keyExprData = m_data->getChild(Cursor::KeyExpr);
+   if (!keyExprData) {
+      return std::nullopt;
+   }
+   return ExprSyntax {m_root, keyExprData.get()};
+}
+
+std::optional<TokenSyntax> YieldExprSyntax::getDoubleArrowToken()
+{
+   RefCountPtr<SyntaxData> doubleArrowTokenData = m_data->getChild(Cursor::DoubleArrowToken);
+   if (!doubleArrowTokenData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, doubleArrowTokenData.get()};
+}
+
+std::optional<ExprSyntax> YieldExprSyntax::getValueExpr()
+{
+   RefCountPtr<SyntaxData> valueExprData = m_data->getChild(Cursor::ValueExpr);
+   if (!valueExprData) {
+      return std::nullopt;
+   }
+   return ExprSyntax {m_root, valueExprData.get()};
+}
+
+YieldExprSyntax YieldExprSyntax::withYieldToken(std::optional<TokenSyntax> yieldToken)
+{
+   RefCountPtr<RawSyntax> yieldTokenRaw;
+   if (yieldToken.has_value()) {
+      yieldTokenRaw = yieldToken->getRaw();
+   } else {
+      yieldTokenRaw = make_missing_token(T_YIELD);
+   }
+   return m_data->replaceChild<YieldExprSyntax>(yieldTokenRaw, Cursor::YieldToken);
+}
+
+YieldExprSyntax YieldExprSyntax::withKeyExpr(std::optional<ExprSyntax> keyExpr)
+{
+   RefCountPtr<RawSyntax> keyExprRaw;
+   if (keyExpr.has_value()) {
+      keyExprRaw = keyExpr->getRaw();
+   } else {
+      keyExprRaw = nullptr;
+   }
+   return m_data->replaceChild<YieldExprSyntax>(keyExprRaw, Cursor::KeyExpr);
+}
+
+YieldExprSyntax YieldExprSyntax::withDoubleArrowToken(std::optional<TokenSyntax> doubleArrowToken)
+{
+   RefCountPtr<RawSyntax> doubleArrowTokenRaw;
+   if (doubleArrowToken.has_value()) {
+      doubleArrowTokenRaw = doubleArrowToken->getRaw();
+   } else {
+      doubleArrowTokenRaw = nullptr;
+   }
+   return m_data->replaceChild<YieldExprSyntax>(doubleArrowTokenRaw, Cursor::DoubleArrowToken);
+}
+
+YieldExprSyntax YieldExprSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
+{
+   RefCountPtr<RawSyntax> valueExprRaw;
+   if (valueExpr.has_value()) {
+      valueExprRaw = valueExpr->getRaw();
+   } else {
+      valueExprRaw = nullptr;
+   }
+   return m_data->replaceChild<YieldExprSyntax>(valueExprRaw, Cursor::ValueExpr);
+}
+
+///
+/// YieldFromExprSyntax
+///
+void YieldFromExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == YieldFromExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, YieldFromToken, std::set{TokenKindType::T_YIELD_FROM});
+   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
+#endif
+}
+
+TokenSyntax YieldFromExprSyntax::getYieldFromToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::YieldFromToken).get()};
+}
+
+ExprSyntax YieldFromExprSyntax::getExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Expr).get()};
+}
+
+YieldFromExprSyntax YieldFromExprSyntax::withYieldFromToken(std::optional<TokenSyntax> yieldFromToken)
+{
+   RefCountPtr<RawSyntax> yieldFromTokenRaw;
+   if (yieldFromToken.has_value()) {
+      yieldFromTokenRaw = yieldFromToken->getRaw();
+   } else {
+      yieldFromTokenRaw = make_missing_token(T_YIELD_FROM);
+   }
+   return m_data->replaceChild<YieldFromExprSyntax>(yieldFromTokenRaw, Cursor::YieldFromToken);
+}
+
+YieldFromExprSyntax YieldFromExprSyntax::withExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
+   } else {
+      exprRaw = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<YieldFromExprSyntax>(exprRaw, Cursor::Expr);
+}
+
+///
 /// EncapsVarOffsetSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD

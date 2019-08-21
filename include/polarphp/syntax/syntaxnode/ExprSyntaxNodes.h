@@ -4168,6 +4168,125 @@ private:
 };
 
 ///
+/// yield_expr:
+///   T_YIELD
+/// | T_YIELD expr
+/// | T_YIELD expr T_DOUBLE_ARROW expr
+///
+class YieldExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 4;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_YIELD)
+      /// optional: false
+      ///
+      YieldToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: true
+      ///
+      KeyExpr,
+      ///
+      /// type: TokenSyntax (T_DOUBLE_ARROW)
+      /// optional: true
+      ///
+      DoubleArrowToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: true
+      ///
+      ValueExpr
+   };
+
+public:
+   YieldExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getYieldToken();
+   std::optional<ExprSyntax> getKeyExpr();
+   std::optional<TokenSyntax> getDoubleArrowToken();
+   std::optional<ExprSyntax> getValueExpr();
+
+   YieldExprSyntax withYieldToken(std::optional<TokenSyntax> yieldToken);
+   YieldExprSyntax withKeyExpr(std::optional<ExprSyntax> keyExpr);
+   YieldExprSyntax withDoubleArrowToken(std::optional<TokenSyntax> doubleArrowToken);
+   YieldExprSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::YieldExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class YieldExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// yield_from_expr:
+///   T_YIELD_FROM expr
+///
+class YieldFromExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_YIELD_FROM)
+      /// optional: false
+      ///
+      YieldFromToken,
+
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Expr
+   };
+
+public:
+   YieldFromExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getYieldFromToken();
+   ExprSyntax getExpr();
+
+   YieldFromExprSyntax withYieldFromToken(std::optional<TokenSyntax> yieldFromToken);
+   YieldFromExprSyntax withExpr(std::optional<ExprSyntax> expr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::YieldFromExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class YieldFromExprSyntaxBuilder;
+   void validate();
+};
+
+///
 /// encaps_var_offset:
 ///   T_IDENTIFIER_STRING
 /// | T_NUM_STRING
