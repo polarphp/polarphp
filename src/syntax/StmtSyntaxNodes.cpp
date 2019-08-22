@@ -257,6 +257,11 @@ void ElseIfClauseSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == ElseIfClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ElseIfKeyword, std::set{TokenKindType::T_ELSEIF});
+   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
+   syntax_assert_child_kind(raw, Condition, std::set{SyntaxKind::Expr});
+   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::CodeBlock});
 #endif
 }
 
@@ -364,12 +369,21 @@ void IfStmtSyntax::validate()
    if (isMissing()) {
       return;
    }
+   assert(raw->getLayout().size() == IfStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LabelName, std::set{TokenKindType::T_IDENTIFIER_STRING});
+   syntax_assert_child_token(raw, LabelColon, std::set{TokenKindType::T_COLON});
+   syntax_assert_child_token(raw, IfKeyword, std::set{TokenKindType::T_IF});
+   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_kind(raw, Condition, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
+   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::CodeBlock});
+   syntax_assert_child_kind(raw, ElseIfClauses, std::set{SyntaxKind::ElseIfList});
+   syntax_assert_child_token(raw, ElseKeyword, std::set{TokenKindType::T_ELSE});
    if (const RefCountPtr<RawSyntax> &elseBody = raw->getChild(Cursor::ElseBody)) {
       bool isIfStmt = elseBody->kindOf(SyntaxKind::IfStmt);
       bool isCodeBlock = elseBody->kindOf(SyntaxKind::CodeBlock);
       assert(isIfStmt || isCodeBlock);
    }
-   assert(raw->getLayout().size() == IfStmtSyntax::CHILDREN_COUNT);
 #endif
 }
 
@@ -578,6 +592,13 @@ void WhileStmtSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == WhileStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LabelName, std::set{TokenKindType::T_IDENTIFIER_STRING});
+   syntax_assert_child_token(raw, LabelColon, std::set{TokenKindType::T_COLON});
+   syntax_assert_child_token(raw, WhileKeyword, std::set{TokenKindType::T_WHILE});
+   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_kind(raw, Conditions, std::set{SyntaxKind::ConditionElementList});
+   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
+   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::CodeBlock});
 #endif
 }
 
@@ -726,6 +747,14 @@ void DoWhileStmtSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == DoWhileStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LabelName, std::set{TokenKindType::T_IDENTIFIER_STRING});
+   syntax_assert_child_token(raw, LabelColon, std::set{TokenKindType::T_COLON});
+   syntax_assert_child_token(raw, DoKeyword, std::set{TokenKindType::T_DO});
+   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::CodeBlock});
+   syntax_assert_child_token(raw, WhileKeyword, std::set{TokenKindType::T_WHILE});
+   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_kind(raw, Condition, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
 #endif
 }
 
@@ -880,6 +909,8 @@ void SwitchDefaultLabelSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == SwitchDefaultLabelSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, DefaultKeyword, std::set{TokenKindType::T_DEFAULT});
+   syntax_assert_child_token(raw, Colon, std::set{TokenKindType::T_COLON});
 #endif
 }
 
@@ -928,6 +959,10 @@ void SwitchCaseLabelSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == SwitchCaseLabelSyntax::CHILDREN_COUNT);
+
+   syntax_assert_child_token(raw, CaseKeyword, std::set{TokenKindType::T_CASE});
+   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, Colon, std::set{TokenKindType::T_COLON});
 #endif
 }
 
@@ -989,7 +1024,7 @@ SwitchCaseLabelSyntax SwitchCaseLabelSyntax::withColon(std::optional<TokenSyntax
 const NodeChoicesType SwitchCaseSyntax::CHILD_NODE_CHOICES
 {
    {
-      SwitchCaseSyntax::Cursor::Statements,{
+      SwitchCaseSyntax::Label,{
          SyntaxKind::SwitchDefaultLabel,
                SyntaxKind::SwitchCaseLabel
       }
@@ -1005,11 +1040,8 @@ void SwitchCaseSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == SwitchCaseSyntax::CHILDREN_COUNT);
-   if (const RefCountPtr<RawSyntax> &statements = raw->getChild(Cursor::Statements)) {
-      bool isDefaultLabel = statements->kindOf(SyntaxKind::SwitchDefaultLabel);
-      bool isCaseLabel = statements->kindOf(SyntaxKind::SwitchCaseLabel);
-      assert(isDefaultLabel || isCaseLabel);
-   }
+   syntax_assert_child_kind(raw, Label, CHILD_NODE_CHOICES.at(Cursor::Label));
+   syntax_assert_child_kind(raw, Statements, std::set{SyntaxKind::CodeBlockItemList});
 #endif
 }
 
@@ -1067,6 +1099,15 @@ void SwitchStmtSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == SwitchStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LabelName, std::set{TokenKindType::T_IDENTIFIER_STRING});
+   syntax_assert_child_token(raw, LabelColon, std::set{TokenKindType::T_COLON});
+   syntax_assert_child_token(raw, SwitchKeyword, std::set{TokenKindType::T_SWITCH});
+   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_kind(raw, ConditionExpr, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
+   syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_BRACE});
+   syntax_assert_child_kind(raw, Cases, std::set{SyntaxKind::SwitchCaseList});
+   syntax_assert_child_token(raw, RightBrace, std::set{TokenKindType::T_RIGHT_BRACE});
 #endif
 }
 

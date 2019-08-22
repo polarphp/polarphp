@@ -516,29 +516,45 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 6;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_IDENTIFIER_STRING)
       /// optional: true
+      ///
       LabelName,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_COLON)
       /// optional: true
+      ///
       LabelColon,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_DO)
       /// optional: false
+      ///
       DoKeyword,
+      ///
       /// type: CodeBlockSyntax
       /// optional: false
+      ///
       Body,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_WHILE)
       /// optional: false
+      ///
       WhileKeyword,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
       /// optional: false
+      ///
       LeftParen,
+      ///
       /// type: ExprSyntax
       /// optional: false
+      ///
       Condition,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
+      ///
       RightParen
    };
 
@@ -584,11 +600,15 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_DEFAULT)
       /// optional: false
+      ///
       DefaultKeyword,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_COLON)
       /// optional: false
+      ///
       Colon,
    };
 
@@ -622,14 +642,20 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_CASE)
       /// optional: false
+      ///
       CaseKeyword,
+      ///
       /// type: ExprSyntax
       /// optional: false
+      ///
       Expr,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_COLON)
       /// optional: false
+      ///
       Colon
    };
 public:
@@ -665,14 +691,20 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: Syntax
       /// optional: false
       /// node choices
-      /// name: Default kind: SwitchDefaultLabelSyntax
-      /// name: Case kind: SwitchCaseLabelSyntax
+      /// -------------------------------------------
+      /// node choice: SwitchDefaultLabelSyntax
+      /// -------------------------------------------
+      /// node choice: SwitchCaseLabelSyntax
+      ///
       Label,
+      ///
       /// type: CodeBlockItemListSyntax
       /// optional: false
+      ///
       Statements
    };
 
@@ -712,33 +744,51 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 7;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_IDENTIFIER_STRING)
       /// optional: true
+      ///
       LabelName,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_COLON)
       /// optional: true
+      ///
       LabelColon,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_SWITCH)
       /// optional: false
+      ///
       SwitchKeyword,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
       /// optional: false
+      ///
       LeftParen,
+      ///
       /// type: ExprSyntax
       /// optional: false
+      ///
       ConditionExpr,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
+      ///
       RightParen,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_LEFT_BRACE)
       /// optional: false
+      ///
       LeftBrace,
+      ///
       /// is_syntax_collection: true
       /// type: SwitchCaseListSyntax
       /// optional: false
+      ///
       Cases,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_RIGHT_BRACE)
       /// optional: false
+      ///
       RightBrace
    };
 
