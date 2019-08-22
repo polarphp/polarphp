@@ -27,7 +27,6 @@ enum class SyntaxKind : std::uint32_t
    Type,
    CodeBlockItem,
    CodeBlock,
-   ConditionElement,
 
    /// decl syntax node
    FirstDecl,
@@ -198,6 +197,8 @@ enum class SyntaxKind : std::uint32_t
 
    /// stmt syntax node
    FirstStmt,
+   EmptyStmt,
+   ConditionElement,
    CommonStmt,
    InnerStmt,
    TopStmt,

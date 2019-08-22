@@ -21,7 +21,48 @@
 namespace polar::syntax {
 
 ///
-/// The ConditionElementSyntax class
+/// empty_stmt:
+///   ';'
+///
+class EmptyStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_SEMICOLON)
+      /// optional: false
+      ///
+      Semicolon,
+   };
+
+public:
+   EmptyStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getSemicolon();
+   EmptyStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EmptyStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EmptyStmtSyntaxBuilder;
+   void validate();
+};
+
 ///
 ///  condition -> expression
 ///
@@ -64,6 +105,16 @@ public:
    ConditionElementSyntax withCondition(std::optional<Syntax> condition);
    ConditionElementSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
 
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ConditionElement;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
 private:
    friend class ConditionElementSyntaxBuilder;
    void validate();
@@ -77,11 +128,15 @@ public:
 
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax
       /// optional: false
+      ///
       ContinueKeyword,
+      ///
       /// type: TokenSyntax
       /// optional: true
+      ///
       LNumberToken,
    };
 public:
@@ -119,11 +174,15 @@ public:
 
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax
       /// optional: false
+      ///
       BreakKeyword,
+      ///
       /// type: TokenSyntax
       /// optional: true
+      ///
       LNumberToken,
    };
 public:
@@ -161,8 +220,10 @@ public:
 
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_FALLTHROUGH)
       /// optional: false
+      ///
       FallthroughKeyword
    };
 
@@ -181,6 +242,11 @@ private:
    void validate();
 };
 
+///
+/// if_stmt_without_else:
+///   T_IF '(' expr ')' statement
+/// | if_stmt_without_else T_ELSEIF '(' expr ')' statement
+///
 class ElseIfClauseSyntax final : public Syntax
 {
 public:
@@ -189,20 +255,30 @@ public:
 
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_ELSEIF)
       /// optional: false
+      ///
       ElseIfKeyword,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
       /// optional: false
+      ///
       LeftParen,
+      ///
       /// type: ExprSyntax
       /// optional: false
+      ///
       Condition,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
+      ///
       RightParen,
+      ///
       /// type: CodeBlockSyntax
       /// optional: false
+      ///
       Body
    };
 
@@ -230,6 +306,11 @@ private:
    void validate();
 };
 
+///
+/// if_stmt:
+///   if_stmt_without_else %prec T_NOELSE
+/// | if_stmt_without_else T_ELSE statement
+///
 class IfStmtSyntax final : public StmtSyntax
 {
 public:
@@ -238,40 +319,60 @@ public:
 
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_IDENTIFIER_STRING)
       /// optional: true
+      ///
       LabelName,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_COLON)
       /// optional: true
+      ///
       LabelColon,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_IF)
       /// optional: false
+      ///
       IfKeyword,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
       /// optional: false
+      ///
       LeftParen,
+      ///
       /// type: ExprSyntax
       /// optional: false
+      ///
       Condition,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
+      ///
       RightParen,
+      ///
       /// type: CodeBlockSyntax
       /// optional: false
+      ///
       Body,
+      ///
       /// type: ElseIfListSyntax
       /// is_syntax_collection: true
       /// optional: true
+      ///
       ElseIfClauses,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_ELSE)
       /// optional: true
+      ///
       ElseKeyword,
+      ///
       /// type: Syntax
       /// optional: true
       /// --------------
       /// node choices
       /// name: IfStmt kind: IfStmt
       /// name: CodeBlock kind: CodeBlock
+      ///
       ElseBody
    };
 
@@ -314,6 +415,10 @@ private:
    void validate();
 };
 
+///
+/// while_stmt:
+///   T_WHILE '(' expr ')' while_statement
+///
 class WhileStmtSyntax final : public StmtSyntax
 {
 public:
@@ -321,26 +426,40 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 5;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_IDENTIFIER_STRING)
       /// optional: true
+      ///
       LabelName,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_COLON)
       /// optional: true
+      ///
       LabelColon,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_WHILE)
       /// optional: false
+      ///
       WhileKeyword,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
       /// optional: false
+      ///
       LeftParen,
+      ///
       /// type: ConditionElementListSyntax
       /// optional: false
+      ///
       Conditions,
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
+      ///
       RightParen,
+      ///
       /// type: CodeBlockSyntax
       /// optional: false
+      ///
       Body
    };
 

@@ -14,6 +14,38 @@
 namespace polar::syntax {
 
 ///
+/// EmptyStmtSyntax
+///
+void EmptyStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == EmptyStmtSyntax::CHILDREN_COUNT);
+   // check condition child node choices
+   syntax_assert_child_token(raw, Semicolon, std::set {TokenKindType::T_SEMICOLON});
+#endif
+}
+
+TokenSyntax EmptyStmtSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
+}
+
+EmptyStmtSyntax EmptyStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> semicolonRaw;
+   if (semicolon.has_value()) {
+      semicolonRaw = semicolon->getRaw();
+   } else {
+      semicolonRaw = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<EmptyStmtSyntax>(semicolonRaw, Cursor::Semicolon);
+}
+
+///
 /// ConditionElementSyntax
 /// current only support expr condition
 ///
@@ -35,9 +67,7 @@ void ConditionElementSyntax::validate()
    }
    assert(raw->getLayout().size() == ConditionElementSyntax::CHILDREN_COUNT);
    // check condition child node choices
-   if (const RefCountPtr<RawSyntax> &condition = raw->getChild(Cursor::Condition)) {
-      assert(condition->kindOf(SyntaxKind::Expr));
-   }
+   syntax_assert_child_kind(raw, Condition, std::set{SyntaxKind::Expr});
 #endif
 }
 
@@ -89,6 +119,8 @@ void ContinueStmtSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == ContinueStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ContinueKeyword, std::set{TokenKindType::T_CONTINUE});
+   syntax_assert_child_token(raw, LNumberToken, std::set{TokenKindType::T_LNUMBER});
 #endif
 }
 
@@ -140,6 +172,8 @@ void BreakStmtSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == BreakStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, BreakKeyword, std::set{TokenKindType::T_BREAK});
+   syntax_assert_child_token(raw, LNumberToken, std::set{TokenKindType::T_LNUMBER});
 #endif
 }
 
@@ -191,6 +225,7 @@ void FallthroughStmtSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == FallthroughStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, FallthroughKeyword, std::set{TokenKindType::T_FALLTHROUGH});
 #endif
 }
 
