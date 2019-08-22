@@ -90,6 +90,8 @@ class EchoFuncExprSyntax;
 class PrintFuncExprSyntax;
 class FuncLikeExprSyntax;
 
+class ArrayStructureAssignmentExprSyntax;
+class ListStructureAssignmentExprSyntax;
 class AssignmentExprSyntax;
 class CompoundAssignmentExprSyntax;
 class LogicalExprSyntax;
@@ -100,6 +102,7 @@ class ExitExprArgClauseSyntax;
 class ExitExprSyntax;
 class YieldExprSyntax;
 class YieldFromExprSyntax;
+class CloneExprSyntax;
 
 // for encaps var syntax
 class EncapsVarOffsetSyntax;

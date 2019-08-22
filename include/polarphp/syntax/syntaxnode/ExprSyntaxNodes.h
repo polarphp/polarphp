@@ -3619,6 +3619,128 @@ private:
 };
 
 ///
+/// array_structure_assignment:
+///   '[' array_pair_list ']' '=' expr
+///
+class ArrayStructureAssignmentExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: SimplifiedArrayCreateExprSyntax
+      /// optional: false
+      ///
+      ArrayStructure,
+      ///
+      /// type: TokenSyntax (T_EQUAL)
+      /// optional: false
+      ///
+      EqualToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      ValueExpr
+   };
+
+public:
+   ArrayStructureAssignmentExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   SimplifiedArrayCreateExprSyntax getArrayStructure();
+   TokenSyntax getEqualToken();
+   ExprSyntax getValueExpr();
+
+   ArrayStructureAssignmentExprSyntax withArrayStructure(std::optional<SimplifiedArrayCreateExprSyntax> arrayStructure) ;
+   ArrayStructureAssignmentExprSyntax withEqualToken(std::optional<TokenSyntax> equalToken);
+   ArrayStructureAssignmentExprSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ArrayStructureAssignmentExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class ArrayStructureAssignmentExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// list_strcture_assignment:
+///   T_LIST '(' array_pair_list ')' '=' expr
+///
+class ListStructureAssignmentExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 4;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 4;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_LIST)
+      /// optional: false
+      ///
+      ListToken,
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optional: false
+      ///
+      LeftParen,
+      ///
+      /// type: ArrayPairItemListSyntax
+      /// optional: false
+      ///
+      PairItemList,
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
+      /// optional: false
+      ///
+      RightParen
+   };
+
+public:
+   ListStructureAssignmentExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getListToken();
+   TokenSyntax getLeftParen();
+   ArrayPairItemListSyntax getPairItemList();
+   TokenSyntax getRightParen();
+
+   ListStructureAssignmentExprSyntax withListToken(std::optional<TokenSyntax> listToken);
+   ListStructureAssignmentExprSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
+   ListStructureAssignmentExprSyntax withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList);
+   ListStructureAssignmentExprSyntax withRightParen(std::optional<TokenSyntax> rightParen);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ListStructureAssignmentExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ListStructureAssignmentExprSyntaxBuilder;
+   void validate();
+};
+
+///
 /// assign_expr:
 ///   variable '=' expr
 /// | variable '=' '&' variable
@@ -4283,6 +4405,58 @@ public:
 
 private:
    friend class YieldFromExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// clone_expr:
+///   T_CLONE expr
+///
+class CloneExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_CLONE)
+      /// optional: false
+      ///
+      CloneToken,
+
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Expr
+   };
+
+public:
+   CloneExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getCloneTokenToken();
+   ExprSyntax getExpr();
+
+   CloneExprSyntax withCloneTokenToken(std::optional<TokenSyntax> cloneToken);
+   CloneExprSyntax withExpr(std::optional<ExprSyntax> expr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::CloneExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class CloneExprSyntaxBuilder;
    void validate();
 };
 

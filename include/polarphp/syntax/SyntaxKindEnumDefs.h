@@ -144,6 +144,8 @@ enum class SyntaxKind : std::uint32_t
    PrintFuncExpr,
    FuncLikeExpr,
 
+   ArrayStructureAssignmentExpr,
+   ListStructureAssignmentExpr,
    AssignmentExpr,
    CompoundAssignmentExpr,
    BitLogicalExpr,
@@ -154,6 +156,7 @@ enum class SyntaxKind : std::uint32_t
    ExitExpr,
    YieldExpr,
    YieldFromExpr,
+   CloneExpr,
 
    EncapsVarOffset,
    EncapsArrayVar,

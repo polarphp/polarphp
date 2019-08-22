@@ -55,6 +55,87 @@ public:
    }
 };
 
+///
+/// expr:
+/// 	variable
+/// | T_LIST '(' array_pair_list ')' '=' expr
+/// | '[' array_pair_list ']' '=' expr
+/// | variable '=' expr
+/// | variable '=' '&' variable
+/// | T_CLONE expr
+/// | variable T_PLUS_EQUAL expr
+/// | variable T_MINUS_EQUAL expr
+/// | variable T_MUL_EQUAL expr
+/// | variable T_POW_EQUAL expr
+/// | variable T_DIV_EQUAL expr
+/// | variable T_CONCAT_EQUAL expr
+/// | variable T_MOD_EQUAL expr
+/// | variable T_AND_EQUAL expr
+/// | variable T_OR_EQUAL expr
+/// | variable T_XOR_EQUAL expr
+/// | variable T_SL_EQUAL expr
+/// | variable T_SR_EQUAL expr
+/// | variable T_COALESCE_EQUAL expr
+/// | variable T_INC
+/// | T_INC variable
+/// | variable T_DEC
+/// | T_DEC variable
+/// | expr T_BOOLEAN_OR expr
+/// | expr T_BOOLEAN_AND expr
+/// | expr T_LOGICAL_OR expr
+/// | expr T_LOGICAL_AND expr
+/// | expr T_LOGICAL_XOR expr
+/// | expr '|' expr
+/// | expr '&' expr
+/// | expr '^' expr
+/// | expr '.' expr
+/// | expr '+' expr
+/// | expr '-' expr
+/// | expr '*' expr
+/// | expr T_POW expr
+/// | expr '/' expr
+/// | expr '%' expr
+/// | expr T_SL expr
+/// | expr T_SR expr
+/// | '+' expr %prec T_INC
+/// | '-' expr %prec T_INC
+/// | '!' expr
+/// | '~' expr
+/// | expr T_IS_IDENTICAL expr
+/// | expr T_IS_NOT_IDENTICAL expr
+/// | expr T_IS_EQUAL expr
+/// | expr T_IS_NOT_EQUAL expr
+/// | expr '<' expr
+/// | expr T_IS_SMALLER_OR_EQUAL expr
+/// | expr '>' expr
+/// | expr T_IS_GREATER_OR_EQUAL expr
+/// | expr T_SPACESHIP expr
+/// | expr T_INSTANCEOF class_name_reference
+/// | '(' expr ')'
+/// | new_expr
+/// | expr '?' expr ':' expr
+/// | expr '?' ':' expr
+/// | expr T_COALESCE expr
+/// | internal_functions_in_yacc
+/// | T_INT_CAST expr
+/// | T_DOUBLE_CAST expr
+/// | T_STRING_CAST expr
+/// | T_ARRAY_CAST expr
+/// | T_OBJECT_CAST expr
+/// | T_BOOL_CAST expr
+/// | T_UNSET_CAST expr
+/// | T_EXIT exit_expr
+/// | '@' expr
+/// | scalar
+/// | '`' backticks_expr '`'
+/// | T_PRINT expr
+/// | T_YIELD
+/// | T_YIELD expr
+/// | T_YIELD expr T_DOUBLE_ARROW expr
+/// | T_YIELD_FROM expr
+/// | inline_function
+/// | T_STATIC inline_function
+///
 class ExprSyntax : public Syntax
 {
 public:
