@@ -121,6 +121,7 @@ void ContinueStmtSyntax::validate()
    assert(raw->getLayout().size() == ContinueStmtSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ContinueKeyword, std::set{TokenKindType::T_CONTINUE});
    syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
 #endif
 }
 
@@ -136,6 +137,11 @@ std::optional<ExprSyntax> ContinueStmtSyntax::getExpr()
       return std::nullopt;
    }
    return ExprSyntax{m_root, exprData.get()};
+}
+
+TokenSyntax ContinueStmtSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
 }
 
 ContinueStmtSyntax ContinueStmtSyntax::withContinueKeyword(std::optional<TokenSyntax> continueKeyword)
@@ -160,6 +166,17 @@ ContinueStmtSyntax ContinueStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
    return m_data->replaceChild<ContinueStmtSyntax>(rawExpr, Cursor::Expr);
 }
 
+ContinueStmtSyntax ContinueStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> rawSemicolon;
+   if (semicolon.has_value()) {
+      rawSemicolon = semicolon->getRaw();
+   } else {
+      rawSemicolon = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<ContinueStmtSyntax>(rawSemicolon, Cursor::Semicolon);
+}
+
 ///
 /// BreakStmtSyntax
 ///
@@ -172,7 +189,8 @@ void BreakStmtSyntax::validate()
    }
    assert(raw->getLayout().size() == BreakStmtSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, BreakKeyword, std::set{TokenKindType::T_BREAK});
-   syntax_assert_child_token(raw, LNumberToken, std::set{TokenKindType::T_LNUMBER});
+   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
 #endif
 }
 
@@ -181,13 +199,18 @@ TokenSyntax BreakStmtSyntax::getBreakKeyword()
    return TokenSyntax{m_root, m_data->getChild(Cursor::BreakKeyword).get()};
 }
 
-std::optional<TokenSyntax> BreakStmtSyntax::getLNumberToken()
+std::optional<ExprSyntax> BreakStmtSyntax::getExpr()
 {
-   RefCountPtr<SyntaxData> numberTokenData = m_data->getChild(Cursor::LNumberToken);
-   if (!numberTokenData) {
+   RefCountPtr<SyntaxData> exprData = m_data->getChild(Cursor::Expr);
+   if (!exprData) {
       return std::nullopt;
    }
-   return TokenSyntax{m_root, numberTokenData.get()};
+   return ExprSyntax{m_root, exprData.get()};
+}
+
+TokenSyntax BreakStmtSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
 }
 
 BreakStmtSyntax BreakStmtSyntax::withBreakKeyword(std::optional<TokenSyntax> breakKeyword)
@@ -202,15 +225,26 @@ BreakStmtSyntax BreakStmtSyntax::withBreakKeyword(std::optional<TokenSyntax> bre
    return m_data->replaceChild<BreakStmtSyntax>(rawBreakKeyword, Cursor::BreakKeyword);
 }
 
-BreakStmtSyntax BreakStmtSyntax::withLNumberToken(std::optional<TokenSyntax> numberToken)
+BreakStmtSyntax BreakStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
 {
-   RefCountPtr<RawSyntax> rawNumberToken;
-   if (numberToken.has_value()) {
-      rawNumberToken = numberToken->getRaw();
+   RefCountPtr<RawSyntax> rawExpr;
+   if (expr.has_value()) {
+      rawExpr = expr->getRaw();
    } else {
-      rawNumberToken = nullptr;
+      rawExpr = nullptr;
    }
-   return m_data->replaceChild<BreakStmtSyntax>(rawNumberToken, Cursor::LNumberToken);
+   return m_data->replaceChild<BreakStmtSyntax>(rawExpr, Cursor::Expr);
+}
+
+BreakStmtSyntax BreakStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> rawSemicolon;
+   if (semicolon.has_value()) {
+      rawSemicolon = semicolon->getRaw();
+   } else {
+      rawSemicolon = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<BreakStmtSyntax>(rawSemicolon, Cursor::Semicolon);
 }
 
 ///

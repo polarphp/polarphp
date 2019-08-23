@@ -35,7 +35,7 @@ public:
 private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[ConditionElementSyntax::CHILDREN_COUNT] = {
-      nullptr, nullptr
+      nullptr, nullptr, nullptr
    };
 };
 
@@ -51,12 +51,13 @@ public:
 
    ContinueStmtSyntaxBuilder &useContinueKeyword(TokenSyntax continueKeyword);
    ContinueStmtSyntaxBuilder &useExpr(ExprSyntax expr);
+   ContinueStmtSyntaxBuilder &useSemicolon(TokenSyntax semicolon);
 
    ContinueStmtSyntax build();
 private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[ContinueStmtSyntax::CHILDREN_COUNT] = {
-      nullptr, nullptr
+      nullptr, nullptr, nullptr
    };
 };
 
@@ -72,7 +73,8 @@ public:
    {}
 
    BreakStmtSyntaxBuilder &useBreakKeyword(TokenSyntax breakKeyword);
-   BreakStmtSyntaxBuilder &useLNumberToken(TokenSyntax numberToken);
+   BreakStmtSyntaxBuilder &useExpr(ExprSyntax expr);
+   BreakStmtSyntaxBuilder &useSemicolon(TokenSyntax semicolon);
 
    BreakStmtSyntax build();
 
@@ -395,11 +397,11 @@ public:
    ReturnStmtSyntaxBuilder &useExpr(ExprSyntax expr);
    ReturnStmtSyntax build();
 
-   private:
-      RefCountPtr<SyntaxArena> m_arena = nullptr;
-      RefCountPtr<RawSyntax> m_layout[ReturnStmtSyntax::CHILDREN_COUNT] = {
-         nullptr, nullptr,
-      };
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[ReturnStmtSyntax::CHILDREN_COUNT] = {
+      nullptr, nullptr,
+   };
 };
 
 } // polar::syntax

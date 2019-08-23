@@ -69,8 +69,8 @@ private:
 class ConditionElementSyntax final : public Syntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 2;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
       /// type: Syntax
@@ -127,8 +127,8 @@ private:
 class ContinueStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 2;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
 
    enum Cursor : SyntaxChildrenCountType
    {
@@ -142,6 +142,11 @@ public:
       /// optional: true
       ///
       Expr,
+      ///
+      /// type: TokenSyntax (T_SEMICOLON)
+      /// optional: false
+      ///
+      Semicolon,
    };
 public:
    ContinueStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
@@ -152,9 +157,11 @@ public:
 
    TokenSyntax getContinueKeyword();
    std::optional<ExprSyntax> getExpr();
+   TokenSyntax getSemicolon();
 
    ContinueStmtSyntax withContinueKeyword(std::optional<TokenSyntax> continueKeyword);
    ContinueStmtSyntax withExpr(std::optional<ExprSyntax> expr);
+   ContinueStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -170,6 +177,10 @@ private:
    void validate();
 };
 
+///
+/// break_stmt:
+///   T_BREAK optional_expr ';'
+///
 class BreakStmtSyntax final : public StmtSyntax
 {
 public:
@@ -184,10 +195,15 @@ public:
       ///
       BreakKeyword,
       ///
-      /// type: TokenSyntax
+      /// type: ExprSyntax
       /// optional: true
       ///
-      LNumberToken,
+      Expr,
+      ///
+      /// type: TokenSyntax (T_SEMICOLON)
+      /// optional: false
+      ///
+      Semicolon,
    };
 public:
    BreakStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
@@ -197,10 +213,12 @@ public:
    }
 
    TokenSyntax getBreakKeyword();
-   std::optional<TokenSyntax> getLNumberToken();
+   std::optional<ExprSyntax> getExpr();
+   TokenSyntax getSemicolon();
 
    BreakStmtSyntax withBreakKeyword(std::optional<TokenSyntax> breakKeyword);
-   BreakStmtSyntax withLNumberToken(std::optional<TokenSyntax> numberToken);
+   BreakStmtSyntax withExpr(std::optional<ExprSyntax> expr);
+   BreakStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
 
    static bool kindOf(SyntaxKind kind)
    {

@@ -61,15 +61,25 @@ ContinueStmtSyntaxBuilder &ContinueStmtSyntaxBuilder::useExpr(ExprSyntax expr)
    return *this;
 }
 
+ContinueStmtSyntaxBuilder &ContinueStmtSyntaxBuilder::useSemicolon(TokenSyntax semicolon)
+{
+   m_layout[cursor_index(Cursor::Semicolon)] = semicolon.getRaw();
+   return *this;
+}
+
 ContinueStmtSyntax ContinueStmtSyntaxBuilder::build()
 {
    CursorIndex continueKeywordIndex = cursor_index(Cursor::ContinueKeyword);
    CursorIndex exprIndex = cursor_index(Cursor::Expr);
+   CursorIndex semicolonIndex = cursor_index(Cursor::Semicolon);
    if (!m_layout[continueKeywordIndex]) {
       m_layout[continueKeywordIndex] = make_missing_token(T_CONTINUE);
    }
    if (!m_layout[exprIndex]) {
       m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::UnknownExpr);
+   }
+   if (!m_layout[semicolonIndex]) {
+      m_layout[semicolonIndex] = make_missing_token(T_SEMICOLON);
    }
    RefCountPtr<RawSyntax> rawContinueStmtSyntax = RawSyntax::make(SyntaxKind::ContinueStmt, m_layout, SourcePresence::Present,
                                                                   m_arena);
@@ -85,23 +95,32 @@ BreakStmtSyntaxBuilder &BreakStmtSyntaxBuilder::useBreakKeyword(TokenSyntax brea
    return *this;
 }
 
-BreakStmtSyntaxBuilder &BreakStmtSyntaxBuilder::useLNumberToken(TokenSyntax numberToken)
+BreakStmtSyntaxBuilder &BreakStmtSyntaxBuilder::useExpr(ExprSyntax expr)
 {
-   m_layout[cursor_index(Cursor::LNumberToken)] = numberToken.getRaw();
+   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
+   return *this;
+}
+
+BreakStmtSyntaxBuilder &BreakStmtSyntaxBuilder::useSemicolon(TokenSyntax semicolon)
+{
+   m_layout[cursor_index(Cursor::Semicolon)] = semicolon.getRaw();
    return *this;
 }
 
 BreakStmtSyntax BreakStmtSyntaxBuilder::build()
 {
    CursorIndex breakKeywordIndex = cursor_index(Cursor::BreakKeyword);
-   CursorIndex numberTokenIndex = cursor_index(Cursor::LNumberToken);
+   CursorIndex exprIndex = cursor_index(Cursor::Expr);
+   CursorIndex semicolonIndex = cursor_index(Cursor::Semicolon);
    if (!m_layout[breakKeywordIndex]) {
       m_layout[breakKeywordIndex] = RawSyntax::missing(TokenKindType::T_BREAK,
                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_BREAK)));
    }
-   if (!m_layout[numberTokenIndex]) {
-      m_layout[numberTokenIndex] = RawSyntax::missing(TokenKindType::T_LNUMBER,
-                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_LNUMBER)));
+   if (!m_layout[exprIndex]) {
+      m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   if (!m_layout[semicolonIndex]) {
+      m_layout[semicolonIndex] = make_missing_token(T_SEMICOLON);
    }
    RefCountPtr<RawSyntax> rawBreakStmtSyntax = RawSyntax::make(SyntaxKind::BreakStmt, m_layout, SourcePresence::Present,
                                                                m_arena);
