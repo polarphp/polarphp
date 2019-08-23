@@ -64,6 +64,57 @@ private:
 };
 
 ///
+/// expr_stmt:
+///   expr ';'
+///
+class ExprStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Expr,
+      ///
+      /// type: TokenSyntax (T_SEMICOLON)
+      /// optional: false
+      ///
+      Semicolon,
+   };
+
+public:
+   ExprStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getExpr();
+   TokenSyntax getSemicolon();
+
+   ExprStmtSyntax withExpr(std::optional<ExprSyntax> expr);
+   ExprStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ExprStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ExprStmtBuilder;
+   void validate();
+};
+
+///
 ///  condition -> expression
 ///
 class ConditionElementSyntax final : public Syntax
@@ -1039,7 +1090,8 @@ private:
 };
 
 ///
-/// T_ECHO echo_expr_list ';'
+/// echo_stmt:
+///   T_ECHO echo_expr_list ';'
 ///
 class EchoStmtSyntax final : public StmtSyntax
 {
@@ -1057,7 +1109,12 @@ public:
       /// type: ExprListSyntax
       /// optional: false
       ///
-      ExprListClause
+      ExprListClause,
+      ///
+      /// type: TokenSyntax (T_SEMICLON)
+      /// optioal: false
+      ///
+      Semicolon,
    };
 
 public:
@@ -1069,9 +1126,77 @@ public:
 
    TokenSyntax getEchoToken();
    ExprListSyntax getExprListClause();
+   TokenSyntax getSemicolon();
 
    EchoStmtSyntax withEchoToken(std::optional<TokenSyntax> echoToken);
    EchoStmtSyntax withExprListClause(std::optional<ExprListSyntax> exprListClause);
+   EchoStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EchoStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EchoStmtSyntaxBuilder;
+   void validate();
+};
+
+///
+/// halt_compiler_stmt:
+///   T_HALT_COMPILER '(' ')' ';'
+///
+class HaltCompilerStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 4;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 4;
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_HALT_COMPILER)
+      /// optional: false
+      ///
+      HaltCompilerToken,
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optioal: false
+      ///
+      LeftParen,
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
+      /// optioal: false
+      ///
+      RightParen,
+      ///
+      /// type: TokenSyntax (T_SEMICLON)
+      /// optioal: false
+      ///
+      Semicolon,
+   };
+
+public:
+   HaltCompilerStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getHaltCompilerToken();
+   TokenSyntax getLeftParen();
+   TokenSyntax getRightParen();
+   TokenSyntax getSemicolon();
+
+   HaltCompilerStmtSyntax withHaltCompilerToken(std::optional<TokenSyntax> haltCompilerToken);
+   HaltCompilerStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
+   HaltCompilerStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
+   HaltCompilerStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
 
    static bool kindOf(SyntaxKind kind)
    {

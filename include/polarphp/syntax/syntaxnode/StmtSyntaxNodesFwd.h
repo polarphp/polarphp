@@ -17,7 +17,9 @@
 namespace polar::syntax {
 
 class EmptyStmtSyntax;
-class CommonStmtSyntax;
+class ExprStmtSyntax;
+class InnerStmtSyntax;
+class TopStmtSyntax;
 class ConditionElementSyntax;
 class ContinueStmtSyntax;
 class BreakStmtSyntax;
@@ -35,6 +37,7 @@ class ExpressionStmtSyntax;
 class ThrowStmtSyntax;
 class ReturnStmtSyntax;
 class EchoStmtSyntax;
+class HaltCompilerStmtSyntax;
 
 // Expr Syntax nodes forward declares
 class ExprListItemSyntax;

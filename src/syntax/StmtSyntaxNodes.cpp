@@ -46,6 +46,55 @@ EmptyStmtSyntax EmptyStmtSyntax::withSemicolon(std::optional<TokenSyntax> semico
 }
 
 ///
+/// EmptyStmtSyntax
+///
+void ExprStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ExprStmtSyntax::CHILDREN_COUNT);
+   // check condition child node choices
+   syntax_assert_child_kind(raw, Expr, std::set {SyntaxKind::Expr});
+   syntax_assert_child_token(raw, Semicolon, std::set {TokenKindType::T_SEMICOLON});
+#endif
+}
+
+ExprSyntax ExprStmtSyntax::getExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Expr).get()};
+}
+
+TokenSyntax ExprStmtSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
+}
+
+ExprStmtSyntax ExprStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
+{
+   RefCountPtr<RawSyntax> rawExpr;
+   if (expr.has_value()) {
+      rawExpr = expr->getRaw();
+   } else {
+      rawExpr = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<ExprStmtSyntax>(rawExpr, Cursor::Expr);
+}
+
+ExprStmtSyntax ExprStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> rawSemicolon;
+   if (semicolon.has_value()) {
+      rawSemicolon = semicolon->getRaw();
+   } else {
+      rawSemicolon = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<ExprStmtSyntax>(rawSemicolon, Cursor::Semicolon);
+}
+
+///
 /// ConditionElementSyntax
 /// current only support expr condition
 ///
@@ -219,8 +268,7 @@ BreakStmtSyntax BreakStmtSyntax::withBreakKeyword(std::optional<TokenSyntax> bre
    if (breakKeyword.has_value()) {
       rawBreakKeyword = breakKeyword->getRaw();
    } else {
-      rawBreakKeyword = RawSyntax::missing(TokenKindType::T_BREAK,
-                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_BREAK)));
+      rawBreakKeyword = make_missing_token(T_BREAK);
    }
    return m_data->replaceChild<BreakStmtSyntax>(rawBreakKeyword, Cursor::BreakKeyword);
 }
@@ -273,10 +321,9 @@ FallthroughStmtSyntax FallthroughStmtSyntax::withFallthroughStmtSyntax(std::opti
    if (fallthroughKeyword.has_value()) {
       rawFallthroughKeyword = fallthroughKeyword->getRaw();
    } else {
-      rawFallthroughKeyword = RawSyntax::missing(TokenKindType::T_FALLTHROUGH,
-                                                 OwnedString::makeUnowned(get_token_text(TokenKindType::T_FALLTHROUGH)));
+      rawFallthroughKeyword = make_missing_token(T_FALLTHROUGH);
    }
-   return m_data->replaceChild<FallthroughStmtSyntax>(rawFallthroughKeyword, TokenKindType::T_FALLTHROUGH);
+   return m_data->replaceChild<FallthroughStmtSyntax>(rawFallthroughKeyword, Cursor::FallthroughKeyword);
 }
 
 ///
@@ -329,8 +376,7 @@ ElseIfClauseSyntax ElseIfClauseSyntax::withElseIfKeyword(std::optional<TokenSynt
    if (elseIfKeyword.has_value()) {
       rawElseIfKeyword = elseIfKeyword->getRaw();
    } else {
-      rawElseIfKeyword = RawSyntax::missing(TokenKindType::T_ELSEIF,
-                                            OwnedString::makeUnowned(get_token_text(TokenKindType::T_ELSEIF)));
+      rawElseIfKeyword = make_missing_token(T_ELSEIF);
    }
    return m_data->replaceChild<ElseIfClauseSyntax>(rawElseIfKeyword, Cursor::ElseIfKeyword);
 }
@@ -341,8 +387,7 @@ ElseIfClauseSyntax ElseIfClauseSyntax::withLeftParen(std::optional<TokenSyntax> 
    if (leftParen.has_value()) {
       rawLeftParen = leftParen->getRaw();
    } else {
-      rawLeftParen = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+      rawLeftParen = make_missing_token(T_LEFT_PAREN);
    }
    return m_data->replaceChild<ElseIfClauseSyntax>(rawLeftParen, Cursor::LeftParen);
 }
@@ -364,10 +409,9 @@ ElseIfClauseSyntax ElseIfClauseSyntax::withRightParen(std::optional<TokenSyntax>
    if (rightParen.has_value()) {
       rawRightParen = rightParen->getRaw();
    } else {
-      rawRightParen = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+      rawRightParen = make_missing_token(T_RIGHT_PAREN);
    }
-   return m_data->replaceChild<ElseIfClauseSyntax>(rawRightParen, Cursor::LeftParen);
+   return m_data->replaceChild<ElseIfClauseSyntax>(rawRightParen, Cursor::RightParen);
 }
 
 ElseIfClauseSyntax ElseIfClauseSyntax::withBody(std::optional<CodeBlockSyntax> body)
@@ -518,8 +562,7 @@ IfStmtSyntax IfStmtSyntax::withIfKeyword(std::optional<TokenSyntax> ifKeyword)
    if (ifKeyword.has_value()) {
       rawIfKeyword = ifKeyword->getRaw();
    } else {
-      rawIfKeyword = RawSyntax::missing(TokenKindType::T_IF,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_IF)));
+      rawIfKeyword = make_missing_token(T_IF);
    }
    return m_data->replaceChild<IfStmtSyntax>(rawIfKeyword, Cursor::IfKeyword);
 }
@@ -530,8 +573,7 @@ IfStmtSyntax IfStmtSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
    if (leftParen.has_value()) {
       rawLeftParen = leftParen->getRaw();
    } else {
-      rawLeftParen = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+      rawLeftParen = make_missing_token(T_LEFT_PAREN);
    }
    return m_data->replaceChild<IfStmtSyntax>(rawLeftParen, Cursor::LeftParen);
 }
@@ -553,10 +595,9 @@ IfStmtSyntax IfStmtSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
    if (rightParen.has_value()) {
       rawRightParen = rightParen->getRaw();
    } else {
-      rawRightParen = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+      rawRightParen = make_missing_token(T_RIGHT_PAREN);
    }
-   return m_data->replaceChild<IfStmtSyntax>(rawRightParen, Cursor::LeftParen);
+   return m_data->replaceChild<IfStmtSyntax>(rawRightParen, Cursor::RightParen);
 }
 
 IfStmtSyntax IfStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
@@ -706,8 +747,7 @@ WhileStmtSyntax WhileStmtSyntax::withWhileKeyword(std::optional<TokenSyntax> whi
    if (whileKeyword.has_value()) {
       rawWhileKeyword = whileKeyword->getRaw();
    } else {
-      rawWhileKeyword = RawSyntax::missing(TokenKindType::T_WHILE,
-                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_WHILE)));
+      rawWhileKeyword = make_missing_token(T_WHILE);
    }
    return m_data->replaceChild<WhileStmtSyntax>(rawWhileKeyword, Cursor::WhileKeyword);
 }
@@ -718,8 +758,7 @@ WhileStmtSyntax WhileStmtSyntax::withLeftParen(std::optional<TokenSyntax> leftPa
    if (leftParen.has_value()) {
       rawLeftParen = leftParen->getRaw();
    } else {
-      rawLeftParen = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+      rawLeftParen = make_missing_token(T_LEFT_PAREN);
    }
    return m_data->replaceChild<WhileStmtSyntax>(rawLeftParen, Cursor::LeftParen);
 }
@@ -741,8 +780,7 @@ WhileStmtSyntax WhileStmtSyntax::withRightParen(std::optional<TokenSyntax> right
    if (rightParen.has_value()) {
       rawRightParen = rightParen->getRaw();
    } else {
-      rawRightParen = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+      rawRightParen = make_missing_token(T_RIGHT_PAREN);
    }
    return m_data->replaceChild<WhileStmtSyntax>(rawRightParen, Cursor::RightParen);
 }
@@ -867,8 +905,7 @@ DoWhileStmtSyntax DoWhileStmtSyntax::withDoKeyword(std::optional<TokenSyntax> do
    if (doKeyword.has_value()) {
       rawDoKeyword = doKeyword->getRaw();
    } else {
-      rawDoKeyword = RawSyntax::missing(TokenKindType::T_DO,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_DO)));
+      rawDoKeyword = make_missing_token(T_DO);
    }
    return m_data->replaceChild<DoWhileStmtSyntax>(rawDoKeyword, Cursor::DoKeyword);
 }
@@ -890,8 +927,7 @@ DoWhileStmtSyntax DoWhileStmtSyntax::withWhileKeyword(std::optional<TokenSyntax>
    if (whileKeyword.has_value()) {
       rawWhileKeyword = whileKeyword->getRaw();
    } else {
-      rawWhileKeyword = RawSyntax::missing(TokenKindType::T_WHILE,
-                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_WHILE)));
+      rawWhileKeyword = make_missing_token(T_WHILE);
    }
    return m_data->replaceChild<DoWhileStmtSyntax>(rawWhileKeyword, Cursor::WhileKeyword);
 }
@@ -902,8 +938,7 @@ DoWhileStmtSyntax DoWhileStmtSyntax::withLeftParen(std::optional<TokenSyntax> le
    if (leftParen.has_value()) {
       rawLeftParen = leftParen->getRaw();
    } else {
-      rawLeftParen = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+      rawLeftParen = make_missing_token(T_LEFT_PAREN);
    }
    return m_data->replaceChild<DoWhileStmtSyntax>(rawLeftParen, Cursor::LeftParen);
 }
@@ -925,8 +960,7 @@ DoWhileStmtSyntax DoWhileStmtSyntax::withRightParen(std::optional<TokenSyntax> r
    if (rightParen.has_value()) {
       rawRightParen = rightParen->getRaw();
    } else {
-      rawRightParen = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+      rawRightParen = make_missing_token(T_RIGHT_PAREN);
    }
    return m_data->replaceChild<DoWhileStmtSyntax>(rawRightParen, Cursor::RightParen);
 }
@@ -963,8 +997,7 @@ SwitchDefaultLabelSyntax SwitchDefaultLabelSyntax::withDefaultKeyword(std::optio
    if (defaultKeyword.has_value()) {
       rawDefaultKeyword = defaultKeyword->getRaw();
    } else {
-      rawDefaultKeyword = RawSyntax::missing(TokenKindType::T_DEFAULT,
-                                             OwnedString::makeUnowned(get_token_text(TokenKindType::T_DEFAULT)));
+      rawDefaultKeyword = make_missing_token(T_DEFAULT);
    }
    return m_data->replaceChild<SwitchDefaultLabelSyntax>(rawDefaultKeyword, Cursor::DefaultKeyword);
 }
@@ -975,8 +1008,7 @@ SwitchDefaultLabelSyntax SwitchDefaultLabelSyntax::withColon(std::optional<Token
    if (colon.has_value()) {
       rawColon = colon->getRaw();
    } else {
-      rawColon = RawSyntax::missing(TokenKindType::T_COLON,
-                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+      rawColon = make_missing_token(T_COLON);
    }
    return m_data->replaceChild<SwitchDefaultLabelSyntax>(rawColon, Cursor::Colon);
 }
@@ -1020,8 +1052,7 @@ SwitchCaseLabelSyntax SwitchCaseLabelSyntax::withCaseKeyword(std::optional<Token
    if (caseKeyword.has_value()) {
       rawCaseKeyword = caseKeyword->getRaw();
    } else {
-      rawCaseKeyword = RawSyntax::missing(TokenKindType::T_CASE,
-                                          OwnedString::makeUnowned(get_token_text(TokenKindType::T_CASE)));
+      rawCaseKeyword = make_missing_token(T_CASE);
    }
    return m_data->replaceChild<SwitchCaseLabelSyntax>(rawCaseKeyword, Cursor::CaseKeyword);
 }
@@ -1043,8 +1074,7 @@ SwitchCaseLabelSyntax SwitchCaseLabelSyntax::withColon(std::optional<TokenSyntax
    if (colon.has_value()) {
       rawColon = colon->getRaw();
    } else {
-      rawColon = RawSyntax::missing(TokenKindType::T_COLON,
-                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+      rawColon = make_missing_token(T_COLON);
    }
    return m_data->replaceChild<SwitchCaseLabelSyntax>(rawColon, Cursor::Colon);
 }
@@ -1225,8 +1255,7 @@ SwitchStmtSyntax SwitchStmtSyntax::withSwitchKeyword(std::optional<TokenSyntax> 
    if (switchKeyword.has_value()) {
       rawSwitchKeyword = switchKeyword->getRaw();
    } else {
-      rawSwitchKeyword = RawSyntax::missing(TokenKindType::T_SWITCH,
-                                            OwnedString::makeUnowned(get_token_text(TokenKindType::T_SWITCH)));
+      rawSwitchKeyword = make_missing_token(T_SWITCH);
    }
    return m_data->replaceChild<SwitchStmtSyntax>(rawSwitchKeyword, Cursor::SwitchKeyword);
 }
@@ -1237,8 +1266,7 @@ SwitchStmtSyntax SwitchStmtSyntax::withLeftParen(std::optional<TokenSyntax> left
    if (leftParen.has_value()) {
       rawLeftParen = leftParen->getRaw();
    } else {
-      rawLeftParen = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+      rawLeftParen = make_missing_token(T_LEFT_PAREN);
    }
    return m_data->replaceChild<SwitchStmtSyntax>(rawLeftParen, Cursor::LeftParen);
 }
@@ -1260,8 +1288,7 @@ SwitchStmtSyntax SwitchStmtSyntax::withRightParen(std::optional<TokenSyntax> rig
    if (rightParen.has_value()) {
       rawRightParen = rightParen->getRaw();
    } else {
-      rawRightParen = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+      rawRightParen = make_missing_token(T_RIGHT_PAREN);
    }
    return m_data->replaceChild<SwitchStmtSyntax>(rawRightParen, Cursor::RightParen);
 }
@@ -1272,8 +1299,7 @@ SwitchStmtSyntax SwitchStmtSyntax::withLeftBrace(std::optional<TokenSyntax> left
    if (leftBrace.has_value()) {
       rawLeftBrace = leftBrace->getRaw();
    } else {
-      rawLeftBrace = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE)));
+      rawLeftBrace = make_missing_token(T_LEFT_BRACE);
    }
    return m_data->replaceChild<SwitchStmtSyntax>(rawLeftBrace, Cursor::LeftBrace);
 }
@@ -1295,8 +1321,7 @@ SwitchStmtSyntax SwitchStmtSyntax::withRightBrace(std::optional<TokenSyntax> rig
    if (rightBrace.has_value()) {
       rawRightBrace = rightBrace->getRaw();
    } else {
-      rawRightBrace = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)));
+      rawRightBrace = make_missing_token(T_RIGHT_BRACE);
    }
    return m_data->replaceChild<SwitchStmtSyntax>(rawRightBrace, Cursor::RightBrace);
 }
@@ -1341,8 +1366,7 @@ DeferStmtSyntax DeferStmtSyntax::withDeferKeyword(std::optional<TokenSyntax> def
    if (deferKeyword.has_value()) {
       rawDeferKeyword = deferKeyword->getRaw();
    } else {
-      rawDeferKeyword = RawSyntax::missing(TokenKindType::T_DEFER,
-                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_DEFER)));
+      rawDeferKeyword = make_missing_token(T_DEFER);
    }
    return m_data->replaceChild<DeferStmtSyntax>(rawDeferKeyword, Cursor::DeferKeyword);
 }
@@ -1429,7 +1453,7 @@ ThrowStmtSyntax ThrowStmtSyntax::withThrowKeyword(std::optional<TokenSyntax> thr
    } else {
       rawThrowKeyword = make_missing_token(T_THROW);
    }
-   return m_data->replaceChild<ThrowStmtSyntax>(rawThrowKeyword, TokenKindType::T_THROW);
+   return m_data->replaceChild<ThrowStmtSyntax>(rawThrowKeyword, Cursor::ThrowKeyword);
 }
 
 ThrowStmtSyntax ThrowStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
@@ -1451,7 +1475,7 @@ ThrowStmtSyntax ThrowStmtSyntax::withSemicolon(std::optional<TokenSyntax> semico
    } else {
       rawSemicolon = make_missing_token(T_SEMICOLON);
    }
-   return m_data->replaceChild<ThrowStmtSyntax>(rawSemicolon, TokenKindType::T_SEMICOLON);
+   return m_data->replaceChild<ThrowStmtSyntax>(rawSemicolon, Cursor::Semicolon);
 }
 
 ///
@@ -1492,8 +1516,7 @@ ReturnStmtSyntax ReturnStmtSyntax::withReturnKeyword(std::optional<TokenSyntax> 
    if (returnKeyword.has_value()) {
       raw = returnKeyword->getRaw();
    } else {
-      raw = RawSyntax::missing(TokenKindType::T_RETURN,
-                               OwnedString::makeUnowned(get_token_text(TokenKindType::T_RETURN)));
+      raw = make_missing_token(T_RETURN);
    }
    return m_data->replaceChild<ReturnStmtSyntax>(raw, Cursor::ReturnKeyword);
 }
@@ -1517,7 +1540,7 @@ ReturnStmtSyntax ReturnStmtSyntax::withSemicolon(std::optional<TokenSyntax> semi
    } else {
       rawSemicolon = make_missing_token(T_SEMICOLON);
    }
-   return m_data->replaceChild<ReturnStmtSyntax>(rawSemicolon, TokenKindType::T_SEMICOLON);
+   return m_data->replaceChild<ReturnStmtSyntax>(rawSemicolon, Cursor::Semicolon);
 }
 
 ///
@@ -1546,6 +1569,11 @@ ExprListSyntax EchoStmtSyntax::getExprListClause()
    return ExprListSyntax {m_root, m_data->getChild(Cursor::ExprListClause).get()};
 }
 
+TokenSyntax EchoStmtSyntax::getSemicolon()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::Semicolon).get()};
+}
+
 EchoStmtSyntax EchoStmtSyntax::withEchoToken(std::optional<TokenSyntax> echoToken)
 {
    RefCountPtr<RawSyntax> rawEchoToken;
@@ -1566,6 +1594,99 @@ EchoStmtSyntax EchoStmtSyntax::withExprListClause(std::optional<ExprListSyntax> 
       rawExprListClause = RawSyntax::missing(SyntaxKind::ExprList);
    }
    return m_data->replaceChild<EchoStmtSyntax>(rawExprListClause, Cursor::ExprListClause);
+}
+
+EchoStmtSyntax EchoStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> rawSemicolon;
+   if (semicolon.has_value()) {
+      rawSemicolon = semicolon->getRaw();
+   } else {
+      rawSemicolon = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<EchoStmtSyntax>(rawSemicolon, Cursor::Semicolon);
+}
+
+///
+/// HaltCompilerStmtSyntax
+///
+void HaltCompilerStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == HaltCompilerStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, HaltCompilerToken, std::set{TokenKindType::T_HALT_COMPILER});
+   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
+   syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
+#endif
+}
+
+TokenSyntax HaltCompilerStmtSyntax::getHaltCompilerToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::HaltCompilerToken).get()};
+}
+
+TokenSyntax HaltCompilerStmtSyntax::getLeftParen()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParen).get()};
+}
+
+TokenSyntax HaltCompilerStmtSyntax::getRightParen()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParen).get()};
+}
+
+TokenSyntax HaltCompilerStmtSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
+}
+
+HaltCompilerStmtSyntax HaltCompilerStmtSyntax::withHaltCompilerToken(std::optional<TokenSyntax> haltCompilerToken)
+{
+   RefCountPtr<RawSyntax> rawHaltCompilerToken;
+   if (haltCompilerToken.has_value()) {
+      rawHaltCompilerToken = haltCompilerToken->getRaw();
+   } else {
+      rawHaltCompilerToken = make_missing_token(T_HALT_COMPILER);
+   }
+   return m_data->replaceChild<HaltCompilerStmtSyntax>(rawHaltCompilerToken, Cursor::HaltCompilerToken);
+}
+
+HaltCompilerStmtSyntax HaltCompilerStmtSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> rawLeftParen;
+   if (leftParen.has_value()) {
+      rawLeftParen = leftParen->getRaw();
+   } else {
+      rawLeftParen = make_missing_token(T_LEFT_PAREN);
+   }
+   return m_data->replaceChild<HaltCompilerStmtSyntax>(rawLeftParen, Cursor::LeftParen);
+}
+
+HaltCompilerStmtSyntax HaltCompilerStmtSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rawRightParen;
+   if (rightParen.has_value()) {
+      rawRightParen = rightParen->getRaw();
+   } else {
+      rawRightParen = make_missing_token(T_RIGHT_PAREN);
+   }
+   return m_data->replaceChild<HaltCompilerStmtSyntax>(rawRightParen, Cursor::RightParen);
+}
+
+HaltCompilerStmtSyntax HaltCompilerStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> rawSemicolon;
+   if (semicolon.has_value()) {
+      rawSemicolon = semicolon->getRaw();
+   } else {
+      rawSemicolon = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<HaltCompilerStmtSyntax>(rawSemicolon, Cursor::Semicolon);
 }
 
 } // polar::syntax
