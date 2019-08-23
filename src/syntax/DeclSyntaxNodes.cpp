@@ -67,8 +67,7 @@ ReservedNonModifierSyntax ReservedNonModifierSyntax::withModifier(std::optional<
       modifierRaw = modifier->getRaw();
    } else {
       /// not very good
-      modifierRaw = RawSyntax::missing(TokenKindType::T_INCLUDE,
-                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_INCLUDE)));
+      modifierRaw = make_missing_token(T_INCLUDE);
    }
    return m_data->replaceChild<ReservedNonModifierSyntax>(modifierRaw, Cursor::Modifier);
 }
@@ -208,8 +207,7 @@ NamespacePartSyntax NamespacePartSyntax::withName(std::optional<TokenSyntax> nam
    if (name.has_value()) {
       nameRaw = name->getRaw();
    } else {
-      nameRaw = RawSyntax::missing(TokenKindType::T_NS_SEPARATOR,
-                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_NS_SEPARATOR)));
+      nameRaw = make_missing_token(T_NS_SEPARATOR);
    }
    return m_data->replaceChild<NamespacePartSyntax>(nameRaw, Cursor::NsSeparator);
 }
@@ -337,8 +335,7 @@ NamespaceUseTypeSyntax NamespaceUseTypeSyntax::withTypeToken(std::optional<Token
    if (typeToken.has_value()) {
       typeTokenRaw = typeToken->getRaw();
    } else {
-      typeTokenRaw = RawSyntax::missing(TokenKindType::T_FUNCTION,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_FUNCTION)));
+      typeTokenRaw = make_missing_token(T_FUNCTION);
    }
    return m_data->replaceChild<NamespaceUseTypeSyntax>(typeTokenRaw, Cursor::TypeToken);
 }
@@ -650,8 +647,7 @@ NamespaceGroupUseDeclarationSyntax::withSecondNsSeparator(std::optional<TokenSyn
    if (separator.has_value()) {
       separatorRaw = separator->getRaw();
    } else {
-      separatorRaw = RawSyntax::missing(TokenKindType::T_NS_SEPARATOR,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_NS_SEPARATOR)));
+      separatorRaw = make_missing_token(T_NS_SEPARATOR);
    }
    return m_data->replaceChild<NamespaceGroupUseDeclarationSyntax>(separatorRaw, Cursor::SecondNsSeparator);
 }
@@ -663,8 +659,7 @@ NamespaceGroupUseDeclarationSyntax::withLeftBrace(std::optional<TokenSyntax> lef
    if (leftBrace.has_value()) {
       leftBraceRaw = leftBrace->getRaw();
    } else {
-      leftBraceRaw = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE)));
+      leftBraceRaw = make_missing_token(T_LEFT_BRACE);
    }
    return m_data->replaceChild<NamespaceGroupUseDeclarationSyntax>(leftBraceRaw, Cursor::LeftBrace);
 }
@@ -688,8 +683,7 @@ NamespaceGroupUseDeclarationSyntax::withCommaToken(std::optional<TokenSyntax> co
    if (comma.has_value()) {
       commaRaw = comma->getRaw();
    } else {
-      commaRaw = RawSyntax::missing(TokenKindType::T_COMMA,
-                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_COMMA)));
+      commaRaw = make_missing_token(T_COMMA);
    }
    return m_data->replaceChild<NamespaceGroupUseDeclarationSyntax>(commaRaw, Cursor::CommaToken);
 }
@@ -701,8 +695,7 @@ NamespaceGroupUseDeclarationSyntax::withRightBrace(std::optional<TokenSyntax> ri
    if (rightBrace.has_value()) {
       rightBraceRaw = rightBrace->getRaw();
    } else {
-      rightBraceRaw = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)));
+      rightBraceRaw = make_missing_token(T_RIGHT_BRACE);
    }
    return m_data->replaceChild<NamespaceGroupUseDeclarationSyntax>(rightBraceRaw, Cursor::RightBrace);
 }
@@ -821,8 +814,7 @@ NamespaceMixedGroupUseDeclarationSyntax::withSecondNsSeparator(std::optional<Tok
    if (separator.has_value()) {
       separatorRaw = separator->getRaw();
    } else {
-      separatorRaw = RawSyntax::missing(TokenKindType::T_NS_SEPARATOR,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_NS_SEPARATOR)));
+      separatorRaw = make_missing_token(T_NS_SEPARATOR);
    }
    return m_data->replaceChild<NamespaceMixedGroupUseDeclarationSyntax>(separatorRaw, Cursor::SecondNsSeparator);
 }
@@ -834,8 +826,7 @@ NamespaceMixedGroupUseDeclarationSyntax::withLeftBrace(std::optional<TokenSyntax
    if (leftBrace.has_value()) {
       leftBraceRaw = leftBrace->getRaw();
    } else {
-      leftBraceRaw = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE)));
+      leftBraceRaw = make_missing_token(T_LEFT_BRACE);
    }
    return m_data->replaceChild<NamespaceMixedGroupUseDeclarationSyntax>(leftBraceRaw, Cursor::LeftBrace);
 }
@@ -859,8 +850,7 @@ NamespaceMixedGroupUseDeclarationSyntax::withCommaToken(std::optional<TokenSynta
    if (comma.has_value()) {
       commaRaw = comma->getRaw();
    } else {
-      commaRaw = RawSyntax::missing(TokenKindType::T_COMMA,
-                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_COMMA)));
+      commaRaw = make_missing_token(T_COMMA);
    }
    return m_data->replaceChild<NamespaceMixedGroupUseDeclarationSyntax>(commaRaw, Cursor::CommaToken);
 }
@@ -872,8 +862,7 @@ NamespaceMixedGroupUseDeclarationSyntax::withRightBrace(std::optional<TokenSynta
    if (rightBrace.has_value()) {
       rightBraceRaw = rightBrace->getRaw();
    } else {
-      rightBraceRaw = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)));
+      rightBraceRaw = make_missing_token(T_RIGHT_BRACE);
    }
    return m_data->replaceChild<NamespaceMixedGroupUseDeclarationSyntax>(rightBraceRaw, Cursor::RightBrace);
 }
@@ -949,8 +938,7 @@ NamespaceUseSyntax::withUseToken(std::optional<TokenSyntax> useToken)
    if (useToken.has_value()) {
       useTokenRaw = useToken->getRaw();
    } else {
-      useTokenRaw = RawSyntax::missing(TokenKindType::T_USE,
-                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_USE)));
+      useTokenRaw = make_missing_token(T_USE);
    }
    return m_data->replaceChild<NamespaceUseSyntax>(useTokenRaw, Cursor::UseToken);
 }
@@ -986,8 +974,7 @@ NamespaceUseSyntax::withSemicolonToken(std::optional<TokenSyntax> semicolon)
    if (semicolon.has_value()) {
       tokenRaw = semicolon->getRaw();
    } else {
-      tokenRaw = RawSyntax::missing(TokenKindType::T_SEMICOLON,
-                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
+      tokenRaw = make_missing_token(T_SEMICOLON);
    }
    return m_data->replaceChild<NamespaceUseSyntax>(tokenRaw, Cursor::SemicolonToken);
 }
@@ -1026,8 +1013,7 @@ InitializeClauseSyntax InitializeClauseSyntax::withEqualToken(std::optional<Toke
    if (equalToken.has_value()) {
       equalTokenRaw = equalToken->getRaw();
    } else {
-      equalTokenRaw = RawSyntax::missing(TokenKindType::T_EQUAL,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_EQUAL)));
+      equalTokenRaw = make_missing_token(T_EQUAL);
    }
    return m_data->replaceChild<InitializeClauseSyntax>(equalTokenRaw, Cursor::EqualToken);
 }
@@ -1077,8 +1063,7 @@ ConstDeclareItemSyntax ConstDeclareItemSyntax::withName(std::optional<TokenSynta
    if (name.has_value()) {
       nameRaw = name->getRaw();
    } else {
-      nameRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
-                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
+      nameRaw = make_missing_token(T_IDENTIFIER_STRING);
    }
    return m_data->replaceChild<ConstDeclareItemSyntax>(nameRaw, Cursor::Name);
 }
@@ -1134,8 +1119,7 @@ ConstDefinitionSyntax ConstDefinitionSyntax::withConstToken(std::optional<TokenS
    if (constToken.has_value()) {
       constTokenRaw = constToken->getRaw();
    } else {
-      constTokenRaw = RawSyntax::missing(TokenKindType::T_CONST,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_CONST)));
+      constTokenRaw = make_missing_token(T_CONST);
    }
    return m_data->replaceChild<ConstDefinitionSyntax>(constTokenRaw, Cursor::ConstToken);
 }
@@ -1157,8 +1141,7 @@ ConstDefinitionSyntax ConstDefinitionSyntax::withSemicolon(std::optional<TokenSy
    if (semicolon.has_value()) {
       semicolonRaw = semicolon->getRaw();
    } else {
-      semicolonRaw = RawSyntax::missing(TokenKindType::T_SEMICOLON,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
+      semicolonRaw = make_missing_token(T_SEMICOLON);
    }
    return m_data->replaceChild<ConstDefinitionSyntax>(semicolonRaw, Cursor::Semicolon);
 }
@@ -1301,8 +1284,7 @@ ReturnTypeClauseSyntax ReturnTypeClauseSyntax::withColon(std::optional<TokenSynt
    if (colon.has_value()) {
       colonRaw = colon->getRaw();
    } else {
-      colonRaw = RawSyntax::missing(TokenKindType::T_COLON,
-                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+      colonRaw = make_missing_token(T_COLON);
    }
    return m_data->replaceChild<ReturnTypeClauseSyntax>(colonRaw, Cursor::ColonToken);
 }
@@ -1421,8 +1403,7 @@ ParameterSyntax ParameterSyntax::withVariable(std::optional<TokenSyntax> variabl
    if (variable.has_value()) {
       variableRaw = variable->getRaw();
    } else {
-      variableRaw = RawSyntax::missing(TokenKindType::T_VARIABLE,
-                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_VARIABLE)));
+      variableRaw = make_missing_token(T_VARIABLE);
    }
    return m_data->replaceChild<ParameterSyntax>(variableRaw, Cursor::Variable);
 }
@@ -1478,8 +1459,7 @@ ParameterClauseSyntax ParameterClauseSyntax::withLeftParen(std::optional<TokenSy
    if (leftParen.has_value()) {
       leftParenRaw = leftParen->getRaw();
    } else {
-      leftParenRaw = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+      leftParenRaw = make_missing_token(T_LEFT_PAREN);
    }
    return m_data->replaceChild<ParameterClauseSyntax>(leftParenRaw, Cursor::LeftParen);
 }
@@ -1501,8 +1481,7 @@ ParameterClauseSyntax ParameterClauseSyntax::withRightParen(std::optional<TokenS
    if (rightParen.has_value()) {
       rightParenRaw = rightParen->getRaw();
    } else {
-      rightParenRaw = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+      rightParenRaw = make_missing_token(T_RIGHT_PAREN);
    }
    return m_data->replaceChild<ParameterClauseSyntax>(rightParenRaw, Cursor::RightParen);
 }
@@ -1578,8 +1557,7 @@ FunctionDefinitionSyntax::withFuncToken(std::optional<TokenSyntax> funcToken)
    if (funcToken.has_value()) {
       funcTokenRaw = funcToken->getRaw();
    } else {
-      funcTokenRaw = RawSyntax::missing(TokenKindType::T_FUNCTION,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_FUNCTION)));
+      funcTokenRaw = make_missing_token(T_FUNCTION);
    }
    return m_data->replaceChild<FunctionDefinitionSyntax>(funcTokenRaw, Cursor::FuncToken);
 }
@@ -1603,8 +1581,7 @@ FunctionDefinitionSyntax::withFuncName(std::optional<TokenSyntax> funcName)
    if (funcName.has_value()) {
       funcNameRaw = funcName->getRaw();
    } else {
-      funcNameRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
-                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
+      funcNameRaw = make_missing_token(T_IDENTIFIER_STRING);
    }
    return m_data->replaceChild<FunctionDefinitionSyntax>(funcNameRaw, Cursor::FuncName);
 }
@@ -1683,8 +1660,7 @@ ClassModifierSyntax ClassModifierSyntax::withModifier(std::optional<TokenSyntax>
    if (modifier.has_value()) {
       modifierRaw = modifier->getRaw();
    } else {
-      modifierRaw = RawSyntax::missing(TokenKindType::T_ABSTRACT,
-                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_ABSTRACT)));
+      modifierRaw = make_missing_token(T_ABSTRACT);
    }
    return m_data->replaceChild<ClassModifierSyntax>(modifierRaw, Cursor::Modifier);
 }
@@ -1723,8 +1699,7 @@ ExtendsFromClauseSyntax ExtendsFromClauseSyntax::withExtendToken(std::optional<T
    if (extendToken.has_value()) {
       extendTokenRaw = extendToken->getRaw();
    } else {
-      extendTokenRaw = RawSyntax::missing(TokenKindType::T_EXTENDS,
-                                          OwnedString::makeUnowned(get_token_text(TokenKindType::T_EXTENDS)));
+      extendTokenRaw = make_missing_token(T_EXTENDS);
    }
    return m_data->replaceChild<ExtendsFromClauseSyntax>(extendTokenRaw, Cursor::ExtendToken);
 }
@@ -1774,8 +1749,7 @@ ImplementClauseSyntax ImplementClauseSyntax::withImplementToken(std::optional<To
    if (implementToken.has_value()) {
       implementTokenRaw = implementToken->getRaw();
    } else {
-      implementTokenRaw = RawSyntax::missing(TokenKindType::T_IMPLEMENTS,
-                                             OwnedString::makeUnowned(get_token_text(TokenKindType::T_IMPLEMENTS)));
+      implementTokenRaw = make_missing_token(T_IMPLEMENTS);
    }
    return m_data->replaceChild<ImplementClauseSyntax>(implementTokenRaw, Cursor::ImplementToken);
 }
@@ -1830,8 +1804,7 @@ MemberModifierSyntax MemberModifierSyntax::withModifier(std::optional<TokenSynta
    if (modifier.has_value()) {
       modifierRaw = modifier->getRaw();
    } else {
-      modifierRaw = RawSyntax::missing(TokenKindType::T_PUBLIC,
-                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_PUBLIC)));
+      modifierRaw = make_missing_token(T_PUBLIC);
    }
    return m_data->replaceChild<MemberModifierSyntax>(modifierRaw, Cursor::Modifier);
 }
@@ -1968,8 +1941,7 @@ ClassConstDeclSyntax ClassConstDeclSyntax::withConstToken(std::optional<TokenSyn
    if (constToken.has_value()) {
       constTokenRaw = constToken->getRaw();
    } else {
-      constTokenRaw = RawSyntax::missing(TokenKindType::T_CONST,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_CONST)));
+      constTokenRaw = make_missing_token(T_CONST);
    }
    return m_data->replaceChild<ClassConstDeclSyntax>(constTokenRaw, Cursor::ConstToken);
 }
@@ -2080,8 +2052,7 @@ ClassMethodDeclSyntax ClassMethodDeclSyntax::withFunctionToken(std::optional<Tok
    if (functionToken.has_value()) {
       functionTokenRaw = functionToken->getRaw();
    } else {
-      functionTokenRaw = RawSyntax::missing(TokenKindType::T_FUNCTION,
-                                            OwnedString::makeUnowned(get_token_text(TokenKindType::T_FUNCTION)));
+      functionTokenRaw = make_missing_token(T_FUNCTION);
    }
    return m_data->replaceChild<ClassMethodDeclSyntax>(functionTokenRaw, Cursor::FunctionToken);
 }
@@ -2092,8 +2063,7 @@ ClassMethodDeclSyntax ClassMethodDeclSyntax::withReturnRefToken(std::optional<To
    if (returnRefToken.has_value()) {
       returnRefTokenRaw = returnRefToken->getRaw();
    } else {
-      returnRefTokenRaw = RawSyntax::missing(TokenKindType::T_AMPERSAND,
-                                             OwnedString::makeUnowned(get_token_text(TokenKindType::T_AMPERSAND)));
+      returnRefTokenRaw = make_missing_token(T_AMPERSAND);
    }
    return m_data->replaceChild<ClassMethodDeclSyntax>(returnRefTokenRaw, Cursor::ReturnRefToken);
 }
@@ -2241,8 +2211,7 @@ ClassAbsoluteTraitMethodReferenceSyntax::withSeparator(std::optional<TokenSyntax
    if (separator.has_value()) {
       separatorRaw = separator->getRaw();
    } else {
-      separatorRaw = RawSyntax::missing(TokenKindType::T_PAAMAYIM_NEKUDOTAYIM,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_PAAMAYIM_NEKUDOTAYIM)));
+      separatorRaw = make_missing_token(T_PAAMAYIM_NEKUDOTAYIM);
    }
    return m_data->replaceChild<ClassAbsoluteTraitMethodReferenceSyntax>(separatorRaw, Cursor::Separator);
 }
@@ -2313,8 +2282,7 @@ ClassTraitPrecedenceSyntax ClassTraitPrecedenceSyntax::withInsteadOfToken(std::o
    if (insteadOfToken.has_value()) {
       insteadOfTokenRaw = insteadOfToken->getRaw();
    } else {
-      insteadOfTokenRaw = RawSyntax::missing(TokenKindType::T_INSTEADOF,
-                                             OwnedString::makeUnowned(get_token_text(TokenKindType::T_INSTEADOF)));
+      insteadOfTokenRaw = make_missing_token(T_INSTEADOF);
    }
    return m_data->replaceChild<ClassTraitPrecedenceSyntax>(insteadOfTokenRaw, Cursor::InsteadOfToken);
 }
@@ -2415,8 +2383,7 @@ ClassTraitAliasSyntax ClassTraitAliasSyntax::withAsToken(std::optional<TokenSynt
    if (asToken.has_value()) {
       asTokenRaw = asToken->getRaw();
    } else {
-      asTokenRaw = RawSyntax::missing(TokenKindType::T_AS,
-                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_AS)));
+      asTokenRaw = make_missing_token(T_AS);
    }
    return m_data->replaceChild<ClassTraitAliasSyntax>(asTokenRaw, Cursor::AsToken);
 }
@@ -2497,8 +2464,7 @@ ClassTraitAdaptationSyntax ClassTraitAdaptationSyntax::withSemicolon(std::option
    if (semicolon.has_value()) {
       semicolonRaw = semicolon->getRaw();
    } else {
-      semicolonRaw = RawSyntax::missing(TokenKindType::T_SEMICOLON,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
+      semicolonRaw = make_missing_token(T_SEMICOLON);
    }
    return m_data->replaceChild<ClassTraitAdaptationSyntax>(semicolonRaw, Cursor::Semicolon);
 }
@@ -2543,8 +2509,7 @@ ClassTraitAdaptationBlockSyntax ClassTraitAdaptationBlockSyntax::withLeftBrace(s
    if (leftBrace.has_value()) {
       leftBraceRaw = leftBrace->getRaw();
    } else {
-      leftBraceRaw = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE)));
+      leftBraceRaw = make_missing_token(T_LEFT_BRACE);
    }
    return m_data->replaceChild<ClassTraitAdaptationBlockSyntax>(leftBraceRaw, Cursor::LeftBrace);
 }
@@ -2567,8 +2532,7 @@ ClassTraitAdaptationBlockSyntax ClassTraitAdaptationBlockSyntax::withRightBrace(
    if (rightBrace.has_value()) {
       rightBraceRaw = rightBrace->getRaw();
    } else {
-      rightBraceRaw = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)));
+      rightBraceRaw = make_missing_token(T_RIGHT_BRACE);
    }
    return m_data->replaceChild<ClassTraitAdaptationBlockSyntax>(rightBraceRaw, Cursor::RightBrace);
 }
@@ -2619,8 +2583,7 @@ ClassTraitDeclSyntax ClassTraitDeclSyntax::withUseToken(std::optional<TokenSynta
    if (useToken.has_value()) {
       useTokenRaw = useToken->getRaw();
    } else {
-      useTokenRaw = RawSyntax::missing(TokenKindType::T_USE,
-                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_USE)));
+      useTokenRaw = make_missing_token(T_USE);
    }
    return m_data->replaceChild<ClassTraitDeclSyntax>(useTokenRaw, Cursor::UseToken);
 }
@@ -2681,8 +2644,7 @@ InterfaceExtendsClauseSyntax InterfaceExtendsClauseSyntax::withExtendsToken(std:
    if (extendsToken.has_value()) {
       extendsTokenRaw = extendsToken->getRaw();
    } else {
-      extendsTokenRaw = RawSyntax::missing(TokenKindType::T_EXTENDS,
-                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_EXTENDS)));
+      extendsTokenRaw = make_missing_token(T_EXTENDS);
    }
    return m_data->replaceChild<InterfaceExtendsClauseSyntax>(extendsTokenRaw, Cursor::ExtendsToken);
 }
@@ -2736,8 +2698,7 @@ ClassPropertyClauseSyntax ClassPropertyClauseSyntax::withVariable(std::optional<
    if (variable.has_value()) {
       variableRaw = variable->getRaw();
    } else {
-      variableRaw = RawSyntax::missing(TokenKindType::T_VARIABLE,
-                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_VARIABLE)));
+      variableRaw = make_missing_token(T_VARIABLE);
    }
    return m_data->replaceChild<ClassPropertyClauseSyntax>(variableRaw, Cursor::Variable);
 }
@@ -2854,8 +2815,7 @@ MemberDeclListItemSyntax MemberDeclListItemSyntax::withSemicolon(std::optional<T
    if (semicolon.has_value()) {
       semicolonRaw = semicolon->getRaw();
    } else {
-      semicolonRaw = RawSyntax::missing(TokenKindType::T_SEMICOLON,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_SEMICOLON)));
+      semicolonRaw = make_missing_token(T_SEMICOLON);
    }
    return m_data->replaceChild<MemberDeclListItemSyntax>(semicolonRaw, Cursor::Semicolon);
 }
@@ -2900,8 +2860,7 @@ MemberDeclBlockSyntax MemberDeclBlockSyntax::withLeftBrace(std::optional<TokenSy
    if (leftBrace.has_value()) {
       leftBraceRaw = leftBrace->getRaw();
    } else {
-      leftBraceRaw = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE)));
+      leftBraceRaw = make_missing_token(T_LEFT_BRACE);
    }
    return m_data->replaceChild<MemberDeclBlockSyntax>(leftBraceRaw, Cursor::LeftBrace);
 }
@@ -2923,8 +2882,7 @@ MemberDeclBlockSyntax MemberDeclBlockSyntax::withRightBrace(std::optional<TokenS
    if (rightBrace.has_value()) {
       rightBraceRaw = rightBrace->getRaw();
    } else {
-      rightBraceRaw = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)));
+      rightBraceRaw = make_missing_token(T_RIGHT_BRACE);
    }
    return m_data->replaceChild<MemberDeclBlockSyntax>(rightBraceRaw, Cursor::RightBrace);
 }
@@ -3000,8 +2958,7 @@ ClassDefinitionSyntax ClassDefinitionSyntax::withClassToken(std::optional<TokenS
    if (classToken.has_value()) {
       classTokenRaw = classToken->getRaw();
    } else {
-      classTokenRaw = RawSyntax::missing(TokenKindType::T_CLASS,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS)));
+      classTokenRaw = make_missing_token(T_CLASS);
    }
    return m_data->replaceChild<ClassDefinitionSyntax>(classTokenRaw, Cursor::ClassToken);
 }
@@ -3012,8 +2969,7 @@ ClassDefinitionSyntax ClassDefinitionSyntax::withName(std::optional<TokenSyntax>
    if (name.has_value()) {
       nameRaw = name->getRaw();
    } else {
-      nameRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
-                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
+      nameRaw = make_missing_token(T_IDENTIFIER_STRING);
    }
    return m_data->replaceChild<ClassDefinitionSyntax>(nameRaw, Cursor::Name);
 }
@@ -3099,8 +3055,7 @@ InterfaceDefinitionSyntax InterfaceDefinitionSyntax::withInterfaceToken(std::opt
    if (interfaceToken.has_value()) {
       interfaceTokenRaw = interfaceToken->getRaw();
    } else {
-      interfaceTokenRaw = RawSyntax::missing(TokenKindType::T_INTERFACE,
-                                             OwnedString::makeUnowned(get_token_text(TokenKindType::T_INTERFACE)));
+      interfaceTokenRaw = make_missing_token(T_INTERFACE);
    }
    return m_data->replaceChild<InterfaceDefinitionSyntax>(interfaceTokenRaw, Cursor::InterfaceToken);
 }
@@ -3111,8 +3066,7 @@ InterfaceDefinitionSyntax InterfaceDefinitionSyntax::withName(std::optional<Toke
    if (name.has_value()) {
       nameRaw = name->getRaw();
    } else {
-      nameRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
-                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
+      nameRaw = make_missing_token(T_IDENTIFIER_STRING);
    }
    return m_data->replaceChild<InterfaceDefinitionSyntax>(nameRaw, Cursor::Name);
 }
@@ -3179,8 +3133,7 @@ TraitDefinitionSyntax TraitDefinitionSyntax::withTraitToken(std::optional<TokenS
    if (traitToken.has_value()) {
       traitTokenRaw = traitToken->getRaw();
    } else {
-      traitTokenRaw = RawSyntax::missing(TokenKindType::T_TRAIT,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_TRAIT)));
+      traitTokenRaw = make_missing_token(T_TRAIT);
    }
    return m_data->replaceChild<TraitDefinitionSyntax>(traitTokenRaw, Cursor::TraitToken);
 }
@@ -3191,8 +3144,7 @@ TraitDefinitionSyntax TraitDefinitionSyntax::withName(std::optional<TokenSyntax>
    if (name.has_value()) {
       nameRaw = name->getRaw();
    } else {
-      nameRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
-                                   OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
+      nameRaw = make_missing_token(T_IDENTIFIER_STRING);
    }
    return m_data->replaceChild<TraitDefinitionSyntax>(nameRaw, Cursor::TraitToken);
 }
