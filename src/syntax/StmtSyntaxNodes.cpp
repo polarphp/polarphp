@@ -46,6 +46,71 @@ EmptyStmtSyntax EmptyStmtSyntax::withSemicolon(std::optional<TokenSyntax> semico
 }
 
 ///
+/// NestStmtSyntax
+///
+void NestStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == NestStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftBraceToken, std::set{TokenKindType::T_LEFT_BRACE});
+   syntax_assert_child_kind(raw, Statements, std::set{SyntaxKind::InnerStmtList});
+   syntax_assert_child_token(raw, RightBraceToken, std::set{TokenKindType::T_RIGHT_BRACE});
+#endif
+}
+
+TokenSyntax NestStmtSyntax::getLeftBrace()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftBraceToken).get()};
+}
+
+InnerStmtListSyntax NestStmtSyntax::getStatements()
+{
+   return InnerStmtListSyntax {m_root, m_data->getChild(Cursor::Statements).get()};
+}
+
+TokenSyntax NestStmtSyntax::getRightBrace()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightBraceToken).get()};
+}
+
+NestStmtSyntax NestStmtSyntax::withLeftBrace(std::optional<TokenSyntax> leftBrace)
+{
+   RefCountPtr<RawSyntax> rawLeftBrace;
+   if (leftBrace.has_value()) {
+      rawLeftBrace = leftBrace->getRaw();
+   } else {
+      rawLeftBrace = make_missing_token(T_LEFT_BRACE);
+   }
+   return m_data->replaceChild<NestStmtSyntax>(rawLeftBrace, Cursor::LeftBraceToken);
+}
+
+NestStmtSyntax NestStmtSyntax::withStatements(std::optional<InnerStmtListSyntax> statements)
+{
+   RefCountPtr<RawSyntax> rawStatements;
+   if (statements.has_value()) {
+      rawStatements = statements->getRaw();
+   } else {
+      rawStatements = RawSyntax::missing(SyntaxKind::InnerStmtList);
+   }
+   return m_data->replaceChild<NestStmtSyntax>(rawStatements, Cursor::Statements);
+}
+
+NestStmtSyntax NestStmtSyntax::withRightBrace(std::optional<TokenSyntax> rightBrace)
+{
+   RefCountPtr<RawSyntax> rawRightBrace;
+   if (rightBrace.has_value()) {
+      rawRightBrace = rightBrace->getRaw();
+   } else {
+      rawRightBrace = make_missing_token(T_RIGHT_BRACE);
+   }
+   return m_data->replaceChild<NestStmtSyntax>(rawRightBrace, Cursor::RightBraceToken);
+}
+
+///
 /// EmptyStmtSyntax
 ///
 void ExprStmtSyntax::validate()

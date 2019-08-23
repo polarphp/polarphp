@@ -196,6 +196,7 @@ enum class SyntaxKind : std::uint32_t
    /// stmt syntax node
    FirstStmt,
    ExprStmt,
+   NestStmt,
    EmptyStmt,
    ConditionElement,
    InnerStmt,

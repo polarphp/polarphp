@@ -17,6 +17,7 @@
 namespace polar::syntax {
 
 class EmptyStmtSyntax;
+class NestStmtSyntax;
 class ExprStmtSyntax;
 class InnerStmtSyntax;
 class TopStmtSyntax;
@@ -71,6 +72,12 @@ using SwitchCaseListSyntax = SyntaxCollection<SyntaxKind::SwitchCaseList, Switch
 /// elseif-list ->  elseif-clause
 ///                | elseif-list elseif-clause
 using ElseIfListSyntax = SyntaxCollection<SyntaxKind::ElseIfList, ElseIfClauseSyntax>;
+
+///
+/// inner_statement_list:
+///   inner_statement_list inner_statement
+///
+using InnerStmtListSyntax = SyntaxCollection<SyntaxKind::InnerStmtList, InnerStmtSyntax>;
 
 } // polar::syntax
 

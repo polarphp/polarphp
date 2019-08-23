@@ -64,6 +64,64 @@ private:
 };
 
 ///
+/// statement:
+///   '{' inner_statement_list '}'
+///
+class NestStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_LEFT_BRACE)
+      /// optional: false
+      ///
+      LeftBraceToken,
+      ///
+      /// type: InnerStmtListSyntax
+      /// optional: false
+      ///
+      Statements,
+      ///
+      /// type: TokenSyntax (T_RIGHT_BRACE)
+      /// optional: false
+      ///
+      RightBraceToken,
+   };
+
+public:
+   NestStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getLeftBrace();
+   InnerStmtListSyntax getStatements();
+   TokenSyntax getRightBrace();
+
+   NestStmtSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
+   NestStmtSyntax withStatements(std::optional<InnerStmtListSyntax> statements);
+   NestStmtSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::NestStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EmptyStmtSyntaxBuilder;
+   void validate();
+};
+
+///
 /// expr_stmt:
 ///   expr ';'
 ///
@@ -112,6 +170,20 @@ public:
 private:
    friend class ExprStmtBuilder;
    void validate();
+};
+
+///
+/// inner_statement:
+///   statement
+/// | function_declaration_statement
+/// | class_declaration_statement
+/// | trait_declaration_statement
+/// | interface_declaration_statement
+/// | T_HALT_COMPILER '(' ')' ';'
+///
+class InnerStmtSyntax final : public StmtSyntax
+{
+
 };
 
 ///
