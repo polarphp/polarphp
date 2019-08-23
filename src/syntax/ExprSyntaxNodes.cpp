@@ -150,58 +150,27 @@ OptionalExprSyntax OptionalExprSyntax::withExpr(std::optional<ExprSyntax> expr)
 }
 
 ///
-/// EchoExprSyntax
+/// ExprListItemSyntax
 ///
-void EchoExprSyntax::validate()
+void ExprListItemSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == EchoExprSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == ExprListItemSyntax::CHILDREN_COUNT);
    syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
-#endif
-}
-
-ExprSyntax EchoExprSyntax::getExpr()
-{
-   return ExprSyntax {m_root, m_data->getChild(Cursor::Expr).get()};
-}
-
-EchoExprSyntax EchoExprSyntax::withExpr(std::optional<ExprSyntax> expr)
-{
-   RefCountPtr<RawSyntax> exprRaw;
-   if (expr.has_value()) {
-      exprRaw = expr->getRaw();
-   } else {
-      exprRaw = RawSyntax::missing(SyntaxKind::Expr);
-   }
-   return m_data->replaceChild<EchoExprSyntax>(exprRaw, Cursor::Expr);
-}
-
-///
-/// EchoExprListItemSyntax
-///
-void EchoExprListItemSyntax::validate()
-{
-#ifdef POLAR_DEBUG_BUILD
-   RefCountPtr<RawSyntax> raw = getRaw();
-   if (isMissing()) {
-      return;
-   }
-   assert(raw->getLayout().size() == EchoExprSyntax::CHILDREN_COUNT);
-   syntax_assert_child_kind(raw, EchoExpr, std::set{SyntaxKind::EchoExpr});
    syntax_assert_child_token(raw, TrailingComma, std::set{TokenKindType::T_COMMA});
 #endif
 }
 
-EchoExprSyntax EchoExprListItemSyntax::getEchoExpr()
+ExprSyntax ExprListItemSyntax::getExpr()
 {
-   return EchoExprSyntax{m_root, m_data->getChild(Cursor::EchoExpr).get()};
+   return ExprSyntax{m_root, m_data->getChild(Cursor::Expr).get()};
 }
 
-std::optional<TokenSyntax> EchoExprListItemSyntax::getTrailingComma()
+std::optional<TokenSyntax> ExprListItemSyntax::getTrailingComma()
 {
    RefCountPtr<SyntaxData> trailingCommaData = m_data->getChild(Cursor::TrailingComma);
    if (!trailingCommaData) {
@@ -210,18 +179,18 @@ std::optional<TokenSyntax> EchoExprListItemSyntax::getTrailingComma()
    return TokenSyntax {m_root, trailingCommaData.get()};
 }
 
-EchoExprListItemSyntax EchoExprListItemSyntax::withEchoExpr(std::optional<EchoExprSyntax> echoExpr)
+ExprListItemSyntax ExprListItemSyntax::withExpr(std::optional<ExprSyntax> expr)
 {
-   RefCountPtr<RawSyntax> echoExprRaw;
-   if (echoExpr.has_value()) {
-      echoExprRaw = echoExpr->getRaw();
+   RefCountPtr<RawSyntax> exprRaw;
+   if (expr.has_value()) {
+      exprRaw = expr->getRaw();
    } else {
-      echoExprRaw = RawSyntax::missing(SyntaxKind::EchoExpr);
+      exprRaw = RawSyntax::missing(SyntaxKind::Expr);
    }
-   return m_data->replaceChild<EchoExprListItemSyntax>(echoExprRaw, Cursor::EchoExpr);
+   return m_data->replaceChild<ExprListItemSyntax>(exprRaw, Cursor::Expr);
 }
 
-EchoExprListItemSyntax EchoExprListItemSyntax::withTrailingComma(std::optional<TokenSyntax> trailingComma)
+ExprListItemSyntax ExprListItemSyntax::withTrailingComma(std::optional<TokenSyntax> trailingComma)
 {
    RefCountPtr<RawSyntax> trailingCommaRaw;
    if (trailingComma.has_value()) {
@@ -229,7 +198,7 @@ EchoExprListItemSyntax EchoExprListItemSyntax::withTrailingComma(std::optional<T
    } else {
       trailingCommaRaw = nullptr;
    }
-   return m_data->replaceChild<EchoExprListItemSyntax>(trailingCommaRaw, Cursor::TrailingComma);
+   return m_data->replaceChild<ExprListItemSyntax>(trailingCommaRaw, Cursor::TrailingComma);
 }
 
 ///
@@ -3618,54 +3587,6 @@ EvalFuncExprSyntax::withArgumentsClause(std::optional<ParenDecoratedExprSyntax> 
       argumentsClauseRaw = RawSyntax::missing(SyntaxKind::ArgumentListClause);
    }
    return m_data->replaceChild<EvalFuncExprSyntax>(argumentsClauseRaw, Cursor::ArgumentsClause);
-}
-
-///
-/// EchoFuncExprSyntax
-///
-void EchoFuncExprSyntax::validate()
-{
-#ifdef POLAR_DEBUG_BUILD
-   RefCountPtr<RawSyntax> raw = m_data->getRaw();
-   if (isMissing()) {
-      return;
-   }
-   assert(raw->getLayout().size() == EchoFuncExprSyntax::CHILDREN_COUNT);
-   syntax_assert_child_token(raw, EchoToken, std::set{TokenKindType::T_ECHO});
-   syntax_assert_child_kind(raw, ArgsExpr, std::set{SyntaxKind::Expr});
-#endif
-}
-
-TokenSyntax EchoFuncExprSyntax::getEchoToken()
-{
-   return TokenSyntax {m_root, m_data->getChild(Cursor::EchoToken).get()};
-}
-
-ExprSyntax EchoFuncExprSyntax::getArgsExpr()
-{
-   return ExprSyntax {m_root, m_data->getChild(Cursor::ArgsExpr).get()};
-}
-
-EchoFuncExprSyntax EchoFuncExprSyntax::withEchoToken(std::optional<TokenSyntax> echoToken)
-{
-   RefCountPtr<RawSyntax> echoTokenRaw;
-   if (echoToken.has_value()) {
-      echoTokenRaw = echoToken->getRaw();
-   } else {
-      echoTokenRaw = make_missing_token(T_ECHO);
-   }
-   return m_data->replaceChild<EchoFuncExprSyntax>(echoTokenRaw, Cursor::EchoToken);
-}
-
-EchoFuncExprSyntax EchoFuncExprSyntax::withArgsExpr(std::optional<ExprSyntax> expr)
-{
-   RefCountPtr<RawSyntax> exprRaw;
-   if (expr.has_value()) {
-      exprRaw = expr->getRaw();
-   } else {
-      exprRaw = RawSyntax::missing(SyntaxKind::Expr);
-   }
-   return m_data->replaceChild<EchoFuncExprSyntax>(exprRaw, Cursor::ArgsExpr);
 }
 
 ///

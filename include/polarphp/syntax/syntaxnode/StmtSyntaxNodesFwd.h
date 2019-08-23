@@ -34,6 +34,7 @@ class DeferStmtSyntax;
 class ExpressionStmtSyntax;
 class ThrowStmtSyntax;
 class ReturnStmtSyntax;
+class EchoStmtSyntax;
 
 ///
 /// type: SyntaxCollection

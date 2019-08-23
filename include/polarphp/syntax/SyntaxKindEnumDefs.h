@@ -86,8 +86,7 @@ enum class SyntaxKind : std::uint32_t
    ParenDecoratedExpr,
    NullExpr,
    OptionalExpr,
-   EchoExpr,
-   EchoExprListItem,
+   ExprListItem,
 
    VariableExpr,
    ClassConstIdentifierExpr,
@@ -139,7 +138,6 @@ enum class SyntaxKind : std::uint32_t
    IncludeExpr,
    RequireExpr,
    EvalFuncExpr,
-   EchoFuncExpr,
    PrintFuncExpr,
    FuncLikeExpr,
 
@@ -217,6 +215,7 @@ enum class SyntaxKind : std::uint32_t
    ExpressionStmt,
    ThrowStmt,
    ReturnStmt,
+   EchoStmt,
    UnknownStmt,
    LastStmt,
 

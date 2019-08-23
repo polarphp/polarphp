@@ -1038,6 +1038,42 @@ private:
    void validate();
 };
 
+///
+/// T_ECHO echo_expr_list ';'
+///
+class EchoStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      EchoToken,
+      ExprListClause
+   };
+
+public:
+   EchoStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::EchoStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class EchoStmtSyntaxBuilder;
+   void validate();
+};
+
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_SYNTAX_NODE_STMT_NODES_H
