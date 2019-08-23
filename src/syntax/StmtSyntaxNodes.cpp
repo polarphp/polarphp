@@ -1520,4 +1520,52 @@ ReturnStmtSyntax ReturnStmtSyntax::withSemicolon(std::optional<TokenSyntax> semi
    return m_data->replaceChild<ReturnStmtSyntax>(rawSemicolon, TokenKindType::T_SEMICOLON);
 }
 
+///
+/// EchoStmtSyntax
+///
+void EchoStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == EchoStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, EchoToken, std::set{TokenKindType::T_ECHO});
+   syntax_assert_child_kind(raw, ExprListClause, std::set{SyntaxKind::ExprList});
+#endif
+}
+
+TokenSyntax EchoStmtSyntax::getEchoToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::EchoToken).get()};
+}
+
+ExprListSyntax EchoStmtSyntax::getExprListClause()
+{
+   return ExprListSyntax {m_root, m_data->getChild(Cursor::ExprListClause).get()};
+}
+
+EchoStmtSyntax EchoStmtSyntax::withEchoToken(std::optional<TokenSyntax> echoToken)
+{
+   RefCountPtr<RawSyntax> rawEchoToken;
+   if (echoToken.has_value()) {
+      rawEchoToken = echoToken->getRaw();
+   } else {
+      rawEchoToken = make_missing_token(T_ECHO);
+   }
+   return m_data->replaceChild<EchoStmtSyntax>(rawEchoToken, Cursor::EchoToken);
+}
+
+EchoStmtSyntax EchoStmtSyntax::withExprListClause(std::optional<ExprListSyntax> exprListClause)
+{
+   RefCountPtr<RawSyntax> rawExprListClause;
+   if (exprListClause.has_value()) {
+      rawExprListClause = exprListClause->getRaw();
+   } else {
+      rawExprListClause = RawSyntax::missing(SyntaxKind::ExprList);
+   }
+   return m_data->replaceChild<EchoStmtSyntax>(rawExprListClause, Cursor::ExprListClause);
+}
+
 } // polar::syntax

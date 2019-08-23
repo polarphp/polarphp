@@ -36,6 +36,15 @@ class ThrowStmtSyntax;
 class ReturnStmtSyntax;
 class EchoStmtSyntax;
 
+// Expr Syntax nodes forward declares
+class ExprListItemSyntax;
+
+///
+/// type: SyntaxCollection
+/// element type: ExprSyntax
+///
+using ExprListSyntax = SyntaxCollection<SyntaxKind::ExprList, ExprListItemSyntax>;
+
 ///
 /// type: SyntaxCollection
 /// element type: ConditionElementSyntax

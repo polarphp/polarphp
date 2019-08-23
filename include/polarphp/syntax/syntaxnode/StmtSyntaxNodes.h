@@ -1048,7 +1048,15 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
+      /// type: TokenSyntax (T_ECHO)
+      /// optional: false
+      ///
       EchoToken,
+      ///
+      /// type: ExprListSyntax
+      /// optional: false
+      ///
       ExprListClause
    };
 
@@ -1058,6 +1066,12 @@ public:
    {
       validate();
    }
+
+   TokenSyntax getEchoToken();
+   ExprListSyntax getExprListClause();
+
+   EchoStmtSyntax withEchoToken(std::optional<TokenSyntax> echoToken);
+   EchoStmtSyntax withExprListClause(std::optional<ExprListSyntax> exprListClause);
 
    static bool kindOf(SyntaxKind kind)
    {
