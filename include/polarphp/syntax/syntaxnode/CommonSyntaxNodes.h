@@ -274,29 +274,35 @@ private:
 ///
 /// code-block -> '{' stmt-list '}'
 ///
-class CodeBlockSyntax final : public Syntax
+class CodeBlockSyntax final : public StmtSyntax
 {
 public:
    constexpr static unsigned int CHILDREN_COUNT = 3;
    constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 3;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax
       /// optional: false
+      ///
       LeftBrace,
+      ///
       /// type: CodeBlockItemListSyntax
       /// optional: false
+      ///
       Statements,
+      ///
       /// type: TokenSyntax
       /// optional: false
+      ///
       RightBrace
    };
 
 public:
    CodeBlockSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : Syntax(root, data)
+      : StmtSyntax(root, data)
    {
-      this->validate();
+      validate();
    }
 
    TokenSyntax getLeftBrace();

@@ -17,12 +17,15 @@ namespace polar::syntax {
 /// CodeBlockItemSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
-const NodeChoicesType CodeBlockItemSyntax::CHILD_NODE_CHOICES{
-   {CodeBlockItemSyntax::Cursor::Item, {
+const NodeChoicesType CodeBlockItemSyntax::CHILD_NODE_CHOICES
+{
+   {
+      CodeBlockItemSyntax::Item, {
          SyntaxKind::Decl,
                SyntaxKind::Expr,
                SyntaxKind::Stmt,
-      }}
+      }
+   }
 };
 #endif // POLAR_DEBUG_BUILD
 
@@ -33,15 +36,7 @@ void CodeBlockItemSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == CodeBlockItemSyntax::CHILDREN_COUNT);
-   /// validate every child token choices
-   /// validate every child token text choices
-   /// validate every child node choices
-   if (auto &item = raw->getChild(Cursor::Item)) {
-      bool declStatus = DeclSyntax::kindOf(item->getKind());
-      bool stmtStatus = StmtSyntax::kindOf(item->getKind());
-      bool exprStatus = ExprSyntax::kindOf(item->getKind());
-      assert(declStatus || stmtStatus || exprStatus);
-   }
+   syntax_assert_child_kind(raw, Item, CHILD_NODE_CHOICES.at(Cursor::Item));
 }
 
 Syntax CodeBlockItemSyntax::getItem()
@@ -86,6 +81,9 @@ void CodeBlockSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == CodeBlockSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_kind(raw, Statements, std::set{SyntaxKind::CodeBlockItemList});
+   syntax_assert_child_token(raw, RightBrace, std::set{TokenKindType::T_RIGHT_PAREN});
 }
 
 TokenSyntax CodeBlockSyntax::getLeftBrace()
