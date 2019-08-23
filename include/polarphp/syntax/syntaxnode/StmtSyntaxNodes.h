@@ -120,6 +120,10 @@ private:
    void validate();
 };
 
+///
+/// continue_stmt:
+///   T_CONTINUE optional_expr ';'
+///
 class ContinueStmtSyntax final : public StmtSyntax
 {
 public:
@@ -134,10 +138,10 @@ public:
       ///
       ContinueKeyword,
       ///
-      /// type: TokenSyntax
+      /// type: ExprSyntax
       /// optional: true
       ///
-      LNumberToken,
+      Expr,
    };
 public:
    ContinueStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
@@ -147,10 +151,10 @@ public:
    }
 
    TokenSyntax getContinueKeyword();
-   std::optional<TokenSyntax> getLNumberToken();
+   std::optional<ExprSyntax> getExpr();
 
    ContinueStmtSyntax withContinueKeyword(std::optional<TokenSyntax> continueKeyword);
-   ContinueStmtSyntax withLNumberToken(std::optional<TokenSyntax> numberToken);
+   ContinueStmtSyntax withExpr(std::optional<ExprSyntax> expr);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -838,11 +842,15 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_DEFER)
       /// optional: false
+      ///
       DeferKeyword,
-      /// type: CodeBlock
+      ///
+      /// type: CodeBlockSyntax
       /// optional: false
+      ///
       Body
    };
 
@@ -875,8 +883,10 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: ExprSyntax
       /// optional: false
+      ///
       Expr
    };
 public:
@@ -894,6 +904,10 @@ private:
    void validate();
 };
 
+///
+/// throw_stmt:
+///   T_THROW expr ';'
+///
 class ThrowStmtSyntax final : public StmtSyntax
 {
 public:
@@ -902,12 +916,21 @@ public:
 
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: TokenSyntax
+      ///
+      /// type: TokenSyntax (T_THROW)
       /// optional: false
+      ///
       ThrowKeyword,
+      ///
       /// type: ExprSyntax
       /// optional: false
-      Expr
+      ///
+      Expr,
+      ///
+      /// type: TokenSyntax (T_SEMICLON)
+      /// optioal: false
+      ///
+      Semicolon,
    };
 public:
    ThrowStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
@@ -918,9 +941,11 @@ public:
 
    TokenSyntax getThrowKeyword();
    ExprSyntax getExpr();
+   TokenSyntax getSemicolon();
 
    ThrowStmtSyntax withThrowKeyword(std::optional<TokenSyntax> throwKeyword);
    ThrowStmtSyntax withExpr(std::optional<ExprSyntax> expr);
+   ThrowStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -937,6 +962,10 @@ private:
    void validate();
 };
 
+///
+/// return_stmt:
+///   T_RETURN optional_expr ';'
+///
 class ReturnStmtSyntax final : public StmtSyntax
 {
 public:
@@ -945,22 +974,36 @@ public:
 
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax
       /// optional: false
+      ///
       ReturnKeyword,
+      ///
       /// type: ExprSyntax
       /// optional: true
-      Expr
+      ///
+      Expr,
+      ///
+      /// type: TokenSyntax (T_SEMICLON)
+      /// optioal: false
+      ///
+      Semicolon,
    };
 public:
    ReturnStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : StmtSyntax(root, data)
-   {}
+   {
+      validate();
+   }
 
    TokenSyntax getReturnKeyword();
    ExprSyntax getExpr();
+   TokenSyntax getSemicolon();
+
    ReturnStmtSyntax withReturnKeyword(std::optional<TokenSyntax> returnKeyword);
    ReturnStmtSyntax withExpr(std::optional<ExprSyntax> expr);
+   ReturnStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
 
    static bool kindOf(SyntaxKind kind)
    {

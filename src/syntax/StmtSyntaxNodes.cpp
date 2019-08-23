@@ -120,7 +120,7 @@ void ContinueStmtSyntax::validate()
    }
    assert(raw->getLayout().size() == ContinueStmtSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ContinueKeyword, std::set{TokenKindType::T_CONTINUE});
-   syntax_assert_child_token(raw, LNumberToken, std::set{TokenKindType::T_LNUMBER});
+   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
 #endif
 }
 
@@ -129,13 +129,13 @@ TokenSyntax ContinueStmtSyntax::getContinueKeyword()
    return TokenSyntax{m_root, m_data->getChild(Cursor::ContinueKeyword).get()};
 }
 
-std::optional<TokenSyntax> ContinueStmtSyntax::getLNumberToken()
+std::optional<ExprSyntax> ContinueStmtSyntax::getExpr()
 {
-   RefCountPtr<SyntaxData> numberTokenData = m_data->getChild(Cursor::LNumberToken);
-   if (!numberTokenData) {
+   RefCountPtr<SyntaxData> exprData = m_data->getChild(Cursor::Expr);
+   if (!exprData) {
       return std::nullopt;
    }
-   return TokenSyntax{m_root, numberTokenData.get()};
+   return ExprSyntax{m_root, exprData.get()};
 }
 
 ContinueStmtSyntax ContinueStmtSyntax::withContinueKeyword(std::optional<TokenSyntax> continueKeyword)
@@ -144,21 +144,20 @@ ContinueStmtSyntax ContinueStmtSyntax::withContinueKeyword(std::optional<TokenSy
    if (continueKeyword.has_value()) {
       rawContinueKeyword = continueKeyword->getRaw();
    } else {
-      rawContinueKeyword = RawSyntax::missing(TokenKindType::T_CONTINUE,
-                                              OwnedString::makeUnowned(get_token_text(TokenKindType::T_CONTINUE)));
+      rawContinueKeyword = make_missing_token(T_CONTINUE);
    }
    return m_data->replaceChild<ContinueStmtSyntax>(rawContinueKeyword, Cursor::ContinueKeyword);
 }
 
-ContinueStmtSyntax ContinueStmtSyntax::withLNumberToken(std::optional<TokenSyntax> numberToken)
+ContinueStmtSyntax ContinueStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
 {
-   RefCountPtr<RawSyntax> rawNumberToken;
-   if (numberToken.has_value()) {
-      rawNumberToken = numberToken->getRaw();
+   RefCountPtr<RawSyntax> rawExpr;
+   if (expr.has_value()) {
+      rawExpr = expr->getRaw();
    } else {
-      rawNumberToken = nullptr;
+      rawExpr = nullptr;
    }
-   return m_data->replaceChild<ContinueStmtSyntax>(rawNumberToken, Cursor::LNumberToken);
+   return m_data->replaceChild<ContinueStmtSyntax>(rawExpr, Cursor::Expr);
 }
 
 ///
@@ -1279,9 +1278,6 @@ SwitchStmtSyntax SwitchStmtSyntax::addCase(SwitchCaseSyntax switchCase)
    return m_data->replaceChild<SwitchStmtSyntax>(cases, Cursor::Cases);
 }
 
-///
-/// DeferStmtSyntax
-///
 void DeferStmtSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
@@ -1290,6 +1286,8 @@ void DeferStmtSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == DeferStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, DeferKeyword, std::set{TokenKindType::T_DEFER});
+   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::CodeBlock});
 #endif
 }
 
@@ -1337,6 +1335,7 @@ void ExpressionStmtSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == ExpressionStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
 #endif
 }
 
@@ -1367,6 +1366,9 @@ void ThrowStmtSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == ThrowStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ThrowKeyword, std::set{TokenKindType::T_THROW});
+   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
 #endif
 }
 
@@ -1380,14 +1382,18 @@ ExprSyntax ThrowStmtSyntax::getExpr()
    return ExprSyntax{m_root, m_data->getChild(Cursor::Expr).get()};
 }
 
+TokenSyntax ThrowStmtSyntax::getSemicolon()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::Semicolon).get()};
+}
+
 ThrowStmtSyntax ThrowStmtSyntax::withThrowKeyword(std::optional<TokenSyntax> throwKeyword)
 {
    RefCountPtr<RawSyntax> rawThrowKeyword;
    if (throwKeyword.has_value()) {
       rawThrowKeyword = throwKeyword->getRaw();
    } else {
-      rawThrowKeyword = RawSyntax::missing(TokenKindType::T_THROW,
-                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_THROW)));
+      rawThrowKeyword = make_missing_token(T_THROW);
    }
    return m_data->replaceChild<ThrowStmtSyntax>(rawThrowKeyword, TokenKindType::T_THROW);
 }
@@ -1403,6 +1409,17 @@ ThrowStmtSyntax ThrowStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
    return m_data->replaceChild<ThrowStmtSyntax>(rawExpr, Cursor::Expr);
 }
 
+ThrowStmtSyntax ThrowStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> rawSemicolon;
+   if (semicolon.has_value()) {
+      rawSemicolon = semicolon->getRaw();
+   } else {
+      rawSemicolon = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<ThrowStmtSyntax>(rawSemicolon, TokenKindType::T_SEMICOLON);
+}
+
 ///
 /// ReturnStmtSyntax
 ///
@@ -1414,6 +1431,9 @@ void ReturnStmtSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == ReturnStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ReturnKeyword, std::set{TokenKindType::T_RETURN});
+   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
 #endif
 }
 
@@ -1425,6 +1445,11 @@ TokenSyntax ReturnStmtSyntax::getReturnKeyword()
 ExprSyntax ReturnStmtSyntax::getExpr()
 {
    return ExprSyntax{m_root, m_data->getChild(Cursor::Expr).get()};
+}
+
+TokenSyntax ReturnStmtSyntax::getSemicolon()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::Semicolon).get()};
 }
 
 ReturnStmtSyntax ReturnStmtSyntax::withReturnKeyword(std::optional<TokenSyntax> returnKeyword)
@@ -1448,6 +1473,17 @@ ReturnStmtSyntax ReturnStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
       rawExpr = nullptr;
    }
    return m_data->replaceChild<ReturnStmtSyntax>(rawExpr, Cursor::Expr);
+}
+
+ReturnStmtSyntax ReturnStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> rawSemicolon;
+   if (semicolon.has_value()) {
+      rawSemicolon = semicolon->getRaw();
+   } else {
+      rawSemicolon = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<ReturnStmtSyntax>(rawSemicolon, TokenKindType::T_SEMICOLON);
 }
 
 } // polar::syntax

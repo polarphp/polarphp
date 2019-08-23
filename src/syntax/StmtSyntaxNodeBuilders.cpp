@@ -55,23 +55,21 @@ ContinueStmtSyntaxBuilder &ContinueStmtSyntaxBuilder::useContinueKeyword(TokenSy
    return *this;
 }
 
-ContinueStmtSyntaxBuilder &ContinueStmtSyntaxBuilder::useLNumberToken(TokenSyntax numberToken)
+ContinueStmtSyntaxBuilder &ContinueStmtSyntaxBuilder::useExpr(ExprSyntax expr)
 {
-   m_layout[cursor_index(Cursor::LNumberToken)] = numberToken.getRaw();
+   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
    return *this;
 }
 
 ContinueStmtSyntax ContinueStmtSyntaxBuilder::build()
 {
    CursorIndex continueKeywordIndex = cursor_index(Cursor::ContinueKeyword);
-   CursorIndex numberTokenIndex = cursor_index(Cursor::LNumberToken);
+   CursorIndex exprIndex = cursor_index(Cursor::Expr);
    if (!m_layout[continueKeywordIndex]) {
-      m_layout[continueKeywordIndex] = RawSyntax::missing(TokenKindType::T_CONTINUE,
-                                                          OwnedString::makeUnowned(get_token_text(TokenKindType::T_CONTINUE)));
+      m_layout[continueKeywordIndex] = make_missing_token(T_CONTINUE);
    }
-   if (!m_layout[numberTokenIndex]) {
-      m_layout[numberTokenIndex] = RawSyntax::missing(TokenKindType::T_LNUMBER,
-                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_LNUMBER)));
+   if (!m_layout[exprIndex]) {
+      m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::UnknownExpr);
    }
    RefCountPtr<RawSyntax> rawContinueStmtSyntax = RawSyntax::make(SyntaxKind::ContinueStmt, m_layout, SourcePresence::Present,
                                                                   m_arena);

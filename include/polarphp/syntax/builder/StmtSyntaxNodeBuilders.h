@@ -50,7 +50,7 @@ public:
    {}
 
    ContinueStmtSyntaxBuilder &useContinueKeyword(TokenSyntax continueKeyword);
-   ContinueStmtSyntaxBuilder &useLNumberToken(TokenSyntax numberToken);
+   ContinueStmtSyntaxBuilder &useExpr(ExprSyntax expr);
 
    ContinueStmtSyntax build();
 private:
