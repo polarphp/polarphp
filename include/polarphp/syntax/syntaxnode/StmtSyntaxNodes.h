@@ -183,7 +183,56 @@ private:
 ///
 class InnerStmtSyntax final : public StmtSyntax
 {
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 3;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: StmtSyntax
+      /// optional: false
+      /// node choices: true
+      /// --------------------------------------------
+      /// node choice: StmtSyntax
+      /// --------------------------------------------
+      /// node choice: ClassDefinitionStmtSyntax
+      /// --------------------------------------------
+      /// node choice: InterfaceDefinitionStmtSyntax
+      /// --------------------------------------------
+      /// node choice: TraitDefinitionStmtSyntax
+      /// --------------------------------------------
+      /// node choice: FunctionDefinitionStmtSyntax
+      ///
+      Stmt
+   };
 
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+
+public:
+   InnerStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   StmtSyntax getStmt();
+   InnerStmtSyntax withStmt(std::optional<StmtSyntax> stmt);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::InnerStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class InnerStmtSyntaxBuilder;
+   void validate();
 };
 
 ///

@@ -161,6 +161,51 @@ ExprStmtSyntax ExprStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolo
 }
 
 ///
+/// InnerStmtSyntax
+///
+
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType InnerStmtSyntax::CHILD_NODE_CHOICES
+{
+   {
+      InnerStmtSyntax::Stmt, {
+         SyntaxKind::Stmt, SyntaxKind::ClassDefinitionStmt,
+               SyntaxKind::InterfaceDefinitionStmt, SyntaxKind::TraitDefinitionStmt,
+               SyntaxKind::FunctionDefinitionStmt,
+      }
+   }
+};
+#endif
+
+void InnerStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == InnerStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Stmt, CHILD_NODE_CHOICES.at(Cursor::Stmt));
+#endif
+}
+
+StmtSyntax InnerStmtSyntax::getStmt()
+{
+   return StmtSyntax {m_root, m_data->getChild(Cursor::Stmt).get()};
+}
+
+InnerStmtSyntax InnerStmtSyntax::withStmt(std::optional<StmtSyntax> stmt)
+{
+   RefCountPtr<RawSyntax> rawStmt;
+   if (stmt.has_value()) {
+      rawStmt = stmt->getRaw();
+   } else {
+      rawStmt = RawSyntax::missing(SyntaxKind::Stmt);
+   }
+   return m_data->replaceChild<InnerStmtSyntax>(rawStmt, Cursor::Stmt);
+}
+
+///
 /// InnerCodeBlockStmtSyntax
 ///
 void InnerCodeBlockStmtSyntax::validate()
