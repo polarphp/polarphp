@@ -66,6 +66,7 @@ class ClassDefinitionSyntax;
 class InterfaceDefinitionSyntax;
 class TraitDefinitionSyntax;
 class FunctionDefinitionSyntax;
+class NameSyntax;
 
 ///
 /// type: SyntaxCollection

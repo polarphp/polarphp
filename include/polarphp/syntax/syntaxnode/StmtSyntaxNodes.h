@@ -1235,6 +1235,57 @@ private:
 };
 
 ///
+/// catch_arg_type_hint_item:
+///   name '|'
+///
+class CatchArgTypeHintItemSyntax final : Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: NameSyntax
+      /// optional: false
+      ///
+      TypeName,
+      ///
+      /// type: TokenSyntax (T_VBAR)
+      /// optional: true
+      ///
+      Separator
+   };
+
+public:
+   CatchArgTypeHintItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   NameSyntax getTypeName();
+   std::optional<TokenSyntax> getSeparator();
+
+   CatchArgTypeHintItemSyntax withTypeName(std::optional<NameSyntax> typeName);
+   CatchArgTypeHintItemSyntax withSeparator(std::optional<TokenSyntax> separator);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::CatchArgTypeHintItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class CatchArgTypeHintItemSyntaxBuilder;
+   void validate();
+};
+
+///
 ///
 ///
 class CatchListItemClauseSyntax final : public Syntax
@@ -1270,6 +1321,7 @@ public:
       ///
       Semicolon,
    };
+
 public:
    ReturnStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : StmtSyntax(root, data)

@@ -1683,6 +1683,60 @@ FinallyClauseSyntax::withCodeBlock(std::optional<InnerCodeBlockStmtSyntax> codeB
 }
 
 ///
+/// CatchArgTypeHintItemSyntax
+///
+void CatchArgTypeHintItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == CatchArgTypeHintItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, TypeName, std::set{SyntaxKind::Name});
+   syntax_assert_child_token(raw, Separator, std::set{TokenKindType::T_VBAR});
+#endif
+}
+
+NameSyntax CatchArgTypeHintItemSyntax::getTypeName()
+{
+   return NameSyntax {m_root, m_data->getChild(Cursor::TypeName).get()};
+}
+
+std::optional<TokenSyntax> CatchArgTypeHintItemSyntax::getSeparator()
+{
+   RefCountPtr<SyntaxData> separatorData = m_data->getChild(Cursor::Separator);
+   if (!separatorData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, separatorData.get()};
+}
+
+CatchArgTypeHintItemSyntax
+CatchArgTypeHintItemSyntax::withTypeName(std::optional<NameSyntax> typeName)
+{
+   RefCountPtr<RawSyntax> rawTypeName;
+   if (typeName.has_value()) {
+      rawTypeName = typeName->getRaw();
+   } else {
+      rawTypeName = RawSyntax::missing(SyntaxKind::Name);
+   }
+   return m_data->replaceChild<CatchArgTypeHintItemSyntax>(rawTypeName, Cursor::TypeName);
+}
+
+CatchArgTypeHintItemSyntax
+CatchArgTypeHintItemSyntax::withSeparator(std::optional<TokenSyntax> separator)
+{
+   RefCountPtr<RawSyntax> rawSeparator;
+   if (separator.has_value()) {
+      rawSeparator = separator->getRaw();
+   } else {
+      rawSeparator = nullptr;
+   }
+   return m_data->replaceChild<CatchArgTypeHintItemSyntax>(rawSeparator, Cursor::Separator);
+}
+
+///
 /// ReturnStmtSyntax
 ///
 void ReturnStmtSyntax::validate()
