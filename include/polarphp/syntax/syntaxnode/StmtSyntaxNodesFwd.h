@@ -52,8 +52,20 @@ class HaltCompilerStmtSyntax;
 class StaticVariableDeclaresStmtSyntax;
 class GlobalVariableDeclaresStmtSyntax;
 
-// Expr Syntax nodes forward declares
+// stmt wrapper for decl syntax nodes
+class ClassDefinitionStmtSyntax;
+class InterfaceDefinitionStmtSyntax;
+class TraitDefinitionStmtSyntax;
+class FunctionDefinitionStmtSyntax;
+
+// expr syntax nodes forward declares
 class ExprListItemSyntax;
+
+// decl syntax nodes forward declares
+class ClassDefinitionSyntax;
+class InterfaceDefinitionSyntax;
+class TraitDefinitionSyntax;
+class FunctionDefinitionSyntax;
 
 ///
 /// type: SyntaxCollection

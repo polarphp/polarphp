@@ -223,6 +223,10 @@ enum class SyntaxKind : std::uint32_t
    ReturnStmt,
    EchoStmt,
    HaltCompilerStmt,
+   ClassDefinitionStmt,
+   InterfaceDefinitionStmt,
+   TraitDefinitionStmt,
+   FunctionDefinitionStmt,
    UnknownStmt,
    LastStmt,
 

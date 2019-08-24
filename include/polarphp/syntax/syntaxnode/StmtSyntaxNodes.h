@@ -1315,7 +1315,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::EchoStmt;
+      return kind == SyntaxKind::HaltCompilerStmt;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -1324,7 +1324,179 @@ public:
    }
 
 private:
-   friend class EchoStmtSyntaxBuilder;
+   friend class HaltCompilerStmtSyntaxBuilder;
+   void validate();
+};
+
+///
+/// class_definition_stmt:
+///   class_definition_decl
+///
+class ClassDefinitionStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ClassDefinitionSyntax
+      /// optional: false
+      ///
+      ClassDefinition
+   };
+
+public:
+   ClassDefinitionStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   ClassDefinitionSyntax getClassDefinition();
+   ClassDefinitionStmtSyntax withClassDefinition(std::optional<ClassDefinitionSyntax> classDefinition);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassDefinitionStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassDefinitionStmtSyntaxBuilder;
+   void validate();
+};
+
+///
+/// interface_definition_stmt:
+///   interface_definition_decl
+///
+class InterfaceDefinitionStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: InterfaceDefinitionSyntax
+      /// optional: false
+      ///
+      InterfaceDefinition
+   };
+
+public:
+   InterfaceDefinitionStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   InterfaceDefinitionSyntax getInterfaceDefinition();
+   InterfaceDefinitionStmtSyntax withInterfaceDefinition(std::optional<InterfaceDefinitionSyntax> interfaceDefinition);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::InterfaceDefinitionStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class InterfaceDefinitionStmtSyntaxBuilder;
+   void validate();
+};
+
+///
+/// trait_definition_stmt:
+///   trait_definition_decl
+///
+class TraitDefinitionStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TraitDefinitionSyntax
+      /// optional: false
+      ///
+      TraitDefinition
+   };
+
+public:
+   TraitDefinitionStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TraitDefinitionSyntax getTraitDefinition();
+   TraitDefinitionStmtSyntax withTraitDefinition(std::optional<TraitDefinitionSyntax> traitDefinition);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::TraitDefinitionStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class TraitDefinitionStmtSyntaxBuilder;
+   void validate();
+};
+
+///
+/// function_definition_stmt:
+///   function_definition_decl
+///
+class FunctionDefinitionStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: FunctionDefinitionSyntax
+      /// optional: false
+      ///
+      FunctionDefinition
+   };
+
+public:
+   FunctionDefinitionStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   FunctionDefinitionSyntax getFunctionDefinition();
+   FunctionDefinitionStmtSyntax withFunctionDefinition(std::optional<FunctionDefinitionSyntax> functionDefinition);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::FunctionDefinitionStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class FunctionDefinitionStmtSyntaxBuilder;
    void validate();
 };
 

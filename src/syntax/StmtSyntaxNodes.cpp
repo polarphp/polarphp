@@ -10,6 +10,7 @@
 // Created by polarboy on 2019/05/17.
 
 #include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/DeclSyntaxNodes.h"
 
 namespace polar::syntax {
 
@@ -1795,6 +1796,134 @@ HaltCompilerStmtSyntax HaltCompilerStmtSyntax::withSemicolon(std::optional<Token
       rawSemicolon = make_missing_token(T_SEMICOLON);
    }
    return m_data->replaceChild<HaltCompilerStmtSyntax>(rawSemicolon, Cursor::Semicolon);
+}
+
+///
+/// ClassDefinitionStmtSyntax
+///
+void ClassDefinitionStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ClassDefinitionStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, ClassDefinition, std::set{SyntaxKind::ClassDefinition});
+#endif
+}
+
+ClassDefinitionSyntax ClassDefinitionStmtSyntax::getClassDefinition()
+{
+   return ClassDefinitionSyntax {m_root, m_data->getChild(Cursor::ClassDefinition).get()};
+}
+
+ClassDefinitionStmtSyntax
+ClassDefinitionStmtSyntax::withClassDefinition(std::optional<ClassDefinitionSyntax> classDefinition)
+{
+   RefCountPtr<RawSyntax> rawClassDefinition;
+   if (classDefinition.has_value()) {
+      rawClassDefinition = classDefinition->getRaw();
+   } else {
+      rawClassDefinition = RawSyntax::missing(SyntaxKind::ClassDefinition);
+   }
+   return m_data->replaceChild<ClassDefinitionStmtSyntax>(rawClassDefinition, Cursor::ClassDefinition);
+}
+
+///
+/// InterfaceDefinitionStmtSyntax
+///
+void InterfaceDefinitionStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == InterfaceDefinitionStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, InterfaceDefinition, std::set{SyntaxKind::InterfaceDefinition});
+#endif
+}
+
+InterfaceDefinitionSyntax InterfaceDefinitionStmtSyntax::getInterfaceDefinition()
+{
+   return InterfaceDefinitionSyntax {m_root, m_data->getChild(Cursor::InterfaceDefinition).get()};
+}
+
+InterfaceDefinitionStmtSyntax
+InterfaceDefinitionStmtSyntax::withInterfaceDefinition(std::optional<InterfaceDefinitionSyntax> interfaceDefinition)
+{
+   RefCountPtr<RawSyntax> rawInterfaceDefinition;
+   if (interfaceDefinition.has_value()) {
+      rawInterfaceDefinition = interfaceDefinition->getRaw();
+   } else {
+      rawInterfaceDefinition = RawSyntax::missing(SyntaxKind::InterfaceDefinition);
+   }
+   return m_data->replaceChild<InterfaceDefinitionStmtSyntax>(rawInterfaceDefinition, Cursor::InterfaceDefinition);
+}
+
+///
+/// TraitDefinitionStmtSyntax
+///
+void TraitDefinitionStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == TraitDefinitionStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, TraitDefinition, std::set{SyntaxKind::TraitDefinition});
+#endif
+}
+
+TraitDefinitionSyntax TraitDefinitionStmtSyntax::getTraitDefinition()
+{
+   return TraitDefinitionSyntax {m_root, m_data->getChild(Cursor::TraitDefinition).get()};
+}
+
+TraitDefinitionStmtSyntax
+TraitDefinitionStmtSyntax::withTraitDefinition(std::optional<TraitDefinitionSyntax> traitDefinition)
+{
+   RefCountPtr<RawSyntax> rawTraitDefinition;
+   if (traitDefinition.has_value()) {
+      rawTraitDefinition = traitDefinition->getRaw();
+   } else {
+      rawTraitDefinition = RawSyntax::missing(SyntaxKind::TraitDefinition);
+   }
+   return m_data->replaceChild<TraitDefinitionStmtSyntax>(rawTraitDefinition, Cursor::TraitDefinition);
+}
+
+///
+/// FunctionDefinitionStmtSyntax
+///
+void FunctionDefinitionStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == FunctionDefinitionStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, FunctionDefinition, std::set{SyntaxKind::FunctionDefinition});
+#endif
+}
+
+FunctionDefinitionSyntax FunctionDefinitionStmtSyntax::getFunctionDefinition()
+{
+   return FunctionDefinitionSyntax {m_root, m_data->getChild(Cursor::FunctionDefinition).get()};
+}
+
+FunctionDefinitionStmtSyntax
+FunctionDefinitionStmtSyntax::withFunctionDefinition(std::optional<FunctionDefinitionSyntax> functionDefinition)
+{
+   RefCountPtr<RawSyntax> rawFunctionDefinition;
+   if (functionDefinition.has_value()) {
+      rawFunctionDefinition = functionDefinition->getRaw();
+   } else {
+      rawFunctionDefinition = RawSyntax::missing(SyntaxKind::FunctionDefinition);
+   }
+   return m_data->replaceChild<FunctionDefinitionStmtSyntax>(rawFunctionDefinition, Cursor::FunctionDefinition);
 }
 
 } // polar::syntax
