@@ -1448,37 +1448,6 @@ DeferStmtSyntax DeferStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
 }
 
 ///
-/// ExpressionStmtSyntax
-///
-void ExpressionStmtSyntax::validate()
-{
-#ifdef POLAR_DEBUG_BUILD
-   RefCountPtr<RawSyntax> raw = m_data->getRaw();
-   if (isMissing()) {
-      return;
-   }
-   assert(raw->getLayout().size() == ExpressionStmtSyntax::CHILDREN_COUNT);
-   syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
-#endif
-}
-
-ExprSyntax ExpressionStmtSyntax::getExpr()
-{
-   return ExprSyntax{m_root, m_data->getChild(Cursor::Expr).get()};
-}
-
-ExpressionStmtSyntax ExpressionStmtSyntax::withExpr(std::optional<ExprSyntax> expr)
-{
-   RefCountPtr<RawSyntax> rawExpr;
-   if (expr.has_value()) {
-      rawExpr = expr->getRaw();
-   } else {
-      rawExpr = RawSyntax::missing(SyntaxKind::Expr);
-   }
-   return m_data->replaceChild<ExpressionStmtSyntax>(rawExpr, Cursor::Expr);
-}
-
-///
 /// ThrowStmtSyntax
 ///
 void ThrowStmtSyntax::validate()

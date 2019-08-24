@@ -1013,39 +1013,6 @@ private:
 };
 
 ///
-/// \brief The ExpressionStmtSyntax class
-///
-/// expr-stmt -> expression ';'
-///
-class ExpressionStmtSyntax final : public StmtSyntax
-{
-public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 1;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
-   enum Cursor : SyntaxChildrenCountType
-   {
-      ///
-      /// type: ExprSyntax
-      /// optional: false
-      ///
-      Expr
-   };
-public:
-   ExpressionStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : StmtSyntax(root, data)
-   {
-      validate();
-   }
-
-   ExprSyntax getExpr();
-   ExpressionStmtSyntax withExpr(std::optional<ExprSyntax> expr);
-
-private:
-   friend class ExpressionStmtSyntaxBuilder;
-   void validate();
-};
-
-///
 /// throw_stmt:
 ///   T_THROW expr ';'
 ///
@@ -1101,6 +1068,14 @@ public:
 private:
    friend class ThrowStmtSyntaxBuilder;
    void validate();
+};
+
+///
+///
+///
+class CatchListItemClauseSyntax final : public Syntax
+{
+
 };
 
 ///

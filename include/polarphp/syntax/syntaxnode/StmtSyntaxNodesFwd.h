@@ -21,6 +21,10 @@ class NestStmtSyntax;
 class ExprStmtSyntax;
 class InnerStmtSyntax;
 class TopStmtSyntax;
+class DeclareStmtSyntax;
+class GotoStmtSyntax;
+class UnsetStmtSyntax;
+class LabelStmtSyntax;
 class ConditionElementSyntax;
 class ContinueStmtSyntax;
 class BreakStmtSyntax;
@@ -29,16 +33,23 @@ class ElseIfClauseSyntax;
 class IfStmtSyntax;
 class WhileStmtSyntax;
 class DoWhileStmtSyntax;
+class ForStmtSyntax;
+class ForeachStmtSyntax;
 class SwitchCaseSyntax;
 class SwitchDefaultLabelSyntax;
 class SwitchCaseLabelSyntax;
 class SwitchStmtSyntax;
 class DeferStmtSyntax;
-class ExpressionStmtSyntax;
 class ThrowStmtSyntax;
+class TryStmtSyntax;
+class FinallyClauseSyntax;
+class CatchArgTypeHintItemSyntax;
+class CatchListItemClauseSyntax;
 class ReturnStmtSyntax;
 class EchoStmtSyntax;
 class HaltCompilerStmtSyntax;
+class StaticVariableDeclaresStmtSyntax;
+class GlobalVariableDeclaresStmtSyntax;
 
 // Expr Syntax nodes forward declares
 class ExprListItemSyntax;
@@ -78,6 +89,19 @@ using ElseIfListSyntax = SyntaxCollection<SyntaxKind::ElseIfList, ElseIfClauseSy
 ///   inner_statement_list inner_statement
 ///
 using InnerStmtListSyntax = SyntaxCollection<SyntaxKind::InnerStmtList, InnerStmtSyntax>;
+
+///
+/// catch_list:
+///   catch_list T_CATCH '(' catch_name_list T_VARIABLE ')' '{' inner_statement_list '}'
+///
+using CatchListSyntax = SyntaxCollection<SyntaxKind::CatchList, CatchListItemClauseSyntax>;
+
+///
+/// catch_name_list:
+///   name
+/// | catch_name_list '|' name
+///
+using CatchArgTypeHintListSyntax = SyntaxCollection<SyntaxKind::CatchArgTypeHintList, CatchArgTypeHintItemSyntax>;
 
 } // polar::syntax
 

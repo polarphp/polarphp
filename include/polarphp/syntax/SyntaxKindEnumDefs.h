@@ -215,6 +215,10 @@ enum class SyntaxKind : std::uint32_t
    DeferStmt,
    ExpressionStmt,
    ThrowStmt,
+   TryStmt,
+   FinallyClause,
+   CatchArgTypeHintItem,
+   CatchListItemClause,
    ReturnStmt,
    EchoStmt,
    HaltCompilerStmt,
@@ -250,6 +254,8 @@ enum class SyntaxKind : std::uint32_t
    EncapsList,
    ArgumentList,
    IsSetVariablesList,
+   CatchList,
+   CatchArgTypeHintList,
 
    // NOTE: Unknown must be the last kind.
    Unknown,
