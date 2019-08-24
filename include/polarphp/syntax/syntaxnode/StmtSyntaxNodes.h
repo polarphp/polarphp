@@ -304,14 +304,19 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: Syntax
       /// optional: false
-      /// ------------
-      /// node choices
-      /// name: Expr kind: ExprSyntax
+      /// node choices: true
+      /// -----------------------------------
+      /// node choice: ExprSyntax
+      ///
       Condition,
+
+      ///
       /// type: TokenSyntax
       /// optional: true
+      ///
       TrailingComma,
    };
 
@@ -1184,7 +1189,49 @@ private:
 ///
 class FinallyClauseSyntax final : public Syntax
 {
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_FINALLY)
+      /// optional: false
+      ///
+      FinallyToken,
+      ///
+      /// type: InnerCodeBlockStmtSyntax
+      /// optional: false
+      ///
+      CodeBlock
+   };
 
+public:
+   FinallyClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getFinallyToken();
+   InnerCodeBlockStmtSyntax getCodeBlock();
+
+   FinallyClauseSyntax withFinallyToken(std::optional<TokenSyntax> finallyToken);
+   FinallyClauseSyntax withCodeBlock(std::optional<InnerCodeBlockStmtSyntax> codeBlock);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::FinallyClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class FinallyClauseSyntaxBuilder;
+   void validate();
 };
 
 ///

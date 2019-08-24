@@ -1633,6 +1633,56 @@ ThrowStmtSyntax ThrowStmtSyntax::withSemicolon(std::optional<TokenSyntax> semico
 }
 
 ///
+/// FinallyClauseSyntax
+///
+void FinallyClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == FinallyClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, FinallyToken, std::set{TokenKindType::T_FINALLY});
+   syntax_assert_child_kind(raw, CodeBlock, std::set{SyntaxKind::InnerCodeBlockStmt});
+#endif
+}
+
+TokenSyntax FinallyClauseSyntax::getFinallyToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::FinallyToken).get()};
+}
+
+InnerCodeBlockStmtSyntax FinallyClauseSyntax::getCodeBlock()
+{
+   return InnerCodeBlockStmtSyntax {m_root, m_data->getChild(Cursor::CodeBlock).get()};
+}
+
+FinallyClauseSyntax
+FinallyClauseSyntax::withFinallyToken(std::optional<TokenSyntax> finallyToken)
+{
+   RefCountPtr<RawSyntax> rawFinallyToken;
+   if (finallyToken.has_value()) {
+      rawFinallyToken = finallyToken->getRaw();
+   } else {
+      rawFinallyToken = make_missing_token(T_FINALLY);
+   }
+   return m_data->replaceChild<FinallyClauseSyntax>(rawFinallyToken, Cursor::FinallyToken);
+}
+
+FinallyClauseSyntax
+FinallyClauseSyntax::withCodeBlock(std::optional<InnerCodeBlockStmtSyntax> codeBlock)
+{
+   RefCountPtr<RawSyntax> rawCodeBlock;
+   if (codeBlock.has_value()) {
+      rawCodeBlock = codeBlock->getRaw();
+   } else {
+      rawCodeBlock = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
+   }
+   return m_data->replaceChild<FinallyClauseSyntax>(rawCodeBlock, Cursor::CodeBlock);
+}
+
+///
 /// ReturnStmtSyntax
 ///
 void ReturnStmtSyntax::validate()
