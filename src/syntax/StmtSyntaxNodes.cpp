@@ -1737,6 +1737,144 @@ CatchArgTypeHintItemSyntax::withSeparator(std::optional<TokenSyntax> separator)
 }
 
 ///
+/// CatchListItemClauseSyntax
+///
+void CatchListItemClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == CatchListItemClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, CatchToken, std::set{TokenKindType::T_CATCH});
+   syntax_assert_child_token(raw, LeftParenToken, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_kind(raw, CatchArgTypeHintList, std::set{SyntaxKind::CatchArgTypeHintList});
+   syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
+   syntax_assert_child_token(raw, RightParenToken, std::set{TokenKindType::T_RIGHT_PAREN});
+   syntax_assert_child_kind(raw, CodeBlock, std::set{SyntaxKind::InnerCodeBlockStmt});
+#endif
+}
+
+TokenSyntax CatchListItemClauseSyntax::getCatchToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::CatchToken).get()};
+}
+
+TokenSyntax CatchListItemClauseSyntax::getLeftParenToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParenToken).get()};
+}
+
+std::optional<InnerCodeBlockStmtSyntax> CatchListItemClauseSyntax::getCatchArgTypeHintList()
+{
+   RefCountPtr<SyntaxData> typeHintsData = m_data->getChild(Cursor::CatchArgTypeHintList);
+   if (!typeHintsData) {
+      return std::nullopt;
+   }
+   return InnerCodeBlockStmtSyntax {m_root, typeHintsData.get()};
+}
+
+TokenSyntax CatchListItemClauseSyntax::getVariable()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
+}
+
+TokenSyntax CatchListItemClauseSyntax::getRightParenToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParenToken).get()};
+}
+
+InnerCodeBlockStmtSyntax CatchListItemClauseSyntax::getCodeBlock()
+{
+   return InnerCodeBlockStmtSyntax {m_root, m_data->getChild(Cursor::CodeBlock).get()};
+}
+
+CatchListItemClauseSyntax
+CatchListItemClauseSyntax::withCatchToken(std::optional<TokenSyntax> catchToken)
+{
+   RefCountPtr<RawSyntax> rawCatchToken;
+   if (catchToken.has_value()) {
+      rawCatchToken = catchToken->getRaw();
+   } else {
+      rawCatchToken = make_missing_token(T_CATCH);
+   }
+   return m_data->replaceChild<CatchListItemClauseSyntax>(rawCatchToken, Cursor::CatchToken);
+}
+
+CatchListItemClauseSyntax
+CatchListItemClauseSyntax::withLeftParenToken(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> rawLeftParen;
+   if (leftParen.has_value()) {
+      rawLeftParen = leftParen->getRaw();
+   } else {
+      rawLeftParen = make_missing_token(T_LEFT_PAREN);
+   }
+   return m_data->replaceChild<CatchListItemClauseSyntax>(rawLeftParen, Cursor::LeftParenToken);
+}
+
+CatchListItemClauseSyntax
+CatchListItemClauseSyntax::withCatchArgTypeHintList(std::optional<InnerCodeBlockStmtSyntax> typeHints)
+{
+   RefCountPtr<RawSyntax> rawTypeHints;
+   if (typeHints.has_value()) {
+      rawTypeHints = typeHints->getRaw();
+   } else {
+      rawTypeHints = nullptr;
+   }
+   return m_data->replaceChild<CatchListItemClauseSyntax>(rawTypeHints, Cursor::CatchArgTypeHintList);
+}
+
+CatchListItemClauseSyntax
+CatchListItemClauseSyntax::withVariable(std::optional<TokenSyntax> variable)
+{
+   RefCountPtr<RawSyntax> rawVariable;
+   if (variable.has_value()) {
+      rawVariable = variable->getRaw();
+   } else {
+      rawVariable = make_missing_token(T_VARIABLE);
+   }
+   return m_data->replaceChild<CatchListItemClauseSyntax>(rawVariable, Cursor::Variable);
+}
+
+CatchListItemClauseSyntax
+CatchListItemClauseSyntax::withRightParenToken(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rawRightParen;
+   if (rightParen.has_value()) {
+      rawRightParen = rightParen->getRaw();
+   } else {
+      rawRightParen = make_missing_token(T_RIGHT_PAREN);
+   }
+   return m_data->replaceChild<CatchListItemClauseSyntax>(rawRightParen, Cursor::RightParenToken);
+}
+
+CatchListItemClauseSyntax
+CatchListItemClauseSyntax::withCodeBlock(std::optional<InnerCodeBlockStmtSyntax> codeBlock)
+{
+   RefCountPtr<RawSyntax> rawCodeBlock;
+   if (codeBlock.has_value()) {
+      rawCodeBlock = codeBlock->getRaw();
+   } else {
+      rawCodeBlock = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
+   }
+   return m_data->replaceChild<CatchListItemClauseSyntax>(rawCodeBlock, Cursor::CodeBlock);
+}
+
+CatchListItemClauseSyntax
+CatchListItemClauseSyntax::addCatchArgTypeHintList(InnerCodeBlockStmtSyntax typeHint)
+{
+   RefCountPtr<RawSyntax> rawTypeHints = getRaw()->getChild(Cursor::CatchArgTypeHintList);
+   if (rawTypeHints) {
+      rawTypeHints->append(typeHint.getRaw());
+   } else {
+      rawTypeHints = RawSyntax::make(SyntaxKind::CatchArgTypeHintList, {typeHint.getRaw()}, SourcePresence::Present);
+   }
+   return m_data->replaceChild<CatchListItemClauseSyntax>(rawTypeHints, Cursor::CatchArgTypeHintList);
+}
+
+///
 /// ReturnStmtSyntax
 ///
 void ReturnStmtSyntax::validate()

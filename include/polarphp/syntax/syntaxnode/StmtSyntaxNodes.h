@@ -1286,11 +1286,84 @@ private:
 };
 
 ///
-///
+/// catch_list:
+///   catch_list T_CATCH '(' catch_name_list T_VARIABLE ')' '{' inner_statement_list '}'
 ///
 class CatchListItemClauseSyntax final : public Syntax
 {
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 6;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 5;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_CATCH)
+      /// optional: false
+      ///
+      CatchToken,
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optional: false
+      ///
+      LeftParenToken,
+      ///
+      /// type: InnerCodeBlockStmtSyntax
+      /// optional: true
+      ///
+      CatchArgTypeHintList,
+      ///
+      /// type: TokenSyntax (T_VARIABLE)
+      /// optional: false
+      ///
+      Variable,
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
+      /// optional: false
+      ///
+      RightParenToken,
+      ///
+      /// type: InnerCodeBlockStmtSyntax
+      /// optional: false
+      ///
+      CodeBlock
+   };
 
+public:
+   CatchListItemClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getCatchToken();
+   TokenSyntax getLeftParenToken();
+   std::optional<InnerCodeBlockStmtSyntax> getCatchArgTypeHintList();
+   TokenSyntax getVariable();
+   TokenSyntax getRightParenToken();
+   InnerCodeBlockStmtSyntax getCodeBlock();
+
+   CatchListItemClauseSyntax withCatchToken(std::optional<TokenSyntax> catchToken);
+   CatchListItemClauseSyntax withLeftParenToken(std::optional<TokenSyntax> leftParen);
+   CatchListItemClauseSyntax withCatchArgTypeHintList(std::optional<InnerCodeBlockStmtSyntax> typeHints);
+   CatchListItemClauseSyntax withVariable(std::optional<TokenSyntax> variable);
+   CatchListItemClauseSyntax withRightParenToken(std::optional<TokenSyntax> rightParen);
+   CatchListItemClauseSyntax withCodeBlock(std::optional<InnerCodeBlockStmtSyntax> codeBlock);
+
+   CatchListItemClauseSyntax addCatchArgTypeHintList(InnerCodeBlockStmtSyntax typeHint);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::CatchListItemClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class CatchListItemClauseSyntaxBuilder;
+   void validate();
 };
 
 ///
