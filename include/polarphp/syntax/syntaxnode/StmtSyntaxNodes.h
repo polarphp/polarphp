@@ -187,6 +187,65 @@ class InnerStmtSyntax final : public StmtSyntax
 };
 
 ///
+/// inner_code_block_stmt:
+///   '{' inner_statement_list '}'
+///
+class InnerCodeBlockStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 3;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_LEFT_BRACE)
+      /// optional: false
+      ///
+      LeftBrace,
+      ///
+      /// type: InnerStmtListSyntax
+      /// optional: false
+      ///
+      Statements,
+      ///
+      /// type: TokenSyntax (T_RIGHT_BRACE)
+      /// optional: false
+      ///
+      RightBrace
+   };
+
+public:
+   InnerCodeBlockStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getLeftBrace();
+   TokenSyntax getRightBrace();
+   CodeBlockItemListSyntax getStatements();
+
+   InnerCodeBlockStmtSyntax addCodeBlockItem(InnerStmtSyntax codeBlockItem);
+   InnerCodeBlockStmtSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
+   InnerCodeBlockStmtSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
+   InnerCodeBlockStmtSyntax withStatements(std::optional<InnerStmtSyntax> statements);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::InnerCodeBlockStmt == kind;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class InnerCodeBlockStmtSyntaxBuilder;
+   void validate();
+};
+
+///
 ///  condition -> expression
 ///
 class ConditionElementSyntax final : public Syntax
@@ -1068,6 +1127,15 @@ public:
 private:
    friend class ThrowStmtSyntaxBuilder;
    void validate();
+};
+
+///
+/// finally_statement:
+///   T_FINALLY '{' inner_statement_list '}'
+///
+class FinallyClauseSyntax final : public Syntax
+{
+
 };
 
 ///

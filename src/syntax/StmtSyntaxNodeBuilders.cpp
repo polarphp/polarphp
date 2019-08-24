@@ -808,26 +808,6 @@ DeferStmtSyntax DeferStmtSyntaxBuilder::build()
 }
 
 ///
-/// ExpressionStmtSyntaxBuilder
-///
-ExpressionStmtSyntaxBuilder &ExpressionStmtSyntaxBuilder::useExpr(ExprSyntax expr)
-{
-   m_layout[cursor_index(Cursor::Expr)] = expr.getRaw();
-   return *this;
-}
-
-ExpressionStmtSyntax ExpressionStmtSyntaxBuilder::build()
-{
-   CursorIndex exprIndex = cursor_index(Cursor::Expr);
-   if (!m_layout[exprIndex]) {
-      m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
-   }
-   RefCountPtr<RawSyntax> rawExpressionStmtSyntax = RawSyntax::make(SyntaxKind::ExpressionStmt, m_layout, SourcePresence::Present,
-                                                                    m_arena);
-   return make<ExpressionStmtSyntax>(rawExpressionStmtSyntax);
-}
-
-///
 /// ThrowStmtSyntaxBuilder
 ///
 

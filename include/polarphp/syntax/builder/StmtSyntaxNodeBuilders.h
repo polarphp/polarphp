@@ -342,25 +342,6 @@ private:
    };
 };
 
-class ExpressionStmtSyntaxBuilder
-{
-public:
-   using Cursor = ExpressionStmtSyntax::Cursor;
-public:
-   ExpressionStmtSyntaxBuilder() = default;
-   ExpressionStmtSyntaxBuilder(const RefCountPtr<SyntaxArena> &arena)
-      : m_arena(arena)
-   {}
-
-   ExpressionStmtSyntaxBuilder &useExpr(ExprSyntax expr);
-   ExpressionStmtSyntax build();
-private:
-   RefCountPtr<SyntaxArena> m_arena = nullptr;
-   RefCountPtr<RawSyntax> m_layout[ExpressionStmtSyntax::CHILDREN_COUNT] = {
-      nullptr,
-   };
-};
-
 class ThrowStmtSyntaxBuilder
 {
 public:

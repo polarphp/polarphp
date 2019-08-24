@@ -111,7 +111,7 @@ NestStmtSyntax NestStmtSyntax::withRightBrace(std::optional<TokenSyntax> rightBr
 }
 
 ///
-/// EmptyStmtSyntax
+/// ExprStmtSyntax
 ///
 void ExprStmtSyntax::validate()
 {
@@ -157,6 +157,80 @@ ExprStmtSyntax ExprStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolo
       rawSemicolon = make_missing_token(T_SEMICOLON);
    }
    return m_data->replaceChild<ExprStmtSyntax>(rawSemicolon, Cursor::Semicolon);
+}
+
+///
+/// InnerCodeBlockStmtSyntax
+///
+void InnerCodeBlockStmtSyntax::validate()
+{
+   auto raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == InnerCodeBlockStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_kind(raw, Statements, std::set{SyntaxKind::InnerStmtList});
+   syntax_assert_child_token(raw, RightBrace, std::set{TokenKindType::T_RIGHT_PAREN});
+}
+
+TokenSyntax InnerCodeBlockStmtSyntax::getLeftBrace()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::LeftBrace).get()};
+}
+
+TokenSyntax InnerCodeBlockStmtSyntax::getRightBrace()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::RightBrace).get()};
+}
+
+CodeBlockItemListSyntax InnerCodeBlockStmtSyntax::getStatements()
+{
+   return CodeBlockItemListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
+}
+
+InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::addCodeBlockItem(InnerStmtSyntax codeBlockItem)
+{
+   RefCountPtr<RawSyntax> statements = getRaw()->getChild(Cursor::Statements);
+   if (statements) {
+      statements = statements->append(codeBlockItem.getRaw());
+   } else {
+      statements = RawSyntax::make(SyntaxKind::InnerStmtList, {codeBlockItem.getRaw()}, SourcePresence::Present);
+   }
+   return m_data->replaceChild<InnerCodeBlockStmtSyntax>(statements, Cursor::Statements);
+}
+
+InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::withLeftBrace(std::optional<TokenSyntax> leftBrace)
+{
+   RefCountPtr<RawSyntax> rawLeftBrace;
+   if (leftBrace.has_value()) {
+      rawLeftBrace = leftBrace->getRaw();
+   } else {
+      rawLeftBrace = make_missing_token(T_LEFT_BRACE);
+   }
+   return m_data->replaceChild<InnerCodeBlockStmtSyntax>(rawLeftBrace, Cursor::LeftBrace);
+}
+
+InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::withRightBrace(std::optional<TokenSyntax> rightBrace)
+{
+   RefCountPtr<RawSyntax> rawRightBrace;
+   if (rightBrace.has_value()) {
+      rawRightBrace = rightBrace->getRaw();
+   } else {
+      rawRightBrace = make_missing_token(T_RIGHT_BRACE);
+   }
+   return m_data->replaceChild<InnerCodeBlockStmtSyntax>(rawRightBrace, Cursor::RightBrace);
+}
+
+InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::withStatements(std::optional<InnerStmtSyntax> statements)
+{
+   RefCountPtr<RawSyntax> rawStatements;
+   if (statements.has_value()) {
+      rawStatements = statements->getRaw();
+   } else {
+      rawStatements = RawSyntax::missing(SyntaxKind::InnerStmtList);
+   }
+   return m_data->replaceChild<InnerCodeBlockStmtSyntax>(rawStatements, Cursor::Statements);
 }
 
 ///

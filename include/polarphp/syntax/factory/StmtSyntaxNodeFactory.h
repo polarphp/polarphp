@@ -66,7 +66,6 @@ public:
                                                 TokenSyntax rightParen, TokenSyntax leftBrace, SwitchCaseListSyntax cases,
                                                 TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);
    static DeferStmtSyntax makeDeferStmtSyntax(TokenSyntax deferKeyword, CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ExpressionStmtSyntax makeExpressionStmtSyntax(ExprSyntax expr, RefCountPtr<SyntaxArena> arena = nullptr);
    static ThrowStmtSyntax makeThrowStmtSyntax(TokenSyntax throwKeyword, ExprSyntax expr, RefCountPtr<SyntaxArena> arena = nullptr);
 
    ///
@@ -89,7 +88,6 @@ public:
    static SwitchCaseSyntax makeBlankSwitchCaseSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
    static SwitchStmtSyntax makeBlankSwitchStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
    static DeferStmtSyntax makeBlankDeferStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ExpressionStmtSyntax makeBlankExpressionStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
    static ThrowStmtSyntax makeBlankThrowStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
 };
 

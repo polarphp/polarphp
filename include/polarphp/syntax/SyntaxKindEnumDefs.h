@@ -200,6 +200,7 @@ enum class SyntaxKind : std::uint32_t
    EmptyStmt,
    ConditionElement,
    InnerStmt,
+   InnerCodeBlockStmt,
    TopStmt,
    ContinueStmt,
    BreakStmt,

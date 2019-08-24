@@ -227,14 +227,6 @@ DeferStmtSyntax StmtSyntaxNodeFactory::makeDeferStmtSyntax(TokenSyntax deferKeyw
    return make<DeferStmtSyntax>(rawDeferStmtSyntax);
 }
 
-ExpressionStmtSyntax StmtSyntaxNodeFactory::makeExpressionStmtSyntax(ExprSyntax expr, RefCountPtr<SyntaxArena> arena)
-{
-   RefCountPtr<RawSyntax> rawExpressionStmtSyntax = RawSyntax::make(SyntaxKind::ExpressionStmt, {
-                                                                       expr.getRaw()
-                                                                    }, SourcePresence::Present, arena);
-   return make<ExpressionStmtSyntax>(rawExpressionStmtSyntax);
-}
-
 ThrowStmtSyntax StmtSyntaxNodeFactory::makeThrowStmtSyntax(TokenSyntax throwKeyword, ExprSyntax expr,
                                                            RefCountPtr<SyntaxArena> arena)
 {
@@ -435,14 +427,6 @@ DeferStmtSyntax StmtSyntaxNodeFactory::makeBlankDeferStmtSyntax(RefCountPtr<Synt
                                                                   RawSyntax::missing(SyntaxKind::CodeBlock)
                                                                }, SourcePresence::Present, arena);
    return make<DeferStmtSyntax>(rawDeferStmtSyntax);
-}
-
-ExpressionStmtSyntax StmtSyntaxNodeFactory::makeBlankExpressionStmtSyntax(RefCountPtr<SyntaxArena> arena)
-{
-   RefCountPtr<RawSyntax> rawExpressionStmtSyntax = RawSyntax::make(SyntaxKind::ExpressionStmt, {
-                                                                       RawSyntax::missing(SyntaxKind::Expr)
-                                                                    }, SourcePresence::Present, arena);
-   return make<ExpressionStmtSyntax>(rawExpressionStmtSyntax);
 }
 
 ThrowStmtSyntax StmtSyntaxNodeFactory::makeBlankThrowStmtSyntax(RefCountPtr<SyntaxArena> arena)

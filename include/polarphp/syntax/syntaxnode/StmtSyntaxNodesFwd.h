@@ -20,6 +20,7 @@ class EmptyStmtSyntax;
 class NestStmtSyntax;
 class ExprStmtSyntax;
 class InnerStmtSyntax;
+class InnerCodeBlockStmtSyntax;
 class TopStmtSyntax;
 class DeclareStmtSyntax;
 class GotoStmtSyntax;
