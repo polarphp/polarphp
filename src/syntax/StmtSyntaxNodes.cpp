@@ -1633,6 +1633,88 @@ ThrowStmtSyntax ThrowStmtSyntax::withSemicolon(std::optional<TokenSyntax> semico
 }
 
 ///
+/// TryStmtSyntax
+///
+void TryStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == TryStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, TryToken, std::set{TokenKindType::T_TRY});
+   syntax_assert_child_kind(raw, CodeBlock, std::set{SyntaxKind::InnerCodeBlockStmt});
+   syntax_assert_child_kind(raw, CatchList, std::set{SyntaxKind::CatchList});
+   syntax_assert_child_kind(raw, FinallyClause, std::set{SyntaxKind::FinallyClause});
+#endif
+}
+
+TokenSyntax TryStmtSyntax::getTryToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::TryToken).get()};
+}
+
+InnerCodeBlockStmtSyntax TryStmtSyntax::getCodeBlock()
+{
+   return InnerCodeBlockStmtSyntax {m_root, m_data->getChild(Cursor::CodeBlock).get()};
+}
+
+std::optional<CatchListSyntax> TryStmtSyntax::getCatchList()
+{
+   return CatchListSyntax {m_root, m_data->getChild(Cursor::CatchList).get()};
+}
+
+std::optional<FinallyClauseSyntax> TryStmtSyntax::getFinallyClause()
+{
+   return FinallyClauseSyntax {m_root, m_data->getChild(Cursor::FinallyClause).get()};
+}
+
+TryStmtSyntax TryStmtSyntax::withTryToken(std::optional<TokenSyntax> tryToken)
+{
+   RefCountPtr<RawSyntax> rawTryToken;
+   if (tryToken.has_value()) {
+      rawTryToken = tryToken->getRaw();
+   } else {
+      rawTryToken = make_missing_token(T_TRY);
+   }
+   return m_data->replaceChild<TryStmtSyntax>(rawTryToken, Cursor::TryToken);
+}
+
+TryStmtSyntax TryStmtSyntax::withCodeBlock(std::optional<InnerCodeBlockStmtSyntax> codeBlock)
+{
+   RefCountPtr<RawSyntax> rawCodeBlock;
+   if (codeBlock.has_value()) {
+      rawCodeBlock = codeBlock->getRaw();
+   } else {
+      rawCodeBlock = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
+   }
+   return m_data->replaceChild<TryStmtSyntax>(rawCodeBlock, Cursor::CodeBlock);
+}
+
+TryStmtSyntax TryStmtSyntax::withCatchList(std::optional<CatchListSyntax> catchList)
+{
+   RefCountPtr<RawSyntax> rawCatchList;
+   if (catchList.has_value()) {
+      rawCatchList = catchList->getRaw();
+   } else {
+      rawCatchList = nullptr;
+   }
+   return m_data->replaceChild<TryStmtSyntax>(rawCatchList, Cursor::CatchList);
+}
+
+TryStmtSyntax TryStmtSyntax::withFinallyClause(std::optional<FinallyClauseSyntax> finallyClause)
+{
+   RefCountPtr<RawSyntax> rawFinallyClause;
+   if (finallyClause.has_value()) {
+      rawFinallyClause = finallyClause->getRaw();
+   } else {
+      rawFinallyClause = nullptr;
+   }
+   return m_data->replaceChild<TryStmtSyntax>(rawFinallyClause, Cursor::FinallyClause);
+}
+
+///
 /// FinallyClauseSyntax
 ///
 void FinallyClauseSyntax::validate()

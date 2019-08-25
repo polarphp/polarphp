@@ -1184,6 +1184,71 @@ private:
 };
 
 ///
+/// try_stmt:
+///   T_TRY '{' inner_statement_list '}' catch_list finally_statement
+///
+class TryStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 4;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_TRY)
+      /// optional: false
+      ///
+      TryToken,
+      ///
+      /// type: InnerCodeBlockStmtSyntax
+      /// optional: false
+      ///
+      CodeBlock,
+      ///
+      /// type: CatchListSyntax
+      /// optional: true
+      ///
+      CatchList,
+      ///
+      /// type: FinallyClauseSyntax
+      /// optional: true
+      ///
+      FinallyClause
+   };
+
+public:
+   TryStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getTryToken();
+   InnerCodeBlockStmtSyntax getCodeBlock();
+   std::optional<CatchListSyntax> getCatchList();
+   std::optional<FinallyClauseSyntax> getFinallyClause();
+
+   TryStmtSyntax withTryToken(std::optional<TokenSyntax> tryToken);
+   TryStmtSyntax withCodeBlock(std::optional<InnerCodeBlockStmtSyntax> codeBlock);
+   TryStmtSyntax withCatchList(std::optional<CatchListSyntax> catchList);
+   TryStmtSyntax withFinallyClause(std::optional<FinallyClauseSyntax> finallyClause);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::TryStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class TryStmtSyntaxBuilder;
+   void validate();
+};
+
+///
 /// finally_statement:
 ///   T_FINALLY '{' inner_statement_list '}'
 ///
