@@ -50,8 +50,10 @@ class CatchListItemClauseSyntax;
 class ReturnStmtSyntax;
 class EchoStmtSyntax;
 class HaltCompilerStmtSyntax;
-class StaticVariableDeclaresStmtSyntax;
-class GlobalVariableDeclaresStmtSyntax;
+class GlobalVariableListItemSyntax;
+class GlobalVariableDeclarationsStmtSyntax;
+class StaticVariableListItemSyntax;
+class StaticVariableDeclarationsStmtSyntax;
 
 // stmt wrapper for decl syntax nodes
 class ClassDefinitionStmtSyntax;
@@ -61,6 +63,7 @@ class FunctionDefinitionStmtSyntax;
 
 // expr syntax nodes forward declares
 class ExprListItemSyntax;
+class SimpleVariableExprSyntax;
 
 // decl syntax nodes forward declares
 class ClassDefinitionSyntax;
@@ -68,6 +71,7 @@ class InterfaceDefinitionSyntax;
 class TraitDefinitionSyntax;
 class FunctionDefinitionSyntax;
 class NameSyntax;
+
 
 ///
 /// type: SyntaxCollection
@@ -125,6 +129,13 @@ using CatchArgTypeHintListSyntax = SyntaxCollection<SyntaxKind::CatchArgTypeHint
 /// | unset_variables ',' unset_variable
 ///
 using UnsetVariableListSyntax = SyntaxCollection<SyntaxKind::UnsetVariableList, UnsetVariableSyntax>;
+
+///
+/// static_var_list:
+///   static_var_list ',' static_var
+/// | static_var
+///
+using GlobalVariableListSyntax = SyntaxCollection<SyntaxKind::GlobalVariableList, GlobalVariableListItemSyntax>;
 
 } // polar::syntax
 

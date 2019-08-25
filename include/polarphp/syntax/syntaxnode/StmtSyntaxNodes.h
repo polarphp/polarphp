@@ -1848,6 +1848,113 @@ private:
 };
 
 ///
+/// global_var:
+///   simple_variable ','
+///
+class GlobalVariableListItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: SimpleVariableExprSyntax
+      /// optional: false
+      ///
+      Variable,
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: true
+      ///
+      TrailingComma
+   };
+
+public:
+   GlobalVariableListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   SimpleVariableExprSyntax getVariable();
+   std::optional<TokenSyntax> getTrailingComma();
+
+   GlobalVariableListItemSyntax withVariable(std::optional<TokenSyntax> variable);
+   GlobalVariableListItemSyntax withTrailingComma(std::optional<TokenSyntax> comma);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::GlobalVariableListItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class GlobalVariableListItemSyntaxBuilder;
+   void validate();
+};
+
+///
+/// global_variable_declarations_stmt:
+///   T_GLOBAL global_var_list ';'
+///
+class GlobalVariableDeclarationsStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_GLOBAL)
+      /// optional: false
+      ///
+      GlobalToken,
+      ///
+      /// type: GlobalVariableListSyntax
+      /// optional: false
+      ///
+      Variables,
+      ///
+      /// type: TokenSyntax (T_SEMICLON)
+      /// optioal: false
+      ///
+      Semicolon,
+   };
+
+public:
+   GlobalVariableDeclarationsStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getGlobalToken();
+   GlobalVariableListSyntax getVariables();
+   TokenSyntax getSemicolon();
+
+   GlobalVariableDeclarationsStmtSyntax withGlobalToken(std::optional<TokenSyntax> globalToken);
+   GlobalVariableDeclarationsStmtSyntax withVariables(std::optional<GlobalVariableListSyntax> variables);
+   GlobalVariableDeclarationsStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::GlobalVariableDeclarationsStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class GlobalVariableDeclarationsStmtSyntaxBuilder;
+   void validate();
+};
+
+///
 /// class_definition_stmt:
 ///   class_definition_decl
 ///

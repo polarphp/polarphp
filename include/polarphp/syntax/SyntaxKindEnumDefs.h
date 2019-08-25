@@ -230,6 +230,11 @@ enum class SyntaxKind : std::uint32_t
    ReturnStmt,
    EchoStmt,
    HaltCompilerStmt,
+   GlobalVariableListItem,
+   GlobalVariableDeclarationsStmt,
+   StaticVariableListItem,
+   StaticVariableDeclarationsStmt,
+
    ClassDefinitionStmt,
    InterfaceDefinitionStmt,
    TraitDefinitionStmt,
@@ -269,7 +274,8 @@ enum class SyntaxKind : std::uint32_t
    CatchList,
    CatchArgTypeHintList,
    UnsetVariableList,
-
+   GlobalVariableList,
+   StaticVariableList,
    // NOTE: Unknown must be the last kind.
    Unknown,
 };

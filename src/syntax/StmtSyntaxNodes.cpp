@@ -11,6 +11,7 @@
 
 #include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
 #include "polarphp/syntax/syntaxnode/DeclSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
 
 namespace polar::syntax {
 
@@ -2428,6 +2429,128 @@ HaltCompilerStmtSyntax HaltCompilerStmtSyntax::withSemicolon(std::optional<Token
       rawSemicolon = make_missing_token(T_SEMICOLON);
    }
    return m_data->replaceChild<HaltCompilerStmtSyntax>(rawSemicolon, Cursor::Semicolon);
+}
+
+///
+/// GlobalVariableListItemSyntax
+///
+void GlobalVariableListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == GlobalVariableListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
+   syntax_assert_child_token(raw, TrailingComma, std::set{TokenKindType::T_COMMA});
+#endif
+}
+
+SimpleVariableExprSyntax GlobalVariableListItemSyntax::getVariable()
+{
+   return SimpleVariableExprSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
+}
+
+std::optional<TokenSyntax> GlobalVariableListItemSyntax::getTrailingComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::TrailingComma);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+GlobalVariableListItemSyntax
+GlobalVariableListItemSyntax::withVariable(std::optional<TokenSyntax> variable)
+{
+   RefCountPtr<RawSyntax> rawVariable;
+   if (variable.has_value()) {
+      rawVariable = variable->getRaw();
+   } else {
+      rawVariable = make_missing_token(T_VARIABLE);
+   }
+   return m_data->replaceChild<GlobalVariableListItemSyntax>(rawVariable, Cursor::Variable);
+}
+
+GlobalVariableListItemSyntax
+GlobalVariableListItemSyntax::withTrailingComma(std::optional<TokenSyntax> comma)
+{
+   RefCountPtr<RawSyntax> rawComma;
+   if (comma.has_value()) {
+      rawComma = comma->getRaw();
+   } else {
+      rawComma = nullptr;
+   }
+   return m_data->replaceChild<GlobalVariableListItemSyntax>(rawComma, Cursor::TrailingComma);
+}
+
+///
+/// GlobalVariableDeclarationsStmtSyntax
+///
+void GlobalVariableDeclarationsStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == GlobalVariableDeclarationsStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, GlobalToken, std::set{TokenKindType::T_GLOBAL});
+   syntax_assert_child_kind(raw, Variables, std::set{SyntaxKind::GlobalVariableList});
+   syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
+#endif
+}
+
+TokenSyntax GlobalVariableDeclarationsStmtSyntax::getGlobalToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::GlobalToken).get()};
+}
+
+GlobalVariableListSyntax GlobalVariableDeclarationsStmtSyntax::getVariables()
+{
+   return GlobalVariableListSyntax {m_root, m_data->getChild(Cursor::Variables).get()};
+}
+
+TokenSyntax GlobalVariableDeclarationsStmtSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
+}
+
+GlobalVariableDeclarationsStmtSyntax
+GlobalVariableDeclarationsStmtSyntax::withGlobalToken(std::optional<TokenSyntax> globalToken)
+{
+   RefCountPtr<RawSyntax> rawGlobalToken;
+   if (globalToken.has_value()) {
+      rawGlobalToken = globalToken->getRaw();
+   } else {
+      rawGlobalToken = make_missing_token(T_GLOBAL);
+   }
+   return m_data->replaceChild<GlobalVariableDeclarationsStmtSyntax>(rawGlobalToken, Cursor::GlobalToken);
+}
+
+GlobalVariableDeclarationsStmtSyntax
+GlobalVariableDeclarationsStmtSyntax::withVariables(std::optional<GlobalVariableListSyntax> variables)
+{
+   RefCountPtr<RawSyntax> rawVariables;
+   if (variables.has_value()) {
+      rawVariables = variables->getRaw();
+   } else {
+      rawVariables = RawSyntax::missing(SyntaxKind::GlobalVariableList);
+   }
+   return m_data->replaceChild<GlobalVariableDeclarationsStmtSyntax>(rawVariables, Cursor::Variables);
+}
+
+GlobalVariableDeclarationsStmtSyntax
+GlobalVariableDeclarationsStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> rawSemicolon;
+   if (semicolon.has_value()) {
+      rawSemicolon = semicolon->getRaw();
+   } else {
+      rawSemicolon = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<GlobalVariableDeclarationsStmtSyntax>(rawSemicolon, Cursor::Semicolon);
 }
 
 ///
