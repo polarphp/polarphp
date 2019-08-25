@@ -253,7 +253,9 @@ public:
 public:
    NameSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
-   {}
+   {
+      validate();
+   }
 
    std::optional<TokenSyntax> getNsToken();
    std::optional<TokenSyntax> getNsSeparator();
@@ -686,7 +688,9 @@ public:
 public:
    NamespaceUseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : DeclSyntax(root, data)
-   {}
+   {
+      validate();
+   }
 
    TokenSyntax getUseToken();
    std::optional<NamespaceUseTypeSyntax> getUseType();
@@ -737,7 +741,9 @@ public:
 public:
    InitializeClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
-   {}
+   {
+      validate();
+   }
 
    TokenSyntax getEqualToken();
    ExprSyntax getValueExpr();

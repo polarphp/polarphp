@@ -353,6 +353,130 @@ private:
 };
 
 ///
+/// unset_variable:
+///   variable ','
+///
+class UnsetVariableSyntax final : public Syntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 2;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_VARIABLE)
+      /// optional: false
+      ///
+      Variable,
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: true
+      ///
+      TrailingComma,
+   };
+
+public:
+   UnsetVariableSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getVariable();
+   std::optional<TokenSyntax> getTrailingComma();
+
+   UnsetVariableSyntax withVariable(std::optional<TokenSyntax> variable);
+   UnsetVariableSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::UnsetVariable == kind;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class UnsetVariableSyntaxBuilder;
+   void validate();
+};
+
+///
+/// unset_stmt:
+///   T_UNSET '(' unset_variables possible_comma ')' ';'
+///
+class UnsetStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 5;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 5;
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_UNSET)
+      /// optional: false
+      ///
+      UnsetToken,
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optional: false
+      ///
+      LeftParenToken,
+      ///
+      /// type: UnsetVariableListSyntax
+      /// optional: false
+      ///
+      UnsetVariables,
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optional: false
+      ///
+      RightParenToken,
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: false
+      ///
+      Semicolon,
+   };
+
+public:
+   UnsetStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getUnsetToken();
+   TokenSyntax getLeftParenToken();
+   UnsetVariableListSyntax getUnsetVariables();
+   TokenSyntax getRightParenToken();
+   TokenSyntax getSemicolon();
+
+   UnsetStmtSyntax withUnsetToken(std::optional<TokenSyntax> unsetToken);
+   UnsetStmtSyntax withLeftParenToken(std::optional<TokenSyntax> leftParen);
+   UnsetStmtSyntax withUnsetVariables(std::optional<UnsetVariableListSyntax> variables);
+   UnsetStmtSyntax withRightParenToken(std::optional<TokenSyntax> rightParen);
+   UnsetStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::UnsetStmt == kind;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class UnsetStmtSyntaxBuilder;
+   void validate();
+};
+
+///
 ///  condition -> expression
 ///
 class ConditionElementSyntax final : public Syntax

@@ -210,7 +210,7 @@ InnerStmtSyntax InnerStmtSyntax::withStmt(std::optional<StmtSyntax> stmt)
 ///
 void InnerCodeBlockStmtSyntax::validate()
 {
-   auto raw = m_data->getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -284,7 +284,7 @@ InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::withStatements(std::optional<
 ///
 void GotoStmtSyntax::validate()
 {
-   auto raw = m_data->getRaw();
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
@@ -340,6 +340,161 @@ GotoStmtSyntax GotoStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolo
       rawSemicolon = make_missing_token(T_SEMICOLON);
    }
    return m_data->replaceChild<GotoStmtSyntax>(rawSemicolon, Cursor::Semicolon);
+}
+
+///
+/// UnsetVariableSyntax
+///
+
+void UnsetVariableSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == UnsetVariableSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
+   syntax_assert_child_token(raw, TrailingComma, std::set{TokenKindType::T_COMMA});
+}
+
+TokenSyntax UnsetVariableSyntax::getVariable()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
+}
+
+std::optional<TokenSyntax> UnsetVariableSyntax::getTrailingComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::TrailingComma);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+UnsetVariableSyntax
+UnsetVariableSyntax::withVariable(std::optional<TokenSyntax> variable)
+{
+   RefCountPtr<RawSyntax> rawVariable;
+   if (variable.has_value()) {
+      rawVariable = variable->getRaw();
+   } else {
+      rawVariable = make_missing_token(T_VARIABLE);
+   }
+   return m_data->replaceChild<UnsetVariableSyntax>(rawVariable, Cursor::Variable);
+}
+
+UnsetVariableSyntax
+UnsetVariableSyntax::withTrailingComma(std::optional<TokenSyntax> trailingComma)
+{
+   RefCountPtr<RawSyntax> rawTrailingComma;
+   if (trailingComma.has_value()) {
+      rawTrailingComma = trailingComma->getRaw();
+   } else {
+      rawTrailingComma = nullptr;
+   }
+   return m_data->replaceChild<UnsetVariableSyntax>(rawTrailingComma, Cursor::TrailingComma);
+}
+
+///
+/// UnsetStmtSyntax
+///
+void UnsetStmtSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == UnsetVariableSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, UnsetToken, std::set{TokenKindType::T_UNSET});
+   syntax_assert_child_token(raw, LeftParenToken, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_kind(raw, UnsetVariables, std::set{SyntaxKind::UnsetVariableList});
+   syntax_assert_child_token(raw, RightParenToken, std::set{TokenKindType::T_RIGHT_PAREN});
+   syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_COMMA});
+}
+
+TokenSyntax UnsetStmtSyntax::getUnsetToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::UnsetToken).get()};
+}
+
+TokenSyntax UnsetStmtSyntax::getLeftParenToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParenToken).get()};
+}
+
+UnsetVariableListSyntax UnsetStmtSyntax::getUnsetVariables()
+{
+   return UnsetVariableListSyntax {m_root, m_data->getChild(Cursor::UnsetVariables).get()};
+}
+
+TokenSyntax UnsetStmtSyntax::getRightParenToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParenToken).get()};
+}
+
+TokenSyntax UnsetStmtSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
+}
+
+UnsetStmtSyntax
+UnsetStmtSyntax::withUnsetToken(std::optional<TokenSyntax> unsetToken)
+{
+   RefCountPtr<RawSyntax> rawUnsetToken;
+   if (unsetToken.has_value()) {
+      rawUnsetToken = unsetToken->getRaw();
+   } else {
+      rawUnsetToken = make_missing_token(T_UNSET);
+   }
+   return m_data->replaceChild<UnsetStmtSyntax>(rawUnsetToken, Cursor::UnsetToken);
+}
+
+UnsetStmtSyntax
+UnsetStmtSyntax::withLeftParenToken(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> rawLeftParen;
+   if (leftParen.has_value()) {
+      rawLeftParen = leftParen->getRaw();
+   } else {
+      rawLeftParen = make_missing_token(T_LEFT_PAREN);
+   }
+   return m_data->replaceChild<UnsetStmtSyntax>(rawLeftParen, Cursor::LeftParenToken);
+}
+
+UnsetStmtSyntax
+UnsetStmtSyntax::withUnsetVariables(std::optional<UnsetVariableListSyntax> variables)
+{
+   RefCountPtr<RawSyntax> rawVariables;
+   if (variables.has_value()) {
+      rawVariables = variables->getRaw();
+   } else {
+      rawVariables = RawSyntax::missing(SyntaxKind::UnsetVariableList);
+   }
+   return m_data->replaceChild<UnsetStmtSyntax>(rawVariables, Cursor::UnsetVariables);
+}
+
+UnsetStmtSyntax
+UnsetStmtSyntax::withRightParenToken(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rawRightParen;
+   if (rightParen.has_value()) {
+      rawRightParen = rightParen->getRaw();
+   } else {
+      rawRightParen = make_missing_token(T_RIGHT_PAREN);
+   }
+   return m_data->replaceChild<UnsetStmtSyntax>(rawRightParen, Cursor::RightParenToken);
+}
+
+UnsetStmtSyntax
+UnsetStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> rawSemicolon;
+   if (semicolon.has_value()) {
+      rawSemicolon = semicolon->getRaw();
+   } else {
+      rawSemicolon = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<UnsetStmtSyntax>(rawSemicolon, Cursor::Semicolon);
 }
 
 ///

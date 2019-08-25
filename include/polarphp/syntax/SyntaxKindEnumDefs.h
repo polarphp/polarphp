@@ -204,6 +204,7 @@ enum class SyntaxKind : std::uint32_t
    TopStmt,
    DeclareStmt,
    GotoStmt,
+   UnsetVariable,
    UnsetStmt,
    LabelStmt,
    ContinueStmt,
@@ -267,6 +268,7 @@ enum class SyntaxKind : std::uint32_t
    IsSetVariablesList,
    CatchList,
    CatchArgTypeHintList,
+   UnsetVariableList,
 
    // NOTE: Unknown must be the last kind.
    Unknown,

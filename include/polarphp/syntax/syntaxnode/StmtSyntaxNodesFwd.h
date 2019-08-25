@@ -24,6 +24,7 @@ class InnerCodeBlockStmtSyntax;
 class TopStmtSyntax;
 class DeclareStmtSyntax;
 class GotoStmtSyntax;
+class UnsetVariableSyntax;
 class UnsetStmtSyntax;
 class LabelStmtSyntax;
 class ConditionElementSyntax;
@@ -116,6 +117,14 @@ using CatchListSyntax = SyntaxCollection<SyntaxKind::CatchList, CatchListItemCla
 /// | catch_name_list '|' name
 ///
 using CatchArgTypeHintListSyntax = SyntaxCollection<SyntaxKind::CatchArgTypeHintList, CatchArgTypeHintItemSyntax>;
+
+///
+/// unset_variable_list:
+///   unset_variables:
+///   unset_variable
+/// | unset_variables ',' unset_variable
+///
+using UnsetVariableListSyntax = SyntaxCollection<SyntaxKind::UnsetVariableList, UnsetVariableSyntax>;
 
 } // polar::syntax
 
