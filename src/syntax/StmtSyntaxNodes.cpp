@@ -498,6 +498,52 @@ UnsetStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
 }
 
 ///
+/// LabelStmtSyntax
+///
+void LabelStmtSyntax::validate()
+{
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == LabelStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
+   syntax_assert_child_token(raw, Colon, std::set{TokenKindType::T_COLON});
+}
+
+TokenSyntax LabelStmtSyntax::getName()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Name).get()};
+}
+
+TokenSyntax LabelStmtSyntax::getColon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Colon).get()};
+}
+
+LabelStmtSyntax LabelStmtSyntax::withName(std::optional<TokenSyntax> name)
+{
+   RefCountPtr<RawSyntax> rawName;
+   if (name.has_value()) {
+      rawName = name->getRaw();
+   } else {
+      rawName = make_missing_token(T_IDENTIFIER_STRING);
+   }
+   return m_data->replaceChild<LabelStmtSyntax>(rawName, Cursor::Name);
+}
+
+LabelStmtSyntax LabelStmtSyntax::withColon(std::optional<TokenSyntax> colon)
+{
+   RefCountPtr<RawSyntax> rawColon;
+   if (colon.has_value()) {
+      rawColon = colon->getRaw();
+   } else {
+      rawColon = make_missing_token(T_COLON);
+   }
+   return m_data->replaceChild<LabelStmtSyntax>(rawColon, Cursor::Colon);
+}
+
+///
 /// ConditionElementSyntax
 ///
 const NodeChoicesType ConditionElementSyntax::CHILD_NODE_CHOICES

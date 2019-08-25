@@ -477,6 +477,57 @@ private:
 };
 
 ///
+/// label_stmt:
+///   T_IDENTIFIER_STRING ':'
+///
+class LabelStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 2;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_IDENTIFIER_STRING)
+      /// optional: false
+      ///
+      Name,
+      ///
+      /// type: TokenSyntax (T_COLON)
+      /// optional: false
+      ///
+      Colon
+   };
+
+public:
+   LabelStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getName();
+   TokenSyntax getColon();
+
+   LabelStmtSyntax withName(std::optional<TokenSyntax> name);
+   LabelStmtSyntax withColon(std::optional<TokenSyntax> colon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::LabelStmt == kind;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class LabelStmtSyntaxBuilder;
+   void validate();
+};
+
+///
 ///  condition -> expression
 ///
 class ConditionElementSyntax final : public Syntax
