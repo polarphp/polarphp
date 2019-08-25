@@ -281,7 +281,69 @@ InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::withStatements(std::optional<
 
 ///
 /// ConditionElementSyntax
-/// current only support expr condition
+///
+void GotoStmtSyntax::validate()
+{
+   auto raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == GotoStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, GotoToken, std::set{TokenKindType::T_GOTO});
+   syntax_assert_child_token(raw, Target, std::set{TokenKindType::T_IDENTIFIER_STRING});
+   syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
+}
+
+TokenSyntax GotoStmtSyntax::getGotoToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::GotoToken).get()};
+}
+
+TokenSyntax GotoStmtSyntax::getTarget()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Target).get()};
+}
+
+TokenSyntax GotoStmtSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
+}
+
+GotoStmtSyntax GotoStmtSyntax::withGotoToken(std::optional<TokenSyntax> gotoToken)
+{
+   RefCountPtr<RawSyntax> rawGotoToken;
+   if (gotoToken.has_value()) {
+      rawGotoToken = gotoToken->getRaw();
+   } else {
+      rawGotoToken = make_missing_token(T_GOTO);
+   }
+   return m_data->replaceChild<GotoStmtSyntax>(rawGotoToken, Cursor::GotoToken);
+}
+
+GotoStmtSyntax GotoStmtSyntax::withTarget(std::optional<TokenSyntax> target)
+{
+   RefCountPtr<RawSyntax> rawTarget;
+   if (target.has_value()) {
+      rawTarget = target->getRaw();
+   } else {
+      rawTarget = make_missing_token(T_IDENTIFIER_STRING);
+   }
+   return m_data->replaceChild<GotoStmtSyntax>(rawTarget, Cursor::Target);
+}
+
+GotoStmtSyntax GotoStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> rawSemicolon;
+   if (semicolon.has_value()) {
+      rawSemicolon = semicolon->getRaw();
+   } else {
+      rawSemicolon = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<GotoStmtSyntax>(rawSemicolon, Cursor::Semicolon);
+}
+
+///
+/// ConditionElementSyntax
 ///
 const NodeChoicesType ConditionElementSyntax::CHILD_NODE_CHOICES
 {

@@ -295,6 +295,64 @@ private:
 };
 
 ///
+/// goto_stmt:
+///   T_GOTO T_IDENTIFIER_STRING ';'
+///
+class GotoStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 3;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_GOTO)
+      /// optional: false
+      ///
+      GotoToken,
+      ///
+      /// type: TokenSyntax (T_IDENTIFIER_STRING)
+      /// optional: false
+      ///
+      Target,
+      ///
+      /// type: TokenSyntax (T_SEMICOLON)
+      /// optional: false
+      ///
+      Semicolon,
+   };
+
+public:
+   GotoStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getGotoToken();
+   TokenSyntax getTarget();
+   TokenSyntax getSemicolon();
+
+   GotoStmtSyntax withGotoToken(std::optional<TokenSyntax> gotoToken);
+   GotoStmtSyntax withTarget(std::optional<TokenSyntax> target);
+   GotoStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::InnerCodeBlockStmt == kind;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class GotoStmtSyntaxBuilder;
+   void validate();
+};
+
+///
 ///  condition -> expression
 ///
 class ConditionElementSyntax final : public Syntax
