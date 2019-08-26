@@ -56,6 +56,14 @@ class GlobalVariableDeclarationsStmtSyntax;
 class StaticVariableListItemSyntax;
 class StaticVariableDeclarationsStmtSyntax;
 
+class NamespaceUseTypeSyntax;
+class NamespaceUnprefixedUseDeclarationSyntax;
+class NamespaceUseDeclarationSyntax;
+class NamespaceInlineUseDeclarationSyntax;
+class NamespaceGroupUseDeclarationSyntax;
+class NamespaceMixedGroupUseDeclarationSyntax;
+class NamespaceUseStmtSyntax;
+
 // stmt wrapper for decl syntax nodes
 class ClassDefinitionStmtSyntax;
 class InterfaceDefinitionStmtSyntax;
@@ -69,6 +77,11 @@ class VariableExprSyntax;
 class ReferencedVariableExprSyntax;
 class ListStructureClauseSyntax;
 class SimplifiedArrayCreateExprSyntax;
+///
+/// type: SyntaxCollection
+/// element type: ExprSyntax
+///
+using ExprListSyntax = SyntaxCollection<SyntaxKind::ExprList, ExprListItemSyntax>;
 
 // decl syntax nodes forward declares
 class ClassDefinitionSyntax;
@@ -76,12 +89,8 @@ class InterfaceDefinitionSyntax;
 class TraitDefinitionSyntax;
 class FunctionDefinitionSyntax;
 class NameSyntax;
-
-///
-/// type: SyntaxCollection
-/// element type: ExprSyntax
-///
-using ExprListSyntax = SyntaxCollection<SyntaxKind::ExprList, ExprListItemSyntax>;
+class NamespacePartSyntax;
+using NamespacePartListSyntax = SyntaxCollection<SyntaxKind::NamespacePartList, NamespacePartSyntax>;
 
 ///
 /// type: SyntaxCollection
@@ -147,6 +156,37 @@ using GlobalVariableListSyntax = SyntaxCollection<SyntaxKind::GlobalVariableList
 /// | static_var
 ///
 using StaticVariableListSyntax = SyntaxCollection<SyntaxKind::StaticVariableList, StaticVariableListItemSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: NamespaceUseDeclarationSyntax
+///
+/// use_declarations:
+///   use_declarations ',' use_declaration
+/// | use_declaration
+///
+using NamespaceUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUseDeclarationList, NamespaceUseDeclarationSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: NamespaceInlineUseDeclarationSyntax
+///
+/// inline_use_declarations:
+///   inline_use_declarations ',' inline_use_declaration
+/// | inline_use_declaration
+///
+using NamespaceInlineUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceInlineUseDeclarationList, NamespaceInlineUseDeclarationSyntax>;
+
+///
+/// type: SyntaxCollection
+/// element type: NamespaceUnprefixedUseDeclarationSyntax
+///
+/// unprefixed_use_declarations:
+///   unprefixed_use_declarations ',' unprefixed_use_declaration
+/// | unprefixed_use_declaration
+///
+using NamespaceUnprefixedUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUnprefixedUseDeclarationList, NamespaceUnprefixedUseDeclarationSyntax>;
+
 
 } // polar::syntax
 

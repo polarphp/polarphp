@@ -21,13 +21,6 @@ class SemiReservedSytnax;
 class IdentifierSyntax;
 class NamespacePartSyntax;
 class NameSyntax;
-class NamespaceUseTypeSyntax;
-class NamespaceUnprefixedUseDeclarationSyntax;
-class NamespaceUseDeclarationSyntax;
-class NamespaceInlineUseDeclarationSyntax;
-class NamespaceGroupUseDeclarationSyntax;
-class NamespaceMixedGroupUseDeclarationSyntax;
-class NamespaceUseSyntax;
 class ConstDeclareItemSyntax;
 class ConstDefinitionSyntax;
 class TypeClauseSyntax;
@@ -80,36 +73,6 @@ using NameListSyntax = SyntaxCollection<SyntaxKind::NameList, NameSyntax>;
 /// | namespace_name T_NS_SEPARATOR T_IDENTIFIER_STRING
 ///
 using NamespacePartListSyntax = SyntaxCollection<SyntaxKind::NamespacePartList, NamespacePartSyntax>;
-
-///
-/// type: SyntaxCollection
-/// element type: NamespaceUseDeclarationSyntax
-///
-/// use_declarations:
-///   use_declarations ',' use_declaration
-/// | use_declaration
-///
-using NamespaceUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUseDeclarationList, NamespaceUseDeclarationSyntax>;
-
-///
-/// type: SyntaxCollection
-/// element type: NamespaceInlineUseDeclarationSyntax
-///
-/// inline_use_declarations:
-///   inline_use_declarations ',' inline_use_declaration
-/// | inline_use_declaration
-///
-using NamespaceInlineUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceInlineUseDeclarationList, NamespaceInlineUseDeclarationSyntax>;
-
-///
-/// type: SyntaxCollection
-/// element type: NamespaceUnprefixedUseDeclarationSyntax
-///
-/// unprefixed_use_declarations:
-///   unprefixed_use_declarations ',' unprefixed_use_declaration
-/// | unprefixed_use_declaration
-///
-using NamespaceUnprefixedUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUnprefixedUseDeclarationList, NamespaceUnprefixedUseDeclarationSyntax>;
 
 ///
 /// type: SyntaxCollection

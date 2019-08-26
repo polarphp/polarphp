@@ -44,7 +44,6 @@ ConditionElementSyntax ConditionElementSyntaxBuilder::build()
    return make<ConditionElementSyntax>(rawConditionElementSyntax);
 }
 
-
 ///
 /// ConditionElementSyntaxBuilder
 ///
