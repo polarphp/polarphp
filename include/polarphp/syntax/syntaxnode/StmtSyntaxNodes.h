@@ -1213,9 +1213,61 @@ private:
    void validate();
 };
 
+///
+/// foreach_variable:
+///   variable
+/// |	'&' variable
+/// |	T_LIST '(' array_pair_list ')'
+/// |	'[' array_pair_list ']'
+///
 class ForeachVariableSyntax final : public Syntax
 {
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      /// node choices: true
+      /// -----------------------------------------------
+      /// node choice: VariableExprSyntax
+      /// -----------------------------------------------
+      /// node choice: ReferencedVariableExprSyntax
+      /// -----------------------------------------------
+      /// node choice: ListStructureClauseSyntax
+      /// -----------------------------------------------
+      /// node choice: SimplifiedArrayCreateExprSyntax
+      ///
+      Variable
+   };
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
+public:
 
+   ForeachVariableSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getVariable();
+   ForeachVariableSyntax withVariable(std::optional<ExprSyntax> variable);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ForeachVariable;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class ForeachVariableSyntaxBuilder;
+   void validate();
 };
 
 ///
@@ -1282,6 +1334,26 @@ public:
    {
       validate();
    }
+
+   TokenSyntax getForeachToken();
+   TokenSyntax getLeftParenToken();
+   ExprSyntax getIterableExpr();
+   TokenSyntax getAsToken();
+   std::optional<ForeachVariableSyntax> getKeyVariable();
+   std::optional<TokenSyntax> getDoubleArrowToken();
+   ForeachVariableSyntax getValueVariable();
+   TokenSyntax getRightParenToken();
+   StmtSyntax getStmt();
+
+   ForeachStmtSyntax withForeachToken(std::optional<TokenSyntax> foreachToken);
+   ForeachStmtSyntax withLeftParenToken(std::optional<TokenSyntax> leftParen);
+   ForeachStmtSyntax withIterableExpr(std::optional<ExprSyntax> iterableExpr);
+   ForeachStmtSyntax withAsToken(std::optional<TokenSyntax> asToken);
+   ForeachStmtSyntax withKeyVariable(std::optional<ForeachVariableSyntax> key);
+   ForeachStmtSyntax withDoubleArrowToken(std::optional<TokenSyntax> doubleArrow);
+   ForeachStmtSyntax withValueVariable(std::optional<ForeachVariableSyntax> value);
+   ForeachStmtSyntax withRightParenToken(std::optional<TokenSyntax> rightParen);
+   ForeachStmtSyntax withStmt(std::optional<StmtSyntax> stmt);
 
    static bool kindOf(SyntaxKind kind)
    {

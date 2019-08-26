@@ -65,7 +65,10 @@ class FunctionDefinitionStmtSyntax;
 // expr syntax nodes forward declares
 class ExprListItemSyntax;
 class SimpleVariableExprSyntax;
+class VariableExprSyntax;
 class ReferencedVariableExprSyntax;
+class ListStructureClauseSyntax;
+class SimplifiedArrayCreateExprSyntax;
 
 // decl syntax nodes forward declares
 class ClassDefinitionSyntax;
@@ -73,7 +76,6 @@ class InterfaceDefinitionSyntax;
 class TraitDefinitionSyntax;
 class FunctionDefinitionSyntax;
 class NameSyntax;
-
 
 ///
 /// type: SyntaxCollection

@@ -1599,6 +1599,49 @@ ForStmtSyntax ForStmtSyntax::withStmt(std::optional<TokenSyntax> stmt)
 }
 
 ///
+/// ForeachVariableSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType ForeachVariableSyntax::CHILD_NODE_CHOICES
+{
+   {
+      ForeachVariableSyntax::Variable, {
+         SyntaxKind::VariableExpr, SyntaxKind::ReferencedVariableExpr,
+               SyntaxKind::ListStructureClause, SyntaxKind::SimplifiedArrayCreateExpr,
+      }
+   }
+};
+#endif
+
+void ForeachVariableSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ForStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Variable, CHILD_NODE_CHOICES.at(Cursor::Variable));
+#endif
+}
+
+ExprSyntax ForeachVariableSyntax::getVariable()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
+}
+
+ForeachVariableSyntax ForeachVariableSyntax::withVariable(std::optional<ExprSyntax> variable)
+{
+   RefCountPtr<RawSyntax> rawVariable;
+   if (variable.has_value()) {
+      rawVariable = variable->getRaw();
+   } else {
+      rawVariable = RawSyntax::missing(SyntaxKind::VariableExpr);
+   }
+   return m_data->replaceChild<ForeachVariableSyntax>(rawVariable, Cursor::Variable);
+}
+
+///
 /// SwitchDefaultLabelSyntax
 ///
 void SwitchDefaultLabelSyntax::validate()
