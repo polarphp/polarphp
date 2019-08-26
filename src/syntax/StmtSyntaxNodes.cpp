@@ -1642,6 +1642,193 @@ ForeachVariableSyntax ForeachVariableSyntax::withVariable(std::optional<ExprSynt
 }
 
 ///
+/// ForeachStmtSyntax
+///
+void ForeachStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ForeachStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ForeachToken, std::set{TokenKindType::T_FOREACH});
+   syntax_assert_child_token(raw, LeftParenToken, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_kind(raw, IterableExpr, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, AsToken, std::set{TokenKindType::T_AS});
+   syntax_assert_child_kind(raw, KeyVariable, std::set{SyntaxKind::ForeachVariable});
+   syntax_assert_child_token(raw, DoubleArrowToken, std::set{TokenKindType::T_DOUBLE_ARROW});
+   syntax_assert_child_kind(raw, ValueVariable, std::set{SyntaxKind::ForeachVariable});
+   syntax_assert_child_token(raw, RightParenToken, std::set{TokenKindType::T_RIGHT_PAREN});
+   syntax_assert_child_kind(raw, Stmt, std::set{SyntaxKind::Stmt});
+   if (raw->getChild(Cursor::KeyVariable)) {
+      assert(raw->getChild(Cursor::DoubleArrowToken));
+   }
+#endif
+}
+
+TokenSyntax ForeachStmtSyntax::getForeachToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::ForeachToken).get()};
+}
+
+TokenSyntax ForeachStmtSyntax::getLeftParenToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParenToken).get()};
+}
+
+ExprSyntax ForeachStmtSyntax::getIterableExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::IterableExpr).get()};
+}
+
+TokenSyntax ForeachStmtSyntax::getAsToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::AsToken).get()};
+}
+
+std::optional<ForeachVariableSyntax> ForeachStmtSyntax::getKeyVariable()
+{
+   RefCountPtr<SyntaxData> keyData = m_data->getChild(Cursor::KeyVariable);
+   if (!keyData) {
+      return std::nullopt;
+   }
+   return ForeachVariableSyntax {m_root, keyData.get()};
+}
+
+std::optional<TokenSyntax> ForeachStmtSyntax::getDoubleArrowToken()
+{
+   RefCountPtr<SyntaxData> arrowData = m_data->getChild(Cursor::DoubleArrowToken);
+   if (!arrowData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, arrowData.get()};
+}
+
+ForeachVariableSyntax ForeachStmtSyntax::getValueVariable()
+{
+   return ForeachVariableSyntax {m_root, m_data->getChild(Cursor::ValueVariable).get()};
+}
+
+TokenSyntax ForeachStmtSyntax::getRightParenToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParenToken).get()};
+}
+
+StmtSyntax ForeachStmtSyntax::getStmt()
+{
+   return StmtSyntax {m_root, m_data->getChild(Cursor::Stmt).get()};
+}
+
+ForeachStmtSyntax
+ForeachStmtSyntax::withForeachToken(std::optional<TokenSyntax> foreachToken)
+{
+   RefCountPtr<RawSyntax> rawForeachToken;
+   if (foreachToken.has_value()) {
+      rawForeachToken = foreachToken->getRaw();
+   } else {
+      rawForeachToken = make_missing_token(T_FOREACH);
+   }
+   return m_data->replaceChild<ForeachStmtSyntax>(rawForeachToken, Cursor::ForeachToken);
+}
+
+ForeachStmtSyntax
+ForeachStmtSyntax::withLeftParenToken(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> rawLeftParen;
+   if (leftParen.has_value()) {
+      rawLeftParen = leftParen->getRaw();
+   } else {
+      rawLeftParen = make_missing_token(T_LEFT_PAREN);
+   }
+   return m_data->replaceChild<ForeachStmtSyntax>(rawLeftParen, Cursor::LeftParenToken);
+}
+
+ForeachStmtSyntax
+ForeachStmtSyntax::withIterableExpr(std::optional<ExprSyntax> iterableExpr)
+{
+   RefCountPtr<RawSyntax> rawIterableExpr;
+   if (iterableExpr.has_value()) {
+      rawIterableExpr = iterableExpr->getRaw();
+   } else {
+      rawIterableExpr = RawSyntax::missing(SyntaxKind::Expr);
+   }
+   return m_data->replaceChild<ForeachStmtSyntax>(rawIterableExpr, Cursor::IterableExpr);
+}
+
+ForeachStmtSyntax
+ForeachStmtSyntax::withAsToken(std::optional<TokenSyntax> asToken)
+{
+   RefCountPtr<RawSyntax> rawAsToken;
+   if (asToken.has_value()) {
+      rawAsToken = asToken->getRaw();
+   } else {
+      rawAsToken = make_missing_token(T_AS);
+   }
+   return m_data->replaceChild<ForeachStmtSyntax>(rawAsToken, Cursor::AsToken);
+}
+
+ForeachStmtSyntax
+ForeachStmtSyntax::withKeyVariable(std::optional<ForeachVariableSyntax> key)
+{
+   RefCountPtr<RawSyntax> rawKey;
+   if (key.has_value()) {
+      rawKey = key->getRaw();
+   } else {
+      rawKey = RawSyntax::missing(SyntaxKind::ForeachVariable);
+   }
+   return m_data->replaceChild<ForeachStmtSyntax>(rawKey, Cursor::KeyVariable);
+}
+
+ForeachStmtSyntax
+ForeachStmtSyntax::withDoubleArrowToken(std::optional<TokenSyntax> doubleArrow)
+{
+   RefCountPtr<RawSyntax> rawDoubleArrow;
+   if (doubleArrow.has_value()) {
+      rawDoubleArrow = doubleArrow->getRaw();
+   } else {
+      rawDoubleArrow = make_missing_token(T_DOUBLE_ARROW);
+   }
+   return m_data->replaceChild<ForeachStmtSyntax>(rawDoubleArrow, Cursor::DoubleArrowToken);
+}
+
+ForeachStmtSyntax
+ForeachStmtSyntax::withValueVariable(std::optional<ForeachVariableSyntax> value)
+{
+   RefCountPtr<RawSyntax> rawValue;
+   if (value.has_value()) {
+      rawValue = value->getRaw();
+   } else {
+      rawValue = RawSyntax::missing(SyntaxKind::ForeachVariable);
+   }
+   return m_data->replaceChild<ForeachStmtSyntax>(rawValue, Cursor::ValueVariable);
+}
+
+ForeachStmtSyntax
+ForeachStmtSyntax::withRightParenToken(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rawRightParen;
+   if (rightParen.has_value()) {
+      rawRightParen = rightParen->getRaw();
+   } else {
+      rawRightParen = make_missing_token(T_RIGHT_PAREN);
+   }
+   return m_data->replaceChild<ForeachStmtSyntax>(rawRightParen, Cursor::RightParenToken);
+}
+
+ForeachStmtSyntax
+ForeachStmtSyntax::withStmt(std::optional<StmtSyntax> stmt)
+{
+   RefCountPtr<RawSyntax> rawStmt;
+   if (stmt.has_value()) {
+      rawStmt = stmt->getRaw();
+   } else {
+      rawStmt = RawSyntax::missing(SyntaxKind::Stmt);
+   }
+   return m_data->replaceChild<ForeachStmtSyntax>(rawStmt, Cursor::Stmt);
+}
+
+///
 /// SwitchDefaultLabelSyntax
 ///
 void SwitchDefaultLabelSyntax::validate()

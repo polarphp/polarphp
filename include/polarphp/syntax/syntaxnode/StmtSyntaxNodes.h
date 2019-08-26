@@ -1318,7 +1318,7 @@ public:
       ///
       ValueVariable,
       ///
-      /// type: TokenSyntax (T_RIGHAT_PAREN)
+      /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
       ///
       RightParenToken,
