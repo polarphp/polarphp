@@ -3781,7 +3781,93 @@ ArrayStructureAssignmentExprSyntax::withValueExpr(std::optional<ExprSyntax> valu
 }
 
 ///
-/// ArrayCreateExprSyntax
+/// ListStructureClauseSyntax
+///
+void ListStructureClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ListStructureClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ListToken, std::set{TokenKindType::T_LIST});
+   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
+   syntax_assert_child_kind(raw, PairItemList, std::set{SyntaxKind::ArrayPairItemList});
+#endif
+}
+
+TokenSyntax ListStructureClauseSyntax::getListToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::ListToken).get()};
+}
+
+TokenSyntax ListStructureClauseSyntax::getLeftParen()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParen).get()};
+}
+
+ArrayPairItemListSyntax ListStructureClauseSyntax::getPairItemList()
+{
+   return ArrayPairItemListSyntax {m_root, m_data->getChild(Cursor::PairItemList).get()};
+}
+
+TokenSyntax ListStructureClauseSyntax::getRightParen()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParen).get()};
+}
+
+ListStructureClauseSyntax
+ListStructureClauseSyntax::withListToken(std::optional<TokenSyntax> listToken)
+{
+   RefCountPtr<RawSyntax> listTokenRaw;
+   if (listToken.has_value()) {
+      listTokenRaw = listToken->getRaw();
+   } else {
+      listTokenRaw = make_missing_token(T_LIST);
+   }
+   return m_data->replaceChild<ListStructureClauseSyntax>(listTokenRaw, Cursor::ListToken);
+}
+
+ListStructureClauseSyntax
+ListStructureClauseSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> leftParanRaw;
+   if (leftParen.has_value()) {
+      leftParanRaw = leftParen->getRaw();
+   } else {
+      leftParanRaw = make_missing_token(T_LEFT_PAREN);
+   }
+   return m_data->replaceChild<ListStructureClauseSyntax>(leftParanRaw, Cursor::LeftParen);
+}
+
+ListStructureClauseSyntax
+ListStructureClauseSyntax::withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList)
+{
+   RefCountPtr<RawSyntax> pairItemListRaw;
+   if (pairItemList.has_value()) {
+      pairItemListRaw = pairItemList->getRaw();
+   } else {
+      pairItemListRaw = RawSyntax::missing(SyntaxKind::ArrayPairItemList);
+   }
+   return m_data->replaceChild<ListStructureClauseSyntax>(pairItemListRaw, Cursor::PairItemList);
+}
+
+ListStructureClauseSyntax
+ListStructureClauseSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rightParenRaw;
+   if (rightParen.has_value()) {
+      rightParenRaw = rightParen->getRaw();
+   } else {
+      rightParenRaw = make_missing_token(T_RIGHT_PAREN);
+   }
+   return m_data->replaceChild<ListStructureClauseSyntax>(rightParenRaw, Cursor::RightParen);
+}
+
+///
+/// ListStructureAssignmentExprSyntax
 ///
 void ListStructureAssignmentExprSyntax::validate()
 {
@@ -3790,85 +3876,63 @@ void ListStructureAssignmentExprSyntax::validate()
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == ListStructureAssignmentExprSyntax::CHILDREN_COUNT);
-   syntax_assert_child_token(raw, ListToken, std::set{TokenKindType::T_LIST});
-   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
-   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
-   syntax_assert_child_kind(raw, PairItemList, std::set{SyntaxKind::ArrayPairItemList});
+   assert(raw->getLayout().size() == ListStructureClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, ListStrcuture, std::set{SyntaxKind::ListStructureClause});
+   syntax_assert_child_token(raw, EqualToken, std::set{TokenKindType::T_EQUAL});
+   syntax_assert_child_kind(raw, ValueExpr, std::set{SyntaxKind::Expr});
 #endif
 }
 
-TokenSyntax ListStructureAssignmentExprSyntax::getListToken()
+ListStructureClauseSyntax ListStructureAssignmentExprSyntax::getListStrcuture()
 {
-   return TokenSyntax {m_root, m_data->getChild(Cursor::ListToken).get()};
+   return ListStructureClauseSyntax{m_root, m_data->getChild(Cursor::ListStrcuture).get()};
 }
 
-TokenSyntax ListStructureAssignmentExprSyntax::getLeftParen()
+TokenSyntax ListStructureAssignmentExprSyntax::getEqualToken()
 {
-   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParen).get()};
+   return TokenSyntax{m_root, m_data->getChild(Cursor::EqualToken).get()};
 }
 
-ArrayPairItemListSyntax ListStructureAssignmentExprSyntax::getPairItemList()
+ExprSyntax ListStructureAssignmentExprSyntax::getValueExpr()
 {
-   return ArrayPairItemListSyntax {m_root, m_data->getChild(Cursor::PairItemList).get()};
-}
-
-TokenSyntax ListStructureAssignmentExprSyntax::getRightParen()
-{
-   return TokenSyntax {m_root, m_data->getChild(Cursor::RightParen).get()};
+   return ExprSyntax{m_root, m_data->getChild(Cursor::ValueExpr).get()};
 }
 
 ListStructureAssignmentExprSyntax
-ListStructureAssignmentExprSyntax::withListToken(std::optional<TokenSyntax> listToken)
+ListStructureAssignmentExprSyntax::withListStrcuture(std::optional<ListStructureClauseSyntax> listStructure)
 {
-   RefCountPtr<RawSyntax> listTokenRaw;
-   if (listToken.has_value()) {
-      listTokenRaw = listToken->getRaw();
+   RefCountPtr<RawSyntax> rawListStructure;
+   if (listStructure.has_value()) {
+      rawListStructure = listStructure->getRaw();
    } else {
-      listTokenRaw = RawSyntax::missing(TokenKindType::T_LIST,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LIST)));
+      rawListStructure = RawSyntax::missing(SyntaxKind::ListStructureClause);
    }
-   return m_data->replaceChild<ListStructureAssignmentExprSyntax>(listTokenRaw, Cursor::ListToken);
+   return m_data->replaceChild<ListStructureAssignmentExprSyntax>(rawListStructure, Cursor::ListStrcuture);
 }
 
 ListStructureAssignmentExprSyntax
-ListStructureAssignmentExprSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
+ListStructureAssignmentExprSyntax::withEqualToken(std::optional<TokenSyntax> equalToken)
 {
-   RefCountPtr<RawSyntax> leftParanRaw;
-   if (leftParen.has_value()) {
-      leftParanRaw = leftParen->getRaw();
+   RefCountPtr<RawSyntax> rawEqualToken;
+   if (equalToken.has_value()) {
+      rawEqualToken = equalToken->getRaw();
    } else {
-      leftParanRaw = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+      rawEqualToken = make_missing_token(T_EQUAL);
    }
-   return m_data->replaceChild<ListStructureAssignmentExprSyntax>(leftParanRaw, Cursor::LeftParen);
+   return m_data->replaceChild<ListStructureAssignmentExprSyntax>(rawEqualToken, Cursor::EqualToken);
 }
 
 ListStructureAssignmentExprSyntax
-ListStructureAssignmentExprSyntax::withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList)
+ListStructureAssignmentExprSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
 {
-   RefCountPtr<RawSyntax> pairItemListRaw;
-   if (pairItemList.has_value()) {
-      pairItemListRaw = pairItemList->getRaw();
+   RefCountPtr<RawSyntax> rawValueExpr;
+   if (valueExpr.has_value()) {
+      rawValueExpr = valueExpr->getRaw();
    } else {
-      pairItemListRaw = RawSyntax::missing(SyntaxKind::ArrayPairItemList);
+      rawValueExpr = RawSyntax::missing(SyntaxKind::Expr);
    }
-   return m_data->replaceChild<ListStructureAssignmentExprSyntax>(pairItemListRaw, Cursor::PairItemList);
+   return m_data->replaceChild<ListStructureAssignmentExprSyntax>(rawValueExpr, Cursor::ValueExpr);
 }
-
-ListStructureAssignmentExprSyntax
-ListStructureAssignmentExprSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
-{
-   RefCountPtr<RawSyntax> rightParenRaw;
-   if (rightParen.has_value()) {
-      rightParenRaw = rightParen->getRaw();
-   } else {
-      rightParenRaw = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
-   }
-   return m_data->replaceChild<ListStructureAssignmentExprSyntax>(rightParenRaw, Cursor::RightParen);
-}
-
 
 ///
 /// assignmentexprExprSyntax
@@ -3901,15 +3965,6 @@ void AssignmentExprSyntax::validate()
 VariableExprSyntax AssignmentExprSyntax::getTarget()
 {
    return VariableExprSyntax {m_root, m_data->getChild(Cursor::Target).get()};
-}
-
-std::optional<TokenSyntax> AssignmentExprSyntax::getRefToken()
-{
-   RefCountPtr<SyntaxData> refTokenData = m_data->getChild(Cursor::RefToken);
-   if (!refTokenData) {
-      return std::nullopt;
-   }
-   return TokenSyntax {m_root, refTokenData.get()};
 }
 
 ExprSyntax AssignmentExprSyntax::getValueExpr()

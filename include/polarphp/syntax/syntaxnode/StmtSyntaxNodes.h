@@ -1213,6 +1213,11 @@ private:
    void validate();
 };
 
+class ForeachVariableSyntax final : public Syntax
+{
+
+};
+
 ///
 /// foreach_stmt:
 ///   T_FOREACH '(' expr T_AS foreach_variable ')' foreach_statement

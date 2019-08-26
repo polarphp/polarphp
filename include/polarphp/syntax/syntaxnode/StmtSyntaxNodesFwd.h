@@ -65,6 +65,7 @@ class FunctionDefinitionStmtSyntax;
 // expr syntax nodes forward declares
 class ExprListItemSyntax;
 class SimpleVariableExprSyntax;
+class ReferencedVariableExprSyntax;
 
 // decl syntax nodes forward declares
 class ClassDefinitionSyntax;

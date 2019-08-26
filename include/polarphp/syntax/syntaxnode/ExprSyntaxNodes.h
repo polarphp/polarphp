@@ -3625,10 +3625,10 @@ private:
 };
 
 ///
-/// list_strcture_assignment:
-///   T_LIST '(' array_pair_list ')' '=' expr
+/// list_structure_clause:
+///   T_LIST '(' array_pair_list ')'
 ///
-class ListStructureAssignmentExprSyntax final : public ExprSyntax
+class ListStructureClauseSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 4;
@@ -3658,8 +3658,8 @@ public:
    };
 
 public:
-   ListStructureAssignmentExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : ExprSyntax(root, data)
+   ListStructureClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
    {
       validate();
    }
@@ -3669,10 +3669,68 @@ public:
    ArrayPairItemListSyntax getPairItemList();
    TokenSyntax getRightParen();
 
-   ListStructureAssignmentExprSyntax withListToken(std::optional<TokenSyntax> listToken);
-   ListStructureAssignmentExprSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
-   ListStructureAssignmentExprSyntax withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList);
-   ListStructureAssignmentExprSyntax withRightParen(std::optional<TokenSyntax> rightParen);
+   ListStructureClauseSyntax withListToken(std::optional<TokenSyntax> listToken);
+   ListStructureClauseSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
+   ListStructureClauseSyntax withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList);
+   ListStructureClauseSyntax withRightParen(std::optional<TokenSyntax> rightParen);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ListStructureClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ListStructureClauseSyntaxBuilder;
+   void validate();
+};
+
+///
+/// list_structure_assignment_expr:
+///   T_LIST '(' array_pair_list ')' = expr
+///
+class ListStructureAssignmentExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ListStructureClauseSyntax
+      /// optional: false
+      ///
+      ListStrcuture,
+      ///
+      /// type: TokenSyntax (T_EQUAL)
+      /// optional: false
+      ///
+      EqualToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      ValueExpr
+   };
+
+public:
+   ListStructureAssignmentExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   ListStructureClauseSyntax getListStrcuture();
+   TokenSyntax getEqualToken();
+   ExprSyntax getValueExpr();
+
+   ListStructureAssignmentExprSyntax withListStrcuture(std::optional<ListStructureClauseSyntax> listStructure);
+   ListStructureAssignmentExprSyntax withEqualToken(std::optional<TokenSyntax> equalToken);
+   ListStructureAssignmentExprSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -3683,6 +3741,7 @@ public:
    {
       return kindOf(syntax->getKind());
    }
+
 
 private:
    friend class ListStructureAssignmentExprSyntaxBuilder;

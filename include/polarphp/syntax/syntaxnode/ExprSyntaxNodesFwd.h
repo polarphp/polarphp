@@ -90,6 +90,7 @@ class PrintFuncExprSyntax;
 class FuncLikeExprSyntax;
 
 class ArrayStructureAssignmentExprSyntax;
+class ListStructureClauseSyntax;
 class ListStructureAssignmentExprSyntax;
 class AssignmentExprSyntax;
 class CompoundAssignmentExprSyntax;

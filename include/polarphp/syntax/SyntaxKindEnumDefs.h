@@ -143,6 +143,7 @@ enum class SyntaxKind : std::uint32_t
    FuncLikeExpr,
 
    ArrayStructureAssignmentExpr,
+   ListStructureClause,
    ListStructureAssignmentExpr,
    AssignmentExpr,
    CompoundAssignmentExpr,
@@ -214,6 +215,7 @@ enum class SyntaxKind : std::uint32_t
    WhileStmt,
    DoWhileStmt,
    ForStmt,
+   ForeachVariable,
    ForeachStmt,
    SwitchCase,
    SwitchDefaultLabel,
