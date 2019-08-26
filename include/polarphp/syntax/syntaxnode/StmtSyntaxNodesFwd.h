@@ -137,6 +137,13 @@ using UnsetVariableListSyntax = SyntaxCollection<SyntaxKind::UnsetVariableList, 
 ///
 using GlobalVariableListSyntax = SyntaxCollection<SyntaxKind::GlobalVariableList, GlobalVariableListItemSyntax>;
 
+///
+/// static_var_list:
+///   static_var_list ',' static_var
+/// | static_var
+///
+using StaticVariableListSyntax = SyntaxCollection<SyntaxKind::StaticVariableList, StaticVariableListItemSyntax>;
+
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_SYNTAX_NODE_STMT_NODES_FWD_H

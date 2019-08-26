@@ -1955,6 +1955,121 @@ private:
 };
 
 ///
+/// static_var:
+///   T_VARIABLE
+/// | T_VARIABLE '=' expr
+///
+class StaticVariableListItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_VARIABLE)
+      /// optional: false
+      ///
+      Variable,
+      ///
+      /// type: TokenSyntax (T_EQUAL)
+      /// optional: false
+      ///
+      EqualToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      ValueExpr
+   };
+
+public:
+   StaticVariableListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getVariable();
+   std::optional<TokenSyntax> getEqualToken();
+   std::optional<ExprSyntax> getValueExpr();
+
+   StaticVariableListItemSyntax withVariable(std::optional<TokenSyntax> variable);
+   StaticVariableListItemSyntax withEqualToken(std::optional<TokenSyntax> equalToken);
+   StaticVariableListItemSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::StaticVariableListItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class StaticVariableListItemSyntaxBuilder;
+   void validate();
+};
+
+///
+/// static_variable_declarations_stmt:
+///   T_STATIC static_var_list ';'
+///
+class StaticVariableDeclarationsStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_STATIC)
+      /// optional: false
+      ///
+      StaticToken,
+      ///
+      /// type: StaticVariableListSyntax
+      /// optional: false
+      ///
+      Variables,
+      ///
+      /// type: TokenSyntax (T_SEMICLON)
+      /// optioal: false
+      ///
+      Semicolon,
+   };
+
+public:
+   StaticVariableDeclarationsStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getStaticToken();
+   GlobalVariableListSyntax getVariables();
+   TokenSyntax getSemicolon();
+
+   StaticVariableDeclarationsStmtSyntax withStaticToken(std::optional<TokenSyntax> staticToken);
+   StaticVariableDeclarationsStmtSyntax withVariables(std::optional<GlobalVariableListSyntax> variables);
+   StaticVariableDeclarationsStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::StaticVariableDeclarationsStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class StaticVariableDeclarationsStmtSyntaxBuilder;
+   void validate();
+};
+
+///
 /// class_definition_stmt:
 ///   class_definition_decl
 ///

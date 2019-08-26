@@ -2554,6 +2554,156 @@ GlobalVariableDeclarationsStmtSyntax::withSemicolon(std::optional<TokenSyntax> s
 }
 
 ///
+/// StaticVariableListItemSyntax
+///
+void StaticVariableListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == StaticVariableListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
+   syntax_assert_child_token(raw, EqualToken, std::set{TokenKindType::T_EQUAL});
+   syntax_assert_child_kind(raw, ValueExpr, std::set{SyntaxKind::Expr});
+   if (raw->getChild(Cursor::EqualToken)) {
+      assert(raw->getChild(Cursor::ValueExpr));
+   } else if (raw->getChild(Cursor::ValueExpr)) {
+      assert(raw->getChild(Cursor::EqualToken));
+   }
+#endif
+}
+
+TokenSyntax StaticVariableListItemSyntax::getVariable()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
+}
+
+std::optional<TokenSyntax> StaticVariableListItemSyntax::getEqualToken()
+{
+   RefCountPtr<SyntaxData> equalTokenData = m_data->getChild(Cursor::EqualToken);
+   if (!equalTokenData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, equalTokenData.get()};
+}
+
+std::optional<ExprSyntax> StaticVariableListItemSyntax::getValueExpr()
+{
+   RefCountPtr<SyntaxData> valueExprData = m_data->getChild(Cursor::ValueExpr);
+   if (!valueExprData) {
+      return std::nullopt;
+   }
+   return ExprSyntax {m_root, valueExprData.get()};
+}
+
+StaticVariableListItemSyntax
+StaticVariableListItemSyntax::withVariable(std::optional<TokenSyntax> variable)
+{
+   RefCountPtr<RawSyntax> rawVariable;
+   if (variable.has_value()) {
+      rawVariable = variable->getRaw();
+   } else {
+      // TODO not good
+      rawVariable = make_missing_token(T_VARIABLE);
+   }
+   return m_data->replaceChild<StaticVariableListItemSyntax>(rawVariable, Cursor::Variable);
+}
+
+StaticVariableListItemSyntax
+StaticVariableListItemSyntax::withEqualToken(std::optional<TokenSyntax> equalToken)
+{
+   RefCountPtr<RawSyntax> rawEqualToken;
+   if (equalToken.has_value()) {
+      rawEqualToken = equalToken->getRaw();
+   } else {
+      rawEqualToken = nullptr;
+   }
+   return m_data->replaceChild<StaticVariableListItemSyntax>(rawEqualToken, Cursor::EqualToken);
+}
+
+StaticVariableListItemSyntax
+StaticVariableListItemSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
+{
+   RefCountPtr<RawSyntax> rawValueExpr;
+   if (valueExpr.has_value()) {
+      rawValueExpr = valueExpr->getRaw();
+   } else {
+      rawValueExpr = nullptr;
+   }
+   return m_data->replaceChild<StaticVariableListItemSyntax>(rawValueExpr, Cursor::ValueExpr);
+}
+
+///
+/// StaticVariableDeclarationsStmtSyntax
+///
+void StaticVariableDeclarationsStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == StaticVariableDeclarationsStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, StaticToken, std::set{TokenKindType::T_STATIC});
+   syntax_assert_child_kind(raw, Variables, std::set{SyntaxKind::StaticVariableList});
+   syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
+#endif
+}
+
+TokenSyntax StaticVariableDeclarationsStmtSyntax::getStaticToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::StaticToken).get()};
+}
+
+GlobalVariableListSyntax StaticVariableDeclarationsStmtSyntax::getVariables()
+{
+   return GlobalVariableListSyntax {m_root, m_data->getChild(Cursor::Variables).get()};
+}
+
+TokenSyntax StaticVariableDeclarationsStmtSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
+}
+
+StaticVariableDeclarationsStmtSyntax
+StaticVariableDeclarationsStmtSyntax::withStaticToken(std::optional<TokenSyntax> staticToken)
+{
+   RefCountPtr<RawSyntax> rawStaticToken;
+   if (staticToken.has_value()) {
+      rawStaticToken = staticToken->getRaw();
+   } else {
+      rawStaticToken = make_missing_token(T_STATIC);
+   }
+   return m_data->replaceChild<StaticVariableDeclarationsStmtSyntax>(rawStaticToken, Cursor::StaticToken);
+}
+
+StaticVariableDeclarationsStmtSyntax
+StaticVariableDeclarationsStmtSyntax::withVariables(std::optional<GlobalVariableListSyntax> variables)
+{
+   RefCountPtr<RawSyntax> rawVariables;
+   if (variables.has_value()) {
+      rawVariables = variables->getRaw();
+   } else {
+      rawVariables = RawSyntax::missing(SyntaxKind::StaticVariableList);
+   }
+   return m_data->replaceChild<StaticVariableDeclarationsStmtSyntax>(rawVariables, Cursor::Variables);
+}
+
+StaticVariableDeclarationsStmtSyntax
+StaticVariableDeclarationsStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> rawSemicolon;
+   if (semicolon.has_value()) {
+      rawSemicolon = semicolon->getRaw();
+   } else {
+      rawSemicolon = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<StaticVariableDeclarationsStmtSyntax>(rawSemicolon, Cursor::Semicolon);
+}
+
+///
 /// ClassDefinitionStmtSyntax
 ///
 void ClassDefinitionStmtSyntax::validate()
