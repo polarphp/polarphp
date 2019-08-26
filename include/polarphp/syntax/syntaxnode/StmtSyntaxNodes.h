@@ -792,6 +792,16 @@ public:
    ElseIfClauseSyntax withRightParen(std::optional<TokenSyntax> rightParen);
    ElseIfClauseSyntax withBody(std::optional<CodeBlockSyntax> body);
 
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ElseIfClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
 private:
    friend class ElseIfClauseSyntaxBuilder;
    void validate();
@@ -901,6 +911,16 @@ public:
    IfStmtSyntax withElseBody(std::optional<Syntax> elseBody);
 
    IfStmtSyntax addElseIfClause(ElseIfClauseSyntax elseIfClause);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::IfStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
 private:
    friend class IfStmtSyntaxBuilder;
    void validate();
@@ -1074,13 +1094,205 @@ public:
    DoWhileStmtSyntax withCondition(std::optional<ExprSyntax> condition);
    DoWhileStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
 
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::DoWhileStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
 private:
    friend class DoWhileStmtSyntaxBuilder;
    void validate();
 };
 
 ///
-/// \brief The SwitchDefaultLabelSyntax class
+/// for_stmt:
+///   T_FOR '(' for_exprs ';' for_exprs ';' for_exprs ')' for_statement
+///
+class ForStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 9;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 6;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_FOR)
+      /// optional: false
+      ///
+      ForToken,
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optional: false
+      ///
+      LeftParenToken,
+      ///
+      /// type: ExprListSyntax
+      /// optional: true
+      ///
+      InitializedExprs,
+      ///
+      /// type: TokenSyntax (T_SEMICOLON)
+      /// optional: false
+      ///
+      InitializedSemicolonToken,
+      ///
+      /// type: ExprListSyntax
+      /// optional: true
+      ///
+      ConditionalExprs,
+      ///
+      /// type: TokenSyntax (T_SEMICOLON)
+      /// optional: false
+      ///
+      ConditionalSemicolonToken,
+      ///
+      /// type: ExprListSyntax
+      /// optional: true
+      ///
+      OperationalExprs,
+      ///
+      /// type: TokenSyntax (T_SEMICOLON)
+      /// optional: false
+      ///
+      OperationalSemicolonToken,
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
+      /// optional: false
+      ///
+      RightParenToken,
+      ///
+      /// type: StmtSyntax
+      /// optional: false
+      ///
+      Stmt
+   };
+public:
+   ForStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getForToken();
+   TokenSyntax getLeftParenToken();
+   std::optional<ExprListSyntax> getInitializedExprs();
+   TokenSyntax getInitializedSemicolonToken();
+   std::optional<ExprListSyntax> getConditionalExprs();
+   TokenSyntax getConditionalSemicolonToken();
+   std::optional<ExprListSyntax> getOperationalExprs();
+   TokenSyntax getOperationalSemicolonToken();
+   TokenSyntax getRightParenToken();
+   StmtSyntax getStmt();
+
+   ForStmtSyntax withForToken(std::optional<TokenSyntax> forToken);
+   ForStmtSyntax withLeftParenToken(std::optional<TokenSyntax> leftParen);
+   ForStmtSyntax withInitializedExprs(std::optional<TokenSyntax> exprs);
+   ForStmtSyntax withInitializedSemicolonToken(std::optional<TokenSyntax> semicolon);
+   ForStmtSyntax withConditionalExprs(std::optional<TokenSyntax> exprs);
+   ForStmtSyntax withConditionalSemicolonToken(std::optional<TokenSyntax> semicolon);
+   ForStmtSyntax withOperationalExprs(std::optional<TokenSyntax> exprs);
+   ForStmtSyntax withOperationalSemicolonToken(std::optional<TokenSyntax> semicolon);
+   ForStmtSyntax withRightParenToken(std::optional<TokenSyntax> rightParen);
+   ForStmtSyntax withStmt(std::optional<TokenSyntax> stmt);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ForStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class ForStmtSyntaxBuilder;
+   void validate();
+};
+
+///
+/// foreach_stmt:
+///   T_FOREACH '(' expr T_AS foreach_variable ')' foreach_statement
+/// | T_FOREACH '(' expr T_AS foreach_variable T_DOUBLE_ARROW foreach_variable ')' foreach_statement
+///
+class ForeachStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 9;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 7;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_FOREACH)
+      /// optional: false
+      ///
+      ForeachToken,
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optional: false
+      ///
+      LeftParenToken,
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      IterableExpr,
+      ///
+      /// type: TokenSyntax (T_AS)
+      /// optional: false
+      ///
+      AsToken,
+      ///
+      /// type: ForeachVariableSyntax
+      /// optional: true
+      ///
+      KeyVariable,
+      ///
+      /// type: TokenSyntax (T_DOUBLE_ARROW)
+      /// optional: true
+      ///
+      DoubleArrowToken,
+      ///
+      /// type: ForeachVariableSyntax
+      /// optional: false
+      ///
+      ValueVariable,
+      ///
+      /// type: TokenSyntax (T_RIGHAT_PAREN)
+      /// optional: false
+      ///
+      RightParenToken,
+      ///
+      /// type: StmtSyntax
+      /// optional: false
+      ///
+      Stmt
+   };
+public:
+   ForeachStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ForeachStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ForeachStmtSyntaxBuilder;
+   void validate();
+};
+
 ///
 /// switch-default-label -> 'default' ':'
 ///
@@ -1115,6 +1327,16 @@ public:
 
    SwitchDefaultLabelSyntax withDefaultKeyword(std::optional<TokenSyntax> defaultKeyword);
    SwitchDefaultLabelSyntax withColon(std::optional<TokenSyntax> colon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SwitchDefaultLabel;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
 
 private:
    friend class SwitchDefaultLabelSyntaxBuilder;
@@ -1163,6 +1385,16 @@ public:
    SwitchCaseLabelSyntax withCaseKeyword(std::optional<TokenSyntax> caseKeyword);
    SwitchCaseLabelSyntax withExpr(std::optional<ExprSyntax> expr);
    SwitchCaseLabelSyntax withColon(std::optional<TokenSyntax> colon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SwitchCaseLabel;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
 
 private:
    friend class SwitchCaseLabelSyntaxBuilder;
@@ -1216,6 +1448,16 @@ public:
    SwitchCaseSyntax withLabel(std::optional<Syntax> label);
    SwitchCaseSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);
    SwitchCaseSyntax addStatement(CodeBlockItemSyntax statement);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SwitchCase;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
 
 private:
    friend class SwitchCaseSyntaxBuilder;
@@ -1312,6 +1554,16 @@ public:
 
    SwitchStmtSyntax addCase(SwitchCaseSyntax switchCase);
 
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SwitchStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
 private:
    friend class SwitchStmtSyntaxBuilder;
    void validate();
@@ -1352,6 +1604,16 @@ public:
    CodeBlockSyntax getBody();
    DeferStmtSyntax withDeferKeyword(std::optional<TokenSyntax> deferKeyword);
    DeferStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::DeferStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
 
 private:
    friend class DeferStmtSyntaxBuilder;

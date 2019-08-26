@@ -23,6 +23,7 @@ class OptionalExprSyntax;
 class ExprListItemSyntax;
 
 class VariableExprSyntax;
+class ReferencedVariableExprSyntax;
 class ClassConstIdentifierExprSyntax;
 class ConstExprSyntax;
 class StaticMemberExprSyntax;

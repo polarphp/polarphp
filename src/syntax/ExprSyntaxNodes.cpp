@@ -245,6 +245,56 @@ VariableExprSyntax VariableExprSyntax::withVar(std::optional<ExprSyntax> var)
 }
 
 ///
+/// ReferencedVariableExprSyntax
+///
+void ReferencedVariableExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == ReferencedVariableExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, RefToken, std::set{TokenKindType::T_AMPERSAND});
+   syntax_assert_child_kind(raw, VariableExpr, std::set{SyntaxKind::VariableExpr});
+#endif
+}
+
+TokenSyntax ReferencedVariableExprSyntax::getRefToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RefToken).get()};
+}
+
+VariableExprSyntax ReferencedVariableExprSyntax::getVariableExpr()
+{
+   return VariableExprSyntax {m_root, m_data->getChild(Cursor::VariableExpr).get()};
+}
+
+ReferencedVariableExprSyntax
+ReferencedVariableExprSyntax::withRefToken(std::optional<TokenSyntax> refToken)
+{
+   RefCountPtr<RawSyntax> rawRefToken;
+   if (refToken.has_value()) {
+      rawRefToken = refToken->getRaw();
+   } else {
+      rawRefToken = make_missing_token(T_AMPERSAND);
+   }
+   return m_data->replaceChild<ReferencedVariableExprSyntax>(rawRefToken, Cursor::RefToken);
+}
+
+ReferencedVariableExprSyntax
+ReferencedVariableExprSyntax::withVariableExpr(std::optional<VariableExprSyntax> valueExpr)
+{
+   RefCountPtr<RawSyntax> rawValueExpr;
+   if (valueExpr.has_value()) {
+      rawValueExpr = valueExpr->getRaw();
+   } else {
+      rawValueExpr = RawSyntax::missing(SyntaxKind::VariableExpr);
+   }
+   return m_data->replaceChild<ReferencedVariableExprSyntax>(rawValueExpr, Cursor::VariableExpr);
+}
+
+///
 /// ClassConstIdentifierExprSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
@@ -1193,7 +1243,7 @@ const NodeChoicesType ArrayKeyValuePairItemSyntax::CHILD_NODE_CHOICES
 {
    {
       ArrayKeyValuePairItemSyntax::Value, {
-         SyntaxKind::Expr, SyntaxKind::VariableExpr
+         SyntaxKind::ReferencedVariableExpr, SyntaxKind::VariableExpr
       }
    }
 };
@@ -1209,7 +1259,6 @@ void ArrayKeyValuePairItemSyntax::validate()
    assert(raw->getLayout().size() == ArrayKeyValuePairItemSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, KeyExpr, std::set{TokenKindType::T_DOUBLE_ARROW});
    syntax_assert_child_token(raw, DoubleArrowToken, std::set{TokenKindType::T_DOUBLE_ARROW});
-   syntax_assert_child_token(raw, ReferenceToken, std::set{TokenKindType::T_AMPERSAND});
    syntax_assert_child_kind(raw, Value, CHILD_NODE_CHOICES.at(Cursor::Value));
 #endif
 }
@@ -1230,15 +1279,6 @@ std::optional<TokenSyntax> ArrayKeyValuePairItemSyntax::getDoubleArrowToken()
       return std::nullopt;
    }
    return TokenSyntax {m_root, doubleArrowTokenData.get()};
-}
-
-std::optional<TokenSyntax> ArrayKeyValuePairItemSyntax::getReferenceToken()
-{
-   RefCountPtr<SyntaxData> referenceTokenData;
-   if (!referenceTokenData) {
-      return std::nullopt;
-   }
-   return TokenSyntax {m_root, referenceTokenData.get()};
 }
 
 ExprSyntax ArrayKeyValuePairItemSyntax::getValue()
@@ -1266,17 +1306,6 @@ ArrayKeyValuePairItemSyntax ArrayKeyValuePairItemSyntax::withDoubleArrowToken(st
       doubleArrowTokenRaw = nullptr;
    }
    return m_data->replaceChild<ArrayKeyValuePairItemSyntax>(doubleArrowTokenRaw, Cursor::DoubleArrowToken);
-}
-
-ArrayKeyValuePairItemSyntax ArrayKeyValuePairItemSyntax::withReferenceToken(std::optional<TokenSyntax> referenceToken)
-{
-   RefCountPtr<RawSyntax> referenceTokenRaw;
-   if (referenceToken.has_value()) {
-      referenceTokenRaw = referenceToken->getRaw();
-   } else {
-      referenceTokenRaw = nullptr;
-   }
-   return m_data->replaceChild<ArrayKeyValuePairItemSyntax>(referenceTokenRaw, Cursor::ReferenceToken);
 }
 
 ArrayKeyValuePairItemSyntax ArrayKeyValuePairItemSyntax::withValue(std::optional<ExprSyntax> value)
@@ -3849,7 +3878,7 @@ const NodeChoicesType AssignmentExprSyntax::CHILD_NODE_CHOICES
 {
    {
       AssignmentExprSyntax::ValueExpr, {
-         SyntaxKind::Expr, SyntaxKind::VariableExpr,
+         SyntaxKind::ReferencedVariableExpr, SyntaxKind::VariableExpr,
       }
    }
 };
@@ -3865,7 +3894,6 @@ void AssignmentExprSyntax::validate()
    assert(raw->getLayout().size() == AssignmentExprSyntax::CHILDREN_COUNT);
    syntax_assert_child_kind(raw, Target, std::set{SyntaxKind::VariableExpr});
    syntax_assert_child_token(raw, AssignToken, std::set{TokenKindType::T_EQUAL});
-   syntax_assert_child_token(raw, RefToken, std::set{TokenKindType::T_AMPERSAND});
    syntax_assert_child_kind(raw, ValueExpr, CHILD_NODE_CHOICES.at(Cursor::ValueExpr));
 #endif
 }
@@ -3873,11 +3901,6 @@ void AssignmentExprSyntax::validate()
 VariableExprSyntax AssignmentExprSyntax::getTarget()
 {
    return VariableExprSyntax {m_root, m_data->getChild(Cursor::Target).get()};
-}
-
-TokenSyntax AssignmentExprSyntax::getAssignToken()
-{
-   return TokenSyntax {m_root, m_data->getChild(Cursor::AssignToken).get()};
 }
 
 std::optional<TokenSyntax> AssignmentExprSyntax::getRefToken()
@@ -3914,17 +3937,6 @@ AssignmentExprSyntax AssignmentExprSyntax::withAssignToken(std::optional<TokenSy
       assignTokenRaw = make_missing_token(T_EQUAL);
    }
    return m_data->replaceChild<AssignmentExprSyntax>(assignTokenRaw, Cursor::AssignToken);
-}
-
-AssignmentExprSyntax AssignmentExprSyntax::withRefToken(std::optional<TokenSyntax> refToken)
-{
-   RefCountPtr<RawSyntax> refTokenRaw;
-   if (refToken.has_value()) {
-      refTokenRaw = refToken->getRaw();
-   } else {
-      refTokenRaw = nullptr;
-   }
-   return m_data->replaceChild<AssignmentExprSyntax>(refTokenRaw, Cursor::RefToken);
 }
 
 AssignmentExprSyntax AssignmentExprSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)

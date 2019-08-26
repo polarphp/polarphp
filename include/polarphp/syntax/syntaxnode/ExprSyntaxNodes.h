@@ -157,9 +157,9 @@ private:
 };
 
 ///
-/// echo_expr_list_item:
-///   echo_expr ','
-/// | echo_expr
+/// expr_list_item:
+///   expr ','
+/// | expr
 ///
 class ExprListItemSyntax final : public Syntax
 {
@@ -262,6 +262,57 @@ public:
 
 private:
    friend class VariableExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// referenced_variable_expr:
+///   '&' variable
+///
+class ReferencedVariableExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_AMPERSAND)
+      /// optional: false
+      ///
+      RefToken,
+      ///
+      /// type: VariableExprSyntax
+      /// optional: false
+      ///
+      VariableExpr
+   };
+
+public:
+   ReferencedVariableExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getRefToken();
+   VariableExprSyntax getVariableExpr();
+
+   ReferencedVariableExprSyntax withRefToken(std::optional<TokenSyntax> refToken);
+   ReferencedVariableExprSyntax withVariableExpr(std::optional<VariableExprSyntax> valueExpr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ReferencedVariableExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ReferencedVariableExprSyntaxBuilder;
    void validate();
 };
 
@@ -1319,17 +1370,12 @@ public:
       ///
       DoubleArrowToken,
       ///
-      /// type: TokenSyntax (T_AMPERSAND)
-      /// optional: true
-      ///
-      ReferenceToken,
-      ///
       /// type: ExprSyntax
       /// optional: false
       /// node choices: true
-      /// --------------------------------
-      /// node choice: VariableExprSyntax
-      /// --------------------------------
+      /// --------------------------------------------
+      /// node choice: ReferencedVariableExprSyntax
+      /// --------------------------------------------
       /// node choice: ExprSyntax
       ///
       Value
@@ -1348,12 +1394,10 @@ public:
 
    std::optional<ExprSyntax> getKeyExpr();
    std::optional<TokenSyntax> getDoubleArrowToken();
-   std::optional<TokenSyntax> getReferenceToken();
    ExprSyntax getValue();
 
    ArrayKeyValuePairItemSyntax withKeyExpr(std::optional<ExprSyntax> keyExpr);
    ArrayKeyValuePairItemSyntax withDoubleArrowToken(std::optional<TokenSyntax> doubleArrowToken);
-   ArrayKeyValuePairItemSyntax withReferenceToken(std::optional<TokenSyntax> referenceToken);
    ArrayKeyValuePairItemSyntax withValue(std::optional<ExprSyntax> value);
 
    static bool kindOf(SyntaxKind kind)
@@ -2517,7 +2561,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax (T_AMPERSAND)
+      /// type: TokenSyntax (T_FN)
       /// optional: false
       ///
       FnToken,
@@ -3668,18 +3712,13 @@ public:
       ///
       AssignToken,
       ///
-      /// type: TokenSyntax (T_AMPERSAND)
-      /// optional: true
-      ///
-      RefToken,
-      ///
       /// type: ExprSyntax
       /// optional: false
       /// node choices: true
-      /// -----------------------------
+      /// ---------------------------------------------
       /// node choice: ExprSyntax
-      /// -----------------------------
-      /// node choice: VariableExprSyntax
+      /// ---------------------------------------------
+      /// node choice: ReferencedVariableExprSyntax
       ///
       ValueExpr
    };
@@ -3697,12 +3736,10 @@ public:
 
    VariableExprSyntax getTarget();
    TokenSyntax getAssignToken();
-   std::optional<TokenSyntax> getRefToken();
    ExprSyntax getValueExpr();
 
    AssignmentExprSyntax withTarget(std::optional<VariableExprSyntax> target);
    AssignmentExprSyntax withAssignToken(std::optional<TokenSyntax> assignToken);
-   AssignmentExprSyntax withRefToken(std::optional<TokenSyntax> refToken);
    AssignmentExprSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
 
    static bool kindOf(SyntaxKind kind)

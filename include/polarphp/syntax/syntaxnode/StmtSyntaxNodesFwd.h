@@ -36,6 +36,7 @@ class IfStmtSyntax;
 class WhileStmtSyntax;
 class DoWhileStmtSyntax;
 class ForStmtSyntax;
+class ForeachVariableSyntax;
 class ForeachStmtSyntax;
 class SwitchCaseSyntax;
 class SwitchDefaultLabelSyntax;

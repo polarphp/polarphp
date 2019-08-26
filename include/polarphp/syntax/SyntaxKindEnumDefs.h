@@ -89,6 +89,7 @@ enum class SyntaxKind : std::uint32_t
    ExprListItem,
 
    VariableExpr,
+   ReferencedVariableExpr,
    ClassConstIdentifierExpr,
    ConstExpr,
    StaticMemberExpr,
