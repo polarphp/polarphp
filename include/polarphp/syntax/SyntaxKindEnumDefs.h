@@ -238,6 +238,8 @@ enum class SyntaxKind : std::uint32_t
    NamespaceGroupUseDeclaration,
    NamespaceMixedGroupUseDeclaration,
    NamespaceUseStmt,
+   NamespaceDefinitionStmt,
+   NamespaceBlockStmt,
 
    ClassDefinitionStmt,
    InterfaceDefinitionStmt,

@@ -64,6 +64,9 @@ class NamespaceGroupUseDeclarationSyntax;
 class NamespaceMixedGroupUseDeclarationSyntax;
 class NamespaceUseStmtSyntax;
 
+class NamespaceDefinitionStmtSyntax;
+class NamespaceBlockStmtSyntax;
+
 // stmt wrapper for decl syntax nodes
 class ClassDefinitionStmtSyntax;
 class InterfaceDefinitionStmtSyntax;

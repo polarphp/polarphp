@@ -3913,6 +3913,74 @@ NamespaceUseStmtSyntax::withSemicolonToken(std::optional<TokenSyntax> semicolon)
 }
 
 ///
+/// NamespaceDefinitionStmtSyntax
+///
+void NamespaceDefinitionStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == NamespaceDefinitionStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, NamespaceToken, std::set{TokenKindType::T_NAMESPACE});
+   syntax_assert_child_kind(raw, NamespaceName, std::set{SyntaxKind::NamespacePartList});
+   syntax_assert_child_token(raw, SemicolonToken, std::set{TokenKindType::T_SEMICOLON});
+#endif
+}
+
+TokenSyntax NamespaceDefinitionStmtSyntax::getNamespaceToken()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::NamespaceToken).get()};
+}
+
+NamespacePartListSyntax NamespaceDefinitionStmtSyntax::getNamespaceName()
+{
+   return NamespacePartListSyntax{m_root, m_data->getChild(Cursor::NamespaceName).get()};
+}
+
+TokenSyntax NamespaceDefinitionStmtSyntax::getSemicolonToken()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::SemicolonToken).get()};
+}
+
+NamespaceDefinitionStmtSyntax
+NamespaceDefinitionStmtSyntax::withNamespaceToken(std::optional<TokenSyntax> namespaceToken)
+{
+   RefCountPtr<RawSyntax> rawNamespaceToken;
+   if (namespaceToken.has_value()) {
+      rawNamespaceToken = namespaceToken->getRaw();
+   } else {
+      rawNamespaceToken = make_missing_token(T_NAMESPACE);
+   }
+   return m_data->replaceChild<NamespaceDefinitionStmtSyntax>(rawNamespaceToken, Cursor::NamespaceToken);
+}
+
+NamespaceDefinitionStmtSyntax
+NamespaceDefinitionStmtSyntax::withNamespaceName(std::optional<NamespacePartListSyntax> name)
+{
+   RefCountPtr<RawSyntax> rawName;
+   if (name.has_value()) {
+      rawName = name->getRaw();
+   } else {
+      rawName = RawSyntax::missing(SyntaxKind::NamespacePartList);
+   }
+   return m_data->replaceChild<NamespaceDefinitionStmtSyntax>(rawName, Cursor::NamespaceName);
+}
+
+NamespaceDefinitionStmtSyntax
+NamespaceDefinitionStmtSyntax::withSemicolonToken(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> rawSemicolon;
+   if (semicolon.has_value()) {
+      rawSemicolon = semicolon->getRaw();
+   } else {
+      rawSemicolon = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<NamespaceDefinitionStmtSyntax>(rawSemicolon, Cursor::SemicolonToken);
+}
+
+///
 /// ClassDefinitionStmtSyntax
 ///
 void ClassDefinitionStmtSyntax::validate()
