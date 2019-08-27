@@ -271,13 +271,13 @@ public:
    }
 
    TokenSyntax getLeftBrace();
-   TokenSyntax getRightBrace();
    CodeBlockItemListSyntax getStatements();
+   TokenSyntax getRightBrace();
 
-   InnerCodeBlockStmtSyntax addCodeBlockItem(InnerStmtSyntax codeBlockItem);
+   InnerCodeBlockStmtSyntax addCodeBlockItem(InnerStmtSyntax stmt);
    InnerCodeBlockStmtSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
-   InnerCodeBlockStmtSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
    InnerCodeBlockStmtSyntax withStatements(std::optional<InnerStmtSyntax> statements);
+   InnerCodeBlockStmtSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -291,6 +291,74 @@ public:
 
 private:
    friend class InnerCodeBlockStmtSyntaxBuilder;
+   void validate();
+};
+
+///
+///
+///
+class TopStmtSyntax final : public StmtSyntax
+{
+
+};
+
+///
+/// top_code_block_stmt:
+///   '{' top_statement_list '}'
+///
+class TopCodeBlockStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 3;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_LEFT_BRACE)
+      /// optional: false
+      ///
+      LeftBrace,
+      ///
+      /// type: TopStmtListSyntax
+      /// optional: false
+      ///
+      Statements,
+      ///
+      /// type: TokenSyntax (T_RIGHT_BRACE)
+      /// optional: false
+      ///
+      RightBrace
+   };
+
+public:
+   TopCodeBlockStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getLeftBrace();
+   CodeBlockItemListSyntax getStatements();
+   TokenSyntax getRightBrace();
+
+
+   TopCodeBlockStmtSyntax addCodeBlockItem(TopStmtSyntax stmt);
+   TopCodeBlockStmtSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
+   TopCodeBlockStmtSyntax withStatements(std::optional<InnerStmtSyntax> statements);
+   TopCodeBlockStmtSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::TopCodeBlockStmt == kind;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class TopCodeBlockStmtSyntaxBuilder;
    void validate();
 };
 

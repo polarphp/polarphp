@@ -228,23 +228,23 @@ TokenSyntax InnerCodeBlockStmtSyntax::getLeftBrace()
    return TokenSyntax{m_root, m_data->getChild(Cursor::LeftBrace).get()};
 }
 
-TokenSyntax InnerCodeBlockStmtSyntax::getRightBrace()
-{
-   return TokenSyntax{m_root, m_data->getChild(Cursor::RightBrace).get()};
-}
-
 CodeBlockItemListSyntax InnerCodeBlockStmtSyntax::getStatements()
 {
    return CodeBlockItemListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
 }
 
-InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::addCodeBlockItem(InnerStmtSyntax codeBlockItem)
+TokenSyntax InnerCodeBlockStmtSyntax::getRightBrace()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::RightBrace).get()};
+}
+
+InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::addCodeBlockItem(InnerStmtSyntax stmt)
 {
    RefCountPtr<RawSyntax> statements = getRaw()->getChild(Cursor::Statements);
    if (statements) {
-      statements = statements->append(codeBlockItem.getRaw());
+      statements = statements->append(stmt.getRaw());
    } else {
-      statements = RawSyntax::make(SyntaxKind::InnerStmtList, {codeBlockItem.getRaw()}, SourcePresence::Present);
+      statements = RawSyntax::make(SyntaxKind::InnerStmtList, {stmt.getRaw()}, SourcePresence::Present);
    }
    return m_data->replaceChild<InnerCodeBlockStmtSyntax>(statements, Cursor::Statements);
 }
@@ -260,6 +260,17 @@ InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::withLeftBrace(std::optional<T
    return m_data->replaceChild<InnerCodeBlockStmtSyntax>(rawLeftBrace, Cursor::LeftBrace);
 }
 
+InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::withStatements(std::optional<InnerStmtSyntax> statements)
+{
+   RefCountPtr<RawSyntax> rawStatements;
+   if (statements.has_value()) {
+      rawStatements = statements->getRaw();
+   } else {
+      rawStatements = RawSyntax::missing(SyntaxKind::InnerStmtList);
+   }
+   return m_data->replaceChild<InnerCodeBlockStmtSyntax>(rawStatements, Cursor::Statements);
+}
+
 InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::withRightBrace(std::optional<TokenSyntax> rightBrace)
 {
    RefCountPtr<RawSyntax> rawRightBrace;
@@ -271,15 +282,80 @@ InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::withRightBrace(std::optional<
    return m_data->replaceChild<InnerCodeBlockStmtSyntax>(rawRightBrace, Cursor::RightBrace);
 }
 
-InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::withStatements(std::optional<InnerStmtSyntax> statements)
+///
+/// TopCodeBlockStmtSyntax
+///
+void TopCodeBlockStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == TopCodeBlockStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_kind(raw, Statements, std::set{SyntaxKind::TopCodeBlockStmt});
+   syntax_assert_child_token(raw, RightBrace, std::set{TokenKindType::T_RIGHT_PAREN});
+#endif
+}
+
+TokenSyntax TopCodeBlockStmtSyntax::getLeftBrace()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::LeftBrace).get()};
+}
+
+CodeBlockItemListSyntax TopCodeBlockStmtSyntax::getStatements()
+{
+   return CodeBlockItemListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
+}
+
+TokenSyntax TopCodeBlockStmtSyntax::getRightBrace()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::RightBrace).get()};
+}
+
+TopCodeBlockStmtSyntax TopCodeBlockStmtSyntax::addCodeBlockItem(TopStmtSyntax stmt)
+{
+   RefCountPtr<RawSyntax> statements = getRaw()->getChild(Cursor::Statements);
+   if (statements) {
+      statements = statements->append(stmt.getRaw());
+   } else {
+      statements = RawSyntax::make(SyntaxKind::TopStmtList, {stmt.getRaw()}, SourcePresence::Present);
+   }
+   return m_data->replaceChild<TopCodeBlockStmtSyntax>(statements, Cursor::Statements);
+}
+
+TopCodeBlockStmtSyntax TopCodeBlockStmtSyntax::withLeftBrace(std::optional<TokenSyntax> leftBrace)
+{
+   RefCountPtr<RawSyntax> rawLeftBrace;
+   if (leftBrace.has_value()) {
+      rawLeftBrace = leftBrace->getRaw();
+   } else {
+      rawLeftBrace = make_missing_token(T_LEFT_BRACE);
+   }
+   return m_data->replaceChild<TopCodeBlockStmtSyntax>(rawLeftBrace, Cursor::LeftBrace);
+}
+
+TopCodeBlockStmtSyntax TopCodeBlockStmtSyntax::withStatements(std::optional<InnerStmtSyntax> statements)
 {
    RefCountPtr<RawSyntax> rawStatements;
    if (statements.has_value()) {
       rawStatements = statements->getRaw();
    } else {
-      rawStatements = RawSyntax::missing(SyntaxKind::InnerStmtList);
+      rawStatements = RawSyntax::missing(SyntaxKind::TopStmtList);
    }
-   return m_data->replaceChild<InnerCodeBlockStmtSyntax>(rawStatements, Cursor::Statements);
+   return m_data->replaceChild<TopCodeBlockStmtSyntax>(rawStatements, Cursor::Statements);
+}
+
+TopCodeBlockStmtSyntax TopCodeBlockStmtSyntax::withRightBrace(std::optional<TokenSyntax> rightBrace)
+{
+   RefCountPtr<RawSyntax> rawRightBrace;
+   if (rightBrace.has_value()) {
+      rawRightBrace = rightBrace->getRaw();
+   } else {
+      rawRightBrace = make_missing_token(T_RIGHT_BRACE);
+   }
+   return m_data->replaceChild<TopCodeBlockStmtSyntax>(rawRightBrace, Cursor::RightBrace);
 }
 
 ///

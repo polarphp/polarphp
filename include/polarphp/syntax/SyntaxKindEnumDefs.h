@@ -197,6 +197,7 @@ enum class SyntaxKind : std::uint32_t
    InnerStmt,
    InnerCodeBlockStmt,
    TopStmt,
+   TopCodeBlockStmt,
    DeclareStmt,
    GotoStmt,
    UnsetVariable,

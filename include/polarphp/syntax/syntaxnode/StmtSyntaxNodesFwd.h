@@ -22,6 +22,7 @@ class ExprStmtSyntax;
 class InnerStmtSyntax;
 class InnerCodeBlockStmtSyntax;
 class TopStmtSyntax;
+class TopCodeBlockStmtSyntax;
 class DeclareStmtSyntax;
 class GotoStmtSyntax;
 class UnsetVariableSyntax;
@@ -122,6 +123,12 @@ using ElseIfListSyntax = SyntaxCollection<SyntaxKind::ElseIfList, ElseIfClauseSy
 ///   inner_statement_list inner_statement
 ///
 using InnerStmtListSyntax = SyntaxCollection<SyntaxKind::InnerStmtList, InnerStmtSyntax>;
+
+///
+/// top_statement_list:
+///   top_statement_list top_statement
+///
+using TopStmtListSyntax = SyntaxCollection<SyntaxKind::TopStmtList, TopStmtSyntax>;
 
 ///
 /// catch_list:
