@@ -16,6 +16,8 @@
 
 namespace polar::parser {
 
+const Trivia Parser::sm_emptyTrivia{};
+
 Parser::Parser(const LangOptions &langOpts, unsigned bufferId,
                SourceManager &sourceMgr, std::shared_ptr<DiagnosticEngine> diags)
    : Parser(sourceMgr, diags,

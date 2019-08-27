@@ -163,11 +163,6 @@ restart_lex:
    return;
 }
 
-<ST_IN_SCRIPTING> "enddeclare" {
-   lexer.formToken(TokenKindType::T_ENDDECLARE, lexer.getYYText());
-   return;
-}
-
 <ST_IN_SCRIPTING> "instanceof" {
    lexer.formToken(TokenKindType::T_INSTANCEOF, lexer.getYYText());
    return;

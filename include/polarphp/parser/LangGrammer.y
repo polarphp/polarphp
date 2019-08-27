@@ -46,8 +46,11 @@ int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer, Parser
 }
 
 %code {
-#include "polarphp/syntax/factory/SyntaxNodeFactories.h"
+#include "polarphp/syntax/SyntaxNodeFactories.h"
+#include "polarphp/parser/Parser.h"
 using namespace polar::syntax;
+
+#define empty_triva() parser->getEmptyTrivia()
 }
 
 // %destructor { delete $$; } <std::shared_ptr<Syntax>>
@@ -333,31 +336,31 @@ using namespace polar::syntax;
 start:
    top_statement_list {
 
-	}
+   }
 ;
 
 reserved_non_modifiers:
-	  T_INCLUDE | T_INCLUDE_ONCE | T_EVAL | T_REQUIRE | T_REQUIRE_ONCE | T_LOGICAL_OR | T_LOGICAL_XOR | T_LOGICAL_AND
-	| T_INSTANCEOF | T_NEW | T_CLONE | T_EXIT | T_IF | T_ELSEIF | T_ELSE | T_ECHO | T_DO | T_WHILE
-	| T_FOR | T_FOREACH | T_DECLARE | T_ENDDECLARE | T_AS | T_TRY | T_CATCH | T_FINALLY
-	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
-	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_CASE | T_DEFAULT | T_BREAK
-	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
-	| T_CLASS_CONST | T_TRAIT_CONST | T_FUNC_CONST | T_METHOD_CONST | T_LINE | T_FILE | T_DIR | T_NS_CONST | T_FN
+     T_INCLUDE | T_INCLUDE_ONCE | T_EVAL | T_REQUIRE | T_REQUIRE_ONCE | T_LOGICAL_OR | T_LOGICAL_XOR | T_LOGICAL_AND
+   | T_INSTANCEOF | T_NEW | T_CLONE | T_EXIT | T_IF | T_ELSEIF | T_ELSE | T_ECHO | T_DO | T_WHILE
+   | T_FOR | T_FOREACH | T_DECLARE | T_AS | T_TRY | T_CATCH | T_FINALLY
+   | T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
+   | T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_CASE | T_DEFAULT | T_BREAK
+   | T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
+   | T_CLASS_CONST | T_TRAIT_CONST | T_FUNC_CONST | T_METHOD_CONST | T_LINE | T_FILE | T_DIR | T_NS_CONST | T_FN
 ;
 
 semi_reserved:
-	   reserved_non_modifiers
+      reserved_non_modifiers
    |  T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
 ;
 
 identifier:
-	T_IDENTIFIER_STRING {
+   T_IDENTIFIER_STRING {
 
-	}
+   }
 |	semi_reserved {
 
-	}
+   }
 ;
 
 top_statement_list:
@@ -392,7 +395,7 @@ name:
 
 top_statement:
    statement {
-      
+
    }
 |  function_declaration_statement {
 
@@ -464,7 +467,7 @@ mixed_group_use_declaration:
 ;
 
 possible_comma:
-   %empty 
+   %empty
 |  T_COMMA
 ;
 
@@ -488,7 +491,7 @@ unprefixed_use_declarations:
 
 use_declarations:
    use_declarations T_COMMA use_declaration {
-      
+
    }
 |  use_declaration {
 
@@ -618,7 +621,7 @@ statement:
    }
 |  T_SEMICOLON {
       // make empty stmt
-      RefCountPtr<SyntaxData> semicolon = TokenSyntaxNodeFactory::makeSemiColonToken();
+      TokenSyntax semicolon = TokenSyntaxNodeFactory::makeSemiColonToken(empty_triva(), empty_triva());
    }
 |  T_TRY T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE catch_list finally_statement {
 
@@ -672,7 +675,7 @@ unset_variables:
 
 unset_variable:
    variable {
-      
+
    }
 ;
 
@@ -737,7 +740,7 @@ trait_declaration_statement:
    }
 ;
 
-interface_declaration_statement: 
+interface_declaration_statement:
    T_INTERFACE {}
    T_IDENTIFIER_STRING interface_extends_list backup_doc_comment T_LEFT_BRACE class_statement_list T_RIGHT_BRACE {
 
@@ -773,7 +776,7 @@ implements_list:
 
 foreach_variable:
    variable {
-      
+
    }
 |  T_AMPERSAND variable {
 
@@ -1021,7 +1024,7 @@ trait_adaptation:
 
 trait_precedence:
    absolute_trait_method_reference T_INSTEADOF name_list {
-      
+
    }
 ;
 
@@ -1440,7 +1443,7 @@ inline_function:
    backup_fn_flags T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE backup_fn_flags {
 
    }
-|  fn returns_ref T_LEFT_PAREN parameter_list T_RIGHT_PAREN return_type backup_doc_comment T_DOUBLE_ARROW 
+|  fn returns_ref T_LEFT_PAREN parameter_list T_RIGHT_PAREN return_type backup_doc_comment T_DOUBLE_ARROW
    backup_fn_flags backup_lex_pos expr backup_fn_flags {
 
    }
@@ -1505,7 +1508,7 @@ lexical_var_list:
 
 lexical_var:
    T_VARIABLE {
-      
+
    }
 |  T_AMPERSAND T_VARIABLE {
 
@@ -1595,7 +1598,7 @@ scalar:
 
    }
 |  T_DNUMBER {
-   
+
    }
 |  T_LINE {
 
@@ -1781,7 +1784,7 @@ member_name:
 
 property_name:
    T_IDENTIFIER_STRING {
-      
+
    }
 |  T_LEFT_BRACE expr T_RIGHT_BRACE {
 
@@ -1793,7 +1796,7 @@ property_name:
 
 array_pair_list:
    non_empty_array_pair_list {
-      
+
    }
 ;
 

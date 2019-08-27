@@ -49,9 +49,7 @@
 
 namespace polar::syntax {
 
-class SyntaxAstMap;
 struct SyntaxVisitor;
-class SourceFileSyntax;
 
 template <typename SyntaxNode>
 SyntaxNode make(RefCountPtr<RawSyntax> raw)
@@ -258,9 +256,6 @@ protected:
    /// This is mutable for being able to set cached child members, which are
    /// lazily created.
    mutable const SyntaxData *m_data;
-private:
-   friend struct SyntaxFactory;
-   friend class SyntaxAstMap;
 };
 
 } // polar::syntax

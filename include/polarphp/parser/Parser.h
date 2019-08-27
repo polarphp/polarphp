@@ -60,6 +60,10 @@ public:
    Parser(SourceManager &sourceMgr, std::shared_ptr<DiagnosticEngine> diags, std::unique_ptr<Lexer> lexer);
    Parser(const Parser &) = delete;
    Parser &operator =(const Parser &) = delete;
+   const Trivia &getEmptyTrivia()
+   {
+      return sm_emptyTrivia;
+   }
 
    bool parse();
    std::shared_ptr<Syntax> getSyntaxTree();
@@ -78,7 +82,6 @@ private:
    friend int internal::token_lex_wrapper(ParserSemantic *value, internal::YYLocation *loc,
                                           Lexer *lexer, Parser *parser);
 private:
-
    /// info properties
    bool m_parserError = false;
    bool m_inCompilation = false;
@@ -95,7 +98,6 @@ private:
    /// leading trivias for \c Token.
    /// Always empty if not shouldBuildSyntaxTree.
    ParsedTrivia m_leadingTrivia;
-
    /// trailing trivias for \c Token.
    /// Always empty if not shouldBuildSyntaxTree.
    ParsedTrivia m_trailingTrivia;
@@ -105,6 +107,7 @@ private:
    std::shared_ptr<DiagnosticEngine> m_diags;
    std::list<std::string> m_openFiles;
 
+   const static Trivia sm_emptyTrivia;
 };
 
 } // polar::parser
