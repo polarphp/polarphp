@@ -12,6 +12,7 @@
 #include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
 #include "polarphp/syntax/syntaxnode/DeclSyntaxNodes.h"
 #include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
 
 namespace polar::syntax {
 

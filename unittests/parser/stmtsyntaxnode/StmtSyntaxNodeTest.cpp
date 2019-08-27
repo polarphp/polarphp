@@ -20,5 +20,12 @@ class StmtSyntaxNodeTest : public AbstractParserTestCase
 
 TEST_F(StmtSyntaxNodeTest, testBasic)
 {
-
+   {
+      // test empty stmt
+      std::string source =
+            R"(
+            ;
+            )";
+      std::shared_ptr<Syntax> ast = parseSource(source);
+   }
 }

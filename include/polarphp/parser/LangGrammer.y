@@ -46,7 +46,8 @@ int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer, Parser
 }
 
 %code {
-using polar::syntax::Syntax;
+#include "polarphp/syntax/factory/SyntaxNodeFactories.h"
+using namespace polar::syntax;
 }
 
 // %destructor { delete $$; } <std::shared_ptr<Syntax>>
@@ -183,7 +184,6 @@ using polar::syntax::Syntax;
 %token T_CLONE     "clone (T_CLONE)"
 %token T_EXIT      "exit (T_EXIT)"
 %token T_DECLARE    "declare (T_DECLARE)"
-%token T_ENDDECLARE "enddeclare (T_ENDDECLARE)"
 %token T_CLASS_REF_STATIC "static (T_CLASS_REF_STATIC)"
 %token T_CLASS_REF_SELF "self (T_CLASS_REF_SELF)"
 %token T_CLASS_REF_PARENT "parent (T_CLASS_REF_PARENT)"
@@ -617,7 +617,8 @@ statement:
 
    }
 |  T_SEMICOLON {
-
+      // make empty stmt
+      RefCountPtr<SyntaxData> semicolon = TokenSyntaxNodeFactory::makeSemiColonToken();
    }
 |  T_TRY T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE catch_list finally_statement {
 

@@ -16,5 +16,6 @@
 #include "polarphp/syntax/factory/DeclSyntaxNodeFactory.h"
 #include "polarphp/syntax/factory/ExprSyntaxNodeFactory.h"
 #include "polarphp/syntax/factory/StmtSyntaxNodeFactory.h"
+#include "polarphp/syntax/factory/TokenSyntaxNodeFactory.h"
 
 #endif // POLARPHP_SYNTAX_FACTORIES_H
