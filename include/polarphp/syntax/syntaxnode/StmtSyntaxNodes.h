@@ -295,11 +295,62 @@ private:
 };
 
 ///
-///
+/// top_statement:
+///   statement
+/// | function_declaration_statement
+/// | class_declaration_statement
+/// |	trait_declaration_statement
+/// | interface_declaration_statement
+/// | T_HALT_COMPILER '(' ')' ';'
+/// | T_NAMESPACE namespace_name ';'
+/// | T_NAMESPACE namespace_name '{' top_statement_list '}'
+/// | T_NAMESPACE '{' top_statement_list '}'
+/// | T_USE mixed_group_use_declaration ';'
+/// | T_USE use_type group_use_declaration ';'
+/// | T_USE use_declarations ';'
+/// | T_USE use_type use_declarations ';'
+/// | T_CONST const_list ';'
 ///
 class TopStmtSyntax final : public StmtSyntax
 {
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 1;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: StmtSyntax
+      /// optional: false
+      ///
+      Stmt
+   };
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
 
+public:
+   TopStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   StmtSyntax getStmt();
+   TopStmtSyntax withStmt(std::optional<StmtSyntax> stmt);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::TopStmt == kind;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class TopStmtSyntaxBuilder;
+   void validate();
 };
 
 ///

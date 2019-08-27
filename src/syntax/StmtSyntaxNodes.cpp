@@ -283,6 +283,52 @@ InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::withRightBrace(std::optional<
 }
 
 ///
+/// TopStmtSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType TopStmtSyntax::CHILD_NODE_CHOICES
+{
+   {
+      TopStmtSyntax::Stmt, {
+         SyntaxKind::Stmt, SyntaxKind::FunctionDefinitionStmt,
+               SyntaxKind::ClassDefinitionStmt, SyntaxKind::InterfaceDefinitionStmt,
+               SyntaxKind::TraitDefinitionStmt, SyntaxKind::HaltCompilerStmt,
+               SyntaxKind::NamespaceBlockStmt, SyntaxKind::NamespaceDefinitionStmt,
+               SyntaxKind::NamespaceUseStmt, SyntaxKind::ConstDefinitionStmt,
+      }
+   }
+};
+#endif
+
+void TopStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == TopStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, Stmt, CHILD_NODE_CHOICES.at(Cursor::Stmt));
+#endif
+}
+
+StmtSyntax TopStmtSyntax::getStmt()
+{
+   return StmtSyntax{m_root, m_data->getChild(Cursor::Stmt).get()};
+}
+
+TopStmtSyntax TopStmtSyntax::withStmt(std::optional<StmtSyntax> stmt)
+{
+   RefCountPtr<RawSyntax> rawStmt;
+   if (stmt.has_value()) {
+      rawStmt = stmt->getRaw();
+   } else {
+      rawStmt = RawSyntax::missing(SyntaxKind::Stmt);
+   }
+   return m_data->replaceChild<TopStmtSyntax>(rawStmt, Cursor::Stmt);
+}
+
+///
 /// TopCodeBlockStmtSyntax
 ///
 void TopCodeBlockStmtSyntax::validate()
