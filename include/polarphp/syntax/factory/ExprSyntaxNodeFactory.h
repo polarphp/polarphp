@@ -26,7 +26,18 @@ public:
    /// make collection nodes
    ///
    static ExprListSyntax makeExprList(const std::vector<ExprSyntax> elements, RefCountPtr<SyntaxArena> arena = nullptr);
-
+   static LexicalVarListSyntax makeLexicalVarList(const std::vector<LexicalVarItemSyntax> elements,
+                                                  RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArrayPairItemListSyntax makeArrayPairItemList(const std::vector<ArrayPairItemSyntax> elements,
+                                                        RefCountPtr<SyntaxArena> arena = nullptr);
+   static ListPairItemListSyntax makeListPairItemList(const std::vector<ListPairItemSyntax> elements,
+                                                      RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsItemListSyntax makeEncapsItemList(const std::vector<EncapsListItemSyntax> elements,
+                                                  RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArgumentListSyntax makeArgumentList(const std::vector<ArgumentListItemSyntax> elements,
+                                              RefCountPtr<SyntaxArena> arena = nullptr);
+   static IssetVariablesListSyntax makeIssetVariablesList(const std::vector<IsSetVarItemSyntax> elements,
+                                                          RefCountPtr<SyntaxArena> arena = nullptr);
    ///
    /// make normal nodes
    ///
