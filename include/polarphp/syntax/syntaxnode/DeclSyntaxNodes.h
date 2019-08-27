@@ -90,11 +90,13 @@ public:
       /// type: Syntax
       /// optional: false
       /// node choices: true
-      /// -----------------
+      /// ------------------------------------------------------------------------
       /// choice type: ReservedNonModifierSyntax
-      /// -----------------
+      /// ------------------------------------------------------------------------
       /// choice type: TokenSyntax
       /// token choices: true
+      /// ------------------------------------------------------------------------
+      /// T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
       Modifier,
       ModifierChoiceToken
    };
@@ -221,6 +223,7 @@ public:
    {
       return kindOf(syntax->getKind());
    }
+
 private:
    friend class NamespacePartSyntaxBuilder;
    void validate();

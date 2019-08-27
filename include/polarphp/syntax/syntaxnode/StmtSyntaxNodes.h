@@ -3036,6 +3036,64 @@ private:
 };
 
 ///
+/// namespace_block_stmt:
+///   T_NAMESPACE namespace_name '{' top_statement_list '}'
+/// | T_NAMESPACE '{' top_statement_list '}'
+///
+class NamespaceBlockStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_NAMESPACE)
+      /// optional: false
+      ///
+      NamespaceToken,
+      ///
+      /// type: NamespacePartListSyntax
+      /// optional: true
+      ///
+      NamespaceName,
+      ///
+      /// type: TopCodeBlockStmtSyntax
+      /// optional: false
+      ///
+      CodeBlock
+   };
+
+public:
+   NamespaceBlockStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getNamespaceToken();
+   NamespacePartListSyntax getNamespaceName();
+   TopCodeBlockStmtSyntax getCodeBlock();
+
+   NamespaceBlockStmtSyntax withNamespaceToken(std::optional<TokenSyntax> namespaceToken);
+   NamespaceBlockStmtSyntax withNamespaceName(std::optional<NamespacePartListSyntax> name);
+   NamespaceBlockStmtSyntax withCodeBlock(std::optional<TopCodeBlockStmtSyntax> codeBlock);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::NamespaceDefinitionStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class NamespaceUseStmtSyntaxBuilder;
+   void validate();
+};
+
+///
 /// class_definition_stmt:
 ///   class_definition_decl
 ///

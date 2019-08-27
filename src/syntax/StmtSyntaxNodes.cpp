@@ -4057,6 +4057,75 @@ NamespaceDefinitionStmtSyntax::withSemicolonToken(std::optional<TokenSyntax> sem
 }
 
 ///
+/// NamespaceBlockStmtSyntax
+///
+void NamespaceBlockStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == NamespaceBlockStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, NamespaceToken, std::set{TokenKindType::T_NAMESPACE});
+   syntax_assert_child_kind(raw, NamespaceName, std::set{SyntaxKind::NamespacePartList});
+   syntax_assert_child_kind(raw, CodeBlock, std::set{SyntaxKind::TopCodeBlockStmt});
+#endif
+}
+
+TokenSyntax NamespaceBlockStmtSyntax::getNamespaceToken()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::NamespaceToken).get()};
+}
+
+NamespacePartListSyntax NamespaceBlockStmtSyntax::getNamespaceName()
+{
+   return NamespacePartListSyntax{m_root, m_data->getChild(Cursor::NamespaceName).get()};
+}
+
+TopCodeBlockStmtSyntax
+NamespaceBlockStmtSyntax::getCodeBlock()
+{
+   return TopCodeBlockStmtSyntax{m_root, m_data->getChild(Cursor::CodeBlock).get()};
+}
+
+NamespaceBlockStmtSyntax
+NamespaceBlockStmtSyntax::withNamespaceToken(std::optional<TokenSyntax> namespaceToken)
+{
+   RefCountPtr<RawSyntax> rawNamespaceToken;
+   if (namespaceToken.has_value()) {
+      rawNamespaceToken = namespaceToken->getRaw();
+   } else {
+      rawNamespaceToken = make_missing_token(T_NAMESPACE);
+   }
+   return m_data->replaceChild<NamespaceBlockStmtSyntax>(rawNamespaceToken, Cursor::NamespaceToken);
+}
+
+NamespaceBlockStmtSyntax
+NamespaceBlockStmtSyntax::withNamespaceName(std::optional<NamespacePartListSyntax> name)
+{
+   RefCountPtr<RawSyntax> rawName;
+   if (name.has_value()) {
+      rawName = name->getRaw();
+   } else {
+      rawName = nullptr;
+   }
+   return m_data->replaceChild<NamespaceBlockStmtSyntax>(rawName, Cursor::NamespaceName);
+}
+
+NamespaceBlockStmtSyntax
+NamespaceBlockStmtSyntax::withCodeBlock(std::optional<TopCodeBlockStmtSyntax> codeBlock)
+{
+   RefCountPtr<RawSyntax> rawCodeBlock;
+   if (codeBlock.has_value()) {
+      rawCodeBlock = codeBlock->getRaw();
+   } else {
+      rawCodeBlock = RawSyntax::missing(SyntaxKind::TopCodeBlockStmt);
+   }
+   return m_data->replaceChild<NamespaceBlockStmtSyntax>(rawCodeBlock, Cursor::CodeBlock);
+}
+
+///
 /// ClassDefinitionStmtSyntax
 ///
 void ClassDefinitionStmtSyntax::validate()
