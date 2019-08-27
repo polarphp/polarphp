@@ -286,7 +286,7 @@ private:
 ///
 /// = expr
 ///
-class InitializeClauseSyntax final : public Syntax
+class InitializerClauseSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -306,7 +306,7 @@ public:
    };
 
 public:
-   InitializeClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   InitializerClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
@@ -315,12 +315,12 @@ public:
    TokenSyntax getEqualToken();
    ExprSyntax getValueExpr();
 
-   InitializeClauseSyntax withEqualToken(std::optional<TokenSyntax> equalToken);
-   InitializeClauseSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
+   InitializerClauseSyntax withEqualToken(std::optional<TokenSyntax> equalToken);
+   InitializerClauseSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::InitializeClause;
+      return kind == SyntaxKind::InitializerClause;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -329,116 +329,7 @@ public:
    }
 
 private:
-   friend class InitializeClauseSyntaxBuilder;
-   void validate();
-};
-
-///
-/// const_decl:
-///   T_IDENTIFIER_STRING '=' expr
-///
-class ConstDeclareItemSyntax final : public Syntax
-{
-public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 2;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
-   enum Cursor : SyntaxChildrenCountType
-   {
-      ///
-      /// type: TokenSyntax
-      /// optional: false
-      ///
-      Name,
-      ///
-      /// type: InitializerClauseSyntax
-      /// optional: false
-      ///
-      InitializerClause
-   };
-
-public:
-   ConstDeclareItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : Syntax(root, data)
-   {
-      validate();
-   }
-
-   TokenSyntax getName();
-   InitializeClauseSyntax getInitializer();
-
-   ConstDeclareItemSyntax withName(std::optional<TokenSyntax> name);
-   ConstDeclareItemSyntax withIntializer(std::optional<InitializeClauseSyntax> initializer);
-
-   static bool kindOf(SyntaxKind kind)
-   {
-      return kind == SyntaxKind::ConstDeclareItem;
-   }
-
-   static bool classOf(const Syntax *syntax)
-   {
-      return kindOf(syntax->getKind());
-   }
-
-private:
-   friend class ConstDeclareItemSyntaxBuilder;
-   void validate();
-};
-
-///
-/// top_statement:
-///   T_CONST const_list ';'
-///
-class ConstDefinitionSyntax final : public DeclSyntax
-{
-public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 3;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
-   enum Cursor : SyntaxChildrenCountType
-   {
-      ///
-      /// type: TokenSyntax
-      /// optional: false
-      ///
-      ConstToken,
-      ///
-      /// type: ConstDefinitionListSyntax
-      /// optional: false
-      ///
-      Declarations,
-      ///
-      /// type: TokenSyntax
-      /// optional: false
-      ///
-      Semicolon
-   };
-
-public:
-   ConstDefinitionSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : DeclSyntax(root, data)
-   {
-      validate();
-   }
-
-   TokenSyntax getConstToken();
-   ConstDeclareItemListSyntax getDeclarations();
-   TokenSyntax getSemicolon();
-
-   ConstDefinitionSyntax withConstToken(std::optional<TokenSyntax> constToken);
-   ConstDefinitionSyntax withDeclarations(std::optional<ConstDeclareItemListSyntax> declarations);
-   ConstDefinitionSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
-
-   static bool kindOf(SyntaxKind kind)
-   {
-      return kind == SyntaxKind::ConstDefinition;
-   }
-
-   static bool classOf(const Syntax *syntax)
-   {
-      return kindOf(syntax->getKind());
-   }
-
-private:
-   friend class ConstDefinitionSyntaxBuilder;
+   friend class InitializerClauseSyntaxBuilder;
    void validate();
 };
 
@@ -631,7 +522,7 @@ public:
       ///
       Variable,
       ///
-      /// type: InitializeClauseSyntax
+      /// type: InitializerClauseSyntax
       /// optional: true
       ///
       Initializer
@@ -648,13 +539,13 @@ public:
    std::optional<TokenSyntax> getReferenceMark();
    std::optional<TokenSyntax> getVariadicMark();
    TokenSyntax getVariable();
-   std::optional<InitializeClauseSyntax> getInitializer();
+   std::optional<InitializerClauseSyntax> getInitializer();
 
    ParameterSyntax withTypeHint(std::optional<TypeExprClauseSyntax> typeHint);
    ParameterSyntax withReferenceMark(std::optional<TokenSyntax> referenceMark);
    ParameterSyntax withVariadicMark(std::optional<TokenSyntax> variadicMark);
    ParameterSyntax withVariable(std::optional<TokenSyntax> variable);
-   ParameterSyntax withInitializer(std::optional<InitializeClauseSyntax> initializer);
+   ParameterSyntax withInitializer(std::optional<InitializerClauseSyntax> initializer);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -1032,7 +923,7 @@ public:
       ///
       Variable,
       ///
-      /// type: InitializeClauseSyntax
+      /// type: InitializerClauseSyntax
       /// optional: true
       ///
       Initializer
@@ -1046,9 +937,9 @@ public:
    }
 
    TokenSyntax getVariable();
-   std::optional<InitializeClauseSyntax> getInitializer();
+   std::optional<InitializerClauseSyntax> getInitializer();
    ClassPropertyClauseSyntax withVariable(std::optional<TokenSyntax> variable);
-   ClassPropertyClauseSyntax withInitializer(std::optional<InitializeClauseSyntax> initializer);
+   ClassPropertyClauseSyntax withInitializer(std::optional<InitializerClauseSyntax> initializer);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -1081,7 +972,7 @@ public:
       ///
       Identifier,
       ///
-      /// type: InitializeClauseSyntax
+      /// type: InitializerClauseSyntax
       /// optional: true
       ///
       Initializer
@@ -1095,9 +986,9 @@ public:
    }
 
    IdentifierSyntax getIdentifier();
-   std::optional<InitializeClauseSyntax> getInitializer();
+   std::optional<InitializerClauseSyntax> getInitializer();
    ClassConstClauseSyntax withIdentifier(std::optional<IdentifierSyntax> identifier);
-   ClassConstClauseSyntax withInitializer(std::optional<InitializeClauseSyntax> initializer);
+   ClassConstClauseSyntax withInitializer(std::optional<InitializerClauseSyntax> initializer);
 
    static bool kindOf(SyntaxKind kind)
    {

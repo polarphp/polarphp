@@ -3094,6 +3094,115 @@ private:
 };
 
 ///
+/// const_decl:
+///   T_IDENTIFIER_STRING '=' expr
+///
+class ConstDeclareItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      Name,
+      ///
+      /// type: InitializerClauseSyntax
+      /// optional: false
+      ///
+      InitializerClause
+   };
+
+public:
+   ConstDeclareItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getName();
+   InitializerClauseSyntax getInitializer();
+
+   ConstDeclareItemSyntax withName(std::optional<TokenSyntax> name);
+   ConstDeclareItemSyntax withIntializer(std::optional<InitializerClauseSyntax> initializer);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ConstDeclareItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ConstDeclareItemSyntaxBuilder;
+   void validate();
+};
+
+///
+/// top_statement:
+///   T_CONST const_list ';'
+///
+class ConstDefinitionStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      ConstToken,
+      ///
+      /// type: ConstDefinitionListSyntax
+      /// optional: false
+      ///
+      Declarations,
+      ///
+      /// type: TokenSyntax
+      /// optional: false
+      ///
+      Semicolon
+   };
+
+public:
+   ConstDefinitionStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getConstToken();
+   ConstDeclareItemListSyntax getDeclarations();
+   TokenSyntax getSemicolon();
+
+   ConstDefinitionStmtSyntax withConstToken(std::optional<TokenSyntax> constToken);
+   ConstDefinitionStmtSyntax withDeclarations(std::optional<ConstDeclareItemListSyntax> declarations);
+   ConstDefinitionStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ConstDefinitionStmt;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ConstDefinitionStmtSyntaxBuilder;
+   void validate();
+};
+
+///
 /// class_definition_stmt:
 ///   class_definition_decl
 ///

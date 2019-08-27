@@ -37,10 +37,8 @@ enum class SyntaxKind : std::uint32_t
    TypeClause,
    TypeExprClause,
    Name,
-   ConstDeclareItem,
-   ConstDefinition,
    ReturnTypeClause,
-   InitializeClause, // for variable assign or initialize
+   InitializerClause, // for variable assign or initialize
    ParameterItem,
    ParameterListClause,
    LexicalVarItem,
@@ -241,6 +239,9 @@ enum class SyntaxKind : std::uint32_t
    NamespaceUseStmt,
    NamespaceDefinitionStmt,
    NamespaceBlockStmt,
+
+   ConstDeclareItem,
+   ConstDefinitionStmt,
 
    ClassDefinitionStmt,
    InterfaceDefinitionStmt,

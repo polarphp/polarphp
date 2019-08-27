@@ -4125,6 +4125,124 @@ NamespaceBlockStmtSyntax::withCodeBlock(std::optional<TopCodeBlockStmtSyntax> co
    return m_data->replaceChild<NamespaceBlockStmtSyntax>(rawCodeBlock, Cursor::CodeBlock);
 }
 
+
+///
+/// ConstDeclareItemSyntax
+///
+void ConstDeclareItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ConstDeclareItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
+   if (const RefCountPtr<RawSyntax> &initializerChild = raw->getChild(Cursor::InitializerClause)) {
+      initializerChild->kindOf(SyntaxKind::InitializerClause);
+   }
+#endif
+}
+
+TokenSyntax ConstDeclareItemSyntax::getName()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Name).get()};
+}
+
+InitializerClauseSyntax ConstDeclareItemSyntax::getInitializer()
+{
+   return InitializerClauseSyntax {m_root, m_data->getChild(Cursor::InitializerClause).get()};
+}
+
+ConstDeclareItemSyntax ConstDeclareItemSyntax::withName(std::optional<TokenSyntax> name)
+{
+   RefCountPtr<RawSyntax> nameRaw;
+   if (name.has_value()) {
+      nameRaw = name->getRaw();
+   } else {
+      nameRaw = make_missing_token(T_IDENTIFIER_STRING);
+   }
+   return m_data->replaceChild<ConstDeclareItemSyntax>(nameRaw, Cursor::Name);
+}
+
+ConstDeclareItemSyntax ConstDeclareItemSyntax::withIntializer(std::optional<InitializerClauseSyntax> initializer)
+{
+   RefCountPtr<RawSyntax> initializerRaw;
+   if (initializer.has_value()) {
+      initializerRaw = initializer->getRaw();
+   } else {
+      initializerRaw = RawSyntax::missing(SyntaxKind::InitializerClause);
+   }
+   return m_data->replaceChild<ConstDeclareItemSyntax>(initializerRaw, Cursor::InitializerClause);
+}
+
+///
+/// ConstDefinitionStmtSyntax
+///
+void ConstDefinitionStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ConstDefinitionStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, ConstToken, std::set{TokenKindType::T_CONST});
+   syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
+   if (const RefCountPtr<RawSyntax> &declarations = raw->getChild(Cursor::Declarations)) {
+      assert(declarations->kindOf(SyntaxKind::ConstDeclareItemList));
+   }
+#endif
+}
+
+TokenSyntax ConstDefinitionStmtSyntax::getConstToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::ConstToken).get()};
+}
+
+ConstDeclareItemListSyntax ConstDefinitionStmtSyntax::getDeclarations()
+{
+   return ConstDeclareItemListSyntax {m_root, m_data->getChild(Cursor::Declarations).get()};
+}
+
+TokenSyntax ConstDefinitionStmtSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
+}
+
+ConstDefinitionStmtSyntax ConstDefinitionStmtSyntax::withConstToken(std::optional<TokenSyntax> constToken)
+{
+   RefCountPtr<RawSyntax> constTokenRaw;
+   if (constToken.has_value()) {
+      constTokenRaw = constToken->getRaw();
+   } else {
+      constTokenRaw = make_missing_token(T_CONST);
+   }
+   return m_data->replaceChild<ConstDefinitionStmtSyntax>(constTokenRaw, Cursor::ConstToken);
+}
+
+ConstDefinitionStmtSyntax ConstDefinitionStmtSyntax::withDeclarations(std::optional<ConstDeclareItemListSyntax> declarations)
+{
+   RefCountPtr<RawSyntax> declarationsRaw;
+   if (declarations.has_value()) {
+      declarationsRaw = declarations->getRaw();
+   } else {
+      declarationsRaw = RawSyntax::missing(SyntaxKind::ConstDeclareItemList);
+   }
+   return m_data->replaceChild<ConstDefinitionStmtSyntax>(declarationsRaw, Cursor::Declarations);
+}
+
+ConstDefinitionStmtSyntax ConstDefinitionStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> semicolonRaw;
+   if (semicolon.has_value()) {
+      semicolonRaw = semicolon->getRaw();
+   } else {
+      semicolonRaw = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<ConstDefinitionStmtSyntax>(semicolonRaw, Cursor::Semicolon);
+}
+
 ///
 /// ClassDefinitionStmtSyntax
 ///

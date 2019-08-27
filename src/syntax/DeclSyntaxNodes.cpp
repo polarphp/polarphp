@@ -300,16 +300,16 @@ NameSyntax NameSyntax::addNamespacePart(NamespacePartSyntax namespacePart)
 
 
 ///
-/// InitializeClauseSyntax
+/// InitializerClauseSyntax
 ///
-void InitializeClauseSyntax::validate()
+void InitializerClauseSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().getSize() == InitializeClauseSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().getSize() == InitializerClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, EqualToken, std::set{TokenKindType::T_EQUAL});
    if (const RefCountPtr<RawSyntax> &valueExpr = raw->getChild(Cursor::ValueExpr)) {
       valueExpr->kindOf(SyntaxKind::Expr);
@@ -317,17 +317,17 @@ void InitializeClauseSyntax::validate()
 #endif
 }
 
-TokenSyntax InitializeClauseSyntax::getEqualToken()
+TokenSyntax InitializerClauseSyntax::getEqualToken()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::EqualToken).get()};
 }
 
-ExprSyntax InitializeClauseSyntax::getValueExpr()
+ExprSyntax InitializerClauseSyntax::getValueExpr()
 {
    return ExprSyntax {m_root, m_data->getChild(Cursor::ValueExpr).get()};
 }
 
-InitializeClauseSyntax InitializeClauseSyntax::withEqualToken(std::optional<TokenSyntax> equalToken)
+InitializerClauseSyntax InitializerClauseSyntax::withEqualToken(std::optional<TokenSyntax> equalToken)
 {
    RefCountPtr<RawSyntax> equalTokenRaw;
    if (equalToken.has_value()) {
@@ -335,10 +335,10 @@ InitializeClauseSyntax InitializeClauseSyntax::withEqualToken(std::optional<Toke
    } else {
       equalTokenRaw = make_missing_token(T_EQUAL);
    }
-   return m_data->replaceChild<InitializeClauseSyntax>(equalTokenRaw, Cursor::EqualToken);
+   return m_data->replaceChild<InitializerClauseSyntax>(equalTokenRaw, Cursor::EqualToken);
 }
 
-InitializeClauseSyntax InitializeClauseSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
+InitializerClauseSyntax InitializerClauseSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
 {
    RefCountPtr<RawSyntax> valueExprRaw;
    if (valueExpr.has_value()) {
@@ -346,124 +346,7 @@ InitializeClauseSyntax InitializeClauseSyntax::withValueExpr(std::optional<ExprS
    } else {
       valueExprRaw = RawSyntax::missing(SyntaxKind::UnknownExpr);
    }
-   return m_data->replaceChild<InitializeClauseSyntax>(valueExprRaw, Cursor::ValueExpr);
-}
-
-///
-/// ConstDeclareItemSyntax
-///
-void ConstDeclareItemSyntax::validate()
-{
-#ifdef POLAR_DEBUG_BUILD
-   RefCountPtr<RawSyntax> raw = m_data->getRaw();
-   if (isMissing()) {
-      return;
-   }
-   assert(raw->getLayout().getSize() == ConstDeclareItemSyntax::CHILDREN_COUNT);
-   syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
-   if (const RefCountPtr<RawSyntax> &initializerChild = raw->getChild(Cursor::InitializerClause)) {
-      initializerChild->kindOf(SyntaxKind::InitializeClause);
-   }
-#endif
-}
-
-TokenSyntax ConstDeclareItemSyntax::getName()
-{
-   return TokenSyntax {m_root, m_data->getChild(Cursor::Name).get()};
-}
-
-InitializeClauseSyntax ConstDeclareItemSyntax::getInitializer()
-{
-   return InitializeClauseSyntax {m_root, m_data->getChild(Cursor::InitializerClause).get()};
-}
-
-ConstDeclareItemSyntax ConstDeclareItemSyntax::withName(std::optional<TokenSyntax> name)
-{
-   RefCountPtr<RawSyntax> nameRaw;
-   if (name.has_value()) {
-      nameRaw = name->getRaw();
-   } else {
-      nameRaw = make_missing_token(T_IDENTIFIER_STRING);
-   }
-   return m_data->replaceChild<ConstDeclareItemSyntax>(nameRaw, Cursor::Name);
-}
-
-ConstDeclareItemSyntax ConstDeclareItemSyntax::withIntializer(std::optional<InitializeClauseSyntax> initializer)
-{
-   RefCountPtr<RawSyntax> initializerRaw;
-   if (initializer.has_value()) {
-      initializerRaw = initializer->getRaw();
-   } else {
-      initializerRaw = RawSyntax::missing(SyntaxKind::InitializeClause);
-   }
-   return m_data->replaceChild<ConstDeclareItemSyntax>(initializerRaw, Cursor::InitializerClause);
-}
-
-///
-/// ConstDefinitionSyntax
-///
-void ConstDefinitionSyntax::validate()
-{
-#ifdef POLAR_DEBUG_BUILD
-   RefCountPtr<RawSyntax> raw = m_data->getRaw();
-   if (isMissing()) {
-      return;
-   }
-   assert(raw->getLayout().getSize() == ConstDefinitionSyntax::CHILDREN_COUNT);
-   syntax_assert_child_token(raw, ConstToken, std::set{TokenKindType::T_CONST});
-   syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
-   if (const RefCountPtr<RawSyntax> &declarations = raw->getChild(Cursor::Declarations)) {
-      assert(declarations->kindOf(SyntaxKind::ConstDeclareItemList));
-   }
-#endif
-}
-
-TokenSyntax ConstDefinitionSyntax::getConstToken()
-{
-   return TokenSyntax {m_root, m_data->getChild(Cursor::ConstToken).get()};
-}
-
-ConstDeclareItemListSyntax ConstDefinitionSyntax::getDeclarations()
-{
-   return ConstDeclareItemListSyntax {m_root, m_data->getChild(Cursor::Declarations).get()};
-}
-
-TokenSyntax ConstDefinitionSyntax::getSemicolon()
-{
-   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
-}
-
-ConstDefinitionSyntax ConstDefinitionSyntax::withConstToken(std::optional<TokenSyntax> constToken)
-{
-   RefCountPtr<RawSyntax> constTokenRaw;
-   if (constToken.has_value()) {
-      constTokenRaw = constToken->getRaw();
-   } else {
-      constTokenRaw = make_missing_token(T_CONST);
-   }
-   return m_data->replaceChild<ConstDefinitionSyntax>(constTokenRaw, Cursor::ConstToken);
-}
-
-ConstDefinitionSyntax ConstDefinitionSyntax::withDeclarations(std::optional<ConstDeclareItemListSyntax> declarations)
-{
-   RefCountPtr<RawSyntax> declarationsRaw;
-   if (declarations.has_value()) {
-      declarationsRaw = declarations->getRaw();
-   } else {
-      declarationsRaw = RawSyntax::missing(SyntaxKind::ConstDeclareItemList);
-   }
-   return m_data->replaceChild<ConstDefinitionSyntax>(declarationsRaw, Cursor::Declarations);
-}
-
-ConstDefinitionSyntax ConstDefinitionSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
-{
-   RefCountPtr<RawSyntax> semicolonRaw;
-   if (semicolon.has_value()) {
-      semicolonRaw = semicolon->getRaw();
-   } else {
-      semicolonRaw = make_missing_token(T_SEMICOLON);
-   }
-   return m_data->replaceChild<ConstDefinitionSyntax>(semicolonRaw, Cursor::Semicolon);
+   return m_data->replaceChild<InitializerClauseSyntax>(valueExprRaw, Cursor::ValueExpr);
 }
 
 ///
@@ -638,7 +521,7 @@ void ParameterSyntax::validate()
       assert(typeHintChild->kindOf(SyntaxKind::TypeExprClause));
    }
    if (const RefCountPtr<RawSyntax> &initializerChild = raw->getChild(Cursor::Initializer)) {
-      assert(initializerChild->kindOf(SyntaxKind::InitializeClause));
+      assert(initializerChild->kindOf(SyntaxKind::InitializerClause));
    }
 #endif
 }
@@ -675,13 +558,13 @@ TokenSyntax ParameterSyntax::getVariable()
    return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
 }
 
-std::optional<InitializeClauseSyntax> ParameterSyntax::getInitializer()
+std::optional<InitializerClauseSyntax> ParameterSyntax::getInitializer()
 {
    RefCountPtr<SyntaxData> initializerData = m_data->getChild(Cursor::Initializer);
    if (!initializerData) {
       return std::nullopt;
    }
-   return InitializeClauseSyntax {m_root, initializerData.get()};
+   return InitializerClauseSyntax {m_root, initializerData.get()};
 }
 
 ParameterSyntax ParameterSyntax::withTypeHint(std::optional<TypeExprClauseSyntax> typeHint)
@@ -728,13 +611,13 @@ ParameterSyntax ParameterSyntax::withVariable(std::optional<TokenSyntax> variabl
    return m_data->replaceChild<ParameterSyntax>(variableRaw, Cursor::Variable);
 }
 
-ParameterSyntax ParameterSyntax::withInitializer(std::optional<InitializeClauseSyntax> initializer)
+ParameterSyntax ParameterSyntax::withInitializer(std::optional<InitializerClauseSyntax> initializer)
 {
    RefCountPtr<RawSyntax> initializerRaw;
    if (initializer.has_value()) {
       initializerRaw = initializer->getRaw();
    } else {
-      initializerRaw = RawSyntax::missing(SyntaxKind::InitializeClause);
+      initializerRaw = RawSyntax::missing(SyntaxKind::InitializerClause);
    }
    return m_data->replaceChild<ParameterSyntax>(initializerRaw, Cursor::Initializer);
 }
@@ -1993,7 +1876,7 @@ void ClassPropertyClauseSyntax::validate()
    assert(raw->getLayout().getSize() == ClassPropertyClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
    if (const RefCountPtr<RawSyntax> &initializerChild = raw->getChild(Cursor::Initializer)) {
-      assert(initializerChild->kindOf(SyntaxKind::InitializeClause));
+      assert(initializerChild->kindOf(SyntaxKind::InitializerClause));
    }
 #endif
 }
@@ -2003,13 +1886,13 @@ TokenSyntax ClassPropertyClauseSyntax::getVariable()
    return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
 }
 
-std::optional<InitializeClauseSyntax> ClassPropertyClauseSyntax::getInitializer()
+std::optional<InitializerClauseSyntax> ClassPropertyClauseSyntax::getInitializer()
 {
    RefCountPtr<SyntaxData> initializerData = m_data->getChild(Cursor::Initializer);
    if (!initializerData) {
       return std::nullopt;
    }
-   return InitializeClauseSyntax {m_root, initializerData.get()};
+   return InitializerClauseSyntax {m_root, initializerData.get()};
 }
 
 ClassPropertyClauseSyntax ClassPropertyClauseSyntax::withVariable(std::optional<TokenSyntax> variable)
@@ -2023,7 +1906,7 @@ ClassPropertyClauseSyntax ClassPropertyClauseSyntax::withVariable(std::optional<
    return m_data->replaceChild<ClassPropertyClauseSyntax>(variableRaw, Cursor::Variable);
 }
 
-ClassPropertyClauseSyntax ClassPropertyClauseSyntax::withInitializer(std::optional<InitializeClauseSyntax> initializer)
+ClassPropertyClauseSyntax ClassPropertyClauseSyntax::withInitializer(std::optional<InitializerClauseSyntax> initializer)
 {
    RefCountPtr<RawSyntax> initializerRaw;
    if (initializer.has_value()) {
@@ -2049,7 +1932,7 @@ void ClassConstClauseSyntax::validate()
       assert(identifierChild->kindOf(SyntaxKind::Identifier));
    }
    if (const RefCountPtr<RawSyntax> &initializerChild = raw->getChild(Cursor::Initializer)) {
-      assert(initializerChild->kindOf(SyntaxKind::InitializeClause));
+      assert(initializerChild->kindOf(SyntaxKind::InitializerClause));
    }
 #endif
 }
@@ -2059,13 +1942,13 @@ IdentifierSyntax ClassConstClauseSyntax::getIdentifier()
    return IdentifierSyntax {m_root, m_data->getChild(Cursor::Identifier).get()};
 }
 
-std::optional<InitializeClauseSyntax> ClassConstClauseSyntax::getInitializer()
+std::optional<InitializerClauseSyntax> ClassConstClauseSyntax::getInitializer()
 {
    RefCountPtr<SyntaxData> initializerData = m_data->getChild(Cursor::Initializer);
    if (!initializerData) {
       return std::nullopt;
    }
-   return InitializeClauseSyntax {m_root, initializerData.get()};
+   return InitializerClauseSyntax {m_root, initializerData.get()};
 }
 
 ClassConstClauseSyntax ClassConstClauseSyntax::withIdentifier(std::optional<IdentifierSyntax> identifier)
@@ -2079,7 +1962,7 @@ ClassConstClauseSyntax ClassConstClauseSyntax::withIdentifier(std::optional<Iden
    return m_data->replaceChild<ClassConstClauseSyntax>(identifierRaw, Cursor::Identifier);
 }
 
-ClassConstClauseSyntax ClassConstClauseSyntax::withInitializer(std::optional<InitializeClauseSyntax> initializer)
+ClassConstClauseSyntax ClassConstClauseSyntax::withInitializer(std::optional<InitializerClauseSyntax> initializer)
 {
    RefCountPtr<RawSyntax> initializerRaw;
    if (initializer.has_value()) {

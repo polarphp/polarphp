@@ -21,12 +21,10 @@ class SemiReservedSytnax;
 class IdentifierSyntax;
 class NamespacePartSyntax;
 class NameSyntax;
-class ConstDeclareItemSyntax;
-class ConstDefinitionSyntax;
 class TypeClauseSyntax;
 class TypeExprClauseSyntax;
 class ReturnTypeClauseSyntax;
-class InitializeClauseSyntax;
+class InitializerClauseSyntax;
 class ParameterSyntax;
 class ParameterClauseSyntax;
 class FunctionDefinitionSyntax;
@@ -86,16 +84,6 @@ using NamespacePartListSyntax = SyntaxCollection<SyntaxKind::NamespacePartList, 
 /// |	non_empty_parameter_list ',' parameter
 ///
 using ParameterListSyntax = SyntaxCollection<SyntaxKind::ParameterList, ParameterSyntax>;
-
-///
-/// type: SyntaxCollection
-/// element type: ConstDeclareItemSyntax
-///
-/// const_list:
-///   const_list ',' const_decl
-/// | const_decl
-///
-using ConstDeclareItemListSyntax = SyntaxCollection<SyntaxKind::ConstDeclareItemList, ConstDeclareItemSyntax>;
 
 ///
 /// type: SyntaxCollection

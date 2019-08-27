@@ -68,11 +68,15 @@ class NamespaceUseStmtSyntax;
 class NamespaceDefinitionStmtSyntax;
 class NamespaceBlockStmtSyntax;
 
+class ConstDeclareItemSyntax;
+class ConstDefinitionStmtSyntax;
+
 // stmt wrapper for decl syntax nodes
 class ClassDefinitionStmtSyntax;
 class InterfaceDefinitionStmtSyntax;
 class TraitDefinitionStmtSyntax;
 class FunctionDefinitionStmtSyntax;
+class InitializerClauseSyntax;
 
 // expr syntax nodes forward declares
 class ExprListItemSyntax;
@@ -90,9 +94,7 @@ class TraitDefinitionSyntax;
 class FunctionDefinitionSyntax;
 class NameSyntax;
 class NamespacePartSyntax;
-class ConstDeclareItemSyntax;
 using NamespacePartListSyntax = SyntaxCollection<SyntaxKind::NamespacePartList, NamespacePartSyntax>;
-using ConstDeclareItemListSyntax = SyntaxCollection<SyntaxKind::ConstDeclareItemList, ConstDeclareItemSyntax>;
 
 ///
 /// type: SyntaxCollection
@@ -195,6 +197,15 @@ using NamespaceInlineUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::Nam
 ///
 using NamespaceUnprefixedUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUnprefixedUseDeclarationList, NamespaceUnprefixedUseDeclarationSyntax>;
 
+///
+/// type: SyntaxCollection
+/// element type: ConstDeclareItemSyntax
+///
+/// const_list:
+///   const_list ',' const_decl
+/// | const_decl
+///
+using ConstDeclareItemListSyntax = SyntaxCollection<SyntaxKind::ConstDeclareItemList, ConstDeclareItemSyntax>;
 
 } // polar::syntax
 
