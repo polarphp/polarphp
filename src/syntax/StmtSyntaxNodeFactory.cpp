@@ -10,6 +10,7 @@
 // Created by polarboy on 2019/05/15.
 
 #include "polarphp/syntax/factory/StmtSyntaxNodeFactory.h"
+#include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
 
 namespace polar::syntax {
 
@@ -63,8 +64,8 @@ ElseIfListSyntax StmtSyntaxNodeFactory::makeElseIfList(const std::vector<ElseIfC
 ///
 /// make normal nodes
 ///
-ConditionElementSyntax StmtSyntaxNodeFactory::makeConditionElementSyntax(Syntax condition, std::optional<TokenSyntax> trailingComma,
-                                                                         RefCountPtr<SyntaxArena> arena)
+ConditionElementSyntax StmtSyntaxNodeFactory::makeConditionElement(Syntax condition, std::optional<TokenSyntax> trailingComma,
+                                                                   RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawConditionElementSyntax = RawSyntax::make(SyntaxKind::ConditionElement, {
                                                                          condition.getRaw(),
@@ -73,8 +74,8 @@ ConditionElementSyntax StmtSyntaxNodeFactory::makeConditionElementSyntax(Syntax 
    return make<ConditionElementSyntax>(rawConditionElementSyntax);
 }
 
-ContinueStmtSyntax StmtSyntaxNodeFactory::makeContinueStmtSyntax(TokenSyntax continueKeyword, std::optional<TokenSyntax> numberToken,
-                                                                 RefCountPtr<SyntaxArena> arena)
+ContinueStmtSyntax StmtSyntaxNodeFactory::makeContinueStmt(TokenSyntax continueKeyword, std::optional<TokenSyntax> numberToken,
+                                                           RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawContinueStmtSyntax = RawSyntax::make(SyntaxKind::ContinueStmt, {
                                                                      continueKeyword.getRaw(),
@@ -83,8 +84,8 @@ ContinueStmtSyntax StmtSyntaxNodeFactory::makeContinueStmtSyntax(TokenSyntax con
    return make<ContinueStmtSyntax>(rawContinueStmtSyntax);
 }
 
-BreakStmtSyntax StmtSyntaxNodeFactory::makeBreakStmtSyntax(TokenSyntax breakKeyword, std::optional<TokenSyntax> numberToken,
-                                                           RefCountPtr<SyntaxArena> arena)
+BreakStmtSyntax StmtSyntaxNodeFactory::makeBreakStmt(TokenSyntax breakKeyword, std::optional<TokenSyntax> numberToken,
+                                                     RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawBreakStmtSyntax = RawSyntax::make(SyntaxKind::BreakStmt, {
                                                                   breakKeyword.getRaw(),
@@ -93,7 +94,7 @@ BreakStmtSyntax StmtSyntaxNodeFactory::makeBreakStmtSyntax(TokenSyntax breakKeyw
    return make<BreakStmtSyntax>(rawBreakStmtSyntax);
 }
 
-FallthroughStmtSyntax StmtSyntaxNodeFactory::makeFallthroughStmtSyntax(TokenSyntax fallthroughKeyword, RefCountPtr<SyntaxArena> arena)
+FallthroughStmtSyntax StmtSyntaxNodeFactory::makeFallthroughStmt(TokenSyntax fallthroughKeyword, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawFallthroughStmtSyntax = RawSyntax::make(SyntaxKind::FallthroughStmt, {
                                                                         fallthroughKeyword.getRaw()
@@ -101,9 +102,9 @@ FallthroughStmtSyntax StmtSyntaxNodeFactory::makeFallthroughStmtSyntax(TokenSynt
    return make<FallthroughStmtSyntax>(rawFallthroughStmtSyntax);
 }
 
-ElseIfClauseSyntax StmtSyntaxNodeFactory::makeElseIfClauseSyntax(TokenSyntax elseIfKeyword, TokenSyntax leftParen,
-                                                                 ExprSyntax condition, TokenSyntax rightParen,
-                                                                 CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena)
+ElseIfClauseSyntax StmtSyntaxNodeFactory::makeElseIfClause(TokenSyntax elseIfKeyword, TokenSyntax leftParen,
+                                                           ExprSyntax condition, TokenSyntax rightParen,
+                                                           CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawElseIfClauseSyntax = RawSyntax::make(SyntaxKind::ElseIfClause, {
                                                                      elseIfKeyword.getRaw(),
@@ -115,11 +116,11 @@ ElseIfClauseSyntax StmtSyntaxNodeFactory::makeElseIfClauseSyntax(TokenSyntax els
    return make<ElseIfClauseSyntax>(rawElseIfClauseSyntax);
 }
 
-IfStmtSyntax StmtSyntaxNodeFactory::makeIfStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
-                                                     TokenSyntax ifKeyword, TokenSyntax leftParen, ExprSyntax condition,
-                                                     TokenSyntax rightParen, CodeBlockSyntax body, std::optional<ElseIfListSyntax> elseIfClauses,
-                                                     std::optional<TokenSyntax> elseKeyword, std::optional<Syntax> elseBody,
-                                                     RefCountPtr<SyntaxArena> arena)
+IfStmtSyntax StmtSyntaxNodeFactory::makeIfStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
+                                               TokenSyntax ifKeyword, TokenSyntax leftParen, ExprSyntax condition,
+                                               TokenSyntax rightParen, CodeBlockSyntax body, std::optional<ElseIfListSyntax> elseIfClauses,
+                                               std::optional<TokenSyntax> elseKeyword, std::optional<Syntax> elseBody,
+                                               RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawIfStmtSyntax = RawSyntax::make(SyntaxKind::IfStmt, {
                                                                labelName.has_value() ? labelName->getRaw() : nullptr,
@@ -135,9 +136,9 @@ IfStmtSyntax StmtSyntaxNodeFactory::makeIfStmtSyntax(std::optional<TokenSyntax> 
    return make<IfStmtSyntax>(rawIfStmtSyntax);
 }
 
-WhileStmtSyntax StmtSyntaxNodeFactory::makeWhileStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
-                                                           TokenSyntax whileKeyword, ConditionElementListSyntax conditions,
-                                                           CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena)
+WhileStmtSyntax StmtSyntaxNodeFactory::makeWhileStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
+                                                     TokenSyntax whileKeyword, ConditionElementListSyntax conditions,
+                                                     CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawWhileStmtSyntax = RawSyntax::make(SyntaxKind::WhileStmt, {
                                                                   labelName.has_value() ? labelName->getRaw() : nullptr,
@@ -149,10 +150,10 @@ WhileStmtSyntax StmtSyntaxNodeFactory::makeWhileStmtSyntax(std::optional<TokenSy
    return make<WhileStmtSyntax>(rawWhileStmtSyntax);
 }
 
-DoWhileStmtSyntax StmtSyntaxNodeFactory::makeDoWhileStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
-                                                               TokenSyntax doKeyword, CodeBlockSyntax body, TokenSyntax whileKeyword,
-                                                               TokenSyntax leftParen, ExprSyntax condition, TokenSyntax rightParen,
-                                                               RefCountPtr<SyntaxArena> arena)
+DoWhileStmtSyntax StmtSyntaxNodeFactory::makeDoWhileStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
+                                                         TokenSyntax doKeyword, CodeBlockSyntax body, TokenSyntax whileKeyword,
+                                                         TokenSyntax leftParen, ExprSyntax condition, TokenSyntax rightParen,
+                                                         RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawDoWhileStmtSyntax = RawSyntax::make(SyntaxKind::DoWhileStmt, {
                                                                     labelName.has_value() ? labelName->getRaw() : nullptr,
@@ -167,8 +168,8 @@ DoWhileStmtSyntax StmtSyntaxNodeFactory::makeDoWhileStmtSyntax(std::optional<Tok
    return make<DoWhileStmtSyntax>(rawDoWhileStmtSyntax);
 }
 
-SwitchDefaultLabelSyntax StmtSyntaxNodeFactory::makeSwitchDefaultLabelSyntax(TokenSyntax defaultKeyword, TokenSyntax colon,
-                                                                             RefCountPtr<SyntaxArena> arena)
+SwitchDefaultLabelSyntax StmtSyntaxNodeFactory::makeSwitchDefaultLabel(TokenSyntax defaultKeyword, TokenSyntax colon,
+                                                                       RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawSwitchDefaultLabelSyntax = RawSyntax::make(SyntaxKind::SwitchDefaultLabel, {
                                                                            defaultKeyword.getRaw(),
@@ -177,8 +178,8 @@ SwitchDefaultLabelSyntax StmtSyntaxNodeFactory::makeSwitchDefaultLabelSyntax(Tok
    return make<SwitchDefaultLabelSyntax>(rawSwitchDefaultLabelSyntax);
 }
 
-SwitchCaseLabelSyntax StmtSyntaxNodeFactory::makeSwitchCaseLabelSyntax(TokenSyntax caseKeyword, ExprSyntax expr, TokenSyntax colon,
-                                                                       RefCountPtr<SyntaxArena> arena)
+SwitchCaseLabelSyntax StmtSyntaxNodeFactory::makeSwitchCaseLabel(TokenSyntax caseKeyword, ExprSyntax expr, TokenSyntax colon,
+                                                                 RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawSwitchCaseLabelSyntax = RawSyntax::make(SyntaxKind::SwitchCaseLabel, {
                                                                         caseKeyword.getRaw(),
@@ -188,8 +189,8 @@ SwitchCaseLabelSyntax StmtSyntaxNodeFactory::makeSwitchCaseLabelSyntax(TokenSynt
    return make<SwitchCaseLabelSyntax>(rawSwitchCaseLabelSyntax);
 }
 
-SwitchCaseSyntax StmtSyntaxNodeFactory::makeSwitchCaseSyntax(Syntax label, CodeBlockItemListSyntax statements,
-                                                             RefCountPtr<SyntaxArena> arena)
+SwitchCaseSyntax StmtSyntaxNodeFactory::makeSwitchCase(Syntax label, CodeBlockItemListSyntax statements,
+                                                       RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawSwitchCaseSyntax = RawSyntax::make(SyntaxKind::SwitchCase, {
                                                                    label.getRaw(),
@@ -198,10 +199,10 @@ SwitchCaseSyntax StmtSyntaxNodeFactory::makeSwitchCaseSyntax(Syntax label, CodeB
    return make<SwitchCaseSyntax>(rawSwitchCaseSyntax);
 }
 
-SwitchStmtSyntax StmtSyntaxNodeFactory::makeSwitchStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
-                                                             TokenSyntax switchKeyword, TokenSyntax leftParen, ExprSyntax conditionExpr,
-                                                             TokenSyntax rightParen, TokenSyntax leftBrace, SwitchCaseListSyntax cases,
-                                                             TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena)
+SwitchStmtSyntax StmtSyntaxNodeFactory::makeSwitchStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
+                                                       TokenSyntax switchKeyword, TokenSyntax leftParen, ExprSyntax conditionExpr,
+                                                       TokenSyntax rightParen, TokenSyntax leftBrace, SwitchCaseListSyntax cases,
+                                                       TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawSwitchStmtSyntax = RawSyntax::make(SyntaxKind::SwitchStmt, {
                                                                    labelName.has_value() ? labelName->getRaw() : nullptr,
@@ -217,8 +218,8 @@ SwitchStmtSyntax StmtSyntaxNodeFactory::makeSwitchStmtSyntax(std::optional<Token
    return make<SwitchStmtSyntax>(rawSwitchStmtSyntax);
 }
 
-DeferStmtSyntax StmtSyntaxNodeFactory::makeDeferStmtSyntax(TokenSyntax deferKeyword, CodeBlockSyntax body,
-                                                           RefCountPtr<SyntaxArena> arena)
+DeferStmtSyntax StmtSyntaxNodeFactory::makeDeferStmt(TokenSyntax deferKeyword, CodeBlockSyntax body,
+                                                     RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawDeferStmtSyntax = RawSyntax::make(SyntaxKind::DeferStmt, {
                                                                   deferKeyword.getRaw(),
@@ -227,8 +228,8 @@ DeferStmtSyntax StmtSyntaxNodeFactory::makeDeferStmtSyntax(TokenSyntax deferKeyw
    return make<DeferStmtSyntax>(rawDeferStmtSyntax);
 }
 
-ThrowStmtSyntax StmtSyntaxNodeFactory::makeThrowStmtSyntax(TokenSyntax throwKeyword, ExprSyntax expr,
-                                                           RefCountPtr<SyntaxArena> arena)
+ThrowStmtSyntax StmtSyntaxNodeFactory::makeThrowStmt(TokenSyntax throwKeyword, ExprSyntax expr,
+                                                     RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawThrowStmtSyntax = RawSyntax::make(SyntaxKind::ThrowStmt, {
                                                                   throwKeyword.getRaw(),
@@ -240,27 +241,27 @@ ThrowStmtSyntax StmtSyntaxNodeFactory::makeThrowStmtSyntax(TokenSyntax throwKeyw
 ///
 /// StmtSyntaxNodeFactory::make blank nodes
 ///
-ConditionElementListSyntax StmtSyntaxNodeFactory::makeBlankConditionElementListSyntax(RefCountPtr<SyntaxArena> arena)
+ConditionElementListSyntax StmtSyntaxNodeFactory::makeBlankConditionElementList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawConditionElementListSyntax = RawSyntax::make(SyntaxKind::ConditionElementList, {},
                                                                           SourcePresence::Present, arena);
    return make<ConditionElementListSyntax>(rawConditionElementListSyntax);
 }
 
-SwitchCaseListSyntax StmtSyntaxNodeFactory::makeBlankSwitchCaseListSyntax(RefCountPtr<SyntaxArena> arena)
+SwitchCaseListSyntax StmtSyntaxNodeFactory::makeBlankSwitchCaseList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawSwitchCaseListSyntax = RawSyntax::make(SyntaxKind::SwitchCaseList, {},
                                                                     SourcePresence::Present, arena);
    return make<SwitchCaseListSyntax>(rawSwitchCaseListSyntax);
 }
 
-ElseIfListSyntax StmtSyntaxNodeFactory::makeBlankElseIfListSyntax(RefCountPtr<SyntaxArena> arena)
+ElseIfListSyntax StmtSyntaxNodeFactory::makeBlankElseIfList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawElseIfListSyntax = RawSyntax::make(SyntaxKind::ElseIfList, {}, SourcePresence::Present, arena);
    return make<ElseIfListSyntax>(rawElseIfListSyntax);
 }
 
-ConditionElementSyntax StmtSyntaxNodeFactory::makeBlankConditionElementSyntax(RefCountPtr<SyntaxArena> arena)
+ConditionElementSyntax StmtSyntaxNodeFactory::makeBlankConditionElement(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawConditionElementSyntax = RawSyntax::make(SyntaxKind::ConditionElement, {
                                                                          RawSyntax::missing(SyntaxKind::Expr),
@@ -269,7 +270,7 @@ ConditionElementSyntax StmtSyntaxNodeFactory::makeBlankConditionElementSyntax(Re
    return make<ConditionElementSyntax>(rawConditionElementSyntax);
 }
 
-ContinueStmtSyntax StmtSyntaxNodeFactory::makeBlankContinueStmtSyntax(RefCountPtr<SyntaxArena> arena)
+ContinueStmtSyntax StmtSyntaxNodeFactory::makeBlankContinueStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawContinueStmtSyntax = RawSyntax::make(SyntaxKind::ContinueStmt, {
                                                                      RawSyntax::missing(TokenKindType::T_CONTINUE,
@@ -279,7 +280,7 @@ ContinueStmtSyntax StmtSyntaxNodeFactory::makeBlankContinueStmtSyntax(RefCountPt
    return make<ContinueStmtSyntax>(rawContinueStmtSyntax);
 }
 
-BreakStmtSyntax StmtSyntaxNodeFactory::makeBlankBreakStmtSyntax(RefCountPtr<SyntaxArena> arena)
+BreakStmtSyntax StmtSyntaxNodeFactory::makeBlankBreakStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawBreakStmtSyntax = RawSyntax::make(SyntaxKind::BreakStmt, {
                                                                   RawSyntax::missing(TokenKindType::T_BREAK,
@@ -289,7 +290,7 @@ BreakStmtSyntax StmtSyntaxNodeFactory::makeBlankBreakStmtSyntax(RefCountPtr<Synt
    return make<BreakStmtSyntax>(rawBreakStmtSyntax);
 }
 
-FallthroughStmtSyntax StmtSyntaxNodeFactory::makeBlankFallthroughStmtSyntax(RefCountPtr<SyntaxArena> arena)
+FallthroughStmtSyntax StmtSyntaxNodeFactory::makeBlankFallthroughStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawFallthroughStmtSyntax = RawSyntax::make(SyntaxKind::FallthroughStmt, {
                                                                         RawSyntax::missing(TokenKindType::T_FALLTHROUGH,
@@ -298,7 +299,7 @@ FallthroughStmtSyntax StmtSyntaxNodeFactory::makeBlankFallthroughStmtSyntax(RefC
    return make<FallthroughStmtSyntax>(rawFallthroughStmtSyntax);
 }
 
-ElseIfClauseSyntax StmtSyntaxNodeFactory::makeBlankElseIfClauseSyntax(RefCountPtr<SyntaxArena> arena)
+ElseIfClauseSyntax StmtSyntaxNodeFactory::makeBlankElseIfClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawElseIfClauseSyntax = RawSyntax::make(SyntaxKind::ElseIfClause, {
                                                                      RawSyntax::missing(TokenKindType::T_ELSEIF,
@@ -313,7 +314,7 @@ ElseIfClauseSyntax StmtSyntaxNodeFactory::makeBlankElseIfClauseSyntax(RefCountPt
    return make<ElseIfClauseSyntax>(rawElseIfClauseSyntax);
 }
 
-IfStmtSyntax StmtSyntaxNodeFactory::makeBlankIfStmtSyntax(RefCountPtr<SyntaxArena> arena)
+IfStmtSyntax StmtSyntaxNodeFactory::makeBlankIfStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawIfStmtSyntax = RawSyntax::make(SyntaxKind::IfStmt, {
                                                                nullptr,
@@ -333,7 +334,7 @@ IfStmtSyntax StmtSyntaxNodeFactory::makeBlankIfStmtSyntax(RefCountPtr<SyntaxAren
    return make<IfStmtSyntax>(rawIfStmtSyntax);
 }
 
-WhileStmtSyntax StmtSyntaxNodeFactory::makeBlankWhileStmtSyntax(RefCountPtr<SyntaxArena> arena)
+WhileStmtSyntax StmtSyntaxNodeFactory::makeBlankWhileStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawWhileStmtSyntax = RawSyntax::make(SyntaxKind::WhileStmt, {
                                                                   nullptr,
@@ -346,7 +347,7 @@ WhileStmtSyntax StmtSyntaxNodeFactory::makeBlankWhileStmtSyntax(RefCountPtr<Synt
    return make<WhileStmtSyntax>(rawWhileStmtSyntax);
 }
 
-DoWhileStmtSyntax StmtSyntaxNodeFactory::makeBlankDoWhileStmtSyntax(RefCountPtr<SyntaxArena> arena)
+DoWhileStmtSyntax StmtSyntaxNodeFactory::makeBlankDoWhileStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawDoWhileStmtSyntax = RawSyntax::make(SyntaxKind::DoWhileStmt, {
                                                                     nullptr,
@@ -365,7 +366,7 @@ DoWhileStmtSyntax StmtSyntaxNodeFactory::makeBlankDoWhileStmtSyntax(RefCountPtr<
    return make<DoWhileStmtSyntax>(rawDoWhileStmtSyntax);
 }
 
-SwitchDefaultLabelSyntax StmtSyntaxNodeFactory::makeBlankSwitchDefaultLabelSyntax(RefCountPtr<SyntaxArena> arena)
+SwitchDefaultLabelSyntax StmtSyntaxNodeFactory::makeBlankSwitchDefaultLabel(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawSwitchDefaultLabelSyntax = RawSyntax::make(SyntaxKind::SwitchDefaultLabel, {
                                                                            RawSyntax::missing(TokenKindType::T_DEFAULT,
@@ -376,7 +377,7 @@ SwitchDefaultLabelSyntax StmtSyntaxNodeFactory::makeBlankSwitchDefaultLabelSynta
    return make<SwitchDefaultLabelSyntax>(rawSwitchDefaultLabelSyntax);
 }
 
-SwitchCaseLabelSyntax StmtSyntaxNodeFactory::makeBlankSwitchCaseLabelSyntax(RefCountPtr<SyntaxArena> arena)
+SwitchCaseLabelSyntax StmtSyntaxNodeFactory::makeBlankSwitchCaseLabel(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawSwitchCaseLabelSyntax = RawSyntax::make(SyntaxKind::SwitchCaseLabel, {
                                                                         RawSyntax::missing(TokenKindType::T_CASE,
@@ -388,7 +389,7 @@ SwitchCaseLabelSyntax StmtSyntaxNodeFactory::makeBlankSwitchCaseLabelSyntax(RefC
    return make<SwitchCaseLabelSyntax>(rawSwitchCaseLabelSyntax);
 }
 
-SwitchCaseSyntax StmtSyntaxNodeFactory::makeBlankSwitchCaseSyntax(RefCountPtr<SyntaxArena> arena)
+SwitchCaseSyntax StmtSyntaxNodeFactory::makeBlankSwitchCase(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawSwitchCaseSyntax = RawSyntax::make(SyntaxKind::SwitchCase, {
                                                                    RawSyntax::missing(SyntaxKind::SwitchDefaultLabel),
@@ -398,7 +399,7 @@ SwitchCaseSyntax StmtSyntaxNodeFactory::makeBlankSwitchCaseSyntax(RefCountPtr<Sy
    return make<SwitchCaseSyntax>(rawSwitchCaseSyntax);
 }
 
-SwitchStmtSyntax StmtSyntaxNodeFactory::makeBlankSwitchStmtSyntax(RefCountPtr<SyntaxArena> arena)
+SwitchStmtSyntax StmtSyntaxNodeFactory::makeBlankSwitchStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawSwitchStmtSyntax = RawSyntax::make(SyntaxKind::SwitchCaseLabel, {
                                                                    nullptr,
@@ -419,7 +420,7 @@ SwitchStmtSyntax StmtSyntaxNodeFactory::makeBlankSwitchStmtSyntax(RefCountPtr<Sy
    return make<SwitchStmtSyntax>(rawSwitchStmtSyntax);
 }
 
-DeferStmtSyntax StmtSyntaxNodeFactory::makeBlankDeferStmtSyntax(RefCountPtr<SyntaxArena> arena)
+DeferStmtSyntax StmtSyntaxNodeFactory::makeBlankDeferStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawDeferStmtSyntax = RawSyntax::make(SyntaxKind::DeferStmt, {
                                                                   RawSyntax::missing(TokenKindType::T_DEFER,
@@ -429,7 +430,7 @@ DeferStmtSyntax StmtSyntaxNodeFactory::makeBlankDeferStmtSyntax(RefCountPtr<Synt
    return make<DeferStmtSyntax>(rawDeferStmtSyntax);
 }
 
-ThrowStmtSyntax StmtSyntaxNodeFactory::makeBlankThrowStmtSyntax(RefCountPtr<SyntaxArena> arena)
+ThrowStmtSyntax StmtSyntaxNodeFactory::makeBlankThrowStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawThrowStmtSyntax = RawSyntax::make(SyntaxKind::ThrowStmt, {
                                                                   RawSyntax::missing(TokenKindType::T_THROW,

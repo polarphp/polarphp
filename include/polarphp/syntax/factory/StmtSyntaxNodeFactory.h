@@ -13,7 +13,7 @@
 #define POLARPHP_SYNTAX_FACTORY_STMT_SYNTAX_NODE_FACTORY_H
 
 #include "polarphp/syntax/AbstractFactory.h"
-#include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/StmtSyntaxNodesFwd.h"
 
 namespace polar::syntax {
 
@@ -57,61 +57,61 @@ public:
    ///
    /// make normal nodes
    ///
-   static ConditionElementSyntax makeConditionElementSyntax(Syntax condition, std::optional<TokenSyntax> trailingComma,
+   static ConditionElementSyntax makeConditionElement(Syntax condition, std::optional<TokenSyntax> trailingComma,
                                                             RefCountPtr<SyntaxArena> arena = nullptr);
-   static ContinueStmtSyntax makeContinueStmtSyntax(TokenSyntax continueKeyword, std::optional<TokenSyntax> numberToken,
+   static ContinueStmtSyntax makeContinueStmt(TokenSyntax continueKeyword, std::optional<TokenSyntax> numberToken,
                                                     RefCountPtr<SyntaxArena> arena = nullptr);
-   static BreakStmtSyntax makeBreakStmtSyntax(TokenSyntax breakKeyword, std::optional<TokenSyntax> numberToken,
+   static BreakStmtSyntax makeBreakStmt(TokenSyntax breakKeyword, std::optional<TokenSyntax> numberToken,
                                               RefCountPtr<SyntaxArena> arena = nullptr);
-   static FallthroughStmtSyntax makeFallthroughStmtSyntax(TokenSyntax fallthroughKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ElseIfClauseSyntax makeElseIfClauseSyntax(TokenSyntax elseIfKeyword, TokenSyntax leftParen,
+   static FallthroughStmtSyntax makeFallthroughStmt(TokenSyntax fallthroughKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ElseIfClauseSyntax makeElseIfClause(TokenSyntax elseIfKeyword, TokenSyntax leftParen,
                                                     ExprSyntax condition, TokenSyntax rightParen,
                                                     CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
-   static IfStmtSyntax makeIfStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
+   static IfStmtSyntax makeIfStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                         TokenSyntax ifKeyword, TokenSyntax leftParen, ExprSyntax condition,
                                         TokenSyntax rightParen, CodeBlockSyntax body, std::optional<ElseIfListSyntax> elseIfClauses,
                                         std::optional<TokenSyntax> elseKeyword, std::optional<Syntax> elseBody,
                                         RefCountPtr<SyntaxArena> arena = nullptr);
-   static WhileStmtSyntax makeWhileStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
+   static WhileStmtSyntax makeWhileStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                               TokenSyntax whileKeyword, ConditionElementListSyntax conditions,
                                               CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
-   static DoWhileStmtSyntax makeDoWhileStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
+   static DoWhileStmtSyntax makeDoWhileStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                                   TokenSyntax doKeyword, CodeBlockSyntax body, TokenSyntax whileKeyword,
                                                   TokenSyntax leftParen, ExprSyntax condition, TokenSyntax rightParen,
                                                   RefCountPtr<SyntaxArena> arena = nullptr);
-   static SwitchDefaultLabelSyntax makeSwitchDefaultLabelSyntax(TokenSyntax defaultKeyword, TokenSyntax colon,
+   static SwitchDefaultLabelSyntax makeSwitchDefaultLabel(TokenSyntax defaultKeyword, TokenSyntax colon,
                                                                 RefCountPtr<SyntaxArena> arena = nullptr);
-   static SwitchCaseLabelSyntax makeSwitchCaseLabelSyntax(TokenSyntax caseKeyword, ExprSyntax expr, TokenSyntax colon,
+   static SwitchCaseLabelSyntax makeSwitchCaseLabel(TokenSyntax caseKeyword, ExprSyntax expr, TokenSyntax colon,
                                                           RefCountPtr<SyntaxArena> arena = nullptr);
-   static SwitchCaseSyntax makeSwitchCaseSyntax(Syntax label, CodeBlockItemListSyntax statements, RefCountPtr<SyntaxArena> arena = nullptr);
-   static SwitchStmtSyntax makeSwitchStmtSyntax(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
+   static SwitchCaseSyntax makeSwitchCase(Syntax label, CodeBlockItemListSyntax statements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static SwitchStmtSyntax makeSwitchStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                                 TokenSyntax switchKeyword, TokenSyntax leftParen, ExprSyntax conditionExpr,
                                                 TokenSyntax rightParen, TokenSyntax leftBrace, SwitchCaseListSyntax cases,
                                                 TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);
-   static DeferStmtSyntax makeDeferStmtSyntax(TokenSyntax deferKeyword, CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ThrowStmtSyntax makeThrowStmtSyntax(TokenSyntax throwKeyword, ExprSyntax expr, RefCountPtr<SyntaxArena> arena = nullptr);
+   static DeferStmtSyntax makeDeferStmt(TokenSyntax deferKeyword, CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ThrowStmtSyntax makeThrowStmt(TokenSyntax throwKeyword, ExprSyntax expr, RefCountPtr<SyntaxArena> arena = nullptr);
 
    ///
    /// make blank nodes
    ///
-   static ConditionElementListSyntax makeBlankConditionElementListSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static SwitchCaseListSyntax makeBlankSwitchCaseListSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ElseIfListSyntax makeBlankElseIfListSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ConditionElementListSyntax makeBlankConditionElementList(RefCountPtr<SyntaxArena> arena = nullptr);
+   static SwitchCaseListSyntax makeBlankSwitchCaseList(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ElseIfListSyntax makeBlankElseIfList(RefCountPtr<SyntaxArena> arena = nullptr);
 
-   static ConditionElementSyntax makeBlankConditionElementSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ContinueStmtSyntax makeBlankContinueStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static BreakStmtSyntax makeBlankBreakStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static FallthroughStmtSyntax makeBlankFallthroughStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ElseIfClauseSyntax makeBlankElseIfClauseSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static IfStmtSyntax makeBlankIfStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static WhileStmtSyntax makeBlankWhileStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static DoWhileStmtSyntax makeBlankDoWhileStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static SwitchDefaultLabelSyntax makeBlankSwitchDefaultLabelSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static SwitchCaseLabelSyntax makeBlankSwitchCaseLabelSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static SwitchCaseSyntax makeBlankSwitchCaseSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static SwitchStmtSyntax makeBlankSwitchStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static DeferStmtSyntax makeBlankDeferStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ThrowStmtSyntax makeBlankThrowStmtSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ConditionElementSyntax makeBlankConditionElement(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ContinueStmtSyntax makeBlankContinueStmt(RefCountPtr<SyntaxArena> arena = nullptr);
+   static BreakStmtSyntax makeBlankBreakStmt(RefCountPtr<SyntaxArena> arena = nullptr);
+   static FallthroughStmtSyntax makeBlankFallthroughStmt(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ElseIfClauseSyntax makeBlankElseIfClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static IfStmtSyntax makeBlankIfStmt(RefCountPtr<SyntaxArena> arena = nullptr);
+   static WhileStmtSyntax makeBlankWhileStmt(RefCountPtr<SyntaxArena> arena = nullptr);
+   static DoWhileStmtSyntax makeBlankDoWhileStmt(RefCountPtr<SyntaxArena> arena = nullptr);
+   static SwitchDefaultLabelSyntax makeBlankSwitchDefaultLabel(RefCountPtr<SyntaxArena> arena = nullptr);
+   static SwitchCaseLabelSyntax makeBlankSwitchCaseLabel(RefCountPtr<SyntaxArena> arena = nullptr);
+   static SwitchCaseSyntax makeBlankSwitchCase(RefCountPtr<SyntaxArena> arena = nullptr);
+   static SwitchStmtSyntax makeBlankSwitchStmt(RefCountPtr<SyntaxArena> arena = nullptr);
+   static DeferStmtSyntax makeBlankDeferStmt(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ThrowStmtSyntax makeBlankThrowStmt(RefCountPtr<SyntaxArena> arena = nullptr);
 };
 
 } // polar::syntax

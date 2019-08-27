@@ -13,7 +13,7 @@
 
 namespace polar::syntax {
 
-Syntax DeclSyntaxNodeFactory::makeBlankCollectionSyntax(SyntaxKind kind)
+Syntax DeclSyntaxNodeFactory::makeBlankCollection(SyntaxKind kind)
 {
 
 }

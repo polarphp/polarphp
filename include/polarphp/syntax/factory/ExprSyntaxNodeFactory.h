@@ -13,7 +13,7 @@
 #define POLARPHP_SYNTAX_FACTORY_EXPR_SYNTAX_NODE_FACTORY_H
 
 #include "polarphp/syntax/AbstractFactory.h"
-#include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/ExprSyntaxNodesFwd.h"
 #include <optional>
 
 namespace polar::syntax {
@@ -21,49 +21,49 @@ namespace polar::syntax {
 class ExprSyntaxNodeFactory final : public AbstractFactory
 {
 public:
-   static Syntax makeBlankCollectionSyntax(SyntaxKind kind);
+   static Syntax makeBlankCollection(SyntaxKind kind);
    ///
    /// make collection nodes
    ///
-   static ExprListSyntax makeExprListSyntax(const std::vector<ExprSyntax> elements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ExprListSyntax makeExprList(const std::vector<ExprSyntax> elements, RefCountPtr<SyntaxArena> arena = nullptr);
 
    ///
    /// make normal nodes
    ///
-   static NullExprSyntax makeNullExprSyntax(TokenSyntax nullKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ClassRefParentExprSyntax makeClassRefParentExprSyntax(TokenSyntax parentKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ClassRefSelfExprSyntax makeClassRefSelfExprSyntax(TokenSyntax selfKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ClassRefStaticExprSyntax makeClassRefStaticExprSyntax(TokenSyntax staticKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
-   static IntegerLiteralExprSyntax makeIntegerLiteralExprSyntax(TokenSyntax digits, RefCountPtr<SyntaxArena> arena = nullptr);
-   static FloatLiteralExprSyntax makeFloatLiteralExprSyntax(TokenSyntax floatDigits, RefCountPtr<SyntaxArena> arena = nullptr);
-   static StringLiteralExprSyntax makeStringLiteralExprSyntax(TokenSyntax str, RefCountPtr<SyntaxArena> arena = nullptr);
-   static BooleanLiteralExprSyntax makeBooleanLiteralExprSyntax(TokenSyntax boolean, RefCountPtr<SyntaxArena> arena = nullptr);
-   static TernaryExprSyntax makeTernaryExprSyntax(ExprSyntax conditionExpr, TokenSyntax questionMark, ExprSyntax firstChoice,
+   static NullExprSyntax makeNullExpr(TokenSyntax nullKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ClassRefParentExprSyntax makeClassRefParentExpr(TokenSyntax parentKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ClassRefSelfExprSyntax makeClassRefSelfExpr(TokenSyntax selfKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ClassRefStaticExprSyntax makeClassRefStaticExpr(TokenSyntax staticKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
+   static IntegerLiteralExprSyntax makeIntegerLiteralExpr(TokenSyntax digits, RefCountPtr<SyntaxArena> arena = nullptr);
+   static FloatLiteralExprSyntax makeFloatLiteralExpr(TokenSyntax floatDigits, RefCountPtr<SyntaxArena> arena = nullptr);
+   static StringLiteralExprSyntax makeStringLiteralExpr(TokenSyntax str, RefCountPtr<SyntaxArena> arena = nullptr);
+   static BooleanLiteralExprSyntax makeBooleanLiteralExpr(TokenSyntax boolean, RefCountPtr<SyntaxArena> arena = nullptr);
+   static TernaryExprSyntax makeTernaryExpr(ExprSyntax conditionExpr, TokenSyntax questionMark, ExprSyntax firstChoice,
                                                   TokenSyntax colonMark, ExprSyntax secondChoice, RefCountPtr<SyntaxArena> arena = nullptr);
-   static AssignmentExprSyntax makeAssignmentExprSyntax(TokenSyntax assignToken, RefCountPtr<SyntaxArena> arena = nullptr);
-   static SequenceExprSyntax makeSequenceExprSyntax(ExprListSyntax elements, RefCountPtr<SyntaxArena> arena = nullptr);
-   static PrefixOperatorExprSyntax makePrefixOperatorExprSyntax(std::optional<TokenSyntax> operatorToken, ExprSyntax expr,
+   static AssignmentExprSyntax makeAssignmentExpr(TokenSyntax assignToken, RefCountPtr<SyntaxArena> arena = nullptr);
+   static SequenceExprSyntax makeSequenceExpr(ExprListSyntax elements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static PrefixOperatorExprSyntax makePrefixOperatorExpr(std::optional<TokenSyntax> operatorToken, ExprSyntax expr,
                                                                 RefCountPtr<SyntaxArena> arena = nullptr);
-   static PostfixOperatorExprSyntax makePostfixOperatorExprSyntax(ExprSyntax expr, TokenSyntax operatorToken,
+   static PostfixOperatorExprSyntax makePostfixOperatorExpr(ExprSyntax expr, TokenSyntax operatorToken,
                                                                   RefCountPtr<SyntaxArena> arena = nullptr);
-   static BinaryOperatorExprSyntax makeBinaryOperatorExprSyntax(TokenSyntax operatorToken, RefCountPtr<SyntaxArena> arena = nullptr);
+   static BinaryOperatorExprSyntax makeBinaryOperatorExpr(TokenSyntax operatorToken, RefCountPtr<SyntaxArena> arena = nullptr);
 
    /// make blank nodes
-   static ExprListSyntax makeBlankExprListSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static NullExprSyntax makeNullExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ClassRefParentExprSyntax makeBlankClassRefParentExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ClassRefSelfExprSyntax makeBlankClassRefSelfExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ClassRefStaticExprSyntax makeBlankClassRefStaticExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static IntegerLiteralExprSyntax makeBlankIntegerLiteralExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static FloatLiteralExprSyntax makeBlankFloatLiteralExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static StringLiteralExprSyntax makeBlankStringLiteralExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static BooleanLiteralExprSyntax makeBlankBooleanLiteralExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static TernaryExprSyntax makeBlankTernaryExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static AssignmentExprSyntax makeBlankAssignmentExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static SequenceExprSyntax makeBlankSequenceExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static PrefixOperatorExprSyntax makeBlankPrefixOperatorExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static PostfixOperatorExprSyntax makeBlankPostfixOperatorExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
-   static BinaryOperatorExprSyntax makeBlankBinaryOperatorExprSyntax(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ExprListSyntax makeBlankExprList(RefCountPtr<SyntaxArena> arena = nullptr);
+   static NullExprSyntax makeNullExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ClassRefParentExprSyntax makeBlankClassRefParentExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ClassRefSelfExprSyntax makeBlankClassRefSelfExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ClassRefStaticExprSyntax makeBlankClassRefStaticExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static IntegerLiteralExprSyntax makeBlankIntegerLiteralExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static FloatLiteralExprSyntax makeBlankFloatLiteralExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static StringLiteralExprSyntax makeBlankStringLiteralExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static BooleanLiteralExprSyntax makeBlankBooleanLiteralExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static TernaryExprSyntax makeBlankTernaryExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static AssignmentExprSyntax makeBlankAssignmentExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static SequenceExprSyntax makeBlankSequenceExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static PrefixOperatorExprSyntax makeBlankPrefixOperatorExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static PostfixOperatorExprSyntax makeBlankPostfixOperatorExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static BinaryOperatorExprSyntax makeBlankBinaryOperatorExpr(RefCountPtr<SyntaxArena> arena = nullptr);
 };
 
 } // polar::syntax

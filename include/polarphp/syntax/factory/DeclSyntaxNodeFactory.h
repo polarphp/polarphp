@@ -19,7 +19,7 @@ namespace polar::syntax {
 class DeclSyntaxNodeFactory final : public AbstractFactory
 {
 public:
-   static Syntax makeBlankCollectionSyntax(SyntaxKind kind);
+   static Syntax makeBlankCollection(SyntaxKind kind);
 };
 
 } // polar::syntax

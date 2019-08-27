@@ -10,16 +10,17 @@
 // Created by polarboy on 2019/05/15.
 
 #include "polarphp/syntax/factory/ExprSyntaxNodeFactory.h"
+#include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
 
 namespace polar::syntax {
 
-Syntax ExprSyntaxNodeFactory::makeBlankCollectionSyntax(SyntaxKind kind)
+Syntax ExprSyntaxNodeFactory::makeBlankCollection(SyntaxKind kind)
 {
 
 }
 
-ExprListSyntax ExprSyntaxNodeFactory::makeExprListSyntax(const std::vector<ExprSyntax> elements,
-                                                         RefCountPtr<SyntaxArena> arena)
+ExprListSyntax ExprSyntaxNodeFactory::makeExprList(const std::vector<ExprSyntax> elements,
+                                                   RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
@@ -34,7 +35,7 @@ ExprListSyntax ExprSyntaxNodeFactory::makeExprListSyntax(const std::vector<ExprS
 ///
 /// make normal nodes
 ///
-NullExprSyntax ExprSyntaxNodeFactory::makeNullExprSyntax(TokenSyntax nullKeyword, RefCountPtr<SyntaxArena> arena)
+NullExprSyntax ExprSyntaxNodeFactory::makeNullExpr(TokenSyntax nullKeyword, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawNullExprSyntax = RawSyntax::make(SyntaxKind::NullExpr, {
                                                                  nullKeyword.getRaw()
@@ -42,8 +43,8 @@ NullExprSyntax ExprSyntaxNodeFactory::makeNullExprSyntax(TokenSyntax nullKeyword
    return make<NullExprSyntax>(rawNullExprSyntax);
 }
 
-ClassRefParentExprSyntax ExprSyntaxNodeFactory::makeClassRefParentExprSyntax(TokenSyntax parentKeyword,
-                                                                             RefCountPtr<SyntaxArena> arena)
+ClassRefParentExprSyntax ExprSyntaxNodeFactory::makeClassRefParentExpr(TokenSyntax parentKeyword,
+                                                                       RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawClassRefParentExprSyntax = RawSyntax::make(SyntaxKind::ClassRefParentExpr, {
                                                                            parentKeyword.getRaw()
@@ -51,7 +52,7 @@ ClassRefParentExprSyntax ExprSyntaxNodeFactory::makeClassRefParentExprSyntax(Tok
    return make<ClassRefParentExprSyntax>(rawClassRefParentExprSyntax);
 }
 
-ClassRefSelfExprSyntax ExprSyntaxNodeFactory::makeClassRefSelfExprSyntax(TokenSyntax selfKeyword, RefCountPtr<SyntaxArena> arena)
+ClassRefSelfExprSyntax ExprSyntaxNodeFactory::makeClassRefSelfExpr(TokenSyntax selfKeyword, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawClassRefSelfExprSyntax = RawSyntax::make(SyntaxKind::ClassRefSelfExpr, {
                                                                          selfKeyword.getRaw()
@@ -59,8 +60,8 @@ ClassRefSelfExprSyntax ExprSyntaxNodeFactory::makeClassRefSelfExprSyntax(TokenSy
    return make<ClassRefSelfExprSyntax>(rawClassRefSelfExprSyntax);
 }
 
-ClassRefStaticExprSyntax ExprSyntaxNodeFactory::makeClassRefStaticExprSyntax(TokenSyntax staticKeyword,
-                                                                             RefCountPtr<SyntaxArena> arena)
+ClassRefStaticExprSyntax ExprSyntaxNodeFactory::makeClassRefStaticExpr(TokenSyntax staticKeyword,
+                                                                       RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawClassRefStaticExprSyntax = RawSyntax::make(SyntaxKind::ClassRefStaticExpr, {
                                                                            staticKeyword.getRaw()
@@ -68,8 +69,8 @@ ClassRefStaticExprSyntax ExprSyntaxNodeFactory::makeClassRefStaticExprSyntax(Tok
    return make<ClassRefStaticExprSyntax>(rawClassRefStaticExprSyntax);
 }
 
-IntegerLiteralExprSyntax ExprSyntaxNodeFactory::makeIntegerLiteralExprSyntax(TokenSyntax digits,
-                                                                             RefCountPtr<SyntaxArena> arena)
+IntegerLiteralExprSyntax ExprSyntaxNodeFactory::makeIntegerLiteralExpr(TokenSyntax digits,
+                                                                       RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawIntegerLiteralExprSyntax = RawSyntax::make(SyntaxKind::IntegerLiteralExpr, {
                                                                            digits.getRaw()
@@ -77,8 +78,8 @@ IntegerLiteralExprSyntax ExprSyntaxNodeFactory::makeIntegerLiteralExprSyntax(Tok
    return make<IntegerLiteralExprSyntax>(rawIntegerLiteralExprSyntax);
 }
 
-FloatLiteralExprSyntax ExprSyntaxNodeFactory::makeFloatLiteralExprSyntax(TokenSyntax floatDigits,
-                                                                         RefCountPtr<SyntaxArena> arena)
+FloatLiteralExprSyntax ExprSyntaxNodeFactory::makeFloatLiteralExpr(TokenSyntax floatDigits,
+                                                                   RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawFloatLiteralExprSyntax = RawSyntax::make(SyntaxKind::FloatLiteralExpr, {
                                                                          floatDigits.getRaw()
@@ -86,8 +87,8 @@ FloatLiteralExprSyntax ExprSyntaxNodeFactory::makeFloatLiteralExprSyntax(TokenSy
    return make<FloatLiteralExprSyntax>(rawFloatLiteralExprSyntax);
 }
 
-BooleanLiteralExprSyntax ExprSyntaxNodeFactory::makeBooleanLiteralExprSyntax(TokenSyntax boolean,
-                                                                             RefCountPtr<SyntaxArena> arena)
+BooleanLiteralExprSyntax ExprSyntaxNodeFactory::makeBooleanLiteralExpr(TokenSyntax boolean,
+                                                                       RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawBooleanLiteralExprSyntax = RawSyntax::make(SyntaxKind::BooleanLiteralExpr, {
                                                                            boolean.getRaw()
@@ -95,9 +96,9 @@ BooleanLiteralExprSyntax ExprSyntaxNodeFactory::makeBooleanLiteralExprSyntax(Tok
    return make<BooleanLiteralExprSyntax>(rawBooleanLiteralExprSyntax);
 }
 
-TernaryExprSyntax ExprSyntaxNodeFactory::makeTernaryExprSyntax(ExprSyntax conditionExpr, TokenSyntax questionMark,
-                                                               ExprSyntax firstChoice, TokenSyntax colonMark,
-                                                               ExprSyntax secondChoice, RefCountPtr<SyntaxArena> arena)
+TernaryExprSyntax ExprSyntaxNodeFactory::makeTernaryExpr(ExprSyntax conditionExpr, TokenSyntax questionMark,
+                                                         ExprSyntax firstChoice, TokenSyntax colonMark,
+                                                         ExprSyntax secondChoice, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawTernaryExprSyntax = RawSyntax::make(SyntaxKind::TernaryExpr, {
                                                                     conditionExpr.getRaw(),
@@ -109,7 +110,7 @@ TernaryExprSyntax ExprSyntaxNodeFactory::makeTernaryExprSyntax(ExprSyntax condit
    return make<TernaryExprSyntax>(rawTernaryExprSyntax);
 }
 
-AssignmentExprSyntax ExprSyntaxNodeFactory::makeAssignmentExprSyntax(TokenSyntax assignToken, RefCountPtr<SyntaxArena> arena)
+AssignmentExprSyntax ExprSyntaxNodeFactory::makeAssignmentExpr(TokenSyntax assignToken, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawAssignmentExprSyntax = RawSyntax::make(SyntaxKind::AssignmentExpr, {
                                                                        assignToken.getRaw()
@@ -117,7 +118,7 @@ AssignmentExprSyntax ExprSyntaxNodeFactory::makeAssignmentExprSyntax(TokenSyntax
    return make<AssignmentExprSyntax>(rawAssignmentExprSyntax);
 }
 
-SequenceExprSyntax ExprSyntaxNodeFactory::makeSequenceExprSyntax(ExprListSyntax elements, RefCountPtr<SyntaxArena> arena)
+SequenceExprSyntax ExprSyntaxNodeFactory::makeSequenceExpr(ExprListSyntax elements, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawSequenceExprSyntax = RawSyntax::make(SyntaxKind::SequenceExpr, {
                                                                      elements.getRaw()
@@ -125,8 +126,8 @@ SequenceExprSyntax ExprSyntaxNodeFactory::makeSequenceExprSyntax(ExprListSyntax 
    return make<SequenceExprSyntax>(rawSequenceExprSyntax);
 }
 
-PrefixOperatorExprSyntax ExprSyntaxNodeFactory::makePrefixOperatorExprSyntax(std::optional<TokenSyntax> operatorToken, ExprSyntax expr,
-                                                                             RefCountPtr<SyntaxArena> arena)
+PrefixOperatorExprSyntax ExprSyntaxNodeFactory::makePrefixOperatorExpr(std::optional<TokenSyntax> operatorToken, ExprSyntax expr,
+                                                                       RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawPrefixOperatorExprSyntax = RawSyntax::make(SyntaxKind::PrefixOperatorExpr, {
                                                                            operatorToken.has_value() ? operatorToken->getRaw() : nullptr,
@@ -135,8 +136,8 @@ PrefixOperatorExprSyntax ExprSyntaxNodeFactory::makePrefixOperatorExprSyntax(std
    return make<PrefixOperatorExprSyntax>(rawPrefixOperatorExprSyntax);
 }
 
-PostfixOperatorExprSyntax ExprSyntaxNodeFactory::makePostfixOperatorExprSyntax(ExprSyntax expr, TokenSyntax operatorToken,
-                                                                               RefCountPtr<SyntaxArena> arena)
+PostfixOperatorExprSyntax ExprSyntaxNodeFactory::makePostfixOperatorExpr(ExprSyntax expr, TokenSyntax operatorToken,
+                                                                         RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawPostfixOperatorExprSyntax = RawSyntax::make(SyntaxKind::PostfixOperatorExpr, {
                                                                             expr.getRaw(),
@@ -145,7 +146,7 @@ PostfixOperatorExprSyntax ExprSyntaxNodeFactory::makePostfixOperatorExprSyntax(E
    return make<PostfixOperatorExprSyntax>(rawPostfixOperatorExprSyntax);
 }
 
-BinaryOperatorExprSyntax ExprSyntaxNodeFactory::makeBinaryOperatorExprSyntax(TokenSyntax operatorToken,
+BinaryOperatorExprSyntax ExprSyntaxNodeFactory::makeBinaryOperatorExpr(TokenSyntax operatorToken,
                                                                              RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawBinaryOperatorExprSyntax = RawSyntax::make(SyntaxKind::BinaryOperatorExpr, {
@@ -155,14 +156,14 @@ BinaryOperatorExprSyntax ExprSyntaxNodeFactory::makeBinaryOperatorExprSyntax(Tok
 }
 
 /// make blank nodes
-ExprListSyntax ExprSyntaxNodeFactory::makeBlankExprListSyntax(RefCountPtr<SyntaxArena> arena)
+ExprListSyntax ExprSyntaxNodeFactory::makeBlankExprList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawExprListSyntax = RawSyntax::make(SyntaxKind::ExprList, {},
                                                               SourcePresence::Present, arena);
    return make<ExprListSyntax>(rawExprListSyntax);
 }
 
-NullExprSyntax ExprSyntaxNodeFactory::makeNullExprSyntax(RefCountPtr<SyntaxArena> arena)
+NullExprSyntax ExprSyntaxNodeFactory::makeNullExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawNullExprSyntax = RawSyntax::make(SyntaxKind::NullExpr, {
                                                                  RawSyntax::missing(TokenKindType::T_NULL, OwnedString::makeUnowned(get_token_text(TokenKindType::T_NULL)))
@@ -170,7 +171,7 @@ NullExprSyntax ExprSyntaxNodeFactory::makeNullExprSyntax(RefCountPtr<SyntaxArena
    return make<NullExprSyntax>(rawNullExprSyntax);
 }
 
-ClassRefParentExprSyntax ExprSyntaxNodeFactory::makeBlankClassRefParentExprSyntax(RefCountPtr<SyntaxArena> arena)
+ClassRefParentExprSyntax ExprSyntaxNodeFactory::makeBlankClassRefParentExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawClassRefParentExprSyntax = RawSyntax::make(SyntaxKind::ClassRefParentExpr, {
                                                                            RawSyntax::missing(TokenKindType::T_CLASS_REF_PARENT,
@@ -179,7 +180,7 @@ ClassRefParentExprSyntax ExprSyntaxNodeFactory::makeBlankClassRefParentExprSynta
    return make<ClassRefParentExprSyntax>(rawClassRefParentExprSyntax);
 }
 
-ClassRefSelfExprSyntax ExprSyntaxNodeFactory::makeBlankClassRefSelfExprSyntax(RefCountPtr<SyntaxArena> arena)
+ClassRefSelfExprSyntax ExprSyntaxNodeFactory::makeBlankClassRefSelfExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawClassRefSelfExprSyntax = RawSyntax::make(SyntaxKind::ClassRefSelfExpr, {
                                                                          RawSyntax::missing(TokenKindType::T_CLASS_REF_SELF,
@@ -188,7 +189,7 @@ ClassRefSelfExprSyntax ExprSyntaxNodeFactory::makeBlankClassRefSelfExprSyntax(Re
    return make<ClassRefSelfExprSyntax>(rawClassRefSelfExprSyntax);
 }
 
-ClassRefStaticExprSyntax ExprSyntaxNodeFactory::makeBlankClassRefStaticExprSyntax(RefCountPtr<SyntaxArena> arena)
+ClassRefStaticExprSyntax ExprSyntaxNodeFactory::makeBlankClassRefStaticExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawClassRefStaticExprSyntax = RawSyntax::make(SyntaxKind::ClassRefStaticExpr, {
                                                                            RawSyntax::missing(TokenKindType::T_CLASS_REF_STATIC,
@@ -197,7 +198,7 @@ ClassRefStaticExprSyntax ExprSyntaxNodeFactory::makeBlankClassRefStaticExprSynta
    return make<ClassRefStaticExprSyntax>(rawClassRefStaticExprSyntax);
 }
 
-IntegerLiteralExprSyntax ExprSyntaxNodeFactory::makeBlankIntegerLiteralExprSyntax(RefCountPtr<SyntaxArena> arena)
+IntegerLiteralExprSyntax ExprSyntaxNodeFactory::makeBlankIntegerLiteralExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawIntegerLiteralExprSyntax = RawSyntax::make(SyntaxKind::IntegerLiteralExpr, {
                                                                            RawSyntax::missing(TokenKindType::T_LNUMBER,
@@ -206,7 +207,7 @@ IntegerLiteralExprSyntax ExprSyntaxNodeFactory::makeBlankIntegerLiteralExprSynta
    return make<IntegerLiteralExprSyntax>(rawIntegerLiteralExprSyntax);
 }
 
-FloatLiteralExprSyntax ExprSyntaxNodeFactory::makeBlankFloatLiteralExprSyntax(RefCountPtr<SyntaxArena> arena)
+FloatLiteralExprSyntax ExprSyntaxNodeFactory::makeBlankFloatLiteralExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawFloatLiteralExprSyntax = RawSyntax::make(SyntaxKind::FloatLiteralExpr, {
                                                                          RawSyntax::missing(TokenKindType::T_DNUMBER,
@@ -215,7 +216,7 @@ FloatLiteralExprSyntax ExprSyntaxNodeFactory::makeBlankFloatLiteralExprSyntax(Re
    return make<FloatLiteralExprSyntax>(rawFloatLiteralExprSyntax);
 }
 
-BooleanLiteralExprSyntax ExprSyntaxNodeFactory::makeBlankBooleanLiteralExprSyntax(RefCountPtr<SyntaxArena> arena)
+BooleanLiteralExprSyntax ExprSyntaxNodeFactory::makeBlankBooleanLiteralExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawBooleanLiteralExprSyntax = RawSyntax::make(SyntaxKind::BooleanLiteralExpr, {
                                                                            RawSyntax::missing(TokenKindType::T_TRUE,
@@ -224,7 +225,7 @@ BooleanLiteralExprSyntax ExprSyntaxNodeFactory::makeBlankBooleanLiteralExprSynta
    return make<BooleanLiteralExprSyntax>(rawBooleanLiteralExprSyntax);
 }
 
-TernaryExprSyntax ExprSyntaxNodeFactory::makeBlankTernaryExprSyntax(RefCountPtr<SyntaxArena> arena)
+TernaryExprSyntax ExprSyntaxNodeFactory::makeBlankTernaryExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawTernaryExprSyntax = RawSyntax::make(SyntaxKind::TernaryExpr, {
                                                                     RawSyntax::missing(SyntaxKind::Expr),
@@ -238,7 +239,7 @@ TernaryExprSyntax ExprSyntaxNodeFactory::makeBlankTernaryExprSyntax(RefCountPtr<
    return make<TernaryExprSyntax>(rawTernaryExprSyntax);
 }
 
-AssignmentExprSyntax ExprSyntaxNodeFactory::makeBlankAssignmentExprSyntax(RefCountPtr<SyntaxArena> arena)
+AssignmentExprSyntax ExprSyntaxNodeFactory::makeBlankAssignmentExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawAssignmentExprSyntax = RawSyntax::make(SyntaxKind::AssignmentExpr, {
                                                                        RawSyntax::missing(TokenKindType::T_EQUAL,
@@ -247,7 +248,7 @@ AssignmentExprSyntax ExprSyntaxNodeFactory::makeBlankAssignmentExprSyntax(RefCou
    return make<AssignmentExprSyntax>(rawAssignmentExprSyntax);
 }
 
-SequenceExprSyntax ExprSyntaxNodeFactory::makeBlankSequenceExprSyntax(RefCountPtr<SyntaxArena> arena)
+SequenceExprSyntax ExprSyntaxNodeFactory::makeBlankSequenceExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawSequenceExprSyntax = RawSyntax::make(SyntaxKind::SequenceExpr, {
                                                                      RawSyntax::missing(SyntaxKind::ExprList)
@@ -255,7 +256,7 @@ SequenceExprSyntax ExprSyntaxNodeFactory::makeBlankSequenceExprSyntax(RefCountPt
    return make<SequenceExprSyntax>(rawSequenceExprSyntax);
 }
 
-PrefixOperatorExprSyntax ExprSyntaxNodeFactory::makeBlankPrefixOperatorExprSyntax(RefCountPtr<SyntaxArena> arena)
+PrefixOperatorExprSyntax ExprSyntaxNodeFactory::makeBlankPrefixOperatorExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawPrefixOperatorExprSyntax = RawSyntax::make(SyntaxKind::PrefixOperatorExpr, {
                                                                            nullptr,
@@ -264,7 +265,7 @@ PrefixOperatorExprSyntax ExprSyntaxNodeFactory::makeBlankPrefixOperatorExprSynta
    return make<PrefixOperatorExprSyntax>(rawPrefixOperatorExprSyntax);
 }
 
-PostfixOperatorExprSyntax ExprSyntaxNodeFactory::makeBlankPostfixOperatorExprSyntax(RefCountPtr<SyntaxArena> arena)
+PostfixOperatorExprSyntax ExprSyntaxNodeFactory::makeBlankPostfixOperatorExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawPostfixOperatorExprSyntax = RawSyntax::make(SyntaxKind::PrefixOperatorExpr, {
                                                                             RawSyntax::missing(SyntaxKind::Expr),
@@ -274,7 +275,7 @@ PostfixOperatorExprSyntax ExprSyntaxNodeFactory::makeBlankPostfixOperatorExprSyn
    return make<PostfixOperatorExprSyntax>(rawPostfixOperatorExprSyntax);
 }
 
-BinaryOperatorExprSyntax ExprSyntaxNodeFactory::makeBlankBinaryOperatorExprSyntax(RefCountPtr<SyntaxArena> arena)
+BinaryOperatorExprSyntax ExprSyntaxNodeFactory::makeBlankBinaryOperatorExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> rawBinaryOperatorExprSyntax = RawSyntax::make(SyntaxKind::BinaryOperatorExpr, {
                                                                            RawSyntax::missing(TokenKindType::T_BINARY_OPERATOR,
