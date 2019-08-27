@@ -21,8 +21,8 @@ Syntax StmtSyntaxNodeFactory::makeBlankCollectionSyntax(SyntaxKind kind)
 ///
 /// make collection nodes
 ///
-ConditionElementListSyntax StmtSyntaxNodeFactory::makeConditionElementListSyntax(const std::vector<ConditionElementSyntax> &elements,
-                                                                                 RefCountPtr<SyntaxArena> arena)
+ConditionElementListSyntax StmtSyntaxNodeFactory::makeConditionElementList(const std::vector<ConditionElementSyntax> &elements,
+                                                                           RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
@@ -34,8 +34,8 @@ ConditionElementListSyntax StmtSyntaxNodeFactory::makeConditionElementListSyntax
    return make<ConditionElementListSyntax>(rawConditionElementListSyntax);
 }
 
-SwitchCaseListSyntax StmtSyntaxNodeFactory::makeSwitchCaseListSyntax(const std::vector<SwitchCaseSyntax> &elements,
-                                                                     RefCountPtr<SyntaxArena> arena)
+SwitchCaseListSyntax StmtSyntaxNodeFactory::makeSwitchCaseList(const std::vector<SwitchCaseSyntax> &elements,
+                                                               RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
@@ -47,8 +47,8 @@ SwitchCaseListSyntax StmtSyntaxNodeFactory::makeSwitchCaseListSyntax(const std::
    return make<SwitchCaseListSyntax>(rawSwitchCaseListSyntax);
 }
 
-ElseIfListSyntax StmtSyntaxNodeFactory::makeElseIfListSyntax(const std::vector<ElseIfClauseSyntax> &elements,
-                                                             RefCountPtr<SyntaxArena> arena)
+ElseIfListSyntax StmtSyntaxNodeFactory::makeElseIfList(const std::vector<ElseIfClauseSyntax> &elements,
+                                                       RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());

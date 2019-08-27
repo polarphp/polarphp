@@ -25,12 +25,35 @@ public:
    ///
    static Syntax makeBlankCollectionSyntax(SyntaxKind kind);
 
-   static ConditionElementListSyntax makeConditionElementListSyntax(const std::vector<ConditionElementSyntax> &elements,
+   static ConditionElementListSyntax makeConditionElementList(const std::vector<ConditionElementSyntax> &elements,
                                                                     RefCountPtr<SyntaxArena> arena = nullptr);
-   static SwitchCaseListSyntax makeSwitchCaseListSyntax(const std::vector<SwitchCaseSyntax> &elements,
+   static SwitchCaseListSyntax makeSwitchCaseList(const std::vector<SwitchCaseSyntax> &elements,
                                                         RefCountPtr<SyntaxArena> arena = nullptr);
-   static ElseIfListSyntax makeElseIfListSyntax(const std::vector<ElseIfClauseSyntax> &elements,
+   static ElseIfListSyntax makeElseIfList(const std::vector<ElseIfClauseSyntax> &elements,
                                                 RefCountPtr<SyntaxArena> arena = nullptr);
+   static InnerStmtListSyntax makeInnerStmtList(
+         const std::vector<InnerStmtSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static TopStmtListSyntax makeTopStmtList(
+         const std::vector<TopStmtSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static CatchListSyntax makeCatchList(
+         const std::vector<CatchListItemClauseSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static CatchArgTypeHintListSyntax makeCatchArgTypeHintList(
+         const std::vector<CatchArgTypeHintItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static UnsetVariableListSyntax makeUnsetVariableList(
+         const std::vector<UnsetVariableSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static GlobalVariableListSyntax makeGlobalVariableList(
+         const std::vector<GlobalVariableListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static StaticVariableListSyntax makeStaticVariableList(
+         const std::vector<StaticVariableListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static NamespaceUseDeclarationListSyntax makeNamespaceUseDeclarationList(
+         const std::vector<NamespaceUseDeclarationSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static NamespaceInlineUseDeclarationListSyntax makeNamespaceInlineUseDeclarationList(
+         const std::vector<NamespaceInlineUseDeclarationSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static NamespaceUnprefixedUseDeclarationListSyntax makeNamespaceUnprefixedUseDeclarationList(
+         const std::vector<NamespaceUnprefixedUseDeclarationSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ConstDeclareItemListSyntax makeConstDeclareItemList(
+         const std::vector<ConstDeclareItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+
    ///
    /// make normal nodes
    ///
