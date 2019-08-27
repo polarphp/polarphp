@@ -295,6 +295,78 @@ private:
 };
 
 ///
+/// declare_stmr:
+///   T_DECLARE '(' const_list ')' declare_statement
+///
+class DeclareStmtSyntax final : public StmtSyntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 5;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 5;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_DECLARE)
+      /// optional: false
+      ///
+      DeclareToken,
+      ///
+      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// optional: false
+      ///
+      LeftParenToken,
+      ///
+      /// type: ConstDeclareItemListSyntax
+      /// optional: false
+      ///
+      ConstList,
+      ///
+      /// type: TokenSyntax (T_RIGHT_PAREN)
+      /// optional: false
+      ///
+      RightParenToken,
+      ///
+      /// type: StmtSyntax
+      /// optional: false
+      ///
+      Stmt
+   };
+
+public:
+   DeclareStmtSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : StmtSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getDeclareToken();
+   TokenSyntax getLeftParenToken();
+   ConstDeclareItemListSyntax getConstList();
+   TokenSyntax getRightParenToken();
+   StmtSyntax getStmt();
+
+   DeclareStmtSyntax withDeclareToken(std::optional<TokenSyntax> declareToken);
+   DeclareStmtSyntax withLeftParenToken(std::optional<TokenSyntax> leftParen);
+   DeclareStmtSyntax withConstList(std::optional<ConstDeclareItemListSyntax> constList);
+   DeclareStmtSyntax withRightParenToken(std::optional<TokenSyntax> rightParen);
+   DeclareStmtSyntax withStmt(std::optional<StmtSyntax> stmt);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::DeclareStmt == kind;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class DeclareStmtSyntaxBuilder;
+   void validate();
+};
+
+///
 /// goto_stmt:
 ///   T_GOTO T_IDENTIFIER_STRING ';'
 ///

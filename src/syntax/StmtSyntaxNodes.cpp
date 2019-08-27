@@ -211,6 +211,7 @@ InnerStmtSyntax InnerStmtSyntax::withStmt(std::optional<StmtSyntax> stmt)
 ///
 void InnerCodeBlockStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -219,6 +220,7 @@ void InnerCodeBlockStmtSyntax::validate()
    syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_PAREN});
    syntax_assert_child_kind(raw, Statements, std::set{SyntaxKind::InnerStmtList});
    syntax_assert_child_token(raw, RightBrace, std::set{TokenKindType::T_RIGHT_PAREN});
+#endif
 }
 
 TokenSyntax InnerCodeBlockStmtSyntax::getLeftBrace()
@@ -281,10 +283,115 @@ InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::withStatements(std::optional<
 }
 
 ///
+/// DeclareStmtSyntax
+///
+void DeclareStmtSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == DeclareStmtSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, DeclareToken, std::set{TokenKindType::T_DECLARE});
+   syntax_assert_child_token(raw, LeftParenToken, std::set{TokenKindType::T_LEFT_PAREN});
+   syntax_assert_child_kind(raw, ConstList, std::set{SyntaxKind::ConstDeclareItemList});
+   syntax_assert_child_token(raw, RightParenToken, std::set{TokenKindType::T_RIGHT_PAREN});
+   syntax_assert_child_kind(raw, Stmt, std::set{SyntaxKind::Stmt});
+#endif
+}
+
+TokenSyntax DeclareStmtSyntax::getDeclareToken()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::DeclareToken).get()};
+}
+
+TokenSyntax DeclareStmtSyntax::getLeftParenToken()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::LeftParenToken).get()};
+}
+
+ConstDeclareItemListSyntax DeclareStmtSyntax::getConstList()
+{
+   return ConstDeclareItemListSyntax{m_root, m_data->getChild(Cursor::ConstList).get()};
+}
+
+TokenSyntax DeclareStmtSyntax::getRightParenToken()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::RightParenToken).get()};
+}
+
+StmtSyntax DeclareStmtSyntax::getStmt()
+{
+   return StmtSyntax{m_root, m_data->getChild(Cursor::Stmt).get()};
+}
+
+DeclareStmtSyntax
+DeclareStmtSyntax::withDeclareToken(std::optional<TokenSyntax> declareToken)
+{
+   RefCountPtr<RawSyntax> rawDeclareToken;
+   if (declareToken.has_value()) {
+      rawDeclareToken = declareToken->getRaw();
+   } else {
+      rawDeclareToken = make_missing_token(T_DECLARE);
+   }
+   return m_data->replaceChild<DeclareStmtSyntax>(rawDeclareToken, Cursor::DeclareToken);
+}
+
+DeclareStmtSyntax
+DeclareStmtSyntax::withLeftParenToken(std::optional<TokenSyntax> leftParen)
+{
+   RefCountPtr<RawSyntax> rawLeftParen;
+   if (leftParen.has_value()) {
+      rawLeftParen = leftParen->getRaw();
+   } else {
+      rawLeftParen = make_missing_token(T_LEFT_PAREN);
+   }
+   return m_data->replaceChild<DeclareStmtSyntax>(rawLeftParen, Cursor::LeftParenToken);
+}
+
+DeclareStmtSyntax
+DeclareStmtSyntax::withConstList(std::optional<ConstDeclareItemListSyntax> constList)
+{
+   RefCountPtr<RawSyntax> rawConstList;
+   if (constList.has_value()) {
+      rawConstList = constList->getRaw();
+   } else {
+      rawConstList = RawSyntax::missing(SyntaxKind::ConstDeclareItemList);
+   }
+   return m_data->replaceChild<DeclareStmtSyntax>(rawConstList, Cursor::ConstList);
+}
+
+DeclareStmtSyntax
+DeclareStmtSyntax::withRightParenToken(std::optional<TokenSyntax> rightParen)
+{
+   RefCountPtr<RawSyntax> rawRightParen;
+   if (rightParen.has_value()) {
+      rawRightParen = rightParen->getRaw();
+   } else {
+      rawRightParen = make_missing_token(T_RIGHT_PAREN);
+   }
+   return m_data->replaceChild<DeclareStmtSyntax>(rawRightParen, Cursor::RightParenToken);
+}
+
+DeclareStmtSyntax
+DeclareStmtSyntax::withStmt(std::optional<StmtSyntax> stmt)
+{
+   RefCountPtr<RawSyntax> rawStmt;
+   if (stmt.has_value()) {
+      rawStmt = stmt->getRaw();
+   } else {
+      rawStmt = RawSyntax::missing(SyntaxKind::Stmt);
+   }
+   return m_data->replaceChild<DeclareStmtSyntax>(rawStmt, Cursor::Stmt);
+}
+
+///
 /// ConditionElementSyntax
 ///
 void GotoStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -293,6 +400,7 @@ void GotoStmtSyntax::validate()
    syntax_assert_child_token(raw, GotoToken, std::set{TokenKindType::T_GOTO});
    syntax_assert_child_token(raw, Target, std::set{TokenKindType::T_IDENTIFIER_STRING});
    syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
+#endif
 }
 
 TokenSyntax GotoStmtSyntax::getGotoToken()
@@ -349,6 +457,7 @@ GotoStmtSyntax GotoStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolo
 
 void UnsetVariableSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -356,6 +465,7 @@ void UnsetVariableSyntax::validate()
    assert(raw->getLayout().size() == UnsetVariableSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
    syntax_assert_child_token(raw, TrailingComma, std::set{TokenKindType::T_COMMA});
+#endif
 }
 
 TokenSyntax UnsetVariableSyntax::getVariable()
@@ -401,6 +511,7 @@ UnsetVariableSyntax::withTrailingComma(std::optional<TokenSyntax> trailingComma)
 ///
 void UnsetStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -411,6 +522,7 @@ void UnsetStmtSyntax::validate()
    syntax_assert_child_kind(raw, UnsetVariables, std::set{SyntaxKind::UnsetVariableList});
    syntax_assert_child_token(raw, RightParenToken, std::set{TokenKindType::T_RIGHT_PAREN});
    syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_COMMA});
+#endif
 }
 
 TokenSyntax UnsetStmtSyntax::getUnsetToken()
@@ -503,6 +615,7 @@ UnsetStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
 ///
 void LabelStmtSyntax::validate()
 {
+#ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
@@ -510,6 +623,7 @@ void LabelStmtSyntax::validate()
    assert(raw->getLayout().size() == LabelStmtSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
    syntax_assert_child_token(raw, Colon, std::set{TokenKindType::T_COLON});
+#endif
 }
 
 TokenSyntax LabelStmtSyntax::getName()

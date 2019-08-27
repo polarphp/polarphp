@@ -77,10 +77,6 @@ class VariableExprSyntax;
 class ReferencedVariableExprSyntax;
 class ListStructureClauseSyntax;
 class SimplifiedArrayCreateExprSyntax;
-///
-/// type: SyntaxCollection
-/// element type: ExprSyntax
-///
 using ExprListSyntax = SyntaxCollection<SyntaxKind::ExprList, ExprListItemSyntax>;
 
 // decl syntax nodes forward declares
@@ -90,7 +86,9 @@ class TraitDefinitionSyntax;
 class FunctionDefinitionSyntax;
 class NameSyntax;
 class NamespacePartSyntax;
+class ConstDeclareItemSyntax;
 using NamespacePartListSyntax = SyntaxCollection<SyntaxKind::NamespacePartList, NamespacePartSyntax>;
+using ConstDeclareItemListSyntax = SyntaxCollection<SyntaxKind::ConstDeclareItemList, ConstDeclareItemSyntax>;
 
 ///
 /// type: SyntaxCollection
