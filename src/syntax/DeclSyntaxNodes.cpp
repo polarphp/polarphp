@@ -2129,14 +2129,22 @@ TokenSyntax ClassDefinitionSyntax::getName()
    return TokenSyntax {m_root, m_data->getChild(Cursor::Name).get()};
 }
 
-ExtendsFromClauseSyntax ClassDefinitionSyntax::getExtendsFrom()
+std::optional<ExtendsFromClauseSyntax> ClassDefinitionSyntax::getExtendsFrom()
 {
-   return ExtendsFromClauseSyntax {m_root, m_data->getChild(Cursor::ExtendsFrom).get()};
+   RefCountPtr<SyntaxData> extendsData = m_data->getChild(Cursor::ExtendsFrom);
+   if (!extendsData) {
+      return std::nullopt;
+   }
+   return ExtendsFromClauseSyntax {m_root, extendsData.get()};
 }
 
-ImplementClauseSyntax ClassDefinitionSyntax::getImplementsList()
+std::optional<ImplementClauseSyntax> ClassDefinitionSyntax::getImplementsList()
 {
-   return ImplementClauseSyntax {m_root, m_data->getChild(Cursor::ImplementsList).get()};
+   RefCountPtr<SyntaxData> implementsData = m_data->getChild(Cursor::ExtendsFrom);
+   if (!implementsData) {
+      return std::nullopt;
+   }
+   return ImplementClauseSyntax {m_root, implementsData.get()};
 }
 
 MemberDeclBlockSyntax ClassDefinitionSyntax::getMembers()
@@ -2183,7 +2191,7 @@ ClassDefinitionSyntax ClassDefinitionSyntax::withExtendsFrom(std::optional<Exten
    if (extends.has_value()) {
       extendsRaw = extends->getRaw();
    } else {
-      extendsRaw = RawSyntax::missing(SyntaxKind::ExtendsFromClause);
+      extendsRaw = nullptr;
    }
    return m_data->replaceChild<ClassDefinitionSyntax>(extendsRaw, Cursor::ExtendsFrom);
 }
@@ -2194,7 +2202,7 @@ ClassDefinitionSyntax ClassDefinitionSyntax::withImplementsList(std::optional<Im
    if (implements.has_value()) {
       implementsRaw = implements->getRaw();
    } else {
-      implementsRaw = RawSyntax::missing(SyntaxKind::ImplementsClause);
+      implementsRaw = nullptr;
    }
    return m_data->replaceChild<ClassDefinitionSyntax>(implementsRaw, Cursor::ImplementsList);
 }

@@ -150,9 +150,9 @@ public:
       /// type: Syntax
       /// optional: false
       /// node choices: true
-      /// -----------------
+      /// --------------------------------
       /// choice type: TokenSyntax
-      /// -----------------
+      /// --------------------------------
       /// choice type: SemiReservedSytnax
       NameItem
    };
@@ -194,11 +194,15 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax
       /// optional: true
+      ///
       NsSeparator,
+      ///
       /// type: TokenSyntax
       /// optional: false
+      ///
       Name
    };
 
@@ -242,15 +246,20 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax
       /// optional: true
+      ///
       NsToken,
+      ///
       /// type: TokenSyntax
       /// optional: true
+      ///
       NsSeparator,
-      /// type: SyntaxCollection
-      /// name: NamespacePartListSyntax
+      ///
+      /// type: NamespacePartListSyntax
       /// optional: false
+      ///
       Namespace
    };
 public:
@@ -350,11 +359,11 @@ public:
       /// type: Syntax
       /// optional: false
       /// node choices: true
-      /// ------------------
+      /// --------------------------
       /// node choice: TokenSyntax
       /// token choices: true
       /// T_ARRAY | T_CALLABLE
-      /// ------------------
+      /// --------------------------
       /// node choice: NameSyntax
       ///
       Type
@@ -901,7 +910,7 @@ public:
    }
 
 private:
-   friend class ImplementClauseSyntaxBuilder;
+   friend class InterfaceExtendsClauseSyntaxBuilder;
    void validate();
 };
 
@@ -1025,7 +1034,7 @@ public:
       /// type: TokenSyntax
       /// optional: false
       /// token choices: true
-      /// --------------------
+      /// ------------------------------------
       /// T_PUBLIC | T_PROTECTED | T_PRIVATE
       /// T_STATIC | T_ABSTRACT  | T_FINAL
       ///
@@ -1178,7 +1187,7 @@ private:
 };
 
 ///
-/// class_statement:
+/// class_method_statement:
 ///   method_modifiers function returns_ref identifier backup_doc_comment '(' parameter_list ')'
 ///   return_type backup_fn_flags method_body backup_fn_flags
 ///
@@ -1280,9 +1289,9 @@ public:
       /// type: Syntax
       /// optional: false
       /// node choices: true
-      /// ------------------------------
+      /// ------------------------------------------------------
       /// node choice: IdentifierSyntax
-      /// ------------------------------
+      /// ------------------------------------------------------
       /// node choice: ClassAbsoluteTraitMethodReferenceSyntax
       ///
       Reference
@@ -1529,7 +1538,7 @@ public:
    {
       ///
       /// type: Syntax
-      /// optiona: false
+      /// optional: false
       /// node choices: true
       /// -----------------------------------------
       /// node choice: ClassTraitPrecedenceSyntax
@@ -1809,7 +1818,7 @@ private:
 class ClassDefinitionSyntax final : public DeclSyntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 9;
+   constexpr static std::uint8_t CHILDREN_COUNT = 6;
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 8;
 
    enum Cursor : SyntaxChildrenCountType
@@ -1831,12 +1840,12 @@ public:
       Name,
       ///
       /// type: ExtendsFromClauseSyntax
-      /// optional: false
+      /// optional: true
       ///
       ExtendsFrom,
       ///
       /// type: ImplementClauseSyntax
-      /// optional: false
+      /// optional: true
       ///
       ImplementsList,
       ///
@@ -1856,8 +1865,8 @@ public:
    std::optional<ClassModififerListSyntax> getModififers();
    TokenSyntax getClassToken();
    TokenSyntax getName();
-   ExtendsFromClauseSyntax getExtendsFrom();
-   ImplementClauseSyntax getImplementsList();
+   std::optional<ExtendsFromClauseSyntax> getExtendsFrom();
+   std::optional<ImplementClauseSyntax> getImplementsList();
    MemberDeclBlockSyntax getMembers();
 
    ClassDefinitionSyntax withModifiers(std::optional<ClassModififerListSyntax> modifiers);
