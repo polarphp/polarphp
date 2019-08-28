@@ -10,6 +10,7 @@
 // Created by polarboy on 2019/05/17.
 
 #include "polarphp/syntax/syntaxnode/DeclSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
 
 namespace polar::syntax {
 
@@ -2250,9 +2251,13 @@ TokenSyntax InterfaceDefinitionSyntax::getName()
    return TokenSyntax {m_root, m_data->getChild(Cursor::Name).get()};
 }
 
-InterfaceExtendsClauseSyntax InterfaceDefinitionSyntax::getExtendsFrom()
+std::optional<InterfaceExtendsClauseSyntax> InterfaceDefinitionSyntax::getExtendsFrom()
 {
-   return InterfaceExtendsClauseSyntax {m_root, m_data->getChild(Cursor::ExtendsFrom).get()};
+   RefCountPtr<SyntaxData> extendsData = m_data->getChild(Cursor::ExtendsFrom);
+   if (!extendsData) {
+      return std::nullopt;
+   }
+   return InterfaceExtendsClauseSyntax {m_root, extendsData.get()};
 }
 
 MemberDeclBlockSyntax InterfaceDefinitionSyntax::getMembers()
@@ -2288,7 +2293,7 @@ InterfaceDefinitionSyntax InterfaceDefinitionSyntax::withExtendsFrom(std::option
    if (extendsFrom.has_value()) {
       extendsFromRaw = extendsFrom->getRaw();
    } else {
-      extendsFromRaw = RawSyntax::missing(SyntaxKind::InterfaceExtendsClause);
+      extendsFromRaw = nullptr;
    }
    return m_data->replaceChild<InterfaceDefinitionSyntax>(extendsFromRaw, Cursor::ExtendsFrom);
 }
@@ -2390,29 +2395,29 @@ TokenSyntax SourceFileSyntax::getEofToken()
    return TokenSyntax{m_root, m_data->getChild(Cursor::EOFToken).get()};
 }
 
-CodeBlockItemListSyntax SourceFileSyntax::getStatements()
+TopStmtListSyntax SourceFileSyntax::getStatements()
 {
-   return CodeBlockItemListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
+   return TopStmtListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
 }
 
-SourceFileSyntax SourceFileSyntax::withStatements(std::optional<CodeBlockItemListSyntax> statements)
+SourceFileSyntax SourceFileSyntax::withStatements(std::optional<TopStmtListSyntax> statements)
 {
    RefCountPtr<RawSyntax> rawStatements;
    if (statements.has_value()) {
       rawStatements = statements->getRaw();
    } else {
-      rawStatements = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
+      rawStatements = RawSyntax::missing(SyntaxKind::TopStmtList);
    }
    return m_data->replaceChild<SourceFileSyntax>(rawStatements, Cursor::Statements);
 }
 
-SourceFileSyntax SourceFileSyntax::addStatement(CodeBlockItemSyntax statement)
+SourceFileSyntax SourceFileSyntax::addStatement(TopStmtSyntax statement)
 {
    RefCountPtr<RawSyntax> rawStatements = getRaw()->getChild(Cursor::Statements);
    if (rawStatements) {
       rawStatements->append(statement.getRaw());
    } else {
-      rawStatements = RawSyntax::make(SyntaxKind::CodeBlockItemList, {statement.getRaw()}, SourcePresence::Present);
+      rawStatements = RawSyntax::make(SyntaxKind::TopStmtList, {statement.getRaw()}, SourcePresence::Present);
    }
    return m_data->replaceChild<SourceFileSyntax>(rawStatements, Cursor::Statements);
 }

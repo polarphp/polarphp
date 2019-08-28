@@ -13,6 +13,7 @@
 #define POLARPHP_SYNTAX_SYNTAX_NODE_STMT_NODES_FWD_H
 
 #include "polarphp/syntax/SyntaxCollection.h"
+#include "polarphp/syntax/SyntaxKind.h"
 
 namespace polar::syntax {
 

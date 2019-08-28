@@ -13,6 +13,7 @@
 #define POLARPHP_SYNTAX_SYNTAX_NODE_DECL_NODES_FWD_H
 
 #include "polarphp/syntax/SyntaxCollection.h"
+#include "polarphp/syntax/SyntaxKind.h"
 
 namespace polar::syntax {
 
@@ -51,6 +52,10 @@ class ClassDefinitionSyntax;
 class InterfaceDefinitionSyntax;
 class TraitDefinitionSyntax;
 class SourceFileSyntax;
+
+// stmt syntax nodes forward declares
+class TopStmtSyntax;
+using TopStmtListSyntax = SyntaxCollection<SyntaxKind::TopStmtList, TopStmtSyntax>;
 
 ///
 /// type: SyntaxCollection

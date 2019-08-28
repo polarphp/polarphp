@@ -1819,7 +1819,7 @@ class ClassDefinitionSyntax final : public DeclSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 6;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 8;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
 
    enum Cursor : SyntaxChildrenCountType
    {
@@ -1898,8 +1898,8 @@ private:
 class InterfaceDefinitionSyntax final : public DeclSyntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 6;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 6;
+   constexpr static std::uint8_t CHILDREN_COUNT = 4;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
    enum Cursor : SyntaxChildrenCountType
    {
       ///
@@ -1914,7 +1914,7 @@ public:
       Name,
       ///
       /// type: InterfaceExtendsClauseSyntax
-      /// optional: false
+      /// optional: true
       ///
       ExtendsFrom,
       ///
@@ -1933,7 +1933,7 @@ public:
 
    TokenSyntax getInterfaceToken();
    TokenSyntax getName();
-   InterfaceExtendsClauseSyntax getExtendsFrom();
+   std::optional<InterfaceExtendsClauseSyntax> getExtendsFrom();
    MemberDeclBlockSyntax getMembers();
 
    InterfaceDefinitionSyntax withInterfaceToken(std::optional<TokenSyntax> interfaceToken);
@@ -1962,8 +1962,8 @@ private:
 class TraitDefinitionSyntax final : public DeclSyntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 5;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 5;
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
    enum Cursor : SyntaxChildrenCountType
    {
       ///
@@ -2012,6 +2012,10 @@ private:
    void validate();
 };
 
+///
+/// sourcefile:
+///   topstmts EOFToken
+///
 class SourceFileSyntax final : public Syntax
 {
 public:
@@ -2019,11 +2023,15 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: CodeBlockItemListSyntax
+      ///
+      /// type: TopStmtListSyntax
       /// optional: false
+      ///
       Statements,
+      ///
       /// type: TokenSyntax
       /// optional: false
+      ///
       EOFToken
    };
 
@@ -2035,9 +2043,9 @@ public:
    }
 
    TokenSyntax getEofToken();
-   CodeBlockItemListSyntax getStatements();
-   SourceFileSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);
-   SourceFileSyntax addStatement(CodeBlockItemSyntax statement);
+   TopStmtListSyntax getStatements();
+   SourceFileSyntax withStatements(std::optional<TopStmtListSyntax> statements);
+   SourceFileSyntax addStatement(TopStmtSyntax statement);
    SourceFileSyntax withEofToken(std::optional<TokenSyntax> eofToken);
 
    static bool kindOf(SyntaxKind kind)
