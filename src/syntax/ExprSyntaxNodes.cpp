@@ -11,6 +11,7 @@
 
 #include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
 #include "polarphp/syntax/syntaxnode/DeclSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
 
 namespace polar::syntax {
 
@@ -2610,9 +2611,9 @@ std::optional<ReturnTypeClauseSyntax> ClassicLambdaExprSyntax::getReturnType()
    return ReturnTypeClauseSyntax {m_root, returnTypeData.get()};
 }
 
-CodeBlockSyntax ClassicLambdaExprSyntax::getBody()
+InnerCodeBlockStmtSyntax ClassicLambdaExprSyntax::getBody()
 {
-   return CodeBlockSyntax {m_root, m_data->getChild(Cursor::Body).get()};
+   return InnerCodeBlockStmtSyntax {m_root, m_data->getChild(Cursor::Body).get()};
 }
 
 ClassicLambdaExprSyntax
@@ -2682,9 +2683,9 @@ ClassicLambdaExprSyntax::withBody(std::optional<CodeBlockSyntax> body)
    if (body.has_value()) {
       bodyRaw = body->getRaw();
    } else {
-      bodyRaw = RawSyntax::missing(SyntaxKind::CodeBlock);
+      bodyRaw = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
-   return m_data->replaceChild<ClassicLambdaExprSyntax>(bodyRaw, Cursor::Body);
+   return m_data->replaceChild<InnerCodeBlockStmtSyntax>(bodyRaw, Cursor::Body);
 }
 
 ///

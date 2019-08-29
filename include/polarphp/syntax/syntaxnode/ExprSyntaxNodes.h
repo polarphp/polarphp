@@ -85,8 +85,10 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax (T_NULL)
       /// optional: false
+      ///
       NullKeyword,
    };
 public:
@@ -126,8 +128,10 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 0;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: ExprSyntax
       /// optional: true
+      ///
       Expr,
    };
 
@@ -340,6 +344,7 @@ public:
       ClassName,
       ///
       /// type: TokenSyntax (T_PAAMAYIM_NEKUDOTAYIM)
+      /// optional: false
       ///
       SeparatorToken,
       ///
@@ -400,10 +405,11 @@ public:
       /// type: Syntax
       /// optional: false
       /// node choices: true
-      /// ---------------------------------------
+      /// ---------------------------------------------------
       /// node choice: NameSyntax
-      /// ---------------------------------------
+      /// ---------------------------------------------------
       /// node choice: ClassConstIdentifierExprSyntax
+      ///
       Identifier
    };
 
@@ -1490,6 +1496,7 @@ public:
       Item,
       ///
       /// type: TokenSyntax (T_COMMA)
+      /// optional: true
       ///
       TrailingComma
    };
@@ -1630,6 +1637,7 @@ public:
       Item,
       ///
       /// type: TokenSyntax (T_COMMA)
+      /// optional: true
       ///
       TrailingComma
    };
@@ -2505,7 +2513,7 @@ public:
       ///
       ReturnType,
       ///
-      /// type: CodeBlockSyntax
+      /// type: InnerCodeBlockStmtSyntax
       /// optional: false
       ///
       Body
@@ -2524,14 +2532,14 @@ public:
    ParameterClauseSyntax getParameterListClause();
    std::optional<UseLexicalVarClauseSyntax> getLexicalVarsClause();
    std::optional<ReturnTypeClauseSyntax> getReturnType();
-   CodeBlockSyntax getBody();
+   InnerCodeBlockStmtSyntax getBody();
 
    ClassicLambdaExprSyntax withFuncToken(std::optional<TokenSyntax> funcToken);
    ClassicLambdaExprSyntax withReturnRefToken(std::optional<TokenSyntax> returnRefToken);
    ClassicLambdaExprSyntax withParameterListClause(std::optional<ParameterClauseSyntax> parameterListClause);
    ClassicLambdaExprSyntax withLexicalVarsClause(std::optional<UseLexicalVarClauseSyntax> lexicalVars);
    ClassicLambdaExprSyntax withReturnType(std::optional<ReturnTypeClauseSyntax> returnType);
-   ClassicLambdaExprSyntax withBody(std::optional<CodeBlockSyntax> body);
+   ClassicLambdaExprSyntax withBody(std::optional<InnerCodeBlockStmtSyntax> body);
 
    static bool kindOf(SyntaxKind kind)
    {

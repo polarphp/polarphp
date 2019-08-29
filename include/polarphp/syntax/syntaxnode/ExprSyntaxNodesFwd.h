@@ -137,6 +137,9 @@ class MemberDeclBlockSyntax;
 class ParameterClauseSyntax;
 class ReturnTypeClauseSyntax;
 
+// Stmt Syntax nodes forward declares
+class InnerCodeBlockStmtSyntax;
+
 ///
 /// type: SyntaxCollection
 /// element type: ExprSyntax
