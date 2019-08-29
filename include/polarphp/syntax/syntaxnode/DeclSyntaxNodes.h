@@ -195,12 +195,12 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_NS_SEPARATOR)
       /// optional: true
       ///
       NsSeparator,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_IDENTIFIER_STRING)
       /// optional: false
       ///
       Name
@@ -247,12 +247,12 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_NAMESPACE)
       /// optional: true
       ///
       NsToken,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_NS_SEPARATOR)
       /// optional: true
       ///
       NsSeparator,
@@ -303,7 +303,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_EQUAL)
       /// optional: false
       ///
       EqualToken,
@@ -411,7 +411,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_QUESTION_MARK)
       /// optional: true
       ///
       QuestionToken,
@@ -461,7 +461,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_COLON)
       /// optional: false
       ///
       ColonToken,
@@ -516,17 +516,17 @@ public:
       ///
       TypeHint,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_AMPERSAND)
       /// optional: true
       ///
       ReferenceMark,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_ELLIPSIS)
       /// optional: true
       ///
       VariadicMark,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_VARIABLE)
       /// optional: false
       ///
       Variable,
@@ -583,7 +583,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_LEFT_PAREN)
       /// optional: false
       ///
       LeftParen,
@@ -593,7 +593,7 @@ public:
       ///
       Parameters,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
       ///
       RightParen
@@ -667,7 +667,7 @@ public:
       ///
       ReturnType,
       ///
-      /// type: CodeBlockSyntax
+      /// type: InnerCodeBlockStmtSyntax
       /// optional: false
       ///
       Body
@@ -685,14 +685,14 @@ public:
    TokenSyntax getFuncName();
    ParameterClauseSyntax getParameterClause();
    std::optional<TokenSyntax> getReturnType();
-   CodeBlockSyntax getBody();
+   InnerCodeBlockStmtSyntax getBody();
 
    FunctionDefinitionSyntax withFuncToken(std::optional<TokenSyntax> funcToken);
    FunctionDefinitionSyntax withReturnRefToken(std::optional<TokenSyntax> returnRefFlagToken);
    FunctionDefinitionSyntax withFuncName(std::optional<TokenSyntax> funcName);
    FunctionDefinitionSyntax withParameterClause(std::optional<ParameterClauseSyntax> parameterClause);
    FunctionDefinitionSyntax withReturnType(std::optional<TokenSyntax> returnType);
-   FunctionDefinitionSyntax withBody(std::optional<CodeBlockSyntax> body);
+   FunctionDefinitionSyntax withBody(std::optional<InnerCodeBlockStmtSyntax> body);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -773,7 +773,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_EXTENDS)
       /// optional: false
       ///
       ExtendToken,
@@ -824,7 +824,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_IMPLEMENTS)
       /// optional: false
       ///
       ImplementToken,
@@ -875,7 +875,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_EXTENDS)
       /// optional: false
       ///
       ExtendsToken,
@@ -927,7 +927,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_VARIABLE)
       /// optional: false
       ///
       Variable,
@@ -982,7 +982,7 @@ public:
       Identifier,
       ///
       /// type: InitializerClauseSyntax
-      /// optional: true
+      /// optional: false
       ///
       Initializer
    };
@@ -995,7 +995,7 @@ public:
    }
 
    IdentifierSyntax getIdentifier();
-   std::optional<InitializerClauseSyntax> getInitializer();
+   InitializerClauseSyntax getInitializer();
    ClassConstClauseSyntax withIdentifier(std::optional<IdentifierSyntax> identifier);
    ClassConstClauseSyntax withInitializer(std::optional<InitializerClauseSyntax> initializer);
 
@@ -1071,7 +1071,7 @@ private:
 };
 
 ///
-/// class_statement:
+/// class_property_decl:
 ///    member_modifiers optional_type property_list
 ///
 class ClassPropertyDeclSyntax final : public DeclSyntax
@@ -1145,7 +1145,7 @@ public:
       ///
       Modifiers,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_CONST)
       /// optional: false
       ///
       ConstToken,
@@ -1204,12 +1204,12 @@ public:
       ///
       Modifiers,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_FUNCTION)
       /// optional: false
       ///
       FunctionToken,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_AMPERSAND)
       /// optional: true
       ///
       ReturnRefToken,
@@ -1219,7 +1219,7 @@ public:
       ///
       FuncName,
       ///
-      /// type: ParameterClauseSyntax
+      /// type: ParameterListClauseSyntax
       /// optional: false
       ///
       ParameterListClause,
@@ -1343,7 +1343,7 @@ public:
       ///
       BaseName,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_PAAMAYIM_NEKUDOTAYIM)
       /// optional: false
       ///
       Separator,
@@ -1401,7 +1401,7 @@ public:
       ///
       MethodReference,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_INSTEADOF)
       /// optional: false
       ///
       InsteadOfToken,
@@ -1462,7 +1462,7 @@ public:
       ///
       MethodReference,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_AS)
       /// optional: false
       ///
       AsToken,
@@ -1480,9 +1480,9 @@ public:
       /// type: Syntax
       /// optional: true
       /// node choices: true
-      /// ------------------------------
-      /// node choice: TokenSyntax
-      /// ------------------------------
+      /// -------------------------------------------------
+      /// node choice: TokenSyntax (T_IDENTIFIER_STRING)
+      /// -------------------------------------------------
       /// node choice: IdentifierSyntax
       ///
       AliasName
@@ -1547,7 +1547,7 @@ public:
       ///
       Adaptation,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_SEMICOLON)
       /// optional: false
       ///
       Semicolon
@@ -1598,7 +1598,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_LEFT_PAREN)
       /// optional: false
       ///
       LeftBrace,
@@ -1608,7 +1608,7 @@ public:
       ///
       AdaptationList,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
       ///
       RightBrace
@@ -1656,7 +1656,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_USE)
       /// optional: false
       ///
       UseToken,
@@ -1719,7 +1719,7 @@ public:
       ///
       Decl,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_SEMICOLON)
       /// optional: true
       ///
       Semicolon
@@ -1764,7 +1764,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_LEFT_PAREN)
       /// optional；false
       ///
       LeftBrace,
@@ -1774,7 +1774,7 @@ public:
       ///
       Members,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
       ///
       RightBrace
@@ -1812,7 +1812,7 @@ private:
 
 ///
 /// class_declaration_statement:
-///   class_modifiers T_CLASS T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+///   class_modifiers T_CLASS T_IDENTIFIER_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
 /// | T_CLASS T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
 ///
 class ClassDefinitionSyntax final : public DeclSyntax
@@ -1834,7 +1834,7 @@ public:
       ///
       ClassToken,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_IDENTIFIER_STRING)
       /// optional: false
       ///
       Name,
@@ -1967,12 +1967,12 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_TRAIT)
       /// optional: false
       ///
       TraitToken,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_IDENTIFIER_STRING)
       /// optional: false
       ///
       Name,
@@ -2029,7 +2029,7 @@ public:
       ///
       Statements,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (EOF)
       /// optional: false
       ///
       EOFToken

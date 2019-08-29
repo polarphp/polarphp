@@ -55,6 +55,7 @@ class SourceFileSyntax;
 
 // stmt syntax nodes forward declares
 class TopStmtSyntax;
+class InnerCodeBlockStmtSyntax;
 using TopStmtListSyntax = SyntaxCollection<SyntaxKind::TopStmtList, TopStmtSyntax>;
 
 ///

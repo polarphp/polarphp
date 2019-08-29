@@ -749,9 +749,9 @@ std::optional<TokenSyntax> FunctionDefinitionSyntax::getReturnType()
    return TokenSyntax {m_root, returnTypeData.get()};
 }
 
-CodeBlockSyntax FunctionDefinitionSyntax::getBody()
+InnerCodeBlockStmtSyntax FunctionDefinitionSyntax::getBody()
 {
-   return CodeBlockSyntax {m_root, m_data->getChild(Cursor::Body).get()};
+   return InnerCodeBlockStmtSyntax {m_root, m_data->getChild(Cursor::Body).get()};
 }
 
 FunctionDefinitionSyntax
@@ -815,13 +815,13 @@ FunctionDefinitionSyntax::withReturnType(std::optional<TokenSyntax> returnType)
 }
 
 FunctionDefinitionSyntax
-FunctionDefinitionSyntax::withBody(std::optional<CodeBlockSyntax> body)
+FunctionDefinitionSyntax::withBody(std::optional<InnerCodeBlockStmtSyntax> body)
 {
    RefCountPtr<RawSyntax> bodyRaw;
    if (body.has_value()) {
       bodyRaw = body->getRaw();
    } else {
-      bodyRaw = RawSyntax::missing(SyntaxKind::CodeBlock);
+      bodyRaw = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
    return m_data->replaceChild<FunctionDefinitionSyntax>(bodyRaw, Cursor::Body);
 }
@@ -1943,13 +1943,9 @@ IdentifierSyntax ClassConstClauseSyntax::getIdentifier()
    return IdentifierSyntax {m_root, m_data->getChild(Cursor::Identifier).get()};
 }
 
-std::optional<InitializerClauseSyntax> ClassConstClauseSyntax::getInitializer()
+InitializerClauseSyntax ClassConstClauseSyntax::getInitializer()
 {
-   RefCountPtr<SyntaxData> initializerData = m_data->getChild(Cursor::Initializer);
-   if (!initializerData) {
-      return std::nullopt;
-   }
-   return InitializerClauseSyntax {m_root, initializerData.get()};
+   return InitializerClauseSyntax {m_root, m_data->getChild(Cursor::Initializer).get()};
 }
 
 ClassConstClauseSyntax ClassConstClauseSyntax::withIdentifier(std::optional<IdentifierSyntax> identifier)
@@ -1969,7 +1965,7 @@ ClassConstClauseSyntax ClassConstClauseSyntax::withInitializer(std::optional<Ini
    if (initializer.has_value()) {
       initializerRaw = initializer->getRaw();
    } else {
-      initializerRaw = RawSyntax::missing(SyntaxKind::Identifier);
+      initializerRaw = RawSyntax::missing(SyntaxKind::InitializerClause);
    }
    return m_data->replaceChild<ClassConstClauseSyntax>(initializerRaw, Cursor::Initializer);
 }

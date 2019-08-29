@@ -126,7 +126,7 @@
 
 #define make_missing_token(token) \
    RawSyntax::missing(TokenKindType::token, \
-                     OwnedString::makeUnowned(get_token_text(TokenKindType::token)));
+                     OwnedString::makeUnowned(get_token_text(TokenKindType::token)))
 
 namespace polar::syntax {
 
