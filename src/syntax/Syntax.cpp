@@ -32,6 +32,9 @@ const TokenTextChoicesType Syntax::CHILD_TOKEN_TEXT_CHOICES{};
 const TokenChoicesType Syntax::CHILD_TOKEN_CHOICES{};
 const NodeChoicesType Syntax::CHILD_NODE_CHOICES{};
 
+Syntax::~Syntax()
+{}
+
 RefCountPtr<RawSyntax> Syntax::getRaw() const
 {
    return m_data->getRaw();
@@ -54,7 +57,7 @@ void Syntax::dump() const
    return getRaw()->dump();
 }
 
-void Syntax::dump(utils::RawOutStream &outStream, unsigned indent) const
+void Syntax::dump(utils::RawOutStream &outStream, [[maybe_unused]] unsigned indent) const
 {
    return getRaw()->dump(outStream, 0);
 }

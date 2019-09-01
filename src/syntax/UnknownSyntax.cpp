@@ -26,6 +26,11 @@
 
 namespace polar::syntax {
 
+UnknownSyntax::~UnknownSyntax()
+{
+
+}
+
 void UnknownSyntax::validate() const
 {
   assert(m_data->getRaw()->isUnknown());

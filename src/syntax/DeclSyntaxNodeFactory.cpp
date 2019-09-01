@@ -270,7 +270,8 @@ ExtendsFromClauseSyntax
 DeclSyntaxNodeFactory::makeExtendsFromClause(TokenSyntax extendsToken, NameSyntax name, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::ExtendsFromClause, {
-                                                      extendsToken.getRaw()
+                                                      extendsToken.getRaw(),
+                                                      name.getRaw()
                                                    }, SourcePresence::Present, arena);
    return make<ExtendsFromClauseSyntax>(target);
 }
@@ -483,6 +484,9 @@ DeclSyntaxNodeFactory::makeClassDefinition(std::optional<ClassModififerListSynta
                                                       modifiers.has_value() ? modifiers->getRaw() : nullptr,
                                                       classToken.getRaw(),
                                                       name.getRaw(),
+                                                      extendsFrom.has_value() ? extendsFrom->getRaw() : nullptr,
+                                                      implementsList.has_value() ? implementsList->getRaw() : nullptr,
+                                                      members.getRaw()
                                                    }, SourcePresence::Present, arena);
    return make<ClassDefinitionSyntax>(target);
 }

@@ -29,8 +29,6 @@
 
 namespace polar::syntax {
 
-#pragma mark unknown-syntax API
-
 /// A chunk of "unknown" syntax.
 ///
 /// Effectively wraps a tree of RawSyntax.
@@ -43,10 +41,13 @@ public:
       : Syntax(root, data)
    {}
 
+   virtual ~UnknownSyntax();
+
    static bool classOf(const Syntax *syntax)
    {
       return syntax->isUnknown();
    }
+
 private:
    void validate() const;
 };

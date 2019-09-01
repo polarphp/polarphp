@@ -95,7 +95,7 @@ public:
       assert(m_data != nullptr);
    }
 
-   virtual ~Syntax() {}
+   virtual ~Syntax();
 
    /// Get the kind of syntax.
    SyntaxKind getKind() const;
@@ -210,12 +210,12 @@ public:
       return m_root == other.m_root && m_data == other.m_data;
    }
 
-   static bool kindOf(SyntaxKind kind)
+   static bool kindOf([[maybe_unused]] SyntaxKind kind)
    {
       return true;
    }
 
-   static bool classOf(const Syntax *syntax)
+   static bool classOf([[maybe_unused]] const Syntax *syntax)
    {
       // Trivially true.
       return true;
@@ -243,9 +243,6 @@ public:
    {
       return m_data->getAbsolutePositionBeforeLeadingTrivia();
    }
-
-   // TODO: hasSameStructureAs ?
-
 protected:
    /// A strong reference to the root node of the tree in which this piece of
    /// syntax resides.
