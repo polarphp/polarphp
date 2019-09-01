@@ -213,7 +213,6 @@ polar_check_headers(
    mach/mach.h
    zlib.h)
 
-
 # Checks for typedefs, structures, and compiler characteristics.
 # -------------------------------------------------------------------------
 

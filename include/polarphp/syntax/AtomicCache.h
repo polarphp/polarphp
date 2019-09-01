@@ -24,7 +24,7 @@
 #define POLARPHP_SYNTAX_ATOMICCACHE_H
 
 #include <functional>
-#include "polarphp/Syntax/References.h"
+#include "polarphp/syntax/References.h"
 #include "polarphp/basic/adt/StlExtras.h"
 
 namespace polar::syntax {

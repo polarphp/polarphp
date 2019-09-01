@@ -17,7 +17,6 @@
 #include "CLI/CLI.hpp"
 #include "lib/Defs.h"
 #include "lib/Commands.h"
-#include "lib/ProcessTitle.h"
 
 #include <vector>
 #include <string>

@@ -156,6 +156,10 @@ endif()
 string(TOLOWER ${CMAKE_BUILD_TYPE} POLAR_BUILD_TYPE)
 string(TOUPPER ${CMAKE_BUILD_TYPE} POLAR_BUILD_CONFIG)
 
+if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL Linux)
+   set(LINUX ON)
+endif()
+
 if (CMAKE_BUILD_TYPE AND
       NOT POLAR_BUILD_TYPE MATCHES "^(debug|release|relwithdebinfo|minsizerel)$")
    message(FATAL_ERROR "Invalid value for CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
@@ -187,14 +191,14 @@ option(POLAR_ENABLE_LIBGCC
 option(POLAR_WITH_VALGRIND
    "whether to enable valgrind support"
    OFF)
-set(POLAR_VALGRIND_DIR "" CACHE string "the valgrind directory")
+set(POLAR_VALGRIND_DIR "" CACHE STRING "the valgrind directory")
 
 option(POLAR_ENABLE_GCOV
    "Enable GCOV code coverage (requires LTP) - FOR DEVELOPERS ONLY!!"
    OFF)
 
-set(POLARPHP_CONFIG_FILE_PATH "Default" CACHE string "Set the path in which to look for php.ini")
-set(POLARPHP_CONFIG_FILE_SCAN_DIR "Default" CACHE string "Set the path where to scan for configuration files")
+set(POLARPHP_CONFIG_FILE_PATH "Default" CACHE STRING "Set the path in which to look for php.ini")
+set(POLARPHP_CONFIG_FILE_SCAN_DIR "Default" CACHE STRING "Set the path where to scan for configuration files")
 
 ##
 ## DTRACE CHECKS
@@ -421,8 +425,8 @@ set(POLAR_DEFAULT_TARGET_TRIPLE "${POLAR_HOST_TRIPLE}" CACHE STRING
 set(TARGET_TRIPLE "${POLAR_DEFAULT_TARGET_TRIPLE}")
 message(STATUS "polarphp host triple: ${POLAR_HOST_TRIPLE}")
 message(STATUS "polarphp default target triple: ${POLAR_DEFAULT_TARGET_TRIPLE}")
-include(HandlePolarOptions)
 include(ProcesseRequirePackages)
+include(HandlePolarOptions)
 
 string(TIMESTAMP _buildDate "%Y-%m-%d %H:%M")
 
