@@ -2058,7 +2058,7 @@ private:
 /// catch_arg_type_hint_item:
 ///   name '|'
 ///
-class CatchArgTypeHintItemSyntax final : Syntax
+class CatchArgTypeHintItemSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
