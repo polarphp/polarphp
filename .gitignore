@@ -37,6 +37,7 @@ temp
 **/CMakeLists.txt.autosave
 !cmake/Config.guess
 build/
+cmake-build-debug/
 **/.idea
 **/.vscode
 devtools/gyb/vendor/

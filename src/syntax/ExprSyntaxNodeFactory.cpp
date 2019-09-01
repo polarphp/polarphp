@@ -2049,19 +2049,38 @@ ExprSyntaxNodeFactory::makeBlankFuncLikeExpr(RefCountPtr<SyntaxArena> arena)
 ArrayStructureAssignmentExprSyntax
 ExprSyntaxNodeFactory::makeBlankArrayStructureAssignmentExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ArrayStructureAssignmentExpr, {
+               RawSyntax::missing(SyntaxKind::SimplifiedArrayCreateExpr), // ArrayStructure
+               make_missing_token(T_EQUAL), // EqualToken
+               RawSyntax::missing(SyntaxKind::Expr), // ValueExpr
+            }, SourcePresence::Present, arena);
+   return make<ArrayStructureAssignmentExprSyntax>(target);
 }
 
 ListStructureClauseSyntax
 ExprSyntaxNodeFactory::makeBlankListStructureClause(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ListStructureClause, {
+               make_missing_token(T_LIST), // ListToken
+               make_missing_token(T_LEFT_PAREN), // LeftParen
+               RawSyntax::missing(SyntaxKind::ArrayPairItemList), // PairItemList
+               make_missing_token(T_RIGHT_PAREN), // RightParen
+            }, SourcePresence::Present, arena);
+   return make<ListStructureClauseSyntax>(target);
 }
 
 ListStructureAssignmentExprSyntax
 ExprSyntaxNodeFactory::makeBlankListStructureAssignmentExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ListStructureAssignmentExpr, {
+               RawSyntax::missing(SyntaxKind::ListStructureClause), // ListStrcuture
+               make_missing_token(T_EQUAL), // EqualToken
+               RawSyntax::missing(SyntaxKind::Expr) // ValueExpr
+            }, SourcePresence::Present, arena);
+   return make<ListStructureAssignmentExprSyntax>(target);
 }
 
 AssignmentExprSyntax
@@ -2069,8 +2088,9 @@ ExprSyntaxNodeFactory::makeBlankAssignmentExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::AssignmentExpr, {
-               RawSyntax::missing(TokenKindType::T_EQUAL,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_EQUAL)))
+               RawSyntax::missing(SyntaxKind::VariableExpr), // Target
+               make_missing_token(T_EQUAL), // AssignToken
+               RawSyntax::missing(SyntaxKind::Expr), // ValueExpr
             }, SourcePresence::Present, arena);
    return make<AssignmentExprSyntax>(target);
 }
@@ -2078,133 +2098,260 @@ ExprSyntaxNodeFactory::makeBlankAssignmentExpr(RefCountPtr<SyntaxArena> arena)
 CompoundAssignmentExprSyntax
 ExprSyntaxNodeFactory::makeBlankCompoundAssignmentExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::CompoundAssignmentExpr, {
+               RawSyntax::missing(SyntaxKind::VariableExpr), // Target
+               make_missing_token(T_PLUS_EQUAL), // CompoundAssignToken
+               RawSyntax::missing(SyntaxKind::Expr), // ValueExpr
+            }, SourcePresence::Present, arena);
+   return make<CompoundAssignmentExprSyntax>(target);
 }
 
 LogicalExprSyntax
 ExprSyntaxNodeFactory::makeBlankLogicalExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::LogicalExpr, {
+               RawSyntax::missing(SyntaxKind::Expr), // Lhs
+               make_missing_token(T_LOGICAL_AND), // LogicalOperator
+               RawSyntax::missing(SyntaxKind::Expr), // Rhs
+            }, SourcePresence::Present, arena);
+   return make<LogicalExprSyntax>(target);
 }
 
 BitLogicalExprSyntax
 ExprSyntaxNodeFactory::makeBlankBitLogicalExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::BitLogicalExpr, {
+               RawSyntax::missing(SyntaxKind::Expr), // Lhs
+               make_missing_token(T_AMPERSAND), // BitLogicalOperator
+               RawSyntax::missing(SyntaxKind::Expr), // Rhs
+            }, SourcePresence::Present, arena);
+   return make<BitLogicalExprSyntax>(target);
 }
 
 RelationExprSyntax
 ExprSyntaxNodeFactory::makeBlankRelationExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::RelationExpr, {
+               RawSyntax::missing(SyntaxKind::Expr), // Lhs
+               make_missing_token(T_IS_IDENTICAL), // RelationOperator
+               RawSyntax::missing(SyntaxKind::Expr), // Rhs
+            }, SourcePresence::Present, arena);
+   return make<RelationExprSyntax>(target);
 }
 
 CastExprSyntax
 ExprSyntaxNodeFactory::makeBlankCastExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::CastExpr, {
+               make_missing_token(T_INT_CAST), // CastOperator
+               RawSyntax::missing(SyntaxKind::Expr), // ValueExpr
+            }, SourcePresence::Present, arena);
+   return make<CastExprSyntax>(target);
 }
 
 ExitExprArgClauseSyntax
 ExprSyntaxNodeFactory::makeBlankExitExprArgClause(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ExitExprArgClause, {
+               make_missing_token(T_LEFT_PAREN), // LeftParenToken
+               nullptr, // ValueExpr
+               make_missing_token(T_RIGHT_PAREN), // RightParenToken
+            }, SourcePresence::Present, arena);
+   return make<ExitExprArgClauseSyntax>(target);
 }
 
 ExitExprSyntax
 ExprSyntaxNodeFactory::makeBlankExitExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ExitExpr, {
+               make_missing_token(T_EXIT), // ExitToken
+               RawSyntax::missing(SyntaxKind::ExitExprArgClause), // ArgClause
+            }, SourcePresence::Present, arena);
+   return make<ExitExprSyntax>(target);
 }
 
 YieldExprSyntax
 ExprSyntaxNodeFactory::makeBlankYieldExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::YieldExpr, {
+               make_missing_token(T_YIELD), // YieldToken
+               RawSyntax::missing(SyntaxKind::Expr), // KeyExpr
+               make_missing_token(T_DOUBLE_ARROW), // DoubleArrowToken
+               RawSyntax::missing(SyntaxKind::Expr), // ValueExpr
+            }, SourcePresence::Present, arena);
+   return make<YieldExprSyntax>(target);
 }
 
 YieldFromExprSyntax
 ExprSyntaxNodeFactory::makeBlankYieldFromExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::YieldFromExpr, {
+               make_missing_token(T_YIELD_FROM), // YieldFromToken
+               RawSyntax::missing(SyntaxKind::Expr), // Expr
+            }, SourcePresence::Present, arena);
+   return make<YieldFromExprSyntax>(target);
 }
 
 CloneExprSyntax
 ExprSyntaxNodeFactory::makeBlankCloneExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::CloneExpr, {
+               make_missing_token(T_CLONE), // CloneToken
+               RawSyntax::missing(SyntaxKind::Expr), // Expr
+            }, SourcePresence::Present, arena);
+   return make<CloneExprSyntax>(target);
 }
 
 EncapsVarOffsetSyntax
 ExprSyntaxNodeFactory::makeBlankEncapsVarOffset(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::EncapsVarOffset, {
+               nullptr, // MinusSign
+               make_missing_token(T_IDENTIFIER_STRING), // Offset
+            }, SourcePresence::Present, arena);
+   return make<EncapsVarOffsetSyntax>(target);
 }
 
 EncapsArrayVarSyntax
 ExprSyntaxNodeFactory::makeBlankEncapsArrayVar(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::EncapsArrayVar, {
+               make_missing_token(T_VARIABLE), // VarToken
+               make_missing_token(T_LEFT_SQUARE_BRACKET), // LeftSquareBracket
+               RawSyntax::missing(SyntaxKind::EncapsVarOffset), // Offset
+               make_missing_token(T_RIGHT_SQUARE_BRACKET) // RightSquareBracket
+            }, SourcePresence::Present, arena);
+   return make<EncapsArrayVarSyntax>(target);
 }
 
 EncapsObjPropSyntax
 ExprSyntaxNodeFactory::makeBlankEncapsObjProp(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::EncapsObjProp, {
+               make_missing_token(T_VARIABLE), // VarToken
+               make_missing_token(T_OBJECT_OPERATOR), // ObjOperatorToken
+               make_missing_token(T_IDENTIFIER_STRING), // IdentifierToken
+            }, SourcePresence::Present, arena);
+   return make<EncapsObjPropSyntax>(target);
 }
 
 EncapsDollarCurlyExprSyntax
 ExprSyntaxNodeFactory::makeBlankEncapsDollarCurlyExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::EncapsDollarCurlyExpr, {
+               make_missing_token(T_DOLLAR_OPEN_CURLY_BRACES), // DollarOpenCurlyToken
+               RawSyntax::missing(SyntaxKind::Expr), // Expr
+               make_missing_token(T_RIGHT_BRACE), // CloseCurlyToken
+            }, SourcePresence::Present, arena);
+   return make<EncapsDollarCurlyExprSyntax>(target);
 }
 
 EncapsDollarCurlyVarSyntax
 ExprSyntaxNodeFactory::makeBlankEncapsDollarCurlyVar(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::EncapsDollarCurlyVar, {
+               make_missing_token(T_DOLLAR_OPEN_CURLY_BRACES), // DollarOpenCurlyToken
+               make_missing_token(T_IDENTIFIER_STRING), // Varname
+               make_missing_token(T_RIGHT_BRACE), // CloseCurlyToken
+            }, SourcePresence::Present, arena);
+   return make<EncapsDollarCurlyVarSyntax>(target);
 }
 
 EncapsDollarCurlyArraySyntax
 ExprSyntaxNodeFactory::makeBlankEncapsDollarCurlyArray(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::EncapsDollarCurlyVar, {
+               make_missing_token(T_DOLLAR_OPEN_CURLY_BRACES), // DollarOpenCurlyToken
+               make_missing_token(T_IDENTIFIER_STRING), // Varname
+               make_missing_token(T_LEFT_SQUARE_BRACKET), // LeftSquareBracketToken
+               RawSyntax::missing(SyntaxKind::Expr), // IndexExpr
+               make_missing_token(T_RIGHT_SQUARE_BRACKET), // RightSquareBracketToken
+               make_missing_token(T_RIGHT_BRACE), // CloseCurlyToken
+            }, SourcePresence::Present, arena);
+   return make<EncapsDollarCurlyArraySyntax>(target);
 }
 
 EncapsCurlyVarSyntax
 ExprSyntaxNodeFactory::makeBlankEncapsCurlyVar(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::EncapsCurlyVar, {
+               make_missing_token(T_CURLY_OPEN), // CurlyOpen
+               make_missing_token(T_VARIABLE), // Variable
+               make_missing_token(T_RIGHT_BRACE), // CloseCurlyToken
+            }, SourcePresence::Present, arena);
+   return make<EncapsCurlyVarSyntax>(target);
 }
 
 EncapsVarSyntax
 ExprSyntaxNodeFactory::makeBlankEncapsVar(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::EncapsVar, {
+               RawSyntax::missing(SyntaxKind::Unknown) // Var
+            }, SourcePresence::Present, arena);
+   return make<EncapsVarSyntax>(target);
 }
 
 EncapsListItemSyntax
 ExprSyntaxNodeFactory::makeBlankEncapsListItem(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::EncapsListItem, {
+               make_missing_token(T_ENCAPSED_AND_WHITESPACE), // StrLiteral
+               nullptr // EncapsVar
+            }, SourcePresence::Present, arena);
+   return make<EncapsListItemSyntax>(target);
 }
 
 BackticksClauseSyntax
 ExprSyntaxNodeFactory::makeBlankBackticksClause(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::BackticksClause, {
+               RawSyntax::missing(SyntaxKind::Unknown), // Backticks
+            }, SourcePresence::Present, arena);
+   return make<BackticksClauseSyntax>(target);
 }
 
 HeredocExprSyntax
 ExprSyntaxNodeFactory::makeBlankHeredocExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::HeredocExpr, {
+               make_missing_token(T_START_HEREDOC), // StartHeredocToken
+               nullptr, // TextClause
+               make_missing_token(T_START_HEREDOC), // EndHeredocToken
+            }, SourcePresence::Present, arena);
+   return make<HeredocExprSyntax>(target);
 }
 
 EncapsListStringExprSyntax
 ExprSyntaxNodeFactory::makeBlankEncapsListStringExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::EncapsListStringExpr, {
+               make_missing_token(T_DOUBLE_QUOTE), // StartHeredocToken
+               RawSyntax::missing(SyntaxKind::EncapsListItem), // EncapsList
+               make_missing_token(T_DOUBLE_QUOTE), // EndHeredocToken
+            }, SourcePresence::Present, arena);
+   return make<EncapsListStringExprSyntax>(target);
 }
 
 TernaryExprSyntax
@@ -2268,19 +2415,38 @@ ExprSyntaxNodeFactory::makeBlankBinaryOperatorExpr(RefCountPtr<SyntaxArena> aren
 ShellCmdExprSyntax
 ExprSyntaxNodeFactory::makeBlankShellCmdExpr(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ShellCmdExpr, {
+               make_missing_token(T_BACKTICK), // LeftBacktick
+               nullptr, // BackticksExpr
+               make_missing_token(T_BACKTICK), // RightBacktick
+            }, SourcePresence::Present, arena);
+   return make<ShellCmdExprSyntax>(target);
 }
 
 UseLexicalVarClauseSyntax
 ExprSyntaxNodeFactory::makeBlankUseLexicalVarClause(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::UseLexicalVarClause, {
+               make_missing_token(T_USE), // UseToken
+               make_missing_token(T_LEFT_PAREN), // LeftParenToken
+               RawSyntax::missing(SyntaxKind::LexicalVarList), // LexicalVars
+               make_missing_token(T_RIGHT_PAREN), // RightParenToken
+            }, SourcePresence::Present, arena);
+   return make<UseLexicalVarClauseSyntax>(target);
 }
 
 LexicalVarItemSyntax
 ExprSyntaxNodeFactory::makeBlankLexicalVarItem(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::LexicalVarItem, {
+               nullptr, // ReferenceToken
+               make_missing_token(T_VARIABLE), // Variable
+               nullptr, // TrailingComma
+            }, SourcePresence::Present, arena);
+   return make<LexicalVarItemSyntax>(target);
 }
 
 } // polar::syntax

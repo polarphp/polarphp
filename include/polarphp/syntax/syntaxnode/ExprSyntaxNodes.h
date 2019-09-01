@@ -5104,7 +5104,7 @@ public:
    {
       ///
       /// type: Syntax
-      /// optional: true
+      /// optional: false
       /// node choices: true
       /// --------------------------------------------------------
       /// node choice: TokenSyntax (T_ENCAPSED_AND_WHITESPACE)
@@ -5221,7 +5221,7 @@ public:
       ///
       LeftQuoteToken,
       ///
-      /// type: EncapsItemListSyntax
+      /// type: EncapsListItemSyntax
       /// optional: false
       ///
       EncapsList,
