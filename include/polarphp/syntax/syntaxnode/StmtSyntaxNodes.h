@@ -2591,10 +2591,11 @@ private:
    void validate();
 };
 
-
+///
 /// use_type:
 ///   T_FUNCTION
 /// | T_CONST
+///
 class NamespaceUseTypeSyntax final : public Syntax
 {
 public:
@@ -2602,9 +2603,14 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax
       /// optional: false
       /// token choices: true
+      /// -------------------------------------
+      /// T_FUNCTION
+      /// T_CONST
+      ///
       TypeToken
    };
 #ifdef POLAR_DEBUG_BUILD
@@ -2652,14 +2658,20 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: SyntaxCollection
+      ///
+      /// type: NamespacePartListSyntax
       /// optional: false
+      ///
       Namespace,
-      /// type: TokenSyntax
-      /// opttional: true
-      AsToken,
+      ///
       /// type: TokenSyntax
       /// optional: true
+      ///
+      AsToken,
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
       IdentifierToken
    };
 
@@ -2705,11 +2717,15 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax
       /// optional: true
+      ///
       NsSeparator,
+      ///
       /// type: NamespaceUnprefixedUseDeclarationSyntax
       /// optional: false
+      ///
       UnprefixedUseDeclaration
    };
 
@@ -2752,11 +2768,15 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: NamespaceUseTypeSyntax
       /// optional: true
+      ///
       UseType,
+      ///
       /// type: NamespaceUnprefixedUseDeclarationSyntax
       /// optional: false
+      ///
       UnprefixedUseDeclaration
    };
 public:
@@ -3123,7 +3143,7 @@ public:
    }
 
    TokenSyntax getNamespaceToken();
-   NamespacePartListSyntax getNamespaceName();
+   std::optional<NamespacePartListSyntax> getNamespaceName();
    TopCodeBlockStmtSyntax getCodeBlock();
 
    NamespaceBlockStmtSyntax withNamespaceToken(std::optional<TokenSyntax> namespaceToken);
@@ -3212,7 +3232,7 @@ public:
       ///
       ConstToken,
       ///
-      /// type: ConstDefinitionListSyntax
+      /// type: ConstDeclareItemListSyntax
       /// optional: false
       ///
       Declarations,

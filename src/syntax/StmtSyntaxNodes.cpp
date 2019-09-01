@@ -4125,9 +4125,13 @@ TokenSyntax NamespaceBlockStmtSyntax::getNamespaceToken()
    return TokenSyntax{m_root, m_data->getChild(Cursor::NamespaceToken).get()};
 }
 
-NamespacePartListSyntax NamespaceBlockStmtSyntax::getNamespaceName()
+std::optional<NamespacePartListSyntax> NamespaceBlockStmtSyntax::getNamespaceName()
 {
-   return NamespacePartListSyntax{m_root, m_data->getChild(Cursor::NamespaceName).get()};
+   RefCountPtr<SyntaxData> nsNameData = m_data->getChild(Cursor::NamespaceName);
+   if (!nsNameData) {
+      return std::nullopt;
+   }
+   return NamespacePartListSyntax{m_root, nsNameData.get()};
 }
 
 TopCodeBlockStmtSyntax
