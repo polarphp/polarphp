@@ -113,7 +113,7 @@ public:
    static DereferencableScalarExprSyntax makeDereferencableScalarExpr(Syntax scalarValue, RefCountPtr<SyntaxArena> arena = nullptr);
    static AnonymousClassDefinitionClauseSyntax makeAnonymousClassDefinitionClause(
          TokenSyntax classToken, std::optional<ArgumentListClauseSyntax> ctorArguments,
-         ExtendsFromClauseSyntax extendsFrom, ImplementClauseSyntax implementsList,
+         std::optional<ExtendsFromClauseSyntax> extendsFrom, std::optional<ImplementClauseSyntax> implementsList,
          MemberDeclBlockSyntax members, RefCountPtr<SyntaxArena> arena = nullptr);
    static SimpleInstanceCreateExprSyntax makeSimpleInstanceCreateExpr(
          TokenSyntax newToken, ClassNameRefClauseSyntax className,
@@ -125,22 +125,108 @@ public:
                                                         ParameterClauseSyntax parameterListClause, std::optional<UseLexicalVarClauseSyntax> lexicalVarsClause,
                                                         std::optional<ReturnTypeClauseSyntax> returnType, InnerCodeBlockStmtSyntax body,
                                                         RefCountPtr<SyntaxArena> arena = nullptr);
+   static SimplifiedLambdaExprSyntax makeSimplifiedLambdaExpr(TokenSyntax fnToken, std::optional<TokenSyntax> returnRefToken,
+                                                              ParameterClauseSyntax parameterListClause, std::optional<ReturnTypeClauseSyntax> returnType,
+                                                              TokenSyntax doubleArrowToken, ExprSyntax body,
+                                                              RefCountPtr<SyntaxArena> arena = nullptr);
+   static LambdaExprSyntax makeLambdaExpr(std::optional<TokenSyntax> staticToken, ExprSyntax lambdaExpr,
+                                          RefCountPtr<SyntaxArena> arena = nullptr);
+   static ScalarExprSyntax makeScalarExpr(Syntax value, RefCountPtr<SyntaxArena> arena = nullptr);
+   static InstanceCreateExprSyntax makeInstanceCreateExpr(ExprSyntax createExpr, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassRefParentExprSyntax makeClassRefParentExpr(TokenSyntax parentKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassRefSelfExprSyntax makeClassRefSelfExpr(TokenSyntax selfKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassRefStaticExprSyntax makeClassRefStaticExpr(TokenSyntax staticKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
    static IntegerLiteralExprSyntax makeIntegerLiteralExpr(TokenSyntax digits, RefCountPtr<SyntaxArena> arena = nullptr);
    static FloatLiteralExprSyntax makeFloatLiteralExpr(TokenSyntax floatDigits, RefCountPtr<SyntaxArena> arena = nullptr);
-   static StringLiteralExprSyntax makeStringLiteralExpr(TokenSyntax str, RefCountPtr<SyntaxArena> arena = nullptr);
+   static StringLiteralExprSyntax makeStringLiteralExpr(TokenSyntax leftQuote, TokenSyntax text,
+                                                        TokenSyntax rightQuote, RefCountPtr<SyntaxArena> arena = nullptr);
    static BooleanLiteralExprSyntax makeBooleanLiteralExpr(TokenSyntax boolean, RefCountPtr<SyntaxArena> arena = nullptr);
-   static TernaryExprSyntax makeTernaryExpr(ExprSyntax conditionExpr, TokenSyntax questionMark, ExprSyntax firstChoice,
+   static IsSetVarItemSyntax makeIsSetVarItem(ExprSyntax expr, std::optional<TokenSyntax> trailingComma,
+                                              RefCountPtr<SyntaxArena> arena = nullptr);
+   static IsSetVariablesClauseSyntax makeIsSetVariablesClause(TokenSyntax leftParen, IssetVariablesListSyntax isSetVariablesList,
+                                                              TokenSyntax rightParen, RefCountPtr<SyntaxArena> arena = nullptr);
+   static IsSetFuncExprSyntax makeIsSetFuncExpr(TokenSyntax isSetToken, IsSetVariablesClauseSyntax isSetVariablesClause,
+                                                RefCountPtr<SyntaxArena> arena = nullptr);
+   static EmptyFuncExprSyntax makeEmptyFuncExpr(TokenSyntax emptyToken, ParenDecoratedExprSyntax argumentsClause,
+                                                RefCountPtr<SyntaxArena> arena = nullptr);
+   static IncludeExprSyntax makeIncludeExpr(TokenSyntax includeToken, ExprSyntax argExpr, RefCountPtr<SyntaxArena> arena = nullptr);
+   static RequireExprSyntax makeRequireExpr(TokenSyntax requireToken, ExprSyntax argExpr, RefCountPtr<SyntaxArena> arena = nullptr);
+   static EvalFuncExprSyntax makeEvalFuncExpr(TokenSyntax evalToken, ParenDecoratedExprSyntax argumentsClause,
+                                              RefCountPtr<SyntaxArena> arena = nullptr);
+   static PrintFuncExprSyntax makePrintFuncExpr(TokenSyntax printToken, ExprSyntax argsExpr, RefCountPtr<SyntaxArena> arena = nullptr);
+   static FuncLikeExprSyntax makeFuncLikeExpr(ExprSyntax funcLikeExpr, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArrayStructureAssignmentExprSyntax makeArrayStructureAssignmentExpr(SimplifiedArrayCreateExprSyntax arrayStructure,
+                                                                              TokenSyntax equalToken, ExprSyntax valueExpr,
+                                                                              RefCountPtr<SyntaxArena> arena = nullptr);
+   static ListStructureClauseSyntax makeListStructureClause(TokenSyntax listToken, TokenSyntax leftParen,
+                                                            ArrayPairItemListSyntax pairItemList, TokenSyntax rightParen,
+                                                            RefCountPtr<SyntaxArena> arena = nullptr);
+   static ListStructureAssignmentExprSyntax makeListStructureAssignmentExpr(
+         ListStructureClauseSyntax listStrcuture, TokenSyntax equalToken,
+         ExprSyntax valueExpr, RefCountPtr<SyntaxArena> arena = nullptr);
+   static AssignmentExprSyntax makeAssignmentExpr(VariableExprSyntax target, TokenSyntax assignToken,
+                                                  ExprSyntax valueExpr, RefCountPtr<SyntaxArena> arena = nullptr);
+   static CompoundAssignmentExprSyntax makeCompoundAssignmentExpr(VariableExprSyntax target, TokenSyntax compoundAssignToken,
+                                                                  ExprSyntax valueExpr, RefCountPtr<SyntaxArena> arena = nullptr);
+   static LogicalExprSyntax makeLogicalExpr(ExprSyntax lhs, TokenSyntax logicalOperator, ExprSyntax rhs,
+                                            RefCountPtr<SyntaxArena> arena = nullptr);
+   static BitLogicalExprSyntax makeBitLogicalExpr(ExprSyntax lhs, TokenSyntax bitLogicalOperator,
+                                                  ExprSyntax rhs, RefCountPtr<SyntaxArena> arena = nullptr);
+   static RelationExprSyntax makeRelationExpr(ExprSyntax lhs, TokenSyntax relationOperator, ExprSyntax rhs,
+                                              RefCountPtr<SyntaxArena> arena = nullptr);
+   static CastExprSyntax makeCastExpr(TokenSyntax castOperator, ExprSyntax valueExpr,
+                                      RefCountPtr<SyntaxArena> arena = nullptr);
+   static ExitExprArgClauseSyntax makeExitExprArgClause(TokenSyntax leftParen, std::optional<ExprSyntax> expr,
+                                                        TokenSyntax rightParen, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ExitExprSyntax makeExitExpr(TokenSyntax exitToken, ExitExprArgClauseSyntax argClause,
+                                      RefCountPtr<SyntaxArena> arena = nullptr);
+   static YieldExprSyntax makeYieldExpr(TokenSyntax yieldToken, std::optional<ExprSyntax> keyExpr,
+                                        std::optional<TokenSyntax> doubleArrowToken, std::optional<ExprSyntax> valueExpr,
+                                        RefCountPtr<SyntaxArena> arena = nullptr);
+   static YieldFromExprSyntax makeYieldFromExpr(TokenSyntax yieldFromToken, ExprSyntax expr,
+                                                RefCountPtr<SyntaxArena> arena = nullptr);
+   static CloneExprSyntax makeCloneExpr(TokenSyntax cloneToken, ExprSyntax expr, RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsVarOffsetSyntax makeEncapsVarOffset(std::optional<TokenSyntax> minusSign, TokenSyntax offset,
+                                                    RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsArrayVarSyntax makeEncapsArrayVar(TokenSyntax varToken, TokenSyntax leftSquareBracket,
+                                                  EncapsVarOffsetSyntax offset, TokenSyntax rightSquareBracket,
+                                                  RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsObjPropSyntax makeEncapsObjProp(TokenSyntax varToken, TokenSyntax objOperatorToken,
+                                                TokenSyntax identifierToken, RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsDollarCurlyExprSyntax makeEncapsDollarCurlyExpr(TokenSyntax dollarOpenCurlyToken, ExprSyntax expr,
+                                                                TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsDollarCurlyVarSyntax makeEncapsDollarCurlyVar(TokenSyntax dollarOpenCurlyToken, TokenSyntax varname,
+                                                              TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsDollarCurlyArraySyntax makeEncapsDollarCurlyArray(TokenSyntax dollarOpenCurlyToken, TokenSyntax varname,
+                                                                  TokenSyntax leftSquareBracket, ExprSyntax indexExpr,
+                                                                  TokenSyntax rightSquareBracket, TokenSyntax closeCurlyToken,
+                                                                  RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsCurlyVarSyntax makeEncapsCurlyVar(TokenSyntax curlyOpen, TokenSyntax variable,
+                                                  TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsVarSyntax makeEncapsVar(Syntax var, RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsListItemSyntax makeEncapsListItem(std::optional<TokenSyntax> strLiteral, std::optional<EncapsVarSyntax> encapsVar,
+                                                  RefCountPtr<SyntaxArena> arena = nullptr);
+   static BackticksClauseSyntax makeBackticksClause(Syntax backticks, RefCountPtr<SyntaxArena> arena = nullptr);
+   static HeredocExprSyntax makeHeredocExpr(TokenSyntax startHeredocToken, std::optional<Syntax> text,
+                                            TokenSyntax endHeredocToken, RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsListStringExprSyntax makeEncapsListStringExpr(TokenSyntax leftQuote, EncapsItemListSyntax encapsList,
+                                                              TokenSyntax rightQuote, RefCountPtr<SyntaxArena> arena = nullptr);
+   static TernaryExprSyntax makeTernaryExpr(ExprSyntax conditionExpr, TokenSyntax questionMark, std::optional<ExprSyntax> firstChoice,
                                             TokenSyntax colonMark, ExprSyntax secondChoice, RefCountPtr<SyntaxArena> arena = nullptr);
-   static AssignmentExprSyntax makeAssignmentExpr(TokenSyntax assignToken, RefCountPtr<SyntaxArena> arena = nullptr);
    static SequenceExprSyntax makeSequenceExpr(ExprListSyntax elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static PrefixOperatorExprSyntax makePrefixOperatorExpr(std::optional<TokenSyntax> operatorToken, ExprSyntax expr,
                                                           RefCountPtr<SyntaxArena> arena = nullptr);
    static PostfixOperatorExprSyntax makePostfixOperatorExpr(ExprSyntax expr, TokenSyntax operatorToken,
                                                             RefCountPtr<SyntaxArena> arena = nullptr);
-   static BinaryOperatorExprSyntax makeBinaryOperatorExpr(TokenSyntax operatorToken, RefCountPtr<SyntaxArena> arena = nullptr);
+   static BinaryOperatorExprSyntax makeBinaryOperatorExpr(ExprSyntax lhs, TokenSyntax operatorToken,
+                                                          ExprSyntax rhs, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ShellCmdExprSyntax makeShellCmdExpr(TokenSyntax leftBacktick, BackticksClauseSyntax backticksExpr,
+                                              TokenSyntax rightBacktick, RefCountPtr<SyntaxArena> arena = nullptr);
+   static UseLexicalVarClauseSyntax makeUseLexicalVarClause(TokenSyntax useToken, TokenSyntax leftParen,
+                                                            LexicalVarListSyntax lexicalVars, TokenSyntax rightParen,
+                                                            RefCountPtr<SyntaxArena> arena = nullptr);
+   static LexicalVarItemSyntax makeLexicalVarItem(TokenSyntax referenceToken, TokenSyntax variable, std::optional<TokenSyntax> trailingComma,
+                                                  RefCountPtr<SyntaxArena> arena = nullptr);
 
    /// make blank nodes
    static ExprListSyntax makeBlankExprList(RefCountPtr<SyntaxArena> arena = nullptr);
@@ -151,7 +237,53 @@ public:
    static ArgumentListSyntax makeBlankArgumentList(RefCountPtr<SyntaxArena> arena = nullptr);
    static IssetVariablesListSyntax makeBlankIssetVariablesList(RefCountPtr<SyntaxArena> arena = nullptr);
 
-   static NullExprSyntax makeNullExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ParenDecoratedExprSyntax makeBlankParenDecoratedExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static NullExprSyntax makeBlankNullExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static OptionalExprSyntax makeBlankOptionalExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ExprListItemSyntax makeBlankExprListItem(RefCountPtr<SyntaxArena> arena = nullptr);
+   static VariableExprSyntax makeBlankVariableExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ReferencedVariableExprSyntax makeBlankReferencedVariableExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ClassConstIdentifierExprSyntax makeBlankClassConstIdentifierExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ConstExprSyntax makeBlankConstExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static NewVariableClauseSyntax makeBlankNewVariableClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static CallableVariableExprSyntax makeBlankCallableVariableExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static CallableFuncNameClauseSyntax makeBlankCallableFuncNameClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static MemberNameClauseSyntax makeBlankMemberNameClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static PropertyNameClauseSyntax makeBlankPropertyNameClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static InstancePropertyExprSyntax makeBlankInstancePropertyExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static StaticPropertyExprSyntax makeBlankStaticPropertyExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArgumentSyntax makeBlankArgument(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArgumentListItemSyntax makeBlankArgumentListItem(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArgumentListClauseSyntax makeBlankArgumentListClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static DereferencableClauseSyntax makeBlankDereferencableClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static VariableClassNameClauseSyntax makeBlankVariableClassNameClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ClassNameClauseSyntax makeBlankClassNameClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ClassNameRefClauseSyntax makeBlankClassNameRefClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static BraceDecoratedExprClauseSyntax makeBlankBraceDecoratedExprClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static BraceDecoratedVariableExprSyntax makeBlankBraceDecoratedVariableExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArrayKeyValuePairItemSyntax makeBlankArrayKeyValuePairItem(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArrayUnpackPairItemSyntax makeBlankArrayUnpackPairItem(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArrayPairItemSyntax makeBlankArrayPairItem(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ListRecursivePairItemSyntax makeBlankListRecursivePairItem(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ListPairItemSyntax makeBlankListPairItem(RefCountPtr<SyntaxArena> arena = nullptr);
+   static SimpleVariableExprSyntax makeBlankSimpleVariableExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArrayCreateExprSyntax makeBlankArrayCreateExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static SimplifiedArrayCreateExprSyntax makeBlankSimplifiedArrayCreateExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArrayAccessExprSyntax makeBlankArrayAccessExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static BraceDecoratedArrayAccessExprSyntax makeBlankBraceDecoratedArrayAccessExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static SimpleFunctionCallExprSyntax makeBlankSimpleFunctionCallExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static FunctionCallExprSyntax makeBlankFunctionCallExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static InstanceMethodCallExprSyntax makeBlankInstanceMethodCallExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static StaticMethodCallExprSyntax makeBlankStaticMethodCallExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static DereferencableScalarExprSyntax makeBlankDereferencableScalarExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static AnonymousClassDefinitionClauseSyntax makeBlankAnonymousClassDefinitionClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static SimpleInstanceCreateExprSyntax makeBlankSimpleInstanceCreateExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static AnonymousInstanceCreateExprSyntax makeBlankAnonymousInstanceCreateExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ClassicLambdaExprSyntax makeBlankClassicLambdaExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static SimplifiedLambdaExprSyntax makeBlankSimplifiedLambdaExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static LambdaExprSyntax makeBlankLambdaExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ScalarExprSyntax makeBlankScalarExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static InstanceCreateExprSyntax makeBlankInstanceCreateExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassRefParentExprSyntax makeBlankClassRefParentExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassRefSelfExprSyntax makeBlankClassRefSelfExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassRefStaticExprSyntax makeBlankClassRefStaticExpr(RefCountPtr<SyntaxArena> arena = nullptr);
@@ -159,12 +291,50 @@ public:
    static FloatLiteralExprSyntax makeBlankFloatLiteralExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static StringLiteralExprSyntax makeBlankStringLiteralExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static BooleanLiteralExprSyntax makeBlankBooleanLiteralExpr(RefCountPtr<SyntaxArena> arena = nullptr);
-   static TernaryExprSyntax makeBlankTernaryExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static IsSetVarItemSyntax makeBlankIsSetVarItem(RefCountPtr<SyntaxArena> arena = nullptr);
+   static IsSetVariablesClauseSyntax makeBlankIsSetVariablesClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static IsSetFuncExprSyntax makeBlankIsSetFuncExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EmptyFuncExprSyntax makeBlankEmptyFuncExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static IncludeExprSyntax makeBlankIncludeExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static RequireExprSyntax makeBlankRequireExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EvalFuncExprSyntax makeBlankEvalFuncExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static PrintFuncExprSyntax makeBlankPrintFuncExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static FuncLikeExprSyntax makeBlankFuncLikeExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArrayStructureAssignmentExprSyntax makeBlankArrayStructureAssignmentExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ListStructureClauseSyntax makeBlankListStructureClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ListStructureAssignmentExprSyntax makeBlankListStructureAssignmentExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static AssignmentExprSyntax makeBlankAssignmentExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static CompoundAssignmentExprSyntax makeBlankCompoundAssignmentExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static LogicalExprSyntax makeBlankLogicalExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static BitLogicalExprSyntax makeBlankBitLogicalExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static RelationExprSyntax makeBlankRelationExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static CastExprSyntax makeBlankCastExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ExitExprArgClauseSyntax makeBlankExitExprArgClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ExitExprSyntax makeBlankExitExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static YieldExprSyntax makeBlankYieldExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static YieldFromExprSyntax makeBlankYieldFromExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static CloneExprSyntax makeBlankCloneExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsVarOffsetSyntax makeBlankEncapsVarOffset(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsArrayVarSyntax makeBlankEncapsArrayVar(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsObjPropSyntax makeBlankEncapsObjProp(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsDollarCurlyExprSyntax makeBlankEncapsDollarCurlyExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsDollarCurlyVarSyntax makeBlankEncapsDollarCurlyVar(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsDollarCurlyArraySyntax makeBlankEncapsDollarCurlyArray(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsCurlyVarSyntax makeBlankEncapsCurlyVar(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsVarSyntax makeBlankEncapsVar(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsListItemSyntax makeBlankEncapsListItem(RefCountPtr<SyntaxArena> arena = nullptr);
+   static BackticksClauseSyntax makeBlankBackticksClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static HeredocExprSyntax makeBlankHeredocExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsListStringExprSyntax makeBlankEncapsListStringExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static TernaryExprSyntax makeBlankTernaryExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static SequenceExprSyntax makeBlankSequenceExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static PrefixOperatorExprSyntax makeBlankPrefixOperatorExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static PostfixOperatorExprSyntax makeBlankPostfixOperatorExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static BinaryOperatorExprSyntax makeBlankBinaryOperatorExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ShellCmdExprSyntax makeBlankShellCmdExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static UseLexicalVarClauseSyntax makeBlankUseLexicalVarClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static LexicalVarItemSyntax makeBlankLexicalVarItem(RefCountPtr<SyntaxArena> arena = nullptr);
+
 };
 
 } // polar::syntax

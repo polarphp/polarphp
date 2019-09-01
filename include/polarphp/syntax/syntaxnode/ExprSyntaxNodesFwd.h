@@ -13,6 +13,7 @@
 #define POLARPHP_SYNTAX_SYNTAX_NODE_EXPR_NODES_FWD_H
 
 #include "polarphp/syntax/SyntaxCollection.h"
+#include "polarphp/syntax/SyntaxKind.h"
 
 namespace polar::syntax {
 
@@ -77,6 +78,7 @@ class ClassRefSelfExprSyntax;
 class IntegerLiteralExprSyntax;
 class FloatLiteralExprSyntax;
 class StringLiteralExprSyntax;
+class BooleanLiteralExprSyntax;
 
 // function like lang structure
 class IsSetVarItemSyntax;
@@ -118,7 +120,6 @@ class EncapsListItemSyntax;
 class BackticksClauseSyntax;
 class HeredocExprSyntax;
 class EncapsListStringExprSyntax;
-class BooleanLiteralExprSyntax;
 class TernaryExprSyntax;
 class SequenceExprSyntax;
 class PrefixOperatorExprSyntax;
@@ -186,7 +187,7 @@ using ListPairItemListSyntax = SyntaxCollection<SyntaxKind::ListPairItemList, Li
 /// | encaps_var
 /// | T_ENCAPSED_AND_WHITESPACE encaps_var
 ///
-using EncapsItemListSyntax = SyntaxCollection<SyntaxKind::EncapsListItem, EncapsListItemSyntax>;
+using EncapsItemListSyntax = SyntaxCollection<SyntaxKind::EncapsList, EncapsListItemSyntax>;
 
 ///
 /// type: SyntaxCollection
@@ -206,7 +207,7 @@ using ArgumentListSyntax = SyntaxCollection<SyntaxKind::ArgumentList, ArgumentLi
 ///   isset_variable
 /// | isset_variables ',' isset_variable
 ///
-using IssetVariablesListSyntax = SyntaxCollection<SyntaxKind::IsSetVariablesList, IsSetVarItemSyntax>;
+using IssetVariablesListSyntax = SyntaxCollection<SyntaxKind::IssetVariablesList, IsSetVarItemSyntax>;
 
 } // polar::syntax
 

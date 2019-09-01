@@ -1112,7 +1112,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: ExprSyntax
+      /// type: DereferencableClauseSyntax
       /// optional: false
       ///
       DereferencableExpr
@@ -1125,8 +1125,8 @@ public:
       validate();
    }
 
-   ExprSyntax getDereferencableExpr();
-   VariableClassNameClauseSyntax withDereferencableExpr(std::optional<ExprSyntax> expr);
+   DereferencableClauseSyntax getDereferencableExpr();
+   VariableClassNameClauseSyntax withDereferencableExpr(std::optional<DereferencableClauseSyntax> expr);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -1255,7 +1255,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_LEFT_PAREN)
       /// optional: false
       ///
       LeftBrace,
@@ -1265,7 +1265,7 @@ public:
       ///
       Expr,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
       ///
       RightBrace
@@ -1312,7 +1312,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_DOLLAR_SIGN)
       /// optional: false
       ///
       DollarSign,
@@ -2317,12 +2317,12 @@ public:
       CtorArguments,
       ///
       /// type: ExtendsFromClauseSyntax
-      /// optional: false
+      /// optional: true
       ///
       ExtendsFrom,
       ///
       /// type: ImplementClauseSyntax
-      /// optional: false
+      /// optional: true
       ///
       ImplementsList,
       ///
@@ -2341,8 +2341,8 @@ public:
 
    TokenSyntax getClassToken();
    std::optional<ArgumentListClauseSyntax> getCtorArguments();
-   ExtendsFromClauseSyntax getExtendsFrom();
-   ImplementClauseSyntax getImplementsList();
+   std::optional<ExtendsFromClauseSyntax> getExtendsFrom();
+   std::optional<ImplementClauseSyntax> getImplementsList();
    MemberDeclBlockSyntax getMembers();
 
    AnonymousClassDefinitionClauseSyntax withClassToken(std::optional<TokenSyntax> classToken);
@@ -2498,7 +2498,7 @@ public:
       ///
       ReturnRefToken,
       ///
-      /// type: ParameterClauseSyntax
+      /// type: ParameterListClauseSyntax
       /// optional: false
       ///
       ParameterListClause,
@@ -2645,7 +2645,7 @@ private:
 class LambdaExprSyntax final : public ExprSyntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
@@ -2656,7 +2656,7 @@ public:
       StaticToken,
       ///
       /// type: ExprSyntax
-      /// optional: true
+      /// optional: false
       /// node choices: true
       /// ------------------------------------------
       /// node choice: ClassicLambdaExprSyntax
@@ -2677,7 +2677,7 @@ public:
       validate();
    }
 
-   TokenSyntax getStaticToken();
+   std::optional<TokenSyntax> getStaticToken();
    ExprSyntax getLambdaExpr();
 
    LambdaExprSyntax withStaticToken(std::optional<TokenSyntax> staticToken);
@@ -2837,8 +2837,10 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax (T_CLASS_REF_PARENT)
       /// optional: false
+      ///
       ParentKeyword,
    };
 
@@ -2874,8 +2876,10 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax (T_CLASS_REF_SELF)
       /// optional: false
+      ///
       SelfKeyword,
    };
 
@@ -2911,8 +2915,10 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax (T_CLASS_REF_STATIC)
       /// optional: false
+      ///
       StaticKeyword,
    };
 public:
@@ -2947,8 +2953,10 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax (T_LNUMBER)
       /// optional: false
+      ///
       Digits,
    };
 public:
@@ -2983,8 +2991,10 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax (T_DNUMBER)
       /// optional: false
+      ///
       FloatDigits,
    };
 
@@ -3073,6 +3083,57 @@ public:
 
 private:
    friend class StringLiteralExprSyntaxBuilder;
+   void validate();
+};
+
+class BooleanLiteralExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: TokenSyntax
+      /// optional: false
+      Boolean,
+   };
+
+#ifdef POLAR_DEBUG_BUILD
+   ///
+   /// Child name: Boolean
+   /// Choices:
+   /// TokenKindType::T_TRUE
+   /// TokenKindType::T_FALSE
+   ///
+   static const TokenChoicesType CHILD_TOKEN_CHOICES;
+#endif
+
+public:
+   BooleanLiteralExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getBooleanValue();
+
+   /// Returns a copy of the receiver with its `Boolean` replaced.
+   /// - param newChild: The new `Boolean` to replace the node's
+   ///                   current `Boolean`, if present.
+   BooleanLiteralExprSyntax withBooleanValue(std::optional<TokenSyntax> booleanValue);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::BooleanLiteralExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class BooleanLiteralExprSyntaxBuilder;
    void validate();
 };
 
@@ -5200,57 +5261,6 @@ private:
    void validate();
 };
 
-class BooleanLiteralExprSyntax final : public ExprSyntax
-{
-public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 1;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
-   enum Cursor : SyntaxChildrenCountType
-   {
-      /// type: TokenSyntax
-      /// optional: false
-      Boolean,
-   };
-
-#ifdef POLAR_DEBUG_BUILD
-   ///
-   /// Child name: Boolean
-   /// Choices:
-   /// TokenKindType::T_TRUE
-   /// TokenKindType::T_FALSE
-   ///
-   static const TokenChoicesType CHILD_TOKEN_CHOICES;
-#endif
-
-public:
-   BooleanLiteralExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : ExprSyntax(root, data)
-   {
-      validate();
-   }
-
-   TokenSyntax getBooleanValue();
-
-   /// Returns a copy of the receiver with its `Boolean` replaced.
-   /// - param newChild: The new `Boolean` to replace the node's
-   ///                   current `Boolean`, if present.
-   BooleanLiteralExprSyntax withBooleanValue(std::optional<TokenSyntax> booleanValue);
-
-   static bool kindOf(SyntaxKind kind)
-   {
-      return kind == SyntaxKind::BooleanLiteralExpr;
-   }
-
-   static bool classOf(const Syntax *syntax)
-   {
-      return kindOf(syntax->getKind());
-   }
-
-private:
-   friend class BooleanLiteralExprSyntaxBuilder;
-   void validate();
-};
-
 ///
 /// ternary_expr:
 /// 	expr '?' expr ':' expr
@@ -5263,20 +5273,30 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 5;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: ExprSyntax
       /// optional: false
+      ///
       ConditionExpr,
+      ///
       /// type: TokenSyntax (T_QUESTION_MARK)
       /// optional: false
+      ///
       QuestionMark,
+      ///
       /// type: ExprSyntax
       /// optional: true
+      ///
       FirstChoice,
+      ///
       /// type: TokenSyntax (T_COLON)
       /// optional: false
+      ///
       ColonMark,
+      ///
       /// type: ExprSyntax
       /// optional: false
+      ///
       SecondChoice
    };
 
@@ -5340,9 +5360,10 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: ExprListSyntax
-      /// is_syntax_collection: true
       /// optional: false
+      ///
       Elements
    };
 
@@ -5409,8 +5430,10 @@ public:
       /// T_DEC
       ///
       OperatorToken,
+      ///
       /// type: ExprSyntax
       /// optional: false
+      ///
       Expr
    };
 
@@ -5457,9 +5480,12 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: Expr
+      ///
+      /// type: ExprSyntax
       /// optional: false
+      ///
       Expr,
+      ///
       /// type: TokenSyntax
       /// optional: false
       /// token choices: true

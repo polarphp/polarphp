@@ -1018,23 +1018,23 @@ void VariableClassNameClauseSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == VariableClassNameClauseSyntax::CHILDREN_COUNT);
-   syntax_assert_child_kind(raw, DereferencableExpr, std::set{SyntaxKind::Expr});
+   syntax_assert_child_kind(raw, DereferencableExpr, std::set{SyntaxKind::DereferencableClause});
 #endif
 }
 
-ExprSyntax VariableClassNameClauseSyntax::getDereferencableExpr()
+DereferencableClauseSyntax VariableClassNameClauseSyntax::getDereferencableExpr()
 {
-   return ExprSyntax {m_root, m_data->getChild(Cursor::DereferencableExpr).get()};
+   return DereferencableClauseSyntax {m_root, m_data->getChild(Cursor::DereferencableExpr).get()};
 }
 
 VariableClassNameClauseSyntax
-VariableClassNameClauseSyntax::withDereferencableExpr(std::optional<ExprSyntax> expr)
+VariableClassNameClauseSyntax::withDereferencableExpr(std::optional<DereferencableClauseSyntax> expr)
 {
    RefCountPtr<RawSyntax> exprRaw;
    if (expr.has_value()) {
       exprRaw = expr->getRaw();
    } else {
-      exprRaw = RawSyntax::missing(SyntaxKind::Expr);
+      exprRaw = RawSyntax::missing(SyntaxKind::DereferencableClause);
    }
    return m_data->replaceChild<VariableClassNameClauseSyntax>(exprRaw, Cursor::DereferencableExpr);
 }
@@ -2356,14 +2356,22 @@ std::optional<ArgumentListClauseSyntax> AnonymousClassDefinitionClauseSyntax::ge
    return ArgumentListClauseSyntax {m_root, ctorArgsData.get()};
 }
 
-ExtendsFromClauseSyntax AnonymousClassDefinitionClauseSyntax::getExtendsFrom()
+std::optional<ExtendsFromClauseSyntax> AnonymousClassDefinitionClauseSyntax::getExtendsFrom()
 {
-   return ExtendsFromClauseSyntax {m_root, m_data->getChild(Cursor::ExtendsFrom).get()};
+   RefCountPtr<SyntaxData> extendsFromData = m_data->getChild(Cursor::ExtendsFrom);
+   if (!extendsFromData) {
+      return std::nullopt;
+   }
+   return ExtendsFromClauseSyntax {m_root, extendsFromData.get()};
 }
 
-ImplementClauseSyntax AnonymousClassDefinitionClauseSyntax::getImplementsList()
+std::optional<ImplementClauseSyntax> AnonymousClassDefinitionClauseSyntax::getImplementsList()
 {
-   return ImplementClauseSyntax {m_root, m_data->getChild(Cursor::ImplementsList).get()};
+   RefCountPtr<SyntaxData> implementsListData = m_data->getChild(Cursor::ImplementsList);
+   if (!implementsListData) {
+      return std::nullopt;
+   }
+   return ImplementClauseSyntax {m_root, implementsListData.get()};
 }
 
 MemberDeclBlockSyntax AnonymousClassDefinitionClauseSyntax::getMembers()
@@ -2677,7 +2685,7 @@ ClassicLambdaExprSyntax::withReturnType(std::optional<ReturnTypeClauseSyntax> re
 }
 
 ClassicLambdaExprSyntax
-ClassicLambdaExprSyntax::withBody(std::optional<CodeBlockSyntax> body)
+ClassicLambdaExprSyntax::withBody(std::optional<InnerCodeBlockStmtSyntax> body)
 {
    RefCountPtr<RawSyntax> bodyRaw;
    if (body.has_value()) {
@@ -2685,7 +2693,7 @@ ClassicLambdaExprSyntax::withBody(std::optional<CodeBlockSyntax> body)
    } else {
       bodyRaw = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
-   return m_data->replaceChild<InnerCodeBlockStmtSyntax>(bodyRaw, Cursor::Body);
+   return m_data->replaceChild<ClassicLambdaExprSyntax>(bodyRaw, Cursor::Body);
 }
 
 ///
@@ -2845,9 +2853,13 @@ void LambdaExprSyntax::validate()
 #endif
 }
 
-TokenSyntax LambdaExprSyntax::getStaticToken()
+std::optional<TokenSyntax> LambdaExprSyntax::getStaticToken()
 {
-   return TokenSyntax {m_root, m_data->getChild(Cursor::StaticToken).get()};
+   RefCountPtr<SyntaxData> staticTokenData = m_data->getChild(Cursor::StaticToken);
+   if (!staticTokenData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, staticTokenData.get()};
 }
 
 ExprSyntax LambdaExprSyntax::getLambdaExpr()
@@ -2861,7 +2873,7 @@ LambdaExprSyntax LambdaExprSyntax::withStaticToken(std::optional<TokenSyntax> st
    if (staticToken.has_value()) {
       staticTokenRaw = staticToken->getRaw();
    } else {
-      staticTokenRaw = make_missing_token(T_STATIC);
+      staticTokenRaw = nullptr;
    }
    return m_data->replaceChild<LambdaExprSyntax>(staticTokenRaw, Cursor::StaticToken);
 }
@@ -3139,7 +3151,6 @@ FloatLiteralExprSyntax FloatLiteralExprSyntax::withFloatDigits(std::optional<Tok
 ///
 /// StringLiteralExprSyntax
 ///
-
 #ifdef POLAR_DEBUG_BUILD
 const TokenChoicesType StringLiteralExprSyntax::CHILD_TOKEN_CHOICES
 {
@@ -3229,6 +3240,53 @@ StringLiteralExprSyntax StringLiteralExprSyntax::withRightQuote(std::optional<To
 }
 
 ///
+/// BooleanLiteralExprSyntax
+///
+#ifdef POLAR_DEBUG_BUILD
+const TokenChoicesType BooleanLiteralExprSyntax::CHILD_TOKEN_CHOICES
+{
+   {
+      BooleanLiteralExprSyntax::Boolean, {
+         TokenKindType::T_FALSE,
+               TokenKindType::T_TRUE
+      }
+   }
+};
+#endif
+
+void BooleanLiteralExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == BooleanLiteralExprSyntax::CHILDREN_COUNT);
+   ///
+   /// check Boolean token choice
+   ///
+   syntax_assert_child_token(raw, Boolean, CHILD_TOKEN_CHOICES.at(Boolean));
+#endif
+}
+
+TokenSyntax BooleanLiteralExprSyntax::getBooleanValue()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::Boolean).get()};
+}
+
+BooleanLiteralExprSyntax BooleanLiteralExprSyntax::withBooleanValue(std::optional<TokenSyntax> booleanValue)
+{
+   RefCountPtr<RawSyntax> rawBooleanValue;
+   if (booleanValue.has_value()) {
+      rawBooleanValue = booleanValue->getRaw();
+   } else {
+      rawBooleanValue = RawSyntax::missing(TokenKindType::T_TRUE,
+                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_TRUE)));
+   }
+   return m_data->replaceChild<BooleanLiteralExprSyntax>(rawBooleanValue, Cursor::Boolean);
+}
+
+///
 /// IsSetVarItemSyntax
 ///
 void IsSetVarItemSyntax::validate()
@@ -3292,7 +3350,7 @@ void IsSetVariablesClauseSyntax::validate()
    }
    assert(raw->getLayout().size() == IsSetVarItemSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, LeftParenToken, std::set{TokenKindType::T_LEFT_PAREN});
-   syntax_assert_child_kind(raw, IsSetVariablesList, std::set{SyntaxKind::IsSetVariablesList});
+   syntax_assert_child_kind(raw, IsSetVariablesList, std::set{SyntaxKind::IssetVariablesList});
    syntax_assert_child_token(raw, RightParenToken, std::set{TokenKindType::T_RIGHT_PAREN});
 #endif
 }
@@ -3331,7 +3389,7 @@ IsSetVariablesClauseSyntax::withIsSetVariablesList(std::optional<IssetVariablesL
    if (issetVariablesList.has_value()) {
       issetVariablesListRaw = issetVariablesList->getRaw();
    } else {
-      issetVariablesListRaw = RawSyntax::missing(SyntaxKind::IsSetVariablesList);
+      issetVariablesListRaw = RawSyntax::missing(SyntaxKind::IssetVariablesList);
    }
    return m_data->replaceChild<IsSetVariablesClauseSyntax>(issetVariablesListRaw, Cursor::IsSetVariablesList);
 }
@@ -5543,53 +5601,6 @@ EncapsListStringExprSyntax::withRightQuoteToken(std::optional<TokenSyntax> right
       rightQuoteTokenRaw = make_missing_token(T_DOUBLE_QUOTE);
    }
    return m_data->replaceChild<EncapsListStringExprSyntax>(rightQuoteTokenRaw, Cursor::RightQuoteToken);
-}
-
-///
-/// BooleanLiteralExprSyntax
-///
-#ifdef POLAR_DEBUG_BUILD
-const TokenChoicesType BooleanLiteralExprSyntax::CHILD_TOKEN_CHOICES
-{
-   {
-      BooleanLiteralExprSyntax::Boolean, {
-         TokenKindType::T_FALSE,
-               TokenKindType::T_TRUE
-      }
-   }
-};
-#endif
-
-void BooleanLiteralExprSyntax::validate()
-{
-#ifdef POLAR_DEBUG_BUILD
-   RefCountPtr<RawSyntax> raw = m_data->getRaw();
-   if (isMissing()) {
-      return;
-   }
-   assert(raw->getLayout().size() == BooleanLiteralExprSyntax::CHILDREN_COUNT);
-   ///
-   /// check Boolean token choice
-   ///
-   syntax_assert_child_token(raw, Boolean, CHILD_TOKEN_CHOICES.at(Boolean));
-#endif
-}
-
-TokenSyntax BooleanLiteralExprSyntax::getBooleanValue()
-{
-   return TokenSyntax{m_root, m_data->getChild(Cursor::Boolean).get()};
-}
-
-BooleanLiteralExprSyntax BooleanLiteralExprSyntax::withBooleanValue(std::optional<TokenSyntax> booleanValue)
-{
-   RefCountPtr<RawSyntax> rawBooleanValue;
-   if (booleanValue.has_value()) {
-      rawBooleanValue = booleanValue->getRaw();
-   } else {
-      rawBooleanValue = RawSyntax::missing(TokenKindType::T_TRUE,
-                                           OwnedString::makeUnowned(get_token_text(TokenKindType::T_TRUE)));
-   }
-   return m_data->replaceChild<BooleanLiteralExprSyntax>(rawBooleanValue, Cursor::Boolean);
 }
 
 ///

@@ -278,7 +278,7 @@ enum class SyntaxKind : std::uint32_t
    MemberDeclList,
    EncapsList,
    ArgumentList,
-   IsSetVariablesList,
+   IssetVariablesList,
    CatchList,
    CatchArgTypeHintList,
    UnsetVariableList,
