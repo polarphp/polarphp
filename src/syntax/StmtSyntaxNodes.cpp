@@ -2228,9 +2228,9 @@ Syntax SwitchCaseSyntax::getLabel()
    return Syntax{m_root, m_data->getChild(Cursor::Label).get()};
 }
 
-CodeBlockItemListSyntax SwitchCaseSyntax::getStatements()
+InnerCodeBlockStmtSyntax SwitchCaseSyntax::getStatements()
 {
-   return CodeBlockItemListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
+   return InnerCodeBlockStmtSyntax {m_root, m_data->getChild(Cursor::Statements).get()};
 }
 
 SwitchCaseSyntax SwitchCaseSyntax::withLabel(std::optional<Syntax> label)
@@ -2244,13 +2244,13 @@ SwitchCaseSyntax SwitchCaseSyntax::withLabel(std::optional<Syntax> label)
    return m_data->replaceChild<SwitchCaseSyntax>(rawLabel, Cursor::Label);
 }
 
-SwitchCaseSyntax SwitchCaseSyntax::withStatements(std::optional<CodeBlockItemListSyntax> statements)
+SwitchCaseSyntax SwitchCaseSyntax::withStatements(std::optional<InnerCodeBlockStmtSyntax> statements)
 {
    RefCountPtr<RawSyntax> rawStatements;
    if (statements.has_value()) {
       rawStatements = statements->getRaw();
    } else {
-      rawStatements = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
+      rawStatements = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
    return m_data->replaceChild<SwitchCaseSyntax>(rawStatements, Cursor::Statements);
 }
@@ -2470,9 +2470,9 @@ TokenSyntax DeferStmtSyntax::getDeferKeyword()
    return TokenSyntax{m_root, m_data->getChild(Cursor::DeferKeyword).get()};
 }
 
-CodeBlockSyntax DeferStmtSyntax::getBody()
+InnerCodeBlockStmtSyntax DeferStmtSyntax::getBody()
 {
-   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+   return InnerCodeBlockStmtSyntax {m_root, m_data->getChild(Cursor::Body).get()};
 }
 
 DeferStmtSyntax DeferStmtSyntax::withDeferKeyword(std::optional<TokenSyntax> deferKeyword)
@@ -2486,13 +2486,13 @@ DeferStmtSyntax DeferStmtSyntax::withDeferKeyword(std::optional<TokenSyntax> def
    return m_data->replaceChild<DeferStmtSyntax>(rawDeferKeyword, Cursor::DeferKeyword);
 }
 
-DeferStmtSyntax DeferStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
+DeferStmtSyntax DeferStmtSyntax::withBody(std::optional<InnerCodeBlockStmtSyntax> body)
 {
    RefCountPtr<RawSyntax> rawBody;
    if (body.has_value()) {
       rawBody = body->getRaw();
    } else {
-      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
+      rawBody = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
    return m_data->replaceChild<DeferStmtSyntax>(rawBody, Cursor::Body);
 }
@@ -2778,13 +2778,9 @@ TokenSyntax CatchListItemClauseSyntax::getLeftParenToken()
    return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParenToken).get()};
 }
 
-std::optional<InnerCodeBlockStmtSyntax> CatchListItemClauseSyntax::getCatchArgTypeHintList()
+CatchArgTypeHintListSyntax CatchListItemClauseSyntax::getCatchArgTypeHintList()
 {
-   RefCountPtr<SyntaxData> typeHintsData = m_data->getChild(Cursor::CatchArgTypeHintList);
-   if (!typeHintsData) {
-      return std::nullopt;
-   }
-   return InnerCodeBlockStmtSyntax {m_root, typeHintsData.get()};
+   return CatchArgTypeHintListSyntax {m_root, m_data->getChild(Cursor::CatchArgTypeHintList).get()};
 }
 
 TokenSyntax CatchListItemClauseSyntax::getVariable()
@@ -2827,13 +2823,13 @@ CatchListItemClauseSyntax::withLeftParenToken(std::optional<TokenSyntax> leftPar
 }
 
 CatchListItemClauseSyntax
-CatchListItemClauseSyntax::withCatchArgTypeHintList(std::optional<InnerCodeBlockStmtSyntax> typeHints)
+CatchListItemClauseSyntax::withCatchArgTypeHintList(std::optional<CatchArgTypeHintListSyntax> typeHints)
 {
    RefCountPtr<RawSyntax> rawTypeHints;
    if (typeHints.has_value()) {
       rawTypeHints = typeHints->getRaw();
    } else {
-      rawTypeHints = nullptr;
+      rawTypeHints = RawSyntax::missing(SyntaxKind::CatchArgTypeHintList);
    }
    return m_data->replaceChild<CatchListItemClauseSyntax>(rawTypeHints, Cursor::CatchArgTypeHintList);
 }

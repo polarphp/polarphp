@@ -1697,7 +1697,7 @@ public:
       ///
       Label,
       ///
-      /// type: CodeBlockItemListSyntax
+      /// type: InnerCodeBlockStmtSyntax
       /// optional: false
       ///
       Statements
@@ -1715,10 +1715,10 @@ public:
    }
 
    Syntax getLabel();
-   CodeBlockItemListSyntax getStatements();
+   InnerCodeBlockStmtSyntax getStatements();
 
    SwitchCaseSyntax withLabel(std::optional<Syntax> label);
-   SwitchCaseSyntax withStatements(std::optional<CodeBlockItemListSyntax> statements);
+   SwitchCaseSyntax withStatements(std::optional<InnerCodeBlockStmtSyntax> statements);
    SwitchCaseSyntax addStatement(CodeBlockItemSyntax statement);
 
    static bool kindOf(SyntaxKind kind)
@@ -1783,7 +1783,6 @@ public:
       ///
       LeftBrace,
       ///
-      /// is_syntax_collection: true
       /// type: SwitchCaseListSyntax
       /// optional: false
       ///
@@ -1855,7 +1854,7 @@ public:
       ///
       DeferKeyword,
       ///
-      /// type: CodeBlockSyntax
+      /// type: InnerCodeBlockStmtSyntax
       /// optional: false
       ///
       Body
@@ -1869,9 +1868,9 @@ public:
    }
 
    TokenSyntax getDeferKeyword();
-   CodeBlockSyntax getBody();
+   InnerCodeBlockStmtSyntax getBody();
    DeferStmtSyntax withDeferKeyword(std::optional<TokenSyntax> deferKeyword);
-   DeferStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+   DeferStmtSyntax withBody(std::optional<InnerCodeBlockStmtSyntax> body);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -1911,7 +1910,7 @@ public:
       ///
       Expr,
       ///
-      /// type: TokenSyntax (T_SEMICLON)
+      /// type: TokenSyntax (T_SEMICOLON)
       /// optioal: false
       ///
       Semicolon,
@@ -2135,8 +2134,8 @@ public:
       ///
       LeftParenToken,
       ///
-      /// type: InnerCodeBlockStmtSyntax
-      /// optional: true
+      /// type: CatchArgTypeHintListSyntax
+      /// optional: false
       ///
       CatchArgTypeHintList,
       ///
@@ -2165,14 +2164,14 @@ public:
 
    TokenSyntax getCatchToken();
    TokenSyntax getLeftParenToken();
-   std::optional<InnerCodeBlockStmtSyntax> getCatchArgTypeHintList();
+   CatchArgTypeHintListSyntax getCatchArgTypeHintList();
    TokenSyntax getVariable();
    TokenSyntax getRightParenToken();
    InnerCodeBlockStmtSyntax getCodeBlock();
 
    CatchListItemClauseSyntax withCatchToken(std::optional<TokenSyntax> catchToken);
    CatchListItemClauseSyntax withLeftParenToken(std::optional<TokenSyntax> leftParen);
-   CatchListItemClauseSyntax withCatchArgTypeHintList(std::optional<InnerCodeBlockStmtSyntax> typeHints);
+   CatchListItemClauseSyntax withCatchArgTypeHintList(std::optional<CatchArgTypeHintListSyntax> typeHints);
    CatchListItemClauseSyntax withVariable(std::optional<TokenSyntax> variable);
    CatchListItemClauseSyntax withRightParenToken(std::optional<TokenSyntax> rightParen);
    CatchListItemClauseSyntax withCodeBlock(std::optional<InnerCodeBlockStmtSyntax> codeBlock);
@@ -2207,7 +2206,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_RETURN)
       /// optional: false
       ///
       ReturnKeyword,
@@ -2217,7 +2216,7 @@ public:
       ///
       Expr,
       ///
-      /// type: TokenSyntax (T_SEMICLON)
+      /// type: TokenSyntax (T_SEMICOLON)
       /// optioal: false
       ///
       Semicolon,
@@ -2275,7 +2274,7 @@ public:
       ///
       ExprListClause,
       ///
-      /// type: TokenSyntax (T_SEMICLON)
+      /// type: TokenSyntax (T_SEMICOLON)
       /// optioal: false
       ///
       Semicolon,
@@ -2339,7 +2338,7 @@ public:
       ///
       RightParen,
       ///
-      /// type: TokenSyntax (T_SEMICLON)
+      /// type: TokenSyntax (T_SEMICOLON)
       /// optioal: false
       ///
       Semicolon,
@@ -2449,7 +2448,7 @@ public:
       ///
       Variables,
       ///
-      /// type: TokenSyntax (T_SEMICLON)
+      /// type: TokenSyntax (T_SEMICOLON)
       /// optioal: false
       ///
       Semicolon,
@@ -2564,7 +2563,7 @@ public:
       ///
       Variables,
       ///
-      /// type: TokenSyntax (T_SEMICLON)
+      /// type: TokenSyntax (T_SEMICOLON)
       /// optioal: false
       ///
       Semicolon,
@@ -2908,7 +2907,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_NS_SEPARATOR)
       /// optional: true
       ///
       FirstNsSeparator,
@@ -2918,12 +2917,12 @@ public:
       ///
       Namespace,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_NS_SEPARATOR)
       /// optional: false
       ///
       SecondNsSeparator,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_LEFT_PAREN)
       /// optional: false
       ///
       LeftBrace,
@@ -2933,12 +2932,12 @@ public:
       ///
       InlineUseDeclarations,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_COMMA)
       /// optional: true
       ///
       CommaToken,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
       ///
       RightBrace
@@ -2998,7 +2997,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_USE)
       /// optional: false
       ///
       UseToken,
@@ -3184,7 +3183,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_IDENTIFIER_STRING)
       /// optional: false
       ///
       Name,
@@ -3235,7 +3234,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_CONST)
       /// optional: false
       ///
       ConstToken,
@@ -3245,7 +3244,7 @@ public:
       ///
       Declarations,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_SEMICOLON)
       /// optional: false
       ///
       Semicolon
