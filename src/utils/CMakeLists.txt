@@ -64,7 +64,7 @@ elseif( CMAKE_HOST_UNIX )
 endif(MSVC OR MINGW)
 
 set(system_libs ${system_libs} PolarBasic)
-set(system_libs ${system_libs} nlohmann_json::nlohmann_json pthread uuid)
+set(system_libs ${system_libs} nlohmann_json::nlohmann_json)
 
 if (LINUX)
    set(system_libs ${system_libs} pthread uuid)

@@ -806,9 +806,9 @@ void ConditionElementSyntax::validate()
 #endif
 }
 
-Syntax ConditionElementSyntax::getCondition()
+ExprSyntax ConditionElementSyntax::getCondition()
 {
-   return Syntax{m_root, m_data->getChild(Cursor::Condition).get()};
+   return ExprSyntax{m_root, m_data->getChild(Cursor::Condition).get()};
 }
 
 std::optional<TokenSyntax> ConditionElementSyntax::getTrailingComma()
@@ -820,7 +820,7 @@ std::optional<TokenSyntax> ConditionElementSyntax::getTrailingComma()
    return TokenSyntax{m_root, trailingCommaData.get()};
 }
 
-ConditionElementSyntax ConditionElementSyntax::withCondition(std::optional<Syntax> condition)
+ConditionElementSyntax ConditionElementSyntax::withCondition(std::optional<ExprSyntax> condition)
 {
    RefCountPtr<RawSyntax> rawCondition;
    if (condition.has_value()) {
@@ -1001,6 +1001,11 @@ TokenSyntax FallthroughStmtSyntax::getFallthroughKeyword()
    return TokenSyntax{m_root, m_data->getChild(Cursor::FallthroughKeyword).get()};
 }
 
+TokenSyntax FallthroughStmtSyntax::getSemicolon()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
+}
+
 FallthroughStmtSyntax FallthroughStmtSyntax::withFallthroughStmtSyntax(std::optional<TokenSyntax> fallthroughKeyword)
 {
    RefCountPtr<RawSyntax> rawFallthroughKeyword;
@@ -1010,6 +1015,17 @@ FallthroughStmtSyntax FallthroughStmtSyntax::withFallthroughStmtSyntax(std::opti
       rawFallthroughKeyword = make_missing_token(T_FALLTHROUGH);
    }
    return m_data->replaceChild<FallthroughStmtSyntax>(rawFallthroughKeyword, Cursor::FallthroughKeyword);
+}
+
+FallthroughStmtSyntax FallthroughStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> rawSemicolon;
+   if (semicolon.has_value()) {
+      rawSemicolon = semicolon->getRaw();
+   } else {
+      rawSemicolon = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<FallthroughStmtSyntax>(rawSemicolon, Cursor::Semicolon);
 }
 
 ///
@@ -1400,9 +1416,9 @@ TokenSyntax WhileStmtSyntax::getRightParen()
    return TokenSyntax{m_root, m_data->getChild(Cursor::RightParen).get()};
 }
 
-CodeBlockSyntax WhileStmtSyntax::getBody()
+InnerCodeBlockStmtSyntax WhileStmtSyntax::getBody()
 {
-   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+   return InnerCodeBlockStmtSyntax{m_root, m_data->getChild(Cursor::Body).get()};
 }
 
 WhileStmtSyntax WhileStmtSyntax::withLabelName(std::optional<TokenSyntax> labelName)
@@ -1471,7 +1487,7 @@ WhileStmtSyntax WhileStmtSyntax::withRightParen(std::optional<TokenSyntax> right
    return m_data->replaceChild<WhileStmtSyntax>(rawRightParen, Cursor::RightParen);
 }
 
-WhileStmtSyntax WhileStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
+WhileStmtSyntax WhileStmtSyntax::withBody(std::optional<InnerCodeBlockStmtSyntax> body)
 {
    RefCountPtr<RawSyntax> rawBody;
    if (body.has_value()) {
@@ -1538,9 +1554,9 @@ TokenSyntax DoWhileStmtSyntax::getDoKeyword()
    return TokenSyntax{m_root, m_data->getChild(Cursor::DoKeyword).get()};
 }
 
-CodeBlockSyntax DoWhileStmtSyntax::getBody()
+InnerCodeBlockStmtSyntax DoWhileStmtSyntax::getBody()
 {
-   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+   return InnerCodeBlockStmtSyntax{m_root, m_data->getChild(Cursor::Body).get()};
 }
 
 TokenSyntax DoWhileStmtSyntax::getWhileKeyword()
@@ -1561,6 +1577,11 @@ ExprSyntax DoWhileStmtSyntax::getCondition()
 TokenSyntax DoWhileStmtSyntax::getRightParen()
 {
    return TokenSyntax{m_root, m_data->getChild(Cursor::RightParen).get()};
+}
+
+TokenSyntax DoWhileStmtSyntax::getSemicolon()
+{
+   return TokenSyntax{m_root, m_data->getChild(Cursor::Semicolon).get()};
 }
 
 DoWhileStmtSyntax DoWhileStmtSyntax::withLabelName(std::optional<TokenSyntax> labelName)
@@ -1596,7 +1617,7 @@ DoWhileStmtSyntax DoWhileStmtSyntax::withDoKeyword(std::optional<TokenSyntax> do
    return m_data->replaceChild<DoWhileStmtSyntax>(rawDoKeyword, Cursor::DoKeyword);
 }
 
-DoWhileStmtSyntax DoWhileStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
+DoWhileStmtSyntax DoWhileStmtSyntax::withBody(std::optional<InnerCodeBlockStmtSyntax> body)
 {
    RefCountPtr<RawSyntax> rawBody;
    if (body.has_value()) {
@@ -1651,6 +1672,17 @@ DoWhileStmtSyntax DoWhileStmtSyntax::withRightParen(std::optional<TokenSyntax> r
    return m_data->replaceChild<DoWhileStmtSyntax>(rawRightParen, Cursor::RightParen);
 }
 
+DoWhileStmtSyntax DoWhileStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
+{
+   RefCountPtr<RawSyntax> rawSemicolon;
+   if (semicolon.has_value()) {
+      rawSemicolon = semicolon->getRaw();
+   } else {
+      rawSemicolon = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<DoWhileStmtSyntax>(rawSemicolon, Cursor::RightParen);
+}
+
 ///
 /// ForStmtSyntax
 ///
@@ -1669,7 +1701,6 @@ void ForStmtSyntax::validate()
    syntax_assert_child_kind(raw, ConditionalExprs, std::set{SyntaxKind::ExprList});
    syntax_assert_child_token(raw, ConditionalSemicolonToken, std::set{TokenKindType::T_SEMICOLON});
    syntax_assert_child_kind(raw, OperationalExprs, std::set{SyntaxKind::ExprList});
-   syntax_assert_child_token(raw, OperationalSemicolonToken, std::set{TokenKindType::T_SEMICOLON});
    syntax_assert_child_token(raw, RightParenToken, std::set{TokenKindType::T_RIGHT_PAREN});
    syntax_assert_child_kind(raw, Stmt, std::set{SyntaxKind::Stmt});
 #endif
@@ -1708,11 +1739,6 @@ TokenSyntax ForStmtSyntax::getConditionalSemicolonToken()
 std::optional<ExprListSyntax> ForStmtSyntax::getOperationalExprs()
 {
    return ExprListSyntax {m_root, m_data->getChild(Cursor::OperationalExprs).get()};
-}
-
-TokenSyntax ForStmtSyntax::getOperationalSemicolonToken()
-{
-   return TokenSyntax {m_root, m_data->getChild(Cursor::OperationalSemicolonToken).get()};
 }
 
 TokenSyntax ForStmtSyntax::getRightParenToken()
@@ -1800,17 +1826,6 @@ ForStmtSyntax ForStmtSyntax::withOperationalExprs(std::optional<TokenSyntax> exp
       rawExprs = RawSyntax::missing(SyntaxKind::ExprList);
    }
    return m_data->replaceChild<ForStmtSyntax>(rawExprs, Cursor::OperationalExprs);
-}
-
-ForStmtSyntax ForStmtSyntax::withOperationalSemicolonToken(std::optional<TokenSyntax> semicolon)
-{
-   RefCountPtr<RawSyntax> rawSemicolon;
-   if (!semicolon.has_value()) {
-      rawSemicolon = semicolon->getRaw();
-   } else {
-      rawSemicolon = make_missing_token(T_SEMICOLON);
-   }
-   return m_data->replaceChild<ForStmtSyntax>(rawSemicolon, Cursor::OperationalSemicolonToken);
 }
 
 ForStmtSyntax ForStmtSyntax::withRightParenToken(std::optional<TokenSyntax> rightParen)

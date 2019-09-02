@@ -622,7 +622,7 @@ public:
       ///
       UnsetVariables,
       ///
-      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
       ///
       RightParenToken,
@@ -729,7 +729,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: Syntax
+      /// type: ExprSyntax
       /// optional: false
       /// node choices: true
       /// -----------------------------------
@@ -738,7 +738,7 @@ public:
       Condition,
 
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_COMMA)
       /// optional: true
       ///
       TrailingComma,
@@ -759,10 +759,10 @@ public:
       validate();
    }
 
-   Syntax getCondition();
+   ExprSyntax getCondition();
    std::optional<TokenSyntax> getTrailingComma();
 
-   ConditionElementSyntax withCondition(std::optional<Syntax> condition);
+   ConditionElementSyntax withCondition(std::optional<ExprSyntax> condition);
    ConditionElementSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
 
    static bool kindOf(SyntaxKind kind)
@@ -793,7 +793,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_CONTINUE)
       /// optional: false
       ///
       ContinueKeyword,
@@ -906,7 +906,12 @@ public:
       /// type: TokenSyntax (T_FALLTHROUGH)
       /// optional: false
       ///
-      FallthroughKeyword
+      FallthroughKeyword,
+      ///
+      /// type: TokenSyntax (T_SEMICOLON)
+      /// optional: false
+      ///
+      Semicolon,
    };
 
 public:
@@ -917,7 +922,10 @@ public:
    }
 
    TokenSyntax getFallthroughKeyword();
+   TokenSyntax getSemicolon();
+
    FallthroughStmtSyntax withFallthroughStmtSyntax(std::optional<TokenSyntax> fallthroughKeyword);
+   FallthroughStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
 
 private:
    friend class FallthroughStmtSyntaxBuilder;
@@ -1159,7 +1167,7 @@ public:
       ///
       RightParen,
       ///
-      /// type: CodeBlockSyntax
+      /// type: InnerCodeBlockStmtSyntax
       /// optional: false
       ///
       Body
@@ -1178,7 +1186,7 @@ public:
    TokenSyntax getLeftParen();
    ConditionElementListSyntax getConditions();
    TokenSyntax getRightParen();
-   CodeBlockSyntax getBody();
+   InnerCodeBlockStmtSyntax getBody();
 
    WhileStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
    WhileStmtSyntax withLabelColon(std::optional<TokenSyntax> labelColon);
@@ -1186,7 +1194,7 @@ public:
    WhileStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
    WhileStmtSyntax withConditions(std::optional<ConditionElementListSyntax> conditions);
    WhileStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
-   WhileStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+   WhileStmtSyntax withBody(std::optional<InnerCodeBlockStmtSyntax> body);
 
    /// Adds the provided `condition` to the node's `Conditions`
    /// collection.
@@ -1257,7 +1265,12 @@ public:
       /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
       ///
-      RightParen
+      RightParen,
+      ///
+      /// type: TokenSyntax (T_SEMICOLON)
+      /// optional: false
+      ///
+      Semicolon,
    };
 
 public:
@@ -1270,20 +1283,22 @@ public:
    std::optional<TokenSyntax> getLabelName();
    std::optional<TokenSyntax> getLabelColon();
    TokenSyntax getDoKeyword();
-   CodeBlockSyntax getBody();
+   InnerCodeBlockStmtSyntax getBody();
    TokenSyntax getWhileKeyword();
    TokenSyntax getLeftParen();
    ExprSyntax getCondition();
    TokenSyntax getRightParen();
+   TokenSyntax getSemicolon();
 
    DoWhileStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
    DoWhileStmtSyntax withLabelColon(std::optional<TokenSyntax> labelColon);
    DoWhileStmtSyntax withDoKeyword(std::optional<TokenSyntax> doKeyword);
-   DoWhileStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+   DoWhileStmtSyntax withBody(std::optional<InnerCodeBlockStmtSyntax> body);
    DoWhileStmtSyntax withWhileKeyword(std::optional<TokenSyntax> whileKeyword);
    DoWhileStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
    DoWhileStmtSyntax withCondition(std::optional<ExprSyntax> condition);
    DoWhileStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
+   DoWhileStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -1346,11 +1361,6 @@ public:
       ///
       OperationalExprs,
       ///
-      /// type: TokenSyntax (T_SEMICOLON)
-      /// optional: false
-      ///
-      OperationalSemicolonToken,
-      ///
       /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
       ///
@@ -1375,7 +1385,6 @@ public:
    std::optional<ExprListSyntax> getConditionalExprs();
    TokenSyntax getConditionalSemicolonToken();
    std::optional<ExprListSyntax> getOperationalExprs();
-   TokenSyntax getOperationalSemicolonToken();
    TokenSyntax getRightParenToken();
    StmtSyntax getStmt();
 
@@ -1386,7 +1395,6 @@ public:
    ForStmtSyntax withConditionalExprs(std::optional<TokenSyntax> exprs);
    ForStmtSyntax withConditionalSemicolonToken(std::optional<TokenSyntax> semicolon);
    ForStmtSyntax withOperationalExprs(std::optional<TokenSyntax> exprs);
-   ForStmtSyntax withOperationalSemicolonToken(std::optional<TokenSyntax> semicolon);
    ForStmtSyntax withRightParenToken(std::optional<TokenSyntax> rightParen);
    ForStmtSyntax withStmt(std::optional<TokenSyntax> stmt);
 

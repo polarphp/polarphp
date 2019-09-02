@@ -1022,139 +1022,228 @@ StmtSyntaxNodeFactory::makeBlankElseIfList(RefCountPtr<SyntaxArena> arena)
 InnerStmtListSyntax
 StmtSyntaxNodeFactory::makeBlankInnerStmtList(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::InnerStmtList, {}, SourcePresence::Present, arena);
+   return make<InnerStmtListSyntax>(target);
 }
 
 TopStmtListSyntax
 StmtSyntaxNodeFactory::makeBlankTopStmtList(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::TopStmtList, {}, SourcePresence::Present, arena);
+   return make<TopStmtListSyntax>(target);
 }
 
 CatchListSyntax
 StmtSyntaxNodeFactory::makeBlankCatchList(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::CatchList, {}, SourcePresence::Present, arena);
+   return make<CatchListSyntax>(target);
 }
 
 CatchArgTypeHintListSyntax
 StmtSyntaxNodeFactory::makeBlankCatchArgTypeHintList(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::CatchArgTypeHintList, {}, SourcePresence::Present, arena);
+   return make<CatchArgTypeHintListSyntax>(target);
 }
 
 UnsetVariableListSyntax
 StmtSyntaxNodeFactory::makeBlankUnsetVariableList(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::UnsetVariableList, {}, SourcePresence::Present, arena);
+   return make<UnsetVariableListSyntax>(target);
 }
 
 GlobalVariableListSyntax
 StmtSyntaxNodeFactory::makeBlankGlobalVariableList(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::GlobalVariableList, {}, SourcePresence::Present, arena);
+   return make<GlobalVariableListSyntax>(target);
 }
 
 StaticVariableListSyntax
 StmtSyntaxNodeFactory::makeBlankStaticVariableList(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::StaticVariableList, {}, SourcePresence::Present, arena);
+   return make<StaticVariableListSyntax>(target);
 }
 
 NamespaceUseDeclarationListSyntax
 StmtSyntaxNodeFactory::makeBlankNamespaceUseDeclarationList(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::NamespaceUseDeclarationList, {}, SourcePresence::Present, arena);
+   return make<NamespaceUseDeclarationListSyntax>(target);
 }
 
 NamespaceInlineUseDeclarationListSyntax
 StmtSyntaxNodeFactory::makeBlankNamespaceInlineUseDeclarationList(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::NamespaceInlineUseDeclarationList, {}, SourcePresence::Present, arena);
+   return make<NamespaceInlineUseDeclarationListSyntax>(target);
 }
 
 NamespaceUnprefixedUseDeclarationListSyntax
 StmtSyntaxNodeFactory::makeBlankNamespaceUnprefixedUseDeclarationList(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::NamespaceUnprefixedUseDeclarationList, {}, SourcePresence::Present, arena);
+   return make<NamespaceUnprefixedUseDeclarationListSyntax>(target);
 }
 
 ConstDeclareItemListSyntax
 StmtSyntaxNodeFactory::makeBlankConstDeclareItemList(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ConstDeclareItemList, {}, SourcePresence::Present, arena);
+   return make<ConstDeclareItemListSyntax>(target);
 }
 
 EmptyStmtSyntax
 StmtSyntaxNodeFactory::makeBlankEmptyStmt(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::EmptyStmt, {
+               make_missing_token(T_SEMICOLON), // Semicolon
+            }, SourcePresence::Present, arena);
+   return make<EmptyStmtSyntax>(target);
 }
 
 NestStmtSyntax
 StmtSyntaxNodeFactory::makeBlankNestStmt(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::NestStmt, {
+               make_missing_token(T_LEFT_BRACE), // LeftBraceToken
+               RawSyntax::missing(SyntaxKind::InnerStmtList), // Statements
+               make_missing_token(T_LEFT_BRACE), // RightBraceToken
+            }, SourcePresence::Present, arena);
+   return make<NestStmtSyntax>(target);
 }
 
 ExprStmtSyntax
 StmtSyntaxNodeFactory::makeBlankExprStmt(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ExprStmt, {
+               RawSyntax::missing(SyntaxKind::Expr), // Expr
+               make_missing_token(T_SEMICOLON), // Semicolon
+            }, SourcePresence::Present, arena);
+   return make<ExprStmtSyntax>(target);
 }
 
 InnerStmtSyntax
 StmtSyntaxNodeFactory::makeBlankInnerStmt(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::InnerStmt, {
+               RawSyntax::missing(SyntaxKind::Stmt), // Stmt
+            }, SourcePresence::Present, arena);
+   return make<InnerStmtSyntax>(target);
 }
 
 InnerCodeBlockStmtSyntax
 StmtSyntaxNodeFactory::makeBlankInnerCodeBlockStmt(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::InnerCodeBlockStmt, {
+               make_missing_token(T_LEFT_BRACE), // LeftBrace
+               RawSyntax::missing(SyntaxKind::InnerStmtList), // Stmt
+               make_missing_token(T_RIGHT_BRACE), // RightBrace
+            }, SourcePresence::Present, arena);
+   return make<InnerCodeBlockStmtSyntax>(target);
 }
 
 TopStmtSyntax
 StmtSyntaxNodeFactory::makeBlankTopStmt(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::TopStmt, {
+               RawSyntax::missing(SyntaxKind::Stmt), // Stmt
+            }, SourcePresence::Present, arena);
+   return make<TopStmtSyntax>(target);
 }
 
 TopCodeBlockStmtSyntax
 StmtSyntaxNodeFactory::makeBlankTopCodeBlockStmt(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::TopCodeBlockStmt, {
+               make_missing_token(T_LEFT_BRACE), // leftBrace
+               RawSyntax::missing(SyntaxKind::TopStmtList), // Statements
+               make_missing_token(T_RIGHT_BRACE), // rightBrace
+            }, SourcePresence::Present, arena);
+   return make<TopCodeBlockStmtSyntax>(target);
 }
 
 DeclareStmtSyntax
 StmtSyntaxNodeFactory::makeBlankDeclareStmt(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::DeclareStmt, {
+               make_missing_token(T_DECLARE), // DeclareToken
+               make_missing_token(T_LEFT_PAREN), // LeftParenToken
+               RawSyntax::missing(SyntaxKind::ConstDeclareItemList), // ConstList
+               make_missing_token(T_RIGHT_PAREN), // RightParenToken
+               RawSyntax::missing(SyntaxKind::Stmt), // Stmt
+            }, SourcePresence::Present, arena);
+   return make<DeclareStmtSyntax>(target);
 }
 
 GotoStmtSyntax
 StmtSyntaxNodeFactory::makeBlankGotoStmt(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::GotoStmt, {
+               make_missing_token(T_GOTO), // GotoToken
+               make_missing_token(T_IDENTIFIER_STRING), // Target
+               make_missing_token(T_SEMICOLON), // Semicolon
+            }, SourcePresence::Present, arena);
+   return make<GotoStmtSyntax>(target);
 }
 
 UnsetVariableSyntax
 StmtSyntaxNodeFactory::makeBlankUnsetVariable(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::UnsetVariable, {
+               make_missing_token(T_VARIABLE), // Variable
+               nullptr // TrailingComma
+            }, SourcePresence::Present, arena);
+   return make<UnsetVariableSyntax>(target);
 }
 
 UnsetStmtSyntax
 StmtSyntaxNodeFactory::makeBlankUnsetStmt(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::UnsetStmt, {
+               make_missing_token(T_UNSET), // UnsetToken
+               make_missing_token(T_LEFT_PAREN), // LeftParenToken
+               RawSyntax::missing(SyntaxKind::UnsetVariableList), // UnsetVariables
+               make_missing_token(T_RIGHT_PAREN), // RightParenToken
+               make_missing_token(T_COMMA), // Semicolon
+            }, SourcePresence::Present, arena);
+   return make<UnsetStmtSyntax>(target);
 }
 
 LabelStmtSyntax
 StmtSyntaxNodeFactory::makeBlankLabelStmt(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::LabelStmt, {
+               make_missing_token(T_IDENTIFIER_STRING), // Name
+               make_missing_token(T_COLON), // Colon
+            }, SourcePresence::Present, arena);
+   return make<LabelStmtSyntax>(target);
 }
 
 ConditionElementSyntax
@@ -1162,8 +1251,8 @@ StmtSyntaxNodeFactory::makeBlankConditionElement(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ConditionElement, {
-               RawSyntax::missing(SyntaxKind::Expr),
-               nullptr
+               RawSyntax::missing(SyntaxKind::Expr), // Condition
+               nullptr // TrailingComma
             }, SourcePresence::Present, arena);
    return make<ConditionElementSyntax>(target);
 }
@@ -1173,9 +1262,9 @@ StmtSyntaxNodeFactory::makeBlankContinueStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ContinueStmt, {
-               RawSyntax::missing(TokenKindType::T_CONTINUE,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_CONTINUE))),
-               nullptr
+               make_missing_token(T_CONTINUE), // ContinueKeyword
+               nullptr, // Expr
+               make_missing_token(T_SEMICOLON), // Semicolon
             }, SourcePresence::Present, arena);
    return make<ContinueStmtSyntax>(target);
 }
@@ -1185,9 +1274,9 @@ StmtSyntaxNodeFactory::makeBlankBreakStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::BreakStmt, {
-               RawSyntax::missing(TokenKindType::T_BREAK,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_BREAK))),
-               nullptr
+               make_missing_token(T_BREAK), // BreakKeyword
+               nullptr, // Expr
+               make_missing_token(T_SEMICOLON), // Semicolon
             }, SourcePresence::Present, arena);
    return make<BreakStmtSyntax>(target);
 }
@@ -1197,8 +1286,8 @@ StmtSyntaxNodeFactory::makeBlankFallthroughStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::FallthroughStmt, {
-               RawSyntax::missing(TokenKindType::T_FALLTHROUGH,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_FALLTHROUGH)))
+               make_missing_token(T_FALLTHROUGH), // FallthroughKeyword
+               make_missing_token(T_SEMICOLON), // Semicolon
             }, SourcePresence::Present, arena);
    return make<FallthroughStmtSyntax>(target);
 }
@@ -1208,14 +1297,11 @@ StmtSyntaxNodeFactory::makeBlankElseIfClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ElseIfClause, {
-               RawSyntax::missing(TokenKindType::T_ELSEIF,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_ELSEIF))),
-               RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN))),
-               RawSyntax::missing(SyntaxKind::Expr),
-               RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN))),
-               RawSyntax::missing(SyntaxKind::CodeBlock)
+               make_missing_token(T_ELSEIF), // ElseIfKeyword
+               make_missing_token(T_LEFT_PAREN), // LeftParen
+               RawSyntax::missing(SyntaxKind::Expr), // Condition
+               make_missing_token(T_RIGHT_PAREN), // RightParen
+               RawSyntax::missing(SyntaxKind::CodeBlock) // Body
             }, SourcePresence::Present, arena);
    return make<ElseIfClauseSyntax>(target);
 }
@@ -1225,19 +1311,16 @@ StmtSyntaxNodeFactory::makeBlankIfStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::IfStmt, {
-               nullptr,
-               nullptr,
-               RawSyntax::missing(TokenKindType::T_IF,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_IF))),
-               RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN))),
-               RawSyntax::missing(SyntaxKind::Expr),
-               RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN))),
-               RawSyntax::missing(SyntaxKind::CodeBlock),
-               nullptr,
-               nullptr,
-               nullptr
+               nullptr, // LabelName
+               nullptr, // LabelColon
+               make_missing_token(T_IF), // IfKeyword
+               make_missing_token(T_LEFT_PAREN), // LeftParen
+               RawSyntax::missing(SyntaxKind::Expr), // Condition
+               make_missing_token(T_RIGHT_PAREN), // RightParen
+               RawSyntax::missing(SyntaxKind::CodeBlock), // Body
+               nullptr, // ElseIfClauses
+               nullptr, // ElseKeyword
+               nullptr, // ElseBody
             }, SourcePresence::Present, arena);
    return make<IfStmtSyntax>(target);
 }
@@ -1247,12 +1330,13 @@ StmtSyntaxNodeFactory::makeBlankWhileStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::WhileStmt, {
-               nullptr,
-               nullptr,
-               RawSyntax::missing(TokenKindType::T_WHILE,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_WHILE))),
-               RawSyntax::missing(SyntaxKind::ConditionElementList),
-               RawSyntax::missing(SyntaxKind::CodeBlock)
+               nullptr, // LabelName
+               nullptr, // LabelColon
+               make_missing_token(T_WHILE), // WhileKeyword
+               make_missing_token(T_LEFT_PAREN), // LeftParen
+               RawSyntax::missing(SyntaxKind::ConditionElementList), // Conditions
+               make_missing_token(T_RIGHT_PAREN), // RightParen
+               RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt), // Body
             }, SourcePresence::Present, arena);
    return make<WhileStmtSyntax>(target);
 }
@@ -1262,27 +1346,35 @@ StmtSyntaxNodeFactory::makeBlankDoWhileStmt(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::DoWhileStmt, {
-               nullptr,
-               nullptr,
-               RawSyntax::missing(TokenKindType::T_DO,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_DO))),
-               RawSyntax::missing(SyntaxKind::CodeBlock),
-               RawSyntax::missing(TokenKindType::T_WHILE,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_WHILE))),
-               RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN))),
-               RawSyntax::missing(SyntaxKind::Expr),
-               RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-               OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN))),
+               nullptr, // LabelName
+               nullptr, // LabelColon
+               make_missing_token(T_DO), // DoKeyword
+               RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt), // Body
+               make_missing_token(T_WHILE), // WhileKeyword
+               make_missing_token(T_LEFT_PAREN), // LeftParen
+               RawSyntax::missing(SyntaxKind::Expr), // Condition
+               make_missing_token(T_RIGHT_PAREN), // RightParen
             }, SourcePresence::Present, arena);
    return make<DoWhileStmtSyntax>(target);
 }
 
-
 ForStmtSyntax
 StmtSyntaxNodeFactory::makeBlankForStmt(RefCountPtr<SyntaxArena> arena)
 {
-
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ForStmt, {
+               make_missing_token(T_FOR), // ForToken
+               make_missing_token(T_LEFT_PAREN), // LeftParenToken
+               nullptr, // InitializedExprs
+               make_missing_token(T_SEMICOLON), // InitializedSemicolonToken
+               nullptr, // ConditionalExprs
+               make_missing_token(T_SEMICOLON), // ConditionalSemicolonToken
+               nullptr, // OperationalExprs
+               make_missing_token(T_SEMICOLON), // OperationalSemicolonToken
+               make_missing_token(T_RIGHT_PAREN), // RightParenToken
+               RawSyntax::missing(SyntaxKind::Stmt), // Stmt
+            }, SourcePresence::Present, arena);
+   return make<ForStmtSyntax>(target);
 }
 
 ForeachVariableSyntax
