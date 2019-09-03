@@ -782,19 +782,20 @@ function(polar_setup_rpath name)
       if(${CMAKE_SYSTEM_NAME} MATCHES "(FreeBSD|DragonFly)")
          set_property(TARGET ${name} APPEND_STRING PROPERTY
             LINK_FLAGS " -Wl,-z,origin ")
-      elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND NOT POLAR_LINKER_IS_GOLD)
+      elseif(LINUX AND NOT POLAR_LINKER_IS_GOLD)
          # $ORIGIN is not interpreted at link time by ld.bfd
          set_property(TARGET ${name} APPEND_STRING PROPERTY
-            LINK_FLAGS " -Wl,-rpath-link,${POLAR_LIBRARY_OUTPUT_INTDIR} ")
+            LINK_FLAGS " -Wl,-rpath-link,${POLAR_LIBRARY_OUTPUT_INTDIR}")
       endif()
    else()
       return()
    endif()
-
+   if (LINUX)
+      set(_install_rpath "${POLAR_COMPILER_ROOT_DIR}/lib64;${POLAR_COMPILER_ROOT_DIR}/lib;${_install_rpath}")
+   endif()
    set_target_properties(${name} PROPERTIES
       BUILD_WITH_INSTALL_RPATH ON
       INSTALL_RPATH "${_install_rpath}"
       ${_install_name_dir})
-
 endfunction(polar_setup_rpath)
 

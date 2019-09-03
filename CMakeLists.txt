@@ -167,6 +167,10 @@ endif()
 
 # First include general CMake utilities.
 include(PolarUtils)
+
+# setup compiler root dir
+polar_detect_compiler_root_dir(POLAR_COMPILER_ROOT_DIR)
+
 include(SummaryOutput)
 include(CheckUtils)
 include(AddDefinitions)
@@ -476,4 +480,3 @@ if (POLAR_BUILD_TESTS)
 endif()
 
 polar_compile_env_summary_output()
-

@@ -78,5 +78,5 @@ set_target_properties(
    PolarUtils
    PROPERTIES
    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR};"
-   INTERFACE_LINK_LIBRARIES "PolarBasic;PolarGlobal"
+   INTERFACE_LINK_LIBRARIES "PolarBasic;PolarGlobal;pthread"
    )

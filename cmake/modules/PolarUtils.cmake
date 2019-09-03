@@ -274,3 +274,10 @@ macro(polar_check_symbol_exists symbol files variable)
    endif()
 endmacro()
 
+macro(polar_detect_compiler_root_dir _targetDir)
+   set(_tempDir ${CMAKE_CXX_COMPILER})
+   get_filename_component(_tempDir ${_tempDir} DIRECTORY)
+   get_filename_component(_tempDir ${_tempDir} DIRECTORY)
+   set(${_targetDir} ${_tempDir})
+endmacro()
+
