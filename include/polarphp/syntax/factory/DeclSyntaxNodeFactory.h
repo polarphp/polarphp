@@ -64,7 +64,7 @@ public:
                                                     RefCountPtr<SyntaxArena> arena = nullptr);
    static FunctionDefinitionSyntax makeFunctionDefinition(TokenSyntax funcToken, std::optional<TokenSyntax> returnRefToken,
                                                           TokenSyntax funcName, ParameterClauseSyntax parameterListClause,
-                                                          std::optional<ReturnTypeClauseSyntax> returnType, CodeBlockSyntax body,
+                                                          std::optional<ReturnTypeClauseSyntax> returnType, InnerCodeBlockStmtSyntax body,
                                                           RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassModifierSyntax makeClassModifier(TokenSyntax modifier, RefCountPtr<SyntaxArena> arena = nullptr);
    static ExtendsFromClauseSyntax makeExtendsFromClause(TokenSyntax extendsToken, NameSyntax name, RefCountPtr<SyntaxArena> arena = nullptr);

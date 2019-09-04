@@ -23,11 +23,6 @@ class UnknownDeclSyntax;
 class UnknownExprSyntax;
 class UnknownStmtSyntax;
 class UnknownTypeSyntax;
-class CodeBlockItemSyntax;
-
-/// type: SyntaxCollection
-/// element type: CodeBlockItem
-using CodeBlockItemListSyntax = SyntaxCollection<SyntaxKind::CodeBlockItemList, CodeBlockItemSyntax>;
 
 } // polar::syntax
 

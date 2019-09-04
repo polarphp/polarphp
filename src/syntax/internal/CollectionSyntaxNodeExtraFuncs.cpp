@@ -9,7 +9,7 @@
 //
 // Created by polarboy on 2019/05/15.
 
-#include "polarphp/syntax/internal/ListSyntaxNodeExtraFuncs.h"
+#include "polarphp/syntax/internal/CollectionSyntaxNodeExtraFuncs.h"
 #include "polarphp/basic/adt/ArrayRef.h"
 #include "polarphp/syntax/SyntaxNodes.h"
 #include "polarphp/syntax/SyntaxKind.h"
@@ -20,10 +20,10 @@
 namespace polar::syntax::internal {
 namespace canserveascollectionmemberraw {
 
-bool check_code_block_item_list(SyntaxKind memberKind)
-{
-   return CodeBlockItemSyntax::kindOf(memberKind);
-}
+//bool check_code_block_item_list(SyntaxKind memberKind)
+//{
+//   return CodeBlockItemSyntax::kindOf(memberKind);
+//}
 
 bool check_token_list(SyntaxKind memberKind)
 {

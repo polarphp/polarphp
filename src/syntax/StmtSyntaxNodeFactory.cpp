@@ -435,7 +435,7 @@ StmtSyntaxNodeFactory::makeFallthroughStmt(TokenSyntax fallthroughKeyword, RefCo
 ElseIfClauseSyntax
 StmtSyntaxNodeFactory::makeElseIfClause(TokenSyntax elseIfKeyword, TokenSyntax leftParen,
                                         ExprSyntax condition, TokenSyntax rightParen,
-                                        CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena)
+                                        StmtSyntax body, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ElseIfClause, {
@@ -451,7 +451,7 @@ StmtSyntaxNodeFactory::makeElseIfClause(TokenSyntax elseIfKeyword, TokenSyntax l
 IfStmtSyntax
 StmtSyntaxNodeFactory::makeIfStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                   TokenSyntax ifKeyword, TokenSyntax leftParen, ExprSyntax condition,
-                                  TokenSyntax rightParen, CodeBlockSyntax body, std::optional<ElseIfListSyntax> elseIfClauses,
+                                  TokenSyntax rightParen, StmtSyntax body, std::optional<ElseIfListSyntax> elseIfClauses,
                                   std::optional<TokenSyntax> elseKeyword, std::optional<Syntax> elseBody,
                                   RefCountPtr<SyntaxArena> arena)
 {
@@ -474,7 +474,7 @@ StmtSyntaxNodeFactory::makeIfStmt(std::optional<TokenSyntax> labelName, std::opt
 WhileStmtSyntax
 StmtSyntaxNodeFactory::makeWhileStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                      TokenSyntax whileKeyword, ConditionElementListSyntax conditions,
-                                     CodeBlockSyntax body, RefCountPtr<SyntaxArena> arena)
+                                     StmtSyntax body, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::WhileStmt, {
@@ -489,7 +489,7 @@ StmtSyntaxNodeFactory::makeWhileStmt(std::optional<TokenSyntax> labelName, std::
 
 DoWhileStmtSyntax
 StmtSyntaxNodeFactory::makeDoWhileStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
-                                       TokenSyntax doKeyword, CodeBlockSyntax body, TokenSyntax whileKeyword,
+                                       TokenSyntax doKeyword, StmtSyntax body, TokenSyntax whileKeyword,
                                        TokenSyntax leftParen, ExprSyntax condition, TokenSyntax rightParen,
                                        RefCountPtr<SyntaxArena> arena)
 {
@@ -589,7 +589,7 @@ StmtSyntaxNodeFactory::makeSwitchCaseLabel(TokenSyntax caseKeyword, ExprSyntax e
 }
 
 SwitchCaseSyntax
-StmtSyntaxNodeFactory::makeSwitchCase(Syntax label, CodeBlockItemListSyntax statements,
+StmtSyntaxNodeFactory::makeSwitchCase(Syntax label, InnerStmtListSyntax statements,
                                       RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -622,7 +622,7 @@ StmtSyntaxNodeFactory::makeSwitchStmt(std::optional<TokenSyntax> labelName, std:
 }
 
 DeferStmtSyntax
-StmtSyntaxNodeFactory::makeDeferStmt(TokenSyntax deferKeyword, CodeBlockSyntax body,
+StmtSyntaxNodeFactory::makeDeferStmt(TokenSyntax deferKeyword, InnerCodeBlockStmtSyntax body,
                                      RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(

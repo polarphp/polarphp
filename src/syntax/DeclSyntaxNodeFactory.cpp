@@ -11,6 +11,7 @@
 
 #include "polarphp/syntax/factory/DeclSyntaxNodeFactory.h"
 #include "polarphp/syntax/syntaxnode/DeclSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
 
 namespace polar::syntax {
 
@@ -243,7 +244,7 @@ DeclSyntaxNodeFactory::makeParameterClause(TokenSyntax leftParen, ParameterListS
 FunctionDefinitionSyntax
 DeclSyntaxNodeFactory::makeFunctionDefinition(TokenSyntax funcToken, std::optional<TokenSyntax> returnRefToken,
                                               TokenSyntax funcName, ParameterClauseSyntax parameterListClause,
-                                              std::optional<ReturnTypeClauseSyntax> returnType, CodeBlockSyntax body,
+                                              std::optional<ReturnTypeClauseSyntax> returnType, InnerCodeBlockStmtSyntax body,
                                               RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::ParameterListClause, {

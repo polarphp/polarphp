@@ -229,9 +229,9 @@ TokenSyntax InnerCodeBlockStmtSyntax::getLeftBrace()
    return TokenSyntax{m_root, m_data->getChild(Cursor::LeftBrace).get()};
 }
 
-CodeBlockItemListSyntax InnerCodeBlockStmtSyntax::getStatements()
+InnerStmtListSyntax InnerCodeBlockStmtSyntax::getStatements()
 {
-   return CodeBlockItemListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
+   return InnerStmtListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
 }
 
 TokenSyntax InnerCodeBlockStmtSyntax::getRightBrace()
@@ -351,9 +351,9 @@ TokenSyntax TopCodeBlockStmtSyntax::getLeftBrace()
    return TokenSyntax{m_root, m_data->getChild(Cursor::LeftBrace).get()};
 }
 
-CodeBlockItemListSyntax TopCodeBlockStmtSyntax::getStatements()
+TopStmtListSyntax TopCodeBlockStmtSyntax::getStatements()
 {
-   return CodeBlockItemListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
+   return TopStmtListSyntax{m_root, m_data->getChild(Cursor::Statements).get()};
 }
 
 TokenSyntax TopCodeBlockStmtSyntax::getRightBrace()
@@ -383,7 +383,7 @@ TopCodeBlockStmtSyntax TopCodeBlockStmtSyntax::withLeftBrace(std::optional<Token
    return m_data->replaceChild<TopCodeBlockStmtSyntax>(rawLeftBrace, Cursor::LeftBrace);
 }
 
-TopCodeBlockStmtSyntax TopCodeBlockStmtSyntax::withStatements(std::optional<InnerStmtSyntax> statements)
+TopCodeBlockStmtSyntax TopCodeBlockStmtSyntax::withStatements(std::optional<TopStmtListSyntax> statements)
 {
    RefCountPtr<RawSyntax> rawStatements;
    if (statements.has_value()) {
@@ -1067,9 +1067,9 @@ TokenSyntax ElseIfClauseSyntax::getRightParen()
    return TokenSyntax{m_root, m_data->getChild(Cursor::RightParen).get()};
 }
 
-CodeBlockSyntax ElseIfClauseSyntax::getBody()
+StmtSyntax ElseIfClauseSyntax::getBody()
 {
-   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+   return StmtSyntax{m_root, m_data->getChild(Cursor::Body).get()};
 }
 
 ElseIfClauseSyntax ElseIfClauseSyntax::withElseIfKeyword(std::optional<TokenSyntax> elseIfKeyword)
@@ -1116,13 +1116,13 @@ ElseIfClauseSyntax ElseIfClauseSyntax::withRightParen(std::optional<TokenSyntax>
    return m_data->replaceChild<ElseIfClauseSyntax>(rawRightParen, Cursor::RightParen);
 }
 
-ElseIfClauseSyntax ElseIfClauseSyntax::withBody(std::optional<CodeBlockSyntax> body)
+ElseIfClauseSyntax ElseIfClauseSyntax::withBody(std::optional<StmtSyntax> body)
 {
    RefCountPtr<RawSyntax> rawBody;
    if (body.has_value()) {
       rawBody = body->getRaw();
    } else {
-      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
+      rawBody = RawSyntax::missing(SyntaxKind::Stmt);
    }
    return m_data->replaceChild<ElseIfClauseSyntax>(rawBody, Cursor::Body);
 }
@@ -1204,9 +1204,9 @@ TokenSyntax IfStmtSyntax::getRightParen()
    return TokenSyntax(m_root, m_data->getChild(Cursor::RightParen).get());
 }
 
-CodeBlockSyntax IfStmtSyntax::getBody()
+StmtSyntax IfStmtSyntax::getBody()
 {
-   return CodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+   return StmtSyntax{m_root, m_data->getChild(Cursor::Body).get()};
 }
 
 std::optional<ElseIfListSyntax> IfStmtSyntax::getElseIfClauses()
@@ -1302,13 +1302,13 @@ IfStmtSyntax IfStmtSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
    return m_data->replaceChild<IfStmtSyntax>(rawRightParen, Cursor::RightParen);
 }
 
-IfStmtSyntax IfStmtSyntax::withBody(std::optional<CodeBlockSyntax> body)
+IfStmtSyntax IfStmtSyntax::withBody(std::optional<StmtSyntax> body)
 {
    RefCountPtr<RawSyntax> rawBody;
    if (body.has_value()) {
       rawBody = body->getRaw();
    } else {
-      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
+      rawBody = RawSyntax::missing(SyntaxKind::Stmt);
    }
    return m_data->replaceChild<IfStmtSyntax>(rawBody, Cursor::Body);
 }
@@ -2244,24 +2244,24 @@ SwitchCaseSyntax SwitchCaseSyntax::withLabel(std::optional<Syntax> label)
    return m_data->replaceChild<SwitchCaseSyntax>(rawLabel, Cursor::Label);
 }
 
-SwitchCaseSyntax SwitchCaseSyntax::withStatements(std::optional<InnerCodeBlockStmtSyntax> statements)
+SwitchCaseSyntax SwitchCaseSyntax::withStatements(std::optional<InnerStmtListSyntax> statements)
 {
    RefCountPtr<RawSyntax> rawStatements;
    if (statements.has_value()) {
       rawStatements = statements->getRaw();
    } else {
-      rawStatements = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
+      rawStatements = RawSyntax::missing(SyntaxKind::InnerStmtList);
    }
    return m_data->replaceChild<SwitchCaseSyntax>(rawStatements, Cursor::Statements);
 }
 
-SwitchCaseSyntax SwitchCaseSyntax::addStatement(CodeBlockItemSyntax statement)
+SwitchCaseSyntax SwitchCaseSyntax::addStatement(InnerStmtSyntax statement)
 {
    RefCountPtr<RawSyntax> statements = getRaw()->getChild(Cursor::Statements);
    if (statements) {
       statements->append(statement.getRaw());
    } else {
-      statements = RawSyntax::make(SyntaxKind::CodeBlockItemList, {statement.getRaw()}, SourcePresence::Present);
+      statements = RawSyntax::make(SyntaxKind::InnerStmtList, {statement.getRaw()}, SourcePresence::Present);
    }
    return m_data->replaceChild<SwitchCaseSyntax>(statements, Cursor::Statements);
 }

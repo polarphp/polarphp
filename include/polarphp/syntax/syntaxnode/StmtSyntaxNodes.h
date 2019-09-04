@@ -271,7 +271,7 @@ public:
    }
 
    TokenSyntax getLeftBrace();
-   CodeBlockItemListSyntax getStatements();
+   InnerStmtListSyntax getStatements();
    TokenSyntax getRightBrace();
 
    InnerCodeBlockStmtSyntax addCodeBlockItem(InnerStmtSyntax stmt);
@@ -389,13 +389,13 @@ public:
    }
 
    TokenSyntax getLeftBrace();
-   CodeBlockItemListSyntax getStatements();
+   TopStmtListSyntax getStatements();
    TokenSyntax getRightBrace();
 
 
    TopCodeBlockStmtSyntax addCodeBlockItem(TopStmtSyntax stmt);
    TopCodeBlockStmtSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
-   TopCodeBlockStmtSyntax withStatements(std::optional<InnerStmtSyntax> statements);
+   TopCodeBlockStmtSyntax withStatements(std::optional<TopStmtListSyntax> statements);
    TopCodeBlockStmtSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
 
    static bool kindOf(SyntaxKind kind)
@@ -966,7 +966,7 @@ public:
       ///
       RightParen,
       ///
-      /// type: CodeBlockSyntax
+      /// type: StmtSyntax
       /// optional: false
       ///
       Body
@@ -983,13 +983,13 @@ public:
    TokenSyntax getLeftParen();
    ExprSyntax getCondition();
    TokenSyntax getRightParen();
-   CodeBlockSyntax getBody();
+   StmtSyntax getBody();
 
    ElseIfClauseSyntax withElseIfKeyword(std::optional<TokenSyntax> elseIfKeyword);
    ElseIfClauseSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
    ElseIfClauseSyntax withCondition(std::optional<ExprSyntax> condition);
    ElseIfClauseSyntax withRightParen(std::optional<TokenSyntax> rightParen);
-   ElseIfClauseSyntax withBody(std::optional<CodeBlockSyntax> body);
+   ElseIfClauseSyntax withBody(std::optional<StmtSyntax> body);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -1093,7 +1093,7 @@ public:
    TokenSyntax getLeftParen();
    ExprSyntax getCondition();
    TokenSyntax getRightParen();
-   CodeBlockSyntax getBody();
+   StmtSyntax getBody();
    std::optional<ElseIfListSyntax> getElseIfClauses();
    std::optional<TokenSyntax> getElseKeyword();
    std::optional<Syntax> getElseBody();
@@ -1104,7 +1104,7 @@ public:
    IfStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
    IfStmtSyntax withCondition(std::optional<ExprSyntax> condition);
    IfStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
-   IfStmtSyntax withBody(std::optional<CodeBlockSyntax> body);
+   IfStmtSyntax withBody(std::optional<StmtSyntax> body);
    IfStmtSyntax withElseIfClauses(std::optional<ElseIfListSyntax> elseIfClauses);
    IfStmtSyntax withElseKeyword(std::optional<TokenSyntax> elseKeyword);
    IfStmtSyntax withElseBody(std::optional<Syntax> elseBody);
@@ -1718,8 +1718,8 @@ public:
    InnerCodeBlockStmtSyntax getStatements();
 
    SwitchCaseSyntax withLabel(std::optional<Syntax> label);
-   SwitchCaseSyntax withStatements(std::optional<InnerCodeBlockStmtSyntax> statements);
-   SwitchCaseSyntax addStatement(CodeBlockItemSyntax statement);
+   SwitchCaseSyntax withStatements(std::optional<InnerStmtListSyntax> statements);
+   SwitchCaseSyntax addStatement(InnerStmtSyntax statement);
 
    static bool kindOf(SyntaxKind kind)
    {

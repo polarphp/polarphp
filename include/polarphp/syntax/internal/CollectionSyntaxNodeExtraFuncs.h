@@ -13,6 +13,7 @@
 #define POLARPHP_INTERNAL_LIST_SYNTAX_NODE_EXTRA_FUNCS_H
 
 #include <cstdint>
+#include <set>
 #include "polarphp/syntax/References.h"
 
 namespace polar::syntax {
@@ -28,11 +29,13 @@ class ArrayRef;
 
 namespace polar::syntax::internal {
 
+std::set<SyntaxKind> retrive_collection_syntax_element_type_choices(SyntaxKind kind);
+
 using polar::basic::ArrayRef;
 
 namespace canserveascollectionmemberraw {
 
-bool check_code_block_item_list(SyntaxKind memberKind);
+//bool check_code_block_item_list(SyntaxKind memberKind);
 bool check_token_list(SyntaxKind memberKind);
 bool check_non_empty_token_list(SyntaxKind memberKind);
 

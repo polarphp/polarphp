@@ -10,20 +10,21 @@
 // Created by polarboy on 2019/05/17.
 
 #include "polarphp/syntax/builder/DeclSyntaxNodeBuilders.h"
+#include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
 
 namespace polar::syntax {
 
-SourceFileSyntaxBuilder &SourceFileSyntaxBuilder::useStatements(CodeBlockItemListSyntax statements)
+SourceFileSyntaxBuilder &SourceFileSyntaxBuilder::useStatements(TopStmtListSyntax statements)
 {
    m_layout[cursor_index(Cursor::Statements)] = statements.getRaw();
    return *this;
 }
 
-SourceFileSyntaxBuilder &SourceFileSyntaxBuilder::addStatement(CodeBlockItemSyntax statement)
+SourceFileSyntaxBuilder &SourceFileSyntaxBuilder::addStatement(TopStmtSyntax statement)
 {
    RefCountPtr<RawSyntax> &rawStatemens = m_layout[cursor_index(Cursor::Statements)];
    if (!rawStatemens) {
-      rawStatemens = RawSyntax::make(SyntaxKind::CodeBlockItemList, {statement.getRaw()}, SourcePresence::Present, m_arena);
+      rawStatemens = RawSyntax::make(SyntaxKind::TopStmtList, {statement.getRaw()}, SourcePresence::Present, m_arena);
    } else {
       rawStatemens = rawStatemens->append(statement.getRaw());
    }
@@ -41,7 +42,7 @@ SourceFileSyntax SourceFileSyntaxBuilder::build()
    CursorIndex statementsIndex = cursor_index(Cursor::Statements);
    CursorIndex eofTokenIndex = cursor_index(Cursor::EOFToken);
    if (!m_layout[statementsIndex]) {
-      m_layout[statementsIndex] = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
+      m_layout[statementsIndex] = RawSyntax::missing(SyntaxKind::TopStmtList);
    }
    if (!m_layout[eofTokenIndex]) {
       m_layout[eofTokenIndex] = RawSyntax::missing(TokenKindType::END, OwnedString::makeUnowned(""));

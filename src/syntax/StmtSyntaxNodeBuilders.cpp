@@ -176,7 +176,7 @@ ElseIfClauseSyntaxBuilder &ElseIfClauseSyntaxBuilder::useRightParen(TokenSyntax 
    return *this;
 }
 
-ElseIfClauseSyntaxBuilder &ElseIfClauseSyntaxBuilder::useBody(CodeBlockSyntax body)
+ElseIfClauseSyntaxBuilder &ElseIfClauseSyntaxBuilder::useBody(StmtSyntax body)
 {
    m_layout[cursor_index(Cursor::Body)] = body.getRaw();
    return *this;
@@ -205,7 +205,7 @@ ElseIfClauseSyntax ElseIfClauseSyntaxBuilder::build()
                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
    }
    if (!m_layout[bodyIndex]) {
-      m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::CodeBlock);
+      m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::Stmt);
    }
    RefCountPtr<RawSyntax> rawElseIfClauseSyntax = RawSyntax::make(SyntaxKind::ElseIfClause, m_layout, SourcePresence::Present,
                                                                   m_arena);
@@ -252,7 +252,7 @@ IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useRightParen(TokenSyntax rightParen)
    return *this;
 }
 
-IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
+IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::useBody(StmtSyntax body)
 {
    m_layout[cursor_index(Cursor::Body)] = body.getRaw();
    return *this;
@@ -381,7 +381,7 @@ WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useRightParen(TokenSyntax rightP
    return *this;
 }
 
-WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
+WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useBody(StmtSyntax body)
 {
    m_layout[cursor_index(Cursor::Body)] = body.getRaw();
    return *this;
@@ -460,7 +460,7 @@ DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useDoKeyword(TokenSyntax doK
    return *this;
 }
 
-DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
+DoWhileStmtSyntaxBuilder &DoWhileStmtSyntaxBuilder::useBody(StmtSyntax body)
 {
    m_layout[cursor_index(Cursor::Body)] = body.getRaw();
    return *this;
@@ -624,7 +624,7 @@ SwitchCaseSyntaxBuilder &SwitchCaseSyntaxBuilder::useLabel(Syntax label)
    return *this;
 }
 
-SwitchCaseSyntaxBuilder &SwitchCaseSyntaxBuilder::useStatements(CodeBlockItemListSyntax statements)
+SwitchCaseSyntaxBuilder &SwitchCaseSyntaxBuilder::useStatements(InnerStmtListSyntax statements)
 {
    m_layout[cursor_index(Cursor::Statements)] = statements.getRaw();
    return *this;
@@ -638,7 +638,7 @@ SwitchCaseSyntax SwitchCaseSyntaxBuilder::build()
       m_layout[labelIndex] = RawSyntax::missing(SyntaxKind::SwitchDefaultLabel);
    }
    if (!m_layout[statementsIndex]) {
-      m_layout[statementsIndex] = RawSyntax::missing(SyntaxKind::CodeBlockItemList);
+      m_layout[statementsIndex] = RawSyntax::missing(SyntaxKind::InnerStmtList);
    }
    RefCountPtr<RawSyntax> rawSwitchCaseSyntax = RawSyntax::make(SyntaxKind::SwitchCase, m_layout, SourcePresence::Present,
                                                                 m_arena);
@@ -784,7 +784,7 @@ DeferStmtSyntaxBuilder &DeferStmtSyntaxBuilder::useDeferKeyword(TokenSyntax defe
    return *this;
 }
 
-DeferStmtSyntaxBuilder &DeferStmtSyntaxBuilder::useBody(CodeBlockSyntax body)
+DeferStmtSyntaxBuilder &DeferStmtSyntaxBuilder::useBody(InnerCodeBlockStmtSyntax body)
 {
    m_layout[cursor_index(Cursor::Body)] = body.getRaw();
    return *this;
@@ -799,7 +799,7 @@ DeferStmtSyntax DeferStmtSyntaxBuilder::build()
                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_DEFER)));
    }
    if (!m_layout[bodyIndex]) {
-      m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::CodeBlock);
+      m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
    RefCountPtr<RawSyntax> rawDeferStmtSyntax = RawSyntax::make(SyntaxKind::DeferStmt, m_layout, SourcePresence::Present,
                                                                m_arena);

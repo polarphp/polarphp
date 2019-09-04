@@ -121,7 +121,7 @@ public:
    ElseIfClauseSyntaxBuilder &useLeftParen(TokenSyntax leftParen);
    ElseIfClauseSyntaxBuilder &useCondition(ExprSyntax condition);
    ElseIfClauseSyntaxBuilder &useRightParen(TokenSyntax rightParen);
-   ElseIfClauseSyntaxBuilder &useBody(CodeBlockSyntax body);
+   ElseIfClauseSyntaxBuilder &useBody(StmtSyntax body);
 
    ElseIfClauseSyntax build();
 
@@ -148,7 +148,7 @@ public:
    IfStmtSyntaxBuilder &useLeftParen(TokenSyntax leftParen);
    IfStmtSyntaxBuilder &useCondition(ExprSyntax condition);
    IfStmtSyntaxBuilder &useRightParen(TokenSyntax rightParen);
-   IfStmtSyntaxBuilder &useBody(CodeBlockSyntax body);
+   IfStmtSyntaxBuilder &useBody(StmtSyntax body);
    IfStmtSyntaxBuilder &useElseIfClauses(ElseIfListSyntax elseIfClauses);
    IfStmtSyntaxBuilder &useElseKeyword(TokenSyntax elseKeyword);
    IfStmtSyntaxBuilder &useElseBody(Syntax elseBody);
@@ -180,7 +180,7 @@ public:
    WhileStmtSyntaxBuilder &useLeftParen(TokenSyntax leftParen);
    WhileStmtSyntaxBuilder &useConditions(ConditionElementListSyntax conditions);
    WhileStmtSyntaxBuilder &useRightParen(TokenSyntax rightParen);
-   WhileStmtSyntaxBuilder &useBody(CodeBlockSyntax body);
+   WhileStmtSyntaxBuilder &useBody(StmtSyntax body);
    WhileStmtSyntaxBuilder &addCondition(ConditionElementSyntax condition);
 
    WhileStmtSyntax build();
@@ -205,7 +205,7 @@ public:
    DoWhileStmtSyntaxBuilder &useLabelName(TokenSyntax labelName);
    DoWhileStmtSyntaxBuilder &useLabelColon(TokenSyntax labelColon);
    DoWhileStmtSyntaxBuilder &useDoKeyword(TokenSyntax doKeyword);
-   DoWhileStmtSyntaxBuilder &useBody(CodeBlockSyntax body);
+   DoWhileStmtSyntaxBuilder &useBody(StmtSyntax body);
    DoWhileStmtSyntaxBuilder &useWhileKeyword(TokenSyntax whileKeyword);
    DoWhileStmtSyntaxBuilder &useLeftParen(TokenSyntax leftParen);
    DoWhileStmtSyntaxBuilder &useCondition(ExprSyntax condition);
@@ -277,7 +277,7 @@ public:
    {}
 
    SwitchCaseSyntaxBuilder &useLabel(Syntax label);
-   SwitchCaseSyntaxBuilder &useStatements(CodeBlockItemListSyntax statements);
+   SwitchCaseSyntaxBuilder &useStatements(InnerStmtListSyntax statements);
    SwitchCaseSyntax build();
 
 private:
@@ -332,7 +332,7 @@ public:
    {}
 
    DeferStmtSyntaxBuilder &useDeferKeyword(TokenSyntax deferKeyword);
-   DeferStmtSyntaxBuilder &useBody(CodeBlockSyntax body);
+   DeferStmtSyntaxBuilder &useBody(InnerCodeBlockStmtSyntax body);
    DeferStmtSyntax build();
 
 private:

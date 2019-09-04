@@ -10,7 +10,7 @@
 // Created by polarboy on 2019/05/14.
 
 #include "polarphp/syntax/AbstractFactory.h"
-#include "polarphp/syntax/internal/ListSyntaxNodeExtraFuncs.h"
+#include "polarphp/syntax/internal/CollectionSyntaxNodeExtraFuncs.h"
 
 namespace polar::syntax {
 

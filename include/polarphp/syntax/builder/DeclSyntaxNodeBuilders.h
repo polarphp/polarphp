@@ -14,6 +14,7 @@
 
 #include "polarphp/syntax/RawSyntax.h"
 #include "polarphp/syntax/syntaxnode/DeclSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/StmtSyntaxNodesFwd.h"
 
 namespace polar::syntax {
 
@@ -27,8 +28,8 @@ public:
       : m_arena(arena)
    {}
 
-   SourceFileSyntaxBuilder &useStatements(CodeBlockItemListSyntax statements);
-   SourceFileSyntaxBuilder &addStatement(CodeBlockItemSyntax statement);
+   SourceFileSyntaxBuilder &useStatements(TopStmtListSyntax statements);
+   SourceFileSyntaxBuilder &addStatement(TopStmtSyntax statement);
    SourceFileSyntaxBuilder &useEofToken(TokenSyntax eofToken);
    SourceFileSyntax build();
 private:
