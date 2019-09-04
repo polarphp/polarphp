@@ -45,6 +45,6 @@ include/polarphp/parser/internal/YYParserDefs.h
 include/polarphp/parser/internal/YYLexerConditionDefs.h
 include/polarphp/parser/internal/YYLocation.h
 include/polarphp/syntax/internal/TokenEnumDefs.h
-src/parser/impl/YYLexer.cpp
-src/parser/impl/YYParser.cpp
+src/parser/internal/YYLexer.cpp
+src/parser/internal/YYParser.cpp
 src/syntax/TokenDescMap.cpp
