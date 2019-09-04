@@ -386,7 +386,6 @@ polar_check_symbol_exists(sched_getaffinity sched.h HAVE_SCHED_GETAFFINITY)
 polar_check_symbol_exists(CPU_COUNT sched.h HAVE_CPU_COUNT)
 
 # Some systems (like OpenSolaris) do not have nanosleep in libc
-
 polar_check_library_exists(rt nanosleep "" HAVE_RT)
 if (POLAR_HAVE_RT)
    set(HAVE_RT ON)
@@ -395,70 +394,6 @@ if (POLAR_HAVE_RT)
    polar_append_flag(-lrt CMAKE_EXE_LINKER_FLAGS)
    set(HAVE_RT ON)
    set(HAVE_NANOSLEEP ON)
-endif()
-
-# Check for getaddrinfo, should be a better way, but...
-# Also check for working getaddrinfo
-check_c_source_runs(
-   "#include <netdb.h>
-   int main(){
-   struct addrinfo *g,h;g=&h;getaddrinfo(\"\",\"\",g,&g);
-   return 0;
-   }" checkLinkGetAddrInfo)
-
-if(checkLinkGetAddrInfo)
-   check_c_source_runs(
-      "#include <netdb.h>
-      #include <sys/types.h>
-      #ifndef AF_INET
-      # include <sys/socket.h>
-      #endif
-      int main(){
-      struct addrinfo *ai, *pai, hints;
-
-      memset(&hints, 0, sizeof(hints));
-      hints.ai_flags = AI_NUMERICHOST;
-
-      if (getaddrinfo(\"127.0.0.1\", 0, &hints, &ai) < 0) {
-         exit(1);
-         }
-
-         if (ai == 0) {
-            exit(1);
-            }
-
-            pai = ai;
-
-            while (pai) {
-               if (pai->ai_family != AF_INET) {
-                  /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
-                  exit(1);
-                  }
-                  if (pai->ai_addr->sa_family != AF_INET) {
-                     /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
-                     exit(1);
-                     }
-                     pai = pai->ai_next;
-                     }
-                     freeaddrinfo(ai);
-                     exit(0);
-                     }"
-                     checkHaveGetAddrInfo)
-   if (checkHaveGetAddrInfo)
-      set(HAVE_GETADDRINFO ON)
-   endif()
-endif()
-
-# Check for the __sync_fetch_and_add builtin
-check_c_source_runs(
-   "#include <netdb.h>
-   int main(){
-   int x;__sync_fetch_and_add(&x,1);
-   return 0;
-   }" checkSyncFetchAndAdd)
-
-if (checkSyncFetchAndAdd)
-   set(HAVE_SYNC_FETCH_AND_ADD ON)
 endif()
 
 if (POLAR_WITH_VALGRIND)
