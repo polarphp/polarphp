@@ -324,6 +324,7 @@ public:
       ///
       Stmt
    };
+
 #ifdef POLAR_DEBUG_BUILD
    const static NodeChoicesType CHILD_NODE_CHOICES;
 #endif

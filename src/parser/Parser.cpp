@@ -45,7 +45,12 @@ bool Parser::parse()
    return status;
 }
 
-std::shared_ptr<Syntax> Parser::getSyntaxTree()
+void Parser::setParsedAst(RefCountPtr<RawSyntax> ast)
+{
+   m_ast = ast;
+}
+
+RefCountPtr<RawSyntax> Parser::getSyntaxTree()
 {
    assert(m_token.is(TokenKindType::END) && "not done parsing yet");
    return m_ast;

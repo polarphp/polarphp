@@ -151,6 +151,7 @@ struct IntrusiveRefCountPtrInfo
    {
       obj->retain();
    }
+
    static void release(T *obj)
    {
       obj->release();

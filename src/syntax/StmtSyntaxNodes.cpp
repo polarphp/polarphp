@@ -290,8 +290,21 @@ InnerCodeBlockStmtSyntax InnerCodeBlockStmtSyntax::withRightBrace(std::optional<
 const NodeChoicesType TopStmtSyntax::CHILD_NODE_CHOICES
 {
    {
-      TopStmtSyntax::Stmt, {
-         SyntaxKind::Stmt, SyntaxKind::FunctionDefinitionStmt,
+      TopStmtSyntax::Cursor::Stmt, {
+         // Statement
+         SyntaxKind::InnerCodeBlockStmt, SyntaxKind::IfStmt,
+               SyntaxKind::WhileStmt, SyntaxKind::DoWhileStmt,
+               SyntaxKind::ForStmt, SyntaxKind::SwitchStmt,
+               SyntaxKind::BreakStmt, SyntaxKind::ContinueStmt,
+               SyntaxKind::ReturnStmt, SyntaxKind::GlobalVariableDeclarationsStmt,
+               SyntaxKind::StaticVariableDeclarationsStmt, SyntaxKind::EchoStmt,
+               SyntaxKind::ExprStmt, SyntaxKind::UnsetStmt,
+               SyntaxKind::ForeachStmt, SyntaxKind::DeclareStmt,
+               SyntaxKind::EmptyStmt, SyntaxKind::TryStmt,
+               SyntaxKind::ThrowStmt, SyntaxKind::GotoStmt,
+               SyntaxKind::LabelStmt,
+
+               SyntaxKind::FunctionDefinitionStmt,
                SyntaxKind::ClassDefinitionStmt, SyntaxKind::InterfaceDefinitionStmt,
                SyntaxKind::TraitDefinitionStmt, SyntaxKind::HaltCompilerStmt,
                SyntaxKind::NamespaceBlockStmt, SyntaxKind::NamespaceDefinitionStmt,
@@ -309,7 +322,22 @@ void TopStmtSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == TopStmtSyntax::CHILDREN_COUNT);
-   syntax_assert_child_kind(raw, Stmt, CHILD_NODE_CHOICES.at(Cursor::Stmt));
+   auto choices = CHILD_NODE_CHOICES.at(Cursor::Stmt);
+   do {
+      if (auto &__child = raw->getChild(Cursor::Stmt)) {
+         bool __found = false;
+         std::string errorMsg;
+         auto kind = __child->getKind();
+         if (choices.find(__child->getKind()) != choices.end()) {
+            __found = true;
+         } else {
+            errorMsg = "invalid syntax node type supplied for "
+                       ", please check";
+         }
+         assert(__found && errorMsg.c_str());
+      }
+   } while (false);
+   //   syntax_assert_child_kind(raw, Stmt, CHILD_NODE_CHOICES.at(Cursor::Stmt));
 #endif
 }
 

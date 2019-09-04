@@ -26,6 +26,6 @@ TEST_F(StmtSyntaxNodeTest, testBasic)
             R"(
             ;
             )";
-      std::shared_ptr<Syntax> ast = parseSource(source);
+      RefCountPtr<RawSyntax> ast = parseSource(source);
    }
 }

@@ -71,5 +71,8 @@ polar_add_library(PolarParser SHARED
 
 # for YYParserDefs.h
 target_include_directories(PolarParser PRIVATE ${POLAR_MAIN_INCLUDE_DIR}/polarphp/parser/internal)
+set_target_properties(PolarParser
+   PROPERTIES
+   INTERFACE_LINK_LIBRARIES PolarSyntax)
 
 set(POLAR_HEADERS ${POLAR_HEADERS} PARENT_SCOPE)

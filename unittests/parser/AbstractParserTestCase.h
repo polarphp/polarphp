@@ -43,7 +43,7 @@ using polar::parser::CommentRetentionMode;
 class AbstractParserTestCase : public ::testing::Test
 {
 public:
-   std::shared_ptr<Syntax> parseSource(StringRef source);
+   RefCountPtr<RawSyntax> parseSource(StringRef source);
 
 private:
    LangOptions m_langOpts;

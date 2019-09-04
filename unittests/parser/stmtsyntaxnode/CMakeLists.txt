@@ -14,3 +14,4 @@ polar_add_unittest(PolarCompilerTests ParserStmtSyntaxNodeTest
    StmtSyntaxNodeTest.cpp)
 
 target_link_libraries(ParserStmtSyntaxNodeTest PRIVATE AbstractParserSupport)
+

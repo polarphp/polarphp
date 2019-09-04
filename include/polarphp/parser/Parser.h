@@ -66,7 +66,7 @@ public:
    }
 
    bool parse();
-   std::shared_ptr<Syntax> getSyntaxTree();
+   RefCountPtr<RawSyntax> getSyntaxTree();
 
    ///
    /// TODO
@@ -78,9 +78,13 @@ protected:
    const Token &peekToken();
    SourceLoc getEndOfPreviousLoc();
 
+protected:
+   void setParsedAst(RefCountPtr<RawSyntax> ast);
+
 private:
    friend int internal::token_lex_wrapper(ParserSemantic *value, internal::YYLocation *loc,
                                           Lexer *lexer, Parser *parser);
+   friend class internal::YYParser;
 private:
    /// info properties
    bool m_parserError = false;
@@ -103,7 +107,7 @@ private:
    ParsedTrivia m_trailingTrivia;
 
    std::string m_docComment;
-   std::shared_ptr<Syntax> m_ast;
+   RefCountPtr<RawSyntax> m_ast;
    std::shared_ptr<DiagnosticEngine> m_diags;
    std::list<std::string> m_openFiles;
 

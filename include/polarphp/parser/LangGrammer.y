@@ -341,7 +341,7 @@ using namespace polar::syntax;
 
 start:
    top_statement_list {
-
+      parser->setParsedAst($1);
    }
 ;
 
@@ -371,10 +371,14 @@ identifier:
 
 top_statement_list:
    top_statement_list top_statement {
-
+      TopStmtListSyntax topStmtList = make<TopStmtListSyntax>($1);
+      TopStmtSyntax stmt = make<TopStmtSyntax>($2);
+      topStmtList.appending(stmt);
+      $$ = topStmtList.getRaw();
    }
 |  %empty {
-
+      TopStmtListSyntax topStmtList = StmtSyntaxNodeFactory::makeBlankTopStmtList();
+      $$ = topStmtList.getRaw();
    }
 ;
 
