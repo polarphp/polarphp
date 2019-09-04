@@ -38,8 +38,17 @@ if (!file_exists($tokenEnumDefsTplFile)) {
 $fileContent = file_get_contents($tokenEnumDefsTplFile);
 $fileContent = str_replace("__TOKEN_DEFS__", implode("\n   ", $defItems), $fileContent);
 
-$oldMd5 = md5_file($tokenEnumDefsFile);
-$newMd5 = md5($fileContent);
-if ($oldMd5 != $newMd5) {
+$needWriteFile = false;
+if (!file_exists($tokenEnumDefsFile)) {
+   $needWriteFile = true;
+} else {
+   $oldMd5 = md5_file($tokenEnumDefsFile);
+   $newMd5 = md5($fileContent);
+   if ($oldMd5 != $newMd5) {
+      $needWriteFile = true;
+   }
+}
+
+if ($needWriteFile) {
    file_put_contents($tokenEnumDefsFile, $fileContent);
 }
