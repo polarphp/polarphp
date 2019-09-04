@@ -16,11 +16,44 @@
 
 namespace polar::syntax::internal {
 namespace {
+
 using CollectionElementTypeChoicesMap = const std::map<SyntaxKind, std::set<SyntaxKind>>;
 static const std::map<SyntaxKind, std::set<SyntaxKind>> scg_collectionElementTypeChoicesMap{
     // decl syntax colloection
+    { SyntaxKind::NameList, { SyntaxKind::Name }},
+    { SyntaxKind::NamespacePartList, { SyntaxKind::NamespacePart }},
+    { SyntaxKind::ParameterList, { SyntaxKind::ParameterItem }},
+    { SyntaxKind::ClassModifierList, { SyntaxKind::ClassModifier }},
+    { SyntaxKind::MemberDeclList, { SyntaxKind::MemberDeclListItem }},
+    { SyntaxKind::MemberModifierList, { SyntaxKind::MemberModifier }},
+    { SyntaxKind::ClassPropertyList, { SyntaxKind::ClassPropertyClause }},
+    { SyntaxKind::ClassConstList, { SyntaxKind::ClassConstClause }},
+    { SyntaxKind::ClassTraitAdaptationList, { SyntaxKind::ClassTraitAdaptation }},
+
     // expr syntax collection
+    { SyntaxKind::ExprList, { SyntaxKind::ExprListItem }},
+    { SyntaxKind::LexicalVarList, { SyntaxKind::LexicalVarItem }},
+    { SyntaxKind::ArrayPairItemList, { SyntaxKind::ArrayPairItem }},
+    { SyntaxKind::ListPairItemList, { SyntaxKind::ListPairItem }},
+    { SyntaxKind::EncapsList, { SyntaxKind::EncapsListItem }},
+    { SyntaxKind::ArgumentList, { SyntaxKind::ArgumentListItem }},
+    { SyntaxKind::IssetVariablesList, { SyntaxKind::IsSetVarItem }},
+
     // stmt syntax collection
+    { SyntaxKind::ConditionElementList, { SyntaxKind::ConditionElement }},
+    { SyntaxKind::SwitchCaseList, { SyntaxKind::SwitchCase }},
+    { SyntaxKind::ElseIfList, { SyntaxKind::ElseIfClause }},
+    { SyntaxKind::InnerStmtList, { SyntaxKind::InnerStmt }},
+    { SyntaxKind::TopStmtList, { SyntaxKind::TopStmt }},
+    { SyntaxKind::CatchList, { SyntaxKind::CatchListItemClause }},
+    { SyntaxKind::CatchArgTypeHintList, { SyntaxKind::CatchArgTypeHintItem }},
+    { SyntaxKind::UnsetVariableList, { SyntaxKind::UnsetVariable }},
+    { SyntaxKind::GlobalVariableList, { SyntaxKind::GlobalVariableListItem }},
+    { SyntaxKind::StaticVariableList, { SyntaxKind::StaticVariableListItem }},
+    { SyntaxKind::NamespaceUseDeclarationList, { SyntaxKind::NamespaceUseDeclaration }},
+    { SyntaxKind::NamespaceInlineUseDeclarationList, { SyntaxKind::NamespaceInlineUseDeclaration }},
+    { SyntaxKind::NamespaceUnprefixedUseDeclarationList, { SyntaxKind::NamespaceUnprefixedUseDeclaration }},
+    { SyntaxKind::ConstDeclareItemList, { SyntaxKind::ConstDeclareItem }},
 };
 } // anonymous namespace
 
