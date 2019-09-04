@@ -23,30 +23,5 @@ add_subdirectory(driver)
 add_subdirectory(serialization)
 add_subdirectory(reflection)
 add_subdirectory(syntax)
+add_subdirectory(parser)
 
-# setup compiler sources
-set(POLAR_PARSER_SOURCES)
-
-# process language grammer files
-include(ProcessLangGrammer)
-
-polar_collect_files(
-   TYPE_BOTH
-   DIR ast
-   OUTPUT_VAR POLAR_AST_SOURCES)
-polar_merge_list(POLAR_PARSER_SOURCES POLAR_AST_SOURCES)
-
-polar_collect_files(
-   TYPE_BOTH
-   DIR parser
-   OUTPUT_VAR POLAR_PARSER_SOURCES)
-
-polar_merge_list(POLAR_PARSER_SOURCES POLAR_PARSER_SOURCES)
-polar_merge_list(POLAR_PARSER_SOURCES POLAR_HEADERS)
-
-polar_add_library(PolarParser SHARED
-   ${POLAR_PARSER_SOURCES}
-   LINK_LIBS PolarUtils PolarKernel PolarSyntax)
-
-# for YYParserDefs.h
-target_include_directories(PolarParser PRIVATE ${POLAR_MAIN_INCLUDE_DIR}/polarphp/parser/internal)
