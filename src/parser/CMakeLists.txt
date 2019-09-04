@@ -45,11 +45,16 @@ re2c_target(NAME PolarRe2cLangLexer
    INPUT ${POLAR_PARSER_INCLUDE_DIR}/LexicalRule.l
    OPTIONS --no-generation-date --case-inverted -Wundefined-control-flow -cbdFt ${POLAR_GENERATED_LEX_HEADER_FILE})
 
+add_custom_target(LangGrammer
+   SOURCES ${POLAR_GRAMMER_FILE})
+
 add_custom_command(OUTPUT ${POLAR_GENERATED_PARSER_IMPL_FILE}
    COMMAND ${BISON_EXECUTABLE}
-   "-d" ${POLAR_PARSER_INCLUDE_DIR}/LangGrammer.y
+   "-d" ${POLAR_GRAMMER_FILE}
    "-o" ${POLAR_GENERATED_PARSER_IMPL_FILE}
-   "--defines=${POLAR_GENERATED_PARSER_HEADER_FILE}")
+   "--defines=${POLAR_GENERATED_PARSER_HEADER_FILE}"
+   DEPENDS ${POLAR_GRAMMER_FILE}
+   )
 
 list(APPEND POLAR_PARSER_SOURCES
    ${POLAR_GENERATED_LEX_IMPL_FILE}
