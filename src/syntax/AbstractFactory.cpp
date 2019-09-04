@@ -55,26 +55,14 @@ std::optional<Syntax> AbstractFactory::createSyntax(SyntaxKind kind,
    }
 }
 
-RefCountPtr<RawSyntax> AbstractFactory::createRaw(SyntaxKind kind,
-                                                  ArrayRef<RefCountPtr<RawSyntax>> elements,
-                                                  RefCountPtr<SyntaxArena> arena)
+///
+/// TODO
+///
+RefCountPtr<RawSyntax> AbstractFactory::createRaw([[maybe_unused]] SyntaxKind kind,
+                                                  [[maybe_unused]] ArrayRef<RefCountPtr<RawSyntax>> elements,
+                                                  [[maybe_unused]] RefCountPtr<SyntaxArena> arena)
 {
-   using namespace internal::abstractfactorycreateraw;
-   if (!need_invoke_create_raw_func(kind)) {
-      return nullptr;
-   }
-//   switch (kind) {
-//   case SyntaxKind::CodeBlockItemList:
-//      return create_code_block_item_list_raw(elements, arena);
-//   case SyntaxKind::TokenList:
-//      return create_token_list_raw(elements, arena);
-//   case SyntaxKind::NonEmptyTokenList:
-//      return create_non_empty_token_list_raw(elements, arena);
-//   case SyntaxKind::CodeBlockItem:
-//      return create_code_block_item_raw(elements, arena);
-//   default:
-//      return nullptr;
-//   }
+   return nullptr;
 }
 
 /// Count the number of children for a given syntax node kind,
@@ -92,20 +80,14 @@ std::pair<unsigned, unsigned> AbstractFactory::countChildren(SyntaxKind kind)
 
 /// Whether a raw node kind `memberKind` can serve as a member in a syntax
 /// collection of the given syntax collection kind.
-bool AbstractFactory::canServeAsCollectionMemberRaw(SyntaxKind collectionKind,
-                                                    SyntaxKind memberKind)
+bool AbstractFactory::canServeAsCollectionMemberRaw(SyntaxKind collectionKind, SyntaxKind memberKind)
 {
-   using namespace internal::canserveascollectionmemberraw;
-//   switch (collectionKind) {
-//   case SyntaxKind::CodeBlockItemList:
-//      return check_code_block_item_list(memberKind);
-//   case SyntaxKind::TokenList:
-//      return check_token_list(memberKind);
-//   case SyntaxKind::NonEmptyTokenList:
-//      return check_non_empty_token_list(memberKind);
-//   default:
-//      polar_unreachable("Not collection kind.");
-//   }
+#ifdef POLAR_DEBUG_BUILD
+   std::set<SyntaxKind> allowElementKinds = internal::retrive_collection_syntax_element_type_choices(collectionKind);
+   return allowElementKinds.find(memberKind) != allowElementKinds.end();
+#else
+   return true;
+#endif
 }
 
 /// Whether a raw node `member` can serve as a member in a syntax collection
