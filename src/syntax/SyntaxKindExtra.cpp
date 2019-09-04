@@ -28,11 +28,6 @@ static const std::map<SyntaxKind, SyntaxKindEntryType> scg_syntaxKindTable
    {SyntaxKind::Stmt, SYNTAX_TABLE_ENTRY(Stmt)},
    {SyntaxKind::Token, SYNTAX_TABLE_ENTRY(Token)},
    {SyntaxKind::Unknown, SYNTAX_TABLE_ENTRY(Unknown)},
-//   {SyntaxKind::CodeBlockItem, SYNTAX_TABLE_ENTRY(CodeBlockItem)},
-//   {SyntaxKind::CodeBlock, SYNTAX_TABLE_ENTRY(CodeBlock)},
-//   {SyntaxKind::TokenList, SYNTAX_TABLE_ENTRY(TokenList)},
-//   {SyntaxKind::NonEmptyTokenList, SYNTAX_TABLE_ENTRY(NonEmptyTokenList)},
-//   {SyntaxKind::CodeBlockItemList, SYNTAX_TABLE_ENTRY(CodeBlockItemList)}
 };
 
 StringRef retrieve_syntax_kind_text(SyntaxKind kind)
@@ -50,7 +45,7 @@ int retrieve_syntax_kind_serialization_code(SyntaxKind kind)
    if (iter == scg_syntaxKindTable.end()) {
       return -1;
    }
-   return std::get<1>(iter->second);
+   return static_cast<int>(std::get<1>(iter->second));
 }
 
 std::pair<std::uint32_t, std::uint32_t> retrieve_syntax_kind_child_count(SyntaxKind kind, bool &exist)

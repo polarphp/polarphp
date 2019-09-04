@@ -62,7 +62,7 @@ foreach($lines as $line) {
 // generate files
 
 
-$tokenDescMapFile = $syntaxSrcDir . "/TokenDescMap.cpp";
+$tokenDescMapFile = $syntaxSrcDir . "/internal/TokenDescMap.cpp";
 $tokenDescMapTplFile = $tokenDescMapFile.".in";
 
 if (!file_exists($tokenDescMapTplFile)) {
@@ -93,9 +93,17 @@ if (!file_exists($tokenDescMapTplFile)) {
 $fileContent = file_get_contents($tokenDescMapTplFile);
 $fileContent = str_replace("__TOKEN_RECORDS__", implode("\n      ", $tokenDescItems), $fileContent);
 
-$oldMd5 = md5_file($tokenDescMapFile);
-$newMd5 = md5($fileContent);
 
-if ($oldMd5 != $newMd5) {
+$needWriteFile = false;
+if (!file_exists($tokenDescMapFile)) {
+   $needWriteFile = true;
+} else {
+   $oldMd5 = md5_file($tokenDescMapFile);
+   $newMd5 = md5($fileContent);
+   if ($oldMd5 != $newMd5) {
+      $needWriteFile = true;
+   }
+}
+if ($needWriteFile) {
    file_put_contents($tokenDescMapFile, $fileContent);
 }

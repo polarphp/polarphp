@@ -24,6 +24,7 @@
 
 #include <memory>
 #include "polarphp/syntax/Syntax.h"
+#include "polarphp/syntax/References.h"
 
 #define YYERROR_VERBOSE
 #define polar_error polar::syntax::parse_error
@@ -34,6 +35,8 @@ class Lexer;
 } // polar::parser
 
 using polar::syntax::Syntax;
+using polar::syntax::RefCountPtr;
+using polar::syntax::RawSyntax;
 
 }
 
@@ -47,13 +50,16 @@ int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer, Parser
 
 %code {
 #include "polarphp/syntax/SyntaxNodeFactories.h"
+#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/DeclSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
 #include "polarphp/parser/Parser.h"
 using namespace polar::syntax;
-
 #define empty_triva() parser->getEmptyTrivia()
 }
 
-// %destructor { delete $$; } <std::shared_ptr<Syntax>>
+// %destructor { delete $$; } <RefCountPtr<RawSyntax>>
 // %destructor { if ($$) delete $$; } <str>
 
 %precedence PREC_ARROW_FUNCTION
@@ -294,35 +300,35 @@ using namespace polar::syntax;
 /* MISC_MARK_END */
 /* token define end */
 
-%type <std::shared_ptr<Syntax>> top_statement namespace_name name statement function_declaration_statement
-%type <std::shared_ptr<Syntax>> class_declaration_statement trait_declaration_statement
-%type <std::shared_ptr<Syntax>> interface_declaration_statement interface_extends_list
-%type <std::shared_ptr<Syntax>> group_use_declaration inline_use_declarations inline_use_declaration
-%type <std::shared_ptr<Syntax>> mixed_group_use_declaration use_declaration unprefixed_use_declaration
-%type <std::shared_ptr<Syntax>> unprefixed_use_declarations const_decl inner_statement
-%type <std::shared_ptr<Syntax>> expr optional_expr foreach_variable
-%type <std::shared_ptr<Syntax>> finally_statement unset_variable variable
-%type <std::shared_ptr<Syntax>> extends_from parameter optional_type argument global_var
-%type <std::shared_ptr<Syntax>> static_var class_statement trait_adaptation trait_precedence trait_alias
-%type <std::shared_ptr<Syntax>> absolute_trait_method_reference trait_method_reference property echo_expr
-%type <std::shared_ptr<Syntax>> new_expr anonymous_class class_name class_name_reference simple_variable
-%type <std::shared_ptr<Syntax>> internal_functions_in_bison
-%type <std::shared_ptr<Syntax>> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
-%type <std::shared_ptr<Syntax>> variable_class_name dereferencable_scalar constant dereferencable
-%type <std::shared_ptr<Syntax>> callable_expr callable_variable static_member new_variable
-%type <std::shared_ptr<Syntax>> encaps_var encaps_var_offset isset_variables
-%type <std::shared_ptr<Syntax>> top_statement_list use_declarations const_list inner_statement_list if_stmt
-%type <std::shared_ptr<Syntax>> for_exprs switch_case_list global_var_list static_var_list
-%type <std::shared_ptr<Syntax>> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
-%type <std::shared_ptr<Syntax>> implements_list case_list if_stmt_without_else
-%type <std::shared_ptr<Syntax>> non_empty_parameter_list argument_list non_empty_argument_list property_list
-%type <std::shared_ptr<Syntax>> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
-%type <std::shared_ptr<Syntax>> ctor_arguments trait_adaptation_list lexical_vars
-%type <std::shared_ptr<Syntax>> lexical_var_list encaps_list
-%type <std::shared_ptr<Syntax>> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
-%type <std::shared_ptr<Syntax>> isset_variable type return_type type_expr
-%type <std::shared_ptr<Syntax>> identifier
-%type <std::shared_ptr<Syntax>> inline_function
+%type <RefCountPtr<RawSyntax>> top_statement namespace_name name statement function_declaration_statement
+%type <RefCountPtr<RawSyntax>> class_declaration_statement trait_declaration_statement
+%type <RefCountPtr<RawSyntax>> interface_declaration_statement interface_extends_list
+%type <RefCountPtr<RawSyntax>> group_use_declaration inline_use_declarations inline_use_declaration
+%type <RefCountPtr<RawSyntax>> mixed_group_use_declaration use_declaration unprefixed_use_declaration
+%type <RefCountPtr<RawSyntax>> unprefixed_use_declarations const_decl inner_statement
+%type <RefCountPtr<RawSyntax>> expr optional_expr foreach_variable
+%type <RefCountPtr<RawSyntax>> finally_statement unset_variable variable
+%type <RefCountPtr<RawSyntax>> extends_from parameter optional_type argument global_var
+%type <RefCountPtr<RawSyntax>> static_var class_statement trait_adaptation trait_precedence trait_alias
+%type <RefCountPtr<RawSyntax>> absolute_trait_method_reference trait_method_reference property echo_expr
+%type <RefCountPtr<RawSyntax>> new_expr anonymous_class class_name class_name_reference simple_variable
+%type <RefCountPtr<RawSyntax>> internal_functions_in_bison
+%type <RefCountPtr<RawSyntax>> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
+%type <RefCountPtr<RawSyntax>> variable_class_name dereferencable_scalar constant dereferencable
+%type <RefCountPtr<RawSyntax>> callable_expr callable_variable static_member new_variable
+%type <RefCountPtr<RawSyntax>> encaps_var encaps_var_offset isset_variables
+%type <RefCountPtr<RawSyntax>> top_statement_list use_declarations const_list inner_statement_list if_stmt
+%type <RefCountPtr<RawSyntax>> for_exprs switch_case_list global_var_list static_var_list
+%type <RefCountPtr<RawSyntax>> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
+%type <RefCountPtr<RawSyntax>> implements_list case_list if_stmt_without_else
+%type <RefCountPtr<RawSyntax>> non_empty_parameter_list argument_list non_empty_argument_list property_list
+%type <RefCountPtr<RawSyntax>> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
+%type <RefCountPtr<RawSyntax>> ctor_arguments trait_adaptation_list lexical_vars
+%type <RefCountPtr<RawSyntax>> lexical_var_list encaps_list
+%type <RefCountPtr<RawSyntax>> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
+%type <RefCountPtr<RawSyntax>> isset_variable type return_type type_expr
+%type <RefCountPtr<RawSyntax>> identifier
+%type <RefCountPtr<RawSyntax>> inline_function
 
 %type <std::uint64_t> returns_ref function fn is_reference is_variadic variable_modifiers
 %type <std::uint64_t> method_modifiers non_empty_member_modifiers member_modifier
@@ -395,7 +401,9 @@ name:
 
 top_statement:
    statement {
-
+      StmtSyntax stmt = make<StmtSyntax>($1);
+      TopStmtSyntax topStmt = StmtSyntaxNodeFactory::makeTopStmt(stmt);
+      $$ = topStmt.getRaw();
    }
 |  function_declaration_statement {
 
@@ -622,6 +630,8 @@ statement:
 |  T_SEMICOLON {
       // make empty stmt
       TokenSyntax semicolon = TokenSyntaxNodeFactory::makeSemiColonToken(empty_triva(), empty_triva());
+      EmptyStmtSyntax emptyStmt = StmtSyntaxNodeFactory::makeEmptyStmt(semicolon);
+      $$ = emptyStmt.getRaw();
    }
 |  T_TRY T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE catch_list finally_statement {
 
