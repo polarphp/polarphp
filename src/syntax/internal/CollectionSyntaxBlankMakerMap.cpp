@@ -7,10 +7,19 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2019/05/14.
+// Created by polarboy on 2019/09/05.
 
-#include "polarphp/syntax/builder/CommonSyntaxNodeBuilders.h"
+#include <map>
 
-namespace polar::syntax {
+#include "polarphp/syntax/SyntaxNodeFactories.h"
+#include "polarphp/syntax/SyntaxKindEnumDefs.h"
 
-} // polar::syntax
+namespace polar::syntax::internal {
+namespace {
+
+static const std::map<SyntaxKind, int> scg_collectionBlankMakerMap{
+   { }
+};
+
+} // anonymous namespace
+} // polar::syntax::internal
