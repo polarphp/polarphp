@@ -9,7 +9,7 @@
 //
 // Created by polarboy on 2019/09/04.
 
-#include <map>
+#include <unordered_map>
 
 #include "polarphp/syntax/internal/CollectionSyntaxNodeExtraFuncs.h"
 #include "polarphp/syntax/SyntaxKindEnumDefs.h"
@@ -17,8 +17,8 @@
 namespace polar::syntax::internal {
 namespace {
 
-using CollectionElementTypeChoicesMap = const std::map<SyntaxKind, std::set<SyntaxKind>>;
-static const std::map<SyntaxKind, std::set<SyntaxKind>> scg_collectionElementTypeChoicesMap{
+using CollectionElementTypeChoicesMap = const std::unordered_map<SyntaxKind, std::set<SyntaxKind>>;
+static const std::unordered_map<SyntaxKind, std::set<SyntaxKind>> scg_collectionElementTypeChoicesMap{
     // decl syntax colloection
     { SyntaxKind::NameList, { SyntaxKind::Name }},
     { SyntaxKind::NamespacePartList, { SyntaxKind::NamespacePart }},

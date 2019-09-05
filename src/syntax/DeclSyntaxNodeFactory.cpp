@@ -51,7 +51,7 @@ ParameterListSyntax DeclSyntaxNodeFactory::makeParameterList(
    return make<ParameterListSyntax>(target);
 }
 
-ClassModififerListSyntax DeclSyntaxNodeFactory::makeClassModififerList(
+ClassModifierListSyntax DeclSyntaxNodeFactory::makeClassModififerList(
       const std::vector<ClassModifierSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
@@ -59,7 +59,7 @@ ClassModififerListSyntax DeclSyntaxNodeFactory::makeClassModififerList(
       layout.push_back(item.getRaw());
    }
    RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::ClassModifierList, layout, SourcePresence::Present, arena);
-   return make<ClassModififerListSyntax>(target);
+   return make<ClassModifierListSyntax>(target);
 }
 
 MemberDeclListSyntax DeclSyntaxNodeFactory::makeMemberDeclList(
@@ -471,7 +471,7 @@ DeclSyntaxNodeFactory::makeMemberDeclBlock(TokenSyntax leftBrace, MemberDeclList
 }
 
 ClassDefinitionSyntax
-DeclSyntaxNodeFactory::makeClassDefinition(std::optional<ClassModififerListSyntax> modifiers, TokenSyntax classToken,
+DeclSyntaxNodeFactory::makeClassDefinition(std::optional<ClassModifierListSyntax> modifiers, TokenSyntax classToken,
                                            TokenSyntax name, std::optional<ExtendsFromClauseSyntax> extendsFrom,
                                            std::optional<ImplementClauseSyntax> implementsList, MemberDeclBlockSyntax members,
                                            RefCountPtr<SyntaxArena> arena)
@@ -533,11 +533,11 @@ ParameterListSyntax DeclSyntaxNodeFactory::makeBlankParameterList(RefCountPtr<Sy
    return make<ParameterListSyntax>(target);
 }
 
-ClassModififerListSyntax DeclSyntaxNodeFactory::makeBlankClassModififerList(RefCountPtr<SyntaxArena> arena)
+ClassModifierListSyntax DeclSyntaxNodeFactory::makeBlankClassModififerList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::ClassModifierList, {},
                                                    SourcePresence::Present, arena);
-   return make<ClassModififerListSyntax>(target);
+   return make<ClassModifierListSyntax>(target);
 }
 
 MemberDeclListSyntax DeclSyntaxNodeFactory::makeBlankMemberDeclList(RefCountPtr<SyntaxArena> arena)

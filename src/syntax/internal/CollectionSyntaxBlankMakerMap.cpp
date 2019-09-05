@@ -9,17 +9,81 @@
 //
 // Created by polarboy on 2019/09/05.
 
-#include <map>
-
 #include "polarphp/syntax/SyntaxNodeFactories.h"
 #include "polarphp/syntax/SyntaxKindEnumDefs.h"
+#include "polarphp/syntax/AbstractFactory.h"
 
-namespace polar::syntax::internal {
-namespace {
+namespace polar::syntax {
 
-static const std::map<SyntaxKind, int> scg_collectionBlankMakerMap{
-   { }
-};
+Syntax AbstractFactory::makeBlankCollectionSyntax(SyntaxKind collectionKind)
+{
+   switch (collectionKind) {
+   case SyntaxKind::NameList:
+      return DeclSyntaxNodeFactory::makeBlankNameList();
+   case SyntaxKind::NamespacePartList:
+      return DeclSyntaxNodeFactory::makeBlankNamespacePartList();
+   case SyntaxKind::ParameterList:
+      return DeclSyntaxNodeFactory::makeBlankParameterList();
+   case SyntaxKind::ClassModifierList:
+      return DeclSyntaxNodeFactory::makeBlankClassModififerList();
+   case SyntaxKind::MemberDeclList:
+      return DeclSyntaxNodeFactory::makeBlankMemberDeclList();
+   case SyntaxKind::MemberModifierList:
+      return DeclSyntaxNodeFactory::makeBlankMemberModifierList();
+   case SyntaxKind::ClassPropertyList:
+      return DeclSyntaxNodeFactory::makeBlankClassPropertyList();
+   case SyntaxKind::ClassConstList:
+      return DeclSyntaxNodeFactory::makeBlankClassConstList();
+   case SyntaxKind::ClassTraitAdaptationList:
+      return DeclSyntaxNodeFactory::makeBlankClassTraitAdaptationList();
 
-} // anonymous namespace
-} // polar::syntax::internal
+   case SyntaxKind::ExprList:
+      return ExprSyntaxNodeFactory::makeBlankExprList();
+   case SyntaxKind::LexicalVarList:
+      return ExprSyntaxNodeFactory::makeBlankLexicalVarList();
+   case SyntaxKind::ArrayPairItemList:
+      return ExprSyntaxNodeFactory::makeBlankArrayPairItemList();
+   case SyntaxKind::ListPairItemList:
+      return ExprSyntaxNodeFactory::makeBlankListPairItemList();
+   case SyntaxKind::EncapsList:
+      return ExprSyntaxNodeFactory::makeBlankEncapsItemList();
+   case SyntaxKind::ArgumentList:
+      return ExprSyntaxNodeFactory::makeBlankArgumentList();
+   case SyntaxKind::IssetVariablesList:
+      return ExprSyntaxNodeFactory::makeBlankIssetVariablesList();
+
+   case SyntaxKind::ConditionElementList:
+      return StmtSyntaxNodeFactory::makeBlankConditionElementList();
+   case SyntaxKind::SwitchCaseList:
+      return StmtSyntaxNodeFactory::makeBlankSwitchCaseList();
+   case SyntaxKind::ElseIfList:
+      return StmtSyntaxNodeFactory::makeBlankElseIfList();
+   case SyntaxKind::InnerStmtList:
+      return StmtSyntaxNodeFactory::makeBlankInnerStmtList();
+   case SyntaxKind::TopStmtList:
+      return StmtSyntaxNodeFactory::makeBlankTopStmtList();
+   case SyntaxKind::CatchList:
+      return StmtSyntaxNodeFactory::makeBlankCatchList();
+   case SyntaxKind::CatchArgTypeHintList:
+      return StmtSyntaxNodeFactory::makeBlankCatchArgTypeHintList();
+   case SyntaxKind::UnsetVariableList:
+      return StmtSyntaxNodeFactory::makeBlankUnsetVariableList();
+   case SyntaxKind::GlobalVariableList:
+      return StmtSyntaxNodeFactory::makeBlankGlobalVariableList();
+   case SyntaxKind::StaticVariableList:
+      return StmtSyntaxNodeFactory::makeBlankStaticVariableList();
+   case SyntaxKind::NamespaceUseDeclarationList:
+      return StmtSyntaxNodeFactory::makeBlankNamespaceUseDeclarationList();
+   case SyntaxKind::NamespaceInlineUseDeclarationList:
+      return StmtSyntaxNodeFactory::makeBlankNamespaceInlineUseDeclarationList();
+   case SyntaxKind::NamespaceUnprefixedUseDeclarationList:
+      return StmtSyntaxNodeFactory::makeBlankNamespaceUnprefixedUseDeclarationList();
+   case SyntaxKind::ConstDeclareItemList:
+      return StmtSyntaxNodeFactory::makeBlankConstDeclareItemList();
+   default:
+      break;
+   }
+   polar_unreachable("not collection syntax kind.");
+}
+
+} // polar::syntax

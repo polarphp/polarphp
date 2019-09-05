@@ -1824,7 +1824,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: ClassModififerListSyntax
+      /// type: ClassModifierListSyntax
       /// optional: true
       ///
       Modififers,
@@ -1862,14 +1862,14 @@ public:
       validate();
    }
 
-   std::optional<ClassModififerListSyntax> getModififers();
+   std::optional<ClassModifierListSyntax> getModififers();
    TokenSyntax getClassToken();
    TokenSyntax getName();
    std::optional<ExtendsFromClauseSyntax> getExtendsFrom();
    std::optional<ImplementClauseSyntax> getImplementsList();
    MemberDeclBlockSyntax getMembers();
 
-   ClassDefinitionSyntax withModifiers(std::optional<ClassModififerListSyntax> modifiers);
+   ClassDefinitionSyntax withModifiers(std::optional<ClassModifierListSyntax> modifiers);
    ClassDefinitionSyntax withClassToken(std::optional<TokenSyntax> classToken);
    ClassDefinitionSyntax withName(std::optional<TokenSyntax> name);
    ClassDefinitionSyntax withExtendsFrom(std::optional<ExtendsFromClauseSyntax> extends);

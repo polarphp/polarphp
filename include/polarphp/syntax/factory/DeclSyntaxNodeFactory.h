@@ -29,7 +29,7 @@ public:
          const std::vector<NamespacePartSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static ParameterListSyntax makeParameterList(
          const std::vector<ParameterSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ClassModififerListSyntax makeClassModififerList(
+   static ClassModifierListSyntax makeClassModififerList(
          const std::vector<ClassModifierSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static MemberDeclListSyntax makeMemberDeclList(
          const std::vector<MemberDeclListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
@@ -100,7 +100,7 @@ public:
                                                           RefCountPtr<SyntaxArena> arena = nullptr);
    static MemberDeclBlockSyntax makeMemberDeclBlock(TokenSyntax leftBrace, MemberDeclListSyntax members,
                                                     TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ClassDefinitionSyntax makeClassDefinition(std::optional<ClassModififerListSyntax> modifiers, TokenSyntax classToken,
+   static ClassDefinitionSyntax makeClassDefinition(std::optional<ClassModifierListSyntax> modifiers, TokenSyntax classToken,
                                                     TokenSyntax name, std::optional<ExtendsFromClauseSyntax> extendsFrom,
                                                     std::optional<ImplementClauseSyntax> implementsList, MemberDeclBlockSyntax members,
                                                     RefCountPtr<SyntaxArena> arena = nullptr);
@@ -114,7 +114,7 @@ public:
    static NameListSyntax makeBlankNameList(RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespacePartListSyntax makeBlankNamespacePartList(RefCountPtr<SyntaxArena> arena = nullptr);
    static ParameterListSyntax makeBlankParameterList(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ClassModififerListSyntax makeBlankClassModififerList(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ClassModifierListSyntax makeBlankClassModififerList(RefCountPtr<SyntaxArena> arena = nullptr);
    static MemberDeclListSyntax makeBlankMemberDeclList(RefCountPtr<SyntaxArena> arena = nullptr);
    static MemberModifierListSyntax makeBlankMemberModifierList(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassPropertyListSyntax makeBlankClassPropertyList(RefCountPtr<SyntaxArena> arena = nullptr);

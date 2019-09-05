@@ -2107,13 +2107,13 @@ void ClassDefinitionSyntax::validate()
 #endif
 }
 
-std::optional<ClassModififerListSyntax> ClassDefinitionSyntax::getModififers()
+std::optional<ClassModifierListSyntax> ClassDefinitionSyntax::getModififers()
 {
    RefCountPtr<SyntaxData> modifiersData = m_data->getChild(Cursor::Modififers);
    if (!modifiersData) {
       return std::nullopt;
    }
-   return ClassModififerListSyntax {m_root, modifiersData.get()};
+   return ClassModifierListSyntax {m_root, modifiersData.get()};
 }
 
 TokenSyntax ClassDefinitionSyntax::getClassToken()
@@ -2149,7 +2149,7 @@ MemberDeclBlockSyntax ClassDefinitionSyntax::getMembers()
    return MemberDeclBlockSyntax {m_root, m_data->getChild(Cursor::Members).get()};
 }
 
-ClassDefinitionSyntax ClassDefinitionSyntax::withModifiers(std::optional<ClassModififerListSyntax> modifiers)
+ClassDefinitionSyntax ClassDefinitionSyntax::withModifiers(std::optional<ClassModifierListSyntax> modifiers)
 {
    RefCountPtr<RawSyntax> modifiersRaw;
    if (modifiers.has_value()) {

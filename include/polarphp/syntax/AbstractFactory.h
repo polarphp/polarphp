@@ -75,6 +75,8 @@ public:
    static UnknownExprSyntax makeBlankUnknownExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static UnknownStmtSyntax makeBlankUnknownStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static UnknownTypeSyntax makeBlankUnknownType(RefCountPtr<SyntaxArena> arena = nullptr);
+
+   static Syntax makeBlankCollectionSyntax(SyntaxKind collectionKind);
 };
 
 } // polar::syntax

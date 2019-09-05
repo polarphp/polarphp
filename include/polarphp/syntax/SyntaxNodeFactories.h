@@ -12,7 +12,6 @@
 #ifndef POLARPHP_SYNTAX_FACTORIES_H
 #define POLARPHP_SYNTAX_FACTORIES_H
 
-#include "polarphp/syntax/factory/CommonSyntaxNodeFactory.h"
 #include "polarphp/syntax/factory/DeclSyntaxNodeFactory.h"
 #include "polarphp/syntax/factory/ExprSyntaxNodeFactory.h"
 #include "polarphp/syntax/factory/StmtSyntaxNodeFactory.h"

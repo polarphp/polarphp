@@ -93,13 +93,13 @@ using ParameterListSyntax = SyntaxCollection<SyntaxKind::ParameterList, Paramete
 
 ///
 /// type: SyntaxCollection
-/// element type: ClassModififerListSyntax
+/// element type: ClassModifierListSyntax
 ///
 /// class_modifiers:
 ///   class_modifier
 /// | class_modifiers class_modifier
 ///
-using ClassModififerListSyntax = SyntaxCollection<SyntaxKind::ClassModifierList, ClassModifierSyntax>;
+using ClassModifierListSyntax = SyntaxCollection<SyntaxKind::ClassModifierList, ClassModifierSyntax>;
 
 ///
 /// type: SyntaxCollection
