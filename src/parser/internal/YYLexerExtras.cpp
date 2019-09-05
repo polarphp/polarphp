@@ -30,6 +30,14 @@ int token_lex_wrapper(ParserSemantic *value, YYLocation *loc, Lexer *lexer, Pars
    lexer->setSemanticValueContainer(value);
    lexer->lex(token);
    // setup values that parser need
+   Token::ValueType valueType = token.getValueType();
+   if (valueType == Token::ValueType::LongLong) {
+      value->emplace<std::int64_t>(token.getValue<std::int64_t>());
+   } else if (valueType == Token::ValueType::Double) {
+      value->emplace<double>(token.getValue<double>());
+   } else if (valueType == Token::ValueType::String) {
+      value->emplace<std::string>(token.getValue<std::string>());
+   }
    parser->m_token = token;
    return token.getKind();
 }
