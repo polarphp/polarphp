@@ -186,8 +186,8 @@ public:
    static TokenSyntax makeAmpersandToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
 
    // misc token
-   static TokenSyntax makeLNumber(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
-   static TokenSyntax makeDNumber(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
+   static TokenSyntax makeLNumber(std::int64_t value, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
+   static TokenSyntax makeDNumber(double value, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
    static TokenSyntax makeString(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
    static TokenSyntax makeVariable(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
    static TokenSyntax makeEncapsedAndWhitespace(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);

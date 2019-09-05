@@ -1610,7 +1610,7 @@ dereferencable_scalar:
 
 scalar:
    T_LNUMBER {
-      TokenSyntax lnumber = TokenSyntaxNodeFactory::makeLNumber("123", empty_triva(), empty_triva());
+      TokenSyntax lnumber = TokenSyntaxNodeFactory::makeLNumber(123, empty_triva(), empty_triva());
       $$ = lnumber.getRaw();
    }
 |  T_DNUMBER {

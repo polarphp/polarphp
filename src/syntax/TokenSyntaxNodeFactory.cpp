@@ -958,52 +958,60 @@ TokenSyntax TokenSyntaxNodeFactory::makeAmpersandToken(const Trivia &leadingTriv
 }
 
 // misc token
-TokenSyntax TokenSyntaxNodeFactory::makeLNumber(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia,
+TokenSyntax TokenSyntaxNodeFactory::makeLNumber(std::int64_t value, const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                 RefCountPtr<SyntaxArena> arena)
 {
-   return make_token_by_kind(T_LNUMBER);
+   return make<TokenSyntax>(RawSyntax::make(TokenKindType::T_LNUMBER, OwnedString::makeRefCounted(std::to_string(value)),
+                                            value, leadingTrivia.pieces, trailingTrivia.pieces, SourcePresence::Present, arena));
 }
 
-TokenSyntax TokenSyntaxNodeFactory::makeDNumber(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia,
+TokenSyntax TokenSyntaxNodeFactory::makeDNumber(double value, const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                 RefCountPtr<SyntaxArena> arena)
 {
-   return make_token_by_kind(T_DNUMBER);
+   return make<TokenSyntax>(RawSyntax::make(TokenKindType::T_DNUMBER, OwnedString::makeRefCounted(std::to_string(value)), value,
+                                            leadingTrivia.pieces, trailingTrivia.pieces, SourcePresence::Present, arena));
 }
 
 TokenSyntax TokenSyntaxNodeFactory::makeString(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                RefCountPtr<SyntaxArena> arena)
 {
-   return make_token_by_kind(T_IDENTIFIER_STRING);
+   return makeToken(TokenKindType::T_IDENTIFIER_STRING, text,
+                    leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 
 TokenSyntax TokenSyntaxNodeFactory::makeVariable(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                  RefCountPtr<SyntaxArena> arena)
 {
-   return make_token_by_kind(T_VARIABLE);
+   return makeToken(TokenKindType::T_VARIABLE, text,
+                    leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 
 TokenSyntax TokenSyntaxNodeFactory::makeEncapsedAndWhitespace(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                               RefCountPtr<SyntaxArena> arena)
 {
-   return make_token_by_kind(T_ENCAPSED_AND_WHITESPACE);
+   return makeToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, text,
+                    leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 
 TokenSyntax TokenSyntaxNodeFactory::makeConstantEncapsedString(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                                RefCountPtr<SyntaxArena> arena)
 {
-   return make_token_by_kind(T_CONSTANT_ENCAPSED_STRING);
+   return makeToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, text,
+                    leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 
 TokenSyntax TokenSyntaxNodeFactory::makeStringVarName(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                       RefCountPtr<SyntaxArena> arena)
 {
-   return make_token_by_kind(T_STRING_VARNAME);
+   return makeToken(TokenKindType::T_STRING_VARNAME, text,
+                    leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 
 TokenSyntax TokenSyntaxNodeFactory::makeNumString(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                   RefCountPtr<SyntaxArena> arena)
 {
-   return make_token_by_kind(T_NUM_STRING);
+   return makeToken(TokenKindType::T_NUM_STRING, text,
+                    leadingTrivia, trailingTrivia, SourcePresence::Present, arena);
 }
 
 TokenSyntax TokenSyntaxNodeFactory::makeWhiteSpace(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
