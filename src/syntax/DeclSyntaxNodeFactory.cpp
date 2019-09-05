@@ -15,11 +15,6 @@
 
 namespace polar::syntax {
 
-Syntax DeclSyntaxNodeFactory::makeBlankCollection(SyntaxKind kind)
-{
-
-}
-
 ///
 /// make collection nodes
 ///

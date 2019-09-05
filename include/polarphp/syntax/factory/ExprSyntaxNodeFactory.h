@@ -21,7 +21,6 @@ namespace polar::syntax {
 class ExprSyntaxNodeFactory final : public AbstractFactory
 {
 public:
-   static Syntax makeBlankCollection(SyntaxKind kind);
    ///
    /// make collection nodes
    ///

@@ -19,10 +19,6 @@ namespace polar::syntax {
 ///
 /// make collection nodes
 ///
-Syntax StmtSyntaxNodeFactory::makeBlankCollectionSyntax(SyntaxKind kind)
-{
-
-}
 
 ConditionElementListSyntax
 StmtSyntaxNodeFactory::makeConditionElementList(const std::vector<ConditionElementSyntax> &elements,

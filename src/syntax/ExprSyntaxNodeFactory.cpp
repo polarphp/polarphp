@@ -20,11 +20,6 @@ namespace polar::syntax {
 /// make collection nodes
 ///
 
-Syntax ExprSyntaxNodeFactory::makeBlankCollection(SyntaxKind kind)
-{
-
-}
-
 ExprListSyntax
 ExprSyntaxNodeFactory::makeExprList(const std::vector<ExprSyntax> elements,
                                     RefCountPtr<SyntaxArena> arena)

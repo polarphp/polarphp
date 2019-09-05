@@ -23,8 +23,6 @@ public:
    ///
    /// make collection nodes
    ///
-   static Syntax makeBlankCollectionSyntax(SyntaxKind kind);
-
    static ConditionElementListSyntax makeConditionElementList(const std::vector<ConditionElementSyntax> &elements,
                                                               RefCountPtr<SyntaxArena> arena = nullptr);
    static SwitchCaseListSyntax makeSwitchCaseList(const std::vector<SwitchCaseSyntax> &elements,

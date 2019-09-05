@@ -23,7 +23,6 @@ public:
    ///
    /// make collection nodes
    ///
-   static Syntax makeBlankCollection(SyntaxKind kind);
    static NameListSyntax makeNameList(
          const std::vector<NameSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespacePartListSyntax makeNamespacePartList(
