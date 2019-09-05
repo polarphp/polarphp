@@ -9,13 +9,13 @@
 //
 // Created by polarboy on 2019/06/26.
 
-#ifndef POLARPHP_PARSER_INTERNAL_YY_LEXER_DEFS_H
-#define POLARPHP_PARSER_INTERNAL_YY_LEXER_DEFS_H
+#ifndef POLARPHP_PARSER_INTERNAL_YYLEXER_DEFS_H
+#define POLARPHP_PARSER_INTERNAL_YYLEXER_DEFS_H
 
 #include "polarphp/parser/internal/YYLexerConditionDefs.h"
 #include "polarphp/parser/internal/YYLocation.h"
 #include "polarphp/parser/internal/YYParserDefs.h"
-#include "polarphp/parser/internal/YYLexerDefs.h"
+#include "polarphp/parser/internal/YYLexerExtras.h"
 
 #include <any>
 #include <functional>
@@ -88,4 +88,4 @@ struct HereDocLabel
 #define BOM_UTF16_LE	"\xff\xfe"
 #define BOM_UTF8		"\xef\xbb\xbf"
 
-#endif // POLARPHP_PARSER_INTERNAL_YY_LEXER_DEFS_H
+#endif // POLARPHP_PARSER_INTERNAL_YYLEXER_DEFS_H

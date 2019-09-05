@@ -15,10 +15,16 @@ using polar::unittest::AbstractParserTestCase;
 
 class ExprSyntaxNodeTest : public AbstractParserTestCase
 {
-
 };
 
-TEST_F(ExprSyntaxNodeTest, testBasic)
+TEST_F(ExprSyntaxNodeTest, testNumberExpr)
 {
-
+   {
+      // test empty stmt
+      std::string source =
+            R"(
+            123;
+            )";
+      RefCountPtr<RawSyntax> ast = parseSource(source);
+   }
 }

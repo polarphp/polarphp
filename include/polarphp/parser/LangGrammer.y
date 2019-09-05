@@ -18,6 +18,14 @@
 
 %code top {
 #include <cstdint>
+
+#include "polarphp/syntax/SyntaxNodeFactories.h"
+#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/DeclSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
+#include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
+#include "polarphp/parser/Parser.h"
+#include "polarphp/parser/internal/YYParserExtraDefs.h"
 }
 
 %code requires {
@@ -49,14 +57,7 @@ int token_lex_wrapper(ParserSemantic *value, location *loc, Lexer *lexer, Parser
 }
 
 %code {
-#include "polarphp/syntax/SyntaxNodeFactories.h"
-#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
-#include "polarphp/syntax/syntaxnode/DeclSyntaxNodes.h"
-#include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
-#include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
-#include "polarphp/parser/Parser.h"
 using namespace polar::syntax;
-#define empty_triva() parser->getEmptyTrivia()
 }
 
 // %destructor { delete $$; } <RefCountPtr<RawSyntax>>
@@ -633,7 +634,7 @@ statement:
    }
 |  T_SEMICOLON {
       // make empty stmt
-      TokenSyntax semicolon = TokenSyntaxNodeFactory::makeSemiColonToken(empty_triva(), empty_triva());
+      TokenSyntax semicolon = make_token(SemiColonToken);
       EmptyStmtSyntax emptyStmt = StmtSyntaxNodeFactory::makeEmptyStmt(semicolon);
       $$ = emptyStmt.getRaw();
    }
@@ -1609,7 +1610,8 @@ dereferencable_scalar:
 
 scalar:
    T_LNUMBER {
-
+      TokenSyntax lnumber = TokenSyntaxNodeFactory::makeLNumber("123", empty_triva(), empty_triva());
+      $$ = lnumber.getRaw();
    }
 |  T_DNUMBER {
 

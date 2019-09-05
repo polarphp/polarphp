@@ -71,15 +71,35 @@ public:
       return m_data->replaceSelf<TokenSyntax>(newRaw);
    }
 
-   /* TODO: If we really need them.
-  bool isKeyword() const;
+   TokenCategory getKindCategory(TokenKindType kind) const
+   {
+      return get_token_category(kind);
+   }
 
-  bool isPunctuation() const;
+   bool isKeyword() const
+   {
+      return is_keyword_token(getTokenKind());
+   }
 
-  bool isOperator() const;
+   bool isDeclKeyword() const
+   {
+      return is_decl_keyword_token(getTokenKind());
+   }
 
-  bool isLiteral() const;
-  */
+   bool isExprKeyword() const
+   {
+      return is_expr_keyword_token(getTokenKind());
+   }
+
+   bool isStmtKeyword() const
+   {
+      return is_stmt_keyword_token(getTokenKind());
+   }
+
+   bool isPunctuation() const
+   {
+      return is_punctuator_token(getTokenKind());
+   }
 
    bool isMissing() const
    {
