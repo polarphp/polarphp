@@ -112,6 +112,22 @@ RawSyntax::RawSyntax(TokenKindType tokenKind, OwnedString text,
                            m_bits.token.numLeadingTrivia);
 }
 
+RawSyntax::RawSyntax(TokenKindType tokenKind, OwnedString text, std::int64_t value, ArrayRef<TriviaPiece> leadingTrivia,
+          ArrayRef<TriviaPiece> trailingTrivia, SourcePresence presence,
+          const RefCountPtr<SyntaxArena> &arena, std::optional<SyntaxNodeId> nodeId)
+{
+   RawSyntax(tokenKind, text, leadingTrivia, trailingTrivia, presence, arena, nodeId);
+   *getTrailingObjects<std::int64_t>() = value;
+}
+
+RawSyntax::RawSyntax(TokenKindType tokenKind, OwnedString text, double value, ArrayRef<TriviaPiece> leadingTrivia,
+          ArrayRef<TriviaPiece> trailingTrivia, SourcePresence presence,
+          const RefCountPtr<SyntaxArena> &arena, std::optional<SyntaxNodeId> nodeId)
+{
+   RawSyntax(tokenKind, text, leadingTrivia, trailingTrivia, presence, arena, nodeId);
+   *getTrailingObjects<double>() = value;
+}
+
 RawSyntax::~RawSyntax()
 {
    if (isToken()) {
@@ -135,8 +151,8 @@ RefCountPtr<RawSyntax> RawSyntax::make(SyntaxKind kind, ArrayRef<RefCountPtr<Raw
                                        const RefCountPtr<SyntaxArena> &arena,
                                        std::optional<unsigned> nodeId)
 {
-   auto size = totalSizeToAlloc<RefCountPtr<RawSyntax>, OwnedString, TriviaPiece>(
-            layout.size(), 0, 0);
+   auto size = totalSizeToAlloc<RefCountPtr<RawSyntax>, OwnedString, std::int64_t, double, TriviaPiece>(
+            layout.size(), 0, 0, 0, 0);
    void *data = arena ? arena->allocate(size, alignof(RawSyntax))
                       : ::operator new(size);
    return RefCountPtr<RawSyntax>(
@@ -150,11 +166,46 @@ RefCountPtr<RawSyntax> RawSyntax::make(TokenKindType tokenKind, OwnedString text
                                        const RefCountPtr<SyntaxArena> &arena,
                                        std::optional<unsigned> nodeId)
 {
-   auto size = totalSizeToAlloc<RefCountPtr<RawSyntax>, OwnedString, TriviaPiece>(
-            0, 1, leadingTrivia.size() + trailingTrivia.size());
+   auto size = totalSizeToAlloc<RefCountPtr<RawSyntax>, OwnedString, std::int64_t, double, TriviaPiece>(
+            0, 1, 0, 0, leadingTrivia.size() + trailingTrivia.size());
    void *data = arena ? arena->allocate(size, alignof(RawSyntax))
                       : ::operator new(size);
    return RefCountPtr<RawSyntax>(new (data) RawSyntax(tokenKind, text, leadingTrivia,
+                                                      trailingTrivia, presence,
+                                                      arena, nodeId));
+}
+
+RefCountPtr<RawSyntax> RawSyntax::make(TokenKindType tokenKind, OwnedString text,
+                                       std::int64_t value,
+                                       ArrayRef<TriviaPiece> leadingTrivia,
+                                       ArrayRef<TriviaPiece> trailingTrivia,
+                                       SourcePresence presence,
+                                       const RefCountPtr<SyntaxArena> &arena,
+                                       std::optional<unsigned> nodeId)
+{
+   auto size = totalSizeToAlloc<RefCountPtr<RawSyntax>, OwnedString, std::int64_t, double, TriviaPiece>(
+            0, 1, 1, 0, leadingTrivia.size() + trailingTrivia.size());
+   void *data = arena ? arena->allocate(size, alignof(RawSyntax))
+                      : ::operator new(size);
+   return RefCountPtr<RawSyntax>(new (data) RawSyntax(tokenKind, text, value, leadingTrivia,
+                                                      trailingTrivia, presence,
+                                                      arena, nodeId));
+}
+
+
+RefCountPtr<RawSyntax> RawSyntax::make(TokenKindType tokenKind, OwnedString text,
+                                       double value,
+                                       ArrayRef<TriviaPiece> leadingTrivia,
+                                       ArrayRef<TriviaPiece> trailingTrivia,
+                                       SourcePresence presence,
+                                       const RefCountPtr<SyntaxArena> &arena,
+                                       std::optional<unsigned> nodeId)
+{
+   auto size = totalSizeToAlloc<RefCountPtr<RawSyntax>, OwnedString, std::int64_t, double, TriviaPiece>(
+            0, 1, 0, 1, leadingTrivia.size() + trailingTrivia.size());
+   void *data = arena ? arena->allocate(size, alignof(RawSyntax))
+                      : ::operator new(size);
+   return RefCountPtr<RawSyntax>(new (data) RawSyntax(tokenKind, text, value, leadingTrivia,
                                                       trailingTrivia, presence,
                                                       arena, nodeId));
 }

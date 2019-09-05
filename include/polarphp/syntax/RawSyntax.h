@@ -258,7 +258,7 @@ using SyntaxNodeId = unsigned;
 ///
 /// This is implementation detail - do not expose it in public API.
 class RawSyntax final
-      : private TrailingObjects<RawSyntax, RefCountPtr<RawSyntax>, OwnedString,
+      : private TrailingObjects<RawSyntax, RefCountPtr<RawSyntax>, OwnedString, std::int64_t, double,
       TriviaPiece>
 {
 public:
@@ -321,6 +321,22 @@ public:
 
    /// Make a raw "token" syntax node that was allocated in \p arena.
    static RefCountPtr<RawSyntax> make(TokenKindType tokenKind, OwnedString text,
+                                      ArrayRef<TriviaPiece> leadingTrivia,
+                                      ArrayRef<TriviaPiece> trailingTrivia,
+                                      SourcePresence presence,
+                                      const RefCountPtr<SyntaxArena> &arena,
+                                      std::optional<SyntaxNodeId> nodeId = std::nullopt);
+
+   static RefCountPtr<RawSyntax> make(TokenKindType tokenKind, OwnedString text,
+                                      std::int64_t value,
+                                      ArrayRef<TriviaPiece> leadingTrivia,
+                                      ArrayRef<TriviaPiece> trailingTrivia,
+                                      SourcePresence presence,
+                                      const RefCountPtr<SyntaxArena> &arena,
+                                      std::optional<SyntaxNodeId> nodeId = std::nullopt);
+
+   static RefCountPtr<RawSyntax> make(TokenKindType tokenKind, OwnedString text,
+                                      double value,
                                       ArrayRef<TriviaPiece> leadingTrivia,
                                       ArrayRef<TriviaPiece> trailingTrivia,
                                       SourcePresence presence,
@@ -637,6 +653,16 @@ private:
       return isToken() ? 1 : 0;
    }
 
+   size_t getNumTrailingObjects(OverloadToken<double>) const
+   {
+      return isToken() ? 1 : 0;
+   }
+
+   size_t getNumTrailingObjects(OverloadToken<std::int64_t>) const
+   {
+      return isToken() ? 1 : 0;
+   }
+
    size_t getNumTrailingObjects(OverloadToken<TriviaPiece>) const
    {
       return isToken()
@@ -660,6 +686,14 @@ private:
    /// If \p nodeId is \c None, the next free nodeId is used, if it is passed,
    /// the caller needs to assure that the nodeId has not been used yet.
    RawSyntax(TokenKindType tokenKind, OwnedString text, ArrayRef<TriviaPiece> leadingTrivia,
+             ArrayRef<TriviaPiece> trailingTrivia, SourcePresence presence,
+             const RefCountPtr<SyntaxArena> &arena, std::optional<SyntaxNodeId> nodeId);
+
+   RawSyntax(TokenKindType tokenKind, OwnedString text, std::int64_t value, ArrayRef<TriviaPiece> leadingTrivia,
+             ArrayRef<TriviaPiece> trailingTrivia, SourcePresence presence,
+             const RefCountPtr<SyntaxArena> &arena, std::optional<SyntaxNodeId> nodeId);
+
+   RawSyntax(TokenKindType tokenKind, OwnedString text, double value, ArrayRef<TriviaPiece> leadingTrivia,
              ArrayRef<TriviaPiece> trailingTrivia, SourcePresence presence,
              const RefCountPtr<SyntaxArena> &arena, std::optional<SyntaxNodeId> nodeId);
 
