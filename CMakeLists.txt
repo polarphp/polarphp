@@ -271,6 +271,7 @@ option(POLAR_EXTERNALIZE_DEBUGINFO
 option(POLAR_BUILD_TESTS
    "Build polarphp unit tests. If OFF, just generate build targets." OFF)
 option(POLAR_BUILD_UNITTESTS "Generate build targets for the polarphp unit tests." ON)
+option(POLAR_BUILD_REGRESSION_TESTS "Generate build targets for the polarphp regression tests." OFF)
 
 option(POLAR_ENABLE_TERMINFO "Use terminfo database if available." ON)
 option(POLAR_ENABLE_ZLIB "Use zlib for compression/decompression if available." ON)
@@ -475,8 +476,12 @@ if (POLAR_BUILD_TESTS)
    set(POLAR_LIT_TEST_BIN_DIR ${POLAR_LIT_RUNTIME_DIR}/bin)
    set(POLAR_LIT_TEST_LIB_DIR ${POLAR_LIT_RUNTIME_DIR}/lib)
    add_subdirectory(devtools)
-   add_subdirectory(unittests)
-   add_subdirectory(tests)
+   if (POLAR_BUILD_UNITTESTS)
+      add_subdirectory(unittests)
+   endif()
+   if (POLAR_BUILD_REGRESSION_TESTS)
+      add_subdirectory(tests)
+   endif()
 endif()
 
 polar_compile_env_summary_output()

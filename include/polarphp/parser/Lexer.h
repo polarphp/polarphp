@@ -587,10 +587,10 @@ private:
    ParserSemantic *m_valueContainer = nullptr;
 
    YYLexerCondType m_yyCondition = COND_NAME(ST_IN_SCRIPTING);
-   unsigned m_heredocIndentation;
+   std::size_t m_heredocIndentation;
    /// current token length
    std::size_t m_yyLength;
-   unsigned int m_lineNumber;
+   std::size_t m_lineNumber;
 
    LexicalEventHandler m_eventHandler = nullptr;
    LexicalExceptionHandler m_lexicalExceptionHandler = nullptr;

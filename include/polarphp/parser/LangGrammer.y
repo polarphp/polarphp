@@ -362,7 +362,7 @@ semi_reserved:
 
 identifier:
    T_IDENTIFIER_STRING {
-
+      
    }
 |	semi_reserved {
 

@@ -57,7 +57,7 @@ enum class TriviaRetentionMode
 struct HereDocLabel
 {
    bool intentationUseSpaces;
-   int indentation;
+   std::size_t indentation;
    std::string name;
 };
 

@@ -241,7 +241,7 @@ public:
       return SourceLoc(polar::utils::SMLocation::getFromPointer(m_text.begin()));
    }
 
-   unsigned getLength() const
+   std::size_t getLength() const
    {
       return m_text.size();
    }
@@ -254,7 +254,7 @@ public:
    CharSourceRange getRangeWithoutBackticks() const
    {
       SourceLoc TokLoc = getLoc();
-      unsigned TokLength = getLength();
+      std::size_t TokLength = getLength();
       if (isEscapedIdentifier()) {
          // Adjust to account for the backticks.
          TokLoc = TokLoc.getAdvancedLoc(1);

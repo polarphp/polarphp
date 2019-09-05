@@ -24,4 +24,8 @@ RefCountPtr<RawSyntax> AbstractParserTestCase::parseSource(StringRef source)
    return parser.getSyntaxTree();
 }
 
+AbstractParserTestCase::~AbstractParserTestCase()
+{
+}
+
 } // polar::uittest

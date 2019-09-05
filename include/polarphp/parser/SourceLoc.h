@@ -203,13 +203,13 @@ public:
 class CharSourceRange
 {
    SourceLoc m_start;
-   unsigned m_byteLength;
+   std::size_t m_byteLength;
 
 public:
    /// Constructs an invalid range.
    CharSourceRange() = default;
 
-   CharSourceRange(SourceLoc start, unsigned byteLength)
+   CharSourceRange(SourceLoc start, std::size_t byteLength)
       : m_start(start),
         m_byteLength(byteLength)
    {}

@@ -44,7 +44,7 @@ class AbstractParserTestCase : public ::testing::Test
 {
 public:
    RefCountPtr<RawSyntax> parseSource(StringRef source);
-
+   virtual ~AbstractParserTestCase();
 private:
    LangOptions m_langOpts;
    SourceManager m_sourceMgr;
