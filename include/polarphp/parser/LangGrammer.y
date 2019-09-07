@@ -1618,28 +1618,36 @@ scalar:
       $$ = dval.getRaw();
    }
 |  T_LINE {
-
+      TokenSyntax lineKeyword = make_token(LineKeyword);
+      $$ = lineKeyword.getRaw();
    }
 |  T_FILE {
-
+      TokenSyntax fileKeyword = make_token(FileKeyword);
+      $$ = fileKeyword.getRaw();
    }
 |  T_DIR {
-
+      TokenSyntax dirKeyword = make_token(DirKeyword);
+      $$ = dirKeyword.getRaw();
    }
 |  T_TRAIT_CONST {
-
+      TokenSyntax traitConstKeyword = make_token(TraitConstKeyword);
+      $$ = traitConstKeyword.getRaw();
    }
 |  T_METHOD_CONST {
-
+      TokenSyntax methodConstKeyword = make_token(MethodConstKeyword);
+      $$ = methodConstKeyword.getRaw();
    }
 |  T_FUNC_CONST {
-
+      TokenSyntax funcConstKeyword = make_token(FuncConstKeyword);
+      $$ = funcConstKeyword.getRaw();
    }
 |  T_NS_CONST {
-
+      TokenSyntax namespaceConstKeyword = make_token(NamespaceConstKeyword);
+      $$ = namespaceConstKeyword.getRaw();
    }
 |  T_CLASS_CONST {
-
+      TokenSyntax classConstKeyword = make_token(ClassConstKeyword);
+      $$ = classConstKeyword.getRaw();
    }
 |  T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC {
 

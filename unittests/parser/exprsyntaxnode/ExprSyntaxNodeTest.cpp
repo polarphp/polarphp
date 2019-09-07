@@ -28,3 +28,15 @@ TEST_F(ExprSyntaxNodeTest, testNumberExpr)
       RefCountPtr<RawSyntax> ast = parseSource(source);
    }
 }
+
+TEST_F(ExprSyntaxNodeTest, testMagicConstExpr)
+{
+   {
+      // __LINE__
+      std::string source =
+            R"(
+            __LINE__;
+            )";
+      RefCountPtr<RawSyntax> ast = parseSource(source);
+   }
+}
