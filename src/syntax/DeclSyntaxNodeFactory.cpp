@@ -29,17 +29,6 @@ NameListSyntax DeclSyntaxNodeFactory::makeNameList(const std::vector<NameSyntax>
    return make<NameListSyntax>(target);
 }
 
-NamespacePartListSyntax DeclSyntaxNodeFactory::makeNamespacePartList(
-      const std::vector<NamespacePartSyntax> &elements, RefCountPtr<SyntaxArena> arena)
-{
-   std::vector<RefCountPtr<RawSyntax>> layout;
-   for (const NamespacePartSyntax &item : elements) {
-      layout.push_back(item.getRaw());
-   }
-   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::NamespacePartList, layout, SourcePresence::Present, arena);
-   return make<NamespacePartListSyntax>(target);
-}
-
 ParameterListSyntax DeclSyntaxNodeFactory::makeParameterList(
       const std::vector<ParameterSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
@@ -147,24 +136,24 @@ DeclSyntaxNodeFactory::makeIdentifier(Syntax name, RefCountPtr<SyntaxArena> aren
    return make<IdentifierSyntax>(target);
 }
 
-NamespacePartSyntax
-DeclSyntaxNodeFactory::makeNamespacePart(std::optional<TokenSyntax> separator, TokenSyntax name, RefCountPtr<SyntaxArena> arena)
+NamespaceNameSyntax
+DeclSyntaxNodeFactory::makeNamespaceName(std::optional<TokenSyntax> separator, TokenSyntax name, RefCountPtr<SyntaxArena> arena)
 {
-   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::NamespacePart, {
+   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::NamespaceName, {
                                                       separator.has_value() ? separator->getRaw() : nullptr,
                                                       name.getRaw()
                                                    }, SourcePresence::Present, arena);
-   return make<NamespacePartSyntax>(target);
+   return make<NamespaceNameSyntax>(target);
 }
 
 NameSyntax
 DeclSyntaxNodeFactory::makeName(std::optional<TokenSyntax> nsToken, std::optional<TokenSyntax> separator,
-                                NamespacePartListSyntax namespaceParts, RefCountPtr<SyntaxArena> arena)
+                                NamespaceNameSyntax namespaceName, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::Name, {
                                                       nsToken.has_value() ? nsToken->getRaw() : nullptr,
                                                       separator.has_value() ? separator->getRaw() : nullptr,
-                                                      namespaceParts.getRaw()
+                                                      namespaceName.getRaw()
                                                    }, SourcePresence::Present, arena);
    return make<NameSyntax>(target);
 }
@@ -519,13 +508,6 @@ NameListSyntax DeclSyntaxNodeFactory::makeBlankNameList(RefCountPtr<SyntaxArena>
    return make<NameListSyntax>(target);
 }
 
-NamespacePartListSyntax DeclSyntaxNodeFactory::makeBlankNamespacePartList(RefCountPtr<SyntaxArena> arena)
-{
-   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::NamespacePartList, {},
-                                                   SourcePresence::Present, arena);
-   return make<NamespacePartListSyntax>(target);
-}
-
 ParameterListSyntax DeclSyntaxNodeFactory::makeBlankParameterList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::ParameterList, {},
@@ -602,14 +584,14 @@ IdentifierSyntax DeclSyntaxNodeFactory::makeBlankIdentifier( RefCountPtr<SyntaxA
    return make<IdentifierSyntax>(target);
 }
 
-NamespacePartSyntax DeclSyntaxNodeFactory::makeBlankNamespacePart(RefCountPtr<SyntaxArena> arena)
+NamespaceNameSyntax DeclSyntaxNodeFactory::makeBlankNamespacePart(RefCountPtr<SyntaxArena> arena)
 {
-   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::NamespacePart, {
+   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::NamespaceName, {
                                                       nullptr, // NsSeparator
                                                       make_missing_token(T_IDENTIFIER_STRING) // Name
                                                    },
                                                    SourcePresence::Present, arena);
-   return make<NamespacePartSyntax>(target);
+   return make<NamespaceNameSyntax>(target);
 }
 
 NameSyntax DeclSyntaxNodeFactory::makeBlankName(RefCountPtr<SyntaxArena> arena)
@@ -617,7 +599,7 @@ NameSyntax DeclSyntaxNodeFactory::makeBlankName(RefCountPtr<SyntaxArena> arena)
    RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::Name, {
                                                       nullptr, // NsToken
                                                       nullptr, // NsSeparator
-                                                      RawSyntax::missing(SyntaxKind::NamespacePartList) // Namespace
+                                                      RawSyntax::missing(SyntaxKind::NamespaceName) // Namespace
                                                    },
                                                    SourcePresence::Present, arena);
    return make<NameSyntax>(target);

@@ -187,7 +187,7 @@ private:
 ///   T_IDENTIFIER_STRING
 /// | namespace_name T_NS_SEPARATOR T_IDENTIFIER_STRING
 ///
-class NamespacePartSyntax final : public Syntax
+class NamespaceNameSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -207,7 +207,7 @@ public:
    };
 
 public:
-   NamespacePartSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   NamespaceNameSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
@@ -215,12 +215,12 @@ public:
 
    std::optional<TokenSyntax> getNsSeparator();
    TokenSyntax getName();
-   NamespacePartSyntax withNsSeparator(std::optional<TokenSyntax> separator);
-   NamespacePartSyntax withName(std::optional<TokenSyntax> name);
+   NamespaceNameSyntax withNsSeparator(std::optional<TokenSyntax> separator);
+   NamespaceNameSyntax withName(std::optional<TokenSyntax> name);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::NamespacePart;
+      return kind == SyntaxKind::NamespaceName;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -229,7 +229,7 @@ public:
    }
 
 private:
-   friend class NamespacePartSyntaxBuilder;
+   friend class NamespaceNameSyntaxBuilder;
    void validate();
 };
 
@@ -257,7 +257,7 @@ public:
       ///
       NsSeparator,
       ///
-      /// type: NamespacePartListSyntax
+      /// type: NamespaceNameSyntax
       /// optional: false
       ///
       Namespace
@@ -271,11 +271,10 @@ public:
 
    std::optional<TokenSyntax> getNsToken();
    std::optional<TokenSyntax> getNsSeparator();
-   NamespacePartListSyntax getNamespace();
+   NamespaceNameSyntax getNamespaceName();
    NameSyntax withNsToken(std::optional<TokenSyntax> nsToken);
    NameSyntax withNsSeparator(std::optional<TokenSyntax> separatorToken);
-   NameSyntax withNamespace(std::optional<NamespacePartListSyntax> ns);
-   NameSyntax addNamespacePart(NamespacePartSyntax namespacePart);
+   NameSyntax withNamespaceName(std::optional<NamespaceNameSyntax> ns);
 
    static bool kindOf(SyntaxKind kind)
    {

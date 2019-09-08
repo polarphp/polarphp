@@ -20,8 +20,6 @@ Syntax AbstractFactory::makeBlankCollectionSyntax(SyntaxKind collectionKind)
    switch (collectionKind) {
    case SyntaxKind::NameList:
       return DeclSyntaxNodeFactory::makeBlankNameList();
-   case SyntaxKind::NamespacePartList:
-      return DeclSyntaxNodeFactory::makeBlankNamespacePartList();
    case SyntaxKind::ParameterList:
       return DeclSyntaxNodeFactory::makeBlankParameterList();
    case SyntaxKind::ClassModifierList:

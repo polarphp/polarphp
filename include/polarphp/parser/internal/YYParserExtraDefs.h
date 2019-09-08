@@ -14,7 +14,8 @@
 
 #define empty_triva() parser->getEmptyTrivia()
 #define make_token(name) TokenSyntaxNodeFactory::make##name(parser->getEmptyTrivia(), parser->getEmptyTrivia())
-#define make_token_with_text(name, text) TokenSyntaxNodeFactory::make##name(text, parser->getEmptyTrivia(), parser->getEmptyTrivia())
+#define make_token_with_text(name, text) \
+   TokenSyntaxNodeFactory::make##name(OwnedString::makeRefCounted(text), parser->getEmptyTrivia(), parser->getEmptyTrivia())
 #define make_lnumber_token(value) TokenSyntaxNodeFactory::makeLNumber(value, parser->getEmptyTrivia(), parser->getEmptyTrivia())
 #define make_dnumber_token(value) TokenSyntaxNodeFactory::makeDNumber(value, parser->getEmptyTrivia(), parser->getEmptyTrivia())
 

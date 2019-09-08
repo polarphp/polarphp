@@ -2693,7 +2693,7 @@ public:
    NamespacePartListSyntax getNamespace();
    std::optional<TokenSyntax> getAsToken();
    std::optional<TokenSyntax> getIdentifierToken();
-   NamespaceUnprefixedUseDeclarationSyntax addNamespacePart(NamespacePartSyntax namespacePart);
+   NamespaceUnprefixedUseDeclarationSyntax addNamespacePart(NamespaceNameSyntax namespacePart);
    NamespaceUnprefixedUseDeclarationSyntax withNamespace(std::optional<NamespacePartListSyntax> ns);
    NamespaceUnprefixedUseDeclarationSyntax withAsToken(std::optional<TokenSyntax> asToken);
    NamespaceUnprefixedUseDeclarationSyntax withIdentifierToken(std::optional<TokenSyntax> identifierToken);

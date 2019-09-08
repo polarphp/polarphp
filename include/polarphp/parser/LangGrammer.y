@@ -363,10 +363,16 @@ semi_reserved:
 
 identifier:
    T_IDENTIFIER_STRING {
-      
+      TokenSyntax identifierToken = make_token_with_text(IdentifierString, $1);
+      IdentifierSyntax identifier = make_decl(Identifier, identifierToken);
+      $$ = identifier.getRaw();
    }
 |	semi_reserved {
-
+      // TokenKindType kind = $<int>1;
+      // TokenSyntax identifierToken = AbstractFactory::makeToken(kind, OwnedString::makeUnowned(get_token_text(kind)),
+      //                                                          empty_trivia(), empty_trivia(), SourcePresence::Present);
+      // IdentifierSyntax identifier = make_decl(Identifier, identifierToken);
+      // $$ = identifier.getRaw();
    }
 ;
 
@@ -385,7 +391,9 @@ top_statement_list:
 
 namespace_name:
    T_IDENTIFIER_STRING {
-
+      TokenSyntax identifierToken = make_token_with_text(IdentifierString, $1);
+      IdentifierSyntax identifier = make_decl(Identifier, identifierToken);
+      $$ = identifier.getRaw();
    }
 |  namespace_name T_NS_SEPARATOR T_IDENTIFIER_STRING {
 

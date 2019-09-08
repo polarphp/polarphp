@@ -40,3 +40,18 @@ TEST_F(ExprSyntaxNodeTest, testMagicConstExpr)
       RefCountPtr<RawSyntax> ast = parseSource(source);
    }
 }
+
+TEST_F(ExprSyntaxNodeTest, testReservedNonModifiers)
+{
+   {
+      // reserved_non_modifiers
+//      std::string source =
+//            R"(
+//            include("file");
+//            )";
+//      RefCountPtr<RawSyntax> ast = parseSource(source);
+   }
+   {
+      // semi_reserved
+   }
+}

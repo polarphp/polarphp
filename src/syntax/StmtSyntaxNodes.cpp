@@ -3432,7 +3432,7 @@ void NamespaceUnprefixedUseDeclarationSyntax::validate()
    }
    assert(raw->getLayout().size() == NamespaceUnprefixedUseDeclarationSyntax::CHILDREN_COUNT);
    if (const RefCountPtr<RawSyntax> &nsChild = raw->getChild(Cursor::Namespace)) {
-      assert(nsChild->kindOf(SyntaxKind::NamespacePartList));
+      assert(nsChild->kindOf(SyntaxKind::NamespaceName));
    }
    syntax_assert_child_token(raw, AsToken, std::set{TokenKindType::T_AS});
    syntax_assert_child_token(raw, IdentifierToken, std::set{TokenKindType::T_IDENTIFIER_STRING});
@@ -3463,13 +3463,13 @@ std::optional<TokenSyntax> NamespaceUnprefixedUseDeclarationSyntax::getIdentifie
 }
 
 NamespaceUnprefixedUseDeclarationSyntax
-NamespaceUnprefixedUseDeclarationSyntax::addNamespacePart(NamespacePartSyntax namespacePart)
+NamespaceUnprefixedUseDeclarationSyntax::addNamespacePart(NamespaceNameSyntax namespacePart)
 {
    RefCountPtr<RawSyntax> namespacesRaw = getRaw()->getChild(Cursor::Namespace);
    if (namespacesRaw) {
       namespacesRaw = namespacesRaw->append(namespacePart.getRaw());
    } else {
-      namespacesRaw = RawSyntax::make(SyntaxKind::NamespacePartList, {namespacePart.getRaw()},
+      namespacesRaw = RawSyntax::make(SyntaxKind::NamespaceName, {namespacePart.getRaw()},
                                       SourcePresence::Present);
    }
    return m_data->replaceChild<NamespaceUnprefixedUseDeclarationSyntax>(namespacesRaw, Cursor::Namespace);
@@ -3482,7 +3482,7 @@ NamespaceUnprefixedUseDeclarationSyntax::withNamespace(std::optional<NamespacePa
    if (ns.has_value()) {
       nsRaw = ns->getRaw();
    } else {
-      nsRaw = RawSyntax::missing(SyntaxKind::NamespacePartList);
+      nsRaw = RawSyntax::missing(SyntaxKind::NamespaceName);
    }
    return m_data->replaceChild<NamespaceUnprefixedUseDeclarationSyntax>(nsRaw, Cursor::Namespace);
 }
@@ -3644,7 +3644,7 @@ void NamespaceGroupUseDeclarationSyntax::validate()
    syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_RIGHT_BRACE});
    syntax_assert_child_token(raw, CommaToken, std::set{TokenKindType::T_COMMA});
    if (const RefCountPtr<RawSyntax> &namespaceChild = raw->getChild(Cursor::Namespace)) {
-      assert(namespaceChild->kindOf(SyntaxKind::NamespacePartList));
+      assert(namespaceChild->kindOf(SyntaxKind::NamespaceName));
    }
    if (const RefCountPtr<RawSyntax> &declarationsChild = raw->getChild(Cursor::UnprefixedUseDeclarations)) {
       assert(declarationsChild->kindOf(SyntaxKind::NamespaceUnprefixedUseDeclarationList));
@@ -3715,7 +3715,7 @@ NamespaceGroupUseDeclarationSyntax::withNamespace(std::optional<NamespacePartLis
    if (ns.has_value()) {
       nsRaw = ns->getRaw();
    } else {
-      nsRaw = RawSyntax::missing(SyntaxKind::NamespacePartList);
+      nsRaw = RawSyntax::missing(SyntaxKind::NamespaceName);
    }
    return m_data->replaceChild<NamespaceGroupUseDeclarationSyntax>(nsRaw, Cursor::Namespace);
 }
@@ -3811,7 +3811,7 @@ void NamespaceMixedGroupUseDeclarationSyntax::validate()
    syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_RIGHT_BRACE});
    syntax_assert_child_token(raw, CommaToken, std::set{TokenKindType::T_COMMA});
    if (const RefCountPtr<RawSyntax> &namespaceChild = raw->getChild(Cursor::Namespace)) {
-      assert(namespaceChild->kindOf(SyntaxKind::NamespacePartList));
+      assert(namespaceChild->kindOf(SyntaxKind::NamespaceName));
    }
    if (const RefCountPtr<RawSyntax> &declarationsChild = raw->getChild(Cursor::InlineUseDeclarations)) {
       assert(declarationsChild->kindOf(SyntaxKind::NamespaceInlineUseDeclarationList));
@@ -3882,7 +3882,7 @@ NamespaceMixedGroupUseDeclarationSyntax::withNamespace(std::optional<NamespacePa
    if (ns.has_value()) {
       nsRaw = ns->getRaw();
    } else {
-      nsRaw = RawSyntax::missing(SyntaxKind::NamespacePartList);
+      nsRaw = RawSyntax::missing(SyntaxKind::NamespaceName);
    }
    return m_data->replaceChild<NamespaceMixedGroupUseDeclarationSyntax>(nsRaw, Cursor::Namespace);
 }
@@ -4071,7 +4071,7 @@ void NamespaceDefinitionStmtSyntax::validate()
    }
    assert(raw->getLayout().getSize() == NamespaceDefinitionStmtSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, NamespaceToken, std::set{TokenKindType::T_NAMESPACE});
-   syntax_assert_child_kind(raw, NamespaceName, std::set{SyntaxKind::NamespacePartList});
+   syntax_assert_child_kind(raw, NamespaceName, std::set{SyntaxKind::NamespaceName});
    syntax_assert_child_token(raw, SemicolonToken, std::set{TokenKindType::T_SEMICOLON});
 #endif
 }
@@ -4110,7 +4110,7 @@ NamespaceDefinitionStmtSyntax::withNamespaceName(std::optional<NamespacePartList
    if (name.has_value()) {
       rawName = name->getRaw();
    } else {
-      rawName = RawSyntax::missing(SyntaxKind::NamespacePartList);
+      rawName = RawSyntax::missing(SyntaxKind::NamespaceName);
    }
    return m_data->replaceChild<NamespaceDefinitionStmtSyntax>(rawName, Cursor::NamespaceName);
 }
@@ -4139,7 +4139,7 @@ void NamespaceBlockStmtSyntax::validate()
    }
    assert(raw->getLayout().getSize() == NamespaceBlockStmtSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, NamespaceToken, std::set{TokenKindType::T_NAMESPACE});
-   syntax_assert_child_kind(raw, NamespaceName, std::set{SyntaxKind::NamespacePartList});
+   syntax_assert_child_kind(raw, NamespaceName, std::set{SyntaxKind::NamespaceName});
    syntax_assert_child_kind(raw, CodeBlock, std::set{SyntaxKind::TopCodeBlockStmt});
 #endif
 }

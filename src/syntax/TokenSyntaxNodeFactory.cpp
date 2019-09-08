@@ -972,8 +972,8 @@ TokenSyntax TokenSyntaxNodeFactory::makeDNumber(double value, const Trivia &lead
                                             leadingTrivia.pieces, trailingTrivia.pieces, SourcePresence::Present, arena));
 }
 
-TokenSyntax TokenSyntaxNodeFactory::makeString(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia,
-                                               RefCountPtr<SyntaxArena> arena)
+TokenSyntax TokenSyntaxNodeFactory::makeIdentifierString(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia,
+                                                         RefCountPtr<SyntaxArena> arena)
 {
    return makeToken(TokenKindType::T_IDENTIFIER_STRING, text,
                     leadingTrivia, trailingTrivia, SourcePresence::Present, arena);

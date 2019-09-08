@@ -21,7 +21,7 @@ using CollectionElementTypeChoicesMap = const std::unordered_map<SyntaxKind, std
 static const std::unordered_map<SyntaxKind, std::set<SyntaxKind>> scg_collectionElementTypeChoicesMap{
     // decl syntax colloection
     { SyntaxKind::NameList, { SyntaxKind::Name }},
-    { SyntaxKind::NamespacePartList, { SyntaxKind::NamespacePart }},
+    { SyntaxKind::NamespaceName, { SyntaxKind::NamespaceName }},
     { SyntaxKind::ParameterList, { SyntaxKind::ParameterItem }},
     { SyntaxKind::ClassModifierList, { SyntaxKind::ClassModifier }},
     { SyntaxKind::MemberDeclList, { SyntaxKind::MemberDeclListItem }},

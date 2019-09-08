@@ -20,7 +20,7 @@ namespace polar::syntax {
 class ReservedNonModifierSyntax;
 class SemiReservedSytnax;
 class IdentifierSyntax;
-class NamespacePartSyntax;
+class NamespaceNameSyntax;
 class NameSyntax;
 class TypeClauseSyntax;
 class TypeExprClauseSyntax;
@@ -67,16 +67,6 @@ using TopStmtListSyntax = SyntaxCollection<SyntaxKind::TopStmtList, TopStmtSynta
 /// |	name_list ',' name
 ///
 using NameListSyntax = SyntaxCollection<SyntaxKind::NameList, NameSyntax>;
-
-///
-/// type: SyntaxCollection
-/// element type: TokenSyntax
-///
-/// namespace_name:
-///   T_IDENTIFIER_STRING
-/// | namespace_name T_NS_SEPARATOR T_IDENTIFIER_STRING
-///
-using NamespacePartListSyntax = SyntaxCollection<SyntaxKind::NamespacePartList, NamespacePartSyntax>;
 
 ///
 /// type: SyntaxCollection

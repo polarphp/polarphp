@@ -25,8 +25,6 @@ public:
    ///
    static NameListSyntax makeNameList(
          const std::vector<NameSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
-   static NamespacePartListSyntax makeNamespacePartList(
-         const std::vector<NamespacePartSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static ParameterListSyntax makeParameterList(
          const std::vector<ParameterSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassModifierListSyntax makeClassModififerList(
@@ -48,9 +46,9 @@ public:
    static ReservedNonModifierSyntax makeReservedNonModifier(TokenSyntax modifier, RefCountPtr<SyntaxArena> arena = nullptr);
    static SemiReservedSytnax makeSemiReserved(Syntax modifier, RefCountPtr<SyntaxArena> arena = nullptr);
    static IdentifierSyntax makeIdentifier(Syntax name, RefCountPtr<SyntaxArena> arena = nullptr);
-   static NamespacePartSyntax makeNamespacePart(std::optional<TokenSyntax> separator, TokenSyntax name, RefCountPtr<SyntaxArena> arena = nullptr);
+   static NamespaceNameSyntax makeNamespaceName(std::optional<TokenSyntax> separator, TokenSyntax name, RefCountPtr<SyntaxArena> arena = nullptr);
    static NameSyntax makeName(std::optional<TokenSyntax> nsToken, std::optional<TokenSyntax> separator,
-                              NamespacePartListSyntax namespaceParts, RefCountPtr<SyntaxArena> arena = nullptr);
+                              NamespaceNameSyntax namespaceName, RefCountPtr<SyntaxArena> arena = nullptr);
    static InitializerClauseSyntax makeInitializerClause(TokenSyntax equalToken, ExprSyntax valueExpr, RefCountPtr<SyntaxArena> arena = nullptr);
    static TypeClauseSyntax makeTypeClause(Syntax type, RefCountPtr<SyntaxArena> arena = nullptr);
    static TypeExprClauseSyntax makeTypeExprClause(std::optional<TokenSyntax> questionToken, TypeClauseSyntax typeClause,
@@ -112,7 +110,6 @@ public:
    /// empty normal nodes
    ///
    static NameListSyntax makeBlankNameList(RefCountPtr<SyntaxArena> arena = nullptr);
-   static NamespacePartListSyntax makeBlankNamespacePartList(RefCountPtr<SyntaxArena> arena = nullptr);
    static ParameterListSyntax makeBlankParameterList(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassModifierListSyntax makeBlankClassModififerList(RefCountPtr<SyntaxArena> arena = nullptr);
    static MemberDeclListSyntax makeBlankMemberDeclList(RefCountPtr<SyntaxArena> arena = nullptr);
@@ -124,7 +121,7 @@ public:
    static ReservedNonModifierSyntax makeBlankReservedNonModifier(RefCountPtr<SyntaxArena> arena = nullptr);
    static SemiReservedSytnax makeBlankSemiReserved(RefCountPtr<SyntaxArena> arena = nullptr);
    static IdentifierSyntax makeBlankIdentifier( RefCountPtr<SyntaxArena> arena = nullptr);
-   static NamespacePartSyntax makeBlankNamespacePart(RefCountPtr<SyntaxArena> arena = nullptr);
+   static NamespaceNameSyntax makeBlankNamespacePart(RefCountPtr<SyntaxArena> arena = nullptr);
    static NameSyntax makeBlankName(RefCountPtr<SyntaxArena> arena = nullptr);
    static InitializerClauseSyntax makeBlankInitializerClause(RefCountPtr<SyntaxArena> arena = nullptr);
    static TypeClauseSyntax makeBlankTypeClause(RefCountPtr<SyntaxArena> arena = nullptr);

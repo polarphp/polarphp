@@ -1628,7 +1628,7 @@ StmtSyntaxNodeFactory::makeBlankNamespaceUnprefixedUseDeclaration(RefCountPtr<Sy
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::NamespaceUnprefixedUseDeclaration, {
-               RawSyntax::missing(SyntaxKind::NamespacePartList), // Namespace
+               RawSyntax::missing(SyntaxKind::NamespaceName), // Namespace
                nullptr, // AsToken
                nullptr, // IdentifierToken
             }, SourcePresence::Present, arena);
@@ -1674,7 +1674,7 @@ StmtSyntaxNodeFactory::makeBlankNamespaceMixedGroupUseDeclaration(RefCountPtr<Sy
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::NamespaceMixedGroupUseDeclaration, {
                nullptr, // FirstNsSeparator
-               RawSyntax::missing(SyntaxKind::NamespacePartList), // ns
+               RawSyntax::missing(SyntaxKind::NamespaceName), // ns
                make_missing_token(T_NS_SEPARATOR), // SecondNsSeparator
                make_missing_token(T_LEFT_PAREN), // LeftBrace
                RawSyntax::missing(SyntaxKind::NamespaceInlineUseDeclarationList), // InlineUseDeclarations
@@ -1703,7 +1703,7 @@ StmtSyntaxNodeFactory::makeBlankNamespaceDefinitionStmt(RefCountPtr<SyntaxArena>
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::NamespaceDefinitionStmt, {
                make_missing_token(T_NAMESPACE), // NamespaceToken
-               RawSyntax::missing(SyntaxKind::NamespacePartList), // NamespaceName
+               RawSyntax::missing(SyntaxKind::NamespaceName), // NamespaceName
                make_missing_token(T_SEMICOLON), // SemicolonToken
             }, SourcePresence::Present, arena);
    return make<NamespaceDefinitionStmtSyntax>(target);

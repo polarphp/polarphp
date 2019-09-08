@@ -162,22 +162,22 @@ IdentifierSyntax IdentifierSyntax::withNameItem(std::optional<Syntax> item)
 }
 
 ///
-/// NamespacePartSyntax
+/// NamespaceNameSyntax
 ///
-void NamespacePartSyntax::validate()
+void NamespaceNameSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().getSize() == NamespacePartSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().getSize() == NamespaceNameSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, NsSeparator, std::set{TokenKindType::T_NS_SEPARATOR});
    syntax_assert_child_token(raw, NsSeparator, std::set{TokenKindType::T_IDENTIFIER_STRING});
 #endif
 }
 
-std::optional<TokenSyntax> NamespacePartSyntax::getNsSeparator()
+std::optional<TokenSyntax> NamespaceNameSyntax::getNsSeparator()
 {
    RefCountPtr<SyntaxData> separatorData = m_data->getChild(Cursor::NsSeparator);
    if (!separatorData) {
@@ -186,12 +186,12 @@ std::optional<TokenSyntax> NamespacePartSyntax::getNsSeparator()
    return TokenSyntax{m_root, separatorData.get()};
 }
 
-TokenSyntax NamespacePartSyntax::getName()
+TokenSyntax NamespaceNameSyntax::getName()
 {
    return TokenSyntax{m_root, m_data->getChild(Cursor::Name).get()};
 }
 
-NamespacePartSyntax NamespacePartSyntax::withNsSeparator(std::optional<TokenSyntax> separator)
+NamespaceNameSyntax NamespaceNameSyntax::withNsSeparator(std::optional<TokenSyntax> separator)
 {
    RefCountPtr<RawSyntax> separatorRaw;
    if (separator.has_value()) {
@@ -199,10 +199,10 @@ NamespacePartSyntax NamespacePartSyntax::withNsSeparator(std::optional<TokenSynt
    } else {
       separatorRaw = nullptr;
    }
-   return m_data->replaceChild<NamespacePartSyntax>(separatorRaw, Cursor::Name);
+   return m_data->replaceChild<NamespaceNameSyntax>(separatorRaw, Cursor::Name);
 }
 
-NamespacePartSyntax NamespacePartSyntax::withName(std::optional<TokenSyntax> name)
+NamespaceNameSyntax NamespaceNameSyntax::withName(std::optional<TokenSyntax> name)
 {
    RefCountPtr<RawSyntax> nameRaw;
    if (name.has_value()) {
@@ -210,7 +210,7 @@ NamespacePartSyntax NamespacePartSyntax::withName(std::optional<TokenSyntax> nam
    } else {
       nameRaw = make_missing_token(T_NS_SEPARATOR);
    }
-   return m_data->replaceChild<NamespacePartSyntax>(nameRaw, Cursor::NsSeparator);
+   return m_data->replaceChild<NamespaceNameSyntax>(nameRaw, Cursor::NsSeparator);
 }
 
 ///
@@ -227,7 +227,7 @@ void NameSyntax::validate()
    syntax_assert_child_token(raw, NsToken, std::set{TokenKindType::T_NAMESPACE});
    syntax_assert_child_token(raw, NsSeparator, std::set{TokenKindType::T_NS_SEPARATOR});
    if (const RefCountPtr<RawSyntax> &nsChild = raw->getChild(Cursor::Namespace)) {
-      assert(nsChild->kindOf(SyntaxKind::NamespacePartList));
+      assert(nsChild->kindOf(SyntaxKind::NamespaceName));
    }
 #endif
 }
@@ -250,9 +250,9 @@ std::optional<TokenSyntax> NameSyntax::getNsSeparator()
    return TokenSyntax{m_root, separatorData.get()};
 }
 
-NamespacePartListSyntax NameSyntax::getNamespace()
+NamespaceNameSyntax NameSyntax::getNamespaceName()
 {
-   return NamespacePartListSyntax{m_root, m_data->getChild(Cursor::Namespace).get()};
+   return NamespaceNameSyntax{m_root, m_data->getChild(Cursor::Namespace).get()};
 }
 
 NameSyntax NameSyntax::withNsToken(std::optional<TokenSyntax> nsToken)
@@ -277,28 +277,16 @@ NameSyntax NameSyntax::withNsSeparator(std::optional<TokenSyntax> separatorToken
    return m_data->replaceChild<NameSyntax>(separatorTokenRaw, Cursor::NsSeparator);
 }
 
-NameSyntax NameSyntax::withNamespace(std::optional<NamespacePartListSyntax> ns)
+NameSyntax NameSyntax::withNamespaceName(std::optional<NamespaceNameSyntax> ns)
 {
    RefCountPtr<RawSyntax> nsRaw;
    if (ns.has_value()) {
       nsRaw = ns->getRaw();
    } else {
-      nsRaw = RawSyntax::missing(SyntaxKind::NamespacePartList);
+      nsRaw = RawSyntax::missing(SyntaxKind::NamespaceName);
    }
    return m_data->replaceChild<NameSyntax>(nsRaw, Cursor::Namespace);
 }
-
-NameSyntax NameSyntax::addNamespacePart(NamespacePartSyntax namespacePart)
-{
-   RefCountPtr<RawSyntax> namespaces = getRaw()->getChild(Cursor::Namespace);
-   if (namespaces) {
-      namespaces = namespaces->append(namespacePart.getRaw());
-   } else {
-      namespaces = RawSyntax::make(SyntaxKind::NamespacePartList, {namespacePart.getRaw()}, SourcePresence::Present);
-   }
-   return m_data->replaceChild<NameSyntax>(namespaces, Cursor::Namespace);
-}
-
 
 ///
 /// InitializerClauseSyntax

@@ -94,8 +94,8 @@ class InterfaceDefinitionSyntax;
 class TraitDefinitionSyntax;
 class FunctionDefinitionSyntax;
 class NameSyntax;
-class NamespacePartSyntax;
-using NamespacePartListSyntax = SyntaxCollection<SyntaxKind::NamespacePartList, NamespacePartSyntax>;
+class NamespaceNameSyntax;
+using NamespacePartListSyntax = SyntaxCollection<SyntaxKind::NamespaceName, NamespaceNameSyntax>;
 
 ///
 /// type: SyntaxCollection
