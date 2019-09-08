@@ -406,13 +406,22 @@ namespace_name:
 
 name:
    namespace_name {
-
+      NamespaceNameSyntax ns = make<NamespaceNameSyntax>($1);
+      NameSyntax name = make_decl(Name, std::nullopt, std::nullopt, ns);
+      $$ = ns.getRaw();
    }
 |  T_NAMESPACE T_NS_SEPARATOR namespace_name {
-
+      TokenSyntax nsKeyword = make_token(NamespaceKeyword);
+      TokenSyntax separator = make_token(NamespaceSeparatorToken);
+      NamespaceNameSyntax ns = make<NamespaceNameSyntax>($3);
+      NameSyntax name = make_decl(Name, nsKeyword, separator, ns);
+      $$ = name.getRaw();
    }
 |  T_NS_SEPARATOR namespace_name {
-
+      TokenSyntax separator = make_token(NamespaceSeparatorToken);
+      NamespaceNameSyntax ns = make<NamespaceNameSyntax>($2);
+      NameSyntax name = make_decl(Name, std::nullopt, separator, ns);
+      $$ = name.getRaw();
    }
 ;
 
