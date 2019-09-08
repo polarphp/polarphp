@@ -571,24 +571,29 @@ inline_use_declaration:
 unprefixed_use_declaration:
    namespace_name {
       NamespaceNameSyntax ns = make<NamespaceNameSyntax>($1);
-      NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make_stmt(NamespaceUnprefixedUseDeclaration, ns, std::nullopt, std::nullopt);
-      $$ = unprefixedUseDecl.getRaw();
+      NamespaceUnprefixedUseDeclarationSyntax useDecl = make_stmt(NamespaceUnprefixedUseDeclaration, ns, std::nullopt, std::nullopt);
+      $$ = useDecl.getRaw();
    }
 |  namespace_name T_AS T_IDENTIFIER_STRING {
       NamespaceNameSyntax ns = make<NamespaceNameSyntax>($1);
       TokenSyntax asToken = make_token(AsKeyword);
       TokenSyntax identifierStr = make_token_with_text(IdentifierString, $3);
-      NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make_stmt(NamespaceUnprefixedUseDeclaration, ns, asToken, identifierStr);
-      $$ = unprefixedUseDecl.getRaw();
+      NamespaceUnprefixedUseDeclarationSyntax useDecl = make_stmt(NamespaceUnprefixedUseDeclaration, ns, asToken, identifierStr);
+      $$ = useDecl.getRaw();
    }
 ;
 
 use_declaration:
    unprefixed_use_declaration {
-
+      NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($1);
+      NamespaceUseDeclarationSyntax useDecl = make_stmt(NamespaceUseDeclaration, std::nullopt, unprefixedUseDecl);
+      $$ = useDecl.getRaw();
    }
 |  T_NS_SEPARATOR unprefixed_use_declaration {
-
+      TokenSyntax nsSeparator = make_token(NamespaceSeparatorToken);
+      NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($2);
+      NamespaceUseDeclarationSyntax useDecl = make_stmt(NamespaceUseDeclaration, nsSeparator, unprefixedUseDecl);
+      $$ = useDecl.getRaw();
    }
 ;
 
@@ -1226,7 +1231,12 @@ class_const_decl:
 
 const_decl:
    T_IDENTIFIER_STRING T_EQUAL expr backup_doc_comment {
-
+      TokenSyntax identifierToken = make_token_with_text(IdentifierString, $1);
+      TokenSyntax equalToken = make_token(EqualToken);
+      ExprSyntax expr = make<ExprSyntax>($3);
+      InitializerClauseSyntax initializer = make_decl(InitializerClause, equalToken, expr);
+      ConstDeclareItemSyntax constDecl = make_stmt(ConstDeclareItem, identifierToken, initializer);
+      $$ = constDecl.getRaw();
    }
 ;
 
