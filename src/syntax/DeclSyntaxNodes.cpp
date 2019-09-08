@@ -172,9 +172,19 @@ void NamespaceNameSyntax::validate()
       return;
    }
    assert(raw->getLayout().getSize() == NamespaceNameSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, ParentNs, std::set{SyntaxKind::NamespaceName});
    syntax_assert_child_token(raw, NsSeparator, std::set{TokenKindType::T_NS_SEPARATOR});
-   syntax_assert_child_token(raw, NsSeparator, std::set{TokenKindType::T_IDENTIFIER_STRING});
+   syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
 #endif
+}
+
+std::optional<NamespaceNameSyntax> NamespaceNameSyntax::getParentNs()
+{
+   RefCountPtr<SyntaxData> parentNsData = m_data->getChild(Cursor::ParentNs);
+   if (!parentNsData) {
+      return std::nullopt;
+   }
+   return NamespaceNameSyntax{m_root, parentNsData.get()};
 }
 
 std::optional<TokenSyntax> NamespaceNameSyntax::getNsSeparator()
@@ -189,6 +199,17 @@ std::optional<TokenSyntax> NamespaceNameSyntax::getNsSeparator()
 TokenSyntax NamespaceNameSyntax::getName()
 {
    return TokenSyntax{m_root, m_data->getChild(Cursor::Name).get()};
+}
+
+NamespaceNameSyntax NamespaceNameSyntax::withParentNs(std::optional<NamespaceNameSyntax> parentNs)
+{
+   RefCountPtr<RawSyntax> parentNsRaw;
+   if (parentNs.has_value()) {
+      parentNsRaw = parentNs->getRaw();
+   } else {
+      parentNsRaw = nullptr;
+   }
+   return m_data->replaceChild<NamespaceNameSyntax>(parentNsRaw, Cursor::ParentNs);
 }
 
 NamespaceNameSyntax NamespaceNameSyntax::withNsSeparator(std::optional<TokenSyntax> separator)

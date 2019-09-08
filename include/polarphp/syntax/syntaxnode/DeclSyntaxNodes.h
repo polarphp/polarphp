@@ -190,10 +190,15 @@ private:
 class NamespaceNameSyntax final : public Syntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
+      /// type: NamespaceNameSyntax
+      /// optional: true
+      ///
+      ParentNs,
       ///
       /// type: TokenSyntax (T_NS_SEPARATOR)
       /// optional: true
@@ -213,8 +218,11 @@ public:
       validate();
    }
 
+   std::optional<NamespaceNameSyntax> getParentNs();
    std::optional<TokenSyntax> getNsSeparator();
    TokenSyntax getName();
+
+   NamespaceNameSyntax withParentNs(std::optional<NamespaceNameSyntax> parentNs);
    NamespaceNameSyntax withNsSeparator(std::optional<TokenSyntax> separator);
    NamespaceNameSyntax withName(std::optional<TokenSyntax> name);
 
