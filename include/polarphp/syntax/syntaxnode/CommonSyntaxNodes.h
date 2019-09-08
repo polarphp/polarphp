@@ -139,9 +139,11 @@ public:
 class ExprSyntax : public Syntax
 {
 public:
+
    ExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
-   {}
+   {
+   }
 
    static bool kindOf(SyntaxKind kind)
    {

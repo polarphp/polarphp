@@ -322,22 +322,7 @@ void TopStmtSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == TopStmtSyntax::CHILDREN_COUNT);
-   auto choices = CHILD_NODE_CHOICES.at(Cursor::Stmt);
-   do {
-      if (auto &__child = raw->getChild(Cursor::Stmt)) {
-         bool __found = false;
-         std::string errorMsg;
-         auto kind = __child->getKind();
-         if (choices.find(__child->getKind()) != choices.end()) {
-            __found = true;
-         } else {
-            errorMsg = "invalid syntax node type supplied for "
-                       ", please check";
-         }
-         assert(__found && errorMsg.c_str());
-      }
-   } while (false);
-   //   syntax_assert_child_kind(raw, Stmt, CHILD_NODE_CHOICES.at(Cursor::Stmt));
+   syntax_assert_child_kind(raw, Stmt, CHILD_NODE_CHOICES.at(Cursor::Stmt));
 #endif
 }
 

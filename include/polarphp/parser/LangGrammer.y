@@ -548,16 +548,20 @@ const_list:
 
 inner_statement_list:
    inner_statement_list inner_statement {
-
+      InnerStmtListSyntax stmtList = make<InnerStmtListSyntax>($1);
+      InnerStmtSyntax stmt = make<InnerStmtSyntax>($2);
+      stmtList.appending(stmt);
+      $$ = stmtList.getRaw();
    }
 |  %empty {
-
+      InnerStmtListSyntax innerStmtList = StmtSyntaxNodeFactory::makeBlankInnerStmtList();
+      $$ = innerStmtList.getRaw();
    }
 ;
 
 inner_statement:
    statement {
-
+      $$ = $1;
    }
 |  function_declaration_statement {
 
@@ -617,7 +621,10 @@ statement:
 
    }
 |  expr T_SEMICOLON {
-
+      ExprSyntax expr = make<ExprSyntax>($1);
+      TokenSyntax simicolon = make_token(SemiColonToken);
+      ExprStmtSyntax exprStmt = StmtSyntaxNodeFactory::makeExprStmt(expr, simicolon);
+      $$ = exprStmt.getRaw();
    }
 |  T_UNSET T_LEFT_PAREN unset_variables possible_comma T_RIGHT_PAREN T_SEMICOLON {
 
@@ -1425,7 +1432,9 @@ expr:
 
    }
 |  scalar {
-
+      Syntax scalarValue = make<Syntax>($1);
+      ScalarExprSyntax scalar = ExprSyntaxNodeFactory::makeScalarExpr(scalarValue);
+      $$ = scalar.getRaw();
    }
 |  T_BACKTICK backticks_expr T_BACKTICK {
 

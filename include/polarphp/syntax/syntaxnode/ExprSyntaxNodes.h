@@ -2775,10 +2775,6 @@ class ScalarExprSyntax final : public ExprSyntax
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 1;
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
-   static bool kindOf(SyntaxKind kind)
-   {
-      return kind == SyntaxKind::ScalarExpr;
-   }
 
    enum Cursor : SyntaxChildrenCountType
    {
@@ -2823,6 +2819,11 @@ public:
    static bool classOf(const Syntax *syntax)
    {
       return kindOf(syntax->getKind());
+   }
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ScalarExpr;
    }
 
 private:
