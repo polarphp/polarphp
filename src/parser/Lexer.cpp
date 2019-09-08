@@ -545,7 +545,7 @@ void Lexer::lexHexNumber()
     /// Skip "0x"
     char *yytext = reinterpret_cast<char *>(const_cast<unsigned char *>(m_yyText));
     char *hexStr = yytext + 2;
-    int length = m_yyLength - 2;
+    std::size_t length = m_yyLength - 2;
     std::int64_t lvalue = 0;
     while (*hexStr == '0') {
         ++hexStr;
@@ -566,7 +566,7 @@ void Lexer::lexHexNumber()
         bool needCorrectOverflow = false;
         if (m_nextToken.getKind() == TokenKindType::T_MINUS_SIGN) {
             char buff[maxWidth];
-            std::sprintf(buff, "%llx\n ", std::numeric_limits<std::int64_t>::min());
+            std::sprintf(buff, "%lx\n ", std::numeric_limits<std::int64_t>::min());
             if (StringRef(buff, maxWidth) == StringRef(hexStr, length)) {
                 needCorrectOverflow = true;
             }
@@ -607,11 +607,11 @@ void Lexer::lexLongNumber()
     } else {
         errno = 0;
         const char *numStr = yytext;
-        int numLength = m_yyLength;
+        std::size_t numLength = m_yyLength;
         int base = 10;
         if (numStr[0] == '0') {
             base = 8;
-            int numWide = m_yyLength;
+            std::size_t numWide = m_yyLength;
             while (numWide-- > 0 && *(numStr + 1) == '0') {
                 ++numStr;
                 --numLength;
@@ -626,7 +626,7 @@ void Lexer::lexLongNumber()
                 std::string minStr;
                 if (numStr[0] == '0') {
                     char buff[24];
-                    std::sprintf(buff, "-0%llo", std::numeric_limits<std::int64_t>::min());
+                    std::sprintf(buff, "-0%lo", std::numeric_limits<std::int64_t>::min());
                     minStr.append(buff, 24);
                 } else {
                     minStr = std::to_string(std::numeric_limits<std::int64_t>::min());

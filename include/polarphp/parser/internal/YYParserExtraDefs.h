@@ -18,4 +18,11 @@
 #define make_lnumber_token(value) TokenSyntaxNodeFactory::makeLNumber(value, parser->getEmptyTrivia(), parser->getEmptyTrivia())
 #define make_dnumber_token(value) TokenSyntaxNodeFactory::makeDNumber(value, parser->getEmptyTrivia(), parser->getEmptyTrivia())
 
+#define make_decl(name, ...) DeclSyntaxNodeFactory::make##name(__VA_ARGS__)
+#define make_blank_decl(name) DeclSyntaxNodeFactory::makeBlank##name()
+#define make_expr(name, ...) ExprSyntaxNodeFactory::make##name(__VA_ARGS__)
+#define make_blank_expr(name) ExprSyntaxNodeFactory::makeBlank##name()
+#define make_stmt(name, ...) StmtSyntaxNodeFactory::make##name(__VA_ARGS__)
+#define make_blank_stmt(name) StmtSyntaxNodeFactory::makeBlank##name()
+
 #endif // POLARPHP_PARSER_INTERNAL_YYPARSER_EXTRAS_DEFS_H

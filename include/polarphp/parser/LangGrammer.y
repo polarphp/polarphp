@@ -378,7 +378,7 @@ top_statement_list:
       $$ = topStmtList.getRaw();
    }
 |  %empty {
-      TopStmtListSyntax topStmtList = StmtSyntaxNodeFactory::makeBlankTopStmtList();
+      TopStmtListSyntax topStmtList = make_blank_stmt(TopStmtList);
       $$ = topStmtList.getRaw();
    }
 ;
@@ -407,7 +407,7 @@ name:
 top_statement:
    statement {
       StmtSyntax stmt = make<StmtSyntax>($1);
-      TopStmtSyntax topStmt = StmtSyntaxNodeFactory::makeTopStmt(stmt);
+      TopStmtSyntax topStmt = make_stmt(TopStmt, stmt);
       $$ = topStmt.getRaw();
    }
 |  function_declaration_statement {
@@ -423,7 +423,12 @@ top_statement:
 
    }
 |  T_HALT_COMPILER T_LEFT_PAREN T_RIGHT_PAREN T_SEMICOLON {
-
+      TokenSyntax haltCompilerToken = make_token(HaltCompilerKeyword);
+      TokenSyntax leftParenToken = make_token(LeftParenToken);
+      TokenSyntax rightParenToken = make_token(RightParenToken);
+      TokenSyntax semicolonToken = make_token(SemiColonToken);
+      HaltCompilerStmtSyntax stmt = make_stmt(HaltCompilerStmt, haltCompilerToken, leftParenToken, rightParenToken, semicolonToken);                                                                          
+      $$ = stmt.getRaw();
    }
 |  T_NAMESPACE namespace_name T_SEMICOLON {
 
@@ -554,7 +559,7 @@ inner_statement_list:
       $$ = stmtList.getRaw();
    }
 |  %empty {
-      InnerStmtListSyntax innerStmtList = StmtSyntaxNodeFactory::makeBlankInnerStmtList();
+      InnerStmtListSyntax innerStmtList = make_blank_stmt(InnerStmtList);
       $$ = innerStmtList.getRaw();
    }
 ;
@@ -623,7 +628,7 @@ statement:
 |  expr T_SEMICOLON {
       ExprSyntax expr = make<ExprSyntax>($1);
       TokenSyntax simicolon = make_token(SemiColonToken);
-      ExprStmtSyntax exprStmt = StmtSyntaxNodeFactory::makeExprStmt(expr, simicolon);
+      ExprStmtSyntax exprStmt = make_stmt(ExprStmt, expr, simicolon);
       $$ = exprStmt.getRaw();
    }
 |  T_UNSET T_LEFT_PAREN unset_variables possible_comma T_RIGHT_PAREN T_SEMICOLON {
@@ -642,7 +647,7 @@ statement:
 |  T_SEMICOLON {
       // make empty stmt
       TokenSyntax semicolon = make_token(SemiColonToken);
-      EmptyStmtSyntax emptyStmt = StmtSyntaxNodeFactory::makeEmptyStmt(semicolon);
+      EmptyStmtSyntax emptyStmt = make_stmt(EmptyStmt, semicolon);
       $$ = emptyStmt.getRaw();
    }
 |  T_TRY T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE catch_list finally_statement {
@@ -1433,7 +1438,7 @@ expr:
    }
 |  scalar {
       Syntax scalarValue = make<Syntax>($1);
-      ScalarExprSyntax scalar = ExprSyntaxNodeFactory::makeScalarExpr(scalarValue);
+      ScalarExprSyntax scalar = make_expr(ScalarExpr, scalarValue);
       $$ = scalar.getRaw();
    }
 |  T_BACKTICK backticks_expr T_BACKTICK {
