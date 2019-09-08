@@ -3439,9 +3439,9 @@ void NamespaceUnprefixedUseDeclarationSyntax::validate()
 #endif
 }
 
-NamespacePartListSyntax NamespaceUnprefixedUseDeclarationSyntax::getNamespace()
+NamespaceNameSyntax NamespaceUnprefixedUseDeclarationSyntax::getNamespace()
 {
-   return NamespacePartListSyntax{m_root, m_data->getChild(Cursor::Namespace).get()};
+   return NamespaceNameSyntax{m_root, m_data->getChild(Cursor::Namespace).get()};
 }
 
 std::optional<TokenSyntax> NamespaceUnprefixedUseDeclarationSyntax::getAsToken()
@@ -3463,20 +3463,7 @@ std::optional<TokenSyntax> NamespaceUnprefixedUseDeclarationSyntax::getIdentifie
 }
 
 NamespaceUnprefixedUseDeclarationSyntax
-NamespaceUnprefixedUseDeclarationSyntax::addNamespacePart(NamespaceNameSyntax namespacePart)
-{
-   RefCountPtr<RawSyntax> namespacesRaw = getRaw()->getChild(Cursor::Namespace);
-   if (namespacesRaw) {
-      namespacesRaw = namespacesRaw->append(namespacePart.getRaw());
-   } else {
-      namespacesRaw = RawSyntax::make(SyntaxKind::NamespaceName, {namespacePart.getRaw()},
-                                      SourcePresence::Present);
-   }
-   return m_data->replaceChild<NamespaceUnprefixedUseDeclarationSyntax>(namespacesRaw, Cursor::Namespace);
-}
-
-NamespaceUnprefixedUseDeclarationSyntax
-NamespaceUnprefixedUseDeclarationSyntax::withNamespace(std::optional<NamespacePartListSyntax> ns)
+NamespaceUnprefixedUseDeclarationSyntax::withNamespace(std::optional<NamespaceNameSyntax> ns)
 {
    RefCountPtr<RawSyntax> nsRaw;
    if (ns.has_value()) {
@@ -3661,9 +3648,9 @@ std::optional<TokenSyntax> NamespaceGroupUseDeclarationSyntax::getFirstNsSeparat
    return TokenSyntax{m_root, separatorData.get()};
 }
 
-NamespacePartListSyntax NamespaceGroupUseDeclarationSyntax::getNamespace()
+NamespaceNameSyntax NamespaceGroupUseDeclarationSyntax::getNamespace()
 {
-   return NamespacePartListSyntax{m_root, m_data->getChild(Cursor::Namespace).get()};
+   return NamespaceNameSyntax{m_root, m_data->getChild(Cursor::Namespace).get()};
 }
 
 TokenSyntax NamespaceGroupUseDeclarationSyntax::getSecondNsSeparator()
@@ -3709,7 +3696,7 @@ NamespaceGroupUseDeclarationSyntax::withFirstNsSeparator(std::optional<TokenSynt
 }
 
 NamespaceGroupUseDeclarationSyntax
-NamespaceGroupUseDeclarationSyntax::withNamespace(std::optional<NamespacePartListSyntax> ns)
+NamespaceGroupUseDeclarationSyntax::withNamespace(std::optional<NamespaceNameSyntax> ns)
 {
    RefCountPtr<RawSyntax> nsRaw;
    if (ns.has_value()) {
@@ -3828,9 +3815,9 @@ std::optional<TokenSyntax> NamespaceMixedGroupUseDeclarationSyntax::getFirstNsSe
    return TokenSyntax{m_root, separatorData.get()};
 }
 
-NamespacePartListSyntax NamespaceMixedGroupUseDeclarationSyntax::getNamespace()
+NamespaceNameSyntax NamespaceMixedGroupUseDeclarationSyntax::getNamespace()
 {
-   return NamespacePartListSyntax{m_root, m_data->getChild(Cursor::Namespace).get()};
+   return NamespaceNameSyntax{m_root, m_data->getChild(Cursor::Namespace).get()};
 }
 
 TokenSyntax NamespaceMixedGroupUseDeclarationSyntax::getSecondNsSeparator()
@@ -3876,7 +3863,7 @@ NamespaceMixedGroupUseDeclarationSyntax::withFirstNsSeparator(std::optional<Toke
 }
 
 NamespaceMixedGroupUseDeclarationSyntax
-NamespaceMixedGroupUseDeclarationSyntax::withNamespace(std::optional<NamespacePartListSyntax> ns)
+NamespaceMixedGroupUseDeclarationSyntax::withNamespace(std::optional<NamespaceNameSyntax> ns)
 {
    RefCountPtr<RawSyntax> nsRaw;
    if (ns.has_value()) {
@@ -4081,9 +4068,9 @@ TokenSyntax NamespaceDefinitionStmtSyntax::getNamespaceToken()
    return TokenSyntax{m_root, m_data->getChild(Cursor::NamespaceToken).get()};
 }
 
-NamespacePartListSyntax NamespaceDefinitionStmtSyntax::getNamespaceName()
+NamespaceNameSyntax NamespaceDefinitionStmtSyntax::getNamespaceName()
 {
-   return NamespacePartListSyntax{m_root, m_data->getChild(Cursor::NamespaceName).get()};
+   return NamespaceNameSyntax{m_root, m_data->getChild(Cursor::NamespaceName).get()};
 }
 
 TokenSyntax NamespaceDefinitionStmtSyntax::getSemicolonToken()
@@ -4104,7 +4091,7 @@ NamespaceDefinitionStmtSyntax::withNamespaceToken(std::optional<TokenSyntax> nam
 }
 
 NamespaceDefinitionStmtSyntax
-NamespaceDefinitionStmtSyntax::withNamespaceName(std::optional<NamespacePartListSyntax> name)
+NamespaceDefinitionStmtSyntax::withNamespaceName(std::optional<NamespaceNameSyntax> name)
 {
    RefCountPtr<RawSyntax> rawName;
    if (name.has_value()) {
@@ -4149,13 +4136,13 @@ TokenSyntax NamespaceBlockStmtSyntax::getNamespaceToken()
    return TokenSyntax{m_root, m_data->getChild(Cursor::NamespaceToken).get()};
 }
 
-std::optional<NamespacePartListSyntax> NamespaceBlockStmtSyntax::getNamespaceName()
+std::optional<NamespaceNameSyntax> NamespaceBlockStmtSyntax::getNamespaceName()
 {
    RefCountPtr<SyntaxData> nsNameData = m_data->getChild(Cursor::NamespaceName);
    if (!nsNameData) {
       return std::nullopt;
    }
-   return NamespacePartListSyntax{m_root, nsNameData.get()};
+   return NamespaceNameSyntax{m_root, nsNameData.get()};
 }
 
 TopCodeBlockStmtSyntax
@@ -4177,7 +4164,7 @@ NamespaceBlockStmtSyntax::withNamespaceToken(std::optional<TokenSyntax> namespac
 }
 
 NamespaceBlockStmtSyntax
-NamespaceBlockStmtSyntax::withNamespaceName(std::optional<NamespacePartListSyntax> name)
+NamespaceBlockStmtSyntax::withNamespaceName(std::optional<NamespaceNameSyntax> name)
 {
    RefCountPtr<RawSyntax> rawName;
    if (name.has_value()) {

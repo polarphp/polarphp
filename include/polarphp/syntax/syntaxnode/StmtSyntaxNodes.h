@@ -2667,12 +2667,12 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: NamespacePartListSyntax
+      /// type: NamespaceNameSyntax
       /// optional: false
       ///
       Namespace,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_AS)
       /// optional: true
       ///
       AsToken,
@@ -2690,11 +2690,11 @@ public:
       validate();
    }
 
-   NamespacePartListSyntax getNamespace();
+   NamespaceNameSyntax getNamespace();
    std::optional<TokenSyntax> getAsToken();
    std::optional<TokenSyntax> getIdentifierToken();
-   NamespaceUnprefixedUseDeclarationSyntax addNamespacePart(NamespaceNameSyntax namespacePart);
-   NamespaceUnprefixedUseDeclarationSyntax withNamespace(std::optional<NamespacePartListSyntax> ns);
+
+   NamespaceUnprefixedUseDeclarationSyntax withNamespace(std::optional<NamespaceNameSyntax> ns);
    NamespaceUnprefixedUseDeclarationSyntax withAsToken(std::optional<TokenSyntax> asToken);
    NamespaceUnprefixedUseDeclarationSyntax withIdentifierToken(std::optional<TokenSyntax> identifierToken);
 
@@ -2870,7 +2870,7 @@ public:
    }
 
    std::optional<TokenSyntax> getFirstNsSeparator();
-   NamespacePartListSyntax getNamespace();
+   NamespaceNameSyntax getNamespace();
    TokenSyntax getSecondNsSeparator();
    TokenSyntax getLeftBrace();
    NamespaceUnprefixedUseDeclarationListSyntax getUnprefixedUseDeclarations();
@@ -2878,7 +2878,7 @@ public:
    TokenSyntax getRightBrace();
 
    NamespaceGroupUseDeclarationSyntax withFirstNsSeparator(std::optional<TokenSyntax> separator);
-   NamespaceGroupUseDeclarationSyntax withNamespace(std::optional<NamespacePartListSyntax> ns);
+   NamespaceGroupUseDeclarationSyntax withNamespace(std::optional<NamespaceNameSyntax> ns);
    NamespaceGroupUseDeclarationSyntax withSecondNsSeparator(std::optional<TokenSyntax> separator);
    NamespaceGroupUseDeclarationSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
    NamespaceGroupUseDeclarationSyntax withUnprefixedUseDeclarations(std::optional<NamespaceUnprefixedUseDeclarationListSyntax> declarations);
@@ -2952,7 +2952,7 @@ public:
    }
 
    std::optional<TokenSyntax> getFirstNsSeparator();
-   NamespacePartListSyntax getNamespace();
+   NamespaceNameSyntax getNamespace();
    TokenSyntax getSecondNsSeparator();
    TokenSyntax getLeftBrace();
    NamespaceInlineUseDeclarationListSyntax getInlineUseDeclarations();
@@ -2960,7 +2960,7 @@ public:
    TokenSyntax getRightBrace();
 
    NamespaceMixedGroupUseDeclarationSyntax withFirstNsSeparator(std::optional<TokenSyntax> separator);
-   NamespaceMixedGroupUseDeclarationSyntax withNamespace(std::optional<NamespacePartListSyntax> ns);
+   NamespaceMixedGroupUseDeclarationSyntax withNamespace(std::optional<NamespaceNameSyntax> ns);
    NamespaceMixedGroupUseDeclarationSyntax withSecondNsSeparator(std::optional<TokenSyntax> separator);
    NamespaceMixedGroupUseDeclarationSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
    NamespaceMixedGroupUseDeclarationSyntax withInlineUseDeclarations(std::optional<NamespaceInlineUseDeclarationListSyntax> declarations);
@@ -3093,11 +3093,11 @@ public:
    }
 
    TokenSyntax getNamespaceToken();
-   NamespacePartListSyntax getNamespaceName();
+   NamespaceNameSyntax getNamespaceName();
    TokenSyntax getSemicolonToken();
 
    NamespaceDefinitionStmtSyntax withNamespaceToken(std::optional<TokenSyntax> namespaceToken);
-   NamespaceDefinitionStmtSyntax withNamespaceName(std::optional<NamespacePartListSyntax> name);
+   NamespaceDefinitionStmtSyntax withNamespaceName(std::optional<NamespaceNameSyntax> name);
    NamespaceDefinitionStmtSyntax withSemicolonToken(std::optional<TokenSyntax> semicolon);
 
    static bool kindOf(SyntaxKind kind)
@@ -3132,7 +3132,7 @@ public:
       ///
       NamespaceToken,
       ///
-      /// type: NamespacePartListSyntax
+      /// type: NamespaceNameSyntax
       /// optional: true
       ///
       NamespaceName,
@@ -3151,11 +3151,11 @@ public:
    }
 
    TokenSyntax getNamespaceToken();
-   std::optional<NamespacePartListSyntax> getNamespaceName();
+   std::optional<NamespaceNameSyntax> getNamespaceName();
    TopCodeBlockStmtSyntax getCodeBlock();
 
    NamespaceBlockStmtSyntax withNamespaceToken(std::optional<TokenSyntax> namespaceToken);
-   NamespaceBlockStmtSyntax withNamespaceName(std::optional<NamespacePartListSyntax> name);
+   NamespaceBlockStmtSyntax withNamespaceName(std::optional<NamespaceNameSyntax> name);
    NamespaceBlockStmtSyntax withCodeBlock(std::optional<TopCodeBlockStmtSyntax> codeBlock);
 
    static bool kindOf(SyntaxKind kind)

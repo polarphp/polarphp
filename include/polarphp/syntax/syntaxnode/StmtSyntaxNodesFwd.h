@@ -95,7 +95,6 @@ class TraitDefinitionSyntax;
 class FunctionDefinitionSyntax;
 class NameSyntax;
 class NamespaceNameSyntax;
-using NamespacePartListSyntax = SyntaxCollection<SyntaxKind::NamespaceName, NamespaceNameSyntax>;
 
 ///
 /// type: SyntaxCollection

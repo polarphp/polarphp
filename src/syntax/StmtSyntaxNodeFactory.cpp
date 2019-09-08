@@ -801,7 +801,7 @@ StmtSyntaxNodeFactory::makeNamespaceUseType(TokenSyntax typeToken, RefCountPtr<S
 
 NamespaceUnprefixedUseDeclarationSyntax
 StmtSyntaxNodeFactory::makeNamespaceUnprefixedUseDeclaration(
-      NamespacePartListSyntax ns, std::optional<TokenSyntax> asToken,
+      NamespaceNameSyntax ns, std::optional<TokenSyntax> asToken,
       std::optional<TokenSyntax> identifierToken, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -841,7 +841,7 @@ StmtSyntaxNodeFactory::makeNamespaceInlineUseDeclaration(
 
 NamespaceGroupUseDeclarationSyntax
 StmtSyntaxNodeFactory::makeNamespaceGroupUseDeclaration(
-      std::optional<TokenSyntax> firstNsSeparator, NamespacePartListSyntax ns,
+      std::optional<TokenSyntax> firstNsSeparator, NamespaceNameSyntax ns,
       TokenSyntax secondNsSeparator, TokenSyntax leftBrace,
       NamespaceUnprefixedUseDeclarationListSyntax unprefixedUseDeclarations, std::optional<TokenSyntax> commaToken,
       TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena)
@@ -861,7 +861,7 @@ StmtSyntaxNodeFactory::makeNamespaceGroupUseDeclaration(
 
 NamespaceMixedGroupUseDeclarationSyntax
 StmtSyntaxNodeFactory::makeNamespaceMixedGroupUseDeclaration(
-      std::optional<TokenSyntax> firstNsSeparator, NamespacePartListSyntax ns,
+      std::optional<TokenSyntax> firstNsSeparator, NamespaceNameSyntax ns,
       TokenSyntax secondNsSeparator, TokenSyntax leftBrace,
       NamespaceInlineUseDeclarationListSyntax inlineUseDeclarations, std::optional<TokenSyntax> commaToken,
       TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena)

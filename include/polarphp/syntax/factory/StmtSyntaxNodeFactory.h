@@ -149,7 +149,7 @@ public:
                                                                                   TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUseTypeSyntax makeNamespaceUseType(TokenSyntax typeToken, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUnprefixedUseDeclarationSyntax makeNamespaceUnprefixedUseDeclaration(
-         NamespacePartListSyntax ns, std::optional<TokenSyntax> asToken,
+         NamespaceNameSyntax ns, std::optional<TokenSyntax> asToken,
          std::optional<TokenSyntax> identifierToken, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUseDeclarationSyntax makeNamespaceUseDeclaration(
          std::optional<TokenSyntax> nsSeparator, NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDeclaration,
@@ -158,12 +158,12 @@ public:
          std::optional<NamespaceUseTypeSyntax> useType, NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDeclaration,
          RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceGroupUseDeclarationSyntax makeNamespaceGroupUseDeclaration(
-         std::optional<TokenSyntax> firstNsSeparator, NamespacePartListSyntax ns,
+         std::optional<TokenSyntax> firstNsSeparator, NamespaceNameSyntax ns,
          TokenSyntax secondNsSeparator, TokenSyntax leftBrace,
          NamespaceUnprefixedUseDeclarationListSyntax unprefixedUseDeclarations, std::optional<TokenSyntax> commaToken,
          TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceMixedGroupUseDeclarationSyntax makeNamespaceMixedGroupUseDeclaration(
-         std::optional<TokenSyntax> firstNsSeparator, NamespacePartListSyntax ns,
+         std::optional<TokenSyntax> firstNsSeparator, NamespaceNameSyntax ns,
          TokenSyntax secondNsSeparator, TokenSyntax leftBrace,
          NamespaceInlineUseDeclarationListSyntax inlineUseDeclarations, std::optional<TokenSyntax> commaToken,
          TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);

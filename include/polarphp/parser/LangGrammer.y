@@ -331,9 +331,9 @@ using namespace polar::syntax;
 %type <RefCountPtr<RawSyntax>> identifier
 %type <RefCountPtr<RawSyntax>> inline_function
 
-%type <std::uint64_t> returns_ref function fn is_reference is_variadic variable_modifiers
-%type <std::uint64_t> method_modifiers non_empty_member_modifiers member_modifier
-%type <std::uint64_t> class_modifiers class_modifier use_type backup_fn_flags
+%type <RefCountPtr<RawSyntax>> returns_ref function fn is_reference is_variadic variable_modifiers
+%type <RefCountPtr<RawSyntax>> method_modifiers non_empty_member_modifiers member_modifier
+%type <RefCountPtr<RawSyntax>> class_modifiers class_modifier use_type backup_fn_flags
 
 %type <unsigned char *> backup_lex_pos
 %type <std::string> backup_doc_comment
@@ -499,10 +499,14 @@ top_statement:
 
 use_type:
    T_FUNCTION {
-
+      TokenSyntax funcKeyword = make_token(FunctionKeyword);
+      NamespaceUseTypeSyntax useType = make_stmt(NamespaceUseType, funcKeyword);
+      $$ = useType.getRaw();
    }
 |  T_CONST {
-
+      TokenSyntax constKeyword = make_token(ConstKeyword);
+      NamespaceUseTypeSyntax useType = make_stmt(NamespaceUseType, constKeyword);
+      $$ = useType.getRaw();
    }
 ;
 
@@ -566,10 +570,16 @@ inline_use_declaration:
 
 unprefixed_use_declaration:
    namespace_name {
-
+      NamespaceNameSyntax ns = make<NamespaceNameSyntax>($1);
+      NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make_stmt(NamespaceUnprefixedUseDeclaration, ns, std::nullopt, std::nullopt);
+      $$ = unprefixedUseDecl.getRaw();
    }
 |  namespace_name T_AS T_IDENTIFIER_STRING {
-
+      NamespaceNameSyntax ns = make<NamespaceNameSyntax>($1);
+      TokenSyntax asToken = make_token(AsKeyword);
+      TokenSyntax identifierStr = make_token_with_text(IdentifierString, $3);
+      NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make_stmt(NamespaceUnprefixedUseDeclaration, ns, asToken, identifierStr);
+      $$ = unprefixedUseDecl.getRaw();
    }
 ;
 
