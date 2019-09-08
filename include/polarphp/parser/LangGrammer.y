@@ -447,19 +447,38 @@ top_statement:
       TokenSyntax haltCompilerToken = make_token(HaltCompilerKeyword);
       TokenSyntax leftParenToken = make_token(LeftParenToken);
       TokenSyntax rightParenToken = make_token(RightParenToken);
-      TokenSyntax semicolonToken = make_token(SemiColonToken);
-      HaltCompilerStmtSyntax stmt = make_stmt(HaltCompilerStmt, haltCompilerToken, leftParenToken, rightParenToken, semicolonToken);                                                                          
+      TokenSyntax SemicolonToken = make_token(SemicolonToken);
+      HaltCompilerStmtSyntax stmt = make_stmt(HaltCompilerStmt, haltCompilerToken, leftParenToken, rightParenToken, SemicolonToken);
       $$ = stmt.getRaw();
    }
 |  T_NAMESPACE namespace_name T_SEMICOLON {
-
+      TokenSyntax namespaceKeyword = make_token(NamespaceKeyword);
+      NamespaceNameSyntax namespaceName = make<NamespaceNameSyntax>($2);
+      TokenSyntax SemicolonToken = make_token(SemicolonToken);
+      NamespaceDefinitionStmtSyntax namespaceStmt = make_stmt(NamespaceDefinitionStmt, namespaceKeyword, namespaceName, SemicolonToken);
+      $$ = namespaceStmt.getRaw();
+      RESET_DOC_COMMENT();
    }
-|  T_NAMESPACE namespace_name {}
+|  T_NAMESPACE namespace_name { RESET_DOC_COMMENT(); }
    T_LEFT_BRACE top_statement_list T_RIGHT_BRACE {
-
+      TokenSyntax namespaceKeyword = make_token(NamespaceKeyword);
+      NamespaceNameSyntax namespaceName = make<NamespaceNameSyntax>($2);
+      TokenSyntax leftParenToken = make_token(LeftParenToken);
+      TopStmtListSyntax topStmtList = make<TopStmtListSyntax>($5);
+      TokenSyntax rightParenToken = make_token(RightParenToken);
+      TopCodeBlockStmtSyntax codeblock = make_stmt(TopCodeBlockStmt, leftParenToken, topStmtList, rightParenToken);
+      NamespaceBlockStmtSyntax namespaceBlockStmt = make_stmt(NamespaceBlockStmt, namespaceKeyword, namespaceName, codeblock);
+      $$ = namespaceBlockStmt.getRaw();
    }
-|  T_NAMESPACE {}
+|  T_NAMESPACE { RESET_DOC_COMMENT(); }
    T_LEFT_BRACE top_statement_list T_RIGHT_BRACE {
+      TokenSyntax namespaceKeyword = make_token(NamespaceKeyword);
+      TokenSyntax leftParenToken = make_token(LeftParenToken);
+      TopStmtListSyntax topStmtList = make<TopStmtListSyntax>($4);
+      TokenSyntax rightParenToken = make_token(RightParenToken);
+      TopCodeBlockStmtSyntax codeblock = make_stmt(TopCodeBlockStmt, leftParenToken, topStmtList, rightParenToken);
+      NamespaceBlockStmtSyntax namespaceBlockStmt = make_stmt(NamespaceBlockStmt, namespaceKeyword, std::nullopt, codeblock);
+      $$ = namespaceBlockStmt.getRaw();
    }
 |  T_USE mixed_group_use_declaration T_SEMICOLON {
 
@@ -648,7 +667,7 @@ statement:
    }
 |  expr T_SEMICOLON {
       ExprSyntax expr = make<ExprSyntax>($1);
-      TokenSyntax simicolon = make_token(SemiColonToken);
+      TokenSyntax simicolon = make_token(SemicolonToken);
       ExprStmtSyntax exprStmt = make_stmt(ExprStmt, expr, simicolon);
       $$ = exprStmt.getRaw();
    }
@@ -667,7 +686,7 @@ statement:
    }
 |  T_SEMICOLON {
       // make empty stmt
-      TokenSyntax semicolon = make_token(SemiColonToken);
+      TokenSyntax semicolon = make_token(SemicolonToken);
       EmptyStmtSyntax emptyStmt = make_stmt(EmptyStmt, semicolon);
       $$ = emptyStmt.getRaw();
    }

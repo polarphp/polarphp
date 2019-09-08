@@ -891,7 +891,7 @@ TokenSyntax TokenSyntaxNodeFactory::makeColonToken(const Trivia &leadingTrivia, 
    return make_token_by_kind(T_COLON);
 }
 
-TokenSyntax TokenSyntaxNodeFactory::makeSemiColonToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
+TokenSyntax TokenSyntaxNodeFactory::makeSemicolonToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                        RefCountPtr<SyntaxArena> arena)
 {
    return make_token_by_kind(T_SEMICOLON);

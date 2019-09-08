@@ -895,7 +895,7 @@ StmtSyntaxNodeFactory::makeNamespaceUseStmt(TokenSyntax useToken, std::optional<
 
 NamespaceDefinitionStmtSyntax
 StmtSyntaxNodeFactory::makeNamespaceDefinitionStmt(
-      TokenSyntax nsToken, NamespacePartListSyntax ns,
+      TokenSyntax nsToken, NamespaceNameSyntax ns,
       TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -908,7 +908,7 @@ StmtSyntaxNodeFactory::makeNamespaceDefinitionStmt(
 }
 
 NamespaceBlockStmtSyntax
-StmtSyntaxNodeFactory::makeNamespaceBlockStmt(TokenSyntax nsToken, std::optional<NamespacePartListSyntax> ns,
+StmtSyntaxNodeFactory::makeNamespaceBlockStmt(TokenSyntax nsToken, std::optional<NamespaceNameSyntax> ns,
                                               TopCodeBlockStmtSyntax codeBlock, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(

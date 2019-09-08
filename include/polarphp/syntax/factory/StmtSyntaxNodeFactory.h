@@ -170,9 +170,9 @@ public:
    static NamespaceUseStmtSyntax makeNamespaceUseStmt(TokenSyntax useToken, std::optional<NamespaceUseTypeSyntax> useType,
                                                       Syntax declarations, TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceDefinitionStmtSyntax makeNamespaceDefinitionStmt(
-         TokenSyntax nsToken, NamespacePartListSyntax ns,
+         TokenSyntax nsToken, NamespaceNameSyntax ns,
          TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
-   static NamespaceBlockStmtSyntax makeNamespaceBlockStmt(TokenSyntax nsToken, std::optional<NamespacePartListSyntax> ns,
+   static NamespaceBlockStmtSyntax makeNamespaceBlockStmt(TokenSyntax nsToken, std::optional<NamespaceNameSyntax> ns,
                                                           TopCodeBlockStmtSyntax codeBlock, RefCountPtr<SyntaxArena> arena = nullptr);
    static ConstDeclareItemSyntax makeConstDeclareItem(TokenSyntax name, InitializerClauseSyntax initializerClause,
                                                       RefCountPtr<SyntaxArena> arena = nullptr);
