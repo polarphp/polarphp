@@ -46,7 +46,8 @@ public:
    static ReservedNonModifierSyntax makeReservedNonModifier(TokenSyntax modifier, RefCountPtr<SyntaxArena> arena = nullptr);
    static SemiReservedSytnax makeSemiReserved(Syntax modifier, RefCountPtr<SyntaxArena> arena = nullptr);
    static IdentifierSyntax makeIdentifier(Syntax name, RefCountPtr<SyntaxArena> arena = nullptr);
-   static NamespaceNameSyntax makeNamespaceName(std::optional<TokenSyntax> separator, TokenSyntax name, RefCountPtr<SyntaxArena> arena = nullptr);
+   static NamespaceNameSyntax makeNamespaceName(std::optional<NamespaceNameSyntax> namespaceNs, std::optional<TokenSyntax> separator,
+                                                TokenSyntax name, RefCountPtr<SyntaxArena> arena = nullptr);
    static NameSyntax makeName(std::optional<TokenSyntax> nsToken, std::optional<TokenSyntax> separator,
                               NamespaceNameSyntax namespaceName, RefCountPtr<SyntaxArena> arena = nullptr);
    static InitializerClauseSyntax makeInitializerClause(TokenSyntax equalToken, ExprSyntax valueExpr, RefCountPtr<SyntaxArena> arena = nullptr);

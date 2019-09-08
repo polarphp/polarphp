@@ -137,9 +137,11 @@ DeclSyntaxNodeFactory::makeIdentifier(Syntax name, RefCountPtr<SyntaxArena> aren
 }
 
 NamespaceNameSyntax
-DeclSyntaxNodeFactory::makeNamespaceName(std::optional<TokenSyntax> separator, TokenSyntax name, RefCountPtr<SyntaxArena> arena)
+DeclSyntaxNodeFactory::makeNamespaceName(std::optional<NamespaceNameSyntax> namespaceNs, std::optional<TokenSyntax> separator,
+                                         TokenSyntax name, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::NamespaceName, {
+                                                      namespaceNs.has_value() ? namespaceNs->getRaw() : nullptr,
                                                       separator.has_value() ? separator->getRaw() : nullptr,
                                                       name.getRaw()
                                                    }, SourcePresence::Present, arena);

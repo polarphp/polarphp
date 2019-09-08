@@ -392,11 +392,15 @@ top_statement_list:
 namespace_name:
    T_IDENTIFIER_STRING {
       TokenSyntax identifierToken = make_token_with_text(IdentifierString, $1);
-      IdentifierSyntax identifier = make_decl(Identifier, identifierToken);
-      $$ = identifier.getRaw();
+      NamespaceNameSyntax namespaceName = make_decl(NamespaceName, std::nullopt, std::nullopt, identifierToken);
+      $$ = namespaceName.getRaw();
    }
 |  namespace_name T_NS_SEPARATOR T_IDENTIFIER_STRING {
-
+      NamespaceNameSyntax parentNs = make<NamespaceNameSyntax>($1);
+      TokenSyntax separator = make_token(NamespaceSeparatorToken);
+      TokenSyntax identifierToken = make_token_with_text(IdentifierString, $3);
+      NamespaceNameSyntax newNs = make_decl(NamespaceName, parentNs, separator, identifierToken);
+      $$ = newNs.getRaw();
    }
 ;
 
