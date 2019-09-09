@@ -738,8 +738,18 @@ StmtSyntaxNodeFactory::makeHaltCompilerStmt(TokenSyntax haltCompilerToken, Token
    return make<HaltCompilerStmtSyntax>(target);
 }
 
+GlobalVariableSyntax
+StmtSyntaxNodeFactory::makeGlobalVariable(SimpleVariableExprSyntax variable, RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::GlobalVariable, {
+               variable.getRaw(),
+            }, SourcePresence::Present, arena);
+   return make<GlobalVariableSyntax>(target);
+}
+
 GlobalVariableListItemSyntax
-StmtSyntaxNodeFactory::makeGlobalVariableListItem(std::optional<TokenSyntax> comma, SimpleVariableExprSyntax variable,
+StmtSyntaxNodeFactory::makeGlobalVariableListItem(std::optional<TokenSyntax> comma, GlobalVariableSyntax variable,
                                                   RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -1626,13 +1636,23 @@ StmtSyntaxNodeFactory::makeBlankHaltCompilerStmt(RefCountPtr<SyntaxArena> arena)
    return make<HaltCompilerStmtSyntax>(target);
 }
 
+GlobalVariableSyntax
+StmtSyntaxNodeFactory::makeBlankGlobalVariable(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::GlobalVariable, {
+               RawSyntax::missing(SyntaxKind::SimpleVariableExpr) // Variable
+            }, SourcePresence::Present, arena);
+   return make<GlobalVariableSyntax>(target);
+}
+
 GlobalVariableListItemSyntax
 StmtSyntaxNodeFactory::makeBlankGlobalVariableListItem(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::GlobalVariableListItem, {
                nullptr, // Comma
-               RawSyntax::missing(SyntaxKind::SimpleVariableExpr) // Variable
+               RawSyntax::missing(SyntaxKind::GlobalVariable) // Variable
             }, SourcePresence::Present, arena);
    return make<GlobalVariableListItemSyntax>(target);
 }

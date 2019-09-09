@@ -2379,6 +2379,48 @@ private:
 
 ///
 /// global_var:
+///   simple_variable
+///
+class GlobalVariableSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: SimpleVariableExprSyntax
+      /// optional: false
+      ///
+      Variable
+   };
+public:
+   GlobalVariableSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   SimpleVariableExprSyntax getVariable();
+   GlobalVariableSyntax withVariable(std::optional<TokenSyntax> variable);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::GlobalVariable;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class GlobalVariableSyntaxBuilder;
+   void validate();
+};
+
+///
+/// global_var:
 ///   simple_variable ','
 ///
 class GlobalVariableListItemSyntax final : public Syntax
@@ -2394,7 +2436,7 @@ public:
       ///
       Comma,
       ///
-      /// type: SimpleVariableExprSyntax
+      /// type: GlobalVariableSyntax
       /// optional: false
       ///
       Variable
@@ -2408,10 +2450,10 @@ public:
    }
 
    std::optional<TokenSyntax> getComma();
-   SimpleVariableExprSyntax getVariable();
+   GlobalVariableSyntax getVariable();
 
    GlobalVariableListItemSyntax withComma(std::optional<TokenSyntax> comma);
-   GlobalVariableListItemSyntax withVariable(std::optional<TokenSyntax> variable);
+   GlobalVariableListItemSyntax withVariable(std::optional<GlobalVariableSyntax> variable);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -2546,7 +2588,7 @@ private:
 /// static_variable_list_item:
 ///   ',' static_var
 ///
-class StaticVariableListItemSyntax : public Syntax
+class StaticVariableListItemSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -2769,7 +2811,7 @@ private:
 /// namespace_unprefixed_use_declaration_list_item:
 /// ',' unprefixed_use_declaration
 ///
-class NamespaceUnprefixedUseDeclarationListItemSyntax : public Syntax
+class NamespaceUnprefixedUseDeclarationListItemSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -2870,7 +2912,7 @@ private:
 /// namespace_use_declaration_list_item:
 ///   ',' use_declaration
 ///
-class NamespaceUseDeclarationListItemSyntax : public Syntax
+class NamespaceUseDeclarationListItemSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -2972,7 +3014,7 @@ private:
 /// namespace_inline_use_declaration_list_item:
 /// ',' inline_use_declaration
 ///
-class NamespaceInlineUseDeclarationListItemSyntax : public Syntax
+class NamespaceInlineUseDeclarationListItemSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -3437,7 +3479,7 @@ private:
 /// const_list_item:
 ///   ',' const_decl
 ///
-class ConstListItemSyntax : public Syntax
+class ConstListItemSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;

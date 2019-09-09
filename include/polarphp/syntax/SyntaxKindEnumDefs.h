@@ -225,6 +225,7 @@ enum class SyntaxKind : std::uint32_t
    ReturnStmt,
    EchoStmt,
    HaltCompilerStmt,
+   GlobalVariable,
    GlobalVariableListItem,
    GlobalVariableDeclarationsStmt,
    StaticVariableDeclare,

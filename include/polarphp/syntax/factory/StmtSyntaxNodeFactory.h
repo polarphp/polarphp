@@ -139,7 +139,9 @@ public:
                                       TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
    static HaltCompilerStmtSyntax makeHaltCompilerStmt(TokenSyntax haltCompilerToken, TokenSyntax leftParen,
                                                       TokenSyntax rightParen, TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
-   static GlobalVariableListItemSyntax makeGlobalVariableListItem(std::optional<TokenSyntax> comma, SimpleVariableExprSyntax variable,
+   static GlobalVariableSyntax makeGlobalVariable(SimpleVariableExprSyntax variable,
+                                                  RefCountPtr<SyntaxArena> arena = nullptr);
+   static GlobalVariableListItemSyntax makeGlobalVariableListItem(std::optional<TokenSyntax> comma, GlobalVariableSyntax variable,
                                                                   RefCountPtr<SyntaxArena> arena = nullptr);
    static GlobalVariableDeclarationsStmtSyntax makeGlobalVariableDeclarationsStmt(TokenSyntax globalToken, GlobalVariableListSyntax variables,
                                                                                   TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
@@ -251,6 +253,7 @@ public:
    static ReturnStmtSyntax makeBlankReturnStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static EchoStmtSyntax makeBlankEchoStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static HaltCompilerStmtSyntax makeBlankHaltCompilerStmt(RefCountPtr<SyntaxArena> arena = nullptr);
+   static GlobalVariableSyntax makeBlankGlobalVariable(RefCountPtr<SyntaxArena> arena = nullptr);
    static GlobalVariableListItemSyntax makeBlankGlobalVariableListItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static GlobalVariableDeclarationsStmtSyntax makeBlankGlobalVariableDeclarationsStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static StaticVariableDeclareSyntax makeBlankStaticVariableDeclare(RefCountPtr<SyntaxArena> arena = nullptr);

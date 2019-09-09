@@ -53,6 +53,7 @@ class CatchListItemClauseSyntax;
 class ReturnStmtSyntax;
 class EchoStmtSyntax;
 class HaltCompilerStmtSyntax;
+class GlobalVariableSyntax;
 class GlobalVariableListItemSyntax;
 class GlobalVariableDeclarationsStmtSyntax;
 class StaticVariableDeclareSyntax;

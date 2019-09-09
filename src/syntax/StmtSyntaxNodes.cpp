@@ -3107,6 +3107,39 @@ HaltCompilerStmtSyntax HaltCompilerStmtSyntax::withSemicolon(std::optional<Token
 }
 
 ///
+/// GlobalVariableSyntax
+///
+void GlobalVariableSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == GlobalVariableSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
+#endif
+}
+
+SimpleVariableExprSyntax
+GlobalVariableSyntax::getVariable()
+{
+   return SimpleVariableExprSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
+}
+
+GlobalVariableSyntax
+GlobalVariableSyntax::withVariable(std::optional<TokenSyntax> variable)
+{
+   RefCountPtr<RawSyntax> rawVariable;
+   if (variable.has_value()) {
+      rawVariable = variable->getRaw();
+   } else {
+      rawVariable = make_missing_token(T_VARIABLE);
+   }
+   return m_data->replaceChild<GlobalVariableSyntax>(rawVariable, Cursor::Variable);
+}
+
+///
 /// GlobalVariableListItemSyntax
 ///
 void GlobalVariableListItemSyntax::validate()
@@ -3131,9 +3164,9 @@ std::optional<TokenSyntax> GlobalVariableListItemSyntax::getComma()
    return TokenSyntax {m_root, commaData.get()};
 }
 
-SimpleVariableExprSyntax GlobalVariableListItemSyntax::getVariable()
+GlobalVariableSyntax GlobalVariableListItemSyntax::getVariable()
 {
-   return SimpleVariableExprSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
+   return GlobalVariableSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
 }
 
 GlobalVariableListItemSyntax
@@ -3149,13 +3182,13 @@ GlobalVariableListItemSyntax::withComma(std::optional<TokenSyntax> comma)
 }
 
 GlobalVariableListItemSyntax
-GlobalVariableListItemSyntax::withVariable(std::optional<TokenSyntax> variable)
+GlobalVariableListItemSyntax::withVariable(std::optional<GlobalVariableSyntax> variable)
 {
    RefCountPtr<RawSyntax> rawVariable;
    if (variable.has_value()) {
       rawVariable = variable->getRaw();
    } else {
-      rawVariable = make_missing_token(T_VARIABLE);
+      rawVariable = RawSyntax::missing(SyntaxKind::GlobalVariable);
    }
    return m_data->replaceChild<GlobalVariableListItemSyntax>(rawVariable, Cursor::Variable);
 }

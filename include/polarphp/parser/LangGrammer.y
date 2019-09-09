@@ -1089,17 +1089,25 @@ argument:
 
 global_var_list:
    global_var_list T_COMMA global_var {
-
+      GlobalVariableListSyntax list = make<GlobalVariableListSyntax>($1);
+      TokenSyntax comma = make_token(CommaToken);
+      GlobalVariableListItemSyntax gvar = make<GlobalVariableListItemSyntax>($3);
+      list.appending(gvar);
+      $$ = list.getRaw();
    }
 |  global_var {
-
+      GlobalVariableSyntax gvar = make<GlobalVariableSyntax>($1);
+      GlobalVariableListItemSyntax gvarItem = make_stmt(GlobalVariableListItem, std::nullopt, gvar);
+      std::vector<GlobalVariableListItemSyntax> vars{gvarItem};
+      GlobalVariableListSyntax list = make_stmt(GlobalVariableList, vars);
+      $$ = list.getRaw();
    }
 ;
 
 global_var:
    simple_variable {
       SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($1);
-      GlobalVariableListItemSyntax gvar = make_stmt(GlobalVariableListItem, std::nullopt, simpleVar);
+      GlobalVariableSyntax gvar = make_stmt(GlobalVariable, simpleVar);
       $$ = gvar.getRaw();
    }
 ;
