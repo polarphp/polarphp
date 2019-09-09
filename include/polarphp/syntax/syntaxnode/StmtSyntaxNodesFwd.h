@@ -73,6 +73,7 @@ class NamespaceDefinitionStmtSyntax;
 class NamespaceBlockStmtSyntax;
 
 class ConstDeclareItemSyntax;
+class ConstListItemSyntax;
 class ConstDefinitionStmtSyntax;
 
 // stmt wrapper for decl syntax nodes

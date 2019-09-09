@@ -244,6 +244,7 @@ enum class SyntaxKind : std::uint32_t
    NamespaceBlockStmt,
 
    ConstDeclareItem,
+   ConstListItem,
    ConstDefinitionStmt,
 
    ClassDefinitionStmt,

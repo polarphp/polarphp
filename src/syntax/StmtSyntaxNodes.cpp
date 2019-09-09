@@ -4355,7 +4355,6 @@ NamespaceBlockStmtSyntax::withCodeBlock(std::optional<TopCodeBlockStmtSyntax> co
    return m_data->replaceChild<NamespaceBlockStmtSyntax>(rawCodeBlock, Cursor::CodeBlock);
 }
 
-
 ///
 /// ConstDeclareItemSyntax
 ///
@@ -4404,6 +4403,58 @@ ConstDeclareItemSyntax ConstDeclareItemSyntax::withIntializer(std::optional<Init
       initializerRaw = RawSyntax::missing(SyntaxKind::InitializerClause);
    }
    return m_data->replaceChild<ConstDeclareItemSyntax>(initializerRaw, Cursor::InitializerClause);
+}
+
+///
+/// ConstListItemSyntax
+///
+void ConstListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ConstListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, CommaToken, std::set{TokenKindType::T_COMMA});
+   syntax_assert_child_kind(raw, Declaration, std::set{SyntaxKind::ConstDeclareItem});
+#endif
+}
+
+std::optional<TokenSyntax> ConstListItemSyntax::getComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::CommaToken);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+ConstDeclareItemSyntax ConstListItemSyntax::getDeclaration()
+{
+   return ConstDeclareItemSyntax {m_root, m_data->getChild(Cursor::Declaration).get()};
+}
+
+ConstListItemSyntax ConstListItemSyntax::withComma(std::optional<TokenSyntax> comma)
+{
+   RefCountPtr<RawSyntax> commaRaw;
+   if (comma.has_value()) {
+      commaRaw = comma->getRaw();
+   } else {
+      commaRaw = nullptr;
+   }
+   return m_data->replaceChild<ConstListItemSyntax>(commaRaw, Cursor::CommaToken);
+}
+
+ConstListItemSyntax ConstListItemSyntax::withDeclaration(std::optional<ConstDeclareItemSyntax> declaration)
+{
+   RefCountPtr<RawSyntax> declarationRaw;
+   if (declaration.has_value()) {
+      declarationRaw = declaration->getRaw();
+   } else {
+      declarationRaw = RawSyntax::missing(SyntaxKind::ConstDeclareItem);
+   }
+   return m_data->replaceChild<ConstListItemSyntax>(declarationRaw, Cursor::Declaration);
 }
 
 ///

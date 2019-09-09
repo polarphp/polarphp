@@ -3382,6 +3382,58 @@ private:
 };
 
 ///
+/// const_list_item:
+///   ',' const_decl
+///
+class ConstListItemSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: false
+      ///
+      CommaToken,
+      ///
+      /// type: ConstDeclareItemSyntax
+      /// optional: false
+      ///
+      Declaration
+   };
+
+
+public:
+   ConstListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getComma();
+   ConstDeclareItemSyntax getDeclaration();
+
+   ConstListItemSyntax withComma(std::optional<TokenSyntax> comma);
+   ConstListItemSyntax withDeclaration(std::optional<ConstDeclareItemSyntax> declaration);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ConstListItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ConstListItemSyntaxBuilder;
+   void validate();
+};
+
+///
 /// top_statement:
 ///   T_CONST const_list ';'
 ///
