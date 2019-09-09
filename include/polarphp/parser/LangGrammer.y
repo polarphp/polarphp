@@ -812,7 +812,11 @@ statement:
 
    }
 |  T_THROW expr T_SEMICOLON {
-
+      TokenSyntax throwKeyword = make_token(ThrowKeyword);
+      ExprSyntax expr = make<ExprSyntax>($2);
+      TokenSyntax colonToken = make_token(ColonToken);
+      ThrowStmtSyntax throwStmt = make_stmt(ThrowStmt, throwKeyword, expr, colonToken);
+      $$ = throwStmt.getRaw();
    }
 |  T_GOTO T_IDENTIFIER_STRING T_SEMICOLON {
       TokenSyntax gotoKeyword = make_token(GotoKeyword);

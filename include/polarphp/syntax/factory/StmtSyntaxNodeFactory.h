@@ -121,7 +121,7 @@ public:
                                           TokenSyntax rightParen, TokenSyntax leftBrace, SwitchCaseListSyntax cases,
                                           TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);
    static DeferStmtSyntax makeDeferStmt(TokenSyntax deferKeyword, InnerCodeBlockStmtSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ThrowStmtSyntax makeThrowStmt(TokenSyntax throwKeyword, ExprSyntax expr, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ThrowStmtSyntax makeThrowStmt(TokenSyntax throwKeyword, ExprSyntax expr, TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
    static TryStmtSyntax makeTryStmt(TokenSyntax tryToken, InnerCodeBlockStmtSyntax codeBlock,
                                     std::optional<CatchListSyntax> catchList, std::optional<FinallyClauseSyntax> finallyClause,
                                     RefCountPtr<SyntaxArena> arena = nullptr);

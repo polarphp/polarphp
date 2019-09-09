@@ -631,12 +631,13 @@ StmtSyntaxNodeFactory::makeDeferStmt(TokenSyntax deferKeyword, InnerCodeBlockStm
 
 ThrowStmtSyntax
 StmtSyntaxNodeFactory::makeThrowStmt(TokenSyntax throwKeyword, ExprSyntax expr,
-                                     RefCountPtr<SyntaxArena> arena)
+                                     TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ThrowStmt, {
                throwKeyword.getRaw(),
-               expr.getRaw()
+               expr.getRaw(),
+               semicolon.getRaw()
             }, SourcePresence::Present, arena);
    return make<ThrowStmtSyntax>(target);
 }
