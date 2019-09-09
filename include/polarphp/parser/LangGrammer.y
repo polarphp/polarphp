@@ -481,16 +481,34 @@ top_statement:
       $$ = namespaceBlockStmt.getRaw();
    }
 |  T_USE mixed_group_use_declaration T_SEMICOLON {
-
+      TokenSyntax useKeyword = make_token(UseKeyword);
+      NamespaceMixedGroupUseDeclarationSyntax groupDecl = make<NamespaceMixedGroupUseDeclarationSyntax>($2);
+      TokenSyntax semicolonToken = make_token(SemicolonToken);
+      NamespaceUseStmtSyntax declStmt = make_stmt(NamespaceUseStmt, useKeyword, std::nullopt, groupDecl, semicolonToken);
+      $$ = declStmt.getRaw();
    }
 |  T_USE use_type group_use_declaration T_SEMICOLON {
-
+      TokenSyntax useKeyword = make_token(UseKeyword);
+      NamespaceUseTypeSyntax useType = make<NamespaceUseTypeSyntax>($2);
+      NamespaceGroupUseDeclarationSyntax groupDecl = make<NamespaceGroupUseDeclarationSyntax>($3);
+      TokenSyntax semicolonToken = make_token(SemicolonToken);
+      NamespaceUseStmtSyntax declStmt = make_stmt(NamespaceUseStmt, useKeyword, useType, groupDecl, semicolonToken);
+      $$ = declStmt.getRaw();
    }
 |  T_USE use_declarations T_SEMICOLON {
-
+      TokenSyntax useKeyword = make_token(UseKeyword);
+      NamespaceUseDeclarationListSyntax declarations = make<NamespaceUseDeclarationListSyntax>($2);
+      TokenSyntax semicolonToken = make_token(SemicolonToken);
+      NamespaceUseStmtSyntax declStmt = make_stmt(NamespaceUseStmt, useKeyword, std::nullopt, declarations, semicolonToken);
+      $$ = declStmt.getRaw();
    }
 |  T_USE use_type use_declarations T_SEMICOLON {
-
+      TokenSyntax useKeyword = make_token(UseKeyword);
+      NamespaceUseTypeSyntax useType = make<NamespaceUseTypeSyntax>($2);
+      NamespaceUseDeclarationListSyntax declarations = make<NamespaceUseDeclarationListSyntax>($3);
+      TokenSyntax semicolonToken = make_token(SemicolonToken);
+      NamespaceUseStmtSyntax declStmt = make_stmt(NamespaceUseStmt, useKeyword, useType, declarations, semicolonToken);
+      $$ = declStmt.getRaw();
    }
 |  T_CONST const_list T_SEMICOLON {
       TokenSyntax constKeyword = make_token(ConstKeyword);
@@ -716,7 +734,12 @@ inner_statement:
 
    }
 |  T_HALT_COMPILER T_LEFT_PAREN T_RIGHT_PAREN T_SEMICOLON {
-
+      TokenSyntax haltCompilerToken = make_token(HaltCompilerKeyword);
+      TokenSyntax leftParenToken = make_token(LeftParenToken);
+      TokenSyntax rightParenToken = make_token(RightParenToken);
+      TokenSyntax SemicolonToken = make_token(SemicolonToken);
+      HaltCompilerStmtSyntax stmt = make_stmt(HaltCompilerStmt, haltCompilerToken, leftParenToken, rightParenToken, SemicolonToken);
+      $$ = stmt.getRaw();
    }
 ;
 

@@ -3304,6 +3304,7 @@ public:
    {
       return kindOf(syntax->getKind());
    }
+
 private:
    friend class NamespaceUseStmtSyntaxBuilder;
    void validate();
