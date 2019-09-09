@@ -815,10 +815,17 @@ statement:
 
    }
 |  T_GOTO T_IDENTIFIER_STRING T_SEMICOLON {
-
+      TokenSyntax gotoKeyword = make_token(GotoKeyword);
+      TokenSyntax identifierStr = make_token_with_text(IdentifierString, $2);
+      TokenSyntax colonToken = make_token(ColonToken);
+      GotoStmtSyntax gotoStmt = make_stmt(GotoStmt, gotoKeyword, identifierStr, colonToken);
+      $$ = gotoStmt.getRaw();
    }
 |  T_IDENTIFIER_STRING T_COLON {
-
+      TokenSyntax identifierStr = make_token_with_text(IdentifierString, $1);
+      TokenSyntax colonToken = make_token(ColonToken);
+      LabelStmtSyntax labelStmt = make_stmt(LabelStmt, identifierStr, colonToken);
+      $$ = labelStmt.getRaw();
    }
 ;
 
