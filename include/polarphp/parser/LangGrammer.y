@@ -562,9 +562,15 @@ use_declarations:
 
 inline_use_declaration:
    unprefixed_use_declaration {
-
+      NamespaceUnprefixedUseDeclarationSyntax useDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($1);
+      NamespaceInlineUseDeclarationSyntax inlineUseDecl = make_stmt(NamespaceInlineUseDeclaration, std::nullopt, useDecl);
+      $$ = inlineUseDecl.getRaw();
    }
 |  use_type unprefixed_use_declaration {
+      NamespaceUseTypeSyntax useType = make<NamespaceUseTypeSyntax>($1);
+      NamespaceUnprefixedUseDeclarationSyntax useDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($2);
+      NamespaceInlineUseDeclarationSyntax inlineUseDecl = make_stmt(NamespaceInlineUseDeclaration, useType, useDecl);
+      $$ = inlineUseDecl.getRaw();
    }
 ;
 

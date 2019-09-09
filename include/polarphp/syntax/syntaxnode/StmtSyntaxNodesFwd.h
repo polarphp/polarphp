@@ -60,8 +60,10 @@ class StaticVariableDeclarationsStmtSyntax;
 
 class NamespaceUseTypeSyntax;
 class NamespaceUnprefixedUseDeclarationSyntax;
+class NamespaceUnprefixedUseDeclarationListItemSyntax;
 class NamespaceUseDeclarationSyntax;
 class NamespaceInlineUseDeclarationSyntax;
+class NamespaceInlineUseDeclarationListItemSyntax;
 class NamespaceGroupUseDeclarationSyntax;
 class NamespaceMixedGroupUseDeclarationSyntax;
 class NamespaceUseStmtSyntax;

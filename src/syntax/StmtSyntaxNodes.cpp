@@ -3499,6 +3499,62 @@ NamespaceUnprefixedUseDeclarationSyntax::withIdentifierToken(std::optional<Token
 }
 
 ///
+/// NamespaceUnprefixedUseDeclarationListItemSyntax
+///
+
+void NamespaceUnprefixedUseDeclarationListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == NamespaceUnprefixedUseDeclarationListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Comma, std::set{TokenKindType::T_COMMA});
+   syntax_assert_child_kind(raw, NamespaceUseDeclaration, std::set{SyntaxKind::NamespaceUseDeclaration});
+#endif
+}
+
+std::optional<TokenSyntax> NamespaceUnprefixedUseDeclarationListItemSyntax::getCommaToken()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::Comma);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+NamespaceUnprefixedUseDeclarationSyntax
+NamespaceUnprefixedUseDeclarationListItemSyntax::getNamespaceUseDeclaration()
+{
+   return NamespaceUnprefixedUseDeclarationSyntax {m_root, m_data->getChild(Cursor::NamespaceUseDeclaration).get()};
+}
+
+NamespaceUnprefixedUseDeclarationListItemSyntax
+NamespaceUnprefixedUseDeclarationListItemSyntax::withCommaToken(std::optional<TokenSyntax> comma)
+{
+   RefCountPtr<RawSyntax> commaRaw;
+   if (comma.has_value()) {
+      commaRaw = comma->getRaw();
+   } else {
+      commaRaw = nullptr;
+   }
+   return m_data->replaceChild<NamespaceUnprefixedUseDeclarationListItemSyntax>(commaRaw, Cursor::Comma);
+}
+
+NamespaceUnprefixedUseDeclarationListItemSyntax
+NamespaceUnprefixedUseDeclarationListItemSyntax::withNamespaceUseDeclaration(std::optional<NamespaceUnprefixedUseDeclarationSyntax> useDecl)
+{
+   RefCountPtr<RawSyntax> useDeclRaw;
+   if (useDecl.has_value()) {
+      useDeclRaw = useDecl->getRaw();
+   } else {
+      useDeclRaw = RawSyntax::missing(SyntaxKind::NamespaceUnprefixedUseDeclaration);
+   }
+   return m_data->replaceChild<NamespaceUnprefixedUseDeclarationListItemSyntax>(useDeclRaw, Cursor::NamespaceUseDeclaration);
+}
+
+///
 /// NamespaceUseDeclarationSyntax
 ///
 void NamespaceUseDeclarationSyntax::validate()
@@ -3612,6 +3668,62 @@ NamespaceInlineUseDeclarationSyntax::withUnprefixedUseDeclaration(std::optional<
       declarationRaw = RawSyntax::missing(SyntaxKind::NamespaceUnprefixedUseDeclaration);
    }
    return m_data->replaceChild<NamespaceInlineUseDeclarationSyntax>(declarationRaw, Cursor::UnprefixedUseDeclaration);
+}
+
+///
+/// NamespaceInlineUseDeclarationListItemSyntax
+///
+
+void NamespaceInlineUseDeclarationListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == NamespaceInlineUseDeclarationListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Comma, std::set{TokenKindType::T_COMMA});
+   syntax_assert_child_kind(raw, NamespaceUseDeclaration, std::set{SyntaxKind::NamespaceUseDeclaration});
+#endif
+}
+
+std::optional<TokenSyntax> NamespaceInlineUseDeclarationListItemSyntax::getCommaToken()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::Comma);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+NamespaceInlineUseDeclarationSyntax
+NamespaceInlineUseDeclarationListItemSyntax::getNamespaceUseDeclaration()
+{
+   return NamespaceInlineUseDeclarationSyntax {m_root, m_data->getChild(Cursor::NamespaceUseDeclaration).get()};
+}
+
+NamespaceInlineUseDeclarationListItemSyntax
+NamespaceInlineUseDeclarationListItemSyntax::withCommaToken(std::optional<TokenSyntax> comma)
+{
+   RefCountPtr<RawSyntax> commaRaw;
+   if (comma.has_value()) {
+      commaRaw = comma->getRaw();
+   } else {
+      commaRaw = nullptr;
+   }
+   return m_data->replaceChild<NamespaceInlineUseDeclarationListItemSyntax>(commaRaw, Cursor::Comma);
+}
+
+NamespaceInlineUseDeclarationListItemSyntax
+NamespaceInlineUseDeclarationListItemSyntax::withNamespaceUseDeclaration(std::optional<NamespaceInlineUseDeclarationSyntax> useDecl)
+{
+   RefCountPtr<RawSyntax> useDeclRaw;
+   if (useDecl.has_value()) {
+      useDeclRaw = useDecl->getRaw();
+   } else {
+      useDeclRaw = RawSyntax::missing(SyntaxKind::NamespaceInlineUseDeclaration);
+   }
+   return m_data->replaceChild<NamespaceInlineUseDeclarationListItemSyntax>(useDeclRaw, Cursor::NamespaceUseDeclaration);
 }
 
 ///
