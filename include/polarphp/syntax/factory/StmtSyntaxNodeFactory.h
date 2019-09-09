@@ -139,7 +139,7 @@ public:
                                       TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
    static HaltCompilerStmtSyntax makeHaltCompilerStmt(TokenSyntax haltCompilerToken, TokenSyntax leftParen,
                                                       TokenSyntax rightParen, TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
-   static GlobalVariableListItemSyntax makeGlobalVariableListItem(SimpleVariableExprSyntax variable, std::optional<TokenSyntax> trailingComma,
+   static GlobalVariableListItemSyntax makeGlobalVariableListItem(std::optional<TokenSyntax> comma, SimpleVariableExprSyntax variable,
                                                                   RefCountPtr<SyntaxArena> arena = nullptr);
    static GlobalVariableDeclarationsStmtSyntax makeGlobalVariableDeclarationsStmt(TokenSyntax globalToken, GlobalVariableListSyntax variables,
                                                                                   TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);

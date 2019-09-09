@@ -3117,9 +3117,18 @@ void GlobalVariableListItemSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == GlobalVariableListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Comma, std::set{TokenKindType::T_COMMA});
    syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
-   syntax_assert_child_token(raw, TrailingComma, std::set{TokenKindType::T_COMMA});
 #endif
+}
+
+std::optional<TokenSyntax> GlobalVariableListItemSyntax::getComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::Comma);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
 }
 
 SimpleVariableExprSyntax GlobalVariableListItemSyntax::getVariable()
@@ -3127,13 +3136,16 @@ SimpleVariableExprSyntax GlobalVariableListItemSyntax::getVariable()
    return SimpleVariableExprSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
 }
 
-std::optional<TokenSyntax> GlobalVariableListItemSyntax::getTrailingComma()
+GlobalVariableListItemSyntax
+GlobalVariableListItemSyntax::withComma(std::optional<TokenSyntax> comma)
 {
-   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::TrailingComma);
-   if (!commaData) {
-      return std::nullopt;
+   RefCountPtr<RawSyntax> rawComma;
+   if (comma.has_value()) {
+      rawComma = comma->getRaw();
+   } else {
+      rawComma = nullptr;
    }
-   return TokenSyntax {m_root, commaData.get()};
+   return m_data->replaceChild<GlobalVariableListItemSyntax>(rawComma, Cursor::Comma);
 }
 
 GlobalVariableListItemSyntax
@@ -3146,18 +3158,6 @@ GlobalVariableListItemSyntax::withVariable(std::optional<TokenSyntax> variable)
       rawVariable = make_missing_token(T_VARIABLE);
    }
    return m_data->replaceChild<GlobalVariableListItemSyntax>(rawVariable, Cursor::Variable);
-}
-
-GlobalVariableListItemSyntax
-GlobalVariableListItemSyntax::withTrailingComma(std::optional<TokenSyntax> comma)
-{
-   RefCountPtr<RawSyntax> rawComma;
-   if (comma.has_value()) {
-      rawComma = comma->getRaw();
-   } else {
-      rawComma = nullptr;
-   }
-   return m_data->replaceChild<GlobalVariableListItemSyntax>(rawComma, Cursor::TrailingComma);
 }
 
 ///

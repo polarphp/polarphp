@@ -1098,7 +1098,9 @@ global_var_list:
 
 global_var:
    simple_variable {
-
+      SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($1);
+      GlobalVariableListItemSyntax gvar = make_stmt(GlobalVariableListItem, std::nullopt, simpleVar);
+      $$ = gvar.getRaw();
    }
 ;
 

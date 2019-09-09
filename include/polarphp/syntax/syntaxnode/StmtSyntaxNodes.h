@@ -2389,15 +2389,15 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: SimpleVariableExprSyntax
-      /// optional: false
-      ///
-      Variable,
-      ///
       /// type: TokenSyntax (T_COMMA)
       /// optional: true
       ///
-      TrailingComma
+      Comma,
+      ///
+      /// type: SimpleVariableExprSyntax
+      /// optional: false
+      ///
+      Variable
    };
 
 public:
@@ -2407,11 +2407,11 @@ public:
       validate();
    }
 
+   std::optional<TokenSyntax> getComma();
    SimpleVariableExprSyntax getVariable();
-   std::optional<TokenSyntax> getTrailingComma();
 
+   GlobalVariableListItemSyntax withComma(std::optional<TokenSyntax> comma);
    GlobalVariableListItemSyntax withVariable(std::optional<TokenSyntax> variable);
-   GlobalVariableListItemSyntax withTrailingComma(std::optional<TokenSyntax> comma);
 
    static bool kindOf(SyntaxKind kind)
    {
