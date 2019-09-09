@@ -192,7 +192,7 @@ using NamespaceUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::Namespace
 using NamespaceInlineUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceInlineUseDeclarationList, NamespaceInlineUseDeclarationListItemSyntax>;
 
 ///
-/// type: SyntaxCollection
+/// type: ConstDeclareListSyntax
 /// element type: NamespaceUnprefixedUseDeclarationSyntax
 ///
 /// unprefixed_use_declarations:
@@ -202,14 +202,14 @@ using NamespaceInlineUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::Nam
 using NamespaceUnprefixedUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUnprefixedUseDeclarationList, NamespaceUnprefixedUseDeclarationListItemSyntax>;
 
 ///
-/// type: SyntaxCollection
+/// type: ConstDeclareListSyntax
 /// element type: ConstDeclareItemSyntax
 ///
 /// const_list:
 ///   const_list ',' const_decl
 /// | const_decl
 ///
-using ConstDeclareItemListSyntax = SyntaxCollection<SyntaxKind::ConstDeclareItemList, ConstDeclareItemSyntax>;
+using ConstDeclareListSyntax = SyntaxCollection<SyntaxKind::ConstDeclareList, ConstListItemSyntax>;
 
 } // polar::syntax
 

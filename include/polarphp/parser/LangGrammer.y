@@ -493,7 +493,11 @@ top_statement:
 
    }
 |  T_CONST const_list T_SEMICOLON {
-
+      TokenSyntax constKeyword = make_token(ConstKeyword);
+      ConstDeclareListSyntax constList = make<ConstDeclareListSyntax>($2);
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      ConstDefinitionStmtSyntax constDeclStmt = make_stmt(ConstDefinitionStmt, constKeyword, constList, semicolon);
+      $$ = constDeclStmt.getRaw();
    }
 ;
 
@@ -570,9 +574,9 @@ possible_comma:
 inline_use_declarations:
    inline_use_declarations T_COMMA inline_use_declaration {
       NamespaceInlineUseDeclarationListSyntax list = make<NamespaceInlineUseDeclarationListSyntax>($1);
-      TokenSyntax commaToken = make_token(CommaToken);
+      TokenSyntax comma = make_token(CommaToken);
       NamespaceInlineUseDeclarationSyntax useDecl = make<NamespaceInlineUseDeclarationSyntax>($3);
-      NamespaceInlineUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceInlineUseDeclarationListItem, commaToken, useDecl);
+      NamespaceInlineUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceInlineUseDeclarationListItem, comma, useDecl);
       list.appending(useDeclListItem);
       $$ = list.getRaw();
    }
@@ -588,9 +592,9 @@ inline_use_declarations:
 unprefixed_use_declarations:
    unprefixed_use_declarations T_COMMA unprefixed_use_declaration {
       NamespaceUnprefixedUseDeclarationListSyntax list = make<NamespaceUnprefixedUseDeclarationListSyntax>($1);
-      TokenSyntax commaToken = make_token(CommaToken);
+      TokenSyntax comma = make_token(CommaToken);
       NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($3);
-      NamespaceUnprefixedUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceUnprefixedUseDeclarationListItem, commaToken, unprefixedUseDecl);
+      NamespaceUnprefixedUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceUnprefixedUseDeclarationListItem, comma, unprefixedUseDecl);
       list.appending(useDeclListItem);
       $$ = list.getRaw();
    }
@@ -606,9 +610,9 @@ unprefixed_use_declarations:
 use_declarations:
    use_declarations T_COMMA use_declaration {
       NamespaceUseDeclarationListSyntax list = make<NamespaceUseDeclarationListSyntax>($1);
-      TokenSyntax commaToken = make_token(CommaToken);
+      TokenSyntax comma = make_token(CommaToken);
       NamespaceUseDeclarationSyntax useDecl = make<NamespaceUseDeclarationSyntax>($3);
-      NamespaceUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceUseDeclarationListItem, commaToken, useDecl);
+      NamespaceUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceUseDeclarationListItem, comma, useDecl);
       list.appending(useDeclListItem);
       $$ = list.getRaw();
    }
@@ -666,10 +670,19 @@ use_declaration:
 
 const_list:
    const_list T_COMMA const_decl {
-
+      ConstDeclareListSyntax list = make<ConstDeclareListSyntax>($1);
+      ConstDeclareItemSyntax constDecl = make<ConstDeclareItemSyntax>($3);
+      TokenSyntax comma = make_token(CommaToken);
+      ConstListItemSyntax constListItem = make_stmt(ConstListItem, comma, constDecl);
+      list.appending(constListItem);
+      $$ = list.getRaw();
    }
 |  const_decl {
-
+      ConstDeclareItemSyntax constDecl = make<ConstDeclareItemSyntax>($1);
+      ConstListItemSyntax constListItem = make_stmt(ConstListItem, std::nullopt, constDecl);
+      std::vector<ConstListItemSyntax> declarations{constListItem};
+      ConstDeclareListSyntax list = make_stmt(ConstDeclareList, declarations);
+      $$ = list.getRaw();
    }
 ;
 

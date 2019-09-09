@@ -436,7 +436,7 @@ public:
       ///
       LeftParenToken,
       ///
-      /// type: ConstDeclareItemListSyntax
+      /// type: ConstDeclareListSyntax
       /// optional: false
       ///
       ConstList,
@@ -461,13 +461,13 @@ public:
 
    TokenSyntax getDeclareToken();
    TokenSyntax getLeftParenToken();
-   ConstDeclareItemListSyntax getConstList();
+   ConstDeclareListSyntax getConstList();
    TokenSyntax getRightParenToken();
    StmtSyntax getStmt();
 
    DeclareStmtSyntax withDeclareToken(std::optional<TokenSyntax> declareToken);
    DeclareStmtSyntax withLeftParenToken(std::optional<TokenSyntax> leftParen);
-   DeclareStmtSyntax withConstList(std::optional<ConstDeclareItemListSyntax> constList);
+   DeclareStmtSyntax withConstList(std::optional<ConstDeclareListSyntax> constList);
    DeclareStmtSyntax withRightParenToken(std::optional<TokenSyntax> rightParen);
    DeclareStmtSyntax withStmt(std::optional<StmtSyntax> stmt);
 
@@ -3450,7 +3450,7 @@ public:
       ///
       ConstToken,
       ///
-      /// type: ConstDeclareItemListSyntax
+      /// type: ConstDeclareListSyntax
       /// optional: false
       ///
       Declarations,
@@ -3469,11 +3469,11 @@ public:
    }
 
    TokenSyntax getConstToken();
-   ConstDeclareItemListSyntax getDeclarations();
+   ConstDeclareListSyntax getDeclarations();
    TokenSyntax getSemicolon();
 
    ConstDefinitionStmtSyntax withConstToken(std::optional<TokenSyntax> constToken);
-   ConstDefinitionStmtSyntax withDeclarations(std::optional<ConstDeclareItemListSyntax> declarations);
+   ConstDefinitionStmtSyntax withDeclarations(std::optional<ConstDeclareListSyntax> declarations);
    ConstDefinitionStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
 
    static bool kindOf(SyntaxKind kind)

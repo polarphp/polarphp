@@ -431,7 +431,7 @@ void DeclareStmtSyntax::validate()
    assert(raw->getLayout().size() == DeclareStmtSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, DeclareToken, std::set{TokenKindType::T_DECLARE});
    syntax_assert_child_token(raw, LeftParenToken, std::set{TokenKindType::T_LEFT_PAREN});
-   syntax_assert_child_kind(raw, ConstList, std::set{SyntaxKind::ConstDeclareItemList});
+   syntax_assert_child_kind(raw, ConstList, std::set{SyntaxKind::ConstDeclareList});
    syntax_assert_child_token(raw, RightParenToken, std::set{TokenKindType::T_RIGHT_PAREN});
    syntax_assert_child_kind(raw, Stmt, std::set{SyntaxKind::Stmt});
 #endif
@@ -447,9 +447,9 @@ TokenSyntax DeclareStmtSyntax::getLeftParenToken()
    return TokenSyntax{m_root, m_data->getChild(Cursor::LeftParenToken).get()};
 }
 
-ConstDeclareItemListSyntax DeclareStmtSyntax::getConstList()
+ConstDeclareListSyntax DeclareStmtSyntax::getConstList()
 {
-   return ConstDeclareItemListSyntax{m_root, m_data->getChild(Cursor::ConstList).get()};
+   return ConstDeclareListSyntax{m_root, m_data->getChild(Cursor::ConstList).get()};
 }
 
 TokenSyntax DeclareStmtSyntax::getRightParenToken()
@@ -487,13 +487,13 @@ DeclareStmtSyntax::withLeftParenToken(std::optional<TokenSyntax> leftParen)
 }
 
 DeclareStmtSyntax
-DeclareStmtSyntax::withConstList(std::optional<ConstDeclareItemListSyntax> constList)
+DeclareStmtSyntax::withConstList(std::optional<ConstDeclareListSyntax> constList)
 {
    RefCountPtr<RawSyntax> rawConstList;
    if (constList.has_value()) {
       rawConstList = constList->getRaw();
    } else {
-      rawConstList = RawSyntax::missing(SyntaxKind::ConstDeclareItemList);
+      rawConstList = RawSyntax::missing(SyntaxKind::ConstDeclareList);
    }
    return m_data->replaceChild<DeclareStmtSyntax>(rawConstList, Cursor::ConstList);
 }
@@ -4471,7 +4471,7 @@ void ConstDefinitionStmtSyntax::validate()
    syntax_assert_child_token(raw, ConstToken, std::set{TokenKindType::T_CONST});
    syntax_assert_child_token(raw, Semicolon, std::set{TokenKindType::T_SEMICOLON});
    if (const RefCountPtr<RawSyntax> &declarations = raw->getChild(Cursor::Declarations)) {
-      assert(declarations->kindOf(SyntaxKind::ConstDeclareItemList));
+      assert(declarations->kindOf(SyntaxKind::ConstDeclareList));
    }
 #endif
 }
@@ -4481,9 +4481,9 @@ TokenSyntax ConstDefinitionStmtSyntax::getConstToken()
    return TokenSyntax {m_root, m_data->getChild(Cursor::ConstToken).get()};
 }
 
-ConstDeclareItemListSyntax ConstDefinitionStmtSyntax::getDeclarations()
+ConstDeclareListSyntax ConstDefinitionStmtSyntax::getDeclarations()
 {
-   return ConstDeclareItemListSyntax {m_root, m_data->getChild(Cursor::Declarations).get()};
+   return ConstDeclareListSyntax {m_root, m_data->getChild(Cursor::Declarations).get()};
 }
 
 TokenSyntax ConstDefinitionStmtSyntax::getSemicolon()
@@ -4502,13 +4502,13 @@ ConstDefinitionStmtSyntax ConstDefinitionStmtSyntax::withConstToken(std::optiona
    return m_data->replaceChild<ConstDefinitionStmtSyntax>(constTokenRaw, Cursor::ConstToken);
 }
 
-ConstDefinitionStmtSyntax ConstDefinitionStmtSyntax::withDeclarations(std::optional<ConstDeclareItemListSyntax> declarations)
+ConstDefinitionStmtSyntax ConstDefinitionStmtSyntax::withDeclarations(std::optional<ConstDeclareListSyntax> declarations)
 {
    RefCountPtr<RawSyntax> declarationsRaw;
    if (declarations.has_value()) {
       declarationsRaw = declarations->getRaw();
    } else {
-      declarationsRaw = RawSyntax::missing(SyntaxKind::ConstDeclareItemList);
+      declarationsRaw = RawSyntax::missing(SyntaxKind::ConstDeclareList);
    }
    return m_data->replaceChild<ConstDefinitionStmtSyntax>(declarationsRaw, Cursor::Declarations);
 }

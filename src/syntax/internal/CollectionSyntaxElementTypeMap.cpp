@@ -53,7 +53,7 @@ static const std::unordered_map<SyntaxKind, std::set<SyntaxKind>> scg_collection
     { SyntaxKind::NamespaceUseDeclarationList, { SyntaxKind::NamespaceUseDeclaration }},
     { SyntaxKind::NamespaceInlineUseDeclarationList, { SyntaxKind::NamespaceInlineUseDeclaration }},
     { SyntaxKind::NamespaceUnprefixedUseDeclarationList, { SyntaxKind::NamespaceUnprefixedUseDeclaration }},
-    { SyntaxKind::ConstDeclareItemList, { SyntaxKind::ConstDeclareItem }},
+    { SyntaxKind::ConstDeclareList, { SyntaxKind::ConstDeclareItem }},
 };
 } // anonymous namespace
 

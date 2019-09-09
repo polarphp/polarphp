@@ -49,8 +49,8 @@ public:
          const std::vector<NamespaceInlineUseDeclarationListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUnprefixedUseDeclarationListSyntax makeNamespaceUnprefixedUseDeclarationList(
          const std::vector<NamespaceUnprefixedUseDeclarationListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ConstDeclareItemListSyntax makeConstDeclareItemList(
-         const std::vector<ConstDeclareItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ConstDeclareListSyntax makeConstDeclareList(
+         const std::vector<ConstListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
 
    ///
    /// make normal nodes
@@ -66,7 +66,7 @@ public:
    static TopCodeBlockStmtSyntax makeTopCodeBlockStmt(TokenSyntax leftBrace, TopStmtListSyntax statements,
                                                       TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);
    static DeclareStmtSyntax makeDeclareStmt(TokenSyntax declareToken, TokenSyntax leftParen,
-                                            ConstDeclareItemListSyntax constList, TokenSyntax rightParen,
+                                            ConstDeclareListSyntax constList, TokenSyntax rightParen,
                                             StmtSyntax stmt, RefCountPtr<SyntaxArena> arena = nullptr);
    static GotoStmtSyntax makeGotoStmt(TokenSyntax gotoTokens, TokenSyntax target,
                                       TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
@@ -169,12 +169,12 @@ public:
    static NamespaceGroupUseDeclarationSyntax makeNamespaceGroupUseDeclaration(
          std::optional<TokenSyntax> firstNsSeparator, NamespaceNameSyntax ns,
          TokenSyntax secondNsSeparator, TokenSyntax leftBrace,
-         NamespaceUnprefixedUseDeclarationListSyntax unprefixedUseDeclarations, std::optional<TokenSyntax> commaToken,
+         NamespaceUnprefixedUseDeclarationListSyntax unprefixedUseDeclarations, std::optional<TokenSyntax> comma,
          TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceMixedGroupUseDeclarationSyntax makeNamespaceMixedGroupUseDeclaration(
          std::optional<TokenSyntax> firstNsSeparator, NamespaceNameSyntax ns,
          TokenSyntax secondNsSeparator, TokenSyntax leftBrace,
-         NamespaceInlineUseDeclarationListSyntax inlineUseDeclarations, std::optional<TokenSyntax> commaToken,
+         NamespaceInlineUseDeclarationListSyntax inlineUseDeclarations, std::optional<TokenSyntax> comma,
          TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUseStmtSyntax makeNamespaceUseStmt(TokenSyntax useToken, std::optional<NamespaceUseTypeSyntax> useType,
                                                       Syntax declarations, TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
@@ -185,7 +185,9 @@ public:
                                                           TopCodeBlockStmtSyntax codeBlock, RefCountPtr<SyntaxArena> arena = nullptr);
    static ConstDeclareItemSyntax makeConstDeclareItem(TokenSyntax name, InitializerClauseSyntax initializerClause,
                                                       RefCountPtr<SyntaxArena> arena = nullptr);
-   static ConstDefinitionStmtSyntax makeConstDefinitionStmt(TokenSyntax constToken, ConstDeclareItemListSyntax declarations,
+   static ConstListItemSyntax makeConstListItem(std::optional<TokenSyntax> comma, ConstDeclareItemSyntax declaration,
+                                                RefCountPtr<SyntaxArena> arena = nullptr);
+   static ConstDefinitionStmtSyntax makeConstDefinitionStmt(TokenSyntax constToken, ConstDeclareListSyntax declarations,
                                                             TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassDefinitionStmtSyntax makeClassDefinitionStmt(ClassDefinitionSyntax classDefinition, RefCountPtr<SyntaxArena> arena = nullptr);
    static InterfaceDefinitionStmtSyntax makeInterfaceDefinitionStmt(InterfaceDefinitionSyntax interfaceDefinition,
@@ -209,7 +211,7 @@ public:
    static NamespaceUseDeclarationListSyntax makeBlankNamespaceUseDeclarationList(RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceInlineUseDeclarationListSyntax makeBlankNamespaceInlineUseDeclarationList(RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUnprefixedUseDeclarationListSyntax makeBlankNamespaceUnprefixedUseDeclarationList(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ConstDeclareItemListSyntax makeBlankConstDeclareItemList(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ConstDeclareListSyntax makeBlankConstDeclareList(RefCountPtr<SyntaxArena> arena = nullptr);
 
    static EmptyStmtSyntax makeBlankEmptyStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static NestStmtSyntax makeBlankNestStmt(RefCountPtr<SyntaxArena> arena = nullptr);

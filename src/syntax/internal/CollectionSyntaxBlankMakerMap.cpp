@@ -76,8 +76,8 @@ Syntax AbstractFactory::makeBlankCollectionSyntax(SyntaxKind collectionKind)
       return StmtSyntaxNodeFactory::makeBlankNamespaceInlineUseDeclarationList();
    case SyntaxKind::NamespaceUnprefixedUseDeclarationList:
       return StmtSyntaxNodeFactory::makeBlankNamespaceUnprefixedUseDeclarationList();
-   case SyntaxKind::ConstDeclareItemList:
-      return StmtSyntaxNodeFactory::makeBlankConstDeclareItemList();
+   case SyntaxKind::ConstDeclareList:
+      return StmtSyntaxNodeFactory::makeBlankConstDeclareList();
    default:
       break;
    }
