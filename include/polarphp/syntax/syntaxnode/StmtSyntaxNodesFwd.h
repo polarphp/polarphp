@@ -55,7 +55,7 @@ class EchoStmtSyntax;
 class HaltCompilerStmtSyntax;
 class GlobalVariableListItemSyntax;
 class GlobalVariableDeclarationsStmtSyntax;
-class StaticVariableListItemSyntax;
+class StaticVariableDeclareSyntax;
 class StaticVariableDeclarationsStmtSyntax;
 
 class NamespaceUseTypeSyntax;
@@ -72,7 +72,7 @@ class NamespaceUseStmtSyntax;
 class NamespaceDefinitionStmtSyntax;
 class NamespaceBlockStmtSyntax;
 
-class ConstDeclareItemSyntax;
+class ConstDeclareSyntax;
 class ConstListItemSyntax;
 class ConstDefinitionStmtSyntax;
 
@@ -169,7 +169,7 @@ using GlobalVariableListSyntax = SyntaxCollection<SyntaxKind::GlobalVariableList
 ///   static_var_list ',' static_var
 /// | static_var
 ///
-using StaticVariableListSyntax = SyntaxCollection<SyntaxKind::StaticVariableList, StaticVariableListItemSyntax>;
+using StaticVariableListSyntax = SyntaxCollection<SyntaxKind::StaticVariableList, StaticVariableDeclareSyntax>;
 
 ///
 /// type: SyntaxCollection
@@ -203,7 +203,7 @@ using NamespaceUnprefixedUseDeclarationListSyntax = SyntaxCollection<SyntaxKind:
 
 ///
 /// type: ConstDeclareListSyntax
-/// element type: ConstDeclareItemSyntax
+/// element type: ConstDeclareSyntax
 ///
 /// const_list:
 ///   const_list ',' const_decl

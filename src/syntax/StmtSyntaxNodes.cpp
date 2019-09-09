@@ -3229,16 +3229,16 @@ GlobalVariableDeclarationsStmtSyntax::withSemicolon(std::optional<TokenSyntax> s
 }
 
 ///
-/// StaticVariableListItemSyntax
+/// StaticVariableDeclareSyntax
 ///
-void StaticVariableListItemSyntax::validate()
+void StaticVariableDeclareSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == StaticVariableListItemSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == StaticVariableDeclareSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
    syntax_assert_child_token(raw, EqualToken, std::set{TokenKindType::T_EQUAL});
    syntax_assert_child_kind(raw, ValueExpr, std::set{SyntaxKind::Expr});
@@ -3250,12 +3250,12 @@ void StaticVariableListItemSyntax::validate()
 #endif
 }
 
-TokenSyntax StaticVariableListItemSyntax::getVariable()
+TokenSyntax StaticVariableDeclareSyntax::getVariable()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
 }
 
-std::optional<TokenSyntax> StaticVariableListItemSyntax::getEqualToken()
+std::optional<TokenSyntax> StaticVariableDeclareSyntax::getEqualToken()
 {
    RefCountPtr<SyntaxData> equalTokenData = m_data->getChild(Cursor::EqualToken);
    if (!equalTokenData) {
@@ -3264,7 +3264,7 @@ std::optional<TokenSyntax> StaticVariableListItemSyntax::getEqualToken()
    return TokenSyntax {m_root, equalTokenData.get()};
 }
 
-std::optional<ExprSyntax> StaticVariableListItemSyntax::getValueExpr()
+std::optional<ExprSyntax> StaticVariableDeclareSyntax::getValueExpr()
 {
    RefCountPtr<SyntaxData> valueExprData = m_data->getChild(Cursor::ValueExpr);
    if (!valueExprData) {
@@ -3273,8 +3273,8 @@ std::optional<ExprSyntax> StaticVariableListItemSyntax::getValueExpr()
    return ExprSyntax {m_root, valueExprData.get()};
 }
 
-StaticVariableListItemSyntax
-StaticVariableListItemSyntax::withVariable(std::optional<TokenSyntax> variable)
+StaticVariableDeclareSyntax
+StaticVariableDeclareSyntax::withVariable(std::optional<TokenSyntax> variable)
 {
    RefCountPtr<RawSyntax> rawVariable;
    if (variable.has_value()) {
@@ -3283,11 +3283,11 @@ StaticVariableListItemSyntax::withVariable(std::optional<TokenSyntax> variable)
       // TODO not good
       rawVariable = make_missing_token(T_VARIABLE);
    }
-   return m_data->replaceChild<StaticVariableListItemSyntax>(rawVariable, Cursor::Variable);
+   return m_data->replaceChild<StaticVariableDeclareSyntax>(rawVariable, Cursor::Variable);
 }
 
-StaticVariableListItemSyntax
-StaticVariableListItemSyntax::withEqualToken(std::optional<TokenSyntax> equalToken)
+StaticVariableDeclareSyntax
+StaticVariableDeclareSyntax::withEqualToken(std::optional<TokenSyntax> equalToken)
 {
    RefCountPtr<RawSyntax> rawEqualToken;
    if (equalToken.has_value()) {
@@ -3295,11 +3295,11 @@ StaticVariableListItemSyntax::withEqualToken(std::optional<TokenSyntax> equalTok
    } else {
       rawEqualToken = nullptr;
    }
-   return m_data->replaceChild<StaticVariableListItemSyntax>(rawEqualToken, Cursor::EqualToken);
+   return m_data->replaceChild<StaticVariableDeclareSyntax>(rawEqualToken, Cursor::EqualToken);
 }
 
-StaticVariableListItemSyntax
-StaticVariableListItemSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
+StaticVariableDeclareSyntax
+StaticVariableDeclareSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
 {
    RefCountPtr<RawSyntax> rawValueExpr;
    if (valueExpr.has_value()) {
@@ -3307,7 +3307,7 @@ StaticVariableListItemSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
    } else {
       rawValueExpr = nullptr;
    }
-   return m_data->replaceChild<StaticVariableListItemSyntax>(rawValueExpr, Cursor::ValueExpr);
+   return m_data->replaceChild<StaticVariableDeclareSyntax>(rawValueExpr, Cursor::ValueExpr);
 }
 
 ///
@@ -4356,16 +4356,16 @@ NamespaceBlockStmtSyntax::withCodeBlock(std::optional<TopCodeBlockStmtSyntax> co
 }
 
 ///
-/// ConstDeclareItemSyntax
+/// ConstDeclareSyntax
 ///
-void ConstDeclareItemSyntax::validate()
+void ConstDeclareSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().getSize() == ConstDeclareItemSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().getSize() == ConstDeclareSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, Name, std::set{TokenKindType::T_IDENTIFIER_STRING});
    if (const RefCountPtr<RawSyntax> &initializerChild = raw->getChild(Cursor::InitializerClause)) {
       initializerChild->kindOf(SyntaxKind::InitializerClause);
@@ -4373,17 +4373,17 @@ void ConstDeclareItemSyntax::validate()
 #endif
 }
 
-TokenSyntax ConstDeclareItemSyntax::getName()
+TokenSyntax ConstDeclareSyntax::getName()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::Name).get()};
 }
 
-InitializerClauseSyntax ConstDeclareItemSyntax::getInitializer()
+InitializerClauseSyntax ConstDeclareSyntax::getInitializer()
 {
    return InitializerClauseSyntax {m_root, m_data->getChild(Cursor::InitializerClause).get()};
 }
 
-ConstDeclareItemSyntax ConstDeclareItemSyntax::withName(std::optional<TokenSyntax> name)
+ConstDeclareSyntax ConstDeclareSyntax::withName(std::optional<TokenSyntax> name)
 {
    RefCountPtr<RawSyntax> nameRaw;
    if (name.has_value()) {
@@ -4391,10 +4391,10 @@ ConstDeclareItemSyntax ConstDeclareItemSyntax::withName(std::optional<TokenSynta
    } else {
       nameRaw = make_missing_token(T_IDENTIFIER_STRING);
    }
-   return m_data->replaceChild<ConstDeclareItemSyntax>(nameRaw, Cursor::Name);
+   return m_data->replaceChild<ConstDeclareSyntax>(nameRaw, Cursor::Name);
 }
 
-ConstDeclareItemSyntax ConstDeclareItemSyntax::withIntializer(std::optional<InitializerClauseSyntax> initializer)
+ConstDeclareSyntax ConstDeclareSyntax::withIntializer(std::optional<InitializerClauseSyntax> initializer)
 {
    RefCountPtr<RawSyntax> initializerRaw;
    if (initializer.has_value()) {
@@ -4402,7 +4402,7 @@ ConstDeclareItemSyntax ConstDeclareItemSyntax::withIntializer(std::optional<Init
    } else {
       initializerRaw = RawSyntax::missing(SyntaxKind::InitializerClause);
    }
-   return m_data->replaceChild<ConstDeclareItemSyntax>(initializerRaw, Cursor::InitializerClause);
+   return m_data->replaceChild<ConstDeclareSyntax>(initializerRaw, Cursor::InitializerClause);
 }
 
 ///
@@ -4417,7 +4417,7 @@ void ConstListItemSyntax::validate()
    }
    assert(raw->getLayout().getSize() == ConstListItemSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, CommaToken, std::set{TokenKindType::T_COMMA});
-   syntax_assert_child_kind(raw, Declaration, std::set{SyntaxKind::ConstDeclareItem});
+   syntax_assert_child_kind(raw, Declaration, std::set{SyntaxKind::ConstDeclare});
 #endif
 }
 
@@ -4430,9 +4430,9 @@ std::optional<TokenSyntax> ConstListItemSyntax::getComma()
    return TokenSyntax {m_root, commaData.get()};
 }
 
-ConstDeclareItemSyntax ConstListItemSyntax::getDeclaration()
+ConstDeclareSyntax ConstListItemSyntax::getDeclaration()
 {
-   return ConstDeclareItemSyntax {m_root, m_data->getChild(Cursor::Declaration).get()};
+   return ConstDeclareSyntax {m_root, m_data->getChild(Cursor::Declaration).get()};
 }
 
 ConstListItemSyntax ConstListItemSyntax::withComma(std::optional<TokenSyntax> comma)
@@ -4446,13 +4446,13 @@ ConstListItemSyntax ConstListItemSyntax::withComma(std::optional<TokenSyntax> co
    return m_data->replaceChild<ConstListItemSyntax>(commaRaw, Cursor::CommaToken);
 }
 
-ConstListItemSyntax ConstListItemSyntax::withDeclaration(std::optional<ConstDeclareItemSyntax> declaration)
+ConstListItemSyntax ConstListItemSyntax::withDeclaration(std::optional<ConstDeclareSyntax> declaration)
 {
    RefCountPtr<RawSyntax> declarationRaw;
    if (declaration.has_value()) {
       declarationRaw = declaration->getRaw();
    } else {
-      declarationRaw = RawSyntax::missing(SyntaxKind::ConstDeclareItem);
+      declarationRaw = RawSyntax::missing(SyntaxKind::ConstDeclare);
    }
    return m_data->replaceChild<ConstListItemSyntax>(declarationRaw, Cursor::Declaration);
 }

@@ -2489,7 +2489,7 @@ private:
 ///   T_VARIABLE
 /// | T_VARIABLE '=' expr
 ///
-class StaticVariableListItemSyntax final : public Syntax
+class StaticVariableDeclareSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 3;
@@ -2514,7 +2514,7 @@ public:
    };
 
 public:
-   StaticVariableListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   StaticVariableDeclareSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
@@ -2524,13 +2524,13 @@ public:
    std::optional<TokenSyntax> getEqualToken();
    std::optional<ExprSyntax> getValueExpr();
 
-   StaticVariableListItemSyntax withVariable(std::optional<TokenSyntax> variable);
-   StaticVariableListItemSyntax withEqualToken(std::optional<TokenSyntax> equalToken);
-   StaticVariableListItemSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
+   StaticVariableDeclareSyntax withVariable(std::optional<TokenSyntax> variable);
+   StaticVariableDeclareSyntax withEqualToken(std::optional<TokenSyntax> equalToken);
+   StaticVariableDeclareSyntax withValueExpr(std::optional<ExprSyntax> valueExpr);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::StaticVariableListItem;
+      return kind == SyntaxKind::StaticVariableDeclare;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -2538,7 +2538,7 @@ public:
       return kindOf(syntax->getKind());
    }
 private:
-   friend class StaticVariableListItemSyntaxBuilder;
+   friend class StaticVariableDeclareSyntaxBuilder;
    void validate();
 };
 
@@ -3334,7 +3334,7 @@ private:
 /// const_decl:
 ///   T_IDENTIFIER_STRING '=' expr
 ///
-class ConstDeclareItemSyntax final : public Syntax
+class ConstDeclareSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -3354,7 +3354,7 @@ public:
    };
 
 public:
-   ConstDeclareItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   ConstDeclareSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
@@ -3363,12 +3363,12 @@ public:
    TokenSyntax getName();
    InitializerClauseSyntax getInitializer();
 
-   ConstDeclareItemSyntax withName(std::optional<TokenSyntax> name);
-   ConstDeclareItemSyntax withIntializer(std::optional<InitializerClauseSyntax> initializer);
+   ConstDeclareSyntax withName(std::optional<TokenSyntax> name);
+   ConstDeclareSyntax withIntializer(std::optional<InitializerClauseSyntax> initializer);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::ConstDeclareItem;
+      return kind == SyntaxKind::ConstDeclare;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -3377,7 +3377,7 @@ public:
    }
 
 private:
-   friend class ConstDeclareItemSyntaxBuilder;
+   friend class ConstDeclareSyntaxBuilder;
    void validate();
 };
 
@@ -3398,7 +3398,7 @@ public:
       ///
       CommaToken,
       ///
-      /// type: ConstDeclareItemSyntax
+      /// type: ConstDeclareSyntax
       /// optional: false
       ///
       Declaration
@@ -3413,10 +3413,10 @@ public:
    }
 
    std::optional<TokenSyntax> getComma();
-   ConstDeclareItemSyntax getDeclaration();
+   ConstDeclareSyntax getDeclaration();
 
    ConstListItemSyntax withComma(std::optional<TokenSyntax> comma);
-   ConstListItemSyntax withDeclaration(std::optional<ConstDeclareItemSyntax> declaration);
+   ConstListItemSyntax withDeclaration(std::optional<ConstDeclareSyntax> declaration);
 
    static bool kindOf(SyntaxKind kind)
    {

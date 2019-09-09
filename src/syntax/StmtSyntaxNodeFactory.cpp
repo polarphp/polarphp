@@ -157,11 +157,11 @@ StmtSyntaxNodeFactory::makeGlobalVariableList(
 
 StaticVariableListSyntax
 StmtSyntaxNodeFactory::makeStaticVariableList(
-      const std::vector<StaticVariableListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
+      const std::vector<StaticVariableDeclareSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
-   for (const StaticVariableListItemSyntax &element : elements) {
+   for (const StaticVariableDeclareSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -763,17 +763,17 @@ StmtSyntaxNodeFactory::makeGlobalVariableDeclarationsStmt(TokenSyntax globalToke
    return make<GlobalVariableDeclarationsStmtSyntax>(target);
 }
 
-StaticVariableListItemSyntax
-StmtSyntaxNodeFactory::makeStaticVariableListItem(TokenSyntax variable, TokenSyntax equalToken,
+StaticVariableDeclareSyntax
+StmtSyntaxNodeFactory::makeStaticVariableDeclare(TokenSyntax variable, TokenSyntax equalToken,
                                                   ExprSyntax valueExpr, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::StaticVariableListItem, {
+            SyntaxKind::StaticVariableDeclare, {
                variable.getRaw(),
                equalToken.getRaw(),
                valueExpr.getRaw(),
             }, SourcePresence::Present, arena);
-   return make<StaticVariableListItemSyntax>(target);
+   return make<StaticVariableDeclareSyntax>(target);
 }
 
 StaticVariableDeclarationsStmtSyntax
@@ -959,24 +959,24 @@ StmtSyntaxNodeFactory::makeNamespaceBlockStmt(TokenSyntax nsToken, std::optional
    return make<NamespaceBlockStmtSyntax>(target);
 }
 
-ConstDeclareItemSyntax
-StmtSyntaxNodeFactory::makeConstDeclareItem(TokenSyntax name, InitializerClauseSyntax initializerClause,
+ConstDeclareSyntax
+StmtSyntaxNodeFactory::makeConstDeclare(TokenSyntax name, InitializerClauseSyntax initializerClause,
                                             RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::ConstDeclareItem, {
+            SyntaxKind::ConstDeclare, {
                name.getRaw(),
                initializerClause.getRaw(),
             }, SourcePresence::Present, arena);
-   return make<ConstDeclareItemSyntax>(target);
+   return make<ConstDeclareSyntax>(target);
 }
 
 ConstListItemSyntax
-StmtSyntaxNodeFactory::makeConstListItem(std::optional<TokenSyntax> comma, ConstDeclareItemSyntax declaration,
+StmtSyntaxNodeFactory::makeConstListItem(std::optional<TokenSyntax> comma, ConstDeclareSyntax declaration,
                                          RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::ConstDeclareItem, {
+            SyntaxKind::ConstDeclare, {
                comma.has_value() ? comma->getRaw() : nullptr,
                declaration.getRaw(),
             }, SourcePresence::Present, arena);
@@ -1639,17 +1639,17 @@ StmtSyntaxNodeFactory::makeBlankGlobalVariableDeclarationsStmt(RefCountPtr<Synta
    return make<GlobalVariableDeclarationsStmtSyntax>(target);
 }
 
-StaticVariableListItemSyntax
-StmtSyntaxNodeFactory::makeBlankStaticVariableListItem(RefCountPtr<SyntaxArena> arena)
+StaticVariableDeclareSyntax
+StmtSyntaxNodeFactory::makeBlankStaticVariableDeclare(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::StaticVariableListItem, {
+            SyntaxKind::StaticVariableDeclare, {
                make_missing_token(T_VARIABLE), // Variable
                make_missing_token(T_EQUAL),
                RawSyntax::missing(SyntaxKind::GlobalVariableList), // Variables
                make_missing_token(T_SEMICOLON), // Semicolon
             }, SourcePresence::Present, arena);
-   return make<StaticVariableListItemSyntax>(target);
+   return make<StaticVariableDeclareSyntax>(target);
 }
 
 StaticVariableDeclarationsStmtSyntax
@@ -1772,15 +1772,15 @@ StmtSyntaxNodeFactory::makeBlankNamespaceBlockStmt(RefCountPtr<SyntaxArena> aren
    return make<NamespaceBlockStmtSyntax>(target);
 }
 
-ConstDeclareItemSyntax
-StmtSyntaxNodeFactory::makeBlankConstDeclareItem(RefCountPtr<SyntaxArena> arena)
+ConstDeclareSyntax
+StmtSyntaxNodeFactory::makeBlankConstDeclare(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::ConstDeclareItem, {
+            SyntaxKind::ConstDeclare, {
                make_missing_token(T_IDENTIFIER_STRING), // Name
                RawSyntax::missing(SyntaxKind::InitializerClause), // InitializerClause
             }, SourcePresence::Present, arena);
-   return make<ConstDeclareItemSyntax>(target);
+   return make<ConstDeclareSyntax>(target);
 }
 
 ConstDefinitionStmtSyntax

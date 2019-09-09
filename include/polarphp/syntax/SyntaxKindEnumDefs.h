@@ -227,7 +227,7 @@ enum class SyntaxKind : std::uint32_t
    HaltCompilerStmt,
    GlobalVariableListItem,
    GlobalVariableDeclarationsStmt,
-   StaticVariableListItem,
+   StaticVariableDeclare,
    StaticVariableDeclarationsStmt,
 
    NamespaceUseType,
@@ -243,7 +243,7 @@ enum class SyntaxKind : std::uint32_t
    NamespaceDefinitionStmt,
    NamespaceBlockStmt,
 
-   ConstDeclareItem,
+   ConstDeclare,
    ConstListItem,
    ConstDefinitionStmt,
 

@@ -49,11 +49,11 @@ static const std::unordered_map<SyntaxKind, std::set<SyntaxKind>> scg_collection
     { SyntaxKind::CatchArgTypeHintList, { SyntaxKind::CatchArgTypeHintItem }},
     { SyntaxKind::UnsetVariableList, { SyntaxKind::UnsetVariable }},
     { SyntaxKind::GlobalVariableList, { SyntaxKind::GlobalVariableListItem }},
-    { SyntaxKind::StaticVariableList, { SyntaxKind::StaticVariableListItem }},
+    { SyntaxKind::StaticVariableList, { SyntaxKind::StaticVariableDeclare }},
     { SyntaxKind::NamespaceUseDeclarationList, { SyntaxKind::NamespaceUseDeclaration }},
     { SyntaxKind::NamespaceInlineUseDeclarationList, { SyntaxKind::NamespaceInlineUseDeclaration }},
     { SyntaxKind::NamespaceUnprefixedUseDeclarationList, { SyntaxKind::NamespaceUnprefixedUseDeclaration }},
-    { SyntaxKind::ConstDeclareList, { SyntaxKind::ConstDeclareItem }},
+    { SyntaxKind::ConstDeclareList, { SyntaxKind::ConstDeclare }},
 };
 } // anonymous namespace
 
