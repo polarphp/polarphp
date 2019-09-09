@@ -157,11 +157,11 @@ StmtSyntaxNodeFactory::makeGlobalVariableList(
 
 StaticVariableListSyntax
 StmtSyntaxNodeFactory::makeStaticVariableList(
-      const std::vector<StaticVariableDeclareSyntax> &elements, RefCountPtr<SyntaxArena> arena)
+      const std::vector<StaticVariableListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
-   for (const StaticVariableDeclareSyntax &element : elements) {
+   for (const StaticVariableListItemSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -765,7 +765,7 @@ StmtSyntaxNodeFactory::makeGlobalVariableDeclarationsStmt(TokenSyntax globalToke
 
 StaticVariableDeclareSyntax
 StmtSyntaxNodeFactory::makeStaticVariableDeclare(TokenSyntax variable, TokenSyntax equalToken,
-                                                  ExprSyntax valueExpr, RefCountPtr<SyntaxArena> arena)
+                                                 ExprSyntax valueExpr, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::StaticVariableDeclare, {
@@ -774,6 +774,18 @@ StmtSyntaxNodeFactory::makeStaticVariableDeclare(TokenSyntax variable, TokenSynt
                valueExpr.getRaw(),
             }, SourcePresence::Present, arena);
    return make<StaticVariableDeclareSyntax>(target);
+}
+
+StaticVariableListItemSyntax
+StmtSyntaxNodeFactory::makeStaticVariableListItem(std::optional<TokenSyntax> comma, StaticVariableDeclareSyntax declaration,
+                                                  RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::StaticVariableListItem, {
+               comma.has_value() ? comma->getRaw() : nullptr,
+               declaration.getRaw(),
+            }, SourcePresence::Present, arena);
+   return make<StaticVariableListItemSyntax>(target);
 }
 
 StaticVariableDeclarationsStmtSyntax
@@ -961,7 +973,7 @@ StmtSyntaxNodeFactory::makeNamespaceBlockStmt(TokenSyntax nsToken, std::optional
 
 ConstDeclareSyntax
 StmtSyntaxNodeFactory::makeConstDeclare(TokenSyntax name, InitializerClauseSyntax initializerClause,
-                                            RefCountPtr<SyntaxArena> arena)
+                                        RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ConstDeclare, {
@@ -1652,6 +1664,17 @@ StmtSyntaxNodeFactory::makeBlankStaticVariableDeclare(RefCountPtr<SyntaxArena> a
    return make<StaticVariableDeclareSyntax>(target);
 }
 
+StaticVariableListItemSyntax
+StmtSyntaxNodeFactory::makeBlankStaticVariableListItem(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::StaticVariableListItem, {
+               nullptr, // Comma
+               RawSyntax::missing(SyntaxKind::StaticVariableDeclare), // Declaration
+            }, SourcePresence::Present, arena);
+   return make<StaticVariableListItemSyntax>(target);
+}
+
 StaticVariableDeclarationsStmtSyntax
 StmtSyntaxNodeFactory::makeBlankStaticVariableDeclarationsStmt(RefCountPtr<SyntaxArena> arena)
 {
@@ -1686,6 +1709,17 @@ StmtSyntaxNodeFactory::makeBlankNamespaceUnprefixedUseDeclaration(RefCountPtr<Sy
    return make<NamespaceUnprefixedUseDeclarationSyntax>(target);
 }
 
+NamespaceUnprefixedUseDeclarationListItemSyntax
+StmtSyntaxNodeFactory::makeBlankNamespaceUnprefixedUseDeclarationListItem(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::NamespaceUnprefixedUseDeclarationListItem, {
+               nullptr, // Comma
+               RawSyntax::missing(SyntaxKind::NamespaceUnprefixedUseDeclaration), // Declaration
+            }, SourcePresence::Present, arena);
+   return make<NamespaceUnprefixedUseDeclarationListItemSyntax>(target);
+}
+
 NamespaceUseDeclarationSyntax
 StmtSyntaxNodeFactory::makeBlankNamespaceUseDeclaration(RefCountPtr<SyntaxArena> arena)
 {
@@ -1697,6 +1731,17 @@ StmtSyntaxNodeFactory::makeBlankNamespaceUseDeclaration(RefCountPtr<SyntaxArena>
    return make<NamespaceUseDeclarationSyntax>(target);
 }
 
+NamespaceUseDeclarationListItemSyntax
+StmtSyntaxNodeFactory::makeBlankNamespaceUseDeclarationListItem(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::NamespaceUseDeclarationListItem, {
+               nullptr, // Comma
+               RawSyntax::missing(SyntaxKind::NamespaceUseDeclaration), // Declaration
+            }, SourcePresence::Present, arena);
+   return make<NamespaceUseDeclarationListItemSyntax>(target);
+}
+
 NamespaceInlineUseDeclarationSyntax
 StmtSyntaxNodeFactory::makeBlankNamespaceInlineUseDeclaration(RefCountPtr<SyntaxArena> arena)
 {
@@ -1706,6 +1751,17 @@ StmtSyntaxNodeFactory::makeBlankNamespaceInlineUseDeclaration(RefCountPtr<Syntax
                RawSyntax::missing(SyntaxKind::NamespaceUnprefixedUseDeclaration), // UnprefixedUseDeclaration
             }, SourcePresence::Present, arena);
    return make<NamespaceInlineUseDeclarationSyntax>(target);
+}
+
+NamespaceInlineUseDeclarationListItemSyntax
+StmtSyntaxNodeFactory::makeBlankNamespaceInlineUseDeclarationListItem(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::NamespaceInlineUseDeclarationListItem, {
+               nullptr, // Comma
+               RawSyntax::missing(SyntaxKind::NamespaceInlineUseDeclaration), // Declaration
+            }, SourcePresence::Present, arena);
+   return make<NamespaceInlineUseDeclarationListItemSyntax>(target);
 }
 
 NamespaceGroupUseDeclarationSyntax
@@ -1781,6 +1837,17 @@ StmtSyntaxNodeFactory::makeBlankConstDeclare(RefCountPtr<SyntaxArena> arena)
                RawSyntax::missing(SyntaxKind::InitializerClause), // InitializerClause
             }, SourcePresence::Present, arena);
    return make<ConstDeclareSyntax>(target);
+}
+
+ConstListItemSyntax
+StmtSyntaxNodeFactory::makeBlankConstListItem(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ConstListItem, {
+               nullptr, // Comma
+               RawSyntax::missing(SyntaxKind::ConstDeclare), // Declaration
+            }, SourcePresence::Present, arena);
+   return make<ConstListItemSyntax>(target);
 }
 
 ConstDefinitionStmtSyntax

@@ -2543,6 +2543,58 @@ private:
 };
 
 ///
+/// static_variable_list_item:
+///   ',' static_var
+///
+class StaticVariableListItemSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: true
+      ///
+      Comma,
+      ///
+      /// type: StaticVariableDeclareSyntax
+      /// optional: false
+      ///
+      Declaration,
+   };
+
+public:
+   StaticVariableListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getComma();
+   StaticVariableDeclareSyntax getDeclaration();
+
+   StaticVariableListItemSyntax withComma(std::optional<TokenSyntax> comma);
+   StaticVariableListItemSyntax withDeclaration(std::optional<TokenSyntax> declaration);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::StaticVariableListItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class StaticVariableListItemSyntaxBuilder;
+   void validate();
+};
+
+///
 /// static_variable_declarations_stmt:
 ///   T_STATIC static_var_list ';'
 ///

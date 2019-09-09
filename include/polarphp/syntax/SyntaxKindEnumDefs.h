@@ -228,6 +228,7 @@ enum class SyntaxKind : std::uint32_t
    GlobalVariableListItem,
    GlobalVariableDeclarationsStmt,
    StaticVariableDeclare,
+   StaticVariableListItem,
    StaticVariableDeclarationsStmt,
 
    NamespaceUseType,

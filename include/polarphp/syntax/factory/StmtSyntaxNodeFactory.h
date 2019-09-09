@@ -42,7 +42,7 @@ public:
    static GlobalVariableListSyntax makeGlobalVariableList(
          const std::vector<GlobalVariableListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static StaticVariableListSyntax makeStaticVariableList(
-         const std::vector<StaticVariableDeclareSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+         const std::vector<StaticVariableListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUseDeclarationListSyntax makeNamespaceUseDeclarationList(
          const std::vector<NamespaceUseDeclarationListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceInlineUseDeclarationListSyntax makeNamespaceInlineUseDeclarationList(
@@ -144,7 +144,9 @@ public:
    static GlobalVariableDeclarationsStmtSyntax makeGlobalVariableDeclarationsStmt(TokenSyntax globalToken, GlobalVariableListSyntax variables,
                                                                                   TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
    static StaticVariableDeclareSyntax makeStaticVariableDeclare(TokenSyntax variable, TokenSyntax equalToken,
-                                                                  ExprSyntax valueExpr, RefCountPtr<SyntaxArena> arena = nullptr);
+                                                                ExprSyntax valueExpr, RefCountPtr<SyntaxArena> arena = nullptr);
+   static StaticVariableListItemSyntax makeStaticVariableListItem(std::optional<TokenSyntax> comma, StaticVariableDeclareSyntax declaration,
+                                                                  RefCountPtr<SyntaxArena> arena = nullptr);
    static StaticVariableDeclarationsStmtSyntax makeStaticVariableDeclarationsStmt(TokenSyntax staticToken, StaticVariableListSyntax variables,
                                                                                   TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUseTypeSyntax makeNamespaceUseType(TokenSyntax typeToken, RefCountPtr<SyntaxArena> arena = nullptr);
@@ -184,7 +186,7 @@ public:
    static NamespaceBlockStmtSyntax makeNamespaceBlockStmt(TokenSyntax nsToken, std::optional<NamespaceNameSyntax> ns,
                                                           TopCodeBlockStmtSyntax codeBlock, RefCountPtr<SyntaxArena> arena = nullptr);
    static ConstDeclareSyntax makeConstDeclare(TokenSyntax name, InitializerClauseSyntax initializerClause,
-                                                      RefCountPtr<SyntaxArena> arena = nullptr);
+                                              RefCountPtr<SyntaxArena> arena = nullptr);
    static ConstListItemSyntax makeConstListItem(std::optional<TokenSyntax> comma, ConstDeclareSyntax declaration,
                                                 RefCountPtr<SyntaxArena> arena = nullptr);
    static ConstDefinitionStmtSyntax makeConstDefinitionStmt(TokenSyntax constToken, ConstDeclareListSyntax declarations,
@@ -252,17 +254,22 @@ public:
    static GlobalVariableListItemSyntax makeBlankGlobalVariableListItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static GlobalVariableDeclarationsStmtSyntax makeBlankGlobalVariableDeclarationsStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static StaticVariableDeclareSyntax makeBlankStaticVariableDeclare(RefCountPtr<SyntaxArena> arena = nullptr);
+   static StaticVariableListItemSyntax makeBlankStaticVariableListItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static StaticVariableDeclarationsStmtSyntax makeBlankStaticVariableDeclarationsStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUseTypeSyntax makeBlankNamespaceUseType(RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUnprefixedUseDeclarationSyntax makeBlankNamespaceUnprefixedUseDeclaration(RefCountPtr<SyntaxArena> arena = nullptr);
+   static NamespaceUnprefixedUseDeclarationListItemSyntax makeBlankNamespaceUnprefixedUseDeclarationListItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUseDeclarationSyntax makeBlankNamespaceUseDeclaration(RefCountPtr<SyntaxArena> arena = nullptr);
+   static NamespaceUseDeclarationListItemSyntax makeBlankNamespaceUseDeclarationListItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceInlineUseDeclarationSyntax makeBlankNamespaceInlineUseDeclaration(RefCountPtr<SyntaxArena> arena = nullptr);
+   static NamespaceInlineUseDeclarationListItemSyntax makeBlankNamespaceInlineUseDeclarationListItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceGroupUseDeclarationSyntax makeBlankNamespaceGroupUseDeclaration(RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceMixedGroupUseDeclarationSyntax makeBlankNamespaceMixedGroupUseDeclaration(RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUseStmtSyntax makeBlankNamespaceUseStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceDefinitionStmtSyntax makeBlankNamespaceDefinitionStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceBlockStmtSyntax makeBlankNamespaceBlockStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static ConstDeclareSyntax makeBlankConstDeclare(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ConstListItemSyntax makeBlankConstListItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static ConstDefinitionStmtSyntax makeBlankConstDefinitionStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassDefinitionStmtSyntax makeBlankClassDefinitionStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static InterfaceDefinitionStmtSyntax makeBlankInterfaceDefinitionStmt(RefCountPtr<SyntaxArena> arena = nullptr);

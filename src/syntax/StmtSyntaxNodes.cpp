@@ -3311,6 +3311,60 @@ StaticVariableDeclareSyntax::withValueExpr(std::optional<ExprSyntax> valueExpr)
 }
 
 ///
+/// StaticVariableListItemSyntax
+///
+void StaticVariableListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == StaticVariableListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Comma, std::set{TokenKindType::T_COMMA});
+   syntax_assert_child_kind(raw, Declaration, std::set{SyntaxKind::StaticVariableDeclare});
+#endif
+}
+
+std::optional<TokenSyntax> StaticVariableListItemSyntax::getComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::Comma);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+StaticVariableDeclareSyntax StaticVariableListItemSyntax::getDeclaration()
+{
+   return StaticVariableDeclareSyntax {m_root, m_data->getChild(Cursor::Declaration).get()};
+}
+
+StaticVariableListItemSyntax
+StaticVariableListItemSyntax::withComma(std::optional<TokenSyntax> comma)
+{
+   RefCountPtr<RawSyntax> commaExpr;
+   if (comma.has_value()) {
+      commaExpr = comma->getRaw();
+   } else {
+      commaExpr = nullptr;
+   }
+   return m_data->replaceChild<StaticVariableListItemSyntax>(commaExpr, Cursor::Comma);
+}
+
+StaticVariableListItemSyntax
+StaticVariableListItemSyntax::withDeclaration(std::optional<TokenSyntax> declaration)
+{
+   RefCountPtr<RawSyntax> declarationExpr;
+   if (declaration.has_value()) {
+      declarationExpr = declaration->getRaw();
+   } else {
+      declarationExpr = RawSyntax::missing(SyntaxKind::StaticVariableDeclare);
+   }
+   return m_data->replaceChild<StaticVariableListItemSyntax>(declarationExpr, Cursor::Declaration);
+}
+
+///
 /// StaticVariableDeclarationsStmtSyntax
 ///
 void StaticVariableDeclarationsStmtSyntax::validate()

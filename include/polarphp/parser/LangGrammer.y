@@ -671,14 +671,14 @@ use_declaration:
 const_list:
    const_list T_COMMA const_decl {
       ConstDeclareListSyntax list = make<ConstDeclareListSyntax>($1);
-      ConstDeclareItemSyntax constDecl = make<ConstDeclareItemSyntax>($3);
+      ConstDeclareSyntax constDecl = make<ConstDeclareSyntax>($3);
       TokenSyntax comma = make_token(CommaToken);
       ConstListItemSyntax constListItem = make_stmt(ConstListItem, comma, constDecl);
       list.appending(constListItem);
       $$ = list.getRaw();
    }
 |  const_decl {
-      ConstDeclareItemSyntax constDecl = make<ConstDeclareItemSyntax>($1);
+      ConstDeclareSyntax constDecl = make<ConstDeclareSyntax>($1);
       ConstListItemSyntax constListItem = make_stmt(ConstListItem, std::nullopt, constDecl);
       std::vector<ConstListItemSyntax> declarations{constListItem};
       ConstDeclareListSyntax list = make_stmt(ConstDeclareList, declarations);
@@ -1107,13 +1107,13 @@ static_var_list:
 
    }
 |  static_var {
-
+      
    }
 ;
 
 static_var:
    T_VARIABLE {
-
+      // StaticVariableDeclareSyntax variable = make_
    }
 |  T_VARIABLE T_EQUAL expr {
 
@@ -1315,7 +1315,7 @@ const_decl:
       TokenSyntax equalToken = make_token(EqualToken);
       ExprSyntax expr = make<ExprSyntax>($3);
       InitializerClauseSyntax initializer = make_decl(InitializerClause, equalToken, expr);
-      ConstDeclareItemSyntax constDecl = make_stmt(ConstDeclareItem, identifierToken, initializer);
+      ConstDeclareSyntax constDecl = make_stmt(ConstDeclare, identifierToken, initializer);
       $$ = constDecl.getRaw();
    }
 ;

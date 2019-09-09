@@ -56,6 +56,7 @@ class HaltCompilerStmtSyntax;
 class GlobalVariableListItemSyntax;
 class GlobalVariableDeclarationsStmtSyntax;
 class StaticVariableDeclareSyntax;
+class StaticVariableListItemSyntax;
 class StaticVariableDeclarationsStmtSyntax;
 
 class NamespaceUseTypeSyntax;
@@ -169,7 +170,7 @@ using GlobalVariableListSyntax = SyntaxCollection<SyntaxKind::GlobalVariableList
 ///   static_var_list ',' static_var
 /// | static_var
 ///
-using StaticVariableListSyntax = SyntaxCollection<SyntaxKind::StaticVariableList, StaticVariableDeclareSyntax>;
+using StaticVariableListSyntax = SyntaxCollection<SyntaxKind::StaticVariableList, StaticVariableListItemSyntax>;
 
 ///
 /// type: SyntaxCollection
