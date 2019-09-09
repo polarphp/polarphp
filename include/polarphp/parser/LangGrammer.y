@@ -512,19 +512,53 @@ use_type:
 
 group_use_declaration:
    namespace_name T_NS_SEPARATOR T_LEFT_BRACE unprefixed_use_declarations possible_comma T_RIGHT_BRACE {
-
+      NamespaceNameSyntax ns = make<NamespaceNameSyntax>($1);
+      TokenSyntax secondNsSeparator = make_token(NamespaceSeparatorToken);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      NamespaceUnprefixedUseDeclarationListSyntax declarations = make<NamespaceUnprefixedUseDeclarationListSyntax>($4);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      NamespaceGroupUseDeclarationSyntax groupUseDeclaration = make_stmt(NamespaceGroupUseDeclaration,
+         std::nullopt, ns, secondNsSeparator, leftParen, declarations, std::nullopt, rightParen
+      );
+      $$ = groupUseDeclaration.getRaw();
    }
 |  T_NS_SEPARATOR namespace_name T_NS_SEPARATOR T_LEFT_BRACE unprefixed_use_declarations possible_comma T_RIGHT_BRACE {
-
+      TokenSyntax firstNsSeparator = make_token(NamespaceSeparatorToken);
+      NamespaceNameSyntax ns = make<NamespaceNameSyntax>($2);
+      TokenSyntax secondNsSeparator = make_token(NamespaceSeparatorToken);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      NamespaceUnprefixedUseDeclarationListSyntax declarations = make<NamespaceUnprefixedUseDeclarationListSyntax>($5);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      NamespaceGroupUseDeclarationSyntax groupUseDeclaration = make_stmt(NamespaceGroupUseDeclaration,
+         firstNsSeparator, ns, secondNsSeparator, leftParen, declarations, std::nullopt, rightParen
+      );
+      $$ = groupUseDeclaration.getRaw();
    }
 ;
 
 mixed_group_use_declaration:
    namespace_name T_NS_SEPARATOR T_LEFT_BRACE inline_use_declarations possible_comma T_RIGHT_BRACE {
-
+      NamespaceNameSyntax ns = make<NamespaceNameSyntax>($1);
+      TokenSyntax secondNsSeparator = make_token(NamespaceSeparatorToken);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      NamespaceInlineUseDeclarationListSyntax declarations = make<NamespaceInlineUseDeclarationListSyntax>($4);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      NamespaceMixedGroupUseDeclarationSyntax groupUseDeclaration = make_stmt(NamespaceMixedGroupUseDeclaration,
+         std::nullopt, ns, secondNsSeparator, leftParen, declarations, std::nullopt, rightParen
+      );
+      $$ = groupUseDeclaration.getRaw();
    }
 |  T_NS_SEPARATOR namespace_name T_NS_SEPARATOR T_LEFT_BRACE inline_use_declarations possible_comma T_RIGHT_BRACE {
-
+      TokenSyntax firstNsSeparator = make_token(NamespaceSeparatorToken);
+      NamespaceNameSyntax ns = make<NamespaceNameSyntax>($2);
+      TokenSyntax secondNsSeparator = make_token(NamespaceSeparatorToken);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      NamespaceInlineUseDeclarationListSyntax declarations = make<NamespaceInlineUseDeclarationListSyntax>($5);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      NamespaceMixedGroupUseDeclarationSyntax groupUseDeclaration = make_stmt(NamespaceMixedGroupUseDeclaration,
+         firstNsSeparator, ns, secondNsSeparator, leftParen, declarations, std::nullopt, rightParen
+      );
+      $$ = groupUseDeclaration.getRaw();
    }
 ;
 

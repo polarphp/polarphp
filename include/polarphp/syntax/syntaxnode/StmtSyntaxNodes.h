@@ -2979,22 +2979,22 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_NS_SEPARATOR)
       /// optional: true
       ///
       FirstNsSeparator,
       ///
-      /// type: NamespacePartListSyntax
+      /// type: NamespaceNameSyntax
       /// optional: false
       ///
       Namespace,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_NS_SEPARATOR)
       /// optional: false
       ///
       SecondNsSeparator,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_LEFT_PAREN)
       /// optional: false
       ///
       LeftBrace,
@@ -3004,12 +3004,12 @@ public:
       ///
       UnprefixedUseDeclarations,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_COMMA)
       /// optional: true
       ///
       CommaToken,
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
       ///
       RightBrace
@@ -3053,6 +3053,11 @@ private:
    void validate();
 };
 
+///
+/// mixed_group_use_declaration:
+///   namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
+/// | T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
+///
 class NamespaceMixedGroupUseDeclarationSyntax final : public Syntax
 {
 public:
