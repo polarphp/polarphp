@@ -764,14 +764,14 @@ StmtSyntaxNodeFactory::makeGlobalVariableDeclarationsStmt(TokenSyntax globalToke
 }
 
 StaticVariableDeclareSyntax
-StmtSyntaxNodeFactory::makeStaticVariableDeclare(TokenSyntax variable, TokenSyntax equalToken,
-                                                 ExprSyntax valueExpr, RefCountPtr<SyntaxArena> arena)
+StmtSyntaxNodeFactory::makeStaticVariableDeclare(TokenSyntax variable, std::optional<TokenSyntax> equalToken,
+                                                 std::optional<ExprSyntax> valueExpr, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::StaticVariableDeclare, {
                variable.getRaw(),
-               equalToken.getRaw(),
-               valueExpr.getRaw(),
+               equalToken.has_value() ? equalToken->getRaw() : nullptr,
+               valueExpr.has_value() ? valueExpr->getRaw() : nullptr,
             }, SourcePresence::Present, arena);
    return make<StaticVariableDeclareSyntax>(target);
 }

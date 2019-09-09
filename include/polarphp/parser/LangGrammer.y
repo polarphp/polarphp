@@ -1104,19 +1104,34 @@ global_var:
 
 static_var_list:
    static_var_list T_COMMA static_var {
-
+      StaticVariableListSyntax list = make<StaticVariableListSyntax>($1);
+      TokenSyntax comma = make_token(CommaToken);
+      StaticVariableDeclareSyntax staticVar = make<StaticVariableDeclareSyntax>($3);
+      StaticVariableListItemSyntax listItem = make_stmt(StaticVariableListItem, comma, staticVar);
+      list.appending(listItem);
+      $$ = list.getRaw();
    }
 |  static_var {
-      
+      StaticVariableDeclareSyntax staticVar = make<StaticVariableDeclareSyntax>($1);
+      StaticVariableListItemSyntax listItem = make_stmt(StaticVariableListItem, std::nullopt, staticVar);
+      std::vector<StaticVariableListItemSyntax> items{listItem};
+      StaticVariableListSyntax list = make_stmt(StaticVariableList, items);
+      $$ = list.getRaw();
    }
 ;
 
 static_var:
    T_VARIABLE {
-      // StaticVariableDeclareSyntax variable = make_
+      TokenSyntax variableToken = make_token_with_text(Variable, $1);
+      StaticVariableDeclareSyntax staticVar = make_stmt(StaticVariableDeclare, variableToken, std::nullopt, std::nullopt);
+      $$ = staticVar.getRaw();
    }
 |  T_VARIABLE T_EQUAL expr {
-
+      TokenSyntax variableToken = make_token_with_text(Variable, $1);
+      TokenSyntax equalToken = make_token(EqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      StaticVariableDeclareSyntax staticVar = make_stmt(StaticVariableDeclare, variableToken, equalToken, valueExpr);
+      $$ = staticVar.getRaw();
    }
 ;
 

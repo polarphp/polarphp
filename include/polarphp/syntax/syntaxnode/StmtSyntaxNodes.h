@@ -2503,7 +2503,7 @@ public:
       Variable,
       ///
       /// type: TokenSyntax (T_EQUAL)
-      /// optional: false
+      /// optional: true
       ///
       EqualToken,
       ///

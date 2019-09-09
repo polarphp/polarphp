@@ -143,8 +143,8 @@ public:
                                                                   RefCountPtr<SyntaxArena> arena = nullptr);
    static GlobalVariableDeclarationsStmtSyntax makeGlobalVariableDeclarationsStmt(TokenSyntax globalToken, GlobalVariableListSyntax variables,
                                                                                   TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
-   static StaticVariableDeclareSyntax makeStaticVariableDeclare(TokenSyntax variable, TokenSyntax equalToken,
-                                                                ExprSyntax valueExpr, RefCountPtr<SyntaxArena> arena = nullptr);
+   static StaticVariableDeclareSyntax makeStaticVariableDeclare(TokenSyntax variable, std::optional<TokenSyntax> equalToken,
+                                                                std::optional<ExprSyntax> valueExpr, RefCountPtr<SyntaxArena> arena = nullptr);
    static StaticVariableListItemSyntax makeStaticVariableListItem(std::optional<TokenSyntax> comma, StaticVariableDeclareSyntax declaration,
                                                                   RefCountPtr<SyntaxArena> arena = nullptr);
    static StaticVariableDeclarationsStmtSyntax makeStaticVariableDeclarationsStmt(TokenSyntax staticToken, StaticVariableListSyntax variables,
