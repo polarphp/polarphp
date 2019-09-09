@@ -234,6 +234,7 @@ enum class SyntaxKind : std::uint32_t
    NamespaceUnprefixedUseDeclaration,
    NamespaceUnprefixedUseDeclarationListItem,
    NamespaceUseDeclaration,
+   NamespaceUseDeclarationListItem,
    NamespaceInlineUseDeclaration,
    NamespaceInlineUseDeclarationListItem,
    NamespaceGroupUseDeclaration,

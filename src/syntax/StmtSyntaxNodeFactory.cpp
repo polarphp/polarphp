@@ -172,11 +172,11 @@ StmtSyntaxNodeFactory::makeStaticVariableList(
 
 NamespaceUseDeclarationListSyntax
 StmtSyntaxNodeFactory::makeNamespaceUseDeclarationList(
-      const std::vector<NamespaceUseDeclarationSyntax> &elements, RefCountPtr<SyntaxArena> arena)
+      const std::vector<NamespaceUseDeclarationListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
-   for (const NamespaceUseDeclarationSyntax &element : elements) {
+   for (const NamespaceUseDeclarationListItemSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -187,11 +187,11 @@ StmtSyntaxNodeFactory::makeNamespaceUseDeclarationList(
 
 NamespaceInlineUseDeclarationListSyntax
 StmtSyntaxNodeFactory::makeNamespaceInlineUseDeclarationList(
-      const std::vector<NamespaceInlineUseDeclarationSyntax> &elements, RefCountPtr<SyntaxArena> arena)
+      const std::vector<NamespaceInlineUseDeclarationListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
-   for (const NamespaceInlineUseDeclarationSyntax &element : elements) {
+   for (const NamespaceInlineUseDeclarationListItemSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -202,11 +202,11 @@ StmtSyntaxNodeFactory::makeNamespaceInlineUseDeclarationList(
 
 NamespaceUnprefixedUseDeclarationListSyntax
 StmtSyntaxNodeFactory::makeNamespaceUnprefixedUseDeclarationList(
-      const std::vector<NamespaceUnprefixedUseDeclarationSyntax> &elements, RefCountPtr<SyntaxArena> arena)
+      const std::vector<NamespaceUnprefixedUseDeclarationListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
-   for (const NamespaceUnprefixedUseDeclarationSyntax &element : elements) {
+   for (const NamespaceUnprefixedUseDeclarationListItemSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -813,6 +813,19 @@ StmtSyntaxNodeFactory::makeNamespaceUnprefixedUseDeclaration(
    return make<NamespaceUnprefixedUseDeclarationSyntax>(target);
 }
 
+NamespaceUnprefixedUseDeclarationListItemSyntax
+StmtSyntaxNodeFactory::makeNamespaceUnprefixedUseDeclarationListItem(
+      std::optional<TokenSyntax> comma, NamespaceUnprefixedUseDeclarationSyntax declaration,
+      RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::NamespaceUnprefixedUseDeclarationListItem, {
+               comma.has_value() ? comma->getRaw() : nullptr,
+               declaration.getRaw()
+            }, SourcePresence::Present, arena);
+   return make<NamespaceUnprefixedUseDeclarationListItemSyntax>(target);
+}
+
 NamespaceUseDeclarationSyntax
 StmtSyntaxNodeFactory::makeNamespaceUseDeclaration(
       std::optional<TokenSyntax> nsSeparator, NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDeclaration,
@@ -826,6 +839,19 @@ StmtSyntaxNodeFactory::makeNamespaceUseDeclaration(
    return make<NamespaceUseDeclarationSyntax>(target);
 }
 
+NamespaceUseDeclarationListItemSyntax
+StmtSyntaxNodeFactory::makeNamespaceUseDeclarationListItem(
+      std::optional<TokenSyntax> comma, NamespaceUseDeclarationSyntax declaration,
+      RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::NamespaceUseDeclaration, {
+               comma.has_value() ? comma->getRaw() : nullptr,
+               declaration.getRaw(),
+            }, SourcePresence::Present, arena);
+   return make<NamespaceUseDeclarationListItemSyntax>(target);
+}
+
 NamespaceInlineUseDeclarationSyntax
 StmtSyntaxNodeFactory::makeNamespaceInlineUseDeclaration(
       std::optional<NamespaceUseTypeSyntax> useType, NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDeclaration,
@@ -837,6 +863,19 @@ StmtSyntaxNodeFactory::makeNamespaceInlineUseDeclaration(
                unprefixedUseDeclaration.getRaw(),
             }, SourcePresence::Present, arena);
    return make<NamespaceInlineUseDeclarationSyntax>(target);
+}
+
+NamespaceInlineUseDeclarationListItemSyntax
+StmtSyntaxNodeFactory::makeNamespaceInlineUseDeclarationListItem(
+      std::optional<TokenSyntax> comma, NamespaceInlineUseDeclarationSyntax declaration,
+      RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::NamespaceInlineUseDeclarationListItem, {
+               comma.has_value() ? comma->getRaw() : nullptr,
+               declaration.getRaw(),
+            }, SourcePresence::Present, arena);
+   return make<NamespaceInlineUseDeclarationListItemSyntax>(target);
 }
 
 NamespaceGroupUseDeclarationSyntax

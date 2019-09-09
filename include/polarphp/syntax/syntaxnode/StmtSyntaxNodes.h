@@ -2728,7 +2728,7 @@ public:
       /// type: TokenSyntax (T_COMMA)
       /// optional: true
       ///
-      Comma,
+      CommaToken,
       ///
       /// type: NamespaceUnprefixedUseDeclarationSyntax
       /// optional: false
@@ -2747,7 +2747,7 @@ public:
    NamespaceUnprefixedUseDeclarationSyntax getNamespaceUseDeclaration();
 
    NamespaceUnprefixedUseDeclarationListItemSyntax withCommaToken(std::optional<TokenSyntax> comma);
-   NamespaceUnprefixedUseDeclarationListItemSyntax withNamespaceUseDeclaration(std::optional<NamespaceUnprefixedUseDeclarationSyntax> useDecl);
+   NamespaceUnprefixedUseDeclarationListItemSyntax withNamespaceUseDeclaration(std::optional<NamespaceUnprefixedUseDeclarationSyntax> declaration);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -2776,7 +2776,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax
+      /// type: TokenSyntax (T_NS_SEPARATOR)
       /// optional: true
       ///
       NsSeparator,
@@ -2811,6 +2811,59 @@ public:
 
 private:
    friend class UseDeclarationSyntaxBuilder;
+   void validate();
+};
+
+///
+/// namespace_use_declaration_list_item:
+///   ',' use_declaration
+///
+class NamespaceUseDeclarationListItemSyntax : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: true
+      ///
+      CommaToken,
+      ///
+      /// type: NamespaceUseDeclarationSyntax
+      /// optional: false
+      ///
+      NamespaceUseDeclaration
+   };
+
+
+public:
+   NamespaceUseDeclarationListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getComma();
+   NamespaceUseDeclarationSyntax getNamespaceUseDeclaration();
+
+   NamespaceUseDeclarationListItemSyntax withComma(std::optional<TokenSyntax> comma);
+   NamespaceUseDeclarationListItemSyntax withNamespaceUseDeclaration(std::optional<NamespaceUseDeclarationSyntax> declaration);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::NamespaceUseDeclarationListItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class NamespaceUseDeclarationListItemSyntaxBuilder;
    void validate();
 };
 
@@ -2878,7 +2931,7 @@ public:
       /// type: TokenSyntax (T_COMMA)
       /// optional: true
       ///
-      Comma,
+      CommaToken,
       ///
       /// type: NamespaceInlineUseDeclarationSyntax
       /// optional: false
@@ -2897,7 +2950,7 @@ public:
    NamespaceInlineUseDeclarationSyntax getNamespaceUseDeclaration();
 
    NamespaceInlineUseDeclarationListItemSyntax withCommaToken(std::optional<TokenSyntax> comma);
-   NamespaceInlineUseDeclarationListItemSyntax withNamespaceUseDeclaration(std::optional<NamespaceInlineUseDeclarationSyntax> useDecl);
+   NamespaceInlineUseDeclarationListItemSyntax withNamespaceUseDeclaration(std::optional<NamespaceInlineUseDeclarationSyntax> declaration);
 
    static bool kindOf(SyntaxKind kind)
    {

@@ -62,6 +62,7 @@ class NamespaceUseTypeSyntax;
 class NamespaceUnprefixedUseDeclarationSyntax;
 class NamespaceUnprefixedUseDeclarationListItemSyntax;
 class NamespaceUseDeclarationSyntax;
+class NamespaceUseDeclarationListItemSyntax;
 class NamespaceInlineUseDeclarationSyntax;
 class NamespaceInlineUseDeclarationListItemSyntax;
 class NamespaceGroupUseDeclarationSyntax;
@@ -177,7 +178,7 @@ using StaticVariableListSyntax = SyntaxCollection<SyntaxKind::StaticVariableList
 ///   use_declarations ',' use_declaration
 /// | use_declaration
 ///
-using NamespaceUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUseDeclarationList, NamespaceUseDeclarationSyntax>;
+using NamespaceUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUseDeclarationList, NamespaceUseDeclarationListItemSyntax>;
 
 ///
 /// type: SyntaxCollection
@@ -187,7 +188,7 @@ using NamespaceUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::Namespace
 ///   inline_use_declarations ',' inline_use_declaration
 /// | inline_use_declaration
 ///
-using NamespaceInlineUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceInlineUseDeclarationList, NamespaceInlineUseDeclarationSyntax>;
+using NamespaceInlineUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceInlineUseDeclarationList, NamespaceInlineUseDeclarationListItemSyntax>;
 
 ///
 /// type: SyntaxCollection
@@ -197,7 +198,7 @@ using NamespaceInlineUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::Nam
 ///   unprefixed_use_declarations ',' unprefixed_use_declaration
 /// | unprefixed_use_declaration
 ///
-using NamespaceUnprefixedUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUnprefixedUseDeclarationList, NamespaceUnprefixedUseDeclarationSyntax>;
+using NamespaceUnprefixedUseDeclarationListSyntax = SyntaxCollection<SyntaxKind::NamespaceUnprefixedUseDeclarationList, NamespaceUnprefixedUseDeclarationListItemSyntax>;
 
 ///
 /// type: SyntaxCollection

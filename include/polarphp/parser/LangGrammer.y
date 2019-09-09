@@ -535,41 +535,68 @@ possible_comma:
 
 inline_use_declarations:
    inline_use_declarations T_COMMA inline_use_declaration {
-
+      NamespaceInlineUseDeclarationListSyntax list = make<NamespaceInlineUseDeclarationListSyntax>($1);
+      TokenSyntax commaToken = make_token(CommaToken);
+      NamespaceInlineUseDeclarationSyntax useDecl = make<NamespaceInlineUseDeclarationSyntax>($3);
+      NamespaceInlineUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceInlineUseDeclarationListItem, commaToken, useDecl);
+      list.appending(useDeclListItem);
+      $$ = list.getRaw();
    }
 |  inline_use_declaration {
-
+      NamespaceInlineUseDeclarationSyntax inlineUseDecl = make<NamespaceInlineUseDeclarationSyntax>($1);
+      NamespaceInlineUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceInlineUseDeclarationListItem, std::nullopt, inlineUseDecl);
+      std::vector<NamespaceInlineUseDeclarationListItemSyntax> declarations{useDeclListItem};
+      NamespaceInlineUseDeclarationListSyntax list = make_stmt(NamespaceInlineUseDeclarationList, declarations);
+      $$ = list.getRaw();
    }
 ;
 
 unprefixed_use_declarations:
    unprefixed_use_declarations T_COMMA unprefixed_use_declaration {
-
+      NamespaceUnprefixedUseDeclarationListSyntax list = make<NamespaceUnprefixedUseDeclarationListSyntax>($1);
+      TokenSyntax commaToken = make_token(CommaToken);
+      NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($3);
+      NamespaceUnprefixedUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceUnprefixedUseDeclarationListItem, commaToken, unprefixedUseDecl);
+      list.appending(useDeclListItem);
+      $$ = list.getRaw();
    }
 |  unprefixed_use_declaration {
-
+      NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($1);
+      NamespaceUnprefixedUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceUnprefixedUseDeclarationListItem, std::nullopt, unprefixedUseDecl);
+      std::vector<NamespaceUnprefixedUseDeclarationListItemSyntax> declarations{useDeclListItem};
+      NamespaceUnprefixedUseDeclarationListSyntax list = make_stmt(NamespaceUnprefixedUseDeclarationList, declarations);
+      $$ = list.getRaw();
    }
 ;
 
 use_declarations:
    use_declarations T_COMMA use_declaration {
-
+      NamespaceUseDeclarationListSyntax list = make<NamespaceUseDeclarationListSyntax>($1);
+      TokenSyntax commaToken = make_token(CommaToken);
+      NamespaceUseDeclarationSyntax useDecl = make<NamespaceUseDeclarationSyntax>($3);
+      NamespaceUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceUseDeclarationListItem, commaToken, useDecl);
+      list.appending(useDeclListItem);
+      $$ = list.getRaw();
    }
 |  use_declaration {
-
+      NamespaceUseDeclarationSyntax declaration = make<NamespaceUseDeclarationSyntax>($1);
+      NamespaceUseDeclarationListItemSyntax declarationListItem = make_stmt(NamespaceUseDeclarationListItem, std::nullopt, declaration);
+      std::vector<NamespaceUseDeclarationListItemSyntax> declarations{declarationListItem};
+      NamespaceUseDeclarationListSyntax list = make_stmt(NamespaceUseDeclarationList, declarations);
+      $$ = list.getRaw();
    }
 ;
 
 inline_use_declaration:
    unprefixed_use_declaration {
-      NamespaceUnprefixedUseDeclarationSyntax useDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($1);
-      NamespaceInlineUseDeclarationSyntax inlineUseDecl = make_stmt(NamespaceInlineUseDeclaration, std::nullopt, useDecl);
+      NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($1);
+      NamespaceInlineUseDeclarationSyntax inlineUseDecl = make_stmt(NamespaceInlineUseDeclaration, std::nullopt, unprefixedUseDecl);
       $$ = inlineUseDecl.getRaw();
    }
 |  use_type unprefixed_use_declaration {
       NamespaceUseTypeSyntax useType = make<NamespaceUseTypeSyntax>($1);
-      NamespaceUnprefixedUseDeclarationSyntax useDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($2);
-      NamespaceInlineUseDeclarationSyntax inlineUseDecl = make_stmt(NamespaceInlineUseDeclaration, useType, useDecl);
+      NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($2);
+      NamespaceInlineUseDeclarationSyntax inlineUseDecl = make_stmt(NamespaceInlineUseDeclaration, useType, unprefixedUseDecl);
       $$ = inlineUseDecl.getRaw();
    }
 ;
@@ -577,15 +604,15 @@ inline_use_declaration:
 unprefixed_use_declaration:
    namespace_name {
       NamespaceNameSyntax ns = make<NamespaceNameSyntax>($1);
-      NamespaceUnprefixedUseDeclarationSyntax useDecl = make_stmt(NamespaceUnprefixedUseDeclaration, ns, std::nullopt, std::nullopt);
-      $$ = useDecl.getRaw();
+      NamespaceUnprefixedUseDeclarationSyntax declaration = make_stmt(NamespaceUnprefixedUseDeclaration, ns, std::nullopt, std::nullopt);
+      $$ = declaration.getRaw();
    }
 |  namespace_name T_AS T_IDENTIFIER_STRING {
       NamespaceNameSyntax ns = make<NamespaceNameSyntax>($1);
       TokenSyntax asToken = make_token(AsKeyword);
       TokenSyntax identifierStr = make_token_with_text(IdentifierString, $3);
-      NamespaceUnprefixedUseDeclarationSyntax useDecl = make_stmt(NamespaceUnprefixedUseDeclaration, ns, asToken, identifierStr);
-      $$ = useDecl.getRaw();
+      NamespaceUnprefixedUseDeclarationSyntax declaration = make_stmt(NamespaceUnprefixedUseDeclaration, ns, asToken, identifierStr);
+      $$ = declaration.getRaw();
    }
 ;
 

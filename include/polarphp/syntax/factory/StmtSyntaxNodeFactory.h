@@ -44,11 +44,11 @@ public:
    static StaticVariableListSyntax makeStaticVariableList(
          const std::vector<StaticVariableListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUseDeclarationListSyntax makeNamespaceUseDeclarationList(
-         const std::vector<NamespaceUseDeclarationSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+         const std::vector<NamespaceUseDeclarationListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceInlineUseDeclarationListSyntax makeNamespaceInlineUseDeclarationList(
-         const std::vector<NamespaceInlineUseDeclarationSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+         const std::vector<NamespaceInlineUseDeclarationListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUnprefixedUseDeclarationListSyntax makeNamespaceUnprefixedUseDeclarationList(
-         const std::vector<NamespaceUnprefixedUseDeclarationSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+         const std::vector<NamespaceUnprefixedUseDeclarationListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static ConstDeclareItemListSyntax makeConstDeclareItemList(
          const std::vector<ConstDeclareItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
 
@@ -151,11 +151,20 @@ public:
    static NamespaceUnprefixedUseDeclarationSyntax makeNamespaceUnprefixedUseDeclaration(
          NamespaceNameSyntax ns, std::optional<TokenSyntax> asToken,
          std::optional<TokenSyntax> identifierToken, RefCountPtr<SyntaxArena> arena = nullptr);
+   static NamespaceUnprefixedUseDeclarationListItemSyntax makeNamespaceUnprefixedUseDeclarationListItem(
+         std::optional<TokenSyntax> comma, NamespaceUnprefixedUseDeclarationSyntax declaration,
+         RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceUseDeclarationSyntax makeNamespaceUseDeclaration(
          std::optional<TokenSyntax> nsSeparator, NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDeclaration,
          RefCountPtr<SyntaxArena> arena = nullptr);
+   static NamespaceUseDeclarationListItemSyntax makeNamespaceUseDeclarationListItem(
+         std::optional<TokenSyntax> comma, NamespaceUseDeclarationSyntax declaration,
+         RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceInlineUseDeclarationSyntax makeNamespaceInlineUseDeclaration(
          std::optional<NamespaceUseTypeSyntax> useType, NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDeclaration,
+         RefCountPtr<SyntaxArena> arena = nullptr);
+   static NamespaceInlineUseDeclarationListItemSyntax makeNamespaceInlineUseDeclarationListItem(
+         std::optional<TokenSyntax> comma, NamespaceInlineUseDeclarationSyntax declaration,
          RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceGroupUseDeclarationSyntax makeNamespaceGroupUseDeclaration(
          std::optional<TokenSyntax> firstNsSeparator, NamespaceNameSyntax ns,
