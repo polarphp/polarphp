@@ -844,10 +844,18 @@ catch_list:
 
 catch_name_list:
    name {
-
+      NameSyntax name = make<NameSyntax>($1);
+      CatchArgTypeHintItemSyntax typeHintItem = make_stmt(CatchArgTypeHintItem, std::nullopt, name);
+      std::vector<CatchArgTypeHintItemSyntax> hits{typeHintItem};
+      CatchArgTypeHintListSyntax list = make_stmt(CatchArgTypeHintList, hits);
+      $$ = list.getRaw();
    }
 |  catch_name_list T_VBAR name {
-
+      CatchArgTypeHintListSyntax list = make<CatchArgTypeHintListSyntax>($1);
+      TokenSyntax vbarToken = make_token(VerticalBarToken);
+      CatchArgTypeHintItemSyntax typeHintItem = make_stmt(CatchArgTypeHintItem, vbarToken, name);
+      list.appending(typeHintItem);
+      $$ = list.getRaw();
    }
 ;
 
@@ -862,16 +870,27 @@ finally_statement:
 
 unset_variables:
    unset_variable {
-
+      UnsetVariableSyntax unsetVar = make<UnsetVariableSyntax>($1);
+      UnsetVariableListItemSyntax listItem = make_stmt(UnsetVariableListItem, std::nullopt, unsetVar);
+      std::vector<UnsetVariableListItemSyntax> vars{listItem};
+      UnsetVariableListSyntax list = make_stmt(UnsetVariableList, vars);
+      $$ = list.getRaw();
    }
 |  unset_variables T_COMMA unset_variable {
-
+      UnsetVariableListSyntax list = make<UnsetVariableListSyntax>($1);
+      TokenSyntax comma = make_token(CommaToken);
+      UnsetVariableSyntax unsetVar = make<UnsetVariableSyntax>($3);
+      UnsetVariableListItemSyntax listItem = make_stmt(UnsetVariableListItem, comma, unsetVar);
+      list.appending(listItem);
+      $$ = list.getRaw();
    }
 ;
 
 unset_variable:
    variable {
-
+      VariableExprSyntax variable = make<VariableExprSyntax>($1);
+      UnsetVariableSyntax unsetVar = make_stmt(UnsetVariable, variable);
+      $$ = unsetVar.getRaw();
    }
 ;
 

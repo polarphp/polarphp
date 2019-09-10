@@ -2107,7 +2107,7 @@ private:
 
 ///
 /// catch_arg_type_hint_item:
-///   name '|'
+///   '|' name
 ///
 class CatchArgTypeHintItemSyntax final : public Syntax
 {
