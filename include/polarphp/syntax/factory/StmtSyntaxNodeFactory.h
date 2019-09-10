@@ -38,7 +38,7 @@ public:
    static CatchArgTypeHintListSyntax makeCatchArgTypeHintList(
          const std::vector<CatchArgTypeHintItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static UnsetVariableListSyntax makeUnsetVariableList(
-         const std::vector<UnsetVariableSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+         const std::vector<UnsetVariableListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static GlobalVariableListSyntax makeGlobalVariableList(
          const std::vector<GlobalVariableListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static StaticVariableListSyntax makeStaticVariableList(
@@ -70,8 +70,10 @@ public:
                                             StmtSyntax stmt, RefCountPtr<SyntaxArena> arena = nullptr);
    static GotoStmtSyntax makeGotoStmt(TokenSyntax gotoTokens, TokenSyntax target,
                                       TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
-   static UnsetVariableSyntax makeUnsetVariable(TokenSyntax variable, std::optional<TokenSyntax> trailingComma,
+   static UnsetVariableSyntax makeUnsetVariable(VariableExprSyntax variable,
                                                 RefCountPtr<SyntaxArena> arena = nullptr);
+   static UnsetVariableListItemSyntax makeUnsetVariableListItem(std::optional<TokenSyntax> comma, UnsetVariableSyntax variable,
+                                                                RefCountPtr<SyntaxArena> arena = nullptr);
    static UnsetStmtSyntax makeUnsetStmt(TokenSyntax unsetToken, TokenSyntax leftParen,
                                         UnsetVariableListSyntax unsetVariables, TokenSyntax rightParen,
                                         TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
@@ -227,6 +229,7 @@ public:
    static DeclareStmtSyntax makeBlankDeclareStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static GotoStmtSyntax makeBlankGotoStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static UnsetVariableSyntax makeBlankUnsetVariable(RefCountPtr<SyntaxArena> arena = nullptr);
+   static UnsetVariableSyntax makeBlankUnsetVariableListItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static UnsetStmtSyntax makeBlankUnsetStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static LabelStmtSyntax makeBlankLabelStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static ConditionElementSyntax makeBlankConditionElement(RefCountPtr<SyntaxArena> arena = nullptr);

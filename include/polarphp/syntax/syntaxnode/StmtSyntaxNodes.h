@@ -546,7 +546,7 @@ private:
 
 ///
 /// unset_variable:
-///   variable ','
+///   variable
 ///
 class UnsetVariableSyntax final : public Syntax
 {
@@ -556,15 +556,10 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax (T_VARIABLE)
+      /// type: VariableExprSyntax
       /// optional: false
       ///
       Variable,
-      ///
-      /// type: TokenSyntax (T_COMMA)
-      /// optional: true
-      ///
-      TrailingComma,
    };
 
 public:
@@ -574,11 +569,8 @@ public:
       validate();
    }
 
-   TokenSyntax getVariable();
-   std::optional<TokenSyntax> getTrailingComma();
-
-   UnsetVariableSyntax withVariable(std::optional<TokenSyntax> variable);
-   UnsetVariableSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
+   VariableExprSyntax getVariable();
+   UnsetVariableSyntax withVariable(std::optional<VariableExprSyntax> variable);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -592,6 +584,57 @@ public:
 
 private:
    friend class UnsetVariableSyntaxBuilder;
+   void validate();
+};
+
+///
+/// unset_variable_list_item:
+///   ',' variable
+///
+class UnsetVariableListItemSyntax final : public Syntax
+{
+public:
+   constexpr static unsigned int CHILDREN_COUNT = 2;
+   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: true
+      ///
+      CommaToken,
+      ///
+      /// type: UnsetVariableSyntax
+      /// optional: false
+      ///
+      Variable,
+   };
+
+public:
+   UnsetVariableListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getComma();
+   TokenSyntax getVariable();
+
+   UnsetVariableListItemSyntax withComma(std::optional<TokenSyntax> comma);
+   UnsetVariableListItemSyntax withVariable(std::optional<UnsetVariableSyntax> variable);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return SyntaxKind::UnsetVariableListItem == kind;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class UnsetVariableListItemSyntaxBuilder;
    void validate();
 };
 
@@ -2074,15 +2117,15 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
+      /// type: TokenSyntax (T_VBAR)
+      /// optional: true
+      ///
+      Separator,
+      ///
       /// type: NameSyntax
       /// optional: false
       ///
       TypeName,
-      ///
-      /// type: TokenSyntax (T_VBAR)
-      /// optional: true
-      ///
-      Separator
    };
 
 public:
@@ -2092,11 +2135,11 @@ public:
       validate();
    }
 
-   NameSyntax getTypeName();
    std::optional<TokenSyntax> getSeparator();
+   NameSyntax getTypeName();
 
-   CatchArgTypeHintItemSyntax withTypeName(std::optional<NameSyntax> typeName);
    CatchArgTypeHintItemSyntax withSeparator(std::optional<TokenSyntax> separator);
+   CatchArgTypeHintItemSyntax withTypeName(std::optional<NameSyntax> typeName);
 
    static bool kindOf(SyntaxKind kind)
    {

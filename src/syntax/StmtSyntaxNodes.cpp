@@ -599,27 +599,64 @@ void UnsetVariableSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == UnsetVariableSyntax::CHILDREN_COUNT);
-   syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
-   syntax_assert_child_token(raw, TrailingComma, std::set{TokenKindType::T_COMMA});
+   syntax_assert_child_kind(raw, Variable, std::set{SyntaxKind::VariableExpr});
+#endif
+}
+VariableExprSyntax UnsetVariableSyntax::getVariable()
+{
+
+}
+
+UnsetVariableSyntax UnsetVariableSyntax::withVariable(std::optional<VariableExprSyntax> variable)
+{
+
+}
+
+///
+/// UnsetVariableListItemSyntax
+///
+
+void UnsetVariableListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == UnsetVariableListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, CommaToken, std::set{TokenKindType::T_COMMA});
+   syntax_assert_child_kind(raw, Variable, std::set{SyntaxKind::UnsetVariable});
 #endif
 }
 
-TokenSyntax UnsetVariableSyntax::getVariable()
+std::optional<TokenSyntax> UnsetVariableListItemSyntax::getComma()
 {
-   return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
-}
-
-std::optional<TokenSyntax> UnsetVariableSyntax::getTrailingComma()
-{
-   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::TrailingComma);
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::CommaToken);
    if (!commaData) {
       return std::nullopt;
    }
    return TokenSyntax {m_root, commaData.get()};
 }
 
-UnsetVariableSyntax
-UnsetVariableSyntax::withVariable(std::optional<TokenSyntax> variable)
+TokenSyntax UnsetVariableListItemSyntax::getVariable()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
+}
+
+UnsetVariableListItemSyntax
+UnsetVariableListItemSyntax::withComma(std::optional<TokenSyntax> comma)
+{
+   RefCountPtr<RawSyntax> commaRaw;
+   if (comma.has_value()) {
+      commaRaw = comma->getRaw();
+   } else {
+      commaRaw = nullptr;
+   }
+   return m_data->replaceChild<UnsetVariableListItemSyntax>(commaRaw, Cursor::CommaToken);
+}
+
+UnsetVariableListItemSyntax
+UnsetVariableListItemSyntax::withVariable(std::optional<UnsetVariableSyntax> variable)
 {
    RefCountPtr<RawSyntax> rawVariable;
    if (variable.has_value()) {
@@ -627,19 +664,7 @@ UnsetVariableSyntax::withVariable(std::optional<TokenSyntax> variable)
    } else {
       rawVariable = make_missing_token(T_VARIABLE);
    }
-   return m_data->replaceChild<UnsetVariableSyntax>(rawVariable, Cursor::Variable);
-}
-
-UnsetVariableSyntax
-UnsetVariableSyntax::withTrailingComma(std::optional<TokenSyntax> trailingComma)
-{
-   RefCountPtr<RawSyntax> rawTrailingComma;
-   if (trailingComma.has_value()) {
-      rawTrailingComma = trailingComma->getRaw();
-   } else {
-      rawTrailingComma = nullptr;
-   }
-   return m_data->replaceChild<UnsetVariableSyntax>(rawTrailingComma, Cursor::TrailingComma);
+   return m_data->replaceChild<UnsetVariableListItemSyntax>(rawVariable, Cursor::Variable);
 }
 
 ///
@@ -2723,10 +2748,6 @@ void CatchArgTypeHintItemSyntax::validate()
 #endif
 }
 
-NameSyntax CatchArgTypeHintItemSyntax::getTypeName()
-{
-   return NameSyntax {m_root, m_data->getChild(Cursor::TypeName).get()};
-}
 
 std::optional<TokenSyntax> CatchArgTypeHintItemSyntax::getSeparator()
 {
@@ -2737,16 +2758,9 @@ std::optional<TokenSyntax> CatchArgTypeHintItemSyntax::getSeparator()
    return TokenSyntax {m_root, separatorData.get()};
 }
 
-CatchArgTypeHintItemSyntax
-CatchArgTypeHintItemSyntax::withTypeName(std::optional<NameSyntax> typeName)
+NameSyntax CatchArgTypeHintItemSyntax::getTypeName()
 {
-   RefCountPtr<RawSyntax> rawTypeName;
-   if (typeName.has_value()) {
-      rawTypeName = typeName->getRaw();
-   } else {
-      rawTypeName = RawSyntax::missing(SyntaxKind::Name);
-   }
-   return m_data->replaceChild<CatchArgTypeHintItemSyntax>(rawTypeName, Cursor::TypeName);
+   return NameSyntax {m_root, m_data->getChild(Cursor::TypeName).get()};
 }
 
 CatchArgTypeHintItemSyntax
@@ -2759,6 +2773,18 @@ CatchArgTypeHintItemSyntax::withSeparator(std::optional<TokenSyntax> separator)
       rawSeparator = nullptr;
    }
    return m_data->replaceChild<CatchArgTypeHintItemSyntax>(rawSeparator, Cursor::Separator);
+}
+
+CatchArgTypeHintItemSyntax
+CatchArgTypeHintItemSyntax::withTypeName(std::optional<NameSyntax> typeName)
+{
+   RefCountPtr<RawSyntax> rawTypeName;
+   if (typeName.has_value()) {
+      rawTypeName = typeName->getRaw();
+   } else {
+      rawTypeName = RawSyntax::missing(SyntaxKind::Name);
+   }
+   return m_data->replaceChild<CatchArgTypeHintItemSyntax>(rawTypeName, Cursor::TypeName);
 }
 
 ///

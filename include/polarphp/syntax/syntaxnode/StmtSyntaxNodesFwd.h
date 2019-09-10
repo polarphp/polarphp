@@ -27,6 +27,7 @@ class TopCodeBlockStmtSyntax;
 class DeclareStmtSyntax;
 class GotoStmtSyntax;
 class UnsetVariableSyntax;
+class UnsetVariableListItemSyntax;
 class UnsetStmtSyntax;
 class LabelStmtSyntax;
 class ConditionElementSyntax;
@@ -157,7 +158,7 @@ using CatchArgTypeHintListSyntax = SyntaxCollection<SyntaxKind::CatchArgTypeHint
 ///   unset_variable
 /// | unset_variables ',' unset_variable
 ///
-using UnsetVariableListSyntax = SyntaxCollection<SyntaxKind::UnsetVariableList, UnsetVariableSyntax>;
+using UnsetVariableListSyntax = SyntaxCollection<SyntaxKind::UnsetVariableList, UnsetVariableListItemSyntax>;
 
 ///
 /// static_var_list:

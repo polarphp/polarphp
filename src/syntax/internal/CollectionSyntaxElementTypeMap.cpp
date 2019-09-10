@@ -47,7 +47,7 @@ static const std::unordered_map<SyntaxKind, std::set<SyntaxKind>> scg_collection
     { SyntaxKind::TopStmtList, { SyntaxKind::TopStmt }},
     { SyntaxKind::CatchList, { SyntaxKind::CatchListItemClause }},
     { SyntaxKind::CatchArgTypeHintList, { SyntaxKind::CatchArgTypeHintItem }},
-    { SyntaxKind::UnsetVariableList, { SyntaxKind::UnsetVariable }},
+    { SyntaxKind::UnsetVariableList, { SyntaxKind::UnsetVariableListItem }},
     { SyntaxKind::GlobalVariableList, { SyntaxKind::GlobalVariableListItem }},
     { SyntaxKind::StaticVariableList, { SyntaxKind::StaticVariableListItem }},
     { SyntaxKind::NamespaceUseDeclarationList, { SyntaxKind::NamespaceUseDeclarationListItem }},

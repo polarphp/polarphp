@@ -200,6 +200,7 @@ enum class SyntaxKind : std::uint32_t
    DeclareStmt,
    GotoStmt,
    UnsetVariable,
+   UnsetVariableListItem,
    UnsetStmt,
    LabelStmt,
    ContinueStmt,

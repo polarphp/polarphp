@@ -127,11 +127,11 @@ StmtSyntaxNodeFactory::makeCatchArgTypeHintList(
 
 UnsetVariableListSyntax
 StmtSyntaxNodeFactory::makeUnsetVariableList(
-      const std::vector<UnsetVariableSyntax> &elements, RefCountPtr<SyntaxArena> arena)
+      const std::vector<UnsetVariableListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
-   for (const UnsetVariableSyntax &element : elements) {
+   for (const UnsetVariableListItemSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -344,15 +344,24 @@ StmtSyntaxNodeFactory::makeGotoStmt(TokenSyntax gotoTokens, TokenSyntax target,
 }
 
 UnsetVariableSyntax
-StmtSyntaxNodeFactory::makeUnsetVariable(TokenSyntax variable, std::optional<TokenSyntax> trailingComma,
-                                         RefCountPtr<SyntaxArena> arena)
+StmtSyntaxNodeFactory::makeUnsetVariable(VariableExprSyntax variable, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> targetSyntaxNode = RawSyntax::make(
             SyntaxKind::UnsetVariable, {
                variable.getRaw(),
-               trailingComma.has_value() ? trailingComma->getRaw() : nullptr,
             }, SourcePresence::Present, arena);
    return make<UnsetVariableSyntax>(targetSyntaxNode);
+}
+
+UnsetVariableListItemSyntax
+StmtSyntaxNodeFactory::makeUnsetVariableListItem(std::optional<TokenSyntax> comma, UnsetVariableSyntax variable, RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> targetSyntaxNode = RawSyntax::make(
+            SyntaxKind::UnsetVariableListItem, {
+               comma.has_value() ? comma->getRaw() : nullptr,
+               variable.getRaw(),
+            }, SourcePresence::Present, arena);
+   return make<UnsetVariableListItemSyntax>(targetSyntaxNode);
 }
 
 UnsetStmtSyntax
@@ -1285,8 +1294,18 @@ StmtSyntaxNodeFactory::makeBlankUnsetVariable(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::UnsetVariable, {
-               make_missing_token(T_VARIABLE), // Variable
-               nullptr // TrailingComma
+               RawSyntax::missing(SyntaxKind::VariableExpr), // Variable
+            }, SourcePresence::Present, arena);
+   return make<UnsetVariableSyntax>(target);
+}
+
+UnsetVariableSyntax
+StmtSyntaxNodeFactory::makeBlankUnsetVariableListItem(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::UnsetVariableListItem, {
+               nullptr, // comma
+               RawSyntax::missing(SyntaxKind::UnsetVariable), // Variable
             }, SourcePresence::Present, arena);
    return make<UnsetVariableSyntax>(target);
 }
