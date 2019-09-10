@@ -50,6 +50,7 @@ public:
                                                 TokenSyntax name, RefCountPtr<SyntaxArena> arena = nullptr);
    static NameSyntax makeName(std::optional<TokenSyntax> nsToken, std::optional<TokenSyntax> separator,
                               NamespaceNameSyntax namespaceName, RefCountPtr<SyntaxArena> arena = nullptr);
+   static NameListItemSyntax makeNameListItem(std::optional<TokenSyntax> comma, NameSyntax name, RefCountPtr<SyntaxArena> arena = nullptr);
    static InitializerClauseSyntax makeInitializerClause(TokenSyntax equalToken, ExprSyntax valueExpr, RefCountPtr<SyntaxArena> arena = nullptr);
    static TypeClauseSyntax makeTypeClause(Syntax type, RefCountPtr<SyntaxArena> arena = nullptr);
    static TypeExprClauseSyntax makeTypeExprClause(std::optional<TokenSyntax> questionToken, TypeClauseSyntax typeClause,
@@ -124,6 +125,7 @@ public:
    static IdentifierSyntax makeBlankIdentifier( RefCountPtr<SyntaxArena> arena = nullptr);
    static NamespaceNameSyntax makeBlankNamespacePart(RefCountPtr<SyntaxArena> arena = nullptr);
    static NameSyntax makeBlankName(RefCountPtr<SyntaxArena> arena = nullptr);
+   static NameListItemSyntax makeBlankNameListItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static InitializerClauseSyntax makeBlankInitializerClause(RefCountPtr<SyntaxArena> arena = nullptr);
    static TypeClauseSyntax makeBlankTypeClause(RefCountPtr<SyntaxArena> arena = nullptr);
    static TypeExprClauseSyntax makeBlankTypeExprClause(RefCountPtr<SyntaxArena> arena = nullptr);

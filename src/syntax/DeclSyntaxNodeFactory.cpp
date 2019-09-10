@@ -160,6 +160,17 @@ DeclSyntaxNodeFactory::makeName(std::optional<TokenSyntax> nsToken, std::optiona
    return make<NameSyntax>(target);
 }
 
+NameListItemSyntax
+DeclSyntaxNodeFactory::makeNameListItem(std::optional<TokenSyntax> comma, NameSyntax name,
+                                        RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::NameListItem, {
+                                                      comma.has_value() ? comma->getRaw() : nullptr,
+                                                      name.getRaw()
+                                                   }, SourcePresence::Present, arena);
+   return make<NameListItemSyntax>(target);
+}
+
 InitializerClauseSyntax
 DeclSyntaxNodeFactory::makeInitializerClause(TokenSyntax equalToken, ExprSyntax valueExpr, RefCountPtr<SyntaxArena> arena)
 {
@@ -605,6 +616,16 @@ NameSyntax DeclSyntaxNodeFactory::makeBlankName(RefCountPtr<SyntaxArena> arena)
                                                    },
                                                    SourcePresence::Present, arena);
    return make<NameSyntax>(target);
+}
+
+NameListItemSyntax DeclSyntaxNodeFactory::makeBlankNameListItem(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::NameListItem, {
+                                                      nullptr, // CommaToken
+                                                      RawSyntax::missing(SyntaxKind::Name) // Name
+                                                   },
+                                                   SourcePresence::Present, arena);
+   return make<NameListItemSyntax>(target);
 }
 
 InitializerClauseSyntax DeclSyntaxNodeFactory::makeBlankInitializerClause(RefCountPtr<SyntaxArena> arena)

@@ -37,6 +37,7 @@ enum class SyntaxKind : std::uint32_t
    TypeClause,
    TypeExprClause,
    Name,
+   NameListItem,
    ReturnTypeClause,
    InitializerClause, // for variable assign or initialize
    ParameterItem,

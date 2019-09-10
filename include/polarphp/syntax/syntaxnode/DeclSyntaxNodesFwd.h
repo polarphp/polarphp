@@ -22,6 +22,7 @@ class SemiReservedSytnax;
 class IdentifierSyntax;
 class NamespaceNameSyntax;
 class NameSyntax;
+class NameListItemSyntax;
 class TypeClauseSyntax;
 class TypeExprClauseSyntax;
 class ReturnTypeClauseSyntax;

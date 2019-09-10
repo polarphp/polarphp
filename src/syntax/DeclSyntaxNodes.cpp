@@ -310,6 +310,58 @@ NameSyntax NameSyntax::withNamespaceName(std::optional<NamespaceNameSyntax> ns)
 }
 
 ///
+/// NameListItemSyntax
+///
+void NameListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == NameSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, CommaToken, std::set{TokenKindType::T_COMMA});
+   syntax_assert_child_kind(raw, Name, std::set{SyntaxKind::Name});
+#endif
+}
+
+std::optional<TokenSyntax> NameListItemSyntax::getComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::CommaToken);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+NameSyntax NameListItemSyntax::getName()
+{
+   return NameSyntax {m_root, m_data->getChild(Cursor::Name).get()};
+}
+
+NameListItemSyntax NameListItemSyntax::withComma(std::optional<TokenSyntax> comma)
+{
+   RefCountPtr<RawSyntax> commaRaw;
+   if (comma.has_value()) {
+      commaRaw = comma->getRaw();
+   } else {
+      commaRaw = nullptr;
+   }
+   return m_data->replaceChild<NameListItemSyntax>(commaRaw, Cursor::CommaToken);
+}
+
+NameListItemSyntax NameListItemSyntax::withName(std::optional<NameSyntax> name)
+{
+   RefCountPtr<RawSyntax> nameRaw;
+   if (name.has_value()) {
+      nameRaw = name->getRaw();
+   } else {
+      nameRaw = RawSyntax::missing(SyntaxKind::NameListItem);
+   }
+   return m_data->replaceChild<NameListItemSyntax>(nameRaw, Cursor::Name);
+}
+
+///
 /// InitializerClauseSyntax
 ///
 void InitializerClauseSyntax::validate()

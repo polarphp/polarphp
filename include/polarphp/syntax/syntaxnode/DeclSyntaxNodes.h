@@ -300,6 +300,57 @@ private:
 };
 
 ///
+/// name_list_item:
+///   , name
+///
+class NameListItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: true
+      ///
+      CommaToken,
+
+      ///
+      /// type: NameSyntax
+      /// optional: false
+      ///
+      Name
+   };
+
+public:
+   NameListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getComma();
+   NameSyntax getName();
+
+   NameListItemSyntax withComma(std::optional<TokenSyntax> comma);
+   NameListItemSyntax withName(std::optional<NameSyntax> name);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::NameListItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class NameListItemSyntaxBuilder;
+   void validate();
+};
+
+///
 /// = expr
 ///
 class InitializerClauseSyntax final : public Syntax
