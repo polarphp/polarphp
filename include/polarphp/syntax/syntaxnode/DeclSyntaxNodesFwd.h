@@ -67,7 +67,7 @@ using TopStmtListSyntax = SyntaxCollection<SyntaxKind::TopStmtList, TopStmtSynta
 ///   name
 /// |	name_list ',' name
 ///
-using NameListSyntax = SyntaxCollection<SyntaxKind::NameList, NameSyntax>;
+using NameListSyntax = SyntaxCollection<SyntaxKind::NameList, NameListItemSyntax>;
 
 ///
 /// type: SyntaxCollection

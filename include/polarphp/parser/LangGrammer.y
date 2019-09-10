@@ -1206,10 +1206,19 @@ class_statement:
 
 name_list:
    name {
-
+      NameSyntax name = make<NameSyntax>($1);
+      NameListItemSyntax listItem = make_decl(NameListItem, std::nullopt, name);
+      std::vector<NameListItemSyntax> names{listItem};
+      NameListSyntax list = make_decl(NameList, names);
+      $$ = list.getRaw();
    }
 |  name_list T_COMMA name {
-
+      NameListSyntax list = make<NameListSyntax>($1);
+      TokenSyntax comma = make_token(CommaToken);
+      NameSyntax name = make<NameSyntax>($3);
+      NameListItemSyntax listItem = make_decl(NameListItem, comma, name);
+      list.appending(listItem);
+      $$ = list.getRaw();
    }
 ;
 

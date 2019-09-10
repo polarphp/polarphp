@@ -20,7 +20,7 @@ namespace {
 using CollectionElementTypeChoicesMap = const std::unordered_map<SyntaxKind, std::set<SyntaxKind>>;
 static const std::unordered_map<SyntaxKind, std::set<SyntaxKind>> scg_collectionElementTypeChoicesMap{
     // decl syntax colloection
-    { SyntaxKind::NameList, { SyntaxKind::Name }},
+    { SyntaxKind::NameList, { SyntaxKind::NameListItem }},
     { SyntaxKind::NamespaceName, { SyntaxKind::NamespaceName }},
     { SyntaxKind::ParameterList, { SyntaxKind::ParameterItem }},
     { SyntaxKind::ClassModifierList, { SyntaxKind::ClassModifier }},
@@ -49,11 +49,11 @@ static const std::unordered_map<SyntaxKind, std::set<SyntaxKind>> scg_collection
     { SyntaxKind::CatchArgTypeHintList, { SyntaxKind::CatchArgTypeHintItem }},
     { SyntaxKind::UnsetVariableList, { SyntaxKind::UnsetVariable }},
     { SyntaxKind::GlobalVariableList, { SyntaxKind::GlobalVariableListItem }},
-    { SyntaxKind::StaticVariableList, { SyntaxKind::StaticVariableDeclare }},
-    { SyntaxKind::NamespaceUseDeclarationList, { SyntaxKind::NamespaceUseDeclaration }},
-    { SyntaxKind::NamespaceInlineUseDeclarationList, { SyntaxKind::NamespaceInlineUseDeclaration }},
-    { SyntaxKind::NamespaceUnprefixedUseDeclarationList, { SyntaxKind::NamespaceUnprefixedUseDeclaration }},
-    { SyntaxKind::ConstDeclareList, { SyntaxKind::ConstDeclare }},
+    { SyntaxKind::StaticVariableList, { SyntaxKind::StaticVariableListItem }},
+    { SyntaxKind::NamespaceUseDeclarationList, { SyntaxKind::NamespaceUseDeclarationListItem }},
+    { SyntaxKind::NamespaceInlineUseDeclarationList, { SyntaxKind::NamespaceInlineUseDeclarationListItem }},
+    { SyntaxKind::NamespaceUnprefixedUseDeclarationList, { SyntaxKind::NamespaceUnprefixedUseDeclarationListItem }},
+    { SyntaxKind::ConstDeclareList, { SyntaxKind::ConstListItem }},
 };
 } // anonymous namespace
 

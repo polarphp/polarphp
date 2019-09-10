@@ -18,11 +18,11 @@ namespace polar::syntax {
 ///
 /// make collection nodes
 ///
-NameListSyntax DeclSyntaxNodeFactory::makeNameList(const std::vector<NameSyntax> &elements, RefCountPtr<SyntaxArena> arena)
+NameListSyntax DeclSyntaxNodeFactory::makeNameList(const std::vector<NameListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
-   for (const NameSyntax &item : elements) {
+   for (const NameListItemSyntax &item : elements) {
       layout.push_back(item.getRaw());
    }
    RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::NameList, layout, SourcePresence::Present, arena);

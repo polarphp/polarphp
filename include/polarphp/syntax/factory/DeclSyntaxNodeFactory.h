@@ -24,7 +24,7 @@ public:
    /// make collection nodes
    ///
    static NameListSyntax makeNameList(
-         const std::vector<NameSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+         const std::vector<NameListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static ParameterListSyntax makeParameterList(
          const std::vector<ParameterSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassModifierListSyntax makeClassModififerList(
