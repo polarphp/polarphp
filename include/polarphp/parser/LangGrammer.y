@@ -2189,16 +2189,27 @@ internal_functions_in_bison:
 
 isset_variables:
    isset_variable {
-
+      IssetVariableSyntax issetVar = make<IssetVariableSyntax>($1);
+      IssetVariableListItemSyntax issetListItem = make_expr(IssetVariableListItem, std::nullopt, issetVar);
+      std::vector<IssetVariableListItemSyntax> issetItems{issetListItem};
+      IssetVariablesListSyntax list = make_expr(IssetVariablesList, issetItems);
+      $$ = list.getRaw();
    }
 |  isset_variables T_COMMA isset_variable {
-
+      IssetVariablesListSyntax list = make<IssetVariablesListSyntax>($1);
+      TokenSyntax comma = make_token(CommaToken);
+      IssetVariableSyntax issetVar = make<IssetVariableSyntax>($3);
+      IssetVariableListItemSyntax issetListItem = make_expr(IssetVariableListItem, comma, issetVar);
+      list.appending(issetListItem);
+      $$ = list.getRaw();
    }
 ;
 
 isset_variable:
    expr {
-
+      ExprSyntax expr = make<ExprSyntax>($1);
+      IssetVariableSyntax issetVariable = make_expr(IssetVariable, expr);
+      $$ = issetVariable.getRaw();
    }
 ;
 %%
