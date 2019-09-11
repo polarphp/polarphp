@@ -1853,55 +1853,83 @@ dereferencable_scalar:
 scalar:
    T_LNUMBER {
       TokenSyntax lval = make_lnumber_token($1);
-      $$ = lval.getRaw();
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, lval);
+      $$ = scalarValue.getRaw();
    }
 |  T_DNUMBER {
       TokenSyntax dval = make_dnumber_token($1);
-      $$ = dval.getRaw();
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, dval);
+      $$ = scalarValue.getRaw();
    }
 |  T_LINE {
       TokenSyntax lineKeyword = make_token(LineKeyword);
-      $$ = lineKeyword.getRaw();
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, lineKeyword);
+      $$ = scalarValue.getRaw();
    }
 |  T_FILE {
       TokenSyntax fileKeyword = make_token(FileKeyword);
-      $$ = fileKeyword.getRaw();
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, fileKeyword);
+      $$ = scalarValue.getRaw();
    }
 |  T_DIR {
       TokenSyntax dirKeyword = make_token(DirKeyword);
-      $$ = dirKeyword.getRaw();
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, dirKeyword);
+      $$ = scalarValue.getRaw();
    }
 |  T_TRAIT_CONST {
       TokenSyntax traitConstKeyword = make_token(TraitConstKeyword);
-      $$ = traitConstKeyword.getRaw();
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, traitConstKeyword);
+      $$ = scalarValue.getRaw();
    }
 |  T_METHOD_CONST {
       TokenSyntax methodConstKeyword = make_token(MethodConstKeyword);
-      $$ = methodConstKeyword.getRaw();
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, methodConstKeyword);
+      $$ = scalarValue.getRaw();
    }
 |  T_FUNC_CONST {
       TokenSyntax funcConstKeyword = make_token(FuncConstKeyword);
-      $$ = funcConstKeyword.getRaw();
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, funcConstKeyword);
+      $$ = scalarValue.getRaw();
    }
 |  T_NS_CONST {
       TokenSyntax namespaceConstKeyword = make_token(NamespaceConstKeyword);
-      $$ = namespaceConstKeyword.getRaw();
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, namespaceConstKeyword);
+      $$ = scalarValue.getRaw();
    }
 |  T_CLASS_CONST {
       TokenSyntax classConstKeyword = make_token(ClassConstKeyword);
-      $$ = classConstKeyword.getRaw();
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, classConstKeyword);
+      $$ = scalarValue.getRaw();
    }
 |  T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC {
-
+      TokenSyntax startHeredoc = make_token(StartHereDoc);
+      TokenSyntax encapsStr = make_token_with_text(EncapsedAndWhitespace, $2);
+      TokenSyntax endHeredoc = make_token(EndHereDoc);
+      HeredocExprSyntax heredoc = make_expr(HeredocExpr, startHeredoc, encapsStr, endHeredoc);
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, heredoc);
+      $$ = scalarValue.getRaw();
    }
 |  T_START_HEREDOC T_END_HEREDOC {
-
+      TokenSyntax startHeredoc = make_token(StartHereDoc);
+      TokenSyntax endHeredoc = make_token(EndHereDoc);
+      HeredocExprSyntax heredoc = make_expr(HeredocExpr, startHeredoc, std::nullopt, endHeredoc);
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, heredoc);
+      $$ = scalarValue.getRaw();
    }
 |  T_DOUBLE_QUOTE encaps_list T_DOUBLE_QUOTE {
-
+      TokenSyntax quote = make_token(DoubleStrQuoteToken);
+      EncapsItemListSyntax encapsList = make<EncapsItemListSyntax>($2);
+      EncapsListStringExprSyntax str = make_expr(EncapsListStringExpr, quote, encapsList, quote);
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, str);
+      $$ = scalarValue.getRaw();
    }
 |  T_START_HEREDOC encaps_list T_END_HEREDOC {
-
+      TokenSyntax startHeredoc = make_token(StartHereDoc);
+      EncapsItemListSyntax encapsList = make<EncapsItemListSyntax>($2);
+      TokenSyntax endHeredoc = make_token(EndHereDoc);
+      HeredocExprSyntax heredoc = make_expr(HeredocExpr, startHeredoc, encapsList, endHeredoc);
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, heredoc);
+      $$ = scalarValue.getRaw();
    }
 |  dereferencable_scalar {
 
@@ -2111,16 +2139,34 @@ array_pair:
 
 encaps_list:
    encaps_list encaps_var {
-
+      EncapsItemListSyntax list = make<EncapsItemListSyntax>($1);
+      EncapsVariableSyntax encapsVar = make<EncapsVariableSyntax>($2);
+      EncapsListItemSyntax listItem = make_expr(EncapsListItem, std::nullopt, encapsVar);
+      list.appending(listItem);
+      $$ = list.getRaw();
    }
 |  encaps_list T_ENCAPSED_AND_WHITESPACE {
-
+      EncapsItemListSyntax list = make<EncapsItemListSyntax>($1);
+      TokenSyntax encapsStr = make_token_with_text(EncapsedAndWhitespace, $2);
+      EncapsListItemSyntax listItem = make_expr(EncapsListItem, encapsStr, std::nullopt);
+      list.appending(listItem);
+      $$ = list.getRaw();
    }
 |  encaps_var {
-
+      EncapsVariableSyntax encapsVar = make<EncapsVariableSyntax>($1);
+      EncapsListItemSyntax listItem = make_expr(EncapsListItem, std::nullopt, encapsVar);
+      std::vector<EncapsListItemSyntax> items{listItem};
+      EncapsItemListSyntax list = make_expr(EncapsItemList, items);
+      $$ = list.getRaw();
    }
 |  T_ENCAPSED_AND_WHITESPACE encaps_var {
-
+      TokenSyntax encapsStr = make_token_with_text(EncapsedAndWhitespace, $1);
+      EncapsVariableSyntax encapsVar = make<EncapsVariableSyntax>($2);
+      EncapsListItemSyntax strListItem = make_expr(EncapsListItem, encapsStr, std::nullopt);
+      EncapsListItemSyntax varListItem = make_expr(EncapsListItem, std::nullopt, encapsVar);
+      std::vector<EncapsListItemSyntax> items{strListItem, varListItem};
+      EncapsItemListSyntax list = make_expr(EncapsItemList, items);
+      $$ = list.getRaw();
    }
 ;
 

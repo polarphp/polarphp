@@ -5078,7 +5078,6 @@ private:
 };
 
 ///
-/// TODO
 /// encaps_list_item:
 ///   encaps_var
 /// | T_ENCAPSED_AND_WHITESPACE
@@ -5249,7 +5248,7 @@ private:
 /// encaps_list_str:
 ///   '"' encaps_list '"'
 ///
-class EncapsListStringExprSyntax final : ExprSyntax
+class EncapsListStringExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 3;
