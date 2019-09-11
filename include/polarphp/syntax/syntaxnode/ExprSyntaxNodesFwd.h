@@ -49,7 +49,8 @@ class BraceDecoratedExprClauseSyntax;
 class BraceDecoratedVariableExprSyntax;
 class ArrayKeyValuePairItemSyntax;
 class ArrayUnpackPairItemSyntax;
-class ArrayPairItemSyntax;
+class ArrayPairSyntax;
+class ArrayPairListItemSyntax;
 class ListRecursivePairItemSyntax;
 class ListPairItemSyntax;
 class SimpleVariableExprSyntax;
@@ -160,13 +161,13 @@ using LexicalVarListSyntax = SyntaxCollection<SyntaxKind::LexicalVarList, Lexica
 
 ///
 /// type: SyntaxCollection
-/// element type: ArrayPairItemSyntax
+/// element type: ArrayPairSyntax
 ///
 /// array_pair_item_list:
 ///   array_pair_item_list ',' array_pair_item
 /// | array_pair_item
 ///
-using ArrayPairItemListSyntax = SyntaxCollection<SyntaxKind::ArrayPairItemList, ArrayPairItemSyntax>;
+using ArrayPairListSyntax = SyntaxCollection<SyntaxKind::ArrayPairList, ArrayPairListItemSyntax>;
 
 ///
 /// type: SyntaxCollection

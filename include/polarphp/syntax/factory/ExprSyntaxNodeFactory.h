@@ -27,7 +27,7 @@ public:
    static ExprListSyntax makeExprList(const std::vector<ExprSyntax> elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static LexicalVarListSyntax makeLexicalVarList(const std::vector<LexicalVarItemSyntax> elements,
                                                   RefCountPtr<SyntaxArena> arena = nullptr);
-   static ArrayPairItemListSyntax makeArrayPairItemList(const std::vector<ArrayPairItemSyntax> elements,
+   static ArrayPairListSyntax makeArrayPairList(const std::vector<ArrayPairSyntax> elements,
                                                         RefCountPtr<SyntaxArena> arena = nullptr);
    static ListPairItemListSyntax makeListPairItemList(const std::vector<ListPairItemSyntax> elements,
                                                       RefCountPtr<SyntaxArena> arena = nullptr);
@@ -80,8 +80,8 @@ public:
                                                                 ExprSyntax value, RefCountPtr<SyntaxArena> arena = nullptr);
    static ArrayUnpackPairItemSyntax makeArrayUnpackPairItem(TokenSyntax ellipsisToken, ExprSyntax unpackExpr,
                                                             RefCountPtr<SyntaxArena> arena = nullptr);
-   static ArrayPairItemSyntax makeArrayPairItem(Syntax item, std::optional<TokenSyntax> trailingComma,
-                                                RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArrayPairSyntax makeArrayPair(Syntax item, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArrayPairSyntax makeArrayListItemPair(std::optional<TokenSyntax> comma, ArrayPairSyntax item, RefCountPtr<SyntaxArena> arena = nullptr);
    static ListRecursivePairItemSyntax makeListRecursivePairItem(std::optional<ExprSyntax> keyExpr, std::optional<TokenSyntax> doubleArrowToken,
                                                                 TokenSyntax listToken, TokenSyntax leftParen,
                                                                 ListPairItemListSyntax listPairItemList, TokenSyntax rightParen,
@@ -91,9 +91,9 @@ public:
    static SimpleVariableExprSyntax makeSimpleVariableExpr(std::optional<TokenSyntax> dollarSign, Syntax variable,
                                                           RefCountPtr<SyntaxArena> arena = nullptr);
    static ArrayCreateExprSyntax makeArrayCreateExpr(TokenSyntax arrayToken, TokenSyntax leftParen,
-                                                    ArrayPairItemListSyntax pairItemList, TokenSyntax rightParen,
+                                                    ArrayPairListSyntax pairItemList, TokenSyntax rightParen,
                                                     RefCountPtr<SyntaxArena> arena = nullptr);
-   static SimplifiedArrayCreateExprSyntax makeSimplifiedArrayCreateExpr(TokenSyntax leftSquareBracket, ArrayPairItemListSyntax pairItemList,
+   static SimplifiedArrayCreateExprSyntax makeSimplifiedArrayCreateExpr(TokenSyntax leftSquareBracket, ArrayPairListSyntax pairItemList,
                                                                         TokenSyntax rightSquareBracket, RefCountPtr<SyntaxArena> arena = nullptr);
    static ArrayAccessExprSyntax makeArrayAccessExpr(Syntax arrayRef, TokenSyntax leftSquareBracket,
                                                     Syntax offset, TokenSyntax rightSquareBracket,
@@ -160,7 +160,7 @@ public:
                                                                               TokenSyntax equalToken, ExprSyntax valueExpr,
                                                                               RefCountPtr<SyntaxArena> arena = nullptr);
    static ListStructureClauseSyntax makeListStructureClause(TokenSyntax listToken, TokenSyntax leftParen,
-                                                            ArrayPairItemListSyntax pairItemList, TokenSyntax rightParen,
+                                                            ArrayPairListSyntax pairItemList, TokenSyntax rightParen,
                                                             RefCountPtr<SyntaxArena> arena = nullptr);
    static ListStructureAssignmentExprSyntax makeListStructureAssignmentExpr(
          ListStructureClauseSyntax listStrcuture, TokenSyntax equalToken,
@@ -232,7 +232,7 @@ public:
    /// make blank nodes
    static ExprListSyntax makeBlankExprList(RefCountPtr<SyntaxArena> arena = nullptr);
    static LexicalVarListSyntax makeBlankLexicalVarList(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ArrayPairItemListSyntax makeBlankArrayPairItemList(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArrayPairListSyntax makeBlankArrayPairList(RefCountPtr<SyntaxArena> arena = nullptr);
    static ListPairItemListSyntax makeBlankListPairItemList(RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsItemListSyntax makeBlankEncapsItemList(RefCountPtr<SyntaxArena> arena = nullptr);
    static ArgumentListSyntax makeBlankArgumentList(RefCountPtr<SyntaxArena> arena = nullptr);
@@ -264,7 +264,8 @@ public:
    static BraceDecoratedVariableExprSyntax makeBlankBraceDecoratedVariableExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static ArrayKeyValuePairItemSyntax makeBlankArrayKeyValuePairItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static ArrayUnpackPairItemSyntax makeBlankArrayUnpackPairItem(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ArrayPairItemSyntax makeBlankArrayPairItem(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArrayPairSyntax makeBlankArrayPair(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArrayPairListItemSyntax makeBlankArrayPairListItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static ListRecursivePairItemSyntax makeBlankListRecursivePairItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static ListPairItemSyntax makeBlankListPairItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static SimpleVariableExprSyntax makeBlankSimpleVariableExpr(RefCountPtr<SyntaxArena> arena = nullptr);

@@ -2115,22 +2115,51 @@ non_empty_array_pair_list:
 
 array_pair:
    expr T_DOUBLE_ARROW expr {
-
+      ExprSyntax keyExpr = make<ExprSyntax>($1);
+      TokenSyntax arrow = make_token(DoubleArrowToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      ArrayKeyValuePairItemSyntax keyValuePair = make_expr(ArrayKeyValuePairItem, keyExpr, arrow, valueExpr);
+      ArrayPairSyntax arrayPair = make_expr(ArrayPair, keyValuePair);
+      $$ = arrayPair.getRaw();
    }
 |  expr {
-
+      ExprSyntax valueExpr = make<ExprSyntax>($1);
+      ArrayKeyValuePairItemSyntax keyValuePair = make_expr(ArrayKeyValuePairItem, std::nullopt, std::nullopt, valueExpr);
+      ArrayPairSyntax arrayPair = make_expr(ArrayPair, keyValuePair);
+      $$ = arrayPair.getRaw();
    }
 |  expr T_DOUBLE_ARROW T_AMPERSAND variable {
-
+      ExprSyntax keyExpr = make<ExprSyntax>($1);
+      TokenSyntax arrow = make_token(DoubleArrowToken);
+      TokenSyntax refToken = make_token(AmpersandToken);
+      VariableExprSyntax variable = make<VariableExprSyntax>($4);
+      ReferencedVariableExprSyntax refVariable = make_expr(ReferencedVariableExpr, refToken, variable);
+      ArrayKeyValuePairItemSyntax keyValuePair = make_expr(ArrayKeyValuePairItem, keyExpr, arrow, refVariable);
+      ArrayPairSyntax arrayPair = make_expr(ArrayPair, keyValuePair);
+      $$ = arrayPair.getRaw();
    }
 |  T_AMPERSAND variable {
-
+      TokenSyntax refToken = make_token(AmpersandToken);
+      VariableExprSyntax variable = make<VariableExprSyntax>($2);
+      ReferencedVariableExprSyntax refVariable = make_expr(ReferencedVariableExpr, refToken, variable);
+      ArrayKeyValuePairItemSyntax keyValuePair = make_expr(ArrayKeyValuePairItem, std::nullopt, std::nullopt, refVariable);
+      ArrayPairSyntax arrayPair = make_expr(ArrayPair, keyValuePair);
+      $$ = arrayPair.getRaw();
    }
 |  T_ELLIPSIS expr {
-
+      TokenSyntax ellipsisToken = make_token(EllipsisToken);
+      ExprSyntax expr = make<ExprSyntax>($2);
+      ArrayUnpackPairItemSyntax unpackPair = make_expr(ArrayUnpackPairItem, ellipsisToken, expr);
+      ArrayPairSyntax arrayPair = make_expr(ArrayPair, unpackPair);
+      $$ = arrayPair.getRaw();
    }
 |  expr T_DOUBLE_ARROW T_LIST T_LEFT_PAREN array_pair_list T_RIGHT_PAREN {
+      ExprSyntax keyExpr = make<ExprSyntax>($1);
+      TokenSyntax arrow = make_token(DoubleArrowToken);
+      TokenSyntax listKeyword = make_token(ListKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
 
+      TokenSyntax rightParen = make_token(LeftParenToken);
    }
 |  T_LIST T_LEFT_PAREN array_pair_list T_RIGHT_PAREN {
 

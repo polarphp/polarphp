@@ -1473,14 +1473,14 @@ private:
 };
 
 ///
-/// array_pair_item:
+/// array_pair:
 ///   array_key_value_pair_item
 /// | array_unpack_pair_item
 ///
-class ArrayPairItemSyntax final : public Syntax
+class ArrayPairSyntax final : public Syntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
@@ -1494,11 +1494,6 @@ public:
       /// node choice: ArrayUnpackPairItemSyntax
       ///
       Item,
-      ///
-      /// type: TokenSyntax (T_COMMA)
-      /// optional: true
-      ///
-      TrailingComma
    };
 
 #ifdef POLAR_DEBUG_BUILD
@@ -1506,21 +1501,19 @@ public:
 #endif
 
 public:
-   ArrayPairItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   ArrayPairSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
    }
 
    Syntax getItem();
-   std::optional<TokenSyntax> getTrailingComma();
 
-   ArrayPairItemSyntax withItem(std::optional<Syntax> item);
-   ArrayPairItemSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
+   ArrayPairSyntax withItem(std::optional<Syntax> item);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::ArrayPairItem;
+      return kind == SyntaxKind::ArrayPair;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -1529,7 +1522,58 @@ public:
    }
 
 private:
-   friend class ArrayPairItemSyntaxBuilder;
+   friend class ArrayPairSyntaxBuilder;
+   void validate();
+};
+
+///
+/// array_pair_list_item:
+///   ',' array_pair
+///
+class ArrayPairListItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: true
+      ///
+      CommaToken,
+      ///
+      /// type: ArrayPairSyntax
+      /// optional: false
+      ///
+      ArrayPair,
+   };
+
+public:
+   ArrayPairListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getComma();
+   ArrayPairSyntax getArrayPair();
+
+   ArrayPairListItemSyntax withComma(std::optional<TokenSyntax> comma);
+   ArrayPairListItemSyntax withArrayPair(std::optional<ArrayPairSyntax> arrayPair);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ArrayPairListItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ArrayPairListItemSyntaxBuilder;
    void validate();
 };
 
@@ -1630,7 +1674,7 @@ public:
       /// optional: false
       /// node choices: true
       /// ------------------------------------------
-      /// node choice: ArrayPairItemSyntax
+      /// node choice: ArrayPairSyntax
       /// ------------------------------------------
       /// node choice: ListRecursivePairItemSyntax
       ///
@@ -1750,7 +1794,7 @@ public:
       ///
       LeftParen,
       ///
-      /// type: ArrayPairItemListSyntax
+      /// type: ArrayPairListSyntax
       /// optional: false
       ///
       PairItemList,
@@ -1770,12 +1814,12 @@ public:
 
    TokenSyntax getArrayToken();
    TokenSyntax getLeftParen();
-   ArrayPairItemListSyntax getPairItemList();
+   ArrayPairListSyntax getPairItemList();
    TokenSyntax getRightParen();
 
    ArrayCreateExprSyntax withArrayToken(std::optional<TokenSyntax> arrayToken);
    ArrayCreateExprSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
-   ArrayCreateExprSyntax withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList);
+   ArrayCreateExprSyntax withPairItemList(std::optional<ArrayPairListSyntax> pairItemList);
    ArrayCreateExprSyntax withRightParen(std::optional<TokenSyntax> rightParen);
 
    static bool kindOf(SyntaxKind kind)
@@ -1810,7 +1854,7 @@ public:
       ///
       LeftSquareBracket,
       ///
-      /// type: ArrayPairItemListSyntax
+      /// type: ArrayPairListSyntax
       /// optional: false
       ///
       PairItemList,
@@ -1829,11 +1873,11 @@ public:
    }
 
    TokenSyntax getLeftSquareBracket();
-   ArrayPairItemListSyntax getPairItemList();
+   ArrayPairListSyntax getPairItemList();
    TokenSyntax getRightSquareBracket();
 
    SimplifiedArrayCreateExprSyntax withLeftSquareBracket(std::optional<TokenSyntax> leftSquareBracket);
-   SimplifiedArrayCreateExprSyntax withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList);
+   SimplifiedArrayCreateExprSyntax withPairItemList(std::optional<ArrayPairListSyntax> pairItemList);
    SimplifiedArrayCreateExprSyntax withRightSquareBracket(std::optional<TokenSyntax> rightSquareBracket);
 
    static bool kindOf(SyntaxKind kind)
@@ -3756,7 +3800,7 @@ public:
       ///
       LeftParen,
       ///
-      /// type: ArrayPairItemListSyntax
+      /// type: ArrayPairListSyntax
       /// optional: false
       ///
       PairItemList,
@@ -3776,12 +3820,12 @@ public:
 
    TokenSyntax getListToken();
    TokenSyntax getLeftParen();
-   ArrayPairItemListSyntax getPairItemList();
+   ArrayPairListSyntax getPairItemList();
    TokenSyntax getRightParen();
 
    ListStructureClauseSyntax withListToken(std::optional<TokenSyntax> listToken);
    ListStructureClauseSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
-   ListStructureClauseSyntax withPairItemList(std::optional<ArrayPairItemListSyntax> pairItemList);
+   ListStructureClauseSyntax withPairItemList(std::optional<ArrayPairListSyntax> pairItemList);
    ListStructureClauseSyntax withRightParen(std::optional<TokenSyntax> rightParen);
 
    static bool kindOf(SyntaxKind kind)

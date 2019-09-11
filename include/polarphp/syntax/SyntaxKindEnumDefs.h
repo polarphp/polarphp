@@ -107,7 +107,8 @@ enum class SyntaxKind : std::uint32_t
    BraceDecoratedVariableExpr,
    ArrayKeyValuePairItem,
    ArrayUnpackPairItem,
-   ArrayPairItem,
+   ArrayPair,
+   ArrayPairListItem,
    ListRecursivePairItem,
    ListPairItem,
    SimpleVariableExpr,
@@ -280,7 +281,7 @@ enum class SyntaxKind : std::uint32_t
    ClassModifierList,
    ClassTraitAdaptationList,
    /// for array
-   ArrayPairItemList,
+   ArrayPairList,
    ListPairItemList,
    MemberModifierList,
    MemberDeclList,
