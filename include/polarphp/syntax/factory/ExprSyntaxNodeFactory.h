@@ -144,9 +144,9 @@ public:
    static IssetVariableSyntax makeIssetVariable(ExprSyntax expr, RefCountPtr<SyntaxArena> arena = nullptr);
    static IssetVariableListItemSyntax makeIssetVariableListItem(std::optional<TokenSyntax> comma, IssetVariableSyntax variable,
                                                                 RefCountPtr<SyntaxArena> arena = nullptr);
-   static IsSetVariablesClauseSyntax makeIsSetVariablesClause(TokenSyntax leftParen, IssetVariablesListSyntax isSetVariablesList,
+   static IssetVariablesClauseSyntax makeIssetVariablesClause(TokenSyntax leftParen, IssetVariablesListSyntax isSetVariablesList,
                                                               TokenSyntax rightParen, RefCountPtr<SyntaxArena> arena = nullptr);
-   static IsSetFuncExprSyntax makeIsSetFuncExpr(TokenSyntax isSetToken, IsSetVariablesClauseSyntax isSetVariablesClause,
+   static IssetFuncExprSyntax makeIssetFuncExpr(TokenSyntax isSetToken, IssetVariablesClauseSyntax isSetVariablesClause,
                                                 RefCountPtr<SyntaxArena> arena = nullptr);
    static EmptyFuncExprSyntax makeEmptyFuncExpr(TokenSyntax emptyToken, ParenDecoratedExprSyntax argumentsClause,
                                                 RefCountPtr<SyntaxArena> arena = nullptr);
@@ -187,25 +187,25 @@ public:
    static YieldFromExprSyntax makeYieldFromExpr(TokenSyntax yieldFromToken, ExprSyntax expr,
                                                 RefCountPtr<SyntaxArena> arena = nullptr);
    static CloneExprSyntax makeCloneExpr(TokenSyntax cloneToken, ExprSyntax expr, RefCountPtr<SyntaxArena> arena = nullptr);
-   static EncapsVarOffsetSyntax makeEncapsVarOffset(std::optional<TokenSyntax> minusSign, TokenSyntax offset,
+   static EncapsVariableOffsetSyntax makeEncapsVariableOffset(std::optional<TokenSyntax> minusSign, TokenSyntax offset,
                                                     RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsArrayVarSyntax makeEncapsArrayVar(TokenSyntax varToken, TokenSyntax leftSquareBracket,
-                                                  EncapsVarOffsetSyntax offset, TokenSyntax rightSquareBracket,
+                                                  EncapsVariableOffsetSyntax offset, TokenSyntax rightSquareBracket,
                                                   RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsObjPropSyntax makeEncapsObjProp(TokenSyntax varToken, TokenSyntax objOperatorToken,
                                                 TokenSyntax identifierToken, RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsDollarCurlyExprSyntax makeEncapsDollarCurlyExpr(TokenSyntax dollarOpenCurlyToken, ExprSyntax expr,
                                                                 TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena = nullptr);
-   static EncapsDollarCurlyVarSyntax makeEncapsDollarCurlyVar(TokenSyntax dollarOpenCurlyToken, TokenSyntax varname,
+   static EncapsDollarCurlyVarSyntax makeEncapsDollarCurlyVariable(TokenSyntax dollarOpenCurlyToken, TokenSyntax varname,
                                                               TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsDollarCurlyArraySyntax makeEncapsDollarCurlyArray(TokenSyntax dollarOpenCurlyToken, TokenSyntax varname,
                                                                   TokenSyntax leftSquareBracket, ExprSyntax indexExpr,
                                                                   TokenSyntax rightSquareBracket, TokenSyntax closeCurlyToken,
                                                                   RefCountPtr<SyntaxArena> arena = nullptr);
-   static EncapsCurlyVarSyntax makeEncapsCurlyVar(TokenSyntax curlyOpen, TokenSyntax variable,
+   static EncapsCurlyVariableSyntax makeEncapsCurlyVariable(TokenSyntax curlyOpen, TokenSyntax variable,
                                                   TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena = nullptr);
-   static EncapsVarSyntax makeEncapsVar(Syntax var, RefCountPtr<SyntaxArena> arena = nullptr);
-   static EncapsListItemSyntax makeEncapsListItem(std::optional<TokenSyntax> strLiteral, std::optional<EncapsVarSyntax> encapsVar,
+   static EncapsVariableSyntax makeEncapsVariable(Syntax var, RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsListItemSyntax makeEncapsListItem(std::optional<TokenSyntax> strLiteral, std::optional<EncapsVariableSyntax> encapsVar,
                                                   RefCountPtr<SyntaxArena> arena = nullptr);
    static BackticksClauseSyntax makeBackticksClause(Syntax backticks, RefCountPtr<SyntaxArena> arena = nullptr);
    static HeredocExprSyntax makeHeredocExpr(TokenSyntax startHeredocToken, std::optional<Syntax> text,
@@ -293,8 +293,8 @@ public:
    static StringLiteralExprSyntax makeBlankStringLiteralExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static BooleanLiteralExprSyntax makeBlankBooleanLiteralExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static IssetVariableListItemSyntax makeBlankIssetVariableListItem(RefCountPtr<SyntaxArena> arena = nullptr);
-   static IsSetVariablesClauseSyntax makeBlankIsSetVariablesClause(RefCountPtr<SyntaxArena> arena = nullptr);
-   static IsSetFuncExprSyntax makeBlankIsSetFuncExpr(RefCountPtr<SyntaxArena> arena = nullptr);
+   static IssetVariablesClauseSyntax makeBlankIssetVariablesClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static IssetFuncExprSyntax makeBlankIssetFuncExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static EmptyFuncExprSyntax makeBlankEmptyFuncExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static IncludeExprSyntax makeBlankIncludeExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static RequireExprSyntax makeBlankRequireExpr(RefCountPtr<SyntaxArena> arena = nullptr);
@@ -315,14 +315,14 @@ public:
    static YieldExprSyntax makeBlankYieldExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static YieldFromExprSyntax makeBlankYieldFromExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static CloneExprSyntax makeBlankCloneExpr(RefCountPtr<SyntaxArena> arena = nullptr);
-   static EncapsVarOffsetSyntax makeBlankEncapsVarOffset(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsVariableOffsetSyntax makeBlankEncapsVariableOffset(RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsArrayVarSyntax makeBlankEncapsArrayVar(RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsObjPropSyntax makeBlankEncapsObjProp(RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsDollarCurlyExprSyntax makeBlankEncapsDollarCurlyExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsDollarCurlyVarSyntax makeBlankEncapsDollarCurlyVar(RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsDollarCurlyArraySyntax makeBlankEncapsDollarCurlyArray(RefCountPtr<SyntaxArena> arena = nullptr);
-   static EncapsCurlyVarSyntax makeBlankEncapsCurlyVar(RefCountPtr<SyntaxArena> arena = nullptr);
-   static EncapsVarSyntax makeBlankEncapsVar(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsCurlyVariableSyntax makeBlankEncapsCurlyVar(RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsVariableSyntax makeBlankEncapsVariable(RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsListItemSyntax makeBlankEncapsListItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static BackticksClauseSyntax makeBlankBackticksClause(RefCountPtr<SyntaxArena> arena = nullptr);
    static HeredocExprSyntax makeBlankHeredocExpr(RefCountPtr<SyntaxArena> arena = nullptr);

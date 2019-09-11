@@ -83,8 +83,8 @@ class BooleanLiteralExprSyntax;
 // function like lang structure
 class IssetVariableSyntax;
 class IssetVariableListItemSyntax;
-class IsSetVariablesClauseSyntax;
-class IsSetFuncExprSyntax;
+class IssetVariablesClauseSyntax;
+class IssetFuncExprSyntax;
 class EmptyFuncExprSyntax;
 class IncludeExprSyntax;
 class RequireExprSyntax;
@@ -108,14 +108,14 @@ class YieldFromExprSyntax;
 class CloneExprSyntax;
 
 // for encaps var syntax
-class EncapsVarOffsetSyntax;
+class EncapsVariableOffsetSyntax;
 class EncapsArrayVarSyntax;
 class EncapsObjPropSyntax;
 class EncapsDollarCurlyExprSyntax;
 class EncapsDollarCurlyVarSyntax;
 class EncapsDollarCurlyArraySyntax;
-class EncapsCurlyVarSyntax;
-class EncapsVarSyntax;
+class EncapsCurlyVariableSyntax;
+class EncapsVariableSyntax;
 class EncapsListItemSyntax;
 
 class BackticksClauseSyntax;

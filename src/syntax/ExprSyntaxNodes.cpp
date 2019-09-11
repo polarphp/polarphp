@@ -1869,7 +1869,7 @@ const NodeChoicesType ArrayAccessExprSyntax::CHILD_NODE_CHOICES
    },
    {
       ArrayAccessExprSyntax::Offset, {
-         SyntaxKind::EncapsVarOffset, SyntaxKind::OptionalExpr,
+         SyntaxKind::EncapsVariableOffset, SyntaxKind::OptionalExpr,
       }
    }
 };
@@ -3371,9 +3371,9 @@ IssetVariableListItemSyntax IssetVariableListItemSyntax::withVariable(std::optio
 }
 
 ///
-/// IsSetVariablesClauseSyntax
+/// IssetVariablesClauseSyntax
 ///
-void IsSetVariablesClauseSyntax::validate()
+void IssetVariablesClauseSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
@@ -3387,23 +3387,23 @@ void IsSetVariablesClauseSyntax::validate()
 #endif
 }
 
-TokenSyntax IsSetVariablesClauseSyntax::getLeftParenToken()
+TokenSyntax IssetVariablesClauseSyntax::getLeftParenToken()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParenToken).get()};
 }
 
-IssetVariablesListSyntax IsSetVariablesClauseSyntax::getIsSetVariablesList()
+IssetVariablesListSyntax IssetVariablesClauseSyntax::getIsSetVariablesList()
 {
    return IssetVariablesListSyntax {m_root, m_data->getChild(Cursor::IsSetVariablesList).get()};
 }
 
-TokenSyntax IsSetVariablesClauseSyntax::getRightParenToken()
+TokenSyntax IssetVariablesClauseSyntax::getRightParenToken()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::RightParenToken).get()};
 }
 
-IsSetVariablesClauseSyntax
-IsSetVariablesClauseSyntax::withLeftParenToken(std::optional<TokenSyntax> leftParenToken)
+IssetVariablesClauseSyntax
+IssetVariablesClauseSyntax::withLeftParenToken(std::optional<TokenSyntax> leftParenToken)
 {
    RefCountPtr<RawSyntax> leftParenTokenRaw;
    if (leftParenToken.has_value()) {
@@ -3411,11 +3411,11 @@ IsSetVariablesClauseSyntax::withLeftParenToken(std::optional<TokenSyntax> leftPa
    } else {
       leftParenTokenRaw = make_missing_token(T_LEFT_PAREN);
    }
-   return m_data->replaceChild<IsSetVariablesClauseSyntax>(leftParenTokenRaw, Cursor::LeftParenToken);
+   return m_data->replaceChild<IssetVariablesClauseSyntax>(leftParenTokenRaw, Cursor::LeftParenToken);
 }
 
-IsSetVariablesClauseSyntax
-IsSetVariablesClauseSyntax::withIsSetVariablesList(std::optional<IssetVariablesListSyntax> issetVariablesList)
+IssetVariablesClauseSyntax
+IssetVariablesClauseSyntax::withIsSetVariablesList(std::optional<IssetVariablesListSyntax> issetVariablesList)
 {
    RefCountPtr<RawSyntax> issetVariablesListRaw;
    if (issetVariablesList.has_value()) {
@@ -3423,11 +3423,11 @@ IsSetVariablesClauseSyntax::withIsSetVariablesList(std::optional<IssetVariablesL
    } else {
       issetVariablesListRaw = RawSyntax::missing(SyntaxKind::IssetVariablesList);
    }
-   return m_data->replaceChild<IsSetVariablesClauseSyntax>(issetVariablesListRaw, Cursor::IsSetVariablesList);
+   return m_data->replaceChild<IssetVariablesClauseSyntax>(issetVariablesListRaw, Cursor::IsSetVariablesList);
 }
 
-IsSetVariablesClauseSyntax
-IsSetVariablesClauseSyntax::withRightParenToken(std::optional<TokenSyntax> rightParenToken)
+IssetVariablesClauseSyntax
+IssetVariablesClauseSyntax::withRightParenToken(std::optional<TokenSyntax> rightParenToken)
 {
    RefCountPtr<RawSyntax> rightParenTokenRaw;
    if (rightParenToken.has_value()) {
@@ -3435,37 +3435,37 @@ IsSetVariablesClauseSyntax::withRightParenToken(std::optional<TokenSyntax> right
    } else {
       rightParenTokenRaw = make_missing_token(T_RIGHT_PAREN);
    }
-   return m_data->replaceChild<IsSetVariablesClauseSyntax>(rightParenTokenRaw, Cursor::RightParenToken);
+   return m_data->replaceChild<IssetVariablesClauseSyntax>(rightParenTokenRaw, Cursor::RightParenToken);
 }
 
 ///
-/// IsSetFuncExprSyntax
+/// IssetFuncExprSyntax
 ///
-void IsSetFuncExprSyntax::validate()
+void IssetFuncExprSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == IsSetFuncExprSyntax::CHILDREN_COUNT);
-   syntax_assert_child_token(raw, IsSetToken, std::set{TokenKindType::T_ISSET});
-   syntax_assert_child_kind(raw, IsSetVariablesClause, std::set{SyntaxKind::IsSetVariablesClause});
+   assert(raw->getLayout().size() == IssetFuncExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, IssetToken, std::set{TokenKindType::T_ISSET});
+   syntax_assert_child_kind(raw, IssetVariablesClause, std::set{SyntaxKind::IssetVariablesClause});
 #endif
 }
 
-TokenSyntax IsSetFuncExprSyntax::getIsSetToken()
+TokenSyntax IssetFuncExprSyntax::getIssetToken()
 {
-   return TokenSyntax {m_root, m_data->getChild(Cursor::IsSetToken).get()};
+   return TokenSyntax {m_root, m_data->getChild(Cursor::IssetToken).get()};
 }
 
-IsSetVariablesClauseSyntax IsSetFuncExprSyntax::getIsSetVariablesClause()
+IssetVariablesClauseSyntax IssetFuncExprSyntax::getIssetVariablesClause()
 {
-   return IsSetVariablesClauseSyntax {m_root, m_data->getChild(Cursor::IsSetVariablesClause).get()};
+   return IssetVariablesClauseSyntax {m_root, m_data->getChild(Cursor::IssetVariablesClause).get()};
 }
 
-IsSetFuncExprSyntax
-IsSetFuncExprSyntax::withIsSetToken(std::optional<TokenSyntax> issetToken)
+IssetFuncExprSyntax
+IssetFuncExprSyntax::withIssetToken(std::optional<TokenSyntax> issetToken)
 {
    RefCountPtr<RawSyntax> issetTokenRaw;
    if (issetToken.has_value()) {
@@ -3473,19 +3473,19 @@ IsSetFuncExprSyntax::withIsSetToken(std::optional<TokenSyntax> issetToken)
    } else {
       issetTokenRaw = make_missing_token(T_ISSET);
    }
-   return m_data->replaceChild<IsSetFuncExprSyntax>(issetTokenRaw, Cursor::IsSetToken);
+   return m_data->replaceChild<IssetFuncExprSyntax>(issetTokenRaw, Cursor::IssetToken);
 }
 
-IsSetFuncExprSyntax
-IsSetFuncExprSyntax::withIsSetVariablesClause(std::optional<IsSetVariablesClauseSyntax> isSetVariablesClause)
+IssetFuncExprSyntax
+IssetFuncExprSyntax::withIssetVariablesClause(std::optional<IssetVariablesClauseSyntax> isSetVariablesClause)
 {
    RefCountPtr<RawSyntax> isSetVariablesClauseRaw;
    if (isSetVariablesClause.has_value()) {
       isSetVariablesClauseRaw = isSetVariablesClause->getRaw();
    } else {
-      isSetVariablesClauseRaw = RawSyntax::missing(SyntaxKind::IsSetVariablesClause);
+      isSetVariablesClauseRaw = RawSyntax::missing(SyntaxKind::IssetVariablesClause);
    }
-   return m_data->replaceChild<IsSetFuncExprSyntax>(isSetVariablesClauseRaw, Cursor::IsSetVariablesClause);
+   return m_data->replaceChild<IssetFuncExprSyntax>(isSetVariablesClauseRaw, Cursor::IssetVariablesClause);
 }
 
 ///
@@ -3765,7 +3765,7 @@ const NodeChoicesType FuncLikeExprSyntax::CHILD_NODE_CHOICES
 {
    {
       FuncLikeExprSyntax::FuncLikeExpr, {
-         SyntaxKind::IsSetFuncExpr, SyntaxKind::EmptyFuncExpr,
+         SyntaxKind::IssetFuncExpr, SyntaxKind::EmptyFuncExpr,
                SyntaxKind::IncludeExpr, SyntaxKind::RequireExpr,
                SyntaxKind::EvalFuncExpr,
       }
@@ -4805,13 +4805,13 @@ CloneExprSyntax CloneExprSyntax::withExpr(std::optional<ExprSyntax> expr)
 }
 
 ///
-/// EncapsVarOffsetSyntax
+/// EncapsVariableOffsetSyntax
 ///
 #ifdef POLAR_DEBUG_BUILD
-const TokenChoicesType EncapsVarOffsetSyntax::CHILD_TOKEN_CHOICES
+const TokenChoicesType EncapsVariableOffsetSyntax::CHILD_TOKEN_CHOICES
 {
    {
-      EncapsVarOffsetSyntax::Offset, {
+      EncapsVariableOffsetSyntax::Offset, {
          TokenKindType::T_IDENTIFIER_STRING, TokenKindType::T_NUM_STRING,
                TokenKindType::T_VARIABLE
       }
@@ -4819,20 +4819,20 @@ const TokenChoicesType EncapsVarOffsetSyntax::CHILD_TOKEN_CHOICES
 };
 #endif
 
-void EncapsVarOffsetSyntax::validate()
+void EncapsVariableOffsetSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == EncapsVarOffsetSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == EncapsVariableOffsetSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, MinusSign, std::set{TokenKindType::T_MINUS_SIGN});
    syntax_assert_child_token(raw, Offset, CHILD_TOKEN_CHOICES.at(Cursor::Offset));
 #endif
 }
 
-std::optional<TokenSyntax> EncapsVarOffsetSyntax::getMinusSign()
+std::optional<TokenSyntax> EncapsVariableOffsetSyntax::getMinusSign()
 {
    RefCountPtr<SyntaxData> minusSignData = m_data->getChild(Cursor::MinusSign);
    if (!minusSignData) {
@@ -4841,12 +4841,12 @@ std::optional<TokenSyntax> EncapsVarOffsetSyntax::getMinusSign()
    return TokenSyntax {m_root, minusSignData.get()};
 }
 
-TokenSyntax EncapsVarOffsetSyntax::getOffset()
+TokenSyntax EncapsVariableOffsetSyntax::getOffset()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::Offset).get()};
 }
 
-EncapsVarOffsetSyntax EncapsVarOffsetSyntax::withMinusSign(std::optional<TokenSyntax> minusSign)
+EncapsVariableOffsetSyntax EncapsVariableOffsetSyntax::withMinusSign(std::optional<TokenSyntax> minusSign)
 {
    RefCountPtr<RawSyntax> minusSignRaw;
    if (minusSign.has_value()) {
@@ -4854,10 +4854,10 @@ EncapsVarOffsetSyntax EncapsVarOffsetSyntax::withMinusSign(std::optional<TokenSy
    } else {
       minusSignRaw = nullptr;
    }
-   return m_data->replaceChild<EncapsVarOffsetSyntax>(minusSignRaw, Cursor::MinusSign);
+   return m_data->replaceChild<EncapsVariableOffsetSyntax>(minusSignRaw, Cursor::MinusSign);
 }
 
-EncapsVarOffsetSyntax EncapsVarOffsetSyntax::withOffset(std::optional<TokenSyntax> offset)
+EncapsVariableOffsetSyntax EncapsVariableOffsetSyntax::withOffset(std::optional<TokenSyntax> offset)
 {
    RefCountPtr<RawSyntax> offsetRaw;
    if (offset.has_value()) {
@@ -4866,7 +4866,7 @@ EncapsVarOffsetSyntax EncapsVarOffsetSyntax::withOffset(std::optional<TokenSynta
       offsetRaw = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_IDENTIFIER_STRING)));
    }
-   return m_data->replaceChild<EncapsVarOffsetSyntax>(offsetRaw, Cursor::Offset);
+   return m_data->replaceChild<EncapsVariableOffsetSyntax>(offsetRaw, Cursor::Offset);
 }
 
 ///
@@ -4883,7 +4883,7 @@ void EncapsArrayVarSyntax::validate()
    syntax_assert_child_token(raw, VarToken, std::set{TokenKindType::T_VARIABLE});
    syntax_assert_child_token(raw, LeftSquareBracket, std::set{TokenKindType::T_LEFT_SQUARE_BRACKET});
    syntax_assert_child_token(raw, RightSquareBracket, std::set{TokenKindType::T_RIGHT_SQUARE_BRACKET});
-   syntax_assert_child_kind(raw, Offset, std::set{SyntaxKind::EncapsVarOffset});
+   syntax_assert_child_kind(raw, Offset, std::set{SyntaxKind::EncapsVariableOffset});
 #endif
 }
 
@@ -4897,9 +4897,9 @@ TokenSyntax EncapsArrayVarSyntax::getLeftSquareBracket()
    return TokenSyntax {m_root, m_data->getChild(Cursor::LeftSquareBracket).get()};
 }
 
-EncapsVarOffsetSyntax EncapsArrayVarSyntax::getOffset()
+EncapsVariableOffsetSyntax EncapsArrayVarSyntax::getOffset()
 {
-   return EncapsVarOffsetSyntax {m_root, m_data->getChild(Cursor::Offset).get()};
+   return EncapsVariableOffsetSyntax {m_root, m_data->getChild(Cursor::Offset).get()};
 }
 
 TokenSyntax EncapsArrayVarSyntax::getRightSquareBracket()
@@ -4931,13 +4931,13 @@ EncapsArrayVarSyntax EncapsArrayVarSyntax::withLeftSquareBracket(std::optional<T
    return m_data->replaceChild<EncapsArrayVarSyntax>(leftSquareBracketRaw, Cursor::LeftSquareBracket);
 }
 
-EncapsArrayVarSyntax EncapsArrayVarSyntax::withOffset(std::optional<EncapsVarOffsetSyntax> offset)
+EncapsArrayVarSyntax EncapsArrayVarSyntax::withOffset(std::optional<EncapsVariableOffsetSyntax> offset)
 {
    RefCountPtr<RawSyntax> offsetRaw;
    if (offset.has_value()) {
       offsetRaw = offset->getRaw();
    } else {
-      offsetRaw = RawSyntax::missing(SyntaxKind::EncapsVarOffset);
+      offsetRaw = RawSyntax::missing(SyntaxKind::EncapsVariableOffset);
    }
    return m_data->replaceChild<EncapsArrayVarSyntax>(offsetRaw, Cursor::Offset);
 }
@@ -5278,39 +5278,39 @@ EncapsDollarCurlyArraySyntax::withCloseCurlyToken(std::optional<TokenSyntax> clo
 }
 
 ///
-/// EncapsCurlyVarSyntax
+/// EncapsCurlyVariableSyntax
 ///
-void EncapsCurlyVarSyntax::validate()
+void EncapsCurlyVariableSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == EncapsCurlyVarSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == EncapsCurlyVariableSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, CurlyOpen, std::set{TokenKindType::T_CURLY_OPEN});
    syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
    syntax_assert_child_token(raw, CloseCurlyToken, std::set{TokenKindType::T_RIGHT_BRACE});
 #endif
 }
 
-TokenSyntax EncapsCurlyVarSyntax::getCurlyOpen()
+TokenSyntax EncapsCurlyVariableSyntax::getCurlyOpen()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::CurlyOpen).get()};
 }
 
-TokenSyntax EncapsCurlyVarSyntax::getVariable()
+TokenSyntax EncapsCurlyVariableSyntax::getVariable()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
 }
 
-TokenSyntax EncapsCurlyVarSyntax::getCloseCurlyToken()
+TokenSyntax EncapsCurlyVariableSyntax::getCloseCurlyToken()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::CloseCurlyToken).get()};
 }
 
-EncapsCurlyVarSyntax
-EncapsCurlyVarSyntax::withCurlyOpen(std::optional<TokenSyntax> curlyOpen)
+EncapsCurlyVariableSyntax
+EncapsCurlyVariableSyntax::withCurlyOpen(std::optional<TokenSyntax> curlyOpen)
 {
    RefCountPtr<RawSyntax> curlyOpenRaw;
    if (curlyOpen.has_value()) {
@@ -5318,11 +5318,11 @@ EncapsCurlyVarSyntax::withCurlyOpen(std::optional<TokenSyntax> curlyOpen)
    } else {
       curlyOpenRaw = make_missing_token(T_CURLY_OPEN);
    }
-   return m_data->replaceChild<EncapsCurlyVarSyntax>(curlyOpenRaw, CurlyOpen);
+   return m_data->replaceChild<EncapsCurlyVariableSyntax>(curlyOpenRaw, CurlyOpen);
 }
 
-EncapsCurlyVarSyntax
-EncapsCurlyVarSyntax::withVariable(std::optional<TokenSyntax> variable)
+EncapsCurlyVariableSyntax
+EncapsCurlyVariableSyntax::withVariable(std::optional<TokenSyntax> variable)
 {
    RefCountPtr<RawSyntax> variableRaw;
    if (variable.has_value()) {
@@ -5330,11 +5330,11 @@ EncapsCurlyVarSyntax::withVariable(std::optional<TokenSyntax> variable)
    } else {
       variableRaw = make_missing_token(T_VARIABLE);
    }
-   return m_data->replaceChild<EncapsCurlyVarSyntax>(variableRaw, Variable);
+   return m_data->replaceChild<EncapsCurlyVariableSyntax>(variableRaw, Variable);
 }
 
-EncapsCurlyVarSyntax
-EncapsCurlyVarSyntax::withCloseCurlyToken(std::optional<TokenSyntax> closeCurlyToken)
+EncapsCurlyVariableSyntax
+EncapsCurlyVariableSyntax::withCloseCurlyToken(std::optional<TokenSyntax> closeCurlyToken)
 {
    RefCountPtr<RawSyntax> closeCurlyTokenRaw;
    if (closeCurlyToken.has_value()) {
@@ -5342,35 +5342,35 @@ EncapsCurlyVarSyntax::withCloseCurlyToken(std::optional<TokenSyntax> closeCurlyT
    } else {
       closeCurlyTokenRaw = make_missing_token(T_RIGHT_BRACE);
    }
-   return m_data->replaceChild<EncapsCurlyVarSyntax>(closeCurlyTokenRaw, CloseCurlyToken);
+   return m_data->replaceChild<EncapsCurlyVariableSyntax>(closeCurlyTokenRaw, CloseCurlyToken);
 }
 
 ///
-/// EncapsVarSyntax
+/// EncapsVariableSyntax
 ///
 
 #ifdef POLAR_DEBUG_BUILD
-const NodeChoicesType EncapsVarSyntax::CHILD_NODE_CHOICES
+const NodeChoicesType EncapsVariableSyntax::CHILD_NODE_CHOICES
 {
    {
-      EncapsVarSyntax::Var, {
+      EncapsVariableSyntax::Var, {
          SyntaxKind::EncapsArrayVar, SyntaxKind::EncapsObjProp,
                SyntaxKind::EncapsDollarCurlyExpr, SyntaxKind::EncapsDollarCurlyVar,
-               SyntaxKind::EncapsDollarCurlyArray, SyntaxKind::EncapsCurlyVar
+               SyntaxKind::EncapsDollarCurlyArray, SyntaxKind::EncapsCurlyVariable
 
       }
    }
 };
 #endif
 
-void EncapsVarSyntax::validate()
+void EncapsVariableSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == EncapsVarSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == EncapsVariableSyntax::CHILDREN_COUNT);
    if (const RefCountPtr<RawSyntax> &varChild = raw->getChild(Cursor::Var)) {
       if (varChild->isToken()) {
          syntax_assert_child_token(raw, Var, std::set{TokenKindType::T_IDENTIFIER_STRING});
@@ -5381,12 +5381,12 @@ void EncapsVarSyntax::validate()
 #endif
 }
 
-Syntax EncapsVarSyntax::getVar()
+Syntax EncapsVariableSyntax::getVariable()
 {
    return Syntax {m_root, m_data->getChild(Cursor::Var).get()};
 }
 
-EncapsVarSyntax EncapsVarSyntax::withVar(std::optional<Syntax> var)
+EncapsVariableSyntax EncapsVariableSyntax::withVariable(std::optional<Syntax> var)
 {
    RefCountPtr<RawSyntax> varRaw;
    if (var.has_value()) {
@@ -5394,7 +5394,7 @@ EncapsVarSyntax EncapsVarSyntax::withVar(std::optional<Syntax> var)
    } else {
       varRaw = RawSyntax::missing(SyntaxKind::Unknown);
    }
-   return m_data->replaceChild<EncapsVarSyntax>(varRaw, Cursor::Var);
+   return m_data->replaceChild<EncapsVariableSyntax>(varRaw, Cursor::Var);
 }
 
 ///
@@ -5408,9 +5408,9 @@ void EncapsListItemSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == EncapsListItemSyntax::CHILDREN_COUNT);
-   syntax_assert_child_kind(raw, EncapsVar, std::set{SyntaxKind::EncapsVar});
+   syntax_assert_child_kind(raw, EncapsVariable, std::set{SyntaxKind::EncapsVariable});
    syntax_assert_child_token(raw, StrLiteral, std::set{TokenKindType::T_ENCAPSED_AND_WHITESPACE});
-   assert(raw->getChild(Cursor::EncapsVar) || raw->getChild(Cursor::StrLiteral));
+   assert(raw->getChild(Cursor::EncapsVariable) || raw->getChild(Cursor::StrLiteral));
 #endif
 }
 
@@ -5423,13 +5423,13 @@ std::optional<TokenSyntax> EncapsListItemSyntax::getStrLiteral()
    return TokenSyntax {m_root, strLiteralData.get()};
 }
 
-std::optional<EncapsVarSyntax> EncapsListItemSyntax::getEncapsVar()
+std::optional<EncapsVariableSyntax> EncapsListItemSyntax::getEncapsVariable()
 {
-   RefCountPtr<SyntaxData> encapsVarData = m_data->getChild(Cursor::EncapsVar);
+   RefCountPtr<SyntaxData> encapsVarData = m_data->getChild(Cursor::EncapsVariable);
    if (!encapsVarData) {
       return std::nullopt;
    }
-   return EncapsVarSyntax {m_root, encapsVarData.get()};
+   return EncapsVariableSyntax {m_root, encapsVarData.get()};
 }
 
 EncapsListItemSyntax EncapsListItemSyntax::withEncapsListItemSyntax(std::optional<TokenSyntax> strLiteral)
@@ -5443,15 +5443,15 @@ EncapsListItemSyntax EncapsListItemSyntax::withEncapsListItemSyntax(std::optiona
    return m_data->replaceChild<EncapsListItemSyntax>(strLiteralRaw, Cursor::StrLiteral);
 }
 
-EncapsListItemSyntax EncapsListItemSyntax::withEncapsVar(std::optional<EncapsVarSyntax> encapsVar)
+EncapsListItemSyntax EncapsListItemSyntax::withEncapsVariable(std::optional<EncapsVariableSyntax> encapsVar)
 {
    RefCountPtr<RawSyntax> encapsVarRaw;
    if (encapsVar.has_value()) {
       encapsVarRaw = encapsVar->getRaw();
    } else {
-      encapsVarRaw = RawSyntax::missing(SyntaxKind::EncapsVar);
+      encapsVarRaw = RawSyntax::missing(SyntaxKind::EncapsVariable);
    }
-   return m_data->replaceChild<EncapsListItemSyntax>(encapsVarRaw, Cursor::EncapsVar);
+   return m_data->replaceChild<EncapsListItemSyntax>(encapsVarRaw, Cursor::EncapsVariable);
 }
 
 ///

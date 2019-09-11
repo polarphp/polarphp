@@ -1889,7 +1889,7 @@ public:
       /// optional: false
       /// node choices: true
       /// ----------------------------------------
-      /// node choice: EncapsVarOffsetSyntax
+      /// node choice: EncapsVariableOffsetSyntax
       /// ----------------------------------------
       /// node choice: OptionalExprSyntax
       ///
@@ -3233,7 +3233,7 @@ private:
 /// isset_vars_clause:
 ///   '(' isset_variables_list ')'
 ///
-class IsSetVariablesClauseSyntax final : public Syntax
+class IssetVariablesClauseSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 3;
@@ -3258,7 +3258,7 @@ public:
    };
 
 public:
-   IsSetVariablesClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   IssetVariablesClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
@@ -3268,13 +3268,13 @@ public:
    IssetVariablesListSyntax getIsSetVariablesList();
    TokenSyntax getRightParenToken();
 
-   IsSetVariablesClauseSyntax withLeftParenToken(std::optional<TokenSyntax> leftParenToken);
-   IsSetVariablesClauseSyntax withIsSetVariablesList(std::optional<IssetVariablesListSyntax> issetVariablesList);
-   IsSetVariablesClauseSyntax withRightParenToken(std::optional<TokenSyntax> rightParenToken);
+   IssetVariablesClauseSyntax withLeftParenToken(std::optional<TokenSyntax> leftParenToken);
+   IssetVariablesClauseSyntax withIsSetVariablesList(std::optional<IssetVariablesListSyntax> issetVariablesList);
+   IssetVariablesClauseSyntax withRightParenToken(std::optional<TokenSyntax> rightParenToken);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::IsSetVariablesClause;
+      return kind == SyntaxKind::IssetVariablesClause;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -3283,7 +3283,7 @@ public:
    }
 
 private:
-   friend class IsSetVariablesClauseSyntaxBuilder;
+   friend class IssetVariablesClauseSyntaxBuilder;
    void validate();
 };
 
@@ -3291,7 +3291,7 @@ private:
 /// isset_expr:
 ///   T_ISSET '(' isset_variables possible_comma ')'
 ///
-class IsSetFuncExprSyntax final : public ExprSyntax
+class IssetFuncExprSyntax final : public ExprSyntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -3302,30 +3302,30 @@ public:
       /// type: TokenSyntax (T_ISSET)
       /// optional: false
       ///
-      IsSetToken,
+      IssetToken,
       ///
-      /// type: IsSetVariablesClauseSyntax
+      /// type: IssetVariablesClauseSyntax
       /// optional: false
       ///
-      IsSetVariablesClause,
+      IssetVariablesClause,
    };
 
 public:
-   IsSetFuncExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   IssetFuncExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : ExprSyntax(root, data)
    {
       validate();
    }
 
-   TokenSyntax getIsSetToken();
-   IsSetVariablesClauseSyntax getIsSetVariablesClause();
+   TokenSyntax getIssetToken();
+   IssetVariablesClauseSyntax getIssetVariablesClause();
 
-   IsSetFuncExprSyntax withIsSetToken(std::optional<TokenSyntax> issetToken);
-   IsSetFuncExprSyntax withIsSetVariablesClause(std::optional<IsSetVariablesClauseSyntax> isSetVariablesClause);
+   IssetFuncExprSyntax withIssetToken(std::optional<TokenSyntax> issetToken);
+   IssetFuncExprSyntax withIssetVariablesClause(std::optional<IssetVariablesClauseSyntax> isSetVariablesClause);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::IsSetFuncExpr;
+      return kind == SyntaxKind::IssetFuncExpr;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -3635,7 +3635,7 @@ public:
       /// optional: false
       /// node choices: true
       /// -------------------------------------------
-      /// node choice: IsSetFuncExprSyntax
+      /// node choice: IssetFuncExprSyntax
       /// -------------------------------------------
       /// node choice: EmptyFuncExprSyntax
       /// -------------------------------------------
@@ -4578,7 +4578,7 @@ private:
 /// | '-' T_NUM_STRING
 /// | T_VARIABLE
 ///
-class EncapsVarOffsetSyntax final : public Syntax
+class EncapsVariableOffsetSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -4607,7 +4607,7 @@ public:
 #endif
 
 public:
-   EncapsVarOffsetSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   EncapsVariableOffsetSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
@@ -4616,12 +4616,12 @@ public:
    std::optional<TokenSyntax> getMinusSign();
    TokenSyntax getOffset();
 
-   EncapsVarOffsetSyntax withMinusSign(std::optional<TokenSyntax> minusSign);
-   EncapsVarOffsetSyntax withOffset(std::optional<TokenSyntax> offset);
+   EncapsVariableOffsetSyntax withMinusSign(std::optional<TokenSyntax> minusSign);
+   EncapsVariableOffsetSyntax withOffset(std::optional<TokenSyntax> offset);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::EncapsVarOffset;
+      return kind == SyntaxKind::EncapsVariableOffset;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -4630,7 +4630,7 @@ public:
    }
 
 private:
-   friend class EncapsVarOffsetSyntaxBuilder;
+   friend class EncapsVariableOffsetSyntaxBuilder;
    void validate();
 };
 
@@ -4656,7 +4656,7 @@ public:
       ///
       LeftSquareBracket,
       ///
-      /// type: EncapsVarOffsetSyntax
+      /// type: EncapsVariableOffsetSyntax
       /// optional: false
       ///
       Offset,
@@ -4676,12 +4676,12 @@ public:
 
    TokenSyntax getVarToken();
    TokenSyntax getLeftSquareBracket();
-   EncapsVarOffsetSyntax getOffset();
+   EncapsVariableOffsetSyntax getOffset();
    TokenSyntax getRightSquareBracket();
 
    EncapsArrayVarSyntax withVarToken(std::optional<TokenSyntax> varToken);
    EncapsArrayVarSyntax withLeftSquareBracket(std::optional<TokenSyntax> leftSquareBracket);
-   EncapsArrayVarSyntax withOffset(std::optional<EncapsVarOffsetSyntax> offset);
+   EncapsArrayVarSyntax withOffset(std::optional<EncapsVariableOffsetSyntax> offset);
    EncapsArrayVarSyntax withRightSquareBracket(std::optional<TokenSyntax> rightSquareBracket);
 
    static bool kindOf(SyntaxKind kind)
@@ -4956,7 +4956,7 @@ private:
 /// encaps_var:
 ///   T_CURLY_OPEN variable '}'
 ///
-class EncapsCurlyVarSyntax final : public Syntax
+class EncapsCurlyVariableSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 3;
@@ -4981,7 +4981,7 @@ public:
    };
 
 public:
-   EncapsCurlyVarSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   EncapsCurlyVariableSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
@@ -4991,13 +4991,13 @@ public:
    TokenSyntax getVariable();
    TokenSyntax getCloseCurlyToken();
 
-   EncapsCurlyVarSyntax withCurlyOpen(std::optional<TokenSyntax> curlyOpen);
-   EncapsCurlyVarSyntax withVariable(std::optional<TokenSyntax> variable);
-   EncapsCurlyVarSyntax withCloseCurlyToken(std::optional<TokenSyntax> closeCurlyToken);
+   EncapsCurlyVariableSyntax withCurlyOpen(std::optional<TokenSyntax> curlyOpen);
+   EncapsCurlyVariableSyntax withVariable(std::optional<TokenSyntax> variable);
+   EncapsCurlyVariableSyntax withCloseCurlyToken(std::optional<TokenSyntax> closeCurlyToken);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::EncapsCurlyVar;
+      return kind == SyntaxKind::EncapsCurlyVariable;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -5006,7 +5006,7 @@ public:
    }
 
 private:
-   friend class EncapsCurlyVarSyntaxBuilder;
+   friend class EncapsCurlyVariableSyntaxBuilder;
    void validate();
 };
 
@@ -5020,7 +5020,7 @@ private:
 /// | T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '[' expr ']' '}'
 /// | T_CURLY_OPEN variable '}'
 ///
-class EncapsVarSyntax final : public Syntax
+class EncapsVariableSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 1;
@@ -5043,7 +5043,7 @@ public:
       /// ------------------------------------------
       /// node choice: EncapsDollarCurlyArraySyntax
       /// ------------------------------------------
-      /// node choice: EncapsCurlyVarSyntax
+      /// node choice: EncapsCurlyVariableSyntax
       ///
       Var,
    };
@@ -5053,18 +5053,18 @@ public:
 #endif
 
 public:
-   EncapsVarSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   EncapsVariableSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
    }
 
-   Syntax getVar();
-   EncapsVarSyntax withVar(std::optional<Syntax> var);
+   Syntax getVariable();
+   EncapsVariableSyntax withVariable(std::optional<Syntax> var);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::EncapsVar;
+      return kind == SyntaxKind::EncapsVariable;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -5073,7 +5073,7 @@ public:
    }
 
 private:
-   friend class EncapsVarSyntaxBuilder;
+   friend class EncapsVariableSyntaxBuilder;
    void validate();
 };
 
@@ -5097,10 +5097,10 @@ public:
       ///
       StrLiteral,
       ///
-      /// type: EncapsVarSyntax
+      /// type: EncapsVariableSyntax
       /// optional: true
       ///
-      EncapsVar
+      EncapsVariable
    };
 
 public:
@@ -5111,10 +5111,10 @@ public:
    }
 
    std::optional<TokenSyntax> getStrLiteral();
-   std::optional<EncapsVarSyntax> getEncapsVar();
+   std::optional<EncapsVariableSyntax> getEncapsVariable();
 
    EncapsListItemSyntax withEncapsListItemSyntax(std::optional<TokenSyntax> strLiteral);
-   EncapsListItemSyntax withEncapsVar(std::optional<EncapsVarSyntax> encapsVar);
+   EncapsListItemSyntax withEncapsVariable(std::optional<EncapsVariableSyntax> encapsVar);
 
    static bool kindOf(SyntaxKind kind)
    {

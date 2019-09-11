@@ -793,29 +793,29 @@ ExprSyntaxNodeFactory::makeIssetVariableListItem(std::optional<TokenSyntax> comm
    return make<IssetVariableListItemSyntax>(target);
 }
 
-IsSetVariablesClauseSyntax
-ExprSyntaxNodeFactory::makeIsSetVariablesClause(TokenSyntax leftParen, IssetVariablesListSyntax isSetVariablesList,
+IssetVariablesClauseSyntax
+ExprSyntaxNodeFactory::makeIssetVariablesClause(TokenSyntax leftParen, IssetVariablesListSyntax isSetVariablesList,
                                                 TokenSyntax rightParen, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::IsSetVariablesClause, {
+            SyntaxKind::IssetVariablesClause, {
                leftParen.getRaw(),
                isSetVariablesList.getRaw(),
                rightParen.getRaw()
             }, SourcePresence::Present, arena);
-   return make<IsSetVariablesClauseSyntax>(target);
+   return make<IssetVariablesClauseSyntax>(target);
 }
 
-IsSetFuncExprSyntax
-ExprSyntaxNodeFactory::makeIsSetFuncExpr(TokenSyntax isSetToken, IsSetVariablesClauseSyntax isSetVariablesClause,
+IssetFuncExprSyntax
+ExprSyntaxNodeFactory::makeIssetFuncExpr(TokenSyntax isSetToken, IssetVariablesClauseSyntax isSetVariablesClause,
                                          RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::IsSetFuncExpr, {
+            SyntaxKind::IssetFuncExpr, {
                isSetToken.getRaw(),
                isSetVariablesClause.getRaw(),
             }, SourcePresence::Present, arena);
-   return make<IsSetFuncExprSyntax>(target);
+   return make<IssetFuncExprSyntax>(target);
 }
 
 EmptyFuncExprSyntax
@@ -1068,25 +1068,25 @@ ExprSyntaxNodeFactory::makeCloneExpr(TokenSyntax cloneToken, ExprSyntax expr, Re
    return make<CloneExprSyntax>(target);
 }
 
-EncapsVarOffsetSyntax
-ExprSyntaxNodeFactory::makeEncapsVarOffset(std::optional<TokenSyntax> minusSign, TokenSyntax offset,
+EncapsVariableOffsetSyntax
+ExprSyntaxNodeFactory::makeEncapsVariableOffset(std::optional<TokenSyntax> minusSign, TokenSyntax offset,
                                            RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::EncapsVarOffset, {
+            SyntaxKind::EncapsVariableOffset, {
                minusSign.has_value() ? minusSign->getRaw() : nullptr,
                offset.getRaw(),
             }, SourcePresence::Present, arena);
-   return make<EncapsVarOffsetSyntax>(target);
+   return make<EncapsVariableOffsetSyntax>(target);
 }
 
 EncapsArrayVarSyntax
 ExprSyntaxNodeFactory::makeEncapsArrayVar(TokenSyntax varToken, TokenSyntax leftSquareBracket,
-                                          EncapsVarOffsetSyntax offset, TokenSyntax rightSquareBracket,
+                                          EncapsVariableOffsetSyntax offset, TokenSyntax rightSquareBracket,
                                           RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::EncapsVarOffset, {
+            SyntaxKind::EncapsVariableOffset, {
                varToken.getRaw(),
                leftSquareBracket.getRaw(),
                offset.getRaw(),
@@ -1122,7 +1122,7 @@ ExprSyntaxNodeFactory::makeEncapsDollarCurlyExpr(TokenSyntax dollarOpenCurlyToke
 }
 
 EncapsDollarCurlyVarSyntax
-ExprSyntaxNodeFactory::makeEncapsDollarCurlyVar(TokenSyntax dollarOpenCurlyToken, TokenSyntax varname,
+ExprSyntaxNodeFactory::makeEncapsDollarCurlyVariable(TokenSyntax dollarOpenCurlyToken, TokenSyntax varname,
                                                 TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -1152,31 +1152,31 @@ ExprSyntaxNodeFactory::makeEncapsDollarCurlyArray(TokenSyntax dollarOpenCurlyTok
    return make<EncapsDollarCurlyArraySyntax>(target);
 }
 
-EncapsCurlyVarSyntax
-ExprSyntaxNodeFactory::makeEncapsCurlyVar(TokenSyntax curlyOpen, TokenSyntax variable,
+EncapsCurlyVariableSyntax
+ExprSyntaxNodeFactory::makeEncapsCurlyVariable(TokenSyntax curlyOpen, TokenSyntax variable,
                                           TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::EncapsCurlyVar, {
+            SyntaxKind::EncapsCurlyVariable, {
                curlyOpen.getRaw(),
                variable.getRaw(),
                closeCurlyToken.getRaw(),
             }, SourcePresence::Present, arena);
-   return make<EncapsCurlyVarSyntax>(target);
+   return make<EncapsCurlyVariableSyntax>(target);
 }
 
-EncapsVarSyntax
-ExprSyntaxNodeFactory::makeEncapsVar(Syntax var, RefCountPtr<SyntaxArena> arena)
+EncapsVariableSyntax
+ExprSyntaxNodeFactory::makeEncapsVariable(Syntax var, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::EncapsVar, {
+            SyntaxKind::EncapsVariable, {
                var.getRaw(),
             }, SourcePresence::Present, arena);
-   return make<EncapsVarSyntax>(target);
+   return make<EncapsVariableSyntax>(target);
 }
 
 EncapsListItemSyntax
-ExprSyntaxNodeFactory::makeEncapsListItem(std::optional<TokenSyntax> strLiteral, std::optional<EncapsVarSyntax> encapsVar,
+ExprSyntaxNodeFactory::makeEncapsListItem(std::optional<TokenSyntax> strLiteral, std::optional<EncapsVariableSyntax> encapsVar,
                                           RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -1963,27 +1963,27 @@ ExprSyntaxNodeFactory::makeBlankIssetVariableListItem(RefCountPtr<SyntaxArena> a
    return make<IssetVariableListItemSyntax>(target);
 }
 
-IsSetVariablesClauseSyntax
-ExprSyntaxNodeFactory::makeBlankIsSetVariablesClause(RefCountPtr<SyntaxArena> arena)
+IssetVariablesClauseSyntax
+ExprSyntaxNodeFactory::makeBlankIssetVariablesClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::IsSetVariablesClause, {
+            SyntaxKind::IssetVariablesClause, {
                make_missing_token(T_LEFT_PAREN), // LeftParenToken
                RawSyntax::missing(SyntaxKind::IssetVariablesList), // IsSetVariablesList
                make_missing_token(T_RIGHT_PAREN), // RightParenToken
             }, SourcePresence::Present, arena);
-   return make<IsSetVariablesClauseSyntax>(target);
+   return make<IssetVariablesClauseSyntax>(target);
 }
 
-IsSetFuncExprSyntax
-ExprSyntaxNodeFactory::makeBlankIsSetFuncExpr(RefCountPtr<SyntaxArena> arena)
+IssetFuncExprSyntax
+ExprSyntaxNodeFactory::makeBlankIssetFuncExpr(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::IsSetFuncExpr, {
-               make_missing_token(T_ISSET), // IsSetToken
-               RawSyntax::missing(SyntaxKind::IsSetVariablesClause), // IsSetVariablesClause
+            SyntaxKind::IssetFuncExpr, {
+               make_missing_token(T_ISSET), // IssetToken
+               RawSyntax::missing(SyntaxKind::IssetVariablesClause), // IssetVariablesClause
             }, SourcePresence::Present, arena);
-   return make<IsSetFuncExprSyntax>(target);
+   return make<IssetFuncExprSyntax>(target);
 }
 
 EmptyFuncExprSyntax
@@ -2217,15 +2217,15 @@ ExprSyntaxNodeFactory::makeBlankCloneExpr(RefCountPtr<SyntaxArena> arena)
    return make<CloneExprSyntax>(target);
 }
 
-EncapsVarOffsetSyntax
-ExprSyntaxNodeFactory::makeBlankEncapsVarOffset(RefCountPtr<SyntaxArena> arena)
+EncapsVariableOffsetSyntax
+ExprSyntaxNodeFactory::makeBlankEncapsVariableOffset(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::EncapsVarOffset, {
+            SyntaxKind::EncapsVariableOffset, {
                nullptr, // MinusSign
                make_missing_token(T_IDENTIFIER_STRING), // Offset
             }, SourcePresence::Present, arena);
-   return make<EncapsVarOffsetSyntax>(target);
+   return make<EncapsVariableOffsetSyntax>(target);
 }
 
 EncapsArrayVarSyntax
@@ -2235,7 +2235,7 @@ ExprSyntaxNodeFactory::makeBlankEncapsArrayVar(RefCountPtr<SyntaxArena> arena)
             SyntaxKind::EncapsArrayVar, {
                make_missing_token(T_VARIABLE), // VarToken
                make_missing_token(T_LEFT_SQUARE_BRACKET), // LeftSquareBracket
-               RawSyntax::missing(SyntaxKind::EncapsVarOffset), // Offset
+               RawSyntax::missing(SyntaxKind::EncapsVariableOffset), // Offset
                make_missing_token(T_RIGHT_SQUARE_BRACKET) // RightSquareBracket
             }, SourcePresence::Present, arena);
    return make<EncapsArrayVarSyntax>(target);
@@ -2292,26 +2292,26 @@ ExprSyntaxNodeFactory::makeBlankEncapsDollarCurlyArray(RefCountPtr<SyntaxArena> 
    return make<EncapsDollarCurlyArraySyntax>(target);
 }
 
-EncapsCurlyVarSyntax
+EncapsCurlyVariableSyntax
 ExprSyntaxNodeFactory::makeBlankEncapsCurlyVar(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::EncapsCurlyVar, {
+            SyntaxKind::EncapsCurlyVariable, {
                make_missing_token(T_CURLY_OPEN), // CurlyOpen
                make_missing_token(T_VARIABLE), // Variable
                make_missing_token(T_RIGHT_BRACE), // CloseCurlyToken
             }, SourcePresence::Present, arena);
-   return make<EncapsCurlyVarSyntax>(target);
+   return make<EncapsCurlyVariableSyntax>(target);
 }
 
-EncapsVarSyntax
-ExprSyntaxNodeFactory::makeBlankEncapsVar(RefCountPtr<SyntaxArena> arena)
+EncapsVariableSyntax
+ExprSyntaxNodeFactory::makeBlankEncapsVariable(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::EncapsVar, {
+            SyntaxKind::EncapsVariable, {
                RawSyntax::missing(SyntaxKind::Unknown) // Var
             }, SourcePresence::Present, arena);
-   return make<EncapsVarSyntax>(target);
+   return make<EncapsVariableSyntax>(target);
 }
 
 EncapsListItemSyntax
@@ -2320,7 +2320,7 @@ ExprSyntaxNodeFactory::makeBlankEncapsListItem(RefCountPtr<SyntaxArena> arena)
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::EncapsListItem, {
                make_missing_token(T_ENCAPSED_AND_WHITESPACE), // StrLiteral
-               nullptr // EncapsVar
+               nullptr // EncapsVariable
             }, SourcePresence::Present, arena);
    return make<EncapsListItemSyntax>(target);
 }

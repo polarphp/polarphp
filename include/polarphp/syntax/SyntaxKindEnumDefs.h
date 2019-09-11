@@ -126,8 +126,8 @@ enum class SyntaxKind : std::uint32_t
    // function like lang structure
    IssetVariable,
    IssetVariableListItem,
-   IsSetVariablesClause,
-   IsSetFuncExpr,
+   IssetVariablesClause,
+   IssetFuncExpr,
    EmptyFuncExpr,
    IncludeExpr,
    RequireExpr,
@@ -150,14 +150,14 @@ enum class SyntaxKind : std::uint32_t
    YieldFromExpr,
    CloneExpr,
 
-   EncapsVarOffset,
+   EncapsVariableOffset,
    EncapsArrayVar,
    EncapsObjProp,
    EncapsDollarCurlyExpr,
    EncapsDollarCurlyVar,
    EncapsDollarCurlyArray,
-   EncapsCurlyVar,
-   EncapsVar,
+   EncapsCurlyVariable,
+   EncapsVariable,
    EncapsListItem,
    BackticksClause,
 

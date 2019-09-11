@@ -2126,7 +2126,7 @@ encaps_list:
 
 encaps_var:
    T_VARIABLE {
-
+         
    }
 |  T_VARIABLE T_LEFT_SQUARE_BRACKET encaps_var_offset T_RIGHT_SQUARE_BRACKET {
 
@@ -2165,25 +2165,53 @@ encaps_var_offset:
 
 internal_functions_in_bison:
    T_ISSET T_LEFT_PAREN isset_variables possible_comma T_RIGHT_PAREN {
-
+      TokenSyntax issetKeyword = make_token(IssetKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      IssetVariablesListSyntax vars = make<IssetVariablesListSyntax>($3);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      IssetVariablesClauseSyntax issetClause = make_expr(IssetVariablesClause, leftParen, vars, rightParen);
    }
 |  T_EMPTY T_LEFT_PAREN expr T_RIGHT_PAREN {
-
+      TokenSyntax emptyKeyword = make_token(EmptyKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ExprSyntax expr = make<ExprSyntax>($3);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      ParenDecoratedExprSyntax argsClause = make_expr(ParenDecoratedExpr, leftParen, expr, rightParen);
+      EmptyFuncExprSyntax emptyFunc = make_expr(EmptyFuncExpr, emptyKeyword, argsClause);
+      $$ = emptyFunc.getRaw();
    }
 |  T_INCLUDE expr {
-
+      TokenSyntax includeKeyword = make_token(IncludeKeyword);
+      ExprSyntax expr = make<ExprSyntax>($2);
+      IncludeExprSyntax includeExpr = make_expr(IncludeExpr, includeKeyword, expr);
+      $$ = includeExpr.getRaw();
    }
 |  T_INCLUDE_ONCE expr {
-
+      TokenSyntax includeOnceKeywork = make_token(IncludeOnceKeyword);
+      ExprSyntax expr = make<ExprSyntax>($2);
+      IncludeExprSyntax includeExpr = make_expr(IncludeExpr, includeOnceKeywork, expr);
+      $$ = includeExpr.getRaw();
    }
 |  T_EVAL T_LEFT_PAREN expr T_RIGHT_PAREN {
-
+      TokenSyntax evalKeyword = make_token(EvalKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ExprSyntax expr = make<ExprSyntax>($3);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      ParenDecoratedExprSyntax argsClause = make_expr(ParenDecoratedExpr, leftParen, expr, rightParen);
+      EvalFuncExprSyntax evalFunc = make_expr(EvalFuncExpr, evalKeyword, argsClause);
+      $$ = evalFunc.getRaw();
    }
 |  T_REQUIRE expr {
-
+      TokenSyntax requireKeyword = make_token(RequireKeyword);
+      ExprSyntax expr = make<ExprSyntax>($2);
+      RequireExprSyntax requireExpr = make_expr(RequireExpr, requireKeyword, expr);
+      $$ = requireExpr.getRaw();
    }
 |  T_REQUIRE_ONCE expr {
-
+      TokenSyntax requireOnceKeyword = make_token(RequireOnceKeyword);
+      ExprSyntax expr = make<ExprSyntax>($2);
+      RequireExprSyntax requireExpr = make_expr(RequireExpr, requireOnceKeyword, expr);
+      $$ = requireExpr.getRaw();
    }
 ;
 
