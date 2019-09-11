@@ -679,13 +679,13 @@ StmtSyntaxNodeFactory::makeFinallyClause(TokenSyntax finallyToken, InnerCodeBloc
 }
 
 CatchArgTypeHintItemSyntax
-StmtSyntaxNodeFactory::makeCatchArgTypeHintItem(NameSyntax typeName, std::optional<TokenSyntax> separator,
+StmtSyntaxNodeFactory::makeCatchArgTypeHintItem(std::optional<TokenSyntax> separator, NameSyntax typeName,
                                                 RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::CatchArgTypeHintItem, {
-               typeName.getRaw(),
                separator.has_value() ? separator->getRaw() : nullptr,
+               typeName.getRaw(),
             }, SourcePresence::Present, arena);
    return make<CatchArgTypeHintItemSyntax>(target);
 }

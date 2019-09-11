@@ -3287,36 +3287,26 @@ BooleanLiteralExprSyntax BooleanLiteralExprSyntax::withBooleanValue(std::optiona
 }
 
 ///
-/// IsSetVarItemSyntax
+/// IssetVariableSyntax
 ///
-void IsSetVarItemSyntax::validate()
+void IssetVariableSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == IsSetVarItemSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == IssetVariableSyntax::CHILDREN_COUNT);
    syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
-   syntax_assert_child_token(raw, TrailingComma, std::set{TokenKindType::T_COMMA});
 #endif
 }
 
-ExprSyntax IsSetVarItemSyntax::getExpr()
+ExprSyntax IssetVariableSyntax::getExpr()
 {
-   return ExprSyntax {m_root, m_data->getChild(Cursor::Expr).get()};
+   return ExprSyntax{m_root, m_data->getChild(Cursor::Expr).get()};
 }
 
-std::optional<TokenSyntax> IsSetVarItemSyntax::getTrailingComma()
-{
-   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::TrailingComma);
-   if (!commaData) {
-      return std::nullopt;
-   }
-   return TokenSyntax {m_root, commaData.get()};
-}
-
-IsSetVarItemSyntax IsSetVarItemSyntax::withExpr(std::optional<ExprSyntax> expr)
+IssetVariableSyntax IssetVariableSyntax::withExpr(std::optional<ExprSyntax> expr)
 {
    RefCountPtr<RawSyntax> exprRaw;
    if (expr.has_value()) {
@@ -3324,10 +3314,40 @@ IsSetVarItemSyntax IsSetVarItemSyntax::withExpr(std::optional<ExprSyntax> expr)
    } else {
       exprRaw = RawSyntax::missing(SyntaxKind::Expr);
    }
-   return m_data->replaceChild<IsSetVarItemSyntax>(exprRaw, Cursor::Expr);
+   return m_data->replaceChild<IssetVariableSyntax>(exprRaw, Cursor::Expr);
 }
 
-IsSetVarItemSyntax IsSetVarItemSyntax::withTrailingComma(std::optional<TokenSyntax> comma)
+///
+/// IssetVariableListItemSyntax
+///
+void IssetVariableListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == IssetVariableListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, CommaToken, std::set{TokenKindType::T_COMMA});
+   syntax_assert_child_kind(raw, Variable, std::set{SyntaxKind::IssetVariable});
+#endif
+}
+
+std::optional<TokenSyntax> IssetVariableListItemSyntax::getComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::CommaToken);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+IssetVariableSyntax IssetVariableListItemSyntax::getVariable()
+{
+   return IssetVariableSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
+}
+
+IssetVariableListItemSyntax IssetVariableListItemSyntax::withComma(std::optional<TokenSyntax> comma)
 {
    RefCountPtr<RawSyntax> commaRaw;
    if (comma.has_value()) {
@@ -3335,7 +3355,19 @@ IsSetVarItemSyntax IsSetVarItemSyntax::withTrailingComma(std::optional<TokenSynt
    } else {
       commaRaw = make_missing_token(T_COMMA);
    }
-   return m_data->replaceChild<IsSetVarItemSyntax>(commaRaw, Cursor::TrailingComma);
+   return m_data->replaceChild<IssetVariableListItemSyntax>(commaRaw, Cursor::CommaToken);
+}
+
+
+IssetVariableListItemSyntax IssetVariableListItemSyntax::withVariable(std::optional<IssetVariableSyntax> variable)
+{
+   RefCountPtr<RawSyntax> variableRaw;
+   if (variable.has_value()) {
+      variableRaw = variable->getRaw();
+   } else {
+      variableRaw = RawSyntax::missing(SyntaxKind::IssetVariable);
+   }
+   return m_data->replaceChild<IssetVariableListItemSyntax>(variableRaw, Cursor::Variable);
 }
 
 ///
@@ -3348,7 +3380,7 @@ void IsSetVariablesClauseSyntax::validate()
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == IsSetVarItemSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == IssetVariableListItemSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, LeftParenToken, std::set{TokenKindType::T_LEFT_PAREN});
    syntax_assert_child_kind(raw, IsSetVariablesList, std::set{SyntaxKind::IssetVariablesList});
    syntax_assert_child_token(raw, RightParenToken, std::set{TokenKindType::T_RIGHT_PAREN});

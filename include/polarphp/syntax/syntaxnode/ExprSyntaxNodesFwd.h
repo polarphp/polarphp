@@ -81,7 +81,8 @@ class StringLiteralExprSyntax;
 class BooleanLiteralExprSyntax;
 
 // function like lang structure
-class IsSetVarItemSyntax;
+class IssetVariableSyntax;
+class IssetVariableListItemSyntax;
 class IsSetVariablesClauseSyntax;
 class IsSetFuncExprSyntax;
 class EmptyFuncExprSyntax;
@@ -201,13 +202,13 @@ using ArgumentListSyntax = SyntaxCollection<SyntaxKind::ArgumentList, ArgumentLi
 
 ///
 /// type: SyntaxCollection
-/// element type: IsSetVarItemSyntax
+/// element type: IssetVariableListItemSyntax
 ///
 /// isset_variables:
 ///   isset_variable
 /// | isset_variables ',' isset_variable
 ///
-using IssetVariablesListSyntax = SyntaxCollection<SyntaxKind::IssetVariablesList, IsSetVarItemSyntax>;
+using IssetVariablesListSyntax = SyntaxCollection<SyntaxKind::IssetVariablesList, IssetVariableListItemSyntax>;
 
 } // polar::syntax
 

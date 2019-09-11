@@ -35,7 +35,7 @@ public:
                                                   RefCountPtr<SyntaxArena> arena = nullptr);
    static ArgumentListSyntax makeArgumentList(const std::vector<ArgumentListItemSyntax> elements,
                                               RefCountPtr<SyntaxArena> arena = nullptr);
-   static IssetVariablesListSyntax makeIssetVariablesList(const std::vector<IsSetVarItemSyntax> elements,
+   static IssetVariablesListSyntax makeIssetVariablesList(const std::vector<IssetVariableListItemSyntax> elements,
                                                           RefCountPtr<SyntaxArena> arena = nullptr);
    ///
    /// make normal nodes
@@ -140,8 +140,10 @@ public:
    static StringLiteralExprSyntax makeStringLiteralExpr(TokenSyntax leftQuote, TokenSyntax text,
                                                         TokenSyntax rightQuote, RefCountPtr<SyntaxArena> arena = nullptr);
    static BooleanLiteralExprSyntax makeBooleanLiteralExpr(TokenSyntax boolean, RefCountPtr<SyntaxArena> arena = nullptr);
-   static IsSetVarItemSyntax makeIsSetVarItem(ExprSyntax expr, std::optional<TokenSyntax> trailingComma,
-                                              RefCountPtr<SyntaxArena> arena = nullptr);
+
+   static IssetVariableSyntax makeIssetVariable(ExprSyntax expr, RefCountPtr<SyntaxArena> arena = nullptr);
+   static IssetVariableListItemSyntax makeIssetVariableListItem(std::optional<TokenSyntax> comma, IssetVariableSyntax variable,
+                                                                RefCountPtr<SyntaxArena> arena = nullptr);
    static IsSetVariablesClauseSyntax makeIsSetVariablesClause(TokenSyntax leftParen, IssetVariablesListSyntax isSetVariablesList,
                                                               TokenSyntax rightParen, RefCountPtr<SyntaxArena> arena = nullptr);
    static IsSetFuncExprSyntax makeIsSetFuncExpr(TokenSyntax isSetToken, IsSetVariablesClauseSyntax isSetVariablesClause,
@@ -290,7 +292,7 @@ public:
    static FloatLiteralExprSyntax makeBlankFloatLiteralExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static StringLiteralExprSyntax makeBlankStringLiteralExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static BooleanLiteralExprSyntax makeBlankBooleanLiteralExpr(RefCountPtr<SyntaxArena> arena = nullptr);
-   static IsSetVarItemSyntax makeBlankIsSetVarItem(RefCountPtr<SyntaxArena> arena = nullptr);
+   static IssetVariableListItemSyntax makeBlankIssetVariableListItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static IsSetVariablesClauseSyntax makeBlankIsSetVariablesClause(RefCountPtr<SyntaxArena> arena = nullptr);
    static IsSetFuncExprSyntax makeBlankIsSetFuncExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static EmptyFuncExprSyntax makeBlankEmptyFuncExpr(RefCountPtr<SyntaxArena> arena = nullptr);

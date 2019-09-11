@@ -124,7 +124,8 @@ enum class SyntaxKind : std::uint32_t
    StringLiteralExpr,
 
    // function like lang structure
-   IsSetVarItem,
+   IssetVariable,
+   IssetVariableListItem,
    IsSetVariablesClause,
    IsSetFuncExpr,
    EmptyFuncExpr,

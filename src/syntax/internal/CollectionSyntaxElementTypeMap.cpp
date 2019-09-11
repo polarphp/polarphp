@@ -37,7 +37,7 @@ static const std::unordered_map<SyntaxKind, std::set<SyntaxKind>> scg_collection
     { SyntaxKind::ListPairItemList, { SyntaxKind::ListPairItem }},
     { SyntaxKind::EncapsList, { SyntaxKind::EncapsListItem }},
     { SyntaxKind::ArgumentList, { SyntaxKind::ArgumentListItem }},
-    { SyntaxKind::IssetVariablesList, { SyntaxKind::IsSetVarItem }},
+    { SyntaxKind::IssetVariablesList, { SyntaxKind::IssetVariableListItem }},
 
     // stmt syntax collection
     { SyntaxKind::ConditionElementList, { SyntaxKind::ConditionElement }},

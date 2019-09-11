@@ -853,6 +853,7 @@ catch_name_list:
 |  catch_name_list T_VBAR name {
       CatchArgTypeHintListSyntax list = make<CatchArgTypeHintListSyntax>($1);
       TokenSyntax vbarToken = make_token(VerticalBarToken);
+      NameSyntax name = make<NameSyntax>($3);
       CatchArgTypeHintItemSyntax typeHintItem = make_stmt(CatchArgTypeHintItem, vbarToken, name);
       list.appending(typeHintItem);
       $$ = list.getRaw();

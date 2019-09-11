@@ -105,12 +105,12 @@ ExprSyntaxNodeFactory::makeArgumentList(const std::vector<ArgumentListItemSyntax
 }
 
 IssetVariablesListSyntax
-ExprSyntaxNodeFactory::makeIssetVariablesList(const std::vector<IsSetVarItemSyntax> elements,
+ExprSyntaxNodeFactory::makeIssetVariablesList(const std::vector<IssetVariableListItemSyntax> elements,
                                               RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
-   for (const IsSetVarItemSyntax &element : elements) {
+   for (const IssetVariableListItemSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
    RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::IssetVariablesList, layout, SourcePresence::Present,
@@ -771,16 +771,26 @@ ExprSyntaxNodeFactory::makeBooleanLiteralExpr(TokenSyntax boolean,
    return make<BooleanLiteralExprSyntax>(target);
 }
 
-IsSetVarItemSyntax
-ExprSyntaxNodeFactory::makeIsSetVarItem(ExprSyntax expr, std::optional<TokenSyntax> trailingComma,
-                                        RefCountPtr<SyntaxArena> arena)
+IssetVariableSyntax
+ExprSyntaxNodeFactory::makeIssetVariable(ExprSyntax expr, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::IsSetVarItem, {
+            SyntaxKind::IssetVariable, {
                expr.getRaw(),
-               trailingComma.has_value() ? trailingComma->getRaw() : nullptr,
             }, SourcePresence::Present, arena);
-   return make<IsSetVarItemSyntax>(target);
+   return make<IssetVariableSyntax>(target);
+}
+
+IssetVariableListItemSyntax
+ExprSyntaxNodeFactory::makeIssetVariableListItem(std::optional<TokenSyntax> comma, IssetVariableSyntax variable,
+                                                 RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::IssetVariableListItem, {
+               comma.has_value() ? comma->getRaw() : nullptr,
+               variable.getRaw(),
+            }, SourcePresence::Present, arena);
+   return make<IssetVariableListItemSyntax>(target);
 }
 
 IsSetVariablesClauseSyntax
@@ -1942,15 +1952,15 @@ ExprSyntaxNodeFactory::makeBlankBooleanLiteralExpr(RefCountPtr<SyntaxArena> aren
    return make<BooleanLiteralExprSyntax>(target);
 }
 
-IsSetVarItemSyntax
-ExprSyntaxNodeFactory::makeBlankIsSetVarItem(RefCountPtr<SyntaxArena> arena)
+IssetVariableListItemSyntax
+ExprSyntaxNodeFactory::makeBlankIssetVariableListItem(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::IsSetVarItem, {
-               RawSyntax::missing(SyntaxKind::Expr), // Expr
-               nullptr // trailingComma
+            SyntaxKind::IssetVariableListItem, {
+               nullptr, // comma
+               RawSyntax::missing(SyntaxKind::IssetVariable), // Variable
             }, SourcePresence::Present, arena);
-   return make<IsSetVarItemSyntax>(target);
+   return make<IssetVariableListItemSyntax>(target);
 }
 
 IsSetVariablesClauseSyntax

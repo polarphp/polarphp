@@ -129,7 +129,7 @@ public:
                                     RefCountPtr<SyntaxArena> arena = nullptr);
    static FinallyClauseSyntax makeFinallyClause(TokenSyntax finallyToken, InnerCodeBlockStmtSyntax codeBlock,
                                                 RefCountPtr<SyntaxArena> arena = nullptr);
-   static CatchArgTypeHintItemSyntax makeCatchArgTypeHintItem(NameSyntax typeName, std::optional<TokenSyntax> separator,
+   static CatchArgTypeHintItemSyntax makeCatchArgTypeHintItem(std::optional<TokenSyntax> separator, NameSyntax typeName,
                                                               RefCountPtr<SyntaxArena> arena = nullptr);
    static CatchListItemClauseSyntax makeCatchListItemClause(TokenSyntax catchToken, TokenSyntax leftParen,
                                                             std::optional<InnerCodeBlockStmtSyntax> catchArgTypeHintList, TokenSyntax variable,

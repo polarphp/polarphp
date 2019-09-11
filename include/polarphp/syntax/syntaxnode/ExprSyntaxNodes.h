@@ -3139,10 +3139,50 @@ private:
 };
 
 ///
-/// isset_var_item:
-///   expr ','
+/// isset_variable:
+///   expr
 ///
-class IsSetVarItemSyntax final : public Syntax
+class IssetVariableSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      /// type: ExprSyntax
+      /// optional: false
+      Expr,
+   };
+
+public:
+   IssetVariableSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getExpr();
+   IssetVariableSyntax withExpr(std::optional<ExprSyntax> expr);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::IssetVariable;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class IssetVariableSyntaxBuilder;
+   void validate();
+};
+
+///
+/// isset_var_item:
+///  ','  expr
+///
+class IssetVariableListItemSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -3150,33 +3190,33 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: ExprSyntax
-      /// optional: false
-      ///
-      Expr,
-      ///
       /// type: TokenSyntax (T_COMMA)
       /// optional: true
       ///
-      TrailingComma,
+      CommaToken,
+      ///
+      /// type: IssetVariableSyntax
+      /// optional: false
+      ///
+      Variable,
    };
 
 public:
-   IsSetVarItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   IssetVariableListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
    }
 
-   ExprSyntax getExpr();
-   std::optional<TokenSyntax> getTrailingComma();
+   std::optional<TokenSyntax> getComma();
+   IssetVariableSyntax getVariable();
 
-   IsSetVarItemSyntax withExpr(std::optional<ExprSyntax> expr);
-   IsSetVarItemSyntax withTrailingComma(std::optional<TokenSyntax> comma);
+   IssetVariableListItemSyntax withComma(std::optional<TokenSyntax> comma);
+   IssetVariableListItemSyntax withVariable(std::optional<IssetVariableSyntax> variable);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::IsSetVarItem;
+      return kind == SyntaxKind::IssetVariableListItem;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -3185,7 +3225,7 @@ public:
    }
 
 private:
-   friend class IsSetVarItemSyntaxBuilder;
+   friend class IssetVariableListItemSyntaxBuilder;
    void validate();
 };
 
