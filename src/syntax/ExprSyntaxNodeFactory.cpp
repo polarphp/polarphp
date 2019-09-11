@@ -1070,7 +1070,7 @@ ExprSyntaxNodeFactory::makeCloneExpr(TokenSyntax cloneToken, ExprSyntax expr, Re
 
 EncapsVariableOffsetSyntax
 ExprSyntaxNodeFactory::makeEncapsVariableOffset(std::optional<TokenSyntax> minusSign, TokenSyntax offset,
-                                           RefCountPtr<SyntaxArena> arena)
+                                                RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::EncapsVariableOffset, {
@@ -1123,7 +1123,7 @@ ExprSyntaxNodeFactory::makeEncapsDollarCurlyExpr(TokenSyntax dollarOpenCurlyToke
 
 EncapsDollarCurlyVarSyntax
 ExprSyntaxNodeFactory::makeEncapsDollarCurlyVariable(TokenSyntax dollarOpenCurlyToken, TokenSyntax varname,
-                                                TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena)
+                                                     TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::EncapsDollarCurlyVar, {
@@ -1153,8 +1153,8 @@ ExprSyntaxNodeFactory::makeEncapsDollarCurlyArray(TokenSyntax dollarOpenCurlyTok
 }
 
 EncapsCurlyVariableSyntax
-ExprSyntaxNodeFactory::makeEncapsCurlyVariable(TokenSyntax curlyOpen, TokenSyntax variable,
-                                          TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena)
+ExprSyntaxNodeFactory::makeEncapsCurlyVariable(TokenSyntax curlyOpen, VariableExprSyntax variable,
+                                               TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::EncapsCurlyVariable, {

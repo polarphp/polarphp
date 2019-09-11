@@ -4969,7 +4969,7 @@ public:
       ///
       CurlyOpen,
       ///
-      /// type: TokenSyntax (T_VARIABLE)
+      /// type: VariableExprSyntax
       /// optional: false
       ///
       Variable,
@@ -4988,11 +4988,11 @@ public:
    }
 
    TokenSyntax getCurlyOpen();
-   TokenSyntax getVariable();
+   VariableExprSyntax getVariable();
    TokenSyntax getCloseCurlyToken();
 
    EncapsCurlyVariableSyntax withCurlyOpen(std::optional<TokenSyntax> curlyOpen);
-   EncapsCurlyVariableSyntax withVariable(std::optional<TokenSyntax> variable);
+   EncapsCurlyVariableSyntax withVariable(std::optional<VariableExprSyntax> variable);
    EncapsCurlyVariableSyntax withCloseCurlyToken(std::optional<TokenSyntax> closeCurlyToken);
 
    static bool kindOf(SyntaxKind kind)

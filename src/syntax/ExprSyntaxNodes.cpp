@@ -5289,7 +5289,7 @@ void EncapsCurlyVariableSyntax::validate()
    }
    assert(raw->getLayout().size() == EncapsCurlyVariableSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, CurlyOpen, std::set{TokenKindType::T_CURLY_OPEN});
-   syntax_assert_child_token(raw, Variable, std::set{TokenKindType::T_VARIABLE});
+   syntax_assert_child_kind(raw, Variable, std::set{SyntaxKind::VariableExpr});
    syntax_assert_child_token(raw, CloseCurlyToken, std::set{TokenKindType::T_RIGHT_BRACE});
 #endif
 }
@@ -5299,9 +5299,9 @@ TokenSyntax EncapsCurlyVariableSyntax::getCurlyOpen()
    return TokenSyntax {m_root, m_data->getChild(Cursor::CurlyOpen).get()};
 }
 
-TokenSyntax EncapsCurlyVariableSyntax::getVariable()
+VariableExprSyntax EncapsCurlyVariableSyntax::getVariable()
 {
-   return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
+   return VariableExprSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
 }
 
 TokenSyntax EncapsCurlyVariableSyntax::getCloseCurlyToken()
@@ -5322,13 +5322,13 @@ EncapsCurlyVariableSyntax::withCurlyOpen(std::optional<TokenSyntax> curlyOpen)
 }
 
 EncapsCurlyVariableSyntax
-EncapsCurlyVariableSyntax::withVariable(std::optional<TokenSyntax> variable)
+EncapsCurlyVariableSyntax::withVariable(std::optional<VariableExprSyntax> variable)
 {
    RefCountPtr<RawSyntax> variableRaw;
    if (variable.has_value()) {
       variableRaw = variable->getRaw();
    } else {
-      variableRaw = make_missing_token(T_VARIABLE);
+      variableRaw = RawSyntax::missing(SyntaxKind::VariableExpr);
    }
    return m_data->replaceChild<EncapsCurlyVariableSyntax>(variableRaw, Variable);
 }

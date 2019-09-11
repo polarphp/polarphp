@@ -188,7 +188,7 @@ public:
                                                 RefCountPtr<SyntaxArena> arena = nullptr);
    static CloneExprSyntax makeCloneExpr(TokenSyntax cloneToken, ExprSyntax expr, RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsVariableOffsetSyntax makeEncapsVariableOffset(std::optional<TokenSyntax> minusSign, TokenSyntax offset,
-                                                    RefCountPtr<SyntaxArena> arena = nullptr);
+                                                              RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsArrayVarSyntax makeEncapsArrayVar(TokenSyntax varToken, TokenSyntax leftSquareBracket,
                                                   EncapsVariableOffsetSyntax offset, TokenSyntax rightSquareBracket,
                                                   RefCountPtr<SyntaxArena> arena = nullptr);
@@ -197,13 +197,13 @@ public:
    static EncapsDollarCurlyExprSyntax makeEncapsDollarCurlyExpr(TokenSyntax dollarOpenCurlyToken, ExprSyntax expr,
                                                                 TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsDollarCurlyVarSyntax makeEncapsDollarCurlyVariable(TokenSyntax dollarOpenCurlyToken, TokenSyntax varname,
-                                                              TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena = nullptr);
+                                                                   TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsDollarCurlyArraySyntax makeEncapsDollarCurlyArray(TokenSyntax dollarOpenCurlyToken, TokenSyntax varname,
                                                                   TokenSyntax leftSquareBracket, ExprSyntax indexExpr,
                                                                   TokenSyntax rightSquareBracket, TokenSyntax closeCurlyToken,
                                                                   RefCountPtr<SyntaxArena> arena = nullptr);
-   static EncapsCurlyVariableSyntax makeEncapsCurlyVariable(TokenSyntax curlyOpen, TokenSyntax variable,
-                                                  TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena = nullptr);
+   static EncapsCurlyVariableSyntax makeEncapsCurlyVariable(TokenSyntax curlyOpen, VariableExprSyntax variable,
+                                                            TokenSyntax closeCurlyToken, RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsVariableSyntax makeEncapsVariable(Syntax var, RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsListItemSyntax makeEncapsListItem(std::optional<TokenSyntax> strLiteral, std::optional<EncapsVariableSyntax> encapsVar,
                                                   RefCountPtr<SyntaxArena> arena = nullptr);

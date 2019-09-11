@@ -2126,25 +2126,57 @@ encaps_list:
 
 encaps_var:
    T_VARIABLE {
-         
+      TokenSyntax variableToken = make_token_with_text(Variable, $1);
+      EncapsVariableSyntax enscapVar = make_expr(EncapsVariable, variableToken);
+      $$ = enscapVar.getRaw();
    }
 |  T_VARIABLE T_LEFT_SQUARE_BRACKET encaps_var_offset T_RIGHT_SQUARE_BRACKET {
 
    }
 |  T_VARIABLE T_OBJECT_OPERATOR T_IDENTIFIER_STRING {
-
+      TokenSyntax variableToken = make_token_with_text(Variable, $1);
+      TokenSyntax objOperator = make_token(ObjectOperatorToken);
+      TokenSyntax identifierStr = make_token_with_text(IdentifierString, $3);
+      EncapsObjPropSyntax objPropVar = make_expr(EncapsObjProp, variableToken, objOperator, identifierStr);
+      EncapsVariableSyntax enscapVar = make_expr(EncapsVariable, objPropVar);
+      $$ = enscapVar.getRaw();
    }
 |  T_DOLLAR_OPEN_CURLY_BRACES expr T_RIGHT_BRACE {
-
+      TokenSyntax curlyOpenToken = make_token(DollarOpenCurlyBracesToken);
+      ExprSyntax expr = make<ExprSyntax>($2);
+      TokenSyntax rightBraceToken = make_token(RightBraceToken);
+      EncapsDollarCurlyExprSyntax curlyExpr = make_expr(EncapsDollarCurlyExpr, curlyOpenToken, expr, rightBraceToken);
+      EncapsVariableSyntax enscapVar = make_expr(EncapsVariable, curlyExpr);
+      $$ = enscapVar.getRaw();
    }
 |  T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME T_RIGHT_BRACE {
-
+      TokenSyntax curlyOpenToken = make_token(DollarOpenCurlyBracesToken);
+      TokenSyntax varname = make_token_with_text(StringVarName, $2);
+      TokenSyntax rightBraceToken = make_token(RightBraceToken);
+      EncapsDollarCurlyVarSyntax curlyVar = make_expr(EncapsDollarCurlyVariable, curlyOpenToken, varname, rightBraceToken);
+      EncapsVariableSyntax enscapVar = make_expr(EncapsVariable, curlyVar);
+      $$ = enscapVar.getRaw();
    }
 |  T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME T_LEFT_SQUARE_BRACKET expr T_RIGHT_SQUARE_BRACKET T_RIGHT_BRACE {
-
+      TokenSyntax curlyOpenToken = make_token(DollarOpenCurlyBracesToken);
+      TokenSyntax varname = make_token_with_text(StringVarName, $2);
+      TokenSyntax leftSquareBracketToken = make_token(LeftSquareBracketToken);
+      ExprSyntax expr = make<ExprSyntax>($4);
+      TokenSyntax rightSquareBracketToken = make_token(RightSquareBracketToken);
+      TokenSyntax rightBraceToken = make_token(RightBraceToken);
+      EncapsDollarCurlyArraySyntax curlyArrayVar = make_expr(EncapsDollarCurlyArray, curlyOpenToken, varname, leftSquareBracketToken,
+         expr, rightSquareBracketToken, rightBraceToken
+      );
+      EncapsVariableSyntax enscapVar = make_expr(EncapsVariable, curlyArrayVar);
+      $$ = enscapVar.getRaw();
    }
 |  T_CURLY_OPEN variable T_RIGHT_BRACE {
-
+      TokenSyntax curlyOpenToken = make_token(CurlyOpenToken);
+      VariableExprSyntax var = make<VariableExprSyntax>($2);
+      TokenSyntax rightBraceToken = make_token(RightBraceToken);
+      EncapsCurlyVariableSyntax curlyVar = make_expr(EncapsCurlyVariable, curlyOpenToken, var, rightBraceToken);
+      EncapsVariableSyntax enscapVar = make_expr(EncapsVariable, curlyVar);
+      $$ = enscapVar.getRaw();
    }
 ;
 
