@@ -1415,6 +1415,18 @@ ArrayPairSyntax ArrayPairSyntax::withItem(std::optional<Syntax> item)
 ///
 /// ArrayPairListItemSyntax
 ///
+#ifdef POLAR_DEBUG_BUILD
+const NodeChoicesType ArrayPairListItemSyntax::CHILD_NODE_CHOICES
+{
+   {
+      Cursor::ArrayPair, {
+         SyntaxKind::ArrayPair,
+               SyntaxKind::ListRecursivePairItem
+      }
+   }
+};
+#endif
+
 void ArrayPairListItemSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
@@ -1424,7 +1436,7 @@ void ArrayPairListItemSyntax::validate()
    }
    assert(raw->getLayout().size() == ArrayPairListItemSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, CommaToken, std::set{TokenKindType::T_COMMA});
-   syntax_assert_child_kind(raw, ArrayPair, std::set{SyntaxKind::ArrayPair});
+   syntax_assert_child_kind(raw, ArrayPair, CHILD_NODE_CHOICES.at(Cursor::ArrayPair));
 #endif
 }
 
@@ -1437,9 +1449,13 @@ std::optional<TokenSyntax> ArrayPairListItemSyntax::getComma()
    return TokenSyntax {m_root, commaData.get()};
 }
 
-ArrayPairSyntax ArrayPairListItemSyntax::getArrayPair()
+std::optional<Syntax> ArrayPairListItemSyntax::getArrayPair()
 {
-   return ArrayPairSyntax {m_root, m_data->getChild(Cursor::ArrayPair).get()};
+   RefCountPtr<SyntaxData> arrayPairData = m_data->getChild(Cursor::ArrayPair);
+   if (!arrayPairData) {
+      return std::nullopt;
+   }
+   return Syntax {m_root, arrayPairData.get()};
 }
 
 ArrayPairListItemSyntax
@@ -1455,13 +1471,13 @@ ArrayPairListItemSyntax::withComma(std::optional<TokenSyntax> comma)
 }
 
 ArrayPairListItemSyntax
-ArrayPairListItemSyntax::withArrayPair(std::optional<ArrayPairSyntax> arrayPair)
+ArrayPairListItemSyntax::withArrayPair(std::optional<Syntax> arrayPair)
 {
    RefCountPtr<RawSyntax> arrayPairRaw;
    if (arrayPair.has_value()) {
       arrayPairRaw = arrayPair->getRaw();
    } else {
-      arrayPairRaw = RawSyntax::missing(SyntaxKind::ArrayPair);
+      arrayPairRaw = nullptr;
    }
    return m_data->replaceChild<ArrayPairListItemSyntax>(arrayPairRaw, Cursor::ArrayPair);
 }
@@ -1478,7 +1494,7 @@ void ListRecursivePairItemSyntax::validate()
    }
    assert(raw->getLayout().size() == ListRecursivePairItemSyntax::CHILDREN_COUNT);
    syntax_assert_child_kind(raw, KeyExpr, std::set{SyntaxKind::Expr});
-   syntax_assert_child_kind(raw, ListPairItemList, std::set{SyntaxKind::ListPairItemList});
+   syntax_assert_child_kind(raw, ArrayPairList, std::set{SyntaxKind::ArrayPairList});
    syntax_assert_child_token(raw, DoubleArrowToken, std::set{TokenKindType::T_DOUBLE_ARROW});
    syntax_assert_child_token(raw, ListToken, std::set{TokenKindType::T_LIST});
    syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
@@ -1514,9 +1530,9 @@ TokenSyntax ListRecursivePairItemSyntax::getLeftParen()
    return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParen).get()};
 }
 
-ListPairItemListSyntax ListRecursivePairItemSyntax::getListPairItemList()
+ArrayPairListSyntax ListRecursivePairItemSyntax::getArrayPairList()
 {
-   return ListPairItemListSyntax {m_root, m_data->getChild(Cursor::ListPairItemList).get()};
+   return ArrayPairListSyntax {m_root, m_data->getChild(Cursor::ArrayPairList).get()};
 }
 
 TokenSyntax ListRecursivePairItemSyntax::getRightParen()
@@ -1555,10 +1571,9 @@ ListRecursivePairItemSyntax::withListToken(std::optional<TokenSyntax> listToken)
    if (listToken.has_value()) {
       listTokenRaw = listToken->getRaw();
    } else {
-      listTokenRaw = RawSyntax::missing(TokenKindType::T_LIST,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LIST)));
+      listTokenRaw = make_missing_token(T_LIST);
    }
-   return m_data->replaceChild<ListRecursivePairItemSyntax>(listTokenRaw, Cursor::ListPairItemList);
+   return m_data->replaceChild<ListRecursivePairItemSyntax>(listTokenRaw, Cursor::ArrayPairList);
 }
 
 ListRecursivePairItemSyntax
@@ -1568,22 +1583,21 @@ ListRecursivePairItemSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
    if (leftParen.has_value()) {
       leftParenRaw = leftParen->getRaw();
    } else {
-      leftParenRaw = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+      leftParenRaw = make_missing_token(T_LEFT_PAREN);
    }
    return m_data->replaceChild<ListRecursivePairItemSyntax>(leftParenRaw, Cursor::LeftParen);
 }
 
 ListRecursivePairItemSyntax
-ListRecursivePairItemSyntax::withListPairItemList(std::optional<ListPairItemListSyntax> pairItemList)
+ListRecursivePairItemSyntax::withArrayPairList(std::optional<ArrayPairListSyntax> pairItemList)
 {
    RefCountPtr<RawSyntax> pairItemListRaw;
    if (pairItemList.has_value()) {
       pairItemListRaw = pairItemList->getRaw();
    } else {
-      pairItemListRaw = RawSyntax::missing(SyntaxKind::ListPairItemList);
+      pairItemListRaw = RawSyntax::missing(SyntaxKind::ArrayPairList);
    }
-   return m_data->replaceChild<ListRecursivePairItemSyntax>(pairItemListRaw, Cursor::ListPairItemList);
+   return m_data->replaceChild<ListRecursivePairItemSyntax>(pairItemListRaw, Cursor::ArrayPairList);
 }
 
 ListRecursivePairItemSyntax ListRecursivePairItemSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
@@ -1592,73 +1606,9 @@ ListRecursivePairItemSyntax ListRecursivePairItemSyntax::withRightParen(std::opt
    if (rightParen.has_value()) {
       rightParenRaw = rightParen->getRaw();
    } else {
-      rightParenRaw = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+      rightParenRaw = make_missing_token(T_RIGHT_PAREN);
    }
    return m_data->replaceChild<ListRecursivePairItemSyntax>(rightParenRaw, Cursor::RightParen);
-}
-
-///
-/// ListPairItemSyntax
-///
-#ifdef POLAR_DEBUG_BUILD
-const NodeChoicesType ListPairItemSyntax::CHILD_NODE_CHOICES
-{
-   {
-      ListPairItemSyntax::Item, {
-         SyntaxKind::ArrayPair, SyntaxKind::ListRecursivePairItem
-      }
-   }
-};
-#endif
-
-void ListPairItemSyntax::validate()
-{
-#ifdef POLAR_DEBUG_BUILD
-   RefCountPtr<RawSyntax> raw = getRaw();
-   if (isMissing()) {
-      return;
-   }
-   assert(raw->getLayout().size() == ListPairItemSyntax::CHILDREN_COUNT);
-   syntax_assert_child_kind(raw, Item, CHILD_NODE_CHOICES.at(Cursor::Item));
-   syntax_assert_child_token(raw, TrailingComma, std::set{TokenKindType::T_COMMA});
-#endif
-}
-
-Syntax ListPairItemSyntax::getItem()
-{
-   return Syntax {m_root, m_data->getChild(Cursor::Item).get()};
-}
-
-std::optional<TokenSyntax> ListPairItemSyntax::getTrailingComma()
-{
-   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::TrailingComma);
-   if (!commaData) {
-      return std::nullopt;
-   }
-   return TokenSyntax {m_root, commaData.get()};
-}
-
-ListPairItemSyntax ListPairItemSyntax::withItem(std::optional<Syntax> item)
-{
-   RefCountPtr<RawSyntax> itemRaw;
-   if (item.has_value()) {
-      itemRaw = item->getRaw();
-   } else {
-      itemRaw = RawSyntax::missing(SyntaxKind::ArrayPair);
-   }
-   return m_data->replaceChild<ListPairItemSyntax>(itemRaw, Cursor::Item);
-}
-
-ListPairItemSyntax ListPairItemSyntax::withTrailingComma(std::optional<TokenSyntax> trailingComma)
-{
-   RefCountPtr<RawSyntax> trailingCommaRaw;
-   if (trailingComma.has_value()) {
-      trailingCommaRaw = trailingComma->getRaw();
-   } else {
-      trailingCommaRaw = nullptr;
-   }
-   return m_data->replaceChild<ListPairItemSyntax>(trailingCommaRaw, Cursor::TrailingComma);
 }
 
 ///

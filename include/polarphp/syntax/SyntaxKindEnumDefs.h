@@ -282,7 +282,6 @@ enum class SyntaxKind : std::uint32_t
    ClassTraitAdaptationList,
    /// for array
    ArrayPairList,
-   ListPairItemList,
    MemberModifierList,
    MemberDeclList,
    EncapsList,

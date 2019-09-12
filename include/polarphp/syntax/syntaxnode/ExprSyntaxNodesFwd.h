@@ -171,16 +171,6 @@ using ArrayPairListSyntax = SyntaxCollection<SyntaxKind::ArrayPairList, ArrayPai
 
 ///
 /// type: SyntaxCollection
-/// element type: ListPairItemSyntax
-///
-/// list_pair_item_list:
-///   list_pair_item_list ',' array_pair_item
-/// | list_pair_item_list
-///
-using ListPairItemListSyntax = SyntaxCollection<SyntaxKind::ListPairItemList, ListPairItemSyntax>;
-
-///
-/// type: SyntaxCollection
 /// element type: EncapsListItemSyntax
 ///
 /// encaps_list:

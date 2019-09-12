@@ -27,10 +27,8 @@ public:
    static ExprListSyntax makeExprList(const std::vector<ExprSyntax> elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static LexicalVarListSyntax makeLexicalVarList(const std::vector<LexicalVarItemSyntax> elements,
                                                   RefCountPtr<SyntaxArena> arena = nullptr);
-   static ArrayPairListSyntax makeArrayPairList(const std::vector<ArrayPairSyntax> elements,
+   static ArrayPairListSyntax makeArrayPairList(const std::vector<ArrayPairListItemSyntax> elements,
                                                         RefCountPtr<SyntaxArena> arena = nullptr);
-   static ListPairItemListSyntax makeListPairItemList(const std::vector<ListPairItemSyntax> elements,
-                                                      RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsItemListSyntax makeEncapsItemList(const std::vector<EncapsListItemSyntax> elements,
                                                   RefCountPtr<SyntaxArena> arena = nullptr);
    static ArgumentListSyntax makeArgumentList(const std::vector<ArgumentListItemSyntax> elements,
@@ -81,10 +79,11 @@ public:
    static ArrayUnpackPairItemSyntax makeArrayUnpackPairItem(TokenSyntax ellipsisToken, ExprSyntax unpackExpr,
                                                             RefCountPtr<SyntaxArena> arena = nullptr);
    static ArrayPairSyntax makeArrayPair(Syntax item, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ArrayPairSyntax makeArrayListItemPair(std::optional<TokenSyntax> comma, ArrayPairSyntax item, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ArrayPairListItemSyntax makeArrayPairListItem(std::optional<TokenSyntax> comma, std::optional<Syntax> arrayPair,
+                                                        RefCountPtr<SyntaxArena> arena = nullptr);
    static ListRecursivePairItemSyntax makeListRecursivePairItem(std::optional<ExprSyntax> keyExpr, std::optional<TokenSyntax> doubleArrowToken,
                                                                 TokenSyntax listToken, TokenSyntax leftParen,
-                                                                ListPairItemListSyntax listPairItemList, TokenSyntax rightParen,
+                                                                ArrayPairListSyntax arrayPairList, TokenSyntax rightParen,
                                                                 RefCountPtr<SyntaxArena> arena = nullptr);
    static ListPairItemSyntax makeListPairItem(Syntax item, std::optional<TokenSyntax> trailingComma,
                                               RefCountPtr<SyntaxArena> arena = nullptr);
@@ -233,7 +232,6 @@ public:
    static ExprListSyntax makeBlankExprList(RefCountPtr<SyntaxArena> arena = nullptr);
    static LexicalVarListSyntax makeBlankLexicalVarList(RefCountPtr<SyntaxArena> arena = nullptr);
    static ArrayPairListSyntax makeBlankArrayPairList(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ListPairItemListSyntax makeBlankListPairItemList(RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsItemListSyntax makeBlankEncapsItemList(RefCountPtr<SyntaxArena> arena = nullptr);
    static ArgumentListSyntax makeBlankArgumentList(RefCountPtr<SyntaxArena> arena = nullptr);
    static IssetVariablesListSyntax makeBlankIssetVariablesList(RefCountPtr<SyntaxArena> arena = nullptr);

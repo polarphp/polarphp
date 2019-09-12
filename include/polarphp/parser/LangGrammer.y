@@ -2091,25 +2091,34 @@ property_name:
 
 array_pair_list:
    non_empty_array_pair_list {
-
+      $$ = $1;
    }
 ;
 
 possible_array_pair:
    %empty {
-
+      $$ = nullptr;
    }
 |  array_pair {
-
+   $$ = $1;
 }
 ;
 
 non_empty_array_pair_list:
    non_empty_array_pair_list T_COMMA possible_array_pair {
-
+      ArrayPairListSyntax list = make<ArrayPairListSyntax>($1);
+      TokenSyntax comma = make_token(CommaToken);
+      ArrayPairListItemSyntax listItem = make<ArrayPairListItemSyntax>($3);
+      list.appending(listItem);
+      $$ = list.getRaw();
    }
 |  possible_array_pair {
-
+      RefCountPtr<RawSyntax> rawArrayPair = $1;
+      ArrayPairListItemSyntax listItem = make_expr(ArrayPairListItem, std::nullopt, 
+         rawArrayPair ? std::optional(make<Syntax>(rawArrayPair)) : std::nullopt);
+      std::vector<ArrayPairListItemSyntax> items{listItem};
+      ArrayPairListSyntax list = make_expr(ArrayPairList, items);
+      $$ = list.getRaw();
    }
 ;
 
@@ -2158,11 +2167,20 @@ array_pair:
       TokenSyntax arrow = make_token(DoubleArrowToken);
       TokenSyntax listKeyword = make_token(ListKeyword);
       TokenSyntax leftParen = make_token(LeftParenToken);
-
+      ArrayPairListSyntax arrayPairList = make<ArrayPairListSyntax>($5);
       TokenSyntax rightParen = make_token(LeftParenToken);
+      ListRecursivePairItemSyntax listRecursivePair = make_expr(ListRecursivePairItem, keyExpr, arrow, listKeyword, 
+         leftParen, arrayPairList, rightParen);
+      $$ = listRecursivePair.getRaw();
    }
 |  T_LIST T_LEFT_PAREN array_pair_list T_RIGHT_PAREN {
-
+      TokenSyntax listKeyword = make_token(ListKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ArrayPairListSyntax arrayPairList = make<ArrayPairListSyntax>($3);
+      TokenSyntax rightParen = make_token(LeftParenToken);
+      ListRecursivePairItemSyntax listRecursivePair = make_expr(ListRecursivePairItem, std::nullopt, std::nullopt, listKeyword, 
+         leftParen, arrayPairList, rightParen);
+      $$ = listRecursivePair.getRaw();
    }
 ;
 

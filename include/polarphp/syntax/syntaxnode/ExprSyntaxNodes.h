@@ -1543,11 +1543,20 @@ public:
       ///
       CommaToken,
       ///
-      /// type: ArrayPairSyntax
-      /// optional: false
+      /// type: Syntax
+      /// optional: true
+      /// node choices: true
+      /// ---------------------------------------------
+      /// node choice: ArrayPairSyntax
+      /// ---------------------------------------------
+      /// node choice: ListRecursivePairItemSyntax
       ///
       ArrayPair,
    };
+
+#ifdef POLAR_DEBUG_BUILD
+   const static NodeChoicesType CHILD_NODE_CHOICES;
+#endif
 
 public:
    ArrayPairListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
@@ -1557,10 +1566,10 @@ public:
    }
 
    std::optional<TokenSyntax> getComma();
-   ArrayPairSyntax getArrayPair();
+   std::optional<Syntax> getArrayPair();
 
    ArrayPairListItemSyntax withComma(std::optional<TokenSyntax> comma);
-   ArrayPairListItemSyntax withArrayPair(std::optional<ArrayPairSyntax> arrayPair);
+   ArrayPairListItemSyntax withArrayPair(std::optional<Syntax> arrayPair);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -1610,10 +1619,10 @@ public:
       ///
       LeftParen,
       ///
-      /// type: ListPairItemListSyntax
+      /// type: ArrayPairListSyntax
       /// optional: false
       ///
-      ListPairItemList,
+      ArrayPairList,
       ///
       /// type: TokenSyntax (T_RIGHT_PAREN)
       /// optional: false
@@ -1632,14 +1641,14 @@ public:
    std::optional<TokenSyntax> getDoubleArrowToken();
    TokenSyntax getListToken();
    TokenSyntax getLeftParen();
-   ListPairItemListSyntax getListPairItemList();
+   ArrayPairListSyntax getArrayPairList();
    TokenSyntax getRightParen();
 
    ListRecursivePairItemSyntax withKeyExpr(std::optional<ExprSyntax> keyExpr);
    ListRecursivePairItemSyntax withDoubleArrowToken(std::optional<TokenSyntax> doubleArrowToken);
    ListRecursivePairItemSyntax withListToken(std::optional<TokenSyntax> listToken);
    ListRecursivePairItemSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
-   ListRecursivePairItemSyntax withListPairItemList(std::optional<ListPairItemListSyntax> pairItemList);
+   ListRecursivePairItemSyntax withArrayPairList(std::optional<ArrayPairListSyntax> arrayPairList);
    ListRecursivePairItemSyntax withRightParen(std::optional<TokenSyntax> rightParen);
 
    static bool kindOf(SyntaxKind kind)
@@ -1654,57 +1663,6 @@ public:
 
 private:
    friend class ListRecursivePairItemSyntaxBuilder;
-   void validate();
-};
-
-///
-/// list_pair_item:
-///   array_pair_item
-/// | list_recursive_pair_item
-///
-class ListPairItemSyntax final : public Syntax
-{
-public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 1;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
-   enum Cursor : SyntaxChildrenCountType
-   {
-      ///
-      /// type: Syntax
-      /// optional: false
-      /// node choices: true
-      /// ------------------------------------------
-      /// node choice: ArrayPairSyntax
-      /// ------------------------------------------
-      /// node choice: ListRecursivePairItemSyntax
-      ///
-      Item,
-      ///
-      /// type: TokenSyntax (T_COMMA)
-      /// optional: true
-      ///
-      TrailingComma
-   };
-
-#ifdef POLAR_DEBUG_BUILD
-   const static NodeChoicesType CHILD_NODE_CHOICES;
-#endif
-
-public:
-   ListPairItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : Syntax(root, data)
-   {
-      validate();
-   }
-
-   Syntax getItem();
-   std::optional<TokenSyntax> getTrailingComma();
-
-   ListPairItemSyntax withItem(std::optional<Syntax> item);
-   ListPairItemSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
-
-private:
-   friend class ListPairItemSyntaxBuilder;
    void validate();
 };
 

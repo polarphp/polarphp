@@ -43,37 +43,25 @@ ExprSyntaxNodeFactory::makeLexicalVarList(const std::vector<LexicalVarItemSyntax
    for (const LexicalVarItemSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
-   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::LexicalVarList, layout, SourcePresence::Present,
-                                                   arena);
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::LexicalVarList, layout, SourcePresence::Present,
+            arena);
    return make<LexicalVarListSyntax>(target);
 }
 
 ArrayPairListSyntax
-ExprSyntaxNodeFactory::makeArrayPairList(const std::vector<ArrayPairSyntax> elements,
-                                             RefCountPtr<SyntaxArena> arena)
+ExprSyntaxNodeFactory::makeArrayPairList(const std::vector<ArrayPairListItemSyntax> elements,
+                                         RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
-   for (const ArrayPairSyntax &element : elements) {
+   for (const ArrayPairListItemSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
-   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::ArrayPairList, layout, SourcePresence::Present,
-                                                   arena);
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ArrayPairList, layout, SourcePresence::Present,
+            arena);
    return make<ArrayPairListSyntax>(target);
-}
-
-ListPairItemListSyntax
-ExprSyntaxNodeFactory::makeListPairItemList(const std::vector<ListPairItemSyntax> elements,
-                                            RefCountPtr<SyntaxArena> arena)
-{
-   std::vector<RefCountPtr<RawSyntax>> layout;
-   layout.reserve(elements.size());
-   for (const ListPairItemSyntax &element : elements) {
-      layout.push_back(element.getRaw());
-   }
-   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::ListPairItemList, layout, SourcePresence::Present,
-                                                   arena);
-   return make<ListPairItemListSyntax>(target);
 }
 
 EncapsItemListSyntax
@@ -85,8 +73,9 @@ ExprSyntaxNodeFactory::makeEncapsItemList(const std::vector<EncapsListItemSyntax
    for (const EncapsListItemSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
-   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::EncapsList, layout, SourcePresence::Present,
-                                                   arena);
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::EncapsList, layout, SourcePresence::Present,
+            arena);
    return make<EncapsItemListSyntax>(target);
 }
 
@@ -99,8 +88,9 @@ ExprSyntaxNodeFactory::makeArgumentList(const std::vector<ArgumentListItemSyntax
    for (const ArgumentListItemSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
-   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::ArgumentList, layout, SourcePresence::Present,
-                                                   arena);
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ArgumentList, layout, SourcePresence::Present,
+            arena);
    return make<ArgumentListSyntax>(target);
 }
 
@@ -113,8 +103,9 @@ ExprSyntaxNodeFactory::makeIssetVariablesList(const std::vector<IssetVariableLis
    for (const IssetVariableListItemSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
-   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::IssetVariablesList, layout, SourcePresence::Present,
-                                                   arena);
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::IssetVariablesList, layout, SourcePresence::Present,
+            arena);
    return make<IssetVariablesListSyntax>(target);
 }
 
@@ -424,22 +415,24 @@ ExprSyntaxNodeFactory::makeArrayPair(Syntax item, RefCountPtr<SyntaxArena> arena
    return make<ArrayPairSyntax>(target);
 }
 
-ArrayPairSyntax
-ExprSyntaxNodeFactory::makeArrayListItemPair(std::optional<TokenSyntax> comma, ArrayPairSyntax arrayPair,
+ArrayPairListItemSyntax
+ExprSyntaxNodeFactory::makeArrayPairListItem(std::optional<TokenSyntax> comma, std::optional<Syntax> arrayPair,
                                              RefCountPtr<SyntaxArena> arena)
 {
+   SyntaxKind kind = arrayPair->getKind();
+   assert(kind == SyntaxKind::ArrayPair || kind == SyntaxKind::ListRecursivePairItem);
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ArrayPairListItem, {
                comma.has_value() ? comma->getRaw() : nullptr,
-               arrayPair.getRaw(),
+               arrayPair.has_value() ? arrayPair->getRaw() : nullptr,
             }, SourcePresence::Present, arena);
-   return make<ArrayPairSyntax>(target);
+   return make<ArrayPairListItemSyntax>(target);
 }
 
 ListRecursivePairItemSyntax
 ExprSyntaxNodeFactory::makeListRecursivePairItem(std::optional<ExprSyntax> keyExpr, std::optional<TokenSyntax> doubleArrowToken,
                                                  TokenSyntax listToken, TokenSyntax leftParen,
-                                                 ListPairItemListSyntax listPairItemList, TokenSyntax rightParen,
+                                                 ArrayPairListSyntax arrayPairList, TokenSyntax rightParen,
                                                  RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -448,22 +441,10 @@ ExprSyntaxNodeFactory::makeListRecursivePairItem(std::optional<ExprSyntax> keyEx
                doubleArrowToken.has_value() ? doubleArrowToken->getRaw() : nullptr,
                listToken.getRaw(),
                leftParen.getRaw(),
-               listPairItemList.getRaw(),
+               arrayPairList.getRaw(),
                rightParen.getRaw()
             }, SourcePresence::Present, arena);
    return make<ListRecursivePairItemSyntax>(target);
-}
-
-ListPairItemSyntax
-ExprSyntaxNodeFactory::makeListPairItem(Syntax item, std::optional<TokenSyntax> trailingComma,
-                                        RefCountPtr<SyntaxArena> arena)
-{
-   RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::ListPairItem, {
-               item.getRaw(),
-               trailingComma.has_value() ? trailingComma->getRaw() : nullptr,
-            }, SourcePresence::Present, arena);
-   return make<ListPairItemSyntax>(target);
 }
 
 SimpleVariableExprSyntax
@@ -1324,15 +1305,6 @@ ExprSyntaxNodeFactory::makeBlankArrayPairList(RefCountPtr<SyntaxArena> arena)
    return make<ArrayPairListSyntax>(target);
 }
 
-ListPairItemListSyntax
-ExprSyntaxNodeFactory::makeBlankListPairItemList(RefCountPtr<SyntaxArena> arena)
-{
-   RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::ListPairItemList, {},
-            SourcePresence::Present, arena);
-   return make<ListPairItemListSyntax>(target);
-}
-
 EncapsItemListSyntax
 ExprSyntaxNodeFactory::makeBlankEncapsItemList(RefCountPtr<SyntaxArena> arena)
 {
@@ -1670,21 +1642,10 @@ ExprSyntaxNodeFactory::makeBlankListRecursivePairItem(RefCountPtr<SyntaxArena> a
                nullptr, // DoubleArrowToken
                make_missing_token(T_LIST), // ListToken
                make_missing_token(T_LEFT_PAREN), // LeftParen
-               RawSyntax::missing(SyntaxKind::ListPairItemList), // ListPairItemList
+               RawSyntax::missing(SyntaxKind::ArrayPairList), // ArrayPairList
                make_missing_token(T_RIGHT_PAREN), // RightParen
             }, SourcePresence::Present, arena);
    return make<ListRecursivePairItemSyntax>(target);
-}
-
-ListPairItemSyntax
-ExprSyntaxNodeFactory::makeBlankListPairItem(RefCountPtr<SyntaxArena> arena)
-{
-   RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::ListPairItem, {
-               RawSyntax::missing(SyntaxKind::Unknown), // Item
-               nullptr, // ListToken
-            }, SourcePresence::Present, arena);
-   return make<ListPairItemSyntax>(target);
 }
 
 SimpleVariableExprSyntax

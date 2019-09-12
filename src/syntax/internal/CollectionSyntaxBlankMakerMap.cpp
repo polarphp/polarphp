@@ -41,8 +41,6 @@ Syntax AbstractFactory::makeBlankCollectionSyntax(SyntaxKind collectionKind)
       return ExprSyntaxNodeFactory::makeBlankLexicalVarList();
    case SyntaxKind::ArrayPairList:
       return ExprSyntaxNodeFactory::makeBlankArrayPairList();
-   case SyntaxKind::ListPairItemList:
-      return ExprSyntaxNodeFactory::makeBlankListPairItemList();
    case SyntaxKind::EncapsList:
       return ExprSyntaxNodeFactory::makeBlankEncapsItemList();
    case SyntaxKind::ArgumentList:
