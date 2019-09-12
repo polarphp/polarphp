@@ -1104,7 +1104,7 @@ private:
 /// variable_class_name:
 ///   dereferencable
 ///
-class VariableClassNameClauseSyntax final : Syntax
+class VariableClassNameClauseSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 1;

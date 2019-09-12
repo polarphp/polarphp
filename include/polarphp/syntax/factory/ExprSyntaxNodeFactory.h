@@ -67,7 +67,7 @@ public:
    static ArgumentListClauseSyntax makeArgumentListClause(TokenSyntax leftParen, std::optional<ArgumentListSyntax> arguments,
                                                           TokenSyntax rightParen, RefCountPtr<SyntaxArena> arena = nullptr);
    static DereferencableClauseSyntax makeDereferencableClause(ExprSyntax dereferencableExpr, RefCountPtr<SyntaxArena> arena = nullptr);
-   static VariableClassNameClauseSyntax makeVariableClassNameClause(ExprSyntax dereferencableExpr, RefCountPtr<SyntaxArena> arena = nullptr);
+   static VariableClassNameClauseSyntax makeVariableClassNameClause(DereferencableClauseSyntax dereferencableExpr, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassNameClauseSyntax makeClassNameClause(Syntax name, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassNameRefClauseSyntax makeClassNameRefClause(Syntax name, RefCountPtr<SyntaxArena> arena = nullptr);
    static BraceDecoratedExprClauseSyntax makeBraceDecoratedExprClause(TokenSyntax leftParen, ExprSyntax expr,

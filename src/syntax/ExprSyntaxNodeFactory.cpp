@@ -326,7 +326,7 @@ ExprSyntaxNodeFactory::makeDereferencableClause(ExprSyntax dereferencableExpr, R
 }
 
 VariableClassNameClauseSyntax
-ExprSyntaxNodeFactory::makeVariableClassNameClause(ExprSyntax dereferencableExpr, RefCountPtr<SyntaxArena> arena)
+ExprSyntaxNodeFactory::makeVariableClassNameClause(DereferencableClauseSyntax dereferencableExpr, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::VariableClassNameClause, {

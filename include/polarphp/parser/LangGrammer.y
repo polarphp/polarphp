@@ -1987,19 +1987,30 @@ optional_expr:
 
 variable_class_name:
    dereferencable {
-
+      DereferencableClauseSyntax dereferencable = make<DereferencableClauseSyntax>($1);
+      VariableClassNameClauseSyntax className = make_expr(VariableClassNameClause, dereferencable);
+      $$ = className.getRaw();
    }
 ;
 
 dereferencable:
    variable {
-
+      VariableExprSyntax variable = make<VariableExprSyntax>($1);
+      DereferencableClauseSyntax dereferencable = make_expr(DereferencableClause, variable);
+      $$ = dereferencable.getRaw();
    }
 |  T_LEFT_PAREN expr T_RIGHT_PAREN {
-
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ExprSyntax expr = make<ExprSyntax>($2);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      ParenDecoratedExprSyntax decoratedExpr = make_expr(ParenDecoratedExpr, leftParen, expr, rightParen);
+      DereferencableClauseSyntax dereferencable = make_expr(DereferencableClause, decoratedExpr);
+      $$ = dereferencable.getRaw();
    }
 |  dereferencable_scalar {
-
+      DereferencableScalarExprSyntax scalar = make<DereferencableScalarExprSyntax>($1);
+      DereferencableClauseSyntax dereferencable = make_expr(DereferencableClause, scalar);
+      $$ = dereferencable.getRaw();
    }
 ;
 
@@ -2011,7 +2022,7 @@ callable_expr:
 
    }
 |  dereferencable_scalar {
-
+     
    }
 ;
 
@@ -2125,13 +2136,22 @@ member_name:
 
 property_name:
    T_IDENTIFIER_STRING {
-
+      TokenSyntax identifierStr = make_token_with_text(IdentifierString, $1);
+      PropertyNameClauseSyntax propertyName = make_expr(PropertyNameClause, identifierStr);
+      $$ = propertyName.getRaw();
    }
 |  T_LEFT_BRACE expr T_RIGHT_BRACE {
-
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      ExprSyntax expr = make<ExprSyntax>($2);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      BraceDecoratedExprClauseSyntax decoratedExpr = make_expr(BraceDecoratedExprClause, leftBrace, expr, rightBrace);
+      PropertyNameClauseSyntax propertyName = make_expr(PropertyNameClause, decoratedExpr);
+      $$ = propertyName.getRaw();
    }
 |  simple_variable {
-
+      SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($1);
+      PropertyNameClauseSyntax propertyName = make_expr(PropertyNameClause, simpleVar);
+      $$ = propertyName.getRaw();
    }
 ;
 
