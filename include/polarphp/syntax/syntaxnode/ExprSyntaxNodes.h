@@ -1255,7 +1255,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// type: TokenSyntax (T_LEFT_BRACE)
       /// optional: false
       ///
       LeftBrace,
@@ -1265,7 +1265,7 @@ public:
       ///
       Expr,
       ///
-      /// type: TokenSyntax (T_RIGHT_PAREN)
+      /// type: TokenSyntax (T_RIGHT_BRACE)
       /// optional: false
       ///
       RightBrace

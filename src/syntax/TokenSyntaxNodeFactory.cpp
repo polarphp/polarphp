@@ -939,6 +939,12 @@ TokenSyntax TokenSyntaxNodeFactory::makeTildeToken(const Trivia &leadingTrivia, 
    return make_token_by_kind(T_TILDE);
 }
 
+TokenSyntax TokenSyntaxNodeFactory::makeDollarToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
+                                                    RefCountPtr<SyntaxArena> arena)
+{
+   return make_token_by_kind(T_DOLLAR_SIGN);
+}
+
 TokenSyntax TokenSyntaxNodeFactory::makeQuestionMarkToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                           RefCountPtr<SyntaxArena> arena)
 {

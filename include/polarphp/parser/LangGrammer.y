@@ -2025,13 +2025,25 @@ variable:
 
 simple_variable:
    T_VARIABLE {
-
+      TokenSyntax variableToken = make_token_with_text(Variable, $1);
+      SimpleVariableExprSyntax simpleVariable = make_expr(SimpleVariableExpr, std::nullopt, variableToken);
+      $$ = simpleVariable.getRaw();
    }
 |  T_DOLLAR_SIGN T_LEFT_BRACE expr T_RIGHT_BRACE {
-
+      TokenSyntax dollarToken = make_token(DollarToken);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ExprSyntax expr = make<ExprSyntax>($3);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      BraceDecoratedExprClauseSyntax decoratedExpr = make_expr(BraceDecoratedExprClause, leftParen, expr, rightParen);
+      BraceDecoratedVariableExprSyntax bracedVarExpr = make_expr(BraceDecoratedVariableExpr, dollarToken, decoratedExpr);
+      SimpleVariableExprSyntax simpleVariable = make_expr(SimpleVariableExpr, std::nullopt, bracedVarExpr);
+      $$ = simpleVariable.getRaw();
    }
 |  T_DOLLAR_SIGN simple_variable {
-
+      TokenSyntax dollarToken = make_token(DollarToken);
+      SimpleVariableExprSyntax parentVar = make<SimpleVariableExprSyntax>($2);
+      SimpleVariableExprSyntax simpleVariable = make_expr(SimpleVariableExpr, dollarToken, parentVar);
+      $$ = simpleVariable.getRaw();
    }
 ;
 
