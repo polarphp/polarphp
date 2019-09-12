@@ -2104,13 +2104,22 @@ new_variable:
 
 member_name:
    identifier {
-
+      IdentifierSyntax identifier = make<IdentifierSyntax>($1);
+      MemberNameClauseSyntax memberName = make_expr(MemberNameClause, identifier);
+      $$ = memberName.getRaw();
    }
 |  T_LEFT_BRACE expr T_RIGHT_BRACE {
-
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      ExprSyntax expr = make<ExprSyntax>($2);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      BraceDecoratedExprClauseSyntax decoratedExpr = make_expr(BraceDecoratedExprClause, leftBrace, expr, rightBrace);
+      MemberNameClauseSyntax memberName = make_expr(MemberNameClause, decoratedExpr);
+      $$ = memberName.getRaw();
    }
 |  simple_variable {
-
+      SimpleVariableExprSyntax simple = make<SimpleVariableExprSyntax>($1);
+      MemberNameClauseSyntax memberName = make_expr(MemberNameClause, simple);
+      $$ = memberName.getRaw();
    }
 ;
 
