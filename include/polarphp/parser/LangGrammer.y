@@ -1789,10 +1789,14 @@ function_call:
 
 class_name:
    T_STATIC {
-
+      TokenSyntax staticToken = make_token(StaticKeyword);
+      ClassNameClauseSyntax className = make_expr(ClassNameClause, staticToken);
+      $$ = className.getRaw();
    }
 |  name {
-
+      NameSyntax name = make<NameSyntax>($1);
+      ClassNameClauseSyntax className = make_expr(ClassNameClause, name);
+      $$ = className.getRaw();
    }
 ;
 
@@ -1837,16 +1841,35 @@ ctor_arguments:
 
 dereferencable_scalar:
    T_ARRAY T_LEFT_PAREN array_pair_list T_RIGHT_PAREN {
-
+      TokenSyntax arrayToken = make_token(ArrayKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ArrayPairListSyntax arrayPairList = make<ArrayPairListSyntax>($3);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      ArrayCreateExprSyntax arrayCreateExpr = make_expr(ArrayCreateExpr, arrayToken, leftParen, arrayPairList, rightParen);
+      DereferencableScalarExprSyntax scalar = make_expr(DereferencableScalarExpr, arrayCreateExpr);
+      $$ = scalar.getRaw();
    }
 |  T_LEFT_SQUARE_BRACKET array_pair_list T_RIGHT_SQUARE_BRACKET {
-
+      TokenSyntax leftSquareBracket = make_token(LeftSquareBracketToken);
+      ArrayPairListSyntax arrayPairList = make<ArrayPairListSyntax>($2);
+      TokenSyntax rightSquareBracket = make_token(RightSquareBracketToken);
+      SimplifiedArrayCreateExprSyntax simpleArrayCreateExpr = make_expr(SimplifiedArrayCreateExpr, leftSquareBracket, arrayPairList, rightSquareBracket);
+      DereferencableScalarExprSyntax scalar = make_expr(DereferencableScalarExpr, simpleArrayCreateExpr);
+      $$ = scalar.getRaw();
    }
 |  T_DOUBLE_QUOTE T_CONSTANT_ENCAPSED_STRING T_DOUBLE_QUOTE {
-
+      TokenSyntax doubleQuote = make_token(DoubleStrQuoteToken);
+      TokenSyntax strToken = make_token_with_text(ConstantEncapsedString, $2);
+      StringLiteralExprSyntax str = make_expr(StringLiteralExpr, doubleQuote, strToken, doubleQuote);
+      DereferencableScalarExprSyntax scalar = make_expr(DereferencableScalarExpr, str);
+      $$ = scalar.getRaw();
    }
 |  T_SINGLE_QUOTE T_CONSTANT_ENCAPSED_STRING T_SINGLE_QUOTE {
-
+      TokenSyntax singleQuote = make_token(SingleStrQuoteToken);
+      TokenSyntax strToken = make_token_with_text(ConstantEncapsedString, $2);
+      StringLiteralExprSyntax str = make_expr(StringLiteralExpr, singleQuote, strToken, singleQuote);
+      DereferencableScalarExprSyntax scalar = make_expr(DereferencableScalarExpr, str);
+      $$ = scalar.getRaw();
    }
 ;
 
@@ -1941,10 +1964,12 @@ scalar:
 
 constant:
    name {
-
+      NameSyntax name = make<NameSyntax>($1);
+      ConstExprSyntax constant = make_expr(ConstExpr, name);
+      $$ = constant.getRaw();
    }
 |  class_name T_PAAMAYIM_NEKUDOTAYIM identifier {
-
+      
    }
 |  variable_class_name T_PAAMAYIM_NEKUDOTAYIM identifier {
 
