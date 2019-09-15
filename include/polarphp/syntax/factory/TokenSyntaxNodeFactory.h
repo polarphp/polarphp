@@ -162,7 +162,7 @@ public:
    static TokenSyntax makeDoubleArrowToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
    static TokenSyntax makeDollarOpenCurlyBracesToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
    static TokenSyntax makeCurlyOpenToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
-   static TokenSyntax makePaamayimNekudotayimTokenToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
+   static TokenSyntax makePaamayimNekudotayimToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
    static TokenSyntax makeLeftParenToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
    static TokenSyntax makeRightParenToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
    static TokenSyntax makeLeftBraceToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);

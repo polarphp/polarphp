@@ -1955,10 +1955,14 @@ scalar:
       $$ = scalarValue.getRaw();
    }
 |  dereferencable_scalar {
-
+      DereferencableScalarExprSyntax dscalar = make<DereferencableScalarExprSyntax>($1);
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, dscalar);
+      $$ = scalarValue.getRaw();
    }
 |  constant {
-
+      ConstExprSyntax constant = make<ConstExprSyntax>($1);
+      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, constant);
+      $$ = scalarValue.getRaw();
    }
 ;
 
@@ -2049,13 +2053,22 @@ callable_variable:
 
 variable:
    callable_variable {
-
+      CallableVariableExprSyntax callableVar = make<CallableVariableExprSyntax>($1);
+      VariableExprSyntax var = make_expr(VariableExpr, callableVar);
+      $$ = var.getRaw();
    }
 |  static_member {
-
+      StaticPropertyExprSyntax staticMember = make<StaticPropertyExprSyntax>($1);
+      VariableExprSyntax var = make_expr(VariableExpr, staticMember);
+      $$ = var.getRaw();
    }
 |  dereferencable T_OBJECT_OPERATOR property_name {
-
+      DereferencableScalarExprSyntax dereferencableExpr = make<DereferencableScalarExprSyntax>($1);
+      TokenSyntax objOperator = make_token(ObjectOperatorToken);
+      PropertyNameClauseSyntax propName = make<PropertyNameClauseSyntax>($3);
+      InstancePropertyExprSyntax propExpr = make_expr(InstancePropertyExpr, dereferencableExpr, objOperator, propName);
+      VariableExprSyntax var = make_expr(VariableExpr, propExpr);
+      $$ = var.getRaw();
    }
 ;
 
@@ -2084,32 +2097,67 @@ simple_variable:
 ;
 
 static_member:
-   class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable {
-
+      class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable {
+      ClassNameClauseSyntax className = make<ClassNameClauseSyntax>($1);
+      TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
+      SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($3);
+      StaticPropertyExprSyntax staticMember = make_expr(StaticPropertyExpr, className, paamayimNekudotayimToken, simpleVar);
+      $$ = staticMember.getRaw();
    }
-|  variable_class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable {
-
+|     variable_class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable {
+      VariableClassNameClauseSyntax className = make<VariableClassNameClauseSyntax>($1);
+      TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
+      SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($3);
+      StaticPropertyExprSyntax staticMember = make_expr(StaticPropertyExpr, className, paamayimNekudotayimToken, simpleVar);
+      $$ = staticMember.getRaw();
    }
 ;
 
 new_variable:
    simple_variable {
-
+      SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($1);
+      NewVariableClauseSyntax newVar = make_expr(NewVariableClause, simpleVar);
+      $$ = newVar.getRaw();
    }
 |  new_variable T_LEFT_SQUARE_BRACKET optional_expr T_RIGHT_SQUARE_BRACKET {
-
+      NewVariableClauseSyntax var = make<NewVariableClauseSyntax>($1);
+      TokenSyntax leftBracket = make_token(LeftSquareBracketToken);
+      OptionalExprSyntax expr = make<OptionalExprSyntax>($3);
+      TokenSyntax rightBracket = make_token(RightSquareBracketToken);
+      ArrayAccessExprSyntax arrayAccess = make_expr(ArrayAccessExpr, var, leftBracket, expr, rightBracket);
+      $$ = arrayAccess.getRaw();
    }
 |  new_variable T_LEFT_BRACE expr T_RIGHT_BRACE {
-
+      NewVariableClauseSyntax var = make<NewVariableClauseSyntax>($1);
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      ExprSyntax expr = make<ExprSyntax>($3);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      BraceDecoratedExprClauseSyntax decoratedExpr = make_expr(BraceDecoratedExprClause,
+         leftBrace, expr, rightBrace);
+      BraceDecoratedArrayAccessExprSyntax arrayAccess = make_expr(
+         BraceDecoratedArrayAccessExpr, var, decoratedExpr);
+      $$ = arrayAccess.getRaw();
    }
 |  new_variable T_OBJECT_OPERATOR property_name {
-
+      NewVariableClauseSyntax var = make<NewVariableClauseSyntax>($1);
+      TokenSyntax objOperator = make_token(ObjectOperatorToken);
+      PropertyNameClauseSyntax propertyName = make<PropertyNameClauseSyntax>($3);
+      InstancePropertyExprSyntax propExpr = make_expr(InstancePropertyExpr, var, objOperator, propertyName);
+      $$ = propExpr.getRaw();
    }
 |  class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable {
-
+      ClassNameClauseSyntax className = make<ClassNameClauseSyntax>($1);
+      TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
+      SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($3);
+      StaticPropertyExprSyntax staticPropExpr = make_expr(StaticPropertyExpr, className, paamayimNekudotayimToken, simpleVar);
+      $$ = staticPropExpr.getRaw();
    }
 |  new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable {
-
+      NewVariableClauseSyntax newVar = make<NewVariableClauseSyntax>($1);
+      TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
+      SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($3);
+      StaticPropertyExprSyntax staticPropExpr = make_expr(StaticPropertyExpr, newVar, paamayimNekudotayimToken, simpleVar);
+      $$ = staticPropExpr.getRaw();
    }
 ;
 

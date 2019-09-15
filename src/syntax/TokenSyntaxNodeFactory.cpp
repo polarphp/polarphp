@@ -825,7 +825,7 @@ TokenSyntax TokenSyntaxNodeFactory::makeCurlyOpenToken(const Trivia &leadingTriv
    return make_token_by_kind(T_CURLY_OPEN);
 }
 
-TokenSyntax TokenSyntaxNodeFactory::makePaamayimNekudotayimTokenToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
+TokenSyntax TokenSyntaxNodeFactory::makePaamayimNekudotayimToken(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                                       RefCountPtr<SyntaxArena> arena)
 {
    return make_token_by_kind(T_PAAMAYIM_NEKUDOTAYIM);
