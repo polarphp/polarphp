@@ -30,10 +30,10 @@ NameListSyntax DeclSyntaxNodeFactory::makeNameList(const std::vector<NameListIte
 }
 
 ParameterListSyntax DeclSyntaxNodeFactory::makeParameterList(
-      const std::vector<ParameterSyntax> &elements, RefCountPtr<SyntaxArena> arena)
+      const std::vector<ParameterListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
-   for (const ParameterSyntax &item : elements) {
+   for (const ParameterListItemSyntax &item : elements) {
       layout.push_back(item.getRaw());
    }
    RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::ParameterList, layout, SourcePresence::Present, arena);
@@ -235,6 +235,18 @@ DeclSyntaxNodeFactory::makeParameter(std::optional<TypeExprClauseSyntax> typeHin
                initializer.has_value() ? initializer->getRaw() : nullptr,
             }, SourcePresence::Present, arena);
    return make<ParameterSyntax>(target);
+}
+
+ParameterListItemSyntax
+DeclSyntaxNodeFactory::makeParameterListItem(std::optional<TokenSyntax> comma, ParameterSyntax param,
+                                             RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ParameterListItem, {
+               comma.has_value() ? comma->getRaw() : nullptr,
+               param.getRaw()
+            }, SourcePresence::Present, arena);
+   return make<ParameterListItemSyntax>(target);
 }
 
 ParameterClauseSyntax
@@ -732,6 +744,17 @@ ParameterSyntax DeclSyntaxNodeFactory::makeBlankParameter(RefCountPtr<SyntaxAren
             },
             SourcePresence::Present, arena);
    return make<ParameterSyntax>(target);
+}
+
+ParameterListItemSyntax DeclSyntaxNodeFactory::makeBlankParameterListItem(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::Parameter, {
+               nullptr, // Comma
+               RawSyntax::missing(SyntaxKind::Parameter), // Parameter
+            },
+            SourcePresence::Present, arena);
+   return make<ParameterListItemSyntax>(target);
 }
 
 ParameterClauseSyntax DeclSyntaxNodeFactory::makeBlankParameterClause(RefCountPtr<SyntaxArena> arena)

@@ -737,8 +737,8 @@ inner_statement:
       TokenSyntax haltCompilerToken = make_token(HaltCompilerKeyword);
       TokenSyntax leftParenToken = make_token(LeftParenToken);
       TokenSyntax rightParenToken = make_token(RightParenToken);
-      TokenSyntax SemicolonToken = make_token(SemicolonToken);
-      HaltCompilerStmtSyntax stmt = make_stmt(HaltCompilerStmt, haltCompilerToken, leftParenToken, rightParenToken, SemicolonToken);
+      TokenSyntax semicolonToken = make_token(SemicolonToken);
+      HaltCompilerStmtSyntax stmt = make_stmt(HaltCompilerStmt, haltCompilerToken, leftParenToken, rightParenToken, semicolonToken);
       $$ = stmt.getRaw();
    }
 ;
@@ -1061,10 +1061,19 @@ parameter_list:
 
 non_empty_parameter_list:
    parameter {
-
+      ParameterSyntax param = make<ParameterSyntax>($1);
+      ParameterListItemSyntax paramListItem = make_decl(ParameterListItem, std::nullopt, param);
+      std::vector<ParameterListItemSyntax> items{paramListItem};
+      ParameterListSyntax list = make_decl(ParameterList, items);
+      $$ = list.getRaw();
    }
 |  non_empty_parameter_list T_COMMA parameter {
-
+      ParameterListSyntax list = make<ParameterListSyntax>($1);
+      TokenSyntax comma = make_token(CommaToken);
+      ParameterSyntax param = make<ParameterSyntax>($3);
+      ParameterListItemSyntax paramListItem = make_decl(ParameterListItem, comma, param);
+      list.appending(paramListItem);
+      $$ = list.getRaw();
    }
 ;
 

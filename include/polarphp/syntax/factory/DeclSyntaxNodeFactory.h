@@ -26,7 +26,7 @@ public:
    static NameListSyntax makeNameList(
          const std::vector<NameListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static ParameterListSyntax makeParameterList(
-         const std::vector<ParameterSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+         const std::vector<ParameterListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassModifierListSyntax makeClassModififerList(
          const std::vector<ClassModifierSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static MemberDeclListSyntax makeMemberDeclList(
@@ -59,6 +59,7 @@ public:
    static ParameterSyntax makeParameter(std::optional<TypeExprClauseSyntax> typeHint, std::optional<TokenSyntax> referenceMark,
                                         std::optional<TokenSyntax> variadicMark, TokenSyntax variable,
                                         std::optional<InitializerClauseSyntax> initializer, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ParameterListItemSyntax makeParameterListItem(std::optional<TokenSyntax> comma, ParameterSyntax param, RefCountPtr<SyntaxArena> arena = nullptr);
    static ParameterClauseSyntax makeParameterClause(TokenSyntax leftParen, ParameterListSyntax parameters, TokenSyntax rightParen,
                                                     RefCountPtr<SyntaxArena> arena = nullptr);
    static FunctionDefinitionSyntax makeFunctionDefinition(TokenSyntax funcToken, std::optional<TokenSyntax> returnRefToken,
@@ -131,6 +132,7 @@ public:
    static TypeExprClauseSyntax makeBlankTypeExprClause(RefCountPtr<SyntaxArena> arena = nullptr);
    static ReturnTypeClauseSyntax makeBlankReturnTypeClause(RefCountPtr<SyntaxArena> arena = nullptr);
    static ParameterSyntax makeBlankParameter(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ParameterListItemSyntax makeBlankParameterListItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static ParameterClauseSyntax makeBlankParameterClause(RefCountPtr<SyntaxArena> arena = nullptr);
    static FunctionDefinitionSyntax makeBlankFunctionDefinition(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassModifierSyntax makeBlankClassModifier(RefCountPtr<SyntaxArena> arena = nullptr);
