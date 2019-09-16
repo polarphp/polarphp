@@ -946,15 +946,15 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: true
+      ///
+      Comma,
+      ///
       /// type: ArgumentSyntax
       /// optional: false
       ///
       Argument,
-      ///
-      /// type: TokenSyntax (T_COMMA)
-      /// optional: true
-      ///
-      TrailingComma
    };
 
 public:
@@ -964,11 +964,11 @@ public:
       validate();
    }
 
+   std::optional<TokenSyntax> getComma();
    ArgumentSyntax getArgument();
-   std::optional<TokenSyntax> getTokenSyntax();
 
+   ArgumentListItemSyntax withComma(std::optional<TokenSyntax> comma);
    ArgumentListItemSyntax withArgument(std::optional<ArgumentSyntax> argument);
-   ArgumentListItemSyntax withTrailingComma(std::optional<TokenSyntax> comma);
 
    static bool kindOf(SyntaxKind kind)
    {

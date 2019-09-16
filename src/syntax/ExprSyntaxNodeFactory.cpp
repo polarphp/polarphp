@@ -291,13 +291,13 @@ ExprSyntaxNodeFactory::makeArgument(std::optional<TokenSyntax> ellipsisToken, Ex
 }
 
 ArgumentListItemSyntax
-ExprSyntaxNodeFactory::makeArgumentListItem(ArgumentSyntax argument, std::optional<TokenSyntax> trailingComma,
+ExprSyntaxNodeFactory::makeArgumentListItem(std::optional<TokenSyntax> comma, ArgumentSyntax argument,
                                             RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ArgumentListItem, {
                argument.getRaw(),
-               trailingComma.has_value() ? trailingComma->getRaw() : nullptr,
+               comma.has_value() ? comma->getRaw() : nullptr,
             }, SourcePresence::Present, arena);
    return make<ArgumentListItemSyntax>(target);
 }

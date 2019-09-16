@@ -616,7 +616,7 @@ public:
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::ParameterItem;
+      return kind == SyntaxKind::Parameter;
    }
 
    static bool classOf(const Syntax *syntax)
@@ -626,6 +626,57 @@ public:
 
 private:
    friend class ParameterSyntaxBuilder;
+   void validate();
+};
+
+///
+/// parameter_list_item:
+///   ',' parameter
+///
+class ParameterListItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      Comma,
+      ///
+      /// type: ParameterSyntax
+      /// optional: false
+      ///
+      Parameter,
+   };
+
+public:
+   ParameterListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getComma();
+   ParameterSyntax getParameter();
+
+   ParameterListItemSyntax withComma(std::optional<TokenSyntax> comma);
+   ParameterListItemSyntax withParameter(std::optional<TokenSyntax> parameter);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ParameterListItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ParameterListItemSyntaxBuilder;
    void validate();
 };
 

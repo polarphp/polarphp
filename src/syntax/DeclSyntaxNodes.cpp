@@ -685,6 +685,58 @@ ParameterSyntax ParameterSyntax::withInitializer(std::optional<InitializerClause
 }
 
 ///
+/// ParameterListItemSyntax
+///
+void ParameterListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ParameterListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Comma, std::set{TokenKindType::T_COMMA});
+   syntax_assert_child_kind(raw, Parameter, std::set{SyntaxKind::Parameter});
+#endif
+}
+
+std::optional<TokenSyntax> ParameterListItemSyntax::getComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::Comma);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+ParameterSyntax ParameterListItemSyntax::getParameter()
+{
+   return ParameterSyntax {m_root, m_data->getChild(Cursor::Parameter).get()};
+}
+
+ParameterListItemSyntax ParameterListItemSyntax::withComma(std::optional<TokenSyntax> comma)
+{
+   RefCountPtr<RawSyntax> commaRaw;
+   if (comma.has_value()) {
+      commaRaw = comma->getRaw();
+   } else {
+      commaRaw = nullptr;
+   }
+   return m_data->replaceChild<ParameterListItemSyntax>(commaRaw, Cursor::Comma);
+}
+
+ParameterListItemSyntax ParameterListItemSyntax::withParameter(std::optional<TokenSyntax> parameter)
+{
+   RefCountPtr<RawSyntax> parameterRaw;
+   if (parameter.has_value()) {
+      parameterRaw = parameter->getRaw();
+   } else {
+      parameterRaw = RawSyntax::missing(SyntaxKind::Parameter);
+   }
+   return m_data->replaceChild<ParameterListItemSyntax>(parameterRaw, Cursor::Parameter);
+}
+
+///
 /// ParameterClauseSyntax
 ///
 void ParameterClauseSyntax::validate()

@@ -227,7 +227,7 @@ DeclSyntaxNodeFactory::makeParameter(std::optional<TypeExprClauseSyntax> typeHin
                                      std::optional<InitializerClauseSyntax> initializer, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::ParameterItem, {
+            SyntaxKind::Parameter, {
                typeHint.has_value() ? typeHint->getRaw() : nullptr,
                referenceMark.has_value() ? referenceMark->getRaw() : nullptr,
                variadicMark.has_value() ? variadicMark->getRaw() : nullptr,
@@ -723,7 +723,7 @@ ReturnTypeClauseSyntax DeclSyntaxNodeFactory::makeBlankReturnTypeClause(RefCount
 ParameterSyntax DeclSyntaxNodeFactory::makeBlankParameter(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::ParameterItem, {
+            SyntaxKind::Parameter, {
                nullptr, // TypeHint
                nullptr, // ReferenceMark
                nullptr, // VariadicMark

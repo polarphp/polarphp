@@ -62,7 +62,7 @@ public:
                                                           SimpleVariableExprSyntax memberName, RefCountPtr<SyntaxArena> arena = nullptr);
    static ArgumentSyntax makeArgument(std::optional<TokenSyntax> ellipsisToken, ExprSyntax expr,
                                       RefCountPtr<SyntaxArena> arena = nullptr);
-   static ArgumentListItemSyntax makeArgumentListItem(ArgumentSyntax argument, std::optional<TokenSyntax> trailingComma,
+   static ArgumentListItemSyntax makeArgumentListItem(std::optional<TokenSyntax> comma, ArgumentSyntax argument,
                                                       RefCountPtr<SyntaxArena> arena = nullptr);
    static ArgumentListClauseSyntax makeArgumentListClause(TokenSyntax leftParen, std::optional<ArgumentListSyntax> arguments,
                                                           TokenSyntax rightParen, RefCountPtr<SyntaxArena> arena = nullptr);

@@ -853,9 +853,18 @@ void ArgumentListItemSyntax::validate()
       return;
    }
    assert(raw->getLayout().size() == ArgumentListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Comma, std::set{TokenKindType::T_COMMA});
    syntax_assert_child_kind(raw, Argument, std::set{SyntaxKind::Argument});
-   syntax_assert_child_token(raw, TrailingComma, std::set{TokenKindType::T_COMMA});
 #endif
+}
+
+std::optional<TokenSyntax> ArgumentListItemSyntax::getComma()
+{
+   RefCountPtr<SyntaxData> tokenSyntaxData = m_data->getChild(Cursor::Argument);
+   if (!tokenSyntaxData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, tokenSyntaxData.get()};
 }
 
 ArgumentSyntax ArgumentListItemSyntax::getArgument()
@@ -863,13 +872,15 @@ ArgumentSyntax ArgumentListItemSyntax::getArgument()
    return ArgumentSyntax {m_root, m_data->getChild(Cursor::Argument).get()};
 }
 
-std::optional<TokenSyntax> ArgumentListItemSyntax::getTokenSyntax()
+ArgumentListItemSyntax ArgumentListItemSyntax::withComma(std::optional<TokenSyntax> comma)
 {
-   RefCountPtr<SyntaxData> tokenSyntaxData = m_data->getChild(Cursor::Argument);
-   if (!tokenSyntaxData) {
-      return std::nullopt;
+   RefCountPtr<RawSyntax> commaRaw;
+   if (comma.has_value()) {
+      commaRaw = comma->getRaw();
+   } else {
+      commaRaw = nullptr;
    }
-   return TokenSyntax {m_root, tokenSyntaxData.get()};
+   return m_data->replaceChild<ArgumentListItemSyntax>(commaRaw, Cursor::Comma);
 }
 
 ArgumentListItemSyntax ArgumentListItemSyntax::withArgument(std::optional<ArgumentSyntax> argument)
@@ -881,17 +892,6 @@ ArgumentListItemSyntax ArgumentListItemSyntax::withArgument(std::optional<Argume
       argumentRaw = RawSyntax::missing(SyntaxKind::Argument);
    }
    return m_data->replaceChild<ArgumentListItemSyntax>(argumentRaw, Cursor::Argument);
-}
-
-ArgumentListItemSyntax ArgumentListItemSyntax::withTrailingComma(std::optional<TokenSyntax> comma)
-{
-   RefCountPtr<RawSyntax> commaRaw;
-   if (comma.has_value()) {
-      commaRaw = comma->getRaw();
-   } else {
-      commaRaw = nullptr;
-   }
-   return m_data->replaceChild<ArgumentListItemSyntax>(commaRaw, Cursor::TrailingComma);
 }
 
 ///

@@ -28,6 +28,7 @@ class TypeExprClauseSyntax;
 class ReturnTypeClauseSyntax;
 class InitializerClauseSyntax;
 class ParameterSyntax;
+class ParameterListItemSyntax;
 class ParameterClauseSyntax;
 class FunctionDefinitionSyntax;
 class ClassModifierSyntax;
@@ -80,7 +81,7 @@ using NameListSyntax = SyntaxCollection<SyntaxKind::NameList, NameListItemSyntax
 ///   parameter
 /// |	non_empty_parameter_list ',' parameter
 ///
-using ParameterListSyntax = SyntaxCollection<SyntaxKind::ParameterList, ParameterSyntax>;
+using ParameterListSyntax = SyntaxCollection<SyntaxKind::ParameterList, ParameterListItemSyntax>;
 
 ///
 /// type: SyntaxCollection

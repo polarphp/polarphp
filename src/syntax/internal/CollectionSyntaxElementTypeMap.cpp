@@ -22,7 +22,7 @@ static const std::unordered_map<SyntaxKind, std::set<SyntaxKind>> scg_collection
     // decl syntax colloection
     { SyntaxKind::NameList, { SyntaxKind::NameListItem }},
     { SyntaxKind::NamespaceName, { SyntaxKind::NamespaceName }},
-    { SyntaxKind::ParameterList, { SyntaxKind::ParameterItem }},
+    { SyntaxKind::ParameterList, { SyntaxKind::ParameterListItem }},
     { SyntaxKind::ClassModifierList, { SyntaxKind::ClassModifier }},
     { SyntaxKind::MemberDeclList, { SyntaxKind::MemberDeclListItem }},
     { SyntaxKind::MemberModifierList, { SyntaxKind::MemberModifier }},

@@ -904,24 +904,26 @@ function_declaration_statement:
 
 is_reference:
    %empty {
-
+      $$ = nullptr;
    }
 |  T_AMPERSAND {
-
+      TokenSyntax ampersand = make_token(AmpersandToken);
+      $$ = ampersand.getRaw();
    }
 ;
 
 is_variadic:
    %empty {
-
+      $$ = nullptr;
    }
 |  T_ELLIPSIS {
-
+      TokenSyntax ellipsis = make_token(EllipsisToken);
+      $$ = ellipsis.getRaw();
    }
 ;
 
 class_declaration_statement:
-   class_modifiers T_CLASS  {}
+   class_modifiers T_CLASS  { }
    T_IDENTIFIER_STRING extends_from implements_list backup_doc_comment T_LEFT_BRACE class_statement_list T_RIGHT_BRACE {
 
    }
@@ -1068,76 +1070,125 @@ non_empty_parameter_list:
 
 parameter:
    optional_type is_reference is_variadic T_VARIABLE {
-
+      std::optional<TypeExprClauseSyntax> optionalType = $1 ? std::optional(make<TypeExprClauseSyntax>($1)) : std::nullopt;
+      std::optional<TokenSyntax> refToken = $2 ? std::optional(make<TokenSyntax>($2)) : std::nullopt;
+      std::optional<TokenSyntax> variadicToken = $3 ? std::optional(make<TokenSyntax>($3)) : std::nullopt;
+      TokenSyntax variable = make_token_with_text(Variable, $4);
+      ParameterSyntax parameterDecl = make_decl(Parameter, optionalType, refToken, variadicToken, variable, std::nullopt);
+      $$ = parameterDecl.getRaw();
    }
 |  optional_type is_reference is_variadic T_VARIABLE T_EQUAL expr {
-
+      std::optional<TypeExprClauseSyntax> optionalType = $1 ? std::optional(make<TypeExprClauseSyntax>($1)) : std::nullopt;
+      std::optional<TokenSyntax> refToken = $2 ? std::optional(make<TokenSyntax>($2)) : std::nullopt;
+      std::optional<TokenSyntax> variadicToken = $3 ? std::optional(make<TokenSyntax>($3)) : std::nullopt;
+      TokenSyntax variable = make_token_with_text(Variable, $4);
+      TokenSyntax equal = make_token(EqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($6);
+      InitializerClauseSyntax initializer = make_decl(InitializerClause, equal, valueExpr);
+      ParameterSyntax parameterDecl = make_decl(Parameter, optionalType, refToken, variadicToken, variable, initializer);
+      $$ = parameterDecl.getRaw();
    }
 ;
 
 optional_type:
    %empty {
-
+      $$ = nullptr;
    }
 |  type_expr {
-
+      TypeExprClauseSyntax typeExpr = make<TypeExprClauseSyntax>($1);
+      $$ = typeExpr.getRaw();
    }
 ;
 
 type_expr:
    type {
-
+      TypeClauseSyntax type = make<TypeClauseSyntax>($1);
+      TypeExprClauseSyntax typeExpr = make_decl(TypeExprClause, std::nullopt, type);
+      $$ = typeExpr.getRaw();
    }
 |  T_QUESTION_MARK type {
-
+      TokenSyntax questionMark = make_token(QuestionMarkToken);
+      TypeClauseSyntax type = make<TypeClauseSyntax>($2);
+      TypeExprClauseSyntax typeExpr = make_decl(TypeExprClause, questionMark, type);
+      $$ = typeExpr.getRaw();
    }
 ;
 
 type:
    T_ARRAY {
-
+      TokenSyntax arrayToken = make_token(ArrayKeyword);
+      TypeClauseSyntax type = make_decl(TypeClause, arrayToken);
+      $$ = type.getRaw();
    }
 |  T_CALLABLE {
-
+      TokenSyntax callableToken = make_token(CallableKeyword);
+      TypeClauseSyntax type = make_decl(TypeClause, callableToken);
+      $$ = type.getRaw();
    }
 |  name {
-
+      NameSyntax name = make<NameSyntax>($1);
+      TypeClauseSyntax type = make_decl(TypeClause, name);
+      $$ = type.getRaw();
    }
 ;
 
 return_type:
    %empty {
-
+      $$ = nullptr;
    }
 |  T_COLON type_expr {
-
+      TokenSyntax colon = make_token(ColonToken);
+      TypeExprClauseSyntax typeExpr = make<TypeExprClauseSyntax>($2);
+      ReturnTypeClauseSyntax returnType = make_decl(ReturnTypeClause, colon, typeExpr);
+      $$ = returnType.getRaw();
    }
 ;
 
 argument_list:
    T_LEFT_PAREN T_RIGHT_PAREN {
-
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      ArgumentListClauseSyntax argumentListClause = make_expr(ArgumentListClause, leftParen, std::nullopt, rightParen);
+      $$ = argumentListClause.getRaw();
    }
 |  T_LEFT_PAREN non_empty_argument_list possible_comma T_RIGHT_PAREN {
-
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ArgumentListSyntax args = make<ArgumentListSyntax>($2);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      ArgumentListClauseSyntax argumentListClause = make_expr(ArgumentListClause, leftParen, args, rightParen);
+      $$ = argumentListClause.getRaw();
    }
 ;
 
 non_empty_argument_list:
    argument {
-
+      ArgumentSyntax argument = make<ArgumentSyntax>($1);
+      ArgumentListItemSyntax argumnetListItem = make_expr(ArgumentListItem, std::nullopt, argument);
+      std::vector<ArgumentListItemSyntax> items{argumnetListItem};
+      ArgumentListSyntax list = make_expr(ArgumentList, items);
+      $$ = list.getRaw();
    }
 |  non_empty_argument_list T_COMMA argument {
-
+      ArgumentListSyntax list = make<ArgumentListSyntax>($1);
+      TokenSyntax comma = make_token(CommaToken);
+      ArgumentSyntax argument = make<ArgumentSyntax>($3);
+      ArgumentListItemSyntax argumnetListItem = make_expr(ArgumentListItem, comma, argument);
+      list.appending(argumnetListItem);
+      $$ = list.getRaw();
    }
 ;
 
 argument:
    expr {
-
+      ExprSyntax expr = make<ExprSyntax>($1);
+      ArgumentSyntax argument = make_expr(Argument, std::nullopt, expr);
+      $$ = argument.getRaw();
    }
 |  T_ELLIPSIS expr {
-
+      TokenSyntax ellipsisToken = make_token(EllipsisToken);
+      ExprSyntax expr = make<ExprSyntax>($2);
+      ArgumentSyntax argument = make_expr(Argument, ellipsisToken, expr);
+      $$ = argument.getRaw();
    }
 ;
 
@@ -2032,19 +2083,41 @@ callable_expr:
 
 callable_variable:
    simple_variable {
-
+      SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($1);
+      CallableVariableExprSyntax callableVar = make_expr(CallableVariableExpr, simpleVar);
+      $$ = callableVar.getRaw();
    }
 |  dereferencable T_LEFT_SQUARE_BRACKET optional_expr T_RIGHT_SQUARE_BRACKET {
-
+      DereferencableClauseSyntax dereferencable = make<DereferencableClauseSyntax>($1);
+      TokenSyntax leftSquareBracket = make_token(LeftSquareBracketToken);
+      OptionalExprSyntax expr = make<OptionalExprSyntax>($3);
+      TokenSyntax rightSquareBracket = make_token(RightSquareBracketToken);
+      ArrayAccessExprSyntax arrayAccess = make_expr(ArrayAccessExpr, dereferencable, leftSquareBracket, expr, rightSquareBracket);
+      CallableVariableExprSyntax callableVar = make_expr(CallableVariableExpr, arrayAccess);
+      $$ = callableVar.getRaw();
    }
 |  constant T_LEFT_SQUARE_BRACKET optional_expr T_RIGHT_SQUARE_BRACKET {
-
+      ConstExprSyntax constant = make<ConstExprSyntax>($1);
+      TokenSyntax leftSquareBracket = make_token(LeftSquareBracketToken);
+      OptionalExprSyntax expr = make<OptionalExprSyntax>($3);
+      TokenSyntax rightSquareBracket = make_token(RightSquareBracketToken);
+      ArrayAccessExprSyntax arrayAccess = make_expr(ArrayAccessExpr, constant, leftSquareBracket, expr, rightSquareBracket);
+      CallableVariableExprSyntax callableVar = make_expr(CallableVariableExpr, arrayAccess);
+      $$ = callableVar.getRaw();
    }
 |  dereferencable T_LEFT_BRACE expr T_RIGHT_BRACE {
-
+      DereferencableClauseSyntax dereferencable = make<DereferencableClauseSyntax>($1);
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      ExprSyntax expr = make<ExprSyntax>($3);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      BraceDecoratedExprClauseSyntax decoratedExpr = make_expr(BraceDecoratedExprClause, leftBrace, expr, rightBrace);
+      BraceDecoratedArrayAccessExprSyntax arrayAccess = make_expr(BraceDecoratedArrayAccessExpr, dereferencable, decoratedExpr);
+      CallableVariableExprSyntax callableVar = make_expr(CallableVariableExpr, arrayAccess);
+      $$ = callableVar.getRaw();
    }
 |  dereferencable T_OBJECT_OPERATOR property_name argument_list {
-
+      DereferencableClauseSyntax dereferencable = make<DereferencableClauseSyntax>($1);
+      TokenSyntax objOperator = make_token(ObjectOperatorToken);
    }
 |  function_call {
 
