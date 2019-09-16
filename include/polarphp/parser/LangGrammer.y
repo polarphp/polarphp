@@ -1052,10 +1052,10 @@ if_stmt:
 
 parameter_list:
    non_empty_parameter_list {
-
+      $$ = $1;
    }
 |  %empty {
-
+      $$ = nullptr;
    }
 ;
 
@@ -2033,19 +2033,30 @@ constant:
       $$ = constant.getRaw();
    }
 |  class_name T_PAAMAYIM_NEKUDOTAYIM identifier {
-      
+      ClassNameClauseSyntax className = make<ClassNameClauseSyntax>($1);
+      TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
+      IdentifierSyntax identifier = make<IdentifierSyntax>($3);
+      ClassConstIdentifierExprSyntax classConst = make_expr(ClassConstIdentifierExpr, className, paamayimNekudotayimToken, identifier);
+      ConstExprSyntax constant = make_expr(ConstExpr, classConst);
+      $$ = constant.getRaw();
    }
 |  variable_class_name T_PAAMAYIM_NEKUDOTAYIM identifier {
-
+      VariableClassNameClauseSyntax className = make<VariableClassNameClauseSyntax>($1);
+      TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
+      IdentifierSyntax identifier = make<IdentifierSyntax>($3);
+      ClassConstIdentifierExprSyntax classConst = make_expr(ClassConstIdentifierExpr, className, paamayimNekudotayimToken, identifier);
+      ConstExprSyntax constant = make_expr(ConstExpr, classConst);
+      $$ = constant.getRaw();
    }
 ;
 
 optional_expr:
    %empty {
-
+      $$ = nullptr;
    }
 |  expr {
-
+      ExprSyntax expr = make<ExprSyntax>($1);
+      $$ = expr.getRaw();
    }
 ;
 
@@ -2080,13 +2091,22 @@ dereferencable:
 
 callable_expr:
    callable_variable {
-
+      CallableVariableExprSyntax callableVar = make<CallableVariableExprSyntax>($1);
+      CallableFuncNameClauseSyntax callableExpr = make_expr(CallableFuncNameClause, callableVar);
+      $$ = callableExpr.getRaw();
    }
 |  T_LEFT_PAREN expr T_RIGHT_PAREN {
-
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ExprSyntax expr = make<ExprSyntax>($2);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      ParenDecoratedExprSyntax decoratedExpr = make_expr(ParenDecoratedExpr, leftParen, expr, rightParen);
+      CallableFuncNameClauseSyntax callableExpr = make_expr(CallableFuncNameClause, decoratedExpr);
+      $$ = callableExpr.getRaw();
    }
 |  dereferencable_scalar {
-     
+      DereferencableScalarExprSyntax dereferencable = make<DereferencableScalarExprSyntax>($1);
+      CallableFuncNameClauseSyntax callableExpr = make_expr(CallableFuncNameClause, dereferencable);
+      $$ = callableExpr.getRaw();
    }
 ;
 
@@ -2127,9 +2147,17 @@ callable_variable:
 |  dereferencable T_OBJECT_OPERATOR property_name argument_list {
       DereferencableClauseSyntax dereferencable = make<DereferencableClauseSyntax>($1);
       TokenSyntax objOperator = make_token(ObjectOperatorToken);
+      PropertyNameClauseSyntax propName = make<PropertyNameClauseSyntax>($3);
+      InstancePropertyExprSyntax methodName = make_expr(InstancePropertyExpr, dereferencable, objOperator, propName);
+      ArgumentListClauseSyntax args = make<ArgumentListClauseSyntax>($4);
+      InstanceMethodCallExprSyntax methodCallExpr = make_expr(InstanceMethodCallExpr, methodName, args);
+      CallableVariableExprSyntax callableVar = make_expr(CallableVariableExpr, methodCallExpr);
+      $$ = callableVar.getRaw();
    }
 |  function_call {
-
+      FunctionCallExprSyntax functionCallExpr = make<FunctionCallExprSyntax>($1);
+      CallableVariableExprSyntax callableVar = make_expr(CallableVariableExpr, functionCallExpr);
+      $$ = callableVar.getRaw();
    }
 ;
 
