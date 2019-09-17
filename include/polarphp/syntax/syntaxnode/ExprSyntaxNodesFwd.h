@@ -68,7 +68,7 @@ class SimpleInstanceCreateExprSyntax;
 class AnonymousInstanceCreateExprSyntax;
 class ClassicLambdaExprSyntax;
 class UseLexicalVarClauseSyntax;
-class LexicalVarItemSyntax;
+class LexicalVariableSyntax;
 class SimplifiedLambdaExprSyntax;
 class LambdaExprSyntax;
 class InstanceCreateExprSyntax;
@@ -152,13 +152,13 @@ using ExprListSyntax = SyntaxCollection<SyntaxKind::ExprList, ExprListItemSyntax
 
 ///
 /// type: SyntaxCollection
-/// element type: LexicalVarItemSyntax
+/// element type: LexicalVariableSyntax
 ///
 /// lexical_var_list:
 ///   lexical_var_list ',' lexical_var
 /// | lexical_var
 ///
-using LexicalVarListSyntax = SyntaxCollection<SyntaxKind::LexicalVarList, LexicalVarItemSyntax>;
+using LexicalVarListSyntax = SyntaxCollection<SyntaxKind::LexicalVarList, LexicalVariableSyntax>;
 
 ///
 /// type: SyntaxCollection

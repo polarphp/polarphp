@@ -602,14 +602,21 @@ void UnsetVariableSyntax::validate()
    syntax_assert_child_kind(raw, Variable, std::set{SyntaxKind::VariableExpr});
 #endif
 }
+
 VariableExprSyntax UnsetVariableSyntax::getVariable()
 {
-
+   return VariableExprSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
 }
 
 UnsetVariableSyntax UnsetVariableSyntax::withVariable(std::optional<VariableExprSyntax> variable)
 {
-
+   RefCountPtr<RawSyntax> rawVariable;
+   if (variable.has_value()) {
+      rawVariable = variable->getRaw();
+   } else {
+      rawVariable = make_missing_token(T_SEMICOLON);
+   }
+   return m_data->replaceChild<UnsetVariableSyntax>(rawVariable, Cursor::Variable);
 }
 
 ///

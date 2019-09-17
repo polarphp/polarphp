@@ -35,12 +35,12 @@ ExprSyntaxNodeFactory::makeExprList(const std::vector<ExprSyntax> elements,
 }
 
 LexicalVarListSyntax
-ExprSyntaxNodeFactory::makeLexicalVarList(const std::vector<LexicalVarItemSyntax> elements,
+ExprSyntaxNodeFactory::makeLexicalVarList(const std::vector<LexicalVariableSyntax> elements,
                                           RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
-   for (const LexicalVarItemSyntax &element : elements) {
+   for (const LexicalVariableSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -1318,7 +1318,7 @@ ExprSyntaxNodeFactory::makeUseLexicalVarClause(TokenSyntax useToken, TokenSyntax
    return make<UseLexicalVarClauseSyntax>(target);
 }
 
-LexicalVarItemSyntax
+LexicalVariableSyntax
 ExprSyntaxNodeFactory::makeLexicalVarItem(TokenSyntax referenceToken, TokenSyntax variable, std::optional<TokenSyntax> trailingComma,
                                           RefCountPtr<SyntaxArena> arena)
 {
@@ -1328,7 +1328,7 @@ ExprSyntaxNodeFactory::makeLexicalVarItem(TokenSyntax referenceToken, TokenSynta
                variable.getRaw(),
                trailingComma.has_value() ? trailingComma->getRaw() : nullptr,
             }, SourcePresence::Present, arena);
-   return make<LexicalVarItemSyntax>(target);
+   return make<LexicalVariableSyntax>(target);
 }
 
 /// make blank nodes
@@ -2489,16 +2489,16 @@ ExprSyntaxNodeFactory::makeBlankUseLexicalVarClause(RefCountPtr<SyntaxArena> are
    return make<UseLexicalVarClauseSyntax>(target);
 }
 
-LexicalVarItemSyntax
+LexicalVariableSyntax
 ExprSyntaxNodeFactory::makeBlankLexicalVarItem(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::LexicalVarItem, {
+            SyntaxKind::LexicalVariable, {
                nullptr, // ReferenceToken
                make_missing_token(T_VARIABLE), // Variable
                nullptr, // TrailingComma
             }, SourcePresence::Present, arena);
-   return make<LexicalVarItemSyntax>(target);
+   return make<LexicalVariableSyntax>(target);
 }
 
 } // polar::syntax

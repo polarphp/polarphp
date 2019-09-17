@@ -43,7 +43,7 @@ enum class SyntaxKind : std::uint32_t
    Parameter,
    ParameterListItem,
    ParameterListClause,
-   LexicalVarItem,
+   LexicalVariable,
    UseLexicalVarClause,
    FunctionDefinition,
    /// for class definition

@@ -32,7 +32,7 @@ static const std::unordered_map<SyntaxKind, std::set<SyntaxKind>> scg_collection
 
     // expr syntax collection
     { SyntaxKind::ExprList, { SyntaxKind::ExprListItem }},
-    { SyntaxKind::LexicalVarList, { SyntaxKind::LexicalVarItem }},
+    { SyntaxKind::LexicalVarList, { SyntaxKind::LexicalVariable }},
     { SyntaxKind::ArrayPairList, { SyntaxKind::ArrayPairListItem }},
     { SyntaxKind::EncapsList, { SyntaxKind::EncapsListItem }},
     { SyntaxKind::ArgumentList, { SyntaxKind::ArgumentListItem }},

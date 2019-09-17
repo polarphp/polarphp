@@ -5834,7 +5834,7 @@ private:
 ///   T_VARIABLE
 /// | '&' T_VARIABLE
 ///
-class LexicalVarItemSyntax final : public Syntax
+class LexicalVariableSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -5858,7 +5858,7 @@ public:
       TrailingComma,
    };
 public:
-   LexicalVarItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   LexicalVariableSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
@@ -5868,13 +5868,13 @@ public:
    TokenSyntax getVariable();
    std::optional<TokenSyntax> getTrailingComma();
 
-   LexicalVarItemSyntax withReferenceToken(std::optional<TokenSyntax> referenceToken);
-   LexicalVarItemSyntax withVariable(std::optional<TokenSyntax> variable);
-   LexicalVarItemSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
+   LexicalVariableSyntax withReferenceToken(std::optional<TokenSyntax> referenceToken);
+   LexicalVariableSyntax withVariable(std::optional<TokenSyntax> variable);
+   LexicalVariableSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
 
    static bool kindOf(SyntaxKind kind)
    {
-      return kind == SyntaxKind::LexicalVarItem;
+      return kind == SyntaxKind::LexicalVariable;
    }
 
    static bool classOf(const Syntax *syntax)
