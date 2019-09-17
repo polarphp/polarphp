@@ -482,7 +482,7 @@ TokenSyntax TokenSyntaxNodeFactory::makeObjectCastKeyword(const Trivia &leadingT
    return make_token_by_kind(T_OBJECT_CAST);
 }
 
-TokenSyntax TokenSyntaxNodeFactory::makeBoolCatsKeyword(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
+TokenSyntax TokenSyntaxNodeFactory::makeBoolCastKeyword(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                         RefCountPtr<SyntaxArena> arena)
 {
    return make_token_by_kind(T_BOOL_CAST);

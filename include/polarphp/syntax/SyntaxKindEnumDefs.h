@@ -183,6 +183,7 @@ enum class SyntaxKind : std::uint32_t
    PrefixOperatorExpr,
    PostfixOperatorExpr,
    BinaryOperatorExpr,
+   InstanceofExpr,
    ShellCmdExpr,
    UnknownExpr,
    LastExpr,

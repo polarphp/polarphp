@@ -173,15 +173,16 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: ExprSyntax
-      /// optional: false
-      ///
-      Expr,
-      ///
       /// type: TokenSyntax (T_COMMA)
       /// optional: true
       ///
-      TrailingComma,
+      Comma,
+
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      Expr
    };
 
 
@@ -192,11 +193,11 @@ public:
       validate();
    }
 
+   std::optional<TokenSyntax> getComma();
    ExprSyntax getExpr();
-   std::optional<TokenSyntax> getTrailingComma();
 
+   ExprListItemSyntax withComma(std::optional<TokenSyntax> comma);
    ExprListItemSyntax withExpr(std::optional<ExprSyntax> expr);
-   ExprListItemSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -2717,7 +2718,7 @@ public:
       /// optional: false
       /// node choices: true
       /// --------------------------------------------------------
-      /// node choice: AnonymousClassDefinitionClauseSyntax
+      /// node choice: AnonymousInstanceCreateExprSyntax
       /// --------------------------------------------------------
       /// node choice: SimpleInstanceCreateExprSyntax
       ///
@@ -4369,7 +4370,7 @@ public:
       ExitToken,
       ///
       /// type: ExitExprArgClauseSyntax
-      /// optional: false
+      /// optional: true
       ///
       ArgClause
    };
@@ -5580,6 +5581,8 @@ private:
 /// | expr '%' expr
 /// | expr T_SL expr
 /// | expr T_SR expr
+/// | expr T_COALESCE expr
+///
 ///
 class BinaryOperatorExprSyntax final : public ExprSyntax
 {
@@ -5600,7 +5603,7 @@ public:
       /// --------------------------------
       /// T_STR_CONCAT | T_PLUS_SIGN | T_MINUS_SIGN
       /// T_MUL_SIGN | T_DIV_SIGN | T_POW
-      /// T_MOD_SIGN | T_SL | T_SR
+      /// T_MOD_SIGN | T_SL | T_SR | T_COALESCE
       ///
       OperatorToken,
       ///
@@ -5641,6 +5644,65 @@ public:
 
 private:
    friend class BinaryOperatorExprSyntaxBuilder;
+   void validate();
+};
+
+///
+/// instanceof_expr:
+///   expr T_INSTANCEOF class_name_reference
+///
+class InstanceofExprSyntax final : public ExprSyntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: ExprSyntax
+      /// optional: false
+      ///
+      InstanceExpr,
+      ///
+      /// type: TokenSyntax (T_INSTANCEOF)
+      /// optional: false
+      ///
+      InstanceofToken,
+      ///
+      /// type: ClassNameRefClauseSyntax
+      /// optional: false
+      ///
+      ClassNameRef
+   };
+
+public:
+   InstanceofExprSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : ExprSyntax(root, data)
+   {
+      validate();
+   }
+
+   ExprSyntax getInstanceExpr();
+   TokenSyntax getInstanceofToken();
+   ClassNameRefClauseSyntax getClassNameRef();
+
+   InstanceofExprSyntax withInstanceExpr(std::optional<ExprSyntax> instanceExpr);
+   InstanceofExprSyntax withInstanceofToken(std::optional<TokenSyntax> instanceofToken);
+   InstanceofExprSyntax withClassNameRef(std::optional<ClassNameRefClauseSyntax> classNameRef);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::InstanceofExpr;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class InstanceofExprSyntaxBuilder;
    void validate();
 };
 

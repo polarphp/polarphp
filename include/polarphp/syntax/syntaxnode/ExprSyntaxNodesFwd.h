@@ -128,6 +128,7 @@ class PrefixOperatorExprSyntax;
 class PostfixOperatorExprSyntax;
 class TernaryExprSyntax;
 class BinaryOperatorExprSyntax;
+class InstanceofExprSyntax;
 class ShellCmdExprSyntax;
 
 // Decl Syntax nodes forward declares

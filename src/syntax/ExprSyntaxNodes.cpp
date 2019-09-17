@@ -162,22 +162,22 @@ void ExprListItemSyntax::validate()
    }
    assert(raw->getLayout().size() == ExprListItemSyntax::CHILDREN_COUNT);
    syntax_assert_child_kind(raw, Expr, std::set{SyntaxKind::Expr});
-   syntax_assert_child_token(raw, TrailingComma, std::set{TokenKindType::T_COMMA});
+   syntax_assert_child_token(raw, Comma, std::set{TokenKindType::T_COMMA});
 #endif
+}
+
+std::optional<TokenSyntax> ExprListItemSyntax::getComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::Comma);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
 }
 
 ExprSyntax ExprListItemSyntax::getExpr()
 {
    return ExprSyntax{m_root, m_data->getChild(Cursor::Expr).get()};
-}
-
-std::optional<TokenSyntax> ExprListItemSyntax::getTrailingComma()
-{
-   RefCountPtr<SyntaxData> trailingCommaData = m_data->getChild(Cursor::TrailingComma);
-   if (!trailingCommaData) {
-      return std::nullopt;
-   }
-   return TokenSyntax {m_root, trailingCommaData.get()};
 }
 
 ExprListItemSyntax ExprListItemSyntax::withExpr(std::optional<ExprSyntax> expr)
@@ -191,15 +191,15 @@ ExprListItemSyntax ExprListItemSyntax::withExpr(std::optional<ExprSyntax> expr)
    return m_data->replaceChild<ExprListItemSyntax>(exprRaw, Cursor::Expr);
 }
 
-ExprListItemSyntax ExprListItemSyntax::withTrailingComma(std::optional<TokenSyntax> trailingComma)
+ExprListItemSyntax ExprListItemSyntax::withComma(std::optional<TokenSyntax> comma)
 {
    RefCountPtr<RawSyntax> trailingCommaRaw;
-   if (trailingComma.has_value()) {
-      trailingCommaRaw = trailingComma->getRaw();
+   if (comma.has_value()) {
+      trailingCommaRaw = comma->getRaw();
    } else {
       trailingCommaRaw = nullptr;
    }
-   return m_data->replaceChild<ExprListItemSyntax>(trailingCommaRaw, Cursor::TrailingComma);
+   return m_data->replaceChild<ExprListItemSyntax>(trailingCommaRaw, Cursor::Comma);
 }
 
 ///
@@ -2881,7 +2881,7 @@ const NodeChoicesType CHILD_NODE_CHOICES
 {
    {
       InstanceCreateExprSyntax::CreateExpr, {
-         SyntaxKind::AnonymousClassDefinitionClause,
+         SyntaxKind::AnonymousInstanceCreateExpr,
                SyntaxKind::SimpleInstanceCreateExpr
       }
    }
@@ -5910,10 +5910,10 @@ const TokenChoicesType BinaryOperatorExprSyntax::CHILD_TOKEN_CHOICES
    {
       BinaryOperatorExprSyntax::OperatorToken, {
          TokenKindType::T_STR_CONCAT, TokenKindType::T_PLUS_SIGN,
-               TokenKindType::T_MINUS_SIGN,TokenKindType::T_MUL_SIGN,
-               TokenKindType::T_DIV_SIGN,TokenKindType::T_POW,
-               TokenKindType::T_MOD_SIGN,TokenKindType::T_SL,
-               TokenKindType::T_SR
+               TokenKindType::T_MINUS_SIGN, TokenKindType::T_MUL_SIGN,
+               TokenKindType::T_DIV_SIGN, TokenKindType::T_POW,
+               TokenKindType::T_MOD_SIGN, TokenKindType::T_SL,
+               TokenKindType::T_SR, TokenKindType::T_COALESCE
       }
    }
 };
@@ -5947,6 +5947,71 @@ BinaryOperatorExprSyntax BinaryOperatorExprSyntax::withOperatorToken(std::option
       rawOperatorToken = make_missing_token(T_PLUS_SIGN);
    }
    return m_data->replaceChild<BinaryOperatorExprSyntax>(rawOperatorToken, Cursor::OperatorToken);
+}
+
+///
+/// InstanceofExprSyntax
+///
+void InstanceofExprSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == InstanceofExprSyntax::CHILDREN_COUNT);
+   syntax_assert_child_kind(raw, InstanceExpr, std::set{SyntaxKind::Expr});
+   syntax_assert_child_token(raw, InstanceofToken, std::set{TokenKindType::T_INSTANCEOF});
+   syntax_assert_child_kind(raw, ClassNameRef, std::set{SyntaxKind::ClassNameRefClause});
+#endif
+}
+
+ExprSyntax InstanceofExprSyntax::getInstanceExpr()
+{
+   return ExprSyntax {m_root, m_data->getChild(Cursor::InstanceExpr).get()};
+}
+
+TokenSyntax InstanceofExprSyntax::getInstanceofToken()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::InstanceofToken).get()};
+}
+
+ClassNameRefClauseSyntax InstanceofExprSyntax::getClassNameRef()
+{
+   return ClassNameRefClauseSyntax {m_root, m_data->getChild(Cursor::ClassNameRef).get()};
+}
+
+InstanceofExprSyntax InstanceofExprSyntax::withInstanceExpr(std::optional<ExprSyntax> instanceExpr)
+{
+   RefCountPtr<RawSyntax> rawInstanceExpr;
+   if (instanceExpr.has_value()) {
+      rawInstanceExpr = instanceExpr->getRaw();
+   } else {
+      rawInstanceExpr = RawSyntax::missing(SyntaxKind::InstanceofExpr);
+   }
+   return m_data->replaceChild<InstanceofExprSyntax>(rawInstanceExpr, Cursor::InstanceExpr);
+}
+
+InstanceofExprSyntax InstanceofExprSyntax::withInstanceofToken(std::optional<TokenSyntax> instanceofToken)
+{
+   RefCountPtr<RawSyntax> rawInstanceof;
+   if (instanceofToken.has_value()) {
+      rawInstanceof = instanceofToken->getRaw();
+   } else {
+      rawInstanceof = make_missing_token(T_INSTANCEOF);
+   }
+   return m_data->replaceChild<InstanceofExprSyntax>(rawInstanceof, Cursor::InstanceofToken);
+}
+
+InstanceofExprSyntax InstanceofExprSyntax::withClassNameRef(std::optional<ClassNameRefClauseSyntax> classNameRef)
+{
+   RefCountPtr<RawSyntax> rawClassNameRef;
+   if (classNameRef.has_value()) {
+      rawClassNameRef = classNameRef->getRaw();
+   } else {
+      rawClassNameRef = RawSyntax::missing(SyntaxKind::ClassNameRefClause);
+   }
+   return m_data->replaceChild<InstanceofExprSyntax>(rawClassNameRef, Cursor::ClassNameRef);
 }
 
 ///

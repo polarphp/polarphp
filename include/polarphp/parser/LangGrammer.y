@@ -1485,6 +1485,7 @@ echo_expr:
 
 for_exprs:
    %empty {
+      
    }
 |  non_empty_for_exprs {
 
@@ -1509,220 +1510,499 @@ anonymous_class:
 
 new_expr:
    T_NEW class_name_reference ctor_arguments {
-
+      TokenSyntax newToken = make_token(NewKeyword);
+      ClassNameRefClauseSyntax classNameRef = make<ClassNameRefClauseSyntax>($2);
+      std::optional<ArgumentListClauseSyntax> argsClause = $3 ? std::optional(make<ArgumentListClauseSyntax>($3)) : std::nullopt;
+      SimpleInstanceCreateExprSyntax simpleInstanceCreateExpr = make_expr(SimpleInstanceCreateExpr, newToken, classNameRef, argsClause);
+      InstanceCreateExprSyntax instanceCreateExpr = make_expr(InstanceCreateExpr, simpleInstanceCreateExpr);
+      $$ = instanceCreateExpr.getRaw();
    }
 |  T_NEW anonymous_class {
-
+      TokenSyntax newToken = make_token(NewKeyword);
+      AnonymousClassDefinitionClauseSyntax anonymousClass = make<AnonymousClassDefinitionClauseSyntax>($2);
+      AnonymousInstanceCreateExprSyntax anonymousClassInstanceCreateExpr = make_expr(
+         AnonymousInstanceCreateExpr, newToken, anonymousClass
+      );
+      InstanceCreateExprSyntax instanceCreateExpr = make_expr(InstanceCreateExpr, anonymousClassInstanceCreateExpr);
+      $$ = instanceCreateExpr.getRaw();
    }
 ;
 
 expr:
    variable {
-
+      VariableExprSyntax var = make<VariableExprSyntax>($1);
+      $$ = var.getRaw();
    }
 |  T_LIST T_LEFT_PAREN array_pair_list T_RIGHT_PAREN T_EQUAL expr {
-
+      TokenSyntax listKeyword = make_token(ListKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ArrayPairListSyntax arrayList = make<ArrayPairListSyntax>($3);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      TokenSyntax equalToken = make_token(EqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($6);
+      ListStructureClauseSyntax listStructureClause = make_expr(
+         ListStructureClause, listKeyword, leftParen, arrayList, rightParen
+      );
+      ListStructureAssignmentExprSyntax listAssignmentExpr = make_expr(
+         ListStructureAssignmentExpr, listStructureClause, equalToken, valueExpr
+      );
+      $$ = listAssignmentExpr.getRaw();
    }
 |  T_LEFT_SQUARE_BRACKET array_pair_list T_RIGHT_SQUARE_BRACKET T_EQUAL expr {
-
+      TokenSyntax leftSquareBracket = make_token(LeftSquareBracketToken);
+      ArrayPairListSyntax arrayList = make<ArrayPairListSyntax>($2);
+      TokenSyntax rightSquareBracket = make_token(RightSquareBracketToken);
+      TokenSyntax equalToken = make_token(EqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($5);
+      SimplifiedArrayCreateExprSyntax simplifiedArrayCreateExpr = make_expr(
+         SimplifiedArrayCreateExpr, leftSquareBracket, arrayList, rightSquareBracket
+      );
+      ArrayStructureAssignmentExprSyntax arrayAssignmentExpr = make_expr(
+         ArrayStructureAssignmentExpr, simplifiedArrayCreateExpr, equalToken, valueExpr
+      );
+      $$ = arrayAssignmentExpr.getRaw();
    }
 |  variable T_EQUAL expr {
-
+      VariableExprSyntax var = make<VariableExprSyntax>($1);
+      TokenSyntax equalToken = make_token(EqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      AssignmentExprSyntax assignmentExpr = make_expr(AssignmentExpr, var, equalToken, valueExpr);
+      $$ = assignmentExpr.getRaw();
    }
 |  variable T_EQUAL T_AMPERSAND variable {
-
+      VariableExprSyntax var = make<VariableExprSyntax>($1);
+      TokenSyntax equalToken = make_token(EqualToken);
+      TokenSyntax ampersand = make_token(AmpersandToken);
+      VariableExprSyntax valueExpr = make<VariableExprSyntax>($4);
+      ReferencedVariableExprSyntax referencedVar = make_expr(ReferencedVariableExpr, ampersand, valueExpr);
+      AssignmentExprSyntax assignmentExpr = make_expr(AssignmentExpr, var, equalToken, referencedVar);
+      $$ = assignmentExpr.getRaw();
    }
 |  T_CLONE expr {
-
+      TokenSyntax cloneKeyword = make_token(CloneKeyword);
+      ExprSyntax expr = make<ExprSyntax>($2);
+      CloneExprSyntax cloneExpr = make_expr(CloneExpr, cloneKeyword, expr);
+      $$ = cloneExpr.getRaw();
    }
 |  variable T_PLUS_EQUAL expr {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax plusEqual = make_token(PlusEqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, plusEqual, valueExpr);
+      $$ = assignment.getRaw();
    }
 |  variable T_MINUS_EQUAL expr {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax minusEqual = make_token(MinusEqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, minusEqual, valueExpr);
+      $$ = assignment.getRaw();
    }
 |  variable T_MUL_EQUAL expr {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax mulEqual = make_token(MulEqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, mulEqual, valueExpr);
+      $$ = assignment.getRaw();
    }
 |  variable T_POW_EQUAL expr {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax powEqual = make_token(PowEqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, powEqual, valueExpr);
+      $$ = assignment.getRaw();
    }
 |  variable T_DIV_EQUAL expr {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax divEqual = make_token(DivEqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, divEqual, valueExpr);
+      $$ = assignment.getRaw();
    }
 |  variable T_STR_CONCAT_EQUAL expr {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax strConcatEqual = make_token(StrConcatEqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, strConcatEqual, valueExpr);
+      $$ = assignment.getRaw();
    }
 |  variable T_MOD_EQUAL expr {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax modEqual = make_token(ModEqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, modEqual, valueExpr);
+      $$ = assignment.getRaw();
    }
 |  variable T_AND_EQUAL expr {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax andEqual = make_token(AndEqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, andEqual, valueExpr);
+      $$ = assignment.getRaw();
    }
 |  variable T_OR_EQUAL expr {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax orEqual = make_token(OrEqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, orEqual, valueExpr);
+      $$ = assignment.getRaw();
    }
 |  variable T_XOR_EQUAL expr {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax xorEqual = make_token(XorEqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, xorEqual, valueExpr);
+      $$ = assignment.getRaw();
    }
 |  variable T_SL_EQUAL expr {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax shiftLeftEqual = make_token(ShiftLeftEqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, shiftLeftEqual, valueExpr);
+      $$ = assignment.getRaw();
    }
 |  variable T_SR_EQUAL expr {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax shiftRightEqual = make_token(ShiftRightEqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, shiftRightEqual, valueExpr);
+      $$ = assignment.getRaw();
    }
 |  variable T_COALESCE_EQUAL expr {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax coalesceEqualToken = make_token(CoalesceEqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, coalesceEqualToken, valueExpr);
+      $$ = assignment.getRaw();
    }
 |  variable T_INC {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax incToken = make_token(IncToken);
+      PostfixOperatorExprSyntax postfixExpr = make_expr(PostfixOperatorExpr, varExpr, incToken);
+      $$ = postfixExpr.getRaw();
    }
 |  T_INC variable {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($2);
+      TokenSyntax incToken = make_token(IncToken);
+      PrefixOperatorExprSyntax prefixExpr = make_expr(PrefixOperatorExpr, incToken, varExpr);
+      $$ = prefixExpr.getRaw();
    }
 |  variable T_DEC {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
+      TokenSyntax decToken = make_token(DecToken);
+      PostfixOperatorExprSyntax postfixExpr = make_expr(PostfixOperatorExpr, varExpr, decToken);
+      $$ = postfixExpr.getRaw();
    }
 |  T_DEC variable {
-
+      VariableExprSyntax varExpr = make<VariableExprSyntax>($2);
+      TokenSyntax decToken = make_token(DecToken);
+      PrefixOperatorExprSyntax prefixExpr = make_expr(PrefixOperatorExpr, decToken, varExpr);
+      $$ = prefixExpr.getRaw();
    }
 |  expr T_BOOLEAN_OR expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(BooleanOrToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      LogicalExprSyntax loginalExpr = make_expr(LogicalExpr, lhs, operatorToken, rhs);
+      $$ = loginalExpr.getRaw();
+      
    }
 |  expr T_BOOLEAN_AND expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(BooleanAndToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      LogicalExprSyntax loginalExpr = make_expr(LogicalExpr, lhs, operatorToken, rhs);
+      $$ = loginalExpr.getRaw();
    }
 |  expr T_LOGICAL_OR expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(LogicOrKeyword);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      LogicalExprSyntax loginalExpr = make_expr(LogicalExpr, lhs, operatorToken, rhs);
+      $$ = loginalExpr.getRaw();
    }
 |  expr T_LOGICAL_AND expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(LogicAndKeyword);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      LogicalExprSyntax loginalExpr = make_expr(LogicalExpr, lhs, operatorToken, rhs);
+      $$ = loginalExpr.getRaw();
    }
 |  expr T_LOGICAL_XOR expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(LogicXorKeyword);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      LogicalExprSyntax loginalExpr = make_expr(LogicalExpr, lhs, operatorToken, rhs);
+      $$ = loginalExpr.getRaw();
    }
 |  expr T_VBAR expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(VerticalBarToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      BitLogicalExprSyntax bitLogicExpr = make_expr(BitLogicalExpr, lhs, operatorToken, rhs);
+      $$ = bitLogicExpr.getRaw();
    }
 |  expr T_AMPERSAND expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(AmpersandToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      BitLogicalExprSyntax bitLogicExpr = make_expr(BitLogicalExpr, lhs, operatorToken, rhs);
+      $$ = bitLogicExpr.getRaw();
    }
 |  expr T_CARET expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(CaretToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      BitLogicalExprSyntax bitLogicExpr = make_expr(BitLogicalExpr, lhs, operatorToken, rhs);
+      $$ = bitLogicExpr.getRaw();
    }
 |  expr T_STR_CONCAT expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(StrConcatToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      $$ = binaryExpr.getRaw();
    }
 |  expr T_PLUS_SIGN expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(PlusSignToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      $$ = binaryExpr.getRaw();
    }
 |  expr T_MINUS_SIGN expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(MinusSignToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      $$ = binaryExpr.getRaw();
    }
 |  expr T_MUL_SIGN expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(MulSignToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      $$ = binaryExpr.getRaw();
    }
 |  expr T_POW expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(PowToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      $$ = binaryExpr.getRaw();
    }
 |  expr T_DIV_SIGN expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(DivSignToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      $$ = binaryExpr.getRaw();
    }
 |  expr T_MOD_SIGN expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(ModSignToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      $$ = binaryExpr.getRaw();
    }
 |  expr T_SL expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(ShiftLeftToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      $$ = binaryExpr.getRaw();
    }
 |  expr T_SR expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(ShiftRightToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      $$ = binaryExpr.getRaw();
    }
 |  T_PLUS_SIGN expr %prec T_INC {
-
+      TokenSyntax plusSignToken = make_token(PlusSignToken);
+      ExprSyntax varExpr = make<ExprSyntax>($2);
+      PrefixOperatorExprSyntax prefixExpr = make_expr(PrefixOperatorExpr, plusSignToken, varExpr);
+      $$ = prefixExpr.getRaw();
    }
 |  T_MINUS_SIGN expr %prec T_INC {
-
+      TokenSyntax minusSignToken = make_token(MinusSignToken);
+      ExprSyntax varExpr = make<ExprSyntax>($2);
+      PrefixOperatorExprSyntax prefixExpr = make_expr(PrefixOperatorExpr, minusSignToken, varExpr);
+      $$ = prefixExpr.getRaw();
    }
 |  T_EXCLAMATION_MARK expr {
-
+      TokenSyntax exclamationMarkToken = make_token(ExclamationMarkToken);
+      ExprSyntax varExpr = make<ExprSyntax>($2);
+      PrefixOperatorExprSyntax prefixExpr = make_expr(PrefixOperatorExpr, exclamationMarkToken, varExpr);
+      $$ = prefixExpr.getRaw();
    }
 |  T_TILDE expr {
-
+      TokenSyntax tildeToken = make_token(TildeToken);
+      ExprSyntax varExpr = make<ExprSyntax>($2);
+      PrefixOperatorExprSyntax prefixExpr = make_expr(PrefixOperatorExpr, tildeToken, varExpr);
+      $$ = prefixExpr.getRaw();
    }
 |  expr T_IS_IDENTICAL expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(IsIdenticalToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      $$ = relationExpr.getRaw();
    }
 |  expr T_IS_NOT_IDENTICAL expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(IsNotIdenticalToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      $$ = relationExpr.getRaw();
    }
 |  expr T_IS_EQUAL expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(IsEqualToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      $$ = relationExpr.getRaw();
    }
 |  expr T_IS_NOT_EQUAL expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(IsNotEqualToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      $$ = relationExpr.getRaw();
    }
 |  expr T_IS_SMALLER expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(IsSmallerToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      $$ = relationExpr.getRaw();
    }
 |  expr T_IS_SMALLER_OR_EQUAL expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(IsSmallerOrEqualToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      $$ = relationExpr.getRaw();
    }
 |  expr T_IS_GREATER expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(IsGreaterToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      $$ = relationExpr.getRaw();
    }
 |  expr T_IS_GREATER_OR_EQUAL expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(IsGreaterOrEqualToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      $$ = relationExpr.getRaw();
    }
 |  expr T_SPACESHIP expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(SpaceshipToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      $$ = relationExpr.getRaw();
    }
 |  expr T_INSTANCEOF class_name_reference {
-
+      ExprSyntax instance = make<ExprSyntax>($1);
+      TokenSyntax instanceof = make_token(InstanceofKeyword);
+      ClassNameRefClauseSyntax classNameRef = make<ClassNameRefClauseSyntax>($3);
+      InstanceofExprSyntax instanceofExpr = make_expr(InstanceofExpr, instance, instanceof, classNameRef);
+      $$ = instanceofExpr.getRaw();
    }
 |  T_LEFT_PAREN expr T_RIGHT_PAREN {
-
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ExprSyntax expr = make<ExprSyntax>($2);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      ParenDecoratedExprSyntax decoatedExpr = make_expr(ParenDecoratedExpr, leftParen, expr, rightParen);
+      $$ = decoatedExpr.getRaw();
    }
 |  new_expr {
-
+      $$ = $1;
    }
-|  expr T_QUESTION_MARK expr T_COLON expr {
-
+|  expr T_QUESTION_MARK expr T_COLON expr { 
+      ExprSyntax conditionExpr = make<ExprSyntax>($1);
+      TokenSyntax questionMark = make_token(QuestionMarkToken);
+      ExprSyntax firstChoice = make<ExprSyntax>($3);
+      TokenSyntax colon = make_token(ColonToken);
+      ExprSyntax secondChoice = make<ExprSyntax>($5);
+      TernaryExprSyntax ternaryExpr = make_expr(TernaryExpr, conditionExpr, questionMark, firstChoice, colon, secondChoice);
+      $$ = ternaryExpr.getRaw();
    }
 |  expr T_QUESTION_MARK T_COLON expr {
-
+      ExprSyntax conditionExpr = make<ExprSyntax>($1);
+      TokenSyntax questionMark = make_token(QuestionMarkToken);
+      TokenSyntax colon = make_token(ColonToken);
+      ExprSyntax secondChoice = make<ExprSyntax>($4);
+      TernaryExprSyntax ternaryExpr = make_expr(TernaryExpr, conditionExpr, questionMark, std::nullopt, colon, secondChoice);
+      $$ = ternaryExpr.getRaw();
    }
 |  expr T_COALESCE expr {
-
+      ExprSyntax lhs = make<ExprSyntax>($1);
+      TokenSyntax operatorToken = make_token(CoalesceToken);
+      ExprSyntax rhs = make<ExprSyntax>($3);
+      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      $$ = binaryExpr.getRaw();
    }
 |  internal_functions_in_bison {
-
+      $$ = $1;
    }
 |  T_INT_CAST expr {
-
+      TokenSyntax castType = make_token(IntCastKeyword);
+      ExprSyntax sourceExpr = make<ExprSyntax>($2);
+      CastExprSyntax castExpr = make_expr(CastExpr, castType, sourceExpr);
+      $$ = castExpr.getRaw();
    }
 |  T_DOUBLE_CAST expr {
-
+      TokenSyntax castType = make_token(DoubleCastKeyword);
+      ExprSyntax sourceExpr = make<ExprSyntax>($2);
+      CastExprSyntax castExpr = make_expr(CastExpr, castType, sourceExpr);
+      $$ = castExpr.getRaw();
    }
 |  T_STRING_CAST expr {
-
+      TokenSyntax castType = make_token(StringCastKeyword);
+      ExprSyntax sourceExpr = make<ExprSyntax>($2);
+      CastExprSyntax castExpr = make_expr(CastExpr, castType, sourceExpr);
+      $$ = castExpr.getRaw();
    }
 |  T_ARRAY_CAST expr {
-
+      TokenSyntax castType = make_token(ArrayCastKeyword);
+      ExprSyntax sourceExpr = make<ExprSyntax>($2);
+      CastExprSyntax castExpr = make_expr(CastExpr, castType, sourceExpr);
+      $$ = castExpr.getRaw();
    }
 |  T_OBJECT_CAST expr {
-
+      TokenSyntax castType = make_token(ObjectCastKeyword);
+      ExprSyntax sourceExpr = make<ExprSyntax>($2);
+      CastExprSyntax castExpr = make_expr(CastExpr, castType, sourceExpr);
+      $$ = castExpr.getRaw();
    }
 |  T_BOOL_CAST expr {
-
+      TokenSyntax castType = make_token(BoolCastKeyword);
+      ExprSyntax sourceExpr = make<ExprSyntax>($2);
+      CastExprSyntax castExpr = make_expr(CastExpr, castType, sourceExpr);
+      $$ = castExpr.getRaw();
    }
 |  T_UNSET_CAST expr {
-
+      TokenSyntax castType = make_token(UnsetCastKeyword);
+      ExprSyntax sourceExpr = make<ExprSyntax>($2);
+      CastExprSyntax castExpr = make_expr(CastExpr, castType, sourceExpr);
+      $$ = castExpr.getRaw();
    }
 |  T_EXIT exit_expr {
-
+      TokenSyntax exitToken = make_token(ExitKeyword);
+      std::optional<ExitExprArgClauseSyntax> exitArgClause = $2 ? std::optional(make<ExitExprArgClauseSyntax>($2)) : std::nullopt;
+      ExitExprSyntax exitExpr = make_expr(ExitExpr, exitToken, exitArgClause);
+      $$ = exitExpr.getRaw();
    }
 |  T_ERROR_SUPPRESS_SIGN expr {
-
+      TokenSyntax errorSuppressToken = make_token(ErrorSuppressSignToken);
+      ExprSyntax varExpr = make<ExprSyntax>($2);
+      PrefixOperatorExprSyntax prefixExpr = make_expr(PrefixOperatorExpr, errorSuppressToken, varExpr);
+      $$ = prefixExpr.getRaw();
    }
 |  scalar {
       Syntax scalarValue = make<Syntax>($1);
@@ -1730,28 +2010,50 @@ expr:
       $$ = scalar.getRaw();
    }
 |  T_BACKTICK backticks_expr T_BACKTICK {
-
+      TokenSyntax backtickToken = make_token(BacktickToken);
+      BackticksClauseSyntax backticksExpr = make<BackticksClauseSyntax>($2);
+      ShellCmdExprSyntax shellCmd = make_expr(ShellCmdExpr, backtickToken, backticksExpr, backtickToken);
+      $$ = shellCmd.getRaw();
    }
 |  T_PRINT expr {
-
+      TokenSyntax printKeyword = make_token(PrintKeyword);
+      ExprSyntax valueExpr = make<ExprSyntax>($2);
+      PrintFuncExprSyntax printExpr = make_expr(PrintFuncExpr, printKeyword, valueExpr);
+      $$ = printExpr.getRaw();
    }
 |  T_YIELD {
-
+      TokenSyntax yieldKeyword = make_token(YieldKeyword);
+      YieldExprSyntax yieldExpr = make_expr(YieldExpr, yieldKeyword, std::nullopt, std::nullopt, std::nullopt);
+      $$ = yieldExpr.getRaw();
    }
 |  T_YIELD expr {
-
+      TokenSyntax yieldKeyword = make_token(YieldKeyword);
+      ExprSyntax valueExpr = make<ExprSyntax>($2);
+      YieldExprSyntax yieldExpr = make_expr(YieldExpr, yieldKeyword, std::nullopt, std::nullopt, valueExpr);
+      $$ = yieldExpr.getRaw();
    }
 |  T_YIELD expr T_DOUBLE_ARROW expr {
-
+      TokenSyntax yieldKeyword = make_token(YieldKeyword);
+      ExprSyntax keyExpr = make<ExprSyntax>($2);
+      TokenSyntax doubleArrowToken = make_token(DoubleArrowToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($4);
+      YieldExprSyntax yieldExpr = make_expr(YieldExpr, yieldKeyword, keyExpr, doubleArrowToken, valueExpr);
+      $$ = yieldExpr.getRaw();
    }
 |  T_YIELD_FROM expr {
-
+      TokenSyntax yieldFromKeyword = make_token(YieldFromKeyword);
+      ExprSyntax valueExpr = make<ExprSyntax>($2);
+      YieldFromExprSyntax yieldFromExpr = make_expr(YieldFromExpr, yieldFromKeyword, valueExpr);
+      $$ = yieldFromExpr.getRaw();
    }
 |  inline_function {
-
+      LambdaExprSyntax lambdaExpr = make_expr(LambdaExpr, std::nullopt, make<LambdaExprSyntax>($1));
+      $$ = lambdaExpr.getRaw();
    }
 |  T_STATIC inline_function {
-
+      TokenSyntax staticKeyword = make_token(StaticKeyword);
+      LambdaExprSyntax lambdaExpr = make_expr(LambdaExpr, staticKeyword, make<LambdaExprSyntax>($2));
+      $$ = lambdaExpr.getRaw();
    }
 ;
 
@@ -1862,40 +2164,52 @@ class_name:
 
 class_name_reference:
    class_name {
-
+      ClassNameClauseSyntax className = make<ClassNameClauseSyntax>($1);
+      ClassNameRefClauseSyntax classNameRef = make_expr(ClassNameRefClause, className);
+      $$ = classNameRef.getRaw();
    }
 |  new_variable {
-
+      NewVariableClauseSyntax newVar = make<NewVariableClauseSyntax>($1);
+      ClassNameRefClauseSyntax classNameRef = make_expr(ClassNameRefClause, newVar);
+      $$ = classNameRef.getRaw();
    }
 ;
 
 exit_expr:
    %empty {
-
+      $$ = nullptr;
    }
 |  T_LEFT_PAREN optional_expr T_RIGHT_PAREN {
-
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      OptionalExprSyntax optExpr = make<OptionalExprSyntax>($2);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      ExitExprArgClauseSyntax exitArgsClause = make_expr(ExitExprArgClause, leftParen, optExpr, rightParen);
+      $$ = exitArgsClause.getRaw();
    }
 ;
 
 backticks_expr:
    %empty {
-
+      $$ = nullptr;
    }
 |  T_ENCAPSED_AND_WHITESPACE {
-
+      TokenSyntax str = make_token_with_text(EncapsedAndWhitespace, $1);
+      BackticksClauseSyntax expr = make_expr(BackticksClause, str);
+      $$ = expr.getRaw();
    }
 |  encaps_list {
-
+      EncapsItemListSyntax encapsList = make<EncapsItemListSyntax>($1);
+      BackticksClauseSyntax expr = make_expr(BackticksClause, encapsList);
+      $$ = expr.getRaw();
    }
 ;
 
 ctor_arguments:
    %empty {
-
+      $$ = nullptr;
    }
 |  argument_list {
-
+      $$ = $1;
    }
 ;
 
@@ -2447,9 +2761,6 @@ encaps_var:
       EncapsVariableSyntax enscapVar = make_expr(EncapsVariable, variableToken);
       $$ = enscapVar.getRaw();
    }
-|  T_VARIABLE T_LEFT_SQUARE_BRACKET encaps_var_offset T_RIGHT_SQUARE_BRACKET {
-
-   }
 |  T_VARIABLE T_OBJECT_OPERATOR T_IDENTIFIER_STRING {
       TokenSyntax variableToken = make_token_with_text(Variable, $1);
       TokenSyntax objOperator = make_token(ObjectOperatorToken);
@@ -2494,21 +2805,6 @@ encaps_var:
       EncapsCurlyVariableSyntax curlyVar = make_expr(EncapsCurlyVariable, curlyOpenToken, var, rightBraceToken);
       EncapsVariableSyntax enscapVar = make_expr(EncapsVariable, curlyVar);
       $$ = enscapVar.getRaw();
-   }
-;
-
-encaps_var_offset:
-   T_STRING_VARNAME {
-
-   }
-|  T_NUM_STRING {
-
-   }
-|  T_MINUS_SIGN T_NUM_STRING {
-
-   }
-|  T_VARIABLE {
-
    }
 ;
 

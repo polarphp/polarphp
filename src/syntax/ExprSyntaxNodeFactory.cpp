@@ -1010,13 +1010,13 @@ ExprSyntaxNodeFactory::makeExitExprArgClause(TokenSyntax leftParen, std::optiona
 }
 
 ExitExprSyntax
-ExprSyntaxNodeFactory::makeExitExpr(TokenSyntax exitToken, ExitExprArgClauseSyntax argClause,
+ExprSyntaxNodeFactory::makeExitExpr(TokenSyntax exitToken, std::optional<ExitExprArgClauseSyntax> argClause,
                                     RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ExitExpr, {
                exitToken.getRaw(),
-               argClause.getRaw(),
+               argClause.has_value() ? argClause->getRaw() : nullptr,
             }, SourcePresence::Present, arena);
    return make<ExitExprSyntax>(target);
 }
@@ -1275,6 +1275,60 @@ ExprSyntaxNodeFactory::makeBinaryOperatorExpr(ExprSyntax lhs, TokenSyntax operat
                rhs.getRaw()
             }, SourcePresence::Present, arena);
    return make<BinaryOperatorExprSyntax>(target);
+}
+
+InstanceofExprSyntax
+ExprSyntaxNodeFactory::makeInstanceofExpr(ExprSyntax instanceExpr, TokenSyntax instanceofToken,
+                                          ClassNameRefClauseSyntax classNameRef, RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::InstanceofExpr, {
+               instanceExpr.getRaw(),
+               instanceofToken.getRaw(),
+               classNameRef.getRaw()
+            }, SourcePresence::Present, arena);
+   return make<InstanceofExprSyntax>(target);
+}
+
+ShellCmdExprSyntax
+ExprSyntaxNodeFactory::makeShellCmdExpr(TokenSyntax leftBacktick, BackticksClauseSyntax backticksExpr,
+                                        TokenSyntax rightBacktick, RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ShellCmdExpr, {
+               leftBacktick.getRaw(),
+               backticksExpr.getRaw(),
+               rightBacktick.getRaw()
+            }, SourcePresence::Present, arena);
+   return make<ShellCmdExprSyntax>(target);
+}
+
+UseLexicalVarClauseSyntax
+ExprSyntaxNodeFactory::makeUseLexicalVarClause(TokenSyntax useToken, TokenSyntax leftParen,
+                                               LexicalVarListSyntax lexicalVars, TokenSyntax rightParen,
+                                               RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::UseLexicalVarClause, {
+               useToken.getRaw(),
+               leftParen.getRaw(),
+               lexicalVars.getRaw(),
+               rightParen.getRaw(),
+            }, SourcePresence::Present, arena);
+   return make<UseLexicalVarClauseSyntax>(target);
+}
+
+LexicalVarItemSyntax
+ExprSyntaxNodeFactory::makeLexicalVarItem(TokenSyntax referenceToken, TokenSyntax variable, std::optional<TokenSyntax> trailingComma,
+                                          RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::UseLexicalVarClause, {
+               referenceToken.getRaw(),
+               variable.getRaw(),
+               trailingComma.has_value() ? trailingComma->getRaw() : nullptr,
+            }, SourcePresence::Present, arena);
+   return make<LexicalVarItemSyntax>(target);
 }
 
 /// make blank nodes
@@ -2158,7 +2212,7 @@ ExprSyntaxNodeFactory::makeBlankExitExpr(RefCountPtr<SyntaxArena> arena)
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ExitExpr, {
                make_missing_token(T_EXIT), // ExitToken
-               RawSyntax::missing(SyntaxKind::ExitExprArgClause), // ArgClause
+               nullptr, // ArgClause
             }, SourcePresence::Present, arena);
    return make<ExitExprSyntax>(target);
 }
@@ -2394,6 +2448,18 @@ ExprSyntaxNodeFactory::makeBlankBinaryOperatorExpr(RefCountPtr<SyntaxArena> aren
                RawSyntax::missing(SyntaxKind::Expr), // Lhs
                make_missing_token(T_PLUS_SIGN), // OperatorToken
                RawSyntax::missing(SyntaxKind::Expr), // Rhs
+            }, SourcePresence::Present, arena);
+   return make<BinaryOperatorExprSyntax>(target);
+}
+
+BinaryOperatorExprSyntax
+ExprSyntaxNodeFactory::makeBlankInstanceofExpr(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::InstanceofExpr, {
+               RawSyntax::missing(SyntaxKind::Expr), // InstanceExpr
+               make_missing_token(T_INSTANCEOF), // InstanceofToken
+               RawSyntax::missing(SyntaxKind::ClassNameRefClause), // ClassNameRef
             }, SourcePresence::Present, arena);
    return make<BinaryOperatorExprSyntax>(target);
 }
