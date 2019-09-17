@@ -6199,15 +6199,6 @@ TokenSyntax LexicalVariableSyntax::getVariable()
    return TokenSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
 }
 
-std::optional<TokenSyntax> LexicalVariableSyntax::getTrailingComma()
-{
-   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::TrailingComma);
-   if (!commaData) {
-      return std::nullopt;
-   }
-   return TokenSyntax {m_root, commaData.get()};
-}
-
 LexicalVariableSyntax LexicalVariableSyntax::withReferenceToken(std::optional<TokenSyntax> referenceToken)
 {
    RefCountPtr<RawSyntax> referenceTokenRaw;
@@ -6225,21 +6216,57 @@ LexicalVariableSyntax LexicalVariableSyntax::withVariable(std::optional<TokenSyn
    if (variable.has_value()) {
       variableRaw = variable->getRaw();
    } else {
-      variableRaw = RawSyntax::missing(TokenKindType::T_VARIABLE,
-                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_VARIABLE)));
+      variableRaw = make_missing_token(T_VARIABLE);
    }
    return m_data->replaceChild<LexicalVariableSyntax>(variableRaw, Cursor::Variable);
 }
 
-LexicalVariableSyntax LexicalVariableSyntax::withTrailingComma(std::optional<TokenSyntax> trailingComma)
+///
+/// LexicalVariableListItemSyntax
+///
+void LexicalVariableListItemSyntax::validate()
 {
-   RefCountPtr<RawSyntax> trailingCommaRaw;
-   if (trailingComma.has_value()) {
-      trailingCommaRaw = trailingComma->getRaw();
-   } else {
-      trailingCommaRaw = make_missing_token(T_COMMA);
+
+}
+
+std::optional<TokenSyntax>
+LexicalVariableListItemSyntax::getComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::Comma);
+   if (!commaData) {
+      return std::nullopt;
    }
-   return m_data->replaceChild<LexicalVariableSyntax>(trailingCommaRaw, Cursor::TrailingComma);
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+LexicalVariableSyntax
+LexicalVariableListItemSyntax::getLexicalVariable()
+{
+   return LexicalVariableSyntax {m_root, m_data->getChild(Cursor::LexicalVariable).get()};
+}
+
+LexicalVariableListItemSyntax
+LexicalVariableListItemSyntax::withComma(std::optional<TokenSyntax> comma)
+{
+   RefCountPtr<RawSyntax> rawComma;
+   if (comma.has_value()) {
+      rawComma = comma->getRaw();
+   } else {
+      rawComma = nullptr;
+   }
+   return m_data->replaceChild<LexicalVariableListItemSyntax>(rawComma, Cursor::Comma);
+}
+
+LexicalVariableListItemSyntax
+LexicalVariableListItemSyntax::withLexicalVariable(std::optional<LexicalVariableSyntax> lexicalVariable)
+{
+   RefCountPtr<RawSyntax> rawLexicalVariable;
+   if (lexicalVariable.has_value()) {
+      rawLexicalVariable = lexicalVariable->getRaw();
+   } else {
+      rawLexicalVariable = RawSyntax::missing(SyntaxKind::LexicalVariable);
+   }
+   return m_data->replaceChild<LexicalVariableListItemSyntax>(rawLexicalVariable, Cursor::LexicalVariable);
 }
 
 } // polar::syntax

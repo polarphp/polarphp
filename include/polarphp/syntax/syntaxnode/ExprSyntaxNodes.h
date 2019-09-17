@@ -177,7 +177,6 @@ public:
       /// optional: true
       ///
       Comma,
-
       ///
       /// type: ExprSyntax
       /// optional: false
@@ -5851,11 +5850,6 @@ public:
       /// optional: false
       ///
       Variable,
-      ///
-      /// type: TokenSyntax (T_COMMA)
-      /// optional: true
-      ///
-      TrailingComma,
    };
 public:
    LexicalVariableSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
@@ -5866,11 +5860,9 @@ public:
 
    std::optional<TokenSyntax> getReferenceToken();
    TokenSyntax getVariable();
-   std::optional<TokenSyntax> getTrailingComma();
 
    LexicalVariableSyntax withReferenceToken(std::optional<TokenSyntax> referenceToken);
    LexicalVariableSyntax withVariable(std::optional<TokenSyntax> variable);
-   LexicalVariableSyntax withTrailingComma(std::optional<TokenSyntax> trailingComma);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -5882,7 +5874,57 @@ public:
       return kindOf(syntax->getKind());
    }
 private:
-   friend class LexicalVarItemSyntaxBuilder;
+   friend class LexicalVariableSyntaxBuilder;
+   void validate();
+};
+
+///
+/// lexical_variable_list_item:
+///   lexical_variable
+/// | ',' lexical_variable
+///
+class LexicalVariableListItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: true
+      ///
+      Comma,
+      ///
+      /// type: LexicalVariableSyntax
+      /// optional: false
+      ///
+      LexicalVariable,
+   };
+public:
+   LexicalVariableListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getComma();
+   LexicalVariableSyntax getLexicalVariable();
+
+   LexicalVariableListItemSyntax withComma(std::optional<TokenSyntax> comma);
+   LexicalVariableListItemSyntax withLexicalVariable(std::optional<LexicalVariableSyntax> lexicalVariable);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::LexicalVariableListItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class LexicalVariableListItemSyntaxBuilder;
    void validate();
 };
 

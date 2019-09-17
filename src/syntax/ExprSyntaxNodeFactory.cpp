@@ -21,26 +21,27 @@ namespace polar::syntax {
 ///
 
 ExprListSyntax
-ExprSyntaxNodeFactory::makeExprList(const std::vector<ExprSyntax> elements,
+ExprSyntaxNodeFactory::makeExprList(const std::vector<ExprListItemSyntax> elements,
                                     RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
-   for (const ExprSyntax &element : elements) {
+   for (const ExprListItemSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
-   RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::ExprList, layout, SourcePresence::Present,
-                                                   arena);
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ExprList, layout, SourcePresence::Present,
+            arena);
    return make<ExprListSyntax>(target);
 }
 
 LexicalVarListSyntax
-ExprSyntaxNodeFactory::makeLexicalVarList(const std::vector<LexicalVariableSyntax> elements,
-                                          RefCountPtr<SyntaxArena> arena)
+ExprSyntaxNodeFactory::makeLexicalVariableList(const std::vector<LexicalVariableListItemSyntax> elements,
+                                               RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
-   for (const LexicalVariableSyntax &element : elements) {
+   for (const LexicalVariableListItemSyntax &element : elements) {
       layout.push_back(element.getRaw());
    }
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -146,13 +147,13 @@ ExprSyntaxNodeFactory::makeOptionalExpr(std::optional<ExprSyntax> expr, RefCount
 }
 
 ExprListItemSyntax
-ExprSyntaxNodeFactory::makeExprListItem(ExprSyntax expr, std::optional<TokenSyntax> trailingComma,
+ExprSyntaxNodeFactory::makeExprListItem(std::optional<TokenSyntax> comma, ExprSyntax expr,
                                         RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ExprListItem, {
+               comma.has_value() ? comma->getRaw() : nullptr,
                expr.getRaw(),
-               trailingComma.has_value() ? trailingComma->getRaw() : nullptr
             }, SourcePresence::Present, arena);
    return make<ExprListItemSyntax>(target);
 }
@@ -1319,16 +1320,27 @@ ExprSyntaxNodeFactory::makeUseLexicalVarClause(TokenSyntax useToken, TokenSyntax
 }
 
 LexicalVariableSyntax
-ExprSyntaxNodeFactory::makeLexicalVarItem(TokenSyntax referenceToken, TokenSyntax variable, std::optional<TokenSyntax> trailingComma,
-                                          RefCountPtr<SyntaxArena> arena)
+ExprSyntaxNodeFactory::makeLexicalVariable(TokenSyntax referenceToken, TokenSyntax variable,
+                                           RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::UseLexicalVarClause, {
+            SyntaxKind::LexicalVariable, {
                referenceToken.getRaw(),
                variable.getRaw(),
-               trailingComma.has_value() ? trailingComma->getRaw() : nullptr,
             }, SourcePresence::Present, arena);
    return make<LexicalVariableSyntax>(target);
+}
+
+LexicalVariableListItemSyntax
+ExprSyntaxNodeFactory::makeLexicalVariable(std::optional<TokenSyntax> comma, LexicalVariableSyntax variable,
+                                           RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::LexicalVariableListItem, {
+               comma.has_value() ? comma->getRaw() : nullptr,
+               variable.getRaw(),
+            }, SourcePresence::Present, arena);
+   return make<LexicalVariableListItemSyntax>(target);
 }
 
 /// make blank nodes
@@ -2490,15 +2502,25 @@ ExprSyntaxNodeFactory::makeBlankUseLexicalVarClause(RefCountPtr<SyntaxArena> are
 }
 
 LexicalVariableSyntax
-ExprSyntaxNodeFactory::makeBlankLexicalVarItem(RefCountPtr<SyntaxArena> arena)
+ExprSyntaxNodeFactory::makeBlankLexicalVariable(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::LexicalVariable, {
                nullptr, // ReferenceToken
                make_missing_token(T_VARIABLE), // Variable
-               nullptr, // TrailingComma
             }, SourcePresence::Present, arena);
    return make<LexicalVariableSyntax>(target);
+}
+
+LexicalVariableListItemSyntax
+ExprSyntaxNodeFactory::makeBlankLexicalVariableListItem(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::LexicalVariableListItem, {
+               nullptr, // Comma
+               RawSyntax::missing(SyntaxKind::LexicalVariable), // Variable
+            }, SourcePresence::Present, arena);
+   return make<LexicalVariableListItemSyntax>(target);
 }
 
 } // polar::syntax

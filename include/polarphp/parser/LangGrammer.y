@@ -317,7 +317,7 @@ using namespace polar::syntax;
 %type <RefCountPtr<RawSyntax>> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
 %type <RefCountPtr<RawSyntax>> variable_class_name dereferencable_scalar constant dereferencable
 %type <RefCountPtr<RawSyntax>> callable_expr callable_variable static_member new_variable
-%type <RefCountPtr<RawSyntax>> encaps_var encaps_var_offset isset_variables
+%type <RefCountPtr<RawSyntax>> encaps_var isset_variables
 %type <RefCountPtr<RawSyntax>> top_statement_list use_declarations const_list inner_statement_list if_stmt
 %type <RefCountPtr<RawSyntax>> for_exprs switch_case_list global_var_list static_var_list
 %type <RefCountPtr<RawSyntax>> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
@@ -1470,16 +1470,25 @@ const_decl:
 
 echo_expr_list:
    echo_expr_list T_COMMA echo_expr {
-
+      ExprListSyntax list = make<ExprListSyntax>($1);
+      TokenSyntax comma = make_token(CommaToken);
+      ExprSyntax echoExpr = make<ExprSyntax>($3);
+      ExprListItemSyntax exprListItem = make_expr(ExprListItem, comma, echoExpr);
+      list.appending(exprListItem);
+      $$ = list.getRaw();
    }
 |  echo_expr {
-
+      ExprSyntax echoExpr = make<ExprSyntax>($1);
+      ExprListItemSyntax exprListItem = make_expr(ExprListItem, std::nullopt, echoExpr);
+      std::vector<ExprListItemSyntax> items{exprListItem};
+      ExprListSyntax list = make_expr(ExprList, items);
+      $$ = list.getRaw();
    }
 ;
 
 echo_expr:
    expr {
-
+      $$ = $1;
    }
 ;
 
