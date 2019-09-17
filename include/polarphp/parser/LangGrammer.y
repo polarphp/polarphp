@@ -809,7 +809,15 @@ statement:
       $$ = emptyStmt.getRaw();
    }
 |  T_TRY T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE catch_list finally_statement {
-
+      TokenSyntax tryKeyword = make_token(TryKeyword);
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      InnerStmtListSyntax innerStmts = make<InnerStmtListSyntax>($3);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      InnerCodeBlockStmtSyntax tryCodeBlcok = make_stmt(InnerCodeBlockStmt, leftBrace, innerStmts, rightBrace);
+      CatchListSyntax catchList = make<CatchListSyntax>($5);
+      std::optional<FinallyClauseSyntax> finallyClause = $6 ? std::optional(make<FinallyClauseSyntax>($6)) : std::nullopt;
+      TryStmtSyntax tryStmt = make_stmt(TryStmt, tryKeyword, tryCodeBlcok, catchList, finallyClause);
+      $$ = tryStmt.getRaw();
    }
 |  T_THROW expr T_SEMICOLON {
       TokenSyntax throwKeyword = make_token(ThrowKeyword);
@@ -835,10 +843,25 @@ statement:
 
 catch_list:
    %empty {
-
+      CatchListSyntax list = make_blank_stmt(CatchList);
+      $$ = list.getRaw();
    }
 |  catch_list T_CATCH T_LEFT_PAREN catch_name_list T_VARIABLE T_RIGHT_PAREN T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE {
-
+      CatchListSyntax list = make<CatchListSyntax>($1);
+      TokenSyntax catchKeyword = make_token(CatchKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      CatchArgTypeHintListSyntax typeHints = make<CatchArgTypeHintListSyntax>($4);
+      TokenSyntax variableToken = make_token_with_text(Variable, $5);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      InnerStmtListSyntax innerStmts = make<InnerStmtListSyntax>($8);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      InnerCodeBlockStmtSyntax catchHandlerCodeBlock = make_stmt(InnerCodeBlockStmt, leftBrace, innerStmts, rightBrace);
+      CatchListItemClauseSyntax catchClause = make_stmt(CatchListItemClause, 
+         catchKeyword, leftParen, typeHints, variableToken, rightParen, catchHandlerCodeBlock
+      );
+      list.appending(catchClause);
+      $$ = list.getRaw();
    }
 ;
 
@@ -862,10 +885,16 @@ catch_name_list:
 
 finally_statement:
    %empty {
-
+      $$ = nullptr;
    }
 |  T_FINALLY T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE {
-
+      TokenSyntax finallyKeyword = make_token(FinallyKeyword);
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      InnerStmtListSyntax innerStmts = make<InnerStmtListSyntax>($3);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      InnerCodeBlockStmtSyntax catchHandlerCodeBlock = make_stmt(InnerCodeBlockStmt, leftBrace, innerStmts, rightBrace);
+      FinallyClauseSyntax finallyClause = make_stmt(FinallyClause, finallyKeyword, catchHandlerCodeBlock);
+      $$ = finallyClause.getRaw();
    }
 ;
 

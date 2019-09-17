@@ -653,14 +653,14 @@ StmtSyntaxNodeFactory::makeThrowStmt(TokenSyntax throwKeyword, ExprSyntax expr,
 
 TryStmtSyntax
 StmtSyntaxNodeFactory::makeTryStmt(TokenSyntax tryToken, InnerCodeBlockStmtSyntax codeBlock,
-                                   std::optional<CatchListSyntax> catchList, std::optional<FinallyClauseSyntax> finallyClause,
+                                   CatchListSyntax catchList, std::optional<FinallyClauseSyntax> finallyClause,
                                    RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::TryStmt, {
                tryToken.getRaw(),
                codeBlock.getRaw(),
-               catchList.has_value() ? catchList->getRaw() : nullptr,
+               catchList.getRaw(),
                finallyClause.has_value() ? finallyClause->getRaw() : nullptr,
             }, SourcePresence::Present, arena);
    return make<TryStmtSyntax>(target);
@@ -692,7 +692,7 @@ StmtSyntaxNodeFactory::makeCatchArgTypeHintItem(std::optional<TokenSyntax> separ
 
 CatchListItemClauseSyntax
 StmtSyntaxNodeFactory::makeCatchListItemClause(TokenSyntax catchToken, TokenSyntax leftParen,
-                                               std::optional<InnerCodeBlockStmtSyntax> catchArgTypeHintList, TokenSyntax variable,
+                                               CatchArgTypeHintListSyntax catchArgTypeHintList, TokenSyntax variable,
                                                TokenSyntax rightParen, InnerCodeBlockStmtSyntax codeBlock,
                                                RefCountPtr<SyntaxArena> arena)
 {
@@ -700,7 +700,7 @@ StmtSyntaxNodeFactory::makeCatchListItemClause(TokenSyntax catchToken, TokenSynt
             SyntaxKind::CatchListItemClause, {
                catchToken.getRaw(),
                leftParen.getRaw(),
-               catchArgTypeHintList.has_value() ? catchArgTypeHintList->getRaw() : nullptr,
+               catchArgTypeHintList.getRaw(),
                variable.getRaw(),
                rightParen.getRaw(),
                codeBlock.getRaw(),
@@ -1576,7 +1576,7 @@ StmtSyntaxNodeFactory::makeBlankTryStmt(RefCountPtr<SyntaxArena> arena)
             SyntaxKind::TryStmt, {
                make_missing_token(T_TRY), // TryToken
                RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt), // CodeBlock
-               nullptr, // CatchList
+               RawSyntax::missing(SyntaxKind::CatchList), // CatchList
                nullptr, // FinallyClause
             }, SourcePresence::Present, arena);
    return make<TryStmtSyntax>(target);

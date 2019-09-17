@@ -125,14 +125,14 @@ public:
    static DeferStmtSyntax makeDeferStmt(TokenSyntax deferKeyword, InnerCodeBlockStmtSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
    static ThrowStmtSyntax makeThrowStmt(TokenSyntax throwKeyword, ExprSyntax expr, TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
    static TryStmtSyntax makeTryStmt(TokenSyntax tryToken, InnerCodeBlockStmtSyntax codeBlock,
-                                    std::optional<CatchListSyntax> catchList, std::optional<FinallyClauseSyntax> finallyClause,
+                                    CatchListSyntax catchList, std::optional<FinallyClauseSyntax> finallyClause,
                                     RefCountPtr<SyntaxArena> arena = nullptr);
    static FinallyClauseSyntax makeFinallyClause(TokenSyntax finallyToken, InnerCodeBlockStmtSyntax codeBlock,
                                                 RefCountPtr<SyntaxArena> arena = nullptr);
    static CatchArgTypeHintItemSyntax makeCatchArgTypeHintItem(std::optional<TokenSyntax> separator, NameSyntax typeName,
                                                               RefCountPtr<SyntaxArena> arena = nullptr);
    static CatchListItemClauseSyntax makeCatchListItemClause(TokenSyntax catchToken, TokenSyntax leftParen,
-                                                            std::optional<InnerCodeBlockStmtSyntax> catchArgTypeHintList, TokenSyntax variable,
+                                                            CatchArgTypeHintListSyntax catchArgTypeHintList, TokenSyntax variable,
                                                             TokenSyntax rightParen, InnerCodeBlockStmtSyntax codeBlock,
                                                             RefCountPtr<SyntaxArena> arena = nullptr);
    static ReturnStmtSyntax makeReturnStmt(TokenSyntax returnKeyword, std::optional<ExprSyntax> expr,

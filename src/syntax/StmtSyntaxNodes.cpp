@@ -2635,7 +2635,7 @@ InnerCodeBlockStmtSyntax TryStmtSyntax::getCodeBlock()
    return InnerCodeBlockStmtSyntax {m_root, m_data->getChild(Cursor::CodeBlock).get()};
 }
 
-std::optional<CatchListSyntax> TryStmtSyntax::getCatchList()
+CatchListSyntax TryStmtSyntax::getCatchList()
 {
    return CatchListSyntax {m_root, m_data->getChild(Cursor::CatchList).get()};
 }
@@ -2673,7 +2673,7 @@ TryStmtSyntax TryStmtSyntax::withCatchList(std::optional<CatchListSyntax> catchL
    if (catchList.has_value()) {
       rawCatchList = catchList->getRaw();
    } else {
-      rawCatchList = nullptr;
+      rawCatchList = RawSyntax::missing(SyntaxKind::CatchList);
    }
    return m_data->replaceChild<TryStmtSyntax>(rawCatchList, Cursor::CatchList);
 }

@@ -2012,7 +2012,7 @@ public:
       CodeBlock,
       ///
       /// type: CatchListSyntax
-      /// optional: true
+      /// optional: false
       ///
       CatchList,
       ///
@@ -2031,7 +2031,7 @@ public:
 
    TokenSyntax getTryToken();
    InnerCodeBlockStmtSyntax getCodeBlock();
-   std::optional<CatchListSyntax> getCatchList();
+   CatchListSyntax getCatchList();
    std::optional<FinallyClauseSyntax> getFinallyClause();
 
    TryStmtSyntax withTryToken(std::optional<TokenSyntax> tryToken);
