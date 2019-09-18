@@ -1279,6 +1279,44 @@ ClassConstDeclSyntax ClassConstDeclSyntax::withConstList(std::optional<ClassCons
 }
 
 ///
+/// MethodCodeBlockSyntax
+///
+void MethodCodeBlockSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == MethodCodeBlockSyntax::CHILDREN_COUNT);
+   if (const RefCountPtr<RawSyntax> &bodyChild = raw->getChild(Cursor::Block)) {
+      if (bodyChild->isToken()) {
+         assert(bodyChild->getTokenKind() == TokenKindType::T_SEMICOLON);
+      } else {
+         assert(bodyChild->kindOf(SyntaxKind::InnerCodeBlockStmt));
+      }
+   }
+#endif
+}
+
+Syntax MethodCodeBlockSyntax::getBody()
+{
+   return Syntax {m_root, m_data->getChild(Cursor::Block).get()};
+}
+
+MethodCodeBlockSyntax
+MethodCodeBlockSyntax::withBody(std::optional<Syntax> body)
+{
+   RefCountPtr<RawSyntax> rawBody;
+   if (body.has_value()) {
+      rawBody = body->getRaw();
+   } else {
+      rawBody = RawSyntax::missing(SyntaxKind::Unknown);
+   }
+   return m_data->replaceChild<MethodCodeBlockSyntax>(rawBody, Cursor::Block);
+}
+
+///
 /// ClassMethodDeclSyntax
 ///
 void ClassMethodDeclSyntax::validate()
@@ -1347,13 +1385,9 @@ std::optional<ReturnTypeClauseSyntax> ClassMethodDeclSyntax::getReturnType()
    return ReturnTypeClauseSyntax {m_root, returnTypeData.get()};
 }
 
-std::optional<MemberDeclBlockSyntax> ClassMethodDeclSyntax::getBody()
+MethodCodeBlockSyntax ClassMethodDeclSyntax::getBody()
 {
-   RefCountPtr<SyntaxData> bodyData = m_data->getChild(Cursor::Body);
-   if (!bodyData) {
-      return std::nullopt;
-   }
-   return MemberDeclBlockSyntax {m_root, bodyData.get()};
+   return MethodCodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
 }
 
 ClassMethodDeclSyntax ClassMethodDeclSyntax::withModifiers(std::optional<MemberModifierListSyntax> modifiers)
@@ -1422,13 +1456,13 @@ ClassMethodDeclSyntax ClassMethodDeclSyntax::withReturnType(std::optional<Return
    return m_data->replaceChild<ClassMethodDeclSyntax>(returnTypeRaw, Cursor::ReturnType);
 }
 
-ClassMethodDeclSyntax ClassMethodDeclSyntax::withBody(std::optional<MemberDeclBlockSyntax> body)
+ClassMethodDeclSyntax ClassMethodDeclSyntax::withBody(std::optional<MethodCodeBlockSyntax> body)
 {
    RefCountPtr<RawSyntax> bodyRaw;
    if (body.has_value()) {
       bodyRaw = body->getRaw();
    } else {
-      bodyRaw = RawSyntax::missing(SyntaxKind::MemberDeclBlock);
+      bodyRaw = RawSyntax::missing(SyntaxKind::MethodCodeBlock);
    }
    return m_data->replaceChild<ClassMethodDeclSyntax>(bodyRaw, Cursor::Body);
 }
@@ -2033,6 +2067,62 @@ ClassPropertyClauseSyntax ClassPropertyClauseSyntax::withInitializer(std::option
       initializerRaw = nullptr;
    }
    return m_data->replaceChild<ClassPropertyClauseSyntax>(initializerRaw, Cursor::Initializer);
+}
+
+///
+/// ClassPropertyListItemSyntax
+///
+void ClassPropertyListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassPropertyListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Comma, std::set{TokenKindType::T_COMMA});
+   syntax_assert_child_kind(raw, Property, std::set{SyntaxKind::ClassPropertyClause});
+#endif
+}
+
+std::optional<TokenSyntax>
+ClassPropertyListItemSyntax::getComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::Comma);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+ClassPropertyClauseSyntax
+ClassPropertyListItemSyntax::getProperty()
+{
+   return ClassPropertyClauseSyntax {m_root, m_data->getChild(Cursor::Property).get()};
+}
+
+ClassPropertyListItemSyntax
+ClassPropertyListItemSyntax::withComma(std::optional<TokenSyntax> comma)
+{
+   RefCountPtr<RawSyntax> rawComma;
+   if (comma.has_value()) {
+      rawComma = comma->getRaw();
+   } else {
+      rawComma = nullptr;
+   }
+   return m_data->replaceChild<ClassPropertyListItemSyntax>(rawComma, Cursor::Comma);
+}
+
+ClassPropertyListItemSyntax
+ClassPropertyListItemSyntax::withProperty(std::optional<ClassPropertyClauseSyntax> property)
+{
+   RefCountPtr<RawSyntax> rawProperty;
+   if (property.has_value()) {
+      rawProperty = property->getRaw();
+   } else {
+      rawProperty = RawSyntax::missing(SyntaxKind::ClassPropertyClause);
+   }
+   return m_data->replaceChild<ClassPropertyListItemSyntax>(rawProperty, Cursor::Property);
 }
 
 ///

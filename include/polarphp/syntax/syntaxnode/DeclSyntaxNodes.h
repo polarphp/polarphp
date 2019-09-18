@@ -1043,7 +1043,7 @@ public:
       ///
       /// type: InitializerClauseSyntax
       /// optional: true
-      ///
+      ///ClassPropertyClauseSyntax
       Initializer
    };
 
@@ -1070,6 +1070,57 @@ public:
    }
 private:
    friend class ClassPropertyClauseSyntaxBuilder;
+   void validate();
+};
+
+///
+/// class_property_list_item:
+///   ',' class_property_clause
+/// | class_property_clause
+///
+class ClassPropertyListItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_COMMA)
+      /// optional: true
+      ///
+      Comma,
+      ///
+      /// type: ClassPropertyClauseSyntax
+      /// optional: false
+      ///
+      Property
+   };
+
+public:
+   ClassPropertyListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getComma();
+   ClassPropertyClauseSyntax getProperty();
+
+   ClassPropertyListItemSyntax withComma(std::optional<TokenSyntax> comma);
+   ClassPropertyListItemSyntax withProperty(std::optional<ClassPropertyClauseSyntax> property);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassPropertyListItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+private:
+   friend class ClassPropertyListItemSyntaxBuilder;
    void validate();
 };
 
@@ -1349,6 +1400,55 @@ private:
 };
 
 ///
+/// method_body:
+/// ';' /* abstract method */
+/// |	'{' inner_statement_list '}'
+///
+class MethodCodeBlockSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: Syntax
+      /// optional: false
+      /// node choices: true
+      /// ----------------------------------------------
+      /// node choice: TokenSyntax (T_SEMICOLON)
+      /// ----------------------------------------------
+      /// node choice: InnerCodeBlockStmtSyntax
+      ///
+      Block
+   };
+
+public:
+   MethodCodeBlockSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   Syntax getBody();
+   MethodCodeBlockSyntax withBody(std::optional<Syntax> body);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::MethodCodeBlock;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class MethodCodeBlockSyntaxBuilder;
+   void validate();
+};
+
+///
 /// class_method_statement:
 ///   method_modifiers function returns_ref identifier backup_doc_comment '(' parameter_list ')'
 ///   return_type backup_fn_flags method_body backup_fn_flags
@@ -1391,8 +1491,8 @@ public:
       ///
       ReturnType,
       ///
-      /// type: MemberDeclBlockSyntax
-      /// optional: true
+      /// type: MethodCodeBlockSyntax
+      /// optional: false
       ///
       Body
    };
@@ -1410,7 +1510,7 @@ public:
    IdentifierSyntax getFuncName();
    ParameterClauseSyntax getParameterClause();
    std::optional<ReturnTypeClauseSyntax> getReturnType();
-   std::optional<MemberDeclBlockSyntax> getBody();
+   MethodCodeBlockSyntax getBody();
 
    ClassMethodDeclSyntax withModifiers(std::optional<MemberModifierListSyntax> modifiers);
    ClassMethodDeclSyntax withFunctionToken(std::optional<TokenSyntax> functionToken);
@@ -1418,7 +1518,7 @@ public:
    ClassMethodDeclSyntax withFuncName(std::optional<IdentifierSyntax> funcName);
    ClassMethodDeclSyntax withParameterClause(std::optional<ParameterClauseSyntax> parameterClause);
    ClassMethodDeclSyntax withReturnType(std::optional<ReturnTypeClauseSyntax> returnType);
-   ClassMethodDeclSyntax withBody(std::optional<MemberDeclBlockSyntax> body);
+   ClassMethodDeclSyntax withBody(std::optional<MethodCodeBlockSyntax> body);
 
    static bool kindOf(SyntaxKind kind)
    {

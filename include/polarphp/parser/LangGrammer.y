@@ -1416,76 +1416,129 @@ method_body:
 
 variable_modifiers:
    non_empty_member_modifiers {
-
+      $$ = $1;
    }
 |  T_VAR {
-
+      TokenSyntax modifierKeyword = make_token(PublicKeyword);
+      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      std::vector<MemberModifierSyntax> items{memberModifier};
+      MemberModifierListSyntax list = make_decl(MemberModifierList, items);
+      $$ = list.getRaw();
    }
 ;
 
 method_modifiers:
    %empty {
-
+      TokenSyntax modifierKeyword = make_token(PublicKeyword);
+      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      std::vector<MemberModifierSyntax> items{memberModifier};
+      MemberModifierListSyntax list = make_decl(MemberModifierList, items);
+      $$ = list.getRaw();
    }
 |  non_empty_member_modifiers {
-
+      $$ = $1;
    }
 ;
 
 non_empty_member_modifiers:
    member_modifier {
-
+      MemberModifierSyntax modifier = make<MemberModifierSyntax>($1);
+      std::vector<MemberModifierSyntax> items{modifier};
+      MemberModifierListSyntax list = make_decl(MemberModifierList, items);
+      $$ = list.getRaw();
    }
 |  non_empty_member_modifiers member_modifier {
-
+      MemberModifierListSyntax list = make<MemberModifierListSyntax>($1);
+      MemberModifierSyntax modifier = make<MemberModifierSyntax>($2);
+      list.appending(modifier);
+      $$ = list.getRaw();
    }
 ;
 
 member_modifier:
    T_PUBLIC {
-
+      TokenSyntax modifierKeyword = make_token(PublicKeyword);
+      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      $$ = memberModifier.getRaw();
    }
 |  T_PROTECTED {
-
+      TokenSyntax modifierKeyword = make_token(ProtectedKeyword);
+      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      $$ = memberModifier.getRaw();
    }
 |  T_PRIVATE {
-
+      TokenSyntax modifierKeyword = make_token(PrivateKeyword);
+      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      $$ = memberModifier.getRaw();
    }
 |  T_STATIC {
-
+      TokenSyntax modifierKeyword = make_token(StaticKeyword);
+      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      $$ = memberModifier.getRaw();
    }
 |  T_ABSTRACT {
-
+      TokenSyntax modifierKeyword = make_token(AbstractKeyword);
+      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      $$ = memberModifier.getRaw();
    }
 |  T_FINAL {
-
+      TokenSyntax modifierKeyword = make_token(FinalKeyword);
+      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      $$ = memberModifier.getRaw();
    }
 ;
 
 property_list:
    property_list T_COMMA property {
-
+      ClassPropertyListSyntax list = make<ClassPropertyListSyntax>($1);
+      TokenSyntax comma = make_token(CommaToken);
+      ClassPropertyClauseSyntax property = make<ClassPropertyClauseSyntax>($3);
+      ClassPropertyListItemSyntax propertyListItem = make_decl(
+         ClassPropertyListItem, comma, property);
+      list.appending(propertyListItem);
+      $$ = list.getRaw();
    }
 |  property {
-
+      ClassPropertyClauseSyntax property = make<ClassPropertyClauseSyntax>($1);
+      ClassPropertyListItemSyntax propertyListItem = make_decl(
+         ClassPropertyListItem, std::nullopt, property);
+      std::vector<ClassPropertyListItemSyntax> items{propertyListItem};
+      ClassPropertyListSyntax list = make_decl(ClassPropertyList, items);
+      $$ = list.getRaw();
    }
 ;
 
 property:
    T_VARIABLE backup_doc_comment {
-
+      TokenSyntax variable = make_token_with_text(Variable, $1);
+      ClassPropertyClauseSyntax prop = make_decl(ClassPropertyClause, variable, std::nullopt);
+      $$ = prop.getRaw();
    }
 |  T_VARIABLE T_EQUAL expr backup_doc_comment {
-
+      TokenSyntax variable = make_token_with_text(Variable, $1);
+      TokenSyntax equalToken = make_token(EqualToken);
+      ExprSyntax valueExpr = make<ExprSyntax>($3);
+      InitializerClauseSyntax initializer = make_decl(InitializerClause, equalToken, valueExpr);
+      ClassPropertyClauseSyntax prop = make_decl(ClassPropertyClause, variable, initializer);
+      $$ = prop.getRaw();
    }
 ;
 
 class_const_list:
    class_const_list T_COMMA class_const_decl {
-
+      ClassConstListSyntax list = make<ClassConstListSyntax>($1);
+      TokenSyntax comma = make_token(CommaToken);
+      ClassConstClauseSyntax constDecl = make<ClassConstClauseSyntax>($3);
+      ClassConstListItemSyntax listItem = make_decl(ClassConstListItem, comma, constDecl);
+      list.appending(listItem);
+      $$ = list.getRaw();
    }
 |  class_const_decl {
-
+      ClassConstClauseSyntax constDecl = make<ClassConstClauseSyntax>($1);
+      ClassConstListItemSyntax listItem = make_decl(ClassConstListItem, std::nullopt, constDecl);
+      std::vector<ClassConstListItemSyntax> items{listItem};
+      ClassConstListSyntax list = make_decl(ClassConstList, items);
+      $$ = list.getRaw();
    }
 ;
 

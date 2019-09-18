@@ -18,7 +18,8 @@ namespace polar::syntax {
 ///
 /// make collection nodes
 ///
-NameListSyntax DeclSyntaxNodeFactory::makeNameList(const std::vector<NameListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
+NameListSyntax
+DeclSyntaxNodeFactory::makeNameList(const std::vector<NameListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
@@ -29,7 +30,8 @@ NameListSyntax DeclSyntaxNodeFactory::makeNameList(const std::vector<NameListIte
    return make<NameListSyntax>(target);
 }
 
-ParameterListSyntax DeclSyntaxNodeFactory::makeParameterList(
+ParameterListSyntax
+DeclSyntaxNodeFactory::makeParameterList(
       const std::vector<ParameterListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
@@ -40,7 +42,8 @@ ParameterListSyntax DeclSyntaxNodeFactory::makeParameterList(
    return make<ParameterListSyntax>(target);
 }
 
-ClassModifierListSyntax DeclSyntaxNodeFactory::makeClassModififerList(
+ClassModifierListSyntax
+DeclSyntaxNodeFactory::makeClassModififerList(
       const std::vector<ClassModifierSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
@@ -51,7 +54,8 @@ ClassModifierListSyntax DeclSyntaxNodeFactory::makeClassModififerList(
    return make<ClassModifierListSyntax>(target);
 }
 
-MemberDeclListSyntax DeclSyntaxNodeFactory::makeMemberDeclList(
+MemberDeclListSyntax
+DeclSyntaxNodeFactory::makeMemberDeclList(
       const std::vector<MemberDeclListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
@@ -62,7 +66,8 @@ MemberDeclListSyntax DeclSyntaxNodeFactory::makeMemberDeclList(
    return make<MemberDeclListSyntax>(target);
 }
 
-MemberModifierListSyntax DeclSyntaxNodeFactory::makeMemberModifierList(
+MemberModifierListSyntax
+DeclSyntaxNodeFactory::makeMemberModifierList(
       const std::vector<MemberModifierSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
@@ -73,18 +78,20 @@ MemberModifierListSyntax DeclSyntaxNodeFactory::makeMemberModifierList(
    return make<MemberModifierListSyntax>(target);
 }
 
-ClassPropertyListSyntax DeclSyntaxNodeFactory::makeClassPropertyList(
-      const std::vector<ClassPropertyClauseSyntax> &elements, RefCountPtr<SyntaxArena> arena)
+ClassPropertyListSyntax
+DeclSyntaxNodeFactory::makeClassPropertyList(
+      const std::vector<ClassPropertyListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
-   for (const ClassPropertyClauseSyntax &item : elements) {
+   for (const ClassPropertyListItemSyntax &item : elements) {
       layout.push_back(item.getRaw());
    }
    RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::ClassPropertyList, layout, SourcePresence::Present, arena);
    return make<ClassPropertyListSyntax>(target);
 }
 
-ClassConstListSyntax DeclSyntaxNodeFactory::makeClassConstList(
+ClassConstListSyntax
+DeclSyntaxNodeFactory::makeClassConstList(
       const std::vector<ClassConstListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
@@ -95,7 +102,8 @@ ClassConstListSyntax DeclSyntaxNodeFactory::makeClassConstList(
    return make<ClassConstListSyntax>(target);
 }
 
-ClassTraitAdaptationListSyntax DeclSyntaxNodeFactory::makeClassTraitAdaptationList(
+ClassTraitAdaptationListSyntax
+DeclSyntaxNodeFactory::makeClassTraitAdaptationList(
       const std::vector<ClassTraitAdaptationSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
@@ -336,6 +344,18 @@ DeclSyntaxNodeFactory::makeClassPropertyClause(TokenSyntax variable, std::option
    return make<ClassPropertyClauseSyntax>(target);
 }
 
+ClassPropertyListItemSyntax
+DeclSyntaxNodeFactory::makeClassPropertyListItem(std::optional<TokenSyntax> comma, ClassPropertyClauseSyntax property,
+                                                 RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ClassPropertyListItem, {
+               comma.has_value() ? comma->getRaw() : nullptr,
+               property.getRaw(),
+            }, SourcePresence::Present, arena);
+   return make<ClassPropertyListItemSyntax>(target);
+}
+
 ClassConstClauseSyntax
 DeclSyntaxNodeFactory::makeClassConstClause(IdentifierSyntax identifier, std::optional<InitializerClauseSyntax> initializer,
                                             RefCountPtr<SyntaxArena> arena)
@@ -394,6 +414,16 @@ DeclSyntaxNodeFactory::makeClassConstDecl(MemberModifierListSyntax modifiers, To
                constList.getRaw()
             }, SourcePresence::Present, arena);
    return make<ClassConstDeclSyntax>(target);
+}
+
+MethodCodeBlockSyntax
+DeclSyntaxNodeFactory::makeMethodCodeBlock(Syntax block, RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::MethodCodeBlock, {
+               block.getRaw(),
+            }, SourcePresence::Present, arena);
+   return make<MethodCodeBlockSyntax>(target);
 }
 
 ClassMethodDeclSyntax
@@ -573,7 +603,8 @@ DeclSyntaxNodeFactory::makeSourceFile(TopStmtListSyntax statements, TokenSyntax 
 ///
 /// empty normal nodes
 ///
-NameListSyntax DeclSyntaxNodeFactory::makeBlankNameList(RefCountPtr<SyntaxArena> arena)
+NameListSyntax
+DeclSyntaxNodeFactory::makeBlankNameList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::NameList, {},
@@ -581,7 +612,8 @@ NameListSyntax DeclSyntaxNodeFactory::makeBlankNameList(RefCountPtr<SyntaxArena>
    return make<NameListSyntax>(target);
 }
 
-ParameterListSyntax DeclSyntaxNodeFactory::makeBlankParameterList(RefCountPtr<SyntaxArena> arena)
+ParameterListSyntax
+DeclSyntaxNodeFactory::makeBlankParameterList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ParameterList, {},
@@ -589,7 +621,8 @@ ParameterListSyntax DeclSyntaxNodeFactory::makeBlankParameterList(RefCountPtr<Sy
    return make<ParameterListSyntax>(target);
 }
 
-ClassModifierListSyntax DeclSyntaxNodeFactory::makeBlankClassModififerList(RefCountPtr<SyntaxArena> arena)
+ClassModifierListSyntax
+DeclSyntaxNodeFactory::makeBlankClassModififerList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassModifierList, {},
@@ -597,7 +630,8 @@ ClassModifierListSyntax DeclSyntaxNodeFactory::makeBlankClassModififerList(RefCo
    return make<ClassModifierListSyntax>(target);
 }
 
-MemberDeclListSyntax DeclSyntaxNodeFactory::makeBlankMemberDeclList(RefCountPtr<SyntaxArena> arena)
+MemberDeclListSyntax
+DeclSyntaxNodeFactory::makeBlankMemberDeclList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::MemberDeclList, {},
@@ -605,7 +639,8 @@ MemberDeclListSyntax DeclSyntaxNodeFactory::makeBlankMemberDeclList(RefCountPtr<
    return make<MemberDeclListSyntax>(target);
 }
 
-MemberModifierListSyntax DeclSyntaxNodeFactory::makeBlankMemberModifierList(RefCountPtr<SyntaxArena> arena)
+MemberModifierListSyntax
+DeclSyntaxNodeFactory::makeBlankMemberModifierList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::MemberModifierList, {},
@@ -613,7 +648,8 @@ MemberModifierListSyntax DeclSyntaxNodeFactory::makeBlankMemberModifierList(RefC
    return make<MemberModifierListSyntax>(target);
 }
 
-ClassPropertyListSyntax DeclSyntaxNodeFactory::makeBlankClassPropertyList(RefCountPtr<SyntaxArena> arena)
+ClassPropertyListSyntax
+DeclSyntaxNodeFactory::makeBlankClassPropertyList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassPropertyList, {},
@@ -621,7 +657,8 @@ ClassPropertyListSyntax DeclSyntaxNodeFactory::makeBlankClassPropertyList(RefCou
    return make<ClassPropertyListSyntax>(target);
 }
 
-ClassConstListSyntax DeclSyntaxNodeFactory::makeBlankClassConstList(RefCountPtr<SyntaxArena> arena)
+ClassConstListSyntax
+DeclSyntaxNodeFactory::makeBlankClassConstList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassConstList, {},
@@ -629,7 +666,8 @@ ClassConstListSyntax DeclSyntaxNodeFactory::makeBlankClassConstList(RefCountPtr<
    return make<ClassConstListSyntax>(target);
 }
 
-ClassTraitAdaptationListSyntax DeclSyntaxNodeFactory::makeBlankClassTraitAdaptationList(RefCountPtr<SyntaxArena> arena)
+ClassTraitAdaptationListSyntax
+DeclSyntaxNodeFactory::makeBlankClassTraitAdaptationList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassTraitAdaptationList, {},
@@ -637,7 +675,8 @@ ClassTraitAdaptationListSyntax DeclSyntaxNodeFactory::makeBlankClassTraitAdaptat
    return make<ClassTraitAdaptationListSyntax>(target);
 }
 
-ReservedNonModifierSyntax DeclSyntaxNodeFactory::makeBlankReservedNonModifier(RefCountPtr<SyntaxArena> arena)
+ReservedNonModifierSyntax
+DeclSyntaxNodeFactory::makeBlankReservedNonModifier(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ReservedNonModifier, {
@@ -647,7 +686,8 @@ ReservedNonModifierSyntax DeclSyntaxNodeFactory::makeBlankReservedNonModifier(Re
    return make<ReservedNonModifierSyntax>(target);
 }
 
-SemiReservedSytnax DeclSyntaxNodeFactory::makeBlankSemiReserved(RefCountPtr<SyntaxArena> arena)
+SemiReservedSytnax
+DeclSyntaxNodeFactory::makeBlankSemiReserved(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::SemiReserved, {
@@ -657,7 +697,8 @@ SemiReservedSytnax DeclSyntaxNodeFactory::makeBlankSemiReserved(RefCountPtr<Synt
    return make<SemiReservedSytnax>(target);
 }
 
-IdentifierSyntax DeclSyntaxNodeFactory::makeBlankIdentifier( RefCountPtr<SyntaxArena> arena)
+IdentifierSyntax
+DeclSyntaxNodeFactory::makeBlankIdentifier( RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::Identifier, {
@@ -667,7 +708,8 @@ IdentifierSyntax DeclSyntaxNodeFactory::makeBlankIdentifier( RefCountPtr<SyntaxA
    return make<IdentifierSyntax>(target);
 }
 
-NamespaceNameSyntax DeclSyntaxNodeFactory::makeBlankNamespacePart(RefCountPtr<SyntaxArena> arena)
+NamespaceNameSyntax
+DeclSyntaxNodeFactory::makeBlankNamespacePart(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::NamespaceName, {
@@ -678,7 +720,8 @@ NamespaceNameSyntax DeclSyntaxNodeFactory::makeBlankNamespacePart(RefCountPtr<Sy
    return make<NamespaceNameSyntax>(target);
 }
 
-NameSyntax DeclSyntaxNodeFactory::makeBlankName(RefCountPtr<SyntaxArena> arena)
+NameSyntax
+DeclSyntaxNodeFactory::makeBlankName(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::Name, {
@@ -690,7 +733,8 @@ NameSyntax DeclSyntaxNodeFactory::makeBlankName(RefCountPtr<SyntaxArena> arena)
    return make<NameSyntax>(target);
 }
 
-NameListItemSyntax DeclSyntaxNodeFactory::makeBlankNameListItem(RefCountPtr<SyntaxArena> arena)
+NameListItemSyntax
+DeclSyntaxNodeFactory::makeBlankNameListItem(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::NameListItem, {
@@ -701,7 +745,8 @@ NameListItemSyntax DeclSyntaxNodeFactory::makeBlankNameListItem(RefCountPtr<Synt
    return make<NameListItemSyntax>(target);
 }
 
-InitializerClauseSyntax DeclSyntaxNodeFactory::makeBlankInitializerClause(RefCountPtr<SyntaxArena> arena)
+InitializerClauseSyntax
+DeclSyntaxNodeFactory::makeBlankInitializerClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::InitializerClause, {
@@ -712,7 +757,8 @@ InitializerClauseSyntax DeclSyntaxNodeFactory::makeBlankInitializerClause(RefCou
    return make<InitializerClauseSyntax>(target);
 }
 
-TypeClauseSyntax DeclSyntaxNodeFactory::makeBlankTypeClause(RefCountPtr<SyntaxArena> arena)
+TypeClauseSyntax
+DeclSyntaxNodeFactory::makeBlankTypeClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::TypeClause, {
@@ -722,7 +768,8 @@ TypeClauseSyntax DeclSyntaxNodeFactory::makeBlankTypeClause(RefCountPtr<SyntaxAr
    return make<TypeClauseSyntax>(target);
 }
 
-TypeExprClauseSyntax DeclSyntaxNodeFactory::makeBlankTypeExprClause(RefCountPtr<SyntaxArena> arena)
+TypeExprClauseSyntax
+DeclSyntaxNodeFactory::makeBlankTypeExprClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::TypeExprClause, {
@@ -733,7 +780,8 @@ TypeExprClauseSyntax DeclSyntaxNodeFactory::makeBlankTypeExprClause(RefCountPtr<
    return make<TypeExprClauseSyntax>(target);
 }
 
-ReturnTypeClauseSyntax DeclSyntaxNodeFactory::makeBlankReturnTypeClause(RefCountPtr<SyntaxArena> arena)
+ReturnTypeClauseSyntax
+DeclSyntaxNodeFactory::makeBlankReturnTypeClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ReturnTypeClause, {
@@ -744,7 +792,8 @@ ReturnTypeClauseSyntax DeclSyntaxNodeFactory::makeBlankReturnTypeClause(RefCount
    return make<ReturnTypeClauseSyntax>(target);
 }
 
-ParameterSyntax DeclSyntaxNodeFactory::makeBlankParameter(RefCountPtr<SyntaxArena> arena)
+ParameterSyntax
+DeclSyntaxNodeFactory::makeBlankParameter(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::Parameter, {
@@ -758,7 +807,8 @@ ParameterSyntax DeclSyntaxNodeFactory::makeBlankParameter(RefCountPtr<SyntaxAren
    return make<ParameterSyntax>(target);
 }
 
-ParameterListItemSyntax DeclSyntaxNodeFactory::makeBlankParameterListItem(RefCountPtr<SyntaxArena> arena)
+ParameterListItemSyntax
+DeclSyntaxNodeFactory::makeBlankParameterListItem(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::Parameter, {
@@ -769,7 +819,8 @@ ParameterListItemSyntax DeclSyntaxNodeFactory::makeBlankParameterListItem(RefCou
    return make<ParameterListItemSyntax>(target);
 }
 
-ParameterClauseSyntax DeclSyntaxNodeFactory::makeBlankParameterClause(RefCountPtr<SyntaxArena> arena)
+ParameterClauseSyntax
+DeclSyntaxNodeFactory::makeBlankParameterClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ParameterListClause, {
@@ -781,8 +832,8 @@ ParameterClauseSyntax DeclSyntaxNodeFactory::makeBlankParameterClause(RefCountPt
    return make<ParameterClauseSyntax>(target);
 }
 
-
-FunctionDefinitionSyntax DeclSyntaxNodeFactory::makeBlankFunctionDefinition(RefCountPtr<SyntaxArena> arena)
+FunctionDefinitionSyntax
+DeclSyntaxNodeFactory::makeBlankFunctionDefinition(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::FunctionDefinition, {
@@ -797,7 +848,8 @@ FunctionDefinitionSyntax DeclSyntaxNodeFactory::makeBlankFunctionDefinition(RefC
    return make<FunctionDefinitionSyntax>(target);
 }
 
-ClassModifierSyntax DeclSyntaxNodeFactory::makeBlankClassModifier(RefCountPtr<SyntaxArena> arena)
+ClassModifierSyntax
+DeclSyntaxNodeFactory::makeBlankClassModifier(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassModifier, {
@@ -807,7 +859,8 @@ ClassModifierSyntax DeclSyntaxNodeFactory::makeBlankClassModifier(RefCountPtr<Sy
    return make<ClassModifierSyntax>(target);
 }
 
-ExtendsFromClauseSyntax DeclSyntaxNodeFactory::makeBlankExtendsFromClause(RefCountPtr<SyntaxArena> arena)
+ExtendsFromClauseSyntax
+DeclSyntaxNodeFactory::makeBlankExtendsFromClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ExtendsFromClause, {
@@ -818,7 +871,8 @@ ExtendsFromClauseSyntax DeclSyntaxNodeFactory::makeBlankExtendsFromClause(RefCou
    return make<ExtendsFromClauseSyntax>(target);
 }
 
-ImplementsClauseSyntax DeclSyntaxNodeFactory::makeBlankImplementsClause(RefCountPtr<SyntaxArena> arena)
+ImplementsClauseSyntax
+DeclSyntaxNodeFactory::makeBlankImplementsClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ImplementsClause, {
@@ -829,7 +883,8 @@ ImplementsClauseSyntax DeclSyntaxNodeFactory::makeBlankImplementsClause(RefCount
    return make<ImplementsClauseSyntax>(target);
 }
 
-InterfaceExtendsClauseSyntax DeclSyntaxNodeFactory::makeBlankInterfaceExtendsClause(RefCountPtr<SyntaxArena> arena)
+InterfaceExtendsClauseSyntax
+DeclSyntaxNodeFactory::makeBlankInterfaceExtendsClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::InterfaceExtendsClause, {
@@ -840,7 +895,8 @@ InterfaceExtendsClauseSyntax DeclSyntaxNodeFactory::makeBlankInterfaceExtendsCla
    return make<InterfaceExtendsClauseSyntax>(target);
 }
 
-ClassPropertyClauseSyntax DeclSyntaxNodeFactory::makeBlankClassPropertyClause(RefCountPtr<SyntaxArena> arena)
+ClassPropertyClauseSyntax
+DeclSyntaxNodeFactory::makeBlankClassPropertyClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassPropertyClause, {
@@ -851,7 +907,20 @@ ClassPropertyClauseSyntax DeclSyntaxNodeFactory::makeBlankClassPropertyClause(Re
    return make<ClassPropertyClauseSyntax>(target);
 }
 
-ClassConstClauseSyntax DeclSyntaxNodeFactory::makeBlankClassConstClause(RefCountPtr<SyntaxArena> arena)
+ClassPropertyListItemSyntax
+DeclSyntaxNodeFactory::makeBlankClassPropertyListItemSyntax(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ClassPropertyListItem, {
+               nullptr, // Initializer
+               RawSyntax::missing(SyntaxKind::ClassPropertyClause), // Property
+            },
+            SourcePresence::Present, arena);
+   return make<ClassPropertyListItemSyntax>(target);
+}
+
+ClassConstClauseSyntax
+DeclSyntaxNodeFactory::makeBlankClassConstClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassConstClause, {
@@ -874,7 +943,8 @@ DeclSyntaxNodeFactory::makeBlankClassConstListItem(RefCountPtr<SyntaxArena> aren
    return make<ClassConstListItemSyntax>(target);
 }
 
-MemberModifierSyntax DeclSyntaxNodeFactory::makeBlankMemberModifier(RefCountPtr<SyntaxArena> arena)
+MemberModifierSyntax
+DeclSyntaxNodeFactory::makeBlankMemberModifier(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::MemberModifier, {
@@ -884,7 +954,8 @@ MemberModifierSyntax DeclSyntaxNodeFactory::makeBlankMemberModifier(RefCountPtr<
    return make<MemberModifierSyntax>(target);
 }
 
-ClassPropertyDeclSyntax DeclSyntaxNodeFactory::makeBlankClassPropertyDecl(RefCountPtr<SyntaxArena> arena)
+ClassPropertyDeclSyntax
+DeclSyntaxNodeFactory::makeBlankClassPropertyDecl(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassPropertyDecl, {
@@ -896,7 +967,8 @@ ClassPropertyDeclSyntax DeclSyntaxNodeFactory::makeBlankClassPropertyDecl(RefCou
    return make<ClassPropertyDeclSyntax>(target);
 }
 
-ClassConstDeclSyntax DeclSyntaxNodeFactory::makeBlankClassConstDecl(RefCountPtr<SyntaxArena> arena)
+ClassConstDeclSyntax
+DeclSyntaxNodeFactory::makeBlankClassConstDecl(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassConstDecl, {
@@ -908,7 +980,19 @@ ClassConstDeclSyntax DeclSyntaxNodeFactory::makeBlankClassConstDecl(RefCountPtr<
    return make<ClassConstDeclSyntax>(target);
 }
 
-ClassMethodDeclSyntax DeclSyntaxNodeFactory::makeBlankClassMethodDecl(RefCountPtr<SyntaxArena> arena)
+ClassMethodDeclSyntax
+DeclSyntaxNodeFactory::makeBlankMethodCodeBlock(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::MethodCodeBlock, {
+               RawSyntax::missing(SyntaxKind::Unknown), // Block
+            },
+            SourcePresence::Present, arena);
+   return make<ClassMethodDeclSyntax>(target);
+}
+
+ClassMethodDeclSyntax
+DeclSyntaxNodeFactory::makeBlankClassMethodDecl(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassConstDecl, {
@@ -924,7 +1008,8 @@ ClassMethodDeclSyntax DeclSyntaxNodeFactory::makeBlankClassMethodDecl(RefCountPt
    return make<ClassMethodDeclSyntax>(target);
 }
 
-ClassTraitMethodReferenceSyntax DeclSyntaxNodeFactory::makeBlankClassTraitMethodReference(RefCountPtr<SyntaxArena> arena)
+ClassTraitMethodReferenceSyntax
+DeclSyntaxNodeFactory::makeBlankClassTraitMethodReference(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassTraitMethodReference, {
@@ -934,7 +1019,8 @@ ClassTraitMethodReferenceSyntax DeclSyntaxNodeFactory::makeBlankClassTraitMethod
    return make<ClassTraitMethodReferenceSyntax>(target);
 }
 
-ClassAbsoluteTraitMethodReferenceSyntax DeclSyntaxNodeFactory::makeBlankClassAbsoluteTraitMethodReference(RefCountPtr<SyntaxArena> arena)
+ClassAbsoluteTraitMethodReferenceSyntax
+DeclSyntaxNodeFactory::makeBlankClassAbsoluteTraitMethodReference(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassAbsoluteTraitMethodReference, {
@@ -946,7 +1032,8 @@ ClassAbsoluteTraitMethodReferenceSyntax DeclSyntaxNodeFactory::makeBlankClassAbs
    return make<ClassAbsoluteTraitMethodReferenceSyntax>(target);
 }
 
-ClassTraitPrecedenceSyntax DeclSyntaxNodeFactory::makeBlankClassTraitPrecedence(RefCountPtr<SyntaxArena> arena)
+ClassTraitPrecedenceSyntax
+DeclSyntaxNodeFactory::makeBlankClassTraitPrecedence(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassTraitPrecedence, {
@@ -958,7 +1045,8 @@ ClassTraitPrecedenceSyntax DeclSyntaxNodeFactory::makeBlankClassTraitPrecedence(
    return make<ClassTraitPrecedenceSyntax>(target);
 }
 
-ClassTraitAliasSyntax DeclSyntaxNodeFactory::makeBlankClassTraitAlias(RefCountPtr<SyntaxArena> arena)
+ClassTraitAliasSyntax
+DeclSyntaxNodeFactory::makeBlankClassTraitAlias(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassTraitAlias, {
@@ -971,7 +1059,8 @@ ClassTraitAliasSyntax DeclSyntaxNodeFactory::makeBlankClassTraitAlias(RefCountPt
    return make<ClassTraitAliasSyntax>(target);
 }
 
-ClassTraitAdaptationSyntax DeclSyntaxNodeFactory::makeBlankClassTraitAdaptation(RefCountPtr<SyntaxArena> arena)
+ClassTraitAdaptationSyntax
+DeclSyntaxNodeFactory::makeBlankClassTraitAdaptation(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassTraitAdaptation, {
@@ -982,7 +1071,8 @@ ClassTraitAdaptationSyntax DeclSyntaxNodeFactory::makeBlankClassTraitAdaptation(
    return make<ClassTraitAdaptationSyntax>(target);
 }
 
-ClassTraitAdaptationBlockSyntax DeclSyntaxNodeFactory::makeBlankClassTraitAdaptationBlock(RefCountPtr<SyntaxArena> arena)
+ClassTraitAdaptationBlockSyntax
+DeclSyntaxNodeFactory::makeBlankClassTraitAdaptationBlock(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassTraitAdaptationBlock, {
@@ -994,7 +1084,8 @@ ClassTraitAdaptationBlockSyntax DeclSyntaxNodeFactory::makeBlankClassTraitAdapta
    return make<ClassTraitAdaptationBlockSyntax>(target);
 }
 
-ClassTraitDeclSyntax DeclSyntaxNodeFactory::makeBlankClassTraitDecl(RefCountPtr<SyntaxArena> arena)
+ClassTraitDeclSyntax
+DeclSyntaxNodeFactory::makeBlankClassTraitDecl(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassTraitDecl, {
@@ -1006,7 +1097,8 @@ ClassTraitDeclSyntax DeclSyntaxNodeFactory::makeBlankClassTraitDecl(RefCountPtr<
    return make<ClassTraitDeclSyntax>(target);
 }
 
-MemberDeclListItemSyntax DeclSyntaxNodeFactory::makeBlankMemberDeclListItem(RefCountPtr<SyntaxArena> arena)
+MemberDeclListItemSyntax
+DeclSyntaxNodeFactory::makeBlankMemberDeclListItem(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::MemberDeclListItem, {
@@ -1017,7 +1109,8 @@ MemberDeclListItemSyntax DeclSyntaxNodeFactory::makeBlankMemberDeclListItem(RefC
    return make<MemberDeclListItemSyntax>(target);
 }
 
-MemberDeclBlockSyntax DeclSyntaxNodeFactory::makeBlankMemberDeclBlock(RefCountPtr<SyntaxArena> arena)
+MemberDeclBlockSyntax
+DeclSyntaxNodeFactory::makeBlankMemberDeclBlock(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::MemberDeclBlock, {
@@ -1029,7 +1122,8 @@ MemberDeclBlockSyntax DeclSyntaxNodeFactory::makeBlankMemberDeclBlock(RefCountPt
    return make<MemberDeclBlockSyntax>(target);
 }
 
-ClassDefinitionSyntax DeclSyntaxNodeFactory::makeBlankClassDefinition(RefCountPtr<SyntaxArena> arena)
+ClassDefinitionSyntax
+DeclSyntaxNodeFactory::makeBlankClassDefinition(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassDefinition, {
@@ -1044,7 +1138,8 @@ ClassDefinitionSyntax DeclSyntaxNodeFactory::makeBlankClassDefinition(RefCountPt
    return make<ClassDefinitionSyntax>(target);
 }
 
-TraitDefinitionSyntax DeclSyntaxNodeFactory::makeBlankTraitDefinition(RefCountPtr<SyntaxArena> arena)
+TraitDefinitionSyntax
+DeclSyntaxNodeFactory::makeBlankTraitDefinition(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::TraitDefinition, {
@@ -1057,7 +1152,8 @@ TraitDefinitionSyntax DeclSyntaxNodeFactory::makeBlankTraitDefinition(RefCountPt
    return make<TraitDefinitionSyntax>(target);
 }
 
-SourceFileSyntax DeclSyntaxNodeFactory::makeBlankSourceFile(RefCountPtr<SyntaxArena> arena)
+SourceFileSyntax
+DeclSyntaxNodeFactory::makeBlankSourceFile(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::SourceFile, {

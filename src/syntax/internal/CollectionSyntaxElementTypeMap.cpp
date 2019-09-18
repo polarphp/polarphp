@@ -26,7 +26,7 @@ static const std::unordered_map<SyntaxKind, std::set<SyntaxKind>> scg_collection
     { SyntaxKind::ClassModifierList, { SyntaxKind::ClassModifier }},
     { SyntaxKind::MemberDeclList, { SyntaxKind::MemberDeclListItem }},
     { SyntaxKind::MemberModifierList, { SyntaxKind::MemberModifier }},
-    { SyntaxKind::ClassPropertyList, { SyntaxKind::ClassPropertyClause }},
+    { SyntaxKind::ClassPropertyList, { SyntaxKind::ClassPropertyListItem }},
     { SyntaxKind::ClassConstList, { SyntaxKind::ClassConstListItem }},
     { SyntaxKind::ClassTraitAdaptationList, { SyntaxKind::ClassTraitAdaptation }},
 

@@ -36,11 +36,13 @@ class ExtendsFromClauseSyntax;
 class ImplementsClauseSyntax;
 class InterfaceExtendsClauseSyntax;
 class ClassPropertyClauseSyntax;
+class ClassPropertyListItemSyntax;
 class ClassConstClauseSyntax;
 class ClassConstListItemSyntax;
 class MemberModifierSyntax;
 class ClassPropertyDeclSyntax;
 class ClassConstDeclSyntax;
+class MethodCodeBlockSyntax;
 class ClassMethodDeclSyntax;
 class ClassTraitMethodReferenceSyntax;
 class ClassAbsoluteTraitMethodReferenceSyntax;
@@ -121,7 +123,7 @@ using MemberModifierListSyntax = SyntaxCollection<SyntaxKind::MemberModifierList
 ///   property_list ',' property
 /// | property
 ///
-using ClassPropertyListSyntax = SyntaxCollection<SyntaxKind::ClassPropertyList, ClassPropertyClauseSyntax>;
+using ClassPropertyListSyntax = SyntaxCollection<SyntaxKind::ClassPropertyList, ClassPropertyListItemSyntax>;
 
 ///
 /// type: SyntaxCollection

@@ -53,10 +53,12 @@ enum class SyntaxKind : std::uint32_t
    InterfaceExtendsClause,
    ExtendsFromClause,
    ClassPropertyClause,
+   ClassPropertyListItem,
    ClassConstClause,
    ClassConstListItem,
    ClassPropertyDecl,
    ClassConstDecl,
+   MethodCodeBlock,
    ClassMethodDecl,
    /// class traint use clauses
    ClassTraitMethodReference,
