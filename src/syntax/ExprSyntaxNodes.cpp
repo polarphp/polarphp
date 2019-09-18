@@ -2585,13 +2585,13 @@ ParameterClauseSyntax ClassicLambdaExprSyntax::getParameterListClause()
    return ParameterClauseSyntax {m_root, m_data->getChild(Cursor::ParameterListClause).get()};
 }
 
-std::optional<UseLexicalVarClauseSyntax> ClassicLambdaExprSyntax::getLexicalVarsClause()
+std::optional<UseLexicalVariableClauseSyntax> ClassicLambdaExprSyntax::getLexicalVarsClause()
 {
    RefCountPtr<SyntaxData> lexicalVarsData = m_data->getChild(Cursor::LexicalVarsClause);
    if (!lexicalVarsData) {
       return std::nullopt;
    }
-   return UseLexicalVarClauseSyntax {m_root, lexicalVarsData.get()};
+   return UseLexicalVariableClauseSyntax {m_root, lexicalVarsData.get()};
 }
 
 std::optional<ReturnTypeClauseSyntax> ClassicLambdaExprSyntax::getReturnType()
@@ -2645,7 +2645,7 @@ ClassicLambdaExprSyntax::withParameterListClause(std::optional<ParameterClauseSy
 }
 
 ClassicLambdaExprSyntax
-ClassicLambdaExprSyntax::withLexicalVarsClause(std::optional<UseLexicalVarClauseSyntax> lexicalVars)
+ClassicLambdaExprSyntax::withLexicalVarsClause(std::optional<UseLexicalVariableClauseSyntax> lexicalVars)
 {
    RefCountPtr<RawSyntax> lexicalVarsRaw;
    if (lexicalVars.has_value()) {
@@ -6084,16 +6084,16 @@ ShellCmdExprSyntax ShellCmdExprSyntax::withRightBacktick(std::optional<TokenSynt
 }
 
 ///
-/// UseLexicalVarClauseSyntax
+/// UseLexicalVariableClauseSyntax
 ///
-void UseLexicalVarClauseSyntax::validate()
+void UseLexicalVariableClauseSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().size() == UseLexicalVarClauseSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().size() == UseLexicalVariableClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, UseToken, std::set{TokenKindType::T_USE});
    syntax_assert_child_token(raw, LeftParenToken, std::set{TokenKindType::T_LEFT_PAREN});
    syntax_assert_child_kind(raw, LexicalVars, std::set{SyntaxKind::LexicalVarList});
@@ -6101,28 +6101,28 @@ void UseLexicalVarClauseSyntax::validate()
 #endif
 }
 
-TokenSyntax UseLexicalVarClauseSyntax::getUseToken()
+TokenSyntax UseLexicalVariableClauseSyntax::getUseToken()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::UseToken).get()};
 }
 
-TokenSyntax UseLexicalVarClauseSyntax::getLeftParenToken()
+TokenSyntax UseLexicalVariableClauseSyntax::getLeftParenToken()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParenToken).get()};
 }
 
-LexicalVarListSyntax UseLexicalVarClauseSyntax::getLexicalVars()
+LexicalVariableListSyntax UseLexicalVariableClauseSyntax::getLexicalVars()
 {
-   return LexicalVarListSyntax {m_root, m_data->getChild(Cursor::LexicalVars).get()};
+   return LexicalVariableListSyntax {m_root, m_data->getChild(Cursor::LexicalVars).get()};
 }
 
-TokenSyntax UseLexicalVarClauseSyntax::getRightParenToken()
+TokenSyntax UseLexicalVariableClauseSyntax::getRightParenToken()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::RightParenToken).get()};
 }
 
-UseLexicalVarClauseSyntax
-UseLexicalVarClauseSyntax::withUseToken(std::optional<TokenSyntax> useToken)
+UseLexicalVariableClauseSyntax
+UseLexicalVariableClauseSyntax::withUseToken(std::optional<TokenSyntax> useToken)
 {
    RefCountPtr<RawSyntax> useTokenRaw;
    if (useToken.has_value()) {
@@ -6130,11 +6130,11 @@ UseLexicalVarClauseSyntax::withUseToken(std::optional<TokenSyntax> useToken)
    } else {
       useTokenRaw = make_missing_token(T_USE);
    }
-   return m_data->replaceChild<UseLexicalVarClauseSyntax>(useTokenRaw, Cursor::UseToken);
+   return m_data->replaceChild<UseLexicalVariableClauseSyntax>(useTokenRaw, Cursor::UseToken);
 }
 
-UseLexicalVarClauseSyntax
-UseLexicalVarClauseSyntax::withLeftParenToken(std::optional<TokenSyntax> leftParen)
+UseLexicalVariableClauseSyntax
+UseLexicalVariableClauseSyntax::withLeftParenToken(std::optional<TokenSyntax> leftParen)
 {
    RefCountPtr<RawSyntax> leftParenRaw;
    if (leftParen.has_value()) {
@@ -6142,11 +6142,11 @@ UseLexicalVarClauseSyntax::withLeftParenToken(std::optional<TokenSyntax> leftPar
    } else {
       leftParenRaw = make_missing_token(T_LEFT_PAREN);
    }
-   return m_data->replaceChild<UseLexicalVarClauseSyntax>(leftParenRaw, Cursor::UseToken);
+   return m_data->replaceChild<UseLexicalVariableClauseSyntax>(leftParenRaw, Cursor::UseToken);
 }
 
-UseLexicalVarClauseSyntax
-UseLexicalVarClauseSyntax::withLexicalVars(std::optional<LexicalVarListSyntax> lexicalVars)
+UseLexicalVariableClauseSyntax
+UseLexicalVariableClauseSyntax::withLexicalVars(std::optional<LexicalVariableListSyntax> lexicalVars)
 {
    RefCountPtr<RawSyntax> lexicalVarsRaw;
    if (lexicalVars.has_value()) {
@@ -6154,11 +6154,11 @@ UseLexicalVarClauseSyntax::withLexicalVars(std::optional<LexicalVarListSyntax> l
    } else {
       lexicalVarsRaw = RawSyntax::missing(SyntaxKind::LexicalVarList);
    }
-   return m_data->replaceChild<UseLexicalVarClauseSyntax>(lexicalVarsRaw, Cursor::LexicalVars);
+   return m_data->replaceChild<UseLexicalVariableClauseSyntax>(lexicalVarsRaw, Cursor::LexicalVars);
 }
 
-UseLexicalVarClauseSyntax
-UseLexicalVarClauseSyntax::withRightParenToken(std::optional<TokenSyntax> rightParen)
+UseLexicalVariableClauseSyntax
+UseLexicalVariableClauseSyntax::withRightParenToken(std::optional<TokenSyntax> rightParen)
 {
    RefCountPtr<RawSyntax> rightParenRaw;
    if (rightParen.has_value()) {
@@ -6166,7 +6166,7 @@ UseLexicalVarClauseSyntax::withRightParenToken(std::optional<TokenSyntax> rightP
    } else {
       rightParenRaw = make_missing_token(T_RIGHT_PAREN);
    }
-   return m_data->replaceChild<UseLexicalVarClauseSyntax>(rightParenRaw, Cursor::UseToken);
+   return m_data->replaceChild<UseLexicalVariableClauseSyntax>(rightParenRaw, Cursor::UseToken);
 }
 
 ///

@@ -35,7 +35,7 @@ ExprSyntaxNodeFactory::makeExprList(const std::vector<ExprListItemSyntax> elemen
    return make<ExprListSyntax>(target);
 }
 
-LexicalVarListSyntax
+LexicalVariableListSyntax
 ExprSyntaxNodeFactory::makeLexicalVariableList(const std::vector<LexicalVariableListItemSyntax> elements,
                                                RefCountPtr<SyntaxArena> arena)
 {
@@ -47,7 +47,7 @@ ExprSyntaxNodeFactory::makeLexicalVariableList(const std::vector<LexicalVariable
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::LexicalVarList, layout, SourcePresence::Present,
             arena);
-   return make<LexicalVarListSyntax>(target);
+   return make<LexicalVariableListSyntax>(target);
 }
 
 ArrayPairListSyntax
@@ -621,7 +621,7 @@ ExprSyntaxNodeFactory::makeAnonymousInstanceCreateExpr(
 
 ClassicLambdaExprSyntax
 ExprSyntaxNodeFactory::makeClassicLambdaExpr(TokenSyntax funcToken, std::optional<TokenSyntax> returnRefToken,
-                                             ParameterClauseSyntax parameterListClause, std::optional<UseLexicalVarClauseSyntax> lexicalVarsClause,
+                                             ParameterClauseSyntax parameterListClause, std::optional<UseLexicalVariableClauseSyntax> lexicalVarsClause,
                                              std::optional<ReturnTypeClauseSyntax> returnType, InnerCodeBlockStmtSyntax body,
                                              RefCountPtr<SyntaxArena> arena)
 {
@@ -1304,9 +1304,9 @@ ExprSyntaxNodeFactory::makeShellCmdExpr(TokenSyntax leftBacktick, BackticksClaus
    return make<ShellCmdExprSyntax>(target);
 }
 
-UseLexicalVarClauseSyntax
-ExprSyntaxNodeFactory::makeUseLexicalVarClause(TokenSyntax useToken, TokenSyntax leftParen,
-                                               LexicalVarListSyntax lexicalVars, TokenSyntax rightParen,
+UseLexicalVariableClauseSyntax
+ExprSyntaxNodeFactory::makeUseLexicalVariableClause(TokenSyntax useToken, TokenSyntax leftParen,
+                                               LexicalVariableListSyntax lexicalVars, TokenSyntax rightParen,
                                                RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -1316,24 +1316,24 @@ ExprSyntaxNodeFactory::makeUseLexicalVarClause(TokenSyntax useToken, TokenSyntax
                lexicalVars.getRaw(),
                rightParen.getRaw(),
             }, SourcePresence::Present, arena);
-   return make<UseLexicalVarClauseSyntax>(target);
+   return make<UseLexicalVariableClauseSyntax>(target);
 }
 
 LexicalVariableSyntax
-ExprSyntaxNodeFactory::makeLexicalVariable(TokenSyntax referenceToken, TokenSyntax variable,
+ExprSyntaxNodeFactory::makeLexicalVariable(std::optional<TokenSyntax> referenceToken, TokenSyntax variable,
                                            RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::LexicalVariable, {
-               referenceToken.getRaw(),
+               referenceToken.has_value() ? referenceToken->getRaw() : nullptr,
                variable.getRaw(),
             }, SourcePresence::Present, arena);
    return make<LexicalVariableSyntax>(target);
 }
 
 LexicalVariableListItemSyntax
-ExprSyntaxNodeFactory::makeLexicalVariable(std::optional<TokenSyntax> comma, LexicalVariableSyntax variable,
-                                           RefCountPtr<SyntaxArena> arena)
+ExprSyntaxNodeFactory::makeLexicalVariableListItem(std::optional<TokenSyntax> comma, LexicalVariableSyntax variable,
+                                                   RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::LexicalVariableListItem, {
@@ -1353,13 +1353,13 @@ ExprSyntaxNodeFactory::makeBlankExprList(RefCountPtr<SyntaxArena> arena)
    return make<ExprListSyntax>(target);
 }
 
-LexicalVarListSyntax
+LexicalVariableListSyntax
 ExprSyntaxNodeFactory::makeBlankLexicalVarList(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::LexicalVarList, {},
             SourcePresence::Present, arena);
-   return make<LexicalVarListSyntax>(target);
+   return make<LexicalVariableListSyntax>(target);
 }
 
 ArrayPairListSyntax
@@ -2488,8 +2488,8 @@ ExprSyntaxNodeFactory::makeBlankShellCmdExpr(RefCountPtr<SyntaxArena> arena)
    return make<ShellCmdExprSyntax>(target);
 }
 
-UseLexicalVarClauseSyntax
-ExprSyntaxNodeFactory::makeBlankUseLexicalVarClause(RefCountPtr<SyntaxArena> arena)
+UseLexicalVariableClauseSyntax
+ExprSyntaxNodeFactory::makeBlankUseLexicalVariableClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::UseLexicalVarClause, {
@@ -2498,7 +2498,7 @@ ExprSyntaxNodeFactory::makeBlankUseLexicalVarClause(RefCountPtr<SyntaxArena> are
                RawSyntax::missing(SyntaxKind::LexicalVarList), // LexicalVars
                make_missing_token(T_RIGHT_PAREN), // RightParenToken
             }, SourcePresence::Present, arena);
-   return make<UseLexicalVarClauseSyntax>(target);
+   return make<UseLexicalVariableClauseSyntax>(target);
 }
 
 LexicalVariableSyntax

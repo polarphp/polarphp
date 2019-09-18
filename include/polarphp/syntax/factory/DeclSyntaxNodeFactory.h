@@ -60,7 +60,7 @@ public:
                                         std::optional<TokenSyntax> variadicMark, TokenSyntax variable,
                                         std::optional<InitializerClauseSyntax> initializer, RefCountPtr<SyntaxArena> arena = nullptr);
    static ParameterListItemSyntax makeParameterListItem(std::optional<TokenSyntax> comma, ParameterSyntax param, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ParameterClauseSyntax makeParameterClause(TokenSyntax leftParen, ParameterListSyntax parameters, TokenSyntax rightParen,
+   static ParameterClauseSyntax makeParameterClause(TokenSyntax leftParen, std::optional<ParameterListSyntax> parameters, TokenSyntax rightParen,
                                                     RefCountPtr<SyntaxArena> arena = nullptr);
    static FunctionDefinitionSyntax makeFunctionDefinition(TokenSyntax funcToken, std::optional<TokenSyntax> returnRefToken,
                                                           TokenSyntax funcName, ParameterClauseSyntax parameterListClause,

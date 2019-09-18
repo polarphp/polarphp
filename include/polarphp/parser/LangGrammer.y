@@ -1523,7 +1523,7 @@ echo_expr:
 
 for_exprs:
    %empty {
-      
+
    }
 |  non_empty_for_exprs {
 
@@ -2085,12 +2085,12 @@ expr:
       $$ = yieldFromExpr.getRaw();
    }
 |  inline_function {
-      LambdaExprSyntax lambdaExpr = make_expr(LambdaExpr, std::nullopt, make<LambdaExprSyntax>($1));
+      LambdaExprSyntax lambdaExpr = make_expr(LambdaExpr, std::nullopt, make<ExprSyntax>($1));
       $$ = lambdaExpr.getRaw();
    }
 |  T_STATIC inline_function {
       TokenSyntax staticKeyword = make_token(StaticKeyword);
-      LambdaExprSyntax lambdaExpr = make_expr(LambdaExpr, staticKeyword, make<LambdaExprSyntax>($2));
+      LambdaExprSyntax lambdaExpr = make_expr(LambdaExpr, staticKeyword, make<ExprSyntax>($2));
       $$ = lambdaExpr.getRaw();
    }
 ;
@@ -2098,23 +2098,49 @@ expr:
 inline_function:
    function returns_ref backup_doc_comment T_LEFT_PAREN parameter_list T_RIGHT_PAREN lexical_vars return_type
    backup_fn_flags T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE backup_fn_flags {
-
+      TokenSyntax functionKeyword = make<TokenSyntax>($1);
+      std::optional<TokenSyntax> returnRef = $2 ? std::optional(make<TokenSyntax>($2)) : std::nullopt;
+      TokenSyntax leftParenToken = make_token(LeftParenToken);
+      std::optional<ParameterListSyntax> params = $5 ? std::optional(make<ParameterListSyntax>($5)) : std::nullopt;
+      TokenSyntax rightParenToken = make_token(RightParenToken);
+      ParameterClauseSyntax paramsClause = make_decl(ParameterClause, leftParenToken, params, rightParenToken);
+      std::optional<UseLexicalVariableClauseSyntax> lexicalVarClause = $7 ? std::optional(make<UseLexicalVariableClauseSyntax>($7)) : std::nullopt;
+      std::optional<ReturnTypeClauseSyntax> returnType = $8 ? std::optional(make<ReturnTypeClauseSyntax>($8)) : std::nullopt;
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      InnerStmtListSyntax innerStmtClause = make<InnerStmtListSyntax>($11);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      InnerCodeBlockStmtSyntax innerClodeBlock = make_stmt(InnerCodeBlockStmt, leftBrace, innerStmtClause, rightBrace);
+      ClassicLambdaExprSyntax lambdaExpr = make_expr(
+         ClassicLambdaExpr, functionKeyword, returnRef, paramsClause, lexicalVarClause, returnType, innerClodeBlock);
+      $$ = lambdaExpr.getRaw();
    }
 |  fn returns_ref T_LEFT_PAREN parameter_list T_RIGHT_PAREN return_type backup_doc_comment T_DOUBLE_ARROW
    backup_fn_flags backup_lex_pos expr backup_fn_flags {
-
+      TokenSyntax fnKeyword = make<TokenSyntax>($1);
+      std::optional<TokenSyntax> returnRef = $2 ? std::optional(make<TokenSyntax>($2)) : std::nullopt;
+      TokenSyntax leftParenToken = make_token(LeftParenToken);
+      std::optional<ParameterListSyntax> params = $4 ? std::optional(make<ParameterListSyntax>($4)) : std::nullopt;
+      TokenSyntax rightParenToken = make_token(RightParenToken);
+      ParameterClauseSyntax paramsClause = make_decl(ParameterClause, leftParenToken, params, rightParenToken);
+      std::optional<ReturnTypeClauseSyntax> returnType = $6 ? std::optional(make<ReturnTypeClauseSyntax>($4)) : std::nullopt;
+      TokenSyntax doubleArrowToken = make_token(DoubleArrowToken);
+      ExprSyntax expr = make<ExprSyntax>($11);
+      SimplifiedLambdaExprSyntax lambdaExpr = make_expr(SimplifiedLambdaExpr, fnKeyword, returnRef, paramsClause, returnType, doubleArrowToken, expr);
+      $$ = lambdaExpr.getRaw();
    }
 ;
 
 fn:
    T_FN {
-
+      TokenSyntax fnKeyword = make_token(FnKeyword);
+      $$ = fnKeyword.getRaw();
    }
 ;
 
 function:
    T_FUNCTION {
-
+      TokenSyntax funcKeyword = make_token(FunctionKeyword);
+      $$ = funcKeyword.getRaw();
    }
 ;
 
@@ -2138,52 +2164,99 @@ backup_lex_pos:
 
 returns_ref:
    %empty {
-
+      $$ = nullptr;
    }
 |  T_AMPERSAND {
-
+      TokenSyntax ampersand = make_token(AmpersandToken);
+      $$ = ampersand.getRaw();
    }
 ;
 
 lexical_vars:
    %empty {
-
+      $$ = nullptr;
    }
 |  T_USE T_LEFT_PAREN lexical_var_list T_RIGHT_PAREN {
-
+      TokenSyntax useKeyword = make_token(UseKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      LexicalVariableListSyntax lexicalVarList = make<LexicalVariableListSyntax>($3);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      UseLexicalVariableClauseSyntax useLexicalVarsClause = make_expr(
+         UseLexicalVariableClause, useKeyword, leftParen, lexicalVarList, rightParen
+      );
+      $$ = useLexicalVarsClause.getRaw();
    }
 ;
 
 lexical_var_list:
    lexical_var_list T_COMMA lexical_var {
-
+      LexicalVariableListSyntax list = make<LexicalVariableListSyntax>($1);
+      TokenSyntax comma = make_token(CommaToken);
+      LexicalVariableSyntax lexicalVar = make<LexicalVariableSyntax>($3);
+      LexicalVariableListItemSyntax lexicalVarListItem = make_expr(
+         LexicalVariableListItem, comma, lexicalVar
+      );
+      list.appending(lexicalVarListItem);
+      $$ = list.getRaw();
    }
 |  lexical_var {
-
+      LexicalVariableSyntax lexicalVar = make<LexicalVariableSyntax>($1);
+      LexicalVariableListItemSyntax lexicalVarListItem = make_expr(
+         LexicalVariableListItem, std::nullopt, lexicalVar
+      );
+      std::vector<LexicalVariableListItemSyntax> items{lexicalVarListItem};
+      LexicalVariableListSyntax list = make_expr(LexicalVariableList, items);
+      $$ = list.getRaw();
    }
 ;
 
 lexical_var:
    T_VARIABLE {
-
+      TokenSyntax variableToken = make_token_with_text(Variable, $1);
+      LexicalVariableSyntax lexicalVar = make_expr(LexicalVariable, std::nullopt, variableToken);
+      $$ = lexicalVar.getRaw();
    }
 |  T_AMPERSAND T_VARIABLE {
-
+      TokenSyntax ampersand = make_token(AmpersandToken);
+      TokenSyntax variableToken = make_token_with_text(Variable, $2);
+      LexicalVariableSyntax lexicalVar = make_expr(LexicalVariable, ampersand, variableToken);
+      $$ = lexicalVar.getRaw();
    }
 ;
 
 function_call:
    name argument_list {
-
+      NameSyntax funcName = make<NameSyntax>($1);
+      ArgumentListClauseSyntax argsClause = make<ArgumentListClauseSyntax>($2);
+      SimpleFunctionCallExprSyntax simpleFuncCallExpr = make_expr(SimpleFunctionCallExpr, funcName, argsClause);
+      FunctionCallExprSyntax funcCallExpr = make_expr(FunctionCallExpr, simpleFuncCallExpr);
+      $$ = funcCallExpr.getRaw();
    }
 |  class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list {
-
+      ClassNameClauseSyntax className = make<ClassNameClauseSyntax>($1);
+      TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
+      MemberNameClauseSyntax memberName = make<MemberNameClauseSyntax>($3);
+      ArgumentListClauseSyntax argsClause = make<ArgumentListClauseSyntax>($4);
+      StaticMethodCallExprSyntax staticMemthodCallExpr = make_expr(
+         StaticMethodCallExpr, className, paamayimNekudotayimToken, memberName, argsClause);
+      FunctionCallExprSyntax funcCallExpr = make_expr(FunctionCallExpr, staticMemthodCallExpr);
+      $$ = funcCallExpr.getRaw();
    }
 |  variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list {
-
+      VariableClassNameClauseSyntax className = make<VariableClassNameClauseSyntax>($1);
+      TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
+      MemberNameClauseSyntax memberName = make<MemberNameClauseSyntax>($3);
+      ArgumentListClauseSyntax argsClause = make<ArgumentListClauseSyntax>($4);
+      StaticMethodCallExprSyntax staticMemthodCallExpr = make_expr(
+         StaticMethodCallExpr, className, paamayimNekudotayimToken, memberName, argsClause);
+      FunctionCallExprSyntax funcCallExpr = make_expr(FunctionCallExpr, staticMemthodCallExpr);
+      $$ = funcCallExpr.getRaw();
    }
 |  callable_expr argument_list {
-
+      CallableFuncNameClauseSyntax funcName = make<CallableFuncNameClauseSyntax>($1);
+      ArgumentListClauseSyntax argsClause = make<ArgumentListClauseSyntax>($2);
+      SimpleFunctionCallExprSyntax simpleFuncCallExpr = make_expr(SimpleFunctionCallExpr, funcName, argsClause);
+      $$ = simpleFuncCallExpr.getRaw();
    }
 ;
 

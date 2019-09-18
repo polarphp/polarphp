@@ -760,9 +760,13 @@ TokenSyntax ParameterClauseSyntax::getLeftParen()
    return TokenSyntax {m_root, m_data->getChild(Cursor::LeftParen).get()};
 }
 
-ParameterListSyntax ParameterClauseSyntax::getParameters()
+std::optional<ParameterListSyntax> ParameterClauseSyntax::getParameters()
 {
-   return ParameterListSyntax {m_root, m_data->getChild(Cursor::Parameters).get()};
+   RefCountPtr<SyntaxData> paramsData = m_data->getChild(Cursor::Parameters);
+   if (!paramsData) {
+      return std::nullopt;
+   }
+   return ParameterListSyntax {m_root, paramsData.get()};
 }
 
 TokenSyntax ParameterClauseSyntax::getRightParen()
@@ -787,7 +791,7 @@ ParameterClauseSyntax ParameterClauseSyntax::withParameters(std::optional<Parame
    if (parameters.has_value()) {
       parametersRaw = parameters->getRaw();
    } else {
-      parametersRaw = RawSyntax::missing(SyntaxKind::ParameterList);
+      parametersRaw = nullptr;
    }
    return m_data->replaceChild<ParameterClauseSyntax>(parametersRaw, Cursor::Parameters);
 }

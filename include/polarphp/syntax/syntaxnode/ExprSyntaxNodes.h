@@ -2505,7 +2505,7 @@ public:
       ///
       ParameterListClause,
       ///
-      /// type: UseLexicalVarClauseSyntax
+      /// type: UseLexicalVariableClauseSyntax
       /// optional: true
       ///
       LexicalVarsClause,
@@ -2532,14 +2532,14 @@ public:
    TokenSyntax getFuncToken();
    std::optional<TokenSyntax> getReturnRefToken();
    ParameterClauseSyntax getParameterListClause();
-   std::optional<UseLexicalVarClauseSyntax> getLexicalVarsClause();
+   std::optional<UseLexicalVariableClauseSyntax> getLexicalVarsClause();
    std::optional<ReturnTypeClauseSyntax> getReturnType();
    InnerCodeBlockStmtSyntax getBody();
 
    ClassicLambdaExprSyntax withFuncToken(std::optional<TokenSyntax> funcToken);
    ClassicLambdaExprSyntax withReturnRefToken(std::optional<TokenSyntax> returnRefToken);
    ClassicLambdaExprSyntax withParameterListClause(std::optional<ParameterClauseSyntax> parameterListClause);
-   ClassicLambdaExprSyntax withLexicalVarsClause(std::optional<UseLexicalVarClauseSyntax> lexicalVars);
+   ClassicLambdaExprSyntax withLexicalVarsClause(std::optional<UseLexicalVariableClauseSyntax> lexicalVars);
    ClassicLambdaExprSyntax withReturnType(std::optional<ReturnTypeClauseSyntax> returnType);
    ClassicLambdaExprSyntax withBody(std::optional<InnerCodeBlockStmtSyntax> body);
 
@@ -5768,7 +5768,7 @@ private:
 ///   /* empty */
 /// | T_USE '(' lexical_var_list ')'
 ///
-class UseLexicalVarClauseSyntax final : public Syntax
+class UseLexicalVariableClauseSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 4;
@@ -5786,7 +5786,7 @@ public:
       ///
       LeftParenToken,
       ///
-      /// type: LexicalVarListSyntax
+      /// type: LexicalVariableListSyntax
       /// optional: false
       ///
       LexicalVars,
@@ -5798,7 +5798,7 @@ public:
    };
 
 public:
-   UseLexicalVarClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   UseLexicalVariableClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
@@ -5806,13 +5806,13 @@ public:
 
    TokenSyntax getUseToken();
    TokenSyntax getLeftParenToken();
-   LexicalVarListSyntax getLexicalVars();
+   LexicalVariableListSyntax getLexicalVars();
    TokenSyntax getRightParenToken();
 
-   UseLexicalVarClauseSyntax withUseToken(std::optional<TokenSyntax> useToken);
-   UseLexicalVarClauseSyntax withLeftParenToken(std::optional<TokenSyntax> leftParen);
-   UseLexicalVarClauseSyntax withLexicalVars(std::optional<LexicalVarListSyntax> lexicalVars);
-   UseLexicalVarClauseSyntax withRightParenToken(std::optional<TokenSyntax> rightParen);
+   UseLexicalVariableClauseSyntax withUseToken(std::optional<TokenSyntax> useToken);
+   UseLexicalVariableClauseSyntax withLeftParenToken(std::optional<TokenSyntax> leftParen);
+   UseLexicalVariableClauseSyntax withLexicalVars(std::optional<LexicalVariableListSyntax> lexicalVars);
+   UseLexicalVariableClauseSyntax withRightParenToken(std::optional<TokenSyntax> rightParen);
 
    static bool kindOf(SyntaxKind kind)
    {

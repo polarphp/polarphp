@@ -698,7 +698,7 @@ public:
       LeftParen,
       ///
       /// type: ParameterListSyntax
-      /// optional: false
+      /// optional: true
       ///
       Parameters,
       ///
@@ -716,7 +716,7 @@ public:
    }
 
    TokenSyntax getLeftParen();
-   ParameterListSyntax getParameters();
+   std::optional<ParameterListSyntax> getParameters();
    TokenSyntax getRightParen();
 
    ParameterClauseSyntax withLeftParen(std::optional<TokenSyntax> leftParen);

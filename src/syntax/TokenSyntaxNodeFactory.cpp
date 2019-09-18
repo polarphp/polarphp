@@ -108,6 +108,12 @@ TokenSyntax TokenSyntaxNodeFactory::makeFunctionKeyword(const Trivia &leadingTri
    return make_token_by_kind(T_FUNCTION);
 }
 
+TokenSyntax
+TokenSyntaxNodeFactory::makeFnKeyword(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena)
+{
+   return make_token_by_kind(T_FN);
+}
+
 TokenSyntax TokenSyntaxNodeFactory::makeConstKeyword(const Trivia &leadingTrivia, const Trivia &trailingTrivia,
                                                      RefCountPtr<SyntaxArena> arena)
 {

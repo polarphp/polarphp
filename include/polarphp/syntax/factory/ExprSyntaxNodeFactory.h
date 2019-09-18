@@ -25,7 +25,7 @@ public:
    /// make collection nodes
    ///
    static ExprListSyntax makeExprList(const std::vector<ExprListItemSyntax> elements, RefCountPtr<SyntaxArena> arena = nullptr);
-   static LexicalVarListSyntax makeLexicalVariableList(const std::vector<LexicalVariableListItemSyntax> elements,
+   static LexicalVariableListSyntax makeLexicalVariableList(const std::vector<LexicalVariableListItemSyntax> elements,
                                                        RefCountPtr<SyntaxArena> arena = nullptr);
    static ArrayPairListSyntax makeArrayPairList(const std::vector<ArrayPairListItemSyntax> elements,
                                                 RefCountPtr<SyntaxArena> arena = nullptr);
@@ -120,7 +120,7 @@ public:
          TokenSyntax newToken, AnonymousClassDefinitionClauseSyntax anonymousClassDef,
          RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassicLambdaExprSyntax makeClassicLambdaExpr(TokenSyntax funcToken, std::optional<TokenSyntax> returnRefToken,
-                                                        ParameterClauseSyntax parameterListClause, std::optional<UseLexicalVarClauseSyntax> lexicalVarsClause,
+                                                        ParameterClauseSyntax parameterListClause, std::optional<UseLexicalVariableClauseSyntax> lexicalVarsClause,
                                                         std::optional<ReturnTypeClauseSyntax> returnType, InnerCodeBlockStmtSyntax body,
                                                         RefCountPtr<SyntaxArena> arena = nullptr);
    static SimplifiedLambdaExprSyntax makeSimplifiedLambdaExpr(TokenSyntax fnToken, std::optional<TokenSyntax> returnRefToken,
@@ -224,17 +224,17 @@ public:
                                                   ClassNameRefClauseSyntax classNameRef, RefCountPtr<SyntaxArena> arena = nullptr);
    static ShellCmdExprSyntax makeShellCmdExpr(TokenSyntax leftBacktick, BackticksClauseSyntax backticksExpr,
                                               TokenSyntax rightBacktick, RefCountPtr<SyntaxArena> arena = nullptr);
-   static UseLexicalVarClauseSyntax makeUseLexicalVarClause(TokenSyntax useToken, TokenSyntax leftParen,
-                                                            LexicalVarListSyntax lexicalVars, TokenSyntax rightParen,
+   static UseLexicalVariableClauseSyntax makeUseLexicalVariableClause(TokenSyntax useToken, TokenSyntax leftParen,
+                                                            LexicalVariableListSyntax lexicalVars, TokenSyntax rightParen,
                                                             RefCountPtr<SyntaxArena> arena = nullptr);
-   static LexicalVariableSyntax makeLexicalVariable(TokenSyntax referenceToken, TokenSyntax variable,
+   static LexicalVariableSyntax makeLexicalVariable(std::optional<TokenSyntax> referenceToken, TokenSyntax variable,
                                                     RefCountPtr<SyntaxArena> arena = nullptr);
-   static LexicalVariableListItemSyntax makeLexicalVariable(std::optional<TokenSyntax> comma, LexicalVariableSyntax variable,
+   static LexicalVariableListItemSyntax makeLexicalVariableListItem(std::optional<TokenSyntax> comma, LexicalVariableSyntax variable,
                                                             RefCountPtr<SyntaxArena> arena = nullptr);
 
    /// make blank nodes
    static ExprListSyntax makeBlankExprList(RefCountPtr<SyntaxArena> arena = nullptr);
-   static LexicalVarListSyntax makeBlankLexicalVarList(RefCountPtr<SyntaxArena> arena = nullptr);
+   static LexicalVariableListSyntax makeBlankLexicalVarList(RefCountPtr<SyntaxArena> arena = nullptr);
    static ArrayPairListSyntax makeBlankArrayPairList(RefCountPtr<SyntaxArena> arena = nullptr);
    static EncapsItemListSyntax makeBlankEncapsItemList(RefCountPtr<SyntaxArena> arena = nullptr);
    static ArgumentListSyntax makeBlankArgumentList(RefCountPtr<SyntaxArena> arena = nullptr);
@@ -337,7 +337,7 @@ public:
    static BinaryOperatorExprSyntax makeBlankBinaryOperatorExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static BinaryOperatorExprSyntax makeBlankInstanceofExpr(RefCountPtr<SyntaxArena> arena = nullptr);
    static ShellCmdExprSyntax makeBlankShellCmdExpr(RefCountPtr<SyntaxArena> arena = nullptr);
-   static UseLexicalVarClauseSyntax makeBlankUseLexicalVarClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static UseLexicalVariableClauseSyntax makeBlankUseLexicalVariableClause(RefCountPtr<SyntaxArena> arena = nullptr);
    static LexicalVariableSyntax makeBlankLexicalVariable(RefCountPtr<SyntaxArena> arena = nullptr);
    static LexicalVariableListItemSyntax makeBlankLexicalVariableListItem(RefCountPtr<SyntaxArena> arena = nullptr);
 };

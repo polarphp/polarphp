@@ -250,13 +250,13 @@ DeclSyntaxNodeFactory::makeParameterListItem(std::optional<TokenSyntax> comma, P
 }
 
 ParameterClauseSyntax
-DeclSyntaxNodeFactory::makeParameterClause(TokenSyntax leftParen, ParameterListSyntax parameters, TokenSyntax rightParen,
+DeclSyntaxNodeFactory::makeParameterClause(TokenSyntax leftParen, std::optional<ParameterListSyntax> parameters, TokenSyntax rightParen,
                                            RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ParameterListClause, {
                leftParen.getRaw(),
-               parameters.getRaw(),
+               parameters.has_value() ? parameters->getRaw() : nullptr,
                rightParen.getRaw()
             }, SourcePresence::Present, arena);
    return make<ParameterClauseSyntax>(target);
@@ -762,7 +762,7 @@ ParameterClauseSyntax DeclSyntaxNodeFactory::makeBlankParameterClause(RefCountPt
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ParameterListClause, {
                make_missing_token(T_LEFT_PAREN), // LeftParen
-               RawSyntax::missing(SyntaxKind::ParameterList), // Parameters
+               nullptr, // Parameters
                make_missing_token(T_RIGHT_PAREN), // RightParen
             },
             SourcePresence::Present, arena);
