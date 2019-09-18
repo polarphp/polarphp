@@ -1037,16 +1037,16 @@ ExtendsFromClauseSyntax ExtendsFromClauseSyntax::withName(std::optional<NameSynt
 }
 
 ///
-/// ImplementClauseSyntax
+/// ImplementsClauseSyntax
 ///
-void ImplementClauseSyntax::validate()
+void ImplementsClauseSyntax::validate()
 {
 #ifdef POLAR_DEBUG_BUILD
    RefCountPtr<RawSyntax> raw = m_data->getRaw();
    if (isMissing()) {
       return;
    }
-   assert(raw->getLayout().getSize() == ImplementClauseSyntax::CHILDREN_COUNT);
+   assert(raw->getLayout().getSize() == ImplementsClauseSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, ImplementToken, std::set{TokenKindType::T_IMPLEMENTS});
    if (const RefCountPtr<RawSyntax> &interfaceChild = raw->getChild(Cursor::Interfaces)) {
       assert(interfaceChild->kindOf(SyntaxKind::ImplementsClause));
@@ -1054,17 +1054,17 @@ void ImplementClauseSyntax::validate()
 #endif
 }
 
-TokenSyntax ImplementClauseSyntax::getImplementToken()
+TokenSyntax ImplementsClauseSyntax::getImplementToken()
 {
    return TokenSyntax {m_root, m_data->getChild(Cursor::ImplementToken).get()};
 }
 
-NameListSyntax ImplementClauseSyntax::getInterfaces()
+NameListSyntax ImplementsClauseSyntax::getInterfaces()
 {
    return NameListSyntax {m_root, m_data->getChild(Cursor::Interfaces).get()};
 }
 
-ImplementClauseSyntax ImplementClauseSyntax::withImplementToken(std::optional<TokenSyntax> implementToken)
+ImplementsClauseSyntax ImplementsClauseSyntax::withImplementToken(std::optional<TokenSyntax> implementToken)
 {
    RefCountPtr<RawSyntax> implementTokenRaw;
    if (implementToken.has_value()) {
@@ -1072,10 +1072,10 @@ ImplementClauseSyntax ImplementClauseSyntax::withImplementToken(std::optional<To
    } else {
       implementTokenRaw = make_missing_token(T_IMPLEMENTS);
    }
-   return m_data->replaceChild<ImplementClauseSyntax>(implementTokenRaw, Cursor::ImplementToken);
+   return m_data->replaceChild<ImplementsClauseSyntax>(implementTokenRaw, Cursor::ImplementToken);
 }
 
-ImplementClauseSyntax ImplementClauseSyntax::withInterfaces(std::optional<NameListSyntax> interfaces)
+ImplementsClauseSyntax ImplementsClauseSyntax::withInterfaces(std::optional<NameListSyntax> interfaces)
 {
    RefCountPtr<RawSyntax> interfacesRaw;
    if (interfaces.has_value()) {
@@ -1083,7 +1083,7 @@ ImplementClauseSyntax ImplementClauseSyntax::withInterfaces(std::optional<NameLi
    } else {
       interfacesRaw = RawSyntax::missing(SyntaxKind::NameList);
    }
-   return m_data->replaceChild<ImplementClauseSyntax>(interfacesRaw, Cursor::Interfaces);
+   return m_data->replaceChild<ImplementsClauseSyntax>(interfacesRaw, Cursor::Interfaces);
 }
 
 ///
@@ -1932,7 +1932,7 @@ ClassTraitDeclSyntax ClassTraitDeclSyntax::withAdaptationBlock(std::optional<Cla
 }
 
 ///
-/// ImplementClauseSyntax
+/// ImplementsClauseSyntax
 ///
 void InterfaceExtendsClauseSyntax::validate()
 {
@@ -2085,6 +2085,62 @@ ClassConstClauseSyntax ClassConstClauseSyntax::withInitializer(std::optional<Ini
       initializerRaw = RawSyntax::missing(SyntaxKind::InitializerClause);
    }
    return m_data->replaceChild<ClassConstClauseSyntax>(initializerRaw, Cursor::Initializer);
+}
+
+///
+/// ClassConstListItemSyntax
+///
+void ClassConstListItemSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().getSize() == ClassConstListItemSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, Comma, std::set{TokenKindType::T_COMMA});
+   syntax_assert_child_kind(raw, ConstDecl, std::set{SyntaxKind::ClassConstClause});
+#endif
+}
+
+std::optional<TokenSyntax>
+ClassConstListItemSyntax::getComma()
+{
+   RefCountPtr<SyntaxData> commaData = m_data->getChild(Cursor::Comma);
+   if (!commaData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, commaData.get()};
+}
+
+ClassConstClauseSyntax
+ClassConstListItemSyntax::getConstDecl()
+{
+   return ClassConstClauseSyntax{m_root, m_data->getChild(Cursor::ConstDecl).get()};
+}
+
+ClassConstListItemSyntax
+ClassConstListItemSyntax::withComma(std::optional<TokenSyntax> comma)
+{
+   RefCountPtr<RawSyntax> rawComma;
+   if (comma.has_value()) {
+      rawComma = comma->getRaw();
+   } else {
+      rawComma = nullptr;
+   }
+   return m_data->replaceChild<ClassConstListItemSyntax>(rawComma, Cursor::Comma);
+}
+
+ClassConstListItemSyntax
+ClassConstListItemSyntax::withConstDecl(std::optional<ClassConstClauseSyntax> decl)
+{
+   RefCountPtr<RawSyntax> rawDecl;
+   if (decl.has_value()) {
+      rawDecl = decl->getRaw();
+   } else {
+      rawDecl = RawSyntax::missing(SyntaxKind::ClassConstClause);
+   }
+   return m_data->replaceChild<ClassConstListItemSyntax>(rawDecl, Cursor::ConstDecl);
 }
 
 ///
@@ -2252,13 +2308,13 @@ std::optional<ExtendsFromClauseSyntax> ClassDefinitionSyntax::getExtendsFrom()
    return ExtendsFromClauseSyntax {m_root, extendsData.get()};
 }
 
-std::optional<ImplementClauseSyntax> ClassDefinitionSyntax::getImplementsList()
+std::optional<ImplementsClauseSyntax> ClassDefinitionSyntax::getImplementsList()
 {
    RefCountPtr<SyntaxData> implementsData = m_data->getChild(Cursor::ExtendsFrom);
    if (!implementsData) {
       return std::nullopt;
    }
-   return ImplementClauseSyntax {m_root, implementsData.get()};
+   return ImplementsClauseSyntax {m_root, implementsData.get()};
 }
 
 MemberDeclBlockSyntax ClassDefinitionSyntax::getMembers()
@@ -2310,7 +2366,7 @@ ClassDefinitionSyntax ClassDefinitionSyntax::withExtendsFrom(std::optional<Exten
    return m_data->replaceChild<ClassDefinitionSyntax>(extendsRaw, Cursor::ExtendsFrom);
 }
 
-ClassDefinitionSyntax ClassDefinitionSyntax::withImplementsList(std::optional<ImplementClauseSyntax> implements)
+ClassDefinitionSyntax ClassDefinitionSyntax::withImplementsList(std::optional<ImplementsClauseSyntax> implements)
 {
    RefCountPtr<RawSyntax> implementsRaw;
    if (implements.has_value()) {

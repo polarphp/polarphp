@@ -137,7 +137,7 @@ class NameSyntax;
 class IdentifierSyntax;
 
 class ExtendsFromClauseSyntax;
-class ImplementClauseSyntax;
+class ImplementsClauseSyntax;
 class MemberDeclBlockSyntax;
 class ParameterClauseSyntax;
 class ReturnTypeClauseSyntax;

@@ -996,28 +996,37 @@ interface_declaration_statement:
 
 extends_from:
    %empty {
-
+      $$ = nullptr;
    }
 |  T_EXTENDS name {
-
+      TokenSyntax extendsKeyword = make_token(ExtendsKeyword);
+      NameSyntax name = make<NameSyntax>($2);
+      ExtendsFromClauseSyntax extendClause = make_decl(ExtendsFromClause, extendsKeyword, name);
+      $$ = extendClause.getRaw();
    }
 ;
 
 interface_extends_list:
    %empty {
-
+      $$ = nullptr;
    }
 |  T_EXTENDS name_list {
-
+      TokenSyntax extendsKeyword = make_token(ExtendsKeyword);
+      NameListSyntax names = make<NameListSyntax>($2);
+      InterfaceExtendsClauseSyntax interfaceExtendsClause = make_decl(InterfaceExtendsClause, extendsKeyword, names);
+      $$ = interfaceExtendsClause.getRaw();
    }
 ;
 
 implements_list:
    %empty {
-
+      $$ = nullptr;
    }
 |  T_IMPLEMENTS name_list {
-
+      TokenSyntax implementsKeyword = make_token(ImplementsKeyword);
+      NameListSyntax names = make<NameListSyntax>($2);
+      ImplementsClauseSyntax implementsClause = make_decl(ImplementsClause, implementsKeyword, names);
+      $$ = implementsClause.getRaw();
    }
 ;
 
@@ -1482,7 +1491,14 @@ class_const_list:
 
 class_const_decl:
    identifier T_EQUAL expr backup_doc_comment {
-
+      IdentifierSyntax identifier = make<IdentifierSyntax>($1);
+      TokenSyntax equalToken = make_token(EqualToken);
+      ExprSyntax expr = make<ExprSyntax>($3);
+      InitializerClauseSyntax initializer = make_decl(InitializerClause, equalToken, expr);
+      ClassConstClauseSyntax classConstClause = make_decl(
+         ClassConstClause, identifier, initializer
+      );
+      $$ = classConstClause.getRaw();
    }
 ;
 
@@ -1523,26 +1539,45 @@ echo_expr:
 
 for_exprs:
    %empty {
-
+      $$ = nullptr;
    }
 |  non_empty_for_exprs {
-
+      $$ = $1;
    }
 ;
 
 non_empty_for_exprs:
    non_empty_for_exprs T_COMMA expr {
-
+      ExprListSyntax list = make<ExprListSyntax>($1);
+      TokenSyntax comma = make_token(CommaToken);
+      ExprSyntax expr = make<ExprSyntax>($3);
+      ExprListItemSyntax exprListItem = make_expr(ExprListItem, comma, expr);
+      list.appending(exprListItem);
+      $$ = list.getRaw();
    }
 |  expr {
-
+      ExprSyntax expr = make<ExprSyntax>($1);
+      ExprListItemSyntax exprListItem = make_expr(ExprListItem, std::nullopt, expr);
+      std::vector<ExprListItemSyntax> items{exprListItem};
+      ExprListSyntax list = make_expr(ExprList, items);
+      $$ = list.getRaw();
    }
 ;
 
 anonymous_class:
    T_CLASS {} ctor_arguments
    extends_from implements_list backup_doc_comment T_LEFT_BRACE class_statement_list T_RIGHT_BRACE {
-
+      TokenSyntax classKeyword = make_token(ClassKeyword);
+      std::optional<ArgumentListClauseSyntax> argsClause = $3 ? std::optional(make<ArgumentListClauseSyntax>($3)) : std::nullopt;
+      std::optional<ExtendsFromClauseSyntax> extendsFrom = $4 ? std::optional(make<ExtendsFromClauseSyntax>($4)) : std::nullopt;
+      std::optional<ImplementsClauseSyntax> implementsFrom = $5 ? std::optional(make<ImplementsClauseSyntax>($5)) : std::nullopt;
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      MemberDeclListSyntax stmts = make<MemberDeclListSyntax>($8);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      MemberDeclBlockSyntax classDefCodeBlock = make_decl(MemberDeclBlock, leftBrace, stmts, rightBrace);
+      AnonymousClassDefinitionClauseSyntax classDef = make_expr(
+         AnonymousClassDefinitionClause, classKeyword, argsClause, extendsFrom, implementsFrom, classDefCodeBlock);
+      $$ = classDef.getRaw();
    }
 ;
 

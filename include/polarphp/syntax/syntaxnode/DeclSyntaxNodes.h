@@ -925,7 +925,7 @@ private:
 /// implements_list:
 ///   T_IMPLEMENTS name_list
 ///
-class ImplementClauseSyntax final : public Syntax
+class ImplementsClauseSyntax final : public Syntax
 {
 public:
    constexpr static std::uint8_t CHILDREN_COUNT = 2;
@@ -945,7 +945,7 @@ public:
    };
 
 public:
-   ImplementClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+   ImplementsClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : Syntax(root, data)
    {
       validate();
@@ -954,8 +954,8 @@ public:
    TokenSyntax getImplementToken();
    NameListSyntax getInterfaces();
 
-   ImplementClauseSyntax withImplementToken(std::optional<TokenSyntax> implementToken);
-   ImplementClauseSyntax withInterfaces(std::optional<NameListSyntax> interfaces);
+   ImplementsClauseSyntax withImplementToken(std::optional<TokenSyntax> implementToken);
+   ImplementsClauseSyntax withInterfaces(std::optional<NameListSyntax> interfaces);
 
    static bool kindOf(SyntaxKind kind)
    {
@@ -1120,6 +1120,59 @@ public:
 
 private:
    friend class ClassConstClauseSyntaxBuilder;
+   void validate();
+};
+
+///
+/// class_const_list_item:
+///   ',' class_const_clause
+/// | class_const_clause
+///
+class ClassConstListItemSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax
+      /// optional: true
+      ///
+      Comma,
+      ///
+      /// type: ClassConstClauseSyntax
+      /// optional: false
+      ///
+      ConstDecl,
+   };
+
+public:
+   ClassConstListItemSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   std::optional<TokenSyntax> getComma();
+   ClassConstClauseSyntax getConstDecl();
+
+   ClassConstListItemSyntax withComma(std::optional<TokenSyntax> comma);
+   ClassConstListItemSyntax withConstDecl(std::optional<ClassConstClauseSyntax> decl);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::ClassConstListItem;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class ClassConstListItemSyntaxBuilder;
    void validate();
 };
 
@@ -1953,7 +2006,7 @@ public:
       ///
       ExtendsFrom,
       ///
-      /// type: ImplementClauseSyntax
+      /// type: ImplementsClauseSyntax
       /// optional: true
       ///
       ImplementsList,
@@ -1975,14 +2028,14 @@ public:
    TokenSyntax getClassToken();
    TokenSyntax getName();
    std::optional<ExtendsFromClauseSyntax> getExtendsFrom();
-   std::optional<ImplementClauseSyntax> getImplementsList();
+   std::optional<ImplementsClauseSyntax> getImplementsList();
    MemberDeclBlockSyntax getMembers();
 
    ClassDefinitionSyntax withModifiers(std::optional<ClassModifierListSyntax> modifiers);
    ClassDefinitionSyntax withClassToken(std::optional<TokenSyntax> classToken);
    ClassDefinitionSyntax withName(std::optional<TokenSyntax> name);
    ClassDefinitionSyntax withExtendsFrom(std::optional<ExtendsFromClauseSyntax> extends);
-   ClassDefinitionSyntax withImplementsList(std::optional<ImplementClauseSyntax> implements);
+   ClassDefinitionSyntax withImplementsList(std::optional<ImplementsClauseSyntax> implements);
    ClassDefinitionSyntax withMembers(std::optional<MemberDeclBlockSyntax> members);
 
    static bool kindOf(SyntaxKind kind)

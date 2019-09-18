@@ -36,7 +36,7 @@ public:
    static ClassPropertyListSyntax makeClassPropertyList(
          const std::vector<ClassPropertyClauseSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassConstListSyntax makeClassConstList(
-         const std::vector<ClassConstClauseSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+         const std::vector<ClassConstListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassTraitAdaptationListSyntax makeClassTraitAdaptationList(
          const std::vector<ClassTraitAdaptationSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
 
@@ -68,13 +68,15 @@ public:
                                                           RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassModifierSyntax makeClassModifier(TokenSyntax modifier, RefCountPtr<SyntaxArena> arena = nullptr);
    static ExtendsFromClauseSyntax makeExtendsFromClause(TokenSyntax extendsToken, NameSyntax name, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ImplementClauseSyntax makeImplementClause(TokenSyntax implementToken, NameListSyntax interfaces, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ImplementsClauseSyntax makeImplementsClause(TokenSyntax implementToken, NameListSyntax interfaces, RefCountPtr<SyntaxArena> arena = nullptr);
    static InterfaceExtendsClauseSyntax makeInterfaceExtendsClause(TokenSyntax extendsToken, NameListSyntax interfaces,
                                                                   RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassPropertyClauseSyntax makeClassPropertyClause(TokenSyntax variable, std::optional<InitializerClauseSyntax> initializer,
                                                             RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassConstClauseSyntax makeClassConstClause(IdentifierSyntax identifier, std::optional<InitializerClauseSyntax> initializer,
                                                       RefCountPtr<SyntaxArena> arena = nullptr);
+   static ClassConstListItemSyntax makeClassConstListItem(std::optional<TokenSyntax> comma, ClassConstClauseSyntax classConstClause,
+                                                          RefCountPtr<SyntaxArena> arena = nullptr);
    static MemberModifierSyntax makeMemberModifier(TokenSyntax modifier, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassPropertyDeclSyntax makeClassPropertyDecl(MemberModifierListSyntax modifiers, std::optional<TypeExprClauseSyntax> typeHint,
                                                         ClassPropertyListSyntax propertyList, RefCountPtr<SyntaxArena> arena = nullptr);
@@ -103,7 +105,7 @@ public:
                                                     TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassDefinitionSyntax makeClassDefinition(std::optional<ClassModifierListSyntax> modifiers, TokenSyntax classToken,
                                                     TokenSyntax name, std::optional<ExtendsFromClauseSyntax> extendsFrom,
-                                                    std::optional<ImplementClauseSyntax> implementsList, MemberDeclBlockSyntax members,
+                                                    std::optional<ImplementsClauseSyntax> implementsList, MemberDeclBlockSyntax members,
                                                     RefCountPtr<SyntaxArena> arena = nullptr);
    static TraitDefinitionSyntax makeTraitDefinition(TokenSyntax traitToken, TokenSyntax name,
                                                     MemberDeclBlockSyntax members, RefCountPtr<SyntaxArena> arena = nullptr);
@@ -137,10 +139,11 @@ public:
    static FunctionDefinitionSyntax makeBlankFunctionDefinition(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassModifierSyntax makeBlankClassModifier(RefCountPtr<SyntaxArena> arena = nullptr);
    static ExtendsFromClauseSyntax makeBlankExtendsFromClause(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ImplementClauseSyntax makeBlankImplementClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ImplementsClauseSyntax makeBlankImplementsClause(RefCountPtr<SyntaxArena> arena = nullptr);
    static InterfaceExtendsClauseSyntax makeBlankInterfaceExtendsClause(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassPropertyClauseSyntax makeBlankClassPropertyClause(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassConstClauseSyntax makeBlankClassConstClause(RefCountPtr<SyntaxArena> arena = nullptr);
+   static ClassConstListItemSyntax makeBlankClassConstListItem(RefCountPtr<SyntaxArena> arena = nullptr);
    static MemberModifierSyntax makeBlankMemberModifier(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassPropertyDeclSyntax makeBlankClassPropertyDecl(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassConstDeclSyntax makeBlankClassConstDecl(RefCountPtr<SyntaxArena> arena = nullptr);

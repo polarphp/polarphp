@@ -2349,13 +2349,13 @@ std::optional<ExtendsFromClauseSyntax> AnonymousClassDefinitionClauseSyntax::get
    return ExtendsFromClauseSyntax {m_root, extendsFromData.get()};
 }
 
-std::optional<ImplementClauseSyntax> AnonymousClassDefinitionClauseSyntax::getImplementsList()
+std::optional<ImplementsClauseSyntax> AnonymousClassDefinitionClauseSyntax::getImplementsList()
 {
    RefCountPtr<SyntaxData> implementsListData = m_data->getChild(Cursor::ImplementsList);
    if (!implementsListData) {
       return std::nullopt;
    }
-   return ImplementClauseSyntax {m_root, implementsListData.get()};
+   return ImplementsClauseSyntax {m_root, implementsListData.get()};
 }
 
 MemberDeclBlockSyntax AnonymousClassDefinitionClauseSyntax::getMembers()
@@ -2401,7 +2401,7 @@ AnonymousClassDefinitionClauseSyntax::withExtendsFrom(std::optional<ExtendsFromC
 }
 
 AnonymousClassDefinitionClauseSyntax
-AnonymousClassDefinitionClauseSyntax::withImplementsList(std::optional<ImplementClauseSyntax> implements)
+AnonymousClassDefinitionClauseSyntax::withImplementsList(std::optional<ImplementsClauseSyntax> implements)
 {
    RefCountPtr<RawSyntax> implementsRaw;
    if (implements.has_value()) {

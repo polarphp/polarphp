@@ -33,10 +33,11 @@ class ParameterClauseSyntax;
 class FunctionDefinitionSyntax;
 class ClassModifierSyntax;
 class ExtendsFromClauseSyntax;
-class ImplementClauseSyntax;
+class ImplementsClauseSyntax;
 class InterfaceExtendsClauseSyntax;
 class ClassPropertyClauseSyntax;
 class ClassConstClauseSyntax;
+class ClassConstListItemSyntax;
 class MemberModifierSyntax;
 class ClassPropertyDeclSyntax;
 class ClassConstDeclSyntax;
@@ -124,13 +125,13 @@ using ClassPropertyListSyntax = SyntaxCollection<SyntaxKind::ClassPropertyList, 
 
 ///
 /// type: SyntaxCollection
-/// element type: ClassConstClauseSyntax
+/// element type: ClassConstListItemSyntax
 ///
 /// class_const_list:
 ///   class_const_list ',' class_const_decl
 ///   | class_const_decl
 ///
-using ClassConstListSyntax = SyntaxCollection<SyntaxKind::ClassConstList, ClassConstClauseSyntax>;
+using ClassConstListSyntax = SyntaxCollection<SyntaxKind::ClassConstList, ClassConstListItemSyntax>;
 
 ///
 /// type: SyntaxCollection

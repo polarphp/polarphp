@@ -111,7 +111,7 @@ public:
    static DereferencableScalarExprSyntax makeDereferencableScalarExpr(Syntax scalarValue, RefCountPtr<SyntaxArena> arena = nullptr);
    static AnonymousClassDefinitionClauseSyntax makeAnonymousClassDefinitionClause(
          TokenSyntax classToken, std::optional<ArgumentListClauseSyntax> ctorArguments,
-         std::optional<ExtendsFromClauseSyntax> extendsFrom, std::optional<ImplementClauseSyntax> implementsList,
+         std::optional<ExtendsFromClauseSyntax> extendsFrom, std::optional<ImplementsClauseSyntax> implementsList,
          MemberDeclBlockSyntax members, RefCountPtr<SyntaxArena> arena = nullptr);
    static SimpleInstanceCreateExprSyntax makeSimpleInstanceCreateExpr(
          TokenSyntax newToken, ClassNameRefClauseSyntax className,

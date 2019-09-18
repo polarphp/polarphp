@@ -85,10 +85,10 @@ ClassPropertyListSyntax DeclSyntaxNodeFactory::makeClassPropertyList(
 }
 
 ClassConstListSyntax DeclSyntaxNodeFactory::makeClassConstList(
-      const std::vector<ClassConstClauseSyntax> &elements, RefCountPtr<SyntaxArena> arena)
+      const std::vector<ClassConstListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
-   for (const ClassConstClauseSyntax &item : elements) {
+   for (const ClassConstListItemSyntax &item : elements) {
       layout.push_back(item.getRaw());
    }
    RefCountPtr<RawSyntax> target = RawSyntax::make(SyntaxKind::ClassConstList, layout, SourcePresence::Present, arena);
@@ -301,15 +301,15 @@ DeclSyntaxNodeFactory::makeExtendsFromClause(TokenSyntax extendsToken, NameSynta
    return make<ExtendsFromClauseSyntax>(target);
 }
 
-ImplementClauseSyntax
-DeclSyntaxNodeFactory::makeImplementClause(TokenSyntax implementToken, NameListSyntax interfaces, RefCountPtr<SyntaxArena> arena)
+ImplementsClauseSyntax
+DeclSyntaxNodeFactory::makeImplementsClause(TokenSyntax implementToken, NameListSyntax interfaces, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ImplementsClause, {
                implementToken.getRaw(),
                interfaces.getRaw()
             }, SourcePresence::Present, arena);
-   return make<ImplementClauseSyntax>(target);
+   return make<ImplementsClauseSyntax>(target);
 }
 
 InterfaceExtendsClauseSyntax
@@ -346,6 +346,18 @@ DeclSyntaxNodeFactory::makeClassConstClause(IdentifierSyntax identifier, std::op
                initializer.has_value() ? initializer->getRaw() : nullptr,
             }, SourcePresence::Present, arena);
    return make<ClassConstClauseSyntax>(target);
+}
+
+ClassConstListItemSyntax
+DeclSyntaxNodeFactory::makeClassConstListItem(std::optional<TokenSyntax> comma, ClassConstClauseSyntax classConstClause,
+                                              RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ClassConstListItem, {
+               comma.has_value() ? comma->getRaw() : nullptr,
+               classConstClause.getRaw(),
+            }, SourcePresence::Present, arena);
+   return make<ClassConstListItemSyntax>(target);
 }
 
 MemberModifierSyntax
@@ -519,7 +531,7 @@ DeclSyntaxNodeFactory::makeMemberDeclBlock(TokenSyntax leftBrace, MemberDeclList
 ClassDefinitionSyntax
 DeclSyntaxNodeFactory::makeClassDefinition(std::optional<ClassModifierListSyntax> modifiers, TokenSyntax classToken,
                                            TokenSyntax name, std::optional<ExtendsFromClauseSyntax> extendsFrom,
-                                           std::optional<ImplementClauseSyntax> implementsList, MemberDeclBlockSyntax members,
+                                           std::optional<ImplementsClauseSyntax> implementsList, MemberDeclBlockSyntax members,
                                            RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -806,7 +818,7 @@ ExtendsFromClauseSyntax DeclSyntaxNodeFactory::makeBlankExtendsFromClause(RefCou
    return make<ExtendsFromClauseSyntax>(target);
 }
 
-ImplementClauseSyntax DeclSyntaxNodeFactory::makeBlankImplementClause(RefCountPtr<SyntaxArena> arena)
+ImplementsClauseSyntax DeclSyntaxNodeFactory::makeBlankImplementsClause(RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ImplementsClause, {
@@ -814,7 +826,7 @@ ImplementClauseSyntax DeclSyntaxNodeFactory::makeBlankImplementClause(RefCountPt
                RawSyntax::missing(SyntaxKind::NameList) // Interfaces
             },
             SourcePresence::Present, arena);
-   return make<ImplementClauseSyntax>(target);
+   return make<ImplementsClauseSyntax>(target);
 }
 
 InterfaceExtendsClauseSyntax DeclSyntaxNodeFactory::makeBlankInterfaceExtendsClause(RefCountPtr<SyntaxArena> arena)
@@ -848,6 +860,18 @@ ClassConstClauseSyntax DeclSyntaxNodeFactory::makeBlankClassConstClause(RefCount
             },
             SourcePresence::Present, arena);
    return make<ClassConstClauseSyntax>(target);
+}
+
+ClassConstListItemSyntax
+DeclSyntaxNodeFactory::makeBlankClassConstListItem(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::ClassConstListItem, {
+               nullptr, // Comma
+               RawSyntax::missing(SyntaxKind::ClassConstClause) // ConstDecl
+            },
+            SourcePresence::Present, arena);
+   return make<ClassConstListItemSyntax>(target);
 }
 
 MemberModifierSyntax DeclSyntaxNodeFactory::makeBlankMemberModifier(RefCountPtr<SyntaxArena> arena)

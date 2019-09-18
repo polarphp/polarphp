@@ -578,7 +578,7 @@ ExprSyntaxNodeFactory::makeDereferencableScalarExpr(Syntax scalarValue, RefCount
 AnonymousClassDefinitionClauseSyntax
 ExprSyntaxNodeFactory::makeAnonymousClassDefinitionClause(
       TokenSyntax classToken, std::optional<ArgumentListClauseSyntax> ctorArguments,
-      std::optional<ExtendsFromClauseSyntax> extendsFrom, std::optional<ImplementClauseSyntax> implementsList,
+      std::optional<ExtendsFromClauseSyntax> extendsFrom, std::optional<ImplementsClauseSyntax> implementsList,
       MemberDeclBlockSyntax members, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(

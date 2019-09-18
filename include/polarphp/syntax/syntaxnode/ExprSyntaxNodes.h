@@ -162,7 +162,7 @@ private:
 
 ///
 /// expr_list_item:
-///   expr ','
+///   ',' expr
 /// | expr
 ///
 class ExprListItemSyntax final : public Syntax
@@ -2323,7 +2323,7 @@ public:
       ///
       ExtendsFrom,
       ///
-      /// type: ImplementClauseSyntax
+      /// type: ImplementsClauseSyntax
       /// optional: true
       ///
       ImplementsList,
@@ -2344,13 +2344,13 @@ public:
    TokenSyntax getClassToken();
    std::optional<ArgumentListClauseSyntax> getCtorArguments();
    std::optional<ExtendsFromClauseSyntax> getExtendsFrom();
-   std::optional<ImplementClauseSyntax> getImplementsList();
+   std::optional<ImplementsClauseSyntax> getImplementsList();
    MemberDeclBlockSyntax getMembers();
 
    AnonymousClassDefinitionClauseSyntax withClassToken(std::optional<TokenSyntax> classToken);
    AnonymousClassDefinitionClauseSyntax withCtorArguments(std::optional<ArgumentListClauseSyntax> ctorArguments);
    AnonymousClassDefinitionClauseSyntax withExtendsFrom(std::optional<ExtendsFromClauseSyntax> extends);
-   AnonymousClassDefinitionClauseSyntax withImplementsList(std::optional<ImplementClauseSyntax> implements);
+   AnonymousClassDefinitionClauseSyntax withImplementsList(std::optional<ImplementsClauseSyntax> implements);
    AnonymousClassDefinitionClauseSyntax withMembers(std::optional<MemberDeclBlockSyntax> members);
 
    static bool kindOf(SyntaxKind kind)

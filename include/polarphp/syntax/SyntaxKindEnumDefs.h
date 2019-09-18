@@ -54,6 +54,7 @@ enum class SyntaxKind : std::uint32_t
    ExtendsFromClause,
    ClassPropertyClause,
    ClassConstClause,
+   ClassConstListItem,
    ClassPropertyDecl,
    ClassConstDecl,
    ClassMethodDecl,
