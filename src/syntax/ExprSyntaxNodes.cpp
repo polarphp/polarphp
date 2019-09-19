@@ -2562,7 +2562,7 @@ void ClassicLambdaExprSyntax::validate()
    syntax_assert_child_kind(raw, ParameterListClause, std::set{SyntaxKind::ParameterListClause});
    syntax_assert_child_kind(raw, LexicalVarsClause, std::set{SyntaxKind::UseLexicalVarClause});
    syntax_assert_child_kind(raw, ReturnType, std::set{SyntaxKind::ReturnTypeClause});
-   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::CodeBlock});
+   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::InnerCodeBlockStmt});
 #endif
 }
 

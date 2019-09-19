@@ -888,7 +888,7 @@ private:
 class BreakStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
 
    enum Cursor : SyntaxChildrenCountType
@@ -1094,7 +1094,7 @@ public:
       ///
       RightParen,
       ///
-      /// type: CodeBlockSyntax
+      /// type: StmtSyntax
       /// optional: false
       ///
       Body,
@@ -1110,12 +1110,8 @@ public:
       ///
       ElseKeyword,
       ///
-      /// type: Syntax
+      /// type: StmtSyntax
       /// optional: true
-      /// --------------
-      /// node choices
-      /// name: IfStmt kind: IfStmt
-      /// name: CodeBlock kind: CodeBlock
       ///
       ElseBody
    };
@@ -1140,7 +1136,7 @@ public:
    StmtSyntax getBody();
    std::optional<ElseIfListSyntax> getElseIfClauses();
    std::optional<TokenSyntax> getElseKeyword();
-   std::optional<Syntax> getElseBody();
+   std::optional<StmtSyntax> getElseBody();
 
    IfStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
    IfStmtSyntax withLabelColon(std::optional<TokenSyntax> labelColon);
@@ -1151,7 +1147,7 @@ public:
    IfStmtSyntax withBody(std::optional<StmtSyntax> body);
    IfStmtSyntax withElseIfClauses(std::optional<ElseIfListSyntax> elseIfClauses);
    IfStmtSyntax withElseKeyword(std::optional<TokenSyntax> elseKeyword);
-   IfStmtSyntax withElseBody(std::optional<Syntax> elseBody);
+   IfStmtSyntax withElseBody(std::optional<StmtSyntax> elseBody);
 
    IfStmtSyntax addElseIfClause(ElseIfClauseSyntax elseIfClause);
 

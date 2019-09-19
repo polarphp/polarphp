@@ -820,15 +820,9 @@ void FunctionDefinitionSyntax::validate()
    syntax_assert_child_token(raw, FuncToken, std::set{TokenKindType::T_FUNCTION});
    syntax_assert_child_token(raw, ReturnRefToken, std::set{TokenKindType::T_AMPERSAND});
    syntax_assert_child_token(raw, FuncName, std::set{TokenKindType::T_IDENTIFIER_STRING});
-   if (const RefCountPtr<RawSyntax> &parameterClause = raw->getChild(Cursor::ParameterListClause)) {
-      assert(parameterClause->kindOf(SyntaxKind::ParameterListClause));
-   }
-   if (const RefCountPtr<RawSyntax> &returnTypeClause = raw->getChild(Cursor::ReturnType)) {
-      assert(returnTypeClause->kindOf(SyntaxKind::ReturnTypeClause));
-   }
-   if (const RefCountPtr<RawSyntax> &body = raw->getChild(Cursor::Body)) {
-      assert(body->kindOf(SyntaxKind::CodeBlock));
-   }
+   syntax_assert_child_kind(raw, ParameterListClause, std::set{SyntaxKind::ParameterListClause});
+   syntax_assert_child_kind(raw, ReturnType, std::set{SyntaxKind::ReturnTypeClause});
+   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::InnerCodeBlockStmt});
 #endif
 }
 

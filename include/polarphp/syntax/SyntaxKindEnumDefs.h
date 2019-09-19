@@ -25,8 +25,6 @@ enum class SyntaxKind : std::uint32_t
    Expr,
    Stmt,
    Type,
-   CodeBlockItem,
-   CodeBlock,
 
    /// decl syntax node
    FirstDecl,

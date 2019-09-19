@@ -91,7 +91,7 @@ public:
    static IfStmtSyntax makeIfStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                   TokenSyntax ifKeyword, TokenSyntax leftParen, ExprSyntax condition,
                                   TokenSyntax rightParen, StmtSyntax body, std::optional<ElseIfListSyntax> elseIfClauses,
-                                  std::optional<TokenSyntax> elseKeyword, std::optional<Syntax> elseBody,
+                                  std::optional<TokenSyntax> elseKeyword, std::optional<StmtSyntax> elseBody,
                                   RefCountPtr<SyntaxArena> arena = nullptr);
    static WhileStmtSyntax makeWhileStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                         TokenSyntax whileKeyword, ConditionElementListSyntax conditions,

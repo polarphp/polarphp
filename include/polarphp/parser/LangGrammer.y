@@ -321,7 +321,7 @@ using namespace polar::syntax;
 %type <RefCountPtr<RawSyntax>> top_statement_list use_declarations const_list inner_statement_list if_stmt
 %type <RefCountPtr<RawSyntax>> for_exprs switch_case_list global_var_list static_var_list
 %type <RefCountPtr<RawSyntax>> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
-%type <RefCountPtr<RawSyntax>> implements_list case_list if_stmt_without_else
+%type <RefCountPtr<RawSyntax>> implements_list case_list if_stmt_without_else case_separator
 %type <RefCountPtr<RawSyntax>> non_empty_parameter_list argument_list non_empty_argument_list property_list
 %type <RefCountPtr<RawSyntax>> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
 %type <RefCountPtr<RawSyntax>> ctor_arguments trait_adaptation_list lexical_vars
@@ -1141,24 +1141,52 @@ case_list:
 ;
 
 case_separator:
-   T_COLON
+   T_COLON {
+      TokenSyntax colon = make_token(ColonToken);
+      $$ = colon.getRaw();
+   }
 ;
 
 if_stmt_without_else:
    T_IF T_LEFT_PAREN expr T_RIGHT_PAREN statement {
-
+      TokenSyntax ifKeyword = make_token(IfKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ExprSyntax expr = make<ExprSyntax>($3);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      StmtSyntax stmt = make<StmtSyntax>($5);
+      ElseIfListSyntax elseIfList = make_blank_stmt(ElseIfList);
+      IfStmtSyntax ifStmt = make_stmt(
+         IfStmt, std::nullopt, std::nullopt, ifKeyword, leftParen, expr, rightParen, 
+         stmt, elseIfList, std::nullopt, std::nullopt
+      );
+      $$ = ifStmt.getRaw();
    }
 |  if_stmt_without_else T_ELSEIF T_LEFT_PAREN expr T_RIGHT_PAREN statement {
-
+      IfStmtSyntax ifStmt = make<IfStmtSyntax>($1);
+      TokenSyntax elseIfKeyword = make_token(ElseIfKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ExprSyntax expr = make<ExprSyntax>($4);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      StmtSyntax stmt = make<StmtSyntax>($6);
+      ElseIfClauseSyntax elseIfClause = make_stmt(
+         ElseIfClause, elseIfKeyword, leftParen, expr, rightParen, stmt
+      );
+      ifStmt.addElseIfClause(elseIfClause);
+      $$ = ifStmt.getRaw();
    }
 ;
 
 if_stmt:
    if_stmt_without_else %prec T_NOELSE {
-
+      $$ = $1;
    }
 |  if_stmt_without_else T_ELSE statement {
-
+      IfStmtSyntax ifStmt = make<IfStmtSyntax>($1);
+      TokenSyntax elseKeyword = make_token(ElseKeyword);
+      StmtSyntax stmt = make<StmtSyntax>($3);
+      ifStmt.withElseKeyword(elseKeyword);
+      ifStmt.withElseBody(stmt);
+      $$ = ifStmt.getRaw();
    }
 ;
 

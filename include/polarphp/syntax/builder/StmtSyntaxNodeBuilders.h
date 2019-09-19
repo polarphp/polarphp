@@ -81,7 +81,7 @@ public:
 private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[BreakStmtSyntax::CHILDREN_COUNT] = {
-      nullptr, nullptr
+      nullptr, nullptr, nullptr
    };
 };
 

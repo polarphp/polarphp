@@ -1088,7 +1088,7 @@ void ElseIfClauseSyntax::validate()
    syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
    syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
    syntax_assert_child_kind(raw, Condition, std::set{SyntaxKind::Expr});
-   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::CodeBlock});
+   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::InnerCodeBlockStmt});
 #endif
 }
 
@@ -1179,10 +1179,13 @@ ElseIfClauseSyntax ElseIfClauseSyntax::withBody(std::optional<StmtSyntax> body)
 #ifdef POLAR_DEBUG_BUILD
 const NodeChoicesType IfStmtSyntax::CHILD_NODE_CHOICES
 {
-   {IfStmtSyntax::ElseBody, {
+   {
+      IfStmtSyntax::ElseBody,
+      {
          SyntaxKind::IfStmt,
-               SyntaxKind::CodeBlock
-      }}
+               SyntaxKind::InnerCodeBlockStmt
+      }
+   }
 };
 #endif
 
@@ -1200,12 +1203,12 @@ void IfStmtSyntax::validate()
    syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
    syntax_assert_child_kind(raw, Condition, std::set{SyntaxKind::Expr});
    syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
-   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::CodeBlock});
+   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::InnerCodeBlockStmt});
    syntax_assert_child_kind(raw, ElseIfClauses, std::set{SyntaxKind::ElseIfList});
    syntax_assert_child_token(raw, ElseKeyword, std::set{TokenKindType::T_ELSE});
    if (const RefCountPtr<RawSyntax> &elseBody = raw->getChild(Cursor::ElseBody)) {
       bool isIfStmt = elseBody->kindOf(SyntaxKind::IfStmt);
-      bool isCodeBlock = elseBody->kindOf(SyntaxKind::CodeBlock);
+      bool isCodeBlock = elseBody->kindOf(SyntaxKind::InnerCodeBlockStmt);
       assert(isIfStmt || isCodeBlock);
    }
 #endif
@@ -1272,13 +1275,13 @@ std::optional<TokenSyntax> IfStmtSyntax::getElseKeyword()
    return TokenSyntax{m_root, elseKeywordData.get()};
 }
 
-std::optional<Syntax> IfStmtSyntax::getElseBody()
+std::optional<StmtSyntax> IfStmtSyntax::getElseBody()
 {
    RefCountPtr<SyntaxData> elseBodyData = m_data->getChild(Cursor::ElseBody);
    if (!elseBodyData) {
       return std::nullopt;
    }
-   return TokenSyntax{m_root, elseBodyData.get()};
+   return StmtSyntax{m_root, elseBodyData.get()};
 }
 
 IfStmtSyntax IfStmtSyntax::withLabelName(std::optional<TokenSyntax> labelName)
@@ -1380,7 +1383,7 @@ IfStmtSyntax IfStmtSyntax::withElseKeyword(std::optional<TokenSyntax> elseKeywor
    return m_data->replaceChild<IfStmtSyntax>(rawElseKeyword, Cursor::ElseKeyword);
 }
 
-IfStmtSyntax IfStmtSyntax::withElseBody(std::optional<Syntax> elseBody)
+IfStmtSyntax IfStmtSyntax::withElseBody(std::optional<StmtSyntax> elseBody)
 {
    RefCountPtr<RawSyntax> rawElseBody;
    if (elseBody.has_value()) {
@@ -1419,7 +1422,7 @@ void WhileStmtSyntax::validate()
    syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
    syntax_assert_child_kind(raw, Conditions, std::set{SyntaxKind::ConditionElementList});
    syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
-   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::CodeBlock});
+   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::InnerCodeBlockStmt});
 #endif
 }
 
@@ -1538,7 +1541,7 @@ WhileStmtSyntax WhileStmtSyntax::withBody(std::optional<InnerCodeBlockStmtSyntax
    if (body.has_value()) {
       rawBody = body->getRaw();
    } else {
-      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
+      rawBody = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
    return m_data->replaceChild<WhileStmtSyntax>(rawBody, Cursor::Body);
 }
@@ -1568,7 +1571,7 @@ void DoWhileStmtSyntax::validate()
    syntax_assert_child_token(raw, LabelName, std::set{TokenKindType::T_IDENTIFIER_STRING});
    syntax_assert_child_token(raw, LabelColon, std::set{TokenKindType::T_COLON});
    syntax_assert_child_token(raw, DoKeyword, std::set{TokenKindType::T_DO});
-   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::CodeBlock});
+   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::InnerCodeBlockStmt});
    syntax_assert_child_token(raw, WhileKeyword, std::set{TokenKindType::T_WHILE});
    syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
    syntax_assert_child_kind(raw, Condition, std::set{SyntaxKind::Expr});
@@ -1668,7 +1671,7 @@ DoWhileStmtSyntax DoWhileStmtSyntax::withBody(std::optional<InnerCodeBlockStmtSy
    if (body.has_value()) {
       rawBody = body->getRaw();
    } else {
-      rawBody = RawSyntax::missing(SyntaxKind::CodeBlock);
+      rawBody = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
    return m_data->replaceChild<DoWhileStmtSyntax>(rawBody, Cursor::Body);
 }
@@ -2506,7 +2509,7 @@ void DeferStmtSyntax::validate()
    }
    assert(raw->getLayout().size() == DeferStmtSyntax::CHILDREN_COUNT);
    syntax_assert_child_token(raw, DeferKeyword, std::set{TokenKindType::T_DEFER});
-   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::CodeBlock});
+   syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::InnerCodeBlockStmt});
 #endif
 }
 

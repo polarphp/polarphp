@@ -324,7 +324,7 @@ IfStmtSyntax IfStmtSyntaxBuilder::build()
                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
    }
    if (!m_layout[bodyIndex]) {
-      m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::CodeBlock);
+      m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
    if (!m_layout[elseIfClausesIndex]) {
       m_layout[elseIfClausesIndex] = RawSyntax::missing(SyntaxKind::ElseIfList);
@@ -432,7 +432,7 @@ WhileStmtSyntax WhileStmtSyntaxBuilder::build()
                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
    }
    if (!m_layout[bodyIndex]) {
-      m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::CodeBlock);
+      m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
    RefCountPtr<RawSyntax> rawWhileStmt = RawSyntax::make(SyntaxKind::WhileStmt, m_layout, SourcePresence::Present,
                                                          m_arena);
@@ -513,7 +513,7 @@ DoWhileStmtSyntax DoWhileStmtSyntaxBuilder::build()
                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_DO)));
    }
    if (!m_layout[bodyIndex]) {
-      m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::CodeBlock);
+      m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
    if (!m_layout[whileKeywordIndex]) {
       m_layout[whileKeywordIndex] = RawSyntax::missing(TokenKindType::T_WHILE,

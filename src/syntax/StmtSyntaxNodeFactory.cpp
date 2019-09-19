@@ -457,7 +457,7 @@ IfStmtSyntax
 StmtSyntaxNodeFactory::makeIfStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                   TokenSyntax ifKeyword, TokenSyntax leftParen, ExprSyntax condition,
                                   TokenSyntax rightParen, StmtSyntax body, std::optional<ElseIfListSyntax> elseIfClauses,
-                                  std::optional<TokenSyntax> elseKeyword, std::optional<Syntax> elseBody,
+                                  std::optional<TokenSyntax> elseKeyword, std::optional<StmtSyntax> elseBody,
                                   RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -1390,7 +1390,7 @@ StmtSyntaxNodeFactory::makeBlankElseIfClause(RefCountPtr<SyntaxArena> arena)
                make_missing_token(T_LEFT_PAREN), // LeftParen
                RawSyntax::missing(SyntaxKind::Expr), // Condition
                make_missing_token(T_RIGHT_PAREN), // RightParen
-               RawSyntax::missing(SyntaxKind::CodeBlock) // Body
+               RawSyntax::missing(SyntaxKind::Stmt) // Body
             }, SourcePresence::Present, arena);
    return make<ElseIfClauseSyntax>(target);
 }
@@ -1406,7 +1406,7 @@ StmtSyntaxNodeFactory::makeBlankIfStmt(RefCountPtr<SyntaxArena> arena)
                make_missing_token(T_LEFT_PAREN), // LeftParen
                RawSyntax::missing(SyntaxKind::Expr), // Condition
                make_missing_token(T_RIGHT_PAREN), // RightParen
-               RawSyntax::missing(SyntaxKind::CodeBlock), // Body
+               RawSyntax::missing(SyntaxKind::Stmt), // Body
                nullptr, // ElseIfClauses
                nullptr, // ElseKeyword
                nullptr, // ElseBody
