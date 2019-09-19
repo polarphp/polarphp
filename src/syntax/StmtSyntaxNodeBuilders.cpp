@@ -36,11 +36,11 @@ ConditionElementSyntax ConditionElementSyntaxBuilder::build()
       m_layout[conditionIndex] = RawSyntax::missing(SyntaxKind::Expr);
    }
    if (!m_layout[trailingCommaIndex]) {
-      m_layout[trailingCommaIndex] = RawSyntax::missing(TokenKindType::T_COMMA,
-                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_COMMA)));
+      m_layout[trailingCommaIndex] = make_missing_token(T_COMMA);
    }
-   RefCountPtr<RawSyntax> rawConditionElementSyntax = RawSyntax::make(SyntaxKind::ConditionElement, m_layout, SourcePresence::Present,
-                                                                      m_arena);
+   RefCountPtr<RawSyntax> rawConditionElementSyntax = RawSyntax::make(
+            SyntaxKind::ConditionElement, m_layout, SourcePresence::Present,
+            m_arena);
    return make<ConditionElementSyntax>(rawConditionElementSyntax);
 }
 
@@ -80,8 +80,9 @@ ContinueStmtSyntax ContinueStmtSyntaxBuilder::build()
    if (!m_layout[semicolonIndex]) {
       m_layout[semicolonIndex] = make_missing_token(T_SEMICOLON);
    }
-   RefCountPtr<RawSyntax> rawContinueStmtSyntax = RawSyntax::make(SyntaxKind::ContinueStmt, m_layout, SourcePresence::Present,
-                                                                  m_arena);
+   RefCountPtr<RawSyntax> rawContinueStmtSyntax = RawSyntax::make(
+            SyntaxKind::ContinueStmt, m_layout, SourcePresence::Present,
+            m_arena);
    return make<ContinueStmtSyntax>(rawContinueStmtSyntax);
 }
 
@@ -109,20 +110,16 @@ BreakStmtSyntaxBuilder &BreakStmtSyntaxBuilder::useSemicolon(TokenSyntax semicol
 BreakStmtSyntax BreakStmtSyntaxBuilder::build()
 {
    CursorIndex breakKeywordIndex = cursor_index(Cursor::BreakKeyword);
-   CursorIndex exprIndex = cursor_index(Cursor::Expr);
    CursorIndex semicolonIndex = cursor_index(Cursor::Semicolon);
    if (!m_layout[breakKeywordIndex]) {
-      m_layout[breakKeywordIndex] = RawSyntax::missing(TokenKindType::T_BREAK,
-                                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_BREAK)));
-   }
-   if (!m_layout[exprIndex]) {
-      m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
+      m_layout[breakKeywordIndex] = make_missing_token(T_BREAK);
    }
    if (!m_layout[semicolonIndex]) {
       m_layout[semicolonIndex] = make_missing_token(T_SEMICOLON);
    }
-   RefCountPtr<RawSyntax> rawBreakStmtSyntax = RawSyntax::make(SyntaxKind::BreakStmt, m_layout, SourcePresence::Present,
-                                                               m_arena);
+   RefCountPtr<RawSyntax> rawBreakStmtSyntax = RawSyntax::make(
+            SyntaxKind::BreakStmt, m_layout, SourcePresence::Present,
+            m_arena);
    return make<BreakStmtSyntax>(rawBreakStmtSyntax);
 }
 
@@ -140,11 +137,11 @@ FallthroughStmtSyntax FallthroughStmtSyntaxBuilder::build()
 {
    CursorIndex fallthroughKeywordIndex = cursor_index(Cursor::FallthroughKeyword);
    if (!m_layout[fallthroughKeywordIndex]) {
-      m_layout[fallthroughKeywordIndex] = RawSyntax::missing(TokenKindType::T_FALLTHROUGH,
-                                                             OwnedString::makeUnowned(get_token_text(TokenKindType::T_FALLTHROUGH)));
+      m_layout[fallthroughKeywordIndex] = make_missing_token(T_FALLTHROUGH);
    }
-   RefCountPtr<RawSyntax> rawFallthroughKeyword = RawSyntax::make(SyntaxKind::FallthroughStmt, m_layout, SourcePresence::Present,
-                                                                  m_arena);
+   RefCountPtr<RawSyntax> rawFallthroughKeyword = RawSyntax::make(
+            SyntaxKind::FallthroughStmt, m_layout, SourcePresence::Present,
+            m_arena);
    return make<FallthroughStmtSyntax>(rawFallthroughKeyword);
 }
 
@@ -190,25 +187,23 @@ ElseIfClauseSyntax ElseIfClauseSyntaxBuilder::build()
    CursorIndex rightParenIndex = cursor_index(Cursor::RightParen);
    CursorIndex bodyIndex = cursor_index(Cursor::Body);
    if (!m_layout[elseIfKeywordIndex]) {
-      m_layout[elseIfKeywordIndex] = RawSyntax::missing(TokenKindType::T_ELSEIF,
-                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_ELSEIF)));
+      m_layout[elseIfKeywordIndex] = make_missing_token(T_ELSEIF);
    }
    if (!m_layout[leftParenIndex]) {
-      m_layout[leftParenIndex] = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+      m_layout[leftParenIndex] = make_missing_token(T_LEFT_PAREN);
    }
    if (!m_layout[conditionIndex]) {
       m_layout[conditionIndex] = RawSyntax::missing(SyntaxKind::Expr);
    }
    if (!m_layout[rightParenIndex]) {
-      m_layout[rightParenIndex] = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+      m_layout[rightParenIndex] = make_missing_token(T_RIGHT_PAREN);
    }
    if (!m_layout[bodyIndex]) {
       m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::Stmt);
    }
-   RefCountPtr<RawSyntax> rawElseIfClauseSyntax = RawSyntax::make(SyntaxKind::ElseIfClause, m_layout, SourcePresence::Present,
-                                                                  m_arena);
+   RefCountPtr<RawSyntax> rawElseIfClauseSyntax = RawSyntax::make(
+            SyntaxKind::ElseIfClause, m_layout, SourcePresence::Present,
+            m_arena);
    return make<ElseIfClauseSyntax>(rawElseIfClauseSyntax);
 }
 
@@ -280,8 +275,9 @@ IfStmtSyntaxBuilder &IfStmtSyntaxBuilder::addElseIfClause(ElseIfClauseSyntax els
 {
    RefCountPtr<RawSyntax> clauses = m_layout[cursor_index(Cursor::ElseIfClauses)];
    if (!clauses) {
-      clauses = RawSyntax::make(SyntaxKind::ElseIfList, {elseIfClause.getRaw()}, SourcePresence::Present,
-                                m_arena);
+      clauses = RawSyntax::make(
+               SyntaxKind::ElseIfList, {elseIfClause.getRaw()}, SourcePresence::Present,
+               m_arena);
    } else {
       clauses = clauses->append(elseIfClause.getRaw());
    }
@@ -305,23 +301,19 @@ IfStmtSyntax IfStmtSyntaxBuilder::build()
                                                     OwnedString::makeUnowned(""));
    }
    if (!m_layout[labelColonIndex]) {
-      m_layout[labelColonIndex] = RawSyntax::missing(TokenKindType::T_COLON,
-                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+      m_layout[labelColonIndex] = make_missing_token(T_COLON);
    }
    if (!m_layout[ifKeywordIndex]) {
-      m_layout[ifKeywordIndex] = RawSyntax::missing(TokenKindType::T_IF,
-                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_IF)));
+      m_layout[ifKeywordIndex] = make_missing_token(T_IF);
    }
    if (!m_layout[leftParenIndex]) {
-      m_layout[leftParenIndex] = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+      m_layout[leftParenIndex] = make_missing_token(T_LEFT_PAREN);
    }
    if (!m_layout[conditionIndex]) {
       m_layout[conditionIndex] = RawSyntax::missing(SyntaxKind::Expr);
    }
    if (!m_layout[rightParenIndex]) {
-      m_layout[rightParenIndex] = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+      m_layout[rightParenIndex] = make_missing_token(T_RIGHT_PAREN);
    }
    if (!m_layout[bodyIndex]) {
       m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
@@ -330,14 +322,14 @@ IfStmtSyntax IfStmtSyntaxBuilder::build()
       m_layout[elseIfClausesIndex] = RawSyntax::missing(SyntaxKind::ElseIfList);
    }
    if (!m_layout[elseKeywordIndex]) {
-      m_layout[elseKeywordIndex] = RawSyntax::missing(TokenKindType::T_ELSEIF,
-                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_ELSEIF)));
+      m_layout[elseKeywordIndex] = make_missing_token(T_ELSEIF);
    }
    if (!m_layout[elseBodyIndex]) {
       m_layout[elseBodyIndex] = RawSyntax::missing(SyntaxKind::IfStmt);
    }
-   RefCountPtr<RawSyntax> rawIfStmtSytax = RawSyntax::make(SyntaxKind::IfStmt, m_layout, SourcePresence::Present,
-                                                           m_arena);
+   RefCountPtr<RawSyntax> rawIfStmtSytax = RawSyntax::make(
+            SyntaxKind::IfStmt, m_layout, SourcePresence::Present,
+            m_arena);
    return make<IfStmtSyntax>(rawIfStmtSytax);
 }
 
@@ -391,8 +383,9 @@ WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::addCondition(ConditionElementSyn
 {
    RefCountPtr<RawSyntax> conditions = m_layout[cursor_index(Cursor::Conditions)];
    if (!conditions) {
-      conditions = RawSyntax::make(SyntaxKind::ConditionElementList, {condition.getRaw()}, SourcePresence::Present,
-                                   m_arena);
+      conditions = RawSyntax::make(
+               SyntaxKind::ConditionElementList, {condition.getRaw()}, SourcePresence::Present,
+               m_arena);
    } else {
       conditions = conditions->append(condition.getRaw());
    }
@@ -413,29 +406,26 @@ WhileStmtSyntax WhileStmtSyntaxBuilder::build()
                                                     OwnedString::makeUnowned(""));
    }
    if (!m_layout[labelColonIndex]) {
-      m_layout[labelColonIndex] = RawSyntax::missing(TokenKindType::T_COLON,
-                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+      m_layout[labelColonIndex] = make_missing_token(T_COLON);
    }
    if (!m_layout[whileKeywordIndex]) {
-      m_layout[whileKeywordIndex] = RawSyntax::missing(TokenKindType::T_WHILE,
-                                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_WHILE)));
+      m_layout[whileKeywordIndex] = make_missing_token(T_WHILE);
    }
    if (!m_layout[leftParenIndex]) {
-      m_layout[leftParenIndex] = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+      m_layout[leftParenIndex] = make_missing_token(T_LEFT_PAREN);
    }
    if (!m_layout[conditionsIndex]) {
       m_layout[conditionsIndex] = RawSyntax::missing(SyntaxKind::ConditionElementList);
    }
    if (!m_layout[rightParenIndex]) {
-      m_layout[rightParenIndex] = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+      m_layout[rightParenIndex] = make_missing_token(T_RIGHT_PAREN);
    }
    if (!m_layout[bodyIndex]) {
       m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
-   RefCountPtr<RawSyntax> rawWhileStmt = RawSyntax::make(SyntaxKind::WhileStmt, m_layout, SourcePresence::Present,
-                                                         m_arena);
+   RefCountPtr<RawSyntax> rawWhileStmt = RawSyntax::make(
+            SyntaxKind::WhileStmt, m_layout, SourcePresence::Present,
+            m_arena);
    return make<WhileStmtSyntax>(rawWhileStmt);
 }
 
@@ -501,28 +491,24 @@ DoWhileStmtSyntax DoWhileStmtSyntaxBuilder::build()
    CursorIndex conditionIndex = cursor_index(Cursor::Condition);
    CursorIndex rightParenIndex =  cursor_index(Cursor::RightParen);
    if (!m_layout[labelColonIndex]) {
-      m_layout[labelColonIndex] = RawSyntax::missing(TokenKindType::T_COLON,
-                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+      m_layout[labelColonIndex] = make_missing_token(T_COLON);
    }
    if (!m_layout[labelName]) {
       m_layout[labelName] = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
                                                OwnedString::makeUnowned(""));
    }
    if (!m_layout[doKeywordIndex]) {
-      m_layout[doKeywordIndex] = RawSyntax::missing(TokenKindType::T_DO,
-                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_DO)));
+      m_layout[doKeywordIndex] = make_missing_token(T_DO);
    }
    if (!m_layout[bodyIndex]) {
       m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
    if (!m_layout[whileKeywordIndex]) {
-      m_layout[whileKeywordIndex] = RawSyntax::missing(TokenKindType::T_WHILE,
-                                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_WHILE)));
+      m_layout[whileKeywordIndex] = make_missing_token(T_WHILE);
    }
 
    if (!m_layout[leftParenIndex]) {
-      m_layout[leftParenIndex] = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+      m_layout[leftParenIndex] = make_missing_token(T_LEFT_PAREN);
    }
 
    if (!m_layout[conditionIndex]) {
@@ -530,11 +516,11 @@ DoWhileStmtSyntax DoWhileStmtSyntaxBuilder::build()
    }
 
    if (!m_layout[rightParenIndex]) {
-      m_layout[rightParenIndex] = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+      m_layout[rightParenIndex] = make_missing_token(T_RIGHT_PAREN);
    }
-   RefCountPtr<RawSyntax> rawDoWhileStmtSyntax = RawSyntax::make(SyntaxKind::DoWhileStmt, m_layout, SourcePresence::Present,
-                                                                 m_arena);
+   RefCountPtr<RawSyntax> rawDoWhileStmtSyntax = RawSyntax::make(
+            SyntaxKind::DoWhileStmt, m_layout, SourcePresence::Present,
+            m_arena);
    return make<DoWhileStmtSyntax>(rawDoWhileStmtSyntax);
 }
 
@@ -560,15 +546,14 @@ SwitchDefaultLabelSyntax SwitchDefaultLabelSyntaxBuilder::build()
    CursorIndex defaultKeywordIndex = cursor_index(Cursor::DefaultKeyword);
    CursorIndex colonIndex = cursor_index(Cursor::Colon);
    if (!m_layout[defaultKeywordIndex]) {
-      m_layout[defaultKeywordIndex] = RawSyntax::missing(TokenKindType::T_DEFAULT,
-                                                         OwnedString::makeUnowned(get_token_text(TokenKindType::T_DEFAULT)));
+      m_layout[defaultKeywordIndex] = make_missing_token(T_DEFAULT);
    }
    if (!m_layout[colonIndex]) {
-      m_layout[colonIndex] = RawSyntax::missing(TokenKindType::T_COLON,
-                                                OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+      m_layout[colonIndex] = make_missing_token(T_COLON);
    }
-   RefCountPtr<RawSyntax> rawSwitchDefaultLabelSyntax = RawSyntax::make(SyntaxKind::SwitchDefaultLabel, m_layout, SourcePresence::Present,
-                                                                        m_arena);
+   RefCountPtr<RawSyntax> rawSwitchDefaultLabelSyntax = RawSyntax::make(
+            SyntaxKind::SwitchDefaultLabel, m_layout, SourcePresence::Present,
+            m_arena);
    return make<SwitchDefaultLabelSyntax>(rawSwitchDefaultLabelSyntax);
 }
 
@@ -600,18 +585,17 @@ SwitchCaseLabelSyntax SwitchCaseLabelSyntaxBuilder::build()
    CursorIndex exprIndex = cursor_index(Cursor::Expr);
    CursorIndex colonIndex = cursor_index(Cursor::Colon);
    if (!m_layout[caseKeywordIndex]) {
-      m_layout[caseKeywordIndex] = RawSyntax::missing(TokenKindType::T_CASE,
-                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_CASE)));
+      m_layout[caseKeywordIndex] = make_missing_token(T_CASE);
    }
    if (!m_layout[exprIndex]) {
       m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
    }
    if (!m_layout[colonIndex]) {
-      m_layout[colonIndex] = RawSyntax::missing(TokenKindType::T_COLON,
-                                                OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+      m_layout[colonIndex] = make_missing_token(T_COLON);
    }
-   RefCountPtr<RawSyntax> rawSwitchCaseLabelSyntax = RawSyntax::make(SyntaxKind::SwitchCaseLabel, m_layout, SourcePresence::Present,
-                                                                     m_arena);
+   RefCountPtr<RawSyntax> rawSwitchCaseLabelSyntax = RawSyntax::make(
+            SyntaxKind::SwitchCaseLabel, m_layout, SourcePresence::Present,
+            m_arena);
    return make<SwitchCaseLabelSyntax>(rawSwitchCaseLabelSyntax);
 }
 
@@ -640,8 +624,9 @@ SwitchCaseSyntax SwitchCaseSyntaxBuilder::build()
    if (!m_layout[statementsIndex]) {
       m_layout[statementsIndex] = RawSyntax::missing(SyntaxKind::InnerStmtList);
    }
-   RefCountPtr<RawSyntax> rawSwitchCaseSyntax = RawSyntax::make(SyntaxKind::SwitchCase, m_layout, SourcePresence::Present,
-                                                                m_arena);
+   RefCountPtr<RawSyntax> rawSwitchCaseSyntax = RawSyntax::make(
+            SyntaxKind::SwitchCase, m_layout, SourcePresence::Present,
+            m_arena);
    return make<SwitchCaseSyntax>(rawSwitchCaseSyntax);
 }
 
@@ -701,8 +686,9 @@ SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::addCase(SwitchCaseSyntax caseI
 {
    RefCountPtr<RawSyntax> cases = m_layout[Cursor::Cases];
    if (!cases) {
-      cases = RawSyntax::make(SyntaxKind::SwitchCaseList, {caseItem.getRaw()}, SourcePresence::Present,
-                              m_arena);
+      cases = RawSyntax::make(
+               SyntaxKind::SwitchCaseList, {caseItem.getRaw()}, SourcePresence::Present,
+               m_arena);
    } else {
       cases = cases->append(caseItem.getRaw());
    }
@@ -732,18 +718,15 @@ SwitchStmtSyntax SwitchStmtSyntaxBuilder::build()
    }
 
    if (!m_layout[labelColonIndex]) {
-      m_layout[labelColonIndex] = RawSyntax::missing(TokenKindType::T_COLON,
-                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+      m_layout[labelColonIndex] = make_missing_token(T_COLON);
    }
 
    if (!m_layout[switchKeywordIndex]) {
-      m_layout[switchKeywordIndex] = RawSyntax::missing(TokenKindType::T_SWITCH,
-                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_SWITCH)));
+      m_layout[switchKeywordIndex] = make_missing_token(T_SWITCH);
    }
 
    if (!m_layout[leftParenIndex]) {
-      m_layout[leftParenIndex] = RawSyntax::missing(TokenKindType::T_LEFT_PAREN,
-                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_PAREN)));
+      m_layout[leftParenIndex] = make_missing_token(T_LEFT_PAREN);
    }
 
    if (!m_layout[conditionExprIndex]) {
@@ -751,13 +734,11 @@ SwitchStmtSyntax SwitchStmtSyntaxBuilder::build()
    }
 
    if (!m_layout[rightParenIndex]) {
-      m_layout[rightParenIndex] = RawSyntax::missing(TokenKindType::T_RIGHT_PAREN,
-                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_PAREN)));
+      m_layout[rightParenIndex] = make_missing_token(T_RIGHT_PAREN);
    }
 
    if (!m_layout[leftBraceIndex]) {
-      m_layout[leftBraceIndex] = RawSyntax::missing(TokenKindType::T_LEFT_BRACE,
-                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_LEFT_BRACE)));
+      m_layout[leftBraceIndex] = make_missing_token(T_LEFT_BRACE);
    }
 
    if (!m_layout[casesIndex]) {
@@ -765,12 +746,12 @@ SwitchStmtSyntax SwitchStmtSyntaxBuilder::build()
    }
 
    if (!m_layout[rightBraceIndex]) {
-      m_layout[rightBraceIndex] = RawSyntax::missing(TokenKindType::T_RIGHT_BRACE,
-                                                     OwnedString::makeUnowned(get_token_text(TokenKindType::T_RIGHT_BRACE)));
+      m_layout[rightBraceIndex] = make_missing_token(T_RIGHT_BRACE);
    }
 
-   RefCountPtr<RawSyntax> rawSwitchStmtSyntax = RawSyntax::make(SyntaxKind::SwitchStmt, m_layout, SourcePresence::Present,
-                                                                m_arena);
+   RefCountPtr<RawSyntax> rawSwitchStmtSyntax = RawSyntax::make(
+            SyntaxKind::SwitchStmt, m_layout, SourcePresence::Present,
+            m_arena);
    return make<SwitchStmtSyntax>(rawSwitchStmtSyntax);
 }
 
@@ -795,14 +776,14 @@ DeferStmtSyntax DeferStmtSyntaxBuilder::build()
    CursorIndex deferKeywordIndex = cursor_index(Cursor::DeferKeyword);
    CursorIndex bodyIndex = cursor_index(Cursor::Body);
    if (!m_layout[deferKeywordIndex]) {
-      m_layout[deferKeywordIndex] = RawSyntax::missing(TokenKindType::T_DEFER,
-                                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_DEFER)));
+      m_layout[deferKeywordIndex] = make_missing_token(T_DEFER);
    }
    if (!m_layout[bodyIndex]) {
       m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
-   RefCountPtr<RawSyntax> rawDeferStmtSyntax = RawSyntax::make(SyntaxKind::DeferStmt, m_layout, SourcePresence::Present,
-                                                               m_arena);
+   RefCountPtr<RawSyntax> rawDeferStmtSyntax = RawSyntax::make(
+            SyntaxKind::DeferStmt, m_layout, SourcePresence::Present,
+            m_arena);
    return make<DeferStmtSyntax>(rawDeferStmtSyntax);
 }
 
@@ -828,16 +809,16 @@ ThrowStmtSyntax ThrowStmtSyntaxBuilder::build()
    CursorIndex exprIndex = cursor_index(Cursor::Expr);
 
    if (!m_layout[throwKeywordIndex]) {
-      m_layout[throwKeywordIndex] = RawSyntax::missing(TokenKindType::T_THROW,
-                                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_THROW)));
+      m_layout[throwKeywordIndex] = make_missing_token(T_THROW);
    }
 
    if (!m_layout[exprIndex]) {
       m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
    }
 
-   RefCountPtr<RawSyntax> rawThrowStmtSyntax = RawSyntax::make(SyntaxKind::ThrowStmt, m_layout, SourcePresence::Present,
-                                                               m_arena);
+   RefCountPtr<RawSyntax> rawThrowStmtSyntax = RawSyntax::make(
+            SyntaxKind::ThrowStmt, m_layout, SourcePresence::Present,
+            m_arena);
    return make<ThrowStmtSyntax>(rawThrowStmtSyntax);
 }
 
@@ -862,15 +843,15 @@ ReturnStmtSyntax ReturnStmtSyntaxBuilder::build()
    CursorIndex exprIndex = cursor_index(Cursor::Expr);
 
    if (!m_layout[returnKeywordIndex]) {
-      m_layout[returnKeywordIndex] = RawSyntax::missing(TokenKindType::T_RETURN,
-                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_RETURN)));
+      m_layout[returnKeywordIndex] = make_missing_token(T_RETURN);
    }
 
    if (!m_layout[exprIndex]) {
       m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
    }
-   RefCountPtr<RawSyntax> rawReturnStmtSyntax = RawSyntax::make(SyntaxKind::ThrowStmt, m_layout, SourcePresence::Present,
-                                                                m_arena);
+   RefCountPtr<RawSyntax> rawReturnStmtSyntax = RawSyntax::make(
+            SyntaxKind::ThrowStmt, m_layout, SourcePresence::Present,
+            m_arena);
    return make<ReturnStmtSyntax>(rawReturnStmtSyntax);
 }
 
