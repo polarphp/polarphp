@@ -28,9 +28,10 @@ public:
 
    enum Cursor : SyntaxChildrenCountType
    {
+      ///
       /// type: TokenSyntax
       /// optional: false
-      /// token choices: true
+      ///
       Modifier
    };
 
@@ -87,18 +88,11 @@ public:
    constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
    enum Cursor : SyntaxChildrenCountType
    {
-      /// type: Syntax
+      /// type: TokenSyntax
       /// optional: false
-      /// node choices: true
-      /// ------------------------------------------------------------------------
-      /// choice type: ReservedNonModifierSyntax
-      /// ------------------------------------------------------------------------
-      /// choice type: TokenSyntax
-      /// token choices: true
       /// ------------------------------------------------------------------------
       /// T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
       Modifier,
-      ModifierChoiceToken
    };
 
 #ifdef POLAR_DEBUG_BUILD
@@ -116,8 +110,8 @@ public:
       validate();
    }
 
-   Syntax getModifier();
-   SemiReservedSytnax withModifier(std::optional<Syntax> modifier);
+   TokenSyntax getModifier();
+   SemiReservedSytnax withModifier(std::optional<TokenSyntax> modifier);
 
    static bool kindOf(SyntaxKind kind)
    {

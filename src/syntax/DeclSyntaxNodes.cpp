@@ -80,7 +80,7 @@ ReservedNonModifierSyntax ReservedNonModifierSyntax::withModifier(std::optional<
 const TokenChoicesType SemiReservedSytnax::CHILD_TOKEN_CHOICES
 {
    {
-      SemiReservedSytnax::Cursor::ModifierChoiceToken, {
+      SemiReservedSytnax::Cursor::Modifier, {
          TokenKindType::T_STATIC, TokenKindType::T_ABSTRACT, TokenKindType::T_FINAL,
                TokenKindType::T_PRIVATE, TokenKindType::T_PROTECTED, TokenKindType::T_PUBLIC
       }
@@ -98,28 +98,27 @@ void SemiReservedSytnax::validate()
    assert(raw->getLayout().size() == SemiReservedSytnax::CHILDREN_COUNT);
    // check node choices
    if (const RefCountPtr<RawSyntax> &modifierChild = raw->getChild(Cursor::Modifier)) {
-      if (modifierChild->isToken()) {
-         syntax_assert_child_token(raw, ModifierChoiceToken,
-                                   CHILD_TOKEN_CHOICES.at(SemiReservedSytnax::ModifierChoiceToken));
-         return;
-      }
-      assert(modifierChild->kindOf(SyntaxKind::ReservedNonModifier));
+      assert(modifierChild->isToken());
+      TokenKindType tokenKind = modifierChild->getTokenKind();
+      const std::set<TokenKindType> &semiReservedKinds = CHILD_TOKEN_CHOICES.at(Cursor::Modifier);
+      const std::set<TokenKindType> &reservedNonModifierKinds = ReservedNonModifierSyntax::CHILD_TOKEN_CHOICES.at(ReservedNonModifierSyntax::Modifier);
+      assert(semiReservedKinds.find(tokenKind) != semiReservedKinds.end() || reservedNonModifierKinds.find(tokenKind) != reservedNonModifierKinds.end());
    }
 #endif
 }
 
-Syntax SemiReservedSytnax::getModifier()
+TokenSyntax SemiReservedSytnax::getModifier()
 {
-   return Syntax{m_root, m_data->getChild(Cursor::Modifier).get()};
+   return TokenSyntax{m_root, m_data->getChild(Cursor::Modifier).get()};
 }
 
-SemiReservedSytnax SemiReservedSytnax::withModifier(std::optional<Syntax> modifier)
+SemiReservedSytnax SemiReservedSytnax::withModifier(std::optional<TokenSyntax> modifier)
 {
    RefCountPtr<RawSyntax> modifierRaw;
    if (modifier.has_value()) {
       modifierRaw = modifier->getRaw();
    } else {
-      modifierRaw = RawSyntax::missing(SyntaxKind::Unknown);
+      modifierRaw = make_missing_token(T_PUBLIC);
    }
    return m_data->replaceChild<SemiReservedSytnax>(modifierRaw, Cursor::Modifier);
 }

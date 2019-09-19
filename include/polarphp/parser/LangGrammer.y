@@ -328,10 +328,10 @@ using namespace polar::syntax;
 %type <RefCountPtr<RawSyntax>> lexical_var_list encaps_list
 %type <RefCountPtr<RawSyntax>> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
 %type <RefCountPtr<RawSyntax>> isset_variable type return_type type_expr
-%type <RefCountPtr<RawSyntax>> identifier reserved_non_modifiers semi_reserved
+%type <RefCountPtr<RawSyntax>> identifier reserved_non_modifiers semi_reserved reserved_non_modifiers_token semi_reserved_token
 %type <RefCountPtr<RawSyntax>> inline_function
 
-%type <RefCountPtr<RawSyntax>> returns_ref function fn is_reference is_variadic variable_modifiers
+%type <RefCountPtr<RawSyntax>> returns_ref function fn is_reference is_variadic variable_modifiers 
 %type <RefCountPtr<RawSyntax>> method_modifiers non_empty_member_modifiers member_modifier
 %type <RefCountPtr<RawSyntax>> class_modifiers class_modifier use_type backup_fn_flags
 
@@ -346,7 +346,7 @@ start:
    }
 ;
 
-reserved_non_modifiers:
+reserved_non_modifiers_token:
      T_INCLUDE { $$ = make_reserved_keyword(Include); }
    | T_INCLUDE_ONCE { $$ = make_reserved_keyword(IncludeOnce); }
    | T_EVAL { $$ = make_reserved_keyword(Eval); }
@@ -411,14 +411,30 @@ reserved_non_modifiers:
    | T_FN { $$ = make_reserved_keyword(Fn); }
 ;
 
-semi_reserved:
-      reserved_non_modifiers { $$ = $1; }
+reserved_non_modifiers:
+   reserved_non_modifiers_token {
+      TokenSyntax modifierKeyword = make<TokenSyntax>($1);
+      ReservedNonModifierSyntax modifier = make_decl(ReservedNonModifier, modifierKeyword);
+      $$ = modifier.getRaw();
+   }
+;
+
+semi_reserved_token:
+   reserved_non_modifiers_token { $$ = $1; }
    |  T_STATIC { $$ = make_reserved_keyword(Static); }
    | T_ABSTRACT { $$ = make_reserved_keyword(Abstract); }
    | T_FINAL { $$ = make_reserved_keyword(Final); }
    | T_PRIVATE { $$ = make_reserved_keyword(Private); }
    | T_PROTECTED { $$ = make_reserved_keyword(Protected); }
    | T_PUBLIC { $$ = make_reserved_keyword(Public); }
+;
+
+semi_reserved:
+   semi_reserved_token {
+      TokenSyntax reservedKeyword = make<TokenSyntax>($1);
+      SemiReservedSytnax semiReserved = make_decl(SemiReserved, reservedKeyword);
+      $$ = semiReserved.getRaw();
+   }
 ;
 
 identifier:
@@ -428,11 +444,9 @@ identifier:
       $$ = identifier.getRaw();
    }
 |	semi_reserved {
-      // TokenKindType kind = $<int>1;
-      // TokenSyntax identifierToken = AbstractFactory::makeToken(kind, OwnedString::makeUnowned(get_token_text(kind)),
-      //                                                          empty_trivia(), empty_trivia(), SourcePresence::Present);
-      // IdentifierSyntax identifier = make_decl(Identifier, identifierToken);
-      // $$ = identifier.getRaw();
+      SemiReservedSytnax reserved = make<SemiReservedSytnax>($1);
+      IdentifierSyntax identifier = make_decl(Identifier, reserved);
+      $$ = identifier.getRaw();
    }
 ;
 
