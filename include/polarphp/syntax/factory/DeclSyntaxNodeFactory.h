@@ -98,7 +98,7 @@ public:
                                                     std::optional<Syntax> modifier, std::optional<Syntax> aliasName,
                                                     RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassTraitAdaptationSyntax makeClassTraitAdaptation(Syntax adaptation, TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ClassTraitAdaptationBlockSyntax makeClassTraitAdaptationBlock(TokenSyntax leftBrace, ClassTraitAdaptationListSyntax adaptationList,
+   static ClassTraitAdaptationBlockSyntax makeClassTraitAdaptationBlock(TokenSyntax leftBrace, std::optional<ClassTraitAdaptationListSyntax> adaptationList,
                                                                         TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassTraitDeclSyntax makeClassTraitDecl(TokenSyntax useToken, NameListSyntax nameList, std::optional<ClassTraitAdaptationBlockSyntax> block,
                                                   RefCountPtr<SyntaxArena> arena = nullptr);

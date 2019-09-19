@@ -1382,13 +1382,41 @@ class_statement_list:
 
 class_statement:
    variable_modifiers optional_type property_list T_SEMICOLON {
-
+      MemberModifierListSyntax modifiers = make<MemberModifierListSyntax>($1);
+      std::optional<TypeExprClauseSyntax> optionalType = $2 ? std::optional(make<TypeExprClauseSyntax>($1)) : std::nullopt;
+      ClassPropertyListSyntax propList = make<ClassPropertyListSyntax>($3);
+      ClassPropertyDeclSyntax decl = make_decl(
+         ClassPropertyDecl, modifiers, optionalType, propList
+      );
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      MemberDeclListItemSyntax declStmt = make_decl(MemberDeclListItem, decl, semicolon);
+      $$ = declStmt.getRaw();
    }
 |  method_modifiers T_CONST class_const_list T_SEMICOLON {
-
+      MemberModifierListSyntax modifiers = make<MemberModifierListSyntax>($1);
+      TokenSyntax constKeyword = make_token(ConstKeyword);
+      ClassConstListSyntax list = make<ClassConstListSyntax>($1);
+      ClassConstDeclSyntax decl = make_decl(ClassConstDecl, modifiers, constKeyword, list);
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      MemberDeclListItemSyntax declStmt = make_decl(MemberDeclListItem, decl, semicolon);
+      $$ = declStmt.getRaw();
    }
 |  T_USE name_list trait_adaptations {
-
+      TokenSyntax useKeyword = make_token(UseKeyword);
+      NameListSyntax names = make<NameListSyntax>($2);
+      RefCountPtr<RawSyntax> rawSyntax = $3;
+      RefCountPtr<RawSyntax> rawSemicolon = nullptr;
+      RefCountPtr<RawSyntax> rawAdaptations = nullptr;
+      if (rawSyntax->kindOf(SyntaxKind::ClassTraitAdaptationBlock)) {
+         rawAdaptations = rawSyntax;
+      } else if (rawSyntax->isToken()) {
+         rawSemicolon = rawSyntax;
+      }
+      ClassTraitDeclSyntax decl = make_decl(
+         ClassTraitDecl, useKeyword, names, rawAdaptations ? std::optional(make<ClassTraitAdaptationBlockSyntax>(rawSyntax)) : std::nullopt);
+      MemberDeclListItemSyntax declStmt = make_decl(
+         MemberDeclListItem, decl, rawSemicolon ? std::optional(make<TokenSyntax>(rawSemicolon)) : std::nullopt);
+      $$ = declStmt.getRaw();
    }
 |  method_modifiers function returns_ref identifier backup_doc_comment T_LEFT_PAREN parameter_list T_RIGHT_PAREN
    return_type backup_fn_flags method_body backup_fn_flags {
@@ -1416,37 +1444,71 @@ name_list:
 
 trait_adaptations:
    T_SEMICOLON {
-
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      $$ = semicolon.getRaw();
    }
 |  T_LEFT_BRACE T_RIGHT_BRACE {
-
+      TokenSyntax leftParen = make_token(LeftBraceToken);
+      TokenSyntax rightParen = make_token(RightBraceToken);
+      ClassTraitAdaptationBlockSyntax adaptationBlock = make_decl(
+         ClassTraitAdaptationBlock, leftParen, std::nullopt, rightParen
+      );
+      $$ = adaptationBlock.getRaw();
    }
 |  T_LEFT_BRACE trait_adaptation_list T_RIGHT_BRACE {
-
+      TokenSyntax leftParen = make_token(LeftBraceToken);
+      ClassTraitAdaptationListSyntax list = make<ClassTraitAdaptationListSyntax>($2);
+      TokenSyntax rightParen = make_token(RightBraceToken);
+      ClassTraitAdaptationBlockSyntax adaptationBlock = make_decl(
+         ClassTraitAdaptationBlock, leftParen, list, rightParen
+      );
+      $$ = adaptationBlock.getRaw();
    }
 ;
 
 trait_adaptation_list:
    trait_adaptation {
-
+      ClassTraitAdaptationSyntax adaptation = make<ClassTraitAdaptationSyntax>($1);
+      std::vector<ClassTraitAdaptationSyntax> items{adaptation};
+      ClassTraitAdaptationListSyntax list = make_decl(
+         ClassTraitAdaptationList, items
+      );
+      $$ = list.getRaw();
    }
 |  trait_adaptation_list trait_adaptation {
-
+      ClassTraitAdaptationListSyntax list = make<ClassTraitAdaptationListSyntax>($1);
+      ClassTraitAdaptationSyntax adaptation = make<ClassTraitAdaptationSyntax>($2);
+      list.appending(adaptation);
+      $$ = list.getRaw();
    }
 ;
 
 trait_adaptation:
    trait_precedence T_SEMICOLON {
-
+      ClassTraitPrecedenceSyntax traitPrecedence = make<ClassTraitPrecedenceSyntax>($1);
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      ClassTraitAdaptationSyntax adaptation = make_decl(
+         ClassTraitAdaptation, traitPrecedence, semicolon);
+      $$ = adaptation.getRaw();
    }
 |  trait_alias T_SEMICOLON {
-
+      ClassTraitAliasSyntax traitAlias = make<ClassTraitAliasSyntax>($1);
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      ClassTraitAdaptationSyntax adaptation = make_decl(
+         ClassTraitAdaptation, traitAlias, semicolon);
+      $$ = adaptation.getRaw();
    }
 ;
 
 trait_precedence:
    absolute_trait_method_reference T_INSTEADOF name_list {
-
+      ClassAbsoluteTraitMethodReferenceSyntax absoluteMethodRef = make<ClassAbsoluteTraitMethodReferenceSyntax>($1);
+      TokenSyntax insteadofKeyword = make_token(InsteadofKeyword);
+      NameListSyntax names = make<NameListSyntax>($3);
+      ClassTraitPrecedenceSyntax traitPrecedence = make_decl(
+         ClassTraitPrecedence, absoluteMethodRef, insteadofKeyword, names
+      );
+      $$ = traitPrecedence.getRaw();
    }
 ;
 
@@ -2957,8 +3019,8 @@ possible_array_pair:
       $$ = nullptr;
    }
 |  array_pair {
-   $$ = $1;
-}
+      $$ = $1;
+   }
 ;
 
 non_empty_array_pair_list:

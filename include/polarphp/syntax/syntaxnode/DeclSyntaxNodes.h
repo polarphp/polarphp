@@ -1860,7 +1860,7 @@ public:
       LeftBrace,
       ///
       /// type: ClassTraitAdaptationListSyntax
-      /// optional: false
+      /// optional: true
       ///
       AdaptationList,
       ///
@@ -1878,7 +1878,7 @@ public:
    }
 
    TokenSyntax getLeftBrace();
-   ClassTraitAdaptationListSyntax getAdaptaionList();
+   std::optional<ClassTraitAdaptationListSyntax> getAdaptationList();
    TokenSyntax getRightBrace();
 
    ClassTraitAdaptationBlockSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
@@ -1989,7 +1989,7 @@ public:
    }
 
    DeclSyntax getDecl();
-   TokenSyntax getSemicolon();
+   std::optional<TokenSyntax> getSemicolon();
    MemberDeclListItemSyntax withDecl(std::optional<DeclSyntax> decl);
    MemberDeclListItemSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
 

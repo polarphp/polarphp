@@ -508,13 +508,13 @@ DeclSyntaxNodeFactory::makeClassTraitAdaptation(Syntax adaptation, TokenSyntax s
 }
 
 ClassTraitAdaptationBlockSyntax
-DeclSyntaxNodeFactory::makeClassTraitAdaptationBlock(TokenSyntax leftBrace, ClassTraitAdaptationListSyntax adaptationList,
+DeclSyntaxNodeFactory::makeClassTraitAdaptationBlock(TokenSyntax leftBrace, std::optional<ClassTraitAdaptationListSyntax> adaptationList,
                                                      TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassTraitAdaptationBlock, {
                leftBrace.getRaw(),
-               adaptationList.getRaw(),
+               adaptationList.has_value() ? adaptationList->getRaw() : nullptr,
                rightBrace.getRaw(),
             }, SourcePresence::Present, arena);
    return make<ClassTraitAdaptationBlockSyntax>(target);
@@ -1077,7 +1077,7 @@ DeclSyntaxNodeFactory::makeBlankClassTraitAdaptationBlock(RefCountPtr<SyntaxAren
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ClassTraitAdaptationBlock, {
                make_missing_token(T_LEFT_PAREN), // LeftBrace
-               RawSyntax::missing(SyntaxKind::ClassTraitAdaptationList), // AdaptationList
+               nullptr, // AdaptationList
                make_missing_token(T_RIGHT_PAREN), // RightBrace
             },
             SourcePresence::Present, arena);

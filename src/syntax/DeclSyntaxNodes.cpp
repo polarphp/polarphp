@@ -1847,9 +1847,13 @@ TokenSyntax ClassTraitAdaptationBlockSyntax::getLeftBrace()
    return TokenSyntax {m_root, m_data->getChild(Cursor::LeftBrace).get()};
 }
 
-ClassTraitAdaptationListSyntax ClassTraitAdaptationBlockSyntax::getAdaptaionList()
+std::optional<ClassTraitAdaptationListSyntax> ClassTraitAdaptationBlockSyntax::getAdaptationList()
 {
-   return ClassTraitAdaptationListSyntax {m_root, m_data->getChild(Cursor::AdaptationList).get()};
+   RefCountPtr<SyntaxData> adaptationData = m_data->getChild(Cursor::AdaptationList);
+   if (!adaptationData) {
+      return std::nullopt;
+   }
+   return ClassTraitAdaptationListSyntax {m_root, adaptationData.get()};
 }
 
 TokenSyntax ClassTraitAdaptationBlockSyntax::getRightBrace()
@@ -1875,7 +1879,7 @@ ClassTraitAdaptationBlockSyntax::withAdaptationList(std::optional<ClassTraitAdap
    if (adaptaionList.has_value()) {
       adaptaionListRaw = adaptaionList->getRaw();
    } else {
-      adaptaionListRaw = RawSyntax::missing(SyntaxKind::ClassTraitAdaptationList);
+      adaptaionListRaw = nullptr;
    }
    return m_data->replaceChild<ClassTraitAdaptationBlockSyntax>(adaptaionListRaw, Cursor::AdaptationList);
 }
@@ -2255,9 +2259,13 @@ DeclSyntax MemberDeclListItemSyntax::getDecl()
    return DeclSyntax {m_root, m_data->getChild(Cursor::Decl).get()};
 }
 
-TokenSyntax MemberDeclListItemSyntax::getSemicolon()
+std::optional<TokenSyntax> MemberDeclListItemSyntax::getSemicolon()
 {
-   return TokenSyntax {m_root, m_data->getChild(Cursor::Semicolon).get()};
+   RefCountPtr<SyntaxData> semicolonData = m_data->getChild(Cursor::Semicolon);
+   if (!semicolonData) {
+      return std::nullopt;
+   }
+   return TokenSyntax {m_root, semicolonData.get()};
 }
 
 MemberDeclListItemSyntax MemberDeclListItemSyntax::withDecl(std::optional<DeclSyntax> decl)
@@ -2277,7 +2285,7 @@ MemberDeclListItemSyntax MemberDeclListItemSyntax::withSemicolon(std::optional<T
    if (semicolon.has_value()) {
       semicolonRaw = semicolon->getRaw();
    } else {
-      semicolonRaw = make_missing_token(T_SEMICOLON);
+      semicolonRaw = nullptr;
    }
    return m_data->replaceChild<MemberDeclListItemSyntax>(semicolonRaw, Cursor::Semicolon);
 }
