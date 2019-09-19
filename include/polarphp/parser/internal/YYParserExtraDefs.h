@@ -26,6 +26,8 @@
 #define make_stmt(name, ...) StmtSyntaxNodeFactory::make##name(__VA_ARGS__)
 #define make_blank_stmt(name) StmtSyntaxNodeFactory::makeBlank##name()
 
+#define make_reserved_keyword(name) make_token(name##Keyword).getRaw()
+
 #define RESET_DOC_COMMENT() (void)0
 
 #endif // POLARPHP_PARSER_INTERNAL_YYPARSER_EXTRAS_DEFS_H

@@ -328,7 +328,7 @@ using namespace polar::syntax;
 %type <RefCountPtr<RawSyntax>> lexical_var_list encaps_list
 %type <RefCountPtr<RawSyntax>> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
 %type <RefCountPtr<RawSyntax>> isset_variable type return_type type_expr
-%type <RefCountPtr<RawSyntax>> identifier
+%type <RefCountPtr<RawSyntax>> identifier reserved_non_modifiers semi_reserved
 %type <RefCountPtr<RawSyntax>> inline_function
 
 %type <RefCountPtr<RawSyntax>> returns_ref function fn is_reference is_variadic variable_modifiers
@@ -347,18 +347,78 @@ start:
 ;
 
 reserved_non_modifiers:
-     T_INCLUDE | T_INCLUDE_ONCE | T_EVAL | T_REQUIRE | T_REQUIRE_ONCE | T_LOGICAL_OR | T_LOGICAL_XOR | T_LOGICAL_AND
-   | T_INSTANCEOF | T_NEW | T_CLONE | T_EXIT | T_IF | T_ELSEIF | T_ELSE | T_ECHO | T_DO | T_WHILE
-   | T_FOR | T_FOREACH | T_DECLARE | T_AS | T_TRY | T_CATCH | T_FINALLY
-   | T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
-   | T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_CASE | T_DEFAULT | T_BREAK
-   | T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
-   | T_CLASS_CONST | T_TRAIT_CONST | T_FUNC_CONST | T_METHOD_CONST | T_LINE | T_FILE | T_DIR | T_NS_CONST | T_FN
+     T_INCLUDE { $$ = make_reserved_keyword(Include); }
+   | T_INCLUDE_ONCE { $$ = make_reserved_keyword(IncludeOnce); }
+   | T_EVAL { $$ = make_reserved_keyword(Eval); }
+   | T_REQUIRE { $$ = make_reserved_keyword(Require); }
+   | T_REQUIRE_ONCE { $$ = make_reserved_keyword(RequireOnce); }
+   | T_LOGICAL_OR { $$ = make_reserved_keyword(LogicOr); }
+   | T_LOGICAL_XOR { $$ = make_reserved_keyword(LogicXor); }
+   | T_LOGICAL_AND { $$ = make_reserved_keyword(LogicAnd); }
+   | T_INSTANCEOF { $$ = make_reserved_keyword(Instanceof); }
+   | T_NEW { $$ = make_reserved_keyword(New); }
+   | T_CLONE { $$ = make_reserved_keyword(Clone); }
+   | T_EXIT { $$ = make_reserved_keyword(Exit); }
+   | T_IF { $$ = make_reserved_keyword(If); }
+   | T_ELSEIF { $$ = make_reserved_keyword(ElseIf); }
+   | T_ELSE { $$ = make_reserved_keyword(Else); }
+   | T_ECHO { $$ = make_reserved_keyword(Echo); }
+   | T_DO { $$ = make_reserved_keyword(Do); }
+   | T_WHILE { $$ = make_reserved_keyword(While); }
+   | T_FOR { $$ = make_reserved_keyword(For); }
+   | T_FOREACH { $$ = make_reserved_keyword(Foreach); }
+   | T_DECLARE { $$ = make_reserved_keyword(Declare); }
+   | T_AS { $$ = make_reserved_keyword(As); }
+   | T_TRY { $$ = make_reserved_keyword(Try); }
+   | T_CATCH { $$ = make_reserved_keyword(Catch); }
+   | T_FINALLY { $$ = make_reserved_keyword(Finally); }
+   | T_THROW { $$ = make_reserved_keyword(Throw); }
+   | T_USE { $$ = make_reserved_keyword(Use); }
+   | T_INSTEADOF { $$ = make_reserved_keyword(Insteadof); }
+   | T_GLOBAL { $$ = make_reserved_keyword(Global); }
+   | T_VAR { $$ = make_reserved_keyword(Var); }
+   | T_UNSET { $$ = make_reserved_keyword(Unset); }
+   | T_ISSET { $$ = make_reserved_keyword(Isset); }
+   | T_EMPTY { $$ = make_reserved_keyword(Empty); }
+   | T_CONTINUE { $$ = make_reserved_keyword(Continue); }
+   | T_GOTO { $$ = make_reserved_keyword(Goto); }
+   | T_FUNCTION { $$ = make_reserved_keyword(Function); }
+   | T_CONST { $$ = make_reserved_keyword(Const); }
+   | T_RETURN { $$ = make_reserved_keyword(Return); }
+   | T_PRINT { $$ = make_reserved_keyword(Print); }
+   | T_YIELD { $$ = make_reserved_keyword(Yield); }
+   | T_LIST { $$ = make_reserved_keyword(List); }
+   | T_SWITCH { $$ = make_reserved_keyword(Switch); }
+   | T_CASE { $$ = make_reserved_keyword(Case); }
+   | T_DEFAULT { $$ = make_reserved_keyword(Default); }
+   | T_BREAK { $$ = make_reserved_keyword(Break); }
+   | T_ARRAY { $$ = make_reserved_keyword(Array); }
+   | T_CALLABLE { $$ = make_reserved_keyword(Callable); }
+   | T_EXTENDS { $$ = make_reserved_keyword(Extends); }
+   | T_IMPLEMENTS { $$ = make_reserved_keyword(Implements); }
+   | T_NAMESPACE { $$ = make_reserved_keyword(Namespace); }
+   | T_TRAIT { $$ = make_reserved_keyword(Trait); }
+   | T_INTERFACE { $$ = make_reserved_keyword(Interface); }
+   | T_CLASS { $$ = make_reserved_keyword(Class); }
+   | T_CLASS_CONST { $$ = make_reserved_keyword(ClassConst); }
+   | T_TRAIT_CONST { $$ = make_reserved_keyword(TraitConst); }
+   | T_FUNC_CONST { $$ = make_reserved_keyword(FuncConst); }
+   | T_METHOD_CONST { $$ = make_reserved_keyword(MethodConst); }
+   | T_LINE { $$ = make_reserved_keyword(Line); }
+   | T_FILE { $$ = make_reserved_keyword(File); }
+   | T_DIR { $$ = make_reserved_keyword(Dir); }
+   | T_NS_CONST { $$ = make_reserved_keyword(NamespaceConst); }
+   | T_FN { $$ = make_reserved_keyword(Fn); }
 ;
 
 semi_reserved:
-      reserved_non_modifiers
-   |  T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
+      reserved_non_modifiers { $$ = $1; }
+   |  T_STATIC { $$ = make_reserved_keyword(Static); }
+   | T_ABSTRACT { $$ = make_reserved_keyword(Abstract); }
+   | T_FINAL { $$ = make_reserved_keyword(Final); }
+   | T_PRIVATE { $$ = make_reserved_keyword(Private); }
+   | T_PROTECTED { $$ = make_reserved_keyword(Protected); }
+   | T_PUBLIC { $$ = make_reserved_keyword(Public); }
 ;
 
 identifier:
@@ -1378,39 +1438,85 @@ trait_precedence:
 
 trait_alias:
    trait_method_reference T_AS T_IDENTIFIER_STRING {
-
+      ClassTraitMethodReferenceSyntax methodRef = make<ClassTraitMethodReferenceSyntax>($1);
+      TokenSyntax asKeyword = make_token(AsKeyword);
+      TokenSyntax aliasName = make_token_with_text(IdentifierString, $3);
+      ClassTraitAliasSyntax traitAlias = make_decl(
+         ClassTraitAlias, methodRef, asKeyword, std::nullopt, aliasName
+      );
+      $$ = traitAlias.getRaw();
    }
 |  trait_method_reference T_AS reserved_non_modifiers {
-
+      ClassTraitMethodReferenceSyntax methodRef = make<ClassTraitMethodReferenceSyntax>($1);
+      TokenSyntax asKeyword = make_token(AsKeyword);
+      ReservedNonModifierSyntax aliasName = make<ReservedNonModifierSyntax>($3);
+      ClassTraitAliasSyntax traitAlias = make_decl(
+         ClassTraitAlias, methodRef, asKeyword, std::nullopt, aliasName
+      );
+      $$ = traitAlias.getRaw();
    }
 |  trait_method_reference T_AS member_modifier identifier {
-
+      ClassTraitMethodReferenceSyntax methodRef = make<ClassTraitMethodReferenceSyntax>($1);
+      TokenSyntax asKeyword = make_token(AsKeyword);
+      IdentifierSyntax aliasName = make<IdentifierSyntax>($4);
+      MemberModifierSyntax modifier = make<MemberModifierSyntax>($3);
+      ClassTraitAliasSyntax traitAlias = make_decl(
+         ClassTraitAlias, methodRef, asKeyword, modifier, aliasName
+      );
+      $$ = traitAlias.getRaw();
    }
 |  trait_method_reference T_AS member_modifier {
-
+      ClassTraitMethodReferenceSyntax methodRef = make<ClassTraitMethodReferenceSyntax>($1);
+      TokenSyntax asKeyword = make_token(AsKeyword);
+      MemberModifierSyntax modifier = make<MemberModifierSyntax>($3);
+      ClassTraitAliasSyntax traitAlias = make_decl(
+         ClassTraitAlias, methodRef, asKeyword, modifier, std::nullopt
+      );
+      $$ = traitAlias.getRaw();
    }
 ;
 
 trait_method_reference:
    identifier {
-
+      IdentifierSyntax identifier = make<IdentifierSyntax>($1);
+      ClassTraitMethodReferenceSyntax methodRef = make_decl(
+         ClassTraitMethodReference, identifier
+      );
+      $$ = methodRef.getRaw();
    }
 |  absolute_trait_method_reference {
+      ClassAbsoluteTraitMethodReferenceSyntax absoluteMethodRef = make<ClassAbsoluteTraitMethodReferenceSyntax>($1);
+      ClassTraitMethodReferenceSyntax methodRef = make_decl(
+         ClassTraitMethodReference, absoluteMethodRef
+      );
+      $$ = methodRef.getRaw();
    }
 ;
 
 absolute_trait_method_reference:
    name T_PAAMAYIM_NEKUDOTAYIM identifier {
-
+      NameSyntax name = make<NameSyntax>($1);
+      TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
+      IdentifierSyntax identifier = make<IdentifierSyntax>($3);
+      ClassAbsoluteTraitMethodReferenceSyntax traitMethodRef = make_decl(
+         ClassAbsoluteTraitMethodReference, name, paamayimNekudotayimToken, identifier
+      );
+      $$ = traitMethodRef.getRaw();
    }
 ;
 
 method_body:
    T_SEMICOLON {
-
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      MethodCodeBlockSyntax codeBlock = make_decl(MethodCodeBlock, semicolon);
+      $$ = codeBlock.getRaw();
    }
 |  T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE {
-
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      InnerStmtListSyntax stmts = make<InnerStmtListSyntax>($2);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      InnerCodeBlockStmtSyntax codeBlock = make_stmt(InnerCodeBlockStmt, leftBrace, stmts, rightBrace);
+      $$ = codeBlock.getRaw();
    }
 ;
 
