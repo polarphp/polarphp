@@ -27,11 +27,10 @@ NullExprSyntax NullExprSyntaxBuilder::build()
 {
    CursorIndex nullKeywordIndex = cursor_index(Cursor::NullKeyword);
    if (!m_layout[nullKeywordIndex]) {
-      m_layout[nullKeywordIndex] = RawSyntax::missing(TokenKindType::T_NULL,
-                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_NULL)));
+      m_layout[nullKeywordIndex] = make_missing_token(T_NULL);
    }
-   RefCountPtr<RawSyntax> rawNullExpr = RawSyntax::make(SyntaxKind::NullExpr, m_layout,
-                                                        SourcePresence::Present, m_arena);
+   RefCountPtr<RawSyntax> rawNullExpr = RawSyntax::make(
+            SyntaxKind::NullExpr, m_layout, SourcePresence::Present, m_arena);
    return make<NullExprSyntax>(rawNullExpr);
 }
 
@@ -49,11 +48,11 @@ ClassRefParentExprSyntax ClassRefParentExprSyntaxBuilder::build()
 {
    CursorIndex parentKeywordIndex = cursor_index(Cursor::ParentKeyword);
    if (!m_layout[parentKeywordIndex]) {
-      m_layout[parentKeywordIndex] = RawSyntax::missing(TokenKindType::T_CLASS_REF_PARENT,
-                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_PARENT)));
+      m_layout[parentKeywordIndex] = make_missing_token(T_CLASS_REF_PARENT);
    }
-   RefCountPtr<RawSyntax> rawParentKeyword = RawSyntax::make(SyntaxKind::ClassRefParentExpr, m_layout, SourcePresence::Present,
-                                                             m_arena);
+   RefCountPtr<RawSyntax> rawParentKeyword = RawSyntax::make(
+            SyntaxKind::ClassRefParentExpr, m_layout, SourcePresence::Present,
+            m_arena);
    return make<ClassRefParentExprSyntax>(rawParentKeyword);
 }
 
@@ -70,11 +69,11 @@ ClassRefSelfExprSyntax ClassRefSelfExprSyntaxBuilder::build()
 {
    CursorIndex selfKeywordIndex = cursor_index(Cursor::SelfKeyword);
    if (!m_layout[selfKeywordIndex]) {
-      m_layout[selfKeywordIndex] = RawSyntax::missing(TokenKindType::T_CLASS_REF_SELF,
-                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_SELF)));
+      m_layout[selfKeywordIndex] = make_missing_token(T_CLASS_REF_SELF);
    }
-   RefCountPtr<RawSyntax> rawParentKeyword = RawSyntax::make(SyntaxKind::ClassRefSelfExpr, m_layout, SourcePresence::Present,
-                                                             m_arena);
+   RefCountPtr<RawSyntax> rawParentKeyword = RawSyntax::make(
+            SyntaxKind::ClassRefSelfExpr, m_layout, SourcePresence::Present,
+            m_arena);
    return make<ClassRefSelfExprSyntax>(rawParentKeyword);
 }
 
@@ -91,11 +90,11 @@ ClassRefStaticExprSyntax ClassRefStaticExprSyntaxBuilder::build()
 {
    CursorIndex staticKeywordIndex = cursor_index(Cursor::StaticKeyword);
    if (!m_layout[staticKeywordIndex]) {
-      m_layout[staticKeywordIndex] = RawSyntax::missing(TokenKindType::T_CLASS_REF_STATIC,
-                                                        OwnedString::makeUnowned(get_token_text(TokenKindType::T_CLASS_REF_STATIC)));
+      m_layout[staticKeywordIndex] = make_missing_token(T_CLASS_REF_STATIC);
    }
-   RefCountPtr<RawSyntax> rawParentKeyword = RawSyntax::make(SyntaxKind::ClassRefStaticExpr, m_layout, SourcePresence::Present,
-                                                             m_arena);
+   RefCountPtr<RawSyntax> rawParentKeyword = RawSyntax::make(
+            SyntaxKind::ClassRefStaticExpr, m_layout, SourcePresence::Present,
+            m_arena);
    return make<ClassRefStaticExprSyntax>(rawParentKeyword);
 }
 
@@ -113,11 +112,11 @@ IntegerLiteralExprSyntax IntegerLiteralExprSyntaxBuilder::build()
 {
    CursorIndex digitsIndex = cursor_index(Cursor::Digits);
    if (!m_layout[digitsIndex]) {
-      m_layout[digitsIndex] = RawSyntax::missing(TokenKindType::T_LNUMBER,
-                                                 OwnedString::makeUnowned(get_token_text(TokenKindType::T_LNUMBER)));
+      m_layout[digitsIndex] = make_missing_token(T_LNUMBER);
    }
-   RefCountPtr<RawSyntax> rawDigits = RawSyntax::make(SyntaxKind::IntegerLiteralExpr, m_layout, SourcePresence::Present,
-                                                      m_arena);
+   RefCountPtr<RawSyntax> rawDigits = RawSyntax::make(
+            SyntaxKind::IntegerLiteralExpr, m_layout, SourcePresence::Present,
+            m_arena);
    return make<IntegerLiteralExprSyntax>(rawDigits);
 }
 
@@ -135,11 +134,11 @@ FloatLiteralExprSyntax FloatLiteralExprSyntaxBuilder::build()
 {
    CursorIndex digitsIndex = cursor_index(Cursor::FloatDigits);
    if (!m_layout[digitsIndex]) {
-      m_layout[digitsIndex] = RawSyntax::missing(TokenKindType::T_DNUMBER,
-                                                 OwnedString::makeUnowned(get_token_text(TokenKindType::T_DNUMBER)));
+      m_layout[digitsIndex] = make_missing_token(T_DNUMBER);
    }
-   RefCountPtr<RawSyntax> rawDigits = RawSyntax::make(SyntaxKind::FloatLiteralExpr, m_layout, SourcePresence::Present,
-                                                      m_arena);
+   RefCountPtr<RawSyntax> rawDigits = RawSyntax::make(
+            SyntaxKind::FloatLiteralExpr, m_layout, SourcePresence::Present,
+            m_arena);
    return make<FloatLiteralExprSyntax>(rawDigits);
 }
 
@@ -156,11 +155,11 @@ BooleanLiteralExprSyntax BooleanLiteralExprSyntaxBuilder::build()
 {
    CursorIndex booleanIndex = cursor_index(Cursor::Boolean);
    if (!m_layout[booleanIndex]) {
-      m_layout[booleanIndex] = RawSyntax::missing(TokenKindType::T_TRUE,
-                                                  OwnedString::makeUnowned(get_token_text(TokenKindType::T_TRUE)));
+      m_layout[booleanIndex] = make_missing_token(T_TRUE);
    }
-   RefCountPtr<RawSyntax> rawDigits = RawSyntax::make(SyntaxKind::BooleanLiteralExpr, m_layout, SourcePresence::Present,
-                                                      m_arena);
+   RefCountPtr<RawSyntax> rawDigits = RawSyntax::make(
+            SyntaxKind::BooleanLiteralExpr, m_layout, SourcePresence::Present,
+            m_arena);
    return make<BooleanLiteralExprSyntax>(rawDigits);
 }
 
@@ -209,21 +208,20 @@ TernaryExprSyntax TernaryExprSyntaxBuilder::build()
       m_layout[conditionExprIndex] = RawSyntax::missing(SyntaxKind::Expr);
    }
    if (!m_layout[questionMarkIndex]) {
-      m_layout[questionMarkIndex] = RawSyntax::missing(TokenKindType::T_QUESTION_MARK,
-                                                       OwnedString::makeUnowned(get_token_text(TokenKindType::T_QUESTION_MARK)));
+      m_layout[questionMarkIndex] = make_missing_token(T_QUESTION_MARK);
    }
    if (!m_layout[firstChoiceIndex]) {
       m_layout[firstChoiceIndex] = RawSyntax::missing(SyntaxKind::Expr);
    }
    if (!m_layout[colonMarkIndex]) {
-      m_layout[colonMarkIndex] = RawSyntax::missing(TokenKindType::T_COLON,
-                                                    OwnedString::makeUnowned(get_token_text(TokenKindType::T_COLON)));
+      m_layout[colonMarkIndex] = make_missing_token(T_COLON);
    }
    if (!m_layout[secondChoiceIndex]) {
       m_layout[secondChoiceIndex] = RawSyntax::missing(SyntaxKind::Expr);
    }
-   RefCountPtr<RawSyntax> rawTernaryExprSyntax = RawSyntax::make(SyntaxKind::TernaryExpr, m_layout, SourcePresence::Present,
-                                                                 m_arena);
+   RefCountPtr<RawSyntax> rawTernaryExprSyntax = RawSyntax::make(
+            SyntaxKind::TernaryExpr, m_layout, SourcePresence::Present,
+            m_arena);
    return make<TernaryExprSyntax>(rawTernaryExprSyntax);
 }
 
@@ -241,11 +239,11 @@ AssignmentExprSyntax AssignmentExprSyntaxBuilder::build()
 {
    CursorIndex assignTokenIndex = cursor_index(Cursor::AssignToken);
    if (!m_layout[assignTokenIndex]) {
-      m_layout[assignTokenIndex] = RawSyntax::missing(TokenKindType::T_EQUAL,
-                                                      OwnedString::makeUnowned(get_token_text(TokenKindType::T_EQUAL)));
+      m_layout[assignTokenIndex] = make_missing_token(T_EQUAL);
    }
-   RefCountPtr<RawSyntax> rawAssignTokenSyntax = RawSyntax::make(SyntaxKind::AssignmentExpr, m_layout, SourcePresence::Present,
-                                                                 m_arena);
+   RefCountPtr<RawSyntax> rawAssignTokenSyntax = RawSyntax::make(
+            SyntaxKind::AssignmentExpr, m_layout, SourcePresence::Present,
+            m_arena);
    return make<AssignmentExprSyntax>(rawAssignTokenSyntax);
 }
 
@@ -276,8 +274,8 @@ SequenceExprSyntax SequenceExprSyntaxBuilder::build()
    if (!m_layout[elementsIndex]) {
       m_layout[elementsIndex] = RawSyntax::missing(SyntaxKind::ExprList);
    }
-   RefCountPtr<RawSyntax> rawSequenceExprSyntax = RawSyntax::make(SyntaxKind::SequenceExpr, m_layout,
-                                                                  SourcePresence::Present, m_arena);
+   RefCountPtr<RawSyntax> rawSequenceExprSyntax = RawSyntax::make(
+            SyntaxKind::SequenceExpr, m_layout, SourcePresence::Present, m_arena);
    return make<SequenceExprSyntax>(rawSequenceExprSyntax);
 }
 
@@ -308,8 +306,9 @@ PrefixOperatorExprSyntax PrefixOperatorExprSyntaxBuilder::build()
    if (!m_layout[exprIndex]) {
       m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
    }
-   RefCountPtr<RawSyntax> rawPrefixOperatorExpr = RawSyntax::make(SyntaxKind::PrefixOperatorExpr, m_layout, SourcePresence::Present,
-                                                                  m_arena);
+   RefCountPtr<RawSyntax> rawPrefixOperatorExpr = RawSyntax::make(
+            SyntaxKind::PrefixOperatorExpr, m_layout, SourcePresence::Present,
+            m_arena);
    return make<PrefixOperatorExprSyntax>(rawPrefixOperatorExpr);
 }
 
@@ -340,8 +339,9 @@ PostfixOperatorExprSyntax PostfixOperatorExprSyntaxBuilder::build()
    if (!m_layout[exprIndex]) {
       m_layout[exprIndex] = RawSyntax::missing(SyntaxKind::Expr);
    }
-   RefCountPtr<RawSyntax> rawPostfixOperatorExpr = RawSyntax::make(SyntaxKind::PostfixOperatorExpr, m_layout, SourcePresence::Present,
-                                                                  m_arena);
+   RefCountPtr<RawSyntax> rawPostfixOperatorExpr = RawSyntax::make(
+            SyntaxKind::PostfixOperatorExpr, m_layout, SourcePresence::Present,
+            m_arena);
    return make<PostfixOperatorExprSyntax>(rawPostfixOperatorExpr);
 }
 
@@ -362,8 +362,9 @@ BinaryOperatorExprSyntax BinaryOperatorExprSyntaxBuilder::build()
       m_layout[operatorTokenIndex] = RawSyntax::missing(TokenKindType::T_BINARY_OPERATOR,
                                                         OwnedString::makeUnowned(""));
    }
-   RefCountPtr<RawSyntax> rawBinaryOperatorExprSyntax = RawSyntax::make(SyntaxKind::BinaryOperatorExpr, m_layout, SourcePresence::Present,
-                                                                        m_arena);
+   RefCountPtr<RawSyntax> rawBinaryOperatorExprSyntax = RawSyntax::make(
+            SyntaxKind::BinaryOperatorExpr, m_layout, SourcePresence::Present,
+            m_arena);
    return make<BinaryOperatorExprSyntax>(rawBinaryOperatorExprSyntax);
 }
 

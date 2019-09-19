@@ -284,7 +284,7 @@ public:
 private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[BinaryOperatorExprSyntax::CHILDREN_COUNT] = {
-      nullptr
+      nullptr, nullptr, nullptr
    };
 };
 
