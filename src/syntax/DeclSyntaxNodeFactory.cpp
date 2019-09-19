@@ -416,20 +416,10 @@ DeclSyntaxNodeFactory::makeClassConstDecl(MemberModifierListSyntax modifiers, To
    return make<ClassConstDeclSyntax>(target);
 }
 
-MethodCodeBlockSyntax
-DeclSyntaxNodeFactory::makeMethodCodeBlock(Syntax block, RefCountPtr<SyntaxArena> arena)
-{
-   RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::MethodCodeBlock, {
-               block.getRaw(),
-            }, SourcePresence::Present, arena);
-   return make<MethodCodeBlockSyntax>(target);
-}
-
 ClassMethodDeclSyntax
 DeclSyntaxNodeFactory::makeClassMethodDecl(MemberModifierListSyntax modifiers, TokenSyntax functionToken, std::optional<TokenSyntax> returnRefToken,
                                            IdentifierSyntax funcName, ParameterClauseSyntax ParameterListClause,
-                                           std::optional<ReturnTypeClauseSyntax> returnType, std::optional<MemberDeclBlockSyntax> body,
+                                           std::optional<ReturnTypeClauseSyntax> returnType, std::optional<InnerCodeBlockStmtSyntax> body,
                                            RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -978,17 +968,6 @@ DeclSyntaxNodeFactory::makeBlankClassConstDecl(RefCountPtr<SyntaxArena> arena)
             },
             SourcePresence::Present, arena);
    return make<ClassConstDeclSyntax>(target);
-}
-
-ClassMethodDeclSyntax
-DeclSyntaxNodeFactory::makeBlankMethodCodeBlock(RefCountPtr<SyntaxArena> arena)
-{
-   RefCountPtr<RawSyntax> target = RawSyntax::make(
-            SyntaxKind::MethodCodeBlock, {
-               RawSyntax::missing(SyntaxKind::Unknown), // Block
-            },
-            SourcePresence::Present, arena);
-   return make<ClassMethodDeclSyntax>(target);
 }
 
 ClassMethodDeclSyntax

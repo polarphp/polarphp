@@ -84,10 +84,9 @@ public:
                                                         ClassPropertyListSyntax propertyList, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassConstDeclSyntax makeClassConstDecl(MemberModifierListSyntax modifiers, TokenSyntax constToken, ClassConstListSyntax constList,
                                                   RefCountPtr<SyntaxArena> arena = nullptr);
-   static MethodCodeBlockSyntax makeMethodCodeBlock(Syntax block, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassMethodDeclSyntax makeClassMethodDecl(MemberModifierListSyntax modifiers, TokenSyntax functionToken, std::optional<TokenSyntax> returnRefToken,
                                                     IdentifierSyntax funcName, ParameterClauseSyntax ParameterListClause,
-                                                    std::optional<ReturnTypeClauseSyntax> returnType, std::optional<MemberDeclBlockSyntax> body,
+                                                    std::optional<ReturnTypeClauseSyntax> returnType, std::optional<InnerCodeBlockStmtSyntax> body,
                                                     RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassTraitMethodReferenceSyntax makeClassTraitMethodReference(Syntax reference, RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassAbsoluteTraitMethodReferenceSyntax makeClassAbsoluteTraitMethodReference(NameSyntax baseName, TokenSyntax separator,
@@ -151,7 +150,6 @@ public:
    static MemberModifierSyntax makeBlankMemberModifier(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassPropertyDeclSyntax makeBlankClassPropertyDecl(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassConstDeclSyntax makeBlankClassConstDecl(RefCountPtr<SyntaxArena> arena = nullptr);
-   static ClassMethodDeclSyntax makeBlankMethodCodeBlock(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassMethodDeclSyntax makeBlankClassMethodDecl(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassTraitMethodReferenceSyntax makeBlankClassTraitMethodReference(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassAbsoluteTraitMethodReferenceSyntax makeBlankClassAbsoluteTraitMethodReference(RefCountPtr<SyntaxArena> arena = nullptr);

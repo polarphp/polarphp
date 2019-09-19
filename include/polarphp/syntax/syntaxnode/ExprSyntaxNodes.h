@@ -2500,7 +2500,7 @@ public:
       ///
       ReturnRefToken,
       ///
-      /// type: ParameterListClauseSyntax
+      /// type: ParameterClauseSyntax
       /// optional: false
       ///
       ParameterListClause,

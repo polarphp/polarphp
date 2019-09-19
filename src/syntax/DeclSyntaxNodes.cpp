@@ -1278,44 +1278,6 @@ ClassConstDeclSyntax ClassConstDeclSyntax::withConstList(std::optional<ClassCons
 }
 
 ///
-/// MethodCodeBlockSyntax
-///
-void MethodCodeBlockSyntax::validate()
-{
-#ifdef POLAR_DEBUG_BUILD
-   RefCountPtr<RawSyntax> raw = m_data->getRaw();
-   if (isMissing()) {
-      return;
-   }
-   assert(raw->getLayout().getSize() == MethodCodeBlockSyntax::CHILDREN_COUNT);
-   if (const RefCountPtr<RawSyntax> &bodyChild = raw->getChild(Cursor::Block)) {
-      if (bodyChild->isToken()) {
-         assert(bodyChild->getTokenKind() == TokenKindType::T_SEMICOLON);
-      } else {
-         assert(bodyChild->kindOf(SyntaxKind::InnerCodeBlockStmt));
-      }
-   }
-#endif
-}
-
-Syntax MethodCodeBlockSyntax::getBody()
-{
-   return Syntax {m_root, m_data->getChild(Cursor::Block).get()};
-}
-
-MethodCodeBlockSyntax
-MethodCodeBlockSyntax::withBody(std::optional<Syntax> body)
-{
-   RefCountPtr<RawSyntax> rawBody;
-   if (body.has_value()) {
-      rawBody = body->getRaw();
-   } else {
-      rawBody = RawSyntax::missing(SyntaxKind::Unknown);
-   }
-   return m_data->replaceChild<MethodCodeBlockSyntax>(rawBody, Cursor::Block);
-}
-
-///
 /// ClassMethodDeclSyntax
 ///
 void ClassMethodDeclSyntax::validate()
@@ -1384,9 +1346,13 @@ std::optional<ReturnTypeClauseSyntax> ClassMethodDeclSyntax::getReturnType()
    return ReturnTypeClauseSyntax {m_root, returnTypeData.get()};
 }
 
-MethodCodeBlockSyntax ClassMethodDeclSyntax::getBody()
+std::optional<InnerCodeBlockStmtSyntax> ClassMethodDeclSyntax::getBody()
 {
-   return MethodCodeBlockSyntax{m_root, m_data->getChild(Cursor::Body).get()};
+   RefCountPtr<SyntaxData> bodyData = m_data->getChild(Cursor::Body);
+   if (!bodyData) {
+      return std::nullopt;
+   }
+   return InnerCodeBlockStmtSyntax{m_root, bodyData.get()};
 }
 
 ClassMethodDeclSyntax ClassMethodDeclSyntax::withModifiers(std::optional<MemberModifierListSyntax> modifiers)
@@ -1455,13 +1421,13 @@ ClassMethodDeclSyntax ClassMethodDeclSyntax::withReturnType(std::optional<Return
    return m_data->replaceChild<ClassMethodDeclSyntax>(returnTypeRaw, Cursor::ReturnType);
 }
 
-ClassMethodDeclSyntax ClassMethodDeclSyntax::withBody(std::optional<MethodCodeBlockSyntax> body)
+ClassMethodDeclSyntax ClassMethodDeclSyntax::withBody(std::optional<InnerCodeBlockStmtSyntax> body)
 {
    RefCountPtr<RawSyntax> bodyRaw;
    if (body.has_value()) {
       bodyRaw = body->getRaw();
    } else {
-      bodyRaw = RawSyntax::missing(SyntaxKind::MethodCodeBlock);
+      bodyRaw = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
    }
    return m_data->replaceChild<ClassMethodDeclSyntax>(bodyRaw, Cursor::Body);
 }

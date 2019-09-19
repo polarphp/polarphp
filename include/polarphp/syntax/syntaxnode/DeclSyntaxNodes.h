@@ -1394,55 +1394,6 @@ private:
 };
 
 ///
-/// method_body:
-/// ';' /* abstract method */
-/// |	'{' inner_statement_list '}'
-///
-class MethodCodeBlockSyntax final : public Syntax
-{
-public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 1;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
-   enum Cursor : SyntaxChildrenCountType
-   {
-      ///
-      /// type: Syntax
-      /// optional: false
-      /// node choices: true
-      /// ----------------------------------------------
-      /// node choice: TokenSyntax (T_SEMICOLON)
-      /// ----------------------------------------------
-      /// node choice: InnerCodeBlockStmtSyntax
-      ///
-      Block
-   };
-
-public:
-   MethodCodeBlockSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
-      : Syntax(root, data)
-   {
-      validate();
-   }
-
-   Syntax getBody();
-   MethodCodeBlockSyntax withBody(std::optional<Syntax> body);
-
-   static bool kindOf(SyntaxKind kind)
-   {
-      return kind == SyntaxKind::MethodCodeBlock;
-   }
-
-   static bool classOf(const Syntax *syntax)
-   {
-      return kindOf(syntax->getKind());
-   }
-
-private:
-   friend class MethodCodeBlockSyntaxBuilder;
-   void validate();
-};
-
-///
 /// class_method_statement:
 ///   method_modifiers function returns_ref identifier backup_doc_comment '(' parameter_list ')'
 ///   return_type backup_fn_flags method_body backup_fn_flags
@@ -1475,7 +1426,7 @@ public:
       ///
       FuncName,
       ///
-      /// type: ParameterListClauseSyntax
+      /// type: ParameterClauseSyntax
       /// optional: false
       ///
       ParameterListClause,
@@ -1485,8 +1436,8 @@ public:
       ///
       ReturnType,
       ///
-      /// type: MethodCodeBlockSyntax
-      /// optional: false
+      /// type: InnerCodeBlockStmtSyntax
+      /// optional: true
       ///
       Body
    };
@@ -1504,7 +1455,7 @@ public:
    IdentifierSyntax getFuncName();
    ParameterClauseSyntax getParameterClause();
    std::optional<ReturnTypeClauseSyntax> getReturnType();
-   MethodCodeBlockSyntax getBody();
+   std::optional<InnerCodeBlockStmtSyntax> getBody();
 
    ClassMethodDeclSyntax withModifiers(std::optional<MemberModifierListSyntax> modifiers);
    ClassMethodDeclSyntax withFunctionToken(std::optional<TokenSyntax> functionToken);
@@ -1512,7 +1463,7 @@ public:
    ClassMethodDeclSyntax withFuncName(std::optional<IdentifierSyntax> funcName);
    ClassMethodDeclSyntax withParameterClause(std::optional<ParameterClauseSyntax> parameterClause);
    ClassMethodDeclSyntax withReturnType(std::optional<ReturnTypeClauseSyntax> returnType);
-   ClassMethodDeclSyntax withBody(std::optional<MethodCodeBlockSyntax> body);
+   ClassMethodDeclSyntax withBody(std::optional<InnerCodeBlockStmtSyntax> body);
 
    static bool kindOf(SyntaxKind kind)
    {

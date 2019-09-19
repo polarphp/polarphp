@@ -1373,10 +1373,14 @@ static_var:
 
 class_statement_list:
    class_statement_list class_statement {
-
+      MemberDeclListSyntax list = make<MemberDeclListSyntax>($1);
+      MemberDeclListItemSyntax classStmt = make<MemberDeclListItemSyntax>($2);
+      list.appending(classStmt);
+      $$ = list.getRaw();
    }
 |  %empty {
-
+      MemberDeclListSyntax list = make_blank_decl(MemberDeclList);
+      $$ = list.getRaw();
    }
 ;
 
@@ -1420,7 +1424,30 @@ class_statement:
    }
 |  method_modifiers function returns_ref identifier backup_doc_comment T_LEFT_PAREN parameter_list T_RIGHT_PAREN
    return_type backup_fn_flags method_body backup_fn_flags {
-
+      MemberModifierListSyntax modifiers = make<MemberModifierListSyntax>($1);
+      TokenSyntax funcKeyword = make<TokenSyntax>($2);
+      std::optional<TokenSyntax> returnRef = $3 ? std::optional(make<TokenSyntax>($3)) : std::nullopt;
+      IdentifierSyntax identifier = make<IdentifierSyntax>($4);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ParameterListSyntax params = make<ParameterListSyntax>($7);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      ParameterClauseSyntax paramsClause = make_decl(ParameterClause, leftParen, params, rightParen);
+      std::optional<ReturnTypeClauseSyntax> returnType = $9 ? std::optional(make<ReturnTypeClauseSyntax>($9)) : std::nullopt;
+      RefCountPtr<RawSyntax> rawSyntax = $11;
+      RefCountPtr<RawSyntax> rawSemicolon = nullptr;
+      RefCountPtr<RawSyntax> rawBody = nullptr;
+      if (rawSyntax->kindOf(SyntaxKind::InnerCodeBlockStmt)) {
+         rawBody = rawSyntax;
+      } else if (rawSyntax->isToken()) {
+         rawSemicolon = rawSyntax;
+      }
+      ClassMethodDeclSyntax methodDecl = make_decl(
+         ClassMethodDecl, modifiers, funcKeyword, returnRef, identifier, 
+         paramsClause, returnType, rawBody ? std::optional(make<InnerCodeBlockStmtSyntax>(rawBody)) : std::nullopt
+      );
+      MemberDeclListItemSyntax declStmt = make_decl(
+         MemberDeclListItem, methodDecl, rawSemicolon ? std::optional(make<TokenSyntax>(rawSemicolon)) : std::nullopt);
+      $$ = declStmt.getRaw();
    }
 ;
 
@@ -1584,15 +1611,14 @@ absolute_trait_method_reference:
 method_body:
    T_SEMICOLON {
       TokenSyntax semicolon = make_token(SemicolonToken);
-      MethodCodeBlockSyntax codeBlock = make_decl(MethodCodeBlock, semicolon);
-      $$ = codeBlock.getRaw();
+      $$ = semicolon.getRaw();
    }
 |  T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE {
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       InnerStmtListSyntax stmts = make<InnerStmtListSyntax>($2);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      InnerCodeBlockStmtSyntax codeBlock = make_stmt(InnerCodeBlockStmt, leftBrace, stmts, rightBrace);
-      $$ = codeBlock.getRaw();
+      InnerCodeBlockStmtSyntax innerStmtCodeBlock = make_stmt(InnerCodeBlockStmt, leftBrace, stmts, rightBrace);
+      $$ = innerStmtCodeBlock.getRaw();
    }
 ;
 
