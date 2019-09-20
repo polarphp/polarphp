@@ -942,10 +942,32 @@ statement:
       $$ = unsetStmt.getRaw();
    }
 |  T_FOREACH T_LEFT_PAREN expr T_AS foreach_variable T_RIGHT_PAREN statement {
-
+      TokenSyntax foreachKeyword = make_token(ForeachKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ExprSyntax iterableExpr = make<ExprSyntax>($3);
+      TokenSyntax asKeyword = make_token(AsKeyword);
+      ForeachVariableSyntax valueVariable = make<ForeachVariableSyntax>($5);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      StmtSyntax stmt = make<StmtSyntax>($7);
+      ForeachStmtSyntax foreachStmt = make_stmt(
+         ForeachStmt, foreachKeyword, leftParen, iterableExpr, asKeyword, std::nullopt, std::nullopt,
+         valueVariable, rightParen, stmt);
+      $$ = stmt.getRaw();
    }
 |  T_FOREACH T_LEFT_PAREN expr T_AS foreach_variable T_DOUBLE_ARROW foreach_variable T_RIGHT_PAREN statement {
-
+      TokenSyntax foreachKeyword = make_token(ForeachKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ExprSyntax iterableExpr = make<ExprSyntax>($3);
+      TokenSyntax asKeyword = make_token(AsKeyword);
+      ForeachVariableSyntax keyVariable = make<ForeachVariableSyntax>($5);
+      TokenSyntax doubleArrowToken = make_token(DoubleArrowToken);
+      ForeachVariableSyntax valueVariable = make<ForeachVariableSyntax>($7);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      StmtSyntax stmt = make<StmtSyntax>($9);
+      ForeachStmtSyntax foreachStmt = make_stmt(
+         ForeachStmt, foreachKeyword, leftParen, iterableExpr, asKeyword, valueVariable, doubleArrowToken,
+         valueVariable, rightParen, stmt);
+      $$ = stmt.getRaw();
    }
 |  T_DECLARE T_LEFT_PAREN const_list T_RIGHT_PAREN {}
    statement {

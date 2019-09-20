@@ -113,7 +113,6 @@ public:
                                             std::optional<ForeachVariableSyntax> keyVariable, std::optional<TokenSyntax> doubleArrowToken,
                                             ForeachVariableSyntax valueVariable, TokenSyntax rightParen,
                                             StmtSyntax stmt, RefCountPtr<SyntaxArena> arena = nullptr);
-
    static SwitchDefaultLabelSyntax makeSwitchDefaultLabel(TokenSyntax defaultKeyword, TokenSyntax colon,
                                                           RefCountPtr<SyntaxArena> arena = nullptr);
    static SwitchCaseLabelSyntax makeSwitchCaseLabel(TokenSyntax caseKeyword, ExprSyntax expr, TokenSyntax colon,
