@@ -98,7 +98,7 @@ public:
                                         StmtSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
    static DoWhileStmtSyntax makeDoWhileStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                             TokenSyntax doKeyword, StmtSyntax body, TokenSyntax whileKeyword,
-                                            TokenSyntax leftParen, ExprSyntax condition, TokenSyntax rightParen,
+                                            ParenDecoratedExprSyntax conditionsClause, TokenSyntax semicolon,
                                             RefCountPtr<SyntaxArena> arena = nullptr);
    static ForStmtSyntax makeForStmt(TokenSyntax forToken, TokenSyntax leftParen,
                                     std::optional<ExprListSyntax> initializedExprs, TokenSyntax initializedSemicolon,

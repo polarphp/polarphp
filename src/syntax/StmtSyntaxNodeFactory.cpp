@@ -495,8 +495,7 @@ StmtSyntaxNodeFactory::makeWhileStmt(std::optional<TokenSyntax> labelName, std::
 DoWhileStmtSyntax
 StmtSyntaxNodeFactory::makeDoWhileStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                        TokenSyntax doKeyword, StmtSyntax body, TokenSyntax whileKeyword,
-                                       TokenSyntax leftParen, ExprSyntax condition, TokenSyntax rightParen,
-                                       RefCountPtr<SyntaxArena> arena)
+                                       ParenDecoratedExprSyntax conditionsClause, TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::DoWhileStmt, {
@@ -505,9 +504,8 @@ StmtSyntaxNodeFactory::makeDoWhileStmt(std::optional<TokenSyntax> labelName, std
                doKeyword.getRaw(),
                body.getRaw(),
                whileKeyword.getRaw(),
-               leftParen.getRaw(),
-               condition.getRaw(),
-               rightParen.getRaw(),
+               conditionsClause.getRaw(),
+               semicolon.getRaw(),
             }, SourcePresence::Present, arena);
    return make<DoWhileStmtSyntax>(target);
 }
@@ -1449,9 +1447,7 @@ StmtSyntaxNodeFactory::makeBlankDoWhileStmt(RefCountPtr<SyntaxArena> arena)
                make_missing_token(T_DO), // DoKeyword
                RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt), // Body
                make_missing_token(T_WHILE), // WhileKeyword
-               make_missing_token(T_LEFT_PAREN), // LeftParen
-               RawSyntax::missing(SyntaxKind::Expr), // Condition
-               make_missing_token(T_RIGHT_PAREN), // RightParen
+               RawSyntax::missing(SyntaxKind::ParenDecoratedExpr), // ConditionClause
             }, SourcePresence::Present, arena);
    return make<DoWhileStmtSyntax>(target);
 }

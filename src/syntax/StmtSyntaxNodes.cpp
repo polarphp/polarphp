@@ -1539,9 +1539,7 @@ void DoWhileStmtSyntax::validate()
    syntax_assert_child_token(raw, DoKeyword, std::set{TokenKindType::T_DO});
    syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::InnerCodeBlockStmt});
    syntax_assert_child_token(raw, WhileKeyword, std::set{TokenKindType::T_WHILE});
-   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
-   syntax_assert_child_kind(raw, Condition, std::set{SyntaxKind::Expr});
-   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
+   syntax_assert_child_kind(raw, ConditionsClause, std::set{SyntaxKind::ParenDecoratedExpr});
 #endif
 }
 
@@ -1578,19 +1576,9 @@ TokenSyntax DoWhileStmtSyntax::getWhileKeyword()
    return TokenSyntax{m_root, m_data->getChild(Cursor::WhileKeyword).get()};
 }
 
-TokenSyntax DoWhileStmtSyntax::getLeftParen()
+ParenDecoratedExprSyntax DoWhileStmtSyntax::getConditionsClause()
 {
-   return TokenSyntax{m_root, m_data->getChild(Cursor::LeftParen).get()};
-}
-
-ExprSyntax DoWhileStmtSyntax::getCondition()
-{
-   return ExprSyntax{m_root, m_data->getChild(Cursor::Condition).get()};
-}
-
-TokenSyntax DoWhileStmtSyntax::getRightParen()
-{
-   return TokenSyntax{m_root, m_data->getChild(Cursor::RightParen).get()};
+   return ParenDecoratedExprSyntax{m_root, m_data->getChild(Cursor::ConditionsClause).get()};
 }
 
 TokenSyntax DoWhileStmtSyntax::getSemicolon()
@@ -1653,37 +1641,15 @@ DoWhileStmtSyntax DoWhileStmtSyntax::withWhileKeyword(std::optional<TokenSyntax>
    return m_data->replaceChild<DoWhileStmtSyntax>(rawWhileKeyword, Cursor::WhileKeyword);
 }
 
-DoWhileStmtSyntax DoWhileStmtSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
-{
-   RefCountPtr<RawSyntax> rawLeftParen;
-   if (leftParen.has_value()) {
-      rawLeftParen = leftParen->getRaw();
-   } else {
-      rawLeftParen = make_missing_token(T_LEFT_PAREN);
-   }
-   return m_data->replaceChild<DoWhileStmtSyntax>(rawLeftParen, Cursor::LeftParen);
-}
-
-DoWhileStmtSyntax DoWhileStmtSyntax::withCondition(std::optional<ExprSyntax> condition)
+DoWhileStmtSyntax DoWhileStmtSyntax::withConditionsClause(std::optional<ParenDecoratedExprSyntax> condition)
 {
    RefCountPtr<RawSyntax> rawCondition;
    if (condition.has_value()) {
       rawCondition = condition->getRaw();
    } else {
-      rawCondition = RawSyntax::missing(SyntaxKind::Expr);
+      rawCondition = RawSyntax::missing(SyntaxKind::ParenDecoratedExpr);
    }
-   return m_data->replaceChild<DoWhileStmtSyntax>(rawCondition, Cursor::Condition);
-}
-
-DoWhileStmtSyntax DoWhileStmtSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
-{
-   RefCountPtr<RawSyntax> rawRightParen;
-   if (rightParen.has_value()) {
-      rawRightParen = rightParen->getRaw();
-   } else {
-      rawRightParen = make_missing_token(T_RIGHT_PAREN);
-   }
-   return m_data->replaceChild<DoWhileStmtSyntax>(rawRightParen, Cursor::RightParen);
+   return m_data->replaceChild<DoWhileStmtSyntax>(rawCondition, Cursor::ConditionsClause);
 }
 
 DoWhileStmtSyntax DoWhileStmtSyntax::withSemicolon(std::optional<TokenSyntax> semicolon)
@@ -1694,7 +1660,7 @@ DoWhileStmtSyntax DoWhileStmtSyntax::withSemicolon(std::optional<TokenSyntax> se
    } else {
       rawSemicolon = make_missing_token(T_SEMICOLON);
    }
-   return m_data->replaceChild<DoWhileStmtSyntax>(rawSemicolon, Cursor::RightParen);
+   return m_data->replaceChild<DoWhileStmtSyntax>(rawSemicolon, Cursor::Semicolon);
 }
 
 ///

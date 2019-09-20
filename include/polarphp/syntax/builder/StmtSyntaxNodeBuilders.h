@@ -205,9 +205,7 @@ public:
    DoWhileStmtSyntaxBuilder &useDoKeyword(TokenSyntax doKeyword);
    DoWhileStmtSyntaxBuilder &useBody(StmtSyntax body);
    DoWhileStmtSyntaxBuilder &useWhileKeyword(TokenSyntax whileKeyword);
-   DoWhileStmtSyntaxBuilder &useLeftParen(TokenSyntax leftParen);
-   DoWhileStmtSyntaxBuilder &useCondition(ExprSyntax condition);
-   DoWhileStmtSyntaxBuilder &useRightParen(TokenSyntax rightParen);
+   DoWhileStmtSyntaxBuilder &useConditionsClause(ParenDecoratedExprSyntax condition);
 
    DoWhileStmtSyntax build();
 
@@ -215,7 +213,7 @@ private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[DoWhileStmtSyntax::CHILDREN_COUNT] = {
       nullptr, nullptr, nullptr, nullptr,
-      nullptr, nullptr, nullptr, nullptr,
+      nullptr, nullptr,
    };
 };
 

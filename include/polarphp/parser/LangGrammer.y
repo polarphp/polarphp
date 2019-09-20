@@ -843,7 +843,18 @@ statement:
       $$ = whileStmt.getRaw();
    }
 |  T_DO statement T_WHILE T_LEFT_PAREN expr T_RIGHT_PAREN T_SEMICOLON {
-
+      TokenSyntax doKeyword = make_token(DoKeyword);
+      StmtSyntax stmt = make<StmtSyntax>($2);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ExprSyntax condExpr = make<ExprSyntax>($5);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      TokenSyntax whileKeyword = make_token(WhileKeyword);
+      ParenDecoratedExprSyntax condClause = make_expr(ParenDecoratedExpr, leftParen, condExpr, rightParen);
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      DoWhileStmtSyntax doWhileStmt = make_stmt(
+         DoWhileStmt, std::nullopt, std::nullopt, doKeyword, stmt, whileKeyword, condClause, semicolon
+      );
+      $$ = doWhileStmt.getRaw();
    }
 |  T_FOR T_LEFT_PAREN for_exprs T_SEMICOLON for_exprs T_SEMICOLON for_exprs T_RIGHT_PAREN statement {
 

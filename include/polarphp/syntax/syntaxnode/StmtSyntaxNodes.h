@@ -1245,11 +1245,15 @@ private:
    void validate();
 };
 
+///
+/// do_while_stmt:
+///   T_DO statement T_WHILE T_LEFT_PAREN expr T_RIGHT_PAREN T_SEMICOLON
+///
 class DoWhileStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 8;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 6;
+   constexpr static std::uint8_t CHILDREN_COUNT = 6;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 4;
    enum Cursor : SyntaxChildrenCountType
    {
       ///
@@ -1278,20 +1282,10 @@ public:
       ///
       WhileKeyword,
       ///
-      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// type: ParenDecoratedExprSyntax
       /// optional: false
       ///
-      LeftParen,
-      ///
-      /// type: ExprSyntax
-      /// optional: false
-      ///
-      Condition,
-      ///
-      /// type: TokenSyntax (T_RIGHT_PAREN)
-      /// optional: false
-      ///
-      RightParen,
+      ConditionsClause,
       ///
       /// type: TokenSyntax (T_SEMICOLON)
       /// optional: false
@@ -1311,9 +1305,7 @@ public:
    TokenSyntax getDoKeyword();
    InnerCodeBlockStmtSyntax getBody();
    TokenSyntax getWhileKeyword();
-   TokenSyntax getLeftParen();
-   ExprSyntax getCondition();
-   TokenSyntax getRightParen();
+   ParenDecoratedExprSyntax getConditionsClause();
    TokenSyntax getSemicolon();
 
    DoWhileStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
@@ -1321,9 +1313,7 @@ public:
    DoWhileStmtSyntax withDoKeyword(std::optional<TokenSyntax> doKeyword);
    DoWhileStmtSyntax withBody(std::optional<InnerCodeBlockStmtSyntax> body);
    DoWhileStmtSyntax withWhileKeyword(std::optional<TokenSyntax> whileKeyword);
-   DoWhileStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
-   DoWhileStmtSyntax withCondition(std::optional<ExprSyntax> condition);
-   DoWhileStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
+   DoWhileStmtSyntax withConditionsClause(std::optional<ParenDecoratedExprSyntax> condition);
    DoWhileStmtSyntax withSemicolon(std::optional<TokenSyntax> semicolon);
 
    static bool kindOf(SyntaxKind kind)
