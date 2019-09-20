@@ -44,6 +44,7 @@ class ForeachStmtSyntax;
 class SwitchCaseSyntax;
 class SwitchDefaultLabelSyntax;
 class SwitchCaseLabelSyntax;
+class SwitchCaseListClauseSyntax;
 class SwitchStmtSyntax;
 class DeferStmtSyntax;
 class ThrowStmtSyntax;

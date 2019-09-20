@@ -2243,6 +2243,74 @@ SwitchCaseLabelSyntax SwitchCaseLabelSyntax::withColon(std::optional<TokenSyntax
 }
 
 ///
+/// SwitchCaseListClauseSyntax
+///
+void SwitchCaseListClauseSyntax::validate()
+{
+#ifdef POLAR_DEBUG_BUILD
+   RefCountPtr<RawSyntax> raw = m_data->getRaw();
+   if (isMissing()) {
+      return;
+   }
+   assert(raw->getLayout().size() == SwitchCaseListClauseSyntax::CHILDREN_COUNT);
+   syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_BRACE});
+   syntax_assert_child_kind(raw, SwitchCaseList, std::set{SyntaxKind::SwitchCaseListClause});
+   syntax_assert_child_token(raw, RightBrace, std::set{TokenKindType::T_RIGHT_BRACE});
+#endif
+}
+
+TokenSyntax SwitchCaseListClauseSyntax::getLeftBrace()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::LeftBrace).get()};
+}
+
+SwitchCaseListSyntax SwitchCaseListClauseSyntax::getSwitchCaseList()
+{
+   return SwitchCaseListSyntax {m_root, m_data->getChild(Cursor::SwitchCaseList).get()};
+}
+
+TokenSyntax SwitchCaseListClauseSyntax::getRightBrace()
+{
+   return TokenSyntax {m_root, m_data->getChild(Cursor::RightBrace).get()};
+}
+
+SwitchCaseListClauseSyntax
+SwitchCaseListClauseSyntax::withLeftBrace(std::optional<TokenSyntax> leftBrace)
+{
+   RefCountPtr<RawSyntax> rawLeftBrace;
+   if (leftBrace.has_value()) {
+      rawLeftBrace = leftBrace->getRaw();
+   } else {
+      rawLeftBrace = make_missing_token(T_LEFT_BRACE);
+   }
+   return m_data->replaceChild<SwitchCaseListClauseSyntax>(rawLeftBrace, Cursor::LeftBrace);
+}
+
+SwitchCaseListClauseSyntax
+SwitchCaseListClauseSyntax::withSwitchCaseList(std::optional<SwitchCaseListSyntax> caseList)
+{
+   RefCountPtr<RawSyntax> rawCaseList;
+   if (caseList.has_value()) {
+      rawCaseList = caseList->getRaw();
+   } else {
+      rawCaseList = RawSyntax::missing(SyntaxKind::SwitchCaseList);
+   }
+   return m_data->replaceChild<SwitchCaseListClauseSyntax>(rawCaseList, Cursor::RightBrace);
+}
+
+SwitchCaseListClauseSyntax
+SwitchCaseListClauseSyntax::withRightBrace(std::optional<TokenSyntax> rightBrace)
+{
+   RefCountPtr<RawSyntax> rawRightBrace;
+   if (rightBrace.has_value()) {
+      rawRightBrace = rightBrace->getRaw();
+   } else {
+      rawRightBrace = make_missing_token(T_RIGHT_BRACE);
+   }
+   return m_data->replaceChild<SwitchCaseListClauseSyntax>(rawRightBrace, Cursor::RightBrace);
+}
+
+///
 /// SwitchCaseSyntax
 ///
 

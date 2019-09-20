@@ -219,6 +219,7 @@ enum class SyntaxKind : std::uint32_t
    SwitchCase,
    SwitchDefaultLabel,
    SwitchCaseLabel,
+   SwitchCaseListClause,
    SwitchStmt,
    ElseIfClause,
    IfStmt,

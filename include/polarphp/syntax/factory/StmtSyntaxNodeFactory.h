@@ -118,6 +118,8 @@ public:
    static SwitchCaseLabelSyntax makeSwitchCaseLabel(TokenSyntax caseKeyword, ExprSyntax expr, TokenSyntax colon,
                                                     RefCountPtr<SyntaxArena> arena = nullptr);
    static SwitchCaseSyntax makeSwitchCase(Syntax label, InnerStmtListSyntax statements, RefCountPtr<SyntaxArena> arena = nullptr);
+   static SwitchCaseListClauseSyntax makeSwitchCaseListClause(TokenSyntax leftBrace, SwitchCaseListSyntax caseList, TokenSyntax rightBrace,
+                                                              RefCountPtr<SyntaxArena> arena = nullptr);
    static SwitchStmtSyntax makeSwitchStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                           TokenSyntax switchKeyword, TokenSyntax leftParen, ExprSyntax conditionExpr,
                                           TokenSyntax rightParen, TokenSyntax leftBrace, SwitchCaseListSyntax cases,
@@ -246,6 +248,7 @@ public:
    static SwitchDefaultLabelSyntax makeBlankSwitchDefaultLabel(RefCountPtr<SyntaxArena> arena = nullptr);
    static SwitchCaseLabelSyntax makeBlankSwitchCaseLabel(RefCountPtr<SyntaxArena> arena = nullptr);
    static SwitchCaseSyntax makeBlankSwitchCase(RefCountPtr<SyntaxArena> arena = nullptr);
+   static SwitchCaseListClauseSyntax makeBlankSwitchCaseListClause(RefCountPtr<SyntaxArena> arena = nullptr);
    static SwitchStmtSyntax makeBlankSwitchStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static DeferStmtSyntax makeBlankDeferStmt(RefCountPtr<SyntaxArena> arena = nullptr);
    static ThrowStmtSyntax makeBlankThrowStmt(RefCountPtr<SyntaxArena> arena = nullptr);

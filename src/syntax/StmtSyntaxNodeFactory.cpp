@@ -605,6 +605,19 @@ StmtSyntaxNodeFactory::makeSwitchCase(Syntax label, InnerStmtListSyntax statemen
    return make<SwitchCaseSyntax>(target);
 }
 
+SwitchCaseListClauseSyntax
+StmtSyntaxNodeFactory::makeSwitchCaseListClause(TokenSyntax leftBrace, SwitchCaseListSyntax caseList, TokenSyntax rightBrace,
+                                                RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::SwitchCaseListClause, {
+               leftBrace.getRaw(),
+               caseList.getRaw(),
+               rightBrace.getRaw()
+            }, SourcePresence::Present, arena);
+   return make<SwitchCaseListClauseSyntax>(target);
+}
+
 SwitchStmtSyntax
 StmtSyntaxNodeFactory::makeSwitchStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                       TokenSyntax switchKeyword, TokenSyntax leftParen, ExprSyntax conditionExpr,
@@ -1526,6 +1539,18 @@ StmtSyntaxNodeFactory::makeBlankSwitchCase(RefCountPtr<SyntaxArena> arena)
                RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt), // Statements
             }, SourcePresence::Present, arena);
    return make<SwitchCaseSyntax>(target);
+}
+
+SwitchCaseListClauseSyntax
+StmtSyntaxNodeFactory::makeBlankSwitchCaseListClause(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::SwitchCaseListClause, {
+               make_missing_token(T_LEFT_BRACE), // LeftBrace
+               RawSyntax::missing(SyntaxKind::SwitchCaseList), // CaseList
+               make_missing_token(T_RIGHT_BRACE), // RightBrace
+            }, SourcePresence::Present, arena);
+   return make<SwitchCaseListClauseSyntax>(target);
 }
 
 SwitchStmtSyntax

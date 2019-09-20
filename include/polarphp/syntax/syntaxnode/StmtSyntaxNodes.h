@@ -1716,6 +1716,63 @@ private:
 };
 
 ///
+/// switch_case_list_clause:
+/// '{' case_list '}'
+///
+class SwitchCaseListClauseSyntax final : public Syntax
+{
+public:
+   constexpr static std::uint8_t CHILDREN_COUNT = 3;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
+   enum Cursor : SyntaxChildrenCountType
+   {
+      ///
+      /// type: TokenSyntax (T_LEFT_BRACE)
+      /// optional: false
+      ///
+      LeftBrace,
+      ///
+      /// type: SwitchCaseListSyntax
+      /// optional: false
+      ///
+      SwitchCaseList,
+      ///
+      /// type: TokenSyntax (T_RIGHT_BRACE)
+      /// optional: false
+      ///
+      RightBrace
+   };
+public:
+   SwitchCaseListClauseSyntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : Syntax(root, data)
+   {
+      validate();
+   }
+
+   TokenSyntax getLeftBrace();
+   SwitchCaseListSyntax getSwitchCaseList();
+   TokenSyntax getRightBrace();
+
+   SwitchCaseListClauseSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
+   SwitchCaseListClauseSyntax withSwitchCaseList(std::optional<SwitchCaseListSyntax> caseList);
+   SwitchCaseListClauseSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
+
+   static bool kindOf(SyntaxKind kind)
+   {
+      return kind == SyntaxKind::SwitchCaseListClause;
+   }
+
+   static bool classOf(const Syntax *syntax)
+   {
+      return kindOf(syntax->getKind());
+   }
+
+private:
+   friend class SwitchCaseListClauseSyntaxBuilder;
+   void validate();
+};
+
+///
 /// switch-case -> switch-case-label stmt-list
 ///              | switch-default-label stmt-list
 ///

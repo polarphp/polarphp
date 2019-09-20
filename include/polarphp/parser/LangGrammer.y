@@ -822,7 +822,7 @@ statement:
 
    }
 |  if_stmt {
-
+      $$ = $1;
    }
 |  T_WHILE T_LEFT_PAREN expr T_RIGHT_PAREN statement {
 
@@ -1123,20 +1123,33 @@ switch_case_list:
    T_LEFT_BRACE case_list T_RIGHT_BRACE {
 
    }
-|  T_LEFT_BRACE T_SEMICOLON case_list T_RIGHT_BRACE {
-
-   }
 ;
 
 case_list:
    %empty {
-
+      SwitchCaseListSyntax list = make_blank_stmt(SwitchCaseList);
+      $$ = list.getRaw();
    }
 |  case_list T_CASE expr case_separator inner_statement_list {
-
+      SwitchCaseListSyntax list = make<SwitchCaseListSyntax>($1);
+      TokenSyntax caseKeyword = make_token(CaseKeyword);
+      ExprSyntax expr = make<ExprSyntax>($3);
+      TokenSyntax separator = make<TokenSyntax>($4);
+      InnerStmtListSyntax stmts = make<InnerStmtListSyntax>($5);
+      SwitchCaseLabelSyntax label = make_stmt(SwitchCaseLabel, caseKeyword, expr, separator);
+      SwitchCaseSyntax caseItem = make_stmt(SwitchCase, label, stmts);
+      list.appending(caseItem);
+      $$ = list.getRaw();
    }
 |  case_list T_DEFAULT case_separator inner_statement_list {
-
+      SwitchCaseListSyntax list = make<SwitchCaseListSyntax>($1);
+      TokenSyntax caseKeyword = make_token(DefaultKeyword);
+      TokenSyntax separator = make<TokenSyntax>($3);
+      InnerStmtListSyntax stmts = make<InnerStmtListSyntax>($4);
+      SwitchDefaultLabelSyntax label = make_stmt(SwitchDefaultLabel, caseKeyword, separator);
+      SwitchCaseSyntax caseItem = make_stmt(SwitchCase, label, stmts);
+      list.appending(caseItem);
+      $$ = list.getRaw();
    }
 ;
 
@@ -1397,6 +1410,7 @@ static_var:
       StaticVariableDeclareSyntax staticVar = make_stmt(StaticVariableDeclare, variableToken, equalToken, valueExpr);
       $$ = staticVar.getRaw();
    }
+   
 ;
 
 class_statement_list:
