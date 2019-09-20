@@ -1443,7 +1443,7 @@ public:
    enum Cursor : SyntaxChildrenCountType
    {
       ///
-      /// type: ExprSyntax
+      /// type: Syntax
       /// optional: false
       /// node choices: true
       /// -----------------------------------------------
@@ -1468,8 +1468,8 @@ public:
       validate();
    }
 
-   ExprSyntax getVariable();
-   ForeachVariableSyntax withVariable(std::optional<ExprSyntax> variable);
+   Syntax getVariable();
+   ForeachVariableSyntax withVariable(std::optional<Syntax> variable);
 
    static bool kindOf(SyntaxKind kind)
    {

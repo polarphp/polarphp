@@ -796,16 +796,30 @@ inner_statement:
       $$ = $1;
    }
 |  function_declaration_statement {
-
+      FunctionDefinitionSyntax funcDecl = make<FunctionDefinitionSyntax>($1);
+      FunctionDefinitionStmtSyntax funcDeclStmt = make_stmt(
+         FunctionDefinitionStmt, funcDecl);
+      $$ = funcDeclStmt.getRaw();
    }
 |  class_declaration_statement {
-
+      ClassDefinitionSyntax classDecl = make<ClassDefinitionSyntax>($1);
+      ClassDefinitionStmtSyntax classDeclStmt = make_stmt(
+         ClassDefinitionStmt, classDecl
+      );
+      $$ = classDeclStmt.getRaw();
    }
 |  trait_declaration_statement {
-
+      TraitDefinitionSyntax traitDecl = make<TraitDefinitionSyntax>($1);
+      TraitDefinitionStmtSyntax traitDeclStmt = make_stmt(
+         TraitDefinitionStmt, traitDecl);
+      $$ = traitDeclStmt.getRaw();
    }
 |  interface_declaration_statement {
-
+      InterfaceDefinitionSyntax interfaceDecl = make<InterfaceDefinitionSyntax>($1);
+      InterfaceDefinitionStmtSyntax interfaceDeclStmt = make_stmt(
+         InterfaceDefinitionStmt, interfaceDecl
+      );
+      $$ = interfaceDeclStmt.getRaw();
    }
 |  T_HALT_COMPILER T_LEFT_PAREN T_RIGHT_PAREN T_SEMICOLON {
       TokenSyntax haltCompilerToken = make_token(HaltCompilerKeyword);
@@ -971,7 +985,15 @@ statement:
    }
 |  T_DECLARE T_LEFT_PAREN const_list T_RIGHT_PAREN {}
    statement {
-
+      TokenSyntax declareKeyword = make_token(DeclareKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ConstDeclareListSyntax constList = make<ConstDeclareListSyntax>($3);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      StmtSyntax stmt = make<StmtSyntax>($6);
+      DeclareStmtSyntax declareStmt = make_stmt(
+         DeclareStmt, declareKeyword, leftParen, constList, rightParen, stmt
+      );
+      $$ = declareStmt.getRaw();
    }
 |  T_SEMICOLON {
       // make empty stmt
@@ -1098,7 +1120,24 @@ unset_variable:
 function_declaration_statement:
    function returns_ref T_IDENTIFIER_STRING backup_doc_comment T_LEFT_PAREN parameter_list T_RIGHT_PAREN return_type
    backup_fn_flags T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE backup_fn_flags {
-
+      TokenSyntax funcKeyword = make<TokenSyntax>($1);
+      std::optional<TokenSyntax> returnRef = $2 ? std::optional(make<TokenSyntax>($2)) : std::nullopt;
+      TokenSyntax funcName = make_token_with_text(IdentifierString, $3);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ParameterListSyntax params = make<ParameterListSyntax>($6);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      ParameterClauseSyntax paramsClause = make_decl(ParameterClause, leftParen, params, rightParen);
+      std::optional<ReturnTypeClauseSyntax> returnType = $9 ? std::optional(make<ReturnTypeClauseSyntax>($8)) : std::nullopt;
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      InnerStmtListSyntax innerStmts = make<InnerStmtListSyntax>($11);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      InnerCodeBlockStmtSyntax body = make_stmt(
+         InnerCodeBlockStmt, leftBrace, innerStmts, rightBrace
+      );
+      FunctionDefinitionSyntax funcDecl = make_decl(
+         FunctionDefinition, funcKeyword, returnRef, funcName, paramsClause, returnType, body
+      );
+      $$ = funcDecl.getRaw();
    }
 ;
 
@@ -1125,43 +1164,95 @@ is_variadic:
 class_declaration_statement:
    class_modifiers T_CLASS  { }
    T_IDENTIFIER_STRING extends_from implements_list backup_doc_comment T_LEFT_BRACE class_statement_list T_RIGHT_BRACE {
-
+      ClassModifierListSyntax classModifiers = make<ClassModifierListSyntax>($1);
+      TokenSyntax classKeyword = make_token(ClassKeyword);
+      TokenSyntax className = make_token_with_text(IdentifierString, $4);
+      std::optional<ExtendsFromClauseSyntax> extendsFrom = $5 ? std::optional(make<ExtendsFromClauseSyntax>($5)) : std::nullopt;
+      std::optional<ImplementsClauseSyntax> implementsFrom = $6 ? std::optional(make<ImplementsClauseSyntax>($6)) : std::nullopt;
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      MemberDeclListSyntax stmts = make<MemberDeclListSyntax>($9);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      MemberDeclBlockSyntax classDefCodeBlock = make_decl(MemberDeclBlock, leftBrace, stmts, rightBrace);
+      ClassDefinitionSyntax classDecl = make_decl(
+         ClassDefinition, classModifiers, classKeyword, className, extendsFrom,
+         implementsFrom, classDefCodeBlock
+      );
+      $$ = classDecl.getRaw();
    }
 |  T_CLASS {}
    T_IDENTIFIER_STRING extends_from implements_list backup_doc_comment T_LEFT_BRACE class_statement_list T_RIGHT_BRACE {
-
+      TokenSyntax classKeyword = make_token(ClassKeyword);
+      TokenSyntax className = make_token_with_text(IdentifierString, $3);
+      std::optional<ExtendsFromClauseSyntax> extendsFrom = $4 ? std::optional(make<ExtendsFromClauseSyntax>($4)) : std::nullopt;
+      std::optional<ImplementsClauseSyntax> implementsFrom = $5 ? std::optional(make<ImplementsClauseSyntax>($5)) : std::nullopt;
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      MemberDeclListSyntax stmts = make<MemberDeclListSyntax>($8);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      MemberDeclBlockSyntax classDefCodeBlock = make_decl(MemberDeclBlock, leftBrace, stmts, rightBrace);
+      ClassDefinitionSyntax classDecl = make_decl(
+         ClassDefinition, std::nullopt, classKeyword, className, extendsFrom,
+         implementsFrom, classDefCodeBlock
+      );
+      $$ = classDecl.getRaw();
    }
 ;
 
 class_modifiers:
    class_modifier {
-
+      ClassModifierSyntax modifier = make<ClassModifierSyntax>($1);
+      std::vector<ClassModifierSyntax> items{modifier};
+      ClassModifierListSyntax list = make_decl(ClassModifierList, items);
+      $$ = list.getRaw();
    }
 |  class_modifiers class_modifier {
-
+      ClassModifierListSyntax list = make<ClassModifierListSyntax>($1);
+      ClassModifierSyntax modifier = make<ClassModifierSyntax>($2);
+      list.appending(modifier);
+      $$ = list.getRaw();
    }
 ;
 
 class_modifier:
    T_ABSTRACT {
-
+      TokenSyntax abstractKeyword = make_token(AbstractKeyword);
+      ClassModifierSyntax modifier = make_decl(ClassModifier, abstractKeyword);
+      $$ = modifier.getRaw();
    }
 |  T_FINAL {
-
+      TokenSyntax finalKeyword = make_token(FinalKeyword);
+      ClassModifierSyntax modifier = make_decl(ClassModifier, finalKeyword);
+      $$ = modifier.getRaw();
    }
 ;
 
 trait_declaration_statement:
    T_TRAIT {}
-   T_IDENTIFIER_STRING interface_extends_list backup_doc_comment T_LEFT_BRACE class_statement_list T_RIGHT_BRACE {
-
+   T_IDENTIFIER_STRING backup_doc_comment T_LEFT_BRACE class_statement_list T_RIGHT_BRACE {
+      TokenSyntax traitKeyword = make_token(TraitKeyword);
+      TokenSyntax traitName = make_token_with_text(IdentifierString, $3);
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      MemberDeclListSyntax stmts = make<MemberDeclListSyntax>($6);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      MemberDeclBlockSyntax traitDefCodeBlock = make_decl(MemberDeclBlock, leftBrace, stmts, rightBrace);
+      TraitDefinitionSyntax traitDecl = make_decl(TraitDefinition, traitKeyword, traitName, traitDefCodeBlock);
+      $$ = traitDecl.getRaw();
    }
 ;
 
 interface_declaration_statement:
    T_INTERFACE {}
    T_IDENTIFIER_STRING interface_extends_list backup_doc_comment T_LEFT_BRACE class_statement_list T_RIGHT_BRACE {
-
+      TokenSyntax interfaceKeyword = make_token(InterfaceKeyword);
+      TokenSyntax interfaceName = make_token_with_text(IdentifierString, $3);
+      std::optional<InterfaceExtendsClauseSyntax> interfaceExtendsFrom = $4 ? std::optional(make<InterfaceExtendsClauseSyntax>($4)) : std::nullopt;
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      MemberDeclListSyntax stmts = make<MemberDeclListSyntax>($7);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      MemberDeclBlockSyntax interfaceDefCodeBlock = make_decl(MemberDeclBlock, leftBrace, stmts, rightBrace);
+      InterfaceDefinitionSyntax interfaceDecl = make_decl(
+         InterfaceDefinition, interfaceKeyword, interfaceName, interfaceExtendsFrom, interfaceDefCodeBlock
+      );
+      $$ = interfaceDecl.getRaw();
    }
 ;
 
@@ -1203,16 +1294,37 @@ implements_list:
 
 foreach_variable:
    variable {
-
+      VariableExprSyntax variable = make<VariableExprSyntax>($1);
+      ForeachVariableSyntax foreachVar = make_stmt(ForeachVariable, variable);
+      $$ = foreachVar.getRaw();
    }
 |  T_AMPERSAND variable {
-
+      TokenSyntax ampersand = make_token(AmpersandToken);
+      VariableExprSyntax variable = make<VariableExprSyntax>($2);
+      ReferencedVariableExprSyntax refVar = make_expr(ReferencedVariableExpr, ampersand, variable);
+      ForeachVariableSyntax foreachVar = make_stmt(ForeachVariable, variable);
+      $$ = foreachVar.getRaw();
    }
 |  T_LIST T_LEFT_PAREN array_pair_list T_RIGHT_PAREN {
-
+      TokenSyntax listKeyword = make_token(ListKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ArrayPairListSyntax arrayPair = make<ArrayPairListSyntax>($3);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      ListStructureClauseSyntax listStructureClause = make_expr(
+         ListStructureClause, listKeyword, leftParen, arrayPair, rightParen
+      );
+      ForeachVariableSyntax foreachVar = make_stmt(ForeachVariable, listStructureClause);
+      $$ = foreachVar.getRaw();
    }
 |  T_LEFT_SQUARE_BRACKET array_pair_list T_RIGHT_SQUARE_BRACKET {
-
+      TokenSyntax leftSquareBracket = make_token(LeftSquareBracketToken);
+      ArrayPairListSyntax arrayPair = make<ArrayPairListSyntax>($2);
+      TokenSyntax rightSquareBracket = make_token(RightSquareBracketToken);
+      SimplifiedArrayCreateExprSyntax arrayCreateExpr = make_expr(
+         SimplifiedArrayCreateExpr, leftSquareBracket, arrayPair, rightSquareBracket
+      );
+      ForeachVariableSyntax foreachVar = make_stmt(ForeachVariable, arrayCreateExpr);
+      $$ = foreachVar.getRaw();
    }
 ;
 

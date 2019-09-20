@@ -1857,12 +1857,12 @@ void ForeachVariableSyntax::validate()
 #endif
 }
 
-ExprSyntax ForeachVariableSyntax::getVariable()
+Syntax ForeachVariableSyntax::getVariable()
 {
-   return ExprSyntax {m_root, m_data->getChild(Cursor::Variable).get()};
+   return Syntax {m_root, m_data->getChild(Cursor::Variable).get()};
 }
 
-ForeachVariableSyntax ForeachVariableSyntax::withVariable(std::optional<ExprSyntax> variable)
+ForeachVariableSyntax ForeachVariableSyntax::withVariable(std::optional<Syntax> variable)
 {
    RefCountPtr<RawSyntax> rawVariable;
    if (variable.has_value()) {

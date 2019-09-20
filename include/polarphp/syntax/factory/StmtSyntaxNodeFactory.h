@@ -107,7 +107,7 @@ public:
                                     std::optional<ExprListSyntax> operationalExprs, TokenSyntax operationalSemicolon,
                                     TokenSyntax rightParen, StmtSyntax stmt,
                                     RefCountPtr<SyntaxArena> arena = nullptr);
-   static ForeachVariableSyntax makeForeachVariable(ExprSyntax variable, RefCountPtr<SyntaxArena> arena = nullptr);
+   static ForeachVariableSyntax makeForeachVariable(Syntax variable, RefCountPtr<SyntaxArena> arena = nullptr);
    static ForeachStmtSyntax makeForeachStmt(TokenSyntax foreachToken, TokenSyntax leftParen,
                                             ExprSyntax iterableExpr, TokenSyntax asToken,
                                             std::optional<ForeachVariableSyntax> keyVariable, std::optional<TokenSyntax> doubleArrowToken,

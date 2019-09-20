@@ -539,7 +539,7 @@ StmtSyntaxNodeFactory::makeForStmt(TokenSyntax forToken, TokenSyntax leftParen,
 }
 
 ForeachVariableSyntax
-StmtSyntaxNodeFactory::makeForeachVariable(ExprSyntax variable, RefCountPtr<SyntaxArena> arena)
+StmtSyntaxNodeFactory::makeForeachVariable(Syntax variable, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ForeachVariable, {

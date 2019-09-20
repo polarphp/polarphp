@@ -43,7 +43,7 @@ DeclSyntaxNodeFactory::makeParameterList(
 }
 
 ClassModifierListSyntax
-DeclSyntaxNodeFactory::makeClassModififerList(
+DeclSyntaxNodeFactory::makeClassModifierList(
       const std::vector<ClassModifierSyntax> &elements, RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
@@ -577,6 +577,20 @@ DeclSyntaxNodeFactory::makeTraitDefinition(TokenSyntax traitToken, TokenSyntax n
                members.getRaw(),
             }, SourcePresence::Present, arena);
    return make<TraitDefinitionSyntax>(target);
+}
+
+InterfaceDefinitionSyntax
+DeclSyntaxNodeFactory::makeInterfaceDefinition(TokenSyntax interfaceToken, TokenSyntax name, std::optional<InterfaceExtendsClauseSyntax> interfaceExtends,
+                                               MemberDeclBlockSyntax members, RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::TraitDefinition, {
+               interfaceToken.getRaw(),
+               name.getRaw(),
+               interfaceExtends.has_value() ? interfaceExtends->getRaw() : nullptr,
+               members.getRaw(),
+            }, SourcePresence::Present, arena);
+   return make<InterfaceDefinitionSyntax>(target);
 }
 
 SourceFileSyntax
@@ -1129,6 +1143,21 @@ DeclSyntaxNodeFactory::makeBlankTraitDefinition(RefCountPtr<SyntaxArena> arena)
             },
             SourcePresence::Present, arena);
    return make<TraitDefinitionSyntax>(target);
+}
+
+InterfaceDefinitionSyntax
+DeclSyntaxNodeFactory::makeBlankInterfaceDefinition(RefCountPtr<SyntaxArena> arena)
+{
+   RefCountPtr<RawSyntax> target = RawSyntax::make(
+            SyntaxKind::InterfaceDefinition, {
+               nullptr, // Modififers
+               make_missing_token(T_INTERFACE), // InterfaceToken
+               make_missing_token(T_IDENTIFIER_STRING), // Name
+               nullptr, // ExtendsFrom
+               RawSyntax::missing(SyntaxKind::MemberDeclBlock) // Members
+            },
+            SourcePresence::Present, arena);
+   return make<InterfaceDefinitionSyntax>(target);
 }
 
 SourceFileSyntax

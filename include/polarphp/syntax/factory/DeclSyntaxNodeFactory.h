@@ -27,7 +27,7 @@ public:
          const std::vector<NameListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static ParameterListSyntax makeParameterList(
          const std::vector<ParameterListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
-   static ClassModifierListSyntax makeClassModififerList(
+   static ClassModifierListSyntax makeClassModifierList(
          const std::vector<ClassModifierSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
    static MemberDeclListSyntax makeMemberDeclList(
          const std::vector<MemberDeclListItemSyntax> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
@@ -111,6 +111,8 @@ public:
                                                     RefCountPtr<SyntaxArena> arena = nullptr);
    static TraitDefinitionSyntax makeTraitDefinition(TokenSyntax traitToken, TokenSyntax name,
                                                     MemberDeclBlockSyntax members, RefCountPtr<SyntaxArena> arena = nullptr);
+   static InterfaceDefinitionSyntax makeInterfaceDefinition(TokenSyntax interfaceToken, TokenSyntax name, std::optional<InterfaceExtendsClauseSyntax> interfaceExtends,
+                                                        MemberDeclBlockSyntax members, RefCountPtr<SyntaxArena> arena = nullptr);
    static SourceFileSyntax makeSourceFile(TopStmtListSyntax statements, TokenSyntax eofToken, RefCountPtr<SyntaxArena> arena = nullptr);
 
    ///
@@ -162,6 +164,7 @@ public:
    static MemberDeclBlockSyntax makeBlankMemberDeclBlock(RefCountPtr<SyntaxArena> arena = nullptr);
    static ClassDefinitionSyntax makeBlankClassDefinition(RefCountPtr<SyntaxArena> arena = nullptr);
    static TraitDefinitionSyntax makeBlankTraitDefinition(RefCountPtr<SyntaxArena> arena = nullptr);
+   static InterfaceDefinitionSyntax makeBlankInterfaceDefinition(RefCountPtr<SyntaxArena> arena = nullptr);
    static SourceFileSyntax makeBlankSourceFile(RefCountPtr<SyntaxArena> arena = nullptr);
 };
 
