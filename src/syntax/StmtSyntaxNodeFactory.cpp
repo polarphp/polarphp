@@ -478,7 +478,7 @@ StmtSyntaxNodeFactory::makeIfStmt(std::optional<TokenSyntax> labelName, std::opt
 
 WhileStmtSyntax
 StmtSyntaxNodeFactory::makeWhileStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
-                                     TokenSyntax whileKeyword, ConditionElementListSyntax conditions,
+                                     TokenSyntax whileKeyword, ParenDecoratedExprSyntax conditionsClause,
                                      StmtSyntax body, RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
@@ -486,7 +486,7 @@ StmtSyntaxNodeFactory::makeWhileStmt(std::optional<TokenSyntax> labelName, std::
                labelName.has_value() ? labelName->getRaw() : nullptr,
                labelColon.has_value() ? labelColon->getRaw() : nullptr,
                whileKeyword.getRaw(),
-               conditions.getRaw(),
+               conditionsClause.getRaw(),
                body.getRaw()
             }, SourcePresence::Present, arena);
    return make<WhileStmtSyntax>(target);
@@ -621,8 +621,8 @@ StmtSyntaxNodeFactory::makeSwitchCaseListClause(TokenSyntax leftBrace, SwitchCas
 SwitchStmtSyntax
 StmtSyntaxNodeFactory::makeSwitchStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                       TokenSyntax switchKeyword, TokenSyntax leftParen, ExprSyntax conditionExpr,
-                                      TokenSyntax rightParen, TokenSyntax leftBrace, SwitchCaseListSyntax cases,
-                                      TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena)
+                                      TokenSyntax rightParen, SwitchCaseListClauseSyntax switchCaseListClause,
+                                      RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::SwitchStmt, {
@@ -632,9 +632,7 @@ StmtSyntaxNodeFactory::makeSwitchStmt(std::optional<TokenSyntax> labelName, std:
                leftParen.getRaw(),
                conditionExpr.getRaw(),
                rightParen.getRaw(),
-               leftBrace.getRaw(),
-               cases.getRaw(),
-               rightBrace.getRaw()
+               switchCaseListClause.getRaw(),
             }, SourcePresence::Present, arena);
    return make<SwitchStmtSyntax>(target);
 }
@@ -1435,9 +1433,7 @@ StmtSyntaxNodeFactory::makeBlankWhileStmt(RefCountPtr<SyntaxArena> arena)
                nullptr, // LabelName
                nullptr, // LabelColon
                make_missing_token(T_WHILE), // WhileKeyword
-               make_missing_token(T_LEFT_PAREN), // LeftParen
-               RawSyntax::missing(SyntaxKind::ConditionElementList), // Conditions
-               make_missing_token(T_RIGHT_PAREN), // RightParen
+               RawSyntax::missing(SyntaxKind::ParenDecoratedExpr), // ConditionsClause
                RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt), // Body
             }, SourcePresence::Present, arena);
    return make<WhileStmtSyntax>(target);
@@ -1563,10 +1559,8 @@ StmtSyntaxNodeFactory::makeBlankSwitchStmt(RefCountPtr<SyntaxArena> arena)
                make_missing_token(T_SWITCH), // SwitchKeyword
                make_missing_token(T_LEFT_PAREN), // LeftParen
                RawSyntax::missing(SyntaxKind::Expr), // ConditionExpr
-               make_missing_token(T_RIGHT_PAREN), // RightParen
                make_missing_token(T_LEFT_BRACE), // LeftBrace
-               RawSyntax::missing(SyntaxKind::SwitchCaseList), // Cases
-               make_missing_token(T_RIGHT_BRACE), // RightBrace
+               RawSyntax::missing(SyntaxKind::SwitchCaseListClause), // SwitchCaseListClause
             }, SourcePresence::Present, arena);
    return make<SwitchStmtSyntax>(target);
 }

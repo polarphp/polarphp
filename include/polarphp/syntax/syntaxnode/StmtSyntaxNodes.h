@@ -1172,8 +1172,8 @@ private:
 class WhileStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 7;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 5;
+   constexpr static std::uint8_t CHILDREN_COUNT = 5;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 3;
    enum Cursor : SyntaxChildrenCountType
    {
       ///
@@ -1192,20 +1192,10 @@ public:
       ///
       WhileKeyword,
       ///
-      /// type: TokenSyntax (T_LEFT_PAREN)
+      /// type: ParenDecoratedExprSyntax
       /// optional: false
       ///
-      LeftParen,
-      ///
-      /// type: ConditionElementListSyntax
-      /// optional: false
-      ///
-      Conditions,
-      ///
-      /// type: TokenSyntax (T_RIGHT_PAREN)
-      /// optional: false
-      ///
-      RightParen,
+      ConditionsClause,
       ///
       /// type: InnerCodeBlockStmtSyntax
       /// optional: false
@@ -1223,17 +1213,13 @@ public:
    std::optional<TokenSyntax> getLabelName();
    std::optional<TokenSyntax> getLabelColon();
    TokenSyntax getWhileKeyword();
-   TokenSyntax getLeftParen();
-   ConditionElementListSyntax getConditions();
-   TokenSyntax getRightParen();
+   ParenDecoratedExprSyntax getConditionsClause();
    InnerCodeBlockStmtSyntax getBody();
 
    WhileStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
    WhileStmtSyntax withLabelColon(std::optional<TokenSyntax> labelColon);
    WhileStmtSyntax withWhileKeyword(std::optional<TokenSyntax> whileKeyword);
-   WhileStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
-   WhileStmtSyntax withConditions(std::optional<ConditionElementListSyntax> conditions);
-   WhileStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
+   WhileStmtSyntax withConditionsClause(std::optional<ParenDecoratedExprSyntax> conditionsClause);
    WhileStmtSyntax withBody(std::optional<InnerCodeBlockStmtSyntax> body);
 
    /// Adds the provided `condition` to the node's `Conditions`
@@ -1840,8 +1826,8 @@ private:
 class SwitchStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 9;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 7;
+   constexpr static std::uint8_t CHILDREN_COUNT = 7;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 5;
    enum Cursor : SyntaxChildrenCountType
    {
       ///
@@ -1875,20 +1861,10 @@ public:
       ///
       RightParen,
       ///
-      /// type: TokenSyntax (T_LEFT_BRACE)
+      /// type: SwitchCaseListClauseSyntax
       /// optional: false
       ///
-      LeftBrace,
-      ///
-      /// type: SwitchCaseListSyntax
-      /// optional: false
-      ///
-      Cases,
-      ///
-      /// type: TokenSyntax (T_RIGHT_BRACE)
-      /// optional: false
-      ///
-      RightBrace
+      SwitchCaseListClause,
    };
 
 public:
@@ -1904,9 +1880,7 @@ public:
    TokenSyntax getLeftParen();
    ExprSyntax getConditionExpr();
    TokenSyntax getRightParen();
-   TokenSyntax getLeftBrace();
-   SwitchCaseListSyntax getCases();
-   TokenSyntax getRightBrace();
+   SwitchCaseListClauseSyntax getSwitchCaseListClause();
 
    SwitchStmtSyntax withLabelName(std::optional<TokenSyntax> labelName);
    SwitchStmtSyntax withLabelColon(std::optional<TokenSyntax> labelColon);
@@ -1914,11 +1888,7 @@ public:
    SwitchStmtSyntax withLeftParen(std::optional<TokenSyntax> leftParen);
    SwitchStmtSyntax withConditionExpr(std::optional<ExprSyntax> conditionExpr);
    SwitchStmtSyntax withRightParen(std::optional<TokenSyntax> rightParen);
-   SwitchStmtSyntax withLeftBrace(std::optional<TokenSyntax> leftBrace);
-   SwitchStmtSyntax withCases(std::optional<SwitchCaseListSyntax> cases);
-   SwitchStmtSyntax withRightBrace(std::optional<TokenSyntax> rightBrace);
-
-   SwitchStmtSyntax addCase(SwitchCaseSyntax switchCase);
+   SwitchStmtSyntax withSwitchCaseListClause(std::optional<SwitchCaseListClauseSyntax> switchCaseListClause);
 
    static bool kindOf(SyntaxKind kind)
    {

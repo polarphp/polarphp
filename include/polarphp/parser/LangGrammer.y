@@ -819,13 +819,28 @@ inner_statement:
 
 statement:
    T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE {
-
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      InnerStmtListSyntax stmts = make<InnerStmtListSyntax>($2);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      InnerCodeBlockStmtSyntax codeBlock = make_stmt(
+         InnerCodeBlockStmt, leftBrace, stmts, rightBrace
+      );
+      $$ = codeBlock.getRaw();
    }
 |  if_stmt {
       $$ = $1;
    }
 |  T_WHILE T_LEFT_PAREN expr T_RIGHT_PAREN statement {
-
+      TokenSyntax whileKeyword = make_token(WhileKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ExprSyntax condExpr = make<ExprSyntax>($3);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      StmtSyntax stmt = make<StmtSyntax>($5);
+      ParenDecoratedExprSyntax condClause = make_expr(ParenDecoratedExpr, leftParen, condExpr, rightParen);
+      WhileStmtSyntax whileStmt = make_stmt(
+         WhileStmt, std::nullopt, std::nullopt, whileKeyword, condClause, stmt
+      );
+      $$ = whileStmt.getRaw();
    }
 |  T_DO statement T_WHILE T_LEFT_PAREN expr T_RIGHT_PAREN T_SEMICOLON {
 
@@ -834,7 +849,15 @@ statement:
 
    }
 |  T_SWITCH T_LEFT_PAREN expr T_RIGHT_PAREN switch_case_list {
-
+      TokenSyntax switchKeyword = make_token(SwitchKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      ExprSyntax condExpr = make<ExprSyntax>($3);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      SwitchCaseListClauseSyntax switchCaseClause = make<SwitchCaseListClauseSyntax>($5);
+      SwitchStmtSyntax stmt = make_stmt(
+         SwitchStmt, std::nullopt, std::nullopt, switchKeyword, leftParen, condExpr, rightParen, switchCaseClause
+      );
+      $$ = stmt.getRaw();
    }
 |  T_BREAK optional_expr T_SEMICOLON {
 
@@ -1121,7 +1144,13 @@ foreach_variable:
 
 switch_case_list:
    T_LEFT_BRACE case_list T_RIGHT_BRACE {
-
+      TokenSyntax leftBrace = make_token(LeftBraceToken);
+      SwitchCaseListSyntax list = make<SwitchCaseListSyntax>($2);
+      TokenSyntax rightBrace = make_token(RightBraceToken);
+      SwitchCaseListClauseSyntax switchCaseClause = make_stmt(
+         SwitchCaseListClause, leftBrace, list, rightBrace
+      );
+      $$ = switchCaseClause.getRaw();
    }
 ;
 

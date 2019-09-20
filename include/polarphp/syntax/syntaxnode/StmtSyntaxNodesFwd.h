@@ -89,6 +89,7 @@ class InitializerClauseSyntax;
 
 // expr syntax nodes forward declares
 class ExprListItemSyntax;
+class ParenDecoratedExprSyntax;
 class SimpleVariableExprSyntax;
 class VariableExprSyntax;
 class ReferencedVariableExprSyntax;

@@ -10,6 +10,7 @@
 // Created by polarboy on 2019/05/17.
 
 #include "polarphp/syntax/builder/StmtSyntaxNodeBuilders.h"
+#include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
 
 namespace polar::syntax {
 
@@ -355,21 +356,9 @@ WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useWhileKeyword(TokenSyntax whil
    return *this;
 }
 
-WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useLeftParen(TokenSyntax leftParen)
+WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useConditions(ParenDecoratedExprSyntax conditions)
 {
-   m_layout[cursor_index(Cursor::LeftParen)] = leftParen.getRaw();
-   return *this;
-}
-
-WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useConditions(ConditionElementListSyntax conditions)
-{
-   m_layout[cursor_index(Cursor::Conditions)] = conditions.getRaw();
-   return *this;
-}
-
-WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useRightParen(TokenSyntax rightParen)
-{
-   m_layout[cursor_index(Cursor::RightParen)] = rightParen.getRaw();
+   m_layout[cursor_index(Cursor::ConditionsClause)] = conditions.getRaw();
    return *this;
 }
 
@@ -381,7 +370,7 @@ WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::useBody(StmtSyntax body)
 
 WhileStmtSyntaxBuilder &WhileStmtSyntaxBuilder::addCondition(ConditionElementSyntax condition)
 {
-   RefCountPtr<RawSyntax> conditions = m_layout[cursor_index(Cursor::Conditions)];
+   RefCountPtr<RawSyntax> conditions = m_layout[cursor_index(Cursor::ConditionsClause)];
    if (!conditions) {
       conditions = RawSyntax::make(
                SyntaxKind::ConditionElementList, {condition.getRaw()}, SourcePresence::Present,
@@ -397,9 +386,7 @@ WhileStmtSyntax WhileStmtSyntaxBuilder::build()
    CursorIndex labelNameIndex = cursor_index(Cursor::LabelName);
    CursorIndex labelColonIndex = cursor_index(Cursor::LabelColon);
    CursorIndex whileKeywordIndex = cursor_index(Cursor::WhileKeyword);
-   CursorIndex leftParenIndex = cursor_index(Cursor::LeftParen);
-   CursorIndex conditionsIndex = cursor_index(Cursor::Conditions);
-   CursorIndex rightParenIndex = cursor_index(Cursor::RightParen);
+   CursorIndex conditionsIndex = cursor_index(Cursor::ConditionsClause);
    CursorIndex bodyIndex = cursor_index(Cursor::Body);
    if (!m_layout[labelNameIndex]) {
       m_layout[labelNameIndex] = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
@@ -411,14 +398,8 @@ WhileStmtSyntax WhileStmtSyntaxBuilder::build()
    if (!m_layout[whileKeywordIndex]) {
       m_layout[whileKeywordIndex] = make_missing_token(T_WHILE);
    }
-   if (!m_layout[leftParenIndex]) {
-      m_layout[leftParenIndex] = make_missing_token(T_LEFT_PAREN);
-   }
    if (!m_layout[conditionsIndex]) {
-      m_layout[conditionsIndex] = RawSyntax::missing(SyntaxKind::ConditionElementList);
-   }
-   if (!m_layout[rightParenIndex]) {
-      m_layout[rightParenIndex] = make_missing_token(T_RIGHT_PAREN);
+      m_layout[conditionsIndex] = RawSyntax::missing(SyntaxKind::ParenDecoratedExpr);
    }
    if (!m_layout[bodyIndex]) {
       m_layout[bodyIndex] = RawSyntax::missing(SyntaxKind::InnerCodeBlockStmt);
@@ -670,34 +651,9 @@ SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useRightParen(TokenSyntax righ
    return *this;
 }
 
-SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useLeftBrace(TokenSyntax leftBrace)
+SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useSwitchCaseListCaluse(SwitchCaseListClauseSyntax switchCaseListCaluse)
 {
-   m_layout[cursor_index(Cursor::LeftBrace)] = leftBrace.getRaw();
-   return *this;
-}
-
-SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useCases(SwitchCaseListSyntax cases)
-{
-   m_layout[cursor_index(Cursor::Cases)] = cases.getRaw();
-   return *this;
-}
-
-SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::addCase(SwitchCaseSyntax caseItem)
-{
-   RefCountPtr<RawSyntax> cases = m_layout[Cursor::Cases];
-   if (!cases) {
-      cases = RawSyntax::make(
-               SyntaxKind::SwitchCaseList, {caseItem.getRaw()}, SourcePresence::Present,
-               m_arena);
-   } else {
-      cases = cases->append(caseItem.getRaw());
-   }
-   return *this;
-}
-
-SwitchStmtSyntaxBuilder &SwitchStmtSyntaxBuilder::useRightBrace(TokenSyntax rightBrace)
-{
-   m_layout[cursor_index(Cursor::RightBrace)] = rightBrace.getRaw();
+   m_layout[cursor_index(Cursor::SwitchCaseListClause)] = switchCaseListCaluse.getRaw();
    return *this;
 }
 
@@ -709,9 +665,7 @@ SwitchStmtSyntax SwitchStmtSyntaxBuilder::build()
    CursorIndex leftParenIndex = cursor_index(Cursor::LeftParen);
    CursorIndex conditionExprIndex = cursor_index(Cursor::ConditionExpr);
    CursorIndex rightParenIndex = cursor_index(Cursor::RightParen);
-   CursorIndex leftBraceIndex = cursor_index(Cursor::LeftBrace);
-   CursorIndex casesIndex = cursor_index(Cursor::Cases);
-   CursorIndex rightBraceIndex = cursor_index(Cursor::RightBrace);
+   CursorIndex casesIndex = cursor_index(Cursor::SwitchCaseListClause);
    if (!m_layout[labelNameIndex]) {
       m_layout[labelNameIndex] = RawSyntax::missing(TokenKindType::T_IDENTIFIER_STRING,
                                                     OwnedString::makeUnowned(""));
@@ -737,16 +691,8 @@ SwitchStmtSyntax SwitchStmtSyntaxBuilder::build()
       m_layout[rightParenIndex] = make_missing_token(T_RIGHT_PAREN);
    }
 
-   if (!m_layout[leftBraceIndex]) {
-      m_layout[leftBraceIndex] = make_missing_token(T_LEFT_BRACE);
-   }
-
    if (!m_layout[casesIndex]) {
-      m_layout[casesIndex] = RawSyntax::missing(SyntaxKind::SwitchCaseList);
-   }
-
-   if (!m_layout[rightBraceIndex]) {
-      m_layout[rightBraceIndex] = make_missing_token(T_RIGHT_BRACE);
+      m_layout[casesIndex] = RawSyntax::missing(SyntaxKind::SwitchCaseListClause);
    }
 
    RefCountPtr<RawSyntax> rawSwitchStmtSyntax = RawSyntax::make(

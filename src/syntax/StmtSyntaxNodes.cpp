@@ -1419,9 +1419,7 @@ void WhileStmtSyntax::validate()
    syntax_assert_child_token(raw, LabelName, std::set{TokenKindType::T_IDENTIFIER_STRING});
    syntax_assert_child_token(raw, LabelColon, std::set{TokenKindType::T_COLON});
    syntax_assert_child_token(raw, WhileKeyword, std::set{TokenKindType::T_WHILE});
-   syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
-   syntax_assert_child_kind(raw, Conditions, std::set{SyntaxKind::ConditionElementList});
-   syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
+   syntax_assert_child_kind(raw, ConditionsClause, std::set{SyntaxKind::ParenDecoratedExpr});
    syntax_assert_child_kind(raw, Body, std::set{SyntaxKind::InnerCodeBlockStmt});
 #endif
 }
@@ -1449,19 +1447,9 @@ TokenSyntax WhileStmtSyntax::getWhileKeyword()
    return TokenSyntax{m_root, m_data->getChild(Cursor::WhileKeyword).get()};
 }
 
-TokenSyntax WhileStmtSyntax::getLeftParen()
+ParenDecoratedExprSyntax WhileStmtSyntax::getConditionsClause()
 {
-   return TokenSyntax{m_root, m_data->getChild(Cursor::LeftParen).get()};
-}
-
-ConditionElementListSyntax WhileStmtSyntax::getConditions()
-{
-   return ConditionElementListSyntax{m_root, m_data->getChild(Cursor::Conditions).get()};
-}
-
-TokenSyntax WhileStmtSyntax::getRightParen()
-{
-   return TokenSyntax{m_root, m_data->getChild(Cursor::RightParen).get()};
+   return ParenDecoratedExprSyntax{m_root, m_data->getChild(Cursor::ConditionsClause).get()};
 }
 
 InnerCodeBlockStmtSyntax WhileStmtSyntax::getBody()
@@ -1502,37 +1490,15 @@ WhileStmtSyntax WhileStmtSyntax::withWhileKeyword(std::optional<TokenSyntax> whi
    return m_data->replaceChild<WhileStmtSyntax>(rawWhileKeyword, Cursor::WhileKeyword);
 }
 
-WhileStmtSyntax WhileStmtSyntax::withLeftParen(std::optional<TokenSyntax> leftParen)
-{
-   RefCountPtr<RawSyntax> rawLeftParen;
-   if (leftParen.has_value()) {
-      rawLeftParen = leftParen->getRaw();
-   } else {
-      rawLeftParen = make_missing_token(T_LEFT_PAREN);
-   }
-   return m_data->replaceChild<WhileStmtSyntax>(rawLeftParen, Cursor::LeftParen);
-}
-
-WhileStmtSyntax WhileStmtSyntax::withConditions(std::optional<ConditionElementListSyntax> conditions)
+WhileStmtSyntax WhileStmtSyntax::withConditionsClause(std::optional<ParenDecoratedExprSyntax> conditionsClause)
 {
    RefCountPtr<RawSyntax> rawConditions;
-   if (conditions.has_value()) {
-      rawConditions = conditions->getRaw();
+   if (conditionsClause.has_value()) {
+      rawConditions = conditionsClause->getRaw();
    } else {
-      rawConditions = RawSyntax::missing(SyntaxKind::ConditionElementList);
+      rawConditions = RawSyntax::missing(SyntaxKind::ParenDecoratedExpr);
    }
-   return m_data->replaceChild<WhileStmtSyntax>(rawConditions, Cursor::Conditions);
-}
-
-WhileStmtSyntax WhileStmtSyntax::withRightParen(std::optional<TokenSyntax> rightParen)
-{
-   RefCountPtr<RawSyntax> rawRightParen;
-   if (rightParen.has_value()) {
-      rawRightParen = rightParen->getRaw();
-   } else {
-      rawRightParen = make_missing_token(T_RIGHT_PAREN);
-   }
-   return m_data->replaceChild<WhileStmtSyntax>(rawRightParen, Cursor::RightParen);
+   return m_data->replaceChild<WhileStmtSyntax>(rawConditions, Cursor::ConditionsClause);
 }
 
 WhileStmtSyntax WhileStmtSyntax::withBody(std::optional<InnerCodeBlockStmtSyntax> body)
@@ -1548,13 +1514,13 @@ WhileStmtSyntax WhileStmtSyntax::withBody(std::optional<InnerCodeBlockStmtSyntax
 
 WhileStmtSyntax WhileStmtSyntax::addCondition(ConditionElementSyntax condition)
 {
-   RefCountPtr<RawSyntax> conditions = getRaw()->getChild(Cursor::Conditions);
+   RefCountPtr<RawSyntax> conditions = getRaw()->getChild(Cursor::ConditionsClause);
    if (conditions) {
       conditions = conditions->append(condition.getRaw());
    } else {
-      conditions = RawSyntax::make(SyntaxKind::ConditionElementList, {condition.getRaw()}, SourcePresence::Present);
+      conditions = RawSyntax::make(SyntaxKind::ParenDecoratedExpr, {condition.getRaw()}, SourcePresence::Present);
    }
-   return m_data->replaceChild<WhileStmtSyntax>(conditions, Cursor::Conditions);
+   return m_data->replaceChild<WhileStmtSyntax>(conditions, Cursor::ConditionsClause);
 }
 
 ///
@@ -2399,9 +2365,7 @@ void SwitchStmtSyntax::validate()
    syntax_assert_child_token(raw, LeftParen, std::set{TokenKindType::T_LEFT_PAREN});
    syntax_assert_child_kind(raw, ConditionExpr, std::set{SyntaxKind::Expr});
    syntax_assert_child_token(raw, RightParen, std::set{TokenKindType::T_RIGHT_PAREN});
-   syntax_assert_child_token(raw, LeftBrace, std::set{TokenKindType::T_LEFT_BRACE});
-   syntax_assert_child_kind(raw, Cases, std::set{SyntaxKind::SwitchCaseList});
-   syntax_assert_child_token(raw, RightBrace, std::set{TokenKindType::T_RIGHT_BRACE});
+   syntax_assert_child_kind(raw, SwitchCaseListClause, std::set{SyntaxKind::SwitchCaseListClause});
 #endif
 }
 
@@ -2443,19 +2407,9 @@ TokenSyntax SwitchStmtSyntax::getRightParen()
    return TokenSyntax{m_root, m_data->getChild(Cursor::RightParen).get()};
 }
 
-TokenSyntax SwitchStmtSyntax::getLeftBrace()
+SwitchCaseListClauseSyntax SwitchStmtSyntax::getSwitchCaseListClause()
 {
-   return TokenSyntax{m_root, m_data->getChild(Cursor::LeftBrace).get()};
-}
-
-SwitchCaseListSyntax SwitchStmtSyntax::getCases()
-{
-   return SwitchCaseListSyntax{m_root, m_data->getChild(Cursor::Cases).get()};
-}
-
-TokenSyntax SwitchStmtSyntax::getRightBrace()
-{
-   return TokenSyntax{m_root, m_data->getChild(Cursor::RightBrace).get()};
+   return SwitchCaseListClauseSyntax{m_root, m_data->getChild(Cursor::SwitchCaseListClause).get()};
 }
 
 SwitchStmtSyntax SwitchStmtSyntax::withLabelName(std::optional<TokenSyntax> labelName)
@@ -2524,48 +2478,15 @@ SwitchStmtSyntax SwitchStmtSyntax::withRightParen(std::optional<TokenSyntax> rig
    return m_data->replaceChild<SwitchStmtSyntax>(rawRightParen, Cursor::RightParen);
 }
 
-SwitchStmtSyntax SwitchStmtSyntax::withLeftBrace(std::optional<TokenSyntax> leftBrace)
+SwitchStmtSyntax SwitchStmtSyntax::withSwitchCaseListClause(std::optional<SwitchCaseListClauseSyntax> switchCaseListClause)
 {
-   RefCountPtr<RawSyntax> rawLeftBrace;
-   if (leftBrace.has_value()) {
-      rawLeftBrace = leftBrace->getRaw();
+   RefCountPtr<RawSyntax> rawSwitchCaseListClause;
+   if (switchCaseListClause.has_value()) {
+      rawSwitchCaseListClause = switchCaseListClause->getRaw();
    } else {
-      rawLeftBrace = make_missing_token(T_LEFT_BRACE);
+      rawSwitchCaseListClause = RawSyntax::missing(SyntaxKind::SwitchCaseListClause);
    }
-   return m_data->replaceChild<SwitchStmtSyntax>(rawLeftBrace, Cursor::LeftBrace);
-}
-
-SwitchStmtSyntax SwitchStmtSyntax::withCases(std::optional<SwitchCaseListSyntax> cases)
-{
-   RefCountPtr<RawSyntax> rawCases;
-   if (cases.has_value()) {
-      rawCases = cases->getRaw();
-   } else {
-      rawCases = RawSyntax::missing(SyntaxKind::SwitchCaseList);
-   }
-   return m_data->replaceChild<SwitchStmtSyntax>(rawCases, Cursor::Cases);
-}
-
-SwitchStmtSyntax SwitchStmtSyntax::withRightBrace(std::optional<TokenSyntax> rightBrace)
-{
-   RefCountPtr<RawSyntax> rawRightBrace;
-   if (rightBrace.has_value()) {
-      rawRightBrace = rightBrace->getRaw();
-   } else {
-      rawRightBrace = make_missing_token(T_RIGHT_BRACE);
-   }
-   return m_data->replaceChild<SwitchStmtSyntax>(rawRightBrace, Cursor::RightBrace);
-}
-
-SwitchStmtSyntax SwitchStmtSyntax::addCase(SwitchCaseSyntax switchCase)
-{
-   RefCountPtr<RawSyntax> cases = getRaw()->getChild(Cursor::Cases);
-   if (cases) {
-      cases = cases->append(switchCase.getRaw());
-   } else {
-      cases = RawSyntax::make(SyntaxKind::SwitchCaseList, {switchCase.getRaw()}, SourcePresence::Present);
-   }
-   return m_data->replaceChild<SwitchStmtSyntax>(cases, Cursor::Cases);
+   return m_data->replaceChild<SwitchStmtSyntax>(rawSwitchCaseListClause, Cursor::SwitchCaseListClause);
 }
 
 void DeferStmtSyntax::validate()

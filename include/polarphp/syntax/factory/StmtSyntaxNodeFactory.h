@@ -94,7 +94,7 @@ public:
                                   std::optional<TokenSyntax> elseKeyword, std::optional<StmtSyntax> elseBody,
                                   RefCountPtr<SyntaxArena> arena = nullptr);
    static WhileStmtSyntax makeWhileStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
-                                        TokenSyntax whileKeyword, ConditionElementListSyntax conditions,
+                                        TokenSyntax whileKeyword, ParenDecoratedExprSyntax conditionsClause,
                                         StmtSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
    static DoWhileStmtSyntax makeDoWhileStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                             TokenSyntax doKeyword, StmtSyntax body, TokenSyntax whileKeyword,
@@ -122,8 +122,7 @@ public:
                                                               RefCountPtr<SyntaxArena> arena = nullptr);
    static SwitchStmtSyntax makeSwitchStmt(std::optional<TokenSyntax> labelName, std::optional<TokenSyntax> labelColon,
                                           TokenSyntax switchKeyword, TokenSyntax leftParen, ExprSyntax conditionExpr,
-                                          TokenSyntax rightParen, TokenSyntax leftBrace, SwitchCaseListSyntax cases,
-                                          TokenSyntax rightBrace, RefCountPtr<SyntaxArena> arena = nullptr);
+                                          TokenSyntax rightParen, SwitchCaseListClauseSyntax switchCaseListClause, RefCountPtr<SyntaxArena> arena = nullptr);
    static DeferStmtSyntax makeDeferStmt(TokenSyntax deferKeyword, InnerCodeBlockStmtSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);
    static ThrowStmtSyntax makeThrowStmt(TokenSyntax throwKeyword, ExprSyntax expr, TokenSyntax semicolon, RefCountPtr<SyntaxArena> arena = nullptr);
    static TryStmtSyntax makeTryStmt(TokenSyntax tryToken, InnerCodeBlockStmtSyntax codeBlock,
