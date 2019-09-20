@@ -80,11 +80,12 @@ public:
    static LabelStmtSyntax makeLabelStmt(TokenSyntax name, TokenSyntax colon, RefCountPtr<SyntaxArena> arena = nullptr);
    static ConditionElementSyntax makeConditionElement(Syntax condition, std::optional<TokenSyntax> trailingComma,
                                                       RefCountPtr<SyntaxArena> arena = nullptr);
-   static ContinueStmtSyntax makeContinueStmt(TokenSyntax continueKeyword, std::optional<TokenSyntax> numberToken,
+   static ContinueStmtSyntax makeContinueStmt(TokenSyntax continueKeyword, std::optional<ExprSyntax> expr, TokenSyntax semicolon,
                                               RefCountPtr<SyntaxArena> arena = nullptr);
-   static BreakStmtSyntax makeBreakStmt(TokenSyntax breakKeyword, std::optional<TokenSyntax> numberToken,
+   static BreakStmtSyntax makeBreakStmt(TokenSyntax breakKeyword, std::optional<ExprSyntax> expr, TokenSyntax semicolon,
                                         RefCountPtr<SyntaxArena> arena = nullptr);
-   static FallthroughStmtSyntax makeFallthroughStmt(TokenSyntax fallthroughKeyword, RefCountPtr<SyntaxArena> arena = nullptr);
+   static FallthroughStmtSyntax makeFallthroughStmt(TokenSyntax fallthroughKeyword, TokenSyntax semicolon,
+                                                    RefCountPtr<SyntaxArena> arena = nullptr);
    static ElseIfClauseSyntax makeElseIfClause(TokenSyntax elseIfKeyword, TokenSyntax leftParen,
                                               ExprSyntax condition, TokenSyntax rightParen,
                                               StmtSyntax body, RefCountPtr<SyntaxArena> arena = nullptr);

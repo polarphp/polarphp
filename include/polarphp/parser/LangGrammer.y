@@ -871,25 +871,58 @@ statement:
       $$ = stmt.getRaw();
    }
 |  T_BREAK optional_expr T_SEMICOLON {
-
+      TokenSyntax breakKeyword = make_token(BreakKeyword);
+      std::optional<ExprSyntax> optExpr = $2 ? std::optional(make<ExprSyntax>($2)) : std::nullopt;
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      BreakStmtSyntax breakStmt = make_stmt(BreakStmt, breakKeyword, optExpr, semicolon);
+      $$ = breakStmt.getRaw();
    }
 |  T_CONTINUE optional_expr T_SEMICOLON {
-
+      TokenSyntax continueKeyword = make_token(ContinueKeyword);
+      std::optional<ExprSyntax> optExpr = $2 ? std::optional(make<ExprSyntax>($2)) : std::nullopt;
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      BreakStmtSyntax continueStmt = make_stmt(BreakStmt, continueKeyword, optExpr, semicolon);
+      $$ = continueStmt.getRaw();
    }
 |  T_FALLTHROUGH T_SEMICOLON {
-
+      TokenSyntax fallthroughKeyword = make_token(FallthroughKeyword);
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      FallthroughStmtSyntax fallthroughStmt = make_stmt(
+         FallthroughStmt, fallthroughKeyword, semicolon
+      );
+      $$ = fallthroughStmt.getRaw();
    }
 |  T_RETURN optional_expr T_SEMICOLON {
-
+      TokenSyntax returnKeyword = make_token(ReturnKeyword);
+      std::optional<ExprSyntax> optExpr = $2 ? std::optional(make<ExprSyntax>($2)) : std::nullopt;
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      ReturnStmtSyntax returnStmt = make_stmt(ReturnStmt, returnKeyword, optExpr, semicolon);
+      $$ = returnStmt.getRaw();
    }
 |  T_GLOBAL global_var_list T_SEMICOLON {
-
+      TokenSyntax globalKeyword = make_token(GlobalKeyword);
+      GlobalVariableListSyntax varList = make<GlobalVariableListSyntax>($2);
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      GlobalVariableDeclarationsStmtSyntax globalVars = make_stmt(
+         GlobalVariableDeclarationsStmt, globalKeyword, varList, semicolon
+      );
+      $$ = globalVars.getRaw();
    }
 |  T_STATIC static_var_list T_SEMICOLON {
-
+      TokenSyntax staticKeyword = make_token(StaticKeyword);
+      StaticVariableListSyntax varList = make<StaticVariableListSyntax>($2);
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      StaticVariableDeclarationsStmtSyntax staticVars = make_stmt(
+         StaticVariableDeclarationsStmt, staticKeyword, varList, semicolon
+      );
+      $$ = staticVars.getRaw();
    }
 |  T_ECHO echo_expr_list T_SEMICOLON {
-
+      TokenSyntax echoKeyword = make_token(EchoKeyword);
+      ExprListSyntax exprList = make<ExprListSyntax>($2);
+      TokenSyntax semicolon = make_token(SemicolonToken);
+      EchoStmtSyntax echoStmt = make_stmt(EchoStmt, echoKeyword, exprList, semicolon);
+      $$ = echoStmt.getRaw();
    }
 |  expr T_SEMICOLON {
       ExprSyntax expr = make<ExprSyntax>($1);
@@ -898,7 +931,15 @@ statement:
       $$ = exprStmt.getRaw();
    }
 |  T_UNSET T_LEFT_PAREN unset_variables possible_comma T_RIGHT_PAREN T_SEMICOLON {
-
+      TokenSyntax unsetKeyword = make_token(UnsetKeyword);
+      TokenSyntax leftParen = make_token(LeftParenToken);
+      UnsetVariableListSyntax list = make<UnsetVariableListSyntax>($3);
+      TokenSyntax rightParen = make_token(RightParenToken);
+      TokenSyntax simicolon = make_token(SemicolonToken);
+      UnsetStmtSyntax unsetStmt = make_stmt(
+         UnsetStmt, unsetKeyword, leftParen, list, rightParen, simicolon
+      );
+      $$ = unsetStmt.getRaw();
    }
 |  T_FOREACH T_LEFT_PAREN expr T_AS foreach_variable T_RIGHT_PAREN statement {
 

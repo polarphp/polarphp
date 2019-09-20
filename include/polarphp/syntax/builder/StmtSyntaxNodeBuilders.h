@@ -102,7 +102,7 @@ public:
 private:
    RefCountPtr<SyntaxArena> m_arena = nullptr;
    RefCountPtr<RawSyntax> m_layout[FallthroughStmtSyntax::CHILDREN_COUNT] = {
-      nullptr
+      nullptr, nullptr
    };
 };
 

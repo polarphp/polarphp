@@ -941,8 +941,8 @@ private:
 class FallthroughStmtSyntax final : public StmtSyntax
 {
 public:
-   constexpr static std::uint8_t CHILDREN_COUNT = 1;
-   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 1;
+   constexpr static std::uint8_t CHILDREN_COUNT = 2;
+   constexpr static std::uint8_t REQUIRED_CHILDREN_COUNT = 2;
 
    enum Cursor : SyntaxChildrenCountType
    {

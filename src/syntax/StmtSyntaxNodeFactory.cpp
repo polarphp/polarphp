@@ -404,35 +404,39 @@ StmtSyntaxNodeFactory::makeConditionElement(Syntax condition, std::optional<Toke
 }
 
 ContinueStmtSyntax
-StmtSyntaxNodeFactory::makeContinueStmt(TokenSyntax continueKeyword, std::optional<TokenSyntax> numberToken,
+StmtSyntaxNodeFactory::makeContinueStmt(TokenSyntax continueKeyword, std::optional<ExprSyntax> expr, TokenSyntax semicolon,
                                         RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::ContinueStmt, {
                continueKeyword.getRaw(),
-               numberToken.has_value() ? numberToken->getRaw() : nullptr
+               expr.has_value() ? expr->getRaw() : nullptr,
+               semicolon.getRaw(),
             }, SourcePresence::Present, arena);
    return make<ContinueStmtSyntax>(target);
 }
 
 BreakStmtSyntax
-StmtSyntaxNodeFactory::makeBreakStmt(TokenSyntax breakKeyword, std::optional<TokenSyntax> numberToken,
+StmtSyntaxNodeFactory::makeBreakStmt(TokenSyntax breakKeyword, std::optional<ExprSyntax> expr, TokenSyntax semicolon,
                                      RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::BreakStmt, {
                breakKeyword.getRaw(),
-               numberToken.has_value() ? numberToken->getRaw() : nullptr
+               expr.has_value() ? expr->getRaw() : nullptr,
+               semicolon.getRaw()
             }, SourcePresence::Present, arena);
    return make<BreakStmtSyntax>(target);
 }
 
 FallthroughStmtSyntax
-StmtSyntaxNodeFactory::makeFallthroughStmt(TokenSyntax fallthroughKeyword, RefCountPtr<SyntaxArena> arena)
+StmtSyntaxNodeFactory::makeFallthroughStmt(TokenSyntax fallthroughKeyword, TokenSyntax semicolon,
+                                           RefCountPtr<SyntaxArena> arena)
 {
    RefCountPtr<RawSyntax> target = RawSyntax::make(
             SyntaxKind::FallthroughStmt, {
-               fallthroughKeyword.getRaw()
+               fallthroughKeyword.getRaw(),
+               semicolon.getRaw()
             }, SourcePresence::Present, arena);
    return make<FallthroughStmtSyntax>(target);
 }
