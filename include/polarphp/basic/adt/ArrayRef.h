@@ -1,3 +1,10 @@
+//===- ArrayRef.h - Array Reference Wrapper ---------------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -578,7 +585,7 @@ public:
 
    OwningArrayRef(OwningArrayRef &&other)
    {
-      *this = other;
+      *this = std::move(other);
    }
 
    OwningArrayRef &operator=(OwningArrayRef &&other)
@@ -694,13 +701,6 @@ inline bool operator!=(ArrayRef<T> lhs, ArrayRef<T> rhs)
 } // basic
 
 namespace utils {
-
-// ArrayRefs can be treated like a POD type.
-template <typename T> struct IsPodLike;
-template <typename T> struct IsPodLike<polar::basic::ArrayRef<T>>
-{
-   static const bool value = true;
-};
 
 template <typename T>
 polar::basic::HashCode hash_value(polar::basic::ArrayRef<T> array)
