@@ -35,14 +35,14 @@ ApSInt::ApSInt(StringRef str)
       if (minBits > 0 && minBits < numBits) {
          temp = temp.trunc(minBits);
       }
-      *this = ApSInt(temp, /*IsUnsigned=*/false);
+      *this = ApSInt(temp, /*isUnsigned=*/false);
       return;
    }
    unsigned activeBits = temp.getActiveBits();
    if (activeBits > 0 && activeBits < numBits) {
       temp = temp.trunc(activeBits);
    }
-   *this = ApSInt(temp, /*IsUnsigned=*/true);
+   *this = ApSInt(temp, /*isUnsigned=*/true);
 }
 
 void ApSInt::profile(FoldingSetNodeId &id) const

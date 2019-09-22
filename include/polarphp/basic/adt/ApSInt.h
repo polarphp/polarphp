@@ -1,3 +1,10 @@
+//===-- llvm/ADT/APSInt.h - Arbitrary Precision Signed Int -----*- C++ -*--===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -45,6 +52,33 @@ public:
    ///
    /// \param Str the string to be interpreted.
    explicit ApSInt(StringRef str);
+
+   /// Determine sign of this APSInt.
+   ///
+   /// \returns true if this APSInt is negative, false otherwise
+   bool isNegative() const
+   {
+      return isSigned() && ApInt::isNegative();
+   }
+
+   /// Determine if this APSInt Value is non-negative (>= 0)
+   ///
+   /// \returns true if this APSInt is non-negative, false otherwise
+   bool isNonNegative() const
+   {
+      return !isNegative();
+   }
+
+   /// Determine if this APSInt Value is positive.
+   ///
+   /// This tests if the value of this APSInt is positive (> 0). Note
+   /// that 0 is not a positive value.
+   ///
+   /// \returns true if this APSInt is positive.
+   bool isStrictlyPositive() const
+   {
+      return isNonNegative() && !isNullValue();
+   }
 
    ApSInt &operator=(ApInt other)
    {
