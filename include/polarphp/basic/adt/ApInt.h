@@ -1,3 +1,10 @@
+//===-- llvm/ADT/APInt.h - For Arbitrary Precision Integer -----*- C++ -*--===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -2515,6 +2522,14 @@ std::optional<ApInt> solve_quadratic_equation_wrap(ApInt A, ApInt B, ApInt C,
 // See friend declaration above. This additional declaration is required in
 // order to compile LLVM with IBM xlC compiler.
 HashCode hash_value(const ApInt &arg);
+
+/// StoreIntToMemory - Fills the StoreBytes bytes of memory starting from Dst
+/// with the integer held in IntVal.
+void store_int_to_memory(const ApInt &intVal, uint8_t *dest, unsigned storeBytes);
+
+/// LoadIntFromMemory - Loads the integer stored in the LoadBytes bytes starting
+/// from Src into IntVal, which is assumed to be wide enough and to hold zero.
+void load_int_from_memory(ApInt &intVal, uint8_t *src, unsigned loadBytes);
 
 } // basic
 } // polar
