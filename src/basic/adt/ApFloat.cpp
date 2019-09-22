@@ -1,3 +1,10 @@
+//===- llvm/ADT/APFloat.h - Arbitrary Precision Floating Point ---*- C++ -*-==//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -115,6 +122,44 @@ static const FltSemantics sg_semPPCDoubleDouble = {-1, 0, 0, 0};
 static const FltSemantics sg_semPPCDoubleDoubleLegacy = {1023, -1022 + 53,
                                                          53 + 53, 128};
 
+const FltSemantics &ApFloatBase::EnumToSemantics(Semantics semantic) {
+   switch (semantic) {
+   case S_IEEEhalf:
+      return getIEEEHalf();
+   case S_IEEEsingle:
+      return getIEEESingle();
+   case S_IEEEdouble:
+      return getIEEEDouble();
+   case S_x87DoubleExtended:
+      return getX87DoubleExtended();
+   case S_IEEEquad:
+      return getIEEEQuad();
+   case S_PPCDoubleDouble:
+      return getPPCDoubleDouble();
+   }
+   polar_unreachable("Unrecognised floating semantics");
+}
+
+ApFloatBase::Semantics
+ApFloatBase::SemanticsToEnum(const FltSemantics &semantic)
+{
+   if (&semantic == &ApFloat::getIEEEHalf()) {
+      return S_IEEEhalf;
+   } else if (&semantic == &ApFloat::getIEEESingle()) {
+      return S_IEEEsingle;
+   } else if (&semantic == &ApFloat::getIEEEDouble()) {
+      return S_IEEEdouble;
+   } else if (&semantic == &ApFloat::getX87DoubleExtended()) {
+      return S_x87DoubleExtended;
+   } else if (&semantic == &ApFloat::getIEEEQuad()) {
+      return S_IEEEquad;
+   } else if (&semantic == &ApFloat::getPPCDoubleDouble()) {
+      return S_PPCDoubleDouble;
+   } else {
+      polar_unreachable("Unknown floating semantics");
+   }
+}
+
 const FltSemantics &ApFloatBase::getIEEEHalf()
 {
    return sg_semIEEEhalf;
@@ -226,7 +271,10 @@ int read_exponent(StringRef::iterator begin, StringRef::iterator end)
    const unsigned int overlargeExponent = 24000;  /* FIXME.  */
    StringRef::iterator p = begin;
 
-   assert(p != end && "Exponent has no digits");
+   // Treat no exponent as 0 to match binutils
+   if (p == end || ((*p == '-' || *p == '+') && (p + 1) == end)) {
+      return 0;
+   }
 
    isNegative = (*p == '-');
    if (*p == '-' || *p == '+') {
@@ -4699,8 +4747,9 @@ ApFloat::Storage::Storage(IEEEFloat fvalue, const FltSemantics &semantics)
       return;
    }
    if (usesLayout<DoubleApFloat>(semantics)) {
+      const FltSemantics& fltSemantic = fvalue.getSemantics();
       new (&m_dvalue)
-            DoubleApFloat(semantics, ApFloat(std::move(fvalue), fvalue.getSemantics()),
+            DoubleApFloat(semantics, ApFloat(std::move(fvalue), fltSemantic),
                           ApFloat(sg_semIEEEdouble));
       return;
    }

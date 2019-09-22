@@ -162,7 +162,7 @@ public:
 
    friend void simple_display(RawOutStream &out, const AnyValue &value)
    {
-      m_value.m_stored->display(out);
+      m_stored->display(out);
    }
 
    /// Return the result of calling simple_display as a string.
