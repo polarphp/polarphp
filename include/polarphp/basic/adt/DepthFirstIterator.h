@@ -1,3 +1,10 @@
+//===- llvm/ADT/DepthFirstIterator.h - Depth First iterator -----*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -44,8 +51,7 @@
 #include <utility>
 #include <vector>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 // DepthFirstIteratorStorage - A private class which is used to figure out where to
 // store the visited set.
@@ -374,7 +380,6 @@ IteratorRange<idf_ext_iterator<T, SetTy>> inverse_depth_first_ext(const T &graph
    return make_range(idf_ext_begin(graph, set), idf_ext_end(graph, set));
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_DEPTHFIRSTITERATOR_H

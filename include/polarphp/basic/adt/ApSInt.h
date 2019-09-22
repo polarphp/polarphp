@@ -22,8 +22,7 @@
 #include "polarphp/basic/adt/ApInt.h"
 #include "polarphp/basic/adt/StringRef.h"
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 class POLAR_NODISCARD ApSInt : public ApInt
 {
@@ -476,7 +475,6 @@ inline RawOutStream &operator<<(RawOutStream &outstream, const ApSInt &ivalue)
    return outstream;
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_AP_SINT_H

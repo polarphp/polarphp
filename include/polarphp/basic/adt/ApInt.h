@@ -32,8 +32,9 @@ namespace polar {
 namespace utils {
 class RawOutStream;
 } // utils
+} // polar
 
-namespace basic {
+namespace polar::basic {
 
 class HashCode;
 class StringRef;
@@ -2531,7 +2532,6 @@ void store_int_to_memory(const ApInt &intVal, uint8_t *dest, unsigned storeBytes
 /// from Src into IntVal, which is assumed to be wide enough and to hold zero.
 void load_int_from_memory(ApInt &intVal, uint8_t *src, unsigned loadBytes);
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_AP_INT_H

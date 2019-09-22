@@ -30,8 +30,7 @@
 #include <cstring>
 #include <utility>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 using polar::utils::count_population;
 using polar::utils::mask_trailing_ones;
@@ -1120,8 +1119,7 @@ inline size_t capacity_in_bytes(const BitVector &vector)
    return vector.getMemorySize();
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 namespace std {
 /// Implement std::swap in terms of BitVector swap.

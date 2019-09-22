@@ -1,3 +1,10 @@
+//===- llvm/ADT/IndexedMap.h - An index map implementation ------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -65,8 +72,7 @@
 #include <cassert>
 #include <cstddef>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// A CRTP mixin class that adds reference counting to a type.
 ///
@@ -329,9 +335,9 @@ bool operator!=(const IntrusiveRefCountPtr<T> &lhs, std::nullptr_t rhs)
 {
    return !(lhs == rhs);
 }
-} // basic
+} // polar::basic
 
-namespace utils {
+namespace polar::utils {
 using polar::basic::IntrusiveRefCountPtr;
 // Make IntrusiveRefCountPtr work with dyn_cast, isa, and the other idioms from
 // Casting.h.
@@ -359,7 +365,7 @@ struct SimplifyType<const IntrusiveRefCountPtr<T>>
       return value.get();
    }
 };
-} // utils
-} // polar
+
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_INTRUSIVE_REF_COUNT_PTR_H

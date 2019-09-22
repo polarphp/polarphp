@@ -72,8 +72,7 @@
    /* Force a semicolon at the end of this macro. */                            \
    using ::polar::basic::bitmaskenumdetail::operator^=
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// Traits class to determine whether an enum has a
 /// POLAR_BITMASK_LARGEST_ENUMERATOR enumerator.
@@ -169,7 +168,6 @@ E &operator^=(E &lhs, E rhs)
 // Enable bitmask enums in namespace ::polar and all nested namespaces.
 POLAR_ENABLE_BITMASK_ENUMS_IN_NAMESPACE();
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_BITMASK_ENUM_H

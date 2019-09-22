@@ -1,3 +1,10 @@
+//===- llvm/ADT/DenseSet.h - Dense probed hash table ------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -22,9 +29,7 @@
 #include <iterator>
 #include <utility>
 
-namespace polar {
-namespace basic {
-
+namespace polar::basic {
 namespace internal {
 
 struct DenseSetEmpty {};
@@ -231,7 +236,7 @@ public:
    class ConstIterator
    {
       typename MapType::const_iterator m_iter;
-      friend class DenseSet;
+      friend class DenseSetImpl;
       friend class Iterator;
 
    public:
@@ -445,7 +450,6 @@ public:
    using BaseType::BaseType;
 };
 
-} // basic
-} // poalr
+} // poalr::basic
 
 #endif // POLARPHP_BASIC_ADT_DENSE_SET_H

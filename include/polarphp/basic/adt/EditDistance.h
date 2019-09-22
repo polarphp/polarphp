@@ -1,3 +1,10 @@
+//===-- llvm/ADT/edit_distance.h - Array edit distance function --- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -24,8 +31,7 @@
 #include <algorithm>
 #include <memory>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// Determine the edit distance between two sequences.
 ///
@@ -104,7 +110,6 @@ unsigned compute_edit_distance(ArrayRef<T> fromArray, ArrayRef<T> toArray,
    return result;
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_EDIT_DISTANCE_H

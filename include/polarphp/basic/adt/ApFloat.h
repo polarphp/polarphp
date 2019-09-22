@@ -31,8 +31,9 @@ namespace polar {
 namespace utils {
 class RawOutStream;
 } // utils
+} // polar
 
-namespace basic {
+namespace polar::basic {
 
 #define APFLOAT_DISPATCH_ON_SEMANTICS(METHOD_CALL)                             \
    do {                                                                         \
@@ -1593,8 +1594,7 @@ inline ApFloat maximum(const ApFloat &lhs, const ApFloat &rhs)
    return (lhs.compare(rhs) == ApFloat::CmpResult::cmpLessThan) ? rhs : lhs;
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #undef APFLOAT_DISPATCH_ON_SEMANTICS
 

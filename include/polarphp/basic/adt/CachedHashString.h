@@ -35,8 +35,7 @@
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/utils/RawOutStream.h"
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// A container which contains a StringRef plus a precomputed hash.
 class CachedHashStringRef
@@ -52,7 +51,7 @@ public:
    {}
 
    CachedHashStringRef(StringRef str, uint32_t hash)
-      : m_size(str.getData()), m_size(str.getSize()), m_hash(hash)
+      : m_str(str.getData()), m_size(str.getSize()), m_hash(hash)
    {
       assert(str.getSize() <= std::numeric_limits<uint32_t>::max());
    }
@@ -260,7 +259,6 @@ struct DenseMapInfo<CachedHashString>
    }
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif //  POLARPHP_BASIC_ADT_CACHED_HASH_STRING_H

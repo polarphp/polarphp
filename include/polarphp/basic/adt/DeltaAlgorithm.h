@@ -44,8 +44,7 @@
 #include <set>
 #include <vector>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// DeltaAlgorithm - Implements the delta debugging algorithm (A. Zeller '99)
 /// for minimizing arbitrary sets using a predicate function.
@@ -123,7 +122,6 @@ public:
    ChangeSetType run(const ChangeSetType &changes);
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_DELTAALGORITHM_H

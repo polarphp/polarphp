@@ -29,8 +29,7 @@
 #include <cstdint>
 #include <utility>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 using polar::utils::PointerLikeTypeTraits;
 using polar::basic::StringRef;
@@ -126,7 +125,8 @@ struct DenseMapInfo<unsigned short>
 };
 
 // Provide DenseMapInfo for unsigned ints.
-template<> struct DenseMapInfo<unsigned>
+template<>
+struct DenseMapInfo<unsigned>
 {
    static inline unsigned getEmptyKey()
    {
@@ -149,7 +149,8 @@ template<> struct DenseMapInfo<unsigned>
 };
 
 // Provide DenseMapInfo for unsigned longs.
-template<> struct DenseMapInfo<unsigned long>
+template<>
+struct DenseMapInfo<unsigned long>
 {
    static inline unsigned long getEmptyKey()
    {
@@ -173,7 +174,8 @@ template<> struct DenseMapInfo<unsigned long>
 };
 
 // Provide DenseMapInfo for unsigned long longs.
-template<> struct DenseMapInfo<unsigned long long>
+template<>
+struct DenseMapInfo<unsigned long long>
 {
    static inline unsigned long long getEmptyKey()
    {
@@ -198,7 +200,8 @@ template<> struct DenseMapInfo<unsigned long long>
 };
 
 // Provide DenseMapInfo for shorts.
-template <> struct DenseMapInfo<short>
+template <>
+struct DenseMapInfo<short>
 {
    static inline short getEmptyKey()
    {
@@ -461,7 +464,6 @@ struct DenseMapInfo<ElementCount>
    }
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_DENSE_MAP_INFO_H

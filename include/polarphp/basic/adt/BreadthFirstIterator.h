@@ -27,8 +27,7 @@
 #include <utility>
 #include <optional>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 // BreadthFirstIteratorStorage - A private class which is used to figure out where to
 // store the visited set. We only provide a non-external variant for now.
@@ -184,7 +183,6 @@ IteratorRange<BreadthFirstIterator<T>> breadth_first(const T &graph)
    return make_range(bf_begin(graph), bf_end(graph));
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_BREADTHFIRSTITERATOR_H

@@ -16,8 +16,7 @@
 #include <cstring>
 #include <type_traits>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 // This implementation of bit_cast is different from the C++17 one in two ways:
 //  - It isn't constexpr because that requires compiler support.
@@ -54,7 +53,6 @@ inline To bit_cast(const From &from) noexcept
   return to;
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_BIT_H

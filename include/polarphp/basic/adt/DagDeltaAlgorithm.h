@@ -22,8 +22,7 @@
 #include <utility>
 #include <vector>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// DAGDeltaAlgorithm - Implements a "delta debugging" algorithm for minimizing
 /// directed acyclic graphs using a predicate function.
@@ -86,7 +85,6 @@ public:
    virtual bool executeOneTest(const ChangeSetType &set) = 0;
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_DAGDELTAALGORITHM_H

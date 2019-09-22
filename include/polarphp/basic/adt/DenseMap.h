@@ -37,8 +37,7 @@
 #include <utility>
 #include <initializer_list>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 using polar::utils::should_reverse_iterate;
 using polar::utils::AlignedCharArrayUnion;
@@ -1485,7 +1484,6 @@ inline size_t capacity_in_bytes(const DenseMap<KeyType, ValueType, KeyInfoType> 
    return value.getMemorySize();
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_DENSE_MAP_H

@@ -30,8 +30,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 using polar::utils::BumpPtrAllocator;
 
@@ -426,7 +425,6 @@ public:
 template <typename T>
 using BumpPtrList = AllocatorList<T, BumpPtrAllocator>;
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_ALLOCATOR_LIST_H

@@ -32,8 +32,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// ArrayRef - Represent a constant reference to an array (0 or more elements
 /// consecutively in memory), i.e. a start pointer and a length.  It allows
@@ -698,9 +697,9 @@ inline bool operator!=(ArrayRef<T> lhs, ArrayRef<T> rhs)
 
 /// @}
 
-} // basic
+} // polar::basic
 
-namespace utils {
+namespace polar::utils {
 
 template <typename T>
 polar::basic::HashCode hash_value(polar::basic::ArrayRef<T> array)
@@ -708,7 +707,6 @@ polar::basic::HashCode hash_value(polar::basic::ArrayRef<T> array)
    return polar::basic::hash_combine_range(array.begin(), array.end());
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_BASIC_ADT_ARRAY_REF_H
