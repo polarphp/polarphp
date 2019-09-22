@@ -1,3 +1,10 @@
+//===- llvm/ADT/BreadthFirstIterator.h - Breadth First iterator -*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // copyright (c) 2017 - 2019 polarphp software foundation
@@ -130,7 +137,7 @@ public:
       return m_visitQueue.front()->first;
    }
 
-   // This is a nonstandard operator-> that dereferenfces the pointer an extra
+   // This is a nonstandard operator-> that dereferences the pointer an extra
    // time so that you can actually call methods on the node, because the
    // contained type is a pointer.
    NodeRef operator->() const

@@ -1,3 +1,10 @@
+//===- llvm/ADT/DenseMapInfo.h - Type traits for DenseMap -------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -16,6 +23,7 @@
 #include "polarphp/basic/adt/Hashing.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/utils/PointerLikeTypeTraits.h"
+#include "polarphp/utils/ScaledSize.h"
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -26,6 +34,7 @@ namespace basic {
 
 using polar::utils::PointerLikeTypeTraits;
 using polar::basic::StringRef;
+using polar::utils::ElementCount;
 
 template<typename T>
 struct DenseMapInfo
@@ -420,6 +429,33 @@ struct DenseMapInfo<HashCode>
    }
 
    static bool isEqual(HashCode lhs, HashCode rhs)
+   {
+      return lhs == rhs;
+   }
+};
+
+template <>
+struct DenseMapInfo<ElementCount>
+{
+   static inline ElementCount getEmptyKey()
+   {
+      return {~0U, true};
+   }
+
+   static inline ElementCount getTombstoneKey()
+   {
+      return {~0U - 1, false};
+   }
+
+   static unsigned getHashValue(const ElementCount& elemCount)
+   {
+      if (elemCount.scalable) {
+         return (elemCount.min * 37U) - 1U;
+      }
+      return elemCount.min * 37U;
+   }
+
+   static bool isEqual(const ElementCount& lhs, const ElementCount& rhs)
    {
       return lhs == rhs;
    }

@@ -175,7 +175,7 @@ struct is_function_ptr
 /// Unlike \c llvm::isPodLike, this trait should produce a precise result and
 /// is not intended to be specialized.
 template<typename T>
-struct IsTriviallyCopyable
+struct is_trivially_copyable
 {
 #if defined(_LIBCPP_VERSION) || POLAR_CC_MSVC
    // libc++ and MSVC implement is_trivially_copyable.
@@ -188,7 +188,7 @@ struct IsTriviallyCopyable
 };
 
 template<typename T>
-struct IsTriviallyConstructible
+struct is_trivially_constructible
 {
 #if defined(_LIBCPP_VERSION) || POLAR_CC_MSVC
    // libc++ and MSVC implement is_trivially_constructible.
@@ -201,7 +201,7 @@ struct IsTriviallyConstructible
 };
 
 template<typename T>
-struct IsTriviallyDestructible
+struct is_trivially_destructible
 {
 #if defined(_LIBCPP_VERSION) || POLAR_CC_MSVC
    // libc++ and MSVC implement is_trivially_destructible.

@@ -1,3 +1,10 @@
+//===- llvm/ADT/DenseMap.h - Dense probed hash table ------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -62,7 +69,7 @@ struct DenseMapPair : public std::pair<KeyType, ValueType>
    DenseMapPair(AltKeyT &&AltKey, AltValueT &&AltValue,
                 typename std::enable_if<
                 std::is_convertible<AltKeyT, KeyType>::value &&
-                std::is_convertible<AltValueT, ValueType>::value>::type * = 0)
+                std::is_convertible<AltValueT, ValueType>::value>::type * = nullptr)
       : std::pair<KeyType, ValueType>(std::forward<AltKeyT>(AltKey),
                                       std::forward<AltValueT>(AltValue)) {}
 
@@ -193,7 +200,7 @@ public:
          return;
       }
       const KeyType emptyKey = getEmptyKey(), tombstoneKey = getTombstoneKey();
-      if (IsPodLike<KeyType>::value && IsPodLike<ValueType>::value) {
+      if (polar::utils::is_trivially_copyable<KeyType>::value && polar::utils::is_trivially_copyable<ValueType>::value) {
          // Use a simpler loop when these are trivial types.
          for (BucketType *ptr = getBuckets(), *end = getBucketsEnd(); ptr != end; ++ptr) {
             ptr->getFirst() = emptyKey;
@@ -508,7 +515,7 @@ protected:
       setNumEntries(other.getNumEntries());
       setNumTombstones(other.getNumTombstones());
 
-      if (IsPodLike<KeyType>::value && IsPodLike<ValueType>::value) {
+      if (polar::utils::is_trivially_copyable<KeyType>::value && polar::utils::is_trivially_copyable<ValueType>::value) {
          memcpy(reinterpret_cast<void *>(getBuckets()), other.getBuckets(),
                 getNumBuckets() * sizeof(BucketType));
       } else {
