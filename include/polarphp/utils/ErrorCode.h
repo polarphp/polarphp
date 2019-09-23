@@ -1,3 +1,10 @@
+//===- llvm/Support/Errc.h - Defines the llvm::errc enum --------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -35,8 +42,7 @@
 
 #include <system_error>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 enum class ErrorCode {
    argument_list_too_long = int(std::errc::argument_list_too_long),
@@ -86,12 +92,12 @@ inline std::error_code make_error_code(ErrorCode errorCode)
    return std::error_code(static_cast<int>(errorCode), std::generic_category());
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 namespace std
 {
-template <> struct is_error_code_enum<polar::utils::ErrorCode> : std::true_type
+template <>
+struct is_error_code_enum<polar::utils::ErrorCode> : std::true_type
 {};
 }
 

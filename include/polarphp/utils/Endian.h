@@ -1,3 +1,10 @@
+//===- Endian.h - Utilities for IO with endian specific data ----*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -20,8 +27,7 @@
 #include <cstring>
 #include <type_traits>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 enum class Endianness
 {
@@ -222,36 +228,39 @@ inline void write_at_bit_alignment(void *memory, value_type value,
 
 namespace internal {
 
-template<typename value_type,
-         Endianness endian,
-         std::size_t alignment>
+template<typename ValueType,
+         Endianness Endian,
+         std::size_t Alignment>
 struct PackedEndianSpecificIntegral
 {
+   using value_type = ValueType;
+   static constexpr Endianness endian = Endian;
+   static constexpr std::size_t alignment = Alignment;
    PackedEndianSpecificIntegral() = default;
 
-   explicit PackedEndianSpecificIntegral(value_type value)
+   explicit PackedEndianSpecificIntegral(ValueType value)
    {
       *this = value;
    }
 
-   operator value_type() const {
-      return endian::read<value_type, endian, alignment>(
+   operator ValueType() const {
+      return endian::read<ValueType, endian, alignment>(
                (const void*)m_value.m_buffer);
    }
 
-   void operator=(value_type newValue)
+   void operator=(ValueType newValue)
    {
-      endian::write<value_type, endian, alignment>(
+      endian::write<ValueType, endian, alignment>(
                (void*)m_value.m_buffer, newValue);
    }
 
-   PackedEndianSpecificIntegral &operator+=(value_type newValue)
+   PackedEndianSpecificIntegral &operator+=(ValueType newValue)
    {
       *this = *this + newValue;
       return *this;
    }
 
-   PackedEndianSpecificIntegral &operator-=(value_type newValue)
+   PackedEndianSpecificIntegral &operator-=(ValueType newValue)
    {
       *this = *this - newValue;
       return *this;
@@ -352,19 +361,30 @@ internal::PackedEndianSpecificIntegral<int32_t, Endianness::Big, ALIGNED>;
 using aligned_big64_t =
 internal::PackedEndianSpecificIntegral<int64_t, Endianness::Big, ALIGNED>;
 
-using UNALIGNED_uint16_t =
+using unaligned_uint16_t =
 internal::PackedEndianSpecificIntegral<uint16_t, Endianness::Native, UNALIGNED>;
-using UNALIGNED_uint32_t =
+using unaligned_uint32_t =
 internal::PackedEndianSpecificIntegral<uint32_t, Endianness::Native, UNALIGNED>;
-using UNALIGNED_uint64_t =
+using unaligned_uint64_t =
 internal::PackedEndianSpecificIntegral<uint64_t, Endianness::Native, UNALIGNED>;
 
-using UNALIGNED_int16_t =
+using unaligned_int16_t =
 internal::PackedEndianSpecificIntegral<int16_t, Endianness::Native, UNALIGNED>;
-using UNALIGNED_int32_t =
+using unaligned_int32_t =
 internal::PackedEndianSpecificIntegral<int32_t, Endianness::Native, UNALIGNED>;
-using UNALIGNED_int64_t =
+using unaligned_int64_t =
 internal::PackedEndianSpecificIntegral<int64_t, Endianness::Native, UNALIGNED>;
+
+template <typename T>
+using little_t = internal::PackedEndianSpecificIntegral<T, Endianness::Little, UNALIGNED>;
+template <typename T>
+using big_t = internal::PackedEndianSpecificIntegral<T, Endianness::Big, UNALIGNED>;
+
+template <typename T>
+using aligned_little_t =
+internal::PackedEndianSpecificIntegral<T, Endianness::Little, ALIGNED>;
+template <typename T>
+using aligned_big_t = internal::PackedEndianSpecificIntegral<T, Endianness::Big, ALIGNED>;
 
 namespace endian {
 
@@ -515,7 +535,6 @@ inline void write64be(void *ptr, uint64_t value)
 
 } // endian
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_ENDIAN_H

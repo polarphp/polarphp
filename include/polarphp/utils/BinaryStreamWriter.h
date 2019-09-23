@@ -1,3 +1,10 @@
+//===- BinaryStreamWriter.h - Writes objects to a BinaryStream ---*- C++-*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -24,8 +31,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 /// \brief Provides write only access to a subclass of `WritableBinaryStream`.
 /// Provides bounds checking and helpers for writing certain common data types
@@ -88,6 +94,20 @@ public:
       using U = typename std::underlying_type<T>::type;
       return writeInteger<U>(static_cast<U>(num));
    }
+
+   /// Write the unsigned integer Value to the underlying stream using ULEB128
+    /// encoding.
+    ///
+    /// \returns a success error code if the data was successfully written,
+    /// otherwise returns an appropriate error code.
+    Error writeUnsignedLeb128(uint64_t Value);
+
+    /// Write the unsigned integer Value to the underlying stream using ULEB128
+    /// encoding.
+    ///
+    /// \returns a success error code if the data was successfully written,
+    /// otherwise returns an appropriate error code.
+    Error writeSignedLeb128(int64_t Value);
 
    /// Write the the string \p str to the underlying stream followed by a null
    /// terminator.  On success, updates the offset so that subsequent writes
@@ -210,7 +230,6 @@ protected:
    uint32_t m_offset = 0;
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_BINARY_STREAM_WRITER_H

@@ -22,8 +22,13 @@
 #include <string>
 #include <system_error>
 
-namespace polar {
-namespace sys {
+namespace polar::utils {
+class RawOutStream;
+}
+
+namespace polar::sys {
+
+using polar::utils::RawOutStream;
 
 /// This class encapsulates the notion of a memory block which has an m_address
 /// and a size. It is used by the Memory class (a friend) as the result of
@@ -34,12 +39,12 @@ class MemoryBlock
 {
 public:
    MemoryBlock() : m_address(nullptr),
-      m_size(0)
+      m_allocatedSize(0)
    {}
 
    MemoryBlock(void *addr, size_t size)
       : m_address(addr),
-        m_size(size)
+        m_allocatedSize(size)
    {}
 
    void *getBase() const
@@ -47,14 +52,15 @@ public:
       return m_address;
    }
 
-   size_t getSize() const
+   size_t getAllocatedSize() const
    {
-      return m_size;
+      return m_allocatedSize;
    }
 
 private:
    void *m_address;    ///< m_address of first byte of memory area
-   size_t m_size;      ///< Size, in bytes of the memory area
+   size_t m_allocatedSize;      ///< Size, in bytes of the memory area
+   unsigned m_flags = 0;
    friend class Memory;
 };
 
@@ -67,9 +73,11 @@ class Memory
 public:
    enum ProtectionFlags
    {
-      MF_READ  = 0x1000000,
+      MF_READ = 0x1000000,
       MF_WRITE = 0x2000000,
-      MF_EXEC  = 0x4000000
+      MF_EXEC = 0x4000000,
+      MF_RWE_MASK = 0x7000000,
+      MF_HUGE_HINT = 0x0000001
    };
 
    /// This method allocates a block of memory that is suitable for loading
@@ -166,9 +174,11 @@ public:
       return m_memoryBlock.getBase();
    }
 
-   size_t getSize() const
+   /// The size as it was allocated. This is always greater or equal to the
+   /// size that was originally requested.
+   size_t getAllocatedSize() const
    {
-      return m_memoryBlock.getSize();
+      return m_memoryBlock.getAllocatedSize();
    }
 
    MemoryBlock getMemoryBlock() const
@@ -179,7 +189,13 @@ private:
    MemoryBlock m_memoryBlock;
 };
 
-} // sys
-} // polar
+#ifndef NDEBUG
+/// Debugging output for Memory::ProtectionFlags.
+RawOutStream &operator<<(RawOutStream &outStream, const Memory::ProtectionFlags &flags);
+/// Debugging output for MemoryBlock.
+RawOutStream &operator<<(RawOutStream &outStream, const MemoryBlock &memoryBlock);
+#endif // ifndef NDEBUG
+
+} // polar::sys
 
 #endif // POLARPHP_UTILS_MEMORY_H

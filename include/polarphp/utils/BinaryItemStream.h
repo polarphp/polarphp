@@ -1,3 +1,10 @@
+//===- BinaryItemStream.h ---------------------------------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -20,8 +27,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 template <typename T> struct BinaryItemTraits
 {
@@ -122,7 +128,6 @@ private:
    std::vector<uint32_t> m_itemEndOffsets;
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_BINARY_ITEM_STREAM_H

@@ -1,3 +1,10 @@
+//===- llvm/Support/LEB128.h - [SU]LEB128 utility functions -----*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -20,8 +27,7 @@
 
 #include "polarphp/utils/RawOutStream.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 /// Utility function to encode a SLEB128 value to an output stream.
 inline unsigned encode_sleb128(int64_t value, RawOutStream &outstream,
@@ -185,6 +191,9 @@ inline int64_t decode_sleb128(const uint8_t *p, unsigned *n = nullptr,
    int64_t value = 0;
    unsigned shift = 0;
    uint8_t byte;
+   if (error) {
+      *error = nullptr;
+   }
    do {
       if (end && p == end) {
          if (error) {
@@ -196,11 +205,11 @@ inline int64_t decode_sleb128(const uint8_t *p, unsigned *n = nullptr,
          return 0;
       }
       byte = *p++;
-      value |= (int64_t(byte & 0x7f) << shift);
+      value |= (uint64_t(byte & 0x7f) << shift);
       shift += 7;
    } while (byte >= 128);
    // Sign extend negative numbers.
-   if (byte & 0x40) {
+   if (shift < 64 && (byte & 0x40)) {
       value |= (-1ULL) << shift;
    }
    if (n) {
@@ -215,7 +224,6 @@ extern unsigned get_uleb128_size(uint64_t value);
 /// Utility function to get the size of the SLEB128-encoded value.
 extern unsigned get_sleb128_size(int64_t value);
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_LEB128_H

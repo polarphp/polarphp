@@ -1,3 +1,10 @@
+//===- Unix/Memory.cpp - Generic UNIX System Configuration ------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -23,6 +30,7 @@
 #include "polarphp/utils/Process.h"
 #include "polarphp/utils/Memory.h"
 #include "polarphp/utils/Valgrind.h"
+#include "polarphp/utils/MathExtras.h"
 
 #ifdef POLAR_HAVE_SYS_MMAN_H
 #include <sys/mman.h>
@@ -50,14 +58,15 @@ extern "C" void sys_icache_invalidate(const void *addr, size_t len);
 extern "C" void __clear_cache(void *, void*);
 #endif
 
-namespace polar {
-namespace sys {
+namespace polar::sys {
+
+using polar::utils::align_addr;
 
 namespace {
 
 int get_posix_protection_flags(unsigned flags)
 {
-   switch (flags) {
+   switch (flags & Memory::MF_RWE_MASK) {
    case Memory::MF_READ:
       return PROT_READ;
    case Memory::MF_WRITE:
@@ -70,14 +79,13 @@ int get_posix_protection_flags(unsigned flags)
    Memory::MF_EXEC:
       return PROT_READ | PROT_WRITE | PROT_EXEC;
    case Memory::MF_EXEC:
-#if defined(__FreeBSD__)
+#if (defined(__FreeBSD__) || defined(__POWERPC__) || defined (__ppc__) || \
+   defined(_POWER) || defined(_ARCH_PPC))
       // On PowerPC, having an executable page that has no read permission
       // can have unintended consequences.  The function InvalidateInstruction-
       // Cache uses instructions dcbf and icbi, both of which are treated by
       // the processor as loads.  If the page has no read permissions,
       // executing these instructions will result in a segmentation fault.
-      // Somehow, this problem is not present on Linux, but it does happen
-      // on FreeBSD.
       return PROT_READ | PROT_EXEC;
 #else
       return PROT_EXEC;
@@ -102,19 +110,24 @@ Memory::allocateMappedMemory(size_t numBytes,
       return MemoryBlock();
    }
 
-   static const size_t pageSize = Process::getPageSize();
-   const size_t numPages = (numBytes+pageSize-1)/pageSize;
+   // On platforms that have it, we can use MAP_ANON to get a memory-mapped
+   // page without file backing, but we need a fallback of opening /dev/zero
+   // for strictly POSIX platforms instead.
+   int fd;
+#if defined(MAP_ANON)
+   fd = -1;
+#else
+   fd = open("/dev/zero", O_RDWR);
+   if (fd == -1) {
+      EC = std::error_code(errno, std::generic_category());
+      return MemoryBlock();
+   }
+#endif
 
-   int fd = -1;
-
-   int mmFlags = MAP_PRIVATE |
-      #ifdef MAP_ANONYMOUS
-         MAP_ANONYMOUS
-      #else
-         MAP_ANON
-      #endif
-         ; // Ends statement above
-
+   int mmFlags = MAP_PRIVATE;
+#if defined(MAP_ANON)
+   mmFlags |= MAP_ANON;
+#endif
    int protect = get_posix_protection_flags(pflags);
 
 #if defined(__NetBSD__) && defined(PROT_MPROTECT)
@@ -123,23 +136,38 @@ Memory::allocateMappedMemory(size_t numBytes,
 
    // Use any near hint and the page size to set a page-aligned starting address
    uintptr_t start = nearBlock ? reinterpret_cast<uintptr_t>(nearBlock->getBase()) +
-                                 nearBlock->getSize() : 0;
+                                 nearBlock->getAllocatedSize() : 0;
+   static const size_t pageSize = Process::getPageSizeEstimate();
+   const size_t numPages = (numBytes+pageSize-1)/pageSize;
+
    if (start && start % pageSize)
       start += pageSize - start % pageSize;
 
-   void *addr = ::mmap(reinterpret_cast<void*>(start), pageSize * numPages,
-                       protect, mmFlags, fd, 0);
+   // FIXME: Handle huge page requests (MF_HUGE_HINT).
+   void *addr = ::mmap(reinterpret_cast<void *>(start), pageSize*numPages, protect,
+                       mmFlags, fd, 0);
    if (addr == MAP_FAILED) {
       if (nearBlock) { //Try again without a near hint
+#if !defined(MAP_ANON)
+         close(fd);
+#endif
          return allocateMappedMemory(numBytes, nullptr, pflags, errorCode);
       }
       errorCode = std::error_code(errno, std::generic_category());
+#if !defined(MAP_ANON)
+      close(fd);
+#endif
       return MemoryBlock();
    }
 
+#if !defined(MAP_ANON)
+   close(fd);
+#endif
+
    MemoryBlock result;
    result.m_address = addr;
-   result.m_size = numPages * pageSize;
+   result.m_allocatedSize = pageSize*numPages;
+   result.m_flags = pflags;
 
    // Rely on protectMappedMemory to invalidate instruction cache.
    if (pflags & MF_EXEC) {
@@ -154,54 +182,50 @@ Memory::allocateMappedMemory(size_t numBytes,
 std::error_code
 Memory::releaseMappedMemory(MemoryBlock &block)
 {
-   if (block.m_address == nullptr || block.m_size == 0) {
+   if (block.m_address == nullptr || block.m_allocatedSize == 0) {
       return std::error_code();
    }
-   if (0 != ::munmap(block.m_address, block.m_size)) {
+   if (0 != ::munmap(block.m_address, block.m_allocatedSize)) {
       return std::error_code(errno, std::generic_category());
    }
    block.m_address = nullptr;
-   block.m_size = 0;
+   block.m_allocatedSize = 0;
    return std::error_code();
 }
 
 std::error_code
 Memory::protectMappedMemory(const MemoryBlock &block, unsigned flags)
 {
-   static const size_t pageSize = Process::getPageSize();
-   if (block.m_address == nullptr || block.m_size == 0) {
-      return std::error_code();
+   static const size_t pageSize = Process::getPageSizeEstimate();
+   if (block.m_address == nullptr || block.m_allocatedSize == 0) {
+       return std::error_code();
    }
-
    if (!flags) {
       return std::error_code(EINVAL, std::generic_category());
    }
-   int protect = get_posix_protection_flags(flags);
-   uintptr_t start = polar::utils::align_addr((uint8_t *)block.m_address - pageSize + 1, pageSize);
-   uintptr_t end = polar::utils::align_addr((uint8_t *)block.m_address + block.m_size, pageSize);
-
+   int Protect = get_posix_protection_flags(flags);
+   uintptr_t start = align_addr((uint8_t *)block.m_address - pageSize + 1, pageSize);
+   uintptr_t end = align_addr((uint8_t *)block.m_address + block.m_allocatedSize, pageSize);
    bool invalidateCache = (flags & MF_EXEC);
-
 #if defined(__arm__) || defined(__aarch64__)
    // Certain ARM implementations treat icache clear instruction as a memory read,
    // and CPU segfaults on trying to clear cache on !PROT_READ page.  Therefore we need
    // to temporarily add PROT_READ for the sake of flushing the instruction caches.
    if (invalidateCache && !(Protect & PROT_READ)) {
-      int result = ::mprotect((void *)start, End - start, Protect | PROT_READ);
-      if (result != 0) {
+      int result = ::mprotect((void *)start, end - start, Protect | PROT_READ);
+      if (result != 0)
          return std::error_code(errno, std::generic_category());
-      }
 
-      Memory::invalidateInstructionCache(m_memoryBlock.m_address, block.m_size);
+      Memory::invalidateInstructionCache(block.m_address, block.m_allocatedSize);
       invalidateCache = false;
    }
 #endif
-   int result = ::mprotect((void *)start, end - start, protect);
+   int result = ::mprotect((void *)start, end - start, Protect);
    if (result != 0) {
-      return std::error_code(errno, std::generic_category());
+       return std::error_code(errno, std::generic_category());
    }
    if (invalidateCache) {
-      Memory::invalidateInstructionCache(block.m_address, block.m_size);
+       Memory::invalidateInstructionCache(block.m_address, block.m_allocatedSize);
    }
    return std::error_code();
 }
@@ -223,8 +247,8 @@ void Memory::invalidateInstructionCache(const void *addr,
 #  endif
 #elif defined(__Fuchsia__)
 
-  zx_status_t Status = zx_cache_flush(Addr, Len, ZX_CACHE_FLUSH_INSN);
-  assert(Status == ZX_OK && "cannot invalidate instruction cache");
+   zx_status_t Status = zx_cache_flush(addr, Len, ZX_CACHE_FLUSH_INSN);
+   assert(Status == ZX_OK && "cannot invalidate instruction cache");
 #else
 
 #  if (defined(__POWERPC__) || defined (__ppc__) || \
@@ -246,8 +270,8 @@ void Memory::invalidateInstructionCache(const void *addr,
    defined(__GNUC__)
    // FIXME: Can we safely always call this for __GNUC__ everywhere?
    const char *start = static_cast<const char *>(addr);
-   const char *End = start + Len;
-   __clear_cache(const_cast<char *>(start), const_cast<char *>(End));
+   const char *end = start + Len;
+   __clear_cache(const_cast<char *>(start), const_cast<char *>(end));
 #  endif
 
 #endif  // end apple
@@ -255,5 +279,4 @@ void Memory::invalidateInstructionCache(const void *addr,
    valgrind_discard_translations(addr, len);
 }
 
-} // sys
-} // polar
+} // polar::sys

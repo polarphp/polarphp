@@ -1,3 +1,10 @@
+//===- llvm/Support/DebugCounter.h - Debug counter support ------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -19,8 +26,7 @@
 #include "polarphp/utils/RawOutStream.h"
 #include <string>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::DenseMap;
 using polar::basic::UniqueVector;
@@ -178,7 +184,6 @@ private:
    static const unsigned VARNAME =                                              \
    DebugCounter::registerCounter(COUNTERNAME, DESC)
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_DEBUG_COUNTER_H

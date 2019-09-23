@@ -1,4 +1,10 @@
-
+//===- BinaryItemStream.h ---------------------------------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -26,8 +32,7 @@
 #include <cstring>
 #include <memory>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::make_array_ref;
 using polar::basic::MutableArrayRef;
@@ -337,7 +342,6 @@ private:
    Streamm_impl m_impl;
 };
 
-} // basic
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_BINARY_BYTE_STREAM_H

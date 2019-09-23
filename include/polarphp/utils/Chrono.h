@@ -1,3 +1,10 @@
+//===- llvm/Support/Chrono.h - Utilities for Timing Manipulation-*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -18,8 +25,7 @@
 #include <chrono>
 #include <ctime>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 class RawOutStream;
 
@@ -35,7 +41,7 @@ template <typename D = std::chrono::nanoseconds>
 using TimePoint = std::chrono::time_point<std::chrono::system_clock, D>;
 
 /// Convert a TimePoint to std::time_t
-POLAR_ATTRIBUTE_ALWAYS_INLINE inline std::time_t to_time_t(TimePoint<> timePoint)
+inline std::time_t to_time_t(TimePoint<> timePoint)
 {
    using namespace std::chrono;
    return system_clock::to_time_t(
@@ -43,7 +49,7 @@ POLAR_ATTRIBUTE_ALWAYS_INLINE inline std::time_t to_time_t(TimePoint<> timePoint
 }
 
 /// Convert a std::time_t to a TimePoint
-POLAR_ATTRIBUTE_ALWAYS_INLINE inline TimePoint<std::chrono::seconds>
+inline TimePoint<std::chrono::seconds>
 to_time_point(std::time_t time)
 {
    using namespace std::chrono;
@@ -52,7 +58,7 @@ to_time_point(std::time_t time)
 
 
 /// Convert a std::time_t + nanoseconds to a TimePoint
-POLAR_ATTRIBUTE_ALWAYS_INLINE inline TimePoint<>
+inline TimePoint<>
 to_time_point(std::time_t T, uint32_t nsec)
 {
    using namespace std::chrono;
@@ -189,7 +195,6 @@ public:
    }
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_CHRONO_H

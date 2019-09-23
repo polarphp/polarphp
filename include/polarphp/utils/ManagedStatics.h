@@ -1,3 +1,10 @@
+//===-- llvm/Support/ManagedStatic.h - Static Global wrapper ----*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -15,8 +22,7 @@
 #include <atomic>
 #include <cstddef>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 /// object_creator - Helper method for ManagedStatic.
 template <typename Class>
@@ -35,7 +41,7 @@ struct ObjectDeleter
 {
    static void call(void *ptr)
    {
-      delete (T *)ptr;
+      delete reinterpret_cast<T *>(ptr);
    }
 };
 
@@ -44,21 +50,45 @@ struct ObjectDeleter<T[N]>
 {
    static void call(void *ptr)
    {
-      delete[](T *)ptr;
+      delete[] reinterpret_cast<T *>(ptr);
    }
 };
+
+// ManagedStatic must be initialized to zero, and it must *not* have a dynamic
+// initializer because managed statics are often created while running other
+// dynamic initializers. In standard C++11, the best way to accomplish this is
+// with a constexpr default constructor. However, different versions of the
+// Visual C++ compiler have had bugs where, even though the constructor may be
+// constexpr, a dynamic initializer may be emitted depending on optimization
+// settings. For the affected versions of MSVC, use the old linker
+// initialization pattern of not providing a constructor and leaving the fields
+// uninitialized.
+#if !defined(_MSC_VER) || defined(__clang__)
+#define POLAR_USE_CONSTEXPR_CTOR
+#endif
 
 /// ManagedStaticBase - Common base class for ManagedStatic instances.
 class ManagedStaticBase
 {
 protected:
+#ifdef POLAR_USE_CONSTEXPR_CTOR
+   mutable std::atomic<void *> m_ptr{};
+   mutable void (*m_deleterFunc)(void *) = nullptr;
+   mutable const ManagedStaticBase *m_next = nullptr;
+#else
    // This should only be used as a static variable, which guarantees that this
    // will be zero initialized.
    mutable std::atomic<void *> m_ptr;
-   mutable void (*m_deleterFunc)(void*);
+   mutable void (*m_deleterFunc)(void *);
    mutable const ManagedStaticBase *m_next;
+#endif
    void registerManagedStatic(void *(*creator)(), void (*deleter)(void*)) const;
 public:
+
+#ifdef POLAR_USE_CONSTEXPR_CTOR
+  constexpr ManagedStaticBase() = default;
+#endif
+
    /// isConstructed - Return true if this object has not been created yet.
    bool isConstructed() const
    {
@@ -121,7 +151,6 @@ struct ManagedStaticsReleaser
    }
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_MANAGED_STATICS_H

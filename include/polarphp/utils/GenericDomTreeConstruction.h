@@ -56,7 +56,7 @@ using polar::basic::SmallDenseMap;
 using polar::basic::reverse;
 using polar::basic::children;
 using polar::basic::inverse_children;
-using polar::utils::debug_stream;
+using polar::debug_stream;
 using polar::basic::find;
 
 namespace domtreebuilder {
@@ -559,7 +559,7 @@ struct SemiNCAInfo
             // If we wound another root in a (forward) DFS walk, remove the current
             // root from the set of roots, as it is reverse-reachable from the other
             // one.
-            if (llvm::find(roots, node) != roots.end()) {
+            if (std::find(roots, node) != roots.end()) {
                POLAR_DEBUG(debug_stream() << "\tForward DFS walk found another root "
                            << BlockNamePrinter(node) << "\n\tRemoving root "
                            << BlockNamePrinter(root) << "\n");
@@ -615,7 +615,7 @@ struct SemiNCAInfo
       NodePtr root = sm_isPostDom ? nullptr : domTree.m_roots[0];
 
       domTree.RootNode = (domTree.m_domTreeNodes[root] =
-            llvm::make_unique<DomTreeNodeBase<NodeT>>(root, nullptr))
+            std::make_unique<DomTreeNodeBase<NodeT>>(root, nullptr))
             .get();
       SNCA.attachNewSubtree(domTree, domTree.RootNode);
    }
@@ -641,7 +641,7 @@ struct SemiNCAInfo
          // Add a new tree node for this BasicBlock, and link it as a child of
          // idomNode.
          domTree.m_domTreeNodes[wnode] = idomNode->addChild(
-                  llvm::make_unique<DomTreeNodeBase<NodeT>>(wnode, idomNode));
+                  std::make_unique<DomTreeNodeBase<NodeT>>(wnode, idomNode));
       }
    }
 
@@ -974,7 +974,7 @@ struct SemiNCAInfo
       // The check is O(node), so run it only in debug configuration.
       auto isSuccessor = [batchUpdatePtr](const NodePtr succCandidate, const NodePtr of) {
          auto Successors = ChildrenGetter<sm_isPostDom>::get(of, batchUpdatePtr);
-         return llvm::find(Successors, succCandidate) != Successors.end();
+         return std::find(Successors, succCandidate) != Successors.end();
       };
       (void)isSuccessor;
       assert(!isSuccessor(to, from) && "Deleted edge still exists in the CFG!");
@@ -1191,7 +1191,7 @@ struct SemiNCAInfo
       const TreeNodePtr m_idom = treeNode->getIDom();
       assert(m_idom);
 
-      auto chiter = llvm::find(m_idom->m_children, treeNode);
+      auto chiter = std::find(m_idom->m_children, treeNode);
       assert(chiter != m_idom->m_children.end());
       std::swap(*chiter, m_idom->m_children.back());
       m_idom->m_children.pop_back();
@@ -1212,7 +1212,7 @@ struct SemiNCAInfo
       // Take the fast path for a single update and avoid running the batch update
       // machinery.
       if (numUpdates == 1) {
-         const auto &update = m_updates.front();
+         const auto &update = updates.front();
          if (update.getKind() == UpdateKind::Insert) {
             domTree.insert_edge(update.getFrom(), update.getTo());
          } else {
@@ -1223,7 +1223,7 @@ struct SemiNCAInfo
 
       BatchUpdateInfo batchUpdatePtr;
       POLAR_DEBUG(debug_stream() << "Legalizing " << batchUpdatePtr.m_updates.size() << " updates\n");
-      cfg::LegalizeUpdates<NodePtr>(updates, batchUpdatePtr.m_updates, sm_isPostDom);
+      cfg::legalize_updates<NodePtr>(updates, batchUpdatePtr.m_updates, sm_isPostDom);
 
       const size_t numLegalized = batchUpdatePtr.m_updates.getSize();
       batchUpdatePtr.m_futureSuccessors.reserve(numLegalized);
@@ -1631,13 +1631,13 @@ void calculate(DomTreeT &domTree)
 
 template <typename DomTreeT>
 void calculate_with_updates(DomTreeT &domTree,
-                          ArrayRef<typename DomTreeT::UpdateType> updates)
+                            ArrayRef<typename DomTreeT::UpdateType> updates)
 {
    // TODO: Move BUI creation in common method, reuse in ApplyUpdates.
    typename SemiNCAInfo<DomTreeT>::BatchUpdateInfo bui;
    POLAR_DEBUG(debug_stream() << "Legalizing " << bui.m_updates.size() << " updates\n");
-   cfg::LegalizeUpdates<typename DomTreeT::NodePtr>(updates, bui.m_updates,
-                                                    DomTreeT::sg_isPostDominator);
+   cfg::legalize_updates<typename DomTreeT::NodePtr>(updates, bui.m_updates,
+                                                     DomTreeT::sg_isPostDominator);
    const size_t numLegalized = bui.m_updates.size();
    bui.m_futureSuccessors.reserve(numLegalized);
    bui.m_futureSuccessors.reserve(numLegalized);

@@ -41,8 +41,7 @@
 #include <utility>
 #include <optional>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::SmallVector;
 using polar::basic::SmallVectorImpl;
@@ -552,8 +551,7 @@ public:
    }
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 template <typename AllocatorType, size_t SlabSize, size_t SizeThreshold>
 void *operator new(size_t size,

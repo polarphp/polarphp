@@ -14,8 +14,7 @@
 
 #include "polarphp/basic/adt/ApInt.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::ApInt;
 
@@ -136,29 +135,41 @@ public:
 
    /// Truncate the underlying known m_zero and m_one bits. This is equivalent
    /// to truncating the value we're tracking.
-   KnownBits trunc(unsigned bitWidth)
+   KnownBits trunc(unsigned bitWidth) const
    {
       return KnownBits(m_zero.trunc(bitWidth), m_one.trunc(bitWidth));
    }
 
-   /// m_zero extends the underlying known m_zero and m_one bits. This is equivalent
-   /// to zero extending the value we're tracking.
-   KnownBits zext(unsigned bitWidth)
+   /// Extends the underlying known Zero and One bits.
+   /// By setting ExtendedBitsAreKnownZero=true this will be equivalent to
+   /// zero extending the value we're tracking.
+   /// With ExtendedBitsAreKnownZero=false the extended bits are set to unknown.
+   KnownBits zext(unsigned bitWidth, bool extendedBitsAreKnownZero) const
    {
-      return KnownBits(m_zero.zext(bitWidth), m_one.zext(bitWidth));
+      unsigned oldBitWidth = getBitWidth();
+      ApInt newZero = m_zero.zext(bitWidth);
+      if (extendedBitsAreKnownZero) {
+         newZero.setBitsFrom(oldBitWidth);
+      }
+      return KnownBits(newZero, m_one.zext(bitWidth));
    }
 
    /// Sign extends the underlying known m_zero and m_one bits. This is equivalent
    /// to sign extending the value we're tracking.
-   KnownBits sext(unsigned bitWidth)
+   KnownBits sext(unsigned bitWidth) const
    {
       return KnownBits(m_zero.sext(bitWidth), m_one.sext(bitWidth));
    }
 
-   /// m_zero extends or truncates the underlying known m_zero and m_one bits. This is
-   /// equivalent to zero extending or truncating the value we're tracking.
-   KnownBits zextOrTrunc(unsigned bitWidth)
+   /// Extends or truncates the underlying known Zero and One bits. When
+   /// extending the extended bits can either be set as known zero (if
+   /// ExtendedBitsAreKnownZero=true) or as unknown (if
+   /// ExtendedBitsAreKnownZero=false).
+   KnownBits zextOrTrunc(unsigned bitWidth, bool extendedBitsAreKnownZero) const
    {
+      if (bitWidth > getBitWidth()) {
+         return zext(bitWidth, extendedBitsAreKnownZero);
+      }
       return KnownBits(m_zero.zextOrTrunc(bitWidth), m_one.zextOrTrunc(bitWidth));
    }
 
@@ -235,12 +246,15 @@ public:
       return getBitWidth() - m_zero.countPopulation();
    }
 
+   /// Compute known bits resulting from adding LHS, RHS and a 1-bit Carry.
+   static KnownBits computeForAddCarry(
+         const KnownBits &lhs, const KnownBits &rhs, const KnownBits &carry);
+
    /// Compute known bits resulting from adding LHS and RHS.
    static KnownBits computeForAddSub(bool add, bool nsw, const KnownBits &lhs,
                                      KnownBits rhs);
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_KONWN_BITS_H

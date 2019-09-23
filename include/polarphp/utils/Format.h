@@ -1,3 +1,10 @@
+//===- Format.h - Efficient printf-style formatting for streams -*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -38,8 +45,7 @@
 #include <optional>
 #include <iostream>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::StringRef;
 using polar::basic::ArrayRef;
@@ -288,7 +294,6 @@ format_bytes_with_ascii(ArrayRef<uint8_t> bytes,
                          byteGroupSize, upper, true);
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_FORMAT_H

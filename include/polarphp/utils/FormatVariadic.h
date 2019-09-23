@@ -1,3 +1,10 @@
+//===- FormatVariadic.h - Efficient type-safe string formatting --*- C++-*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -26,8 +33,7 @@
 #include <vector>
 #include <optional>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 enum class ReplacementType
 {
@@ -277,7 +283,6 @@ inline auto formatv(const char *fmt, Ts &&... values) -> FormatvObject<decltype(
             std::make_tuple(internal::build_format_adapter(std::forward<Ts>(values))...));
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_FORMAT_VARIADIC_H

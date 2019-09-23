@@ -1,3 +1,10 @@
+//===- llvm/Support/GraphWriter.h - Write graph to a .dot file --*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -40,8 +47,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::GraphTraits;
 using polar::basic::Twine;
@@ -422,7 +428,6 @@ void view_graph(const GraphType &graph, const Twine &name,
    display_graph(filename, false, program);
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_GRAPH_WRITER_H

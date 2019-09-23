@@ -1,3 +1,10 @@
+//===- llvm/Support/Process.h -----------------------------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -14,31 +21,50 @@
 
 #include "polarphp/utils/Allocator.h"
 #include "polarphp/utils/Chrono.h"
+#include "polarphp/utils/Error.h"
 #include "polarphp/global/DataTypes.h"
 #include <system_error>
 #include <optional>
 
-namespace polar {
-
+namespace polar::basic {
 // forward declare class with namespace
-namespace basic {
 template <typename T>
 class ArrayRef;
 class StringRef;
-} // basic
+} // polar::basic
 
-namespace sys {
+namespace polar::sys {
 
 using polar::basic::ArrayRef;
 using polar::basic::StringRef;
 using polar::utils::TimePoint;
+using polar::utils::Expected;
 
 /// A collection of legacy interfaces for querying information about the
 /// current executing process.
 class Process
 {
 public:
-   static unsigned getPageSize();
+   /// Get the process's page size.
+   /// This may fail if the underlying syscall returns an error. In most cases,
+   /// page size information is used for optimization, and this error can be
+   /// safely discarded by calling consumeError, and an estimated page size
+   /// substituted instead.
+   static Expected<unsigned> getPageSize();
+
+   /// Get the process's estimated page size.
+   /// This function always succeeds, but if the underlying syscall to determine
+   /// the page size fails then this will silently return an estimated page size.
+   /// The estimated page size is guaranteed to be a power of 2.
+   static unsigned getPageSizeEstimate()
+   {
+      if (auto pageSize = getPageSize()) {
+         return *pageSize;
+      } else {
+         consume_error(pageSize.takeError());
+         return 4096;
+      }
+   }
 
    /// Return process memory usage.
    /// This static function will return the total amount of memory allocated
@@ -181,7 +207,6 @@ public:
    static unsigned getRandomNumber();
 };
 
-} // sys
-} // polar
+} // polar::sys
 
 #endif // POLARPHP_UTILS_PROCESS_H

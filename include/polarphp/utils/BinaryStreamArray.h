@@ -1,9 +1,8 @@
-//===- BinaryStreamArray.h - Array backed by an arbitrary stream *- C++ -*-===//
+//===- BinaryStream.h - Base interface for a stream of data -----*- C++ -*-===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
@@ -38,8 +37,7 @@
 #include <cassert>
 #include <cstdint>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::IteratorFacadeBase;
 using polar::basic::ArrayRef;
@@ -484,7 +482,6 @@ private:
    uint32_t m_idx;
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_BINARY_STREAM_ARRAY_H

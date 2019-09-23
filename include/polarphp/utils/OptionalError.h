@@ -1,3 +1,10 @@
+//===- llvm/Support/ErrorOr.h - Error Smart Pointer -------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -19,8 +26,7 @@
 #include "polarphp/utils/AlignOf.h"
 #include "polarphp/utils/ErrorCode.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 /// Represents either an error or a value T.
 ///
@@ -319,7 +325,6 @@ operator==(const OptionalError<T> &error, E code)
    return error.getError() == code;
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_OPTIONAL_ERROR_H

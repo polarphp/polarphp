@@ -1,3 +1,10 @@
+//===- llvm/Support/Host.h - Host machine characteristics --------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -37,8 +44,7 @@
 
 #include <string>
 
-namespace polar {
-namespace sys {
+namespace polar::sys {
 
 using polar::basic::StringRef;
 using polar::basic::StringMap;
@@ -96,7 +102,6 @@ StringRef get_host_cpu_name_for_s390x(StringRef procCpuinfoContent);
 StringRef get_host_cpu_name_for_bpf();
 } // internal
 
-} // sys
-} // polar
+} // polar::sys
 
 #endif // POLARPHP_UTILS_HOST_H

@@ -1,3 +1,10 @@
+//===- llvm/Support/Casting.h - Allow flexible, checked, casts --*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -25,8 +32,7 @@
 #include <memory>
 #include <type_traits>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 //===----------------------------------------------------------------------===//
 //                          isa<x> Support Templates
@@ -180,6 +186,18 @@ POLAR_NODISCARD inline bool isa(const Y &value)
 {
    return IsaImplWrap<X, const Y,
          typename SimplifyType<const Y>::SimpleType>::doit(value);
+}
+
+// isa_and_nonnull<X> - Functionally identical to isa, except that a null value
+// is accepted.
+//
+template <class X, class Y>
+POLAR_NODISCARD inline bool isa_and_nonnull(const Y &value)
+{
+   if (!value) {
+      return false;
+   }
+   return isa<X>(value);
 }
 
 //===----------------------------------------------------------------------===//
@@ -485,7 +503,6 @@ POLAR_NODISCARD inline auto unique_dyn_cast_or_null(std::unique_ptr<Y> &&value)
    return unique_dyn_cast_or_null<X, Y>(value);
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_CASTING_H

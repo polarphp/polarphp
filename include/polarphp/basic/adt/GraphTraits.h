@@ -21,8 +21,7 @@
 
 #include "polarphp/basic/adt/IteratorRange.h"
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 // GraphTraits - This class should be specialized by different graph types...
 // which is why the default version is empty.
@@ -137,7 +136,6 @@ children_edges(const typename GraphTraits<GraphType>::NodeRef &graph)
                      GraphTraits<GraphType>::child_edge_end(graph));
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_GRAPH_TRAITS_H

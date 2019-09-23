@@ -1,9 +1,8 @@
 //===- llvm/Support/Error.h - Recoverable error handling --------*- C++ -*-===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 //
@@ -96,14 +95,12 @@ PolarErrorTypeId polar_get_string_error_type_id();
 }
 #endif
 
-namespace polar {
-
+namespace polar::basic {
 // forward declare with namespace
-namespace basic {
 class Twine;
-} // basic
+} // polar::basic
 
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::Twine;
 
@@ -1378,7 +1375,7 @@ private:
 
 /// Create formatted StringError object.
 template <typename... Ts>
-Error create_string_error(std::error_code errorCode, char const *fmt,
+inline Error create_string_error(std::error_code errorCode, char const *fmt,
                           const Ts &... values)
 {
    std::string buffer;
@@ -1389,6 +1386,12 @@ Error create_string_error(std::error_code errorCode, char const *fmt,
 
 Error create_string_error(std::error_code errorCode, char const *msg);
 
+template <typename... Ts>
+inline Error createStringError(std::errc errorCode, char const *format,
+                               const Ts &... values)
+{
+   return createStringError(std::make_error_code(errorCode), format, values...);
+}
 
 /// This class wraps a filename and another Error.
 ///
@@ -1519,7 +1522,6 @@ inline Error unwrap(PolarErrorRef errRef)
                    reinterpret_cast<ErrorInfoBase *>(errRef)));
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_ERROR_H

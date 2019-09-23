@@ -16,8 +16,7 @@
 #include "polarphp/global/DataTypes.h"
 #include <iterator>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::StringRef;
 
@@ -112,7 +111,6 @@ private:
    void advance();
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_LINE_ITERATOR_H

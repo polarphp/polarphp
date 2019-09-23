@@ -380,15 +380,15 @@ public:
          return true;
       }
 
-      for (const auto &DomTreeNode : m_domTreeNodes) {
-         NodeT *BB = DomTreeNode.first;
+      for (const auto &domTreeNode : m_domTreeNodes) {
+         NodeT *BB = domTreeNode.first;
          typename DomTreeNodeMapType::const_iterator oiter =
                otherDomTreeNodes.find(BB);
          if (oiter == otherDomTreeNodes.end()) {
             return true;
          }
-         DomTreeNodeBase<NodeT> &myNd = *DomTreeNode.second;
-         DomTreeNodeBase<NodeT> &otherNd = *OI->second;
+         DomTreeNodeBase<NodeT> &myNd = *domTreeNode.second;
+         DomTreeNodeBase<NodeT> &otherNd = *oiter->second;
          if (myNd.compare(&otherNd)) {
             return true;
          }
@@ -450,7 +450,7 @@ public:
       while (!WL.empty()) {
          const DomTreeNodeBase<NodeT> *node = WL.popBackValue();
          result.push_back(node->getBlock());
-         WL.append(N->begin(), node->end());
+         WL.append(node->begin(), node->end());
       }
    }
 
@@ -662,7 +662,7 @@ public:
    /// Note that for postdominators it automatically takes care of deleting
    /// a reverse edge internally (so there's no need to swap the parameters).
    ///
-   void deleteEdge(NodeT *m_from, NodeT *m_to)
+   void deleteEdge(NodeT *from, NodeT *to)
    {
       assert(from);
       assert(to);
@@ -796,14 +796,12 @@ public:
       if (getRootNode()) {
          print_dom_tree<NodeT>(getRootNode(), outstream, 1);
       }
-      if (sm_isPostDominator) {
-         outstream << "m_roots: ";
-         for (const NodePtr block : m_roots) {
-            block->printAsOperand(outstream, false);
-            outstream << " ";
-         }
-         outstream << "\n";
+      outstream << "Roots: ";
+      for (const NodePtr block : m_roots) {
+         block->printAsOperand(outstream, false);
+         outstream << " ";
       }
+      outstream << "\n";
    }
 
 public:
@@ -915,13 +913,13 @@ protected:
       NodeRef newBBSucc = *GraphT::childBegin(newBB);
 
       std::vector<NodeRef> predBlocks;
-      for (const auto &pred : children<Inverse<N>>(newBB))
+      for (const auto &pred : polar::basic::children<Inverse<N>>(newBB))
          predBlocks.push_back(pred);
 
       assert(!predBlocks.empty() && "No predblocks?");
 
       bool newBBDominatesNewBBSucc = true;
-      for (const auto &pred : children<Inverse<N>>(newBBSucc)) {
+      for (const auto &pred : polar::basic::children<Inverse<N>>(newBBSucc)) {
          if (pred != newBB && !dominates(newBBSucc, pred) &&
              isReachableFromEntry(pred)) {
             newBBDominatesNewBBSucc = false;
@@ -933,20 +931,23 @@ protected:
       // newBB.
       NodeT *newBBIdom = nullptr;
       unsigned i = 0;
-      for (i = 0; i < predBlocks.size(); ++i)
+      for (i = 0; i < predBlocks.size(); ++i) {
          if (isReachableFromEntry(predBlocks[i])) {
             newBBIdom = predBlocks[i];
             break;
          }
-
+      }
       // It's possible that none of the predecessors of newBB are reachable;
       // in that case, newBB itself is unreachable, so nothing needs to be
       // changed.
-      if (!newBBIdom) return;
+      if (!newBBIdom) {
+         return;
+      }
 
       for (i = i + 1; i < predBlocks.size(); ++i) {
-         if (isReachableFromEntry(predBlocks[i]))
+         if (isReachableFromEntry(predBlocks[i])) {
             newBBIdom = findNearestCommonDominator(newBBIdom, predBlocks[i]);
+         }
       }
 
       // Create the new dominator tree node... and set the idom of newBB.
