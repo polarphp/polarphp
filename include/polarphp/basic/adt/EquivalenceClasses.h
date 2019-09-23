@@ -24,8 +24,7 @@
 #include <iterator>
 #include <set>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// EquivalenceClasses - This represents a collection of equivalence classes and
 /// supports three efficient operations: insert an element into a class of its
@@ -358,7 +357,6 @@ public:
    };
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_EQUIVALENCE_CLASSES_H

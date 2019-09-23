@@ -35,8 +35,7 @@
 #include <cstdint>
 #include <utility>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 using polar::utils::BumpPtrAllocator;
 
@@ -950,6 +949,7 @@ template<typename T> struct FoldingSetTrait<T*>
       id.addPointer(value);
    }
 };
+
 template <typename T1, typename T2>
 struct FoldingSetTrait<std::pair<T1, T2>>
 {
@@ -961,7 +961,6 @@ struct FoldingSetTrait<std::pair<T1, T2>>
    }
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_FOLDING_SET_H

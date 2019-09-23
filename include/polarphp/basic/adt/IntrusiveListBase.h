@@ -1,3 +1,10 @@
+//===- llvm/ADT/ilist_base.h - Intrusive List Base --------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -15,12 +22,12 @@
 #include "polarphp/basic/adt/IntrusiveListNodeBase.h"
 #include <cassert>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// Implementations of list algorithms using IntrusiveListNodeBase.
 template <bool EnableSentinelTracking>
-class IntrusiveListBase {
+class IntrusiveListBase
+{
 public:
    using NodeBaseType = IntrusiveListNodeBase<EnableSentinelTracking>;
 
@@ -107,7 +114,6 @@ public:
    }
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_INTRUSIVE_LIST_BASE_H

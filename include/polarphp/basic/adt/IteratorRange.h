@@ -1,3 +1,10 @@
+//===- iterator_range.h - A range adaptor for iterators ---------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -15,8 +22,7 @@
 #include <iterator>
 #include <utility>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// \brief A range adaptor for a pair of iterators.
 ///
@@ -76,7 +82,6 @@ IteratorRange<decltype(adl_begin(std::declval<T>()))> drop_begin(T &&t, int n)
    return make_range(std::next(adl_begin(t), n), adl_end(t));
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_ITERATOR_RANGE_H

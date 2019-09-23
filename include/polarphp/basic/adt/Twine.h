@@ -19,15 +19,13 @@
 #include <cstdint>
 #include <string>
 
-namespace polar {
-
+namespace polar::utils {
 // forward declare class with namespace
-namespace utils {
 class FormatvObjectBase;
 class RawOutStream;
-} // utils
+} // polar::utils
 
-namespace basic {
+namespace polar::basic {
 
 using polar::utils::FormatvObjectBase;
 using polar::utils::RawOutStream;
@@ -308,15 +306,21 @@ public:
       assert(isValid() && "Invalid twine!");
    }
 
+   /// Delete the implicit conversion from nullptr as Twine(const char *)
+   /// cannot take nullptr.
+   /*implicit*/ Twine(std::nullptr_t) = delete;
+
    /// Construct from an std::string.
-   /*implicit*/ Twine(const std::string &str) : m_lhsKind(NodeKind::StdStringKind)
+   /*implicit*/ Twine(const std::string &str)
+      : m_lhsKind(NodeKind::StdStringKind)
    {
       m_lhs.m_stdString = &str;
       assert(isValid() && "Invalid twine!");
    }
 
    /// Construct from a StringRef.
-   /*implicit*/ Twine(const StringRef &str) : m_lhsKind(NodeKind::StringRefKind)
+   /*implicit*/ Twine(const StringRef &str)
+      : m_lhsKind(NodeKind::StringRefKind)
    {
       m_lhs.m_stringRef = &str;
       assert(isValid() && "Invalid twine!");
@@ -602,7 +606,6 @@ inline RawOutStream &operator<<(RawOutStream &outStream, const Twine &rhs)
 
 /// @}
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_TWINE_H

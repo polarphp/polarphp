@@ -33,8 +33,7 @@
 #include <cstddef>
 #include <iterator>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// Use delete by default for PurelyIntrusiveList and ilist.
 ///
@@ -81,9 +80,8 @@ struct IntrusiveListCallbackTraits
    void addNodeToList(NodeTypeype *) {}
    void removeNodeFromList(NodeTypeype *) {}
 
-   /// Callback before transferring nodes to this list.
-   ///
-   /// \pre \c this!=&oldList
+   /// Callback before transferring nodes to this list. The nodes may already be
+   /// in this same list.
    template <typename Iterator>
    void transferNodesFromList(IntrusiveListCallbackTraits &oldList, Iterator /*first*/,
                               Iterator /*last*/)
@@ -371,14 +369,13 @@ private:
    // transfer - The heart of the splice function.  Move linked list nodes from
    // [first, last) into position.
    //
-   void transfer(iterator position, PurelyIntrusiveListImpl &list, iterator first, iterator last) {
+   void transfer(iterator position, PurelyIntrusiveListImpl &list, iterator first, iterator last)
+   {
       if (position == last) {
          return;
       }
-      if (this != &list) {
-         // Notify traits we moved the nodes...
-         this->transferNodesFromList(list, first, last);
-      }
+      // Notify traits we moved the nodes...
+      this->transferNodesFromList(list, first, last);
       BaseListType::splice(position, list, first, last);
    }
 
@@ -547,8 +544,7 @@ public:
 template <typename T, class... Options>
 using IntrusiveList = PurelyIntrusiveList<T, Options...>;
 
-} // basic
-} // polar
+} // polar::basic
 
 namespace std {
 
