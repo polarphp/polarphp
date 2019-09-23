@@ -21,8 +21,7 @@
 #include <vector>
 #include <optional>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 // The PostOrderIteratorStorage template provides access to the set of already
 // visited nodes during the PostOrderIterator's depth-first traversal.
@@ -254,7 +253,7 @@ po_ext_iterator<T, SetType> po_ext_end(T graph, SetType &set)
 }
 
 template <typename T, typename SetType>
-iterator_range<po_ext_iterator<T, SetType>> post_order_ext(const T &graph, SetType &set)
+IteratorRange<po_ext_iterator<T, SetType>> post_order_ext(const T &graph, SetType &set)
 {
    return make_range(po_ext_begin(graph, set), po_ext_end(graph, set));
 }
@@ -282,7 +281,7 @@ ipo_iterator<T> ipo_end(const T &graph)
 }
 
 template <typename T>
-iterator_range<ipo_iterator<T>> inverse_post_order(const T &graph)
+IteratorRange<ipo_iterator<T>> inverse_post_order(const T &graph)
 {
    return make_range(ipo_begin(graph), ipo_end(graph));
 }
@@ -389,7 +388,6 @@ public:
    }
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_POST_ORDER_ITERATOR_H

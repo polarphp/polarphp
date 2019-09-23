@@ -1,3 +1,10 @@
+//===- llvm/ADT/PointerUnion.h - Discriminated Union of 2 Ptrs --*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -22,8 +29,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// A FILO worklist that prioritizes on re-insertion without duplication.
 ///
@@ -282,7 +288,6 @@ public:
    SmallPriorityWorkList() = default;
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_PRIORITY_WORKLIST_H

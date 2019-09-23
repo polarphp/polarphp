@@ -1,3 +1,10 @@
+//===-- llvm/ADT/SetOperations.h - Generic Set Operations -------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -35,8 +42,7 @@
 #ifndef POLARPHP_BASIC_SET_OPERATIONS_H
 #define POLARPHP_BASIC_SET_OPERATIONS_H
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// set_union(A, B) - Compute A := A u B, return whether A changed.
 ///
@@ -96,7 +102,6 @@ void set_subtract(S1Ty &lhs, const S2Ty &rhs)
    }
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_SET_OPERATIONS_H

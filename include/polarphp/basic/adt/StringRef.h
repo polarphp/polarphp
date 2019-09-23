@@ -1,3 +1,10 @@
+//===- StringRef.h - Constant String Reference Wrapper ----------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -25,8 +32,7 @@
 #include <utility>
 #include <ostream>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 class ApInt;
 class HashCode;
@@ -68,7 +74,6 @@ private:
 
    // Workaround memcmp issue with null pointers (undefined behavior)
    // by providing a specialized version
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    static int compareMemory(const char *lhs, const char *rhs, size_t length)
    {
       if (length == 0) {
@@ -89,19 +94,16 @@ public:
    StringRef(std::nullptr_t) = delete;
 
    /// Construct a string ref from a cstring.
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    /*implicit*/ StringRef(const char *str)
       : m_data(str), m_length(str ? ::strlen(str) : 0)
    {}
 
    /// Construct a string ref from a pointer and length.
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    /*implicit*/ constexpr StringRef(const char *data, size_t length)
       : m_data(data), m_length(length)
    {}
 
    /// Construct a string ref from an std::string.
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    /*implicit*/ StringRef(const std::string &str)
       : m_data(str.data()), m_length(str.length())
    {}
@@ -147,7 +149,6 @@ public:
    /// data - Get a pointer to the start of the string (which may not be null
    /// terminated).
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    const char *getData() const
    {
       return m_data;
@@ -156,7 +157,6 @@ public:
    /// data - Get a pointer to the start of the string (which may not be null
    /// terminated).
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    const char *data() const
    {
       return m_data;
@@ -164,7 +164,6 @@ public:
 
    /// empty - Check if the string is empty.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    bool empty() const
    {
       return m_length == 0;
@@ -172,7 +171,6 @@ public:
 
    /// size - Get the string size.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    size_t getSize() const
    {
       return m_length;
@@ -180,7 +178,6 @@ public:
 
    /// size - Get the string size.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    size_t size() const
    {
       return m_length;
@@ -230,7 +227,6 @@ public:
    /// equals - Check for string equality, this is more efficient than
    /// compare() when the relative ordering of inequal strings isn't needed.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    bool equals(StringRef other) const
    {
       return (m_length == other.m_length &&
@@ -247,7 +243,6 @@ public:
    /// compare - Compare two strings; the result is -1, 0, or 1 if this string
    /// is lexicographically less than, equal to, or greater than the \p RHS.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    int compare(StringRef other) const
    {
       // Check the prefix for a mismatch.
@@ -337,7 +332,6 @@ public:
 
    /// Check if this string starts with the given \p Prefix.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    bool startsWith(StringRef prefix) const
    {
       return m_length >= prefix.m_length &&
@@ -350,7 +344,6 @@ public:
 
    /// Check if this string ends with the given \p Suffix.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    bool endsWith(StringRef suffix) const
    {
       return m_length >= suffix.m_length &&
@@ -370,7 +363,6 @@ public:
    /// \returns The index of the first occurrence of \p C, or npos if not
    /// found.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    size_t find(char character, size_t from = 0) const
    {
       size_t findBegin = std::min(from, m_length);
@@ -395,7 +387,6 @@ public:
    /// \returns The index of the first character satisfying \p F starting from
    /// \p From, or npos if not found.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    size_t findIf(FunctionRef<bool(char)> func, size_t from = 0) const
    {
       StringRef str = dropFront(from);
@@ -413,7 +404,6 @@ public:
    /// \returns The index of the first character not satisfying \p F starting
    /// from \p From, or npos if not found.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    size_t findIfNot(FunctionRef<bool(char)> func, size_t from = 0) const
    {
       return findIf([func](char c) { return !func(c); }, from);
@@ -528,7 +518,6 @@ public:
    /// Return true if the given string is a substring of *this, and false
    /// otherwise.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    bool contains(StringRef other) const
    {
       return find(other) != npos;
@@ -537,7 +526,6 @@ public:
    /// Return true if the given character is contained in *this, and false
    /// otherwise.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    bool contains(char character) const
    {
       return findFirstOf(character) != npos;
@@ -546,7 +534,6 @@ public:
    /// Return true if the given string is a substring of *this, and false
    /// otherwise.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    bool containsLower(StringRef other) const
    {
       return findLower(other) != npos;
@@ -555,7 +542,6 @@ public:
    /// Return true if the given character is contained in *this, and false
    /// otherwise.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    bool containsLower(char character) const
    {
       return findLower(character) != npos;
@@ -699,7 +685,6 @@ public:
    /// exceeds the number of characters remaining in the string, the string
    /// suffix (starting with \p Start) will be returned.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringRef substr(size_t start, size_t size = npos) const
    {
       start = std::min(start, m_length);
@@ -710,7 +695,6 @@ public:
    /// elements remaining.  If \p N is greater than the length of the
    /// string, the entire string is returned.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringRef takeFront(size_t size = 1) const
    {
       if (size >= getSize()) {
@@ -723,7 +707,6 @@ public:
    /// elements remaining.  If \p N is greater than the length of the
    /// string, the entire string is returned.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringRef takeBack(size_t size = 1) const
    {
       if (size >= getSize()) {
@@ -735,7 +718,6 @@ public:
    /// Return the longest prefix of 'this' such that every character
    /// in the prefix satisfies the given predicate.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringRef takeWhile(FunctionRef<bool(char)> func) const
    {
       return substr(0, findIfNot(func));
@@ -744,7 +726,6 @@ public:
    /// Return the longest prefix of 'this' such that no character in
    /// the prefix satisfies the given predicate.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringRef takeUntil(FunctionRef<bool(char)> func) const
    {
       return substr(0, findIf(func));
@@ -753,7 +734,6 @@ public:
    /// Return a StringRef equal to 'this' but with the first \p N elements
    /// dropped.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringRef dropFront(size_t size = 1) const
    {
       assert(getSize() >= size && "Dropping more elements than exist");
@@ -761,7 +741,6 @@ public:
    }
 
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringRef drop_front(size_t size = 1) const
    {
       return dropFront(size);
@@ -770,7 +749,6 @@ public:
    /// Return a StringRef equal to 'this' but with the last \p N elements
    /// dropped.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringRef dropBack(size_t size = 1) const
    {
       assert(getSize() >= size && "Dropping more elements than exist");
@@ -780,7 +758,6 @@ public:
    /// Return a StringRef equal to 'this' but with the last \p N elements
    /// dropped.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringRef drop_back(size_t size = 1) const
    {
       return dropBack(size);
@@ -789,7 +766,6 @@ public:
    /// Return a StringRef equal to 'this', but with all characters satisfying
    /// the given predicate dropped from the beginning of the string.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringRef dropWhile(FunctionRef<bool(char)> func) const
    {
       return substr(findIfNot(func));
@@ -798,7 +774,6 @@ public:
    /// Return a StringRef equal to 'this', but with all characters not
    /// satisfying the given predicate dropped from the beginning of the string.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringRef dropUntil(FunctionRef<bool(char)> func) const
    {
       return substr(findIf(func));
@@ -806,7 +781,6 @@ public:
 
    /// Returns true if this StringRef has the given prefix and removes that
    /// prefix.
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    bool consumeFront(StringRef prefix)
    {
       if (!startsWith(prefix)) {
@@ -818,7 +792,6 @@ public:
 
    /// Returns true if this StringRef has the given suffix and removes that
    /// suffix.
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    bool consumeBack(StringRef suffix) {
       if (!endsWith(suffix)) {
          return false;
@@ -839,7 +812,6 @@ public:
    /// will be returned. If this is less than \p Start, an empty string will
    /// be returned.
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringRef slice(size_t start, size_t end) const
    {
       start = std::min(start, m_length);
@@ -1043,14 +1015,11 @@ public:
 
 /// @name StringRef Comparison Operators
 /// @{
-
-POLAR_ATTRIBUTE_ALWAYS_INLINE
 inline bool operator==(StringRef lhs, StringRef rhs)
 {
    return lhs.equals(rhs);
 }
 
-POLAR_ATTRIBUTE_ALWAYS_INLINE
 inline bool operator!=(StringRef lhs, StringRef rhs)
 {
    return !(lhs == rhs);
@@ -1093,18 +1062,6 @@ inline std::ostream &operator <<(std::ostream &out, const StringRef str)
 POLAR_NODISCARD
 HashCode hash_value(StringRef str);
 
-} // basic
-
-namespace utils {
-// StringRefs can be treated like a POD type.
-template <typename T> struct IsPodLike;
-template <>
-struct IsPodLike<polar::basic::StringRef>
-{
-   static const bool value = true;
-};
-} // utils
-
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_STRINGREF_H

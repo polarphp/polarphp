@@ -1,3 +1,10 @@
+//===- StringMap.h - String Hash table map interface ------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -27,8 +34,7 @@
 #include <iterator>
 #include <utility>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 template<typename ValueType>
 class StringMapConstIterator;
@@ -461,6 +467,12 @@ public:
       return find(key) == end() ? 0 : 1;
    }
 
+   template <typename InputTy>
+   size_type count(const StringMapEntry<InputTy> &entry) const
+   {
+      return count(entry.getKey());
+   }
+
    /// insert - Insert the specified key/value pair into the map.  If the key
    /// already exists in the map, return false and ignore the request, otherwise
    /// insert it and return true.
@@ -685,7 +697,6 @@ private:
    StringRef m_key;
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_STRING_MAP_H

@@ -17,8 +17,7 @@
 #include <cstring>
 #include <optional>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// A switch()-like statement whose conds are string literals.
 ///
@@ -50,7 +49,6 @@ class StringSwitch
    std::optional<T> m_result;
 
 public:
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    explicit StringSwitch(StringRef str)
       : m_str(str),
         m_result(std::nullopt)
@@ -69,7 +67,6 @@ public:
    ~StringSwitch() = default;
 
    // cond-sensitive cond matchers
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch& cond(StringLiteral str, T value)
    {
       if (!m_result && m_str == str) {
@@ -78,7 +75,6 @@ public:
       return *this;
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &endsWith(StringLiteral str, T value)
    {
       if (!m_result && m_str.endsWith(str)) {
@@ -87,7 +83,6 @@ public:
       return *this;
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &startsWith(StringLiteral str, T value)
    {
       if (!m_result && m_str.startsWith(str)) {
@@ -96,20 +91,17 @@ public:
       return *this;
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &conds(StringLiteral str0, StringLiteral str1, T value)
    {
       return cond(str0, value).cond(str1, value);
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &conds(StringLiteral str0, StringLiteral str1,
                        StringLiteral str2, T value)
    {
       return cond(str0, value).conds(str1, str2, value);
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &conds(StringLiteral str0, StringLiteral str1,
                        StringLiteral str2, StringLiteral str3,
                        T value)
@@ -117,7 +109,6 @@ public:
       return cond(str0, value).conds(str1, str2, str3, value);
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &conds(StringLiteral str0, StringLiteral str1,
                        StringLiteral str2, StringLiteral str3,
                        StringLiteral str4, T value)
@@ -125,7 +116,6 @@ public:
       return cond(str0, value).conds(str1, str2, str3, str4, value);
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &conds(StringLiteral str0, StringLiteral str1,
                        StringLiteral str2, StringLiteral str3,
                        StringLiteral str4, StringLiteral str5,
@@ -134,7 +124,6 @@ public:
       return cond(str0, value).conds(str1, str2, str3, str4, str5, value);
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &conds(StringLiteral str0, StringLiteral str1,
                        StringLiteral str2, StringLiteral str3,
                        StringLiteral str4, StringLiteral str5,
@@ -143,7 +132,6 @@ public:
       return cond(str0, value).conds(str1, str2, str3, str4, str5, str6, value);
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &conds(StringLiteral str0, StringLiteral str1,
                        StringLiteral str2, StringLiteral str3,
                        StringLiteral str4, StringLiteral str5,
@@ -153,7 +141,6 @@ public:
       return cond(str0, value).conds(str1, str2, str3, str4, str5, str6, str7, value);
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &conds(StringLiteral str0, StringLiteral str1,
                        StringLiteral str2, StringLiteral str3,
                        StringLiteral str4, StringLiteral str5,
@@ -163,7 +150,6 @@ public:
       return cond(str0, value).conds(str1, str2, str3, str4, str5, str6, str7, str8, value);
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &conds(StringLiteral str0, StringLiteral str1,
                        StringLiteral str2, StringLiteral str3,
                        StringLiteral str4, StringLiteral str5,
@@ -175,7 +161,6 @@ public:
    }
 
    // cond-insensitive cond matchers.
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &condLower(StringLiteral str, T value)
    {
       if (!m_result && m_str.equalsLower(str)) {
@@ -184,7 +169,6 @@ public:
       return *this;
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &endsWithLower(StringLiteral str, T value)
    {
       if (!m_result && m_str.endsWithLower(str)) {
@@ -193,7 +177,6 @@ public:
       return *this;
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &startsWithLower(StringLiteral str, T value)
    {
       if (!m_result && m_str.startsWithLower(str)) {
@@ -202,20 +185,17 @@ public:
       return *this;
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &condsLower(StringLiteral str0, StringLiteral str1, T value)
    {
       return condLower(str0, value).condLower(str1, value);
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &condsLower(StringLiteral str0, StringLiteral str1,
                             StringLiteral str2, T value)
    {
       return condLower(str0, value).condsLower(str1, str2, value);
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &condsLower(StringLiteral str0, StringLiteral str1,
                             StringLiteral str2, StringLiteral str3,
                             T value)
@@ -223,7 +203,6 @@ public:
       return condLower(str0, value).condsLower(str1, str2, str3, value);
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    StringSwitch &condsLower(StringLiteral str0, StringLiteral str1,
                             StringLiteral str2, StringLiteral str3,
                             StringLiteral str4, T value)
@@ -232,7 +211,6 @@ public:
    }
 
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    R defaultCond(T value) const
    {
       if (m_result) {
@@ -242,7 +220,6 @@ public:
    }
 
    POLAR_NODISCARD
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    operator R() const
    {
       assert(m_result && "Fell off the end of a string-switch");
@@ -250,7 +227,6 @@ public:
    }
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_STRING_SWITCH_H

@@ -18,8 +18,7 @@
 #include <iterator>
 #include <utility>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 namespace internal {
 
@@ -90,7 +89,6 @@ IteratorRange<internal::ValueSequenceIterator<ValueT>> seq(ValueT begin,
                      internal::ValueSequenceIterator<ValueT>(end));
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_SEQUENCE_H

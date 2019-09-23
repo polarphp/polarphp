@@ -37,8 +37,7 @@
 #include <random> // for std::mt19937
 #endif
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 // Only used by compiler if both template types are the same.  Useful when
 // using SFINAE to test for the existence of member functions.
@@ -1470,32 +1469,44 @@ auto partition(R &&range, UnaryPredicate pred) -> decltype(adl_begin(range))
 
 /// Provide wrappers to std::lower_bound which take ranges instead of having to
 /// pass begin/end explicitly.
-template <typename R, typename ForwardIt>
-auto lower_bound(R &&range, ForwardIt iter) -> decltype(adl_begin(range))
+template <typename R, typename T>
+auto lower_bound(R &&range, T &&value) -> decltype(adl_begin(range))
 {
-   return std::lower_bound(adl_begin(range), adl_end(range), iter);
+   return std::lower_bound(adl_begin(range), adl_end(range), std::forward<T>(value));
 }
 
-template <typename R, typename ForwardIt, typename Compare>
-auto lower_bound(R &&range, ForwardIt iter, Compare compare)
+template <typename R, typename T, typename Compare>
+auto lower_bound(R &&range, T &&value, Compare compare)
 -> decltype(adl_begin(range))
 {
-   return std::lower_bound(adl_begin(range), adl_end(range), iter, compare);
+   return std::lower_bound(adl_begin(range), adl_end(range), std::forward<T>(value), compare);
 }
 
 /// Provide wrappers to std::upper_bound which take ranges instead of having to
 /// pass begin/end explicitly.
-template <typename R, typename ForwardIt>
-auto upper_bound(R &&range, ForwardIt iter) -> decltype(adl_begin(range))
+template <typename R, typename T>
+auto upper_bound(R &&range, T &&value) -> decltype(adl_begin(range))
 {
-   return std::upper_bound(adl_begin(range), adl_end(range), iter);
+   return std::upper_bound(adl_begin(range), adl_end(range), std::forward<T>(value));
 }
 
-template <typename R, typename ForwardIt, typename Compare>
-auto upper_bound(R &&range, ForwardIt iter, Compare compare)
+template <typename R, typename T, typename Compare>
+auto upper_bound(R &&range,T &&value, Compare compare)
 -> decltype(adl_begin(range))
 {
-   return std::upper_bound(adl_begin(range), adl_end(range), iter, compare);
+   return std::upper_bound(adl_begin(range), adl_end(range), std::forward<T>(value), compare);
+}
+
+template <typename R>
+void stable_sort(R &&range)
+{
+   std::stable_sort(adl_begin(range), adl_end(range));
+}
+
+template <typename R, typename Compare>
+void stable_sort(R &&range, Compare comparator)
+{
+   std::stable_sort(adl_begin(range), adl_end(range), comparator);
 }
 
 /// Wrapper function around std::equal to detect if all elements
@@ -1529,6 +1540,35 @@ template <typename Container, typename UnaryPredicate>
 void erase_if(Container &container, UnaryPredicate pred)
 {
    container.erase(remove_if(container, pred), container.end());
+}
+
+/// Given a sequence container Cont, replace the range [ContIt, ContEnd) with
+/// the range [ValIt, ValEnd) (which is not from the same container).
+template<typename Container, typename RandomAccessIterator>
+void replace(Container &container, typename Container::iterator iter,
+             typename Container::iterator endIter, RandomAccessIterator valueIter,
+             RandomAccessIterator valueEndIter)
+{
+   while (true) {
+      if (valueIter == valueEndIter) {
+         container.erase(iter, endIter);
+         return;
+      } else if (iter == endIter) {
+         container.insert(iter, valueIter, valueEndIter);
+         return;
+      }
+      *iter++ = *valueIter++;
+   }
+}
+
+/// Given a sequence container Cont, replace the range [ContIt, ContEnd) with
+/// the range R.
+template<typename Container, typename Range = std::initializer_list<
+                                 typename Container::value_type>>
+void replace(Container &container, typename Container::iterator iter,
+             typename Container::iterator endIter, Range range)
+{
+   replace(container, iter, endIter, range.begin(), range.end());
 }
 
 //===----------------------------------------------------------------------===//
@@ -1632,6 +1672,10 @@ template <typename R> class EnumeratorIter;
 template <typename R>
 struct ResultPair
 {
+   using ValueReference =
+         typename std::iterator_traits<IterOfRange<R>>::reference;
+   using value_reference = ValueReference;
+
    friend class EnumeratorIter<R>;
 
    ResultPair() = default;
@@ -1651,12 +1695,12 @@ struct ResultPair
       return m_index;
    }
 
-   const ValueOfRange<R> &getValue() const
+   const ValueReference getValue() const
    {
       return *m_iter;
    }
 
-   ValueOfRange<R> &getValue()
+   ValueReference getValue()
    {
       return *m_iter;
    }
@@ -2172,7 +2216,26 @@ make_optional_transform_range(Range range, OptionalTransform op)
    return OptionalTransformRange<Range, OptionalTransform>(range, op);
 }
 
-} // basic
-} // polar
+/// Returns a raw pointer that represents the same address as the argument.
+///
+/// The late bound return should be removed once we move to C++14 to better
+/// align with the C++20 declaration. Also, this implementation can be removed
+/// once we move to C++20 where it's defined as std::to_addres()
+///
+/// The std::pointer_traits<>::to_address(p) variations of these overloads has
+/// not been implemented.
+template <typename Ptr>
+auto to_address(const Ptr &ptr) -> decltype(ptr.operator->())
+{
+  return ptr.operator->();
+}
+
+template <typename T>
+constexpr T *to_address(T *ptr)
+{
+   return ptr;
+}
+
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_STL_EXTRAS_H

@@ -948,6 +948,7 @@ class ApFloat : public ApFloatBase
    explicit ApFloat(IEEEFloat fvalue, const FltSemantics &semantic)
       : m_storage(std::move(fvalue), semantic)
    {}
+
    explicit ApFloat(DoubleApFloat fvalue, const FltSemantics &semantic)
       : m_storage(std::move(fvalue), semantic)
    {}
@@ -968,7 +969,9 @@ class ApFloat : public ApFloatBase
 public:
    ApFloat(const FltSemantics &semantics) : m_storage(semantics)
    {}
+
    ApFloat(const FltSemantics &semantics, StringRef str);
+
    ApFloat(const FltSemantics &semantics, integerPart ivalue) : m_storage(semantics, ivalue)
    {}
    // TODO: Remove this constructor. This isn't faster than the first one.

@@ -21,8 +21,7 @@
 #include <iterator>
 #include <list>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 using polar::utils::count_population;
 using polar::utils::count_trailing_zeros;
@@ -978,7 +977,6 @@ void dump(const SparseBitVector<ElementSize> &vector, RawOutStream &out)
    out << "]\n";
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_SPARSE_BIT_VECTOR_H
