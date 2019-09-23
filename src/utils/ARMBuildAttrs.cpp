@@ -1,3 +1,10 @@
+//===-- ARMBuildAttrs.cpp - ARM Build Attributes --------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -33,6 +40,7 @@ const struct {
 { armbuildattrs::FP_arch, "Tag_FP_arch" },
 { armbuildattrs::WMMX_arch, "Tag_WMMX_arch" },
 { armbuildattrs::Advanced_SIMD_arch, "Tag_Advanced_SIMD_arch" },
+{ armbuildattrs::MVE_arch, "Tag_MVE_arch" },
 { armbuildattrs::PCS_config, "Tag_PCS_config" },
 { armbuildattrs::ABI_PCS_R9_use, "Tag_ABI_PCS_R9_use" },
 { armbuildattrs::ABI_PCS_RW_data, "Tag_ABI_PCS_RW_data" },

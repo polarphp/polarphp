@@ -1,9 +1,8 @@
-//===--- AMDGPUMetadata.h ---------------------------------------*- C++ -*-===//
+//===- AARCH64TargetParser.def - AARCH64 target parsing defines ---------*- C++ -*-===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
@@ -81,6 +80,7 @@ enum class ValueKind : uint8_t
    HiddenPrintfBuffer     = 11,
    HiddenDefaultQueue     = 12,
    HiddenCompletionAction = 13,
+   HiddenMultiGridSyncArg = 14,
    Unknown                = 0xff
 };
 
@@ -167,6 +167,8 @@ constexpr char name[] = "Name";
 constexpr char typeName[] = "TypeName";
 /// key for kernel::arg::Metadata::m_size.
 constexpr char size[] = "Size";
+/// Key for kernel::arg::Metadata::mOffset.
+constexpr char offset[] = "Offset";
 /// key for kernel::arg::Metadata::m_align.
 constexpr char align[] = "Align";
 /// key for kernel::arg::Metadata::m_valueKind.
@@ -200,6 +202,8 @@ struct Metadata final
    std::string m_typeName = std::string();
    /// Size in bytes. Required.
    uint32_t m_size = 0;
+   /// Offset in bytes. Required for code object v3, unused for code object v2.
+   uint32_t m_offset = 0;
    /// Alignment in bytes. Required.
    uint32_t m_align = 0;
    /// Value kind. Required.
@@ -474,8 +478,27 @@ namespace palmd {
 /// PAL metadata assembler directive.
 constexpr char assemblerDirective[] = ".amd_amdgpu_pal_metadata";
 
+/// PAL metadata (new MsgPack format) beginning assembler directive.
+constexpr char assemblerDirectiveBegin[] = ".amdgpu_pal_metadata";
+
+/// PAL metadata (new MsgPack format) ending assembler directive.
+constexpr char assemblerDirectiveEnd[] = ".end_amdgpu_pal_metadata";
+
 /// PAL metadata keys.
 enum key : uint32_t {
+   R_2E12_COMPUTE_PGM_RSRC1 = 0x2e12,
+   R_2D4A_SPI_SHADER_PGM_RSRC1_LS = 0x2d4a,
+   R_2D0A_SPI_SHADER_PGM_RSRC1_HS = 0x2d0a,
+   R_2CCA_SPI_SHADER_PGM_RSRC1_ES = 0x2cca,
+   R_2C8A_SPI_SHADER_PGM_RSRC1_GS = 0x2c8a,
+   R_2C4A_SPI_SHADER_PGM_RSRC1_VS = 0x2c4a,
+   R_2C0A_SPI_SHADER_PGM_RSRC1_PS = 0x2c0a,
+   R_2E00_COMPUTE_DISPATCH_INITIATOR = 0x2e00,
+   R_A1B3_SPI_PS_INPUT_ENA = 0xa1b3,
+   R_A1B4_SPI_PS_INPUT_ADDR = 0xa1b4,
+   R_A1B6_SPI_PS_IN_CONTROL = 0xa1b6,
+   R_A2D5_VGT_SHADER_STAGES_EN = 0xa2d5,
+
    LS_NUM_USED_VGPRS = 0x10000021,
    HS_NUM_USED_VGPRS = 0x10000022,
    ES_NUM_USED_VGPRS = 0x10000023,
@@ -500,12 +523,6 @@ enum key : uint32_t {
    PS_SCRATCH_SIZE = 0x10000049,
    CS_SCRATCH_SIZE = 0x1000004a
 };
-
-/// PAL metadata represented as a vector.
-typedef std::vector<uint32_t> Metadata;
-
-/// Converts \p palMetadata to \p str.
-std::error_code toString(const Metadata &palMetadata, std::string &string);
 
 } // end namespace palmd
 } // amdgpu

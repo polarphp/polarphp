@@ -1,3 +1,10 @@
+//===--- ARMAttributeParser.h - ARM Attribute Information Printer ---------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -69,6 +76,7 @@ enum AttrType
    MPextension_use           = 42, // recoded from 70 (ABI r2.08)
    DIV_use                   = 44,
    DSP_extension             = 46,
+   MVE_arch                  = 48,
    also_compatible_with      = 65,
    conformance               = 67,
    Virtualization_use        = 68,
@@ -96,24 +104,25 @@ enum AttrMagic
 // Legal Values for CPU_arch, (=6), uleb128
 enum CPUArch
 {
-   Pre_v4   = 0,
-   v4       = 1,   // e.g. SA110
-   v4T      = 2,   // e.g. ARM7TDMI
-   v5T      = 3,   // e.g. ARM9TDMI
-   v5TE     = 4,   // e.g. ARM946E_S
-   v5TEJ    = 5,   // e.g. ARM926EJ_S
-   v6       = 6,   // e.g. ARM1136J_S
-   v6KZ     = 7,   // e.g. ARM1176JZ_S
-   v6T2     = 8,   // e.g. ARM1156T2_S
-   v6K      = 9,   // e.g. ARM1176JZ_S
-   v7       = 10,  // e.g. Cortex A8, Cortex M3
-   v6_M     = 11,  // e.g. Cortex M1
-   v6S_M    = 12,  // v6_M with the System extensions
-   v7E_M    = 13,  // v7_M with DSP extensions
-   v8_A     = 14,  // v8_A AArch32
-   v8_R     = 15,  // e.g. Cortex R52
-   v8_M_Base= 16,  // v8_M_Base AArch32
-   v8_M_Main= 17,  // v8_M_Main AArch32
+   Pre_v4      = 0,
+   v4          = 1,   // e.g. SA110
+   v4T         = 2,   // e.g. ARM7TDMI
+   v5T         = 3,   // e.g. ARM9TDMI
+   v5TE        = 4,   // e.g. ARM946E_S
+   v5TEJ       = 5,   // e.g. ARM926EJ_S
+   v6          = 6,   // e.g. ARM1136J_S
+   v6KZ        = 7,   // e.g. ARM1176JZ_S
+   v6T2        = 8,   // e.g. ARM1156T2_S
+   v6K         = 9,   // e.g. ARM1176JZ_S
+   v7          = 10,  // e.g. Cortex A8, Cortex M3
+   v6_M        = 11,  // e.g. Cortex M1
+   v6S_M       = 12,  // v6_M with the System extensions
+   v7E_M       = 13,  // v7_M with DSP extensions
+   v8_A        = 14,  // v8_A AArch32
+   v8_R        = 15,  // e.g. Cortex R52
+   v8_M_Base   = 16,  // v8_M_Base AArch32
+   v8_M_Main   = 17,  // v8_M_Main AArch32
+   v8_1_M_Main = 21, // v8_1_M_Main AArch32
 };
 
 enum CPUArchProfile
@@ -156,6 +165,10 @@ enum
    AllowNeon2 = 2,     // SIMDv2 was permitted (Half-precision FP, MAC operations)
    AllowNeonARMv8 = 3, // ARM v8-A SIMD was permitted
    AllowNeonARMv8_1a = 4,// ARM v8.1-A SIMD was permitted (RDMA)
+
+   // Tag_MVE_arch, (=48), uleb128
+   AllowMVEInteger = 1, // integer-only MVE was permitted
+   AllowMVEIntegerAndFloat = 2, // both integer and floating point MVE were permitted
 
    // Tag_ABI_PCS_R9_use, (=14), uleb128
    R9IsGPR = 0,        // R9 used as v6 (just another callee-saved register)

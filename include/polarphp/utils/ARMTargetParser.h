@@ -1,9 +1,8 @@
 //===-- ARMTargetParser - Parser for ARM target features --------*- C++ -*-===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
@@ -50,12 +49,13 @@ enum ArchExtKind : unsigned
    AEK_DSP =         1 << 10,
    AEK_FP16 =        1 << 11,
    AEK_RAS =         1 << 12,
-   AEK_SVE =         1 << 13,
-   AEK_DOTPROD =     1 << 14,
-   AEK_SHA2    =     1 << 15,
-   AEK_AES     =     1 << 16,
-   AEK_FP16FML =     1 << 17,
-   AEK_SB      =     1 << 18,
+   AEK_DOTPROD =     1 << 13,
+   AEK_SHA2    =     1 << 14,
+   AEK_AES     =     1 << 15,
+   AEK_FP16FML =     1 << 16,
+   AEK_SB      =     1 << 17,
+   AEK_FP_DP   =     1 << 18,
+   AEK_LOB     =     1 << 19,
    // Unsupported extensions.
    AEK_OS = 0x8000000,
    AEK_IWMMXT = 0x10000000,
@@ -68,21 +68,21 @@ enum ArchExtKind : unsigned
 // FIXME: TableGen this.
 struct ExtName
 {
-   const char *NameCStr;
-   size_t NameLength;
-   unsigned ID;
-   const char *Feature;
-   const char *NegFeature;
+   const char *nameCStr;
+   size_t nameLength;
+   unsigned id;
+   const char *feature;
+   const char *negFeature;
 
    StringRef getName() const
    {
-      return StringRef(NameCStr, NameLength);
+      return StringRef(nameCStr, nameLength);
    }
 };
 
 const ExtName sg_archExtNames[] = {
-   #define ARM_ARCH_EXT_NAME(NAME, ID, FEATURE, NEGFEATURE)                       \
-{NAME, sizeof(NAME) - 1, ID, FEATURE, NEGFEATURE},
+   #define ARM_ARCH_EXT_NAME(NAME, id, FEATURE, NEGFEATURE)                       \
+{NAME, sizeof(NAME) - 1, id, FEATURE, NEGFEATURE},
    #include "polarphp/utils/ARMTargetParserDefs.h"
 };
 
@@ -91,19 +91,19 @@ const ExtName sg_archExtNames[] = {
 // FIXME: TableGen this.
 const struct
 {
-   const char *NameCStr;
-   size_t NameLength;
-   unsigned ID;
+   const char *nameCStr;
+   size_t nameLength;
+   unsigned id;
 
-   StringRef getName() const { return StringRef(NameCStr, NameLength); }
+   StringRef getName() const { return StringRef(nameCStr, nameLength); }
 } sg_hwDivNames[] = {
-#define ARM_HW_DIV_NAME(NAME, ID) {NAME, sizeof(NAME) - 1, ID},
+#define ARM_HW_DIV_NAME(NAME, id) {NAME, sizeof(NAME) - 1, id},
 #include "polarphp/utils/ARMTargetParserDefs.h"
 };
 
 // Arch names.
 enum class ArchKind {
-#define ARM_ARCH(NAME, ID, CPU_ATTR, SUB_ARCH, ARCH_ATTR, ARCH_FPU, ARCH_BASE_EXT) ID,
+#define ARM_ARCH(NAME, id, CPU_ATTR, SUB_ARCH, ARCH_ATTR, ARCH_FPU, ARCH_BASE_EXT) id,
 #include "polarphp/utils/ARMTargetParserDefs.h"
 };
 
@@ -114,21 +114,21 @@ enum class ArchKind {
 // FIXME: TableGen this.
 template <typename T> struct CpuNames
 {
-   const char *NameCStr;
-   size_t NameLength;
+   const char *nameCStr;
+   size_t nameLength;
    T ArchID;
    bool Default; // is $Name the default CPU for $ArchID ?
    unsigned DefaultExtensions;
 
    StringRef getName() const
    {
-      return StringRef(NameCStr, NameLength);
+      return StringRef(nameCStr, nameLength);
    }
 };
 
 const CpuNames<ArchKind> sg_cpuNames[] = {
-   #define ARM_CPU_NAME(NAME, ID, DEFAULT_FPU, IS_DEFAULT, DEFAULT_EXT)           \
-{NAME, sizeof(NAME) - 1, arm::ArchKind::ID, IS_DEFAULT, DEFAULT_EXT},
+   #define ARM_CPU_NAME(NAME, id, DEFAULT_FPU, IS_DEFAULT, DEFAULT_EXT)           \
+{NAME, sizeof(NAME) - 1, arm::ArchKind::id, IS_DEFAULT, DEFAULT_EXT},
    #include "polarphp/utils/ARMTargetParserDefs.h"
 };
 
@@ -148,7 +148,8 @@ enum class FPUVersion
    VFPV3,
    VFPV3_FP16,
    VFPV4,
-   VFPV5
+   VFPV5,
+   VFPV5_FULLFP16
 };
 
 // An FPU name restricts the FPU in one of three ways:
@@ -193,15 +194,15 @@ enum class ProfileKind
 
 struct FPUName
 {
-   const char *NameCStr;
-   size_t NameLength;
-   FPUKind ID;
-   FPUVersion FPUVer;
-   NeonSupportLevel NeonSupport;
-   FPURestriction Restriction;
+   const char *nameCStr;
+   size_t nameLength;
+   FPUKind id;
+   FPUVersion fpuVer;
+   NeonSupportLevel neonSupport;
+   FPURestriction restriction;
    StringRef getName() const
    {
-      return StringRef(NameCStr, NameLength);
+      return StringRef(nameCStr, nameLength);
    }
 };
 
@@ -213,7 +214,7 @@ static const FPUName sg_fpuNames[] = {
 
 // List of canonical arch names (use getArchSynonym).
 // This table also provides the build attribute fields for CPU arch
-// and Arch ID, according to the Addenda to the ARM ABI, chapters
+// and Arch id, according to the Addenda to the ARM ABI, chapters
 // 2.4 and 2.3.5.2 respectively.
 // FIXME: SubArch values were simplified to fit into the expectations
 // of the triples and are not conforming with their official names.
@@ -222,20 +223,20 @@ static const FPUName sg_fpuNames[] = {
 template <typename T>
 struct ArchNames
 {
-   const char *NameCStr;
-   size_t NameLength;
+   const char *nameCStr;
+   size_t nameLength;
    const char *CPUAttrCStr;
    size_t CPUAttrLength;
    const char *SubArchCStr;
    size_t SubArchLength;
    unsigned DefaultFPU;
    unsigned ArchBaseExtensions;
-   T ID;
-   armbuildattrs::CPUArch ArchAttr; // Arch ID in build attributes.
+   T id;
+   armbuildattrs::CPUArch ArchAttr; // Arch id in build attributes.
 
    StringRef getName() const
    {
-      return StringRef(NameCStr, NameLength);
+      return StringRef(nameCStr, nameLength);
    }
 
    // CPU class in build attributes.
@@ -252,17 +253,17 @@ struct ArchNames
 };
 
 static const ArchNames<ArchKind> sg_archNames[] = {
-   #define ARM_ARCH(NAME, ID, CPU_ATTR, SUB_ARCH, ARCH_ATTR, ARCH_FPU,            \
+   #define ARM_ARCH(NAME, id, CPU_ATTR, SUB_ARCH, ARCH_ATTR, ARCH_FPU,            \
       ARCH_BASE_EXT)                                                \
 {NAME,         sizeof(NAME) - 1,                                             \
       CPU_ATTR,     sizeof(CPU_ATTR) - 1,                                         \
       SUB_ARCH,     sizeof(SUB_ARCH) - 1,                                         \
       ARCH_FPU,     ARCH_BASE_EXT,                                                \
-      ArchKind::ID, ARCH_ATTR},
+      ArchKind::id, ARCH_ATTR},
    #include "polarphp/utils/ARMTargetParserDefs.h"
 };
 
-// Information by ID
+// Information by id
 StringRef get_fpu_name(unsigned fpuKind);
 FPUVersion get_fpu_version(unsigned fpuKind);
 NeonSupportLevel get_fpu_neon_support_level(unsigned fpuKind);
@@ -280,6 +281,8 @@ StringRef get_cpu_attr(ArchKind archKind);
 StringRef get_sub_arch(ArchKind archKind);
 StringRef get_arch_ext_name(unsigned archExtKind);
 StringRef get_arch_ext_feature(StringRef archExt);
+bool appendArchExtFeatures(StringRef cpu, arm::ArchKind AK, StringRef archExt,
+                           std::vector<StringRef> &features);
 StringRef get_hw_div_name(unsigned hwDivKind);
 
 // Information by Name

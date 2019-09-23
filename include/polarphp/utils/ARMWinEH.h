@@ -1,3 +1,10 @@
+//===-- llvm/Support/ARMWinEH.h - Windows on ARM EH Constants ---*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -8,14 +15,6 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/10/17.
-//===-- llvm/Support/WinARMEH.h - Windows on ARM EH Constants ---*- C++ -*-===//
-//
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
-//
-//===----------------------------------------------------------------------===//
 
 #ifndef POLARPHP_UTILS_ARMWINEH_H
 #define POLARPHP_UTILS_ARMWINEH_H
@@ -445,7 +444,7 @@ struct ExceptionDataRecord
       return ((m_data[0] & 0x00400000) >> 22);
    }
 
-   uint8_t epilogueCount() const
+   uint16_t epilogueCount() const
    {
       if (header_words(*this) == 1) {
          if (m_isAArch64) {

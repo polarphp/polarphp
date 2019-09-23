@@ -1,3 +1,10 @@
+//===--- Triple.cpp - Target triple helper class --------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -18,8 +25,7 @@
 #include "polarphp/utils/Host.h"
 #include <cstring>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 namespace arm = polar::arm;
 
@@ -30,6 +36,7 @@ StringRef Triple::getArchTypeName(Triple::ArchType kind)
 
    case ArchType::aarch64:        return "aarch64";
    case ArchType::aarch64_be:     return "aarch64_be";
+   case ArchType::aarch64_32:     return "aarch64_32";
    case ArchType::arm:            return "arm";
    case ArchType::armeb:          return "armeb";
    case ArchType::arc:            return "arc";
@@ -88,7 +95,8 @@ StringRef Triple::getArchTypePrefix(ArchType kind)
       return StringRef();
 
    case ArchType::aarch64:
-   case ArchType::aarch64_be:  return "aarch64";
+   case ArchType::aarch64_be:
+   case ArchType::aarch64_32:  return "aarch64";
 
    case ArchType::arc:         return "arc";
 
@@ -217,6 +225,7 @@ StringRef Triple::getOSTypeName(OSType kind)
    case OSType::HermitCore: return "hermit";
    case OSType::Hurd: return "hurd";
    case OSType::WASI: return "wasi";
+   case OSType::Emscripten: return "emscripten";
    }
 
    polar_unreachable("Invalid OSType");
@@ -235,6 +244,8 @@ StringRef Triple::getEnvironmentTypeName(EnvironmentType kind)
    case Triple::EnvironmentType::CODE16: return "code16";
    case Triple::EnvironmentType::EABI: return "eabi";
    case Triple::EnvironmentType::EABIHF: return "eabihf";
+   case Triple::EnvironmentType::ELFv1: return "elfv1";
+   case Triple::EnvironmentType::ELFv2: return "elfv2";
    case Triple::EnvironmentType::Android: return "android";
    case Triple::EnvironmentType::Musl: return "musl";
    case Triple::EnvironmentType::MuslEABI: return "musleabi";
@@ -244,6 +255,7 @@ StringRef Triple::getEnvironmentTypeName(EnvironmentType kind)
    case Triple::EnvironmentType::Cygnus: return "cygnus";
    case Triple::EnvironmentType::CoreCLR: return "coreclr";
    case Triple::EnvironmentType::Simulator: return "simulator";
+   case Triple::EnvironmentType::MacABI: return "macabi";
    }
 
    polar_unreachable("Invalid Triple::EnvironmentType!");
@@ -276,8 +288,10 @@ Triple::ArchType Triple::getArchTypeForPolarName(StringRef name)
    return StringSwitch<ArchType>(name)
          .cond("aarch64", ArchType::aarch64)
          .cond("aarch64_be", ArchType::aarch64_be)
+         .cond("aarch64_32", ArchType::aarch64_32)
          .cond("arc", ArchType::arc)
          .cond("arm64", ArchType::aarch64) // "arm64" is an alias for "aarch64"
+         .cond("arm64_32", ArchType::aarch64_32)
          .cond("arm", ArchType::arm)
          .cond("armeb", ArchType::armeb)
          .cond("avr", ArchType::avr)
@@ -410,8 +424,10 @@ Triple::ArchType parse_arch(StringRef archName)
          .cond("xscaleeb", Triple::ArchType::armeb)
          .cond("aarch64", Triple::ArchType::aarch64)
          .cond("aarch64_be", Triple::ArchType::aarch64_be)
+         .cond("aarch64_32", Triple::ArchType::aarch64_32)
          .cond("arc", Triple::ArchType::arc)
          .cond("arm64", Triple::ArchType::aarch64)
+         .cond("arm64_32", Triple::ArchType::aarch64_32)
          .cond("arm", Triple::ArchType::arm)
          .cond("armeb", Triple::ArchType::armeb)
          .cond("thumb", Triple::ArchType::thumb)
@@ -531,6 +547,7 @@ Triple::OSType parse_os(StringRef osName)
          .startsWith("hermit", Triple::OSType::HermitCore)
          .startsWith("hurd", Triple::OSType::Hurd)
          .startsWith("wasi", Triple::OSType::WASI)
+         .startsWith("emscripten", Triple::OSType::Emscripten)
          .defaultCond(Triple::OSType::UnknownOS);
 }
 
@@ -539,6 +556,8 @@ Triple::EnvironmentType parse_environment(StringRef environmentName)
    return StringSwitch<Triple::EnvironmentType>(environmentName)
          .startsWith("eabihf", Triple::EnvironmentType::EABIHF)
          .startsWith("eabi", Triple::EnvironmentType::EABI)
+         .startsWith("elfv1", Triple::EnvironmentType::ELFv1)
+         .startsWith("elfv2", Triple::EnvironmentType::ELFv2)
          .startsWith("gnuabin32", Triple::EnvironmentType::GNUABIN32)
          .startsWith("gnuabi64", Triple::EnvironmentType::GNUABI64)
          .startsWith("gnueabihf", Triple::EnvironmentType::GNUEABIHF)
@@ -555,12 +574,16 @@ Triple::EnvironmentType parse_environment(StringRef environmentName)
          .startsWith("cygnus", Triple::EnvironmentType::Cygnus)
          .startsWith("coreclr", Triple::EnvironmentType::CoreCLR)
          .startsWith("simulator", Triple::EnvironmentType::Simulator)
+         .startsWith("macabi", Triple::EnvironmentType::MacABI)
          .defaultCond(Triple::EnvironmentType::UnknownEnvironment);
 }
 
 Triple::ObjectFormatType parse_format(StringRef environmentName)
 {
    return StringSwitch<Triple::ObjectFormatType>(environmentName)
+         // "xcoff" must come before "coff" because of the order-dependendent
+             // pattern matching.
+         .endsWith("xcoff", Triple::ObjectFormatType::XCOFF)
          .endsWith("coff", Triple::ObjectFormatType::COFF)
          .endsWith("elf", Triple::ObjectFormatType::ELF)
          .endsWith("macho", Triple::ObjectFormatType::MachO)
@@ -639,6 +662,8 @@ Triple::SubArchType parse_sub_arch(StringRef subArchName)
       return Triple::SubArchType::ARMSubArch_v8m_baseline;
    case arm::ArchKind::ARMV8MMainline:
       return Triple::SubArchType::ARMSubArch_v8m_mainline;
+   case arm::ArchKind::ARMV8_1MMainline:
+       return Triple::SubArchType::ARMSubArch_v8_1m_mainline;
    default:
       return Triple::SubArchType::NoSubArch;
    }
@@ -652,6 +677,7 @@ StringRef getObjectFormatTypeName(Triple::ObjectFormatType kind)
    case Triple::ObjectFormatType::ELF: return "elf";
    case Triple::ObjectFormatType::MachO: return "macho";
    case Triple::ObjectFormatType::Wasm: return "wasm";
+   case Triple::ObjectFormatType::XCOFF: return "xcoff";
    }
    polar_unreachable("unknown object format type");
 }
@@ -673,6 +699,7 @@ Triple::ObjectFormatType get_default_format(const Triple &triple)
       return Triple::ObjectFormatType::ELF;
 
    case Triple::ArchType::aarch64_be:
+   case Triple::ArchType::aarch64_32:
    case Triple::ArchType::arc:
    case Triple::ArchType::amdgcn:
    case Triple::ArchType::amdil:
@@ -716,12 +743,15 @@ Triple::ObjectFormatType get_default_format(const Triple &triple)
 
    case Triple::ArchType::ppc:
    case Triple::ArchType::ppc64:
-      if (triple.isOSDarwin())
+      if (triple.isOSDarwin()) {
          return Triple::ObjectFormatType::MachO;
+      } else if (triple.isOSAIX()) {
+         return Triple::ObjectFormatType::XCOFF;
+      }
       return Triple::ObjectFormatType::ELF;
    case Triple::ArchType::wasm32:
    case Triple::ArchType::wasm64:
-       return Triple::ObjectFormatType::Wasm;
+      return Triple::ObjectFormatType::Wasm;
    }
    polar_unreachable("unknown architecture");
 }
@@ -1290,7 +1320,7 @@ unsigned get_arch_pointer_bit_width(Triple::ArchType arch)
    case Triple::ArchType::avr:
    case Triple::ArchType::msp430:
       return 16;
-
+   case Triple::ArchType::aarch64_32:
    case Triple::ArchType::arc:
    case Triple::ArchType::arm:
    case Triple::ArchType::armeb:
@@ -1375,7 +1405,7 @@ Triple Triple::get32BitArchVariant() const
    case ArchType::ppc64le:
       temp.setArch(ArchType::UnknownArch);
       break;
-
+   case ArchType::aarch64_32:
    case ArchType::amdil:
    case ArchType::hsail:
    case ArchType::spir:
@@ -1467,7 +1497,7 @@ Triple Triple::get64BitArchVariant() const
    case ArchType::renderscript64:
       // Already 64-bit.
       break;
-
+   case ArchType::aarch64_32:      temp.setArch(ArchType::aarch64);    break;
    case ArchType::arm:             temp.setArch(ArchType::aarch64);    break;
    case ArchType::armeb:           temp.setArch(ArchType::aarch64_be); break;
    case ArchType::le32:            temp.setArch(ArchType::le64);       break;
@@ -1583,6 +1613,7 @@ bool Triple::isLittleEndian() const
 {
    switch (getArch()) {
    case ArchType::aarch64:
+   case ArchType::aarch64_32:
    case ArchType::amdgcn:
    case ArchType::amdil64:
    case ArchType::amdil:
@@ -1723,5 +1754,4 @@ StringRef Triple::getARMCPUForArch(StringRef mArch) const
    polar_unreachable("invalid arch name");
 }
 
-} // basic
-} // polar
+} // polar::basic

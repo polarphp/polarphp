@@ -1,3 +1,10 @@
+//===--- ARMAttributeParser.cpp - ARM Attribute Information Printer -------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -50,6 +57,7 @@ ARMAttributeParser::sm_displayRoutines[] = {
    ATTRIBUTE_HANDLER(FP_arch),
    ATTRIBUTE_HANDLER(WMMX_arch),
    ATTRIBUTE_HANDLER(Advanced_SIMD_arch),
+   ATTRIBUTE_HANDLER(MVE_arch),
    ATTRIBUTE_HANDLER(PCS_config),
    ATTRIBUTE_HANDLER(ABI_PCS_R9_use),
    ATTRIBUTE_HANDLER(ABI_PCS_RW_data),
@@ -151,7 +159,9 @@ void ARMAttributeParser::CPU_arch(AttrType tag, const uint8_t *data,
    static const char *const strings[] = {
       "Pre-v4", "ARM v4", "ARM v4T", "ARM v5T", "ARM v5TE", "ARM v5TEJ", "ARM v6",
       "ARM v6KZ", "ARM v6T2", "ARM v6K", "ARM v7", "ARM v6-M", "ARM v6S-M",
-      "ARM v7E-M", "ARM v8"
+      "ARM v7E-M", "ARM v8", nullptr,
+      "ARM v8-M Baseline", "ARM v8-M Mainline", nullptr, nullptr, nullptr,
+      "ARM v8.1-M Mainline"
    };
 
    uint64_t value = parseInteger(data, offset);
@@ -230,6 +240,20 @@ void ARMAttributeParser::Advanced_SIMD_arch(AttrType tag, const uint8_t *data,
 {
    static const char *const strings[] = {
       "Not Permitted", "NEONv1", "NEONv2+FMA", "ARMv8-a NEON", "ARMv8.1-a NEON"
+   };
+
+   uint64_t value = parseInteger(data, offset);
+   StringRef valueDesc =
+         (value < array_lengthof(strings)) ? strings[value] : nullptr;
+   printAttribute(tag, value, valueDesc);
+}
+
+
+void ARMAttributeParser::MVE_arch(AttrType tag, const uint8_t *data,
+                                  uint32_t &offset)
+{
+   static const char *const strings[] = {
+      "Not Permitted", "MVE integer", "MVE integer and float"
    };
 
    uint64_t value = parseInteger(data, offset);
@@ -650,7 +674,7 @@ void ARMAttributeParser::parseAttributeList(const uint8_t *data,
            ahi != ahe && !handled; ++ahi) {
          if (uint64_t(sm_displayRoutines[ahi].m_attribute) == tag) {
             (this->*sm_displayRoutines[ahi].m_routine)(armbuildattrs::AttrType(tag),
-                                                  data, offset);
+                                                       data, offset);
             handled = true;
             break;
          }
@@ -658,7 +682,7 @@ void ARMAttributeParser::parseAttributeList(const uint8_t *data,
       if (!handled) {
          if (tag < 32) {
             error_stream() << "unhandled AEABI tag " << tag
-                   << " (" << armbuildattrs::attr_type_as_string(tag) << ")\n";
+                           << " (" << armbuildattrs::attr_type_as_string(tag) << ")\n";
             continue;
          }
 
@@ -740,7 +764,7 @@ void ARMAttributeParser::parseSubsection(const uint8_t *data, uint32_t length)
 
 void ARMAttributeParser::parse(ArrayRef<uint8_t> section, bool isLittle)
 {
-   size_t offset = 1;
+   uint64_t offset = 1;
    unsigned sectionNumber = 0;
    while (offset < section.getSize()) {
       uint32_t sectionLength = isLittle ?
@@ -751,6 +775,12 @@ void ARMAttributeParser::parse(ArrayRef<uint8_t> section, bool isLittle)
          m_sw->startLine() << "section " << ++sectionNumber << " {\n";
          m_sw->indent();
       }
+      if (sectionLength == 0 || (sectionLength + offset) > section.size()) {
+         error_stream() << "invalid subsection length " << sectionLength << " at offset "
+                << offset << "\n";
+         return;
+      }
+
       parseSubsection(section.getData() + offset, sectionLength);
       offset = offset + sectionLength;
       if (m_sw) {
