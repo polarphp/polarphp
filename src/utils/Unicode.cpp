@@ -20,9 +20,7 @@
 #include "polarphp/utils/ConvertUtf.h"
 #include "polarphp/utils/UnicodeCharRanges.h"
 
-namespace polar {
-namespace sys {
-namespace unicode {
+namespace polar::sys::unicode {
 
 using polar::utils::Utf32;
 using polar::utils::Utf8;
@@ -376,6 +374,4 @@ int column_width_utf8(StringRef text)
    return columnWidth;
 }
 
-} // unicode
-} // sys
-} // polar
+} // polar::sys::unicode

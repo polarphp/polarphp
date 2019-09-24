@@ -1,3 +1,10 @@
+//===-- MathExtras.cpp - Implement the MathExtras header --------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -16,8 +23,7 @@
 #include <math.h>
 #endif
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 #if defined(_MSC_VER)
 // Visual Studio defines the HUGE_VAL class of macros using purposeful
@@ -131,5 +137,4 @@ double octstr_to_double(const char *str, const char **endptr)
    return value;
 }
 
-} // utils
-} // polar
+} // polar::utils

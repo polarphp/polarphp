@@ -41,7 +41,6 @@ namespace polar::basic {
 
 using polar::utils::should_reverse_iterate;
 using polar::utils::AlignedCharArrayUnion;
-using polar::utils::IsPodLike;
 
 namespace internal {
 

@@ -1,3 +1,10 @@
+//===- llvm/Support/Valgrind.h - Communication with Valgrind ----*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -22,8 +29,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-namespace polar {
-namespace sys {
+namespace polar::sys {
 
 // True if Valgrind is controlling this process.
 bool running_on_valgrind();
@@ -32,7 +38,6 @@ bool running_on_valgrind();
 // Otherwise valgrind may continue to execute the old version of the code.
 void valgrind_discard_translations(const void *addr, size_t len);
 
-} // sys
-} // polar
+} // polar::sys
 
 #endif // POLARPHP_UTILS_VALGRIND_H

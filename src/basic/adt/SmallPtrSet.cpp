@@ -1,3 +1,10 @@
+//===- llvm/ADT/SmallPtrSet.cpp - 'Normally small' pointer set ------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -24,8 +31,7 @@
 #include <cassert>
 #include <cstdlib>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 using polar::utils::log2_ceil_32;
 using polar::utils::log2_ceil_64;
@@ -303,5 +309,4 @@ void SmallPtrSetImplBase::swap(SmallPtrSetImplBase &other)
    std::swap(this->m_numTombstones, other.m_numTombstones);
 }
 
-} // basic
-} // polar
+} // polar::basic

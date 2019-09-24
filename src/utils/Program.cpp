@@ -1,3 +1,10 @@
+//===-- Program.cpp - Implement OS Program Concept --------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -21,8 +28,7 @@
 #include "polarphp/global/Config.h"
 #include <system_error>
 
-namespace polar {
-namespace sys {
+namespace polar::sys {
 
 using polar::basic::SmallVector;
 using polar::basic::ArrayRef;
@@ -125,5 +131,4 @@ bool commandline_fits_within_system_limits(StringRef program,
    return commandline_fits_within_system_limits(program, stringRefArgs);
 }
 
-} // sys
-} // polar
+} // polar::sys

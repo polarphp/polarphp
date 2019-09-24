@@ -1,3 +1,10 @@
+//===- SystemUtils.h - Utilities to do low-level system stuff ---*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -12,6 +19,8 @@
 #ifndef POLARPHP_UTILS_SYSTEM_UTILS_H
 #define POLARPHP_UTILS_SYSTEM_UTILS_H
 
+namespace polar::utils {
+
 class RawOutStream;
 
 /// Determine if the RawOutStream provided is connected to a terminal. If so,
@@ -22,5 +31,7 @@ bool check_bitcode_output_to_console(
       RawOutStream &streamToCheck, ///< The stream to be checked
       bool printWarning = true     ///< Control whether warnings are printed
       );
+
+} // polar::utils
 
 #endif // POLARPHP_UTILS_SYSTEM_UTILS_H

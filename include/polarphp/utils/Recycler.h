@@ -1,3 +1,10 @@
+//==- llvm/Support/Recycler.h - Recycling Allocator --------------*- C++ -*-==//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -17,9 +24,7 @@
 #include "polarphp/utils/ErrorHandling.h"
 #include <cassert>
 
-namespace polar {
-namespace utils {
-
+namespace polar::utils {
 
 /// PrintRecyclingAllocatorStats - Helper for RecyclingAllocator for
 /// printing statistics.
@@ -124,7 +129,6 @@ void Recycler<T, Size, Align>::printStats()
    print_recycler_stats(Size, Align, size);
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_RECYCLER_H

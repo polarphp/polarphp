@@ -1,3 +1,10 @@
+//==- SHA1.h - SHA1 implementation for LLVM                     --*- C++ -*-==//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -25,15 +32,13 @@
 #include <array>
 #include <cstdint>
 
-namespace polar {
-
+namespace polar::basic {
 // forward declare class with namespace
-namespace basic {
 template <typename T>
 class ArrayRef;
-} //basic
+} // polar::basic
 
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::ArrayRef;
 using polar::basic::StringRef;
@@ -102,7 +107,6 @@ private:
    void pad();
 };
 
-} // basic
-} // utils
+} // polar::utils
 
 #endif // POLARPHP_UTILS_SHA1_H

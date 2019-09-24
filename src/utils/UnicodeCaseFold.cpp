@@ -11,9 +11,7 @@
 
 #include "polarphp/utils/Unicode.h"
 
-namespace polar {
-namespace sys {
-namespace unicode {
+namespace polar::sys::unicode {
 
 int fold_char_simple(int c) {
    if (c < 0x0041) {
@@ -1007,6 +1005,4 @@ int fold_char_simple(int c) {
    return c;
 }
 
-} // unicode
-} // sys
-} // polar
+} // polar::sys::unicode

@@ -24,8 +24,7 @@
 
 #if HAVE_VALGRIND_VALGRIND_H
 #include <valgrind/valgrind.h>
-namespace polar {
-namespace sys {
+namespace polar::sys {
 
 namespace {
 
@@ -57,12 +56,11 @@ void valgrind_discard_translations(const void *addr, size_t len)
    }
    VALGRIND_DISCARD_TRANSLATIONS(addr, len);
 }
-} // sys
-} // polar
+
+} // polar::sys
 #else  // !HAVE_VALGRIND_VALGRIND_H
 
-namespace polar {
-namespace sys {
+namespace polar::sys {
 
 bool running_on_valgrind()
 {
@@ -72,7 +70,6 @@ bool running_on_valgrind()
 void valgrind_discard_translations(const void *addr, size_t len)
 {}
 
-} // sys
-} // polar
+} // polar::sys
 
 #endif

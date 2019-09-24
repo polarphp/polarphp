@@ -1,3 +1,10 @@
+//===--- Printable.h - Print function helpers -------------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -14,8 +21,7 @@
 
 #include <functional>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 class RawOutStream;
 
@@ -49,7 +55,6 @@ inline RawOutStream &operator<<(RawOutStream &outStream, const Printable &printa
   return outStream;
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_PRINTABLE_H

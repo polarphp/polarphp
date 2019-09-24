@@ -1,3 +1,10 @@
+//===- X86TargetParser.def - X86 target parsing defines ---------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -45,6 +52,8 @@ X86_VENDOR(VENDOR_AMD,   "amd")
 #ifndef X86_CPU_TYPE
 #define X86_CPU_TYPE(ARCHNAME, ENUM)
 #endif
+// The first part of this list must match what is implemented in libgcc and
+// compilert-rt. Clang uses this to know how to implement __builtin_cpu_is.
 X86_CPU_TYPE_COMPAT_WITH_ALIAS("bonnell",       INTEL_BONNELL,       "bonnell", "atom")
 X86_CPU_TYPE_COMPAT           ("core2",         INTEL_CORE2,         "core2")
 X86_CPU_TYPE_COMPAT           ("nehalem",       INTEL_COREI7,        "corei7")
@@ -91,6 +100,8 @@ X86_CPU_TYPE                  ("k8-sse3",     AMD_K8SSE3)
 #define X86_CPU_SUBTYPE(ARCHNAME, ENUM)
 #endif
 
+// The first part of this list must match what is implemented in libgcc and
+// compilert-rt. Clang uses this to know how to implement __builtin_cpu_is.
 X86_CPU_SUBTYPE_COMPAT("nehalem",        INTEL_COREI7_NEHALEM,        "nehalem")
 X86_CPU_SUBTYPE_COMPAT("westmere",       INTEL_COREI7_WESTMERE,       "westmere")
 X86_CPU_SUBTYPE_COMPAT("sandybridge",    INTEL_COREI7_SANDYBRIDGE,    "sandybridge")
@@ -110,14 +121,16 @@ X86_CPU_SUBTYPE_COMPAT("skylake-avx512", INTEL_COREI7_SKYLAKE_AVX512, "skylake-a
 X86_CPU_SUBTYPE_COMPAT("cannonlake",     INTEL_COREI7_CANNONLAKE,     "cannonlake")
 X86_CPU_SUBTYPE_COMPAT("icelake-client", INTEL_COREI7_ICELAKE_CLIENT, "icelake-client")
 X86_CPU_SUBTYPE_COMPAT("icelake-server", INTEL_COREI7_ICELAKE_SERVER, "icelake-server")
+X86_CPU_SUBTYPE_COMPAT("znver2",         AMDFAM17H_ZNVER2,            "znver2")
+X86_CPU_SUBTYPE_COMPAT("cascadelake",    INTEL_COREI7_CASCADELAKE,    "cascadelake")
 // Entries below this are not in libgcc/compiler-rt.
 X86_CPU_SUBTYPE       ("core2",          INTEL_CORE2_65)
 X86_CPU_SUBTYPE       ("penryn",         INTEL_CORE2_45)
-X86_CPU_SUBTYPE       ("cascadelake",    INTEL_COREI7_CASCADELAKE)
 X86_CPU_SUBTYPE       ("k6",             AMDPENTIUM_K6)
 X86_CPU_SUBTYPE       ("k6-2",           AMDPENTIUM_K62)
 X86_CPU_SUBTYPE       ("k6-3",           AMDPENTIUM_K63)
 X86_CPU_SUBTYPE       ("geode",          AMDPENTIUM_GEODE)
+X86_CPU_SUBTYPE       ("cooperlake",     INTEL_COREI7_COOPERLAKE)
 #undef X86_CPU_SUBTYPE_COMPAT
 #undef X86_CPU_SUBTYPE
 
@@ -173,5 +186,6 @@ X86_FEATURE       (65, FEATURE_ADX)
 X86_FEATURE       (66, FEATURE_EM64T)
 X86_FEATURE       (67, FEATURE_CLFLUSHOPT)
 X86_FEATURE       (68, FEATURE_SHA)
+X86_FEATURE       (69, FEATURE_AVX512BF16)
 #undef X86_FEATURE_COMPAT
 #undef X86_FEATURE

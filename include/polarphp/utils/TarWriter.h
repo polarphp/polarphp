@@ -1,3 +1,10 @@
+//===-- llvm/Support/TarWriter.h - Tar archive file creator -----*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -17,8 +24,7 @@
 #include "polarphp/utils/Error.h"
 #include "polarphp/utils/RawOutStream.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::StringSet;
 
@@ -36,7 +42,6 @@ private:
    StringSet<> m_files;
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_TAR_WRITER_H

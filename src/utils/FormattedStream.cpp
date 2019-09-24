@@ -1,3 +1,10 @@
+//===-- llvm/Support/FormattedStream.cpp - Formatted streams ----*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -14,8 +21,7 @@
 #include "polarphp/utils/RawOutStream.h"
 #include <algorithm>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 /// update_position - Examine the given char sequence and figure out which
 /// column we end up in after output, and how many line breaks are contained.
@@ -115,5 +121,4 @@ FormattedRawOutStream &formatted_debug_stream()
    return stream;
 }
 
-} // utils
-} // polar
+} // polar::utils

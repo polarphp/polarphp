@@ -1,3 +1,10 @@
+//===-- Support/FoldingSet.cpp - Uniquing Hash Set --------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -26,8 +33,7 @@
 #include <cassert>
 #include <cstring>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 using polar::utils::is_power_of_two32;
 using polar::utils::power_of_two_floor;
@@ -514,5 +520,4 @@ FoldingSetBucketIteratorImpl::FoldingSetBucketIteratorImpl(void **bucket)
    m_ptr = (!*bucket || !get_next_ptr(*bucket)) ? (void*) bucket : *bucket;
 }
 
-} // basic
-} // polar
+} // polar::basic

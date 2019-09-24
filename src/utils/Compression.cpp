@@ -1,3 +1,10 @@
+//===--- Compression.cpp - Compression implementation ---------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -19,9 +26,7 @@
 #include <zlib.h>
 #endif
 
-namespace polar {
-namespace utils {
-namespace zlib {
+namespace polar::utils::zlib {
 
 #if defined(POLAR_ENABLE_ZLIB) && defined(HAVE_LIBZ)
 
@@ -132,6 +137,5 @@ uint32_t crc32(StringRef buffer)
    polar_unreachable("zlib::crc32 is unavailable");
 }
 #endif
-} // zlib
-} // utils
-} // polar
+
+} // polar::utils::zlib

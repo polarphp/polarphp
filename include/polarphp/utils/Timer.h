@@ -1,3 +1,10 @@
+//===-- llvm/Support/Timer.h - Interval Timing Support ----------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -20,8 +27,7 @@
 #include <utility>
 #include <vector>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 class Timer;
 class TimerGroup;
@@ -289,8 +295,9 @@ public:
       m_description.assign(newDescription.begin(), newDescription.end());
    }
 
-   /// Print any started timers in this group.
-   void print(RawOutStream &outStream);
+   /// Print any started timers in this group, optionally resetting timers after
+   /// printing them.
+   void print(RawOutStream &outStream, bool resetAfterPrint = false);
 
    /// Clear all timers in this group.
    void clear();
@@ -317,13 +324,12 @@ private:
    friend void print_statistics_json(RawOutStream &outStream);
    void addTimer(Timer &T);
    void removeTimer(Timer &T);
-   void prepareToPrintList();
+   void prepareToPrintList(bool resetTime = false);
    void printQueuedTimers(RawOutStream &outStream);
    void printJSONValue(RawOutStream &outStream, const PrintRecord &R,
                        const char *suffix, double value);
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_TIMER_H

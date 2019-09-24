@@ -1,3 +1,10 @@
+//===-CachePruning.cpp - LLVM Cache Directory Pruning ---------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -21,31 +28,20 @@
 
 #define DEBUG_TYPE "cache-pruning"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 namespace {
 struct FileInfo {
-   TimePoint<> Time;
-   uint64_t Size;
-   std::string Path;
+   TimePoint<> time;
+   uint64_t size;
+   std::string path;
 
    /// Used to determine which files to prune first. Also used to determine
    /// set membership, so must take into account all fields.
    bool operator<(const FileInfo &other) const
    {
-      if (Time < other.Time) {
-         return true;
-      } else if (other.Time < Time) {
-         return false;
-      }
-
-      if (other.Size < Size) {
-         return true;
-      } else if (Size < other.Size) {
-         return false;
-      }
-      return Path < other.Path;
+      return std::tie(time, other.size, path) <
+                 std::tie(other.time, size, other.path);
    }
 };
 /// Write a new timestamp file with the given path. This is used for the pruning
@@ -273,12 +269,12 @@ bool prune_cache(StringRef path, CachePruningPolicy policy)
 
    auto removeCacheFile = [&]() {
       // Remove the file.
-      polar::fs::remove(fileInfo->Path);
+      polar::fs::remove(fileInfo->path);
       // Update size
-      totalSize -= fileInfo->Size;
+      totalSize -= fileInfo->size;
       numFiles--;
-      POLAR_DEBUG(debug_stream() << " - Remove " << fileInfo->Path << " (size "
-                  << fileInfo->Size << "), new occupancy is " << totalSize
+      POLAR_DEBUG(debug_stream() << " - Remove " << fileInfo->path << " (size "
+                  << fileInfo->size << "), new occupancy is " << totalSize
                   << "%\n");
       ++fileInfo;
    };
@@ -320,5 +316,4 @@ bool prune_cache(StringRef path, CachePruningPolicy policy)
    return true;
 }
 
-} // utils
-} // polar
+} // polar::utils

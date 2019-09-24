@@ -1,3 +1,10 @@
+//===- TypeName.h -----------------------------------------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -14,11 +21,11 @@
 
 #include "polarphp/basic/adt/StringRef.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::StringRef;
 
+///
 /// We provide a function which tries to compute the (demangled) name of a type
 /// statically.
 ///
@@ -29,6 +36,7 @@ using polar::basic::StringRef;
 /// The returned StringRef will point into a static storage duration string.
 /// However, it may not be null terminated and may be some strangely aligned
 /// inner substring of a larger string.
+///
 template <typename DesiredTypeName>
 inline StringRef getTypeName()
 {
@@ -65,7 +73,6 @@ inline StringRef getTypeName()
 #endif
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_TYPE_NAME_H

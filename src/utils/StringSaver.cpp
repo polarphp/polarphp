@@ -1,3 +1,10 @@
+//===-- StringSaver.cpp ---------------------------------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -11,8 +18,7 @@
 
 #include "polarphp/utils/StringSaver.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 StringRef StringSaver::save(StringRef str)
 {
@@ -34,5 +40,4 @@ StringRef UniqueStringSaver::save(StringRef str)
    return *r.first;
 }
 
-} // utils
-} // polar
+} // polar::utils

@@ -15,8 +15,7 @@
 #include "polarphp/global/DataTypes.h"
 #include <type_traits>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 /// A traits type that is used to handle pointer types and things that are just
 /// wrappers for pointers as a uniform entity.
@@ -199,7 +198,6 @@ struct PointerLikeTypeTraits<ReturnT (*)(ParamTs...)>
     : FunctionPointerLikeTypeTraits<4, ReturnT (*)(ParamTs...)>
 {};
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_POINTER_LIKE_TYPE_TRAITS_H

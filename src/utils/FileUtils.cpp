@@ -1,28 +1,10 @@
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2018/10/17.
-
 //===- Support/FileUtilities.cpp - File System Utilities ------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
-//
-//===----------------------------------------------------------------------===//
-//
-// This file implements a family of utility functions which are useful for doing
-// various things with files.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -55,8 +37,7 @@
 #include <memory>
 #include <system_error>
 
-namespace polar {
-namespace fs {
+namespace polar::fs {
 
 using polar::utils::RawStringOutStream;
 using polar::utils::MemoryBuffer;
@@ -324,5 +305,4 @@ int diff_files_with_tolerance(StringRef lhs,
    return compareFailed;
 }
 
-} // fs
-} // polar
+} // polar::fs

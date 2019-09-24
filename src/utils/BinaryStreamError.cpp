@@ -1,3 +1,10 @@
+//===- BinaryStreamError.cpp - Error extensions for streams -----*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -13,8 +20,7 @@
 #include "polarphp/utils/ErrorHandling.h"
 #include "polarphp/basic/adt/StringRef.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::StringRef;
 
@@ -71,5 +77,4 @@ std::error_code BinaryStreamError::convertToErrorCode() const
    return inconvertible_error_code();
 }
 
-} // utils
-} // polar
+} // polar::utils

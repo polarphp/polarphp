@@ -1,3 +1,10 @@
+//===- Errno.cpp - errno support --------------------------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -23,8 +30,7 @@
 //===          independent code.
 //===----------------------------------------------------------------------===//
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 #ifdef POLAR_HAVE_ERRNO_H
 std::string get_str_error()
@@ -73,5 +79,4 @@ std::string get_str_error(int errnum)
    return str;
 }
 
-} // utils
-} // polar
+} // polar::utils

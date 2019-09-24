@@ -1,3 +1,10 @@
+//===- VersionTuple.cpp - Version Number Handling ---------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -12,8 +19,7 @@
 #include "polarphp/utils/VersionTuple.h"
 #include "polarphp/utils/RawOutStream.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::utils::RawStringOutStream;
 
@@ -124,6 +130,5 @@ bool VersionTuple::tryParse(StringRef input)
    return false;
 }
 
-} // utils
-} // polar
+} // polar::utils
 

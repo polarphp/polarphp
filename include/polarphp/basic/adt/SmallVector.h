@@ -52,9 +52,9 @@ protected:
    unsigned m_capacity;
 
 protected:
-   SmallVectorBase(void *firstEl, size_t capacity)
+   SmallVectorBase(void *firstEl, size_t totalCapacity)
       : m_beginX(firstEl),
-        m_capacity(capacity)
+        m_capacity(totalCapacity)
    {}
 
    /// This is an implementation of the grow() method which only works
@@ -94,7 +94,7 @@ public:
    void setSize(size_t size)
    {
       assert(size <= getCapacity());
-      this->m_size = size;
+      m_size = size;
    }
 };
 
@@ -164,25 +164,21 @@ public:
    using const_pointer = const T *;
 
    // forward iterator creation methods.
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    iterator begin()
    {
       return (iterator)m_beginX;
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    const_iterator begin() const
    {
       return (const_iterator)m_beginX;
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    iterator end()
    {
       return begin() + getSize();
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    const_iterator end() const
    {
       return begin() + getSize();
@@ -249,14 +245,12 @@ public:
       return const_pointer(begin());
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    reference operator[](size_type idx)
    {
       assert(idx < getSize());
       return begin()[idx];
    }
 
-   POLAR_ATTRIBUTE_ALWAYS_INLINE
    const_reference operator[](size_type idx) const
    {
       assert(idx < getSize());
@@ -308,7 +302,7 @@ public:
 
 /// SmallVectorTemplateBase<IsPodLike = false> - This is where we put method
 /// implementations that are designed to work with non-POD-like T's.
-template <typename T, bool = polar::utils::IsPodLike<T>::value>
+template <typename T, bool = polar::utils::is_trivially_copyable<T>::value>
 class SmallVectorTemplateBase : public SmallVectorTemplateCommon<T>
 {
 protected:
@@ -388,8 +382,8 @@ public:
 };
 
 // Define this out-of-line to dissuade the C++ compiler from inlining it.
-template <typename T, bool IsPodLike>
-void SmallVectorTemplateBase<T, IsPodLike>::grow(size_t minSize)
+template <typename T, bool TriviallyCopyable>
+void SmallVectorTemplateBase<T, TriviallyCopyable>::grow(size_t minSize)
 {
    if (minSize > UINT32_MAX) {
       utils::report_bad_alloc_error("SmallVector capacity overflow during allocation");
@@ -414,8 +408,8 @@ void SmallVectorTemplateBase<T, IsPodLike>::grow(size_t minSize)
 }
 
 
-/// SmallVectorTemplateBase<IsPodLike = true> - This is where we put method
-/// implementations that are designed to work with POD-like T's.
+/// SmallVectorTemplateBase<TriviallyCopyable = true> - This is where we put
+/// method implementations that are designed to work with POD-like T's.
 template <typename T>
 class SmallVectorTemplateBase<T, true> : public SmallVectorTemplateCommon<T>
 {
@@ -506,13 +500,14 @@ public:
    using iterator = typename SuperClass::iterator;
    using const_iterator = typename SuperClass::const_iterator;
    using ConstIterator = const_iterator;
+   using reference = typename SuperClass::reference;
    using Iterator = iterator;
    using size_type = typename SuperClass::size_type;
 
 protected:
    // Default ctor - Initialize to empty.
    explicit SmallVectorImpl(unsigned N)
-      : SmallVectorTemplateBase<T, utils::IsPodLike<T>::value>(N)
+      : SmallVectorTemplateBase<T>(N)
    {
    }
 
@@ -588,23 +583,19 @@ public:
    void append(InputIter start, InputIter end)
    {
       size_type numInputs = std::distance(start, end);
-      // Grow allocated space if needed.
       if (numInputs > this->getCapacity() - this->getSize()) {
          this->grow(this->getSize() + numInputs);
       }
-      // Copy the new elements over.
       this->uninitializedCopy(start, end, this->end());
       this->setSize(this->getSize() + numInputs);
    }
 
-   /// Add the specified range to the end of the SmallVector.
+   /// Append \p NumInputs copies of \p Elt to the end.
    void append(size_type numInputs, const T &element)
    {
-      // Grow allocated space if needed.
       if (numInputs > this->getCapacity() - this->getSize()) {
          this->grow(this->getSize() + numInputs);
       }
-      // Copy the new elements over.
       std::uninitialized_fill_n(this->end(), numInputs, element);
       this->setSize(this->getSize() + numInputs);
    }
@@ -859,19 +850,20 @@ public:
    }
 
    template <typename... ArgTypes>
-   void emplaceBack(ArgTypes &&... args)
+   reference emplaceBack(ArgTypes &&... args)
    {
       if (POLAR_UNLIKELY(this->getSize() >= this->getCapacity())) {
          this->grow();
       }
       ::new ((void *)this->end()) T(std::forward<ArgTypes>(args)...);
       this->setSize(this->getSize() + 1);
+      return this->back();
    }
 
    template <typename... ArgTypes>
-   inline void emplace_back(ArgTypes &&... args)
+   inline reference emplace_back(ArgTypes &&... args)
    {
-      emplaceBack(std::forward<ArgTypes>(args)...);
+      return emplaceBack(std::forward<ArgTypes>(args)...);
    }
 
    SmallVectorImpl &operator=(const SmallVectorImpl &rhs);

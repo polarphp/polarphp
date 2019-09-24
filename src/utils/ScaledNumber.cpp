@@ -1,3 +1,10 @@
+//==- lib/Support/ScaledNumber.cpp - Support for scaled numbers -*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -21,8 +28,7 @@
 #include "polarphp/utils/Debug.h"
 #include "polarphp/utils/RawOutStream.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 namespace scalednumbers {
 
 using polar::basic::ApFloat;
@@ -354,5 +360,4 @@ void ScaledNumberBase::dump(uint64_t D, int16_t end, int width)
                                            << "]";
 }
 
-} // utils
-} // polar
+} // polar::utils

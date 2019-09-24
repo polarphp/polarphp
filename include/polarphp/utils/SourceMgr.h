@@ -1,3 +1,10 @@
+//===- SourceMgr.h - Manager for Source Buffers & Diagnostics ---*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -26,8 +33,7 @@
 #include <utility>
 #include <vector>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 class RawOutStream;
 class SMDiagnostic;
@@ -113,6 +119,8 @@ public:
    SourceMgr() = default;
    SourceMgr(const SourceMgr &) = delete;
    SourceMgr &operator=(const SourceMgr &) = delete;
+   SourceMgr(SourceMgr &&) = default;
+   SourceMgr &operator=(SourceMgr &&) = default;
    ~SourceMgr() = default;
 
    void setIncludeDirs(const std::vector<std::string> &dirs)
@@ -379,7 +387,6 @@ public:
               bool showKindLabel = true) const;
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_SOURCE_MGR_H

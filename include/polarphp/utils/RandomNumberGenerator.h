@@ -1,4 +1,10 @@
-
+//==- llvm/Support/RandomNumberGenerator.h - RNG for diversity ---*- C++ -*-==//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -17,14 +23,12 @@
 #include <random>
 #include <system_error>
 
-namespace polar {
-
+namespace polar::basic {
 // forward declare class with namespace
-namespace basic {
 class StringRef;
-} // basic
+} // polar::basic
 
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::StringRef;
 
@@ -78,7 +82,6 @@ private:
 // Get random vector of specified size
 std::error_code get_random_bytes(void *buffer, size_t size);
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_RANDOM_NUMBER_GENERATOR_H

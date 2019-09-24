@@ -1,3 +1,9 @@
+//===-- TrigramIndex.h - a heuristic for SpecialCaseList --------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -19,14 +25,12 @@
 #include <unordered_map>
 #include <vector>
 
-namespace polar {
-
+namespace polar::basic {
 // forawrd declare class with namespace
-namespace basic {
 class StringRef;
-} // basic
+} // polar::basic
 
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::StringRef;
 
@@ -46,6 +50,7 @@ public:
    {
       return m_defeated;
    }
+
 private:
    // If true, the rules are too complicated for the check to work, and full
    // regex matching is needed for every rule.
@@ -62,7 +67,6 @@ private:
    std::unordered_map<unsigned, SmallVector<size_t, 4>> m_index{256};
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_TRIGRAM_INDEX_H

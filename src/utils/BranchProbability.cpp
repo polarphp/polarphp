@@ -1,3 +1,10 @@
+//===-------------- lib/Support/BranchProbability.cpp -----------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -15,8 +22,7 @@
 #include "polarphp/utils/RawOutStream.h"
 #include <cassert>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 const uint32_t BranchProbability::m_denominator;
 
@@ -98,10 +104,6 @@ static uint64_t scale(uint64_t num, uint32_t numerator, uint32_t denominator)
    // Carry.
    upper32 += mid32 < mid32Partial;
 
-   // Check for overflow.
-   if (upper32 >= denominator) {
-      return UINT64_MAX;
-   }
    uint64_t rem = (uint64_t(upper32) << 32) | mid32;
    uint64_t upperQ = rem / denominator;
 
@@ -129,5 +131,4 @@ uint64_t BranchProbability::scaleByInverse(uint64_t num) const
    return polar::utils::scale<0>(num, m_denominator, m_numerator);
 }
 
-} // utils
-} // polar
+} // polar::utils

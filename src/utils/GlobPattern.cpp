@@ -15,8 +15,7 @@
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/utils/ErrorCode.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::BitVector;
 
@@ -186,5 +185,4 @@ bool GlobPattern::matchOne(ArrayRef<BitVector> pattern, StringRef str) const
    }
 }
 
-} // utils
-} // polar
+} // polar::utils

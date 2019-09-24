@@ -1,3 +1,10 @@
+/*===--- ConvertUTF.c - Universal Character Names conversions ---------------===
+ *
+ * Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+ * See https://llvm.org/LICENSE.txt for license information.
+ * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+ *
+ *===------------------------------------------------------------------------=*/
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -84,8 +91,7 @@
 
 //ConvertUTF_DISABLE_WARNINGS
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 static const int sg_halfShift  = 10; /* used for shifting by 10 bits */
 
@@ -768,8 +774,7 @@ ConversionResult convert_utf8_to_utf32(const Utf8 **sourceStart,
                                      flags, /*InputIsPartial=*/false);
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 /* ---------------------------------------------------------------------
 

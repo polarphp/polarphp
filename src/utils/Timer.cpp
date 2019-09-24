@@ -1,3 +1,10 @@
+//===-- Timer.cpp - Interval Timing Support -------------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -23,8 +30,7 @@
 #include <mutex>
 #include <chrono>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 namespace cmd = polar::cmd;
 using polar::sys::Process;
@@ -56,9 +62,9 @@ sg_infooutputFilename("info-output-file", cmd::ValueDesc("filename"),
                       cmd::Hidden, cmd::location(get_lib_support_info_output_filename()));
 }
 
-} // utils
+} // polar::utils
 
-namespace basic {
+namespace polar::basic {
 
 using polar::utils::error_stream;
 using polar::utils::get_lib_support_info_output_filename;
@@ -87,9 +93,9 @@ std::unique_ptr<RawFdOutStream> create_info_output_file()
    return std::make_unique<RawFdOutStream>(2, false); // stderr.
 }
 
-} // basic
+} // polar::basic
 
-namespace utils {
+namespace polar::utils {
 
 namespace {
 struct CreateDefaultTimerGroup
@@ -399,7 +405,7 @@ void TimerGroup::printQueuedTimers(RawOutStream &outstream)
    m_timersToPrint.clear();
 }
 
-void TimerGroup::prepareToPrintList()
+void TimerGroup::prepareToPrintList(bool resetTime)
 {
    // See if any of our timers were started, if so add them to TimersToPrint.
    for (Timer *timer = m_firstTimer; timer; timer = timer->m_next) {
@@ -409,16 +415,21 @@ void TimerGroup::prepareToPrintList()
          timer->stopTimer();
       }
       m_timersToPrint.emplace_back(timer->m_time, timer->m_name, timer->m_description);
+      if (resetTime) {
+          timer->clear();
+      }
       if (wasRunning) {
          timer->startTimer();
       }
    }
 }
 
-void TimerGroup::print(RawOutStream &outstream)
+void TimerGroup::print(RawOutStream &outstream, bool resetAfterPrint)
 {
-   std::lock_guard lock(sg_timerLock);
-   prepareToPrintList();
+   {
+      std::lock_guard lock(sg_timerLock);
+      prepareToPrintList(resetAfterPrint);
+   }
    // If any timers were started, print the group.
    if (!m_timersToPrint.empty()) {
       printQueuedTimers(outstream);
@@ -499,5 +510,4 @@ void TimerGroup::constructTimerLists()
    (void)*sg_namedGroupedTimers;
 }
 
-} // utils
-} // polar
+} // polar::utils

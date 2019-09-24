@@ -1,3 +1,10 @@
+//===- Support/Chrono.cpp - Utilities for Timing Manipulation ---*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -14,8 +21,7 @@
 #include "polarphp/utils/Format.h"
 #include "polarphp/utils/RawOutStream.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 const char internal::Unit<std::ratio<3600>>::value[] = "h";
 const char internal::Unit<std::ratio<60>>::value[] = "m";
@@ -99,5 +105,4 @@ void FormatProvider<TimePoint<>>::format(const TimePoint<> &timePoint, RawOutStr
    outStream << (len ? buffer : "BAD-DATE-FORMAT");
 }
 
-} // utils
-} // polar
+} // polar::utils

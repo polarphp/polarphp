@@ -34,8 +34,8 @@
 #include <tuple>
 #include <utility>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
+
 namespace scalednumbers {
 
 /// \brief Maximum m_scale; same as APFloat for easy debug printing.
@@ -1085,15 +1085,6 @@ void ScaledNumber<DigitsT>::shiftRight(int32_t shift)
    m_digits >>= shift;
 }
 
-template <typename T>
-struct IsPodLike;
-template <typename T>
-struct IsPodLike<ScaledNumber<T>>
-{
-   static const bool value = true;
-};
-
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_SCALED_NUMBER_H
