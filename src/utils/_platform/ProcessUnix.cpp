@@ -1,3 +1,10 @@
+//===- Unix/Process.cpp - Unix Process Implementation --------- -*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -43,10 +50,7 @@
 #ifdef POLAR_HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-// DragonFlyBSD, and OpenBSD have deprecated <malloc.h> for
-// <stdlib.h> instead. Unix.h includes this for us already.
-#if defined(POLAR_HAVE_MALLOC_H) && !defined(__DragonFly__) && \
-   !defined(__OpenBSD__)
+#ifdef defined(HAVE_MALLINFO)
 #include <malloc.h>
 #endif
 #if defined(HAVE_MALLCTL)
@@ -64,8 +68,7 @@
 
 #include <mutex>
 
-namespace polar {
-namespace sys {
+namespace polar::sys {
 
 using polar::basic::StringSwitch;
 using polar::utils::ManagedStatic;
@@ -89,7 +92,7 @@ std::pair<std::chrono::microseconds, std::chrono::microseconds> get_resource_usa
 
 // On Cygwin, getpagesize() returns 64k(AllocationGranularity) and
 // offset in mmap(3) should be aligned to the AllocationGranularity.
-unsigned Process::getPageSize()
+Expected<unsigned> Process::getPageSize()
 {
 #if defined(HAVE_GETPAGESIZE)
    static const int pageSize = ::getpagesize();
@@ -98,6 +101,9 @@ unsigned Process::getPageSize()
 #else
 #warning Cannot get the page size on this machine
 #endif
+   if (pageSize == -1) {
+      return polar::utils::error_code_to_error(std::error_code(errno, std::generic_category()));
+   }
    return static_cast<unsigned>(pageSize);
 }
 
@@ -325,7 +331,8 @@ static unsigned getColumns(int fileId)
       }
    }
    unsigned columns = 0;
-#if defined(POLAR_HAVE_SYS_IOCTL_H) && defined(HAVE_TERMIOS_H)
+#if defined(POLAR_HAVE_SYS_IOCTL_H) && defined(HAVE_TERMIOS_H) \
+  && !(defined(_XOPEN_SOURCE) || defined(_POSIX_C_SOURCE))
    // Try to determine the width of the terminal.
    struct winsize ws;
    if (ioctl(fileId, TIOCGWINSZ, &ws) == 0) {
@@ -401,7 +408,7 @@ static bool terminal_has_colors(int fd)
 
    // Return true if we found a color capabilities for the current terminal.
    if (hasColors) {
-       return true;
+      return true;
    }
 #else
    // When the terminfo database is not available, check if the current terminal
@@ -507,5 +514,4 @@ unsigned Process::getRandomNumber()
 #endif
 }
 
-} // sys
-} // polar
+} // polar::sys

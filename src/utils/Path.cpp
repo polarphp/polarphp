@@ -1,3 +1,10 @@
+//===-- Path.cpp - Implement OS Path Concept ------------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -37,8 +44,7 @@ enum FSEntity
    FS_Name
 };
 
-namespace polar {
-namespace fs {
+namespace polar::fs {
 
 using polar::basic::StringRef;
 using polar::utils::error_code_to_error;
@@ -188,41 +194,15 @@ size_t parent_path_end(StringRef path, Style style)
 std::error_code create_unique_entity(const Twine &model, int &resultFD,
                                      SmallVectorImpl<char> &resultPath, bool makeAbsolute,
                                      unsigned mode, FSEntity type,
-                                     polar::fs::OpenFlags flags = polar::fs::F_None) {
-   SmallString<128> modelStorage;
-   model.toVector(modelStorage);
-
-   if (makeAbsolute) {
-      // Make model absolute by prepending a temp directory if it's not already.
-      if (!path::is_absolute(Twine(modelStorage))) {
-         SmallString<128> tdir;
-         path::system_temp_directory(true, tdir);
-         path::append(tdir, Twine(modelStorage));
-         modelStorage.swap(tdir);
-      }
-   }
-
-   // From here on, DO NOT modify model. It may be needed if the randomly chosen
-   // path already exists.
-   resultPath = modelStorage;
-   // Null terminate.
-   resultPath.push_back(0);
-   resultPath.pop_back();
-
+                                     polar::fs::OpenFlags flags = polar::fs::F_None)
+{
    // Limit the number of attempts we make, so that we don't infinite loop. E.g.
    // "permission denied" could be for a specific file (so we retry with a
    // different name) or for the whole directory (retry would always fail).
    // Checking which is racy, so we try a number of times, then give up.
    std::error_code errorCode;
    for (int retries = 128; retries > 0; --retries) {
-      // Replace '%' with random chars.
-      for (unsigned i = 0, e = modelStorage.size(); i != e; ++i) {
-         if (modelStorage[i] == '%') {
-            resultPath[i] =
-                  "0123456789abcdef"[sys::Process::getRandomNumber() & 15];
-         }
-      }
-
+      fs::create_unique_path(model, resultPath, makeAbsolute);
       // Try to open + create the file.
       switch (type) {
       case FS_File: {
@@ -349,7 +329,8 @@ ReverseIterator rbegin(StringRef path, Style style)
    iter.m_path = path;
    iter.m_position = path.getSize();
    iter.m_style = style;
-   return ++iter;
+   ++iter;
+   return iter;
 }
 
 ReverseIterator rend(StringRef path)
@@ -830,6 +811,34 @@ std::error_code get_unique_id(const Twine path, UniqueId &result)
    return std::error_code();
 }
 
+void create_unique_path(const Twine &mode, SmallVectorImpl<char> &resultPath,
+                        bool makeAbsolute)
+{
+   SmallString<128> modelStorage;
+   mode.toVector(modelStorage);
+
+   if (makeAbsolute) {
+      // Make model absolute by prepending a temp directory if it's not already.
+      if (!path::is_absolute(Twine(modelStorage))) {
+         SmallString<128> tempDir;
+         path::system_temp_directory(true, tempDir);
+         path::append(tempDir, Twine(modelStorage));
+         modelStorage.swap(tempDir);
+      }
+   }
+
+   resultPath = modelStorage;
+   resultPath.push_back(0);
+   resultPath.pop_back();
+
+   // Replace '%' with random chars.
+   for (unsigned i = 0, e = modelStorage.size(); i != e; ++i) {
+      if (modelStorage[i] == '%') {
+         resultPath[i] = "0123456789abcdef"[Process::getRandomNumber() & 15];
+      }
+   }
+}
+
 std::error_code create_unique_file(const Twine &model, int &resultFd,
                                    SmallVectorImpl<char> &resultPath,
                                    unsigned mode)
@@ -911,7 +920,7 @@ std::error_code create_unique_directory(const Twine &prefix,
 }
 
 void make_absolute(const Twine &currentDirectory,
-                              SmallVectorImpl<char> &path)
+                   SmallVectorImpl<char> &path)
 {
    StringRef p(path.getData(), path.getSize());
 
@@ -1027,7 +1036,9 @@ static std::error_code copy_file_internal(int readFD, int writeFD) {
 }
 } // anonymous namespace
 
-std::error_code copy_file(const Twine &from, const Twine &to) {
+#ifndef __APPLE__
+std::error_code copy_file(const Twine &from, const Twine &to)
+{
    int readFD, writeFD;
    if (std::error_code errorCode = open_file_for_read(from, readFD, OF_None)) {
       return errorCode;
@@ -1042,6 +1053,7 @@ std::error_code copy_file(const Twine &from, const Twine &to) {
    close(writeFD);
    return errorCode;
 }
+#endif
 
 std::error_code copy_file(const Twine &from, int toFD)
 {
@@ -1201,6 +1213,7 @@ TempFile &TempFile::operator=(TempFile &&other)
    m_tmpName = std::move(other.m_tmpName);
    m_fd = other.m_fd;
    other.m_done = true;
+   other.m_fd = -1;
    return *this;
 }
 
@@ -1212,25 +1225,28 @@ TempFile::~TempFile()
 Error TempFile::discard()
 {
    m_done = true;
-   std::error_code removeErrorCode;
-   // On windows closing will remove the file.
-#ifndef _WIN32
-   // Always try to close and remove.
-   if (!m_tmpName.empty()) {
-      removeErrorCode = fs::remove(m_tmpName);
-      polar::utils::dont_remove_file_on_signal(m_tmpName);
-   }
-#endif
-
-   if (!removeErrorCode){
-      m_tmpName = "";
-   }
    if (m_fd != -1 && close(m_fd) == -1) {
       std::error_code errorCode = std::error_code(errno, std::generic_category());
       return error_code_to_error(errorCode);
    }
    m_fd = -1;
+
+#ifdef _WIN32
+   // On windows closing will remove the file.
+   m_tmpName = "";
+   return Error::getSuccess();
+#else
+   // Always try to close and remove.
+   std::error_code removeErrorCode;
+   if (!m_tmpName.empty()) {
+      removeErrorCode = fs::remove(m_tmpName);
+      utils::dont_remove_file_on_signal(m_tmpName);
+      if (!removeErrorCode) {
+         m_tmpName = "";
+      }
+   }
    return error_code_to_error(removeErrorCode);
+#endif
 }
 
 Error TempFile::keep(const Twine &name)
@@ -1313,5 +1329,4 @@ Expected<TempFile> TempFile::create(const Twine &model, unsigned mode)
    return std::move(ret);
 }
 
-} // fs
-} // polar
+} // polar::fs

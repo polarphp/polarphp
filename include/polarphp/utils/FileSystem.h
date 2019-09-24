@@ -1273,7 +1273,7 @@ open_native_file_for_read(const Twine &name, OpenFlags flags = OF_None,
 ///
 /// @returns An error code if closing the file failed. Typically, an error here
 /// means that the filesystem may have failed to perform some buffered writes.
-void close_file(file_t &file);
+std::error_code close_file(file_t &file);
 
 std::error_code get_unique_id(const Twine path, UniqueId &result);
 
