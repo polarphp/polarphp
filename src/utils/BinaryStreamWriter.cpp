@@ -1,3 +1,10 @@
+//===- BinaryStreamWriter.cpp - Writes objects to a BinaryStream ----------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -13,9 +20,9 @@
 #include "polarphp/utils/BinaryStreamError.h"
 #include "polarphp/utils/BinaryStreamReader.h"
 #include "polarphp/utils/BinaryStreamRef.h"
+#include "polarphp/utils/Leb128.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::arrayref_from_stringref;
 
@@ -39,6 +46,21 @@ Error BinaryStreamWriter::writeBytes(ArrayRef<uint8_t> buffer)
    }
    m_offset += buffer.getSize();
    return Error::getSuccess();
+}
+
+
+Error BinaryStreamWriter::writeUnsignedLeb128(uint64_t value)
+{
+   uint8_t encodedBytes[10] = {0};
+   unsigned size = encode_uleb128(value, &encodedBytes[0]);
+   return writeBytes({encodedBytes, size});
+}
+
+Error BinaryStreamWriter::writeSignedLeb128(int64_t value)
+{
+   uint8_t encodedBytes[10] = {0};
+   unsigned size = encode_sleb128(value, &encodedBytes[0]);
+   return writeBytes({encodedBytes, size});
 }
 
 Error BinaryStreamWriter::writeCString(StringRef str)
@@ -108,5 +130,4 @@ Error BinaryStreamWriter::padToAlignment(uint32_t align)
    return Error::getSuccess();
 }
 
-} // utils
-} // polar
+} // polar::utils

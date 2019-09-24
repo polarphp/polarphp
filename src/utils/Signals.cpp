@@ -1,9 +1,8 @@
 //===- Signals.cpp - Signal Handling support --------------------*- C++ -*-===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
@@ -29,8 +28,7 @@
 #include <mutex>
 #include <iostream>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 // Callbacks to run in signal handler must be lock-free because a signal handler
 // could be running as we add new callbacks. We don't add unbounded numbers of
@@ -81,5 +79,4 @@ void insert_signal_handler(SignalHandlerCallback funcPtr,
    report_fatal_error("too many signal callbacks already registered");
 }
 
-} // utils
-} // polar
+} // polar::utils

@@ -13,9 +13,9 @@
 #include "polarphp/utils/ErrorHandling.h"
 #include "polarphp/utils/Host.h"
 #include "polarphp/utils/SwapByteOrder.h"
+#include "polarphp/utils/Leb128.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 template <typename T>
 static T getU(uint32_t *offsetPtr, const DataExtractor *extractor,
@@ -127,7 +127,8 @@ DataExtractor::getUnsigned(uint32_t *offsetPtr, uint32_t byte_size) const
 }
 
 int64_t
-DataExtractor::getSigned(uint32_t *offsetPtr, uint32_t byte_size) const {
+DataExtractor::getSigned(uint32_t *offsetPtr, uint32_t byte_size) const
+{
    switch (byte_size) {
    case 1:
       return (int8_t)getU8(offsetPtr);
@@ -141,7 +142,8 @@ DataExtractor::getSigned(uint32_t *offsetPtr, uint32_t byte_size) const {
    polar_unreachable("getSigned unhandled case!");
 }
 
-const char *DataExtractor::getCStr(uint32_t *offsetPtr) const {
+const char *DataExtractor::getCStr(uint32_t *offsetPtr) const
+{
    uint32_t offset = *offsetPtr;
    StringRef::size_type pos = m_data.find('\0', offset);
    if (pos != StringRef::npos) {
@@ -151,63 +153,45 @@ const char *DataExtractor::getCStr(uint32_t *offsetPtr) const {
    return nullptr;
 }
 
-StringRef DataExtractor::getCStrRef(uint32_t *OffsetPtr) const {
-   uint32_t Start = *OffsetPtr;
-   StringRef::size_type Pos = m_data.find('\0', Start);
-   if (Pos != StringRef::npos) {
-      *OffsetPtr = Pos + 1;
-      return StringRef(m_data.getData() + Start, Pos - Start);
+StringRef DataExtractor::getCStrRef(uint32_t *offsetPtr) const
+{
+   uint32_t start = *offsetPtr;
+   StringRef::size_type pos = m_data.find('\0', start);
+   if (pos != StringRef::npos) {
+      *offsetPtr = pos + 1;
+      return StringRef(m_data.getData() + start, pos - start);
    }
    return StringRef();
 }
 
-uint64_t DataExtractor::getULEB128(uint32_t *offsetPtr) const {
-   uint64_t result = 0;
-   if (m_data.empty())
+uint64_t DataExtractor::getULEB128(uint32_t *offsetPtr) const
+{
+   assert(*offsetPtr <= m_data.size());
+   const char *error;
+   unsigned bytesRead;
+   uint64_t result = decode_uleb128(
+            reinterpret_cast<const uint8_t *>(m_data.data() + *offsetPtr), &bytesRead,
+            reinterpret_cast<const uint8_t *>(m_data.data() + m_data.size()), &error);
+   if (error) {
       return 0;
-
-   unsigned shift = 0;
-   uint32_t offset = *offsetPtr;
-   uint8_t byte = 0;
-
-   while (isValidOffset(offset)) {
-      byte = m_data[offset++];
-      result |= uint64_t(byte & 0x7f) << shift;
-      shift += 7;
-      if ((byte & 0x80) == 0)
-         break;
    }
-
-   *offsetPtr = offset;
+   *offsetPtr += bytesRead;
    return result;
 }
 
 int64_t DataExtractor::getSLEB128(uint32_t *offsetPtr) const
 {
-   int64_t result = 0;
-   if (m_data.empty()) {
+   assert(*offsetPtr <= m_data.size());
+   const char *error;
+   unsigned bytesRead;
+   int64_t result = decode_sleb128(
+            reinterpret_cast<const uint8_t *>(m_data.data() + *offsetPtr), &bytesRead,
+            reinterpret_cast<const uint8_t *>(m_data.data() + m_data.size()), &error);
+   if (error) {
       return 0;
    }
-   unsigned shift = 0;
-   uint32_t offset = *offsetPtr;
-   uint8_t byte = 0;
-
-   while (isValidOffset(offset)) {
-      byte = m_data[offset++];
-      result |= uint64_t(byte & 0x7f) << shift;
-      shift += 7;
-      if ((byte & 0x80) == 0) {
-         break;
-      }
-   }
-
-   // Sign bit of byte is 2nd high order bit (0x40)
-   if (shift < 64 && (byte & 0x40)) {
-      result |= -(1ULL << shift);
-   }
-   *offsetPtr = offset;
+   *offsetPtr += bytesRead;
    return result;
 }
 
-} // utils
-} // polar
+} // polar::utils

@@ -21,123 +21,126 @@ using polar::basic::ApInt;
 // Struct for tracking the known zeros and ones of a value.
 struct KnownBits
 {
-   ApInt m_zero;
-   ApInt m_one;
+   ApInt zero;
+   ApInt one;
 
 private:
    // Internal constructor for creating a KnownBits from two APInts.
-   KnownBits(ApInt zero, ApInt one)
-      : m_zero(std::move(zero)), m_one(std::move(one))
+   KnownBits(ApInt z, ApInt o)
+      : zero(std::move(z)),
+        one(std::move(o))
    {}
 
 public:
-   // Default construct m_zero and m_one.
+   // Default construct zero and one.
    KnownBits()
    {}
 
    /// Create a known bits object of bitWidth bits initialized to unknown.
-   KnownBits(unsigned bitWidth) : m_zero(bitWidth, 0), m_one(bitWidth, 0)
+   KnownBits(unsigned bitWidth)
+      : zero(bitWidth, 0),
+        one(bitWidth, 0)
    {}
 
    /// Get the bit width of this value.
    unsigned getBitWidth() const
    {
-      assert(m_zero.getBitWidth() == m_one.getBitWidth() &&
-             "m_zero and m_one should have the same width!");
-      return m_zero.getBitWidth();
+      assert(zero.getBitWidth() == one.getBitWidth() &&
+             "zero and one should have the same width!");
+      return zero.getBitWidth();
    }
 
    /// Returns true if there is conflicting information.
    bool hasConflict() const
    {
-      return m_zero.intersects(m_one);
+      return zero.intersects(one);
    }
 
    /// Returns true if we know the value of all bits.
    bool isConstant() const
    {
       assert(!hasConflict() && "KnownBits conflict!");
-      return m_zero.countPopulation() + m_one.countPopulation() == getBitWidth();
+      return zero.countPopulation() + one.countPopulation() == getBitWidth();
    }
 
-   /// Returns the value when all bits have a known value. This just returns m_one
+   /// Returns the value when all bits have a known value. This just returns one
    /// with a protective assertion.
    const ApInt &getConstant() const
    {
       assert(isConstant() && "Can only get value when all bits are known");
-      return m_one;
+      return one;
    }
 
    /// Returns true if we don't know any bits.
    bool isUnknown() const
    {
-      return m_zero.isNullValue() && m_one.isNullValue();
+      return zero.isNullValue() && one.isNullValue();
    }
 
    /// Resets the known state of all bits.
    void resetAll()
    {
-      m_zero.clearAllBits();
-      m_one.clearAllBits();
+      zero.clearAllBits();
+      one.clearAllBits();
    }
 
    /// Returns true if value is all zero.
    bool isZero() const
    {
       assert(!hasConflict() && "KnownBits conflict!");
-      return m_zero.isAllOnesValue();
+      return zero.isAllOnesValue();
    }
 
    /// Returns true if value is all one bits.
    bool isAllOnes() const
    {
       assert(!hasConflict() && "KnownBits conflict!");
-      return m_one.isAllOnesValue();
+      return one.isAllOnesValue();
    }
 
    /// Make all bits known to be zero and discard any previous information.
    void setAllZero()
    {
-      m_zero.setAllBits();
-      m_one.clearAllBits();
+      zero.setAllBits();
+      one.clearAllBits();
    }
 
    /// Make all bits known to be one and discard any previous information.
    void setAllOnes()
    {
-      m_zero.clearAllBits();
-      m_one.setAllBits();
+      zero.clearAllBits();
+      one.setAllBits();
    }
 
    /// Returns true if this value is known to be negative.
    bool isNegative() const
    {
-      return m_one.isSignBitSet();
+      return one.isSignBitSet();
    }
 
    /// Returns true if this value is known to be non-negative.
    bool isNonNegative() const
    {
-      return m_zero.isSignBitSet();
+      return zero.isSignBitSet();
    }
 
    /// Make this value negative.
    void makeNegative()
    {
-      m_one.setSignBit();
+      one.setSignBit();
    }
 
    /// Make this value negative.
    void makeNonNegative()
    {
-      m_zero.setSignBit();
+      zero.setSignBit();
    }
 
-   /// Truncate the underlying known m_zero and m_one bits. This is equivalent
+   /// Truncate the underlying known zero and one bits. This is equivalent
    /// to truncating the value we're tracking.
    KnownBits trunc(unsigned bitWidth) const
    {
-      return KnownBits(m_zero.trunc(bitWidth), m_one.trunc(bitWidth));
+      return KnownBits(zero.trunc(bitWidth), one.trunc(bitWidth));
    }
 
    /// Extends the underlying known Zero and One bits.
@@ -147,18 +150,18 @@ public:
    KnownBits zext(unsigned bitWidth, bool extendedBitsAreKnownZero) const
    {
       unsigned oldBitWidth = getBitWidth();
-      ApInt newZero = m_zero.zext(bitWidth);
+      ApInt newZero = zero.zext(bitWidth);
       if (extendedBitsAreKnownZero) {
          newZero.setBitsFrom(oldBitWidth);
       }
-      return KnownBits(newZero, m_one.zext(bitWidth));
+      return KnownBits(newZero, one.zext(bitWidth));
    }
 
-   /// Sign extends the underlying known m_zero and m_one bits. This is equivalent
+   /// Sign extends the underlying known zero and one bits. This is equivalent
    /// to sign extending the value we're tracking.
    KnownBits sext(unsigned bitWidth) const
    {
-      return KnownBits(m_zero.sext(bitWidth), m_one.sext(bitWidth));
+      return KnownBits(zero.sext(bitWidth), one.sext(bitWidth));
    }
 
    /// Extends or truncates the underlying known Zero and One bits. When
@@ -170,31 +173,31 @@ public:
       if (bitWidth > getBitWidth()) {
          return zext(bitWidth, extendedBitsAreKnownZero);
       }
-      return KnownBits(m_zero.zextOrTrunc(bitWidth), m_one.zextOrTrunc(bitWidth));
+      return KnownBits(zero.zextOrTrunc(bitWidth), one.zextOrTrunc(bitWidth));
    }
 
    /// Returns the minimum number of trailing zero bits.
    unsigned countMinTrailingZeros() const
    {
-      return m_zero.countTrailingOnes();
+      return zero.countTrailingOnes();
    }
 
    /// Returns the minimum number of trailing one bits.
    unsigned countMinTrailingOnes() const
    {
-      return m_one.countTrailingOnes();
+      return one.countTrailingOnes();
    }
 
    /// Returns the minimum number of leading zero bits.
    unsigned countMinLeadingZeros() const
    {
-      return m_zero.countLeadingOnes();
+      return zero.countLeadingOnes();
    }
 
    /// Returns the minimum number of leading one bits.
    unsigned countMinLeadingOnes() const
    {
-      return m_one.countLeadingOnes();
+      return one.countLeadingOnes();
    }
 
    /// Returns the number of times the sign bit is replicated into the other
@@ -213,37 +216,37 @@ public:
    /// Returns the maximum number of trailing zero bits possible.
    unsigned countMaxTrailingZeros() const
    {
-      return m_one.countTrailingZeros();
+      return one.countTrailingZeros();
    }
 
    /// Returns the maximum number of trailing one bits possible.
    unsigned countMaxTrailingOnes() const
    {
-      return m_zero.countTrailingZeros();
+      return zero.countTrailingZeros();
    }
 
    /// Returns the maximum number of leading zero bits possible.
    unsigned countMaxLeadingZeros() const
    {
-      return m_one.countLeadingZeros();
+      return one.countLeadingZeros();
    }
 
    /// Returns the maximum number of leading one bits possible.
    unsigned countMaxLeadingOnes() const
    {
-      return m_zero.countLeadingZeros();
+      return zero.countLeadingZeros();
    }
 
    /// Returns the number of bits known to be one.
    unsigned countMinPopulation() const
    {
-      return m_one.countPopulation();
+      return one.countPopulation();
    }
 
    /// Returns the maximum number of bits that could be one.
    unsigned countMaxPopulation() const
    {
-      return getBitWidth() - m_zero.countPopulation();
+      return getBitWidth() - zero.countPopulation();
    }
 
    /// Compute known bits resulting from adding LHS, RHS and a 1-bit Carry.

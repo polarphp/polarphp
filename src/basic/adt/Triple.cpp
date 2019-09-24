@@ -33,7 +33,6 @@ StringRef Triple::getArchTypeName(Triple::ArchType kind)
 {
    switch (kind) {
    case ArchType::UnknownArch:    return "unknown";
-
    case ArchType::aarch64:        return "aarch64";
    case ArchType::aarch64_be:     return "aarch64_be";
    case ArchType::aarch64_32:     return "aarch64_32";

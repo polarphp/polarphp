@@ -1,9 +1,8 @@
 //===- VirtualFileSystem.h - Virtual File System Layer ----------*- C++ -*-===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
@@ -54,14 +53,11 @@
 #include <vector>
 
 // forward declared class with namespace
-namespace polar {
-namespace utils {
+namespace polar::utils {
 class MemoryBuffer;
-} // utils
-} // polar
+} // polar::utils
 
-namespace polar {
-namespace vfs {
+namespace polar::vfs {
 
 using polar::basic::StringRef;
 using polar::basic::Twine;
@@ -90,19 +86,18 @@ class Status
 
 public:
    // FIXME: remove when files support multiple names
-   bool IsVFSMapped = false;
+   bool isVFSMapped = false;
 
    Status() = default;
    Status(const polar::fs::FileStatus &status);
-   Status(StringRef name, polar::fs::UniqueId uid,
+   Status(const Twine &name, polar::fs::UniqueId uid,
           polar::utils::TimePoint<> mtime, uint32_t user, uint32_t group,
           uint64_t size, polar::fs::FileType type,
           polar::fs::Permission perms);
 
    /// Get a copy of a Status with a different name.
-   static Status copyWithNewName(const Status &in, StringRef newName);
-   static Status copyWithNewName(const polar::fs::FileStatus &in,
-                                 StringRef newName);
+   static Status copyWithNewName(const Status &in, const Twine &newName);
+   static Status copyWithNewName(const polar::fs::FileStatus &in, const Twine &newName);
 
    /// Returns the name that should be used for this file or directory.
    StringRef getName() const
@@ -410,9 +405,15 @@ public:
    std::error_code makeAbsolute(SmallVectorImpl<char> &path) const;
 };
 
-/// Gets an \p vfs::FileSystem for the 'real' file system, as seen by
-/// the operating system.
+/// The working directory is linked to the process's working directory.
+/// (This is usually thread-hostile).
 IntrusiveRefCountPtr<FileSystem> get_real_file_system();
+
+/// Create an \p vfs::FileSystem for the 'real' file system, as seen by
+/// the operating system.
+/// It has its own working directory, independent of (but initially equal to)
+/// that of the process.
+std::unique_ptr<FileSystem> create_physical_file_system();
 
 /// A file system that allows overlaying one \p AbstractFileSystem on top
 /// of another.
@@ -450,6 +451,8 @@ public:
 
    using iterator = FileSystemList::reverse_iterator;
    using const_iterator = FileSystemList::const_reverse_iterator;
+   using reverse_iterator = FileSystemList::iterator;
+   using const_reverse_iterator = FileSystemList::const_iterator;
 
    /// Get an iterator pointing to the most recently added file system.
    iterator overlaysBegin()
@@ -462,8 +465,7 @@ public:
       return m_fsList.rbegin();
    }
 
-   /// Get an iterator pointing one-past the least recently added file
-   /// system.
+   /// Get an iterator pointing one-past the least recently added file system.
    iterator overlaysEnd()
    {
       return m_fsList.rend();
@@ -472,6 +474,28 @@ public:
    const_iterator overlaysEnd() const
    {
       return m_fsList.rend();
+   }
+
+   /// Get an iterator pointing to the least recently added file system.
+   reverse_iterator overlays_rbegin()
+   {
+      return m_fsList.begin();
+   }
+
+   const_reverse_iterator overlays_rbegin() const
+   {
+      return m_fsList.begin();
+   }
+
+   /// Get an iterator pointing one-past the most recently added file system.
+   reverse_iterator overlays_rend()
+   {
+      return m_fsList.end();
+   }
+
+   const_reverse_iterator overlays_rend() const
+   {
+      return m_fsList.end();
    }
 };
 
@@ -815,7 +839,7 @@ public:
       bool useExternalName(bool globalUseExternalName) const
       {
          return m_useName == NK_NotSet ? globalUseExternalName
-                                     : (m_useName == NK_External);
+                                       : (m_useName == NK_External);
       }
 
       NameKind getUseName() const
@@ -970,7 +994,6 @@ public:
    void write(RawOutStream &outStream);
 };
 
-} // vfs
-} // polar
+} // polar::vfs
 
 #endif // POLARPHP_UTILS_VIRTUAL_FILESYSTEM_H

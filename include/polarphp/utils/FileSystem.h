@@ -68,8 +68,7 @@ class RawPwriteStream;
 class MemoryBuffer;
 } // polar::utils
 
-namespace polar {
-namespace fs {
+namespace polar::fs {
 
 using polar::basic::Twine;
 using polar::basic::SmallVectorImpl;
@@ -1658,9 +1657,9 @@ std::error_code atomically_writing_to_file(
 /// the file at \p source will still be present at \p source.
 std::error_code move_file_if_different(const Twine &source,
                                        const Twine &destination);
-} // fs
+} // polar::fs
 
-namespace vfs {
+namespace polar::vfs {
 
 using polar::basic::Twine;
 using polar::utils::OptionalError;
@@ -1672,7 +1671,6 @@ OptionalError<std::unique_ptr<MemoryBuffer>>
 get_file_or_stdin(FileSystem &fs,
                   const Twine &name, int64_t fileSize = -1,
                   bool requiresNullTerminator = true, bool isVolatile = false);
-} // vfs
-} // polar
+} // polar::vfs
 
 #endif // POLARPHP_UTILS_ERROR_FILESYSTEM_H
