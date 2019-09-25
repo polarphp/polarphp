@@ -96,7 +96,7 @@ DumpInputValue get_dump_input_type(const std::string &opt);
 void dump_command_line(int argc, char **argv);
 MarkerStyle get_marker(FileCheckDiag::MatchType matchTy);
 void dump_input_annotation_help(RawOutStream &outStream);
-std::string get_check_type_abbreviation(FileCheckType type);
+std::string get_check_type_abbreviation(check::FileCheckType type);
 void build_input_annotations(const std::vector<FileCheckDiag> &diags,
                              std::vector<InputAnnotation> &annotations,
                              unsigned &labelWidth);

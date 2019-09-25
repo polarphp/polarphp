@@ -21,6 +21,7 @@ namespace filechecker {
 
 using polar::utils::WithColor;
 using polar::utils::RawStringOutStream;
+using namespace polar::filechecker::check;
 
 CLI::App *sg_commandParser = nullptr;
 std::vector<std::string> sg_checkPrefixes{};

@@ -23,8 +23,7 @@
 #include "polarphp/utils/RawOutStream.h"
 #include "polarphp/utils/unix/Unix.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 #define DEBUG_TYPE "rng"
 
@@ -32,9 +31,10 @@ namespace utils {
 // http://llvm.org/bugs/show_bug.cgi?id=19665
 //
 // Do not change to cmd::Opt<uint64_t> since this silently breaks argument parsing.
-static cmd::Opt<unsigned long long>
-sg_seed("rng-seed", cmd::ValueDesc("seed"), cmd::Hidden,
-        cmd::Desc("sg_seed for the random number generator"), cmd::init(0));
+
+static cmd::Opt<uint64_t> sg_seed("rng-seed", cmd::ValueDesc("seed"), cmd::Hidden,
+                                  cmd::Desc("Seed for the random number generator"),
+                                  cmd::init(0));
 
 RandomNumberGenerator::RandomNumberGenerator(StringRef salt)
 {
@@ -95,5 +95,4 @@ std::error_code get_random_bytes(void *buffer, size_t size) {
 #endif
 }
 
-} // utils
-} // polar
+} // polar::utils
