@@ -44,9 +44,9 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    MathExtrasTest.cpp
    Md5Test.cpp
    MemoryBufferTest.cpp
-   MemoryTest.cpp
+#   MemoryTest.cpp
    NativeFormatTests.cpp
-   ParallelTest.cpp
+#   ParallelTest.cpp
    PathTest.cpp
    ProcessTest.cpp
    ProgramTest.cpp
@@ -72,7 +72,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    VersionTupleTest.cpp
    ThreadPoolTest.cpp
    TaskQueueTest.cpp
-   VirtualFileSystemTest.cpp
+#   VirtualFileSystemTest.cpp
    )
 
 target_link_libraries(BasicUtilsTest PRIVATE TestSupport)

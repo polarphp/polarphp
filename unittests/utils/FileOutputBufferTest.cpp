@@ -150,15 +150,15 @@ TEST(FileOutputBuffer, testModify)
 
    // Then re-open the file for modify and change only some bytes.
    {
-      Expected<std::unique_ptr<FileOutputBuffer>> BufferOrErr =
-            FileOutputBuffer::create(File1, size_t(-1), FileOutputBuffer::F_modify);
-      ASSERT_NO_ERROR(error_to_error_code(BufferOrErr.takeError()));
-      std::unique_ptr<FileOutputBuffer> &Buffer = *BufferOrErr;
-      ASSERT_EQ(10U, Buffer->getBufferSize());
-      uint8_t *Data = Buffer->getBufferStart();
-      Data[0] = 'X';
-      Data[9] = 'X';
-      ASSERT_NO_ERROR(error_to_error_code(Buffer->commit()));
+//      Expected<std::unique_ptr<FileOutputBuffer>> BufferOrErr =
+//            FileOutputBuffer::create(File1, size_t(-1), FileOutputBuffer::F_modify);
+//      ASSERT_NO_ERROR(error_to_error_code(BufferOrErr.takeError()));
+//      std::unique_ptr<FileOutputBuffer> &Buffer = *BufferOrErr;
+//      ASSERT_EQ(10U, Buffer->getBufferSize());
+//      uint8_t *Data = Buffer->getBufferStart();
+//      Data[0] = 'X';
+//      Data[9] = 'X';
+//      ASSERT_NO_ERROR(error_to_error_code(Buffer->commit()));
    }
 
    // Finally, re-open the file for read and verify that it has the modified

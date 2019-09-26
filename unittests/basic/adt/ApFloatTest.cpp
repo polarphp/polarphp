@@ -571,34 +571,34 @@ TEST(ApFloatTest, testMaxNum)
 
 TEST(APFloatTest, testMinimum)
 {
-  ApFloat f1(1.0);
-  ApFloat f2(2.0);
-  ApFloat zp(0.0);
-  ApFloat zn(-0.0);
-  ApFloat nan = ApFloat::getNaN(ApFloat::getIEEEDouble());
+   ApFloat f1(1.0);
+   ApFloat f2(2.0);
+   ApFloat zp(0.0);
+   ApFloat zn(-0.0);
+   ApFloat nan = ApFloat::getNaN(ApFloat::getIEEEDouble());
 
-  EXPECT_EQ(1.0, minimum(f1, f2).convertToDouble());
-  EXPECT_EQ(1.0, minimum(f2, f1).convertToDouble());
-  EXPECT_EQ(-0.0, minimum(zp, zn).convertToDouble());
-  EXPECT_EQ(-0.0, minimum(zn, zp).convertToDouble());
-  EXPECT_TRUE(std::isnan(minimum(f1, nan).convertToDouble()));
-  EXPECT_TRUE(std::isnan(minimum(nan, f1).convertToDouble()));
+   EXPECT_EQ(1.0, minimum(f1, f2).convertToDouble());
+   EXPECT_EQ(1.0, minimum(f2, f1).convertToDouble());
+   EXPECT_EQ(-0.0, minimum(zp, zn).convertToDouble());
+   EXPECT_EQ(-0.0, minimum(zn, zp).convertToDouble());
+   EXPECT_TRUE(std::isnan(minimum(f1, nan).convertToDouble()));
+   EXPECT_TRUE(std::isnan(minimum(nan, f1).convertToDouble()));
 }
 
 TEST(APFloatTest, testMaximum)
 {
-  ApFloat f1(1.0);
-  ApFloat f2(2.0);
-  ApFloat zp(0.0);
-  ApFloat zn(-0.0);
-  ApFloat nan = ApFloat::getNaN(ApFloat::getIEEEDouble());
+   ApFloat f1(1.0);
+   ApFloat f2(2.0);
+   ApFloat zp(0.0);
+   ApFloat zn(-0.0);
+   ApFloat nan = ApFloat::getNaN(ApFloat::getIEEEDouble());
 
-  EXPECT_EQ(2.0, maximum(f1, f2).convertToDouble());
-  EXPECT_EQ(2.0, maximum(f2, f1).convertToDouble());
-  EXPECT_EQ(0.0, maximum(zp, zn).convertToDouble());
-  EXPECT_EQ(0.0, maximum(zn, zp).convertToDouble());
-  EXPECT_TRUE(std::isnan(maximum(f1, nan).convertToDouble()));
-  EXPECT_TRUE(std::isnan(maximum(nan, f1).convertToDouble()));
+   EXPECT_EQ(2.0, maximum(f1, f2).convertToDouble());
+   EXPECT_EQ(2.0, maximum(f2, f1).convertToDouble());
+   EXPECT_EQ(0.0, maximum(zp, zn).convertToDouble());
+   EXPECT_EQ(0.0, maximum(zn, zp).convertToDouble());
+   EXPECT_TRUE(std::isnan(maximum(f1, nan).convertToDouble()));
+   EXPECT_TRUE(std::isnan(maximum(nan, f1).convertToDouble()));
 }
 
 TEST(ApFloatTest, testDenormal)
@@ -893,6 +893,33 @@ TEST(ApFloatTest, testFromDecimalString)
    EXPECT_EQ(2.05e+12,  ApFloat(ApFloat::getIEEEDouble(), "002.05000e+12").convertToDouble());
    EXPECT_EQ(2.05e-12,  ApFloat(ApFloat::getIEEEDouble(), "002.05000e-12").convertToDouble());
 
+   EXPECT_EQ(1.0,      ApFloat(ApFloat::getIEEEDouble(), "1e").convertToDouble());
+   EXPECT_EQ(1.0,      ApFloat(ApFloat::getIEEEDouble(), "+1e").convertToDouble());
+   EXPECT_EQ(-1.0,      ApFloat(ApFloat::getIEEEDouble(), "-1e").convertToDouble());
+
+   EXPECT_EQ(1.0,      ApFloat(ApFloat::getIEEEDouble(), "1.e").convertToDouble());
+   EXPECT_EQ(1.0,      ApFloat(ApFloat::getIEEEDouble(), "+1.e").convertToDouble());
+   EXPECT_EQ(-1.0,      ApFloat(ApFloat::getIEEEDouble(), "-1.e").convertToDouble());
+
+   EXPECT_EQ(0.1,      ApFloat(ApFloat::getIEEEDouble(), ".1e").convertToDouble());
+   EXPECT_EQ(0.1,      ApFloat(ApFloat::getIEEEDouble(), "+.1e").convertToDouble());
+   EXPECT_EQ(-0.1,      ApFloat(ApFloat::getIEEEDouble(), "-.1e").convertToDouble());
+
+   EXPECT_EQ(1.1,      ApFloat(ApFloat::getIEEEDouble(), "1.1e").convertToDouble());
+   EXPECT_EQ(1.1,      ApFloat(ApFloat::getIEEEDouble(), "+1.1e").convertToDouble());
+   EXPECT_EQ(-1.1,      ApFloat(ApFloat::getIEEEDouble(), "-1.1e").convertToDouble());
+
+   EXPECT_EQ(1.0,      ApFloat(ApFloat::getIEEEDouble(), "1e+").convertToDouble());
+   EXPECT_EQ(1.0,      ApFloat(ApFloat::getIEEEDouble(), "1e-").convertToDouble());
+
+   EXPECT_EQ(0.1,      ApFloat(ApFloat::getIEEEDouble(), ".1e").convertToDouble());
+   EXPECT_EQ(0.1,      ApFloat(ApFloat::getIEEEDouble(), ".1e+").convertToDouble());
+   EXPECT_EQ(0.1,      ApFloat(ApFloat::getIEEEDouble(), ".1e-").convertToDouble());
+
+   EXPECT_EQ(1.0,      ApFloat(ApFloat::getIEEEDouble(), "1.0e").convertToDouble());
+   EXPECT_EQ(1.0,      ApFloat(ApFloat::getIEEEDouble(), "1.0e+").convertToDouble());
+   EXPECT_EQ(1.0,      ApFloat(ApFloat::getIEEEDouble(), "1.0e-").convertToDouble());
+
    // These are "carefully selected" to overflow the fast log-base
    // calculations in ApFloat.cpp
    EXPECT_TRUE(ApFloat(ApFloat::getIEEEDouble(), "99e99999").isInfinity());
@@ -1101,48 +1128,48 @@ TEST(ApFloatTest, testToInteger)
 
 static ApInt nanbitsFromAPInt(const FltSemantics &Sem, bool SNaN, bool negative,
                               uint64_t payload) {
-  ApInt appayload(64, payload);
-  if (SNaN)
-    return ApFloat::getSNaN(Sem, negative, &appayload).bitcastToApInt();
-  else
-    return ApFloat::getQNaN(Sem, negative, &appayload).bitcastToApInt();
+   ApInt appayload(64, payload);
+   if (SNaN)
+      return ApFloat::getSNaN(Sem, negative, &appayload).bitcastToApInt();
+   else
+      return ApFloat::getQNaN(Sem, negative, &appayload).bitcastToApInt();
 }
 
 TEST(ApFloatTest, testMakeNaN)
 {
    const struct {
-       uint64_t expected;
-       const FltSemantics &semantics;
-       bool sNaN;
-       bool negative;
-       uint64_t payload;
-     } tests[] = {
-       /*             expected              semantics   SNaN    Neg                payload */
-       {         0x7fc00000ULL, ApFloat::getIEEESingle(), false, false,         0x00000000ULL },
-       {         0xffc00000ULL, ApFloat::getIEEESingle(), false,  true,         0x00000000ULL },
-       {         0x7fc0ae72ULL, ApFloat::getIEEESingle(), false, false,         0x0000ae72ULL },
-       {         0x7fffae72ULL, ApFloat::getIEEESingle(), false, false,         0xffffae72ULL },
-       {         0x7fdaae72ULL, ApFloat::getIEEESingle(), false, false,         0x00daae72ULL },
-       {         0x7fa00000ULL, ApFloat::getIEEESingle(),  true, false,         0x00000000ULL },
-       {         0xffa00000ULL, ApFloat::getIEEESingle(),  true,  true,         0x00000000ULL },
-       {         0x7f80ae72ULL, ApFloat::getIEEESingle(),  true, false,         0x0000ae72ULL },
-       {         0x7fbfae72ULL, ApFloat::getIEEESingle(),  true, false,         0xffffae72ULL },
-       {         0x7f9aae72ULL, ApFloat::getIEEESingle(),  true, false,         0x001aae72ULL },
-       { 0x7ff8000000000000ULL, ApFloat::getIEEEDouble(), false, false, 0x0000000000000000ULL },
-       { 0xfff8000000000000ULL, ApFloat::getIEEEDouble(), false,  true, 0x0000000000000000ULL },
-       { 0x7ff800000000ae72ULL, ApFloat::getIEEEDouble(), false, false, 0x000000000000ae72ULL },
-       { 0x7fffffffffffae72ULL, ApFloat::getIEEEDouble(), false, false, 0xffffffffffffae72ULL },
-       { 0x7ffdaaaaaaaaae72ULL, ApFloat::getIEEEDouble(), false, false, 0x000daaaaaaaaae72ULL },
-       { 0x7ff4000000000000ULL, ApFloat::getIEEEDouble(),  true, false, 0x0000000000000000ULL },
-       { 0xfff4000000000000ULL, ApFloat::getIEEEDouble(),  true,  true, 0x0000000000000000ULL },
-       { 0x7ff000000000ae72ULL, ApFloat::getIEEEDouble(),  true, false, 0x000000000000ae72ULL },
-       { 0x7ff7ffffffffae72ULL, ApFloat::getIEEEDouble(),  true, false, 0xffffffffffffae72ULL },
-       { 0x7ff1aaaaaaaaae72ULL, ApFloat::getIEEEDouble(),  true, false, 0x0001aaaaaaaaae72ULL },
-     };
+      uint64_t expected;
+      const FltSemantics &semantics;
+      bool sNaN;
+      bool negative;
+      uint64_t payload;
+   } tests[] = {
+      /*             expected              semantics   SNaN    Neg                payload */
+   {         0x7fc00000ULL, ApFloat::getIEEESingle(), false, false,         0x00000000ULL },
+   {         0xffc00000ULL, ApFloat::getIEEESingle(), false,  true,         0x00000000ULL },
+   {         0x7fc0ae72ULL, ApFloat::getIEEESingle(), false, false,         0x0000ae72ULL },
+   {         0x7fffae72ULL, ApFloat::getIEEESingle(), false, false,         0xffffae72ULL },
+   {         0x7fdaae72ULL, ApFloat::getIEEESingle(), false, false,         0x00daae72ULL },
+   {         0x7fa00000ULL, ApFloat::getIEEESingle(),  true, false,         0x00000000ULL },
+   {         0xffa00000ULL, ApFloat::getIEEESingle(),  true,  true,         0x00000000ULL },
+   {         0x7f80ae72ULL, ApFloat::getIEEESingle(),  true, false,         0x0000ae72ULL },
+   {         0x7fbfae72ULL, ApFloat::getIEEESingle(),  true, false,         0xffffae72ULL },
+   {         0x7f9aae72ULL, ApFloat::getIEEESingle(),  true, false,         0x001aae72ULL },
+   { 0x7ff8000000000000ULL, ApFloat::getIEEEDouble(), false, false, 0x0000000000000000ULL },
+   { 0xfff8000000000000ULL, ApFloat::getIEEEDouble(), false,  true, 0x0000000000000000ULL },
+   { 0x7ff800000000ae72ULL, ApFloat::getIEEEDouble(), false, false, 0x000000000000ae72ULL },
+   { 0x7fffffffffffae72ULL, ApFloat::getIEEEDouble(), false, false, 0xffffffffffffae72ULL },
+   { 0x7ffdaaaaaaaaae72ULL, ApFloat::getIEEEDouble(), false, false, 0x000daaaaaaaaae72ULL },
+   { 0x7ff4000000000000ULL, ApFloat::getIEEEDouble(),  true, false, 0x0000000000000000ULL },
+   { 0xfff4000000000000ULL, ApFloat::getIEEEDouble(),  true,  true, 0x0000000000000000ULL },
+   { 0x7ff000000000ae72ULL, ApFloat::getIEEEDouble(),  true, false, 0x000000000000ae72ULL },
+   { 0x7ff7ffffffffae72ULL, ApFloat::getIEEEDouble(),  true, false, 0xffffffffffffae72ULL },
+   { 0x7ff1aaaaaaaaae72ULL, ApFloat::getIEEEDouble(),  true, false, 0x0001aaaaaaaaae72ULL },
+};
 
-     for (const auto &t : tests) {
-       ASSERT_EQ(t.expected, nanbitsFromAPInt(t.semantics, t.sNaN, t.negative, t.payload));
-     }
+   for (const auto &t : tests) {
+      ASSERT_EQ(t.expected, nanbitsFromAPInt(t.semantics, t.sNaN, t.negative, t.payload));
+   }
 }
 
 #ifdef GTEST_HAS_DEATH_TEST
@@ -1197,37 +1224,6 @@ TEST(ApFloatTest, testStringDecimalSignificandDeath)
    EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),  ".e"), "Significand has no digits");
    EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(), "+.e"), "Significand has no digits");
    EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(), "-.e"), "Significand has no digits");
-}
-
-TEST(ApFloatTest, StringDecimalExponentDeath)
-{
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),   "1e"), "Exponent has no digits");
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),  "+1e"), "Exponent has no digits");
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),  "-1e"), "Exponent has no digits");
-
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),   "1.e"), "Exponent has no digits");
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),  "+1.e"), "Exponent has no digits");
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),  "-1.e"), "Exponent has no digits");
-
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),   ".1e"), "Exponent has no digits");
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),  "+.1e"), "Exponent has no digits");
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),  "-.1e"), "Exponent has no digits");
-
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),   "1.1e"), "Exponent has no digits");
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),  "+1.1e"), "Exponent has no digits");
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),  "-1.1e"), "Exponent has no digits");
-
-
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(), "1e+"), "Exponent has no digits");
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(), "1e-"), "Exponent has no digits");
-
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),  ".1e"), "Exponent has no digits");
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(), ".1e+"), "Exponent has no digits");
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(), ".1e-"), "Exponent has no digits");
-
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(),  "1.0e"), "Exponent has no digits");
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(), "1.0e+"), "Exponent has no digits");
-   EXPECT_DEATH(ApFloat(ApFloat::getIEEEDouble(), "1.0e-"), "Exponent has no digits");
 }
 
 TEST(ApFloatTest, testStringHexadecimalDeath)

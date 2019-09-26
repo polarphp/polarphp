@@ -104,7 +104,7 @@ TEST(CommandLineTest, testModifyExisitingOption)
    ASSERT_EQ(&cmd::sg_generalCategory,Retrieved->m_category) <<
                                                                 "Incorrect default option category.";
 
-   Retrieved->setCategory(TestCategory);
+   Retrieved->addCategory(TestCategory);
    ASSERT_EQ(&TestCategory,Retrieved->m_category) <<
                                                      "Failed to modify option's option category.";
 
@@ -772,11 +772,11 @@ TEST(CommandLineTest, SetDefautValue) {
    cmd::reset_all_option_occurrences();
 
    for (auto &OM : cmd::get_registered_options(*cmd::sg_topLevelSubCommand)) {
-      cmd::Option *O = OM.m_second;
-      if (O->m_argStr == "opt2") {
+      cmd::Option *opt = OM.second;
+      if (opt->m_argStr == "opt2") {
          continue;
       }
-      O->setDefault();
+      opt->setDefault();
    }
 
    EXPECT_TRUE(Opt1 == "true");

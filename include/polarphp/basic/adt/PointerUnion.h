@@ -251,7 +251,7 @@ public:
    /// Returns the current pointer if it is of the specified pointer type,
    /// otherwises returns null.
    template <typename T>
-   T dyn_cast() const
+   T dynamicCast() const
    {
       if (is<T>()) {
          return get<T>();

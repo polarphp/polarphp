@@ -1,3 +1,10 @@
+//===- llvm/unittest/ADT/ApInt.cpp - ApInt unit tests ---------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -617,9 +624,9 @@ TEST(ApIntTest, testRvalueArithmetic)
    // Lamdba to return an ApInt by value, but also provide the raw value of the
    // allocated data.
    auto getRValue = [](const char *HexString, uint64_t const *&RawData) {
-      ApInt V(129, HexString, 16);
-      RawData = V.getRawData();
-      return V;
+      ApInt v(129, HexString, 16);
+      RawData = v.getRawData();
+      return v;
    };
 
    ApInt One(129, "1", 16);
@@ -787,9 +794,9 @@ TEST(ApIntTest, testRvalueBitwise)
    // Lamdba to return an ApInt by value, but also provide the raw value of the
    // allocated data.
    auto getRValue = [](const char *HexString, uint64_t const *&RawData) {
-      ApInt V(129, HexString, 16);
-      RawData = V.getRawData();
-      return V;
+      ApInt v(129, HexString, 16);
+      RawData = v.getRawData();
+      return v;
    };
 
    ApInt Ten(129, "A", 16);
@@ -906,9 +913,9 @@ TEST(ApIntTest, testRvalueInvert)
    // Lamdba to return an ApInt by value, but also provide the raw value of the
    // allocated data.
    auto getRValue = [](const char *HexString, uint64_t const *&RawData) {
-      ApInt V(129, HexString, 16);
-      RawData = V.getRawData();
-      return V;
+      ApInt v(129, HexString, 16);
+      RawData = v.getRawData();
+      return v;
    };
 
    ApInt One(129, 1);
@@ -1321,6 +1328,22 @@ TEST(ApIntTest, testStringBitsNeeded16)
    EXPECT_EQ(9U, ApInt::getBitsNeeded("-10", 16));
    EXPECT_EQ(9U, ApInt::getBitsNeeded("-1F", 16));
    EXPECT_EQ(9U, ApInt::getBitsNeeded("-20", 16));
+
+   EXPECT_EQ(1U, ApInt::getBitsNeeded("-1", 10));
+   EXPECT_EQ(2U, ApInt::getBitsNeeded("-2", 10));
+   EXPECT_EQ(3U, ApInt::getBitsNeeded("-4", 10));
+   EXPECT_EQ(4U, ApInt::getBitsNeeded("-8", 10));
+   EXPECT_EQ(5U, ApInt::getBitsNeeded("-16", 10));
+   EXPECT_EQ(6U, ApInt::getBitsNeeded("-23", 10));
+   EXPECT_EQ(6U, ApInt::getBitsNeeded("-32", 10));
+   EXPECT_EQ(7U, ApInt::getBitsNeeded("-64", 10));
+   EXPECT_EQ(8U, ApInt::getBitsNeeded("-127", 10));
+   EXPECT_EQ(8U, ApInt::getBitsNeeded("-128", 10));
+   EXPECT_EQ(9U, ApInt::getBitsNeeded("-255", 10));
+   EXPECT_EQ(9U, ApInt::getBitsNeeded("-256", 10));
+   EXPECT_EQ(10U, ApInt::getBitsNeeded("-512", 10));
+   EXPECT_EQ(11U, ApInt::getBitsNeeded("-1024", 10));
+   EXPECT_EQ(12U, ApInt::getBitsNeeded("-1025", 10));
 }
 
 TEST(ApIntTest, testToString)
@@ -1671,7 +1694,7 @@ TEST(ApIntTest, testNearestLogBase2)
    ApInt A6(ApInt::APINT_BITS_PER_WORD*4, I6);
    EXPECT_EQ(A6.nearestLogBase2(), A6.ceilLogBase2());
 
-   // Test BitWidth == 1 special cases.
+   // Test bitWidth == 1 special cases.
    ApInt A7(1, 1);
    EXPECT_EQ(A7.nearestLogBase2(), 0ULL);
    ApInt A8(1, 0);
@@ -1785,8 +1808,8 @@ TEST(ApIntTest, SelfMoveAssignment) {
    EXPECT_EQ(32u, X.getBitWidth());
    EXPECT_EQ(0xdeadbeefULL, X.getLimitedValue());
 
-   uint64_t Bits[] = {0xdeadbeefdeadbeefULL, 0xdeadbeefdeadbeefULL};
-   ApInt Y(128, Bits);
+   uint64_t bits[] = {0xdeadbeefdeadbeefULL, 0xdeadbeefdeadbeefULL};
+   ApInt Y(128, bits);
    Y = std::move(Y);
    EXPECT_EQ(128u, Y.getBitWidth());
    EXPECT_EQ(~0ULL, Y.getLimitedValue());
@@ -2171,22 +2194,22 @@ TEST(ApIntTest, testGCD)
 {
    using apintops::greatest_common_divisor;
 
-   for (unsigned Bits : {1, 2, 32, 63, 64, 65}) {
+   for (unsigned bits : {1, 2, 32, 63, 64, 65}) {
       // Test some corner cases near zero.
-      ApInt Zero(Bits, 0), One(Bits, 1);
+      ApInt Zero(bits, 0), One(bits, 1);
       EXPECT_EQ(greatest_common_divisor(Zero, Zero), Zero);
       EXPECT_EQ(greatest_common_divisor(Zero, One), One);
       EXPECT_EQ(greatest_common_divisor(One, Zero), One);
       EXPECT_EQ(greatest_common_divisor(One, One), One);
 
-      if (Bits > 1) {
-         ApInt Two(Bits, 2);
+      if (bits > 1) {
+         ApInt Two(bits, 2);
          EXPECT_EQ(greatest_common_divisor(Zero, Two), Two);
          EXPECT_EQ(greatest_common_divisor(One, Two), One);
          EXPECT_EQ(greatest_common_divisor(Two, Two), Two);
 
          // Test some corner cases near the highest representable value.
-         ApInt Max(Bits, 0);
+         ApInt Max(bits, 0);
          Max.setAllBits();
          EXPECT_EQ(greatest_common_divisor(Zero, Max), Max);
          EXPECT_EQ(greatest_common_divisor(One, Max), One);
@@ -2201,12 +2224,12 @@ TEST(ApIntTest, testGCD)
    }
 
    // Compute the 20th Mersenne prime.
-   const unsigned BitWidth = 4450;
-   ApInt HugePrime = ApInt::getLowBitsSet(BitWidth, 4423);
+   const unsigned bitWidth = 4450;
+   ApInt HugePrime = ApInt::getLowBitsSet(bitWidth, 4423);
 
    // 9931 and 123456 are coprime.
-   ApInt A = HugePrime * ApInt(BitWidth, 9931);
-   ApInt B = HugePrime * ApInt(BitWidth, 123456);
+   ApInt A = HugePrime * ApInt(bitWidth, 9931);
+   ApInt B = HugePrime * ApInt(bitWidth, 123456);
    ApInt C = greatest_common_divisor(A, B);
    EXPECT_EQ(C, HugePrime);
 }
@@ -2456,6 +2479,42 @@ TEST(ApIntTest, testRoundingSDiv)
    }
 }
 
+TEST(ApIntTest, testUmulOverflow) {
+   const std::pair<uint64_t, uint64_t> Overflows[] = {
+      {0x8000000000000000, 2},
+      {0x5555555555555556, 3},
+      {4294967296, 4294967296},
+      {4294967295, 4294967298},
+   };
+   const std::pair<uint64_t, uint64_t> NonOverflows[] = {
+      {0x7fffffffffffffff, 2},
+      {0x5555555555555555, 3},
+      {4294967295, 4294967297},
+   };
+
+   bool overflow;
+   for (auto &X : Overflows) {
+      ApInt A(64, X.first);
+      ApInt B(64, X.second);
+      (void)A.umulOverflow(B, overflow);
+      EXPECT_TRUE(overflow);
+   }
+   for (auto &X : NonOverflows) {
+      ApInt A(64, X.first);
+      ApInt B(64, X.second);
+      (void)A.umulOverflow(B, overflow);
+      EXPECT_FALSE(overflow);
+   }
+
+   for (unsigned bits = 1; bits <= 5; ++bits)
+      for (unsigned A = 0; A != 1u << bits; ++A)
+         for (unsigned B = 0; B != 1u << bits; ++B) {
+            ApInt C = ApInt(bits, A).umulOverflow(ApInt(bits, B), overflow);
+            ApInt D = ApInt(2 * bits, A) * ApInt(2 * bits, B);
+            EXPECT_TRUE(D.getHiBits(bits).isNullValue() != overflow);
+         }
+}
+
 TEST(ApIntTest, testSolveQuadraticEquationWrap)
 {
    // Verify that "Solution" is the first non-negative integer that solves
@@ -2467,8 +2526,8 @@ TEST(ApIntTest, testSolveQuadraticEquationWrap)
       // Solution should be non-negative.
       EXPECT_GE(Solution, 0);
 
-      auto OverflowBits = [] (int64_t V, unsigned W) {
-         return V & -(1 << W);
+      auto OverflowBits = [] (int64_t v, unsigned W) {
+         return v & -(1 << W);
       };
 
       int64_t Over0 = OverflowBits(C, Width);
@@ -2540,6 +2599,26 @@ TEST(ApIntTest, testSolveQuadraticEquationWrap)
    // Test all widths in [2..6].
    for (unsigned i = 2; i <= 6; ++i)
       Iterate(i);
+}
+
+TEST(ApIntTest, testMultiplicativeInverseExaustive) {
+   for (unsigned bitWidth = 1; bitWidth <= 16; ++bitWidth) {
+      for (unsigned Value = 0; Value < (1u << bitWidth); ++Value) {
+         ApInt v = ApInt(bitWidth, Value);
+         ApInt mulInv =
+               v.zext(bitWidth + 1)
+               .multiplicativeInverse(ApInt::getSignedMinValue(bitWidth + 1))
+               .trunc(bitWidth);
+         ApInt One = v * mulInv;
+         if (!v.isNullValue() && v.countTrailingZeros() == 0) {
+            // Multiplicative inverse exists for all odd numbers.
+            EXPECT_TRUE(One.isOneValue());
+         } else {
+            // Multiplicative inverse does not exist for even numbers (and 0).
+            EXPECT_TRUE(mulInv.isNullValue());
+         }
+      }
+   }
 }
 
 } // anonymous namespace
