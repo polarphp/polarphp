@@ -1,3 +1,10 @@
+//===- llvm/unittest/ADT/DenseMapMap.cpp - DenseMap unit tests --*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -126,17 +133,8 @@ TYPED_TEST(DenseMapTest, testEmptyIntMap)
    // Lookup tests
    EXPECT_FALSE(this->Map.count(this->getKey()));
    EXPECT_TRUE(this->Map.find(this->getKey()) == this->Map.end());
-#if !defined(_MSC_VER) || defined(__clang__)
    EXPECT_EQ(typename TypeParam::mapped_type(),
              this->Map.lookup(this->getKey()));
-#else
-   // MSVC, at least old versions, cannot parse the typename to disambiguate
-   // TypeParam::mapped_type as a type. However, because MSVC doesn't implement
-   // two-phase name lookup, it also doesn't require the typename. Deal with
-   // this mutual incompatibility through specialized code.
-   EXPECT_EQ(TypeParam::mapped_type(),
-             this->Map.lookup(this->getKey()));
-#endif
 }
 
 // Constant map tests

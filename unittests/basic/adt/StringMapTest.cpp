@@ -1,3 +1,10 @@
+//===- llvm/unittest/ADT/StringMapMap.cpp - StringMap unit tests ----------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -10,7 +17,6 @@
 // Created by polarboy on 2018/07/09.
 
 #include "polarphp/basic/adt/StringMap.h"
-#include "polarphp/basic/adt/StringSet.h"
 #include "polarphp/basic/adt/Twine.h"
 #include "polarphp/global/DataTypes.h"
 #include "gtest/gtest.h"
@@ -305,20 +311,6 @@ TEST_F(StringMapTest, testIterMapKeys)
    EXPECT_EQ(Expected, keys);
 }
 
-TEST_F(StringMapTest, testIterSetKeys)
-{
-   StringSet<> set;
-   set.insert("A");
-   set.insert("B");
-   set.insert("C");
-   set.insert("D");
-
-   auto keys = to_vector<4>(set.getKeys());
-   polar::basic::sort(keys);
-
-   SmallVector<StringRef, 4> Expected = {"A", "B", "C", "D"};
-   EXPECT_EQ(Expected, keys);
-}
 
 // Create a non-default constructable value
 struct StringMapTestStruct

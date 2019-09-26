@@ -1,3 +1,10 @@
+//===- llvm/unittest/ADT/PointerIntPairTest.cpp - Unit tests --------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -68,6 +75,9 @@ TEST(PointerIntPairTest, testGetSet)
    Pair2.setPointerAndInt(&s, E::Case3);
    EXPECT_EQ(&s, Pair2.getPointer());
    EXPECT_EQ(E::Case3, Pair2.getInt());
+
+   static_assert(std::is_trivially_copyable<PointerIntPair<S *, 2, E>>::value,
+                 "trivially copyable");
 }
 
 TEST(PointerIntPairTest, testDefaultInitialize)
@@ -105,6 +115,11 @@ TEST(PointerIntPairTest, testManyUnusedBits)
 
    EXPECT_EQ(FixnumPointerTraits::NumLowBitsAvailable - 1,
              PointerLikeTypeTraits<decltype(pair)>::NumLowBitsAvailable);
+
+   static_assert(
+            std::is_trivially_copyable<
+            PointerIntPair<Fixnum31, 1, bool, FixnumPointerTraits>>::value,
+            "trivially copyable");
 }
 
 } // anonymous namespace

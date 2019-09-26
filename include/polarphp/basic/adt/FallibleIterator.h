@@ -262,7 +262,7 @@ private:
 template <typename Underlying>
 FallibleIterator<Underlying> make_fallible_iter(Underlying iter, Error &error)
 {
-   return FallibleIterator<Underlying>::itr(std::move(iter), error);
+   return FallibleIterator<Underlying>::makeIterator(std::move(iter), error);
 }
 
 /// Convenience wrapper to make a FallibleIterator end value from an instance
@@ -277,7 +277,7 @@ template <typename Underlying>
 IteratorRange<FallibleIterator<Underlying>>
 make_fallible_range(Underlying iter, Underlying endMark, Error &error)
 {
-   return make_range(make_fallible_itr(std::move(iter), error),
+   return make_range(make_fallible_iter(std::move(iter), error),
                      make_fallible_end(std::move(endMark)));
 }
 

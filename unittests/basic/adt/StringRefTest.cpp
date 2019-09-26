@@ -1,12 +1,16 @@
+//===- llvm/unittest/ADT/StringRefTest.cpp - StringRef unit tests ---------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
-
 // Copyright (c) 2017 - 2019 polarphp software foundation
 // Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
-
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-
 // Created by polarboy on 2018/07/06.
 
 #include "polarphp/basic/adt/StringRef.h"
@@ -40,7 +44,6 @@ std::ostream &operator<<(std::ostream &outstream,
 //
 // Disable this check under MSVC; even MSVC 2015 isn't consistent between
 // std::is_assignable and actually writing such an assignment.
-#if !defined(_MSC_VER)
 static_assert(
       !std::is_assignable<StringRef&, std::string>::value,
       "Assigning from prvalue std::string");
@@ -59,7 +62,7 @@ static_assert(
 static_assert(
       std::is_assignable<StringRef&, const char * &>::value,
       "Assigning from lvalue C string");
-#endif
+
 
 namespace {
 
@@ -1095,3 +1098,5 @@ TEST(StringRefTest, testStringLiteral)
    EXPECT_EQ(StringRef("Foo"), Strings[0]);
    EXPECT_EQ(StringRef("Bar"), Strings[1]);
 }
+
+static_assert(is_trivially_copyable<StringRef>::value, "trivially copyable");

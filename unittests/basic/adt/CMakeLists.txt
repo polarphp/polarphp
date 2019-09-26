@@ -30,6 +30,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    DeltaAlgorithmTest.cpp
    DepthFirstIteratorTest.cpp
    EquivalenceClassesTest.cpp
+   FallibleIteratorTest.cpp
    FoldingSetTest.cpp
    FuncExtrasTest.cpp
    FuncRefTest.cpp
@@ -46,6 +47,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    IntrusiveListTest.cpp
    IntrusiveRefCntPtrTest.cpp
    ImmutableListTest.cpp
+   IntEqClassesTest.cpp
    MappedIteratorTest.cpp
    MapVectorTest.cpp
    PackedVectorTest.cpp
@@ -70,7 +72,10 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    SmallPtrSetTest.cpp
    SparseBitVectorTest.cpp
    SparseMultiSetTest.cpp
+   SparseSetTest.cpp
    StringSwitchTest.cpp
+   StringSetTest.cpp
+   StatisticTest.cpp
    TinyPtrVectorTest.cpp
    TwineTest.cpp
    TripleTest.cpp
