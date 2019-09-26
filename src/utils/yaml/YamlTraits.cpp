@@ -1,3 +1,10 @@
+//===- lib/Support/YAMLTraits.cpp -----------------------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -31,8 +38,7 @@
 #include <string>
 #include <vector>
 
-namespace polar {
-namespace yaml {
+namespace polar::yaml {
 
 using polar::utils::SmallString;
 using polar::basic::StringLiteral;
@@ -157,6 +163,11 @@ const Node *Input::getCurrentNode() const
 
 bool Input::mapTag(StringRef tag, bool defaultValue)
 {
+   // CurrentNode can be null if setCurrentDocument() was unable to
+   // parse the document because it was invalid or empty.
+   if (!m_currentNode) {
+      return false;
+   }
    std::string foundTag = m_currentNode->m_node->getVerbatimTag();
    if (foundTag.empty()) {
       // If no tag found and 'tag' is the default, say it was found.
@@ -553,7 +564,8 @@ bool Output::outputting()
 void Output::beginMapping()
 {
    m_stateStack.push_back(inMapFirstKey);
-   m_needsNewLine = true;
+   m_paddingBeforeContainer = m_padding;
+   m_padding = "\n";
 }
 
 bool Output::mapTag(StringRef tag, bool use)
@@ -582,7 +594,7 @@ bool Output::mapTag(StringRef tag, bool use)
          }
          // Tags inside maps in sequences should act as keys in the map from a
          // formatting perspective, so we always want a newline in a sequence.
-         m_needsNewLine = true;
+         m_padding = "\n";
       }
    }
    return use;
@@ -592,7 +604,10 @@ void Output::endMapping()
 {
    // If we did not map anything, we should explicitly emit an empty map
    if (m_stateStack.back() == inMapFirstKey) {
+      m_padding = m_paddingBeforeContainer;
+      newLineCheck();
       output("{}");
+      m_padding = "\n";
    }
    m_stateStack.pop_back();
 }
@@ -668,7 +683,8 @@ void Output::endDocuments()
 size_t Output::beginSequence()
 {
    m_stateStack.push_back(inSeqFirstElement);
-   m_needsNewLine = true;
+   m_paddingBeforeContainer = m_padding;
+   m_padding = "\n";
    return 0;
 }
 
@@ -676,7 +692,10 @@ void Output::endSequence()
 {
    // If we did not emit anything, we should explicitly emit an empty sequence
    if (m_stateStack.back() == inSeqFirstElement) {
-      output("[]");
+      m_padding = m_paddingBeforeContainer;
+      newLineCheck();
+      output("{}");
+      m_padding = "\n";
    }
    m_stateStack.pop_back();
 }
@@ -807,11 +826,6 @@ void Output::scalarString(StringRef &str, QuotingType mustQuote)
       return;
    }
 
-   unsigned i = 0;
-   unsigned j = 0;
-   size_t endMark = str.getSize();
-   const char *base = str.getData();
-
    const char *const quote = mustQuote == QuotingType::Single ? "'" : "\"";
 
    output(quote); // Starting quote.
@@ -820,10 +834,15 @@ void Output::scalarString(StringRef &str, QuotingType mustQuote)
    // present, and will be escaped using a variety of unicode-scalar and special short-form
    // escapes. This is handled in yaml::escape.
    if (mustQuote == QuotingType::Double) {
-      output(yaml::escape(base, /* EscapePrintable= */ false));
+      output(yaml::escape(str, /* EscapePrintable= */ false));
       outputUpToEndOfLine(quote);
       return;
    }
+
+   unsigned i = 0;
+   unsigned j = 0;
+   unsigned endMark = str.size();
+   const char *base = str.data();
 
    // When using single-quoted strings, any single quote ' must be doubled to be escaped.
    while (j < endMark) {
@@ -898,7 +917,7 @@ void Output::outputUpToEndOfLine(StringRef str)
    output(str);
    if (m_stateStack.empty() || (!inFlowSeqAnyElement(m_stateStack.back()) &&
                                 !inFlowMapAnyKey(m_stateStack.back()))){
-      m_needsNewLine = true;
+      m_padding = "\n";
    }
 }
 
@@ -914,11 +933,13 @@ void Output::outputNewLine()
 
 void Output::newLineCheck()
 {
-   if (!m_needsNewLine) {
+   if (m_padding != "\n") {
+      output(m_padding);
+      m_padding = {};
       return;
    }
-   m_needsNewLine = false;
    outputNewLine();
+   m_padding = {};
    if (m_stateStack.size() == 0) {
       return;
    }
@@ -951,9 +972,9 @@ void Output::paddedKey(StringRef key)
    output(":");
    const char *spaces = "                ";
    if (key.getSize() < strlen(spaces)) {
-      output(&spaces[key.getSize()]);
+      m_padding = &spaces[key.size()];
    } else {
-      output(" ");
+      m_padding = " ";
    }
 }
 
@@ -1296,5 +1317,4 @@ StringRef ScalarTraits<Hex64>::input(StringRef scalar, void *, Hex64 &value)
    return StringRef();
 }
 
-} // yaml
-} // polar
+} // polar::yaml

@@ -1,3 +1,10 @@
+//===- llvm/Support/YAMLTraits.h --------------------------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -39,8 +46,7 @@
 #include <regex>
 #include <optional>
 
-namespace polar {
-namespace yaml {
+namespace polar::yaml {
 
 using polar::basic::is_alnum;
 using polar::utils::RawStringOutStream;
@@ -118,7 +124,7 @@ struct MappingContextTraits
 ///           io.enumCase(value, "green", cGreen);
 ///         }
 ///       };
-template <typename T>
+template <typename T, typename Enable = void>
 struct ScalarEnumerationTraits
 {
    // Must provide:
@@ -136,7 +142,7 @@ struct ScalarEnumerationTraits
 ///          io.bitSetCase(value, "round", flagRound);
 ///        }
 ///      };
-template <typename T>
+template <typename T, typename Enable = void>
 struct ScalarBitSetTraits
 {
    // Must provide:
@@ -164,7 +170,7 @@ enum class QuotingType { None, Single, Double };
 ///      }
 ///      static QuotingType mustQuote(StringRef) { return QuotingType::Single; }
 ///    };
-template <typename T>
+template <typename T, typename Enable = void>
 struct ScalarTraits
 {
    // Must provide:
@@ -932,8 +938,8 @@ public:
       mapOptionalWithContext(key, value, context);
    }
 
-   template <typename T>
-   void mapOptional(const char *key, T &value, const T &defaultValue)
+   template <typename T, typename DefaultT>
+   void mapOptional(const char *key, T &value, const DefaultT &defaultValue)
    {
       EmptyContext context;
       mapOptionalWithContext(key, value, defaultValue, context);
@@ -964,11 +970,14 @@ public:
       this->processKey(Key, value, false, context);
    }
 
-   template <typename T, typename Context>
-   void mapOptionalWithContext(const char *key, T &value, const T &defaultValue,
+   template <typename T, typename Context, typename DefaultT>
+   void mapOptionalWithContext(const char *key, T &value, const DefaultT &defaultValue,
                                Context &context)
    {
-      this->processKeyWithDefault(key, value, defaultValue, false, context);
+      static_assert(std::is_convertible<DefaultT, T>::value,
+                    "Default type must be implicitly convertible to value type!");
+      this->processKeyWithDefault(key, value, static_cast<const T &>(defaultValue),
+                                  false, context);
    }
 
 private:
@@ -1063,7 +1072,7 @@ yamlize(IO &io, T &value, bool, EmptyContext &)
    bool doClear;
    if (io.beginBitSetScalar(doClear)) {
       if (doClear) {
-         value = static_cast<T>(0);
+         value = T();
       }
       ScalarBitSetTraits<T>::bitset(io, value);
       io.endBitSetScalar();
@@ -1391,12 +1400,13 @@ struct ScalarTraits<double> {
    }
 };
 
-// For endian types, we just use the existing ScalarTraits for the underlying
-// type.  This way endian aware types are supported whenever a ScalarTraits
-// is defined for the underlying type.
+// For endian types, we use existing scalar Traits class for the underlying
+// type.  This way endian aware types are supported whenever the traits are
+// defined for the underlying type.
 template <typename value_type, polar::utils::Endianness defaultEndian, size_t alignment>
 struct ScalarTraits<PackedEndianSpecificIntegral<
-      value_type, defaultEndian, alignment>>
+      value_type, defaultEndian, alignment>,
+      typename std::enable_if<HasScalarTraits<value_type>::value>::type>
 {
    using EndianType =
    PackedEndianSpecificIntegral<value_type, defaultEndian,
@@ -1418,6 +1428,41 @@ struct ScalarTraits<PackedEndianSpecificIntegral<
    static QuotingType mustQuote(StringRef str)
    {
       return ScalarTraits<value_type>::mustQuote(str);
+   }
+};
+
+template <typename value_type, polar::utils::Endianness endian, size_t alignment>
+struct ScalarEnumerationTraits<
+      PackedEndianSpecificIntegral<value_type, endian,
+      alignment>,
+      typename std::enable_if<
+      HasScalarEnumerationTraits<value_type>::value>::type>
+{
+   using EndianType =
+   PackedEndianSpecificIntegral<value_type, endian,
+   alignment>;
+
+   static void enumeration(IO &io, EndianType &endianValue)
+   {
+      value_type value = endianValue;
+      ScalarEnumerationTraits<value_type>::enumeration(io, value);
+      endianValue = value;
+   }
+};
+
+template <typename value_type, polar::utils::Endianness endian, size_t alignment>
+struct ScalarBitSetTraits<
+      PackedEndianSpecificIntegral<value_type, endian,
+      alignment>,
+      typename std::enable_if<HasScalarBitSetTraits<value_type>::value>::type> {
+   using EndianType =
+   PackedEndianSpecificIntegral<value_type, endian,
+   alignment>;
+   static void bitset(IO &io, EndianType &endianValue)
+   {
+      value_type value = endianValue;
+      ScalarBitSetTraits<value_type>::bitset(io, endianValue);
+      endianValue = value;
    }
 };
 
@@ -1788,8 +1833,9 @@ private:
    bool m_needBitValueComma = false;
    bool m_needFlowSequenceComma = false;
    bool m_enumerationMatchFound = false;
-   bool m_needsNewLine = false;
    bool m_writeDefaultValues = false;
+   StringRef m_padding;
+   StringRef m_paddingBeforeContainer;
 };
 
 /// YAML I/O does conversion based on types. But often native data types
@@ -2114,6 +2160,13 @@ struct SequenceTraits<SmallVector<T, N>,
       : SequenceTraitsImpl<SmallVector<T, N>, SequenceElementTraits<T>::sm_flow>
 {};
 
+template <typename T>
+struct SequenceTraits<SmallVectorImpl<T>,
+                      typename std::enable_if<CheckIsBool<
+                          SequenceElementTraits<T>::sm_flow>::value>::type>
+    : SequenceTraitsImpl<SmallVectorImpl<T>, SequenceElementTraits<T>::sm_flow>
+{};
+
 // Sequences of fundamental types use sm_flow formatting.
 template <typename T>
 struct SequenceElementTraits<
@@ -2159,8 +2212,7 @@ struct StdMapStringCustomMappingTraitsImpl
    }
 };
 
-} // yaml
-} // polar
+} // polar::yaml
 
 #define POLAR_YAML_IS_SEQUENCE_VECTOR_IMPL(TYPE, FLOW)                          \
    namespace polar {                                                             \
