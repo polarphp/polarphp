@@ -163,15 +163,15 @@ template<typename ValueType>
 class StringMapEntry : public StringMapEntryBase
 {
 public:
-   ValueType m_second;
+   ValueType second;
 
    explicit StringMapEntry(size_t strLen)
-      : StringMapEntryBase(strLen), m_second()
+      : StringMapEntryBase(strLen), second()
    {}
 
    template <typename... InitType>
    StringMapEntry(size_t strLen, InitType &&... initVals)
-      : StringMapEntryBase(strLen), m_second(std::forward<InitType>(initVals)...)
+      : StringMapEntryBase(strLen), second(std::forward<InitType>(initVals)...)
    {}
 
    StringMapEntry(StringMapEntry &entry) = delete;
@@ -183,17 +183,17 @@ public:
 
    const ValueType &getValue() const
    {
-      return m_second;
+      return second;
    }
 
    ValueType &getValue()
    {
-      return m_second;
+      return second;
    }
 
    void setValue(const ValueType &value)
    {
-      m_second = value;
+      second = value;
    }
 
    /// getKeyData - Return the start of the string data that is the key for this
@@ -449,7 +449,7 @@ public:
    {
       const_iterator iter = find(key);
       if (iter != end()) {
-         return iter->m_second;
+         return iter->second;
       }
       return ValueType();
    }
@@ -458,7 +458,7 @@ public:
    /// if the key is not in the map.
    ValueType &operator[](StringRef key)
    {
-      return tryEmplace(key).first->m_second;
+      return tryEmplace(key).first->second;
    }
 
    /// count - Return 1 if the element is in the map, 0 otherwise.

@@ -97,7 +97,7 @@ void *DynamicLibrary::searchForAddressOfSymbol(const char *symbolName)
       if (sg_explicitSymbols.isConstructed()) {
          StringMap<void *>::iterator i = sg_explicitSymbols->find(symbolName);
          if (i != sg_explicitSymbols->end()) {
-            return i->m_second;
+            return i->second;
          }
       }
       // Now search the libraries.

@@ -250,7 +250,7 @@ void Input::endMapping()
 
    for (const auto &mapItem : mapNode->m_mapping) {
       if (!is_contained(mapNode->m_validKeys, mapItem.getFirst())) {
-         setError(mapItem.m_second.get(), Twine("unknown key '") + mapItem.getFirst() + "'");
+         setError(mapItem.second.get(), Twine("unknown key '") + mapItem.getFirst() + "'");
          break;
       }
    }

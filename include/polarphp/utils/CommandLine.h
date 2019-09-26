@@ -1,9 +1,8 @@
 //===- llvm/Support/CommandLine.h - Command line handler --------*- C++ -*-===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
@@ -53,17 +52,14 @@
 #include <type_traits>
 #include <vector>
 
-namespace polar {
-
-// forward declare class with namespace
-namespace utils {
+namespace polar::utils {
 class StringSaver;
-} // utils
+} // polar::utils
 
 /// cmd Namespace - This namespace contains all of the command line option
 /// processing machinery.  It is intentionally a short name to make qualified
 /// usage concise.
-namespace cmd {
+namespace polar::cmd {
 
 using polar::utils::RawOutStream;
 using polar::basic::StringRef;
@@ -92,8 +88,9 @@ using polar::utils::ManagedStatic;
 // that give precedence to earlier occurrences, you will need to extend this
 bool parse_commandline_options(int argc, const char *const *argv,
                                StringRef overview = "",
-                               RawOutStream *errStream = nullptr,
-                               const char *envVar = nullptr);
+                               RawOutStream *errors = nullptr,
+                               const char *envVar = nullptr,
+                               bool longOptionsUseDoubleDash = false);
 
 //===----------------------------------------------------------------------===//
 // parse_environment_options - Environment variable option processing alternate
@@ -188,9 +185,6 @@ enum OptionHidden
 // AlwaysPrefix - Only allow the behavior enabled by the Prefix flag and reject
 // the Option=Value form.
 //
-// Grouping - With this option enabled, multiple letter options are allowed to
-// bunch together with only a single hyphen for the whole group.  This allows
-// emulation of the behavior that ls uses for example: ls -la === ls -l -a
 //
 
 enum FormattingFlags
@@ -199,14 +193,22 @@ enum FormattingFlags
    Positional = 0x01,       // Is a positional argument, no '-' required
    Prefix = 0x02,           // Can this option directly prefix its value?
    AlwaysPrefix = 0x03,     // Can this option only directly prefix its value?
-   Grouping = 0x04          // Can this option group with other options?
 };
 
 enum MiscFlags
 {             // Miscellaneous flags to adjust argument
    CommaSeparated = 0x01,     // Should this cl::list split between commas?
    PositionalEatsArgs = 0x02, // Should this positional cl::list eat -args?
-   Sink = 0x04                // Should this cl::list eat all unknown options?
+   Sink = 0x04,               // Should this cl::list eat all unknown options?
+
+   // Grouping - Can this option group with other options?
+   // If this is enabled, multiple letter options are allowed to bunch together
+   // with only a single hyphen for the whole group.  This allows emulation
+   // of the behavior that ls uses for example: ls -la === ls -l -a
+   Grouping = 0x08,
+
+   // Default option
+   DefaultOption = 0x10
 };
 
 //===----------------------------------------------------------------------===//
@@ -312,27 +314,27 @@ class Option
    // Out of line virtual function to provide home for the class.
    virtual void anchor();
 
-   int m_numOccurrences = 0; // The number of times specified
+   uint16_t m_numOccurrences; // The number of times specified
    // Occurrences, HiddenFlag, and Formatting are all enum types but to avoid
    // problems with signed enums in bitfields.
-   unsigned m_occurrences : 3; // enum NumOccurrencesFlag
+   uint16_t m_occurrences : 3; // enum NumOccurrencesFlag
    // not using the enum type for 'Value' because zero is an implementation
    // detail representing the non-value
-   unsigned m_value : 2;
-   unsigned m_hiddenFlag : 2; // enum OptionHidden
-   unsigned m_formatting : 2; // enum FormattingFlags
-   unsigned Formatting : 3; // enum FormattingFlags
-   unsigned m_misc : 3;
-   unsigned m_position = 0;       // Position of last occurrence of the option
-   unsigned m_additionalVals = 0; // Greater than 0 for multi-valued option.
+   uint16_t m_value : 2;
+   uint16_t m_hiddenFlag : 2; // enum OptionHidden
+   uint16_t m_formatting : 2; // enum FormattingFlags
+   uint16_t m_misc : 5;
+   uint16_t m_fullyInitialized : 1; // Has addArgument been called?
+   uint16_t m_position;       // Position of last occurrence of the option
+   uint16_t m_additionalVals; // Greater than 0 for multi-valued option.
 
 public:
    StringRef m_argStr;   // The argument string itself (ex: "help", "o")
    StringRef m_helpStr;  // The Descriptive text message for -help
    StringRef m_valueStr; // String Describing what the value of this option is
    OptionCategory *m_category; // The Category this option belongs to
-   SmallPtrSet<SubCommand *, 4> m_subs; // The subcommands this option belongs to.
-   bool m_fullyInitialized = false; // Has addArgument been called?
+   SmallVector<OptionCategory *, 1> m_categories;                    // The Categories this option belongs to
+   SmallPtrSet<SubCommand *, 1> m_subs; // The subcommands this option belongs to.
 
    inline enum NumOccurrencesFlag getNumOccurrencesFlag() const
    {
@@ -383,6 +385,11 @@ public:
    bool isSink() const
    {
       return getMiscFlags() & cmd::Sink;
+   }
+
+   bool isDefaultOption() const
+   {
+      return getMiscFlags() & cmd::DefaultOption;
    }
 
    bool isConsumeAfter() const
@@ -439,10 +446,7 @@ public:
       m_position = pos;
    }
 
-   void setCategory(OptionCategory &category)
-   {
-      m_category = &category;
-   }
+   void addCategory(OptionCategory &category);
 
    void addSubCommand(SubCommand &cmd)
    {
@@ -452,9 +456,18 @@ public:
 protected:
    explicit Option(enum NumOccurrencesFlag occurrencesFlag,
                    enum OptionHidden hidden)
-      : m_occurrences(occurrencesFlag), m_value(0), m_hiddenFlag(hidden),
-        m_formatting(NormalFormatting), m_misc(0), m_category(&sg_generalCategory)
-   {}
+      :  m_numOccurrences(0),
+        m_occurrences(occurrencesFlag),
+        m_value(0),
+        m_hiddenFlag(hidden),
+        m_formatting(NormalFormatting),
+        m_misc(0),
+        m_fullyInitialized(false),
+        m_position(0),
+        m_additionalVals(0)
+   {
+      m_categories.push_back(&sg_generalCategory);
+   }
 
    inline void setNumAdditionalVals(unsigned n)
    {
@@ -509,10 +522,7 @@ public:
       return m_numOccurrences;
    }
 
-   inline void reset()
-   {
-      m_numOccurrences = 0;
-   }
+   void reset();
 };
 
 //===----------------------------------------------------------------------===//
@@ -607,7 +617,7 @@ struct Category
    template <typename Opt>
    void apply(Opt &opt) const
    {
-      opt.setCategory(m_category);
+      opt.addCategory(m_category);
    }
 };
 
@@ -1068,9 +1078,13 @@ public:
 // BasicParser - Super class of Parsers to provide boilerplate code
 //
 class BasicParserImpl
-{ // non-template implementation of BasicParser<t>
+{
+   // non-template implementation of BasicParser<t>
 public:
    BasicParserImpl(Option &)
+   {}
+
+   virtual ~BasicParserImpl()
    {}
 
    enum ValueExpected getValueExpectedFlagDefault() const
@@ -1104,10 +1118,6 @@ public:
 
    // An out-of-line virtual method to provide a 'home' for this class.
    virtual void anchor();
-
-protected:
-   virtual ~BasicParserImpl() = default;
-
    // A helper for BasicParser::printOptionDiff.
    void printOptionName(const Option &option, size_t globalWidth) const;
 };
@@ -1122,11 +1132,9 @@ public:
    using ParserDataType = DataType;
    using OptVal = OptionValue<DataType>;
 
-   BasicParser(Option &option) : BasicParserImpl(option)
+   BasicParser(Option &option)
+      : BasicParserImpl(option)
    {}
-
-protected:
-   ~BasicParser() = default;
 };
 
 //--------------------------------------------------
@@ -1228,7 +1236,8 @@ extern template class BasicParser<int>;
 //--------------------------------------------------
 // Parser<unsigned>
 //
-template <> class Parser<unsigned> : public BasicParser<unsigned>
+template <>
+class Parser<unsigned> : public BasicParser<unsigned>
 {
 public:
    Parser(Option &option) : BasicParser(option)
@@ -1253,6 +1262,31 @@ public:
 extern template class BasicParser<unsigned>;
 
 //--------------------------------------------------
+// parser<unsigned long>
+//
+template <>
+class Parser<unsigned long> final : public BasicParser<unsigned long> {
+public:
+   Parser(Option &option)
+      : BasicParser(option)
+   {}
+
+   // parse - Return true on error.
+   bool parse(Option &option, StringRef argName, StringRef arg, unsigned long &value);
+
+   // getValueName - Overload in subclass to provide a better default value.
+   StringRef getValueName() const override { return "ulong"; }
+
+   void printOptionDiff(const Option &option, unsigned long value, OptVal defaultValue,
+                        size_t globalWidth) const;
+
+   // An out-of-line virtual method to provide a 'home' for this class.
+   void anchor() override;
+};
+
+extern template class BasicParser<unsigned long>;
+
+//--------------------------------------------------
 // Parser<unsigned long long>
 //
 template <>
@@ -1270,7 +1304,7 @@ public:
    // getValueName - Overload in subclass to provide a better default value.
    StringRef getValueName() const override
    {
-      return "uint";
+      return "ulong";
    }
 
    void printOptionDiff(const Option &option, unsigned long long value, OptVal defaultValue,
@@ -1538,6 +1572,8 @@ struct Applicator<MiscFlags>
 {
    static void opt(MiscFlags mflag, Option &option)
    {
+      assert((mflag != Grouping || option.m_argStr.size() == 1) &&
+             "cl::Grouping can only apply to single charater Options.");
       option.setMiscFlag(mflag);
    }
 };
@@ -1578,6 +1614,8 @@ class OptStorage
 
 public:
    OptStorage() = default;
+
+   void clear() {}
 
    bool setLocation(Option &option, DataType &location)
    {
@@ -1838,6 +1876,7 @@ class ListStorage
 
 public:
    ListStorage() = default;
+   void clear() {}
 
    bool setLocation(Option &option, StorageClass &storage)
    {
@@ -1928,6 +1967,11 @@ public:
    const_reference operator[](size_type pos) const
    {
       return m_storage[pos];
+   }
+
+   void clear()
+   {
+      m_storage.clear();
    }
 
    iterator erase(const_iterator pos)
@@ -2056,7 +2100,10 @@ class List : public Option, public ListStorage<DataType, StorageClass>
    }
 
    void setDefault() override
-   {}
+   {
+      m_positions.clear();
+      ListStorage<DataType, StorageClass>::clear();
+   }
 
    void done()
    {
@@ -2321,12 +2368,16 @@ class Alias : public Option
    void done()
    {
       if (!hasArgStr()) {
-         error("cmd::Alias must have argument name specified!");
+         error("cmd::alias must have argument name specified!");
       }
       if (!m_aliasFor) {
-         error("cmd::Alias must have an cmd::AliasOpt(option) specified!");
+         error("cmd::alias must have an cl::aliasopt(option) specified!");
+      }
+      if (!m_subs.empty()) {
+         error("cmd::alias must not have cl::sub(), aliased option's cl::sub() will be used!");
       }
       m_subs = m_aliasFor->m_subs;
+      m_categories = m_aliasFor->m_categories;
       addArgument();
    }
 
@@ -2560,7 +2611,6 @@ void reset_all_option_occurrences();
 /// where no options are supported.
 void reset_command_line_parser();
 
-} // cmd
-} // polar
+} // polar::cmd
 
 #endif // POLARPHP_UTILS_COMMAND_LINE_H

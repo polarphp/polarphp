@@ -189,7 +189,7 @@ FileCheckPattern::parseNumericVariableDefinition(
    FileCheckNumericVariable *definedNumericVariable;
    auto varTableIter = context->m_globalNumericVariableTable.find(name);
    if (varTableIter != context->m_globalNumericVariableTable.end()) {
-      definedNumericVariable = varTableIter->m_second;
+      definedNumericVariable = varTableIter->second;
    } else {
       definedNumericVariable = context->makeNumericVariable(name, lineNumber);
    }
@@ -215,7 +215,7 @@ FileCheckPattern::parseNumericVariableUse(StringRef name, bool isPseudo,
    auto varTableIter = m_context->m_globalNumericVariableTable.find(name);
    FileCheckNumericVariable *m_numericVariable;
    if (varTableIter != m_context->m_globalNumericVariableTable.end()) {
-      m_numericVariable = varTableIter->m_second;
+      m_numericVariable = varTableIter->second;
    } else {
       m_numericVariable = m_context->makeNumericVariable(name);
       m_context->m_globalNumericVariableTable[name] = m_numericVariable;
@@ -888,7 +888,7 @@ FileCheckPatternContext::getPatternVarValue(StringRef varName)
    if (varIter == m_globalVariableTable.end()) {
       return make_error<FileCheckUndefVarError>(varName);
    }
-   return varIter->m_second;
+   return varIter->second;
 }
 
 template <typename... Types>

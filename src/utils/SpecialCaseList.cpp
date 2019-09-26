@@ -88,7 +88,7 @@ unsigned SpecialCaseList::Matcher::match(StringRef query) const
 {
    auto iter = m_strings.find(query);
    if (iter != m_strings.end()) {
-      return iter->m_second;
+      return iter->second;
    }
    if (m_trigrams.isDefinitelyOut(query)) {
       return false;
@@ -271,8 +271,8 @@ unsigned SpecialCaseList::inSectionBlame(const SectionEntries &entries,
    if (iter == entries.end()) {
       return 0;
    }
-   StringMap<Matcher>::const_iterator iter1 = iter->m_second.find(category);
-   if (iter1 == iter->m_second.end()) {
+   StringMap<Matcher>::const_iterator iter1 = iter->second.find(category);
+   if (iter1 == iter->second.end()) {
       return 0;
    }
    return iter1->getValue().match(query);

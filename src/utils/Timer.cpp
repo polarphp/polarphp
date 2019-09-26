@@ -236,7 +236,7 @@ public:
    {
       for (StringMap<std::pair<TimerGroup*, Name2TimerMap>>::iterator
            iter = m_map.begin(), end = m_map.end(); iter != end; ++iter) {
-         delete iter->m_second.first;
+         delete iter->second.first;
       }
    }
 

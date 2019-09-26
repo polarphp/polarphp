@@ -788,7 +788,7 @@ public:
    {
       auto iter = m_entries.find(name);
       if (iter != m_entries.end()) {
-         return iter->m_second.get();
+         return iter->second.get();
       }
       return nullptr;
    }
@@ -796,7 +796,7 @@ public:
    InMemoryNode *addChild(StringRef name, std::unique_ptr<InMemoryNode> child)
    {
       return m_entries.insert(make_pair(name, std::move(child)))
-            .first->m_second.get();
+            .first->second.get();
    }
 
    using const_iterator = decltype(m_entries)::const_iterator;
@@ -816,7 +816,7 @@ public:
       std::string result =
             (std::string(indent, ' ') + m_stat.getName() + "\n").getStr();
       for (const auto &entry : m_entries) {
-         result += entry.m_second->toString(indent + 2);
+         result += entry.second->toString(indent + 2);
       }
       return result;
    }
@@ -1080,9 +1080,9 @@ class InMemoryDirIterator : public polar::vfs::internal::DirIterImpl
    {
       if (m_iter != m_end) {
          SmallString<256> path(m_requestedDirName);
-         polar::fs::path::append(path, m_iter->m_second->getFileName());
+         polar::fs::path::append(path, m_iter->second->getFileName());
          polar::fs::FileType type;
-         switch (m_iter->m_second->getKind()) {
+         switch (m_iter->second->getKind()) {
          case internal::IME_File:
          case internal::IME_HardLink:
             type = polar::fs::FileType::regular_file;
