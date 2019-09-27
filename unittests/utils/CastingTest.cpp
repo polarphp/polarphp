@@ -1,3 +1,10 @@
+//===---------- llvm/unittest/Support/Casting.cpp - Casting tests ---------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -127,6 +134,13 @@ TEST(CastingTest, testIsa) {
    EXPECT_TRUE(isa<foo>(B2));
    EXPECT_TRUE(isa<foo>(B3));
    EXPECT_TRUE(isa<foo>(B4));
+}
+
+
+TEST(CastingTest, testIsaAndNonnull) {
+  EXPECT_TRUE(isa_and_nonnull<foo>(B2));
+  EXPECT_TRUE(isa_and_nonnull<foo>(B4));
+  EXPECT_FALSE(isa_and_nonnull<foo>(fub()));
 }
 
 TEST(CastingTest, testCast) {

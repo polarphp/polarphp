@@ -694,7 +694,7 @@ void Output::endSequence()
    if (m_stateStack.back() == inSeqFirstElement) {
       m_padding = m_paddingBeforeContainer;
       newLineCheck();
-      output("{}");
+      output("[]");
       m_padding = "\n";
    }
    m_stateStack.pop_back();

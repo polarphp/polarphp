@@ -329,12 +329,12 @@ class Option
    uint16_t m_additionalVals; // Greater than 0 for multi-valued option.
 
 public:
-   StringRef m_argStr;   // The argument string itself (ex: "help", "o")
-   StringRef m_helpStr;  // The Descriptive text message for -help
-   StringRef m_valueStr; // String Describing what the value of this option is
-   OptionCategory *m_category; // The Category this option belongs to
-   SmallVector<OptionCategory *, 1> m_categories;                    // The Categories this option belongs to
-   SmallPtrSet<SubCommand *, 1> m_subs; // The subcommands this option belongs to.
+   StringRef argStr;   // The argument string itself (ex: "help", "o")
+   StringRef helpStr;  // The Descriptive text message for -help
+   StringRef valueStr; // String Describing what the value of this option is
+   OptionCategory *category; // The Category this option belongs to
+   SmallVector<OptionCategory *, 1> categories;                    // The Categories this option belongs to
+   SmallPtrSet<SubCommand *, 1> subs; // The subcommands this option belongs to.
 
    inline enum NumOccurrencesFlag getNumOccurrencesFlag() const
    {
@@ -374,7 +374,7 @@ public:
    // hasArgStr - Return true if the argstr != ""
    bool hasArgStr() const
    {
-      return !m_argStr.empty();
+      return !argStr.empty();
    }
 
    bool isPositional() const
@@ -399,7 +399,7 @@ public:
 
    bool isInAllSubCommands() const
    {
-      return polar::basic::any_of(m_subs, [](const SubCommand *subcmd) {
+      return polar::basic::any_of(subs, [](const SubCommand *subcmd) {
          return subcmd == &*sg_allSubCommands;
       });
    }
@@ -410,11 +410,11 @@ public:
    void setArgStr(StringRef str);
    void setDescription(StringRef str)
    {
-      m_helpStr = str;
+      helpStr = str;
    }
    void setValueStr(StringRef str)
    {
-      m_valueStr = str;
+      valueStr = str;
    }
    void setNumOccurrencesFlag(enum NumOccurrencesFlag value)
    {
@@ -450,7 +450,7 @@ public:
 
    void addSubCommand(SubCommand &cmd)
    {
-      m_subs.insert(&cmd);
+      subs.insert(&cmd);
    }
 
 protected:
@@ -466,7 +466,7 @@ protected:
         m_position(0),
         m_additionalVals(0)
    {
-      m_categories.push_back(&sg_generalCategory);
+      categories.push_back(&sg_generalCategory);
    }
 
    inline void setNumAdditionalVals(unsigned n)
@@ -609,15 +609,15 @@ LocationClass<Type> location(Type &loc)
 // to.
 struct Category
 {
-   OptionCategory &m_category;
+   OptionCategory &category;
 
-   Category(OptionCategory &category) : m_category(category)
+   Category(OptionCategory &category) : category(category)
    {}
 
    template <typename Opt>
    void apply(Opt &opt) const
    {
-      opt.addCategory(m_category);
+      opt.addCategory(category);
    }
 };
 
@@ -893,10 +893,10 @@ protected:
    {
    public:
       GenericOptionInfo(StringRef name, StringRef helpStr)
-         : m_name(name), m_helpStr(helpStr)
+         : m_name(name), helpStr(helpStr)
       {}
       StringRef m_name;
-      StringRef m_helpStr;
+      StringRef helpStr;
    };
 
 public:
@@ -1027,7 +1027,7 @@ public:
 
    StringRef getDescription(unsigned index) const override
    {
-      return m_values[index].m_helpStr;
+      return m_values[index].helpStr;
    }
 
    // getOptionValue - Return the value of option name N.
@@ -1045,7 +1045,7 @@ public:
          argVal = argName;
       }
       for (size_t i = 0, e = m_values.getSize(); i != e; ++i)
-         if (m_values[i].m_names == argVal) {
+         if (m_values[i].m_name == argVal) {
             value = m_values[i].m_value.getValue();
             return false;
          }
@@ -1055,13 +1055,13 @@ public:
 
    /// addLiteralOption - Add an entry to the mapping table.
    ///
-   template <typename OtherDataType>
-   void addLiteralOption(StringRef name, const DataType &value, StringRef helpStr)
+   template <typename DT>
+   void addLiteralOption(StringRef name, const DT &value, StringRef helpStr)
    {
       assert(findOption(name) == m_values.getSize() && "Option already exists!");
       OptionInfo x(name, static_cast<DataType>(value), helpStr);
       m_values.push_back(x);
-      addLiteralOption(m_owner, name);
+      add_literal_option(m_owner, name);
    }
 
    /// removeLiteralOption - Remove the specified option.
@@ -1572,7 +1572,7 @@ struct Applicator<MiscFlags>
 {
    static void opt(MiscFlags mflag, Option &option)
    {
-      assert((mflag != Grouping || option.m_argStr.size() == 1) &&
+      assert((mflag != Grouping || option.argStr.size() == 1) &&
              "cl::Grouping can only apply to single charater Options.");
       option.setMiscFlag(mflag);
    }
@@ -2337,13 +2337,13 @@ class Alias : public Option
    bool handleOccurrence(unsigned pos, StringRef /*ArgName*/,
                          StringRef arg) override
    {
-      return m_aliasFor->handleOccurrence(pos, m_aliasFor->m_argStr, arg);
+      return m_aliasFor->handleOccurrence(pos, m_aliasFor->argStr, arg);
    }
 
    bool addOccurrence(unsigned pos, StringRef /*ArgName*/, StringRef value,
                       bool multiArg = false) override
    {
-      return m_aliasFor->addOccurrence(pos, m_aliasFor->m_argStr, value, multiArg);
+      return m_aliasFor->addOccurrence(pos, m_aliasFor->argStr, value, multiArg);
    }
 
    // Handle printing stuff...
@@ -2373,11 +2373,11 @@ class Alias : public Option
       if (!m_aliasFor) {
          error("cmd::alias must have an cl::aliasopt(option) specified!");
       }
-      if (!m_subs.empty()) {
+      if (!subs.empty()) {
          error("cmd::alias must not have cl::sub(), aliased option's cl::sub() will be used!");
       }
-      m_subs = m_aliasFor->m_subs;
-      m_categories = m_aliasFor->m_categories;
+      subs = m_aliasFor->subs;
+      categories = m_aliasFor->categories;
       addArgument();
    }
 

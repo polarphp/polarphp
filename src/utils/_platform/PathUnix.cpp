@@ -777,7 +777,7 @@ std::error_code set_permissions(const Twine &path, Permission permissions)
    return std::error_code();
 }
 
-std::error_code setPermissions(int fd, Permission permissions)
+std::error_code set_permissions(int fd, Permission permissions)
 {
    if (::fchmod(fd, permissions)) {
       return std::error_code(errno, std::generic_category());
@@ -849,7 +849,10 @@ std::error_code MappedFileRegion::init(int fd, uint64_t offset,
 
 MappedFileRegion::MappedFileRegion(int fd, MapMode mode, size_t length,
                                    uint64_t offset, std::error_code &errorCode)
-   : m_size(length), m_mapping(), m_fd(fd), m_mode(mode)
+   : m_size(length),
+     m_mapping(),
+     fd(fd),
+     m_mode(mode)
 {
    (void)mode;
    errorCode = init(fd, offset, mode);

@@ -174,7 +174,7 @@ createOnDiskBuffer(StringRef path, size_t size, unsigned mode)
    // extend the file beforehand. _chsize (ftruncate on Windows) is
    // pretty slow just like it writes specified amount of bytes,
    // so we should avoid calling that function.
-   if (auto errorCode = fs::resize_file(file.m_fd, size)) {
+   if (auto errorCode = fs::resize_file(file.fd, size)) {
       consume_error(file.discard());
       return error_code_to_error(errorCode);
    }
@@ -183,7 +183,7 @@ createOnDiskBuffer(StringRef path, size_t size, unsigned mode)
    // Mmap it.
    std::error_code errorCode;
    auto mappedFile = std::make_unique<fs::MappedFileRegion>(
-            fs::convert_fd_to_native_file(file.m_fd), fs::MappedFileRegion::readwrite, size, 0, errorCode);
+            fs::convert_fd_to_native_file(file.fd), fs::MappedFileRegion::readwrite, size, 0, errorCode);
    // mmap(2) can fail if the underlying filesystem does not support it.
    // If that happens, we fall back to in-memory buffer as the last resort.
    if (errorCode) {

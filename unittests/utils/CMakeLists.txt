@@ -9,11 +9,12 @@
 #
 # Created by polarboy on 2018/10/12.
 
-polar_add_unittest(PolarBaseLibTests BasicUtilsTest
+polar_add_unittest(PolarBaseLibTests UtilsTest
    ../TestEntry.cpp
    AlignOfTest.cpp
    AllocatorTest.cpp
    ArrayRecyclerTest.cpp
+   ARMAttributeParserTest.cpp
    BinaryStreamTest.cpp
    BranchProbabilityTest.cpp
    CachePruningTest.cpp
@@ -23,6 +24,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    CompressionTest.cpp
    ConvertUtfTest.cpp
    CrashRecoveryTest.cpp
+   CrcTest.cpp
    DataExtractorTest.cpp
    DebugTest.cpp
    DebugCounterTest.cpp
@@ -37,6 +39,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    FormatVariadicTest.cpp
    GlobPatternTest.cpp
    HostTest.cpp
+   KnownBitsTest.cpp
    LEB128Test.cpp
    LineIteratorTest.cpp
    LockFileManagerTest.cpp
@@ -44,9 +47,8 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    MathExtrasTest.cpp
    Md5Test.cpp
    MemoryBufferTest.cpp
-#   MemoryTest.cpp
+   MemoryTest.cpp
    NativeFormatTests.cpp
-#   ParallelTest.cpp
    PathTest.cpp
    ProcessTest.cpp
    ProgramTest.cpp
@@ -66,13 +68,14 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    TrailingObjectsTest.cpp
    TrigramIndexTest.cpp
    TypeNameTest.cpp
+   TypeTraitsTest.cpp
    UnicodeTest.cpp
    YamlIOTest.cpp
    YamlParserTest.cpp
    VersionTupleTest.cpp
    ThreadPoolTest.cpp
    TaskQueueTest.cpp
-#   VirtualFileSystemTest.cpp
+   VirtualFileSystemTest.cpp
    )
 
-target_link_libraries(BasicUtilsTest PRIVATE TestSupport)
+target_link_libraries(UtilsTest PRIVATE TestSupport)

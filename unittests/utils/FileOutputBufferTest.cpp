@@ -1,12 +1,16 @@
+//===- llvm/unittest/Support/FileOutputBuffer.cpp - unit tests ------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
-
 // Copyright (c) 2017 - 2019 polarphp software foundation
 // Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
-
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-
 // Created by polarboy on 2018/07/13.
 
 #include "polarphp/utils/FileOutputBuffer.h"
@@ -125,55 +129,6 @@ TEST(FileOutputBufferTest, Test)
 
    // Clean up.
    ASSERT_NO_ERROR(fs::remove(TestDirectory.getStr()));
-}
-
-TEST(FileOutputBuffer, testModify)
-{
-   // Create unique temporary directory for these tests
-   SmallString<128> TestDirectory;
-   {
-      ASSERT_NO_ERROR(
-               fs::create_unique_directory("FileOutputBuffer-modify", TestDirectory));
-   }
-
-   SmallString<128> File1(TestDirectory);
-   File1.append("/file");
-   // First write some data.
-   {
-      Expected<std::unique_ptr<FileOutputBuffer>> BufferOrErr =
-            FileOutputBuffer::create(File1, 10);
-      ASSERT_NO_ERROR(error_to_error_code(BufferOrErr.takeError()));
-      std::unique_ptr<FileOutputBuffer> &Buffer = *BufferOrErr;
-      memcpy(Buffer->getBufferStart(), "AAAAAAAAAA", 10);
-      ASSERT_NO_ERROR(error_to_error_code(Buffer->commit()));
-   }
-
-   // Then re-open the file for modify and change only some bytes.
-   {
-//      Expected<std::unique_ptr<FileOutputBuffer>> BufferOrErr =
-//            FileOutputBuffer::create(File1, size_t(-1), FileOutputBuffer::F_modify);
-//      ASSERT_NO_ERROR(error_to_error_code(BufferOrErr.takeError()));
-//      std::unique_ptr<FileOutputBuffer> &Buffer = *BufferOrErr;
-//      ASSERT_EQ(10U, Buffer->getBufferSize());
-//      uint8_t *Data = Buffer->getBufferStart();
-//      Data[0] = 'X';
-//      Data[9] = 'X';
-//      ASSERT_NO_ERROR(error_to_error_code(Buffer->commit()));
-   }
-
-   // Finally, re-open the file for read and verify that it has the modified
-   // contents.
-   {
-      OptionalError<std::unique_ptr<MemoryBuffer>> BufferOrErr = MemoryBuffer::getFile(File1);
-      ASSERT_NO_ERROR(BufferOrErr.getError());
-      std::unique_ptr<MemoryBuffer> Buffer = std::move(*BufferOrErr);
-      ASSERT_EQ(10U, Buffer->getBufferSize());
-      EXPECT_EQ(StringRef("XAAAAAAAAX"), Buffer->getBuffer());
-   }
-
-   // Clean up.
-   ASSERT_NO_ERROR(fs::remove(File1));
-   ASSERT_NO_ERROR(fs::remove(TestDirectory));
 }
 
 } // anonymous namespace

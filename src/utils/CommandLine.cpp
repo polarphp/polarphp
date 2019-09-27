@@ -220,10 +220,10 @@ public:
    }
 
    void addLiteralOption(Option &option, StringRef name) {
-      if (option.m_subs.empty()) {
+      if (option.subs.empty()) {
          addLiteralOption(option, &*sg_topLevelSubCommand, name);
       } else {
-         for (auto subcommand : option.m_subs) {
+         for (auto subcommand : option.subs) {
             addLiteralOption(option, subcommand, name);
          }
       }
@@ -235,12 +235,12 @@ public:
       if (option->hasArgStr()) {
          // If it's a DefaultOption, check to make sure it isn't already there.
          if (option->isDefaultOption() &&
-             subcommand->m_optionsMap.find(option->m_argStr) != subcommand->m_optionsMap.end()) {
+             subcommand->m_optionsMap.find(option->argStr) != subcommand->m_optionsMap.end()) {
             return;
          }
          // Add argument to the argument map!
-         if (!subcommand->m_optionsMap.insert(std::make_pair(option->m_argStr, option)).second) {
-            error_stream() << m_programName << ": CommandLine Error: Option '" << option->m_argStr
+         if (!subcommand->m_optionsMap.insert(std::make_pair(option->argStr, option)).second) {
+            error_stream() << m_programName << ": CommandLine Error: Option '" << option->argStr
                            << "' registered more than once!\n";
             hadErrors = true;
          }
@@ -286,10 +286,10 @@ public:
          m_defaultOptions.push_back(option);
          return;
       }
-      if (option->m_subs.empty()) {
+      if (option->subs.empty()) {
          addOption(option, &*sg_topLevelSubCommand);
       } else {
-         for (auto SubCommand : option->m_subs) {
+         for (auto SubCommand : option->subs) {
             addOption(option, SubCommand);
          }
       }
@@ -300,7 +300,7 @@ public:
       SmallVector<StringRef, 16> optionNames;
       option->getExtraOptionNames(optionNames);
       if (option->hasArgStr()) {
-         optionNames.push_back(option->m_argStr);
+         optionNames.push_back(option->argStr);
       }
       SubCommand &sub = *subcommand;
       auto end = sub.m_optionsMap.end();
@@ -332,7 +332,7 @@ public:
 
    void removeOption(Option *option)
    {
-      if (option->m_subs.empty()) {
+      if (option->subs.empty()) {
          removeOption(option, &*sg_topLevelSubCommand);
       } else {
          if (option->isInAllSubCommands()) {
@@ -340,7 +340,7 @@ public:
                removeOption(option, subcommand);
             }
          } else {
-            for (auto subcommand : option->m_subs) {
+            for (auto subcommand : option->subs) {
                removeOption(option, subcommand);
             }
          }
@@ -372,16 +372,16 @@ public:
    {
       SubCommand &sub = *subcommand;
       if (!sub.m_optionsMap.insert(std::make_pair(newName, option)).second) {
-         error_stream() << m_programName << ": CommandLine Error: Option '" << option->m_argStr
+         error_stream() << m_programName << ": CommandLine Error: Option '" << option->argStr
                         << "' registered more than once!\n";
          report_fatal_error("inconsistency in registered CommandLine options");
       }
-      sub.m_optionsMap.erase(option->m_argStr);
+      sub.m_optionsMap.erase(option->argStr);
    }
 
    void updateArgStr(Option *option, StringRef newName)
    {
-      if (option->m_subs.empty()) {
+      if (option->subs.empty()) {
          updateArgStr(option, newName, &*sg_topLevelSubCommand);
       } else {
          if (option->isInAllSubCommands()) {
@@ -389,7 +389,7 @@ public:
                updateArgStr(option, newName, sc);
             }
          } else {
-            for (auto sc : option->m_subs) {
+            for (auto sc : option->subs) {
                updateArgStr(option, newName, sc);
             }
          }
@@ -513,22 +513,22 @@ void Option::setArgStr(StringRef str)
       sg_globalParser->updateArgStr(this, str);
    }
    assert((str.empty() || str[0] != '-') && "Option can't start with '-");
-   m_argStr = str;
-   if (m_argStr.size() == 1) {
+   argStr = str;
+   if (argStr.size() == 1) {
       setMiscFlag(Grouping);
    }
 }
 
 void Option::addCategory(OptionCategory &category)
 {
-   assert(!m_categories.empty() && "Categories cannot be empty.");
+   assert(!categories.empty() && "Categories cannot be empty.");
    // Maintain backward compatibility by replacing the default GeneralCategory
    // if it's still set.  Otherwise, just add the new one.  The GeneralCategory
    // must be explicitly added if you want multiple categories that include it.
-   if (&category != &sg_generalCategory && m_categories[0] == &sg_generalCategory) {
-      m_categories[0] = &category;
-   } else if (find(m_categories, &category) == m_categories.end()) {
-      m_categories.push_back(&category);
+   if (&category != &sg_generalCategory && categories[0] == &sg_generalCategory) {
+      categories[0] = &category;
+   } else if (find(categories, &category) == categories.end()) {
+      categories.push_back(&category);
    }
 }
 
@@ -673,7 +673,7 @@ Option *lookup_nearest_option(StringRef arg,
       SmallVector<StringRef, 16> optionNames;
       option->getExtraOptionNames(optionNames);
       if (option->hasArgStr()) {
-         optionNames.push_back(option->m_argStr);
+         optionNames.push_back(option->argStr);
       }
       bool permitValue = option->getValueExpectedFlag() != cmd::ValueDisallowed;
       StringRef flag = permitValue ? lhs : arg;
@@ -795,7 +795,7 @@ inline bool provide_option(Option *handler, StringRef argName,
 bool provide_positional_option(Option *handler, StringRef arg, int i)
 {
    int dummy = i;
-   return provide_option(handler, handler->m_argStr, arg, 0, nullptr, dummy);
+   return provide_option(handler, handler->argStr, arg, 0, nullptr, dummy);
 }
 
 // get_option_pred - Check to see if there are any options that satisfy the
@@ -1490,7 +1490,7 @@ bool CommandLineParser::parseCommandLineOptions(int argc,
                           "unbounded number of values, and this option"
                           " does not require a value!");
             }
-            *errorStream << m_programName << ": CommandLine Error: Option '" << opt->m_argStr
+            *errorStream << m_programName << ": CommandLine Error: Option '" << opt->argStr
                          << "' is all messed up!\n";
             *errorStream << positionalOpts.size();
             errorParsing = true;
@@ -1752,10 +1752,10 @@ bool CommandLineParser::parseCommandLineOptions(int argc,
 bool Option::error(const Twine &message, StringRef argName, RawOutStream &errorStream)
 {
    if (!argName.getData()) {
-      argName = m_argStr;
+      argName = argStr;
    }
    if (argName.empty()) {
-      errorStream << m_helpStr; // Be nice for positional arguments
+      errorStream << helpStr; // Be nice for positional arguments
    } else {
       errorStream << sg_globalParser->m_programName << ": for the -" << PrintArg(argName);
    }
@@ -1796,10 +1796,10 @@ namespace {
 
 StringRef get_value_str(const Option &option, StringRef defaultMsg)
 {
-   if (option.m_valueStr.empty()) {
+   if (option.valueStr.empty()) {
       return defaultMsg;
    }
-   return option.m_valueStr;
+   return option.valueStr;
 }
 
 } // anonymous namespace
@@ -1811,7 +1811,7 @@ StringRef get_value_str(const Option &option, StringRef defaultMsg)
 // Return the width of the option tag for printing...
 size_t Alias::getOptionWidth() const
 {
-   return arg_plus_prefixes_size(m_argStr);
+   return arg_plus_prefixes_size(argStr);
 }
 
 void Option::printHelpStr(StringRef helpStr, size_t indent,
@@ -1830,8 +1830,8 @@ void Option::printHelpStr(StringRef helpStr, size_t indent,
 // Print out the option for the Alias.
 void Alias::printOptionInfo(size_t globalWidth) const
 {
-   out_stream() << PrintArg(m_argStr);
-   printHelpStr(m_helpStr, globalWidth, arg_plus_prefixes_size(m_argStr));
+   out_stream() << PrintArg(argStr);
+   printHelpStr(helpStr, globalWidth, arg_plus_prefixes_size(argStr));
 }
 
 //===----------------------------------------------------------------------===//
@@ -1844,7 +1844,7 @@ void Alias::printOptionInfo(size_t globalWidth) const
 // Return the width of the option tag for printing...
 size_t BasicParserImpl::getOptionWidth(const Option &option) const
 {
-   size_t len = arg_plus_prefixes_size(option.m_argStr);
+   size_t len = arg_plus_prefixes_size(option.argStr);
    auto valName = getValueName();
    if (!valName.empty()) {
       size_t formattingLen = 3;
@@ -1862,7 +1862,7 @@ size_t BasicParserImpl::getOptionWidth(const Option &option) const
 void BasicParserImpl::printOptionInfo(const Option &option,
                                       size_t globalWidth) const
 {
-   out_stream() << PrintArg(option.m_argStr);
+   out_stream() << PrintArg(option.argStr);
 
    auto valName = getValueName();
    if (!valName.empty()) {
@@ -1872,14 +1872,14 @@ void BasicParserImpl::printOptionInfo(const Option &option,
          out_stream() << "=<" << get_value_str(option, valName) << '>';
       }
    }
-   Option::printHelpStr(option.m_helpStr, globalWidth, getOptionWidth(option));
+   Option::printHelpStr(option.helpStr, globalWidth, getOptionWidth(option));
 }
 
 void BasicParserImpl::printOptionName(const Option &option,
                                       size_t globalWidth) const
 {
-   out_stream() << PrintArg(option.m_argStr);
-   out_stream().indent(globalWidth - option.m_argStr.getSize());
+   out_stream() << PrintArg(option.argStr);
+   out_stream().indent(globalWidth - option.argStr.getSize());
 }
 
 // Parser<bool> implementation
@@ -2033,7 +2033,7 @@ size_t GenericParserBase::getOptionWidth(const Option &option) const
 {
    if (option.hasArgStr()) {
       size_t size =
-            arg_plus_prefixes_size(option.m_argStr) + sg_eqValue.size();
+            arg_plus_prefixes_size(option.argStr) + sg_eqValue.size();
       for (unsigned i = 0, e = getNumOptions(); i != e; ++i) {
          StringRef name = getOption(i);
          if (!shouldPrintOption(name, getDescription(i), option)) {
@@ -2064,18 +2064,18 @@ void GenericParserBase::printOptionInfo(const Option &option,
       if (option.getValueExpectedFlag() == ValueOptional) {
          for (unsigned i = 0, e = getNumOptions(); i != e; ++i) {
             if (getOption(i).empty()) {
-               out_stream() << PrintArg(option.m_argStr);
-               Option::printHelpStr(option.m_helpStr, globalWidth,
-                                    arg_plus_prefixes_size(option.m_argStr));
+               out_stream() << PrintArg(option.argStr);
+               Option::printHelpStr(option.helpStr, globalWidth,
+                                    arg_plus_prefixes_size(option.argStr));
                break;
             }
          }
       }
 
-      out_stream() << PrintArg(option.m_argStr) << sg_eqValue;
-      Option::printHelpStr(option.m_helpStr, globalWidth,
+      out_stream() << PrintArg(option.argStr) << sg_eqValue;
+      Option::printHelpStr(option.helpStr, globalWidth,
                            sg_eqValue.size() +
-                           arg_plus_prefixes_size(option.m_argStr));
+                           arg_plus_prefixes_size(option.argStr));
       for (unsigned i = 0, e = getNumOptions(); i != e; ++i) {
          StringRef optionName = getOption(i);
          StringRef description = getDescription(i);
@@ -2096,8 +2096,8 @@ void GenericParserBase::printOptionInfo(const Option &option,
          out_stream() << '\n';
       }
    } else {
-      if (!option.m_helpStr.empty()) {
-         out_stream() << "  " << option.m_helpStr << '\n';
+      if (!option.helpStr.empty()) {
+         out_stream() << "  " << option.helpStr << '\n';
       }
       for (unsigned i = 0, e = getNumOptions(); i != e; ++i) {
          StringRef Option = getOption(i);
@@ -2116,8 +2116,8 @@ void GenericParserBase::printGenericOptionDiff(
       const Option &option, const GenericOptionValue &value,
       const GenericOptionValue &defaultValue, size_t globalWidth) const
 {
-   out_stream() << PrintArg(option.m_argStr);
-   out_stream().indent(globalWidth - option.m_argStr.getSize());
+   out_stream() << PrintArg(option.argStr);
+   out_stream().indent(globalWidth - option.argStr.getSize());
 
    unsigned numOpts = getNumOptions();
    for (unsigned i = 0; i != numOpts; ++i) {
@@ -2343,14 +2343,14 @@ public:
 
       for (auto opt : positionalOpts) {
          if (opt->hasArgStr()) {
-            out_stream() << " --" << opt->m_argStr;
+            out_stream() << " --" << opt->argStr;
          }
-         out_stream() << " " << opt->m_helpStr;
+         out_stream() << " " << opt->helpStr;
       }
 
       // Print the consume after option info if it exists...
       if (consumeAfterOpt) {
-         out_stream() << " " << consumeAfterOpt->m_helpStr;
+         out_stream() << " " << consumeAfterOpt->helpStr;
       }
       if (subcommand == &*sg_topLevelSubCommand && !subs.empty()) {
          // Compute the maximum subcommand length...
@@ -2437,7 +2437,7 @@ protected:
       // options within categories will also be alphabetically sorted.
       for (size_t index = 0, end = opts.getSize(); index != end; ++index) {
          Option *opt = opts[index].second;
-         for (auto &category : opt->m_categories) {
+         for (auto &category : opt->categories) {
             assert(categorizedOptions.count(category) > 0 &&
                    "Option has an unregistered category");
             categorizedOptions[category].push_back(opt);
@@ -2717,7 +2717,7 @@ get_registered_subcommands()
 void hide_unrelated_options(cmd::OptionCategory &category, SubCommand &sub)
 {
    for (auto &iter : sub.m_optionsMap) {
-      for (auto &categryItem : iter.second->m_categories) {
+      for (auto &categryItem : iter.second->categories) {
          if (categryItem != &category &&
              categryItem != &sg_genericCategory) {
             iter.second->setHiddenFlag(cmd::ReallyHidden);
@@ -2730,7 +2730,7 @@ void hide_unrelated_options(ArrayRef<const cmd::OptionCategory *> categories,
                             SubCommand &sub)
 {
    for (auto &iter : sub.m_optionsMap) {
-      for (auto &categoryItem : iter.second->m_categories) {
+      for (auto &categoryItem : iter.second->categories) {
          if (find(categories, categoryItem) == categories.end() && categoryItem != &sg_genericCategory) {
             iter.second->setHiddenFlag(cmd::ReallyHidden);
          }

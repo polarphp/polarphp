@@ -1200,7 +1200,7 @@ void DirectoryEntry::replaceFilename(const Twine &filename, FileType type,
 }
 
 TempFile::TempFile(StringRef name, int fd)
-   : m_tmpName(name), m_fd(fd)
+   : m_tmpName(name), fd(fd)
 {}
 
 TempFile::TempFile(TempFile &&other)
@@ -1211,9 +1211,9 @@ TempFile::TempFile(TempFile &&other)
 TempFile &TempFile::operator=(TempFile &&other)
 {
    m_tmpName = std::move(other.m_tmpName);
-   m_fd = other.m_fd;
+   fd = other.fd;
    other.m_done = true;
-   other.m_fd = -1;
+   other.fd = -1;
    return *this;
 }
 
@@ -1225,11 +1225,11 @@ TempFile::~TempFile()
 Error TempFile::discard()
 {
    m_done = true;
-   if (m_fd != -1 && close(m_fd) == -1) {
+   if (fd != -1 && close(fd) == -1) {
       std::error_code errorCode = std::error_code(errno, std::generic_category());
       return error_code_to_error(errorCode);
    }
-   m_fd = -1;
+   fd = -1;
 
 #ifdef _WIN32
    // On windows closing will remove the file.
@@ -1258,11 +1258,11 @@ Error TempFile::keep(const Twine &name)
    // If we cant't cancel the delete don't rename.
    std::error_code renameErrorCode = cancel_delete_on_close(fd);
    if (!renameErrorCode) {
-      renameErrorCode = rename_fd(m_fd, name);
+      renameErrorCode = rename_fd(fd, name);
    }
    // If we can't rename, discard the temporary file.
    if (renameErrorCode) {
-      remove_fd(m_fd);
+      remove_fd(fd);
    }
 
 #else
@@ -1277,11 +1277,11 @@ Error TempFile::keep(const Twine &name)
    if (!renameErrorCode) {
       m_tmpName = "";
    }
-   if (close(m_fd) == -1) {
+   if (close(fd) == -1) {
       std::error_code errorCode(errno, std::generic_category());
       return error_code_to_error(errorCode);
    }
-   m_fd = -1;
+   fd = -1;
    return error_code_to_error(renameErrorCode);
 }
 
@@ -1291,7 +1291,7 @@ Error TempFile::keep()
    m_done = true;
 
 #ifdef _WIN32
-   if (std::error_code errorCode = cancel_delete_on_close(m_fd)) {
+   if (std::error_code errorCode = cancel_delete_on_close(fd)) {
       return error_code_to_error(errorCode);
    }
 #else
@@ -1300,11 +1300,11 @@ Error TempFile::keep()
 
    m_tmpName = "";
 
-   if (close(m_fd) == -1) {
+   if (close(fd) == -1) {
       std::error_code errorCode(errno, std::generic_category());
       return error_code_to_error(errorCode);
    }
-   m_fd = -1;
+   fd = -1;
 
    return Error::getSuccess();
 }

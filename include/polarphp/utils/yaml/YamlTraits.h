@@ -1454,14 +1454,15 @@ template <typename value_type, polar::utils::Endianness endian, size_t alignment
 struct ScalarBitSetTraits<
       PackedEndianSpecificIntegral<value_type, endian,
       alignment>,
-      typename std::enable_if<HasScalarBitSetTraits<value_type>::value>::type> {
+      typename std::enable_if<HasScalarBitSetTraits<value_type>::value>::type>
+{
    using EndianType =
    PackedEndianSpecificIntegral<value_type, endian,
    alignment>;
    static void bitset(IO &io, EndianType &endianValue)
    {
       value_type value = endianValue;
-      ScalarBitSetTraits<value_type>::bitset(io, endianValue);
+      ScalarBitSetTraits<value_type>::bitset(io, value);
       endianValue = value;
    }
 };

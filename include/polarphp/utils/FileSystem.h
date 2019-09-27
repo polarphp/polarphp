@@ -786,7 +786,7 @@ std::error_code set_permissions(const Twine &path, Permission permissions);
 /// Vesion of setPermissions accepting a file descriptor.
 /// TODO Delete the path based overload once we implement the FD based overload
 /// on Windows.
-std::error_code setPermissions(int fd, Permission Permissions);
+std::error_code set_permissions(int fd, Permission Permissions);
 
 /// Get file permissions.
 ///
@@ -976,7 +976,7 @@ public:
    std::string m_tmpName;
 
    // The open file descriptor.
-   int m_fd = -1;
+   int fd = -1;
 
    // Keep this with the given name.
    Error keep(const Twine &name);
@@ -1305,7 +1305,7 @@ private:
 #ifdef _WIN32
   sys::fs::file_t m_fileHandle;
 #endif
-   int m_fd;
+   int fd;
    MapMode m_mode;
 
    std::error_code init(fs::file_t fd, uint64_t offset, MapMode mode);

@@ -42,17 +42,17 @@ private:
       // options are global and would pollute the global namespace with our
       // counters.  Rather than go that route, we have just overridden the
       // printing, which only a few things call anyway.
-      out_stream() << "  -" << m_argStr;
-      // All of the other options in CommandLine.cpp use m_argStr.size() + 6 for
+      out_stream() << "  -" << argStr;
+      // All of the other options in CommandLine.cpp use argStr.size() + 6 for
       // width, so we do the same.
-      Option::printHelpStr(m_helpStr, globalWidth, m_argStr.getSize() + 6);
+      Option::printHelpStr(helpStr, globalWidth, argStr.getSize() + 6);
       const auto &counterInstance = DebugCounter::getInstance();
       for (auto name : counterInstance) {
          const auto info =
                counterInstance.getCounterInfo(counterInstance.getCounterId(name));
-         size_t NumSpaces = globalWidth - info.first.size() - 8;
+         size_t numSpaces = globalWidth - info.first.size() - 8;
          out_stream() << "    =" << info.first;
-         out_stream().indent(NumSpaces) << " -   " << info.second << '\n';
+         out_stream().indent(numSpaces) << " -   " << info.second << '\n';
       }
    }
 };

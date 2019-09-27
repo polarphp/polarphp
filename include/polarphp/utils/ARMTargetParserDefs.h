@@ -275,12 +275,16 @@ ARM_CPU_NAME("cortex-a32", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
 ARM_CPU_NAME("cortex-a35", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
 ARM_CPU_NAME("cortex-a53", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
 ARM_CPU_NAME("cortex-a55", ARMV8_2A, FK_CRYPTO_NEON_FP_ARMV8, false,
-             (arm::AEK_FP16 | arm::AEK_DOTPROD))
+            (arm::AEK_FP16 | arm::AEK_DOTPROD))
 ARM_CPU_NAME("cortex-a57", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
 ARM_CPU_NAME("cortex-a72", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
 ARM_CPU_NAME("cortex-a73", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
 ARM_CPU_NAME("cortex-a75", ARMV8_2A, FK_CRYPTO_NEON_FP_ARMV8, false,
-             (arm::AEK_FP16 | arm::AEK_DOTPROD))
+            (arm::AEK_FP16 | arm::AEK_DOTPROD))
+ARM_CPU_NAME("cortex-a76", ARMV8_2A, FK_CRYPTO_NEON_FP_ARMV8, false,
+            (arm::AEK_FP16 | arm::AEK_DOTPROD))
+ARM_CPU_NAME("cortex-a76ae", ARMV8_2A, FK_CRYPTO_NEON_FP_ARMV8, false,
+            (arm::AEK_FP16 | arm::AEK_DOTPROD))
 ARM_CPU_NAME("cyclone", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
 ARM_CPU_NAME("exynos-m1", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
 ARM_CPU_NAME("exynos-m2", ARMV8A, FK_CRYPTO_NEON_FP_ARMV8, false, arm::AEK_CRC)
