@@ -28,6 +28,7 @@ polar_add_unittest(PolarBaseLibTests UtilsTest
    DataExtractorTest.cpp
    DebugTest.cpp
    DebugCounterTest.cpp
+   FileCheckTest.cpp
    EndianStreamTest.cpp
    EndianTest.cpp
    ErrorNumberTest.cpp
@@ -78,4 +79,4 @@ polar_add_unittest(PolarBaseLibTests UtilsTest
    VirtualFileSystemTest.cpp
    )
 
-target_link_libraries(UtilsTest PRIVATE TestSupport)
+target_link_libraries(UtilsTest PRIVATE TestSupport filecheckerkernel)
