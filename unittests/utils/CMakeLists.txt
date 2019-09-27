@@ -9,6 +9,8 @@
 #
 # Created by polarboy on 2018/10/12.
 
+add_subdirectory(dynamiclibrary)
+
 polar_add_unittest(PolarBaseLibTests UtilsTest
    ../TestEntry.cpp
    AlignOfTest.cpp
