@@ -1,8 +1,8 @@
 #!/usr/bin/env php
 <?php
 
-use Lit\Kernel;
-use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Lit\Kernel\Kernel;
+use Lit\Application;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Debug\Debug;
 

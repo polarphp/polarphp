@@ -10,7 +10,7 @@
 //
 // Created by polarboy on 2019/10/08.
 
-namespace Lit;
+namespace Lit\Kernel;
 
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -37,7 +37,7 @@ class Kernel extends BaseKernel
 
    public function getProjectDir(): string
    {
-      return \dirname(__DIR__);
+      return LIT_ROOT_DIR;
    }
 
    protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
