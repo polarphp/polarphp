@@ -40,7 +40,6 @@ build/
 cmake-build-debug/
 **/.idea
 **/.vscode
-devtools/gyb/vendor/
 include/polarphp/parser/internal/YYParserDefs.h
 include/polarphp/parser/internal/YYLexerConditionDefs.h
 include/polarphp/parser/internal/YYLocation.h
@@ -48,3 +47,13 @@ include/polarphp/syntax/internal/TokenEnumDefs.h
 src/parser/internal/YYLexer.cpp
 src/parser/internal/YYParser.cpp
 src/syntax/TokenDescMap.cpp
+
+# symfony projects
+devtools/gyb/vendor/
+
+## phplit
+devtools/phplit/.env.local
+devtools/phplit/.env.local.php
+devtools/phplit/.env.*.local
+devtools/phplit/var/
+devtools/phplit/vendor/
