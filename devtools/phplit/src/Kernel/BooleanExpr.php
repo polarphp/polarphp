@@ -10,6 +10,9 @@
 //
 // Created by polarboy on 2019/10/09.
 namespace Lit\Kernel;
+
+use Lit\Kernel\ValueException;
+
 // A simple evaluator of boolean expressions.
 //
 // Grammar:
@@ -30,9 +33,10 @@ namespace Lit\Kernel;
 // All other identifiers are false.
 class BooleanExpr
 {
-   const TOKENIZATION_REGEX = '\A\s*([()]|[-+=._a-zA-Z0-9]+|&&|\|\||!)\s*(.*)\Z';
+   const TOKENIZATION_REGEX = '/\A\s*([()]|[-+=._a-zA-Z0-9]+|&&|\|\||!)\s*(.*)\Z/';
+   const END_TOKEN_MARK = '__END_MARK__';
    /**
-    * @var array $tokens
+    * @var iterable $tokens
     */
    private $tokens;
    /**
@@ -52,10 +56,123 @@ class BooleanExpr
     */
    private $token;
 
+   public function __construct(string $expr, array $variables, string $triple = '')
+   {
+      $this->tokens = self::tokenize($expr);
+      $this->variables = $variables;
+      $this->variables[] = 'true';
+      $this->triple = $triple;
+   }
+
+   private function quote(string $token) : string
+   {
+      if ($token == self::END_TOKEN_MARK) {
+         return '<end of expression>';
+      } else {
+         return var_export($token, true);
+      }
+   }
+
+   private function accept(string $token) : bool
+   {
+      if ($this->token == $token) {
+         $this->token = next($this->tokens);
+         return true;
+      }
+      return false;
+   }
+
+   private function expect(string $token) : void
+   {
+      if ($this->token == $token) {
+         if ($this->token != self::END_TOKEN_MARK) {
+            $this->token = next($this->tokens);
+         }
+      } else {
+         throw new ValueException(sprintf("expected: %s\nhave: %s", self::quote($token), self::quote($this->token)));
+      }
+   }
+
+   private function isIdentifier(string $token) : bool
+   {
+      if ($token == self::END_TOKEN_MARK || $token == '&&' || $token == '||' ||
+          $token == '!' || $token == '(' || $token == ')') {
+         return false;
+      }
+      return true;
+   }
+
+   private function parseNotExpr() : void
+   {
+      if ($this->accept('!')) {
+         $this->parseNotExpr();
+         $this->value = !$this->value;
+      } elseif($this->accept('(')) {
+         $this->parseOrExpr();
+         $this->expect(')');
+      } elseif (!$this->isIdentifier($this->token)) {
+         throw new ValueException("expected: '!' or '(' or identifier\nhave: %s", self::quote($this->token));
+      } else {
+         $this->value = in_array($this->token, $this->variables) or $this->isSubStr($this->triple, $this->token);
+         $this->token = next($this->tokens);
+      }
+   }
+
+   private function isSubStr(string $haystack, string $needle) : bool
+   {
+      return strpos($haystack, $needle) === false ? false : true;
+   }
+
+   private function parseAndExpr() : void
+   {
+      $this->parseNotExpr();
+      while ($this->accept('&&')) {
+         $left = $this->value;
+         $this->parseNotExpr();
+         $right = $this->value;
+         // this is technically the wrong associativity, but it
+         // doesn't matter for this limited expression grammar
+         $this->value = $left and $right;
+      }
+   }
+
+   private function parseOrExpr() : void
+   {
+      $this->parseAndExpr();
+      while ($this->accept('||')) {
+         $left = $this->value;
+         $this->parseAndExpr();
+         $right = $this->value;
+         // this is technically the wrong associativity, but it
+         // doesn't matter for this limited expression grammar
+         $this->value = $left or $right;
+      }
+   }
+
+   public function parseAllExpr()
+   {
+      $this->token = next($this->tokens);
+      $this->parseOrExpr();
+      $this->expect(self::END_TOKEN_MARK);
+      return $this->value;
+   }
+
    private static function tokenize(string $expr) : iterable
    {
       while (true) {
-
+         preg_match(self::TOKENIZATION_REGEX, $expr, $matches);
+         if (empty($matches)) {
+            $expr = trim($expr);
+            if (strlen($expr) == 0) {
+               yield self::END_TOKEN_MARK;
+               return;
+            } else {
+               throw new ValueException(sprintf("couldn't parse text: %s", $expr));
+            }
+         }
+         $token = $matches[1];
+         $expr = $matches[2];
+         yield $token;
       }
    }
 }
