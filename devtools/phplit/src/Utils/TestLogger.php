@@ -37,24 +37,24 @@ class TestLogger
       self::$logger = $logger;
    }
 
-   public static function writeNote(string $message) : void
+   public static function note(string $message) : void
    {
       self::doWriteMessage(LogLevel::INFO, $message);
    }
 
-   public static function writeWarning(string $message) : void
+   public static function warning(string $message) : void
    {
       self::doWriteMessage(LogLevel::WARNING, $message);
       ++self::$numWarnings;
    }
 
-   public static function writeError(string $message) : void
+   public static function error(string $message) : void
    {
       self::doWriteMessage(LogLevel::ERROR, $message);
       ++self::$numErrors;
    }
 
-   public static function writeFatal(string $message) : void
+   public static function fatal(string $message) : void
    {
       self::doWriteMessage(LogLevel::EMERGENCY, $message);
       exit(2);

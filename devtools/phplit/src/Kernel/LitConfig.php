@@ -11,6 +11,8 @@
 // Created by polarboy on 2019/10/09.
 
 namespace Lit\Kernel;
+use Lit\Utils\TestLogger;
+
 /**
  * LitConfig - Configuration data for a 'lit' test runner instance, shared
  * across all tests.
@@ -495,6 +497,9 @@ class LitConfig
     */
    public function setMaxIndividualTestTime(int $maxIndividualTestTime): LitConfig
    {
+      if ($maxIndividualTestTime < 0) {
+         TestLogger::fatal("The timeout per test must be >= 0 seconds");
+      }
       $this->maxIndividualTestTime = $maxIndividualTestTime;
       return $this;
    }
@@ -551,5 +556,14 @@ class LitConfig
    {
       $this->echoAllCommands = $echoAllCommands;
       return $this;
+   }
+
+   public function loadConfig($testConfig, string $path)
+   {
+      if ($this->debug) {
+         TestLogger::note('load_config from %s', $path);
+      }
+      $testConfig->loadFromPath($path, $this);
+      return $testConfig;
    }
 }
