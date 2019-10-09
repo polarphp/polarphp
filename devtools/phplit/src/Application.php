@@ -11,12 +11,16 @@
 // Created by polarboy on 2019/10/08.
 
 namespace Lit;
+
 use Symfony\Bundle\FrameworkBundle\Console\Application as BaseApplication;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 class Application extends BaseApplication
 {
    const VERSION = '0.0.1';
+
    public function __construct(KernelInterface $kernel)
    {
       parent::__construct($kernel);

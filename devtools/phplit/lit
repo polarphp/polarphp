@@ -11,7 +11,13 @@ if (false === in_array(\PHP_SAPI, ['cli', 'phpdbg', 'embed'], true)) {
 }
 
 set_time_limit(0);
-define('LIT_ROOT_DIR', dirname($_SERVER['SCRIPT_NAME']));
+$script = $_SERVER['SCRIPT_NAME'];
+// TODO work around for windows
+if ($script[0] == '/') {
+   define('LIT_ROOT_DIR', dirname($_SERVER['SCRIPT_NAME']));
+} else {
+   define('LIT_ROOT_DIR', dirname(getcwd().'/'.$_SERVER['SCRIPT_NAME']));
+}
 
 require LIT_ROOT_DIR .'/vendor/autoload.php';
 

@@ -16,9 +16,12 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
+
+use Lit\Utils\TestLogger;
 
 class MainCommand extends Command
 {
@@ -52,7 +55,7 @@ class MainCommand extends Command
       $this->addOption('time-tests', null, InputOption::VALUE_OPTIONAL, 'Track elapsed wall time for each test', false);
       $this->addOption('no-execute', null, InputOption::VALUE_OPTIONAL, 'Don\'t execute any tests (assume PASS)', false);
       $this->addOption('xunit-xml-output', null, InputOption::VALUE_OPTIONAL, 'Write XUnit-compatible XML test reports to the specified file');
-      $this->addOption('timeout', null, InputOption::VALUE_OPTIONAL, 'Maximum time to spend running a single test (in seconds). 0 means no time limit.', 0);
+      $this->addOption('timeout', null, InputOption::VALUE_OPTIONAL, 'Maximum time to spend running a single test (in seconds). 0 means no time limit.');
       $this->addOption('max-failures', null, InputOption::VALUE_OPTIONAL, 'Stop execution after the given number of failures.');
       // selection group
       $this->addOption('max-tests', null, InputOption::VALUE_OPTIONAL, 'Maximum number of tests to run');
@@ -74,6 +77,8 @@ class MainCommand extends Command
 
    protected function execute(InputInterface $input, OutputInterface $output)
    {
+      $logger = new ConsoleLogger($output);
+      TestLogger::init($logger);
       $fs = new Filesystem();
       $tempDir = $this->prepareTempDir($fs);
       try {
@@ -102,7 +107,14 @@ class MainCommand extends Command
    private function doExecute(InputInterface $input, OutputInterface $output)
    {
       $userParams = $this->parseUserParams($input);
-      var_dump($userParams);
+      $maxIndividualTestTime = 0;
+      if (null != $input->getOption('timeout')) {
+         $maxIndividualTestTime = intval($input->getOption('timeout'));
+      }
+      $isWindows = false;
+      if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+         $isWindows = true;
+      }
    }
 
    private function parseUserParams(InputInterface $input)
