@@ -12,6 +12,29 @@
 
 namespace Lit\Utils;
 
+function phpize_bool($value) : bool
+{
+   if (is_null($value)) {
+      return false;
+   }
+   if (is_bool($value)) {
+      return $value;
+   }
+   if (is_int($value)) {
+      return $value != 0;
+   }
+   if (is_string($value)) {
+      $value = strtolower(trim($value));
+      if (in_array($value, array('1', 'true', 'on', 'yes'))) {
+         return true;
+      }
+      if (in_array($value, array('', '0', 'false', 'off', 'no'))) {
+         return false;
+      }
+   }
+   throw new \Exception(sprintf('%s is not a valid boolean', strval($value)));
+}
+
 /**
  * TODO port to Windows
  * @return bool
@@ -62,3 +85,28 @@ function which(string $command, string $paths = null) : string
    }
    return null;
 }
+
+function check_tools_path(string $dir, array $tools) : bool
+{
+   foreach ($tools as $tool) {
+      $file = $dir . PATH_SEPARATOR . $tool;
+      if (!file_exists($file)) {
+         return false;
+      }
+   }
+   return true;
+}
+
+function which_tools(array $tools, string $paths) : string
+{
+   $paths = explode(PATH_SEPARATOR, $paths);
+   foreach ($paths as $path) {
+      if (check_tools_path($path, $tools)) {
+         return $path;
+      }
+   }
+   return null;
+}
+
+// dummy class
+class UtilFuncs{}
