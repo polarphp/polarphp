@@ -13,19 +13,16 @@
 namespace Lit\Commands;
 
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
-use Lit\Utils\CmdOpts;
 
 class MainCommand extends Command
 {
    protected static $defaultName = 'run-test';
-   /**
-    * @var CmdOpts $cmdOpts
-    */
-   private $cmdOpts;
 
    protected function configure()
    {
@@ -37,12 +34,42 @@ class MainCommand extends Command
 
    private function setupOptions()
    {
-
+      $this->addOption('threads', 'j', InputOption::VALUE_OPTIONAL, "Number of testing threads");
+      $this->addOption('config-prefix', null, InputOption::VALUE_OPTIONAL, "Prefix for 'lit' config files");
+      $this->addOption('param', 'D', InputOption::VALUE_REQUIRED|InputOption::VALUE_IS_ARRAY, "Add 'NAME' = 'VAL' to the user defined parameters", []);
+      // format group
+      $this->addOption('succinct', 's', InputOption::VALUE_OPTIONAL, 'Reduce amount of output', false);
+      $this->addOption('show-all', 'a', InputOption::VALUE_OPTIONAL, 'Display all commandlines and output', false);
+      $this->addOption('output', 'o', InputOption::VALUE_OPTIONAL, 'Write test results to the provided path');
+      $this->addOption('no-progress-bar', null, InputOption::VALUE_OPTIONAL, 'Do not use curses based progress bar', true);
+      $this->addOption('show-unsupported', null, InputOption::VALUE_OPTIONAL, 'Show unsupported tests', false);
+      $this->addOption('show-xfail', null, InputOption::VALUE_OPTIONAL, 'Show tests that were expected to fail', false);
+      // execution group
+      $this->addOption('path', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Additional paths to add to testing environment', []);
+      $this->addOption('vg', null, InputOption::VALUE_OPTIONAL, 'Run tests under valgrind', false);
+      $this->addOption('vg-leak', null, InputOption::VALUE_OPTIONAL, 'Check for memory leaks under valgrind', false);
+      $this->addOption('vg-arg', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Specify an extra argument for valgrind', []);
+      $this->addOption('time-tests', null, InputOption::VALUE_OPTIONAL, 'Track elapsed wall time for each test', false);
+      $this->addOption('no-execute', null, InputOption::VALUE_OPTIONAL, 'Don\'t execute any tests (assume PASS)', false);
+      $this->addOption('xunit-xml-output', null, InputOption::VALUE_OPTIONAL, 'Write XUnit-compatible XML test reports to the specified file');
+      $this->addOption('timeout', null, InputOption::VALUE_OPTIONAL, 'Maximum time to spend running a single test (in seconds). 0 means no time limit.', 0);
+      $this->addOption('max-failures', null, InputOption::VALUE_OPTIONAL, 'Stop execution after the given number of failures.');
+      // selection group
+      $this->addOption('max-tests', null, InputOption::VALUE_OPTIONAL, 'Maximum number of tests to run');
+      $this->addOption('max-time', null, InputOption::VALUE_OPTIONAL, 'Maximum time to spend testing (in seconds)');
+      $this->addOption('shuffle', null, InputOption::VALUE_OPTIONAL, 'Run tests in random order', false);
+      $this->addOption('incremental', 'i', InputOption::VALUE_OPTIONAL, 'Run modified and failing tests first (updates mtimes)', false);
+      $this->addOption('filter', null, InputOption::VALUE_OPTIONAL, 'Only run tests with paths matching the given regular expression', getenv('LIT_FILTER'));
+      $this->addOption('num-shards', null, InputOption::VALUE_OPTIONAL, 'Split testsuite into M pieces and only run one', intval(getenv('LIT_NUM_SHARDS')));
+      $this->addOption('run-shard', null, InputOption::VALUE_OPTIONAL, 'Run shard #N of the testsuite', intval(getenv('LIT_RUN_SHARD')));
+      // debug group
+      $this->addOption('show-suites', null, InputOption::VALUE_OPTIONAL, 'Show discovered test suites', false);
+      $this->addOption('show-tests', null, InputOption::VALUE_OPTIONAL, 'Show all discovered tests', false);
    }
 
    private function setupArguments()
    {
-
+      $this->addArgument("test_paths", InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'Files or paths to include in the test suite', []);
    }
 
    protected function execute(InputInterface $input, OutputInterface $output)
@@ -50,7 +77,7 @@ class MainCommand extends Command
       $fs = new Filesystem();
       $tempDir = $this->prepareTempDir($fs);
       try {
-         $this->doExecute();
+         $this->doExecute($input, $output);
       } finally {
          if (!is_null($tempDir)) {
             $tryCount = 3;
@@ -72,9 +99,26 @@ class MainCommand extends Command
       }
    }
 
-   private function doExecute()
+   private function doExecute(InputInterface $input, OutputInterface $output)
    {
+      $userParams = $this->parseUserParams($input);
+      var_dump($userParams);
+   }
 
+   private function parseUserParams(InputInterface $input)
+   {
+      $params = $input->getOption('param');
+      $userParams = array();
+      foreach ($params as $entry) {
+         $entry = trim($entry);
+         if (false === strpos($entry, '=')) {
+            $userParams[$entry] = '';
+         } else {
+            $parts = explode('=', $entry, 2);
+            $userParams[trim($parts[0])] = trim($parts[1]);
+         }
+      }
+      return $userParams;
    }
 
    private function prepareTempDir(Filesystem $fs)
@@ -85,7 +129,20 @@ class MainCommand extends Command
          $tempDir = @tempnam($sysTempDir, 'lit_tmp_');
          $fs->remove($tempDir);
          $fs->mkdir($tempDir);
+         $this->setupEnvVars($tempDir);
       }
       return $tempDir;
+   }
+
+   private function setupEnvVars($tempDir)
+   {
+      putenv("TMPDIR=$tempDir");
+      putenv("TMP=$tempDir");
+      putenv("TEMP=$tempDir");
+      putenv("TEMPDIR=$tempDir");
+      $_ENV['TMPDIR'] = $tempDir;
+      $_ENV['TMP'] = $tempDir;
+      $_ENV['TEMP'] = $tempDir;
+      $_ENV['TEMPDIR'] = $tempDir;
    }
 }
