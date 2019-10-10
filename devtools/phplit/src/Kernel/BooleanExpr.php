@@ -64,6 +64,16 @@ class BooleanExpr
       $this->triple = $triple;
    }
 
+   public static function evaluate(string $expr, array $variables, string $triple = '')
+   {
+      try {
+         $parser = new self($expr, $variables, $triple);
+         return $parser->parseAllExpr();
+      } catch (ValueException $e) {
+         throw new ValueException($e->getMessage() . sprintf("\nin expression: %s", var_export($expr, true)));
+      }
+   }
+
    private function quote(string $token) : string
    {
       if ($token == self::END_TOKEN_MARK) {
@@ -76,7 +86,8 @@ class BooleanExpr
    private function accept(string $token) : bool
    {
       if ($this->token == $token) {
-         $this->token = next($this->tokens);
+         $this->token = $this->tokens->current();
+         $this->tokens->next();
          return true;
       }
       return false;
@@ -86,7 +97,8 @@ class BooleanExpr
    {
       if ($this->token == $token) {
          if ($this->token != self::END_TOKEN_MARK) {
-            $this->token = next($this->tokens);
+            $this->token = $this->tokens->current();
+            $this->tokens->next();
          }
       } else {
          throw new ValueException(sprintf("expected: %s\nhave: %s", self::quote($token), self::quote($this->token)));
@@ -111,10 +123,11 @@ class BooleanExpr
          $this->parseOrExpr();
          $this->expect(')');
       } elseif (!$this->isIdentifier($this->token)) {
-         throw new ValueException("expected: '!' or '(' or identifier\nhave: %s", self::quote($this->token));
+         throw new ValueException(sprintf("expected: '!' or '(' or identifier\nhave: %s", self::quote($this->token)));
       } else {
-         $this->value = in_array($this->token, $this->variables) or $this->isSubStr($this->triple, $this->token);
-         $this->token = next($this->tokens);
+         $this->value = in_array($this->token, $this->variables) || $this->isSubStr($this->triple, $this->token);
+         $this->token = $this->tokens->current();
+         $this->tokens->next();
       }
    }
 
@@ -132,7 +145,7 @@ class BooleanExpr
          $right = $this->value;
          // this is technically the wrong associativity, but it
          // doesn't matter for this limited expression grammar
-         $this->value = $left and $right;
+         $this->value = $left && $right;
       }
    }
 
@@ -145,13 +158,14 @@ class BooleanExpr
          $right = $this->value;
          // this is technically the wrong associativity, but it
          // doesn't matter for this limited expression grammar
-         $this->value = $left or $right;
+         $this->value = $left || $right;
       }
    }
 
-   public function parseAllExpr()
+   private function parseAllExpr()
    {
-      $this->token = next($this->tokens);
+      $this->token = $this->tokens->current();
+      $this->tokens->next();
       $this->parseOrExpr();
       $this->expect(self::END_TOKEN_MARK);
       return $this->value;
@@ -167,7 +181,7 @@ class BooleanExpr
                yield self::END_TOKEN_MARK;
                return;
             } else {
-               throw new ValueException(sprintf("couldn't parse text: %s", $expr));
+               throw new ValueException(sprintf("couldn't parse text: %s", var_export($expr, true)));
             }
          }
          $token = $matches[1];

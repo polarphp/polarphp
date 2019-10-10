@@ -7,30 +7,11 @@
 *.mem
 *.gcda
 *.gcno
-*.la
-*.lo
-*.loT
-*.o
-*.a
-*.ncb
-*.opt
-*.plg
-*swp
-*.patch
-*.tgz
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.gz.asc
-*.tar.bz2.asc
-*.tar.xz.asc
-.FBCIndex
-.FBCLockFolder
 .deps
 .libs
 .DS_Store
 
-**/tests/**/*
+**/Output/**/*
 
 CMakeLists.txt.user*
 temp
@@ -57,3 +38,4 @@ devtools/phplit/.env.local.php
 devtools/phplit/.env.*.local
 devtools/phplit/var/
 devtools/phplit/vendor/
+!devtools/phplit/tests
