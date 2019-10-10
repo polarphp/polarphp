@@ -27,6 +27,14 @@ class SeqCmmand implements ShCommandInterface
     */
    private $rhs;
 
+   public function __construct(ShCommandInterface $lhs, string $op, ShCommandInterface $rhs)
+   {
+      assert(in_array($op, [';', '&', '||', '&&']));
+      $this->lhs = $lhs;
+      $this->op = $op;
+      $this->rhs = $rhs;
+   }
+
    public function __toString() : string
    {
       return sprintf('Seq(%s, %s, %s)', var_export($this->args, true), var_export($this->redirects, true));
