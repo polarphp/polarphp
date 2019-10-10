@@ -12,6 +12,8 @@
 
 namespace Lit\Utils;
 
+use function foo\func;
+
 function phpize_bool($value) : bool
 {
    if (is_null($value)) {
@@ -106,6 +108,17 @@ function which_tools(array $tools, string $paths) : string
       }
    }
    return null;
+}
+
+function get_envvar($name, $defaultValue) : string
+{
+   $value = getenv($name);
+   return empty($value) ? $defaultValue : $value;
+}
+
+function is_os_win() : bool
+{
+   return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
 }
 
 // dummy class
