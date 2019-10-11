@@ -84,6 +84,11 @@ class TestingConfig
     */
    private $parallelismGroup;
 
+   /**
+    * @var array $extraConfig
+    */
+   private $extraConfig = array();
+
    public function __construct(TestingConfig $parent, string $name, array $suffixes, $testFormat,
                                array $environment, array $substitutions, bool $unsupported,
                                string $testExecRoot, string $testSourceRoot, array $excludes,
@@ -458,5 +463,19 @@ class TestingConfig
    {
       $this->parallelismGroup = $parallelismGroup;
       return $this;
+   }
+
+   public function setExtraConfig(string $name, $value) : TestingConfig
+   {
+      $this->extraConfig[$name] = $value;
+      return $this;
+   }
+
+   public function getExtraConfig(string $name, $defaultValue)
+   {
+      if (array_key_exists($name, $this->extraConfig)) {
+         return $defaultValue;
+      }
+      return $this->extraConfig[$name];
    }
 }

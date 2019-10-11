@@ -23,9 +23,9 @@ class TestResult
     */
    private $output;
    /**
-    * @var int $elapsed
+    * @var float $elapsed
     */
-   private $elapsed;
+   private $elapsed = 0.0;
    /**
     * @var array $metrics
     */
@@ -35,7 +35,7 @@ class TestResult
     */
    private $microResults = array();
 
-   public function __construct(TestResultCode $code, string $output = '', $elapsed = null)
+   public function __construct(TestResultCode $code, string $output = '', $elapsed = 0.0)
    {
       $this->code = $code;
       $this->output = $output;
@@ -75,6 +75,96 @@ class TestResult
          throw new ValueException('Result already includes microResult for %s', $name);
       }
       $this->microResults[$name] = $result;
+      return $this;
+   }
+
+   /**
+    * @return TestResultCode
+    */
+   public function getCode(): TestResultCode
+   {
+      return $this->code;
+   }
+
+   /**
+    * @param TestResultCode $code
+    * @return TestResult
+    */
+   public function setCode(TestResultCode $code): TestResult
+   {
+      $this->code = $code;
+      return $this;
+   }
+
+   /**
+    * @return string
+    */
+   public function getOutput(): string
+   {
+      return $this->output;
+   }
+
+   /**
+    * @param string $output
+    * @return TestResult
+    */
+   public function setOutput(string $output): TestResult
+   {
+      $this->output = $output;
+      return $this;
+   }
+
+   /**
+    * @return float
+    */
+   public function getElapsed(): float
+   {
+      return $this->elapsed;
+   }
+
+   /**
+    * @param float $elapsed
+    * @return TestResult
+    */
+   public function setElapsed(float $elapsed): TestResult
+   {
+      $this->elapsed = $elapsed;
+      return $this;
+   }
+
+   /**
+    * @return array
+    */
+   public function getMetrics(): array
+   {
+      return $this->metrics;
+   }
+
+   /**
+    * @param array $metrics
+    * @return TestResult
+    */
+   public function setMetrics(array $metrics): TestResult
+   {
+      $this->metrics = $metrics;
+      return $this;
+   }
+
+   /**
+    * @return array
+    */
+   public function getMicroResults(): array
+   {
+      return $this->microResults;
+   }
+
+   /**
+    * @param array $microResults
+    * @return TestResult
+    */
+   public function setMicroResults(array $microResults): TestResult
+   {
+      $this->microResults = $microResults;
       return $this;
    }
 }
