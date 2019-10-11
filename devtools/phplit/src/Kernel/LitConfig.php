@@ -12,6 +12,7 @@
 
 namespace Lit\Kernel;
 use Lit\Utils\TestLogger;
+use phpDocumentor\Reflection\Types\Mixed_;
 
 /**
  * LitConfig - Configuration data for a 'lit' test runner instance, shared
@@ -354,6 +355,20 @@ class LitConfig
    public function setParams(array $params): LitConfig
    {
       $this->params = $params;
+      return $this;
+   }
+
+   public function getParam(string $name, $defaultValue = null)
+   {
+      if (!array_key_exists($name, $this->params)) {
+         return $defaultValue;
+      }
+      return $this->params[$name];
+   }
+
+   public function setParam(string $name, $value): LitConfig
+   {
+      $this->params[$name] = $value;
       return $this;
    }
 

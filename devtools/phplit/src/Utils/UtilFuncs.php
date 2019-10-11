@@ -11,6 +11,7 @@
 // Created by polarboy on 2019/10/09.
 
 namespace Lit\Utils;
+use Symfony\Component\Filesystem\Filesystem;
 
 use function foo\func;
 
@@ -43,10 +44,8 @@ function phpize_bool($value) : bool
  */
 function is_absolute_path(string $path) : bool
 {
-   if (strlen($path) == 0) {
-      return false;
-   }
-   return $path[0] == DIRECTORY_SEPARATOR;
+   $fs = new Filesystem();
+   return $fs->isAbsolutePath($path);
 }
 
 /**
@@ -119,6 +118,12 @@ function get_envvar($name, $defaultValue) : string
 function is_os_win() : bool
 {
    return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+}
+
+function copy_array(array $data) : array
+{
+   $temp = new \ArrayObject($data);
+   return $temp->getArrayCopy();
 }
 
 // dummy class

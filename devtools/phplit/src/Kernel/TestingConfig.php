@@ -15,6 +15,7 @@ namespace Lit\Kernel;
 use Lit\Utils\TestLogger;
 use function Lit\Utils\get_envvar;
 use function Lit\Utils\is_os_win;
+use function Lit\Utils\copy_array;
 
 /**
  * TestingConfig - Information on the tests inside a suite.
@@ -170,6 +171,29 @@ class TestingConfig
          $availableFeatures,
          true
       );
+   }
+
+   public function getCopyConfig() : TestingConfig
+   {
+      $config = new self(
+         $this->parent,
+         $this->name,
+         copy_array($this->suffixes),
+         $this->testFormat,
+         copy_array($this->environment),
+         copy_array($this->substitutions),
+         $this->unsupported,
+         $this->testExecRoot,
+         $this->testSourceRoot,
+         copy_array($this->excludes),
+         copy_array($this->availableFeatures),
+         $this->pipeFail,
+         copy_array($this->limitToFeatures),
+         $this->isEarly,
+         copy_array($this->parallelismGroup)
+      );
+      $config->extraConfig = copy_array($this->extraConfig);
+      return $config;
    }
 
    /**
