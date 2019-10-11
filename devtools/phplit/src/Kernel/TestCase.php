@@ -26,6 +26,12 @@ class TestCase
     * @var array $pathInSuite
     */
    private $pathInSuite;
+
+   /**
+    * @var string $manualSpecifiedSourcePath
+    */
+   private $manualSpecifiedSourcePath;
+
    /**
     * @var TestingConfig $config
     */
@@ -414,5 +420,23 @@ class TestCase
    public function getResult(): TestResult
    {
       return $this->result;
+   }
+
+   /**
+    * @return string
+    */
+   public function getManualSpecifiedSourcePath(): string
+   {
+      return $this->manualSpecifiedSourcePath;
+   }
+
+   /**
+    * @param string $manualSpecifiedSourcePath
+    * @return TestCase
+    */
+   public function setManualSpecifiedSourcePath(string $manualSpecifiedSourcePath): TestCase
+   {
+      $this->manualSpecifiedSourcePath = $manualSpecifiedSourcePath;
+      return $this;
    }
 }

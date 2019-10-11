@@ -26,7 +26,7 @@ class AbstractTestFormat implements TestFormatInterface
    public function collectTestsInDirectory(TestSuite $testSuite, array $pathInSuite, TestingConfig $localConfig)
    {}
 
-   public function execute(TestCase $test)
+   public function execute(TestCase $test) : array
    {}
 
    /**
