@@ -82,7 +82,6 @@ class OneCommandPerFileTestFormat extends AbstractTestFormat
                $suffix = substr($suffix, 1);
             }
             $test = new TestCase($testSuite, $pathInSuite + explode(DIRECTORY_SEPARATOR, $suffix));
-            # FIXME: Hack?
             $test->setManualSpecifiedSourcePath($pathname);
             yield $test;
          }

@@ -10,3 +10,25 @@
 //
 // Created by polarboy on 2019/10/11.
 namespace Lit\Format;
+
+use Lit\Kernel\LitConfig;
+use Lit\kernel\TestCase;
+
+class ShellTestFormat extends FileBasedTestFormat
+{
+   /**
+    * @var bool $executeExternal
+    */
+   private $executeExternal;
+
+   public function __construct(LitConfig $litConfig, bool $executeExternal = false)
+   {
+      parent::__construct($litConfig);
+      $this->executeExternal = $executeExternal;
+   }
+
+   public function execute(TestCase $test) : array
+   {
+      // TODO
+   }
+}

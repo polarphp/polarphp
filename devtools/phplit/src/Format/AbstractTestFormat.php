@@ -23,6 +23,11 @@ class AbstractTestFormat implements TestFormatInterface
     */
    private $litConfig;
 
+   public function __construct(LitConfig $litConfig)
+   {
+      $this->litConfig = $litConfig;
+   }
+
    public function collectTestsInDirectory(TestSuite $testSuite, array $pathInSuite, TestingConfig $localConfig)
    {}
 

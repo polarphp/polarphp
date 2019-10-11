@@ -11,6 +11,8 @@
 // Created by polarboy on 2019/10/09.
 
 namespace Lit\Utils;
+use Lit\Kernel\LitConfig;
+use Lit\Kernel\TestingConfig;
 use Symfony\Component\Filesystem\Filesystem;
 
 function phpize_bool($value) : bool
@@ -122,6 +124,43 @@ function copy_array(array $data) : array
 {
    $temp = new \ArrayObject($data);
    return $temp->getArrayCopy();
+}
+
+/**
+ * Execute command ``command`` (list of arguments or string) with.
+ * working directory ``cwd`` (str), use None to use the current
+ * working directory
+ * environment ``env`` (dict), use None for none
+ * Input to the command ``input`` (str), use string to pass
+ * no input.
+ * Max execution time ``timeout`` (int) seconds. Use 0 for no timeout.
+ * Returns a tuple (out, err, exitCode) where
+ * ``out`` (str) is the standard output of running the command
+ * ``err`` (str) is the standard error of running the command
+ * ``exitCode`` (int) is the exitCode of running the command
+ * If the timeout is hit an ``ExecuteCommandTimeoutException``
+ * is raised.
+ *
+ * @param string $command
+ * @param string|null $cwd
+ * @param array $env
+ * @param string|null $input
+ * @param int $timeout
+ */
+function execute_command(string $command, string $cwd = null, array $env = [],
+                         string $input = null, int $timeout = 0)
+{
+
+}
+
+function use_platform_sdk_on_darwin(TestingConfig $config, LitConfig $litConfig)
+{
+
+}
+
+function find_platform_sdk_version_on_macos(TestingConfig $config, LitConfig $litConfig)
+{
+
 }
 
 // dummy class
