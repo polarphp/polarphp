@@ -13,8 +13,6 @@
 namespace Lit\Utils;
 use Symfony\Component\Filesystem\Filesystem;
 
-use function foo\func;
-
 function phpize_bool($value) : bool
 {
    if (is_null($value)) {
