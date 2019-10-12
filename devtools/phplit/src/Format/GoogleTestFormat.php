@@ -172,7 +172,7 @@ class GoogleTestFormat extends AbstractTestFormat
       $passingTestLine = '[  PASSED  ] 1 test.';
       if (!has_substr($outMsg, $passingTestLine)) {
          $msg = sprintf("Unable to find %r in gtest output:\n\n%s%s", $passingTestLine, $outMsg, $errorMsg);
-         return [TestResultCode::UNRESOLVED(), msg];
+         return [TestResultCode::UNRESOLVED(), $msg];
       }
       return [TestResultCode::PASS(), ''];
    }
