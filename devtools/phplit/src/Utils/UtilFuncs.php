@@ -39,7 +39,6 @@ function phpize_bool($value) : bool
 }
 
 /**
- * TODO port to Windows
  * @return bool
  */
 function is_absolute_path(string $path) : bool
@@ -127,6 +126,24 @@ function copy_array(array $data) : array
 }
 
 /**
+ * @param string $dirname
+ * @param array $suffixes
+ * @param array $excludeFilenames
+ * @return iterable
+ */
+function listdir_files(string $dirname, array $suffixes = [''], array $excludeFilenames = []) : iterable
+{
+   $iter = new \DirectoryIterator($dirname);
+   foreach ($iter as $entry) {
+      if ($entry->isDir() || $entry->isDot() || in_array($entry->getFilename(), $excludeFilenames) ||
+          !in_array($entry->getExtension(), $suffixes)) {
+         continue;
+      }
+      yield $entry->getFilename();
+   }
+}
+
+/**
  * Execute command ``command`` (list of arguments or string) with.
  * working directory ``cwd`` (str), use None to use the current
  * working directory
@@ -161,6 +178,11 @@ function use_platform_sdk_on_darwin(TestingConfig $config, LitConfig $litConfig)
 function find_platform_sdk_version_on_macos(TestingConfig $config, LitConfig $litConfig)
 {
 
+}
+
+function has_substr(string $str, string $subStr)
+{
+   return strpos($str, $subStr) !== false;
 }
 
 // dummy class

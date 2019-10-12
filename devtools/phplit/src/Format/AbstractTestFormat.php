@@ -21,7 +21,7 @@ class AbstractTestFormat implements TestFormatInterface
    /**
     * @var LitConfig $litConfig
     */
-   private $litConfig;
+   protected $litConfig;
 
    public function __construct(LitConfig $litConfig)
    {
