@@ -13,6 +13,8 @@
 namespace Lit\Commands;
 
 use Lit\Kernel\LitConfig;
+use Lit\Kernel\TestCollector;
+use Lit\Kernel\TestDispatcher;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,7 +25,6 @@ use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
 use function Lit\Utils\detect_cpus;
-
 use Lit\Utils\TestLogger;
 
 class MainCommand extends Command
@@ -156,14 +157,22 @@ class MainCommand extends Command
          $quite = true;
       }
       // Decide what the requested maximum indvidual test time should be
+      $path = $input->getOption('path');
+      if (null == $path) {
+         $path = array();
+      }
+      $vgArg = $input->getOption('vg-arg');
+      if (null == $vgArg) {
+         $vgArg = array();
+      }
       $maxIndividualTestTime = $input->getOption('timeout');
       $litConfig = new LitConfig(
          'phplit',
-         $input->getOption('path'),
+         $path,
          $quite,
          $input->getOption('vg'),
          $input->getOption('vg-leak'),
-         $input->getOption('vg-arg'),
+         $vgArg,
          $input->getOption('no-execute'),
          $isDebug,
          $isWindows,
@@ -174,6 +183,10 @@ class MainCommand extends Command
          array(),
          $echoAllCommands
       );
+      // Perform test discovery.
+      $testCollector = new TestCollector($litConfig, $inputDirs);
+      $testCollector->resolve();
+      $testDispatcher = new TestDispatcher($litConfig, $testCollector->getTests());
    }
 
    private function parseUserParams(InputInterface $input)

@@ -90,7 +90,7 @@ class TestingConfig
     */
    private $extraConfig = array();
 
-   public function __construct(TestingConfig $parent, string $name, array $suffixes, $testFormat,
+   public function __construct($parent, string $name, array $suffixes, $testFormat,
                                array $environment, array $substitutions, bool $unsupported,
                                string $testExecRoot, string $testSourceRoot, array $excludes,
                                array $availableFeatures, bool $pipeFail, array $limitToFeatures = [],
@@ -162,7 +162,7 @@ class TestingConfig
          '<unnamed>',
          [],
          null,
-         environment,
+         $environment,
          [],
          false,
          '',
@@ -203,16 +203,41 @@ class TestingConfig
     * @param string $path
     * @param LitConfig $config
     */
-   public function loadFromPath(string $path, LitConfig $config)
+   public function loadFromPath(string $path, LitConfig $litConfig)
    {
       if (!file_exists($path)) {
          TestLogger::fatal(sprintf('unable to load config file: %s', $path));
       }
-      // set some closure variables used by included config script
-      include $path;
-      if ($config->isDebug()){
-         TestLogger::note(sprintf('... loaded config %s', $path));
+      try {
+         // set some closure variables used by included config script
+         $config = $this;
+         include $path;
+         if ($litConfig->isDebug()){
+            TestLogger::note(sprintf('... loaded config %s', $path));
+         }
+         $this->loadFinish();
+      } catch (\ParseError $error) {
+         TestLogger::fatal(sprintf("unable to parse config file %s\n error: %s", $path, $error->getMessage()));
       }
+   }
+
+   private function loadFinish()
+   {
+      $this->name = (string)$this->name;
+      $this->suffixes = (array)$this->suffixes;
+      $this->environment = (array)$this->environment;
+      $this->substitutions = (array)$this->substitutions;
+      if (!$this->testExecRoot) {
+         // FIXME: This should really only be suite in test suite config
+         // files. Should we distinguish them?
+         $this->testExecRoot = ($this->testExecRoot);
+      }
+      if (!$this->testSourceRoot) {
+         // FIXME: This should really only be suite in test suite config
+         // files. Should we distinguish them?
+         $this->testSourceRoot = ($this->testSourceRoot);
+      }
+      $this->excludes = (array)$this->excludes;
    }
 
    /**

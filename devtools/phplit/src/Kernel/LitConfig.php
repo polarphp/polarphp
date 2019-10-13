@@ -35,7 +35,7 @@ class LitConfig
     * The items to add to the PATH environment variable.
     * @var array $paths
     */
-   private $paths;
+   private $paths = array();
 
    /**
     * @var boolean $quite
@@ -100,7 +100,7 @@ class LitConfig
    /**
     * @var array $siteConfigNames
     */
-   private $siteConfigNames;
+   private $siteConfigNames = array();
 
    /**
     * @var array $localConfigNames

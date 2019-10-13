@@ -13,6 +13,7 @@
 namespace Lit\Kernel;
 
 use Lit\Utils\TestLogger;
+use function Lit\Utils\is_absolute_path;
 
 class TestCollector
 {
@@ -72,7 +73,7 @@ class TestCollector
       if ($numErrors > 0) {
          TestLogger::fatal("%d errors, exiting.\n", $numErrors);
       }
-      return $tests;
+      $this->tests = $tests;
    }
 
    private function doSearchConfigFunc(array $pathInSuite, TestSuite $testSuite, array $cache)
@@ -118,7 +119,11 @@ class TestCollector
    private function collectTestSuite(string $path, array $cache) : array
    {
       // Canonicalize the path.
-      $path = realpath(getcwd() . DIRECTORY_SEPARATOR . $path);
+      if (!is_absolute_path($path)) {
+         $path = realpath(getcwd() . DIRECTORY_SEPARATOR . $path);
+      } else {
+         $path = realpath($path);
+      }
       // Skip files and virtual components.
       $components = array();
       while (!is_dir($path)) {
@@ -131,7 +136,7 @@ class TestCollector
          $path = $parent;
       }
       $components = array_reverse($components);
-      list($testSuite, $relative) = $this->doCollectionTestSuiteWithCache($path);
+      list($testSuite, $relative) = $this->doCollectionTestSuiteWithCache($path, $cache);
       return [$testSuite, $relative + $components];
    }
 
@@ -164,7 +169,7 @@ class TestCollector
       }
       // We found a test suite, create a new config for it and load it.
       if ($this->litConfig->isDebug()) {
-         TestLogger::note('loading suite config %s', $cfgPath);
+         TestLogger::note(sprintf('loading suite config %s', $cfgPath));
       }
       $config = TestingConfig::fromDefaults($this->litConfig);
       $config->loadFromPath($cfgPath, $this->litConfig);
@@ -192,7 +197,7 @@ class TestCollector
          return [null, []];
       }
       if ($this->litConfig->isDebug()) {
-         litConfig.note(sprintf('resolved input %s to %s::%s', $path, $testSuite->getName(), var_export($pathInSuite, true)));
+         TestLogger::note(sprintf('resolved input %s to %s::%s', $path, $testSuite->getName(), var_export($pathInSuite, true)));
       }
       return [$testSuite, $this->collectTestsInSuite($testSuite, $pathInSuite, $testSuiteCache, $localConfigCache)];
    }
@@ -269,7 +274,7 @@ class TestCollector
       }
    }
 
-   private function chooseConfigFileFromDir(string $dir, array $configNames) : string
+   private function chooseConfigFileFromDir(string $dir, array $configNames)
    {
       foreach ($configNames as $name) {
          $path = $dir . DIRECTORY_SEPARATOR . $name;

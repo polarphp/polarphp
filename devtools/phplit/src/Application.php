@@ -27,4 +27,14 @@ class Application extends BaseApplication
       $this->setName("phplit");
       $this->setVersion(Application::VERSION);
    }
+
+   public function loadExtraFiles()
+   {
+      $files = array(
+         "src/Utils/UtilFuncs.php"
+      );
+      foreach ($files as $file) {
+         include LIT_ROOT_DIR .DIRECTORY_SEPARATOR . $file;
+      }
+   }
 }
