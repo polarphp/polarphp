@@ -154,10 +154,10 @@ class LitConfig
       $this->configPrefix = is_null($configPrefix) ? 'lit' : $configPrefix;
       $this->suffixes = ['cfg.php', 'cfg'];
       foreach ($this->suffixes as $suffix) {
-         $this->configNames[] = printf('%s.%s', $this->configPrefix, $suffix);
+         $this->configNames[] = sprintf('%s.%s', $this->configPrefix, $suffix);
       }
       foreach ($this->suffixes as $suffix) {
-         $this->localConfigNames[] = printf('%s.local.%s', $this->configPrefix, $suffix);
+         $this->localConfigNames[] = sprintf('%s.local.%s', $this->configPrefix, $suffix);
       }
       if ($this->useValgrind) {
          $this->valgrindArgs = [

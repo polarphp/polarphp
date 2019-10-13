@@ -14,6 +14,8 @@ namespace Lit\Utils;
 use Lit\Kernel\LitConfig;
 use Lit\Kernel\TestingConfig;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 
 function phpize_bool($value) : bool
 {
@@ -188,6 +190,32 @@ function has_substr(string $str, string $subStr)
 function kill_process_and_children(int $pid)
 {
 
+}
+
+/**
+ * Detects the number of CPUs on a system.
+ * Cribbed from pp.
+ */
+function detect_cpus()
+{
+   // Linux, Unix and MacOS:
+   if (PHP_OS_FAMILY == OS_MACOS) {
+      $shell = ['sysctl', '-n', 'hw.ncpu'];
+   } elseif (PHP_OS_FAMILY == OS_LINUX) {
+      $shell = ['cat', '/proc/cpuinfo', '|', 'grep', 'processor', '|', 'wc', '-l'];
+   } else {
+      // default
+      return 1;
+   }
+   try {
+      $process = new Process($shell);
+      $process->mustRun();
+      $output = $process->getOutput();
+      return intval($output);
+   } catch (ProcessFailedException $e) {
+      TestLogger::warning($e);
+      return 1;
+   }
 }
 
 // dummy class

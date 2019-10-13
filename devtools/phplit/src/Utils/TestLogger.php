@@ -82,6 +82,6 @@ class TestLogger
       $targetStack = $stack[1];
       $file = substr($targetStack['file'], strlen(LIT_ROOT_DIR) + 1);
       $location = sprintf('%s:%d', $file, $targetStack['line']);
-      self::$logger->log($level, sprintf('%s :%s', $location, $message));
+      self::$logger->log($level, sprintf('%s: %s', $location, $message));
    }
 }

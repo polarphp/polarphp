@@ -10,6 +10,12 @@ if (false === in_array(\PHP_SAPI, ['cli', 'phpdbg', 'embed'], true)) {
    echo 'Warning: The console should be invoked via the CLI version of PHP, not the '.\PHP_SAPI.' SAPI'.\PHP_EOL;
 }
 
+define('OS_WINDOWS', 'Windows');
+define('OS_BSD', 'BSD');
+define('OS_MACOS', 'Darwin');
+define('OS_SOLARIS', 'Solaris');
+define('OS_LINUX', 'Linux');
+
 set_time_limit(0);
 $script = $_SERVER['SCRIPT_NAME'];
 // TODO work around for windows

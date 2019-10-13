@@ -12,6 +12,7 @@
 
 namespace Lit\Commands;
 
+use Lit\Kernel\LitConfig;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,6 +21,8 @@ use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
+
+use function Lit\Utils\detect_cpus;
 
 use Lit\Utils\TestLogger;
 
@@ -55,7 +58,7 @@ class MainCommand extends Command
       $this->addOption('time-tests', null, InputOption::VALUE_OPTIONAL, 'Track elapsed wall time for each test', false);
       $this->addOption('no-execute', null, InputOption::VALUE_OPTIONAL, 'Don\'t execute any tests (assume PASS)', false);
       $this->addOption('xunit-xml-output', null, InputOption::VALUE_OPTIONAL, 'Write XUnit-compatible XML test reports to the specified file');
-      $this->addOption('timeout', null, InputOption::VALUE_OPTIONAL, 'Maximum time to spend running a single test (in seconds). 0 means no time limit.');
+      $this->addOption('timeout', null, InputOption::VALUE_OPTIONAL, 'Maximum time to spend running a single test (in seconds). 0 means no time limit.', 0);
       $this->addOption('max-failures', null, InputOption::VALUE_OPTIONAL, 'Stop execution after the given number of failures.');
       // selection group
       $this->addOption('max-tests', null, InputOption::VALUE_OPTIONAL, 'Maximum number of tests to run');
@@ -72,7 +75,7 @@ class MainCommand extends Command
 
    private function setupArguments()
    {
-      $this->addArgument("test_paths", InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'Files or paths to include in the test suite', []);
+      $this->addArgument("test_paths", InputArgument::IS_ARRAY, 'Files or paths to include in the test suite', []);
    }
 
    protected function execute(InputInterface $input, OutputInterface $output)
@@ -106,6 +109,10 @@ class MainCommand extends Command
 
    private function doExecute(InputInterface $input, OutputInterface $output)
    {
+      $inputDirs = $input->getArgument('test_paths');
+      if (empty($inputDirs)) {
+         TestLogger::fatal("No inputs specified");
+      }
       $userParams = $this->parseUserParams($input);
       $maxIndividualTestTime = 0;
       if (null != $input->getOption('timeout')) {
@@ -115,6 +122,58 @@ class MainCommand extends Command
       if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
          $isWindows = true;
       }
+      $numThreads = $input->getOption('threads');
+      if (null != $numThreads) {
+         $numThreads = intval($numThreads);
+         if ($numThreads < 0) {
+            TestLogger::fatal("Option '--threads' or '-j' requires positive integer");
+         }
+      } else {
+         $numThreads = detect_cpus();
+      }
+      $maxFailures = $input->getOption('max-failures');
+      if ($maxFailures != null) {
+         $maxFailures = intval($maxFailures);
+         if ($maxFailures < 0) {
+            TestLogger::fatal("Option '--max-failures' requires positive integer");
+         }
+      }
+      $showOutput = false;
+      $echoAllCommands = false;
+      if ($input->hasParameterOption('-v', true) || $input->hasParameterOption('--verbose=1', true) || 1 === $input->getParameterOption('--verbose', false, true)) {
+         $showOutput = true;
+      }
+      if ($input->hasParameterOption('-vv', true) || $input->hasParameterOption('--verbose=2', true) || 2 === $input->getParameterOption('--verbose', false, true)) {
+         $showOutput = true;
+         $echoAllCommands = true;
+      }
+      $isDebug = false;
+      if ($input->hasParameterOption('-vvv', true) || $input->hasParameterOption('--verbose=3', true) || 3 === $input->getParameterOption('--verbose', false, true)) {
+         $isDebug = true;
+      }
+      $quite = false;
+      if ($input->hasParameterOption(['--quiet', '-q'], true)) {
+         $quite = true;
+      }
+      // Decide what the requested maximum indvidual test time should be
+      $maxIndividualTestTime = $input->getOption('timeout');
+      $litConfig = new LitConfig(
+         'phplit',
+         $input->getOption('path'),
+         $quite,
+         $input->getOption('vg'),
+         $input->getOption('vg-leak'),
+         $input->getOption('vg-arg'),
+         $input->getOption('no-execute'),
+         $isDebug,
+         $isWindows,
+         $userParams,
+         $input->getOption('config-prefix'),
+         $maxIndividualTestTime,
+         $maxFailures,
+         array(),
+         $echoAllCommands
+      );
    }
 
    private function parseUserParams(InputInterface $input)
