@@ -185,5 +185,10 @@ function has_substr(string $str, string $subStr)
    return strpos($str, $subStr) !== false;
 }
 
+function kill_process_and_children(int $pid)
+{
+
+}
+
 // dummy class
 class UtilFuncs{}
