@@ -10,7 +10,7 @@
 //
 // Created by polarboy on 2019/10/10.
 
-namespace Lit\kernel;
+namespace Lit\Kernel;
 /**
  * Test - Information on a single test instance.
  *

@@ -11,6 +11,7 @@
 // Created by polarboy on 2019/10/11.
 namespace Lit\Kernel;
 
+use Lit\Application;
 use Lit\Utils\TestingProgressDisplay;
 
 class TestDispatcher
@@ -50,6 +51,59 @@ class TestDispatcher
    public function executeTests(array $jobs, $maxTime = null)
    {
 
+   }
+
+   public function writeTestResults(int $testingTime, string $outputPath)
+   {
+      // Construct the data we will write.
+      $data = array();
+      // Encode the current lit version as a schema version.
+      $data['__version__'] = Application::VERSION;
+      $data['elapsed'] = $testingTime;
+      // FIXME: Record some information on the lit configuration used?
+      // FIXME: Record information from the individual test suites?
+      // Encode the tests.
+      $data['tests'] = $testsData = [];
+      foreach ($this->tests as $test) {
+         $result = $test->getResult();
+         $testData = array(
+            'name' => $test->getFullName(),
+            'code' => $result->getCode()->getName(),
+            'output' => $result->getOutput(),
+            'elapsed' => $result->getElapsed()
+         );
+         // Add test metrics, if present.
+         if (!empty($result->getMetrics())) {
+            $testData['metrics'] = $metricsData = [];
+            foreach ($result->getMetrics() as $key => $value) {
+               $metricsData[$key] = $value->toData();
+            }
+         }
+         // Report micro-tests separately, if present
+         if (!empty($result->getMicroResults())) {
+            foreach ($result->getMicroResults() as $key => $microTest) {
+               // Expand parent test name with micro test name
+               $parentName = $test->getFullName();
+               $microFullName = $parentName . ':' . $key;
+               $microTestData = array(
+                  'name' => $microFullName,
+                  'code' => $microTest->getCode->getName(),
+                  'output' => $microTest->getOutput(),
+                  'elapsed' => $microTest->getElapsed(),
+               );
+               if ($microTest->getMetrics()) {
+                  $microTestData['metrics'] = $microMetricsData = array();
+                  foreach ($microTest->getMetrics() as $key => $value) {
+                     $microMetricsData[$key] = $value->toData();
+                  }
+               }
+               $testsData[] = $microTestData;
+            }
+         }
+         $testsData[] = $testData;
+      }
+      // Write the output.
+      file_put_contents($outputPath, json_encode($data)."\n");
    }
 
    public function setDisplay(TestingProgressDisplay $display): TestDispatcher
