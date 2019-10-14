@@ -112,6 +112,14 @@ class TestDispatcher
       return $this;
    }
 
+   /**
+    * @return iterable
+    */
+   public function getTests(): iterable
+   {
+      return $this->tests;
+   }
+
    private function consumeTestResult($poolResult)
    {
 
@@ -121,4 +129,5 @@ class TestDispatcher
    {
 
    }
+
 }

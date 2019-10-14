@@ -13,6 +13,7 @@
 namespace Lit\Commands;
 
 use Lit\Kernel\LitConfig;
+use Lit\Kernel\TestCase;
 use Lit\Kernel\TestCollector;
 use Lit\Kernel\TestDispatcher;
 use Symfony\Component\Console\Command\Command;
@@ -45,33 +46,33 @@ class MainCommand extends Command
       $this->addOption('config-prefix', null, InputOption::VALUE_OPTIONAL, "Prefix for 'lit' config files");
       $this->addOption('param', 'D', InputOption::VALUE_REQUIRED|InputOption::VALUE_IS_ARRAY, "Add 'NAME' = 'VAL' to the user defined parameters", []);
       // format group
-      $this->addOption('succinct', 's', InputOption::VALUE_OPTIONAL, 'Reduce amount of output', false);
-      $this->addOption('show-all', 'a', InputOption::VALUE_OPTIONAL, 'Display all commandlines and output', false);
+      $this->addOption('succinct', 's', InputOption::VALUE_NONE, 'Reduce amount of output');
+      $this->addOption('show-all', 'a', InputOption::VALUE_NONE, 'Display all commandlines and output');
       $this->addOption('output', 'o', InputOption::VALUE_OPTIONAL, 'Write test results to the provided path');
-      $this->addOption('no-progress-bar', null, InputOption::VALUE_OPTIONAL, 'Do not use curses based progress bar', true);
-      $this->addOption('show-unsupported', null, InputOption::VALUE_OPTIONAL, 'Show unsupported tests', false);
-      $this->addOption('show-xfail', null, InputOption::VALUE_OPTIONAL, 'Show tests that were expected to fail', false);
+      $this->addOption('no-progress-bar', null, InputOption::VALUE_NONE, 'Do not use curses based progress bar');
+      $this->addOption('show-unsupported', null, InputOption::VALUE_NONE, 'Show unsupported tests');
+      $this->addOption('show-xfail', null, InputOption::VALUE_NONE, 'Show tests that were expected to fail');
       // execution group
       $this->addOption('path', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Additional paths to add to testing environment', []);
-      $this->addOption('vg', null, InputOption::VALUE_OPTIONAL, 'Run tests under valgrind', false);
-      $this->addOption('vg-leak', null, InputOption::VALUE_OPTIONAL, 'Check for memory leaks under valgrind', false);
+      $this->addOption('vg', null, InputOption::VALUE_NONE, 'Run tests under valgrind');
+      $this->addOption('vg-leak', null, InputOption::VALUE_NONE, 'Check for memory leaks under valgrind');
       $this->addOption('vg-arg', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Specify an extra argument for valgrind', []);
-      $this->addOption('time-tests', null, InputOption::VALUE_OPTIONAL, 'Track elapsed wall time for each test', false);
-      $this->addOption('no-execute', null, InputOption::VALUE_OPTIONAL, 'Don\'t execute any tests (assume PASS)', false);
+      $this->addOption('time-tests', null, InputOption::VALUE_NONE, 'Track elapsed wall time for each test');
+      $this->addOption('no-execute', null, InputOption::VALUE_NONE, 'Don\'t execute any tests (assume PASS)');
       $this->addOption('xunit-xml-output', null, InputOption::VALUE_OPTIONAL, 'Write XUnit-compatible XML test reports to the specified file');
-      $this->addOption('timeout', null, InputOption::VALUE_OPTIONAL, 'Maximum time to spend running a single test (in seconds). 0 means no time limit.', 0);
+      $this->addOption('timeout', null, InputOption::VALUE_OPTIONAL, 'Maximum time to spend running a single test (in seconds). 0 means no time limit.');
       $this->addOption('max-failures', null, InputOption::VALUE_OPTIONAL, 'Stop execution after the given number of failures.');
       // selection group
       $this->addOption('max-tests', null, InputOption::VALUE_OPTIONAL, 'Maximum number of tests to run');
       $this->addOption('max-time', null, InputOption::VALUE_OPTIONAL, 'Maximum time to spend testing (in seconds)');
-      $this->addOption('shuffle', null, InputOption::VALUE_OPTIONAL, 'Run tests in random order', false);
+      $this->addOption('shuffle', null, InputOption::VALUE_NONE, 'Run tests in random order');
       $this->addOption('incremental', 'i', InputOption::VALUE_OPTIONAL, 'Run modified and failing tests first (updates mtimes)', false);
       $this->addOption('filter', null, InputOption::VALUE_OPTIONAL, 'Only run tests with paths matching the given regular expression', getenv('LIT_FILTER'));
       $this->addOption('num-shards', null, InputOption::VALUE_OPTIONAL, 'Split testsuite into M pieces and only run one', intval(getenv('LIT_NUM_SHARDS')));
       $this->addOption('run-shard', null, InputOption::VALUE_OPTIONAL, 'Run shard #N of the testsuite', intval(getenv('LIT_RUN_SHARD')));
       // debug group
-      $this->addOption('show-suites', null, InputOption::VALUE_OPTIONAL, 'Show discovered test suites', false);
-      $this->addOption('show-tests', null, InputOption::VALUE_OPTIONAL, 'Show all discovered tests', false);
+      $this->addOption('show-suites', null, InputOption::VALUE_NONE, 'Show discovered test suites');
+      $this->addOption('show-tests', null, InputOption::VALUE_NONE, 'Show all discovered tests');
    }
 
    private function setupArguments()
@@ -165,7 +166,6 @@ class MainCommand extends Command
       if (null == $vgArg) {
          $vgArg = array();
       }
-      $maxIndividualTestTime = $input->getOption('timeout');
       $litConfig = new LitConfig(
          'phplit',
          $path,
@@ -187,6 +187,24 @@ class MainCommand extends Command
       $testCollector = new TestCollector($litConfig, $inputDirs);
       $testCollector->resolve();
       $testDispatcher = new TestDispatcher($litConfig, $testCollector->getTests());
+      // After test discovery the configuration might have changed
+      // the maxIndividualTestTime. If we explicitly set this on the
+      // command line then override what was set in the test configuration
+      if (null != $input->getOption('timeout')) {
+         $cmdValue = intval($input->getOption('timeout'));
+         if ($cmdValue != $litConfig->getMaxIndividualTestTime()) {
+            TestLogger::note(sprintf(
+               join(array(
+                  'The test suite configuration requested an individual',
+                  ' test timeout of %d seconds but a timeout of %d seconds was',
+                  ' requested on the command line. Forcing timeout to be %d',
+                  ' seconds'
+               ), $litConfig->getMaxIndividualTestTime(), $cmdValue, $cmdValue)
+            ));
+            $litConfig->setMaxIndividualTestTime($cmdValue);
+         }
+      }
+      $this->handleShowTestsOpt($input, $testDispatcher);
    }
 
    private function parseUserParams(InputInterface $input)
@@ -203,6 +221,50 @@ class MainCommand extends Command
          }
       }
       return $userParams;
+   }
+
+   private function handleShowTestsOpt(InputInterface $input, TestDispatcher $dispatcher)
+   {
+      if ($input->getOption('show-suites') || $input->getOption('show-tests')) {
+         // Aggregate the tests by suite.
+         $suitesAndTests = array();
+         $testSuites = array();
+         foreach ($dispatcher->getTests() as $test) {
+            $testSuite = $test->getTestSuite();
+            $key = hash('sha256',$testSuite->getSourceRoot() . $testSuite->getExecRoot());
+            $key = $key .'_'.$testSuite->getName();
+            if (!array_key_exists($key, $suitesAndTests)) {
+               $suitesAndTests[$key] = array();
+               $testSuites[$key] = $testSuite;
+            }
+            $suitesAndTests[$key][] = $test;
+         }
+         uksort($suitesAndTests, function (string $lhs, string $rhs) {
+            $lname = explode('_', $lhs)[1];
+            $rname = explode('_', $rhs)[1];
+            return $lname <=> $rname;
+         });
+         if ($input->getOption('show-suites')) {
+            // Show the suites, if requested.
+            print("-- Test Suites --\n");
+            foreach ($suitesAndTests as $key => $tests) {
+               $testSuite = $testSuites[$key];
+               printf("  %s - %d tests\n", $testSuite->getName(), count($tests));
+               printf("    Source Root: %s\n", $testSuite->getSourceRoot());
+               printf("    Exec Root  : %s\n", $testSuite->getExecRoot());
+            }
+         }
+         //  Show the tests, if requested.
+         if ($input->getOption('show-tests')) {
+            print("-- Available Tests --\n");
+            foreach ($suitesAndTests as $key => $tests) {
+               foreach ($tests as $test) {
+                  printf("  %s\n", $test->getFullName());
+               }
+            }
+         }
+         exit(0);
+      }
    }
 
    private function prepareTempDir(Filesystem $fs)
