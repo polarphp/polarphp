@@ -37,35 +37,37 @@ class TestLogger
       self::$logger = $logger;
    }
 
-   public static function note(string $message) : void
+   public static function note(string $message): void
    {
       self::doWriteMessage(LogLevel::INFO, $message);
    }
 
-   public static function warning(string $message) : void
+   public static function warning(string $message): void
    {
       self::doWriteMessage(LogLevel::WARNING, $message);
       ++self::$numWarnings;
    }
 
-   public static function error(string $message) : void
+   public static function error(string $message, bool $count = true): void
    {
       self::doWriteMessage(LogLevel::ERROR, $message);
-      ++self::$numErrors;
+      if ($count) {
+         ++self::$numErrors;
+      }
    }
 
-   public static function fatal(string $message) : void
+   public static function fatal(string $message): void
    {
       self::doWriteMessage(LogLevel::EMERGENCY, $message);
       exit(2);
    }
 
-   public static function getNumErrors() : int
+   public static function getNumErrors(): int
    {
       return self::$numErrors;
    }
 
-   public static function getNumWarnings() : int
+   public static function getNumWarnings(): int
    {
       return self::$numWarnings;
    }
@@ -76,7 +78,7 @@ class TestLogger
       self::$numErrors = 0;
    }
 
-   private static function doWriteMessage($level, $message) : void
+   private static function doWriteMessage($level, $message): void
    {
       $stack = debug_backtrace();
       $targetStack = $stack[1];

@@ -120,6 +120,12 @@ class TestDispatcher
       return $this->tests;
    }
 
+   public function setTests(array $tests): TestDispatcher
+   {
+      $this->tests = $tests;
+      return $this;
+   }
+
    private function consumeTestResult($poolResult)
    {
 

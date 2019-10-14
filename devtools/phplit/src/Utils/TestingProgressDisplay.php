@@ -36,17 +36,20 @@ class TestingProgressDisplay
     * TestingProgressDisplay constructor.
     * @param array $opts
     * @param int $numTests
+    * @param ProgressBar $progressBar
     */
-   public function __construct(array $opts, int $numTests)
+   public function __construct(array $opts, int $numTests, $progressBar)
    {
       $this->opts = $opts;
       $this->numTests = $numTests;
-      $this->setupProgressBar();
+      $this->progressBar = $progressBar;
    }
 
    public function finish()
    {
-      $this->progressBar->clear();
+      if ($this->progressBar) {
+         $this->progressBar->clear();
+      }
       if ($this->opts['succinct']) {
          echo "\n";
       }
@@ -66,7 +69,9 @@ class TestingProgressDisplay
       if (!$shouldShow) {
          return;
       }
-      $this->progressBar->clear();
+      if ($this->progressBar) {
+         $this->progressBar->clear();
+      }
       // Show the test result line.
       $testName = $test->getFullName();
       printf('%s: %s (%d of %d)' % $resultCode->getName(), $testName,
@@ -107,11 +112,6 @@ class TestingProgressDisplay
          }
       }
       flush();
-   }
-
-   private function setupProgressBar()
-   {
-
    }
 
    private function updateIncrementalCache(TestCase $test)

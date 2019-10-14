@@ -16,16 +16,20 @@ use Lit\Kernel\LitConfig;
 use Lit\Kernel\TestCase;
 use Lit\Kernel\TestCollector;
 use Lit\Kernel\TestDispatcher;
+use Lit\Kernel\TestResultCode;
+use Lit\Utils\TestingProgressDisplay;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
 use function Lit\Utils\detect_cpus;
+use function Lit\Utils\sort_by_incremental_cache;
 use Lit\Utils\TestLogger;
 
 class MainCommand extends Command
@@ -139,6 +143,7 @@ class MainCommand extends Command
          if ($maxFailures < 0) {
             TestLogger::fatal("Option '--max-failures' requires positive integer");
          }
+         $input->setOption('max-failures', $maxFailures);
       }
       $showOutput = false;
       $echoAllCommands = false;
@@ -205,6 +210,72 @@ class MainCommand extends Command
          }
       }
       $this->handleShowTestsOpt($input, $testDispatcher);
+      // Select and order the tests.
+      $numTotalTests = count($testDispatcher->getTests());
+      $this->filterTests($input, $testDispatcher);
+      $this->handleTestsOrder($input, $testDispatcher);
+      $this->handleTestShard($input, $testDispatcher);
+      // Finally limit the number of tests, if desired.
+      if ($input->getOption('max-tests')) {
+         $maxTests = intval($input->getOption('max-tests'));
+         $testDispatcher->setTests(array_slice($testDispatcher->getTests(), 0, $maxTests));
+      }
+      $tests = $testDispatcher->getTests();
+      $numThreads = min(count($tests), $numThreads);
+      $actualTestNum = count($tests);
+      $extra = '';
+      if ($actualTestNum != $numTotalTests) {
+         $extra = " of $numTotalTests";
+      }
+      $threads = "";
+      if ($numThreads == 1) {
+         $threads = 'single process';
+      } else {
+         $threads = "$numThreads threads";
+      }
+      $header = sprintf("-- Testing: %d%s tests, %s --\n", $actualTestNum, $extra, $threads);
+      $progressBar = null;
+      if (!$quite) {
+         if ($input->getOption('succinct') && !$input->getOption('no-progress-bar')) {
+            $progressBar = new ProgressBar($output, $actualTestNum);
+         } else {
+            print($header);
+         }
+      }
+      $startTime = time();
+      $progressDisplay = new TestingProgressDisplay($input->getOptions(), $actualTestNum, $progressBar);
+      try {
+
+      } catch (\Exception $e) {
+         TestLogger::fatal("Interrupt");
+      }
+      $progressDisplay->finish();
+      $testingTime = time() - $startTime;
+      if (!$quite) {
+         printf("Testing Time: %.2ds", $testingTime);
+      }
+      // Write out the test data, if requested.
+      if ($input->getOption('output')) {
+         $testDispatcher->writeTestResults($testingTime, $input->getOption('output'));
+      }
+      //$this->handleTestResults($input, $testDispatcher);
+      $hasFailures = false;
+      $this->handleXuintOutput($input, $testDispatcher);
+      //  If we encountered any additional errors, exit abnormally.
+      $numErrors = TestLogger::getNumErrors();
+      if ($numErrors > 0) {
+         TestLogger::error(sprintf("\n%d error(s), exiting.\n", $numErrors), false);
+         exit(2);
+      }
+      // Warn about warnings.
+      $numWarnings = TestLogger::getNumWarnings();
+      if ($numWarnings > 0) {
+         TestLogger::error(sprintf("\n%d warning(s), exiting.\n", $numWarnings), false);
+      }
+      if ($hasFailures) {
+         exit(1);
+      }
+      exit(0);
    }
 
    private function parseUserParams(InputInterface $input)
@@ -223,7 +294,7 @@ class MainCommand extends Command
       return $userParams;
    }
 
-   private function handleShowTestsOpt(InputInterface $input, TestDispatcher $dispatcher)
+   private function handleShowTestsOpt(InputInterface $input, TestDispatcher $dispatcher): void
    {
       if ($input->getOption('show-suites') || $input->getOption('show-tests')) {
          // Aggregate the tests by suite.
@@ -265,6 +336,172 @@ class MainCommand extends Command
          }
          exit(0);
       }
+   }
+
+   private function filterTests(InputInterface $input, TestDispatcher $testDispatcher): void
+   {
+      // First, select based on the filter expression if given.
+      $filter = $input->getOption('filter');
+      if ($filter) {
+         $tests = $testDispatcher->getTests();
+         $filteredTests = array();
+         foreach ($tests as $test) {
+            $mresult = preg_match("/$filter/", $test->getFullName());
+            if ($mresult === false) {
+               TestLogger::fatal("invalid regular expression for --filter: %s", $filter);
+            } elseif ($mresult > 0) {
+               $filteredTests[] = $test;
+            }
+         }
+         $testDispatcher->setTests($filteredTests);
+      }
+   }
+
+   private function handleTestsOrder(InputInterface $input, TestDispatcher $testDispatcher): void
+   {
+      $tests = $testDispatcher->getTests();
+      // Then select the order.
+      if ($input->getOption('shuffle')) {
+         shuffle($tests);
+      } elseif ($input->getOption('incremental')) {
+         sort_by_incremental_cache($tests);
+      } else {
+         usort($tests, function (TestCase $lhs, TestCase $rhs) {
+            $learlyTest = intval($lhs->isEarlyTest());
+            $rearlyTest = intval($rhs->isEarlyTest());
+            if ($learlyTest < $rearlyTest) {
+               return -1;
+            } elseif ($learlyTest > $rearlyTest) {
+               return 1;
+            } else {
+               // by fullname
+               return $lhs->getFullName() <=> $rhs->getFullName();
+            }
+         });
+      }
+      $testDispatcher->setTests($tests);
+   }
+
+   private function handleTestShard(InputInterface $input, TestDispatcher $testDispatcher): void
+   {
+      $runShard = $input->getOption('run-shard');
+      $numShards = $input->getOption('num-shards');
+      if (null != $runShard || null != $numShards) {
+         if (null == $runShard || null == $numShards) {
+            TestLogger::fatal("--num-shards and --run-shard must be used together");
+         }
+         $runShard = intval($runShard);
+         $numShards = intval($numShards);
+         if ($numShards <= 0) {
+            TestLogger::fatal("--num-shards must be positive");
+         }
+         if ($runShard < 1 || $runShard > $numShards) {
+            TestLogger::fatal("--run-shard must be between 1 and --num-shards (inclusive)");
+         }
+         $tests = $testDispatcher->getTests();
+         $selectedTests = array();
+         $numTests = count($tests);
+         // Note: user views tests and shard numbers counting from 1.
+         $testIndexes = range($runShard, $numTests, $numShards);
+         foreach ($testIndexes as $index) {
+            $selectedTests[] = $tests[$index];
+         }
+         $testDispatcher->setTests($selectedTests);
+         $tests = $selectedTests;
+         // Generate a preview of the first few test indices in the shard
+         // to accompany the arithmetic expression, for clarity.
+         $previewLen = min(3, count($testIndexes));
+         $idxPreview = array();
+         foreach (array_slice($testIndexes, 0, $previewLen) as $index) {
+            $idxPreview[] = $index;
+         }
+         $idxPreview = join(', ', $idxPreview);
+         if (count($testIndexes) > $previewLen) {
+            $idxPreview .= ', ...';
+         }
+         TestLogger::note(sprintf('Selecting shard %d/%d = size %d/%d = tests #(%d*k)+%d = [%s]',
+            $runShard, $numShards, count($tests), $numTests, $numShards, $runShard, $idxPreview));
+      }
+   }
+
+   private function handleTestResults(InputInterface $input, TestDispatcher $testDispatcher): void
+   {
+      $hasFailures = false;
+      $byCode = array();
+      $tests = $testDispatcher->getTests();
+      foreach ($tests as $test) {
+         $resultCode = $test->getResult()->getCode();
+         $codeName = $resultCode->getName();
+         if (!in_array($codeName, $byCode)) {
+            $byCode[$codeName] = array();
+         }
+         $byCode[$codeName][] = $test;
+         if ($resultCode->isFailure()) {
+            $hasFailures = true;
+         }
+      }
+      // Print each test in any of the failing groups.
+      $codeTitleMap = array(
+         ['Unexpected Passing Tests', TestResultCode::XPASS()],
+         ['Failing Tests', TestResultCode::FAIL()],
+         ['Unresolved Tests', TestResultCode::UNRESOLVED()],
+         ['Unsupported Tests', TestResultCode::UNSUPPORTED()],
+         ['Expected Failing Tests', TestResultCode::XFAIL()],
+         ['Timed Out Tests', TestResultCode::TIMEOUT()],
+      );
+      foreach ($codeTitleMap as $entry) {
+         list($title, $code) = $entry;
+         if (($code == TestResultCode::XPASS() && !$input->getOption('show-xfail')) ||
+             ($code == TestResultCode::UNSUPPORTED() && !$input->getOption('show-unsupported')) ||
+             ($code == TestResultCode::UNRESOLVED() && $input->getOption('max-failures') !== null)) {
+            continue;
+         }
+         $elements = $byCode[$code->getName()];
+         if (empty($elements)) {
+            continue;
+         }
+         print(str_repeat('*', 20)."\n");
+         printf("%s (%d):\n", $title, count($elements));
+         foreach ($elements as $test) {
+            printf("    %s\n", $test->getFullName());
+         }
+         echo "\n";
+      }
+
+      if ($input->getOption('time-tests') && !empty($tests)) {
+         // Order by time.
+         // TODO
+
+      }
+      $codeNameMap = array(
+         ['Expected Passes    ', TestResultCode::XPASS()],
+         ['Passes With Retry  ', TestResultCode::FLAKYPASS()],
+         ['Expected Failures  ', TestResultCode::XFAIL()],
+         ['Unsupported Tests  ', TestResultCode::UNSUPPORTED()],
+         ['Unresolved Tests   ', TestResultCode::UNRESOLVED()],
+         ['Unexpected Passes  ', TestResultCode::XPASS()],
+         ['Unexpected Failures', TestResultCode::FAIL()],
+         ['Individual Timeouts', TestResultCode::TIMEOUT()],
+      );
+      foreach ($codeNameMap as $entry) {
+         list($name, $code) = $entry;
+         if ($input->hasParameterOption(['--quiet', '-q'], true) && !$code->isFailure()) {
+            continue;
+         }
+         if (array_key_exists($code->getName(), $byCode)) {
+            $num = count($byCode[$code->getName()]);
+         } else {
+            $num = 0;
+         }
+         if ($num > 0) {
+            printf("  %s: %d\n", $name, $num);
+         }
+      }
+   }
+
+   private function handleXuintOutput(InputInterface $input, TestDispatcher $testDispatcher)
+   {
+
    }
 
    private function prepareTempDir(Filesystem $fs)

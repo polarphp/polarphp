@@ -12,6 +12,7 @@
 
 namespace Lit\Utils;
 use Lit\Kernel\LitConfig;
+use Lit\Kernel\TestCase;
 use Lit\Kernel\TestingConfig;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -228,6 +229,17 @@ function array_extend_by_iterable(array &$target, iterable $source): void
    foreach ($source as $item) {
       array_push($target, $item);
    }
+}
+
+function sort_by_incremental_cache(array &$tests)
+{
+   usort($tests, function (TestCase $lhs, TestCase $rhs) {
+      $lfname = $lhs->getFilePath();
+      $rfname = $rhs->getFilePath();
+      $lftime = fileatime($lfname);
+      $rftime = fileatime($rfname);
+      return $lftime <=> $rftime;
+   });
 }
 
 // dummy class
