@@ -12,7 +12,7 @@
 namespace Lit\Format;
 
 use Lit\Kernel\NotImplementedException;
-use Lit\kernel\TestCase;
+use Lit\Kernel\TestCase;
 use Lit\Kernel\TestingConfig;
 use Lit\Kernel\TestResultCode;
 use Lit\Kernel\TestSuite;
@@ -53,7 +53,7 @@ class OneCommandPerFileTestFormat extends AbstractTestFormat
       $this->useTempInput = $useTempInput;
    }
 
-   public function collectTestsInDirectory(TestSuite $testSuite, array $pathInSuite, TestingConfig $localConfig)
+   public function collectTestsInDirectory(TestSuite $testSuite, array $pathInSuite, TestingConfig $localConfig): iterable
    {
       $dir = $this->dir;
       if (empty($dir)) {
@@ -81,7 +81,7 @@ class OneCommandPerFileTestFormat extends AbstractTestFormat
             if ($suffix[0] == DIRECTORY_SEPARATOR) {
                $suffix = substr($suffix, 1);
             }
-            $test = new TestCase($testSuite, $pathInSuite + explode(DIRECTORY_SEPARATOR, $suffix));
+            $test = new TestCase($testSuite, array_merge($pathInSuite, explode(DIRECTORY_SEPARATOR, $suffix)));
             $test->setManualSpecifiedSourcePath($pathname);
             yield $test;
          }

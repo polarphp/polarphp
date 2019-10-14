@@ -42,13 +42,13 @@ class TestSuite
 
    public function getSourcePath(array $components) : string
    {
-      $parts = [$this->sourceRoot] + $components;
+      $parts = array_merge([$this->sourceRoot], $components);
       return implode(DIRECTORY_SEPARATOR, $parts);
    }
 
    public function getExecPath(array $components) : string
    {
-      $parts = [$this->execRoot] + $components;
+      $parts = array_merge([$this->execRoot], $components);
       return implode(DIRECTORY_SEPARATOR, $parts);
    }
 

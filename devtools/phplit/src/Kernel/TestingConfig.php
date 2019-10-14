@@ -12,6 +12,7 @@
 
 namespace Lit\Kernel;
 
+use Lit\Format\AbstractTestFormat;
 use Lit\Utils\TestLogger;
 use function Lit\Utils\get_envvar;
 use function Lit\Utils\is_os_win;
@@ -37,7 +38,7 @@ class TestingConfig
     */
    private $suffixes;
    /**
-    * @var $testFormat
+    * @var AbstractTestFormat $testFormat
     */
    private $testFormat;
    /**
@@ -179,7 +180,7 @@ class TestingConfig
          $this->parent,
          $this->name,
          copy_array($this->suffixes),
-         $this->testFormat,
+         $this->testFormat ? clone $this->testFormat : null,
          copy_array($this->environment),
          copy_array($this->substitutions),
          $this->unsupported,
@@ -307,10 +308,10 @@ class TestingConfig
    }
 
    /**
-    * @param mixed $testFormat
+    * @param AbstractTestFormat $testFormat
     * @return TestingConfig
     */
-   public function setTestFormat($testFormat)
+   public function setTestFormat(AbstractTestFormat $testFormat)
    {
       $this->testFormat = $testFormat;
       return $this;
@@ -526,5 +527,10 @@ class TestingConfig
          return $defaultValue;
       }
       return $this->extraConfig[$name];
+   }
+
+   public function hasExtraConfig(string $name): bool
+   {
+      return array_key_exists($name, $this->extraConfig);
    }
 }

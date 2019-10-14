@@ -11,18 +11,20 @@
 // Created by polarboy on 2019/10/11.
 namespace Lit\Format;
 
-use Lit\kernel\TestCase;
+use Lit\Kernel\TestCase;
 use Lit\Kernel\TestingConfig;
 use Lit\Kernel\TestSuite;
 
 class FileBasedTestFormat extends AbstractTestFormat
 {
-   public function collectTestsInDirectory(TestSuite $testSuite, array $pathInSuite, TestingConfig $localConfig)
+   public function collectTestsInDirectory(TestSuite $testSuite, array $pathInSuite, TestingConfig $localConfig): iterable
    {
       $sourcePath = $testSuite->getSourcePath($pathInSuite);
       $diter = new \DirectoryIterator($sourcePath);
       $excludes = $localConfig->getExcludes();
       $suffixes = $localConfig->getSuffixes();
+      $litConfig = $this->litConfig;
+      $excludes = array_merge($excludes, $litConfig->getConfigNames(), $litConfig->getLocalConfigNames(), $litConfig->getSiteConfigNames());
       foreach ($diter as $entry) {
          // Ignore dot files and excluded tests.
          $filename = $entry->getFilename();
@@ -32,7 +34,7 @@ class FileBasedTestFormat extends AbstractTestFormat
          if ($entry->isFile()) {
             $ext = $entry->getExtension();
             if (in_array($ext, $suffixes)) {
-               yield new TestCase($testSuite, $pathInSuite + [$filename], $localConfig);
+               yield new TestCase($testSuite, array_merge($pathInSuite, [$filename]), $localConfig);
             }
          }
       }

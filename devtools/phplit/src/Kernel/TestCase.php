@@ -14,7 +14,7 @@ namespace Lit\Kernel;
 /**
  * Test - Information on a single test instance.
  *
- * @package Lit\kernel
+ * @package Lit\Kernel
  */
 class TestCase
 {

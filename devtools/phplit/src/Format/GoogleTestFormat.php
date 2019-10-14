@@ -13,7 +13,7 @@
 namespace Lit\Format;
 
 use Lit\Kernel\LitConfig;
-use Lit\kernel\TestCase;
+use Lit\Kernel\TestCase;
 use Lit\Kernel\TestingConfig;
 use Lit\Kernel\TestResultCode;
 use Lit\Kernel\TestSuite;
@@ -123,7 +123,7 @@ class GoogleTestFormat extends AbstractTestFormat
       return false;
    }
 
-   public function collectTestsInDirectory(TestSuite $testSuite, array $pathInSuite, TestingConfig $localConfig)
+   public function collectTestsInDirectory(TestSuite $testSuite, array $pathInSuite, TestingConfig $localConfig): iterable
    {
       $sourcePath = $testSuite->getSourcePath($pathInSuite);
       foreach ($this->testSubDirs as $subDir) {
@@ -136,7 +136,7 @@ class GoogleTestFormat extends AbstractTestFormat
             $execPath = join(DIRECTORY_SEPARATOR, [$sourcePath, $subDir, $fn]);
             $testNames = $this->getGTestTests($execPath, $this->litConfig, $localConfig);
             foreach ($testNames as $testName) {
-               $testPath = $pathInSuite + [$subDir, $fn, $testName];
+               $testPath = array_merge($pathInSuite, [$subDir, $fn, $testName]);
                yield new TestCase($testSuite, $testPath, $localConfig, $execPath);
             }
          }

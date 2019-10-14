@@ -11,8 +11,8 @@
 // Created by polarboy on 2019/10/12.
 namespace Lit\Utils;
 
-use Lit\kernel\PipelineCommand;
-use Lit\kernel\SeqCmmand;
+use Lit\Kernel\PipelineCommand;
+use Lit\Kernel\SeqCmmand;
 use Lit\Kernel\ValueException;
 use Lit\Kernel\ShCommand;
 

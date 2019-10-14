@@ -12,7 +12,7 @@
 namespace Lit\Format;
 
 use Lit\Kernel\LitConfig;
-use Lit\kernel\TestCase;
+use Lit\Kernel\TestCase;
 
 class ShellTestFormat extends FileBasedTestFormat
 {

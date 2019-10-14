@@ -12,7 +12,7 @@
 namespace Lit\Format;
 
 use Lit\Kernel\LitConfig;
-use Lit\kernel\TestCase;
+use Lit\Kernel\TestCase;
 use Lit\Kernel\TestingConfig;
 use Lit\Kernel\TestSuite;
 
@@ -28,8 +28,10 @@ class AbstractTestFormat implements TestFormatInterface
       $this->litConfig = $litConfig;
    }
 
-   public function collectTestsInDirectory(TestSuite $testSuite, array $pathInSuite, TestingConfig $localConfig)
-   {}
+   public function collectTestsInDirectory(TestSuite $testSuite, array $pathInSuite, TestingConfig $localConfig): iterable
+   {
+      return null;
+   }
 
    public function execute(TestCase $test) : array
    {}

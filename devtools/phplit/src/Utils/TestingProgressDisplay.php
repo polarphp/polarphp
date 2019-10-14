@@ -10,7 +10,7 @@
 //
 // Created by polarboy on 2019/10/12.
 namespace Lit\Utils;
-use Lit\kernel\TestCase;
+use Lit\Kernel\TestCase;
 use Symfony\Component\Console\Helper\ProgressBar;
 
 class TestingProgressDisplay

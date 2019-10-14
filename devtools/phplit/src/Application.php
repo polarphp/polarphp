@@ -21,9 +21,9 @@ class Application extends BaseApplication
 {
    const VERSION = '0.0.1';
 
-   public function __construct(KernelInterface $kernel)
+   public function __construct(KernelInterface $Kernel)
    {
-      parent::__construct($kernel);
+      parent::__construct($Kernel);
       $this->setName("phplit");
       $this->setVersion(Application::VERSION);
    }

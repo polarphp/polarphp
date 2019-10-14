@@ -13,6 +13,6 @@ use Lit\Kernel\TestingConfig;
  * @var TestingConfig $config
  */
 $config->setName('top-level-suite');
-$config->setSuffixes(['.txt']);
+$config->setSuffixes(['txt']);
 $config->setExtraConfig('an_extra_variable', false);
 $config->setTestFormat(new ShellTestFormat($litConfig));

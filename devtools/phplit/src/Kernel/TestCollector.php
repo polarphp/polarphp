@@ -14,6 +14,8 @@ namespace Lit\Kernel;
 
 use Lit\Utils\TestLogger;
 use function Lit\Utils\is_absolute_path;
+use function Lit\Utils\array_to_str;
+use function Lit\Utils\array_extend_by_iterable;
 
 class TestCollector
 {
@@ -63,7 +65,7 @@ class TestCollector
       $localConfigCache = array();
       foreach ($actualInputs as $input) {
          $prevCount = count($tests);
-         $tests += $this->collectTests($input, $testSuiteCache, $localConfigCache)[1];
+         array_extend_by_iterable($tests, $this->collectTests($input, $testSuiteCache, $localConfigCache)[1]);
          if ($prevCount == count($tests)) {
             TestLogger::warning(sprintf('input %s contained no tests', $input));
          }
@@ -76,36 +78,36 @@ class TestCollector
       $this->tests = $tests;
    }
 
-   private function doSearchConfigFunc(array $pathInSuite, TestSuite $testSuite, array $cache)
+   private function doSearchConfigFunc(array $pathInSuite, TestSuite $testSuite, array &$cache): TestingConfig
    {
       // Get the parent config.
       if (empty($pathInSuite)) {
          $parent = $testSuite->getConfig();
       } else {
-         $parent = getLocalConfig(array_slice($pathInSuite, 0, -1), $testSuite, $cache);
+         $parent = $this->getLocalConfig($testSuite, array_slice($pathInSuite, 0, -1),$cache);
       }
       // Check if there is a local configuration file.
       $sourcePath = $testSuite->getSourcePath($pathInSuite);
       $cfgPath = $this->chooseConfigFileFromDir($sourcePath, $this->litConfig->getLocalConfigNames());
       // If not, just reuse the parent config.
-      if (is_null($cfgPath)) {
+      if (strlen($cfgPath) == 0) {
          return $parent;
       }
       // Otherwise, copy the current config and load the local configuration
       // file into it.
       $config = $parent->getCopyConfig();
       if ($this->litConfig->isDebug()) {
-         TestLogger::note('loading local config %s', $cfgPath);
+         TestLogger::note(sprintf('loading local config %s', $cfgPath));
       }
       $config->loadFromPath($cfgPath, $this->litConfig);
       return $config;
    }
 
-   private function getLocalConfig(TestSuite $testSuite, array $pathInSuite, array $cache) : string
+   private function getLocalConfig(TestSuite $testSuite, array $pathInSuite, array &$cache) : TestingConfig
    {
       $key = hash('sha256', serialize($testSuite) . serialize($pathInSuite));
       if (!array_key_exists($key, $cache)) {
-         $cache[$key] = doSearchConfigFunc($pathInSuite, $testSuite, $cache);
+         $cache[$key] = $this->doSearchConfigFunc($pathInSuite, $testSuite, $cache);
       }
       return $cache[$key];
    }
@@ -116,7 +118,7 @@ class TestCollector
     * @retval (suite, relative_path) - The suite that @arg item is in, and its
     * relative path inside that suite.
     */
-   private function collectTestSuite(string $path, array $cache) : array
+   private function collectTestSuite(string $path, array &$cache) : array
    {
       // Canonicalize the path.
       if (!is_absolute_path($path)) {
@@ -140,7 +142,7 @@ class TestCollector
       return [$testSuite, $relative + $components];
    }
 
-   private function doCollectionTestSuite(string $path, array $cache) : array
+   private function doCollectionTestSuite(string $path, array &$cache) : array
    {
       // Check for a site config or a lit config.
       $cfgPath = $this->findTestSuiteDir($path);
@@ -178,7 +180,7 @@ class TestCollector
       return [new TestSuite($config->getName(), $sourceRoot, $execRoot, $config), []];
    }
 
-   private function doCollectionTestSuiteWithCache(string $path, array $cache) : array
+   private function doCollectionTestSuiteWithCache(string $path, array &$cache) : array
    {
       // Check for an already instantiated test suite.
       $realPath = realpath($path);
@@ -188,7 +190,7 @@ class TestCollector
       return $cache[$realPath];
    }
 
-   private function collectTests(string $path, array $testSuiteCache, array $localConfigCache) : array
+   private function collectTests(string $path, array &$testSuiteCache, array &$localConfigCache) : array
    {
       // Find the test suite for this input and its relative path.
       list($testSuite, $pathInSuite) = $this->collectTestSuite($path, $testSuiteCache);
@@ -197,12 +199,12 @@ class TestCollector
          return [null, []];
       }
       if ($this->litConfig->isDebug()) {
-         TestLogger::note(sprintf('resolved input %s to %s::%s', $path, $testSuite->getName(), var_export($pathInSuite, true)));
+         TestLogger::note(sprintf('resolved input %s to %s::%s', $path, $testSuite->getName(), array_to_str($pathInSuite)));
       }
       return [$testSuite, $this->collectTestsInSuite($testSuite, $pathInSuite, $testSuiteCache, $localConfigCache)];
    }
 
-   private function collectTestsInSuite(TestSuite $testSuite, array $pathInSuite, array $testSuiteCache, array $localConfigCache) : iterable
+   private function collectTestsInSuite(TestSuite $testSuite, array $pathInSuite, array &$testSuiteCache, array &$localConfigCache) : iterable
    {
       // Check that the source path exists (errors here are reported by the
       // caller).
@@ -221,7 +223,7 @@ class TestCollector
       $localConfig = $this->getLocalConfig($testSuite, $pathInSuite, $localConfigCache);
       // Search for tests.
       $testFormat = $localConfig->getTestFormat();
-      if (!is_null($testFormat)) {
+      if (null != $testFormat) {
          foreach ($testFormat->collectTestsInDirectory($testSuite, $pathInSuite, $localConfig) as $test) {
             yield $test;
          }
@@ -241,12 +243,12 @@ class TestCollector
          $fileSourcePath = $entry->getPathname();
          // Check for nested test suites, first in the execpath in case there is a
          // site configuration and then in the source path.
-         $subPath = $pathInSuite + [$filename];
+         $subPath = array_merge($pathInSuite, [$filename]);
          $fileExecPath = $testSuite->getExecPath($subPath);
          if ($this->findTestSuiteDir($fileExecPath, $this->litConfig)) {
-            list($subTestSuite, $subpathInSuite) = $this->collectTestSuite($fileExecPath,testSuiteCache);
+            list($subTestSuite, $subpathInSuite) = $this->collectTestSuite($fileExecPath,$testSuiteCache);
          } elseif ($this->findTestSuiteDir($fileSourcePath, $this->litConfig)) {
-            list($subTestSuite, $subpathInSuite) = $this->collectTestSuite($fileSourcePath,testSuiteCache);
+            list($subTestSuite, $subpathInSuite) = $this->collectTestSuite($fileSourcePath,$testSuiteCache);
          } else {
             $subTestSuite = null;
             $subpathInSuite = array();
@@ -258,7 +260,7 @@ class TestCollector
             continue;
          }
          // Otherwise, load from the nested test suite, if present.
-         if (!is_null($subTestSuite)) {
+         if (null != $subTestSuite) {
             $subDirTests = $this->collectTestsInSuite($subTestSuite, $subpathInSuite, $testSuiteCache, $localConfigCache);
          } else {
             $subDirTests = $this->collectTestsInSuite($testSuite, $subPath, $testSuiteCache, $localConfigCache);
@@ -268,13 +270,13 @@ class TestCollector
             ++$num;
             yield $subTest;
          }
-         if (!is_null($subTestSuite) && !$num) {
+         if ($subTestSuite != null && !$num) {
             TestLogger::warning(sprintf('test suite %s contained no tests', $subTestSuite->getName()));
          }
       }
    }
 
-   private function chooseConfigFileFromDir(string $dir, array $configNames)
+   private function chooseConfigFileFromDir(string $dir, array $configNames): string
    {
       foreach ($configNames as $name) {
          $path = $dir . DIRECTORY_SEPARATOR . $name;
@@ -282,13 +284,13 @@ class TestCollector
             return $path;
          }
       }
-      return null;
+      return '';
    }
 
    private function findTestSuiteDir(string $path) : string
    {
       $cfgPath = $this->chooseConfigFileFromDir($path, $this->litConfig->getSiteConfigNames());
-      if (is_null($cfgPath)) {
+      if (strlen($cfgPath) == 0) {
          $cfgPath = $this->chooseConfigFileFromDir($path, $this->litConfig->getConfigNames());
       }
       return $cfgPath;

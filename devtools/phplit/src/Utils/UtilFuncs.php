@@ -218,5 +218,17 @@ function detect_cpus()
    }
 }
 
+function array_to_str(array $arr)
+{
+   return sprintf('[]', join(', ', $arr));
+}
+
+function array_extend_by_iterable(array &$target, iterable $source): void
+{
+   foreach ($source as $item) {
+      array_push($target, $item);
+   }
+}
+
 // dummy class
 class UtilFuncs{}
