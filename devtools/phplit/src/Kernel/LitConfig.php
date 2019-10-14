@@ -173,7 +173,7 @@ class LitConfig
          $this->valgrindArgs += $this->valgrindUserArgs;
       }
       $this->maxIndividualTestTime = $maxIndividualTestTime;
-      $this->maxFailures = $this->maxFailures;
+      $this->maxFailures = $maxFailures;
       $this->parallelismGroups = $parallelismGroups;
       $this->echoAllCommands = $echoAllCommands;
    }
