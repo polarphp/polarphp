@@ -139,7 +139,7 @@ function listdir_files(string $dirname, array $suffixes = [''], array $excludeFi
    $iter = new \DirectoryIterator($dirname);
    foreach ($iter as $entry) {
       if ($entry->isDir() || $entry->isDot() || in_array($entry->getFilename(), $excludeFilenames) ||
-          !in_array($entry->getExtension(), $suffixes)) {
+         !in_array($entry->getExtension(), $suffixes)) {
          continue;
       }
       yield $entry->getFilename();
@@ -240,6 +240,86 @@ function sort_by_incremental_cache(array &$tests)
       $rftime = fileatime($rfname);
       return $lftime <=> $rftime;
    });
+}
+
+function print_histogram(array $items, $title = 'Items')
+{
+   usort($items, function ($lhs, $rhs){
+      return $lhs[1] <=> $rhs[1];
+   });
+   $maxValue = 0;
+   foreach ($items as $item) {
+      if ($item[1] > $maxValue) {
+         $maxValue = $item[1];
+      }
+   }
+   // Select first "nice" bar height that produces more than 10 bars.
+   $power = intval(ceil(log($maxValue, 10)));
+   foreach (generate_cycle([5, 2, 2.5, 1]) as $inc) {
+      $barH = $inc * pow(10, $power);
+      $num = intval(ceil($maxValue / $barH));
+      if ($num > 10) {
+         break;
+      } elseif ($inc == 1) {
+         $power -= 1;
+      }
+   }
+   $histo = array();
+   foreach (range(0, $num) as $index) {
+      $histo[$index] = array();
+   }
+   foreach ($items as $name => $v) {
+      $bin = min(intval($num * $v / $maxValue), $num - 1);
+      $histo[$bin][] = $name;
+   }
+   $barW = 40;
+   $hr = str_replace('-', $barW + 34)."\n";
+   printf("\nSlowest %s:", $title);
+   print($hr);
+   foreach (array_slice($items, -20) as $entry) {
+      list($name, $value) = $entry;
+      printf("%.2fs: %s", $value, $name);
+   }
+   printf("\n%s Times:", $title);
+   print($hr);
+   $pDigits = intval(ceil(log($maxValue, 10)));
+   $pfDigits = max(0, 3 - $pDigits);
+   if ($pfDigits) {
+      $pDigits += $pfDigits + 1;
+   }
+   $cDigits = int(ceil(log(count($items), 10)));
+   printf("[%s] :: [%s] :: [%s]\n",
+      center_str('Range', ($pDigits + 1) * 2 + 3),
+      center_str('Percentage', $barW),
+      center_str('Count', $cDigits * 2 + 1));
+   print($hr);
+   foreach ($histo as $i => $row) {
+      $pct = (float)count($row) / count($items);
+      $w = intval($barW * $pct);
+      printf("[%*.*fs,%*.*fs) :: [%s%s] :: [%*d/%*d]",
+         $pDigits, $pfDigits, $i * $barH, $pDigits, $pfDigits, ($i + 1) * $barH,
+            str_repeat('*', $w), str_repeat(' ', $barW - $w), $cDigits, count($row), $cDigits, count($items));
+   }
+}
+
+function center_str(string $text, int $width, string $fillStr)
+{
+   $textSize = strlen($text);
+   if ($width < $textSize) {
+      return $text;
+   }
+   $halfWidth = ($width - $textSize) / 2;
+   $sideStr = str_repeat($fillStr, $halfWidth);
+   return $sideStr . $text . $sideStr;
+}
+
+function generate_cycle(array $items)
+{
+   while (true) {
+      foreach ($items as $item) {
+         yield $item;
+      }
+   }
 }
 
 // dummy class

@@ -29,6 +29,7 @@ use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
 use function Lit\Utils\detect_cpus;
+use function Lit\Utils\print_histogram;
 use function Lit\Utils\sort_by_incremental_cache;
 use Lit\Utils\TestLogger;
 
@@ -470,8 +471,11 @@ class MainCommand extends Command
 
       if ($input->getOption('time-tests') && !empty($tests)) {
          // Order by time.
-         // TODO
-
+         $testTimes = array();
+         foreach ($testDispatcher->getTests() as $test) {
+            $testTimes[] = [$test->getFullName(), $test->getResult()->getElapsed()];
+         }
+         print_histogram($testTimes, 'Tests');
       }
       $codeNameMap = array(
          ['Expected Passes    ', TestResultCode::XPASS()],
