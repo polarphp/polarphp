@@ -253,7 +253,7 @@ class MainCommand extends Command
       $progressDisplay->finish();
       $testingTime = time() - $startTime;
       if (!$quite) {
-         printf("Testing Time: %.2ds", $testingTime);
+         printf("Testing Time: %.2ds\n", $testingTime);
       }
       // Write out the test data, if requested.
       if ($input->getOption('output')) {

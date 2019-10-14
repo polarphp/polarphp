@@ -154,7 +154,10 @@ class LitConfig
       $this->configPrefix = is_null($configPrefix) ? 'lit' : $configPrefix;
       $this->suffixes = ['cfg.php', 'cfg'];
       foreach ($this->suffixes as $suffix) {
-         $this->configNames[] = sprintf('%s.%s', $this->configPrefix, $suffix);
+         $this->configNames[] = sprintf('%s.site.%s', $this->configPrefix, $suffix);
+      }
+      foreach ($this->suffixes as $suffix) {
+         $this->siteConfigNames[] = sprintf('%s.%s', $this->configPrefix, $suffix);
       }
       foreach ($this->suffixes as $suffix) {
          $this->localConfigNames[] = sprintf('%s.local.%s', $this->configPrefix, $suffix);

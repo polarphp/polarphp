@@ -188,6 +188,11 @@ function has_substr(string $str, string $subStr)
    return strpos($str, $subStr) !== false;
 }
 
+function call_pgrep_command(int $pid)
+{
+
+}
+
 function kill_process_and_children(int $pid)
 {
 
