@@ -1,7 +1,14 @@
+//===- llvm/ADT/BreadthFirstIterator.h - Breadth First iterator -*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// copyright (c) 2017 - 2018  polarphp software foundation
-// copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// copyright (c) 2017 - 2019  polarphp software foundation
+// copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -28,8 +35,7 @@
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/utils/RawOutStream.h"
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// A container which contains a StringRef plus a precomputed hash.
 class CachedHashStringRef
@@ -45,7 +51,7 @@ public:
    {}
 
    CachedHashStringRef(StringRef str, uint32_t hash)
-      : m_size(str.getData()), m_size(str.getSize()), m_hash(hash)
+      : m_str(str.getData()), m_size(str.getSize()), m_hash(hash)
    {
       assert(str.getSize() <= std::numeric_limits<uint32_t>::max());
    }
@@ -253,7 +259,6 @@ struct DenseMapInfo<CachedHashString>
    }
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif //  POLARPHP_BASIC_ADT_CACHED_HASH_STRING_H

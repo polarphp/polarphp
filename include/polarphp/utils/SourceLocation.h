@@ -1,7 +1,14 @@
+//===- SMLoc.h - Source location for use with diagnostics -------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -22,8 +29,7 @@
 #include <cassert>
 #include <optional>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 /// Represents a location in source code.
 class SMLocation
@@ -73,6 +79,9 @@ public:
    SMLocation m_end;
 
    SMRange() = default;
+   SMRange(std::nullopt_t)
+   {}
+
    SMRange(SMLocation start, SMLocation end)
       : m_start(start),
         m_end(end)
@@ -87,7 +96,6 @@ public:
    }
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_SOURCE_LOCATION_H

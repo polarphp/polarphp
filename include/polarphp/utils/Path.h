@@ -1,7 +1,14 @@
+//===- llvm/Support/Path.h - Path Operating System Concept ------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -25,9 +32,7 @@
 #include "polarphp/global/DataTypes.h"
 #include <iterator>
 
-namespace polar {
-namespace fs {
-namespace path {
+namespace polar::fs::path {
 
 using polar::basic::IteratorFacadeBase;
 using polar::basic::StringRef;
@@ -469,9 +474,6 @@ StringRef remove_leading_dotslash(StringRef path, Style style = Style::native);
 bool remove_dots(SmallVectorImpl<char> &path, bool remove_dot_dot = false,
                  Style style = Style::native);
 
-
-} // path
-} // fs
-} // polar
+} // polar::fs::path
 
 #endif // POLARPHP_UTILS_PATH_H

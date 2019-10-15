@@ -1,7 +1,14 @@
+//===-- TargetParser - Parser for target features ---------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -26,13 +33,13 @@
 #include "polarphp/utils/AArch64TargetParser.h"
 #include <vector>
 
-namespace polar {
-
+namespace polar::basic {
 // forward declare class with namespace
-namespace basic {
 class StringRef;
 class Triple;
-} // basic
+} // polar::basic
+
+namespace polar {
 
 using polar::basic::StringRef;
 using polar::basic::Triple;
@@ -137,10 +144,15 @@ enum GPUKind : uint32_t {
    GK_GFX902 = 61,
    GK_GFX904 = 62,
    GK_GFX906 = 63,
+   GK_GFX908 = 64,
    GK_GFX909 = 65,
 
+   GK_GFX1010 = 71,
+   GK_GFX1011 = 72,
+   GK_GFX1012 = 73,
+
    GK_AMDGCN_FIRST = GK_GFX600,
-   GK_AMDGCN_LAST = GK_GFX909,
+   GK_AMDGCN_LAST = GK_GFX1012,
 };
 
 /// Instruction set architecture version.

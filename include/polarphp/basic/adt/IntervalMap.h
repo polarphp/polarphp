@@ -1,7 +1,14 @@
+//===- llvm/ADT/IndexedMap.h - An index map implementation ------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphpath.org open source project
 //
-// Copyright (c) 2017 - 2018  polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019  polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See http://polarphpath.org/LICENSE.txt for license information
@@ -1347,6 +1354,20 @@ public:
       Iterator iter(*this);
       iter.find(value);
       return iter;
+   }
+
+   /// overlaps(a, b) - Return true if the intervals in this map overlap with the
+   /// interval [a;b].
+   bool overlaps(KeyT a, KeyT b)
+   {
+      assert(Traits::nonEmpty(a, b));
+      ConstIterator iter = find(a);
+      if (!iter.valid())
+         return false;
+      // [a;b] and [x;y] overlap iff x<=b and a<=y. The find() call guarantees the
+      // second part (y = find(a).stop()), so it is sufficient to check the first
+      // one.
+      return !Traits::stopLess(b, iter.start());
    }
 };
 

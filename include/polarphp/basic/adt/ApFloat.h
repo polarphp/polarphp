@@ -1,7 +1,15 @@
+//===- llvm/ADT/APFloat.h - Arbitrary Precision Floating Point ---*- C++ -*-==//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -23,8 +31,9 @@ namespace polar {
 namespace utils {
 class RawOutStream;
 } // utils
+} // polar
 
-namespace basic {
+namespace polar::basic {
 
 #define APFLOAT_DISPATCH_ON_SEMANTICS(METHOD_CALL)                             \
    do {                                                                         \
@@ -154,11 +163,22 @@ struct ApFloatBase
 
    /// \name Floating Point Semantics.
    /// @{
+   enum Semantics {
+      S_IEEEhalf,
+      S_IEEEsingle,
+      S_IEEEdouble,
+      S_x87DoubleExtended,
+      S_IEEEquad,
+      S_PPCDoubleDouble
+   };
 
-   static const FltSemantics &getIEEEhalf() POLAR_READNONE;
-   static const FltSemantics &getIEEEsingle() POLAR_READNONE;
-   static const FltSemantics &getIEEEdouble() POLAR_READNONE;
-   static const FltSemantics &getIEEEquad() POLAR_READNONE;
+   static const FltSemantics &EnumToSemantics(Semantics semantic);
+   static Semantics SemanticsToEnum(const FltSemantics &fltSemantic);
+
+   static const FltSemantics &getIEEEHalf() POLAR_READNONE;
+   static const FltSemantics &getIEEESingle() POLAR_READNONE;
+   static const FltSemantics &getIEEEDouble() POLAR_READNONE;
+   static const FltSemantics &getIEEEQuad() POLAR_READNONE;
    static const FltSemantics &getPPCDoubleDouble() POLAR_READNONE;
    static const FltSemantics &getX87DoubleExtended() POLAR_READNONE;
 
@@ -627,7 +647,7 @@ IEEEFloat frexp(const IEEEFloat &value, int &exp, IEEEFloat::RoundingMode rmode)
 // This mode implements more precise float in terms of two ApFloats.
 // The interface and layout is designed for arbitray underlying semantics,
 // though currently only getPPCDoubleDouble semantics are supported, whose
-// corresponding underlying semantics are getIEEEdouble.
+// corresponding underlying semantics are getIEEEDouble.
 class DoubleApFloat final : public ApFloatBase
 {
    // Note: this must be the first data member.
@@ -920,7 +940,7 @@ class ApFloat : public ApFloatBase
    // FIXME: This is due to clang 3.3 (or older version) always checks for the
    // default constructor in an array aggregate initialization, even if no
    // elements in the array is default initialized.
-   ApFloat() : m_storage(getIEEEdouble())
+   ApFloat() : m_storage(getIEEEDouble())
    {
       polar_unreachable("This is a workaround for old clang.");
    }
@@ -928,6 +948,7 @@ class ApFloat : public ApFloatBase
    explicit ApFloat(IEEEFloat fvalue, const FltSemantics &semantic)
       : m_storage(std::move(fvalue), semantic)
    {}
+
    explicit ApFloat(DoubleApFloat fvalue, const FltSemantics &semantic)
       : m_storage(std::move(fvalue), semantic)
    {}
@@ -948,7 +969,9 @@ class ApFloat : public ApFloatBase
 public:
    ApFloat(const FltSemantics &semantics) : m_storage(semantics)
    {}
+
    ApFloat(const FltSemantics &semantics, StringRef str);
+
    ApFloat(const FltSemantics &semantics, integerPart ivalue) : m_storage(semantics, ivalue)
    {}
    // TODO: Remove this constructor. This isn't faster than the first one.
@@ -958,10 +981,10 @@ public:
 
    ApFloat(const FltSemantics &semantics, const ApInt &ivalue) : m_storage(semantics, ivalue)
    {}
-   explicit ApFloat(double dvalue) : m_storage(IEEEFloat(dvalue), getIEEEdouble())
+   explicit ApFloat(double dvalue) : m_storage(IEEEFloat(dvalue), getIEEEDouble())
    {}
 
-   explicit ApFloat(float fvalue) : m_storage(IEEEFloat(fvalue), getIEEEsingle())
+   explicit ApFloat(float fvalue) : m_storage(IEEEFloat(fvalue), getIEEESingle())
    {}
 
    ApFloat(const ApFloat &other) = default;
@@ -997,14 +1020,14 @@ public:
    /// Factory for NaN values.
    ///
    /// \param Negative - True iff the NaN generated should be negative.
-   /// \param type - The unspecified fill bits for creating the NaN, 0 by
+   /// \param payload - The unspecified fill bits for creating the NaN, 0 by
    /// default.  The value is truncated as necessary.
    static ApFloat getNaN(const FltSemantics &semantic, bool negative = false,
-                         unsigned type = 0)
+                         uint64_t payload = 0)
    {
-      if (type) {
-         ApInt fill(64, type);
-         return getQNaN(semantic, negative, &fill);
+      if (payload) {
+         ApInt intPayload(64, payload);
+         return getQNaN(semantic, negative, &intPayload);
       } else {
          return getQNaN(semantic, negative, nullptr);
       }
@@ -1574,8 +1597,7 @@ inline ApFloat maximum(const ApFloat &lhs, const ApFloat &rhs)
    return (lhs.compare(rhs) == ApFloat::CmpResult::cmpLessThan) ? rhs : lhs;
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #undef APFLOAT_DISPATCH_ON_SEMANTICS
 

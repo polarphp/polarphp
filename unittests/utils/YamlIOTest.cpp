@@ -1,7 +1,14 @@
+//===- unittest/Support/YAMLIOTest.cpp ------------------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -9,6 +16,7 @@
 //
 // Created by polarboy on 2018/07/15.
 
+#include "polarphp/basic/adt/BitmaskEnum.h"
 #include "polarphp/basic/adt/StringMap.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/basic/adt/Twine.h"
@@ -604,6 +612,90 @@ TEST(YamlIOTest, testReadWriteEndianTypes)
    }
 }
 
+enum class Enum : uint16_t { One, Two };
+enum class BitsetEnum : uint16_t {
+   ZeroOne = 0x01,
+   OneZero = 0x10,
+   POLAR_MARK_AS_BITMASK_ENUM(/*LargestValue*/ OneZero),
+};
+POLAR_ENABLE_BITMASK_ENUMS_IN_NAMESPACE();
+struct EndianEnums {
+   polar::utils::little_t<Enum> LittleEnum;
+   polar::utils::big_t<Enum> BigEnum;
+   polar::utils::little_t<BitsetEnum> LittleBitset;
+   polar::utils::big_t<BitsetEnum> BigBitset;
+};
+namespace polar {
+namespace yaml {
+template <> struct ScalarEnumerationTraits<Enum> {
+   static void enumeration(IO &io, Enum &E) {
+      io.enumCase(E, "One", Enum::One);
+      io.enumCase(E, "Two", Enum::Two);
+   }
+};
+
+template <> struct ScalarBitSetTraits<BitsetEnum> {
+   static void bitset(IO &io, BitsetEnum &E) {
+      io.bitSetCase(E, "ZeroOne", BitsetEnum::ZeroOne);
+      io.bitSetCase(E, "OneZero", BitsetEnum::OneZero);
+   }
+};
+
+template <> struct MappingTraits<EndianEnums> {
+   static void mapping(IO &io, EndianEnums &EE) {
+      io.mapRequired("LittleEnum", EE.LittleEnum);
+      io.mapRequired("BigEnum", EE.BigEnum);
+      io.mapRequired("LittleBitset", EE.LittleBitset);
+      io.mapRequired("BigBitset", EE.BigBitset);
+   }
+};
+} // namespace yaml
+} // namespace llvm
+
+TEST(YamlIOTest, TestReadEndianEnums) {
+   EndianEnums map;
+   Input yin("---\n"
+             "LittleEnum:   One\n"
+             "BigEnum:      Two\n"
+             "LittleBitset: [ ZeroOne ]\n"
+             "BigBitset:    [ ZeroOne, OneZero ]\n"
+             "...\n");
+   yin >> map;
+
+   EXPECT_FALSE(yin.getError());
+   EXPECT_EQ(Enum::One, map.LittleEnum);
+   EXPECT_EQ(Enum::Two, map.BigEnum);
+   EXPECT_EQ(BitsetEnum::ZeroOne, map.LittleBitset);
+   EXPECT_EQ(BitsetEnum::ZeroOne | BitsetEnum::OneZero, map.BigBitset);
+}
+
+TEST(YamlIOTest, TestReadWriteEndianEnums) {
+   std::string intermediate;
+   {
+      EndianEnums map;
+      map.LittleEnum = Enum::Two;
+      map.BigEnum = Enum::One;
+      map.LittleBitset = BitsetEnum::OneZero | BitsetEnum::ZeroOne;
+      map.BigBitset = BitsetEnum::OneZero;
+
+      RawStringOutStream ostr(intermediate);
+      Output yout(ostr);
+      yout << map;
+   }
+
+   {
+      Input yin(intermediate);
+      EndianEnums map;
+      yin >> map;
+
+      EXPECT_FALSE(yin.getError());
+      EXPECT_EQ(Enum::Two, map.LittleEnum);
+      EXPECT_EQ(Enum::One, map.BigEnum);
+      EXPECT_EQ(BitsetEnum::OneZero | BitsetEnum::ZeroOne, map.LittleBitset);
+      EXPECT_EQ(BitsetEnum::OneZero, map.BigBitset);
+   }
+}
+
 struct StringTypes {
    StringRef str1;
    StringRef str2;
@@ -628,6 +720,7 @@ struct StringTypes {
    std::string stdstr10;
    std::string stdstr11;
    std::string stdstr12;
+   std::string stdstr13;
 };
 
 namespace polar {
@@ -658,6 +751,7 @@ struct MappingTraits<StringTypes> {
       io.mapRequired("stdstr10",  st.stdstr10);
       io.mapRequired("stdstr11",  st.stdstr11);
       io.mapRequired("stdstr12",  st.stdstr12);
+      io.mapRequired("stdstr13",  st.stdstr13);
    }
 };
 }
@@ -691,6 +785,7 @@ TEST(YamlIOTest, testReadWriteStringTypes)
       map.stdstr10 = "0.2e20";
       map.stdstr11 = "0x30";
       map.stdstr12 = "- match";
+      map.stdstr13.assign("\0a\0b\0", 5);
 
       RawStringOutStream ostr(intermediate);
       Output yout(ostr);
@@ -716,6 +811,7 @@ TEST(YamlIOTest, testReadWriteStringTypes)
    EXPECT_NE(std::string::npos, flowOut.find("'@hhh'"));
    EXPECT_NE(std::string::npos, flowOut.find("''\n"));
    EXPECT_NE(std::string::npos, flowOut.find("'0000000004000000'\n"));
+   EXPECT_NE(std::string::npos, flowOut.find("\"\\0a\\0b\\0\""));
 
    {
       Input yin(intermediate);
@@ -735,6 +831,7 @@ TEST(YamlIOTest, testReadWriteStringTypes)
       EXPECT_TRUE(map.stdstr4 == "@hhh");
       EXPECT_TRUE(map.stdstr5 == "");
       EXPECT_TRUE(map.stdstr6 == "0000000004000000");
+      EXPECT_EQ(std::string("\0a\0b\0", 5), map.stdstr13);
    }
 }
 
@@ -849,7 +946,7 @@ struct MappingTraits<FlagsMap> {
       io.mapRequired("f1", c.f1);
       io.mapRequired("f2", c.f2);
       io.mapRequired("f3", c.f3);
-      io.mapOptional("f4", c.f4, MyFlags(flagRound));
+      io.mapOptional("f4", c.f4, flagRound);
    }
 };
 }
@@ -1359,9 +1456,8 @@ namespace polar {
 
       static void mapping(IO &io, TotalSeconds &secs) {
          MappingNormalization<NormalizedSeconds, TotalSeconds> keys(io, secs);
-
-         io.mapOptional("hours",    keys->hours,    (uint32_t)0);
-         io.mapOptional("minutes",  keys->minutes,  (uint8_t)0);
+         io.mapOptional("hours", keys->hours, 0);
+         io.mapOptional("minutes", keys->minutes, 0);
          io.mapRequired("seconds",  keys->seconds);
       }
    };
@@ -2506,7 +2602,7 @@ TEST(YamlIOTest, testMapWithContext)
    ostr.flush();
    EXPECT_EQ(1, Context.A);
    EXPECT_EQ("---\n"
-             "Simple:          \n"
+             "Simple:\n"
              "  B:               0\n"
              "  C:               0\n"
              "  Context:         1\n"
@@ -2521,7 +2617,7 @@ TEST(YamlIOTest, testMapWithContext)
    ostr.flush();
    EXPECT_EQ(2, Context.A);
    EXPECT_EQ("---\n"
-             "Simple:          \n"
+             "Simple:\n"
              "  B:               2\n"
              "  C:               3\n"
              "  Context:         2\n"
@@ -2535,13 +2631,22 @@ POLAR_YAML_IS_STRING_MAP(int)
 TEST(YamlIOTest, testCustomMapping)
 {
    std::map<std::string, int> x;
-   x["foo"] = 1;
-   x["bar"] = 2;
 
    std::string out;
    RawStringOutStream ostr(out);
    Output xout(ostr, nullptr, 0);
 
+   xout << x;
+   ostr.flush();
+   EXPECT_EQ("---\n"
+             "{}\n"
+             "...\n",
+             out);
+
+   x["foo"] = 1;
+   x["bar"] = 2;
+
+   out.clear();
    xout << x;
    ostr.flush();
    EXPECT_EQ("---\n"
@@ -2575,10 +2680,10 @@ TEST(YamlIOTest, testCustomMappingStruct)
    xout << x;
    ostr.flush();
    EXPECT_EQ("---\n"
-             "bar:             \n"
+             "bar:\n"
              "  foo:             3\n"
              "  bar:             4\n"
-             "foo:             \n"
+             "foo:\n"
              "  foo:             1\n"
              "  bar:             2\n"
              "...\n",
@@ -2592,6 +2697,39 @@ TEST(YamlIOTest, testCustomMappingStruct)
    EXPECT_EQ(2, y["foo"].bar);
    EXPECT_EQ(3, y["bar"].foo);
    EXPECT_EQ(4, y["bar"].bar);
+}
+
+
+struct FooBarMapMap {
+   std::map<std::string, FooBar> fbm;
+};
+
+namespace polar {
+namespace yaml {
+template <> struct MappingTraits<FooBarMapMap> {
+   static void mapping(IO &io, FooBarMapMap &x) {
+      io.mapRequired("fbm", x.fbm);
+   }
+};
+}
+}
+
+TEST(YamlIOTest, TestEmptyMapWrite) {
+   FooBarMapMap cont;
+   std::string str;
+   RawStringOutStream OS(str);
+   Output yout(OS);
+   yout << cont;
+   EXPECT_EQ(OS.getStr(), "---\nfbm:             {}\n...\n");
+}
+
+TEST(YamlIOTest, TestEmptySequenceWrite) {
+   FooBarContainer cont;
+   std::string str;
+   RawStringOutStream OS(str);
+   Output yout(OS);
+   yout << cont;
+   EXPECT_EQ(OS.getStr(), "---\nfbs:             []\n...\n");
 }
 
 static void testEscaped(StringRef Input, StringRef Expected)
@@ -2751,20 +2889,20 @@ struct Scalar : Poly {
    Scalar(bool BoolValue)
       : Poly(NK_Scalar), SKind(SK_Bool), BoolValue(BoolValue) {}
 
-   static bool classof(const Poly *N) { return N->getKind() == NK_Scalar; }
+   static bool classOf(const Poly *N) { return N->getKind() == NK_Scalar; }
 };
 
 struct Seq : Poly, std::vector<std::unique_ptr<Poly>> {
    Seq() : Poly(NK_Seq) {}
 
-   static bool classof(const Poly *N) { return N->getKind() == NK_Seq; }
+   static bool classOf(const Poly *N) { return N->getKind() == NK_Seq; }
 };
 
 struct Map : Poly, StringMap<std::unique_ptr<Poly>>
 {
    Map() : Poly(NK_Map) {}
 
-   static bool classof(const Poly *N) { return N->getKind() == NK_Map; }
+   static bool classOf(const Poly *N) { return N->getKind() == NK_Map; }
 };
 
 namespace polar {

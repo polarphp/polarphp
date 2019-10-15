@@ -1,7 +1,14 @@
+//===- FunctionExtras.h - Function type erasure utilities -------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -179,7 +186,7 @@ inline uint64_t hash_1to3_bytes(const char *s, size_t len, uint64_t seed)
    uint8_t b = s[len >> 1];
    uint8_t c = s[len - 1];
    uint32_t y = static_cast<uint32_t>(a) + (static_cast<uint32_t>(b) << 8);
-   uint32_t z = len + (static_cast<uint32_t>(c) << 2);
+   uint32_t z = static_cast<uint32_t>(len) + (static_cast<uint32_t>(c) << 2);
    return shift_mix(y * k2 ^ z * k3 ^ seed) * k2;
 }
 
@@ -612,7 +619,8 @@ public:
 /// The result is suitable for returning from a user's hash_value
 /// *implementation* for their user-defined type. Consumers of a type should
 /// *not* call this routine, they should instead call 'hash_value'.
-template <typename ...Ts> HashCode hash_combine(const Ts &...args)
+template <typename ...Ts>
+HashCode hash_combine(const Ts &...args)
 {
    // Recursively hash each argument using a helper class.
    ::polar::basic::hashing::internal::HashCombineRecursiveHelper helper;

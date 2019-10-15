@@ -1,4 +1,10 @@
-<img width="350" src ="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/polarphp.png?sanitize=true"/>
+<img width="350" src ="https://raw.githubusercontent.com/polarphp/polarphp/master/assets/images/polarphp.png"/>
+
+## 让 PHP 语言变得更加美好
+
+<br/>
+
+Read the English version of this document: [English](README.en_US.md)
 
 阅读本文档其他语言版本: [English](README.en_US.md), **简体中文**.
 
@@ -85,7 +91,7 @@ if (function_exists('\php\retrieve_patch_version')) {
 }
 
 ```
-您可以运行一下命名：
+您可以运行一下命令：
 ```
 polar ~/temp/main.php
 ```
@@ -135,7 +141,7 @@ patch version: 1
 
 ## 贡献代码引导
 ===========================
-- [CODING_STANDARDS](docs/CODING_STANDARDS)
+- [CODING_STANDARDS](CODING_STANDARDS)
 - [README.GIT-RULES](docs/README.GIT-RULES)
 - [README.MAILINGLIST_RULES](docs/README.MAILINGLIST_RULES)
 - [README.RELEASE_PROCESS](docs/README.RELEASE_PROCESS)

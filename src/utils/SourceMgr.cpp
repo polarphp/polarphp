@@ -1,7 +1,14 @@
+//===- SourceMgr.cpp - Manager for Simple Source Buffers & Diagnostics ----===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -37,8 +44,7 @@
 #include <string>
 #include <utility>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::make_array_ref;
 using polar::basic::find_if;
@@ -55,7 +61,8 @@ unsigned SourceMgr::addIncludeFile(const std::string &filename,
 
    // If the file didn't exist directly, see if it's in an include path.
    for (unsigned i = 0, e = m_includeDirectories.size(); i != e && !newBufOrErr;
-        ++i) {
+        ++i)
+   {
       includedFile =
             m_includeDirectories[i] + fs::path::get_separator().getData() + filename;
       newBufOrErr = MemoryBuffer::getFile(includedFile);
@@ -83,7 +90,6 @@ unsigned SourceMgr::findBufferContainingLoc(SMLocation loc) const
 template <typename T>
 unsigned SourceMgr::SrcBuffer::getLineNumber(const char *ptr) const
 {
-
    // Ensure m_offsetCache is allocated and populated with offsets of all the
    // '\n' bytes.
    std::vector<T> *offsets = nullptr;
@@ -108,14 +114,9 @@ unsigned SourceMgr::SrcBuffer::getLineNumber(const char *ptr) const
    assert(ptrDiff >= 0 && static_cast<size_t>(ptrDiff) <= std::numeric_limits<T>::max());
    T ptrOffset = static_cast<T>(ptrDiff);
 
-   // std::lower_bound returns the first eol offset that's not-less-than
-   // ptrOffset, meaning the eol that _ends the line_ that ptrOffset is on
-   // (including if ptrOffset refers to the eol itself). If there's no such
-   // eol, returns end().
-   auto eol = std::lower_bound(offsets->begin(), offsets->end(), ptrOffset);
-
-   // Lines count from 1, so add 1 to the distance from the 0th line.
-   return (1 + (eol - offsets->begin()));
+   // polar::basic::lower_bound gives the number of EOL before PtrOffset. Add 1 to get
+   // the line number.
+   return polar::basic::lower_bound(*offsets, ptrOffset) - offsets->begin() + 1;
 }
 
 SourceMgr::SrcBuffer::SrcBuffer(SourceMgr::SrcBuffer &&other)
@@ -500,7 +501,6 @@ void SMDiagnostic::print(const char *progName, RawOutStream &stream,
 
    {
       WithColor colorStream(stream, RawOutStream::Colors::GREEN, true, false, !showColors);
-
       // Print out the caret line, matching tabs in the source line.
       for (unsigned i = 0, e = caretLine.size(), outCol = 0; i != e; ++i) {
          if (i >= m_lineContents.size() || m_lineContents[i] != '\t') {
@@ -546,5 +546,4 @@ void SMDiagnostic::print(const char *progName, RawOutStream &stream,
    stream << '\n';
 }
 
-} // utils
-} // polar
+} // polar::utils

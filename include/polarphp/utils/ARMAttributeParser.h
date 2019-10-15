@@ -1,7 +1,14 @@
+//===--- ARMAttributeParser.h - ARM Attribute Information Printer ---------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -70,6 +77,8 @@ class ARMAttributeParser
                   uint32_t &offset);
    void Advanced_SIMD_arch(armbuildattrs::AttrType tag, const uint8_t *data,
                            uint32_t &offset);
+   void MVE_arch(armbuildattrs::AttrType Tag, const uint8_t *Data,
+                 uint32_t &offset);
    void PCS_config(armbuildattrs::AttrType tag, const uint8_t *data,
                    uint32_t &offset);
    void ABI_PCS_R9_use(armbuildattrs::AttrType tag, const uint8_t *data,

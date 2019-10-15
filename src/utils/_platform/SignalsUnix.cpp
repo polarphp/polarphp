@@ -1,7 +1,14 @@
+//===- Signals.cpp - Generic Unix Signals Implementation -----*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -45,6 +52,7 @@
 #include "polarphp/utils/Signals.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/utils/RawOutStream.h"
+#include "polarphp/utils/SaveAndRestore.h"
 #include "polarphp/utils/Format.h"
 
 #include <filesystem>
@@ -88,11 +96,17 @@
 
 using polar::utils::ManagedStatic;
 using polar::utils::StringRef;
+using polar::basic::array_lengthof;
 
-static void signal_handler(int sig);  // defined below.
+static void signal_handler(int Sig);  // defined below.
+static void info_signal_handler(int Sig);  // defined below.
+
 /// The function to call if ctrl-c is pressed.
-using InterruptFunctionType = void (*)();
-static std::atomic<InterruptFunctionType> sg_interruptFunction =
+using SignalHandlerFunctionType = void (*)();
+/// The function to call if ctrl-c is pressed.
+static std::atomic<SignalHandlerFunctionType> sg_interruptFunction =
+      ATOMIC_VAR_INIT(nullptr);
+static std::atomic<SignalHandlerFunctionType> sg_infoSignalFunction =
       ATOMIC_VAR_INIT(nullptr);
 
 namespace {
@@ -220,16 +234,16 @@ struct FilesToRemoveCleanup
 
 static std::string sg_argv0;
 
-// Signals that represent requested termination. There's no bug or failure, or
-// if there is, it's not our direct responsibility. For whatever reason, our
-// continued execution is no longer desirable.
+/// Signals that represent requested termination. There's no bug or failure, or
+/// if there is, it's not our direct responsibility. For whatever reason, our
+/// continued execution is no longer desirable.
 static const int sg_intSigs[] =
 {
-   SIGHUP, SIGINT, SIGPIPE, SIGTERM, SIGUSR1, SIGUSR2
+   SIGHUP, SIGINT, SIGPIPE, SIGTERM, SIGUSR2
 };
 
-// Signals that represent that we have a bug, and our prompt termination has
-// been ordered.
+/// Signals that represent that we have a bug, and our prompt termination has
+/// been ordered.
 static const int sg_killSigs[] =
 {
    SIGILL, SIGTRAP, SIGABRT, SIGFPE, SIGBUS, SIGSEGV, SIGQUIT
@@ -247,11 +261,26 @@ static const int sg_killSigs[] =
    #endif
 };
 
+/// Signals that represent requests for status.
+static const int sg_infoSigs[] =
+{
+   SIGUSR1
+   #ifdef SIGINFO
+   , SIGINFO
+   #endif
+};
+
+static const size_t sg_numSigs =
+      array_lengthof(sg_intSigs) + array_lengthof(sg_killSigs) +
+      array_lengthof(sg_infoSigs);
+
+
 static std::atomic<unsigned> sg_numRegisteredSignals = ATOMIC_VAR_INIT(0);
-static struct {
-   struct sigaction m_sa;
-   int m_sigNo;
-} sg_registeredSignalInfo[polar::basic::array_lengthof(sg_intSigs) + polar::basic::array_lengthof(sg_killSigs)];
+static struct
+{
+   struct sigaction sa;
+   int sigNo;
+} sg_registeredSignalInfo[sg_numSigs];
 
 #if defined(HAVE_SIGALTSTACK)
 // Hold onto both the old and new alternate signal stack so that it's not
@@ -302,28 +331,40 @@ static void register_handlers()
    // be able to reliably handle signals due to stack overflow.
    create_sig_alt_stack();
 
-   auto registerHandler = [&](int signal) {
+   enum class SignalKind { IsKill, IsInfo };
+   auto registerHandler = [&](int signal, SignalKind kind) {
       unsigned index = sg_numRegisteredSignals.load();
-      assert(index < polar::basic::array_lengthof(sg_registeredSignalInfo) &&
+      assert(index < array_lengthof(sg_registeredSignalInfo) &&
              "Out of space for signal handlers!");
 
       struct sigaction newHandler;
 
-      newHandler.sa_handler = signal_handler;
-      newHandler.sa_flags = SA_NODEFER | SA_RESETHAND | SA_ONSTACK;
+      switch (kind) {
+      case SignalKind::IsKill:
+         newHandler.sa_handler = signal_handler;
+         newHandler.sa_flags = SA_NODEFER | SA_RESETHAND | SA_ONSTACK;
+         break;
+      case SignalKind::IsInfo:
+         newHandler.sa_handler = signal_handler;
+         newHandler.sa_flags = SA_ONSTACK;
+         break;
+      }
       sigemptyset(&newHandler.sa_mask);
 
       // Install the new handler, save the old one in RegisteredSignalInfo.
-      sigaction(signal, &newHandler, &sg_registeredSignalInfo[index].m_sa);
-      sg_registeredSignalInfo[index].m_sigNo = signal;
+      sigaction(signal, &newHandler, &sg_registeredSignalInfo[index].sa);
+      sg_registeredSignalInfo[index].sigNo = signal;
       ++sg_numRegisteredSignals;
    };
 
    for (auto sig : sg_intSigs) {
-      registerHandler(sig);
+      registerHandler(sig, SignalKind::IsKill);
    }
    for (auto sig : sg_killSigs) {
-      registerHandler(sig);
+      registerHandler(sig, SignalKind::IsKill);
+   }
+   for (auto sig : sg_infoSigs) {
+      registerHandler(sig, SignalKind::IsInfo);
    }
 }
 
@@ -331,8 +372,8 @@ static void unregister_handlers()
 {
    // Restore all of the signal handlers to how they were before we showed up.
    for (unsigned i = 0, e = sg_numRegisteredSignals.load(); i != e; ++i) {
-      sigaction(sg_registeredSignalInfo[i].m_sigNo,
-                &sg_registeredSignalInfo[i].m_sa, nullptr);
+      sigaction(sg_registeredSignalInfo[i].sigNo,
+                &sg_registeredSignalInfo[i].sa, nullptr);
       --sg_numRegisteredSignals;
    }
 }
@@ -385,8 +426,15 @@ static void signal_handler(int sig)
 #endif
 }
 
-namespace polar {
-namespace utils {
+static void info_signal_handler(int sig)
+{
+   polar::utils::SaveAndRestore<int> saveErrnoDuringASignalHandler(errno);
+   if (SignalHandlerFunctionType currentInfoFunction = sg_infoSignalFunction) {
+      currentInfoFunction();
+   }
+}
+
+namespace polar::utils {
 
 void run_interrupt_handlers()
 {
@@ -396,6 +444,12 @@ void run_interrupt_handlers()
 void set_interrupt_function(void (*ifunc)())
 {
    sg_interruptFunction.exchange(ifunc);
+   register_handlers();
+}
+
+void set_info_signal_function(void (*handle)())
+{
+   sg_infoSignalFunction.exchange(handle);
    register_handlers();
 }
 
@@ -532,11 +586,9 @@ void print_stack_trace(RawOutStream &out)
          //         else    out << d;
          //         free(d);
          out << dlinfo.dli_sname;
-         // FIXME: When we move to C++11, use %t length modifier. It's not in
-         // C++03 and causes gcc to issue warnings. Losing the upper 32 bits of
-         // the stack offset for a stack dump isn't likely to cause any problems.
-         out << format(" + %u",(unsigned)((char*)stackTrace[i]-
-                                          (char*)dlinfo.dli_saddr));
+
+         out << format(" + %tu", (static_cast<const char*>(stackTrace[i])-
+                                  static_cast<const char*>(dlinfo.dli_saddr)));
       }
       out << '\n';
    }
@@ -580,5 +632,4 @@ void print_stack_trace_on_error_signal(StringRef argv0,
 #endif
 }
 
-} // utils
-} // polar
+} // polar::utils

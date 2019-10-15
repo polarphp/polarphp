@@ -1,7 +1,7 @@
 # This source file is part of the polarphp.org open source project
 #
-# Copyright (c) 2017 - 2018 polarphp software foundation
-# Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+# Copyright (c) 2017 - 2019 polarphp software foundation
+# Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
 # See https://polarphp.org/LICENSE.txt for license information
@@ -9,6 +9,10 @@
 #
 # Created by polarboy on 2018/10/18.
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+if (POLAR_DEBUG_MODE)
+   polar_add_definitions(-DPOLAR_DEBUG_MODE)
+endif()
 
 polar_add_unittest(PolarBaseLibTests BasicAdtTest
    ../../TestEntry.cpp
@@ -26,6 +30,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    DeltaAlgorithmTest.cpp
    DepthFirstIteratorTest.cpp
    EquivalenceClassesTest.cpp
+   FallibleIteratorTest.cpp
    FoldingSetTest.cpp
    FuncExtrasTest.cpp
    FuncRefTest.cpp
@@ -42,6 +47,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    IntrusiveListTest.cpp
    IntrusiveRefCntPtrTest.cpp
    ImmutableListTest.cpp
+   IntEqClassesTest.cpp
    MappedIteratorTest.cpp
    MapVectorTest.cpp
    PackedVectorTest.cpp
@@ -58,7 +64,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    SimpleIntrusiveListTest.cpp
    StringRefTest.cpp
    StringExtrasTest.cpp
-   STLExtrasTest.cpp
+   StlExtrasTest.cpp
    StringMapTest.cpp
    SmallStringTest.cpp
    SmallVectorTest.cpp
@@ -66,7 +72,10 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    SmallPtrSetTest.cpp
    SparseBitVectorTest.cpp
    SparseMultiSetTest.cpp
+   SparseSetTest.cpp
    StringSwitchTest.cpp
+   StringSetTest.cpp
+   StatisticTest.cpp
    TinyPtrVectorTest.cpp
    TwineTest.cpp
    TripleTest.cpp

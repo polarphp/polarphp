@@ -1,11 +1,18 @@
+//===- AARCH64TargetParser.def - AARCH64 target parsing defines ---------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarPHP software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarPHP project authors
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/06/18.
 
@@ -57,6 +64,13 @@ enum ArchExtKind : unsigned
    AEK_RAND =        1 << 18,
    AEK_MTE =         1 << 19,
    AEK_SSBS =        1 << 20,
+   AEK_SB =          1 << 21,
+   AEK_PREDRES =     1 << 22,
+   AEK_SVE2 =        1 << 23,
+   AEK_SVE2AES =     1 << 24,
+   AEK_SVE2SM4 =     1 << 25,
+   AEK_SVE2SHA3 =    1 << 26,
+   AEK_SVE2BITPERM = 1 << 27,
 };
 
 // arch names.

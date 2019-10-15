@@ -1,7 +1,14 @@
+//===-- llvm/ADT/Triple.h - Target triple helper class ----------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -21,8 +28,7 @@
 #undef mips
 #undef sparc
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// Triple - Helper class for working with autoconf configuration names. For
 /// historical reasons, we also call these 'triples' (they used to contain
@@ -57,6 +63,7 @@ public:
       armeb,          // ARM (big endian): armeb
       aarch64,        // AArch64 (little endian): aarch64
       aarch64_be,     // AArch64 (big endian): aarch64_be
+      aarch64_32,     // AArch64 (little endian) ILP32: aarch64_32
       arc,            // ARC: Synopsys ARC
       avr,            // AVR: Atmel AVR microcontroller
       bpfel,          // eBPF or extended BPF or 64-bit BPF (little endian)
@@ -67,7 +74,6 @@ public:
       mips64,         // MIPS64: mips64, mips64r6, mipsn32, mipsn32r6
       mips64el,       // MIPS64EL: mips64el, mips64r6el, mipsn32el, mipsn32r6el
       msp430,         // MSP430: msp430
-      nios2,          // NIOSII: nios2
       ppc,            // PPC: powerpc
       ppc64,          // PPC64: powerpc64, ppu
       ppc64le,        // PPC64LE: powerpc64le
@@ -119,6 +125,7 @@ public:
       ARMSubArch_v8r,
       ARMSubArch_v8m_baseline,
       ARMSubArch_v8m_mainline,
+      ARMSubArch_v8_1m_mainline,
       ARMSubArch_v7,
       ARMSubArch_v7em,
       ARMSubArch_v7m,
@@ -200,7 +207,9 @@ public:
       AMDPAL,     // AMD PAL Runtime
       HermitCore, // HermitCore Unikernel/Multikernel
       Hurd,       // GNU/Hurd
-      LastOSType = Hurd
+      WASI,       // Experimental WebAssembly OS
+      Emscripten,
+      LastOSType = Emscripten
    };
 
    enum class EnvironmentType
@@ -216,6 +225,8 @@ public:
       CODE16,
       EABI,
       EABIHF,
+      ELFv1,
+      ELFv2,
       Android,
       Musl,
       MuslEABI,
@@ -225,8 +236,9 @@ public:
       Itanium,
       Cygnus,
       CoreCLR,
-      Simulator,  // Simulator variants of other systems, e.g., Apple's iOS
-      LastEnvironmentType = Simulator
+      Simulator, // Simulator variants of other systems, e.g., Apple's iOS
+      MacABI, // Mac Catalyst variant of Apple's iOS deployment target.
+      LastEnvironmentType = MacABI
    };
 
    enum class ObjectFormatType
@@ -237,6 +249,7 @@ public:
       ELF,
       MachO,
       Wasm,
+      XCOFF,
    };
 
 private:
@@ -475,7 +488,7 @@ public:
       }
 
       if (lhs[2] != micro) {
-         return lhs[1] < micro;
+         return lhs[2] < micro;
       }
       return false;
    }
@@ -549,6 +562,11 @@ public:
       return getEnvironment() == Triple::EnvironmentType::Simulator;
    }
 
+   bool isMacCatalystEnvironment() const
+   {
+      return getEnvironment() == Triple::EnvironmentType::MacABI;
+   }
+
    bool isOSNetBSD() const
    {
       return getOS() == Triple::OSType::NetBSD;
@@ -608,42 +626,48 @@ public:
       return getOS() == Triple::OSType::Haiku;
    }
 
-   /// Checks if the environment could be MSVC.
-   bool isWindowsMSVCEnvironment() const
+   /// Tests whether the OS is Windows.
+   bool isOSWindows() const
    {
-      return getOS() == Triple::OSType::Win32 &&
-            (getEnvironment() == Triple::EnvironmentType::UnknownEnvironment ||
-             getEnvironment() == Triple::EnvironmentType::MSVC);
+      return getOS() == Triple::OSType::Win32;
    }
 
    /// Checks if the environment is MSVC.
    bool isKnownWindowsMSVCEnvironment() const
    {
-      return getOS() == Triple::OSType::Win32 && getEnvironment() == Triple::EnvironmentType::MSVC;
+      return isOSWindows() && getEnvironment() == Triple::EnvironmentType::MSVC;
+   }
+
+   /// Checks if the environment could be MSVC.
+   bool isWindowsMSVCEnvironment() const
+   {
+      return isKnownWindowsMSVCEnvironment() ||
+            (isOSWindows() && getEnvironment() == Triple::EnvironmentType::UnknownEnvironment);
    }
 
    bool isWindowsCoreCLREnvironment() const
    {
-      return getOS() == Triple::OSType::Win32 && getEnvironment() == Triple::EnvironmentType::CoreCLR;
+      return isOSWindows() && getEnvironment() == Triple::EnvironmentType::CoreCLR;
    }
 
    bool isWindowsItaniumEnvironment() const
    {
-      return getOS() == Triple::OSType::Win32 && getEnvironment() == Triple::EnvironmentType::Itanium;
+      return isOSWindows() && getEnvironment() == Triple::EnvironmentType::Itanium;
    }
 
    bool isWindowsCygwinEnvironment() const
    {
-      return getOS() == Triple::OSType::Win32 && getEnvironment() == Triple::EnvironmentType::Cygnus;
+      return isOSWindows() && getEnvironment() == Triple::EnvironmentType::Cygnus;
    }
 
    bool isWindowsGNUEnvironment() const
    {
-      return getOS() == Triple::OSType::Win32 && getEnvironment() == Triple::EnvironmentType::GNU;
+      return isOSWindows() && getEnvironment() == Triple::EnvironmentType::GNU;
    }
 
    /// Tests for either Cygwin or MinGW OS
-   bool isOSCygMing() const {
+   bool isOSCygMing() const
+   {
       return isWindowsCygwinEnvironment() || isWindowsGNUEnvironment();
    }
 
@@ -652,12 +676,6 @@ public:
    {
       return isWindowsMSVCEnvironment() || isWindowsGNUEnvironment() ||
             isWindowsItaniumEnvironment();
-   }
-
-   /// Tests whether the OS is Windows.
-   bool isOSWindows() const
-   {
-      return getOS() == Triple::OSType::Win32;
    }
 
    /// Tests whether the OS is NaCl (Native Client)
@@ -685,12 +703,30 @@ public:
       return getOS() == Triple::OSType::Hurd;
    }
 
+   /// Tests whether the OS is WASI.
+   bool isOSWASI() const
+   {
+      return getOS() == Triple::OSType::WASI;
+   }
+
+   /// Tests whether the OS is Emscripten.
+   bool isOSEmscripten() const
+   {
+      return getOS() == Triple::OSType::Emscripten;
+   }
+
    /// Tests whether the OS uses glibc.
    bool isOSGlibc() const
    {
       return (getOS() == Triple::OSType::Linux || getOS() == Triple::OSType::KFreeBSD ||
               getOS() == Triple::OSType::Hurd) &&
             !isAndroid();
+   }
+
+   /// Tests whether the OS is AIX.
+   bool isOSAIX() const
+   {
+      return getOS() == Triple::OSType::AIX;
    }
 
    /// Tests whether the OS uses the ELF binary format.
@@ -715,6 +751,12 @@ public:
    bool isOSBinFormatWasm() const
    {
       return getObjectFormat() == Triple::ObjectFormatType::Wasm;
+   }
+
+   /// Tests whether the OS uses the XCOFF binary format.
+   bool isOSBinFormatXCOFF() const
+   {
+      return getObjectFormat() == Triple::ObjectFormatType::XCOFF;
    }
 
    /// Tests whether the target is the PS4 CPU
@@ -758,6 +800,12 @@ public:
             getEnvironment() == Triple::EnvironmentType::MuslEABIHF;
    }
 
+   /// Tests whether the target is SPIR (32- or 64-bit).
+   bool isSPIR() const
+   {
+      return getArch() == Triple::ArchType::spir || getArch() == Triple::ArchType::spir64;
+   }
+
    /// Tests whether the target is NVPTX (32- or 64-bit).
    bool isNVPTX() const
    {
@@ -780,6 +828,35 @@ public:
    bool isAArch64() const
    {
       return getArch() == Triple::ArchType::aarch64 || getArch() == Triple::ArchType::aarch64_be;
+   }
+
+   /// Tests whether the target is MIPS 32-bit (little and big endian).
+   bool isMIPS32() const
+   {
+      return getArch() == Triple::ArchType::mips || getArch() == Triple::ArchType::mipsel;
+   }
+
+   /// Tests whether the target is MIPS 64-bit (little and big endian).
+   bool isMIPS64() const
+   {
+      return getArch() == Triple::ArchType::mips64 || getArch() == Triple::ArchType::mips64el;
+   }
+
+   /// Tests whether the target is MIPS (little and big endian, 32- or 64-bit).
+   bool isMIPS() const {
+      return isMIPS32() || isMIPS64();
+   }
+
+   /// Tests whether the target is 64-bit PowerPC (little and big endian).
+   bool isPPC64() const
+   {
+      return getArch() == Triple::ArchType::ppc64 || getArch() == Triple::ArchType::ppc64le;
+   }
+
+   /// Tests whether the target is RISC-V (32- and 64-bit).
+   bool isRISCV() const
+   {
+      return getArch() == Triple::ArchType::riscv32 || getArch() == Triple::ArchType::riscv64;
    }
 
    /// Tests whether the target supports comdat
@@ -929,7 +1006,6 @@ public:
    /// @}
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_TRIPLE_H

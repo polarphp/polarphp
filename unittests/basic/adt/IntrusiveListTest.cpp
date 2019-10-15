@@ -1,7 +1,14 @@
+//===- unittests/ADT/IListTest.cpp - ilist unit tests ---------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -226,6 +233,14 @@ struct NodeWithCallback : IntrusiveListNode<NodeWithCallback>
 namespace polar {
 namespace basic {
 
+// These nodes are stack-allocated for testing purposes, so don't let the ilist
+// own or delete them.
+template <>
+struct IntrusiveListAllocTraits<NodeWithCallback>
+{
+   static void deleteNode(NodeWithCallback *) {}
+};
+
 template <>
 struct IntrusiveListCallbackTraits<NodeWithCallback>
 {
@@ -270,6 +285,30 @@ TEST(IntrusiveListTest, testAddNodeToList)
    ASSERT_EQ(0u, l1.size());
    ASSERT_FALSE(N.IsInList);
    ASSERT_TRUE(N.WasTransferred);
+}
+
+TEST(IntrusiveListTest, testSameListSplice) {
+   NodeWithCallback N1(1);
+   NodeWithCallback N2(2);
+   ASSERT_FALSE(N1.WasTransferred);
+   ASSERT_FALSE(N2.WasTransferred);
+
+   IntrusiveList<NodeWithCallback> L1;
+   L1.insert(L1.end(), &N1);
+   L1.insert(L1.end(), &N2);
+   ASSERT_EQ(2u, L1.size());
+   ASSERT_EQ(&N1, &L1.front());
+   ASSERT_FALSE(N1.WasTransferred);
+   ASSERT_FALSE(N2.WasTransferred);
+
+   // Swap the nodes with splice inside the same list. Check that we get the
+   // transfer callback.
+   L1.splice(L1.begin(), L1, std::next(L1.begin()), L1.end());
+   ASSERT_EQ(2u, L1.size());
+   ASSERT_EQ(&N1, &L1.back());
+   ASSERT_EQ(&N2, &L1.front());
+   ASSERT_FALSE(N1.WasTransferred);
+   ASSERT_TRUE(N2.WasTransferred);
 }
 
 struct PrivateNode : private IntrusiveListNode<PrivateNode>

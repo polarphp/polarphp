@@ -1,7 +1,14 @@
+//===-- ARMTargetParser - Parser for arm target features --------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -10,7 +17,7 @@
 // Created by polarboy on 2018/12/05.
 //===----------------------------------------------------------------------===//
 //
-// This file implements a target parser to recognise ARM hardware features
+// This file implements a target parser to recognise arm hardware features
 // such as fpu/cpu/ARCH/extensions and specific support such as HWDIV.
 //
 //===----------------------------------------------------------------------===//
@@ -43,7 +50,7 @@ ArchKind parse_arch(StringRef arch)
    StringRef syn = get_arch_synonym(arch);
    for (const auto item : sg_archNames) {
       if (item.getName().endsWith(syn)) {
-         return item.ID;
+         return item.id;
       }
    }
    return ArchKind::INVALID;
@@ -93,6 +100,7 @@ unsigned parse_arch_version(StringRef arch)
    case ArchKind::ARMV8R:
    case ArchKind::ARMV8MBaseline:
    case ArchKind::ARMV8MMainline:
+   case ArchKind::ARMV8_1MMainline:
       return 8;
    case ArchKind::INVALID:
       return 0;
@@ -110,6 +118,7 @@ ProfileKind parse_arch_profile(StringRef arch)
    case ArchKind::ARMV7EM:
    case ArchKind::ARMV8MMainline:
    case ArchKind::ARMV8MBaseline:
+   case ArchKind::ARMV8_1MMainline:
       return ProfileKind::M;
    case ArchKind::ARMV7R:
    case ArchKind::ARMV8R:
@@ -169,6 +178,7 @@ StringRef get_arch_synonym(StringRef arch)
          .cond("v8r", "v8-r")
          .cond("v8m.base", "v8-m.base")
          .cond("v8m.main", "v8-m.main")
+         .cond("v8.1m.main", "v8.1-m.main")
          .defaultCond(arch);
 }
 
@@ -178,77 +188,63 @@ bool get_fpu_features(unsigned fpuKind, std::vector<StringRef> &features)
       return false;
    }
 
-   // fp-only-sp and d16 subtarget features are independent of each other, so we
-   // must enable/disable both.
-   switch (sg_fpuNames[fpuKind].Restriction) {
-   case FPURestriction::SP_D16:
-      features.push_back("+fp-only-sp");
-      features.push_back("+d16");
-      break;
-   case FPURestriction::D16:
-      features.push_back("-fp-only-sp");
-      features.push_back("+d16");
-      break;
-   case FPURestriction::None:
-      features.push_back("-fp-only-sp");
-      features.push_back("-d16");
-      break;
+   static const struct FPUFeatureNameInfo {
+      const char *plusName, *minusName;
+      FPUVersion minVersion;
+      FPURestriction maxRestriction;
+   } fpuFeatureInfoList[] = {
+      // We have to specify the + and - versions of the name in full so
+      // that we can return them as static StringRefs.
+      //
+      // Also, the SubtargetFeatures ending in just "sp" are listed here
+      // under FPURestriction::None, which is the only FPURestriction in
+      // which they would be valid (since FPURestriction::SP doesn't
+      // exist).
+
+      {"+fpregs", "-fpregs", FPUVersion::VFPV2, FPURestriction::SP_D16},
+      {"+vfp2", "-vfp2", FPUVersion::VFPV2, FPURestriction::None},
+      {"+vfp2d16", "-vfp2d16", FPUVersion::VFPV2, FPURestriction::D16},
+      {"+vfp2d16sp", "-vfp2d16sp", FPUVersion::VFPV2, FPURestriction::SP_D16},
+      {"+vfp2sp", "-vfp2sp", FPUVersion::VFPV2, FPURestriction::None},
+      {"+vfp3", "-vfp3", FPUVersion::VFPV3, FPURestriction::None},
+      {"+vfp3d16", "-vfp3d16", FPUVersion::VFPV3, FPURestriction::D16},
+      {"+vfp3d16sp", "-vfp3d16sp", FPUVersion::VFPV3, FPURestriction::SP_D16},
+      {"+vfp3sp", "-vfp3sp", FPUVersion::VFPV3, FPURestriction::None},
+      {"+fp16", "-fp16", FPUVersion::VFPV3_FP16, FPURestriction::SP_D16},
+      {"+vfp4", "-vfp4", FPUVersion::VFPV4, FPURestriction::None},
+      {"+vfp4d16", "-vfp4d16", FPUVersion::VFPV4, FPURestriction::D16},
+      {"+vfp4d16sp", "-vfp4d16sp", FPUVersion::VFPV4, FPURestriction::SP_D16},
+      {"+vfp4sp", "-vfp4sp", FPUVersion::VFPV4, FPURestriction::None},
+      {"+fp-armv8", "-fp-armv8", FPUVersion::VFPV5, FPURestriction::None},
+      {"+fp-armv8d16", "-fp-armv8d16", FPUVersion::VFPV5, FPURestriction::D16},
+      {"+fp-armv8d16sp", "-fp-armv8d16sp", FPUVersion::VFPV5, FPURestriction::SP_D16},
+      {"+fp-armv8sp", "-fp-armv8sp", FPUVersion::VFPV5, FPURestriction::None},
+      {"+fullfp16", "-fullfp16", FPUVersion::VFPV5_FULLFP16, FPURestriction::SP_D16},
+      {"+fp64", "-fp64", FPUVersion::VFPV2, FPURestriction::D16},
+      {"+d32", "-d32", FPUVersion::VFPV2, FPURestriction::None},
+   };
+
+   for (const auto &info: fpuFeatureInfoList) {
+      if (sg_fpuNames[fpuKind].fpuVer >= info.minVersion &&
+          sg_fpuNames[fpuKind].restriction <= info.maxRestriction)
+         features.push_back(info.plusName);
+      else
+         features.push_back(info.minusName);
    }
 
-   // fpu version subtarget features are inclusive of lower-numbered ones, so
-   // enable the one corresponding to this version and disable all that are
-   // higher. We also have to make sure to disable fp16 when vfp4 is disabled,
-   // as +vfp4 implies +fp16 but -vfp4 does not imply -fp16.
-   switch (sg_fpuNames[fpuKind].FPUVer) {
-   case FPUVersion::VFPV5:
-      features.push_back("+fp-armv8");
-      break;
-   case FPUVersion::VFPV4:
-      features.push_back("+vfp4");
-      features.push_back("-fp-armv8");
-      break;
-   case FPUVersion::VFPV3_FP16:
-      features.push_back("+vfp3");
-      features.push_back("+fp16");
-      features.push_back("-vfp4");
-      features.push_back("-fp-armv8");
-      break;
-   case FPUVersion::VFPV3:
-      features.push_back("+vfp3");
-      features.push_back("-fp16");
-      features.push_back("-vfp4");
-      features.push_back("-fp-armv8");
-      break;
-   case FPUVersion::VFPV2:
-      features.push_back("+vfp2");
-      features.push_back("-vfp3");
-      features.push_back("-fp16");
-      features.push_back("-vfp4");
-      features.push_back("-fp-armv8");
-      break;
-   case FPUVersion::NONE:
-      features.push_back("-vfp2");
-      features.push_back("-vfp3");
-      features.push_back("-fp16");
-      features.push_back("-vfp4");
-      features.push_back("-fp-armv8");
-      break;
-   }
+   static const struct NeonFeatureNameInfo {
+      const char *plusName, *minusName;
+      NeonSupportLevel minSupportLevel;
+   } neonFeatureInfoList[] = {
+      {"+neon", "-neon", NeonSupportLevel::Neon},
+      {"+crypto", "-crypto", NeonSupportLevel::Crypto},
+   };
 
-   // crypto includes neon, so we handle this similarly to fpu version.
-   switch (sg_fpuNames[fpuKind].NeonSupport) {
-   case NeonSupportLevel::Crypto:
-      features.push_back("+neon");
-      features.push_back("+crypto");
-      break;
-   case NeonSupportLevel::Neon:
-      features.push_back("+neon");
-      features.push_back("-crypto");
-      break;
-   case NeonSupportLevel::None:
-      features.push_back("-neon");
-      features.push_back("-crypto");
-      break;
+   for (const auto &info: neonFeatureInfoList) {
+      if (sg_fpuNames[fpuKind].neonSupport >= info.minSupportLevel)
+         features.push_back(info.plusName);
+      else
+         features.push_back(info.minusName);
    }
 
    return true;
@@ -268,13 +264,13 @@ EndianKind parse_arch_endian(StringRef arch)
          return EndianKind::LITTLE;
       }
    }
-   if (arch.startsWith("aarch64")) {
+   if (arch.startsWith("aarch64") || arch.startsWith("aarch64_32")) {
       return EndianKind::LITTLE;
    }
    return EndianKind::INVALID;
 }
 
-// ARM, Thumb, AArch64
+// arm, Thumb, AArch64
 ISAKind parse_arch_isa(StringRef arch)
 {
    return StringSwitch<ISAKind>(arch)
@@ -290,7 +286,7 @@ unsigned parse_fpu(StringRef fpu)
    StringRef syn = get_fpu_synonym(fpu);
    for (const auto F : sg_fpuNames) {
       if (syn == F.getName()) {
-         return F.ID;
+         return F.id;
       }
    }
    return FK_INVALID;
@@ -301,7 +297,7 @@ NeonSupportLevel get_fpu_neon_support_level(unsigned fpuKind)
    if (fpuKind >= FK_LAST) {
       return NeonSupportLevel::None;
    }
-   return sg_fpuNames[fpuKind].NeonSupport;
+   return sg_fpuNames[fpuKind].neonSupport;
 }
 
 // MArch is expected to be of the form (arm|thumb)?(eb)?(v.+)?(eb)?, but
@@ -315,8 +311,12 @@ StringRef get_canonical_arch_name(StringRef arch)
    StringRef errorMsg = "";
 
    // Begins with "arm" / "thumb", move past it.
-   if (A.startsWith("arm64")) {
+   if (A.startsWith("arm64_32")) {
+      offset = 8;
+   } else if  (A.startsWith("arm64")) {
       offset = 5;
+   } else if (A.startsWith("aarch64_32")) {
+      offset = 10;
    } else if (A.startsWith("arm")) {
       offset = 3;
    } else if (A.startsWith("thumb")) {
@@ -394,7 +394,7 @@ FPUVersion get_fpu_version(unsigned fpuKind)
    if (fpuKind >= FK_LAST) {
       return FPUVersion::NONE;
    }
-   return sg_fpuNames[fpuKind].FPUVer;
+   return sg_fpuNames[fpuKind].fpuVer;
 }
 
 FPURestriction get_fpu_restriction(unsigned fpuKind)
@@ -402,7 +402,7 @@ FPURestriction get_fpu_restriction(unsigned fpuKind)
    if (fpuKind >= FK_LAST) {
       return FPURestriction::None;
    }
-   return sg_fpuNames[fpuKind].Restriction;
+   return sg_fpuNames[fpuKind].restriction;
 }
 
 unsigned get_default_fpu(StringRef cpu, ArchKind archKind)
@@ -457,33 +457,12 @@ bool get_extension_features(unsigned extensions,
    if (extensions == AEK_INVALID) {
       return false;
    }
-   if (extensions & AEK_CRC) {
-      features.push_back("+crc");
-   } else {
-      features.push_back("-crc");
-   }
-   if (extensions & AEK_DSP) {
-      features.push_back("+dsp");
-   } else {
-      features.push_back("-dsp");
-   }
-
-   if (extensions & AEK_FP16FML) {
-      features.push_back("+fp16fml");
-   } else {
-      features.push_back("-fp16fml");
-   }
-
-   if (extensions & AEK_RAS) {
-      features.push_back("+ras");
-   } else {
-      features.push_back("-ras");
-   }
-
-   if (extensions & AEK_DOTPROD) {
-      features.push_back("+dotprod");
-   } else {
-      features.push_back("-dotprod");
+   for (const auto AE : sg_archExtNames) {
+      if ((extensions & AE.id) == AE.id && AE.feature) {
+         features.push_back(AE.feature);
+      } else if (AE.negFeature) {
+         features.push_back(AE.negFeature);
+      }
    }
    return get_hw_div_features(extensions, features);
 }
@@ -511,35 +490,120 @@ unsigned get_arch_attr(ArchKind archKind)
 StringRef get_arch_ext_name(unsigned archExtKind)
 {
    for (const auto item : sg_archExtNames) {
-      if (archExtKind == item.ID) {
+      if (archExtKind == item.id) {
          return item.getName();
       }
    }
    return StringRef();
 }
 
+static bool stripNegationPrefix(StringRef &name)
+{
+   if (name.startsWith("no")) {
+      name = name.substr(2);
+      return true;
+   }
+   return false;
+}
+
 StringRef get_arch_ext_feature(StringRef archExt)
 {
-   if (archExt.startsWith("no")) {
-      StringRef ArchExtBase(archExt.substr(2));
-      for (const auto item : sg_archExtNames) {
-         if (item.NegFeature && ArchExtBase == item.getName()) {
-            return StringRef(item.NegFeature);
-         }
-      }
-   }
+   bool negated = stripNegationPrefix(archExt);
    for (const auto item : sg_archExtNames) {
-      if (item.Feature && archExt == item.getName()) {
-         return StringRef(item.Feature);
+      if (item.feature && archExt == item.getName()) {
+         return StringRef(negated ? item.negFeature : item.feature);
       }
    }
    return StringRef();
 }
 
+static unsigned findDoublePrecisionFPU(unsigned inputFPUKind)
+{
+   const arm::FPUName &inputFPU = sg_fpuNames[inputFPUKind];
+
+   // If the input FPU already supports double-precision, then there
+   // isn't any different FPU we can return here.
+   //
+   // The current available FPURestriction values are None (no
+   // restriction), D16 (only 16 d-regs) and SP_D16 (16 d-regs
+   // and single precision only); there's no value representing
+   // SP restriction without D16. So this test just means 'is it
+   // SP only?'.
+   if (inputFPU.restriction != arm::FPURestriction::SP_D16) {
+      return arm::FK_INVALID;
+   }
+
+   // Otherwise, look for an FPU entry with all the same fields, except
+   // that SP_D16 has been replaced with just D16, representing adding
+   // double precision and not changing anything else.
+   for (const arm::FPUName &CandidateFPU : sg_fpuNames) {
+      if (CandidateFPU.fpuVer == inputFPU.fpuVer &&
+          CandidateFPU.neonSupport == inputFPU.neonSupport &&
+          CandidateFPU.restriction == arm::FPURestriction::D16) {
+         return CandidateFPU.id;
+      }
+   }
+
+   // nothing found
+   return arm::FK_INVALID;
+}
+
+static unsigned getAEKID(StringRef archExtName)
+{
+   for (const auto AE : sg_archExtNames) {
+      if (AE.getName() == archExtName) {
+         return AE.id;
+      }
+   }
+   return arm::AEK_INVALID;
+}
+
+bool append_arch_ext_features(
+      StringRef cpu, arm::ArchKind archKind, StringRef archExt,
+      std::vector<StringRef> &features)
+{
+
+   size_t startingNumFeatures = features.size();
+   const bool negated = stripNegationPrefix(archExt);
+   unsigned id = getAEKID(archExt);
+
+   if (id == AEK_INVALID)
+      return false;
+
+   for (const auto AE : sg_archExtNames) {
+      if (negated && (AE.id & id) == id && AE.negFeature) {
+         features.push_back(AE.negFeature);
+      }else if (AE.id == id && AE.feature) {
+         features.push_back(AE.feature);
+      }
+   }
+
+   if (cpu == "") {
+      cpu = "generic";
+   }
+
+   if (archExt == "fp" || archExt == "fp.dp") {
+      unsigned fpuKind;
+      if (archExt == "fp.dp") {
+         if (negated) {
+            features.push_back("-fp64");
+            return true;
+         }
+         fpuKind = findDoublePrecisionFPU(get_default_fpu(cpu, archKind));
+      } else if (negated) {
+         fpuKind = arm::FK_NONE;
+      } else {
+         fpuKind = get_default_fpu(cpu, archKind);
+      }
+      return arm::get_fpu_features(fpuKind, features);
+   }
+   return startingNumFeatures != features.size();
+}
+
 StringRef get_hw_div_name(unsigned hwDivKind)
 {
    for (const auto item : sg_hwDivNames) {
-      if (hwDivKind == item.ID) {
+      if (hwDivKind == item.id) {
          return item.getName();
       }
    }
@@ -567,7 +631,7 @@ unsigned parse_hw_div(StringRef hwDiv)
    StringRef syn = get_hw_div_synonym(hwDiv);
    for (const auto item : sg_hwDivNames) {
       if (syn == item.getName()) {
-         return item.ID;
+         return item.id;
       }
    }
    return AEK_INVALID;
@@ -577,7 +641,7 @@ unsigned parse_arch_ext(StringRef archExt)
 {
    for (const auto item : sg_archExtNames) {
       if (archExt == item.getName()) {
-         return item.ID;
+         return item.id;
       }
    }
    return AEK_INVALID;

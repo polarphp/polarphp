@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -31,15 +31,14 @@
 // expensive, and MathExtras.h is popular.
 // #include <intrin.h>
 extern "C" {
-unsigned char _BitScanForward(unsigned long *_Index, unsigned long _mask);
-unsigned char _BitScanForward64(unsigned long *_Index, unsigned __int64 _mask);
-unsigned char _BitScanReverse(unsigned long *_Index, unsigned long _mask);
-unsigned char _BitScanReverse64(unsigned long *_Index, unsigned __int64 _mask);
+unsigned char _BitScanForward(unsigned long *_index, unsigned long _mask);
+unsigned char _BitScanForward64(unsigned long *_index, unsigned __int64 _mask);
+unsigned char _BitScanReverse(unsigned long *_index, unsigned long _mask);
+unsigned char _BitScanReverse64(unsigned long *_index, unsigned __int64 _mask);
 }
 #endif
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 /// The behavior an operation has on an input of 0.
 enum ZeroBehavior
@@ -56,7 +55,8 @@ namespace internal {
 template <typename T, std::size_t SizeOfT>
 struct TrailingZerosCounter
 {
-   static std::size_t count(T value, ZeroBehavior) {
+   static unsigned count(T value, ZeroBehavior)
+   {
       if (!value) {
          return std::numeric_limits<T>::digits;
       }
@@ -64,7 +64,7 @@ struct TrailingZerosCounter
          return 0;
       }
       // Bisection method.
-      std::size_t zeroBits = 0;
+      unsigned zeroBits = 0;
       T shift = std::numeric_limits<T>::digits >> 1;
       T mask = std::numeric_limits<T>::max() >> shift;
       while (shift) {
@@ -83,7 +83,8 @@ struct TrailingZerosCounter
 template <typename T>
 struct TrailingZerosCounter<T, 4>
 {
-   static std::size_t count(T value, ZeroBehavior zb) {
+   static unsigned count(T value, ZeroBehavior zb)
+   {
       if (zb != ZB_Undefined && value == 0) {
          return 32;
       }
@@ -91,9 +92,9 @@ struct TrailingZerosCounter<T, 4>
 #if __has_builtin(__builtin_ctz) || POLAR_GNUC_PREREQ(4, 0, 0)
       return __builtin_ctz(value);
 #elif defined(_MSC_VER)
-      unsigned long Index;
-      _BitScanForward(&Index, value);
-      return Index;
+      unsigned long index;
+      _BitScanForward(&index, value);
+      return index;
 #endif
    }
 };
@@ -102,16 +103,17 @@ struct TrailingZerosCounter<T, 4>
 template <typename T>
 struct TrailingZerosCounter<T, 8>
 {
-   static std::size_t count(T value, ZeroBehavior zb) {
+   static unsigned count(T value, ZeroBehavior zb)
+   {
       if (zb != ZB_Undefined && value == 0) {
          return 64;
       }
 #if __has_builtin(__builtin_ctzll) || POLAR_GNUC_PREREQ(4, 0, 0)
       return __builtin_ctzll(value);
 #elif defined(_MSC_VER)
-      unsigned long Index;
-      _BitScanForward64(&Index, value);
-      return Index;
+      unsigned long index;
+      _BitScanForward64(&index, value);
+      return index;
 #endif
    }
 };
@@ -127,7 +129,7 @@ struct TrailingZerosCounter<T, 8>
 /// \param ZB the behavior on an input of 0. Only ZB_Width and ZB_Undefined are
 ///   valid arguments.
 template <typename T>
-std::size_t count_trailing_zeros(T value, ZeroBehavior zb = ZB_Width)
+unsigned count_trailing_zeros(T value, ZeroBehavior zb = ZB_Width)
 {
    static_assert(std::numeric_limits<T>::is_integer &&
                  !std::numeric_limits<T>::is_signed,
@@ -136,14 +138,15 @@ std::size_t count_trailing_zeros(T value, ZeroBehavior zb = ZB_Width)
 }
 
 namespace internal {
-template <typename T, std::size_t SizeOfT> struct LeadingZerosCounter
+template <typename T, std::size_t SizeOfT>
+struct LeadingZerosCounter
 {
-   static std::size_t count(T value, ZeroBehavior) {
+   static unsigned count(T value, ZeroBehavior) {
       if (!value) {
          return std::numeric_limits<T>::digits;
       }
       // Bisection method.
-      std::size_t zeroBits = 0;
+      unsigned zeroBits = 0;
       for (T shift = std::numeric_limits<T>::digits >> 1; shift; shift >>= 1) {
          T temp = value >> shift;
          if (temp) {
@@ -160,16 +163,17 @@ template <typename T, std::size_t SizeOfT> struct LeadingZerosCounter
 template <typename T>
 struct LeadingZerosCounter<T, 4>
 {
-   static std::size_t count(T value, ZeroBehavior zb) {
+   static unsigned count(T value, ZeroBehavior zb)
+   {
       if (zb != ZB_Undefined && value == 0) {
          return 32;
       }
 #if __has_builtin(__builtin_clz) || POLAR_GNUC_PREREQ(4, 0, 0)
       return __builtin_clz(value);
 #elif defined(_MSC_VER)
-      unsigned long Index;
-      _BitScanReverse(&Index, value);
-      return Index ^ 31;
+      unsigned long index;
+      _BitScanReverse(&index, value);
+      return index ^ 31;
 #endif
    }
 };
@@ -178,18 +182,17 @@ struct LeadingZerosCounter<T, 4>
 template <typename T>
 struct LeadingZerosCounter<T, 8>
 {
-   static std::size_t count(T value, ZeroBehavior zb) {
+   static unsigned count(T value, ZeroBehavior zb)
+   {
       if (zb != ZB_Undefined && value == 0) {
          return 64;
       }
-
-
 #if __has_builtin(__builtin_clzll) || POLAR_GNUC_PREREQ(4, 0, 0)
       return __builtin_clzll(value);
 #elif defined(_MSC_VER)
-      unsigned long Index;
-      _BitScanReverse64(&Index, value);
-      return Index ^ 63;
+      unsigned long index;
+      _BitScanReverse64(&index, value);
+      return index ^ 63;
 #endif
    }
 };
@@ -205,7 +208,7 @@ struct LeadingZerosCounter<T, 8>
 /// \param ZB the behavior on an input of 0. Only ZB_Width and ZB_Undefined are
 ///   valid arguments.
 template <typename T>
-std::size_t count_leading_zeros(T value, ZeroBehavior zb = ZB_Width)
+unsigned count_leading_zeros(T value, ZeroBehavior zb = ZB_Width)
 {
    static_assert(std::numeric_limits<T>::is_integer &&
                  !std::numeric_limits<T>::is_signed,
@@ -535,7 +538,7 @@ inline uint64_t byte_swap64(uint64_t value)
 /// \param ZB the behavior on an input of all ones. Only ZB_Width and
 /// ZB_Undefined are valid arguments.
 template <typename T>
-std::size_t count_leading_ones(T value, ZeroBehavior zb = ZB_Width)
+unsigned count_leading_ones(T value, ZeroBehavior zb = ZB_Width)
 {
    static_assert(std::numeric_limits<T>::is_integer &&
                  !std::numeric_limits<T>::is_signed,
@@ -552,7 +555,7 @@ std::size_t count_leading_ones(T value, ZeroBehavior zb = ZB_Width)
 /// \param ZB the behavior on an input of all ones. Only ZB_Width and
 /// ZB_Undefined are valid arguments.
 template <typename T>
-std::size_t count_trailing_ones(T value, ZeroBehavior zb = ZB_Width)
+unsigned count_trailing_ones(T value, ZeroBehavior zb = ZB_Width)
 {
    static_assert(std::numeric_limits<T>::is_integer &&
                  !std::numeric_limits<T>::is_signed,
@@ -561,7 +564,9 @@ std::size_t count_trailing_ones(T value, ZeroBehavior zb = ZB_Width)
 }
 
 namespace internal {
-template <typename T, std::size_t SizeOfT> struct PopulationCounter {
+template <typename T, std::size_t SizeOfT>
+struct PopulationCounter
+{
    static unsigned count(T value)
    {
       // Generic version, forward to 32 bits.
@@ -577,7 +582,8 @@ template <typename T, std::size_t SizeOfT> struct PopulationCounter {
    }
 };
 
-template <typename T> struct PopulationCounter<T, 8>
+template <typename T>
+struct PopulationCounter<T, 8>
 {
    static unsigned count(T value) {
 #if __GNUC__ >= 4
@@ -646,14 +652,20 @@ inline unsigned log2_ceil_64(uint64_t value)
 }
 
 /// Return the greatest common divisor of the values using Euclid's algorithm.
-inline uint64_t greatest_common_divisor64(uint64_t A, uint64_t B)
+template <typename T>
+inline T greatest_common_divisor(T lhs, T rhs)
 {
-   while (B) {
-      uint64_t T = B;
-      B = A % B;
-      A = T;
+   while (rhs) {
+      T temp = rhs;
+      rhs = lhs % rhs;
+      lhs = temp;
    }
-   return A;
+   return lhs;
+}
+
+inline uint64_t greatest_common_divisor64(uint64_t lhs, uint64_t rhs)
+{
+   return greatest_common_divisor<uint64_t>(lhs, rhs);
 }
 
 /// This function takes a 64-bit integer and returns the bit equivalent double.
@@ -969,7 +981,10 @@ saturating_multiply_add(T X, T Y, T A, bool *resultOverflowed = nullptr)
 /// Use this rather than HUGE_VALF; the latter causes warnings on MSVC.
 extern const float huge_valf;
 
-} // utils
-} // polar
+double bstr_to_double(const char *str, const char **endptr);
+double hexstr_to_double(const char *str, const char **endptr);
+double octstr_to_double(const char *str, const char **endptr);
+
+} // polar::utils
 
 #endif // POLARPHP_UTILS_MATHEXTRAS_H

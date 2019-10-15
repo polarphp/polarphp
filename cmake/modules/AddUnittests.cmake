@@ -1,7 +1,7 @@
 # This source file is part of the polarphp.org open source project
 #
-# Copyright (c) 2017 - 2018 polarphp software foundation
-# Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+# Copyright (c) 2017 - 2019 polarphp software foundation
+# Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
 # See https://polarphp.org/LICENSE.txt for license information
@@ -27,8 +27,8 @@ function(polar_add_unittest test_suite test_name)
       set(POLAR_TEMP_GTEST_LIBS googletest::gtest googletest::gtest_main
          googletest::gmock googletest::gmock_main)
    else()
-      include_directories(${POLAR_THIRDPARTY_DIR}/unittest/googletest/include)
-      include_directories(${POLAR_THIRDPARTY_DIR}/unittest/googlemock/include)
+      include_directories(${POLAR_THIRDPARTY_DIR}/googletest/googletest/include)
+      include_directories(${POLAR_THIRDPARTY_DIR}/googletest/googlemock/include)
       set(POLAR_TEMP_GTEST_LIBS gtest_main gtest gmock gmock_main)
    endif()
    if (NOT POLAR_ENABLE_THREADS)
@@ -53,7 +53,10 @@ function(polar_add_unittest test_suite test_name)
    # executable must be linked with it in order to provide consistent
    # API for all shared libaries loaded by this executable.
    target_link_libraries(${test_name} PRIVATE ${POLAR_TEMP_GTEST_LIBS} PolarUtils ${POLAR_PTHREAD_LIB})
-
+   if (LINUX)
+      set_target_properties(${test_name} PROPERTIES
+         BUILD_RPATH "${POLAR_COMPILER_ROOT_DIR}/lib64;${POLAR_COMPILER_ROOT_DIR}/lib")
+   endif()
    add_dependencies(${test_suite} ${test_name})
    get_target_property(test_suite_folder ${test_suite} FOLDER)
    if (NOT ${test_suite_folder} STREQUAL "NOTFOUND")

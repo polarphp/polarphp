@@ -1,7 +1,7 @@
 # This source file is part of the polarphp.org open source project
 #
-# Copyright (c) 2017 - 2018 polarphp software foundation
-# Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+# Copyright (c) 2017 - 2019 polarphp software foundation
+# Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
 # See https://polarphp.org/LICENSE.txt for license information
@@ -53,7 +53,7 @@ find_package(nlohmann_json CONFIG REQUIRED
    PATHS ${POLAR_CMAKE_MODULES_DIR}/json)
 message(STATUS "found json parser version: ${nlohmann_json_VERSION}")
 
-if(POLAR_INCLUDE_TESTS)
+if(POLAR_BUILD_TESTS)
    ExternalProject_Add(thirdparty_gtest
       PREFIX thirdparty
       SOURCE_DIR "${POLAR_THIRDPARTY_DIR}/googletest"

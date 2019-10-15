@@ -1,7 +1,14 @@
+//===---------- llvm/unittest/Support/Casting.cpp - Casting tests ---------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -39,7 +46,7 @@ private:
 struct foo
 {
    void ext() const;
-   /*  static bool classof(const bar *X) {
+   /*  static bool classOf(const bar *X) {
     cerr << "Classof: " << X << "\n";
     return true;
     }*/
@@ -52,7 +59,7 @@ struct base
 
 struct derived : public base
 {
-   static bool classof(const base *B) { return true; }
+   static bool classOf(const base *B) { return true; }
 };
 
 template <> struct IsaImpl<foo, bar>
@@ -92,7 +99,7 @@ foo *bar::naz()
 bar *fub();
 
 template <>
-struct SmplifyType<foo>
+struct SimplifyType<foo>
 {
    typedef int SimpleType;
    static SimpleType getSimplifiedValue(foo &Val) { return 0; }
@@ -105,10 +112,10 @@ using namespace polar::basic;
 using namespace polar::utils;
 
 // Test that a regular class behaves as expected.
-static_assert(std::is_same<SmplifyType<foo>::SimpleType, int>::value,
-              "Unexpected SmplifyType result!");
-static_assert(std::is_same<SmplifyType<foo *>::SimpleType, foo *>::value,
-              "Unexpected SmplifyType result!");
+static_assert(std::is_same<SimplifyType<foo>::SimpleType, int>::value,
+              "Unexpected SimplifyType result!");
+static_assert(std::is_same<SimplifyType<foo *>::SimpleType, foo *>::value,
+              "Unexpected SimplifyType result!");
 
 namespace {
 
@@ -127,6 +134,13 @@ TEST(CastingTest, testIsa) {
    EXPECT_TRUE(isa<foo>(B2));
    EXPECT_TRUE(isa<foo>(B3));
    EXPECT_TRUE(isa<foo>(B4));
+}
+
+
+TEST(CastingTest, testIsaAndNonnull) {
+  EXPECT_TRUE(isa_and_nonnull<foo>(B2));
+  EXPECT_TRUE(isa_and_nonnull<foo>(B4));
+  EXPECT_FALSE(isa_and_nonnull<foo>(fub()));
 }
 
 TEST(CastingTest, testCast) {
@@ -273,7 +287,7 @@ namespace inferred_upcasting {
 
 class Base {
 public:
-   // No classof. We are testing that the upcast is inferred.
+   // No classOf. We are testing that the upcast is inferred.
    Base() {}
 };
 
@@ -282,7 +296,7 @@ public:
    Derived() {}
 };
 
-// Even with no explicit classof() in Base, we should still be able to cast
+// Even with no explicit classOf() in Base, we should still be able to cast
 // Derived to its base class.
 TEST(CastingTest, testUpcastIsInferred) {
    Derived D;
@@ -298,14 +312,14 @@ TEST(CastingTest, testUpcastIsInferred) {
 class UseInferredUpcast {
 public:
    int Dummy;
-   static bool classof(const UseInferredUpcast *) {
+   static bool classOf(const UseInferredUpcast *) {
       return false;
    }
 };
 
 TEST(CastingTest, testInferredUpcastTakesPrecedence) {
    UseInferredUpcast UIU;
-   // Since the explicit classof() returns false, this will fail if the
+   // Since the explicit classOf() returns false, this will fail if the
    // explicit one is used.
    EXPECT_TRUE(isa<UseInferredUpcast>(&UIU));
 }
@@ -328,7 +342,7 @@ struct Base {
 
 struct Derived : Base {
    Derived() : Base(true) {}
-   static bool classof(const Base *B) { return B->IsDerived; }
+   static bool classOf(const Base *B) { return B->IsDerived; }
 };
 
 class PTy {
@@ -345,7 +359,7 @@ public:
 namespace polar {
 namespace utils {
 
-template <> struct SmplifyType<pointer_wrappers::PTy>
+template <> struct SimplifyType<pointer_wrappers::PTy>
 {
    typedef pointer_wrappers::Base *SimpleType;
    static SimpleType getSimplifiedValue(pointer_wrappers::PTy &P) {
@@ -353,7 +367,7 @@ template <> struct SmplifyType<pointer_wrappers::PTy>
    }
 };
 
-template <> struct SmplifyType<const pointer_wrappers::PTy>
+template <> struct SimplifyType<const pointer_wrappers::PTy>
 {
    typedef pointer_wrappers::Base *SimpleType;
    static SimpleType getSimplifiedValue(const pointer_wrappers::PTy &P) {

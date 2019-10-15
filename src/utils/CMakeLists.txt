@@ -1,7 +1,7 @@
 # This source file is part of the polarphp.org open source project
 #
-# Copyright (c) 2017 - 2018 polarphp software foundation
-# Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+# Copyright (c) 2017 - 2019 polarphp software foundation
+# Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
 # See https://polarphp.org/LICENSE.txt for license information
@@ -66,6 +66,10 @@ endif(MSVC OR MINGW)
 set(system_libs ${system_libs} PolarBasic)
 set(system_libs ${system_libs} nlohmann_json::nlohmann_json)
 
+if (LINUX)
+   set(system_libs ${system_libs} pthread uuid)
+endif()
+
 polar_add_library(PolarUtils SHARED
    ${POLAR_UTILS_SOURCES}
    LINK_LIBS ${system_libs})
@@ -74,6 +78,5 @@ set_target_properties(
    PolarUtils
    PROPERTIES
    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR};"
-   INTERFACE_LINK_LIBRARIES "PolarBasic;PolarGlobal"
+   INTERFACE_LINK_LIBRARIES "PolarBasic;PolarGlobal;pthread"
    )
-

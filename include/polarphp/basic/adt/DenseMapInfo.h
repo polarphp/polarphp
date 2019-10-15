@@ -1,7 +1,14 @@
+//===- llvm/ADT/DenseMapInfo.h - Type traits for DenseMap -------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -16,16 +23,17 @@
 #include "polarphp/basic/adt/Hashing.h"
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/utils/PointerLikeTypeTraits.h"
+#include "polarphp/utils/ScaledSize.h"
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <utility>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 using polar::utils::PointerLikeTypeTraits;
 using polar::basic::StringRef;
+using polar::utils::ElementCount;
 
 template<typename T>
 struct DenseMapInfo
@@ -117,7 +125,8 @@ struct DenseMapInfo<unsigned short>
 };
 
 // Provide DenseMapInfo for unsigned ints.
-template<> struct DenseMapInfo<unsigned>
+template<>
+struct DenseMapInfo<unsigned>
 {
    static inline unsigned getEmptyKey()
    {
@@ -140,7 +149,8 @@ template<> struct DenseMapInfo<unsigned>
 };
 
 // Provide DenseMapInfo for unsigned longs.
-template<> struct DenseMapInfo<unsigned long>
+template<>
+struct DenseMapInfo<unsigned long>
 {
    static inline unsigned long getEmptyKey()
    {
@@ -164,7 +174,8 @@ template<> struct DenseMapInfo<unsigned long>
 };
 
 // Provide DenseMapInfo for unsigned long longs.
-template<> struct DenseMapInfo<unsigned long long>
+template<>
+struct DenseMapInfo<unsigned long long>
 {
    static inline unsigned long long getEmptyKey()
    {
@@ -189,7 +200,8 @@ template<> struct DenseMapInfo<unsigned long long>
 };
 
 // Provide DenseMapInfo for shorts.
-template <> struct DenseMapInfo<short>
+template <>
+struct DenseMapInfo<short>
 {
    static inline short getEmptyKey()
    {
@@ -425,7 +437,33 @@ struct DenseMapInfo<HashCode>
    }
 };
 
-} // basic
-} // polar
+template <>
+struct DenseMapInfo<ElementCount>
+{
+   static inline ElementCount getEmptyKey()
+   {
+      return {~0U, true};
+   }
+
+   static inline ElementCount getTombstoneKey()
+   {
+      return {~0U - 1, false};
+   }
+
+   static unsigned getHashValue(const ElementCount& elemCount)
+   {
+      if (elemCount.scalable) {
+         return (elemCount.min * 37U) - 1U;
+      }
+      return elemCount.min * 37U;
+   }
+
+   static bool isEqual(const ElementCount& lhs, const ElementCount& rhs)
+   {
+      return lhs == rhs;
+   }
+};
+
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_DENSE_MAP_INFO_H

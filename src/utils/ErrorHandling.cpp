@@ -1,7 +1,14 @@
+//===- lib/Support/ErrorHandling.cpp - Callbacks for errors ---------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -29,8 +36,7 @@
 # include <fcntl.h>
 #endif
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 static FatalErrorHandlerFunc sg_errorHandler = nullptr;
 static void *sg_errorHandlerUserData = nullptr;
@@ -148,7 +154,7 @@ void report_bad_alloc_error(std::string_view reason, bool genCrashDiag)
    throw std::bad_alloc();
 }
 
-void polar_unreachable_internal(const char *msg, const char *file, unsigned line)
+void unreachable_internal(const char *msg, const char *file, unsigned line)
 {
    // This code intentionally doesn't call the ErrorHandler callback, because
    // llvm_unreachable is intended to be used to indicate "impossible"
@@ -167,8 +173,7 @@ void polar_unreachable_internal(const char *msg, const char *file, unsigned line
 
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 static void bindings_error_handler(void *userData, const std::string &reason,
                                    bool)

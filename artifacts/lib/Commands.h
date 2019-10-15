@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -11,8 +11,6 @@
 
 #ifndef POLARPHP_ARTIFACTS_COMMANDS_H
 #define POLARPHP_ARTIFACTS_COMMANDS_H
-
-#include "polarphp/runtime/internal/DepsZendVmHeaders.h"
 
 #include <string>
 #include <vector>
@@ -37,7 +35,6 @@ private:
 };
 
 void print_polar_version();
-POLAR_DECL_EXPORT int php_lint_script(zend_file_handle *file);
 void setup_init_entries_commands(const std::vector<std::string> defines, std::string &iniEntries);
 int dispatch_cli_command();
 

@@ -1,7 +1,14 @@
+//===- BinaryStreamReader.cpp - Reads objects from a binary stream --------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -12,9 +19,9 @@
 #include "polarphp/utils/BinaryStreamReader.h"
 #include "polarphp/utils/BinaryStreamError.h"
 #include "polarphp/utils/BinaryStreamRef.h"
+#include "polarphp/utils/Leb128.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 BinaryStreamReader::BinaryStreamReader(BinaryStreamRef ref)
    : m_stream(ref)
@@ -51,6 +58,37 @@ Error BinaryStreamReader::readBytes(ArrayRef<uint8_t> &buffer, uint32_t size)
    m_offset += size;
    return Error::getSuccess();
 }
+
+Error BinaryStreamReader::readUnsignedLeb128(uint64_t &dest)
+{
+   SmallVector<uint8_t, 10> encodedBytes;
+   ArrayRef<uint8_t> nextByte;
+   // Copy the encoded ULEB into the buffer.
+   do {
+      if (auto error = readBytes(nextByte, 1)) {
+         return error;
+      }
+      encodedBytes.push_back(nextByte[0]);
+   } while (nextByte[0] & 0x80);
+
+   dest = decode_uleb128(encodedBytes.begin(), nullptr, encodedBytes.end());
+   return Error::getSuccess();
+}
+
+Error BinaryStreamReader::readSignedLeb128(int64_t &dest)
+{
+   SmallVector<uint8_t, 10> encodedBytes;
+   ArrayRef<uint8_t> nextByte;
+   // Copy the encoded ULEB into the buffer.
+   do {
+      if (auto error = readBytes(nextByte, 1))
+         return error;
+      encodedBytes.push_back(nextByte[0]);
+   } while (nextByte[0] & 0x80);
+   dest = decode_sleb128(encodedBytes.begin(), nullptr, encodedBytes.end());
+   return Error::getSuccess();
+}
+
 
 Error BinaryStreamReader::readCString(StringRef &dest)
 {
@@ -171,5 +209,4 @@ BinaryStreamReader::split(uint32_t offset) const
    return std::make_pair(w1, w2);
 }
 
-} // utils
-} // polar
+} // polar::utils

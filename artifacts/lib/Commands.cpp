@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -14,9 +14,6 @@
 
 #include "polarphp/global/CompilerFeature.h"
 #include "polarphp/basic/adt/StringRef.h"
-#include "polarphp/runtime/ExecEnv.h"
-#include "polarphp/runtime/LifeCycle.h"
-#include "polarphp/runtime/RtDefs.h"
 
 #include <iostream>
 #include <vector>
@@ -49,14 +46,9 @@ extern std::string sg_errorMsg;
 
 namespace polar {
 
-namespace runtime {
-extern CliShellCallbacksType sg_cliShellCallbacks;
-}
-
 using namespace runtime;
 
 using polar::basic::StringRef;
-using runtime::sg_cliShellCallbacks;
 
 namespace {
 const char *PARAM_MODE_CONFLICT = "Either execute direct code, process stdin or use a file.";
@@ -220,9 +212,9 @@ void reflection_show_ini_cfg_opt_setter(int)
 
 void print_polar_version()
 {
-   std::cout << POLARPHP_PACKAGE_STRING << " (built: "<< BUILD_TIME <<  ") "<< std::endl
-             << "Copyright (c) 2016-2018 The polarphp foundation (https://polar.foundation)" << std::endl
-             << get_zend_version();
+//   std::cout << POLARPHP_PACKAGE_STRING << " (built: "<< BUILD_TIME <<  ") "<< std::endl
+//             << "Copyright (c) 2016-2018 The polarphp foundation (https://polar.foundation)" << std::endl
+//             << get_zend_version();
 }
 
 void setup_init_entries_commands(const std::vector<std::string> defines, std::string &iniEntries)
@@ -244,71 +236,6 @@ void setup_init_entries_commands(const std::vector<std::string> defines, std::st
       }
    }
 }
-
-namespace {
-void standard_exec_command(ExecEnv &execEnv, StringRef fileHandle);
-} // anonymous namespace
-
-int dispatch_cli_command()
-{
-   ExecEnv &execEnv = retrieve_global_execenv();
-   ExecEnvInfo &execEnvInfo = execEnv.getRuntimeInfo();
-
-   if (sg_showVersion) {
-      print_polar_version();
-      return 0;
-   }
-
-   int interactive = 0;
-   if (interactive) {
-#if (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)) && !defined(COMPILE_DL_READLINE)
-      printf("Interactive shell\n\n");
-#else
-      printf("Interactive mode enabled\n\n");
-#endif
-      std::cout.flush();
-   }
-   size_t scriptStartIndex = 0;
-   /// setup script file from position arguments
-   if (sg_scriptFile.empty() && sg_behavior != ExecMode::CliDirect &&
-       sg_behavior != ExecMode::ProcessStdin &&
-       !sg_scriptArgs.empty()) {
-      sg_scriptFile = sg_scriptArgs.front();
-      ++scriptStartIndex;
-   }
-   size_t scriptArgc = sg_scriptArgs.size();
-   std::vector<std::string> &scriptArgv = execEnvInfo.scriptArgv;
-   for (size_t i = scriptStartIndex; i < scriptArgc; ++i) {
-      scriptArgv.push_back(sg_scriptArgs[i]);
-   }
-   execEnvInfo.scriptArgc = scriptArgv.size();
-   ///
-   /// php exec env is ready
-   /// begin dispatch commands
-   ///
-   switch (sg_behavior) {
-   case ExecMode::Standard:
-      standard_exec_command(execEnv, sg_scriptFile);
-      break;
-   default:
-      polar_unreachable("can't execute here");
-   }
-   return sg_exitStatus;
-}
-
-namespace {
-void standard_exec_command(ExecEnv &execEnv, StringRef filename)
-{
-   if (filename == PHP_STDIN_FILENAME_MARK) {
-      cli_register_file_handles();
-   }
-   if (sg_interactive && sg_cliShellCallbacks.cliShellRun) {
-      sg_exitStatus = sg_cliShellCallbacks.cliShellRun();
-   } else {
-      execEnv.execScript(filename, sg_exitStatus);
-   }
-}
-} // anonymous namespace
 
 std::string PhpOptFormatter::make_usage(const CLI::App *, std::string name) const
 {

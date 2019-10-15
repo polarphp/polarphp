@@ -1,7 +1,7 @@
 # This source file is part of the polarphp.org open source project
 #
-# Copyright (c) 2017 - 2018 polarphp software foundation
-# Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+# Copyright (c) 2017 - 2019 polarphp software foundation
+# Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
 # See https://polarphp.org/LICENSE.txt for license information
@@ -35,8 +35,7 @@ function(polar_update_compile_flags name)
       set_property(TARGET ${name} APPEND_STRING PROPERTY
          COMPILE_FLAGS "${target_compile_flags}")
    endif()
-
-   set_property(TARGET ${name} APPEND PROPERTY COMPILE_DEFINITIONS ${POLAR_COMPILE_DEFINITIONS})
+#   set_property(TARGET ${name} APPEND PROPERTY COMPILE_DEFINITIONS "${POLAR_COMPILE_DEFINITIONS}")
 endfunction()
 
 function(polar_add_symbol_exports target_name export_file)
@@ -783,19 +782,20 @@ function(polar_setup_rpath name)
       if(${CMAKE_SYSTEM_NAME} MATCHES "(FreeBSD|DragonFly)")
          set_property(TARGET ${name} APPEND_STRING PROPERTY
             LINK_FLAGS " -Wl,-z,origin ")
-      elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND NOT POLAR_LINKER_IS_GOLD)
+      elseif(LINUX AND NOT POLAR_LINKER_IS_GOLD)
          # $ORIGIN is not interpreted at link time by ld.bfd
          set_property(TARGET ${name} APPEND_STRING PROPERTY
-            LINK_FLAGS " -Wl,-rpath-link,${POLAR_LIBRARY_OUTPUT_INTDIR} ")
+            LINK_FLAGS " -Wl,-rpath-link,${POLAR_LIBRARY_OUTPUT_INTDIR}")
       endif()
    else()
       return()
    endif()
-
+   if (LINUX)
+      set(_install_rpath "${POLAR_COMPILER_ROOT_DIR}/lib64;${POLAR_COMPILER_ROOT_DIR}/lib;${_install_rpath}")
+   endif()
    set_target_properties(${name} PROPERTIES
       BUILD_WITH_INSTALL_RPATH ON
       INSTALL_RPATH "${_install_rpath}"
       ${_install_name_dir})
-
 endfunction(polar_setup_rpath)
 

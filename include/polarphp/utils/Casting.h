@@ -1,7 +1,14 @@
+//===- llvm/Support/Casting.h - Allow flexible, checked, casts --*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -25,8 +32,7 @@
 #include <memory>
 #include <type_traits>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 //===----------------------------------------------------------------------===//
 //                          isa<x> Support Templates
@@ -37,7 +43,7 @@ namespace utils {
 // template selection process...  the default implementation is a noop.
 //
 template<typename From>
-struct SmplifyType
+struct SimplifyType
 {
    using SimpleType = From; // The real type this represents...
 
@@ -49,9 +55,9 @@ struct SmplifyType
 };
 
 template<typename From>
-struct SmplifyType<const From>
+struct SimplifyType<const From>
 {
-   using NonConstSimpleType = typename SmplifyType<From>::SimpleType;
+   using NonConstSimpleType = typename SimplifyType<From>::SimpleType;
    using SimpleType =
    typename add_const_past_pointer<NonConstSimpleType>::type;
    using RetType =
@@ -59,7 +65,7 @@ struct SmplifyType<const From>
 
    static RetType getSimplifiedValue(const From& value)
    {
-      return SmplifyType<From>::getSimplifiedValue(const_cast<From&>(value));
+      return SimplifyType<From>::getSimplifiedValue(const_cast<From&>(value));
    }
 };
 
@@ -71,7 +77,7 @@ struct IsaImpl
 {
    static inline bool doit(const From &value)
    {
-      return To::classof(&value);
+      return To::classOf(&value);
    }
 };
 
@@ -151,12 +157,12 @@ template<typename To, typename From, typename SimpleFrom>
 struct IsaImplWrap
 {
    // When From != SimplifiedType, we can simplify the type some more by using
-   // the SmplifyType template.
+   // the SimplifyType template.
    static bool doit(const From &value)
    {
       return IsaImplWrap<To, SimpleFrom,
-            typename SmplifyType<SimpleFrom>::SimpleType>::doit(
-               SmplifyType<const From>::getSimplifiedValue(value));
+            typename SimplifyType<SimpleFrom>::SimpleType>::doit(
+               SimplifyType<const From>::getSimplifiedValue(value));
    }
 };
 
@@ -179,7 +185,19 @@ template <typename X, typename Y>
 POLAR_NODISCARD inline bool isa(const Y &value)
 {
    return IsaImplWrap<X, const Y,
-         typename SmplifyType<const Y>::SimpleType>::doit(value);
+         typename SimplifyType<const Y>::SimpleType>::doit(value);
+}
+
+// isa_and_nonnull<X> - Functionally identical to isa, except that a null value
+// is accepted.
+//
+template <class X, class Y>
+POLAR_NODISCARD inline bool isa_and_nonnull(const Y &value)
+{
+   if (!value) {
+      return false;
+   }
+   return isa<X>(value);
 }
 
 //===----------------------------------------------------------------------===//
@@ -261,10 +279,10 @@ template <typename To, typename From>
 struct CastRetty
 {
    using RetType = typename CastRettyWrap<
-   To, From, typename SmplifyType<From>::SimpleType>::RetType;
+   To, From, typename SimplifyType<From>::SimpleType>::RetType;
 };
 
-// Ensure the non-simple values are converted using the SmplifyType template
+// Ensure the non-simple values are converted using the SimplifyType template
 // that may be specialized by smart pointers...
 //
 
@@ -275,8 +293,8 @@ struct CastConvertVal
    static typename CastRetty<To, From>::RetType doit(From &value)
    {
       return CastConvertVal<To, SimpleFrom,
-            typename SmplifyType<SimpleFrom>::SimpleType>::doit(
-               SmplifyType<From>::getSimplifiedValue(value));
+            typename SimplifyType<SimpleFrom>::SimpleType>::doit(
+               SimplifyType<From>::getSimplifiedValue(value));
    }
 };
 
@@ -297,7 +315,7 @@ template <typename X>
 struct IsSimpleType
 {
    static const bool value =
-         std::is_same<X, typename SmplifyType<X>::SimpleType>::value;
+         std::is_same<X, typename SimplifyType<X>::SimpleType>::value;
 };
 
 // cast<X> - Return the argument parameter cast to the specified type.  This
@@ -314,7 +332,7 @@ cast(const Y &value)
 {
    assert(isa<X>(value) && "cast<Ty>() argument of incompatible type!");
    return CastConvertVal<
-         X, const Y, typename SmplifyType<const Y>::SimpleType>::doit(value);
+         X, const Y, typename SimplifyType<const Y>::SimpleType>::doit(value);
 }
 
 template <typename X, typename Y>
@@ -322,7 +340,7 @@ inline typename CastRetty<X, Y>::RetType cast(Y &value)
 {
    assert(isa<X>(value) && "cast<Ty>() argument of incompatible type!");
    return CastConvertVal<X, Y,
-         typename SmplifyType<Y>::SimpleType>::doit(value);
+         typename SimplifyType<Y>::SimpleType>::doit(value);
 }
 
 template <typename X, typename Y>
@@ -330,7 +348,7 @@ inline typename CastRetty<X, Y *>::RetType cast(Y *value)
 {
    assert(isa<X>(value) && "cast<Ty>() argument of incompatible type!");
    return CastConvertVal<X, Y*,
-         typename SmplifyType<Y*>::SimpleType>::doit(value);
+         typename SimplifyType<Y*>::SimpleType>::doit(value);
 }
 
 template <typename X, typename Y>
@@ -339,7 +357,7 @@ cast(std::unique_ptr<Y> &&value) {
    assert(isa<X>(value.get()) && "cast<Ty>() argument of incompatible type!");
    using RetType = typename CastRetty<X, std::unique_ptr<Y>>::RetType;
    return RetType(
-            CastConvertVal<X, Y *, typename SmplifyType<Y *>::SimpleType>::doit(
+            CastConvertVal<X, Y *, typename SimplifyType<Y *>::SimpleType>::doit(
                value.release()));
 }
 
@@ -485,7 +503,6 @@ POLAR_NODISCARD inline auto unique_dyn_cast_or_null(std::unique_ptr<Y> &&value)
    return unique_dyn_cast_or_null<X, Y>(value);
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_CASTING_H

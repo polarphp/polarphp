@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -514,6 +514,34 @@ inline void deallocate_buffer(void *ptr, size_t size, size_t alignment) {
    _Pragma("GCC diagnostic ignored \"-Wpedantic\"")
 
 #define POLAR_END_DISABLE_ZENDVM_WARNING() POLAR_WARNING_POP
+#endif
+
+/// \macro POLAR_PACKED
+/// Used to specify a packed structure.
+/// POLAR_PACKED(
+///    struct A {
+///      int i;
+///      int j;
+///      int k;
+///      long long l;
+///   });
+///
+/// POLAR_PACKED_START
+/// struct B {
+///   int i;
+///   int j;
+///   int k;
+///   long long l;
+/// };
+/// POLAR_PACKED_END
+#ifdef _MSC_VER
+# define POLAR_PACKED(d) __pragma(pack(push, 1)) d __pragma(pack(pop))
+# define POLAR_PACKED_START __pragma(pack(push, 1))
+# define POLAR_PACKED_END   __pragma(pack(pop))
+#else
+# define POLAR_PACKED(d) d __attribute__((packed))
+# define POLAR_PACKED_START _Pragma("pack(push, 1)")
+# define POLAR_PACKED_END   _Pragma("pack(pop)")
 #endif
 
 #endif // POLAR_DEVLTOOLS_UTILS_COMPILER_FEATURE_H

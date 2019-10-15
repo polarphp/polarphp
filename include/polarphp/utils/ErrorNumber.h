@@ -1,7 +1,14 @@
+//===- llvm/Support/Errno.h - Portable+convenient errno handling -*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -16,8 +23,7 @@
 #include <string>
 #include <type_traits>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 /// Returns a string representation of the errno value, using whatever
 /// thread-safe variant of strerror() is available.  Be sure to call this
@@ -40,7 +46,6 @@ inline auto retry_after_signal(const FailT &fail, const Fun &func,
    return res;
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_ERROR_NUMBER_H

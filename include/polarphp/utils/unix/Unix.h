@@ -1,22 +1,20 @@
+//===- llvm/Support/Unix/Unix.h - Common Unix Include File -------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/10/09.
-
-//===- llvm/Support/Unix/Unix.h - Common Unix Include File -------*- C++ -*-===//
-//
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
-//
-//===----------------------------------------------------------------------===//
 //
 // This file defines things specific to Unix implementations.
 //
@@ -85,8 +83,8 @@ static inline bool make_error_msg(
    return true;
 }
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
+
 /// Convert a struct timeval to a duration. Note that timeval can be used both
 /// as a time point and a duration. Be sure to check what the input represents.
 inline std::chrono::microseconds to_duration(const struct timeval &tv)
@@ -116,8 +114,6 @@ inline struct timeval to_time_val(TimePoint<std::chrono::microseconds> tp)
   return retVal;
 }
 
-
-} // unix
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_UNIX_UNIX_H

@@ -1,7 +1,14 @@
+//===- llvm/Support/Signals.h - Signal Handling support ----------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -14,14 +21,12 @@
 
 #include <string>
 
-namespace polar {
-
+namespace polar::basic {
 // forward declare with namespace
-namespace basic {
 class StringRef;
-} // basic
+} // polar::basic
 
-namespace utils {
+namespace polar::utils {
 
 class RawOutStream;
 using polar::basic::StringRef;
@@ -69,15 +74,26 @@ void add_signal_handler(SignalHandlerCallback funcPtr, void *cookie);
 /// This function registers a function to be called when the user "interrupts"
 /// the program (typically by pressing ctrl-c).  When the user interrupts the
 /// program, the specified interrupt function is called instead of the program
-/// being killed, and the interrupt function automatically disabled.  Note
-/// that interrupt functions are not allowed to call any non-reentrant
+/// being killed, and the interrupt function automatically disabled.
+///
+/// Note that interrupt functions are not allowed to call any non-reentrant
 /// functions.  An null interrupt function pointer disables the current
 /// installed function.  Note also that the handler may be executed on a
 /// different thread on some platforms.
-/// Register a function to be called when ctrl-c is pressed.
 void set_interrupt_function(void (*ifunc)());
 
-} // utils
-} // polar
+/// Registers a function to be called when an "info" signal is delivered to
+/// the process.
+///
+/// On POSIX systems, this will be SIGUSR1; on systems that have it, SIGINFO
+/// will also be used (typically ctrl-t).
+///
+/// Note that signal handlers are not allowed to call any non-reentrant
+/// functions.  An null function pointer disables the current installed
+/// function.  Note also that the handler may be executed on a different
+/// thread on some platforms.
+void set_info_signal_function(void (*func)());
+
+} // polar::utils
 
 #endif // POLARPHP_UTILS_SIGNALS_H

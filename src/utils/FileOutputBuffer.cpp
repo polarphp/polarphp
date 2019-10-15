@@ -1,7 +1,14 @@
+//===- llvm/Support/FileSystem.h - File System OS Concept -------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -29,8 +36,7 @@
 #include <io.h>
 #endif
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::sys::MemoryBlock;
 using polar::sys::Memory;
@@ -95,8 +101,11 @@ private:
 class InMemoryBuffer : public FileOutputBuffer
 {
 public:
-   InMemoryBuffer(StringRef path, MemoryBlock buffer, unsigned mode)
-      : FileOutputBuffer(path), m_buffer(buffer), m_mode(mode)
+   InMemoryBuffer(StringRef path, MemoryBlock buffer, std::size_t bufSize, unsigned mode)
+      : FileOutputBuffer(path),
+        m_buffer(buffer),
+        m_bufferSize(bufSize),
+        m_mode(mode)
    {}
 
    uint8_t *getBufferStart() const override
@@ -106,27 +115,34 @@ public:
 
    uint8_t *getBufferEnd() const override
    {
-      return (uint8_t *)m_buffer.getBase() + m_buffer.getSize();
+      return (uint8_t *)m_buffer.getBase() + m_bufferSize;
    }
 
    size_t getBufferSize() const override
    {
-      return m_buffer.getSize();
+      return m_bufferSize;
    }
 
    Error commit() override
    {
+      if (m_finalPath == "-") {
+         out_stream() << StringRef((const char *)m_buffer.getBase(), m_bufferSize);
+         out_stream().flush();
+         return Error::getSuccess();
+      }
       int fd;
       if (auto errorCode = polar::fs::open_file_for_write(m_finalPath, fd, fs::CD_CreateAlways, fs::F_None, m_mode)) {
          return error_code_to_error(errorCode);
       }
       RawFdOutStream outstream(fd, /*shouldClose=*/true, /*unbuffered=*/true);
-      outstream << StringRef((const char *)m_buffer.getBase(), m_buffer.getSize());
+      outstream << StringRef((const char *)m_buffer.getBase(), m_bufferSize);
       return Error::getSuccess();
    }
 
 private:
+   // Buffer may actually contain a larger memory block than BufferSize
    OwningMemoryBlock m_buffer;
+   size_t m_bufferSize;
    unsigned m_mode;
 };
 
@@ -139,12 +155,11 @@ createInMemoryBuffer(StringRef path, size_t size, unsigned mode)
    if (errorCode) {
       return error_code_to_error(errorCode);
    }
-   return std::make_unique<InMemoryBuffer>(path, block, mode);
+   return std::make_unique<InMemoryBuffer>(path, block, size, mode);
 }
 
-Expected<std::unique_ptr<OnDiskBuffer>>
-createOnDiskBuffer(StringRef path, size_t size, bool initExisting,
-                   unsigned mode)
+Expected<std::unique_ptr<FileOutputBuffer>>
+createOnDiskBuffer(StringRef path, size_t size, unsigned mode)
 {
    Expected<fs::TempFile> fileOrErr =
          fs::TempFile::create(path + ".tmp%%%%%%%", mode);
@@ -153,31 +168,27 @@ createOnDiskBuffer(StringRef path, size_t size, bool initExisting,
    }
 
    fs::TempFile file = std::move(*fileOrErr);
-   if (initExisting) {
-      if (auto errorCode = fs::copy_file(path, file.m_fd)) {
-         return error_code_to_error(errorCode);
-      }
-   } else {
 #ifndef POLAR_OS_WIN
-      // On Windows, CreateFileMapping (the mmap function on Windows)
-      // automatically extends the underlying file. We don't need to
-      // extend the file beforehand. _chsize (ftruncate on Windows) is
-      // pretty slow just like it writes specified amount of bytes,
-      // so we should avoid calling that function.
-      if (auto errorCode = fs::resize_file(file.m_fd, size)) {
-         consume_error(file.discard());
-         return error_code_to_error(errorCode);
-      }
-#endif
+   // On Windows, CreateFileMapping (the mmap function on Windows)
+   // automatically extends the underlying file. We don't need to
+   // extend the file beforehand. _chsize (ftruncate on Windows) is
+   // pretty slow just like it writes specified amount of bytes,
+   // so we should avoid calling that function.
+   if (auto errorCode = fs::resize_file(file.fd, size)) {
+      consume_error(file.discard());
+      return error_code_to_error(errorCode);
    }
+#endif
 
    // Mmap it.
    std::error_code errorCode;
    auto mappedFile = std::make_unique<fs::MappedFileRegion>(
-            file.m_fd, fs::MappedFileRegion::readwrite, size, 0, errorCode);
+            fs::convert_fd_to_native_file(file.fd), fs::MappedFileRegion::readwrite, size, 0, errorCode);
+   // mmap(2) can fail if the underlying filesystem does not support it.
+   // If that happens, we fall back to in-memory buffer as the last resort.
    if (errorCode) {
       consume_error(file.discard());
-      return error_code_to_error(errorCode);
+      return createInMemoryBuffer(path, size, mode);
    }
    return std::make_unique<OnDiskBuffer>(path, std::move(file),
                                          std::move(mappedFile));
@@ -190,22 +201,17 @@ createOnDiskBuffer(StringRef path, size_t size, bool initExisting,
 Expected<std::unique_ptr<FileOutputBuffer>>
 FileOutputBuffer::create(StringRef path, size_t size, unsigned flags)
 {
+   // Handle "-" as stdout just like llvm::raw_ostream does.
+   if (path == "-") {
+      return createInMemoryBuffer("-", size, /*Mode=*/0);
+   }
+
    unsigned mode = fs::all_read | fs::all_write;
    if (flags & F_executable) {
       mode |= fs::all_exe;
    }
    fs::FileStatus stat;
    fs::status(path, stat);
-
-   if ((flags & F_modify) && size == size_t(-1)) {
-      if (stat.getType() == fs::FileType::regular_file) {
-         size = stat.getSize();
-      } else if (stat.getType() == fs::FileType::file_not_found) {
-         return error_code_to_error(ErrorCode::no_such_file_or_directory);
-      } else {
-         return error_code_to_error(ErrorCode::invalid_argument);
-      }
-   }
 
    // Usually, we want to create OnDiskBuffer to create a temporary file in
    // the same directory as the destination file and atomically replaces it
@@ -221,11 +227,10 @@ FileOutputBuffer::create(StringRef path, size_t size, unsigned flags)
    case fs::FileType::regular_file:
    case fs::FileType::file_not_found:
    case fs::FileType::status_error:
-      return createOnDiskBuffer(path, size, !!(flags & F_modify), mode);
+      return createOnDiskBuffer(path, size, mode);
    default:
       return createInMemoryBuffer(path, size, mode);
    }
 }
 
-} // utils
-} // polar
+} // polar::utils

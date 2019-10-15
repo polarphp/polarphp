@@ -1,7 +1,14 @@
+//===- llvm/ADT/BreadthFirstIterator.h - Breadth First iterator -*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// copyright (c) 2017 - 2018 polarphp software foundation
-// copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// copyright (c) 2017 - 2019 polarphp software foundation
+// copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -20,8 +27,7 @@
 #include <utility>
 #include <optional>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 // BreadthFirstIteratorStorage - A private class which is used to figure out where to
 // store the visited set. We only provide a non-external variant for now.
@@ -130,7 +136,7 @@ public:
       return m_visitQueue.front()->first;
    }
 
-   // This is a nonstandard operator-> that dereferenfces the pointer an extra
+   // This is a nonstandard operator-> that dereferences the pointer an extra
    // time so that you can actually call methods on the node, because the
    // contained type is a pointer.
    NodeRef operator->() const
@@ -177,7 +183,6 @@ IteratorRange<BreadthFirstIterator<T>> breadth_first(const T &graph)
    return make_range(bf_begin(graph), bf_end(graph));
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_BREADTHFIRSTITERATOR_H

@@ -1,7 +1,14 @@
+//===----- lib/Support/Error.cpp - Error and associated utilities ---------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -57,12 +64,12 @@ public:
 
 static polar::utils::ManagedStatic<ErrorErrorCategory> sg_errorErrorCat;
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 void ErrorInfoBase::getAnchor() {}
 char ErrorInfoBase::sm_id = 0;
 char ErrorList::sm_id = 0;
+void EcError::getAnchor() {}
 char EcError::sm_id = 0;
 char StringError::sm_id = 0;
 char FileError::sm_id = 0;
@@ -176,8 +183,7 @@ void report_fatal_error(Error error, bool)
    report_fatal_error(errorMsg);
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 PolarErrorTypeId polar_get_error_type_id(PolarErrorRef error)
 {

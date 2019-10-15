@@ -1,7 +1,7 @@
 # This source file is part of the polarphp.org open source project
 #
-# Copyright (c) 2017 - 2018 polarphp software foundation
-# Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+# Copyright (c) 2017 - 2019 polarphp software foundation
+# Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
 # See https://polarphp.org/LICENSE.txt for license information
@@ -11,12 +11,19 @@
 
 add_custom_target(PolarBaseLibTests)
 set_target_properties(PolarBaseLibTests PROPERTIES FOLDER "PolarBaseLibTests")
+add_custom_target(PolarCompilerTests)
+set_target_properties(PolarCompilerTests PROPERTIES FOLDER "PolarCompilerTests")
 
 add_subdirectory(support)
 
 if (POLAR_DEV_BUILD_LLVM_UNITTEST)
    add_subdirectory(basic/adt)
    add_subdirectory(utils)
+endif()
+
+if (POLAR_DEV_BUILD_POLARPHP_UNITTEST)
+   add_subdirectory(syntax)
+   add_subdirectory(parser)
 endif()
 
 if (POLAR_DEV_BUILD_VMAPI_UNITEST)

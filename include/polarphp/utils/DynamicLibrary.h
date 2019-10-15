@@ -1,7 +1,14 @@
+//===-- llvm/Support/DynamicLibrary.h - Portable Dynamic Library -*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -17,14 +24,12 @@
 #include <algorithm>
 #include "polarphp/global/Global.h"
 
-namespace polar {
-
+namespace polar::basic {
 // forward declare class with namespace
-namespace basic {
 class StringRef;
 } // basic
 
-namespace sys {
+namespace polar::sys {
 
 using polar::basic::StringRef;
 
@@ -146,7 +151,6 @@ private:
    void *m_data;
 };
 
-} // utils
-} // polar
+} // polar::sys
 
 #endif // POLARPHP_UTILS_DYNAMIC_LIBRARY_H

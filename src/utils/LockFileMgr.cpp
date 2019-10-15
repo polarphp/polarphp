@@ -1,7 +1,14 @@
+//===--- LockFileManager.cpp - File-level Locking Utility------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 POLARPHP_UTILS_LOCK_FILE_MGR_H software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 POLARPHP_UTILS_LOCK_FILE_MGR_H software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -34,8 +41,7 @@
 #include <unistd.h>
 #endif
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 #if defined(__APPLE__) && defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && (__MAC_OS_X_VERSION_MIN_REQUIRED > 1050)
 #define USE_OSX_GETHOSTUUID 1
@@ -124,7 +130,6 @@ bool LockFileManager::processStillExecuting(StringRef hostID, int pid)
    if (storedHostID == hostID && getsid(pid) == -1 && errno == ESRCH) {
       return false;
    }
-
 #endif
    return true;
 }
@@ -375,5 +380,4 @@ std::error_code LockFileManager::unsafeRemoveLockFile()
    return polar::fs::remove(m_lockFilename);
 }
 
-} // utils
-} // polar
+} // polar::utils

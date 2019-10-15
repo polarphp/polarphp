@@ -1,7 +1,7 @@
 # This source file is part of the polarphp.org open source project
 #
-# Copyright (c) 2017 - 2018 polarphp software foundation
-# Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+# Copyright (c) 2017 - 2019 polarphp software foundation
+# Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
 # See https://polarphp.org/LICENSE.txt for license information
@@ -69,13 +69,12 @@ function(polar_add_lit_cfg_setter)
       set(headerFilename ${CMAKE_CURRENT_LIST_DIR}/litlocalcfg.h)
       polar_get_lit_cfgsetter_name(localcfgsetter targetName)
    else()
+      set(targetOutputName cfgsetter)
       set(targetCfgSourceFilename litcfg.cpp)
       set(sourceFilename ${CMAKE_CURRENT_LIST_DIR}/${targetCfgSourceFilename})
       polar_get_lit_cfgsetter_name(cfgsetter targetName)
       set(headerFilename ${CMAKE_CURRENT_LIST_DIR}/litcfg.h)
-      set(targetOutputName cfgsetter)
    endif()
-
    polar_find_parent_dir(${CMAKE_CURRENT_SOURCE_DIR} baseDir)
    set(setterModuleDir ${CMAKE_CURRENT_LIST_DIR})
    string(REPLACE ${baseDir}/ "" setterModuleDir ${setterModuleDir})
@@ -84,11 +83,9 @@ function(polar_add_lit_cfg_setter)
       set(headerTplFilename ${headerFilename}.in)
       set(headerFilename ${setterModuleDir}/${headerFilename})
       if (EXISTS ${headerTplFilename})
-         message("${headerTplFilename}")
-         message("${headerFilename}")
          configure_file(${headerTplFilename} ${headerFilename}
             @ONLY)
-         list(APPEND POLAR_CFG_SETTER_SRCS ${sourceFilename})
+         list(APPEND POLAR_CFG_SETTER_SRCS ${headerFilename})
       endif()
    endif()
    list(APPEND POLAR_CFG_SETTER_SRCS ${sourceFilename})

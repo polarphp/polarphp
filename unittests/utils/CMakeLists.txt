@@ -1,7 +1,7 @@
 # This source file is part of the polarphp.org open source project
 #
-# Copyright (c) 2017 - 2018 polarphp software foundation
-# Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+# Copyright (c) 2017 - 2019 polarphp software foundation
+# Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
 # See https://polarphp.org/LICENSE.txt for license information
@@ -9,11 +9,14 @@
 #
 # Created by polarboy on 2018/10/12.
 
-polar_add_unittest(PolarBaseLibTests BasicUtilsTest
+add_subdirectory(dynamiclibrary)
+
+polar_add_unittest(PolarBaseLibTests UtilsTest
    ../TestEntry.cpp
    AlignOfTest.cpp
    AllocatorTest.cpp
    ArrayRecyclerTest.cpp
+   ARMAttributeParserTest.cpp
    BinaryStreamTest.cpp
    BranchProbabilityTest.cpp
    CachePruningTest.cpp
@@ -23,9 +26,11 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    CompressionTest.cpp
    ConvertUtfTest.cpp
    CrashRecoveryTest.cpp
+   CrcTest.cpp
    DataExtractorTest.cpp
    DebugTest.cpp
    DebugCounterTest.cpp
+   FileCheckTest.cpp
    EndianStreamTest.cpp
    EndianTest.cpp
    ErrorNumberTest.cpp
@@ -37,6 +42,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    FormatVariadicTest.cpp
    GlobPatternTest.cpp
    HostTest.cpp
+   KnownBitsTest.cpp
    LEB128Test.cpp
    LineIteratorTest.cpp
    LockFileManagerTest.cpp
@@ -46,7 +52,6 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    MemoryBufferTest.cpp
    MemoryTest.cpp
    NativeFormatTests.cpp
-   ParallelTest.cpp
    PathTest.cpp
    ProcessTest.cpp
    ProgramTest.cpp
@@ -66,6 +71,7 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    TrailingObjectsTest.cpp
    TrigramIndexTest.cpp
    TypeNameTest.cpp
+   TypeTraitsTest.cpp
    UnicodeTest.cpp
    YamlIOTest.cpp
    YamlParserTest.cpp
@@ -75,4 +81,4 @@ polar_add_unittest(PolarBaseLibTests BasicUtilsTest
    VirtualFileSystemTest.cpp
    )
 
-target_link_libraries(BasicUtilsTest PRIVATE TestSupport)
+target_link_libraries(UtilsTest PRIVATE TestSupport filecheckerkernel)

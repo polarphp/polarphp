@@ -1,7 +1,14 @@
+//===- llvm/Support/ErrorHandling.h - Fatal error handling ------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -9,14 +16,6 @@
 //
 // Created by polarboy on 2018/10/09.
 
-//===- llvm/Support/ErrorHandling.h - Fatal error handling ------*- C++ -*-===//
-//
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
-//
-//===----------------------------------------------------------------------===//
 //
 // This file defines an API used to indicate fatal error conditions.  Non-fatal
 // errors (most of them) should be handled through LLVMContext.
@@ -161,8 +160,8 @@ void report_bad_alloc_error(std::string_view reason, bool genCrashDiag = true);
 /// Use the llvm_unreachable macro (that adds location info), instead of
 /// calling this function directly.
 POLAR_ATTRIBUTE_NORETURN void
-polar_unreachable_internal(const char *msg = nullptr, const char *file = nullptr,
-                           unsigned line = 0);
+unreachable_internal(const char *msg = nullptr, const char *file = nullptr,
+                     unsigned line = 0);
 
 } // utils
 } // polar
@@ -177,11 +176,11 @@ polar_unreachable_internal(const char *msg = nullptr, const char *file = nullptr
 /// allows compilers to omit some unnecessary code.
 #ifndef NDEBUG
 #define polar_unreachable(msg) \
-   ::polar::utils::polar_unreachable_internal(msg, __FILE__, __LINE__)
+   ::polar::utils::unreachable_internal(msg, __FILE__, __LINE__)
 #elif defined(POLAR_BUILTIN_UNREACHABLE)
 #define polar_unreachable(msg) POLAR_BUILTIN_UNREACHABLE
 #else
-#define polar_unreachable(msg) ::polar::utils::polar_unreachable_internal()
+#define polar_unreachable(msg) ::polar::utils::unreachable_internal()
 #endif
 
 #endif // POLARPHP_UTILS_ERROR_HANDLING_H

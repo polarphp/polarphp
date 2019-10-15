@@ -1,7 +1,14 @@
+//===--- MemoryBuffer.h - Memory Buffer Interface ---------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -21,8 +28,7 @@
 #include <cstdint>
 #include <memory>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 class MemoryBufferRef;
 
@@ -109,7 +115,7 @@ public:
    /// MemoryBuffer. The slice is specified by an \p Offset and \p MapSize.
    /// Since this is in the middle of a file, the buffer is not null terminated.
    static OptionalError<std::unique_ptr<MemoryBuffer>>
-   getOpenFileSlice(int fd, const Twine &filename, uint64_t mapSize,
+   getOpenFileSlice(fs::file_t fd, const Twine &filename, uint64_t mapSize,
                     int64_t offset, bool isVolatile = false);
 
    /// Given an already-open file descriptor, read the file and return a
@@ -119,7 +125,7 @@ public:
    /// can change outside the user's control, e.g. when libclang tries to parse
    /// while the user is editing/updating the file or if the file is on an NFS.
    static OptionalError<std::unique_ptr<MemoryBuffer>>
-   getOpenFile(int fd, const Twine &filename, uint64_t fileSize,
+   getOpenFile(fs::file_t fd, const Twine &filename, uint64_t fileSize,
                bool requiresNullTerminator = true, bool isVolatile = false);
 
    /// Open the specified memory range as a MemoryBuffer. Note that inputData
@@ -295,7 +301,7 @@ class MemoryBufferRef
 
 public:
    MemoryBufferRef() = default;
-   MemoryBufferRef(MemoryBuffer& buffer)
+   MemoryBufferRef(const MemoryBuffer& buffer)
       : m_buffer(buffer.getBuffer()),
         m_identifier(buffer.getBufferIdentifier())
    {}
@@ -330,7 +336,6 @@ public:
    }
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_MEMORY_BUFFER_H

@@ -1,7 +1,14 @@
+//===-- llvm/ADT/BitmaskEnum.h ----------------------------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -65,8 +72,7 @@
    /* Force a semicolon at the end of this macro. */                            \
    using ::polar::basic::bitmaskenumdetail::operator^=
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// Traits class to determine whether an enum has a
 /// POLAR_BITMASK_LARGEST_ENUMERATOR enumerator.
@@ -162,7 +168,6 @@ E &operator^=(E &lhs, E rhs)
 // Enable bitmask enums in namespace ::polar and all nested namespaces.
 POLAR_ENABLE_BITMASK_ENUMS_IN_NAMESPACE();
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_BITMASK_ENUM_H

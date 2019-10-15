@@ -1,7 +1,14 @@
+//===- lib/Support/IntervalMap.cpp - A sorted interval map ----------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -11,9 +18,7 @@
 
 #include "polarphp/basic/adt/IntervalMap.h"
 
-namespace polar {
-namespace basic {
-namespace intervalmapimpl {
+namespace polar::basic::intervalmapimpl {
 
 void Path::replaceRoot(void *root, unsigned size, IdxPair offsets)
 {
@@ -164,6 +169,4 @@ IdxPair distribute(unsigned nodes, unsigned elements, unsigned capacity,
    return posPair;
 }
 
-} // intervalmapimpl
-} // basic
-} // polar
+} // polar::basic::intervalmapimpl

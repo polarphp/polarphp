@@ -1,7 +1,14 @@
+//===- llvm/ADT/ilist_node.h - Intrusive Linked List Helper -----*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -15,8 +22,7 @@
 #include "polarphp/basic/adt/IntrusiveListNodeBase.h"
 #include "polarphp/basic/adt/IntrusiveListNodeOptions.h"
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 namespace ilist_internal {
 
@@ -39,7 +45,8 @@ class IntrusiveListSentinel;
 /// provide type safety: you can't insert nodes of \a IntrusiveListNodeImpl into the
 /// wrong \a simple_ilist or \a iplist.
 template <typename OptionsType>
-class IntrusiveListNodeImpl : OptionsType::NodeBaseType {
+class IntrusiveListNodeImpl : OptionsType::NodeBaseType
+{
    using value_type = typename OptionsType::value_type;
    using NodeBaseType = typename OptionsType::NodeBaseType;
    using ListBaseType = typename OptionsType::ListBaseType;
@@ -353,7 +360,6 @@ public:
    /// @}
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_INTRUSIVE_LIST_NODE_H

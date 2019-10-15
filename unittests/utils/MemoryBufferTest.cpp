@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -157,11 +157,12 @@ void MemoryBufferTest::testGetOpenFileSlice(bool Reopen)
       EXPECT_FALSE(fs::open_file_for_read(TestPath.getCStr(), TestFD));
    }
 
-   OptionalError<OwningBuffer> Buf =
-         MemoryBuffer::getOpenFileSlice(TestFD, TestPath.getCStr(),
-                                        40000, // Size
-                                        80000  // Offset
-                                        );
+
+   OptionalError<OwningBuffer> Buf = MemoryBuffer::getOpenFileSlice(
+            fs::convert_fd_to_native_file(TestFD), TestPath.getCStr(),
+            40000, // Size
+            80000  // Offset
+            );
 
    std::error_code errorCode = Buf.getError();
    EXPECT_FALSE(errorCode);
@@ -280,7 +281,7 @@ TEST_F(MemoryBufferTest, writeThroughFile)
    int fd;
    SmallString<64> TestPath;
    fs::create_temporary_file("MemoryBufferTest_WriteThrough", "temp", fd,
-                                TestPath);
+                             TestPath);
    FileRemover Cleanup(TestPath);
    RawFdOutStream OF(fd, true);
    OF << "0123456789abcdef";

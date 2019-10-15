@@ -1,7 +1,14 @@
+//===- llvm/ADT/MapVector.h - Map w/ deterministic value order --*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -22,8 +29,7 @@
 #include <utility>
 #include <vector>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// This class implements a map that also provides access to all stored values
 /// in a deterministic order. The values are kept in a std::vector and the
@@ -301,7 +307,6 @@ struct SmallMapVector
 {
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_MAP_VECTOR_H

@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -195,7 +195,6 @@
 #   define POLAR_REQUIRED_RESULT __attribute__ ((__warn_unused_result__))
 #   define POLAR_DECL_PURE_FUNCTION __attribute__((pure))
 #   define POLAR_DECL_CONST_FUNCTION __attribute__((const))
-#   define POLAR_PACKED __attribute__ ((__packed__))
 #   ifndef __ARM_EABI__
 #      define POLAR_NO_ARM_EABI
 #   endif
@@ -230,7 +229,6 @@
 #      define POLAR_ALGINOF(type) __alignof__(type)
 #      define POLAR_TYPEOF __typeof__(expr)
 #      define POLAR_DECL_ALIGN(n) __attribute__((__aligned__(n)))
-#      define POLAR_PACKED __attribute__((__packed__))
 #   endif
 
 /* Older versions of DEC C++ do not define __EDG__ or __EDG - observed
@@ -1317,7 +1315,7 @@
 #   if defined(POLAR_CC_GNU) && POLAR_CC_GNU >= 700
 #      define POLAR_FALLTHROUGH __attribute__((fallthrough))
 #   else
-#      define POLAR_FALLTHROUGH (void)0
+#      define POLAR_FALLTHROUGH (void) 0
 #   endif
 #endif
 

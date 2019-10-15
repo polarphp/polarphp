@@ -1,7 +1,14 @@
+//===- llvm/ADT/DenseMap.h - Dense probed hash table ------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -30,12 +37,10 @@
 #include <utility>
 #include <initializer_list>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 using polar::utils::should_reverse_iterate;
 using polar::utils::AlignedCharArrayUnion;
-using polar::utils::IsPodLike;
 
 namespace internal {
 
@@ -62,7 +67,7 @@ struct DenseMapPair : public std::pair<KeyType, ValueType>
    DenseMapPair(AltKeyT &&AltKey, AltValueT &&AltValue,
                 typename std::enable_if<
                 std::is_convertible<AltKeyT, KeyType>::value &&
-                std::is_convertible<AltValueT, ValueType>::value>::type * = 0)
+                std::is_convertible<AltValueT, ValueType>::value>::type * = nullptr)
       : std::pair<KeyType, ValueType>(std::forward<AltKeyT>(AltKey),
                                       std::forward<AltValueT>(AltValue)) {}
 
@@ -193,7 +198,7 @@ public:
          return;
       }
       const KeyType emptyKey = getEmptyKey(), tombstoneKey = getTombstoneKey();
-      if (IsPodLike<KeyType>::value && IsPodLike<ValueType>::value) {
+      if (polar::utils::is_trivially_copyable<KeyType>::value && polar::utils::is_trivially_copyable<ValueType>::value) {
          // Use a simpler loop when these are trivial types.
          for (BucketType *ptr = getBuckets(), *end = getBucketsEnd(); ptr != end; ++ptr) {
             ptr->getFirst() = emptyKey;
@@ -508,7 +513,7 @@ protected:
       setNumEntries(other.getNumEntries());
       setNumTombstones(other.getNumTombstones());
 
-      if (IsPodLike<KeyType>::value && IsPodLike<ValueType>::value) {
+      if (polar::utils::is_trivially_copyable<KeyType>::value && polar::utils::is_trivially_copyable<ValueType>::value) {
          memcpy(reinterpret_cast<void *>(getBuckets()), other.getBuckets(),
                 getNumBuckets() * sizeof(BucketType));
       } else {
@@ -1478,7 +1483,6 @@ inline size_t capacity_in_bytes(const DenseMap<KeyType, ValueType, KeyInfoType> 
    return value.getMemorySize();
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_DENSE_MAP_H

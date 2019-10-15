@@ -1,7 +1,14 @@
+//===- AARCH64TargetParser.def - AARCH64 target parsing defines ---------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -25,14 +32,14 @@ namespace hsamd {
 // HSA metadata.
 //===----------------------------------------------------------------------===//
 /// HSA metadata major version.
-constexpr uint32_t VersionMajor = 1;
+constexpr uint32_t versionMajor = 1;
 /// HSA metadata minor version.
-constexpr uint32_t VersionMinor = 0;
+constexpr uint32_t versionMinor = 0;
 
 /// HSA metadata beginning assembler directive.
-constexpr char AssemblerDirectiveBegin[] = ".amd_amdgpu_hsa_metadata";
+constexpr char assemblerDirectiveBegin[] = ".amd_amdgpu_hsa_metadata";
 /// HSA metadata ending assembler directive.
-constexpr char AssemblerDirectiveEnd[] = ".end_amd_amdgpu_hsa_metadata";
+constexpr char assemblerDirectiveEnd[] = ".end_amd_amdgpu_hsa_metadata";
 
 /// Access qualifiers.
 enum class AccessQualifier : uint8_t
@@ -73,6 +80,7 @@ enum class ValueKind : uint8_t
    HiddenPrintfBuffer     = 11,
    HiddenDefaultQueue     = 12,
    HiddenCompletionAction = 13,
+   HiddenMultiGridSyncArg = 14,
    Unknown                = 0xff
 };
 
@@ -106,13 +114,13 @@ namespace attrs {
 
 namespace key {
 /// key for kernel::Attr::Metadata::m_reqdWorkGroupSize.
-constexpr char ReqdWorkGroupSize[] = "ReqdWorkGroupSize";
+constexpr char reqdWorkGroupSize[] = "ReqdWorkGroupSize";
 /// key for kernel::Attr::Metadata::m_workGroupSizeHint.
-constexpr char WorkGroupSizeHint[] = "WorkGroupSizeHint";
+constexpr char workGroupSizeHint[] = "WorkGroupSizeHint";
 /// key for kernel::Attr::Metadata::m_vecTypeHint.
-constexpr char VecTypeHint[] = "VecTypeHint";
+constexpr char vecTypeHint[] = "VecTypeHint";
 /// key for kernel::Attr::Metadata::m_runtimeHandle.
-constexpr char RuntimeHandle[] = "RuntimeHandle";
+constexpr char runtimeHandle[] = "RuntimeHandle";
 } // end namespace key
 
 /// In-memory representation of kernel attributes metadata.
@@ -154,33 +162,35 @@ namespace arg {
 
 namespace key {
 /// key for kernel::arg::Metadata::m_name.
-constexpr char Name[] = "Name";
+constexpr char name[] = "Name";
 /// key for kernel::arg::Metadata::m_typeName.
-constexpr char TypeName[] = "TypeName";
+constexpr char typeName[] = "TypeName";
 /// key for kernel::arg::Metadata::m_size.
-constexpr char Size[] = "Size";
+constexpr char size[] = "Size";
+/// Key for kernel::arg::Metadata::mOffset.
+constexpr char offset[] = "Offset";
 /// key for kernel::arg::Metadata::m_align.
-constexpr char Align[] = "Align";
+constexpr char align[] = "Align";
 /// key for kernel::arg::Metadata::m_valueKind.
-constexpr char ValueKind[] = "ValueKind";
+constexpr char valueKind[] = "ValueKind";
 /// key for kernel::arg::Metadata::m_valueType.
-constexpr char ValueType[] = "ValueType";
+constexpr char valueType[] = "ValueType";
 /// key for kernel::arg::Metadata::m_pointeeAlign.
-constexpr char PointeeAlign[] = "PointeeAlign";
+constexpr char pointeeAlign[] = "PointeeAlign";
 /// key for kernel::arg::Metadata::m_addrSpaceQual.
-constexpr char AddrSpaceQual[] = "AddrSpaceQual";
+constexpr char addrSpaceQual[] = "AddrSpaceQual";
 /// key for kernel::arg::Metadata::m_accQual.
-constexpr char AccQual[] = "AccQual";
+constexpr char accQual[] = "AccQual";
 /// key for kernel::arg::Metadata::m_actualAccQual.
-constexpr char ActualAccQual[] = "ActualAccQual";
+constexpr char actualAccQual[] = "ActualAccQual";
 /// key for kernel::arg::Metadata::m_isConst.
-constexpr char IsConst[] = "IsConst";
+constexpr char isConst[] = "IsConst";
 /// key for kernel::arg::Metadata::m_isRestrict.
-constexpr char IsRestrict[] = "IsRestrict";
+constexpr char isRestrict[] = "IsRestrict";
 /// key for kernel::arg::Metadata::m_isVolatile.
-constexpr char IsVolatile[] = "IsVolatile";
+constexpr char isVolatile[] = "IsVolatile";
 /// key for kernel::arg::Metadata::m_isPipe.
-constexpr char IsPipe[] = "IsPipe";
+constexpr char isPipe[] = "IsPipe";
 } // end namespace key
 
 /// In-memory representation of kernel argument metadata.
@@ -192,6 +202,8 @@ struct Metadata final
    std::string m_typeName = std::string();
    /// Size in bytes. Required.
    uint32_t m_size = 0;
+   /// Offset in bytes. Required for code object v3, unused for code object v2.
+   uint32_t m_offset = 0;
    /// Alignment in bytes. Required.
    uint32_t m_align = 0;
    /// Value kind. Required.
@@ -228,29 +240,29 @@ namespace codeProps {
 
 namespace key {
 /// key for kernel::codeProps::Metadata::mKernargSegmentSize.
-constexpr char KernargSegmentSize[] = "KernargSegmentSize";
+constexpr char kernargSegmentSize[] = "KernargSegmentSize";
 /// key for kernel::codeProps::Metadata::mGroupSegmentFixedSize.
-constexpr char GroupSegmentFixedSize[] = "GroupSegmentFixedSize";
+constexpr char groupSegmentFixedSize[] = "GroupSegmentFixedSize";
 /// key for kernel::codeProps::Metadata::mPrivateSegmentFixedSize.
-constexpr char PrivateSegmentFixedSize[] = "PrivateSegmentFixedSize";
+constexpr char privateSegmentFixedSize[] = "PrivateSegmentFixedSize";
 /// key for kernel::codeProps::Metadata::mKernargSegmentAlign.
-constexpr char KernargSegmentAlign[] = "KernargSegmentAlign";
+constexpr char kernargSegmentAlign[] = "KernargSegmentAlign";
 /// key for kernel::codeProps::Metadata::mWavefrontSize.
-constexpr char WavefrontSize[] = "WavefrontSize";
+constexpr char wavefrontSize[] = "WavefrontSize";
 /// key for kernel::codeProps::Metadata::mNumSGPRs.
-constexpr char NumSGPRs[] = "NumSGPRs";
+constexpr char numSGPRs[] = "NumSGPRs";
 /// key for kernel::codeProps::Metadata::mNumVGPRs.
-constexpr char NumVGPRs[] = "NumVGPRs";
+constexpr char numVGPRs[] = "NumVGPRs";
 /// key for kernel::codeProps::Metadata::mMaxFlatWorkGroupSize.
-constexpr char MaxFlatWorkGroupSize[] = "MaxFlatWorkGroupSize";
+constexpr char maxFlatWorkGroupSize[] = "MaxFlatWorkGroupSize";
 /// key for kernel::codeProps::Metadata::mIsDynamicCallStack.
-constexpr char IsDynamicCallStack[] = "IsDynamicCallStack";
+constexpr char isDynamicCallStack[] = "IsDynamicCallStack";
 /// key for kernel::codeProps::Metadata::mIsXNACKEnabled.
-constexpr char IsXNACKEnabled[] = "IsXNACKEnabled";
+constexpr char isXNACKEnabled[] = "IsXNACKEnabled";
 /// key for kernel::codeProps::Metadata::mNumSpilledSGPRs.
-constexpr char NumSpilledSGPRs[] = "NumSpilledSGPRs";
+constexpr char numSpilledSGPRs[] = "NumSpilledSGPRs";
 /// key for kernel::codeProps::Metadata::mNumSpilledVGPRs.
-constexpr char NumSpilledVGPRs[] = "NumSpilledVGPRs";
+constexpr char numSpilledVGPRs[] = "NumSpilledVGPRs";
 } // end namespace key
 
 /// In-memory representation of kernel code properties metadata.
@@ -258,35 +270,35 @@ struct Metadata final
 {
    /// Size in bytes of the kernarg segment memory. Kernarg segment memory
    /// holds the values of the arguments to the kernel. Required.
-   uint64_t mKernargSegmentSize = 0;
+   uint64_t m_kernargSegmentSize = 0;
    /// Size in bytes of the group segment memory required by a workgroup.
    /// This value does not include any dynamically allocated group segment memory
    /// that may be added when the kernel is dispatched. Required.
-   uint32_t mGroupSegmentFixedSize = 0;
+   uint32_t m_groupSegmentFixedSize = 0;
    /// Size in bytes of the private segment memory required by a workitem.
    /// Private segment memory includes arg, spill and private segments. Required.
-   uint32_t mPrivateSegmentFixedSize = 0;
+   uint32_t m_privateSegmentFixedSize = 0;
    /// Maximum byte alignment of variables used by the kernel in the
    /// kernarg memory segment. Required.
-   uint32_t mKernargSegmentAlign = 0;
+   uint32_t m_kernargSegmentAlign = 0;
    /// Wavefront size. Required.
-   uint32_t mWavefrontSize = 0;
+   uint32_t m_wavefrontSize = 0;
    /// Total number of SGPRs used by a wavefront. Optional.
-   uint16_t mNumSGPRs = 0;
+   uint16_t m_numSGPRs = 0;
    /// Total number of VGPRs used by a workitem. Optional.
-   uint16_t mNumVGPRs = 0;
+   uint16_t m_numVGPRs = 0;
    /// Maximum flat work-group size supported by the kernel. Optional.
-   uint32_t mMaxFlatWorkGroupSize = 0;
+   uint32_t m_maxFlatWorkGroupSize = 0;
    /// True if the generated machine code is using a dynamically sized
    /// call stack. Optional.
-   bool mIsDynamicCallStack = false;
+   bool m_isDynamicCallStack = false;
    /// True if the generated machine code is capable of supporting XNACK.
    /// Optional.
-   bool mIsXNACKEnabled = false;
+   bool m_isXNACKEnabled = false;
    /// Number of SGPRs spilled by a wavefront. Optional.
-   uint16_t mNumSpilledSGPRs = 0;
+   uint16_t m_numSpilledSGPRs = 0;
    /// Number of VGPRs spilled by a workitem. Optional.
-   uint16_t mNumSpilledVGPRs = 0;
+   uint16_t m_numSpilledVGPRs = 0;
 
    /// Default constructor.
    Metadata() = default;
@@ -314,16 +326,16 @@ struct Metadata final
 namespace debugprops {
 namespace key {
 /// key for kernel::debugprops::Metadata::m_debuggerABIVersion.
-constexpr char DebuggerABIVersion[] = "DebuggerABIVersion";
+constexpr char debuggerABIVersion[] = "DebuggerABIVersion";
 /// key for kernel::debugprops::Metadata::m_reservedNumVGPRs.
-constexpr char ReservedNumVGPRs[] = "ReservedNumVGPRs";
+constexpr char reservedNumVGPRs[] = "ReservedNumVGPRs";
 /// key for kernel::debugprops::Metadata::m_reservedFirstVGPR.
-constexpr char ReservedFirstVGPR[] = "ReservedFirstVGPR";
+constexpr char reservedFirstVGPR[] = "ReservedFirstVGPR";
 /// key for kernel::debugprops::Metadata::m_privateSegmentBufferSGPR.
-constexpr char PrivateSegmentBufferSGPR[] = "PrivateSegmentBufferSGPR";
+constexpr char privateSegmentBufferSGPR[] = "PrivateSegmentBufferSGPR";
 /// key for
 ///     kernel::debugprops::Metadata::m_wavefrontPrivateSegmentOffsetSGPR.
-constexpr char WavefrontPrivateSegmentOffsetSGPR[] =
+constexpr char wavefrontPrivateSegmentOffsetSGPR[] =
       "WavefrontPrivateSegmentOffsetSGPR";
 } // end namespace key
 
@@ -369,21 +381,21 @@ struct Metadata final
 
 namespace key {
 /// key for kernel::Metadata::m_name.
-constexpr char Name[] = "Name";
+constexpr char name[] = "Name";
 /// key for kernel::Metadata::m_symbolName.
-constexpr char SymbolName[] = "SymbolName";
+constexpr char symbolName[] = "SymbolName";
 /// key for kernel::Metadata::m_language.
-constexpr char Language[] = "Language";
+constexpr char language[] = "Language";
 /// key for kernel::Metadata::m_languageVersion.
-constexpr char LanguageVersion[] = "LanguageVersion";
+constexpr char languageVersion[] = "LanguageVersion";
 /// key for kernel::Metadata::m_attrs.
-constexpr char attrs[] = "attrs";
+constexpr char attrs[] = "Attrs";
 /// key for kernel::Metadata::m_args.
-constexpr char Args[] = "Args";
+constexpr char args[] = "Args";
 /// key for kernel::Metadata::m_codeProps.
-constexpr char codeProps[] = "codeProps";
+constexpr char codeProps[] = "CodeProps";
 /// key for kernel::Metadata::m_debugProps.
-constexpr char debugprops[] = "debugprops";
+constexpr char debugprops[] = "Debugprops";
 } // end namespace key
 
 /// In-memory representation of kernel metadata.
@@ -414,32 +426,47 @@ struct Metadata final
 
 namespace key {
 /// key for HSA::Metadata::mVersion.
-constexpr char Version[] = "Version";
+constexpr char version[] = "Version";
 /// key for HSA::Metadata::mPrintf.
-constexpr char Printf[] = "Printf";
+constexpr char printf[] = "Printf";
 /// key for HSA::Metadata::mKernels.
-constexpr char Kernels[] = "Kernels";
+constexpr char kernels[] = "Kernels";
 } // end namespace key
 
 /// In-memory representation of HSA metadata.
 struct Metadata final
 {
    /// HSA metadata version. Required.
-   std::vector<uint32_t> mVersion = std::vector<uint32_t>();
+   std::vector<uint32_t> m_version = std::vector<uint32_t>();
    /// Printf metadata. Optional.
-   std::vector<std::string> mPrintf = std::vector<std::string>();
+   std::vector<std::string> m_printf = std::vector<std::string>();
    /// Kernels metadata. Required.
-   std::vector<kernel::Metadata> mKernels = std::vector<kernel::Metadata>();
+   std::vector<kernel::Metadata> m_kernels = std::vector<kernel::Metadata>();
 
    /// Default constructor.
    Metadata() = default;
 };
 
-/// Converts \p String to \p HSAMetadata.
-std::error_code fromString(std::string String, Metadata &HSAMetadata);
+/// Converts \p str to \p hsaMetadata.
+std::error_code fromString(std::string str, Metadata &hsaMetadata);
 
-/// Converts \p HSAMetadata to \p String.
-std::error_code toString(Metadata HSAMetadata, std::string &String);
+/// Converts \p hsaMetadata to \p str.
+std::error_code toString(Metadata hsaMetadata, std::string &str);
+
+//===----------------------------------------------------------------------===//
+// HSA metadata for v3 code object.
+//===----------------------------------------------------------------------===//
+namespace v3 {
+/// HSA metadata major version.
+constexpr uint32_t versionMajor = 1;
+/// HSA metadata minor version.
+constexpr uint32_t versionMinor = 0;
+
+/// HSA metadata beginning assembler directive.
+constexpr char assemblerDirectiveBegin[] = ".amdgpu_metadata";
+/// HSA metadata ending assembler directive.
+constexpr char assemblerDirectiveEnd[] = ".end_amdgpu_metadata";
+} // end namespace V3
 
 } // end namespace hsamd
 
@@ -449,10 +476,29 @@ std::error_code toString(Metadata HSAMetadata, std::string &String);
 namespace palmd {
 
 /// PAL metadata assembler directive.
-constexpr char AssemblerDirective[] = ".amd_amdgpu_pal_metadata";
+constexpr char assemblerDirective[] = ".amd_amdgpu_pal_metadata";
+
+/// PAL metadata (new MsgPack format) beginning assembler directive.
+constexpr char assemblerDirectiveBegin[] = ".amdgpu_pal_metadata";
+
+/// PAL metadata (new MsgPack format) ending assembler directive.
+constexpr char assemblerDirectiveEnd[] = ".end_amdgpu_pal_metadata";
 
 /// PAL metadata keys.
 enum key : uint32_t {
+   R_2E12_COMPUTE_PGM_RSRC1 = 0x2e12,
+   R_2D4A_SPI_SHADER_PGM_RSRC1_LS = 0x2d4a,
+   R_2D0A_SPI_SHADER_PGM_RSRC1_HS = 0x2d0a,
+   R_2CCA_SPI_SHADER_PGM_RSRC1_ES = 0x2cca,
+   R_2C8A_SPI_SHADER_PGM_RSRC1_GS = 0x2c8a,
+   R_2C4A_SPI_SHADER_PGM_RSRC1_VS = 0x2c4a,
+   R_2C0A_SPI_SHADER_PGM_RSRC1_PS = 0x2c0a,
+   R_2E00_COMPUTE_DISPATCH_INITIATOR = 0x2e00,
+   R_A1B3_SPI_PS_INPUT_ENA = 0xa1b3,
+   R_A1B4_SPI_PS_INPUT_ADDR = 0xa1b4,
+   R_A1B6_SPI_PS_IN_CONTROL = 0xa1b6,
+   R_A2D5_VGT_SHADER_STAGES_EN = 0xa2d5,
+
    LS_NUM_USED_VGPRS = 0x10000021,
    HS_NUM_USED_VGPRS = 0x10000022,
    ES_NUM_USED_VGPRS = 0x10000023,
@@ -477,12 +523,6 @@ enum key : uint32_t {
    PS_SCRATCH_SIZE = 0x10000049,
    CS_SCRATCH_SIZE = 0x1000004a
 };
-
-/// PAL metadata represented as a vector.
-typedef std::vector<uint32_t> Metadata;
-
-/// Converts \p palMetadata to \p String.
-std::error_code toString(const Metadata &palMetadata, std::string &string);
 
 } // end namespace palmd
 } // amdgpu

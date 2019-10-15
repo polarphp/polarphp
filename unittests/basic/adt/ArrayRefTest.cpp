@@ -1,7 +1,14 @@
+//===- llvm/unittest/ADT/ArrayRefTest.cpp - ArrayRef unit tests -----------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -19,6 +26,7 @@
 using polar::basic::ArrayRef;
 using polar::utils::BumpPtrAllocator;
 using polar::basic::make_array_ref;
+using polar::basic::OwningArrayRef;
 
 // Check that the ArrayRef-of-pointer converting constructor only allows adding
 // cv qualifiers (not removing them, or otherwise changing the type)
@@ -42,7 +50,6 @@ static_assert(
 //
 // Disable this check under MSVC; even MSVC 2015 isn't inconsistent between
 // std::is_assignable and actually writing such an assignment.
-#if !defined(_MSC_VER)
 static_assert(
       !std::is_assignable<ArrayRef<int *>, int *>::value,
       "Assigning from single prvalue element");
@@ -55,7 +62,6 @@ static_assert(
 static_assert(
       !std::is_assignable<ArrayRef<int *>, std::initializer_list<int *>>::value,
       "Assigning from an initializer list");
-#endif
 
 TEST(ArrayRefTest, testAllocatorCopy)
 {
@@ -272,3 +278,14 @@ TEST(ArrayRefTest, testMakeArrayRef)
    EXPECT_NE(&arrayRef2Ref, &arrayRef2);
    EXPECT_TRUE(arrayRef2.equals(arrayRef2Ref));
 }
+
+
+TEST(ArrayRefTest, testOwningArrayRef) {
+   static const int A1[] = {0, 1};
+   OwningArrayRef<int> A(make_array_ref(A1));
+   OwningArrayRef<int> B(std::move(A));
+   EXPECT_EQ(A.data(), nullptr);
+}
+
+static_assert(std::is_trivially_copyable<ArrayRef<int>>::value,
+              "trivially copyable");

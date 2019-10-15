@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -21,39 +21,8 @@
 #define __has_feature(x) 0
 #endif
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
-/// IsPodLike - This is a type trait that is used to determine whether a given
-/// type can be copied around with memcpy instead of running ctors etc.
-template <typename T>
-struct IsPodLike {
-   // std::is_trivially_copyable is available in libc++ with clang, libstdc++
-   // that comes with GCC 5.  MSVC 2015 and newer also have
-   // std::is_trivially_copyable.
-#if (__has_feature(is_trivially_copyable) && defined(_LIBCPP_VERSION)) ||      \
-   (defined(__GNUC__) && __GNUC__ >= 5)  || defined(_MSC_VER)
-   // If the compiler supports the is_trivially_copyable trait use it, as it
-   // matches the definition of IsPodLike closely.
-   static const bool value = std::is_trivially_copyable<T>::value;
-#elif __has_feature(is_trivially_copyable)
-   // Use the internal name if the compiler supports is_trivially_copyable but we
-   // don't know if the standard library does. This is the case for clang in
-   // conjunction with libstdc++ from GCC 4.x.
-   static const bool value = __is_trivially_copyable(T);
-#else
-   // If we don't know anything else, we can (at least) assume that all non-class
-   // types are PODs.
-   static const bool value = !std::is_class<T>::value;
-#endif
-};
-
-// std::pair's are pod-like if their elements are.
-template<typename T, typename U>
-struct IsPodLike<std::pair<T, U>>
-{
-   static const bool value = IsPodLike<T>::value && IsPodLike<U>::value;
-};
 
 /// Metafunction that determines whether the given type is either an
 /// integral type or an enumeration type, including enum classes.
@@ -79,9 +48,7 @@ public:
 /// If T is a pointer, just return it. If it is not, return T&.
 template<typename T, typename Enable = void>
 struct add_lvalue_reference_if_not_pointer
-{
-   using type = T &;
-};
+{ using type = T &; };
 
 template <typename T>
 struct add_lvalue_reference_if_not_pointer<
@@ -110,7 +77,6 @@ struct const_pointer_or_const_ref
 {
    using type = const T &;
 };
-
 template <typename T>
 struct const_pointer_or_const_ref<
       T, typename std::enable_if<std::is_pointer<T>::value>::type>
@@ -120,32 +86,38 @@ struct const_pointer_or_const_ref<
 
 namespace internal {
 /// Internal utility to detect trivial copy construction.
-template<typename T> union copy_construction_triviality_helper
+template<typename T>
+union copy_construction_triviality_helper
 {
    T t;
    copy_construction_triviality_helper() = default;
    copy_construction_triviality_helper(const copy_construction_triviality_helper&) = default;
    ~copy_construction_triviality_helper() = default;
 };
-
 /// Internal utility to detect trivial move construction.
-template<typename T> union move_construction_triviality_helper
+template<typename T>
+union move_construction_triviality_helper
 {
    T t;
    move_construction_triviality_helper() = default;
    move_construction_triviality_helper(move_construction_triviality_helper&&) = default;
    ~move_construction_triviality_helper() = default;
 };
-} // end namespace internal
+
+template<class T>
+union trivial_helper
+{
+   T t;
+};
+
+} // end namespace detail
 
 /// An implementation of `std::is_trivially_copy_constructible` since we have
 /// users with STLs that don't yet include it.
 template <typename T>
 struct is_trivially_copy_constructible
       : std::is_copy_constructible<
-      internal::copy_construction_triviality_helper<T>>
-{};
-
+      polar::utils::internal::copy_construction_triviality_helper<T>> {};
 template <typename T>
 struct is_trivially_copy_constructible<T &> : std::true_type {};
 template <typename T>
@@ -156,23 +128,86 @@ struct is_trivially_copy_constructible<T &&> : std::false_type {};
 template <typename T>
 struct is_trivially_move_constructible
       : std::is_move_constructible<
-      ::polar::utils::internal::move_construction_triviality_helper<T>> {};
+      polar::utils::internal::move_construction_triviality_helper<T>> {};
 template <typename T>
 struct is_trivially_move_constructible<T &> : std::true_type {};
 template <typename T>
 struct is_trivially_move_constructible<T &&> : std::true_type {};
 
-template <typename FuncType>
-struct is_function_ptr
-      : std::integral_constant<bool, std::is_pointer<FuncType>::value
-      && std::is_function<
-      typename std::remove_pointer<FuncType>::type
-      >::value>
+
+template <typename T>
+struct is_copy_assignable
 {
+   template<class F>
+   static auto get(F*) -> decltype(std::declval<F &>() = std::declval<const F &>(), std::true_type{});
+   static std::false_type get(...);
+   static constexpr bool value = decltype(get((T*)nullptr))::value;
 };
 
-} // utils
-} // polar
+template <typename T>
+struct is_move_assignable {
+   template<class F>
+   static auto get(F*) -> decltype(std::declval<F &>() = std::declval<F &&>(), std::true_type{});
+   static std::false_type get(...);
+   static constexpr bool value = decltype(get((T*)nullptr))::value;
+};
+
+
+// An implementation of `std::is_trivially_copyable` since STL version
+// is not equally supported by all compilers, especially GCC 4.9.
+// Uniform implementation of this trait is important for ABI compatibility
+// as it has an impact on SmallVector's ABI (among others).
+template <typename T>
+class is_trivially_copyable
+{
+
+   // copy constructors
+   static constexpr bool has_trivial_copy_constructor =
+         std::is_copy_constructible<internal::trivial_helper<T>>::value;
+   static constexpr bool has_deleted_copy_constructor =
+         !std::is_copy_constructible<T>::value;
+
+   // move constructors
+   static constexpr bool has_trivial_move_constructor =
+         std::is_move_constructible<internal::trivial_helper<T>>::value;
+   static constexpr bool has_deleted_move_constructor =
+         !std::is_move_constructible<T>::value;
+
+   // copy assign
+   static constexpr bool has_trivial_copy_assign =
+         is_copy_assignable<internal::trivial_helper<T>>::value;
+   static constexpr bool has_deleted_copy_assign =
+         !is_copy_assignable<T>::value;
+
+   // move assign
+   static constexpr bool has_trivial_move_assign =
+         is_move_assignable<internal::trivial_helper<T>>::value;
+   static constexpr bool has_deleted_move_assign =
+         !is_move_assignable<T>::value;
+
+   // destructor
+   static constexpr bool has_trivial_destructor =
+         std::is_destructible<internal::trivial_helper<T>>::value;
+
+public:
+
+   static constexpr bool value =
+         has_trivial_destructor &&
+         (has_deleted_move_assign || has_trivial_move_assign) &&
+         (has_deleted_move_constructor || has_trivial_move_constructor) &&
+         (has_deleted_copy_assign || has_trivial_copy_assign) &&
+         (has_deleted_copy_constructor || has_trivial_copy_constructor);
+
+#ifdef HAVE_STD_IS_TRIVIALLY_COPYABLE
+   static_assert(value == std::is_trivially_copyable<T>::value,
+                 "inconsistent behavior between llvm:: and std:: implementation of is_trivially_copyable");
+#endif
+};
+template <typename T>
+class is_trivially_copyable<T*> : public std::true_type {
+};
+
+} // polar::utils
 
 // If the compiler supports detecting whether a class is final, define
 // an POLAR_IS_FINAL macro. If it cannot be defined properly, this

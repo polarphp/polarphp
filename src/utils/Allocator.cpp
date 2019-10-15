@@ -1,7 +1,14 @@
+//===--- Allocator.cpp - Simple memory allocation abstraction -------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -12,8 +19,7 @@
 #include "polarphp/utils/Allocator.h"
 #include "polarphp/utils/RawOutStream.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 namespace internal {
 
@@ -37,5 +43,4 @@ void print_recycler_stats(size_t size,
                   << "Number of elements free for recycling: " << freeListSize << '\n';
 }
 
-} // utils
-} // polar
+} // polar::utils

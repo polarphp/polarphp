@@ -1,7 +1,7 @@
 # This source file is part of the polarphp.org open source project
 #
-# Copyright (c) 2017 - 2018 polarphp software foundation
-# Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+# Copyright (c) 2017 - 2019 polarphp software foundation
+# Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
 # See https://polarphp.org/LICENSE.txt for license information
@@ -41,8 +41,7 @@ polar_merge_list(STDLIB_SOURCES STDLIB_VM_BINDER_SOURCES)
 polar_merge_list(STDLIB_SOURCES STDLIB_HEADERS)
 
 polar_add_library(Stdlib SHARED
-   ${STDLIB_SOURCES}
-   LINK_LIBS ZendApi)
+   ${STDLIB_SOURCES})
 
 set_target_properties(
    Stdlib

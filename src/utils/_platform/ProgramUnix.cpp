@@ -1,7 +1,14 @@
+//===- llvm/Support/Unix/Program.cpp -----------------------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -55,8 +62,7 @@ extern char **environ;
 #endif
 #endif
 
-namespace polar {
-namespace sys {
+namespace polar::sys {
 
 using polar::basic::SmallVector;
 using polar::basic::SmallString;
@@ -354,12 +360,16 @@ bool execute(ProcessInfo &processInfo, StringRef program,
 #endif
          }
 
-         // Explicitly initialized to prevent what appears to be a valgrind false
-         // positive.
-         pid_t pid = 0;
-         int error = posix_spawn(&pid, program.getStr().c_str(), fileActions,
-                                 /*attrp*/nullptr, const_cast<char **>(argv),
-                                 const_cast<char **>(envp));
+         constexpr int maxRetries = 8;
+         int retries = 0;
+         pid_t pid;
+         int error;
+         do {
+            pid = 0; // Make Valgrind happy.
+            error = posix_spawn(&pid, program.getStr().c_str(), fileActions,
+                              /*attrp*/ nullptr, const_cast<char **>(argv),
+                              const_cast<char **>(envp));
+         } while (error == EINTR && ++retries < maxRetries);
 
          if (fileActions) {
             posix_spawn_file_actions_destroy(fileActions);
@@ -369,6 +379,7 @@ bool execute(ProcessInfo &processInfo, StringRef program,
             return !make_error_msg(errMsg, "posix_spawn failed", error);
          }
          processInfo.m_pid = pid;
+         processInfo.m_process = pid;
          return true;
       }
    }
@@ -638,5 +649,4 @@ bool commandline_fits_within_system_limits(StringRef program,
    return true;
 }
 
-} // sys
-} // polar
+} // polar::sys

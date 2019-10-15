@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -27,7 +27,21 @@ namespace utils {
 class RawOutStream;
 using polar::basic::SmallVector;
 
+/// Enables dumping a "pretty" stack trace when the program crashes.
+///
+/// \see PrettyStackTraceEntry
 void enable_pretty_stack_trace();
+
+/// Enables (or disables) dumping a "pretty" stack trace when the user sends
+/// SIGINFO or SIGUSR1 to the current process.
+///
+/// This is a per-thread decision so that a program can choose to print stack
+/// traces only on a primary thread, or on all threads that use
+/// PrettyStackTraceEntry.
+///
+/// \see EnablePrettyStackTrace
+/// \see PrettyStackTraceEntry
+void enable_pretty_stack_trace_on_sig_info_for_this_thread(bool shouldEnable = true);
 
 /// PrettyStackTraceEntry - This class is used to represent a frame of the
 /// "pretty" stack trace that is dumped when a program crashes. You can define

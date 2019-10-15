@@ -1,7 +1,14 @@
+//===- llvm/ADT/SmallBitVector.h - 'Normally small' bit vectors -*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -23,8 +30,7 @@
 #include <limits>
 #include <utility>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// This is a 'bitvector' (really, a variable-sized bit array), optimized for
 /// the case when the array is small. It contains one pointer-sized field, which
@@ -98,11 +104,6 @@ public:
    };
 
 private:
-   bool isSmall() const
-   {
-      return m_bitVector & uintptr_t(1);
-   }
-
    BitVector *getPointer() const
    {
       assert(!isSmall());
@@ -208,6 +209,11 @@ public:
       return make_range(setBitsBegin(), setBitsEnd());
    }
 
+   bool isSmall() const
+   {
+      return m_bitVector & uintptr_t(1);
+   }
+
    /// Tests whether there are no bits in this bitvector.
    bool empty() const
    {
@@ -277,7 +283,7 @@ public:
          if (bits == 0) {
             return -1;
          }
-         return NumBaseBits - count_leading_zeros(bits);
+         return NumBaseBits - count_leading_zeros(bits) - 1;
       }
       return getPointer()->findLast();
    }
@@ -302,7 +308,9 @@ public:
             return -1;
          }
          uintptr_t bits = getSmallBits();
-         return NumBaseBits - count_leading_ones(bits);
+         // Set unused bits.
+         bits |= ~uintptr_t(0) << getSmallSize();
+         return NumBaseBits - count_leading_ones(bits) - 1;
       }
       return getPointer()->findLastUnset();
    }
@@ -568,10 +576,16 @@ public:
          return false;
       }
 
-      if (isSmall()) {
+      if (isSmall() && other.isSmall()) {
          return getSmallBits() == other.getSmallBits();
-      } else {
+      } else if (!isSmall() && !other.isSmall()) {
          return *getPointer() == *other.getPointer();
+      } else {
+         for (size_t i = 0, e = size(); i != e; ++i) {
+            if ((*this)[i] != other[i])
+               return false;
+         }
+         return true;
       }
    }
 
@@ -581,17 +595,23 @@ public:
    }
 
    // Intersection, union, disjoint union.
+   // FIXME BitVector::operator&= does not resize the other but this does
    SmallBitVector &operator&=(const SmallBitVector &other)
    {
       resize(std::max(size(), other.size()));
-      if (isSmall()) {
+      if (isSmall() && other.isSmall()) {
          setSmallBits(getSmallBits() & other.getSmallBits());
-      } else if (!other.isSmall()) {
+      } else if (!isSmall() && !other.isSmall()) {
          getPointer()->operator&=(*other.getPointer());
       } else {
-         SmallBitVector copy = other;
-         copy.resize(size());
-         getPointer()->operator&=(*copy.getPointer());
+         size_t i, e;
+         for (i = 0, e = std::min(size(), other.size()); i != e; ++i) {
+            (*this)[i] = test(i) && other.test(i);
+         }
+         for (e = size(); i != e; ++i) {
+            reset(i);
+         }
+
       }
       return *this;
    }
@@ -641,14 +661,14 @@ public:
    SmallBitVector &operator|=(const SmallBitVector &other)
    {
       resize(std::max(size(), other.size()));
-      if (isSmall()) {
+      if (isSmall() && other.isSmall()) {
          setSmallBits(getSmallBits() | other.getSmallBits());
-      } else if (!other.isSmall()) {
+      } else if (!isSmall() && !other.isSmall()) {
          getPointer()->operator|=(*other.getPointer());
       } else {
-         SmallBitVector copy = other;
-         copy.resize(size());
-         getPointer()->operator|=(*copy.getPointer());
+         for (size_t i = 0, e = other.size(); i != e; ++i) {
+            (*this)[i] = test(i) || other.test(i);
+         }
       }
       return *this;
    }
@@ -656,14 +676,14 @@ public:
    SmallBitVector &operator^=(const SmallBitVector &other)
    {
       resize(std::max(size(), other.size()));
-      if (isSmall())
+      if (isSmall() && other.isSmall())
          setSmallBits(getSmallBits() ^ other.getSmallBits());
-      else if (!other.isSmall())
+      else if (!isSmall() && !other.isSmall())
          getPointer()->operator^=(*other.getPointer());
       else {
-         SmallBitVector copy = other;
-         copy.resize(size());
-         getPointer()->operator^=(*copy.getPointer());
+         for (size_t i = 0, e = other.size(); i != e; ++i) {
+             (*this)[i] = test(i) != other.test(i);
+         }
       }
       return *this;
    }
@@ -810,8 +830,7 @@ operator^(const SmallBitVector &lhs, const SmallBitVector &other)
    return result;
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 namespace std {
 

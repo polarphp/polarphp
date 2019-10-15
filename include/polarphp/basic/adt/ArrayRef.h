@@ -1,7 +1,14 @@
+//===- ArrayRef.h - Array Reference Wrapper ---------------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -25,8 +32,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// ArrayRef - Represent a constant reference to an array (0 or more elements
 /// consecutively in memory), i.e. a start pointer and a length.  It allows
@@ -176,8 +182,19 @@ public:
       return m_data;
    }
 
+   const T *data() const
+   {
+      return m_data;
+   }
+
    /// size - Get the array size.
    size_t getSize() const
+   {
+      return m_length;
+   }
+
+   /// size - Get the array size.
+   size_t size() const
    {
       return m_length;
    }
@@ -246,11 +263,22 @@ public:
       return slice(size, getSize() - size);
    }
 
+   /// \brief Drop the first \p N elements of the array.
+   ArrayRef<T> drop_front(size_t size = 1) const
+   {
+      return dropFront(size);
+   }
+
    /// \brief Drop the last \p N elements of the array.
    ArrayRef<T> dropBack(size_t size = 1) const
    {
       assert(getSize() >= size && "Dropping more elements than exist");
       return slice(0, getSize() - size);
+   }
+
+   ArrayRef<T> drop_back(size_t size = 1) const
+   {
+      return dropBack(size);
    }
 
    /// \brief Return a copy of *this with the first N elements satisfying the
@@ -413,6 +441,11 @@ public:
       return const_cast<T*>(ArrayRef<T>::getData());
    }
 
+   T *data() const
+   {
+      return const_cast<T*>(ArrayRef<T>::getData());
+   }
+
    iterator begin() const
    {
       return getData();
@@ -551,7 +584,7 @@ public:
 
    OwningArrayRef(OwningArrayRef &&other)
    {
-      *this = other;
+      *this = std::move(other);
    }
 
    OwningArrayRef &operator=(OwningArrayRef &&other)
@@ -664,16 +697,9 @@ inline bool operator!=(ArrayRef<T> lhs, ArrayRef<T> rhs)
 
 /// @}
 
-} // basic
+} // polar::basic
 
-namespace utils {
-
-// ArrayRefs can be treated like a POD type.
-template <typename T> struct IsPodLike;
-template <typename T> struct IsPodLike<polar::basic::ArrayRef<T>>
-{
-   static const bool value = true;
-};
+namespace polar::utils {
 
 template <typename T>
 polar::basic::HashCode hash_value(polar::basic::ArrayRef<T> array)
@@ -681,7 +707,6 @@ polar::basic::HashCode hash_value(polar::basic::ArrayRef<T> array)
    return polar::basic::hash_combine_range(array.begin(), array.end());
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_BASIC_ADT_ARRAY_REF_H

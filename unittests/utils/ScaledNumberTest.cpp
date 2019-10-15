@@ -1,11 +1,18 @@
+//===- llvm/unittest/Support/ScaledNumberTest.cpp - ScaledPair tests -----==//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarPHP software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarPHP project authors
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/07/15.
 
@@ -581,5 +588,8 @@ TEST(ScaledNumberHelpersTest, testToIntBug)
    ScaledNumber<uint32_t> n(1, 0);
    EXPECT_EQ(1u, (n * n).toInt<uint32_t>());
 }
+
+static_assert(std::is_trivially_copyable<ScaledNumber<uint32_t>>::value,
+              "trivially copyable");
 
 } // anonymous namespace

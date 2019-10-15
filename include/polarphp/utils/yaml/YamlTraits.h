@@ -1,11 +1,18 @@
+//===- llvm/Support/YAMLTraits.h --------------------------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarPHP software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORstr.txt for the list of polarPHP project authors
+// See https://polarphp.org/CONTRIBUTORstr.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/06/27.
 
@@ -39,8 +46,7 @@
 #include <regex>
 #include <optional>
 
-namespace polar {
-namespace yaml {
+namespace polar::yaml {
 
 using polar::basic::is_alnum;
 using polar::utils::RawStringOutStream;
@@ -118,7 +124,7 @@ struct MappingContextTraits
 ///           io.enumCase(value, "green", cGreen);
 ///         }
 ///       };
-template <typename T>
+template <typename T, typename Enable = void>
 struct ScalarEnumerationTraits
 {
    // Must provide:
@@ -136,7 +142,7 @@ struct ScalarEnumerationTraits
 ///          io.bitSetCase(value, "round", flagRound);
 ///        }
 ///      };
-template <typename T>
+template <typename T, typename Enable = void>
 struct ScalarBitSetTraits
 {
    // Must provide:
@@ -164,7 +170,7 @@ enum class QuotingType { None, Single, Double };
 ///      }
 ///      static QuotingType mustQuote(StringRef) { return QuotingType::Single; }
 ///    };
-template <typename T>
+template <typename T, typename Enable = void>
 struct ScalarTraits
 {
    // Must provide:
@@ -771,7 +777,7 @@ inline QuotingType needs_quotes(StringRef str)
 }
 
 template <typename T, typename Context>
-struct missingTraits
+struct MissingTraits
       : public std::integral_constant<bool,
       !HasScalarEnumerationTraits<T>::value &&
       !HasScalarBitSetTraits<T>::value &&
@@ -786,14 +792,14 @@ struct missingTraits
 {};
 
 template <typename T, typename Context>
-struct validatedMappingTraits
+struct ValidatedMappingTraits
       : public std::integral_constant<
       bool, HasMappingTraits<T, Context>::value &&
       HasMappingValidateTraits<T, Context>::value>
 {};
 
 template <typename T, typename Context>
-struct unvalidatedMappingTraits
+struct UnvalidatedMappingTraits
       : public std::integral_constant<
       bool, HasMappingTraits<T, Context>::value &&
       !HasMappingValidateTraits<T, Context>::value>
@@ -932,8 +938,8 @@ public:
       mapOptionalWithContext(key, value, context);
    }
 
-   template <typename T>
-   void mapOptional(const char *key, T &value, const T &defaultValue)
+   template <typename T, typename DefaultT>
+   void mapOptional(const char *key, T &value, const DefaultT &defaultValue)
    {
       EmptyContext context;
       mapOptionalWithContext(key, value, defaultValue, context);
@@ -964,11 +970,14 @@ public:
       this->processKey(Key, value, false, context);
    }
 
-   template <typename T, typename Context>
-   void mapOptionalWithContext(const char *key, T &value, const T &defaultValue,
+   template <typename T, typename Context, typename DefaultT>
+   void mapOptionalWithContext(const char *key, T &value, const DefaultT &defaultValue,
                                Context &context)
    {
-      this->processKeyWithDefault(key, value, defaultValue, false, context);
+      static_assert(std::is_convertible<DefaultT, T>::value,
+                    "Default type must be implicitly convertible to value type!");
+      this->processKeyWithDefault(key, value, static_cast<const T &>(defaultValue),
+                                  false, context);
    }
 
 private:
@@ -1063,7 +1072,7 @@ yamlize(IO &io, T &value, bool, EmptyContext &)
    bool doClear;
    if (io.beginBitSetScalar(doClear)) {
       if (doClear) {
-         value = static_cast<T>(0);
+         value = T();
       }
       ScalarBitSetTraits<T>::bitset(io, value);
       io.endBitSetScalar();
@@ -1139,7 +1148,7 @@ yamlize(IO &io, T &value, bool, EmptyContext &)
 }
 
 template <typename T, typename Context>
-typename std::enable_if<validatedMappingTraits<T, Context>::value, void>::type
+typename std::enable_if<ValidatedMappingTraits<T, Context>::value, void>::type
 yamlize(IO &io, T &value, bool, Context &context)
 {
    if (HasFlowTraits<MappingTraits<T>>::value) {
@@ -1169,7 +1178,7 @@ yamlize(IO &io, T &value, bool, Context &context)
 }
 
 template <typename T, typename Context>
-typename std::enable_if<unvalidatedMappingTraits<T, Context>::value, void>::type
+typename std::enable_if<UnvalidatedMappingTraits<T, Context>::value, void>::type
 yamlize(IO &io, T &value, bool, Context &context)
 {
    if (HasFlowTraits<MappingTraits<T>>::value) {
@@ -1215,7 +1224,7 @@ yamlize(IO &io, T &value, bool, EmptyContext &ctx)
 }
 
 template <typename T>
-typename std::enable_if<missingTraits<T, EmptyContext>::value, void>::type
+typename std::enable_if<MissingTraits<T, EmptyContext>::value, void>::type
 yamlize(IO &, T &, bool, EmptyContext &)
 {
    char missing_yaml_trait_for_type[sizeof(MissingTrait<T>)];
@@ -1391,12 +1400,13 @@ struct ScalarTraits<double> {
    }
 };
 
-// For endian types, we just use the existing ScalarTraits for the underlying
-// type.  This way endian aware types are supported whenever a ScalarTraits
-// is defined for the underlying type.
+// For endian types, we use existing scalar Traits class for the underlying
+// type.  This way endian aware types are supported whenever the traits are
+// defined for the underlying type.
 template <typename value_type, polar::utils::Endianness defaultEndian, size_t alignment>
 struct ScalarTraits<PackedEndianSpecificIntegral<
-      value_type, defaultEndian, alignment>>
+      value_type, defaultEndian, alignment>,
+      typename std::enable_if<HasScalarTraits<value_type>::value>::type>
 {
    using EndianType =
    PackedEndianSpecificIntegral<value_type, defaultEndian,
@@ -1418,6 +1428,42 @@ struct ScalarTraits<PackedEndianSpecificIntegral<
    static QuotingType mustQuote(StringRef str)
    {
       return ScalarTraits<value_type>::mustQuote(str);
+   }
+};
+
+template <typename value_type, polar::utils::Endianness endian, size_t alignment>
+struct ScalarEnumerationTraits<
+      PackedEndianSpecificIntegral<value_type, endian,
+      alignment>,
+      typename std::enable_if<
+      HasScalarEnumerationTraits<value_type>::value>::type>
+{
+   using EndianType =
+   PackedEndianSpecificIntegral<value_type, endian,
+   alignment>;
+
+   static void enumeration(IO &io, EndianType &endianValue)
+   {
+      value_type value = endianValue;
+      ScalarEnumerationTraits<value_type>::enumeration(io, value);
+      endianValue = value;
+   }
+};
+
+template <typename value_type, polar::utils::Endianness endian, size_t alignment>
+struct ScalarBitSetTraits<
+      PackedEndianSpecificIntegral<value_type, endian,
+      alignment>,
+      typename std::enable_if<HasScalarBitSetTraits<value_type>::value>::type>
+{
+   using EndianType =
+   PackedEndianSpecificIntegral<value_type, endian,
+   alignment>;
+   static void bitset(IO &io, EndianType &endianValue)
+   {
+      value_type value = endianValue;
+      ScalarBitSetTraits<value_type>::bitset(io, value);
+      endianValue = value;
    }
 };
 
@@ -1574,7 +1620,7 @@ private:
       {}
       virtual ~HNode() = default;
 
-      static bool classof(const HNode *)
+      static bool classOf(const HNode *)
       {
          return true;
       }
@@ -1590,12 +1636,12 @@ private:
       EmptyHNode(Node *node) : HNode(node)
       {}
 
-      static bool classof(const HNode *node)
+      static bool classOf(const HNode *node)
       {
-         return NullNode::classof(node->m_node);
+         return NullNode::classOf(node->m_node);
       }
 
-      static bool classof(const EmptyHNode *)
+      static bool classOf(const EmptyHNode *)
       {
          return true;
       }
@@ -1611,13 +1657,13 @@ private:
 
       StringRef value() const { return m_value; }
 
-      static bool classof(const HNode *node)
+      static bool classOf(const HNode *node)
       {
-         return ScalarNode::classof(node->m_node) ||
-               BlockScalarNode::classof(node->m_node);
+         return ScalarNode::classOf(node->m_node) ||
+               BlockScalarNode::classOf(node->m_node);
       }
 
-      static bool classof(const ScalarHNode *)
+      static bool classOf(const ScalarHNode *)
       {
          return true;
       }
@@ -1634,12 +1680,12 @@ private:
       MapHNode(Node *node) : HNode(node)
       {}
 
-      static bool classof(const HNode *node)
+      static bool classOf(const HNode *node)
       {
-         return MappingNode::classof(node->m_node);
+         return MappingNode::classOf(node->m_node);
       }
 
-      static bool classof(const MapHNode *)
+      static bool classOf(const MapHNode *)
       {
          return true;
       }
@@ -1658,12 +1704,12 @@ private:
       SequenceHNode(Node *node) : HNode(node)
       {}
 
-      static bool classof(const HNode *node)
+      static bool classOf(const HNode *node)
       {
-         return SequenceNode::classof(node->m_node);
+         return SequenceNode::classOf(node->m_node);
       }
 
-      static bool classof(const SequenceHNode *)
+      static bool classOf(const SequenceHNode *)
       {
          return true;
       }
@@ -1788,8 +1834,9 @@ private:
    bool m_needBitValueComma = false;
    bool m_needFlowSequenceComma = false;
    bool m_enumerationMatchFound = false;
-   bool m_needsNewLine = false;
    bool m_writeDefaultValues = false;
+   StringRef m_padding;
+   StringRef m_paddingBeforeContainer;
 };
 
 /// YAML I/O does conversion based on types. But often native data types
@@ -1939,7 +1986,7 @@ operator>>(Input &input, T &value)
 
 // Provide better error message about types missing a trait specialization
 template <typename T>
-inline typename std::enable_if<missingTraits<T, EmptyContext>::value,
+inline typename std::enable_if<MissingTraits<T, EmptyContext>::value,
 Input &>::type
 operator>>(Input &yin, T &docSeq)
 {
@@ -2052,7 +2099,7 @@ operator<<(Output &out, T &value)
 
 // Provide better error message about types missing a trait specialization
 template <typename T>
-inline typename std::enable_if<missingTraits<T, EmptyContext>::value,
+inline typename std::enable_if<MissingTraits<T, EmptyContext>::value,
 Output &>::type
 operator<<(Output &yout, T &seq)
 {
@@ -2114,6 +2161,13 @@ struct SequenceTraits<SmallVector<T, N>,
       : SequenceTraitsImpl<SmallVector<T, N>, SequenceElementTraits<T>::sm_flow>
 {};
 
+template <typename T>
+struct SequenceTraits<SmallVectorImpl<T>,
+                      typename std::enable_if<CheckIsBool<
+                          SequenceElementTraits<T>::sm_flow>::value>::type>
+    : SequenceTraitsImpl<SmallVectorImpl<T>, SequenceElementTraits<T>::sm_flow>
+{};
+
 // Sequences of fundamental types use sm_flow formatting.
 template <typename T>
 struct SequenceElementTraits<
@@ -2159,8 +2213,7 @@ struct StdMapStringCustomMappingTraitsImpl
    }
 };
 
-} // yaml
-} // polar
+} // polar::yaml
 
 #define POLAR_YAML_IS_SEQUENCE_VECTOR_IMPL(TYPE, FLOW)                          \
    namespace polar {                                                             \

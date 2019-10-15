@@ -1,7 +1,14 @@
+//===-- Path.cpp - Implement OS Path Concept ------------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -37,8 +44,7 @@ enum FSEntity
    FS_Name
 };
 
-namespace polar {
-namespace fs {
+namespace polar::fs {
 
 using polar::basic::StringRef;
 using polar::utils::error_code_to_error;
@@ -188,41 +194,15 @@ size_t parent_path_end(StringRef path, Style style)
 std::error_code create_unique_entity(const Twine &model, int &resultFD,
                                      SmallVectorImpl<char> &resultPath, bool makeAbsolute,
                                      unsigned mode, FSEntity type,
-                                     polar::fs::OpenFlags flags = polar::fs::F_None) {
-   SmallString<128> modelStorage;
-   model.toVector(modelStorage);
-
-   if (makeAbsolute) {
-      // Make model absolute by prepending a temp directory if it's not already.
-      if (!path::is_absolute(Twine(modelStorage))) {
-         SmallString<128> tdir;
-         path::system_temp_directory(true, tdir);
-         path::append(tdir, Twine(modelStorage));
-         modelStorage.swap(tdir);
-      }
-   }
-
-   // From here on, DO NOT modify model. It may be needed if the randomly chosen
-   // path already exists.
-   resultPath = modelStorage;
-   // Null terminate.
-   resultPath.push_back(0);
-   resultPath.pop_back();
-
+                                     polar::fs::OpenFlags flags = polar::fs::F_None)
+{
    // Limit the number of attempts we make, so that we don't infinite loop. E.g.
    // "permission denied" could be for a specific file (so we retry with a
    // different name) or for the whole directory (retry would always fail).
    // Checking which is racy, so we try a number of times, then give up.
    std::error_code errorCode;
    for (int retries = 128; retries > 0; --retries) {
-      // Replace '%' with random chars.
-      for (unsigned i = 0, e = modelStorage.size(); i != e; ++i) {
-         if (modelStorage[i] == '%') {
-            resultPath[i] =
-                  "0123456789abcdef"[sys::Process::getRandomNumber() & 15];
-         }
-      }
-
+      fs::create_unique_path(model, resultPath, makeAbsolute);
       // Try to open + create the file.
       switch (type) {
       case FS_File: {
@@ -349,7 +329,8 @@ ReverseIterator rbegin(StringRef path, Style style)
    iter.m_path = path;
    iter.m_position = path.getSize();
    iter.m_style = style;
-   return ++iter;
+   ++iter;
+   return iter;
 }
 
 ReverseIterator rend(StringRef path)
@@ -830,6 +811,34 @@ std::error_code get_unique_id(const Twine path, UniqueId &result)
    return std::error_code();
 }
 
+void create_unique_path(const Twine &mode, SmallVectorImpl<char> &resultPath,
+                        bool makeAbsolute)
+{
+   SmallString<128> modelStorage;
+   mode.toVector(modelStorage);
+
+   if (makeAbsolute) {
+      // Make model absolute by prepending a temp directory if it's not already.
+      if (!path::is_absolute(Twine(modelStorage))) {
+         SmallString<128> tempDir;
+         path::system_temp_directory(true, tempDir);
+         path::append(tempDir, Twine(modelStorage));
+         modelStorage.swap(tempDir);
+      }
+   }
+
+   resultPath = modelStorage;
+   resultPath.push_back(0);
+   resultPath.pop_back();
+
+   // Replace '%' with random chars.
+   for (unsigned i = 0, e = modelStorage.size(); i != e; ++i) {
+      if (modelStorage[i] == '%') {
+         resultPath[i] = "0123456789abcdef"[Process::getRandomNumber() & 15];
+      }
+   }
+}
+
 std::error_code create_unique_file(const Twine &model, int &resultFd,
                                    SmallVectorImpl<char> &resultPath,
                                    unsigned mode)
@@ -910,9 +919,8 @@ std::error_code create_unique_directory(const Twine &prefix,
                                true, 0, FS_Dir);
 }
 
-static std::error_code make_absolute(const Twine &currentDirectory,
-                                     SmallVectorImpl<char> &path,
-                                     bool useCurrentDirectory)
+void make_absolute(const Twine &currentDirectory,
+                   SmallVectorImpl<char> &path)
 {
    StringRef p(path.getData(), path.getSize());
 
@@ -922,23 +930,19 @@ static std::error_code make_absolute(const Twine &currentDirectory,
 
    // Already absolute.
    if (rootName && rootDirectory) {
-      return std::error_code();
+      return;
    }
 
    // All of the following conditions will need the current directory.
    SmallString<128> currentDir;
-   if (useCurrentDirectory) {
-      currentDirectory.toVector(currentDir);
-   } else if (std::error_code ec = current_path(currentDir)) {
-      return ec;
-   }
+   currentDirectory.toVector(currentDir);
    // Relative path. Prepend the current directory.
    if (!rootName && !rootDirectory) {
       // Append path to the current directory.
       path::append(currentDir, p);
       // Set path to the result.
       path.swap(currentDir);
-      return std::error_code();
+      return;
    }
 
    if (!rootName && rootDirectory) {
@@ -947,7 +951,7 @@ static std::error_code make_absolute(const Twine &currentDirectory,
       path::append(curDirRootName, p);
       // Set path to the result.
       path.swap(curDirRootName);
-      return std::error_code();
+      return;
    }
 
    if (rootName && !rootDirectory) {
@@ -959,22 +963,24 @@ static std::error_code make_absolute(const Twine &currentDirectory,
       SmallString<128> res;
       path::append(res, pRootName, bRootDirectory, bRelativePath, pRelativePath);
       path.swap(res);
-      return std::error_code();
+      return;
    }
 
    polar_unreachable("All rootName and rootDirectory combinations should have "
                      "occurred above!");
 }
 
-std::error_code make_absolute(const Twine &currentDirectory,
-                              SmallVectorImpl<char> &path)
-{
-   return make_absolute(currentDirectory, path, true);
-}
-
 std::error_code make_absolute(SmallVectorImpl<char> &path)
 {
-   return make_absolute(Twine(), path, false);
+   if (path::is_absolute(path)) {
+      return {};
+   }
+   SmallString<128> currentDir;
+   if (std::error_code ec = current_path(currentDir)) {
+      return ec;
+   }
+   make_absolute(currentDir, path);
+   return {};
 }
 
 std::error_code create_directories(const Twine &path, bool ignoreExisting,
@@ -1030,7 +1036,9 @@ static std::error_code copy_file_internal(int readFD, int writeFD) {
 }
 } // anonymous namespace
 
-std::error_code copy_file(const Twine &from, const Twine &to) {
+#ifndef __APPLE__
+std::error_code copy_file(const Twine &from, const Twine &to)
+{
    int readFD, writeFD;
    if (std::error_code errorCode = open_file_for_read(from, readFD, OF_None)) {
       return errorCode;
@@ -1045,6 +1053,7 @@ std::error_code copy_file(const Twine &from, const Twine &to) {
    close(writeFD);
    return errorCode;
 }
+#endif
 
 std::error_code copy_file(const Twine &from, int toFD)
 {
@@ -1191,7 +1200,7 @@ void DirectoryEntry::replaceFilename(const Twine &filename, FileType type,
 }
 
 TempFile::TempFile(StringRef name, int fd)
-   : m_tmpName(name), m_fd(fd)
+   : m_tmpName(name), fd(fd)
 {}
 
 TempFile::TempFile(TempFile &&other)
@@ -1202,8 +1211,9 @@ TempFile::TempFile(TempFile &&other)
 TempFile &TempFile::operator=(TempFile &&other)
 {
    m_tmpName = std::move(other.m_tmpName);
-   m_fd = other.m_fd;
+   fd = other.fd;
    other.m_done = true;
+   other.fd = -1;
    return *this;
 }
 
@@ -1215,25 +1225,28 @@ TempFile::~TempFile()
 Error TempFile::discard()
 {
    m_done = true;
-   std::error_code removeErrorCode;
-   // On windows closing will remove the file.
-#ifndef _WIN32
-   // Always try to close and remove.
-   if (!m_tmpName.empty()) {
-      removeErrorCode = fs::remove(m_tmpName);
-      polar::utils::dont_remove_file_on_signal(m_tmpName);
-   }
-#endif
-
-   if (!removeErrorCode){
-      m_tmpName = "";
-   }
-   if (m_fd != -1 && close(m_fd) == -1) {
+   if (fd != -1 && close(fd) == -1) {
       std::error_code errorCode = std::error_code(errno, std::generic_category());
       return error_code_to_error(errorCode);
    }
-   m_fd = -1;
+   fd = -1;
+
+#ifdef _WIN32
+   // On windows closing will remove the file.
+   m_tmpName = "";
+   return Error::getSuccess();
+#else
+   // Always try to close and remove.
+   std::error_code removeErrorCode;
+   if (!m_tmpName.empty()) {
+      removeErrorCode = fs::remove(m_tmpName);
+      utils::dont_remove_file_on_signal(m_tmpName);
+      if (!removeErrorCode) {
+         m_tmpName = "";
+      }
+   }
    return error_code_to_error(removeErrorCode);
+#endif
 }
 
 Error TempFile::keep(const Twine &name)
@@ -1245,11 +1258,11 @@ Error TempFile::keep(const Twine &name)
    // If we cant't cancel the delete don't rename.
    std::error_code renameErrorCode = cancel_delete_on_close(fd);
    if (!renameErrorCode) {
-      renameErrorCode = rename_fd(m_fd, name);
+      renameErrorCode = rename_fd(fd, name);
    }
    // If we can't rename, discard the temporary file.
    if (renameErrorCode) {
-      remove_fd(m_fd);
+      remove_fd(fd);
    }
 
 #else
@@ -1264,11 +1277,11 @@ Error TempFile::keep(const Twine &name)
    if (!renameErrorCode) {
       m_tmpName = "";
    }
-   if (close(m_fd) == -1) {
+   if (close(fd) == -1) {
       std::error_code errorCode(errno, std::generic_category());
       return error_code_to_error(errorCode);
    }
-   m_fd = -1;
+   fd = -1;
    return error_code_to_error(renameErrorCode);
 }
 
@@ -1278,7 +1291,7 @@ Error TempFile::keep()
    m_done = true;
 
 #ifdef _WIN32
-   if (std::error_code errorCode = cancel_delete_on_close(m_fd)) {
+   if (std::error_code errorCode = cancel_delete_on_close(fd)) {
       return error_code_to_error(errorCode);
    }
 #else
@@ -1287,11 +1300,11 @@ Error TempFile::keep()
 
    m_tmpName = "";
 
-   if (close(m_fd) == -1) {
+   if (close(fd) == -1) {
       std::error_code errorCode(errno, std::generic_category());
       return error_code_to_error(errorCode);
    }
-   m_fd = -1;
+   fd = -1;
 
    return Error::getSuccess();
 }
@@ -1316,5 +1329,4 @@ Expected<TempFile> TempFile::create(const Twine &model, unsigned mode)
    return std::move(ret);
 }
 
-} // fs
-} // polar
+} // polar::fs

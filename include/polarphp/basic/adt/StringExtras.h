@@ -1,7 +1,14 @@
+//===- llvm/ADT/STLExtras.h - Useful STL related functions ------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -24,14 +31,12 @@
 #include <vector>
 #include <array>
 
-namespace polar {
-
+namespace polar::utils {
 // forward declare with namespace
-namespace utils {
 class RawOutStream;
-}
+} // polar::utils
 
-namespace basic {
+namespace polar::basic {
 
 template<typename T>
 class SmallVectorImpl;
@@ -633,7 +638,18 @@ string_consume_integer(std::string_view &str, unsigned radix, T &result)
    return false;
 }
 
-} // basic
-} // polar
+template <typename T,
+          typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+const T &sprintable(const T &value)
+{
+   return value;
+}
+
+inline const char *sprintable(StringRef str)
+{
+   return str.data();
+}
+
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_STRING_EXTRAS_H

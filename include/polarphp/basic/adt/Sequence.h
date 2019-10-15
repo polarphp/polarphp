@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -18,8 +18,7 @@
 #include <iterator>
 #include <utility>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 namespace internal {
 
@@ -90,7 +89,6 @@ IteratorRange<internal::ValueSequenceIterator<ValueT>> seq(ValueT begin,
                      internal::ValueSequenceIterator<ValueT>(end));
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_SEQUENCE_H

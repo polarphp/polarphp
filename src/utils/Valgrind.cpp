@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -24,8 +24,7 @@
 
 #if HAVE_VALGRIND_VALGRIND_H
 #include <valgrind/valgrind.h>
-namespace polar {
-namespace sys {
+namespace polar::sys {
 
 namespace {
 
@@ -57,12 +56,11 @@ void valgrind_discard_translations(const void *addr, size_t len)
    }
    VALGRIND_DISCARD_TRANSLATIONS(addr, len);
 }
-} // sys
-} // polar
+
+} // polar::sys
 #else  // !HAVE_VALGRIND_VALGRIND_H
 
-namespace polar {
-namespace sys {
+namespace polar::sys {
 
 bool running_on_valgrind()
 {
@@ -72,7 +70,6 @@ bool running_on_valgrind()
 void valgrind_discard_translations(const void *addr, size_t len)
 {}
 
-} // sys
-} // polar
+} // polar::sys
 
 #endif

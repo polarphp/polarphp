@@ -1,7 +1,14 @@
+//===- llvm/Support/Unix/Host.inc -------------------------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -22,8 +29,7 @@
 #include <string>
 #include <sys/utsname.h>
 
-namespace polar {
-namespace sys {
+namespace polar::sys {
 
 using polar::basic::Triple;
 
@@ -53,6 +59,23 @@ std::string update_triple_os_version(std::string targetTripleString)
       targetTripleString += "-darwin";
       targetTripleString += get_os_version();
    }
+   // On AIX, the AIX version and release should be that of the current host
+   // unless if the version has already been specified.
+   if (Triple(POLAR_HOST_TRIPLE).getOS() == Triple::OSType::AIX) {
+      Triple tempTriple(targetTripleString);
+      if (tempTriple.getOS() == Triple::OSType::AIX && !tempTriple.getOSMajorVersion()) {
+         struct utsname name;
+         if (uname(&name) != -1) {
+            std::string newOsName = Triple::getOSTypeName(Triple::OSType::AIX);
+            newOsName += name.version;
+            newOsName += '.';
+            newOsName += name.release;
+            newOsName += ".0.0";
+            tempTriple.setOSName(newOsName);
+            return tempTriple.getStr();
+         }
+      }
+   }
    return targetTripleString;
 }
 
@@ -72,5 +95,4 @@ std::string get_default_target_triple()
    return Triple::normalize(targetTripleString);
 }
 
-} // sys
-} // polar
+} // polar::sys

@@ -1,1 +1,1 @@
-The cpp version of swift gyp tool
+The php version of swift gyp tool

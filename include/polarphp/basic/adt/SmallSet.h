@@ -1,7 +1,14 @@
+//===- llvm/ADT/SmallSet.h - 'Normally small' sets --------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -20,16 +27,15 @@
 #include <set>
 #include <utility>
 
-namespace polar {
-namespace basic {
-
+namespace polar::basic {
 
 /// SmallSetIterator - This class implements a const_iterator for SmallSet by
 /// delegating to the underlying SmallVector or Set iterators.
 template <typename T, unsigned N, typename C>
 class SmallSetIterator
       : public IteratorFacadeBase<SmallSetIterator<T, N, C>,
-      std::forward_iterator_tag, T> {
+      std::forward_iterator_tag, T>
+{
 private:
    using SetIterType = typename std::set<T, C>::const_iterator;
    using VecIterType = typename SmallVector<T, N>::const_iterator;
@@ -299,7 +305,6 @@ template <typename PointeeType, unsigned N>
 class SmallSet<PointeeType*, N> : public SmallPtrSet<PointeeType*, N>
 {};
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_SMALL_SET_H

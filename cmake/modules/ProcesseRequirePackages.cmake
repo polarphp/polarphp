@@ -1,7 +1,7 @@
 # This source file is part of the polarphp.org open source project
 #
-# Copyright (c) 2017 - 2018 polarphp software foundation
-# Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+# Copyright (c) 2017 - 2019 polarphp software foundation
+# Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
 # See https://polarphp.org/LICENSE.txt for license information
@@ -36,7 +36,7 @@ endif()
 
 if (NOT EXISTS ${POLAR_SOURCE_DIR}/Zend/zend_language_parser.h OR NOT EXISTS ${POLAR_SOURCE_DIR}/Zend/zend_language_parser.c)
    if (NOT RE2C_FOUND)
-      message(FATAL_ERROR "re2c is required to build PHP/Zend when building a GIT checkout!")
+      message(FATAL_ERROR "re2c is required to build polarphp")
    endif()
 endif()
 
@@ -44,21 +44,28 @@ find_package(BISON)
 if (BISON_FOUND)
    message("using bison version: ${BISON_VERSION}")
 else()
-   if (NOT EXISTS ${POLAR_SOURCE_DIR}/Zend/zend_language_parser.h OR
-         NOT EXISTS ${POLAR_SOURCE_DIR}/Zend/zend_language_parser.c)
-      message(FATAL_ERROR "bison is required to build PHP/Zend when building a GIT checkout!")
-   endif()
+   message(FATAL_ERROR "bison is required to build polarphp")
+endif()
+
+find_package(PHP)
+if (PHP_FOUND)
+   message("using php interpreter version: ${PHP_VERSION_STRING}")
+else()
+   message(FATAL_ERROR "php interpreter is required to build polarphp")
 endif()
 
 polar_check_prog_awk()
 find_program(POLAR_PROG_SED sed)
 if (NOT POLAR_PROG_SED)
-   message(FATAL_ERROR "sed required by php building")
+   message(FATAL_ERROR "sed required by polarphp")
 endif()
 
 find_package(UUID)
+if (NOT UUID_FOUND)
+   message(FATAL_ERROR "uuid required by polarphp")
+endif()
 
-if (POLAR_INCLUDE_TESTS)
+if (POLAR_BUILD_TESTS)
    find_package(Curses REQUIRED)
 endif()
 

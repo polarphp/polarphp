@@ -1,7 +1,13 @@
+//===- DeltaAlgorithm.h - A Set Minimization Algorithm ---------*- C++ -*--===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// copyright (c) 2017 - 2018 polarphp software foundation
-// copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// copyright (c) 2017 - 2019 polarphp software foundation
+// copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -38,8 +44,7 @@
 #include <set>
 #include <vector>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// DeltaAlgorithm - Implements the delta debugging algorithm (A. Zeller '99)
 /// for minimizing arbitrary sets using a predicate function.
@@ -117,7 +122,6 @@ public:
    ChangeSetType run(const ChangeSetType &changes);
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_DELTAALGORITHM_H

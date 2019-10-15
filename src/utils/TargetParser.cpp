@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -77,7 +77,7 @@ constexpr GPUInfo sg_r600GPUs[26] =
 
 // This table should be sorted by the value of GPUKind
 // Don't bother listing the implicitly true features
-constexpr GPUInfo sg_amdGCNGPUs[33] = {
+constexpr GPUInfo sg_amdGCNGPUs[37] = {
    // Name         Canonical    Kind        Features
    //              Name
    {{"gfx600"},    {"gfx600"},  GK_GFX600,  FEATURE_FAST_FMA_F32},
@@ -112,7 +112,11 @@ constexpr GPUInfo sg_amdGCNGPUs[33] = {
    {{"gfx902"},    {"gfx902"},  GK_GFX902,  FEATURE_FAST_FMA_F32|FEATURE_FAST_DENORMAL_F32},
    {{"gfx904"},    {"gfx904"},  GK_GFX904,  FEATURE_FAST_FMA_F32|FEATURE_FAST_DENORMAL_F32},
    {{"gfx906"},    {"gfx906"},  GK_GFX906,  FEATURE_FAST_FMA_F32|FEATURE_FAST_DENORMAL_F32},
+   {{"gfx908"},    {"gfx908"},  GK_GFX908,  FEATURE_FAST_FMA_F32|FEATURE_FAST_DENORMAL_F32},
    {{"gfx909"},    {"gfx909"},  GK_GFX909,  FEATURE_FAST_FMA_F32|FEATURE_FAST_DENORMAL_F32},
+   {{"gfx1010"},   {"gfx1010"}, GK_GFX1010, FEATURE_FAST_FMA_F32|FEATURE_FAST_DENORMAL_F32},
+   {{"gfx1011"},   {"gfx1011"}, GK_GFX1011, FEATURE_FAST_FMA_F32|FEATURE_FAST_DENORMAL_F32},
+   {{"gfx1012"},   {"gfx1012"}, GK_GFX1012, FEATURE_FAST_FMA_F32|FEATURE_FAST_DENORMAL_F32},
 };
 
 const GPUInfo *get_arch_entry(amdgpu::GPUKind archKind, ArrayRef<GPUInfo> table)
@@ -197,31 +201,38 @@ void amdgpu::fill_valid_arch_list_r600(SmallVectorImpl<StringRef> &values)
 
 amdgpu::IsaVersion amdgpu::get_isa_version(StringRef gpu)
 {
-   if (gpu == "generic") {
-      return {7, 0, 0};
-   }
    amdgpu::GPUKind archKind = parse_arch_amd_gcn(gpu);
    if (archKind == amdgpu::GPUKind::GK_NONE) {
+      if (gpu == "generic-hsa") {
+         return {7, 0, 0};
+      }
+      if (gpu == "generic") {
+         return {6, 0, 0};
+      }
       return {0, 0, 0};
    }
    switch (archKind) {
-   case GK_GFX600: return {6, 0, 0};
-   case GK_GFX601: return {6, 0, 1};
-   case GK_GFX700: return {7, 0, 0};
-   case GK_GFX701: return {7, 0, 1};
-   case GK_GFX702: return {7, 0, 2};
-   case GK_GFX703: return {7, 0, 3};
-   case GK_GFX704: return {7, 0, 4};
-   case GK_GFX801: return {8, 0, 1};
-   case GK_GFX802: return {8, 0, 2};
-   case GK_GFX803: return {8, 0, 3};
-   case GK_GFX810: return {8, 1, 0};
-   case GK_GFX900: return {9, 0, 0};
-   case GK_GFX902: return {9, 0, 2};
-   case GK_GFX904: return {9, 0, 4};
-   case GK_GFX906: return {9, 0, 6};
-   case GK_GFX909: return {9, 0, 9};
-   default:        return {0, 0, 0};
+   case GK_GFX600:  return {6, 0, 0};
+   case GK_GFX601:  return {6, 0, 1};
+   case GK_GFX700:  return {7, 0, 0};
+   case GK_GFX701:  return {7, 0, 1};
+   case GK_GFX702:  return {7, 0, 2};
+   case GK_GFX703:  return {7, 0, 3};
+   case GK_GFX704:  return {7, 0, 4};
+   case GK_GFX801:  return {8, 0, 1};
+   case GK_GFX802:  return {8, 0, 2};
+   case GK_GFX803:  return {8, 0, 3};
+   case GK_GFX810:  return {8, 1, 0};
+   case GK_GFX900:  return {9, 0, 0};
+   case GK_GFX902:  return {9, 0, 2};
+   case GK_GFX904:  return {9, 0, 4};
+   case GK_GFX906:  return {9, 0, 6};
+   case GK_GFX908:  return {9, 0, 8};
+   case GK_GFX909:  return {9, 0, 9};
+   case GK_GFX1010: return {10, 1, 0};
+   case GK_GFX1011: return {10, 1, 1};
+   case GK_GFX1012: return {10, 1, 2};
+   default:         return {0, 0, 0};
    }
 }
 

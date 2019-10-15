@@ -1,7 +1,14 @@
+//===- llvm/unittest/ADT/PointerUnionTest.cpp - Optional unit tests -------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -75,6 +82,43 @@ TEST_F(PointerUnionTest, testGet)
    EXPECT_EQ(a.get<float *>(), &f);
    EXPECT_EQ(b.get<int *>(), &i);
    EXPECT_EQ(n.get<int *>(), (int *)nullptr);
+}
+
+template<int I> struct alignas(8) Aligned {};
+
+typedef PointerUnion<Aligned<0> *, Aligned<1> *, Aligned<2> *, Aligned<3> *,
+Aligned<4> *, Aligned<5> *, Aligned<6> *, Aligned<7> *>
+PU8;
+
+TEST_F(PointerUnionTest, testManyElements) {
+   Aligned<0> a0;
+   Aligned<7> a7;
+
+   PU8 a = &a0;
+   EXPECT_TRUE(a.is<Aligned<0>*>());
+   EXPECT_FALSE(a.is<Aligned<1>*>());
+   EXPECT_FALSE(a.is<Aligned<2>*>());
+   EXPECT_FALSE(a.is<Aligned<3>*>());
+   EXPECT_FALSE(a.is<Aligned<4>*>());
+   EXPECT_FALSE(a.is<Aligned<5>*>());
+   EXPECT_FALSE(a.is<Aligned<6>*>());
+   EXPECT_FALSE(a.is<Aligned<7>*>());
+   EXPECT_EQ(a.dynamicCast<Aligned<0>*>(), &a0);
+   EXPECT_EQ(*a.getAddrOfPtr1(), &a0);
+
+   a = &a7;
+   EXPECT_FALSE(a.is<Aligned<0>*>());
+   EXPECT_FALSE(a.is<Aligned<1>*>());
+   EXPECT_FALSE(a.is<Aligned<2>*>());
+   EXPECT_FALSE(a.is<Aligned<3>*>());
+   EXPECT_FALSE(a.is<Aligned<4>*>());
+   EXPECT_FALSE(a.is<Aligned<5>*>());
+   EXPECT_FALSE(a.is<Aligned<6>*>());
+   EXPECT_TRUE(a.is<Aligned<7>*>());
+   EXPECT_EQ(a.dynamicCast<Aligned<7>*>(), &a7);
+
+   EXPECT_TRUE(a == PU8(&a7));
+   EXPECT_TRUE(a != PU8(&a0));
 }
 
 } // anonymous namespace

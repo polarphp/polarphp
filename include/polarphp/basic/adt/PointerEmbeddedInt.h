@@ -1,7 +1,14 @@
+//===- llvm/ADT/PackedVector.h - Packed values vector -----------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -20,8 +27,7 @@
 #include <cstdint>
 #include <type_traits>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 /// Utility to embed an integer into a pointer-like type. This is specifically
 /// intended to allow embedding integers where fewer bits are required than
@@ -88,9 +94,9 @@ public:
    }
 };
 
-} // basic
+} // polar::basic
 
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::PointerEmbeddedInt;
 
@@ -119,9 +125,9 @@ struct PointerLikeTypeTraits<PointerEmbeddedInt<IntType, Bits>>
    enum { NumLowBitsAvailable = T::Shift };
 };
 
-} // utils
+} // polar::utils
 
-namespace basic {
+namespace polar::basic {
 
 // Teach DenseMap how to use PointerEmbeddedInt objects as keys if the Int type
 // itself can be a key.
@@ -152,7 +158,6 @@ struct DenseMapInfo<PointerEmbeddedInt<IntType, Bits>>
    }
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_POINTER_EMBEDDED_INT_H

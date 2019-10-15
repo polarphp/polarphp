@@ -1,7 +1,14 @@
+//===---- ADT/IntervalMapTest.cpp - IntervalMap unit tests ------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -620,6 +627,53 @@ TEST(IntervalMapTest, testRandomCoalescing)
    EXPECT_EQ(1, std::distance(map.begin(), map.end()));
 
 }
+
+TEST(IntervalMapTest, testOverlaps)
+{
+   UUMap::Allocator allocator;
+   UUMap map(allocator);
+   map.insert(10, 20, 0);
+   map.insert(30, 40, 0);
+   map.insert(50, 60, 0);
+
+   EXPECT_FALSE(map.overlaps(0, 9));
+   EXPECT_TRUE(map.overlaps(0, 10));
+   EXPECT_TRUE(map.overlaps(0, 15));
+   EXPECT_TRUE(map.overlaps(0, 25));
+   EXPECT_TRUE(map.overlaps(0, 45));
+   EXPECT_TRUE(map.overlaps(10, 45));
+   EXPECT_TRUE(map.overlaps(30, 45));
+   EXPECT_TRUE(map.overlaps(35, 36));
+   EXPECT_TRUE(map.overlaps(40, 45));
+   EXPECT_FALSE(map.overlaps(45, 45));
+   EXPECT_TRUE(map.overlaps(60, 60));
+   EXPECT_TRUE(map.overlaps(60, 66));
+   EXPECT_FALSE(map.overlaps(66, 66));
+}
+
+TEST(IntervalMapTest, testOverlapsHalfOpen)
+{
+   UUHalfOpenMap::Allocator allocator;
+   UUHalfOpenMap map(allocator);
+   map.insert(10, 20, 0);
+   map.insert(30, 40, 0);
+   map.insert(50, 60, 0);
+
+   EXPECT_FALSE(map.overlaps(0, 9));
+   EXPECT_FALSE(map.overlaps(0, 10));
+   EXPECT_TRUE(map.overlaps(0, 15));
+   EXPECT_TRUE(map.overlaps(0, 25));
+   EXPECT_TRUE(map.overlaps(0, 45));
+   EXPECT_TRUE(map.overlaps(10, 45));
+   EXPECT_TRUE(map.overlaps(30, 45));
+   EXPECT_TRUE(map.overlaps(35, 36));
+   EXPECT_FALSE(map.overlaps(40, 45));
+   EXPECT_FALSE(map.overlaps(45, 46));
+   EXPECT_FALSE(map.overlaps(60, 61));
+   EXPECT_FALSE(map.overlaps(60, 66));
+   EXPECT_FALSE(map.overlaps(66, 67));
+}
+
 
 TEST(IntervalMapOverlapsTest, testSmallMaps)
 {

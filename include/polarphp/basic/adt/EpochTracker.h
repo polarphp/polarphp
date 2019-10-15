@@ -1,7 +1,14 @@
+//===- llvm/ADT/EpochTracker.h - ADT epoch tracking --------------*- C++ -*-==//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -15,8 +22,7 @@
 #include "polarphp/global/AbiBreaking.h"
 #include <cstdint>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 #if POLAR_ENABLE_ABI_BREAKING_CHECKS
 
@@ -120,7 +126,6 @@ public:
 
 #endif // POLAR_ENABLE_ABI_BREAKING_CHECKS
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_EPOCH_TRACKER_H

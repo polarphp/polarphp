@@ -1,7 +1,18 @@
+//===- llvm/Support/Error.h - Recoverable error handling --------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+//
+// This file defines an API used to report recoverable errors.
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -84,14 +95,12 @@ PolarErrorTypeId polar_get_string_error_type_id();
 }
 #endif
 
-namespace polar {
-
+namespace polar::basic {
 // forward declare with namespace
-namespace basic {
 class Twine;
-} // basic
+} // polar::basic
 
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::Twine;
 
@@ -1251,7 +1260,7 @@ private:
 class EcError : public ErrorInfo<EcError>
 {
    friend Error error_code_to_error(std::error_code);
-
+   virtual void getAnchor() override;
 public:
    void setErrorCode(std::error_code errorCode)
    {
@@ -1366,7 +1375,7 @@ private:
 
 /// Create formatted StringError object.
 template <typename... Ts>
-Error create_string_error(std::error_code errorCode, char const *fmt,
+inline Error create_string_error(std::error_code errorCode, char const *fmt,
                           const Ts &... values)
 {
    std::string buffer;
@@ -1377,6 +1386,12 @@ Error create_string_error(std::error_code errorCode, char const *fmt,
 
 Error create_string_error(std::error_code errorCode, char const *msg);
 
+template <typename... Ts>
+inline Error createStringError(std::errc errorCode, char const *format,
+                               const Ts &... values)
+{
+   return createStringError(std::make_error_code(errorCode), format, values...);
+}
 
 /// This class wraps a filename and another Error.
 ///
@@ -1507,7 +1522,6 @@ inline Error unwrap(PolarErrorRef errRef)
                    reinterpret_cast<ErrorInfoBase *>(errRef)));
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_ERROR_H

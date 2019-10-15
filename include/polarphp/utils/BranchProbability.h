@@ -1,7 +1,14 @@
+//===- BranchProbability.h - Branch Probability Wrapper ---------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -24,8 +31,7 @@
 #include <climits>
 #include <numeric>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 class RawOutStream;
 
@@ -165,6 +171,14 @@ public:
       return *this;
    }
 
+   BranchProbability &operator/=(BranchProbability rhs)
+   {
+      assert(m_numerator != m_unknown && rhs.m_numerator != m_unknown &&
+            "Unknown probability cannot participate in arithmetics.");
+      m_numerator = (static_cast<uint64_t>(m_numerator) * m_denominator + rhs.m_numerator / 2) / rhs.m_numerator;
+      return *this;
+   }
+
    BranchProbability &operator/=(uint32_t other)
    {
       assert(m_numerator != m_unknown &&
@@ -177,31 +191,43 @@ public:
    BranchProbability operator+(BranchProbability other) const
    {
       BranchProbability prob(*this);
-      return prob += other;
+      prob += other;
+      return prob;
    }
 
    BranchProbability operator-(BranchProbability other) const
    {
       BranchProbability prob(*this);
-      return prob -= other;
+      prob -= other;
+      return prob;
    }
 
    BranchProbability operator*(BranchProbability other) const
    {
       BranchProbability prob(*this);
-      return prob *= other;
+      prob *= other;
+      return prob;
    }
 
    BranchProbability operator*(uint32_t other) const
    {
       BranchProbability prob(*this);
-      return prob *= other;
+      prob *= other;
+      return prob;
+   }
+
+   BranchProbability operator/(BranchProbability other) const
+   {
+      BranchProbability prob(*this);
+      prob /= other;
+      return prob;
    }
 
    BranchProbability operator/(uint32_t other) const
    {
       BranchProbability prob(*this);
-      return prob /= other;
+      prob /= other;
+      return prob;
    }
 
    bool operator==(BranchProbability other) const
@@ -294,7 +320,6 @@ void BranchProbability::normalizeProbabilities(ProbabilityIter begin,
    }
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_BRANCHPROBABILITY_H

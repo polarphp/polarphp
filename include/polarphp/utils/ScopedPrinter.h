@@ -1,7 +1,14 @@
+//===-- ScopedPrinter.h ----------------------------------------*- C++ -*--===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -21,16 +28,14 @@
 #include "polarphp/utils/RawOutStream.h"
 #include <algorithm>
 
-namespace polar {
-
+namespace polar::basic {
 // forward declare class with namespace
-namespace basic {
 class ApSInt;
 template<typename T>
 class ArrayRef;
-} // basic
+} // polar::basic
 
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::ArrayRef;
 using basic::ApSInt;
@@ -494,7 +499,6 @@ struct DelimitedScope
 using DictScope = DelimitedScope<'{', '}'>;
 using ListScope = DelimitedScope<'[', ']'>;
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_SCOPED_PRINTER_H

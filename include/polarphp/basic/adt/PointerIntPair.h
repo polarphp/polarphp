@@ -1,7 +1,14 @@
+//===- llvm/ADT/PackedVector.h - Packed values vector -----------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -13,12 +20,12 @@
 #define POLARPHP_BASIC_ADT_POINTER_INT_PAIR_H
 
 #include "polarphp/utils/PointerLikeTypeTraits.h"
+#include "polarphp/utils/TypeTraits.h"
 #include <cassert>
 #include <cstdint>
 #include <limits>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 template <typename T> struct DenseMapInfo;
 template <typename PointerType, unsigned IntBits, typename PtrTraits>
@@ -42,6 +49,8 @@ template <typename PointerTypeype, unsigned IntBits, typename IntType = unsigned
           typename Info = PointerIntPairInfo<PointerTypeype, IntBits, PtrTraits>>
 class PointerIntPair
 {
+   // Used by MSVC visualizer and generally helpful for debugging/visualizing.
+   using InfoType = Info;
    intptr_t m_value = 0;
 
 public:
@@ -245,19 +254,24 @@ struct DenseMapInfo<PointerIntPair<PointerTypeype, IntBits, IntType>>
    }
 };
 
-} // basic
+} // polar::basic
 
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::PointerIntPair;
 
-template <typename T> struct IsPodLike;
-template <typename PointerTypeype, unsigned IntBits, typename IntType>
-struct IsPodLike<PointerIntPair<PointerTypeype, IntBits, IntType>>
+// Specialize is_trivially_copyable to avoid limitation of llvm::is_trivially_copyable
+// when compiled with gcc 4.9.
+template <typename PointerTy, unsigned IntBits, typename IntType,
+          typename PtrTraits,
+          typename Info>
+struct is_trivially_copyable<PointerIntPair<PointerTy, IntBits, IntType, PtrTraits, Info>> : std::true_type
 {
-   static const bool value = true;
+#ifdef HAVE_STD_IS_TRIVIALLY_COPYABLE
+  static_assert(std::is_trivially_copyable<PointerIntPair<PointerTy, IntBits, IntType, PtrTraits, Info>>::value,
+                "inconsistent behavior between llvm:: and std:: implementation of is_trivially_copyable");
+#endif
 };
-
 
 // Teach SmallPtrSet that PointerIntPair is "basically a pointer".
 template <typename PointerTypeype, unsigned IntBits, typename IntType,
@@ -286,8 +300,6 @@ struct PointerLikeTypeTraits<
    enum { NumLowBitsAvailable = PtrTraits::NumLowBitsAvailable - IntBits };
 };
 
-} // utils
-
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_BASIC_ADT_POINTER_INT_PAIR_H

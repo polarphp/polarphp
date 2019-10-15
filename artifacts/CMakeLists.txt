@@ -1,7 +1,7 @@
 # This source file is part of the polarphp.org open source project
 #
-# Copyright (c) 2017 - 2018 polarphp software foundation
-# Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+# Copyright (c) 2017 - 2019 polarphp software foundation
+# Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 # Licensed under Apache License v2.0 with Runtime Library Exception
 #
 # See https://polarphp.org/LICENSE.txt for license information
@@ -18,7 +18,7 @@ string(TIMESTAMP _buildDate "%Y-%m-%d %H:%M")
 
 polar_add_executable(polar main.cpp ${POLAR_MAIN_LIB_SOURCES})
 set_target_properties(polar PROPERTIES COMPILE_DEFINITIONS "BUILD_TIME=\"${_buildDate}\"")
-target_link_libraries(polar PUBLIC PolarRuntime Stdlib CLI11::CLI11)
+target_link_libraries(polar PUBLIC CLI11::CLI11)
 install(TARGETS polar RUNTIME
    DESTINATION bin
    COMPONENT corebins)

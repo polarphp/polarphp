@@ -1,7 +1,14 @@
+//===-- llvm/ADT/APSInt.h - Arbitrary Precision Signed Int -----*- C++ -*--===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -15,8 +22,7 @@
 #include "polarphp/basic/adt/ApInt.h"
 #include "polarphp/basic/adt/StringRef.h"
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 class POLAR_NODISCARD ApSInt : public ApInt
 {
@@ -45,6 +51,33 @@ public:
    ///
    /// \param Str the string to be interpreted.
    explicit ApSInt(StringRef str);
+
+   /// Determine sign of this APSInt.
+   ///
+   /// \returns true if this APSInt is negative, false otherwise
+   bool isNegative() const
+   {
+      return isSigned() && ApInt::isNegative();
+   }
+
+   /// Determine if this APSInt Value is non-negative (>= 0)
+   ///
+   /// \returns true if this APSInt is non-negative, false otherwise
+   bool isNonNegative() const
+   {
+      return !isNegative();
+   }
+
+   /// Determine if this APSInt Value is positive.
+   ///
+   /// This tests if the value of this APSInt is positive (> 0). Note
+   /// that 0 is not a positive value.
+   ///
+   /// \returns true if this APSInt is positive.
+   bool isStrictlyPositive() const
+   {
+      return isNonNegative() && !isNullValue();
+   }
 
    ApSInt &operator=(ApInt other)
    {
@@ -116,7 +149,8 @@ public:
       }
    }
 
-   ApSInt extOrTrunc(uint32_t width) const {
+   ApSInt extOrTrunc(uint32_t width) const
+   {
       if (m_isUnsigned) {
          return ApSInt(zextOrTrunc(width), m_isUnsigned);
       } else {
@@ -441,7 +475,6 @@ inline RawOutStream &operator<<(RawOutStream &outstream, const ApSInt &ivalue)
    return outstream;
 }
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_AP_SINT_H

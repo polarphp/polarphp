@@ -1,7 +1,14 @@
+//===-- AArch64TargetParser - Parser for AArch64 features -------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -44,7 +51,7 @@ unsigned get_default_fpu(StringRef cpu, aarch64::ArchKind archKind)
       return sg_aarch64ARCHNames[static_cast<unsigned>(archKind)].DefaultFPU;
    }
    return StringSwitch<unsigned>(cpu)
-      #define AARCH64_CPU_NAME(NAME, ID, DEFAULT_FPU, IS_DEFAULT, DEFAULT_EXT)       \
+      #define AARCH64_CPU_NAME(NAME, id, DEFAULT_FPU, IS_DEFAULT, DEFAULT_EXT)       \
          .cond(NAME, arm::DEFAULT_FPU)
       #include "polarphp/utils/AArch64TargetParserDefs.h"
          .defaultCond(arm::FK_INVALID);
@@ -56,8 +63,8 @@ unsigned get_default_extensions(StringRef cpu, aarch64::ArchKind archKind)
       return sg_aarch64ARCHNames[static_cast<unsigned>(archKind)].ArchBaseExtensions;
    }
    return StringSwitch<unsigned>(cpu)
-      #define AARCH64_CPU_NAME(NAME, ID, DEFAULT_FPU, IS_DEFAULT, DEFAULT_EXT)       \
-         .cond(NAME, sg_aarch64ARCHNames[static_cast<unsigned>(ArchKind::ID)]            \
+      #define AARCH64_CPU_NAME(NAME, id, DEFAULT_FPU, IS_DEFAULT, DEFAULT_EXT)       \
+         .cond(NAME, sg_aarch64ARCHNames[static_cast<unsigned>(ArchKind::id)]            \
          .ArchBaseExtensions |                                    \
          DEFAULT_EXT)
       #include "polarphp/utils/AArch64TargetParserDefs.h"
@@ -70,8 +77,8 @@ ArchKind get_cpu_arch_kind(StringRef cpu)
       return ArchKind::ARMV8A;
    }
    return StringSwitch<aarch64::ArchKind>(cpu)
-      #define AARCH64_CPU_NAME(NAME, ID, DEFAULT_FPU, IS_DEFAULT, DEFAULT_EXT)       \
-         .cond(NAME, ArchKind::ID)
+      #define AARCH64_CPU_NAME(NAME, id, DEFAULT_FPU, IS_DEFAULT, DEFAULT_EXT)       \
+         .cond(NAME, ArchKind::id)
       #include "polarphp/utils/AArch64TargetParserDefs.h"
          .defaultCond(ArchKind::INVALID);
 }
@@ -117,6 +124,21 @@ bool get_extension_features(unsigned extensions,
    }
    if (extensions & AEK_SVE) {
       features.push_back("+sve");
+   }
+   if (extensions & AEK_SVE2) {
+      features.push_back("+sve2");
+   }
+   if (extensions & AEK_SVE2AES) {
+      features.push_back("+sve2-aes");
+   }
+   if (extensions & AEK_SVE2SM4) {
+      features.push_back("+sve2-sm4");
+   }
+   if (extensions & AEK_SVE2SHA3) {
+      features.push_back("+sve2-sha3");
+   }
+   if (extensions & AEK_SVE2BITPERM) {
+      features.push_back("+sve2-bitperm");
    }
    if (extensions & AEK_RCPC) {
       features.push_back("+rcpc");
@@ -164,7 +186,7 @@ unsigned get_arch_attr(aarch64::ArchKind archKind)
 StringRef get_arch_ext_name(unsigned archExtKind)
 {
    for (const auto &item : sg_aarch64ARCHExtNames) {
-      if (archExtKind == item.ID) {
+      if (archExtKind == item.id) {
          return item.getName();
       }
    }
@@ -176,15 +198,15 @@ StringRef get_arch_ext_feature(StringRef archExt)
    if (archExt.startsWith("no")) {
       StringRef archExtBase(archExt.substr(2));
       for (const auto &item : sg_aarch64ARCHExtNames) {
-         if (item.NegFeature && archExtBase == item.getName()) {
-            return StringRef(item.NegFeature);
+         if (item.negFeature && archExtBase == item.getName()) {
+            return StringRef(item.negFeature);
          }
       }
    }
 
    for (const auto &item : sg_aarch64ARCHExtNames) {
-      if (item.Feature && archExt == item.getName()) {
-         return StringRef(item.Feature);
+      if (item.feature && archExt == item.getName()) {
+         return StringRef(item.feature);
       }
    }
 
@@ -200,7 +222,7 @@ StringRef get_default_cpu(StringRef arch)
    // Look for multiple AKs to find the default for pair archKind+Name.
    for (const auto &cpu : sg_aarch64CPUNames) {
       if (cpu.ArchID == archKind && cpu.Default) {
-          return cpu.getName();
+         return cpu.getName();
       }
    }
    // If we can't find a default then target the architecture instead
@@ -233,7 +255,7 @@ ArchKind parse_arch(StringRef arch)
    StringRef Syn = arm::get_arch_synonym(arch);
    for (const auto item : sg_aarch64ARCHNames) {
       if (item.getName().endsWith(Syn)) {
-         return item.ID;
+         return item.id;
       }
    }
    return ArchKind::INVALID;
@@ -243,7 +265,7 @@ ArchExtKind parse_arch_ext(StringRef archExt)
 {
    for (const auto item : sg_aarch64ARCHExtNames) {
       if (archExt == item.getName()) {
-         return static_cast<ArchExtKind>(item.ID);
+         return static_cast<ArchExtKind>(item.id);
       }
    }
    return aarch64::AEK_INVALID;

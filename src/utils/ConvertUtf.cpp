@@ -1,7 +1,14 @@
+/*===--- ConvertUTF.c - Universal Character Names conversions ---------------===
+ *
+ * Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+ * See https://llvm.org/LICENSE.txt for license information.
+ * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+ *
+ *===------------------------------------------------------------------------=*/
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -84,8 +91,7 @@
 
 //ConvertUTF_DISABLE_WARNINGS
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 static const int sg_halfShift  = 10; /* used for shifting by 10 bits */
 
@@ -319,10 +325,28 @@ ConversionResult convert_utf16_to_utf8 (
          break;
       }
       switch (bytesToWrite) { /* note: everything falls through. */
-      case 4: *--target = static_cast<Utf8>((ch | byteMark) & byteMask); ch >>= 6;POLAR_FALLTHROUGH;
-      case 3: *--target = static_cast<Utf8>((ch | byteMark) & byteMask); ch >>= 6;POLAR_FALLTHROUGH;
-      case 2: *--target = static_cast<Utf8>((ch | byteMark) & byteMask); ch >>= 6;POLAR_FALLTHROUGH;
-      case 1: *--target = static_cast<Utf8>(ch | sg_firstByteMark[bytesToWrite]);POLAR_FALLTHROUGH;
+      case 4:
+      {
+         *--target = static_cast<Utf8>((ch | byteMark) & byteMask);
+         ch >>= 6;
+         [[fallthrough]];
+      }
+      case 3:
+      {
+         *--target = static_cast<Utf8>((ch | byteMark) & byteMask);
+         ch >>= 6;
+         [[fallthrough]];
+      }
+      case 2:
+      {
+          *--target = static_cast<Utf8>((ch | byteMark) & byteMask);
+         ch >>= 6;
+         [[fallthrough]];
+      }
+      case 1:
+      {
+         *--target = static_cast<Utf8>(ch | sg_firstByteMark[bytesToWrite]);
+      }
       }
       target += bytesToWrite;
    }
@@ -750,8 +774,7 @@ ConversionResult convert_utf8_to_utf32(const Utf8 **sourceStart,
                                      flags, /*InputIsPartial=*/false);
 }
 
-} // utils
-} // polar
+} // polar::utils
 
 /* ---------------------------------------------------------------------
 

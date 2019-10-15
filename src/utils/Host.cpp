@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -36,16 +36,20 @@
 #include <intrin.h>
 #endif
 #if defined(__APPLE__) && (defined(__ppc__) || defined(__powerpc__))
-#include <mach/host_info.h>
-#include <mach/mach.h>
-#include <mach/mach_host.h>
-#include <mach/machine.h>
+#  include <mach/host_info.h>
+#  include <mach/mach.h>
+#  include <mach/mach_host.h>
+#  include <mach/machine.h>
+#endif
+
+#if defined(__APPLE__) && defined(__x86_64__)
+#  include <sys/param.h>
+#  include <sys/sysctl.h>
 #endif
 
 #define DEBUG_TYPE "host-detection"
 
-namespace polar {
-namespace sys {
+namespace polar::sys {
 
 using polar::utils::OptionalError;
 using polar::utils::MemoryBuffer;
@@ -205,6 +209,8 @@ StringRef get_host_cpu_name_for_arm(StringRef procCpuinfoContent)
                   .cond("0xd07", "cortex-a57")
                   .cond("0xd08", "cortex-a72")
                   .cond("0xd09", "cortex-a73")
+                  .cond("0xd0a", "cortex-a75")
+                  .cond("0xd0b", "cortex-a76")
                   .defaultCond("generic");
    }
 
@@ -252,6 +258,10 @@ StringRef get_host_cpu_name_for_arm(StringRef procCpuinfoContent)
                   .cond("0x211", "kryo")
                   .cond("0x800", "cortex-a73")
                   .cond("0x801", "cortex-a73")
+                  .cond("0x802", "cortex-a73")
+                  .cond("0x803", "cortex-a73")
+                  .cond("0x804", "cortex-a73")
+                  .cond("0x805", "cortex-a73")
                   .cond("0xc00", "falkor")
                   .cond("0xc01", "saphira")
                   .defaultCond("generic");
@@ -333,6 +343,9 @@ StringRef get_host_cpu_name_for_s390x(StringRef procCpuinfoContent)
             pos += sizeof("machine = ") - 1;
             unsigned int id;
             if (!lines[index].dropFront(pos).getAsInteger(10, id)) {
+               if (id >= 8561 && haveVectorSupport) {
+                  return "arch13";
+               }
                if (id >= 3906 && haveVectorSupport) {
                   return "z14";
                }
@@ -358,7 +371,19 @@ StringRef get_host_cpu_name_for_bpf()
 #if !defined(__linux__) || !defined(__x86_64__)
    return "generic";
 #else
-   uint8_t insns[40] __attribute__ ((aligned (8))) =
+   uint8_t v3_insns[40] __attribute__ ((aligned (8))) =
+         /* BPF_MOV64_IMM(BPF_REG_0, 0) */
+   { 0xb7, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+         /* BPF_MOV64_IMM(BPF_REG_2, 1) */
+         0xb7, 0x2, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0,
+         /* BPF_JMP32_REG(BPF_JLT, BPF_REG_0, BPF_REG_2, 1) */
+         0xae, 0x20, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0,
+         /* BPF_MOV64_IMM(BPF_REG_0, 1) */
+         0xb7, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0,
+         /* BPF_EXIT_INSN() */
+         0x95, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 };
+
+   uint8_t v2_insns[40] __attribute__ ((aligned (8))) =
          /* BPF_MOV64_IMM(BPF_REG_0, 0) */
    { 0xb7, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
          /* BPF_MOV64_IMM(BPF_REG_2, 1) */
@@ -383,10 +408,23 @@ StringRef get_host_cpu_name_for_bpf()
    } attr = {};
    attr.prog_type = 1; /* BPF_PROG_TYPE_SOCKET_FILTER */
    attr.insn_cnt = 5;
-   attr.insns = (uint64_t)insns;
+   attr.insns = (uint64_t)v3_insns;
    attr.license = (uint64_t)"DUMMY";
 
-   int fd = syscall(321 /* __NR_bpf */, 5 /* BPF_PROG_LOAD */, &attr, sizeof(attr));
+   int fd = syscall(321 /* __NR_bpf */, 5 /* BPF_PROG_LOAD */, &attr,
+                    sizeof(attr));
+   if (fd >= 0) {
+      close(fd);
+      return "v3";
+   }
+
+   /* Clear the whole attr in case its content changed by syscall. */
+   memset(&attr, 0, sizeof(attr));
+   attr.prog_type = 1; /* BPF_PROG_TYPE_SOCKET_FILTER */
+   attr.insn_cnt = 5;
+   attr.insns = (uint64_t)v2_insns;
+   attr.license = (uint64_t)"DUMMY";
+   fd = syscall(321 /* __NR_bpf */, 5 /* BPF_PROG_LOAD */, &attr, sizeof(attr));
    if (fd >= 0) {
       close(fd);
       return "v2";
@@ -685,13 +723,32 @@ get_intel_processor_type_and_subtype(unsigned family, unsigned model,
          // Skylake Xeon:
       case 0x55:
          *type = x86::INTEL_COREI7;
-         *subtype = x86::INTEL_COREI7_SKYLAKE_AVX512; // "skylake-avx512"
+         if (features3 & (1 << (x86::FEATURE_AVX512BF16 - 64))) {
+            *subtype = x86::INTEL_COREI7_COOPERLAKE; // "cooperlake"
+         } else if (features2 & (1 << (x86::FEATURE_AVX512VNNI - 32))) {
+            *subtype = x86::INTEL_COREI7_CASCADELAKE; // "cascadelake"
+         } else {
+            *subtype = x86::INTEL_COREI7_SKYLAKE_AVX512; // "skylake-avx512"
+         }
          break;
-
          // Cannonlake:
       case 0x66:
          *type = x86::INTEL_COREI7;
          *subtype = x86::INTEL_COREI7_CANNONLAKE; // "cannonlake"
+         break;
+
+         // Icelake:
+      case 0x7d:
+      case 0x7e:
+         *type = x86::INTEL_COREI7;
+         *subtype = x86::INTEL_COREI7_ICELAKE_CLIENT; // "icelake-client"
+         break;
+
+         // Icelake Xeon:
+      case 0x6a:
+      case 0x6c:
+         *type = x86::INTEL_COREI7;
+         *subtype = x86::INTEL_COREI7_ICELAKE_SERVER; // "icelake-server"
          break;
 
       case 0x1c: // Most 45 nm Intel Atom processors
@@ -719,6 +776,9 @@ get_intel_processor_type_and_subtype(unsigned family, unsigned model,
       case 0x7a:
          *type = x86::INTEL_GOLDMONT_PLUS;
          break;
+      case 0x86:
+         *type = x86::INTEL_TREMONT;
+         break;
       case 0x57:
          *type = x86::INTEL_KNL; // knl
          break;
@@ -736,6 +796,12 @@ get_intel_processor_type_and_subtype(unsigned family, unsigned model,
          if (features & (1 << x86::FEATURE_AVX512VBMI)) {
             *type = x86::INTEL_COREI7;
             *subtype = x86::INTEL_COREI7_CANNONLAKE;
+            break;
+         }
+
+         if (features3 & (1 << (x86::FEATURE_AVX512BF16 - 64))) {
+            *type = x86::INTEL_COREI7;
+            *subtype = x86::INTEL_COREI7_COOPERLAKE;
             break;
          }
 
@@ -932,7 +998,14 @@ void get_amd_processor_type_and_subtype(unsigned family, unsigned model,
       break; // "btver2"
    case 23:
       *type = x86::AMDFAM17H;
-      *subtype = x86::AMDFAM17H_ZNVER1;
+      if (model >= 0x30 && model <= 0x3f) {
+         *subtype = x86::AMDFAM17H_ZNVER2;
+         break; // "znver2"; 30h-3fh: Zen2
+      }
+      if (model <= 0x0f) {
+         *subtype = x86::AMDFAM17H_ZNVER1;
+         break; // "znver1"; 00h-0Fh: Zen1
+      }
       break;
    default:
       break; // "generic"
@@ -1278,11 +1351,9 @@ int compute_host_num_physical_cores()
    return UniqueItems.size();
 }
 #elif defined(__APPLE__) && defined(__x86_64__)
-#include <sys/param.h>
-#include <sys/sysctl.h>
-
 // Gets the number of *physical cores* on the machine.
-int compute_host_num_physical_cores() {
+int compute_host_num_physical_cores()
+{
    uint32_t count;
    size_t len = sizeof(count);
    sysctlbyname("hw.physicalcpu", &count, &len, NULL, 0);
@@ -1326,8 +1397,10 @@ bool get_host_cpu_features(StringMap<bool> &features)
 
    get_x86_cpuid_and_info(1, &eax, &ebx, &ecx, &edx);
 
+   features["cx8"]    = (edx >>  8) & 1;
    features["cmov"]   = (edx >> 15) & 1;
    features["mmx"]    = (edx >> 23) & 1;
+   features["fxsr"]   = (edx >> 24) & 1;
    features["sse"]    = (edx >> 25) & 1;
    features["sse2"]   = (edx >> 26) & 1;
 
@@ -1348,7 +1421,7 @@ bool get_host_cpu_features(StringMap<bool> &features)
    bool hasAVXSave = ((ecx >> 27) & 1) && ((ecx >> 28) & 1) &&
          !get_x86_xcr0(&eax, &edx) && ((eax & 0x6) == 0x6);
    // AVX512 requires additional context to be saved by the OS.
-   bool HasAVX512Save = hasAVXSave && ((eax & 0xe0) == 0xe0);
+   bool hasAVX512Save = hasAVXSave && ((eax & 0xe0) == 0xe0);
 
    features["avx"]   = hasAVXSave;
    features["fma"]   = ((ecx >> 12) & 1) && hasAVXSave;
@@ -1390,37 +1463,39 @@ bool get_host_cpu_features(StringMap<bool> &features)
    features["bmi2"]       = hasLeaf7 && ((ebx >>  8) & 1);
    features["invpcid"]    = hasLeaf7 && ((ebx >> 10) & 1);
    features["rtm"]        = hasLeaf7 && ((ebx >> 11) & 1);
+   features["mpx"]        = hasLeaf7 && ((ebx >> 14) & 1);
    // AVX512 is only supported if the OS supports the context save for it.
-   features["avx512f"]    = hasLeaf7 && ((ebx >> 16) & 1) && HasAVX512Save;
-   features["avx512dq"]   = hasLeaf7 && ((ebx >> 17) & 1) && HasAVX512Save;
+   features["avx512f"]    = hasLeaf7 && ((ebx >> 16) & 1) && hasAVX512Save;
+   features["avx512dq"]   = hasLeaf7 && ((ebx >> 17) & 1) && hasAVX512Save;
    features["rdseed"]     = hasLeaf7 && ((ebx >> 18) & 1);
    features["adx"]        = hasLeaf7 && ((ebx >> 19) & 1);
-   features["avx512ifma"] = hasLeaf7 && ((ebx >> 21) & 1) && HasAVX512Save;
+   features["avx512ifma"] = hasLeaf7 && ((ebx >> 21) & 1) && hasAVX512Save;
    features["clflushopt"] = hasLeaf7 && ((ebx >> 23) & 1);
    features["clwb"]       = hasLeaf7 && ((ebx >> 24) & 1);
-   features["avx512pf"]   = hasLeaf7 && ((ebx >> 26) & 1) && HasAVX512Save;
-   features["avx512er"]   = hasLeaf7 && ((ebx >> 27) & 1) && HasAVX512Save;
-   features["avx512cd"]   = hasLeaf7 && ((ebx >> 28) & 1) && HasAVX512Save;
+   features["avx512pf"]   = hasLeaf7 && ((ebx >> 26) & 1) && hasAVX512Save;
+   features["avx512er"]   = hasLeaf7 && ((ebx >> 27) & 1) && hasAVX512Save;
+   features["avx512cd"]   = hasLeaf7 && ((ebx >> 28) & 1) && hasAVX512Save;
    features["sha"]        = hasLeaf7 && ((ebx >> 29) & 1);
-   features["avx512bw"]   = hasLeaf7 && ((ebx >> 30) & 1) && HasAVX512Save;
-   features["avx512vl"]   = hasLeaf7 && ((ebx >> 31) & 1) && HasAVX512Save;
+   features["avx512bw"]   = hasLeaf7 && ((ebx >> 30) & 1) && hasAVX512Save;
+   features["avx512vl"]   = hasLeaf7 && ((ebx >> 31) & 1) && hasAVX512Save;
 
    features["prefetchwt1"]     = hasLeaf7 && ((ecx >>  0) & 1);
-   features["avx512vbmi"]      = hasLeaf7 && ((ecx >>  1) & 1) && HasAVX512Save;
+   features["avx512vbmi"]      = hasLeaf7 && ((ecx >>  1) & 1) && hasAVX512Save;
    features["pku"]             = hasLeaf7 && ((ecx >>  4) & 1);
    features["waitpkg"]         = hasLeaf7 && ((ecx >>  5) & 1);
-   features["avx512vbmi2"]     = hasLeaf7 && ((ecx >>  6) & 1) && HasAVX512Save;
+   features["avx512vbmi2"]     = hasLeaf7 && ((ecx >>  6) & 1) && hasAVX512Save;
    features["shstk"]           = hasLeaf7 && ((ecx >>  7) & 1);
    features["gfni"]            = hasLeaf7 && ((ecx >>  8) & 1);
    features["vaes"]            = hasLeaf7 && ((ecx >>  9) & 1) && hasAVXSave;
    features["vpclmulqdq"]      = hasLeaf7 && ((ecx >> 10) & 1) && hasAVXSave;
-   features["avx512vnni"]      = hasLeaf7 && ((ecx >> 11) & 1) && HasAVX512Save;
-   features["avx512bitalg"]    = hasLeaf7 && ((ecx >> 12) & 1) && HasAVX512Save;
-   features["avx512vpopcntdq"] = hasLeaf7 && ((ecx >> 14) & 1) && HasAVX512Save;
+   features["avx512vnni"]      = hasLeaf7 && ((ecx >> 11) & 1) && hasAVX512Save;
+   features["avx512bitalg"]    = hasLeaf7 && ((ecx >> 12) & 1) && hasAVX512Save;
+   features["avx512vpopcntdq"] = hasLeaf7 && ((ecx >> 14) & 1) && hasAVX512Save;
    features["rdpid"]           = hasLeaf7 && ((ecx >> 22) & 1);
    features["cldemote"]        = hasLeaf7 && ((ecx >> 25) & 1);
    features["movdiri"]         = hasLeaf7 && ((ecx >> 27) & 1);
    features["movdir64b"]       = hasLeaf7 && ((ecx >> 28) & 1);
+   features["enqcmd"]          = hasLeaf7 && ((ecx >> 29) & 1);
 
    // There are two CPUID leafs which information associated with the pconfig
    // instruction:
@@ -1433,6 +1508,10 @@ bool get_host_cpu_features(StringMap<bool> &features)
    // detecting features using the "-march=native" flag.
    // For more info, see x86 ISA docs.
    features["pconfig"] = hasLeaf7 && ((edx >> 18) & 1);
+
+   bool hasLeaf7Subleaf1 =
+         maxLevel >= 7 && !get_x86_cpuid_and_info_ex(0x7, 0x1, &eax, &ebx, &ecx, &edx);
+   features["avx512bf16"] = hasLeaf7Subleaf1 && ((eax >> 5) & 1) && hasAVX512Save;
 
    bool hasLeafD = maxLevel >= 0xd &&
          !get_x86_cpuid_and_info_ex(0xd, 0x1, &eax, &ebx, &ecx, &edx);
@@ -1539,5 +1618,4 @@ std::string get_process_triple()
    return triple.getStr();
 }
 
-} // sys
-} // polar
+} // polar::sys

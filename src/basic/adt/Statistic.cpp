@@ -1,7 +1,14 @@
+//===-- Statistic.cpp - Easy way to expose stats information --------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -37,26 +44,23 @@
 #include <cstring>
 #include <mutex>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 namespace cmd = polar::cmd;
 using polar::utils::TimerGroup;
 using polar::utils::ManagedStatic;
 
-namespace {
 /// -stats - Command line option to cause transformations to emit stats about
 /// what they did.
 ///
-cmd::Opt<bool> sg_stats(
+static cmd::Opt<bool> sg_stats(
       "stats",
       cmd::Desc("Enable statistics output from program (available with Asserts)"),
       cmd::Hidden);
 
-cmd::Opt<bool> sg_statsAsJson("stats-json",
+static cmd::Opt<bool> sg_statsAsJson("stats-json",
                               cmd::Desc("Display statistics as json data"),
                               cmd::Hidden);
-} // anonymous namespace
 
 static bool sg_enabled;
 static bool sg_printOnExit;
@@ -302,5 +306,4 @@ void reset_statistics()
    sg_statInfo->reset();
 }
 
-} // basic
-} // polar
+} // polar::basic

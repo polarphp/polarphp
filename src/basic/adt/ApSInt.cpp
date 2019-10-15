@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -35,14 +35,14 @@ ApSInt::ApSInt(StringRef str)
       if (minBits > 0 && minBits < numBits) {
          temp = temp.trunc(minBits);
       }
-      *this = ApSInt(temp, /*IsUnsigned=*/false);
+      *this = ApSInt(temp, /*isUnsigned=*/false);
       return;
    }
    unsigned activeBits = temp.getActiveBits();
    if (activeBits > 0 && activeBits < numBits) {
       temp = temp.trunc(activeBits);
    }
-   *this = ApSInt(temp, /*IsUnsigned=*/true);
+   *this = ApSInt(temp, /*isUnsigned=*/true);
 }
 
 void ApSInt::profile(FoldingSetNodeId &id) const

@@ -1,11 +1,18 @@
+//===- STLExtrasTest.cpp - Unit tests for STL extras ----------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarPHP software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarPHP project authors
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/06/02.
 
@@ -14,19 +21,21 @@
 #include "polarphp/basic/adt/StringRef.h"
 #include <list>
 #include <vector>
-
+#include <memory>
 namespace {
 using polar::basic::rank;
 using polar::basic::StringRef;
 using polar::basic::is_splat;
 using polar::basic::make_range;
+using namespace polar::utils;
+using namespace polar::basic;
 
 int f(rank<0>) { return 0; }
 int f(rank<1>) { return 1; }
 int f(rank<2>) { return 2; }
 int f(rank<4>) { return 4; }
 
-}
+
 
 TEST(StlExtrasTest, testRank)
 {
@@ -491,3 +500,39 @@ TEST(StlExtrasTest, testSplat)
    EXPECT_FALSE(is_splat(V));
 }
 
+
+TEST(StlExtrasTest, testToAddress)
+{
+   int *V1 = new int;
+   EXPECT_EQ(V1, to_address(V1));
+
+   // Check fancy pointer overload for unique_ptr
+   std::unique_ptr<int> V2 = make_unique<int>(0);
+   EXPECT_EQ(V2.get(), to_address(V2));
+
+   V2.reset(V1);
+   EXPECT_EQ(V1, to_address(V2));
+   V2.release();
+
+   // Check fancy pointer overload for shared_ptr
+   std::shared_ptr<int> V3 = std::make_shared<int>(0);
+   std::shared_ptr<int> V4 = V3;
+   EXPECT_EQ(V3.get(), V4.get());
+   EXPECT_EQ(V3.get(), to_address(V3));
+   EXPECT_EQ(V4.get(), to_address(V4));
+
+   V3.reset(V1);
+   EXPECT_EQ(V1, to_address(V3));
+}
+
+TEST(StlExtrasTest, partition_point) {
+   std::vector<int> V = {1, 3, 5, 7, 9};
+
+   // Range version.
+   EXPECT_EQ(V.begin() + 3,
+             partition_point(V, [](unsigned X) { return X < 7; }));
+   EXPECT_EQ(V.begin(), partition_point(V, [](unsigned X) { return X < 1; }));
+   EXPECT_EQ(V.end(), partition_point(V, [](unsigned X) { return X < 50; }));
+}
+
+}

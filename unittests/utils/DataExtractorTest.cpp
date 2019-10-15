@@ -1,21 +1,20 @@
+//===- llvm/unittest/Support/DataExtractorTest.cpp - DataExtractor tests --===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/07/12.
-//===- llvm/unittest/Support/DataExtractorTest.cpp - DataExtractor tests --===//
-//
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
-//
-//===----------------------------------------------------------------------===//
 
 #include "polarphp/utils/DataExtractor.h"
 #include "gtest/gtest.h"
@@ -130,6 +129,17 @@ TEST(DataExtractorTest, testLEB128)
    offset = 0;
    EXPECT_EQ(-29839268287359830LL, BDE.getSLEB128(&offset));
    EXPECT_EQ(8U, offset);
+}
+
+TEST(DataExtractorTest, testLEB128Error) {
+  DataExtractor DE(StringRef("\x81"), false, 8);
+  uint32_t Offset = 0;
+  EXPECT_EQ(0U, DE.getULEB128(&Offset));
+  EXPECT_EQ(0U, Offset);
+
+  Offset = 0;
+  EXPECT_EQ(0U, DE.getSLEB128(&Offset));
+  EXPECT_EQ(0U, Offset);
 }
 
 }

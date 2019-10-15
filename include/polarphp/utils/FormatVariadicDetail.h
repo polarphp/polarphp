@@ -1,7 +1,15 @@
+//===- FormatVariadicDetails.h - Helpers for FormatVariadic.h ----*- C++-*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -16,8 +24,7 @@
 #include "polarphp/utils/RawOutStream.h"
 #include <type_traits>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 class Error;
 
@@ -27,7 +34,9 @@ struct FormatProvider
 
 namespace internal {
 
-class FormatAdapterImpl {
+class FormatAdapterImpl
+{
+   virtual void anchor();
 protected:
    virtual ~FormatAdapterImpl()
    {}
@@ -186,7 +195,6 @@ build_format_adapter(T &&item)
 
 } // internal
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_FORMAT_VARIADIC_DETAILS_H

@@ -1,7 +1,14 @@
+//===- BinaryStreamReader.h - Reads objects from a binary stream *- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -24,8 +31,7 @@
 #include <string>
 #include <type_traits>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 /// \brief Provides read only access to a subclass of `BinaryStream`.  Provides
 /// bounds checking and helpers for writing certain common data types such as
@@ -107,6 +113,18 @@ public:
       dest = static_cast<T>(N);
       return Error::getSuccess();
    }
+
+   /// Read an unsigned LEB128 encoded value.
+   ///
+   /// \returns a success error code if the data was successfully read, otherwise
+   /// returns an appropriate error code.
+   Error readUnsignedLeb128(uint64_t &dest);
+
+   /// Read a signed LEB128 encoded value.
+   ///
+   /// \returns a success error code if the data was successfully read, otherwise
+   /// returns an appropriate error code.
+   Error readSignedLeb128(int64_t &dest);
 
    /// Read a null terminated string from \p dest.  Whether a copy occurs depends
    /// on the implementation of the underlying stream.  Updates the stream's
@@ -217,13 +235,14 @@ public:
    /// \returns a success error code if the data was successfully read, otherwise
    /// returns an appropriate error code.
    template <typename T, typename U>
-   Error readArray(VarStreamArray<T, U> &array, uint32_t size)
+   Error readArray(VarStreamArray<T, U> &array, uint32_t size,
+                   uint32_t skew = 0)
    {
       BinaryStreamRef stream;
       if (auto errorCode = readStreamRef(stream, size)) {
          return errorCode;
       }
-      array.setUnderlyingStream(stream);
+      array.setUnderlyingStream(stream, skew);
       return Error::getSuccess();
    }
 
@@ -301,7 +320,6 @@ private:
    uint32_t m_offset = 0;
 };
 
-} // basic
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_BINARY_STREAM_READER_H

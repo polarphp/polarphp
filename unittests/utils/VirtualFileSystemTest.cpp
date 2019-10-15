@@ -1,7 +1,14 @@
+//===- unittests/Support/VirtualFileSystem.cpp -------------- VFS tests ---===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -18,6 +25,7 @@
 #include "polarphp/utils/MemoryBuffer.h"
 #include "polarphp/utils/Path.h"
 #include "polarphp/utils/SourceMgr.h"
+#include "polarphp/basic/adt/IntrusiveRefCountPtr.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include <map>
@@ -61,16 +69,16 @@ class DummyFileSystem : public vfs::FileSystem
 public:
    DummyFileSystem() : FSID(getNextFsId()), FileID(0) {}
 
-   OptionalError<vfs::Status> getStatus(const Twine &Path) override {
+   OptionalError<vfs::Status> getStatus(const Twine &path) override {
       std::map<std::string, vfs::Status>::iterator I =
-            FilesAndDirs.find(Path.getStr());
+            FilesAndDirs.find(path.getStr());
       if (I == FilesAndDirs.end())
          return make_error_code(ErrorCode::no_such_file_or_directory);
       return I->second;
    }
    OptionalError<std::unique_ptr<vfs::File>>
-   openFileForRead(const Twine &Path) override {
-      auto S = getStatus(Path);
+   openFileForRead(const Twine &path) override {
+      auto S = getStatus(path);
       if (S)
          return std::unique_ptr<vfs::File>(new DummyFile{*S});
       return S.getError();
@@ -78,13 +86,13 @@ public:
    OptionalError<std::string> getCurrentWorkingDirectory() const override {
       return std::string();
    }
-   std::error_code setCurrentWorkingDirectory(const Twine &Path) override {
+   std::error_code setCurrentWorkingDirectory(const Twine &path) override {
       return std::error_code();
    }
    // Map any symlink to "/symlink".
-   std::error_code getRealPath(const Twine &Path,
+   std::error_code getRealPath(const Twine &path,
                                SmallVectorImpl<char> &Output) const override {
-      auto I = FilesAndDirs.find(Path.getStr());
+      auto I = FilesAndDirs.find(path.getStr());
       if (I == FilesAndDirs.end())
          return make_error_code(ErrorCode::no_such_file_or_directory);
       if (I->second.isSymlink()) {
@@ -93,26 +101,26 @@ public:
          return std::error_code();
       }
       Output.clear();
-      Path.toVector(Output);
+      path.toVector(Output);
       return std::error_code();
    }
 
    struct DirIterImpl : public polar::vfs::internal::DirIterImpl {
       std::map<std::string, vfs::Status> &FilesAndDirs;
       std::map<std::string, vfs::Status>::iterator I;
-      std::string Path;
+      std::string path;
       bool isInPath(StringRef S) {
-         if (Path.size() < S.size() && S.find(Path) == 0) {
+         if (path.size() < S.size() && S.find(path) == 0) {
             auto LastSep = S.findLastOf('/');
-            if (LastSep == Path.size() || LastSep == Path.size() - 1)
+            if (LastSep == path.size() || LastSep == path.size() - 1)
                return true;
          }
          return false;
       }
       DirIterImpl(std::map<std::string, vfs::Status> &FilesAndDirs,
-                  const Twine &_Path)
+                  const Twine &_path)
          : FilesAndDirs(FilesAndDirs), I(FilesAndDirs.begin()),
-           Path(_Path.getStr()) {
+           path(_path.getStr()) {
          for (; I != FilesAndDirs.end(); ++I) {
             if (isInPath(I->first)) {
                m_currentEntry =
@@ -137,34 +145,34 @@ public:
    };
 
    vfs::DirectoryIterator dirBegin(const Twine &Dir,
-                                   std::error_code &EC) override {
+                                   std::error_code &errorCode) override {
       return vfs::DirectoryIterator(
                std::make_shared<DirIterImpl>(FilesAndDirs, Dir));
    }
 
-   void addEntry(StringRef Path, const vfs::Status &Status) {
-      FilesAndDirs[Path] = Status;
+   void addEntry(StringRef path, const vfs::Status &Status) {
+      FilesAndDirs[path] = Status;
    }
 
-   void addRegularFile(StringRef Path, polar::fs::Permission Perms = polar::fs::all_all) {
-      vfs::Status S(Path, UniqueId(FSID, FileID++),
+   void addRegularFile(StringRef path, polar::fs::Permission Perms = polar::fs::all_all) {
+      vfs::Status S(path, UniqueId(FSID, FileID++),
                     std::chrono::system_clock::now(), 0, 0, 1024,
                     polar::fs::FileType::regular_file, Perms);
-      addEntry(Path, S);
+      addEntry(path, S);
    }
 
-   void addDirectory(StringRef Path, polar::fs::Permission Perms = polar::fs::all_all) {
-      vfs::Status S(Path, UniqueId(FSID, FileID++),
+   void addDirectory(StringRef path, polar::fs::Permission Perms = polar::fs::all_all) {
+      vfs::Status S(path, UniqueId(FSID, FileID++),
                     std::chrono::system_clock::now(), 0, 0, 0,
                     polar::fs::FileType::directory_file, Perms);
-      addEntry(Path, S);
+      addEntry(path, S);
    }
 
-   void addSymlink(StringRef Path) {
-      vfs::Status S(Path, UniqueId(FSID, FileID++),
+   void addSymlink(StringRef path) {
+      vfs::Status S(path, UniqueId(FSID, FileID++),
                     std::chrono::system_clock::now(), 0, 0, 0,
                     polar::fs::FileType::symlink_file, polar::fs::all_all);
-      addEntry(Path, S);
+      addEntry(path, S);
    }
 };
 
@@ -358,44 +366,122 @@ TEST(VirtualFileSystemTest, testMergedDirPermissions)
    EXPECT_EQ(0200, Status->getPermissions());
 }
 
+TEST(VirtualFileSystemTest, testOverlayIterator) {
+   IntrusiveRefCountPtr<DummyFileSystem> Lower(new DummyFileSystem());
+   Lower->addRegularFile("/foo");
+   IntrusiveRefCountPtr<DummyFileSystem> Upper(new DummyFileSystem());
+
+   IntrusiveRefCountPtr<vfs::OverlayFileSystem> O(
+            new vfs::OverlayFileSystem(Lower));
+   O->pushOverlay(Upper);
+
+   OptionalError<vfs::Status> Status((std::error_code()));
+   {
+      auto it = O->overlaysBegin();
+      auto end = O->overlaysEnd();
+
+      EXPECT_NE(it, end);
+
+      Status = (*it)->getStatus("/foo");
+      ASSERT_TRUE(Status.getError());
+
+      it++;
+      EXPECT_NE(it, end);
+
+      Status = (*it)->getStatus("/foo");
+      ASSERT_FALSE(Status.getError());
+      EXPECT_TRUE(Status->exists());
+
+      it++;
+      EXPECT_EQ(it, end);
+   }
+
+   {
+      auto it = O->overlays_rbegin();
+      auto end = O->overlays_rend();
+
+      EXPECT_NE(it, end);
+
+      Status = (*it)->getStatus("/foo");
+      ASSERT_FALSE(Status.getError());
+      EXPECT_TRUE(Status->exists());
+
+      it++;
+      EXPECT_NE(it, end);
+
+      Status = (*it)->getStatus("/foo");
+      ASSERT_TRUE(Status.getError());
+
+      it++;
+      EXPECT_EQ(it, end);
+   }
+}
+
 namespace {
 struct ScopedDir {
-   SmallString<128> Path;
+   SmallString<128> path;
    ScopedDir(const Twine &Name, bool Unique = false) {
-      std::error_code EC;
+      std::error_code errorCode;
       if (Unique) {
-         EC = polar::fs::create_unique_directory(Name, Path);
+         errorCode = polar::fs::create_unique_directory(Name, path);
+         if (!errorCode) {
+            // Resolve any symlinks in the new directory.
+            std::string unresolvedPath = path.getStr();
+            errorCode = fs::real_path(unresolvedPath, path);
+         }
       } else {
-         Path = Name.getStr();
-         EC = polar::fs::create_directory(Twine(Path));
+         path = Name.getStr();
+         errorCode = polar::fs::create_directory(Twine(path));
       }
-      if (EC)
-         Path = "";
-      EXPECT_FALSE(EC);
+      if (errorCode){
+         path = "";
+      }
+      EXPECT_FALSE(errorCode) << errorCode.message();
    }
    ~ScopedDir() {
-      if (Path != "") {
-         EXPECT_FALSE(polar::fs::remove(Path.getStr()));
+      if (path != "") {
+         EXPECT_FALSE(polar::fs::remove(path.getStr()));
       }
    }
-   operator StringRef() { return Path.getStr(); }
+   operator StringRef() { return path.getStr(); }
 };
 
 struct ScopedLink {
-   SmallString<128> Path;
+   SmallString<128> path;
    ScopedLink(const Twine &To, const Twine &From) {
-      Path = From.getStr();
-      std::error_code EC = polar::fs::create_link(To, From);
-      if (EC)
-         Path = "";
-      EXPECT_FALSE(EC);
+      path = From.getStr();
+      std::error_code errorCode = polar::fs::create_link(To, From);
+      if (errorCode)
+         path = "";
+      EXPECT_FALSE(errorCode);
    }
    ~ScopedLink() {
-      if (Path != "") {
-         EXPECT_FALSE(polar::fs::remove(Path.getStr()));
+      if (path != "") {
+         EXPECT_FALSE(polar::fs::remove(path.getStr()));
       }
    }
-   operator StringRef() { return Path.getStr(); }
+   operator StringRef() { return path.getStr(); }
+};
+
+struct ScopedFile {
+   SmallString<128> path;
+   ScopedFile(const Twine &path, StringRef Contents) {
+      path.toVector(this->path);
+      std::error_code errorCode;
+      RawFdOutStream outStream(this->path, errorCode);
+      EXPECT_FALSE(errorCode);
+      outStream << Contents;
+      outStream.flush();
+      EXPECT_FALSE(outStream.getErrorCode());
+      if (errorCode || outStream.getErrorCode()) {
+         this->path = "";
+      }
+   }
+   ~ScopedFile() {
+      if (path != "") {
+         EXPECT_FALSE(fs::remove(path.getStr()));
+      }
+   }
 };
 } // end anonymous namespace
 
@@ -404,9 +490,9 @@ TEST(VirtualFileSystemTest, testBasicRealFSIteration)
    ScopedDir TestDirectory("virtual-file-system-test", /*Unique*/ true);
    IntrusiveRefCountPtr<vfs::FileSystem> FS = vfs::get_real_file_system();
 
-   std::error_code EC;
-   vfs::DirectoryIterator I = FS->dirBegin(Twine(TestDirectory), EC);
-   ASSERT_FALSE(EC);
+   std::error_code errorCode;
+   vfs::DirectoryIterator I = FS->dirBegin(Twine(TestDirectory), errorCode);
+   ASSERT_FALSE(errorCode);
    EXPECT_EQ(vfs::DirectoryIterator(), I); // empty directory is empty
 
    ScopedDir _a(TestDirectory + "/a");
@@ -414,20 +500,81 @@ TEST(VirtualFileSystemTest, testBasicRealFSIteration)
    ScopedDir _c(TestDirectory + "/c");
    ScopedDir _cd(TestDirectory + "/c/d");
 
-   I = FS->dirBegin(Twine(TestDirectory), EC);
-   ASSERT_FALSE(EC);
+   I = FS->dirBegin(Twine(TestDirectory), errorCode);
+   ASSERT_FALSE(errorCode);
    ASSERT_NE(vfs::DirectoryIterator(), I);
    // Check either a or c, since we can't rely on the iteration order.
    EXPECT_TRUE(I->path().endsWith("a") || I->path().endsWith("c"));
-   I.increment(EC);
-   ASSERT_FALSE(EC);
+   I.increment(errorCode);
+   ASSERT_FALSE(errorCode);
    ASSERT_NE(vfs::DirectoryIterator(), I);
    EXPECT_TRUE(I->path().endsWith("a") || I->path().endsWith("c"));
-   I.increment(EC);
+   I.increment(errorCode);
    EXPECT_EQ(vfs::DirectoryIterator(), I);
 }
 
 #ifdef POLAR_ON_UNIX
+TEST(VirtualFileSystemTest, testMultipleWorkingDirs) {
+   // Our root contains a/aa, b/bb, c, where c is a link to a/.
+   // Run tests both in root/b/ and root/c/ (to test "normal" and symlink dirs).
+   // Interleave operations to show the working directories are independent.
+   ScopedDir root("r", true), ADir(root.path + "/a"), BDir(root.path + "/b");
+   ScopedLink C(ADir.path, root.path + "/c");
+   ScopedFile AA(ADir.path + "/aa", "aaaa"), BB(BDir.path + "/bb", "bbbb");
+   std::unique_ptr<vfs::FileSystem> bfs = vfs::create_physical_file_system(),
+         cfs = vfs::create_physical_file_system();
+
+   ASSERT_FALSE(bfs->setCurrentWorkingDirectory(BDir.path));
+   ASSERT_FALSE(cfs->setCurrentWorkingDirectory(C.path));
+   EXPECT_EQ(BDir.path, *bfs->getCurrentWorkingDirectory());
+   EXPECT_EQ(C.path, *cfs->getCurrentWorkingDirectory());
+
+   // openFileForRead(), indirectly.
+   auto BBuf = bfs->getBufferForFile("bb");
+   ASSERT_TRUE(BBuf);
+   EXPECT_EQ("bbbb", (*BBuf)->getBuffer());
+
+   auto ABuf = cfs->getBufferForFile("aa");
+   ASSERT_TRUE(ABuf);
+   EXPECT_EQ("aaaa", (*ABuf)->getBuffer());
+
+   // status()
+   auto BStat = bfs->getStatus("bb");
+   ASSERT_TRUE(BStat);
+   EXPECT_EQ("bb", BStat->getName());
+
+   auto AStat = cfs->getStatus("aa");
+   ASSERT_TRUE(AStat);
+   EXPECT_EQ("aa", AStat->getName()); // unresolved name
+
+   // getRealPath()
+   SmallString<128> BPath;
+   ASSERT_FALSE(bfs->getRealPath("bb", BPath));
+   EXPECT_EQ(BB.path, BPath);
+
+   SmallString<128> APath;
+   ASSERT_FALSE(cfs->getRealPath("aa", APath));
+   EXPECT_EQ(AA.path, APath); // Reports resolved name.
+
+   // dir_begin
+   std::error_code errorCode;
+   auto biter = bfs->dirBegin(".", errorCode);
+   ASSERT_FALSE(errorCode);
+   ASSERT_NE(biter, vfs::DirectoryIterator());
+   EXPECT_EQ((BDir.path + "/./bb").getStr(), biter->path());
+   biter.increment(errorCode);
+   ASSERT_FALSE(errorCode);
+   ASSERT_EQ(biter, vfs::DirectoryIterator());
+
+   auto citer = cfs->dirBegin(".", errorCode);
+   ASSERT_FALSE(errorCode);
+   ASSERT_NE(citer, vfs::DirectoryIterator());
+   EXPECT_EQ((ADir.path + "/./aa").getStr(), citer->path()); // Partly resolved name!
+   citer.increment(errorCode); // Because likely to read through this path.
+   ASSERT_FALSE(errorCode);
+   ASSERT_EQ(citer, vfs::DirectoryIterator());
+}
+
 TEST(VirtualFileSystemTest, testBrokenSymlinkRealFSIteration)
 {
    ScopedDir TestDirectory("virtual-file-system-test", /*Unique*/ true);
@@ -439,10 +586,10 @@ TEST(VirtualFileSystemTest, testBrokenSymlinkRealFSIteration)
 
    // Should get no iteration error, but a stat error for the broken symlinks.
    std::map<std::string, std::error_code> StatResults;
-   std::error_code EC;
-   for (vfs::DirectoryIterator I = FS->dirBegin(Twine(TestDirectory), EC), E;
-        I != E; I.increment(EC)) {
-      EXPECT_FALSE(EC);
+   std::error_code errorCode;
+   for (vfs::DirectoryIterator I = FS->dirBegin(Twine(TestDirectory), errorCode), E;
+        I != E; I.increment(errorCode)) {
+      EXPECT_FALSE(errorCode);
       StatResults[polar::fs::path::filename(I->path())] =
             FS->getStatus(I->path()).getError();
    }
@@ -461,9 +608,9 @@ TEST(VirtualFileSystemTest, testBasicRealFSRecursiveIteration)
    ScopedDir TestDirectory("virtual-file-system-test", /*Unique*/ true);
    IntrusiveRefCountPtr<vfs::FileSystem> FS = vfs::get_real_file_system();
 
-   std::error_code EC;
-   auto I = vfs::RecursiveDirectoryIterator(*FS, Twine(TestDirectory), EC);
-   ASSERT_FALSE(EC);
+   std::error_code errorCode;
+   auto I = vfs::RecursiveDirectoryIterator(*FS, Twine(TestDirectory), errorCode);
+   ASSERT_FALSE(errorCode);
    EXPECT_EQ(vfs::RecursiveDirectoryIterator(), I); // empty directory is empty
 
    ScopedDir _a(TestDirectory + "/a");
@@ -471,13 +618,13 @@ TEST(VirtualFileSystemTest, testBasicRealFSRecursiveIteration)
    ScopedDir _c(TestDirectory + "/c");
    ScopedDir _cd(TestDirectory + "/c/d");
 
-   I = vfs::RecursiveDirectoryIterator(*FS, Twine(TestDirectory), EC);
-   ASSERT_FALSE(EC);
+   I = vfs::RecursiveDirectoryIterator(*FS, Twine(TestDirectory), errorCode);
+   ASSERT_FALSE(errorCode);
    ASSERT_NE(vfs::RecursiveDirectoryIterator(), I);
 
    std::vector<std::string> Contents;
-   for (auto E = vfs::RecursiveDirectoryIterator(); !EC && I != E;
-        I.increment(EC)) {
+   for (auto E = vfs::RecursiveDirectoryIterator(); !errorCode && I != E;
+        I.increment(errorCode)) {
       Contents.push_back(I->path());
    }
 
@@ -512,13 +659,13 @@ TEST(VirtualFileSystemTest, testBasicRealFSRecursiveIterationNoPush)
 
    // Test that calling no_push on entries without subdirectories has no effect.
    {
-      std::error_code EC;
-      auto I = vfs::RecursiveDirectoryIterator(*FS, Twine(TestDirectory), EC);
-      ASSERT_FALSE(EC);
+      std::error_code errorCode;
+      auto I = vfs::RecursiveDirectoryIterator(*FS, Twine(TestDirectory), errorCode);
+      ASSERT_FALSE(errorCode);
 
       std::vector<std::string> Contents;
-      for (auto E = vfs::RecursiveDirectoryIterator(); !EC && I != E;
-           I.increment(EC)) {
+      for (auto E = vfs::RecursiveDirectoryIterator(); !errorCode && I != E;
+           I.increment(errorCode)) {
          Contents.push_back(I->path());
          char last = I->path().back();
          switch (last) {
@@ -537,13 +684,13 @@ TEST(VirtualFileSystemTest, testBasicRealFSRecursiveIterationNoPush)
 
    // Test that calling no_push skips subdirectories.
    {
-      std::error_code EC;
-      auto I = vfs::RecursiveDirectoryIterator(*FS, Twine(TestDirectory), EC);
-      ASSERT_FALSE(EC);
+      std::error_code errorCode;
+      auto I = vfs::RecursiveDirectoryIterator(*FS, Twine(TestDirectory), errorCode);
+      ASSERT_FALSE(errorCode);
 
       std::vector<std::string> Contents;
-      for (auto E = vfs::RecursiveDirectoryIterator(); !EC && I != E;
-           I.increment(EC)) {
+      for (auto E = vfs::RecursiveDirectoryIterator(); !errorCode && I != E;
+           I.increment(errorCode)) {
          Contents.push_back(I->path());
          char last = I->path().back();
          switch (last) {
@@ -595,10 +742,10 @@ TEST(VirtualFileSystemTest, testBrokenSymlinkRealFSRecursiveIteration)
 
    std::vector<std::string> VisitedBrokenSymlinks;
    std::vector<std::string> VisitedNonBrokenSymlinks;
-   std::error_code EC;
-   for (vfs::RecursiveDirectoryIterator I(*FS, Twine(TestDirectory), EC), E;
-        I != E; I.increment(EC)) {
-      EXPECT_FALSE(EC);
+   std::error_code errorCode;
+   for (vfs::RecursiveDirectoryIterator I(*FS, Twine(TestDirectory), errorCode), E;
+        I != E; I.increment(errorCode)) {
+      EXPECT_FALSE(errorCode);
       (FS->getStatus(I->path()) ? VisitedNonBrokenSymlinks : VisitedBrokenSymlinks)
             .push_back(I->path());
    }
@@ -617,13 +764,13 @@ TEST(VirtualFileSystemTest, testBrokenSymlinkRealFSRecursiveIteration)
 template <typename DirIter>
 static void checkContents(DirIter I, ArrayRef<StringRef> ExpectedOut)
 {
-   std::error_code EC;
+   std::error_code errorCode;
    SmallVector<StringRef, 4> Expected(ExpectedOut.begin(), ExpectedOut.end());
    SmallVector<std::string, 4> InputToCheck;
 
    // Do not rely on iteration order to check for contents, sort both
    // content vectors before comparison.
-   for (DirIter E; !EC && I != E; I.increment(EC))
+   for (DirIter E; !errorCode && I != E; I.increment(errorCode))
       InputToCheck.push_back(I->path());
 
    polar::basic::sort(InputToCheck);
@@ -643,21 +790,21 @@ TEST(VirtualFileSystemTest, testOverlayIteration)
             new vfs::OverlayFileSystem(Lower));
    O->pushOverlay(Upper);
 
-   std::error_code EC;
-   checkContents(O->dirBegin("/", EC), ArrayRef<StringRef>());
+   std::error_code errorCode;
+   checkContents(O->dirBegin("/", errorCode), ArrayRef<StringRef>());
 
    Lower->addRegularFile("/file1");
-   checkContents(O->dirBegin("/", EC), ArrayRef<StringRef>("/file1"));
+   checkContents(O->dirBegin("/", errorCode), ArrayRef<StringRef>("/file1"));
 
    Upper->addRegularFile("/file2");
-   checkContents(O->dirBegin("/", EC), {"/file2", "/file1"});
+   checkContents(O->dirBegin("/", errorCode), {"/file2", "/file1"});
 
    Lower->addDirectory("/dir1");
    Lower->addRegularFile("/dir1/foo");
    Upper->addDirectory("/dir2");
    Upper->addRegularFile("/dir2/foo");
-   checkContents(O->dirBegin("/dir2", EC), ArrayRef<StringRef>("/dir2/foo"));
-   checkContents(O->dirBegin("/", EC), {"/dir2", "/file2", "/dir1", "/file1"});
+   checkContents(O->dirBegin("/dir2", errorCode), ArrayRef<StringRef>("/dir2/foo"));
+   checkContents(O->dirBegin("/", errorCode), {"/dir2", "/file2", "/dir1", "/file1"});
 }
 
 TEST(VirtualFileSystemTest, testOverlayRecursiveIteration)
@@ -670,17 +817,17 @@ TEST(VirtualFileSystemTest, testOverlayRecursiveIteration)
    O->pushOverlay(Middle);
    O->pushOverlay(Upper);
 
-   std::error_code EC;
-   checkContents(vfs::RecursiveDirectoryIterator(*O, "/", EC),
+   std::error_code errorCode;
+   checkContents(vfs::RecursiveDirectoryIterator(*O, "/", errorCode),
                  ArrayRef<StringRef>());
 
    Lower->addRegularFile("/file1");
-   checkContents(vfs::RecursiveDirectoryIterator(*O, "/", EC),
+   checkContents(vfs::RecursiveDirectoryIterator(*O, "/", errorCode),
                  ArrayRef<StringRef>("/file1"));
 
    Upper->addDirectory("/dir");
    Upper->addRegularFile("/dir/file2");
-   checkContents(vfs::RecursiveDirectoryIterator(*O, "/", EC),
+   checkContents(vfs::RecursiveDirectoryIterator(*O, "/", errorCode),
    {"/dir", "/dir/file2", "/file1"});
 
    Lower->addDirectory("/dir1");
@@ -695,9 +842,9 @@ TEST(VirtualFileSystemTest, testOverlayRecursiveIteration)
    Upper->addDirectory("/dir2");
    Upper->addRegularFile("/dir2/foo");
    Upper->addRegularFile("/hiddenByUp");
-   checkContents(vfs::RecursiveDirectoryIterator(*O, "/dir2", EC),
+   checkContents(vfs::RecursiveDirectoryIterator(*O, "/dir2", errorCode),
                  ArrayRef<StringRef>("/dir2/foo"));
-   checkContents(vfs::RecursiveDirectoryIterator(*O, "/", EC),
+   checkContents(vfs::RecursiveDirectoryIterator(*O, "/", errorCode),
    {"/dir", "/dir/file2", "/dir2", "/dir2/foo", "/hiddenByUp",
     "/a", "/a/b", "/a/b/c", "/a/b/c/d", "/dir1", "/dir1/a",
     "/dir1/a/b", "/dir1/foo", "/file1"});
@@ -713,15 +860,15 @@ TEST(VirtualFileSystemTest, testThreeLevelIteration)
    O->pushOverlay(Middle);
    O->pushOverlay(Upper);
 
-   std::error_code EC;
-   checkContents(O->dirBegin("/", EC), ArrayRef<StringRef>());
+   std::error_code errorCode;
+   checkContents(O->dirBegin("/", errorCode), ArrayRef<StringRef>());
 
    Middle->addRegularFile("/file2");
-   checkContents(O->dirBegin("/", EC), ArrayRef<StringRef>("/file2"));
+   checkContents(O->dirBegin("/", errorCode), ArrayRef<StringRef>("/file2"));
 
    Lower->addRegularFile("/file1");
    Upper->addRegularFile("/file3");
-   checkContents(O->dirBegin("/", EC), {"/file3", "/file2", "/file1"});
+   checkContents(O->dirBegin("/", errorCode), {"/file3", "/file2", "/file1"});
 }
 
 TEST(VirtualFileSystemTest, testHiddenInIteration)
@@ -734,7 +881,7 @@ TEST(VirtualFileSystemTest, testHiddenInIteration)
    O->pushOverlay(Middle);
    O->pushOverlay(Upper);
 
-   std::error_code EC;
+   std::error_code errorCode;
    Lower->addRegularFile("/onlyInLow");
    Lower->addDirectory("/hiddenByMid");
    Lower->addDirectory("/hiddenByUp");
@@ -744,28 +891,66 @@ TEST(VirtualFileSystemTest, testHiddenInIteration)
    Upper->addRegularFile("/onlyInUp");
    Upper->addRegularFile("/hiddenByUp");
    checkContents(
-            O->dirBegin("/", EC),
+            O->dirBegin("/", errorCode),
    {"/hiddenByUp", "/onlyInUp", "/hiddenByMid", "/onlyInMid", "/onlyInLow"});
 
    // Make sure we get the top-most entry
    {
-      std::error_code EC;
-      vfs::DirectoryIterator I = O->dirBegin("/", EC), E;
-      for (; !EC && I != E; I.increment(EC))
+      std::error_code errorCode;
+      vfs::DirectoryIterator I = O->dirBegin("/", errorCode), E;
+      for (; !errorCode && I != E; I.increment(errorCode))
          if (I->path() == "/hiddenByUp")
             break;
       ASSERT_NE(E, I);
       EXPECT_EQ(polar::fs::FileType::regular_file, I->type());
    }
    {
-      std::error_code EC;
-      vfs::DirectoryIterator I = O->dirBegin("/", EC), E;
-      for (; !EC && I != E; I.increment(EC))
+      std::error_code errorCode;
+      vfs::DirectoryIterator I = O->dirBegin("/", errorCode), E;
+      for (; !errorCode && I != E; I.increment(errorCode))
          if (I->path() == "/hiddenByMid")
             break;
       ASSERT_NE(E, I);
       EXPECT_EQ(polar::fs::FileType::regular_file, I->type());
    }
+}
+
+
+TEST(VirtualFileSystemTest, testBasicProxy) {
+   IntrusiveRefCountPtr<vfs::InMemoryFileSystem> Base(
+            new vfs::InMemoryFileSystem());
+   vfs::ProxyFileSystem PFS(Base);
+
+   Base->addFile("/a", 0, MemoryBuffer::getMemBuffer("test"));
+
+   auto Stat = PFS.getStatus("/a");
+   ASSERT_FALSE(Stat.getError());
+
+   auto File = PFS.openFileForRead("/a");
+   ASSERT_FALSE(File.getError());
+   EXPECT_EQ("test", (*(*File)->getBuffer("ignored"))->getBuffer());
+
+   std::error_code errorCode;
+   vfs::DirectoryIterator I = PFS.dirBegin("/", errorCode);
+   ASSERT_FALSE(errorCode);
+   ASSERT_EQ("/a", I->path());
+   I.increment(errorCode);
+   ASSERT_FALSE(errorCode);
+   ASSERT_EQ(vfs::DirectoryIterator(), I);
+
+   ASSERT_FALSE(PFS.setCurrentWorkingDirectory("/"));
+
+   auto PWD = PFS.getCurrentWorkingDirectory();
+   ASSERT_FALSE(PWD.getError());
+   ASSERT_EQ("/", *PWD);
+
+   SmallString<16> path;
+   ASSERT_FALSE(PFS.getRealPath("a", path));
+   ASSERT_EQ("/a", path);
+
+   bool Local = true;
+   ASSERT_FALSE(PFS.isLocal("/a", Local));
+   EXPECT_FALSE(Local);
 }
 
 class InMemoryFileSystemTest : public ::testing::Test
@@ -876,24 +1061,24 @@ TEST_F(InMemoryFileSystemTest, testDirectoryIteration)
    FS.addFile("/a", 0, MemoryBuffer::getMemBuffer(""));
    FS.addFile("/b/c", 0, MemoryBuffer::getMemBuffer(""));
 
-   std::error_code EC;
-   vfs::DirectoryIterator I = FS.dirBegin("/", EC);
-   ASSERT_FALSE(EC);
+   std::error_code errorCode;
+   vfs::DirectoryIterator I = FS.dirBegin("/", errorCode);
+   ASSERT_FALSE(errorCode);
    ASSERT_EQ("/a", I->path());
-   I.increment(EC);
-   ASSERT_FALSE(EC);
+   I.increment(errorCode);
+   ASSERT_FALSE(errorCode);
    ASSERT_EQ("/b", I->path());
-   I.increment(EC);
-   ASSERT_FALSE(EC);
+   I.increment(errorCode);
+   ASSERT_FALSE(errorCode);
    ASSERT_EQ(vfs::DirectoryIterator(), I);
 
-   I = FS.dirBegin("/b", EC);
-   ASSERT_FALSE(EC);
+   I = FS.dirBegin("/b", errorCode);
+   ASSERT_FALSE(errorCode);
    // When on Windows, we end up with "/b\\c" as the name.  Convert to Posix
    // path for the sake of the comparison.
    ASSERT_EQ("/b/c", getPosixPath(I->path()));
-   I.increment(EC);
-   ASSERT_FALSE(EC);
+   I.increment(errorCode);
+   ASSERT_FALSE(errorCode);
    ASSERT_EQ(vfs::DirectoryIterator(), I);
 }
 
@@ -924,23 +1109,23 @@ TEST_F(InMemoryFileSystemTest, testIsLocal)
    FS.setCurrentWorkingDirectory("/b");
    FS.addFile("c", 0, MemoryBuffer::getMemBuffer(""));
 
-   std::error_code EC;
+   std::error_code errorCode;
    bool IsLocal = true;
-   EC = FS.isLocal("c", IsLocal);
-   ASSERT_FALSE(EC);
+   errorCode = FS.isLocal("c", IsLocal);
+   ASSERT_FALSE(errorCode);
    ASSERT_FALSE(IsLocal);
 }
 
 #if !defined(_WIN32)
 TEST_F(InMemoryFileSystemTest, testGetRealPath)
 {
-   SmallString<16> Path;
-   EXPECT_EQ(FS.getRealPath("b", Path), ErrorCode::operation_not_permitted);
+   SmallString<16> path;
+   EXPECT_EQ(FS.getRealPath("b", path), ErrorCode::operation_not_permitted);
 
    auto GetRealPath = [this](StringRef P) {
       SmallString<16> Output;
-      auto EC = FS.getRealPath(P, Output);
-      EXPECT_FALSE(EC);
+      auto errorCode = FS.getRealPath(P, Output);
+      EXPECT_FALSE(errorCode);
       return Output.getStr().getStr();
    };
 
@@ -1072,8 +1257,8 @@ TEST_F(InMemoryFileSystemTest, testStatusName)
    ASSERT_EQ("../b/c", Stat->getName());
 
    // Access using a directory iterator.
-   std::error_code EC;
-   polar::vfs::DirectoryIterator It = NormalizedFS.dirBegin("../b", EC);
+   std::error_code errorCode;
+   polar::vfs::DirectoryIterator It = NormalizedFS.dirBegin("../b", errorCode);
    // When on Windows, we end up with "../b\\c" as the name.  Convert to Posix
    // path for the sake of the comparison.
    ASSERT_EQ("../b/c", getPosixPath(It->path()));
@@ -1179,14 +1364,14 @@ TEST_F(InMemoryFileSystemTest, testAddHardLinkUnderAFile)
 
 TEST_F(InMemoryFileSystemTest, testRecursiveIterationWithHardLink)
 {
-   std::error_code EC;
+   std::error_code errorCode;
    FS.addFile("/a/b", 0, MemoryBuffer::getMemBuffer("content string"));
    EXPECT_TRUE(FS.addHardLink("/c/d", "/a/b"));
-   auto I = vfs::RecursiveDirectoryIterator(FS, "/", EC);
-   ASSERT_FALSE(EC);
+   auto I = vfs::RecursiveDirectoryIterator(FS, "/", errorCode);
+   ASSERT_FALSE(errorCode);
    std::vector<std::string> Nodes;
-   for (auto E = vfs::RecursiveDirectoryIterator(); !EC && I != E;
-        I.increment(EC)) {
+   for (auto E = vfs::RecursiveDirectoryIterator(); !errorCode && I != E;
+        I.increment(errorCode)) {
       Nodes.push_back(getPosixPath(I->path()));
    }
    EXPECT_THAT(Nodes, testing::UnorderedElementsAre("/a", "/a/b", "/c", "/c/d"));
@@ -1210,7 +1395,7 @@ public:
                         IntrusiveRefCountPtr<vfs::FileSystem> ExternalFS) {
       std::unique_ptr<MemoryBuffer> Buffer = MemoryBuffer::getMemBuffer(Content);
       return vfs::get_vfs_from_yaml(std::move(Buffer), CountingDiagHandler, "", this,
-                            ExternalFS);
+                                    ExternalFS);
    }
 
    IntrusiveRefCountPtr<vfs::FileSystem> getFromYAMLString(
@@ -1274,12 +1459,12 @@ TEST_F(VFSFromYAMLTest, testMappedFiles)
    OptionalError<vfs::Status> S = O->getStatus("//root/file1");
    ASSERT_FALSE(S.getError());
    EXPECT_EQ("//root/foo/bar/a", S->getName());
-   EXPECT_TRUE(S->IsVFSMapped);
+   EXPECT_TRUE(S->isVFSMapped);
 
    OptionalError<vfs::Status> SLower = O->getStatus("//root/foo/bar/a");
    EXPECT_EQ("//root/foo/bar/a", SLower->getName());
    EXPECT_TRUE(S->equivalent(*SLower));
-   EXPECT_FALSE(SLower->IsVFSMapped);
+   EXPECT_FALSE(SLower->isVFSMapped);
 
    // file after opening
    auto OpenedF = O->openFileForRead("//root/file1");
@@ -1287,7 +1472,7 @@ TEST_F(VFSFromYAMLTest, testMappedFiles)
    auto OpenedS = (*OpenedF)->getStatus();
    ASSERT_FALSE(OpenedS.getError());
    EXPECT_EQ("//root/foo/bar/a", OpenedS->getName());
-   EXPECT_TRUE(OpenedS->IsVFSMapped);
+   EXPECT_TRUE(OpenedS->isVFSMapped);
 
    // directory
    S = O->getStatus("//root/");
@@ -1619,11 +1804,11 @@ TEST_F(VFSFromYAMLTest, testDirectoryIteration)
             new vfs::OverlayFileSystem(Lower));
    O->pushOverlay(FS);
 
-   std::error_code EC;
-   checkContents(O->dirBegin("//root/", EC),
+   std::error_code errorCode;
+   checkContents(O->dirBegin("//root/", errorCode),
    {"//root/file1", "//root/file2", "//root/file3", "//root/foo"});
 
-   checkContents(O->dirBegin("//root/foo/bar", EC),
+   checkContents(O->dirBegin("//root/foo/bar", errorCode),
    {"//root/foo/bar/a", "//root/foo/bar/b"});
 }
 
@@ -1670,9 +1855,9 @@ TEST_F(VFSFromYAMLTest, testDirectoryIterationSameDirMultipleEntries)
             new vfs::OverlayFileSystem(Lower));
    O->pushOverlay(FS);
 
-   std::error_code EC;
+   std::error_code errorCode;
 
-   checkContents(O->dirBegin("//root/baz/", EC),
+   checkContents(O->dirBegin("//root/baz/", errorCode),
    {"//root/baz/x", "//root/baz/y"});
 }
 
@@ -1706,15 +1891,15 @@ TEST_F(VFSFromYAMLTest, testRecursiveDirectoryIterationLevel)
             new vfs::OverlayFileSystem(Lower));
    O->pushOverlay(FS);
 
-   std::error_code EC;
+   std::error_code errorCode;
 
    // Test RecursiveDirectoryIterator level()
    vfs::RecursiveDirectoryIterator I = vfs::RecursiveDirectoryIterator(
-            *O, "//root", EC),
+            *O, "//root", errorCode),
          E;
-   ASSERT_FALSE(EC);
-   for (int l = 0; I != E; I.increment(EC), ++l) {
-      ASSERT_FALSE(EC);
+   ASSERT_FALSE(errorCode);
+   for (int l = 0; I != E; I.increment(errorCode), ++l) {
+      ASSERT_FALSE(errorCode);
       EXPECT_EQ(I.level(), l);
    }
    EXPECT_EQ(I, E);
@@ -1780,8 +1965,8 @@ TEST_F(VFSFromYAMLTest, testNonFallthroughDirectoryIteration)
             Lower);
    ASSERT_TRUE(FS.get() != nullptr);
 
-   std::error_code EC;
-   checkContents(FS->dirBegin("//root/", EC),
+   std::error_code errorCode;
+   checkContents(FS->dirBegin("//root/", errorCode),
    {"//root/c"});
 }
 
@@ -1809,8 +1994,8 @@ TEST_F(VFSFromYAMLTest, testDirectoryIterationWithDuplicates)
             Lower);
    ASSERT_TRUE(FS.get() != nullptr);
 
-   std::error_code EC;
-   checkContents(FS->dirBegin("//root/", EC),
+   std::error_code errorCode;
+   checkContents(FS->dirBegin("//root/", errorCode),
    {"//root/a", "//root/b"});
 }
 
@@ -1839,8 +2024,8 @@ TEST_F(VFSFromYAMLTest, testDirectoryIterationErrorInVFSLayer)
             Lower);
    ASSERT_TRUE(FS.get() != nullptr);
 
-   std::error_code EC;
-   checkContents(FS->dirBegin("//root/foo", EC),
+   std::error_code errorCode;
+   checkContents(FS->dirBegin("//root/foo", errorCode),
    {"//root/foo/a", "//root/foo/b"});
 }
 

@@ -1,7 +1,14 @@
+//===- StringMap.h - String Hash table map interface ------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -27,8 +34,7 @@
 #include <iterator>
 #include <utility>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 template<typename ValueType>
 class StringMapConstIterator;
@@ -157,15 +163,15 @@ template<typename ValueType>
 class StringMapEntry : public StringMapEntryBase
 {
 public:
-   ValueType m_second;
+   ValueType second;
 
    explicit StringMapEntry(size_t strLen)
-      : StringMapEntryBase(strLen), m_second()
+      : StringMapEntryBase(strLen), second()
    {}
 
    template <typename... InitType>
    StringMapEntry(size_t strLen, InitType &&... initVals)
-      : StringMapEntryBase(strLen), m_second(std::forward<InitType>(initVals)...)
+      : StringMapEntryBase(strLen), second(std::forward<InitType>(initVals)...)
    {}
 
    StringMapEntry(StringMapEntry &entry) = delete;
@@ -177,17 +183,17 @@ public:
 
    const ValueType &getValue() const
    {
-      return m_second;
+      return second;
    }
 
    ValueType &getValue()
    {
-      return m_second;
+      return second;
    }
 
    void setValue(const ValueType &value)
    {
-      m_second = value;
+      second = value;
    }
 
    /// getKeyData - Return the start of the string data that is the key for this
@@ -443,7 +449,7 @@ public:
    {
       const_iterator iter = find(key);
       if (iter != end()) {
-         return iter->m_second;
+         return iter->second;
       }
       return ValueType();
    }
@@ -452,13 +458,19 @@ public:
    /// if the key is not in the map.
    ValueType &operator[](StringRef key)
    {
-      return tryEmplace(key).first->m_second;
+      return tryEmplace(key).first->second;
    }
 
    /// count - Return 1 if the element is in the map, 0 otherwise.
    size_type count(StringRef key) const
    {
       return find(key) == end() ? 0 : 1;
+   }
+
+   template <typename InputTy>
+   size_type count(const StringMapEntry<InputTy> &entry) const
+   {
+      return count(entry.getKey());
    }
 
    /// insert - Insert the specified key/value pair into the map.  If the key
@@ -685,7 +697,6 @@ private:
    StringRef m_key;
 };
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_STRING_MAP_H

@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// copyright (c) 2017 - 2018 polarphp software foundation
-// copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// copyright (c) 2017 - 2019 polarphp software foundation
+// copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information

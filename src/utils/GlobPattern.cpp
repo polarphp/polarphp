@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -15,8 +15,7 @@
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/utils/ErrorCode.h"
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::BitVector;
 
@@ -186,5 +185,4 @@ bool GlobPattern::matchOne(ArrayRef<BitVector> pattern, StringRef str) const
    }
 }
 
-} // utils
-} // polar
+} // polar::utils

@@ -1,9 +1,14 @@
+//========- unittests/Support/Host.cpp - Host.cpp tests --------------========//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
-
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
-
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 
@@ -36,7 +41,7 @@ using namespace polar::basic;
 
 namespace {
 
-class HostTestFix : public testing::Test {
+class HostTest : public testing::Test {
    Triple Host;
 
 protected:
@@ -48,10 +53,10 @@ protected:
               (Host.isOSDarwin() || Host.getOS() == Triple::OSType::Linux));
    }
 
-   HostTestFix() : Host(Triple::normalize(polar::sys::get_process_triple())) {}
+   HostTest() : Host(Triple::normalize(polar::sys::get_process_triple())) {}
 };
 
-TEST_F(HostTestFix, testNumPhysicalCores)
+TEST_F(HostTest, testNumPhysicalCores)
 {
    int Num = polar::sys::get_host_num_physical_cores();
 
@@ -62,7 +67,7 @@ TEST_F(HostTestFix, testNumPhysicalCores)
    }
 }
 
-TEST(HostTest, testLinuxHostCPUNamARM)
+TEST_F(HostTest, testLinuxHostCPUNamARM)
 {
    StringRef CortexA9ProcCpuinfo =
          R"(
@@ -105,7 +110,7 @@ Serial          : 0000000000000000
              "krait");
 }
 
-TEST(HostTest, testLinuxHostCPUNameAArch64)
+TEST_F(HostTest, testLinuxHostCPUNameAArch64)
 {
    EXPECT_EQ(sys::internal::get_host_cpu_name_for_arm("CPU implementer : 0x41\n"
                                                       "CPU part        : 0xd03"),
@@ -263,38 +268,63 @@ CPU part	: 0x0a1
                "tsv110");
 }
 
+#if defined(__APPLE__) || defined(_AIX)
+static bool runAndGetCommandOutput(
+      const char *ExePath, ArrayRef<StringRef> argv,
+      std::unique_ptr<char[]> &Buffer, off_t &Size) {
+   bool Success = false;
+   [ExePath, argv, &Buffer, &Size, &Success] {
+      SmallString<128> TestDirectory;
+      ASSERT_NO_ERROR(fs::create_unique_directory("host_test", TestDirectory));
+
+      SmallString<128> OutputFile(TestDirectory);
+      fs::path::append(OutputFile, "out");
+      StringRef OutputPath = OutputFile.getStr();
+
+      const std::optional<StringRef> Redirects[] = {
+         /*STDIN=*/std::nullopt, /*STDOUT=*/OutputPath, /*STDERR=*/std::nullopt};
+      int RetCode = sys::execute_and_wait(ExePath, argv, std::nullopt, /*env=*/std::nullopt, Redirects);
+      ASSERT_EQ(0, RetCode);
+
+      int FD = 0;
+      ASSERT_NO_ERROR(fs::open_file_for_read(OutputPath, FD));
+      Size = ::lseek(FD, 0, SEEK_END);
+      ASSERT_NE(-1, Size);
+      ::lseek(FD, 0, SEEK_SET);
+      Buffer = std::make_unique<char[]>(Size);
+      ASSERT_EQ(::read(FD, Buffer.get(), Size), Size);
+      ::close(FD);
+
+      ASSERT_NO_ERROR(fs::remove(OutputPath));
+      ASSERT_NO_ERROR(fs::remove(TestDirectory.getStr()));
+      Success = true;
+   }();
+   return Success;
+}
+
+TEST_F(HostTest, testDummyRunAndGetCommandOutputUse) {
+   // Suppress defined-but-not-used warnings when the tests using the helper are
+   // disabled.
+   (void) runAndGetCommandOutput;
+}
+#endif
+
+
 #if defined(__APPLE__)
-TEST_F(HostTestFix, testGetMacOSHostVersion)
+TEST_F(HostTest, testGetMacOSHostVersion)
 {
    Triple HostTriple(sys::get_process_triple());
    if (!HostTriple.isMacOSX())
       return;
 
-   SmallString<128> TestDirectory;
-   ASSERT_NO_ERROR(fs::create_unique_directory("host_test", TestDirectory));
-   SmallString<128> OutputFile(TestDirectory);
-   fs::path::append(OutputFile, "out");
-
    const char *SwVersPath = "/usr/bin/sw_vers";
    StringRef argv[] = {SwVersPath, "-productVersion"};
-   StringRef OutputPath = OutputFile.getStr();
-   const std::optional<StringRef> Redirects[] = {/*STDIN=*/std::nullopt,
-                                                 /*STDOUT=*/OutputPath,
-                                                 /*STDERR=*/std::nullopt};
-   int RetCode = sys::execute_and_wait(SwVersPath, argv,std::nullopt, /*env=*/std::nullopt, Redirects);
-   ASSERT_EQ(0, RetCode);
-
-   int FD = 0;
-   ASSERT_NO_ERROR(fs::open_file_for_read(OutputPath, FD));
-   off_t Size = ::lseek(FD, 0, SEEK_END);
-   ASSERT_NE(-1, Size);
-   ::lseek(FD, 0, SEEK_SET);
-   std::unique_ptr<char[]> Buffer = std::make_unique<char[]>(Size);
-   ASSERT_EQ(::read(FD, Buffer.get(), Size), Size);
-   ::close(FD);
+   std::unique_ptr<char[]> Buffer;
+   off_t Size;
+   ASSERT_EQ(runAndGetCommandOutput(SwVersPath, argv, Buffer, Size), true);
+   StringRef SystemVersion(Buffer.get(), Size);
 
    // Ensure that the two versions match.
-   StringRef SystemVersion(Buffer.get(), Size);
    unsigned SystemMajor, SystemMinor, SystemMicro;
    ASSERT_EQ(Triple((Twine("x86_64-apple-macos") + SystemVersion))
              .getMacOSXVersion(SystemMajor, SystemMinor, SystemMicro),
@@ -305,9 +335,52 @@ TEST_F(HostTestFix, testGetMacOSHostVersion)
    // Don't compare the 'Micro' version, as it's always '0' for the 'Darwin'
    // triples.
    ASSERT_EQ(std::tie(SystemMajor, SystemMinor), std::tie(HostMajor, HostMinor));
+}
+#endif
 
-   ASSERT_NO_ERROR(fs::remove(OutputPath));
-   ASSERT_NO_ERROR(fs::remove(TestDirectory.getStr()));
+#if defined(_AIX)
+TEST_F(HostTest, AIXVersionDetect) {
+
+   Triple HostTriple(sys::get_process_triple());
+   ASSERT_EQ(HostTriple.getOS(), Triple::OSType::AIX);
+
+   Triple ConfiguredHostTriple(POLAR_HOST_TRIPLE);
+   ASSERT_EQ(ConfiguredHostTriple.getOS(), Triple::OsType::AIX);
+
+   const char *ExePath = "/usr/bin/oslevel";
+   StringRef argv[] = {ExePath};
+   std::unique_ptr<char[]> Buffer;
+   off_t Size;
+   ASSERT_EQ(runAndGetCommandOutput(ExePath, argv, Buffer, Size), true);
+   StringRef SystemVersion(Buffer.get(), Size);
+
+   unsigned SystemMajor, SystemMinor, SystemMicro;
+   Triple((Twine("powerpc-ibm-aix") + SystemVersion))
+         .getOSVersion(SystemMajor, SystemMinor, SystemMicro);
+
+   // Ensure that the host triple version (major) and release (minor) numbers,
+   // unless explicitly configured, match with those of the current system.
+   if (!ConfiguredHostTriple.getOSMajorVersion()) {
+      unsigned HostMajor, HostMinor, HostMicro;
+      HostTriple.getOSVersion(HostMajor, HostMinor, HostMicro);
+      ASSERT_EQ(std::tie(SystemMajor, SystemMinor),
+                std::tie(HostMajor, HostMinor));
+   }
+
+   Triple TargetTriple(sys::get_default_target_triple());
+   if (TargetTriple.getOS() != Triple::OSType::AIX)
+      return;
+
+   // Ensure that the target triple version (major) and release (minor) numbers
+   // match with those of the current system.
+   Triple ConfiguredTargetTriple(POLAR_DEFAULT_TARGET_TRIPLE);
+   if (ConfiguredTargetTriple.getOSMajorVersion())
+      return; // The version was configured explicitly; skip.
+
+   unsigned TargetMajor, TargetMinor, TargetMicro;
+   TargetTriple.getOSVersion(TargetMajor, TargetMinor, TargetMicro);
+   ASSERT_EQ(std::tie(SystemMajor, SystemMinor),
+             std::tie(TargetMajor, TargetMinor));
 }
 #endif
 

@@ -1,7 +1,14 @@
+//=== Registry.h - Linker-supported plugin registries -----------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -16,14 +23,15 @@
 #include "polarphp/basic/adt/StringRef.h"
 #include "polarphp/basic/adt/IteratorRange.h"
 #include "polarphp/utils/DynamicLibrary.h"
+#include "polarphp/basic/adt/Iterator.h"
 #include <memory>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 using polar::basic::IteratorRange;
 using polar::basic::make_range;
 using polar::basic::StringRef;
+using polar::basic::IteratorFacadeBase;
 
 /// A simple registry EntryType which provides only a name, description, and
 /// no-argument constructor.
@@ -104,7 +112,8 @@ public:
 
    /// Iterators for registry entries.
    ///
-   class Iterator
+   class Iterator : public IteratorFacadeBase<Iterator, std::forward_iterator_tag,
+         const EntryType>
    {
       const Node *m_cur;
 
@@ -117,11 +126,6 @@ public:
          return m_cur == other.m_cur;
       }
 
-      bool operator!=(const Iterator &other) const
-      {
-         return m_cur != other.m_cur;
-      }
-
       Iterator &operator++()
       {
          m_cur = m_cur->m_next;
@@ -131,11 +135,6 @@ public:
       const EntryType &operator*() const
       {
          return m_cur->m_value;
-      }
-
-      const EntryType *operator->() const
-      {
-         return &m_cur->m_value;
       }
    };
 
@@ -177,8 +176,7 @@ public:
    };
 };
 
-} // utils
-} // polar
+} // polar::utils
 
 /// Instantiate a registry class.
 ///
@@ -200,16 +198,16 @@ public:
    else \
    m_head = node; \
    m_tail = node; \
-} \
+   } \
    template<typename T> typename Registry<T>::Iterator Registry<T>::begin() { \
    return Iterator(m_head); \
-} \
+   } \
    template REGISTRY_CLASS::Node *Registry<REGISTRY_CLASS::type>::m_head; \
    template REGISTRY_CLASS::Node *Registry<REGISTRY_CLASS::type>::m_tail; \
    template \
    void Registry<REGISTRY_CLASS::type>::addNode(REGISTRY_CLASS::Node*); \
    template REGISTRY_CLASS::Iterator Registry<REGISTRY_CLASS::type>::begin(); \
-}\
-}
+   }\
+   }
 
 #endif // POLARPHP_UTILS_REGISTRY_H

@@ -1,7 +1,14 @@
+//===- llvm/ADT/AllocatorList.h - Custom allocator list ---------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -23,8 +30,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace polar {
-namespace basic {
+namespace polar::basic {
 
 using polar::utils::BumpPtrAllocator;
 
@@ -419,7 +425,6 @@ public:
 template <typename T>
 using BumpPtrList = AllocatorList<T, BumpPtrAllocator>;
 
-} // basic
-} // polar
+} // polar::basic
 
 #endif // POLARPHP_BASIC_ADT_ALLOCATOR_LIST_H

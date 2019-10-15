@@ -1,7 +1,14 @@
+//===- VersionTuple.h - Version Number Handling -----------------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -27,8 +34,7 @@
 #include <string>
 #include <tuple>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 /// Represents a version number in the form major[.minor[.subminor[.build]]].
 class VersionTuple
@@ -172,6 +178,7 @@ public:
    /// \returns \c true if the string does not match the regular expression
    ///   [0-9]+(\.[0-9]+){0,3}
    bool tryParse(StringRef string);
+
 private:
    unsigned m_major : 32;
    unsigned m_minor : 31;
@@ -185,7 +192,6 @@ private:
 /// Print a version number.
 RawOutStream &operator<<(RawOutStream &Out, const VersionTuple &version);
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_VERSION_TUPLE_H

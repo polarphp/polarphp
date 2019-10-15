@@ -1,7 +1,7 @@
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
@@ -62,9 +62,10 @@ public:
 
 bool fd_has_content(int fd, StringRef content)
 {
-   auto Buffer = MemoryBuffer::getOpenFile(fd, "", -1);
-   assert(Buffer);
-   return Buffer.get()->getBuffer() == content;
+   auto buffer =
+         MemoryBuffer::getOpenFile(fs::convert_fd_to_native_file(fd), "", -1);
+   assert(buffer);
+   return buffer.get()->getBuffer() == content;
 }
 
 bool file_has_content(StringRef file, StringRef content)
@@ -159,8 +160,9 @@ TEST(ReplaceFileTest, testExistingTemp)
       std::error_code EC;
       ASSERT_NO_ERROR(fs::open_file_for_read(targetFileName, TargetFD));
       ScopedFD X(TargetFD);
-      fs::MappedFileRegion MFR(
-               TargetFD, fs::MappedFileRegion::readonly, 10, 0, EC);
+      fs::MappedFileRegion MFR(fs::convert_fd_to_native_file(TargetFD),
+                               fs::MappedFileRegion::readonly, 10,
+                               0, EC);
       ASSERT_FALSE(EC);
 
       ASSERT_NO_ERROR(fs::rename(sourceFileName, targetFileName));

@@ -1,21 +1,27 @@
+//===--- AlignOf.h - Portable calculation of type alignment -----*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarphp software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2018/10/08.
+// Created by polarboy on 2019/04/24.
 
 #ifndef POLARPHP_UTILS_ALIGN_OF_H
 #define POLARPHP_UTILS_ALIGN_OF_H
 
 #include <cstddef>
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
 /// \struct AlignedCharArray
 /// Helper for building an aligned character array type.
@@ -147,7 +153,6 @@ sizeof(internal::SizerImpl<T1, T2, T3, T4, T5,
        T6, T7, T8, T9, T10>)>
 {};
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_ALIGN_OF_H

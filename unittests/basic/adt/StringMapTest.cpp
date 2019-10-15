@@ -1,16 +1,22 @@
+//===- llvm/unittest/ADT/StringMapMap.cpp - StringMap unit tests ----------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2018 polarPHP software foundation
-// Copyright (c) 2017 - 2018 zzu_softboy <zzu_softboy@163.com>
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarPHP project authors
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2018/07/09.
 
 #include "polarphp/basic/adt/StringMap.h"
-#include "polarphp/basic/adt/StringSet.h"
 #include "polarphp/basic/adt/Twine.h"
 #include "polarphp/global/DataTypes.h"
 #include "gtest/gtest.h"
@@ -61,7 +67,7 @@ protected:
       // Iterator tests
       StringMap<uint32_t>::iterator it = testMap.begin();
       EXPECT_STREQ(testKey, it->getFirst().getData());
-      EXPECT_EQ(testValue, it->m_second);
+      EXPECT_EQ(testValue, it->second);
       ++it;
       EXPECT_TRUE(it == testMap.end());
 
@@ -218,9 +224,9 @@ TEST_F(StringMapTest, testIterationTest)
    for (StringMap<uint32_t>::iterator it = testMap.begin();
         it != testMap.end(); ++it) {
       std::stringstream ss;
-      ss << "key_" << it->m_second;
+      ss << "key_" << it->second;
       ASSERT_STREQ(ss.str().c_str(), it->getFirst().getData());
-      visited[it->m_second] = true;
+      visited[it->second] = true;
    }
 
    // Ensure every number was visited.
@@ -236,7 +242,7 @@ TEST_F(StringMapTest, testStringMapEntryTest)
          StringMap<uint32_t>::value_type::create(
             StringRef(testKeyFirst, testKeyLength), 1u);
    EXPECT_STREQ(testKey, entry->getFirst().getData());
-   EXPECT_EQ(1u, entry->m_second);
+   EXPECT_EQ(1u, entry->second);
    free(entry);
 }
 
@@ -261,7 +267,7 @@ TEST_F(StringMapTest, testInsertPairTest)
    EXPECT_EQ(1u, testMap.getSize());
    EXPECT_EQ(testValue, testMap[testKeyFirst]);
    EXPECT_EQ(testKeyFirst, NewIt->getFirst());
-   EXPECT_EQ(testValue, NewIt->m_second);
+   EXPECT_EQ(testValue, NewIt->second);
    EXPECT_TRUE(Inserted);
 
    StringMap<uint32_t>::iterator ExistingIt;
@@ -287,7 +293,7 @@ TEST_F(StringMapTest, testInsertRehashingPairTest)
          t.insert(std::make_pair("abcdef", 42)).first;
    EXPECT_EQ(16u, t.getNumBuckets());
    EXPECT_EQ("abcdef", iter->getFirst());
-   EXPECT_EQ(42u, iter->m_second);
+   EXPECT_EQ(42u, iter->second);
 }
 
 TEST_F(StringMapTest, testIterMapKeys)
@@ -305,20 +311,6 @@ TEST_F(StringMapTest, testIterMapKeys)
    EXPECT_EQ(Expected, keys);
 }
 
-TEST_F(StringMapTest, testIterSetKeys)
-{
-   StringSet<> set;
-   set.insert("A");
-   set.insert("B");
-   set.insert("C");
-   set.insert("D");
-
-   auto keys = to_vector<4>(set.getKeys());
-   polar::basic::sort(keys);
-
-   SmallVector<StringRef, 4> Expected = {"A", "B", "C", "D"};
-   EXPECT_EQ(Expected, keys);
-}
 
 // Create a non-default constructable value
 struct StringMapTestStruct
@@ -334,7 +326,7 @@ TEST_F(StringMapTest, testNonDefaultConstructable)
    t.insert(std::make_pair("Test", StringMapTestStruct(123)));
    StringMap<StringMapTestStruct>::iterator iter = t.find("Test");
    ASSERT_NE(iter, t.end());
-   ASSERT_EQ(iter->m_second.i, 123);
+   ASSERT_EQ(iter->second.i, 123);
 }
 
 struct Immovable
@@ -430,7 +422,7 @@ TEST_F(StringMapTest, testMoveDtor)
    ASSERT_EQ(InstanceCount, 1);
    auto I = A.find("x");
    ASSERT_NE(I, A.end());
-   ASSERT_EQ(I->m_second.Number, 42);
+   ASSERT_EQ(I->second.Number, 42);
 
    StringMap<Countable> B;
    B = std::move(A);
@@ -438,7 +430,7 @@ TEST_F(StringMapTest, testMoveDtor)
    ASSERT_TRUE(A.empty());
    I = B.find("x");
    ASSERT_NE(I, B.end());
-   ASSERT_EQ(I->m_second.Number, 42);
+   ASSERT_EQ(I->second.Number, 42);
 
    B = StringMap<Countable>();
    ASSERT_EQ(InstanceCount, 0);
