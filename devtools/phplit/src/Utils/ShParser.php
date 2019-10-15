@@ -11,6 +11,7 @@
 // Created by polarboy on 2019/10/12.
 namespace Lit\Utils;
 
+use Lit\Kernel\GlobItemCommand;
 use Lit\Kernel\PipelineCommand;
 use Lit\Kernel\SeqCmmand;
 use Lit\Kernel\ValueException;

@@ -23,6 +23,19 @@ class ShCommand implements ShCommandInterface
     */
    protected $redirects;
 
+
+    /**
+     * ShCommand constructor.
+     * @param string $args
+     * @param string $redirects
+     */
+   public function __construct(string $args,string $redirects)
+   {
+       $this->args = $args;
+       $this->redirects = $redirects;
+   }
+
+
    public function __toString() : string
    {
       return sprintf('Command(%s, %s)', var_export($this->args, true), var_export($this->redirects, true));

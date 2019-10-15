@@ -31,7 +31,7 @@ class GlobItemCommand implements ShCommandInterface
 
    public function equalWith($other) : bool
    {
-      if (!$other instanceof ShCommandInterface) {
+      if (!$other instanceof GlobItemCommand) {
          return false;
       }
       return $this->pattern == $other->pattern;
@@ -39,6 +39,7 @@ class GlobItemCommand implements ShCommandInterface
 
    public function resolve(string $cwd) : array
    {
+       //TODO is_absolute_path函数不存在 是否实在类中实现一个函数
       if (is_absolute_path($this->pattern)) {
          $abspath = $this->pattern;
       } else {

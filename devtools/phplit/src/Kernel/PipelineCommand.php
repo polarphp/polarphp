@@ -36,7 +36,8 @@ class PipelineCommand implements ShCommandInterface
 
    public function __toString() : string
    {
-      return sprintf('Pipeline(%s, %s, %s)', var_export($this->args, true), var_export($this->redirects, true));
+       //todo $this->args && $this->redirects 并不存在
+       return sprintf('Pipeline(%s, %s, %s)', var_export($this->args, true), var_export($this->redirects, true));
    }
 
    public function equalWith($other) : bool

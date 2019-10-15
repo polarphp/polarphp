@@ -37,6 +37,7 @@ class SeqCmmand implements ShCommandInterface
 
    public function __toString() : string
    {
+       //todo $this->args && $this->redirects 并不存在
       return sprintf('Seq(%s, %s, %s)', var_export($this->args, true), var_export($this->redirects, true));
    }
 
