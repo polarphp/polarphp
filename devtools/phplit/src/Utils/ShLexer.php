@@ -10,6 +10,7 @@
 //
 // Created by polarboy on 2019/10/12.
 namespace Lit\Utils;
+use Lit\Kernel\GlobItemCommand;
 use Lit\Kernel\ValueException;
 
 class ShLexer
@@ -266,6 +267,7 @@ class ShLexer
     */
    public function getData(): array
    {
+      //todo 实例的时候 放入变量的是一个字符串 但是返回却是数组类型
       return $this->data;
    }
 
