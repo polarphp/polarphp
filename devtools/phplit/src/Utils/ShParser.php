@@ -33,7 +33,7 @@ class ShParser
    public function __construct($data, $win32Escapes = false, $pipeFail = false)
    {
       $this->data = $data;
-      $this->pipeFail = $this->pipeFail;
+      $this->pipeFail = $pipeFail;
       $this->tokens = new ShLexer($data, $pipeFail);
    }
 
