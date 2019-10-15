@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
    cmdParser.add_option("--input-file", inputFilename, "File to check (defaults to stdin)")->default_val("-")
          ->type_name("filename");
    cmdParser.add_option("--check-prefix", checkPrefix, "Prefix to use from check file (defaults to 'CHECK')");
-   cmdParser.add_option("--check-prefixes", sg_checkPrefixes, "Alias for -check-prefix permitting multiple comma separated values");
+   cmdParser.add_option("--check-prefixes", sg_checkPrefixes, "Alias for --check-prefix permitting multiple comma separated values");
    cmdParser.add_flag("--strict-whitespace", noCanonicalizeWhiteSpace, "Do not treat all horizontal whitespace as equivalent");
    cmdParser.add_option("--implicit-check-not", sg_implicitCheckNot, "Add an implicit negative check with this pattern to every"
                                                                      "positive check. This can be used to ensure that no instances of"
@@ -145,6 +145,10 @@ int main(int argc, char *argv[])
    checkRequest.noCanonicalizeWhiteSpace = noCanonicalizeWhiteSpace;
    checkRequest.matchFullLines = matchFullLines;
 
+   if (verboseVerbose) {
+      checkRequest.verbose = true;
+   }
+
    FileCheck fileChecker(checkRequest);
    if (!fileChecker.validateCheckPrefixes()) {
       error_stream() << "Supplied check-prefix is invalid! Prefixes must be unique and "
@@ -167,76 +171,76 @@ int main(int argc, char *argv[])
 
    SourceMgr sourceMgr;
 
-     // Read the expected strings from the check file.
-     OptionalError<std::unique_ptr<MemoryBuffer>> checkFileOrError =
+   // Read the expected strings from the check file.
+   OptionalError<std::unique_ptr<MemoryBuffer>> checkFileOrError =
          MemoryBuffer::getFileOrStdIn(checkFilename);
-     if (std::error_code errorCode = checkFileOrError.getError()) {
-       error_stream() << "Could not open check file '" << checkFilename
-              << "': " << errorCode.message() << '\n';
-       return 2;
-     }
-     MemoryBuffer &checkFile = *checkFileOrError.get();
+   if (std::error_code errorCode = checkFileOrError.getError()) {
+      error_stream() << "Could not open check file '" << checkFilename
+                     << "': " << errorCode.message() << '\n';
+      return 2;
+   }
+   MemoryBuffer &checkFile = *checkFileOrError.get();
 
-     SmallString<4096> checkFileBuffer;
-     StringRef checkFileText = fileChecker.canonicalizeFile(checkFile, checkFileBuffer);
+   SmallString<4096> checkFileBuffer;
+   StringRef checkFileText = fileChecker.canonicalizeFile(checkFile, checkFileBuffer);
 
-     sourceMgr.addNewSourceBuffer(MemoryBuffer::getMemBuffer(
-                               checkFileText, checkFile.getBufferIdentifier()),
-                           SMLocation());
+   sourceMgr.addNewSourceBuffer(MemoryBuffer::getMemBuffer(
+                                   checkFileText, checkFile.getBufferIdentifier()),
+                                SMLocation());
 
-     std::vector<FileCheckString> checkStrings;
-     if (fileChecker.readCheckFile(sourceMgr, checkFileText, prefixRegex, checkStrings)) {
-        return 2;
-     }
+   std::vector<FileCheckString> checkStrings;
+   if (fileChecker.readCheckFile(sourceMgr, checkFileText, prefixRegex, checkStrings)) {
+      return 2;
+   }
 
 
-     // Open the file to check and add it to SourceMgr.
-     OptionalError<std::unique_ptr<MemoryBuffer>> inputFileOrErr =
+   // Open the file to check and add it to SourceMgr.
+   OptionalError<std::unique_ptr<MemoryBuffer>> inputFileOrErr =
          MemoryBuffer::getFileOrStdIn(inputFilename);
-     if (std::error_code errorCode = inputFileOrErr.getError()) {
-       error_stream() << "Could not open input file '" << inputFilename
-              << "': " << errorCode.message() << '\n';
-       return 2;
-     }
-     MemoryBuffer &inputFile = *inputFileOrErr.get();
+   if (std::error_code errorCode = inputFileOrErr.getError()) {
+      error_stream() << "Could not open input file '" << inputFilename
+                     << "': " << errorCode.message() << '\n';
+      return 2;
+   }
+   MemoryBuffer &inputFile = *inputFileOrErr.get();
 
-     if (inputFile.getBufferSize() == 0 && !allowEmptyInput) {
-       error_stream() << "FileCheck error: '" << inputFilename << "' is empty.\n";
-       dump_command_line(argc, argv);
-       return 2;
-     }
+   if (inputFile.getBufferSize() == 0 && !allowEmptyInput) {
+      error_stream() << "FileCheck error: '" << inputFilename << "' is empty.\n";
+      dump_command_line(argc, argv);
+      return 2;
+   }
 
-     SmallString<4096> InputFileBuffer;
-     StringRef inputFileText = fileChecker.canonicalizeFile(inputFile, InputFileBuffer);
+   SmallString<4096> InputFileBuffer;
+   StringRef inputFileText = fileChecker.canonicalizeFile(inputFile, InputFileBuffer);
 
-     sourceMgr.addNewSourceBuffer(MemoryBuffer::getMemBuffer(
-                               inputFileText, inputFile.getBufferIdentifier()),
-                           SMLocation());
+   sourceMgr.addNewSourceBuffer(MemoryBuffer::getMemBuffer(
+                                   inputFileText, inputFile.getBufferIdentifier()),
+                                SMLocation());
 
-     if (dumpInput == DumpInputValue::Default) {
-        dumpInput = dumpInputOnFailure ? DumpInputValue::Fail : DumpInputValue::Never;
-     }
+   if (dumpInput == DumpInputValue::Default) {
+      dumpInput = dumpInputOnFailure ? DumpInputValue::Fail : DumpInputValue::Never;
+   }
 
-     std::vector<FileCheckDiag> diags;
-     int exitCode = fileChecker.checkInput(sourceMgr, inputFileText, checkStrings,
-                                  dumpInput == DumpInputValue::Never ? nullptr : &diags)
-                        ? EXIT_SUCCESS
-                        : 1;
-     if (dumpInput == DumpInputValue::Always ||
-         (exitCode == 1 && dumpInput == DumpInputValue::Fail)) {
-       error_stream() << "\n"
-              << "Input file: "
-              << (inputFilename == "-" ? "<stdin>" : inputFilename)
-              << "\n"
-              << "Check file: " << checkFilename << "\n"
-              << "\n"
-              << "-dump-input=help describes the format of the following dump.\n"
-              << "\n";
-       std::vector<InputAnnotation> annotations;
-       unsigned labelWidth;
-       build_input_annotations(diags, annotations, labelWidth);
-       dump_annotated_input(error_stream(), checkRequest, inputFileText, annotations, labelWidth);
-     }
+   std::vector<FileCheckDiag> diags;
+   int exitCode = fileChecker.checkInput(sourceMgr, inputFileText, checkStrings,
+                                         dumpInput == DumpInputValue::Never ? nullptr : &diags)
+         ? EXIT_SUCCESS
+         : 1;
+   if (dumpInput == DumpInputValue::Always ||
+       (exitCode == 1 && dumpInput == DumpInputValue::Fail)) {
+      error_stream() << "\n"
+                     << "Input file: "
+                     << (inputFilename == "-" ? "<stdin>" : inputFilename)
+                     << "\n"
+                     << "Check file: " << checkFilename << "\n"
+                     << "\n"
+                     << "-dump-input=help describes the format of the following dump.\n"
+                     << "\n";
+      std::vector<InputAnnotation> annotations;
+      unsigned labelWidth;
+      build_input_annotations(diags, annotations, labelWidth);
+      dump_annotated_input(error_stream(), checkRequest, inputFileText, annotations, labelWidth);
+   }
 
-     return exitCode;
+   return exitCode;
 }

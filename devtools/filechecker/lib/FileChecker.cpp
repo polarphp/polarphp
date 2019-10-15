@@ -105,7 +105,7 @@ Expected<std::string> FileCheckNumericSubstitution::getResult() const
 Expected<std::string> FileCheckStringSubstitution::getResult() const
 {
    // Look up the value and escape it so that we can put it into the regex.
-   Expected<StringRef> varVal = m_m_context->getPatternVarValue(m_fromStr);
+   Expected<StringRef> varVal = m_context->getPatternVarValue(m_fromStr);
    if (!varVal) {
       return varVal.takeError();
    }
@@ -556,8 +556,9 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
                isDefinition = true;
                defName = (*definedNumericVariable)->getName();
                matchRegexp = StringRef("[0-9]+");
-            } else
+            } else {
                substStr = matchStr;
+            }
          }
 
          // Handle substitutions: [[foo]] and [[#<foo expr>]].
@@ -728,16 +729,17 @@ Expected<size_t> FileCheckPattern::match(StringRef buffer, size_t &matchLen,
    for (const auto &numericVariableDef : numericVariableDefs) {
       const FileCheckNumericVariableMatch &numericVariableMatch =
             numericVariableDef.getValue();
-      unsigned CaptureParenGroup = numericVariableMatch.captureParenGroup;
-      assert(CaptureParenGroup < matchInfo.size() && "Internal paren error");
+      unsigned captureParenGroup = numericVariableMatch.captureParenGroup;
+      assert(captureParenGroup < matchInfo.size() && "Internal paren error");
       FileCheckNumericVariable *definedNumericVariable =
             numericVariableMatch.definedNumericVariable;
 
-      StringRef matchedValue = StringRef(matchInfo[CaptureParenGroup]);
+      StringRef matchedValue = StringRef(matchInfo[captureParenGroup]);
       uint64_t val;
-      if (matchedValue.getAsInteger(10, val))
+      if (matchedValue.getAsInteger(10, val)) {
          return FileCheckErrorDiagnostic::get(sourceMgr, matchedValue,
                                               "Unable to represent numeric value");
+      }
       definedNumericVariable->setValue(val);
    }
 

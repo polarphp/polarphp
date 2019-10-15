@@ -248,7 +248,7 @@ protected:
    /// as. Expressions are linked to the numeric variables they use at
    /// parse time and directly access the value of the numeric variable to
    /// evaluate their value.
-   FileCheckPatternContext *m_m_context;
+   FileCheckPatternContext *m_context;
 
    /// The string that needs to be substituted for something else. For a
    /// string variable this is its name, otherwise this is the whole expression.
@@ -258,9 +258,9 @@ protected:
    size_t m_insertIdx;
 
 public:
-   FileCheckSubstitution(FileCheckPatternContext *m_context, StringRef varName,
+   FileCheckSubstitution(FileCheckPatternContext *context, StringRef varName,
                          size_t insertIdx)
-      : m_m_context(m_context),
+      : m_context(context),
         m_fromStr(varName),
         m_insertIdx(insertIdx)
    {}
@@ -287,9 +287,9 @@ public:
 class FileCheckStringSubstitution : public FileCheckSubstitution
 {
 public:
-   FileCheckStringSubstitution(FileCheckPatternContext *m_m_context,
-                               StringRef m_varName, size_t m_insertIdx)
-      : FileCheckSubstitution(m_m_context, m_varName, m_insertIdx) {}
+   FileCheckStringSubstitution(FileCheckPatternContext *context,
+                               StringRef varName, size_t insertIdx)
+      : FileCheckSubstitution(context, varName, insertIdx) {}
 
    /// \returns the text that the string variable in this substitution matched
    /// when defined, or an error if the variable is undefined.
@@ -304,10 +304,10 @@ private:
    std::unique_ptr<FileCheckExpressionAST> m_expressionAST;
 
 public:
-   FileCheckNumericSubstitution(FileCheckPatternContext *m_context, StringRef expr,
+   FileCheckNumericSubstitution(FileCheckPatternContext *context, StringRef expr,
                                 std::unique_ptr<FileCheckExpressionAST> exprAST,
                                 size_t insertIdx)
-      : FileCheckSubstitution(m_context, expr, insertIdx)
+      : FileCheckSubstitution(context, expr, insertIdx)
    {
       m_expressionAST = std::move(exprAST);
    }
@@ -511,6 +511,7 @@ public:
 
 class FileCheckPattern
 {
+private:
    SMLocation m_patternLoc;
 
    /// A fixed string to match as the pattern or empty if this pattern requires
@@ -834,6 +835,7 @@ struct FileCheckString
 /// use information from the request.
 class FileCheck
 {
+private:
    FileCheckRequest m_req;
    FileCheckPatternContext m_patternContext;
 public:
