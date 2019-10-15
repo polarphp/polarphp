@@ -355,7 +355,7 @@ function print_histogram(array $items, $title = 'Items')
       $histo[$bin][] = $name;
    }
    $barW = 40;
-   $hr = str_replace('-', $barW + 34)."\n";
+   $hr = str_repeat('-', $barW + 34)."\n";
    printf("\nSlowest %s:", $title);
    print($hr);
    foreach (array_slice($items, -20) as $entry) {
@@ -371,9 +371,9 @@ function print_histogram(array $items, $title = 'Items')
    }
    $cDigits = int(ceil(log(count($items), 10)));
    printf("[%s] :: [%s] :: [%s]\n",
-      center_str('Range', ($pDigits + 1) * 2 + 3),
-      center_str('Percentage', $barW),
-      center_str('Count', $cDigits * 2 + 1));
+      center_str('Range', ($pDigits + 1) * 2 + 3,' '),
+      center_str('Percentage', $barW,' '),
+      center_str('Count', $cDigits * 2 + 1,' '));
    print($hr);
    foreach ($histo as $i => $row) {
       $pct = (float)count($row) / count($items);
