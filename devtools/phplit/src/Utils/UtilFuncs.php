@@ -14,8 +14,11 @@ namespace Lit\Utils;
 use Lit\Kernel\LitConfig;
 use Lit\Kernel\TestCase;
 use Lit\Kernel\TestingConfig;
+use Lit\Kernel\ExecuteCommandTimeoutException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
+use Symfony\Component\Process\Exception\ProcessSignaledException;
 use Symfony\Component\Process\Process;
 
 function phpize_bool($value) : bool
@@ -186,16 +189,46 @@ function listdir_files(string $dirname, array $suffixes = [''], array $excludeFi
  * If the timeout is hit an ``ExecuteCommandTimeoutException``
  * is raised.
  *
- * @param string $command
+ * @param array $command
  * @param string|null $cwd
  * @param array $env
  * @param string|null $input
  * @param int $timeout
  */
-function execute_command(string $command, string $cwd = null, array $env = [],
-                         string $input = null, int $timeout = 0)
+function execute_command(array $command, string $cwd = null, array $env = [],
+                         string $input = null, float $timeout = null): array
 {
-
+   $process = new Process($command, $cwd, $env, null, $timeout);
+   $process->setInput($input);
+   $process->start();
+   $hitTimeout = false;
+   $cpids = array();
+   try {
+      while ($process->isRunning()) {
+         $cpids = retrieve_children_pids($process->getPid(), true);
+         $process->checkTimeout();
+         usleep(200000);
+      }
+      $process->wait();
+   } catch (ProcessTimedOutException $e) {
+      $hitTimeout = true;
+      kill_processes($cpids);
+   } catch (ProcessSignaledException $e) {
+      kill_processes($cpids);
+      throw $e;
+   }
+   $exitCode = $process->getExitCode();
+   $out = $process->getOutput();
+   $err = $process->getErrorOutput();
+   if ($hitTimeout) {
+      throw new ExecuteCommandTimeoutException(
+         "Reached timeout of $timeout seconds",
+         $out,
+         $err,
+         $exitCode
+      );
+   }
+   return [$out, $err, $exitCode];
 }
 
 function use_platform_sdk_on_darwin(TestingConfig $config, LitConfig $litConfig)
@@ -271,7 +304,7 @@ function call_pgrep_command(int $pid): array
 {
    $pgrep = find_program_by_name('pgrep');
    assert(!empty($pgrep), 'pgrep command not found.');
-   $cmd = [$pgrep, '-P', $pid];
+   $cmd = [$pgrep, '-P', strval($pid)];
    $process = new Process($cmd);
    $cpids = array();
    try {
@@ -282,8 +315,9 @@ function call_pgrep_command(int $pid): array
          return !empty(trim($item));
       });
    } catch (ProcessFailedException $e) {
-      // TODO reafctor me
-      TestLogger::error("run pgrep error: %s", $e->getMessage());
+      if (1 != $process->getExitCode()) {
+         TestLogger::error("run pgrep error: %s\n%s", $e->getMessage(), $process->getErrorOutput());
+      }
    }
    return $cpids;
 }
@@ -320,6 +354,13 @@ function kill_process_and_children(int $pid)
       kill_process($cpid);
    }
    kill_process($pid);
+}
+
+function kill_processes(array $pids)
+{
+   foreach ($pids as $pid) {
+      kill_process($pid);
+   }
 }
 
 /**
