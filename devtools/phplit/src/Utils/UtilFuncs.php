@@ -128,6 +128,29 @@ function copy_array(array $data) : array
    return $temp->getArrayCopy();
 }
 
+function any_true(array $items, callable $callable)
+{
+   foreach ($items as $item) {
+      if ($callable($item)) {
+         return true;
+      }
+   }
+   return false;
+}
+
+function str_end_with(string $str, string $suffix): bool
+{
+   $suffixLength = strlen($suffix);
+   $strLength = strlen($str);
+   if ($suffixLength == 0 || $strLength == 0) {
+      return false;
+   }
+   if ($suffixLength > $strLength) {
+      return false;
+   }
+   return substr($str, -$suffixLength) == $suffix;
+}
+
 /**
  * @param string $dirname
  * @param array $suffixes
@@ -139,7 +162,9 @@ function listdir_files(string $dirname, array $suffixes = [''], array $excludeFi
    $iter = new \DirectoryIterator($dirname);
    foreach ($iter as $entry) {
       if ($entry->isDir() || $entry->isDot() || in_array($entry->getFilename(), $excludeFilenames) ||
-         !in_array($entry->getExtension(), $suffixes)) {
+         !any_true($suffixes, function ($suffix) use($entry) {
+            return str_end_with($entry->getFilename(), $suffix);
+      })) {
          continue;
       }
       yield $entry->getFilename();

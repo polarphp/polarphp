@@ -22,6 +22,7 @@ use Lit\Utils\TestLogger;
 use function Lit\Utils\has_substr;
 use function Lit\Utils\listdir_files;
 use function Lit\Utils\execute_command;
+use function Lit\Utils\str_end_with;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
@@ -70,7 +71,7 @@ class GoogleTestFormat extends AbstractTestFormat
          throw $e;
       }
       $output = $process->getOutput();
-      $lines = array_filter(explode("\n", $output), function ($key, $value){
+      $lines = array_filter(explode("\n", $output), function ($value){
          return !empty(trim($value));
       });
       $nestedTests = array();
@@ -133,7 +134,7 @@ class GoogleTestFormat extends AbstractTestFormat
          foreach (listdir_files($dirPath, $this->testSuffixes) as $fn) {
             // Discover the tests in this executable.
             $execPath = join(DIRECTORY_SEPARATOR, [$sourcePath, $subDir, $fn]);
-            $testNames = $this->getGTestTests($execPath, $this->litConfig, $localConfig);
+            $testNames = $this->getGTestTests($execPath, $localConfig);
             foreach ($testNames as $testName) {
                $testPath = array_merge($pathInSuite, [$subDir, $fn, $testName]);
                yield new TestCase($testSuite, $testPath, $localConfig, $execPath);
@@ -185,10 +186,10 @@ class GoogleTestFormat extends AbstractTestFormat
     * @param array $cmd
     * @return string
     */
-   private function maybeAddPhpToCmd(array $cmd) : string
+   private function maybeAddPhpToCmd(array $cmd): array
    {
-      if (substr($cmd[0], -4) == '.php') {
-         return [PHP_BINARY] + $cmd;
+      if (str_end_with($cmd[0], '.php')) {
+         return array_merge([PHP_BINARY], $cmd);
       }
       return $cmd;
    }
