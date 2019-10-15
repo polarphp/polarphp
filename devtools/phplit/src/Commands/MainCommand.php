@@ -48,7 +48,7 @@ class MainCommand extends Command
 
    private function setupOptions()
    {
-      $this->addOption('threads', 'j', InputOption::VALUE_OPTIONAL, "Number of testing threads");
+      $this->addOption('workers', 'j', InputOption::VALUE_OPTIONAL, "Number of testing threads");
       $this->addOption('config-prefix', null, InputOption::VALUE_OPTIONAL, "Prefix for 'lit' config files");
       $this->addOption('param', 'D', InputOption::VALUE_REQUIRED|InputOption::VALUE_IS_ARRAY, "Add 'NAME' = 'VAL' to the user defined parameters", []);
       // format group
@@ -130,14 +130,14 @@ class MainCommand extends Command
       if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
          $isWindows = true;
       }
-      $numThreads = $input->getOption('threads');
-      if (null != $numThreads) {
-         $numThreads = intval($numThreads);
-         if ($numThreads < 0) {
-            TestLogger::fatal("Option '--threads' or '-j' requires positive integer");
+      $numWorkers = $input->getOption('workers');
+      if (null != $numWorkers) {
+         $numWorkers = intval($numWorkers);
+         if ($numWorkers < 0) {
+            TestLogger::fatal("Option '--workers' or '-j' requires positive integer");
          }
       } else {
-         $numThreads = detect_cpus();
+         $numWorkers = detect_cpus();
       }
       $maxFailures = $input->getOption('max-failures');
       if ($maxFailures != null) {
@@ -223,17 +223,17 @@ class MainCommand extends Command
          $testDispatcher->setTests(array_slice($testDispatcher->getTests(), 0, $maxTests));
       }
       $tests = $testDispatcher->getTests();
-      $numThreads = min(count($tests), $numThreads);
+      $numWorkers = min(count($tests), $numWorkers);
       $actualTestNum = count($tests);
       $extra = '';
       if ($actualTestNum != $numTotalTests) {
          $extra = " of $numTotalTests";
       }
       $threads = "";
-      if ($numThreads == 1) {
+      if ($numWorkers == 1) {
          $threads = 'single process';
       } else {
-         $threads = "$numThreads threads";
+         $threads = "$numWorkers workers";
       }
       $header = sprintf("-- Testing: %d%s tests, %s --\n", $actualTestNum, $extra, $threads);
       $progressBar = null;
