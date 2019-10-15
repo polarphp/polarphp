@@ -199,14 +199,14 @@ class MainCommand extends Command
       if (null != $input->getOption('timeout')) {
          $cmdValue = intval($input->getOption('timeout'));
          if ($cmdValue != $litConfig->getMaxIndividualTestTime()) {
-            TestLogger::note(sprintf(
+            TestLogger::note(
                join(array(
                   'The test suite configuration requested an individual',
                   ' test timeout of %d seconds but a timeout of %d seconds was',
                   ' requested on the command line. Forcing timeout to be %d',
                   ' seconds'
                ), $litConfig->getMaxIndividualTestTime(), $cmdValue, $cmdValue)
-            ));
+            );
             $litConfig->setMaxIndividualTestTime($cmdValue);
          }
       }
@@ -265,13 +265,13 @@ class MainCommand extends Command
       //  If we encountered any additional errors, exit abnormally.
       $numErrors = TestLogger::getNumErrors();
       if ($numErrors > 0) {
-         TestLogger::error(sprintf("\n%d error(s), exiting.\n", $numErrors), false);
+         TestLogger::errorWithoutCount("\n%d error(s), exiting.\n", $numErrors);
          exit(2);
       }
       // Warn about warnings.
       $numWarnings = TestLogger::getNumWarnings();
       if ($numWarnings > 0) {
-         TestLogger::error(sprintf("\n%d warning(s), exiting.\n", $numWarnings), false);
+         TestLogger::errorWithoutCount("\n%d warning(s), exiting.\n", $numWarnings);
       }
       if ($hasFailures) {
          exit(1);
@@ -420,8 +420,8 @@ class MainCommand extends Command
          if (count($testIndexes) > $previewLen) {
             $idxPreview .= ', ...';
          }
-         TestLogger::note(sprintf('Selecting shard %d/%d = size %d/%d = tests #(%d*k)+%d = [%s]',
-            $runShard, $numShards, count($tests), $numTests, $numShards, $runShard, $idxPreview));
+         TestLogger::note('Selecting shard %d/%d = size %d/%d = tests #(%d*k)+%d = [%s]',
+            $runShard, $numShards, count($tests), $numTests, $numShards, $runShard, $idxPreview);
       }
    }
 

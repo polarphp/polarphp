@@ -133,7 +133,7 @@ class ShLexer
             // Outside of a string, '\\' escapes everything.
             $this->eat();
             if ($this->pos == $this->end) {
-               TestLogger::warning(sprintf("escape at end of quoted argument in: %s", $this->data));
+               TestLogger::warning("escape at end of quoted argument in: %s", $this->data);
                return $str;
             }
             $str .= $this->eat();
@@ -174,7 +174,7 @@ class ShLexer
             // Inside a '"' quoted string, '\\' only escapes the quote
             // character and backslash, otherwise it is preserved.
             if ($this->pos == $this->end) {
-               TestLogger::warning(sprintf('escape at end of quoted argument in: %s', $this->data));
+               TestLogger::warning('escape at end of quoted argument in: %s', $this->data);
                return $str;
             }
             $char = $this->eat();

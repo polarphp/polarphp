@@ -207,18 +207,18 @@ class TestingConfig
    public function loadFromPath(string $path, LitConfig $litConfig)
    {
       if (!file_exists($path)) {
-         TestLogger::fatal(sprintf('unable to load config file: %s', $path));
+         TestLogger::fatal('unable to load config file: %s', $path);
       }
       try {
          // set some closure variables used by included config script
          $config = $this;
          include $path;
          if ($litConfig->isDebug()){
-            TestLogger::note(sprintf('... loaded config %s', $path));
+            TestLogger::note('... loaded config %s', $path);
          }
          $this->loadFinish();
       } catch (\ParseError $error) {
-         TestLogger::fatal(sprintf("unable to parse config file %s\n error: %s", $path, $error->getMessage()));
+         TestLogger::fatal("unable to parse config file %s\n error: %s", $path, $error->getMessage());
       }
    }
 

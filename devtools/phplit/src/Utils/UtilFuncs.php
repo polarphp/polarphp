@@ -188,9 +188,44 @@ function has_substr(string $str, string $subStr)
    return strpos($str, $subStr) !== false;
 }
 
+function find_program_by_name(string $name, array $paths): string
+{
+   $name = trim($name);
+   assert(!empty($name), "Must have a name!");
+   // Use the given path verbatim if it contains any slashes; this matches
+   // the behavior of sh(1) and friends.
+   if (is_absolute_path($name)) {
+      return $name;
+   }
+   if (empty($paths)) {
+      $pathStr = get_envvar('PATH', '');
+      $paths = explode(PATH_SEPARATOR, $pathStr);
+   }
+   foreach ($paths as $path) {
+      $path = trim($path);
+      if (empty($path)) {
+         continue;
+      }
+      $filePath = $path . DIRECTORY_SEPARATOR . $name;
+      if (file_exists($filePath) && is_executable($filePath)) {
+         return $filePath;
+      }
+   }
+   return '';
+}
+
 function call_pgrep_command(int $pid)
 {
+   $pgrep = find_program_by_name('pgrep');
+   assert(!empty($pgrep), 'pgrep command not found.');
+   $cmd = [$pgrep, '-P', $pid];
+   $process = new Process($cmd);
+   try {
+      $process->mustRun();
 
+   } catch (ProcessFailedException $e) {
+      TestLogger::error("run pgrep error: %s", $e->getMessage());
+   }
 }
 
 function kill_process_and_children(int $pid)

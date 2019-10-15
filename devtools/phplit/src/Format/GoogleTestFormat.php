@@ -66,8 +66,7 @@ class GoogleTestFormat extends AbstractTestFormat
       try {
          $process->mustRun();
       } catch (ProcessFailedException $e) {
-         TestLogger::warning(
-           sprintf("unable to discover google-tests in %s: %s. Process output: %s", $path, $e->getMessage(), $process->getErrorOutput()));
+         TestLogger::warning("unable to discover google-tests in %s: %s. Process output: %s", $path, $e->getMessage(), $process->getErrorOutput());
          throw $e;
       }
       $output = $process->getOutput();

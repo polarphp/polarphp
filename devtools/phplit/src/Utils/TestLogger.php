@@ -37,27 +37,44 @@ class TestLogger
       self::$logger = $logger;
    }
 
-   public static function note(string $message): void
+   public static function note(string $format, ...$args): void
    {
+      $message = self::generateMessage($format, $args);
       self::doWriteMessage(LogLevel::INFO, $message);
    }
 
-   public static function warning(string $message): void
+   public static function warning(string $format, ...$args): void
    {
+      $message = self::generateMessage($format, $args);
       self::doWriteMessage(LogLevel::WARNING, $message);
       ++self::$numWarnings;
    }
 
-   public static function error(string $message, bool $count = true): void
+   public static function error(string $format, ...$args): void
    {
+      $message = self::generateMessage($format, $args);
       self::doWriteMessage(LogLevel::ERROR, $message);
-      if ($count) {
-         ++self::$numErrors;
-      }
+      ++self::$numErrors;
    }
 
-   public static function fatal(string $message): void
+   public static function errorWithoutCount(string $format, ...$args)
    {
+      $message = self::generateMessage($format, $args);
+      self::doWriteMessage(LogLevel::ERROR, $message);
+   }
+
+   private static function generateMessage(string $format, array $args): string
+   {
+      $message = $format;
+      if (count($args) > 0) {
+         $message = sprintf($format, ...$args);
+      }
+      return $message;
+   }
+
+   public static function fatal(string $format, ...$args): void
+   {
+      $message = self::generateMessage($format, $args);
       self::doWriteMessage(LogLevel::EMERGENCY, $message);
       exit(2);
    }
