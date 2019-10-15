@@ -200,12 +200,34 @@ function execute_command(string $command, string $cwd = null, array $env = [],
 
 function use_platform_sdk_on_darwin(TestingConfig $config, LitConfig $litConfig)
 {
-
+   // On Darwin, support relocatable SDKs by providing Clang with a
+   // default system root path.
+   if (has_substr($config->hasExtraConfig('target_triple'), 'darwin')) {
+      try {
+         $cmd = ['xcrun', '--show-sdk-path', '--sdk', 'macosx'];
+         $process = new Process($cmd);
+         $sdkPath = trim($process->mustRun());
+         TestLogger::note('using SDKROOT: %s', $sdkPath);
+         $config->setEnvVar('SDKROOT', $sdkPath);
+      } catch (ProcessFailedException $e) {
+         TestLogger::errorWithoutCount('run xcrun error: %s', $e->getMessage());
+      }
+   }
 }
 
 function find_platform_sdk_version_on_macos(TestingConfig $config, LitConfig $litConfig)
 {
-
+   $sdkPath = '';
+   if (has_substr($config->hasExtraConfig('target_triple'), 'darwin')) {
+      try {
+         $cmd = ['xcrun', '--show-sdk-path', '--sdk', 'macosx'];
+         $process = new Process($cmd);
+         $sdkPath = trim($process->mustRun());
+      } catch (ProcessFailedException $e) {
+         TestLogger::errorWithoutCount('run xcrun error: %s', $e->getMessage());
+      }
+   }
+   return $sdkPath;
 }
 
 function has_substr(string $str, string $subStr)

@@ -335,6 +335,12 @@ class TestingConfig
       return $this;
    }
 
+   public function setEnvVar(string $name, string $value): TestingConfig
+   {
+      $this->environment[$name] = $value;
+      return $this;
+   }
+
    /**
     * @return array
     */
