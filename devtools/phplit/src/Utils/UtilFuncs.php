@@ -188,7 +188,7 @@ function has_substr(string $str, string $subStr)
    return strpos($str, $subStr) !== false;
 }
 
-function find_program_by_name(string $name, array $paths): string
+function find_program_by_name(string $name, array $paths = []): string
 {
    $name = trim($name);
    assert(!empty($name), "Must have a name!");
@@ -214,23 +214,65 @@ function find_program_by_name(string $name, array $paths): string
    return '';
 }
 
-function call_pgrep_command(int $pid)
+/**
+ * TODO what about error ?
+ *
+ * @param int $pid
+ * @return array
+ */
+function call_pgrep_command(int $pid): array
 {
    $pgrep = find_program_by_name('pgrep');
    assert(!empty($pgrep), 'pgrep command not found.');
    $cmd = [$pgrep, '-P', $pid];
    $process = new Process($cmd);
+   $cpids = array();
    try {
       $process->mustRun();
-
+      $output = $process->getOutput();
+      $cpids = explode("\n", $output);
+      $cpids = array_filter($cpids, function ($item) {
+         return !empty(trim($item));
+      });
    } catch (ProcessFailedException $e) {
+      // TODO reafctor me
       TestLogger::error("run pgrep error: %s", $e->getMessage());
+   }
+   return $cpids;
+}
+
+function retrieve_children_pids(int $pid, bool $recursive = true): array
+{
+   $list = array();
+   $children = call_pgrep_command($pid);
+   $list = array_merge($list, $children);
+   if (!$recursive) {
+      return $list;
+   }
+   foreach ($list as $cpid) {
+      $list = array_merge($list, retrieve_children_pids($cpid, true));
+   }
+   return $list;
+}
+
+function kill_process(int $pid)
+{
+   $tryCount = 3;
+   while ($tryCount--) {
+      $result = posix_kill($pid, SIGKILL);
+      if ($result) {
+         break;
+      }
    }
 }
 
 function kill_process_and_children(int $pid)
 {
-
+   $children = retrieve_children_pids($pid, true);
+   foreach ($children as $cpid) {
+      kill_process($cpid);
+   }
+   kill_process($pid);
 }
 
 /**
