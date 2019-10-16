@@ -10,17 +10,9 @@
 //
 // Created by polarboy on 2019/10/16.
 
-namespace Lit\Commands;
+namespace Lit\ProcessPool;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-
-class TestWorkerCommand extends Command
+interface TaskInterface
 {
-   protected static $defaultName = 'run-worker';
-
-   protected function execute(InputInterface $input, OutputInterface $output)
-   {
-   }
+   public function exec(array $data);
 }

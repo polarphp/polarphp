@@ -11,6 +11,7 @@ use Lit\ProcessPool\Events\ProcessStarted;
 use Symfony\Component\Process\Exception\RuntimeException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use function Lit\Utils\detect_cpus;
 
 /**
  * Process pool allow you to run a constant number
@@ -19,21 +20,21 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 class ProcessPool
 {
    /**
-    * @var Iterator
+    * @var array $queue
     */
    private $queue;
    /**
     * Running processes
     *
-    * @var array
+    * @var array $running
     */
    private $running = [];
    /**
-    * @var array
+    * @var array $options
     */
    private $options;
    /**
-    * @var int
+    * @var int $concurrency
     */
    private $concurrency;
    /**
@@ -42,17 +43,47 @@ class ProcessPool
    private $eventDispatcher;
 
    /**
+    * @var WorkerInitializerInterface $initializer
+    */
+   private $initializer;
+
+   /**
+    * @var bool $closed
+    */
+   private $closed = false;
+
+   /**
+    * @var bool $terminateFlag
+    */
+   private $terminateFlag = false;
+
+   /**
+    * @var float $maxTimeout
+    */
+   private $maxTimeout = null;
+
+   /**
     * Accept any type of iterator, inclusive Generator
     *
     * @param Process[] $queue
     * @param array $options
     */
-   public function __construct(Iterator $queue, array $options = [])
+   public function __construct(WorkerInitializerInterface $initializer, array $options = [])
    {
       $this->eventDispatcher = new EventDispatcher;
-      $this->queue = $queue;
       $this->options = array_merge($this->getDefaultOptions(), $options);
-      $this->concurrency = $this->options['concurrency'];
+      if (!isset($this->options['concurrency'])) {
+         $this->concurrency = detect_cpus();
+      } else {
+         $this->concurrency = $this->options['concurrency'];
+      }
+      if (isset($this->options['maxTimeout'])) {
+         $maxTimeout = (int)$this->options['maxTimeout'];
+         if ($maxTimeout > 0){
+            $this->maxTimeout = (float)$maxTimeout * 1000000;
+         }
+      }
+      $this->initializer = $initializer;
    }
 
    private function getDefaultOptions()
@@ -64,6 +95,21 @@ class ProcessPool
       ];
    }
 
+   public function postTask(TaskInterface $task)
+   {
+      if ($this->closed) {
+         return;
+      }
+      $cmd = [PHP_BINARY, LIT_SCRIPT, 'run-worker'];
+      $process = new Process($cmd, null, null);
+      $data = array(
+         'task' => $task,
+         'initializer' => $this->initializer
+      );
+      $process->setInput(serialize($data));
+      $this->queue[] = $process;
+   }
+
    /**
     * Start and wait until all processes finishes
     *
@@ -71,10 +117,15 @@ class ProcessPool
     */
    public function wait()
    {
-      $this->startNextProcesses();
-      while (count($this->running) > 0) {
+      if (!$this->terminateFlag) {
+         $this->startNextProcesses();
+      }
+      while (count($this->running) > 0 && !$this->terminateFlag) {
          /** @var Process $process */
          foreach ($this->running as $key => $process) {
+            if ($this->maxTimeout !== null) {
+               $process->setTimeout(max($this->maxTimeout - microtime(true)));
+            }
             $exception = null;
             try {
                $process->checkTimeout();
@@ -98,12 +149,26 @@ class ProcessPool
          }
          usleep(1000);
       }
+      if ($this->terminateFlag && !empty($this->running)) {
+         foreach ($this->running as $key => $process) {
+            $process->stop(0);
+            unset($this->running[$key]);
+         }
+      }
    }
 
-   public function onProcessFinished(callable $callback)
+   public function setProcessFinishedCallback(callable $callback)
    {
       $eventName = $this->options['eventPreffix'] . '.' . ProcessFinished::NAME;
       $this->getEventDispatcher()->addListener($eventName, $callback);
+   }
+
+   /**
+    * called in process callback
+    */
+   public function terminate()
+   {
+      $this->terminateFlag = true;
    }
 
    /**
@@ -114,12 +179,11 @@ class ProcessPool
    private function startNextProcesses()
    {
       $concurrency = $this->getConcurrency();
-      while (count($this->running) < $concurrency && $this->queue->valid()) {
-         $process = $this->queue->current();
+      while (count($this->running) < $concurrency && !empty($this->queue)) {
+         $process = array_shift($this->queue);
          $process->start();
          $this->dispatchEvent(new ProcessStarted($process));
          $this->running[] = $process;
-         $this->queue->next();
       }
    }
 
@@ -136,6 +200,20 @@ class ProcessPool
    public function getConcurrency()
    {
       return $this->concurrency;
+   }
+
+   public function close(): ProcessPool
+   {
+      $this->closed = true;
+      return $this;
+   }
+
+   /**
+    * @return bool
+    */
+   public function isClosed()
+   {
+      return $this->closed;
    }
 
    /**
@@ -162,6 +240,14 @@ class ProcessPool
    public function getEventDispatcher()
    {
       return $this->eventDispatcher;
+   }
+
+   /**
+    * @return WorkerInitializerInterface
+    */
+   public function getInitializer(): WorkerInitializerInterface
+   {
+      return $this->initializer;
    }
 
    /**

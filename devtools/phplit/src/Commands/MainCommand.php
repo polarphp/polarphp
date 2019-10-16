@@ -17,6 +17,7 @@ use Lit\Kernel\TestCase;
 use Lit\Kernel\TestCollector;
 use Lit\Kernel\TestDispatcher;
 use Lit\Kernel\TestResultCode;
+use Lit\Person;
 use Lit\Utils\TestingProgressDisplay;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -28,10 +29,10 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
+use Symfony\Component\Process\Process;
 use function Lit\Utils\execute_command;
 use function Lit\Utils\detect_cpus;
 use function Lit\Utils\print_histogram;
-use function Lit\Utils\retrieve_children_pids;
 use function Lit\Utils\sort_by_incremental_cache;
 use Lit\Utils\TestLogger;
 
