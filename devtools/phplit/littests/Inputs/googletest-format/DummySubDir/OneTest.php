@@ -28,7 +28,7 @@ if ($testName == 'FirstTest.subTestA') {
 } elseif ($testName == 'FirstTest.subTestB') {
    print("I am subTest B, I FAIL\n");
    print("And I have two lines of output\n");
-   exit(0);
+   exit(1);
 } elseif (in_array($testName, ['ParameterizedTest/0.subTest', 'ParameterizedTest/1.subTest'])) {
    print("I am a parameterized test, I also PASS\n");
    print("[  PASSED  ] 1 test.\n");

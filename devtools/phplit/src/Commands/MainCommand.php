@@ -246,7 +246,7 @@ class MainCommand extends Command
             print($header);
          }
       }
-      $startTime = time();
+      $startTime = microtime(true);
       $progressDisplay = new TestingProgressDisplay($input->getOptions(), $actualTestNum, $progressBar);
       $testDispatcher->setDisplay($progressDisplay);
       $maxTime = null;
@@ -259,9 +259,9 @@ class MainCommand extends Command
          TestLogger::fatal("execute tests error: %s", $e->getMessage());
       }
       $progressDisplay->finish();
-      $testingTime = time() - $startTime;
+      $testingTime = microtime(true) - $startTime;
       if (!$quite) {
-         printf("Testing Time: %.2ds\n", $testingTime);
+         printf("Testing Time: %.2fs\n", $testingTime / 1000000);
       }
       // Write out the test data, if requested.
       if ($input->getOption('output')) {

@@ -23,6 +23,7 @@ use function Lit\Utils\has_substr;
 use function Lit\Utils\listdir_files;
 use function Lit\Utils\execute_command;
 use function Lit\Utils\str_end_with;
+use function Lit\Utils\path_split;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
@@ -145,12 +146,11 @@ class GoogleTestFormat extends AbstractTestFormat
 
    public function execute(TestCase $test)
    {
-      $testDir = $test->getSourcePath();
-      list($testPath, $testName) = explode(DIRECTORY_SEPARATOR, $test->getSourcePath());
+      list($testPath, $testName) = path_split($test->getSourcePath());
       while (!file_exists($testPath)) {
          // Handle GTest parametrized and typed tests, whose name includes
          // some '/'s.
-         list($testPath, $namePrefix) = explode(DIRECTORY_SEPARATOR, $testPath);
+         list($testPath, $namePrefix) = path_split($testPath);
          $testName = $namePrefix . '/' . $testName;
       }
       $cmd = [$testPath, '--gtest_filter=' . $testName];

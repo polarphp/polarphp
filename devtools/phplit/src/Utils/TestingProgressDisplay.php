@@ -43,6 +43,15 @@ class TestingProgressDisplay
       $this->opts = $opts;
       $this->numTests = $numTests;
       $this->progressBar = $progressBar;
+      $this->setupOpts();
+   }
+
+   private function setupOpts()
+   {
+      $this->opts += array(
+         'showAllOutput' => false,
+         'showOutput' => false
+      );
    }
 
    public function finish()
@@ -74,7 +83,7 @@ class TestingProgressDisplay
       }
       // Show the test result line.
       $testName = $test->getFullName();
-      printf('%s: %s (%d of %d)' % $resultCode->getName(), $testName,
+      printf("%s: %s (%d of %d)\n", $resultCode->getName(), $testName,
          $this->completed, $this->numTests);
       // Show the test failure output, if requested.
       if (($resultCode->isFailure() && $this->opts['showOutput']) || $this->opts['showAllOutput']) {

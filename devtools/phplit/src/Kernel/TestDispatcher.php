@@ -95,7 +95,7 @@ class TestDispatcher
          foreach ($this->tests as $index => $test) {
             $testTask = new TestRunnerTask($index, $test, $litConfig);
             $testTask->exec();
-            //$this->consumeTestResult($index, $test);
+            $this->consumeTestResult($index, $test);
             if ($this->hitMaxFailures) {
                break;
             }

@@ -523,9 +523,9 @@ class LitConfig
    }
 
    /**
-    * @return int
+    * @return mixed
     */
-   public function getMaxFailures(): int
+   public function getMaxFailures()
    {
       return $this->maxFailures;
    }

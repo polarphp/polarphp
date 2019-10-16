@@ -207,7 +207,7 @@ function execute_command(array $command, string $cwd = null, array $env = [],
       while ($process->isRunning()) {
          $cpids = retrieve_children_pids($process->getPid(), true);
          $process->checkTimeout();
-         usleep(200000);
+         usleep(10000);
       }
       $process->wait();
    } catch (ProcessTimedOutException $e) {
