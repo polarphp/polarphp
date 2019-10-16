@@ -14,6 +14,8 @@ namespace Lit\ProcessPool;
 
 class TaskExecutor
 {
+   const E_TASK_TEXT_EMPTY = -99;
+   const E_TASK_UNSERIALIZED = -100;
    /**
     * @var array $data
     */

@@ -12,8 +12,10 @@
 
 namespace Lit\Commands;
 
+use Lit\ProcessPool\TaskExecutor;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class TestWorkerCommand extends Command
@@ -22,5 +24,30 @@ class TestWorkerCommand extends Command
 
    protected function execute(InputInterface $input, OutputInterface $output)
    {
+      $logger = new ConsoleLogger($output);
+      $stdin = fopen( 'php://stdin', 'r' );
+      $execText = stream_get_contents($stdin);
+      fclose($stdin);
+      $execText = trim($execText);
+      if (empty($execText)) {
+         $logger->error("task executable text empty");
+         exit(TaskExecutor::E_TASK_TEXT_EMPTY);
+      }
+      $data = unserialize($execText);
+      if (false === $data) {
+         $logger->error("task executable text unserialize error");
+         exit(TaskExecutor::E_TASK_UNSERIALIZED);
+      }
+      $initializer = $data['initializer'];
+      $task = $data['task'];
+      try {
+         $initializer->init();
+         $executor = new TaskExecutor($task);
+         $executor->exec();
+         exit(0);
+      } catch (\Exception $e) {
+         $logger->error($e->getMessage());
+         exit($e->getCode());
+      }
    }
 }
