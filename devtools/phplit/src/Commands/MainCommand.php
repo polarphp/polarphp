@@ -231,13 +231,13 @@ class MainCommand extends Command
       if ($actualTestNum != $numTotalTests) {
          $extra = " of $numTotalTests";
       }
-      $threads = "";
+      $workersText = "";
       if ($numWorkers == 1) {
-         $threads = 'single process';
+         $workersText = 'single process';
       } else {
-         $threads = "$numWorkers workers";
+         $workersText = "$numWorkers workers";
       }
-      $header = sprintf("-- Testing: %d%s tests, %s --\n", $actualTestNum, $extra, $threads);
+      $header = sprintf("-- Testing: %d%s tests, %s --\n", $actualTestNum, $extra, $workersText);
       $progressBar = null;
       if (!$quite) {
          if ($input->getOption('succinct') && !$input->getOption('no-progress-bar')) {

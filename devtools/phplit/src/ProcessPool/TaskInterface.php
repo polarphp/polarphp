@@ -14,5 +14,5 @@ namespace Lit\ProcessPool;
 
 interface TaskInterface
 {
-   public function exec(array $data);
+   public function exec(array $data = array());
 }

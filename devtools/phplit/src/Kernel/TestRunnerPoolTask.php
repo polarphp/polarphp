@@ -16,7 +16,7 @@ use Lit\ProcessPool\TaskInterface;
 
 class TestRunnerPoolTask implements TaskInterface
 {
-   public function exec(array $data)
+   public function exec(array $data = array())
    {
 
    }

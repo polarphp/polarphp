@@ -16,8 +16,27 @@ use Lit\ProcessPool\TaskInterface;
 
 class TestRunnerTask implements TaskInterface
 {
-   public function exec(array $data)
-   {
+   /**
+    * @var int $index
+    */
+   private $index;
+   /**
+    * @var TestCase $test
+    */
+   private $test;
 
+   /**
+    * TestRunnerTask constructor.
+    * @param int $index
+    * @param TestCase $test
+    */
+   public function __construct(int $index, TestCase $test)
+   {
+      $this->index = $index;
+      $this->test = $test;
+   }
+
+   public function exec(array $data = array())
+   {
    }
 }

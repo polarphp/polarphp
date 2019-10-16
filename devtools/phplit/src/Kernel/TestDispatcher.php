@@ -91,7 +91,14 @@ class TestDispatcher
          return;
       }
       if ($jobs == 1) {
-
+         foreach ($this->tests as $index => $test) {
+            $testTask = new TestRunnerTask($index, $test);
+            $testTask->exec();
+            //$this->consumeTestResult($index, $test);
+            if ($this->hitMaxFailures) {
+               break;
+            }
+         }
       } else {
          $this->executeTestsInPool($jobs, $maxTime);
       }
@@ -176,9 +183,37 @@ class TestDispatcher
       return $this;
    }
 
-   private function consumeTestResult($poolResult)
+   /**
+    * Test completion callback
+    * Updates the test result status in the parent process. Each task in the
+    * pool returns the test index and the result, and we use the index to look
+    * up the original test object. Also updates the progress bar as tasks
+    * complete.
+    *
+    * @param int $testIndex
+    * @param TestCase $test
+    */
+   private function consumeTestResult(int $testIndex, TestCase $test)
    {
-
+      // Don't add any more test results after we've hit the maximum failure
+      // count.  Otherwise we're racing with the main thread, which is going
+      // to terminate the process pool soon.
+      if ($this->hitMaxFailures) {
+         return;
+      }
+      // Update the parent process copy of the test. This includes the result,
+      // XFAILS, REQUIRES, and UNSUPPORTED statuses.
+      assert($this->tests[$testIndex]->getFilePath() == $test->getFilePath(),
+            'parent and child disagree on test path');
+      $this->tests[$testIndex] = $test;
+      $this->display->update($test);
+      // If we've finished all the tests or too many tests have failed, notify
+      // the main thread that we've stopped testing.
+      $this->failureCount += $test->getResult()->getCode() == TestResultCode::FAIL();
+      $maxFailures = $this->litConfig->getMaxFailures();
+      if ($maxFailures && $this->failureCount == $maxFailures) {
+         $this->hitMaxFailures = true;
+      }
    }
 
    /**
