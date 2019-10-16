@@ -529,7 +529,7 @@ class TestingConfig
 
    public function getExtraConfig(string $name, $defaultValue)
    {
-      if (array_key_exists($name, $this->extraConfig)) {
+      if (!array_key_exists($name, $this->extraConfig)) {
          return $defaultValue;
       }
       return $this->extraConfig[$name];

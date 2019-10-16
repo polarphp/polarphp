@@ -13,6 +13,7 @@ namespace Lit\Kernel;
 
 use Lit\Application;
 use Lit\Utils\TestingProgressDisplay;
+use PHPUnit\Util\Test;
 
 class TestDispatcher
 {
@@ -21,7 +22,7 @@ class TestDispatcher
     */
    private $litConfig;
    /**
-    * @var iterable $tests
+    * @var TestCase[] $tests
     */
    private $tests;
 
@@ -31,26 +32,75 @@ class TestDispatcher
    private $display;
 
    /**
+    * array (
+    *    'SemaphoreName' => 'count',
+    *    ...
+    * )
+    *
     * @var array $parallelismSemaphores
     */
    private $parallelismSemaphores;
 
-   public function __construct(LitConfig $litConfig, iterable $tests)
+   /**
+    * @var int $failureCount
+    */
+   private $failureCount = 0;
+   /**
+    * @var bool $hitMaxFailures
+    */
+   private $hitMaxFailures = false;
+
+   public function __construct(LitConfig $litConfig, array $tests)
    {
       $this->litConfig = $litConfig;
       $this->tests = $tests;
       // Set up semaphores to limit parallelism of certain classes of tests.
-      $this->setupSemaphores();
+      $this->parallelismSemaphores = $litConfig->getParallelismGroups();
    }
 
-   public function executeTestsInPool(array $jobs, int $maxTime)
+   public function executeTestsInPool(int $jobs, int $maxTime)
    {
 
    }
 
-   public function executeTests(array $jobs, $maxTime = null)
+   /**
+    * Execute each of the tests in the run, using up to jobs number of
+    * parallel tasks, and inform the display of each individual result. The
+    * provided tests should be a subset of the tests available in this run
+    * object.
+    *
+    * If max_time is non-None, it should be a time in seconds after which to
+    * stop executing tests.
+    *
+    * The display object will have its update method called with each test as
+    * it is completed. The calls are guaranteed to be locked with respect to
+    * one another, but are *not* guaranteed to be called on the same thread as
+    * this method was invoked on.
+    *
+    * Upon completion, each test in the run will have its result
+    * computed. Tests which were not actually executed (for any reason) will
+    * be given an UNRESOLVED result.
+    *
+    * @param int $jobs
+    * @param null $maxTime
+    */
+   public function executeTests(int $jobs, $maxTime = null)
    {
+      $tests = $this->tests;
+      if (empty($tests)) {
+         return;
+      }
+      if ($jobs == 1) {
 
+      } else {
+         $this->executeTestsInPool($jobs, $maxTime);
+      }
+      // Mark any tests that weren't run as UNRESOLVED.
+      foreach ($tests as $test) {
+         if (!$test->hasResult()) {
+            $test->setResult(new TestResult(TestResultCode::UNRESOLVED(), '', 0.0));
+         }
+      }
    }
 
    public function writeTestResults(int $testingTime, string $outputPath)
@@ -113,9 +163,9 @@ class TestDispatcher
    }
 
    /**
-    * @return iterable
+    * @return array
     */
-   public function getTests(): iterable
+   public function getTests(): array
    {
       return $this->tests;
    }
@@ -131,9 +181,19 @@ class TestDispatcher
 
    }
 
-   private function setupSemaphores()
+   /**
+    * @return int
+    */
+   public function getFailureCount(): int
    {
-
+      return $this->failureCount;
    }
 
+   /**
+    * @return bool
+    */
+   public function isHitMaxFailures(): bool
+   {
+      return $this->hitMaxFailures;
+   }
 }

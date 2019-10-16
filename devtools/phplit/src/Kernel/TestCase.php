@@ -439,4 +439,9 @@ class TestCase
       $this->manualSpecifiedSourcePath = $manualSpecifiedSourcePath;
       return $this;
    }
+
+   public function hasResult(): bool
+   {
+      return $this->result != null;
+   }
 }

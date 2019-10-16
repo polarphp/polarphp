@@ -248,10 +248,15 @@ class MainCommand extends Command
       }
       $startTime = time();
       $progressDisplay = new TestingProgressDisplay($input->getOptions(), $actualTestNum, $progressBar);
+      $testDispatcher->setDisplay($progressDisplay);
+      $maxTime = null;
+      if ($input->getOption('max-time')) {
+         $maxTime = (int)$input->getOption('max-time');
+      }
       try {
-
+         $testDispatcher->executeTests($numWorkers, $maxTime);
       } catch (\Exception $e) {
-         TestLogger::fatal("Interrupt");
+         TestLogger::fatal("execute tests error: %s", $e->getMessage());
       }
       $progressDisplay->finish();
       $testingTime = time() - $startTime;
@@ -262,8 +267,7 @@ class MainCommand extends Command
       if ($input->getOption('output')) {
          $testDispatcher->writeTestResults($testingTime, $input->getOption('output'));
       }
-      //$this->handleTestResults($input, $testDispatcher);
-      $hasFailures = false;
+      $this->handleTestResults($input, $testDispatcher, $hasFailures);
       $this->handleXuintOutput($input, $testDispatcher);
       //  If we encountered any additional errors, exit abnormally.
       $numErrors = TestLogger::getNumErrors();
@@ -428,7 +432,7 @@ class MainCommand extends Command
       }
    }
 
-   private function handleTestResults(InputInterface $input, TestDispatcher $testDispatcher): void
+   private function handleTestResults(InputInterface $input, TestDispatcher $testDispatcher, &$hasFailures): void
    {
       $hasFailures = false;
       $byCode = array();
@@ -436,7 +440,7 @@ class MainCommand extends Command
       foreach ($tests as $test) {
          $resultCode = $test->getResult()->getCode();
          $codeName = $resultCode->getName();
-         if (!in_array($codeName, $byCode)) {
+         if (!array_key_exists($codeName, $byCode)) {
             $byCode[$codeName] = array();
          }
          $byCode[$codeName][] = $test;
@@ -460,7 +464,11 @@ class MainCommand extends Command
              ($code == TestResultCode::UNRESOLVED() && $input->getOption('max-failures') !== null)) {
             continue;
          }
-         $elements = $byCode[$code->getName()];
+         $codeName = $code->getName();
+         if (!array_key_exists($codeName, $byCode) || empty($byCode[$codeName])) {
+            continue;
+         }
+         $elements = $byCode[$codeName];
          if (empty($elements)) {
             continue;
          }
