@@ -88,7 +88,7 @@ class OneCommandPerFileTestFormat extends AbstractTestFormat
       }
    }
 
-   public function execute(TestCase $test) : array
+   public function execute(TestCase $test)
    {
       if ($test->isUnsupported()) {
          return [TestResultCode::UNSUPPORTED(), 'Test is unsupported'];

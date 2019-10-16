@@ -492,5 +492,21 @@ function generate_cycle(array $items)
    }
 }
 
+function path_split(string $path): array
+{
+   $path = trim($path);
+   if (empty($path)) {
+      return [];
+   }
+   $pos = strrpos($path, DIRECTORY_SEPARATOR);
+   if (false === $pos) {
+      return ['', $path];
+   }
+   if ($pos == 0) {
+      return [DIRECTORY_SEPARATOR, substr($path, 1)];
+   }
+   return [substr($path, 0, $pos), substr($path, $pos + 1)];
+}
+
 // dummy class
 class UtilFuncs{}

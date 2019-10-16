@@ -33,7 +33,7 @@ class AbstractTestFormat implements TestFormatInterface
       return null;
    }
 
-   public function execute(TestCase $test) : array
+   public function execute(TestCase $test)
    {}
 
    /**

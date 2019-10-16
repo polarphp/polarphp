@@ -302,7 +302,7 @@ class TestingConfig
    /**
     * @return mixed
     */
-   public function getTestFormat()
+   public function getTestFormat(): AbstractTestFormat
    {
       return $this->testFormat;
    }

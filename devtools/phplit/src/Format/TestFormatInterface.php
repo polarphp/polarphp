@@ -18,5 +18,5 @@ use Lit\Kernel\TestSuite;
 interface TestFormatInterface
 {
    public function collectTestsInDirectory(TestSuite $testSuite, array $pathInSuite, TestingConfig $localConfig): iterable;
-   public function execute(TestCase $test) : array ;
+   public function execute(TestCase $test);
 }

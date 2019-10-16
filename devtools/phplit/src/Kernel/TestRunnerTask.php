@@ -13,6 +13,7 @@
 namespace Lit\Kernel;
 
 use Lit\ProcessPool\TaskInterface;
+use Symfony\Component\Process\Exception\ProcessSignaledException;
 
 class TestRunnerTask implements TaskInterface
 {
@@ -26,17 +27,45 @@ class TestRunnerTask implements TaskInterface
    private $test;
 
    /**
+    * @var LitConfig $litConfig
+    */
+   private $litConfig;
+   /**
     * TestRunnerTask constructor.
     * @param int $index
     * @param TestCase $test
     */
-   public function __construct(int $index, TestCase $test)
+   public function __construct(int $index, TestCase $test, LitConfig $litConfig)
    {
       $this->index = $index;
       $this->test = $test;
+      $this->litConfig = $litConfig;
    }
 
    public function exec(array $data = array())
    {
+      try {
+         $startTime = time();
+         $result = $this->test->getConfig()->getTestFormat()->execute($this->test);
+         if (is_array($result)) {
+            list($code, $output) = $result;
+            $result = new TestResult($code, $output);
+         } elseif (!$result instanceof TestResult) {
+            throw new ValueException('unexpected result from test execution');
+         }
+         $result->setElapsed(time() - $startTime);
+      } catch (ProcessSignaledException $e) {
+         // TODO handle some type signal?
+         throw $e;
+      } catch (\Exception $e) {
+         if ($this->litConfig->isDebug()) {
+            throw $e;
+         }
+         $output = "Exception during script execution:\n";
+         $output .= $e->getMessage();
+         $output .= "\n";
+         $result = new TestResult(TestResultCode::UNRESOLVED(), $output);
+      }
+      $this->test->setResult($result);
    }
 }

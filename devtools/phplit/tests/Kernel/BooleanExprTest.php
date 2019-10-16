@@ -10,6 +10,7 @@
 //
 // Created by polarboy on 2019/10/09.
 namespace Lit\Tests\Kernel;
+
 use Lit\Kernel\BooleanExpr;
 use Lit\Kernel\ValueException;
 use PHPUnit\Framework\TestCase;

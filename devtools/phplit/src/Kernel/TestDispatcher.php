@@ -90,9 +90,10 @@ class TestDispatcher
       if (empty($tests)) {
          return;
       }
+      $litConfig = $this->litConfig;
       if ($jobs == 1) {
          foreach ($this->tests as $index => $test) {
-            $testTask = new TestRunnerTask($index, $test);
+            $testTask = new TestRunnerTask($index, $test, $litConfig);
             $testTask->exec();
             //$this->consumeTestResult($index, $test);
             if ($this->hitMaxFailures) {

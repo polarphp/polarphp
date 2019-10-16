@@ -143,8 +143,9 @@ class GoogleTestFormat extends AbstractTestFormat
       }
    }
 
-   public function execute(TestCase $test) : array
+   public function execute(TestCase $test)
    {
+      $testDir = $test->getSourcePath();
       list($testPath, $testName) = explode(DIRECTORY_SEPARATOR, $test->getSourcePath());
       while (!file_exists($testPath)) {
          // Handle GTest parametrized and typed tests, whose name includes

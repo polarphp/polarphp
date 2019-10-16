@@ -116,12 +116,12 @@ class TestCase
 
    public function getSourcePath() : string
    {
-      $this->testSuite->getSourcePath($this->pathInSuite);
+      return $this->testSuite->getSourcePath($this->pathInSuite);
    }
 
    public function getExecPath() : string
    {
-      $this->testSuite->getExecPath($this->pathInSuite);
+      return $this->testSuite->getExecPath($this->pathInSuite);
    }
 
    /**
