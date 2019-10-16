@@ -12,6 +12,7 @@
 namespace Lit\Utils;
 use Lit\Kernel\TestCase;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class TestingProgressDisplay
 {
@@ -33,16 +34,22 @@ class TestingProgressDisplay
    private $completed = 0;
 
    /**
+    * @var OutputInterface $output
+    */
+   private $output;
+
+   /**
     * TestingProgressDisplay constructor.
     * @param array $opts
     * @param int $numTests
     * @param ProgressBar $progressBar
     */
-   public function __construct(array $opts, int $numTests, $progressBar)
+   public function __construct(array $opts, int $numTests, $progressBar, OutputInterface $output)
    {
       $this->opts = $opts;
       $this->numTests = $numTests;
       $this->progressBar = $progressBar;
+      $this->output = $output;
       $this->setupOpts();
    }
 
@@ -60,7 +67,7 @@ class TestingProgressDisplay
          $this->progressBar->clear();
       }
       if ($this->opts['succinct']) {
-         echo "\n";
+         $this->output->writeln('');
       }
    }
 
@@ -70,7 +77,9 @@ class TestingProgressDisplay
       if ($this->opts['incremental']) {
          $this->updateIncrementalCache($test);
       }
-      // TODO update progress bar
+      if ($this->progressBar) {
+         $this->progressBar->advance(1);
+      }
       $result = $test->getResult();
       $resultCode = $result->getCode();
       $shouldShow = $resultCode->isFailure() || $this->opts['showAllOutput'] ||
@@ -83,39 +92,39 @@ class TestingProgressDisplay
       }
       // Show the test result line.
       $testName = $test->getFullName();
-      printf("%s: %s (%d of %d)\n", $resultCode->getName(), $testName,
-         $this->completed, $this->numTests);
+      $this->output->writeln(sprintf("%s: %s (%d of %d)", $resultCode->getName(), $testName,
+         $this->completed, $this->numTests));
       // Show the test failure output, if requested.
       if (($resultCode->isFailure() && $this->opts['showOutput']) || $this->opts['showAllOutput']) {
          if ($resultCode->isFailure()) {
-            printf("%s TEST '%s' FAILED %s", str_repeat('*', 20), $test->getFullName(),
-               str_repeat('*', 20));
+            $this->output->writeln(sprintf("%s TEST '%s' FAILED %s", str_repeat('*', 20), $test->getFullName(),
+               str_repeat('*', 20)));
          }
          printf($test->getResult()->getOutput());
          printf(str_repeat('*', 20));
       }
       // Report test metrics, if present.
       if (!empty($result->getMetrics())) {
-         printf("%s TEST '%s' RESULTS %s", str_repeat('*', 10), $test->getFullName(),
-            str_repeat('*', 10));
+         $this->output->writeln(sprintf("%s TEST '%s' RESULTS %s", str_repeat('*', 10), $test->getFullName(),
+            str_repeat('*', 10)));
          $items = $result->getMetrics();
          sort($items);
          foreach ($items as $metricName => $value) {
-            printf('%s: %s ', $metricName, $value->format());
+            $this->output->writeln(sprintf('%s: %s ', $metricName, $value->format()));
          }
-         printf(str_repeat('*', 10));
+         $this->output->writeln(sprintf(str_repeat('*', 10)));
       }
       // Report micro-tests, if present
       if (!empty($result->getMicroResults())) {
          $items = $result->getMicroResults();
          sort($items);
          foreach ($items as $microTestName => $microTest) {
-            printf("%s MICRO-TEST: %s", str_repeat('*', 3), $microTestName);
+            $this->output->writeln(sprintf("%s MICRO-TEST: %s", str_repeat('*', 3), $microTestName));
             if(!empty($microTest->getMetrics())) {
                $sortedMetrics = $microTest->getMetrics();
                sort($sortedMetrics);
                foreach ($sortedMetrics as $metricName => $value) {
-                  printf('    %s:  %s ', $metricName, $value->format());
+                  $this->output->writeln(sprintf('    %s:  %s ', $metricName, $value->format()));
                }
             }
          }

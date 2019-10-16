@@ -13,7 +13,7 @@ namespace Lit\Kernel;
 
 use Lit\Application;
 use Lit\Utils\TestingProgressDisplay;
-use PHPUnit\Util\Test;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class TestDispatcher
 {

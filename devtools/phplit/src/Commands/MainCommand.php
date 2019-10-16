@@ -29,8 +29,6 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
-use Symfony\Component\Process\Process;
-use function Lit\Utils\execute_command;
 use function Lit\Utils\detect_cpus;
 use function Lit\Utils\print_histogram;
 use function Lit\Utils\sort_by_incremental_cache;
@@ -213,7 +211,7 @@ class MainCommand extends Command
             $litConfig->setMaxIndividualTestTime($cmdValue);
          }
       }
-      $this->handleShowTestsOpt($input, $testDispatcher);
+      $this->handleShowTestsOpt($input, $testDispatcher, $output);
       // Select and order the tests.
       $numTotalTests = count($testDispatcher->getTests());
       $this->filterTests($input, $testDispatcher);
@@ -237,17 +235,21 @@ class MainCommand extends Command
       } else {
          $workersText = "$numWorkers workers";
       }
-      $header = sprintf("-- Testing: %d%s tests, %s --\n", $actualTestNum, $extra, $workersText);
+      if ($litConfig->isDebug()) {
+         $output->writeln('');
+      }
+      $header = sprintf("-- Testing: %d%s tests, %s --", $actualTestNum, $extra, $workersText);
       $progressBar = null;
       if (!$quite) {
          if ($input->getOption('succinct') && !$input->getOption('no-progress-bar')) {
             $progressBar = new ProgressBar($output, $actualTestNum);
+            $progressBar->setOverwrite(false);
          } else {
-            print($header);
+            $output->writeln($header);
          }
       }
       $startTime = microtime(true);
-      $progressDisplay = new TestingProgressDisplay($input->getOptions(), $actualTestNum, $progressBar);
+      $progressDisplay = new TestingProgressDisplay($input->getOptions(), $actualTestNum, $progressBar, $output);
       $testDispatcher->setDisplay($progressDisplay);
       $maxTime = null;
       if ($input->getOption('max-time')) {
@@ -261,13 +263,13 @@ class MainCommand extends Command
       $progressDisplay->finish();
       $testingTime = microtime(true) - $startTime;
       if (!$quite) {
-         printf("Testing Time: %.2fs\n", $testingTime / 1000000);
+         $output->writeln(sprintf("\nTesting Time: %.2fs", $testingTime / 1000000));
       }
       // Write out the test data, if requested.
       if ($input->getOption('output')) {
          $testDispatcher->writeTestResults($testingTime, $input->getOption('output'));
       }
-      $this->handleTestResults($input, $testDispatcher, $hasFailures);
+      $this->handleTestResults($input, $testDispatcher, $hasFailures, $output);
       $this->handleXuintOutput($input, $testDispatcher);
       //  If we encountered any additional errors, exit abnormally.
       $numErrors = TestLogger::getNumErrors();
@@ -302,7 +304,7 @@ class MainCommand extends Command
       return $userParams;
    }
 
-   private function handleShowTestsOpt(InputInterface $input, TestDispatcher $dispatcher): void
+   private function handleShowTestsOpt(InputInterface $input, TestDispatcher $dispatcher, OutputInterface $output): void
    {
       if ($input->getOption('show-suites') || $input->getOption('show-tests')) {
          // Aggregate the tests by suite.
@@ -325,20 +327,20 @@ class MainCommand extends Command
          });
          if ($input->getOption('show-suites')) {
             // Show the suites, if requested.
-            print("-- Test Suites --\n");
+            $output->writeln('-- Test Suites --');
             foreach ($suitesAndTests as $key => $tests) {
                $testSuite = $testSuites[$key];
-               printf("  %s - %d tests\n", $testSuite->getName(), count($tests));
-               printf("    Source Root: %s\n", $testSuite->getSourceRoot());
-               printf("    Exec Root  : %s\n", $testSuite->getExecRoot());
+               $output->writeln(sprintf("  %s - %d tests", $testSuite->getName(), count($tests)));
+               $output->writeln(sprintf("    Source Root: %s", $testSuite->getSourceRoot()));
+               $output->writeln(sprintf("    Exec Root  : %s", $testSuite->getExecRoot()));
             }
          }
          //  Show the tests, if requested.
          if ($input->getOption('show-tests')) {
-            print("-- Available Tests --\n");
+            $output->writeln("-- Available Tests --");
             foreach ($suitesAndTests as $key => $tests) {
                foreach ($tests as $test) {
-                  printf("  %s\n", $test->getFullName());
+                  $output->writeln(sprintf("  %s", $test->getFullName()));
                }
             }
          }
@@ -432,7 +434,7 @@ class MainCommand extends Command
       }
    }
 
-   private function handleTestResults(InputInterface $input, TestDispatcher $testDispatcher, &$hasFailures): void
+   private function handleTestResults(InputInterface $input, TestDispatcher $testDispatcher, &$hasFailures, OutputInterface $output): void
    {
       $hasFailures = false;
       $byCode = array();
@@ -472,12 +474,11 @@ class MainCommand extends Command
          if (empty($elements)) {
             continue;
          }
-         print(str_repeat('*', 20)."\n");
-         printf("%s (%d):\n", $title, count($elements));
+         $output->writeln(str_repeat('*', 20));
+         $output->writeln(sprintf('%s (%d):', $title, count($elements)));
          foreach ($elements as $test) {
-            printf("    %s\n", $test->getFullName());
+            $output->writeln(sprintf("    %s", $test->getFullName()));
          }
-         echo "\n";
       }
 
       if ($input->getOption('time-tests') && !empty($tests)) {
@@ -509,7 +510,7 @@ class MainCommand extends Command
             $num = 0;
          }
          if ($num > 0) {
-            printf("  %s: %d\n", $name, $num);
+            $output->writeln(sprintf("  %s: %d", $name, $num));
          }
       }
    }
