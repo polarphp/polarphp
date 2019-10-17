@@ -30,6 +30,7 @@ class IntegratedTestKeywordParser
    const TAG_PARSER = 'handleTag';
    const REQUIRE_ANY_PARSER = 'handleRequiresAny';
 
+   const PDBG_REGEX = '%dbg\(([^)\'"]*)\)';
    /**
     * @var string $keyword
     */
@@ -145,7 +146,7 @@ class IntegratedTestKeywordParser
          $output[$last] = substr($output[$last], 0, -1) . $line;
       } else {
          $pdbg = sprintf("%%dbg(%s at line %d)", $keyword, $lineNumber);
-         assert(preg_match('/%dbg\(([^)\'"]*)\)$/', $pdbg), "kPdbgRegex expected to match actual %dbg usage");
+         assert(preg_match(sprintf('/%s$/', self::PDBG_REGEX), $pdbg), "kPdbgRegex expected to match actual %dbg usage");
          $line = $pdbg . ' ' . $line;
          $output[] = $line;
       }

@@ -26,10 +26,10 @@ class ShCommand implements ShCommandInterface
 
     /**
      * ShCommand constructor.
-     * @param string $args
-     * @param string $redirects
+     * @param array $args
+     * @param array $redirects
      */
-   public function __construct(string $args,string $redirects)
+   public function __construct(array $args, array $redirects)
    {
        $this->args = $args;
        $this->redirects = $redirects;

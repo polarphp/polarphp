@@ -17,6 +17,7 @@ use Lit\Kernel\TestCase;
 use Lit\Kernel\TestResult;
 use Lit\Kernel\TestResultCode;
 use Lit\Kernel\ValueException;
+use Lit\Utils\ShParser;
 use Symfony\Component\Filesystem\Filesystem;
 use function Lit\Utils\path_split;
 
@@ -129,24 +130,34 @@ class TestRunner
 
    /**
     * @param TestCase $test
-    * @param array $script
+    * @param array $commands
     * @param string $tempBase
-    * @param string $execdir
+    * @param string $cwd
     */
-   private function executeScriptByProcess(TestCase $test, array $script, string $tempBase, string $execdir)
+   private function executeScriptByProcess(TestCase $test, array $commands, string $tempBase, string $cwd)
    {
 
    }
 
    /**
     * @param TestCase $test
-    * @param array $script
+    * @param array $commands
     * @param string $tempBase
-    * @param string $execdir
+    * @param string $cwd
     */
-   private function executeScriptInternal(TestCase $test, array $script, string $tempBase, string $execdir)
+   private function executeScriptInternal(TestCase $test, array $commands, string $tempBase, string $cwd)
    {
-
+      $cmds = [];
+      foreach ($commands as $i => $line) {
+         $line = preg_replace(sprintf('/%s/', IntegratedTestKeywordParser::PDBG_REGEX), ": '$1'; ", $line);
+         $commands[$i] = $line;
+         try {
+            $parser = new ShParser($line, $this->litConfig->isWindows(), $test->getConfig()->isPipeFail());
+            $cmds[] = $parser->parse();
+         } catch (\Exception $e) {
+            return new TestResult(TestResultCode::FAIL(), "shell parser error on: $line");
+         }
+      }
    }
 
    /**

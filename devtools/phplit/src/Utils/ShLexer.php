@@ -81,8 +81,8 @@ class ShLexer
    private function lexArgFast($char)
    {
       // Get the leading whitespace free section.
-      $chunk = substr($this->data, $this->pos + 1);
-      $chunk = preg_split('/[\t\n\r\0\x0B]/', $chunk, 2)[0];
+      $chunk = substr($this->data, $this->pos - 1);
+      $chunk = preg_split('/[\s\t\n\r\0\x0B]+/', $chunk, 2)[0];
       // If it has special characters, the fast path failed.
       if (has_substr($chunk, '|')  || has_substr($chunk, '&') ||
          has_substr($chunk, '<')  || has_substr($chunk, '>') ||
@@ -214,13 +214,17 @@ class ShLexer
 
    private function lexArg($char)
    {
-      return $this->lexArgFast($char) || $this->lexArgSlow($char);
+      $token = $this->lexArgFast($char);
+      if ($token != null) {
+         return $token;
+      }
+      return $this->lexArgSlow($char);
    }
 
    /**
     * Lex a single 'sh' token.
     */
-   private function lexOneToken(): array
+   private function lexOneToken()
    {
       $char = $this->eat();
       if ($char == ';') {
@@ -263,11 +267,10 @@ class ShLexer
    }
 
    /**
-    * @return array
+    * @return string
     */
-   public function getData(): array
+   public function getData(): string
    {
-      //todo 实例的时候 放入变量的是一个字符串 但是返回却是数组类型
       return $this->data;
    }
 
