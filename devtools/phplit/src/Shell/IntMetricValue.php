@@ -10,13 +10,13 @@
 //
 // Created by polarboy on 2019/10/10.
 
-namespace Lit\Kernel;
+namespace Lit\Shell;
 
-class JSONMetricValue extends AbstractMetricValue
+class IntMetricValue extends AbstractMetricValue
 {
    public function format() : string
    {
-      return json_encode($this->value);
+      return strval($this->value);
    }
 
    public function toData()

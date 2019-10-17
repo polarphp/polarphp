@@ -9,9 +9,9 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/10/09.
-namespace Lit\Tests\Kernel;
+namespace Lit\Tests\Ut;
 
-use Lit\Kernel\BooleanExpr;
+use Lit\Utils\BooleanExpr;
 use Lit\Kernel\ValueException;
 use PHPUnit\Framework\TestCase;
 

@@ -9,7 +9,7 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/10/12.
-namespace Lit\Kernel;
+namespace Lit\Shell;
 
 /**
  * keyword: The keyword to parse for. It must end in either '.' or ':'.

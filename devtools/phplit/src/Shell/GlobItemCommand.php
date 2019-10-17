@@ -10,7 +10,7 @@
 //
 // Created by polarboy on 2019/10/10.
 
-namespace Lit\Kernel;
+namespace Lit\Shell;
 
 class GlobItemCommand implements ShCommandInterface
 {

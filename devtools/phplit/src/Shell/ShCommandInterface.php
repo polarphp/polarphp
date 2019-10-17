@@ -10,17 +10,11 @@
 //
 // Created by polarboy on 2019/10/10.
 
-namespace Lit\Kernel;
+namespace Lit\Shell;
 
-class IntMetricValue extends AbstractMetricValue
+interface ShCommandInterface
 {
-   public function format() : string
-   {
-      return strval($this->value);
-   }
-
-   public function toData()
-   {
-      return $this->value;
-   }
+   public function __toString() : string;
+   public function equalWith($other) : bool;
+   public function toShell($file, $pipeFail = false) : void;
 }

@@ -10,13 +10,13 @@
 //
 // Created by polarboy on 2019/10/10.
 
-namespace Lit\Kernel;
+namespace Lit\Shell;
 
-class RealMetricValue extends AbstractMetricValue
+class JSONMetricValue extends AbstractMetricValue
 {
    public function format() : string
    {
-      return sprintf('%.4f', $this->value);
+      return json_encode($this->value);
    }
 
    public function toData()
