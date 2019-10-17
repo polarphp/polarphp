@@ -498,7 +498,7 @@ class MainCommand extends Command
          print_histogram($testTimes, 'Tests');
       }
       $codeNameMap = array(
-         ['Expected Passes    ', TestResultCode::XPASS()],
+         ['Expected Passes    ', TestResultCode::PASS()],
          ['Passes With Retry  ', TestResultCode::FLAKYPASS()],
          ['Expected Failures  ', TestResultCode::XFAIL()],
          ['Unsupported Tests  ', TestResultCode::UNSUPPORTED()],
@@ -512,8 +512,9 @@ class MainCommand extends Command
          if ($input->hasParameterOption(['--quiet', '-q'], true) && !$code->isFailure()) {
             continue;
          }
-         if (array_key_exists($code->getName(), $byCode)) {
-            $num = count($byCode[$code->getName()]);
+         $codeName = $code->getName();
+         if (array_key_exists($codeName, $byCode)) {
+            $num = count($byCode[$codeName]);
          } else {
             $num = 0;
          }

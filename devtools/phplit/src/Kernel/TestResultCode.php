@@ -58,7 +58,7 @@ class TestResultCode
 
    public static function FLAKYPASS() : TestResultCode
    {
-      return self::getInstance('PASS', false);
+      return self::getInstance('FLAKYPASS', false);
    }
 
    public static function XFAIL() : TestResultCode

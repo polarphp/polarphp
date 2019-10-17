@@ -6,5 +6,5 @@ use Lit\Kernel\TestingConfig;
  * @var TestingConfig $config
  * @var LitConfig $litConfig
  */
-$config->setName('googletest-format');
+$config->setName('googletest-upstream-format');
 $config->setTestFormat(new GoogleTestFormat('DummySubDir', 'Test', $litConfig));
