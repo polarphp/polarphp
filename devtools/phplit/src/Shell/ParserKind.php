@@ -36,7 +36,7 @@ class ParserKind
          self::COMMAND =>      [':'],
          self::LIST =>         [':'],
          self::BOOLEAN_EXPR => [':'],
-         self::COMMAND      => [':', '.']
+         self::CUSTOM      => [':', '.']
       )[$value];
    }
 

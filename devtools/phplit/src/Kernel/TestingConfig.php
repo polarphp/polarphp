@@ -302,7 +302,7 @@ class TestingConfig
    /**
     * @return mixed
     */
-   public function getTestFormat(): AbstractTestFormat
+   public function getTestFormat()
    {
       return $this->testFormat;
    }
@@ -356,6 +356,17 @@ class TestingConfig
    public function setSubstitutions(array $substitutions): TestingConfig
    {
       $this->substitutions = $substitutions;
+      return $this;
+   }
+
+   /**
+    * @param string $name
+    * @param string $value
+    * @return TestingConfig
+    */
+   public function addSubstitution(string $name, string $value): TestingConfig
+   {
+      $this->substitutions[$name] = $value;
       return $this;
    }
 
@@ -446,6 +457,16 @@ class TestingConfig
    public function setAvailableFeatures(array $availableFeatures): TestingConfig
    {
       $this->availableFeatures = $availableFeatures;
+      return $this;
+   }
+
+   /**
+    * @param $feature
+    * @return TestingConfig
+    */
+   public function addAvailableFeature($feature): TestingConfig
+   {
+      $this->availableFeatures[] = $feature;
       return $this;
    }
 

@@ -11,6 +11,9 @@
 // Created by polarboy on 2019/10/10.
 
 namespace Lit\Kernel;
+
+use Lit\Utils\BooleanExpr;
+
 /**
  * Test - Information on a single test instance.
  *
@@ -222,7 +225,7 @@ class TestCase
     *
     * @return array
     */
-   public function getUnsupportedFeatures() : array
+   public function getUnsupportedFeatures(): array
    {
       $features = $this->config->getAvailableFeatures();
       $triple = $this->testSuite->getConfig()->getExtraConfig('target_triple', '');
@@ -233,6 +236,7 @@ class TestCase
                $evalResult[] = $item;
             }
          }
+         return $evalResult;
       } catch (ValueException $e) {
          throw new ValueException(sprintf("Error in UNSUPPORTED list:\n%s", $e->getMessage()));
       }
@@ -397,18 +401,18 @@ class TestCase
    }
 
    /**
-    * @return bool
+    * @return array
     */
-   public function isUnsupported(): bool
+   public function getUnsupported(): array
    {
       return $this->unsupported;
    }
 
    /**
-    * @param bool $unsupported
+    * @param array $unsupported
     * @return TestCase
     */
-   public function setUnsupported(bool $unsupported): TestCase
+   public function setUnsupported(array $unsupported): TestCase
    {
       $this->unsupported = $unsupported;
       return $this;

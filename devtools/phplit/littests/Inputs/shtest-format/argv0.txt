@@ -4,3 +4,4 @@
 # '['. Otherwise it will refuse to accept the trailing closing bracket.
 #
 # RUN: [ "A" = "A" ]
+# RUN: [ "B" = "B" ]

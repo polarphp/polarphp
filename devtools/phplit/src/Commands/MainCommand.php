@@ -258,6 +258,9 @@ class MainCommand extends Command
       try {
          $testDispatcher->executeTests($numWorkers, $maxTime);
       } catch (\Exception $e) {
+         if ($litConfig->isDebug()) {
+            TestLogger::errorWithoutCount("catch exception:\nlocation: %s:%d", $e->getFile(), $e->getLine());
+         }
          TestLogger::fatal("execute tests error: %s", $e->getMessage());
       }
       $progressDisplay->finish();

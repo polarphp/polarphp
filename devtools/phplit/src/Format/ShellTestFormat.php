@@ -13,6 +13,7 @@ namespace Lit\Format;
 
 use Lit\Kernel\LitConfig;
 use Lit\Kernel\TestCase;
+use Lit\Shell\TestRunner;
 
 class ShellTestFormat extends FileBasedTestFormat
 {
@@ -20,15 +21,20 @@ class ShellTestFormat extends FileBasedTestFormat
     * @var bool $executeExternal
     */
    private $executeExternal;
+   /**
+    * @var TestRunner $testRunner
+    */
+   private $testRunner;
 
    public function __construct(LitConfig $litConfig, bool $executeExternal = false)
    {
       parent::__construct($litConfig);
       $this->executeExternal = $executeExternal;
+      $this->testRunner = new TestRunner($litConfig);
    }
 
-   public function execute(TestCase $test) : array
+   public function execute(TestCase $test)
    {
-      // TODO
+      return $this->testRunner->executeTest($test);
    }
 }

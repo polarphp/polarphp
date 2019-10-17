@@ -9,7 +9,8 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/10/12.
-namespace Lit\Utils;
+namespace Lit\Shell;
+
 class ShellCommandResult
 {
    /**

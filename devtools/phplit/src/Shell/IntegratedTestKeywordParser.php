@@ -11,6 +11,8 @@
 // Created by polarboy on 2019/10/12.
 namespace Lit\Shell;
 
+use Lit\Kernel\ValueException;
+
 /**
  * keyword: The keyword to parse for. It must end in either '.' or ':'.
  * kind: An value of ParserKind.
@@ -22,6 +24,12 @@ namespace Lit\Shell;
  */
 class IntegratedTestKeywordParser
 {
+   const COMMAND_PARSER = 'handleCommand';
+   const LIST_PARSER = 'handleList';
+   const BOOLEAN_EXPR_PARSER = 'handleBooleanExpr';
+   const TAG_PARSER = 'handleTag';
+   const REQUIRE_ANY_PARSER = 'handleRequiresAny';
+
    /**
     * @var string $keyword
     */
@@ -37,13 +45,13 @@ class IntegratedTestKeywordParser
    /**
     * @var string $value
     */
-   private $value;
+   private $value = array();
    /**
     * @var callable $parser
     */
    private $parser;
 
-   public function __construct(string $keyword, int $kind, $parser = null, $initialValue = null)
+   public function __construct(string $keyword, int $kind, $parser = null, array $initialValue = array())
    {
       $allowedSuffixes = ParserKind::allowedKeywordSuffixes($kind);
       if (strlen($keyword) == 0 || !in_array($keyword[-1], $allowedSuffixes)) {
@@ -64,22 +72,15 @@ class IntegratedTestKeywordParser
       $this->kind = $kind;
       $this->parsedLines = [];
       $this->parser = $parser;
+      $this->value = $initialValue;
       if ($kind == ParserKind::COMMAND) {
-         $this->parser = function(int $lineNumber, string $line, array $output) use($keyword) {
-            IntegratedTestKeywordParser::handleCommand($lineNumber, $line, $output);
-         };
+         $this->parser = self::COMMAND_PARSER;
       } elseif($keyword == ParserKind::LIST) {
-         $this->parser = function(int $lineNumber, string $line, array $output) use($keyword) {
-            IntegratedTestKeywordParser::handleList($lineNumber, $line, $output);
-         };
+         $this->parser = self::LIST_PARSER;
       } elseif($keyword == ParserKind::BOOLEAN_EXPR) {
-         $this->parser = function(int $lineNumber, string $line, array $output) use($keyword) {
-            IntegratedTestKeywordParser::handleBooleanExpr($lineNumber, $line, $output);
-         };
+         $this->parser = self::BOOLEAN_EXPR_PARSER;
       } elseif($keyword == ParserKind::TAG) {
-         $this->parser = function(int $lineNumber, string $line, array $output) use($keyword) {
-            IntegratedTestKeywordParser::handleTag($lineNumber, $line, $output);
-         };
+         $this->parser = self::TAG_PARSER;
       } elseif($keyword == ParserKind::CUSTOM) {
          if (null == $parser) {
             throw new ValueException(sprintf("Unknown kind '%d'", $kind));
@@ -87,11 +88,17 @@ class IntegratedTestKeywordParser
       }
    }
 
-   private function parseLine(int $lineNumber, string $line)
+   public function parseLine(int $lineNumber, string $line)
    {
       try {
          $this->parsedLines += [[$lineNumber, $line]];
-         $this->value = $this->parser($lineNumber, $line, $this->value);
+         $args = [
+            $lineNumber, $line, $this->value
+         ];
+         if ($this->parser == self::COMMAND_PARSER) {
+            $args[] = $this->keyword;
+         }
+         $this->value = call_user_func_array(array(self::class, $this->parser), $args);
       } catch (ValueException $e) {
          throw new ValueException("%s\nin %s directive on test line %d", $e->getMessage(),
             $this->keyword, $lineNumber);
@@ -105,7 +112,7 @@ class IntegratedTestKeywordParser
     * @param string $line
     * @param array $output
     */
-   private static function handleTag(int $lineNumber, string $line, array $output): bool
+   public static function handleTag(int $lineNumber, string $line, array $output): bool
    {
       return 0 == strlen(trim($line)) || !empty($output);
    }
@@ -117,7 +124,7 @@ class IntegratedTestKeywordParser
     * @param string $line
     * @param array $output
     */
-   private static function handleCommand(int $lineNumber, string $line, array $output, string $keyword): array
+   public static function handleCommand(int $lineNumber, string $line, array $output, string $keyword): array
    {
       // Trim trailing whitespace.
       $line = rtrim($line);
@@ -132,11 +139,13 @@ class IntegratedTestKeywordParser
          }
       }, $line);
       // Collapse lines with trailing '\\'.
-      if (count($output) > 0 && $output[-1][-1] == '\\') {
-         $output[-1] = substr($output[-1], 0, -1) . $line;
+      $count = count($output);
+      if ($count > 0 && $output[$count - 1][-1] == '\\') {
+         $last = $count - 1;
+         $output[$last] = substr($output[$last], 0, -1) . $line;
       } else {
-         $pdbg = sprintf("%dbg(%s at line %d)", $keyword, $lineNumber);
-         assert(preg_match('/%dbg\\(([^)\'"]*)\\)$/', $pdbg), "kPdbgRegex expected to match actual %dbg usage");
+         $pdbg = sprintf("%%dbg(%s at line %d)", $keyword, $lineNumber);
+         assert(preg_match('/%dbg\(([^)\'"]*)\)$/', $pdbg), "kPdbgRegex expected to match actual %dbg usage");
          $line = $pdbg . ' ' . $line;
          $output[] = $line;
       }
@@ -150,7 +159,7 @@ class IntegratedTestKeywordParser
     * @param string $line
     * @param array $output
     */
-   private static function handleList(int $lineNumber, string $line, array $output): array
+   public static function handleList(int $lineNumber, string $line, array $output): array
    {
       $parts = explode(',', $line);
       foreach ($parts as $item) {
@@ -166,7 +175,7 @@ class IntegratedTestKeywordParser
     * @param string $line
     * @param array $output
     */
-   private static function handleBooleanExpr(int $lineNumber, string $line, array $output): array
+   public static function handleBooleanExpr(int $lineNumber, string $line, array $output): array
    {
       $parts = [];
       foreach (explode(',', $line) as $item) {
@@ -197,7 +206,7 @@ class IntegratedTestKeywordParser
     * @param string $line
     * @param array $output
     */
-   private static function handleRequiresAny(int $lineNumber, string $line, array $output): array
+   public static function handleRequiresAny(int $lineNumber, string $line, array $output): array
    {
       // Extract the conditions specified in REQUIRES-ANY: as written.
       $conditions = array();
@@ -217,9 +226,9 @@ class IntegratedTestKeywordParser
    }
 
    /**
-    * @return ParserKind
+    * @return int
     */
-   public function getKind(): ParserKind
+   public function getKind(): int
    {
       return $this->kind;
    }
@@ -233,9 +242,9 @@ class IntegratedTestKeywordParser
    }
 
    /**
-    * @return string
+    * @return array
     */
-   public function getValue(): string
+   public function getValue(): array
    {
       return $this->value;
    }
