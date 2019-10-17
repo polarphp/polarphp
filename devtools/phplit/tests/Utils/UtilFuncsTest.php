@@ -13,6 +13,7 @@
 namespace Lit\Tests\Utils;
 
 use function Lit\Utils\path_split;
+use function Lit\Utils\str_start_with;
 use PHPUnit\Framework\TestCase;
 
 class UtilFuncsTest extends TestCase
@@ -23,5 +24,13 @@ class UtilFuncsTest extends TestCase
       $this->assertEquals([], path_split(''));
       $this->assertEquals(['/a', 'b'], path_split('/a/b'));
       $this->assertEquals(['/a/b', ''], path_split('/a/b/'));
+   }
+
+   public function testStrStartWith()
+   {
+      $this->assertFalse(str_start_with("some_str", "some_strsome_str"));
+      $this->assertFalse(str_start_with('', ''));
+      $this->assertFalse(str_start_with('some_str', ''));
+      $this->assertTrue(str_start_with('some_str', 'so'));
    }
 }

@@ -141,6 +141,19 @@ function any_true(array $items, callable $callable)
    return false;
 }
 
+function str_start_with(string $str, string $prefix): bool
+{
+   $prefixLength = strlen($prefix);
+   $strLength = strlen($str);
+   if ($prefixLength == 0 || $strLength == 0) {
+      return false;
+   }
+   if ($prefixLength > $strLength) {
+      return false;
+   }
+   return substr($str, 0, $prefixLength) == $prefix;
+}
+
 function str_end_with(string $str, string $suffix): bool
 {
    $suffixLength = strlen($suffix);

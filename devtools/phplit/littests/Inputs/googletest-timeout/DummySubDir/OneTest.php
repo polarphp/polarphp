@@ -18,34 +18,34 @@ $argv = $_SERVER['argv'];
 if ($argc != 2) {
    throw new RuntimeException("unexpected number of args");
 }
-
 if ($argv[1] == '--gtest_list_tests') {
    echo <<<END
 FirstTest.
   subTestA
   subTestB
-ParameterizedTest/0.
-  subTest
-ParameterizedTest/1.
-  subTest
+  subTestC
 END;
    exit(0);
 } elseif (!str_start_with($argv[1],'--gtest_filter=')) {
    throw new RuntimeException("unexpected argument: ${argv[1]}");
 }
+
 $testName = explode('=', $argv[1], 2)[1];
 if ($testName == 'FirstTest.subTestA') {
    print("I am subTest A, I PASS\n");
-   print("[  PASSED  ] 1 test.\n");
+   print("[  PASSED  ] 1 test.");
    exit(0);
 } elseif ($testName == 'FirstTest.subTestB') {
-   print("I am subTest B, I FAIL\n");
-   print("And I have two lines of output\n");
-   exit(1);
-} elseif (in_array($testName, ['ParameterizedTest/0.subTest', 'ParameterizedTest/1.subTest'])) {
-   print("I am a parameterized test, I also PASS\n");
+   print("I am subTest B, I am slow\n");
+   sleep(6);
    print("[  PASSED  ] 1 test.\n");
    exit(0);
+} elseif ($testName == 'FirstTest.subTestC') {
+   print("I am subTest C, I will hang\n");
+   while (true)
+   {
+
+   }
 } else {
    die("error: invalid test name: $testName");
 }

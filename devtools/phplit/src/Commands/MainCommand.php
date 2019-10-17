@@ -263,7 +263,7 @@ class MainCommand extends Command
       $progressDisplay->finish();
       $testingTime = microtime(true) - $startTime;
       if (!$quite) {
-         $output->writeln(sprintf("\nTesting Time: %.2fs", $testingTime / 1000000));
+         $output->writeln(sprintf("\nTesting Time: %.2fs", $testingTime));
       }
       // Write out the test data, if requested.
       if ($input->getOption('output')) {
@@ -298,7 +298,15 @@ class MainCommand extends Command
             $userParams[$entry] = '';
          } else {
             $parts = explode('=', $entry, 2);
-            $userParams[trim($parts[0])] = trim($parts[1]);
+            $value = trim($parts[1]);
+            if (ctype_digit($value)) {
+               if (strpos($value,'.') === false) {
+                  $value = intval($value);
+               } else {
+                  $value = doubleval($value);
+               }
+            }
+            $userParams[trim($parts[0])] = $value;
          }
       }
       return $userParams;
