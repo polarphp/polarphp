@@ -14,7 +14,7 @@ namespace Lit\Utils;
 use Lit\Shell\GlobItemCommand;
 use Lit\Shell\PipelineCommand;
 use Lit\Shell\SeqCmmand;
-use Lit\Kernel\ValueException;
+use Lit\Exception\ValueException;
 use Lit\Shell\ShCommand;
 
 class ShParser

@@ -16,7 +16,7 @@ use Lit\Kernel\LitConfig;
 use Lit\Kernel\TestCase;
 use Lit\Kernel\TestResult;
 use Lit\Kernel\TestResultCode;
-use Lit\Kernel\ValueException;
+use Lit\Exception\ValueException;
 use Lit\Utils\ShParser;
 use Symfony\Component\Filesystem\Filesystem;
 use function Lit\Utils\path_split;
@@ -158,6 +158,17 @@ class TestRunner
             return new TestResult(TestResultCode::FAIL(), "shell parser error on: $line");
          }
       }
+      $cmd = $cmds[0];
+      foreach (array_slice($cmds, 1) as $c) {
+         $cmd = new SeqCmmand($cmd, '&&', $c);
+      }
+      $results = [];
+      $timeoutInfo = null;
+//      try {
+//
+//      } catch () {
+//
+//      }
    }
 
    /**

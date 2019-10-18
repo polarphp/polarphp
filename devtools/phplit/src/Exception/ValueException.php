@@ -9,6 +9,6 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/10/09.
-namespace Lit\Kernel;
+namespace Lit\Exception;
 class ValueException extends \RuntimeException
 {}

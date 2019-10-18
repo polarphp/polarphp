@@ -11,7 +11,7 @@
 // Created by polarboy on 2019/10/12.
 namespace Lit\Shell;
 
-use Lit\Kernel\ValueException;
+use Lit\Exception\ValueException;
 
 /**
  * keyword: The keyword to parse for. It must end in either '.' or ':'.

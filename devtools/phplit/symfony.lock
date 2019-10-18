@@ -1,4 +1,7 @@
 {
+    "diff/diff": {
+        "version": "3.2.0"
+    },
     "psr/cache": {
         "version": "1.0.1"
     },

@@ -10,7 +10,7 @@
 //
 // Created by polarboy on 2019/10/11.
 
-namespace Lit\Kernel;
+namespace Lit\Exception;
 
 class ExecuteCommandTimeoutException extends \RuntimeException
 {
