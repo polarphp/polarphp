@@ -4,7 +4,7 @@
 
 ## Why did I launch the `polarphp` project?
 
-With the strong rise of `Go` and `NodeJS`, the market share of `PHP` has gradually been eroded, and the `PHP` official still sticks to the Web programming field. The more things you want to keep, the more you can't keep it. `polarphp` draws on the related features of `NodeJS` and `Go` to repackage `zendVM`, remove some of the old deprecated features and strong `Web` attributes of `PHP`, by implementing a new set of runtime framework `libpdk` , the `PHP` language is built into a true universal scripting language, empower `PHP`, let it have asynchronous programming, coroutine, thread, built-in `unicode` support, standard file `IO` and so on. So that the `PHP` programmer can not only do the `web` application, but also face the real server application. `polarphp` is not a new language, but a runtime container for the `PHP` language.
+With the strong rise of `Go` and `NodeJS`, the market share of `PHP` has gradually been eroded, and the `PHP` official still sticks to the Web programming field. The more things you want to keep, the more you can't keep it. `polarphp` draws on the related features of `NodeJS` and `Go` to repackage `zendVM`, remove some of the old deprecated features and strong `Web` attributes of `PHP`, by implementing a new set of runtime framework `libpdk` , the `PHP` language is built into a true universal scripting language, empower `PHP`, let it have asynchronous programming, coroutine, thread, built-in `unicode` support, standard file `IO` and so on. So that the `PHP` programmer can not only do the `web` application, but also face the real server application. `polarphp` is not a new language, but a new compiler with runtime for the `PHP` language.
 
 ## Main features
 
