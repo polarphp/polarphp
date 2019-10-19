@@ -12,7 +12,7 @@
 
 namespace Lit\Shell;
 
-class GlobItemCommand implements ShCommandInterface
+class GlobItemCommand extends AbstractCommand
 {
    /**
     * @var string $pattern

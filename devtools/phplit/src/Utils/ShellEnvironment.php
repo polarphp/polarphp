@@ -42,10 +42,39 @@ class ShellEnvironment
    }
 
    /**
+    * @param string $cwd
+    * @return ShellEnvironment
+    */
+   public function setCwd(string $cwd): ShellEnvironment
+   {
+      $this->cwd = $cwd;
+      return $this;
+   }
+
+   /**
     * @return array
     */
    public function getEnv(): array
    {
       return $this->env;
+   }
+
+   public function getEnvVar(string $name, $default = null)
+   {
+      if (!array_key_exists($name, $this->env)) {
+         return $default;
+      }
+      return $this->env[$name];
+   }
+
+   public function unsetEnvVar(string $name): ShellEnvironment
+   {
+      unset($this->env[$name]);
+   }
+
+   public function addEnvVar(string $name, $value): ShellEnvironment
+   {
+      $this->env[$name] = $value;
+      return $this;
    }
 }

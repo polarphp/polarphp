@@ -15,6 +15,7 @@ define('OS_BSD', 'BSD');
 define('OS_MACOS', 'Darwin');
 define('OS_SOLARIS', 'Solaris');
 define('OS_LINUX', 'Linux');
+define('PHPLIT_TEMP_PREFIX', 'phplit_');
 
 set_time_limit(0);
 $script = $_SERVER['SCRIPT_NAME'];

@@ -240,7 +240,7 @@ class ShLexer
          if ($this->maybeEat('&')) {
             return ['&&'];
          }
-         if ($this->maybeEat('&>')) {
+         if ($this->maybeEat('>')) {
             return ['&>'];
          }
          return [$char];

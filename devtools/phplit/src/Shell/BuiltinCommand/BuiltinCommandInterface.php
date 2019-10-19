@@ -8,16 +8,13 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2019/10/10.
+// Created by polarboy on 2019/10/18.
 
-namespace Lit\Shell;
+namespace Lit\Shell\BuiltinCommand;
+use Lit\Shell\ShCommandInterface;
+use Lit\Utils\ShellEnvironment;
 
-interface ShCommandInterface
+interface BuiltinCommandInterface
 {
-   public function getArgsCount(): int;
-   public function getArgs(): array;
-   public function setArgs(array $args = array());
-   public function __toString(): string;
-   public function equalWith($other): bool;
-   public function toShell($file, $pipeFail = false): void;
+   public function execute(ShCommandInterface $cmd, ShellEnvironment $shenv);
 }

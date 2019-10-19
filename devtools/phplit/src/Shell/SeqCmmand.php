@@ -12,7 +12,7 @@
 
 namespace Lit\Shell;
 
-class SeqCmmand implements ShCommandInterface
+class SeqCmmand extends AbstractCommand
 {
    /**
     * @var string $op
@@ -55,5 +55,29 @@ class SeqCmmand implements ShCommandInterface
       $this->lhs->toShell($file, $pipeFail);
       fwrite($file, sprintf(" %s\n", $this->op));
       $this->rhs->toShell($file, $pipeFail);
+   }
+
+   /**
+    * @return string
+    */
+   public function getOp(): string
+   {
+      return $this->op;
+   }
+
+   /**
+    * @return ShCommandInterface
+    */
+   public function getLhs(): ShCommandInterface
+   {
+      return $this->lhs;
+   }
+
+   /**
+    * @return ShCommandInterface
+    */
+   public function getRhs(): ShCommandInterface
+   {
+      return $this->rhs;
    }
 }

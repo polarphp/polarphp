@@ -40,14 +40,14 @@ class ShellCommandResult
 
    /**
     * ShellCommandResult constructor.
-    * @param string $command
+    * @param ShCommandInterface $command
     * @param string $stdout
     * @param string $stderr
     * @param int $exitCode
     * @param bool $timeoutReached
     * @param array $outputFiles
     */
-   public function __construct(string $command, string $stdout, string $stderr,
+   public function __construct(ShCommandInterface $command, string $stdout, string $stderr,
                                int $exitCode, bool $timeoutReached, array $outputFiles = array())
    {
       $this->command = $command;
@@ -59,9 +59,9 @@ class ShellCommandResult
    }
 
    /**
-    * @return string
+    * @return ShCommandInterface
     */
-   public function getCommand(): string
+   public function getCommand(): ShCommandInterface
    {
       return $this->command;
    }

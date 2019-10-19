@@ -12,7 +12,7 @@
 
 namespace Lit\Shell;
 
-class ShCommand implements ShCommandInterface
+class ShCommand extends AbstractCommand
 {
    /**
     * @var array $args
@@ -52,5 +52,29 @@ class ShCommand implements ShCommandInterface
 
    public function toShell($file, $pipeFail = false) : void
    {
+   }
+
+   /**
+    * @return array
+    */
+   public function getArgs(): array
+   {
+      return $this->args;
+   }
+
+   public function getArgsCount(): int
+   {
+      return count($this->args);
+   }
+
+   /**
+    * item structure
+    * [op, filename]
+    *
+    * @return array
+    */
+   public function getRedirects(): array
+   {
+      return $this->redirects;
    }
 }

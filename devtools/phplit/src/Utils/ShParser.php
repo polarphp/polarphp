@@ -73,7 +73,7 @@ class ShParser
          throw new ValueException('empty command!');
       }
       if (is_array($token)) {
-         throw new ValueException('syntax error near unexpected token %s', $token[0]);
+         throw new ValueException(sprintf('syntax error near unexpected token %s', $token[0]));
       }
       $args = [$token];
       $redirects = [];

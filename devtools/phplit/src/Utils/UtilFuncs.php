@@ -89,7 +89,7 @@ function which(string $command, string $paths = null) : string
          }
       }
    }
-   return null;
+   return '';
 }
 
 function check_tools_path(string $dir, array $tools) : bool
@@ -519,6 +519,21 @@ function path_split(string $path): array
       return [DIRECTORY_SEPARATOR, substr($path, 1)];
    }
    return [substr($path, 0, $pos), substr($path, $pos + 1)];
+}
+
+function open_temp_file(string $prefix, string $mode)
+{
+   $fs = new Filesystem();
+   $tempFilename = $fs->tempnam(sys_get_temp_dir(), $prefix);
+   return fopen($tempFilename, $mode);
+}
+
+function make_temp_file(string $prefix): string
+{
+   $fs = new Filesystem();
+   $tempFilename = $fs->tempnam(sys_get_temp_dir(), $prefix);
+   $fs->touch($tempFilename);
+   return $tempFilename;
 }
 
 // dummy class

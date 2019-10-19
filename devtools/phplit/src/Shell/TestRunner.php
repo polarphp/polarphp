@@ -12,14 +12,29 @@
 
 namespace Lit\Shell;
 
+use Lit\Exception\InternalShellException;
+use Lit\Exception\KeyboardInterruptException;
 use Lit\Kernel\LitConfig;
 use Lit\Kernel\TestCase;
 use Lit\Kernel\TestResult;
 use Lit\Kernel\TestResultCode;
 use Lit\Exception\ValueException;
+use Lit\Shell\BuiltinCommand\BuiltinCommandInterface;
+use Lit\Shell\BuiltinCommand\CdCommand;
+use Lit\Shell\BuiltinCommand\EchoCommand;
+use Lit\Shell\BuiltinCommand\ExportCommand;
+use Lit\Shell\BuiltinCommand\MkdirCommand;
+use Lit\Shell\BuiltinCommand\RmCommand;
+use Lit\Utils\ShellEnvironment;
 use Lit\Utils\ShParser;
+use Lit\Utils\TimeoutHelper;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Process;
+use function Lit\Utils\has_substr;
+use function Lit\Utils\make_temp_file;
+use function Lit\Utils\open_temp_file;
 use function Lit\Utils\path_split;
+use function Lit\Utils\which;
 
 class TestRunner
 {
@@ -29,6 +44,9 @@ class TestRunner
    const REQUIRES_ANY_KEYWORD = 'REQUIRES-ANY:';
    const UNSUPPORTED_KEYWORD = 'UNSUPPORTED:';
    const END_KEYWORD = 'END.';
+   const REDIRECT_PIPE = -1;
+   const REDIRECT_STDOUT = -2;
+   const DEV_NULL = '/dev/null';
 
    /**
     * @var LitConfig $litConfig
@@ -45,12 +63,18 @@ class TestRunner
     */
    private $useExternalShell;
 
+   /**
+    * @var BuiltinCommandInterface[] $builtinCommands
+    */
+   private $builtinCommands = [];
+
    public function __construct(LitConfig $litConfig, array $extraSubstitutions = array(),
                                bool $useExternalShell = false)
    {
       $this->litConfig = $litConfig;
       $this->extraSubstitutions = $extraSubstitutions;
       $this->useExternalShell = $useExternalShell;
+      $this->setupBuiltinCommands();
    }
 
    public function executeTest(TestCase $test)
@@ -164,11 +188,457 @@ class TestRunner
       }
       $results = [];
       $timeoutInfo = null;
-//      try {
-//
-//      } catch () {
-//
-//      }
+      try {
+         $shenv = new ShellEnvironment($cwd, $test->getConfig()->getEnvironment());
+         list($exitCode, $timeoutInfo) = $this->executeShellCommand($cmd, $shenv, $results, $this->litConfig->getMaxIndividualTestTime());
+      } catch (InternalShellException $e) {
+         $exitCode = 127;
+         $results[] = new ShellCommandResult($e->getCommand(), '', $e->getMessage(), $exitCode,false);
+      }
+      $out = $err = '';
+      $litConfig = $this->litConfig;
+      foreach ($results as $i => $result) {
+         // Write the command line run.
+         $args = $result->getCommand()->getArgs();
+         $out .= sprintf("$ %s\n", join(' ', array_map(function ($item) {
+            return sprintf('"%s"', $item);
+         } ,$args)));
+         $stdout = trim($result->getStdout());
+         $stderr = trim($result->getStderr());
+         $resultExitCode = $result->getExitCode();
+         // If nothing interesting happened, move on.
+         if ($litConfig->getMaxIndividualTestTime() == 0 && $resultExitCode == 0 &&
+            empty($stdout) && empty($stderr)) {
+            continue;
+         }
+         // Otherwise, something failed or was printed, show it.
+         // Add the command output, if redirected.
+         foreach ($result->getOutputFiles() as $fentry) {
+            list($name, $path, $data) = $fentry;
+            if (trim($data)) {
+               $out .= "# redirected output from %r:$name";
+               // TODO encoding of data ?
+               if (iconv_strlen($data, 'UTF-8') > 1024) {
+                  $out .= iconv_substr($data, 0, 1024, 'UTF-8') . "\n...\n";
+                  $out .= "note: data was truncated\n";
+               } else {
+                  $out .= $data;
+               }
+               $out += "\n";
+            }
+         }
+         if ($stdout) {
+            $out .= sprintf("# command output:\n%s\n", $result->getStdout());
+         }
+         if ($stderr) {
+            $out .= sprintf("# command stderr:\n%s\n", $result->getStderr());
+         }
+         if (!$stdout && !$stderr) {
+            $out .= "note: command had no output on stdout or stderr\n";
+         }
+         // Show the error conditions:
+         if ($resultExitCode != 0) {
+            // On Windows, a negative exit code indicates a signal, and those are
+            // easier to recognize or look up if we print them in hex.
+            if ($litConfig->isWindows() && $resultExitCode < 0) {
+               $codeStr = dechex(intval($resultExitCode & 0xFFFFFFFF));
+            } else {
+               $codeStr = strval($resultExitCode);
+            }
+            $out .= "error: command failed with exit status: $codeStr\n";
+         }
+         if ($litConfig->getMaxIndividualTestTime() > 0 && $result->isTimeoutReached()) {
+            $out .= sprintf("error: command reached timeout: %s\n", strval($result->isTimeoutReached()));
+         }
+      }
+      return [$out, $err, $exitCode, $timeoutInfo];
+   }
+
+   /**
+    * Wrapper around _executeShCmd that handles timeout
+    * @param ShCommandInterface $cmd
+    * @param ShellEnvironment $shenv
+    * @param array $results
+    * @param int $timeout
+    */
+   private function executeShellCommand(ShCommandInterface $cmd, ShellEnvironment $shenv, array &$results, int $timeout = 0)
+   {
+      // Use the helper even when no timeout is required to make
+      // other code simpler (i.e. avoid bunch of ``!= None`` checks)
+      $timeoutHelper = new TimeoutHelper($timeout);
+      if ($timeout > 0) {
+         $timeoutHelper->startTimer();
+      }
+      $finalExitCode = $this->doExecuteShellCommand($cmd, $shenv, $results, $timeoutHelper);
+      $timeoutHelper->cancel();
+      $timeoutInfo = null;
+      if ($timeoutHelper->timeoutReached()) {
+         $timeoutInfo = "Reached timeout of $timeout seconds";
+      }
+      return [$finalExitCode, $timeoutInfo];
+   }
+
+   private function doExecuteShellCommand(ShCommandInterface $cmd, ShellEnvironment $shenv, array &$results,
+                                          TimeoutHelper $timeoutHelper)
+   {
+      $kIsWindows = $this->litConfig->isWindows();
+      $kAvoidDevNull = $kIsWindows;
+      if ($timeoutHelper->timeoutReached()) {
+         // Prevent further recursion if the timeout has been hit
+         // as we should try avoid launching more processes.
+         return null;
+      }
+      if ($cmd instanceof SeqCmmand) {
+         $op = $cmd->getOp();
+         if ($op == ';') {
+            $this->doExecuteShellCommand($cmd->getLhs(), $shenv, $results, $timeoutHelper);
+            return $this->doExecuteShellCommand($cmd->getRhs(), $shenv, $results, $timeoutHelper);
+         }
+         if ($op == '&') {
+            throw new InternalShellException($cmd, "unsupported shell operator: '&'");
+         }
+         if ($op == '||') {
+            $result = $this->doExecuteShellCommand($cmd->getLhs(), $shenv, $results, $timeoutHelper);
+            if (0 != $results) {
+               $result = $this->doExecuteShellCommand($cmd->getRhs(), $shenv, $results, $timeoutHelper);
+            }
+            return $result;
+         }
+         if ($op == '&&') {
+            $result = $this->doExecuteShellCommand($cmd->getLhs(), $shenv, $results, $timeoutHelper);
+            if ($result == null) {
+               return $result;
+            }
+            if (0 == $result) {
+               $result = $this->doExecuteShellCommand($cmd->getRhs(), $shenv, $results, $timeoutHelper);
+            }
+            return $result;
+         }
+         throw new ValueException("Unknown shell command: $op");
+      }
+      assert($cmd instanceof PipelineCommand);
+      $commands = $cmd->getCommands();
+      $firstCommand = $commands[0]->getArgs()[0];
+
+      // Handle shell builtins first.
+      if ($firstCommand == 'cd') {
+         if ($cmd->getPipeSize() != 1) {
+            throw new ValueException("'cd' cannot be part of a pipeline");
+         }
+         $cdCmd = $this->builtinCommands['cd'];
+         return $cdCmd->execute($cmd->getCommand(0), $shenv);
+      }
+
+      // Handle "echo" as a builtin if it is not part of a pipeline. This greatly
+      // speeds up tests that construct input files by repeatedly echo-appending to
+      // a file.
+      // FIXME: Standardize on the builtin echo implementation. We can use a
+      // temporary file to sidestep blocking pipe write issues.
+      if ($firstCommand == 'echo' && count($commands) == 1) {
+
+         return 0;
+      }
+
+      if ($firstCommand == 'export') {
+         return 0;
+      }
+      if ($firstCommand == 'mkdir') {
+         return 0;
+      }
+      if ($firstCommand == 'diff') {
+         return 0;
+      }
+      if ($firstCommand == 'rm') {
+         return 0;
+      }
+      if ($firstCommand == ':') {
+         if ($cmd->getPipeSize() != 1) {
+            throw new InternalShellException($cmd->getCommand(0),
+               "Unsupported: ':' cannot be part of a pipeline");
+         }
+         $results[] = new ShellCommandResult($cmd->getCommand(0), '', '', 0, false);
+         return 0;
+      }
+      /**
+       * @var Process[] $processes
+       */
+      $processes = [];
+      $defaultStdin = self::REDIRECT_PIPE;
+      $stderrTempFiles = [];
+      $openedFiles = [];
+      $namedTempFiles = [];
+      $builtinCommands = ['cat'];
+      // To avoid deadlock, we use a single stderr stream for piped
+      // output. This is null until we have seen some output using
+      // stderr.
+      $commandCount = count($commands);
+      foreach ($commands as $i => $pcmd) {
+         // Reference the global environment by default.
+         $cmdShenv = $shenv;
+         $pcmdArgs = $pcmd->getArgs();
+         if ($pcmdArgs[0] == 'env') {
+            // Create a copy of the global environment and modify it for this one
+            // command. There might be multiple envs in a pipeline:
+            //   env FOO=1 llc < %s | env BAR=2 llvm-mc | FileCheck %s
+            $cmdShenv = new ShellEnvironment($shenv->getCwd(), $shenv->getEnv());
+            $this->updateEnv($cmdShenv, $pcmd);
+         }
+         list($stdin, $stdout, $stderr) = $this->processRedirects($pcmd, $defaultStdin, $cmdShenv, $openedFiles);
+         // If stderr wants to come from stdout, but stdout isn't a pipe, then put
+         // stderr on a pipe and treat it as stdout.
+         if ($stderr == self::REDIRECT_STDOUT && $stdout != self::REDIRECT_PIPE) {
+            $stderr = self::REDIRECT_PIPE;
+            $stderrIsStdout = true;
+         } else {
+            $stderrIsStdout = false;
+            // Don't allow stderr on a PIPE except for the last
+            // process, this could deadlock.
+            //
+            // FIXME: This is slow, but so is deadlock.
+            if ($stderr == self::REDIRECT_PIPE && $pcmd != $commands[$commandCount - 1]) {
+               $stderr = make_temp_file(PHPLIT_TEMP_PREFIX, 'w+b');
+               $stderrTempFiles[] = [$i, $stderr];
+            }
+         }
+         // Resolve the executable path ourselves.
+         $args = $pcmd->getArgs();
+         $executable = null;
+         $isBuiltinCmd = in_array($args[0], $builtinCommands);
+         if (!$isBuiltinCmd) {
+            // For paths relative to cwd, use the cwd of the shell environment.
+            if ($args[0][0] == '.') {
+               $exeInCwd = $cmdShenv->getCwd().DIRECTORY_SEPARATOR.$args[0];
+               if (is_file($exeInCwd)) {
+                  $executable = $exeInCwd;
+               }
+            }
+            if (!$executable) {
+               $executable = which($args[0], $cmdShenv->getEnvVar('PATH', ''));
+            }
+            if (!$executable) {
+               throw new InternalShellException($pcmd, sprintf("%s: command not found", $args[0]));
+            }
+         }
+         // Replace uses of /dev/null with temporary files.
+         if ($kAvoidDevNull) {
+            foreach ($args as $argIndex => $arg) {
+               if (is_string($arg) && has_substr($arg, self::DEV_NULL)) {
+                  $tfilename = make_temp_file(PHPLIT_TEMP_PREFIX);
+                  $namedTempFiles[] = $tfilename;
+                  $args[$argIndex] = str_replace(self::DEV_NULL, $tfilename);
+               }
+            }
+            $pcmd->setArgs($args);
+         }
+
+         // Expand all glob expressions
+         $args = $this->expandGlobExpressions($args, $cmdShenv->getCwd());
+         if ($isBuiltinCmd) {
+            // TODO builtin directory
+            array_unshift($args,PHP_BINARY);
+         }
+         // On Windows, do our own command line quoting for better compatibility
+         // with some core utility distributions.
+         if ($kIsWindows) {
+            $args = $this->quoteWindowsCommand($args);
+         }
+         try {
+
+         } catch (\Exception $e) {
+            throw new InternalShellException($pcmd, 'Could not create process ({}) due to {}');
+         }
+         // Immediately close stdin for any process taking stdin from us.
+         if ($stdin == self::REDIRECT_PIPE) {
+            flose($stdin);
+         }
+         // Update the current stdin source.
+         if ($stdout == self::REDIRECT_PIPE) {
+            $defaultStdin = $stdout;
+         } elseif ($stderrIsStdout) {
+            $defaultStdin = $stderr;
+         } else {
+            $defaultStdin = self::REDIRECT_PIPE;
+         }
+      }
+      // Explicitly close any redirected files. We need to do this now because we
+      // need to release any handles we may have on the temporary files (important
+      // on Win32, for example). Since we have already spawned the subprocess, our
+      // handles have already been transferred so we do not need them anymore.
+      foreach ($openedFiles as $fentry) {
+         list($name, $mode, $file, $path) = $fentry;
+         fclose($file);
+      }
+      // FIXME: There is probably still deadlock potential here. Yawn.
+      $processesData = [];
+      foreach ($processes as $i => $process) {
+         $exitCode = $process->getExitCode();
+         if ($exitCode == 0) {
+            $out = $process->getOutput();
+         } else {
+            $out = '';
+         }
+         if ($exitCode != 0) {
+            $err = $process->getErrorOutput();
+         } else {
+            $err = '';
+         }
+         $processesData[$i] = [$out, $err];
+      }
+      // Read stderr out of the temp files.
+      foreach ($stderrTempFiles as $entry) {
+         list($i, $file) = $entry;
+         fseek($file, 0, SEEK_SET);
+         $processesData[$i] = [$processesData[$i][0], stream_get_contents($file)];
+         fclose($file);
+      }
+      $exitCode = null;
+      foreach ($processesData as $i => $entry) {
+         list($out, $err) = $entry;
+         $processes[$i]->wait();
+         $result = $processes[$i]->getExitCode();
+         //  Detect Ctrl-C in subprocess.
+         if ($result == SIGINT) {
+            throw new KeyboardInterruptException();
+         }
+         // Ensure the resulting output is always of string type.
+         $outputFiles = [];
+
+         if ($result != 0) {
+            foreach ($openedFiles as $entry) {
+               list($name, $mode, $file, $path) = $entry;
+               if ($path != null && in_array($mode, ['w', 'a'])) {
+                  $file = fopen($path, 'rb');
+                  $data = stream_get_contents($file);
+                  if ($data) {
+                     $outputFiles[] = [$name, $path, $data];
+                  }
+               }
+            }
+         }
+
+         $results[] = new ShellCommandResult(
+            $cmd->getCommands()[$i], $out, $err, $result, $timeoutHelper->timeoutReached(),
+            $outputFiles
+         );
+         if ($cmd->isPipeError()) {
+            // Take the last failing exit code from the pipeline.
+            if (!$exitCode || $result != 0) {
+               $exitCode = $result;
+            }
+         } else {
+            $exitCode = $result;
+         }
+      }
+      $fs = new Filesystem();
+      // Remove any named temporary files we created.
+      $fs->remove($namedTempFiles);
+      if ($cmd->isNegate()) {
+         $exitCode = !$exitCode;
+      }
+      return $exitCode;
+   }
+
+   /**
+    * Return the standard fds for cmd after applying redirects
+    *
+    * Returns the three standard file descriptors for the new child process.  Each
+    * fd may be an open, writable file object or a sentinel value from the
+    * subprocess module.
+    *
+    * @param ShCommand $cmd
+    * @param $stdSource
+    * @param ShellEnvironment $cmdShEnv
+    * @param array $openFiles
+    */
+   private function processRedirects(ShCommand $cmd, $stdSource, ShellEnvironment $cmdShEnv, array &$openFiles)
+   {
+      $kIsWindows = $this->litConfig->isWindows();
+      $kAvoidDevNull = $kIsWindows;
+      // Apply the redirections, we use (N,) as a sentinel to indicate stdin,
+      // stdout, stderr for N equal to 0, 1, or 2 respectively. Redirects to or
+      // from a file are represented with a list [file, mode, file-object]
+      // where file-object is initially None.
+      $redirects = array(
+         [0], [1], [2]
+      );
+      foreach ($cmd->getRedirects() as $entry) {
+         list($op, $filename) = $entry;
+         if ($op === ['>', 2]) {
+            $redirects[2] = [$filename, 'w', null];
+         } elseif ($op === ['>>', 2]) {
+            $redirects[2] = [$filename, 'a', null];
+         } elseif ($op === ['>&', 2] && has_substr('012', $filename)) {
+            $redirects[2] = $redirects[intval($filename)];
+         } elseif ($op === ['>&'] || $op === ['&>']) {
+            $redirects[1] = $redirects[2] = [$filename, 'w', null];
+         } elseif ($op === ['>']) {
+            $redirects[1] = [$filename, 'w', null];
+         } elseif ($op === ['>>']) {
+            $redirects[1] = [$filename, 'a', null];
+         } elseif ($op === ['<']) {
+            $redirects[0] = [$filename, 'r', null];
+         } else {
+            throw new InternalShellException($cmd, sprintf("Unsupported redirect: %s", print_r([$op, $filename], true)));
+         }
+      }
+      // Open file descriptors in a second pass.
+      $stdFds = [null, null, null];
+      foreach ($redirects as $i => $redirect) {
+         // Handle the sentinel values for defaults up front.
+         if (count($redirect) == 1) {
+            if ($redirect === [0]) {
+               $fd = $stdSource;
+            } elseif ($redirect == [1]) {
+               if ($i == 0) {
+                  throw new InternalShellException($cmd, 'Unsupported redirect for stdin');
+               } elseif ($i == 1) {
+                  $fd = self::REDIRECT_PIPE;
+               } else {
+                  $fd = self::REDIRECT_STDOUT;
+               }
+            } elseif ($redirect == [2]) {
+               if ($i != 2) {
+                  throw new InternalShellException($cmd, 'Unsupported redirect on stdout');
+               }
+               $fd = self::REDIRECT_PIPE;
+            } else {
+               throw new InternalShellException($cmd, 'Bad redirect');
+            }
+            $stdFds[$i] = $fd;
+            continue;
+         }
+         list($filename, $mode, $fd) = $redirect;
+         // Check if we already have an open fd. This can happen if stdout and
+         // stderr go to the same place.
+         if ($fd != null) {
+            $stdFds[$i] = $fd;
+            continue;
+         }
+         $redirectFilename = null;
+         $name = $this->expandGlob($filename, $cmdShEnv->getCwd());
+         if (count($name) != 1) {
+            throw new InternalShellException($cmd, "Unsupported: glob in redirect expanded to multiple files");
+         }
+         $name = $name[0];
+         if ($kAvoidDevNull && $name == self::DEV_NULL) {
+            $fd = open_temp_file(PHPLIT_TEMP_PREFIX, $mode);
+         } elseif ($kIsWindows && $name == '/dev/tty') {
+            // Simulate /dev/tty on Windows.
+            // "CON" is a special filename for the console.
+            $fd = fopen("CON", $mode);
+         }
+         // Workaround a Win32 and/or subprocess bug when appending.
+         // FIXME: Actually, this is probably an instance of PR6753.
+         if ($mode == 'a') {
+            fseek($fd, 0, SEEK_SET);
+         }
+         // Mutate the underlying redirect list so that we can redirect stdout
+         // and stderr to the same place without opening the file twice.
+         $redirect[2] = $fd;
+         $openFiles[] = [$filename, $mode, $fd];
+         $stdFds[$i] = $fd;
+      }
+      return $stdFds;
    }
 
    /**
@@ -382,7 +852,7 @@ class TestRunner
          ['%t', $tempName],
          ['%basename_t', $baseName],
          ['%T', $tempDir],
-         ['%{php}', PHP_BINARY],
+         ['%{php}', sprintf('"%s"', PHP_BINARY)],
          ['#_MARKER_#', '%']
       ));
       // "%/[STpst]" should be normalized.
@@ -429,5 +899,132 @@ class TestRunner
          // Strip the trailing newline and any extra whitespace.
          return trim($line);
       }, $script);
+   }
+
+   private function expandGlob($expr, string $cwd): array
+   {
+      if ($expr instanceof GlobItemCommand) {
+         $items = $expr->resolve($cwd);
+         sort($items);
+         return $items;
+      }
+      return [$expr];
+   }
+
+   private function expandGlobExpressions(array $exprs, string $cwd): array
+   {
+      $result = [$exprs[0]];
+      foreach (array_slice($exprs, 1) as $expr) {
+         $result = array_merge($result, $this->expandGlob($expr, $cwd));
+      }
+      return $result;
+   }
+
+   /**
+    *  Reimplement Python's private subprocess.list2cmdline for MSys compatibility
+    *
+    * Based on CPython implementation here:
+    * https://hg.python.org/cpython/file/849826a900d2/Lib/subprocess.py#l422
+    *
+    * Some core util distributions (MSys) don't tokenize command line arguments
+    * the same way that MSVC CRT does. Lit rolls its own quoting logic similar to
+    * the stock CPython logic to paper over these quoting and tokenization rule
+    * differences.
+    *
+    * We use the same algorithm from MSDN as CPython
+    * (http://msdn.microsoft.com/en-us/library/17w5ykft.aspx), but we treat more
+    * characters as needing quoting, such as double quotes themselves.
+    * @param array $seq
+    */
+   private function quoteWindowsCommand(array $seq)
+   {
+      $result = [];
+      $needQuote = false;
+      foreach ($seq as $arg) {
+         $bsBuf = [];
+         // Add a space to separate this argument from the others
+         if ($result) {
+            $result[] = ' ';
+         }
+         // This logic differs from upstream list2cmdline.
+         $needquote = has_substr($arg, ' ') || has_substr($arg, "\t") ||
+            has_substr($arg, "\"") || empty($arg);
+         if ($needQuote) {
+            $result[] = '"';
+         }
+         for ($i = 0; $i < strlen($arg); ++$i) {
+            $char = $arg[$i];
+            if ($char == "\\") {
+               // Don't know if we need to double yet.
+               $bsBuf[] = $char;
+            } elseif ($char == '"') {
+               // Double backslashes.
+               $result[] = str_repeat("\\", count($bsBuf) * 2);
+               $bsBuf = [];
+               $result[] = '\\"';
+            } else {
+               // Normal char
+               if ($bsBuf) {
+                  $result = array_merge($result, $bsBuf);
+                  $bsBuf = [];
+               }
+               $result[] = $char;
+            }
+         }
+         // Add remaining backslashes, if any.
+         if ($bsBuf) {
+            $result = array_merge($result, $bsBuf);
+         }
+         if ($needQuote) {
+            $result = array_merge($result, $bsBuf);
+            $result[] = '"';
+         }
+      }
+      return join('', $result);
+   }
+
+   private function updateEnv(ShellEnvironment $env, ShCommandInterface $cmd)
+   {
+      $argIndex = 1;
+      $unsetNextEnvVar = false;
+      $cmdArgs = $cmd->getArgs();
+      assert(count($cmdArgs) > 0, "command args count must greater than 0");
+      $cmdArgs = array_slice($cmdArgs, 1);
+      $envPool = $env->getEnv();
+      foreach ($cmdArgs as $index => $arg) {
+         // Support for the -u flag (unsetting) for env command
+         // e.g., env -u FOO -u BAR will remove both FOO and BAR
+         // from the environment.
+         if ($arg == '-u') {
+            $unsetNextEnvVar = true;
+            continue;
+         }
+         if ($unsetNextEnvVar) {
+            $unsetNextEnvVar = false;
+            if (in_array($arg, $envPool)) {
+               $env->unsetEnvVar($arg);
+            }
+            continue;
+         }
+         // Partition the string into KEY=VALUE.
+         if (false === strpos($arg, '=')) {
+            break;
+         }
+         $parts = explode('=', $arg, 2);
+         assert(count($parts) == 3);
+         $env->addEnvVar(trim($parts[0]), trim($parts[1]));
+      }
+      $cmd->setArgs(array_slice($cmdArgs, $index));
+   }
+
+   private function setupBuiltinCommands()
+   {
+      $this->builtinCommands = array(
+         'export' => new ExportCommand(),
+         'mkdir' => new MkdirCommand(),
+         'rm' => new RmCommand(),
+         'echo' => new EchoCommand(),
+         'cd' => new CdCommand(),
+      );
    }
 }

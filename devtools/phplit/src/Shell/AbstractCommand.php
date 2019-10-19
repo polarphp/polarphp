@@ -8,16 +8,22 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2019/10/10.
+// Created by polarboy on 2019/10/18.
 
 namespace Lit\Shell;
 
-interface ShCommandInterface
+abstract class AbstractCommand implements ShCommandInterface
 {
-   public function getArgsCount(): int;
-   public function getArgs(): array;
-   public function setArgs(array $args = array());
-   public function __toString(): string;
-   public function equalWith($other): bool;
-   public function toShell($file, $pipeFail = false): void;
+   public function getArgs(): array
+   {
+      return [];
+   }
+
+   public function getArgsCount(): int
+   {
+      return count($this->getArgs());
+   }
+
+   public function setArgs(array $args = array())
+   {}
 }

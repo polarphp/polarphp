@@ -12,10 +12,10 @@
 
 namespace Lit\Shell;
 
-class PipelineCommand implements ShCommandInterface
+class PipelineCommand extends AbstractCommand
 {
    /**
-    * @var array $commands
+    * @var ShCommandInterface[] $commands
     */
    private $commands;
    /**
@@ -65,5 +65,47 @@ class PipelineCommand implements ShCommandInterface
             fwrite($file, "|\n  ");
          }
       }
+   }
+
+   /**
+    * @return ShCommandInterface[]
+    */
+   public function getCommands(): array
+   {
+      return $this->commands;
+   }
+
+   /**
+    * @param int $index
+    * @return ShCommandInterface
+    */
+   public function getCommand(int $index): ShCommandInterface
+   {
+      assert(0 < $index && $index < $this->getPipeSize());
+      return $this->commands[$index];
+   }
+
+   /**
+    * @return int
+    */
+   public function getPipeSize(): int
+   {
+      return count($this->commands);
+   }
+
+   /**
+    * @return bool
+    */
+   public function isNegate(): bool
+   {
+      return $this->negate;
+   }
+
+   /**
+    * @return bool
+    */
+   public function isPipeError(): bool
+   {
+      return $this->pipeError;
    }
 }
