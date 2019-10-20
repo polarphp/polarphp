@@ -307,7 +307,7 @@ class TestRunner
          }
          if ($op == '&&') {
             $result = $this->doExecuteShellCommand($cmd->getLhs(), $shenv, $results, $timeoutHelper);
-            if ($result == null) {
+            if ($result === null) {
                return $result;
             }
             if (0 == $result) {
@@ -713,6 +713,8 @@ class TestRunner
       $test->setXfails($keywordParsers[self::XFAIL_KEYWORD]->getValue());
       $requires = $keywordParsers[self::REQUIRES_KEYWORD]->getValue();
       $requires = array_merge($requires, $keywordParsers[self::REQUIRES_ANY_KEYWORD]->getValue());
+      $keywordParsers[self::REQUIRES_KEYWORD]->setValue($requires);
+      $keywordParsers[self::REQUIRES_ANY_KEYWORD]->setValue($requires);
       $test->setRequires($requires);
       $test->setUnsupported($keywordParsers[self::UNSUPPORTED_KEYWORD]->getValue());
       // Verify the script contains a run line.
@@ -800,7 +802,7 @@ class TestRunner
 
    private function countNewline(string $str, int $start = 0, int $stop = null): int
    {
-      if ($stop == null) {
+      if ($stop === null) {
          $stop = strlen($str);
       }
       $count = 0;

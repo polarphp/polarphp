@@ -11,6 +11,7 @@
 // Created by polarboy on 2019/10/12.
 namespace Lit\Shell;
 
+use Lit\Utils\BooleanExpr;
 use Lit\Exception\ValueException;
 
 /**
@@ -76,13 +77,13 @@ class IntegratedTestKeywordParser
       $this->value = $initialValue;
       if ($kind == ParserKind::COMMAND) {
          $this->parser = self::COMMAND_PARSER;
-      } elseif($keyword == ParserKind::LIST) {
+      } elseif($kind == ParserKind::LIST) {
          $this->parser = self::LIST_PARSER;
-      } elseif($keyword == ParserKind::BOOLEAN_EXPR) {
+      } elseif($kind == ParserKind::BOOLEAN_EXPR) {
          $this->parser = self::BOOLEAN_EXPR_PARSER;
-      } elseif($keyword == ParserKind::TAG) {
+      } elseif($kind == ParserKind::TAG) {
          $this->parser = self::TAG_PARSER;
-      } elseif($keyword == ParserKind::CUSTOM) {
+      } elseif($kind == ParserKind::CUSTOM) {
          if (null == $parser) {
             throw new ValueException(sprintf("Unknown kind '%d'", $kind));
          }
@@ -160,7 +161,7 @@ class IntegratedTestKeywordParser
     * @param string $line
     * @param array $output
     */
-   public static function handleList(int $lineNumber, string $line, array $output): array
+   public static function handleList(int $lineNumber, string $line, array &$output): array
    {
       $parts = explode(',', $line);
       foreach ($parts as $item) {
@@ -176,7 +177,7 @@ class IntegratedTestKeywordParser
     * @param string $line
     * @param array $output
     */
-   public static function handleBooleanExpr(int $lineNumber, string $line, array $output): array
+   public static function handleBooleanExpr(int $lineNumber, string $line, array &$output): array
    {
       $parts = [];
       foreach (explode(',', $line) as $item) {
@@ -248,6 +249,12 @@ class IntegratedTestKeywordParser
    public function getValue(): array
    {
       return $this->value;
+   }
+
+   public function setValue(array $value): IntegratedTestKeywordParser
+   {
+      $this->value = $value;
+      return $this;
    }
 
    /**
