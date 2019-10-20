@@ -12,13 +12,19 @@
 
 namespace Lit\Shell\BuiltinCommand;
 
+use Lit\Exception\ValueException;
 use Lit\Shell\ShCommandInterface;
 use Lit\Utils\ShellEnvironment;
+use function Lit\Utils\update_shell_env;
 
 class ExportCommand implements BuiltinCommandInterface
 {
    public function execute(ShCommandInterface $cmd, ShellEnvironment $shenv)
    {
-
+      if ($cmd->getArgsCount() != 2) {
+         throw new ValueException("'export' supports only one argument");
+      }
+      update_shell_env($shenv, $cmd);
+      return 0;
    }
 }

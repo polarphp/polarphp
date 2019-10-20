@@ -25,16 +25,18 @@ use Lit\Shell\BuiltinCommand\EchoCommand;
 use Lit\Shell\BuiltinCommand\ExportCommand;
 use Lit\Shell\BuiltinCommand\MkdirCommand;
 use Lit\Shell\BuiltinCommand\RmCommand;
+use Lit\Shell\Process;
 use Lit\Utils\ShellEnvironment;
 use Lit\Utils\ShParser;
 use Lit\Utils\TimeoutHelper;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Process\Process;
 use function Lit\Utils\has_substr;
+use function Lit\Utils\is_absolute_path;
 use function Lit\Utils\make_temp_file;
 use function Lit\Utils\open_temp_file;
 use function Lit\Utils\path_split;
 use function Lit\Utils\which;
+use function Lit\Utils\update_shell_env;
 
 class TestRunner
 {
@@ -44,8 +46,7 @@ class TestRunner
    const REQUIRES_ANY_KEYWORD = 'REQUIRES-ANY:';
    const UNSUPPORTED_KEYWORD = 'UNSUPPORTED:';
    const END_KEYWORD = 'END.';
-   const REDIRECT_PIPE = -1;
-   const REDIRECT_STDOUT = -2;
+
    const DEV_NULL = '/dev/null';
 
    /**
@@ -317,13 +318,13 @@ class TestRunner
          throw new ValueException("Unknown shell command: $op");
       }
       assert($cmd instanceof PipelineCommand);
-      $commands = $cmd->getCommands();
-      $firstCommand = $commands[0]->getArgs()[0];
+      $firstCommand = $cmd->getCommand(0);
+      $firstCommandName = $firstCommand->getArgs()[0];
 
       // Handle shell builtins first.
-      if ($firstCommand == 'cd') {
+      if ($firstCommandName == 'cd') {
          if ($cmd->getPipeSize() != 1) {
-            throw new ValueException("'cd' cannot be part of a pipeline");
+            throw new InternalShellException($firstCommand,"'cd' cannot be part of a pipeline");
          }
          $cdCmd = $this->builtinCommands['cd'];
          return $cdCmd->execute($cmd->getCommand(0), $shenv);
@@ -334,36 +335,49 @@ class TestRunner
       // a file.
       // FIXME: Standardize on the builtin echo implementation. We can use a
       // temporary file to sidestep blocking pipe write issues.
-      if ($firstCommand == 'echo' && count($commands) == 1) {
+      if ($firstCommandName == 'echo' && $cmd->getPipeSize() == 1) {
 
          return 0;
       }
 
-      if ($firstCommand == 'export') {
-         return 0;
-      }
-      if ($firstCommand == 'mkdir') {
-         return 0;
-      }
-      if ($firstCommand == 'diff') {
-         return 0;
-      }
-      if ($firstCommand == 'rm') {
-         return 0;
-      }
-      if ($firstCommand == ':') {
+      if ($firstCommandName == 'export') {
          if ($cmd->getPipeSize() != 1) {
-            throw new InternalShellException($cmd->getCommand(0),
+            throw new InternalShellError($firstCommand, "'export' cannot be part of a pipeline");
+         }
+         $exportCmd = new ExportCommand();
+         return $exportCmd->execute($cmd, $shenv);
+      }
+      if ($firstCommandName == 'mkdir') {
+         if ($cmd->getPipeSize() != 1) {
+            throw new InternalShellError($firstCommand,"Unsupported: 'mkdir' cannot be part of a pipeline");
+         }
+         return 0;
+      }
+      if ($firstCommandName == 'diff') {
+         if ($cmd->getPipeSize() != 1) {
+            throw new InternalShellError($firstCommand, "Unsupported: 'diff' cannot be part of a pipeline");
+         }
+         return 0;
+      }
+      if ($firstCommandName == 'rm') {
+         if ($cmd->getPipeSize() != 1) {
+            throw new InternalShellError($firstCommand, "Unsupported: 'rm' cannot be part of a pipeline");
+         }
+         return 0;
+      }
+      if ($firstCommandName == ':') {
+         if ($cmd->getPipeSize() != 1) {
+            throw new InternalShellException($firstCommand,
                "Unsupported: ':' cannot be part of a pipeline");
          }
-         $results[] = new ShellCommandResult($cmd->getCommand(0), '', '', 0, false);
+         $results[] = new ShellCommandResult($firstCommand, '', '', 0, false);
          return 0;
       }
       /**
        * @var Process[] $processes
        */
       $processes = [];
-      $defaultStdin = self::REDIRECT_PIPE;
+      $defaultStdin = Process::REDIRECT_PIPE;
       $stderrTempFiles = [];
       $openedFiles = [];
       $namedTempFiles = [];
@@ -371,8 +385,7 @@ class TestRunner
       // To avoid deadlock, we use a single stderr stream for piped
       // output. This is null until we have seen some output using
       // stderr.
-      $commandCount = count($commands);
-      foreach ($commands as $i => $pcmd) {
+      foreach ($cmd->getCommands() as $i => $pcmd) {
          // Reference the global environment by default.
          $cmdShenv = $shenv;
          $pcmdArgs = $pcmd->getArgs();
@@ -381,13 +394,13 @@ class TestRunner
             // command. There might be multiple envs in a pipeline:
             //   env FOO=1 llc < %s | env BAR=2 llvm-mc | FileCheck %s
             $cmdShenv = new ShellEnvironment($shenv->getCwd(), $shenv->getEnv());
-            $this->updateEnv($cmdShenv, $pcmd);
+            update_shell_env($cmdShenv, $pcmd);
          }
          list($stdin, $stdout, $stderr) = $this->processRedirects($pcmd, $defaultStdin, $cmdShenv, $openedFiles);
          // If stderr wants to come from stdout, but stdout isn't a pipe, then put
          // stderr on a pipe and treat it as stdout.
-         if ($stderr == self::REDIRECT_STDOUT && $stdout != self::REDIRECT_PIPE) {
-            $stderr = self::REDIRECT_PIPE;
+         if ($stderr == Process::REDIRECT_STDOUT && $stdout != Process::REDIRECT_PIPE) {
+            $stderr = Process::REDIRECT_PIPE;
             $stderrIsStdout = true;
          } else {
             $stderrIsStdout = false;
@@ -395,7 +408,7 @@ class TestRunner
             // process, this could deadlock.
             //
             // FIXME: This is slow, but so is deadlock.
-            if ($stderr == self::REDIRECT_PIPE && $pcmd != $commands[$commandCount - 1]) {
+            if ($stderr == Process::REDIRECT_PIPE && $pcmd != $commands[$commandCount - 1]) {
                $stderr = make_temp_file(PHPLIT_TEMP_PREFIX, 'w+b');
                $stderrTempFiles[] = [$i, $stderr];
             }
@@ -443,21 +456,24 @@ class TestRunner
             $args = $this->quoteWindowsCommand($args);
          }
          try {
-
+            $targetCmd = array_merge([$executable], $args);
+            $process = new Process($targetCmd, $cmdShenv->getCwd(), $cmdShenv->getEnv(), $stdin, $stdout, $stderr);
+            $processes[] = $process;
+            $timeoutHelper->addProcess($process);
          } catch (\Exception $e) {
             throw new InternalShellException($pcmd, 'Could not create process ({}) due to {}');
          }
          // Immediately close stdin for any process taking stdin from us.
-         if ($stdin == self::REDIRECT_PIPE) {
-            flose($stdin);
-         }
+//         if ($stdin == Process::REDIRECT_PIPE) {
+//            $process->closeStdin();
+//         }
          // Update the current stdin source.
-         if ($stdout == self::REDIRECT_PIPE) {
-            $defaultStdin = $stdout;
+         if ($stdout == Process::REDIRECT_PIPE) {
+            $defaultStdin = $process->getStdout();
          } elseif ($stderrIsStdout) {
-            $defaultStdin = $stderr;
+            $defaultStdin = $process->getStderr();
          } else {
-            $defaultStdin = self::REDIRECT_PIPE;
+            $defaultStdin = Process::REDIRECT_PIPE;
          }
       }
       // Explicitly close any redirected files. We need to do this now because we
@@ -568,9 +584,10 @@ class TestRunner
          } elseif ($op === ['>>', 2]) {
             $redirects[2] = [$filename, 'a', null];
          } elseif ($op === ['>&', 2] && has_substr('012', $filename)) {
-            $redirects[2] = $redirects[intval($filename)];
+            $redirects[2] = &$redirects[intval($filename)];
          } elseif ($op === ['>&'] || $op === ['&>']) {
-            $redirects[1] = $redirects[2] = [$filename, 'w', null];
+            $redirects[1] = [$filename, 'w', null];
+            $redirects[2] = &$redirects[1];
          } elseif ($op === ['>']) {
             $redirects[1] = [$filename, 'w', null];
          } elseif ($op === ['>>']) {
@@ -583,7 +600,7 @@ class TestRunner
       }
       // Open file descriptors in a second pass.
       $stdFds = [null, null, null];
-      foreach ($redirects as $i => $redirect) {
+      foreach ($redirects as $i => &$redirect) {
          // Handle the sentinel values for defaults up front.
          if (count($redirect) == 1) {
             if ($redirect === [0]) {
@@ -592,15 +609,15 @@ class TestRunner
                if ($i == 0) {
                   throw new InternalShellException($cmd, 'Unsupported redirect for stdin');
                } elseif ($i == 1) {
-                  $fd = self::REDIRECT_PIPE;
+                  $fd = Process::REDIRECT_PIPE;
                } else {
-                  $fd = self::REDIRECT_STDOUT;
+                  $fd = Process::REDIRECT_STDOUT;
                }
             } elseif ($redirect == [2]) {
                if ($i != 2) {
                   throw new InternalShellException($cmd, 'Unsupported redirect on stdout');
                }
-               $fd = self::REDIRECT_PIPE;
+               $fd = Process::REDIRECT_PIPE;
             } else {
                throw new InternalShellException($cmd, 'Bad redirect');
             }
@@ -626,6 +643,13 @@ class TestRunner
             // Simulate /dev/tty on Windows.
             // "CON" is a special filename for the console.
             $fd = fopen("CON", $mode);
+         } else {
+            // Make sure relative paths are relative to the cwd.
+            $redirectFilename = $name;
+            if (!is_absolute_path($redirectFilename)) {
+               $redirectFilename = $cmdShEnv->getCwd().DIRECTORY_SEPARATOR.$name;
+            }
+            $fd = fopen($redirectFilename, $mode);
          }
          // Workaround a Win32 and/or subprocess bug when appending.
          // FIXME: Actually, this is probably an instance of PR6753.
@@ -636,6 +660,7 @@ class TestRunner
          // and stderr to the same place without opening the file twice.
          $redirect[2] = $fd;
          $openFiles[] = [$filename, $mode, $fd];
+         $openFiles[] = [$redirectFilename, null, null];
          $stdFds[$i] = $fd;
       }
       return $stdFds;
@@ -981,40 +1006,6 @@ class TestRunner
          }
       }
       return join('', $result);
-   }
-
-   private function updateEnv(ShellEnvironment $env, ShCommandInterface $cmd)
-   {
-      $argIndex = 1;
-      $unsetNextEnvVar = false;
-      $cmdArgs = $cmd->getArgs();
-      assert(count($cmdArgs) > 0, "command args count must greater than 0");
-      $cmdArgs = array_slice($cmdArgs, 1);
-      $envPool = $env->getEnv();
-      foreach ($cmdArgs as $index => $arg) {
-         // Support for the -u flag (unsetting) for env command
-         // e.g., env -u FOO -u BAR will remove both FOO and BAR
-         // from the environment.
-         if ($arg == '-u') {
-            $unsetNextEnvVar = true;
-            continue;
-         }
-         if ($unsetNextEnvVar) {
-            $unsetNextEnvVar = false;
-            if (in_array($arg, $envPool)) {
-               $env->unsetEnvVar($arg);
-            }
-            continue;
-         }
-         // Partition the string into KEY=VALUE.
-         if (false === strpos($arg, '=')) {
-            break;
-         }
-         $parts = explode('=', $arg, 2);
-         assert(count($parts) == 3);
-         $env->addEnvVar(trim($parts[0]), trim($parts[1]));
-      }
-      $cmd->setArgs(array_slice($cmdArgs, $index));
    }
 
    private function setupBuiltinCommands()

@@ -10,7 +10,7 @@
 //
 // Created by polarboy on 2019/10/12.
 namespace Lit\Utils;
-use Symfony\Component\Process\Process;
+use Lit\Shell\Process;
 
 /**
  * Object used to helper manage enforcing a timeout in

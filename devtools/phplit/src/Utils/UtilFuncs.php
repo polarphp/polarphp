@@ -15,6 +15,7 @@ use Lit\Kernel\LitConfig;
 use Lit\Kernel\TestCase;
 use Lit\Kernel\TestingConfig;
 use Lit\Kernel\ExecuteCommandTimeoutException;
+use Lit\Shell\ShCommandInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
@@ -534,6 +535,40 @@ function make_temp_file(string $prefix): string
    $tempFilename = $fs->tempnam(sys_get_temp_dir(), $prefix);
    $fs->touch($tempFilename);
    return $tempFilename;
+}
+
+function update_shell_env(ShellEnvironment $env, ShCommandInterface $cmd)
+{
+   $argIndex = 1;
+   $unsetNextEnvVar = false;
+   $cmdArgs = $cmd->getArgs();
+   assert(count($cmdArgs) > 0, "command args count must greater than 0");
+   $cmdArgs = array_slice($cmdArgs, 1);
+   $envPool = $env->getEnv();
+   foreach ($cmdArgs as $index => $arg) {
+      // Support for the -u flag (unsetting) for env command
+      // e.g., env -u FOO -u BAR will remove both FOO and BAR
+      // from the environment.
+      if ($arg == '-u') {
+         $unsetNextEnvVar = true;
+         continue;
+      }
+      if ($unsetNextEnvVar) {
+         $unsetNextEnvVar = false;
+         if (in_array($arg, $envPool)) {
+            $env->unsetEnvVar($arg);
+         }
+         continue;
+      }
+      // Partition the string into KEY=VALUE.
+      if (false === strpos($arg, '=')) {
+         break;
+      }
+      $parts = explode('=', $arg, 2);
+      assert(count($parts) == 3);
+      $env->addEnvVar(trim($parts[0]), trim($parts[1]));
+   }
+   $cmd->setArgs(array_slice($cmdArgs, $index));
 }
 
 // dummy class

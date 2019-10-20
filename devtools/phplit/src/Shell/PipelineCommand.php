@@ -81,8 +81,13 @@ class PipelineCommand extends AbstractCommand
     */
    public function getCommand(int $index): ShCommandInterface
    {
-      assert(0 < $index && $index < $this->getPipeSize());
+      assert(0 <= $index && $index < $this->getPipeSize());
       return $this->commands[$index];
+   }
+
+   public function getLastCommand(): ShCommandInterface
+   {
+      return $this->commands[count($this->commands) - 1];
    }
 
    /**
