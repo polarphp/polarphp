@@ -147,14 +147,14 @@ class TestCollector
       // Check for a site config or a lit config.
       $cfgPath = $this->findTestSuiteDir($path);
       // If we didn't find a config file, keep looking.
-      if (is_null($cfgPath)) {
+      if (empty($cfgPath)) {
          $parent = dirname($path);
          $base = basename($path);
          if ($parent == $path) {
             return [null, []];
          }
-         list($testSuite, $relative) = $this->doCollectionTestSuiteWithCache($path, $cache);
-         return [$testSuite, $relative + [$base]];
+         list($testSuite, $relative) = $this->doCollectionTestSuiteWithCache($parent, $cache);
+         return [$testSuite, array_merge($relative, [$base])];
       }
       // This is a private builtin parameter which can be used to perform
       // translation of configuration paths.  Specifically, this parameter

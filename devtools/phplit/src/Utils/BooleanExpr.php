@@ -11,6 +11,8 @@
 // Created by polarboy on 2019/10/09.
 namespace Lit\Utils;
 
+use Lit\Exception\ValueException;
+
 // A simple evaluator of boolean expressions.
 //
 // Grammar:

@@ -260,6 +260,7 @@ class MainCommand extends Command
       } catch (\Exception $e) {
          if ($litConfig->isDebug()) {
             TestLogger::errorWithoutCount("catch exception:\nlocation: %s:%d", $e->getFile(), $e->getLine());
+            TestLogger::errorWithoutCount($e->getTraceAsString());
          }
          TestLogger::fatal("execute tests error: %s", $e->getMessage());
       }
