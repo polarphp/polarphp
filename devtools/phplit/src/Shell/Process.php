@@ -1264,7 +1264,17 @@ class Process implements \IteratorAggregate
 
    public function getStderr()
    {
-      return $this->getStderr();
+      return $this->stderr;
+   }
+
+   public function isStdoutClosed()
+   {
+      return isset($this->processPipes->pipes[self::STDOUT]);
+   }
+
+   public function isStderrClosed()
+   {
+      return isset($this->processPipes->pipes[self::STDERR]);
    }
 
    /**

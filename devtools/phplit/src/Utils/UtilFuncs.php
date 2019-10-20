@@ -84,7 +84,7 @@ function which(string $command, string $paths = null) : string
    $paths = explode(PATH_SEPARATOR, $paths);
    foreach ($paths as $path) {
       foreach ($pathExts as $ext) {
-         $file = $path . PATH_SEPARATOR . $command . $ext;
+         $file = $path . DIRECTORY_SEPARATOR . $command . $ext;
          if (file_exists($file) && !is_dir($file)) {
             return realpath($file);
          }

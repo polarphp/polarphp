@@ -408,7 +408,7 @@ class TestRunner
             // process, this could deadlock.
             //
             // FIXME: This is slow, but so is deadlock.
-            if ($stderr == Process::REDIRECT_PIPE && $pcmd != $commands[$commandCount - 1]) {
+            if ($stderr == Process::REDIRECT_PIPE && $pcmd != $cmd->getLastCommand()) {
                $stderr = make_temp_file(PHPLIT_TEMP_PREFIX, 'w+b');
                $stderrTempFiles[] = [$i, $stderr];
             }
@@ -431,6 +431,7 @@ class TestRunner
             if (!$executable) {
                throw new InternalShellException($pcmd, sprintf("%s: command not found", $args[0]));
             }
+            $args[0] = $executable;
          }
          // Replace uses of /dev/null with temporary files.
          if ($kAvoidDevNull) {
@@ -456,12 +457,12 @@ class TestRunner
             $args = $this->quoteWindowsCommand($args);
          }
          try {
-            $targetCmd = array_merge([$executable], $args);
-            $process = new Process($targetCmd, $cmdShenv->getCwd(), $cmdShenv->getEnv(), $stdin, $stdout, $stderr);
+            $process = new Process($args, $cmdShenv->getCwd(), $cmdShenv->getEnv(), $stdin, $stdout, $stderr);
+            $process->start();
             $processes[] = $process;
             $timeoutHelper->addProcess($process);
          } catch (\Exception $e) {
-            throw new InternalShellException($pcmd, 'Could not create process ({}) due to {}');
+            throw new InternalShellException($pcmd, sprintf('Could not create process (%s) due to %s', $executable, $e->getMessage()));
          }
          // Immediately close stdin for any process taking stdin from us.
 //         if ($stdin == Process::REDIRECT_PIPE) {
@@ -487,18 +488,8 @@ class TestRunner
       // FIXME: There is probably still deadlock potential here. Yawn.
       $processesData = [];
       foreach ($processes as $i => $process) {
-         $exitCode = $process->getExitCode();
-         if ($exitCode == 0) {
-            $out = $process->getOutput();
-         } else {
-            $out = '';
-         }
-         if ($exitCode != 0) {
-            $err = $process->getErrorOutput();
-         } else {
-            $err = '';
-         }
-         $processesData[$i] = [$out, $err];
+         $process->wait();
+         $processesData[$i] = [$process->getOutput(), $process->getErrorOutput()];
       }
       // Read stderr out of the temp files.
       foreach ($stderrTempFiles as $entry) {
@@ -510,15 +501,13 @@ class TestRunner
       $exitCode = null;
       foreach ($processesData as $i => $entry) {
          list($out, $err) = $entry;
-         $processes[$i]->wait();
          $result = $processes[$i]->getExitCode();
          //  Detect Ctrl-C in subprocess.
-         if ($result == SIGINT) {
+         if ($result == 2) {
             throw new KeyboardInterruptException();
          }
          // Ensure the resulting output is always of string type.
          $outputFiles = [];
-
          if ($result != 0) {
             foreach ($openedFiles as $entry) {
                list($name, $mode, $file, $path) = $entry;
