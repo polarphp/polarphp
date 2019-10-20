@@ -100,7 +100,8 @@ class IntegratedTestKeywordParser
          if ($this->parser == self::COMMAND_PARSER) {
             $args[] = $this->keyword;
          }
-         $this->value = call_user_func_array(array(self::class, $this->parser), $args);
+         $parserFuncName = self::class . '::' .$this->parser;
+         $this->value = $parserFuncName(...$args);
       } catch (ValueException $e) {
          throw new ValueException("%s\nin %s directive on test line %d", $e->getMessage(),
             $this->keyword, $lineNumber);
@@ -186,11 +187,12 @@ class IntegratedTestKeywordParser
             $parts[] = $item;
          }
       }
-      if (!empty($output) && $output[-1][-1] == '\\') {
-         $output[-1] = substr($output[-1], 0, -1) + $parts[0];
+      $lastOutputIndex = count($output) - 1;
+      if (!empty($output) && $output[$lastOutputIndex][-1] == '\\') {
+         $output[$lastOutputIndex] = substr($output[$lastOutputIndex], 0, -1) + $parts[0];
          unset($parts[0]);
       }
-      $output += $parts;
+      $output = array_merge($output, $parts);
       // Evaluate each expression to verify syntax.
       // We don't want any results, just the raised ValueError.
       foreach ($output as $item) {
