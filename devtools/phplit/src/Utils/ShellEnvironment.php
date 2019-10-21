@@ -31,6 +31,11 @@ class ShellEnvironment
    {
       $this->cwd = $cwd;
       $this->env = $env;
+      if (isset($this->env['PATH'])) {
+         $path = $this->env['PATH'];
+         $path = POLARPHP_BIN_DIR.PATH_SEPARATOR.$path;
+         $this->env['PATH'] = $path;
+      }
    }
 
    /**

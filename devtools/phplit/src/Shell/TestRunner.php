@@ -933,6 +933,8 @@ class TestRunner
          ['%basename_t', $baseName],
          ['%T', $tempDir],
          ['%{php}', sprintf('"%s"', PHP_BINARY)],
+         ['%{filechecker}', POLARPHP_BIN_DIR. DIRECTORY_SEPARATOR . 'filechecker'],
+         ['%{not}', POLARPHP_BIN_DIR. DIRECTORY_SEPARATOR . 'not'],
          ['#_MARKER_#', '%']
       ));
       // "%/[STpst]" should be normalized.
