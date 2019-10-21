@@ -15,6 +15,7 @@ use Lit\Kernel\LitConfig;
 use Lit\Kernel\TestCase;
 use Lit\Kernel\TestingConfig;
 use Lit\Kernel\ExecuteCommandTimeoutException;
+use Lit\Shell\GlobItemCommand;
 use Lit\Shell\ShCommandInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -569,6 +570,25 @@ function update_shell_env(ShellEnvironment $env, ShCommandInterface $cmd)
       $env->addEnvVar(trim($parts[0]), trim($parts[1]));
    }
    $cmd->setArgs(array_slice($cmdArgs, $index));
+}
+
+function expand_glob($expr, string $cwd): array
+{
+   if ($expr instanceof GlobItemCommand) {
+      $items = $expr->resolve($cwd);
+      sort($items);
+      return $items;
+   }
+   return [$expr];
+}
+
+function expand_glob_expressions(array $exprs, string $cwd): array
+{
+   $result = [$exprs[0]];
+   foreach (array_slice($exprs, 1) as $expr) {
+      $result = array_merge($result, expand_glob($expr, $cwd));
+   }
+   return $result;
 }
 
 // dummy class

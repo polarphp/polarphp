@@ -30,6 +30,8 @@ use Lit\Utils\ShellEnvironment;
 use Lit\Utils\ShParser;
 use Lit\Utils\TimeoutHelper;
 use Symfony\Component\Filesystem\Filesystem;
+use function Lit\Utils\expand_glob;
+use function Lit\Utils\expand_glob_expressions;
 use function Lit\Utils\has_substr;
 use function Lit\Utils\is_absolute_path;
 use function Lit\Utils\make_temp_file;
@@ -446,7 +448,7 @@ class TestRunner
          }
 
          // Expand all glob expressions
-         $args = $this->expandGlobExpressions($args, $cmdShenv->getCwd());
+         $args = expand_glob_expressions($args, $cmdShenv->getCwd());
          if ($isBuiltinCmd) {
             // TODO builtin directory
             array_unshift($args,PHP_BINARY);
@@ -621,7 +623,7 @@ class TestRunner
             continue;
          }
          $redirectFilename = null;
-         $name = $this->expandGlob($filename, $cmdShEnv->getCwd());
+         $name = expand_glob($filename, $cmdShEnv->getCwd());
          if (count($name) != 1) {
             throw new InternalShellException($cmd, "Unsupported: glob in redirect expanded to multiple files");
          }
@@ -915,25 +917,6 @@ class TestRunner
          // Strip the trailing newline and any extra whitespace.
          return trim($line);
       }, $script);
-   }
-
-   private function expandGlob($expr, string $cwd): array
-   {
-      if ($expr instanceof GlobItemCommand) {
-         $items = $expr->resolve($cwd);
-         sort($items);
-         return $items;
-      }
-      return [$expr];
-   }
-
-   private function expandGlobExpressions(array $exprs, string $cwd): array
-   {
-      $result = [$exprs[0]];
-      foreach (array_slice($exprs, 1) as $expr) {
-         $result = array_merge($result, $this->expandGlob($expr, $cwd));
-      }
-      return $result;
    }
 
    /**
