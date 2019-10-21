@@ -74,6 +74,9 @@ function which(string $command, string $paths = null) : string
    if (is_absolute_path($command) && is_file($command)) {
       return realpath($command);
    }
+   if (empty($paths)) {
+      $paths = ':/bin/:/usr/bin';
+   }
    // Get suffixes to search.
    // On Cygwin, 'PATHEXT' may exist but it should not be used.
    $pathExts = array('');

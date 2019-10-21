@@ -30,7 +30,7 @@ class ShellTestFormat extends FileBasedTestFormat
    {
       parent::__construct($litConfig);
       $this->executeExternal = $executeExternal;
-      $this->testRunner = new TestRunner($litConfig);
+      $this->testRunner = new TestRunner($litConfig, [], $this->executeExternal);
    }
 
    public function execute(TestCase $test)

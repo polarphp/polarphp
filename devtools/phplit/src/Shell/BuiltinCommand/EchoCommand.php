@@ -48,7 +48,7 @@ class EchoCommand implements BuiltinCommandInterface
          "escapes"));
       $definitions->addOption(new InputOption("newline", 'n', InputOption::VALUE_NONE,
          "newline"));
-      $definitions->addOption(new InputArgument("items", InputArgument::IS_ARRAY, "directories to created"));
+      $definitions->addArgument(new InputArgument("items", InputArgument::IS_ARRAY, "directories to created"));
       $this->definitions = $definitions;
    }
 

@@ -13,6 +13,11 @@
 namespace Lit\Kernel;
 use Lit\Utils\TestLogger;
 use phpDocumentor\Reflection\Types\Mixed_;
+use function Lit\Utils\check_tools_path;
+use function Lit\Utils\execute_command;
+use function Lit\Utils\is_absolute_path;
+use function Lit\Utils\which;
+use function Lit\Utils\which_tools;
 
 /**
  * LitConfig - Configuration data for a 'lit' test runner instance, shared
@@ -380,17 +385,46 @@ class LitConfig
     */
    public function getBashPath(): string
    {
+      if ($this->bashPath) {
+         return $this->bashPath;
+      }
+      $this->bashPath = which('bash', join(PATH_SEPARATOR, $this->paths));
+      if ($this->bashPath == '') {
+         $this->bashPath = which('bash');
+      }
+      // Check whether the found version of bash is able to cope with paths in
+      // the host path format. If not, don't return it as it can't be used to
+      // run scripts. For example, WSL's bash.exe requires '/mnt/c/foo' rather
+      // than 'C:\\foo' or 'C:/foo'.
+      if ($this->isWindows && $this->bashPath) {
+         $command = [$this->bashPath, '-c', sprintf('[[ -f "%s" ]]', str_replace('\\', '\\\\', $this->bashPath))];
+         list($out, $err, $exitCode) = execute_command($command);
+         if ($exitCode) {
+            TestLogger::note('bash command failed: %s', join('"%s"', $command));
+            $this->bashPath = '';
+         }
+      }
+      if (empty($this->bashPath)) {
+         TestLogger::warning('Unable to find a usable version of bash.');
+      }
       return $this->bashPath;
    }
 
-   /**
-    * @param string $bashPath
-    * @return LitConfig
-    */
-   public function setBashPath(string $bashPath): LitConfig
+   public function getToolsPath(string $dir, array $paths, array $tools): string
    {
-      $this->bashPath = $bashPath;
-      return $this;
+      if (!empty($dir) && is_absolute_path($dir) && is_dir($dir)) {
+         if (!check_tools_path($dir, $tools)) {
+            return '';
+         }
+      } else {
+         $dir = which_tools($tools, $paths);
+      }
+      // bash
+      $this->bashPath = which('bash', $dir);
+      if ($this->bashPath == null) {
+         $this->bashPath = '';
+      }
+      return $dir;
    }
 
    /**

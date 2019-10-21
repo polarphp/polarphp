@@ -38,7 +38,7 @@ class RmCommand implements BuiltinCommandInterface
          "force remove directories"));
       $definitions->addOption(new InputOption("recursive","r", InputOption::VALUE_NONE,
          "recursive remove"));
-      $definitions->addOption(new InputArgument("paths", InputArgument::IS_ARRAY, "paths to remove"));
+      $definitions->addArgument(new InputArgument("paths", InputArgument::IS_ARRAY, "paths to remove"));
       $this->definitions = $definitions;
    }
    public function execute(ShCommandInterface $cmd, ShellEnvironment $shenv)

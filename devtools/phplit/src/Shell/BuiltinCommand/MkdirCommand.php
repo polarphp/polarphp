@@ -35,7 +35,7 @@ class MkdirCommand implements BuiltinCommandInterface
       $definitions = new InputDefinition();
       $definitions->addOption(new InputOption("parent", 'p', InputOption::VALUE_NONE,
          "Create intermediate directories as required."));
-      $definitions->addOption(new InputArgument("dirs", InputArgument::IS_ARRAY, "directories to created"));
+      $definitions->addArgument(new InputArgument("dirs", InputArgument::IS_ARRAY, "directories to created"));
       $this->definitions = $definitions;
    }
 

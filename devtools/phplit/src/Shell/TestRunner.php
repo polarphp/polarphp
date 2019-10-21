@@ -14,6 +14,7 @@ namespace Lit\Shell;
 
 use Lit\Exception\InternalShellException;
 use Lit\Exception\KeyboardInterruptException;
+use Lit\Exception\ExecuteCommandTimeoutException;
 use Lit\Kernel\LitConfig;
 use Lit\Kernel\TestCase;
 use Lit\Kernel\TestResult;
@@ -29,6 +30,7 @@ use Lit\Utils\ShellEnvironment;
 use Lit\Utils\ShParser;
 use Lit\Utils\TimeoutHelper;
 use Symfony\Component\Filesystem\Filesystem;
+use function Lit\Utils\execute_command;
 use function Lit\Utils\expand_glob;
 use function Lit\Utils\expand_glob_expressions;
 use function Lit\Utils\has_substr;
@@ -160,9 +162,65 @@ class TestRunner
     * @param string $tempBase
     * @param string $cwd
     */
-   private function executeScriptByProcess(TestCase $test, array $commands, string $tempBase, string $cwd)
+   private function executeScriptByProcess(TestCase $test, array &$commands, string $tempBase, string $cwd)
    {
-
+      $isWindows = $this->litConfig->isWindows();
+      $basePath = $this->litConfig->getBashPath();
+      $isWin32CMDEXE = $isWindows && !$basePath;
+      $script = $tempBase . '.script';
+      if ($isWin32CMDEXE) {
+         $script .= '.bat';
+      }
+      // Write script file
+      $mode = 'w';
+      if ($isWindows && !$isWin32CMDEXE) {
+         $mode .= 'b';
+      }
+      $file = fopen($script, $mode);
+      if ($isWin32CMDEXE) {
+         foreach ($commands as $index => $line) {
+            $commands[$index] = preg_replace(sprintf('/%s$/', IntegratedTestKeywordParser::PDBG_REGEX), "echo '\\1' > nul && ", $line);
+         }
+         if ($this->litConfig->isEchoAllCommands()) {
+            fwrite($file, "@echo on\n");
+         } else {
+            fwrite($file, "@echo off\n");
+         }
+         fwrite($file, join("\n@if %ERRORLEVEL% NEQ 0 EXIT\n", $commands));
+      } else {
+         foreach ($commands as $index => $line) {
+            $commands[$index] = preg_replace(sprintf('/%s/', IntegratedTestKeywordParser::PDBG_REGEX), ": '$1'; ", $line);
+         }
+         if ($test->getConfig()->isPipeFail()) {
+            fwrite($file, "set -o pipefail;");
+         }
+         if ($this->litConfig->isEchoAllCommands()) {
+            fwrite($file, "set -x;");
+         }
+         fwrite($file, '{ ' . join("; } &&\n{ ", $commands) . '; }');
+      }
+      fwrite($file, "\n");
+      fclose($file);
+      if ($isWin32CMDEXE) {
+         $command = ['cmd', '/', $script];
+      } else {
+         if ($basePath) {
+            $command = [$basePath, $script];
+         } else {
+            $command = ['/bin/sh', $script];
+         }
+         if ($this->litConfig->isUseValgrind()) {
+            # FIXME: Running valgrind on sh is overkill. We probably could just
+            # run on clang with no real loss.
+            $command = array_merge($this->litConfig->getValgrindArgs(), $command);
+         }
+      }
+      try {
+         list($out, $err, $exitCode) = execute_command($command, $cwd, $test->getConfig()->getEnvironment(), $this->litConfig->getMaxIndividualTestTime());
+         return [$out, $err, $exitCode, null];
+      } catch (ExecuteCommandTimeoutException $e) {
+         return [$e->getOutMsg(), $e->getErrorMsg(), $e->getExitCode(), $e->getMessage()];
+      }
    }
 
    /**
@@ -171,7 +229,7 @@ class TestRunner
     * @param string $tempBase
     * @param string $cwd
     */
-   private function executeScriptInternal(TestCase $test, array $commands, string $tempBase, string $cwd)
+   private function executeScriptInternal(TestCase $test, array &$commands, string $tempBase, string $cwd)
    {
       $cmds = [];
       foreach ($commands as $i => $line) {
@@ -327,8 +385,7 @@ class TestRunner
          if ($cmd->getPipeSize() != 1) {
             throw new InternalShellException($firstCommand,"'cd' cannot be part of a pipeline");
          }
-         $cdCmd = $this->builtinCommands['cd'];
-         $cdCmd->execute($firstCommand, $shenv);
+         $this->builtinCommands['cd']->execute($firstCommand, $shenv);
          return 0;
       }
 
@@ -338,8 +395,7 @@ class TestRunner
       // FIXME: Standardize on the builtin echo implementation. We can use a
       // temporary file to sidestep blocking pipe write issues.
       if ($firstCommandName == 'echo' && $cmd->getPipeSize() == 1) {
-         $echoCmd = new EchoCommand($this, $this->litConfig);
-         $output = $echoCmd->execute($firstCommand, $shenv);
+         $output = $this->builtinCommands['echo']->execute($firstCommand, $shenv);
          $results[] = new ShellCommandResult($firstCommand, $output, '', 0, false);
          return 0;
       }
@@ -348,16 +404,14 @@ class TestRunner
          if ($cmd->getPipeSize() != 1) {
             throw new InternalShellError($firstCommand, "'export' cannot be part of a pipeline");
          }
-         $exportCmd = new ExportCommand();
-         $exportCmd->execute($firstCommand, $shenv);
+         $this->builtinCommands['export']->execute($firstCommand, $shenv);
          return 0;
       }
       if ($firstCommandName == 'mkdir') {
          if ($cmd->getPipeSize() != 1) {
             throw new InternalShellError($firstCommand,"Unsupported: 'mkdir' cannot be part of a pipeline");
          }
-         $mkdirCmd = new MkdirCommand();
-         $result = $mkdirCmd->execute($firstCommand, $shenv);
+         $result = $this->builtinCommands['mkdir']->execute($firstCommand, $shenv);
          $results[] = $result;
          return $result->getExitCode();
       }
@@ -371,8 +425,7 @@ class TestRunner
          if ($cmd->getPipeSize() != 1) {
             throw new InternalShellError($firstCommand, "Unsupported: 'rm' cannot be part of a pipeline");
          }
-         $rmCmd = new RmCommand();
-         $result = $rmCmd->execute($firstCommand, $shenv);
+         $result = $this->builtinCommands['rm']->execute($firstCommand, $shenv);
          $results[] = $result;
          return $result->getExitCode();
       }
@@ -997,7 +1050,7 @@ class TestRunner
          'export' => new ExportCommand(),
          'mkdir' => new MkdirCommand(),
          'rm' => new RmCommand(),
-         'echo' => new EchoCommand(),
+         'echo' => new EchoCommand($this, $this->litConfig),
          'cd' => new CdCommand(),
       );
    }
