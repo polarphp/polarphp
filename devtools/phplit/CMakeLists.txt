@@ -9,9 +9,4 @@
 #
 # Created by polarboy on 2018/08/27.
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-add_subdirectory(lit)
-add_subdirectory(filechecker)
-add_subdirectory(not)
-add_subdirectory(phplit)
+configure_file(lit.php.in ${CMAKE_CURRENT_SOURCE_DIR}/lit @ONLY)

@@ -3,4 +3,5 @@
 .phpunit
 .phpunit.result.cache
 /phpunit.xml
+lit
 ###< symfony/phpunit-bridge ###

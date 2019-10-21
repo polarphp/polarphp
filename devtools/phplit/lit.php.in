@@ -16,7 +16,7 @@ define('OS_MACOS', 'Darwin');
 define('OS_SOLARIS', 'Solaris');
 define('OS_LINUX', 'Linux');
 define('PHPLIT_TEMP_PREFIX', 'phplit_');
-
+define('POLARPHP_BIN_DIR', '@POLAR_RUNTIME_OUTPUT_INTDIR@');
 set_time_limit(0);
 $script = $_SERVER['SCRIPT_NAME'];
 define('LIT_SCRIPT', $script);
