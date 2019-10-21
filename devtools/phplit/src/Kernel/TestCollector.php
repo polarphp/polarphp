@@ -139,7 +139,7 @@ class TestCollector
       }
       $components = array_reverse($components);
       list($testSuite, $relative) = $this->doCollectionTestSuiteWithCache($path, $cache);
-      return [$testSuite, $relative + $components];
+      return [$testSuite, array_merge($relative, $components)];
    }
 
    private function doCollectionTestSuite(string $path, array &$cache) : array
