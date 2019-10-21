@@ -25,7 +25,6 @@ use Lit\Shell\BuiltinCommand\EchoCommand;
 use Lit\Shell\BuiltinCommand\ExportCommand;
 use Lit\Shell\BuiltinCommand\MkdirCommand;
 use Lit\Shell\BuiltinCommand\RmCommand;
-use Lit\Shell\Process;
 use Lit\Utils\ShellEnvironment;
 use Lit\Utils\ShParser;
 use Lit\Utils\TimeoutHelper;
@@ -329,7 +328,8 @@ class TestRunner
             throw new InternalShellException($firstCommand,"'cd' cannot be part of a pipeline");
          }
          $cdCmd = $this->builtinCommands['cd'];
-         return $cdCmd->execute($cmd->getCommand(0), $shenv);
+         $cdCmd->execute($firstCommand, $shenv);
+         return 0;
       }
 
       // Handle "echo" as a builtin if it is not part of a pipeline. This greatly
@@ -338,7 +338,9 @@ class TestRunner
       // FIXME: Standardize on the builtin echo implementation. We can use a
       // temporary file to sidestep blocking pipe write issues.
       if ($firstCommandName == 'echo' && $cmd->getPipeSize() == 1) {
-
+         $echoCmd = new EchoCommand($this, $this->litConfig);
+         $output = $echoCmd->execute($firstCommand, $shenv);
+         $results[] = new ShellCommandResult($firstCommand, $output, '', 0, false);
          return 0;
       }
 
@@ -347,13 +349,17 @@ class TestRunner
             throw new InternalShellError($firstCommand, "'export' cannot be part of a pipeline");
          }
          $exportCmd = new ExportCommand();
-         return $exportCmd->execute($cmd, $shenv);
+         $exportCmd->execute($firstCommand, $shenv);
+         return 0;
       }
       if ($firstCommandName == 'mkdir') {
          if ($cmd->getPipeSize() != 1) {
             throw new InternalShellError($firstCommand,"Unsupported: 'mkdir' cannot be part of a pipeline");
          }
-         return 0;
+         $mkdirCmd = new MkdirCommand();
+         $result = $mkdirCmd->execute($firstCommand, $shenv);
+         $results[] = $result;
+         return $result->getExitCode();
       }
       if ($firstCommandName == 'diff') {
          if ($cmd->getPipeSize() != 1) {
@@ -365,7 +371,10 @@ class TestRunner
          if ($cmd->getPipeSize() != 1) {
             throw new InternalShellError($firstCommand, "Unsupported: 'rm' cannot be part of a pipeline");
          }
-         return 0;
+         $rmCmd = new RmCommand();
+         $result = $rmCmd->execute($firstCommand, $shenv);
+         $results[] = $result;
+         return $result->getExitCode();
       }
       if ($firstCommandName == ':') {
          if ($cmd->getPipeSize() != 1) {
@@ -557,7 +566,7 @@ class TestRunner
     * @param ShellEnvironment $cmdShEnv
     * @param array $openFiles
     */
-   private function processRedirects(ShCommand $cmd, $stdSource, ShellEnvironment $cmdShEnv, array &$openFiles)
+   public function processRedirects(ShCommand $cmd, $stdSource, ShellEnvironment $cmdShEnv, array &$openFiles)
    {
       $kIsWindows = $this->litConfig->isWindows();
       $kAvoidDevNull = $kIsWindows;

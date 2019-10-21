@@ -12,13 +12,86 @@
 
 namespace Lit\Shell\BuiltinCommand;
 
+use Lit\Exception\InternalShellException;
+use Lit\Kernel\LitConfig;
 use Lit\Shell\ShCommandInterface;
+use Lit\Shell\TestRunner;
 use Lit\Utils\ShellEnvironment;
+use Lit\Shell\Process;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputOption;
 
 class EchoCommand implements BuiltinCommandInterface
 {
+   /**
+    * @var TestRunner $testRunner
+    */
+   private $testRunner;
+   /**
+    * @var LitConfig $litConfig
+    */
+   private $litConfig;
+
+   /**
+    * @var InputDefinition $definitions
+    */
+   private $definitions;
+
+   public function __construct(TestRunner $runner, LitConfig $litConfig)
+   {
+      $this->testRunner = $runner;
+      $this->litConfig = $litConfig;
+      $definitions = new InputDefinition();
+      $definitions->addOption(new InputOption("escapes", 'e', InputOption::VALUE_NONE,
+         "escapes"));
+      $definitions->addOption(new InputOption("newline", 'n', InputOption::VALUE_NONE,
+         "newline"));
+      $definitions->addOption(new InputArgument("items", InputArgument::IS_ARRAY, "directories to created"));
+      $this->definitions = $definitions;
+   }
+
    public function execute(ShCommandInterface $cmd, ShellEnvironment $shenv)
    {
-
+      $openedFiles = [];
+      list($stdin, $stdout, $stderr) = $this->testRunner->processRedirects($cmd, Process::REDIRECT_PIPE, $shenv, $openedFiles);
+      if ($stdin != Process::REDIRECT_PIPE || $stderr != Process::REDIRECT_PIPE) {
+         throw new InternalShellException($cmd, 'stdin and stderr redirects not supported for echo');
+      }
+      // Some tests have un-redirected echo commands to help debug test failures.
+      // Buffer our output and return it to the caller.
+      $isRedirected = true;
+      if ($stdout == Process::REDIRECT_PIPE) {
+         $isRedirected = false;
+         $stdout = '';
+      }
+      $input = new ArgvInput($cmd->getArgs(), $this->definitions);
+      // Implement echo flags. We only support -e and -n, and not yet in
+      // combination. We have to ignore unknown flags, because `echo "-D FOO"`
+      // prints the dash.
+      $interpretEscapes = false;
+      $writeNewline = true;
+      if ($input->getOption('escapes')) {
+         $interpretEscapes = true;
+      }
+      if ($input->getOption('newline')) {
+         $writeNewline = false;
+      }
+      $items = $input->getArgument('items');
+      $count = count($items);
+      for ($i = 0; $i < $count - 1; ++$i) {
+         $stdout .= $items[$i];
+         $stdout .= ' ';
+      }
+      $stdout .= $items[$count - 1];
+      if ($writeNewline) {
+         $stdout .= "\n";
+      }
+      if (!$isRedirected) {
+         return $stdout;
+      }
+      echo $stdout;
+      return '';
    }
 }
