@@ -100,7 +100,7 @@ class TestingProgressDisplay
             $this->output->writeln(sprintf("%s TEST '%s' FAILED %s", str_repeat('*', 20), $test->getFullName(),
                str_repeat('*', 20)));
          }
-         printf($test->getResult()->getOutput());
+         printf("%s\n", $test->getResult()->getOutput());
          printf(str_repeat('*', 20));
       }
       // Report test metrics, if present.

@@ -80,7 +80,7 @@ class ShParser
       while (true) {
          $token = $this->look();
          // EOF?
-         if (is_null($token)) {
+         if ($token == null) {
             break;
          }
          // If this is an argument, just add it to the current command.

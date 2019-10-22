@@ -28,6 +28,7 @@ use Lit\Shell\BuiltinCommand\MkdirCommand;
 use Lit\Shell\BuiltinCommand\RmCommand;
 use Lit\Utils\ShellEnvironment;
 use Lit\Utils\ShParser;
+use Lit\Utils\TestLogger;
 use Lit\Utils\TimeoutHelper;
 use Symfony\Component\Filesystem\Filesystem;
 use function Lit\Utils\execute_command;
@@ -109,7 +110,7 @@ class TestRunner
       if ($test->getConfig()->hasExtraConfig('test_retry_attempts')) {
          $attempts += (int)$test->getConfig()->getExtraConfig('test_retry_attempts');
       }
-      foreach (range(0, $attempts) as $index) {
+      for ($index = 0; $index < $attempts; ++$index) {
          $result = $this->doExecuteTest($test, $script, $tempBase);
          if ($result->getCode() != TestResultCode::FAIL()) {
             break;
@@ -246,6 +247,7 @@ class TestRunner
             $parser = new ShParser($line, $this->litConfig->isWindows(), $test->getConfig()->isPipeFail());
             $cmds[] = $parser->parse();
          } catch (\Exception $e) {
+            TestLogger::errorWithoutCount($e->getMessage());
             return new TestResult(TestResultCode::FAIL(), "shell parser error on: $line");
          }
       }
