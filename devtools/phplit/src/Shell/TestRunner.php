@@ -473,7 +473,7 @@ class TestRunner
             //
             // FIXME: This is slow, but so is deadlock.
             if ($stderr == Process::REDIRECT_PIPE && $pcmd != $cmd->getLastCommand()) {
-               $stderr = make_temp_file(PHPLIT_TEMP_PREFIX, 'w+b');
+               $stderr = open_temp_file(PHPLIT_TEMP_PREFIX, 'w+b');
                $stderrTempFiles[] = [$i, $stderr];
             }
          }
@@ -488,7 +488,10 @@ class TestRunner
                if (is_file($exeInCwd)) {
                   $executable = $exeInCwd;
                }
+            } elseif ($args[0] == 'php') {
+               $executable = PHP_BINARY;
             }
+
             if (!$executable) {
                $executable = which($args[0], $cmdShenv->getEnvVar('PATH', ''));
             }
@@ -523,15 +526,12 @@ class TestRunner
          try {
             $process = new Process($args, $cmdShenv->getCwd(), $cmdShenv->getEnv(), $stdin, $stdout, $stderr);
             $process->start();
+            $process->wait();
             $processes[] = $process;
             $timeoutHelper->addProcess($process);
          } catch (\Exception $e) {
             throw new InternalShellException($pcmd, sprintf('Could not create process (%s) due to %s', $executable, $e->getMessage()));
          }
-         // Immediately close stdin for any process taking stdin from us.
-//         if ($stdin == Process::REDIRECT_PIPE) {
-//            $process->closeStdin();
-//         }
          // Update the current stdin source.
          if ($stdout == Process::REDIRECT_PIPE) {
             $defaultStdin = $process->getStdout();
@@ -552,7 +552,6 @@ class TestRunner
       // FIXME: There is probably still deadlock potential here. Yawn.
       $processesData = [];
       foreach ($processes as $i => $process) {
-         $process->wait();
          $processesData[$i] = [$process->getOutput(), $process->getErrorOutput()];
       }
       // Read stderr out of the temp files.

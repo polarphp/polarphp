@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 <?php
-foreach (getenv() as $name => $value) {
+$env = getenv();
+ksort($env);
+foreach ($env as $name => $value) {
     echo $name . ' = ' . $value . "\n";
 }

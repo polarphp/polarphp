@@ -62,6 +62,11 @@ class ShCommand extends AbstractCommand
       return $this->args;
    }
 
+   public function setArgs(array $args = array())
+   {
+      $this->args = $args;
+   }
+
    public function getArgsCount(): int
    {
       return count($this->args);

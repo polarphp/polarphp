@@ -549,7 +549,7 @@ function update_shell_env(ShellEnvironment $env, ShCommandInterface $cmd)
    assert(count($cmdArgs) > 0, "command args count must greater than 0");
    $cmdArgs = array_slice($cmdArgs, 1);
    $envPool = $env->getEnv();
-   foreach ($cmdArgs as $index => $arg) {
+   foreach ($cmdArgs as $argIndex => $arg) {
       // Support for the -u flag (unsetting) for env command
       // e.g., env -u FOO -u BAR will remove both FOO and BAR
       // from the environment.
@@ -569,10 +569,10 @@ function update_shell_env(ShellEnvironment $env, ShCommandInterface $cmd)
          break;
       }
       $parts = explode('=', $arg, 2);
-      assert(count($parts) == 3);
+      assert(count($parts) == 2);
       $env->addEnvVar(trim($parts[0]), trim($parts[1]));
    }
-   $cmd->setArgs(array_slice($cmdArgs, $index));
+   $cmd->setArgs(array_slice($cmdArgs, $argIndex));
 }
 
 function expand_glob($expr, string $cwd): array
