@@ -75,6 +75,7 @@ class ShellEnvironment
    public function unsetEnvVar(string $name): ShellEnvironment
    {
       unset($this->env[$name]);
+      return $this;
    }
 
    public function addEnvVar(string $name, $value): ShellEnvironment

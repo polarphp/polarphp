@@ -559,7 +559,7 @@ function update_shell_env(ShellEnvironment $env, ShCommandInterface $cmd)
       }
       if ($unsetNextEnvVar) {
          $unsetNextEnvVar = false;
-         if (in_array($arg, $envPool)) {
+         if (array_key_exists($arg, $envPool)) {
             $env->unsetEnvVar($arg);
          }
          continue;
