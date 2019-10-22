@@ -7,12 +7,14 @@
 # See https://polarphp.org/LICENSE.txt for license information
 # See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
-# Created by polarboy on 2018/08/27.
+# Created by polarboy on 2019/10/22.
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-add_subdirectory(lit)
-add_subdirectory(filechecker)
-add_subdirectory(not)
-add_subdirectory(cat)
-add_subdirectory(phplit)
+polar_collect_files(
+   TYPE_BOTH
+   DIR ${CMAKE_CURRENT_SOURCE_DIR}
+   OUTPUT_VAR POLAR_DEVTOOLS_CAT_SOURCES)
+
+polar_add_executable(cat Cat.cpp)
+
+target_link_libraries(cat PRIVATE PolarUtils CLI11::CLI11)

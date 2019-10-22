@@ -276,7 +276,7 @@ class TestRunner
          foreach ($result->getOutputFiles() as $fentry) {
             list($name, $path, $data) = $fentry;
             if (trim($data)) {
-               $out .= "# redirected output from %r:$name";
+               $out .= "# redirected output from $name:";
                // TODO encoding of data ?
                if (iconv_strlen($data, 'UTF-8') > 1024) {
                   $out .= iconv_substr($data, 0, 1024, 'UTF-8') . "\n...\n";
@@ -284,7 +284,7 @@ class TestRunner
                } else {
                   $out .= $data;
                }
-               $out += "\n";
+               $out .= "\n";
             }
          }
          if ($stdout) {
@@ -711,8 +711,7 @@ class TestRunner
          // Mutate the underlying redirect list so that we can redirect stdout
          // and stderr to the same place without opening the file twice.
          $redirect[2] = $fd;
-         $openFiles[] = [$filename, $mode, $fd];
-         $openFiles[] = [$redirectFilename, null, null];
+         $openFiles[] = [$filename, $mode, $fd, $redirectFilename];
          $stdFds[$i] = $fd;
       }
       return $stdFds;

@@ -8,5 +8,5 @@ use Lit\Kernel\TestingConfig;
  */
 $config->setName('shtest-output-printing');
 $config->setSuffixes(['txt']);
-$config->setTestFormat(new ShellTestFormat(false));
+$config->setTestFormat(new ShellTestFormat($litConfig, false));
 

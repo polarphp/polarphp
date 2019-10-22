@@ -227,6 +227,11 @@ class TestingConfig
       $this->name = (string)$this->name;
       $this->suffixes = (array)$this->suffixes;
       $this->environment = (array)$this->environment;
+      if (isset($this->environment['PATH'])) {
+         $path = $this->environment['PATH'];
+         $path = POLARPHP_BIN_DIR.PATH_SEPARATOR.$path;
+         $this->environment['PATH'] = $path;
+      }
       $this->substitutions = (array)$this->substitutions;
       if (!$this->testExecRoot) {
          // FIXME: This should really only be suite in test suite config
