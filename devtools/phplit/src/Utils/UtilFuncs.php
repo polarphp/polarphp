@@ -409,7 +409,22 @@ function detect_cpus()
 
 function array_to_str(array $arr)
 {
-   return sprintf('[%s]', join(', ', $arr));
+   $msg = '[';
+   $count = count($arr);
+   for ($i = 0; $i < $count; ++$i) {
+      $item = $arr[$i];
+      if (is_array($item)) {
+         $itemStr = array_to_str($item);
+      } else {
+         $itemStr = strval($item);
+      }
+      if ($i < $count - 1) {
+         $itemStr .= ', ';
+      }
+      $msg .= $itemStr;
+   }
+   $msg .= ']';
+   return $msg;
 }
 
 function array_extend_by_iterable(array &$target, iterable $source): void

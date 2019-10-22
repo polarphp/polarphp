@@ -31,6 +31,7 @@ use Lit\Utils\ShParser;
 use Lit\Utils\TestLogger;
 use Lit\Utils\TimeoutHelper;
 use Symfony\Component\Filesystem\Filesystem;
+use function Lit\Utils\array_to_str;
 use function Lit\Utils\execute_command;
 use function Lit\Utils\expand_glob;
 use function Lit\Utils\expand_glob_expressions;
@@ -657,7 +658,7 @@ class TestRunner
          } elseif ($op === ['<']) {
             $redirects[0] = [$filename, 'r', null];
          } else {
-            throw new InternalShellException($cmd, sprintf("Unsupported redirect: %s", print_r([$op, $filename], true)));
+            throw new InternalShellException($cmd, sprintf("Unsupported redirect: %s", array_to_str([$op, $filename])));
          }
       }
       // Open file descriptors in a second pass.
