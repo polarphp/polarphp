@@ -487,8 +487,8 @@ class TestRunner
          // Resolve the executable path ourselves.
          $args = $pcmd->getArgs();
          $executable = null;
-         $isBuiltinCmd = array_key_exists($args[0], $this->builtinExecutables);
-         if (!$isBuiltinCmd) {
+         $isBuiltinExecutable = array_key_exists($args[0], $this->builtinExecutables);
+         if (!$isBuiltinExecutable) {
             // For paths relative to cwd, use the cwd of the shell environment.
             if ($args[0][0] == '.') {
                $exeInCwd = $cmdShenv->getCwd().DIRECTORY_SEPARATOR.$args[0];
@@ -505,13 +505,13 @@ class TestRunner
             if (!$executable) {
                throw new InternalShellException($pcmd, sprintf("%s: command not found", $args[0]));
             }
-            $args[0] = $executable;
          } else {
             $executable = $this->builtinExecutables[$args[0]];
             if (!$executable) {
                throw new InternalShellException($pcmd, sprintf("%s: builtin executable not found", $args[0]));
             }
          }
+         $args[0] = $executable;
          // Replace uses of /dev/null with temporary files.
          if ($kAvoidDevNull) {
             foreach ($args as $argIndex => $arg) {
@@ -526,10 +526,6 @@ class TestRunner
 
          // Expand all glob expressions
          $args = expand_glob_expressions($args, $cmdShenv->getCwd());
-         if ($isBuiltinCmd) {
-            // TODO builtin directory
-            array_unshift($args,PHP_BINARY);
-         }
          // On Windows, do our own command line quoting for better compatibility
          // with some core utility distributions.
          if ($kIsWindows) {

@@ -249,7 +249,9 @@ class MainCommand extends Command
          }
       }
       $startTime = microtime(true);
-      $progressDisplay = new TestingProgressDisplay($input->getOptions(), $actualTestNum, $progressBar, $output);
+      $opts = $input->getOptions();
+      $opts['showOutput'] = $showOutput;
+      $progressDisplay = new TestingProgressDisplay($opts, $actualTestNum, $progressBar, $output);
       $testDispatcher->setDisplay($progressDisplay);
       $maxTime = null;
       if ($input->getOption('max-time')) {
