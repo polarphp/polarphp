@@ -412,14 +412,14 @@ class TestRunner
 
       if ($firstCommandName == 'export') {
          if ($cmd->getPipeSize() != 1) {
-            throw new InternalShellError($firstCommand, "'export' cannot be part of a pipeline");
+            throw new InternalShellException($firstCommand, "'export' cannot be part of a pipeline");
          }
          $this->builtinCommands['export']->execute($firstCommand, $shenv);
          return 0;
       }
       if ($firstCommandName == 'mkdir') {
          if ($cmd->getPipeSize() != 1) {
-            throw new InternalShellError($firstCommand,"Unsupported: 'mkdir' cannot be part of a pipeline");
+            throw new InternalShellException($firstCommand,"Unsupported: 'mkdir' cannot be part of a pipeline");
          }
          $result = $this->builtinCommands['mkdir']->execute($firstCommand, $shenv);
          $results[] = $result;
@@ -427,13 +427,13 @@ class TestRunner
       }
       if ($firstCommandName == 'diff') {
          if ($cmd->getPipeSize() != 1) {
-            throw new InternalShellError($firstCommand, "Unsupported: 'diff' cannot be part of a pipeline");
+            throw new InternalShellException($firstCommand, "Unsupported: 'diff' cannot be part of a pipeline");
          }
          return 0;
       }
       if ($firstCommandName == 'rm') {
          if ($cmd->getPipeSize() != 1) {
-            throw new InternalShellError($firstCommand, "Unsupported: 'rm' cannot be part of a pipeline");
+            throw new InternalShellException($firstCommand, "Unsupported: 'rm' cannot be part of a pipeline");
          }
          $result = $this->builtinCommands['rm']->execute($firstCommand, $shenv);
          $results[] = $result;

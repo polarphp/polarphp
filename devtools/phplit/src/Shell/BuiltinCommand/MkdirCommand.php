@@ -12,6 +12,7 @@
 
 namespace Lit\Shell\BuiltinCommand;
 
+use Lit\Exception\InternalShellException;
 use Lit\Shell\ShellCommandResult;
 use Lit\Utils\TestLogger;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -41,12 +42,16 @@ class MkdirCommand implements BuiltinCommandInterface
 
    public function execute(ShCommandInterface $cmd, ShellEnvironment $shenv)
    {
-      $args = expand_glob_expressions($cmd->getArgs(), $shenv->getCwd());
-      $input = new ArgvInput($args, $this->definitions);
+      try {
+         $args = expand_glob_expressions($cmd->getArgs(), $shenv->getCwd());
+         $input = new ArgvInput($args, $this->definitions);
+      } catch (\Exception $e) {
+         throw new InternalShellException($cmd, sprintf("Unsupported: 'mkdir':  %s", $e->getMessage()));
+      }
       $parent = $input->getOption('parent');
       $dirs = $input->getArgument('dirs');
       if (empty($dirs)) {
-         throw new InternalShellError($cmd, "Error: 'mkdir' is missing an operand");
+         throw new InternalShellException($cmd, "Error: 'mkdir' is missing an operand");
       }
       $exitCode = 0;
       $errorMsg = '';
