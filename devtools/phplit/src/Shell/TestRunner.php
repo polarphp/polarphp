@@ -52,6 +52,7 @@ class TestRunner
 
    const DEV_NULL = '/dev/null';
 
+
    /**
     * @var LitConfig $litConfig
     */
@@ -72,6 +73,11 @@ class TestRunner
     */
    private $builtinCommands = [];
 
+   /**
+    * @var array $builtinExecutables
+    */
+   private $builtinExecutables = [];
+
    public function __construct(LitConfig $litConfig, array $extraSubstitutions = array(),
                                bool $useExternalShell = false)
    {
@@ -79,6 +85,7 @@ class TestRunner
       $this->extraSubstitutions = $extraSubstitutions;
       $this->useExternalShell = $useExternalShell;
       $this->setupBuiltinCommands();
+      $this->setupBuiltinExecutables();
    }
 
    public function executeTest(TestCase $test)
@@ -480,7 +487,7 @@ class TestRunner
          // Resolve the executable path ourselves.
          $args = $pcmd->getArgs();
          $executable = null;
-         $isBuiltinCmd = in_array($args[0], $builtinCommands);
+         $isBuiltinCmd = array_key_exists($args[0], $this->builtinExecutables);
          if (!$isBuiltinCmd) {
             // For paths relative to cwd, use the cwd of the shell environment.
             if ($args[0][0] == '.') {
@@ -499,6 +506,11 @@ class TestRunner
                throw new InternalShellException($pcmd, sprintf("%s: command not found", $args[0]));
             }
             $args[0] = $executable;
+         } else {
+            $executable = $this->builtinExecutables[$args[0]];
+            if (!$executable) {
+               throw new InternalShellException($pcmd, sprintf("%s: builtin executable not found", $args[0]));
+            }
          }
          // Replace uses of /dev/null with temporary files.
          if ($kAvoidDevNull) {
@@ -1052,6 +1064,13 @@ class TestRunner
          'rm' => new RmCommand(),
          'echo' => new EchoCommand($this, $this->litConfig),
          'cd' => new CdCommand(),
+      );
+   }
+
+   private function setupBuiltinExecutables()
+   {
+      $this->builtinExecutables = array(
+         'cat' => POLARPHP_BIN_DIR.DIRECTORY_SEPARATOR.'cat'
       );
    }
 }
