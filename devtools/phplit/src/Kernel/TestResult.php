@@ -12,6 +12,8 @@
 
 namespace Lit\Kernel;
 
+use Lit\Shell\AbstractMetricValue;
+
 class TestResult
 {
    /**
