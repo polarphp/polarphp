@@ -23,13 +23,13 @@ namespace Lit\Shell;
 
 use Symfony\Component\Process\Exception\InvalidArgumentException;
 use Symfony\Component\Process\Exception\LogicException;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Exception\ProcessSignaledException;
-use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Exception\RuntimeException;
 use Symfony\Component\Process\Pipes\PipesInterface;
 use Symfony\Component\Process\Pipes\UnixPipes;
 use Symfony\Component\Process\Pipes\WindowsPipes;
+use Lit\Exception\ProcessSignaledException;
+use Lit\Exception\ProcessFailedException;
+use Lit\Exception\ProcessTimedOutException;
 
 /**
  * Process is a thin wrapper around proc_* functions to easily

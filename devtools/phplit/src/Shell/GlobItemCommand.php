@@ -12,6 +12,8 @@
 
 namespace Lit\Shell;
 
+use function Lit\Utils\is_absolute_path;
+
 class GlobItemCommand extends AbstractCommand
 {
    /**

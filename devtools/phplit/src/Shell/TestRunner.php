@@ -15,6 +15,7 @@ namespace Lit\Shell;
 use Lit\Exception\InternalShellException;
 use Lit\Exception\KeyboardInterruptException;
 use Lit\Exception\ExecuteCommandTimeoutException;
+use Lit\Exception\ProcessSignaledException;
 use Lit\Kernel\LitConfig;
 use Lit\Kernel\TestCase;
 use Lit\Kernel\TestResult;
@@ -225,7 +226,8 @@ class TestRunner
          }
       }
       try {
-         list($out, $err, $exitCode) = execute_command($command, $cwd, $test->getConfig()->getEnvironment(), $this->litConfig->getMaxIndividualTestTime());
+         list($out, $err, $exitCode) = execute_command($command, $cwd, $test->getConfig()->getEnvironment(), null,
+            $this->litConfig->getMaxIndividualTestTime());
          return [$out, $err, $exitCode, null];
       } catch (ExecuteCommandTimeoutException $e) {
          return [$e->getOutMsg(), $e->getErrorMsg(), $e->getExitCode(), $e->getMessage()];
@@ -318,7 +320,7 @@ class TestRunner
             $out .= "error: command failed with exit status: $codeStr\n";
          }
          if ($litConfig->getMaxIndividualTestTime() > 0 && $result->isTimeoutReached()) {
-            $out .= sprintf("error: command reached timeout: %s\n", strval($result->isTimeoutReached()));
+            $out .= sprintf("error: command reached timeout: %s\n", $result->isTimeoutReached() ? 'true' : 'false');
          }
       }
       return [$out, $err, $exitCode, $timeoutInfo];
@@ -537,9 +539,13 @@ class TestRunner
          try {
             $process = new Process($args, $cmdShenv->getCwd(), $cmdShenv->getEnv(), $stdin, $stdout, $stderr);
             $process->start();
-            $process->wait();
-            $processes[] = $process;
             $timeoutHelper->addProcess($process);
+            $processes[] = $process;
+            $process->wait();
+         } catch (ProcessSignaledException $e) {
+            if ($e->getSignal() != SIGKILL) {
+               throw new InternalShellException($pcmd, sprintf('process (%s) exit due catch signal %d', $executable, $e->getSignal()));
+            }
          } catch (\Exception $e) {
             throw new InternalShellException($pcmd, sprintf('Could not create process (%s) due to %s', $executable, $e->getMessage()));
          }

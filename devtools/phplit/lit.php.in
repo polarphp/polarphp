@@ -20,6 +20,7 @@ define('POLARPHP_BIN_DIR', '@POLAR_RUNTIME_OUTPUT_INTDIR@');
 set_time_limit(0);
 $script = $_SERVER['SCRIPT_NAME'];
 define('LIT_SCRIPT', $script);
+
 // TODO work around for windows
 if ($script[0] == '/') {
    define('LIT_ROOT_DIR', dirname($_SERVER['SCRIPT_NAME']));

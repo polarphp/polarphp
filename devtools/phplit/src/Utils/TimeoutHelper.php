@@ -27,7 +27,7 @@ class TimeoutHelper
     */
    private $timeout;
    /**
-    * @var array $processes
+    * @var \Symfony\Component\Process\Process[] $processes
     */
    private $processes = array();
    /**
@@ -42,6 +42,7 @@ class TimeoutHelper
    public function __construct(int $timeout)
    {
       $this->timeout = $timeout;
+      pcntl_async_signals(true);
    }
 
    public function cancel()
@@ -78,10 +79,10 @@ class TimeoutHelper
       if (!$this->active()) {
          return;
       }
+      \pcntl_signal(SIGALRM, array($this, 'handleTimeoutReached'));
       // Do some late initialisation that's only needed
       // if there is a timeout set
-      pcntl_alarm($this->timeout);
-      pcntl_signal(SIGALRM, array($this, 'handleTimeoutReached'));
+      \pcntl_alarm($this->timeout);
    }
 
    public function timeoutReached()

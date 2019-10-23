@@ -14,7 +14,7 @@ namespace Lit\Utils;
 use Lit\Kernel\LitConfig;
 use Lit\Kernel\TestCase;
 use Lit\Kernel\TestingConfig;
-use Lit\Kernel\ExecuteCommandTimeoutException;
+use Lit\Exception\ExecuteCommandTimeoutException;
 use Lit\Shell\GlobItemCommand;
 use Lit\Shell\ShCommandInterface;
 use Symfony\Component\Filesystem\Filesystem;
