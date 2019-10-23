@@ -609,5 +609,30 @@ function expand_glob_expressions(array $exprs, string $cwd): array
    return $result;
 }
 
+function escape_xml_attr($text)
+{
+   return htmlspecialchars($text, ENT_XML1 | ENT_COMPAT, 'UTF-8');
+}
+
+function quote_xml_attr(string $data)
+{
+   $entities = [
+      '\n'=> '&#10;',
+      '\r'=> '&#13;',
+      '\t'=> '&#9;'
+   ];
+   $data = escape_xml_attr(str_replace(array_keys($entities), array_values($entities), $data));
+   if (has_substr($data, '"')) {
+      if (has_substr($data, "'")) {
+         $data = sprintf('"%s"', str_replace("'", '&quot;', $data));
+      } else {
+         $data = sprintf("'%s'", $data);
+      }
+   } else {
+      $data = sprintf('"%s"', $data);
+   }
+   return $data;
+}
+
 // dummy class
 class UtilFuncs{}

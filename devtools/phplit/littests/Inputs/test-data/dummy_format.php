@@ -19,8 +19,7 @@ class DummyFormat extends FileBasedTestFormat
    {
       // In this dummy format, expect that each test file is actually just a
       //  .ini format dump of the results to report.
-      $cfgFilename = __DIR__.DIRECTORY_SEPARATOR.'metrics.ini';
-      $config = parse_ini_file($cfgFilename, true);
+      $config = parse_ini_file($test->getSourcePath(), true);
       // Create the basic test result.
       $resultCode = $config['global']['result_code'];
       $resultOutput = $config['global']['result_output'];

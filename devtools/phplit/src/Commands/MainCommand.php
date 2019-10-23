@@ -17,7 +17,6 @@ use Lit\Kernel\TestCase;
 use Lit\Kernel\TestCollector;
 use Lit\Kernel\TestDispatcher;
 use Lit\Kernel\TestResultCode;
-use Lit\Person;
 use Lit\Utils\TestingProgressDisplay;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -32,6 +31,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use function Lit\Utils\detect_cpus;
 use function Lit\Utils\print_histogram;
 use function Lit\Utils\sort_by_incremental_cache;
+use function Lit\Utils\quote_xml_attr;
 use Lit\Utils\TestLogger;
 
 class MainCommand extends Command
@@ -476,8 +476,8 @@ class MainCommand extends Command
       foreach ($codeTitleMap as $entry) {
          list($title, $code) = $entry;
          if (($code == TestResultCode::XPASS() && !$input->getOption('show-xfail')) ||
-             ($code == TestResultCode::UNSUPPORTED() && !$input->getOption('show-unsupported')) ||
-             ($code == TestResultCode::UNRESOLVED() && $input->getOption('max-failures') !== null)) {
+            ($code == TestResultCode::UNSUPPORTED() && !$input->getOption('show-unsupported')) ||
+            ($code == TestResultCode::UNRESOLVED() && $input->getOption('max-failures') !== null)) {
             continue;
          }
          $codeName = $code->getName();
@@ -532,7 +532,51 @@ class MainCommand extends Command
 
    private function handleXuintOutput(InputInterface $input, TestDispatcher $testDispatcher)
    {
-
+      if (!$input->getOption('xunit-xml-output')) {
+         return;
+      }
+      // Collect the tests, indexed by test suite
+      $bySuite = [];
+      $tests = $testDispatcher->getTests();
+      foreach ($tests as $resultTest) {
+         /**
+          * @var TestCase $resultTest
+          */
+         $suite = $resultTest->getTestSuite()->getConfig()->getName();
+         if (!array_key_exists($suite, $bySuite)) {
+            $bySuite[$suite] = [
+               'passes'   => 0,
+               'failures' => 0,
+               'skipped'=> 0,
+               'tests' => []
+            ];
+         }
+         $bySuite[$suite]['tests'][] = $resultTest;
+         if ($resultTest->getResult()->getCode()->isFailure()) {
+            $bySuite[$suite]['failures'] += 1;
+         } elseif ($resultTest->getResult()->getCode()) {
+            $bySuite[$suite]['skipped'] += 1;
+         } else {
+            $bySuite[$suite]['passes'] += 1;
+         }
+      }
+      $xunitOutputFile = fopen($input->getOption('xunit-xml-output'),'w');
+      fwrite($xunitOutputFile, "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
+      fwrite($xunitOutputFile, "<testsuites>\n");
+      foreach ($bySuite as $suiteName => $suite) {
+         $safeSuiteName = quote_xml_attr(str_replace(".", "-", $suiteName));
+         fwrite($xunitOutputFile,"<testsuite name=".$safeSuiteName);
+         fwrite($xunitOutputFile," tests=\"" . strval($suite['passes'] + $suite['failures'] + $suite['skipped']) . "\"");
+         fwrite($xunitOutputFile," failures=\"" . strval($suite['failures']) . "\"");
+         fwrite($xunitOutputFile," skipped=\"" . strval($suite['skipped']) . "\">\n");
+         foreach ($suite['tests'] as $resultTest) {
+            $resultTest->writeJUnitXML($xunitOutputFile);
+            fwrite($xunitOutputFile, "\n");
+         }
+         fwrite($xunitOutputFile, "</testsuite>\n");
+      }
+      fwrite($xunitOutputFile, "</testsuites>");
+      fclose($xunitOutputFile);
    }
 
    private function prepareTempDir(Filesystem $fs)

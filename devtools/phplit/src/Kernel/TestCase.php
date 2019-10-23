@@ -13,6 +13,8 @@
 namespace Lit\Kernel;
 
 use Lit\Utils\BooleanExpr;
+use function Lit\Utils\escape_xml_attr;
+use function Lit\Utils\quote_xml_attr;
 
 /**
  * Test - Information on a single test instance.
@@ -261,31 +263,30 @@ class TestCase
     */
    public function writeJUnitXML($file)
    {
-      $testName = htmlspecialchars($this->pathInSuite[-1], ENT_XML1 | ENT_COMPAT, 'UTF-8');
+      $testName = htmlspecialchars($this->pathInSuite[count($this->pathInSuite) - 1], ENT_XML1 | ENT_COMPAT, 'UTF-8');
       $testPath = array_slice($this->pathInSuite, 0, -1);
       $safeTestPath = array();
       foreach ($testPath as $path) {
-         $safeTestPath[] = str_replace($path, '.', '_');
+         $safeTestPath[] = str_replace('.', '_', $path);
       }
-      $safeName = str_replace($this->testSuite->getName(), '.', '_');
+      $safeName = str_replace('.', '_', $this->testSuite->getName());
       if ($safeTestPath) {
          $className = $safeName .'.' .implode('/', $safeTestPath);
       } else {
          $className = $safeName . '.' . $safeName;
       }
-      $className = htmlspecialchars($className, ENT_XML1 | ENT_COMPAT, 'UTF-8');
+      $className = escape_xml_attr($className);
       $elapsedTime = $this->result->getElapsed();
-      $testcaseTemplate = '<testcase classname={class_name} name={test_name} time="{time:.2f}"';
-      $testcaseXml = str_replace($testcaseTemplate,
-         array('class_name', 'test_name', 'time'),
-         array($className, $testName, $elapsedTime));
+      $testcaseTemplate = '<testcase classname=%s name=%s time=%s';
+      $testcaseXml = sprintf($testcaseTemplate, quote_xml_attr($className),
+         quote_xml_attr($testName), quote_xml_attr($elapsedTime));
       fwrite($file, $testcaseXml);
       if ($this->result->getCode()->isFailure()) {
          fwrite($file,">\n\t<failure ><![CDATA[");
          $output = $this->result->getOutput();
          // In the unlikely case that the output contains the CDATA terminator
          // we wrap it by creating a new CDATA block
-         fwrite($file, str_replace($output, "]]>","]]]]><![CDATA[>"));
+         fwrite($file, str_replace("]]>","]]]]><![CDATA[>", $output));
          fwrite($file, "]]></failure>\n</testcase>");
       } else if ($this->result->getCode() === TestResultCode::UNRESOLVED()) {
          $unsupportedFeatures = $this->getMissingRequiredFeatures();
@@ -294,7 +295,7 @@ class TestCase
          } else {
             $skipMessage = 'Skipping because of configuration.';
          }
-         fwrite($file, sprintf(">\n\t<skipped message=%s />\n</testcase>\n", htmlspecialchars($skipMessage, ENT_XML1 | ENT_COMPAT, 'UTF-8')));
+         fwrite($file, sprintf(">\n\t<skipped message=%s />\n</testcase>\n", escape_xml_attr($skipMessage)));
       } else {
          fwrite($file, "/>");
       }
