@@ -1,4 +1,5 @@
 <?php
+namespace TestData;
 use Lit\Format\FileBasedTestFormat;
 use Lit\Kernel\LitConfig;
 use Lit\Kernel\TestCase;

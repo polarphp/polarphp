@@ -108,7 +108,7 @@ class TestingProgressDisplay
          $this->output->writeln(sprintf("%s TEST '%s' RESULTS %s", str_repeat('*', 10), $test->getFullName(),
             str_repeat('*', 10)));
          $items = $result->getMetrics();
-         sort($items);
+         ksort($items);
          foreach ($items as $metricName => $value) {
             $this->output->writeln(sprintf('%s: %s ', $metricName, $value->format()));
          }
@@ -117,12 +117,12 @@ class TestingProgressDisplay
       // Report micro-tests, if present
       if (!empty($result->getMicroResults())) {
          $items = $result->getMicroResults();
-         sort($items);
+         ksort($items);
          foreach ($items as $microTestName => $microTest) {
             $this->output->writeln(sprintf("%s MICRO-TEST: %s", str_repeat('*', 3), $microTestName));
             if(!empty($microTest->getMetrics())) {
                $sortedMetrics = $microTest->getMetrics();
-               sort($sortedMetrics);
+               ksort($sortedMetrics);
                foreach ($sortedMetrics as $metricName => $value) {
                   $this->output->writeln(sprintf('    %s:  %s ', $metricName, $value->format()));
                }
