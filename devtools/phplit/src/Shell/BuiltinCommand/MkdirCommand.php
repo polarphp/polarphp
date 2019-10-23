@@ -58,14 +58,13 @@ class MkdirCommand implements BuiltinCommandInterface
       $cwd = $shenv->getCwd();
       foreach ($dirs as $dir) {
          if (!is_absolute_path($dir)) {
-            $dir = realpath($cwd . DIRECTORY_SEPARATOR . $dir);
+            $dir = $cwd . DIRECTORY_SEPARATOR . $dir;
          }
          $result = @mkdir($dir, 0777, $parent);
          if (false === $result) {
             $exitCode = 1;
             $e = error_get_last();
             $errorMsg = sprintf("Error: 'mkdir' command failed, %s\n", $e['message']);
-            TestLogger::error($errorMsg);
          }
       }
       return new ShellCommandResult($cmd, "", $errorMsg, $exitCode, false);

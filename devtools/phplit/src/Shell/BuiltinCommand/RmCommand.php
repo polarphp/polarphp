@@ -12,12 +12,14 @@
 
 namespace Lit\Shell\BuiltinCommand;
 
+use Lit\Exception\InternalShellException;
 use Lit\Utils\TestLogger;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 
+use Lit\Shell\ShellCommandResult;
 use Lit\Shell\ShCommandInterface;
 use Lit\Utils\ShellEnvironment;
 use Lit\Utils\Filesystem;
@@ -43,21 +45,25 @@ class RmCommand implements BuiltinCommandInterface
    }
    public function execute(ShCommandInterface $cmd, ShellEnvironment $shenv)
    {
-      $args = expand_glob_expressions($cmd->getArgs(), $shenv->getCwd());
-      $input = new ArgvInput($args, $this->definitions);
+      try {
+         $args = expand_glob_expressions($cmd->getArgs(), $shenv->getCwd());
+         $input = new ArgvInput($args, $this->definitions);
+      } catch (\Exception $e) {
+         throw new InternalShellException($cmd, sprintf("Unsupported: 'rm':  %s", $e->getMessage()));
+      }
       $force = $input->getOption('force');
       $recurive = $input->getOption('recursive');
       $fs = new Filesystem();
       $paths = $input->getArgument('paths');
-      if (empty($dirs)) {
-         throw new InternalShellError($cmd, "Error: 'rm' is missing an operand");
+      if (empty($paths)) {
+         throw new InternalShellException($cmd, "Error: 'rm' is missing an operand");
       }
       $errorMsg = '';
       $exitCode = 0;
       try {
          foreach ($paths as $path) {
             if (!is_absolute_path($path)) {
-               $path = realpath($shenv->getCwd() . DIRECTORY_SEPARATOR . $path);
+               $path = $shenv->getCwd() . DIRECTORY_SEPARATOR . $path;
             }
             if ($force && !file_exists($path)) {
                continue;
@@ -74,19 +80,23 @@ class RmCommand implements BuiltinCommandInterface
                   if ($force && !is_writable($path)) {
                      $fs->chmod($path, 0777);
                   }
+                  if (!file_exists($path)) {
+                     throw new IOException(sprintf('No such file or directory: %s', $path));
+                  }
                   $fs->remove($path);
                }
             } catch (IOException $ioException) {
                if ($force) {
                   $fs->chmod($path, 0777);
                   $fs->remove($path);
+               } elseif(!file_exists($path)) {
+                  throw new InternalShellException($cmd, $ioException->getMessage());
                }
             }
          }
       } catch (\Exception $e) {
          $errorMsg = sprintf("Error: 'rm' command failed, %s", $e->getMessage());
          $exitCode = 1;
-         TestLogger::error($errorMsg);
       }
       return new ShellCommandResult($cmd, '', $errorMsg, $exitCode, false);
    }
