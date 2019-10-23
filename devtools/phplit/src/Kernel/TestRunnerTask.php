@@ -13,7 +13,9 @@
 namespace Lit\Kernel;
 
 use Lit\ProcessPool\TaskInterface;
+use Lit\Utils\TestLogger;
 use Symfony\Component\Process\Exception\ProcessSignaledException;
+use Lit\Exception\ValueException;
 
 class TestRunnerTask implements TaskInterface
 {
@@ -58,13 +60,13 @@ class TestRunnerTask implements TaskInterface
          // TODO handle some type signal?
          throw $e;
       } catch (\Exception $e) {
-         if ($this->litConfig->isDebug()) {
-            throw $e;
-         }
          $output = "Exception during script execution:\n";
          $output .= $e->getMessage();
          $output .= "\n";
          $result = new TestResult(TestResultCode::UNRESOLVED(), $output);
+         if ($this->litConfig->isDebug()) {
+            TestLogger::errorWithoutCount($e->getTraceAsString());
+         }
       }
       $this->test->setResult($result);
    }
