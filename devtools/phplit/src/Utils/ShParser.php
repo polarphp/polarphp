@@ -80,7 +80,7 @@ class ShParser
       while (true) {
          $token = $this->look();
          // EOF?
-         if ($token == null) {
+         if ($token === null) {
             break;
          }
          // If this is an argument, just add it to the current command.
@@ -96,7 +96,7 @@ class ShParser
          // Otherwise it must be a redirection.
          $op = $this->lex();
          $arg = $this->lex();
-         if (is_null($arg)) {
+         if (null === $arg) {
             throw new ValueException(sprintf('syntax error near token %s', $op[0]));
          }
          $redirects[] = [$op, $arg];

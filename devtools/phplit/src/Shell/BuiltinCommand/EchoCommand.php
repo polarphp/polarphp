@@ -22,6 +22,7 @@ use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
+use function Lit\Utils\expand_glob_expressions;
 
 class EchoCommand implements BuiltinCommandInterface
 {
@@ -64,9 +65,13 @@ class EchoCommand implements BuiltinCommandInterface
       $isRedirected = true;
       if ($stdout == Process::REDIRECT_PIPE) {
          $isRedirected = false;
-         $stdout = '';
+         $stdout = fopen('php://memory','r+');
       }
-      $input = new ArgvInput($cmd->getArgs(), $this->definitions);
+      try {
+         $input = new ArgvInput($cmd->getArgs(), $this->definitions);
+      } catch (\Exception $e) {
+         throw new InternalShellException($cmd, sprintf("Unsupported: 'rm':  %s", $e->getMessage()));
+      }
       // Implement echo flags. We only support -e and -n, and not yet in
       // combination. We have to ignore unknown flags, because `echo "-D FOO"`
       // prints the dash.
@@ -81,17 +86,20 @@ class EchoCommand implements BuiltinCommandInterface
       $items = $input->getArgument('items');
       $count = count($items);
       for ($i = 0; $i < $count - 1; ++$i) {
-         $stdout .= $items[$i];
-         $stdout .= ' ';
+         fwrite($stdout, $items[$i]);
+         fwrite($stdout, ' ');
       }
-      $stdout .= $items[$count - 1];
+      fwrite($stdout, $items[$count - 1]);
       if ($writeNewline) {
-         $stdout .= "\n";
+         fwrite($stdout, "\n");
+      }
+      foreach ($openedFiles as $entry) {
+         list($name, $mode, $f, $path) = $entry;
+         fclose($f);
       }
       if (!$isRedirected) {
-         return $stdout;
+         return stream_get_contents($stdout);
       }
-      echo $stdout;
       return '';
    }
 }
