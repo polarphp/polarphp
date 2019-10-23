@@ -1380,9 +1380,9 @@ class Process implements \IteratorAggregate
 
          if ($this->stdoutDescriptor != self::REDIRECT_PIPE) {
             if (is_string($this->stdoutDescriptor)) {
-               $descriptors[2] = ['file', $this->stdoutDescriptor];
+               $descriptors[1] = ['file', $this->stdoutDescriptor];
             } elseif (is_resource($this->stdoutDescriptor)) {
-               $descriptors[2] = $this->stdoutDescriptor;
+               $descriptors[1] = $this->stdoutDescriptor;
             }
          }
       }

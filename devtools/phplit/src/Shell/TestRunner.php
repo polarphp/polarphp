@@ -369,7 +369,7 @@ class TestRunner
          }
          if ($op == '||') {
             $result = $this->doExecuteShellCommand($cmd->getLhs(), $shenv, $results, $timeoutHelper);
-            if (0 != $results) {
+            if (0 != $result) {
                $result = $this->doExecuteShellCommand($cmd->getRhs(), $shenv, $results, $timeoutHelper);
             }
             return $result;
@@ -576,10 +576,6 @@ class TestRunner
       foreach ($processesData as $i => $entry) {
          list($out, $err) = $entry;
          $result = $processes[$i]->getExitCode();
-         //  Detect Ctrl-C in subprocess.
-         if ($result == 2) {
-            throw new KeyboardInterruptException();
-         }
          // Ensure the resulting output is always of string type.
          $outputFiles = [];
          if ($result != 0) {

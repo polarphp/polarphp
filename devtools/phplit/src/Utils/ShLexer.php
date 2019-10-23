@@ -10,7 +10,7 @@
 //
 // Created by polarboy on 2019/10/12.
 namespace Lit\Utils;
-use Lit\Kernel\GlobItemCommand;
+use Lit\Shell\GlobItemCommand;
 use Lit\Exception\ValueException;
 
 class ShLexer
