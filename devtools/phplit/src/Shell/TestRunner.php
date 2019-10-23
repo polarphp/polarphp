@@ -932,7 +932,7 @@ class TestRunner
       // We use #_MARKER_# to hide %% while we do the other substitutions.
       $substitutions = [];
       $substitutions[] = ['%%', '#_MARKER_#'];
-      array_merge($substitutions, $test->getConfig()->getSubstitutions());
+      $substitutions = array_merge($substitutions, $test->getConfig()->getSubstitutions());
       $tempName = $tempBase . '.temp';
       $baseName = basename($tempBase);
       $substitutions = array_merge($substitutions, array(

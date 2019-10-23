@@ -12,7 +12,7 @@
 namespace Lit\Tests\Ut;
 
 use Lit\Utils\BooleanExpr;
-use Lit\Kernel\ValueException;
+use Lit\Exception\ValueException;
 use PHPUnit\Framework\TestCase;
 
 class BooleanExprTest extends TestCase

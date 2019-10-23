@@ -371,7 +371,7 @@ class TestingConfig
     */
    public function addSubstitution(string $name, string $value): TestingConfig
    {
-      $this->substitutions[$name] = $value;
+      $this->substitutions[] = [$name, $value];
       return $this;
    }
 

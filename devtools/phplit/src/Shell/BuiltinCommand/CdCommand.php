@@ -30,7 +30,7 @@ class CdCommand implements BuiltinCommandInterface
       if (is_absolute_path($newDir)) {
          $shenv->setCwd($newDir);
       } else {
-         $shenv->setCwd(realpath($shenv->getCwd().DIRECTORY_SEPARATOR.$newDir));
+         $shenv->setCwd($shenv->getCwd().DIRECTORY_SEPARATOR.$newDir);
       }
       // The cd builtin always succeeds. If the directory does not exist, the
       // following Popen calls will fail instead.
