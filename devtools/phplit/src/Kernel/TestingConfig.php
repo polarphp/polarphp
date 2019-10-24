@@ -214,7 +214,7 @@ class TestingConfig
          $config = $this;
          include $path;
          if ($litConfig->isDebug()){
-            TestLogger::note('... loaded config %s', $path);
+            TestLogger::note("... loaded config '%s'", $path);
          }
          $this->loadFinish();
       } catch (\ParseError $error) {

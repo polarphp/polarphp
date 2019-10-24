@@ -97,7 +97,7 @@ class TestCollector
       // file into it.
       $config = $parent->getCopyConfig();
       if ($this->litConfig->isDebug()) {
-         TestLogger::note('loading local config %s', $cfgPath);
+         TestLogger::note("loading local config '%s'", $cfgPath);
       }
       $config->loadFromPath($cfgPath, $this->litConfig);
       return $config;
@@ -171,7 +171,7 @@ class TestCollector
       }
       // We found a test suite, create a new config for it and load it.
       if ($this->litConfig->isDebug()) {
-         TestLogger::note('loading suite config %s', $cfgPath);
+         TestLogger::note("loading suite config '%s'", $cfgPath);
       }
       $config = TestingConfig::fromDefaults($this->litConfig);
       $config->loadFromPath($cfgPath, $this->litConfig);
@@ -199,7 +199,7 @@ class TestCollector
          return [null, []];
       }
       if ($this->litConfig->isDebug()) {
-         TestLogger::note('resolved input %s to %s::%s', $path, $testSuite->getName(), array_to_str($pathInSuite));
+         TestLogger::note("resolved input '%s' to '%s'::%s", $path, $testSuite->getName(), array_to_str($pathInSuite));
       }
       return [$testSuite, $this->collectTestsInSuite($testSuite, $pathInSuite, $testSuiteCache, $localConfigCache)];
    }

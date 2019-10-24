@@ -613,7 +613,7 @@ class LitConfig
    public function loadConfig($testConfig, string $path)
    {
       if ($this->debug) {
-         TestLogger::note('load_config from %s', $path);
+         TestLogger::note("load_config from '%s'", $path);
       }
       $testConfig->loadFromPath($path, $this);
       return $testConfig;
