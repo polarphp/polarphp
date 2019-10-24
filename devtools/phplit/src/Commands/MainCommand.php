@@ -202,12 +202,12 @@ class MainCommand extends Command
          $cmdValue = intval($input->getOption('timeout'));
          if ($cmdValue != $litConfig->getMaxIndividualTestTime()) {
             TestLogger::note(
-               join(array(
+               join('', array(
                   'The test suite configuration requested an individual',
                   ' test timeout of %d seconds but a timeout of %d seconds was',
                   ' requested on the command line. Forcing timeout to be %d',
                   ' seconds'
-               ), $litConfig->getMaxIndividualTestTime(), $cmdValue, $cmdValue)
+               )), $litConfig->getMaxIndividualTestTime(), $cmdValue, $cmdValue
             );
             $litConfig->setMaxIndividualTestTime($cmdValue);
          }
