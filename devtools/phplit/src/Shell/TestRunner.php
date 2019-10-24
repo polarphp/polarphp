@@ -943,8 +943,7 @@ class TestRunner
          ['%t', $tempName],
          ['%basename_t', $baseName],
          ['%T', $tempDir],
-         ['%{php}', sprintf('"%s"', PHP_BINARY)],
-         ['%{filechecker}', POLARPHP_BIN_DIR. DIRECTORY_SEPARATOR . 'filechecker'],
+         ['%{phplit}', PHP_BINARY . ' ' . LIT_ROOT_DIR. DIRECTORY_SEPARATOR . 'lit'],
          ['%{not}', POLARPHP_BIN_DIR. DIRECTORY_SEPARATOR . 'not'],
          ['#_MARKER_#', '%']
       ));

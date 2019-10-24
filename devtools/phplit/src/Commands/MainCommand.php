@@ -77,6 +77,7 @@ class MainCommand extends Command
       $this->addOption('num-shards', null, InputOption::VALUE_OPTIONAL, 'Split testsuite into M pieces and only run one', intval(getenv('LIT_NUM_SHARDS')));
       $this->addOption('run-shard', null, InputOption::VALUE_OPTIONAL, 'Run shard #N of the testsuite', intval(getenv('LIT_RUN_SHARD')));
       // debug group
+      $this->addOption('debug', null, InputOption::VALUE_NONE, 'Debug and Experimental Options');
       $this->addOption('show-suites', null, InputOption::VALUE_NONE, 'Show discovered test suites');
       $this->addOption('show-tests', null, InputOption::VALUE_NONE, 'Show all discovered tests');
    }
@@ -156,9 +157,9 @@ class MainCommand extends Command
          $showOutput = true;
          $echoAllCommands = true;
       }
-      $isDebug = false;
       if ($input->hasParameterOption('-vvv', true) || $input->hasParameterOption('--verbose=3', true) || 3 === $input->getParameterOption('--verbose', false, true)) {
-         $isDebug = true;
+         $showOutput = true;
+         $echoAllCommands = true;
       }
       $quite = false;
       if ($input->hasParameterOption(['--quiet', '-q'], true)) {
@@ -181,7 +182,7 @@ class MainCommand extends Command
          $input->getOption('vg-leak'),
          $vgArg,
          $input->getOption('no-execute'),
-         $isDebug,
+         $input->getOption('debug'),
          $isWindows,
          $userParams,
          $input->getOption('config-prefix'),
