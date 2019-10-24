@@ -13,7 +13,7 @@
 namespace Lit\Utils;
 
 use Psr\Log\LogLevel;
-use Symfony\Component\Console\Logger\ConsoleLogger;
+use Lit\Utils\ConsoleLogger;
 
 class TestLogger
 {
@@ -101,6 +101,6 @@ class TestLogger
       $targetStack = $stack[1];
       $file = substr($targetStack['file'], strlen(LIT_ROOT_DIR) + 1);
       $location = sprintf('%s:%d', $file, $targetStack['line']);
-      self::$logger->log($level, sprintf('%s: %s', $location, $message));
+      self::$logger->log(LogLevel::ERROR, sprintf('%s: %s', $location, $message));
    }
 }

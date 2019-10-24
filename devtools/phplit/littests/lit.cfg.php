@@ -15,3 +15,4 @@ $config->setTestSourceRoot(dirname(__FILE__));
 $config->setTestExecRoot($config->getTestSourceRoot());
 $config->setExtraConfig('target_triple', '(unused)');
 $config->addSubstitution('%{phpuint}', LIT_ROOT_DIR.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'phpunit');
+$config->addSubstitution('%{inputs}', $config->getTestSourceRoot().DIRECTORY_SEPARATOR.'Inputs');

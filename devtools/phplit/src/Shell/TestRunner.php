@@ -943,8 +943,7 @@ class TestRunner
          ['%t', $tempName],
          ['%basename_t', $baseName],
          ['%T', $tempDir],
-         ['%{phplit}', PHP_BINARY . ' ' . LIT_ROOT_DIR. DIRECTORY_SEPARATOR . 'lit'],
-         ['%{not}', POLARPHP_BIN_DIR. DIRECTORY_SEPARATOR . 'not'],
+         ['%{phplit}', PHP_BINARY . ' ' . LIT_ROOT_DIR. DIRECTORY_SEPARATOR . 'lit run-test'],
          ['#_MARKER_#', '%']
       ));
       // "%/[STpst]" should be normalized.
