@@ -9,7 +9,7 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/10/09.
-namespace Lit\Tests\Ut;
+namespace Lit\Tests\Utils;
 
 use Lit\Utils\BooleanExpr;
 use Lit\Exception\ValueException;
