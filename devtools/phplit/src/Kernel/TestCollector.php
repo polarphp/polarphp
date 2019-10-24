@@ -122,9 +122,7 @@ class TestCollector
    {
       // Canonicalize the path.
       if (!is_absolute_path($path)) {
-         $path = realpath(getcwd() . DIRECTORY_SEPARATOR . $path);
-      } else {
-         $path = realpath($path);
+         $path = getcwd() . DIRECTORY_SEPARATOR . $path;
       }
       // Skip files and virtual components.
       $components = array();
