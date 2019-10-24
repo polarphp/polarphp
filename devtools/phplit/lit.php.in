@@ -30,6 +30,19 @@ if ($script[0] == '/') {
 
 require LIT_ROOT_DIR .'/vendor/autoload.php';
 
+$files = array(
+   "src/Utils/UtilFuncs.php"
+);
+foreach ($files as $file) {
+   include LIT_ROOT_DIR .DIRECTORY_SEPARATOR . $file;
+}
+
+$envArgs = shcmd_split(get_envvar('LIT_OPTS', ''));
+$argv = $_SERVER['argv'];
+$argv = array_merge(array_slice($argv, 0, 2), $envArgs, array_slice($argv, 2));
+$_SERVER['argv'] = $argv;
+$_SERVER['argc'] = count($argv);
+
 if (!class_exists(Application::class)) {
    throw new RuntimeException('You need to add "symfony/framework-bundle" as a Composer dependency.');
 }
@@ -55,5 +68,4 @@ if ($_SERVER['APP_DEBUG']) {
 
 $kernel = new Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
 $application = new Application($kernel);
-$application->loadExtraFiles();
 $application->run($input);

@@ -242,11 +242,10 @@ class MainCommand extends Command
       $header = sprintf("-- Testing: %d%s tests, %s --", $actualTestNum, $extra, $workersText);
       $progressBar = null;
       if (!$quite) {
+         $output->writeln($header);
          if ($input->getOption('succinct') && !$input->getOption('no-progress-bar')) {
             $progressBar = new ProgressBar($output, $actualTestNum);
             $progressBar->setOverwrite(false);
-         } else {
-            $output->writeln($header);
          }
       }
       $startTime = microtime(true);

@@ -634,5 +634,15 @@ function quote_xml_attr(string $data)
    return $data;
 }
 
+function shcmd_split($source, bool $comments = false, bool $posix = true)
+{
+   $lexer = new SysShLexer($source, null, $posix);
+   $lexer->setWhitespaceSplit(true);
+   if (!$comments) {
+      $lexer->setCommenters('');
+   }
+   return $lexer->toArray();
+}
+
 // dummy class
 class UtilFuncs{}

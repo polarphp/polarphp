@@ -85,11 +85,13 @@ class EchoCommand implements BuiltinCommandInterface
       }
       $items = $input->getArgument('items');
       $count = count($items);
-      for ($i = 0; $i < $count - 1; ++$i) {
-         fwrite($stdout, $items[$i]);
-         fwrite($stdout, ' ');
+      if ($count > 0) {
+         for ($i = 0; $i < $count - 1; ++$i) {
+            fwrite($stdout, $items[$i]);
+            fwrite($stdout, ' ');
+         }
+         fwrite($stdout, $items[$count - 1]);
       }
-      fwrite($stdout, $items[$count - 1]);
       if ($writeNewline) {
          fwrite($stdout, "\n");
       }
