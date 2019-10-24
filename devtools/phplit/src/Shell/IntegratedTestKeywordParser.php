@@ -115,9 +115,9 @@ class IntegratedTestKeywordParser
     * @param string $line
     * @param array $output
     */
-   public static function handleTag(int $lineNumber, string $line, array $output): bool
+   public static function handleTag(int $lineNumber, string $line, array $output): array
    {
-      return 0 == strlen(trim($line)) || !empty($output);
+      return [0 == strlen(trim($line)) || !empty($output)];
    }
 
    /**

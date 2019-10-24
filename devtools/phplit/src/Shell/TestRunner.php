@@ -780,7 +780,7 @@ class TestRunner
          list($lineNumber, $commandType, $line) = $centry;
          $parser = $keywordParsers[$commandType];
          $parser->parseLine($lineNumber, $line);
-         if ($commandType == 'END.' && $parser->getValue()) {
+         if ($commandType == 'END.' && [true] == $parser->getValue()) {
             break;
          }
       }

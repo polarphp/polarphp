@@ -17,7 +17,7 @@ use Lit\Kernel\TestCase;
 use Lit\Kernel\TestingConfig;
 use Lit\Kernel\TestResultCode;
 use Lit\Kernel\TestSuite;
-use Lit\Kernel\ExecuteCommandTimeoutException;
+use Lit\Exception\ExecuteCommandTimeoutException;
 use Lit\Utils\TestLogger;
 use function Lit\Utils\has_substr;
 use function Lit\Utils\listdir_files;
