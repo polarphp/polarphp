@@ -99,8 +99,8 @@ class EchoCommand implements BuiltinCommandInterface
          list($name, $mode, $f, $path) = $entry;
          fclose($f);
       }
-      rewind($stdout);
       if (!$isRedirected) {
+         rewind($stdout);
          return stream_get_contents($stdout);
       }
       return '';
