@@ -56,8 +56,7 @@ class TestingProgressDisplay
    private function setupOpts()
    {
       $this->opts += array(
-         'showAllOutput' => false,
-         'showOutput' => false
+         'show-all' => false
       );
    }
 
@@ -82,7 +81,7 @@ class TestingProgressDisplay
       }
       $result = $test->getResult();
       $resultCode = $result->getCode();
-      $shouldShow = $resultCode->isFailure() || $this->opts['showAllOutput'] ||
+      $shouldShow = $resultCode->isFailure() || $this->opts['show-all'] ||
          (!$this->opts['quiet'] && !$this->opts['succinct']);
       if (!$shouldShow) {
          return;
@@ -95,7 +94,7 @@ class TestingProgressDisplay
       $this->output->writeln(sprintf("%s: %s (%d of %d)", $resultCode->getName(), $testName,
          $this->completed, $this->numTests));
       // Show the test failure output, if requested.
-      if (($resultCode->isFailure() && $this->opts['showOutput']) || $this->opts['showAllOutput']) {
+      if (($resultCode->isFailure() && $this->opts['verbose']) || $this->opts['show-all']) {
          if ($resultCode->isFailure()) {
             $this->output->writeln(sprintf("%s TEST '%s' FAILED %s", str_repeat('*', 20), $test->getFullName(),
                str_repeat('*', 20)));

@@ -148,17 +148,11 @@ class MainCommand extends Command
          }
          $input->setOption('max-failures', $maxFailures);
       }
-      $showOutput = false;
       $echoAllCommands = false;
-      if ($input->hasParameterOption('-v', true) || $input->hasParameterOption('--verbose=1', true) || 1 === $input->getParameterOption('--verbose', false, true)) {
-         $showOutput = true;
-      }
       if ($input->hasParameterOption('-vv', true) || $input->hasParameterOption('--verbose=2', true) || 2 === $input->getParameterOption('--verbose', false, true)) {
-         $showOutput = true;
          $echoAllCommands = true;
       }
       if ($input->hasParameterOption('-vvv', true) || $input->hasParameterOption('--verbose=3', true) || 3 === $input->getParameterOption('--verbose', false, true)) {
-         $showOutput = true;
          $echoAllCommands = true;
       }
       $quite = false;
@@ -250,7 +244,6 @@ class MainCommand extends Command
       }
       $startTime = microtime(true);
       $opts = $input->getOptions();
-      $opts['showOutput'] = $showOutput;
       $progressDisplay = new TestingProgressDisplay($opts, $actualTestNum, $progressBar, $output);
       $testDispatcher->setDisplay($progressDisplay);
       $maxTime = null;

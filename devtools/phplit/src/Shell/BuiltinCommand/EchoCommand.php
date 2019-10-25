@@ -65,7 +65,7 @@ class EchoCommand implements BuiltinCommandInterface
       $isRedirected = true;
       if ($stdout == Process::REDIRECT_PIPE) {
          $isRedirected = false;
-         $stdout = fopen('php://memory','r+');
+         $stdout = fopen('php://memory','rw');
       }
       try {
          $input = new ArgvInput($cmd->getArgs(), $this->definitions);
@@ -99,6 +99,7 @@ class EchoCommand implements BuiltinCommandInterface
          list($name, $mode, $f, $path) = $entry;
          fclose($f);
       }
+      rewind($stdout);
       if (!$isRedirected) {
          return stream_get_contents($stdout);
       }

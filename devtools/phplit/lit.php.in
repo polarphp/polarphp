@@ -37,7 +37,7 @@ foreach ($files as $file) {
    include LIT_ROOT_DIR .DIRECTORY_SEPARATOR . $file;
 }
 
-$envArgs = shcmd_split(get_envvar('LIT_OPTS', ''));
+$envArgs = \Lit\Utils\shcmd_split(\Lit\Utils\get_envvar('LIT_OPTS', ''));
 $argv = $_SERVER['argv'];
 $argv = array_merge(array_slice($argv, 0, 2), $envArgs, array_slice($argv, 2));
 $_SERVER['argv'] = $argv;
