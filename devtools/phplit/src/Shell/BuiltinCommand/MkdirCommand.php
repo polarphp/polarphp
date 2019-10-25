@@ -60,6 +60,9 @@ class MkdirCommand implements BuiltinCommandInterface
          if (!is_absolute_path($dir)) {
             $dir = $cwd . DIRECTORY_SEPARATOR . $dir;
          }
+         if (file_exists($dir)) {
+            continue;
+         }
          $result = @mkdir($dir, 0777, $parent);
          if (false === $result) {
             $exitCode = 1;
