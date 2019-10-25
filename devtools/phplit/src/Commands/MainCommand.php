@@ -547,7 +547,7 @@ class MainCommand extends Command
          $bySuite[$suite]['tests'][] = $resultTest;
          if ($resultTest->getResult()->getCode()->isFailure()) {
             $bySuite[$suite]['failures'] += 1;
-         } elseif ($resultTest->getResult()->getCode()) {
+         } elseif ($resultTest->getResult()->getCode() == TestResultCode::UNSUPPORTED()) {
             $bySuite[$suite]['skipped'] += 1;
          } else {
             $bySuite[$suite]['passes'] += 1;

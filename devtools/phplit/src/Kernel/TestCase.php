@@ -279,7 +279,7 @@ class TestCase
       $elapsedTime = $this->result->getElapsed();
       $testcaseTemplate = '<testcase classname=%s name=%s time=%s';
       $testcaseXml = sprintf($testcaseTemplate, quote_xml_attr($className),
-         quote_xml_attr($testName), quote_xml_attr($elapsedTime));
+         quote_xml_attr($testName), quote_xml_attr(sprintf("%.2f", $elapsedTime)));
       fwrite($file, $testcaseXml);
       if ($this->result->getCode()->isFailure()) {
          fwrite($file,">\n\t<failure ><![CDATA[");
@@ -288,14 +288,14 @@ class TestCase
          // we wrap it by creating a new CDATA block
          fwrite($file, str_replace("]]>","]]]]><![CDATA[>", $output));
          fwrite($file, "]]></failure>\n</testcase>");
-      } else if ($this->result->getCode() === TestResultCode::UNRESOLVED()) {
+      } else if ($this->result->getCode() === TestResultCode::UNSUPPORTED()) {
          $unsupportedFeatures = $this->getMissingRequiredFeatures();
          if (!empty($unsupportedFeatures)) {
             $skipMessage = "Skipping because of: " . join(',', $unsupportedFeatures);
          } else {
             $skipMessage = 'Skipping because of configuration.';
          }
-         fwrite($file, sprintf(">\n\t<skipped message=%s />\n</testcase>\n", escape_xml_attr($skipMessage)));
+         fwrite($file, sprintf(">\n\t<skipped message=%s />\n</testcase>\n", quote_xml_attr($skipMessage)));
       } else {
          fwrite($file, "/>");
       }
