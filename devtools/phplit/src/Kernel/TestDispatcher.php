@@ -111,7 +111,7 @@ class TestDispatcher
       }
    }
 
-   public function writeTestResults(int $testingTime, string $outputPath)
+   public function writeTestResults(float $testingTime, string $outputPath)
    {
       // Construct the data we will write.
       $data = array();
@@ -121,7 +121,8 @@ class TestDispatcher
       // FIXME: Record some information on the lit configuration used?
       // FIXME: Record information from the individual test suites?
       // Encode the tests.
-      $data['tests'] = $testsData = [];
+      $data['tests'] = [];
+      $testsData = &$data['tests'];
       foreach ($this->tests as $test) {
          $result = $test->getResult();
          $testData = array(
@@ -132,7 +133,8 @@ class TestDispatcher
          );
          // Add test metrics, if present.
          if (!empty($result->getMetrics())) {
-            $testData['metrics'] = $metricsData = [];
+            $testData['metrics'] = [];
+            $metricsData = &$testData['metrics'];
             foreach ($result->getMetrics() as $key => $value) {
                $metricsData[$key] = $value->toData();
             }
@@ -145,12 +147,13 @@ class TestDispatcher
                $microFullName = $parentName . ':' . $key;
                $microTestData = array(
                   'name' => $microFullName,
-                  'code' => $microTest->getCode->getName(),
+                  'code' => $microTest->getCode()->getName(),
                   'output' => $microTest->getOutput(),
                   'elapsed' => $microTest->getElapsed(),
                );
                if ($microTest->getMetrics()) {
-                  $microTestData['metrics'] = $microMetricsData = array();
+                  $microTestData['metrics'] = [];
+                  $microMetricsData = &$microTestData['metrics'];
                   foreach ($microTest->getMetrics() as $key => $value) {
                      $microMetricsData[$key] = $value->toData();
                   }
@@ -161,7 +164,7 @@ class TestDispatcher
          $testsData[] = $testData;
       }
       // Write the output.
-      file_put_contents($outputPath, json_encode($data)."\n");
+      file_put_contents($outputPath, json_encode($data, JSON_PRETTY_PRINT)."\n");
    }
 
    public function setDisplay(TestingProgressDisplay $display): TestDispatcher

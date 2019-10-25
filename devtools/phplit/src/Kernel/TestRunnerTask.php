@@ -47,7 +47,7 @@ class TestRunnerTask implements TaskInterface
    public function exec(array $data = array())
    {
       try {
-         $startTime = time();
+         $startTime = microtime(true);
          $result = $this->test->getConfig()->getTestFormat()->execute($this->test);
          if (is_array($result)) {
             list($code, $output) = $result;
@@ -55,7 +55,7 @@ class TestRunnerTask implements TaskInterface
          } elseif (!$result instanceof TestResult) {
             throw new ValueException('unexpected result from test execution');
          }
-         $result->setElapsed(time() - $startTime);
+         $result->setElapsed(microtime(true) - $startTime);
       } catch (ProcessSignaledException $e) {
          // TODO handle some type signal?
          throw $e;
