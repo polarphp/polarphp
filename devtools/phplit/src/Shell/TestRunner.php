@@ -306,7 +306,7 @@ class TestRunner
          foreach ($result->getOutputFiles() as $fentry) {
             list($name, $path, $data) = $fentry;
             if (trim($data)) {
-               $out .= "# redirected output from $name:";
+               $out .= "# redirected output from $name:\n";
                // TODO encoding of data ?
                if (iconv_strlen($data, 'UTF-8') > 1024) {
                   $out .= iconv_substr($data, 0, 1024, 'UTF-8') . "\n...\n";
@@ -475,7 +475,6 @@ class TestRunner
       $stderrTempFiles = [];
       $openedFiles = [];
       $namedTempFiles = [];
-      $builtinCommands = ['cat'];
       // To avoid deadlock, we use a single stderr stream for piped
       // output. This is null until we have seen some output using
       // stderr.
@@ -555,7 +554,13 @@ class TestRunner
             $args = $this->quoteWindowsCommand($args);
          }
          try {
-            $process = new Process($args, $cmdShenv->getCwd(), $cmdShenv->getEnv(), $stdin, $stdout, $stderr);
+            if (is_resource($stdin)) {
+               $processInput = stream_get_contents($stdin);
+               fseek($stdin, 1, SEEK_END);
+            } else {
+               $processInput = $stdin;
+            }
+            $process = new Process($args, $cmdShenv->getCwd(), $cmdShenv->getEnv(), $processInput, $stdout, $stderr);
             $process->start();
             $timeoutHelper->addProcess($process);
             $processes[] = $process;
