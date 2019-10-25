@@ -468,7 +468,7 @@ class MainCommand extends Command
       );
       foreach ($codeTitleMap as $entry) {
          list($title, $code) = $entry;
-         if (($code == TestResultCode::XPASS() && !$input->getOption('show-xfail')) ||
+         if (($code == TestResultCode::XFAIL() && !$input->getOption('show-xfail')) ||
             ($code == TestResultCode::UNSUPPORTED() && !$input->getOption('show-unsupported')) ||
             ($code == TestResultCode::UNRESOLVED() && $input->getOption('max-failures') !== null)) {
             continue;

@@ -1,3 +1,5 @@
 #!/usr/bin/env php
 <?php
-echo "a line with bad encoding: \xc2.";
+$stdout = fopen("php://stdout", 'b');
+fwrite($stdout, "a line with bad encoding: \xc2.");
+fflush($stdout);

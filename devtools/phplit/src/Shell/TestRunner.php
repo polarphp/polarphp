@@ -228,10 +228,28 @@ class TestRunner
       try {
          list($out, $err, $exitCode) = execute_command($command, $cwd, $test->getConfig()->getEnvironment(), null,
             $this->litConfig->getMaxIndividualTestTime());
-         return [$out, $err, $exitCode, null];
+         return [$this->filterInvalidUtf8($out), $this->filterInvalidUtf8($err), $exitCode, null];
       } catch (ExecuteCommandTimeoutException $e) {
          return [$e->getOutMsg(), $e->getErrorMsg(), $e->getExitCode(), $e->getMessage()];
       }
+   }
+
+   protected function filterInvalidUtf8(string $data)
+   {
+      $data = preg_replace_callback('/([\x00-\x08\x10\x0B\x0C\x0E-\x19\x7F]'.
+         '|[\x00-\x7F][\x80-\xBF]+'.
+         '|([\xC0\xC1]|[\xF0-\xFF])[\x80-\xBF]*'.
+         '|[\xC2-\xDF]((?![\x80-\xBF])|[\x80-\xBF]{2,})'.
+         '|[\xE0-\xEF](([\x80-\xBF](?![\x80-\xBF]))|(?![\x80-\xBF]{2})|[\x80-\xBF]{3,}))/S',
+         function ($code) {
+            return '\x'.dechex(ord($code[1]));
+         }, $data);
+      $data = preg_replace_callback('/(\xE0[\x80-\x9F][\x80-\xBF]'.
+         '|\xED[\xA0-\xBF][\x80-\xBF])/S',
+         function($code) {
+            return '\x'.dechex(ord($code[1]));
+         }, $data);
+      return $data;
    }
 
    /**
@@ -569,7 +587,7 @@ class TestRunner
       // FIXME: There is probably still deadlock potential here. Yawn.
       $processesData = [];
       foreach ($processes as $i => $process) {
-         $processesData[$i] = [$process->getOutput(), $process->getErrorOutput()];
+         $processesData[$i] = [$this->filterInvalidUtf8($process->getOutput()), $this->filterInvalidUtf8($process->getErrorOutput())];
       }
       // Read stderr out of the temp files.
       foreach ($stderrTempFiles as $entry) {
