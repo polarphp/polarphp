@@ -22,7 +22,6 @@ use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
-use function Lit\Utils\expand_glob_expressions;
 
 class EchoCommand implements BuiltinCommandInterface
 {
@@ -65,7 +64,7 @@ class EchoCommand implements BuiltinCommandInterface
       $isRedirected = true;
       if ($stdout == Process::REDIRECT_PIPE) {
          $isRedirected = false;
-         $stdout = fopen('php://memory','rw');
+         $stdout = fopen('php://memory','rwb');
       }
       try {
          $input = new ArgvInput($cmd->getArgs(), $this->definitions);
@@ -87,13 +86,13 @@ class EchoCommand implements BuiltinCommandInterface
       $count = count($items);
       if ($count > 0) {
          for ($i = 0; $i < $count - 1; ++$i) {
-            fwrite($stdout, $items[$i]);
+            fwrite($stdout, $this->maybeUnescape($items[$i], $interpretEscapes));
             fwrite($stdout, ' ');
          }
-         fwrite($stdout, $items[$count - 1]);
+         fwrite($stdout, $this->maybeUnescape($items[$count - 1], $interpretEscapes));
       }
       if ($writeNewline) {
-         fwrite($stdout, "\n");
+         fwrite($stdout, PHP_EOL);
       }
       foreach ($openedFiles as $entry) {
          list($name, $mode, $f, $path) = $entry;
@@ -104,5 +103,15 @@ class EchoCommand implements BuiltinCommandInterface
          return stream_get_contents($stdout);
       }
       return '';
+   }
+
+   private function maybeUnescape(string $str, bool $interpretEscapes)
+   {
+      if (!$interpretEscapes) {
+         return $str;
+      }
+      return str_replace(
+         array('\r', '\t', '\n', '\f'),
+         array("\r", "\t", "\n", "\f"), $str);
    }
 }

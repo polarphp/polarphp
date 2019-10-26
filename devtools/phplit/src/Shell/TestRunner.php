@@ -23,6 +23,7 @@ use Lit\Kernel\TestResultCode;
 use Lit\Exception\ValueException;
 use Lit\Shell\BuiltinCommand\BuiltinCommandInterface;
 use Lit\Shell\BuiltinCommand\CdCommand;
+use Lit\Shell\BuiltinCommand\DiffCommand;
 use Lit\Shell\BuiltinCommand\EchoCommand;
 use Lit\Shell\BuiltinCommand\ExportCommand;
 use Lit\Shell\BuiltinCommand\MkdirCommand;
@@ -449,7 +450,9 @@ class TestRunner
          if ($cmd->getPipeSize() != 1) {
             throw new InternalShellException($firstCommand, "Unsupported: 'diff' cannot be part of a pipeline");
          }
-         return 0;
+         $result = $this->builtinCommands['diff']->execute($firstCommand, $shenv);
+         $results[] = $result;
+         return $result->getExitCode();
       }
       if ($firstCommandName == 'rm') {
          if ($cmd->getPipeSize() != 1) {
@@ -668,18 +671,18 @@ class TestRunner
       foreach ($cmd->getRedirects() as $entry) {
          list($op, $filename) = $entry;
          if ($op === ['>', 2]) {
-            $redirects[2] = [$filename, 'w', null];
+            $redirects[2] = [$filename, 'wb', null];
          } elseif ($op === ['>>', 2]) {
             $redirects[2] = [$filename, 'a', null];
          } elseif ($op === ['>&', 2] && has_substr('012', $filename)) {
             $redirects[2] = &$redirects[intval($filename)];
          } elseif ($op === ['>&'] || $op === ['&>']) {
-            $redirects[1] = [$filename, 'w', null];
+            $redirects[1] = [$filename, 'wb', null];
             $redirects[2] = &$redirects[1];
          } elseif ($op === ['>']) {
-            $redirects[1] = [$filename, 'w', null];
+            $redirects[1] = [$filename, 'wb', null];
          } elseif ($op === ['>>']) {
-            $redirects[1] = [$filename, 'a', null];
+            $redirects[1] = [$filename, 'ab', null];
          } elseif ($op === ['<']) {
             $redirects[0] = [$filename, 'r', null];
          } else {
@@ -1083,6 +1086,7 @@ class TestRunner
       $this->builtinCommands = array(
          'export' => new ExportCommand(),
          'mkdir' => new MkdirCommand(),
+         'diff' => new DiffCommand(),
          'rm' => new RmCommand(),
          'echo' => new EchoCommand($this, $this->litConfig),
          'cd' => new CdCommand(),
