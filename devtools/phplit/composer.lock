@@ -4,73 +4,18 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "72b1d20c0954addfb3a1882eb827165a",
+    "content-hash": "5795043dfe724c24ff4cb65f022e9281",
     "packages": [
         {
-            "name": "diff/diff",
-            "version": "3.2.0",
+            "name": "chrisboulton/php-diff",
+            "version": "master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/wmde/Diff.git",
-                "reference": "89bbd224a9ad6cc6cb8e01263ae5add2564e7cf0"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/wmde/Diff/zipball/89bbd224a9ad6cc6cb8e01263ae5add2564e7cf0",
-                "reference": "89bbd224a9ad6cc6cb8e01263ae5add2564e7cf0",
-                "shasum": "",
-                "mirrors": [
-                    {
-                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
-                        "preferred": true
-                    }
-                ]
-            },
-            "require": {
-                "php": ">=7.0"
-            },
-            "require-dev": {
-                "ockcyp/covers-validator": "~1.0",
-                "phpunit/phpunit": "~6.2",
-                "squizlabs/php_codesniffer": "~3.2"
+                "url": "https://github.com/chrisboulton/php-diff.git",
+                "reference": "master"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "3.2.x-dev"
-                }
-            },
-            "autoload": {
-                "files": [
-                    "Diff.php"
-                ],
-                "psr-4": {
-                    "Diff\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Jeroen De Dauw",
-                    "email": "jeroendedauw@gmail.com",
-                    "homepage": "http://jeroendedauw.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Small standalone library for representing differences between data structures, computing such differences, and applying them as patches",
-            "homepage": "https://github.com/wmde/Diff",
-            "keywords": [
-                "diff",
-                "diffing",
-                "diffop",
-                "patch",
-                "patching",
-                "wikidata"
-            ],
-            "time": "2018-09-11T11:51:44+00:00"
+            "time": "2016-10-14T23:54:40+00:00"
         },
         {
             "name": "psr/cache",
@@ -2059,7 +2004,7 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,

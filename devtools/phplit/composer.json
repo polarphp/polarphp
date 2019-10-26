@@ -1,11 +1,26 @@
 {
     "type": "project",
     "license": "proprietary",
+    "minimum-stability": "dev",
+    "repositories": [
+        {
+            "type":"package",
+            "package": {
+                "name": "chrisboulton/php-diff",
+                "version":"master",
+                "source": {
+                    "url": "https://github.com/chrisboulton/php-diff.git",
+                    "type": "git",
+                    "reference":"master"
+                }
+            }
+        }
+    ],
     "require": {
         "php": "^7.1.3",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "diff/diff": "^3.2",
+        "chrisboulton/php-diff": "master",
         "symfony/console": "4.3.*",
         "symfony/dotenv": "4.3.*",
         "symfony/event-dispatcher-contracts": "^1.1",
@@ -31,7 +46,11 @@
     "autoload-dev": {
         "psr-4": {
             "App\\Tests\\": "tests/"
-        }
+        },
+        "files": [
+            "vendor/chrisboulton/php-diff/lib/Diff.php",
+            "vendor/chrisboulton/php-diff/lib/Diff/Renderer/Text/Unified.php"
+        ]
     },
     "replace": {
         "paragonie/random_compat": "2.*",
