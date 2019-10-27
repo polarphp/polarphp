@@ -1,6 +1,0 @@
-# Basic sanity check that usage works.
-#
-# RUN: %{lit} --help > %t.out
-# RUN: filechecker < %t.out %s
-#
-# CHECK: Usage: {{.*}}/lit [OPTIONS] [test_paths...]
