@@ -43,7 +43,7 @@ class TestWorkerCommand extends Command
       try {
          $initializer->init();
          $executor = new TaskExecutor($task);
-         $executor->exec();
+         fwrite(STDOUT, $executor->exec());
          exit(0);
       } catch (\Exception $e) {
          $logger->error($e->getMessage());

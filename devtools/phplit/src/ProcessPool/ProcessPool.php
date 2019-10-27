@@ -95,10 +95,10 @@ class ProcessPool
       ];
    }
 
-   public function postTask(TaskInterface $task)
+   public function postTask(TaskInterface $task): Process
    {
       if ($this->closed) {
-         return;
+         return null;
       }
       $cmd = [PHP_BINARY, LIT_SCRIPT, 'run-worker'];
       $process = new Process($cmd, null, null);
@@ -108,6 +108,7 @@ class ProcessPool
       );
       $process->setInput(serialize($data));
       $this->queue[] = $process;
+      return $process;
    }
 
    /**
@@ -231,7 +232,7 @@ class ProcessPool
    {
       $eventPreffix = $this->options['eventPreffix'];
       $eventName = $event::NAME;
-      $this->getEventDispatcher()->dispatch("$eventPreffix.$eventName", $event);
+      $this->getEventDispatcher()->dispatch($event, "$eventPreffix.$eventName");
    }
 
    /**

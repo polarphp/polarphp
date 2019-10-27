@@ -13,6 +13,7 @@
 namespace Lit\Kernel;
 
 use Lit\ProcessPool\TaskInterface;
+use Lit\Utils\ConsoleLogger;
 use Lit\Utils\TestLogger;
 use Symfony\Component\Process\Exception\ProcessSignaledException;
 use Lit\Exception\ValueException;
@@ -22,16 +23,22 @@ class TestRunnerTask implements TaskInterface
    /**
     * @var int $index
     */
-   private $index;
+   protected $index;
    /**
     * @var TestCase $test
     */
-   private $test;
+   protected $test;
 
    /**
     * @var LitConfig $litConfig
     */
    private $litConfig;
+
+   /**
+    * @var ConsoleLogger $logger
+    */
+   private $logger;
+
    /**
     * TestRunnerTask constructor.
     * @param int $index
@@ -42,6 +49,11 @@ class TestRunnerTask implements TaskInterface
       $this->index = $index;
       $this->test = $test;
       $this->litConfig = $litConfig;
+   }
+
+   public function setLogger(ConsoleLogger $logger)
+   {
+      $this->logger = $logger;
    }
 
    public function exec(array $data = array())
@@ -69,5 +81,15 @@ class TestRunnerTask implements TaskInterface
          }
       }
       $this->test->setResult($result);
+   }
+
+   public function writeToStdout($format, ...$args)
+   {
+      fwrite(STDOUT, sprintf($format, ...$args));
+   }
+
+   public function writeToStderr($format, ...$args)
+   {
+      fwrite(STDERR, sprintf($format, ...$args));
    }
 }

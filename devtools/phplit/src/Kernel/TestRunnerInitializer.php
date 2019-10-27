@@ -8,19 +8,17 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2019/10/16.
+// Created by polarboy on 2019/10/27.
 
 namespace Lit\Kernel;
 
-class TestRunnerPoolTask extends TestRunnerTask
-{
+use Lit\ProcessPool\TaskExecutor;
+use Lit\ProcessPool\WorkerInitializerInterface;
 
-   public function exec(array $data = array())
+class TestRunnerInitializer implements WorkerInitializerInterface
+{
+   public function init()
    {
-      parent::exec($data);
-      return serialize([
-         $this->index,
-         $this->test
-      ]);
+      TaskExecutor::setDataItem("name", "polarphp");
    }
 }

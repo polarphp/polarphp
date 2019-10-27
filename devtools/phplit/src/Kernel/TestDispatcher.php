@@ -11,9 +11,14 @@
 // Created by polarboy on 2019/10/11.
 namespace Lit\Kernel;
 
+use http\Exception\RuntimeException;
 use Lit\Application;
+use Lit\ProcessPool\Events\ProcessFinished;
+use Lit\ProcessPool\ProcessPool;
 use Lit\Utils\TestingProgressDisplay;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
+use Symfony\Component\Process\Process;
 
 class TestDispatcher
 {
@@ -58,9 +63,74 @@ class TestDispatcher
       $this->parallelismSemaphores = $litConfig->getParallelismGroups();
    }
 
-   public function executeTestsInPool(int $jobs, int $maxTime)
+   public function executeTestsInPool(int $jobs, $maxTime)
    {
+      // We need to issue many wait calls, so compute the final deadline and
+      // subtract time.time() from that as we go along.
+      $deadline = null;
+      if ($maxTime) {
+         $deadline = time() + (int)$maxTime;
+      }
+      // Start a process pool. Copy over the data shared between all test runs.
+      // FIXME: Find a way to capture the worker process stderr. If the user
+      // interrupts the workers before we make it into our task callback, they
+      // will each raise a KeyboardInterrupt exception and print to stderr at
+      // the same time.
+      $processPool = new ProcessPool(new TestRunnerInitializer(), [
+         'concurrency' => $jobs,
+         'maxTimeout' => $deadline,
+         'throwExceptions' => true
+      ]);
+      $self = $this;
+      $processTestMap = [];
+      $processPool->setProcessFinishedCallback(function (ProcessFinished $event) use ($self, &$processTestMap, $processPool) {
+         list($testIndex, $test) = $self->handleTaskProcessResult($event->getProcess(), $processTestMap);
+         $self->setTest($testIndex, $test);
+         $this->consumeTestResult($testIndex, $test);
+         if ($this->hitMaxFailures) {
+            $processPool->terminate();
+         }
+      });
+      try {
+         foreach ($this->tests as $index => $test) {
+            $process = $processPool->postTask(new TestRunnerPoolTask($index, $test, $this->litConfig));
+            $processTestMap[] = [$process, $index, $test];
+         }
+         $processPool->wait();
+      } catch (ProcessTimedOutException $e) {
+         throw new \RuntimeException(sprintf("maxTime timeout of %s seconds.", $maxTime));
+      } finally {
+         $processPool->terminate();
+      }
+   }
 
+   public function handleTaskProcessResult(Process $process, array $processTestMap): array
+   {
+      $origTestIndex = null;
+      /**
+       * @var TestCase $origTest
+       */
+      $origTest = null;
+      foreach ($processTestMap as $entry) {
+         if ($process === $entry[0]) {
+            $origTestIndex = $entry[1];
+            $origTest = $entry[2];
+            break;
+         }
+      }
+      assert($origTestIndex !== null);
+      assert($origTest !== null);
+      $exitCode = $process->getExitCode();
+      if ($exitCode != 0) {
+         $result = new TestResult(TestResultCode::UNRESOLVED(), $process->getErrorOutput());
+         $origTest->setResult($result);
+         return [$origTestIndex, $origTest];
+      }
+      $output = $process->getOutput();
+      assert(!empty($output));
+      $returnData = unserialize($output);
+      assert(false !== $returnData && is_array($returnData) && count($returnData) == 2);
+      return $returnData;
    }
 
    /**
@@ -185,6 +255,11 @@ class TestDispatcher
    {
       $this->tests = $tests;
       return $this;
+   }
+
+   public function setTest(int $index, TestCase $test): void
+   {
+      $this->tests[$index] = $test;
    }
 
    /**

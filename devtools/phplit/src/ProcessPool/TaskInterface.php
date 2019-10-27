@@ -12,7 +12,10 @@
 
 namespace Lit\ProcessPool;
 
+use Lit\Utils\ConsoleLogger;
+
 interface TaskInterface
 {
+   public function setLogger(ConsoleLogger $logger);
    public function exec(array $data = array());
 }

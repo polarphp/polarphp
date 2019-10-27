@@ -32,12 +32,20 @@ class TaskExecutor
 
    public function exec()
    {
-      $this->task->exec(self::$data);
+      return $this->task->exec(self::$data);
    }
 
    public static function setDataItem(string $name, $value)
    {
       self::$data[$name] = $value;
+   }
+
+   public static function getDataItem(string $name, $defaultValue = null)
+   {
+      if (array_key_exists($name, self::$data)) {
+         return self::$data[$name];
+      }
+      return $defaultValue;
    }
 
    public static function getDataPool()
