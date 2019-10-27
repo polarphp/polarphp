@@ -325,7 +325,7 @@ class DiffCommand implements BuiltinCommandInterface
       }
       while ($r < count($rightNames)) {
          $exitCode = 1;
-         $this->printOnlyIn($rightBase, $rightTree[0], $rightNames[$l]);
+         $this->printOnlyIn($rightBase, $rightTree[0], $rightNames[$r]);
          $r += 1;
       }
       return $exitCode;
