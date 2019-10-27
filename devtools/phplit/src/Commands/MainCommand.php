@@ -143,7 +143,7 @@ class MainCommand extends Command
       $maxFailures = $input->getOption('max-failures');
       if ($maxFailures != null) {
          $maxFailures = intval($maxFailures);
-         if ($maxFailures < 0) {
+         if ($maxFailures <= 0) {
             TestLogger::fatal("Option '--max-failures' requires positive integer");
          }
          $input->setOption('max-failures', $maxFailures);
