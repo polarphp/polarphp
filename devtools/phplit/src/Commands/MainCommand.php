@@ -419,7 +419,7 @@ class MainCommand extends Command
          $selectedTests = array();
          $numTests = count($tests);
          // Note: user views tests and shard numbers counting from 1.
-         $testIndexes = range($runShard, $numTests, $numShards);
+         $testIndexes = $this->range($runShard - 1, $numTests, $numShards);
          foreach ($testIndexes as $index) {
             $selectedTests[] = $tests[$index];
          }
@@ -430,7 +430,7 @@ class MainCommand extends Command
          $previewLen = min(3, count($testIndexes));
          $idxPreview = array();
          foreach (array_slice($testIndexes, 0, $previewLen) as $index) {
-            $idxPreview[] = $index;
+            $idxPreview[] = 1 + $index;
          }
          $idxPreview = join(', ', $idxPreview);
          if (count($testIndexes) > $previewLen) {
@@ -439,6 +439,15 @@ class MainCommand extends Command
          TestLogger::note('Selecting shard %d/%d = size %d/%d = tests #(%d*k)+%d = [%s]',
             $runShard, $numShards, count($tests), $numTests, $numShards, $runShard, $idxPreview);
       }
+   }
+
+   private function range(int $start, int $end, $step = 1): array
+   {
+      $itmes = [];
+      for ($i = $start; $i < $end; $i += $step) {
+         $itmes[] = $i;
+      }
+      return $itmes;
    }
 
    private function handleTestResults(InputInterface $input, TestDispatcher $testDispatcher, &$hasFailures, OutputInterface $output): void
