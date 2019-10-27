@@ -69,7 +69,7 @@ class EchoCommand implements BuiltinCommandInterface
       try {
          $input = new ArgvInput($cmd->getArgs(), $this->definitions);
       } catch (\Exception $e) {
-         throw new InternalShellException($cmd, sprintf("Unsupported: 'rm':  %s", $e->getMessage()));
+         throw new InternalShellException($cmd, sprintf("Unsupported: 'rm': %s", $e->getMessage()));
       }
       // Implement echo flags. We only support -e and -n, and not yet in
       // combination. We have to ignore unknown flags, because `echo "-D FOO"`

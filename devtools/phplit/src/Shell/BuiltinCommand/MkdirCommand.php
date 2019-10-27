@@ -46,7 +46,7 @@ class MkdirCommand implements BuiltinCommandInterface
          $args = expand_glob_expressions($cmd->getArgs(), $shenv->getCwd());
          $input = new ArgvInput($args, $this->definitions);
       } catch (\Exception $e) {
-         throw new InternalShellException($cmd, sprintf("Unsupported: 'mkdir':  %s", $e->getMessage()));
+         throw new InternalShellException($cmd, sprintf("Unsupported: 'mkdir': %s", $e->getMessage()));
       }
       $parent = $input->getOption('parent');
       $dirs = $input->getArgument('dirs');

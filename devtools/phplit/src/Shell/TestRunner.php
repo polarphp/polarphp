@@ -528,12 +528,12 @@ class TestRunner
                $executable = which($args[0], $cmdShenv->getEnvVar('PATH', ''));
             }
             if (!$executable) {
-               throw new InternalShellException($pcmd, sprintf("%s: command not found", $args[0]));
+               throw new InternalShellException($pcmd, sprintf("'%s': command not found", $args[0]));
             }
          } else {
             $executable = $this->builtinExecutables[$args[0]];
             if (!$executable) {
-               throw new InternalShellException($pcmd, sprintf("%s: builtin executable not found", $args[0]));
+               throw new InternalShellException($pcmd, sprintf("'%s': builtin executable not found", $args[0]));
             }
          }
          $args[0] = $executable;

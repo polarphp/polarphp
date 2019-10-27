@@ -72,7 +72,7 @@ class DiffCommand implements BuiltinCommandInterface
          $args = expand_glob_expressions($cmd->getArgs(), $shenv->getCwd());
          $input = new ArgvInput($args, $this->definitions);
       } catch (\Exception $e) {
-         throw new InternalShellException($cmd, sprintf("Unsupported: 'diff':  %s", $e->getMessage()));
+         throw new InternalShellException($cmd, sprintf("Unsupported: 'diff': %s", $e->getMessage()));
       }
       $this->ignoreAllSpace = $input->getOption('ignore-all-space');
       $this->ignoreSpaceChange = $input->getOption('ignore-space-change');
@@ -204,6 +204,8 @@ class DiffCommand implements BuiltinCommandInterface
       $renderer = new \Diff_Renderer_Text_Unified();
       $ditems = $diff->render($renderer);
       if (!empty($ditems)) {
+         $this->writeToStdout(sprintf("*** %s\n", $filePaths[0]));
+         $this->writeToStdout(sprintf("--- %s\n", $filePaths[1]));
          $this->writeToStdout($ditems);
          $exitCode = 1;
       }
@@ -283,7 +285,7 @@ class DiffCommand implements BuiltinCommandInterface
          return 1;
       }
       if ($leftTree[1] !== null && $rightTree[1] === null) {
-         $this->printFileVsDir($leftBase.DIRECTORY_SEPARATOR.$leftTree[0],
+         $this->printDirVsFile($leftBase.DIRECTORY_SEPARATOR.$leftTree[0],
             $rightBase.DIRECTORY_SEPARATOR.$rightTree[0]);
          return 1;
       }

@@ -49,7 +49,7 @@ class RmCommand implements BuiltinCommandInterface
          $args = expand_glob_expressions($cmd->getArgs(), $shenv->getCwd());
          $input = new ArgvInput($args, $this->definitions);
       } catch (\Exception $e) {
-         throw new InternalShellException($cmd, sprintf("Unsupported: 'rm':  %s", $e->getMessage()));
+         throw new InternalShellException($cmd, sprintf("Unsupported: 'rm': %s", $e->getMessage()));
       }
       $force = $input->getOption('force');
       $recurive = $input->getOption('recursive');
