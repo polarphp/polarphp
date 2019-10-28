@@ -12,11 +12,15 @@
 
 namespace Gyb\Commands;
 
+use Gyb\Kernel\Generator;
+use Gyb\Utils\Logger;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 class MainCommand extends Command
 {
@@ -36,14 +40,7 @@ class MainCommand extends Command
          "Add 'NAME' = 'VAL' Bindings to be set in the template's execution context", []);
       $this->addOption('output', 'o', InputOption::VALUE_OPTIONAL,
          'Output file (defaults to stdout)');
-      $this->addOption('test', null, InputOption::VALUE_NONE,
-         'Run a self-test');
-      $this->addOption('verbose-test', null, InputOption::VALUE_NONE,
-         'Run a verbose self-test');
-      $this->addOption('dump', null, InputOption::VALUE_NONE,
-         'Dump the parsed template to stdout');
       $this->addOption('line-directive', null, InputOption::VALUE_OPTIONAL, $this->getLineDirectiveDesc());
-
    }
 
    protected function setupArguments()
@@ -54,7 +51,68 @@ class MainCommand extends Command
 
    protected function execute(InputInterface $input, OutputInterface $output)
    {
+      $logger = new ConsoleLogger($output);
+      Logger::init($logger);
+      $fs = new Filesystem();
+      try {
+         $inputFile = $input->getArgument('file');
+         $inputStream = STDIN;
+         if ($inputFile !== null) {
+            $inputFile = trim($inputFile);
+            $inputStream = $this->openFileStream($inputFile, 'r', 'open input template error: ');
+         }
+         $outputStream = STDOUT;
+         $outputFile = $input->getOption('output');
+         if ($outputFile !== null) {
+            $outputFile = trim($outputFile);
+            if (!file_exists($outputFile)) {
+               $fs->touch($outputFile);
+            }
+            $outputStream = $this->openFileStream($outputFile, 'w', 'open output template error:');
+         }
+         $generater = new Generator($inputStream, $outputStream);
+         $generater->generate();
+         exit(0);
+      } catch (\Exception $e) {
+         $logger->error(sprintf('execute gyb error: ', $e->getMessage()));
+         exit($e->getCode());
+      }
+   }
 
+   private function openFileStream(string $path, string $mode, string $errorPrefix = '')
+   {
+      if (!file_exists($path)) {
+         throw new \RuntimeException(sprintf($errorPrefix. "file %s not exist", $path));
+      }
+      $fd = fopen($path, $mode);
+      if ($fd === false) {
+         throw new \RuntimeException($errorPrefix. error_get_last()['message']);
+      }
+      return $fd;
+   }
+
+   private function parseUserParams(InputInterface $input)
+   {
+      $params = $input->getOption('param');
+      $userParams = array();
+      foreach ($params as $entry) {
+         $entry = trim($entry);
+         if (false === strpos($entry, '=')) {
+            $userParams[$entry] = '';
+         } else {
+            $parts = explode('=', $entry, 2);
+            $value = trim($parts[1]);
+            if (ctype_digit($value)) {
+               if (strpos($value,'.') === false) {
+                  $value = intval($value);
+               } else {
+                  $value = doubleval($value);
+               }
+            }
+            $userParams[trim($parts[0])] = $value;
+         }
+      }
+      return $userParams;
    }
 
    protected function getHelpStr()

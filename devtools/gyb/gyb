@@ -27,11 +27,21 @@ if ($script[0] == '/') {
    define('GYB_ROOT_DIR', dirname(getcwd().'/'.$_SERVER['SCRIPT_NAME']));
 }
 
+define('GYB_VAR_DIR', GYB_ROOT_DIR.DIRECTORY_SEPARATOR.'var');
+define('GYB_TEMP_DIR', GYB_VAR_DIR.DIRECTORY_SEPARATOR.'temp');
+
+define('GYB_SYNTAX_DEFINITION_DIR', implode(DIRECTORY_SEPARATOR, [
+   GYB_ROOT_DIR,
+   'src',
+   'Definition'
+]));
+
 require GYB_ROOT_DIR .'/vendor/autoload.php';
 
 $files = array(
    "src/Utils/UtilFuncs.php"
 );
+
 foreach ($files as $file) {
    include GYB_ROOT_DIR .DIRECTORY_SEPARATOR . $file;
 }
@@ -53,7 +63,6 @@ require GYB_ROOT_DIR.'/bootstrap.php';
 
 if ($_SERVER['APP_DEBUG']) {
    umask(0000);
-
    if (class_exists(Debug::class)) {
       Debug::enable();
    }
