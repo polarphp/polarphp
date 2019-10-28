@@ -23,6 +23,7 @@ class Kinds
    const SYNTAX = 'Syntax';
    const SYNTAX_COLLECTION = 'SyntaxCollection';
    const TOKEN_SYNTAX = 'TokenSyntax';
+   const UNKNOWN = 'Unknown';
    /**
     * @var array $baseKinds
     */
@@ -42,13 +43,18 @@ class Kinds
       return self::$baseKinds;
    }
 
+   public static function isValidBaseKind(string $kind): bool
+   {
+      return in_array($kind, self::$baseKinds);
+   }
+
    /**
     * Converts a SyntaxKind to a type name, checking to see if the kind is
     * Syntax or SyntaxCollection first.
     * A type name is the same as the SyntaxKind name with the suffix "Syntax"
     * added.
     */
-   public static function getKindToType(string $kind): string
+   public static function convertKindToType(string $kind): string
    {
       if (in_array($kind, [self::SYNTAX, self::SYNTAX_COLLECTION])) {
          return $kind;

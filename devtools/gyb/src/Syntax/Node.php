@@ -60,7 +60,7 @@ class Node
    /**
     * @var string $collectionElement
     */
-   private $collectionElement;
+   private $collectionElementKind;
    /**
     * @var string $collectionElementName
     */
@@ -74,12 +74,112 @@ class Node
     */
    private $collectionElementChoices;
 
+   public function __construct(string $kind, string $description = '', $baseKind = null,
+                               array $traits = [], array $children = [], string $elementKind = '',
+                               string $elementName = '', array $elementChoices = [],
+                               bool $omitWhenEmpty = false)
+   {
+      $this->syntaxKind = $kind;
+      $this->polarSyntaxKind = lcfirst($kind);
+      $this->name = Kinds::convertKindToType($kind);
+      $this->description = $description;
+      $this->traits = $traits;
+      $this->children = $children;
+      $this->baseKind = $kind;
+      if ($this->baseKind == Kinds::SYNTAX_COLLECTION) {
+         $this->baseType = Kinds::SYNTAX;
+      } else {
+         $this->baseType = Kinds::convertKindToType($this->baseKind);
+      }
+      if (!Kinds::isValidBaseKind($this->baseKind)) {
+         throw new \RuntimeException(sprintf("unknown base kind '%s' for node '%s'",
+            $this->baseKind, $this->syntaxKind));
+      }
+      $this->omitWhenEmpty = $omitWhenEmpty;
+      $this->collectionElementKind = trim($elementKind);
+      $elementName = trim($elementName);
+      $elementKind = trim($elementKind);
+      // For SyntaxCollections make sure that the element_name is set.
+      assert(!$this->isSyntaxCollection() || !empty($elementName) ||
+         (!empty($elementKind) && $elementKind != Kinds::SYNTAX));
+      // If there's a preferred name for the collection element that differs
+      // from its supertype, use that.
+      $this->collectionElementName = !empty($elementName) ? $elementName: $this->collectionElementKind;
+      $this->collectionElementType = Kinds::convertKindToType($this->collectionElementKind);
+      $this->collectionElementChoices = $elementChoices;
+   }
+
+   /**
+    * Returns `True` if this node declares one of the base syntax kinds.
+    *
+    * @return bool
+    */
+   public function isBase(): bool
+   {
+      return Kinds::isValidBaseKind($this->syntaxKind);
+   }
+
+   /**
+    * Returns `True` if this node is a subclass of SyntaxCollection.
+    *
+    * @return bool
+    */
+   public function isSyntaxCollection(): bool
+   {
+      return $this->baseKind == Kinds::SYNTAX_COLLECTION;
+   }
+
    /**
     * @return int
     */
    public function getSyntaxKind(): int
    {
       return $this->syntaxKind;
+   }
+
+   /**
+    * Returns `True` if this node should have a `validate` method associated.
+    * @return bool
+    */
+   public function requiresValidation(): bool
+   {
+      return $this->isBuildable();
+   }
+
+   /**
+    * Returns `True` if this node is an `Unknown` syntax subclass.
+    * @return bool
+    */
+   public function isUnknown(): bool
+   {
+      return \Gyb\Utils\has_substr($this->syntaxKind, Kinds::UNKNOWN);
+   }
+
+   /**
+    * Returns `True` if this node should have a builder associated.
+    *
+    * @return bool
+    */
+   public function isBuildable(): bool
+   {
+      return !$this->isBase() && !$this->isUnknown() && !$this->isSyntaxCollection();
+   }
+
+   /**
+    * Returns 'True' if this node shall not be created while parsing if it
+    * has no children.
+    */
+   public function shallBeOmittedWhenEmpty(): bool
+   {
+      return $this->omitWhenEmpty;
+   }
+
+   /**
+    * @return string
+    */
+   public function getCollectionElementKind(): string
+   {
+      return $this->collectionElementKind;
    }
 
    /**
@@ -241,7 +341,7 @@ class Node
     */
    public function getCollectionElement(): string
    {
-      return $this->collectionElement;
+      return $this->collectionElementKind;
    }
 
    /**
@@ -250,7 +350,7 @@ class Node
     */
    public function setCollectionElement(string $collectionElement): Node
    {
-      $this->collectionElement = $collectionElement;
+      $this->collectionElementKind = $collectionElement;
       return $this;
    }
 

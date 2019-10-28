@@ -37,3 +37,8 @@ function str_end_with(string $str, string $suffix): bool
    }
    return substr($str, -$suffixLength) == $suffix;
 }
+
+function has_substr(string $str, string $subStr)
+{
+   return strpos($str, $subStr) !== false;
+}
