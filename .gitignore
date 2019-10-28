@@ -39,3 +39,8 @@ devtools/phplit/.env.*.local
 devtools/phplit/var/
 devtools/phplit/vendor/
 !devtools/phplit/tests
+
+## gyb
+devtools/gyb/var/
+devtools/gyb/vendor/
+!devtools/gyb/tests

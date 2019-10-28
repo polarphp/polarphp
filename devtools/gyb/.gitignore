@@ -1,0 +1,15 @@
+
+###> symfony/framework-bundle ###
+.env.local
+.env.local.php
+.env.*.local
+var/
+###< symfony/framework-bundle ###
+
+###> symfony/phpunit-bridge ###
+bin
+.phpunit
+.phpunit.result.cache
+phpunit.xml
+vendor/
+###< symfony/phpunit-bridge ###

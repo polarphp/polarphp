@@ -1,8 +1,8 @@
 #!/usr/bin/env php
 <?php
 
-use Lit\Kernel\Kernel;
-use Lit\Application;
+use Gyb\Kernel\Kernel;
+use Gyb\Application;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Debug\Debug;
 
@@ -15,33 +15,26 @@ define('OS_BSD', 'BSD');
 define('OS_MACOS', 'Darwin');
 define('OS_SOLARIS', 'Solaris');
 define('OS_LINUX', 'Linux');
-define('PHPLIT_TEMP_PREFIX', 'polar_phplit_');
-define('POLARPHP_BIN_DIR', '@POLAR_RUNTIME_OUTPUT_INTDIR@');
+define('GYB_TEMP_PREFIX', 'polar_gyb_');
 set_time_limit(0);
 $script = $_SERVER['SCRIPT_NAME'];
-define('LIT_SCRIPT', $script);
+define('GYB_SCRIPT', $script);
 
 // TODO work around for windows
 if ($script[0] == '/') {
-   define('LIT_ROOT_DIR', dirname($_SERVER['SCRIPT_NAME']));
+   define('GYB_ROOT_DIR', dirname($_SERVER['SCRIPT_NAME']));
 } else {
-   define('LIT_ROOT_DIR', dirname(getcwd().'/'.$_SERVER['SCRIPT_NAME']));
+   define('GYB_ROOT_DIR', dirname(getcwd().'/'.$_SERVER['SCRIPT_NAME']));
 }
 
-require LIT_ROOT_DIR .'/vendor/autoload.php';
+require GYB_ROOT_DIR .'/vendor/autoload.php';
 
 $files = array(
    "src/Utils/UtilFuncs.php"
 );
 foreach ($files as $file) {
-   include LIT_ROOT_DIR .DIRECTORY_SEPARATOR . $file;
+   include GYB_ROOT_DIR .DIRECTORY_SEPARATOR . $file;
 }
-
-$envArgs = \Lit\Utils\shcmd_split(\Lit\Utils\get_envvar('LIT_OPTS', ''));
-$argv = $_SERVER['argv'];
-$argv = array_merge(array_slice($argv, 0, 2), $envArgs, array_slice($argv, 2));
-$_SERVER['argv'] = $argv;
-$_SERVER['argc'] = count($argv);
 
 if (!class_exists(Application::class)) {
    throw new RuntimeException('You need to add "symfony/framework-bundle" as a Composer dependency.');
@@ -56,7 +49,7 @@ if ($input->hasParameterOption('--no-debug', true)) {
    putenv('APP_DEBUG='.$_SERVER['APP_DEBUG'] = $_ENV['APP_DEBUG'] = '0');
 }
 
-require LIT_ROOT_DIR.'/bootstrap.php';
+require GYB_ROOT_DIR.'/bootstrap.php';
 
 if ($_SERVER['APP_DEBUG']) {
    umask(0000);

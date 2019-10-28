@@ -8,9 +8,9 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2019/10/08.
+// Created by polarboy on 2019/10/28.
 
-namespace Lit;
+namespace Gyb;
 
 use Symfony\Bundle\FrameworkBundle\Console\Application as BaseApplication;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -22,7 +22,7 @@ class Application extends BaseApplication
    public function __construct(KernelInterface $Kernel)
    {
       parent::__construct($Kernel);
-      $this->setName("phplit");
+      $this->setName("gyb");
       $this->setVersion(Application::VERSION);
    }
 }
