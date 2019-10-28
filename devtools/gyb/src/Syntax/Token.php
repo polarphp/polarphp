@@ -49,7 +49,7 @@ class Token
     */
    private $isKeyword;
 
-   public function __construct(string $name, string $kind, $serializationCode = '',
+   public function __construct(string $name, string $kind, string $serializationCode = '',
                                string $unprefixedKind = '', string $text = '',
                                string $classification = '', bool $isKeyword = false)
    {
@@ -199,5 +199,13 @@ class Token
    {
       $this->isKeyword = $isKeyword;
       return $this;
+   }
+
+   /**
+    * @return string
+    */
+   public function getMacroName(): string
+   {
+      return 'TOKEN';
    }
 }
