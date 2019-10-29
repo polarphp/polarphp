@@ -68,6 +68,22 @@ class Trivia
       assert(count($this->polarCharacters) == count($this->characters));
    }
 
+   /**
+    * @param Trivia[] $trivias
+    */
+   public static function verifyNoDuplicateSerializationCodes(array $trivias)
+   {
+      $usedCodes = [];
+      foreach ($trivias as $trivia) {
+         $code = $trivia->getSerializationCode();
+         if (in_array($code, $usedCodes)) {
+            throw new \RuntimeException(sprintf('Serialization code %d used twice for trivia',
+               $code));
+         }
+         $usedCodes[] = $code;
+      }
+   }
+
    public function getCharatersLen()
    {
       return count($this->characters);
