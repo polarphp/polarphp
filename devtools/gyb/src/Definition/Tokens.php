@@ -8,11 +8,8 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2019/10/28.
+// Created by polarboy on 2019/10/29.
 
-namespace Gyb\Syntax;
+return array(
 
-class Traits
-{
-
-}
+);
