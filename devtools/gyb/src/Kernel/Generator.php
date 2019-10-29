@@ -12,6 +12,8 @@
 
 namespace Gyb\Kernel;
 
+use Gyb\Syntax\SyntaxRegistry;
+
 class Generator
 {
    /**
@@ -23,10 +25,6 @@ class Generator
     */
    private $output;
 
-   /**
-    * @var array $syntaxNodes
-    */
-   private $syntaxNodes = [];
    /**
     * Generator constructor.
     * @param resource $input
@@ -66,10 +64,12 @@ class Generator
    private function loadSyntaxNodes()
    {
       $baseDir = GYB_SYNTAX_DEFINITION_DIR;
-      $this->syntaxNodes['COMMON_NODES'] = include $baseDir.DIRECTORY_SEPARATOR.'CommonNodes.php';
-      $this->syntaxNodes['DECL_NODES'] = include $baseDir.DIRECTORY_SEPARATOR.'DeclNodes.php';
-      $this->syntaxNodes['EXPR_NODES'] = include $baseDir.DIRECTORY_SEPARATOR.'ExprNodes.php';
-      $this->syntaxNodes['STMT_NODES'] = include $baseDir.DIRECTORY_SEPARATOR.'StmtNodes.php';
+      SyntaxRegistry::setCommonNodes(include $baseDir.DIRECTORY_SEPARATOR.'CommonNodes.php');
+      SyntaxRegistry::setDeclNodes(include $baseDir.DIRECTORY_SEPARATOR.'DeclNodes.php');
+      SyntaxRegistry::setExprNodes(include $baseDir.DIRECTORY_SEPARATOR.'ExprNodes.php');
+      SyntaxRegistry::setStmtNodes(include $baseDir.DIRECTORY_SEPARATOR.'StmtNodes.php');
+      SyntaxRegistry::setTokens(include $baseDir.DIRECTORY_SEPARATOR.'Tokens.php');
+
    }
 
    private function executeTpl(string &$tpl): void

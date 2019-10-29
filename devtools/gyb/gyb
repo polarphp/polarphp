@@ -43,7 +43,7 @@ $files = array(
 );
 
 foreach ($files as $file) {
-   include GYB_ROOT_DIR .DIRECTORY_SEPARATOR . $file;
+   include_once GYB_ROOT_DIR .DIRECTORY_SEPARATOR . $file;
 }
 
 if (!class_exists(Application::class)) {

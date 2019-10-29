@@ -41,6 +41,11 @@ class SyntaxRegistry
    private static $stmtNodes = [];
 
    /**
+    * @var Trivia[] $trivias
+    */
+   private static $trivias = [];
+
+   /**
     * @return Token[]
     */
    public static function getTokens(): array
@@ -131,5 +136,21 @@ class SyntaxRegistry
    public static function setStmtNodes(array $stmtNodes): void
    {
       self::$stmtNodes = $stmtNodes;
+   }
+
+   /**
+    * @return Trivia[]
+    */
+   public static function getTrivias(): array
+   {
+      return self::$trivias;
+   }
+
+   /**
+    * @param Trivia[] $trivias
+    */
+   public static function setTrivias(array $trivias): void
+   {
+      self::$trivias = $trivias;
    }
 }
