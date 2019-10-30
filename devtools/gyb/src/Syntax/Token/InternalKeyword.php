@@ -12,8 +12,6 @@
 
 namespace Gyb\Syntax\Token;
 
-use Gyb\Syntax\Token;
-
 class InternalKeyword extends Keyword
 {
    public function getMacroName(): string

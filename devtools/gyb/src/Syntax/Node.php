@@ -74,7 +74,7 @@ class Node
     */
    private $collectionElementChoices;
 
-   public function __construct(string $kind, string $description = '', $baseKind = null,
+   public function __construct(string $kind, $baseKind = null, string $description = '',
                                array $traits = [], array $children = [], string $elementKind = '',
                                string $elementName = '', array $elementChoices = [],
                                bool $omitWhenEmpty = false)

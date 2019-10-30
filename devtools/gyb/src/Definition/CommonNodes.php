@@ -10,3 +10,14 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/10/29.
+
+use Gyb\Syntax\Node;
+
+return array(
+   ['kind' => 'Decl', 'baseKind' => 'Syntax'],
+   ['kind' => 'Expr', 'baseKind' => 'Syntax'],
+   ['kind' => 'Stmt', 'baseKind' => 'Syntax'],
+   ['kind' => 'UnknownDecl', 'baseKind' => 'Decl'],
+   ['kind' => 'UnknownExpr', 'baseKind' => 'Expr'],
+   ['kind' => 'UnknownStmt', 'baseKind' => 'Stmt']
+);
