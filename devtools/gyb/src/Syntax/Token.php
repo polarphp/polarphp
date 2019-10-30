@@ -29,10 +29,6 @@ class Token
     */
    private $kind;
    /**
-    * @var string $unprefixedKind
-    */
-   private $unprefixedKind;
-   /**
     * @var string $serializationCode
     */
    private $serializationCode;
@@ -49,17 +45,12 @@ class Token
     */
    private $isKeyword;
 
-   public function __construct(string $name, string $kind, string $serializationCode = '',
-                               string $unprefixedKind = '', string $text = '',
-                               string $classification = '', bool $isKeyword = false)
+   public function __construct(string $name, string $kind, int $serializationCode,
+                               string $text = '', string $classification = '',
+                               bool $isKeyword = false)
    {
       $this->name = trim($name);
       $this->kind = trim($kind);
-      if ($unprefixedKind === null) {
-         $this->unprefixedKind = $kind;
-      } else {
-         $this->unprefixedKind = $unprefixedKind;
-      }
       $this->serializationCode = $serializationCode;
       $this->text = $text;
       $this->classification = SyntaxClassification::getByName(trim($classification));
@@ -108,24 +99,6 @@ class Token
    public function setKind($kind)
    {
       $this->kind = $kind;
-      return $this;
-   }
-
-   /**
-    * @return mixed
-    */
-   public function getUnprefixedKind()
-   {
-      return $this->unprefixedKind;
-   }
-
-   /**
-    * @param mixed $unprefixedKind
-    * @return Token
-    */
-   public function setUnprefixedKind($unprefixedKind)
-   {
-      $this->unprefixedKind = $unprefixedKind;
       return $this;
    }
 
