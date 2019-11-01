@@ -176,7 +176,7 @@ return array(
    new Punctuator('Tilde', 'T_TILDE', '~', 155),
    new Punctuator('Dollar', 'T_DOLLAR_SIGN', '$', 156),
    new Punctuator('QuestionMark', 'T_QUESTION_MARK', '?', 157),
-   new Punctuator('ErrorSuppressSign', 'T_ERROR_SUPPRESS_SIGN', '$', 158),
+   new Punctuator('ErrorSuppressSign', 'T_ERROR_SUPPRESS_SIGN', '@', 158),
    new Punctuator('Ampersand', 'T_AMPERSAND', '&', 159),
    new Misc('LNumber', 'T_LNUMBER', 'integer number', 160),
    new Misc('DNumber', 'T_DNUMBER', 'floating-point number', 161),

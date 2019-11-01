@@ -3963,7 +3963,7 @@ public:
       /// -----------------------------------------------
       /// T_PLUS_EQUAL | T_MINUS_EQUAL | T_MUL_EQUAL
       /// -----------------------------------------------
-      /// T_POW_EQUAL | T_DIV_EQUAL | T_CONCAT_EQUAL
+      /// T_POW_EQUAL | T_DIV_EQUAL | T_STR_CONCAT_EQUAL
       /// -----------------------------------------------
       /// T_MOD_EQUAL | T_AND_EQUAL | T_OR_EQUAL
       /// -----------------------------------------------
