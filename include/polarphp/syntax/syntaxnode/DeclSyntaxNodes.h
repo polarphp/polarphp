@@ -1037,7 +1037,7 @@ public:
       ///
       /// type: InitializerClauseSyntax
       /// optional: true
-      ///ClassPropertyClauseSyntax
+      ///
       Initializer
    };
 
