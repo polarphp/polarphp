@@ -11,7 +11,9 @@
 //
 // Created by polarboy on 2019/10/29.
 
-return array(
+use function Gyb\Utils\process_collection_items;
+
+$definitions = array(
    /**
     * empty_stmt:
     *   ';'
@@ -901,3 +903,5 @@ return array(
       ]
    ]
 );
+
+return $definitions;

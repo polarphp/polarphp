@@ -11,6 +11,8 @@
 //
 // Created by polarboy on 2019/10/29.
 
+use function Gyb\Utils\process_collection_items;
+
 $reservedNonModifierTokens = [
    'IncludeKeyword', 'IncludeOnceKeyword', 'EvalKeyword', 'RequireKeyword',
    'RequireOnceKeyword', 'LogicOrKeyword', 'LogicXorKeyword', 'LogicAndKeyword',
@@ -28,10 +30,11 @@ $reservedNonModifierTokens = [
 ];
 
 $semiReservedTokens = array_merge($reservedNonModifierTokens, [
-
+   'StaticKeyword', 'AbstractKeyword', 'FinalKeyword',
+   'PrivateKeyword', 'ProtectedKeyword', 'PublicKeyword'
 ]);
 
-return array(
+$definitions = array(
    [
       'kind' => 'ReservedNonModifier',
       'baseKind' => 'Syntax',
@@ -619,3 +622,61 @@ return array(
       ]
    ]
 );
+
+/**
+ * collection syntax node definitions
+ */
+
+$definitions = array_merge($definitions, process_collection_items([
+   ['kind' => 'TopStmtList', 'elementKind' => 'TopStmt'],
+   /**
+    * name_list:
+    *    name
+    * |	name_list ',' name
+    */
+   ['kind' => 'NameList', 'elementKind' => 'NameListItem'],
+   /**
+    * parameter_list:
+    *   non_empty_parameter_list
+    * |	%empty
+    * non_empty_parameter_list:
+    *   parameter
+    * |	non_empty_parameter_list ',' parameter
+    */
+   ['kind' => 'ParameterList', 'elementKind' => 'ParameterListItem'],
+   /**
+    * class_modifiers:
+    *    class_modifier
+    * |  class_modifiers class_modifier
+    */
+   ['kind' => 'ClassModifierList', 'elementKind' => 'ClassModifier'],
+   /**
+    * class_statement_list:
+    *   class_statement_list class_statement
+    */
+   ['kind' => 'MemberDeclListItem', 'elementKind' => 'MemberDeclListItem'],
+   /**
+    * member_modifiers:
+    *    member_modifier
+    * |  member_modifiers member_modifier
+    */
+   ['kind' => 'MemberModifierList', 'elementKind' => 'MemberModifier'],
+   /**
+    * property_list:
+    *    property_list ',' property
+    * |  property
+    */
+   ['kind' => 'ClassPropertyList', 'elementKind' => 'ClassPropertyListItem'],
+   /**
+    * class_const_list:
+    *    class_const_list ',' class_const_decl
+    * |  class_const_decl
+    */
+   ['kind' => 'ClassConstList', 'elementKind' => 'ClassConstListItem'],
+   /**
+    * trait_adaptation_list:
+    *    trait_adaptation
+    * |  trait_adaptation_list trait_adaptation
+    */
+   ['kind' => 'ClassTraitAdaptationList', 'elementKind' => 'ClassTraitAdaptatio']
+]));

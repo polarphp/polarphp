@@ -42,3 +42,11 @@ function has_substr(string $str, string $subStr)
 {
    return strpos($str, $subStr) !== false;
 }
+
+function process_collection_items(array $items)
+{
+   foreach ($items as $item) {
+      $item['baseKind'] = 'SyntaxCollection';
+   }
+   return $items;
+}
