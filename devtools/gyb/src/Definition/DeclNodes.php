@@ -571,7 +571,7 @@ return array(
       'kind' => 'ClassDefinition',
       'baseKind' => 'Decl',
       'children' => [
-         ['name' => 'Modififers', 'kind' => 'ClassModifierList', 'isOptional' => true],
+         ['name' => 'Modifiers', 'kind' => 'ClassModifierList', 'isOptional' => true],
          ['name' => 'ClassKeyword', 'kind' => 'ClassKeyword'],
          ['name' => 'Name', 'kind' => 'IdentifierStringToken'],
          ['name' => 'ExtendsFrom', 'kind' => 'ExtendsFromClause', 'isOptional' => true],

@@ -736,7 +736,7 @@ return array(
       'kind' => 'AnonymousClassDefinitionClause',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'ClassKeword', 'kind' => 'ClassKeyword'],
+         ['name' => 'ClassKeyword', 'kind' => 'ClassKeyword'],
          ['name' => 'CtorArguments', 'kind' => 'ArgumentListClause', 'isOptional' => true],
          ['name' => 'ExtendsFrom', 'kind' => 'ExtendsFromClause', 'isOptional' => true],
          ['name' => 'Implements', 'kind' => 'ImplementsClause', 'isOptional' => true],
