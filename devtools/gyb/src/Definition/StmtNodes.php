@@ -904,4 +904,89 @@ $definitions = array(
    ]
 );
 
+$definitions = array_merge($definitions, process_collection_items([
+   /**
+    * condition-list:
+    *    condition
+    * |  condition-list, condition ','?
+    */
+   ['kind' => 'ConditionElementList', 'elementKind' => 'ConditionElement'],
+   /**
+    * switch-case-list:
+    *    switch-case
+    * |  switch-case-list switch-case
+    */
+   ['kind' => 'SwitchCaseList', 'elementKind' => 'SwitchCase'],
+   /**
+    * elseif-list:
+    *    elseif-clause
+    * |  elseif-list elseif-clause
+    */
+   ['kind' => 'ElseIfList', 'elementKind' => 'ElseIfClause'],
+   /**
+    * inner_statement_list:
+    *   inner_statement_list inner_statement
+    */
+   ['kind' => 'InnerStmtList', 'elementKind' => 'InnerStmt'],
+   /**
+    * top_statement_list:
+    *   top_statement_list top_statement
+    */
+   ['kind' => 'TopStmtList', 'elementKind' => 'TopStmt'],
+   /**
+    * catch_list:
+    *   catch_list T_CATCH '(' catch_name_list T_VARIABLE ')' '{' inner_statement_list '}'
+    */
+   ['kind' => 'CatchList', 'elementKind' => 'CatchListItemClause'],
+   /**
+    * catch_name_list:
+    *    name
+    * |  catch_name_list '|' name
+    */
+   ['kind' => 'CatchArgTypeHintList', 'elementKind' => 'CatchArgTypeHintItem'],
+   /**
+    * unset_variable_list:
+    *    unset_variables:
+    *    unset_variable
+    * |  unset_variables ',' unset_variable
+    */
+   ['kind' => 'UnsetVariableList', 'elementKind' => 'UnsetVariableListItem'],
+   /**
+    * static_var_list:
+    *    static_var_list ',' static_var
+    * |  static_var
+    */
+   ['kind' => 'GlobalVariableList', 'elementKind' => 'GlobalVariableListItem'],
+   /**
+    * static_var_list:
+    *    static_var_list ',' static_var
+    * |  static_var
+    */
+   ['kind' => 'StaticVariableList', 'elementKind' => 'StaticVariableListItem'],
+   /**
+    * use_declarations:
+    *    use_declarations ',' use_declaration
+    * |  use_declaration
+    */
+   ['kind' => 'NamespaceUseDeclarationList', 'elementKind' => 'NamespaceUseDeclarationListItem'],
+   /**
+    * inline_use_declarations:
+    *    inline_use_declarations ',' inline_use_declaration
+    * |  inline_use_declaration
+    */
+   ['kind' => 'NamespaceInlineUseDeclarationList', 'elementKind' => 'NamespaceInlineUseDeclarationListItem'],
+   /**
+    * unprefixed_use_declarations:
+    *    unprefixed_use_declarations ',' unprefixed_use_declaration
+    * |  unprefixed_use_declaration
+    */
+   ['kind' => 'NamespaceUnprefixedUseDeclarationList', 'elementKind' => 'NamespaceUnprefixedUseDeclarationListItem'],
+   /**
+    * const_list:
+    *    const_list ',' const_decl
+    * |  const_decl
+    */
+   ['kind' => 'ConstDeclareList', 'elementKind' => 'ConstListItem']
+]));
+
 return $definitions;

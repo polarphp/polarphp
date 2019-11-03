@@ -628,7 +628,6 @@ $definitions = array(
  */
 
 $definitions = array_merge($definitions, process_collection_items([
-   ['kind' => 'TopStmtList', 'elementKind' => 'TopStmt'],
    /**
     * name_list:
     *    name
