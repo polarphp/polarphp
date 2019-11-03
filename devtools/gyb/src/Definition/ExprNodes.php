@@ -11,7 +11,9 @@
 //
 // Created by polarboy on 2019/10/29.
 
-return array(
+use function Gyb\Utils\process_collection_items;
+
+$definitions = array(
    /**
     * paren_decorated_expr：
     * '(' expr ')'
@@ -1806,3 +1808,44 @@ return array(
       ]
    ]
 );
+
+/**
+ * collection syntax node definitions
+ */
+$definitions = array_merge($definitions, process_collection_items([
+   ['kind' => 'ExprList', 'elementKind' => 'ExprListItem'],
+   /**
+    * lexical_var_list:
+    *    lexical_var_list ',' lexical_var
+    * |  lexical_var
+    */
+   ['kind' => 'LexicalVariableList', 'elementKind' => 'LexicalVariableListItem'],
+   /**
+    * array_pair_item_list:
+    *    array_pair_item_list ',' array_pair_item
+    * |  array_pair_item
+    */
+   ['kind' => 'ArrayPairList', 'elementKind' => 'ArrayPairListItem'],
+   /**
+    * encaps_list:
+    *    encaps_list encaps_var
+    * |  encaps_list T_ENCAPSED_AND_WHITESPACE
+    * |  encaps_var
+    * |  T_ENCAPSED_AND_WHITESPACE encaps_var
+    */
+   ['kind' => 'EncapsItemList', 'elementKind' => 'EncapsListItem'],
+   /**
+    * non_empty_argument_list:
+    *    argument
+    * |  non_empty_argument_list ',' argument
+    */
+   ['kind' => 'ArgumentList', 'elementKind' => 'ArgumentListItem'],
+   /**
+    * isset_variables:
+    *    isset_variable
+    * |  isset_variables ',' isset_variable
+    */
+   ['kind' => 'IssetVariablesList', 'elementKind' => 'IssetVariableListItem']
+]));
+
+return $definitions;
