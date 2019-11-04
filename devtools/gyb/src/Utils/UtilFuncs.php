@@ -45,8 +45,21 @@ function has_substr(string $str, string $subStr)
 
 function process_collection_items(array $items)
 {
-   foreach ($items as $item) {
+   foreach ($items as &$item) {
       $item['baseKind'] = 'SyntaxCollection';
    }
    return $items;
+}
+
+function ensure_require_keys(array $targetArray, array $requireKeys): void
+{
+   $missedKeys = [];
+   foreach ($requireKeys as $key) {
+      if (!array_key_exists($key, $targetArray)) {
+         $missedKeys[]  = $key;
+      }
+   }
+   if (!empty($missedKeys)) {
+      throw new \RuntimeException(sprintf("miss require keys %s", implode(', ', $missedKeys)));
+   }
 }

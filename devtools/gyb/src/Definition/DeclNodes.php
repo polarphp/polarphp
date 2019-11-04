@@ -679,3 +679,5 @@ $definitions = array_merge($definitions, process_collection_items([
     */
    ['kind' => 'ClassTraitAdaptationList', 'elementKind' => 'ClassTraitAdaptatio']
 ]));
+
+return $definitions;

@@ -182,7 +182,7 @@ class SyntaxRegistry
    /**
     * @param array $stmtNodes
     */
-   public static function setStmtNodes(array $stmtNodes): void
+   public static function registerStmtNodes(array $stmtNodes): void
    {
       if (empty(self::$stmtNodes)) {
          self::verifySyntaxNodeSerializationCodes($stmtNodes);

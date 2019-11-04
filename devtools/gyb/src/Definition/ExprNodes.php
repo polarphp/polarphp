@@ -450,7 +450,7 @@ $definitions = array(
     */
    [
       'kind' => 'ArrayKeyValuePairItem',
-      'bindKind' => 'Syntax',
+      'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'KeyExpr', 'kind' => 'Expr', 'isOptional' => true],
          ['name' => 'DoubleArrow', 'kind' => 'DoubleArrowToken', 'isOptional' => true],
@@ -1056,8 +1056,8 @@ $definitions = array(
     * |  T_INCLUDE_ONCE expr
     */
    [
-      'name' => 'IncludeExpr',
-      'kind' => 'Expr',
+      'kind' => 'IncludeExpr',
+      'baseKind' => 'Expr',
       'children' => [
          [
             'name' => 'IncludeKeyword',
@@ -1075,8 +1075,8 @@ $definitions = array(
     * |  T_REQUIRE_ONCE expr
     */
    [
-      'name' => 'RequireExpr',
-      'kind' => 'Expr',
+      'kind' => 'RequireExpr',
+      'baseKind' => 'Expr',
       'children' => [
          [
             'name' => 'RequireKeyword',

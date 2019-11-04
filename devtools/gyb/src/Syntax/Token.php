@@ -46,7 +46,7 @@ class Token
    private $isKeyword;
 
    public function __construct(string $name, string $kind, int $serializationCode,
-                               string $text = '', string $classification = '',
+                               string $text = '', string $classification = 'None',
                                bool $isKeyword = false)
    {
       $this->name = trim($name);

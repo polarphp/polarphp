@@ -221,7 +221,7 @@ $definitions = array(
     */
    [
       'kind' => 'ContinueStmt',
-      'baseKind' => 'StmtSyntax',
+      'baseKind' => 'Stmt',
       'children' => [
          ['name' => 'ContinueKeyword', 'kind' => 'ContinueKeyword'],
          ['name' => 'OptionalExpr', 'kind' => 'Expr', 'isOptional' => true],
@@ -592,7 +592,7 @@ $definitions = array(
     */
    [
       'kind' => 'GlobalVariableDeclarationsStmt',
-      'baseKind' => 'StmtSyntax',
+      'baseKind' => 'Stmt',
       'children' => [
          ['name' => 'Global', 'kind' => 'GlobalKeyword'],
          ['name' => 'Variables', 'kind' => 'GlobalVariableList'],
@@ -648,7 +648,7 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          [
-            'name' => 'TypeToken',
+            'name' => 'Type',
             'kind' => 'Token',
             'tokenChoices' => [
                'FunctionKeyword',

@@ -41,6 +41,7 @@ class MainCommand extends Command
       $this->addOption('output', 'o', InputOption::VALUE_OPTIONAL,
          'Output file (defaults to stdout)');
       $this->addOption('line-directive', null, InputOption::VALUE_OPTIONAL, $this->getLineDirectiveDesc());
+      $this->addOption('debug', null, InputOption::VALUE_NONE, 'turn on debug mode');
    }
 
    protected function setupArguments()
@@ -74,7 +75,10 @@ class MainCommand extends Command
          $generater->generate();
          exit(0);
       } catch (\Exception $e) {
-         $logger->error(sprintf('execute gyb error: ', $e->getMessage()));
+         $logger->error(sprintf('execute gyb error: %s', $e->getMessage()));
+         if ($input->getOption('debug')) {
+            $logger->error($e->getTraceAsString());
+         }
          exit($e->getCode());
       }
    }

@@ -16,10 +16,10 @@ use Gyb\Syntax\Token;
 
 class Punctuator extends Token
 {
-   public function __construct(string $name, string $text, int $serializationCode,
-                               string $classification = '')
+   public function __construct(string $name, string $kind, string $text, int $serializationCode,
+                               string $classification = 'None')
    {
-      parent::__construct($name, $text, $serializationCode, $text, $classification);
+      parent::__construct($name, $kind, $serializationCode, $text, $classification);
    }
 
    public function getMacroName(): string

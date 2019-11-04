@@ -99,7 +99,7 @@ class Logger
    {
       $stack = debug_backtrace();
       $targetStack = $stack[1];
-      $file = substr($targetStack['file'], strlen(DYB_ROOT_DIR) + 1);
+      $file = substr($targetStack['file'], strlen(GYB_ROOT_DIR) + 1);
       $location = sprintf('%s:%d', $file, $targetStack['line']);
       self::$logger->log($level, sprintf('%s: %s: %s', $location, $level, $message));
    }

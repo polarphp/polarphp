@@ -22,7 +22,7 @@ namespace Gyb\Syntax;
 class Node
 {
    /**
-    * @var int $syntaxKind
+    * @var string $syntaxKind
     */
    private $syntaxKind;
    /**
@@ -85,7 +85,7 @@ class Node
       $this->description = $description;
       $this->traits = $traits;
       $this->children = $children;
-      $this->baseKind = $kind;
+      $this->baseKind = $baseKind;
       if ($this->baseKind == Kinds::SYNTAX_COLLECTION) {
          $this->baseType = Kinds::SYNTAX;
       } else {
@@ -130,9 +130,9 @@ class Node
    }
 
    /**
-    * @return int
+    * @return string
     */
-   public function getSyntaxKind(): int
+   public function getSyntaxKind(): string
    {
       return $this->syntaxKind;
    }

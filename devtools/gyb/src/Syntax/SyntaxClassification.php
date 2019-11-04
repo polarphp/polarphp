@@ -49,7 +49,7 @@ class SyntaxClassification
       if (empty(self::$pool)) {
          self::initPool();
       }
-      if (array_key_exists($name)) {
+      if (array_key_exists($name, self::$pool)) {
          return self::$pool[$name];
       }
       throw new \RuntimeException(sprintf("Unknown syntax classification '%s'", $name));
@@ -112,16 +112,16 @@ class SyntaxClassification
    protected static function initPool(): void
    {
       self::$pool = [
-         new SyntaxClassification('None', '', 'The token should not receive syntax coloring.'),
-         new SyntaxClassification('Keyword', '', 'A polarphp keyword, including contextual keywords.'),
-         new SyntaxClassification('Identifier', '', 'A generic identifier.'),
-         new SyntaxClassification('IntegerLiteral', '', 'An integer literal.'),
-         new SyntaxClassification('FloatingLiteral', '', 'A floating point literal.'),
-         new SyntaxClassification('StringLiteral', '', 'A string literal including multiline string literals.'),
-         new SyntaxClassification('LineComment', '', 'A line comment starting with `//`.'),
-         new SyntaxClassification('DocLineComment','', 'A doc line comment starting with `///`.'),
-         new SyntaxClassification('BlockComment', '', 'A block comment starting with `/**` and ending with `*/.'),
-         new SyntaxClassification('DocBlockComment', '', 'A doc block comment starting with `/**` and ending with `*/.')
+         'None' => new SyntaxClassification('None', '', 'The token should not receive syntax coloring.'),
+         'Keyword' => new SyntaxClassification('Keyword', '', 'A polarphp keyword, including contextual keywords.'),
+         'Identifier' => new SyntaxClassification('Identifier', '', 'A generic identifier.'),
+         'IntegerLiteral' => new SyntaxClassification('IntegerLiteral', '', 'An integer literal.'),
+         'FloatingLiteral' => new SyntaxClassification('FloatingLiteral', '', 'A floating point literal.'),
+         'StringLiteral' => new SyntaxClassification('StringLiteral', '', 'A string literal including multiline string literals.'),
+         'LineComment' => new SyntaxClassification('LineComment', '', 'A line comment starting with `//`.'),
+         'DocLineComment' => new SyntaxClassification('DocLineComment','', 'A doc line comment starting with `///`.'),
+         'BlockComment' => new SyntaxClassification('BlockComment', '', 'A block comment starting with `/**` and ending with `*/.'),
+         'DocBlockComment' => new SyntaxClassification('DocBlockComment', '', 'A doc block comment starting with `/**` and ending with `*/.')
       ];
    }
 }
