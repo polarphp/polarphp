@@ -97,7 +97,18 @@ using namespace polar::syntax;
 %precedence T_ELSE
 
 /* token define start */
-<?php $SYNTAX_NODES; ?>
+
+<?php
+   foreach($TOKENS as $token) {
+      $line = "%token " . $token->getKind();
+      if (!is_null($token->getEnumValue())) {
+         $line .= ' ' . $token->getEnumValue();
+      }
+      $line .= '  "' . $token->getText() . ' (' . $token->getKind() . ')"';
+      echo $line."\n";
+   }
+?>
+
 /* token define end */
 
 %type <RefCountPtr<RawSyntax>> top_statement namespace_name name statement function_declaration_statement

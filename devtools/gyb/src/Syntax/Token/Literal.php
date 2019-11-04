@@ -16,6 +16,12 @@ use Gyb\Syntax\Token;
 
 class Literal extends Token
 {
+   public function __construct(string $name, string $kind, string $text, int $serializationCode, $enumValue = null,
+                               string $classification = 'Literal')
+   {
+      parent::__construct($name, $kind, $serializationCode, $text, $enumValue, $classification);
+   }
+
    public function getMacroName(): string
    {
       return 'LITERAL';

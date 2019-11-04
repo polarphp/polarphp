@@ -102,11 +102,13 @@ class Node
       // For SyntaxCollections make sure that the element_name is set.
       assert(!$this->isSyntaxCollection() || !empty($elementName) ||
          (!empty($elementKind) && $elementKind != Kinds::SYNTAX));
-      // If there's a preferred name for the collection element that differs
-      // from its supertype, use that.
-      $this->collectionElementName = !empty($elementName) ? $elementName: $this->collectionElementKind;
-      $this->collectionElementType = Kinds::convertKindToType($this->collectionElementKind);
-      $this->collectionElementChoices = $elementChoices;
+      if ($this->isSyntaxCollection()) {
+         // If there's a preferred name for the collection element that differs
+         // from its supertype, use that.
+         $this->collectionElementName = !empty($elementName) ? $elementName: $this->collectionElementKind;
+         $this->collectionElementType = Kinds::convertKindToType($this->collectionElementKind);
+         $this->collectionElementChoices = $elementChoices;
+      }
    }
 
    /**

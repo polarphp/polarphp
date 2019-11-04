@@ -21,10 +21,10 @@ use Gyb\Syntax\Token;
  */
 class Keyword extends Token
 {
-   public function __construct(string $name, string $kind, string $text, int $serializationCode,
+   public function __construct(string $name, string $kind, string $text, int $serializationCode, $enumValue = null,
                                string $classification = 'Keyword')
    {
-      parent::__construct($name, $kind, $serializationCode, $text, $classification, true);
+      parent::__construct($name, $kind, $serializationCode, $text, $enumValue, $classification, true);
    }
 
    public function getMacroName(): string

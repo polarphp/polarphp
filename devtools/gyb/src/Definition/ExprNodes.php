@@ -1624,7 +1624,7 @@ $definitions = array(
       'baseKind' => 'Expr',
       'children' => [
          ['name' => 'LeftQuote', 'kind' => 'DoubleStrQuoteToken'],
-         ['name' => 'EncapsItems', 'kind' => 'EncapsListItem'],
+         ['name' => 'EncapsItems', 'kind' => 'EncapsItemList'],
          ['name' => 'RightQuote', 'kind' => 'DoubleStrQuoteToken']
       ]
    ],

@@ -19,7 +19,7 @@ use Gyb\Syntax\Token\Punctuator;
 use Gyb\Syntax\Token\StmtKeyword;
 
 return array(
-   new InternalKeyword('End', 'END', 'end of file', 1),
+   new InternalKeyword('End', 'END', 'end of file', 1, 0),
    new Keyword('Line', 'T_LINE', '__LINE__', 2),
    new Keyword('File', 'T_FILE', '__FILE__', 3),
    new Keyword('Dir', 'T_DIR','__DIR__', 4),

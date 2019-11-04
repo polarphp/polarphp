@@ -33,6 +33,10 @@ class Token
     */
    private $serializationCode;
    /**
+    * @var null|int $enumValue
+    */
+   private $enumValue = null;
+   /**
     * @var string $text
     */
    private $text;
@@ -46,13 +50,14 @@ class Token
    private $isKeyword;
 
    public function __construct(string $name, string $kind, int $serializationCode,
-                               string $text = '', string $classification = 'None',
+                               string $text = '', $enumValue = null, string $classification = 'None',
                                bool $isKeyword = false)
    {
       $this->name = trim($name);
       $this->kind = trim($kind);
       $this->serializationCode = $serializationCode;
       $this->text = $text;
+      $this->enumValue = $enumValue;
       $this->classification = SyntaxClassification::getByName(trim($classification));
       $this->isKeyword = $isKeyword;
    }
@@ -117,6 +122,14 @@ class Token
    public function getIsKeyword()
    {
       return $this->isKeyword;
+   }
+
+   /**
+    * @return int|null
+    */
+   public function getEnumValue(): ?int
+   {
+      return $this->enumValue;
    }
 
    /**
