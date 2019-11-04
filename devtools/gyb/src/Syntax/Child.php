@@ -108,6 +108,7 @@ class Child
       $this->polarName = lcfirst($name);
       $this->syntaxKind = $kind;
       $this->description = $description;
+      $this->typeName = Kinds::convertKindToType($kind);
       $this->polarSyntaxKind = lcfirst($this->syntaxKind);
       $this->collectionElementName = $collectionElementName;
       $this->classification = SyntaxClassification::getByName($classification);

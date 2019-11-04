@@ -45,27 +45,27 @@ class Token
     */
    private $classification;
    /**
-    * @var bool $isKeyword
+    * @var bool $keyword
     */
-   private $isKeyword;
+   private $keyword;
 
    public function __construct(string $name, string $kind, int $serializationCode,
                                string $text = '', $enumValue = null, string $classification = 'None',
-                               bool $isKeyword = false)
+                               bool $keyword = false)
    {
       $this->name = trim($name);
       $this->kind = trim($kind);
       $this->serializationCode = $serializationCode;
-      $this->text = $text;
+      $this->text = trim($text);
       $this->enumValue = $enumValue;
       $this->classification = SyntaxClassification::getByName(trim($classification));
-      $this->isKeyword = $isKeyword;
+      $this->keyword = $keyword;
    }
 
    public function getPolarKind(): string
    {
       $name = lcfirst($this->name);
-      if ($this->isKeyword) {
+      if ($this->keyword) {
          return $name . 'Keyword';
       }
       return $name;
@@ -109,6 +109,14 @@ class Token
    }
 
    /**
+    * @return bool
+    */
+   public function isTextEmpty(): bool
+   {
+      return strlen($this->text) == 0;
+   }
+
+   /**
     * @return mixed
     */
    public function getClassification()
@@ -117,11 +125,11 @@ class Token
    }
 
    /**
-    * @return mixed
+    * @return bool
     */
-   public function getIsKeyword()
+   public function isKeyword(): bool
    {
-      return $this->isKeyword;
+      return $this->keyword;
    }
 
    /**

@@ -1,0 +1,114 @@
+// Automatically Generated From SyntaxFactory.h.gyb.
+// Do Not Edit Directly!
+// This source file is part of the polarphp.org open source project
+//
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://polarphp.org/LICENSE.txt for license information
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+//
+// Created by polarboy on 2019/11/04.
+
+#ifndef POLARPHP_SYNTAX_SYNTAX_FACTORY_H
+#define POLARPHP_SYNTAX_SYNTAX_FACTORY_H
+
+#include "polarphp/syntax/SyntaxNodes.h"
+#include "polarphp/syntax/Trivia.h"
+#include "polarphp/basic/adt/ArrayRef.h"
+
+#include <vector>
+
+namespace polar::syntax {
+
+using polar::basic::ArrayRef;
+
+class SyntaxFactory
+{
+   /// Make any kind of token.
+   static TokenSyntax makeToken(
+      TokenKindType kind,
+      OwnedString text, const Trivia &leadingTrivia,
+      const Trivia &trailingTrivia, SourcePresence presence,
+      RefCountPtr<SyntaxArena> arena = nullptr);
+
+   /// Collect a list of tokens into a piece of "unknown" syntax.
+   static UnknownSyntax makeUnknownSyntax(ArrayRef<TokenSyntax> tokens,
+                                          RefCountPtr<SyntaxArena> arena = nullptr);
+
+   static std::optional<Syntax> createSyntax(SyntaxKind kind,
+                                             ArrayRef<Syntax> elements,
+                                             RefCountPtr<SyntaxArena> arena = nullptr);
+   
+   static RefCountPtr<RawSyntax> createRaw(SyntaxKind kind,
+                                           ArrayRef<RefCountPtr<RawSyntax>> elements,
+                                           RefCountPtr<SyntaxArena> arena = nullptr);
+   
+   /// Count the number of children for a given syntax node kind,
+   /// returning a pair of mininum and maximum count of children. The gap
+   /// between these two numbers is the number of optional children.
+   static std::pair<unsigned, unsigned> countChildren(SyntaxKind kind);
+   static Syntax makeBlankCollectionSyntax(SyntaxKind kind);
+<?php
+   foreach ($SYNTAX_NODES as $node) {
+      if ($node->hasChild()) {
+         $childParams = [];
+         $children = $node->getChildren();
+         foreach($children as $child) {
+            $paramType = $child->getTypeName();
+            if ($child->isOptional()) {
+               $paramType = "std::optional<$paramType>";
+            }
+            $childParams[] = sprintf('%s %s', $paramType, $child->getPolarName());
+         }
+         $childParams = implode(', ', $childParams);
+?>
+   static <?= $node->getName(); ?> make<?= $node->getSyntaxKind(); ?>(<?= $childParams; ?>, RefCountPtr<SyntaxArena> arena = nullptr);
+<?php
+      } elseif($node->isSyntaxCollection()) {
+?>
+   static <?= $node->getName(); ?> make<?= $node->getSyntaxKind(); ?>(const std::vector<<?= $node->getCollectionElementType(); ?>> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
+<?php
+      }
+?>
+   static <?= $node->getName(); ?> makeBlank<?= $node->getSyntaxKind(); ?>(RefCountPtr<SyntaxArena> arena = nullptr);
+<?php
+   }
+?>
+
+<?php
+   foreach ($TOKENS as $token) {
+      if ($token->isKeyword()) {
+?>
+   static TokenSyntax make<?= $token->getRawName(); ?>Keyword(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
+<?php
+      } elseif (!$token->isTextEmpty()) {
+?>
+   static TokenSyntax make<?= $token->getRawName(); ?>Token(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
+<?php
+      } else {
+?>
+   static TokenSyntax make<?= $token->getRawName(); ?>(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
+<?php
+      }
+   }
+?>
+
+   /// Whether a raw node kind `MemberKind` can serve as a member in a syntax
+   /// collection of the given syntax collection kind.
+   static bool canServeAsCollectionMemberRaw(SyntaxKind collectionKind, SyntaxKind memberKind);
+
+   /// Whether a raw node `Member` can serve as a member in a syntax collection
+   /// of the given syntax collection kind.
+   static bool canServeAsCollectionMemberRaw(SyntaxKind collectionKind,
+                                             const RefCountPtr<RawSyntax> &member);
+
+   /// Whether a node `Member` can serve as a member in a syntax collection of
+   /// the given syntax collection kind.
+   static bool canServeAsCollectionMember(SyntaxKind collectionKind, Syntax member);
+};
+
+} // polar::syntax
+
+#endif // POLARPHP_SYNTAX_SYNTAX_FACTORY_H

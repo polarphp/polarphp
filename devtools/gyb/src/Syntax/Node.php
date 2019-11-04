@@ -96,9 +96,9 @@ class Node
             $this->baseKind, $this->syntaxKind));
       }
       $this->omitWhenEmpty = $omitWhenEmpty;
-      $this->collectionElementKind = trim($elementKind);
-      $elementName = trim($elementName);
       $elementKind = trim($elementKind);
+      $this->collectionElementKind = $elementKind;
+      $elementName = trim($elementName);
       // For SyntaxCollections make sure that the element_name is set.
       assert(!$this->isSyntaxCollection() || !empty($elementName) ||
          (!empty($elementKind) && $elementKind != Kinds::SYNTAX));
@@ -129,6 +129,14 @@ class Node
    public function isSyntaxCollection(): bool
    {
       return $this->baseKind == Kinds::SYNTAX_COLLECTION;
+   }
+
+   /**
+    * @return bool
+    */
+   public function hasChild(): bool
+   {
+      return count($this->children) > 0;
    }
 
    /**
