@@ -39,7 +39,10 @@ class SyntaxRegistry
     * @var array $stmtNodes
     */
    private static $stmtNodes = [];
-
+   /**
+    * @var array $syntaxNodes
+    */
+   private static $syntaxNodes = [];
    /**
     * @var Trivia[] $trivias
     */
@@ -136,6 +139,18 @@ class SyntaxRegistry
    public static function setStmtNodes(array $stmtNodes): void
    {
       self::$stmtNodes = $stmtNodes;
+   }
+
+   /**
+    * @return Node[]
+    */
+   public static function getSyntaxNodes(): array
+   {
+      if (empty(self::$syntaxNodes)) {
+         self::$syntaxNodes = array_merge(self::getCommonNodes(), self::getExprNodes(),
+            self::getDeclNodes(), self::getStmtNodes());
+      }
+      return self::$syntaxNodes;
    }
 
    /**

@@ -19,7 +19,7 @@ $definitions = array(
     *   ';'
     */
    [
-      'kind' => 'EmptyStmtSyntax',
+      'kind' => 'EmptyStmt',
       'baseKind' => 'Stmt',
       'children' => [
          ['name' => 'Semicolon', 'kind' => 'SemicolonToken']

@@ -69,7 +69,6 @@ class Generator
       SyntaxRegistry::setExprNodes(include $baseDir.DIRECTORY_SEPARATOR.'ExprNodes.php');
       SyntaxRegistry::setStmtNodes(include $baseDir.DIRECTORY_SEPARATOR.'StmtNodes.php');
       SyntaxRegistry::setTokens(include $baseDir.DIRECTORY_SEPARATOR.'Tokens.php');
-
    }
 
    private function executeTpl(string &$tpl): void

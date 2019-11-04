@@ -653,7 +653,7 @@ $definitions = array_merge($definitions, process_collection_items([
     * class_statement_list:
     *   class_statement_list class_statement
     */
-   ['kind' => 'MemberDeclListItem', 'elementKind' => 'MemberDeclListItem'],
+   ['kind' => 'MemberDeclList', 'elementKind' => 'MemberDeclListItem'],
    /**
     * member_modifiers:
     *    member_modifier
