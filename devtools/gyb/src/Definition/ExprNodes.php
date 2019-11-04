@@ -152,14 +152,16 @@ $definitions = array(
       'kind' => 'NewVariableClause',
       'baseKind' => 'Syntax',
       'children' => [
-         'name' => 'Variable',
-         'kind' => 'Expr',
-         'nodeChoices' => [
-            ['name' => 'SimpleVariable', 'kind' => 'SimpleVariableExpr'],
-            ['name' => 'ArrayItemVariable', 'kind' => 'ArrayAccessExpr'],
-            ['name' => 'BraceDecoratedArrayItemVariable', 'kind' => 'ArrayAccessExpr'],
-            ['name' => 'InstanceProperty', 'kind' => 'InstancePropertyExpr'],
-            ['name' => 'StaticProperty', 'kind' => 'StaticPropertyExpr']
+         [
+            'name' => 'Variable',
+            'kind' => 'Expr',
+            'nodeChoices' => [
+               ['name' => 'SimpleVariable', 'kind' => 'SimpleVariableExpr'],
+               ['name' => 'ArrayItemVariable', 'kind' => 'ArrayAccessExpr'],
+               ['name' => 'BraceDecoratedArrayItemVariable', 'kind' => 'ArrayAccessExpr'],
+               ['name' => 'InstanceProperty', 'kind' => 'InstancePropertyExpr'],
+               ['name' => 'StaticProperty', 'kind' => 'StaticPropertyExpr']
+            ]
          ]
       ]
    ],
@@ -1109,8 +1111,8 @@ $definitions = array(
       'kind' => 'PrintFuncExpr',
       'baseKind' => 'Expr',
       'children' => [
-         ['name' => 'PrintKeyword', 'type' => 'PrintKeyword'],
-         ['name' => 'Args', 'type' => 'Expr']
+         ['name' => 'PrintKeyword', 'kind' => 'PrintKeyword'],
+         ['name' => 'Args', 'kind' => 'Expr']
       ]
    ],
    /**
@@ -1231,7 +1233,7 @@ $definitions = array(
                'MulEqualToken',
                'PowEqualToken',
                'DivEqualToken',
-               'StrConcatEqual',
+               'StrConcatEqualToken',
                'ModEqualToken',
                'AndEqualToken',
                'OrEqualToken',
@@ -1263,9 +1265,9 @@ $definitions = array(
             'tokenChoices' => [
                'BooleanOrToken',
                'BooleanAndToken',
-               'LogicOrToken',
-               'LogicAndToken',
-               'LogicXorToken'
+               'LogicOrKeyword',
+               'LogicAndKeyword',
+               'LogicXorKeyword'
             ]
          ],
          ['name' => 'Rhs', 'kind' => 'Expr'],
@@ -1420,8 +1422,8 @@ $definitions = array(
       'kind' => 'CloneExpr',
       'baseKind' => 'Expr',
       'children' => [
-         ['name' => 'CloneKeyword', 'kind' => 'CloneKeyword'],
-         ['name' => 'ObjectExpr']
+         ['name' => 'Clone', 'kind' => 'CloneKeyword'],
+         ['name' => 'ObjectExpr', 'kind' => 'Expr']
       ]
    ],
    /**

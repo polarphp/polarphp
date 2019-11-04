@@ -44,11 +44,16 @@ class SyntaxClassification
       $this->description = $description;
    }
 
-   static function getByName(string $name)
+   static function getByName($name)
    {
       if (empty(self::$pool)) {
          self::initPool();
       }
+      if (is_null($name)) {
+         return null;
+      }
+      assert(is_string($name), 'must pass string type for method SyntaxClassification::getByName');
+      $name = trim($name);
       if (array_key_exists($name, self::$pool)) {
          return self::$pool[$name];
       }

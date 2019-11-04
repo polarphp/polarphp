@@ -12,6 +12,7 @@
 
 namespace Gyb\Kernel;
 
+use Gyb\Syntax\Child;
 use Gyb\Syntax\Node;
 use Gyb\Syntax\SyntaxRegistry;
 use Gyb\Utils\Logger;
@@ -92,11 +93,11 @@ class Generator
    {
       $baseDir = GYB_SYNTAX_DEFINITION_DIR;
       SyntaxRegistry::registerSyntaxNodeSerializationCodes(include $baseDir.DIRECTORY_SEPARATOR.'SyntaxNodeSerializationCodes.php');
+      SyntaxRegistry::registerTokens(include $baseDir.DIRECTORY_SEPARATOR.'Tokens.php');
       SyntaxRegistry::registerCommonNodes($this->createSyntaxNodes(include $baseDir.DIRECTORY_SEPARATOR.'CommonNodes.php'));
       SyntaxRegistry::registerDeclNodes($this->createSyntaxNodes(include $baseDir.DIRECTORY_SEPARATOR.'DeclNodes.php'));
       SyntaxRegistry::registerExprNodes($this->createSyntaxNodes(include $baseDir.DIRECTORY_SEPARATOR.'ExprNodes.php'));
       SyntaxRegistry::registerStmtNodes($this->createSyntaxNodes(include $baseDir.DIRECTORY_SEPARATOR.'StmtNodes.php'));
-      SyntaxRegistry::registerTokens(include $baseDir.DIRECTORY_SEPARATOR.'Tokens.php');
    }
 
    private function executeTpl(string $executableFile): string
@@ -145,7 +146,7 @@ class Generator
       $createArgs[] = [];
       // children
       if (isset($definition['children']) && is_array($definition['children'])) {
-         $createArgs[] = $this->createChildNodes($definition);
+         $createArgs[] = $this->createChildNodes($definition['children']);
       } else {
          $createArgs[] = [];
       }
@@ -179,11 +180,77 @@ class Generator
 
    private function createChildNodes(array $definitions): array
    {
-      return [];
+      $children = [];
+      foreach ($definitions as $definition) {
+         if (!is_array($definition)) {
+            Logger::error(var_export($definitions, true));
+         }
+         $children[] = $this->createChildNodeFromDefinition($definition);
+      }
+      return $children;
    }
 
-   private function createChildNodeFromDefinition(array $definition): array
+   private function createChildNodeFromDefinition(array $definition)
    {
-
+      try {
+         ensure_require_keys($definition, ['name', 'kind']);
+      } catch (\RuntimeException $e) {
+         Logger::error(var_export($definition, true));
+         throw $e;
+      }
+      $createArgs = [
+         $definition['name'],
+         $definition['kind'],
+      ];
+      // description
+      if (isset($definition['description']) && is_string($definition['description'])) {
+         $createArgs[] = $definition['description'];
+      } else {
+         $createArgs[] = '';
+      }
+      // isOptional
+      if (isset($definition['isOptional']) && is_bool($definition['isOptional'])) {
+         $createArgs[] = $definition['isOptional'];
+      } else {
+         $createArgs[] = false;
+      }
+      // tokenChoices
+      if (isset($definition['tokenChoices']) && is_array($definition['tokenChoices'])) {
+         $createArgs[] = $definition['tokenChoices'];
+      } else {
+         $createArgs[] = [];
+      }
+      // textChoices
+      if (isset($definition['textChoices']) && is_array($definition['textChoices'])) {
+         $createArgs[] = $definition['textChoices'];
+      } else {
+         $createArgs[] = [];
+      }
+      // nodeChoices
+      if (isset($definition['nodeChoices']) && is_array($definition['nodeChoices'])) {
+         $createArgs[] = $this->createChildNodes($definition['nodeChoices']);
+      } else {
+         $createArgs[] = [];
+      }
+      // collectionElementName
+      if (isset($definition['collectionElementName']) && is_string($definition['collectionElementName'])) {
+         $createArgs[] = $definition['collectionElementName'];
+      } else {
+         $createArgs[] = '';
+      }
+      // classification
+      if (isset($definition['classification']) && is_string($definition['classification'])) {
+         $createArgs[] = $definition['classification'];
+      } else {
+         $createArgs[] = null;
+      }
+      // isOptional
+      if (isset($definition['forceClassification']) && is_bool($definition['forceClassification'])) {
+         $createArgs[] = $definition['forceClassification'];
+      } else {
+         $createArgs[] = false;
+      }
+      $child = new Child(...$createArgs);
+      return $child;
    }
 }

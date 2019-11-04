@@ -69,19 +69,14 @@ class Token
    /**
     * @return mixed
     */
-   public function getName()
+   public function getRawName()
    {
       return $this->name;
    }
 
-   /**
-    * @param mixed $name
-    * @return Token
-    */
-   public function setName($name)
+   public function getName()
    {
-      $this->name = $name;
-      return $this;
+      return $this->name.'Token';
    }
 
    /**
@@ -93,31 +88,11 @@ class Token
    }
 
    /**
-    * @param mixed $kind
-    * @return Token
-    */
-   public function setKind($kind)
-   {
-      $this->kind = $kind;
-      return $this;
-   }
-
-   /**
     * @return mixed
     */
    public function getSerializationCode()
    {
       return $this->serializationCode;
-   }
-
-   /**
-    * @param mixed $serializationCode
-    * @return Token
-    */
-   public function setSerializationCode($serializationCode)
-   {
-      $this->serializationCode = $serializationCode;
-      return $this;
    }
 
    /**
@@ -129,16 +104,6 @@ class Token
    }
 
    /**
-    * @param mixed $text
-    * @return Token
-    */
-   public function setText($text)
-   {
-      $this->text = $text;
-      return $this;
-   }
-
-   /**
     * @return mixed
     */
    public function getClassification()
@@ -147,31 +112,11 @@ class Token
    }
 
    /**
-    * @param mixed $classification
-    * @return Token
-    */
-   public function setClassification($classification)
-   {
-      $this->classification = $classification;
-      return $this;
-   }
-
-   /**
     * @return mixed
     */
    public function getIsKeyword()
    {
       return $this->isKeyword;
-   }
-
-   /**
-    * @param mixed $isKeyword
-    * @return Token
-    */
-   public function setIsKeyword($isKeyword)
-   {
-      $this->isKeyword = $isKeyword;
-      return $this;
    }
 
    /**

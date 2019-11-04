@@ -55,9 +55,11 @@ $definitions = array(
       'kind' => 'SemiReserved',
       'baseKind' => 'Syntax',
       'children' => [
-         'name' => 'Modifier',
-         'kind' => 'Token',
-         'tokenChoices' => $semiReservedTokens
+         [
+            'name' => 'Modifier',
+            'kind' => 'Token',
+            'tokenChoices' => $semiReservedTokens
+         ]
       ]
    ],
    /**
@@ -69,11 +71,13 @@ $definitions = array(
       'kind' => 'Identifier',
       'baseKind' => 'Syntax',
       'children' => [
-         'name' => 'NameItem',
-         'kind' => 'Syntax',
-         'nodeChoices' => [
-            ['name' => 'Identifier', 'kind' => 'IdentifierStringToken'],
-            ['name' => 'SemiReservedIdentifier', 'kind' => 'SemiReserved']
+         [
+            'name' => 'NameItem',
+            'kind' => 'Syntax',
+            'nodeChoices' => [
+               ['name' => 'Identifier', 'kind' => 'IdentifierStringToken'],
+               ['name' => 'SemiReservedIdentifier', 'kind' => 'SemiReserved']
+            ]
          ]
       ]
    ],
@@ -148,7 +152,7 @@ $definitions = array(
                   'kind' => 'Token',
                   'tokenChoices' => [
                      'ArrayKeyword',
-                     'CallableKeywrd',
+                     'CallableKeyword',
                   ]
                ],
                ['name' => 'NameType', 'kind' => 'Name']

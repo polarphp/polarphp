@@ -61,9 +61,10 @@ class SyntaxRegistry
    {
       if (empty(self::$tokenMap)) {
          foreach (self::$tokens as $token) {
-            self::$tokenMap[$token->getName().'Token'] = $token;
+            self::$tokenMap[$token->getName()] = $token;
          }
       }
+      return self::$tokenMap[$name];
    }
 
    /**

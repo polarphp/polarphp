@@ -101,7 +101,7 @@ class Child
    public function __construct(string $name, string $kind, string $description = '',
                                bool $isOptional = false, array $tokenChoices = [],
                                array $textChoices = [], array $nodeChoices = [],
-                               string $collectionElementName = '', string $classification = '',
+                               string $collectionElementName = '', $classification = null,
                                bool $forceClassification = false)
    {
       $this->name = $name;
@@ -128,7 +128,7 @@ class Child
       }
       foreach ($tokenChoices as $choice) {
          $token = SyntaxRegistry::getTokenByName($choice);
-         assert($token != null);
+         assert($token != null, sprintf("token %s is not exist", $choice));
          $this->tokenChoices[] = $token;
       }
       // A list of valid text for tokens, if specified.

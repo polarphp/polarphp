@@ -31,4 +31,9 @@ class Keyword extends Token
    {
       return 'KEYWORD';
    }
+
+   public function getName()
+   {
+      return parent::getRawName().'Keyword';
+   }
 }
