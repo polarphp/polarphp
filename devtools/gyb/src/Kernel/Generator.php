@@ -64,11 +64,12 @@ class Generator
    private function loadSyntaxNodes()
    {
       $baseDir = GYB_SYNTAX_DEFINITION_DIR;
-      SyntaxRegistry::setCommonNodes(include $baseDir.DIRECTORY_SEPARATOR.'CommonNodes.php');
-      SyntaxRegistry::setDeclNodes(include $baseDir.DIRECTORY_SEPARATOR.'DeclNodes.php');
-      SyntaxRegistry::setExprNodes(include $baseDir.DIRECTORY_SEPARATOR.'ExprNodes.php');
-      SyntaxRegistry::setStmtNodes(include $baseDir.DIRECTORY_SEPARATOR.'StmtNodes.php');
-      SyntaxRegistry::setTokens(include $baseDir.DIRECTORY_SEPARATOR.'Tokens.php');
+      SyntaxRegistry::registerCommonNodes(include $baseDir.DIRECTORY_SEPARATOR.'CommonNodes.php');
+      SyntaxRegistry::registerDeclNodes(include $baseDir.DIRECTORY_SEPARATOR.'DeclNodes.php');
+      SyntaxRegistry::registerExprNodes(include $baseDir.DIRECTORY_SEPARATOR.'ExprNodes.php');
+      SyntaxRegistry::registerStmtNodes(include $baseDir.DIRECTORY_SEPARATOR.'StmtNodes.php');
+      SyntaxRegistry::registerTokens(include $baseDir.DIRECTORY_SEPARATOR.'Tokens.php');
+      SyntaxRegistry::registerSyntaxNodeSerializationCodes(include $baseDir.DIRECTORY_SEPARATOR.'SyntaxNodeSerializationCodes.php');
    }
 
    private function executeTpl(string &$tpl): void

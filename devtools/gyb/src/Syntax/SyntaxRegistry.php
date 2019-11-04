@@ -49,20 +49,9 @@ class SyntaxRegistry
    private static $trivias = [];
 
    /**
-    * @return Token[]
+    * @var array $syntaxNodeSerializationCodes
     */
-   public static function getTokens(): array
-   {
-      return self::$tokens;
-   }
-
-   /**
-    * @param Token[] $tokens
-    */
-   public static function setTokens(array $tokens): void
-   {
-      self::$tokens = $tokens;
-   }
+   private static $syntaxNodeSerializationCodes = [];
 
    /**
     * @param $name
@@ -78,6 +67,54 @@ class SyntaxRegistry
    }
 
    /**
+    * @return Node[]
+    */
+   public static function getSyntaxNodes(): array
+   {
+      if (empty(self::$syntaxNodes)) {
+         self::$syntaxNodes = array_merge(self::getCommonNodes(), self::getExprNodes(),
+            self::getDeclNodes(), self::getStmtNodes());
+      }
+      return self::$syntaxNodes;
+   }
+
+   /**
+    * @return Token[]
+    */
+   public static function getTokens(): array
+   {
+      return self::$tokens;
+   }
+
+   /**
+    * @param Token[] $tokens
+    */
+   public static function registerTokens(array $tokens): void
+   {
+      if (empty(self::$tokens)) {
+         self::$tokens = $tokens;
+      }
+   }
+
+   /**
+    * @return array
+    */
+   public static function getTokenMap(): array
+   {
+      return self::$tokenMap;
+   }
+
+   /**
+    * @param array $tokenMap
+    */
+   public static function registerTokenMap(array $tokenMap): void
+   {
+      if (empty(self::$tokenMap)) {
+         self::$tokenMap = $tokenMap;
+      }
+   }
+
+   /**
     * @return array
     */
    public static function getCommonNodes(): array
@@ -88,9 +125,12 @@ class SyntaxRegistry
    /**
     * @param array $commonNodes
     */
-   public static function setCommonNodes(array $commonNodes): void
+   public static function registerCommonNodes(array $commonNodes): void
    {
-      self::$commonNodes = $commonNodes;
+      if (empty(self::$commonNodes)) {
+         self::verifySyntaxNodeSerializationCodes($commonNodes);
+         self::$commonNodes = $commonNodes;
+      }
    }
 
    /**
@@ -104,9 +144,12 @@ class SyntaxRegistry
    /**
     * @param array $declNodes
     */
-   public static function setDeclNodes(array $declNodes): void
+   public static function registerDeclNodes(array $declNodes): void
    {
-      self::$declNodes = $declNodes;
+      if (empty(self::$declNodes)) {
+         self::verifySyntaxNodeSerializationCodes($declNodes);
+         self::$declNodes = $declNodes;
+      }
    }
 
    /**
@@ -120,9 +163,12 @@ class SyntaxRegistry
    /**
     * @param array $exprNodes
     */
-   public static function setExprNodes(array $exprNodes): void
+   public static function registerExprNodes(array $exprNodes): void
    {
-      self::$exprNodes = $exprNodes;
+      if (empty(self::$exprNodes)) {
+         self::verifySyntaxNodeSerializationCodes($exprNodes);
+         self::$exprNodes = $exprNodes;
+      }
    }
 
    /**
@@ -138,19 +184,10 @@ class SyntaxRegistry
     */
    public static function setStmtNodes(array $stmtNodes): void
    {
-      self::$stmtNodes = $stmtNodes;
-   }
-
-   /**
-    * @return Node[]
-    */
-   public static function getSyntaxNodes(): array
-   {
-      if (empty(self::$syntaxNodes)) {
-         self::$syntaxNodes = array_merge(self::getCommonNodes(), self::getExprNodes(),
-            self::getDeclNodes(), self::getStmtNodes());
+      if (empty(self::$stmtNodes)) {
+         self::verifySyntaxNodeSerializationCodes($stmtNodes);
+         self::$stmtNodes = $stmtNodes;
       }
-      return self::$syntaxNodes;
    }
 
    /**
@@ -164,8 +201,58 @@ class SyntaxRegistry
    /**
     * @param Trivia[] $trivias
     */
-   public static function setTrivias(array $trivias): void
+   public static function registerTrivias(array $trivias): void
    {
-      self::$trivias = $trivias;
+      if (empty(self::$trivias)) {
+         self::$trivias = $trivias;
+      }
+   }
+
+   /**
+    * @return array
+    */
+   public static function getSyntaxNodeSerializationCodes(): array
+   {
+      return self::$syntaxNodeSerializationCodes;
+   }
+
+   /**
+    * @param array $syntaxNodeSerializationCodes
+    */
+   public static function registerSyntaxNodeSerializationCodes(array $syntaxNodeSerializationCodes): void
+   {
+      if (empty(self::$syntaxNodeSerializationCodes)) {
+         self::$syntaxNodeSerializationCodes = $syntaxNodeSerializationCodes;
+      }
+   }
+
+   /**
+    * @param string $kind
+    * @return int
+    */
+   public static function getSerializationCode(string $kind): int
+   {
+      return self::$syntaxNodeSerializationCodes[$kind];
+   }
+
+   /**
+    * @param Node[] $nodes
+    */
+   private static function verifySyntaxNodeSerializationCodes(array $nodes)
+   {
+      // Verify that all nodes have serialization codes
+      foreach ($nodes as $node) {
+         if (!$node->isBase() && !array_key_exists($node->getSyntaxKind(), self::$syntaxNodeSerializationCodes)) {
+            throw new \RuntimeException(sprintf('Node %s has no serialization code', $node->getSyntaxKind()));
+         }
+      }
+      // Verify that no serialization code is used twice
+      $usedCodes = [];
+      foreach (self::$syntaxNodeSerializationCodes as $code) {
+         if (in_array($code, $usedCodes)) {
+            throw new \RuntimeException("Serialization code $code used twice");
+         }
+         $usedCodes[] = $code;
+      }
    }
 }
