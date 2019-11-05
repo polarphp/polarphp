@@ -1,0 +1,55 @@
+<?php
+$groupNodes = [];
+foreach($SYNTAX_BASE_KINDS as $kind) {
+   $groupNodes[$kind] = [];
+}
+foreach($SYNTAX_NODES as $node) {
+   $groupNodes[$node->getBaseKind()][] = $node;
+}
+?>
+// This source file is part of the polarphp.org open source project
+//
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://polarphp.org/LICENSE.txt for license information
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+//
+// Created by polarboy on 2019/05/11.
+
+#ifndef POLARPHP_SYNTAX_KIND_ENUM_DEFS_H
+#define POLARPHP_SYNTAX_KIND_ENUM_DEFS_H
+
+#include <cstdint>
+
+namespace polar::syntax {
+
+enum class SyntaxKind : std::uint32_t
+{
+   Token,
+<?php 
+   foreach($groupNodes as $group => $nodes) {
+      foreach($nodes as $node) {
+?>
+   <?= $node->getSyntaxKind().",\n"; ?>
+<?php
+      }
+      if (!in_array($group, [\Gyb\Syntax\Kinds::SYNTAX, \Gyb\Syntax\Kinds::SYNTAX_COLLECTION]) && !empty($nodes)) {
+         $firstKind = $nodes[0]->getSyntaxKind();
+         $lastKind = $nodes[count($nodes) - 1]->getSyntaxKind();
+?>
+   First<?= $group ?> = <?= $firstKind ?>,
+   Last<?= $group ?> = <?= $lastKind ?>,
+   
+<?php
+      }
+   }
+?>
+   // NOTE: Unknown must be the last kind.
+   Unknown,
+};
+
+} // polar::syntax
+
+#endif // POLARPHP_SYNTAX_KIND_ENUM_DEFS_H

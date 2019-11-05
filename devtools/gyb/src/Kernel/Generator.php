@@ -65,7 +65,8 @@ class Generator
          '$STMT_NODES',
          '$SYNTAX_NODES',
          '$TRIVIAS',
-         '$SYNTAX_NODE_SERIALIZATION_CODES'
+         '$SYNTAX_NODE_SERIALIZATION_CODES',
+         '$SYNTAX_BASE_KINDS'
       ];
       $replacements = [
          '\Gyb\Syntax\SyntaxRegistry::getTokens()',
@@ -76,7 +77,8 @@ class Generator
          '\Gyb\Syntax\SyntaxRegistry::getStmtNodes()',
          '\Gyb\Syntax\SyntaxRegistry::getSyntaxNodes()',
          '\Gyb\Syntax\SyntaxRegistry::getTrivias()',
-         '\Gyb\Syntax\SyntaxRegistry::getSyntaxNodeSerializationCodes()'
+         '\Gyb\Syntax\SyntaxRegistry::getSyntaxNodeSerializationCodes()',
+         '\Gyb\Syntax\Kinds::getBaseSyntaxKinds()'
       ];
       $tpl = str_replace($searches, $replacements, $tpl);
       $fs = new Filesystem;
