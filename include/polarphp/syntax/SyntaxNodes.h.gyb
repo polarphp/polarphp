@@ -1,0 +1,182 @@
+//// Automatically Generated From SyntaxNodes.h.gyb.
+//// Do Not Edit Directly!
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
+// This source file is part of the polarphp.org open source project
+//
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://polarphp.org/LICENSE.txt for license information
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+//
+// Created by polarboy on 2019/05/08.
+
+#ifndef POLARPHP_SYNTAX_NODES_H
+#define POLARPHP_SYNTAX_NODES_H
+
+#include "polarphp/syntax/Syntax.h"
+#include "polarphp/syntax/TokenSyntax.h"
+#include "polarphp/syntax/SyntaxCollection.h"
+#include "polarphp/syntax/UnknownSyntax.h"
+
+namespace polar::syntax {
+
+<?php
+// Emit the non-collection classes first, then emit the collection classes
+// that reference these classes.
+use function Gyb\Utils\dedented_lines;
+?>
+<?php
+$syntaxNodeMap = $SYNTAX_NODE_MAP;
+foreach ($SYNTAX_NODES as $node)
+{
+   if (!$node->isSyntaxCollection()) {
+?>
+class <?= $node->getName(); ?>;
+<?php
+   }
+}
+?>
+
+<?php
+foreach ($SYNTAX_NODES as $node)
+{
+   if ($node->isSyntaxCollection()) {
+?>
+using <?= $node->getName(); ?> = SyntaxCollection<SyntaxKind::<?= $node->getSyntaxKind(); ?>, <?= $node->getCollectionElementType(); ?>>;
+<?php
+   }
+}
+?>
+
+<?php
+foreach ($SYNTAX_NODES as $node)
+{
+   $nodeName = $node->getName();
+   $baseType = $node->getBaseType();
+   if (!$node->isSyntaxCollection()) {
+      $qualifier = "";
+      if (!$node->isBase()) {
+         $qualifier = "final";
+      }
+      $lines = dedented_lines($node->getDescription());
+?>
+<?php foreach ($lines as $line) { ?>
+/// <?= $line ?>
+<?php } ?>
+class <?= $nodeName ?> <?= $qualifier ?> : public <?= $baseType ?> 
+{
+public:
+<?php 
+      if ($node->hasChild()) {
+?>
+   enum Cursor : uint32_t 
+   {
+<?php
+         foreach ($node->getChildren() as $child) {
+?>
+      <?= $child->getName(); ?>,
+<?php
+         }
+?>
+   }
+
+<?php
+      }
+?>
+   <?= $nodeName ?>(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
+      : <?= $baseType ?>(root, data) 
+   {
+<?php 
+      if ($node->requireValidation()) {
+?>
+      this->validate();
+<?php
+      }
+?>
+   }
+
+<?php
+   // setup for children methods
+   foreach ($node->getChildren() as $child) {
+      $childTypeName = $child->getTypeName();
+      $childSyntaxKind = $child->getSyntaxKind();
+      $childName = $child->getName();
+      $lines = dedented_lines($child->getDescription());
+?>
+<?php
+      // setup for child method comment
+      foreach ($lines as $line) {
+?>
+   // <?= $line ?>
+<?php 
+      }
+?>
+<?php
+      if ($child->isOptional()) {
+?>
+   std::optional<<?= $childTypeName ?>> get<?= $childName ?>();
+<?php
+      } else { 
+?>
+   <?= $childTypeName ?> get<?= $childName ?>();
+<?php
+      }
+?>
+<?php
+      $childNode = isset($syntaxNodeMap[$childSyntaxKind]) ? $syntaxNodeMap[$childSyntaxKind] : null;
+      if ($childNode && $childNode->isSyntaxCollection()) {
+         $elementName = $child->getCollectionElementName();
+         $elementType = $childNode->getCollectionElementType();
+         if (strlen($elementName) == 0) {
+            throw new \RuntimeException(sprintf("'collectionElementName' should be set for '%s' of '%s'", 
+               $childName, $nodeName));
+         }
+?>
+   /// Adds the provided `<?= $elementName ?>` to the node's `<?= $childName ?>`
+   /// collection.
+   /// - param element: The new `<?= $elementName ?>` to add to the node's
+   ///                  `<?= $childName ?>` collection.
+   /// - returns: A copy of the receiver with the provided `<?= $elementName ?>`
+   ///            appended to its `<?= $childName ?>` collection.
+   $nodeName add<?= $elementName ?>(<?= $elementType ?> <?= lcfirst($elementName); ?>);
+<?php
+      }
+?>
+<?php
+   }
+?>
+
+private:
+<?php 
+      if ($node->requireValidation()) {
+?>
+   void validate() const;
+<?php
+      }
+?>
+<?php 
+      if ($node->isBuildable()) {
+?>
+   friend class <?= $nodeName ?>Builder;
+<?php
+      }
+?>
+};
+
+<?php
+   }
+}
+?>
+} // polar::syntax
+
+#endif // POLARPHP_SYNTAX_NODES_H

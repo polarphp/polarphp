@@ -64,6 +64,7 @@ class Generator
          '$EXPR_NODES',
          '$STMT_NODES',
          '$SYNTAX_NODES',
+         '$SYNTAX_NODE_MAP',
          '$TRIVIAS',
          '$SYNTAX_NODE_SERIALIZATION_CODES',
          '$SYNTAX_BASE_KINDS'
@@ -76,6 +77,7 @@ class Generator
          '\Gyb\Syntax\SyntaxRegistry::getExprNodes()',
          '\Gyb\Syntax\SyntaxRegistry::getStmtNodes()',
          '\Gyb\Syntax\SyntaxRegistry::getSyntaxNodes()',
+         '\Gyb\Syntax\SyntaxRegistry::getSyntaxNodeMap()',
          '\Gyb\Syntax\SyntaxRegistry::getTrivias()',
          '\Gyb\Syntax\SyntaxRegistry::getSyntaxNodeSerializationCodes()',
          '\Gyb\Syntax\Kinds::getBaseSyntaxKinds()'
@@ -106,7 +108,12 @@ class Generator
    private function executeTpl(string $executableFile): string
    {
       ob_start();
-      include $executableFile;
+      try {
+         include $executableFile;
+      } catch (\Exception $e) {
+         ob_get_clean();
+         throw $e;
+      }
       $result = ob_get_clean();
       return $result;
    }

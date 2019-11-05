@@ -318,7 +318,7 @@ $definitions = array(
       'kind' => 'Argument',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'EllipsisToken', 'kind' => 'EllipsisToken', 'isOptional' => true],
+         ['name' => 'Ellipsis', 'kind' => 'EllipsisToken', 'isOptional' => true],
          ['name' => 'Expr', 'kind' => 'Expr']
       ]
    ],
@@ -330,7 +330,7 @@ $definitions = array(
       'kind' => 'ArgumentListItem',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'CommaToken', 'kind' => 'CommaToken', 'isOptional' => true],
+         ['name' => 'Comma', 'kind' => 'CommaToken', 'isOptional' => true],
          ['name' => 'Argument', 'kind' => 'Argument']
       ]
    ],
@@ -344,7 +344,7 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'LeftParen', 'kind' => 'LeftParenToken'],
-         ['name' => 'Arguments', 'kind' => 'ArgumentList'],
+         ['name' => 'Arguments', 'kind' => 'ArgumentList', 'collectionElementName' => 'Argument'],
          ['name' => 'RightParen', 'kind' => 'RightParenToken']
       ]
    ],
@@ -474,7 +474,7 @@ $definitions = array(
       'kind' => 'ArrayUnpackPairItem',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'EllipsisToken', 'kind' => 'EllipsisToken'],
+         ['name' => 'Ellipsis', 'kind' => 'EllipsisToken'],
          ['name' => 'UnpackExpr', 'kind' => 'UnpackExpr']
       ]
    ],
@@ -505,7 +505,7 @@ $definitions = array(
       'kind' => 'ArrayPairListItem',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'CommaToken', 'kind' => 'CommaToken', 'isOptional' => true],
+         ['name' => 'Comma', 'kind' => 'CommaToken', 'isOptional' => true],
          [
             'name' => 'ArrayPair',
             'kind' => 'Syntax',
@@ -530,7 +530,7 @@ $definitions = array(
          ['name' => 'DoubleArrow', 'kind' => 'DoubleArrowToken', 'isOptional' => true],
          ['name' => 'ListToken', 'kind' => 'ListToken'],
          ['name' => 'LeftParen', 'kind' => 'LeftParenToken'],
-         ['name' => 'ArrayPairList', 'kind' => 'ArrayPairList'],
+         ['name' => 'Items', 'kind' => 'ArrayPairList', 'collectionElementName' => 'PairItem'],
          ['name' => 'RightParen', 'kind' => 'RightParenToken']
       ]
    ],
@@ -566,7 +566,7 @@ $definitions = array(
       'children' => [
          ['name' => 'Array', 'kind' => 'ArrayToken'],
          ['name' => 'LeftParen', 'kind' => 'LeftParenToken'],
-         ['name' => 'Items', 'kind' => 'ArrayPairList'],
+         ['name' => 'Items', 'kind' => 'ArrayPairList', 'collectionElementName' => 'PairItem'],
          ['name' => 'RightParen', 'kind' => 'RightParenToken']
       ]
    ],
@@ -579,7 +579,7 @@ $definitions = array(
       'baseKind' => 'Expr',
       'children' => [
          ['name' => 'LeftSquareBracket', 'kind' => 'LeftSquareBracketToken'],
-         ['name' => 'Items', 'kind' => 'ArrayPairList'],
+         ['name' => 'Items', 'kind' => 'ArrayPairList', 'collectionElementName' => 'PairItem'],
          ['name' => 'RightSquareBracket', 'kind' => 'RightSquareBracketToken']
       ]
    ],

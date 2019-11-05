@@ -63,3 +63,17 @@ function ensure_require_keys(array $targetArray, array $requireKeys): void
       throw new \RuntimeException(sprintf("miss require keys %s", implode(', ', $missedKeys)));
    }
 }
+
+/**
+ * Each line of the provided string with leading whitespace stripped.
+ *
+ * @param $description
+ */
+function dedented_lines($description)
+{
+   if (0 == strlen($description)) {
+      return [];
+   }
+   $description = trim($description);
+   return explode("\n", $description);
+}

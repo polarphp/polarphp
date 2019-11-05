@@ -49,6 +49,11 @@ class SyntaxRegistry
    private static $trivias = [];
 
    /**
+    * @var array $syntaxNodeMap
+    */
+   private static $syntaxNodeMap = [];
+
+   /**
     * @var array $syntaxNodeSerializationCodes
     */
    private static $syntaxNodeSerializationCodes = [];
@@ -113,6 +118,19 @@ class SyntaxRegistry
       if (empty(self::$tokenMap)) {
          self::$tokenMap = $tokenMap;
       }
+   }
+
+   /**
+    * @return array
+    */
+   public static function getSyntaxNodeMap(): array
+   {
+      if (empty(self::$syntaxNodeMap)) {
+         foreach (self::getSyntaxNodes() as $node) {
+            self::$syntaxNodeMap[$node->getSyntaxKind()] = $node;
+         }
+      }
+      return self::$syntaxNodeMap;
    }
 
    /**

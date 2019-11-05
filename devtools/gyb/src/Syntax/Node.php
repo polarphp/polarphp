@@ -151,7 +151,7 @@ class Node
     * Returns `True` if this node should have a `validate` method associated.
     * @return bool
     */
-   public function requiresValidation(): bool
+   public function requireValidation(): bool
    {
       return $this->isBuildable();
    }
@@ -288,16 +288,6 @@ class Node
    public function getChildren(): array
    {
       return $this->children;
-   }
-
-   /**
-    * @param array $children
-    * @return Node
-    */
-   public function setChildren(array $children): Node
-   {
-      $this->children = $children;
-      return $this;
    }
 
    /**
