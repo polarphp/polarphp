@@ -176,6 +176,14 @@ class Node
    }
 
    /**
+    * @return bool
+    */
+   public function isVisitable(): bool
+   {
+      return !$this->isBase();
+   }
+
+   /**
     * Returns 'True' if this node shall not be created while parsing if it
     * has no children.
     */
