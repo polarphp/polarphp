@@ -1,3 +1,6 @@
+//// Automatically Generated From SyntaxVisitor.cpp.gyb.
+//// Do Not Edit Directly!
+//
 // This source file is part of the Swift.org open source project
 //
 // Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
@@ -18,26 +21,53 @@
 //
 // Created by polarboy on 2019/05/12.
 
-#include "polarphp/syntax/SyntaxVisitor.h"
+#include "polarphp/syntax/SyntaxNodeVisitor.h"
 #include "polarphp/basic/Defer.h"
 
 namespace polar::syntax {
 
-void SyntaxVisitor::visit(Syntax node)
+<?php
+foreach ($SYNTAX_NODES as $node)
 {
-  visitPre(node);
-  POLAR_DEFER { visitPost(node); };
-  switch (node.getKind()) {
-  case SyntaxKind::Token:
-    visit(node.castTo<TokenSyntax>());
-    return;
-  default:
-    visitChildren(node);
-    return;
-  }
+   if ($node->isVisitable()) {
+?>
+void SyntaxNodeVisitor::visit(<?= $node->getName(); ?> node)
+{
+   visitChildren(node);
 }
 
-void Syntax::accept(SyntaxVisitor &visitor)
+<?php
+   }
+}
+?>
+
+void SyntaxNodeVisitor::visit(Syntax node)
+{
+   visitPre(node);
+   POLAR_DEFER { visitPost(node); };
+   switch (node.getKind()) {
+   case SyntaxKind::Token:
+      visit(node.castTo<TokenSyntax>());
+      return;
+<?php
+foreach ($SYNTAX_NODES as $node)
+{
+   if ($node->isVisitable()) {
+?>
+   case SyntaxKind::<?= $node->getSyntaxKind(); ?>:
+      visit(node.castTo<<?= $node->getName(); ?>>());
+      return;
+<?php
+   }
+}
+?>
+   default:
+      visitChildren(node);
+      return;
+   }
+}
+
+void SyntaxNodeVisitor::accept(SyntaxNodeVisitor &visitor)
 {
    visitor.visit(*this);
 }
