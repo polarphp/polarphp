@@ -151,7 +151,7 @@ class Trivia
    /**
     * @return string
     */
-   public function getCharacters(): string
+   public function getCharacters(): array
    {
       return $this->characters;
    }

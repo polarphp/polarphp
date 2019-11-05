@@ -16,7 +16,7 @@ use Gyb\Syntax\Trivia;
 return array(
    new Trivia('Space', "A space ' ' character.", 0, [' ']),
    new Trivia('Tab', "A tab '\\t' character.", 1, ['\t']),
-   new Trivia('VerticalTab', "A vertical tab '\\v' character.", 2, ['\u{2B7F}']),
+   new Trivia('VerticalTab', "A vertical tab '\\v' character.", 2, ['\v']),
    new Trivia('Formfeed', "A form-feed 'f' character.", 3, ['\f']),
    new Trivia('Newline', "A newline '\\n' character.", 4, ['\n'], [], true),
    new Trivia('CarriageReturn', "A newline '\\r' character.", 5, ['\r'],

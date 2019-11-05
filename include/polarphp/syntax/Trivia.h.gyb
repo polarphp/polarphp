@@ -122,7 +122,6 @@ enum class TriviaKind : uint8_t
 };
 
 bool is_comment_trivia_kind(TriviaKind kind);
-uint32_t retrieve_trivia_kind_characters_count(TriviaKind kind);
 
 /// A contiguous stretch of a single kind of trivia. The constituent part of
 /// a `trivia` collection.
@@ -431,7 +430,6 @@ struct Trivia
    {
       return !(*this == other);
    }
-
 <?php
    foreach($TRIVIAS as $trivia) {
       $triviaName = $trivia->getName();
