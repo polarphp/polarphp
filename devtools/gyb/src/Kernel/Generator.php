@@ -94,6 +94,7 @@ class Generator
    private function loadSyntaxNodes()
    {
       $baseDir = GYB_SYNTAX_DEFINITION_DIR;
+      SyntaxRegistry::registerTrivias(include $baseDir.DIRECTORY_SEPARATOR."Trivias.php");
       SyntaxRegistry::registerSyntaxNodeSerializationCodes(include $baseDir.DIRECTORY_SEPARATOR.'SyntaxNodeSerializationCodes.php');
       SyntaxRegistry::registerTokens(include $baseDir.DIRECTORY_SEPARATOR.'Tokens.php');
       SyntaxRegistry::registerCommonNodes($this->createSyntaxNodes(include $baseDir.DIRECTORY_SEPARATOR.'CommonNodes.php'));

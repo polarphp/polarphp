@@ -1,3 +1,5 @@
+//// Automatically Generated From Trivia.h.gyb.
+//// Do Not Edit Directly!
 // This source file is part of the Swift.org open source project
 //
 // Copyright (c) 2014 - 2018 Apple Inc. and the Swift project authors
@@ -109,36 +111,14 @@ using polar::utils::RawOutStream;
 /// The kind of source trivia, such as spaces, newlines, or comments.
 enum class TriviaKind : uint8_t
 {
-   // A space ' ' character.
-   Space,
-   // A tab '\t' character.
-   Tab,
-   // A vertical tab '\v' character.
-   VerticalTab,
-   // A form-feed '\f' character.
-   Formfeed,
-   // A newline '\n' character.
-   Newline,
-   // A newline '\r' character.
-   CarriageReturn,
-   // A newline consists of contiguous '\r' and '\n' characters.
-   CarriageReturnLineFeed,
-   // A backtick '`' character, used to escape identifiers.
-   Backtick,
-   // A developer line comment, starting with "//"
-   // is_comment: true
-   LineComment,
-   // A developer block comment, starting with "/*" and ending with "*/".
-   // is_comment: true
-   BlockComment,
-   // A documentation line comment, starting with "///".
-   // is_comment: true
-   DocLineComment,
-   // A documentation block comment, starting with "/**" and ending with "*/".
-   // is_comment: true
-   DocBlockComment,
-   // Any skipped garbage text.
-   GarbageText
+<?php
+   foreach($TRIVIAS as $trivia) {
+?>
+   // <?= $trivia->getComment()."\n"; ?>
+   <?= $trivia->getName().",\n"; ?>
+<?php
+   }
+?>
 };
 
 bool is_comment_trivia_kind(TriviaKind kind);
@@ -158,113 +138,33 @@ uint32_t retrieve_trivia_kind_characters_count(TriviaKind kind);
 class TriviaPiece
 {
 public:
+<?php
+   foreach($TRIVIAS as $trivia) {
+      $triviaName = $trivia->getName();
+      if ($trivia->isCollection()) {
+?>
 
-   /// single char trivia
-   static TriviaPiece getSpaces(unsigned count)
+   static TriviaPiece get<?= $triviaName ?>s(unsigned count) 
    {
-      return {TriviaKind::Space, count};
+      return {TriviaKind::<?= $triviaName ?>, count};
    }
 
-   static TriviaPiece getSpace(unsigned count)
+   static TriviaPiece get<?= $triviaName ?>() 
    {
-      return getSpaces(1);
+      return get<?= $triviaName ?>s(1);
    }
+<?php
+      } else {
+?>
 
-   static TriviaPiece getTabs(unsigned count)
+   static TriviaPiece get<?= $triviaName ?>(const OwnedString text) 
    {
-      return {TriviaKind::Tab, count};
+      return {TriviaKind::<?= $triviaName ?>, text};
    }
-
-   static TriviaPiece getTab()
-   {
-      return getTabs(1);
+<?php
+      }
    }
-
-   static TriviaPiece getVerticalTabs(unsigned count)
-   {
-      return {TriviaKind::VerticalTab, count};
-   }
-
-   static TriviaPiece getVerticalTab()
-   {
-      return getVerticalTabs(1);
-   }
-
-   static TriviaPiece getFormfeeds(unsigned count)
-   {
-      return {TriviaKind::Formfeed, count};
-   }
-
-   static TriviaPiece getFormfeed()
-   {
-      return getFormfeeds(1);
-   }
-
-   static TriviaPiece getNewlines(unsigned count)
-   {
-      return {TriviaKind::Newline, count};
-   }
-
-   static TriviaPiece getNewline()
-   {
-      return getNewlines(1);
-   }
-
-   static TriviaPiece getCarriageReturns(unsigned count)
-   {
-      return {TriviaKind::CarriageReturn, count};
-   }
-
-   static TriviaPiece getCarriageReturn()
-   {
-      return getCarriageReturns(1);
-   }
-
-   static TriviaPiece getBackticks(unsigned count)
-   {
-      return {TriviaKind::Backtick, count};
-   }
-
-   static TriviaPiece getBacktick()
-   {
-      return getBackticks(1);
-   }
-
-   /// multi char trivia
-   static TriviaPiece getCarriageReturnLineFeeds(unsigned count)
-   {
-      return {TriviaKind::CarriageReturnLineFeed, count};
-   }
-
-   static TriviaPiece getCarriageReturnLineFeed()
-   {
-      return getCarriageReturnLineFeeds(1);
-   }
-
-   static TriviaPiece getLineComment(const OwnedString text)
-   {
-      return {TriviaKind::LineComment, text};
-   }
-
-   static TriviaPiece getBlockComment(const OwnedString text)
-   {
-      return {TriviaKind::BlockComment, text};
-   }
-
-   static TriviaPiece getDocLineComment(const OwnedString text)
-   {
-      return {TriviaKind::DocLineComment, text};
-   }
-
-   static TriviaPiece getDocBlockComment(const OwnedString text)
-   {
-      return {TriviaKind::DocBlockComment, text};
-   }
-
-   static TriviaPiece getGarbageText(const OwnedString text)
-   {
-      return {TriviaKind::GarbageText, text};
-   }
+?>
 
    static TriviaPiece fromText(TriviaKind kind, StringRef text);
 
@@ -290,21 +190,25 @@ public:
    size_t getTextLength() const
    {
       switch (m_kind) {
-      case TriviaKind::Space:
-      case TriviaKind::Tab:
-      case TriviaKind::VerticalTab:
-      case TriviaKind::Formfeed:
-      case TriviaKind::Newline:
-      case TriviaKind::CarriageReturn:
-      case TriviaKind::Backtick:
-      case TriviaKind::CarriageReturnLineFeed:
-         return m_count * retrieve_trivia_kind_characters_count(m_kind);
-      case TriviaKind::LineComment:
-      case TriviaKind::BlockComment:
-      case TriviaKind::DocLineComment:
-      case TriviaKind::DocBlockComment:
-      case TriviaKind::GarbageText:
+<?php
+   foreach($TRIVIAS as $trivia) {
+      $triviaName = $trivia->getName();
+?>
+      case TriviaKind::<?= $triviaName ?>:
+<?php
+      if ($trivia->isCollection()) {
+?>
+         return count * <?= $trivia->getCharatersLen(); ?>;
+<?php
+      } else {
+?>
          return m_text.getSize();
+<?php
+      }
+?>
+<?php
+   }
+?>
       }
       polar_unreachable("unhandled kind");
    }
@@ -343,23 +247,23 @@ public:
    {
       id.addInteger(unsigned(m_kind));
       switch (m_kind) {
-      case TriviaKind::LineComment:
-      case TriviaKind::BlockComment:
-      case TriviaKind::DocLineComment:
-      case TriviaKind::DocBlockComment:
-      case TriviaKind::GarbageText:
-         id.addString(m_text.getStr());
-         break;
-      case TriviaKind::Space:
-      case TriviaKind::Tab:
-      case TriviaKind::VerticalTab:
-      case TriviaKind::Formfeed:
-      case TriviaKind::Newline:
-      case TriviaKind::CarriageReturn:
-      case TriviaKind::Backtick:
-      case TriviaKind::CarriageReturnLineFeed:
+<?php
+   foreach($TRIVIAS as $trivia) {
+      $triviaName = $trivia->getName();
+?>
+      case TriviaKind::<?= $triviaName ?>:
+<?php
+      if ($trivia->isCollection()) {
+?>
          id.addInteger(m_count);
-         break;
+<?php
+      } else {
+?>
+         id.addInteger(m_text.getStr());
+<?php
+      }
+   }
+?>
       }
    }
 
@@ -528,136 +432,36 @@ struct Trivia
       return !(*this == other);
    }
 
-   /// single char trivia
+<?php
+   foreach($TRIVIAS as $trivia) {
+      $triviaName = $trivia->getName();
+      if ($trivia->isCollection()) {
+?>
 
-   static Trivia getSpaces(unsigned count)
-   {
-      if (0 == count) {
+   static Trivia get<?= $triviaName ?>s(unsigned count) {
+      if (Count == 0) {
          return {};
       }
-      return {{TriviaPiece::getSpaces(count)}};
+      return {{TriviaPiece::get<?= $triviaName ?>s(count)}};
    }
 
-   static Trivia getSpace()
+   static Trivia get<?= $triviaName ?>() 
    {
-      return {{TriviaPiece::getSpaces(1)}};
+      return {{TriviaPiece::get<?= $triviaName ?>s(1)}};
    }
+<?php
+      } else {
+?>
 
-   static Trivia getTabs(unsigned count)
+   static Trivia get<?= $triviaName ?>(const OwnedString text) 
    {
-      if (0 == count) {
-         return {};
+      assert(checkTriviaText(text.getStr(), TriviaKind::<?= $triviaName ?>));
+      return {{TriviaPiece::get<?= $triviaName ?>(text)}};
+   }
+<?php
       }
-      return {{TriviaPiece::getTabs(count)}};
    }
-
-   static Trivia getTab()
-   {
-      return {{TriviaPiece::getTabs(1)}};
-   }
-
-   static Trivia getVerticalTabs(unsigned count)
-   {
-      if (0 == count) {
-         return {};
-      }
-      return {{TriviaPiece::getVerticalTabs(count)}};
-   }
-
-   static Trivia getVerticalTab()
-   {
-      return {{TriviaPiece::getVerticalTabs(1)}};
-   }
-
-   static Trivia getFormfeeds(unsigned count)
-   {
-      if (0 == count) {
-         return {};
-      }
-      return {{TriviaPiece::getFormfeeds(count)}};
-   }
-
-   static Trivia getFormfeed()
-   {
-      return {{TriviaPiece::getFormfeeds(1)}};
-   }
-
-   static Trivia getNewlines(unsigned count)
-   {
-      if (0 == count) {
-         return {};
-      }
-      return {{TriviaPiece::getNewlines(count)}};
-   }
-
-   static Trivia getNewline()
-   {
-      return {{TriviaPiece::getNewlines(1)}};
-   }
-
-   static Trivia getCarriageReturns(unsigned count)
-   {
-      if (0 == count) {
-         return {};
-      }
-      return {{TriviaPiece::getCarriageReturns(count)}};
-   }
-
-   static Trivia getCarriageReturn()
-   {
-      return {{TriviaPiece::getCarriageReturns(1)}};
-   }
-
-   static Trivia getBackticks(unsigned count)
-   {
-      if (0 == count) {
-         return {};
-      }
-      return {{TriviaPiece::getBackticks(count)}};
-   }
-
-   static Trivia getBacktick()
-   {
-      return {{TriviaPiece::getBackticks(1)}};
-   }
-
-   static Trivia getCarriageReturnLineFeeds(unsigned count)
-   {
-      if (0 == count) {
-         return {};
-      }
-      return {{TriviaPiece::getCarriageReturnLineFeeds(count)}};
-   }
-
-   static Trivia getCarriageReturnLineFeed()
-   {
-      return {{TriviaPiece::getCarriageReturnLineFeeds(1)}};
-   }
-
-   static Trivia getLineComment(const OwnedString text)
-   {
-      return {{TriviaPiece::getLineComment(text)}};
-   }
-
-   static Trivia getBlockComment(const OwnedString text)
-   {
-      return {{TriviaPiece::getBlockComment(text)}};
-   }
-
-   static Trivia getDocLineComment(const OwnedString text)
-   {
-      return {{TriviaPiece::getDocLineComment(text)}};
-   }
-
-   static Trivia getDocBlockComment(const OwnedString text)
-   {
-      return {{TriviaPiece::getDocBlockComment(text)}};
-   }
-
-   static Trivia getGarbageText(const OwnedString text)
-   {
-      return {{TriviaPiece::getGarbageText(text)}};
-   }
+?>
 private:
    static bool checkTriviaText(StringRef text, TriviaKind kind)
    {
@@ -672,16 +476,20 @@ private:
          return text.startsWith("/**") && text.endsWith("*/");
       case TriviaKind::GarbageText:
          return !text.empty();
-      case TriviaKind::CarriageReturnLineFeed:
+<?php
+   foreach($TRIVIAS as $trivia) {
+      $triviaName = $trivia->getName();
+      if ($trivia->isCollection()) {
+?>
+      case TriviaKind::<?= $triviaName ?>:
          return true;
-      default:
-         polar_unreachable("unexcepted kind");
+<?php
+      }
+   }
+?>
       }
    }
 };
-
-StringRef retrieve_trivia_kind_name(TriviaKind kind);
-StringRef retrieve_trivia_kind_characters(TriviaKind kind);
 
 } // polar::syntax
 
@@ -694,7 +502,20 @@ struct WrapperTypeTraits<syntax::TriviaKind>
 {
    static uint8_t numericValue(const syntax::TriviaKind &kind)
    {
-      return polar::as_integer<TriviaKind>(kind);
+      switch (kind) {
+<?php
+   foreach($TRIVIAS as $trivia) {
+      $triviaName = $trivia->getName();
+      if ($trivia->isCollection()) {
+?>
+      case syntax::TriviaKind::<?= $triviaName ?>:
+         return <?= $trivia->getSerializationCode();?>;
+<?php
+      }
+   }
+?>
+      }
+      polar_unreachable("unhandled kind");
    }
 
    static void write(ByteTreeWriter &writer, const syntax::TriviaKind &kind,
@@ -720,23 +541,23 @@ struct ObjectTraits<syntax::TriviaPiece>
       writer.write(trivia.getKind(), /*index=*/0);
       // Write the trivia's text or count depending on its kind
       switch (trivia.getKind()) {
-      case TriviaKind::Space:
-      case TriviaKind::Tab:
-      case TriviaKind::VerticalTab:
-      case TriviaKind::Formfeed:
-      case TriviaKind::Newline:
-      case TriviaKind::CarriageReturn:
-      case TriviaKind::Backtick:
-      case TriviaKind::CarriageReturnLineFeed:
-         writer.write(static_cast<uint32_t>(trivia.getCount()), /*Index=*/1);
-         break;
-      case TriviaKind::LineComment:
-      case TriviaKind::BlockComment:
-      case TriviaKind::DocLineComment:
-      case TriviaKind::DocBlockComment:
-      case TriviaKind::GarbageText:
-         writer.write(trivia.getText(), /*Index=*/ 1);
-         break;
+<?php
+   foreach($TRIVIAS as $trivia) {
+      $triviaName = $trivia->getName();
+?>
+      case TriviaKind::<?= $triviaName ?>:
+<?php
+      if ($trivia->isCollection()) {
+?>
+         writer.write(static_cast<uint32_t>(trivia.getCount()), /*index=*/1);
+<?php
+      } else {
+?>
+         writer.write(trivia.getText(), /*index=*/1);
+<?php
+      }
+   }
+?>
       }
    }
 };
@@ -744,8 +565,6 @@ struct ObjectTraits<syntax::TriviaPiece>
 } // polar::basic::bytetree
 
 namespace polar::yaml {
-
-using polar::syntax::retrieve_trivia_kind_name;
 
 /// Deserialization traits for TriviaPiece.
 /// - All trivia pieces will have a "kind" key that contains the serialized
@@ -763,15 +582,15 @@ struct MappingTraits<polar::syntax::TriviaPiece>
       TriviaKind kind;
       in.mapRequired("kind", kind);
       switch (kind) {
-      case TriviaKind::Space:
-      case TriviaKind::Tab:
-      case TriviaKind::VerticalTab:
-      case TriviaKind::Formfeed:
-      case TriviaKind::Newline:
-      case TriviaKind::CarriageReturn:
-      case TriviaKind::Backtick:
-      case TriviaKind::CarriageReturnLineFeed:
+<?php
+   foreach($TRIVIAS as $trivia) {
+      $triviaName = $trivia->getName();
+?>
+      case TriviaKind::<?= $triviaName ?>:
       {
+<?php
+      if ($trivia->isCollection()) {
+?>
          /// FIXME: This is a workaround for existing bug from llvm yaml parser
          /// which would raise error when deserializing number with trailing character
          /// like "1\n". See https://bugs.llvm.org/show_bug.cgi?id=15505
@@ -779,17 +598,20 @@ struct MappingTraits<polar::syntax::TriviaPiece>
          in.mapRequired("value", str);
          unsigned count = std::atoi(str.data());
          return polar::syntax::TriviaPiece(kind, count);
-      }
-      case TriviaKind::LineComment:
-      case TriviaKind::BlockComment:
-      case TriviaKind::DocLineComment:
-      case TriviaKind::DocBlockComment:
-      case TriviaKind::GarbageText: {
+<?php
+      } else {
+?>
          StringRef text;
          in.mapRequired("value", text);
          return polar::syntax::TriviaPiece(
-                  kind, polar::basic::OwnedString::makeRefCounted(text));
+            kind, polar::basic::OwnedString::makeRefCounted(text));
+<?php
       }
+?>
+      }
+<?php
+   }
+?>
       }
    }
 };
@@ -801,19 +623,14 @@ struct ScalarEnumerationTraits<polar::syntax::TriviaKind>
    static void enumeration(IO &in, polar::syntax::TriviaKind &value)
    {
       using polar::syntax::TriviaKind;
-      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::Space).getData(), TriviaKind::Space);
-      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::Tab).getData(), TriviaKind::Tab);
-      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::VerticalTab).getData(), TriviaKind::VerticalTab);
-      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::Formfeed).getData(), TriviaKind::Formfeed);
-      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::Newline).getData(), TriviaKind::Newline);
-      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::CarriageReturn).getData(), TriviaKind::CarriageReturn);
-      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::Backtick).getData(), TriviaKind::Backtick);
-      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::LineComment).getData(), TriviaKind::LineComment);
-      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::BlockComment).getData(), TriviaKind::BlockComment);
-      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::DocLineComment).getData(), TriviaKind::DocLineComment);
-      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::DocBlockComment).getData(), TriviaKind::DocBlockComment);
-      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::GarbageText).getData(), TriviaKind::GarbageText);
-      in.enumCase(value, retrieve_trivia_kind_name(TriviaKind::CarriageReturnLineFeed).getData(), TriviaKind::CarriageReturnLineFeed);
+<?php
+   foreach($TRIVIAS as $trivia) {
+      $triviaName = $trivia->getName();
+?>
+      in.enumCase(value, "<?= $triviaName ?>", TriviaKind::<?= $triviaName ?>);
+<?php
+   }
+?>   
    }
 };
 
