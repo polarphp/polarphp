@@ -222,7 +222,7 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'LeftParen', 'kind' => 'LeftParenKeyword'],
-         ['name' => 'Parameters', 'kind' => 'ParameterList'],
+         ['name' => 'Parameters', 'kind' => 'ParameterList', 'collectionElementName' => 'Parameter'],
          ['name' => 'RightParen', 'kind' => 'RightParenKeyword'],
       ]
    ],
@@ -283,7 +283,7 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'ImplementKeyword', 'kind' => 'ImplementsKeyword'],
-         ['name' => 'Interfaces', 'kind' => 'NameList']
+         ['name' => 'Interfaces', 'kind' => 'NameList', 'collectionElementName' => 'ImplementInterface']
       ]
    ],
    /**
@@ -295,7 +295,7 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'ExtendsKeyword', 'kind' => 'ExtendsKeyword'],
-         ['name' => 'Interfaces', 'kind' => 'NameList']
+         ['name' => 'Interfaces', 'kind' => 'NameList', 'collectionElementName' => 'ParentInterface']
       ]
    ],
    /**
@@ -384,9 +384,9 @@ $definitions = array(
       'kind' => 'ClassPropertyDecl',
       'baseKind' => 'Decl',
       'children' => [
-         ['name' => 'Modifiers', 'kind' => 'MemberModifierList'],
+         ['name' => 'Modifiers', 'kind' => 'MemberModifierList', 'collectionElementName' => 'Modifier'],
          ['name' => 'TypeHint', 'kind' => 'TypeExprClause', 'isOptional' => true],
-         ['name' => 'Properties', 'kind' => 'ClassPropertyList']
+         ['name' => 'Properties', 'kind' => 'ClassPropertyList', 'collectionElementName' => 'Propertie']
       ]
    ],
    /**
@@ -397,9 +397,9 @@ $definitions = array(
       'kind' => 'ClassConstDecl',
       'baseKind' => 'Decl',
       'children' => [
-         ['name' => 'Modifiers', 'kind' => 'MemberModifierList'],
+         ['name' => 'Modifiers', 'kind' => 'MemberModifierList', 'collectionElementName' => 'Modifier'],
          ['name' => 'ConstKeyword', 'kind' => 'ConstKeyword'],
-         ['name' => 'ConstList', 'kind' => 'ClassConstList']
+         ['name' => 'ConstList', 'kind' => 'ClassConstList', 'collectionElementName' => 'ConstItem']
       ]
    ],
    /**
@@ -411,11 +411,11 @@ $definitions = array(
       'kind' => 'ClassMethodDecl',
       'baseKind' => 'Decl',
       'children' => [
-         ['name' => 'Modifiers', 'kind' => 'MemberModifierList'],
+         ['name' => 'Modifiers', 'kind' => 'MemberModifierList', 'collectionElementName' => 'Modifier'],
          ['name' => 'FunctionKeyword', 'kind' => 'FunctionKeyword'],
          ['name' => 'ReturnRef', 'kind' => 'AmpersandToken'],
          ['name' => 'FuncName', 'kind' => 'Identifier'],
-         ['name' => 'ParameterList', 'kind' => 'ParameterClause'],
+         ['name' => 'ParameterClause', 'kind' => 'ParameterClause'],
          ['name' => 'ReturnType', 'kind' => 'ReturnTypeClause', 'isOptional' => true],
          ['name' => 'Body', 'kind' => 'InnerCodeBlockStmt', 'isOptional' => true]
       ]
@@ -462,7 +462,7 @@ $definitions = array(
       'children' => [
          ['name' => 'MethodRef', 'kind' => 'ClassAbsoluteTraitMethodReference'],
          ['name' => 'InsteadOfKeyword', 'kind' => 'InsteadofKeyword'],
-         ['name' => 'Names', 'kind' => 'NameList']
+         ['name' => 'Names', 'kind' => 'NameList', 'collectionElementName' => 'TraitName']
       ]
    ],
    /**
@@ -527,7 +527,7 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'LeftBrace', 'kind' => 'LeftParenToken'],
-         ['name' => 'Adaptations', 'kind' => 'ClassTraitAdaptationList'],
+         ['name' => 'Adaptations', 'kind' => 'ClassTraitAdaptationList', 'collectionElementName' => 'Adaptation'],
          ['name' => 'RightBrace', 'kind' => 'RightParenToken']
       ]
    ],
@@ -540,7 +540,7 @@ $definitions = array(
       'baseKind' => 'Decl',
       'children' => [
          ['name' => 'UseKeyword', 'kind' => 'UseKeyword'],
-         ['name' => 'Names', 'kind' => 'NameList'],
+         ['name' => 'Names', 'kind' => 'NameList', 'collectionElementName' => 'TraitName'],
          ['name' => 'AdaptationBlock', 'kind' => 'ClassTraitAdaptationBlock', 'isOptional' => true]
       ]
    ],
@@ -565,7 +565,7 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'LeftBrace', 'kind' => 'LeftBraceToken'],
-         ['name' => 'Members', 'kind' => 'MemberDeclList'],
+         ['name' => 'Members', 'kind' => 'MemberDeclList', 'collectionElementName' => 'Member'],
          ['name' => 'RightBrace', 'kind' => 'RightBraceToken']
       ]
    ],
@@ -578,12 +578,12 @@ $definitions = array(
       'kind' => 'ClassDefinition',
       'baseKind' => 'Decl',
       'children' => [
-         ['name' => 'Modifiers', 'kind' => 'ClassModifierList', 'isOptional' => true],
+         ['name' => 'Modifiers', 'kind' => 'ClassModifierList', 'isOptional' => true, 'collectionElementName' => 'Modifier'],
          ['name' => 'ClassKeyword', 'kind' => 'ClassKeyword'],
          ['name' => 'Name', 'kind' => 'IdentifierStringToken'],
          ['name' => 'ExtendsFrom', 'kind' => 'ExtendsFromClause', 'isOptional' => true],
          ['name' => 'Implements', 'kind' => 'ImplementsClause', 'isOptional' => true],
-         ['name' => 'Members', 'kind' => 'MemberDeclBlock']
+         ['name' => 'MemberBlock', 'kind' => 'MemberDeclBlock']
       ]
    ],
    /**
@@ -621,7 +621,7 @@ $definitions = array(
       'kind' => 'SourceFile',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'Statements', 'kind' => 'TopStmtList'],
+         ['name' => 'Statements', 'kind' => 'TopStmtList', 'collectionElementName' => 'Statement'],
          ['name' => 'EOF', 'kind' => 'EndToken']
       ]
    ]

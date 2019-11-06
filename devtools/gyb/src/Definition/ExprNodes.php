@@ -1024,7 +1024,7 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'LeftParen', 'kind' => 'LeftParenToken'],
-         ['name' => 'Variables', 'kind' => 'IssetVariablesList'],
+         ['name' => 'Variables', 'kind' => 'IssetVariablesList', 'collectionElementName' => 'Variable'],
          ['name' => 'RightParen', 'kind' => 'RightParenToken']
       ]
    ],
@@ -1165,7 +1165,7 @@ $definitions = array(
       'children' => [
          ['name' => 'ListKeyword', 'kind' => 'ListKeyword'],
          ['name' => 'LeftParen', 'kind' => 'LeftParenToken'],
-         ['name' => 'PairItems', 'kind' => 'ArrayPairList'],
+         ['name' => 'PairItems', 'kind' => 'ArrayPairList', 'collectionElementName' => 'pairItem'],
          ['name' => 'LeftParen', 'kind' => 'LeftParenToken']
       ]
    ],
@@ -1624,7 +1624,7 @@ $definitions = array(
       'baseKind' => 'Expr',
       'children' => [
          ['name' => 'LeftQuote', 'kind' => 'DoubleStrQuoteToken'],
-         ['name' => 'EncapsItems', 'kind' => 'EncapsItemList'],
+         ['name' => 'EncapsItems', 'kind' => 'EncapsItemList', 'collectionElementName' => 'EncapsItem'],
          ['name' => 'RightQuote', 'kind' => 'DoubleStrQuoteToken']
       ]
    ],
@@ -1652,7 +1652,7 @@ $definitions = array(
       'kind' => 'SequenceExpr',
       'baseKind' => 'Expr',
       'children' => [
-         ['name' => 'Elements', 'kind' => 'ExprList']
+         ['name' => 'Elements', 'kind' => 'ExprList', 'collectionElementName' => 'Element']
       ]
    ],
    /**
@@ -1779,7 +1779,7 @@ $definitions = array(
       'children' => [
          ['name' => 'UseKeyword', 'kind' => 'UseKeyword'],
          ['name' => 'LeftParen', 'kind' => 'LeftParenToken'],
-         ['name' => 'LexicalVars', 'kind' => 'LexicalVariableList'],
+         ['name' => 'LexicalVars', 'kind' => 'LexicalVariableList', 'collectionElementName' => 'LexicalVar'],
          ['name' => 'RightParen', 'kind' => 'LeftParenToken']
       ]
    ],

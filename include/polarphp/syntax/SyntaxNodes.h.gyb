@@ -142,13 +142,14 @@ public:
                $childName, $nodeName));
          }
 ?>
+
    /// Adds the provided `<?= $elementName ?>` to the node's `<?= $childName ?>`
    /// collection.
    /// - param element: The new `<?= $elementName ?>` to add to the node's
    ///                  `<?= $childName ?>` collection.
    /// - returns: A copy of the receiver with the provided `<?= $elementName ?>`
    ///            appended to its `<?= $childName ?>` collection.
-   $nodeName add<?= $elementName ?>(<?= $elementType ?> <?= lcfirst($elementName); ?>);
+   <?= $nodeName ?> add<?= $elementName ?>(<?= $elementType ?> <?= lcfirst($elementName); ?>);
 <?php
       }
 ?>
