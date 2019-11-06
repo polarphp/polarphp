@@ -63,6 +63,7 @@ foreach ($SYNTAX_NODES as $node)
 {
    $nodeName = $node->getName();
    $baseType = $node->getBaseType();
+   $nodeSyntaxKind = $node->getSyntaxKind();
    if (!$node->isSyntaxCollection()) {
       $qualifier = "";
       if (!$node->isBase()) {
@@ -153,9 +154,33 @@ public:
 <?php
       }
 ?>
+
+   /// Returns a copy of the receiver with its `<?= $childName ?>` replaced.
+   /// - param newChild: The new `<?= $childName ?>` to replace the node's
+   ///                   current `<?= $childName ?>`, if present.
+   <?= $nodeName ?> with<?= $childName ?>(std::optional<<?= $childTypeName ?>> new<?= $childName ?>);
 <?php
    }
 ?>
+   static bool kindOf(SyntaxKind Kind) 
+   {
+<?php 
+      if ($node->isBase()) {
+?>
+      return is_<?= strtolower($nodeSyntaxKind); ?>_kind(Kind);
+<?php
+      } else {
+?>
+      return kind == SyntaxKind::<?= $nodeSyntaxKind ?>;
+<?php
+      }
+?>
+   }
+
+   static bool classOf(const Syntax *syntax) 
+   {
+      return kindOf(syntax->getKind());
+   }
 
 private:
 <?php 
@@ -178,6 +203,10 @@ private:
    }
 }
 ?>
+/// Calculating an identifier for all syntax nodes' structures for verification
+/// purposes.
+const char* get_syntax_structure_versioning_identifier();
+
 } // polar::syntax
 
 #endif // POLARPHP_SYNTAX_NODES_H
