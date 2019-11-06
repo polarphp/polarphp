@@ -62,14 +62,31 @@ class SyntaxRegistry
     * @param $name
     * @return mixed
     */
-   public static function getTokenByName($name)
+   public static function getTokenByName(string $name)
    {
       if (empty(self::$tokenMap)) {
          foreach (self::$tokens as $token) {
             self::$tokenMap[$token->getName()] = $token;
          }
       }
+      if (!array_key_exists($name, self::$tokenMap)) {
+         return null;
+      }
       return self::$tokenMap[$name];
+   }
+
+   /**
+    * @param string $name
+    * @return bool
+    */
+   public static function hasToken(string $name): bool
+   {
+      if (empty(self::$tokenMap)) {
+         foreach (self::$tokens as $token) {
+            self::$tokenMap[$token->getName()] = $token;
+         }
+      }
+      return array_key_exists($name, self::$tokenMap);
    }
 
    /**

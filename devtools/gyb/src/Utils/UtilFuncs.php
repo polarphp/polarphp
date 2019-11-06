@@ -12,6 +12,9 @@
 
 namespace Gyb\Utils;
 
+use Gyb\Syntax\Child;
+use Gyb\Syntax\Kinds;
+
 function str_start_with(string $str, string $prefix): bool
 {
    $prefixLength = strlen($prefix);
@@ -76,4 +79,79 @@ function dedented_lines($description)
    }
    $description = trim($description);
    return explode("\n", $description);
+}
+
+/**
+ * Generates a C++ closure to check whether a given raw syntax node can
+ * satisfy the requirements of child.
+ *
+ * @param Child $child
+ * @return string
+ */
+function check_child_condition_raw(Child $child)
+{
+   $result = "[](const RefCountPtr<RawSyntax> &raw) {\n";
+   $result .= sprintf(" // check %s\n", $child->getName());
+   $tokenChoices = $child->getTokenChoices();
+   $textChoices = $child->getTextChoices();
+   $nodeChoices = $child->getNodeChoices();
+   if (!empty($tokenChoices)) {
+      $result .= "if (!raw->isToken()) return false;\n";
+      $result .= "auto tokenKind = raw->getTokenKind();\n";
+      $tokenChecks = [];
+      foreach ($tokenChoices as $choice) {
+         $tokenChecks[] = sprintf("tokenKind == TokenKindType::%s", $choice->getKind());
+      }
+      $result .= sprintf("return %s;\n", join(' || ', $tokenChecks));
+   } elseif (!empty($textChoices)) {
+      $result .= "if (!raw->isToken()) return false;\n";
+      $result .= "auto text = raw->getTokenText();\n";
+      $tokenChecks = [];
+      foreach ($textChoices as $choice) {
+         $tokenChecks[] = sprintf("text == %s", $choice);
+      }
+      $result .= sprintf("return %s;\n", join(' || ', $tokenChecks));
+   } elseif (!empty($nodeChoices)) {
+      $nodeChecks = [];
+      foreach ($nodeChoices as $choice) {
+         $nodeChecks[] = check_child_condition_raw($choice).'(raw)';
+      }
+      $result .= sprintf("return %s;\n", join(' || ', $nodeChecks));
+   } else {
+      $result .= sprintf("return %s::kindOf(raw->getKind())", $child->getTypeName());
+   }
+   $result .= '}';
+   return $result;
+}
+
+/**
+ * Generates a C++ call to make the raw syntax for a given Child object.
+ *
+ * @param Child $child
+ */
+function make_missing_child(Child $child)
+{
+   if ($child->isToken()) {
+      $token = $child->getMainToken();
+      $tokenKind = "T_UNKNOWN_MARK";
+      $tokenText = "";
+      if ($token) {
+         $tokenKind = $token->getKind();
+         $tokenText = $token->getText();
+      }
+      return sprintf('RawSyntax::missing(TokenKindType::%s, OwnedString::makeUnowned("%s"))',
+         $tokenKind, $tokenText);
+   } else {
+      $missingKind = "";
+      if ($child->getSyntaxKind() == Kinds::SYNTAX) {
+         $missingKind = "Unknown";
+      } else {
+         $missingKind = $child->getSyntaxKind();
+      }
+      $nodeChoices = $child->getNodeChoices();
+      if (!empty($nodeChoices)) {
+         return make_missing_child($nodeChoices[0]);
+      }
+      return sprintf('RawSyntax::missing(SyntaxKind::%s)', $missingKind);
+   }
 }

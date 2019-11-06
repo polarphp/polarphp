@@ -117,9 +117,10 @@ class Child
       // a token node. Grab the existing reference to that token from the
       // global list.
       $this->tokenKind = '';
-      if (\Gyb\Utils\has_substr($this->syntaxKind, 'Token')) {
+      if (\Gyb\Utils\has_substr($this->syntaxKind, 'Token') || \Gyb\Utils\has_substr($this->syntaxKind, 'Keyword')) {
          $this->tokenKind = $this->syntaxKind;
       }
+      $this->token = SyntaxRegistry::getTokenByName($this->tokenKind);
       $this->isOptional = $isOptional;
       // A restricted set of token kinds that will be accepted for this
       // child.
@@ -158,7 +159,7 @@ class Child
     */
    public function isToken()
    {
-      return $this->tokenKind !== null;
+      return $this->tokenKind != null;
    }
 
    /**
