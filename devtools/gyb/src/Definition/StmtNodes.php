@@ -62,6 +62,7 @@ $definitions = array(
    [
       'kind' => 'InnerStmt',
       'baseKind' => 'Stmt',
+      'omitWhenEmpty' => 'true',
       'children' => [
          [
             'name' => 'InnerStmt',
@@ -109,6 +110,7 @@ $definitions = array(
    [
       'kind' => 'TopStmt',
       'baseKind' => 'Stmt',
+      'omitWhenEmpty' => true,
       'children' => [
          ['name' => 'TopStmt', 'kind' => 'Stmt']
       ]
