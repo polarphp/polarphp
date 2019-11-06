@@ -1,0 +1,91 @@
+//// Automatically Generated From SyntaxBuilders.h.gyb.
+//// Do Not Edit Directly!
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
+// This source file is part of the polarphp.org open source project
+//
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://polarphp.org/LICENSE.txt for license information
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+//
+// Created by polarboy on 2019/11/06.
+
+#ifndef POLARPHP_SYNTAX_NODE_BUILDERS_H
+#define POLARPHP_SYNTAX_NODE_BUILDERS_H
+
+#include "polarphp/syntax/RawSyntax.h"
+#include "polarphp/syntax/SyntaxNodes.h"
+
+namespace polar::syntax {
+
+class SyntaxArena;
+
+<?php
+$syntaxNodeMap = $SYNTAX_NODE_MAP;
+foreach ($SYNTAX_NODES as $node) {
+   $nodeName = $node->getName();
+   if ($node->isBuildable()) {
+      $children = $node->getChildren();
+      $childCount = count($children);
+?>
+class <?= $nodeName ?>Builder
+{
+public:
+   <?= $nodeName ?>Builder() = default;
+   <?= $nodeName ?>Builder(const RefCountPtr<SyntaxArena> &arena)
+      : m_arena(arena)
+   {}
+<?php
+      foreach ($node->getChildren() as $child) {
+         $childName = $child->getName();
+         $childType = $child->getTypeName();
+         $childSyntaxKind = $child->getSyntaxKind();
+         $childNode = isset($syntaxNodeMap[$childSyntaxKind]) ? $syntaxNodeMap[$childSyntaxKind] : null;
+?>
+   <?= $nodeName ?>Builder &use<?= $childName ?>(<?= $childType ?> <?= lcfirst($childName); ?>);
+<?php
+         if ($childNode && $childNode->isSyntaxCollection()) {
+            $elementName = $child->getCollectionElementName();
+            $elementType = $childNode->getCollectionElementType();
+            if (strlen($elementName) == 0) {
+               throw new \RuntimeException(sprintf("'collectionElementName' should be set for '%s' of '%s'", 
+                  $childName, $nodeName));
+            }
+?>
+   <?= $nodeName ?>Builder &add<?= $elementName ?>(<?= $elementType ?> <?= lcfirst($elementName); ?>);
+<?php
+         }
+?>
+<?php
+      }
+?>
+   <?= $nodeName ?> build();
+private:
+   RefCountPtr<SyntaxArena> m_arena = nullptr;
+   RefCountPtr<RawSyntax> m_layout[<?= $childCount ?>] = {
+<?php
+      foreach ($node->getChildren() as $child) {
+?>
+      nullptr,
+<?php 
+      }
+?>
+   };
+};
+
+<?php
+   }
+}
+?>
+} // polar::syntax
+
+#endif // POLARPHP_SYNTAX_NODE_BUILDERS_H

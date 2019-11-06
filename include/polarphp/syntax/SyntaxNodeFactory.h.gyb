@@ -1,4 +1,4 @@
-// Automatically Generated From SyntaxFactory.h.gyb.
+// Automatically Generated From SyntaxNodeFactory.h.gyb.
 // Do Not Edit Directly!
 // This source file is part of the polarphp.org open source project
 //
@@ -11,8 +11,8 @@
 //
 // Created by polarboy on 2019/11/04.
 
-#ifndef POLARPHP_SYNTAX_SYNTAX_FACTORY_H
-#define POLARPHP_SYNTAX_SYNTAX_FACTORY_H
+#ifndef POLARPHP_SYNTAX_SYNTAX_NODE_FACTORY_H
+#define POLARPHP_SYNTAX_SYNTAX_NODE_FACTORY_H
 
 #include "polarphp/syntax/SyntaxNodes.h"
 #include "polarphp/syntax/Trivia.h"
@@ -24,7 +24,7 @@ namespace polar::syntax {
 
 using polar::basic::ArrayRef;
 
-class SyntaxFactory
+class SyntaxNodeFactory
 {
    /// Make any kind of token.
    static TokenSyntax makeToken(
@@ -51,48 +51,48 @@ class SyntaxFactory
    static std::pair<unsigned, unsigned> countChildren(SyntaxKind kind);
    static Syntax makeBlankCollectionSyntax(SyntaxKind kind);
 <?php
-   foreach ($SYNTAX_NODES as $node) {
-      if ($node->hasChild()) {
-         $childParams = [];
-         $children = $node->getChildren();
-         foreach($children as $child) {
-            $paramType = $child->getTypeName();
-            if ($child->isOptional()) {
-               $paramType = "std::optional<$paramType>";
-            }
-            $childParams[] = sprintf('%s %s', $paramType, $child->getPolarName());
+foreach ($SYNTAX_NODES as $node) {
+   if ($node->hasChild()) {
+      $childParams = [];
+      $children = $node->getChildren();
+      foreach($children as $child) {
+         $paramType = $child->getTypeName();
+         if ($child->isOptional()) {
+            $paramType = "std::optional<$paramType>";
          }
-         $childParams = implode(', ', $childParams);
+         $childParams[] = sprintf('%s %s', $paramType, $child->getPolarName());
+      }
+      $childParams = implode(', ', $childParams);
 ?>
    static <?= $node->getName(); ?> make<?= $node->getSyntaxKind(); ?>(<?= $childParams; ?>, RefCountPtr<SyntaxArena> arena = nullptr);
 <?php
-      } elseif($node->isSyntaxCollection()) {
+   } elseif($node->isSyntaxCollection()) {
 ?>
    static <?= $node->getName(); ?> make<?= $node->getSyntaxKind(); ?>(const std::vector<<?= $node->getCollectionElementType(); ?>> &elements, RefCountPtr<SyntaxArena> arena = nullptr);
 <?php
-      }
+   }
 ?>
    static <?= $node->getName(); ?> makeBlank<?= $node->getSyntaxKind(); ?>(RefCountPtr<SyntaxArena> arena = nullptr);
 <?php
-   }
+}
 ?>
 
 <?php
-   foreach ($TOKENS as $token) {
-      if ($token->isKeyword()) {
+foreach ($TOKENS as $token) {
+   if ($token->isKeyword()) {
 ?>
    static TokenSyntax make<?= $token->getRawName(); ?>Keyword(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
 <?php
-      } elseif (!$token->isTextEmpty()) {
+   } elseif (!$token->isTextEmpty()) {
 ?>
    static TokenSyntax make<?= $token->getRawName(); ?>Token(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
 <?php
-      } else {
+   } else {
 ?>
    static TokenSyntax make<?= $token->getRawName(); ?>(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
 <?php
-      }
    }
+}
 ?>
 
    /// Whether a raw node kind `MemberKind` can serve as a member in a syntax
@@ -111,4 +111,4 @@ class SyntaxFactory
 
 } // polar::syntax
 
-#endif // POLARPHP_SYNTAX_SYNTAX_FACTORY_H
+#endif // POLARPHP_SYNTAX_SYNTAX_NODE_FACTORY_H

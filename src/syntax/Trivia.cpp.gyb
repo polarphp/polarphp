@@ -30,26 +30,26 @@ TriviaPiece TriviaPiece::fromText(TriviaKind kind, StringRef text)
 {
    switch (kind) {
 <?php 
-   foreach($TRIVIAS as $trivia) {
-      $triviaName = $trivia->getName();
+foreach($TRIVIAS as $trivia) {
+   $triviaName = $trivia->getName();
 ?>
    case TriviaKind::<?= $triviaName ?>:
    {
 <?php
-      if ($trivia->isCollection()) {
+   if ($trivia->isCollection()) {
 ?>
       assert(text.size() % <?= $trivia->getCharatersLen(); ?> == 0);
       return TriviaPiece(kind, text.size() / <?= $trivia->getCharatersLen(); ?>);
 <?php
-      } else {
+   } else {
 ?>
       return TriviaPiece(kind, OwnedString::makeRefCounted(text));
 <?php
-      }
+   }
 ?>
    }
 <?php
-   }
+}
 ?>
    }
    polar_unreachable("unknown kind");
@@ -64,25 +64,25 @@ void TriviaPiece::dump(RawOutStream &outStream, unsigned indent) const
    outStream << retrieve_trivia_kind_name(m_kind);
    switch (m_kind) {
 <?php 
-   foreach($TRIVIAS as $trivia) {
-      $triviaName = $trivia->getName();
+foreach($TRIVIAS as $trivia) {
+   $triviaName = $trivia->getName();
 ?>
    case TriviaKind::<?= $triviaName ?>:
       outStream << "<?= $trivia->getLowerName() ?>";
 <?php
-      if ($trivia->isCollection()) {
+   if ($trivia->isCollection()) {
 ?>
       outStream << m_count;
 <?php
-      } else {
+   } else {
 ?>
       outStream.writeEscaped(m_text.getStr());
 <?php
-      }
+   }
 ?>
       break;
 <?php 
-   }
+}
 ?>
    }
    outStream << ')';
@@ -97,8 +97,8 @@ bool is_comment_trivia_kind(TriviaKind kind)
 {
    switch (kind) {
 <?php 
-   foreach($TRIVIAS as $trivia) {
-      $triviaName = $trivia->getName();
+foreach($TRIVIAS as $trivia) {
+   $triviaName = $trivia->getName();
 ?>
    case TriviaKind::<?= $triviaName ?>:
 <?php 
@@ -113,7 +113,7 @@ bool is_comment_trivia_kind(TriviaKind kind)
    }
 ?>
 <?php
-   }
+}
 ?>
    }
    polar_unreachable("unknown kind");
@@ -123,30 +123,30 @@ void TriviaPiece::accumulateAbsolutePosition(AbsolutePosition &pos) const
 {
    switch (m_kind) {
 <?php 
-   foreach($TRIVIAS as $trivia) {
-      $triviaName = $trivia->getName();
+foreach($TRIVIAS as $trivia) {
+   $triviaName = $trivia->getName();
 ?>
    case TriviaKind::<?= $triviaName ?>:
 <?php
-      if (!$trivia->isCollection()) {
+   if (!$trivia->isCollection()) {
 ?>
       pos.addText(m_text.getStr());
 <?php
-      } elseif($trivia->isNewLine()) {
+   } elseif($trivia->isNewLine()) {
 ?>
       /// newline
       pos.addNewlines(m_count, <?= $trivia->getCharatersLen(); ?>);
 <?php
-      } else {
+   } else {
 ?>
       /// collection
       pos.addColumns(m_count);
 <?php
-      }
+   }
 ?>
       break;
 <?php
-   }
+}
 ?>
    }
 }
@@ -158,22 +158,22 @@ bool TriviaPiece::trySquash(const TriviaPiece &next)
    }
    switch (m_kind) {
 <?php 
-   foreach($TRIVIAS as $trivia) {
-      $triviaName = $trivia->getName();
+foreach($TRIVIAS as $trivia) {
+   $triviaName = $trivia->getName();
 ?>
    case TriviaKind::<?= $triviaName ?>:
 <?php
-      if ($trivia->isCollection()) {
+   if ($trivia->isCollection()) {
 ?>
       m_count += next.m_count;
       return true;
 <?php
-      } else {
+   } else {
 ?>
       return false;
 <?php
-      }
    }
+}
 ?>
    }
    polar_unreachable("unknown kind");
@@ -183,27 +183,27 @@ void TriviaPiece::print(RawOutStream &outStream) const
 {
    switch (m_kind) {
 <?php 
-   foreach($TRIVIAS as $trivia) {
-      $triviaName = $trivia->getName();
+foreach($TRIVIAS as $trivia) {
+   $triviaName = $trivia->getName();
 ?>
    case TriviaKind::<?= $triviaName ?>:
 <?php
-      if ($trivia->isCollection()) {
-         $joined = join('', $trivia->getCharacters());
+   if ($trivia->isCollection()) {
+      $joined = join('', $trivia->getCharacters());
 ?>
       for (uint i = 0; i < m_count; ++i) {
          outStream << "<?= $joined; ?>";
       }
 <?php
-      } else {
+   } else {
 ?>
       outStream << m_text.getStr();
 <?php
-      }
+   }
 ?>
       break;
 <?php
-   }
+}
 ?>
    }
 }
