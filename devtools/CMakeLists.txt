@@ -11,6 +11,8 @@
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+include(InitializePhpDevTools)
+
 add_subdirectory(filechecker)
 add_subdirectory(not)
 add_subdirectory(cat)

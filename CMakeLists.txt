@@ -75,7 +75,7 @@ set(POLAR_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_NAME})
 string(TOLOWER ${POLAR_SYSTEM_NAME} POLAR_SYSTEM_NORMAL_NAME)
 set(POLAR_CONFIGURE_TEMP_DIR ${POLAR_BINARY_DIR}/conf_temp)
 set(POLAR_HEADER_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/polarphp)
-set(POLAR_DEVTOLS_DIR ${CMAKE_SOURCE_DIR}/devtools)
+set(POLAR_DEVTOOLS_DIR ${CMAKE_SOURCE_DIR}/devtools)
 
 # for test only
 set(POLAR_UNITTEST_TEST_BINARY_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/unittests/bin")
@@ -431,7 +431,7 @@ set(TARGET_TRIPLE "${POLAR_DEFAULT_TARGET_TRIPLE}")
 message(STATUS "polarphp host triple: ${POLAR_HOST_TRIPLE}")
 message(STATUS "polarphp default target triple: ${POLAR_DEFAULT_TARGET_TRIPLE}")
 include(ProcesseRequirePackages)
-include(HandlePolarOptions)
+include(HandleOptions)
 
 string(TIMESTAMP _buildDate "%Y-%m-%d %H:%M")
 
@@ -460,6 +460,7 @@ include_directories(${POLAR_SOURCE_DIR}
 
 include(ImportThirdparty)
 
+add_subdirectory(devtools)
 add_subdirectory(assets)
 add_subdirectory(include)
 add_subdirectory(src)
@@ -475,7 +476,6 @@ if (POLAR_BUILD_TESTS)
    set(POLAR_LIT_RUNTIME_DIR ${POLAR_BINARY_DIR}/litruntime)
    set(POLAR_LIT_TEST_BIN_DIR ${POLAR_LIT_RUNTIME_DIR}/bin)
    set(POLAR_LIT_TEST_LIB_DIR ${POLAR_LIT_RUNTIME_DIR}/lib)
-   add_subdirectory(devtools)
    if (POLAR_BUILD_UNITTESTS)
       add_subdirectory(unittests)
    endif()

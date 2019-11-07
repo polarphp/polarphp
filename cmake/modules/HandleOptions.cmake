@@ -17,7 +17,7 @@
 # else.
 
 include(CheckCompilerVersion)
-include(HandlePolarStdlib)
+include(HandleStdlib)
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 

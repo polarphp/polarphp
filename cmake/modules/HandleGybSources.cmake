@@ -48,8 +48,8 @@ function(handle_gyb_source_single dependency_out_var_name)
       GYB_SINGLE # prefix
       "${options}" "${single_value_args}" "${multi_value_args}" ${ARGN})
 
-   set(gyb_tool "${SWIFT_SOURCE_DIR}/utils/gyb")
-   set(gyb_tool_source "${gyb_tool}" "${gyb_tool}.py")
+   set(gyb_tool "${POLAR_DEVTOOLS_DIR}/gyb/gyb")
+   set(gyb_tool_source "${gyb_tool}" "${gyb_tool}.php")
 
    get_filename_component(dir "${GYB_SINGLE_OUTPUT}" DIRECTORY)
    get_filename_component(basename "${GYB_SINGLE_OUTPUT}" NAME)
@@ -69,7 +69,7 @@ function(handle_gyb_source_single dependency_out_var_name)
       COMMAND
       "${CMAKE_COMMAND}" -E make_directory "${dir}"
       COMMAND
-      "${PYTHON_EXECUTABLE}" "${gyb_tool}" ${SWIFT_GYB_FLAGS} ${GYB_SINGLE_FLAGS} -o "${GYB_SINGLE_OUTPUT}.tmp" "${GYB_SINGLE_SOURCE}"
+      "${PHP_EXECUTABLE}" "${gyb_tool}" generate ${GYB_SINGLE_FLAGS} -o "${GYB_SINGLE_OUTPUT}.tmp" "${GYB_SINGLE_SOURCE}"
       COMMAND
       "${CMAKE_COMMAND}" -E copy_if_different "${GYB_SINGLE_OUTPUT}.tmp" "${GYB_SINGLE_OUTPUT}"
       COMMAND
@@ -111,7 +111,7 @@ function(handle_gyb_sources dependency_out_var_name sources_var_name)
    set(dependency_targets)
    set(de_gybbed_sources)
    set(gyb_extra_sources)
-   set(gyb_dir ${POLAR_DEVTOLS_DIR}/gyb/src)
+   set(gyb_dir ${POLAR_DEVTOOLS_DIR}/gyb/src)
    file(GLOB_RECURSE gyb_extra_sources
       LIST_DIRECTORIES false
       ${gyb_dir}/*.php)
@@ -130,19 +130,13 @@ function(handle_gyb_sources dependency_out_var_name sources_var_name)
             set(dir_root ${CMAKE_CURRENT_BINARY_DIR})
          endif()
 
-         if (arch)
-            set(dir "${dir_root}/${ptr_size}")
-         else()
-            set(dir "${dir_root}")
-         endif()
-         set(output_file_name "${dir}/${src_sans_gyb}")
+         set(output_file_name "${dir_root}/${src_sans_gyb}")
          list(APPEND de_gybbed_sources "${output_file_name}")
          handle_gyb_source_single(dependency_target
             SOURCE "${src}"
             OUTPUT "${output_file_name}"
             FLAGS ${extra_gyb_flags}
-            DEPENDS "${gyb_extra_sources}"
-            COMMENT "with ptr size = ${ptr_size}")
+            DEPENDS "${gyb_extra_sources}")
          list(APPEND dependency_targets "${dependency_target}")
       endif()
    endforeach()
