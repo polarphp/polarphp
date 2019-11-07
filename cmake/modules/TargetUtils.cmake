@@ -242,10 +242,16 @@ function(polar_add_library_internal name)
       # Pass through ADDITIONAL_HEADERS.
       set(ARG_ADDITIONAL_HEADERS ADDITIONAL_HEADERS ${ARG_ADDITIONAL_HEADERS})
    endif()
+
    if(ARG_OBJLIBS)
       set(ALL_FILES ${ARG_OBJLIBS})
    else()
       polar_process_sources(ALL_FILES ${ARG_UNPARSED_ARGUMENTS} ${ARG_ADDITIONAL_HEADERS})
+   endif()
+   handle_gyb_sources(gyb_dependency_targets ALL_FILES)
+
+   if (gyb_dependency_targets)
+      list(APPEND POLAR_COMMON_DEPENDS ${gyb_dependency_targets})
    endif()
 
    if(ARG_MODULE)

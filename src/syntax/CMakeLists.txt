@@ -37,10 +37,16 @@ add_custom_command(OUTPUT ${POLAR_TOKEN_ENUM_DEF_FILE}
 list(APPEND POLAR_SYNTAX_SOURCES
    ${POLAR_TOKEN_DESC_MAP_FILE}
    ${POLAR_TOKEN_ENUM_DEF_FILE}
+   SyntaxNodes.cpp.gyb
+   SyntaxNodeBuilders.cpp.gyb
+   SyntaxKind.cpp.gyb
+   SyntaxNodeFactory.cpp.gyb
+   SyntaxNodeVisitor.cpp.gyb
+   Trivia.cpp.gyb
    )
 
 polar_add_library(PolarSyntax SHARED
    ${POLAR_SYNTAX_SOURCES}
    LINK_LIBS PolarUtils PolarKernel
-   DEPENDS PolarRe2cLangLexer)
+   DEPENDS PolarRe2cLangLexer polar-syntax-generated-headers)
 

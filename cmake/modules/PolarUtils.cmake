@@ -10,6 +10,7 @@
 include(CMakeParseArguments)
 include(CheckIncludeFiles)
 include(CheckCSourceCompiles)
+include(CheckSymbolExists)
 
 function(polar_precondition var)
    cmake_parse_arguments(

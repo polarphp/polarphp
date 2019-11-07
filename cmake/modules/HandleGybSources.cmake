@@ -49,7 +49,7 @@ function(handle_gyb_source_single dependency_out_var_name)
       "${options}" "${single_value_args}" "${multi_value_args}" ${ARGN})
 
    set(gyb_tool "${POLAR_DEVTOOLS_DIR}/gyb/gyb")
-   set(gyb_tool_source "${gyb_tool}" "${gyb_tool}.php")
+   set(gyb_tool_source "${gyb_tool}")
 
    get_filename_component(dir "${GYB_SINGLE_OUTPUT}" DIRECTORY)
    get_filename_component(basename "${GYB_SINGLE_OUTPUT}" NAME)

@@ -11,7 +11,6 @@ include(CheckIncludeFiles)
 include(CheckTypeSize)
 include(CMakeDetermineSystem)
 include(CheckFunctionExists)
-include(CheckStdCHeaders)
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 include(CheckCSourceCompiles)
@@ -143,10 +142,6 @@ polar_add_rt_require_lib(m)
 # Then headers.
 # -------------------------------------------------------------------------
 
-## Check include files
-polar_check_stdc_headers()
-polar_check_dirent_headers()
-
 # QNX requires unix.h to allow functions in libunix to work properly
 polar_check_headers(
    inttypes.h
@@ -169,16 +164,9 @@ polar_check_headers(
    locale.h
    monetary.h
    netdb.h
-   poll.h
    pwd.h
    resolv.h
    signal.h
-   stdarg.h
-   stdlib.h
-   string.h
-   strings.h
-   syslog.h
-   sysexits.h
    sys/param.h
    sys/types.h
    sys/time.h
@@ -241,24 +229,11 @@ if (HAVE_STRUCT_STAT_ST_RDEV)
 endif()
 
 polar_check_funcs(
-   alphasort
    asctime_r
    chroot
    ctime_r
-   cuserid
-   crypt
    flock
    ftok
-   funopen
-   gai_strerror
-   gcvt
-   getloadavg
-   getlogin
-   getprotobyname
-   getprotobynumber
-   getservbyname
-   getservbyport
-   gethostname
    gettimeofday
    gmtime_r
    getpwnam_r
@@ -301,15 +276,6 @@ polar_check_funcs(
    srandom
    statfs
    statvfs
-   std_syslog
-   strcasecmp
-   strcoll
-   strdup
-   strerror
-   strftime
-   strnlen
-   strptime
-   strstr
    strtok_r
    symlink
    tempnam
@@ -321,9 +287,7 @@ polar_check_funcs(
    vsnprintf
    vasprintf
    asprintf
-   nanosleep
-   setproctitle
-   setproctitle_fast)
+   nanosleep)
 
 # TODO use polar_check_symbol_exists or polar_check_funcs ?
 polar_check_symbol_exists(arc4random "stdlib.h" HAVE_DECL_ARC4RANDOM)

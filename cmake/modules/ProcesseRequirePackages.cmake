@@ -49,10 +49,10 @@ else()
 endif()
 
 find_program(POLAR_COMPOSER_EXECUTABLE composer)
-if (NOT POLAR_COMPOSER)
+if (NOT POLAR_COMPOSER_EXECUTABLE)
    message(FATAL_ERROR "composer is required to build polarphp")
 else()
-   message("found ${POLAR_COMPOSER}")
+   message("found ${POLAR_COMPOSER_EXECUTABLE}")
 endif()
 
 polar_check_prog_awk()
