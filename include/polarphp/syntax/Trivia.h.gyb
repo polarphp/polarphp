@@ -197,7 +197,7 @@ public:
 <?php
       if ($trivia->isCollection()) {
 ?>
-         return count * <?= $trivia->getCharatersLen(); ?>;
+         return m_count * <?= $trivia->getCharatersLen(); ?>;
 <?php
       } else {
 ?>
@@ -258,7 +258,7 @@ public:
 <?php
       } else {
 ?>
-         id.addInteger(m_text.getStr());
+         id.addString(m_text.getStr());
 <?php
       }
    }
@@ -436,8 +436,9 @@ struct Trivia
       if ($trivia->isCollection()) {
 ?>
 
-   static Trivia get<?= $triviaName ?>s(unsigned count) {
-      if (Count == 0) {
+   static Trivia get<?= $triviaName ?>s(unsigned count) 
+   {
+      if (count == 0) {
          return {};
       }
       return {{TriviaPiece::get<?= $triviaName ?>s(count)}};
@@ -512,6 +513,8 @@ struct WrapperTypeTraits<syntax::TriviaKind>
       }
    }
 ?>
+      default:
+         break;
       }
       polar_unreachable("unhandled kind");
    }
