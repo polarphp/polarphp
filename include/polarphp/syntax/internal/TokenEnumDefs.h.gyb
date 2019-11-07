@@ -13,10 +13,18 @@
 #define POLARPHP_SYNTAX_INTERNAL_TOKEN_ENUM_DEFS_H
 
 namespace polar::syntax::internal {
+
 enum TokenKindType
 {
-
+<?php 
+foreach ($TOKENS as $token) {
+?>
+   <?= $token->getKind(); ?> = <?= $token->getSerializationCode(); ?>,
+<?php
+}
+?>
 };
+
 } // namespace polar::syntax::internal
 
 #endif // POLARPHP_SYNTAX_INTERNAL_TOKEN_ENUM_DEFS_H
