@@ -107,6 +107,8 @@ polar_merge_list(POLAR_HEADERS POLAR_SYNTAX_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_UTILS_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_RUNTIME_HEADERS)
 
+add_subdirectory(syntax)
+
 configure_file(global/PolarVersion.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/polarphp/global/PolarVersion.h
    @ONLY)
 configure_file(global/BuildDefs.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/polarphp/global/BuildDefs.h

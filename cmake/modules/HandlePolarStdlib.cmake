@@ -8,6 +8,7 @@
 # See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
 # Created by polarboy on 2018/08/22.
+
 include(DetermineGCCCompatible)
 
 if(NOT DEFINED POLAR_STDLIB_HANDLED)

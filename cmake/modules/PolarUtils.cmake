@@ -281,3 +281,24 @@ macro(polar_detect_compiler_root_dir _targetDir)
    set(${_targetDir} ${_tempDir})
 endmacro()
 
+# Translate a yes/no variable to the presence of a given string in a
+# variable.
+#
+# Usage:
+#   translate_flag(is_set flag_name var_name)
+#
+# If is_set is true, sets ${var_name} to ${flag_name}. Otherwise,
+# unsets ${var_name}.
+function(polar_translate_flag is_set flag_name var_name)
+   if(${is_set})
+      set("${var_name}" "${flag_name}" PARENT_SCOPE)
+   else()
+      set("${var_name}" "" PARENT_SCOPE)
+   endif()
+endfunction()
+
+macro(polar_translate_flags prefix options)
+   foreach(var ${options})
+      polar_translate_flag("${${prefix}_${var}}" "${var}" "${prefix}_${var}_keyword")
+   endforeach()
+endmacro()

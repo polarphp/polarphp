@@ -37,7 +37,6 @@
 #  License text for the above reference.)
 
 FIND_PROGRAM(PHP_CONFIG_EXECUTABLE NAMES php-config5 php-config4 php-config)
-
 if (PHP_CONFIG_EXECUTABLE)
    execute_process(
       COMMAND

@@ -107,14 +107,17 @@ class Generator
 
    private function executeTpl(string $executableFile): string
    {
+      $fs = new Filesystem();
       ob_start();
       try {
          include $executableFile;
       } catch (\Exception $e) {
          ob_get_clean();
+         $fs->remove($executableFile);
          throw $e;
       }
       $result = ob_get_clean();
+      $fs->remove($executableFile);
       return $result;
    }
 
