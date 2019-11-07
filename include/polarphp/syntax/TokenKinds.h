@@ -45,9 +45,6 @@ bool is_token_text_determined(TokenKindType kind);
 /// If a token kind has determined text, return the text; otherwise assert.
 StringRef get_token_text(TokenKindType kind);
 void dump_token_kind(RawOutStream &outStream, TokenKindType kind);
-TokenDescItemType retrieve_token_desc_entry(TokenKindType kind);
-TokenDescMap::const_iterator find_token_desc_entry(TokenKindType kind);
-TokenDescMap::const_iterator token_desc_map_end();
 bool is_internal_token(TokenKindType kind);
 bool is_keyword_token(TokenKindType kind);
 bool is_decl_keyword_token(TokenKindType kind);

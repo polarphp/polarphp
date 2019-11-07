@@ -15,7 +15,7 @@
 namespace polar::syntax::internal {
 enum TokenKindType
 {
-   __TOKEN_DEFS__
+
 };
 } // namespace polar::syntax::internal
 

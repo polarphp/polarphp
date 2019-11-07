@@ -101,9 +101,7 @@ using namespace polar::syntax;
 <?php
    foreach($TOKENS as $token) {
       $line = "%token " . $token->getKind();
-      if (!is_null($token->getEnumValue())) {
-         $line .= ' ' . $token->getEnumValue();
-      }
+      $line .= ' ' . $token->getSerializationCode();
       $line .= '  "' . $token->getText() . ' (' . $token->getKind() . ')"';
       echo $line."\n";
    }

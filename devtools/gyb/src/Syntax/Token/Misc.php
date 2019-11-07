@@ -16,10 +16,10 @@ use Gyb\Syntax\Token;
 
 class Misc extends Token
 {
-   public function __construct(string $name, string $kind, string $text, int $serializationCode, $enumValue = null,
+   public function __construct(string $name, string $kind, string $text, int $serializationCode,
                                string $classification = 'None')
    {
-      parent::__construct($name, $kind, $serializationCode, $text, $enumValue, $classification);
+      parent::__construct($name, $kind, $serializationCode, $text, $classification);
    }
 
    public function getMacroName(): string
