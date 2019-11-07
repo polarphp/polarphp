@@ -1,0 +1,99 @@
+//// Automatically Generated From SyntaxBuilders.cpp.gyb.
+//// Do Not Edit Directly!
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
+// This source file is part of the polarphp.org open source project
+//
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://polarphp.org/LICENSE.txt for license information
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+//
+// Created by polarboy on 2019/11/07.
+
+#include "polarphp/syntax/SyntaxNodeBuilders.h"
+
+namespace polar::syntax
+{
+
+<?php
+use function Gyb\Utils\make_missing_child;
+$syntaxNodeMap = $SYNTAX_NODE_MAP;
+foreach ($SYNTAX_NODES as $node) {
+   $nodeName = $node->getName();
+   $nodeSyntaxKind = $node->getSyntaxKind();
+   if ($node->isBuildable()) {
+      $children = $node->getChildren();
+      foreach ($children as $child) {
+         $childName = $child->getName();
+         $childTypeName = $child->getTypeName();
+         $childSyntaxKind = $child->getSyntaxKind();
+         $childNode = isset($syntaxNodeMap[$childSyntaxKind]) ? $syntaxNodeMap[$childSyntaxKind] : null;
+?>
+<?= $nodeName ?>Builder &<?= $nodeName ?>Builder::use<?= $childName ?>(<?= $childTypeName ?> <?= lcfirst($childName) ?>) 
+{
+   layout[cursorIndex(<?= $nodeName ?>::Cursor::<?= $childName ?>)] = <?= lcfirst($childName) ?>.getRaw();
+   return *this;
+}
+
+<?php
+         if ($childNode && $childNode->isSyntaxCollection()) {
+            $elementName = $child->getCollectionElementName();
+            $elementType = $childNode->getCollectionElementType();
+            if (strlen($elementName) == 0) {
+               throw new \RuntimeException(sprintf("'collectionElementName' should be set for '%s' of '%s'", 
+                  $childName, $nodeName));
+            }
+?>
+<?= $nodeName ?>Builder 
+&<?= $nodeName ?>Builder::add<?= $elementName ?>(<?= $elementType ?> <?= lcfirst($elementName) ?>) {
+  auto &raw = layout[cursor_index(<?= $nodeName ?>::Cursor::<?= $childName ?>)];
+  if (!raw) {
+      raw = RawSyntax::make(
+                           SyntaxKind::<?= $childNode->getSyntaxKind() ?>,
+                           {<?= lcfirst($elementName) ?>.getRaw()},
+                           SourcePresence::Present, arena);
+   } else {
+      raw = raw->append(<?= lcfirst($elementName) ?>.getRaw());
+   }
+   return *this;
+}
+
+<?php
+         }
+      }
+?>
+<?= $nodeName ?> <?= $nodeName ?>Builder::build() 
+{
+<?php
+   if (!empty($children)) {
+      foreach ($children as $childIndex => $child) {
+         if (!$child->isOptional()) {
+?>
+   if (!m_layout[<?= $childIndex ?>]) {
+      m_layout[<?= $childIndex ?>] = <?= make_missing_child($child); ?>;
+   }
+<?php
+         }
+      }
+   }
+?>
+   auto raw = RawSyntax::make(SyntaxKind::<?= $nodeSyntaxKind ?>, 
+                              layout, SourcePresence::Present, arena);
+   return make<<?= $nodeName ?>>(raw);
+}
+
+<?php
+   }
+}
+?>
+} // polar::syntax
