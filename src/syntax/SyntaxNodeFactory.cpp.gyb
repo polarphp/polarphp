@@ -1,0 +1,381 @@
+<?php
+use function Gyb\Utils\check_child_condition_raw;
+use function Gyb\Utils\make_missing_child;
+?>
+//// Automatically Generated From SyntaxFactory.cpp.gyb.
+//// Do Not Edit Directly!
+//===----------------------------------------------------------------------===//
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
+//
+// This file defines the SyntaxFactory, one of the most important client-facing
+// types in lib/Syntax and likely to be very commonly used.
+//
+// Effectively a namespace, SyntaxFactory is never instantiated, but is *the*
+// one-stop shop for making new Syntax nodes. Putting all of these into a
+// collection of static methods provides a single point of API lookup for
+// clients' convenience and also allows the library to hide all of the
+// constructors for all Syntax nodes, as the SyntaxFactory is friend to all.
+//
+//===----------------------------------------------------------------------===//
+// This source file is part of the polarphp.org open source project
+//
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://polarphp.org/LICENSE.txt for license information
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+//
+// Created by polarboy on 2019/11/06.
+
+#include "polarphp/syntax/SyntaxNodes.h"
+#include "polarphp/syntax/SyntaxFactory.h"
+#include "polarphp/basic/adt/ArrayRef.h"
+
+#include <vector>
+
+namespace polar::syntax {
+
+using polar::basic::ArrayRef;
+
+TokenSyntax SyntaxFactory::makeToken(TokenKindType kind, OwnedString text,
+                                     const Trivia &leadingTrivia,
+                                     const Trivia &trailingTrivia,
+                                     SourcePresence presence,
+                                     RefCountPtr<SyntaxArena> arena) 
+{
+   return make<TokenSyntax>(
+      RawSyntax::make(kind, text, leadingTrivia.pieces, trailingTrivia.pieces, presence, arena));
+}
+
+UnknownSyntax
+SyntaxFactory::makeUnknownSyntax(ArrayRef<TokenSyntax> tokens,
+                                 RefCountPtr<SyntaxArena> arena)
+{
+   std::vector<RefCountPtr<RawSyntax>> layout;
+   layout.reserve(tokens.size());
+   for (auto &token : tokens) {
+      layout.push_back(token.getRaw());
+   }
+   auto raw = RawSyntax::make(SyntaxKind::Unknown, layout, SourcePresence::Present, arena);
+   return make<UnknownSyntax>(raw);
+}
+
+Syntax SyntaxFactory::makeBlankCollectionSyntax(SyntaxKind kind) 
+{
+   switch(kind) {
+<?php
+foreach ($SYNTAX_NODES as $node) {
+   $nodeName = $node->getName();
+   $nodeSyntaxKind = $node->getSyntaxKind();
+   if ($node->isSyntaxCollection()) {
+?>
+   case SyntaxKind::<?= $nodeSyntaxKind ?>:
+      return makeBlank<?= $nodeSyntaxKind ?>();
+<?php
+   }
+}
+?>
+   default:
+      polar_unreachable("not collection kind.");
+   }
+}
+
+std::pair<unsigned, unsigned> SyntaxFactory::countChildren(SyntaxKind kind)
+{
+   switch(kind) {
+<?php
+foreach ($SYNTAX_NODES as $node) {
+   $nodeName = $node->getName();
+   $nodeSyntaxKind = $node->getSyntaxKind();
+   if (!$node->isSyntaxCollection()) {
+?>
+   case SyntaxKind::<?= $nodeSyntaxKind ?>:
+<?php 
+      $children = $node->getChildren();
+      $childCount = count($children);
+      $nonOptionalChildCount = 0;
+      foreach ($children as $child) {
+         if (!$child->isOptional()) {
+            ++$nonOptionalChildCount;
+         }
+      }
+?>
+      return {<?= $nonOptionalChildCount ?>, <?= $childCount ?>};
+<?php
+   }
+}
+?>
+   default:
+      polar_unreachable("bad syntax kind.");
+   }
+}
+
+bool SyntaxFactory::canServeAsCollectionMemberRaw(SyntaxKind collectionKind, SyntaxKind memberKind)
+{
+   switch (collectionKind) {
+<?php
+foreach ($SYNTAX_NODES as $node) {
+   $nodeName = $node->getName();
+   $nodeSyntaxKind = $node->getSyntaxKind();
+   if ($node->isSyntaxCollection()) {
+?>
+   case SyntaxKind::<?= $nodeSyntaxKind ?>:
+<?php
+      if ($node->getCollectionElementChoices()) {
+         $elementChecks = [];
+         foreach ($node->getCollectionElementChoices() as $choice) {
+            $elementChecks[] = sprintf('%sSyntax::kindOf(memberKind)', $choice);
+         }
+?>
+      return <?= join(' || ', $elementChecks); ?>;
+<?php 
+      } else {
+?>
+      return <?= $node->getCollectionElementType(); ?>::kindOf(memberKind);
+<?php
+      }
+   }
+}
+?>
+   default:
+      polar_unreachable("Not collection kind.");
+   }
+}
+
+bool SyntaxFactory::canServeAsCollectionMemberRaw(SyntaxKind collectionKind,
+                                                  const RefCountPtr<RawSyntax> &member)
+{
+   return canServeAsCollectionMemberRaw(collectionKind, member->getKind());
+}
+
+bool SyntaxFactory::canServeAsCollectionMember(SyntaxKind collectionKind, Syntax member) 
+{
+   return canServeAsCollectionMemberRaw(collectionKind, member.getRaw());
+}
+
+RefCountPtr<RawSyntax> SyntaxFactory::createRaw(SyntaxKind kind,
+                                                ArrayRef<RC<RawSyntax>> elements,
+                                                RefCountPtr<SyntaxArena> arena)
+{
+   switch (kind) {
+<?php
+foreach ($SYNTAX_NODES as $node) {
+   $nodeName = $node->getName();
+   $nodeSyntaxKind = $node->getSyntaxKind();
+?>
+   case SyntaxKind::<?= $nodeSyntaxKind ?>: {
+<?php
+   $children = $node->getChildren();
+   $childCount = count($children);
+   if (!empty($children)) {
+?>
+      RefCountPtr<RawSyntax> layout[<?= $childCount ?>];
+      unsigned index = 0;
+<?php
+      foreach ($children as $childIndex => $child) { 
+?>
+      // child[<?= $childIndex ?>] <?= $child->getName(); ?>
+
+      if (index == elements.size() || 
+          !<?= check_child_condition_raw($child); ?>(elements[index])) {
+<?php
+         if ($child->isOptional()) {
+?>
+         layout[${child_idx}] = nullptr;
+<?php
+         } else {
+?>
+         return nullptr;
+<?php
+         }
+?>
+      } else {
+         layout[<?= $childIndex ?>] = elements[index];
+         ++index;
+      }
+<?php
+      }
+?>
+      if (index != elements.size()) {
+         return nullptr;
+      }
+      return RawSyntax::make(kind, layout, SourcePresence::Present, arena);   
+<?php
+   } elseif ($node->isSyntaxCollection()) {
+?>
+      for (auto &element : elements) {
+      if (!canServeAsCollectionMemberRaw(SyntaxKind::<?= $nodeSyntaxKind ?>, element))
+         return nullptr;
+      }
+      return RawSyntax::make(kind, elements, SourcePresence::Present, arena);
+<?php
+   } else {
+?>
+      return nullptr;
+<?php      
+   }
+?>
+   }
+<?php
+}
+?>
+   default:
+      return nullptr;
+   }
+}
+
+std::optional<Syntax> SyntaxFactory::createSyntax(SyntaxKind kind,
+                                                  ArrayRef<Syntax> elements,
+                                                  RefCountPtr<SyntaxArena> arena) 
+{
+   std::vector<RefCountPtr<RawSyntax>> layout;
+   layout.reserve(elements.size());
+   for (auto &element : elements) {
+      layout.emplace_back(element.getRaw());
+   }
+   if (auto raw = createRaw(kind, layout, arena)) {
+      return make<Syntax>(raw);
+   } else {
+      return std::nullopt;
+   }
+}
+
+<?php
+foreach ($SYNTAX_NODES as $node) {
+   $nodeName = $node->getName();
+   $nodeSyntaxKind = $node->getSyntaxKind();
+   $children = $node->getChildren();
+   if (!empty($children)) {
+      $childParams = [];
+      foreach ($children as $child) {
+         $paramType = $child->getTypeName();
+         if ($child->isOptional()) {
+            $paramType = sprintf('std::optional<%s>', $paramType);
+         }
+         $childParams[] = sprintf('%s %s', $paramType, $child->getName());
+      }
+      $childParams = join(', ', $childParams);
+?>
+<?= $nodeName ?>
+SyntaxFactory::make<?= $nodeSyntaxKind ?>(
+   <?= $childParams ?>,
+   RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::<?= $nodeSyntaxKind ?>, {
+<?php
+      foreach ($children as $child) {
+         $childName = $child->getName();
+         if ($child->isOptional()) {
+?>
+      <?= $childName ?>.has_value() ? <?= $childName ?>->getRaw() : nullptr,
+<?php
+         } else {
+?>
+      <?= $childName ?>.getRaw(),
+<?php
+         }
+      }
+?>
+   } , SourcePresence::Present, arena);
+   return make<<?= $nodeName ?>>(raw);
+}
+
+<?php
+   } elseif ($node->isSyntaxCollection()) {
+?>
+<?= $nodeName ?>
+SyntaxFactory::make<?= $nodeSyntaxKind ?>(
+   const std::vector<<?= $node->getCollectionElementType() ?>> &elements,
+   RefCountPtr<SyntaxArena> arena) 
+{
+   std::vector<RC<RawSyntax>> layout;
+   layout.reserve(elements.size());
+   for (auto &element : elements) {
+      layout.push_back(element.getRaw());
+   }
+   auto raw = RawSyntax::make(SyntaxKind::<?= $nodeSyntaxKind ?>,
+                              layout, SourcePresence::Present, arena);
+   return make<<?= $nodeName ?>>(raw);
+}
+
+<?php
+   }
+?>
+<?= $nodeName ?>
+SyntaxFactory::makeBlank<?= $nodeSyntaxKind ?>(RefCountPtr<SyntaxArena> arena)
+{
+   auto raw = RawSyntax::make(SyntaxKind::<?= $nodeSyntaxKind ?>, {
+<?php
+   foreach ($children as $child) {
+      if ($child->isOptional()) {
+?>
+      nullptr,
+<?php
+      } else {
+?>
+      <?= make_missing_child($child); ?>,
+<?php
+      }
+   }
+?>
+   }, SourcePresence::Present, arena);
+   return make<<?= $nodeName ?>>(raw);
+}
+
+<?php
+}
+?>
+<?php
+foreach ($TOKENS as $token) {
+   $tokenName = $token->getName();
+   $tokenKind = $token->getKind();
+   $tokenText = $token->getText();
+   if ($token instanceof \Gyb\Syntax\Token\Misc) {
+      $tokenText = '';
+   }
+   if ($token->isKeyword()) {
+?>
+TokenSyntax
+SyntaxFactory::make<?= $tokenName ?>(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena)
+{
+   return makeToken(TokenKindType::<?= $tokenKind ?>,
+                    OwnedString::makeUnowned("<?= $tokenText ?>"),
+                    leadingTrivia, trailingTrivia,
+                    SourcePresence::Present, arena);
+}
+
+<?php
+   } elseif (!empty($tokenText)) {
+?>
+TokenSyntax
+SyntaxFactory::make<?= $tokenName ?>(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena)
+{
+   return makeToken(TokenKindType::<?= $tokenKind ?>,
+                    OwnedString::makeUnowned("<?= $tokenText ?>"),
+                    leadingTrivia, trailingTrivia,
+                    SourcePresence::Present, arena);
+}
+
+<?php
+   } else {
+?>
+TokenSyntax
+SyntaxFactory::make<?= $tokenName ?>(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena)
+{
+   return makeToken(TokenKindType::<?= $tokenKind ?>, text,
+                    leadingTrivia, trailingTrivia,
+                    SourcePresence::Present, arena);
+}
+
+<?php
+   }
+}
+?>
+} // polar::syntax
