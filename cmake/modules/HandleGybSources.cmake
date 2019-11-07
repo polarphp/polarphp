@@ -107,45 +107,47 @@ endfunction()
 #   destination; this is useful for generated include files.
 
 function(handle_gyb_sources dependency_out_var_name sources_var_name)
-  set(extra_gyb_flags "")
-
-  set(dependency_targets)
-  set(de_gybbed_sources)
-  set(gyb_extra_sources)
-
-  foreach (src ${${sources_var_name}})
-    string(REGEX REPLACE "[.]gyb$" "" src_sans_gyb "${src}")
-    if(src STREQUAL src_sans_gyb)
-      list(APPEND de_gybbed_sources "${src}")
-    else()
-
-      # On Windows (using Visual Studio), the generated project files assume that the
-      # generated GYB files will be in the source, not binary directory.
-      # We can work around this by modifying the root directory when generating VS projects.
-      if ("${CMAKE_GENERATOR_PLATFORM}" MATCHES "Visual Studio")
-        set(dir_root ${CMAKE_CURRENT_SOURCE_DIR})
+   set(extra_gyb_flags "")
+   set(dependency_targets)
+   set(de_gybbed_sources)
+   set(gyb_extra_sources)
+   set(gyb_dir ${POLAR_DEVTOLS_DIR}/gyb/src)
+   file(GLOB_RECURSE gyb_extra_sources
+      LIST_DIRECTORIES false
+      ${gyb_dir}/*.php)
+   foreach (src ${${sources_var_name}})
+      string(REGEX REPLACE "[.]gyb$" "" src_sans_gyb "${src}")
+      if(src STREQUAL src_sans_gyb)
+         list(APPEND de_gybbed_sources "${src}")
       else()
-        set(dir_root ${CMAKE_CURRENT_BINARY_DIR})
-      endif()
 
-      if (arch)
-        set(dir "${dir_root}/${ptr_size}")
-      else()
-        set(dir "${dir_root}")
+         # On Windows (using Visual Studio), the generated project files assume that the
+         # generated GYB files will be in the source, not binary directory.
+         # We can work around this by modifying the root directory when generating VS projects.
+         if ("${CMAKE_GENERATOR_PLATFORM}" MATCHES "Visual Studio")
+            set(dir_root ${CMAKE_CURRENT_SOURCE_DIR})
+         else()
+            set(dir_root ${CMAKE_CURRENT_BINARY_DIR})
+         endif()
+
+         if (arch)
+            set(dir "${dir_root}/${ptr_size}")
+         else()
+            set(dir "${dir_root}")
+         endif()
+         set(output_file_name "${dir}/${src_sans_gyb}")
+         list(APPEND de_gybbed_sources "${output_file_name}")
+         handle_gyb_source_single(dependency_target
+            SOURCE "${src}"
+            OUTPUT "${output_file_name}"
+            FLAGS ${extra_gyb_flags}
+            DEPENDS "${gyb_extra_sources}"
+            COMMENT "with ptr size = ${ptr_size}")
+         list(APPEND dependency_targets "${dependency_target}")
       endif()
-      set(output_file_name "${dir}/${src_sans_gyb}")
-      list(APPEND de_gybbed_sources "${output_file_name}")
-      handle_gyb_source_single(dependency_target
-          SOURCE "${src}"
-          OUTPUT "${output_file_name}"
-          FLAGS ${extra_gyb_flags}
-          DEPENDS "${gyb_extra_sources}"
-          COMMENT "with ptr size = ${ptr_size}")
-      list(APPEND dependency_targets "${dependency_target}")
-    endif()
-  endforeach()
-  set("${dependency_out_var_name}" "${dependency_targets}" PARENT_SCOPE)
-  set("${sources_var_name}" "${de_gybbed_sources}" PARENT_SCOPE)
+   endforeach()
+   set("${dependency_out_var_name}" "${dependency_targets}" PARENT_SCOPE)
+   set("${sources_var_name}" "${de_gybbed_sources}" PARENT_SCOPE)
 endfunction()
 
 function(add_gyb_target target sources)
