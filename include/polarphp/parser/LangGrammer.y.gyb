@@ -99,12 +99,12 @@ using namespace polar::syntax;
 /* token define start */
 
 <?php
-   foreach($TOKENS as $token) {
-      $line = "%token " . $token->getKind();
-      $line .= ' ' . $token->getSerializationCode();
-      $line .= '  "' . $token->getText() . ' (' . $token->getKind() . ')"';
-      echo $line."\n";
-   }
+foreach($TOKENS as $token) {
+   $line = "%token " . $token->getKind();
+   $line .= ' ' . $token->getSerializationCode();
+   $line .= '  "' . $token->getText() . ' (' . $token->getKind() . ')"';
+   echo $line."\n";
+}
 ?>
 
 /* token define end */
@@ -222,7 +222,7 @@ reserved_non_modifiers_token:
 reserved_non_modifiers:
    reserved_non_modifiers_token {
       TokenSyntax modifierKeyword = make<TokenSyntax>($1);
-      ReservedNonModifierSyntax modifier = make_decl(ReservedNonModifier, modifierKeyword);
+      ReservedNonModifierSyntax modifier = make_syntax_node(ReservedNonModifier, modifierKeyword);
       $$ = modifier.getRaw();
    }
 ;
@@ -240,20 +240,20 @@ semi_reserved_token:
 semi_reserved:
    semi_reserved_token {
       TokenSyntax reservedKeyword = make<TokenSyntax>($1);
-      SemiReservedSytnax semiReserved = make_decl(SemiReserved, reservedKeyword);
+      SemiReservedSytnax semiReserved = make_syntax_node(SemiReserved, reservedKeyword);
       $$ = semiReserved.getRaw();
    }
 ;
 
 identifier:
    T_IDENTIFIER_STRING {
-      TokenSyntax identifierToken = make_token_with_text(IdentifierString, $1);
-      IdentifierSyntax identifier = make_decl(Identifier, identifierToken);
+      TokenSyntax identifierToken = make_token_with_text(IdentifierStringToken, $1);
+      IdentifierSyntax identifier = make_syntax_node(Identifier, identifierToken);
       $$ = identifier.getRaw();
    }
 |	semi_reserved {
       SemiReservedSytnax reserved = make<SemiReservedSytnax>($1);
-      IdentifierSyntax identifier = make_decl(Identifier, reserved);
+      IdentifierSyntax identifier = make_syntax_node(Identifier, reserved);
       $$ = identifier.getRaw();
    }
 ;
@@ -266,7 +266,7 @@ top_statement_list:
       $$ = topStmtList.getRaw();
    }
 |  %empty {
-      TopStmtListSyntax topStmtList = make_blank_stmt(TopStmtList);
+      TopStmtListSyntax topStmtList = make_blank_syntax_node(TopStmtList);
       $$ = topStmtList.getRaw();
    }
 ;
@@ -274,14 +274,14 @@ top_statement_list:
 namespace_name:
    T_IDENTIFIER_STRING {
       TokenSyntax identifierToken = make_token_with_text(IdentifierString, $1);
-      NamespaceNameSyntax namespaceName = make_decl(NamespaceName, std::nullopt, std::nullopt, identifierToken);
+      NamespaceNameSyntax namespaceName = make_syntax_node(NamespaceName, std::nullopt, std::nullopt, identifierToken);
       $$ = namespaceName.getRaw();
    }
 |  namespace_name T_NS_SEPARATOR T_IDENTIFIER_STRING {
       NamespaceNameSyntax parentNs = make<NamespaceNameSyntax>($1);
       TokenSyntax separator = make_token(NamespaceSeparatorToken);
       TokenSyntax identifierToken = make_token_with_text(IdentifierString, $3);
-      NamespaceNameSyntax newNs = make_decl(NamespaceName, parentNs, separator, identifierToken);
+      NamespaceNameSyntax newNs = make_syntax_node(NamespaceName, parentNs, separator, identifierToken);
       $$ = newNs.getRaw();
    }
 ;
@@ -289,20 +289,20 @@ namespace_name:
 name:
    namespace_name {
       NamespaceNameSyntax ns = make<NamespaceNameSyntax>($1);
-      NameSyntax name = make_decl(Name, std::nullopt, std::nullopt, ns);
+      NameSyntax name = make_syntax_node(Name, std::nullopt, std::nullopt, ns);
       $$ = ns.getRaw();
    }
 |  T_NAMESPACE T_NS_SEPARATOR namespace_name {
       TokenSyntax nsKeyword = make_token(NamespaceKeyword);
       TokenSyntax separator = make_token(NamespaceSeparatorToken);
       NamespaceNameSyntax ns = make<NamespaceNameSyntax>($3);
-      NameSyntax name = make_decl(Name, nsKeyword, separator, ns);
+      NameSyntax name = make_syntax_node(Name, nsKeyword, separator, ns);
       $$ = name.getRaw();
    }
 |  T_NS_SEPARATOR namespace_name {
       TokenSyntax separator = make_token(NamespaceSeparatorToken);
       NamespaceNameSyntax ns = make<NamespaceNameSyntax>($2);
-      NameSyntax name = make_decl(Name, std::nullopt, separator, ns);
+      NameSyntax name = make_syntax_node(Name, std::nullopt, separator, ns);
       $$ = name.getRaw();
    }
 ;
@@ -310,7 +310,7 @@ name:
 top_statement:
    statement {
       StmtSyntax stmt = make<StmtSyntax>($1);
-      TopStmtSyntax topStmt = make_stmt(TopStmt, stmt);
+      TopStmtSyntax topStmt = make_syntax_node(TopStmt, stmt);
       $$ = topStmt.getRaw();
    }
 |  function_declaration_statement {
@@ -330,14 +330,14 @@ top_statement:
       TokenSyntax leftParenToken = make_token(LeftParenToken);
       TokenSyntax rightParenToken = make_token(RightParenToken);
       TokenSyntax SemicolonToken = make_token(SemicolonToken);
-      HaltCompilerStmtSyntax stmt = make_stmt(HaltCompilerStmt, haltCompilerToken, leftParenToken, rightParenToken, SemicolonToken);
+      HaltCompilerStmtSyntax stmt = make_syntax_node(HaltCompilerStmt, haltCompilerToken, leftParenToken, rightParenToken, SemicolonToken);
       $$ = stmt.getRaw();
    }
 |  T_NAMESPACE namespace_name T_SEMICOLON {
       TokenSyntax namespaceKeyword = make_token(NamespaceKeyword);
       NamespaceNameSyntax namespaceName = make<NamespaceNameSyntax>($2);
       TokenSyntax SemicolonToken = make_token(SemicolonToken);
-      NamespaceDefinitionStmtSyntax namespaceStmt = make_stmt(NamespaceDefinitionStmt, namespaceKeyword, namespaceName, SemicolonToken);
+      NamespaceDefinitionStmtSyntax namespaceStmt = make_syntax_node(NamespaceDefinitionStmt, namespaceKeyword, namespaceName, SemicolonToken);
       $$ = namespaceStmt.getRaw();
       RESET_DOC_COMMENT();
    }
@@ -348,8 +348,8 @@ top_statement:
       TokenSyntax leftParenToken = make_token(LeftParenToken);
       TopStmtListSyntax topStmtList = make<TopStmtListSyntax>($5);
       TokenSyntax rightParenToken = make_token(RightParenToken);
-      TopCodeBlockStmtSyntax codeblock = make_stmt(TopCodeBlockStmt, leftParenToken, topStmtList, rightParenToken);
-      NamespaceBlockStmtSyntax namespaceBlockStmt = make_stmt(NamespaceBlockStmt, namespaceKeyword, namespaceName, codeblock);
+      TopCodeBlockStmtSyntax codeblock = make_syntax_node(TopCodeBlockStmt, leftParenToken, topStmtList, rightParenToken);
+      NamespaceBlockStmtSyntax namespaceBlockStmt = make_syntax_node(NamespaceBlockStmt, namespaceKeyword, namespaceName, codeblock);
       $$ = namespaceBlockStmt.getRaw();
    }
 |  T_NAMESPACE { RESET_DOC_COMMENT(); }
@@ -358,15 +358,15 @@ top_statement:
       TokenSyntax leftParenToken = make_token(LeftParenToken);
       TopStmtListSyntax topStmtList = make<TopStmtListSyntax>($4);
       TokenSyntax rightParenToken = make_token(RightParenToken);
-      TopCodeBlockStmtSyntax codeblock = make_stmt(TopCodeBlockStmt, leftParenToken, topStmtList, rightParenToken);
-      NamespaceBlockStmtSyntax namespaceBlockStmt = make_stmt(NamespaceBlockStmt, namespaceKeyword, std::nullopt, codeblock);
+      TopCodeBlockStmtSyntax codeblock = make_syntax_node(TopCodeBlockStmt, leftParenToken, topStmtList, rightParenToken);
+      NamespaceBlockStmtSyntax namespaceBlockStmt = make_syntax_node(NamespaceBlockStmt, namespaceKeyword, std::nullopt, codeblock);
       $$ = namespaceBlockStmt.getRaw();
    }
 |  T_USE mixed_group_use_declaration T_SEMICOLON {
       TokenSyntax useKeyword = make_token(UseKeyword);
       NamespaceMixedGroupUseDeclarationSyntax groupDecl = make<NamespaceMixedGroupUseDeclarationSyntax>($2);
       TokenSyntax semicolonToken = make_token(SemicolonToken);
-      NamespaceUseStmtSyntax declStmt = make_stmt(NamespaceUseStmt, useKeyword, std::nullopt, groupDecl, semicolonToken);
+      NamespaceUseStmtSyntax declStmt = make_syntax_node(NamespaceUseStmt, useKeyword, std::nullopt, groupDecl, semicolonToken);
       $$ = declStmt.getRaw();
    }
 |  T_USE use_type group_use_declaration T_SEMICOLON {
@@ -374,14 +374,14 @@ top_statement:
       NamespaceUseTypeSyntax useType = make<NamespaceUseTypeSyntax>($2);
       NamespaceGroupUseDeclarationSyntax groupDecl = make<NamespaceGroupUseDeclarationSyntax>($3);
       TokenSyntax semicolonToken = make_token(SemicolonToken);
-      NamespaceUseStmtSyntax declStmt = make_stmt(NamespaceUseStmt, useKeyword, useType, groupDecl, semicolonToken);
+      NamespaceUseStmtSyntax declStmt = make_syntax_node(NamespaceUseStmt, useKeyword, useType, groupDecl, semicolonToken);
       $$ = declStmt.getRaw();
    }
 |  T_USE use_declarations T_SEMICOLON {
       TokenSyntax useKeyword = make_token(UseKeyword);
       NamespaceUseDeclarationListSyntax declarations = make<NamespaceUseDeclarationListSyntax>($2);
       TokenSyntax semicolonToken = make_token(SemicolonToken);
-      NamespaceUseStmtSyntax declStmt = make_stmt(NamespaceUseStmt, useKeyword, std::nullopt, declarations, semicolonToken);
+      NamespaceUseStmtSyntax declStmt = make_syntax_node(NamespaceUseStmt, useKeyword, std::nullopt, declarations, semicolonToken);
       $$ = declStmt.getRaw();
    }
 |  T_USE use_type use_declarations T_SEMICOLON {
@@ -389,14 +389,14 @@ top_statement:
       NamespaceUseTypeSyntax useType = make<NamespaceUseTypeSyntax>($2);
       NamespaceUseDeclarationListSyntax declarations = make<NamespaceUseDeclarationListSyntax>($3);
       TokenSyntax semicolonToken = make_token(SemicolonToken);
-      NamespaceUseStmtSyntax declStmt = make_stmt(NamespaceUseStmt, useKeyword, useType, declarations, semicolonToken);
+      NamespaceUseStmtSyntax declStmt = make_syntax_node(NamespaceUseStmt, useKeyword, useType, declarations, semicolonToken);
       $$ = declStmt.getRaw();
    }
 |  T_CONST const_list T_SEMICOLON {
       TokenSyntax constKeyword = make_token(ConstKeyword);
       ConstDeclareListSyntax constList = make<ConstDeclareListSyntax>($2);
       TokenSyntax semicolon = make_token(SemicolonToken);
-      ConstDefinitionStmtSyntax constDeclStmt = make_stmt(ConstDefinitionStmt, constKeyword, constList, semicolon);
+      ConstDefinitionStmtSyntax constDeclStmt = make_syntax_node(ConstDefinitionStmt, constKeyword, constList, semicolon);
       $$ = constDeclStmt.getRaw();
    }
 ;
@@ -404,12 +404,12 @@ top_statement:
 use_type:
    T_FUNCTION {
       TokenSyntax funcKeyword = make_token(FunctionKeyword);
-      NamespaceUseTypeSyntax useType = make_stmt(NamespaceUseType, funcKeyword);
+      NamespaceUseTypeSyntax useType = make_syntax_node(NamespaceUseType, funcKeyword);
       $$ = useType.getRaw();
    }
 |  T_CONST {
       TokenSyntax constKeyword = make_token(ConstKeyword);
-      NamespaceUseTypeSyntax useType = make_stmt(NamespaceUseType, constKeyword);
+      NamespaceUseTypeSyntax useType = make_syntax_node(NamespaceUseType, constKeyword);
       $$ = useType.getRaw();
    }
 ;
@@ -421,7 +421,7 @@ group_use_declaration:
       TokenSyntax leftParen = make_token(LeftParenToken);
       NamespaceUnprefixedUseDeclarationListSyntax declarations = make<NamespaceUnprefixedUseDeclarationListSyntax>($4);
       TokenSyntax rightParen = make_token(RightParenToken);
-      NamespaceGroupUseDeclarationSyntax groupUseDeclaration = make_stmt(NamespaceGroupUseDeclaration,
+      NamespaceGroupUseDeclarationSyntax groupUseDeclaration = make_syntax_node(NamespaceGroupUseDeclaration,
          std::nullopt, ns, secondNsSeparator, leftParen, declarations, std::nullopt, rightParen
       );
       $$ = groupUseDeclaration.getRaw();
@@ -433,7 +433,7 @@ group_use_declaration:
       TokenSyntax leftParen = make_token(LeftParenToken);
       NamespaceUnprefixedUseDeclarationListSyntax declarations = make<NamespaceUnprefixedUseDeclarationListSyntax>($5);
       TokenSyntax rightParen = make_token(RightParenToken);
-      NamespaceGroupUseDeclarationSyntax groupUseDeclaration = make_stmt(NamespaceGroupUseDeclaration,
+      NamespaceGroupUseDeclarationSyntax groupUseDeclaration = make_syntax_node(NamespaceGroupUseDeclaration,
          firstNsSeparator, ns, secondNsSeparator, leftParen, declarations, std::nullopt, rightParen
       );
       $$ = groupUseDeclaration.getRaw();
@@ -447,7 +447,7 @@ mixed_group_use_declaration:
       TokenSyntax leftParen = make_token(LeftParenToken);
       NamespaceInlineUseDeclarationListSyntax declarations = make<NamespaceInlineUseDeclarationListSyntax>($4);
       TokenSyntax rightParen = make_token(RightParenToken);
-      NamespaceMixedGroupUseDeclarationSyntax groupUseDeclaration = make_stmt(NamespaceMixedGroupUseDeclaration,
+      NamespaceMixedGroupUseDeclarationSyntax groupUseDeclaration = make_syntax_node(NamespaceMixedGroupUseDeclaration,
          std::nullopt, ns, secondNsSeparator, leftParen, declarations, std::nullopt, rightParen
       );
       $$ = groupUseDeclaration.getRaw();
@@ -459,7 +459,7 @@ mixed_group_use_declaration:
       TokenSyntax leftParen = make_token(LeftParenToken);
       NamespaceInlineUseDeclarationListSyntax declarations = make<NamespaceInlineUseDeclarationListSyntax>($5);
       TokenSyntax rightParen = make_token(RightParenToken);
-      NamespaceMixedGroupUseDeclarationSyntax groupUseDeclaration = make_stmt(NamespaceMixedGroupUseDeclaration,
+      NamespaceMixedGroupUseDeclarationSyntax groupUseDeclaration = make_syntax_node(NamespaceMixedGroupUseDeclaration,
          firstNsSeparator, ns, secondNsSeparator, leftParen, declarations, std::nullopt, rightParen
       );
       $$ = groupUseDeclaration.getRaw();
@@ -476,15 +476,15 @@ inline_use_declarations:
       NamespaceInlineUseDeclarationListSyntax list = make<NamespaceInlineUseDeclarationListSyntax>($1);
       TokenSyntax comma = make_token(CommaToken);
       NamespaceInlineUseDeclarationSyntax useDecl = make<NamespaceInlineUseDeclarationSyntax>($3);
-      NamespaceInlineUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceInlineUseDeclarationListItem, comma, useDecl);
+      NamespaceInlineUseDeclarationListItemSyntax useDeclListItem = make_syntax_node(NamespaceInlineUseDeclarationListItem, comma, useDecl);
       list.appending(useDeclListItem);
       $$ = list.getRaw();
    }
 |  inline_use_declaration {
       NamespaceInlineUseDeclarationSyntax inlineUseDecl = make<NamespaceInlineUseDeclarationSyntax>($1);
-      NamespaceInlineUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceInlineUseDeclarationListItem, std::nullopt, inlineUseDecl);
+      NamespaceInlineUseDeclarationListItemSyntax useDeclListItem = make_syntax_node(NamespaceInlineUseDeclarationListItem, std::nullopt, inlineUseDecl);
       std::vector<NamespaceInlineUseDeclarationListItemSyntax> declarations{useDeclListItem};
-      NamespaceInlineUseDeclarationListSyntax list = make_stmt(NamespaceInlineUseDeclarationList, declarations);
+      NamespaceInlineUseDeclarationListSyntax list = make_syntax_node(NamespaceInlineUseDeclarationList, declarations);
       $$ = list.getRaw();
    }
 ;
@@ -494,15 +494,15 @@ unprefixed_use_declarations:
       NamespaceUnprefixedUseDeclarationListSyntax list = make<NamespaceUnprefixedUseDeclarationListSyntax>($1);
       TokenSyntax comma = make_token(CommaToken);
       NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($3);
-      NamespaceUnprefixedUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceUnprefixedUseDeclarationListItem, comma, unprefixedUseDecl);
+      NamespaceUnprefixedUseDeclarationListItemSyntax useDeclListItem = make_syntax_node(NamespaceUnprefixedUseDeclarationListItem, comma, unprefixedUseDecl);
       list.appending(useDeclListItem);
       $$ = list.getRaw();
    }
 |  unprefixed_use_declaration {
       NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($1);
-      NamespaceUnprefixedUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceUnprefixedUseDeclarationListItem, std::nullopt, unprefixedUseDecl);
+      NamespaceUnprefixedUseDeclarationListItemSyntax useDeclListItem = make_syntax_node(NamespaceUnprefixedUseDeclarationListItem, std::nullopt, unprefixedUseDecl);
       std::vector<NamespaceUnprefixedUseDeclarationListItemSyntax> declarations{useDeclListItem};
-      NamespaceUnprefixedUseDeclarationListSyntax list = make_stmt(NamespaceUnprefixedUseDeclarationList, declarations);
+      NamespaceUnprefixedUseDeclarationListSyntax list = make_syntax_node(NamespaceUnprefixedUseDeclarationList, declarations);
       $$ = list.getRaw();
    }
 ;
@@ -512,15 +512,15 @@ use_declarations:
       NamespaceUseDeclarationListSyntax list = make<NamespaceUseDeclarationListSyntax>($1);
       TokenSyntax comma = make_token(CommaToken);
       NamespaceUseDeclarationSyntax useDecl = make<NamespaceUseDeclarationSyntax>($3);
-      NamespaceUseDeclarationListItemSyntax useDeclListItem = make_stmt(NamespaceUseDeclarationListItem, comma, useDecl);
+      NamespaceUseDeclarationListItemSyntax useDeclListItem = make_syntax_node(NamespaceUseDeclarationListItem, comma, useDecl);
       list.appending(useDeclListItem);
       $$ = list.getRaw();
    }
 |  use_declaration {
       NamespaceUseDeclarationSyntax declaration = make<NamespaceUseDeclarationSyntax>($1);
-      NamespaceUseDeclarationListItemSyntax declarationListItem = make_stmt(NamespaceUseDeclarationListItem, std::nullopt, declaration);
+      NamespaceUseDeclarationListItemSyntax declarationListItem = make_syntax_node(NamespaceUseDeclarationListItem, std::nullopt, declaration);
       std::vector<NamespaceUseDeclarationListItemSyntax> declarations{declarationListItem};
-      NamespaceUseDeclarationListSyntax list = make_stmt(NamespaceUseDeclarationList, declarations);
+      NamespaceUseDeclarationListSyntax list = make_syntax_node(NamespaceUseDeclarationList, declarations);
       $$ = list.getRaw();
    }
 ;
@@ -528,13 +528,13 @@ use_declarations:
 inline_use_declaration:
    unprefixed_use_declaration {
       NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($1);
-      NamespaceInlineUseDeclarationSyntax inlineUseDecl = make_stmt(NamespaceInlineUseDeclaration, std::nullopt, unprefixedUseDecl);
+      NamespaceInlineUseDeclarationSyntax inlineUseDecl = make_syntax_node(NamespaceInlineUseDeclaration, std::nullopt, unprefixedUseDecl);
       $$ = inlineUseDecl.getRaw();
    }
 |  use_type unprefixed_use_declaration {
       NamespaceUseTypeSyntax useType = make<NamespaceUseTypeSyntax>($1);
       NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($2);
-      NamespaceInlineUseDeclarationSyntax inlineUseDecl = make_stmt(NamespaceInlineUseDeclaration, useType, unprefixedUseDecl);
+      NamespaceInlineUseDeclarationSyntax inlineUseDecl = make_syntax_node(NamespaceInlineUseDeclaration, useType, unprefixedUseDecl);
       $$ = inlineUseDecl.getRaw();
    }
 ;
@@ -542,14 +542,14 @@ inline_use_declaration:
 unprefixed_use_declaration:
    namespace_name {
       NamespaceNameSyntax ns = make<NamespaceNameSyntax>($1);
-      NamespaceUnprefixedUseDeclarationSyntax declaration = make_stmt(NamespaceUnprefixedUseDeclaration, ns, std::nullopt, std::nullopt);
+      NamespaceUnprefixedUseDeclarationSyntax declaration = make_syntax_node(NamespaceUnprefixedUseDeclaration, ns, std::nullopt, std::nullopt);
       $$ = declaration.getRaw();
    }
 |  namespace_name T_AS T_IDENTIFIER_STRING {
       NamespaceNameSyntax ns = make<NamespaceNameSyntax>($1);
       TokenSyntax asToken = make_token(AsKeyword);
       TokenSyntax identifierStr = make_token_with_text(IdentifierString, $3);
-      NamespaceUnprefixedUseDeclarationSyntax declaration = make_stmt(NamespaceUnprefixedUseDeclaration, ns, asToken, identifierStr);
+      NamespaceUnprefixedUseDeclarationSyntax declaration = make_syntax_node(NamespaceUnprefixedUseDeclaration, ns, asToken, identifierStr);
       $$ = declaration.getRaw();
    }
 ;
@@ -557,13 +557,13 @@ unprefixed_use_declaration:
 use_declaration:
    unprefixed_use_declaration {
       NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($1);
-      NamespaceUseDeclarationSyntax useDecl = make_stmt(NamespaceUseDeclaration, std::nullopt, unprefixedUseDecl);
+      NamespaceUseDeclarationSyntax useDecl = make_syntax_node(NamespaceUseDeclaration, std::nullopt, unprefixedUseDecl);
       $$ = useDecl.getRaw();
    }
 |  T_NS_SEPARATOR unprefixed_use_declaration {
       TokenSyntax nsSeparator = make_token(NamespaceSeparatorToken);
       NamespaceUnprefixedUseDeclarationSyntax unprefixedUseDecl = make<NamespaceUnprefixedUseDeclarationSyntax>($2);
-      NamespaceUseDeclarationSyntax useDecl = make_stmt(NamespaceUseDeclaration, nsSeparator, unprefixedUseDecl);
+      NamespaceUseDeclarationSyntax useDecl = make_syntax_node(NamespaceUseDeclaration, nsSeparator, unprefixedUseDecl);
       $$ = useDecl.getRaw();
    }
 ;
@@ -573,15 +573,15 @@ const_list:
       ConstDeclareListSyntax list = make<ConstDeclareListSyntax>($1);
       ConstDeclareSyntax constDecl = make<ConstDeclareSyntax>($3);
       TokenSyntax comma = make_token(CommaToken);
-      ConstListItemSyntax constListItem = make_stmt(ConstListItem, comma, constDecl);
+      ConstListItemSyntax constListItem = make_syntax_node(ConstListItem, comma, constDecl);
       list.appending(constListItem);
       $$ = list.getRaw();
    }
 |  const_decl {
       ConstDeclareSyntax constDecl = make<ConstDeclareSyntax>($1);
-      ConstListItemSyntax constListItem = make_stmt(ConstListItem, std::nullopt, constDecl);
+      ConstListItemSyntax constListItem = make_syntax_node(ConstListItem, std::nullopt, constDecl);
       std::vector<ConstListItemSyntax> declarations{constListItem};
-      ConstDeclareListSyntax list = make_stmt(ConstDeclareList, declarations);
+      ConstDeclareListSyntax list = make_syntax_node(ConstDeclareList, declarations);
       $$ = list.getRaw();
    }
 ;
@@ -594,7 +594,7 @@ inner_statement_list:
       $$ = stmtList.getRaw();
    }
 |  %empty {
-      InnerStmtListSyntax innerStmtList = make_blank_stmt(InnerStmtList);
+      InnerStmtListSyntax innerStmtList = make_blank_syntax_node(InnerStmtList);
       $$ = innerStmtList.getRaw();
    }
 ;
@@ -605,26 +605,26 @@ inner_statement:
    }
 |  function_declaration_statement {
       FunctionDefinitionSyntax funcDecl = make<FunctionDefinitionSyntax>($1);
-      FunctionDefinitionStmtSyntax funcDeclStmt = make_stmt(
+      FunctionDefinitionStmtSyntax funcDeclStmt = make_syntax_node(
          FunctionDefinitionStmt, funcDecl);
       $$ = funcDeclStmt.getRaw();
    }
 |  class_declaration_statement {
       ClassDefinitionSyntax classDecl = make<ClassDefinitionSyntax>($1);
-      ClassDefinitionStmtSyntax classDeclStmt = make_stmt(
+      ClassDefinitionStmtSyntax classDeclStmt = make_syntax_node(
          ClassDefinitionStmt, classDecl
       );
       $$ = classDeclStmt.getRaw();
    }
 |  trait_declaration_statement {
       TraitDefinitionSyntax traitDecl = make<TraitDefinitionSyntax>($1);
-      TraitDefinitionStmtSyntax traitDeclStmt = make_stmt(
+      TraitDefinitionStmtSyntax traitDeclStmt = make_syntax_node(
          TraitDefinitionStmt, traitDecl);
       $$ = traitDeclStmt.getRaw();
    }
 |  interface_declaration_statement {
       InterfaceDefinitionSyntax interfaceDecl = make<InterfaceDefinitionSyntax>($1);
-      InterfaceDefinitionStmtSyntax interfaceDeclStmt = make_stmt(
+      InterfaceDefinitionStmtSyntax interfaceDeclStmt = make_syntax_node(
          InterfaceDefinitionStmt, interfaceDecl
       );
       $$ = interfaceDeclStmt.getRaw();
@@ -634,7 +634,7 @@ inner_statement:
       TokenSyntax leftParenToken = make_token(LeftParenToken);
       TokenSyntax rightParenToken = make_token(RightParenToken);
       TokenSyntax semicolonToken = make_token(SemicolonToken);
-      HaltCompilerStmtSyntax stmt = make_stmt(HaltCompilerStmt, haltCompilerToken, leftParenToken, rightParenToken, semicolonToken);
+      HaltCompilerStmtSyntax stmt = make_syntax_node(HaltCompilerStmt, haltCompilerToken, leftParenToken, rightParenToken, semicolonToken);
       $$ = stmt.getRaw();
    }
 ;
@@ -644,7 +644,7 @@ statement:
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       InnerStmtListSyntax stmts = make<InnerStmtListSyntax>($2);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      InnerCodeBlockStmtSyntax codeBlock = make_stmt(
+      InnerCodeBlockStmtSyntax codeBlock = make_syntax_node(
          InnerCodeBlockStmt, leftBrace, stmts, rightBrace
       );
       $$ = codeBlock.getRaw();
@@ -658,8 +658,8 @@ statement:
       ExprSyntax condExpr = make<ExprSyntax>($3);
       TokenSyntax rightParen = make_token(RightParenToken);
       StmtSyntax stmt = make<StmtSyntax>($5);
-      ParenDecoratedExprSyntax condClause = make_expr(ParenDecoratedExpr, leftParen, condExpr, rightParen);
-      WhileStmtSyntax whileStmt = make_stmt(
+      ParenDecoratedExprSyntax condClause = make_syntax_node(ParenDecoratedExpr, leftParen, condExpr, rightParen);
+      WhileStmtSyntax whileStmt = make_syntax_node(
          WhileStmt, std::nullopt, std::nullopt, whileKeyword, condClause, stmt
       );
       $$ = whileStmt.getRaw();
@@ -671,9 +671,9 @@ statement:
       ExprSyntax condExpr = make<ExprSyntax>($5);
       TokenSyntax rightParen = make_token(RightParenToken);
       TokenSyntax whileKeyword = make_token(WhileKeyword);
-      ParenDecoratedExprSyntax condClause = make_expr(ParenDecoratedExpr, leftParen, condExpr, rightParen);
+      ParenDecoratedExprSyntax condClause = make_syntax_node(ParenDecoratedExpr, leftParen, condExpr, rightParen);
       TokenSyntax semicolon = make_token(SemicolonToken);
-      DoWhileStmtSyntax doWhileStmt = make_stmt(
+      DoWhileStmtSyntax doWhileStmt = make_syntax_node(
          DoWhileStmt, std::nullopt, std::nullopt, doKeyword, stmt, whileKeyword, condClause, semicolon
       );
       $$ = doWhileStmt.getRaw();
@@ -687,7 +687,7 @@ statement:
       ExprSyntax condExpr = make<ExprSyntax>($3);
       TokenSyntax rightParen = make_token(RightParenToken);
       SwitchCaseListClauseSyntax switchCaseClause = make<SwitchCaseListClauseSyntax>($5);
-      SwitchStmtSyntax stmt = make_stmt(
+      SwitchStmtSyntax stmt = make_syntax_node(
          SwitchStmt, std::nullopt, std::nullopt, switchKeyword, leftParen, condExpr, rightParen, switchCaseClause
       );
       $$ = stmt.getRaw();
@@ -696,20 +696,20 @@ statement:
       TokenSyntax breakKeyword = make_token(BreakKeyword);
       std::optional<ExprSyntax> optExpr = $2 ? std::optional(make<ExprSyntax>($2)) : std::nullopt;
       TokenSyntax semicolon = make_token(SemicolonToken);
-      BreakStmtSyntax breakStmt = make_stmt(BreakStmt, breakKeyword, optExpr, semicolon);
+      BreakStmtSyntax breakStmt = make_syntax_node(BreakStmt, breakKeyword, optExpr, semicolon);
       $$ = breakStmt.getRaw();
    }
 |  T_CONTINUE optional_expr T_SEMICOLON {
       TokenSyntax continueKeyword = make_token(ContinueKeyword);
       std::optional<ExprSyntax> optExpr = $2 ? std::optional(make<ExprSyntax>($2)) : std::nullopt;
       TokenSyntax semicolon = make_token(SemicolonToken);
-      BreakStmtSyntax continueStmt = make_stmt(BreakStmt, continueKeyword, optExpr, semicolon);
+      BreakStmtSyntax continueStmt = make_syntax_node(BreakStmt, continueKeyword, optExpr, semicolon);
       $$ = continueStmt.getRaw();
    }
 |  T_FALLTHROUGH T_SEMICOLON {
       TokenSyntax fallthroughKeyword = make_token(FallthroughKeyword);
       TokenSyntax semicolon = make_token(SemicolonToken);
-      FallthroughStmtSyntax fallthroughStmt = make_stmt(
+      FallthroughStmtSyntax fallthroughStmt = make_syntax_node(
          FallthroughStmt, fallthroughKeyword, semicolon
       );
       $$ = fallthroughStmt.getRaw();
@@ -718,14 +718,14 @@ statement:
       TokenSyntax returnKeyword = make_token(ReturnKeyword);
       std::optional<ExprSyntax> optExpr = $2 ? std::optional(make<ExprSyntax>($2)) : std::nullopt;
       TokenSyntax semicolon = make_token(SemicolonToken);
-      ReturnStmtSyntax returnStmt = make_stmt(ReturnStmt, returnKeyword, optExpr, semicolon);
+      ReturnStmtSyntax returnStmt = make_syntax_node(ReturnStmt, returnKeyword, optExpr, semicolon);
       $$ = returnStmt.getRaw();
    }
 |  T_GLOBAL global_var_list T_SEMICOLON {
       TokenSyntax globalKeyword = make_token(GlobalKeyword);
       GlobalVariableListSyntax varList = make<GlobalVariableListSyntax>($2);
       TokenSyntax semicolon = make_token(SemicolonToken);
-      GlobalVariableDeclarationsStmtSyntax globalVars = make_stmt(
+      GlobalVariableDeclarationsStmtSyntax globalVars = make_syntax_node(
          GlobalVariableDeclarationsStmt, globalKeyword, varList, semicolon
       );
       $$ = globalVars.getRaw();
@@ -734,7 +734,7 @@ statement:
       TokenSyntax staticKeyword = make_token(StaticKeyword);
       StaticVariableListSyntax varList = make<StaticVariableListSyntax>($2);
       TokenSyntax semicolon = make_token(SemicolonToken);
-      StaticVariableDeclarationsStmtSyntax staticVars = make_stmt(
+      StaticVariableDeclarationsStmtSyntax staticVars = make_syntax_node(
          StaticVariableDeclarationsStmt, staticKeyword, varList, semicolon
       );
       $$ = staticVars.getRaw();
@@ -743,13 +743,13 @@ statement:
       TokenSyntax echoKeyword = make_token(EchoKeyword);
       ExprListSyntax exprList = make<ExprListSyntax>($2);
       TokenSyntax semicolon = make_token(SemicolonToken);
-      EchoStmtSyntax echoStmt = make_stmt(EchoStmt, echoKeyword, exprList, semicolon);
+      EchoStmtSyntax echoStmt = make_syntax_node(EchoStmt, echoKeyword, exprList, semicolon);
       $$ = echoStmt.getRaw();
    }
 |  expr T_SEMICOLON {
       ExprSyntax expr = make<ExprSyntax>($1);
       TokenSyntax simicolon = make_token(SemicolonToken);
-      ExprStmtSyntax exprStmt = make_stmt(ExprStmt, expr, simicolon);
+      ExprStmtSyntax exprStmt = make_syntax_node(ExprStmt, expr, simicolon);
       $$ = exprStmt.getRaw();
    }
 |  T_UNSET T_LEFT_PAREN unset_variables possible_comma T_RIGHT_PAREN T_SEMICOLON {
@@ -758,7 +758,7 @@ statement:
       UnsetVariableListSyntax list = make<UnsetVariableListSyntax>($3);
       TokenSyntax rightParen = make_token(RightParenToken);
       TokenSyntax simicolon = make_token(SemicolonToken);
-      UnsetStmtSyntax unsetStmt = make_stmt(
+      UnsetStmtSyntax unsetStmt = make_syntax_node(
          UnsetStmt, unsetKeyword, leftParen, list, rightParen, simicolon
       );
       $$ = unsetStmt.getRaw();
@@ -771,7 +771,7 @@ statement:
       ForeachVariableSyntax valueVariable = make<ForeachVariableSyntax>($5);
       TokenSyntax rightParen = make_token(RightParenToken);
       StmtSyntax stmt = make<StmtSyntax>($7);
-      ForeachStmtSyntax foreachStmt = make_stmt(
+      ForeachStmtSyntax foreachStmt = make_syntax_node(
          ForeachStmt, foreachKeyword, leftParen, iterableExpr, asKeyword, std::nullopt, std::nullopt,
          valueVariable, rightParen, stmt);
       $$ = stmt.getRaw();
@@ -786,7 +786,7 @@ statement:
       ForeachVariableSyntax valueVariable = make<ForeachVariableSyntax>($7);
       TokenSyntax rightParen = make_token(RightParenToken);
       StmtSyntax stmt = make<StmtSyntax>($9);
-      ForeachStmtSyntax foreachStmt = make_stmt(
+      ForeachStmtSyntax foreachStmt = make_syntax_node(
          ForeachStmt, foreachKeyword, leftParen, iterableExpr, asKeyword, valueVariable, doubleArrowToken,
          valueVariable, rightParen, stmt);
       $$ = stmt.getRaw();
@@ -798,7 +798,7 @@ statement:
       ConstDeclareListSyntax constList = make<ConstDeclareListSyntax>($3);
       TokenSyntax rightParen = make_token(RightParenToken);
       StmtSyntax stmt = make<StmtSyntax>($6);
-      DeclareStmtSyntax declareStmt = make_stmt(
+      DeclareStmtSyntax declareStmt = make_syntax_node(
          DeclareStmt, declareKeyword, leftParen, constList, rightParen, stmt
       );
       $$ = declareStmt.getRaw();
@@ -806,7 +806,7 @@ statement:
 |  T_SEMICOLON {
       // make empty stmt
       TokenSyntax semicolon = make_token(SemicolonToken);
-      EmptyStmtSyntax emptyStmt = make_stmt(EmptyStmt, semicolon);
+      EmptyStmtSyntax emptyStmt = make_syntax_node(EmptyStmt, semicolon);
       $$ = emptyStmt.getRaw();
    }
 |  T_TRY T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE catch_list finally_statement {
@@ -814,37 +814,37 @@ statement:
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       InnerStmtListSyntax innerStmts = make<InnerStmtListSyntax>($3);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      InnerCodeBlockStmtSyntax tryCodeBlcok = make_stmt(InnerCodeBlockStmt, leftBrace, innerStmts, rightBrace);
+      InnerCodeBlockStmtSyntax tryCodeBlcok = make_syntax_node(InnerCodeBlockStmt, leftBrace, innerStmts, rightBrace);
       CatchListSyntax catchList = make<CatchListSyntax>($5);
       std::optional<FinallyClauseSyntax> finallyClause = $6 ? std::optional(make<FinallyClauseSyntax>($6)) : std::nullopt;
-      TryStmtSyntax tryStmt = make_stmt(TryStmt, tryKeyword, tryCodeBlcok, catchList, finallyClause);
+      TryStmtSyntax tryStmt = make_syntax_node(TryStmt, tryKeyword, tryCodeBlcok, catchList, finallyClause);
       $$ = tryStmt.getRaw();
    }
 |  T_THROW expr T_SEMICOLON {
       TokenSyntax throwKeyword = make_token(ThrowKeyword);
       ExprSyntax expr = make<ExprSyntax>($2);
       TokenSyntax colonToken = make_token(ColonToken);
-      ThrowStmtSyntax throwStmt = make_stmt(ThrowStmt, throwKeyword, expr, colonToken);
+      ThrowStmtSyntax throwStmt = make_syntax_node(ThrowStmt, throwKeyword, expr, colonToken);
       $$ = throwStmt.getRaw();
    }
 |  T_GOTO T_IDENTIFIER_STRING T_SEMICOLON {
       TokenSyntax gotoKeyword = make_token(GotoKeyword);
       TokenSyntax identifierStr = make_token_with_text(IdentifierString, $2);
       TokenSyntax colonToken = make_token(ColonToken);
-      GotoStmtSyntax gotoStmt = make_stmt(GotoStmt, gotoKeyword, identifierStr, colonToken);
+      GotoStmtSyntax gotoStmt = make_syntax_node(GotoStmt, gotoKeyword, identifierStr, colonToken);
       $$ = gotoStmt.getRaw();
    }
 |  T_IDENTIFIER_STRING T_COLON {
       TokenSyntax identifierStr = make_token_with_text(IdentifierString, $1);
       TokenSyntax colonToken = make_token(ColonToken);
-      LabelStmtSyntax labelStmt = make_stmt(LabelStmt, identifierStr, colonToken);
+      LabelStmtSyntax labelStmt = make_syntax_node(LabelStmt, identifierStr, colonToken);
       $$ = labelStmt.getRaw();
    }
 ;
 
 catch_list:
    %empty {
-      CatchListSyntax list = make_blank_stmt(CatchList);
+      CatchListSyntax list = make_blank_syntax_node(CatchList);
       $$ = list.getRaw();
    }
 |  catch_list T_CATCH T_LEFT_PAREN catch_name_list T_VARIABLE T_RIGHT_PAREN T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE {
@@ -857,8 +857,8 @@ catch_list:
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       InnerStmtListSyntax innerStmts = make<InnerStmtListSyntax>($8);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      InnerCodeBlockStmtSyntax catchHandlerCodeBlock = make_stmt(InnerCodeBlockStmt, leftBrace, innerStmts, rightBrace);
-      CatchListItemClauseSyntax catchClause = make_stmt(CatchListItemClause, 
+      InnerCodeBlockStmtSyntax catchHandlerCodeBlock = make_syntax_node(InnerCodeBlockStmt, leftBrace, innerStmts, rightBrace);
+      CatchListItemClauseSyntax catchClause = make_syntax_node(CatchListItemClause, 
          catchKeyword, leftParen, typeHints, variableToken, rightParen, catchHandlerCodeBlock
       );
       list.appending(catchClause);
@@ -869,16 +869,16 @@ catch_list:
 catch_name_list:
    name {
       NameSyntax name = make<NameSyntax>($1);
-      CatchArgTypeHintItemSyntax typeHintItem = make_stmt(CatchArgTypeHintItem, std::nullopt, name);
+      CatchArgTypeHintItemSyntax typeHintItem = make_syntax_node(CatchArgTypeHintItem, std::nullopt, name);
       std::vector<CatchArgTypeHintItemSyntax> hits{typeHintItem};
-      CatchArgTypeHintListSyntax list = make_stmt(CatchArgTypeHintList, hits);
+      CatchArgTypeHintListSyntax list = make_syntax_node(CatchArgTypeHintList, hits);
       $$ = list.getRaw();
    }
 |  catch_name_list T_VBAR name {
       CatchArgTypeHintListSyntax list = make<CatchArgTypeHintListSyntax>($1);
       TokenSyntax vbarToken = make_token(VerticalBarToken);
       NameSyntax name = make<NameSyntax>($3);
-      CatchArgTypeHintItemSyntax typeHintItem = make_stmt(CatchArgTypeHintItem, vbarToken, name);
+      CatchArgTypeHintItemSyntax typeHintItem = make_syntax_node(CatchArgTypeHintItem, vbarToken, name);
       list.appending(typeHintItem);
       $$ = list.getRaw();
    }
@@ -893,8 +893,8 @@ finally_statement:
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       InnerStmtListSyntax innerStmts = make<InnerStmtListSyntax>($3);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      InnerCodeBlockStmtSyntax catchHandlerCodeBlock = make_stmt(InnerCodeBlockStmt, leftBrace, innerStmts, rightBrace);
-      FinallyClauseSyntax finallyClause = make_stmt(FinallyClause, finallyKeyword, catchHandlerCodeBlock);
+      InnerCodeBlockStmtSyntax catchHandlerCodeBlock = make_syntax_node(InnerCodeBlockStmt, leftBrace, innerStmts, rightBrace);
+      FinallyClauseSyntax finallyClause = make_syntax_node(FinallyClause, finallyKeyword, catchHandlerCodeBlock);
       $$ = finallyClause.getRaw();
    }
 ;
@@ -902,16 +902,16 @@ finally_statement:
 unset_variables:
    unset_variable {
       UnsetVariableSyntax unsetVar = make<UnsetVariableSyntax>($1);
-      UnsetVariableListItemSyntax listItem = make_stmt(UnsetVariableListItem, std::nullopt, unsetVar);
+      UnsetVariableListItemSyntax listItem = make_syntax_node(UnsetVariableListItem, std::nullopt, unsetVar);
       std::vector<UnsetVariableListItemSyntax> vars{listItem};
-      UnsetVariableListSyntax list = make_stmt(UnsetVariableList, vars);
+      UnsetVariableListSyntax list = make_syntax_node(UnsetVariableList, vars);
       $$ = list.getRaw();
    }
 |  unset_variables T_COMMA unset_variable {
       UnsetVariableListSyntax list = make<UnsetVariableListSyntax>($1);
       TokenSyntax comma = make_token(CommaToken);
       UnsetVariableSyntax unsetVar = make<UnsetVariableSyntax>($3);
-      UnsetVariableListItemSyntax listItem = make_stmt(UnsetVariableListItem, comma, unsetVar);
+      UnsetVariableListItemSyntax listItem = make_syntax_node(UnsetVariableListItem, comma, unsetVar);
       list.appending(listItem);
       $$ = list.getRaw();
    }
@@ -920,7 +920,7 @@ unset_variables:
 unset_variable:
    variable {
       VariableExprSyntax variable = make<VariableExprSyntax>($1);
-      UnsetVariableSyntax unsetVar = make_stmt(UnsetVariable, variable);
+      UnsetVariableSyntax unsetVar = make_syntax_node(UnsetVariable, variable);
       $$ = unsetVar.getRaw();
    }
 ;
@@ -934,15 +934,15 @@ function_declaration_statement:
       TokenSyntax leftParen = make_token(LeftParenToken);
       ParameterListSyntax params = make<ParameterListSyntax>($6);
       TokenSyntax rightParen = make_token(RightParenToken);
-      ParameterClauseSyntax paramsClause = make_decl(ParameterClause, leftParen, params, rightParen);
+      ParameterClauseSyntax paramsClause = make_syntax_node(ParameterClause, leftParen, params, rightParen);
       std::optional<ReturnTypeClauseSyntax> returnType = $9 ? std::optional(make<ReturnTypeClauseSyntax>($8)) : std::nullopt;
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       InnerStmtListSyntax innerStmts = make<InnerStmtListSyntax>($11);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      InnerCodeBlockStmtSyntax body = make_stmt(
+      InnerCodeBlockStmtSyntax body = make_syntax_node(
          InnerCodeBlockStmt, leftBrace, innerStmts, rightBrace
       );
-      FunctionDefinitionSyntax funcDecl = make_decl(
+      FunctionDefinitionSyntax funcDecl = make_syntax_node(
          FunctionDefinition, funcKeyword, returnRef, funcName, paramsClause, returnType, body
       );
       $$ = funcDecl.getRaw();
@@ -980,8 +980,8 @@ class_declaration_statement:
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       MemberDeclListSyntax stmts = make<MemberDeclListSyntax>($9);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      MemberDeclBlockSyntax classDefCodeBlock = make_decl(MemberDeclBlock, leftBrace, stmts, rightBrace);
-      ClassDefinitionSyntax classDecl = make_decl(
+      MemberDeclBlockSyntax classDefCodeBlock = make_syntax_node(MemberDeclBlock, leftBrace, stmts, rightBrace);
+      ClassDefinitionSyntax classDecl = make_syntax_node(
          ClassDefinition, classModifiers, classKeyword, className, extendsFrom,
          implementsFrom, classDefCodeBlock
       );
@@ -996,8 +996,8 @@ class_declaration_statement:
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       MemberDeclListSyntax stmts = make<MemberDeclListSyntax>($8);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      MemberDeclBlockSyntax classDefCodeBlock = make_decl(MemberDeclBlock, leftBrace, stmts, rightBrace);
-      ClassDefinitionSyntax classDecl = make_decl(
+      MemberDeclBlockSyntax classDefCodeBlock = make_syntax_node(MemberDeclBlock, leftBrace, stmts, rightBrace);
+      ClassDefinitionSyntax classDecl = make_syntax_node(
          ClassDefinition, std::nullopt, classKeyword, className, extendsFrom,
          implementsFrom, classDefCodeBlock
       );
@@ -1009,7 +1009,7 @@ class_modifiers:
    class_modifier {
       ClassModifierSyntax modifier = make<ClassModifierSyntax>($1);
       std::vector<ClassModifierSyntax> items{modifier};
-      ClassModifierListSyntax list = make_decl(ClassModifierList, items);
+      ClassModifierListSyntax list = make_syntax_node(ClassModifierList, items);
       $$ = list.getRaw();
    }
 |  class_modifiers class_modifier {
@@ -1023,12 +1023,12 @@ class_modifiers:
 class_modifier:
    T_ABSTRACT {
       TokenSyntax abstractKeyword = make_token(AbstractKeyword);
-      ClassModifierSyntax modifier = make_decl(ClassModifier, abstractKeyword);
+      ClassModifierSyntax modifier = make_syntax_node(ClassModifier, abstractKeyword);
       $$ = modifier.getRaw();
    }
 |  T_FINAL {
       TokenSyntax finalKeyword = make_token(FinalKeyword);
-      ClassModifierSyntax modifier = make_decl(ClassModifier, finalKeyword);
+      ClassModifierSyntax modifier = make_syntax_node(ClassModifier, finalKeyword);
       $$ = modifier.getRaw();
    }
 ;
@@ -1041,8 +1041,8 @@ trait_declaration_statement:
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       MemberDeclListSyntax stmts = make<MemberDeclListSyntax>($6);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      MemberDeclBlockSyntax traitDefCodeBlock = make_decl(MemberDeclBlock, leftBrace, stmts, rightBrace);
-      TraitDefinitionSyntax traitDecl = make_decl(TraitDefinition, traitKeyword, traitName, traitDefCodeBlock);
+      MemberDeclBlockSyntax traitDefCodeBlock = make_syntax_node(MemberDeclBlock, leftBrace, stmts, rightBrace);
+      TraitDefinitionSyntax traitDecl = make_syntax_node(TraitDefinition, traitKeyword, traitName, traitDefCodeBlock);
       $$ = traitDecl.getRaw();
    }
 ;
@@ -1056,8 +1056,8 @@ interface_declaration_statement:
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       MemberDeclListSyntax stmts = make<MemberDeclListSyntax>($7);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      MemberDeclBlockSyntax interfaceDefCodeBlock = make_decl(MemberDeclBlock, leftBrace, stmts, rightBrace);
-      InterfaceDefinitionSyntax interfaceDecl = make_decl(
+      MemberDeclBlockSyntax interfaceDefCodeBlock = make_syntax_node(MemberDeclBlock, leftBrace, stmts, rightBrace);
+      InterfaceDefinitionSyntax interfaceDecl = make_syntax_node(
          InterfaceDefinition, interfaceKeyword, interfaceName, interfaceExtendsFrom, interfaceDefCodeBlock
       );
       $$ = interfaceDecl.getRaw();
@@ -1071,7 +1071,7 @@ extends_from:
 |  T_EXTENDS name {
       TokenSyntax extendsKeyword = make_token(ExtendsKeyword);
       NameSyntax name = make<NameSyntax>($2);
-      ExtendsFromClauseSyntax extendClause = make_decl(ExtendsFromClause, extendsKeyword, name);
+      ExtendsFromClauseSyntax extendClause = make_syntax_node(ExtendsFromClause, extendsKeyword, name);
       $$ = extendClause.getRaw();
    }
 ;
@@ -1083,7 +1083,7 @@ interface_extends_list:
 |  T_EXTENDS name_list {
       TokenSyntax extendsKeyword = make_token(ExtendsKeyword);
       NameListSyntax names = make<NameListSyntax>($2);
-      InterfaceExtendsClauseSyntax interfaceExtendsClause = make_decl(InterfaceExtendsClause, extendsKeyword, names);
+      InterfaceExtendsClauseSyntax interfaceExtendsClause = make_syntax_node(InterfaceExtendsClause, extendsKeyword, names);
       $$ = interfaceExtendsClause.getRaw();
    }
 ;
@@ -1095,7 +1095,7 @@ implements_list:
 |  T_IMPLEMENTS name_list {
       TokenSyntax implementsKeyword = make_token(ImplementsKeyword);
       NameListSyntax names = make<NameListSyntax>($2);
-      ImplementsClauseSyntax implementsClause = make_decl(ImplementsClause, implementsKeyword, names);
+      ImplementsClauseSyntax implementsClause = make_syntax_node(ImplementsClause, implementsKeyword, names);
       $$ = implementsClause.getRaw();
    }
 ;
@@ -1103,14 +1103,14 @@ implements_list:
 foreach_variable:
    variable {
       VariableExprSyntax variable = make<VariableExprSyntax>($1);
-      ForeachVariableSyntax foreachVar = make_stmt(ForeachVariable, variable);
+      ForeachVariableSyntax foreachVar = make_syntax_node(ForeachVariable, variable);
       $$ = foreachVar.getRaw();
    }
 |  T_AMPERSAND variable {
       TokenSyntax ampersand = make_token(AmpersandToken);
       VariableExprSyntax variable = make<VariableExprSyntax>($2);
-      ReferencedVariableExprSyntax refVar = make_expr(ReferencedVariableExpr, ampersand, variable);
-      ForeachVariableSyntax foreachVar = make_stmt(ForeachVariable, variable);
+      ReferencedVariableExprSyntax refVar = make_syntax_node(ReferencedVariableExpr, ampersand, variable);
+      ForeachVariableSyntax foreachVar = make_syntax_node(ForeachVariable, variable);
       $$ = foreachVar.getRaw();
    }
 |  T_LIST T_LEFT_PAREN array_pair_list T_RIGHT_PAREN {
@@ -1118,20 +1118,20 @@ foreach_variable:
       TokenSyntax leftParen = make_token(LeftParenToken);
       ArrayPairListSyntax arrayPair = make<ArrayPairListSyntax>($3);
       TokenSyntax rightParen = make_token(RightParenToken);
-      ListStructureClauseSyntax listStructureClause = make_expr(
+      ListStructureClauseSyntax listStructureClause = make_syntax_node(
          ListStructureClause, listKeyword, leftParen, arrayPair, rightParen
       );
-      ForeachVariableSyntax foreachVar = make_stmt(ForeachVariable, listStructureClause);
+      ForeachVariableSyntax foreachVar = make_syntax_node(ForeachVariable, listStructureClause);
       $$ = foreachVar.getRaw();
    }
 |  T_LEFT_SQUARE_BRACKET array_pair_list T_RIGHT_SQUARE_BRACKET {
       TokenSyntax leftSquareBracket = make_token(LeftSquareBracketToken);
       ArrayPairListSyntax arrayPair = make<ArrayPairListSyntax>($2);
       TokenSyntax rightSquareBracket = make_token(RightSquareBracketToken);
-      SimplifiedArrayCreateExprSyntax arrayCreateExpr = make_expr(
+      SimplifiedArrayCreateExprSyntax arrayCreateExpr = make_syntax_node(
          SimplifiedArrayCreateExpr, leftSquareBracket, arrayPair, rightSquareBracket
       );
-      ForeachVariableSyntax foreachVar = make_stmt(ForeachVariable, arrayCreateExpr);
+      ForeachVariableSyntax foreachVar = make_syntax_node(ForeachVariable, arrayCreateExpr);
       $$ = foreachVar.getRaw();
    }
 ;
@@ -1141,7 +1141,7 @@ switch_case_list:
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       SwitchCaseListSyntax list = make<SwitchCaseListSyntax>($2);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      SwitchCaseListClauseSyntax switchCaseClause = make_stmt(
+      SwitchCaseListClauseSyntax switchCaseClause = make_syntax_node(
          SwitchCaseListClause, leftBrace, list, rightBrace
       );
       $$ = switchCaseClause.getRaw();
@@ -1150,7 +1150,7 @@ switch_case_list:
 
 case_list:
    %empty {
-      SwitchCaseListSyntax list = make_blank_stmt(SwitchCaseList);
+      SwitchCaseListSyntax list = make_blank_syntax_node(SwitchCaseList);
       $$ = list.getRaw();
    }
 |  case_list T_CASE expr case_separator inner_statement_list {
@@ -1159,8 +1159,8 @@ case_list:
       ExprSyntax expr = make<ExprSyntax>($3);
       TokenSyntax separator = make<TokenSyntax>($4);
       InnerStmtListSyntax stmts = make<InnerStmtListSyntax>($5);
-      SwitchCaseLabelSyntax label = make_stmt(SwitchCaseLabel, caseKeyword, expr, separator);
-      SwitchCaseSyntax caseItem = make_stmt(SwitchCase, label, stmts);
+      SwitchCaseLabelSyntax label = make_syntax_node(SwitchCaseLabel, caseKeyword, expr, separator);
+      SwitchCaseSyntax caseItem = make_syntax_node(SwitchCase, label, stmts);
       list.appending(caseItem);
       $$ = list.getRaw();
    }
@@ -1169,8 +1169,8 @@ case_list:
       TokenSyntax caseKeyword = make_token(DefaultKeyword);
       TokenSyntax separator = make<TokenSyntax>($3);
       InnerStmtListSyntax stmts = make<InnerStmtListSyntax>($4);
-      SwitchDefaultLabelSyntax label = make_stmt(SwitchDefaultLabel, caseKeyword, separator);
-      SwitchCaseSyntax caseItem = make_stmt(SwitchCase, label, stmts);
+      SwitchDefaultLabelSyntax label = make_syntax_node(SwitchDefaultLabel, caseKeyword, separator);
+      SwitchCaseSyntax caseItem = make_syntax_node(SwitchCase, label, stmts);
       list.appending(caseItem);
       $$ = list.getRaw();
    }
@@ -1190,8 +1190,8 @@ if_stmt_without_else:
       ExprSyntax expr = make<ExprSyntax>($3);
       TokenSyntax rightParen = make_token(RightParenToken);
       StmtSyntax stmt = make<StmtSyntax>($5);
-      ElseIfListSyntax elseIfList = make_blank_stmt(ElseIfList);
-      IfStmtSyntax ifStmt = make_stmt(
+      ElseIfListSyntax elseIfList = make_blank_syntax_node(ElseIfList);
+      IfStmtSyntax ifStmt = make_syntax_node(
          IfStmt, std::nullopt, std::nullopt, ifKeyword, leftParen, expr, rightParen, 
          stmt, elseIfList, std::nullopt, std::nullopt
       );
@@ -1204,7 +1204,7 @@ if_stmt_without_else:
       ExprSyntax expr = make<ExprSyntax>($4);
       TokenSyntax rightParen = make_token(RightParenToken);
       StmtSyntax stmt = make<StmtSyntax>($6);
-      ElseIfClauseSyntax elseIfClause = make_stmt(
+      ElseIfClauseSyntax elseIfClause = make_syntax_node(
          ElseIfClause, elseIfKeyword, leftParen, expr, rightParen, stmt
       );
       ifStmt.addElseIfClause(elseIfClause);
@@ -1238,16 +1238,16 @@ parameter_list:
 non_empty_parameter_list:
    parameter {
       ParameterSyntax param = make<ParameterSyntax>($1);
-      ParameterListItemSyntax paramListItem = make_decl(ParameterListItem, std::nullopt, param);
+      ParameterListItemSyntax paramListItem = make_syntax_node(ParameterListItem, std::nullopt, param);
       std::vector<ParameterListItemSyntax> items{paramListItem};
-      ParameterListSyntax list = make_decl(ParameterList, items);
+      ParameterListSyntax list = make_syntax_node(ParameterList, items);
       $$ = list.getRaw();
    }
 |  non_empty_parameter_list T_COMMA parameter {
       ParameterListSyntax list = make<ParameterListSyntax>($1);
       TokenSyntax comma = make_token(CommaToken);
       ParameterSyntax param = make<ParameterSyntax>($3);
-      ParameterListItemSyntax paramListItem = make_decl(ParameterListItem, comma, param);
+      ParameterListItemSyntax paramListItem = make_syntax_node(ParameterListItem, comma, param);
       list.appending(paramListItem);
       $$ = list.getRaw();
    }
@@ -1259,7 +1259,7 @@ parameter:
       std::optional<TokenSyntax> refToken = $2 ? std::optional(make<TokenSyntax>($2)) : std::nullopt;
       std::optional<TokenSyntax> variadicToken = $3 ? std::optional(make<TokenSyntax>($3)) : std::nullopt;
       TokenSyntax variable = make_token_with_text(Variable, $4);
-      ParameterSyntax parameterDecl = make_decl(Parameter, optionalType, refToken, variadicToken, variable, std::nullopt);
+      ParameterSyntax parameterDecl = make_syntax_node(Parameter, optionalType, refToken, variadicToken, variable, std::nullopt);
       $$ = parameterDecl.getRaw();
    }
 |  optional_type is_reference is_variadic T_VARIABLE T_EQUAL expr {
@@ -1269,8 +1269,8 @@ parameter:
       TokenSyntax variable = make_token_with_text(Variable, $4);
       TokenSyntax equal = make_token(EqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($6);
-      InitializerClauseSyntax initializer = make_decl(InitializerClause, equal, valueExpr);
-      ParameterSyntax parameterDecl = make_decl(Parameter, optionalType, refToken, variadicToken, variable, initializer);
+      InitializerClauseSyntax initializer = make_syntax_node(InitializerClause, equal, valueExpr);
+      ParameterSyntax parameterDecl = make_syntax_node(Parameter, optionalType, refToken, variadicToken, variable, initializer);
       $$ = parameterDecl.getRaw();
    }
 ;
@@ -1288,13 +1288,13 @@ optional_type:
 type_expr:
    type {
       TypeClauseSyntax type = make<TypeClauseSyntax>($1);
-      TypeExprClauseSyntax typeExpr = make_decl(TypeExprClause, std::nullopt, type);
+      TypeExprClauseSyntax typeExpr = make_syntax_node(TypeExprClause, std::nullopt, type);
       $$ = typeExpr.getRaw();
    }
 |  T_QUESTION_MARK type {
       TokenSyntax questionMark = make_token(QuestionMarkToken);
       TypeClauseSyntax type = make<TypeClauseSyntax>($2);
-      TypeExprClauseSyntax typeExpr = make_decl(TypeExprClause, questionMark, type);
+      TypeExprClauseSyntax typeExpr = make_syntax_node(TypeExprClause, questionMark, type);
       $$ = typeExpr.getRaw();
    }
 ;
@@ -1302,17 +1302,17 @@ type_expr:
 type:
    T_ARRAY {
       TokenSyntax arrayToken = make_token(ArrayKeyword);
-      TypeClauseSyntax type = make_decl(TypeClause, arrayToken);
+      TypeClauseSyntax type = make_syntax_node(TypeClause, arrayToken);
       $$ = type.getRaw();
    }
 |  T_CALLABLE {
       TokenSyntax callableToken = make_token(CallableKeyword);
-      TypeClauseSyntax type = make_decl(TypeClause, callableToken);
+      TypeClauseSyntax type = make_syntax_node(TypeClause, callableToken);
       $$ = type.getRaw();
    }
 |  name {
       NameSyntax name = make<NameSyntax>($1);
-      TypeClauseSyntax type = make_decl(TypeClause, name);
+      TypeClauseSyntax type = make_syntax_node(TypeClause, name);
       $$ = type.getRaw();
    }
 ;
@@ -1324,7 +1324,7 @@ return_type:
 |  T_COLON type_expr {
       TokenSyntax colon = make_token(ColonToken);
       TypeExprClauseSyntax typeExpr = make<TypeExprClauseSyntax>($2);
-      ReturnTypeClauseSyntax returnType = make_decl(ReturnTypeClause, colon, typeExpr);
+      ReturnTypeClauseSyntax returnType = make_syntax_node(ReturnTypeClause, colon, typeExpr);
       $$ = returnType.getRaw();
    }
 ;
@@ -1333,14 +1333,14 @@ argument_list:
    T_LEFT_PAREN T_RIGHT_PAREN {
       TokenSyntax leftParen = make_token(LeftParenToken);
       TokenSyntax rightParen = make_token(RightParenToken);
-      ArgumentListClauseSyntax argumentListClause = make_expr(ArgumentListClause, leftParen, std::nullopt, rightParen);
+      ArgumentListClauseSyntax argumentListClause = make_syntax_node(ArgumentListClause, leftParen, std::nullopt, rightParen);
       $$ = argumentListClause.getRaw();
    }
 |  T_LEFT_PAREN non_empty_argument_list possible_comma T_RIGHT_PAREN {
       TokenSyntax leftParen = make_token(LeftParenToken);
       ArgumentListSyntax args = make<ArgumentListSyntax>($2);
       TokenSyntax rightParen = make_token(RightParenToken);
-      ArgumentListClauseSyntax argumentListClause = make_expr(ArgumentListClause, leftParen, args, rightParen);
+      ArgumentListClauseSyntax argumentListClause = make_syntax_node(ArgumentListClause, leftParen, args, rightParen);
       $$ = argumentListClause.getRaw();
    }
 ;
@@ -1348,16 +1348,16 @@ argument_list:
 non_empty_argument_list:
    argument {
       ArgumentSyntax argument = make<ArgumentSyntax>($1);
-      ArgumentListItemSyntax argumnetListItem = make_expr(ArgumentListItem, std::nullopt, argument);
+      ArgumentListItemSyntax argumnetListItem = make_syntax_node(ArgumentListItem, std::nullopt, argument);
       std::vector<ArgumentListItemSyntax> items{argumnetListItem};
-      ArgumentListSyntax list = make_expr(ArgumentList, items);
+      ArgumentListSyntax list = make_syntax_node(ArgumentList, items);
       $$ = list.getRaw();
    }
 |  non_empty_argument_list T_COMMA argument {
       ArgumentListSyntax list = make<ArgumentListSyntax>($1);
       TokenSyntax comma = make_token(CommaToken);
       ArgumentSyntax argument = make<ArgumentSyntax>($3);
-      ArgumentListItemSyntax argumnetListItem = make_expr(ArgumentListItem, comma, argument);
+      ArgumentListItemSyntax argumnetListItem = make_syntax_node(ArgumentListItem, comma, argument);
       list.appending(argumnetListItem);
       $$ = list.getRaw();
    }
@@ -1366,13 +1366,13 @@ non_empty_argument_list:
 argument:
    expr {
       ExprSyntax expr = make<ExprSyntax>($1);
-      ArgumentSyntax argument = make_expr(Argument, std::nullopt, expr);
+      ArgumentSyntax argument = make_syntax_node(Argument, std::nullopt, expr);
       $$ = argument.getRaw();
    }
 |  T_ELLIPSIS expr {
       TokenSyntax ellipsisToken = make_token(EllipsisToken);
       ExprSyntax expr = make<ExprSyntax>($2);
-      ArgumentSyntax argument = make_expr(Argument, ellipsisToken, expr);
+      ArgumentSyntax argument = make_syntax_node(Argument, ellipsisToken, expr);
       $$ = argument.getRaw();
    }
 ;
@@ -1387,9 +1387,9 @@ global_var_list:
    }
 |  global_var {
       GlobalVariableSyntax gvar = make<GlobalVariableSyntax>($1);
-      GlobalVariableListItemSyntax gvarItem = make_stmt(GlobalVariableListItem, std::nullopt, gvar);
+      GlobalVariableListItemSyntax gvarItem = make_syntax_node(GlobalVariableListItem, std::nullopt, gvar);
       std::vector<GlobalVariableListItemSyntax> vars{gvarItem};
-      GlobalVariableListSyntax list = make_stmt(GlobalVariableList, vars);
+      GlobalVariableListSyntax list = make_syntax_node(GlobalVariableList, vars);
       $$ = list.getRaw();
    }
 ;
@@ -1397,7 +1397,7 @@ global_var_list:
 global_var:
    simple_variable {
       SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($1);
-      GlobalVariableSyntax gvar = make_stmt(GlobalVariable, simpleVar);
+      GlobalVariableSyntax gvar = make_syntax_node(GlobalVariable, simpleVar);
       $$ = gvar.getRaw();
    }
 ;
@@ -1407,15 +1407,15 @@ static_var_list:
       StaticVariableListSyntax list = make<StaticVariableListSyntax>($1);
       TokenSyntax comma = make_token(CommaToken);
       StaticVariableDeclareSyntax staticVar = make<StaticVariableDeclareSyntax>($3);
-      StaticVariableListItemSyntax listItem = make_stmt(StaticVariableListItem, comma, staticVar);
+      StaticVariableListItemSyntax listItem = make_syntax_node(StaticVariableListItem, comma, staticVar);
       list.appending(listItem);
       $$ = list.getRaw();
    }
 |  static_var {
       StaticVariableDeclareSyntax staticVar = make<StaticVariableDeclareSyntax>($1);
-      StaticVariableListItemSyntax listItem = make_stmt(StaticVariableListItem, std::nullopt, staticVar);
+      StaticVariableListItemSyntax listItem = make_syntax_node(StaticVariableListItem, std::nullopt, staticVar);
       std::vector<StaticVariableListItemSyntax> items{listItem};
-      StaticVariableListSyntax list = make_stmt(StaticVariableList, items);
+      StaticVariableListSyntax list = make_syntax_node(StaticVariableList, items);
       $$ = list.getRaw();
    }
 ;
@@ -1423,14 +1423,14 @@ static_var_list:
 static_var:
    T_VARIABLE {
       TokenSyntax variableToken = make_token_with_text(Variable, $1);
-      StaticVariableDeclareSyntax staticVar = make_stmt(StaticVariableDeclare, variableToken, std::nullopt, std::nullopt);
+      StaticVariableDeclareSyntax staticVar = make_syntax_node(StaticVariableDeclare, variableToken, std::nullopt, std::nullopt);
       $$ = staticVar.getRaw();
    }
 |  T_VARIABLE T_EQUAL expr {
       TokenSyntax variableToken = make_token_with_text(Variable, $1);
       TokenSyntax equalToken = make_token(EqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      StaticVariableDeclareSyntax staticVar = make_stmt(StaticVariableDeclare, variableToken, equalToken, valueExpr);
+      StaticVariableDeclareSyntax staticVar = make_syntax_node(StaticVariableDeclare, variableToken, equalToken, valueExpr);
       $$ = staticVar.getRaw();
    }
    
@@ -1444,7 +1444,7 @@ class_statement_list:
       $$ = list.getRaw();
    }
 |  %empty {
-      MemberDeclListSyntax list = make_blank_decl(MemberDeclList);
+      MemberDeclListSyntax list = make_blank_syntax_node(MemberDeclList);
       $$ = list.getRaw();
    }
 ;
@@ -1454,20 +1454,20 @@ class_statement:
       MemberModifierListSyntax modifiers = make<MemberModifierListSyntax>($1);
       std::optional<TypeExprClauseSyntax> optionalType = $2 ? std::optional(make<TypeExprClauseSyntax>($1)) : std::nullopt;
       ClassPropertyListSyntax propList = make<ClassPropertyListSyntax>($3);
-      ClassPropertyDeclSyntax decl = make_decl(
+      ClassPropertyDeclSyntax decl = make_syntax_node(
          ClassPropertyDecl, modifiers, optionalType, propList
       );
       TokenSyntax semicolon = make_token(SemicolonToken);
-      MemberDeclListItemSyntax declStmt = make_decl(MemberDeclListItem, decl, semicolon);
+      MemberDeclListItemSyntax declStmt = make_syntax_node(MemberDeclListItem, decl, semicolon);
       $$ = declStmt.getRaw();
    }
 |  method_modifiers T_CONST class_const_list T_SEMICOLON {
       MemberModifierListSyntax modifiers = make<MemberModifierListSyntax>($1);
       TokenSyntax constKeyword = make_token(ConstKeyword);
       ClassConstListSyntax list = make<ClassConstListSyntax>($1);
-      ClassConstDeclSyntax decl = make_decl(ClassConstDecl, modifiers, constKeyword, list);
+      ClassConstDeclSyntax decl = make_syntax_node(ClassConstDecl, modifiers, constKeyword, list);
       TokenSyntax semicolon = make_token(SemicolonToken);
-      MemberDeclListItemSyntax declStmt = make_decl(MemberDeclListItem, decl, semicolon);
+      MemberDeclListItemSyntax declStmt = make_syntax_node(MemberDeclListItem, decl, semicolon);
       $$ = declStmt.getRaw();
    }
 |  T_USE name_list trait_adaptations {
@@ -1481,9 +1481,9 @@ class_statement:
       } else if (rawSyntax->isToken()) {
          rawSemicolon = rawSyntax;
       }
-      ClassTraitDeclSyntax decl = make_decl(
+      ClassTraitDeclSyntax decl = make_syntax_node(
          ClassTraitDecl, useKeyword, names, rawAdaptations ? std::optional(make<ClassTraitAdaptationBlockSyntax>(rawSyntax)) : std::nullopt);
-      MemberDeclListItemSyntax declStmt = make_decl(
+      MemberDeclListItemSyntax declStmt = make_syntax_node(
          MemberDeclListItem, decl, rawSemicolon ? std::optional(make<TokenSyntax>(rawSemicolon)) : std::nullopt);
       $$ = declStmt.getRaw();
    }
@@ -1496,7 +1496,7 @@ class_statement:
       TokenSyntax leftParen = make_token(LeftParenToken);
       ParameterListSyntax params = make<ParameterListSyntax>($7);
       TokenSyntax rightParen = make_token(RightParenToken);
-      ParameterClauseSyntax paramsClause = make_decl(ParameterClause, leftParen, params, rightParen);
+      ParameterClauseSyntax paramsClause = make_syntax_node(ParameterClause, leftParen, params, rightParen);
       std::optional<ReturnTypeClauseSyntax> returnType = $9 ? std::optional(make<ReturnTypeClauseSyntax>($9)) : std::nullopt;
       RefCountPtr<RawSyntax> rawSyntax = $11;
       RefCountPtr<RawSyntax> rawSemicolon = nullptr;
@@ -1506,11 +1506,11 @@ class_statement:
       } else if (rawSyntax->isToken()) {
          rawSemicolon = rawSyntax;
       }
-      ClassMethodDeclSyntax methodDecl = make_decl(
+      ClassMethodDeclSyntax methodDecl = make_syntax_node(
          ClassMethodDecl, modifiers, funcKeyword, returnRef, identifier, 
          paramsClause, returnType, rawBody ? std::optional(make<InnerCodeBlockStmtSyntax>(rawBody)) : std::nullopt
       );
-      MemberDeclListItemSyntax declStmt = make_decl(
+      MemberDeclListItemSyntax declStmt = make_syntax_node(
          MemberDeclListItem, methodDecl, rawSemicolon ? std::optional(make<TokenSyntax>(rawSemicolon)) : std::nullopt);
       $$ = declStmt.getRaw();
    }
@@ -1519,16 +1519,16 @@ class_statement:
 name_list:
    name {
       NameSyntax name = make<NameSyntax>($1);
-      NameListItemSyntax listItem = make_decl(NameListItem, std::nullopt, name);
+      NameListItemSyntax listItem = make_syntax_node(NameListItem, std::nullopt, name);
       std::vector<NameListItemSyntax> names{listItem};
-      NameListSyntax list = make_decl(NameList, names);
+      NameListSyntax list = make_syntax_node(NameList, names);
       $$ = list.getRaw();
    }
 |  name_list T_COMMA name {
       NameListSyntax list = make<NameListSyntax>($1);
       TokenSyntax comma = make_token(CommaToken);
       NameSyntax name = make<NameSyntax>($3);
-      NameListItemSyntax listItem = make_decl(NameListItem, comma, name);
+      NameListItemSyntax listItem = make_syntax_node(NameListItem, comma, name);
       list.appending(listItem);
       $$ = list.getRaw();
    }
@@ -1542,7 +1542,7 @@ trait_adaptations:
 |  T_LEFT_BRACE T_RIGHT_BRACE {
       TokenSyntax leftParen = make_token(LeftBraceToken);
       TokenSyntax rightParen = make_token(RightBraceToken);
-      ClassTraitAdaptationBlockSyntax adaptationBlock = make_decl(
+      ClassTraitAdaptationBlockSyntax adaptationBlock = make_syntax_node(
          ClassTraitAdaptationBlock, leftParen, std::nullopt, rightParen
       );
       $$ = adaptationBlock.getRaw();
@@ -1551,7 +1551,7 @@ trait_adaptations:
       TokenSyntax leftParen = make_token(LeftBraceToken);
       ClassTraitAdaptationListSyntax list = make<ClassTraitAdaptationListSyntax>($2);
       TokenSyntax rightParen = make_token(RightBraceToken);
-      ClassTraitAdaptationBlockSyntax adaptationBlock = make_decl(
+      ClassTraitAdaptationBlockSyntax adaptationBlock = make_syntax_node(
          ClassTraitAdaptationBlock, leftParen, list, rightParen
       );
       $$ = adaptationBlock.getRaw();
@@ -1562,7 +1562,7 @@ trait_adaptation_list:
    trait_adaptation {
       ClassTraitAdaptationSyntax adaptation = make<ClassTraitAdaptationSyntax>($1);
       std::vector<ClassTraitAdaptationSyntax> items{adaptation};
-      ClassTraitAdaptationListSyntax list = make_decl(
+      ClassTraitAdaptationListSyntax list = make_syntax_node(
          ClassTraitAdaptationList, items
       );
       $$ = list.getRaw();
@@ -1579,14 +1579,14 @@ trait_adaptation:
    trait_precedence T_SEMICOLON {
       ClassTraitPrecedenceSyntax traitPrecedence = make<ClassTraitPrecedenceSyntax>($1);
       TokenSyntax semicolon = make_token(SemicolonToken);
-      ClassTraitAdaptationSyntax adaptation = make_decl(
+      ClassTraitAdaptationSyntax adaptation = make_syntax_node(
          ClassTraitAdaptation, traitPrecedence, semicolon);
       $$ = adaptation.getRaw();
    }
 |  trait_alias T_SEMICOLON {
       ClassTraitAliasSyntax traitAlias = make<ClassTraitAliasSyntax>($1);
       TokenSyntax semicolon = make_token(SemicolonToken);
-      ClassTraitAdaptationSyntax adaptation = make_decl(
+      ClassTraitAdaptationSyntax adaptation = make_syntax_node(
          ClassTraitAdaptation, traitAlias, semicolon);
       $$ = adaptation.getRaw();
    }
@@ -1597,7 +1597,7 @@ trait_precedence:
       ClassAbsoluteTraitMethodReferenceSyntax absoluteMethodRef = make<ClassAbsoluteTraitMethodReferenceSyntax>($1);
       TokenSyntax insteadofKeyword = make_token(InsteadofKeyword);
       NameListSyntax names = make<NameListSyntax>($3);
-      ClassTraitPrecedenceSyntax traitPrecedence = make_decl(
+      ClassTraitPrecedenceSyntax traitPrecedence = make_syntax_node(
          ClassTraitPrecedence, absoluteMethodRef, insteadofKeyword, names
       );
       $$ = traitPrecedence.getRaw();
@@ -1609,7 +1609,7 @@ trait_alias:
       ClassTraitMethodReferenceSyntax methodRef = make<ClassTraitMethodReferenceSyntax>($1);
       TokenSyntax asKeyword = make_token(AsKeyword);
       TokenSyntax aliasName = make_token_with_text(IdentifierString, $3);
-      ClassTraitAliasSyntax traitAlias = make_decl(
+      ClassTraitAliasSyntax traitAlias = make_syntax_node(
          ClassTraitAlias, methodRef, asKeyword, std::nullopt, aliasName
       );
       $$ = traitAlias.getRaw();
@@ -1618,7 +1618,7 @@ trait_alias:
       ClassTraitMethodReferenceSyntax methodRef = make<ClassTraitMethodReferenceSyntax>($1);
       TokenSyntax asKeyword = make_token(AsKeyword);
       ReservedNonModifierSyntax aliasName = make<ReservedNonModifierSyntax>($3);
-      ClassTraitAliasSyntax traitAlias = make_decl(
+      ClassTraitAliasSyntax traitAlias = make_syntax_node(
          ClassTraitAlias, methodRef, asKeyword, std::nullopt, aliasName
       );
       $$ = traitAlias.getRaw();
@@ -1628,7 +1628,7 @@ trait_alias:
       TokenSyntax asKeyword = make_token(AsKeyword);
       IdentifierSyntax aliasName = make<IdentifierSyntax>($4);
       MemberModifierSyntax modifier = make<MemberModifierSyntax>($3);
-      ClassTraitAliasSyntax traitAlias = make_decl(
+      ClassTraitAliasSyntax traitAlias = make_syntax_node(
          ClassTraitAlias, methodRef, asKeyword, modifier, aliasName
       );
       $$ = traitAlias.getRaw();
@@ -1637,7 +1637,7 @@ trait_alias:
       ClassTraitMethodReferenceSyntax methodRef = make<ClassTraitMethodReferenceSyntax>($1);
       TokenSyntax asKeyword = make_token(AsKeyword);
       MemberModifierSyntax modifier = make<MemberModifierSyntax>($3);
-      ClassTraitAliasSyntax traitAlias = make_decl(
+      ClassTraitAliasSyntax traitAlias = make_syntax_node(
          ClassTraitAlias, methodRef, asKeyword, modifier, std::nullopt
       );
       $$ = traitAlias.getRaw();
@@ -1647,14 +1647,14 @@ trait_alias:
 trait_method_reference:
    identifier {
       IdentifierSyntax identifier = make<IdentifierSyntax>($1);
-      ClassTraitMethodReferenceSyntax methodRef = make_decl(
+      ClassTraitMethodReferenceSyntax methodRef = make_syntax_node(
          ClassTraitMethodReference, identifier
       );
       $$ = methodRef.getRaw();
    }
 |  absolute_trait_method_reference {
       ClassAbsoluteTraitMethodReferenceSyntax absoluteMethodRef = make<ClassAbsoluteTraitMethodReferenceSyntax>($1);
-      ClassTraitMethodReferenceSyntax methodRef = make_decl(
+      ClassTraitMethodReferenceSyntax methodRef = make_syntax_node(
          ClassTraitMethodReference, absoluteMethodRef
       );
       $$ = methodRef.getRaw();
@@ -1666,7 +1666,7 @@ absolute_trait_method_reference:
       NameSyntax name = make<NameSyntax>($1);
       TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
       IdentifierSyntax identifier = make<IdentifierSyntax>($3);
-      ClassAbsoluteTraitMethodReferenceSyntax traitMethodRef = make_decl(
+      ClassAbsoluteTraitMethodReferenceSyntax traitMethodRef = make_syntax_node(
          ClassAbsoluteTraitMethodReference, name, paamayimNekudotayimToken, identifier
       );
       $$ = traitMethodRef.getRaw();
@@ -1682,7 +1682,7 @@ method_body:
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       InnerStmtListSyntax stmts = make<InnerStmtListSyntax>($2);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      InnerCodeBlockStmtSyntax innerStmtCodeBlock = make_stmt(InnerCodeBlockStmt, leftBrace, stmts, rightBrace);
+      InnerCodeBlockStmtSyntax innerStmtCodeBlock = make_syntax_node(InnerCodeBlockStmt, leftBrace, stmts, rightBrace);
       $$ = innerStmtCodeBlock.getRaw();
    }
 ;
@@ -1693,9 +1693,9 @@ variable_modifiers:
    }
 |  T_VAR {
       TokenSyntax modifierKeyword = make_token(PublicKeyword);
-      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      MemberModifierSyntax memberModifier = make_syntax_node(MemberModifier, modifierKeyword);
       std::vector<MemberModifierSyntax> items{memberModifier};
-      MemberModifierListSyntax list = make_decl(MemberModifierList, items);
+      MemberModifierListSyntax list = make_syntax_node(MemberModifierList, items);
       $$ = list.getRaw();
    }
 ;
@@ -1703,9 +1703,9 @@ variable_modifiers:
 method_modifiers:
    %empty {
       TokenSyntax modifierKeyword = make_token(PublicKeyword);
-      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      MemberModifierSyntax memberModifier = make_syntax_node(MemberModifier, modifierKeyword);
       std::vector<MemberModifierSyntax> items{memberModifier};
-      MemberModifierListSyntax list = make_decl(MemberModifierList, items);
+      MemberModifierListSyntax list = make_syntax_node(MemberModifierList, items);
       $$ = list.getRaw();
    }
 |  non_empty_member_modifiers {
@@ -1717,7 +1717,7 @@ non_empty_member_modifiers:
    member_modifier {
       MemberModifierSyntax modifier = make<MemberModifierSyntax>($1);
       std::vector<MemberModifierSyntax> items{modifier};
-      MemberModifierListSyntax list = make_decl(MemberModifierList, items);
+      MemberModifierListSyntax list = make_syntax_node(MemberModifierList, items);
       $$ = list.getRaw();
    }
 |  non_empty_member_modifiers member_modifier {
@@ -1731,32 +1731,32 @@ non_empty_member_modifiers:
 member_modifier:
    T_PUBLIC {
       TokenSyntax modifierKeyword = make_token(PublicKeyword);
-      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      MemberModifierSyntax memberModifier = make_syntax_node(MemberModifier, modifierKeyword);
       $$ = memberModifier.getRaw();
    }
 |  T_PROTECTED {
       TokenSyntax modifierKeyword = make_token(ProtectedKeyword);
-      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      MemberModifierSyntax memberModifier = make_syntax_node(MemberModifier, modifierKeyword);
       $$ = memberModifier.getRaw();
    }
 |  T_PRIVATE {
       TokenSyntax modifierKeyword = make_token(PrivateKeyword);
-      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      MemberModifierSyntax memberModifier = make_syntax_node(MemberModifier, modifierKeyword);
       $$ = memberModifier.getRaw();
    }
 |  T_STATIC {
       TokenSyntax modifierKeyword = make_token(StaticKeyword);
-      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      MemberModifierSyntax memberModifier = make_syntax_node(MemberModifier, modifierKeyword);
       $$ = memberModifier.getRaw();
    }
 |  T_ABSTRACT {
       TokenSyntax modifierKeyword = make_token(AbstractKeyword);
-      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      MemberModifierSyntax memberModifier = make_syntax_node(MemberModifier, modifierKeyword);
       $$ = memberModifier.getRaw();
    }
 |  T_FINAL {
       TokenSyntax modifierKeyword = make_token(FinalKeyword);
-      MemberModifierSyntax memberModifier = make_decl(MemberModifier, modifierKeyword);
+      MemberModifierSyntax memberModifier = make_syntax_node(MemberModifier, modifierKeyword);
       $$ = memberModifier.getRaw();
    }
 ;
@@ -1766,17 +1766,17 @@ property_list:
       ClassPropertyListSyntax list = make<ClassPropertyListSyntax>($1);
       TokenSyntax comma = make_token(CommaToken);
       ClassPropertyClauseSyntax property = make<ClassPropertyClauseSyntax>($3);
-      ClassPropertyListItemSyntax propertyListItem = make_decl(
+      ClassPropertyListItemSyntax propertyListItem = make_syntax_node(
          ClassPropertyListItem, comma, property);
       list.appending(propertyListItem);
       $$ = list.getRaw();
    }
 |  property {
       ClassPropertyClauseSyntax property = make<ClassPropertyClauseSyntax>($1);
-      ClassPropertyListItemSyntax propertyListItem = make_decl(
+      ClassPropertyListItemSyntax propertyListItem = make_syntax_node(
          ClassPropertyListItem, std::nullopt, property);
       std::vector<ClassPropertyListItemSyntax> items{propertyListItem};
-      ClassPropertyListSyntax list = make_decl(ClassPropertyList, items);
+      ClassPropertyListSyntax list = make_syntax_node(ClassPropertyList, items);
       $$ = list.getRaw();
    }
 ;
@@ -1784,15 +1784,15 @@ property_list:
 property:
    T_VARIABLE backup_doc_comment {
       TokenSyntax variable = make_token_with_text(Variable, $1);
-      ClassPropertyClauseSyntax prop = make_decl(ClassPropertyClause, variable, std::nullopt);
+      ClassPropertyClauseSyntax prop = make_syntax_node(ClassPropertyClause, variable, std::nullopt);
       $$ = prop.getRaw();
    }
 |  T_VARIABLE T_EQUAL expr backup_doc_comment {
       TokenSyntax variable = make_token_with_text(Variable, $1);
       TokenSyntax equalToken = make_token(EqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      InitializerClauseSyntax initializer = make_decl(InitializerClause, equalToken, valueExpr);
-      ClassPropertyClauseSyntax prop = make_decl(ClassPropertyClause, variable, initializer);
+      InitializerClauseSyntax initializer = make_syntax_node(InitializerClause, equalToken, valueExpr);
+      ClassPropertyClauseSyntax prop = make_syntax_node(ClassPropertyClause, variable, initializer);
       $$ = prop.getRaw();
    }
 ;
@@ -1802,15 +1802,15 @@ class_const_list:
       ClassConstListSyntax list = make<ClassConstListSyntax>($1);
       TokenSyntax comma = make_token(CommaToken);
       ClassConstClauseSyntax constDecl = make<ClassConstClauseSyntax>($3);
-      ClassConstListItemSyntax listItem = make_decl(ClassConstListItem, comma, constDecl);
+      ClassConstListItemSyntax listItem = make_syntax_node(ClassConstListItem, comma, constDecl);
       list.appending(listItem);
       $$ = list.getRaw();
    }
 |  class_const_decl {
       ClassConstClauseSyntax constDecl = make<ClassConstClauseSyntax>($1);
-      ClassConstListItemSyntax listItem = make_decl(ClassConstListItem, std::nullopt, constDecl);
+      ClassConstListItemSyntax listItem = make_syntax_node(ClassConstListItem, std::nullopt, constDecl);
       std::vector<ClassConstListItemSyntax> items{listItem};
-      ClassConstListSyntax list = make_decl(ClassConstList, items);
+      ClassConstListSyntax list = make_syntax_node(ClassConstList, items);
       $$ = list.getRaw();
    }
 ;
@@ -1820,8 +1820,8 @@ class_const_decl:
       IdentifierSyntax identifier = make<IdentifierSyntax>($1);
       TokenSyntax equalToken = make_token(EqualToken);
       ExprSyntax expr = make<ExprSyntax>($3);
-      InitializerClauseSyntax initializer = make_decl(InitializerClause, equalToken, expr);
-      ClassConstClauseSyntax classConstClause = make_decl(
+      InitializerClauseSyntax initializer = make_syntax_node(InitializerClause, equalToken, expr);
+      ClassConstClauseSyntax classConstClause = make_syntax_node(
          ClassConstClause, identifier, initializer
       );
       $$ = classConstClause.getRaw();
@@ -1833,8 +1833,8 @@ const_decl:
       TokenSyntax identifierToken = make_token_with_text(IdentifierString, $1);
       TokenSyntax equalToken = make_token(EqualToken);
       ExprSyntax expr = make<ExprSyntax>($3);
-      InitializerClauseSyntax initializer = make_decl(InitializerClause, equalToken, expr);
-      ConstDeclareSyntax constDecl = make_stmt(ConstDeclare, identifierToken, initializer);
+      InitializerClauseSyntax initializer = make_syntax_node(InitializerClause, equalToken, expr);
+      ConstDeclareSyntax constDecl = make_syntax_node(ConstDeclare, identifierToken, initializer);
       $$ = constDecl.getRaw();
    }
 ;
@@ -1844,15 +1844,15 @@ echo_expr_list:
       ExprListSyntax list = make<ExprListSyntax>($1);
       TokenSyntax comma = make_token(CommaToken);
       ExprSyntax echoExpr = make<ExprSyntax>($3);
-      ExprListItemSyntax exprListItem = make_expr(ExprListItem, comma, echoExpr);
+      ExprListItemSyntax exprListItem = make_syntax_node(ExprListItem, comma, echoExpr);
       list.appending(exprListItem);
       $$ = list.getRaw();
    }
 |  echo_expr {
       ExprSyntax echoExpr = make<ExprSyntax>($1);
-      ExprListItemSyntax exprListItem = make_expr(ExprListItem, std::nullopt, echoExpr);
+      ExprListItemSyntax exprListItem = make_syntax_node(ExprListItem, std::nullopt, echoExpr);
       std::vector<ExprListItemSyntax> items{exprListItem};
-      ExprListSyntax list = make_expr(ExprList, items);
+      ExprListSyntax list = make_syntax_node(ExprList, items);
       $$ = list.getRaw();
    }
 ;
@@ -1877,15 +1877,15 @@ non_empty_for_exprs:
       ExprListSyntax list = make<ExprListSyntax>($1);
       TokenSyntax comma = make_token(CommaToken);
       ExprSyntax expr = make<ExprSyntax>($3);
-      ExprListItemSyntax exprListItem = make_expr(ExprListItem, comma, expr);
+      ExprListItemSyntax exprListItem = make_syntax_node(ExprListItem, comma, expr);
       list.appending(exprListItem);
       $$ = list.getRaw();
    }
 |  expr {
       ExprSyntax expr = make<ExprSyntax>($1);
-      ExprListItemSyntax exprListItem = make_expr(ExprListItem, std::nullopt, expr);
+      ExprListItemSyntax exprListItem = make_syntax_node(ExprListItem, std::nullopt, expr);
       std::vector<ExprListItemSyntax> items{exprListItem};
-      ExprListSyntax list = make_expr(ExprList, items);
+      ExprListSyntax list = make_syntax_node(ExprList, items);
       $$ = list.getRaw();
    }
 ;
@@ -1900,8 +1900,8 @@ anonymous_class:
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       MemberDeclListSyntax stmts = make<MemberDeclListSyntax>($8);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      MemberDeclBlockSyntax classDefCodeBlock = make_decl(MemberDeclBlock, leftBrace, stmts, rightBrace);
-      AnonymousClassDefinitionClauseSyntax classDef = make_expr(
+      MemberDeclBlockSyntax classDefCodeBlock = make_syntax_node(MemberDeclBlock, leftBrace, stmts, rightBrace);
+      AnonymousClassDefinitionClauseSyntax classDef = make_syntax_node(
          AnonymousClassDefinitionClause, classKeyword, argsClause, extendsFrom, implementsFrom, classDefCodeBlock);
       $$ = classDef.getRaw();
    }
@@ -1912,17 +1912,17 @@ new_expr:
       TokenSyntax newToken = make_token(NewKeyword);
       ClassNameRefClauseSyntax classNameRef = make<ClassNameRefClauseSyntax>($2);
       std::optional<ArgumentListClauseSyntax> argsClause = $3 ? std::optional(make<ArgumentListClauseSyntax>($3)) : std::nullopt;
-      SimpleInstanceCreateExprSyntax simpleInstanceCreateExpr = make_expr(SimpleInstanceCreateExpr, newToken, classNameRef, argsClause);
-      InstanceCreateExprSyntax instanceCreateExpr = make_expr(InstanceCreateExpr, simpleInstanceCreateExpr);
+      SimpleInstanceCreateExprSyntax simpleInstanceCreateExpr = make_syntax_node(SimpleInstanceCreateExpr, newToken, classNameRef, argsClause);
+      InstanceCreateExprSyntax instanceCreateExpr = make_syntax_node(InstanceCreateExpr, simpleInstanceCreateExpr);
       $$ = instanceCreateExpr.getRaw();
    }
 |  T_NEW anonymous_class {
       TokenSyntax newToken = make_token(NewKeyword);
       AnonymousClassDefinitionClauseSyntax anonymousClass = make<AnonymousClassDefinitionClauseSyntax>($2);
-      AnonymousInstanceCreateExprSyntax anonymousClassInstanceCreateExpr = make_expr(
+      AnonymousInstanceCreateExprSyntax anonymousClassInstanceCreateExpr = make_syntax_node(
          AnonymousInstanceCreateExpr, newToken, anonymousClass
       );
-      InstanceCreateExprSyntax instanceCreateExpr = make_expr(InstanceCreateExpr, anonymousClassInstanceCreateExpr);
+      InstanceCreateExprSyntax instanceCreateExpr = make_syntax_node(InstanceCreateExpr, anonymousClassInstanceCreateExpr);
       $$ = instanceCreateExpr.getRaw();
    }
 ;
@@ -1939,10 +1939,10 @@ expr:
       TokenSyntax rightParen = make_token(RightParenToken);
       TokenSyntax equalToken = make_token(EqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($6);
-      ListStructureClauseSyntax listStructureClause = make_expr(
+      ListStructureClauseSyntax listStructureClause = make_syntax_node(
          ListStructureClause, listKeyword, leftParen, arrayList, rightParen
       );
-      ListStructureAssignmentExprSyntax listAssignmentExpr = make_expr(
+      ListStructureAssignmentExprSyntax listAssignmentExpr = make_syntax_node(
          ListStructureAssignmentExpr, listStructureClause, equalToken, valueExpr
       );
       $$ = listAssignmentExpr.getRaw();
@@ -1953,10 +1953,10 @@ expr:
       TokenSyntax rightSquareBracket = make_token(RightSquareBracketToken);
       TokenSyntax equalToken = make_token(EqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($5);
-      SimplifiedArrayCreateExprSyntax simplifiedArrayCreateExpr = make_expr(
+      SimplifiedArrayCreateExprSyntax simplifiedArrayCreateExpr = make_syntax_node(
          SimplifiedArrayCreateExpr, leftSquareBracket, arrayList, rightSquareBracket
       );
-      ArrayStructureAssignmentExprSyntax arrayAssignmentExpr = make_expr(
+      ArrayStructureAssignmentExprSyntax arrayAssignmentExpr = make_syntax_node(
          ArrayStructureAssignmentExpr, simplifiedArrayCreateExpr, equalToken, valueExpr
       );
       $$ = arrayAssignmentExpr.getRaw();
@@ -1965,7 +1965,7 @@ expr:
       VariableExprSyntax var = make<VariableExprSyntax>($1);
       TokenSyntax equalToken = make_token(EqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      AssignmentExprSyntax assignmentExpr = make_expr(AssignmentExpr, var, equalToken, valueExpr);
+      AssignmentExprSyntax assignmentExpr = make_syntax_node(AssignmentExpr, var, equalToken, valueExpr);
       $$ = assignmentExpr.getRaw();
    }
 |  variable T_EQUAL T_AMPERSAND variable {
@@ -1973,136 +1973,136 @@ expr:
       TokenSyntax equalToken = make_token(EqualToken);
       TokenSyntax ampersand = make_token(AmpersandToken);
       VariableExprSyntax valueExpr = make<VariableExprSyntax>($4);
-      ReferencedVariableExprSyntax referencedVar = make_expr(ReferencedVariableExpr, ampersand, valueExpr);
-      AssignmentExprSyntax assignmentExpr = make_expr(AssignmentExpr, var, equalToken, referencedVar);
+      ReferencedVariableExprSyntax referencedVar = make_syntax_node(ReferencedVariableExpr, ampersand, valueExpr);
+      AssignmentExprSyntax assignmentExpr = make_syntax_node(AssignmentExpr, var, equalToken, referencedVar);
       $$ = assignmentExpr.getRaw();
    }
 |  T_CLONE expr {
       TokenSyntax cloneKeyword = make_token(CloneKeyword);
       ExprSyntax expr = make<ExprSyntax>($2);
-      CloneExprSyntax cloneExpr = make_expr(CloneExpr, cloneKeyword, expr);
+      CloneExprSyntax cloneExpr = make_syntax_node(CloneExpr, cloneKeyword, expr);
       $$ = cloneExpr.getRaw();
    }
 |  variable T_PLUS_EQUAL expr {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax plusEqual = make_token(PlusEqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, plusEqual, valueExpr);
+      CompoundAssignmentExprSyntax assignment = make_syntax_node(CompoundAssignmentExpr, varExpr, plusEqual, valueExpr);
       $$ = assignment.getRaw();
    }
 |  variable T_MINUS_EQUAL expr {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax minusEqual = make_token(MinusEqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, minusEqual, valueExpr);
+      CompoundAssignmentExprSyntax assignment = make_syntax_node(CompoundAssignmentExpr, varExpr, minusEqual, valueExpr);
       $$ = assignment.getRaw();
    }
 |  variable T_MUL_EQUAL expr {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax mulEqual = make_token(MulEqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, mulEqual, valueExpr);
+      CompoundAssignmentExprSyntax assignment = make_syntax_node(CompoundAssignmentExpr, varExpr, mulEqual, valueExpr);
       $$ = assignment.getRaw();
    }
 |  variable T_POW_EQUAL expr {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax powEqual = make_token(PowEqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, powEqual, valueExpr);
+      CompoundAssignmentExprSyntax assignment = make_syntax_node(CompoundAssignmentExpr, varExpr, powEqual, valueExpr);
       $$ = assignment.getRaw();
    }
 |  variable T_DIV_EQUAL expr {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax divEqual = make_token(DivEqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, divEqual, valueExpr);
+      CompoundAssignmentExprSyntax assignment = make_syntax_node(CompoundAssignmentExpr, varExpr, divEqual, valueExpr);
       $$ = assignment.getRaw();
    }
 |  variable T_STR_CONCAT_EQUAL expr {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax strConcatEqual = make_token(StrConcatEqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, strConcatEqual, valueExpr);
+      CompoundAssignmentExprSyntax assignment = make_syntax_node(CompoundAssignmentExpr, varExpr, strConcatEqual, valueExpr);
       $$ = assignment.getRaw();
    }
 |  variable T_MOD_EQUAL expr {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax modEqual = make_token(ModEqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, modEqual, valueExpr);
+      CompoundAssignmentExprSyntax assignment = make_syntax_node(CompoundAssignmentExpr, varExpr, modEqual, valueExpr);
       $$ = assignment.getRaw();
    }
 |  variable T_AND_EQUAL expr {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax andEqual = make_token(AndEqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, andEqual, valueExpr);
+      CompoundAssignmentExprSyntax assignment = make_syntax_node(CompoundAssignmentExpr, varExpr, andEqual, valueExpr);
       $$ = assignment.getRaw();
    }
 |  variable T_OR_EQUAL expr {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax orEqual = make_token(OrEqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, orEqual, valueExpr);
+      CompoundAssignmentExprSyntax assignment = make_syntax_node(CompoundAssignmentExpr, varExpr, orEqual, valueExpr);
       $$ = assignment.getRaw();
    }
 |  variable T_XOR_EQUAL expr {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax xorEqual = make_token(XorEqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, xorEqual, valueExpr);
+      CompoundAssignmentExprSyntax assignment = make_syntax_node(CompoundAssignmentExpr, varExpr, xorEqual, valueExpr);
       $$ = assignment.getRaw();
    }
 |  variable T_SL_EQUAL expr {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax shiftLeftEqual = make_token(ShiftLeftEqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, shiftLeftEqual, valueExpr);
+      CompoundAssignmentExprSyntax assignment = make_syntax_node(CompoundAssignmentExpr, varExpr, shiftLeftEqual, valueExpr);
       $$ = assignment.getRaw();
    }
 |  variable T_SR_EQUAL expr {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax shiftRightEqual = make_token(ShiftRightEqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, shiftRightEqual, valueExpr);
+      CompoundAssignmentExprSyntax assignment = make_syntax_node(CompoundAssignmentExpr, varExpr, shiftRightEqual, valueExpr);
       $$ = assignment.getRaw();
    }
 |  variable T_COALESCE_EQUAL expr {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax coalesceEqualToken = make_token(CoalesceEqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      CompoundAssignmentExprSyntax assignment = make_expr(CompoundAssignmentExpr, varExpr, coalesceEqualToken, valueExpr);
+      CompoundAssignmentExprSyntax assignment = make_syntax_node(CompoundAssignmentExpr, varExpr, coalesceEqualToken, valueExpr);
       $$ = assignment.getRaw();
    }
 |  variable T_INC {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax incToken = make_token(IncToken);
-      PostfixOperatorExprSyntax postfixExpr = make_expr(PostfixOperatorExpr, varExpr, incToken);
+      PostfixOperatorExprSyntax postfixExpr = make_syntax_node(PostfixOperatorExpr, varExpr, incToken);
       $$ = postfixExpr.getRaw();
    }
 |  T_INC variable {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($2);
       TokenSyntax incToken = make_token(IncToken);
-      PrefixOperatorExprSyntax prefixExpr = make_expr(PrefixOperatorExpr, incToken, varExpr);
+      PrefixOperatorExprSyntax prefixExpr = make_syntax_node(PrefixOperatorExpr, incToken, varExpr);
       $$ = prefixExpr.getRaw();
    }
 |  variable T_DEC {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($1);
       TokenSyntax decToken = make_token(DecToken);
-      PostfixOperatorExprSyntax postfixExpr = make_expr(PostfixOperatorExpr, varExpr, decToken);
+      PostfixOperatorExprSyntax postfixExpr = make_syntax_node(PostfixOperatorExpr, varExpr, decToken);
       $$ = postfixExpr.getRaw();
    }
 |  T_DEC variable {
       VariableExprSyntax varExpr = make<VariableExprSyntax>($2);
       TokenSyntax decToken = make_token(DecToken);
-      PrefixOperatorExprSyntax prefixExpr = make_expr(PrefixOperatorExpr, decToken, varExpr);
+      PrefixOperatorExprSyntax prefixExpr = make_syntax_node(PrefixOperatorExpr, decToken, varExpr);
       $$ = prefixExpr.getRaw();
    }
 |  expr T_BOOLEAN_OR expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(BooleanOrToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      LogicalExprSyntax loginalExpr = make_expr(LogicalExpr, lhs, operatorToken, rhs);
+      LogicalExprSyntax loginalExpr = make_syntax_node(LogicalExpr, lhs, operatorToken, rhs);
       $$ = loginalExpr.getRaw();
       
    }
@@ -2110,213 +2110,213 @@ expr:
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(BooleanAndToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      LogicalExprSyntax loginalExpr = make_expr(LogicalExpr, lhs, operatorToken, rhs);
+      LogicalExprSyntax loginalExpr = make_syntax_node(LogicalExpr, lhs, operatorToken, rhs);
       $$ = loginalExpr.getRaw();
    }
 |  expr T_LOGICAL_OR expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(LogicOrKeyword);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      LogicalExprSyntax loginalExpr = make_expr(LogicalExpr, lhs, operatorToken, rhs);
+      LogicalExprSyntax loginalExpr = make_syntax_node(LogicalExpr, lhs, operatorToken, rhs);
       $$ = loginalExpr.getRaw();
    }
 |  expr T_LOGICAL_AND expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(LogicAndKeyword);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      LogicalExprSyntax loginalExpr = make_expr(LogicalExpr, lhs, operatorToken, rhs);
+      LogicalExprSyntax loginalExpr = make_syntax_node(LogicalExpr, lhs, operatorToken, rhs);
       $$ = loginalExpr.getRaw();
    }
 |  expr T_LOGICAL_XOR expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(LogicXorKeyword);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      LogicalExprSyntax loginalExpr = make_expr(LogicalExpr, lhs, operatorToken, rhs);
+      LogicalExprSyntax loginalExpr = make_syntax_node(LogicalExpr, lhs, operatorToken, rhs);
       $$ = loginalExpr.getRaw();
    }
 |  expr T_VBAR expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(VerticalBarToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      BitLogicalExprSyntax bitLogicExpr = make_expr(BitLogicalExpr, lhs, operatorToken, rhs);
+      BitLogicalExprSyntax bitLogicExpr = make_syntax_node(BitLogicalExpr, lhs, operatorToken, rhs);
       $$ = bitLogicExpr.getRaw();
    }
 |  expr T_AMPERSAND expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(AmpersandToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      BitLogicalExprSyntax bitLogicExpr = make_expr(BitLogicalExpr, lhs, operatorToken, rhs);
+      BitLogicalExprSyntax bitLogicExpr = make_syntax_node(BitLogicalExpr, lhs, operatorToken, rhs);
       $$ = bitLogicExpr.getRaw();
    }
 |  expr T_CARET expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(CaretToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      BitLogicalExprSyntax bitLogicExpr = make_expr(BitLogicalExpr, lhs, operatorToken, rhs);
+      BitLogicalExprSyntax bitLogicExpr = make_syntax_node(BitLogicalExpr, lhs, operatorToken, rhs);
       $$ = bitLogicExpr.getRaw();
    }
 |  expr T_STR_CONCAT expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(StrConcatToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      BinaryOperatorExprSyntax binaryExpr = make_syntax_node(BinaryOperatorExpr, lhs, operatorToken, rhs);
       $$ = binaryExpr.getRaw();
    }
 |  expr T_PLUS_SIGN expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(PlusSignToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      BinaryOperatorExprSyntax binaryExpr = make_syntax_node(BinaryOperatorExpr, lhs, operatorToken, rhs);
       $$ = binaryExpr.getRaw();
    }
 |  expr T_MINUS_SIGN expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(MinusSignToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      BinaryOperatorExprSyntax binaryExpr = make_syntax_node(BinaryOperatorExpr, lhs, operatorToken, rhs);
       $$ = binaryExpr.getRaw();
    }
 |  expr T_MUL_SIGN expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(MulSignToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      BinaryOperatorExprSyntax binaryExpr = make_syntax_node(BinaryOperatorExpr, lhs, operatorToken, rhs);
       $$ = binaryExpr.getRaw();
    }
 |  expr T_POW expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(PowToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      BinaryOperatorExprSyntax binaryExpr = make_syntax_node(BinaryOperatorExpr, lhs, operatorToken, rhs);
       $$ = binaryExpr.getRaw();
    }
 |  expr T_DIV_SIGN expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(DivSignToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      BinaryOperatorExprSyntax binaryExpr = make_syntax_node(BinaryOperatorExpr, lhs, operatorToken, rhs);
       $$ = binaryExpr.getRaw();
    }
 |  expr T_MOD_SIGN expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(ModSignToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      BinaryOperatorExprSyntax binaryExpr = make_syntax_node(BinaryOperatorExpr, lhs, operatorToken, rhs);
       $$ = binaryExpr.getRaw();
    }
 |  expr T_SL expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(ShiftLeftToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      BinaryOperatorExprSyntax binaryExpr = make_syntax_node(BinaryOperatorExpr, lhs, operatorToken, rhs);
       $$ = binaryExpr.getRaw();
    }
 |  expr T_SR expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(ShiftRightToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      BinaryOperatorExprSyntax binaryExpr = make_syntax_node(BinaryOperatorExpr, lhs, operatorToken, rhs);
       $$ = binaryExpr.getRaw();
    }
 |  T_PLUS_SIGN expr %prec T_INC {
       TokenSyntax plusSignToken = make_token(PlusSignToken);
       ExprSyntax varExpr = make<ExprSyntax>($2);
-      PrefixOperatorExprSyntax prefixExpr = make_expr(PrefixOperatorExpr, plusSignToken, varExpr);
+      PrefixOperatorExprSyntax prefixExpr = make_syntax_node(PrefixOperatorExpr, plusSignToken, varExpr);
       $$ = prefixExpr.getRaw();
    }
 |  T_MINUS_SIGN expr %prec T_INC {
       TokenSyntax minusSignToken = make_token(MinusSignToken);
       ExprSyntax varExpr = make<ExprSyntax>($2);
-      PrefixOperatorExprSyntax prefixExpr = make_expr(PrefixOperatorExpr, minusSignToken, varExpr);
+      PrefixOperatorExprSyntax prefixExpr = make_syntax_node(PrefixOperatorExpr, minusSignToken, varExpr);
       $$ = prefixExpr.getRaw();
    }
 |  T_EXCLAMATION_MARK expr {
       TokenSyntax exclamationMarkToken = make_token(ExclamationMarkToken);
       ExprSyntax varExpr = make<ExprSyntax>($2);
-      PrefixOperatorExprSyntax prefixExpr = make_expr(PrefixOperatorExpr, exclamationMarkToken, varExpr);
+      PrefixOperatorExprSyntax prefixExpr = make_syntax_node(PrefixOperatorExpr, exclamationMarkToken, varExpr);
       $$ = prefixExpr.getRaw();
    }
 |  T_TILDE expr {
       TokenSyntax tildeToken = make_token(TildeToken);
       ExprSyntax varExpr = make<ExprSyntax>($2);
-      PrefixOperatorExprSyntax prefixExpr = make_expr(PrefixOperatorExpr, tildeToken, varExpr);
+      PrefixOperatorExprSyntax prefixExpr = make_syntax_node(PrefixOperatorExpr, tildeToken, varExpr);
       $$ = prefixExpr.getRaw();
    }
 |  expr T_IS_IDENTICAL expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(IsIdenticalToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      RelationExprSyntax relationExpr = make_syntax_node(RelationExpr, lhs, operatorToken, rhs);
       $$ = relationExpr.getRaw();
    }
 |  expr T_IS_NOT_IDENTICAL expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(IsNotIdenticalToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      RelationExprSyntax relationExpr = make_syntax_node(RelationExpr, lhs, operatorToken, rhs);
       $$ = relationExpr.getRaw();
    }
 |  expr T_IS_EQUAL expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(IsEqualToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      RelationExprSyntax relationExpr = make_syntax_node(RelationExpr, lhs, operatorToken, rhs);
       $$ = relationExpr.getRaw();
    }
 |  expr T_IS_NOT_EQUAL expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(IsNotEqualToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      RelationExprSyntax relationExpr = make_syntax_node(RelationExpr, lhs, operatorToken, rhs);
       $$ = relationExpr.getRaw();
    }
 |  expr T_IS_SMALLER expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(IsSmallerToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      RelationExprSyntax relationExpr = make_syntax_node(RelationExpr, lhs, operatorToken, rhs);
       $$ = relationExpr.getRaw();
    }
 |  expr T_IS_SMALLER_OR_EQUAL expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(IsSmallerOrEqualToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      RelationExprSyntax relationExpr = make_syntax_node(RelationExpr, lhs, operatorToken, rhs);
       $$ = relationExpr.getRaw();
    }
 |  expr T_IS_GREATER expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(IsGreaterToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      RelationExprSyntax relationExpr = make_syntax_node(RelationExpr, lhs, operatorToken, rhs);
       $$ = relationExpr.getRaw();
    }
 |  expr T_IS_GREATER_OR_EQUAL expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(IsGreaterOrEqualToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      RelationExprSyntax relationExpr = make_syntax_node(RelationExpr, lhs, operatorToken, rhs);
       $$ = relationExpr.getRaw();
    }
 |  expr T_SPACESHIP expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(SpaceshipToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      RelationExprSyntax relationExpr = make_expr(RelationExpr, lhs, operatorToken, rhs);
+      RelationExprSyntax relationExpr = make_syntax_node(RelationExpr, lhs, operatorToken, rhs);
       $$ = relationExpr.getRaw();
    }
 |  expr T_INSTANCEOF class_name_reference {
       ExprSyntax instance = make<ExprSyntax>($1);
       TokenSyntax instanceof = make_token(InstanceofKeyword);
       ClassNameRefClauseSyntax classNameRef = make<ClassNameRefClauseSyntax>($3);
-      InstanceofExprSyntax instanceofExpr = make_expr(InstanceofExpr, instance, instanceof, classNameRef);
+      InstanceofExprSyntax instanceofExpr = make_syntax_node(InstanceofExpr, instance, instanceof, classNameRef);
       $$ = instanceofExpr.getRaw();
    }
 |  T_LEFT_PAREN expr T_RIGHT_PAREN {
       TokenSyntax leftParen = make_token(LeftParenToken);
       ExprSyntax expr = make<ExprSyntax>($2);
       TokenSyntax rightParen = make_token(RightParenToken);
-      ParenDecoratedExprSyntax decoatedExpr = make_expr(ParenDecoratedExpr, leftParen, expr, rightParen);
+      ParenDecoratedExprSyntax decoatedExpr = make_syntax_node(ParenDecoratedExpr, leftParen, expr, rightParen);
       $$ = decoatedExpr.getRaw();
    }
 |  new_expr {
@@ -2328,7 +2328,7 @@ expr:
       ExprSyntax firstChoice = make<ExprSyntax>($3);
       TokenSyntax colon = make_token(ColonToken);
       ExprSyntax secondChoice = make<ExprSyntax>($5);
-      TernaryExprSyntax ternaryExpr = make_expr(TernaryExpr, conditionExpr, questionMark, firstChoice, colon, secondChoice);
+      TernaryExprSyntax ternaryExpr = make_syntax_node(TernaryExpr, conditionExpr, questionMark, firstChoice, colon, secondChoice);
       $$ = ternaryExpr.getRaw();
    }
 |  expr T_QUESTION_MARK T_COLON expr {
@@ -2336,14 +2336,14 @@ expr:
       TokenSyntax questionMark = make_token(QuestionMarkToken);
       TokenSyntax colon = make_token(ColonToken);
       ExprSyntax secondChoice = make<ExprSyntax>($4);
-      TernaryExprSyntax ternaryExpr = make_expr(TernaryExpr, conditionExpr, questionMark, std::nullopt, colon, secondChoice);
+      TernaryExprSyntax ternaryExpr = make_syntax_node(TernaryExpr, conditionExpr, questionMark, std::nullopt, colon, secondChoice);
       $$ = ternaryExpr.getRaw();
    }
 |  expr T_COALESCE expr {
       ExprSyntax lhs = make<ExprSyntax>($1);
       TokenSyntax operatorToken = make_token(CoalesceToken);
       ExprSyntax rhs = make<ExprSyntax>($3);
-      BinaryOperatorExprSyntax binaryExpr = make_expr(BinaryOperatorExpr, lhs, operatorToken, rhs);
+      BinaryOperatorExprSyntax binaryExpr = make_syntax_node(BinaryOperatorExpr, lhs, operatorToken, rhs);
       $$ = binaryExpr.getRaw();
    }
 |  internal_functions_in_bison {
@@ -2352,83 +2352,83 @@ expr:
 |  T_INT_CAST expr {
       TokenSyntax castType = make_token(IntCastKeyword);
       ExprSyntax sourceExpr = make<ExprSyntax>($2);
-      CastExprSyntax castExpr = make_expr(CastExpr, castType, sourceExpr);
+      CastExprSyntax castExpr = make_syntax_node(CastExpr, castType, sourceExpr);
       $$ = castExpr.getRaw();
    }
 |  T_DOUBLE_CAST expr {
       TokenSyntax castType = make_token(DoubleCastKeyword);
       ExprSyntax sourceExpr = make<ExprSyntax>($2);
-      CastExprSyntax castExpr = make_expr(CastExpr, castType, sourceExpr);
+      CastExprSyntax castExpr = make_syntax_node(CastExpr, castType, sourceExpr);
       $$ = castExpr.getRaw();
    }
 |  T_STRING_CAST expr {
       TokenSyntax castType = make_token(StringCastKeyword);
       ExprSyntax sourceExpr = make<ExprSyntax>($2);
-      CastExprSyntax castExpr = make_expr(CastExpr, castType, sourceExpr);
+      CastExprSyntax castExpr = make_syntax_node(CastExpr, castType, sourceExpr);
       $$ = castExpr.getRaw();
    }
 |  T_ARRAY_CAST expr {
       TokenSyntax castType = make_token(ArrayCastKeyword);
       ExprSyntax sourceExpr = make<ExprSyntax>($2);
-      CastExprSyntax castExpr = make_expr(CastExpr, castType, sourceExpr);
+      CastExprSyntax castExpr = make_syntax_node(CastExpr, castType, sourceExpr);
       $$ = castExpr.getRaw();
    }
 |  T_OBJECT_CAST expr {
       TokenSyntax castType = make_token(ObjectCastKeyword);
       ExprSyntax sourceExpr = make<ExprSyntax>($2);
-      CastExprSyntax castExpr = make_expr(CastExpr, castType, sourceExpr);
+      CastExprSyntax castExpr = make_syntax_node(CastExpr, castType, sourceExpr);
       $$ = castExpr.getRaw();
    }
 |  T_BOOL_CAST expr {
       TokenSyntax castType = make_token(BoolCastKeyword);
       ExprSyntax sourceExpr = make<ExprSyntax>($2);
-      CastExprSyntax castExpr = make_expr(CastExpr, castType, sourceExpr);
+      CastExprSyntax castExpr = make_syntax_node(CastExpr, castType, sourceExpr);
       $$ = castExpr.getRaw();
    }
 |  T_UNSET_CAST expr {
       TokenSyntax castType = make_token(UnsetCastKeyword);
       ExprSyntax sourceExpr = make<ExprSyntax>($2);
-      CastExprSyntax castExpr = make_expr(CastExpr, castType, sourceExpr);
+      CastExprSyntax castExpr = make_syntax_node(CastExpr, castType, sourceExpr);
       $$ = castExpr.getRaw();
    }
 |  T_EXIT exit_expr {
       TokenSyntax exitToken = make_token(ExitKeyword);
       std::optional<ExitExprArgClauseSyntax> exitArgClause = $2 ? std::optional(make<ExitExprArgClauseSyntax>($2)) : std::nullopt;
-      ExitExprSyntax exitExpr = make_expr(ExitExpr, exitToken, exitArgClause);
+      ExitExprSyntax exitExpr = make_syntax_node(ExitExpr, exitToken, exitArgClause);
       $$ = exitExpr.getRaw();
    }
 |  T_ERROR_SUPPRESS_SIGN expr {
       TokenSyntax errorSuppressToken = make_token(ErrorSuppressSignToken);
       ExprSyntax varExpr = make<ExprSyntax>($2);
-      PrefixOperatorExprSyntax prefixExpr = make_expr(PrefixOperatorExpr, errorSuppressToken, varExpr);
+      PrefixOperatorExprSyntax prefixExpr = make_syntax_node(PrefixOperatorExpr, errorSuppressToken, varExpr);
       $$ = prefixExpr.getRaw();
    }
 |  scalar {
       Syntax scalarValue = make<Syntax>($1);
-      ScalarExprSyntax scalar = make_expr(ScalarExpr, scalarValue);
+      ScalarExprSyntax scalar = make_syntax_node(ScalarExpr, scalarValue);
       $$ = scalar.getRaw();
    }
 |  T_BACKTICK backticks_expr T_BACKTICK {
       TokenSyntax backtickToken = make_token(BacktickToken);
       BackticksClauseSyntax backticksExpr = make<BackticksClauseSyntax>($2);
-      ShellCmdExprSyntax shellCmd = make_expr(ShellCmdExpr, backtickToken, backticksExpr, backtickToken);
+      ShellCmdExprSyntax shellCmd = make_syntax_node(ShellCmdExpr, backtickToken, backticksExpr, backtickToken);
       $$ = shellCmd.getRaw();
    }
 |  T_PRINT expr {
       TokenSyntax printKeyword = make_token(PrintKeyword);
       ExprSyntax valueExpr = make<ExprSyntax>($2);
-      PrintFuncExprSyntax printExpr = make_expr(PrintFuncExpr, printKeyword, valueExpr);
+      PrintFuncExprSyntax printExpr = make_syntax_node(PrintFuncExpr, printKeyword, valueExpr);
       $$ = printExpr.getRaw();
    }
 |  T_YIELD {
       TokenSyntax yieldKeyword = make_token(YieldKeyword);
-      YieldExprSyntax yieldExpr = make_expr(YieldExpr, yieldKeyword, std::nullopt, std::nullopt, std::nullopt);
+      YieldExprSyntax yieldExpr = make_syntax_node(YieldExpr, yieldKeyword, std::nullopt, std::nullopt, std::nullopt);
       $$ = yieldExpr.getRaw();
    }
 |  T_YIELD expr {
       TokenSyntax yieldKeyword = make_token(YieldKeyword);
       ExprSyntax valueExpr = make<ExprSyntax>($2);
-      YieldExprSyntax yieldExpr = make_expr(YieldExpr, yieldKeyword, std::nullopt, std::nullopt, valueExpr);
+      YieldExprSyntax yieldExpr = make_syntax_node(YieldExpr, yieldKeyword, std::nullopt, std::nullopt, valueExpr);
       $$ = yieldExpr.getRaw();
    }
 |  T_YIELD expr T_DOUBLE_ARROW expr {
@@ -2436,22 +2436,22 @@ expr:
       ExprSyntax keyExpr = make<ExprSyntax>($2);
       TokenSyntax doubleArrowToken = make_token(DoubleArrowToken);
       ExprSyntax valueExpr = make<ExprSyntax>($4);
-      YieldExprSyntax yieldExpr = make_expr(YieldExpr, yieldKeyword, keyExpr, doubleArrowToken, valueExpr);
+      YieldExprSyntax yieldExpr = make_syntax_node(YieldExpr, yieldKeyword, keyExpr, doubleArrowToken, valueExpr);
       $$ = yieldExpr.getRaw();
    }
 |  T_YIELD_FROM expr {
       TokenSyntax yieldFromKeyword = make_token(YieldFromKeyword);
       ExprSyntax valueExpr = make<ExprSyntax>($2);
-      YieldFromExprSyntax yieldFromExpr = make_expr(YieldFromExpr, yieldFromKeyword, valueExpr);
+      YieldFromExprSyntax yieldFromExpr = make_syntax_node(YieldFromExpr, yieldFromKeyword, valueExpr);
       $$ = yieldFromExpr.getRaw();
    }
 |  inline_function {
-      LambdaExprSyntax lambdaExpr = make_expr(LambdaExpr, std::nullopt, make<ExprSyntax>($1));
+      LambdaExprSyntax lambdaExpr = make_syntax_node(LambdaExpr, std::nullopt, make<ExprSyntax>($1));
       $$ = lambdaExpr.getRaw();
    }
 |  T_STATIC inline_function {
       TokenSyntax staticKeyword = make_token(StaticKeyword);
-      LambdaExprSyntax lambdaExpr = make_expr(LambdaExpr, staticKeyword, make<ExprSyntax>($2));
+      LambdaExprSyntax lambdaExpr = make_syntax_node(LambdaExpr, staticKeyword, make<ExprSyntax>($2));
       $$ = lambdaExpr.getRaw();
    }
 ;
@@ -2464,14 +2464,14 @@ inline_function:
       TokenSyntax leftParenToken = make_token(LeftParenToken);
       std::optional<ParameterListSyntax> params = $5 ? std::optional(make<ParameterListSyntax>($5)) : std::nullopt;
       TokenSyntax rightParenToken = make_token(RightParenToken);
-      ParameterClauseSyntax paramsClause = make_decl(ParameterClause, leftParenToken, params, rightParenToken);
+      ParameterClauseSyntax paramsClause = make_syntax_node(ParameterClause, leftParenToken, params, rightParenToken);
       std::optional<UseLexicalVariableClauseSyntax> lexicalVarClause = $7 ? std::optional(make<UseLexicalVariableClauseSyntax>($7)) : std::nullopt;
       std::optional<ReturnTypeClauseSyntax> returnType = $8 ? std::optional(make<ReturnTypeClauseSyntax>($8)) : std::nullopt;
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       InnerStmtListSyntax innerStmtClause = make<InnerStmtListSyntax>($11);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      InnerCodeBlockStmtSyntax innerClodeBlock = make_stmt(InnerCodeBlockStmt, leftBrace, innerStmtClause, rightBrace);
-      ClassicLambdaExprSyntax lambdaExpr = make_expr(
+      InnerCodeBlockStmtSyntax innerClodeBlock = make_syntax_node(InnerCodeBlockStmt, leftBrace, innerStmtClause, rightBrace);
+      ClassicLambdaExprSyntax lambdaExpr = make_syntax_node(
          ClassicLambdaExpr, functionKeyword, returnRef, paramsClause, lexicalVarClause, returnType, innerClodeBlock);
       $$ = lambdaExpr.getRaw();
    }
@@ -2482,11 +2482,11 @@ inline_function:
       TokenSyntax leftParenToken = make_token(LeftParenToken);
       std::optional<ParameterListSyntax> params = $4 ? std::optional(make<ParameterListSyntax>($4)) : std::nullopt;
       TokenSyntax rightParenToken = make_token(RightParenToken);
-      ParameterClauseSyntax paramsClause = make_decl(ParameterClause, leftParenToken, params, rightParenToken);
+      ParameterClauseSyntax paramsClause = make_syntax_node(ParameterClause, leftParenToken, params, rightParenToken);
       std::optional<ReturnTypeClauseSyntax> returnType = $6 ? std::optional(make<ReturnTypeClauseSyntax>($4)) : std::nullopt;
       TokenSyntax doubleArrowToken = make_token(DoubleArrowToken);
       ExprSyntax expr = make<ExprSyntax>($11);
-      SimplifiedLambdaExprSyntax lambdaExpr = make_expr(SimplifiedLambdaExpr, fnKeyword, returnRef, paramsClause, returnType, doubleArrowToken, expr);
+      SimplifiedLambdaExprSyntax lambdaExpr = make_syntax_node(SimplifiedLambdaExpr, fnKeyword, returnRef, paramsClause, returnType, doubleArrowToken, expr);
       $$ = lambdaExpr.getRaw();
    }
 ;
@@ -2542,7 +2542,7 @@ lexical_vars:
       TokenSyntax leftParen = make_token(LeftParenToken);
       LexicalVariableListSyntax lexicalVarList = make<LexicalVariableListSyntax>($3);
       TokenSyntax rightParen = make_token(RightParenToken);
-      UseLexicalVariableClauseSyntax useLexicalVarsClause = make_expr(
+      UseLexicalVariableClauseSyntax useLexicalVarsClause = make_syntax_node(
          UseLexicalVariableClause, useKeyword, leftParen, lexicalVarList, rightParen
       );
       $$ = useLexicalVarsClause.getRaw();
@@ -2554,7 +2554,7 @@ lexical_var_list:
       LexicalVariableListSyntax list = make<LexicalVariableListSyntax>($1);
       TokenSyntax comma = make_token(CommaToken);
       LexicalVariableSyntax lexicalVar = make<LexicalVariableSyntax>($3);
-      LexicalVariableListItemSyntax lexicalVarListItem = make_expr(
+      LexicalVariableListItemSyntax lexicalVarListItem = make_syntax_node(
          LexicalVariableListItem, comma, lexicalVar
       );
       list.appending(lexicalVarListItem);
@@ -2562,11 +2562,11 @@ lexical_var_list:
    }
 |  lexical_var {
       LexicalVariableSyntax lexicalVar = make<LexicalVariableSyntax>($1);
-      LexicalVariableListItemSyntax lexicalVarListItem = make_expr(
+      LexicalVariableListItemSyntax lexicalVarListItem = make_syntax_node(
          LexicalVariableListItem, std::nullopt, lexicalVar
       );
       std::vector<LexicalVariableListItemSyntax> items{lexicalVarListItem};
-      LexicalVariableListSyntax list = make_expr(LexicalVariableList, items);
+      LexicalVariableListSyntax list = make_syntax_node(LexicalVariableList, items);
       $$ = list.getRaw();
    }
 ;
@@ -2574,13 +2574,13 @@ lexical_var_list:
 lexical_var:
    T_VARIABLE {
       TokenSyntax variableToken = make_token_with_text(Variable, $1);
-      LexicalVariableSyntax lexicalVar = make_expr(LexicalVariable, std::nullopt, variableToken);
+      LexicalVariableSyntax lexicalVar = make_syntax_node(LexicalVariable, std::nullopt, variableToken);
       $$ = lexicalVar.getRaw();
    }
 |  T_AMPERSAND T_VARIABLE {
       TokenSyntax ampersand = make_token(AmpersandToken);
       TokenSyntax variableToken = make_token_with_text(Variable, $2);
-      LexicalVariableSyntax lexicalVar = make_expr(LexicalVariable, ampersand, variableToken);
+      LexicalVariableSyntax lexicalVar = make_syntax_node(LexicalVariable, ampersand, variableToken);
       $$ = lexicalVar.getRaw();
    }
 ;
@@ -2589,8 +2589,8 @@ function_call:
    name argument_list {
       NameSyntax funcName = make<NameSyntax>($1);
       ArgumentListClauseSyntax argsClause = make<ArgumentListClauseSyntax>($2);
-      SimpleFunctionCallExprSyntax simpleFuncCallExpr = make_expr(SimpleFunctionCallExpr, funcName, argsClause);
-      FunctionCallExprSyntax funcCallExpr = make_expr(FunctionCallExpr, simpleFuncCallExpr);
+      SimpleFunctionCallExprSyntax simpleFuncCallExpr = make_syntax_node(SimpleFunctionCallExpr, funcName, argsClause);
+      FunctionCallExprSyntax funcCallExpr = make_syntax_node(FunctionCallExpr, simpleFuncCallExpr);
       $$ = funcCallExpr.getRaw();
    }
 |  class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list {
@@ -2598,9 +2598,9 @@ function_call:
       TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
       MemberNameClauseSyntax memberName = make<MemberNameClauseSyntax>($3);
       ArgumentListClauseSyntax argsClause = make<ArgumentListClauseSyntax>($4);
-      StaticMethodCallExprSyntax staticMemthodCallExpr = make_expr(
+      StaticMethodCallExprSyntax staticMemthodCallExpr = make_syntax_node(
          StaticMethodCallExpr, className, paamayimNekudotayimToken, memberName, argsClause);
-      FunctionCallExprSyntax funcCallExpr = make_expr(FunctionCallExpr, staticMemthodCallExpr);
+      FunctionCallExprSyntax funcCallExpr = make_syntax_node(FunctionCallExpr, staticMemthodCallExpr);
       $$ = funcCallExpr.getRaw();
    }
 |  variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list {
@@ -2608,15 +2608,15 @@ function_call:
       TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
       MemberNameClauseSyntax memberName = make<MemberNameClauseSyntax>($3);
       ArgumentListClauseSyntax argsClause = make<ArgumentListClauseSyntax>($4);
-      StaticMethodCallExprSyntax staticMemthodCallExpr = make_expr(
+      StaticMethodCallExprSyntax staticMemthodCallExpr = make_syntax_node(
          StaticMethodCallExpr, className, paamayimNekudotayimToken, memberName, argsClause);
-      FunctionCallExprSyntax funcCallExpr = make_expr(FunctionCallExpr, staticMemthodCallExpr);
+      FunctionCallExprSyntax funcCallExpr = make_syntax_node(FunctionCallExpr, staticMemthodCallExpr);
       $$ = funcCallExpr.getRaw();
    }
 |  callable_expr argument_list {
       CallableFuncNameClauseSyntax funcName = make<CallableFuncNameClauseSyntax>($1);
       ArgumentListClauseSyntax argsClause = make<ArgumentListClauseSyntax>($2);
-      SimpleFunctionCallExprSyntax simpleFuncCallExpr = make_expr(SimpleFunctionCallExpr, funcName, argsClause);
+      SimpleFunctionCallExprSyntax simpleFuncCallExpr = make_syntax_node(SimpleFunctionCallExpr, funcName, argsClause);
       $$ = simpleFuncCallExpr.getRaw();
    }
 ;
@@ -2624,12 +2624,12 @@ function_call:
 class_name:
    T_STATIC {
       TokenSyntax staticToken = make_token(StaticKeyword);
-      ClassNameClauseSyntax className = make_expr(ClassNameClause, staticToken);
+      ClassNameClauseSyntax className = make_syntax_node(ClassNameClause, staticToken);
       $$ = className.getRaw();
    }
 |  name {
       NameSyntax name = make<NameSyntax>($1);
-      ClassNameClauseSyntax className = make_expr(ClassNameClause, name);
+      ClassNameClauseSyntax className = make_syntax_node(ClassNameClause, name);
       $$ = className.getRaw();
    }
 ;
@@ -2637,12 +2637,12 @@ class_name:
 class_name_reference:
    class_name {
       ClassNameClauseSyntax className = make<ClassNameClauseSyntax>($1);
-      ClassNameRefClauseSyntax classNameRef = make_expr(ClassNameRefClause, className);
+      ClassNameRefClauseSyntax classNameRef = make_syntax_node(ClassNameRefClause, className);
       $$ = classNameRef.getRaw();
    }
 |  new_variable {
       NewVariableClauseSyntax newVar = make<NewVariableClauseSyntax>($1);
-      ClassNameRefClauseSyntax classNameRef = make_expr(ClassNameRefClause, newVar);
+      ClassNameRefClauseSyntax classNameRef = make_syntax_node(ClassNameRefClause, newVar);
       $$ = classNameRef.getRaw();
    }
 ;
@@ -2655,7 +2655,7 @@ exit_expr:
       TokenSyntax leftParen = make_token(LeftParenToken);
       OptionalExprSyntax optExpr = make<OptionalExprSyntax>($2);
       TokenSyntax rightParen = make_token(RightParenToken);
-      ExitExprArgClauseSyntax exitArgsClause = make_expr(ExitExprArgClause, leftParen, optExpr, rightParen);
+      ExitExprArgClauseSyntax exitArgsClause = make_syntax_node(ExitExprArgClause, leftParen, optExpr, rightParen);
       $$ = exitArgsClause.getRaw();
    }
 ;
@@ -2666,12 +2666,12 @@ backticks_expr:
    }
 |  T_ENCAPSED_AND_WHITESPACE {
       TokenSyntax str = make_token_with_text(EncapsedAndWhitespace, $1);
-      BackticksClauseSyntax expr = make_expr(BackticksClause, str);
+      BackticksClauseSyntax expr = make_syntax_node(BackticksClause, str);
       $$ = expr.getRaw();
    }
 |  encaps_list {
       EncapsItemListSyntax encapsList = make<EncapsItemListSyntax>($1);
-      BackticksClauseSyntax expr = make_expr(BackticksClause, encapsList);
+      BackticksClauseSyntax expr = make_syntax_node(BackticksClause, encapsList);
       $$ = expr.getRaw();
    }
 ;
@@ -2691,30 +2691,30 @@ dereferencable_scalar:
       TokenSyntax leftParen = make_token(LeftParenToken);
       ArrayPairListSyntax arrayPairList = make<ArrayPairListSyntax>($3);
       TokenSyntax rightParen = make_token(RightParenToken);
-      ArrayCreateExprSyntax arrayCreateExpr = make_expr(ArrayCreateExpr, arrayToken, leftParen, arrayPairList, rightParen);
-      DereferencableScalarExprSyntax scalar = make_expr(DereferencableScalarExpr, arrayCreateExpr);
+      ArrayCreateExprSyntax arrayCreateExpr = make_syntax_node(ArrayCreateExpr, arrayToken, leftParen, arrayPairList, rightParen);
+      DereferencableScalarExprSyntax scalar = make_syntax_node(DereferencableScalarExpr, arrayCreateExpr);
       $$ = scalar.getRaw();
    }
 |  T_LEFT_SQUARE_BRACKET array_pair_list T_RIGHT_SQUARE_BRACKET {
       TokenSyntax leftSquareBracket = make_token(LeftSquareBracketToken);
       ArrayPairListSyntax arrayPairList = make<ArrayPairListSyntax>($2);
       TokenSyntax rightSquareBracket = make_token(RightSquareBracketToken);
-      SimplifiedArrayCreateExprSyntax simpleArrayCreateExpr = make_expr(SimplifiedArrayCreateExpr, leftSquareBracket, arrayPairList, rightSquareBracket);
-      DereferencableScalarExprSyntax scalar = make_expr(DereferencableScalarExpr, simpleArrayCreateExpr);
+      SimplifiedArrayCreateExprSyntax simpleArrayCreateExpr = make_syntax_node(SimplifiedArrayCreateExpr, leftSquareBracket, arrayPairList, rightSquareBracket);
+      DereferencableScalarExprSyntax scalar = make_syntax_node(DereferencableScalarExpr, simpleArrayCreateExpr);
       $$ = scalar.getRaw();
    }
 |  T_DOUBLE_QUOTE T_CONSTANT_ENCAPSED_STRING T_DOUBLE_QUOTE {
       TokenSyntax doubleQuote = make_token(DoubleStrQuoteToken);
       TokenSyntax strToken = make_token_with_text(ConstantEncapsedString, $2);
-      StringLiteralExprSyntax str = make_expr(StringLiteralExpr, doubleQuote, strToken, doubleQuote);
-      DereferencableScalarExprSyntax scalar = make_expr(DereferencableScalarExpr, str);
+      StringLiteralExprSyntax str = make_syntax_node(StringLiteralExpr, doubleQuote, strToken, doubleQuote);
+      DereferencableScalarExprSyntax scalar = make_syntax_node(DereferencableScalarExpr, str);
       $$ = scalar.getRaw();
    }
 |  T_SINGLE_QUOTE T_CONSTANT_ENCAPSED_STRING T_SINGLE_QUOTE {
       TokenSyntax singleQuote = make_token(SingleStrQuoteToken);
       TokenSyntax strToken = make_token_with_text(ConstantEncapsedString, $2);
-      StringLiteralExprSyntax str = make_expr(StringLiteralExpr, singleQuote, strToken, singleQuote);
-      DereferencableScalarExprSyntax scalar = make_expr(DereferencableScalarExpr, str);
+      StringLiteralExprSyntax str = make_syntax_node(StringLiteralExpr, singleQuote, strToken, singleQuote);
+      DereferencableScalarExprSyntax scalar = make_syntax_node(DereferencableScalarExpr, str);
       $$ = scalar.getRaw();
    }
 ;
@@ -2722,92 +2722,92 @@ dereferencable_scalar:
 scalar:
    T_LNUMBER {
       TokenSyntax lval = make_lnumber_token($1);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, lval);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, lval);
       $$ = scalarValue.getRaw();
    }
 |  T_DNUMBER {
       TokenSyntax dval = make_dnumber_token($1);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, dval);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, dval);
       $$ = scalarValue.getRaw();
    }
 |  T_LINE {
       TokenSyntax lineKeyword = make_token(LineKeyword);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, lineKeyword);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, lineKeyword);
       $$ = scalarValue.getRaw();
    }
 |  T_FILE {
       TokenSyntax fileKeyword = make_token(FileKeyword);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, fileKeyword);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, fileKeyword);
       $$ = scalarValue.getRaw();
    }
 |  T_DIR {
       TokenSyntax dirKeyword = make_token(DirKeyword);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, dirKeyword);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, dirKeyword);
       $$ = scalarValue.getRaw();
    }
 |  T_TRAIT_CONST {
       TokenSyntax traitConstKeyword = make_token(TraitConstKeyword);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, traitConstKeyword);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, traitConstKeyword);
       $$ = scalarValue.getRaw();
    }
 |  T_METHOD_CONST {
       TokenSyntax methodConstKeyword = make_token(MethodConstKeyword);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, methodConstKeyword);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, methodConstKeyword);
       $$ = scalarValue.getRaw();
    }
 |  T_FUNC_CONST {
       TokenSyntax funcConstKeyword = make_token(FuncConstKeyword);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, funcConstKeyword);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, funcConstKeyword);
       $$ = scalarValue.getRaw();
    }
 |  T_NS_CONST {
       TokenSyntax namespaceConstKeyword = make_token(NamespaceConstKeyword);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, namespaceConstKeyword);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, namespaceConstKeyword);
       $$ = scalarValue.getRaw();
    }
 |  T_CLASS_CONST {
       TokenSyntax classConstKeyword = make_token(ClassConstKeyword);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, classConstKeyword);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, classConstKeyword);
       $$ = scalarValue.getRaw();
    }
 |  T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC {
       TokenSyntax startHeredoc = make_token(StartHereDoc);
       TokenSyntax encapsStr = make_token_with_text(EncapsedAndWhitespace, $2);
       TokenSyntax endHeredoc = make_token(EndHereDoc);
-      HeredocExprSyntax heredoc = make_expr(HeredocExpr, startHeredoc, encapsStr, endHeredoc);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, heredoc);
+      HeredocExprSyntax heredoc = make_syntax_node(HeredocExpr, startHeredoc, encapsStr, endHeredoc);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, heredoc);
       $$ = scalarValue.getRaw();
    }
 |  T_START_HEREDOC T_END_HEREDOC {
       TokenSyntax startHeredoc = make_token(StartHereDoc);
       TokenSyntax endHeredoc = make_token(EndHereDoc);
-      HeredocExprSyntax heredoc = make_expr(HeredocExpr, startHeredoc, std::nullopt, endHeredoc);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, heredoc);
+      HeredocExprSyntax heredoc = make_syntax_node(HeredocExpr, startHeredoc, std::nullopt, endHeredoc);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, heredoc);
       $$ = scalarValue.getRaw();
    }
 |  T_DOUBLE_QUOTE encaps_list T_DOUBLE_QUOTE {
       TokenSyntax quote = make_token(DoubleStrQuoteToken);
       EncapsItemListSyntax encapsList = make<EncapsItemListSyntax>($2);
-      EncapsListStringExprSyntax str = make_expr(EncapsListStringExpr, quote, encapsList, quote);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, str);
+      EncapsListStringExprSyntax str = make_syntax_node(EncapsListStringExpr, quote, encapsList, quote);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, str);
       $$ = scalarValue.getRaw();
    }
 |  T_START_HEREDOC encaps_list T_END_HEREDOC {
       TokenSyntax startHeredoc = make_token(StartHereDoc);
       EncapsItemListSyntax encapsList = make<EncapsItemListSyntax>($2);
       TokenSyntax endHeredoc = make_token(EndHereDoc);
-      HeredocExprSyntax heredoc = make_expr(HeredocExpr, startHeredoc, encapsList, endHeredoc);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, heredoc);
+      HeredocExprSyntax heredoc = make_syntax_node(HeredocExpr, startHeredoc, encapsList, endHeredoc);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, heredoc);
       $$ = scalarValue.getRaw();
    }
 |  dereferencable_scalar {
       DereferencableScalarExprSyntax dscalar = make<DereferencableScalarExprSyntax>($1);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, dscalar);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, dscalar);
       $$ = scalarValue.getRaw();
    }
 |  constant {
       ConstExprSyntax constant = make<ConstExprSyntax>($1);
-      ScalarExprSyntax scalarValue = make_expr(ScalarExpr, constant);
+      ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, constant);
       $$ = scalarValue.getRaw();
    }
 ;
@@ -2815,23 +2815,23 @@ scalar:
 constant:
    name {
       NameSyntax name = make<NameSyntax>($1);
-      ConstExprSyntax constant = make_expr(ConstExpr, name);
+      ConstExprSyntax constant = make_syntax_node(ConstExpr, name);
       $$ = constant.getRaw();
    }
 |  class_name T_PAAMAYIM_NEKUDOTAYIM identifier {
       ClassNameClauseSyntax className = make<ClassNameClauseSyntax>($1);
       TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
       IdentifierSyntax identifier = make<IdentifierSyntax>($3);
-      ClassConstIdentifierExprSyntax classConst = make_expr(ClassConstIdentifierExpr, className, paamayimNekudotayimToken, identifier);
-      ConstExprSyntax constant = make_expr(ConstExpr, classConst);
+      ClassConstIdentifierExprSyntax classConst = make_syntax_node(ClassConstIdentifierExpr, className, paamayimNekudotayimToken, identifier);
+      ConstExprSyntax constant = make_syntax_node(ConstExpr, classConst);
       $$ = constant.getRaw();
    }
 |  variable_class_name T_PAAMAYIM_NEKUDOTAYIM identifier {
       VariableClassNameClauseSyntax className = make<VariableClassNameClauseSyntax>($1);
       TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
       IdentifierSyntax identifier = make<IdentifierSyntax>($3);
-      ClassConstIdentifierExprSyntax classConst = make_expr(ClassConstIdentifierExpr, className, paamayimNekudotayimToken, identifier);
-      ConstExprSyntax constant = make_expr(ConstExpr, classConst);
+      ClassConstIdentifierExprSyntax classConst = make_syntax_node(ClassConstIdentifierExpr, className, paamayimNekudotayimToken, identifier);
+      ConstExprSyntax constant = make_syntax_node(ConstExpr, classConst);
       $$ = constant.getRaw();
    }
 ;
@@ -2849,7 +2849,7 @@ optional_expr:
 variable_class_name:
    dereferencable {
       DereferencableClauseSyntax dereferencable = make<DereferencableClauseSyntax>($1);
-      VariableClassNameClauseSyntax className = make_expr(VariableClassNameClause, dereferencable);
+      VariableClassNameClauseSyntax className = make_syntax_node(VariableClassNameClause, dereferencable);
       $$ = className.getRaw();
    }
 ;
@@ -2857,20 +2857,20 @@ variable_class_name:
 dereferencable:
    variable {
       VariableExprSyntax variable = make<VariableExprSyntax>($1);
-      DereferencableClauseSyntax dereferencable = make_expr(DereferencableClause, variable);
+      DereferencableClauseSyntax dereferencable = make_syntax_node(DereferencableClause, variable);
       $$ = dereferencable.getRaw();
    }
 |  T_LEFT_PAREN expr T_RIGHT_PAREN {
       TokenSyntax leftParen = make_token(LeftParenToken);
       ExprSyntax expr = make<ExprSyntax>($2);
       TokenSyntax rightParen = make_token(RightParenToken);
-      ParenDecoratedExprSyntax decoratedExpr = make_expr(ParenDecoratedExpr, leftParen, expr, rightParen);
-      DereferencableClauseSyntax dereferencable = make_expr(DereferencableClause, decoratedExpr);
+      ParenDecoratedExprSyntax decoratedExpr = make_syntax_node(ParenDecoratedExpr, leftParen, expr, rightParen);
+      DereferencableClauseSyntax dereferencable = make_syntax_node(DereferencableClause, decoratedExpr);
       $$ = dereferencable.getRaw();
    }
 |  dereferencable_scalar {
       DereferencableScalarExprSyntax scalar = make<DereferencableScalarExprSyntax>($1);
-      DereferencableClauseSyntax dereferencable = make_expr(DereferencableClause, scalar);
+      DereferencableClauseSyntax dereferencable = make_syntax_node(DereferencableClause, scalar);
       $$ = dereferencable.getRaw();
    }
 ;
@@ -2878,20 +2878,20 @@ dereferencable:
 callable_expr:
    callable_variable {
       CallableVariableExprSyntax callableVar = make<CallableVariableExprSyntax>($1);
-      CallableFuncNameClauseSyntax callableExpr = make_expr(CallableFuncNameClause, callableVar);
+      CallableFuncNameClauseSyntax callableExpr = make_syntax_node(CallableFuncNameClause, callableVar);
       $$ = callableExpr.getRaw();
    }
 |  T_LEFT_PAREN expr T_RIGHT_PAREN {
       TokenSyntax leftParen = make_token(LeftParenToken);
       ExprSyntax expr = make<ExprSyntax>($2);
       TokenSyntax rightParen = make_token(RightParenToken);
-      ParenDecoratedExprSyntax decoratedExpr = make_expr(ParenDecoratedExpr, leftParen, expr, rightParen);
-      CallableFuncNameClauseSyntax callableExpr = make_expr(CallableFuncNameClause, decoratedExpr);
+      ParenDecoratedExprSyntax decoratedExpr = make_syntax_node(ParenDecoratedExpr, leftParen, expr, rightParen);
+      CallableFuncNameClauseSyntax callableExpr = make_syntax_node(CallableFuncNameClause, decoratedExpr);
       $$ = callableExpr.getRaw();
    }
 |  dereferencable_scalar {
       DereferencableScalarExprSyntax dereferencable = make<DereferencableScalarExprSyntax>($1);
-      CallableFuncNameClauseSyntax callableExpr = make_expr(CallableFuncNameClause, dereferencable);
+      CallableFuncNameClauseSyntax callableExpr = make_syntax_node(CallableFuncNameClause, dereferencable);
       $$ = callableExpr.getRaw();
    }
 ;
@@ -2899,7 +2899,7 @@ callable_expr:
 callable_variable:
    simple_variable {
       SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($1);
-      CallableVariableExprSyntax callableVar = make_expr(CallableVariableExpr, simpleVar);
+      CallableVariableExprSyntax callableVar = make_syntax_node(CallableVariableExpr, simpleVar);
       $$ = callableVar.getRaw();
    }
 |  dereferencable T_LEFT_SQUARE_BRACKET optional_expr T_RIGHT_SQUARE_BRACKET {
@@ -2907,8 +2907,8 @@ callable_variable:
       TokenSyntax leftSquareBracket = make_token(LeftSquareBracketToken);
       OptionalExprSyntax expr = make<OptionalExprSyntax>($3);
       TokenSyntax rightSquareBracket = make_token(RightSquareBracketToken);
-      ArrayAccessExprSyntax arrayAccess = make_expr(ArrayAccessExpr, dereferencable, leftSquareBracket, expr, rightSquareBracket);
-      CallableVariableExprSyntax callableVar = make_expr(CallableVariableExpr, arrayAccess);
+      ArrayAccessExprSyntax arrayAccess = make_syntax_node(ArrayAccessExpr, dereferencable, leftSquareBracket, expr, rightSquareBracket);
+      CallableVariableExprSyntax callableVar = make_syntax_node(CallableVariableExpr, arrayAccess);
       $$ = callableVar.getRaw();
    }
 |  constant T_LEFT_SQUARE_BRACKET optional_expr T_RIGHT_SQUARE_BRACKET {
@@ -2916,8 +2916,8 @@ callable_variable:
       TokenSyntax leftSquareBracket = make_token(LeftSquareBracketToken);
       OptionalExprSyntax expr = make<OptionalExprSyntax>($3);
       TokenSyntax rightSquareBracket = make_token(RightSquareBracketToken);
-      ArrayAccessExprSyntax arrayAccess = make_expr(ArrayAccessExpr, constant, leftSquareBracket, expr, rightSquareBracket);
-      CallableVariableExprSyntax callableVar = make_expr(CallableVariableExpr, arrayAccess);
+      ArrayAccessExprSyntax arrayAccess = make_syntax_node(ArrayAccessExpr, constant, leftSquareBracket, expr, rightSquareBracket);
+      CallableVariableExprSyntax callableVar = make_syntax_node(CallableVariableExpr, arrayAccess);
       $$ = callableVar.getRaw();
    }
 |  dereferencable T_LEFT_BRACE expr T_RIGHT_BRACE {
@@ -2925,24 +2925,24 @@ callable_variable:
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       ExprSyntax expr = make<ExprSyntax>($3);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      BraceDecoratedExprClauseSyntax decoratedExpr = make_expr(BraceDecoratedExprClause, leftBrace, expr, rightBrace);
-      BraceDecoratedArrayAccessExprSyntax arrayAccess = make_expr(BraceDecoratedArrayAccessExpr, dereferencable, decoratedExpr);
-      CallableVariableExprSyntax callableVar = make_expr(CallableVariableExpr, arrayAccess);
+      BraceDecoratedExprClauseSyntax decoratedExpr = make_syntax_node(BraceDecoratedExprClause, leftBrace, expr, rightBrace);
+      BraceDecoratedArrayAccessExprSyntax arrayAccess = make_syntax_node(BraceDecoratedArrayAccessExpr, dereferencable, decoratedExpr);
+      CallableVariableExprSyntax callableVar = make_syntax_node(CallableVariableExpr, arrayAccess);
       $$ = callableVar.getRaw();
    }
 |  dereferencable T_OBJECT_OPERATOR property_name argument_list {
       DereferencableClauseSyntax dereferencable = make<DereferencableClauseSyntax>($1);
       TokenSyntax objOperator = make_token(ObjectOperatorToken);
       PropertyNameClauseSyntax propName = make<PropertyNameClauseSyntax>($3);
-      InstancePropertyExprSyntax methodName = make_expr(InstancePropertyExpr, dereferencable, objOperator, propName);
+      InstancePropertyExprSyntax methodName = make_syntax_node(InstancePropertyExpr, dereferencable, objOperator, propName);
       ArgumentListClauseSyntax args = make<ArgumentListClauseSyntax>($4);
-      InstanceMethodCallExprSyntax methodCallExpr = make_expr(InstanceMethodCallExpr, methodName, args);
-      CallableVariableExprSyntax callableVar = make_expr(CallableVariableExpr, methodCallExpr);
+      InstanceMethodCallExprSyntax methodCallExpr = make_syntax_node(InstanceMethodCallExpr, methodName, args);
+      CallableVariableExprSyntax callableVar = make_syntax_node(CallableVariableExpr, methodCallExpr);
       $$ = callableVar.getRaw();
    }
 |  function_call {
       FunctionCallExprSyntax functionCallExpr = make<FunctionCallExprSyntax>($1);
-      CallableVariableExprSyntax callableVar = make_expr(CallableVariableExpr, functionCallExpr);
+      CallableVariableExprSyntax callableVar = make_syntax_node(CallableVariableExpr, functionCallExpr);
       $$ = callableVar.getRaw();
    }
 ;
@@ -2950,20 +2950,20 @@ callable_variable:
 variable:
    callable_variable {
       CallableVariableExprSyntax callableVar = make<CallableVariableExprSyntax>($1);
-      VariableExprSyntax var = make_expr(VariableExpr, callableVar);
+      VariableExprSyntax var = make_syntax_node(VariableExpr, callableVar);
       $$ = var.getRaw();
    }
 |  static_member {
       StaticPropertyExprSyntax staticMember = make<StaticPropertyExprSyntax>($1);
-      VariableExprSyntax var = make_expr(VariableExpr, staticMember);
+      VariableExprSyntax var = make_syntax_node(VariableExpr, staticMember);
       $$ = var.getRaw();
    }
 |  dereferencable T_OBJECT_OPERATOR property_name {
       DereferencableScalarExprSyntax dereferencableExpr = make<DereferencableScalarExprSyntax>($1);
       TokenSyntax objOperator = make_token(ObjectOperatorToken);
       PropertyNameClauseSyntax propName = make<PropertyNameClauseSyntax>($3);
-      InstancePropertyExprSyntax propExpr = make_expr(InstancePropertyExpr, dereferencableExpr, objOperator, propName);
-      VariableExprSyntax var = make_expr(VariableExpr, propExpr);
+      InstancePropertyExprSyntax propExpr = make_syntax_node(InstancePropertyExpr, dereferencableExpr, objOperator, propName);
+      VariableExprSyntax var = make_syntax_node(VariableExpr, propExpr);
       $$ = var.getRaw();
    }
 ;
@@ -2971,7 +2971,7 @@ variable:
 simple_variable:
    T_VARIABLE {
       TokenSyntax variableToken = make_token_with_text(Variable, $1);
-      SimpleVariableExprSyntax simpleVariable = make_expr(SimpleVariableExpr, std::nullopt, variableToken);
+      SimpleVariableExprSyntax simpleVariable = make_syntax_node(SimpleVariableExpr, std::nullopt, variableToken);
       $$ = simpleVariable.getRaw();
    }
 |  T_DOLLAR_SIGN T_LEFT_BRACE expr T_RIGHT_BRACE {
@@ -2979,15 +2979,15 @@ simple_variable:
       TokenSyntax leftParen = make_token(LeftParenToken);
       ExprSyntax expr = make<ExprSyntax>($3);
       TokenSyntax rightParen = make_token(RightParenToken);
-      BraceDecoratedExprClauseSyntax decoratedExpr = make_expr(BraceDecoratedExprClause, leftParen, expr, rightParen);
-      BraceDecoratedVariableExprSyntax bracedVarExpr = make_expr(BraceDecoratedVariableExpr, dollarToken, decoratedExpr);
-      SimpleVariableExprSyntax simpleVariable = make_expr(SimpleVariableExpr, std::nullopt, bracedVarExpr);
+      BraceDecoratedExprClauseSyntax decoratedExpr = make_syntax_node(BraceDecoratedExprClause, leftParen, expr, rightParen);
+      BraceDecoratedVariableExprSyntax bracedVarExpr = make_syntax_node(BraceDecoratedVariableExpr, dollarToken, decoratedExpr);
+      SimpleVariableExprSyntax simpleVariable = make_syntax_node(SimpleVariableExpr, std::nullopt, bracedVarExpr);
       $$ = simpleVariable.getRaw();
    }
 |  T_DOLLAR_SIGN simple_variable {
       TokenSyntax dollarToken = make_token(DollarToken);
       SimpleVariableExprSyntax parentVar = make<SimpleVariableExprSyntax>($2);
-      SimpleVariableExprSyntax simpleVariable = make_expr(SimpleVariableExpr, dollarToken, parentVar);
+      SimpleVariableExprSyntax simpleVariable = make_syntax_node(SimpleVariableExpr, dollarToken, parentVar);
       $$ = simpleVariable.getRaw();
    }
 ;
@@ -2997,14 +2997,14 @@ static_member:
       ClassNameClauseSyntax className = make<ClassNameClauseSyntax>($1);
       TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
       SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($3);
-      StaticPropertyExprSyntax staticMember = make_expr(StaticPropertyExpr, className, paamayimNekudotayimToken, simpleVar);
+      StaticPropertyExprSyntax staticMember = make_syntax_node(StaticPropertyExpr, className, paamayimNekudotayimToken, simpleVar);
       $$ = staticMember.getRaw();
    }
 |     variable_class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable {
       VariableClassNameClauseSyntax className = make<VariableClassNameClauseSyntax>($1);
       TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
       SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($3);
-      StaticPropertyExprSyntax staticMember = make_expr(StaticPropertyExpr, className, paamayimNekudotayimToken, simpleVar);
+      StaticPropertyExprSyntax staticMember = make_syntax_node(StaticPropertyExpr, className, paamayimNekudotayimToken, simpleVar);
       $$ = staticMember.getRaw();
    }
 ;
@@ -3012,7 +3012,7 @@ static_member:
 new_variable:
    simple_variable {
       SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($1);
-      NewVariableClauseSyntax newVar = make_expr(NewVariableClause, simpleVar);
+      NewVariableClauseSyntax newVar = make_syntax_node(NewVariableClause, simpleVar);
       $$ = newVar.getRaw();
    }
 |  new_variable T_LEFT_SQUARE_BRACKET optional_expr T_RIGHT_SQUARE_BRACKET {
@@ -3020,7 +3020,7 @@ new_variable:
       TokenSyntax leftBracket = make_token(LeftSquareBracketToken);
       OptionalExprSyntax expr = make<OptionalExprSyntax>($3);
       TokenSyntax rightBracket = make_token(RightSquareBracketToken);
-      ArrayAccessExprSyntax arrayAccess = make_expr(ArrayAccessExpr, var, leftBracket, expr, rightBracket);
+      ArrayAccessExprSyntax arrayAccess = make_syntax_node(ArrayAccessExpr, var, leftBracket, expr, rightBracket);
       $$ = arrayAccess.getRaw();
    }
 |  new_variable T_LEFT_BRACE expr T_RIGHT_BRACE {
@@ -3028,9 +3028,9 @@ new_variable:
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       ExprSyntax expr = make<ExprSyntax>($3);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      BraceDecoratedExprClauseSyntax decoratedExpr = make_expr(BraceDecoratedExprClause,
+      BraceDecoratedExprClauseSyntax decoratedExpr = make_syntax_node(BraceDecoratedExprClause,
          leftBrace, expr, rightBrace);
-      BraceDecoratedArrayAccessExprSyntax arrayAccess = make_expr(
+      BraceDecoratedArrayAccessExprSyntax arrayAccess = make_syntax_node(
          BraceDecoratedArrayAccessExpr, var, decoratedExpr);
       $$ = arrayAccess.getRaw();
    }
@@ -3038,21 +3038,21 @@ new_variable:
       NewVariableClauseSyntax var = make<NewVariableClauseSyntax>($1);
       TokenSyntax objOperator = make_token(ObjectOperatorToken);
       PropertyNameClauseSyntax propertyName = make<PropertyNameClauseSyntax>($3);
-      InstancePropertyExprSyntax propExpr = make_expr(InstancePropertyExpr, var, objOperator, propertyName);
+      InstancePropertyExprSyntax propExpr = make_syntax_node(InstancePropertyExpr, var, objOperator, propertyName);
       $$ = propExpr.getRaw();
    }
 |  class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable {
       ClassNameClauseSyntax className = make<ClassNameClauseSyntax>($1);
       TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
       SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($3);
-      StaticPropertyExprSyntax staticPropExpr = make_expr(StaticPropertyExpr, className, paamayimNekudotayimToken, simpleVar);
+      StaticPropertyExprSyntax staticPropExpr = make_syntax_node(StaticPropertyExpr, className, paamayimNekudotayimToken, simpleVar);
       $$ = staticPropExpr.getRaw();
    }
 |  new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable {
       NewVariableClauseSyntax newVar = make<NewVariableClauseSyntax>($1);
       TokenSyntax paamayimNekudotayimToken = make_token(PaamayimNekudotayimToken);
       SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($3);
-      StaticPropertyExprSyntax staticPropExpr = make_expr(StaticPropertyExpr, newVar, paamayimNekudotayimToken, simpleVar);
+      StaticPropertyExprSyntax staticPropExpr = make_syntax_node(StaticPropertyExpr, newVar, paamayimNekudotayimToken, simpleVar);
       $$ = staticPropExpr.getRaw();
    }
 ;
@@ -3060,20 +3060,20 @@ new_variable:
 member_name:
    identifier {
       IdentifierSyntax identifier = make<IdentifierSyntax>($1);
-      MemberNameClauseSyntax memberName = make_expr(MemberNameClause, identifier);
+      MemberNameClauseSyntax memberName = make_syntax_node(MemberNameClause, identifier);
       $$ = memberName.getRaw();
    }
 |  T_LEFT_BRACE expr T_RIGHT_BRACE {
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       ExprSyntax expr = make<ExprSyntax>($2);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      BraceDecoratedExprClauseSyntax decoratedExpr = make_expr(BraceDecoratedExprClause, leftBrace, expr, rightBrace);
-      MemberNameClauseSyntax memberName = make_expr(MemberNameClause, decoratedExpr);
+      BraceDecoratedExprClauseSyntax decoratedExpr = make_syntax_node(BraceDecoratedExprClause, leftBrace, expr, rightBrace);
+      MemberNameClauseSyntax memberName = make_syntax_node(MemberNameClause, decoratedExpr);
       $$ = memberName.getRaw();
    }
 |  simple_variable {
       SimpleVariableExprSyntax simple = make<SimpleVariableExprSyntax>($1);
-      MemberNameClauseSyntax memberName = make_expr(MemberNameClause, simple);
+      MemberNameClauseSyntax memberName = make_syntax_node(MemberNameClause, simple);
       $$ = memberName.getRaw();
    }
 ;
@@ -3081,20 +3081,20 @@ member_name:
 property_name:
    T_IDENTIFIER_STRING {
       TokenSyntax identifierStr = make_token_with_text(IdentifierString, $1);
-      PropertyNameClauseSyntax propertyName = make_expr(PropertyNameClause, identifierStr);
+      PropertyNameClauseSyntax propertyName = make_syntax_node(PropertyNameClause, identifierStr);
       $$ = propertyName.getRaw();
    }
 |  T_LEFT_BRACE expr T_RIGHT_BRACE {
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       ExprSyntax expr = make<ExprSyntax>($2);
       TokenSyntax rightBrace = make_token(RightBraceToken);
-      BraceDecoratedExprClauseSyntax decoratedExpr = make_expr(BraceDecoratedExprClause, leftBrace, expr, rightBrace);
-      PropertyNameClauseSyntax propertyName = make_expr(PropertyNameClause, decoratedExpr);
+      BraceDecoratedExprClauseSyntax decoratedExpr = make_syntax_node(BraceDecoratedExprClause, leftBrace, expr, rightBrace);
+      PropertyNameClauseSyntax propertyName = make_syntax_node(PropertyNameClause, decoratedExpr);
       $$ = propertyName.getRaw();
    }
 |  simple_variable {
       SimpleVariableExprSyntax simpleVar = make<SimpleVariableExprSyntax>($1);
-      PropertyNameClauseSyntax propertyName = make_expr(PropertyNameClause, simpleVar);
+      PropertyNameClauseSyntax propertyName = make_syntax_node(PropertyNameClause, simpleVar);
       $$ = propertyName.getRaw();
    }
 ;
@@ -3124,10 +3124,10 @@ non_empty_array_pair_list:
    }
 |  possible_array_pair {
       RefCountPtr<RawSyntax> rawArrayPair = $1;
-      ArrayPairListItemSyntax listItem = make_expr(ArrayPairListItem, std::nullopt, 
+      ArrayPairListItemSyntax listItem = make_syntax_node(ArrayPairListItem, std::nullopt, 
          rawArrayPair ? std::optional(make<Syntax>(rawArrayPair)) : std::nullopt);
       std::vector<ArrayPairListItemSyntax> items{listItem};
-      ArrayPairListSyntax list = make_expr(ArrayPairList, items);
+      ArrayPairListSyntax list = make_syntax_node(ArrayPairList, items);
       $$ = list.getRaw();
    }
 ;
@@ -3137,14 +3137,14 @@ array_pair:
       ExprSyntax keyExpr = make<ExprSyntax>($1);
       TokenSyntax arrow = make_token(DoubleArrowToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
-      ArrayKeyValuePairItemSyntax keyValuePair = make_expr(ArrayKeyValuePairItem, keyExpr, arrow, valueExpr);
-      ArrayPairSyntax arrayPair = make_expr(ArrayPair, keyValuePair);
+      ArrayKeyValuePairItemSyntax keyValuePair = make_syntax_node(ArrayKeyValuePairItem, keyExpr, arrow, valueExpr);
+      ArrayPairSyntax arrayPair = make_syntax_node(ArrayPair, keyValuePair);
       $$ = arrayPair.getRaw();
    }
 |  expr {
       ExprSyntax valueExpr = make<ExprSyntax>($1);
-      ArrayKeyValuePairItemSyntax keyValuePair = make_expr(ArrayKeyValuePairItem, std::nullopt, std::nullopt, valueExpr);
-      ArrayPairSyntax arrayPair = make_expr(ArrayPair, keyValuePair);
+      ArrayKeyValuePairItemSyntax keyValuePair = make_syntax_node(ArrayKeyValuePairItem, std::nullopt, std::nullopt, valueExpr);
+      ArrayPairSyntax arrayPair = make_syntax_node(ArrayPair, keyValuePair);
       $$ = arrayPair.getRaw();
    }
 |  expr T_DOUBLE_ARROW T_AMPERSAND variable {
@@ -3152,24 +3152,24 @@ array_pair:
       TokenSyntax arrow = make_token(DoubleArrowToken);
       TokenSyntax refToken = make_token(AmpersandToken);
       VariableExprSyntax variable = make<VariableExprSyntax>($4);
-      ReferencedVariableExprSyntax refVariable = make_expr(ReferencedVariableExpr, refToken, variable);
-      ArrayKeyValuePairItemSyntax keyValuePair = make_expr(ArrayKeyValuePairItem, keyExpr, arrow, refVariable);
-      ArrayPairSyntax arrayPair = make_expr(ArrayPair, keyValuePair);
+      ReferencedVariableExprSyntax refVariable = make_syntax_node(ReferencedVariableExpr, refToken, variable);
+      ArrayKeyValuePairItemSyntax keyValuePair = make_syntax_node(ArrayKeyValuePairItem, keyExpr, arrow, refVariable);
+      ArrayPairSyntax arrayPair = make_syntax_node(ArrayPair, keyValuePair);
       $$ = arrayPair.getRaw();
    }
 |  T_AMPERSAND variable {
       TokenSyntax refToken = make_token(AmpersandToken);
       VariableExprSyntax variable = make<VariableExprSyntax>($2);
-      ReferencedVariableExprSyntax refVariable = make_expr(ReferencedVariableExpr, refToken, variable);
-      ArrayKeyValuePairItemSyntax keyValuePair = make_expr(ArrayKeyValuePairItem, std::nullopt, std::nullopt, refVariable);
-      ArrayPairSyntax arrayPair = make_expr(ArrayPair, keyValuePair);
+      ReferencedVariableExprSyntax refVariable = make_syntax_node(ReferencedVariableExpr, refToken, variable);
+      ArrayKeyValuePairItemSyntax keyValuePair = make_syntax_node(ArrayKeyValuePairItem, std::nullopt, std::nullopt, refVariable);
+      ArrayPairSyntax arrayPair = make_syntax_node(ArrayPair, keyValuePair);
       $$ = arrayPair.getRaw();
    }
 |  T_ELLIPSIS expr {
       TokenSyntax ellipsisToken = make_token(EllipsisToken);
       ExprSyntax expr = make<ExprSyntax>($2);
-      ArrayUnpackPairItemSyntax unpackPair = make_expr(ArrayUnpackPairItem, ellipsisToken, expr);
-      ArrayPairSyntax arrayPair = make_expr(ArrayPair, unpackPair);
+      ArrayUnpackPairItemSyntax unpackPair = make_syntax_node(ArrayUnpackPairItem, ellipsisToken, expr);
+      ArrayPairSyntax arrayPair = make_syntax_node(ArrayPair, unpackPair);
       $$ = arrayPair.getRaw();
    }
 |  expr T_DOUBLE_ARROW T_LIST T_LEFT_PAREN array_pair_list T_RIGHT_PAREN {
@@ -3179,7 +3179,7 @@ array_pair:
       TokenSyntax leftParen = make_token(LeftParenToken);
       ArrayPairListSyntax arrayPairList = make<ArrayPairListSyntax>($5);
       TokenSyntax rightParen = make_token(LeftParenToken);
-      ListRecursivePairItemSyntax listRecursivePair = make_expr(ListRecursivePairItem, keyExpr, arrow, listKeyword, 
+      ListRecursivePairItemSyntax listRecursivePair = make_syntax_node(ListRecursivePairItem, keyExpr, arrow, listKeyword, 
          leftParen, arrayPairList, rightParen);
       $$ = listRecursivePair.getRaw();
    }
@@ -3188,7 +3188,7 @@ array_pair:
       TokenSyntax leftParen = make_token(LeftParenToken);
       ArrayPairListSyntax arrayPairList = make<ArrayPairListSyntax>($3);
       TokenSyntax rightParen = make_token(LeftParenToken);
-      ListRecursivePairItemSyntax listRecursivePair = make_expr(ListRecursivePairItem, std::nullopt, std::nullopt, listKeyword, 
+      ListRecursivePairItemSyntax listRecursivePair = make_syntax_node(ListRecursivePairItem, std::nullopt, std::nullopt, listKeyword, 
          leftParen, arrayPairList, rightParen);
       $$ = listRecursivePair.getRaw();
    }
@@ -3198,31 +3198,31 @@ encaps_list:
    encaps_list encaps_var {
       EncapsItemListSyntax list = make<EncapsItemListSyntax>($1);
       EncapsVariableSyntax encapsVar = make<EncapsVariableSyntax>($2);
-      EncapsListItemSyntax listItem = make_expr(EncapsListItem, std::nullopt, encapsVar);
+      EncapsListItemSyntax listItem = make_syntax_node(EncapsListItem, std::nullopt, encapsVar);
       list.appending(listItem);
       $$ = list.getRaw();
    }
 |  encaps_list T_ENCAPSED_AND_WHITESPACE {
       EncapsItemListSyntax list = make<EncapsItemListSyntax>($1);
       TokenSyntax encapsStr = make_token_with_text(EncapsedAndWhitespace, $2);
-      EncapsListItemSyntax listItem = make_expr(EncapsListItem, encapsStr, std::nullopt);
+      EncapsListItemSyntax listItem = make_syntax_node(EncapsListItem, encapsStr, std::nullopt);
       list.appending(listItem);
       $$ = list.getRaw();
    }
 |  encaps_var {
       EncapsVariableSyntax encapsVar = make<EncapsVariableSyntax>($1);
-      EncapsListItemSyntax listItem = make_expr(EncapsListItem, std::nullopt, encapsVar);
+      EncapsListItemSyntax listItem = make_syntax_node(EncapsListItem, std::nullopt, encapsVar);
       std::vector<EncapsListItemSyntax> items{listItem};
-      EncapsItemListSyntax list = make_expr(EncapsItemList, items);
+      EncapsItemListSyntax list = make_syntax_node(EncapsItemList, items);
       $$ = list.getRaw();
    }
 |  T_ENCAPSED_AND_WHITESPACE encaps_var {
       TokenSyntax encapsStr = make_token_with_text(EncapsedAndWhitespace, $1);
       EncapsVariableSyntax encapsVar = make<EncapsVariableSyntax>($2);
-      EncapsListItemSyntax strListItem = make_expr(EncapsListItem, encapsStr, std::nullopt);
-      EncapsListItemSyntax varListItem = make_expr(EncapsListItem, std::nullopt, encapsVar);
+      EncapsListItemSyntax strListItem = make_syntax_node(EncapsListItem, encapsStr, std::nullopt);
+      EncapsListItemSyntax varListItem = make_syntax_node(EncapsListItem, std::nullopt, encapsVar);
       std::vector<EncapsListItemSyntax> items{strListItem, varListItem};
-      EncapsItemListSyntax list = make_expr(EncapsItemList, items);
+      EncapsItemListSyntax list = make_syntax_node(EncapsItemList, items);
       $$ = list.getRaw();
    }
 ;
@@ -3230,31 +3230,31 @@ encaps_list:
 encaps_var:
    T_VARIABLE {
       TokenSyntax variableToken = make_token_with_text(Variable, $1);
-      EncapsVariableSyntax enscapVar = make_expr(EncapsVariable, variableToken);
+      EncapsVariableSyntax enscapVar = make_syntax_node(EncapsVariable, variableToken);
       $$ = enscapVar.getRaw();
    }
 |  T_VARIABLE T_OBJECT_OPERATOR T_IDENTIFIER_STRING {
       TokenSyntax variableToken = make_token_with_text(Variable, $1);
       TokenSyntax objOperator = make_token(ObjectOperatorToken);
       TokenSyntax identifierStr = make_token_with_text(IdentifierString, $3);
-      EncapsObjPropSyntax objPropVar = make_expr(EncapsObjProp, variableToken, objOperator, identifierStr);
-      EncapsVariableSyntax enscapVar = make_expr(EncapsVariable, objPropVar);
+      EncapsObjPropSyntax objPropVar = make_syntax_node(EncapsObjProp, variableToken, objOperator, identifierStr);
+      EncapsVariableSyntax enscapVar = make_syntax_node(EncapsVariable, objPropVar);
       $$ = enscapVar.getRaw();
    }
 |  T_DOLLAR_OPEN_CURLY_BRACES expr T_RIGHT_BRACE {
       TokenSyntax curlyOpenToken = make_token(DollarOpenCurlyBracesToken);
       ExprSyntax expr = make<ExprSyntax>($2);
       TokenSyntax rightBraceToken = make_token(RightBraceToken);
-      EncapsDollarCurlyExprSyntax curlyExpr = make_expr(EncapsDollarCurlyExpr, curlyOpenToken, expr, rightBraceToken);
-      EncapsVariableSyntax enscapVar = make_expr(EncapsVariable, curlyExpr);
+      EncapsDollarCurlyExprSyntax curlyExpr = make_syntax_node(EncapsDollarCurlyExpr, curlyOpenToken, expr, rightBraceToken);
+      EncapsVariableSyntax enscapVar = make_syntax_node(EncapsVariable, curlyExpr);
       $$ = enscapVar.getRaw();
    }
 |  T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME T_RIGHT_BRACE {
       TokenSyntax curlyOpenToken = make_token(DollarOpenCurlyBracesToken);
       TokenSyntax varname = make_token_with_text(StringVarName, $2);
       TokenSyntax rightBraceToken = make_token(RightBraceToken);
-      EncapsDollarCurlyVarSyntax curlyVar = make_expr(EncapsDollarCurlyVariable, curlyOpenToken, varname, rightBraceToken);
-      EncapsVariableSyntax enscapVar = make_expr(EncapsVariable, curlyVar);
+      EncapsDollarCurlyVarSyntax curlyVar = make_syntax_node(EncapsDollarCurlyVariable, curlyOpenToken, varname, rightBraceToken);
+      EncapsVariableSyntax enscapVar = make_syntax_node(EncapsVariable, curlyVar);
       $$ = enscapVar.getRaw();
    }
 |  T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME T_LEFT_SQUARE_BRACKET expr T_RIGHT_SQUARE_BRACKET T_RIGHT_BRACE {
@@ -3264,18 +3264,18 @@ encaps_var:
       ExprSyntax expr = make<ExprSyntax>($4);
       TokenSyntax rightSquareBracketToken = make_token(RightSquareBracketToken);
       TokenSyntax rightBraceToken = make_token(RightBraceToken);
-      EncapsDollarCurlyArraySyntax curlyArrayVar = make_expr(EncapsDollarCurlyArray, curlyOpenToken, varname, leftSquareBracketToken,
+      EncapsDollarCurlyArraySyntax curlyArrayVar = make_syntax_node(EncapsDollarCurlyArray, curlyOpenToken, varname, leftSquareBracketToken,
          expr, rightSquareBracketToken, rightBraceToken
       );
-      EncapsVariableSyntax enscapVar = make_expr(EncapsVariable, curlyArrayVar);
+      EncapsVariableSyntax enscapVar = make_syntax_node(EncapsVariable, curlyArrayVar);
       $$ = enscapVar.getRaw();
    }
 |  T_CURLY_OPEN variable T_RIGHT_BRACE {
       TokenSyntax curlyOpenToken = make_token(CurlyOpenToken);
       VariableExprSyntax var = make<VariableExprSyntax>($2);
       TokenSyntax rightBraceToken = make_token(RightBraceToken);
-      EncapsCurlyVariableSyntax curlyVar = make_expr(EncapsCurlyVariable, curlyOpenToken, var, rightBraceToken);
-      EncapsVariableSyntax enscapVar = make_expr(EncapsVariable, curlyVar);
+      EncapsCurlyVariableSyntax curlyVar = make_syntax_node(EncapsCurlyVariable, curlyOpenToken, var, rightBraceToken);
+      EncapsVariableSyntax enscapVar = make_syntax_node(EncapsVariable, curlyVar);
       $$ = enscapVar.getRaw();
    }
 ;
@@ -3286,27 +3286,27 @@ internal_functions_in_bison:
       TokenSyntax leftParen = make_token(LeftParenToken);
       IssetVariablesListSyntax vars = make<IssetVariablesListSyntax>($3);
       TokenSyntax rightParen = make_token(RightParenToken);
-      IssetVariablesClauseSyntax issetClause = make_expr(IssetVariablesClause, leftParen, vars, rightParen);
+      IssetVariablesClauseSyntax issetClause = make_syntax_node(IssetVariablesClause, leftParen, vars, rightParen);
    }
 |  T_EMPTY T_LEFT_PAREN expr T_RIGHT_PAREN {
       TokenSyntax emptyKeyword = make_token(EmptyKeyword);
       TokenSyntax leftParen = make_token(LeftParenToken);
       ExprSyntax expr = make<ExprSyntax>($3);
       TokenSyntax rightParen = make_token(RightParenToken);
-      ParenDecoratedExprSyntax argsClause = make_expr(ParenDecoratedExpr, leftParen, expr, rightParen);
-      EmptyFuncExprSyntax emptyFunc = make_expr(EmptyFuncExpr, emptyKeyword, argsClause);
+      ParenDecoratedExprSyntax argsClause = make_syntax_node(ParenDecoratedExpr, leftParen, expr, rightParen);
+      EmptyFuncExprSyntax emptyFunc = make_syntax_node(EmptyFuncExpr, emptyKeyword, argsClause);
       $$ = emptyFunc.getRaw();
    }
 |  T_INCLUDE expr {
       TokenSyntax includeKeyword = make_token(IncludeKeyword);
       ExprSyntax expr = make<ExprSyntax>($2);
-      IncludeExprSyntax includeExpr = make_expr(IncludeExpr, includeKeyword, expr);
+      IncludeExprSyntax includeExpr = make_syntax_node(IncludeExpr, includeKeyword, expr);
       $$ = includeExpr.getRaw();
    }
 |  T_INCLUDE_ONCE expr {
       TokenSyntax includeOnceKeywork = make_token(IncludeOnceKeyword);
       ExprSyntax expr = make<ExprSyntax>($2);
-      IncludeExprSyntax includeExpr = make_expr(IncludeExpr, includeOnceKeywork, expr);
+      IncludeExprSyntax includeExpr = make_syntax_node(IncludeExpr, includeOnceKeywork, expr);
       $$ = includeExpr.getRaw();
    }
 |  T_EVAL T_LEFT_PAREN expr T_RIGHT_PAREN {
@@ -3314,20 +3314,20 @@ internal_functions_in_bison:
       TokenSyntax leftParen = make_token(LeftParenToken);
       ExprSyntax expr = make<ExprSyntax>($3);
       TokenSyntax rightParen = make_token(RightParenToken);
-      ParenDecoratedExprSyntax argsClause = make_expr(ParenDecoratedExpr, leftParen, expr, rightParen);
-      EvalFuncExprSyntax evalFunc = make_expr(EvalFuncExpr, evalKeyword, argsClause);
+      ParenDecoratedExprSyntax argsClause = make_syntax_node(ParenDecoratedExpr, leftParen, expr, rightParen);
+      EvalFuncExprSyntax evalFunc = make_syntax_node(EvalFuncExpr, evalKeyword, argsClause);
       $$ = evalFunc.getRaw();
    }
 |  T_REQUIRE expr {
       TokenSyntax requireKeyword = make_token(RequireKeyword);
       ExprSyntax expr = make<ExprSyntax>($2);
-      RequireExprSyntax requireExpr = make_expr(RequireExpr, requireKeyword, expr);
+      RequireExprSyntax requireExpr = make_syntax_node(RequireExpr, requireKeyword, expr);
       $$ = requireExpr.getRaw();
    }
 |  T_REQUIRE_ONCE expr {
       TokenSyntax requireOnceKeyword = make_token(RequireOnceKeyword);
       ExprSyntax expr = make<ExprSyntax>($2);
-      RequireExprSyntax requireExpr = make_expr(RequireExpr, requireOnceKeyword, expr);
+      RequireExprSyntax requireExpr = make_syntax_node(RequireExpr, requireOnceKeyword, expr);
       $$ = requireExpr.getRaw();
    }
 ;
@@ -3335,16 +3335,16 @@ internal_functions_in_bison:
 isset_variables:
    isset_variable {
       IssetVariableSyntax issetVar = make<IssetVariableSyntax>($1);
-      IssetVariableListItemSyntax issetListItem = make_expr(IssetVariableListItem, std::nullopt, issetVar);
+      IssetVariableListItemSyntax issetListItem = make_syntax_node(IssetVariableListItem, std::nullopt, issetVar);
       std::vector<IssetVariableListItemSyntax> issetItems{issetListItem};
-      IssetVariablesListSyntax list = make_expr(IssetVariablesList, issetItems);
+      IssetVariablesListSyntax list = make_syntax_node(IssetVariablesList, issetItems);
       $$ = list.getRaw();
    }
 |  isset_variables T_COMMA isset_variable {
       IssetVariablesListSyntax list = make<IssetVariablesListSyntax>($1);
       TokenSyntax comma = make_token(CommaToken);
       IssetVariableSyntax issetVar = make<IssetVariableSyntax>($3);
-      IssetVariableListItemSyntax issetListItem = make_expr(IssetVariableListItem, comma, issetVar);
+      IssetVariableListItemSyntax issetListItem = make_syntax_node(IssetVariableListItem, comma, issetVar);
       list.appending(issetListItem);
       $$ = list.getRaw();
    }
@@ -3353,7 +3353,7 @@ isset_variables:
 isset_variable:
    expr {
       ExprSyntax expr = make<ExprSyntax>($1);
-      IssetVariableSyntax issetVariable = make_expr(IssetVariable, expr);
+      IssetVariableSyntax issetVariable = make_syntax_node(IssetVariable, expr);
       $$ = issetVariable.getRaw();
    }
 ;

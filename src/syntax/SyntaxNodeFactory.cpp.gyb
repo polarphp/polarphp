@@ -337,18 +337,7 @@ foreach ($TOKENS as $token) {
    if ($token instanceof \Gyb\Syntax\Token\Misc) {
       $tokenText = '';
    }
-   if ($token->isKeyword()) {
-?>
-TokenSyntax SyntaxNodeFactory::make<?= $tokenName ?>(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena)
-{
-   return makeToken(TokenKindType::<?= $tokenKind ?>,
-                    OwnedString::makeUnowned("<?= $tokenText ?>"),
-                    leadingTrivia, trailingTrivia,
-                    SourcePresence::Present, arena);
-}
-
-<?php
-   } elseif (!empty($tokenText)) {
+   if (!empty($tokenText)) {
 ?>
 TokenSyntax
 SyntaxNodeFactory::make<?= $tokenName ?>(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena)
@@ -357,6 +346,30 @@ SyntaxNodeFactory::make<?= $tokenName ?>(const Trivia &leadingTrivia, const Triv
                     OwnedString::makeUnowned("<?= $tokenText ?>"),
                     leadingTrivia, trailingTrivia,
                     SourcePresence::Present, arena);
+}
+
+<?php
+   } elseif ($tokenName == "LNumberToken") {
+?>
+TokenSyntax
+SyntaxNodeFactory::make<?= $tokenName ?>(std::int64_t value, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena)
+{
+   return make<TokenSyntax>(
+      RawSyntax::make(TokenKindType::<?= $tokenKind ?>, 
+                      OwnedString::makeRefCounted(std::to_string(value)),
+                      value, leadingTrivia.pieces, trailingTrivia.pieces, SourcePresence::Present, arena));
+}
+
+<?php
+   } elseif ($tokenName == "DNumberToken") {
+?>
+TokenSyntax
+SyntaxNodeFactory::make<?= $tokenName ?>(double value, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena)
+{
+   return make<TokenSyntax>(
+      RawSyntax::make(TokenKindType::<?= $tokenKind ?>, 
+                      OwnedString::makeRefCounted(std::to_string(value)),
+                      value, leadingTrivia.pieces, trailingTrivia.pieces, SourcePresence::Present, arena));
 }
 
 <?php

@@ -108,6 +108,7 @@ polar_merge_list(POLAR_HEADERS POLAR_UTILS_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_RUNTIME_HEADERS)
 
 add_subdirectory(syntax)
+add_subdirectory(parser)
 
 configure_file(global/PolarVersion.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/global/PolarVersion.h
    @ONLY)

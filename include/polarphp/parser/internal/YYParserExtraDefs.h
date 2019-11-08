@@ -15,16 +15,12 @@
 #define empty_triva() parser->getEmptyTrivia()
 #define make_token(name) SyntaxNodeFactory::make##name(parser->getEmptyTrivia(), parser->getEmptyTrivia())
 #define make_token_with_text(name, text) \
-   TokenSyntaxNodeFactory::make##name(OwnedString::makeRefCounted(text), parser->getEmptyTrivia(), parser->getEmptyTrivia())
+   SyntaxNodeFactory::make##name(OwnedString::makeRefCounted(text), parser->getEmptyTrivia(), parser->getEmptyTrivia())
 #define make_lnumber_token(value) SyntaxNodeFactory::makeLNumberToken(value, parser->getEmptyTrivia(), parser->getEmptyTrivia())
 #define make_dnumber_token(value) SyntaxNodeFactory::makeDNumberToken(value, parser->getEmptyTrivia(), parser->getEmptyTrivia())
 
-#define make_decl(name, ...) SyntaxNodeFactory::make##name(__VA_ARGS__)
-#define make_blank_decl(name) SyntaxNodeFactory::makeBlank##name()
-#define make_expr(name, ...) SyntaxNodeFactory::make##name(__VA_ARGS__)
-#define make_blank_expr(name) SyntaxNodeFactory::makeBlank##name()
-#define make_stmt(name, ...) SyntaxNodeFactory::make##name(__VA_ARGS__)
-#define make_blank_stmt(name) SyntaxNodeFactory::makeBlank##name()
+#define make_syntax_node(name, ...) SyntaxNodeFactory::make##name(__VA_ARGS__)
+#define make_blank_syntax_node(name, ...) SyntaxNodeFactory::makeBlank##name()
 
 #define make_reserved_keyword(name) make_token(name##Keyword).getRaw()
 

@@ -84,14 +84,18 @@ foreach ($TOKENS as $token) {
    if ($token instanceof \Gyb\Syntax\Token\Misc) {
       $tokenText = '';
    }
-   if ($token->isKeyword()) {
+   if (!empty($tokenText)) {
 ?>
    static TokenSyntax make<?= $tokenName ?>(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
 <?php
-   } elseif (!empty($tokenText)) {
+   } elseif($tokenName == "LNumberToken") {
 ?>
-   static TokenSyntax make<?= $tokenName ?>(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
+   static TokenSyntax make<?= $tokenName ?>(std::int64_t value, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
 <?php
+   } elseif($tokenName == "DNumberToken") {
+?>
+   static TokenSyntax make<?= $tokenName ?>(double value, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
+<?php   
    } else {
 ?>
    static TokenSyntax make<?= $tokenName ?>(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
