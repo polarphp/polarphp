@@ -20,7 +20,7 @@
 #define make_dnumber_token(value) SyntaxNodeFactory::makeDNumberToken(value, parser->getEmptyTrivia(), parser->getEmptyTrivia())
 
 #define make_syntax_node(name, ...) SyntaxNodeFactory::make##name(__VA_ARGS__)
-#define make_blank_syntax_node(name, ...) SyntaxNodeFactory::makeBlank##name()
+#define make_blank_syntax_node(name) SyntaxNodeFactory::makeBlank##name()
 
 #define make_reserved_keyword(name) make_token(name##Keyword).getRaw()
 

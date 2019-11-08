@@ -51,7 +51,7 @@ add_custom_command(OUTPUT ${POLAR_GENERATED_PARSER_IMPL_FILE}
    "-d" ${POLAR_GRAMMER_FILE}
    "-o" ${POLAR_GENERATED_PARSER_IMPL_FILE}
    "--defines=${POLAR_GENERATED_PARSER_HEADER_FILE}"
-   DEPENDS polar-parser-generated-headers
+   DEPENDS ${POLAR_GRAMMER_FILE} polar-parser-generated-headers
    )
 
 list(APPEND POLAR_PARSER_SOURCES

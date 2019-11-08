@@ -196,7 +196,7 @@ return array(
    ['class' => 'Misc', 'name' => 'OpenTagWithEcho', 'kind' => 'T_OPEN_TAG_WITH_ECHO', 'text' => 'open tag with echo',
       'serializationCode' => 473],
    ['class' => 'Misc', 'name' => 'CloseTag', 'kind' => 'T_CLOSE_TAG', 'text' => 'close tag', 'serializationCode' => 474],
-   ['class' => 'Misc', 'name' => 'StartHeredoc', 'kind' => 'T_START_HEREDOC', 'text' => 'heredoc start',
+   ['class' => 'Misc', 'name' => 'StartHereDoc', 'kind' => 'T_START_HEREDOC', 'text' => 'heredoc start',
       'serializationCode' => 475],
    ['class' => 'Misc', 'name' => 'EndHereDoc', 'kind' => 'T_END_HEREDOC', 'text' => 'heredoc end',
       'serializationCode' => 476],

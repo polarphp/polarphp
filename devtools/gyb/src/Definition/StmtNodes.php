@@ -290,7 +290,7 @@ $definitions = array(
          [
             'name' => 'ElseIfClauses',
             'kind' => 'ElseIfList',
-            'collectionElementName' => 'ElseIfItem',
+            'collectionElementName' => 'ElseIfClause',
             'isOptional' => true
          ],
          ['name' => 'ElseKeyword', 'kind' => 'ElseKeyword', 'isOptional' => true],
@@ -309,9 +309,27 @@ $definitions = array(
          ['name' => 'LabelColon', 'kind' => 'ColonToken', 'isOptional' => true],
          ['name' => 'WhileKeyword', 'kind' => 'WhileKeyword'],
          ['name' => 'ConditionsClause', 'kind' => 'ParenDecoratedExpr'],
-         ['name' => 'Body', 'kind' => 'InnerCodeBlockStmt']
+         ['name' => 'Body', 'kind' => 'Stmt']
       ]
    ],
+   /**
+    * do_while_stmt:
+    *   T_DO statement T_WHILE T_LEFT_PAREN expr T_RIGHT_PAREN T_SEMICOLON
+    */
+   [
+      'kind' => 'DoWhileStmt',
+      'baseKind' => 'Stmt',
+      'children' => [
+         ['name' => 'LabelName', 'kind' => 'IdentifierStringToken', 'isOptional' => true],
+         ['name' => 'LabelColon', 'kind' => 'ColonToken', 'isOptional' => true],
+         ['name' => 'DoKeyword', 'kind' => 'DoKeyword'],
+         ['name' => 'Body', 'kind' => 'Stmt'],
+         ['name' => 'WhileKeyword', 'kind' => 'WhileKeyword'],
+         ['name' => 'ConditionsClause', 'kind' => 'ParenDecoratedExpr'],
+         ['name' => 'Semicolon', 'kind' => 'SemicolonToken']
+      ]
+   ],
+
    /**
     * for_stmt:
     *   T_FOR '(' for_exprs ';' for_exprs ';' for_exprs ')' for_statement
@@ -427,7 +445,7 @@ $definitions = array(
                ['name' => 'CaseLabel', 'kind' => 'SwitchCaseLabel']
             ]
          ],
-         ['name' => 'Statements', 'kind' => 'InnerCodeBlockStmt']
+         ['name' => 'Statements', 'kind' => 'InnerStmtList', 'collectionElementName' => 'Stmt']
       ]
    ],
    /**
@@ -505,7 +523,7 @@ $definitions = array(
       'kind' => 'CatchArgTypeHintItem',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'Separator', 'kind' => 'VerticalBarToken'],
+         ['name' => 'Separator', 'kind' => 'VerticalBarToken', 'isOptional' => true],
          ['name' => 'TypeName', 'kind' => 'Name']
       ]
    ],
@@ -534,7 +552,7 @@ $definitions = array(
       'baseKind' => 'Stmt',
       'children' => [
          ['name' => 'ReturnKeyword', 'kind' => 'ReturnKeyword'],
-         ['name' => 'ValueExpr', 'kind' => 'Expr'],
+         ['name' => 'ValueExpr', 'kind' => 'Expr', 'isOptional' => true],
          ['name' => 'Semicolon', 'kind' => 'SemicolonToken']
       ]
    ],
@@ -584,8 +602,8 @@ $definitions = array(
       'kind' => 'GlobalVariableListItem',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'Comma', 'kind' => 'CommaToken'],
-         ['name' => 'Variable', 'kind' => 'VariableToken']
+         ['name' => 'Comma', 'kind' => 'CommaToken', 'isOptional' => true],
+         ['name' => 'Variable', 'kind' => 'GlobalVariable']
       ]
    ],
    /**
@@ -611,8 +629,8 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'Variable', 'kind' => 'VariableToken'],
-         ['name' => 'Equal', 'kind' => 'EqualToken'],
-         ['name' => 'ValueExpr', 'kind' => 'Expr']
+         ['name' => 'Equal', 'kind' => 'EqualToken', 'isOptional' => true],
+         ['name' => 'ValueExpr', 'kind' => 'Expr', 'isOptional' => true]
       ]
    ],
    /**
@@ -843,7 +861,7 @@ $definitions = array(
       'kind' => 'ConstListItem',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'Comma', 'kind' => 'CommaToken'],
+         ['name' => 'Comma', 'kind' => 'CommaToken', 'isOptional' => true],
          ['name' => 'Declaration', 'kind' => 'ConstDeclare']
       ]
    ],

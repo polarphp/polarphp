@@ -335,7 +335,9 @@ foreach ($TOKENS as $token) {
    $tokenKind = $token->getKind();
    $tokenText = $token->getText();
    if ($token instanceof \Gyb\Syntax\Token\Misc) {
-      $tokenText = '';
+      if (!in_array($tokenName, ['StartHereDocToken','EndHereDocToken', 'UnknownToken'])) {
+         $tokenText = '';
+      }
    }
    if (!empty($tokenText)) {
 ?>

@@ -90,8 +90,8 @@ $definitions = array(
       'kind' => 'NamespaceName',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'ParentNs', 'kind' => 'NamespaceName'],
-         ['name' => 'NsSeparator', 'kind' => 'NamespaceSeparatorToken'],
+         ['name' => 'ParentNs', 'kind' => 'NamespaceName', 'isOptional' => true],
+         ['name' => 'NsSeparator', 'kind' => 'NamespaceSeparatorToken', 'isOptional' => true],
          ['name' => 'Identifier', 'kind' => 'IdentifierStringToken']
       ]
    ],
@@ -105,8 +105,8 @@ $definitions = array(
       'kind' => 'Name',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'NsKeyword', 'kind' => 'NamespaceKeyword'],
-         ['name' => 'NsSeparator', 'kind' => 'NamespaceSeparatorToken'],
+         ['name' => 'NsKeyword', 'kind' => 'NamespaceKeyword', 'isOptional' => true],
+         ['name' => 'NsSeparator', 'kind' => 'NamespaceSeparatorToken', 'isOptional' => true],
          ['name' => 'NamespaceName', 'kind' => 'NamespaceName']
       ]
    ],
@@ -118,7 +118,7 @@ $definitions = array(
       'kind' => 'NameListItem',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'Comma', 'kind' => 'CommaToken'],
+         ['name' => 'Comma', 'kind' => 'CommaToken', 'isOptional' => true],
          ['name' => 'NameRef', 'kind' => 'Name']
       ]
    ],
@@ -145,7 +145,7 @@ $definitions = array(
       'children' => [
          [
             'name' => 'Type',
-            'kind' => 'Token',
+            'kind' => 'Syntax',
             'nodeChoices' => [
                [
                   'name' => 'TokenType',
@@ -169,7 +169,7 @@ $definitions = array(
       'kind' => 'TypeExprClause',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'Question', 'kind' => 'QuestionKeyword'],
+         ['name' => 'Question', 'kind' => 'QuestionKeyword', 'isOptional' => true],
          ['name' => 'TypeClause', 'kind' => 'TypeClause']
       ]
    ],
@@ -209,7 +209,7 @@ $definitions = array(
       'kind' => 'ParameterListItem',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'Comma', 'kind' => 'CommaToken'],
+         ['name' => 'Comma', 'kind' => 'CommaToken', 'isOptional' => true],
          ['name' => 'Parameter', 'kind' => 'Parameter']
       ]
    ],
@@ -222,7 +222,12 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'LeftParen', 'kind' => 'LeftParenKeyword'],
-         ['name' => 'Parameters', 'kind' => 'ParameterList', 'collectionElementName' => 'Parameter'],
+         [
+            'name' => 'Parameters',
+            'kind' => 'ParameterList',
+            'collectionElementName' => 'Parameter',
+            'isOptional' => true
+         ],
          ['name' => 'RightParen', 'kind' => 'RightParenKeyword'],
       ]
    ],
@@ -320,7 +325,7 @@ $definitions = array(
       'kind' => 'ClassPropertyListItem',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'Comma', 'kind' => 'CommaToken'],
+         ['name' => 'Comma', 'kind' => 'CommaToken', 'isOptional' => true],
          ['name' => 'Property', 'kind' => 'ClassPropertyClause']
       ]
    ],
@@ -345,7 +350,7 @@ $definitions = array(
       'kind' => 'ClassConstListItem',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'Comma', 'kind' => 'CommaToken'],
+         ['name' => 'Comma', 'kind' => 'CommaToken', 'isOptional' => true],
          ['name' => 'ConstDecl', 'kind' => 'ClassConstClause']
       ]
    ],
@@ -413,7 +418,7 @@ $definitions = array(
       'children' => [
          ['name' => 'Modifiers', 'kind' => 'MemberModifierList', 'collectionElementName' => 'Modifier'],
          ['name' => 'FunctionKeyword', 'kind' => 'FunctionKeyword'],
-         ['name' => 'ReturnRef', 'kind' => 'AmpersandToken'],
+         ['name' => 'ReturnRef', 'kind' => 'AmpersandToken', 'isOptional' => true],
          ['name' => 'FuncName', 'kind' => 'Identifier'],
          ['name' => 'ParameterClause', 'kind' => 'ParameterClause'],
          ['name' => 'ReturnType', 'kind' => 'ReturnTypeClause', 'isOptional' => true],
@@ -484,7 +489,8 @@ $definitions = array(
             'nodeChoices' => [
                ['name' => 'ReservedNonModifier', 'kind' => 'ReservedNonModifier'],
                ['name' => 'MemberModifier', 'kind' => 'MemberModifier']
-            ]
+            ],
+            'isOptional' => true,
          ],
          [
             'name' => 'AliasName',
@@ -492,7 +498,8 @@ $definitions = array(
             'nodeChoices' => [
                ['name' => 'IdentifierStringAlias', 'kind' => 'IdentifierStringToken'],
                ['name' => 'IdentifierAlias', 'kind' => 'Identifier']
-            ]
+            ],
+            'isOptional' => true,
          ]
       ]
    ],
@@ -527,7 +534,12 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'LeftBrace', 'kind' => 'LeftParenToken'],
-         ['name' => 'Adaptations', 'kind' => 'ClassTraitAdaptationList', 'collectionElementName' => 'Adaptation'],
+         [
+            'name' => 'Adaptations',
+            'kind' => 'ClassTraitAdaptationList',
+            'collectionElementName' => 'Adaptation',
+            'isOptional' => true
+         ],
          ['name' => 'RightBrace', 'kind' => 'RightParenToken']
       ]
    ],
@@ -596,7 +608,7 @@ $definitions = array(
       'children' => [
          ['name' => 'InterfaceKeyword', 'kind' => 'InterfaceKeyword'],
          ['name' => 'Name', 'kind' => 'IdentifierStringToken'],
-         ['name' => 'ExtendsFrom', 'kind' => 'ExtendsFromKeyword', 'isOptional' => true],
+         ['name' => 'ExtendsFrom', 'kind' => 'InterfaceExtendsClause', 'isOptional' => true],
          ['name' => 'Members', 'kind' => 'MemberDeclBlock']
       ]
    ],

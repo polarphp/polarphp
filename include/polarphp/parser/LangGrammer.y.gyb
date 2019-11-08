@@ -19,11 +19,8 @@
 %code top {
 #include <cstdint>
 
-#include "polarphp/syntax/SyntaxNodeFactories.h"
-#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
-#include "polarphp/syntax/syntaxnode/DeclSyntaxNodes.h"
-#include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
-#include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
+#include "polarphp/syntax/SyntaxNodeFactory.h"
+#include "polarphp/syntax/SyntaxNodes.h"
 #include "polarphp/parser/Parser.h"
 #include "polarphp/parser/internal/YYParserExtraDefs.h"
 }
@@ -247,7 +244,7 @@ semi_reserved_token:
 semi_reserved:
    semi_reserved_token {
       TokenSyntax reservedKeyword = make<TokenSyntax>($1);
-      SemiReservedSytnax semiReserved = make_syntax_node(SemiReserved, reservedKeyword);
+      SemiReservedSyntax semiReserved = make_syntax_node(SemiReserved, reservedKeyword);
       $$ = semiReserved.getRaw();
    }
 ;
@@ -259,7 +256,7 @@ identifier:
       $$ = identifier.getRaw();
    }
 |	semi_reserved {
-      SemiReservedSytnax reserved = make<SemiReservedSytnax>($1);
+      SemiReservedSyntax reserved = make<SemiReservedSyntax>($1);
       IdentifierSyntax identifier = make_syntax_node(Identifier, reserved);
       $$ = identifier.getRaw();
    }
@@ -280,14 +277,14 @@ top_statement_list:
 
 namespace_name:
    T_IDENTIFIER_STRING {
-      TokenSyntax identifierToken = make_token_with_text(IdentifierString, $1);
+      TokenSyntax identifierToken = make_token_with_text(IdentifierStringToken, $1);
       NamespaceNameSyntax namespaceName = make_syntax_node(NamespaceName, std::nullopt, std::nullopt, identifierToken);
       $$ = namespaceName.getRaw();
    }
 |  namespace_name T_NS_SEPARATOR T_IDENTIFIER_STRING {
       NamespaceNameSyntax parentNs = make<NamespaceNameSyntax>($1);
       TokenSyntax separator = make_token(NamespaceSeparatorToken);
-      TokenSyntax identifierToken = make_token_with_text(IdentifierString, $3);
+      TokenSyntax identifierToken = make_token_with_text(IdentifierStringToken, $3);
       NamespaceNameSyntax newNs = make_syntax_node(NamespaceName, parentNs, separator, identifierToken);
       $$ = newNs.getRaw();
    }
@@ -555,7 +552,7 @@ unprefixed_use_declaration:
 |  namespace_name T_AS T_IDENTIFIER_STRING {
       NamespaceNameSyntax ns = make<NamespaceNameSyntax>($1);
       TokenSyntax asToken = make_token(AsKeyword);
-      TokenSyntax identifierStr = make_token_with_text(IdentifierString, $3);
+      TokenSyntax identifierStr = make_token_with_text(IdentifierStringToken, $3);
       NamespaceUnprefixedUseDeclarationSyntax declaration = make_syntax_node(NamespaceUnprefixedUseDeclaration, ns, asToken, identifierStr);
       $$ = declaration.getRaw();
    }
@@ -836,13 +833,13 @@ statement:
    }
 |  T_GOTO T_IDENTIFIER_STRING T_SEMICOLON {
       TokenSyntax gotoKeyword = make_token(GotoKeyword);
-      TokenSyntax identifierStr = make_token_with_text(IdentifierString, $2);
+      TokenSyntax identifierStr = make_token_with_text(IdentifierStringToken, $2);
       TokenSyntax colonToken = make_token(ColonToken);
       GotoStmtSyntax gotoStmt = make_syntax_node(GotoStmt, gotoKeyword, identifierStr, colonToken);
       $$ = gotoStmt.getRaw();
    }
 |  T_IDENTIFIER_STRING T_COLON {
-      TokenSyntax identifierStr = make_token_with_text(IdentifierString, $1);
+      TokenSyntax identifierStr = make_token_with_text(IdentifierStringToken, $1);
       TokenSyntax colonToken = make_token(ColonToken);
       LabelStmtSyntax labelStmt = make_syntax_node(LabelStmt, identifierStr, colonToken);
       $$ = labelStmt.getRaw();
@@ -859,7 +856,7 @@ catch_list:
       TokenSyntax catchKeyword = make_token(CatchKeyword);
       TokenSyntax leftParen = make_token(LeftParenToken);
       CatchArgTypeHintListSyntax typeHints = make<CatchArgTypeHintListSyntax>($4);
-      TokenSyntax variableToken = make_token_with_text(Variable, $5);
+      TokenSyntax variableToken = make_token_with_text(VariableToken, $5);
       TokenSyntax rightParen = make_token(RightParenToken);
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       InnerStmtListSyntax innerStmts = make<InnerStmtListSyntax>($8);
@@ -937,7 +934,7 @@ function_declaration_statement:
    backup_fn_flags T_LEFT_BRACE inner_statement_list T_RIGHT_BRACE backup_fn_flags {
       TokenSyntax funcKeyword = make<TokenSyntax>($1);
       std::optional<TokenSyntax> returnRef = $2 ? std::optional(make<TokenSyntax>($2)) : std::nullopt;
-      TokenSyntax funcName = make_token_with_text(IdentifierString, $3);
+      TokenSyntax funcName = make_token_with_text(IdentifierStringToken, $3);
       TokenSyntax leftParen = make_token(LeftParenToken);
       ParameterListSyntax params = make<ParameterListSyntax>($6);
       TokenSyntax rightParen = make_token(RightParenToken);
@@ -981,7 +978,7 @@ class_declaration_statement:
    T_IDENTIFIER_STRING extends_from implements_list backup_doc_comment T_LEFT_BRACE class_statement_list T_RIGHT_BRACE {
       ClassModifierListSyntax classModifiers = make<ClassModifierListSyntax>($1);
       TokenSyntax classKeyword = make_token(ClassKeyword);
-      TokenSyntax className = make_token_with_text(IdentifierString, $4);
+      TokenSyntax className = make_token_with_text(IdentifierStringToken, $4);
       std::optional<ExtendsFromClauseSyntax> extendsFrom = $5 ? std::optional(make<ExtendsFromClauseSyntax>($5)) : std::nullopt;
       std::optional<ImplementsClauseSyntax> implementsFrom = $6 ? std::optional(make<ImplementsClauseSyntax>($6)) : std::nullopt;
       TokenSyntax leftBrace = make_token(LeftBraceToken);
@@ -997,7 +994,7 @@ class_declaration_statement:
 |  T_CLASS {}
    T_IDENTIFIER_STRING extends_from implements_list backup_doc_comment T_LEFT_BRACE class_statement_list T_RIGHT_BRACE {
       TokenSyntax classKeyword = make_token(ClassKeyword);
-      TokenSyntax className = make_token_with_text(IdentifierString, $3);
+      TokenSyntax className = make_token_with_text(IdentifierStringToken, $3);
       std::optional<ExtendsFromClauseSyntax> extendsFrom = $4 ? std::optional(make<ExtendsFromClauseSyntax>($4)) : std::nullopt;
       std::optional<ImplementsClauseSyntax> implementsFrom = $5 ? std::optional(make<ImplementsClauseSyntax>($5)) : std::nullopt;
       TokenSyntax leftBrace = make_token(LeftBraceToken);
@@ -1044,7 +1041,7 @@ trait_declaration_statement:
    T_TRAIT {}
    T_IDENTIFIER_STRING backup_doc_comment T_LEFT_BRACE class_statement_list T_RIGHT_BRACE {
       TokenSyntax traitKeyword = make_token(TraitKeyword);
-      TokenSyntax traitName = make_token_with_text(IdentifierString, $3);
+      TokenSyntax traitName = make_token_with_text(IdentifierStringToken, $3);
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       MemberDeclListSyntax stmts = make<MemberDeclListSyntax>($6);
       TokenSyntax rightBrace = make_token(RightBraceToken);
@@ -1058,7 +1055,7 @@ interface_declaration_statement:
    T_INTERFACE {}
    T_IDENTIFIER_STRING interface_extends_list backup_doc_comment T_LEFT_BRACE class_statement_list T_RIGHT_BRACE {
       TokenSyntax interfaceKeyword = make_token(InterfaceKeyword);
-      TokenSyntax interfaceName = make_token_with_text(IdentifierString, $3);
+      TokenSyntax interfaceName = make_token_with_text(IdentifierStringToken, $3);
       std::optional<InterfaceExtendsClauseSyntax> interfaceExtendsFrom = $4 ? std::optional(make<InterfaceExtendsClauseSyntax>($4)) : std::nullopt;
       TokenSyntax leftBrace = make_token(LeftBraceToken);
       MemberDeclListSyntax stmts = make<MemberDeclListSyntax>($7);
@@ -1265,7 +1262,7 @@ parameter:
       std::optional<TypeExprClauseSyntax> optionalType = $1 ? std::optional(make<TypeExprClauseSyntax>($1)) : std::nullopt;
       std::optional<TokenSyntax> refToken = $2 ? std::optional(make<TokenSyntax>($2)) : std::nullopt;
       std::optional<TokenSyntax> variadicToken = $3 ? std::optional(make<TokenSyntax>($3)) : std::nullopt;
-      TokenSyntax variable = make_token_with_text(Variable, $4);
+      TokenSyntax variable = make_token_with_text(VariableToken, $4);
       ParameterSyntax parameterDecl = make_syntax_node(Parameter, optionalType, refToken, variadicToken, variable, std::nullopt);
       $$ = parameterDecl.getRaw();
    }
@@ -1273,7 +1270,7 @@ parameter:
       std::optional<TypeExprClauseSyntax> optionalType = $1 ? std::optional(make<TypeExprClauseSyntax>($1)) : std::nullopt;
       std::optional<TokenSyntax> refToken = $2 ? std::optional(make<TokenSyntax>($2)) : std::nullopt;
       std::optional<TokenSyntax> variadicToken = $3 ? std::optional(make<TokenSyntax>($3)) : std::nullopt;
-      TokenSyntax variable = make_token_with_text(Variable, $4);
+      TokenSyntax variable = make_token_with_text(VariableToken, $4);
       TokenSyntax equal = make_token(EqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($6);
       InitializerClauseSyntax initializer = make_syntax_node(InitializerClause, equal, valueExpr);
@@ -1429,12 +1426,12 @@ static_var_list:
 
 static_var:
    T_VARIABLE {
-      TokenSyntax variableToken = make_token_with_text(Variable, $1);
+      TokenSyntax variableToken = make_token_with_text(VariableToken, $1);
       StaticVariableDeclareSyntax staticVar = make_syntax_node(StaticVariableDeclare, variableToken, std::nullopt, std::nullopt);
       $$ = staticVar.getRaw();
    }
 |  T_VARIABLE T_EQUAL expr {
-      TokenSyntax variableToken = make_token_with_text(Variable, $1);
+      TokenSyntax variableToken = make_token_with_text(VariableToken, $1);
       TokenSyntax equalToken = make_token(EqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
       StaticVariableDeclareSyntax staticVar = make_syntax_node(StaticVariableDeclare, variableToken, equalToken, valueExpr);
@@ -1615,7 +1612,7 @@ trait_alias:
    trait_method_reference T_AS T_IDENTIFIER_STRING {
       ClassTraitMethodReferenceSyntax methodRef = make<ClassTraitMethodReferenceSyntax>($1);
       TokenSyntax asKeyword = make_token(AsKeyword);
-      TokenSyntax aliasName = make_token_with_text(IdentifierString, $3);
+      TokenSyntax aliasName = make_token_with_text(IdentifierStringToken, $3);
       ClassTraitAliasSyntax traitAlias = make_syntax_node(
          ClassTraitAlias, methodRef, asKeyword, std::nullopt, aliasName
       );
@@ -1790,12 +1787,12 @@ property_list:
 
 property:
    T_VARIABLE backup_doc_comment {
-      TokenSyntax variable = make_token_with_text(Variable, $1);
+      TokenSyntax variable = make_token_with_text(VariableToken, $1);
       ClassPropertyClauseSyntax prop = make_syntax_node(ClassPropertyClause, variable, std::nullopt);
       $$ = prop.getRaw();
    }
 |  T_VARIABLE T_EQUAL expr backup_doc_comment {
-      TokenSyntax variable = make_token_with_text(Variable, $1);
+      TokenSyntax variable = make_token_with_text(VariableToken, $1);
       TokenSyntax equalToken = make_token(EqualToken);
       ExprSyntax valueExpr = make<ExprSyntax>($3);
       InitializerClauseSyntax initializer = make_syntax_node(InitializerClause, equalToken, valueExpr);
@@ -1837,7 +1834,7 @@ class_const_decl:
 
 const_decl:
    T_IDENTIFIER_STRING T_EQUAL expr backup_doc_comment {
-      TokenSyntax identifierToken = make_token_with_text(IdentifierString, $1);
+      TokenSyntax identifierToken = make_token_with_text(IdentifierStringToken, $1);
       TokenSyntax equalToken = make_token(EqualToken);
       ExprSyntax expr = make<ExprSyntax>($3);
       InitializerClauseSyntax initializer = make_syntax_node(InitializerClause, equalToken, expr);
@@ -2580,13 +2577,13 @@ lexical_var_list:
 
 lexical_var:
    T_VARIABLE {
-      TokenSyntax variableToken = make_token_with_text(Variable, $1);
+      TokenSyntax variableToken = make_token_with_text(VariableToken, $1);
       LexicalVariableSyntax lexicalVar = make_syntax_node(LexicalVariable, std::nullopt, variableToken);
       $$ = lexicalVar.getRaw();
    }
 |  T_AMPERSAND T_VARIABLE {
       TokenSyntax ampersand = make_token(AmpersandToken);
-      TokenSyntax variableToken = make_token_with_text(Variable, $2);
+      TokenSyntax variableToken = make_token_with_text(VariableToken, $2);
       LexicalVariableSyntax lexicalVar = make_syntax_node(LexicalVariable, ampersand, variableToken);
       $$ = lexicalVar.getRaw();
    }
@@ -2672,7 +2669,7 @@ backticks_expr:
       $$ = nullptr;
    }
 |  T_ENCAPSED_AND_WHITESPACE {
-      TokenSyntax str = make_token_with_text(EncapsedAndWhitespace, $1);
+      TokenSyntax str = make_token_with_text(EncapsedAndWhitespaceToken, $1);
       BackticksClauseSyntax expr = make_syntax_node(BackticksClause, str);
       $$ = expr.getRaw();
    }
@@ -2712,14 +2709,14 @@ dereferencable_scalar:
    }
 |  T_DOUBLE_QUOTE T_CONSTANT_ENCAPSED_STRING T_DOUBLE_QUOTE {
       TokenSyntax doubleQuote = make_token(DoubleStrQuoteToken);
-      TokenSyntax strToken = make_token_with_text(ConstantEncapsedString, $2);
+      TokenSyntax strToken = make_token_with_text(ConstantEncapsedStringToken, $2);
       StringLiteralExprSyntax str = make_syntax_node(StringLiteralExpr, doubleQuote, strToken, doubleQuote);
       DereferencableScalarExprSyntax scalar = make_syntax_node(DereferencableScalarExpr, str);
       $$ = scalar.getRaw();
    }
 |  T_SINGLE_QUOTE T_CONSTANT_ENCAPSED_STRING T_SINGLE_QUOTE {
       TokenSyntax singleQuote = make_token(SingleStrQuoteToken);
-      TokenSyntax strToken = make_token_with_text(ConstantEncapsedString, $2);
+      TokenSyntax strToken = make_token_with_text(ConstantEncapsedStringToken, $2);
       StringLiteralExprSyntax str = make_syntax_node(StringLiteralExpr, singleQuote, strToken, singleQuote);
       DereferencableScalarExprSyntax scalar = make_syntax_node(DereferencableScalarExpr, str);
       $$ = scalar.getRaw();
@@ -2778,16 +2775,16 @@ scalar:
       $$ = scalarValue.getRaw();
    }
 |  T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC {
-      TokenSyntax startHeredoc = make_token(StartHereDoc);
-      TokenSyntax encapsStr = make_token_with_text(EncapsedAndWhitespace, $2);
-      TokenSyntax endHeredoc = make_token(EndHereDoc);
+      TokenSyntax startHeredoc = make_token(StartHereDocToken);
+      TokenSyntax encapsStr = make_token_with_text(EncapsedAndWhitespaceToken, $2);
+      TokenSyntax endHeredoc = make_token(EndHereDocToken);
       HeredocExprSyntax heredoc = make_syntax_node(HeredocExpr, startHeredoc, encapsStr, endHeredoc);
       ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, heredoc);
       $$ = scalarValue.getRaw();
    }
 |  T_START_HEREDOC T_END_HEREDOC {
-      TokenSyntax startHeredoc = make_token(StartHereDoc);
-      TokenSyntax endHeredoc = make_token(EndHereDoc);
+      TokenSyntax startHeredoc = make_token(StartHereDocToken);
+      TokenSyntax endHeredoc = make_token(EndHereDocToken);
       HeredocExprSyntax heredoc = make_syntax_node(HeredocExpr, startHeredoc, std::nullopt, endHeredoc);
       ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, heredoc);
       $$ = scalarValue.getRaw();
@@ -2800,9 +2797,9 @@ scalar:
       $$ = scalarValue.getRaw();
    }
 |  T_START_HEREDOC encaps_list T_END_HEREDOC {
-      TokenSyntax startHeredoc = make_token(StartHereDoc);
+      TokenSyntax startHeredoc = make_token(StartHereDocToken);
       EncapsItemListSyntax encapsList = make<EncapsItemListSyntax>($2);
-      TokenSyntax endHeredoc = make_token(EndHereDoc);
+      TokenSyntax endHeredoc = make_token(EndHereDocToken);
       HeredocExprSyntax heredoc = make_syntax_node(HeredocExpr, startHeredoc, encapsList, endHeredoc);
       ScalarExprSyntax scalarValue = make_syntax_node(ScalarExpr, heredoc);
       $$ = scalarValue.getRaw();
@@ -2977,7 +2974,7 @@ variable:
 
 simple_variable:
    T_VARIABLE {
-      TokenSyntax variableToken = make_token_with_text(Variable, $1);
+      TokenSyntax variableToken = make_token_with_text(VariableToken, $1);
       SimpleVariableExprSyntax simpleVariable = make_syntax_node(SimpleVariableExpr, std::nullopt, variableToken);
       $$ = simpleVariable.getRaw();
    }
@@ -3087,7 +3084,7 @@ member_name:
 
 property_name:
    T_IDENTIFIER_STRING {
-      TokenSyntax identifierStr = make_token_with_text(IdentifierString, $1);
+      TokenSyntax identifierStr = make_token_with_text(IdentifierStringToken, $1);
       PropertyNameClauseSyntax propertyName = make_syntax_node(PropertyNameClause, identifierStr);
       $$ = propertyName.getRaw();
    }
@@ -3211,7 +3208,7 @@ encaps_list:
    }
 |  encaps_list T_ENCAPSED_AND_WHITESPACE {
       EncapsItemListSyntax list = make<EncapsItemListSyntax>($1);
-      TokenSyntax encapsStr = make_token_with_text(EncapsedAndWhitespace, $2);
+      TokenSyntax encapsStr = make_token_with_text(EncapsedAndWhitespaceToken, $2);
       EncapsListItemSyntax listItem = make_syntax_node(EncapsListItem, encapsStr, std::nullopt);
       list.appending(listItem);
       $$ = list.getRaw();
@@ -3224,7 +3221,7 @@ encaps_list:
       $$ = list.getRaw();
    }
 |  T_ENCAPSED_AND_WHITESPACE encaps_var {
-      TokenSyntax encapsStr = make_token_with_text(EncapsedAndWhitespace, $1);
+      TokenSyntax encapsStr = make_token_with_text(EncapsedAndWhitespaceToken, $1);
       EncapsVariableSyntax encapsVar = make<EncapsVariableSyntax>($2);
       EncapsListItemSyntax strListItem = make_syntax_node(EncapsListItem, encapsStr, std::nullopt);
       EncapsListItemSyntax varListItem = make_syntax_node(EncapsListItem, std::nullopt, encapsVar);
@@ -3236,14 +3233,14 @@ encaps_list:
 
 encaps_var:
    T_VARIABLE {
-      TokenSyntax variableToken = make_token_with_text(Variable, $1);
+      TokenSyntax variableToken = make_token_with_text(VariableToken, $1);
       EncapsVariableSyntax enscapVar = make_syntax_node(EncapsVariable, variableToken);
       $$ = enscapVar.getRaw();
    }
 |  T_VARIABLE T_OBJECT_OPERATOR T_IDENTIFIER_STRING {
-      TokenSyntax variableToken = make_token_with_text(Variable, $1);
+      TokenSyntax variableToken = make_token_with_text(VariableToken, $1);
       TokenSyntax objOperator = make_token(ObjectOperatorToken);
-      TokenSyntax identifierStr = make_token_with_text(IdentifierString, $3);
+      TokenSyntax identifierStr = make_token_with_text(IdentifierStringToken, $3);
       EncapsObjPropSyntax objPropVar = make_syntax_node(EncapsObjProp, variableToken, objOperator, identifierStr);
       EncapsVariableSyntax enscapVar = make_syntax_node(EncapsVariable, objPropVar);
       $$ = enscapVar.getRaw();
@@ -3258,15 +3255,15 @@ encaps_var:
    }
 |  T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME T_RIGHT_BRACE {
       TokenSyntax curlyOpenToken = make_token(DollarOpenCurlyBracesToken);
-      TokenSyntax varname = make_token_with_text(StringVarName, $2);
+      TokenSyntax varname = make_token_with_text(StringVarNameToken, $2);
       TokenSyntax rightBraceToken = make_token(RightBraceToken);
-      EncapsDollarCurlyVarSyntax curlyVar = make_syntax_node(EncapsDollarCurlyVariable, curlyOpenToken, varname, rightBraceToken);
+      EncapsDollarCurlyVariableSyntax curlyVar = make_syntax_node(EncapsDollarCurlyVariable, curlyOpenToken, varname, rightBraceToken);
       EncapsVariableSyntax enscapVar = make_syntax_node(EncapsVariable, curlyVar);
       $$ = enscapVar.getRaw();
    }
 |  T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME T_LEFT_SQUARE_BRACKET expr T_RIGHT_SQUARE_BRACKET T_RIGHT_BRACE {
       TokenSyntax curlyOpenToken = make_token(DollarOpenCurlyBracesToken);
-      TokenSyntax varname = make_token_with_text(StringVarName, $2);
+      TokenSyntax varname = make_token_with_text(StringVarNameToken, $2);
       TokenSyntax leftSquareBracketToken = make_token(LeftSquareBracketToken);
       ExprSyntax expr = make<ExprSyntax>($4);
       TokenSyntax rightSquareBracketToken = make_token(RightSquareBracketToken);

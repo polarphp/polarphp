@@ -92,10 +92,8 @@ $definitions = array(
       'kind' => 'ReferencedVariableExpr',
       'baseKind' => 'Expr',
       'children' => [
-         [
-            'name' => 'RefToken',
-            'kind' => 'AmpersandToken'
-         ]
+         ['name' => 'RefToken', 'kind' => 'AmpersandToken'],
+         ['name' => 'Variable', 'kind' => 'VariableExpr'],
       ]
    ],
    /**
@@ -344,7 +342,12 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'LeftParen', 'kind' => 'LeftParenToken'],
-         ['name' => 'Arguments', 'kind' => 'ArgumentList', 'collectionElementName' => 'Argument'],
+         [
+            'name' => 'Arguments',
+            'kind' => 'ArgumentList',
+            'collectionElementName' => 'Argument',
+            'isOptional' => true
+         ],
          ['name' => 'RightParen', 'kind' => 'RightParenToken']
       ]
    ],
@@ -652,6 +655,10 @@ $definitions = array(
                ['name' => 'NameFuncName', 'kind' => 'Name'],
                ['name' => 'CallableFuncName', 'kind' => 'CallableFuncNameClause']
             ]
+         ],
+         [
+            'name' => 'ArgumentsClause',
+            'kind' => 'ArgumentListClause'
          ]
       ]
    ],
@@ -757,7 +764,7 @@ $definitions = array(
       'children' => [
          ['name' => 'NewKeyword', 'kind' => 'NewKeyword'],
          ['name' => 'ClassName', 'kind' => 'ClassNameRefClause'],
-         ['name' => 'CtorArgsClause', 'kind' => 'ArgumentListClause']
+         ['name' => 'CtorArgsClause', 'kind' => 'ArgumentListClause', 'isOptional' => true]
       ]
    ],
    /**
@@ -815,7 +822,7 @@ $definitions = array(
       'kind' => 'LambdaExpr',
       'baseKind' => 'Expr',
       'children' => [
-         ['name' => 'StaticKeyword', 'kind' => 'StaticKeyword'],
+         ['name' => 'StaticKeyword', 'kind' => 'StaticKeyword', 'isOptional' => true],
          [
             'name' => 'LambdaExpr',
             'kind' => 'Expr',
@@ -1500,7 +1507,7 @@ $definitions = array(
     *   T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '}'
     */
    [
-      'kind' => 'EncapsDollarCurlyVar',
+      'kind' => 'EncapsDollarCurlyVariable',
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'DollarOpenCurly', 'kind' => 'DollarOpenCurlyBracesToken'],
@@ -1559,7 +1566,7 @@ $definitions = array(
                ['name' => 'EncapsArrayVar', 'kind' => 'EncapsArrayVar'],
                ['name' => 'EncapsObjPropVar', 'kind' => 'EncapsObjProp'],
                ['name' => 'EncapsDollarCurlyExprVar', 'kind' => 'EncapsDollarCurlyExpr'],
-               ['name' => 'EncapsDollarCurlyVar', 'kind' => 'EncapsDollarCurlyVar'],
+               ['name' => 'EncapsDollarCurlyVar', 'kind' => 'EncapsDollarCurlyVariable'],
                ['name' => 'EncapsDollarCurlyArrayVar', 'kind' => 'EncapsDollarCurlyArray'],
                ['name' => 'EncapsCurlyVariable', 'kind' => 'EncapsCurlyVariable']
             ]
@@ -1616,9 +1623,10 @@ $definitions = array(
             'children' => [
                ['name' => 'EncapsedStr', 'kind' => 'EncapsedAndWhitespaceToken'],
                ['name' => 'EncapsItems', 'kind' => 'EncapsItemList'],
-            ]
+            ],
+            'isOptional' => true
          ],
-         ['name' => 'EndHeredoc', 'kind' => 'StartHeredocToken']
+         ['name' => 'EndHeredoc', 'kind' => 'EndHereDocToken']
       ]
    ],
    /**
@@ -1811,7 +1819,7 @@ $definitions = array(
       'kind' => 'LexicalVariableListItem',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'Comma', 'kind' => 'CommaToken'],
+         ['name' => 'Comma', 'kind' => 'CommaToken', 'isOptional' => true],
          ['name' => 'LexicalVariable', 'kind' => 'LexicalVariable']
       ]
    ]

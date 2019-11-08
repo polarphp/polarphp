@@ -26,6 +26,7 @@ using polar::basic::ArrayRef;
 
 class SyntaxNodeFactory
 {
+public:
    /// Make any kind of token.
    static TokenSyntax makeToken(
       TokenKindType kind,
@@ -82,7 +83,9 @@ foreach ($TOKENS as $token) {
    $tokenName = $token->getName();
    $tokenText = $token->getText();
    if ($token instanceof \Gyb\Syntax\Token\Misc) {
-      $tokenText = '';
+      if (!in_array($tokenName, ['StartHereDocToken','EndHereDocToken', 'UnknownToken'])) {
+         $tokenText = '';
+      }
    }
    if (!empty($tokenText)) {
 ?>
