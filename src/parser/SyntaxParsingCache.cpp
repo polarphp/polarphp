@@ -21,11 +21,11 @@
 // Created by polarboy on 2019/06/16.
 
 #include "polarphp/parser/SyntaxParsingCache.h"
-#include "polarphp/syntax/SyntaxVisitor.h"
+#include "polarphp/syntax/SyntaxNodeVisitor.h"
 
 namespace polar::parser {
 
-using polar::syntax::SyntaxVisitor;
+using polar::syntax::SyntaxNodeVisitor;
 
 void SyntaxParsingCache::addEdit(size_t start, size_t end,
                                  size_t replacementLength)
@@ -142,7 +142,7 @@ std::vector<SyntaxReuseRegion>
 SyntaxParsingCache::getReusedRegions(const SourceFileSyntax &SyntaxTree) const
 {
    /// Determines the reused source regions from reused syntax node IDs
-   class ReusedRegionsCollector : public SyntaxVisitor
+   class ReusedRegionsCollector : public SyntaxNodeVisitor
    {
       std::unordered_set<SyntaxNodeId> m_reusedNodeIds;
       std::vector<SyntaxReuseRegion> m_reusedRegions;
@@ -176,7 +176,7 @@ SyntaxParsingCache::getReusedRegions(const SourceFileSyntax &SyntaxTree) const
             auto end = node.getAbsoluteEndPositionAfterTrailingTrivia();
             m_reusedRegions.push_back({start, end});
          } else {
-            SyntaxVisitor::visit(node);
+            SyntaxNodeVisitor::visit(node);
          }
       }
 

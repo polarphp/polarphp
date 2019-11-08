@@ -28,14 +28,14 @@
 #include "polarphp/syntax/SyntaxCollection.h"
 #include "polarphp/syntax/TokenSyntax.h"
 #include "polarphp/syntax/UnknownSyntax.h"
-#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
+#include "polarphp/syntax/SyntaxNodes.h"
 
 namespace polar::syntax {
 
 class SyntaxNodeVisitor
 {
 public:
-   virtual ~SyntaxVisitor()
+   virtual ~SyntaxNodeVisitor()
    {}
 
 <?php

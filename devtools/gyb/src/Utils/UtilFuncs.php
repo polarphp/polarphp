@@ -118,7 +118,7 @@ function check_child_condition_raw(Child $child)
       }
       $result .= sprintf("return %s;\n", join(' || ', $nodeChecks));
    } else {
-      $result .= sprintf("return %s::kindOf(raw->getKind())", $child->getTypeName());
+      $result .= sprintf("return %s::kindOf(raw->getKind());\n", $child->getTypeName());
    }
    $result .= '}';
    return $result;

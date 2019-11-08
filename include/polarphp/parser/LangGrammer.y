@@ -19,11 +19,8 @@
 %code top {
 #include <cstdint>
 
-#include "polarphp/syntax/SyntaxNodeFactories.h"
-#include "polarphp/syntax/syntaxnode/CommonSyntaxNodes.h"
-#include "polarphp/syntax/syntaxnode/DeclSyntaxNodes.h"
-#include "polarphp/syntax/syntaxnode/ExprSyntaxNodes.h"
-#include "polarphp/syntax/syntaxnode/StmtSyntaxNodes.h"
+#include "polarphp/syntax/SyntaxNodeFactory.h"
+#include "polarphp/syntax/SyntaxNodes.h"
 #include "polarphp/parser/Parser.h"
 #include "polarphp/parser/internal/YYParserExtraDefs.h"
 }

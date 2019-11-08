@@ -79,17 +79,22 @@ foreach ($SYNTAX_NODES as $node) {
 
 <?php
 foreach ($TOKENS as $token) {
+   $tokenName = $token->getName();
+   $tokenText = $token->getText();
+   if ($token instanceof \Gyb\Syntax\Token\Misc) {
+      $tokenText = '';
+   }
    if ($token->isKeyword()) {
 ?>
-   static TokenSyntax make<?= $token->getRawName(); ?>Keyword(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
+   static TokenSyntax make<?= $tokenName ?>(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
 <?php
-   } elseif (!$token->isTextEmpty()) {
+   } elseif (!empty($tokenText)) {
 ?>
-   static TokenSyntax make<?= $token->getRawName(); ?>Token(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
+   static TokenSyntax make<?= $tokenName ?>(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
 <?php
    } else {
 ?>
-   static TokenSyntax make<?= $token->getRawName(); ?>(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
+   static TokenSyntax make<?= $tokenName ?>(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena = nullptr);
 <?php
    }
 }

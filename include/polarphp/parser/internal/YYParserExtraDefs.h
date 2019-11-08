@@ -13,18 +13,18 @@
 #define POLARPHP_PARSER_INTERNAL_YYPARSER_EXTRAS_DEFS_H
 
 #define empty_triva() parser->getEmptyTrivia()
-#define make_token(name) TokenSyntaxNodeFactory::make##name(parser->getEmptyTrivia(), parser->getEmptyTrivia())
+#define make_token(name) SyntaxNodeFactory::make##name(parser->getEmptyTrivia(), parser->getEmptyTrivia())
 #define make_token_with_text(name, text) \
    TokenSyntaxNodeFactory::make##name(OwnedString::makeRefCounted(text), parser->getEmptyTrivia(), parser->getEmptyTrivia())
-#define make_lnumber_token(value) TokenSyntaxNodeFactory::makeLNumber(value, parser->getEmptyTrivia(), parser->getEmptyTrivia())
-#define make_dnumber_token(value) TokenSyntaxNodeFactory::makeDNumber(value, parser->getEmptyTrivia(), parser->getEmptyTrivia())
+#define make_lnumber_token(value) SyntaxNodeFactory::makeLNumberToken(value, parser->getEmptyTrivia(), parser->getEmptyTrivia())
+#define make_dnumber_token(value) SyntaxNodeFactory::makeDNumberToken(value, parser->getEmptyTrivia(), parser->getEmptyTrivia())
 
-#define make_decl(name, ...) DeclSyntaxNodeFactory::make##name(__VA_ARGS__)
-#define make_blank_decl(name) DeclSyntaxNodeFactory::makeBlank##name()
-#define make_expr(name, ...) ExprSyntaxNodeFactory::make##name(__VA_ARGS__)
-#define make_blank_expr(name) ExprSyntaxNodeFactory::makeBlank##name()
-#define make_stmt(name, ...) StmtSyntaxNodeFactory::make##name(__VA_ARGS__)
-#define make_blank_stmt(name) StmtSyntaxNodeFactory::makeBlank##name()
+#define make_decl(name, ...) SyntaxNodeFactory::make##name(__VA_ARGS__)
+#define make_blank_decl(name) SyntaxNodeFactory::makeBlank##name()
+#define make_expr(name, ...) SyntaxNodeFactory::make##name(__VA_ARGS__)
+#define make_blank_expr(name) SyntaxNodeFactory::makeBlank##name()
+#define make_stmt(name, ...) SyntaxNodeFactory::make##name(__VA_ARGS__)
+#define make_blank_stmt(name) SyntaxNodeFactory::makeBlank##name()
 
 #define make_reserved_keyword(name) make_token(name##Keyword).getRaw()
 

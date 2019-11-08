@@ -141,7 +141,7 @@ std::optional<<?= $childTypeName ?>> <?= $nodeName ?>::get<?= $childName ?>()
 <?= $nodeName ?> <?= $nodeName ?>::with<?= $childName ?>(std::optional<<?= $childTypeName ?>> new<?= $childTypeName ?>)
 {
    RefCountPtr<RawSyntax> raw;
-   if (new<?= $childTypeName ?>.hasValue()) {
+   if (new<?= $childTypeName ?>.has_value()) {
       raw = new<?= $childTypeName ?>->getRaw();
    } else {
 <?php

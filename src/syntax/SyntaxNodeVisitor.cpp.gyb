@@ -67,7 +67,7 @@ foreach ($SYNTAX_NODES as $node)
    }
 }
 
-void SyntaxNodeVisitor::accept(SyntaxNodeVisitor &visitor)
+void Syntax::accept(SyntaxNodeVisitor &visitor)
 {
    visitor.visit(*this);
 }

@@ -1,7 +1,5 @@
 //===--- RawSyntax.h - Swift raw Syntax Interface ---------------*- ch++ -*-===//
 //
-// This source file is part of the Swift.org open source project
-//
 // Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
@@ -9,7 +7,17 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
+// This source file is part of the polarphp.org open source project
 //
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://polarphp.org/LICENSE.txt for license information
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+//
+// Created by polarboy on 2019/05/08.
+//===----------------------------------------------------------------------===//
 // This file defines the RawSyntax type.
 //
 // These are the "backbone or "skeleton" of the Syntax tree, providing
@@ -47,18 +55,10 @@
 #include <atomic>
 
 #ifndef NDEBUG
-#define syntax_assert_child_kind(raw, cursorName, choices)                   \
+#define syntax_assert_child_kind(raw, cursorName, expectedKind)              \
    do {                                                                      \
-      if (auto &__child = raw->getChild(cursorName)) {                       \
-         bool __found = false;                                               \
-         std::string errorMsg;                                               \
-         if (choices.find(__child->getKind()) != choices.end()) {            \
-            __found = true;                                                  \
-         } else {                                                            \
-            errorMsg = "invalid syntax node type supplied for " #cursorName  \
-            ", please check";                                                \
-         }                                                                   \
-         assert(__found && errorMsg.c_str());                                \
+      if (auto &__child = raw->getChild(cursorName)) {                       \                                                        \
+         assert(__child->getKind() == expectedKind)                          \
       }                                                                      \
    } while (false)
 #else
@@ -66,24 +66,21 @@
 #endif
 
 #ifndef NDEBUG
-#define syntax_assert_child_token(raw, cursorName, choices)                    \
+#define syntax_assert_child_token(raw, cursorName, ...)                        \
    do {                                                                        \
       bool __found = false;                                                    \
       std::string errorMsg;                                                    \
       if (auto &__token = raw->getChild(Cursor::cursorName)) {                 \
          assert(__token->isToken());                                           \
          if (__token->isPresent()) {                                           \
-            if (choices.find(__token->getTokenKind()) != choices.end()) {      \
-               __found = true;                                                 \
-            } else {                                                           \
-               errorMsg = "invalid token supplied for " #cursorName            \
-               ", expected one of {";                                          \
-               for (TokenKindType kind : choices) {                            \
-                  errorMsg += get_token_text(kind).getStr();                   \
+            for (auto tokenKind : {__VA_ARGS__}) {                             \
+               if (__token->getTokenKind() == tokenKind) {                     \
+                  __found = true;                                              \
+                  break;                                                       \
                }                                                               \
-               errorMsg += "}";                                                \
             }                                                                  \
-            assert(__found && errorMsg.c_str());                               \
+            assert(__found && "invalid token supplied for " #cursorName        \
+                              ", expected one of {" #__VA_ARGS__ "}");         \
          }                                                                     \
       }                                                                        \
    } while (false)
@@ -117,16 +114,12 @@
 #ifndef NDEBUG
 #define syntax_assert_token_is(token, kind, text)                               \
    do {                                                                         \
-   assert(token.getTokenKind() == kind);                                        \
-   assert(token.getText() == text);                                             \
+      assert(token.getTokenKind() == kind);                                     \
+      assert(token.getText() == text);                                          \
    } while (false)
 #else
 #define syntax_assert_token_is(token, kind, text)
 #endif
-
-#define make_missing_token(token) \
-   RawSyntax::missing(TokenKindType::token, \
-                     OwnedString::makeUnowned(get_token_text(TokenKindType::token)))
 
 namespace polar::syntax {
 
@@ -226,6 +219,7 @@ public:
    /// Dump a description of this position to the given output stream
    /// for debugging.
    void dump(RawOutStream &outStream = polar::utils::error_stream()) const;
+
 private:
    uintptr_t m_offset = 0;
    uint32_t m_line = 1;
@@ -259,7 +253,7 @@ using SyntaxNodeId = unsigned;
 /// This is implementation detail - do not expose it in public API.
 class RawSyntax final
       : private TrailingObjects<RawSyntax, RefCountPtr<RawSyntax>, OwnedString, std::int64_t, double,
-      TriviaPiece>
+                                TriviaPiece>
 {
 public:
    ~RawSyntax();

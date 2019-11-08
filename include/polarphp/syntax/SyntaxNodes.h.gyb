@@ -27,6 +27,7 @@
 #include "polarphp/syntax/TokenSyntax.h"
 #include "polarphp/syntax/SyntaxCollection.h"
 #include "polarphp/syntax/UnknownSyntax.h"
+#include "polarphp/syntax/References.h"
 
 namespace polar::syntax {
 
@@ -89,7 +90,7 @@ public:
 <?php
          }
 ?>
-   }
+   };
 
 <?php
       }
@@ -162,12 +163,12 @@ public:
 <?php
    }
 ?>
-   static bool kindOf(SyntaxKind Kind) 
+   static bool kindOf(SyntaxKind kind) 
    {
 <?php 
       if ($node->isBase()) {
 ?>
-      return is_<?= strtolower($nodeSyntaxKind); ?>_kind(Kind);
+      return is_<?= strtolower($nodeSyntaxKind); ?>_kind(kind);
 <?php
       } else {
 ?>

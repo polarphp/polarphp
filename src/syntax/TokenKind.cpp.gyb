@@ -1,0 +1,70 @@
+// This source file is part of the polarphp.org open source project
+//
+// Copyright (c) 2017 - 2019 polarphp software foundation
+// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://polarphp.org/LICENSE.txt for license information
+// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+//
+// Created by polarboy on 2019/11/08.
+
+#include "polarphp/syntax/TokenKinds.h"
+#include "polarphp/utils/RawOutStream.h"
+
+namespace polar::syntax {
+
+namespace {
+StringRef get_token_text_internal(TokenKindType kind)
+{
+   switch(kind) {
+<?php 
+foreach ($TOKENS as $token) {
+   $text = trim($token->getText());
+   $kind = $token->getKind();
+   if (!empty($text)) {
+?>
+   case TokenKindType::<?= $kind ?>: 
+      return "<?= $text ?>";
+<?php
+   }
+}
+?>
+   }
+   return StringRef();
+}
+} // anonymous namespace
+
+
+bool is_token_text_determined(TokenKindType kind) 
+{
+   return !get_token_text_internal(kind).empty();
+}
+
+StringRef get_token_text(TokenKindType kind)
+{
+   auto text = get_token_text_internal(kind);
+   assert(!text.empty() && "token kind cannot be determined");
+   return text;
+}
+
+void dump_token_kind(RawOutStream &outStream, TokenKindType kind)
+{
+   switch(kind) {
+<?php 
+foreach ($TOKENS as $token) {
+   $kind = $token->getKind();
+   if (!empty($text)) {
+?>
+   case TokenKindType::<?= $kind ?>:
+      outStream << "<?= $kind ?>";
+      return;
+<?php
+   }
+}
+?>
+   };
+   polar_unreachable("unknown token kind");
+}
+
+} // polar::syntax

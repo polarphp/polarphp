@@ -175,7 +175,7 @@ $definitions = array(
       'kind' => 'UnsetVariableListItem',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'Comma', 'kind' => 'Comma', 'isOptional' => true],
+         ['name' => 'Comma', 'kind' => 'CommaToken', 'isOptional' => true],
          ['name' => 'Variable', 'kind' => 'UnsetVariable']
       ]
    ],
@@ -440,7 +440,7 @@ $definitions = array(
       'children' => [
          ['name' => 'LabelName', 'kind' => 'IdentifierStringToken', 'isOptional' => true],
          ['name' => 'LabelColon', 'kind' => 'ColonToken', 'isOptional' => true],
-         ['name' => 'Switch', 'kind' => 'SwitchKeyword'],
+         ['name' => 'SwitchKeyword', 'kind' => 'SwitchKeyword'],
          ['name' => 'LeftParen', 'kind' => 'LeftParenToken'],
          ['name' => 'Condition', 'kind' => 'Expr'],
          ['name' => 'RightParen', 'kind' => 'RightParenToken'],
@@ -466,7 +466,7 @@ $definitions = array(
       'kind' => 'ThrowStmt',
       'baseKind' => 'Stmt',
       'children' => [
-         ['name' => 'Throw', 'kind' => 'ThrowKeyword'],
+         ['name' => 'ThrowKeyword', 'kind' => 'ThrowKeyword'],
          ['name' => 'Expr', 'kind' => 'Expr'],
          ['name' => 'Semicolon', 'kind' => 'SemicolonToken']
       ]
@@ -479,7 +479,7 @@ $definitions = array(
       'kind' => 'TryStmt',
       'baseKind' => 'Stmt',
       'children' => [
-         ['name' => 'Try', 'kind' => 'TryKeyword'],
+         ['name' => 'TryKeyword', 'kind' => 'TryKeyword'],
          ['name' => 'CodeBlock', 'kind' => 'InnerCodeBlockStmt'],
          ['name' => 'Catches', 'kind' => 'CatchList', 'collectionElementName' => 'CatcheItem'],
          ['name' => 'FinallyClause', 'kind' => 'FinallyClause', 'isOptional' => true]
@@ -517,7 +517,7 @@ $definitions = array(
       'kind' => 'CatchListItemClause',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'Catch', 'kind' => 'CatchKeyword'],
+         ['name' => 'CatchKeyword', 'kind' => 'CatchKeyword'],
          ['name' => 'LeftParen', 'kind' => 'LeftParenToken'],
          ['name' => 'CatchArgTypeHints', 'kind' => 'CatchArgTypeHintList', 'collectionElementName' => 'CatchArgTypeHit'],
          ['name' => 'Variable', 'kind' => 'VariableToken'],
@@ -533,7 +533,7 @@ $definitions = array(
       'kind' => 'ReturnStmt',
       'baseKind' => 'Stmt',
       'children' => [
-         ['name' => 'Return', 'kind' => 'ReturnKeyword'],
+         ['name' => 'ReturnKeyword', 'kind' => 'ReturnKeyword'],
          ['name' => 'ValueExpr', 'kind' => 'Expr'],
          ['name' => 'Semicolon', 'kind' => 'SemicolonToken']
       ]
@@ -635,7 +635,7 @@ $definitions = array(
       'kind' => 'StaticVariableDeclarationsStmt',
       'baseKind' => 'Stmt',
       'children' => [
-         ['name' => 'Static', 'kind' => 'StaticKeyword'],
+         ['name' => 'StaticKeyword', 'kind' => 'StaticKeyword'],
          ['name' => 'Variables', 'kind' => 'StaticVariableList', 'collectionElementName' => 'Variable'],
          ['name' => 'Semicolon', 'kind' => 'SemicolonToken']
       ]
@@ -668,7 +668,7 @@ $definitions = array(
       'kind' => 'NamespaceUnprefixedUseDeclaration',
       'baseKind' => 'Syntax',
       'children' => [
-         ['name' => 'Namespace', 'kind' => 'NamespaceName'],
+         ['name' => 'NamespaceName', 'kind' => 'NamespaceName'],
          ['name' => 'As', 'kind' => 'AsKeyword', 'isOptional' => true],
          ['name' => 'Identifier', 'kind' => 'IdentifierStringToken', 'isOptional' => true]
       ]
@@ -745,7 +745,7 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'FirstNsSeparator', 'kind' => 'NamespaceSeparatorToken', 'isOptional' => true],
-         ['name' => 'Namespace', 'kind' => 'NamespaceName'],
+         ['name' => 'NamespaceName', 'kind' => 'NamespaceName'],
          ['name' => 'SecondNsSeparator', 'kind' => 'NamespaceSeparatorToken'],
          ['name' => 'LeftBrace', 'kind' => 'LeftBraceToken'],
          ['name' => 'Declarations', 'kind' => 'NamespaceUnprefixedUseDeclarationList', 'collectionElementName' => 'Declaration'],
@@ -763,7 +763,7 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'FirstNsSeparator', 'kind' => 'NamespaceSeparatorToken', 'isOptional' => true],
-         ['name' => 'Namespace', 'kind' => 'NamespaceName'],
+         ['name' => 'NamespaceName', 'kind' => 'NamespaceName'],
          ['name' => 'SecondNsSeparator', 'kind' => 'NamespaceSeparatorToken'],
          ['name' => 'LeftBrace', 'kind' => 'LeftBraceToken'],
          ['name' => 'Declarations', 'kind' => 'NamespaceInlineUseDeclarationList', 'collectionElementName' => 'Declaration'],
@@ -804,8 +804,8 @@ $definitions = array(
       'kind' => 'NamespaceDefinitionStmt',
       'baseKind' => 'Stmt',
       'children' => [
-         ['name' => 'Namespace', 'kind' => 'NamespaceKeyword'],
-         ['name' => 'Name', 'kind' => 'NamespacePartList'],
+         ['name' => 'NamespaceName', 'kind' => 'NamespaceKeyword'],
+         ['name' => 'Name', 'kind' => 'NamespaceName'],
          ['name' => 'Semicolon', 'kind' => 'SemicolonToken']
       ]
    ],
@@ -818,7 +818,7 @@ $definitions = array(
       'kind' => 'NamespaceBlockStmt',
       'baseKind' => 'Stmt',
       'children' => [
-         ['name' => 'Namespace', 'kind' => 'NamespaceKeyword'],
+         ['name' => 'NamespaceName', 'kind' => 'NamespaceKeyword'],
          ['name' => 'Name', 'kind' => 'NamespaceName', 'isOptional' => true],
          ['name' => 'CodeBlock', 'kind' => 'TopCodeBlockStmt']
       ]
@@ -855,7 +855,7 @@ $definitions = array(
       'kind' => 'ConstDefinitionStmt',
       'baseKind' => 'Stmt',
       'children' => [
-         ['name' => 'Const', 'kind' => 'ConstKeyword'],
+         ['name' => 'ConstKeyword', 'kind' => 'ConstKeyword'],
          ['name' => 'Declarations', 'kind' => 'ConstDeclareList', 'collectionElementName' => 'Declaration'],
          ['name' => 'Semicolon', 'kind' => 'SemicolonToken']
       ]

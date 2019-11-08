@@ -229,6 +229,7 @@ public:
    {
       return kindOf(syntax->getKind());
    }
+
 private:
    friend struct SyntaxFactory;
    friend class Syntax;

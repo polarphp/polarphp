@@ -25,6 +25,9 @@ bool is_trivial_syntax_kind(SyntaxKind kind)
       return true;
    }
    switch(kind) {
+   case SyntaxKind::SourceFile:
+   case SyntaxKind::InnerStmt:
+   case SyntaxKind::TopStmt:
    default:
       return false;
    }
@@ -325,7 +328,8 @@ void RawSyntax::dump() const
    polar::utils::error_stream() << '\n';
 }
 
-void RawSyntax::dump(RawOutStream &outStream, unsigned indent) const {
+void RawSyntax::dump(RawOutStream &outStream, unsigned indent) const
+{
    auto indentFunc = [&](unsigned Amount) {
       for (decltype(Amount) i = 0; i < Amount; ++i) {
          outStream << ' ';
@@ -388,7 +392,6 @@ void RawSyntax::profile(FoldingSetNodeId &id, TokenKindType tokenKind,
 {
    id.addInteger(unsigned(tokenKind));
      switch (tokenKind) {
-       break;
      default:
        id.addString(text.str());
        break;

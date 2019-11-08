@@ -49,7 +49,7 @@
 
 namespace polar::syntax {
 
-struct SyntaxVisitor;
+class SyntaxNodeVisitor;
 
 template <typename SyntaxNode>
 SyntaxNode make(RefCountPtr<RawSyntax> raw)
@@ -76,17 +76,6 @@ using NodeChoicesType = std::map<SyntaxChildrenCountType, std::set<SyntaxKind>>;
 /// their children.
 class Syntax
 {
-public:
-   constexpr static unsigned int CHILDREN_COUNT = 0;
-   constexpr static unsigned int REQUIRED_CHILDREN_COUNT = 0;
-
-#ifdef POLAR_DEBUG_BUILD
-   /// meta info
-   static const TokenTextChoicesType CHILD_TOKEN_TEXT_CHOICES;
-   static const TokenChoicesType CHILD_TOKEN_CHOICES;
-   static const NodeChoicesType CHILD_NODE_CHOICES;
-#endif
-
 public:
    Syntax(const RefCountPtr<SyntaxData> root, const SyntaxData *data)
       : m_root(root),
@@ -222,7 +211,7 @@ public:
    }
 
    /// Recursively visit this node.
-   void accept(SyntaxVisitor &visitor);
+   void accept(SyntaxNodeVisitor &visitor);
 
    /// Get the absolute position of this raw syntax: its offset, line,
    /// and column.
@@ -243,6 +232,7 @@ public:
    {
       return m_data->getAbsolutePositionBeforeLeadingTrivia();
    }
+
 protected:
    /// A strong reference to the root node of the tree in which this piece of
    /// syntax resides.

@@ -160,9 +160,9 @@ public:
    /// Gets the child at the index specified by the provided cursor,
    /// lazily creating it if necessary.
    template <typename CursorType>
-   RefCountPtr<SyntaxData> getChild(CursorType Cursor) const
+   RefCountPtr<SyntaxData> getChild(CursorType cursor) const
    {
-      return getChild((size_t)cursor_index(Cursor));
+      return getChild(static_cast<size_t>(cursor_index(cursor)));
    }
 
    /// Gets the child at the specified index in this data's children array.

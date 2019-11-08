@@ -61,7 +61,6 @@ void TriviaPiece::dump(RawOutStream &outStream, unsigned indent) const
       outStream << ' ';
    }
    outStream << "(trivia ";
-   outStream << retrieve_trivia_kind_name(m_kind);
    switch (m_kind) {
 <?php 
 foreach($TRIVIAS as $trivia) {

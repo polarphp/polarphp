@@ -59,7 +59,7 @@ class Kinds
       if (in_array($kind, [self::SYNTAX, self::SYNTAX_COLLECTION])) {
          return $kind;
       }
-      if (str_end_with($kind, 'Token')) {
+      if (str_end_with($kind, 'Token') || str_end_with($kind, 'Keyword')) {
          return self::TOKEN_SYNTAX;
       }
       return $kind.self::SYNTAX;

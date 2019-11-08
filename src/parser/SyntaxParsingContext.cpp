@@ -27,7 +27,6 @@
 #include "polarphp/basic/Defer.h"
 #include "polarphp/parser/SyntaxParsingCache.h"
 #include "polarphp/parser/Token.h"
-#include "polarphp/syntax/SyntaxNodeFactories.h"
 
 namespace polar::parser {
 

@@ -22,15 +22,11 @@
 
 #include "polarphp/syntax/Syntax.h"
 #include "polarphp/syntax/SyntaxData.h"
-#include "polarphp/syntax/SyntaxVisitor.h"
+#include "polarphp/syntax/SyntaxNodeVisitor.h"
 
 #include <optional>
 
 namespace polar::syntax {
-
-const TokenTextChoicesType Syntax::CHILD_TOKEN_TEXT_CHOICES{};
-const TokenChoicesType Syntax::CHILD_TOKEN_CHOICES{};
-const NodeChoicesType Syntax::CHILD_NODE_CHOICES{};
 
 Syntax::~Syntax()
 {}

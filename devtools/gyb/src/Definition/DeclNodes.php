@@ -107,7 +107,7 @@ $definitions = array(
       'children' => [
          ['name' => 'NsKeyword', 'kind' => 'NamespaceKeyword'],
          ['name' => 'NsSeparator', 'kind' => 'NamespaceSeparatorToken'],
-         ['name' => 'Namespace', 'kind' => 'NamespaceName']
+         ['name' => 'NamespaceName', 'kind' => 'NamespaceName']
       ]
    ],
    /**
@@ -622,7 +622,7 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'Statements', 'kind' => 'TopStmtList', 'collectionElementName' => 'Statement'],
-         ['name' => 'EOF', 'kind' => 'EndToken']
+         ['name' => 'EofMark', 'kind' => 'EndToken']
       ]
    ]
 );
@@ -681,7 +681,7 @@ $definitions = array_merge($definitions, process_collection_items([
     *    trait_adaptation
     * |  trait_adaptation_list trait_adaptation
     */
-   ['kind' => 'ClassTraitAdaptationList', 'elementKind' => 'ClassTraitAdaptatio']
+   ['kind' => 'ClassTraitAdaptationList', 'elementKind' => 'ClassTraitAdaptation']
 ]));
 
 return $definitions;

@@ -2,7 +2,7 @@
 use function Gyb\Utils\check_child_condition_raw;
 use function Gyb\Utils\make_missing_child;
 ?>
-//// Automatically Generated From SyntaxFactory.cpp.gyb.
+//// Automatically Generated From SyntaxNodeFactory.cpp.gyb.
 //// Do Not Edit Directly!
 //===----------------------------------------------------------------------===//
 // Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
@@ -13,14 +13,14 @@ use function Gyb\Utils\make_missing_child;
 //
 //===----------------------------------------------------------------------===//
 //
-// This file defines the SyntaxFactory, one of the most important client-facing
+// This file defines the SyntaxNodeFactory, one of the most important client-facing
 // types in lib/Syntax and likely to be very commonly used.
 //
-// Effectively a namespace, SyntaxFactory is never instantiated, but is *the*
+// Effectively a namespace, SyntaxNodeFactory is never instantiated, but is *the*
 // one-stop shop for making new Syntax nodes. Putting all of these into a
 // collection of static methods provides a single point of API lookup for
 // clients' convenience and also allows the library to hide all of the
-// constructors for all Syntax nodes, as the SyntaxFactory is friend to all.
+// constructors for all Syntax nodes, as the SyntaxNodeFactory is friend to all.
 //
 //===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
@@ -35,7 +35,7 @@ use function Gyb\Utils\make_missing_child;
 // Created by polarboy on 2019/11/06.
 
 #include "polarphp/syntax/SyntaxNodes.h"
-#include "polarphp/syntax/SyntaxFactory.h"
+#include "polarphp/syntax/SyntaxNodeFactory.h"
 #include "polarphp/basic/adt/ArrayRef.h"
 
 #include <vector>
@@ -44,7 +44,7 @@ namespace polar::syntax {
 
 using polar::basic::ArrayRef;
 
-TokenSyntax SyntaxFactory::makeToken(TokenKindType kind, OwnedString text,
+TokenSyntax SyntaxNodeFactory::makeToken(TokenKindType kind, OwnedString text,
                                      const Trivia &leadingTrivia,
                                      const Trivia &trailingTrivia,
                                      SourcePresence presence,
@@ -55,7 +55,7 @@ TokenSyntax SyntaxFactory::makeToken(TokenKindType kind, OwnedString text,
 }
 
 UnknownSyntax
-SyntaxFactory::makeUnknownSyntax(ArrayRef<TokenSyntax> tokens,
+SyntaxNodeFactory::makeUnknownSyntax(ArrayRef<TokenSyntax> tokens,
                                  RefCountPtr<SyntaxArena> arena)
 {
    std::vector<RefCountPtr<RawSyntax>> layout;
@@ -67,7 +67,7 @@ SyntaxFactory::makeUnknownSyntax(ArrayRef<TokenSyntax> tokens,
    return make<UnknownSyntax>(raw);
 }
 
-Syntax SyntaxFactory::makeBlankCollectionSyntax(SyntaxKind kind) 
+Syntax SyntaxNodeFactory::makeBlankCollectionSyntax(SyntaxKind kind) 
 {
    switch(kind) {
 <?php
@@ -87,7 +87,7 @@ foreach ($SYNTAX_NODES as $node) {
    }
 }
 
-std::pair<unsigned, unsigned> SyntaxFactory::countChildren(SyntaxKind kind)
+std::pair<unsigned, unsigned> SyntaxNodeFactory::countChildren(SyntaxKind kind)
 {
    switch(kind) {
 <?php
@@ -117,7 +117,7 @@ foreach ($SYNTAX_NODES as $node) {
    }
 }
 
-bool SyntaxFactory::canServeAsCollectionMemberRaw(SyntaxKind collectionKind, SyntaxKind memberKind)
+bool SyntaxNodeFactory::canServeAsCollectionMemberRaw(SyntaxKind collectionKind, SyntaxKind memberKind)
 {
    switch (collectionKind) {
 <?php
@@ -149,19 +149,19 @@ foreach ($SYNTAX_NODES as $node) {
    }
 }
 
-bool SyntaxFactory::canServeAsCollectionMemberRaw(SyntaxKind collectionKind,
+bool SyntaxNodeFactory::canServeAsCollectionMemberRaw(SyntaxKind collectionKind,
                                                   const RefCountPtr<RawSyntax> &member)
 {
    return canServeAsCollectionMemberRaw(collectionKind, member->getKind());
 }
 
-bool SyntaxFactory::canServeAsCollectionMember(SyntaxKind collectionKind, Syntax member) 
+bool SyntaxNodeFactory::canServeAsCollectionMember(SyntaxKind collectionKind, Syntax member) 
 {
    return canServeAsCollectionMemberRaw(collectionKind, member.getRaw());
 }
 
-RefCountPtr<RawSyntax> SyntaxFactory::createRaw(SyntaxKind kind,
-                                                ArrayRef<RC<RawSyntax>> elements,
+RefCountPtr<RawSyntax> SyntaxNodeFactory::createRaw(SyntaxKind kind,
+                                                ArrayRef<RefCountPtr<RawSyntax>> elements,
                                                 RefCountPtr<SyntaxArena> arena)
 {
    switch (kind) {
@@ -188,7 +188,7 @@ foreach ($SYNTAX_NODES as $node) {
 <?php
          if ($child->isOptional()) {
 ?>
-         layout[${child_idx}] = nullptr;
+         layout[<?= $childIndex ?>] = nullptr;
 <?php
          } else {
 ?>
@@ -231,7 +231,7 @@ foreach ($SYNTAX_NODES as $node) {
    }
 }
 
-std::optional<Syntax> SyntaxFactory::createSyntax(SyntaxKind kind,
+std::optional<Syntax> SyntaxNodeFactory::createSyntax(SyntaxKind kind,
                                                   ArrayRef<Syntax> elements,
                                                   RefCountPtr<SyntaxArena> arena) 
 {
@@ -263,8 +263,7 @@ foreach ($SYNTAX_NODES as $node) {
       }
       $childParams = join(', ', $childParams);
 ?>
-<?= $nodeName ?>
-SyntaxFactory::make<?= $nodeSyntaxKind ?>(
+<?= $nodeName ?> SyntaxNodeFactory::make<?= $nodeSyntaxKind ?>(
    <?= $childParams ?>,
    RefCountPtr<SyntaxArena> arena)
 {
@@ -290,12 +289,11 @@ SyntaxFactory::make<?= $nodeSyntaxKind ?>(
 <?php
    } elseif ($node->isSyntaxCollection()) {
 ?>
-<?= $nodeName ?>
-SyntaxFactory::make<?= $nodeSyntaxKind ?>(
+<?= $nodeName ?> SyntaxNodeFactory::make<?= $nodeSyntaxKind ?>(
    const std::vector<<?= $node->getCollectionElementType() ?>> &elements,
    RefCountPtr<SyntaxArena> arena) 
 {
-   std::vector<RC<RawSyntax>> layout;
+   std::vector<RefCountPtr<RawSyntax>> layout;
    layout.reserve(elements.size());
    for (auto &element : elements) {
       layout.push_back(element.getRaw());
@@ -308,8 +306,7 @@ SyntaxFactory::make<?= $nodeSyntaxKind ?>(
 <?php
    }
 ?>
-<?= $nodeName ?>
-SyntaxFactory::makeBlank<?= $nodeSyntaxKind ?>(RefCountPtr<SyntaxArena> arena)
+<?= $nodeName ?> SyntaxNodeFactory::makeBlank<?= $nodeSyntaxKind ?>(RefCountPtr<SyntaxArena> arena)
 {
    auto raw = RawSyntax::make(SyntaxKind::<?= $nodeSyntaxKind ?>, {
 <?php
@@ -342,8 +339,7 @@ foreach ($TOKENS as $token) {
    }
    if ($token->isKeyword()) {
 ?>
-TokenSyntax
-SyntaxFactory::make<?= $tokenName ?>(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena)
+TokenSyntax SyntaxNodeFactory::make<?= $tokenName ?>(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena)
 {
    return makeToken(TokenKindType::<?= $tokenKind ?>,
                     OwnedString::makeUnowned("<?= $tokenText ?>"),
@@ -355,7 +351,7 @@ SyntaxFactory::make<?= $tokenName ?>(const Trivia &leadingTrivia, const Trivia &
    } elseif (!empty($tokenText)) {
 ?>
 TokenSyntax
-SyntaxFactory::make<?= $tokenName ?>(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena)
+SyntaxNodeFactory::make<?= $tokenName ?>(const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena)
 {
    return makeToken(TokenKindType::<?= $tokenKind ?>,
                     OwnedString::makeUnowned("<?= $tokenText ?>"),
@@ -366,8 +362,7 @@ SyntaxFactory::make<?= $tokenName ?>(const Trivia &leadingTrivia, const Trivia &
 <?php
    } else {
 ?>
-TokenSyntax
-SyntaxFactory::make<?= $tokenName ?>(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena)
+TokenSyntax SyntaxNodeFactory::make<?= $tokenName ?>(OwnedString text, const Trivia &leadingTrivia, const Trivia &trailingTrivia, RefCountPtr<SyntaxArena> arena)
 {
    return makeToken(TokenKindType::<?= $tokenKind ?>, text,
                     leadingTrivia, trailingTrivia,

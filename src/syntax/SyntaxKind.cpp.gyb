@@ -27,29 +27,7 @@
 
 namespace polar::syntax {
 
-namespace {
-StringRef get_token_text_internal(TokenKindType kind)
-{
-   switch(kind) {
-<?php 
-foreach ($TOKENS as $token) {
-   $text = trim($token->getText());
-   $kind = $token->getKind();
-   if (!empty($text)) {
-?>
-   case TokenKindType::<?= $kind ?>: 
-      return "<?= $text ?>";
-<?php
-   }
-}
-?>
-   default: 
-      return StringRef();
-   }
-}
-} // anonymous namespace
-
-bool parserShallOmitWhenNoChildren(SyntaxKind kind) 
+bool parser_shall_omit_when_no_children(SyntaxKind kind) 
 {
    switch(kind) {
 <?php
@@ -66,18 +44,6 @@ foreach ($SYNTAX_NODES as $node) {
    default:
       return false;
    }
-}
-
-bool is_token_text_determined(TokenKindType kind) 
-{
-   return !get_token_text_internal(kind).empty();
-}
-
-StringRef get_token_text(TokenKindType kind)
-{
-   auto text = get_token_text_internal(kind);
-   assert(!text.empty() && "token kind cannot be determined");
-   return text;
 }
 
 void dump_syntax_kind(RawOutStream &outStream, const SyntaxKind kind) 
@@ -151,13 +117,13 @@ bool is_unknown_kind(SyntaxKind kind)
 
 SyntaxKind get_unknown_kind(SyntaxKind kind)
 {
-   if (isExprKind(kind)) {
+   if (is_expr_kind(kind)) {
       return SyntaxKind::UnknownExpr;
    }
-   if (isStmtKind(kind)) {
+   if (is_stmt_kind(kind)) {
       return SyntaxKind::UnknownStmt;
    }
-   if (isDeclKind(kind)) {
+   if (is_decl_kind(kind)) {
       return SyntaxKind::UnknownDecl;
    }
    return SyntaxKind::Unknown;
@@ -166,7 +132,7 @@ SyntaxKind get_unknown_kind(SyntaxKind kind)
 } // polar::syntax
 
 namespace polar::utils {
-use polar::syntax::SyntaxKind;
+using polar::syntax::SyntaxKind;
 RawOutStream &operator<<(RawOutStream &outStream, SyntaxKind kind)
 {
    switch (kind) {

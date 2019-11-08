@@ -41,7 +41,7 @@ foreach ($SYNTAX_NODES as $node) {
 ?>
 <?= $nodeName ?>Builder &<?= $nodeName ?>Builder::use<?= $childName ?>(<?= $childTypeName ?> <?= lcfirst($childName) ?>) 
 {
-   layout[cursorIndex(<?= $nodeName ?>::Cursor::<?= $childName ?>)] = <?= lcfirst($childName) ?>.getRaw();
+   m_layout[cursor_index(<?= $nodeName ?>::Cursor::<?= $childName ?>)] = <?= lcfirst($childName) ?>.getRaw();
    return *this;
 }
 
@@ -56,12 +56,12 @@ foreach ($SYNTAX_NODES as $node) {
 ?>
 <?= $nodeName ?>Builder 
 &<?= $nodeName ?>Builder::add<?= $elementName ?>(<?= $elementType ?> <?= lcfirst($elementName) ?>) {
-  auto &raw = layout[cursor_index(<?= $nodeName ?>::Cursor::<?= $childName ?>)];
+  auto &raw = m_layout[cursor_index(<?= $nodeName ?>::Cursor::<?= $childName ?>)];
   if (!raw) {
       raw = RawSyntax::make(
                            SyntaxKind::<?= $childNode->getSyntaxKind() ?>,
                            {<?= lcfirst($elementName) ?>.getRaw()},
-                           SourcePresence::Present, arena);
+                           SourcePresence::Present, m_arena);
    } else {
       raw = raw->append(<?= lcfirst($elementName) ?>.getRaw());
    }
@@ -88,7 +88,7 @@ foreach ($SYNTAX_NODES as $node) {
    }
 ?>
    auto raw = RawSyntax::make(SyntaxKind::<?= $nodeSyntaxKind ?>, 
-                              layout, SourcePresence::Present, arena);
+                              m_layout, SourcePresence::Present, m_arena);
    return make<<?= $nodeName ?>>(raw);
 }
 

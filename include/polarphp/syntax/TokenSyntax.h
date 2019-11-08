@@ -71,11 +71,6 @@ public:
       return m_data->replaceSelf<TokenSyntax>(newRaw);
    }
 
-   TokenCategory getKindCategory(TokenKindType kind) const
-   {
-      return get_token_category(kind);
-   }
-
    bool isKeyword() const
    {
       return is_keyword_token(getTokenKind());

@@ -269,7 +269,7 @@ $definitions = array(
             'kind' => 'Syntax',
             'nodeChoices' => [
                ['name' => 'TokenInstance', 'kind' => 'VariableToken'],
-               ['name' => 'NewVariableInstance', 'kind' => 'NewVariable'],
+               ['name' => 'NewVariableInstance', 'kind' => 'NewVariableClause'],
                ['name' => 'DereferencableInstance', 'kind' => 'DereferencableClause']
             ]
          ],
@@ -394,7 +394,7 @@ $definitions = array(
             'kind' => 'Syntax',
             'nodeChoices' => [
                ['name' => 'StaticClassName', 'kind' => 'StaticKeyword'],
-               ['name' => 'NameExprClassName', 'kind' => 'NameExpr']
+               ['name' => 'NameExprClassName', 'kind' => 'Name']
             ]
          ]
       ]
@@ -475,7 +475,7 @@ $definitions = array(
       'baseKind' => 'Syntax',
       'children' => [
          ['name' => 'Ellipsis', 'kind' => 'EllipsisToken'],
-         ['name' => 'UnpackExpr', 'kind' => 'UnpackExpr']
+         ['name' => 'UnpackExpr', 'kind' => 'Expr']
       ]
    ],
    /**
@@ -987,9 +987,15 @@ $definitions = array(
    [
       'kind' => 'BooleanLiteralExpr',
       'baseKind' => 'Expr',
-      'tokenChoices' => [
-         'TrueKeyword',
-         'FalseKeyword'
+      'children' => [
+         [
+            'name' => 'Value',
+            'kind' => 'Token',
+            'tokenChoices' => [
+               'TrueKeyword',
+               'FalseKeyword'
+            ]
+         ]
       ]
    ],
    /**
@@ -1166,7 +1172,7 @@ $definitions = array(
          ['name' => 'ListKeyword', 'kind' => 'ListKeyword'],
          ['name' => 'LeftParen', 'kind' => 'LeftParenToken'],
          ['name' => 'PairItems', 'kind' => 'ArrayPairList', 'collectionElementName' => 'pairItem'],
-         ['name' => 'LeftParen', 'kind' => 'LeftParenToken']
+         ['name' => 'RightParen', 'kind' => 'RightParenToken']
       ]
    ],
    /**
@@ -1179,7 +1185,7 @@ $definitions = array(
       'children' => [
          ['name' => 'ListStrcuture', 'kind' => 'ListStructureClause'],
          ['name' => 'EqualKeyword', 'kind' => 'EqualKeyword'],
-         ['name' => 'Value', 'kind' => 'ValueExpr']
+         ['name' => 'Value', 'kind' => 'Expr']
       ]
    ],
    /**
@@ -1670,7 +1676,7 @@ $definitions = array(
       'baseKind' => 'Expr',
       'children' => [
          [
-            'name' => 'Operator',
+            'name' => 'PrefixOperator',
             'kind' => 'Token',
             'tokenChoices' => [
                'PlusSignToken',
@@ -1696,7 +1702,7 @@ $definitions = array(
       'children' => [
          ['name' => 'ValueExpr', 'kind' => 'Expr'],
          [
-            'name' => 'Operator',
+            'name' => 'PostfixOperator',
             'kind' => 'Token',
             'tokenChoices' => [
                'IncToken',
@@ -1724,7 +1730,7 @@ $definitions = array(
       'children' => [
          ['name' => 'Lhs', 'kind' => 'Expr'],
          [
-            'name' => 'Operator',
+            'name' => 'BinaryOperator',
             'kind' => 'Token',
             'tokenChoices' => [
                'StrConcatToken',
