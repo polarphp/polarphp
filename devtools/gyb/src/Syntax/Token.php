@@ -45,8 +45,13 @@ class Token
     */
    private $keyword;
 
+   /**
+    * @var string $valueType
+    */
+   private $valueType = '';
+
    public function __construct(string $name, string $kind, int $serializationCode,
-                               string $text = '', string $classification = 'None',
+                               string $text = '', string $valueType = '', string $classification = 'None',
                                bool $keyword = false)
    {
       $this->name = trim($name);
@@ -55,6 +60,7 @@ class Token
       $this->text = trim($text);
       $this->classification = SyntaxClassification::getByName(trim($classification));
       $this->keyword = $keyword;
+      $this->valueType = $valueType;
    }
 
    public function getPolarKind(): string
@@ -133,5 +139,13 @@ class Token
    public function getMacroName(): string
    {
       return 'TOKEN';
+   }
+
+   /**
+    * @return string
+    */
+   public function getValueType(): string
+   {
+      return $this->valueType;
    }
 }

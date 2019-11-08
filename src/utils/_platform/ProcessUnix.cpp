@@ -50,10 +50,10 @@
 #ifdef POLAR_HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-#ifdef defined(HAVE_MALLINFO)
+#ifdef HAVE_MALLINFO
 #include <malloc.h>
 #endif
-#if defined(HAVE_MALLCTL)
+#ifdef HAVE_MALLCTL
 #include <malloc_np.h>
 #endif
 #ifdef HAVE_MALLOC_MALLOC_H

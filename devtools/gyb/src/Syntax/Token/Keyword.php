@@ -24,7 +24,7 @@ class Keyword extends Token
    public function __construct(string $name, string $kind, string $text, int $serializationCode,
                                string $classification = 'Keyword')
    {
-      parent::__construct($name, $kind, $serializationCode, $text, $classification, true);
+      parent::__construct($name, $kind, $serializationCode, $text, '', $classification, true);
    }
 
    public function getMacroName(): string

@@ -16,6 +16,7 @@ use Gyb\Syntax\Child;
 use Gyb\Syntax\Node;
 use Gyb\Syntax\SyntaxRegistry;
 use Gyb\Utils\Logger;
+use http\Exception\RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 use function Gyb\Utils\ensure_require_keys;
 
@@ -98,7 +99,7 @@ class Generator
       $baseDir = GYB_SYNTAX_DEFINITION_DIR;
       SyntaxRegistry::registerTrivias(include $baseDir.DIRECTORY_SEPARATOR."Trivias.php");
       SyntaxRegistry::registerSyntaxNodeSerializationCodes(include $baseDir.DIRECTORY_SEPARATOR.'SyntaxNodeSerializationCodes.php');
-      SyntaxRegistry::registerTokens(include $baseDir.DIRECTORY_SEPARATOR.'Tokens.php');
+      SyntaxRegistry::registerTokens($this->createTokens(include $baseDir.DIRECTORY_SEPARATOR.'Tokens.php'));
       SyntaxRegistry::registerCommonNodes($this->createSyntaxNodes(include $baseDir.DIRECTORY_SEPARATOR.'CommonNodes.php'));
       SyntaxRegistry::registerDeclNodes($this->createSyntaxNodes(include $baseDir.DIRECTORY_SEPARATOR.'DeclNodes.php'));
       SyntaxRegistry::registerExprNodes($this->createSyntaxNodes(include $baseDir.DIRECTORY_SEPARATOR.'ExprNodes.php'));
@@ -265,5 +266,60 @@ class Generator
       }
       $child = new Child(...$createArgs);
       return $child;
+   }
+
+   /**
+    * @param array $tokenDefinitions
+    */
+   private function createTokens(array $tokenDefinitions)
+   {
+      $children = [];
+      foreach ($tokenDefinitions as $definition) {
+         if (!is_array($definition)) {
+            Logger::error(var_export($tokenDefinitions, true));
+         }
+         $children[] = $this->createToken($definition);
+      }
+      return $children;
+   }
+
+   private function createToken(array $definition)
+   {
+      try {
+         ensure_require_keys($definition, ['class', 'name', 'kind', 'text', 'serializationCode']);
+         $class = $definition['class'];
+         if (!in_array($class, ['InternalKeyword', 'Keyword', 'DeclKeyword',
+            'StmtKeyword', 'ExprKeyword', 'Punctuator', 'Misc'])) {
+            throw new RuntimeException("class type: $class is not supported.");
+         }
+      } catch (\RuntimeException $e) {
+         Logger::error(var_export($definition, true));
+         throw $e;
+      }
+      $createArgs = [
+         $definition['name'],
+         $definition['kind'],
+         $definition['text'],
+         $definition['serializationCode'],
+      ];
+      $classification = 'None';
+      if (\Gyb\Utils\has_substr($class, 'Keyword')) {
+         $classification = 'Keyword';
+      }
+      if ($class == 'Misc') {
+         $valueType = '';
+         if (isset($definition['valueType']) && is_string($definition['valueType'])) {
+            $valueType = $definition['valueType'];
+         }
+         $createArgs[] = $valueType;
+      }
+      if (!isset($definition['classification']) || !is_string($definition['classification'])) {
+         $createArgs[] = $classification;
+      } else {
+         $createArgs[] = $definition['classification'];
+      }
+      $class = '\\Gyb\\Syntax\\Token\\'.$class;
+      $token = new $class(...$createArgs);
+      return $token;
    }
 }

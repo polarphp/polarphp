@@ -100,7 +100,14 @@ using namespace polar::syntax;
 
 <?php
 foreach($TOKENS as $token) {
-   $line = "%token " . $token->getKind();
+   $line = "%token ";
+   if ($token instanceof \Gyb\Syntax\Token\Misc) {
+      $valueType = $token->getValueType();
+      if (!empty($valueType)) {
+         $line .= "<$valueType> ";
+      }
+   }
+   $line .= $token->getKind();
    $line .= ' ' . $token->getSerializationCode();
    $line .= '  "' . $token->getText() . ' (' . $token->getKind() . ')"';
    echo $line."\n";
