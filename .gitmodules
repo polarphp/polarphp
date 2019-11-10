@@ -7,3 +7,6 @@
 [submodule "thirdparty/json"]
 	path = thirdparty/json
 	url = https://github.com/nlohmann/json.git
+[submodule "thirdparty/yaml"]
+	path = thirdparty/yaml
+	url = https://github.com/jbeder/yaml-cpp.git
