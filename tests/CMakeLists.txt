@@ -9,17 +9,11 @@
 #
 # Created by polarboy on 2018/11/19.
 
-set(REGRESSION_TEST_DEFS "")
-
-list(APPEND REGRESSION_TEST_DEFS "LIT_TEST_BIN=\"${POLAR_RUNTIME_OUTPUT_INTDIR}${DIR_SEPARATOR}lit\"")
-list(APPEND REGRESSION_TEST_DEFS "POLAR_RUNTIME_OUTPUT_INTDIR=\"${POLAR_RUNTIME_OUTPUT_INTDIR}\"")
 
 if (POLAR_DEV_BUILD_DEVTOOLS_TESTS)
    add_subdirectory(devtools)
 endif()
 
 if (POLAR_DEV_BUILD_POLARPHP_TESTS)
-   add_subdirectory(polarphp/polarphpmock)
-   add_subdirectory(polarphp/vmapi)
 endif()
 

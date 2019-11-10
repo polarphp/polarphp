@@ -106,6 +106,11 @@ int main(int argc, char *argv[])
          checkRequest.checkPrefixes.push_back(prefix);
       }
    }
+   if (!sg_checkPrefixes.empty()) {
+      for (std::string &prefix : sg_checkPrefixes) {
+         checkRequest.checkPrefixes.push_back(prefix);
+      }
+   }
 
    for (auto item : sg_implicitCheckNot) {
       checkRequest.implicitCheckNot.push_back(item);
@@ -205,7 +210,7 @@ int main(int argc, char *argv[])
    MemoryBuffer &inputFile = *inputFileOrErr.get();
 
    if (inputFile.getBufferSize() == 0 && !allowEmptyInput) {
-      error_stream() << "FileCheck error: '" << inputFilename << "' is empty.\n";
+      error_stream() << "filechecker error: '" << inputFilename << "' is empty.\n";
       dump_command_line(argc, argv);
       return 2;
    }

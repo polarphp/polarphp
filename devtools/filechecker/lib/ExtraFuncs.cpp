@@ -62,7 +62,7 @@ DumpInputValue get_dump_input_type(const std::string &opt)
 
 void dump_command_line(int argc, char **argv)
 {
-   polar::utils::error_stream() << "FileCheck command line: ";
+   polar::utils::error_stream() << "filechecker command line: ";
    for (int i = 0; i < argc; i++) {
       polar::utils::error_stream() << " " << argv[i];
    }

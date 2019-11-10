@@ -488,7 +488,7 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
          StringRef defName;
          StringRef substStr;
          StringRef matchRegexp;
-         size_t SubstInsertIdx = m_regExStr.size();
+         size_t substInsertIdx = m_regExStr.size();
 
          // Parse string variable or legacy @LINE expression.
          if (!isNumBlock) {
@@ -581,8 +581,8 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
                FileCheckSubstitution *substitution =
                      isNumBlock
                      ? m_context->makeNumericSubstitution(
-                          substStr, std::move(expressionAST), SubstInsertIdx)
-                     : m_context->makeStringSubstitution(substStr, SubstInsertIdx);
+                          substStr, std::move(expressionAST), substInsertIdx)
+                     : m_context->makeStringSubstitution(substStr, substInsertIdx);
                m_substitutions.push_back(substitution);
             }
             continue;
@@ -721,8 +721,7 @@ Expected<size_t> FileCheckPattern::match(StringRef buffer, size_t &matchLen,
    // If this defines any string variables, remember their values.
    for (const auto &variableDef : m_variableDefs) {
       assert(variableDef.second < matchInfo.size() && "Internal paren error");
-      m_context->m_globalVariableTable[variableDef.first] =
-            StringRef(matchInfo[variableDef.second]);
+      m_context->m_globalVariableTable[variableDef.first] = matchInfo[variableDef.second];
    }
 
    // If this defines any numeric variables, remember their values.
@@ -1231,7 +1230,7 @@ bool FileCheck::readCheckFile(SourceMgr &sourceMgr, StringRef buffer,
    for (const auto &patternString : m_req.implicitCheckNot) {
       // Create a buffer with fake command line content in order to display the
       // command line option responsible for the specific implicit CHECK-NOT.
-      std::string prefix = "-implicit-check-not='";
+      std::string prefix = "--implicit-check-not='";
       std::string Suffix = "'";
       std::unique_ptr<MemoryBuffer> cmdLine = MemoryBuffer::getMemBufferCopy(
                prefix + patternString + Suffix, "command line");
@@ -1997,7 +1996,7 @@ void FileCheckPatternContext::clearLocalVars()
 {
    SmallVector<StringRef, 16> localPatternVars;
    SmallVector<StringRef, 16> localNumericVars;
-   for (const StringMapEntry<StringRef> &var : m_globalVariableTable) {
+   for (const StringMapEntry<std::string> &var : m_globalVariableTable) {
       if (var.getFirst()[0] != '$') {
          localPatternVars.push_back(var.getFirst());
       }

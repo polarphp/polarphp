@@ -388,7 +388,7 @@ private:
    /// variables defined in previous patterns. In a pattern, only the last
    /// definition for a given variable is recorded in this table.
    /// Back-references are used for uses after any the other definition.
-   StringMap<StringRef> m_globalVariableTable;
+   StringMap<std::string> m_globalVariableTable;
 
    /// Map of all string variables defined so far. Used at parse time to detect
    /// a name conflict between a numeric variable and a string variable when

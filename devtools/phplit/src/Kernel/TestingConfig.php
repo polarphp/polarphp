@@ -347,6 +347,18 @@ class TestingConfig
    }
 
    /**
+    * @param string $name
+    * @return TestingConfig
+    */
+   public function unsetEnvVar(string $name): TestingConfig
+   {
+      if (array_key_exists($name, $this->environment)) {
+         unset($this->environment[$name]);
+      }
+      return $this;
+   }
+
+   /**
     * @return array
     */
    public function getSubstitutions(): array

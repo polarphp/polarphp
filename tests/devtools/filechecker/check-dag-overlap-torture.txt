@@ -63,8 +63,8 @@ __EndAfterEnd
 
 ;---------------------------------------------------------------------
 ; RUN: not filechecker --allow-deprecated-dag-overlap --input-file %s %s \
-; RUN:               --check-prefix EndRightAfterEnd
-; RUN: filechecker --input-file %s %s --check-prefix EndRightAfterEnd
+; RUN:               --check-prefix=EndRightAfterEnd
+; RUN: filechecker --input-file %s %s --check-prefix=EndRightAfterEnd
 
 new match end right after old match end
 
@@ -119,8 +119,8 @@ __EndRightAfterEnd
 
 ;---------------------------------------------------------------------
 ; RUN: not filechecker --allow-deprecated-dag-overlap --input-file %s %s \
-; RUN:               --check-prefix EndAtEnd
-; RUN: filechecker --input-file %s %s --check-prefix EndAtEnd
+; RUN:               --check-prefix=EndAtEnd
+; RUN: filechecker --input-file %s %s --check-prefix=EndAtEnd
 
 new match end at old match end
 
@@ -168,8 +168,8 @@ __EndAtEnd
 
 ;---------------------------------------------------------------------
 ; RUN: not filechecker --allow-deprecated-dag-overlap --input-file %s %s \
-; RUN:               --check-prefix EndWithin
-; RUN: filechecker --input-file %s %s --check-prefix EndWithin
+; RUN:               --check-prefix=EndWithin
+; RUN: filechecker --input-file %s %s --check-prefix=EndWithin
 
 new match end within old match
 
@@ -210,8 +210,8 @@ __EndWithin
 
 ;---------------------------------------------------------------------
 ; RUN: not filechecker --allow-deprecated-dag-overlap --input-file %s %s \
-; RUN:               --check-prefix EndRightAfterStart
-; RUN: filechecker --input-file %s %s --check-prefix EndRightAfterStart
+; RUN:               --check-prefix=EndRightAfterStart
+; RUN: filechecker --input-file %s %s --check-prefix=EndRightAfterStart
 
 new match end right after old match start
 
@@ -245,7 +245,7 @@ __EndRightAfterStart
 
 ;---------------------------------------------------------------------
 ; RUN: filechecker --allow-deprecated-dag-overlap --input-file %s %s \
-; RUN:           --check-prefix EndAtStart
+; RUN:           --check-prefix=EndAtStart
 ; RUN: filechecker --input-file %s %s --check-prefix=EndAtStart
 
 new match end at old match start
@@ -275,8 +275,8 @@ __EndAtStart
 
 ;---------------------------------------------------------------------
 ; RUN: filechecker --allow-deprecated-dag-overlap --input-file %s %s \
-; RUN:           --check-prefix EndBeforeStart
-; RUN: filechecker --input-file %s %s --check-prefix EndBeforeStart
+; RUN:           --check-prefix=EndBeforeStart
+; RUN: filechecker --input-file %s %s --check-prefix=EndBeforeStart
 
 new match end before old match start
 

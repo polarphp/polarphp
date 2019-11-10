@@ -1,0 +1,18 @@
+; RUN: filechecker -D VALUE=10 --input-file %s %s
+; RUN: not filechecker -D VALUE=20 --input-file %s %s 2>&1 | filechecker %s --check-prefix ERRMSG
+;
+; RUN: not filechecker -D VALUE=10 --check-prefix NOT --input-file %s %s 2>&1 | filechecker %s --check-prefix NOT-ERRMSG
+; RUN: filechecker -D VALUE=20 --check-prefix NOT --input-file %s %s
+
+Value = 10
+; CHECK: Value = [[VALUE]]
+; NOT-NOT: Value = [[VALUE]]
+
+; ERRMSG: error: CHECK: expected string not found in input
+; ERRMSG: note: scanning from here
+; ERRMSG: note: with "VALUE" equal to "20"
+; ERRMSG: note: possible intended match here
+
+; NOT-ERRMSG: error: {{NOT}}-NOT: excluded string found in input
+; NOT-ERRMSG: note: found here
+; NOT-ERRMSG: note: with "VALUE" equal to "10"

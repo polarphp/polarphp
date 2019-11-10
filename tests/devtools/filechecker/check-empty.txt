@@ -7,6 +7,6 @@
 # NOFOO-NOT: foo
 
 # EMPTY-ERR: filechecker error: '-' is empty.
-# EMPTY-ERR-NEXT: filechecker command line: {{.*}}filechecker{{.*}}--check-prefix {{.*}}FOO {{.*}}check-empty.littest
+# EMPTY-ERR-NEXT: filechecker command line: {{.*}}filechecker{{.*}}--check-prefix {{.*}}FOO {{.*}}check-empty.txt
 # NO-EMPTY-ERR-NOT: filechecker error: '-' is empty.
 # NOT-FOUND: error: FOO: expected string not found in input
