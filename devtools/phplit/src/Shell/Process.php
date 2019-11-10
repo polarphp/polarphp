@@ -1370,19 +1370,24 @@ class Process implements \IteratorAggregate
 
       $descriptors = $this->processPipes->getDescriptors();
       if (!$this->isTty() && !$this->isPty()) {
-         if ($this->stderrDescriptor != self::REDIRECT_PIPE) {
+         if ($this->stderrDescriptor != self::REDIRECT_PIPE && $this->stderrDescriptor != self::REDIRECT_STDOUT) {
             if (is_string($this->stderrDescriptor)) {
                $descriptors[2] = ['file', $this->stderrDescriptor];
             } elseif (is_resource($this->stderrDescriptor)) {
                $descriptors[2] = $this->stderrDescriptor;
+            } else {
+               throw new \RuntimeException("unsupport stderr descriptor type");
             }
          }
 
          if ($this->stdoutDescriptor != self::REDIRECT_PIPE) {
+            fclose($descriptors[1]);
             if (is_string($this->stdoutDescriptor)) {
                $descriptors[1] = ['file', $this->stdoutDescriptor];
             } elseif (is_resource($this->stdoutDescriptor)) {
                $descriptors[1] = $this->stdoutDescriptor;
+            } else {
+               throw new \RuntimeException("unsupport stdout descriptor type");
             }
          }
       }
@@ -1512,11 +1517,15 @@ class Process implements \IteratorAggregate
    private function readPipes(bool $blocking, bool $close)
    {
       $result = $this->processPipes->readAndWrite($blocking, $close);
-
       $callback = $this->callback;
       foreach ($result as $type => $data) {
          if (3 !== $type) {
-            $callback(self::STDOUT === $type ? self::OUT : self::ERR, $data);
+            if ($type == self::STDOUT || ($type == self::STDERR && $this->stderrDescriptor == self::REDIRECT_STDOUT)) {
+               $target = self::OUT;
+            } else {
+               $target = self::ERR;
+            }
+            $callback($target, $data);
          } elseif (!isset($this->fallbackStatus['signaled'])) {
             $this->fallbackStatus['exitcode'] = (int)$data;
          }

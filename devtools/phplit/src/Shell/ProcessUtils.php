@@ -13,7 +13,6 @@
 namespace Lit\Shell;
 
 use Symfony\Component\Process\Exception\InvalidArgumentException;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessUtils as BaseProcessUtils;
 
 class ProcessUtils extends BaseProcessUtils
@@ -27,8 +26,8 @@ class ProcessUtils extends BaseProcessUtils
          if (\is_string($stdout)) {
             return $stdout;
          }
-         if (is_scalar($stdout)) {
-            return (string) $stdout;
+         if (\is_scalar($stdout)) {
+            return $stdout;
          }
 
          throw new InvalidArgumentException(sprintf('%s only accepts strings, Traversable objects or stream resources.', $caller));
@@ -46,10 +45,9 @@ class ProcessUtils extends BaseProcessUtils
          if (\is_string($stderr)) {
             return $stderr;
          }
-         if (is_scalar($stderr)) {
-            return (string) $stderr;
+         if (\is_scalar($stderr)) {
+            return $stderr;
          }
-
          throw new InvalidArgumentException(sprintf('%s only accepts strings, Traversable objects or stream resources.', $caller));
       }
 
