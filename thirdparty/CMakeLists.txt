@@ -10,7 +10,3 @@
 # Created by polarboy on 2018/10/28.
 
 add_subdirectory(boost)
-
-if (POLAR_BUILD_TESTS)
-   add_subdirectory(cppdiff)
-endif()
