@@ -46,7 +46,7 @@ std::string dump_input_checker(const std::string &value)
 {
    auto iter = sg_allowDumpOpts.find(value);
    if (iter == sg_allowDumpOpts.end()) {
-      return std::string("dump input option value invalid");
+      return std::string("dump input option value: '") + value + "' is invalid";
    }
    return std::string();
 }
@@ -85,16 +85,16 @@ MarkerStyle get_marker(FileCheckDiag::MatchType matchTy) {
    case FileCheckDiag::MatchNoneButExpected:
       return MarkerStyle('X', RawOutStream::Colors::RED, "error: no match found");
    case FileCheckDiag::MatchFuzzy:
-      return MarkerStyle('?', RawOutStream::Colors::MAGENTA, "poutStreamsible intended match");
+      return MarkerStyle('?', RawOutStream::Colors::MAGENTA, "possible intended match");
    }
    polar::utils::unreachable_internal("unexpected match type");
 }
 
 void dump_input_annotation_help(RawOutStream &outStream)
 {
-   outStream << "The following description was requested by -dump-input=help to\n"
-             << "explain the input annotations printed by -dump-input=always and\n"
-             << "-dump-input=fail:\n\n";
+   outStream << "The following description was requested by --dump-input=help to\n"
+             << "explain the input annotations printed by --dump-input=always and\n"
+             << "--dump-input=fail:\n\n";
 
    // Labels for input lines.
    outStream << "  - ";
@@ -146,7 +146,7 @@ void dump_input_annotation_help(RawOutStream &outStream)
    outStream << ", ";
    WithColor(outStream, RawOutStream::Colors::CYAN, true, true) << "unmatched input";
    outStream << "\n\n"
-             << "If you are not seeing color above or in input dumps, try: -color\n";
+             << "If you are not seeing color above or in input dumps, try: --color\n";
 }
 
 /// Get an abbreviation for the check type.

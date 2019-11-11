@@ -1,0 +1,99 @@
+;--------------------------------------------------
+; Create the check file, good input, and bad input.
+;
+; For both good and bad input, make sure the -v trace has at least one remark
+; so we can check how trace suppression is affected by -dump-input.
+;--------------------------------------------------
+
+; RUN: echo hello > %t.good
+; RUN: echo world >> %t.good
+
+; RUN: echo hello > %t.err
+; RUN: echo whirled >> %t.err
+
+; RUN: echo 'CHECK: hello' > %t.check
+; RUN: echo 'CHECK-NEXT: world' >> %t.check
+
+;--------------------------------------------------
+; Check --dump-input=<bad value>.
+;--------------------------------------------------
+
+; RUN: not filechecker --input-file %t.good %t.check --check-prefix=CHECK \
+; RUN:               --match-full-lines --dump-input=foobar 2>&1 \
+; RUN: | filechecker %s --match-full-lines --check-prefix=BADVAL
+
+; No positional arg.
+; RUN: not filechecker --dump-input=foobar 2>&1 \
+; RUN: | filechecker %s --match-full-lines --check-prefix=BADVAL
+
+BADVAL: --dump-input: dump input option value: 'foobar' is invalid
+
+;--------------------------------------------------
+; Check -dump-input=help.
+;--------------------------------------------------
+
+; Appended to normal command line.
+; RUN: filechecker --input-file %t.err --color %t.check --dump-input=help \
+; RUN: | filechecker %s --check-prefix=HELP
+
+; No positional arg.
+; RUN: filechecker --dump-input=help | filechecker %s --check-prefix=HELP
+
+HELP-NOT: {{.}}
+HELP: The following description was requested by --dump-input=help
+HELP: try{{.*}}-color
+HELP-NOT: {{.}}
+
+;--------------------------------------------------
+; Check -dump-input=never.
+;
+; Include the case without -v, which isn't covered elsewhere.
+;--------------------------------------------------
+
+; RUN: filechecker --input-file %t.good %t.check --check-prefix=CHECK \
+; RUN:           --match-full-lines --dump-input=never 2>&1 \
+; RUN: | filechecker %s --match-full-lines --allow-empty \
+; RUN:             --check-prefixes=NOTRACE --check-prefixes=NODUMP
+
+; RUN: not filechecker --input-file %t.err %t.check --check-prefix=CHECK \
+; RUN:               --match-full-lines --dump-input=never 2>&1 \
+; RUN: | filechecker %s --match-full-lines --check-prefixes=NOTRACE --check-prefixes=ERR --check-prefixes=NODUMP
+
+; RUN: filechecker --input-file %t.good %t.check --check-prefix=CHECK \
+; RUN:           --match-full-lines --dump-input=never -v 2>&1 \
+; RUN: | filechecker %s --match-full-lines --check-prefixes=TRACE --check-prefixes=NODUMP
+
+; RUN: not filechecker --input-file %t.err %t.check --check-prefix=CHECK \
+; RUN:               --match-full-lines --dump-input=never -v 2>&1 \
+; RUN: | filechecker %s --match-full-lines --check-prefixes=TRACE --check-prefixes=ERR --check-prefixes=NODUMP
+
+
+;--------------------------------------------------
+; Check the output for all cases that actually process directives.
+;--------------------------------------------------
+
+; Trace is sometimes suppressed.
+; TRACE:       {{.*}}remark:{{.*}}
+; NOTRACE-NOT: remark:
+
+; Error diagnostics are never suppressed.
+; ERR: {{.*}}error:{{.*}}
+
+; NODUMP-NOT: <<<<<<
+
+; DUMP-OK:      Full input was:
+; DUMP-OK-NEXT: <<<<<<
+; DUMP-OK-NEXT:          1: hello
+; DUMP-OK-NEXT: check:1     ^~~~~
+; DUMP-OK-NEXT:          2: world
+; DUMP-OK-NEXT: next:2      ^~~~~
+; DUMP-OK-NEXT: >>>>>>
+
+; DUMP-ERR:        Full input was:
+; DUMP-ERR-NEXT:   <<<<<<
+; DUMP-ERR-NEXT:            1: hello
+; DUMP-ERR-V-NEXT: check:1     ^~~~~
+; DUMP-ERR-NEXT:            2: whirled
+; DUMP-ERR-NEXT:   next:2      X~~~~~~ error: no match found
+; DUMP-ERR-NEXT:   >>>>>>
+

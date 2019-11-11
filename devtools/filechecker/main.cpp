@@ -47,8 +47,9 @@ int main(int argc, char *argv[])
    bool verbose;
    bool verboseVerbose = false;
    int dumpInputOnFailure = 0;
+   bool enableColor = false;
 
-   cmdParser.add_option("check-filename", checkFilename, "<check-file>")->required(true)->check(CLI::ExistingFile);
+   cmdParser.add_option("check-filename", checkFilename, "<check-file>")->check(CLI::ExistingFile);
    cmdParser.add_option("--input-file", inputFilename, "File to check (defaults to stdin)")->default_val("-")
          ->type_name("filename");
    cmdParser.add_option("--check-prefix", checkPrefix, "Prefix to use from check file (defaults to 'CHECK')");
@@ -81,6 +82,7 @@ int main(int argc, char *argv[])
                                                       "\talways Always dump input\n")
          ->default_val("default")
          ->check(dump_input_checker);
+   cmdParser.add_flag("--color", enableColor, "Enable color output");
    CLI::Option *dumpInputOnFailureOpt = cmdParser.add_option("--dump-input-on-failure", dumpInputOnFailure, "Dump original input to stderr before failing."
                                                                                                             "The value can be also controlled using "
                                                                                                             "FILECHECK_DUMP_INPUT_ON_FAILURE environment variable.");
@@ -89,6 +91,11 @@ int main(int argc, char *argv[])
    if (dumpInput == DumpInputValue::Help) {
       dump_input_annotation_help(polar::utils::out_stream());
       return 0;
+   }
+
+   if (checkFilename.empty()) {
+      error_stream() << "<check-file> not specified\n";
+      return 2;
    }
 
    if (dumpInputOnFailureOpt->count() == 0) {
