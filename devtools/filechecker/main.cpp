@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
          continue;
       }
       if (eqIdx == 0) {
-         error_stream() << "Missing pattern variable name in command-line definition '-D"
+         error_stream() << "Missing variable name in command-line definition '-D"
                         << def << "'\n";
          globalDefineError = true;
          continue;

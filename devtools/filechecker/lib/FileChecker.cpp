@@ -733,7 +733,7 @@ Expected<size_t> FileCheckPattern::match(StringRef buffer, size_t &matchLen,
       FileCheckNumericVariable *definedNumericVariable =
             numericVariableMatch.definedNumericVariable;
 
-      StringRef matchedValue = StringRef(matchInfo[captureParenGroup]);
+      StringRef matchedValue = StringRef(buffer.getData() + matchInfo.position(captureParenGroup), matchInfo[captureParenGroup].length());
       uint64_t val;
       if (matchedValue.getAsInteger(10, val)) {
          return FileCheckErrorDiagnostic::get(sourceMgr, matchedValue,

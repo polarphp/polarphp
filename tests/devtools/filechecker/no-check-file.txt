@@ -1,0 +1,3 @@
+; RUN: not filechecker 2>&1 | filechecker %s
+
+CHECK: <check-file> not specified
