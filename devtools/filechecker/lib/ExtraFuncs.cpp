@@ -199,18 +199,19 @@ void build_input_annotations(const std::vector<FileCheckDiag> &diags,
       label << get_check_type_abbreviation(diagItr->checkType) << ":"
             << diagItr->checkLine;
       A.checkDiagIndex = UINT_MAX;
-      auto DiagNext = std::next(diagItr);
-      if (DiagNext != diagEnd && diagItr->checkType == DiagNext->checkType &&
-          diagItr->checkLine == DiagNext->checkLine)
+      auto diagNext = std::next(diagItr);
+      if (diagNext != diagEnd && diagItr->checkType == diagNext->checkType &&
+          diagItr->checkLine == diagNext->checkLine) {
          A.checkDiagIndex = checkDiagCount++;
-      else if (checkDiagCount) {
+      } else if (checkDiagCount) {
          A.checkDiagIndex = checkDiagCount;
          checkDiagCount = 0;
       }
-      if (A.checkDiagIndex != UINT_MAX)
+      if (A.checkDiagIndex != UINT_MAX) {
          label << "'" << A.checkDiagIndex;
-      else
+      } else {
          A.checkDiagIndex = 0;
+      }
       label.flush();
       labelWidth = std::max((std::string::size_type)labelWidth, A.label.size());
 
@@ -286,11 +287,14 @@ void dump_annotated_input(RawOutStream &outStream, const FileCheckRequest &req,
    // results, is consistent across multiple lines, thus making match results
    // easier to track from one line to the next when they span multiple lines.
    std::sort(annotations.begin(), annotations.end(),
-             [](const InputAnnotation &A, const InputAnnotation &B) {
-      if (A.inputLine != B.inputLine)
+             [](const InputAnnotation &A, const InputAnnotation &B)
+   {
+      if (A.inputLine != B.inputLine) {
          return A.inputLine < B.inputLine;
-      if (A.checkLine != B.checkLine)
+      }
+      if (A.checkLine != B.checkLine) {
          return A.checkLine < B.checkLine;
+      }
       // FIXME: Sometimes CHECK-LABEL reports its match twice with
       // other diagnostics in between, and then diag index incrementing
       // fails to work properly, and then this assert fails.  We should
@@ -304,12 +308,13 @@ void dump_annotated_input(RawOutStream &outStream, const FileCheckRequest &req,
    });
 
    // Compute the width of the label column.
-   const unsigned char *InputFilePtr = inputFileText.getBytesBegin(),
-         *InputFileEnd = inputFileText.getBytesEnd();
-   unsigned LineCount = inputFileText.count('\n');
-   if (InputFileEnd[-1] != '\n')
-      ++LineCount;
-   unsigned LineNoWidth = log10(LineCount) + 1;
+   const unsigned char *inputFilePtr = inputFileText.getBytesBegin(),
+         *inputFileEnd = inputFileText.getBytesEnd();
+   unsigned lineCount = inputFileText.count('\n');
+   if (inputFileEnd[-1] != '\n') {
+      ++lineCount;
+   }
+   unsigned lineNoWidth = log10(lineCount) + 1;
    // +3 below adds spaces (1) to the left of the (right-aligned) line numbers
    // on input lines and (2) to the right of the (left-aligned) labels on
    // annotation lines so that input lines and annotation lines are more
@@ -318,88 +323,96 @@ void dump_annotated_input(RawOutStream &outStream, const FileCheckRequest &req,
    // horizontally.  Those line numbers might not even be for the same file.
    // One space would be enough to achieve that, but more makes it even easier
    // to see.
-   labelWidth = std::max(labelWidth, LineNoWidth) + 3;
+   labelWidth = std::max(labelWidth, lineNoWidth) + 3;
 
    // Print annotated input lines.
-   auto AnnotationItr = annotations.begin(), AnnotationEnd = annotations.end();
-   for (unsigned Line = 1;
-        InputFilePtr != InputFileEnd || AnnotationItr != AnnotationEnd;
-        ++Line) {
-      const unsigned char *InputFileLine = InputFilePtr;
+   auto annotationItr = annotations.begin(), annotationEnd = annotations.end();
+   for (unsigned line = 1;
+        inputFilePtr != inputFileEnd || annotationItr != annotationEnd;
+        ++line) {
+      const unsigned char *inputFileLine = inputFilePtr;
 
       // Print right-aligned line number.
       WithColor(outStream, RawOutStream::Colors::BLACK, true)
-            << polar::utils::format_decimal(Line, labelWidth) << ": ";
+            << polar::utils::format_decimal(line, labelWidth) << ": ";
 
       // For the case where -v and colors are enabled, find the annotations for
       // good matches for expected patterns in order to highlight everything
       // else in the line.  There are no such annotations if -v is disabled.
-      std::vector<InputAnnotation> FoundAndExpectedMatches;
+      std::vector<InputAnnotation> foundAndExpectedMatches;
       if (req.verbose && WithColor(outStream).colorsEnabled()) {
-         for (auto I = AnnotationItr; I != AnnotationEnd && I->inputLine == Line;
-              ++I) {
-            if (I->foundAndExpectedMatch)
-               FoundAndExpectedMatches.push_back(*I);
+         for (auto index = annotationItr; index != annotationEnd && index->inputLine == line;
+              ++index) {
+            if (index->foundAndExpectedMatch) {
+               foundAndExpectedMatches.push_back(*index);
+            }
          }
       }
 
       // Print numbered line with highlighting where there are no matches for
       // expected patterns.
-      bool Newline = false;
+      bool newline = false;
       {
-         WithColor COS(outStream);
-         bool InMatch = false;
-         if (req.verbose)
-            COS.changeColor(RawOutStream::Colors::CYAN, true, true);
-         for (unsigned Col = 1; InputFilePtr != InputFileEnd && !Newline; ++Col) {
-            bool WasInMatch = InMatch;
-            InMatch = false;
-            for (auto M : FoundAndExpectedMatches) {
-               if (M.inputStartCol <= Col && Col < M.inputEndCol) {
-                  InMatch = true;
+         WithColor cos(outStream);
+         bool inMatch = false;
+         if (req.verbose) {
+            cos.changeColor(RawOutStream::Colors::CYAN, true, true);
+         }
+         for (unsigned col = 1; inputFilePtr != inputFileEnd && !newline; ++col) {
+            bool wasInMatch = inMatch;
+            inMatch = false;
+            for (auto M : foundAndExpectedMatches) {
+               if (M.inputStartCol <= col && col < M.inputEndCol) {
+                  inMatch = true;
                   break;
                }
             }
-            if (!WasInMatch && InMatch)
-               COS.resetColor();
-            else if (WasInMatch && !InMatch)
-               COS.changeColor(RawOutStream::Colors::CYAN, true, true);
-            if (*InputFilePtr == '\n')
-               Newline = true;
-            else
-               COS << *InputFilePtr;
-            ++InputFilePtr;
+            if (!wasInMatch && inMatch) {
+               cos.resetColor();
+            } else if (wasInMatch && !inMatch) {
+               cos.changeColor(RawOutStream::Colors::CYAN, true, true);
+            }
+            if (*inputFilePtr == '\n') {
+               newline = true;
+            } else {
+               cos << *inputFilePtr;
+            }
+            ++inputFilePtr;
          }
       }
       outStream << '\n';
-      unsigned InputLineWidth = InputFilePtr - InputFileLine - Newline;
+      unsigned inputLineWidth = inputFilePtr - inputFileLine - newline;
 
       // Print any annotations.
-      while (AnnotationItr != AnnotationEnd &&
-             AnnotationItr->inputLine == Line) {
-         WithColor COS(outStream, AnnotationItr->marker.color, true);
+      while (annotationItr != annotationEnd &&
+             annotationItr->inputLine == line) {
+         WithColor cos(outStream, annotationItr->marker.color, true);
          // The two spaces below are where the ": " appears on input lines.
-         COS << polar::utils::left_justify(AnnotationItr->label, labelWidth) << "  ";
-         unsigned Col;
-         for (Col = 1; Col < AnnotationItr->inputStartCol; ++Col)
-            COS << ' ';
-         COS << AnnotationItr->marker.lead;
-         // If inputEndCol=UINT_MAX, stop at InputLineWidth.
-         for (++Col; Col < AnnotationItr->inputEndCol && Col <= InputLineWidth;
-              ++Col)
-            COS << '~';
-         const std::string &note = AnnotationItr->marker.note;
+         cos << polar::utils::left_justify(annotationItr->label, labelWidth) << "  ";
+         unsigned col;
+         for (col = 1; col < annotationItr->inputStartCol; ++col) {
+            cos << ' ';
+         }
+         cos << annotationItr->marker.lead;
+         // If inputEndCol=UINT_MAX, stop at inputLineWidth.
+         for (++col; col < annotationItr->inputEndCol && col <= inputLineWidth;
+              ++col) {
+            cos << '~';
+         }
+
+         const std::string &note = annotationItr->marker.note;
          if (!note.empty()) {
             // Put the note at the end of the input line.  If we were to instead
             // put the note right after the marker, subsequent annotations for the
             // same input line might appear to mark this note instead of the input
             // line.
-            for (; Col <= InputLineWidth; ++Col)
-               COS << ' ';
-            COS << ' ' << note;
+            for (; col <= inputLineWidth; ++col) {
+               cos << ' ';
+            }
+            cos << ' ' << note;
          }
-         COS << '\n';
-         ++AnnotationItr;
+         cos << '\n';
+         ++annotationItr;
       }
    }
 

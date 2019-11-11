@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
                      << "\n"
                      << "Check file: " << checkFilename << "\n"
                      << "\n"
-                     << "-dump-input=help describes the format of the following dump.\n"
+                     << "--dump-input=help describes the format of the following dump.\n"
                      << "\n";
       std::vector<InputAnnotation> annotations;
       unsigned labelWidth;
