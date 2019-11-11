@@ -9,9 +9,13 @@
 #
 # Created by polarboy on 2018/11/19.
 
-
 if (POLAR_DEV_BUILD_DEVTOOLS_TESTS)
-   add_subdirectory(devtools)
+   set(DEVTOOLS_DEPS cat)
+   polar_add_lit_testsuite(check-devtools "devtools lit test"
+      ${CMAKE_CURRENT_SOURCE_DIR}/devtools/filechecker
+      DEPENDS PolarSyntax
+      ARGS -j 8
+      )
 endif()
 
 if (POLAR_DEV_BUILD_POLARPHP_TESTS)

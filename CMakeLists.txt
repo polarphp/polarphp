@@ -179,6 +179,7 @@ include(TargetUtils)
 include(ProcessSources)
 include(GetHostTriple)
 include(HandleGybSources)
+include(LitUtils)
 
 set(CMAKE_C_STANDARD_REQUIRED 11)
 set(CMAKE_CXX_STANDARD_REQUIRED 17)

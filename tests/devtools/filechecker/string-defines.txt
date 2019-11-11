@@ -23,7 +23,7 @@ NOT-ERRMSG: defines.txt:[[@LINE-10]]:1: note: found here
 NOT-ERRMSG: defines.txt:[[@LINE-11]]:1: note: with "VALUE" equal to "10"
 
 ; Definition of string variable to an empty string.
-RUN: FileCheck -DVALUE= --check-prefix EMPTY --input-file %s %s 2>&1
+RUN: filechecker -DVALUE= --check-prefix EMPTY --input-file %s %s 2>&1
 
 Empty value = @@
 EMPTY: Empty value = @[[VALUE]]@

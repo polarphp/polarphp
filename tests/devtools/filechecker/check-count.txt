@@ -70,7 +70,7 @@ Many-label:
 -many-
 -many-
 
-; RUN: FileCheck %s --input-file %s --check-prefix=CHECK-CNTMANY
+; RUN: filechecker %s --input-file %s --check-prefix=CHECK-CNTMANY
 CHECK-CNTMANY-COUNT-2: this is duplicate
 CHECK-CNTMANY-LABEL: Many-label:
 CHECK-CNTMANY-EMPTY:
