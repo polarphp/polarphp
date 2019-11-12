@@ -32,7 +32,7 @@ include(AddCustomCommandTarget)
 #   Output filename to be generated
 #
 # flags ...
-#    gyb flags in addition to ${SWIFT_GYB_FLAGS}.
+#    gyb flags in addition to ${POLAR_GYB_FLAGS}.
 #
 # depends ...
 #    gyb flags in addition to 'src_gyb' and sources of gyb itself.
@@ -124,11 +124,12 @@ function(handle_gyb_sources dependency_out_var_name sources_var_name)
          # On Windows (using Visual Studio), the generated project files assume that the
          # generated GYB files will be in the source, not binary directory.
          # We can work around this by modifying the root directory when generating VS projects.
-         if ("${CMAKE_GENERATOR_PLATFORM}" MATCHES "Visual Studio")
-            set(dir_root ${CMAKE_CURRENT_SOURCE_DIR})
-         else()
-            set(dir_root ${CMAKE_CURRENT_BINARY_DIR})
-         endif()
+#         if ("${CMAKE_GENERATOR_PLATFORM}" MATCHES "Visual Studio")
+#            set(dir_root ${CMAKE_CURRENT_SOURCE_DIR})
+#         else()
+#            set(dir_root ${CMAKE_CURRENT_BINARY_DIR})
+#         endif()
+         set(dir_root ${CMAKE_CURRENT_SOURCE_DIR})
 
          set(output_file_name "${dir_root}/${src_sans_gyb}")
          list(APPEND de_gybbed_sources "${output_file_name}")

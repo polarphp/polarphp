@@ -21,13 +21,29 @@ build/
 cmake-build-debug/
 **/.idea
 **/.vscode
+
 include/polarphp/parser/internal/YYParserDefs.h
 include/polarphp/parser/internal/YYLexerConditionDefs.h
 include/polarphp/parser/internal/YYLocation.h
 include/polarphp/syntax/internal/TokenEnumDefs.h
+
+include/polarphp/parser/LangGrammer.y
+include/polarphp/syntax/SyntaxKindEnumDefs.h
+include/polarphp/syntax/SyntaxNodeBuilders.h
+include/polarphp/syntax/SyntaxNodeFactory.h
+include/polarphp/syntax/SyntaxNodeVisitor.h
+include/polarphp/syntax/SyntaxNodes.h
+include/polarphp/syntax/Trivia.h
+
 src/parser/internal/YYLexer.cpp
 src/parser/internal/YYParser.cpp
-src/syntax/TokenDescMap.cpp
+src/syntax/SyntaxKind.cpp
+src/syntax/SyntaxNodeBuilders.cpp
+src/syntax/SyntaxNodeFactory.cpp
+src/syntax/SyntaxNodeVisitor.cpp
+src/syntax/SyntaxNodes.cpp
+src/syntax/TokenKind.cpp
+src/syntax/Trivia.cpp
 
 # symfony projects
 devtools/gyb/vendor/
