@@ -35,7 +35,6 @@ function(polar_add_lit_target target comment)
             list(APPEND sources ${files})
          endif()
       endforeach()
-      message("${LIT_COMMAND}")
       add_custom_target(${target}
          COMMAND ${LIT_COMMAND} -- ${ARG_UNPARSED_ARGUMENTS}
          COMMENT "${comment}"
