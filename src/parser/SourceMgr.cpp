@@ -228,7 +228,8 @@ unsigned SourceManager::getByteDistance(SourceLoc start, SourceLoc end) const
    return end.m_loc.getPointer() - start.m_loc.getPointer();
 }
 
-StringRef SourceManager::getEntireTextForBuffer(unsigned bufferID) const {
+StringRef SourceManager::getEntireTextForBuffer(unsigned bufferID) const
+{
    return m_sourceMgr.getMemoryBuffer(bufferID)->getBuffer();
 }
 

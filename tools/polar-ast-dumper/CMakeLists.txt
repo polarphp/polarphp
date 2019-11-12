@@ -14,4 +14,7 @@ polar_collect_files(
    DIR ${CMAKE_CURRENT_SOURCE_DIR}
    OUTPUT_VAR POLAR_TOOLS_AST_DUMPER)
 
-polar_add_executable(polar-ast-dumper ${POLAR_TOOLS_AST_DUMPER})
+polar_add_executable(
+   polar-ast-dumper ${POLAR_TOOLS_AST_DUMPER}
+   LINK_LIBS nlohmann_json::nlohmann_json PolarSyntax PolarParser
+   )

@@ -558,7 +558,7 @@ macro(polar_add_loadable_module name)
 endmacro(polar_add_loadable_module)
 
 macro(polar_add_executable name)
-   cmake_parse_arguments(ARG "DISABLE_POLAR_LINK_POLAR_DYLIB;IGNORE_EXTERNALIZE_DEBUGINFO;NO_INSTALL_RPATH" "" "DEPENDS" ${ARGN})
+   cmake_parse_arguments(ARG "DISABLE_POLAR_LINK_POLAR_DYLIB;IGNORE_EXTERNALIZE_DEBUGINFO;NO_INSTALL_RPATH;" "" "LINK_LIBS;DEPENDS" ${ARGN})
    polar_process_sources(ALL_FILES ${ARG_UNPARSED_ARGUMENTS})
    list(APPEND POLAR_COMMON_DEPENDS ${ARG_DEPENDS})
    # Generate objlib
@@ -618,11 +618,15 @@ macro(polar_add_executable name)
    if(NOT ARG_IGNORE_EXTERNALIZE_DEBUGINFO)
       polar_externalize_debuginfo(${name})
    endif()
+
    if (POLAR_THREADS_WORKING)
       # libpthreads overrides some standard library symbols, so main
       # executable must be linked with it in order to provide consistent
       # API for all shared libaries loaded by this executable.
-      target_link_libraries(${name} PRIVATE ${POLAR_THREADS_LIBRARY})
+      list(APPEND ARG_LINK_LIBS ${POLAR_THREADS_LIBRARY})
+   endif()
+   if (ARG_LINK_LIBS)
+      target_link_libraries(${name} PRIVATE ${ARG_LINK_LIBS})
    endif()
 endmacro(polar_add_executable)
 

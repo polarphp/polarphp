@@ -290,4 +290,6 @@ constexpr auto as_integer(Enumeration const value)
 
 #include "CompilerFeature.h"
 
+#define POLAR_CLI11_PARSE(app, argc, argv) CLI11_PARSE(app, argc, argv) (void) 0
+
 #endif // POLARPHP_GLOBAL_GLOBAL_H
