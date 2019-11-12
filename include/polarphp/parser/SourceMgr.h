@@ -88,16 +88,16 @@ public:
       return m_filesystem;
    }
 
-   void setCodeCompletionPoint(unsigned bufferID, unsigned offset)
+   void setCodeCompletionPoint(unsigned bufferId, unsigned offset)
    {
-      assert(bufferID != 0U && "Buffer should be valid");
-      m_codeCompletionBufferID = bufferID;
+      assert(bufferId != 0U && "Buffer should be valid");
+      m_codeCompletionBufferId = bufferId;
       m_codeCompletionOffset = offset;
    }
 
    unsigned getCodeCompletionBufferID() const
    {
-      return m_codeCompletionBufferID;
+      return m_codeCompletionBufferId;
    }
 
    unsigned getCodeCompletionOffset() const
@@ -167,41 +167,41 @@ public:
 
    /// Returns the identifier for the buffer with the given ID.
    ///
-   /// \p bufferID must be a valid buffer ID.
+   /// \p bufferId must be a valid buffer ID.
    ///
    /// This should not be used for displaying information about the \e contents
    /// of a buffer, since lines within the buffer may be marked as coming from
    /// other files using \c #sourceLocation. Use #getDisplayNameForLoc instead
    /// in that case.
-   StringRef getIdentifierForBuffer(unsigned bufferID) const;
+   StringRef getIdentifierForBuffer(unsigned bufferId) const;
 
    /// Returns a SourceRange covering the entire specified buffer.
    ///
    /// Note that the start location might not point at the first token: it
    /// might point at whitespace or a comment.
-   CharSourceRange getRangeForBuffer(unsigned bufferID) const;
+   CharSourceRange getRangeForBuffer(unsigned bufferId) const;
 
    /// Returns the SourceLoc for the beginning of the specified buffer
    /// (at offset zero).
    ///
    /// Note that the resulting location might not point at the first token: it
    /// might point at whitespace or a comment.
-   SourceLoc getLocForBufferStart(unsigned bufferID) const
+   SourceLoc getLocForBufferStart(unsigned bufferId) const
    {
-      return getRangeForBuffer(bufferID).getStart();
+      return getRangeForBuffer(bufferId).getStart();
    }
 
    /// Returns the offset in bytes for the given valid source location.
-   unsigned getLocOffsetInBuffer(SourceLoc loc, unsigned bufferID) const;
+   unsigned getLocOffsetInBuffer(SourceLoc loc, unsigned bufferId) const;
 
    /// Returns the distance in bytes between the given valid source
    /// locations.
    unsigned getByteDistance(SourceLoc start, SourceLoc end) const;
 
    /// Returns the SourceLoc for the byte offset in the specified buffer.
-   SourceLoc getLocForOffset(unsigned bufferID, unsigned offset) const
+   SourceLoc getLocForOffset(unsigned bufferId, unsigned offset) const
    {
-      return getLocForBufferStart(bufferID).getAdvancedLoc(offset);
+      return getLocForBufferStart(bufferId).getAdvancedLoc(offset);
    }
 
    /// Returns a buffer identifier suitable for display to the user containing
@@ -214,35 +214,35 @@ public:
 
    /// Returns the line and column represented by the given source location.
    ///
-   /// If \p bufferID is provided, \p loc must come from that source buffer.
+   /// If \p bufferId is provided, \p loc must come from that source buffer.
    ///
    /// This respects \c #sourceLocation directives.
    std::pair<unsigned, unsigned>
-   getLineAndColumn(SourceLoc loc, unsigned bufferID = 0) const
+   getLineAndColumn(SourceLoc loc, unsigned bufferId = 0) const
    {
       assert(loc.isValid());
       int lineOffset = getLineOffset(loc);
       int l, c;
-      std::tie(l, c) = m_sourceMgr.getLineAndColumn(loc.m_loc, bufferID);
+      std::tie(l, c) = m_sourceMgr.getLineAndColumn(loc.m_loc, bufferId);
       assert(lineOffset+l > 0 && "bogus line offset");
       return { lineOffset + l, c };
    }
 
    /// Returns the real line number for a source location.
    ///
-   /// If \p bufferID is provided, \p loc must come from that source buffer.
+   /// If \p bufferId is provided, \p loc must come from that source buffer.
    ///
    /// This does not respect \c #sourceLocation directives.
-   unsigned getLineNumber(SourceLoc loc, unsigned bufferID = 0) const
+   unsigned getLineNumber(SourceLoc loc, unsigned bufferId = 0) const
    {
       assert(loc.isValid());
-      return m_sourceMgr.findLineNumber(loc.m_loc, bufferID);
+      return m_sourceMgr.findLineNumber(loc.m_loc, bufferId);
    }
 
-   StringRef getEntireTextForBuffer(unsigned bufferID) const;
+   StringRef getEntireTextForBuffer(unsigned bufferId) const;
 
    StringRef extractText(CharSourceRange range,
-                         std::optional<unsigned> bufferID = std::nullopt) const;
+                         std::optional<unsigned> bufferId = std::nullopt) const;
 
    SMDiagnostic getMessage(SourceLoc loc, BasicSourceMgr::DiagKind kind,
                            const Twine &Msg,
@@ -278,11 +278,11 @@ private:
 private:
    BasicSourceMgr m_sourceMgr;
    IntrusiveRefCountPtr<polar::vfs::FileSystem> m_filesystem;
-   unsigned m_codeCompletionBufferID = 0U;
+   unsigned m_codeCompletionBufferId = 0U;
    unsigned m_codeCompletionOffset;
 
    /// Associates buffer identifiers to buffer IDs.
-   DenseMap<StringRef, unsigned> m_bufIdentIDMap;
+   DenseMap<StringRef, unsigned> m_bufIdentIdMap;
 
    /// A cache mapping buffer identifiers to vfs Status entries.
    ///

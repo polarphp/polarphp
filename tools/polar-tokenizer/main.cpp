@@ -11,13 +11,58 @@
 
 #include "CLI/CLI.hpp"
 #include "polarphp/global/Global.h"
+#include "polarphp/utils/MemoryBuffer.h"
+#include "polarphp/utils/OptionalError.h"
+#include "polarphp/parser/Lexer.h"
+#include "polarphp/parser/Token.h"
+#include "polarphp/kernel/LangOptions.h"
+#include "polarphp/parser/SourceMgr.h"
+#include "polarphp/syntax/TokenKinds.h"
+
+#include <memory>
+
+using polar::utils::MemoryBuffer;
+using polar::utils::OptionalError;
+using polar::kernel::LangOptions;
+using polar::parser::SourceManager;
+using polar::parser::Lexer;
+using polar::parser::Token;
+using polar::parser::TokenKindType;
 
 int main(int argc, char * argv[])
 {
    CLI::App tokenizer;
    std::string filePath;
+   std::string outputFilePath;
    tokenizer.add_option("sourceFilepath", filePath, "path of file to be tokenized");
-   tokenizer.add_option("-o,--output", filePath, "process result write into file path");
+   tokenizer.add_option("-o,--output", outputFilePath, "process result write into file path");
    POLAR_CLI11_PARSE(tokenizer, argc, argv);
+   std::unique_ptr<MemoryBuffer> sourceBuffer;
+   if (filePath.empty()) {
+      OptionalError<std::unique_ptr<MemoryBuffer>> tempBuffer = MemoryBuffer::getStdIn();
+      if (tempBuffer) {
+         sourceBuffer = std::move(tempBuffer.get());
+      } else {
+         std::cerr << "read stdin error: " << tempBuffer.getError() << std::endl;
+         return 1;
+      }
+   } else {
+      OptionalError<std::unique_ptr<MemoryBuffer>> tempBuffer = MemoryBuffer::getFile(filePath);
+      if (tempBuffer) {
+         sourceBuffer = std::move(tempBuffer.get());
+      } else {
+         std::cerr << "read source file error: " << tempBuffer.getError() << std::endl;
+         return 2;
+      }
+   }
+
+   LangOptions langOpts{};
+   SourceManager sourceMgr;
+   unsigned bufferId = sourceMgr.addNewSourceBuffer(std::move(sourceBuffer));
+   Lexer lexer(langOpts, sourceMgr, bufferId, nullptr);
+   Token currentToken;
+   do {
+      lexer.lex(currentToken);
+   } while (currentToken.isNot(TokenKindType::END));
    return 0;
 }

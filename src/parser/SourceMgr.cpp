@@ -57,7 +57,7 @@ void SourceManager::verifyAllBuffers() const
 
 SourceLoc SourceManager::getCodeCompletionLoc() const
 {
-   return getLocForBufferStart(m_codeCompletionBufferID)
+   return getLocForBufferStart(m_codeCompletionBufferId)
          .getAdvancedLoc(m_codeCompletionOffset);
 }
 
@@ -89,7 +89,7 @@ SourceManager::addNewSourceBuffer(std::unique_ptr<MemoryBuffer> buffer)
    assert(buffer);
    StringRef bufIdentifier = buffer->getBufferIdentifier();
    auto id = m_sourceMgr.addNewSourceBuffer(std::move(buffer), SMLocation());
-   m_bufIdentIDMap[bufIdentifier] = id;
+   m_bufIdentIdMap[bufIdentifier] = id;
    return id;
 }
 
@@ -180,8 +180,8 @@ SourceManager::getVirtualFile(SourceLoc loc) const
 std::optional<unsigned> SourceManager::getIDForBufferIdentifier(
       StringRef bufIdentifier)
 {
-   auto iter = m_bufIdentIDMap.find(bufIdentifier);
-   if (iter == m_bufIdentIDMap.end()) {
+   auto iter = m_bufIdentIdMap.find(bufIdentifier);
+   if (iter == m_bufIdentIdMap.end()) {
       return std::nullopt;
    }
    return iter->second;
