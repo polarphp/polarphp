@@ -14,6 +14,6 @@ polar_collect_files(
    DIR ${CMAKE_CURRENT_SOURCE_DIR}
    OUTPUT_VAR POLAR_DEVTOOLS_NOT_SOURCES)
 
-polar_add_executable(not Not.cpp)
+polar_add_executable(not ${POLAR_DEVTOOLS_NOT_SOURCES})
 
 target_link_libraries(not PRIVATE PolarUtils CLI11::CLI11)

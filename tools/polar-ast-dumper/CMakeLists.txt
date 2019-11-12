@@ -7,14 +7,11 @@
 # See https://polarphp.org/LICENSE.txt for license information
 # See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 #
-# Created by polarboy on 2019/10/22.
-
+# Created by polarboy on 2019/10/12.
 
 polar_collect_files(
    TYPE_BOTH
    DIR ${CMAKE_CURRENT_SOURCE_DIR}
-   OUTPUT_VAR POLAR_DEVTOOLS_CAT_SOURCES)
+   OUTPUT_VAR POLAR_TOOLS_AST_DUMPER)
 
-polar_add_executable(cat ${POLAR_DEVTOOLS_CAT_SOURCES})
-
-target_link_libraries(cat PRIVATE PolarUtils CLI11::CLI11)
+polar_add_executable(polar-ast-dumper ${POLAR_TOOLS_AST_DUMPER})
