@@ -117,15 +117,15 @@ public:
    /// \c loc should point at the beginning of the token.
    bool rangeContainsTokenLoc(SourceRange range, SourceLoc loc) const
    {
-      return loc == range.m_start || loc == range.m_end ||
-            (isBeforeInBuffer(range.m_start, loc) && isBeforeInBuffer(loc, range.m_end));
+      return loc == range.getStart() || loc == range.getEnd() ||
+            (isBeforeInBuffer(range.getStart(), loc) && isBeforeInBuffer(loc, range.getEnd()));
    }
 
    /// Returns true if range \c enclosing contains the range \c inner.
    bool rangeContains(SourceRange enclosing, SourceRange inner) const
    {
-      return rangeContainsTokenLoc(enclosing, inner.m_start) &&
-            rangeContainsTokenLoc(enclosing, inner.m_end);
+      return rangeContainsTokenLoc(enclosing, inner.getStart()) &&
+            rangeContainsTokenLoc(enclosing, inner.getEnd());
    }
 
    /// Returns the buffer ID for the specified *valid* location.
@@ -245,7 +245,7 @@ public:
                          std::optional<unsigned> bufferId = std::nullopt) const;
 
    SMDiagnostic getMessage(SourceLoc loc, BasicSourceMgr::DiagKind kind,
-                           const Twine &Msg,
+                           const Twine &msg,
                            ArrayRef<SMRange> ranges,
                            ArrayRef<SMFixIt> fixIts) const;
 

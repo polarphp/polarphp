@@ -164,6 +164,26 @@ public:
       return !isValid();
    }
 
+   const SourceLoc &getStart() const
+   {
+      return m_start;
+   }
+
+   const SourceLoc &getEnd() const
+   {
+      return m_end;
+   }
+
+   SourceLoc &getStart()
+   {
+      return m_start;
+   }
+
+   SourceLoc &getEnd()
+   {
+      return m_end;
+   }
+
    /// Extend this SourceRange to the smallest continuous SourceRange that
    /// includes both this range and the other one.
    void widen(SourceRange other);
@@ -194,7 +214,7 @@ public:
 
    void dump(const SourceManager &sourceMgr) const;
 
-public:
+private:
    SourceLoc m_start;
    SourceLoc m_end;
 };
@@ -380,9 +400,9 @@ struct DenseMapInfo<SourceRange>
    static unsigned getHashValue(const SourceRange &loc)
    {
       return hash_combine(DenseMapInfo<const void *>::getHashValue(
-                             loc.m_start.getOpaquePointerValue()),
+                             loc.getStart().getOpaquePointerValue()),
                           DenseMapInfo<const void *>::getHashValue(
-                             loc.m_end.getOpaquePointerValue()));
+                             loc.getEnd().getOpaquePointerValue()));
    }
 
    static bool isEqual(const SourceRange &lhs,

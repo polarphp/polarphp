@@ -252,7 +252,7 @@ public:
    /// \param SR The source range
    static CharSourceRange getCharSourceRangeFromSourceRange(const SourceManager &sourceMgr, const SourceRange &range)
    {
-      return CharSourceRange(sourceMgr, range.m_start, getLocForEndOfToken(sourceMgr, range.m_end));
+      return CharSourceRange(sourceMgr, range.getStart(), getLocForEndOfToken(sourceMgr, range.getEnd()));
    }
 
    /// Return the start location of the token that the offset in the given buffer
