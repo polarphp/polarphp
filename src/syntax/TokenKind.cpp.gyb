@@ -24,6 +24,7 @@ use Gyb\Syntax\Token\Punctuator;
 namespace polar::syntax {
 
 namespace {
+
 StringRef get_token_text_internal(TokenKindType kind)
 {
    switch(kind) {
@@ -57,156 +58,109 @@ StringRef get_token_text(TokenKindType kind)
    return text;
 }
 
-void dump_token_kind(RawOutStream &outStream, TokenKindType kind)
+StringRef get_token_kind_str(TokenKindType kind)
 {
    switch(kind) {
 <?php
 foreach ($TOKENS as $token) {
    $kind = $token->getKind();
-   if (!empty($text)) {
 ?>
    case TokenKindType::<?= $kind ?>:
-      outStream << "<?= $kind ?>";
-      return;
+      return "<?= $kind ?>";
+<?php
+}
+?>
+   }
+   return StringRef();
+}
+
+TokenCategory get_token_category(TokenKindType kind)
+{
+   switch(kind) {
+<?php
+foreach ($TOKENS as $token) {
+   $kind = $token->getKind();
+?>
+   case TokenKindType::<?= $kind ?>:
+<?php
+   if ($token instanceof DeclKeyword) {
+?>
+      return TokenCategory::DeclKeyword;
+<?php
+   } elseif ($token instanceof ExprKeyword) {
+?>
+      return TokenCategory::ExprKeyword;
+<?php
+   } elseif ($token instanceof StmtKeyword) {
+?>
+      return TokenCategory::StmtKeyword;
+<?php
+   } elseif ($token instanceof InternalKeyword) {
+?>
+      return TokenCategory::Internal;
+<?php
+   } elseif ($token instanceof Keyword) {
+?>
+      return TokenCategory::Keyword;
+<?php
+   } elseif ($token instanceof Misc) {
+?>
+      return TokenCategory::Misc;
+<?php
+   } else {
+?>
+      return TokenCategory::Punctuator;
 <?php
    }
 }
 ?>
-   };
+   }
+   return TokenCategory::Unknown;
+}
+
+void dump_token_kind(RawOutStream &outStream, TokenKindType kind)
+{
+   StringRef kindStr = get_token_kind_str(kind);
+   if (!kindStr.empty()) {
+      outStream << kindStr;
+      return;
+   }
    polar_unreachable("unknown token kind");
 }
 
 bool is_internal_token(TokenKindType kind)
 {
-   switch(kind) {
-<?php
-foreach ($TOKENS as $token) {
-   $kind = $token->getKind();
-   if ($token instanceof InternalKeyword) {
-?>
-   case TokenKindType::<?= $kind ?>:
-      return true;
-<?php
-   }
-}
-?>
-   default:
-      return false;
-   };
+   return get_token_category(kind) == TokenCategory::Internal;
 }
 
 bool is_keyword_token(TokenKindType kind)
 {
-   switch(kind) {
-<?php
-foreach ($TOKENS as $token) {
-   $kind = $token->getKind();
-   if ($token instanceof Keyword) {
-?>
-   case TokenKindType::<?= $kind ?>:
-      return true;
-<?php
-   }
-}
-?>
-   default:
-      return false;
-   };
+   return get_token_category(kind) == TokenCategory::Keyword;
 }
 
 bool is_decl_keyword_token(TokenKindType kind)
 {
-   switch(kind) {
-<?php
-foreach ($TOKENS as $token) {
-   $kind = $token->getKind();
-   if ($token instanceof DeclKeyword) {
-?>
-   case TokenKindType::<?= $kind ?>:
-      return true;
-<?php
-   }
-}
-?>
-   default:
-      return false;
-   };
+   return get_token_category(kind) == TokenCategory::DeclKeyword;
 }
 
 bool is_stmt_keyword_token(TokenKindType kind)
 {
-   switch(kind) {
-<?php
-foreach ($TOKENS as $token) {
-   $kind = $token->getKind();
-   if ($token instanceof StmtKeyword) {
-?>
-   case TokenKindType::<?= $kind ?>:
-      return true;
-<?php
-   }
-}
-?>
-   default:
-      return false;
-   };
+   return get_token_category(kind) == TokenCategory::StmtKeyword;
 }
 
 bool is_expr_keyword_token(TokenKindType kind)
 {
-   switch(kind) {
-<?php
-foreach ($TOKENS as $token) {
-   $kind = $token->getKind();
-   if ($token instanceof ExprKeyword) {
-?>
-   case TokenKindType::<?= $kind ?>:
-      return true;
-<?php
-   }
-}
-?>
-   default:
-      return false;
-   };
+   return get_token_category(kind) == TokenCategory::ExprKeyword;
 }
 
 bool is_punctuator_token(TokenKindType kind)
 {
-   switch(kind) {
-<?php
-foreach ($TOKENS as $token) {
-   $kind = $token->getKind();
-   if ($token instanceof Punctuator) {
-?>
-   case TokenKindType::<?= $kind ?>:
-      return true;
-<?php
-   }
-}
-?>
-   default:
-      return false;
-   };
+   return get_token_category(kind) == TokenCategory::Punctuator;
 }
 
 bool is_misc_token(TokenKindType kind)
 {
-   switch(kind) {
-<?php
-foreach ($TOKENS as $token) {
-   $kind = $token->getKind();
-   if ($token instanceof Misc) {
-?>
-   case TokenKindType::<?= $kind ?>:
-      return true;
-<?php
-   }
-}
-?>
-   default:
-      return false;
-   };
+   return get_token_category(kind) == TokenCategory::Misc;
 }
 
 } // polar::syntax

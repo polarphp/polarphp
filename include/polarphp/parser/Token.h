@@ -39,6 +39,7 @@ using polar::basic::FlagSet;
 using polar::utils::RawOutStream;
 using polar::syntax::TokenKindType;
 using polar::parser::internal::ParserSemantic;
+using polar::syntax::TokenCategory;
 
 class TokenFlags final : public FlagSet<std::uint8_t>
 {
@@ -147,16 +148,6 @@ public:
       return false;
    }
 
-   bool isAnyOperator() const
-   {
-      return false;
-   }
-
-   bool isNotAnyOperator() const
-   {
-      return !isAnyOperator();
-   }
-
    /// Determine whether this token occurred at the start of a line.
    bool isAtStartOfLine() const
    {
@@ -207,27 +198,34 @@ public:
       return m_flags.isNeedCorrectLNumberOverflow();
    }
 
-   /// True if the token is an identifier
-   bool isIdentifier() const
+   bool isDeclKeyword() const
    {
-      return false;
+      return polar::syntax::is_decl_keyword_token(m_kind);
    }
 
-   /// True if the token is any keyword.
+   bool isStmtKeyword() const
+   {
+      return polar::syntax::is_stmt_keyword_token(m_kind);
+   }
+
+   bool isExprKeyword() const
+   {
+      return polar::syntax::is_expr_keyword_token(m_kind);
+   }
+
    bool isKeyword() const
    {
-      return false;
-   }
-
-   /// True if the token is any literal.
-   bool isLiteral() const
-   {
-      return false;
+      return polar::syntax::is_keyword_token(m_kind);
    }
 
    bool isPunctuation() const
    {
-      return false;
+      return polar::syntax::is_punctuator_token(m_kind);
+   }
+
+   bool isInternal() const
+   {
+      return polar::syntax::is_internal_token(m_kind);
    }
 
    bool hasValue() const

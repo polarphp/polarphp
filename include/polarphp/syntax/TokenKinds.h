@@ -24,6 +24,7 @@ namespace polar::syntax {
 
 enum class TokenCategory
 {
+   Unknown,
    Internal,
    Keyword,
    DeclKeyword,
@@ -42,7 +43,11 @@ using polar::utils::RawOutStream;
 bool is_token_text_determined(TokenKindType kind);
 
 /// If a token kind has determined text, return the text; otherwise assert.
+
 StringRef get_token_text(TokenKindType kind);
+StringRef get_token_kind_str(TokenKindType kind);
+TokenCategory get_token_category(TokenKindType kind);
+
 void dump_token_kind(RawOutStream &outStream, TokenKindType kind);
 bool is_internal_token(TokenKindType kind);
 bool is_keyword_token(TokenKindType kind);
