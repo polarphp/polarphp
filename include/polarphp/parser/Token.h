@@ -42,8 +42,9 @@ using polar::parser::internal::ParserSemantic;
 
 class TokenFlags final : public FlagSet<std::uint8_t>
 {
-protected:
-   enum {
+public:
+   enum FlagType
+   {
       NeedCorrectLNumberOverflow,
       AtStartOfLine,
       EscapedIdentifier,
@@ -51,7 +52,7 @@ protected:
    };
 
 public:
-   explicit TokenFlags(std::uint16_t bits)
+   explicit TokenFlags(std::uint8_t bits)
       : FlagSet(bits)
    {}
 
@@ -74,6 +75,7 @@ class Token
 public:
    enum class ValueType
    {
+      Invalid,
       Unknown,
       LongLong,
       String,

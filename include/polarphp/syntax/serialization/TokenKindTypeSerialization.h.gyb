@@ -16,6 +16,7 @@
 
 #include "nlohmann/json.hpp"
 #include "polarphp/syntax/internal/TokenEnumDefs.h"
+#include "polarphp/parser/Token.h"
 
 namespace polar::syntax::internal {
 
@@ -33,6 +34,28 @@ foreach ($TOKENS as $token) {
 ?>
 })
 
-}
+} // polar::syntax::internal
+
+namespace polar::parser {
+
+using ValueType = Token::ValueType;
+using TokenFlagType = TokenFlags::FlagType;
+
+NLOHMANN_JSON_SERIALIZE_ENUM(ValueType, {
+   {ValueType::Invalid, nullptr},
+   {ValueType::Unknown, "Unknown"},
+   {ValueType::LongLong, "LongLong"},
+   {ValueType::String, "String"},
+   {ValueType::Double, "Double"}
+})
+
+NLOHMANN_JSON_SERIALIZE_ENUM(TokenFlagType, {
+   {TokenFlagType::NeedCorrectLNumberOverflow, "NeedCorrectLNumberOverflow"},
+   {TokenFlagType::AtStartOfLine, "AtStartOfLine"},
+   {TokenFlagType::EscapedIdentifier, "EscapedIdentifier"},
+   {TokenFlagType::InvalidLexValue, "InvalidLexValue"},
+})
+
+} // polar::parser
 
 #endif // POLARPHP_SYNTAX_SERIALIZATION_TOKEN_KINDTYPE_SERIALIZATION_H

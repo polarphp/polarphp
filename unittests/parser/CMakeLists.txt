@@ -11,7 +11,8 @@
 
 polar_add_unittest(PolarCompilerTests ParserLexerTest
    ../TestEntry.cpp
-   LexerTest.cpp)
+   LexerTest.cpp
+   TokenJsonSerializationTest.cpp)
 target_link_libraries(ParserLexerTest PRIVATE PolarParser)
 
 add_library(AbstractParserSupport SHARED

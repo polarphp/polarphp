@@ -12,6 +12,15 @@
 #ifndef POLARPHP_PARSER_SERIALIZATION_TOKEN_JSON_SERIALIZATION_H
 #define POLARPHP_PARSER_SERIALIZATION_TOKEN_JSON_SERIALIZATION_H
 
+#include "nlohmann/json.hpp"
 
+namespace polar::parser {
+
+using nlohmann::json;
+class TokenFlags;
+
+void to_json(json &jsonObject, const TokenFlags &flags);
+
+} // polar::parser
 
 #endif // POLARPHP_PARSER_SERIALIZATION_TOKEN_JSON_SERIALIZATION_H

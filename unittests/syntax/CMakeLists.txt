@@ -12,7 +12,6 @@
 polar_add_unittest(PolarCompilerTests SyntaxTest
    ../TestEntry.cpp
    TriviaTest.cpp
-   AbsolutePositionTest.cpp
-   TokenJsonSerializationTest.cpp)
+   AbsolutePositionTest.cpp)
 polar_detect_compiler_root_dir(compilerRootDir)
 target_link_libraries(SyntaxTest PRIVATE PolarSyntax)
