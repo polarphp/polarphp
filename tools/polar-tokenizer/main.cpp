@@ -20,6 +20,8 @@
 #include "polarphp/syntax/TokenKinds.h"
 
 #include <memory>
+#include <iostream>
+#include <fstream>
 
 using polar::utils::MemoryBuffer;
 using polar::utils::OptionalError;
@@ -28,6 +30,10 @@ using polar::parser::SourceManager;
 using polar::parser::Lexer;
 using polar::parser::Token;
 using polar::parser::TokenKindType;
+
+#define READ_STDIN_ERROR 1
+#define OPEN_SOURCE_FILE_ERROR 2
+#define OPEN_OUTPUT_FILE_ERROR 3
 
 int main(int argc, char * argv[])
 {
@@ -44,7 +50,7 @@ int main(int argc, char * argv[])
          sourceBuffer = std::move(tempBuffer.get());
       } else {
          std::cerr << "read stdin error: " << tempBuffer.getError() << std::endl;
-         return 1;
+         return READ_STDIN_ERROR;
       }
    } else {
       OptionalError<std::unique_ptr<MemoryBuffer>> tempBuffer = MemoryBuffer::getFile(filePath);
@@ -52,10 +58,21 @@ int main(int argc, char * argv[])
          sourceBuffer = std::move(tempBuffer.get());
       } else {
          std::cerr << "read source file error: " << tempBuffer.getError() << std::endl;
-         return 2;
+         return OPEN_SOURCE_FILE_ERROR;
       }
    }
 
+   std::ostream *output = nullptr;
+   std::unique_ptr<std::ofstream> foutstream;
+   if (outputFilePath.empty()) {
+      output = &std::cout;
+   } else {
+      foutstream = std::make_unique<std::ofstream>(outputFilePath, std::ios_base::out | std::ios_base::trunc);
+      if (foutstream->fail()) {
+         std::cerr << "open output file error: " << strerror(errno) << std::endl;
+         return OPEN_OUTPUT_FILE_ERROR;
+      }
+   }
    LangOptions langOpts{};
    SourceManager sourceMgr;
    unsigned bufferId = sourceMgr.addNewSourceBuffer(std::move(sourceBuffer));

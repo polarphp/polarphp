@@ -19,19 +19,19 @@
 
 namespace polar::syntax::internal {
 
-NLOHMANN_JSON_SERIALIZE_ENUM(TokenKindType,
+NLOHMANN_JSON_SERIALIZE_ENUM(TokenKindType, {
    {T_UNKNOWN_MARK, nullptr},
 <?php 
 foreach ($TOKENS as $token) {
    $tokenKind = $token->getKind();
    if ($tokenKind != "T_UNKNOWN_MARK") {
 ?>
-   {<?= $tokenKind ?>, "<?= $tokenKind ?>"}
+   {<?= $tokenKind ?>, "<?= $tokenKind ?>"},
 <?php
    }
 }
 ?>
-);
+})
 
 }
 

@@ -55,8 +55,7 @@ public:
       : FlagSet(bits)
    {}
 
-   constexpr TokenFlags()
-   {}
+   constexpr TokenFlags() {}
 
    FLAGSET_DEFINE_FLAG_ACCESSORS(NeedCorrectLNumberOverflow, isNeedCorrectLNumberOverflow, setNeedCorrectLNumberOverflow)
    FLAGSET_DEFINE_FLAG_ACCESSORS(AtStartOfLine, isAtStartOfLine, setAtStartOfLine)

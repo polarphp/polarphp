@@ -79,6 +79,7 @@ polar_add_unittest(PolarBaseLibTests BasicAdtTest
    TinyPtrVectorTest.cpp
    TwineTest.cpp
    TripleTest.cpp
+   JsonSerializationTest.cpp
    )
 
 target_link_libraries(BasicAdtTest PRIVATE TestSupport)
