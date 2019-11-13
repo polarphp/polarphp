@@ -16,5 +16,5 @@ polar_collect_files(
 
 polar_add_executable(
    polar-ast-dumper ${POLAR_TOOLS_AST_DUMPER}
-   LINK_LIBS nlohmann_json::nlohmann_json PolarSyntax PolarParser
+   LINK_LIBS PolarSyntax PolarParser
    )

@@ -115,7 +115,7 @@ public:
             m_isTaskInFlight = true;
          }
       }
-      return std::move(future);
+      return future;
    }
 
 private:

@@ -15,4 +15,4 @@ polar_collect_files(
    OUTPUT_VAR POLAR_TOOLS_TOKENIZER)
 
 polar_add_executable(polar-tokenizer ${POLAR_TOOLS_TOKENIZER}
-   LINK_LIBS nlohmann_json::nlohmann_json PolarSyntax PolarParser PolarUtils)
+   LINK_LIBS PolarSyntax PolarParser PolarUtils)

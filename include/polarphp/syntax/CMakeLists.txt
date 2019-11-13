@@ -16,7 +16,8 @@ set(generated_include_sources
     SyntaxNodeFactory.h.gyb
     SyntaxNodeVisitor.h.gyb
     Trivia.h.gyb
-    internal/TokenEnumDefs.h.gyb)
+    internal/TokenEnumDefs.h.gyb
+    serialization/TokenKindTypeSerialization.h.gyb)
 
 add_gyb_target(polar-syntax-generated-headers
      "${generated_include_sources}")

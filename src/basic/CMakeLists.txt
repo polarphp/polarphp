@@ -21,6 +21,6 @@ set_target_properties(
    PolarBasic
    PROPERTIES
    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR};"
-   INTERFACE_LINK_LIBRARIES "PolarGlobal")
+   INTERFACE_LINK_LIBRARIES "PolarGlobal;nlohmann_json::nlohmann_json")
 
-target_link_libraries(PolarBasic PolarGlobal)
+target_link_libraries(PolarBasic PolarGlobal nlohmann_json::nlohmann_json)

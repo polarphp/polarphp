@@ -36,3 +36,9 @@ polar_add_library(PolarSyntax SHARED
    LINK_LIBS PolarUtils PolarKernel
    DEPENDS PolarRe2cLangLexer polar-syntax-generated-headers)
 
+set_target_properties(
+   PolarSyntax
+   PROPERTIES
+   INTERFACE_LINK_LIBRARIES "PolarBasic;PolarGlobal;"
+   )
+
