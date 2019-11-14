@@ -91,6 +91,10 @@ public:
         m_text(text)
    {}
 
+   Token(TokenKindType kind, unsigned commentLength = 0)
+      : Token(kind, polar::syntax::get_token_text(kind), commentLength)
+   {}
+
    Token()
       : Token(TokenKindType::T_UNKNOWN_MARK, {}, 0)
    {}
@@ -104,6 +108,11 @@ public:
    {
       m_kind = kind;
       return *this;
+   }
+
+   StringRef getName() const
+   {
+      return polar::syntax::get_token_name(m_kind);
    }
 
    Token & clearCommentLegth()
@@ -196,6 +205,11 @@ public:
    bool isNeedCorrectLNumberOverflow() const
    {
       return m_flags.isNeedCorrectLNumberOverflow();
+   }
+
+   TokenCategory getCategory() const
+   {
+      return polar::syntax::get_token_category(m_kind);
    }
 
    bool isDeclKeyword() const

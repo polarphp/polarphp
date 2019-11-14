@@ -16,6 +16,7 @@
 
 #include "nlohmann/json.hpp"
 #include "polarphp/syntax/internal/TokenEnumDefs.h"
+#include "polarphp/syntax/TokenKinds.h"
 #include "polarphp/parser/Token.h"
 
 namespace polar::syntax::internal {
@@ -35,6 +36,19 @@ foreach ($TOKENS as $token) {
 })
 
 } // polar::syntax::internal
+
+namespace polar::syntax {
+NLOHMANN_JSON_SERIALIZE_ENUM(TokenCategory, {
+   {TokenCategory::Unknown, nullptr},
+   {TokenCategory::Internal, "Internal"},
+   {TokenCategory::Keyword, "Keyword"},
+   {TokenCategory::DeclKeyword, "DeclKeyword"},
+   {TokenCategory::StmtKeyword, "StmtKeyword"},
+   {TokenCategory::ExprKeyword, "ExprKeyword"},
+   {TokenCategory::Punctuator, "Punctuator"},
+   {TokenCategory::Misc, "Misc"}
+})
+} // polar::syntax
 
 namespace polar::parser {
 

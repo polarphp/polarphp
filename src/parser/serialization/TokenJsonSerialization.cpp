@@ -37,4 +37,10 @@ void to_json(json &jsonObject, const TokenFlags &flags)
    jsonObject = flagList;
 }
 
+void to_json(json &jsonObject, const Token &token)
+{
+   jsonObject = json::object();
+   jsonObject["name"] = token.getName();
+}
+
 } // polar::parser

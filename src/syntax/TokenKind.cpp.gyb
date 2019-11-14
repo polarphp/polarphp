@@ -43,8 +43,8 @@ foreach ($TOKENS as $token) {
    }
    return StringRef();
 }
-} // anonymous namespace
 
+} // anonymous namespace
 
 bool is_token_text_determined(TokenKindType kind) 
 {
@@ -56,6 +56,23 @@ StringRef get_token_text(TokenKindType kind)
    auto text = get_token_text_internal(kind);
    assert(!text.empty() && "token kind cannot be determined");
    return text;
+}
+
+StringRef get_token_name(TokenKindType kind)
+{
+   switch(kind) {
+<?php
+foreach ($TOKENS as $token) {
+   $kind = $token->getKind();
+   $name = $token->getName();
+?>
+   case TokenKindType::<?= $kind ?>:
+      return "<?= $name ?>";
+<?php
+}
+?>
+   }
+   return StringRef();
 }
 
 StringRef get_token_kind_str(TokenKindType kind)

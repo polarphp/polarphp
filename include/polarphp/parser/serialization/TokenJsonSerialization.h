@@ -18,8 +18,10 @@ namespace polar::parser {
 
 using nlohmann::json;
 class TokenFlags;
+class Token;
 
 void to_json(json &jsonObject, const TokenFlags &flags);
+void to_json(json &jsonObject, const Token &token);
 
 } // polar::parser
 

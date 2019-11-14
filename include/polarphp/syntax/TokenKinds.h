@@ -46,6 +46,7 @@ bool is_token_text_determined(TokenKindType kind);
 
 StringRef get_token_text(TokenKindType kind);
 StringRef get_token_kind_str(TokenKindType kind);
+StringRef get_token_name(TokenKindType kind);
 TokenCategory get_token_category(TokenKindType kind);
 
 void dump_token_kind(RawOutStream &outStream, TokenKindType kind);

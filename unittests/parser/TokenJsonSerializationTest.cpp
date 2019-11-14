@@ -87,4 +87,11 @@ TEST(TokenJsonSerializationTest, testTokenFlags)
    ASSERT_TRUE(std::find(flagList.begin(), flagList.end(), TokenFlags::FlagType::InvalidLexValue) == flagList.end());
 }
 
+TEST(TokenJsonSerializationTest, testToken)
+{
+   {
+      Token token;
+   }
+}
+
 } // anonymous namespace
