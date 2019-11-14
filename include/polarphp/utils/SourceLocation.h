@@ -34,8 +34,6 @@ namespace polar::utils {
 /// Represents a location in source code.
 class SMLocation
 {
-   const char *m_ptr = nullptr;
-
 public:
    SMLocation() = default;
 
@@ -65,6 +63,9 @@ public:
       location.m_ptr = ptr;
       return location;
    }
+
+private:
+   const char *m_ptr = nullptr;
 };
 
 /// Represents a range in source code.
@@ -75,25 +76,25 @@ public:
 class SMRange
 {
 public:
-   SMLocation m_start;
-   SMLocation m_end;
-
    SMRange() = default;
-   SMRange(std::nullopt_t)
-   {}
+   SMRange(std::nullopt_t) {}
 
-   SMRange(SMLocation start, SMLocation end)
-      : m_start(start),
-        m_end(end)
+   SMRange(SMLocation startLoc, SMLocation endLoc)
+      : start(startLoc),
+        end(endLoc)
    {
-      assert(m_start.isValid() == m_end.isValid() &&
-             "m_start and m_end should either both be valid or both be invalid!");
+      assert(start.isValid() == end.isValid() &&
+             "start and end should either both be valid or both be invalid!");
    }
 
    bool isValid() const
    {
-      return m_start.isValid();
+      return start.isValid();
    }
+
+public:
+   SMLocation start;
+   SMLocation end;
 };
 
 } // polar::utils

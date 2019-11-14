@@ -13,7 +13,7 @@
 #include "polarphp/syntax/serialization/TokenKindTypeSerialization.h"
 #include "polarphp/parser/Token.h"
 
-#include <list>
+#include <set>
 
 namespace polar::parser {
 
@@ -21,26 +21,52 @@ using FlagType = TokenFlags::FlagType;
 
 void to_json(json &jsonObject, const TokenFlags &flags)
 {
-   std::list<TokenFlags::FlagType> flagList{};
+   std::set<TokenFlags::FlagType> flagList{};
    if (flags.isAtStartOfLine()) {
-      flagList.push_back(FlagType::AtStartOfLine);
+      flagList.insert(FlagType::AtStartOfLine);
    }
    if (flags.isInvalidLexValue()) {
-      flagList.push_back(FlagType::InvalidLexValue);
+      flagList.insert(FlagType::InvalidLexValue);
    }
    if (flags.isEscapedIdentifier()) {
-      flagList.push_back(FlagType::EscapedIdentifier);
+      flagList.insert(FlagType::EscapedIdentifier);
    }
    if (flags.isNeedCorrectLNumberOverflow()) {
-      flagList.push_back(FlagType::NeedCorrectLNumberOverflow);
+      flagList.insert(FlagType::NeedCorrectLNumberOverflow);
    }
    jsonObject = flagList;
+}
+
+void from_json(json &jsonObject, TokenFlags &flags)
+{
+   auto items = jsonObject.get<std::set<FlagType>>();
+   if (items.find(FlagType::AtStartOfLine) != items.end()) {
+      flags.setAtStartOfLine(true);
+   }
+   if (items.find(FlagType::InvalidLexValue) != items.end()) {
+      flags.setInvalidLexValue(true);
+   }
+   if (items.find(FlagType::EscapedIdentifier) != items.end()) {
+      flags.setEscapedIdentifier(true);
+   }
+   if (items.find(FlagType::NeedCorrectLNumberOverflow) != items.end()) {
+      flags.setNeedCorrectLNumberOverflow(true);
+   }
 }
 
 void to_json(json &jsonObject, const Token &token)
 {
    jsonObject = json::object();
    jsonObject["name"] = token.getName();
+   jsonObject["kind"] = token.getKind();
+   jsonObject["category"] = token.getCategory();
+   jsonObject["flags"] = token.getFlags();
+}
+
+void from_json(json &jsonObject, Token &token)
+{
+   TokenKindType kind = jsonObject.at("token").get<TokenKindType>();
+   token.setKind(kind);
 }
 
 } // polar::parser

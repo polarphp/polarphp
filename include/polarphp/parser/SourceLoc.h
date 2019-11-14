@@ -58,8 +58,7 @@ using polar::ast::DiagnosticConsumer;
 class SourceLoc
 {
 public:
-   SourceLoc()
-   {}
+   SourceLoc() {}
 
    explicit SourceLoc(BasicSMLoc loc)
       : m_loc(loc)
@@ -222,9 +221,6 @@ private:
 /// A half-open character-based source range.
 class CharSourceRange
 {
-   SourceLoc m_start;
-   std::size_t m_byteLength;
-
 public:
    /// Constructs an invalid range.
    CharSourceRange() = default;
@@ -336,6 +332,10 @@ public:
    }
 
    void dump(const SourceManager &sourceMgr) const;
+
+private:
+   SourceLoc m_start;
+   std::size_t m_byteLength;
 };
 
 } // parser

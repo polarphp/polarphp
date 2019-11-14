@@ -225,20 +225,20 @@ SMDiagnostic SourceMgr::getMessage(SMLocation loc, SourceMgr::DiagKind m_kind,
             continue;
          }
          // If the line doesn't contain any part of the range, then ignore it.
-         if (range.m_start.getPointer() > lineEnd || range.m_end.getPointer() < lineStart) {
+         if (range.start.getPointer() > lineEnd || range.end.getPointer() < lineStart) {
             continue;
          }
          // Ignore pieces of the range that go onto other lines.
-         if (range.m_start.getPointer() < lineStart) {
-            range.m_start = SMLocation::getFromPointer(lineStart);
+         if (range.start.getPointer() < lineStart) {
+            range.start = SMLocation::getFromPointer(lineStart);
          }
-         if (range.m_end.getPointer() > lineEnd) {
-            range.m_end = SMLocation::getFromPointer(lineEnd);
+         if (range.end.getPointer() > lineEnd) {
+            range.end = SMLocation::getFromPointer(lineEnd);
          }
          // Translate from SMLocation ranges to column ranges.
          // FIXME: Handle multibyte characters.
-         colRanges.push_back(std::make_pair(range.m_start.getPointer()-lineStart,
-                                            range.m_end.getPointer()-lineStart));
+         colRanges.push_back(std::make_pair(range.start.getPointer()-lineStart,
+                                            range.end.getPointer()-lineStart));
       }
 
       lineAndCol = getLineAndColumn(loc, curBuffer);
@@ -325,17 +325,17 @@ void build_fixit_line(std::string &caretLine, std::string &fixItLine,
       }
       SMRange range = iter->getRange();
       // If the line doesn't contain any part of the range, then ignore it.
-      if (range.m_start.getPointer() > lineEnd || range.m_end.getPointer() < lineStart) {
+      if (range.start.getPointer() > lineEnd || range.end.getPointer() < lineStart) {
          continue;
       }
       // Translate from SMLocation to column.
       // Ignore pieces of the range that go onto other lines.
       // FIXME: Handle multibyte characters in the source line.
       unsigned firstCol;
-      if (range.m_start.getPointer() < lineStart) {
+      if (range.start.getPointer() < lineStart) {
          firstCol = 0;
       } else {
-         firstCol = range.m_start.getPointer() - lineStart;
+         firstCol = range.start.getPointer() - lineStart;
       }
       // If we inserted a long previous hint, push this one forwards, and add
       // an extra space to show that this is not part of the previous
@@ -368,10 +368,10 @@ void build_fixit_line(std::string &caretLine, std::string &fixItLine,
       // For replacements, mark the removal range with '~'.
       // FIXME: Handle multibyte characters in the source line.
       unsigned lastCol;
-      if (range.m_end.getPointer() >= lineEnd) {
+      if (range.end.getPointer() >= lineEnd) {
          lastCol = lineEnd - lineStart;
       } else{
-         lastCol = range.m_end.getPointer() - lineStart;
+         lastCol = range.end.getPointer() - lineStart;
       }
       std::fill(&caretLine[firstCol], &caretLine[lastCol], '~');
    }

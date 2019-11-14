@@ -21,7 +21,9 @@ class TokenFlags;
 class Token;
 
 void to_json(json &jsonObject, const TokenFlags &flags);
+void from_json(json &jsonObject, TokenFlags &flags);
 void to_json(json &jsonObject, const Token &token);
+void from_json(json &jsonObject, Token &token);
 
 } // polar::parser
 

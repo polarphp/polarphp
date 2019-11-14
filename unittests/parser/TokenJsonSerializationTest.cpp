@@ -20,6 +20,8 @@
 
 using polar::syntax::internal::TokenKindType;
 using polar::parser::Token;
+using polar::syntax::TokenKindType;
+using polar::syntax::TokenCategory;
 using polar::parser::TokenFlags;
 using nlohmann::json;
 
@@ -81,16 +83,31 @@ TEST(TokenJsonSerializationTest, testTokenFlags)
    tokenFlags.setNeedCorrectLNumberOverflow(true);
    json flagsJsonObject = tokenFlags;
    ASSERT_EQ(flagsJsonObject.size(), 2);
-   auto flagList = flagsJsonObject.get<std::list<TokenFlags::FlagType>>();
-   ASSERT_TRUE(std::find(flagList.begin(), flagList.end(), TokenFlags::FlagType::AtStartOfLine) != flagList.end());
-   ASSERT_TRUE(std::find(flagList.begin(), flagList.end(), TokenFlags::FlagType::NeedCorrectLNumberOverflow) != flagList.end());
-   ASSERT_TRUE(std::find(flagList.begin(), flagList.end(), TokenFlags::FlagType::InvalidLexValue) == flagList.end());
+   auto flagList = flagsJsonObject.get<std::set<TokenFlags::FlagType>>();
+   ASSERT_TRUE(flagList.find(TokenFlags::FlagType::AtStartOfLine) != flagList.end());
+   ASSERT_TRUE(flagList.find(TokenFlags::FlagType::NeedCorrectLNumberOverflow) != flagList.end());
+   ASSERT_TRUE(flagList.find(TokenFlags::FlagType::InvalidLexValue) == flagList.end());
 }
 
 TEST(TokenJsonSerializationTest, testToken)
 {
    {
       Token token;
+      token.setAtStartOfLine(true);
+      json jsonObject = token;
+      TokenKindType kind = jsonObject.at("kind").get<TokenKindType>();
+      std::string name = jsonObject.at("name").get<std::string>();
+      TokenCategory category = jsonObject.at("category").get<TokenCategory>();
+      ASSERT_EQ(kind, TokenKindType::T_UNKNOWN_MARK);
+      ASSERT_EQ(name, "UnknownToken");
+      ASSERT_EQ(category, TokenCategory::Misc);
+      std::cout << jsonObject.dump(3) << std::endl;
+   }
+   {
+      Token token(TokenKindType::T_NAMESPACE);
+      token.setInvalidLexValue(true);
+      json jsonObject = token;
+      std::cout << jsonObject.dump(3) << std::endl;
    }
 }
 

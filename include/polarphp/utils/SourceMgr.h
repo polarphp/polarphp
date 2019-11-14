@@ -289,11 +289,11 @@ public:
 
    bool operator<(const SMFixIt &other) const
    {
-      if (m_range.m_start.getPointer() != other.m_range.m_start.getPointer()) {
-         return m_range.m_start.getPointer() < other.m_range.m_start.getPointer();
+      if (m_range.start.getPointer() != other.m_range.start.getPointer()) {
+         return m_range.start.getPointer() < other.m_range.start.getPointer();
       }
-      if (m_range.m_end.getPointer() != other.m_range.m_end.getPointer()) {
-         return m_range.m_end.getPointer() < other.m_range.m_end.getPointer();
+      if (m_range.end.getPointer() != other.m_range.end.getPointer()) {
+         return m_range.end.getPointer() < other.m_range.end.getPointer();
       }
       return m_text < other.m_text;
    }

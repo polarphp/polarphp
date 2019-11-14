@@ -36,10 +36,11 @@ namespace polar::parser {
 
 using polar::basic::StringRef;
 using polar::basic::FlagSet;
-using polar::utils::RawOutStream;
 using polar::syntax::TokenKindType;
-using polar::parser::internal::ParserSemantic;
 using polar::syntax::TokenCategory;
+using polar::parser::internal::ParserSemantic;
+using polar::utils::RawOutStream;
+using polar::utils::SMLocation;
 
 class TokenFlags final : public FlagSet<std::uint8_t>
 {
@@ -96,7 +97,7 @@ public:
    {}
 
    Token()
-      : Token(TokenKindType::T_UNKNOWN_MARK, {}, 0)
+      : Token(TokenKindType::T_UNKNOWN_MARK, 0)
    {}
 
    TokenKindType getKind() const
@@ -155,6 +156,11 @@ public:
    bool isBinaryOperator() const
    {
       return false;
+   }
+
+   TokenFlags getFlags() const
+   {
+      return m_flags;
    }
 
    /// Determine whether this token occurred at the start of a line.
@@ -284,7 +290,7 @@ public:
    CharSourceRange getCommentRange() const
    {
       if (m_commentLength == 0) {
-         return CharSourceRange(SourceLoc(polar::utils::SMLocation::getFromPointer(m_text.begin())),
+         return CharSourceRange(SourceLoc(SMLocation::getFromPointer(m_text.begin())),
                                 0);
       }
 

@@ -786,9 +786,9 @@ void FileCheckPattern::printSubstitutions(const SourceMgr &sourceMgr, StringRef 
          if (!matchedValue) {
             bool undefSeen = false;
             handle_all_errors(matchedValue.takeError(),
-                              [](const FileCheckNotFoundError &E) {},
+                              [](const FileCheckNotFoundError &) {},
             // Handled in PrintNoMatch().
-            [](const FileCheckErrorDiagnostic &E) {},
+            [](const FileCheckErrorDiagnostic &) {},
             [&](const FileCheckUndefVarError &E) {
                if (!undefSeen) {
                   outStream << "uses undefined variable(s):";
@@ -805,7 +805,7 @@ void FileCheckPattern::printSubstitutions(const SourceMgr &sourceMgr, StringRef 
          }
 
          if (matchRange.isValid())
-            sourceMgr.printMessage(matchRange.m_start, SourceMgr::DK_Note, outStream.getStr(),
+            sourceMgr.printMessage(matchRange.start, SourceMgr::DK_Note, outStream.getStr(),
             {matchRange});
          else
             sourceMgr.printMessage(SMLocation::getFromPointer(buffer.data()),
@@ -874,7 +874,7 @@ void FileCheckPattern::printFuzzyMatch(
       SMRange matchRange =
             process_match_result(FileCheckDiag::MatchFuzzy, sourceMgr, getLoc(),
                                  getCheckType(), buffer, best, 0, diags);
-      sourceMgr.printMessage(matchRange.m_start, SourceMgr::DK_Note,
+      sourceMgr.printMessage(matchRange.start, SourceMgr::DK_Note,
                              "possible intended match here");
 
       // FIXME: If we wanted to be really friendly we would show why the match
@@ -1000,8 +1000,8 @@ FileCheckDiag::FileCheckDiag(const SourceMgr &sourceMgr,
    : checkType(checkType),
      matchType(matchType)
 {
-   auto start = sourceMgr.getLineAndColumn(inputRange.m_start);
-   auto end = sourceMgr.getLineAndColumn(inputRange.m_end);
+   auto start = sourceMgr.getLineAndColumn(inputRange.start);
+   auto end = sourceMgr.getLineAndColumn(inputRange.end);
    inputStartLine = start.first;
    inputStartCol = start.second;
    inputEndLine = end.first;
@@ -1410,7 +1410,7 @@ static void print_match(bool expectedMatch, const SourceMgr &sourceMgr,
 
    sourceMgr.printMessage(
             loc, expectedMatch ? SourceMgr::DK_Remark : SourceMgr::DK_Error, message);
-   sourceMgr.printMessage(MatchRange.m_start, SourceMgr::DK_Note, "found here",
+   sourceMgr.printMessage(MatchRange.start, SourceMgr::DK_Note, "found here",
    {MatchRange});
    pattern.printSubstitutions(sourceMgr, buffer, MatchRange);
 }
@@ -1479,7 +1479,7 @@ static void print_no_match(bool expectedMatch, const SourceMgr &sourceMgr,
             loc, expectedMatch ? SourceMgr::DK_Error : SourceMgr::DK_Remark, message);
 
    // Print the "scanning from here" line.
-   sourceMgr.printMessage(SearchRange.m_start, SourceMgr::DK_Note, "scanning from here");
+   sourceMgr.printMessage(SearchRange.start, SourceMgr::DK_Note, "scanning from here");
    // Allow the pattern to print additional information if desired.
    pattern.printSubstitutions(sourceMgr, buffer);
    if (expectedMatch) {

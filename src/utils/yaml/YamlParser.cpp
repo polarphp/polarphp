@@ -1889,7 +1889,7 @@ bool Stream::failed()
 
 void Stream::printError(Node *node, const Twine &msg)
 {
-   m_scanner->printError(node->getSourceRange().m_start,
+   m_scanner->printError(node->getSourceRange().start,
                          SourceMgr::DK_Error,
                          msg,
                          node->getSourceRange());
