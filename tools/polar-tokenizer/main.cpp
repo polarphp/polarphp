@@ -40,7 +40,9 @@ int main(int argc, char * argv[])
    CLI::App tokenizer;
    std::string filePath;
    std::string outputFilePath;
-   tokenizer.add_option("sourceFilepath", filePath, "path of file to be tokenized");
+   tokenizer.name("polar-tokenizer");
+   tokenizer.footer("\nCopyright (c) 2019-2020 polar software foundation");
+   tokenizer.add_option("sourceFilepath", filePath, "path of file to be tokenized, use stdin if not specified");
    tokenizer.add_option("-o,--output", outputFilePath, "process result write into file path");
    POLAR_CLI11_PARSE(tokenizer, argc, argv);
    std::unique_ptr<MemoryBuffer> sourceBuffer;

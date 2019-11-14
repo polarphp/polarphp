@@ -31,7 +31,7 @@ void Token::dump(RawOutStream &outStream) const
    dump_token_kind(outStream, m_kind);
    outStream << "\n";
    if (is_keyword_token(m_kind) || is_punctuator_token(m_kind)) {
-      outStream << "text: " << getText() << "\n";
+      outStream << "text: " << getLexicalText() << "\n";
    }
    if (!isInvalidLexValue()) {
       if (m_kind == TokenKindType::T_VARIABLE ||

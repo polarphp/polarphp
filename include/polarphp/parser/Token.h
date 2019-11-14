@@ -89,7 +89,7 @@ public:
         m_kind(kind),
         m_commentLength(commentLength),
         m_valueType(ValueType::Unknown),
-        m_text(text)
+        m_lexicalText(text)
    {}
 
    Token(TokenKindType kind, unsigned commentLength = 0)
@@ -114,6 +114,11 @@ public:
    StringRef getName() const
    {
       return polar::syntax::get_token_name(m_kind);
+   }
+
+   StringRef getDefinedText() const
+   {
+      return polar::syntax::get_token_text(m_kind);
    }
 
    Token & clearCommentLegth()
@@ -161,6 +166,12 @@ public:
    TokenFlags getFlags() const
    {
       return m_flags;
+   }
+
+   Token &setFlags(TokenFlags flags)
+   {
+      m_flags = flags;
+      return *this;
    }
 
    /// Determine whether this token occurred at the start of a line.
@@ -250,30 +261,30 @@ public:
 
    bool hasValue() const
    {
-      return m_value.has_value();
+      return !isInvalidLexValue() && m_value.has_value();
    }
 
    /// getLoc - Return a source location identifier for the specified
    /// offset in the current file.
    SourceLoc getLoc() const
    {
-      return SourceLoc(polar::utils::SMLocation::getFromPointer(m_text.begin()));
+      return SourceLoc(polar::utils::SMLocation::getFromPointer(m_lexicalText.begin()));
    }
 
-   std::size_t getLength() const
+   std::size_t getLexicalLength() const
    {
-      return m_text.size();
+      return m_lexicalText.size();
    }
 
    CharSourceRange getRange() const
    {
-      return CharSourceRange(getLoc(), getLength());
+      return CharSourceRange(getLoc(), getLexicalLength());
    }
 
    CharSourceRange getRangeWithoutBackticks() const
    {
       SourceLoc TokLoc = getLoc();
-      std::size_t TokLength = getLength();
+      std::size_t TokLength = getLexicalLength();
       if (isEscapedIdentifier()) {
          // Adjust to account for the backticks.
          TokLoc = TokLoc.getAdvancedLoc(1);
@@ -290,7 +301,7 @@ public:
    CharSourceRange getCommentRange() const
    {
       if (m_commentLength == 0) {
-         return CharSourceRange(SourceLoc(SMLocation::getFromPointer(m_text.begin())),
+         return CharSourceRange(SourceLoc(SMLocation::getFromPointer(m_lexicalText.begin())),
                                 0);
       }
 
@@ -308,24 +319,24 @@ public:
       return SourceLoc(polar::utils::SMLocation::getFromPointer(trimComment().begin()));
    }
 
-   StringRef getRawText() const
+   StringRef getRawLexicalText() const
    {
-      return m_text;
+      return m_lexicalText;
    }
 
-   StringRef getText() const
+   StringRef getLexicalText() const
    {
       if (m_flags.isEscapedIdentifier()) {
          // Strip off the backticks on either side.
-         assert(m_text.front() == '`' && m_text.back() == '`');
-         return m_text.slice(1, m_text.size() - 1);
+         assert(m_lexicalText.front() == '`' && m_lexicalText.back() == '`');
+         return m_lexicalText.slice(1, m_lexicalText.size() - 1);
       }
-      return m_text;
+      return m_lexicalText;
    }
 
-   Token &setText(StringRef text)
+   Token &setLexicalText(StringRef text)
    {
-      m_text = text;
+      m_lexicalText = text;
       return *this;
    }
 
@@ -336,10 +347,12 @@ public:
       return *this;
    }
 
-   Token &setValue(std::int64_t value)
+   template <typename T,
+             typename std::enable_if<std::is_integral<T>::value, void *>::type = nullptr>
+   Token &setValue(T value)
    {
       m_valueType = ValueType::LongLong;
-      m_value.emplace<std::int64_t>(value);
+      m_value.emplace<std::int64_t>(static_cast<std::int64_t>(value));
       return *this;
    }
 
@@ -383,7 +396,7 @@ public:
    Token &setToken(TokenKindType kind, StringRef text = StringRef(), unsigned commentLength = 0)
    {
       m_kind = kind;
-      m_text = text;
+      m_lexicalText = text;
       m_commentLength = commentLength;
       m_flags.setEscapedIdentifier(false);
       return *this;
@@ -393,11 +406,12 @@ public:
 
    /// Dump this piece of syntax recursively.
    void dump(RawOutStream &outStream) const;
+
 private:
    StringRef trimComment() const
    {
       assert(hasComment() && "Has no comment to trim.");
-      StringRef raw(m_text.begin() - m_commentLength, m_commentLength);
+      StringRef raw(m_lexicalText.begin() - m_commentLength, m_commentLength);
       return raw.trim();
    }
 
@@ -413,7 +427,7 @@ private:
    ValueType m_valueType;
 
    /// Text - The actual string covered by the token in the source buffer.
-   StringRef m_text;
+   StringRef m_lexicalText;
 
    /// The token value
    std::any m_value;

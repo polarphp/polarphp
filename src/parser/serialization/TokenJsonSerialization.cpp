@@ -37,7 +37,7 @@ void to_json(json &jsonObject, const TokenFlags &flags)
    jsonObject = flagList;
 }
 
-void from_json(json &jsonObject, TokenFlags &flags)
+void from_json(const json &jsonObject, TokenFlags &flags)
 {
    auto items = jsonObject.get<std::set<FlagType>>();
    if (items.find(FlagType::AtStartOfLine) != items.end()) {
@@ -57,16 +57,53 @@ void from_json(json &jsonObject, TokenFlags &flags)
 void to_json(json &jsonObject, const Token &token)
 {
    jsonObject = json::object();
+   bool hasValue = token.hasValue();
    jsonObject["name"] = token.getName();
    jsonObject["kind"] = token.getKind();
    jsonObject["category"] = token.getCategory();
    jsonObject["flags"] = token.getFlags();
+   if (hasValue) {
+      jsonObject["valueType"] = token.getValueType();
+   }
+   if (!token.isInvalidLexValue()) {
+      ValueType valueType = token.getValueType();
+      TokenKindType kind = token.getKind();
+      if (valueType == ValueType::String) {
+         std::string value = token.getValue<std::string>();
+         if (kind == TokenKindType::T_VARIABLE) {
+            value = '$' + value;
+         }
+         jsonObject["value"] = value;
+      } else if (valueType == ValueType::Double) {
+         jsonObject["value"] = token.getValue<double>();
+      } else if (valueType == ValueType::LongLong) {
+         jsonObject["value"] = token.getValue<std::int64_t>();
+      }
+   }
+   jsonObject["hasValue"] = hasValue;
+   jsonObject["hasComment"] = token.hasComment();
+   jsonObject["definedText"] = token.getDefinedText();
 }
 
-void from_json(json &jsonObject, Token &token)
+void from_json(const json &jsonObject, Token &token)
 {
    TokenKindType kind = jsonObject.at("token").get<TokenKindType>();
    token.setKind(kind);
+   if (jsonObject.contains("flags")) {
+      TokenFlags flags = jsonObject.at("flags").get<TokenFlags>();
+      token.setFlags(flags);
+   }
+   bool hasValue = jsonObject.at("hasValue").get<bool>();
+   if (hasValue) {
+      ValueType valueType = jsonObject.at("valueType").get<ValueType>();
+      if (valueType == ValueType::String) {
+         token.setValue(jsonObject.at("value").get<std::string>());
+      } else if (valueType == ValueType::Double) {
+         token.setValue(jsonObject.at("value").get<double>());
+      } else if (valueType == ValueType::LongLong) {
+         token.setValue(jsonObject.at("value").get<std::int64_t>());
+      }
+   }
 }
 
 } // polar::parser

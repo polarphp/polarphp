@@ -1339,7 +1339,7 @@ SourceLoc get_loc_for_start_of_token_in_buffer(
          // that it points into whitespace. We are done here.
          break;
       }
-      if (offset < tokenOffsets + token.getLength()) {
+      if (offset < tokenOffsets + token.getLexicalLength()) {
          // Current token encompasses our source location.
          if (token.is(TokenKindType::T_IDENTIFIER_STRING)) {
             //            SmallVector<Lexer::StringSegment, 4> Segments;
@@ -1451,7 +1451,7 @@ Token Lexer::getTokenAtLocation(const SourceManager &sourceMgr, SourceLoc loc)
 
 SourceLoc Lexer::getLocForEndOfToken(const SourceManager &sourceMgr, SourceLoc loc)
 {
-   return loc.getAdvancedLocOrInvalid(getTokenAtLocation(sourceMgr, loc).getLength());
+   return loc.getAdvancedLocOrInvalid(getTokenAtLocation(sourceMgr, loc).getLexicalLength());
 }
 
 SourceLoc Lexer::getLocForStartOfToken(SourceManager &sourceMgr, SourceLoc loc)

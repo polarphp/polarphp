@@ -25,6 +25,8 @@ using polar::syntax::TokenCategory;
 using polar::parser::TokenFlags;
 using nlohmann::json;
 
+using ValueType = polar::parser::Token::ValueType;
+
 namespace {
 
 TEST(TokenJsonSerializationTest, testTokenKindEnum)
@@ -101,13 +103,65 @@ TEST(TokenJsonSerializationTest, testToken)
       ASSERT_EQ(kind, TokenKindType::T_UNKNOWN_MARK);
       ASSERT_EQ(name, "UnknownToken");
       ASSERT_EQ(category, TokenCategory::Misc);
-      std::cout << jsonObject.dump(3) << std::endl;
+      //std::cout << jsonObject.dump(3) << std::endl;
    }
    {
       Token token(TokenKindType::T_NAMESPACE);
       token.setInvalidLexValue(true);
       json jsonObject = token;
-      std::cout << jsonObject.dump(3) << std::endl;
+      TokenKindType kind = jsonObject.at("kind").get<TokenKindType>();
+      std::string name = jsonObject.at("name").get<std::string>();
+      TokenCategory category = jsonObject.at("category").get<TokenCategory>();
+      auto flagList = jsonObject.at("flags").get<std::set<TokenFlags::FlagType>>();
+      ASSERT_TRUE(flagList.find(TokenFlags::FlagType::InvalidLexValue) != flagList.end());
+      ASSERT_EQ(kind, TokenKindType::T_NAMESPACE);
+      ASSERT_EQ(name, "NamespaceKeyword");
+      ASSERT_EQ(category, TokenCategory::DeclKeyword);
+   }
+   {
+      // test token value
+      Token token(TokenKindType::T_LNUMBER);
+      token.setValue(1024);
+      json jsonObject = token;
+      ASSERT_EQ(jsonObject.at("valueType").get<ValueType>(), ValueType::LongLong);
+      ASSERT_EQ(jsonObject.at("value").get<std::int64_t>(), 1024);
+   }
+   {
+      // test token value
+      Token token(TokenKindType::T_DNUMBER);
+      token.setValue(3.14);
+      json jsonObject = token;
+      ASSERT_EQ(jsonObject.at("valueType").get<ValueType>(), ValueType::Double);
+      ASSERT_DOUBLE_EQ(jsonObject.at("value").get<double>(), 3.14);
+   }
+   {
+      // test token value
+      Token token(TokenKindType::T_IDENTIFIER_STRING);
+      token.setValue("polarphp");
+      json jsonObject = token;
+      ASSERT_EQ(jsonObject.at("valueType").get<ValueType>(), ValueType::String);
+      ASSERT_EQ(jsonObject.at("value").get<std::string>(), "polarphp");
+   }
+   {
+      // test token value
+      Token token(TokenKindType::T_ERROR);
+      token.setValue("fata error: value type error");
+      json jsonObject = token;
+      ASSERT_EQ(jsonObject.at("valueType").get<ValueType>(), ValueType::String);
+      ASSERT_EQ(jsonObject.at("value").get<std::string>(), "fata error: value type error");
+   }
+   {
+      // test token value
+      Token token(TokenKindType::T_DNUMBER);
+      token.setValue(3.14);
+      token.setInvalidLexValue(true);
+      json jsonObject = token;
+      ASSERT_EQ(jsonObject.at("hasValue").get<bool>(), false);
+   }
+   {
+      Token token(TokenKindType::T_SPACESHIP);
+      json jsonObject = token;
+      ASSERT_EQ(jsonObject.at("definedText").get<std::string>(), "<=>");
    }
 }
 
