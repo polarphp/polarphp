@@ -12,6 +12,7 @@
 
 namespace Lit\Kernel;
 
+use Lit\Exception\ValueException;
 use Lit\Utils\BooleanExpr;
 use function Lit\Utils\escape_xml_attr;
 use function Lit\Utils\quote_xml_attr;
@@ -28,7 +29,7 @@ class TestCase
     */
    private $testSuite;
    /**
-    * @var array $pathInSuite
+    * @var string $pathInSuite
     */
    private $pathInSuite;
 
@@ -187,7 +188,7 @@ class TestCase
             $featuresMinusLimits[] = $feature;
          }
       }
-      if (empty(getMissingRequiredFeaturesFromList($featuresMinusLimits))) {
+      if (empty($this->getMissingRequiredFeaturesFromList($featuresMinusLimits))) {
          return false;
       }
       return true;
