@@ -287,6 +287,22 @@ bool strip_multiline_string_indentation(Lexer &lexer, std::string &str, int inde
    return true;
 }
 
+void strip_underscores(std::string &str, size_t &len)
+{
+   std::string::iterator src = str.begin();
+   std::string::iterator dest = str.begin();
+   while (*src != '\0') {
+      if (*src != '_') {
+         *dest = *src;
+         dest++;
+      } else {
+         --len;
+      }
+      src++;
+   }
+   str.resize(len);
+}
+
 TokenKindType token_kind_map(unsigned char c)
 {
    TokenKindType token;

@@ -712,11 +712,11 @@ restart_lex:
 }
 
 <ST_IN_SCRIPTING> "}" {
-   /// RESET_DOC_COMMENT();
+   RESET_DOC_COMMENT();
    if (!lexer.yyConditonStackEmpty()) {
       lexer.popYYCondtion();
    }
-   if (lexer.m_yyCondition == COND_NAME(ST_HEREDOC) && lexer.nextLineHasHeredocEndMarker()) {
+   if (lexer.getYYCondition() == COND_NAME(ST_HEREDOC) && lexer.nextLineHasHeredocEndMarker()) {
       /// check next line is heredoc endmarker
       lexer.m_flags.setReserveHeredocSpaces(true);
    }
@@ -725,6 +725,8 @@ restart_lex:
 }
 
 <ST_LOOKING_FOR_VARNAME> {LABEL} / [[}] {
+   lexer.popYYCondtion();
+   polar_yy_push_condition(ST_IN_SCRIPTING);
    lexer.formStringVariableToken();
    return;
 }

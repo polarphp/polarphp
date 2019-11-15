@@ -437,6 +437,14 @@ bool Lexer::nextLineHasHeredocEndMarker()
    return found;
 }
 
+bool Lexer::isFoundHeredocEndMarker(std::shared_ptr<HereDocLabel> label) const
+{
+   size_t labelLength = label->name.size();
+   return isLabelStart(*m_yyCursor) &&
+         (labelLength < m_artificialEof - m_yyCursor) &&
+         (StringRef(reinterpret_cast<const char *>(m_yyCursor), labelLength) == label->name);
+}
+
 void Lexer::notifyLexicalException(StringRef msg, int code)
 {
    m_flags.setLexExceptionOccurred(true);
@@ -452,7 +460,7 @@ LexerState Lexer::getStateForBeginningOfTokenLoc(SourceLoc sourceLoc) const
    // Skip whitespace backwards until we hit a newline.  This is needed to
    // correctly lex the token if it is at the beginning of the line.
    while (ptr >= m_contentStart + 1) {
-      char c = ptr[-1];
+      unsigned char c = ptr[-1];
       if (c == ' ' || c == '\t') {
          --ptr;
          continue;
@@ -512,30 +520,35 @@ void Lexer::lexBinaryNumber()
 {
    /// The +/- 2 skips "0b"
    char *yytext = reinterpret_cast<char *>(const_cast<unsigned char *>(m_yyText));
-   char *bnumStr = yytext + 2;
-   char *bnumStrEnd = nullptr;
+   char *bnumYYStr = yytext + 2;
    size_t numLength = m_yyLength - 2;
+   bool containsUnderscores = false;
+   char *end = nullptr;
    /// Skip any leading 0s
-   while (*bnumStr == '0') {
-      ++bnumStr;
+   while (numLength > 0 && (*bnumYYStr == '0' || *bnumYYStr == '_')) {
+      ++bnumYYStr;
       --numLength;
+   }
+   containsUnderscores = std::memchr(bnumYYStr, '_', numLength) != nullptr;
+   std::string bnumStr(bnumYYStr, numLength);
+   if (containsUnderscores) {
+      strip_underscores(bnumStr, numLength);
    }
    if (numLength < sizeof(std::int64_t) * CHAR_BIT) {
       std::int64_t numValue = 0;
       if (numLength > 0) {
          errno = 0;
-         numValue = std::strtoll(bnumStr, &bnumStrEnd, 2);
-         assert(!errno && bnumStrEnd == yytext + m_yyLength);
+         numValue = std::strtoll(bnumStr.c_str(), &end, 2);
+         assert(!errno && end == bnumStr.c_str() + numLength);
       }
       formToken(TokenKindType::T_LNUMBER, m_yyText);
       m_nextToken.setValue(numValue);
    } else {
       double numValue = 0;
-      const char *tempPtr = reinterpret_cast<const char *>(bnumStrEnd);
-      numValue = polar::utils::bstr_to_double(bnumStr, &tempPtr);
+      numValue = polar::utils::bstr_to_double(bnumStr.c_str(), const_cast<const char **>(&end));
       /// errno isn't checked since we allow HUGE_VAL/INF overflow
-      assert(tempPtr == yytext + m_yyLength);
-      formToken(TokenKindType::T_DNUMBER, m_yyText);
+      assert(end == bnumStr.c_str() + numLength);
+      formToken(TokenKindType::T_DNUMBER);
       m_nextToken.setValue(numValue);
    }
 }

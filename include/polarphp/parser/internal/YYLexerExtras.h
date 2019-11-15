@@ -68,6 +68,8 @@ bool skip_to_end_of_slash_star_comment(const unsigned char *&m_yyCursor,
 const char *next_newline(const char *str, const char *end, size_t &newlineLen);
 bool strip_multiline_string_indentation(Lexer &lexer, std::string &str, int indentation, bool usingSpaces,
                                         bool newlineAtStart, bool newlineAtEnd);
+void strip_underscores(std::string &str, size_t &len);
+
 } // polar::parser::internal
 
 #endif // POLARPHP_PARSER_INTERNAL_YY_LEXER_EXTRAS_H

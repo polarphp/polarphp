@@ -510,16 +510,12 @@ private:
    /// Returns it should be tokenize.
    bool lexUnknown(bool emitDiagnosticsIfToken);
    void lexEscapedIdentifier();
-
    NullCharacterKind getNullCharacterKind(const unsigned char *ptr) const;
-
    bool nextLineHasHeredocEndMarker();
-   bool isFoundHeredocEndMarker(std::shared_ptr<HereDocLabel> label) const
+   bool isFoundHeredocEndMarker(std::shared_ptr<HereDocLabel> label) const;
+   YYLexerCondType getYYCondition() const
    {
-      long int labelLength = label->name.size();
-      return isLabelStart(*m_yyCursor) &&
-            (labelLength < m_artificialEof - m_yyCursor) &&
-            (StringRef(reinterpret_cast<const char *>(m_yyCursor), labelLength) == label->name);
+      return m_yyCondition;
    }
 
    bool isLabelStart(unsigned char c) const
