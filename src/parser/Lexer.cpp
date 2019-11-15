@@ -312,10 +312,87 @@ restart:
    case '<': case '>':
       break;
    default:
+      const unsigned char *temp = m_yyCursor - 1;
+      if (advance_if_valid_start_of_identifier(temp, m_bufferEnd)) {
+         break;
+      }
+      if (advance_if_valid_start_of_operator(temp, m_bufferEnd)) {
+         break;
+      }
+      bool shouldTokenize = lexUnknown(/*EmitDiagnosticsIfToken=*/false);
+      if (shouldTokenize) {
+         m_yyCursor = temp;
+         return;
+      }
+      size_t length = m_yyCursor - triviaStart;
+      trivia.push_back(TriviaKind::GarbageText, length);
       goto restart;
    }
    // Reset the cursor.
    --m_yyCursor;
+}
+
+bool Lexer::lexUnknown(bool emitDiagnosticsIfToken)
+{
+   const unsigned char *temp = m_yyCursor - 1;
+   if (advance_if_valid_continuation_of_identifier(temp, m_bufferEnd)) {
+      // If this is a valid identifier continuation, but not a valid identifier
+      // start, attempt to recover by eating more continuation characters.
+      if (emitDiagnosticsIfToken) {
+         //         diagnose(m_yyCursor - 1, diag::lex_invalid_identifier_start_character);
+      }
+      while (advance_if_valid_continuation_of_identifier(temp, m_bufferEnd));
+      m_yyCursor = temp;
+      return true;
+   }
+   // This character isn't allowed in polarphp source.
+   uint32_t codepoint = validate_utf8_character_and_advance(temp, m_bufferEnd);
+   if (codepoint == ~0U) {
+      //      diagnose(m_yyCursor - 1, diag::lex_invalid_utf8)
+      //            .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp), " ");
+      m_yyCursor = temp;
+      return false;// Skip presumed whitespace.
+   } else if (codepoint == 0x000000A0) {
+      // Non-breaking whitespace (U+00A0)
+      while (reinterpret_cast<const char *>(temp)[0] == '\xC2' &&
+             reinterpret_cast<const char *>(temp)[1] == '\xA0') {
+         temp += 2;
+      }
+      SmallString<8> spaces;
+      spaces.assign((temp - m_yyCursor + 1) / 2, ' ');
+      //      diagnose(m_yyCursor - 1, diag::lex_nonbreaking_space)
+      //            .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp),
+      //                               spaces);
+      m_yyCursor = temp;
+      return false;// Skip presumed whitespace.
+   } else if (codepoint == 0x0000201D) {
+      // If this is an end curly quote, just diagnose it with a fixit hint.
+      if (emitDiagnosticsIfToken) {
+         //         diagnose(m_yyCursor - 1, diag::lex_invalid_curly_quote)
+         //               .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp), "\"");
+      }
+      m_yyCursor = temp;
+      return true;
+   }
+   //   diagnose(m_yyCursor - 1, diag::lex_invalid_character)
+   //         .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp), " ");
+
+   char expectedCodepoint;
+   if ((expectedCodepoint =
+        try_convert_confusable_character_to_ascii(codepoint))) {
+
+      SmallString<4> confusedChar;
+      encode_to_utf8(codepoint, confusedChar);
+      SmallString<1> expectedChar;
+      expectedChar += expectedCodepoint;
+      //      diagnose(m_yyCursor - 1, diag::lex_confusable_character, confusedChar,
+      //               expectedChar)
+      //            .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp),
+      //                               expectedChar);
+   }
+
+   m_yyCursor = temp;
+   return false; // Skip presumed whitespace.
 }
 
 Lexer::NullCharacterKind Lexer::getNullCharacterKind(const unsigned char *ptr) const

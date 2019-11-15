@@ -44,12 +44,6 @@ union ParserStackElement;
 
 class Parser;
 
-/// Given a pointer to the starting byte of a UTF8 character, validate it and
-/// advance the lexer past it.  This returns the encoded character or ~0U if
-/// the encoding is invalid.
-///
-uint32_t validate_utf8_character_and_advance(const unsigned char *&ptr, const unsigned char *end);
-
 class Lexer final
 {
 private:
@@ -454,11 +448,41 @@ private:
       return diagnose(loc, Diagnostic(diagId, std::forward<ArgTypes>(args)...));
    }
 
+   void formToken(TokenKindType kind)
+   {
+      formToken(kind, getYYText());
+   }
+
    void formToken(TokenKindType kind, const unsigned char *tokenStart);
+   void formEscapedIdentifierToken()
+   {
+      formEscapedIdentifierToken(getYYText());
+   }
    void formEscapedIdentifierToken(const unsigned char *tokenStart);
+
+   void formVariableToken()
+   {
+      formVariableToken(getYYText());
+   }
+
    void formVariableToken(const unsigned char *tokenStart);
+
+   void formIdentifierToken()
+   {
+      formIdentifierToken(getYYText());
+   }
    void formIdentifierToken(const unsigned char *tokenStart);
+
+   void formStringVariableToken()
+   {
+      formStringVariableToken(getYYText());
+   }
    void formStringVariableToken(const unsigned char *tokenStart);
+
+   void formErrorToken()
+   {
+      formErrorToken(getYYText());
+   }
    void formErrorToken(const unsigned char *tokenStart);
 
    /// Advance to the end of the line.
@@ -483,6 +507,8 @@ private:
    void lexNowdocBody();
    void lexHereAndNowDocEnd();
    void lexTrivia(ParsedTrivia &trivia, bool isForTrailingTrivia);
+   /// Returns it should be tokenize.
+   bool lexUnknown(bool emitDiagnosticsIfToken);
    void lexEscapedIdentifier();
 
    NullCharacterKind getNullCharacterKind(const unsigned char *ptr) const;

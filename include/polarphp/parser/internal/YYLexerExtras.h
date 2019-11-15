@@ -47,9 +47,19 @@ size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexe
 bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const char *iter,
                                                const char *endMark, Lexer &lexer);
 void diagnose_embedded_null(DiagnosticEngine *diags, const unsigned char *ptr);
-bool advance_to_end_of_line(const unsigned char *&m_yyCursor, const unsigned char *bufferEnd,
+bool advance_to_end_of_line(const unsigned char *&yyCursor, const unsigned char *bufferEnd,
                             const unsigned char *codeCompletionPtr = nullptr,
                             DiagnosticEngine *diags = nullptr);
+bool encode_to_utf8(unsigned c, SmallVectorImpl<char> &result);
+/// Given a pointer to the starting byte of a UTF8 character, validate it and
+/// advance the lexer past it.  This returns the encoded character or ~0U if
+/// the encoding is invalid.
+///
+uint32_t validate_utf8_character_and_advance(const unsigned char *&ptr, const unsigned char *end);
+bool advance_if_valid_start_of_identifier(const unsigned char *&ptr, const unsigned char *end);
+bool advance_if_valid_continuation_of_identifier(const unsigned char *&ptr, const unsigned char *end);
+bool advance_if_valid_start_of_operator(const unsigned char *&ptr, const unsigned char *end);
+bool advance_if_valid_continuation_of_operator(const unsigned char *&ptr, const unsigned char *end);
 bool skip_to_end_of_slash_star_comment(const unsigned char *&m_yyCursor,
                                        const unsigned char *bufferEnd,
                                        const unsigned char *codeCompletionPtr = nullptr,
