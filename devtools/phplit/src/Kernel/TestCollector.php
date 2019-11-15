@@ -243,9 +243,9 @@ class TestCollector
          // site configuration and then in the source path.
          $subPath = array_merge($pathInSuite, [$filename]);
          $fileExecPath = $testSuite->getExecPath($subPath);
-         if ($this->findTestSuiteDir($fileExecPath, $this->litConfig)) {
+         if ($this->findTestSuiteDir($fileExecPath)) {
             list($subTestSuite, $subpathInSuite) = $this->collectTestSuite($fileExecPath,$testSuiteCache);
-         } elseif ($this->findTestSuiteDir($fileSourcePath, $this->litConfig)) {
+         } elseif ($this->findTestSuiteDir($fileSourcePath)) {
             list($subTestSuite, $subpathInSuite) = $this->collectTestSuite($fileSourcePath,$testSuiteCache);
          } else {
             $subTestSuite = null;

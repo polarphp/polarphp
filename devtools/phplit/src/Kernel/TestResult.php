@@ -12,6 +12,7 @@
 
 namespace Lit\Kernel;
 
+use Lit\Exception\ValueException;
 use Lit\Shell\AbstractMetricValue;
 
 class TestResult
