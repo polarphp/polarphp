@@ -44,9 +44,6 @@ bool encode_to_utf8(unsigned c,
 unsigned count_leading_ones(unsigned char c);
 bool is_start_of_utf8_character(unsigned char c);
 void strip_underscores(unsigned char *str, int &length);
-size_t count_str_newline(const unsigned char *str, size_t length);
-void handle_newlines(Lexer &lexer, const unsigned char *str, size_t length);
-void handle_newline(Lexer &lexer, unsigned char c);
 TokenKindType token_kind_map(unsigned char c);
 size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexer &lexer);
 bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const char *iter,

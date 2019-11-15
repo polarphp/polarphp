@@ -309,16 +309,6 @@ public:
    /// Get the token that starts at the given location.
    Token getTokenAt(SourceLoc Loc);
 
-   void incLineNumber(int count = 1)
-   {
-      m_lineNumber += count;
-   }
-
-   int getLineNumber()
-   {
-      return m_lineNumber;
-   }
-
    unsigned int getYYLength()
    {
       return m_yyLength;
@@ -590,7 +580,6 @@ private:
    std::size_t m_heredocIndentation;
    /// current token length
    std::size_t m_yyLength;
-   std::size_t m_lineNumber;
 
    LexicalEventHandler m_eventHandler = nullptr;
    LexicalExceptionHandler m_lexicalExceptionHandler = nullptr;

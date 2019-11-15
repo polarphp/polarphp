@@ -716,11 +716,6 @@ void Lexer::lexSingleQuoteString()
    if (m_yyLength - bprefix - 2 <= 1) {
       if (m_yyLength - bprefix - 2 == 1) {
          unsigned char c = *(yytext + bprefix + 1);
-         if (c == '\n' || c == '\r') {
-            incLineNumber();
-         }
-         /// TODO
-         /// ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
          strValue.push_back(c);
       }
    } else {
@@ -856,8 +851,6 @@ void Lexer::lexHeredocHeader()
    int indentation = 0;
    std::string heredocLabel;
    bool isHeredoc = true;
-   /// header include a newline
-   incLineNumber();
    int newlineLength = 1;
    if (yytext[m_yyLength - 2] == 'r') {
       // \r\n
@@ -1038,7 +1031,6 @@ void Lexer::lexHeredocBody()
 
          if (yycursor == yylimit) {
             yylength = yycursor - yytext;
-            handle_newlines(*this, yytext, yylength);
             formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
             /// save unclosed string into token
             m_nextToken.setValue(StringRef(reinterpret_cast<const char *>(yytext), yylength));
@@ -1117,9 +1109,6 @@ void Lexer::lexHeredocBody()
          formToken(TokenKindType::T_ERROR, yytext);
          return;
       }
-   } else {
-      /// just handle newline
-      handle_newlines(*this, yytext, yylength - newlineLength);
    }
    formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
    m_nextToken.setValue(filteredStr);
@@ -1162,7 +1151,6 @@ void Lexer::lexNowdocBody()
          }
          if (yycursor == yylimit) {
             m_yyLength = yycursor - yytext;
-            handle_newlines(*this, yytext, m_yyLength);
             formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
             m_nextToken.setValue(StringRef(reinterpret_cast<const char *>(yytext), yylength));
             return;
@@ -1209,7 +1197,6 @@ void Lexer::lexNowdocBody()
          return;
       }
    }
-   handle_newlines(*this, yytext, yylength - newlineLength);
    formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
    m_nextToken.setValue(filteredStr);
 }
@@ -1294,10 +1281,6 @@ void Lexer::lexImpl()
       m_flags.setReserveHeredocSpaces(false);
    }
    m_yyText = m_yyCursor;
-   // invoke yylexer
-   if (m_flags.isIncrementLineNumber()) {
-      incLineNumber();
-   }
    internal::yy_token_lex(*this);
 }
 
@@ -1379,7 +1362,6 @@ Lexer &Lexer::saveYYState()
    state.setYYLimit(m_artificialEof);
 
    state.setCondition(m_yyCondition);
-   state.setLineNumber(m_lineNumber);
    state.setLexerFlags(m_flags);
    state.setLexicalEventHandler(m_eventHandler);
    state.setLexicalExceptionHandler(m_lexicalExceptionHandler);
@@ -1405,9 +1387,7 @@ Lexer &Lexer::restoreYYState()
    m_yyCursor = state.getYYCursor();
    m_yyMarker = state.getYYMarker();
    m_artificialEof = state.getYYLimit();
-
    m_yyCondition = state.getCondition();
-   m_lineNumber = state.getLineNumber();
    m_flags = state.getLexerFlags();
    m_eventHandler = state.getLexicalEventHandler();
    m_lexicalExceptionHandler = state.getLexicalExceptionHandler();

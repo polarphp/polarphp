@@ -42,34 +42,6 @@ int token_lex_wrapper(ParserSemantic *value, YYLocation *loc, Lexer *lexer, Pars
    return token.getKind();
 }
 
-size_t count_str_newline(const unsigned char *str, size_t length)
-{
-   const unsigned char *p = str;
-   const unsigned char *boundary = p + length;
-
-   size_t count = 0;
-   while (p < boundary) {
-      if (*p == '\n' || (*p == '\r' && (*(p+1) != '\n'))) {
-         ++count;
-      }
-      p++;
-   }
-   return count;
-}
-
-void handle_newlines(Lexer &lexer, const unsigned char *str, size_t length)
-{
-   size_t count = count_str_newline(str, length);
-   lexer.incLineNumber(count);
-}
-
-void handle_newline(Lexer &lexer, unsigned char c)
-{
-   if (c == '\n' || c == '\r') {
-      lexer.incLineNumber();
-   }
-}
-
 bool encode_to_utf8(unsigned c,
                     SmallVectorImpl<char> &result)
 {
@@ -438,13 +410,11 @@ bool strip_multiline_string_indentation(Lexer &lexer, std::string &str, int inde
             break;
          }
          if (cursor == end || (*cursor != ' ' && *cursor != '\t')) {
-            lexer.incLineNumber(newLineCount);
             lexer.notifyLexicalException(0, "Invalid body indentation level (expecting an indentation level of at least %d)",
                                          indentation);
             return false;
          }
          if ((!usingSpaces && *cursor == ' ') || (usingSpaces && *cursor == '\t')) {
-            lexer.incLineNumber(newLineCount);
             lexer.notifyLexicalException("Invalid indentation - tabs and spaces cannot be mixed", 0);
             return false;
          }
@@ -553,9 +523,6 @@ size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexe
       if (*iter == '\\') {
          break;
       }
-      if (*iter == '\n' || (*iter == '\r' && (*(iter + 1) != '\n'))) {
-         lexer.incLineNumber();
-      }
       ++iter;
       if (iter == endMark) {
          return iter - origIter;
@@ -574,9 +541,6 @@ size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexe
       } else {
          *targetStr++ = *iter;
       }
-      if (*iter == '\n' || (*iter == '\r' && (*(iter + 1) != '\n'))) {
-         lexer.incLineNumber();
-      }
       ++iter;
    }
    return targetStr - origIter;
@@ -587,14 +551,6 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
 {
    size_t origLength = endMark - iter;
    if (origLength <= 1) {
-      if (origLength == 1) {
-         char c = *iter;
-         if (c == '\n' || c == '\r') {
-            lexer.incLineNumber();
-         }
-         /// TODO
-         /// ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
-      }
       return true;
    }
    /// convert escape sequences
@@ -604,9 +560,6 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
    while (true) {
       if (*fiter == '\\') {
          break;
-      }
-      if (*iter == '\n' || (*fiter == '\r' && (*(fiter + 1) != '\n'))) {
-         lexer.incLineNumber();
       }
       ++fiter;
       if (fiter == fendMark) {
@@ -754,9 +707,6 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
          }
       } else {
          *targetIter++ = *fiter;
-      }
-      if (*fiter == '\n' || (*fiter == '\r' && (*(fiter + 1) != '\n'))) {
-         lexer.incLineNumber();
       }
       ++fiter;
    }

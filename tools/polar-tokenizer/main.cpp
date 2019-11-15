@@ -18,6 +18,9 @@
 #include "polarphp/kernel/LangOptions.h"
 #include "polarphp/parser/SourceMgr.h"
 #include "polarphp/syntax/TokenKinds.h"
+#include "polarphp/syntax/serialization/TokenKindTypeSerialization.h"
+#include "polarphp/parser/serialization/TokenJsonSerialization.h"
+#include "nlohmann/json.hpp"
 
 #include <memory>
 #include <iostream>
@@ -30,6 +33,7 @@ using polar::parser::SourceManager;
 using polar::parser::Lexer;
 using polar::parser::Token;
 using polar::parser::TokenKindType;
+using nlohmann::json;
 
 #define READ_STDIN_ERROR 1
 #define OPEN_SOURCE_FILE_ERROR 2
@@ -74,14 +78,19 @@ int main(int argc, char * argv[])
          std::cerr << "open output file error: " << strerror(errno) << std::endl;
          return OPEN_OUTPUT_FILE_ERROR;
       }
+      output = foutstream.get();
    }
    LangOptions langOpts{};
    SourceManager sourceMgr;
    unsigned bufferId = sourceMgr.addNewSourceBuffer(std::move(sourceBuffer));
    Lexer lexer(langOpts, sourceMgr, bufferId, nullptr);
    Token currentToken;
+   json tokenJsonArray = json::array();
    do {
       lexer.lex(currentToken);
+      tokenJsonArray.push_back(currentToken);
    } while (currentToken.isNot(TokenKindType::END));
+   *output << tokenJsonArray.dump(3);
+   output->flush();
    return 0;
 }
