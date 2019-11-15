@@ -312,87 +312,10 @@ restart:
    case '<': case '>':
       break;
    default:
-      const unsigned char *temp = m_yyCursor - 1;
-      if (advance_if_valid_start_of_identifier(temp, m_bufferEnd)) {
-         break;
-      }
-      if (advance_if_valid_start_of_operator(temp, m_bufferEnd)) {
-         break;
-      }
-      bool shouldTokenize = lexUnknown(/*EmitDiagnosticsIfToken=*/false);
-      if (shouldTokenize) {
-         m_yyCursor = temp;
-         return;
-      }
-      size_t length = m_yyCursor - triviaStart;
-      trivia.push_back(TriviaKind::GarbageText, length);
       goto restart;
    }
    // Reset the cursor.
    --m_yyCursor;
-}
-
-bool Lexer::lexUnknown(bool emitDiagnosticsIfToken)
-{
-   const unsigned char *temp = m_yyCursor - 1;
-   if (advance_if_valid_continuation_of_identifier(temp, m_bufferEnd)) {
-      // If this is a valid identifier continuation, but not a valid identifier
-      // start, attempt to recover by eating more continuation characters.
-      if (emitDiagnosticsIfToken) {
-         //         diagnose(m_yyCursor - 1, diag::lex_invalid_identifier_start_character);
-      }
-      while (advance_if_valid_continuation_of_identifier(temp, m_bufferEnd));
-      m_yyCursor = temp;
-      return true;
-   }
-   // This character isn't allowed in polarphp source.
-   uint32_t codepoint = validate_utf8_character_and_advance(temp, m_bufferEnd);
-   if (codepoint == ~0U) {
-      //      diagnose(m_yyCursor - 1, diag::lex_invalid_utf8)
-      //            .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp), " ");
-      m_yyCursor = temp;
-      return false;// Skip presumed whitespace.
-   } else if (codepoint == 0x000000A0) {
-      // Non-breaking whitespace (U+00A0)
-      while (reinterpret_cast<const char *>(temp)[0] == '\xC2' &&
-             reinterpret_cast<const char *>(temp)[1] == '\xA0') {
-         temp += 2;
-      }
-      SmallString<8> spaces;
-      spaces.assign((temp - m_yyCursor + 1) / 2, ' ');
-      //      diagnose(m_yyCursor - 1, diag::lex_nonbreaking_space)
-      //            .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp),
-      //                               spaces);
-      m_yyCursor = temp;
-      return false;// Skip presumed whitespace.
-   } else if (codepoint == 0x0000201D) {
-      // If this is an end curly quote, just diagnose it with a fixit hint.
-      if (emitDiagnosticsIfToken) {
-         //         diagnose(m_yyCursor - 1, diag::lex_invalid_curly_quote)
-         //               .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp), "\"");
-      }
-      m_yyCursor = temp;
-      return true;
-   }
-   //   diagnose(m_yyCursor - 1, diag::lex_invalid_character)
-   //         .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp), " ");
-
-   char expectedCodepoint;
-   if ((expectedCodepoint =
-        try_convert_confusable_character_to_ascii(codepoint))) {
-
-      SmallString<4> confusedChar;
-      encode_to_utf8(codepoint, confusedChar);
-      SmallString<1> expectedChar;
-      expectedChar += expectedCodepoint;
-      //      diagnose(m_yyCursor - 1, diag::lex_confusable_character, confusedChar,
-      //               expectedChar)
-      //            .fixItReplaceChars(getSourceLoc(m_yyCursor - 1), getSourceLoc(temp),
-      //                               expectedChar);
-   }
-
-   m_yyCursor = temp;
-   return false; // Skip presumed whitespace.
 }
 
 Lexer::NullCharacterKind Lexer::getNullCharacterKind(const unsigned char *ptr) const
@@ -440,7 +363,7 @@ bool Lexer::nextLineHasHeredocEndMarker()
 void Lexer::notifyLexicalException(StringRef msg, int code)
 {
    m_flags.setLexExceptionOccurred(true);
-   m_currentExceptionMsg = std::move(msg.getStr());
+   m_currentExceptionMsg = msg.getStr();
    if (m_lexicalExceptionHandler) {
       m_lexicalExceptionHandler(msg, code);
    }
@@ -1221,36 +1144,6 @@ void Lexer::lexHereAndNowDocEnd()
    formToken(TokenKindType::T_END_HEREDOC, m_yyText);
 }
 
-bool Lexer::isIdentifier(StringRef string)
-{
-   if (string.empty()) {
-      return false;
-   }
-   const unsigned char *p = reinterpret_cast<const unsigned char *>(string.data());
-   const unsigned char *end = reinterpret_cast<const unsigned char *>(string.end());
-   if (!advance_if_valid_start_of_identifier(p, end)) {
-      return false;
-   }
-   while (p < end && advance_if_valid_continuation_of_identifier(p, end));
-   return p == end;
-}
-
-/// Determines if the given string is a valid operator identifier,
-/// without escaping characters.
-bool Lexer::isOperator(StringRef string)
-{
-   if (string.empty()) {
-      return false;
-   }
-   const unsigned char *p = reinterpret_cast<const unsigned char *>(string.data());
-   const unsigned char *end = reinterpret_cast<const unsigned char *>(string.end());
-   if (!advance_if_valid_start_of_operator(p, end)) {
-      return false;
-   }
-   while (p < end && advance_if_valid_continuation_of_operator(p, end));
-   return p == end;
-}
-
 //===----------------------------------------------------------------------===//
 // Main Lexer Loop
 //===----------------------------------------------------------------------===//
@@ -1510,52 +1403,6 @@ SourceLoc Lexer::getLocForEndOfLine(SourceManager &sourceMgr, SourceLoc loc)
    lexer.restoreState(LexerState(loc));
    lexer.skipToEndOfLine(/*EatNewline=*/true);
    return getSourceLoc(lexer.m_yyCursor);
-}
-
-StringRef Lexer::getIndentationForLine(SourceManager &sourceMgr, SourceLoc loc,
-                                       StringRef *extraIndentation)
-{
-   // FIXME: do something more intelligent here.
-   //
-   // Four spaces is the typical indentation in Swift code, so for now just use
-   // that directly here, but if someone was to do something better, updating
-   // here will update everyone.
-
-   if (extraIndentation) {
-      *extraIndentation = "    ";
-   }
-
-   // Don't try to do anything with an invalid location.
-   if (loc.isInvalid()) {
-      return "";
-   }
-   // Figure out which buffer contains this location.
-   int bufferId = sourceMgr.findBufferContainingLoc(loc);
-   if (bufferId < 0) {
-      return "";
-   }
-
-   CharSourceRange entireRange = sourceMgr.getRangeForBuffer(bufferId);
-   StringRef buffer = sourceMgr.extractText(entireRange);
-
-   const unsigned char *bufStart = reinterpret_cast<const unsigned char *>(buffer.data());
-   unsigned offset = sourceMgr.getLocOffsetInBuffer(loc, bufferId);
-
-   const unsigned char *startOfLine = find_start_of_line(bufStart, bufStart + offset);
-   const unsigned char *endOfIndentation = startOfLine;
-   while (*endOfIndentation && is_horizontal_whitespace(*endOfIndentation)) {
-      ++endOfIndentation;
-   }
-   return StringRef(reinterpret_cast<const char *>(startOfLine), endOfIndentation - startOfLine);
-}
-
-ArrayRef<Token> slice_token_array(ArrayRef<Token> allTokens, SourceLoc startLoc, SourceLoc endLoc)
-{
-   assert(startLoc.isValid() && endLoc.isValid());
-   auto startIt = token_lower_bound(allTokens, startLoc);
-   auto endIt = token_lower_bound(allTokens, endLoc);
-   assert(startIt->getLoc() == startLoc && endIt->getLoc() == endLoc);
-   return allTokens.slice(startIt - allTokens.begin(), endIt - startIt + 1);
 }
 
 std::vector<Token> tokenize(const LangOptions &langOpts,

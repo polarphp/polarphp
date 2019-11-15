@@ -39,8 +39,6 @@ using polar::basic::SmallVectorImpl;
 using polar::basic::StringRef;
 using polar::ast::DiagnosticEngine;
 
-bool encode_to_utf8(unsigned c,
-                    SmallVectorImpl<char> &result);
 unsigned count_leading_ones(unsigned char c);
 bool is_start_of_utf8_character(unsigned char c);
 void strip_underscores(unsigned char *str, int &length);
@@ -56,18 +54,7 @@ bool skip_to_end_of_slash_star_comment(const unsigned char *&m_yyCursor,
                                        const unsigned char *bufferEnd,
                                        const unsigned char *codeCompletionPtr = nullptr,
                                        DiagnosticEngine *diags = nullptr);
-bool is_valid_identifier_continuation_code_point(uint32_t c);
-bool is_valid_identifier_start_code_point(uint32_t c);
-bool advance_if(const unsigned char *&ptr, const unsigned char *end,
-                bool (*predicate)(uint32_t));
-bool advance_if_valid_start_of_identifier(const unsigned char *&ptr,
-                                          const unsigned char *end);
-bool advance_if_valid_continuation_of_identifier(const unsigned char *&ptr,
-                                                 const unsigned char *end);
-bool advance_if_valid_start_of_operator(const unsigned char *&ptr,
-                                        const unsigned char *end);
-bool advance_if_valid_continuation_of_operator(const unsigned char *&ptr,
-                                               const unsigned char *end);
+
 const char *next_newline(const char *str, const char *end, size_t &newlineLen);
 bool strip_multiline_string_indentation(Lexer &lexer, std::string &str, int indentation, bool usingSpaces,
                                         bool newlineAtStart, bool newlineAtEnd);

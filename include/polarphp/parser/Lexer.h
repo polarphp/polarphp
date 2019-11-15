@@ -280,22 +280,6 @@ public:
    /// given token, which is the location of the start of the next line.
    static SourceLoc getLocForEndOfLine(SourceManager &sourceMgr, SourceLoc loc);
 
-   /// Retrieve the string used to indent the line that contains the given
-   /// source location.
-   ///
-   /// If \c ExtraIndentation is not null, it will be set to an appropriate
-   /// additional intendation for adding code in a smaller scope "within" \c Loc.
-   static StringRef getIndentationForLine(SourceManager &sourceMgr, SourceLoc loc,
-                                          StringRef *extraIndentation = nullptr);
-
-   /// Determines if the given string is a valid non-operator
-   /// identifier, without escaping characters.
-   static bool isIdentifier(StringRef identifier);
-
-   /// Determines if the given string is a valid operator identifier,
-   /// without escaping characters.
-   static bool isOperator(StringRef string);
-
    SourceLoc getLocForStartOfBuffer() const
    {
       return SourceLoc(polar::utils::SMLocation::getFromPointer(reinterpret_cast<const char *>(m_bufferStart)));
@@ -501,8 +485,6 @@ private:
    void lexTrivia(ParsedTrivia &trivia, bool isForTrailingTrivia);
    void lexEscapedIdentifier();
 
-   /// Returns it should be tokenize.
-   bool lexUnknown(bool emitDiagnosticsIfToken);
    NullCharacterKind getNullCharacterKind(const unsigned char *ptr) const;
 
    bool nextLineHasHeredocEndMarker();
@@ -605,22 +587,6 @@ private:
    std::stack<std::shared_ptr<HereDocLabel>> m_heredocLabelStack;
    std::stack<LexerState> m_yyStateStack;
 };
-
-/// Given an ordered token \param Array , get the iterator pointing to the first
-/// token that is not before \param Loc .
-template<typename ArrayTy, typename Iterator = typename ArrayTy::iterator>
-Iterator token_lower_bound(ArrayTy &array, SourceLoc loc)
-{
-   return std::lower_bound(array.begin(), array.end(), loc,
-                           [](const Token &t, SourceLoc l) {
-      return t.getLoc().getOpaquePointerValue() < l.getOpaquePointerValue();
-   });
-}
-
-/// Given an ordered token array \param AllTokens , get the slice of the array
-/// where front() locates at \param StartLoc and back() locates at \param EndLoc .
-ArrayRef<Token> slice_token_array(ArrayRef<Token> allTokens, SourceLoc startLoc,
-                                  SourceLoc endLoc);
 
 template <typename DF>
 void tokenize(const LangOptions &langOpts, const SourceManager &sourceMgr,

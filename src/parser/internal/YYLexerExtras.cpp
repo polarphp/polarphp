@@ -42,49 +42,6 @@ int token_lex_wrapper(ParserSemantic *value, YYLocation *loc, Lexer *lexer, Pars
    return token.getKind();
 }
 
-bool encode_to_utf8(unsigned c,
-                    SmallVectorImpl<char> &result)
-{
-   // Number of bits in the value, ignoring leading zeros.
-   unsigned numBits = 32 - polar::utils::count_leading_zeros(c);
-   // Handle the leading byte, based on the number of bits in the value.
-   unsigned numTrailingBytes;
-   if (numBits <= 5 + 6) {
-      // Encoding is 0x110aaaaa 10bbbbbb
-      result.push_back(char(0xC0 | (c >> 6)));
-      numTrailingBytes = 1;
-   } else if(numBits <= 4 + 6 + 6) {
-      // Encoding is 0x1110aaaa 10bbbbbb 10cccccc
-      result.push_back(char(0xE0 | (c >> (6 + 6))));
-      numTrailingBytes = 2;
-
-      // UTF-16 surrogate pair values are not valid code points.
-      if (c >= 0xD800 && c <= 0xDFFF) {
-         return false;
-      }
-      // U+FDD0...U+FDEF are also reserved
-      if (c >= 0xFDD0 && c <= 0xFDEF) {
-         return false;
-      }
-   } else if (numBits <= 3 + 6 + 6 + 6) {
-      // Encoding is 0x11110aaa 10bbbbbb 10cccccc 10dddddd
-      result.push_back(char(0xF0 | (c >> (6 + 6 + 6))));
-      numTrailingBytes = 3;
-      // Reject over-large code points.  These cannot be encoded as UTF-16
-      // surrogate pairs, so UTF-32 doesn't allow them.
-      if (c > 0x10FFFF) {
-         return false;
-      }
-   } else {
-      return false;  // UTF8 can encode these, but they aren't valid code points.
-   }
-   // Emit all of the trailing bytes.
-   while (numTrailingBytes--) {
-      result.push_back(char(0x80 | (0x3F & (c >> (numTrailingBytes * 6)))));
-   }
-   return true;
-}
-
 unsigned count_leading_ones(unsigned char c)
 {
    return polar::utils::count_leading_ones(uint32_t(c) << 24);
@@ -245,82 +202,6 @@ bool skip_to_end_of_slash_star_comment(const unsigned char *&m_yyCursor, const u
    }
 }
 
-bool is_valid_identifier_continuation_code_point(uint32_t c)
-{
-   if (c < 0x80) {
-      return polar::basic::is_identifier_body(c, true);
-   }
-   // N1518: Recommendations for extended identifier characters for C and C++
-   // Proposed Annex X.1: Ranges of characters allowed
-   return c == 0x00A8 || c == 0x00AA || c == 0x00AD || c == 0x00AF
-         || (c >= 0x00B2 && c <= 0x00B5) || (c >= 0x00B7 && c <= 0x00BA)
-         || (c >= 0x00BC && c <= 0x00BE) || (c >= 0x00C0 && c <= 0x00D6)
-         || (c >= 0x00D8 && c <= 0x00F6) || (c >= 0x00F8 && c <= 0x00FF)
-
-         || (c >= 0x0100 && c <= 0x167F)
-         || (c >= 0x1681 && c <= 0x180D)
-         || (c >= 0x180F && c <= 0x1FFF)
-
-         || (c >= 0x200B && c <= 0x200D)
-         || (c >= 0x202A && c <= 0x202E)
-         || (c >= 0x203F && c <= 0x2040)
-         || c == 0x2054
-         || (c >= 0x2060 && c <= 0x206F)
-
-         || (c >= 0x2070 && c <= 0x218F)
-         || (c >= 0x2460 && c <= 0x24FF)
-         || (c >= 0x2776 && c <= 0x2793)
-         || (c >= 0x2C00 && c <= 0x2DFF)
-         || (c >= 0x2E80 && c <= 0x2FFF)
-
-         || (c >= 0x3004 && c <= 0x3007)
-         || (c >= 0x3021 && c <= 0x302F)
-         || (c >= 0x3031 && c <= 0x303F)
-
-         || (c >= 0x3040 && c <= 0xD7FF)
-
-         || (c >= 0xF900 && c <= 0xFD3D)
-         || (c >= 0xFD40 && c <= 0xFDCF)
-         || (c >= 0xFDF0 && c <= 0xFE44)
-         || (c >= 0xFE47 && c <= 0xFFF8)
-
-         || (c >= 0x10000 && c <= 0x1FFFD)
-         || (c >= 0x20000 && c <= 0x2FFFD)
-         || (c >= 0x30000 && c <= 0x3FFFD)
-         || (c >= 0x40000 && c <= 0x4FFFD)
-         || (c >= 0x50000 && c <= 0x5FFFD)
-         || (c >= 0x60000 && c <= 0x6FFFD)
-         || (c >= 0x70000 && c <= 0x7FFFD)
-         || (c >= 0x80000 && c <= 0x8FFFD)
-         || (c >= 0x90000 && c <= 0x9FFFD)
-         || (c >= 0xA0000 && c <= 0xAFFFD)
-         || (c >= 0xB0000 && c <= 0xBFFFD)
-         || (c >= 0xC0000 && c <= 0xCFFFD)
-         || (c >= 0xD0000 && c <= 0xDFFFD)
-         || (c >= 0xE0000 && c <= 0xEFFFD);
-}
-
-bool is_valid_identifier_start_code_point(uint32_t c)
-{
-   if (!is_valid_identifier_continuation_code_point(c)) {
-      return false;
-   }
-
-   if (c < 0x80 && (is_digit(static_cast<unsigned char>(c)) || c == '$')) {
-      return false;
-   }
-
-   // N1518: Recommendations for extended identifier characters for C and C++
-   // Proposed Annex X.2: Ranges of characters disallowed initially
-   if ((c >= 0x0300 && c <= 0x036F) ||
-       (c >= 0x1DC0 && c <= 0x1DFF) ||
-       (c >= 0x20D0 && c <= 0x20FF) ||
-       (c >= 0xFE20 && c <= 0xFE2F)) {
-      return false;
-   }
-   return true;
-}
-
 bool advance_if(const unsigned char *&ptr, const unsigned char *end,
                 bool (*predicate)(uint32_t))
 {
@@ -334,32 +215,6 @@ bool advance_if(const unsigned char *&ptr, const unsigned char *end,
       return true;
    }
    return false;
-}
-
-bool advance_if_valid_start_of_identifier(const unsigned char *&ptr,
-                                          const unsigned char *end)
-{
-   return advance_if(ptr, end, is_valid_identifier_start_code_point);
-}
-
-bool advance_if_valid_continuation_of_identifier(const unsigned char *&ptr,
-                                                 const unsigned char *end)
-{
-   return advance_if(ptr, end, is_valid_identifier_continuation_code_point);
-}
-
-bool advance_if_valid_start_of_operator(const unsigned char *&ptr,
-                                        const unsigned char *end)
-{
-   return true;
-//   return advance_if(ptr, end, Identifier::isOperatorStartCodePoint);
-}
-
-bool advance_if_valid_continuation_of_operator(const unsigned char *&ptr,
-                                               const unsigned char *end)
-{
-   return true;
-//   return advance_if(ptr, end, Identifier::isOperatorContinuationCodePoint);
 }
 
 const char *next_newline(const char *str, const char *end, size_t &newlineLen)
