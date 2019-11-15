@@ -579,7 +579,7 @@ void Lexer::lexHexNumber()
       bool needCorrectOverflow = false;
       if (m_nextToken.getKind() == TokenKindType::T_MINUS_SIGN) {
          char buff[maxWidth];
-         std::sprintf(buff, "%lx\n ", std::numeric_limits<std::int64_t>::min());
+         std::sprintf(buff, "%llx\n ", std::numeric_limits<std::int64_t>::min());
          if (StringRef(buff, maxWidth) == StringRef(hexStr, length)) {
             needCorrectOverflow = true;
          }
@@ -597,93 +597,74 @@ void Lexer::lexHexNumber()
 void Lexer::lexLongNumber()
 {
    char *end = nullptr;
-   char *yytext = reinterpret_cast<char *>(const_cast<unsigned char *>(m_yyText));
+   size_t length = m_yyLength;
+   std::string lnumStr(reinterpret_cast<char *>(const_cast<unsigned char *>(m_yyText)), length);
    std::int64_t lvalue = 0;
-   if (m_yyLength < MAX_LENGTH_OF_INT64) {
+   bool isOctal =  lnumStr.at(0) == '0';
+   bool containsUnderscores = lnumStr.find('_') != std::string::npos;
+   if (containsUnderscores) {
+      strip_underscores(lnumStr, length);
+   }
+
+   // Digits 8 and 9 are illegal in octal literals.
+   if (isOctal) {
+      for(size_t i = 0; i < length; ++i) {
+         if (lnumStr.at(i) == 8 || lnumStr.at(i) == 9) {
+            notifyLexicalException("Invalid numeric literal", 0);
+            if (isInParseMode()) {
+               formToken(TokenKindType::T_ERROR);
+            }
+            // Continue in order to determine if this is T_LNUMBER or T_DNUMBER.
+            length = i;
+            break;
+         }
+      }
+   }
+
+   if (length < MAX_LENGTH_OF_INT64) {
       /// Won't overflow
       errno = 0;
       /// base must be passed explicitly for correct parse error on Windows
-      lvalue = std::strtoll(yytext, &end, yytext[0] == '0' ? 8 : 10);
-      /// This isn't an assert, we need to ensure 019 isn't valid octal
-      /// Because the lexing itself doesn't do that for us
-      if (end != yytext + m_yyLength) {
-         notifyLexicalException("Invalid numeric literal", 0);
-         if (isInParseMode()) {
-            formToken(TokenKindType::T_ERROR, m_yyText);
-            return;
-         }
-         /// here we does not set semantic value
-         formToken(TokenKindType::T_LNUMBER, m_yyText);
-         m_nextToken.setInvalidLexValue(true);
-         return;
-      }
+      lvalue = std::strtoll(lnumStr.c_str(), &end, isOctal ? 8 : 10);
+      assert(end == lnumStr.c_str() + length);
    } else {
       errno = 0;
-      const char *numStr = yytext;
-      std::size_t numLength = m_yyLength;
-      int base = 10;
-      if (numStr[0] == '0') {
-         base = 8;
-         std::size_t numWide = m_yyLength;
-         while (numWide-- > 0 && *(numStr + 1) == '0') {
-            ++numStr;
-            --numLength;
-         }
-      }
-      lvalue = std::strtoll(numStr, &end, base);
+      lvalue = std::strtoll(lnumStr.c_str(), &end, 0);
       /// overflow is undefined behavior
       /// we just handle -9223372036854775808
       if (errno == ERANGE) {
+         // Overflow
+         errno = 0;
          bool needCorrectOverflow = false;
          if (m_nextToken.getKind() == TokenKindType::T_MINUS_SIGN) {
             std::string minStr;
-            if (numStr[0] == '0') {
+            if (isOctal) {
                char buff[24];
                std::sprintf(buff, "-0%lo", std::numeric_limits<std::int64_t>::min());
                minStr.append(buff, 24);
             } else {
                minStr = std::to_string(std::numeric_limits<std::int64_t>::min());
             }
-            if (StringRef(minStr.data() + 1, minStr.size() - 1) == StringRef(reinterpret_cast<const char *>(numStr), numLength)) {
+            if (StringRef(minStr.data() + 1, minStr.size() - 1) == StringRef(lnumStr)) {
                needCorrectOverflow = true;
             }
          }
          double dvalue = 0.0;
-         if (yytext[0] == '0') {
+         if (isOctal) {
             /// octal overflow
-            const char *tempPtr = reinterpret_cast<const char *>(end);
-            dvalue = polar::utils::octstr_to_double(numStr, &tempPtr);
+            dvalue = polar::utils::octstr_to_double(lnumStr.c_str(), const_cast<const char **>(&end));
          } else {
-            dvalue = std::strtod(numStr, &end);
+            dvalue = std::strtod(lnumStr.c_str(), &end);
          }
-         /// handle double literal format error
-         /// Also not an assert for the same reason
-         if (end != yytext + m_yyLength) {
-            notifyLexicalException("Invalid numeric literal", 0);
-            if (isInParseMode()) {
-               formToken(TokenKindType::T_ERROR, m_yyText);
-               return;
-            }
-         }
-         formToken(TokenKindType::T_DNUMBER, m_yyText);
+         formToken(TokenKindType::T_DNUMBER);
          m_nextToken.setValue(dvalue);
          m_nextToken.setNeedCorrectLNumberOverflow(needCorrectOverflow);
          return;
       }
-      /// handle integer literal format error
-      if (end != yytext + m_yyLength) {
-         notifyLexicalException("Invalid numeric literal", 0);
-         if (isInParseMode()) {
-            formToken(TokenKindType::T_ERROR, m_yyText);
-            return;
-         }
-         formToken(TokenKindType::T_LNUMBER, m_yyText);
-         m_nextToken.setInvalidLexValue(true);
-         return;
-      }
+      assert(end == lnumStr.c_str() + length);
    }
    assert(!errno);
-   formToken(TokenKindType::T_LNUMBER, m_yyText);
+   formToken(TokenKindType::T_LNUMBER);
    m_nextToken.setValue(lvalue);
 }
 

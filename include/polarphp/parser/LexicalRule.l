@@ -11,6 +11,7 @@
 
 #include "polarphp/parser/internal/YYLexerDefs.h"
 #include "polarphp/parser/internal/YYLexerExtras.h"
+#include "polarphp/parser/internal/YYParserExtraDefs.h"
 #include "polarphp/parser/Parser.h"
 #include "polarphp/parser/Lexer.h"
 
