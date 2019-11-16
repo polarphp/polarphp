@@ -37,7 +37,12 @@ using namespace polar::basic;
 
 #define HEREDOC_USING_SPACES 1
 #define HEREDOC_USING_TABS 2
-#define MAX_LENGTH_OF_INT64 19
+
+#if POLAR_POINTER_SIZE == 8
+#  define MAX_LENGTH_OF_INT64 20
+#else
+#  define MAX_LENGTH_OF_INT64 11
+#endif
 
 Lexer::Lexer(const PrincipalTag &, const LangOptions &langOpts,
              const SourceManager &sourceMgr, unsigned bufferId,
@@ -522,15 +527,14 @@ void Lexer::lexBinaryNumber()
    char *yytext = reinterpret_cast<char *>(const_cast<unsigned char *>(m_yyText));
    char *bnumYYStr = yytext + 2;
    size_t numLength = m_yyLength - 2;
-   bool containsUnderscores = false;
    char *end = nullptr;
    /// Skip any leading 0s
    while (numLength > 0 && (*bnumYYStr == '0' || *bnumYYStr == '_')) {
       ++bnumYYStr;
       --numLength;
    }
-   containsUnderscores = std::memchr(bnumYYStr, '_', numLength) != nullptr;
    std::string bnumStr(bnumYYStr, numLength);
+   bool containsUnderscores = bnumStr.find('_') != std::string::npos;
    if (containsUnderscores) {
       strip_underscores(bnumStr, numLength);
    }
@@ -557,22 +561,28 @@ void Lexer::lexHexNumber()
 {
    /// Skip "0x"
    char *yytext = reinterpret_cast<char *>(const_cast<unsigned char *>(m_yyText));
-   char *hexStr = yytext + 2;
+   char *hexYYStr = yytext + 2;
+   char *end = nullptr;
    std::size_t length = m_yyLength - 2;
    std::int64_t lvalue = 0;
-   while (*hexStr == '0') {
-      ++hexStr;
+   while (*hexYYStr == '0') {
+      ++hexYYStr;
       --length;
    }
-   constexpr int maxWidth = sizeof(std::int64_t) * 2;
-   if (length < maxWidth || (length == maxWidth && *hexStr <= '7')) {
-      char *end = nullptr;
+   std::string hexStr(hexYYStr, length);
+   bool containsUnderscores = hexStr.find('_') != std::string::npos;
+   if (containsUnderscores) {
+      strip_underscores(hexStr, length);
+   }
+   constexpr int maxWidth = POLAR_POINTER_SIZE * 2;
+   if (length < maxWidth || (length == maxWidth && hexStr.at(0) <= '7')) {
+
       if (length > 0) {
          errno = 0;
-         lvalue = std::strtoll(yytext, &end, 16);
-         assert(!errno && end == hexStr + length);
+         lvalue = std::strtoll(hexStr.c_str(), &end, 16);
+         assert(!errno && end == hexStr.c_str() + length);
       }
-      formToken(TokenKindType::T_LNUMBER, m_yyText);
+      formToken(TokenKindType::T_LNUMBER);
       m_nextToken.setValue(lvalue);
    } else {
       /// overflow
@@ -580,14 +590,13 @@ void Lexer::lexHexNumber()
       if (m_nextToken.getKind() == TokenKindType::T_MINUS_SIGN) {
          char buff[maxWidth];
          std::sprintf(buff, "%llx\n ", std::numeric_limits<std::int64_t>::min());
-         if (StringRef(buff, maxWidth) == StringRef(hexStr, length)) {
+         if (StringRef(buff, maxWidth) == StringRef(hexStr)) {
             needCorrectOverflow = true;
          }
       }
-      const char *tempPtr = nullptr;
-      double dvalue = polar::utils::hexstr_to_double(yytext, &tempPtr);
+      double dvalue = polar::utils::hexstr_to_double(hexStr.c_str(), const_cast<const char **>(&end));
       /// errno isn't checked since we allow HUGE_VAL/INF overflow
-      assert(tempPtr == hexStr + length);
+      assert(end == hexStr.c_str() + length);
       formToken(TokenKindType::T_DNUMBER, m_yyText);
       m_nextToken.setNeedCorrectLNumberOverflow(needCorrectOverflow);
       m_nextToken.setValue(dvalue);
@@ -621,7 +630,7 @@ void Lexer::lexLongNumber()
       }
    }
 
-   if (length < MAX_LENGTH_OF_INT64) {
+   if (length < MAX_LENGTH_OF_INT64 - 1) {
       /// Won't overflow
       errno = 0;
       /// base must be passed explicitly for correct parse error on Windows
@@ -640,7 +649,7 @@ void Lexer::lexLongNumber()
             std::string minStr;
             if (isOctal) {
                char buff[24];
-               std::sprintf(buff, "-0%lo", std::numeric_limits<std::int64_t>::min());
+               std::sprintf(buff, "-0%llo", std::numeric_limits<std::int64_t>::min());
                minStr.append(buff, 24);
             } else {
                minStr = std::to_string(std::numeric_limits<std::int64_t>::min());
@@ -656,6 +665,7 @@ void Lexer::lexLongNumber()
          } else {
             dvalue = std::strtod(lnumStr.c_str(), &end);
          }
+         assert(end == lnumStr.c_str() + length);
          formToken(TokenKindType::T_DNUMBER);
          m_nextToken.setValue(dvalue);
          m_nextToken.setNeedCorrectLNumberOverflow(needCorrectOverflow);
@@ -672,10 +682,16 @@ void Lexer::lexDoubleNumber()
 {
    char *end = nullptr;
    char *yytext = reinterpret_cast<char *>(const_cast<unsigned char *>(m_yyText));
-   double dvalue = std::strtod(yytext, &end);
+   size_t length = m_yyLength;
+   std::string dnumStr(yytext, m_yyLength);
+   bool containsUnderscores = dnumStr.find('_') != std::string::npos;
+   if (containsUnderscores) {
+      strip_underscores(dnumStr, length);
+   }
+   double dvalue = std::strtod(dnumStr.c_str(), &end);
    /// errno isn't checked since we allow HUGE_VAL/INF overflow
-   assert(end == yytext + m_yyLength);
-   formToken(TokenKindType::T_DNUMBER, m_yyText);
+   assert(end == dnumStr.c_str() + length);
+   formToken(TokenKindType::T_DNUMBER);
    m_nextToken.setValue(dvalue);
 }
 

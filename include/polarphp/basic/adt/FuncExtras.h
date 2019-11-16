@@ -48,8 +48,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_ADT_FUNCTION_EXTRAS_H
-#define LLVM_ADT_FUNCTION_EXTRAS_H
+#ifndef POLAR_ADT_FUNCTION_EXTRAS_H
+#define POLAR_ADT_FUNCTION_EXTRAS_H
 
 #include "polarphp/basic/adt/PointerIntPair.h"
 #include "polarphp/basic/adt/PointerUnion.h"
@@ -337,4 +337,4 @@ class unique_function<ReturnT(ParamTs...)>
 
 } // end namespace polar
 
-#endif // POLARPHP_ADT_FUNCTION_H
+#endif // POLAR_ADT_FUNCTION_EXTRAS_H
