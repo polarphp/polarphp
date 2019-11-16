@@ -24,4 +24,13 @@ ExternalProject_Add(llvm-project
    -DCMAKE_INSTALL_PREFIX:PATH=${POLAR_DEPS_INSTALL_DIR}
    -DLLVM_ENABLE_ASSERTIONS:BOOL=ON
    BUILD_COMMAND make ${POLAR_BUILD_FLAGS}
+   -DCMAKE_CXX_FLAGS:STRING=-w
    )
+
+find_package(LLVM
+   PATHS ${POLAR_CMAKE_MODULES_DIR}/llvm)
+if (LLVM_FOUND)
+   message("found LLVM version: ${LLVM_VERSION}")
+else()
+   message(FATAL_ERROR "LLVM is required to build polarphp")
+endif()

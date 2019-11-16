@@ -28,3 +28,5 @@ set_target_properties(
    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
    COMPILE_DEFINITIONS "BOOST_HAS_ICU"
    )
+
+target_compile_options(boost_regex PRIVATE -w)

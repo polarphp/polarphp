@@ -85,7 +85,8 @@ set(POLAR_UNITTEST_LIB_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/unittests/li
 # Add path for custom CMake modules.
 list(APPEND CMAKE_MODULE_PATH
    "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
-   "${POLAR_CMAKE_MODULES_DIR}")
+   "${POLAR_CMAKE_MODULES_DIR}"
+   )
 
 # Make a job pool for things that can't yet be distributed
 cmake_host_system_information(
@@ -168,7 +169,7 @@ endif()
 include(ProcessorCount)
 ProcessorCount(POLAR_PROCESSOR_COUNT)
 if(NOT POLAR_PROCESSOR_COUNT EQUAL 0)
-  set(POLAR_BUILD_FLAGS -j${POLAR_PROCESSOR_COUNT})
+   set(POLAR_BUILD_FLAGS -j${POLAR_PROCESSOR_COUNT})
 endif()
 
 # First include general CMake utilities.

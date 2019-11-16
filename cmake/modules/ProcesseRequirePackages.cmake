@@ -13,25 +13,8 @@
 find_package(Re2c)
 if (${RE2C_FOUND})
    message("using re2c version: ${RE2C_VERSION}")
-endif()
-
-set(RE2C_FLAGS "")
-if (POLAR_ENABLE_RE2C_CGOTO)
-   message("checking whether re2c -g works")
-   check_c_source_compiles("
-      int main(int argc, const char **argv)
-      {
-      argc = argc;
-      argv = argv;
-      label1:
-      label2:
-      static void *adr[] = { &&label1, &&label2};
-      goto *adr[0];
-      return 0;
-      }" checkRe2cGoto)
-   if (checkRe2cGoto)
-      set(RE2C_FLAGS "-g")
-   endif()
+else()
+   message(FATAL_ERROR "re2c is required to build polarphp")
 endif()
 
 find_package(BISON)
@@ -49,10 +32,10 @@ else()
 endif()
 
 find_program(POLAR_COMPOSER_EXECUTABLE composer)
-if (NOT POLAR_COMPOSER_EXECUTABLE)
-   message(FATAL_ERROR "composer is required to build polarphp")
-else()
+if (POLAR_COMPOSER_EXECUTABLE)
    message("found ${POLAR_COMPOSER_EXECUTABLE}")
+else()
+   message(FATAL_ERROR "composer is required to build polarphp")
 endif()
 
 polar_check_prog_awk()
@@ -66,31 +49,9 @@ if (NOT UUID_FOUND)
    message(FATAL_ERROR "uuid required by polarphp")
 endif()
 
-if (POLAR_BUILD_TESTS)
-   find_package(Curses REQUIRED)
-endif()
-
 find_package(Backtrace)
 set(HAVE_BACKTRACE ${Backtrace_FOUND})
 set(BACKTRACE_HEADER ${Backtrace_HEADER})
-
-# Don't look for these libraries on Windows.
-if (NOT PURE_WINDOWS)
-   if(POLAR_ENABLE_TERMINFO)
-      set(HAVE_TERMINFO 0)
-      foreach(library tinfo terminfo curses ncurses ncursesw)
-         string(TOUPPER ${library} library_suffix)
-         polar_check_library_exists(${library} setupterm "" HAVE_TERMINFO_${library_suffix})
-         if(HAVE_TERMINFO_${library_suffix})
-            set(HAVE_TERMINFO 1)
-            set(TERMINFO_LIBS "${library}")
-            break()
-         endif()
-      endforeach()
-   else()
-      set(HAVE_TERMINFO 0)
-   endif()
-endif()
 
 # find icu package for unicode
 # for macos install icu by brew
