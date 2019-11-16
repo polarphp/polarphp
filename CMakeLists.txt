@@ -76,6 +76,7 @@ string(TOLOWER ${POLAR_SYSTEM_NAME} POLAR_SYSTEM_NORMAL_NAME)
 set(POLAR_CONFIGURE_TEMP_DIR ${POLAR_BINARY_DIR}/conf_temp)
 set(POLAR_HEADER_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/polarphp)
 set(POLAR_DEVTOOLS_DIR ${CMAKE_SOURCE_DIR}/devtools)
+set(POLAR_LLVM_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/llvm-project/llvm)
 
 # for test only
 set(POLAR_UNITTEST_TEST_BINARY_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/unittests/bin")
@@ -162,6 +163,12 @@ endif()
 if (CMAKE_BUILD_TYPE AND
       NOT POLAR_BUILD_TYPE MATCHES "^(debug|release|relwithdebinfo|minsizerel)$")
    message(FATAL_ERROR "Invalid value for CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+endif()
+
+include(ProcessorCount)
+ProcessorCount(POLAR_PROCESSOR_COUNT)
+if(NOT POLAR_PROCESSOR_COUNT EQUAL 0)
+  set(POLAR_BUILD_FLAGS -j${POLAR_PROCESSOR_COUNT})
 endif()
 
 # First include general CMake utilities.
@@ -460,6 +467,7 @@ include_directories(${POLAR_SOURCE_DIR}
    ${POLAR_INCLUDE_DIR}/polarphp)
 
 include(ImportThirdparty)
+include(ImportLLVM)
 
 add_subdirectory(devtools)
 add_subdirectory(assets)

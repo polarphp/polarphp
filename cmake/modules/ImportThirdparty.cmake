@@ -28,12 +28,13 @@ ExternalProject_Add(thirdparty_cli11
    -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
    -DBUILD_STATIC_LIBS:BOOL=${BUILD_STATIC_LIBS}
    -DCMAKE_INSTALL_PREFIX:PATH=${POLAR_DEPS_INSTALL_DIR}
+   BUILD_COMMAND make ${POLAR_BUILD_FLAGS}
    )
 
 add_library(CLI11::CLI11 INTERFACE IMPORTED)
 set_target_properties(CLI11::CLI11 PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "${POLAR_DEPS_INSTALL_DIR}/include"
-)
+   INTERFACE_INCLUDE_DIRECTORIES "${POLAR_DEPS_INSTALL_DIR}/include"
+   )
 
 ExternalProject_Add(thirdparty_yaml
    PREFIX thirdparty
@@ -47,6 +48,7 @@ ExternalProject_Add(thirdparty_yaml
    -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
    -DBUILD_STATIC_LIBS:BOOL=${BUILD_STATIC_LIBS}
    -DCMAKE_INSTALL_PREFIX:PATH=${POLAR_DEPS_INSTALL_DIR}
+   BUILD_COMMAND make ${POLAR_BUILD_FLAGS}
    )
 
 find_package(yaml-cpp CONFIG REQUIRED
@@ -65,6 +67,7 @@ ExternalProject_Add(thirdparty_json
    -DBUILD_STATIC_LIBS:BOOL=${BUILD_STATIC_LIBS}
    -DCMAKE_INSTALL_PREFIX:PATH=${POLAR_DEPS_INSTALL_DIR}
    -DJSON_BuildTests:BOOL=OFF
+   BUILD_COMMAND make ${POLAR_BUILD_FLAGS}
    )
 
 find_package(nlohmann_json CONFIG REQUIRED
@@ -84,13 +87,14 @@ if(POLAR_BUILD_TESTS)
       -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
       -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
       -DBUILD_STATIC_LIBS:BOOL=${BUILD_STATIC_LIBS}
-      -DCMAKE_INSTALL_PREFIX:PATH=${POLAR_DEPS_INSTALL_DIR})
+      -DCMAKE_INSTALL_PREFIX:PATH=${POLAR_DEPS_INSTALL_DIR}
+      BUILD_COMMAND make ${POLAR_BUILD_FLAGS})
 
-# setup googletest targets
-find_package(googletest CONFIG
-   PATHS ${POLAR_CMAKE_MODULES_DIR}/googletest)
-if (googletest_FOUND)
-   set(POLAR_FOUND_NATIVE_GTEST ON)
-endif()
+   # setup googletest targets
+   find_package(googletest CONFIG
+      PATHS ${POLAR_CMAKE_MODULES_DIR}/googletest)
+   if (googletest_FOUND)
+      set(POLAR_FOUND_NATIVE_GTEST ON)
+   endif()
 
 endif()
