@@ -214,4 +214,6 @@ don't. */
 /* Define if overriding target triple is enabled */
 #cmakedefine POLAR_TARGET_TRIPLE_ENV "${POLAR_TARGET_TRIPLE_ENV}"
 
+#cmakedefine POLAR_SIZEOF_WORD @POLAR_SIZEOF_WORD@
+
 #endif // POLAR_DEVLTOOLS_UTILS_UTILS_CONFIG_H

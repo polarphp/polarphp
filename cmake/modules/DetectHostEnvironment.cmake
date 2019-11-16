@@ -209,7 +209,7 @@ check_type_size("long long" SIZEOF_LONG_LONG)
 check_type_size("long long int" SIZEOF_LONG_LONG_INT)
 check_type_size(long SIZEOF_LONG)
 check_type_size(int SIZEOF_INT)
-set(SIZEOF_VOID_P ${CMAKE_SIZEOF_VOID_P})
+set(POLAR_SIZEOF_WORD ${CMAKE_SIZEOF_VOID_P})
 
 # These are defined elsewhere than stdio.h
 check_type_size(intmax_t SIZEOF_INTMAX_T)
@@ -217,77 +217,9 @@ check_type_size(ssize_t SIZEOF_SSIZE_T)
 check_type_size(off_t SIZEOF_OFF_T)
 check_type_size(ptrdiff_t SIZEOF_PTRDIFF_T)
 
-# Check for members of the stat structure
-if (HAVE_STRUCT_STAT_ST_BLKSIZE)
-   set(HAVE_ST_BLKSIZE ON)
-endif()
-
-
-check_struct_has_member("struct stat" st_rdev "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_RDEV LANGUAGE C)
-if (HAVE_STRUCT_STAT_ST_RDEV)
-   set(HAVE_ST_RDEV ON)
-endif()
-
 polar_check_funcs(
-   asctime_r
-   chroot
-   ctime_r
-   flock
-   ftok
-   gettimeofday
-   gmtime_r
-   getpwnam_r
-   getgrnam_r
-   getpwuid_r
-   grantpt
-   inet_ntoa
-   inet_ntop
-   inet_pton
-   isascii
-   link
-   localtime_r
-   lockf
-   lchown
-   lrand48
    memcpy
-   memmove
-   mkstemp
-   mmap
-   nl_langinfo
-   perror
-   poll
-   ptsname
-   putenv
-   realpath
-   random
-   rand_r
-   scandir
-   setitimer
-   setlocale
-   localeconv
-   setenv
-   setpgid
-   setsockopt
-   setvbuf
-   shutdown
-   sin
-   snprintf
-   srand48
-   srandom
-   statfs
-   statvfs
-   strtok_r
-   symlink
-   tempnam
-   tzset
-   unlockpt
-   unsetenv
-   usleep
-   utime
-   vsnprintf
-   vasprintf
-   asprintf
-   nanosleep)
+   memmove)
 
 # TODO use polar_check_symbol_exists or polar_check_funcs ?
 polar_check_symbol_exists(arc4random "stdlib.h" HAVE_DECL_ARC4RANDOM)
@@ -344,20 +276,6 @@ polar_check_symbol_exists(__GLIBC__ stdio.h POLAR_USING_GLIBC)
 if(POLAR_USING_GLIBC)
    add_definitions(-D_GNU_SOURCE)
    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")
-endif()
-# This check requires _GNU_SOURCE
-polar_check_symbol_exists(sched_getaffinity sched.h HAVE_SCHED_GETAFFINITY)
-polar_check_symbol_exists(CPU_COUNT sched.h HAVE_CPU_COUNT)
-
-# Some systems (like OpenSolaris) do not have nanosleep in libc
-polar_check_library_exists(rt nanosleep "" HAVE_RT)
-if (POLAR_HAVE_RT)
-   set(HAVE_RT ON)
-   set(HAVE_NANOSLEEP ON)
-   set(POLAR_HAVE_NANOSLEEP ON)
-   polar_append_flag(-lrt CMAKE_EXE_LINKER_FLAGS)
-   set(HAVE_RT ON)
-   set(HAVE_NANOSLEEP ON)
 endif()
 
 if (POLAR_WITH_VALGRIND)
@@ -463,16 +381,6 @@ if (POLAR_ENABLE_DTRACE)
    else()
       message(FATAL_ERROR "Cannot find sys/sdt.h which is required for DTrace support")
    endif()
-endif()
-
-if (POLAR_ENABLE_FD_SETSIZE)
-   if (POLAR_FD_SETSIZE GREATER 0)
-      polar_append_flag(-DFD_SETSIZE="${POLAR_FD_SETSIZE}" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
-   else()
-      message(FATAL_ERROR "Invalid value passed to POLAR_FD_SETSIZE!")
-   endif()
-else()
-   message("using system default fd set limit")
 endif()
 
 # By default, we target the host, but this can be overridden at CMake
