@@ -29,15 +29,15 @@
 #ifndef POLARPHP_BASIC_BYTETREESERIALIZATION_H
 #define POLARPHP_BASIC_BYTETREESERIALIZATION_H
 
-#include "polarphp/utils/BinaryStreamError.h"
-#include "polarphp/utils/BinaryStreamWriter.h"
+#include "llvm/Support/BinaryStreamError.h"
+#include "llvm/Support/BinaryStreamWriter.h"
 #include "polarphp/basic/ExponentialGrowthAppendingBinaryByteStream.h"
 #include <map>
 
 namespace polar::basic::bytetree {
 
-using polar::utils::BinaryStreamWriter;
-using polar::basic::StringRef;
+using llvm::BinaryStreamWriter;
+using llvm::StringRef;
 
 namespace {
 // Only used by compiler if both template types are the same
@@ -137,7 +137,7 @@ template <class T>
 struct has_ScalarTraits
 {
    using SignatureSize = unsigned (*)(const T &object);
-   using SignatureWrite = polar::utils::Error (*)(BinaryStreamWriter &writer,
+   using SignatureWrite = llvm::Error (*)(BinaryStreamWriter &writer,
    const T &object);
 
    template <typename U>
@@ -206,7 +206,7 @@ private:
    /// Write the given value to the ByteTree in the same form in which it is
    /// represented on the serializing machine.
    template <typename T>
-   polar::utils::Error writeRaw(T value)
+   llvm::Error writeRaw(T value)
    {
       // FIXME: We implicitly inherit the endianess of the serializing machine.
       // Since we're currently only supporting macOS that's not a problem for now.
@@ -377,7 +377,7 @@ struct ScalarTraits<StringRef>
       return str.size();
    }
 
-   static polar::utils::Error write(BinaryStreamWriter &writer,
+   static llvm::Error write(BinaryStreamWriter &writer,
                             const StringRef &str)
    {
       return writer.writeFixedString(str);
@@ -389,7 +389,7 @@ struct ObjectTraits<std::nullopt_t>
 {
    // Serialize llvm::None as an object without any elements
    static unsigned getNumFields(const std::nullopt_t &object,
-                             UserInfoMap &userInfo)
+                                UserInfoMap &userInfo)
    {
       return 0;
    }

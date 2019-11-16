@@ -51,7 +51,7 @@
 #include "polarphp/syntax/AtomicCache.h"
 #include "polarphp/syntax/RawSyntax.h"
 #include "polarphp/syntax/References.h"
-#include "polarphp/basic/adt/DenseMap.h"
+#include "llvm/ADT/DenseMap.h"
 
 #include <atomic>
 
@@ -228,7 +228,7 @@ public:
 
    /// Dump a debug description of the syntax data for debugging to
    /// standard error.
-   void dump(RawOutStream &outStream) const;
+   void dump(raw_ostream &outStream) const;
 
    POLAR_ATTRIBUTE_DEPRECATED(void dump() const POLAR_ATTRIBUTE_USED,
                               "Only meant for use in the debugger");
@@ -318,7 +318,7 @@ private:
 
 } // polar::syntax
 
-namespace polar::basic
+namespace llvm
 {
 
 using SD = polar::syntax::SyntaxData;
@@ -353,6 +353,6 @@ struct DenseMapInfo<RCSD>
    }
 };
 
-} // polar::basic
+} // llvm
 
 #endif // POLARPHP_SYNTAX_SYNTAXDATA_H

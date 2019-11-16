@@ -18,7 +18,7 @@ checkPlatformConditionSupported(PlatformConditionKind kind, StringRef value,
                                 std::vector<StringRef> &suggestions)
 {
    return true;
-   polar_unreachable("Unhandled enum value");
+   llvm_unreachable("Unhandled enum value");
 }
 
 StringRef LangOptions::getPlatformConditionValue(PlatformConditionKind kind) const

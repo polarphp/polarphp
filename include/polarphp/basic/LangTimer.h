@@ -23,12 +23,13 @@
 #ifndef POLARPHP_BASIC_LANG_TIMER_H
 #define POLARPHP_BASIC_LANG_TIMER_H
 
-#include "polarphp/utils/Timer.h"
+#include "llvm/Support/Timer.h"
 
 namespace polar::basic {
 
-using polar::utils::Timer;
-using polar::utils::NamedRegionTimer;
+using llvm::Timer;
+using llvm::NamedRegionTimer;
+using llvm::StringRef;
 
 /// A convenience class for declaring a timer that's part of the Swift
 /// compilation timers group.

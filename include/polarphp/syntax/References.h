@@ -23,15 +23,17 @@
 #ifndef POLARPHP_SYNTAX_REFERENCES_H
 #define POLARPHP_SYNTAX_REFERENCES_H
 
-#include "polarphp/basic/adt/IntrusiveRefCountPtr.h"
+#include "llvm/ADT/IntrusiveRefCntPtr.h"
 
 namespace polar::syntax {
+
+using llvm::IntrusiveRefCntPtr;
 
 /// A shorthand to clearly indicate that a value is a reference counted and
 /// heap-allocated.
 ///
 template <typename InnerClsType>
-using RefCountPtr = polar::utils::IntrusiveRefCountPtr<InnerClsType>;
+using RefCountPtr = IntrusiveRefCntPtr<InnerClsType>;
 
 } // polar::syntax
 

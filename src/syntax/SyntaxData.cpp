@@ -42,7 +42,7 @@ bool SyntaxData::isUnknown() const
    return getRaw()->isUnknown();
 }
 
-void SyntaxData::dump(RawOutStream &outStream) const
+void SyntaxData::dump(raw_ostream &outStream) const
 {
    m_raw->dump(outStream, 0);
    outStream << '\n';
@@ -50,7 +50,7 @@ void SyntaxData::dump(RawOutStream &outStream) const
 
 void SyntaxData::dump() const
 {
-   dump(polar::utils::error_stream());
+   dump(llvm::errs());
 }
 
 RefCountPtr<SyntaxData> SyntaxData::getPreviousNode() const

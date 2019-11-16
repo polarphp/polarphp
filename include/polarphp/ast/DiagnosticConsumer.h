@@ -32,7 +32,7 @@
 #define POLARPHP_AST_DIAGNOSTIC_CONSUMER_H
 
 #include "polarphp/parser/SourceLoc.h"
-#include "polarphp/utils/SourceMgr.h"
+#include "llvm/Support/SourceMgr.h"
 
 /// forward declare class with namespace
 namespace polar::parser {
@@ -41,16 +41,16 @@ class SourceManager;
 
 namespace polar::ast {
 
-using polar::basic::ArrayRef;
-using polar::basic::StringRef;
-using polar::basic::SmallVectorImpl;
-using polar::basic::SmallVector;
+using llvm::ArrayRef;
+using llvm::StringRef;
+using llvm::SmallVectorImpl;
+using llvm::SmallVector;
 using polar::parser::CharSourceRange;
 using polar::parser::SourceLoc;
 using polar::parser::SourceManager;
-using polar::utils::SMLocation;
-using polar::utils::SMFixIt;
-using polar::utils::SMRange;
+using llvm::SMLoc;
+using llvm::SMFixIt;
+using llvm::SMRange;
 
 /// forward declare class
 class DiagnosticArgument;
@@ -106,7 +106,7 @@ struct DiagnosticInfo
 class DiagnosticConsumer
 {
 protected:
-   static SMLocation getRawLoc(SourceLoc loc);
+   static SMLoc getRawLoc(SourceLoc loc);
 
    static SMRange getRawRange(SourceManager &, CharSourceRange range)
    {

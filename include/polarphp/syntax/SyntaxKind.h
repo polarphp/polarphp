@@ -26,20 +26,20 @@
 
 #include "polarphp/basic/InlineBitfield.h"
 #include "polarphp/basic/ByteTreeSerialization.h"
-#include "polarphp/utils/yaml/YamlTraits.h"
 #include "polarphp/syntax/SyntaxKindEnumDefs.h"
+#include "llvm/Support/YAMLTraits.h"
 
 namespace polar::syntax {
 
 using polar::basic::count_bits_used;
-using polar::basic::StringRef;
-using polar::utils::RawOutStream;
+using llvm::StringRef;
+using llvm::raw_ostream;
 
 enum : unsigned {
    NumSyntaxKindBits = count_bits_used(static_cast<unsigned>(SyntaxKind::Unknown))
 };
 
-void dump_syntax_kind(RawOutStream &outStream, const SyntaxKind kind);
+void dump_syntax_kind(raw_ostream &outStream, const SyntaxKind kind);
 
 /// Whether this kind is a syntax collection.
 bool is_collection_kind(SyntaxKind kind);
@@ -73,7 +73,7 @@ struct WrapperTypeTraits<syntax::SyntaxKind>
       case syntax::SyntaxKind::Unknown:
          return 1;
       default:
-         polar_unreachable("unhandled kind");
+         llvm_unreachable("unhandled kind");
       }
    }
 
@@ -86,7 +86,7 @@ struct WrapperTypeTraits<syntax::SyntaxKind>
 
 } // polar::basic::bytetree
 
-namespace polar::yaml {
+namespace llvm::yaml {
 
 /// Deserialization traits for SyntaxKind.
 template <>
@@ -99,10 +99,11 @@ struct ScalarEnumerationTraits<polar::syntax::SyntaxKind>
    }
 };
 
-} // polar::yaml
+} // llvm::yaml
 
 namespace polar::utils {
-  RawOutStream &operator<<(RawOutStream &outStream, polar::syntax::SyntaxKind kind);
+using llvm::raw_ostream;
+raw_ostream &operator<<(raw_ostream &outStream, polar::syntax::SyntaxKind kind);
 } // polar::utils
 
 #endif // POLARPHP_SYNTAX_KIND_H

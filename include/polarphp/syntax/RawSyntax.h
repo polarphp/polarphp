@@ -37,19 +37,20 @@
 #ifndef POLARPHP_SYNTAX_RAWSYNTAX_H
 #define POLARPHP_SYNTAX_RAWSYNTAX_H
 
+#include "llvm/ADT/FoldingSet.h"
+#include "llvm/ADT/IntrusiveRefCntPtr.h"
+#include "llvm/ADT/PointerUnion.h"
+#include "llvm/Support/Casting.h"
+#include "llvm/Support/TrailingObjects.h"
+#include "llvm/Support/raw_ostream.h"
+
 #include "polarphp/basic/InlineBitfield.h"
 #include "polarphp/syntax/References.h"
 #include "polarphp/syntax/SyntaxArena.h"
 #include "polarphp/syntax/SyntaxKind.h"
 #include "polarphp/syntax/TokenKinds.h"
 #include "polarphp/syntax/Trivia.h"
-#include "polarphp/basic/adt/FoldingSet.h"
-#include "polarphp/basic/adt/IntrusiveRefCountPtr.h"
-#include "polarphp/basic/adt/PointerUnion.h"
-#include "polarphp/basic/adt/OwnedString.h"
-#include "polarphp/utils/Casting.h"
-#include "polarphp/utils/TrailingObjects.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "polarphp/basic/OwnedString.h"
 
 #include <vector>
 #include <atomic>
@@ -123,12 +124,12 @@
 
 namespace polar::syntax {
 
-using polar::utils::RawOutStream;
-using polar::utils::TrailingObjects;
-using polar::basic::StringRef;
+using llvm::raw_ostream;
+using llvm::TrailingObjects;
+using llvm::StringRef;
+using llvm::ArrayRef;
+using llvm::FoldingSetNodeID;
 using polar::basic::OwnedString;
-using polar::basic::ArrayRef;
-using polar::basic::FoldingSetNodeId;
 
 class SyntaxArena;
 using CursorIndex = size_t;
@@ -214,11 +215,11 @@ public:
    }
 
    /// Print the line and column as "l:c" to the given output stream.
-   void printLineAndColumn(RawOutStream &outStream) const;
+   void printLineAndColumn(raw_ostream &outStream) const;
 
    /// Dump a description of this position to the given output stream
    /// for debugging.
-   void dump(RawOutStream &outStream = polar::utils::error_stream()) const;
+   void dump(raw_ostream &outStream = llvm::errs()) const;
 
 private:
    uintptr_t m_offset = 0;
@@ -266,6 +267,11 @@ public:
       m_refCount.fetch_add(1, std::memory_order_relaxed);
    }
 
+   void Retain() const
+   {
+      retain();
+   }
+
    void release() const
    {
       int newRefCount = m_refCount.fetch_sub(1, std::memory_order_acq_rel) - 1;
@@ -281,6 +287,11 @@ public:
             delete this;
          }
       }
+   }
+
+   void Release() const
+   {
+      release();
    }
 
    /// \name Factory methods.
@@ -574,15 +585,15 @@ public:
    bool accumulateLeadingTrivia(AbsolutePosition &pos) const;
 
    /// Print this piece of syntax recursively.
-   void print(RawOutStream &outStream, SyntaxPrintOptions opts) const;
+   void print(raw_ostream &outStream, SyntaxPrintOptions opts) const;
 
    /// Dump this piece of syntax recursively for debugging or testing.
    void dump() const;
 
    /// Dump this piece of syntax recursively.
-   void dump(RawOutStream &outStream, unsigned indent = 0) const;
+   void dump(raw_ostream &outStream, unsigned indent = 0) const;
 
-   static void profile(FoldingSetNodeId &id, TokenKindType tokenKind, OwnedString text,
+   static void profile(FoldingSetNodeID &id, TokenKindType tokenKind, OwnedString text,
                        ArrayRef<TriviaPiece> leadingTrivia,
                        ArrayRef<TriviaPiece> trailingTrivia);
 private:
@@ -642,9 +653,19 @@ private:
       return isToken() ? 0 : m_bits.layout.numChildren;
    }
 
+   size_t numTrailingObjects(OverloadToken<RefCountPtr<RawSyntax>> token) const
+   {
+      return getNumTrailingObjects(token);
+   }
+
    size_t getNumTrailingObjects(OverloadToken<OwnedString>) const
    {
       return isToken() ? 1 : 0;
+   }
+
+   size_t numTrailingObjects(OverloadToken<OwnedString> token) const
+   {
+      return getNumTrailingObjects(token);
    }
 
    size_t getNumTrailingObjects(OverloadToken<double>) const
@@ -652,9 +673,19 @@ private:
       return isToken() ? 1 : 0;
    }
 
+   size_t numTrailingObjects(OverloadToken<double> token) const
+   {
+      return getNumTrailingObjects(token);
+   }
+
    size_t getNumTrailingObjects(OverloadToken<std::int64_t>) const
    {
       return isToken() ? 1 : 0;
+   }
+
+   size_t numTrailingObjects(OverloadToken<std::int64_t> token) const
+   {
+      return getNumTrailingObjects(token);
    }
 
    size_t getNumTrailingObjects(OverloadToken<TriviaPiece>) const
@@ -662,6 +693,11 @@ private:
       return isToken()
             ? m_bits.token.numLeadingTrivia + m_bits.token.numTrailingTrivia
             : 0;
+   }
+
+   size_t numTrailingObjects(OverloadToken<TriviaPiece> token) const
+   {
+      return getNumTrailingObjects(token);
    }
 
    /// Constructor for creating layout nodes.
@@ -710,7 +746,7 @@ private:
 } // polar::syntax
 
 namespace polar::utils {
-RawOutStream &operator<<(RawOutStream &outStream, polar::syntax::AbsolutePosition pos);
+raw_ostream &operator<<(raw_ostream &outStream, polar::syntax::AbsolutePosition pos);
 } // polar::utils
 
 #endif // POLARPHP_SYNTAX_RAWSYNTAX_H

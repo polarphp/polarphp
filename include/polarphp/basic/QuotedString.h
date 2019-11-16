@@ -28,19 +28,20 @@
 #ifndef POLARPHP_BASIC_QUOTEDSTRING_H
 #define POLARPHP_BASIC_QUOTEDSTRING_H
 
-#include "polarphp/basic/adt/StringRef.h"
+#include "llvm/ADT/StringRef.h"
 
 /// forward declare class with namespace
 namespace polar::utils {
-class RawOutStream;
+class raw_ostream;
 }
 
 namespace polar::basic {
 
-using polar::utils::RawOutStream;
+using llvm::StringRef;
+using llvm::raw_ostream;
 
 /// Print the given string as if it were a quoted string.
-void print_as_quoted_string(RawOutStream &out, StringRef text);
+void print_as_quoted_string(raw_ostream &out, StringRef text);
 
 /// A class designed to make it easy to write a string to a stream
 /// as a quoted string.
@@ -51,7 +52,7 @@ public:
       : m_text(text)
    {}
 
-   friend RawOutStream &operator<<(RawOutStream &out, QuotedString string)
+   friend raw_ostream &operator<<(raw_ostream &out, QuotedString string)
    {
       print_as_quoted_string(out, string.m_text);
       return out;

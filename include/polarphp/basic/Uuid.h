@@ -29,17 +29,22 @@
 #ifndef POLARPHP_BASIC_UUID_H
 #define POLARPHP_BASIC_UUID_H
 
-#include "polarphp/basic/adt/DenseMap.h"
-#include "polarphp/basic/adt/SmallString.h"
-#include "polarphp/basic/adt/StringRef.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/ADT/DenseMap.h"
+#include "llvm/ADT/SmallString.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/Support/raw_ostream.h"
 
 #include <optional>
 #include <array>
 
 namespace polar::basic {
 
-using polar::utils::RawOutStream;
+using llvm::raw_ostream;
+using llvm::DenseMap;
+using llvm::DenseMapInfo;
+using llvm::SmallString;
+using llvm::StringRef;
+using llvm::SmallVectorImpl;
 
 class UUID
 {
@@ -107,8 +112,12 @@ public:
 #undef COMPARE_UUID
 };
 
-RawOutStream &operator<<(RawOutStream &outStream, UUID uuid);
+raw_ostream &operator<<(raw_ostream &outStream, UUID uuid);
 
+} // polar
+
+namespace llvm {
+using polar::basic::UUID;
 template<>
 struct DenseMapInfo<UUID>
 {
@@ -138,7 +147,6 @@ struct DenseMapInfo<UUID>
       return a == b;
    }
 };
-
-} // polar
+}
 
 #endif // POLARPHP_BASIC_UUID_H

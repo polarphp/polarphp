@@ -16,7 +16,7 @@
 
 #include "polarphp/syntax/SyntaxNodes.h"
 #include "polarphp/syntax/Trivia.h"
-#include "polarphp/basic/adt/ArrayRef.h"
+#include "llvm/ADT/ArrayRef.h"
 
 #include <vector>
 

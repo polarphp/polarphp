@@ -27,27 +27,27 @@
 #ifndef POLARPHP_PARSER_SOURCE_MGR_H
 #define POLARPHP_PARSER_SOURCE_MGR_H
 
-#include "polarphp/basic/adt/StringMap.h"
-#include "polarphp/basic/adt/IntrusiveRefCountPtr.h"
-#include "polarphp/basic/adt/DenseMap.h"
-#include "polarphp/utils/FileSystem.h"
-#include "polarphp/utils/VirtualFileSystem.h"
-#include "polarphp/utils/SourceMgr.h"
-#include "polarphp/utils/MemoryBuffer.h"
+#include "llvm/ADT/StringMap.h"
+#include "llvm/ADT/IntrusiveRefCntPtr.h"
+#include "llvm/ADT/DenseMap.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/VirtualFileSystem.h"
+#include "llvm/Support/SourceMgr.h"
+#include "llvm/Support/MemoryBuffer.h"
 #include "polarphp/parser/SourceLoc.h"
 #include <map>
 
 namespace polar::parser {
 
-using BasicSourceMgr = polar::utils::SourceMgr;
-using polar::basic::IntrusiveRefCountPtr;
-using polar::basic::DenseMap;
-using polar::basic::ArrayRef;
-using polar::basic::Twine;
-using polar::utils::MemoryBuffer;
-using polar::utils::SMDiagnostic;
-using polar::utils::SMFixIt;
-using polar::utils::SMRange;
+using BasicSourceMgr = llvm::SourceMgr;
+using llvm::IntrusiveRefCntPtr;
+using llvm::DenseMap;
+using llvm::ArrayRef;
+using llvm::Twine;
+using llvm::MemoryBuffer;
+using llvm::SMDiagnostic;
+using llvm::SMFixIt;
+using llvm::SMRange;
 
 /// This class manages and owns source buffers.
 class SourceManager
@@ -63,8 +63,8 @@ class SourceManager
    mutable std::pair<const char *, const VirtualFile*> m_cachedVFile = {nullptr, nullptr};
 
 public:
-   SourceManager(IntrusiveRefCountPtr<polar::vfs::FileSystem> fs =
-         polar::vfs::get_real_file_system())
+   SourceManager(IntrusiveRefCntPtr<llvm::vfs::FileSystem> fs =
+         llvm::vfs::getRealFileSystem())
       : m_filesystem(fs)
    {}
 
@@ -78,12 +78,12 @@ public:
       return m_sourceMgr;
    }
 
-   void setFileSystem(IntrusiveRefCountPtr<polar::vfs::FileSystem> fs)
+   void setFileSystem(IntrusiveRefCntPtr<llvm::vfs::FileSystem> fs)
    {
       m_filesystem = fs;
    }
 
-   IntrusiveRefCountPtr<polar::vfs::FileSystem> getFileSystem()
+   IntrusiveRefCntPtr<llvm::vfs::FileSystem> getFileSystem()
    {
       return m_filesystem;
    }
@@ -236,7 +236,7 @@ public:
    unsigned getLineNumber(SourceLoc loc, unsigned bufferId = 0) const
    {
       assert(loc.isValid());
-      return m_sourceMgr.findLineNumber(loc.m_loc, bufferId);
+      return m_sourceMgr.FindLineNumber(loc.m_loc, bufferId);
    }
 
    StringRef getEntireTextForBuffer(unsigned bufferId) const;
@@ -277,7 +277,7 @@ private:
 
 private:
    BasicSourceMgr m_sourceMgr;
-   IntrusiveRefCountPtr<polar::vfs::FileSystem> m_filesystem;
+   IntrusiveRefCntPtr<llvm::vfs::FileSystem> m_filesystem;
    unsigned m_codeCompletionBufferId = 0U;
    unsigned m_codeCompletionOffset;
 
@@ -288,7 +288,7 @@ private:
    ///
    /// This is as much a hack to prolong the lifetime of status objects as it is
    /// to speed up stats.
-   mutable DenseMap<StringRef, polar::vfs::Status> m_statusCache;
+   mutable DenseMap<StringRef, llvm::vfs::Status> m_statusCache;
 };
 
 } // polar::parser

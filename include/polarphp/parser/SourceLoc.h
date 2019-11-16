@@ -27,27 +27,26 @@
 #ifndef POLARPHP_PARSER_SOURCE_LOC_H
 #define POLARPHP_PARSER_SOURCE_LOC_H
 
-#include "polarphp/basic/adt/DenseMapInfo.h"
-#include "polarphp/basic/adt/StringRef.h"
-#include "polarphp/utils/SourceLocation.h"
+#include "llvm/ADT/DenseMapInfo.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/Support/SourceMgr.h"
 #include <functional>
 
 /// forwrad declare with namespace
-namespace polar::utils {
-class RawOutStream;
+namespace llvm {
+class raw_ostream;
 }
 namespace polar::ast {
 class DiagnosticConsumer;
 }
 
-namespace polar {
-namespace parser {
+namespace polar::parser {
 
 /// forward declare class
 class SourceManager;
-using polar::utils::RawOutStream;
-using BasicSMLoc = polar::utils::SMLocation;
-using polar::basic::StringRef;
+using llvm::raw_ostream;
+using BasicSMLoc = llvm::SMLoc;
+using llvm::StringRef;
 using polar::ast::DiagnosticConsumer;
 
 /// SourceLoc in parser namespace is just an polar::utils::SMLocation.
@@ -108,13 +107,13 @@ public:
    /// as specified by \c LastBufferID, then we don't print the filename.  If
    /// not, we do print the filename, and then update \c LastBufferID with the
    /// BufferID printed.
-   void print(RawOutStream &outStream, const SourceManager &sourceMgr,
+   void print(raw_ostream &outStream, const SourceManager &sourceMgr,
               unsigned &lastBufferID) const;
 
-   void printLineAndColumn(RawOutStream &outStream, const SourceManager &sourceMgr,
+   void printLineAndColumn(raw_ostream &outStream, const SourceManager &sourceMgr,
                            unsigned bufferID = 0) const;
 
-   void print(RawOutStream &outStream, const SourceManager &sourceMgr) const
+   void print(raw_ostream &outStream, const SourceManager &sourceMgr) const
    {
       unsigned temp = ~0U;
       print(outStream, sourceMgr, temp);
@@ -201,10 +200,10 @@ public:
    /// as specified by LastBufferID, then we don't print the filename.  If not,
    /// we do print the filename, and then update LastBufferID with the BufferID
    /// printed.
-   void print(RawOutStream &outStream, const SourceManager &sourceMgr,
+   void print(raw_ostream &outStream, const SourceManager &sourceMgr,
               unsigned &lastBufferID, bool PrintText = true) const;
 
-   void print(RawOutStream &outStream, const SourceManager &sourceMgr,
+   void print(raw_ostream &outStream, const SourceManager &sourceMgr,
               bool printText = true) const
    {
       unsigned temp = ~0U;
@@ -321,10 +320,10 @@ public:
    /// as specified by LastBufferID, then we don't print the filename.  If not,
    /// we do print the filename, and then update LastBufferID with the BufferID
    /// printed.
-   void print(RawOutStream &outStream, const SourceManager &sourceMgr,
+   void print(raw_ostream &outStream, const SourceManager &sourceMgr,
               unsigned &lastBufferID, bool printText = true) const;
 
-   void print(RawOutStream &outStream, const SourceManager &sourceMgr,
+   void print(raw_ostream &outStream, const SourceManager &sourceMgr,
               bool printText = true) const
    {
       unsigned temp = ~0U;
@@ -338,10 +337,9 @@ private:
    std::size_t m_byteLength;
 };
 
-} // parser
-} // polar
+} // polar::parser
 
-namespace polar::basic {
+namespace llvm {
 
 using polar::parser::SourceLoc;
 using polar::parser::BasicSMLoc;
@@ -386,7 +384,7 @@ struct DenseMapInfo<SourceRange>
    static SourceRange getEmptyKey()
    {
       return SourceRange(SourceLoc(
-                                   BasicSMLoc::getFromPointer(DenseMapInfo<const char *>::getEmptyKey())));
+                            BasicSMLoc::getFromPointer(DenseMapInfo<const char *>::getEmptyKey())));
    }
 
    static SourceRange getTombstoneKey()
@@ -394,7 +392,7 @@ struct DenseMapInfo<SourceRange>
       // Make this different from empty key. See for context:
       // http://lists.llvm.org/pipermail/llvm-dev/2015-July/088744.html
       return SourceRange(SourceLoc(
-                                   BasicSMLoc::getFromPointer(DenseMapInfo<const char *>::getTombstoneKey())));
+                            BasicSMLoc::getFromPointer(DenseMapInfo<const char *>::getTombstoneKey())));
    }
 
    static unsigned getHashValue(const SourceRange &loc)
@@ -412,6 +410,6 @@ struct DenseMapInfo<SourceRange>
    }
 };
 
-} // polar::basic
+} // llvm
 
 #endif // POLARPHP_PARSER_SOURCE_LOC_H

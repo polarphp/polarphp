@@ -20,24 +20,24 @@
 
 #include "polarphp/basic/CycleDiagnosticKind.h"
 #include "polarphp/kernel/Version.h"
-#include "polarphp/basic/adt/ArrayRef.h"
-#include "polarphp/basic/adt/Hashing.h"
-#include "polarphp/basic/adt/SmallVector.h"
-#include "polarphp/basic/adt/StringRef.h"
-#include "polarphp/basic/adt/SmallString.h"
-#include "polarphp/basic/adt/Triple.h"
-#include "polarphp/utils/RawOutStream.h"
-#include "polarphp/utils/VersionTuple.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/Hashing.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ADT/SmallString.h"
+#include "llvm/ADT/Triple.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/VersionTuple.h"
 #include <string>
 #include <vector>
 
 namespace polar::kernel {
 
-using polar::utils::VersionTuple;
-using polar::basic::Triple;
-using polar::basic::StringRef;
-using polar::basic::ArrayRef;
-using polar::basic::SmallVector;
+using llvm::VersionTuple;
+using llvm::Triple;
+using llvm::StringRef;
+using llvm::ArrayRef;
+using llvm::SmallVector;
 using polar::basic::CycleDiagnosticKind;
 
 /// Kind of implicit platform conditions.
@@ -273,7 +273,7 @@ public:
                  target.getTriple().empty()) {
          major = minor = revision = 0;
       } else {
-         polar_unreachable("Unsupported target OS");
+         llvm_unreachable("Unsupported target OS");
       }
       return VersionTuple(major, minor, revision);
    }

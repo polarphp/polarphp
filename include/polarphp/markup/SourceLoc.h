@@ -23,7 +23,7 @@
 #ifndef POLARPHP_MARKUP_SOURCELOC_H
 #define POLARPHP_MARKUP_SOURCELOC_H
 
-#include "polarphp/basic/adt/StringRef.h"
+#include "llvm/ADTStringRef.h"
 #include <algorithm>
 #include <cassert>
 #include <utility>

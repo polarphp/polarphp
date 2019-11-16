@@ -28,12 +28,12 @@
 
 #define DEBUG_TYPE "polarphp-ast"
 
-#include "polarphp/basic/adt/StlExtras.h"
-#include "polarphp/basic/adt/StringRef.h"
-#include "polarphp/basic/adt/StringSet.h"
-#include "polarphp/basic/adt/ArrayRef.h"
-#include "polarphp/utils/Debug.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/ADT/STLExtras.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ADT/StringSet.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/Support/Debug.h"
+#include "llvm/Support/raw_ostream.h"
 #include "polarphp/basic/Defer.h"
 
 #include "polarphp/ast/DiagnosticConsumer.h"
@@ -43,17 +43,17 @@
 
 namespace polar::ast {
 
-using polar::basic::StringSet;
+using llvm::StringSet;
 
 DiagnosticConsumer::~DiagnosticConsumer()
 {}
 
-SMLocation DiagnosticConsumer::getRawLoc(SourceLoc loc)
+SMLoc DiagnosticConsumer::getRawLoc(SourceLoc loc)
 {
    return loc.m_loc;
 }
 
-POLAR_ATTRIBUTE_UNUSED
+LLVM_ATTRIBUTE_UNUSED
 static bool has_duplicate_filenames(
       ArrayRef<FileSpecificDiagnosticConsumer::Subconsumer> m_subconsumers)
 {
@@ -161,7 +161,7 @@ FileSpecificDiagnosticConsumer::subconsumerForLocation(SourceManager &sourceMgr,
       assert(!m_subconsumers.empty());
       if (!sourceMgr.getIDForBufferIdentifier(m_subconsumers.begin()->getInputFileName())
           .has_value()) {
-         assert(polar::basic::none_of(m_subconsumers, [&sourceMgr](const Subconsumer &subconsumer) {
+         assert(llvm::none_of(m_subconsumers, [&sourceMgr](const Subconsumer &subconsumer) {
             return sourceMgr.getIDForBufferIdentifier(subconsumer.getInputFileName())
                   .has_value();
          }));
@@ -252,11 +252,11 @@ void NullDiagnosticConsumer::handleDiagnostic(
       StringRef formatString, ArrayRef<DiagnosticArgument> formatArgs,
       const DiagnosticInfo &info)
 {
-   POLAR_DEBUG({
-                 polar::debug_stream() << "NullDiagnosticConsumer received diagnostic: ";
-                 DiagnosticEngine::formatDiagnosticText(polar::debug_stream(), formatString,
+   LLVM_DEBUG({
+                 llvm::dbgs() << "NullDiagnosticConsumer received diagnostic: ";
+                 DiagnosticEngine::formatDiagnosticText(llvm::dbgs(), formatString,
                  formatArgs);
-                 polar::debug_stream() << "\n";
+                 llvm::dbgs() << "\n";
               });
 }
 
@@ -269,11 +269,11 @@ void ForwardingDiagnosticConsumer::handleDiagnostic(
       StringRef formatString, ArrayRef<DiagnosticArgument> formatArgs,
       const DiagnosticInfo &info)
 {
-   POLAR_DEBUG({
-                 polar::debug_stream() << "ForwardingDiagnosticConsumer received diagnostic: ";
-                 DiagnosticEngine::formatDiagnosticText(polar::debug_stream(), formatString,
+   LLVM_DEBUG({
+                 llvm::dbgs() << "ForwardingDiagnosticConsumer received diagnostic: ";
+                 DiagnosticEngine::formatDiagnosticText(llvm::dbgs(), formatString,
                  formatArgs);
-                 polar::debug_stream() << "\n";
+                 llvm::dbgs() << "\n";
               });
    for (auto *C : m_targetEngine.getConsumers()) {
       C->handleDiagnostic(sourceMgr, loc, kind, formatString, formatArgs, info);

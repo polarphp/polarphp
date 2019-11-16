@@ -21,9 +21,13 @@
 #define POLARPHP_BASIC_CHARINFO_H
 
 #include "polarphp/global/DataTypes.h"
-#include "polarphp/basic/adt/StringRef.h"
+#include "polarphp/global/CompilerFeature.h"
+#include "llvm/ADT/StringRef.h"
 
 namespace polar::basic {
+
+using llvm::StringRef;
+
 namespace charinfo {
 extern const uint16_t cg_infoTable[256];
 enum {

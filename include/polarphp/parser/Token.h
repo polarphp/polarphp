@@ -18,9 +18,8 @@
 #ifndef POLAR_PARSER_TOKEN_H
 #define POLAR_PARSER_TOKEN_H
 
-#include "polarphp/basic/adt/StringRef.h"
+#include "llvm/ADT/StringRef.h"
 #include "polarphp/basic/FlagSet.h"
-#include "polarphp/utils/SourceLocation.h"
 #include "polarphp/parser/SourceLoc.h"
 #include "polarphp/syntax/TokenKinds.h"
 #include "polarphp/parser/internal/YYParserDefs.h"
@@ -28,8 +27,8 @@
 #include <any>
 
 /// forward declare class with namespace
-namespace polar::utils {
-class RawOutStream;
+namespace llvm {
+class raw_ostream;
 }
 
 namespace polar::parser {
@@ -39,8 +38,8 @@ using polar::basic::FlagSet;
 using polar::syntax::TokenKindType;
 using polar::syntax::TokenCategory;
 using polar::parser::internal::ParserSemantic;
-using polar::utils::RawOutStream;
-using polar::utils::SMLocation;
+using llvm::raw_ostream;
+using llvm::SMLoc;
 
 class TokenFlags final : public FlagSet<std::uint8_t>
 {
@@ -268,7 +267,7 @@ public:
    /// offset in the current file.
    SourceLoc getLoc() const
    {
-      return SourceLoc(polar::utils::SMLocation::getFromPointer(m_lexicalText.begin()));
+      return SourceLoc(SMLoc::getFromPointer(m_lexicalText.begin()));
    }
 
    std::size_t getLexicalLength() const
@@ -301,13 +300,13 @@ public:
    CharSourceRange getCommentRange() const
    {
       if (m_commentLength == 0) {
-         return CharSourceRange(SourceLoc(SMLocation::getFromPointer(m_lexicalText.begin())),
+         return CharSourceRange(SourceLoc(SMLoc::getFromPointer(m_lexicalText.begin())),
                                 0);
       }
 
       auto trimedComment = trimComment();
       return CharSourceRange(
-               SourceLoc(polar::utils::SMLocation::getFromPointer(trimedComment.begin())),
+               SourceLoc(SMLoc::getFromPointer(trimedComment.begin())),
                trimedComment.size());
    }
 
@@ -316,7 +315,7 @@ public:
       if (m_commentLength == 0) {
          return SourceLoc();
       }
-      return SourceLoc(polar::utils::SMLocation::getFromPointer(trimComment().begin()));
+      return SourceLoc(SMLoc::getFromPointer(trimComment().begin()));
    }
 
    StringRef getRawLexicalText() const
@@ -343,7 +342,7 @@ public:
    Token &setValue(StringRef value)
    {
       m_valueType = ValueType::String;
-      m_value.emplace<std::string>(value.data(), value.getSize());
+      m_value.emplace<std::string>(value.data(), value.size());
       return *this;
    }
 
@@ -405,7 +404,7 @@ public:
    void dump() const;
 
    /// Dump this piece of syntax recursively.
-   void dump(RawOutStream &outStream) const;
+   void dump(raw_ostream &outStream) const;
 
 private:
    StringRef trimComment() const

@@ -14,17 +14,6 @@ polar_collect_files(
    DIR .
    OUTPUT_VAR POLAR_UTILS_SOURCES)
 
-if (UNIX)
-   list(APPEND POLAR_UTILS_SOURCES _platform/SignalsUnix.cpp)
-   list(APPEND POLAR_UTILS_SOURCES _platform/PathUnix.cpp)
-   list(APPEND POLAR_UTILS_SOURCES _platform/ProcessUnix.cpp)
-   list(APPEND POLAR_UTILS_SOURCES _platform/ProgramUnix.cpp)
-   list(APPEND POLAR_UTILS_SOURCES _platform/HostUnix.cpp)
-   list(APPEND POLAR_UTILS_SOURCES _platform/DynamicLibraryUnix.cpp)
-   list(APPEND POLAR_UTILS_SOURCES _platform/MemoryUnix.cpp)
-   list(APPEND POLAR_UTILS_SOURCES _platform/WatchDogUnix.cpp)
-endif()
-
 polar_merge_list(POLAR_UTILS_SOURCES POLAR_HEADERS)
 
 set(system_libs)

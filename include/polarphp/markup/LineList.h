@@ -23,8 +23,8 @@
 #ifndef POLARPHP_MARKUP_LINELIST_H
 #define POLARPHP_MARKUP_LINELIST_H
 
-#include "polarphp/basic/adt/ArrayRef.h"
-#include "polarphp/basic/adt/StringRef.h"
+#include "llvm/ADTArrayRef.h"
+#include "llvm/ADTStringRef.h"
 #include "polarphp/parser/SourceLoc.h"
 
 namespace polar::markup {

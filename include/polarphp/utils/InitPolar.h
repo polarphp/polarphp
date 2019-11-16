@@ -12,9 +12,9 @@
 #ifndef POLARPHP_UTILS_INIT_POLAR_H
 #define POLARPHP_UTILS_INIT_POLAR_H
 
-#include "polarphp/basic/adt/SmallVector.h"
-#include "polarphp/utils/Allocator.h"
-#include "polarphp/utils/PrettyStackTrace.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/Support/Allocator.h"
+#include "llvm/Support/PrettyStackTrace.h"
 
 // forward declare class with namespace
 namespace CLI {
@@ -46,9 +46,9 @@ public:
    void initNgOpts(CLI::App &parser);
    ~InitPolar();
 private:
-   utils::BumpPtrAllocator m_alloc;
-   basic::SmallVector<const char *, 0> m_args;
-   utils::PrettyStackTraceProgram m_stackPrinter;
+   llvm::BumpPtrAllocator m_alloc;
+   llvm::SmallVector<const char *, 0> m_args;
+   llvm::PrettyStackTraceProgram m_stackPrinter;
 };
 
 } // polar

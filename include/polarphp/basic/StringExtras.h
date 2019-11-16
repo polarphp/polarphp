@@ -20,10 +20,10 @@
 #define POLARPHP_BASIC_ADT_STRING_EXTRAS_H
 
 #include "polarphp/global/CompilerFeature.h"
-#include "polarphp/basic/adt/StringRef.h"
-#include "polarphp/basic/adt/SmallString.h"
-#include "polarphp/basic/adt/Twine.h"
-#include "polarphp/basic/adt/ArrayRef.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ADT/SmallString.h"
+#include "llvm/ADT/Twine.h"
+#include "llvm/ADT/ArrayRef.h"
 #include <cassert>
 #include <cstring>
 #include <string>
@@ -31,17 +31,21 @@
 #include <vector>
 #include <array>
 
-namespace polar::utils {
+namespace llvm {
 // forward declare with namespace
-class RawOutStream;
-} // polar::utils
+class raw_ostream;
+} // llvm
 
 namespace polar::basic {
 
 template<typename T>
 class SmallVectorImpl;
 
-using polar::utils::RawOutStream;
+using llvm::raw_ostream;
+using llvm::StringRef;
+using llvm::ArrayRef;
+using llvm::Twine;
+using llvm::SmallString;
 
 /// hexdigit - Return the hexadecimal character for the
 /// given number \p value (which should be less than 16).
@@ -61,13 +65,13 @@ inline StringRef to_string_ref(bool value)
 /// Construct a string ref from an array ref of unsigned chars.
 inline StringRef to_string_ref(ArrayRef<uint8_t> value)
 {
-   return StringRef(reinterpret_cast<const char *>(value.begin()), value.getSize());
+   return StringRef(reinterpret_cast<const char *>(value.begin()), value.size());
 }
 
 /// Construct a string ref from an array ref of unsigned chars.
 inline ArrayRef<uint8_t> arrayref_from_stringref(StringRef value)
 {
-   return {value.getBytesBegin(), value.getBytesEnd()};
+   return {value.bytes_begin(), value.bytes_end()};
 }
 
 /// Given an array of c-style strings terminated by a null pointer, construct
@@ -208,7 +212,7 @@ inline std::string to_hex(StringRef input, bool lowerCase = false)
 {
    static const char *const lut = "0123456789ABCDEF";
    const uint8_t offset = lowerCase ? 32 : 0;
-   size_t length = input.getSize();
+   size_t length = input.size();
    std::string output;
    output.reserve(2 * length);
    for (size_t i = 0; i < length; ++i) {
@@ -242,17 +246,17 @@ inline std::string from_hex(StringRef input)
       return std::string();
    }
    std::string output;
-   output.reserve((input.getSize() + 1) / 2);
-   if (input.getSize() % 2 == 1) {
+   output.reserve((input.size() + 1) / 2);
+   if (input.size() % 2 == 1) {
       output.push_back(hex_from_nibbles('0', input.front()));
-      input = input.dropFront();
+      input = input.drop_front();
    }
 
-   assert(input.getSize() % 2 == 0);
+   assert(input.size() % 2 == 0);
    while (!input.empty()) {
       uint8_t hex = hex_from_nibbles(input[0], input[1]);
       output.push_back(hex);
-      input = input.dropFront(2);
+      input = input.drop_front(2);
    }
    return output;
 }
@@ -273,7 +277,7 @@ inline bool to_float(const Twine &twine, N &num, N (*strToFunc)(const char *, ch
    SmallString<32> storage;
    StringRef str = twine.toNullTerminatedStringRef(storage);
    char *end;
-   N temp = strToFunc(str.getData(), &end);
+   N temp = strToFunc(str.data(), &end);
    if (*end != '\0') {
       return false;
    }
@@ -375,7 +379,7 @@ void split_string(StringRef source,
 //   X*33+c -> X*33^c
 inline unsigned hash_string(StringRef str, unsigned result = 0)
 {
-   for (StringRef::size_type i = 0, e = str.getSize(); i != e; ++i) {
+   for (StringRef::size_type i = 0, e = str.size(); i != e; ++i) {
       result = result * 33 + (unsigned char)str[i];
    }
    return result;
@@ -403,10 +407,10 @@ inline StringRef get_ordinal_suffix(unsigned value)
 
 /// PrintEscapedString - Print each character of the specified string, escaping
 /// it if it is not printable or if it is an escape char.
-void print_escaped_string(StringRef name, RawOutStream &out);
+void print_escaped_string(StringRef name, raw_ostream &out);
 
 /// printLowerCase - Print each character as lowercase if it is uppercase.
-void print_lower_case(StringRef string, RawOutStream &out);
+void print_lower_case(StringRef string, raw_ostream &out);
 
 namespace internal {
 
@@ -433,7 +437,7 @@ inline std::string join_impl(IteratorType begin, IteratorType end,
    if (begin == end) {
       return str;
    }
-   size_t length = (std::distance(begin, end) - 1) * separator.getSize();
+   size_t length = (std::distance(begin, end) - 1) * separator.size();
    for (IteratorType iter = begin; iter != end; ++iter) {
       length += (*begin).size();
    }
@@ -539,14 +543,14 @@ inline std::string join_items(Sep separator, Args &&... items)
 
 /// Print each character of the specified string, escaping it if it is not
 /// printable or if it is an escape char.
-void print_escaped_string(StringRef name, RawOutStream &out);
+void print_escaped_string(StringRef name, raw_ostream &out);
 
 /// Print each character of the specified string, escaping HTML special
 /// characters.
-void print_html_escaped(StringRef string, RawOutStream &out);
+void print_html_escaped(StringRef string, raw_ostream &out);
 
 /// print_lower_case - Print each character as lowercase if it is uppercase.
-void print_lower_case(StringRef string, RawOutStream &out);
+void print_lower_case(StringRef string, raw_ostream &out);
 
 template <typename... ArgTypes>
 std::string format_string(const std::string &format, ArgTypes&&...args)

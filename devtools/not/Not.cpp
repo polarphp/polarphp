@@ -17,14 +17,13 @@
 //     Will return true if cmd crashes (e.g. for testing crash reporting).
 
 #include "CLI/CLI.hpp"
-#include "polarphp/basic/adt/StringRef.h"
+#include "llvm/ADT/StringRef.h"
 #include "polarphp/utils/InitPolar.h"
-#include "polarphp/utils/Program.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/Support/Program.h"
+#include "llvm/Support/raw_ostream.h"
 
-using polar::basic::StringRef;
-using namespace polar::utils;
-using namespace polar::basic;
+using llvm::StringRef;
+using namespace llvm;
 
 int main(int argc, char *argv[])
 {
@@ -40,10 +39,10 @@ int main(int argc, char *argv[])
    if (argc == 0) {
       return 1;
    }
-   OptionalError<std::string> finded = polar::sys::find_program_by_name(argv[0]);
+   ErrorOr<std::string> finded = sys::findProgramByName(argv[0]);
    if (!finded) {
-      polar::utils::error_stream() << "Error: Unable to find `" << argv[0]
-                                   << "' in PATH: " << finded.getError().message() << "\n";
+      errs() << "Error: Unable to find `" << argv[0]
+             << "' in PATH: " << finded.getError().message() << "\n";
    }
    std::vector<StringRef> subArgv;
    subArgv.reserve(argc);
@@ -51,18 +50,18 @@ int main(int argc, char *argv[])
       subArgv.push_back(argv[i]);
    }
    std::string errMsg;
-   int result = polar::sys::execute_and_wait(*finded, subArgv, std::nullopt, {}, {}, 0, 0, &errMsg);
+   int result = sys::ExecuteAndWait(*finded, subArgv, None, {}, 0, 0, &errMsg);
 #ifdef _WIN32
    // Handle abort() in msvcrt -- It has exit code as 3.  abort(), aka
    // unreachable, should be recognized as a crash.  However, some binaries use
    // exit code 3 on non-crash failure paths, so only do this if we expect a
    // crash.
    if (expectCrash && result == 3) {
-       result = -3;
+      result = -3;
    }
 #endif
    if (result < 0) {
-      polar::utils::error_stream() << "Error: " << errMsg << "\n";
+      errs() << "Error: " << errMsg << "\n";
       if (expectCrash) {
          return 0;
       }

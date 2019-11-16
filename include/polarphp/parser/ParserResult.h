@@ -23,7 +23,7 @@
 #ifndef POLARPHP_PARSER_PARSER_RESULT_H
 #define POLARPHP_PARSER_PARSER_RESULT_H
 
-#include "polarphp/basic/adt/PointerIntPair.h"
+#include "llvm/ADTPointerIntPair.h"
 
 namespace polar::parser {
 

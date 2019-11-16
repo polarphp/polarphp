@@ -26,15 +26,15 @@
 
 #include "polarphp/parser/SourceLoc.h"
 #include "polarphp/parser/SourceMgr.h"
-#include "polarphp/utils/MemoryBuffer.h"
-#include "polarphp/utils/PrettyStackTrace.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/PrettyStackTrace.h"
+#include "llvm/Support/raw_ostream.h"
 
 #include <optional>
 
 namespace polar::parser {
 
-using polar::utils::error_stream;
+using llvm::errs;
 
 void SourceRange::widen(SourceRange other)
 {
@@ -46,7 +46,7 @@ void SourceRange::widen(SourceRange other)
    }
 }
 
-void SourceLoc::printLineAndColumn(RawOutStream &outStream, const SourceManager &sourceMgr,
+void SourceLoc::printLineAndColumn(raw_ostream &outStream, const SourceManager &sourceMgr,
                                    unsigned bufferId) const
 {
    if (isInvalid()) {
@@ -58,7 +58,7 @@ void SourceLoc::printLineAndColumn(RawOutStream &outStream, const SourceManager 
    outStream << "line:" << lineAndCol.first << ':' << lineAndCol.second;
 }
 
-void SourceLoc::print(RawOutStream &outStream, const SourceManager &sourceMgr,
+void SourceLoc::print(raw_ostream &outStream, const SourceManager &sourceMgr,
                       unsigned &lastbufferID) const
 {
    if (isInvalid()) {
@@ -80,10 +80,10 @@ void SourceLoc::print(RawOutStream &outStream, const SourceManager &sourceMgr,
 
 void SourceLoc::dump(const SourceManager &sourceMgr) const
 {
-   print(error_stream(), sourceMgr);
+   print(llvm::errs(), sourceMgr);
 }
 
-void SourceRange::print(RawOutStream &outStream, const SourceManager &sourceMgr,
+void SourceRange::print(raw_ostream &outStream, const SourceManager &sourceMgr,
                         unsigned &lastbufferID, bool printText) const
 {
    // FIXME: CharSourceRange is a half-open character-based range, while
@@ -96,7 +96,7 @@ void SourceRange::print(RawOutStream &outStream, const SourceManager &sourceMgr,
 
 void SourceRange::dump(const SourceManager &sourceMgr) const
 {
-   print(error_stream(), sourceMgr);
+   print(llvm::errs(), sourceMgr);
 }
 
 CharSourceRange::CharSourceRange(const SourceManager &sourceMgr, SourceLoc start,
@@ -110,7 +110,7 @@ CharSourceRange::CharSourceRange(const SourceManager &sourceMgr, SourceLoc start
    }
 }
 
-void CharSourceRange::print(RawOutStream &outStream, const SourceManager &sourceMgr,
+void CharSourceRange::print(raw_ostream &outStream, const SourceManager &sourceMgr,
                             unsigned &lastbufferID, bool printText) const
 {
    outStream << '[';
@@ -128,7 +128,7 @@ void CharSourceRange::print(RawOutStream &outStream, const SourceManager &source
 
 void CharSourceRange::dump(const SourceManager &sourceMgr) const
 {
-   print(error_stream(), sourceMgr);
+   print(llvm::errs(), sourceMgr);
 }
 
 } // polar::parser

@@ -16,7 +16,7 @@
 #include <string>
 #include <memory>
 
-#include "polarphp/basic/adt/StringRef.h"
+#include "llvm/ADT/StringRef.h"
 #include "polarphp/parser/CommonDefs.h"
 #include "polarphp/parser/Token.h"
 #include "polarphp/parser/ParsedTrivia.h"

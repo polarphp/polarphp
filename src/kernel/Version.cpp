@@ -26,9 +26,9 @@
 //===----------------------------------------------------------------------===//
 
 #include "polarphp/basic/CharInfo.h"
-#include "polarphp/basic/adt/SmallString.h"
-#include "polarphp/basic/adt/StringExtras.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/ADT/SmallString.h"
+#include "llvm/ADT/StringExtras.h"
+#include "llvm/Support/raw_ostream.h"
 #include "polarphp/kernel/Version.h"
 #include "polarphp/ast/DiagnosticsParse.h"
 
@@ -56,17 +56,19 @@
 
 namespace polar::version {
 
-using polar::utils::RawOutStream;
-using polar::utils::RawStringOutStream;
-using polar::utils::RawSvectorOutStream;
+
 using polar::parser::SourceLoc;
 using polar::parser::SourceRange;
-using polar::basic::SmallVectorImpl;
-using polar::basic::SmallString;
+
+using llvm::raw_ostream;
+using llvm::raw_string_ostream;
+using llvm::raw_svector_ostream;
+using llvm::SmallVectorImpl;
+using llvm::SmallString;
 
 /// Print a string of the form "LLVM xxxxx, Clang yyyyy, Swift zzzzz",
 /// where each placeholder is the revision for the associated repository.
-//static void print_full_revision_string(RawOutStream &out)
+//static void print_full_revision_string(raw_ostream &out)
 //{
 //}
 
@@ -103,7 +105,7 @@ std::optional<Version> Version::parseCompilerVersionString(
 
    Version CV;
    SmallString<16> digits;
-   RawSvectorOutStream OS(digits);
+   raw_svector_ostream OS(digits);
    SmallVector<std::pair<StringRef, SourceRange>, 5> splitComponents;
 
    split_version_components(splitComponents, versionString, loc,
@@ -173,7 +175,7 @@ std::optional<Version> Version::parseVersionString(StringRef versionString,
 {
    Version TheVersion;
    SmallString<16> digits;
-   RawSvectorOutStream OS(digits);
+   raw_svector_ostream OS(digits);
    SmallVector<std::pair<StringRef, SourceRange>, 5> splitComponents;
    // Skip over quote character in string literal.
 
@@ -248,7 +250,7 @@ Version Version::getCurrentLanguageVersion()
 #endif
 }
 
-RawOutStream &operator<<(RawOutStream &outStream, const Version &version)
+raw_ostream &operator<<(raw_ostream &outStream, const Version &version)
 {
    if (version.empty()) {
        return outStream;
@@ -265,13 +267,13 @@ Version::preprocessorDefinition(StringRef macroName,
                                 ArrayRef<uint64_t> componentWeights) const
 {
    uint64_t versionConstant = 0;
-   for (size_t i = 0, e = std::min(componentWeights.getSize(), m_components.size());
+   for (size_t i = 0, e = std::min(componentWeights.size(), m_components.size());
         i < e; ++i) {
       versionConstant += componentWeights[i] * m_components[i];
    }
 
    std::string define("-D");
-   RawStringOutStream(define) << macroName << '=' << versionConstant;
+   raw_string_ostream(define) << macroName << '=' << versionConstant;
    // This isn't using stream.str() so that we get move semantics.
    return define;
 }
@@ -297,7 +299,7 @@ Version::operator VersionTuple() const
             (unsigned)m_components[2],
             (unsigned)m_components[3]);
    default:
-      polar_unreachable("polar::version::Version with 6 or more components");
+      llvm_unreachable("polar::version::Version with 6 or more components");
    }
 }
 
@@ -365,7 +367,7 @@ std::string Version::asAPINotesVersionString() const
    if (size() >= 2 && m_components[0] == 4 && m_components[1] == 2) {
       return "4.2";
    }
-   return polar::basic::itostr(m_components[0]);
+   return llvm::itostr(m_components[0]);
 }
 
 bool operator>=(const class Version &lhs,

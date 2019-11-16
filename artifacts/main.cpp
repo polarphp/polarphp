@@ -9,7 +9,7 @@
 //
 // Created by polarboy on 2018/12/12.
 
-#include "polarphp/basic/adt/StringRef.h"
+#include "llvm/ADT/StringRef.h"
 #include "polarphp/utils/InitPolar.h"
 #include "polarphp/global/CompilerFeature.h"
 #include "polarphp/global/Config.h"
@@ -21,7 +21,7 @@
 #include <vector>
 #include <string>
 
-using polar::basic::StringRef;
+using llvm::StringRef;
 
 void setup_command_opts(CLI::App &parser);
 

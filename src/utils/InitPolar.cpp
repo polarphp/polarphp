@@ -10,11 +10,11 @@
 // Created by polarboy on 2018/10/21.
 
 #include "polarphp/utils/InitPolar.h"
-#include "polarphp/utils/Error.h"
-#include "polarphp/utils/PrettyStackTrace.h"
-#include "polarphp/utils/Process.h"
-#include "polarphp/utils/Signals.h"
-#include "polarphp/utils/ManagedStatics.h"
+#include "llvm/Support/Error.h"
+#include "llvm/Support/PrettyStackTrace.h"
+#include "llvm/Support/Process.h"
+#include "llvm/Support/Signals.h"
+#include "llvm/Support/ManagedStatic.h"
 #include "CLI/CLI.hpp"
 #include <string>
 
@@ -27,7 +27,7 @@ namespace polar {
 InitPolar::InitPolar(int &argc, const char **&argv)
    : m_stackPrinter(argc, argv)
 {
-   utils::print_stack_trace_on_error_signal(argv[0]);
+   llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
 
 #ifdef _WIN32
    // We use UTF-8 as the internal character encoding. On Windows,
@@ -60,7 +60,7 @@ void InitPolar::initNgOpts(CLI::App &parser)
 
 InitPolar::~InitPolar()
 {
-   utils::managed_statics_shutdown();
+   llvm::llvm_shutdown();
 }
 
 } // polar

@@ -23,7 +23,7 @@
 #ifndef POLARPHP_AST_AST_WALKER_H
 #define POLARPHP_AST_AST_WALKER_H
 
-#include "polarphp/basic/adt/PointerUnion.h"
+#include "llvm/ADTPointerUnion.h"
 #include <utility>
 
 namespace polar::ast {

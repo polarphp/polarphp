@@ -14,8 +14,8 @@
 #define POLARPHP_PARSER_SYNTAX_PARSING_CACHE_H
 
 #include "polarphp/syntax/SyntaxNodes.h"
-#include "polarphp/utils/FileSystem.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/raw_ostream.h"
 #include <unordered_set>
 
 namespace polar::parser {

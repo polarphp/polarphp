@@ -23,8 +23,8 @@
 #ifndef POLARPHP_PARSER_PARSED_TRIVIA_H
 #define POLARPHP_PARSER_PARSED_TRIVIA_H
 
-#include "polarphp/basic/adt/ArrayRef.h"
-#include "polarphp/basic/adt/SmallVector.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/SmallVector.h"
 
 namespace polar::syntax {
 enum class TriviaKind : uint8_t;
@@ -38,8 +38,8 @@ class SourceManager;
 
 using polar::syntax::Trivia;
 using polar::syntax::TriviaKind;
-using polar::basic::ArrayRef;
-using polar::basic::SmallVector;
+using llvm::ArrayRef;
+using llvm::SmallVector;
 
 class ParsedTriviaPiece
 {

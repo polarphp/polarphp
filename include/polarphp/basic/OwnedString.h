@@ -12,15 +12,17 @@
 #ifndef POLARPHP_BASIC_ADT_OWNED_STRING_H
 #define POLARPHP_BASIC_ADT_OWNED_STRING_H
 
-#include "polarphp/basic/adt/IntrusiveRefCountPtr.h"
-#include "polarphp/basic/adt/StringRef.h"
-#include "polarphp/utils/TrailingObjects.h"
+#include "llvm/ADT/IntrusiveRefCntPtr.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/Support/TrailingObjects.h"
 
 namespace polar {
 namespace basic {
 
-using polar::basic::StringRef;
-using polar::utils::TrailingObjects;
+using llvm::StringRef;
+using llvm::TrailingObjects;
+using llvm::ThreadSafeRefCountedBase;
+using llvm::IntrusiveRefCntPtr;
 
 /// Holds a string - either statically allocated or dynamically allocated
 /// and owned by this type.
@@ -55,25 +57,22 @@ class OwnedString
 
    /// In case of a ref counted string an owner that keeps the buffer \c text
    /// references alive.
-   IntrusiveRefCountPtr<TextOwner> m_ownedPtr;
+   IntrusiveRefCntPtr<TextOwner> m_ownedPtr;
 
-   OwnedString(StringRef text, IntrusiveRefCountPtr<TextOwner> ownedPtr)
+   OwnedString(StringRef text, IntrusiveRefCntPtr<TextOwner> ownedPtr)
       : text(text), m_ownedPtr(ownedPtr)
    {}
 
 public:
-   OwnedString() : OwnedString(/*text=*/StringRef(), /*m_ownedPtr=*/nullptr)
-   {}
+   OwnedString() : OwnedString(/*text=*/StringRef(), /*m_ownedPtr=*/nullptr) {}
 
    /// Create a ref counted \c OwnedString that is initialized with the text of
    /// the given \c StringRef.
-   OwnedString(StringRef str) : OwnedString(makeRefCounted(str))
-   {}
+   OwnedString(StringRef str) : OwnedString(makeRefCounted(str)) {}
 
    /// Create a ref counted \c OwnedString that is initialized with the text of
    /// the given buffer.
-   OwnedString(const char *str) : OwnedString(StringRef(str))
-   {}
+   OwnedString(const char *str) : OwnedString(StringRef(str)) {}
 
    /// Create an \c OwnedString that references the given string. The
    /// \c OwnedString will not take ownership of that buffer and will assume that
@@ -93,7 +92,7 @@ public:
          // string that points to the empty string.
          return makeUnowned(str);
       } else {
-         IntrusiveRefCountPtr<TextOwner> m_ownedPtr(TextOwner::make(str));
+         IntrusiveRefCntPtr<TextOwner> m_ownedPtr(TextOwner::make(str));
          // Allocate the StringRef on the stack first.  This is to ensure that the
          // order of evaluation of the arguments is specified.  The specification
          // does not specify the order of evaluation for the arguments.  Itanium

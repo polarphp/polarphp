@@ -24,9 +24,9 @@
 #define POLARPHP_MARKUP_AST_H
 
 #include "polarphp/markup/LineList.h"
-#include "polarphp/basic/adt/SetVector.h"
-#include "polarphp/utils/ErrorHandling.h"
-#include "polarphp/utils/TrailingObjects.h"
+#include "llvm/ADTSetVector.h"
+#include "llvm/Support/ErrorHandling.h"
+#include "llvm/Support/TrailingObjects.h"
 
 #include <optional>
 
@@ -44,7 +44,7 @@ class LocalizationKeyField;
 using polar::basic::SmallSetVector;
 using polar::basic::ArrayRef;
 using polar::utils::TrailingObjects;
-using polar::utils::RawOutStream;
+using polar::utils::raw_ostream;
 
 /// The basic structure of a doc comment attached to a Swift
 /// declaration.
@@ -882,8 +882,8 @@ MarkupAstNode *create_simple_field(MarkupContext &mcontext, StringRef tag,
 
 bool is_a_field_tag(StringRef Tag);
 
-void dump(const MarkupAstNode *node, RawOutStream &OS, unsigned indent = 0);
-void print_inlines_under(const MarkupAstNode *node, RawOutStream &OS,
+void dump(const MarkupAstNode *node, raw_ostream &OS, unsigned indent = 0);
+void print_inlines_under(const MarkupAstNode *node, raw_ostream &OS,
                          bool printDecorators = false);
 
 

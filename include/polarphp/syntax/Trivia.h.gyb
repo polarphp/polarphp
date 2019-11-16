@@ -90,11 +90,11 @@
 #ifndef POLARPHP_SYNTAX_TRIVIA_H
 #define POLARPHP_SYNTAX_TRIVIA_H
 
-#include "polarphp/basic/adt/OwnedString.h"
+#include "polarphp/basic/OwnedString.h"
 #include "polarphp/basic/ByteTreeSerialization.h"
-#include "polarphp/basic/adt/FoldingSet.h"
-#include "polarphp/utils/RawOutStream.h"
-#include "polarphp/utils/yaml/YamlTraits.h"
+#include "llvm/ADT/FoldingSet.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/YAMLTraits.h"
 #include "polarphp/global/Global.h"
 
 #include <vector>
@@ -103,10 +103,10 @@ namespace polar::syntax {
 
 class AbsolutePosition;
 
-using polar::basic::StringRef;
-using polar::basic::FoldingSetNodeId;
+using llvm::StringRef;
+using llvm::FoldingSetNodeID;
+using llvm::raw_ostream;
 using polar::basic::OwnedString;
-using polar::utils::RawOutStream;
 
 /// The kind of source trivia, such as spaces, newlines, or comments.
 enum class TriviaKind : uint8_t
@@ -209,7 +209,7 @@ public:
    }
 ?>
       }
-      polar_unreachable("unhandled kind");
+      llvm_unreachable("unhandled kind");
    }
 
    bool isComment() const
@@ -225,10 +225,10 @@ public:
 
    /// Print a debug representation of this trivia piece to the provided output
    /// stream and indentation level.
-   void dump(RawOutStream &outStream, unsigned indent = 0) const;
+   void dump(raw_ostream &outStream, unsigned indent = 0) const;
 
    /// Print this piece of trivia to the provided output stream.
-   void print(RawOutStream &outStream) const;
+   void print(raw_ostream &outStream) const;
 
    bool operator==(const TriviaPiece &other) const
    {
@@ -242,9 +242,9 @@ public:
       return !(*this == other);
    }
 
-   void profile(FoldingSetNodeId &id) const
+   void profile(FoldingSetNodeID &id) const
    {
-      id.addInteger(unsigned(m_kind));
+      id.AddInteger(unsigned(m_kind));
       switch (m_kind) {
 <?php
    foreach($TRIVIAS as $trivia) {
@@ -254,11 +254,11 @@ public:
 <?php
       if ($trivia->isCollection()) {
 ?>
-         id.addInteger(m_count);
+         id.AddInteger(m_count);
 <?php
       } else {
 ?>
-         id.addString(m_text.getStr());
+         id.AddString(m_text.getStr());
 <?php
       }
 ?>
@@ -282,7 +282,7 @@ private:
         m_text()
    {}
 
-   friend struct polar::yaml::MappingTraits<TriviaPiece>;
+   friend struct llvm::yaml::MappingTraits<TriviaPiece>;
 
    TriviaKind m_kind;
    unsigned m_count;
@@ -396,10 +396,10 @@ struct Trivia
 
    /// Dump a debug representation of this trivia collection to the provided
    /// stream and indentation level.
-   void dump(RawOutStream &outStream, unsigned indent = 0) const;
+   void dump(raw_ostream &outStream, unsigned indent = 0) const;
 
    /// Print all of the pieces to the provided output stream in source order.
-   void print(RawOutStream &outStream) const;
+   void print(raw_ostream &outStream) const;
 
    /// Return a new trivia collection by appending pieces from `other`.
    Trivia appending(const Trivia &other) const;
@@ -469,13 +469,13 @@ private:
    {
       switch(kind) {
       case TriviaKind::LineComment:
-         return text.startsWith("//");
+         return text.startswith("//");
       case TriviaKind::BlockComment:
-         return text.startsWith("/*") && text.endsWith("*/");
+         return text.startswith("/*") && text.endswith("*/");
       case TriviaKind::DocLineComment:
-         return text.startsWith("///");
+         return text.startswith("///");
       case TriviaKind::DocBlockComment:
-         return text.startsWith("/**") && text.endsWith("*/");
+         return text.startswith("/**") && text.endswith("*/");
       case TriviaKind::GarbageText:
          return !text.empty();
 <?php
@@ -519,7 +519,7 @@ struct WrapperTypeTraits<syntax::TriviaKind>
       default:
          break;
       }
-      polar_unreachable("unhandled kind");
+      llvm_unreachable("unhandled kind");
    }
 
    static void write(ByteTreeWriter &writer, const syntax::TriviaKind &kind,
@@ -560,6 +560,9 @@ struct ObjectTraits<syntax::TriviaPiece>
          writer.write(trivia.getText(), /*index=*/1);
 <?php
       }
+?>
+         break;
+<?php
    }
 ?>
       }
@@ -568,7 +571,7 @@ struct ObjectTraits<syntax::TriviaPiece>
 
 } // polar::basic::bytetree
 
-namespace polar::yaml {
+namespace llvm::yaml {
 
 /// Deserialization traits for TriviaPiece.
 /// - All trivia pieces will have a "kind" key that contains the serialized
@@ -638,6 +641,6 @@ struct ScalarEnumerationTraits<polar::syntax::TriviaKind>
    }
 };
 
-} // polar::yaml
+} // llvm::yaml
 
 #endif // POLARPHP_SYNTAX_TRIVIA_H

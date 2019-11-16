@@ -30,7 +30,7 @@
 #ifndef POLARPHP_AST_PRETTYSTACKTRACE_H
 #define POLARPHP_AST_PRETTYSTACKTRACE_H
 
-#include "polarphp/utils/PrettyStackTrace.h"
+#include "llvm/Support/PrettyStackTrace.h"
 #include "polarphp/parser/SourceLoc.h"
 #include "polarphp/ast/Identifier.h"
 #include "polarphp/ast/Type.h"
@@ -40,7 +40,7 @@ namespace polar::ast {
 using polar::utils::PrettyStackTraceEntry;
 using polar::parser::SourceLoc;
 
-void print_source_loc_description(RawOutStream &out, SourceLoc loc,
+void print_source_loc_description(raw_ostream &out, SourceLoc loc,
                                   AstContext &context, bool addNewline = true);
 
 /// PrettyStackTraceLocation - Observe that we are doing some
@@ -57,10 +57,10 @@ public:
         m_action(action)
    {}
 
-   virtual void print(RawOutStream &outStream) const;
+   virtual void print(raw_ostream &outStream) const;
 };
 
-void print_decl_description(RawOutStream &out, const Decl *decl,
+void print_decl_description(raw_ostream &out, const Decl *decl,
                             AstContext &context, bool addNewline = true);
 
 /// PrettyStackTraceDecl - Observe that we are processing a specific
@@ -75,10 +75,10 @@ public:
         m_action(action)
    {}
 
-   virtual void print(RawOutStream &outStream) const;
+   virtual void print(raw_ostream &outStream) const;
 };
 
-void print_expr_description(RawOutStream &out, Expr *expr,
+void print_expr_description(raw_ostream &out, Expr *expr,
                             AstContext &context, bool addNewline = true);
 
 /// PrettyStackTraceExpr - Observe that we are processing a specific
@@ -95,10 +95,10 @@ public:
         m_action(action)
    {}
 
-   virtual void print(RawOutStream &outStream) const;
+   virtual void print(raw_ostream &outStream) const;
 };
 
-void print_stmt_description(RawOutStream &out, Stmt *stmt,
+void print_stmt_description(raw_ostream &out, Stmt *stmt,
                             AstContext &context, bool addNewline = true);
 
 /// PrettyStackTraceStmt - Observe that we are processing a specific
@@ -115,14 +115,14 @@ public:
         m_action(action)
    {}
 
-   virtual void print(RawOutStream &outStream) const;
+   virtual void print(raw_ostream &outStream) const;
 };
 
-void printPatternDescription(RawOutStream &out, Pattern *P,
+void printPatternDescription(raw_ostream &out, Pattern *P,
                              AstContext &m_context, bool addNewline = true);
 
 
-void print_type_description(RawOutStream &out, Type type,
+void print_type_description(raw_ostream &out, Type type,
                             AstContext &context, bool addNewline = true);
 
 /// PrettyStackTraceType - Observe that we are processing a specific type.
@@ -138,7 +138,7 @@ public:
         m_action(action)
    {}
 
-   virtual void print(RawOutStream &outStream) const;
+   virtual void print(raw_ostream &outStream) const;
 };
 
 /// Observe that we are processing a specific type representation.
@@ -150,7 +150,7 @@ class PrettyStackTraceTypeRepr : public PrettyStackTraceEntry
 public:
    PrettyStackTraceTypeRepr(AstContext &C, const char *action, TypeRepr *type)
       : m_context(C), m_theType(type), m_action(action) {}
-   virtual void print(RawOutStream &OS) const;
+   virtual void print(raw_ostream &OS) const;
 };
 
 
@@ -174,7 +174,7 @@ public:
       m_requirement = requirement;
    }
 
-   void print(RawOutStream &out) const override;
+   void print(raw_ostream &out) const override;
 };
 
 } // polar::ast

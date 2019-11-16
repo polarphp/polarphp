@@ -30,13 +30,13 @@
 #ifndef POLAR_BASIC_SIMPLE_DISPLAY_H
 #define POLAR_BASIC_SIMPLE_DISPLAY_H
 
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/Support/raw_ostream.h"
 #include <tuple>
 #include <type_traits>
 
 namespace polar::basic {
 
-using polar::utils::RawOutStream;
+using polar::utils::raw_ostream;
 
 template<typename T>
 struct HasTrivialDisplay {
@@ -69,19 +69,19 @@ HAS_TRIVIAL_DISPLAY(std::string);
 
 template<typename T>
 typename std::enable_if<HasTrivialDisplay<T>::value>::type
-simple_display(RawOutStream &out, const T &value)
+simple_display(raw_ostream &out, const T &value)
 {
    out << value;
 }
 
 template<unsigned I, typename ...Types,
          typename std::enable_if<I == sizeof...(Types)>::type* = nullptr>
-void simple_display_tuple(RawOutStream &out,
+void simple_display_tuple(raw_ostream &out,
                           const std::tuple<Types...> &value);
 
 template<unsigned I, typename ...Types,
          typename std::enable_if<I < sizeof...(Types)>::type* = nullptr>
-void simple_display_tuple(RawOutStream &out,
+void simple_display_tuple(raw_ostream &out,
          const std::tuple<Types...> &value)
 {
    // Start or separator.
@@ -98,7 +98,7 @@ void simple_display_tuple(RawOutStream &out,
 
 template<unsigned I, typename ...Types,
          typename std::enable_if<I == sizeof...(Types)>::type*>
-void simple_display_tuple(RawOutStream &out,
+void simple_display_tuple(raw_ostream &out,
                           const std::tuple<Types...> &)
 {
    // Last element.
@@ -106,7 +106,7 @@ void simple_display_tuple(RawOutStream &out,
 }
 
 template<typename ...Types>
-void simple_display(RawOutStream &out,
+void simple_display(raw_ostream &out,
                     const std::tuple<Types...> &value)
 {
    simple_display_tuple<0>(out, value);

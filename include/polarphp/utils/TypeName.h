@@ -19,7 +19,7 @@
 #ifndef POLARPHP_UTILS_TYPE_NAME_H
 #define POLARPHP_UTILS_TYPE_NAME_H
 
-#include "polarphp/basic/adt/StringRef.h"
+#include "llvm/ADTStringRef.h"
 
 namespace polar::utils {
 

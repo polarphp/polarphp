@@ -467,8 +467,8 @@ include_directories(${POLAR_SOURCE_DIR}
    ${POLAR_INCLUDE_DIR}
    ${POLAR_INCLUDE_DIR}/polarphp)
 
-include(ImportThirdparty)
 include(ImportLLVM)
+include(ImportThirdparty)
 
 add_subdirectory(devtools)
 add_subdirectory(assets)

@@ -114,7 +114,7 @@ void UUID::toString(SmallVectorImpl<char> &out) const
   memcpy(out.data(), signedStr, StringBufferSize);
   std::transform(std::begin(out), std::end(out), std::begin(out), toupper);
 #else
-  uuid_unparse_upper(m_value, out.getData());
+  uuid_unparse_upper(m_value, out.data());
 #endif
   // Pop off the null terminator.
   assert(out.back() == '\0' && "did not null-terminate?!");
@@ -137,7 +137,7 @@ int UUID::compare(UUID y) const
 #endif
 }
 
-RawOutStream &operator<<(RawOutStream &os, UUID uuid)
+raw_ostream &operator<<(raw_ostream &os, UUID uuid)
 {
   SmallString<UUID::StringBufferSize> buf;
   uuid.toString(buf);

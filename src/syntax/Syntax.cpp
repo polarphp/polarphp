@@ -41,7 +41,7 @@ SyntaxKind Syntax::getKind() const
    return getRaw()->getKind();
 }
 
-void Syntax::print(utils::RawOutStream &outStream, SyntaxPrintOptions opts) const
+void Syntax::print(utils::raw_ostream &outStream, SyntaxPrintOptions opts) const
 {
    if (auto raw = getRaw()) {
       raw->print(outStream, opts);
@@ -53,7 +53,7 @@ void Syntax::dump() const
    return getRaw()->dump();
 }
 
-void Syntax::dump(utils::RawOutStream &outStream, [[maybe_unused]] unsigned indent) const
+void Syntax::dump(utils::raw_ostream &outStream, [[maybe_unused]] unsigned indent) const
 {
    return getRaw()->dump(outStream, 0);
 }

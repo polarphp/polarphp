@@ -46,7 +46,7 @@ foreach ($SYNTAX_NODES as $node) {
    }
 }
 
-void dump_syntax_kind(RawOutStream &outStream, const SyntaxKind kind) 
+void dump_syntax_kind(raw_ostream &outStream, const SyntaxKind kind) 
 {
    switch (kind) {
    case SyntaxKind::Token:
@@ -133,7 +133,7 @@ SyntaxKind get_unknown_kind(SyntaxKind kind)
 
 namespace polar::utils {
 using polar::syntax::SyntaxKind;
-RawOutStream &operator<<(RawOutStream &outStream, SyntaxKind kind)
+raw_ostream &operator<<(raw_ostream &outStream, SyntaxKind kind)
 {
    switch (kind) {
 <?php

@@ -23,17 +23,17 @@
 #ifndef POLARPHP_MARKUP_XML_UTILS_H
 #define POLARPHP_MARKUP_XML_UTILS_H
 
-#include "polarphp/basic/adt/StringRef.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/ADTStringRef.h"
+#include "llvm/Support/raw_ostream.h"
 
 namespace polar::markup {
 
-using polar::utils::RawOutStream;
+using polar::utils::raw_ostream;
 using polar::basic::StringRef;
 
 // FIXME: copied from Clang's
 // CommentASTToXMLConverter::appendToResultWithXMLEscaping
-static inline void append_with_xml_escaping(RawOutStream &outStream, StringRef str)
+static inline void append_with_xml_escaping(raw_ostream &outStream, StringRef str)
 {
    for (const char c : str) {
       switch (c) {
@@ -61,7 +61,7 @@ static inline void append_with_xml_escaping(RawOutStream &outStream, StringRef s
 
 // FIXME: copied from Clang's
 // CommentASTToXMLConverter::appendToResultWithCDATAEscaping
-static inline void append_with_cdata_escaping(RawOutStream &outStream, StringRef str)
+static inline void append_with_cdata_escaping(raw_ostream &outStream, StringRef str)
 {
    if (str.empty()) {
       return;

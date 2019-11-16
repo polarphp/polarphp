@@ -13,7 +13,7 @@
 #include "Defs.h"
 
 #include "polarphp/global/CompilerFeature.h"
-#include "polarphp/basic/adt/StringRef.h"
+#include "llvm/ADT/StringRef.h"
 
 #include <iostream>
 #include <vector>
@@ -48,7 +48,7 @@ namespace polar {
 
 using namespace runtime;
 
-using polar::basic::StringRef;
+using llvm::StringRef;
 
 namespace {
 const char *PARAM_MODE_CONFLICT = "Either execute direct code, process stdin or use a file.";
@@ -224,12 +224,12 @@ void setup_init_entries_commands(const std::vector<std::string> defines, std::st
       if (equalPos != StringRef::npos) {
          char val = defineStr[++equalPos];
          if (!isalnum(val) && val != '"' && val != '\'' && val != '\0') {
-            iniEntries += defineStr.substr(0, equalPos).getStr();
+            iniEntries += defineStr.substr(0, equalPos).str();
             iniEntries += "\"";
-            iniEntries += defineStr.substr(equalPos).getStr();
+            iniEntries += defineStr.substr(equalPos).str();
             iniEntries += "\n\0\"";
          } else {
-            iniEntries += defineStr.getStr();
+            iniEntries += defineStr.str();
          }
       } else {
          iniEntries += "=1\n\0";

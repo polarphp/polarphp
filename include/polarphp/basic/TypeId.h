@@ -29,8 +29,8 @@
 #ifndef POLARPHP_BASIC_TYPEID_H
 #define POLARPHP_BASIC_TYPEID_H
 
-#include "polarphp/basic/adt/StringRef.h"
-#include "polarphp/basic/adt/TinyPtrVector.h"
+#include "llvm/ADTStringRef.h"
+#include "llvm/ADTTinyPtrVector.h"
 #include <cstdint>
 #include <string>
 #include <vector>

@@ -280,7 +280,7 @@ ERROR(error_extracting_version_from_parseable_interface,none,
       "error extracting version from parseable module interface", ())
 ERROR(unsupported_version_of_parseable_interface,none,
       "unsupported version of parseable module interface '%0': '%1'",
-      (StringRef, polar::utils::VersionTuple))
+      (StringRef, llvm::VersionTuple))
 ERROR(error_extracting_flags_from_parseable_interface,none,
       "error extracting flags from parseable module interface", ())
 ERROR(missing_dependency_of_parseable_module_interface,none,

@@ -10,7 +10,7 @@
 // Created by polarboy on 2018/09/18.
 
 #include "CLI/CLI.hpp"
-#include "polarphp/basic/adt/StringRef.h"
+#include "llvm/ADT/StringRef.h"
 #include <iostream>
 #include <thread>
 #include <assert.h>
@@ -19,7 +19,7 @@
 
 namespace fs = std::filesystem;
 
-using polar::basic::StringRef;
+using llvm::StringRef;
 
 std::string convert_to_caret_and_mnotation(StringRef data)
 {

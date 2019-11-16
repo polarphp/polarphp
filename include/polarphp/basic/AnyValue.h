@@ -30,7 +30,7 @@
 
 #include "polarphp/basic/SimpleDisplay.h"
 #include "polarphp/basic/TypeId.h"
-#include "polarphp/basic/adt/PointerUnion.h"  // to define hash_m_value
+#include "llvm/ADTPointerUnion.h"  // to define hash_m_value
 
 namespace polar::basic {
 template<typename PT1, typename PT2>
@@ -47,7 +47,7 @@ HashCode hash_m_value(const PointerUnion<PT1, PT2> &ptr)
 ///   - Equality operator (==)
 ///   - TypeId support (see swift/Basic/TypeId.h)
 ///   - Display support (free function):
-///       void simple_display(RawOutStream &, const T &);
+///       void simple_display(raw_ostream &, const T &);
 class AnyValue
 {
    /// Abstract base class used to hold on to a m_value.
@@ -76,7 +76,7 @@ class AnyValue
       virtual bool equals(const HolderBase &other) const = 0;
 
       /// Display.
-      virtual void display(RawOutStream &out) const = 0;
+      virtual void display(raw_ostream &out) const = 0;
    };
 
    /// Holds a m_value that can be used as a request input/output.
@@ -109,7 +109,7 @@ class AnyValue
       }
 
       /// Display.
-      virtual void display(RawOutStream &out) const override
+      virtual void display(raw_ostream &out) const override
       {
          simple_display(out, m_value);
       }
@@ -160,7 +160,7 @@ public:
       return !(lhs == rhs);
    }
 
-   friend void simple_display(RawOutStream &out, const AnyValue &value)
+   friend void simple_display(raw_ostream &out, const AnyValue &value)
    {
       m_stored->display(out);
    }

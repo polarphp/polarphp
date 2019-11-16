@@ -17,6 +17,8 @@ polar_collect_files(
 polar_merge_list(POLARPHP_KERNEL_SOURCES POLAR_HEADERS)
 
 add_library(PolarKernel OBJECT ${POLARPHP_KERNEL_SOURCES})
+target_link_libraries(PolarKernel PolarBasic)
+
 set_target_properties(
    PolarKernel
    PROPERTIES

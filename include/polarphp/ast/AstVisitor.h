@@ -29,7 +29,7 @@
 #ifndef POLARPHP_AST_AST_VISITOR_H
 #define POLARPHP_AST_AST_VISITOR_H
 
-#include "polarphp/utils/ErrorHandling.h"
+#include "llvm/Support/ErrorHandling.h"
 
 namespace polar::ast {
 

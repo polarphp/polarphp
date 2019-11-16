@@ -10,7 +10,7 @@
 // Created by polarboy on 2019/07/09.
 
 #include "polarphp/parser/Token.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/Support/raw_ostream.h"
 #include "polarphp/syntax/TokenKinds.h"
 
 namespace polar::parser {
@@ -19,12 +19,12 @@ using namespace polar::syntax;
 
 void Token::dump() const
 {
-   dump(polar::utils::error_stream());
-   polar::utils::error_stream() << "\n";
+   dump(llvm::errs());
+   llvm::errs() << "\n";
 }
 
 /// Dump this piece of syntax recursively.
-void Token::dump(RawOutStream &outStream) const
+void Token::dump(raw_ostream &outStream) const
 {
    outStream << "============================" << "\n";
    outStream << "name: ";

@@ -24,7 +24,7 @@
 #ifndef POLARPHP_AST_SEARCHPATHOPTIONS_H
 #define POLARPHP_AST_SEARCHPATHOPTIONS_H
 
-#include "polarphp/basic/adt/Hashing.h"
+#include "llvm/ADTHashing.h"
 #include <string>
 #include <vector>
 

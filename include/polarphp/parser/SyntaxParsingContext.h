@@ -23,10 +23,10 @@
 #ifndef POLARPHP_PARSER_SYNTAX_PARSING_CONTEXT_H
 #define POLARPHP_PARSER_SYNTAX_PARSING_CONTEXT_H
 
-#include "polarphp/basic/adt/PointerUnion.h"
+#include "llvm/ADT/PointerUnion.h"
 #include "polarphp/parser/SourceLoc.h"
 #include "polarphp/syntax/TokenKinds.h"
-#include "polarphp/utils/Allocator.h"
+#include "llvm/Support/Allocator.h"
 #include "polarphp/syntax/SyntaxKind.h"
 
 namespace polar::ast {
@@ -99,7 +99,7 @@ public:
 
       unsigned bufferId;
 
-      polar::utils::BumpPtrAllocator scratchAlloc;
+      llvm::BumpPtrAllocator scratchAlloc;
 
       RootContextData(DiagnosticEngine &diags,
                       SourceManager &sourceMgr, unsigned bufferId)

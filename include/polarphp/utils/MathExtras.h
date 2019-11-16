@@ -13,7 +13,7 @@
 #define POLARPHP_UTILS_MATHEXTRAS_H
 
 #include "polarphp/global/CompilerFeature.h"
-#include "polarphp/utils/SwapByteOrder.h"
+#include "llvm/Support/SwapByteOrder.h"
 
 #include <algorithm>
 #include <cassert>
@@ -514,19 +514,19 @@ constexpr inline bool is_power_of_two64(uint64_t value)
 /// Return a byte-swapped representation of the 16-bit argument.
 inline uint16_t byte_swap16(uint16_t value)
 {
-   return swap_byte_order16(value);
+   return llvm::sys::SwapByteOrder_16(value);
 }
 
 /// Return a byte-swapped representation of the 32-bit argument.
 inline uint32_t byte_swap32(uint32_t value)
 {
-   return swap_byte_order32(value);
+   return llvm::sys::SwapByteOrder_32(value);
 }
 
 /// Return a byte-swapped representation of the 64-bit argument.
 inline uint64_t byte_swap64(uint64_t value)
 {
-   return swap_byte_order64(value);
+   return llvm::sys::SwapByteOrder_64(value);
 }
 
 /// Count the number of ones from the most significant bit to the first

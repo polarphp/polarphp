@@ -37,8 +37,8 @@
 #include "polarphp/syntax/References.h"
 #include "polarphp/syntax/RawSyntax.h"
 #include "polarphp/syntax/Trivia.h"
-#include "polarphp/basic/adt/IntrusiveRefCountPtr.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/ADT/IntrusiveRefCntPtr.h"
+#include "llvm/Support/raw_ostream.h"
 
 #ifdef POLAR_DEBUG_BUILD
 #  include <set>
@@ -185,11 +185,11 @@ public:
    bool isPresent() const;
 
    /// Print the syntax node with full fidelity to the given output stream.
-   void print(RawOutStream &outStream, SyntaxPrintOptions opts = SyntaxPrintOptions()) const;
+   void print(raw_ostream &outStream, SyntaxPrintOptions opts = SyntaxPrintOptions()) const;
 
    /// Print a debug representation of the syntax node to the given output stream
    /// and indentation level.
-   void dump(RawOutStream &outStream, unsigned indent = 0) const;
+   void dump(raw_ostream &outStream, unsigned indent = 0) const;
 
    /// Print a debug representation of the syntax node to standard error.
    void dump() const;

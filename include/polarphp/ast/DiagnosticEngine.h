@@ -29,8 +29,8 @@
 #define POLARPHP_AST_DIAGNOSTIC_ENGINE_H
 
 #include "polarphp/ast/DiagnosticConsumer.h"
-#include "polarphp/utils/VersionTuple.h"
-#include "polarphp/basic/adt/DenseMap.h"
+#include "llvm/Support/VersionTuple.h"
+#include "llvm/ADT/DenseMap.h"
 
 /// forward declare with namespace
 namespace polar::parser {
@@ -42,11 +42,11 @@ namespace polar::ast {
 class ReferenceOwnership;
 class DiagnosticEngine;
 
-using polar::basic::DenseMap;
+using llvm::DenseMap;
 using polar::parser::SourceManager;
 using polar::parser::SourceRange;
-using polar::utils::VersionTuple;
-using polar::utils::RawOutStream;
+using llvm::VersionTuple;
+using llvm::raw_ostream;
 
 enum class StaticSpellingKind : uint8_t;
 enum class DescriptiveDeclKind : uint8_t;
@@ -681,7 +681,7 @@ public:
    /// Format the given diagnostic text and place the result in the given
    /// buffer.
    static void formatDiagnosticText(
-         RawOutStream &outStream, StringRef inText,
+         raw_ostream &outStream, StringRef inText,
          ArrayRef<DiagnosticArgument> formatArgs,
          DiagnosticFormatOptions formatOpts = DiagnosticFormatOptions());
 

@@ -23,9 +23,9 @@
 #ifndef POLARPHP_MARKUP_MARKUP_H
 #define POLARPHP_MARKUP_MARKUP_H
 
-#include "polarphp/basic/adt/ArrayRef.h"
-#include "polarphp/utils/Allocator.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/ADTArrayRef.h"
+#include "llvm/Support/Allocator.h"
+#include "llvm/Support/raw_ostream.h"
 #include "polarphp/parser/SourceLoc.h"
 #include "polarphp/markup/AST.h"
 #include "polarphp/markup/LineList.h"

@@ -15,12 +15,12 @@
 #include "polarphp/parser/internal/YYLexerDefs.h"
 #include "polarphp/parser/internal/YYLexerExtras.h"
 #include "polarphp/parser/Confusables.h"
-#include "polarphp/basic/adt/SmallString.h"
 #include "polarphp/basic/CharInfo.h"
 #include "polarphp/syntax/Trivia.h"
 #include "polarphp/utils/MathExtras.h"
 #include "polarphp/kernel/LangOptions.h"
 #include "polarphp/kernel/Exceptions.h"
+#include "llvm/ADT/SmallString.h"
 
 #include <set>
 #include <string>
@@ -102,7 +102,7 @@ void Lexer::initialize(unsigned offset, unsigned endOffset)
    assert(m_bufferStart + offset <= m_bufferEnd);
    assert(m_bufferStart + endOffset <= m_bufferEnd);
    // Check for Unicode BOM at start of file (Only UTF-8 BOM supported now).
-   size_t BOMLength = contents.startsWith("\xEF\xBB\xBF") ? 3 : 0;
+   size_t BOMLength = contents.startswith("\xEF\xBB\xBF") ? 3 : 0;
    // Keep information about existance of UTF-8 BOM for transparency source code
    // editing with libSyntax.
    m_contentStart = m_bufferStart + BOMLength;
@@ -166,7 +166,7 @@ void Lexer::formToken(syntax::TokenKindType kind, const unsigned char *tokenStar
    if (m_commentRetention == CommentRetentionMode::AttachToNextToken) {
       // 'CommentLength' here is the length from the *first* comment to the
       // token text (or its backtick if exist).
-      auto iter = polar::basic::find_if(m_leadingTrivia, [](const ParsedTriviaPiece &piece) {
+      auto iter = llvm::find_if(m_leadingTrivia, [](const ParsedTriviaPiece &piece) {
          return is_comment_trivia_kind(piece.getKind());
       });
       for (auto end = m_leadingTrivia.end(); iter != end; iter++) {
@@ -453,7 +453,7 @@ bool Lexer::isFoundHeredocEndMarker(std::shared_ptr<HereDocLabel> label) const
 void Lexer::notifyLexicalException(StringRef msg, int code)
 {
    m_flags.setLexExceptionOccurred(true);
-   m_currentExceptionMsg = msg.getStr();
+   m_currentExceptionMsg = msg.str();
    if (m_lexicalExceptionHandler) {
       m_lexicalExceptionHandler(msg, code);
    }
@@ -485,7 +485,7 @@ LexerState Lexer::getStateForBeginningOfTokenLoc(SourceLoc sourceLoc) const
       }
       break;
    }
-   return LexerState(SourceLoc(polar::utils::SMLocation::getFromPointer(reinterpret_cast<const char *>(ptr))));
+   return LexerState(SourceLoc(SMLoc::getFromPointer(reinterpret_cast<const char *>(ptr))));
 }
 
 void Lexer::skipToEndOfLine(bool eatNewline)

@@ -15,6 +15,7 @@
 #include "polarphp/parser/Token.h"
 #include "polarphp/parser/Lexer.h"
 #include "polarphp/parser/Parser.h"
+#include "polarphp/utils/MathExtras.h"
 
 #include <string>
 
@@ -531,7 +532,7 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
             }
             errno = 0;
             StringRef codePointStr(filteredStr.data() + (start - filteredStr.begin()), fiter - start);
-            codePoint = strtoul(codePointStr.getData(), nullptr, 16);
+            codePoint = strtoul(codePointStr.data(), nullptr, 16);
             /// per RFC 3629, UTF-8 can only represent 21 bits
             if (codePoint > 0x10FFFF || errno) {
                lexer.notifyLexicalException("Invalid UTF-8 codepoint escape sequence: Codepoint too large", 0);

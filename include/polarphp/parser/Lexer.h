@@ -12,14 +12,14 @@
 #ifndef POLARPHP_PARSER_LEXER_H
 #define POLARPHP_PARSER_LEXER_H
 
-#include "polarphp/basic/adt/StringExtras.h"
+#include "polarphp/basic/StringExtras.h"
 #include "polarphp/ast/DiagnosticEngine.h"
 #include "polarphp/parser/SourceLoc.h"
 #include "polarphp/parser/SourceMgr.h"
 #include "polarphp/parser/Token.h"
 #include "polarphp/parser/ParsedTrivia.h"
 #include "polarphp/parser/LexerState.h"
-#include "polarphp/utils/SaveAndRestore.h"
+#include "llvm/Support/SaveAndRestore.h"
 #include "polarphp/parser/internal/YYLexerDefs.h"
 #include "polarphp/parser/LexerFlags.h"
 #include "polarphp/kernel/LangOptions.h"
@@ -199,7 +199,7 @@ public:
       assert(LexerState.isValid());
       m_yyCursor = getBufferPtrForSourceLoc(LexerState.m_loc);
       // Don't reemit diagnostics while readvancing the lexer.
-      polar::utils::SaveAndRestore<DiagnosticEngine *> diag(m_diags, enableDiagnostics ? m_diags : nullptr);
+      llvm::SaveAndRestore<DiagnosticEngine *> diag(m_diags, enableDiagnostics ? m_diags : nullptr);
       lexImpl();
       // Restore Trivia.
       if (m_triviaRetention == TriviaRetentionMode::WithTrivia) {
@@ -276,12 +276,12 @@ public:
 
    SourceLoc getLocForStartOfBuffer() const
    {
-      return SourceLoc(polar::utils::SMLocation::getFromPointer(reinterpret_cast<const char *>(m_bufferStart)));
+      return SourceLoc(SMLoc::getFromPointer(reinterpret_cast<const char *>(m_bufferStart)));
    }
 
    static SourceLoc getSourceLoc(const unsigned char *loc)
    {
-      return SourceLoc(polar::utils::SMLocation::getFromPointer(reinterpret_cast<const char *>(loc)));
+      return SourceLoc(SMLoc::getFromPointer(reinterpret_cast<const char *>(loc)));
    }
 
    /// Get the token that starts at the given location.

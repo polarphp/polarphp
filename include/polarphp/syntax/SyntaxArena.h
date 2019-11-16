@@ -29,13 +29,13 @@
 #ifndef POLARPHP_SYNTAX_SYNTAXARENA_H
 #define POLARPHP_SYNTAX_SYNTAXARENA_H
 
-#include "polarphp/basic/adt/IntrusiveRefCountPtr.h"
-#include "polarphp/utils/Allocator.h"
+#include "llvm/ADT/IntrusiveRefCntPtr.h"
+#include "llvm/Support/Allocator.h"
 
 namespace polar::syntax {
 
-using polar::utils::BumpPtrAllocator;
-using polar::basic::ThreadSafeRefCountedBase;
+using llvm::BumpPtrAllocator;
+using llvm::ThreadSafeRefCountedBase;
 
 /// Memory manager for Syntax nodes.
 class SyntaxArena : public ThreadSafeRefCountedBase<SyntaxArena>
@@ -44,14 +44,14 @@ public:
    SyntaxArena()
    {}
 
-   polar::utils::BumpPtrAllocator &getAllocator()
+   BumpPtrAllocator &getAllocator()
    {
       return m_allocator;
    }
 
    void *allocate(size_t size, size_t alignment)
    {
-      return m_allocator.allocate(size, alignment);
+      return m_allocator.Allocate(size, alignment);
    }
 
 private:

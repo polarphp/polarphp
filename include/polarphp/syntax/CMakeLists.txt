@@ -20,7 +20,10 @@ set(generated_include_sources
     serialization/TokenKindTypeSerialization.h.gyb)
 
 add_gyb_target(polar-syntax-generated-headers
-     "${generated_include_sources}")
+     "${generated_include_sources}"
+     )
+
+add_dependencies(polar-syntax-generated-headers llvm-project)
 
 set_property(TARGET polar-syntax-generated-headers
      PROPERTY FOLDER "Miscellaneous")

@@ -23,10 +23,10 @@
 #ifndef POLARPHP_BASIC_LANG_STATISTIC_H
 #define POLARPHP_BASIC_LANG_STATISTIC_H
 
-#include "polarphp/basic/adt/SmallString.h"
-#include "polarphp/basic/adt/Statistic.h"
+#include "llvm/ADTSmallString.h"
+#include "llvm/ADTStatistic.h"
 #include "polarphp/basic/LangTimer.h"
-#include "polarphp/basic/adt/PointerUnion.h"
+#include "llvm/ADTPointerUnion.h"
 
 #include <thread>
 #include <tuple>
@@ -42,7 +42,7 @@
 
 namespace polar::basic {
 
-using polar::utils::RawOutStream;
+using polar::utils::raw_ostream;
 
 // Helper class designed to consolidate reporting of LLVM statistics and timers
 // across polarphp compilations that typically invoke many drivers, each running
@@ -109,10 +109,10 @@ public:
    // separate from objects in C++. Pity us.
    struct TraceFormatter
    {
-      virtual void traceName(const void *entity, RawOutStream &outStream) const = 0;
+      virtual void traceName(const void *entity, raw_ostream &outStream) const = 0;
       virtual void traceLoc(const void *entity,
                             SourceManager *sourceMgr,
-                            RawOutStream &outStream) const = 0;
+                            raw_ostream &outStream) const = 0;
       virtual ~TraceFormatter();
    };
 
@@ -167,7 +167,7 @@ private:
    std::unique_ptr<StatsProfilers> m_entityProfilers;
 
    void publishAlwaysOnStatsToKernelStatistic();
-   void printAlwaysOnStatsAndTimers(RawOutStream &outStream);
+   void printAlwaysOnStatsAndTimers(raw_ostream &outStream);
 
    UnifiedStatsReporter(StringRef programName,
                         StringRef auxName,

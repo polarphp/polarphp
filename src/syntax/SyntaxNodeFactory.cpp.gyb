@@ -36,7 +36,7 @@ use function Gyb\Utils\make_missing_child;
 
 #include "polarphp/syntax/SyntaxNodes.h"
 #include "polarphp/syntax/SyntaxNodeFactory.h"
-#include "polarphp/basic/adt/ArrayRef.h"
+#include "llvm/ADTArrayRef.h"
 
 #include <vector>
 
@@ -83,7 +83,7 @@ foreach ($SYNTAX_NODES as $node) {
 }
 ?>
    default:
-      polar_unreachable("not collection kind.");
+      llvm_unreachable("not collection kind.");
    }
 }
 
@@ -113,7 +113,7 @@ foreach ($SYNTAX_NODES as $node) {
 }
 ?>
    default:
-      polar_unreachable("bad syntax kind.");
+      llvm_unreachable("bad syntax kind.");
    }
 }
 
@@ -145,7 +145,7 @@ foreach ($SYNTAX_NODES as $node) {
 }
 ?>
    default:
-      polar_unreachable("Not collection kind.");
+      llvm_unreachable("Not collection kind.");
    }
 }
 

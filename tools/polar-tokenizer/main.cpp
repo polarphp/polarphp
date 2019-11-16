@@ -11,8 +11,8 @@
 
 #include "CLI/CLI.hpp"
 #include "polarphp/global/Global.h"
-#include "polarphp/utils/MemoryBuffer.h"
-#include "polarphp/utils/OptionalError.h"
+#include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/ErrorOr.h"
 #include "polarphp/parser/Lexer.h"
 #include "polarphp/parser/Token.h"
 #include "polarphp/kernel/LangOptions.h"
@@ -26,8 +26,8 @@
 #include <iostream>
 #include <fstream>
 
-using polar::utils::MemoryBuffer;
-using polar::utils::OptionalError;
+using llvm::MemoryBuffer;
+using llvm::ErrorOr;
 using polar::kernel::LangOptions;
 using polar::parser::SourceManager;
 using polar::parser::Lexer;
@@ -51,7 +51,7 @@ int main(int argc, char * argv[])
    POLAR_CLI11_PARSE(tokenizer, argc, argv);
    std::unique_ptr<MemoryBuffer> sourceBuffer;
    if (filePath.empty()) {
-      OptionalError<std::unique_ptr<MemoryBuffer>> tempBuffer = MemoryBuffer::getStdIn();
+      ErrorOr<std::unique_ptr<MemoryBuffer>> tempBuffer = MemoryBuffer::getSTDIN();
       if (tempBuffer) {
          sourceBuffer = std::move(tempBuffer.get());
       } else {
@@ -59,7 +59,7 @@ int main(int argc, char * argv[])
          return READ_STDIN_ERROR;
       }
    } else {
-      OptionalError<std::unique_ptr<MemoryBuffer>> tempBuffer = MemoryBuffer::getFile(filePath);
+      ErrorOr<std::unique_ptr<MemoryBuffer>> tempBuffer = MemoryBuffer::getFile(filePath);
       if (tempBuffer) {
          sourceBuffer = std::move(tempBuffer.get());
       } else {

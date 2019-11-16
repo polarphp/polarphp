@@ -19,7 +19,7 @@ use Gyb\Syntax\Token\Punctuator;
 // Created by polarboy on 2019/11/08.
 
 #include "polarphp/syntax/TokenKinds.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/Support/raw_ostream.h"
 
 namespace polar::syntax {
 
@@ -135,14 +135,14 @@ foreach ($TOKENS as $token) {
    return TokenCategory::Unknown;
 }
 
-void dump_token_kind(RawOutStream &outStream, TokenKindType kind)
+void dump_token_kind(raw_ostream &outStream, TokenKindType kind)
 {
    StringRef kindStr = get_token_kind_str(kind);
    if (!kindStr.empty()) {
       outStream << kindStr;
       return;
    }
-   polar_unreachable("unknown token kind");
+   llvm_unreachable("unknown token kind");
 }
 
 bool is_internal_token(TokenKindType kind)

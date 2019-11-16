@@ -25,7 +25,7 @@
 
 #include <functional>
 #include "polarphp/syntax/References.h"
-#include "polarphp/basic/adt/StlExtras.h"
+#include "llvm/ADT/STLExtras.h"
 
 namespace polar::syntax {
 
@@ -48,7 +48,7 @@ public:
 
    /// Gets the value inside the cache, or creates it atomically using the
    /// provided lambda if it doesn't already exist.
-   RefCountPtr<T> getOrCreate(polar::basic::FunctionRef<RefCountPtr<T>()> create) const
+   RefCountPtr<T> getOrCreate(llvm::function_ref<RefCountPtr<T>()> create) const
    {
       auto &ptr = *reinterpret_cast<std::atomic<uintptr_t> *>(&m_storage);
       // If an atomic load gets an initialized value, then return m_storage.

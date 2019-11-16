@@ -51,12 +51,12 @@ public:
 
    Trivia getLeadingTrivia() const
    {
-      return Trivia { getRaw()->getLeadingTrivia().getVector() };
+      return Trivia { getRaw()->getLeadingTrivia().vec() };
    }
 
    Trivia getTrailingTrivia() const
    {
-      return Trivia { getRaw()->getTrailingTrivia().getVector() };
+      return Trivia { getRaw()->getTrailingTrivia().vec() };
    }
 
    TokenSyntax withLeadingTrivia(const Trivia &trivia) const

@@ -52,10 +52,10 @@ foreach($TRIVIAS as $trivia) {
 }
 ?>
    }
-   polar_unreachable("unknown kind");
+   llvm_unreachable("unknown kind");
 }
 
-void TriviaPiece::dump(RawOutStream &outStream, unsigned indent) const
+void TriviaPiece::dump(raw_ostream &outStream, unsigned indent) const
 {
    for (decltype(m_count) i = 0; i < indent; ++i) {
       outStream << ' ';
@@ -75,7 +75,7 @@ foreach($TRIVIAS as $trivia) {
 <?php
    } else {
 ?>
-      outStream.writeEscaped(m_text.getStr());
+      outStream.write_escaped(m_text.getStr());
 <?php
    }
 ?>
@@ -115,7 +115,7 @@ foreach($TRIVIAS as $trivia) {
 }
 ?>
    }
-   polar_unreachable("unknown kind");
+   llvm_unreachable("unknown kind");
 }
 
 void TriviaPiece::accumulateAbsolutePosition(AbsolutePosition &pos) const
@@ -175,10 +175,10 @@ foreach($TRIVIAS as $trivia) {
 }
 ?>
    }
-   polar_unreachable("unknown kind");
+   llvm_unreachable("unknown kind");
 }
 
-void TriviaPiece::print(RawOutStream &outStream) const
+void TriviaPiece::print(raw_ostream &outStream) const
 {
    switch (m_kind) {
 <?php 
@@ -227,7 +227,7 @@ Trivia Trivia::appending(const Trivia &other) const
    return { newPieces };
 }
 
-void Trivia::dump(RawOutStream &outStream, unsigned indent) const
+void Trivia::dump(raw_ostream &outStream, unsigned indent) const
 {
    for (const auto &piece : pieces) {
       piece.dump(outStream, indent);
@@ -236,10 +236,10 @@ void Trivia::dump(RawOutStream &outStream, unsigned indent) const
 
 void Trivia::dump() const
 {
-   dump(polar::utils::error_stream());
+   dump(llvm::errs());
 }
 
-void Trivia::print(RawOutStream &outStream) const
+void Trivia::print(raw_ostream &outStream) const
 {
    for (const auto &piece : pieces) {
       piece.print(outStream);

@@ -15,20 +15,16 @@
 #include <string>
 
 /// forward declare class with namespace
-namespace polar {
-namespace basic {
+namespace llvm {
 class StringRef;
-} // basic
-} // polar
+} // llvm
 
-namespace polar {
-namespace utils {
+namespace polar::utils {
 
-using polar::basic::StringRef;
+using llvm::StringRef;
 
 std::string regex_escape(StringRef str);
 
-} // utils
-} // polar
+} // polar::utils
 
 #endif // POLARPHP_UTILS_STRING_UTILS_H

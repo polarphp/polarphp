@@ -10,7 +10,7 @@
 // Created by polarboy on 2018/10/25.
 
 #include "polarphp/utils/StringUtils.h"
-#include "polarphp/basic/adt/StringRef.h"
+#include "llvm/ADT/StringRef.h"
 #include <cstring>
 
 namespace polar {
@@ -21,7 +21,7 @@ static const char sg_regexMetachars[] = "()^$|*+?.:[]\\{}";
 std::string regex_escape(StringRef str)
 {
    std::string regexStr;
-   for (unsigned i = 0, e = str.getSize(); i != e; ++i) {
+   for (unsigned i = 0, e = str.size(); i != e; ++i) {
       if (strchr(sg_regexMetachars, str[i])) {
          regexStr += '\\';
       }

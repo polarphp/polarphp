@@ -20,12 +20,12 @@
 //
 // Created by polarboy on 2019/02/13.
 
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/Support/raw_ostream.h"
 #include "polarphp/basic/QuotedString.h"
 
 namespace polar::basic {
 
-void print_as_quoted_string(RawOutStream &out, StringRef text) {
+void print_as_quoted_string(raw_ostream &out, StringRef text) {
    out << '"';
    for (auto C : text) {
       switch (C) {

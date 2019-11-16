@@ -30,10 +30,10 @@
 #ifndef POLARPHP_KERNEL_VERSION_H
 #define POLARPHP_KERNEL_VERSION_H
 
-#include "polarphp/basic/adt/SmallVector.h"
-#include "polarphp/basic/adt/StringRef.h"
-#include "polarphp/basic/adt/ArrayRef.h"
-#include "polarphp/utils/VersionTuple.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/Support/VersionTuple.h"
 
 #include <optional>
 #include <string>
@@ -46,20 +46,20 @@ class DiagnosticEngine;
 namespace parser {
 class SourceLoc;
 } // parser
-namespace utils {
-class RawOutStream;
-} // utils
 } // polar
+namespace llvm {
+class raw_ostream;
+} // llvm
 
 namespace polar::version {
 
 using polar::ast::DiagnosticEngine;
 using polar::parser::SourceLoc;
-using polar::basic::SmallVector;
-using polar::basic::StringRef;
-using polar::basic::ArrayRef;
-using polar::utils::VersionTuple;
-using polar::utils::RawOutStream;
+using llvm::SmallVector;
+using llvm::StringRef;
+using llvm::ArrayRef;
+using llvm::VersionTuple;
+using llvm::raw_ostream;
 
 /// Represents an internal compiler version, represented as a tuple of
 /// integers, or "version components".
@@ -200,7 +200,7 @@ inline bool operator!=(const Version &lhs, const Version &rhs)
    return !(lhs == rhs);
 }
 
-RawOutStream &operator<<(RawOutStream &outStream, const Version &version);
+raw_ostream &operator<<(raw_ostream &outStream, const Version &version);
 
 /// Retrieves the numeric {major, minor} Swift version.
 ///

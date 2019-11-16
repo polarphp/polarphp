@@ -20,13 +20,19 @@
 #ifndef POLARPHP_BASIC_EXPONENTIALGROWTHAPPENDINGBINARYBYTESTREAM_H
 #define POLARPHP_BASIC_EXPONENTIALGROWTHAPPENDINGBINARYBYTESTREAM_H
 
-#include "polarphp/basic/adt/ArrayRef.h"
-#include "polarphp/utils/BinaryByteStream.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/Support/BinaryByteStream.h"
+#include "llvm/Support/Endian.h"
 
 namespace polar::basic {
 
-using polar::utils::WritableBinaryStream;
-using polar::utils::BinaryStreamFlags;
+using llvm::WritableBinaryStream;
+using llvm::BinaryStreamFlags;
+using llvm::MutableArrayRef;
+using llvm::Error;
+using llvm::ArrayRef;
+using llvm::SmallVector;
+using llvm::support::endianness;
 
 /// An implementation of WritableBinaryStream which can write at its end
 /// causing the underlying data to grow.  This class owns the underlying data.
@@ -36,25 +42,23 @@ class ExponentialGrowthAppendingBinaryByteStream
 public:
    ExponentialGrowthAppendingBinaryByteStream()
       : ExponentialGrowthAppendingBinaryByteStream(
-           polar::utils::Endianness::Little)
+           llvm::support::endianness::little)
    {}
 
-   ExponentialGrowthAppendingBinaryByteStream(polar::utils::Endianness endian)
+   ExponentialGrowthAppendingBinaryByteStream(endianness endian)
       : m_endian(endian)
    {}
 
    void reserve(size_t size);
 
-   polar::utils::Endianness getEndian() const override
+   endianness getEndian() const override
    {
       return m_endian;
    }
 
-   polar::utils::Error readBytes(uint32_t offset, uint32_t size,
-                                 ArrayRef<uint8_t> &buffer) override;
-
-   polar::utils::Error readLongestContiguousChunk(uint32_t offset,
-                                                  ArrayRef<uint8_t> &buffer) override;
+   Error readBytes(uint32_t offset, uint32_t size, ArrayRef<uint8_t> &buffer) override;
+   Error readLongestContiguousChunk(uint32_t offset,
+                                    ArrayRef<uint8_t> &buffer) override;
 
    MutableArrayRef<uint8_t> data()
    {
@@ -66,7 +70,7 @@ public:
       return m_data.size();
    }
 
-   polar::utils::Error writeBytes(uint32_t offset, ArrayRef<uint8_t> buffer) override;
+   Error writeBytes(uint32_t offset, ArrayRef<uint8_t> buffer) override;
 
    /// This is an optimized version of \c writeBytes that assumes we know the
    /// size of \p value at compile time (which in particular holds for integers).
@@ -77,7 +81,7 @@ public:
    /// endianess on the executing machine. No endianess transformations are
    /// performed.
    template<typename T>
-   polar::utils::Error writeRaw(uint32_t offset, T value)
+   Error writeRaw(uint32_t offset, T value)
    {
       if (auto error = checkOffsetForWrite(offset, sizeof(T))) {
          return error;
@@ -88,15 +92,14 @@ public:
       if (RequiredSize > m_data.size()) {
          m_data.resize(RequiredSize);
       }
-
       ::memcpy(m_data.data() + offset, &value, sizeof value);
 
-      return polar::utils::Error::getSuccess();
+      return Error::success();
    }
 
-   polar::utils::Error commit() override
+   Error commit() override
    {
-      return polar::utils::Error::getSuccess();
+      return Error::success();
    }
 
    virtual BinaryStreamFlags getFlags() const override
@@ -107,7 +110,7 @@ public:
 private:
    /// The buffer holding the data.
    SmallVector<uint8_t, 0> m_data;
-   polar::utils::Endianness m_endian;
+   endianness m_endian;
 };
 
 } // polar::basic

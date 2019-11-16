@@ -33,12 +33,12 @@ bool is_trivial_syntax_kind(SyntaxKind kind)
    }
 }
 
-void print_syntax_kind(SyntaxKind kind, RawOutStream &outStream,
+void print_syntax_kind(SyntaxKind kind, raw_ostream &outStream,
                        SyntaxPrintOptions opts, bool open)
 {
    std::unique_ptr<polar::basic::OsColor> color;
    if (opts.visual) {
-      color.reset(new polar::basic::OsColor(outStream, RawOutStream::Colors::GREEN));
+      color.reset(new polar::basic::OsColor(outStream, raw_ostream::Colors::GREEN));
    }
    outStream << "<";
    if (!open) {
@@ -291,7 +291,7 @@ bool RawSyntax::accumulateLeadingTrivia(AbsolutePosition &pos) const
    return false;
 }
 
-void RawSyntax::print(RawOutStream &outStream, SyntaxPrintOptions opts) const
+void RawSyntax::print(raw_ostream &outStream, SyntaxPrintOptions opts) const
 {
    if (isMissing()) {
       return;
@@ -324,11 +324,11 @@ void RawSyntax::print(RawOutStream &outStream, SyntaxPrintOptions opts) const
 
 void RawSyntax::dump() const
 {
-   dump(polar::utils::error_stream(), /*indent*/ 0);
-   polar::utils::error_stream() << '\n';
+   dump(llvm::errs(), /*indent*/ 0);
+   llvm::errs() << '\n';
 }
 
-void RawSyntax::dump(RawOutStream &outStream, unsigned indent) const
+void RawSyntax::dump(raw_ostream &outStream, unsigned indent) const
 {
    auto indentFunc = [&](unsigned Amount) {
       for (decltype(Amount) i = 0; i < Amount; ++i) {
@@ -353,7 +353,7 @@ void RawSyntax::dump(RawOutStream &outStream, unsigned indent) const
       outStream << "\n";
       indentFunc(indent + 1);
       outStream << "(text=\"";
-      outStream.writeEscaped(getTokenText(), /*UseHexEscapes=*/true);
+      outStream.write_escaped(getTokenText(), /*UseHexEscapes=*/true);
       outStream << "\")";
 
       for (auto &trailer : getTrailingTrivia()) {
@@ -372,12 +372,12 @@ void RawSyntax::dump(RawOutStream &outStream, unsigned indent) const
    outStream << ')';
 }
 
-void AbsolutePosition::printLineAndColumn(RawOutStream &outStream) const
+void AbsolutePosition::printLineAndColumn(raw_ostream &outStream) const
 {
    outStream << getLine() << ':' << getColumn();
 }
 
-void AbsolutePosition::dump(RawOutStream &outStream) const
+void AbsolutePosition::dump(raw_ostream &outStream) const
 {
    outStream << "(absolute_position ";
    outStream << "offset=" << getOffset() << " ";
@@ -386,14 +386,14 @@ void AbsolutePosition::dump(RawOutStream &outStream) const
    outStream << ')';
 }
 
-void RawSyntax::profile(FoldingSetNodeId &id, TokenKindType tokenKind,
+void RawSyntax::profile(FoldingSetNodeID &id, TokenKindType tokenKind,
                         OwnedString text, ArrayRef<TriviaPiece> leadingTrivia,
                         ArrayRef<TriviaPiece> trailingTrivia)
 {
-   id.addInteger(unsigned(tokenKind));
+   id.AddInteger(unsigned(tokenKind));
      switch (tokenKind) {
      default:
-       id.addString(text.str());
+       id.AddString(text.str());
        break;
      }
    for (auto &piece : leadingTrivia) {
@@ -408,7 +408,7 @@ void RawSyntax::profile(FoldingSetNodeId &id, TokenKindType tokenKind,
 
 namespace polar::utils {
 using polar::syntax::AbsolutePosition;
-RawOutStream &operator<<(RawOutStream &outStream, AbsolutePosition pos)
+raw_ostream &operator<<(raw_ostream &outStream, AbsolutePosition pos)
 {
    pos.printLineAndColumn(outStream);
    return outStream;

@@ -16,7 +16,7 @@
 #include <string>
 
 #include "polarphp/syntax/internal/TokenEnumDefs.h"
-#include "polarphp/basic/adt/SmallVector.h"
+#include "llvm/ADT/SmallVector.h"
 
 /// forward declare class
 namespace polar::parser {
@@ -24,9 +24,9 @@ class Lexer;
 class Token;
 } // polar::parser
 
-namespace polar::basic {
+namespace llvm {
 class StringRef;
-} // polar::basic
+} // llvm
 
 namespace polar::ast {
 class DiagnosticEngine;
@@ -35,9 +35,9 @@ class DiagnosticEngine;
 namespace polar::parser::internal {
 
 using polar::syntax::internal::TokenKindType;
-using polar::basic::SmallVectorImpl;
-using polar::basic::StringRef;
 using polar::ast::DiagnosticEngine;
+using llvm::SmallVectorImpl;
+using llvm::StringRef;
 
 unsigned count_leading_ones(unsigned char c);
 bool is_start_of_utf8_character(unsigned char c);

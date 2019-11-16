@@ -24,7 +24,7 @@
 
 namespace polar::basic {
 
-using polar::utils::Error;
+using llvm::Error;
 
 Error ExponentialGrowthAppendingBinaryByteStream::readBytes(
       uint32_t offset, uint32_t size, ArrayRef<uint8_t> &buffer)
@@ -34,7 +34,7 @@ Error ExponentialGrowthAppendingBinaryByteStream::readBytes(
    }
 
    buffer = ArrayRef<uint8_t>(m_data.data() + offset, size);
-   return Error::getSuccess();
+   return Error::success();
 }
 
 Error ExponentialGrowthAppendingBinaryByteStream::readLongestContiguousChunk(
@@ -45,7 +45,7 @@ Error ExponentialGrowthAppendingBinaryByteStream::readLongestContiguousChunk(
    }
 
    buffer = ArrayRef<uint8_t>(m_data.data() + offset, m_data.size() - offset);
-   return Error::getSuccess();
+   return Error::success();
 }
 
 void ExponentialGrowthAppendingBinaryByteStream::reserve(size_t size)
@@ -57,22 +57,18 @@ Error ExponentialGrowthAppendingBinaryByteStream::writeBytes(
       uint32_t offset, ArrayRef<uint8_t> buffer)
 {
    if (buffer.empty()) {
-       return Error::getSuccess();
+       return Error::success();
    }
-
    if (auto error = checkOffsetForWrite(offset, buffer.size())) {
       return error;
    }
-
    // Resize the internal buffer if needed.
    uint32_t requiredSize = offset + buffer.size();
    if (requiredSize > m_data.size()) {
       m_data.resize(requiredSize);
    }
-
    ::memcpy(m_data.data() + offset, buffer.data(), buffer.size());
-
-   return Error::getSuccess();
+   return Error::success();
 }
 
 } // polar::basic
