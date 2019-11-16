@@ -10,3 +10,6 @@
 [submodule "thirdparty/yaml"]
 	path = thirdparty/yaml
 	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "llvm-project"]
+	path = llvm-project
+	url = https://github.com/llvm/llvm-project.git
