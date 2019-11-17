@@ -88,6 +88,8 @@ list(APPEND CMAKE_MODULE_PATH
    "${POLAR_CMAKE_MODULES_DIR}"
    )
 
+list(APPEND CMAKE_INSTALL_RPATH "${POLAR_DEPS_INSTALL_DIR}/lib")
+
 # Make a job pool for things that can't yet be distributed
 cmake_host_system_information(
    RESULT localhost_logical_cores QUERY NUMBER_OF_LOGICAL_CORES)
@@ -291,7 +293,6 @@ mark_as_advanced(POLAR_TARGET_TRIPLE_ENV)
 # devel options
 option(POLAR_DEV_BUILD_DEVTOOLS_TESTS "turn on to build tests of devtools" OFF)
 option(POLAR_DEV_BUILD_POLARPHP_TESTS "turn on to build tests of devtools" ON)
-option(POLAR_DEV_BUILD_LLVM_UNITTEST "turn on llvm support libraries unitests" OFF)
 option(POLAR_DEV_BUILD_POLARPHP_UNITTEST "turn on polarphp libraries unitests" ON)
 option(POLAR_DEV_BUILD_VMAPI_UNITEST "turn on to build unittests of vmapi" ON)
 

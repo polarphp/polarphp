@@ -19,11 +19,11 @@
 #ifndef POLARPHP_UTILS_TYPE_NAME_H
 #define POLARPHP_UTILS_TYPE_NAME_H
 
-#include "llvm/ADTStringRef.h"
+#include "llvm/ADT/StringRef.h"
 
 namespace polar::utils {
 
-using polar::basic::StringRef;
+using llvm::StringRef;
 
 ///
 /// We provide a function which tries to compute the (demangled) name of a type
@@ -46,9 +46,9 @@ inline StringRef getTypeName()
    StringRef key = "DesiredTypeName = ";
    name = name.substr(name.find(key));
    assert(!name.empty() && "Unable to find the template parameter!");
-   name = name.dropFront(key.getSize());
-   assert(name.endsWith("]") && "name doesn't end in the substitution key!");
-   return name.dropBack(1);
+   name = name.drop_front(key.size());
+   assert(name.endswith("]") && "name doesn't end in the substitution key!");
+   return name.drop_back(1);
 #elif defined(_MSC_VER)
    StringRef name = __FUNCSIG__;
 

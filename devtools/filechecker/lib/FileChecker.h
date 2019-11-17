@@ -17,12 +17,12 @@
 //
 // Created by polarboy on 2019/04/23.
 
-#include "polarphp/basic/adt/StringMap.h"
-#include "polarphp/basic/adt/StringRef.h"
-#include "polarphp/utils/MemoryBuffer.h"
-#include "polarphp/utils/SourceMgr.h"
-#include "polarphp/utils/Error.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/ADT/StringMap.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/SourceMgr.h"
+#include "llvm/Support/Error.h"
+#include "llvm/Support/raw_ostream.h"
 #include "FileCheckerConfig.h"
 #include <boost/regex.hpp>
 #include <vector>
@@ -31,22 +31,22 @@
 namespace polar {
 namespace filechecker {
 
-using polar::basic::StringRef;
-using polar::basic::StringMap;
-using polar::basic::SmallVectorImpl;
-using polar::basic::ArrayRef;
-using polar::basic::Twine;
-using polar::utils::SourceMgr;
-using polar::utils::SMLocation;
-using polar::utils::SMRange;
-using polar::utils::MemoryBuffer;
-using polar::utils::Expected;
-using polar::utils::ErrorInfo;
-using polar::utils::RawOutStream;
-using polar::utils::Error;
-using polar::utils::SMDiagnostic;
-using polar::utils::inconvertible_error_code;
-using polar::utils::make_error;
+using llvm::StringRef;
+using llvm::StringMap;
+using llvm::SmallVectorImpl;
+using llvm::ArrayRef;
+using llvm::Twine;
+using llvm::SourceMgr;
+using llvm::SMLoc;
+using llvm::SMRange;
+using llvm::MemoryBuffer;
+using llvm::Expected;
+using llvm::ErrorInfo;
+using llvm::raw_ostream;
+using llvm::Error;
+using llvm::SMDiagnostic;
+using llvm::inconvertibleErrorCode;
+using llvm::make_error;
 
 /// Contains info about various FileCheck options.
 struct FileCheckRequest
@@ -106,7 +106,7 @@ private:
    StringRef m_varName;
 
 public:
-   static char sm_id;
+   static char ID;
 
    FileCheckUndefVarError(StringRef varName)
       : m_varName(varName)
@@ -119,14 +119,14 @@ public:
 
    std::error_code convertToErrorCode() const override
    {
-      return inconvertible_error_code();
+      return inconvertibleErrorCode();
    }
 
    /// Print name of variable associated with this error.
-   void log(RawOutStream &outStream) const override
+   void log(raw_ostream &outStream) const override
    {
       outStream << "\"";
-      outStream.writeEscaped(m_varName) << "\"";
+      outStream.write_escaped(m_varName) << "\"";
    }
 };
 
@@ -463,7 +463,7 @@ private:
    SMDiagnostic m_diagnostic;
 
 public:
-   static char sm_id;
+   static char ID;
 
    FileCheckErrorDiagnostic(SMDiagnostic &&diag)
       : m_diagnostic(diag)
@@ -471,39 +471,39 @@ public:
 
    std::error_code convertToErrorCode() const override
    {
-      return inconvertible_error_code();
+      return inconvertibleErrorCode();
    }
 
    /// Print diagnostic associated with this error when printing the error.
-   void log(RawOutStream &outStream) const override
+   void log(raw_ostream &outStream) const override
    {
       m_diagnostic.print(nullptr, outStream);
    }
 
-   static Error get(const SourceMgr &sourceMgr, SMLocation loc, const Twine &errorMsg)
+   static Error get(const SourceMgr &sourceMgr, SMLoc loc, const Twine &errorMsg)
    {
       return make_error<FileCheckErrorDiagnostic>(
-               sourceMgr.getMessage(loc, SourceMgr::DK_Error, errorMsg));
+               sourceMgr.GetMessage(loc, SourceMgr::DK_Error, errorMsg));
    }
 
    static Error get(const SourceMgr &sourceMgr, StringRef buffer, const Twine &errorMsg)
    {
-      return get(sourceMgr, SMLocation::getFromPointer(buffer.data()), errorMsg);
+      return get(sourceMgr, SMLoc::getFromPointer(buffer.data()), errorMsg);
    }
 };
 
 class FileCheckNotFoundError : public ErrorInfo<FileCheckNotFoundError>
 {
 public:
-   static char sm_id;
+   static char ID;
 
    std::error_code convertToErrorCode() const override
    {
-      return inconvertible_error_code();
+      return inconvertibleErrorCode();
    }
 
    /// Print diagnostic associated with this error when printing the error.
-   void log(RawOutStream &outStream) const override
+   void log(raw_ostream &outStream) const override
    {
       outStream << "String not found in input";
    }
@@ -512,7 +512,7 @@ public:
 class FileCheckPattern
 {
 private:
-   SMLocation m_patternLoc;
+   SMLoc m_patternLoc;
 
    /// A fixed string to match as the pattern or empty if this pattern requires
    /// a regex match.
@@ -588,7 +588,7 @@ public:
    {}
 
    /// \returns the location in source code.
-   SMLocation getLoc() const
+   SMLoc getLoc() const
    {
       return m_patternLoc;
    }
@@ -667,7 +667,7 @@ public:
    /// Prints the value of successful substitutions or the name of the undefined
    /// string or numeric variables preventing a successful substitution.
    void printSubstitutions(const SourceMgr &sourceMgr, StringRef buffer,
-                           SMRange matchRange = std::nullopt) const;
+                           SMRange matchRange = llvm::None) const;
    void printFuzzyMatch(const SourceMgr &sourceMgr, StringRef buffer,
                         std::vector<FileCheckDiag> *diags) const;
 
@@ -780,7 +780,7 @@ struct FileCheckDiag
    unsigned inputEndCol;
 
    FileCheckDiag(const SourceMgr &sourceMgr, const check::FileCheckType &checkType,
-                 SMLocation checkLoc, MatchType matchType, SMRange inputRange);
+                 SMLoc checkLoc, MatchType matchType, SMRange inputRange);
 };
 
 //===----------------------------------------------------------------------===//
@@ -797,13 +797,13 @@ struct FileCheckString
    StringRef prefix;
 
    /// The location in the match file that the check string was specified.
-   SMLocation loc;
+   SMLoc loc;
 
    /// All of the strings that are disallowed from occurring between this match
    /// string and the previous one (or start of file).
    std::vector<FileCheckPattern> m_dagNotStrings;
 
-   FileCheckString(const FileCheckPattern &pattern, StringRef str, SMLocation loc)
+   FileCheckString(const FileCheckPattern &pattern, StringRef str, SMLoc loc)
       : pattern(pattern),
         prefix(str),
         loc(loc)

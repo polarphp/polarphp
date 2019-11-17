@@ -10,13 +10,13 @@
 // Created by polarboy on 2019/05/17.
 
 #include "gtest/gtest.h"
-#include "polarphp/basic/adt/SmallString.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/ADT/SmallString.h"
+#include "llvm/Support/raw_ostream.h"
 #include "polarphp/syntax/Trivia.h"
 
-using polar::basic::SmallString;
+using llvm::SmallString;
+using llvm::raw_svector_ostream;
 using polar::syntax::Trivia;
-using polar::utils::RawSvectorOutStream;
 using polar::syntax::TriviaKind;
 using polar::syntax::TriviaPiece;
 
@@ -24,59 +24,59 @@ TEST(TriviaTest, testEmpty)
 {
    {
       SmallString<1> scratch;
-      RawSvectorOutStream outStream(scratch);
+      raw_svector_ostream outStream(scratch);
       Trivia::getSpaces(0).print(outStream);
-      ASSERT_EQ(outStream.getStr(), "");
+      ASSERT_EQ(outStream.str(), "");
    }
    {
       SmallString<1> scratch;
-      RawSvectorOutStream outStream(scratch);
+      raw_svector_ostream outStream(scratch);
       Trivia::getTabs(0).print(outStream);
-      ASSERT_EQ(outStream.getStr(), "");
+      ASSERT_EQ(outStream.str(), "");
    }
    {
       SmallString<1> scratch;
-      RawSvectorOutStream outStream(scratch);
+      raw_svector_ostream outStream(scratch);
       Trivia::getNewlines(0).print(outStream);
-      ASSERT_EQ(outStream.getStr(), "");
+      ASSERT_EQ(outStream.str(), "");
    }
 #ifdef POLAR_DEBUG_BUILD
    {
       SmallString<1> scratch;
-      RawSvectorOutStream outStream(scratch);
+      raw_svector_ostream outStream(scratch);
       Trivia::getLineComment("").print(outStream);
-      ASSERT_EQ(outStream.getStr(), "");
+      ASSERT_EQ(outStream.str(), "");
    }
    {
       SmallString<1> scratch;
-      RawSvectorOutStream outStream(scratch);
+      raw_svector_ostream outStream(scratch);
       Trivia::getBlockComment("").print(outStream);
-      ASSERT_EQ(outStream.getStr(), "");
+      ASSERT_EQ(outStream.str(), "");
    }
    {
       SmallString<1> scratch;
-      RawSvectorOutStream outStream(scratch);
+      raw_svector_ostream outStream(scratch);
       Trivia::getDocLineComment("").print(outStream);
-      ASSERT_EQ(outStream.getStr(), "");
+      ASSERT_EQ(outStream.str(), "");
    }
    {
       SmallString<1> scratch;
-      RawSvectorOutStream outStream(scratch);
+      raw_svector_ostream outStream(scratch);
       Trivia::getDocBlockComment("").print(outStream);
-      ASSERT_EQ(outStream.getStr(), "");
+      ASSERT_EQ(outStream.str(), "");
    }
    {
       SmallString<1> scratch;
-      RawSvectorOutStream outStream(scratch);
+      raw_svector_ostream outStream(scratch);
       Trivia::getGarbageText("").print(outStream);
-      ASSERT_EQ(outStream.getStr(), "");
+      ASSERT_EQ(outStream.str(), "");
    }
 #endif
    {
       SmallString<1> scratch;
-      RawSvectorOutStream outStream(scratch);
+      raw_svector_ostream outStream(scratch);
       Trivia().print(outStream);
-      ASSERT_EQ(outStream.getStr(), "");
+      ASSERT_EQ(outStream.str(), "");
    }
 }
 
@@ -94,108 +94,108 @@ TEST(TriviaTest, testEmptyEquivalence)
 TEST(TriviaTest, testBacktick)
 {
    SmallString<1> scratch;
-   RawSvectorOutStream outStream(scratch);
+   raw_svector_ostream outStream(scratch);
    Trivia::getBacktick().print(outStream);
-   ASSERT_EQ(outStream.getStr(), "`");
+   ASSERT_EQ(outStream.str(), "`");
 }
 
 TEST(TriviaTest, testPrintingSpaces)
 {
    SmallString<4> scratch;
-   RawSvectorOutStream outStream(scratch);
+   raw_svector_ostream outStream(scratch);
    Trivia::getSpaces(4).print(outStream);
-   ASSERT_EQ(outStream.getStr(), "    ");
+   ASSERT_EQ(outStream.str(), "    ");
 }
 
 TEST(TriviaTest, testPrintingTabs)
 {
    SmallString<4> scratch;
-   RawSvectorOutStream outStream(scratch);
+   raw_svector_ostream outStream(scratch);
    Trivia::getTabs(4).print(outStream);
-   ASSERT_EQ(outStream.getStr(), "\t\t\t\t");
+   ASSERT_EQ(outStream.str(), "\t\t\t\t");
 }
 
 TEST(TriviaTest, testPrintingNewlines)
 {
    SmallString<4> scratch;
-   RawSvectorOutStream outStream(scratch);
+   raw_svector_ostream outStream(scratch);
    Trivia::getNewlines(4).print(outStream);
-   ASSERT_EQ(outStream.getStr(), "\n\n\n\n");
+   ASSERT_EQ(outStream.str(), "\n\n\n\n");
 }
 
 TEST(TriviaTest, testPrintingLineComments)
 {
    SmallString<256> scratch;
-   RawSvectorOutStream outStream(scratch);
+   raw_svector_ostream outStream(scratch);
    auto lines = Trivia::getLineComment("// Line 1") +
          Trivia::getNewlines(1) +
          Trivia::getLineComment("// Line 2");
    lines.print(outStream);
-   ASSERT_EQ(outStream.getStr(), "// Line 1\n// Line 2");
+   ASSERT_EQ(outStream.str(), "// Line 1\n// Line 2");
 }
 
 TEST(TriviaTest, testPrintingBlockComments)
 {
    SmallString<256> scratch;
-   RawSvectorOutStream outStream(scratch);
+   raw_svector_ostream outStream(scratch);
    Trivia::getBlockComment("/* Block Line 1\n\n  Block Line 2 */").print(outStream);
-   ASSERT_EQ(outStream.getStr(), "/* Block Line 1\n\n  Block Line 2 */");
+   ASSERT_EQ(outStream.str(), "/* Block Line 1\n\n  Block Line 2 */");
 }
 
 
 TEST(TriviaTest, testPrintingDocLineComments)
 {
    SmallString<256> scratch;
-   RawSvectorOutStream outStream(scratch);
+   raw_svector_ostream outStream(scratch);
    auto lines = Trivia::getDocLineComment("/// Line 1") +
          Trivia::getNewlines(1) +
          Trivia::getDocLineComment("/// Line 2");
    lines.print(outStream);
-   ASSERT_EQ(outStream.getStr(), "/// Line 1\n/// Line 2");
+   ASSERT_EQ(outStream.str(), "/// Line 1\n/// Line 2");
 }
 
 TEST(TriviaTest, testPrintingDocBlockComments)
 {
    SmallString<256> scratch;
-   RawSvectorOutStream outStream(scratch);
+   raw_svector_ostream outStream(scratch);
    Trivia::getDocBlockComment("/** Block Line 1\n\n  Block Line 2 */").print(outStream);
-   ASSERT_EQ(outStream.getStr(), "/** Block Line 1\n\n  Block Line 2 */");
+   ASSERT_EQ(outStream.str(), "/** Block Line 1\n\n  Block Line 2 */");
 }
 
 TEST(TriviaTest, testPrintingCombinations)
 {
    {
       SmallString<4> scratch;
-      RawSvectorOutStream outStream(scratch);
+      raw_svector_ostream outStream(scratch);
       (Trivia() + Trivia()).print(outStream);
-      ASSERT_EQ(outStream.getStr(), "");
+      ASSERT_EQ(outStream.str(), "");
    }
    {
       SmallString<4> scratch;
-      RawSvectorOutStream outStream(scratch);
+      raw_svector_ostream outStream(scratch);
       (Trivia::getNewlines(2) + Trivia::getSpaces(2)).print(outStream);
-      ASSERT_EQ(outStream.getStr(), "\n\n  ");
+      ASSERT_EQ(outStream.str(), "\n\n  ");
    }
    {
       SmallString<48> scratch;
-      RawSvectorOutStream outStream(scratch);
+      raw_svector_ostream outStream(scratch);
       auto CCCCombo = Trivia::getSpaces(1) +
             Trivia::getTabs(1) +
             Trivia::getNewlines(1) +
             Trivia::getBacktick();
       CCCCombo.print(outStream);
-      ASSERT_EQ(outStream.getStr(), " \t\n`");
+      ASSERT_EQ(outStream.str(), " \t\n`");
    }
    {
       SmallString<48> scratch;
-      RawSvectorOutStream outStream(scratch);
+      raw_svector_ostream outStream(scratch);
       auto CCCCombo = Trivia::getSpaces(1) +
             Trivia::getTabs(1) +
             Trivia::getNewlines(1) +
             Trivia::getBacktick() +
             Trivia::getLineComment("// Line comment");
       CCCCombo.print(outStream);
-      ASSERT_EQ(outStream.getStr(), " \t\n`// Line comment");
+      ASSERT_EQ(outStream.str(), " \t\n`// Line comment");
    }
 }
 
@@ -236,40 +236,40 @@ TEST(TriviaTest, testContains)
 TEST(TriviaTest, testIteration)
 {
    SmallString<6> wholeScratch;
-   RawSvectorOutStream wholeScratchOutStream(wholeScratch);
+   raw_svector_ostream wholeScratchOutStream(wholeScratch);
    auto trivia = Trivia::getSpaces(2) + Trivia::getNewlines(2) + Trivia::getSpaces(2);
    trivia.print(wholeScratchOutStream);
    SmallString<6> piecesScratch;
-   RawSvectorOutStream piecesOutStream(piecesScratch);
+   raw_svector_ostream piecesOutStream(piecesScratch);
    for (const auto &piece : trivia) {
       piece.print(piecesOutStream);
    }
-   ASSERT_EQ(wholeScratchOutStream.getStr(), piecesOutStream.getStr());
+   ASSERT_EQ(wholeScratchOutStream.str(), piecesOutStream.str());
 }
 
 TEST(TriviaTest, testPushBack)
 {
    SmallString<3> scratch;
-   RawSvectorOutStream outStream(scratch);
+   raw_svector_ostream outStream(scratch);
    Trivia trivia;
    trivia.pushBack(TriviaPiece::getBacktick());
    trivia.pushBack(TriviaPiece::getBacktick());
    trivia.pushBack(TriviaPiece::getBacktick());
    trivia.print(outStream);
-   ASSERT_EQ(outStream.getStr(), "```");
+   ASSERT_EQ(outStream.str(), "```");
 }
 
 TEST(TriviaTest, testPushFront)
 {
    SmallString<3> scratch;
-   RawSvectorOutStream outStream(scratch);
+   raw_svector_ostream outStream(scratch);
    Trivia trivia;
    trivia.pushBack(TriviaPiece::getBacktick());
    trivia.pushFront(TriviaPiece::getSpaces(1));
    trivia.pushBack(TriviaPiece::getSpaces(1));
    trivia.pushFront(TriviaPiece::getBacktick());
    trivia.print(outStream);
-   ASSERT_EQ(outStream.getStr(), "` ` ");
+   ASSERT_EQ(outStream.str(), "` ` ");
 }
 
 TEST(TriviaTest, testFront)

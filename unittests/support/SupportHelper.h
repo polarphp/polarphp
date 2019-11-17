@@ -12,19 +12,19 @@
 #ifndef POLAR_UNITTEST_SUPPORT_HELPER_H
 #define POLAR_UNITTEST_SUPPORT_HELPER_H
 
-#include "polarphp/basic/adt/StringRef.h"
-#include "polarphp/utils/Error.h"
-#include "polarphp/utils/RawOsOutStream.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/Support/Error.h"
+#include "llvm/Support/raw_os_ostream.h"
 #include "gtest/gtest-printers.h"
 
 namespace polar {
 namespace unittest {
 namespace internal {
 
-using polar::utils::Expected;
-using polar::basic::StringRef;
-using polar::utils::ErrorInfoBase;
-using polar::utils::RawOsOutStream;
+using llvm::Expected;
+using llvm::StringRef;
+using llvm::ErrorInfoBase;
+using llvm::raw_os_ostream;
 
 struct ErrorHolder
 {
@@ -47,7 +47,7 @@ template <typename T> struct ExpectedHolder : public ErrorHolder
 
 inline void print_to(const ErrorHolder &error, std::ostream *outstream)
 {
-   RawOsOutStream out(*outstream);
+   raw_os_ostream out(*outstream);
    out << (error.getSuccess() ? "succeeded" : "failed");
    if (!error.getSuccess()) {
       const char *delim = "  (";

@@ -12,7 +12,7 @@
 #ifndef POLARPHP_UNITTEST_SUPPORT_ERROR_H
 #define POLARPHP_UNITTEST_SUPPORT_ERROR_H
 
-#include "polarphp/utils/Error.h"
+#include "llvm/Support/Error.h"
 #include "SupportHelper.h"
 
 #include "gmock/gmock.h"
@@ -21,7 +21,8 @@
 namespace polar {
 namespace unittest {
 
-using polar::utils::Error;
+using llvm::Error;
+
 
 namespace internal {
 

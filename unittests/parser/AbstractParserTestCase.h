@@ -20,8 +20,8 @@
 #include "polarphp/parser/Token.h"
 #include "polarphp/ast/DiagnosticConsumer.h"
 #include "polarphp/ast/DiagnosticEngine.h"
-#include "polarphp/utils/MemoryBuffer.h"
 #include "polarphp/syntax/Syntax.h"
+#include "llvm/Support/MemoryBuffer.h"
 
 namespace polar::unittest {
 
@@ -34,11 +34,11 @@ using polar::parser::SourceManager;
 using polar::parser::SourceLoc;
 using polar::parser::Lexer;
 using polar::parser::Token;
-using polar::basic::StringRef;
 using polar::basic::ArrayRef;
 using polar::parser::ParsedTrivia;
 using polar::parser::TriviaRetentionMode;
 using polar::parser::CommentRetentionMode;
+using llvm::StringRef;
 
 class AbstractParserTestCase : public ::testing::Test
 {

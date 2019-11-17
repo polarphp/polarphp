@@ -18,7 +18,7 @@
 #include "polarphp/parser/Token.h"
 #include "polarphp/ast/DiagnosticConsumer.h"
 #include "polarphp/ast/DiagnosticEngine.h"
-#include "polarphp/utils/MemoryBuffer.h"
+#include "llvm/Support/MemoryBuffer.h"
 
 #include <iostream>
 #include <vector>
@@ -39,8 +39,8 @@ using polar::parser::SourceLoc;
 using polar::parser::Lexer;
 using polar::parser::tokenize;
 using polar::parser::Token;
-using polar::basic::StringRef;
-using polar::basic::ArrayRef;
+using llvm::StringRef;
+using llvm::ArrayRef;
 
 using polar::parser::ParsedTrivia;
 using polar::parser::TriviaRetentionMode;
@@ -78,7 +78,7 @@ public:
       }, [&](Lexer &lexer) {
          lexer.setCheckHeredocIndentation(true);
          lexer.registerLexicalExceptionHandler([&](StringRef msg, int code){
-            m_exceptionMsgs.push_back(msg.getStr());
+            m_exceptionMsgs.push_back(msg.str());
          });
       });
       assert(tokens.back().is(TokenKindType::END));

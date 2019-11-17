@@ -18,12 +18,14 @@
 
 #include "FileChecker.h"
 
-#include "polarphp/basic/adt/StringSet.h"
-#include "polarphp/basic/adt/Twine.h"
-#include "polarphp/basic/adt/SmallVector.h"
-#include "polarphp/utils/FormatVariadic.h"
+#include "llvm/ADT/StringSet.h"
+#include "llvm/ADT/Twine.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/Support/FormatVariadic.h"
 #include "polarphp/utils/StringUtils.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/Error.h"
+#include "llvm/Support/SourceMgr.h"
 
 #include <cstdint>
 #include <list>
@@ -33,21 +35,25 @@
 
 namespace polar::filechecker {
 
-using polar::basic::SmallString;
-using polar::basic::Twine;
-using polar::basic::StringSet;
-using polar::basic::SmallVector;
-using polar::basic::StringMapEntry;
+using llvm::SmallString;
+using llvm::Twine;
+using llvm::StringSet;
+using llvm::StringRef;
+using llvm::SmallVector;
+using llvm::StringMapEntry;
 using polar::utils::regex_escape;
-using polar::utils::error_stream;
-using polar::utils::consume_error;
-using polar::utils::log_all_unhandled_errors;
-using polar::utils::RawSvectorOutStream;
-using polar::utils::handle_all_errors;
-using polar::utils::join_errors;
-using polar::utils::formatv;
+using llvm::raw_svector_ostream;
+using llvm::consumeError;
+using llvm::logAllUnhandledErrors;
+using llvm::handleAllErrors;
+using llvm::joinErrors;
+using llvm::formatv;
+using llvm::make_error;
+using llvm::Expected;
+using llvm::Error;
 using check::FileCheckType;
 using check::FileCheckKind;
+using llvm::SourceMgr;
 
 void FileCheckNumericVariable::setValue(uint64_t newValue)
 {
@@ -80,12 +86,12 @@ Expected<uint64_t> FileCheckASTBinop::eval() const
    // Bubble up any error (e.g. undefined variables) in the recursive
    // evaluation.
    if (!leftOp || !rightOp) {
-      Error error = Error::getSuccess();
+      Error error = Error::success();
       if (!leftOp) {
-         error = join_errors(std::move(error), leftOp.takeError());
+         error = joinErrors(std::move(error), leftOp.takeError());
       }
       if (!rightOp) {
-         error = join_errors(std::move(error), rightOp.takeError());
+         error = joinErrors(std::move(error), rightOp.takeError());
       }
       return std::move(error);
    }
@@ -99,7 +105,7 @@ Expected<std::string> FileCheckNumericSubstitution::getResult() const
    if (!evaluatedValue) {
       return evaluatedValue.takeError();
    }
-   return polar::basic::utostr(*evaluatedValue);
+   return llvm::utostr(*evaluatedValue);
 }
 
 Expected<std::string> FileCheckStringSubstitution::getResult() const
@@ -125,7 +131,7 @@ FileCheckPattern::parseVariable(StringRef &str, const SourceMgr &sourceMgr) {
    bool parsedOneChar = false;
    unsigned index = 0;
    bool isPseudo = str[0] == '@';
-   // Global vars start with '$'.
+   // Global vars Start with '$'.
    if (str[0] == '$' || isPseudo) {
       ++index;
    }
@@ -139,7 +145,7 @@ FileCheckPattern::parseVariable(StringRef &str, const SourceMgr &sourceMgr) {
       }
       parsedOneChar = true;
    }
-   StringRef name = str.takeFront(index);
+   StringRef name = str.take_front(index);
    str = str.substr(index);
    return VariableProperties {name, isPseudo};
 }
@@ -156,9 +162,9 @@ static char pop_front(StringRef &str)
    return C;
 }
 
-char FileCheckUndefVarError::sm_id = 0;
-char FileCheckErrorDiagnostic::sm_id = 0;
-char FileCheckNotFoundError::sm_id = 0;
+char FileCheckUndefVarError::ID = 0;
+char FileCheckErrorDiagnostic::ID = 0;
+char FileCheckNotFoundError::ID = 0;
 
 Expected<FileCheckNumericVariable *>
 FileCheckPattern::parseNumericVariableDefinition(
@@ -246,7 +252,7 @@ FileCheckPattern::parseNumericOperand(StringRef &expr, AllowedOperand allowedOpe
          return parseVarResult.takeError();
       }
       // Ignore the error and retry parsing as a literal.
-      consume_error(parseVarResult.takeError());
+      consumeError(parseVarResult.takeError());
    }
 
    // Otherwise, parse it as a literal.
@@ -279,7 +285,7 @@ FileCheckPattern::parseBinop(StringRef &expr,
    }
    // Check if this is a supported operation and select a function to perform
    // it.
-   SMLocation opLoc = SMLocation::getFromPointer(expr.data());
+   SMLoc opLoc = SMLoc::getFromPointer(expr.data());
    char optor = pop_front(expr);
    binop_eval_t evalBinop;
    switch (optor) {
@@ -378,7 +384,7 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
 {
    bool matchFullLinesHere = req.matchFullLines && m_checkType != check::CheckNot;
 
-   m_patternLoc = SMLocation::getFromPointer(patternStr.data());
+   m_patternLoc = SMLoc::getFromPointer(patternStr.data());
 
    if (!(req.noCanonicalizeWhiteSpace && req.matchFullLines)) {
       // Ignore trailing whitespace.
@@ -388,13 +394,13 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
    }
    // Check that there is something on the line.
    if (patternStr.empty() && m_checkType != check::CheckEmpty) {
-      sourceMgr.printMessage(m_patternLoc, SourceMgr::DK_Error,
+      sourceMgr.PrintMessage(m_patternLoc, SourceMgr::DK_Error,
                              "found empty check string with prefix '" + prefix + ":'");
       return true;
    }
 
    if (!patternStr.empty() && m_checkType == check::CheckEmpty) {
-      sourceMgr.printMessage(
+      sourceMgr.PrintMessage(
                m_patternLoc, SourceMgr::DK_Error,
                "found non-empty check string for empty check with prefix '" + prefix +
                ":'");
@@ -429,13 +435,13 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
    // by escaping scary characters in fixed strings, building up one big regex.
    while (!patternStr.empty()) {
       // RegEx matches.
-      if (patternStr.startsWith("{{")) {
-         // This is the start of a regex match.  Scan for the }}.
+      if (patternStr.startswith("{{")) {
+         // This is the Start of a regex match.  Scan for the }}.
          size_t end = patternStr.find("}}");
          if (end == StringRef::npos) {
-            sourceMgr.printMessage(SMLocation::getFromPointer(patternStr.data()),
+            sourceMgr.PrintMessage(SMLoc::getFromPointer(patternStr.data()),
                                    SourceMgr::DK_Error,
-                                   "found start of regex string with no end '}}'");
+                                   "found Start of regex string with no end '}}'");
             return true;
          }
 
@@ -458,25 +464,25 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
       // in two forms: [[foo:.*]] and [[foo]]. The former matches .* (or some
       // other regex) and assigns it to the string variable 'foo'. The latter
       // substitutes foo's value. Numeric substitution blocks work the same way
-      // as string ones, but start with a '#' sign after the double brackets.
+      // as string ones, but Start with a '#' sign after the double brackets.
       // Both string and numeric variable names must satisfy the regular
       // expression "[a-zA-Z_][0-9a-zA-Z_]*" to be valid, as this helps catch
       // some common errors.
-      if (patternStr.startsWith("[[")) {
+      if (patternStr.startswith("[[")) {
          StringRef unparsedPatternStr = patternStr.substr(2);
          // Find the closing bracket pair ending the match.  end is going to be an
          // offset relative to the beginning of the match string.
          size_t end = findRegexVarEnd(unparsedPatternStr, sourceMgr);
          StringRef matchStr = unparsedPatternStr.substr(0, end);
-         bool isNumBlock = matchStr.consumeFront("#");
+         bool isNumBlock = matchStr.consume_front("#");
 
          if (end == StringRef::npos) {
-            sourceMgr.printMessage(SMLocation::getFromPointer(patternStr.data()),
+            sourceMgr.PrintMessage(SMLoc::getFromPointer(patternStr.data()),
                                    SourceMgr::DK_Error,
                                    "Invalid substitution block, no ]] found");
             return true;
          }
-         // Strip the substitution block we are parsing. end points to the start
+         // Strip the substitution block we are parsing. end points to the Start
          // of the "]]" closing the expression so account for it in computing the
          // index of the first unparsed character.
          patternStr = unparsedPatternStr.substr(end + 2);
@@ -493,9 +499,9 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
          // Parse string variable or legacy @LINE expression.
          if (!isNumBlock) {
             size_t varEndIdx = matchStr.find(":");
-            size_t spacePos = matchStr.substr(0, varEndIdx).findFirstOf(" \t");
+            size_t spacePos = matchStr.substr(0, varEndIdx).find_first_of(" \t");
             if (spacePos != StringRef::npos) {
-               sourceMgr.printMessage(SMLocation::getFromPointer(matchStr.data() + spacePos),
+               sourceMgr.PrintMessage(SMLoc::getFromPointer(matchStr.data() + spacePos),
                                       SourceMgr::DK_Error, "unexpected whitespace");
                return true;
             }
@@ -505,7 +511,7 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
             Expected<FileCheckPattern::VariableProperties> parseVarResult =
                   parseVariable(matchStr, sourceMgr);
             if (!parseVarResult) {
-               log_all_unhandled_errors(parseVarResult.takeError(), error_stream());
+               logAllUnhandledErrors(parseVarResult.takeError(), llvm::errs());
                return true;
             }
             StringRef name = parseVarResult->name;
@@ -513,8 +519,8 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
 
             isDefinition = (varEndIdx != StringRef::npos);
             if (isDefinition) {
-               if ((isPseudo || !matchStr.consumeFront(":"))) {
-                  sourceMgr.printMessage(SMLocation::getFromPointer(name.data()),
+               if ((isPseudo || !matchStr.consume_front(":"))) {
+                  sourceMgr.PrintMessage(SMLoc::getFromPointer(name.data()),
                                          SourceMgr::DK_Error,
                                          "invalid name in string variable definition");
                   return true;
@@ -524,8 +530,8 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
                // former is created later than the latter.
                if (m_context->m_globalNumericVariableTable.find(name) !=
                    m_context->m_globalNumericVariableTable.end()) {
-                  sourceMgr.printMessage(
-                           SMLocation::getFromPointer(name.data()), SourceMgr::DK_Error,
+                  sourceMgr.PrintMessage(
+                           SMLoc::getFromPointer(name.data()), SourceMgr::DK_Error,
                            "numeric variable with name '" + name + "' already exists");
                   return true;
                }
@@ -548,7 +554,7 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
                   parseNumericSubstitutionBlock(matchStr, definedNumericVariable,
                                                 isLegacyLineExpr, sourceMgr);
             if (!parseResult) {
-               log_all_unhandled_errors(parseResult.takeError(), error_stream());
+               logAllUnhandledErrors(parseResult.takeError(), llvm::errs());
                return true;
             }
             expressionAST = std::move(*parseResult);
@@ -569,7 +575,7 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
             if (!isNumBlock && m_variableDefs.find(substStr) != m_variableDefs.end()) {
                unsigned captureParenGroup = m_variableDefs[substStr];
                if (captureParenGroup < 1 || captureParenGroup > 9) {
-                  sourceMgr.printMessage(SMLocation::getFromPointer(substStr.data()),
+                  sourceMgr.PrintMessage(SMLoc::getFromPointer(substStr.data()),
                                          SourceMgr::DK_Error,
                                          "Can't back-reference more than 9 variables");
                   return true;
@@ -618,7 +624,7 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
       }
 
       // Handle fixed string matches.
-      // Find the end, which is the start of the next regex.
+      // Find the end, which is the Start of the next regex.
       size_t fixedMatchEnd = patternStr.find("{{");
       fixedMatchEnd = std::min(fixedMatchEnd, patternStr.find("[["));
       m_regExStr += regex_escape(patternStr.substr(0, fixedMatchEnd));
@@ -637,13 +643,13 @@ bool FileCheckPattern::parsePattern(StringRef patternStr, StringRef prefix,
 bool FileCheckPattern::addRegExToRegEx(StringRef regexStr, unsigned &curParen, SourceMgr &sourceMgr)
 {
    try {
-      std::string stdRegexStr = regexStr.getStr();
+      std::string stdRegexStr = regexStr.str();
       boost::regex regex(stdRegexStr);
       m_regExStr += stdRegexStr;
       curParen += regex.mark_count();
       return false;
    } catch (boost::regex_error &e) {
-      sourceMgr.printMessage(SMLocation::getFromPointer(regexStr.getData()), SourceMgr::DK_Error,
+      sourceMgr.PrintMessage(SMLoc::getFromPointer(regexStr.data()), SourceMgr::DK_Error,
                              "invalid regex: " + StringRef(e.what()));
       return true;
    }
@@ -709,13 +715,13 @@ Expected<size_t> FileCheckPattern::match(StringRef buffer, size_t &matchLen,
    }
 
    boost::cmatch matchInfo;
-   if (!boost::regex_search(buffer.begin(), buffer.end(), matchInfo, boost::regex(regExToMatch.getStr()), boost::match_not_dot_newline)) {
+   if (!boost::regex_search(buffer.begin(), buffer.end(), matchInfo, boost::regex(regExToMatch.str()), boost::match_not_dot_newline)) {
       return make_error<FileCheckNotFoundError>();
    }
 
    // Successful regex match.
    assert(!matchInfo.empty() && "Didn't get any match");
-   StringRef fullMatch(buffer.getData() + matchInfo.position(), matchInfo[0].length());
+   StringRef fullMatch(buffer.data() + matchInfo.position(), matchInfo[0].length());
 
 
    // If this defines any string variables, remember their values.
@@ -733,7 +739,7 @@ Expected<size_t> FileCheckPattern::match(StringRef buffer, size_t &matchLen,
       FileCheckNumericVariable *definedNumericVariable =
             numericVariableMatch.definedNumericVariable;
 
-      StringRef matchedValue = StringRef(buffer.getData() + matchInfo.position(captureParenGroup), matchInfo[captureParenGroup].length());
+      StringRef matchedValue = StringRef(buffer.data() + matchInfo.position(captureParenGroup), matchInfo[captureParenGroup].length());
       uint64_t val;
       if (matchedValue.getAsInteger(10, val)) {
          return FileCheckErrorDiagnostic::get(sourceMgr, matchedValue,
@@ -742,12 +748,12 @@ Expected<size_t> FileCheckPattern::match(StringRef buffer, size_t &matchLen,
       definedNumericVariable->setValue(val);
    }
 
-   // Like CHECK-NEXT, CHECK-EMPTY's match range is considered to start after
+   // Like CHECK-NEXT, CHECK-EMPTY's match range is considered to Start after
    // the required preceding newline, which is consumed by the pattern in the
    // case of CHECK-EMPTY but not CHECK-NEXT.
    size_t matchStartSkip = m_checkType == check::CheckEmpty;
    matchLen = fullMatch.size() - matchStartSkip;
-   return fullMatch.data() - buffer.getData() + matchStartSkip;
+   return fullMatch.data() - buffer.data() + matchStartSkip;
 }
 
 unsigned
@@ -767,7 +773,7 @@ FileCheckPattern::computeMatchDistance(StringRef buffer) const
    // Only compare up to the first line in the buffer, or the string size.
    StringRef bufferPrefix = buffer.substr(0, exampleString.size());
    bufferPrefix = bufferPrefix.split('\n').first;
-   return bufferPrefix.editDistance(exampleString);
+   return bufferPrefix.edit_distance(exampleString);
 }
 
 
@@ -778,14 +784,14 @@ void FileCheckPattern::printSubstitutions(const SourceMgr &sourceMgr, StringRef 
    if (!m_substitutions.empty()) {
       for (const auto &substitution : m_substitutions) {
          SmallString<256> msg;
-         RawSvectorOutStream outStream(msg);
+         raw_svector_ostream outStream(msg);
          Expected<std::string> matchedValue = substitution->getResult();
 
          // substitution failed or is not known at match time, print the undefined
          // variables it uses.
          if (!matchedValue) {
             bool undefSeen = false;
-            handle_all_errors(matchedValue.takeError(),
+            handleAllErrors(matchedValue.takeError(),
                               [](const FileCheckNotFoundError &) {},
             // Handled in PrintNoMatch().
             [](const FileCheckErrorDiagnostic &) {},
@@ -800,30 +806,30 @@ void FileCheckPattern::printSubstitutions(const SourceMgr &sourceMgr, StringRef 
          } else {
             // substitution succeeded. Print substituted value.
             outStream << "with \"";
-            outStream.writeEscaped(substitution->getFromString()) << "\" equal to \"";
-            outStream.writeEscaped(*matchedValue) << "\"";
+            outStream.write_escaped(substitution->getFromString()) << "\" equal to \"";
+            outStream.write_escaped(*matchedValue) << "\"";
          }
 
          if (matchRange.isValid())
-            sourceMgr.printMessage(matchRange.start, SourceMgr::DK_Note, outStream.getStr(),
+            sourceMgr.PrintMessage(matchRange.Start, SourceMgr::DK_Note, outStream.str(),
             {matchRange});
          else
-            sourceMgr.printMessage(SMLocation::getFromPointer(buffer.data()),
-                                   SourceMgr::DK_Note, outStream.getStr());
+            sourceMgr.PrintMessage(SMLoc::getFromPointer(buffer.data()),
+                                   SourceMgr::DK_Note, outStream.str());
       }
    }
 }
 
 static SMRange process_match_result(FileCheckDiag::MatchType matchType,
-                                    const SourceMgr &sourceMgr, SMLocation loc,
+                                    const SourceMgr &sourceMgr, SMLoc loc,
                                     FileCheckType checkType,
                                     StringRef buffer, size_t pos, size_t len,
                                     std::vector<FileCheckDiag> *diags,
                                     bool adjustPrevDiag = false)
 {
-   SMLocation start = SMLocation::getFromPointer(buffer.getData() + pos);
-   SMLocation end = SMLocation::getFromPointer(buffer.getData() + pos + len);
-   SMRange range(start, end);
+   SMLoc Start = SMLoc::getFromPointer(buffer.data() + pos);
+   SMLoc end = SMLoc::getFromPointer(buffer.data() + pos + len);
+   SMRange range(Start, end);
    if (diags) {
       if (adjustPrevDiag) {
          diags->rbegin()->matchType = matchType;
@@ -874,7 +880,7 @@ void FileCheckPattern::printFuzzyMatch(
       SMRange matchRange =
             process_match_result(FileCheckDiag::MatchFuzzy, sourceMgr, getLoc(),
                                  getCheckType(), buffer, best, 0, diags);
-      sourceMgr.printMessage(matchRange.start, SourceMgr::DK_Note,
+      sourceMgr.PrintMessage(matchRange.Start, SourceMgr::DK_Note,
                              "possible intended match here");
 
       // FIXME: If we wanted to be really friendly we would show why the match
@@ -933,7 +939,7 @@ size_t FileCheckPattern::findRegexVarEnd(StringRef str, SourceMgr &sourceMgr)
    size_t bracketDepth = 0;
 
    while (!str.empty()) {
-      if (str.startsWith("]]") && bracketDepth == 0)
+      if (str.startswith("]]") && bracketDepth == 0)
          return offset;
       if (str[0] == '\\') {
          // Backslash escapes the next char within regexes, so skip them both.
@@ -948,7 +954,7 @@ size_t FileCheckPattern::findRegexVarEnd(StringRef str, SourceMgr &sourceMgr)
             break;
          case ']':
             if (bracketDepth == 0) {
-               sourceMgr.printMessage(SMLocation::getFromPointer(str.getData()),
+               sourceMgr.PrintMessage(SMLoc::getFromPointer(str.data()),
                                       SourceMgr::DK_Error,
                                       "missing closing \"]\" for regex variable");
                exit(1);
@@ -990,25 +996,25 @@ StringRef FileCheck::canonicalizeFile(MemoryBuffer &memoryBuffer,
 
    // Add a null byte and then return all but that byte.
    outputBuffer.push_back('\0');
-   return StringRef(outputBuffer.getData(), outputBuffer.size() - 1);
+   return StringRef(outputBuffer.data(), outputBuffer.size() - 1);
 }
 
 FileCheckDiag::FileCheckDiag(const SourceMgr &sourceMgr,
                              const FileCheckType &checkType,
-                             SMLocation checkLoc, MatchType matchType,
+                             SMLoc checkLoc, MatchType matchType,
                              SMRange inputRange)
    : checkType(checkType),
      matchType(matchType)
 {
-   auto start = sourceMgr.getLineAndColumn(inputRange.start);
-   auto end = sourceMgr.getLineAndColumn(inputRange.end);
-   inputStartLine = start.first;
-   inputStartCol = start.second;
+   auto Start = sourceMgr.getLineAndColumn(inputRange.Start);
+   auto end = sourceMgr.getLineAndColumn(inputRange.End);
+   inputStartLine = Start.first;
+   inputStartCol = Start.second;
    inputEndLine = end.first;
    inputEndCol = end.second;
-   start = sourceMgr.getLineAndColumn(checkLoc);
-   checkLine = start.first;
-   checkCol = start.second;
+   Start = sourceMgr.getLineAndColumn(checkLoc);
+   checkLine = Start.first;
+   checkCol = Start.second;
 }
 
 static bool is_part_of_word(char c)
@@ -1032,21 +1038,21 @@ std::string FileCheckType::getDescription(StringRef prefix) const
       return "invalid";
    case FileCheckKind::CheckPlain:
       if (m_count > 1) {
-         return prefix.getStr() + "-COUNT";
+         return prefix.str() + "-COUNT";
       }
       return prefix;
    case FileCheckKind::CheckNext:
-      return prefix.getStr() + "-NEXT";
+      return prefix.str() + "-NEXT";
    case FileCheckKind::CheckSame:
-      return prefix.getStr() + "-SAME";
+      return prefix.str() + "-SAME";
    case FileCheckKind::CheckNot:
-      return prefix.getStr() + "-NOT";
+      return prefix.str() + "-NOT";
    case FileCheckKind::CheckDAG:
-      return prefix.getStr() + "-DAG";
+      return prefix.str() + "-DAG";
    case FileCheckKind::CheckLabel:
-      return prefix.getStr() + "-LABEL";
+      return prefix.str() + "-LABEL";
    case FileCheckKind::CheckEmpty:
-      return prefix.getStr() + "-EMPTY";
+      return prefix.str() + "-EMPTY";
    case FileCheckKind::CheckEOF:
       return "implicit EOF";
    case FileCheckKind::CheckBadNot:
@@ -1054,7 +1060,7 @@ std::string FileCheckType::getDescription(StringRef prefix) const
    case FileCheckKind::CheckBadCount:
       return "bad COUNT";
    }
-   polar_unreachable("unknown FileCheckType");
+   llvm_unreachable("unknown FileCheckType");
 }
 
 static std::pair<check::FileCheckType, StringRef>
@@ -1065,7 +1071,7 @@ find_check_type(StringRef buffer, StringRef prefix)
    }
    char nextChar = buffer[prefix.size()];
 
-   StringRef rest = buffer.dropFront(prefix.size() + 1);
+   StringRef rest = buffer.drop_front(prefix.size() + 1);
    // Verify that the : is present after the prefix.
    if (nextChar == ':') {
       return {check::FileCheckKind::CheckPlain, rest};
@@ -1074,7 +1080,7 @@ find_check_type(StringRef buffer, StringRef prefix)
       return {check::FileCheckKind::CheckNone, StringRef()};
    }
 
-   if (rest.consumeFront("COUNT-")) {
+   if (rest.consume_front("COUNT-")) {
       int64_t count;
       if (rest.consumeInteger(10, count)) {
          // Error happened in parsing integer.
@@ -1084,35 +1090,35 @@ find_check_type(StringRef buffer, StringRef prefix)
          return {FileCheckKind::CheckBadCount, rest};
       }
 
-      if (!rest.consumeFront(":")) {
+      if (!rest.consume_front(":")) {
          return {FileCheckKind::CheckBadCount, rest};
       }
       return {FileCheckType(FileCheckKind::CheckPlain).setCount(count), rest};
    }
 
-   if (rest.consumeFront("NEXT:"))
+   if (rest.consume_front("NEXT:"))
       return {FileCheckKind::CheckNext, rest};
 
-   if (rest.consumeFront("SAME:"))
+   if (rest.consume_front("SAME:"))
       return {FileCheckKind::CheckSame, rest};
 
-   if (rest.consumeFront("NOT:"))
+   if (rest.consume_front("NOT:"))
       return {FileCheckKind::CheckNot, rest};
 
-   if (rest.consumeFront("DAG:"))
+   if (rest.consume_front("DAG:"))
       return {FileCheckKind::CheckDAG, rest};
 
-   if (rest.consumeFront("LABEL:"))
+   if (rest.consume_front("LABEL:"))
       return {FileCheckKind::CheckLabel, rest};
 
-   if (rest.consumeFront("EMPTY:"))
+   if (rest.consume_front("EMPTY:"))
       return {FileCheckKind::CheckEmpty, rest};
 
    // You can't combine -NOT with another suffix.
-   if (rest.startsWith("DAG-NOT:") || rest.startsWith("NOT-DAG:") ||
-       rest.startsWith("NEXT-NOT:") || rest.startsWith("NOT-NEXT:") ||
-       rest.startsWith("SAME-NOT:") || rest.startsWith("NOT-SAME:") ||
-       rest.startsWith("EMPTY-NOT:") || rest.startsWith("NOT-EMPTY:")) {
+   if (rest.startswith("DAG-NOT:") || rest.startswith("NOT-DAG:") ||
+       rest.startswith("NEXT-NOT:") || rest.startswith("NOT-NEXT:") ||
+       rest.startswith("SAME-NOT:") || rest.startswith("NOT-SAME:") ||
+       rest.startswith("EMPTY-NOT:") || rest.startswith("NOT-EMPTY:")) {
       return {FileCheckKind::CheckBadNot, rest};
    }
 
@@ -1145,7 +1151,7 @@ static size_t skip_word(StringRef str, size_t loc)
 ///     to continue from
 ///
 /// If this routine returns a valid prefix, it will also shrink \p buffer to
-/// start at the beginning of the returned prefix, increment \p lineNumber for
+/// Start at the beginning of the returned prefix, increment \p lineNumber for
 /// each new line consumed from \p buffer, and set \p checkType to the type of
 /// check found by examining the suffix.
 ///
@@ -1165,14 +1171,14 @@ find_first_matching_prefix(boost::regex &prefixRegex, StringRef &buffer,
          // No match at all, bail.
          return {StringRef(), StringRef()};
       }
-      StringRef prefix(buffer.getData() + matches.position(), matches[0].length());
-      assert(prefix.getData() >= buffer.getData() &&
-             prefix.getData() < buffer.getData() + buffer.size() &&
-             "prefix doesn't start inside of buffer!");
+      StringRef prefix(buffer.data() + matches.position(), matches[0].length());
+      assert(prefix.data() >= buffer.data() &&
+             prefix.data() < buffer.data() + buffer.size() &&
+             "prefix doesn't Start inside of buffer!");
 
       size_t loc = matches.position();
       StringRef skipped = buffer.substr(0, loc);
-      buffer = buffer.dropFront(loc);
+      buffer = buffer.drop_front(loc);
       lineNumber += skipped.count('\n');
 
       // Check that the matched prefix isn't a suffix of some other check-like
@@ -1194,7 +1200,7 @@ find_first_matching_prefix(boost::regex &prefixRegex, StringRef &buffer,
       // If we didn't successfully find a prefix, we need to skip this invalid
       // prefix and continue scanning. We directly skip the prefix that was
       // matched and any additional parts of that check-like word.
-      buffer = buffer.dropFront(skip_word(buffer, prefix.size()));
+      buffer = buffer.drop_front(skip_word(buffer, prefix.size()));
    }
 
    // We ran out of buffer while skipping partial matches so give up.
@@ -1220,7 +1226,7 @@ bool FileCheck::readCheckFile(SourceMgr &sourceMgr, StringRef buffer,
    Error defineError =
          m_patternContext.defineCmdlineVariables(m_req.globalDefines, sourceMgr);
    if (defineError) {
-      log_all_unhandled_errors(std::move(defineError), error_stream());
+      logAllUnhandledErrors(std::move(defineError), llvm::errs());
       return true;
    }
 
@@ -1237,7 +1243,7 @@ bool FileCheck::readCheckFile(SourceMgr &sourceMgr, StringRef buffer,
 
       StringRef patternInBuffer =
             cmdLine->getBuffer().substr(prefix.size(), patternString.size());
-      sourceMgr.addNewSourceBuffer(std::move(cmdLine), SMLocation());
+      sourceMgr.AddNewSourceBuffer(std::move(cmdLine), SMLoc());
 
       implicitNegativeChecks.push_back(
                FileCheckPattern(check::CheckNot, &m_patternContext));
@@ -1262,11 +1268,11 @@ bool FileCheck::readCheckFile(SourceMgr &sourceMgr, StringRef buffer,
       if (usedPrefix.empty())
          break;
       assert(usedPrefix.data() == buffer.data() &&
-             "Failed to move buffer's start forward, or pointed prefix outside "
+             "Failed to move buffer's Start forward, or pointed prefix outside "
              "of the buffer!");
       assert(afterSuffix.data() >= buffer.data() &&
              afterSuffix.data() < buffer.data() + buffer.size() &&
-             "Parsing after suffix doesn't start inside of buffer!");
+             "Parsing after suffix doesn't Start inside of buffer!");
 
       // Location to use for error messages.
       const char *usedPrefixStart = usedPrefix.data();
@@ -1278,14 +1284,14 @@ bool FileCheck::readCheckFile(SourceMgr &sourceMgr, StringRef buffer,
 
       // Complain about useful-looking but unsupported suffixes.
       if (checkType == check::CheckBadNot) {
-         sourceMgr.printMessage(SMLocation::getFromPointer(buffer.data()), SourceMgr::DK_Error,
+         sourceMgr.PrintMessage(SMLoc::getFromPointer(buffer.data()), SourceMgr::DK_Error,
                                 "unsupported -NOT combo on prefix '" + usedPrefix + "'");
          return true;
       }
 
       // Complain about invalid count specification.
       if (checkType == check::CheckBadCount) {
-         sourceMgr.printMessage(SMLocation::getFromPointer(buffer.data()), SourceMgr::DK_Error,
+         sourceMgr.PrintMessage(SMLoc::getFromPointer(buffer.data()), SourceMgr::DK_Error,
                                 "invalid count in -COUNT specification on prefix '" +
                                 usedPrefix + "'");
          return true;
@@ -1293,14 +1299,14 @@ bool FileCheck::readCheckFile(SourceMgr &sourceMgr, StringRef buffer,
 
       // Okay, we found the prefix, yay. Remember the rest of the line, but ignore
       // leading whitespace.
-      if (!(m_req.noCanonicalizeWhiteSpace && m_req.matchFullLines))
-         buffer = buffer.substr(buffer.findFirstNotOf(" \t"));
-
+      if (!(m_req.noCanonicalizeWhiteSpace && m_req.matchFullLines)) {
+         buffer = buffer.substr(buffer.find_first_not_of(" \t"));
+      }
       // Scan ahead to the end of line.
-      size_t eol = buffer.findFirstOf("\n\r");
+      size_t eol = buffer.find_first_of("\n\r");
 
-      // Remember the location of the start of the pattern, for diagnostics.
-      SMLocation patternLoc = SMLocation::getFromPointer(buffer.data());
+      // Remember the location of the Start of the pattern, for diagnostics.
+      SMLoc patternLoc = SMLoc::getFromPointer(buffer.data());
 
       // Parse the pattern.
       FileCheckPattern P(checkType, &m_patternContext, lineNumber);
@@ -1309,8 +1315,8 @@ bool FileCheck::readCheckFile(SourceMgr &sourceMgr, StringRef buffer,
 
       // Verify that CHECK-LABEL lines do not define or use variables
       if ((checkType == check::CheckLabel) && P.hasVariable()) {
-         sourceMgr.printMessage(
-                  SMLocation::getFromPointer(usedPrefixStart), SourceMgr::DK_Error,
+         sourceMgr.PrintMessage(
+                  SMLoc::getFromPointer(usedPrefixStart), SourceMgr::DK_Error,
                   "found '" + usedPrefix + "-LABEL:'"
                                            " with variable definition or use");
          return true;
@@ -1325,7 +1331,7 @@ bool FileCheck::readCheckFile(SourceMgr &sourceMgr, StringRef buffer,
          StringRef Type = checkType == check::CheckNext
                ? "NEXT"
                : checkType == check::CheckEmpty ? "EMPTY" : "SAME";
-         sourceMgr.printMessage(SMLocation::getFromPointer(usedPrefixStart),
+         sourceMgr.PrintMessage(SMLoc::getFromPointer(usedPrefixStart),
                                 SourceMgr::DK_Error,
                                 "found '" + usedPrefix + "-" + Type +
                                 "' without previous '" + usedPrefix + ": line");
@@ -1349,25 +1355,25 @@ bool FileCheck::readCheckFile(SourceMgr &sourceMgr, StringRef buffer,
    if (!dagNotMatches.empty()) {
       checkStrings.emplace_back(
                FileCheckPattern(check::CheckEOF, &m_patternContext, lineNumber + 1),
-               *m_req.checkPrefixes.begin(), SMLocation::getFromPointer(buffer.data()));
+               *m_req.checkPrefixes.begin(), SMLoc::getFromPointer(buffer.data()));
       std::swap(dagNotMatches, checkStrings.back().m_dagNotStrings);
    }
 
    if (checkStrings.empty()) {
-      error_stream() << "error: no check strings found with prefix"
+      llvm::errs() << "error: no check strings found with prefix"
                      << (m_req.checkPrefixes.size() > 1 ? "es " : " ");
       auto I = m_req.checkPrefixes.begin();
       auto E = m_req.checkPrefixes.end();
       if (I != E) {
-         error_stream() << "\'" << *I << ":'";
+         llvm::errs() << "\'" << *I << ":'";
          ++I;
       }
       for (; I != E; ++I) {
-         error_stream() << ", \'" << *I << ":'";
+         llvm::errs() << ", \'" << *I << ":'";
       }
 
 
-      error_stream() << '\n';
+      llvm::errs() << '\n';
       return true;
    }
 
@@ -1375,7 +1381,7 @@ bool FileCheck::readCheckFile(SourceMgr &sourceMgr, StringRef buffer,
 }
 
 static void print_match(bool expectedMatch, const SourceMgr &sourceMgr,
-                        StringRef prefix, SMLocation loc, const FileCheckPattern &pattern,
+                        StringRef prefix, SMLoc loc, const FileCheckPattern &pattern,
                         int matchedCount, StringRef buffer, size_t matchPos,
                         size_t matchLen, const FileCheckRequest &req,
                         std::vector<FileCheckDiag> *diags)
@@ -1404,13 +1410,13 @@ static void print_match(bool expectedMatch, const SourceMgr &sourceMgr,
    std::string message = formatv("{0}: {1} string found in input",
                                  pattern.getCheckType().getDescription(prefix),
                                  (expectedMatch ? "expected" : "excluded"))
-         .getStr();
+         .str();
    if (pattern.getCount() > 1)
-      message += formatv(" ({0} out of {1})", matchedCount, pattern.getCount()).getStr();
+      message += formatv(" ({0} out of {1})", matchedCount, pattern.getCount()).str();
 
-   sourceMgr.printMessage(
+   sourceMgr.PrintMessage(
             loc, expectedMatch ? SourceMgr::DK_Remark : SourceMgr::DK_Error, message);
-   sourceMgr.printMessage(MatchRange.start, SourceMgr::DK_Note, "found here",
+   sourceMgr.PrintMessage(MatchRange.Start, SourceMgr::DK_Note, "found here",
    {MatchRange});
    pattern.printSubstitutions(sourceMgr, buffer, MatchRange);
 }
@@ -1426,7 +1432,7 @@ static void print_match(bool expectedMatch, const SourceMgr &sourceMgr,
 }
 
 static void print_no_match(bool expectedMatch, const SourceMgr &sourceMgr,
-                           StringRef prefix, SMLocation loc,
+                           StringRef prefix, SMLoc loc,
                            const FileCheckPattern &pattern, int matchedCount,
                            StringRef buffer, bool verboseVerbose,
                            std::vector<FileCheckDiag> *diags, Error matchErrors)
@@ -1435,7 +1441,7 @@ static void print_no_match(bool expectedMatch, const SourceMgr &sourceMgr,
    bool printDiag = true;
    if (!expectedMatch) {
       if (!verboseVerbose) {
-         consume_error(std::move(matchErrors));
+         consumeError(std::move(matchErrors));
          return;
       }
       // Due to their verbosity, we don't print verbose diagnostics here if we're
@@ -1444,42 +1450,42 @@ static void print_no_match(bool expectedMatch, const SourceMgr &sourceMgr,
       printDiag = !diags;
    }
 
-   // If the current position is at the end of a line, advance to the start of
+   // If the current position is at the end of a line, advance to the Start of
    // the next line.
-   buffer = buffer.substr(buffer.findFirstNotOf(" \t\n\r"));
+   buffer = buffer.substr(buffer.find_first_not_of(" \t\n\r"));
    SMRange SearchRange = process_match_result(
             expectedMatch ? FileCheckDiag::MatchNoneButExpected
                           : FileCheckDiag::MatchNoneAndExcluded,
             sourceMgr, loc, pattern.getCheckType(), buffer, 0, buffer.size(), diags);
    if (!printDiag) {
-      consume_error(std::move(matchErrors));
+      consumeError(std::move(matchErrors));
       return;
    }
 
    matchErrors =
-         handle_errors(std::move(matchErrors),
-                       [](const FileCheckErrorDiagnostic &E) { E.log(error_stream()); });
+         handleErrors(std::move(matchErrors),
+                      [](const FileCheckErrorDiagnostic &E) { E.log(llvm::errs()); });
 
    // No problem matching the string per se.
    if (!matchErrors) {
       return;
    }
 
-   consume_error(std::move(matchErrors));
+   consumeError(std::move(matchErrors));
 
    // Print "not found" diagnostic.
    std::string message = formatv("{0}: {1} string not found in input",
                                  pattern.getCheckType().getDescription(prefix),
                                  (expectedMatch ? "expected" : "excluded"))
-         .getStr();
+         .str();
    if (pattern.getCount() > 1) {
-      message += formatv(" ({0} out of {1})", matchedCount, pattern.getCount()).getStr();
+      message += formatv(" ({0} out of {1})", matchedCount, pattern.getCount()).str();
    }
-   sourceMgr.printMessage(
+   sourceMgr.PrintMessage(
             loc, expectedMatch ? SourceMgr::DK_Error : SourceMgr::DK_Remark, message);
 
    // Print the "scanning from here" line.
-   sourceMgr.printMessage(SearchRange.start, SourceMgr::DK_Note, "scanning from here");
+   sourceMgr.PrintMessage(SearchRange.Start, SourceMgr::DK_Note, "scanning from here");
    // Allow the pattern to print additional information if desired.
    pattern.printSubstitutions(sourceMgr, buffer);
    if (expectedMatch) {
@@ -1505,7 +1511,7 @@ static unsigned count_num_newlines_between(StringRef range,
    unsigned numNewLines = 0;
    while (1) {
       // Scan for newline.
-      range = range.substr(range.findFirstOf("\n\r"));
+      range = range.substr(range.find_first_of("\n\r"));
       if (range.empty()) {
          return numNewLines;
       }
@@ -1553,7 +1559,7 @@ size_t FileCheckString::check(const SourceMgr &sourceMgr, StringRef buffer,
    for (int i = 1; i <= pattern.getCount(); i++) {
       StringRef matchBuffer = buffer.substr(lastMatchEnd);
       size_t CurrentMatchLen;
-      // get a match at current start point
+      // get a match at current Start point
       Expected<size_t> matchResult = pattern.match(matchBuffer, CurrentMatchLen, sourceMgr);
 
       // report
@@ -1568,7 +1574,7 @@ size_t FileCheckString::check(const SourceMgr &sourceMgr, StringRef buffer,
       if (i == 1) {
          firstMatchPos = lastPos + matchPos;
       }
-      // move start point after the match
+      // move Start point after the match
       lastMatchEnd += matchPos + CurrentMatchLen;
    }
    // Full match len counts from first match pos.
@@ -1624,24 +1630,24 @@ bool FileCheckString::checkNext(const SourceMgr &sourceMgr, StringRef buffer) co
    unsigned numNewLines = count_num_newlines_between(buffer, firstNewLine);
 
    if (numNewLines == 0) {
-      sourceMgr.printMessage(loc, SourceMgr::DK_Error,
+      sourceMgr.PrintMessage(loc, SourceMgr::DK_Error,
                              checkName + ": is on the same line as previous match");
-      sourceMgr.printMessage(SMLocation::getFromPointer(buffer.end()), SourceMgr::DK_Note,
+      sourceMgr.PrintMessage(SMLoc::getFromPointer(buffer.end()), SourceMgr::DK_Note,
                              "'next' match was here");
-      sourceMgr.printMessage(SMLocation::getFromPointer(buffer.data()), SourceMgr::DK_Note,
+      sourceMgr.PrintMessage(SMLoc::getFromPointer(buffer.data()), SourceMgr::DK_Note,
                              "previous match ended here");
       return true;
    }
 
    if (numNewLines != 1) {
-      sourceMgr.printMessage(loc, SourceMgr::DK_Error,
+      sourceMgr.PrintMessage(loc, SourceMgr::DK_Error,
                              checkName +
                              ": is not on the line after the previous match");
-      sourceMgr.printMessage(SMLocation::getFromPointer(buffer.end()), SourceMgr::DK_Note,
+      sourceMgr.PrintMessage(SMLoc::getFromPointer(buffer.end()), SourceMgr::DK_Note,
                              "'next' match was here");
-      sourceMgr.printMessage(SMLocation::getFromPointer(buffer.data()), SourceMgr::DK_Note,
+      sourceMgr.PrintMessage(SMLoc::getFromPointer(buffer.data()), SourceMgr::DK_Note,
                              "previous match ended here");
-      sourceMgr.printMessage(SMLocation::getFromPointer(firstNewLine), SourceMgr::DK_Note,
+      sourceMgr.PrintMessage(SMLoc::getFromPointer(firstNewLine), SourceMgr::DK_Note,
                              "non-matching line after previous match is here");
       return true;
    }
@@ -1659,12 +1665,12 @@ bool FileCheckString::checkSame(const SourceMgr &sourceMgr, StringRef buffer) co
    unsigned numNewLines = count_num_newlines_between(buffer, FirstNewLine);
 
    if (numNewLines != 0) {
-      sourceMgr.printMessage(loc, SourceMgr::DK_Error,
+      sourceMgr.PrintMessage(loc, SourceMgr::DK_Error,
                              prefix +
                              "-SAME: is not on the same line as the previous match");
-      sourceMgr.printMessage(SMLocation::getFromPointer(buffer.end()), SourceMgr::DK_Note,
+      sourceMgr.PrintMessage(SMLoc::getFromPointer(buffer.end()), SourceMgr::DK_Note,
                              "'next' match was here");
-      sourceMgr.printMessage(SMLocation::getFromPointer(buffer.data()), SourceMgr::DK_Note,
+      sourceMgr.PrintMessage(SMLoc::getFromPointer(buffer.data()), SourceMgr::DK_Note,
                              "previous match ended here");
       return true;
    }
@@ -1705,7 +1711,7 @@ FileCheckString::checkDag(const SourceMgr &sourceMgr, StringRef buffer,
    if (m_dagNotStrings.empty()) {
       return 0;
    }
-   // The start of the search range.
+   // The Start of the search range.
    size_t startPos = 0;
 
    struct MatchRange {
@@ -1733,7 +1739,7 @@ FileCheckString::checkDag(const SourceMgr &sourceMgr, StringRef buffer,
 
       assert((patten.getCheckType() == check::CheckDAG) && "Expect CHECK-DAG!");
 
-      // CHECK-DAG always matches from the start.
+      // CHECK-DAG always matches from the Start.
       size_t matchLen = 0, matchPos = startPos;
 
       // Search for a match that doesn't overlap a previous match in this
@@ -1749,7 +1755,7 @@ FileCheckString::checkDag(const SourceMgr &sourceMgr, StringRef buffer,
             return StringRef::npos;
          }
          size_t matchPosBuf = *matchResult;
-         // Re-calc it as the offset relative to the start of the original string.
+         // Re-calc it as the offset relative to the Start of the original string.
          matchPos += matchPosBuf;
          if (req.verboseVerbose)
             print_match(true, sourceMgr, prefix, patten.getLoc(), patten, 1, buffer, matchPos,
@@ -1788,10 +1794,10 @@ FileCheckString::checkDag(const SourceMgr &sourceMgr, StringRef buffer,
             // we're gathering them for a different rendering, but we always print
             // other diagnostics.
             if (!diags) {
-               SMLocation oldStart = SMLocation::getFromPointer(buffer.data() + miter->pos);
-               SMLocation oldEnd = SMLocation::getFromPointer(buffer.data() + miter->End);
+               SMLoc oldStart = SMLoc::getFromPointer(buffer.data() + miter->pos);
+               SMLoc oldEnd = SMLoc::getFromPointer(buffer.data() + miter->End);
                SMRange oldRange(oldStart, oldEnd);
-               sourceMgr.printMessage(oldStart, SourceMgr::DK_Note,
+               sourceMgr.PrintMessage(oldStart, SourceMgr::DK_Note,
                                       "match discarded, overlaps earlier DAG match here",
                {oldRange});
             } else
@@ -1831,7 +1837,7 @@ FileCheckString::checkDag(const SourceMgr &sourceMgr, StringRef buffer,
 // A check prefix must contain only alphanumeric, hyphens and underscores.
 static bool validate_check_prefix(StringRef checkPrefix)
 {
-   return boost::regex_match(checkPrefix.getStr(), boost::regex("^[a-zA-Z0-9_-]*$"));
+   return boost::regex_match(checkPrefix.str(), boost::regex("^[a-zA-Z0-9_-]*$"));
 }
 
 bool FileCheck::validateCheckPrefixes()
@@ -1870,7 +1876,7 @@ boost::regex FileCheck::buildCheckPrefixRegex()
       }
       prefixRegexStr.append(prefix);
    }
-   return boost::regex(prefixRegexStr.getStr().getStr());
+   return boost::regex(prefixRegexStr.str().str());
 }
 
 Error FileCheckPatternContext::defineCmdlineVariables(
@@ -1879,19 +1885,19 @@ Error FileCheckPatternContext::defineCmdlineVariables(
    assert(m_globalVariableTable.empty() && m_globalVariableTable.empty() &&
           "Overriding defined variable with command-line variable definitions");
    if (cmdlineDefines.empty()) {
-      return Error::getSuccess();
+      return Error::success();
    }
    // Create a string representing the vector of command-line definitions. Each
    // definition is on its own line and prefixed with a definition number to
    // clarify which definition a given diagnostic corresponds to.
    unsigned I = 0;
-   Error errors = Error::getSuccess();
+   Error errors = Error::success();
    std::string cmdlineDefsDiag;
    StringRef prefix1 = "Global define #";
    StringRef prefix2 = ": ";
    for (StringRef cmdlineDef : cmdlineDefines) {
       cmdlineDefsDiag +=
-            (prefix1 + Twine(++I) + prefix2 + cmdlineDef + "\n").getStr();
+            (prefix1 + Twine(++I) + prefix2 + cmdlineDef + "\n").str();
    }
 
 
@@ -1901,7 +1907,7 @@ Error FileCheckPatternContext::defineCmdlineVariables(
    std::unique_ptr<MemoryBuffer> cmdLineDefsDiagBuffer =
          MemoryBuffer::getMemBufferCopy(cmdlineDefsDiag, "Global defines");
    StringRef cmdlineDefsDiagRef = cmdLineDefsDiagBuffer->getBuffer();
-   sourceMgr.addNewSourceBuffer(std::move(cmdLineDefsDiagBuffer), SMLocation());
+   sourceMgr.AddNewSourceBuffer(std::move(cmdLineDefsDiagBuffer), SMLoc());
 
    SmallVector<StringRef, 4> cmdlineDefsDiagVec;
    cmdlineDefsDiagRef.split(cmdlineDefsDiagVec, '\n', -1 /*MaxSplit*/,
@@ -1911,7 +1917,7 @@ Error FileCheckPatternContext::defineCmdlineVariables(
       StringRef cmdlineDef = cmdlineDefDiag.substr(defStart);
       size_t eqIdx = cmdlineDef.find('=');
       if (eqIdx == StringRef::npos) {
-         errors = join_errors(
+         errors = joinErrors(
                   std::move(errors),
                   FileCheckErrorDiagnostic::get(
                      sourceMgr, cmdlineDef, "missing equal sign in global definition"));
@@ -1925,18 +1931,18 @@ Error FileCheckPatternContext::defineCmdlineVariables(
                FileCheckPattern::parseNumericVariableDefinition(cmdlineName, this,
                                                                 std::nullopt, sourceMgr);
          if (!ParseResult) {
-            errors = join_errors(std::move(errors), ParseResult.takeError());
+            errors = joinErrors(std::move(errors), ParseResult.takeError());
             continue;
          }
 
          StringRef CmdlineVal = cmdlineDef.substr(eqIdx + 1);
          uint64_t val;
          if (CmdlineVal.getAsInteger(10, val)) {
-            errors = join_errors(std::move(errors),
-                                 FileCheckErrorDiagnostic::get(
-                                    sourceMgr, CmdlineVal,
-                                    "invalid value in numeric variable definition '" +
-                                    CmdlineVal + "'"));
+            errors = joinErrors(std::move(errors),
+                                FileCheckErrorDiagnostic::get(
+                                   sourceMgr, CmdlineVal,
+                                   "invalid value in numeric variable definition '" +
+                                   CmdlineVal + "'"));
             continue;
          }
          FileCheckNumericVariable *definedNumericVariable = *ParseResult;
@@ -1953,18 +1959,18 @@ Error FileCheckPatternContext::defineCmdlineVariables(
          Expected<FileCheckPattern::VariableProperties> parseVarResult =
                FileCheckPattern::parseVariable(cmdlineName, sourceMgr);
          if (!parseVarResult) {
-            errors = join_errors(std::move(errors), parseVarResult.takeError());
+            errors = joinErrors(std::move(errors), parseVarResult.takeError());
             continue;
          }
          // Check that cmdlineName does not denote a pseudo variable is only
          // composed of the parsed numeric variable. This catches cases like
          // "FOO+2" in a "FOO+2=10" definition.
          if (parseVarResult->isPseudo || !cmdlineName.empty()) {
-            errors = join_errors(std::move(errors),
-                                 FileCheckErrorDiagnostic::get(
-                                    sourceMgr, origCmdlineName,
-                                    "invalid name in string variable definition '" +
-                                    origCmdlineName + "'"));
+            errors = joinErrors(std::move(errors),
+                                FileCheckErrorDiagnostic::get(
+                                   sourceMgr, origCmdlineName,
+                                   "invalid name in string variable definition '" +
+                                   origCmdlineName + "'"));
             continue;
          }
          StringRef name = parseVarResult->name;
@@ -1973,10 +1979,10 @@ Error FileCheckPatternContext::defineCmdlineVariables(
          // is created later than the latter.
          if (m_globalNumericVariableTable.find(name) !=
              m_globalNumericVariableTable.end()) {
-            errors = join_errors(std::move(errors), FileCheckErrorDiagnostic::get(
-                                    sourceMgr, name,
-                                    "numeric variable with name '" +
-                                    name + "' already exists"));
+            errors = joinErrors(std::move(errors), FileCheckErrorDiagnostic::get(
+                                   sourceMgr, name,
+                                   "numeric variable with name '" +
+                                   name + "' already exists"));
             continue;
          }
          m_globalVariableTable.insert(cmdlineNameVal);
@@ -1997,8 +2003,8 @@ void FileCheckPatternContext::clearLocalVars()
    SmallVector<StringRef, 16> localPatternVars;
    SmallVector<StringRef, 16> localNumericVars;
    for (const StringMapEntry<std::string> &var : m_globalVariableTable) {
-      if (var.getFirst()[0] != '$') {
-         localPatternVars.push_back(var.getFirst());
+      if (var.first()[0] != '$') {
+         localPatternVars.push_back(var.first());
       }
    }
    // Numeric substitution reads the value of a variable directly, not via
@@ -2008,9 +2014,9 @@ void FileCheckPatternContext::clearLocalVars()
    // this is what defineCmdlineVariables checks to decide that no global
    // variable has been defined.
    for (const auto &var : m_globalNumericVariableTable) {
-      if (var.getFirst()[0] != '$') {
+      if (var.first()[0] != '$') {
          var.getValue()->clearValue();
-         localNumericVars.push_back(var.getFirst());
+         localNumericVars.push_back(var.first());
       }
    }
    for (const auto &var : localPatternVars) {

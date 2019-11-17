@@ -17,12 +17,11 @@
 // Created by polarboy on 2018/07/15.
 
 #include "polarphp/utils/TypeName.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/Support/raw_ostream.h"
 #include "gtest/gtest.h"
 
 using namespace polar;
 using namespace polar::utils;
-using namespace polar::basic;
 
 namespace {
 namespace N1 {
@@ -42,13 +41,13 @@ TEST(TypeNameTest, testNames)
 
 #if defined(__clang__) || defined(__GNUC__) || defined(__INTEL_COMPILER) ||    \
    defined(_MSC_VER)
-   EXPECT_TRUE(S1Name.endsWith("::N1::S1")) << S1Name.getStr();
-   EXPECT_TRUE(C1Name.endsWith("::N1::C1")) << C1Name.getStr();
-   EXPECT_TRUE(U1Name.endsWith("::N1::U1")) << U1Name.getStr();
+   EXPECT_TRUE(S1Name.endswith("::N1::S1")) << S1Name.str();
+   EXPECT_TRUE(C1Name.endswith("::N1::C1")) << C1Name.str();
+   EXPECT_TRUE(U1Name.endswith("::N1::U1")) << U1Name.str();
 #ifdef __clang__
-   EXPECT_TRUE(S2Name.endsWith("S2")) << S2Name.getStr();
+   EXPECT_TRUE(S2Name.endswith("S2")) << S2Name.str();
 #else
-   EXPECT_TRUE(S2Name.endsWith("::S2")) << S2Name.getStr();
+   EXPECT_TRUE(S2Name.endswith("::S2")) << S2Name.str();
 #endif
 #else
    EXPECT_EQ("UNKNOWN_TYPE", S1Name);

@@ -10,19 +10,19 @@
 // Created by polarboy on 2018/07/12.
 
 #include "Error.h"
-#include "polarphp/basic/adt/StringRef.h"
+#include "llvm/ADT/StringRef.h"
 #include <iostream>
 
 namespace polar {
 namespace unittest {
 
-using polar::utils::handle_all_errors;
-using polar::utils::ErrorInfoBase;
+using llvm::handleAllErrors;
+using llvm::ErrorInfoBase;
 
 internal::ErrorHolder internal::take_error(Error error)
 {
    std::vector<std::shared_ptr<ErrorInfoBase>> infos;
-   handle_all_errors(std::move(error),
+   handleAllErrors(std::move(error),
                    [&infos](std::unique_ptr<ErrorInfoBase> info) {
       infos.emplace_back(std::move(info));
    });

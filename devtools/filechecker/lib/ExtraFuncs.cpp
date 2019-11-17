@@ -10,17 +10,18 @@
 // Created by polarboy on 2018/10/25.
 
 #include "ExtraFuncs.h"
-#include "polarphp/utils/RawOutStream.h"
-#include "polarphp/utils/ErrorHandling.h"
-#include "polarphp/utils/WithColor.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/ErrorHandling.h"
+#include "llvm/Support/WithColor.h"
 #include "CLI/CLI.hpp"
 #include <cassert>
 
 namespace polar {
 namespace filechecker {
 
-using polar::utils::WithColor;
-using polar::utils::RawStringOutStream;
+using llvm::WithColor;
+using llvm::raw_string_ostream;
+using llvm::raw_ostream;
 using namespace polar::filechecker::check;
 
 CLI::App *sg_commandParser = nullptr;
@@ -62,35 +63,35 @@ DumpInputValue get_dump_input_type(const std::string &opt)
 
 void dump_command_line(int argc, char **argv)
 {
-   polar::utils::error_stream() << "filechecker command line: ";
+   llvm::errs() << "filechecker command line: ";
    for (int i = 0; i < argc; i++) {
-      polar::utils::error_stream() << " " << argv[i];
+      llvm::errs() << " " << argv[i];
    }
-   polar::utils::error_stream() << "\n";
+   llvm::errs() << "\n";
 }
 
 MarkerStyle get_marker(FileCheckDiag::MatchType matchTy) {
    switch (matchTy) {
    case FileCheckDiag::MatchFoundAndExpected:
-      return MarkerStyle('^', RawOutStream::Colors::GREEN);
+      return MarkerStyle('^', raw_ostream::Colors::GREEN);
    case FileCheckDiag::MatchFoundButExcluded:
-      return MarkerStyle('!', RawOutStream::Colors::RED, "error: no match expected");
+      return MarkerStyle('!', raw_ostream::Colors::RED, "error: no match expected");
    case FileCheckDiag::MatchFoundButWrongLine:
-      return MarkerStyle('!', RawOutStream::Colors::RED, "error: match on wrong line");
+      return MarkerStyle('!', raw_ostream::Colors::RED, "error: match on wrong line");
    case FileCheckDiag::MatchFoundButDiscarded:
-      return MarkerStyle('!', RawOutStream::Colors::CYAN,
+      return MarkerStyle('!', raw_ostream::Colors::CYAN,
                          "discard: overlaps earlier match");
    case FileCheckDiag::MatchNoneAndExcluded:
-      return MarkerStyle('X', RawOutStream::Colors::GREEN);
+      return MarkerStyle('X', raw_ostream::Colors::GREEN);
    case FileCheckDiag::MatchNoneButExpected:
-      return MarkerStyle('X', RawOutStream::Colors::RED, "error: no match found");
+      return MarkerStyle('X', raw_ostream::Colors::RED, "error: no match found");
    case FileCheckDiag::MatchFuzzy:
-      return MarkerStyle('?', RawOutStream::Colors::MAGENTA, "possible intended match");
+      return MarkerStyle('?', raw_ostream::Colors::MAGENTA, "possible intended match");
    }
-   polar::utils::unreachable_internal("unexpected match type");
+   llvm_unreachable("unexpected match type");
 }
 
-void dump_input_annotation_help(RawOutStream &outStream)
+void dump_input_annotation_help(raw_ostream &outStream)
 {
    outStream << "The following description was requested by --dump-input=help to\n"
              << "explain the input annotations printed by --dump-input=always and\n"
@@ -98,53 +99,53 @@ void dump_input_annotation_help(RawOutStream &outStream)
 
    // Labels for input lines.
    outStream << "  - ";
-   WithColor(outStream, RawOutStream::Colors::SAVEDCOLOR, true) << "L:";
+   WithColor(outStream, raw_ostream::Colors::SAVEDCOLOR, true) << "L:";
    outStream << "     labels line number L of the input file\n";
 
    // Labels for annotation lines.
    outStream << "  - ";
-   WithColor(outStream, RawOutStream::Colors::SAVEDCOLOR, true) << "T:L";
+   WithColor(outStream, raw_ostream::Colors::SAVEDCOLOR, true) << "T:L";
    outStream << "    labels the only match result for a pattern of type T from "
              << "line L of\n"
              << "           the check file\n";
    outStream << "  - ";
-   WithColor(outStream, RawOutStream::Colors::SAVEDCOLOR, true) << "T:L'N";
+   WithColor(outStream, raw_ostream::Colors::SAVEDCOLOR, true) << "T:L'N";
    outStream << "  labels the Nth match result for a pattern of type T from line "
              << "L of\n"
              << "           the check file\n";
 
    // Markers on annotation lines.
    outStream << "  - ";
-   WithColor(outStream, RawOutStream::Colors::SAVEDCOLOR, true) << "^~~";
+   WithColor(outStream, raw_ostream::Colors::SAVEDCOLOR, true) << "^~~";
    outStream << "    marks good match (reported if -v)\n"
              << "  - ";
-   WithColor(outStream, RawOutStream::Colors::SAVEDCOLOR, true) << "!~~";
+   WithColor(outStream, raw_ostream::Colors::SAVEDCOLOR, true) << "!~~";
    outStream << "    marks bad match, such as:\n"
              << "           - CHECK-NEXT on same line as previous match (error)\n"
              << "           - CHECK-NOT found (error)\n"
              << "           - CHECK-DAG overlapping match (discarded, reported if "
              << "-vv)\n"
              << "  - ";
-   WithColor(outStream, RawOutStream::Colors::SAVEDCOLOR, true) << "X~~";
+   WithColor(outStream, raw_ostream::Colors::SAVEDCOLOR, true) << "X~~";
    outStream << "    marks search range when no match is found, such as:\n"
              << "           - CHECK-NEXT not found (error)\n"
              << "           - CHECK-NOT not found (success, reported if -vv)\n"
              << "           - CHECK-DAG not found after discarded matches (error)\n"
              << "  - ";
-   WithColor(outStream, RawOutStream::Colors::SAVEDCOLOR, true) << "?";
+   WithColor(outStream, raw_ostream::Colors::SAVEDCOLOR, true) << "?";
    outStream << "      marks fuzzy match when no match is found\n";
 
    // Colors.
    outStream << "  - colors ";
-   WithColor(outStream, RawOutStream::Colors::GREEN, true) << "success";
+   WithColor(outStream, raw_ostream::Colors::GREEN, true) << "success";
    outStream << ", ";
-   WithColor(outStream, RawOutStream::Colors::RED, true) << "error";
+   WithColor(outStream, raw_ostream::Colors::RED, true) << "error";
    outStream << ", ";
-   WithColor(outStream, RawOutStream::Colors::MAGENTA, true) << "fuzzy match";
+   WithColor(outStream, raw_ostream::Colors::MAGENTA, true) << "fuzzy match";
    outStream << ", ";
-   WithColor(outStream, RawOutStream::Colors::CYAN, true, false) << "discarded match";
+   WithColor(outStream, raw_ostream::Colors::CYAN, true, false) << "discarded match";
    outStream << ", ";
-   WithColor(outStream, RawOutStream::Colors::CYAN, true, true) << "unmatched input";
+   WithColor(outStream, raw_ostream::Colors::CYAN, true, true) << "unmatched input";
    outStream << "\n\n"
              << "If you are not seeing color above or in input dumps, try: --color\n";
 }
@@ -176,9 +177,9 @@ std::string get_check_type_abbreviation(FileCheckType type)
    case FileCheckKind::CheckBadCount:
       return "bad-count";
    case FileCheckKind::CheckNone:
-      polar_unreachable("invalid FileCheckType");
+      llvm_unreachable("invalid FileCheckType");
    }
-   polar_unreachable("unknown FileCheckType");
+   llvm_unreachable("unknown FileCheckType");
 }
 
 void build_input_annotations(const std::vector<FileCheckDiag> &diags,
@@ -195,7 +196,7 @@ void build_input_annotations(const std::vector<FileCheckDiag> &diags,
 
       // Build label, which uniquely identifies this check result.
       A.checkLine = diagItr->checkLine;
-      RawStringOutStream label(A.label);
+      raw_string_ostream label(A.label);
       label << get_check_type_abbreviation(diagItr->checkType) << ":"
             << diagItr->checkLine;
       A.checkDiagIndex = UINT_MAX;
@@ -265,7 +266,7 @@ void build_input_annotations(const std::vector<FileCheckDiag> &diags,
    }
 }
 
-void dump_annotated_input(RawOutStream &outStream, const FileCheckRequest &req,
+void dump_annotated_input(raw_ostream &outStream, const FileCheckRequest &req,
                           StringRef inputFileText,
                           std::vector<InputAnnotation> &annotations,
                           unsigned labelWidth)
@@ -308,8 +309,8 @@ void dump_annotated_input(RawOutStream &outStream, const FileCheckRequest &req,
    });
 
    // Compute the width of the label column.
-   const unsigned char *inputFilePtr = inputFileText.getBytesBegin(),
-         *inputFileEnd = inputFileText.getBytesEnd();
+   const unsigned char *inputFilePtr = inputFileText.bytes_begin(),
+         *inputFileEnd = inputFileText.bytes_end();
    unsigned lineCount = inputFileText.count('\n');
    if (inputFileEnd[-1] != '\n') {
       ++lineCount;
@@ -333,8 +334,8 @@ void dump_annotated_input(RawOutStream &outStream, const FileCheckRequest &req,
       const unsigned char *inputFileLine = inputFilePtr;
 
       // Print right-aligned line number.
-      WithColor(outStream, RawOutStream::Colors::BLACK, true)
-            << polar::utils::format_decimal(line, labelWidth) << ": ";
+      WithColor(outStream, raw_ostream::Colors::BLACK, true)
+            << llvm::format_decimal(line, labelWidth) << ": ";
 
       // For the case where -v and colors are enabled, find the annotations for
       // good matches for expected patterns in order to highlight everything
@@ -356,7 +357,7 @@ void dump_annotated_input(RawOutStream &outStream, const FileCheckRequest &req,
          WithColor cos(outStream);
          bool inMatch = false;
          if (req.verbose) {
-            cos.changeColor(RawOutStream::Colors::CYAN, true, true);
+            cos.changeColor(raw_ostream::Colors::CYAN, true, true);
          }
          for (unsigned col = 1; inputFilePtr != inputFileEnd && !newline; ++col) {
             bool wasInMatch = inMatch;
@@ -370,7 +371,7 @@ void dump_annotated_input(RawOutStream &outStream, const FileCheckRequest &req,
             if (!wasInMatch && inMatch) {
                cos.resetColor();
             } else if (wasInMatch && !inMatch) {
-               cos.changeColor(RawOutStream::Colors::CYAN, true, true);
+               cos.changeColor(raw_ostream::Colors::CYAN, true, true);
             }
             if (*inputFilePtr == '\n') {
                newline = true;
@@ -388,7 +389,7 @@ void dump_annotated_input(RawOutStream &outStream, const FileCheckRequest &req,
              annotationItr->inputLine == line) {
          WithColor cos(outStream, annotationItr->marker.color, true);
          // The two spaces below are where the ": " appears on input lines.
-         cos << polar::utils::left_justify(annotationItr->label, labelWidth) << "  ";
+         cos << llvm::left_justify(annotationItr->label, labelWidth) << "  ";
          unsigned col;
          for (col = 1; col < annotationItr->inputStartCol; ++col) {
             cos << ' ';

@@ -10,7 +10,7 @@
 // Created by polarboy on 2019/05/17.
 
 #include "polarphp/syntax/RawSyntax.h"
-#include "polarphp/basic/adt/SmallString.h"
+#include "llvm/ADT/SmallString.h"
 #include "polarphp/syntax/TokenKinds.h"
 #include "gtest/gtest.h"
 

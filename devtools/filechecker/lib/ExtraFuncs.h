@@ -13,8 +13,8 @@
 #define POLAR_DEVLTOOLS_FILECHECKER_GLOBAL_H
 
 #include "FileCheckerConfig.h"
-#include "polarphp/utils/ManagedStatics.h"
-#include "polarphp/utils/RawOutStream.h"
+#include "llvm/Support/ManagedStatic.h"
+#include "llvm/Support/raw_os_ostream.h"
 #include "FileChecker.h"
 #include <cstddef>
 #include <vector>
@@ -29,8 +29,8 @@ class App;
 namespace polar {
 namespace filechecker {
 
-using polar::utils::ManagedStatic;
-using polar::utils::RawOutStream;
+using llvm::ManagedStatic;
+using llvm::raw_ostream;
 
 enum class DumpInputValue
 {
@@ -46,11 +46,11 @@ struct MarkerStyle
    /// The starting char (before tildes) for marking the line.
    char lead;
    /// What color to use for this annotation.
-   RawOutStream::Colors color;
+   raw_ostream::Colors color;
    /// A note to follow the marker, or empty string if none.
    std::string note;
    MarkerStyle() {}
-   MarkerStyle(char lead, RawOutStream::Colors color,
+   MarkerStyle(char lead, raw_ostream::Colors color,
                const std::string &note = "")
       : lead(lead),
         color(color),
@@ -95,12 +95,12 @@ DumpInputValue get_dump_input_type(const std::string &opt);
 
 void dump_command_line(int argc, char **argv);
 MarkerStyle get_marker(FileCheckDiag::MatchType matchTy);
-void dump_input_annotation_help(RawOutStream &outStream);
+void dump_input_annotation_help(raw_ostream &outStream);
 std::string get_check_type_abbreviation(check::FileCheckType type);
 void build_input_annotations(const std::vector<FileCheckDiag> &diags,
                              std::vector<InputAnnotation> &annotations,
                              unsigned &labelWidth);
-void dump_annotated_input(RawOutStream &outStream, const FileCheckRequest &req,
+void dump_annotated_input(raw_ostream &outStream, const FileCheckRequest &req,
                           StringRef inputFileText,
                           std::vector<InputAnnotation> &annotations,
                           unsigned labelWidth);
