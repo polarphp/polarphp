@@ -36,7 +36,7 @@ use function Gyb\Utils\make_missing_child;
 
 #include "polarphp/syntax/SyntaxNodes.h"
 #include "polarphp/syntax/SyntaxNodeFactory.h"
-#include "llvm/ADTArrayRef.h"
+#include "llvm/ADT/ArrayRef.h"
 
 #include <vector>
 
