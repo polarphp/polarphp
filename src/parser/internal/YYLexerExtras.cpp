@@ -417,8 +417,8 @@ long convert_single_quote_str_escape_sequences(std::string::iterator iter, std::
    return targetIter - origIter;
 }
 
-bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const char *iter,
-                                               const char *endMark, Lexer &lexer)
+bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, std::string::iterator iter,
+                                               std::string::iterator endMark, Lexer &lexer)
 {
    size_t origLength = endMark - iter;
    if (origLength <= 1) {
@@ -539,19 +539,19 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
             }
             /// based on https://en.wikipedia.org/wiki/UTF-8#Sample_code
             if (codePoint < 0x80) {
-               *targetIter++ = codePoint;
+               *targetIter++ = static_cast<std::string::value_type>(codePoint);
             } else if (codePoint <= 0x7FF) {
-               *targetIter++ = (codePoint >> 6) + 0xC0;
-               *targetIter++ = (codePoint & 0x3F) + 0x80;
+               *targetIter++ = static_cast<std::string::value_type>((codePoint >> 6) + 0xC0);
+               *targetIter++ = static_cast<std::string::value_type>((codePoint & 0x3F) + 0x80);
             } else if (codePoint <= 0xFFFF) {
-               *targetIter++ = (codePoint >> 12) + 0xE0;
-               *targetIter++ = ((codePoint >> 6) & 0x3F) + 0x80;
-               *targetIter++ = (codePoint & 0x3F) + 0x80;
+               *targetIter++ = static_cast<std::string::value_type>((codePoint >> 12) + 0xE0);
+               *targetIter++ = static_cast<std::string::value_type>(((codePoint >> 6) & 0x3F) + 0x80);
+               *targetIter++ = static_cast<std::string::value_type>((codePoint & 0x3F) + 0x80);
             } else if (codePoint <= 0x10FFFF) {
-               *targetIter++ = (codePoint >> 18) + 0xF0;
-               *targetIter++ = ((codePoint >> 12) & 0x3F) + 0x80;
-               *targetIter++ = ((codePoint >> 6) & 0x3F) + 0x80;
-               *targetIter++ = (codePoint & 0x3F) + 0x80;
+               *targetIter++ = static_cast<std::string::value_type>((codePoint >> 18) + 0xF0);
+               *targetIter++ = static_cast<std::string::value_type>(((codePoint >> 12) & 0x3F) + 0x80);
+               *targetIter++ = static_cast<std::string::value_type>(((codePoint >> 6) & 0x3F) + 0x80);
+               *targetIter++ = static_cast<std::string::value_type>((codePoint & 0x3F) + 0x80);
             }
          }
             break;
@@ -582,8 +582,6 @@ bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char qu
       ++fiter;
    }
    filteredStr.resize(targetIter - filteredStr.begin());
-   /// TODO
-   /// output filtered
    return true;
 }
 
@@ -591,7 +589,7 @@ namespace {
 bool is_valid_identifier_continuation_code_point(uint32_t c)
 {
    if (c < 0x80) {
-      return polar::basic::is_identifier_body(c, true);
+      return polar::basic::is_identifier_body(static_cast<unsigned char>(c), true);
    }
    // N1518: Recommendations for extended identifier characters for c and c++
    // Proposed Annex X.1: Ranges of characters allowed

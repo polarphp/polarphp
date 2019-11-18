@@ -538,8 +538,8 @@ private:
    friend void internal::yy_token_lex(Lexer &lexer);
    friend bool internal::strip_multiline_string_indentation(Lexer &lexer, std::string &str, int indentation, bool usingSpaces,
                                                             bool newlineAtStart, bool newlineAtEnd);
-   friend bool internal::convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const char *iter,
-                                                                   const char *endMark, Lexer &lexer);
+   friend bool internal::convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, std::string::iterator iter,
+                                                                   std::string::iterator endMark, Lexer &lexer);
 private:
    LexerFlags m_flags;
    const LangOptions &m_langOpts;

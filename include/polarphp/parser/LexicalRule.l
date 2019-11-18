@@ -823,10 +823,8 @@ restart_lex:
 
 <ST_DOUBLE_QUOTES> ["] {
    if (lexer.m_nextToken.getKind() == TokenKindType::T_DOUBLE_QUOTE) {
-      /// check whether is empty string
       lexer.setYYLength(0);
       lexer.formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, lexer.getYYText() - 1);
-      /// TODO
       /// use some flag to represent empty string
       lexer.m_nextToken.setValue("");
       lexer.setYYCursor(lexer.getYYText());

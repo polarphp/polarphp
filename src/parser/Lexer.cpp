@@ -745,10 +745,8 @@ void Lexer::lexDoubleQuoteString()
    const unsigned char *yytext = m_yyText;
    const unsigned char *yylimit = m_artificialEof;
    if (yycursor >= yylimit) {
-      /// TODO
-      /// need guard here ?
       yycursor = yylimit;
-      formToken(TokenKindType::T_ERROR, yytext);
+      formToken(TokenKindType::T_ERROR);
       return;
    }
    if (yytext[0] == '\\' && yycursor < yylimit) {
@@ -781,13 +779,13 @@ void Lexer::lexDoubleQuoteString()
    }
    m_yyLength = yycursor - yytext;
    std::string filteredStr(reinterpret_cast<const char *>(yytext), m_yyLength);
-   if (convert_double_quote_str_escape_sequences(filteredStr, '"', filteredStr.data(),
-                                                 filteredStr.data() + m_yyLength, *this) ||
+   if (convert_double_quote_str_escape_sequences(filteredStr, '"', filteredStr.begin(),
+                                                 filteredStr.end(), *this) ||
        !isInParseMode()) {
-      formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, yytext);
+      formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING);
       m_nextToken.setValue(filteredStr);
    } else {
-      formToken(TokenKindType::T_ERROR, yytext);
+      formToken(TokenKindType::T_ERROR);
    }
    return;
 }
@@ -836,7 +834,7 @@ void Lexer::lexBackquote()
 
    m_yyLength = yycursor - yytext;
    std::string filteredStr(reinterpret_cast<const char *>(yytext), m_yyLength);
-   if (convert_double_quote_str_escape_sequences(filteredStr, '`', filteredStr.data(), filteredStr.data() + m_yyLength, *this) ||
+   if (convert_double_quote_str_escape_sequences(filteredStr, '`', filteredStr.begin(), filteredStr.end(), *this) ||
        !isInParseMode()) {
       formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
       m_nextToken.setValue(filteredStr);
@@ -880,13 +878,13 @@ void Lexer::lexHeredocHeader()
       ++iter;
       hereDocLabelLength -= 2;
       isHeredoc = false;
-      m_yyCondition = COND_NAME(ST_NOWDOC);
+      setYYCondition(COND_NAME(ST_NOWDOC));
    } else {
       if (*iter == '"') {
          ++iter;
          hereDocLabelLength -= 2;
       }
-      m_yyCondition = COND_NAME(ST_HEREDOC);
+      setYYCondition(COND_NAME(ST_HEREDOC));
    }
    heredocLabel.append(reinterpret_cast<const char *>(iter), hereDocLabelLength);
    heredocLabel.resize(hereDocLabelLength);
@@ -914,7 +912,7 @@ void Lexer::lexHeredocHeader()
    /// just empty heredoc with no end mark because it reach eof
    if (yycursor == yylimit) {
       yycursor = savedCursor;
-      formToken(TokenKindType::T_START_HEREDOC, yytext);
+      formToken(TokenKindType::T_START_HEREDOC);
       return;
    }
    /// Check for ending label on the next line
@@ -929,7 +927,7 @@ void Lexer::lexHeredocHeader()
          label->indentation = indentation;
          m_yyCondition = COND_NAME(ST_END_HEREDOC);
          m_flags.setReserveHeredocSpaces(true);
-         formToken(TokenKindType::T_START_HEREDOC, yytext);
+         formToken(TokenKindType::T_START_HEREDOC);
          return;
       }
    }
@@ -995,8 +993,7 @@ void Lexer::lexHeredocHeader()
       m_flags.setHeredocScanAhead(false);
       m_flags.setIncrementLineNumber(false);
    }
-   formToken(TokenKindType::T_START_HEREDOC, yytext);
-   ///
+   formToken(TokenKindType::T_START_HEREDOC);
    /// reserve spaces after header
    m_flags.setReserveHeredocSpaces(true);
 }
@@ -1015,7 +1012,7 @@ void Lexer::lexHeredocBody()
    /// lex until we meet end mark or '${' or '{$'
    if (yycursor > yylimit) {
       yycursor = yylimit;
-      formToken(TokenKindType::END, yytext);
+      formToken(TokenKindType::END);
       return;
    }
    /// before control get here, re2c already increment yycursor
@@ -1042,7 +1039,7 @@ void Lexer::lexHeredocBody()
 
          if (yycursor == yylimit) {
             yylength = yycursor - yytext;
-            formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
+            formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE);
             /// save unclosed string into token
             m_nextToken.setValue(StringRef(reinterpret_cast<const char *>(yytext), yylength));
             return;
@@ -1065,7 +1062,6 @@ void Lexer::lexHeredocBody()
             }
             /// For newline before label
             m_flags.setIncrementLineNumber(true);
-
             if (m_flags.isHeredocScanAhead()) {
                /// in scan ahead mode, we don't care about indentation
                /// just record it
@@ -1075,7 +1071,7 @@ void Lexer::lexHeredocBody()
                yycursor -= indentation;
             }
             m_flags.setReserveHeredocSpaces(true);
-            m_yyCondition = COND_NAME(ST_END_HEREDOC);
+            setYYCondition(COND_NAME(ST_END_HEREDOC));
             foundEndMarker = true;
             break;
          }
@@ -1115,13 +1111,13 @@ void Lexer::lexHeredocBody()
          formErrorToken(yytext);
          return;
       }
-      if (!convert_double_quote_str_escape_sequences(filteredStr, 0, filteredStr.data(),
-                                                     filteredStr.data() + filteredStr.size(), *this)) {
-         formToken(TokenKindType::T_ERROR, yytext);
+      if (!convert_double_quote_str_escape_sequences(filteredStr, 0, filteredStr.begin(),
+                                                     filteredStr.end(), *this)) {
+         formToken(TokenKindType::T_ERROR);
          return;
       }
    }
-   formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
+   formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE);
    m_nextToken.setValue(filteredStr);
 }
 
@@ -1138,7 +1134,7 @@ void Lexer::lexNowdocBody()
    bool foundEndMarker = false;
    if (yycursor > yylimit) {
       yycursor = yylimit;
-      formToken(TokenKindType::END, yytext);
+      formToken(TokenKindType::END);
       return;
    }
    --yycursor;
@@ -1162,7 +1158,7 @@ void Lexer::lexNowdocBody()
          }
          if (yycursor == yylimit) {
             m_yyLength = yycursor - yytext;
-            formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, yytext);
+            formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE);
             m_nextToken.setValue(StringRef(reinterpret_cast<const char *>(yytext), yylength));
             return;
          }
@@ -1186,7 +1182,7 @@ void Lexer::lexNowdocBody()
             m_flags.setReserveHeredocSpaces(true);
             yycursor -= indentation;
             label->indentation = indentation;
-            m_yyCondition = COND_NAME(ST_END_HEREDOC);
+            setYYCondition(COND_NAME(ST_END_HEREDOC));
             foundEndMarker = true;
             break;
          }
@@ -1216,8 +1212,6 @@ void Lexer::lexHereAndNowDocEnd()
 {
    /// handle empty nowdoc and heredoc
    if (m_nextToken.getKind() == TokenKindType::T_START_HEREDOC) {
-      /// TODO
-      /// use some flag to represent empty string
       setYYLength(0);
       formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, getYYText() - 1);
       m_nextToken.setValue("");
