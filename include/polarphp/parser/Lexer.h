@@ -580,7 +580,7 @@ private:
    /// The token semantic value
    ParserSemantic *m_valueContainer = nullptr;
 
-   YYLexerCondType m_yyCondition = COND_NAME(ST_IN_SCRIPTING);
+   YYLexerCondType m_yyCondition = COND_NAME(INITIAL);
    std::size_t m_heredocIndentation;
    /// current token length
    std::size_t m_yyLength;

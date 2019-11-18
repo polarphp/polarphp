@@ -882,6 +882,37 @@ restart_lex:
    /// lexing recursive
    RESTART_LEX();
 }
+
+<INITIAL>"<?php"([ \t]|{NEWLINE}) {
+   lexer.setYYText(lexer.getYYText() + lexer.getYYLength());
+   GOTO_CONDITION(ST_IN_SCRIPTING);
+   RESTART_LEX();
+}
+
+<INITIAL>"<?php" {
+   lexer.setYYText(lexer.getYYText() + lexer.getYYLength());
+   GOTO_CONDITION(ST_IN_SCRIPTING);
+   RESTART_LEX();
+}
+
+<INITIAL>"<?polar"([ \t]|{NEWLINE}) {
+   lexer.setYYText(lexer.getYYText() + lexer.getYYLength());
+   GOTO_CONDITION(ST_IN_SCRIPTING);
+   RESTART_LEX();
+}
+
+<INITIAL>"<?polar" {
+   lexer.setYYText(lexer.getYYText() + lexer.getYYLength());
+   GOTO_CONDITION(ST_IN_SCRIPTING);
+   RESTART_LEX();
+}
+
+<INITIAL> * {
+   lexer.setYYCursor(--lexer.getYYCursor());
+   GOTO_CONDITION(ST_IN_SCRIPTING);
+   RESTART_LEX();
+}
+
 */
 }
 } // polar::parser::internal
