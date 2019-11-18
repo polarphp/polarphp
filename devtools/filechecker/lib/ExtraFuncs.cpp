@@ -22,7 +22,7 @@ namespace filechecker {
 using llvm::WithColor;
 using llvm::raw_string_ostream;
 using llvm::raw_ostream;
-using namespace polar::filechecker::check;
+using llvm::Check::FileCheckKind;
 
 CLI::App *sg_commandParser = nullptr;
 std::vector<std::string> sg_checkPrefixes{};
@@ -195,14 +195,14 @@ void build_input_annotations(const std::vector<FileCheckDiag> &diags,
       InputAnnotation A;
 
       // Build label, which uniquely identifies this check result.
-      A.checkLine = diagItr->checkLine;
+      A.checkLine = diagItr->CheckLine;
       raw_string_ostream label(A.label);
-      label << get_check_type_abbreviation(diagItr->checkType) << ":"
-            << diagItr->checkLine;
+      label << get_check_type_abbreviation(diagItr->CheckTy) << ":"
+            << diagItr->CheckLine;
       A.checkDiagIndex = UINT_MAX;
       auto diagNext = std::next(diagItr);
-      if (diagNext != diagEnd && diagItr->checkType == diagNext->checkType &&
-          diagItr->checkLine == diagNext->checkLine) {
+      if (diagNext != diagEnd && diagItr->CheckTy == diagNext->CheckTy &&
+          diagItr->CheckLine == diagNext->CheckLine) {
          A.checkDiagIndex = checkDiagCount++;
       } else if (checkDiagCount) {
          A.checkDiagIndex = checkDiagCount;
@@ -216,33 +216,33 @@ void build_input_annotations(const std::vector<FileCheckDiag> &diags,
       label.flush();
       labelWidth = std::max((std::string::size_type)labelWidth, A.label.size());
 
-      MarkerStyle marker = get_marker(diagItr->matchType);
+      MarkerStyle marker = get_marker(diagItr->MatchTy);
       A.marker = marker;
       A.foundAndExpectedMatch =
-            diagItr->matchType == FileCheckDiag::MatchFoundAndExpected;
+            diagItr->MatchTy == FileCheckDiag::MatchFoundAndExpected;
 
       // Compute the mark location, and break annotation into multiple
       // annotations if it spans multiple lines.
-      A.inputLine = diagItr->inputStartLine;
-      A.inputStartCol = diagItr->inputStartCol;
-      if (diagItr->inputStartLine == diagItr->inputEndLine) {
+      A.inputLine = diagItr->InputStartLine;
+      A.inputStartCol = diagItr->InputStartCol;
+      if (diagItr->InputStartLine == diagItr->InputEndLine) {
          // Sometimes ranges are empty in order to indicate a specific point, but
          // that would mean nothing would be marked, so adjust the range to
          // include the following character.
          A.inputEndCol =
-               std::max(diagItr->inputStartCol + 1, diagItr->inputEndCol);
+               std::max(diagItr->InputStartCol + 1, diagItr->InputEndCol);
          annotations.push_back(A);
       } else {
-         assert(diagItr->inputStartLine < diagItr->inputEndLine &&
+         assert(diagItr->InputStartLine < diagItr->InputEndLine &&
                 "expected input range not to be inverted");
          A.inputEndCol = UINT_MAX;
          A.marker.note = "";
          annotations.push_back(A);
-         for (unsigned L = diagItr->inputStartLine + 1, E = diagItr->inputEndLine;
+         for (unsigned L = diagItr->InputStartLine + 1, E = diagItr->InputEndLine;
               L <= E; ++L) {
             // If a range ends before the first column on a line, then it has no
             // characters on that line, so there's nothing to render.
-            if (diagItr->inputEndCol == 1 && L == E) {
+            if (diagItr->InputEndCol == 1 && L == E) {
                annotations.back().marker.note = marker.note;
                break;
             }
@@ -258,7 +258,7 @@ void build_input_annotations(const std::vector<FileCheckDiag> &diags,
                B.inputEndCol = UINT_MAX;
                B.marker.note = "";
             } else
-               B.inputEndCol = diagItr->inputEndCol;
+               B.inputEndCol = diagItr->InputEndCol;
             B.foundAndExpectedMatch = A.foundAndExpectedMatch;
             annotations.push_back(B);
          }
@@ -341,7 +341,7 @@ void dump_annotated_input(raw_ostream &outStream, const FileCheckRequest &req,
       // good matches for expected patterns in order to highlight everything
       // else in the line.  There are no such annotations if -v is disabled.
       std::vector<InputAnnotation> foundAndExpectedMatches;
-      if (req.verbose && WithColor(outStream).colorsEnabled()) {
+      if (req.Verbose && WithColor(outStream).colorsEnabled()) {
          for (auto index = annotationItr; index != annotationEnd && index->inputLine == line;
               ++index) {
             if (index->foundAndExpectedMatch) {
@@ -356,7 +356,7 @@ void dump_annotated_input(raw_ostream &outStream, const FileCheckRequest &req,
       {
          WithColor cos(outStream);
          bool inMatch = false;
-         if (req.verbose) {
+         if (req.Verbose) {
             cos.changeColor(raw_ostream::Colors::CYAN, true, true);
          }
          for (unsigned col = 1; inputFilePtr != inputFileEnd && !newline; ++col) {

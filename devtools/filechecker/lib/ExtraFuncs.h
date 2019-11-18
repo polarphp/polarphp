@@ -15,7 +15,8 @@
 #include "FileCheckerConfig.h"
 #include "llvm/Support/ManagedStatic.h"
 #include "llvm/Support/raw_os_ostream.h"
-#include "FileChecker.h"
+#include "llvm/Support/FileCheck.h"
+#include "llvm/ADT/StringRef.h"
 #include <cstddef>
 #include <vector>
 #include <string>
@@ -31,6 +32,10 @@ namespace filechecker {
 
 using llvm::ManagedStatic;
 using llvm::raw_ostream;
+using llvm::FileCheckDiag;
+using llvm::FileCheckRequest;
+using llvm::StringRef;
+using llvm::Check::FileCheckType;
 
 enum class DumpInputValue
 {
@@ -96,7 +101,7 @@ DumpInputValue get_dump_input_type(const std::string &opt);
 void dump_command_line(int argc, char **argv);
 MarkerStyle get_marker(FileCheckDiag::MatchType matchTy);
 void dump_input_annotation_help(raw_ostream &outStream);
-std::string get_check_type_abbreviation(check::FileCheckType type);
+std::string get_check_type_abbreviation(FileCheckType type);
 void build_input_annotations(const std::vector<FileCheckDiag> &diags,
                              std::vector<InputAnnotation> &annotations,
                              unsigned &labelWidth);

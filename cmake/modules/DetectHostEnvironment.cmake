@@ -372,7 +372,6 @@ if (POLARPHP_CONFIG_FILE_SCAN_DIR)
    message("using directory ${POLARPHP_CONFIG_FILE_SCAN_DIR} for scan configuration files")
 endif()
 
-
 # TODO I don't understand very well about this
 # I need read some article about dtrace
 if (POLAR_ENABLE_DTRACE)

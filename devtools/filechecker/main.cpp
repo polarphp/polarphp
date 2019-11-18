@@ -13,12 +13,12 @@
 #include "lib/ExtraFuncs.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/SmallString.h"
+#include "llvm/Support/FileCheck.h"
 #include "polarphp/utils/InitPolar.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/ErrorOr.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/Process.h"
-#include <boost/regex.hpp>
 
 using llvm::StringRef;
 using namespace polar::filechecker;
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
    CLI::Option *dumpInputOnFailureOpt = cmdParser.add_option("--dump-input-on-failure", dumpInputOnFailure, "Dump original input to stderr before failing."
                                                                                                             "The value can be also controlled using "
                                                                                                             "FILECHECK_DUMP_INPUT_ON_FAILURE environment variable.");
-   CLI11_PARSE(cmdParser, argc, argv);
+   CLI11_PARSE(cmdParser, argc, argv)
    dumpInput = get_dump_input_type(dumpInputStr);
    if (dumpInput == DumpInputValue::Help) {
       dump_input_annotation_help(outs());
@@ -109,17 +109,17 @@ int main(int argc, char *argv[])
    FileCheckRequest checkRequest;
    if (!checkPrefix.empty()) {
       for (std::string &prefix : checkPrefix) {
-         checkRequest.checkPrefixes.push_back(prefix);
+         checkRequest.CheckPrefixes.push_back(prefix);
       }
    }
    if (!sg_checkPrefixes.empty()) {
       for (std::string &prefix : sg_checkPrefixes) {
-         checkRequest.checkPrefixes.push_back(prefix);
+         checkRequest.CheckPrefixes.push_back(prefix);
       }
    }
 
    for (auto item : sg_implicitCheckNot) {
-      checkRequest.implicitCheckNot.push_back(item);
+      checkRequest.ImplicitCheckNot.push_back(item);
    }
 
    bool globalDefineError = false;
@@ -127,17 +127,17 @@ int main(int argc, char *argv[])
       size_t eqIdx = def.find('=');
       if (eqIdx == std::string::npos) {
          errs() << "Missing equal sign in command-line definition '-D" << def
-                        << "'\n";
+                << "'\n";
          globalDefineError = true;
          continue;
       }
       if (eqIdx == 0) {
          errs() << "Missing variable name in command-line definition '-D"
-                        << def << "'\n";
+                << def << "'\n";
          globalDefineError = true;
          continue;
       }
-      checkRequest.globalDefines.push_back(def);
+      checkRequest.GlobalDefines.push_back(def);
    }
 
    if (globalDefineError) {
@@ -148,35 +148,35 @@ int main(int argc, char *argv[])
       verboseVerbose = true;
    }
 
-   checkRequest.allowEmptyInput = allowEmptyInput;
-   checkRequest.enableVarScope = enableVarScope;
-   checkRequest.allowDeprecatedDagOverlap = allowDeprecatedDagOverlap;
-   checkRequest.verbose = verbose;
-   checkRequest.verboseVerbose = verboseVerbose;
-   checkRequest.noCanonicalizeWhiteSpace = noCanonicalizeWhiteSpace;
-   checkRequest.matchFullLines = matchFullLines;
+   checkRequest.AllowEmptyInput = allowEmptyInput;
+   checkRequest.EnableVarScope = enableVarScope;
+   checkRequest.AllowDeprecatedDagOverlap = allowDeprecatedDagOverlap;
+   checkRequest.Verbose = verbose;
+   checkRequest.VerboseVerbose = verboseVerbose;
+   checkRequest.NoCanonicalizeWhiteSpace = noCanonicalizeWhiteSpace;
+   checkRequest.MatchFullLines = matchFullLines;
 
    if (verboseVerbose) {
-      checkRequest.verbose = true;
+      checkRequest.Verbose = true;
    }
 
    FileCheck fileChecker(checkRequest);
-   if (!fileChecker.validateCheckPrefixes()) {
+   if (!fileChecker.ValidateCheckPrefixes()) {
       errs() << "Supplied check-prefix is invalid! Prefixes must be unique and "
-                        "start with a letter and contain only alphanumeric characters, "
-                        "hyphens and underscores\n";
+                "start with a letter and contain only alphanumeric characters, "
+                "hyphens and underscores\n";
       return 2;
    }
 
-   boost::regex prefixRegex;
+   Regex prefixRegex;
    try {
       prefixRegex = fileChecker.buildCheckPrefixRegex();
    } catch (std::exception &e) {
       errs() << "Unable to combine check-prefix strings into a prefix regular "
-                        "expression! This is likely a bug in FileCheck's verification of "
-                        "the check-prefix strings. Regular expression parsing failed "
-                        "with the following error: "
-                     << e.what() << "\n";
+                "expression! This is likely a bug in FileCheck's verification of "
+                "the check-prefix strings. Regular expression parsing failed "
+                "with the following error: "
+             << e.what() << "\n";
       return 2;
    }
 
@@ -187,30 +187,28 @@ int main(int argc, char *argv[])
          MemoryBuffer::getFileOrSTDIN(checkFilename);
    if (std::error_code errorCode = checkFileOrError.getError()) {
       errs() << "Could not open check file '" << checkFilename
-                     << "': " << errorCode.message() << '\n';
+             << "': " << errorCode.message() << '\n';
       return 2;
    }
    MemoryBuffer &checkFile = *checkFileOrError.get();
 
    SmallString<4096> checkFileBuffer;
-   StringRef checkFileText = fileChecker.canonicalizeFile(checkFile, checkFileBuffer);
+   StringRef checkFileText = fileChecker.CanonicalizeFile(checkFile, checkFileBuffer);
 
    sourceMgr.AddNewSourceBuffer(MemoryBuffer::getMemBuffer(
                                    checkFileText, checkFile.getBufferIdentifier()),
                                 SMLoc());
 
-   std::vector<FileCheckString> checkStrings;
-   if (fileChecker.readCheckFile(sourceMgr, checkFileText, prefixRegex, checkStrings)) {
+   if (fileChecker.readCheckFile(sourceMgr, checkFileText, prefixRegex)) {
       return 2;
    }
-
 
    // Open the file to check and add it to SourceMgr.
    ErrorOr<std::unique_ptr<MemoryBuffer>> inputFileOrErr =
          MemoryBuffer::getFileOrSTDIN(inputFilename);
    if (std::error_code errorCode = inputFileOrErr.getError()) {
       errs() << "Could not open input file '" << inputFilename
-                     << "': " << errorCode.message() << '\n';
+             << "': " << errorCode.message() << '\n';
       return 2;
    }
    MemoryBuffer &inputFile = *inputFileOrErr.get();
@@ -222,7 +220,7 @@ int main(int argc, char *argv[])
    }
 
    SmallString<4096> InputFileBuffer;
-   StringRef inputFileText = fileChecker.canonicalizeFile(inputFile, InputFileBuffer);
+   StringRef inputFileText = fileChecker.CanonicalizeFile(inputFile, InputFileBuffer);
 
    sourceMgr.AddNewSourceBuffer(MemoryBuffer::getMemBuffer(
                                    inputFileText, inputFile.getBufferIdentifier()),
@@ -233,20 +231,20 @@ int main(int argc, char *argv[])
    }
 
    std::vector<FileCheckDiag> diags;
-   int exitCode = fileChecker.checkInput(sourceMgr, inputFileText, checkStrings,
+   int exitCode = fileChecker.checkInput(sourceMgr, inputFileText,
                                          dumpInput == DumpInputValue::Never ? nullptr : &diags)
          ? EXIT_SUCCESS
          : 1;
    if (dumpInput == DumpInputValue::Always ||
        (exitCode == 1 && dumpInput == DumpInputValue::Fail)) {
       errs() << "\n"
-                     << "Input file: "
-                     << (inputFilename == "-" ? "<stdin>" : inputFilename)
-                     << "\n"
-                     << "Check file: " << checkFilename << "\n"
-                     << "\n"
-                     << "--dump-input=help describes the format of the following dump.\n"
-                     << "\n";
+             << "Input file: "
+             << (inputFilename == "-" ? "<stdin>" : inputFilename)
+             << "\n"
+             << "Check file: " << checkFilename << "\n"
+             << "\n"
+             << "--dump-input=help describes the format of the following dump.\n"
+             << "\n";
       std::vector<InputAnnotation> annotations;
       unsigned labelWidth;
       build_input_annotations(diags, annotations, labelWidth);

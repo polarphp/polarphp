@@ -10,14 +10,17 @@
 # Created by polarboy on 2018/11/19.
 
 if (POLAR_DEV_BUILD_DEVTOOLS_TESTS)
-   set(DEVTOOLS_DEPS cat)
-   polar_add_lit_testsuite(check-devtools "devtools lit test"
+   polar_add_lit_testsuite(check-devtools "devtools lit tests"
       ${CMAKE_CURRENT_SOURCE_DIR}/devtools/filechecker
-      DEPENDS PolarSyntax
-      ARGS -j 8
+      ARGS -j ${POLAR_PROCESSOR_COUNT}
       )
 endif()
 
 if (POLAR_DEV_BUILD_POLARPHP_TESTS)
+   polar_add_lit_testsuite(check-parser "polarphp parser tests"
+      ${CMAKE_CURRENT_SOURCE_DIR}/parser
+      DEPENDS PolarSyntax PolarParser
+      ARGS -j ${POLAR_PROCESSOR_COUNT}
+      )
 endif()
 
