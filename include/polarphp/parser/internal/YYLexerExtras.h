@@ -43,7 +43,7 @@ unsigned count_leading_ones(unsigned char c);
 bool is_start_of_utf8_character(unsigned char c);
 void strip_underscores(unsigned char *str, int &length);
 TokenKindType get_token_kind_by_char(unsigned char c);
-size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexer &lexer);
+long convert_single_quote_str_escape_sequences(std::string::iterator iter, std::string::iterator endMark, Lexer &lexer);
 bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const char *iter,
                                                const char *endMark, Lexer &lexer);
 void diagnose_embedded_null(DiagnosticEngine *diags, const unsigned char *ptr);

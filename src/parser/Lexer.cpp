@@ -718,11 +718,12 @@ void Lexer::lexSingleQuoteString()
          /// Unclosed single quotes; treat similar to double quotes, but without a separate token
          /// for ' (unrecognized by parser), instead of old flex fallback to "Unexpected character..."
          /// rule, which continued in ST_IN_SCRIPTING LexerState after the quote
-         formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE, m_yyText);
+         formToken(TokenKindType::T_ENCAPSED_AND_WHITESPACE);
          return;
       }
    }
    std::string strValue;
+   // '0b', '\'' and '\''
    if (m_yyLength - bprefix - 2 <= 1) {
       if (m_yyLength - bprefix - 2 == 1) {
          unsigned char c = *(yytext + bprefix + 1);
@@ -730,10 +731,10 @@ void Lexer::lexSingleQuoteString()
       }
    } else {
       strValue.append(reinterpret_cast<const char *>(m_yyText + bprefix + 1), m_yyLength - bprefix - 2);
-      size_t filteredLength = convert_single_quote_str_escape_sequences(strValue.data(), strValue.data() + strValue.length(), *this);
+      long filteredLength = convert_single_quote_str_escape_sequences(strValue.begin(), strValue.end(), *this);
       strValue.resize(filteredLength);
    }
-   formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING, m_yyText);
+   formToken(TokenKindType::T_CONSTANT_ENCAPSED_STRING);
    m_nextToken.setValue(strValue);
    return;
 }

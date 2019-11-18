@@ -696,7 +696,7 @@ restart_lex:
 }
 
 <ST_IN_SCRIPTING> {TOKENS} {
-   lexer.formToken(token_kind_map(lexer.getYYText()[0]));
+   lexer.formToken(get_token_kind_by_char(lexer.getYYText()[0]));
    return;
 }
 
@@ -738,7 +738,6 @@ restart_lex:
    lexer.popYYCondtion();
    polar_yy_push_condition(ST_IN_SCRIPTING);
    RESTART_LEX();
-   return;
 }
 
 <ST_IN_SCRIPTING> {BNUM} {
@@ -884,7 +883,6 @@ restart_lex:
    /// zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
    /// lexing recursive
    RESTART_LEX();
-   return;
 }
 */
 }

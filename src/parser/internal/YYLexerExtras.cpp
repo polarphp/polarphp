@@ -387,11 +387,10 @@ TokenKindType get_token_kind_by_char(unsigned char c)
    return token;
 }
 
-size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexer &lexer)
+long convert_single_quote_str_escape_sequences(std::string::iterator iter, std::string::iterator endMark, Lexer &lexer)
 {
-   char *origIter = iter;
-   /// find first '\'
-   while(true) {
+   std::string::iterator origIter = iter;
+   while (true) {
       if (*iter == '\\') {
          break;
       }
@@ -400,22 +399,22 @@ size_t convert_single_quote_str_escape_sequences(char *iter, char *endMark, Lexe
          return iter - origIter;
       }
    }
-   char *targetStr = iter;
-   while (iter < endMark) {
+   std::string::iterator targetIter = iter;
+   while (iter != endMark) {
       if (*iter == '\\') {
          ++iter;
          if (*iter == '\\' || *iter == '\'') {
-            *targetStr++ = *iter;
+            *targetIter = *iter;
          } else {
-            *targetStr++ = '\\';
-            *targetStr++ = *iter;
+            *targetIter++ = '\\';
+            *targetIter++ = *iter;
          }
       } else {
-         *targetStr++ = *iter;
+         *targetIter++ = *iter;
       }
-      ++iter;
+      ++targetIter;
    }
-   return targetStr - origIter;
+   return targetIter - origIter;
 }
 
 bool convert_double_quote_str_escape_sequences(std::string &filteredStr, char quoteType, const char *iter,
