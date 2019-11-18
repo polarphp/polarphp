@@ -304,7 +304,7 @@ void strip_underscores(std::string &str, size_t &len)
    str.resize(len);
 }
 
-TokenKindType token_kind_map(unsigned char c)
+TokenKindType get_token_kind_by_char(unsigned char c)
 {
    TokenKindType token;
    switch (c) {
