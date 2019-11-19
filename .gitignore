@@ -35,6 +35,7 @@ include/polarphp/syntax/SyntaxNodeVisitor.h
 include/polarphp/syntax/SyntaxNodes.h
 include/polarphp/syntax/Trivia.h
 include/polarphp/syntax/serialization/TokenKindTypeSerialization.h
+include/polarphp/syntax/serialization/SyntaxJsonSerialization.h
 
 src/parser/internal/YYLexer.cpp
 src/parser/internal/YYParser.cpp

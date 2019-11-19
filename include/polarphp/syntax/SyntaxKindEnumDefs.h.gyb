@@ -33,8 +33,9 @@ enum class SyntaxKind : std::uint32_t
 <?php 
    foreach($groupNodes as $group => $nodes) {
       foreach($nodes as $node) {
+         $syntaxKind = $node->getSyntaxKind();
 ?>
-   <?= $node->getSyntaxKind().",\n"; ?>
+   <?= $syntaxKind.",\n"; ?>
 <?php
       }
       if (!in_array($group, [\Gyb\Syntax\Kinds::SYNTAX, \Gyb\Syntax\Kinds::SYNTAX_COLLECTION]) && !empty($nodes)) {
