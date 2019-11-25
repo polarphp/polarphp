@@ -8,3 +8,18 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/11/19.
+
+#include "polarphp/syntax/serialization/SyntaxJsonSerialization.h"
+#include "polarphp/syntax/Syntax.h"
+
+namespace polar::syntax {
+
+void to_json(json &jsonObject, const Syntax &syntax)
+{
+   jsonObject["kind"] = syntax.getKind();
+   jsonObject["hasChild"] = syntax.getNumChildren() != 0;
+   jsonObject["childCount"] = syntax.getNumChildren();
+}
+
+} // polar::syntax
+

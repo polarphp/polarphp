@@ -2408,9 +2408,7 @@ expr:
       $$ = prefixExpr.getRaw();
    }
 |  scalar {
-      Syntax scalarValue = make<Syntax>($1);
-      ScalarExprSyntax scalar = make_syntax_node(ScalarExpr, scalarValue);
-      $$ = scalar.getRaw();
+      $$ = $1;
    }
 |  T_BACKTICK backticks_expr T_BACKTICK {
       TokenSyntax backtickToken = make_token(BacktickToken);

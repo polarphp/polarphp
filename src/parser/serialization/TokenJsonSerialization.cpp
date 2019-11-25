@@ -56,7 +56,6 @@ void from_json(const json &jsonObject, TokenFlags &flags)
 
 void to_json(json &jsonObject, const Token &token)
 {
-   jsonObject = json::object();
    bool hasValue = token.hasValue();
    jsonObject["name"] = token.getName();
    jsonObject["kind"] = token.getKind();

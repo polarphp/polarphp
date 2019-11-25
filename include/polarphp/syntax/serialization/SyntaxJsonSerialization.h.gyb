@@ -14,10 +14,12 @@
 
 #include "nlohmann/json.hpp"
 #include "polarphp/syntax/SyntaxKindEnumDefs.h"
+#include "polarphp/syntax/RawSyntax.h"
 
 namespace polar::syntax {
 
 using nlohmann::json;
+class Syntax;
 
 NLOHMANN_JSON_SERIALIZE_ENUM(SyntaxKind, {
    {SyntaxKind::Unknown, nullptr},
@@ -30,6 +32,13 @@ foreach ($SYNTAX_NODES as $node) {
 }
 ?>
 })
+
+NLOHMANN_JSON_SERIALIZE_ENUM(SourcePresence, {
+   {SourcePresence::Present, "Present"},
+   {SourcePresence::Missing, "Missing"},
+})
+
+void to_json(json &jsonObject, const Syntax &syntax);
 
 } // polar::syntax
 

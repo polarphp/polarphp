@@ -116,16 +116,16 @@ RawSyntax::RawSyntax(TokenKindType tokenKind, OwnedString text,
 RawSyntax::RawSyntax(TokenKindType tokenKind, OwnedString text, std::int64_t value, ArrayRef<TriviaPiece> leadingTrivia,
           ArrayRef<TriviaPiece> trailingTrivia, SourcePresence presence,
           const RefCountPtr<SyntaxArena> &arena, std::optional<SyntaxNodeId> nodeId)
+   : RawSyntax(tokenKind, text, leadingTrivia, trailingTrivia, presence, arena, nodeId)
 {
-   RawSyntax(tokenKind, text, leadingTrivia, trailingTrivia, presence, arena, nodeId);
    *getTrailingObjects<std::int64_t>() = value;
 }
 
 RawSyntax::RawSyntax(TokenKindType tokenKind, OwnedString text, double value, ArrayRef<TriviaPiece> leadingTrivia,
           ArrayRef<TriviaPiece> trailingTrivia, SourcePresence presence,
           const RefCountPtr<SyntaxArena> &arena, std::optional<SyntaxNodeId> nodeId)
+   : RawSyntax(tokenKind, text, leadingTrivia, trailingTrivia, presence, arena, nodeId)
 {
-   RawSyntax(tokenKind, text, leadingTrivia, trailingTrivia, presence, arena, nodeId);
    *getTrailingObjects<double>() = value;
 }
 

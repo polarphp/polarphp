@@ -58,15 +58,6 @@ SyntaxNode make(RefCountPtr<RawSyntax> raw)
    return { data, data.get() };
 }
 
-const auto cg_noParent = std::nullopt;
-using SyntaxChildrenCountType = uint32_t;
-
-#ifdef POLAR_DEBUG_BUILD
-using TokenChoicesType = std::map<SyntaxChildrenCountType, std::set<TokenKindType>>;
-using TokenTextChoicesType = std::map<SyntaxChildrenCountType, std::set<std::string>>;
-using NodeChoicesType = std::map<SyntaxChildrenCountType, std::set<SyntaxKind>>;
-#endif
-
 /// The main handle for syntax nodes - subclasses contain all public
 /// structured editing APIs.
 ///
