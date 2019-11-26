@@ -9,15 +9,15 @@
 #
 # Created by polarboy on 2019/11/26.
 
-set(POLAR_DRIVER_SOURCES)
+set(POLAR_FRONTEND_SOURCES)
 
 polar_collect_files(
    TYPE_BOTH
    DIR .
-   OUTPUT_VAR POLAR_DRIVER_SOURCES)
+   OUTPUT_VAR POLAR_FRONTEND_SOURCES)
 
-polar_merge_list(POLAR_DRIVER_SOURCES POLAR_HEADERS)
+polar_merge_list(POLAR_FRONTEND_SOURCES POLAR_HEADERS)
 
-polar_add_library(PolarDriver SHARED
-   ${POLAR_DRIVER_SOURCES}
+polar_add_library(PolarFrontend SHARED
+   ${POLAR_FRONTEND_SOURCES}
    LINK_LIBS PolarUtils PolarKernel PolarSyntax)
