@@ -432,8 +432,8 @@ private:
 /// input file list and arguments as one another, aside from their primary-file.
 /// See ToolChain::jobsAreBatchCombinable for details.
 
-class BatchJob : public Job {
-
+class BatchJob : public Job
+{
 public:
    BatchJob(const JobAction &source, SmallVectorImpl<const Job *> &&inputs,
             std::unique_ptr<CommandOutput> output, const char *executable,

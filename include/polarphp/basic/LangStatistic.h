@@ -23,10 +23,10 @@
 #ifndef POLARPHP_BASIC_LANG_STATISTIC_H
 #define POLARPHP_BASIC_LANG_STATISTIC_H
 
-#include "llvm/ADTSmallString.h"
-#include "llvm/ADTStatistic.h"
+#include "llvm/ADT/SmallString.h"
+#include "llvm/ADT/Statistic.h"
 #include "polarphp/basic/LangTimer.h"
-#include "llvm/ADTPointerUnion.h"
+#include "llvm/ADT/PointerUnion.h"
 
 #include <thread>
 #include <tuple>

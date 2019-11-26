@@ -49,9 +49,9 @@
 #include <type_traits>
 #include <utility>
 
-#include "llvm/ADTIteratorRange.h"
-#include "llvm/ADTArrayRef.h"
-#include "llvm/ADTStlExtras.h"
+#include "llvm/ADT/iterator_range.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/STLExtras.h"
 
 namespace polar::basic {
 
