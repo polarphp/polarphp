@@ -274,7 +274,8 @@ public:
    /// This is only intended for testing purposes.
    ///
    /// \sa loadFromPath
-   LoadResult loadFromString(T node, StringRef data) {
+   LoadResult loadFromString(T node, StringRef data)
+   {
       return DependencyGraphImpl::loadFromString(Traits::getAsVoidPointer(node),
                                                  data);
    }
@@ -282,7 +283,8 @@ public:
    /// Adds \p node to the dependency graph without any connections.
    ///
    /// This can be used for new nodes that may be updated later.
-   void addIndependentNode(T node) {
+   void addIndependentNode(T node)
+   {
       return DependencyGraphImpl::addIndependentNode(Traits::getAsVoidPointer(node));
    }
 
