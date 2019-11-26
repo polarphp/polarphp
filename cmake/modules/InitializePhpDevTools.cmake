@@ -26,6 +26,7 @@ execute_process(COMMAND ${POLAR_COMPOSER_EXECUTABLE} install
    WORKING_DIRECTORY ${POLAR_DEVTOOLS_DIR}/gyb
    RESULT_VARIABLE exitCode
    ERROR_VARIABLE errorMsg)
+
 if (NOT exitCode EQUAL 0)
    message(FATAL_ERROR "initialize gyb error: ${errorMsg}")
 endif()

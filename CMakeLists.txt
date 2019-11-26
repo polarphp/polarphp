@@ -77,6 +77,7 @@ set(POLAR_CONFIGURE_TEMP_DIR ${POLAR_BINARY_DIR}/conf_temp)
 set(POLAR_HEADER_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/polarphp)
 set(POLAR_DEVTOOLS_DIR ${CMAKE_SOURCE_DIR}/devtools)
 set(POLAR_LLVM_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/llvm-project/llvm)
+set(POLAR_CLANG_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/llvm-project/clang)
 
 # for test only
 set(POLAR_UNITTEST_TEST_BINARY_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/unittests/bin")
@@ -469,6 +470,7 @@ include_directories(${POLAR_SOURCE_DIR}
    ${POLAR_INCLUDE_DIR}/polarphp)
 
 include(ImportLLVM)
+include(ImportClang)
 include(ImportThirdparty)
 
 add_subdirectory(devtools)
