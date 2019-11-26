@@ -30,11 +30,16 @@
 
 #include "polarphp/basic/SimpleDisplay.h"
 #include "polarphp/basic/TypeId.h"
-#include "llvm/ADTPointerUnion.h"  // to define hash_m_value
+#include "llvm/ADT/PointerUnion.h"  // to define hash_m_value
 
 namespace polar::basic {
+
+using llvm::PointerUnion;
+using llvm::hash_code;
+using llvm::raw_ostream;
+
 template<typename PT1, typename PT2>
-HashCode hash_m_value(const PointerUnion<PT1, PT2> &ptr)
+hash_code hash_m_value(const PointerUnion<PT1, PT2> &ptr)
 {
    return hash_m_value(ptr.getOpaqueValue());
 }

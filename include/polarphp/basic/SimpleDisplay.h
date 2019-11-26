@@ -36,7 +36,7 @@
 
 namespace polar::basic {
 
-using polar::utils::raw_ostream;
+using llvm::raw_ostream;
 
 template<typename T>
 struct HasTrivialDisplay {

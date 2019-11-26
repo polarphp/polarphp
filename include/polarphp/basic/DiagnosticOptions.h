@@ -24,7 +24,7 @@
 #ifndef POLARPHP_BASIC_DIAGNOSTICOPTIONS_H
 #define POLARPHP_BASIC_DIAGNOSTICOPTIONS_H
 
-#include "llvm/ADTHashing.h"
+#include "llvm/ADT/Hashing.h"
 
 namespace polar::basic {
 

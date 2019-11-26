@@ -7,17 +7,6 @@
 //
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
-//
-//===----------------------------------------------------------------------===//
-//
-// This file defines the Syntax type, the main public-facing classes and
-// subclasses for dealing with polarphp Syntax.
-//
-// Syntax types contain a strong reference to the root of the tree to keep
-// the subtree above alive, and a weak reference to the data representing
-// the syntax node (weak to prevent retain cycles). All significant public API
-// are contained in Syntax and its subclasses.
-//
 //===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
@@ -29,6 +18,16 @@
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
 // Created by polarboy on 2019/05/07.
+//
+//===----------------------------------------------------------------------===//
+//
+// This file defines the Syntax type, the main public-facing classes and
+// subclasses for dealing with polarphp Syntax.
+//
+// Syntax types contain a strong reference to the root of the tree to keep
+// the subtree above alive, and a weak reference to the data representing
+// the syntax node (weak to prevent retain cycles). All significant public API
+// are contained in Syntax and its subclasses.
 
 #ifndef POLARPHP_SYNTAX_SYNTAX_H
 #define POLARPHP_SYNTAX_SYNTAX_H
