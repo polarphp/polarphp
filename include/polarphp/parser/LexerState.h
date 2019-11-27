@@ -12,7 +12,7 @@
 #ifndef POLARPHP_PARSER_LEXER_STATE_H
 #define POLARPHP_PARSER_LEXER_STATE_H
 
-#include "polarphp/parser/SourceLoc.h"
+#include "polarphp/basic/SourceLoc.h"
 #include "polarphp/parser/ParsedTrivia.h"
 #include "polarphp/parser/LexerFlags.h"
 #include "polarphp/parser/internal/YYLexerDefs.h"

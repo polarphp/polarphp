@@ -14,8 +14,8 @@
 
 #include "polarphp/basic/StringExtras.h"
 #include "polarphp/ast/DiagnosticEngine.h"
-#include "polarphp/parser/SourceLoc.h"
-#include "polarphp/parser/SourceMgr.h"
+#include "polarphp/basic/SourceLoc.h"
+#include "polarphp/basic/SourceMgr.h"
 #include "polarphp/parser/Token.h"
 #include "polarphp/parser/ParsedTrivia.h"
 #include "polarphp/parser/LexerState.h"
@@ -41,6 +41,9 @@ using polar::ast::InFlightDiagnostic;
 using polar::ast::Diag;
 using polar::kernel::LangOptions;
 union ParserStackElement;
+using polar::basic::SourceManager;
+using polar::basic::SourceLoc;
+using polar::basic::SourceRange;
 
 class Parser;
 

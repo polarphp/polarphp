@@ -24,7 +24,7 @@
 #define POLARPHP_PARSER_SYNTAX_PARSING_CONTEXT_H
 
 #include "llvm/ADT/PointerUnion.h"
-#include "polarphp/parser/SourceLoc.h"
+#include "polarphp/basic/SourceLoc.h"
 #include "polarphp/syntax/TokenKinds.h"
 #include "llvm/Support/Allocator.h"
 #include "polarphp/syntax/SyntaxKind.h"
@@ -43,6 +43,8 @@ class Token;
 using polar::syntax::SyntaxKind;
 using polar::syntax::internal::TokenKindType;
 using polar::ast::DiagnosticEngine;
+using polar::basic::SourceManager;
+using polar::basic::SourceLoc;
 
 enum class SyntaxContextKind
 {

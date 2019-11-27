@@ -27,7 +27,7 @@
 
 #include "polarphp/ast/DiagnosticEngine.h"
 #include "polarphp/ast/DiagnosticSuppression.h"
-#include "polarphp/parser/SourceMgr.h"
+#include "polarphp/basic/SourceMgr.h"
 #include "polarphp/parser/Lexer.h" // bad dependency
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/Twine.h"
@@ -42,7 +42,7 @@ llvm::cl::opt<bool> sg_assertOnError("polar-diagnostics-assert-on-error",
 
 namespace polar::ast {
 
-using polar::parser::SourceManager;
+using polar::basic::SourceManager;
 using llvm::raw_svector_ostream;
 
 namespace {

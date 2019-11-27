@@ -15,7 +15,7 @@
 #include "gtest/gtest.h"
 #include "polarphp/kernel/LangOptions.h"
 #include "polarphp/syntax/Trivia.h"
-#include "polarphp/parser/SourceMgr.h"
+#include "polarphp/basic/SourceMgr.h"
 #include "polarphp/parser/Lexer.h"
 #include "polarphp/parser/Token.h"
 #include "polarphp/ast/DiagnosticConsumer.h"

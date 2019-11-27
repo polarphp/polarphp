@@ -24,15 +24,15 @@
 //
 // Created by polarboy on 2019/04/25.
 
-#include "polarphp/parser/SourceLoc.h"
-#include "polarphp/parser/SourceMgr.h"
+#include "polarphp/basic/SourceLoc.h"
+#include "polarphp/basic/SourceMgr.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/PrettyStackTrace.h"
 #include "llvm/Support/raw_ostream.h"
 
 #include <optional>
 
-namespace polar::parser {
+namespace polar::basic {
 
 using llvm::errs;
 
@@ -131,4 +131,4 @@ void CharSourceRange::dump(const SourceManager &sourceMgr) const
    print(llvm::errs(), sourceMgr);
 }
 
-} // polar::parser
+} // polar::basic

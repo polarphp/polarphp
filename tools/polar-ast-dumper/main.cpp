@@ -16,7 +16,7 @@
 #include "polarphp/parser/Lexer.h"
 #include "polarphp/parser/Token.h"
 #include "polarphp/kernel/LangOptions.h"
-#include "polarphp/parser/SourceMgr.h"
+#include "polarphp/basic/SourceMgr.h"
 #include "polarphp/parser/Parser.h"
 
 #include <memory>
@@ -30,7 +30,7 @@
 using llvm::MemoryBuffer;
 using llvm::ErrorOr;
 using polar::kernel::LangOptions;
-using polar::parser::SourceManager;
+using polar::basic::SourceManager;
 using polar::parser::Parser;
 using polar::syntax::RefCountPtr;
 

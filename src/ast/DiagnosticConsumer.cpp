@@ -39,7 +39,7 @@
 #include "polarphp/ast/DiagnosticConsumer.h"
 #include "polarphp/ast/DiagnosticEngine.h"
 #include "polarphp/ast/DiagnosticsFrontend.h"
-#include "polarphp/parser/SourceMgr.h"
+#include "polarphp/basic/SourceMgr.h"
 
 namespace polar::ast {
 

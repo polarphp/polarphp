@@ -24,15 +24,15 @@
 //
 // Created by polarboy on 2019/04/25.
 
-#include "polarphp/parser/SourceLoc.h"
-#include "polarphp/parser/SourceMgr.h"
-#include "llvm/Support/MemoryBuffer.h"
+#include "polarphp/basic/SourceLoc.h"
+#include "polarphp/basic/SourceMgr.h"
 #include "llvm/Support/PrettyStackTrace.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/MemoryBuffer.h"
 
 #include <optional>
 
-namespace polar::parser {
+namespace polar::basic {
 
 using llvm::PrettyStackTraceString;
 using llvm::SMLoc;
@@ -299,4 +299,4 @@ std::optional<unsigned> SourceManager::resolveFromLineCol(unsigned bufferId,
    return std::nullopt;
 }
 
-} // polar::parser
+} // polar::basic

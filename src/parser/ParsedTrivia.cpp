@@ -22,11 +22,13 @@
 
 #include "polarphp/parser/ParsedTrivia.h"
 #include "polarphp/syntax/Trivia.h"
-#include "polarphp/parser/SourceMgr.h"
+#include "polarphp/basic/SourceMgr.h"
 
 namespace polar::parser {
 
 using polar::syntax::TriviaPiece;
+using polar::basic::CharSourceRange;
+using llvm::StringRef;
 
 Trivia
 ParsedTriviaPiece::convertToSyntaxTrivia(ArrayRef<ParsedTriviaPiece> pieces,

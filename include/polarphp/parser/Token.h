@@ -20,7 +20,7 @@
 
 #include "llvm/ADT/StringRef.h"
 #include "polarphp/basic/FlagSet.h"
-#include "polarphp/parser/SourceLoc.h"
+#include "polarphp/basic/SourceLoc.h"
 #include "polarphp/syntax/TokenKinds.h"
 #include "polarphp/parser/internal/YYParserDefs.h"
 
@@ -35,6 +35,8 @@ namespace polar::parser {
 
 using polar::basic::StringRef;
 using polar::basic::FlagSet;
+using polar::basic::CharSourceRange;
+using polar::basic::SourceLoc;
 using polar::syntax::TokenKindType;
 using polar::syntax::TokenCategory;
 using polar::parser::internal::ParserSemantic;

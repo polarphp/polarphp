@@ -13,7 +13,7 @@
 #include "polarphp/kernel/LangOptions.h"
 #include "polarphp/syntax/Trivia.h"
 #include "polarphp/basic/Defer.h"
-#include "polarphp/parser/SourceMgr.h"
+#include "polarphp/basic/SourceMgr.h"
 #include "polarphp/parser/Lexer.h"
 #include "polarphp/parser/Token.h"
 #include "polarphp/ast/DiagnosticConsumer.h"
@@ -34,8 +34,8 @@
 using polar::kernel::LangOptions;
 using polar::syntax::TriviaKind;
 using polar::syntax::TokenKindType;
-using polar::parser::SourceManager;
-using polar::parser::SourceLoc;
+using polar::basic::SourceManager;
+using polar::basic::SourceLoc;
 using polar::parser::Lexer;
 using polar::parser::tokenize;
 using polar::parser::Token;

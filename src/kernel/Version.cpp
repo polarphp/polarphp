@@ -57,8 +57,8 @@
 namespace polar::version {
 
 
-using polar::parser::SourceLoc;
-using polar::parser::SourceRange;
+using polar::basic::SourceLoc;
+using polar::basic::SourceRange;
 
 using llvm::raw_ostream;
 using llvm::raw_string_ostream;

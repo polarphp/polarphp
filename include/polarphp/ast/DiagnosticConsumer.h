@@ -31,11 +31,11 @@
 #ifndef POLARPHP_AST_DIAGNOSTIC_CONSUMER_H
 #define POLARPHP_AST_DIAGNOSTIC_CONSUMER_H
 
-#include "polarphp/parser/SourceLoc.h"
+#include "polarphp/basic/SourceLoc.h"
 #include "llvm/Support/SourceMgr.h"
 
 /// forward declare class with namespace
-namespace polar::parser {
+namespace polar::basic {
 class SourceManager;
 }
 
@@ -45,9 +45,9 @@ using llvm::ArrayRef;
 using llvm::StringRef;
 using llvm::SmallVectorImpl;
 using llvm::SmallVector;
-using polar::parser::CharSourceRange;
-using polar::parser::SourceLoc;
-using polar::parser::SourceManager;
+using polar::basic::CharSourceRange;
+using polar::basic::SourceLoc;
+using polar::basic::SourceManager;
 using llvm::SMLoc;
 using llvm::SMFixIt;
 using llvm::SMRange;

@@ -24,8 +24,8 @@
 //
 // Created by polarboy on 2019/04/24.
 
-#ifndef POLARPHP_PARSER_SOURCE_LOC_H
-#define POLARPHP_PARSER_SOURCE_LOC_H
+#ifndef POLARPHP_BASIC_SOURCE_LOC_H
+#define POLARPHP_BASIC_SOURCE_LOC_H
 
 #include "llvm/ADT/DenseMapInfo.h"
 #include "llvm/ADT/StringRef.h"
@@ -40,7 +40,7 @@ namespace polar::ast {
 class DiagnosticConsumer;
 }
 
-namespace polar::parser {
+namespace polar::basic {
 
 /// forward declare class
 class SourceManager;
@@ -337,13 +337,13 @@ private:
    std::size_t m_byteLength;
 };
 
-} // polar::parser
+} // polar::basic
 
 namespace llvm {
 
-using polar::parser::SourceLoc;
-using polar::parser::BasicSMLoc;
-using polar::parser::SourceRange;
+using polar::basic::SourceLoc;
+using polar::basic::BasicSMLoc;
+using polar::basic::SourceRange;
 
 template <typename T>
 struct DenseMapInfo;
@@ -412,4 +412,4 @@ struct DenseMapInfo<SourceRange>
 
 } // llvm
 
-#endif // POLARPHP_PARSER_SOURCE_LOC_H
+#endif // POLARPHP_BASIC_SOURCE_LOC_H

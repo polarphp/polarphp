@@ -24,8 +24,8 @@
 //
 // Created by polarboy on 2019/04/25.
 
-#ifndef POLARPHP_PARSER_SOURCE_MGR_H
-#define POLARPHP_PARSER_SOURCE_MGR_H
+#ifndef POLARPHP_BASIC_SOURCE_MGR_H
+#define POLARPHP_BASIC_SOURCE_MGR_H
 
 #include "llvm/ADT/StringMap.h"
 #include "llvm/ADT/IntrusiveRefCntPtr.h"
@@ -33,11 +33,14 @@
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/VirtualFileSystem.h"
 #include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "polarphp/parser/SourceLoc.h"
+#include "polarphp/basic/SourceLoc.h"
 #include <map>
 
-namespace polar::parser {
+namespace llvm {
+class MemoryBuffer;
+}
+
+namespace polar::basic {
 
 using BasicSourceMgr = llvm::SourceMgr;
 using llvm::IntrusiveRefCntPtr;
@@ -291,6 +294,6 @@ private:
    mutable DenseMap<StringRef, llvm::vfs::Status> m_statusCache;
 };
 
-} // polar::parser
+} // polar::basic
 
-#endif // POLARPHP_PARSER_SOURCE_MGR_H
+#endif // POLARPHP_BASIC_SOURCE_MGR_H

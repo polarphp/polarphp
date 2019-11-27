@@ -33,7 +33,7 @@
 #include "llvm/ADT/DenseMap.h"
 
 /// forward declare with namespace
-namespace polar::parser {
+namespace polar::basic {
 class SourceManager;
 }
 
@@ -43,8 +43,8 @@ class ReferenceOwnership;
 class DiagnosticEngine;
 
 using llvm::DenseMap;
-using polar::parser::SourceManager;
-using polar::parser::SourceRange;
+using polar::basic::SourceManager;
+using polar::basic::SourceRange;
 using llvm::VersionTuple;
 using llvm::raw_ostream;
 
