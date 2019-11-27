@@ -55,22 +55,25 @@
 
 namespace polar::basic {
 
+using llvm::make_range;
+using llvm::iterator_range;
+
 template<typename T>
 inline auto reversed(T &&container)
--> decltype(make_range(container.rbegin(), container.rend()))
+-> decltype(llvm::make_range(container.rbegin(), container.rend()))
 {
-   return make_range(container.rbegin(), container.rend());
+   return llvm::make_range(container.rbegin(), container.rend());
 }
 
 // Wrapper for std::transform that creates a new back-insertable container
 // and transforms a range into it.
 template<typename T, typename InputRange, typename MapFn>
-T map(InputRange &&range, MapFn &&mapFunc)
+T map(InputRange &&range, MapFn &&mapFn)
 {
    T result;
    std::transform(std::begin(range), std::end(range),
                   std::back_inserter(result),
-                  std::forward<MapFn>(mapFunc));
+                  std::forward<MapFn>(mapFn));
    return result;
 }
 
@@ -118,26 +121,21 @@ struct IntRangeTraits<T, /*is enum*/ true>
 template <class T = unsigned, class Traits = IntRangeTraits<T>>
 class IntRange
 {
+   using int_type = typename Traits::int_type;
+   using difference_type = typename Traits::difference_type;
+
 public:
-   IntRange()
-      : m_begin(0),
-        m_end(0)
-   {}
-
-   IntRange(T end)
-      : m_begin(0),
-        m_end(end)
-   {}
-
-   IntRange(T begin, T end)
-      : m_begin(begin),
-        m_end(end)
-   {
+   IntRange() : m_begin(0), m_end(0) {}
+   IntRange(T end) : m_begin(0), m_end(end) {}
+   IntRange(T begin, T end) : m_begin(begin), m_end(end) {
       assert(begin <= end);
    }
 
-   class Iterator
+   class iterator
    {
+      friend class IntRange<T>;
+      iterator(T value)
+         : m_value(value) {}
    public:
       using value_type = T;
       using reference = T;
@@ -150,68 +148,67 @@ public:
          return m_value;
       }
 
-      Iterator &operator++()
+      iterator &operator++()
       {
          return *this += 1;
       }
 
-      Iterator operator++(int)
+      iterator operator++(int)
       {
          auto copy = *this;
          *this += 1;
          return copy;
       }
 
-      Iterator &operator--()
+      iterator &operator--()
       {
          return *this -= 1;
       }
 
-      Iterator operator--(int)
-      {
+      iterator operator--(int) {
          auto copy = *this;
          *this -= 1;
          return copy;
       }
 
-      bool operator==(Iterator rhs)
+      bool operator==(iterator rhs)
       {
          return m_value == rhs.m_value;
       }
 
-      bool operator!=(Iterator rhs)
+      bool operator!=(iterator rhs)
       {
          return m_value != rhs.m_value;
       }
 
-      Iterator &operator+=(difference_type i)
+      iterator &operator+=(difference_type i)
       {
          m_value = Traits::addOffset(m_value, i);
          return *this;
       }
 
-      Iterator operator+(difference_type i) const
+      iterator operator+(difference_type i) const
       {
-         return Iterator(Traits::adddOfset(m_value, i));
+         return iterator(Traits::adddOfset(m_value, i));
       }
 
-      friend Iterator operator+(difference_type i, Iterator base)
+      friend iterator operator+(difference_type i, iterator base)
       {
-         return Iterator(Traits::addOffset(base.m_value, i));
+         return iterator(Traits::addOffset(base.m_value, i));
       }
 
-      Iterator &operator-=(difference_type i)
+      iterator &operator-=(difference_type i)
       {
          m_value = Traits::addOffset(m_value, -i);
          return *this;
       }
 
-      Iterator operator-(difference_type i) const
+      iterator operator-(difference_type i) const
       {
-         return Iterator(Traits::addOffset(m_value, -i));
+         return iterator(Traits::addOffset(m_value, -i));
       }
 
-      difference_type operator-(Iterator rhs) const
+      difference_type operator-(iterator rhs) const
       {
          return Traits::distance(rhs.m_value, m_value);
       }
@@ -221,52 +218,48 @@ public:
          return Traits::addOffset(m_value, i);
       }
 
-      bool operator<(Iterator rhs) const
+      bool operator<(iterator rhs) const
       {
-         return m_value < rhs.m_value;
+         return m_value <  rhs.m_value;
       }
 
-      bool operator<=(Iterator rhs) const
+      bool operator<=(iterator rhs) const
       {
          return m_value <= rhs.m_value;
       }
 
-      bool operator>(Iterator rhs) const
+      bool operator>(iterator rhs) const
       {
          return m_value >  rhs.m_value;
       }
 
-      bool operator>=(Iterator rhs) const
+      bool operator>=(iterator rhs) const
       {
          return m_value >= rhs.m_value;
       }
 
    private:
-      friend class IntRange<T>;
       T m_value;
-      Iterator(T value)
-         : m_value(value)
-      {}
    };
 
-   Iterator begin() const
+   iterator begin() const
    {
-      return Iterator(m_begin);
+      return iterator(m_begin);
    }
 
-   Iterator end() const
+   iterator end() const
    {
-      return Iterator(m_end);
+      return iterator(m_end);
    }
 
-   std::reverse_iterator<Iterator> rbegin() const
+   std::reverse_iterator<iterator> rbegin() const
    {
-      return std::reverse_iterator<Iterator>(end());
+      return std::reverse_iterator<iterator>(end());
    }
 
-   std::reverse_iterator<Iterator> rend() const
+   std::reverse_iterator<iterator> rend() const
    {
-      return std::reverse_iterator<Iterator>(begin());
+      return std::reverse_iterator<iterator>(begin());
    }
 
    bool empty() const
@@ -287,8 +280,7 @@ public:
 
    T front() const
    {
-      assert(!empty());
-      return m_begin;
+      assert(!empty()); return m_begin;
    }
 
    T back() const
@@ -301,11 +293,6 @@ public:
    {
       assert(length <= size());
       return IntRange(m_begin, Traits::addOffset(m_end, -length));
-   }
-
-   IntRange dropBack(size_t length = 1) const
-   {
-      return drop_back(length);
    }
 
    IntRange slice(size_t start) const
@@ -331,13 +318,9 @@ public:
    {
       return !(operator==(other));
    }
-
 private:
    T m_begin;
    T m_end;
-
-   using int_type = typename Traits::int_type;
-   using difference_type = typename Traits::difference_type;
 };
 
 /// indices - Given a type that's subscriptable with integers, return
@@ -345,7 +328,7 @@ private:
 template <class T>
 typename std::enable_if<sizeof(std::declval<T>()[size_t(1)]) != 0,
 IntRange<decltype(std::declval<T>().size())>>::type
-                                             indices(const T &collection)
+indices(const T &collection)
 {
    return IntRange<decltype(std::declval<T>().size())>(0, collection.size());
 }
@@ -381,14 +364,17 @@ public:
                  std::random_access_iterator_tag>::value,
                  "Expected a random access iterator");
 
-public:
-   EnumeratorRange(IterTy begin, IterTy end)
-      : m_begin(begin),
-        m_end(end)
-   {}
+   EnumeratorRange(IterTy begin, IterTy end) : m_begin(begin), m_end(end) {}
 
-   class Iterator
+   class iterator
    {
+      friend class EnumeratorRange;
+      IterTy m_begin;
+      IterTy m_iter;
+
+      iterator(IterTy begin, IterTy iter)
+         : m_begin(begin), m_iter(iter) {}
+
    public:
       using value_type =
       std::pair<typename std::iterator_traits<IterTy>::value_type, int>;
@@ -398,105 +384,92 @@ public:
       using iterator_category = std::random_access_iterator_tag;
       using difference_type = int;
 
-      using ValueType = value_type;
-      using Reference = reference;
-      using Pointer = pointer;
-      using IteratorCategory = iterator_category;
-      using DifferenceType = difference_type;
-
       value_type operator*() const
       {
          return {*m_iter, std::distance(m_begin, m_iter)};
       }
 
-      Iterator &operator++() {
+      iterator &operator++()
+      {
          m_iter++;
          return *this;
       }
-      Iterator operator++(int)
+
+      iterator operator++(int)
       {
-         return Iterator(m_begin, m_iter++);
+         return iterator(m_begin, m_iter++);
       }
 
-      Iterator &operator--()
+      iterator &operator--()
       {
          m_iter--;
          return *this;
       }
 
-      Iterator operator--(int)
+      iterator operator--(int)
       {
-         return Iterator(m_begin, m_iter--);
+         return iterator(m_begin, m_iter--);
       }
 
-      bool operator==(Iterator rhs)
+      bool operator==(iterator rhs)
       {
          return m_iter == rhs.m_iter;
       }
 
-      bool operator!=(Iterator rhs)
+      bool operator!=(iterator rhs)
       {
          return !(*this == rhs);
       }
 
-      Iterator &operator+=(difference_type i)
+      iterator &operator+=(difference_type i)
       {
          std::advance(m_iter, i);
          return *this;
       }
 
-      Iterator operator+(difference_type i) const
+      iterator operator+(difference_type i) const
       {
-         auto iterCopy = m_iter;
-         std::advance(iterCopy, i);
-         return Iterator(begin, iterCopy);
+         auto IterCopy = m_iter;
+         std::advance(IterCopy, i);
+         return iterator(m_begin, IterCopy);
       }
 
-      friend Iterator operator+(difference_type i, Iterator base)
+      friend iterator operator+(difference_type i, iterator base)
       {
          std::advance(base.m_iter, i);
          return base;
       }
 
-      Iterator &operator-=(difference_type i)
+      iterator &operator-=(difference_type i)
       {
          *this += -i;
          return *this;
       }
 
-      Iterator operator-(difference_type i) const
+      iterator operator-(difference_type i) const
       {
          auto newIter = *this;
          return newIter -= i;
       }
 
-      difference_type operator-(Iterator rhs) const
+      difference_type operator-(iterator rhs) const
       {
          return difference_type(std::distance(m_iter, rhs.m_iter));
       }
 
-   private:
-      friend class EnumeratorRange;
-      IterTy m_begin;
-      IterTy m_iter;
-
-      Iterator(IterTy begin, IterTy iter)
-         : m_begin(begin),
-           m_iter(iter)
-      {}
    };
 
-   Iterator begin() const
+   iterator begin() const
    {
-      return Iterator(m_begin, m_begin);
+      return iterator(m_begin, m_begin);
    }
 
-   Iterator end() const
+   iterator end() const
    {
-      return Iterator(m_begin, m_end);
+      return iterator(m_begin, m_end);
    }
 
-   using reverse_iterator = std::reverse_iterator<Iterator>;
+   using reverse_iterator = std::reverse_iterator<iterator>;
    reverse_iterator rbegin() const
    {
       return reverse_iterator(end());
@@ -508,6 +481,7 @@ public:
    }
 
 private:
+private:
    IterTy m_begin;
    IterTy m_end;
 };
@@ -515,15 +489,13 @@ private:
 /// enumerate - Given a type that's subscriptable with integers, return an
 /// IntEnumerateRange consisting of the valid subscripts.
 template <class T>
-EnumeratorRange<typename T::iterator>
-enumerate(T &collection)
+EnumeratorRange<typename T::iterator> enumerate(T &collection)
 {
    return EnumeratorRange<typename T::iterator>(collection.begin(),
                                                 collection.end());
 }
 
-template <class T>
-EnumeratorRange<T> enumerate(T begin, T end)
+template <class T> EnumeratorRange<T> enumerate(T begin, T end)
 {
    return EnumeratorRange<T>(begin, end);
 }
