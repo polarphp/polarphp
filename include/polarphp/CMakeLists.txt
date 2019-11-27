@@ -58,6 +58,11 @@ polar_collect_files(
 
 polar_collect_files(
    TYPE_HEADER
+   DIR pil
+   OUTPUT_VAR POLAR_PIL_HEADERS)
+
+polar_collect_files(
+   TYPE_HEADER
    DIR parser
    OUTPUT_VAR POLAR_PARSER_HEADERS)
 
@@ -109,6 +114,7 @@ polar_merge_list(POLAR_HEADERS POLAR_DRIVER_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_FRONTEND_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_FRONTEND_TOOL_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_BASIC_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_PIL_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_KERNEL_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_PARSER_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_MARKUP_HEADERS)
