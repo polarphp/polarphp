@@ -16,8 +16,8 @@
 //
 // Created by polarboy on 2018/10/10.
 
-#ifndef POLARPHP_BASIC_ADT_STRING_EXTRAS_H
-#define POLARPHP_BASIC_ADT_STRING_EXTRAS_H
+#ifndef POLARPHP_BASIC_STRING_EXTRAS_H
+#define POLARPHP_BASIC_STRING_EXTRAS_H
 
 #include "polarphp/global/CompilerFeature.h"
 #include "llvm/ADT/StringRef.h"
@@ -656,4 +656,4 @@ inline const char *sprintable(StringRef str)
 
 } // polar::basic
 
-#endif // POLARPHP_BASIC_ADT_STRING_EXTRAS_H
+#endif // POLARPHP_BASIC_STRING_EXTRAS_H

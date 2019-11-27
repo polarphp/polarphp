@@ -88,7 +88,8 @@ class Stmt;
 // else nondeterministic we find).
 bool environment_variable_requested_maximum_determinism();
 
-class UnifiedStatsReporter {
+class UnifiedStatsReporter
+{
 
 public:
    struct AlwaysOnDriverCounters
