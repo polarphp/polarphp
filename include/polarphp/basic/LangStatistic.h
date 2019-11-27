@@ -42,7 +42,7 @@
 
 namespace polar::basic {
 
-using polar::utils::raw_ostream;
+using llvm::raw_ostream;
 
 // Helper class designed to consolidate reporting of LLVM statistics and timers
 // across polarphp compilations that typically invoke many drivers, each running

@@ -269,7 +269,8 @@ public:
 
    // Get a hash of all options which influence the llvm compilation but are not
    // reflected in the llvm module itself.
-   unsigned getLLVMCodeGenOptionsHash() {
+   unsigned getLLVMCodeGenOptionsHash()
+   {
       unsigned Hash = (unsigned)optMode;
       Hash = (Hash << 1) | disableLLVMOptzns;
       Hash = (Hash << 1) | disablePolarphpSpecificLLVMOptzns;
