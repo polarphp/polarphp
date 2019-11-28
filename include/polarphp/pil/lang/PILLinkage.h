@@ -20,8 +20,8 @@
 //
 // Created by polarboy on 2019/11/27.
 
-#ifndef POLAR_PIL_LANG_PIL_LINKAGE_H
-#define POLAR_PIL_LANG_PIL_LINKAGE_H
+#ifndef POLAR_PIL_LANG_PILLINKAGE_H
+#define POLAR_PIL_LANG_PILLINKAGE_H
 
 #include "llvm/Support/ErrorHandling.h"
 
@@ -309,4 +309,4 @@ fixme_witness_has_linkage_that_needs_to_be_public(PILLinkage witnessLinkage)
 
 } // polar::pil
 
-#endif // POLAR_PIL_LANG_PIL_LINKAGE_H
+#endif // POLAR_PIL_LANG_PILLINKAGE_H

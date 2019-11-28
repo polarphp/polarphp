@@ -65,7 +65,7 @@ list(APPEND POLAR_HEADERS
 
 polar_add_library(PolarParser SHARED
    ${POLAR_PARSER_SOURCES}
-   LINK_LIBS PolarUtils PolarKernel PolarSyntax)
+   LINK_LIBS PolarUtils PolarKernel PolarSyntax clangAST)
 
 # for YYParserDefs.h
 target_include_directories(PolarParser PRIVATE ${POLAR_MAIN_INCLUDE_DIR}/polarphp/parser/internal)

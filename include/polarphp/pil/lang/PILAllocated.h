@@ -20,8 +20,8 @@
 //
 // Created by polarboy on 2019/11/27.
 
-#ifndef POLAR_PIL_LANG_PIL_ALLOCATED_H
-#define POLAR_PIL_LANG_PIL_ALLOCATED_H
+#ifndef POLAR_PIL_LANG_PILALLOCATED_H
+#define POLAR_PIL_LANG_PILALLOCATED_H
 
 #include "polarphp/basic/LLVM.h"
 #include "llvm/Support/ErrorHandling.h"
@@ -58,4 +58,4 @@ public:
 
 } // polar::pil
 
-#endif // POLAR_PIL_LANG_PIL_ALLOCATED_H
+#endif // POLAR_PIL_LANG_PILALLOCATED_H

@@ -120,7 +120,6 @@ public:
    }
 };
 
-
 } // polar::ast
 
 #endif // POLARPHP_AST_SEARCHPATH_OPTIONS_H

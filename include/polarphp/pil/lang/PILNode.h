@@ -23,8 +23,8 @@
 // This file defines the PILNode class.
 //===----------------------------------------------------------------------===//
 
-#ifndef POLAR_PIL_LANG_PIL_NODE_H
-#define POLAR_PIL_LANG_PIL_NODE_H
+#ifndef POLAR_PIL_LANG_PILNODE_H
+#define POLAR_PIL_LANG_PILNODE_H
 
 #include "llvm/Support/Compiler.h"
 #include "llvm/ADT/DenseMapInfo.h"
@@ -646,4 +646,4 @@ public:
 
 } // polar::pil
 
-#endif // POLAR_PIL_LANG_PIL_NODE_H
+#endif // POLAR_PIL_LANG_PILNODE_H

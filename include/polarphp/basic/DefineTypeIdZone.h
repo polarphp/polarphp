@@ -45,8 +45,11 @@
 #define POLAR_TYPEID(Type) POLAR_TYPEID_NAMED(Type, Type)
 
 // First pass: put all of the names into an enum so we get values for them.
-template<> struct TypeIdZoneTypes<POLAR_TYPEID_ZONE> {
-  enum Types : uint8_t {
+template<>
+struct TypeIdZoneTypes<POLAR_TYPEID_ZONE>
+{
+  enum Types : uint8_t
+  {
 #define POLAR_TYPEID_NAMED(Type, Name) Name,
 #define POLAR_TYPEID_TEMPLATE1_NAMED(Template, Name, Param1, Arg1) Name,
 #include POLAR_TYPEID_HEADER
