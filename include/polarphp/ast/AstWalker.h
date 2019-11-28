@@ -8,6 +8,7 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //===----------------------------------------------------------------------===//
+//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -23,7 +24,7 @@
 #ifndef POLARPHP_AST_AST_WALKER_H
 #define POLARPHP_AST_AST_WALKER_H
 
-#include "llvm/ADTPointerUnion.h"
+#include "llvm/ADT/PointerUnion.h"
 #include <utility>
 
 namespace polar::ast {
