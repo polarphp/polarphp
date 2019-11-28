@@ -31,14 +31,13 @@
 #define POLARPHP_AST_PRETTYSTACKTRACE_H
 
 #include "llvm/Support/PrettyStackTrace.h"
-#include "polarphp/parser/SourceLoc.h"
+#include "polarphp/basic/SourceLoc.h"
 
 namespace polar::ast {
 
 using llvm::PrettyStackTraceEntry;
 using llvm::raw_ostream;
-using polar::parser::SourceLoc;
-
+using polar::basic::SourceLoc;
 class AstContext;
 
 } // polar::ast
