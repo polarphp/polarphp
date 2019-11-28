@@ -68,6 +68,11 @@ polar_collect_files(
 
 polar_collect_files(
    TYPE_HEADER
+   DIR demangling
+   OUTPUT_VAR POLAR_DEMANGLING_HEADERS)
+
+polar_collect_files(
+   TYPE_HEADER
    DIR markup
    OUTPUT_VAR POLAR_MARKUP_HEADERS)
 
@@ -117,6 +122,7 @@ polar_merge_list(POLAR_HEADERS POLAR_BASIC_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_PIL_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_KERNEL_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_PARSER_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_DEMANGLING_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_MARKUP_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_REFLECTION_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_SEMA_HEADERS)

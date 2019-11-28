@@ -17,12 +17,12 @@ polar_collect_files(
 polar_merge_list(POLARPHP_BASIC_ADT_SOURCES POLAR_HEADERS)
 
 add_library(PolarBasic OBJECT ${POLARPHP_BASIC_ADT_SOURCES})
-target_link_libraries(PolarBasic PolarGlobal nlohmann_json::nlohmann_json LLVMSupport)
+target_link_libraries(PolarBasic PolarGlobal nlohmann_json::nlohmann_json LLVMSupport LLVMCore)
 
 set_target_properties(
    PolarBasic
    PROPERTIES
    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR};"
-   INTERFACE_LINK_LIBRARIES "PolarGlobal;nlohmann_json::nlohmann_json;LLVMSupport")
+   INTERFACE_LINK_LIBRARIES "PolarGlobal;nlohmann_json::nlohmann_json;LLVMSupport;LLVMCore")
 
 add_dependencies(PolarBasic llvm-project)
