@@ -21,6 +21,10 @@
 #include "polarphp/parser/Token.h"
 #include "polarphp/parser/ParsedTrivia.h"
 
+namespace polar::basic {
+class SourceManager;
+}
+
 namespace polar::ast {
 class DiagnosticEngine;
 } // polar::ast
@@ -46,8 +50,8 @@ using polar::basic::StringRef;
 using polar::ast::DiagnosticEngine;
 using polar::kernel::LangOptions;
 using polar::syntax::Syntax;
+using polar::basic::SourceManager;
 
-class SourceManager;
 class Lexer;
 
 void parse_error(StringRef msg);

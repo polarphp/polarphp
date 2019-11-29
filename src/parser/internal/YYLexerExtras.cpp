@@ -11,7 +11,7 @@
 
 #include "polarphp/parser/internal/YYLexerExtras.h"
 #include "polarphp/parser/internal/YYLexerDefs.h"
-#include "polarphp/basic/CharInfo.h"
+#include "clang/Basic/CharInfo.h"
 #include "polarphp/parser/Token.h"
 #include "polarphp/parser/Lexer.h"
 #include "polarphp/parser/Parser.h"
@@ -589,7 +589,7 @@ namespace {
 bool is_valid_identifier_continuation_code_point(uint32_t c)
 {
    if (c < 0x80) {
-      return polar::basic::is_identifier_body(static_cast<unsigned char>(c), true);
+      return clang::isIdentifierBody(static_cast<unsigned char>(c), true);
    }
    // N1518: Recommendations for extended identifier characters for c and c++
    // Proposed Annex X.1: Ranges of characters allowed

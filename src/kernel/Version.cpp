@@ -25,7 +25,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "polarphp/basic/CharInfo.h"
+#include "clang/Basic/CharInfo.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/StringExtras.h"
 #include "llvm/Support/raw_ostream.h"
