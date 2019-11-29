@@ -167,7 +167,7 @@ public:
 
    friend void simple_display(raw_ostream &out, const AnyValue &value)
    {
-      m_stored->display(out);
+      value.m_stored->display(out);
    }
 
    /// Return the result of calling simple_display as a string.
@@ -175,5 +175,30 @@ public:
 };
 
 } // polar::basic
+
+
+namespace llvm {
+template<typename T>
+bool operator==(const TinyPtrVector<T> &lhs, const TinyPtrVector<T> &rhs)
+{
+   if (lhs.size() != rhs.size()) {
+      return false;
+   }
+
+   for (unsigned i = 0, n = lhs.size(); i != n; ++i) {
+      if (lhs[i] != rhs[i]) {
+         return false;
+      }
+   }
+
+   return true;
+}
+
+template<typename T>
+bool operator!=(const TinyPtrVector<T> &lhs, const TinyPtrVector<T> &rhs)
+{
+   return !(lhs == rhs);
+}
+} // end namespace llvm
 
 #endif // POLARPHP_BASIC_ANYVALUE_H

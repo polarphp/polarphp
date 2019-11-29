@@ -34,22 +34,21 @@
 //===----------------------------------------------------------------------===//
 
 #ifndef POLAR_TYPEID_ZONE
-#  error Must define the value of the TypeId zone with the given name.
+#  error Must define the value of the TypeID zone with the given name.
 #endif
 
 #ifndef POLAR_TYPEID_HEADER
-#  error Must define the TypeId header name with POLAR_TYPEID_HEADER
+#  error Must define the TypeID header name with POLAR_TYPEID_HEADER
 #endif
 
-// Define a TypeId where the type name and internal name are the same.
+// Define a TypeID where the type name and internal name are the same.
 #define POLAR_TYPEID(Type) POLAR_TYPEID_NAMED(Type, Type)
 
 // First pass: put all of the names into an enum so we get values for them.
 template<>
 struct TypeIdZoneTypes<POLAR_TYPEID_ZONE>
 {
-  enum Types : uint8_t
-  {
+  enum Types : std::uint8_t {
 #define POLAR_TYPEID_NAMED(Type, Name) Name,
 #define POLAR_TYPEID_TEMPLATE1_NAMED(Template, Name, Param1, Arg1) Name,
 #include POLAR_TYPEID_HEADER
@@ -58,24 +57,24 @@ struct TypeIdZoneTypes<POLAR_TYPEID_ZONE>
   };
 };
 
-// Second pass: create specializations of TypeId for these types.
+// Second pass: create specializations of TypeID for these types.
 #define POLAR_TYPEID_NAMED(Type, Name)                       \
 template<> struct TypeId<Type> {                             \
   static const uint8_t zoneID = POLAR_TYPEID_ZONE;           \
   static const uint8_t localID =                             \
     TypeIdZoneTypes<POLAR_TYPEID_ZONE>::Name;                \
                                                              \
-  static const uint64_t value = formTypeId(zoneID, localID); \
+  static const uint64_t value = form_type_id(zoneID, localID); \
                                                              \
-  static polar::basic::StringRef getName() { return #Name; }         \
+  static llvm::StringRef getName() { return #Name; }         \
 };
 
 #define POLAR_TYPEID_TEMPLATE1_NAMED(Template, Name, Param1, Arg1)    \
 template<Param1> struct TypeId<Template<Arg1>> {                      \
 private:                                                              \
   static const uint64_t templateID =                                  \
-    formTypeId(POLAR_TYPEID_ZONE,                                     \
-               TypeIdZoneTypes<POLAR_TYPEID_ZONE>::Name);             \
+    form_type_id(POLAR_TYPEID_ZONE,                                   \
+                 TypeIdZoneTypes<POLAR_TYPEID_ZONE>::Name);             \
                                                                       \
 public:                                                               \
   static const uint64_t value =                                       \

@@ -31,9 +31,9 @@
 #include <thread>
 #include <tuple>
 
-#define SWIFT_FUNC_STAT SWIFT_FUNC_STAT_NAMED(DEBUG_TYPE)
+#define POLAR_FUNC_STAT POLAR_FUNC_STAT_NAMED(DEBUG_TYPE)
 
-#define SWIFT_FUNC_STAT_NAMED(DEBUG_TYPE)                               \
+#define POLAR_FUNC_STAT_NAMED(DEBUG_TYPE)                               \
    do {                                                                  \
    static llvm::Statistic FStat =                                      \
 {DEBUG_TYPE, __func__, __func__, {0}, {false}};                   \
