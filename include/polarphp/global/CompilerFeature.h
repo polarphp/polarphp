@@ -544,4 +544,10 @@ inline void deallocate_buffer(void *ptr, size_t size, size_t alignment) {
 # define POLAR_PACKED_END   _Pragma("pack(pop)")
 #endif
 
+#if __has_attribute(constructor)
+#define POLAR_CONSTRUCTOR __attribute__((constructor))
+#else
+#define POLAR_CONSTRUCTOR
+#endif
+
 #endif // POLAR_DEVLTOOLS_UTILS_COMPILER_FEATURE_H
