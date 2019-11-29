@@ -1,4 +1,4 @@
-//===--- SILType.h - Defines the SILType type -------------------*- C++ -*-===//
+//===--- Unreachable.h - Implements swift_runtime_unreachable ---*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -10,10 +10,6 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// This file defines the SILType class, which is used to refer to SIL
-// representation types.
-//
-//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -23,18 +19,27 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2019/11/27.
+// Created by polarboy on 2019/11/29.
+//
+//===----------------------------------------------------------------------===//
+//
+//  This file defines swift_runtime_unreachable, an LLVM-independent
+//  implementation of llvm_unreachable.
+//
+//===----------------------------------------------------------------------===//
 
-#ifndef POLAR_PIL_LANG_PILTYPE_H
-#define POLAR_PIL_LANG_PILTYPE_H
+#ifndef POLARPHP_RUNTIME_UNREACHABLE_H
+#define POLARPHP_RUNTIME_UNREACHABLE_H
 
-//#include "polarphp/ast/CanTypeVisitor.h"
-//#include "polarphp/ast/Types.h"
-#include "llvm/ADT/PointerIntPair.h"
-#include "llvm/ADT/Hashing.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "polarphp/pil/lang/PILAllocated.h"
-#include "polarphp/pil/lang/PILArgumentConvention.h"
-#include "polarphp/pil/lang/PILDeclRef.h"
+#include <assert.h>
+#include <stdlib.h>
 
-#endif //POLAR_PIL_LANG_PILTYPE_H
+[[noreturn]]
+inline static void polarphp_runtime_unreachable(const char *msg)
+{
+   assert(false && msg);
+   (void)msg;
+   abort();
+}
+
+#endif // POLARPHP_RUNTIME_UNREACHABLE_H
