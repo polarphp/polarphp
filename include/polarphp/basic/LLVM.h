@@ -37,8 +37,14 @@ template<typename T> class ArrayRef;
 template<typename T> class MutableArrayRef;
 template<typename T> class TinyPtrVector;
 template<typename T> class Optional;
-template <typename PT1, typename PT2> class PointerUnion;
-template <typename PT1, typename PT2, typename PT3> class PointerUnion3;
+template <typename... PTs> class PointerUnion;
+template <typename PT1, typename PT2, typename PT3>
+using PointerUnion3 = PointerUnion<PT1, PT2, PT3>;
+/// A pointer union of four pointer types. See documentation for PointerUnion
+/// for usage.
+template <typename PT1, typename PT2, typename PT3, typename PT4>
+using PointerUnion4 = PointerUnion<PT1, PT2, PT3, PT4>;
+
 class SmallBitVector;
 
 // Other common classes.

@@ -25,4 +25,179 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "polarphp/ast/Identifier.h"
+#include "llvm/ADT/StringExtras.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/ConvertUTF.h"
+#include "clang/Basic/CharInfo.h"
 
+//namespace polar::ast {
+
+//void *DeclBaseName::SubscriptIdentifierData =
+//      &DeclBaseName::SubscriptIdentifierData;
+//void *DeclBaseName::ConstructorIdentifierData =
+//      &DeclBaseName::ConstructorIdentifierData;
+//void *DeclBaseName::DestructorIdentifierData =
+//      &DeclBaseName::DestructorIdentifierData;
+
+//raw_ostream &llvm::operator<<(raw_ostream &OS, Identifier I) {
+//   if (I.get() == nullptr)
+//      return OS << "_";
+//   return OS << I.get();
+//}
+
+//raw_ostream &llvm::operator<<(raw_ostream &OS, DeclBaseName D) {
+//   return OS << D.userFacingName();
+//}
+
+//raw_ostream &llvm::operator<<(raw_ostream &OS, DeclName I) {
+//   if (I.isSimpleName())
+//      return OS << I.getBaseName();
+
+//   OS << I.getBaseName() << "(";
+//   for (auto c : I.getArgumentNames()) {
+//      OS << c << ':';
+//   }
+//   OS << ")";
+//   return OS;
+//}
+
+//raw_ostream &llvm::operator<<(raw_ostream &OS, swift::ObjCSelector S) {
+//   unsigned n = S.getNumArgs();
+//   if (n == 0) {
+//      OS << S.getSelectorPieces()[0];
+//      return OS;
+//   }
+
+//   for (auto piece : S.getSelectorPieces()) {
+//      if (!piece.empty())
+//         OS << piece;
+//      OS << ":";
+//   }
+//   return OS;
+//}
+
+//bool Identifier::isOperatorSlow() const {
+//   StringRef data = str();
+//   auto *s = reinterpret_cast<llvm::UTF8 const *>(data.begin()),
+//         *end = reinterpret_cast<llvm::UTF8 const *>(data.end());
+//   llvm::UTF32 codePoint;
+//   llvm::ConversionResult res =
+//         llvm::convertUTF8Sequence(&s, end, &codePoint, llvm::strictConversion);
+//   assert(res == llvm::conversionOK && "invalid UTF-8 in identifier?!");
+//   (void)res;
+//   return !empty() && isOperatorStartCodePoint(codePoint);
+//}
+
+//int Identifier::compare(Identifier other) const {
+//   // Handle empty identifiers.
+//   if (empty() || other.empty()) {
+//      if (empty() != other.empty()) {
+//         return other.empty() ? -1 : 1;
+//      }
+
+//      return 0;
+//   }
+
+//   return str().compare(other.str());
+//}
+
+//int DeclName::compare(DeclName other) const {
+//   // Compare base names.
+//   if (int result = getBaseName().compare(other.getBaseName()))
+//      return result;
+
+//   // Compare argument names.
+//   auto argNames = getArgumentNames();
+//   auto otherArgNames = other.getArgumentNames();
+//   for (unsigned i = 0, n = std::min(argNames.size(), otherArgNames.size());
+//        i != n; ++i) {
+//      if (int result = argNames[i].compare(otherArgNames[i]))
+//         return result;
+//   }
+
+//   if (argNames.size() == otherArgNames.size())
+//      return 0;
+
+//   return argNames.size() < otherArgNames.size() ? -1 : 1;
+//}
+
+//static bool equals(ArrayRef<Identifier> idents, ArrayRef<StringRef> strings) {
+//   if (idents.size() != strings.size())
+//      return false;
+//   for (size_t i = 0, e = idents.size(); i != e; ++i) {
+//      if (!idents[i].is(strings[i]))
+//         return false;
+//   }
+//   return true;
+//}
+
+//bool DeclName::isCompoundName(DeclBaseName baseName,
+//                              ArrayRef<StringRef> argNames) const {
+//   return (isCompoundName() &&
+//           getBaseName() == baseName &&
+//           equals(getArgumentNames(), argNames));
+//}
+
+//bool DeclName::isCompoundName(StringRef baseName,
+//                              ArrayRef<StringRef> argNames) const {
+//   return (isCompoundName() &&
+//           getBaseName() == baseName &&
+//           equals(getArgumentNames(), argNames));
+//}
+
+//void DeclName::dump() const {
+//   llvm::errs() << *this << "\n";
+//}
+
+//StringRef DeclName::getString(llvm::SmallVectorImpl<char> &scratch,
+//                              bool skipEmptyArgumentNames) const {
+//   {
+//      llvm::raw_svector_ostream out(scratch);
+//      print(out, skipEmptyArgumentNames);
+//   }
+
+//   return StringRef(scratch.data(), scratch.size());
+//}
+
+//llvm::raw_ostream &DeclName::print(llvm::raw_ostream &os,
+//                                   bool skipEmptyArgumentNames) const {
+//   // Print the base name.
+//   os << getBaseName();
+
+//   // If this is a simple name, we're done.
+//   if (isSimpleName())
+//      return os;
+
+//   if (skipEmptyArgumentNames) {
+//      // If there is more than one argument yet none of them have names,
+//      // we're done.
+//      if (!getArgumentNames().empty()) {
+//         bool anyNonEmptyNames = false;
+//         for (auto c : getArgumentNames()) {
+//            if (!c.empty()) {
+//               anyNonEmptyNames = true;
+//               break;
+//            }
+//         }
+
+//         if (!anyNonEmptyNames)
+//            return os;
+//      }
+//   }
+
+//   // Print the argument names.
+//   os << "(";
+//   for (auto c : getArgumentNames()) {
+//      os << c << ':';
+//   }
+//   os << ")";
+//   return os;
+
+//}
+
+//llvm::raw_ostream &DeclName::printPretty(llvm::raw_ostream &os) const {
+//   return print(os, /*skipEmptyArgumentNames=*/!isSpecial());
+//}
+
+//} // polar::ast
