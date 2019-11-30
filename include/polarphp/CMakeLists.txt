@@ -54,7 +54,7 @@ polar_collect_files(
 if (UNIX)
    list(APPEND POLAR_BASIC_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/basic/internal/_platform/TaskQueueImplUnix.h)
 else()
-   list(APPEND POLAR_BASIC_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/basic/internal/_platform/TaskQueueDefault.h)
+   list(APPEND POLAR_BASIC_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/basic/internal/_platform/TaskQueueImplDefault.h)
 endif()
 
 polar_collect_files(
