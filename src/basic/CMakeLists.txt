@@ -14,11 +14,19 @@ polar_collect_files(
    DIR .
    OUTPUT_VAR POLARPHP_BASIC_SOURCES)
 
+set(platformDir ${CMAKE_CURRENT_SOURCE_DIR}/_platform)
+
 polar_merge_list(POLARPHP_BASIC_SOURCES POLAR_HEADERS)
 if (UNIX)
-   list(APPEND POLARPHP_BASIC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/_platform/TaskQueueUnix.cpp)
+   list(APPEND POLARPHP_BASIC_SOURCES ${platformDir}/TaskQueueUnix.cpp)
 else()
-   list(APPEND POLARPHP_BASIC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/_platform/TaskQueueDefault.cpp)
+   list(APPEND POLARPHP_BASIC_SOURCES ${platformDir}/TaskQueueDefault.cpp)
+endif()
+
+if (APPLE)
+   list(APPEND POLARPHP_BASIC_SOURCES ${platformDir}/CacheDarwin.cpp)
+else()
+   list(APPEND POLARPHP_BASIC_SOURCES ${platformDir}/CacheDefault.cpp)
 endif()
 
 add_library(PolarBasic OBJECT ${POLARPHP_BASIC_SOURCES})
