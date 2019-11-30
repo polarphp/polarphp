@@ -37,7 +37,7 @@
 struct rusage;
 #endif
 
-namespace polar {
+namespace polar::basic {
 class UnifiedStatsReporter;
 }
 
@@ -45,6 +45,7 @@ namespace polar::sys {
 
 class Task; // forward declared to allow for platform-specific implementations
 
+using polar::basic::UnifiedStatsReporter;
 using ProcessId = llvm::sys::procid_t;
 
 /// Indicates how a TaskQueue should respond to the task finished event.
@@ -297,5 +298,26 @@ private:
 };
 
 } // polar::sys
+
+namespace polar::json {
+template <>
+struct ObjectTraits<sys::TaskProcessInformation>
+{
+   static void mapping(Output &out, sys::TaskProcessInformation &value)
+   {
+      value.provideMapping(out);
+   }
+};
+
+template <>
+struct ObjectTraits<sys::TaskProcessInformation::ResourceUsage>
+{
+   static void mapping(Output &out,
+                       sys::TaskProcessInformation::ResourceUsage &value)
+   {
+      value.provideMapping(out);
+   }
+};
+} // polar::json
 
 #endif // POLARPHP_BASIC_TASK_QUEUE_H

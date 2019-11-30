@@ -199,10 +199,10 @@ struct MissingTrait;
 template <class T>
 struct HasScalarEnumerationTraits
 {
-   using Signature_enumeration = void (*)(class Output &, T &);
+   using SignatureEnumeration = void (*)(class Output &, T &);
 
    template <typename U>
-   static char test(SameType<Signature_enumeration, &U::enumeration>*);
+   static char test(SameType<SignatureEnumeration, &U::enumeration>*);
 
    template <typename U>
    static double test(...);
@@ -217,10 +217,10 @@ public:
 template <class T>
 struct HasScalarBitSetTraits
 {
-   using Signature_bitset = void (*)(class Output &, T &);
+   using SignatureBitset = void (*)(class Output &, T &);
 
    template <typename U>
-   static char test(SameType<Signature_bitset, &U::bitset>*);
+   static char test(SameType<SignatureBitset, &U::bitset>*);
 
    template <typename U>
    static double test(...);
@@ -234,12 +234,12 @@ public:
 template <class T>
 struct HasScalarTraits
 {
-   using Signature_output = void (*)(const T &, llvm::raw_ostream &);
-   using Signature_mustQuote = bool (*)(StringRef);
+   using SignatureOutput = void (*)(const T &, llvm::raw_ostream &);
+   using SignatureMustQuote = bool (*)(StringRef);
 
    template <typename U>
-   static char test(SameType<Signature_output, &U::output> *,
-                    SameType<Signature_mustQuote, &U::mustQuote> *);
+   static char test(SameType<SignatureOutput, &U::output> *,
+                    SameType<SignatureMustQuote, &U::mustQuote> *);
 
    template <typename U>
    static double test(...);
@@ -253,12 +253,12 @@ public:
 template <class T>
 struct HasScalarReferenceTraits
 {
-   using Signature_stringRef = StringRef (*)(const T &);
-   using Signature_mustQuote = bool (*)(StringRef);
+   using SignatureStringRef = StringRef (*)(const T &);
+   using SignatureMustQuote = bool (*)(StringRef);
 
    template <typename U>
-   static char test(SameType<Signature_stringRef, &U::stringRef> *,
-                    SameType<Signature_mustQuote, &U::mustQuote> *);
+   static char test(SameType<SignatureStringRef, &U::stringRef> *,
+                    SameType<SignatureMustQuote, &U::mustQuote> *);
 
    template <typename U>
    static double test(...);
@@ -272,10 +272,10 @@ public:
 template <class T>
 struct HasObjectTraits
 {
-   using Signature_mapping = void (*)(class Output &, T &);
+   using SignatureMapping = void (*)(class Output &, T &);
 
    template <typename U>
-   static char test(SameType<Signature_mapping, &U::mapping>*);
+   static char test(SameType<SignatureMapping, &U::mapping>*);
 
    template <typename U>
    static double test(...);
@@ -288,10 +288,10 @@ public:
 template <class T>
 struct HasObjectValidateTraits
 {
-   using Signature_validate = StringRef (*)(class Output &, T &);
+   using SignatureValidate = StringRef (*)(class Output &, T &);
 
    template <typename U>
-   static char test(SameType<Signature_validate, &U::validate>*);
+   static char test(SameType<SignatureValidate, &U::validate>*);
 
    template <typename U>
    static double test(...);
@@ -306,10 +306,10 @@ public:
 template <class T>
 struct HasArrayMethodTraits
 {
-   using Signature_size = size_t (*)(class Output &, T &);
+   using SignatureSize = size_t (*)(class Output &, T &);
 
    template <typename U>
-   static char test(SameType<Signature_size, &U::size>*);
+   static char test(SameType<SignatureSize, &U::size>*);
 
    template <typename U>
    static double test(...);
@@ -327,10 +327,10 @@ struct HasArrayTraits : public std::integral_constant<bool,
 template <class T>
 struct HasNullableTraits
 {
-   using Signature_isNull = bool (*)(T &);
+   using SignatureIsNull = bool (*)(T &);
 
    template <typename U>
-   static char test(SameType<Signature_isNull, &U::isNull> *);
+   static char test(SameType<SignatureIsNull, &U::isNull> *);
 
    template <typename U>
    static double test(...);
@@ -376,7 +376,7 @@ inline bool isBool(StringRef str)
 }
 
 template<typename T>
-struct missingTraits : public std::integral_constant<bool,
+struct MissingTraits : public std::integral_constant<bool,
       !HasScalarEnumerationTraits<T>::value
       && !HasScalarBitSetTraits<T>::value
       && !HasScalarTraits<T>::value
@@ -386,12 +386,12 @@ struct missingTraits : public std::integral_constant<bool,
       && !HasArrayTraits<T>::value> {};
 
 template<typename T>
-struct validatedObjectTraits : public std::integral_constant<bool,
+struct ValidatedObjectTraits : public std::integral_constant<bool,
       HasObjectTraits<T>::value
       && HasObjectValidateTraits<T>::value> {};
 
 template<typename T>
-struct unvalidatedObjectTraits : public std::integral_constant<bool,
+struct UnvalidatedObjectTraits : public std::integral_constant<bool,
       HasObjectTraits<T>::value
       && !HasObjectValidateTraits<T>::value> {};
 
@@ -408,23 +408,28 @@ private:
       ObjectOtherKey
    };
 
-   llvm::raw_ostream &Stream;
-   SmallVector<State, 8> StateStack;
-   bool PrettyPrint;
-   bool NeedBitValueComma;
-   bool EnumerationMatchFound;
-   UserInfoMap UserInfo;
+   llvm::raw_ostream &m_stream;
+   SmallVector<State, 8> m_stateStack;
+   bool m_prettyPrint;
+   bool m_needBitValueComma;
+   bool m_enumerationMatchFound;
+   UserInfoMap m_userInfo;
 
 public:
-   Output(llvm::raw_ostream &os, UserInfoMap UserInfo = {},
-          bool PrettyPrint = true)
-      : Stream(os), PrettyPrint(PrettyPrint), NeedBitValueComma(false),
-        EnumerationMatchFound(false), UserInfo(UserInfo) {}
+   Output(llvm::raw_ostream &os, UserInfoMap userInfo = {},
+          bool prettyPrint = true)
+      : m_stream(os),
+        m_prettyPrint(prettyPrint),
+        m_needBitValueComma(false),
+        m_enumerationMatchFound(false),
+        m_userInfo(userInfo)
+   {}
+
    virtual ~Output() = default;
 
    UserInfoMap &getUserInfo()
    {
-      return UserInfo;
+      return m_userInfo;
    }
 
    unsigned beginArray();
@@ -518,9 +523,9 @@ public:
 private:
    template <typename T>
    void processKeyWithDefault(StringRef key, Optional<T> &value,
-                              const Optional<T> &DefaultValue, bool required)
+                              const Optional<T> &defaultValue, bool required)
    {
-      assert(!DefaultValue.hasValue() &&
+      assert(!defaultValue.hasValue() &&
              "Optional<T> shouldn't have a value!");
       void *SaveInfo;
       bool UseDefault;
@@ -533,24 +538,24 @@ private:
          this->postflightKey(SaveInfo);
       } else {
          if (UseDefault)
-            value = DefaultValue;
+            value = defaultValue;
       }
    }
 
    template <typename T>
-   void processKeyWithDefault(StringRef key, T &value, const T &DefaultValue,
+   void processKeyWithDefault(StringRef key, T &value, const T &defaultValue,
                               bool required)
    {
       void *SaveInfo;
       bool UseDefault;
-      const bool sameAsDefault = value == DefaultValue;
+      const bool sameAsDefault = value == defaultValue;
       if (this->preflightKey(key, required, sameAsDefault, UseDefault,
                              SaveInfo)) {
          jsonize(*this, value, required);
          this->postflightKey(SaveInfo);
       } else {
          if (UseDefault)
-            value = DefaultValue;
+            value = defaultValue;
       }
    }
 
@@ -703,7 +708,6 @@ jsonize(Output &out, T &value, bool)
    }
 }
 
-
 template<typename T>
 typename std::enable_if<HasScalarTraits<T>::value,void>::type
 jsonize(Output &out, T &value, bool)
@@ -738,7 +742,7 @@ jsonize(Output &out, T &Obj, bool)
 
 
 template<typename T>
-typename std::enable_if<validatedObjectTraits<T>::value, void>::type
+typename std::enable_if<ValidatedObjectTraits<T>::value, void>::type
 jsonize(Output &out, T &value, bool)
 {
    out.beginObject();
@@ -754,7 +758,7 @@ jsonize(Output &out, T &value, bool)
 }
 
 template<typename T>
-typename std::enable_if<unvalidatedObjectTraits<T>::value, void>::type
+typename std::enable_if<UnvalidatedObjectTraits<T>::value, void>::type
 jsonize(Output &out, T &value, bool)
 {
    out.beginObject();
@@ -763,7 +767,7 @@ jsonize(Output &out, T &value, bool)
 }
 
 template<typename T>
-typename std::enable_if<missingTraits<T>::value, void>::type
+typename std::enable_if<MissingTrait<T>::value, void>::type
 jsonize(Output &out, T &value, bool)
 {
    char missing_json_trait_for_type[sizeof(MissingTrait<T>)];

@@ -57,7 +57,7 @@
 #cmakedefine HAVE_CRASHREPORTER_INFO
 
 /* Define to 1 if you have the `getrlimit' function. conflict with zendVM */
-#cmakedefine POLAR_HAVE_GETRLIMIT
+#cmakedefine HAVE_GETRLIMIT
 
 /* Define to 1 if you have the `getrusage' function. */
 #cmakedefine HAVE_GETRUSAGE
@@ -100,7 +100,7 @@ don't. */
 #cmakedefine HAVE_MALLINFO
 
 /* Define to 1 if you have the <malloc.h> header file. */
-#cmakedefine POLAR_HAVE_MALLOC_H
+#cmakedefine HAVE_MALLOC_H
 
 /* Define to 1 if you have the <malloc/malloc.h> header file. */
 #cmakedefine HAVE_MALLOC_MALLOC_H
@@ -130,22 +130,22 @@ don't. */
 #cmakedefine HAVE_SIGALTSTACK
 
 /* Define to 1 if you have the <signal.h> header file. conflict with zendVM */
-#cmakedefine POLAR_HAVE_SIGNAL_H
+#cmakedefine HAVE_SIGNAL_H
 
 /* Define to 1 if you have the <dlfcn.h> header file. conflict with zendVM */
-#cmakedefine POLAR_HAVE_DLFCN_H
+#cmakedefine HAVE_DLFCN_H
 
 /* Define if dlopen() is available on this platform. conflict with zendVM */
-#cmakedefine POLAR_HAVE_DLOPEN
+#cmakedefine HAVE_DLOPEN
 
 /* Define if dladdr() is available on this platform. conflict with zendVM */
-#cmakedefine POLAR_HAVE_DLADDR
+#cmakedefine HAVE_DLADDR
 
 /* Define to 1 if you have the <errno.h> header file. conflict with zendVM */
-#cmakedefine POLAR_HAVE_ERRNO_H
+#cmakedefine HAVE_ERRNO_H
 
 /* Define to 1 if you have the <fcntl.h> header file. conflict with zendVM */
-#cmakedefine POLAR_HAVE_FCNTL_H
+#cmakedefine HAVE_FCNTL_H
 
 /* Define to 1 if you have the <fenv.h> header file. */
 #cmakedefine HAVE_FENV_H
@@ -155,31 +155,31 @@ don't. */
 #cmakedefine HAVE_DECL_STRERROR_S
 
 /* Define to 1 if you have the `strerror' function. conflict with zendVM */
-#cmakedefine POLAR_HAVE_STRERROR
+#cmakedefine HAVE_STRERROR
 
 /* Define to 1 if you have the `strerror_r' function. */
 #cmakedefine HAVE_STRERROR_R
 
 /* Define to 1 if you have the `setrlimit' function. conflict with zendVM */
-#cmakedefine POLAR_HAVE_SETRLIMIT
+#cmakedefine HAVE_SETRLIMIT
 
 /* Define to 1 if you have the <sys/ioctl.h> header file. conflict with zendVM */
-#cmakedefine POLAR_HAVE_SYS_IOCTL_H
+#cmakedefine HAVE_SYS_IOCTL_H
 
 /* Define to 1 if you have the <sys/mman.h> header file. conflict with zendVM */
-#cmakedefine POLAR_HAVE_SYS_MMAN_H
+#cmakedefine HAVE_SYS_MMAN_H
 
 /* Define to 1 if you have the <sys/param.h> header file. conflict with zendVM */
-#cmakedefine POLAR_HAVE_SYS_PARAM_H
+#cmakedefine HAVE_SYS_PARAM_H
 
 /* Define to 1 if you have the <sys/resource.h> header file. */
 #cmakedefine HAVE_SYS_RESOURCE_H
 
 /* Define to 1 if you have the <sys/stat.h> header file. conflict with zendVM */
-#cmakedefine POLAR_HAVE_SYS_STAT_H
+#cmakedefine HAVE_SYS_STAT_H
 
 /* Define to 1 if you have the <sys/time.h> header file. conflict with zendVM */
-#cmakedefine POLAR_HAVE_SYS_TIME_H
+#cmakedefine HAVE_SYS_TIME_H
 
 /* Define to 1 if stat struct has st_mtimespec member .*/
 #cmakedefine HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC
@@ -188,7 +188,7 @@ don't. */
 #cmakedefine HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC
 
 /* Define to 1 if you have the <sys/types.h> header file. conflict with zendVM */
-#cmakedefine POLAR_HAVE_SYS_TYPES_H
+#cmakedefine HAVE_SYS_TYPES_H
 
 /* Define if the setupterm() function is supported this platform. */
 #cmakedefine HAVE_TERMINFO
@@ -197,7 +197,9 @@ don't. */
 #cmakedefine HAVE_TERMIOS_H
 
 /* Define to 1 if you have the <unistd.h> header file. conflict with zendVM */
-#cmakedefine POLAR_HAVE_UNISTD_H
+#cmakedefine HAVE_UNISTD_H
+
+#cmakedefine HAVE_PROC_PID_RUSAGE
 
 /* Define to 1 if you have the <valgrind/valgrind.h> header file. */
 #cmakedefine HAVE_VALGRIND_VALGRIND_H
@@ -209,7 +211,7 @@ don't. */
 #cmakedefine01 POLAR_ON_UNIX
 
 /* Define to 1 if you have the `setlocale' function. */
-#cmakedefine POLAR_HAVE_SETLOCALE
+#cmakedefine HAVE_SETLOCALE
 
 /* Define if overriding target triple is enabled */
 #cmakedefine POLAR_TARGET_TRIPLE_ENV "${POLAR_TARGET_TRIPLE_ENV}"

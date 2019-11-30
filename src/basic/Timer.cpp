@@ -20,10 +20,10 @@
 //
 // Created by polarboy on 2019/04/29.
 
-#include "polarphp/basic/LangTimer.h"
+#include "polarphp/basic/Timer.h"
 
 namespace polar::basic {
 
-SharedTimer::State SharedTimer::m_compilationTimersEnabled = SharedTimer::State::Initial;
+SharedTimer::State SharedTimer::sm_compilationTimersEnabled = SharedTimer::State::Initial;
 
 } // polar::basic

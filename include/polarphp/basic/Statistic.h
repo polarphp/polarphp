@@ -110,26 +110,27 @@ public:
    // separate type since we do not have retroactive conformances in C++, and it
    // is a type that takes void* arguments since we do not have existentials
    // separate from objects in C++. Pity us.
-   struct TraceFormatter {
-      virtual void traceName(const void *Entity, raw_ostream &OS) const = 0;
-      virtual void traceLoc(const void *Entity,
-                            SourceManager *SourceMgr,
-                            clang::SourceManager *ClangSourceMgr,
+   struct TraceFormatter
+   {
+      virtual void traceName(const void *entity, raw_ostream &OS) const = 0;
+      virtual void traceLoc(const void *entity,
+                            SourceManager *sourceMgr,
+                            clang::SourceManager *clangSourceMgr,
                             raw_ostream &OS) const = 0;
       virtual ~TraceFormatter();
    };
 
    struct FrontendStatsEvent
    {
-      uint64_t TimeUSec;
-      uint64_t LiveUSec;
-      bool IsEntry;
+      uint64_t timeUSec;
+      uint64_t liveUSec;
+      bool isEntry;
       StringRef eventName;
-      StringRef CounterName;
-      int64_t CounterDelta;
-      int64_t CounterValue;
-      const void *Entity;
-      const TraceFormatter *Formatter;
+      StringRef counterName;
+      int64_t counterDelta;
+      int64_t counterValue;
+      const void *entity;
+      const TraceFormatter *formatter;
    };
 
    // We only write fine-grained trace entries when the user passed

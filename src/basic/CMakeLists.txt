@@ -12,11 +12,16 @@
 polar_collect_files(
    TYPE_BOTH
    DIR .
-   OUTPUT_VAR POLARPHP_BASIC_ADT_SOURCES)
+   OUTPUT_VAR POLARPHP_BASIC_SOURCES)
 
-polar_merge_list(POLARPHP_BASIC_ADT_SOURCES POLAR_HEADERS)
+polar_merge_list(POLARPHP_BASIC_SOURCES POLAR_HEADERS)
+if (UNIX)
+   list(APPEND POLARPHP_BASIC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/_platform/TaskQueueUnix.cpp)
+else()
+   list(APPEND POLARPHP_BASIC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/_platform/TaskQueueDefault.cpp)
+endif()
 
-add_library(PolarBasic OBJECT ${POLARPHP_BASIC_ADT_SOURCES})
+add_library(PolarBasic OBJECT ${POLARPHP_BASIC_SOURCES})
 target_link_libraries(PolarBasic PolarGlobal nlohmann_json::nlohmann_json LLVMSupport LLVMCore)
 
 set_target_properties(

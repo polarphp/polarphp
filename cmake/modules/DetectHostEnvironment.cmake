@@ -234,6 +234,7 @@ polar_check_symbol_exists(futimes sys/time.h HAVE_FUTIMES)
 polar_check_symbol_exists(posix_fallocate fcntl.h HAVE_POSIX_FALLOCATE)
 polar_check_symbol_exists(malloc_zone_statistics malloc/malloc.h
    HAVE_MALLOC_ZONE_STATISTICS)
+polar_check_symbol_exists(proc_pid_rusage "libproc.h" HAVE_PROC_PID_RUSAGE)
 polar_check_symbol_exists(posix_spawn spawn.h HAVE_POSIX_SPAWN)
 polar_check_symbol_exists(pread unistd.h HAVE_PREAD)
 polar_check_symbol_exists(realpath stdlib.h HAVE_REALPATH)
