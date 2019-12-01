@@ -109,7 +109,7 @@ public:
       return m_input;
    }
 
-   static bool classOf(const Action *action)
+   static bool classof(const Action *action)
    {
       return action->getKind() == Action::Kind::Input;
    }
@@ -167,7 +167,7 @@ public:
       return 0;
    }
 
-   static bool classOf(const Action *action)
+   static bool classof(const Action *action)
    {
       return (action->getKind() >= Kind::JobFirst &&
               action->getKind() <= Kind::JobLast);
@@ -229,7 +229,7 @@ public:
       return m_inputInfo;
    }
 
-   static bool classOf(const Action *action)
+   static bool classof(const Action *action)
    {
       return action->getKind() == Action::Kind::CompileJob;
    }
@@ -249,7 +249,7 @@ public:
                   filetypes::TY_Nothing)
    {}
 
-   static bool classOf(const Action *action)
+   static bool classof(const Action *action)
    {
       return action->getKind() == Action::Kind::InterpretJob;
    }
@@ -267,7 +267,7 @@ public:
         m_inputIndex(inputIndex)
    {}
 
-   static bool classOf(const Action *action)
+   static bool classof(const Action *action)
    {
       return action->getKind() == Action::Kind::BackendJob;
    }
@@ -308,7 +308,7 @@ public:
       return m_requestedMode;
    }
 
-   static bool classOf(const Action *action)
+   static bool classof(const Action *action)
    {
       return action->getKind() == Action::Kind::REPLJob;
    }
@@ -328,7 +328,7 @@ public:
                   filetypes::TY_PolarModuleFile)
    {}
 
-   static bool classOf(const Action *action)
+   static bool classof(const Action *action)
    {
       return action->getKind() == Action::Kind::MergeModuleJob;
    }
@@ -344,7 +344,7 @@ public:
                   filetypes::TY_Object)
    {}
 
-   static bool classOf(const Action *action)
+   static bool classof(const Action *action)
    {
       return action->getKind() == Action::Kind::ModuleWrapJob;
    }
@@ -360,7 +360,7 @@ public:
       : JobAction(Action::Kind::AutolinkExtractJob, inputs,
                   filetypes::TY_AutolinkFile) {}
 
-   static bool classOf(const Action *action)
+   static bool classof(const Action *action)
    {
       return action->getKind() == Action::Kind::AutolinkExtractJob;
    }
@@ -377,7 +377,7 @@ public:
                   filetypes::TY_dSYM)
    {}
 
-   static bool classOf(const Action *action)
+   static bool classof(const Action *action)
    {
       return action->getKind() == Action::Kind::GenerateDSYMJob;
    }
@@ -393,7 +393,7 @@ public:
       : JobAction(Action::Kind::VerifyDebugInfoJob, input,
                   filetypes::TY_Nothing) {}
 
-   static bool classOf(const Action *action)
+   static bool classof(const Action *action)
    {
       return action->getKind() == Action::Kind::VerifyDebugInfoJob;
    }
@@ -422,7 +422,7 @@ public:
       return m_persistentPCHDir;
    }
 
-   static bool classOf(const Action *action)
+   static bool classof(const Action *action)
    {
       return action->getKind() == Action::Kind::GeneratePCHJob;
    }
@@ -448,7 +448,7 @@ public:
       return m_kind;
    }
 
-   static bool classOf(const Action *action)
+   static bool classof(const Action *action)
    {
       return action->getKind() == Action::Kind::DynamicLinkJob;
    }
@@ -470,7 +470,7 @@ public:
       assert(linkKind == LinkKind::StaticLibrary);
    }
 
-   static bool classOf(const Action *action)
+   static bool classof(const Action *action)
    {
       return action->getKind() == Action::Kind::StaticLinkJob;
    }

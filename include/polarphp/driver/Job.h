@@ -273,14 +273,14 @@ public:
 
 public:
    Job(const JobAction &source, SmallVectorImpl<const Job *> &&inputs,
-       std::unique_ptr<CommandOutput> output, const char *executable,
+       std::unique_ptr<CommandOutput> output, const char *m_executable,
        llvm::opt::ArgStringList arguments,
        EnvironmentVector extraEnvironment = {},
        std::vector<FilelistInfo> infos = {},
        Optional<ResponseFileInfo> responseFile = None)
       : m_sourceAndCondition(&source, Condition::Always),
         m_inputs(std::move(inputs)), m_output(std::move(output)),
-        executable(executable), m_arguments(std::move(arguments)),
+        m_executable(m_executable), m_arguments(std::move(arguments)),
         m_extraEnvironment(std::move(extraEnvironment)),
         m_filelistFileInfos(std::move(infos)), m_responseFile(responseFile)
    {}
@@ -294,7 +294,7 @@ public:
 
    const char *getExecutable() const
    {
-      return executable;
+      return m_executable;
    }
 
    const llvm::opt::ArgStringList &getArguments() const
@@ -397,11 +397,11 @@ private:
    /// The output of this command.
    std::unique_ptr<CommandOutput> m_output;
 
-   /// The executable to run.
-   const char *executable;
+   /// The m_executable to run.
+   const char *m_executable;
 
    /// The list of program arguments (not including the implicit first argument,
-   /// which will be the executable).
+   /// which will be the m_executable).
    ///
    /// These argument strings must be kept alive as long as the Job is alive.
    llvm::opt::ArgStringList m_arguments;
@@ -436,7 +436,7 @@ class BatchJob : public Job
 {
 public:
    BatchJob(const JobAction &source, SmallVectorImpl<const Job *> &&inputs,
-            std::unique_ptr<CommandOutput> output, const char *executable,
+            std::unique_ptr<CommandOutput> output, const char *m_executable,
             llvm::opt::ArgStringList arguments,
             EnvironmentVector extraEnvironment, std::vector<FilelistInfo> infos,
             ArrayRef<const Job *> Combined, Job::PID &nextQuasiPID,

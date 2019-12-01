@@ -36,7 +36,7 @@ enum FileTypeId : uint8_t {
 #define TYPE(NAME, ID, EXTENSION, FLAGS) TY_##ID,
 #include "polarphp/basic/FileTypesDef.h"
 #undef TYPE
-  TY_INVALID
+   TY_INVALID
 };
 
 
@@ -79,5 +79,31 @@ static inline void for_all_types(llvm::function_ref<void(filetypes::FileTypeId)>
 }
 
 } // polar::filetypes
+
+namespace llvm {
+template <>
+struct DenseMapInfo<polar::filetypes::FileTypeId>
+{
+   using ID = polar::filetypes::FileTypeId;
+   static inline ID getEmptyKey()
+   {
+      return ID::TY_INVALID;
+   }
+
+   static inline ID getTombstoneKey()
+   {
+      return static_cast<ID>(ID::TY_INVALID + 1);
+   }
+   static unsigned getHashValue(ID value)
+   {
+      return static_cast<unsigned>(value * 37U);
+   }
+
+   static bool isEqual(ID lhs, ID rhs)
+   {
+      return lhs == rhs;
+   }
+};
+} // end namespace llvm
 
 #endif // POLARPHP_BASIC_FILE_TYPES_H
