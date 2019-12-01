@@ -42,7 +42,6 @@ class MemoryBuffer;
 
 namespace polar::basic {
 
-using BasicSourceMgr = llvm::SourceMgr;
 using llvm::IntrusiveRefCntPtr;
 using llvm::DenseMap;
 using llvm::ArrayRef;
@@ -51,10 +50,26 @@ using llvm::MemoryBuffer;
 using llvm::SMDiagnostic;
 using llvm::SMFixIt;
 using llvm::SMRange;
+using llvm::Optional;
+using llvm::None;
 
 /// This class manages and owns source buffers.
 class SourceManager
 {
+   llvm::SourceMgr LLVMSourceMgr;
+   llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem> m_filesystem;
+   unsigned m_codeCompletionBufferId = 0U;
+   unsigned m_codeCompletionOffset;
+
+   /// Associates buffer identifiers to buffer IDs.
+   llvm::DenseMap<StringRef, unsigned> m_bufIdentIdMap;
+
+   /// A cache mapping buffer identifiers to vfs Status entries.
+   ///
+   /// This is as much a hack to prolong the lifetime of status objects as it is
+   /// to speed up stats.
+   mutable llvm::DenseMap<StringRef, llvm::vfs::Status> m_statusCache;
+
    // \c #sourceLocation directive handling.
    struct VirtualFile
    {
@@ -66,39 +81,38 @@ class SourceManager
    mutable std::pair<const char *, const VirtualFile*> m_cachedVFile = {nullptr, nullptr};
 
 public:
-   SourceManager(IntrusiveRefCntPtr<llvm::vfs::FileSystem> fs =
+   SourceManager(llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem> fs =
          llvm::vfs::getRealFileSystem())
       : m_filesystem(fs)
    {}
 
-   BasicSourceMgr &getBasicSourceMgr()
+   llvm::SourceMgr &getLLVMSourceMgr()
    {
-      return m_sourceMgr;
+      return LLVMSourceMgr;
+   }
+   const llvm::SourceMgr &getLLVMSourceMgr() const
+   {
+      return LLVMSourceMgr;
    }
 
-   const BasicSourceMgr &getBasicSourceMgr() const
-   {
-      return m_sourceMgr;
-   }
-
-   void setFileSystem(IntrusiveRefCntPtr<llvm::vfs::FileSystem> fs)
+   void setFileSystem(llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem> fs)
    {
       m_filesystem = fs;
    }
 
-   IntrusiveRefCntPtr<llvm::vfs::FileSystem> getFileSystem()
+   llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem> getFileSystem()
    {
       return m_filesystem;
    }
 
    void setCodeCompletionPoint(unsigned bufferId, unsigned offset)
    {
-      assert(bufferId != 0U && "Buffer should be valid");
+      assert(bufferId != 0U && "buffer should be valid");
       m_codeCompletionBufferId = bufferId;
       m_codeCompletionOffset = offset;
    }
 
-   unsigned getCodeCompletionBufferID() const
+   unsigned getCodeCompletionBufferId() const
    {
       return m_codeCompletionBufferId;
    }
@@ -113,22 +127,30 @@ public:
    /// Returns true if \c LHS is before \c RHS in the source buffer.
    bool isBeforeInBuffer(SourceLoc lhs, SourceLoc rhs) const
    {
-      return lhs.m_loc.getPointer() < rhs.m_loc.getPointer();
+      return lhs.m_value.getPointer() < rhs.m_value.getPointer();
    }
 
    /// Returns true if range \c R contains the location \c loc.  The location
    /// \c loc should point at the beginning of the token.
    bool rangeContainsTokenLoc(SourceRange range, SourceLoc loc) const
    {
-      return loc == range.getStart() || loc == range.getEnd() ||
-            (isBeforeInBuffer(range.getStart(), loc) && isBeforeInBuffer(loc, range.getEnd()));
+      return loc == range.start || loc == range.end ||
+            (isBeforeInBuffer(range.start, loc) && isBeforeInBuffer(loc, range.end));
    }
 
    /// Returns true if range \c enclosing contains the range \c inner.
    bool rangeContains(SourceRange enclosing, SourceRange inner) const
    {
-      return rangeContainsTokenLoc(enclosing, inner.getStart()) &&
-            rangeContainsTokenLoc(enclosing, inner.getEnd());
+      return rangeContainsTokenLoc(enclosing, inner.start) &&
+            rangeContainsTokenLoc(enclosing, inner.end);
+   }
+
+   /// Returns true if range \p R contains the code-completion location, if any.
+   bool rangeContainsCodeCompletionLoc(SourceRange range) const
+   {
+      return m_codeCompletionBufferId
+            ? rangeContainsTokenLoc(range, getCodeCompletionLoc())
+            : false;
    }
 
    /// Returns the buffer ID for the specified *valid* location.
@@ -138,7 +160,7 @@ public:
    unsigned findBufferContainingLoc(SourceLoc loc) const;
 
    /// Adds a memory buffer to the SourceManager, taking ownership of it.
-   unsigned addNewSourceBuffer(std::unique_ptr<MemoryBuffer> buffer);
+   unsigned addNewSourceBuffer(std::unique_ptr<llvm::MemoryBuffer> buffer);
 
    /// Add a \c #sourceLocation-defined virtual file region.
    ///
@@ -155,7 +177,7 @@ public:
 
    /// Creates a copy of a \c MemoryBuffer and adds it to the \c SourceManager,
    /// taking ownership of the copy.
-   unsigned addMemBufferCopy(MemoryBuffer *buffer);
+   unsigned addMemBufferCopy(llvm::MemoryBuffer *buffer);
 
    /// Creates and adds a memory buffer to the \c SourceManager, taking
    /// ownership of the newly created copy.
@@ -166,7 +188,7 @@ public:
 
    /// Returns a buffer ID for a previously added buffer with the given
    /// buffer identifier, or None if there is no such buffer.
-   std::optional<unsigned> getIDForBufferIdentifier(StringRef bufIdentifier);
+   Optional<unsigned> getIDForBufferIdentifier(StringRef bufIdentifier);
 
    /// Returns the identifier for the buffer with the given ID.
    ///
@@ -224,11 +246,11 @@ public:
    getLineAndColumn(SourceLoc loc, unsigned bufferId = 0) const
    {
       assert(loc.isValid());
-      int lineOffset = getLineOffset(loc);
+      int LineOffset = getLineOffset(loc);
       int l, c;
-      std::tie(l, c) = m_sourceMgr.getLineAndColumn(loc.m_loc, bufferId);
-      assert(lineOffset+l > 0 && "bogus line offset");
-      return { lineOffset + l, c };
+      std::tie(l, c) = LLVMSourceMgr.getLineAndColumn(loc.m_value, bufferId);
+      assert(LineOffset+l > 0 && "bogus line offset");
+      return { LineOffset + l, c };
    }
 
    /// Returns the real line number for a source location.
@@ -239,30 +261,35 @@ public:
    unsigned getLineNumber(SourceLoc loc, unsigned bufferId = 0) const
    {
       assert(loc.isValid());
-      return m_sourceMgr.FindLineNumber(loc.m_loc, bufferId);
+      return LLVMSourceMgr.FindLineNumber(loc.m_value, bufferId);
    }
 
    StringRef getEntireTextForBuffer(unsigned bufferId) const;
 
-   StringRef extractText(CharSourceRange range,
-                         std::optional<unsigned> bufferId = std::nullopt) const;
+   StringRef extractText(CharSourceRange Range,
+                         Optional<unsigned> bufferId = None) const;
 
-   SMDiagnostic getMessage(SourceLoc loc, BasicSourceMgr::DiagKind kind,
-                           const Twine &msg,
-                           ArrayRef<SMRange> ranges,
-                           ArrayRef<SMFixIt> fixIts) const;
+   llvm::SMDiagnostic GetMessage(SourceLoc loc, llvm::SourceMgr::DiagKind kind,
+                                 const Twine &msg,
+                                 ArrayRef<llvm::SMRange> ranges,
+                                 ArrayRef<llvm::SMFixIt> fixIts) const;
 
    /// Verifies that all buffers are still valid.
    void verifyAllBuffers() const;
 
    /// Translate line and column pair to the offset.
-   std::optional<unsigned> resolveFromLineCol(unsigned bufferId, unsigned line,
-                                              unsigned col) const;
+   /// If the column number is the maximum unsinged int, return the offset of the end of the line.
+   llvm::Optional<unsigned> resolveFromLineCol(unsigned bufferId, unsigned line,
+                                               unsigned col) const;
+
+   /// Translate the end position of the given line to the offset.
+   llvm::Optional<unsigned> resolveOffsetForEndOfLine(unsigned bufferId,
+                                                      unsigned line) const;
 
    SourceLoc getLocForLineCol(unsigned bufferId, unsigned line, unsigned col) const
    {
       auto offset = resolveFromLineCol(bufferId, line, col);
-      return offset.has_value() ? getLocForOffset(bufferId, offset.value()) :
+      return offset.hasValue() ? getLocForOffset(bufferId, offset.getValue()) :
                                  SourceLoc();
    }
 
@@ -277,21 +304,6 @@ private:
          return 0;
       }
    }
-
-private:
-   BasicSourceMgr m_sourceMgr;
-   IntrusiveRefCntPtr<llvm::vfs::FileSystem> m_filesystem;
-   unsigned m_codeCompletionBufferId = 0U;
-   unsigned m_codeCompletionOffset;
-
-   /// Associates buffer identifiers to buffer IDs.
-   DenseMap<StringRef, unsigned> m_bufIdentIdMap;
-
-   /// A cache mapping buffer identifiers to vfs Status entries.
-   ///
-   /// This is as much a hack to prolong the lifetime of status objects as it is
-   /// to speed up stats.
-   mutable DenseMap<StringRef, llvm::vfs::Status> m_statusCache;
 };
 
 } // polar::basic

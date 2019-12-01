@@ -53,13 +53,13 @@ using polar::syntax::TokenSyntax;
 struct TypeTransformContext
 {
    TypeBase *baseType;
-   TypeOrExtensionDecl decl;
+//   TypeOrExtensionDecl decl;
 
    explicit TypeTransformContext(Type T);
-   explicit TypeTransformContext(TypeOrExtensionDecl decl);
+//   explicit TypeTransformContext(TypeOrExtensionDecl decl);
 
    Type getBaseType() const;
-   TypeOrExtensionDecl getDecl() const;
+//   TypeOrExtensionDecl getDecl() const;
    DeclContext *getDeclContext() const;
    bool isPrintingSynthesizedExtension() const;
 };
@@ -546,7 +546,7 @@ struct PrintOptions
 
    void setBaseType(Type T);
 
-   void initForSynthesizedExtension(TypeOrExtensionDecl decl);
+//   void initForSynthesizedExtension(TypeOrExtensionDecl decl);
 
    void clearSynthesizedExtension();
 

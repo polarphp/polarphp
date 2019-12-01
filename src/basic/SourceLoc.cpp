@@ -35,47 +35,46 @@
 namespace polar::basic {
 
 using llvm::errs;
+using LLVMSourceMgr = llvm::SourceMgr;
 
 void SourceRange::widen(SourceRange other)
 {
-   if (other.m_start.m_loc.getPointer() < m_start.m_loc.getPointer()) {
-      m_start = other.m_start;
+   if (other.start.m_value.getPointer() < start.m_value.getPointer()) {
+      start = other.start;
    }
-   if (other.m_end.m_loc.getPointer() > m_end.m_loc.getPointer()) {
-      m_end = other.m_end;
+   if (other.end.m_value.getPointer() > end.m_value.getPointer()) {
+      end = other.end;
    }
 }
 
-void SourceLoc::printLineAndColumn(raw_ostream &outStream, const SourceManager &sourceMgr,
+void SourceLoc::printLineAndColumn(raw_ostream &ostream, const SourceManager &sourceMgr,
                                    unsigned bufferId) const
 {
    if (isInvalid()) {
-      outStream << "<invalid loc>";
+      ostream << "<invalid loc>";
       return;
    }
-
    auto lineAndCol = sourceMgr.getLineAndColumn(*this, bufferId);
-   outStream << "line:" << lineAndCol.first << ':' << lineAndCol.second;
+   ostream << "line:" << lineAndCol.first << ':' << lineAndCol.second;
 }
 
-void SourceLoc::print(raw_ostream &outStream, const SourceManager &sourceMgr,
-                      unsigned &lastbufferID) const
+void SourceLoc::print(raw_ostream &ostream, const SourceManager &sourceMgr,
+                      unsigned &lastBufferId) const
 {
    if (isInvalid()) {
-      outStream << "<invalid loc>";
+      ostream << "<invalid loc>";
       return;
    }
 
    unsigned bufferId = sourceMgr.findBufferContainingLoc(*this);
-   if (bufferId != lastbufferID) {
-      outStream << sourceMgr.getIdentifierForBuffer(bufferId);
-      lastbufferID = bufferId;
+   if (bufferId != lastBufferId) {
+      ostream << sourceMgr.getIdentifierForBuffer(bufferId);
+      lastBufferId = bufferId;
    } else {
-      outStream << "line";
+      ostream << "line";
    }
-
    auto lineAndCol = sourceMgr.getLineAndColumn(*this, bufferId);
-   outStream << ':' << lineAndCol.first << ':' << lineAndCol.second;
+   ostream << ':' << lineAndCol.first << ':' << lineAndCol.second;
 }
 
 void SourceLoc::dump(const SourceManager &sourceMgr) const
@@ -83,15 +82,15 @@ void SourceLoc::dump(const SourceManager &sourceMgr) const
    print(llvm::errs(), sourceMgr);
 }
 
-void SourceRange::print(raw_ostream &outStream, const SourceManager &sourceMgr,
-                        unsigned &lastbufferID, bool printText) const
+void SourceRange::print(raw_ostream &ostream, const SourceManager &sourceMgr,
+                        unsigned &lastBufferId, bool printText) const
 {
    // FIXME: CharSourceRange is a half-open character-based range, while
    // SourceRange is a closed token-based range, so this conversion omits the
    // last token in the range. Unfortunately, we can't actually get to the end
    // of the token without using the Lex library, which would be a layering
    // violation. This is still better than nothing.
-   CharSourceRange(sourceMgr, m_start, m_end).print(outStream, sourceMgr, lastbufferID, printText);
+   CharSourceRange(sourceMgr, start, end).print(ostream, sourceMgr, lastBufferId, printText);
 }
 
 void SourceRange::dump(const SourceManager &sourceMgr) const
@@ -101,28 +100,28 @@ void SourceRange::dump(const SourceManager &sourceMgr) const
 
 CharSourceRange::CharSourceRange(const SourceManager &sourceMgr, SourceLoc start,
                                  SourceLoc end)
-   : m_start(start)
+   : start(start)
 {
-   assert(m_start.isValid() == end.isValid() &&
-          "Start and end should either both be valid or both be invalid!");
-   if (m_start.isValid()) {
-      m_byteLength = sourceMgr.getByteDistance(m_start, end);
+   assert(start.isValid() == end.isValid() &&
+          "start and end should either both be valid or both be invalid!");
+   if (start.isValid()) {
+      byteLength = sourceMgr.getByteDistance(start, end);
    }
 }
 
-void CharSourceRange::print(raw_ostream &outStream, const SourceManager &sourceMgr,
-                            unsigned &lastbufferID, bool printText) const
+void CharSourceRange::print(raw_ostream &ostream, const SourceManager &sourceMgr,
+                            unsigned &lastBufferId, bool printText) const
 {
-   outStream << '[';
-   m_start.print(outStream, sourceMgr, lastbufferID);
-   outStream << " - ";
-   getEnd().print(outStream, sourceMgr, lastbufferID);
-   outStream << ']';
-   if (m_start.isInvalid() || getEnd().isInvalid()) {
+   ostream << '[';
+   start.print(ostream, sourceMgr, lastBufferId);
+   ostream << " - ";
+   getEnd().print(ostream, sourceMgr, lastBufferId);
+   ostream << ']';
+   if (start.isInvalid() || getEnd().isInvalid()) {
       return;
    }
    if (printText) {
-      outStream << " RangeText=\"" << sourceMgr.extractText(*this) << '"';
+      ostream << " RangeText=\"" << sourceMgr.extractText(*this) << '"';
    }
 }
 

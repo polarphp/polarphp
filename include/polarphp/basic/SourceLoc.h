@@ -49,23 +49,25 @@ using BasicSMLoc = llvm::SMLoc;
 using llvm::StringRef;
 using polar::ast::DiagnosticConsumer;
 
-/// SourceLoc in parser namespace is just an polar::utils::SMLocation.
-/// We define it as a different type
+/// SourceLoc in swift is just an SMLoc.  We define it as a different type
 /// (instead of as a typedef) just to remove the "getFromPointer" methods and
-/// enforce purity in the polarphp codebase.
-///
+/// enforce purity in the Swift codebase.
 class SourceLoc
 {
+   friend class SourceManager;
+   friend class SourceRange;
+   friend class CharSourceRange;
+   friend class DiagnosticConsumer;
+   llvm::SMLoc m_value;
 public:
    SourceLoc() {}
-
-   explicit SourceLoc(BasicSMLoc loc)
-      : m_loc(loc)
+   explicit SourceLoc(llvm::SMLoc value)
+      : m_value(value)
    {}
 
    bool isValid() const
    {
-      return m_loc.isValid();
+      return m_value.isValid();
    }
 
    bool isInvalid() const
@@ -75,7 +77,7 @@ public:
 
    bool operator==(const SourceLoc &other) const
    {
-      return m_loc == other.m_loc;
+      return other.m_value == m_value;
    }
 
    bool operator!=(const SourceLoc &other) const
@@ -87,7 +89,8 @@ public:
    SourceLoc getAdvancedLoc(int byteOffset) const
    {
       assert(isValid() && "Can't advance an invalid location");
-      return SourceLoc(BasicSMLoc::getFromPointer(m_loc.getPointer() + byteOffset));
+      return SourceLoc(
+               llvm::SMLoc::getFromPointer(m_value.getPointer() + byteOffset));
    }
 
    SourceLoc getAdvancedLocOrInvalid(int byteOffset) const
@@ -100,35 +103,26 @@ public:
 
    const void *getOpaquePointerValue() const
    {
-      return m_loc.getPointer();
+      return m_value.getPointer();
    }
 
    /// Print out the SourceLoc.  If this location is in the same buffer
-   /// as specified by \c LastBufferID, then we don't print the filename.  If
-   /// not, we do print the filename, and then update \c LastBufferID with the
-   /// BufferID printed.
-   void print(raw_ostream &outStream, const SourceManager &sourceMgr,
-              unsigned &lastBufferID) const;
+   /// as specified by \c lastBufferId, then we don't print the filename.  If
+   /// not, we do print the filename, and then update \c lastBufferId with the
+   /// bufferID printed.
+   void print(raw_ostream &ostream, const SourceManager &sourceMgr,
+              unsigned &lastBufferId) const;
 
-   void printLineAndColumn(raw_ostream &outStream, const SourceManager &sourceMgr,
+   void printLineAndColumn(raw_ostream &ostream, const SourceManager &sourceMgr,
                            unsigned bufferID = 0) const;
 
-   void print(raw_ostream &outStream, const SourceManager &sourceMgr) const
+   void print(raw_ostream &ostream, const SourceManager &sourceMgr) const
    {
       unsigned temp = ~0U;
-      print(outStream, sourceMgr, temp);
+      print(ostream, sourceMgr, temp);
    }
 
    void dump(const SourceManager &sourceMgr) const;
-
-private:
-   BasicSMLoc m_loc;
-
-private:
-   friend class SourceManager;
-   friend class SourceRange;
-   friend class CharSourceRange;
-   friend class DiagnosticConsumer;
 };
 
 /// SourceRange in swift is a pair of locations.  However, note that the end
@@ -138,23 +132,27 @@ private:
 class SourceRange
 {
 public:
+   SourceLoc start;
+   SourceLoc end;
+
    SourceRange() {}
+
    SourceRange(SourceLoc loc)
-      : m_start(loc),
-        m_end(loc)
+      : start(loc),
+        end(loc)
    {}
 
    SourceRange(SourceLoc start, SourceLoc end)
-      : m_start(start),
-        m_end(end)
+      : start(start),
+        end(end)
    {
-      assert(m_start.isValid() == m_end.isValid() &&
-             "m_start and end should either both be valid or both be invalid!");
+      assert(start.isValid() == end.isValid() &&
+             "start and end should either both be valid or both be invalid!");
    }
 
    bool isValid() const
    {
-      return m_start.isValid();
+      return start.isValid();
    }
 
    bool isInvalid() const
@@ -164,22 +162,12 @@ public:
 
    const SourceLoc &getStart() const
    {
-      return m_start;
+      return start;
    }
 
    const SourceLoc &getEnd() const
    {
-      return m_end;
-   }
-
-   SourceLoc &getStart()
-   {
-      return m_start;
-   }
-
-   SourceLoc &getEnd()
-   {
-      return m_end;
+      return end;
    }
 
    /// Extend this SourceRange to the smallest continuous SourceRange that
@@ -188,7 +176,7 @@ public:
 
    bool operator==(const SourceRange &other) const
    {
-      return m_start == other.m_start && m_end == other.m_end;
+      return start == other.start && end == other.end;
    }
 
    bool operator!=(const SourceRange &other) const
@@ -197,36 +185,35 @@ public:
    }
 
    /// Print out the SourceRange.  If the locations are in the same buffer
-   /// as specified by LastBufferID, then we don't print the filename.  If not,
-   /// we do print the filename, and then update LastBufferID with the BufferID
+   /// as specified by lastBufferId, then we don't print the filename.  If not,
+   /// we do print the filename, and then update lastBufferId with the bufferID
    /// printed.
-   void print(raw_ostream &outStream, const SourceManager &sourceMgr,
-              unsigned &lastBufferID, bool PrintText = true) const;
+   void print(raw_ostream &ostream, const SourceManager &sourceMgr,
+              unsigned &lastBufferId, bool printText = true) const;
 
-   void print(raw_ostream &outStream, const SourceManager &sourceMgr,
+   void print(raw_ostream &ostream, const SourceManager &sourceMgr,
               bool printText = true) const
    {
       unsigned temp = ~0U;
-      print(outStream, sourceMgr, temp, printText);
+      print(ostream, sourceMgr, temp, printText);
    }
 
    void dump(const SourceManager &sourceMgr) const;
-
-private:
-   SourceLoc m_start;
-   SourceLoc m_end;
 };
 
 /// A half-open character-based source range.
 class CharSourceRange
 {
+   SourceLoc start;
+   unsigned byteLength;
+
 public:
    /// Constructs an invalid range.
    CharSourceRange() = default;
 
-   CharSourceRange(SourceLoc start, std::size_t byteLength)
-      : m_start(start),
-        m_byteLength(byteLength)
+   CharSourceRange(SourceLoc start, unsigned byteLength)
+      : start(start),
+        byteLength(byteLength)
    {}
 
    /// Constructs a character range which starts and ends at the
@@ -238,7 +225,7 @@ public:
 
    bool isValid() const
    {
-      return m_start.isValid();
+      return start.isValid();
    }
 
    bool isInvalid() const
@@ -248,8 +235,9 @@ public:
 
    bool operator==(const CharSourceRange &other) const
    {
-      return m_start == other.m_start && m_byteLength == other.m_byteLength;
+      return start == other.start && byteLength == other.byteLength;
    }
+
    bool operator!=(const CharSourceRange &other) const
    {
       return !operator==(other);
@@ -257,12 +245,12 @@ public:
 
    SourceLoc getStart() const
    {
-      return m_start;
+      return start;
    }
 
    SourceLoc getEnd() const
    {
-      return m_start.getAdvancedLocOrInvalid(m_byteLength);
+      return start.getAdvancedLocOrInvalid(byteLength);
    }
 
    /// Returns true if the given source location is contained in the range.
@@ -270,29 +258,29 @@ public:
    {
       auto less = std::less<const char *>();
       auto less_equal = std::less_equal<const char *>();
-      return less_equal(getStart().m_loc.getPointer(), loc.m_loc.getPointer()) &&
-            less(loc.m_loc.getPointer(), getEnd().m_loc.getPointer());
+      return less_equal(getStart().m_value.getPointer(), loc.m_value.getPointer()) &&
+            less(loc.m_value.getPointer(), getEnd().m_value.getPointer());
    }
 
    bool contains(CharSourceRange other) const
    {
       auto less_equal = std::less_equal<const char *>();
       return contains(other.getStart()) &&
-            less_equal(other.getEnd().m_loc.getPointer(), getEnd().m_loc.getPointer());
+            less_equal(other.getEnd().m_value.getPointer(), getEnd().m_value.getPointer());
    }
 
    /// expands *this to cover other
    void widen(CharSourceRange other)
    {
-      auto diff = other.getEnd().m_loc.getPointer() - getEnd().m_loc.getPointer();
+      auto diff = other.getEnd().m_value.getPointer() - getEnd().m_value.getPointer();
       if (diff > 0) {
-         m_byteLength += diff;
+         byteLength += diff;
       }
-      const auto myStartPtr = getStart().m_loc.getPointer();
-      diff = myStartPtr - other.getStart().m_loc.getPointer();
+      const auto myStartPtr = getStart().m_value.getPointer();
+      diff = myStartPtr - other.getStart().m_value.getPointer();
       if (diff > 0) {
-         m_byteLength += diff;
-         m_start = SourceLoc(BasicSMLoc::getFromPointer(myStartPtr - diff));
+         byteLength += diff;
+         start = SourceLoc(llvm::SMLoc::getFromPointer(myStartPtr - diff));
       }
    }
 
@@ -306,110 +294,101 @@ public:
 
    StringRef str() const
    {
-      return StringRef(m_start.m_loc.getPointer(), m_byteLength);
+      return StringRef(start.m_value.getPointer(), byteLength);
    }
 
    /// Return the length of this valid range in bytes.  Can be zero.
    unsigned getByteLength() const
    {
       assert(isValid() && "length does not make sense for an invalid range");
-      return m_byteLength;
+      return byteLength;
    }
 
    /// Print out the CharSourceRange.  If the locations are in the same buffer
-   /// as specified by LastBufferID, then we don't print the filename.  If not,
-   /// we do print the filename, and then update LastBufferID with the BufferID
+   /// as specified by lastBufferId, then we don't print the filename.  If not,
+   /// we do print the filename, and then update lastBufferId with the bufferID
    /// printed.
-   void print(raw_ostream &outStream, const SourceManager &sourceMgr,
-              unsigned &lastBufferID, bool printText = true) const;
+   void print(raw_ostream &ostream, const SourceManager &sourceMgr,
+              unsigned &lastBufferId, bool printText = true) const;
 
-   void print(raw_ostream &outStream, const SourceManager &sourceMgr,
+   void print(raw_ostream &ostream, const SourceManager &sourceMgr,
               bool printText = true) const
    {
       unsigned temp = ~0U;
-      print(outStream, sourceMgr, temp, printText);
+      print(ostream, sourceMgr, temp, printText);
    }
 
    void dump(const SourceManager &sourceMgr) const;
-
-private:
-   SourceLoc m_start;
-   std::size_t m_byteLength;
 };
 
 } // polar::basic
 
 namespace llvm {
-
-using polar::basic::SourceLoc;
-using polar::basic::BasicSMLoc;
-using polar::basic::SourceRange;
-
 template <typename T>
 struct DenseMapInfo;
 
 template <>
-struct DenseMapInfo<SourceLoc>
+struct DenseMapInfo<polar::basic::SourceLoc>
 {
-   static SourceLoc getEmptyKey()
+   static polar::basic::SourceLoc getEmptyKey()
    {
-      return SourceLoc(
-               BasicSMLoc::getFromPointer(DenseMapInfo<const char *>::getEmptyKey()));
+      return polar::basic::SourceLoc(
+               SMLoc::getFromPointer(DenseMapInfo<const char *>::getEmptyKey()));
    }
 
-   static SourceLoc getTombstoneKey()
+   static polar::basic::SourceLoc getTombstoneKey()
    {
       // Make this different from empty key. See for context:
       // http://lists.llvm.org/pipermail/llvm-dev/2015-July/088744.html
-      return SourceLoc(
-               BasicSMLoc::getFromPointer(DenseMapInfo<const char *>::getTombstoneKey()));
+      return polar::basic::SourceLoc(
+               SMLoc::getFromPointer(DenseMapInfo<const char *>::getTombstoneKey()));
    }
 
-   static unsigned getHashValue(const SourceLoc &loc)
+   static unsigned getHashValue(const polar::basic::SourceLoc &value)
    {
       return DenseMapInfo<const void *>::getHashValue(
-               loc.getOpaquePointerValue());
+               value.getOpaquePointerValue());
    }
 
-   static bool isEqual(const SourceLoc &lhs,
-                       const SourceLoc &rhs)
+   static bool isEqual(const polar::basic::SourceLoc &lhs,
+                       const polar::basic::SourceLoc &rhs)
    {
       return lhs == rhs;
    }
 };
 
 template <>
-struct DenseMapInfo<SourceRange>
+struct DenseMapInfo<polar::basic::SourceRange>
 {
-   static SourceRange getEmptyKey()
+   static polar::basic::SourceRange getEmptyKey()
    {
-      return SourceRange(SourceLoc(
-                            BasicSMLoc::getFromPointer(DenseMapInfo<const char *>::getEmptyKey())));
+      return polar::basic::SourceRange(polar::basic::SourceLoc(
+                                          SMLoc::getFromPointer(DenseMapInfo<const char *>::getEmptyKey())));
    }
 
-   static SourceRange getTombstoneKey()
+   static polar::basic::SourceRange getTombstoneKey()
    {
       // Make this different from empty key. See for context:
       // http://lists.llvm.org/pipermail/llvm-dev/2015-July/088744.html
-      return SourceRange(SourceLoc(
-                            BasicSMLoc::getFromPointer(DenseMapInfo<const char *>::getTombstoneKey())));
+      return polar::basic::SourceRange(polar::basic::SourceLoc(
+                                          SMLoc::getFromPointer(DenseMapInfo<const char *>::getTombstoneKey())));
    }
 
-   static unsigned getHashValue(const SourceRange &loc)
+   static unsigned getHashValue(const polar::basic::SourceRange &value)
    {
       return hash_combine(DenseMapInfo<const void *>::getHashValue(
-                             loc.getStart().getOpaquePointerValue()),
+                             value.start.getOpaquePointerValue()),
                           DenseMapInfo<const void *>::getHashValue(
-                             loc.getEnd().getOpaquePointerValue()));
+                             value.end.getOpaquePointerValue()));
    }
 
-   static bool isEqual(const SourceRange &lhs,
-                       const SourceRange &rhs)
+   static bool isEqual(const polar::basic::SourceRange &lhs,
+                       const polar::basic::SourceRange &rhs)
    {
       return lhs == rhs;
    }
 };
 
-} // llvm
+} // namespace llvm
 
 #endif // POLARPHP_BASIC_SOURCE_LOC_H

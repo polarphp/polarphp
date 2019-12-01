@@ -31,6 +31,7 @@
 #ifndef POLARPHP_AST_DIAGNOSTIC_CONSUMER_H
 #define POLARPHP_AST_DIAGNOSTIC_CONSUMER_H
 
+#include "polarphp/basic/LLVM.h"
 #include "polarphp/basic/SourceLoc.h"
 #include "llvm/Support/SourceMgr.h"
 
@@ -60,8 +61,7 @@ enum class DiagID : uint32_t;
 
 /// Describes the kind of diagnostic.
 ///
-enum class DiagnosticKind : uint8_t
-{
+enum class DiagnosticKind : uint8_t {
    Error,
    Warning,
    Remark,
@@ -69,12 +69,12 @@ enum class DiagnosticKind : uint8_t
 };
 
 /// Extra information carried along with a diagnostic, which may or
-/// may not be of interest to a given diagnostic consumer.
+/// may not be of interest to a given diagnostic m_consumer.
 struct DiagnosticInfo
 {
    DiagID id = DiagID(0);
 
-   /// Represents a fix-it, a replacement of one range of text with another.
+   /// Represents a fix-it, a replacement of one m_range of text with another.
    class FixIt
    {
       CharSourceRange m_range;
@@ -83,8 +83,7 @@ struct DiagnosticInfo
    public:
       FixIt(CharSourceRange range, StringRef str)
          : m_range(range),
-           m_text(str)
-      {}
+           m_text(str) {}
 
       CharSourceRange getRange() const
       {
@@ -110,15 +109,15 @@ class DiagnosticConsumer
 protected:
    static llvm::SMLoc getRawLoc(SourceLoc loc);
 
-   static llvm::SMRange getRawRange(SourceManager &sm, CharSourceRange range)
+   static llvm::SMRange getRawRange(SourceManager &sourceMgr, CharSourceRange range)
    {
       return llvm::SMRange(getRawLoc(range.getStart()), getRawLoc(range.getEnd()));
    }
 
-   static llvm::SMFixIt getRawFixIt(SourceManager &sm, DiagnosticInfo::FixIt fixit)
+   static llvm::SMFixIt getRawFixIt(SourceManager &sourceMgr, DiagnosticInfo::FixIt fixIt)
    {
       // FIXME: It's unfortunate that we have to copy the replacement text.
-      return llvm::SMFixIt(getRawRange(sm, fixit.getRange()), fixit.getText());
+      return llvm::SMFixIt(getRawRange(sourceMgr, fixIt.getRange()), fixIt.getText());
    }
 
 public:
@@ -126,7 +125,7 @@ public:
 
    /// Invoked whenever the frontend emits a diagnostic.
    ///
-   /// \param sm The source manager associated with the source locations in
+   /// \param sourceMgr The source manager associated with the source locations in
    /// this diagnostic.
    ///
    /// \param loc The source location associated with this diagnostic. This
@@ -147,7 +146,7 @@ public:
    /// that corresponds to a primary input. The .dia file for that primary can be
    /// used for the diagnostic, as if it had occurred at this location.
    virtual void
-   handleDiagnostic(SourceManager &sm, SourceLoc loc, DiagnosticKind kind,
+   handleDiagnostic(SourceManager &sourceMgr, SourceLoc loc, DiagnosticKind kind,
                     StringRef formatString,
                     ArrayRef<DiagnosticArgument> formatArgs,
                     const DiagnosticInfo &info,
@@ -170,7 +169,7 @@ public:
 class NullDiagnosticConsumer : public DiagnosticConsumer
 {
 public:
-   void handleDiagnostic(SourceManager &sm, SourceLoc loc, DiagnosticKind kind,
+   void handleDiagnostic(SourceManager &sourceMgr, SourceLoc loc, DiagnosticKind kind,
                          StringRef formatString,
                          ArrayRef<DiagnosticArgument> formatArgs,
                          const DiagnosticInfo &info,
@@ -181,28 +180,26 @@ public:
 // another DiagnosticEngine.
 class ForwardingDiagnosticConsumer : public DiagnosticConsumer
 {
-
+   DiagnosticEngine &m_targetEngine;
 public:
-   ForwardingDiagnosticConsumer(DiagnosticEngine &target);
-   void handleDiagnostic(SourceManager &sm, SourceLoc loc, DiagnosticKind kind,
+   ForwardingDiagnosticConsumer(DiagnosticEngine &Target);
+   void handleDiagnostic(SourceManager &sourceMgr, SourceLoc loc, DiagnosticKind kind,
                          StringRef formatString,
                          ArrayRef<DiagnosticArgument> formatArgs,
                          const DiagnosticInfo &info,
                          SourceLoc bufferIndirectlyCausingDiagnostic) override;
-
-   DiagnosticEngine &m_targetEngine;
 };
 
 /// DiagnosticConsumer that funnels diagnostics in certain files to
 /// particular sub-consumers.
 ///
-/// The intended use case for such a consumer is "batch mode" compilations,
+/// The intended use case for such a m_consumer is "batch mode" compilations,
 /// where we want to record diagnostics for each file as if they were compiled
 /// separately. This is important for incremental builds, so that if a file has
 /// warnings but doesn't get recompiled in the next build, the warnings persist.
 ///
 /// Diagnostics that are not in one of the special files are emitted into every
-/// sub-consumer. This is necessary to deal with, for example, diagnostics in a
+/// sub-m_consumer. This is necessary to deal with, for example, diagnostics in a
 /// bridging header imported from Objective-C, which isn't really about the
 /// current file.
 class FileSpecificDiagnosticConsumer : public DiagnosticConsumer
@@ -219,13 +216,31 @@ public:
    static std::unique_ptr<DiagnosticConsumer>
    consolidateSubconsumers(SmallVectorImpl<Subconsumer> &subconsumers);
 
-   /// A diagnostic consumer, along with the name of the buffer that it should
+   /// A diagnostic m_consumer, along with the name of the buffer that it should
    /// be associated with.
    class Subconsumer
    {
       friend std::unique_ptr<DiagnosticConsumer>
       FileSpecificDiagnosticConsumer::consolidateSubconsumers(
             SmallVectorImpl<Subconsumer> &subconsumers);
+
+      /// The name of the input file that a m_consumer and diagnostics should
+      /// be associated with. An empty string means that a m_consumer is not
+      /// associated with any particular buffer, and should only receive
+      /// diagnostics that are not in any of the other consumers' files.
+      std::string m_inputFileName;
+
+      /// The m_consumer (if any) for diagnostics associated with the m_inputFileName.
+      /// A null pointer for the DiagnosticConsumer means that this file is a
+      /// non-primary one in batch mode and we have no .dia file for it.
+      /// If there is a responsible primary when the diagnostic is handled
+      /// it will be shunted to that primary's .dia file.
+      /// Otherwise it will be suppressed, assuming that the diagnostic will
+      /// surface in another frontend job that compiles that file as a primary.
+      std::unique_ptr<DiagnosticConsumer> m_consumer;
+
+      // Has this subconsumer ever handled a diagnostic that is an error?
+      bool m_hasAnErrorBeenConsumed = false;
 
    public:
       std::string getInputFileName() const
@@ -243,7 +258,7 @@ public:
          : m_inputFileName(inputFileName),
            m_consumer(std::move(consumer)) {}
 
-      void handleDiagnostic(SourceManager &sm, SourceLoc loc, DiagnosticKind kind,
+      void handleDiagnostic(SourceManager &sourceMgr, SourceLoc loc, DiagnosticKind kind,
                             StringRef formatString,
                             ArrayRef<DiagnosticArgument> formatArgs,
                             const DiagnosticInfo &info,
@@ -253,7 +268,7 @@ public:
             return;
          }
          m_hasAnErrorBeenConsumed |= kind == DiagnosticKind::Error;
-         getConsumer()->handleDiagnostic(sm, loc, kind, formatString, formatArgs,
+         getConsumer()->handleDiagnostic(sourceMgr, loc, kind, formatString, formatArgs,
                                          info, bufferIndirectlyCausingDiagnostic);
       }
 
@@ -263,40 +278,32 @@ public:
             getConsumer()->informDriverOfIncompleteBatchModeCompilation();
          }
       }
-   private:
-      /// The name of the input file that a consumer and diagnostics should
-      /// be associated with. An empty string means that a consumer is not
-      /// associated with any particular buffer, and should only receive
-      /// diagnostics that are not in any of the other consumers' files.
-      std::string m_inputFileName;
-
-      /// The consumer (if any) for diagnostics associated with the inputFileName.
-      /// A null pointer for the DiagnosticConsumer means that this file is a
-      /// non-primary one in batch mode and we have no .dia file for it.
-      /// If there is a responsible primary when the diagnostic is handled
-      /// it will be shunted to that primary's .dia file.
-      /// Otherwise it will be suppressed, assuming that the diagnostic will
-      /// surface in another frontend job that compiles that file as a primary.
-      std::unique_ptr<DiagnosticConsumer> m_consumer;
-
-      // Has this subconsumer ever handled a diagnostic that is an error?
-      bool m_hasAnErrorBeenConsumed = false;
    };
+
+private:
+   /// All consumers owned by this FileSpecificDiagnosticConsumer.
+   SmallVector<Subconsumer, 4> m_subconsumers;
 
 public:
    class ConsumerAndRange {
+   private:
+      /// The m_range of SourceLoc's for which diagnostics should be directed to
+      /// this subconsumer.
+      /// Should be const but then the sort won't compile.
+      /*const*/ CharSourceRange m_range;
+
+      /// Index into m_subconsumers vector for this subconsumer.
+      /// Should be const but then the sort won't compile.
+      /*const*/ unsigned m_subconsumerIndex;
 
    public:
-      unsigned getSubconsumerIndex() const
-      {
-         return m_subconsumerIndex;
-      }
+      unsigned getSubconsumerIndex() const { return m_subconsumerIndex; }
 
       ConsumerAndRange(const CharSourceRange range, unsigned subconsumerIndex)
          : m_range(range),
            m_subconsumerIndex(subconsumerIndex) {}
 
-      /// Compare according to range:
+      /// Compare according to m_range:
       bool operator<(const ConsumerAndRange &right) const
       {
          auto compare = std::less<const char *>();
@@ -304,13 +311,13 @@ public:
                         getRawLoc(right.m_range.getEnd()).getPointer());
       }
 
-      /// Overlaps by range:
+      /// Overlaps by m_range:
       bool overlaps(const ConsumerAndRange &other) const
       {
          return m_range.overlaps(other.m_range);
       }
 
-      /// Does my range end after \p loc?
+      /// Does my m_range end after \p loc?
       bool endsAfter(const SourceLoc loc) const
       {
          auto compare = std::less<const char *>();
@@ -322,65 +329,13 @@ public:
       {
          return m_range.contains(loc);
       }
-   private:
-      /// The range of SourceLoc's for which diagnostics should be directed to
-      /// this subconsumer.
-      /// Should be const but then the sort won't compile.
-      /*const*/ CharSourceRange m_range;
-
-      /// Index into Subconsumers vector for this subconsumer.
-      /// Should be const but then the sort won't compile.
-      /*const*/ unsigned m_subconsumerIndex;
    };
-
-   void handleDiagnostic(SourceManager &sm, SourceLoc loc, DiagnosticKind kind,
-                         StringRef formatString,
-                         ArrayRef<DiagnosticArgument> formatArgs,
-                         const DiagnosticInfo &info,
-                         SourceLoc bufferIndirectlyCausingDiagnostic) override;
-
-   bool finishProcessing() override;
 
 private:
    Subconsumer &operator[](const ConsumerAndRange &consumerAndRange)
    {
       return m_subconsumers[consumerAndRange.getSubconsumerIndex()];
    }
-
-
-   /// Takes ownership of the DiagnosticConsumers specified in \p consumers.
-   ///
-   /// There must not be two consumers for the same file (i.e., having the same
-   /// buffer name).
-   explicit FileSpecificDiagnosticConsumer(
-         SmallVectorImpl<Subconsumer> &consumers);
-
-   /// In batch mode, any error causes failure for all primary files, but
-   /// Xcode will only see an error for a particular primary in that primary's
-   /// serialized diagnostics file. So, tell the subconsumers to inform the
-   /// driver of incomplete batch mode compilation.
-   void tellSubconsumersToInformDriverOfIncompleteBatchModeCompilation();
-
-   void computeConsumersOrderedByRange(SourceManager &sm);
-
-   /// Returns nullptr if diagnostic is to be suppressed,
-   /// None if diagnostic is to be distributed to every consumer,
-   /// a particular consumer if diagnostic goes there.
-   Optional<FileSpecificDiagnosticConsumer::Subconsumer *>
-   subconsumerForLocation(SourceManager &sm, SourceLoc loc);
-
-   Optional<FileSpecificDiagnosticConsumer::Subconsumer *>
-   findSubconsumer(SourceManager &sm, SourceLoc loc, DiagnosticKind kind,
-                   SourceLoc bufferIndirectlyCausingDiagnostic);
-
-   Optional<FileSpecificDiagnosticConsumer::Subconsumer *>
-   findSubconsumerForNonNote(SourceManager &sm, SourceLoc loc,
-                             SourceLoc bufferIndirectlyCausingDiagnostic);
-
-private:
-   /// All consumers owned by this FileSpecificDiagnosticConsumer.
-   SmallVector<Subconsumer, 4> m_subconsumers;
-
    /// The consumers owned by this FileSpecificDiagnosticConsumer, sorted by
    /// the end locations of each file so that a lookup by position can be done
    /// using binary search.
@@ -392,16 +347,55 @@ private:
    /// \see #subconsumerForLocation
    SmallVector<ConsumerAndRange, 4> m_consumersOrderedByRange;
 
-   /// Indicates which consumer to send Note diagnostics too.
+   /// Indicates which m_consumer to send Note diagnostics too.
    ///
    /// Notes are always considered attached to the error, warning, or remark
    /// that was most recently emitted.
    ///
-   /// If None, Note diagnostics are sent to every consumer.
+   /// If None, Note diagnostics are sent to every m_consumer.
    /// If null, diagnostics are suppressed.
    Optional<Subconsumer *> m_subconsumerForSubsequentNotes = None;
 
    bool m_hasAnErrorBeenConsumed = false;
+
+   /// Takes ownership of the DiagnosticConsumers specified in \p consumers.
+   ///
+   /// There must not be two consumers for the same file (i.e., having the same
+   /// buffer name).
+   explicit FileSpecificDiagnosticConsumer(
+         SmallVectorImpl<Subconsumer> &consumers);
+
+public:
+   void handleDiagnostic(SourceManager &sourceMgr, SourceLoc loc, DiagnosticKind kind,
+                         StringRef formatString,
+                         ArrayRef<DiagnosticArgument> formatArgs,
+                         const DiagnosticInfo &info,
+                         SourceLoc bufferIndirectlyCausingDiagnostic) override;
+
+   bool finishProcessing() override;
+
+private:
+   /// In batch mode, any error causes failure for all primary files, but
+   /// Xcode will only see an error for a particular primary in that primary's
+   /// serialized diagnostics file. So, tell the subconsumers to inform the
+   /// driver of incomplete batch mode compilation.
+   void tellSubconsumersToInformDriverOfIncompleteBatchModeCompilation();
+
+   void computeConsumersOrderedByRange(SourceManager &sourceMgr);
+
+   /// Returns nullptr if diagnostic is to be suppressed,
+   /// None if diagnostic is to be distributed to every m_consumer,
+   /// a particular m_consumer if diagnostic goes there.
+   Optional<FileSpecificDiagnosticConsumer::Subconsumer *>
+   subconsumerForLocation(SourceManager &sourceMgr, SourceLoc loc);
+
+   Optional<FileSpecificDiagnosticConsumer::Subconsumer *>
+   findSubconsumer(SourceManager &sourceMgr, SourceLoc loc, DiagnosticKind kind,
+                   SourceLoc bufferIndirectlyCausingDiagnostic);
+
+   Optional<FileSpecificDiagnosticConsumer::Subconsumer *>
+   findSubconsumerForNonNote(SourceManager &sourceMgr, SourceLoc loc,
+                             SourceLoc bufferIndirectlyCausingDiagnostic);
 };
 
 } // polar::ast

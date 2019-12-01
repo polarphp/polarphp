@@ -39,17 +39,16 @@ using llvm::SMLoc;
 
 void SourceManager::verifyAllBuffers() const
 {
-   PrettyStackTraceString backtrace{
+   llvm::PrettyStackTraceString backtrace{
       "Checking that all source buffers are still valid"
    };
 
    // FIXME: This depends on the buffer IDs chosen by llvm::SourceMgr.
    LLVM_ATTRIBUTE_USED static char arbitraryTotal = 0;
-   for (unsigned i = 1, e = m_sourceMgr.getNumBuffers(); i <= e; ++i) {
-      auto *buffer = m_sourceMgr.getMemoryBuffer(i);
-      if (buffer->getBufferSize() == 0) {
+   for (unsigned i = 1, e = LLVMSourceMgr.getNumBuffers(); i <= e; ++i) {
+      auto *buffer = LLVMSourceMgr.getMemoryBuffer(i);
+      if (buffer->getBufferSize() == 0)
          continue;
-      }
       arbitraryTotal += buffer->getBufferStart()[0];
       arbitraryTotal += buffer->getBufferEnd()[-1];
    }
@@ -67,6 +66,7 @@ StringRef SourceManager::getDisplayNameForLoc(SourceLoc loc) const
    if (auto vfile = getVirtualFile(loc)) {
       return vfile->name;
    }
+
    // Next, try the stat cache
    auto ident = getIdentifierForBuffer(findBufferContainingLoc(loc));
    auto found = m_statusCache.find(ident);
@@ -84,16 +84,16 @@ StringRef SourceManager::getDisplayNameForLoc(SourceLoc loc) const
 }
 
 unsigned
-SourceManager::addNewSourceBuffer(std::unique_ptr<MemoryBuffer> buffer)
+SourceManager::addNewSourceBuffer(std::unique_ptr<llvm::MemoryBuffer> buffer)
 {
    assert(buffer);
    StringRef bufIdentifier = buffer->getBufferIdentifier();
-   auto id = m_sourceMgr.AddNewSourceBuffer(std::move(buffer), SMLoc());
+   auto id = LLVMSourceMgr.AddNewSourceBuffer(std::move(buffer), llvm::SMLoc());
    m_bufIdentIdMap[bufIdentifier] = id;
    return id;
 }
 
-unsigned SourceManager::addMemBufferCopy(MemoryBuffer *buffer)
+unsigned SourceManager::addMemBufferCopy(llvm::MemoryBuffer *buffer)
 {
    return addMemBufferCopy(buffer->getBuffer(), buffer->getBufferIdentifier());
 }
@@ -101,8 +101,8 @@ unsigned SourceManager::addMemBufferCopy(MemoryBuffer *buffer)
 unsigned SourceManager::addMemBufferCopy(StringRef inputData,
                                          StringRef bufIdentifier)
 {
-   auto buffer = std::unique_ptr<MemoryBuffer>(
-            MemoryBuffer::getMemBufferCopy(inputData, bufIdentifier));
+   auto buffer = std::unique_ptr<llvm::MemoryBuffer>(
+            llvm::MemoryBuffer::getMemBufferCopy(inputData, bufIdentifier));
    return addNewSourceBuffer(std::move(buffer));
 }
 
@@ -111,8 +111,7 @@ bool SourceManager::openVirtualFile(SourceLoc loc, StringRef name,
 {
    CharSourceRange fullRange = getRangeForBuffer(findBufferContainingLoc(loc));
    SourceLoc end;
-
-   auto nextRangeIter = m_virtualFiles.upper_bound(loc.m_loc.getPointer());
+   auto nextRangeIter = m_virtualFiles.upper_bound(loc.m_value.getPointer());
    if (nextRangeIter != m_virtualFiles.end() &&
        fullRange.contains(nextRangeIter->second.range.getStart())) {
       const VirtualFile &existingFile = nextRangeIter->second;
@@ -129,7 +128,7 @@ bool SourceManager::openVirtualFile(SourceLoc loc, StringRef name,
    }
 
    CharSourceRange range = CharSourceRange(*this, loc, end);
-   m_virtualFiles[end.m_loc.getPointer()] = { range, name, lineOffset };
+   m_virtualFiles[end.m_value.getPointer()] = { range, name, lineOffset };
    m_cachedVFile = {nullptr, nullptr};
    return true;
 }
@@ -139,8 +138,8 @@ void SourceManager::closeVirtualFile(SourceLoc end)
    auto *virtualFile = const_cast<VirtualFile *>(getVirtualFile(end));
    if (!virtualFile) {
 #ifndef NDEBUG
-      unsigned bufferID = findBufferContainingLoc(end);
-      CharSourceRange fullRange = getRangeForBuffer(bufferID);
+      unsigned bufferId = findBufferContainingLoc(end);
+      CharSourceRange fullRange = getRangeForBuffer(bufferId);
       assert((fullRange.getByteLength() == 0 ||
               getVirtualFile(end.getAdvancedLoc(-1))) &&
              "no open virtual file for this location");
@@ -153,8 +152,8 @@ void SourceManager::closeVirtualFile(SourceLoc end)
    CharSourceRange oldRange = virtualFile->range;
    virtualFile->range = CharSourceRange(*this, virtualFile->range.getStart(),
                                         end);
-   m_virtualFiles[end.m_loc.getPointer()] = std::move(*virtualFile);
-   bool existed = m_virtualFiles.erase(oldRange.getEnd().m_loc.getPointer());
+   m_virtualFiles[end.m_value.getPointer()] = std::move(*virtualFile);
+   bool existed = m_virtualFiles.erase(oldRange.getEnd().m_value.getPointer());
    assert(existed);
    (void)existed;
 }
@@ -162,7 +161,7 @@ void SourceManager::closeVirtualFile(SourceLoc end)
 const SourceManager::VirtualFile *
 SourceManager::getVirtualFile(SourceLoc loc) const
 {
-   const char *p = loc.m_loc.getPointer();
+   const char *p = loc.m_value.getPointer();
    if (m_cachedVFile.first == p) {
       return m_cachedVFile.second;
    }
@@ -172,44 +171,43 @@ SourceManager::getVirtualFile(SourceLoc loc) const
       m_cachedVFile = { p, &vfileIter->second };
       return m_cachedVFile.second;
    }
-
    return nullptr;
 }
 
 
-std::optional<unsigned> SourceManager::getIDForBufferIdentifier(
+Optional<unsigned> SourceManager::getIDForBufferIdentifier(
       StringRef bufIdentifier)
 {
    auto iter = m_bufIdentIdMap.find(bufIdentifier);
    if (iter == m_bufIdentIdMap.end()) {
-      return std::nullopt;
+      return None;
    }
    return iter->second;
 }
 
-StringRef SourceManager::getIdentifierForBuffer(unsigned bufferID) const
+StringRef SourceManager::getIdentifierForBuffer(unsigned bufferId) const
 {
-   auto *buffer = m_sourceMgr.getMemoryBuffer(bufferID);
+   auto *buffer = LLVMSourceMgr.getMemoryBuffer(bufferId);
    assert(buffer && "invalid buffer id");
    return buffer->getBufferIdentifier();
 }
 
-CharSourceRange SourceManager::getRangeForBuffer(unsigned bufferID) const
+CharSourceRange SourceManager::getRangeForBuffer(unsigned bufferId) const
 {
-   auto *buffer = m_sourceMgr.getMemoryBuffer(bufferID);
-   SourceLoc start{SMLoc::getFromPointer(buffer->getBufferStart())};
+   auto *buffer = LLVMSourceMgr.getMemoryBuffer(bufferId);
+   SourceLoc start{llvm::SMLoc::getFromPointer(buffer->getBufferStart())};
    return CharSourceRange(start, buffer->getBufferSize());
 }
 
 unsigned SourceManager::getLocOffsetInBuffer(SourceLoc loc,
-                                             unsigned bufferID) const
+                                             unsigned bufferId) const
 {
    assert(loc.isValid() && "location should be valid");
-   auto *buffer = m_sourceMgr.getMemoryBuffer(bufferID);
-   assert(loc.m_loc.getPointer() >= buffer->getBuffer().begin() &&
-          loc.m_loc.getPointer() <= buffer->getBuffer().end() &&
+   auto *buffer = LLVMSourceMgr.getMemoryBuffer(bufferId);
+   assert(loc.m_value.getPointer() >= buffer->getBuffer().begin() &&
+          loc.m_value.getPointer() <= buffer->getBuffer().end() &&
           "Location is not from the specified buffer");
-   return loc.m_loc.getPointer() - buffer->getBuffer().begin();
+   return loc.m_value.getPointer() - buffer->getBuffer().begin();
 }
 
 unsigned SourceManager::getByteDistance(SourceLoc start, SourceLoc end) const
@@ -217,32 +215,31 @@ unsigned SourceManager::getByteDistance(SourceLoc start, SourceLoc end) const
    assert(start.isValid() && "start location should be valid");
    assert(end.isValid() && "end location should be valid");
 #ifndef NDEBUG
-   unsigned bufferID = findBufferContainingLoc(start);
-   auto *buffer = m_sourceMgr.getMemoryBuffer(bufferID);
-   assert(end.m_loc.getPointer() >= buffer->getBuffer().begin() &&
-          end.m_loc.getPointer() <= buffer->getBuffer().end() &&
+   unsigned bufferId = findBufferContainingLoc(start);
+   auto *buffer = LLVMSourceMgr.getMemoryBuffer(bufferId);
+   assert(end.m_value.getPointer() >= buffer->getBuffer().begin() &&
+          end.m_value.getPointer() <= buffer->getBuffer().end() &&
           "end location is not from the same buffer");
 #endif
    // When we have a rope buffer, could be implemented in terms of
    // getLocOffsetInBuffer().
-   return end.m_loc.getPointer() - start.m_loc.getPointer();
+   return end.m_value.getPointer() - start.m_value.getPointer();
 }
 
-StringRef SourceManager::getEntireTextForBuffer(unsigned bufferID) const
+StringRef SourceManager::getEntireTextForBuffer(unsigned bufferId) const
 {
-   return m_sourceMgr.getMemoryBuffer(bufferID)->getBuffer();
+   return LLVMSourceMgr.getMemoryBuffer(bufferId)->getBuffer();
 }
 
 StringRef SourceManager::extractText(CharSourceRange range,
-                                     std::optional<unsigned> bufferID) const
+                                     Optional<unsigned> bufferId) const
 {
    assert(range.isValid() && "range should be valid");
-
-   if (!bufferID) {
-      bufferID = findBufferContainingLoc(range.getStart());
+   if (!bufferId) {
+      bufferId = findBufferContainingLoc(range.getStart());
    }
-   StringRef buffer = m_sourceMgr.getMemoryBuffer(*bufferID)->getBuffer();
-   return buffer.substr(getLocOffsetInBuffer(range.getStart(), *bufferID),
+   StringRef buffer = LLVMSourceMgr.getMemoryBuffer(*bufferId)->getBuffer();
+   return buffer.substr(getLocOffsetInBuffer(range.getStart(), *bufferId),
                         range.getByteLength());
 }
 
@@ -252,25 +249,33 @@ unsigned SourceManager::findBufferContainingLoc(SourceLoc loc) const
    // Search the buffers back-to front, so later alias buffers are
    // visited first.
    auto less_equal = std::less_equal<const char *>();
-   for (unsigned i = m_sourceMgr.getNumBuffers(), e = 1; i >= e; --i) {
-      auto buffer = m_sourceMgr.getMemoryBuffer(i);
-      if (less_equal(buffer->getBufferStart(), loc.m_loc.getPointer()) &&
+   for (unsigned i = LLVMSourceMgr.getNumBuffers(), e = 1; i >= e; --i) {
+      auto buffer = LLVMSourceMgr.getMemoryBuffer(i);
+      if (less_equal(buffer->getBufferStart(), loc.m_value.getPointer()) &&
           // Use <= here so that a pointer to the null at the end of the buffer
           // is included as part of the buffer.
-          less_equal(loc.m_loc.getPointer(), buffer->getBufferEnd()))
+          less_equal(loc.m_value.getPointer(), buffer->getBufferEnd()))
          return i;
    }
    llvm_unreachable("no buffer containing location found");
 }
 
-std::optional<unsigned> SourceManager::resolveFromLineCol(unsigned bufferId,
+llvm::Optional<unsigned>
+SourceManager::resolveOffsetForEndOfLine(unsigned bufferId,
+                                         unsigned line) const
+{
+   return resolveFromLineCol(bufferId, line, ~0u);
+}
+
+llvm::Optional<unsigned> SourceManager::resolveFromLineCol(unsigned bufferId,
                                                            unsigned line,
                                                            unsigned col) const
 {
    if (line == 0 || col == 0) {
-      return std::nullopt;
+      return None;
    }
-   auto inputBuf = getBasicSourceMgr().getMemoryBuffer(bufferId);
+   const bool lineEnd = col == ~0u;
+   auto inputBuf = getLLVMSourceMgr().getMemoryBuffer(bufferId);
    const char *ptr = inputBuf->getBufferStart();
    const char *end = inputBuf->getBufferEnd();
    const char *lineStart = ptr;
@@ -282,21 +287,24 @@ std::optional<unsigned> SourceManager::resolveFromLineCol(unsigned bufferId,
       }
    }
    if (line != 0) {
-      return std::nullopt;
+      return None;
    }
    ptr = lineStart;
-
    // The <= here is to allow for non-inclusive range end positions at EOF
-   for (; ptr <= end; ++ptr) {
+   for (; ; ++ptr) {
       --col;
       if (col == 0) {
          return ptr - inputBuf->getBufferStart();
       }
-      if (*ptr == '\n') {
-         break;
+      if (*ptr == '\n' || ptr == end) {
+         if (lineEnd) {
+            return ptr - inputBuf->getBufferStart();
+         } else {
+            break;
+         }
       }
    }
-   return std::nullopt;
+   return None;
 }
 
 } // polar::basic

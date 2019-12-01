@@ -107,7 +107,7 @@ void Lexer::initialize(unsigned offset, unsigned endOffset)
    // editing with libSyntax.
    m_contentStart = m_bufferStart + BOMLength;
    // Initialize code completion.
-   if (m_bufferId == m_sourceMgr.getCodeCompletionBufferID()) {
+   if (m_bufferId == m_sourceMgr.getCodeCompletionBufferId()) {
       const unsigned char *ptr = m_bufferStart + m_sourceMgr.getCodeCompletionOffset();
       if (ptr >= m_bufferStart && ptr <= m_bufferEnd) {
          m_codeCompletionPtr = ptr;

@@ -45,16 +45,18 @@
 namespace polar::ast {
 
 using llvm::StringSet;
+using polar::basic::indices;
+using polar::basic::SourceLoc;
 
 DiagnosticConsumer::~DiagnosticConsumer() = default;
 
 llvm::SMLoc DiagnosticConsumer::getRawLoc(SourceLoc loc)
 {
-   return loc.m_loc;
+   return loc.m_value;
 }
 
 LLVM_ATTRIBUTE_UNUSED
-static bool has_duplicate_file_names(
+static bool hasDuplicateFileNames(
       ArrayRef<FileSpecificDiagnosticConsumer::Subconsumer> subconsumers)
 {
    llvm::StringSet<> seenFiles;
@@ -66,10 +68,10 @@ static bool has_duplicate_file_names(
          // SmallSet doesn't handle empty strings anyway!
          continue;
       }
-
       bool isUnique = seenFiles.insert(subconsumer.getInputFileName()).second;
-      if (!isUnique)
+      if (!isUnique) {
          return true;
+      }
    }
    return false;
 }
@@ -78,13 +80,10 @@ std::unique_ptr<DiagnosticConsumer>
 FileSpecificDiagnosticConsumer::consolidateSubconsumers(
       SmallVectorImpl<Subconsumer> &subconsumers)
 {
-   if (subconsumers.empty()) {
+   if (subconsumers.empty())
       return nullptr;
-   }
-   if (subconsumers.size() == 1) {
+   if (subconsumers.size() == 1)
       return std::move(subconsumers.front()).m_consumer;
-   }
-
    // Cannot use return
    // llvm::make_unique<FileSpecificDiagnosticConsumer>(subconsumers); because
    // the constructor is private.
@@ -98,23 +97,23 @@ FileSpecificDiagnosticConsumer::FileSpecificDiagnosticConsumer(
 {
    assert(!m_subconsumers.empty() &&
           "don't waste time handling diagnostics that will never get emitted");
-   assert(!has_duplicate_file_names(m_subconsumers) &&
+   assert(!hasDuplicateFileNames(m_subconsumers) &&
           "having multiple subconsumers for the same file is not implemented");
 }
 
 void FileSpecificDiagnosticConsumer::computeConsumersOrderedByRange(
-      SourceManager &sm)
+      SourceManager &sourceMgr)
 {
    // Look up each file's source range and add it to the "map" (to be sorted).
-   for (const unsigned subconsumerIndex: polar::basic::indices(m_subconsumers)) {
+   for (const unsigned subconsumerIndex: indices(m_subconsumers)) {
       const Subconsumer &subconsumer = m_subconsumers[subconsumerIndex];
-      if (subconsumer.getInputFileName().empty())
+      if (subconsumer.getInputFileName().empty()) {
          continue;
-
-      std::optional<unsigned> bufferID =
-            sm.getIDForBufferIdentifier(subconsumer.getInputFileName());
-      assert(bufferID.has_value() && "consumer registered for unknown file");
-      CharSourceRange range = sm.getRangeForBuffer(bufferID.value());
+      }
+      Optional<unsigned> bufferId =
+            sourceMgr.getIDForBufferIdentifier(subconsumer.getInputFileName());
+      assert(bufferId.hasValue() && "consumer registered for unknown file");
+      CharSourceRange range = sourceMgr.getRangeForBuffer(bufferId.getValue());
       m_consumersOrderedByRange.emplace_back(
                ConsumerAndRange(range, subconsumerIndex));
    }
@@ -139,20 +138,20 @@ void FileSpecificDiagnosticConsumer::computeConsumersOrderedByRange(
 }
 
 Optional<FileSpecificDiagnosticConsumer::Subconsumer *>
-FileSpecificDiagnosticConsumer::subconsumerForLocation(SourceManager &sm,
+FileSpecificDiagnosticConsumer::subconsumerForLocation(SourceManager &sourceMgr,
                                                        SourceLoc loc)
 {
    // Diagnostics with invalid locations always go to every consumer.
    if (loc.isInvalid()) {
       return None;
    }
-
    // What if a there's a FileSpecificDiagnosticConsumer but there are no
    // subconsumers in it? (This situation occurs for the fix-its
    // FileSpecificDiagnosticConsumer.) In such a case, bail out now.
    if (m_subconsumers.empty()) {
       return None;
    }
+
    // This map is generated on first use and cached, to allow the
    // FileSpecificDiagnosticConsumer to be set up before the source files are
    // actually loaded.
@@ -165,16 +164,16 @@ FileSpecificDiagnosticConsumer::subconsumerForLocation(SourceManager &sm,
       // than trying to build a nonsensical map (and actually crashing since we
       // can't find buffers for the inputs).
       assert(!m_subconsumers.empty());
-      if (!sm.getIDForBufferIdentifier(m_subconsumers.begin()->getInputFileName())
-          .has_value()) {
+      if (!sourceMgr.getIDForBufferIdentifier(m_subconsumers.begin()->getInputFileName())
+          .hasValue()) {
          assert(llvm::none_of(m_subconsumers, [&](const Subconsumer &subconsumer) {
-            return sm.getIDForBufferIdentifier(subconsumer.getInputFileName())
-                  .has_value();
+            return sourceMgr.getIDForBufferIdentifier(subconsumer.getInputFileName())
+                  .hasValue();
          }));
          return None;
       }
       auto *mutableThis = const_cast<FileSpecificDiagnosticConsumer*>(this);
-      mutableThis->computeConsumersOrderedByRange(sm);
+      mutableThis->computeConsumersOrderedByRange(sourceMgr);
    }
 
    // This std::lower_bound call is doing a binary search for the first range
@@ -193,35 +192,34 @@ FileSpecificDiagnosticConsumer::subconsumerForLocation(SourceManager &sm,
             const_cast<ConsumerAndRange *>(possiblyContainingRangeIter);
       return &(*this)[*consumerAndRangeForLocation];
    }
-
    return None;
 }
 
 void FileSpecificDiagnosticConsumer::handleDiagnostic(
-      SourceManager &sm, SourceLoc Loc, DiagnosticKind kind,
+      SourceManager &sourceMgr, SourceLoc loc, DiagnosticKind kind,
       StringRef formatString, ArrayRef<DiagnosticArgument> formatArgs,
       const DiagnosticInfo &info,
       const SourceLoc bufferIndirectlyCausingDiagnostic)
 {
    m_hasAnErrorBeenConsumed |= kind == DiagnosticKind::Error;
    auto subconsumer =
-         findSubconsumer(sm, Loc, kind, bufferIndirectlyCausingDiagnostic);
+         findSubconsumer(sourceMgr, loc, kind, bufferIndirectlyCausingDiagnostic);
    if (subconsumer) {
-      subconsumer.getValue()->handleDiagnostic(sm, Loc, kind, formatString,
+      subconsumer.getValue()->handleDiagnostic(sourceMgr, loc, kind, formatString,
                                                formatArgs, info,
                                                bufferIndirectlyCausingDiagnostic);
       return;
    }
    // Last resort: spray it everywhere
    for (auto &subconsumer : m_subconsumers) {
-      subconsumer.handleDiagnostic(sm, Loc, kind, formatString, formatArgs, info,
+      subconsumer.handleDiagnostic(sourceMgr, loc, kind, formatString, formatArgs, info,
                                    bufferIndirectlyCausingDiagnostic);
    }
 }
 
 Optional<FileSpecificDiagnosticConsumer::Subconsumer *>
 FileSpecificDiagnosticConsumer::findSubconsumer(
-      SourceManager &sm, SourceLoc loc, DiagnosticKind kind,
+      SourceManager &sourceMgr, SourceLoc loc, DiagnosticKind kind,
       SourceLoc bufferIndirectlyCausingDiagnostic)
 {
    // Ensure that a note goes to the same place as the preceeding non-note.
@@ -230,21 +228,22 @@ FileSpecificDiagnosticConsumer::findSubconsumer(
    case DiagnosticKind::Warning:
    case DiagnosticKind::Remark: {
       auto subconsumer =
-            findSubconsumerForNonNote(sm, loc, bufferIndirectlyCausingDiagnostic);
+            findSubconsumerForNonNote(sourceMgr, loc, bufferIndirectlyCausingDiagnostic);
       m_subconsumerForSubsequentNotes = subconsumer;
       return subconsumer;
    }
    case DiagnosticKind::Note:
       return m_subconsumerForSubsequentNotes;
    }
+   llvm_unreachable("unkonwn DiagnosticKind");
 }
 
 Optional<FileSpecificDiagnosticConsumer::Subconsumer *>
 FileSpecificDiagnosticConsumer::findSubconsumerForNonNote(
-      SourceManager &sm, const SourceLoc loc,
+      SourceManager &sourceMgr, const SourceLoc loc,
       const SourceLoc bufferIndirectlyCausingDiagnostic)
 {
-   const auto subconsumer = subconsumerForLocation(sm, loc);
+   const auto subconsumer = subconsumerForLocation(sourceMgr, loc);
    if (!subconsumer) {
       return None; // No place to put it; might be in an imported module
    }
@@ -256,7 +255,7 @@ FileSpecificDiagnosticConsumer::findSubconsumerForNonNote(
       return None;
    }
    const auto currentPrimarySubconsumer =
-         subconsumerForLocation(sm, bufferIndirectlyCausingDiagnostic);
+         subconsumerForLocation(sourceMgr, bufferIndirectlyCausingDiagnostic);
    assert(!currentPrimarySubconsumer ||
           (*currentPrimarySubconsumer)->getConsumer() &&
           "current primary must have a .dia file");
@@ -266,10 +265,8 @@ FileSpecificDiagnosticConsumer::findSubconsumerForNonNote(
 bool FileSpecificDiagnosticConsumer::finishProcessing()
 {
    tellSubconsumersToInformDriverOfIncompleteBatchModeCompilation();
-
    // Deliberately don't use std::any_of here because we don't want early-exit
    // behavior.
-
    bool hadError = false;
    for (auto &subconsumer : m_subconsumers) {
       hadError |= subconsumer.getConsumer() &&
@@ -290,9 +287,10 @@ tellSubconsumersToInformDriverOfIncompleteBatchModeCompilation()
 }
 
 void NullDiagnosticConsumer::handleDiagnostic(
-      SourceManager &sm, SourceLoc Loc, DiagnosticKind kind,
+      SourceManager &sourceMgr, SourceLoc loc, DiagnosticKind kind,
       StringRef formatString, ArrayRef<DiagnosticArgument> formatArgs,
-      const DiagnosticInfo &info, const SourceLoc) {
+      const DiagnosticInfo &info, const SourceLoc)
+{
    LLVM_DEBUG({
                  llvm::dbgs() << "NullDiagnosticConsumer received diagnostic: ";
                  DiagnosticEngine::formatDiagnosticText(llvm::dbgs(), formatString,
@@ -306,7 +304,7 @@ ForwardingDiagnosticConsumer::ForwardingDiagnosticConsumer(DiagnosticEngine &tar
 {}
 
 void ForwardingDiagnosticConsumer::handleDiagnostic(
-      SourceManager &sm, SourceLoc Loc, DiagnosticKind kind,
+      SourceManager &sourceMgr, SourceLoc loc, DiagnosticKind kind,
       StringRef formatString, ArrayRef<DiagnosticArgument> formatArgs,
       const DiagnosticInfo &info,
       const SourceLoc bufferIndirectlyCausingDiagnostic)
@@ -317,9 +315,9 @@ void ForwardingDiagnosticConsumer::handleDiagnostic(
                  formatArgs);
                  llvm::dbgs() << "\n";
               });
-   for (auto *consumer : m_targetEngine.getConsumers()) {
-      consumer->handleDiagnostic(sm, Loc, kind, formatString, formatArgs, info,
-                                 bufferIndirectlyCausingDiagnostic);
+   for (auto *comsummer : m_targetEngine.getConsumers()) {
+      comsummer->handleDiagnostic(sourceMgr, loc, kind, formatString, formatArgs, info,
+                                  bufferIndirectlyCausingDiagnostic);
    }
 }
 

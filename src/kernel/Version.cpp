@@ -243,7 +243,7 @@ Version Version::getCurrentCompilerVersion()
 
 Version Version::getCurrentLanguageVersion()
 {
-#if POLAR_VERSION_PATCHLEVEL
+#ifdef POLAR_VERSION_PATCHLEVEL
    return {0, 1, 1};
 #else
    return {0, 1};
