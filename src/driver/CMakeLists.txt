@@ -20,4 +20,4 @@ polar_merge_list(POLAR_DRIVER_SOURCES POLAR_HEADERS)
 
 polar_add_library(PolarDriver SHARED
    ${POLAR_DRIVER_SOURCES}
-   LINK_LIBS PolarUtils PolarKernel PolarSyntax)
+   LINK_LIBS PolarUtils PolarKernel PolarSyntax LLVMOption)
