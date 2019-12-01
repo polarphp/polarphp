@@ -36,7 +36,7 @@ public:
 
    enum class Kind : unsigned
    {
-      input = 0,
+      Input = 0,
       CompileJob,
       InterpretJob,
       BackendJob,
@@ -100,7 +100,7 @@ class InputAction : public Action
 {
 public:
    InputAction(const llvm::opt::Arg &input, filetypes::FileTypeId type)
-      : Action(Action::Kind::input, type),
+      : Action(Action::Kind::Input, type),
         m_input(input)
    {}
 
@@ -111,7 +111,7 @@ public:
 
    static bool classOf(const Action *action)
    {
-      return action->getKind() == Action::Kind::input;
+      return action->getKind() == Action::Kind::Input;
    }
 
 protected:
