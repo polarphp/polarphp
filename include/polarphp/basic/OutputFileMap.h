@@ -36,9 +36,6 @@ using TypeToPathMap = llvm::DenseMap<filetypes::FileTypeId, std::string>;
 /// file types to output paths.
 class OutputFileMap
 {
-private:
-   llvm::StringMap<TypeToPathMap> InputToOutputsMap;
-
 public:
    OutputFileMap()
    {}
@@ -90,8 +87,8 @@ private:
    /// error, taking ownership of \p buffer in the process.
    static llvm::Expected<OutputFileMap>
    parse(std::unique_ptr<llvm::MemoryBuffer> buffer, StringRef workingDirectory);
+   llvm::StringMap<TypeToPathMap> m_inputToOutputsMap;
 };
-
 
 } // polar::basic
 
