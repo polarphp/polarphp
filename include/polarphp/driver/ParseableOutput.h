@@ -30,26 +30,27 @@ namespace polar::driver {
 
 class Job;
 
-namespace parseable_output {
+namespace parseableoutput {
 
 /// Emits a "began" message to the given stream.
-void emit_began_message(raw_ostream &os, const Job &job, int64_t pid,
+void emit_began_message(raw_ostream &ostream, const Job &job, int64_t pid,
                         sys::TaskProcessInformation procInfo);
 
 /// Emits a "finished" message to the given stream.
-void emit_finished_message(raw_ostream &os, const Job &job, int64_t pid,
+void emit_finished_message(raw_ostream &ostream, const Job &job, int64_t pid,
                            int exitStatus, StringRef output,
                            sys::TaskProcessInformation procInfo);
 
 /// Emits a "signalled" message to the given stream.
-void emit_signalled_message(raw_ostream &os, const Job &job, int64_t pid,
+void emit_signalled_message(raw_ostream &ostream, const Job &job, int64_t pid,
                             StringRef errorMsg, StringRef output,
                             Optional<int> signal,
                             sys::TaskProcessInformation procInfo);
 
 /// Emits a "skipped" message to the given stream.
-void emit_skipped_message(raw_ostream &os, const Job &job);
+void emit_skipped_message(raw_ostream &ostream, const Job &job);
 
+} // parseableoutput
 } // polar::driver
 
 #endif // POLARPHP_PARSEABLE_OUTPUT_H
