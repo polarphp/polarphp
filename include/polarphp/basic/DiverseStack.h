@@ -19,8 +19,6 @@
 ///
 //===----------------------------------------------------------------------===//
 
-
-
 #ifndef POLARPHP_BASIC_DIVERSE_STACK_H
 #define POLARPHP_BASIC_DIVERSE_STACK_H
 
