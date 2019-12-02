@@ -53,7 +53,7 @@ protected:
    class JobContext
    {
    private:
-      Compilation &C;
+      Compilation &m_compilation;
 
    public:
       ArrayRef<const Job *> inputs;
@@ -117,9 +117,9 @@ protected:
    /// Packs together information chosen by toolchains to create jobs.
    struct InvocationInfo
    {
-      const char *ExecutableName;
+      const char *executableName;
       llvm::opt::ArgStringList arguments;
-      std::vector<std::pair<const char *, const char *>> ExtraEnvironment;
+      std::vector<std::pair<const char *, const char *>> extraEnvironment;
       std::vector<FilelistInfo> filelistInfos;
 
       // Not all platforms and jobs support the use of response files, so assume
@@ -129,9 +129,9 @@ protected:
       bool allowsResponseFiles = false;
 
       InvocationInfo(const char *name, llvm::opt::ArgStringList args = {},
-                     decltype(ExtraEnvironment) extraEnv = {})
-         : ExecutableName(name), arguments(std::move(args)),
-           ExtraEnvironment(std::move(extraEnv)) {}
+                     decltype(extraEnvironment) extraEnv = {})
+         : executableName(name), arguments(std::move(args)),
+           extraEnvironment(std::move(extraEnv)) {}
    };
 
    virtual InvocationInfo constructInvocation(const CompileJobAction &job,

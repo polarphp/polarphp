@@ -35,10 +35,13 @@ using namespace polar::sys;
 using namespace polar;
 
 namespace {
-struct CommandInput {
-   std::string Path;
+struct CommandInput
+{
+   std::string path;
    CommandInput() {}
-   CommandInput(StringRef Path) : Path(Path) {}
+   CommandInput(StringRef path)
+      : path(path)
+   {}
 };
 
 using OutputPair = std::pair<filetypes::FileTypeId, std::string>;
@@ -50,8 +53,9 @@ struct ScalarTraits<CommandInput>
 {
    static void output(const CommandInput &value, llvm::raw_ostream &ostream)
    {
-      ostream << value.Path;
+      ostream << value.path;
    }
+
    static bool mustQuote(StringRef)
    {
       return true;
@@ -59,8 +63,10 @@ struct ScalarTraits<CommandInput>
 };
 
 template <>
-struct ScalarEnumerationTraits<filetypes::FileTypeId> {
-   static void enumeration(Output &out, filetypes::FileTypeId &value) {
+struct ScalarEnumerationTraits<filetypes::FileTypeId>
+{
+   static void enumeration(Output &out, filetypes::FileTypeId &value)
+   {
       filetypes::for_all_types([&](filetypes::FileTypeId ty)
       {
          std::string typeName = filetypes::get_type_name(ty);
