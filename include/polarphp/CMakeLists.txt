@@ -84,6 +84,11 @@ polar_collect_files(
 
 polar_collect_files(
    TYPE_HEADER
+   DIR option
+   OUTPUT_VAR POLAR_OPTION_HEADERS)
+
+polar_collect_files(
+   TYPE_HEADER
    DIR reflection
    OUTPUT_VAR POLAR_REFLECTION_HEADERS)
 
@@ -129,6 +134,7 @@ polar_merge_list(POLAR_HEADERS POLAR_PIL_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_KERNEL_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_PARSER_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_DEMANGLING_HEADERS)
+polar_merge_list(POLAR_HEADERS POLAR_OPTION_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_MARKUP_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_REFLECTION_HEADERS)
 polar_merge_list(POLAR_HEADERS POLAR_SEMA_HEADERS)
@@ -139,6 +145,7 @@ polar_merge_list(POLAR_HEADERS POLAR_RUNTIME_HEADERS)
 
 add_subdirectory(syntax)
 add_subdirectory(parser)
+add_subdirectory(option)
 
 configure_file(global/PolarVersion.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/global/PolarVersion.h
    @ONLY)

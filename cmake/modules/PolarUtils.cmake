@@ -93,9 +93,9 @@ function(polar_print_versions)
       polar_find_version(${CMAKE_MAKE_PROGRAM} "--version" FALSE)
    endif()
 
-   if(${SWIFT_PATH_TO_CMARK_BUILD})
+   if(${POLARPHP_PATH_TO_CMARK_BUILD})
       polar_find_version("cmark" "--version" TRUE)
-      polar_find_version("${SWIFT_PATH_TO_CMARK_BUILD}/src/cmark" "--version" FALSE)
+      polar_find_version("${POLARPHP_PATH_TO_CMARK_BUILD}/src/cmark" "--version" FALSE)
    endif()
 
    message(STATUS "Finding version for: ${CMAKE_C_COMPILER}")

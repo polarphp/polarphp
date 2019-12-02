@@ -36,3 +36,7 @@ if (LLVM_FOUND)
 else()
    message(FATAL_ERROR "LLVM is required to build polarphp")
 endif()
+
+set(LLVM_MAIN_INCLUDE_DIR "${POLAR_DEPS_INSTALL_DIR}/include")
+set(LLVM_TABLEGEN_EXE ${POLAR_DEPS_INSTALL_DIR}/bin/llvm-tblgen)
+

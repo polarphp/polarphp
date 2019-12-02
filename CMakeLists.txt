@@ -87,6 +87,8 @@ set(POLAR_UNITTEST_LIB_DIR "${POLAR_BINARY_DIR}/${CMAKE_CFG_INTDIR}/unittests/li
 list(APPEND CMAKE_MODULE_PATH
    "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
    "${POLAR_CMAKE_MODULES_DIR}"
+   "${POLAR_CMAKE_MODULES_DIR}/clang"
+   "${POLAR_CMAKE_MODULES_DIR}/llvm"
    )
 
 list(APPEND CMAKE_INSTALL_RPATH "${POLAR_DEPS_INSTALL_DIR}/lib")
@@ -457,7 +459,6 @@ else()
    set(PHP_BUILD_DATE ${_buildDate})
 endif()
 
-set(PHP_OS ${POLAR_SYSTEM_NAME})
 set(POLAR_OS ${POLAR_SYSTEM_NAME})
 
 # setup default build rpath
@@ -472,6 +473,7 @@ include_directories(${POLAR_SOURCE_DIR}
 include(ImportLLVM)
 include(ImportClang)
 include(ImportThirdparty)
+include(AddPolarphpTableGen)
 
 add_subdirectory(devtools)
 add_subdirectory(assets)
