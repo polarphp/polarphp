@@ -117,6 +117,23 @@ DarwinPlatformKind get_darwin_platform_kind(const llvm::Triple &triple)
    llvm_unreachable("Unsupported Darwin platform");
 }
 
+DarwinPlatformKind get_non_simulator_platform(DarwinPlatformKind platform)
+{
+   switch (platform) {
+   case DarwinPlatformKind::MacOS:
+      return DarwinPlatformKind::MacOS;
+   case DarwinPlatformKind::IPhoneOS:
+   case DarwinPlatformKind::IPhoneOSSimulator:
+      return DarwinPlatformKind::IPhoneOS;
+   case DarwinPlatformKind::TvOS:
+   case DarwinPlatformKind::TvOSSimulator:
+      return DarwinPlatformKind::TvOS;
+   case DarwinPlatformKind::WatchOS:
+   case DarwinPlatformKind::WatchOSSimulator:
+      return DarwinPlatformKind::WatchOS;
+   }
+   llvm_unreachable("Unsupported Darwin platform");
+}
 
 StringRef get_platform_name_for_triple(const llvm::Triple &triple)
 {

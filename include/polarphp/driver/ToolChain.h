@@ -68,7 +68,7 @@ protected:
       const llvm::opt::ArgList &args;
 
    public:
-      JobContext(Compilation &C, ArrayRef<const Job *> inputs,
+      JobContext(Compilation &compilation, ArrayRef<const Job *> inputs,
                  ArrayRef<const Action *> inputActions,
                  const CommandOutput &output, const OutputInfo &outputInfo);
 

@@ -60,6 +60,11 @@ bool triple_is_any_simulator(const llvm::Triple &triple);
 /// Returns the platform Kind for Darwin triples.
 DarwinPlatformKind get_darwin_platform_kind(const llvm::Triple &triple);
 
+/// Maps an arbitrary platform to its non-simulator equivalent.
+///
+/// If \p platform is not a simulator platform, it will be returned as is.
+DarwinPlatformKind get_non_simulator_platform(DarwinPlatformKind platform);
+
 /// Returns the platform name for a given target triple.
 ///
 /// For example, the iOS simulator has the name "iphonesimulator", while real
