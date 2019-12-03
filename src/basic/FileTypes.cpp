@@ -166,7 +166,7 @@ bool is_after_llvm(FileTypeId id) {
    llvm_unreachable("All switch cases are covered");
 }
 
-bool is_part_of_polar_compilation(FileTypeId id)
+bool is_part_of_polarphp_compilation(FileTypeId id)
 {
    switch (id) {
    case filetypes::TY_Polar:
