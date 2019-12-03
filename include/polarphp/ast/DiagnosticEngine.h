@@ -360,7 +360,7 @@ public:
    template<typename ...ArgTypes>
    Diagnostic(Diag<ArgTypes...> id,
               typename internal::PassArgument<ArgTypes>::type... VArgs)
-      : m_id(id.m_id)
+      : m_id(id.id)
    {
       DiagnosticArgument diagArgs[] = {
          DiagnosticArgument(0), std::move(VArgs)...

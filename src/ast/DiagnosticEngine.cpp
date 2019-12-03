@@ -733,9 +733,9 @@ DiagnosticState::Behavior DiagnosticState::determineBehavior(DiagID id)
    //   2) If the user provided a behavior for this specific diagnostic, follow
    //      that
 
-   if (m_perDiagnosticBehavior[static_cast<unsigned>(id)] != Behavior::Unspecified)
+   if (m_perDiagnosticBehavior[static_cast<unsigned>(id)] != Behavior::Unspecified) {
       return set(m_perDiagnosticBehavior[static_cast<unsigned>(id)]);
-
+   }
    //   3) If the user provided a behavior for this diagnostic's kind, follow
    //      that
    if (diagInfo.kind == DiagnosticKind::Warning) {

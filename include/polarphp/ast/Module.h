@@ -934,7 +934,7 @@ public:
    /// substituting another name instead.
    virtual StringRef getExportedModuleName() const
    {
-      return getParentModule()->getName().str();
+//      return getParentModule()->getName().str();
    }
 
    /// If this is a module imported from a parseable interface, return the path
@@ -950,7 +950,7 @@ public:
    // Efficiency override for DeclContext::getParentModule().
    ModuleDecl *getParentModule() const
    {
-      return const_cast<ModuleDecl *>(cast<ModuleDecl>(getParent()));
+//      return const_cast<ModuleDecl *>(cast<ModuleDecl>(getParent()));
    }
 
 protected:
@@ -1041,7 +1041,7 @@ private:
    TypeRefinementContext *m_trc = nullptr;
 
    /// If non-null, used to track name lookups that happen within this file.
-   Optional<ReferencedNameTracker> m_referencedNames;
+//   Optional<ReferencedNameTracker> m_referencedNames;
 
    /// The class in this file marked \@NS/UIApplicationMain.
    ClassDecl *m_mainClass = nullptr;
@@ -1078,14 +1078,14 @@ public:
 
    /// A cache of syntax nodes that can be reused when creating the syntax tree
    /// for this file.
-   syntaxParsingCache *syntaxParsingCache = nullptr;
+//   syntaxParsingCache *syntaxParsingCache = nullptr;
 
    /// The list of local type declarations in the source file.
    llvm::SetVector<TypeDecl *> localTypeDecls;
 
    /// The set of validated opaque return type decls in the source file.
-   llvm::SmallVector<OpaqueTypeDecl *, 4> opaqueReturnTypes;
-   llvm::StringMap<OpaqueTypeDecl *> validatedOpaqueReturnTypes;
+//   llvm::SmallVector<OpaqueTypeDecl *, 4> opaqueReturnTypes;
+//   llvm::StringMap<OpaqueTypeDecl *> validatedOpaqueReturnTypes;
    /// The set of parsed decls with opaque return types that have not yet
    /// been validated.
    llvm::DenseSet<ValueDecl *> unvalidatedDeclsWithOpaqueReturnTypes;
@@ -1239,12 +1239,12 @@ public:
 
    ReferencedNameTracker *getReferencedNameTracker()
    {
-      return m_referencedNames ? m_referencedNames.getPointer() : nullptr;
+//      return m_referencedNames ? m_referencedNames.getPointer() : nullptr;
    }
 
    const ReferencedNameTracker *getReferencedNameTracker() const
    {
-      return m_referencedNames ? m_referencedNames.getPointer() : nullptr;
+//      return m_referencedNames ? m_referencedNames.getPointer() : nullptr;
    }
 
    void createReferencedNameTracker();
@@ -1429,7 +1429,7 @@ protected:
    ~LoadedFile() = default;
    LoadedFile(FileUnitKind kind, ModuleDecl &M) noexcept
       : FileUnit(kind, M) {
-      assert(classof(this) && "invalid kind");
+      assert(classOf(this) && "invalid kind");
    }
 
    /// A map from private/fileprivate decls to the file they were defined in.

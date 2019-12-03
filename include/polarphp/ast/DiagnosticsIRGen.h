@@ -34,7 +34,7 @@ namespace polar::ast::diag {
 // Declare common diagnostics objects with their appropriate types.
 #define DIAG(KIND,ID,Options,Text,Signature) \
    extern internal::DiagWithArguments<void Signature>::type ID;
-#include "polarphp/ast/DiagnosticsIRGenDef.h"
+#include "polarphp/ast/DiagnosticsIRGenDefs.h"
 } // polar::ast::diag
 
 #endif // POLARPHP_DIAGNOSTICSIRGEN_H

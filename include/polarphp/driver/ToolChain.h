@@ -16,7 +16,7 @@
 #include "polarphp/basic/LLVM.h"
 #include "polarphp/driver/Action.h"
 #include "polarphp/driver/Job.h"
-#include "polarphp/kernel/Options.h"
+#include "polarphp/option/Options.h"
 #include "llvm/ADT/Triple.h"
 
 #include <memory>

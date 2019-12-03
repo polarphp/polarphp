@@ -176,7 +176,7 @@ public:
              const Key2 &new2)
    {
       Value v = findAndErase(old1, old2);
-      insert(old1, old2, v);
+      return insert(old1, old2, v);
    }
 
    /// Returns the submap at \p k1. May create one if not present.
@@ -881,7 +881,7 @@ public:
    InterfaceAndImplementationPair<SourceFileDepGraphNode>
    getSourceFileNodePair() const;
 
-   StringRef getSwiftDepsFromSourceFileProvide() const;
+   StringRef getPolarphpDepsFromSourceFileProvide() const;
 
    std::string getGraphID() const {
       return getSourceFileNodePair().getInterface()->getKey().humanReadableName();
@@ -943,8 +943,8 @@ private:
    void addNode(SourceFileDepGraphNode *n)
    {
       n->setSequenceNumber(m_allNodes.size());
-      assert(m_allNodes.size() < 2 ==
-             (n->getKey().getKind() == NodeKind::sourceFileProvide) &&
+      assert(((m_allNodes.size() < 2) ==
+              (n->getKey().getKind() == NodeKind::sourceFileProvide)) &&
              "First two and only first two nodes should be sourceFileProvide "
              "nodes.");
       m_allNodes.push_back(n);
@@ -1140,42 +1140,42 @@ private:
 // This introduces a redefinition where ever std::is_same_t<size_t, uint64_t>
 // holds
 #if !(defined(__linux__) || defined(_WIN64))
-LLVM_YAML_DECLARE_SCALAR_TRAITS(size_t, QuotingType::None);
+LLVM_YAML_DECLARE_SCALAR_TRAITS(size_t, QuotingType::None)
 #endif
-LLVM_YAML_DECLARE_ENUM_TRAITS(polar::ast::experimentaldependencies::NodeKind);
-LLVM_YAML_DECLARE_ENUM_TRAITS(polar::ast::experimentaldependencies::DeclAspect);
+LLVM_YAML_DECLARE_ENUM_TRAITS(polar::ast::experimentaldependencies::NodeKind)
+LLVM_YAML_DECLARE_ENUM_TRAITS(polar::ast::experimentaldependencies::DeclAspect)
 LLVM_YAML_DECLARE_MAPPING_TRAITS(
-      polar::ast::experimentaldependencies::DependencyKey);
-LLVM_YAML_DECLARE_MAPPING_TRAITS(polar::ast::experimentaldependencies::DepGraphNode);
+      polar::ast::experimentaldependencies::DependencyKey)
+LLVM_YAML_DECLARE_MAPPING_TRAITS(polar::ast::experimentaldependencies::DepGraphNode)
 
 namespace llvm {
-namespace yaml {
-template <>
-struct MappingContextTraits<
-      polar::ast::experimentaldependencies::SourceFileDepGraphNode,
-      polar::ast::experimentaldependencies::SourceFileDepGraph>
-{
-   using SourceFileDepGraphNode =
-   polar::ast::experimentaldependencies::SourceFileDepGraphNode;
-   using SourceFileDepGraph =
-   polar::ast::experimentaldependencies::SourceFileDepGraph;
+   namespace yaml {
+   template <>
+   struct MappingContextTraits<
+         polar::ast::experimentaldependencies::SourceFileDepGraphNode,
+         polar::ast::experimentaldependencies::SourceFileDepGraph>
+   {
+      using SourceFileDepGraphNode =
+      polar::ast::experimentaldependencies::SourceFileDepGraphNode;
+      using SourceFileDepGraph =
+      polar::ast::experimentaldependencies::SourceFileDepGraph;
 
-   static void mapping(IO &io, SourceFileDepGraphNode &node,
-                       SourceFileDepGraph &g);
-};
+      static void mapping(IO &io, SourceFileDepGraphNode &node,
+                          SourceFileDepGraph &g);
+   };
 
-template <>
-struct SequenceTraits<
-      std::vector<polar::ast::experimentaldependencies::SourceFileDepGraphNode *>>
-{
-   using SourceFileDepGraphNode =
-   polar::ast::experimentaldependencies::SourceFileDepGraphNode;
-   using NodeVec = std::vector<SourceFileDepGraphNode *>;
-   static size_t size(IO &, NodeVec &vec);
-   static SourceFileDepGraphNode &element(IO &, NodeVec &vec, size_t index);
-};
+   template <>
+   struct SequenceTraits<
+         std::vector<polar::ast::experimentaldependencies::SourceFileDepGraphNode *>>
+   {
+      using SourceFileDepGraphNode =
+      polar::ast::experimentaldependencies::SourceFileDepGraphNode;
+      using NodeVec = std::vector<SourceFileDepGraphNode *>;
+      static size_t size(IO &, NodeVec &vec);
+      static SourceFileDepGraphNode &element(IO &, NodeVec &vec, size_t index);
+   };
 
-} // namespace yaml
+   } // namespace yaml
 } // namespace llvm
 
 LLVM_YAML_DECLARE_MAPPING_TRAITS(

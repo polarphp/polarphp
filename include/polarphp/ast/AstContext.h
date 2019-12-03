@@ -62,11 +62,13 @@ class SyntaxArena;
 namespace polar::basic {
 class SourceLoc;
 class UnifiedStatsReporter;
+class SourceManager;
 }
 
 namespace polar::ast {
 
 using polar::basic::SourceLoc;
+using polar::basic::SourceManager;
 using polar::basic::UnifiedStatsReporter;
 using polar::kernel::LangOptions;
 using polar::basic::aligned_alloc;
@@ -109,7 +111,7 @@ class NominalTypeDecl;
 class NormalProtocolConformance;
 class OpaqueTypeDecl;
 class InheritedProtocolConformance;
-class m_selfProtocolConformance;
+class SelfProtocolConformance;
 class SpecializedProtocolConformance;
 enum class ProtocolConformanceState;
 class Pattern;
@@ -119,7 +121,6 @@ class TupleTypeElt;
 class EnumElementDecl;
 class ProtocolDecl;
 class SubstitutableType;
-class SourceManager;
 class ValueDecl;
 class DiagnosticEngine;
 class TypeCheckerDebugConsumer;

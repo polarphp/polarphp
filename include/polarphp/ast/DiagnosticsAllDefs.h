@@ -54,6 +54,8 @@
 #include "polarphp/ast/DiagnosticsParseDefs.h"
 #include "polarphp/ast/DiagnosticsDriverDefs.h"
 #include "polarphp/ast/DiagnosticsFrontendDefs.h"
+#include "polarphp/ast/DiagnosticsIRGenDefs.h"
+#include "polarphp/ast/DiagnosticsPILDefs.h"
 
 #undef DIAG_NO_UNDEF
 
