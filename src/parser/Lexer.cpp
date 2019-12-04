@@ -132,6 +132,20 @@ void Lexer::lex(Token &result, ParsedTrivia &leadingTriviaResult, ParsedTrivia &
    }
 }
 
+bool Lexer::isIdentifier(StringRef string)
+{
+  if (string.empty()) {
+     return false;
+  }
+  const unsigned char *p = reinterpret_cast<const unsigned char *>(string.data());
+  const unsigned char *end = reinterpret_cast<const unsigned char *>(string.end());
+  if (!advance_if_valid_start_of_identifier(p, end)) {
+     return false;
+  }
+  while (p < end && advance_if_valid_continuation_of_identifier(p, end));
+  return p == end;
+}
+
 InFlightDiagnostic Lexer::diagnose(const unsigned char *loc, ast::Diagnostic diag)
 {
    if (m_diags) {

@@ -36,3 +36,185 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/StringSwitch.h"
 #include "llvm/ADT/Triple.h"
+
+namespace polar {
+
+using namespace polar::ast;
+using namespace polar::basic;
+using namespace llvm::opt;
+
+static StringRef to_string_ref(const SanitizerKind kind)
+{
+   switch (kind) {
+#define SANITIZER(_, kind, name, file) \
+   case SanitizerKind::kind: return #name;
+#include "polarphp/basic/SanitizersDef.h"
+   }
+   llvm_unreachable("Unknown sanitizer");
+}
+
+static StringRef to_file_name(const SanitizerKind kind)
+{
+   switch (kind) {
+#define SANITIZER(_, kind, name, file) \
+   case SanitizerKind::kind: return #file;
+#include "polarphp/basic/SanitizersDef.h"
+   }
+   llvm_unreachable("Unknown sanitizer");
+}
+
+static Optional<SanitizerKind> parse(const char* arg)
+{
+   return llvm::StringSwitch<Optional<SanitizerKind>>(arg)
+#define SANITIZER(_, kind, name, file) .Case(#name, SanitizerKind::kind)
+#include "polarphp/basic/SanitizersDef.h"
+   .Default(None);
+}
+
+llvm::SanitizerCoverageOptions parse_sanitizer_coverage_arg_value(
+      const llvm::opt::Arg *arg, const llvm::Triple &triple,
+      DiagnosticEngine &diags, OptionSet<SanitizerKind> sanitizers)
+{
+
+   llvm::SanitizerCoverageOptions opts;
+   // The coverage names here follow the names used by clang's
+   // ``-fsanitize-coverage=`` flag.
+   for (int i = 0, n = arg->getNumValues(); i != n; ++i) {
+      if (opts.CoverageType == llvm::SanitizerCoverageOptions::SCK_None) {
+         opts.CoverageType =
+               llvm::StringSwitch<llvm::SanitizerCoverageOptions::Type>(
+                  arg->getValue(i))
+               .Case("func", llvm::SanitizerCoverageOptions::SCK_Function)
+               .Case("bb", llvm::SanitizerCoverageOptions::SCK_BB)
+               .Case("edge", llvm::SanitizerCoverageOptions::SCK_Edge)
+               .Default(llvm::SanitizerCoverageOptions::SCK_None);
+         if (opts.CoverageType != llvm::SanitizerCoverageOptions::SCK_None)
+            continue;
+      }
+
+      if (StringRef(arg->getValue(i)) == "indirect-calls") {
+         opts.IndirectCalls = true;
+         continue;
+      } else if (StringRef(arg->getValue(i)) == "trace-bb") {
+         opts.TraceBB = true;
+         continue;
+      } else if (StringRef(arg->getValue(i)) == "trace-cmp") {
+         opts.TraceCmp = true;
+         continue;
+      } else if (StringRef(arg->getValue(i)) == "8bit-counters") {
+         opts.Use8bitCounters = true;
+         continue;
+      } else if (StringRef(arg->getValue(i)) == "trace-pc") {
+         opts.TracePC = true;
+         continue;
+      } else if (StringRef(arg->getValue(i)) == "trace-pc-guard") {
+         opts.TracePCGuard = true;
+         continue;
+      }
+
+      // Argument is not supported.
+      diags.diagnose(SourceLoc(), diag::error_unsupported_option_argument,
+                     arg->getOption().getPrefixedName(), arg->getValue(i));
+      return llvm::SanitizerCoverageOptions();
+   }
+
+   if (opts.CoverageType == llvm::SanitizerCoverageOptions::SCK_None) {
+      diags.diagnose(SourceLoc(), diag::error_option_missing_required_argument,
+                     arg->getSpelling(), "\"func\", \"bb\", \"edge\"");
+      return llvm::SanitizerCoverageOptions();
+   }
+
+   // Running the sanitizer coverage pass will add undefined symbols to
+   // functions in compiler-rt's "sanitizer_common". "sanitizer_common" isn't
+   // shipped as a separate library we can link with. However those are defined
+   // in the various sanitizer runtime libraries so we require that we are
+   // doing a sanitized build so we pick up the required functions during
+   // linking.
+   if (opts.CoverageType != llvm::SanitizerCoverageOptions::SCK_None &&
+       !sanitizers) {
+      diags.diagnose(SourceLoc(), diag::error_option_requires_sanitizer,
+                     arg->getSpelling());
+      return llvm::SanitizerCoverageOptions();
+   }
+   return opts;
+}
+
+OptionSet<SanitizerKind> parse_sanitizer_arg_values(
+      const llvm::opt::ArgList &Args,
+      const llvm::opt::Arg *arg,
+      const llvm::Triple &triple,
+      DiagnosticEngine &diags,
+      llvm::function_ref<bool(llvm::StringRef, bool)> sanitizerRuntimeLibExists)
+{
+   OptionSet<SanitizerKind> sanitizerSet;
+
+   // Find the sanitizer kind.
+   for (const char *argValue : arg->getValues()) {
+      Optional<SanitizerKind> optKind = parse(argValue);
+
+      // Unrecognized sanitizer option
+      if (!optKind.hasValue()) {
+         diags.diagnose(SourceLoc(), diag::error_unsupported_option_argument,
+                        arg->getOption().getPrefixedName(), argValue);
+         continue;
+      }
+      SanitizerKind kind = optKind.getValue();
+
+      // Support is determined by existance of the sanitizer library.
+      auto fileName = to_file_name(kind);
+      bool isShared = (kind != SanitizerKind::Fuzzer);
+      bool sanitizerSupported = sanitizerRuntimeLibExists(fileName, isShared);
+
+      // TSan is explicitly not supported for 32 bits.
+      if (kind == SanitizerKind::Thread && !triple.isArch64Bit())
+         sanitizerSupported = false;
+
+      if (!sanitizerSupported) {
+         SmallString<128> b;
+         diags.diagnose(SourceLoc(), diag::error_unsupported_opt_for_target,
+                        (arg->getOption().getPrefixedName() + to_string_ref(kind))
+                        .toStringRef(b),
+                        triple.getTriple());
+      } else {
+         sanitizerSet |= kind;
+      }
+   }
+
+   // Check that we're one of the known supported targets for sanitizers.
+   if (!(triple.isOSDarwin() || triple.isOSLinux() || triple.isOSWindows())) {
+      SmallString<128> b;
+      diags.diagnose(SourceLoc(), diag::error_unsupported_opt_for_target,
+                     (arg->getOption().getPrefixedName() +
+                      StringRef(arg->getAsString(Args))).toStringRef(b),
+                     triple.getTriple());
+   }
+
+   // Address and thread sanitizers can not be enabled concurrently.
+   if ((sanitizerSet & SanitizerKind::Thread)
+       && (sanitizerSet & SanitizerKind::Address)) {
+      SmallString<128> b1;
+      SmallString<128> b2;
+      diags.diagnose(SourceLoc(), diag::error_argument_not_allowed_with,
+                     (arg->getOption().getPrefixedName()
+                      + to_string_ref(SanitizerKind::Address)).toStringRef(b1),
+                     (arg->getOption().getPrefixedName()
+                      + to_string_ref(SanitizerKind::Thread)).toStringRef(b2));
+   }
+
+   return sanitizerSet;
+}
+
+std::string get_sanitizer_list(const OptionSet<SanitizerKind> &set)
+{
+   std::string list;
+#define SANITIZER(_, kind, name, file) \
+   if (set & SanitizerKind::kind) list += #name ",";
+#include "polarphp/basic/SanitizersDef.h"
+   if (!list.empty()) {
+      list.pop_back(); // Remove last comma
+   }
+   return list;
+}
+
+} // polar
+

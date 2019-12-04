@@ -18,7 +18,7 @@ polar_merge_list(POLARPHP_OPTION_SOURCES POLAR_HEADERS)
 
 polar_add_library(PolarOption SHARED
    ${POLARPHP_OPTION_SOURCES}
-   LINK_LIBS PolarBasic LLVMOption
+   LINK_LIBS PolarBasic PolarParser LLVMOption
    DEPENDS PolarphpOptions)
 
 set_target_properties(

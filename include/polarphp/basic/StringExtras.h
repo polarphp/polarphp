@@ -20,6 +20,7 @@
 #define POLARPHP_BASIC_STRING_EXTRAS_H
 
 #include "polarphp/global/CompilerFeature.h"
+#include "polarphp/basic/LLVM.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/Twine.h"
@@ -38,14 +39,12 @@ class raw_ostream;
 
 namespace polar::basic {
 
-template<typename T>
-class SmallVectorImpl;
-
 using llvm::raw_ostream;
 using llvm::StringRef;
 using llvm::ArrayRef;
 using llvm::Twine;
 using llvm::SmallString;
+using llvm::SmallVectorImpl;
 
 /// hexdigit - Return the hexadecimal character for the
 /// given number \p value (which should be less than 16).

@@ -28,9 +28,13 @@
 #include <string>
 #include <vector>
 
+namespace llvm {
+class StringRef;
+}
+
 namespace polar::basic {
 
-class StringRef;
+using llvm::StringRef;
 
 /// Options for controlling search path behavior.
 class SearchPathOptions

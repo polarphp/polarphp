@@ -79,6 +79,9 @@ ERROR(error_expected_frontend_command, NoneType,
 ERROR(error_cannot_specify__o_for_multiple_outputs, NoneType,
       "cannot specify -o when generating multiple output files", ())
 
+ERROR(error_static_emit_executable_disallowed,NoneType,
+      "-static may not be used with -emit-executable", ())
+
 ERROR(error_unable_to_load_output_file_map, NoneType,
       "unable to load output file map '%1': %0", (StringRef, StringRef))
 

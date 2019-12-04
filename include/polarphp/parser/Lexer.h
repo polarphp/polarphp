@@ -122,6 +122,8 @@ public:
       return m_commentRetention == CommentRetentionMode::ReturnAsTokens;
    }
 
+   static bool isIdentifier(StringRef name);
+
    const LexerFlags &getFlags() const
    {
       return m_flags;

@@ -28,11 +28,13 @@
 
 #include <memory>
 
-namespace polar::driver {
+namespace polar::ast {
 class DiagnosticEngine;
 } // polar::driver
 
 namespace polar::driver {
+
+using polar::ast::DiagnosticEngine;
 
 /// Generates the list of arguments that would be passed to the compiler
 /// frontend from the given driver arguments.

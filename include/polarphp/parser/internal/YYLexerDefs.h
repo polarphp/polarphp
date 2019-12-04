@@ -20,13 +20,13 @@
 #include <any>
 #include <functional>
 
-namespace polar::basic {
+namespace llvm {
 class StringRef;
 }
 
 namespace polar::parser {
 using YYLexerCondType = YYCONDTYPE;
-using polar::basic::StringRef;
+using llvm::StringRef;
 
 namespace internal {
 using YYLocation = location;

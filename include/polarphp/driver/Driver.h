@@ -40,7 +40,7 @@
 
 namespace llvm::opt {
 class Arg;
-class argList;
+class ArgList;
 class OptTable;
 class InputArgList;
 class DerivedArgList;
@@ -178,13 +178,13 @@ public:
       Interactive,     // polarphp
       Batch,           // polarphpc
       AutolinkExtract, // polarphp-autolink-extract
-      SwiftFormat      // polarphp-format
+      PolarphpFormat      // polarphp-format
    };
 
    class InputInfoMap;
 
 public:
-   Driver(StringRef m_driverExecutable, StringRef m_name,
+   Driver(StringRef driverExecutable, StringRef name,
           ArrayRef<const char *> args, DiagnosticEngine &diags);
    ~Driver();
 
@@ -345,7 +345,7 @@ public:
    /// binding tools.
    ///
    /// \return Whether any compilation should be built for this invocation
-   bool handleImmediateArgs(const llvm::opt::argList &args, const ToolChain &toolchain);
+   bool handleImmediateArgs(const llvm::opt::ArgList &args, const ToolChain &toolchain);
 
    /// Print the list of Actions in a Compilation.
    void printActions(const Compilation &compilation) const;
