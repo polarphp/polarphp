@@ -1,12 +1,13 @@
-// This source file is part of the polarphp.org open source project
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
+//===--- PILOptions.h - Swift Language PILGen and PIL options ---*- C++ -*-===//
+//
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
-// Created by polarboy on 2019/11/26.
 //===----------------------------------------------------------------------===//
 //
 // This file defines the options which control the generation, processing,
@@ -31,163 +32,152 @@ using polar::basic::OptimizationMode;
 using polar::basic::OptionSet;
 using polar::basic::SanitizerKind;
 
-class PILOptions
-{
+class PILOptions {
 public:
-   /// Controls the aggressiveness of the performance inliner.
-   int inlineThreshold = -1;
+  /// Controls the aggressiveness of the performance inliner.
+  int InlineThreshold = -1;
 
-   /// Controls the aggressiveness of the performance inliner for Osize.
-   int callerBaseBenefitReductionFactor = 2;
+  /// Controls the aggressiveness of the performance inliner for Osize.
+  int CallerBaseBenefitReductionFactor = 2;
 
-   /// Controls the aggressiveness of the loop unroller.
-   int unrollThreshold = 250;
+  /// Controls the aggressiveness of the loop unroller.
+  int UnrollThreshold = 250;
 
-   /// The number of threads for multi-threaded code generation.
-   int numThreads = 0;
+  /// The number of threads for multi-threaded code generation.
+  int NumThreads = 0;
 
-   /// Controls whether to pull in SIL from partial modules during the
-   /// merge modules step. Could perhaps be merged with the link mode
-   /// above but the interactions between all the flags are tricky.
-   bool mergePartialModules = false;
+  /// Controls whether to pull in PIL from partial modules during the
+  /// merge modules step. Could perhaps be merged with the link mode
+  /// above but the interactions between all the flags are tricky.
+  bool MergePartialModules = false;
 
-   /// Remove all runtime assertions during optimizations.
-   bool removeRuntimeAsserts = false;
+  /// Remove all runtime assertions during optimizations.
+  bool RemoveRuntimeAsserts = false;
 
-   /// Enable existential specializer optimization.
-   bool existentialSpecializer = false;
+  /// Controls whether the PIL ARC optimizations are run.
+  bool EnableARCOptimizations = true;
 
-   /// Controls whether the SIL ARC optimizations are run.
-   bool enableARCOptimizations = true;
+  /// Controls whether specific OSSA optimizations are run. For benchmarking
+  /// purposes.
+  bool EnableOSSAOptimizations = true;
 
-   /// Should we run any SIL performance optimizations
-   ///
-   /// Useful when you want to enable -O LLVM opts but not -O SIL opts.
-   bool disableSILPerfOptimizations = false;
+  /// Should we run any PIL performance optimizations
+  ///
+  /// Useful when you want to enable -O LLVM opts but not -O PIL opts.
+  bool DisablePILPerfOptimizations = false;
 
-   /// Controls whether or not paranoid verification checks are run.
-   bool verifyAll = false;
+  /// Controls whether cross module optimization is enabled.
+  bool CrossModuleOptimization = false;
 
-   /// Are we debugging sil serialization.
-   bool debugSerialization = false;
+  /// Controls whether or not paranoid verification checks are run.
+  bool VerifyAll = false;
 
-   /// Whether to dump verbose SIL with scope and location information.
-   bool emitVerbosePIL = false;
+  /// Are we debugging sil serialization.
+  bool DebugSerialization = false;
 
-   /// Whether to stop the optimization pipeline after serializing SIL.
-   bool stopOptimizationAfterSerialization = false;
+  /// Whether to dump verbose PIL with scope and location information.
+  bool EmitVerbosePIL = false;
 
-   /// Optimization mode being used.
-   OptimizationMode optMode = OptimizationMode::NotSet;
+  /// Whether to stop the optimization pipeline after serializing PIL.
+  bool StopOptimizationAfterSerialization = false;
 
-   enum AssertConfiguration: unsigned
-   {
-      // Used by standard library code to distinguish between a debug and release
-      // build.
-      Debug = 0,     // Enables all asserts.
-      Release = 1,   // Disables asserts.
-      Unchecked = 2, // Disables asserts, preconditions, and runtime checks.
+  /// Whether to skip emitting non-inlinable function bodies.
+  bool SkipNonInlinableFunctionBodies = false;
 
-      // Leave the assert_configuration instruction around.
-      DisableReplacement = UINT_MAX
-   };
+  /// Optimization mode being used.
+  OptimizationMode OptMode = OptimizationMode::NotSet;
 
-   /// The assert configuration controls how assertions behave.
-   unsigned assertConfig = Debug;
+  enum AssertConfiguration: unsigned {
+    // Used by standard library code to distinguish between a debug and release
+    // build.
+    Debug = 0,     // Enables all asserts.
+    Release = 1,   // Disables asserts.
+    Unchecked = 2, // Disables asserts, preconditions, and runtime checks.
 
-   /// Should we print out instruction counts if -print-stats is passed in?
-   bool printInstCounts = false;
+    // Leave the assert_configuration instruction around.
+    DisableReplacement = UINT_MAX
+  };
 
-   /// Instrument code to generate profiling information.
-   bool generateProfile = false;
+  /// The assert configuration controls how assertions behave.
+  unsigned AssertConfig = Debug;
 
-   /// Path to the profdata file to be used for PGO, or the empty string.
-   std::string useProfile = "";
+  /// Should we print out instruction counts if -print-stats is passed in?
+  bool PrintInstCounts = false;
 
-   /// Emit a mapping of profile counters for use in coverage.
-   bool emitProfileCoverageMapping = false;
+  /// Instrument code to generate profiling information.
+  bool GenerateProfile = false;
 
-   /// Should we use a pass pipeline passed in via a json file? Null by default.
-   llvm::StringRef externalPassPipelineFilename;
+  /// Path to the profdata file to be used for PGO, or the empty string.
+  std::string UseProfile = "";
 
-   /// Don't generate code using partial_apply in SIL generation.
-   bool disableSILPartialApply = false;
+  /// Emit a mapping of profile counters for use in coverage.
+  bool EmitProfileCoverageMapping = false;
 
-   /// The name of the SIL outputfile if compiled with SIL debugging (-gsil).
-   std::string PILOutputFileNameForDebugging;
+  /// Should we use a pass pipeline passed in via a json file? Null by default.
+  llvm::StringRef ExternalPassPipelineFilename;
 
-   /// If set to true, compile with the SIL Ownership Model enabled.
-   bool verifyPILOwnership = false;
+  /// Don't generate code using partial_apply in PIL generation.
+  bool DisablePILPartialApply = false;
 
-   /// Assume that code will be executed in a single-threaded environment.
-   bool assumeSingleThreaded = false;
+  /// The name of the PIL outputfile if compiled with PIL debugging (-gsil).
+  std::string PILOutputFileNameForDebug;
 
-   /// Indicates which sanitizer is turned on.
-   OptionSet<SanitizerKind> sanitizers;
+  /// If set to true, compile with the PIL Ownership Model enabled.
+  bool VerifyPILOwnership = true;
 
-   /// Emit compile-time diagnostics when the law of exclusivity is violated.
-   bool enforceExclusivityStatic = true;
+  /// Assume that code will be executed in a single-threaded environment.
+  bool AssumeSingleThreaded = false;
 
-   /// Emit checks to trap at run time when the law of exclusivity is violated.
-   bool enforceExclusivityDynamic = true;
+  /// Indicates which sanitizer is turned on.
+  OptionSet<SanitizerKind> Sanitizers;
 
-   /// Emit extra exclusvity markers for memory access and verify coverage.
-   bool verifyExclusivity = false;
+  /// Emit compile-time diagnostics when the law of exclusivity is violated.
+  bool EnforceExclusivityStatic = true;
 
-   /// Enable the mandatory semantic arc optimizer.
-   bool enableMandatorySemanticARCOpts = false;
+  /// Emit checks to trap at run time when the law of exclusivity is violated.
+  bool EnforceExclusivityDynamic = true;
 
-   /// Calls to the replaced method inside of the replacement method will call
-   /// the previous implementation.
-   ///
-   /// @_dynamicReplacement(for: original())
-   /// func replacement() {
-   ///   if (...)
-   ///     original() // calls original() implementation if true
-   /// }
-   bool enableDynamicReplacementCanCallPreviousImplementation = true;
+  /// Emit extra exclusvity markers for memory access and verify coverage.
+  bool VerifyExclusivity = false;
 
-   /// Enable large loadable types IRGen pass.
-   bool enableLargeLoadableTypes = true;
+  /// Calls to the replaced method inside of the replacement method will call
+  /// the previous implementation.
+  ///
+  /// @_dynamicReplacement(for: original())
+  /// func replacement() {
+  ///   if (...)
+  ///     original() // calls original() implementation if true
+  /// }
+  bool EnableDynamicReplacementCanCallPreviousImplementation = true;
 
-   /// Should the default pass pipelines strip ownership during the diagnostic
-   /// pipeline.
-   bool stripOwnershipDuringDiagnosticsPipeline = true;
+  /// Enable large loadable types IRGen pass.
+  bool EnableLargeLoadableTypes = true;
 
-   /// The name of the file to which the backend should save YAML optimization
-   /// records.
-   std::string optRecordFile;
+  /// Should the default pass pipelines strip ownership during the diagnostic
+  /// pipeline or after serialization.
+  bool StripOwnershipAfterSerialization = true;
 
-   PILOptions() {}
+  /// The name of the file to which the backend should save YAML optimization
+  /// records.
+  std::string OptRecordFile;
 
-   /// Return a hash code of any components from these options that should
-   /// contribute to a Swift Bridging PCH hash.
-   llvm::hash_code getPCHHashComponents() const
-   {
-      return llvm::hash_value(0);
-   }
+  PILOptions() {}
 
-   bool shouldOptimize() const
-   {
-      return optMode > OptimizationMode::NoOptimization;
-   }
+  /// Return a hash code of any components from these options that should
+  /// contribute to a Swift Bridging PCH hash.
+  llvm::hash_code getPCHHashComponents() const {
+    return llvm::hash_value(0);
+  }
 
-   bool hasMultipleIRGenThreads() const
-   {
-      return numThreads > 1;
-   }
+  bool shouldOptimize() const {
+    return OptMode > OptimizationMode::NoOptimization;
+  }
 
-   bool shouldPerformIRGenerationInParallel() const
-   {
-      return numThreads != 0;
-   }
-
-   bool hasMultipleIGMs() const
-   {
-      return hasMultipleIRGenThreads();
-   }
+  bool hasMultipleIRGenThreads() const { return NumThreads > 1; }
+  bool shouldPerformIRGenerationInParallel() const { return NumThreads != 0; }
+  bool hasMultipleIGMs() const { return hasMultipleIRGenThreads(); }
 };
 
-} // polar::ast
+} // end namespace polar::ast
 
 #endif // POLARPHP_AST_PIL_OPTIONS_H

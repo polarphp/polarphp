@@ -550,4 +550,14 @@ inline void deallocate_buffer(void *ptr, size_t size, size_t alignment) {
 #define POLAR_CONSTRUCTOR
 #endif
 
-#endif // POLAR_DEVLTOOLS_UTILS_COMPILER_FEATURE_H
+
+#if defined (POLAR_CC_MSVC) && _MSC_VER < 1910
+// Work around MSVC bug: attempting to reference a deleted function
+// https://connect.microsoft.com/VisualStudio/feedback/details/3116505
+#define POLAR_DELETE_OPERATOR_DELETED                                          \
+  { llvm_unreachable("Delete operator should not be called."); }
+#else
+#define POLAR_DELETE_OPERATOR_DELETED = delete;
+#endif
+
+#endif // POLARPHP_GLOBAL_COMPILER_FEATURE_H

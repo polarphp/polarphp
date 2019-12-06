@@ -1,3 +1,14 @@
+//===--- Frontend.h - frontend utility methods ------------------*- C++ -*-===//
+//
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
 // This source file is part of the polarphp.org open source project
 //
 // Copyright (c) 2017 - 2019 polarphp software foundation
@@ -7,4 +18,14 @@
 // See https://polarphp.org/LICENSE.txt for license information
 // See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
 //
-// Created by polarboy on 2019/11/26.
+// Created by polarboy on 2019/12/04.
+//
+// This file contains declarations of utility methods for parsing and
+// performing semantic on modules.
+//
+//===----------------------------------------------------------------------===//
+
+#ifndef POLARPHP_FRONTEND_FRONTEND_H
+#define POLARPHP_FRONTEND_FRONTEND_H
+
+#endif // POLARPHP_FRONTEND_FRONTEND_H

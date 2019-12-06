@@ -31,10 +31,6 @@
 #  error Must define either DIAG or the set {ERROR,WARNING,NOTE,REMARK}
 #endif
 
-#ifndef DIAG
-#  define DIAG(ERROR,ID,Options,Text,Signature)
-#endif
-
 #ifndef ERROR
 #  define ERROR(ID,Options,Text,Signature)   \
   DIAG(ERROR,ID,Options,Text,Signature)
@@ -55,56 +51,69 @@
   DIAG(REMARK,ID,Options,Text,Signature)
 #endif
 
+#ifndef FIXIT
+#  define FIXIT(ID, Text, Signature)
+#endif
+
 ERROR(invalid_diagnostic, NoneType,
       "INTERNAL ERROR: this diagnostic should not be produced", ())
 
-ERROR(not_implemented, NoneType,
+ERROR(not_implemented,NoneType,
       "INTERNAL ERROR: feature not implemented: %0", (StringRef))
 
-ERROR(error_opening_output, NoneType,
+ERROR(error_opening_output,NoneType,
       "error opening '%0' for output: %1", (StringRef, StringRef))
 
-ERROR(error_no_group_info, NoneType,
+ERROR(cannot_find_group_info_file,NoneType,
+      "cannot find group info file at path: '%0'", (StringRef))
+
+ERROR(cannot_parse_group_info_file,NoneType,
+      "cannot parse group info file at path: '%0'", (StringRef))
+
+ERROR(error_no_group_info,NoneType,
       "no group info found for file: '%0'", (StringRef))
 
-NOTE(brace_stmt_suggest_do, NoneType,
+NOTE(previous_decldef,NoneType,
+     "previous definition of %0 is here", (DeclBaseName))
+
+NOTE(brace_stmt_suggest_do,NoneType,
      "did you mean to use a 'do' statement?", ())
 
 // Generic disambiguation
-NOTE(while_parsing_as_left_angle_bracket, NoneType,
+NOTE(while_parsing_as_left_angle_bracket,NoneType,
      "while parsing this '<' as a type parameter bracket", ())
 
 // Generic determinism-forcing override.
-REMARK(remark_max_determinism_overriding, NoneType,
-         "SWIFTC_MAXIMUM_DETERMINISM overriding %0", (StringRef))
+REMARK(remark_max_determinism_overriding,NoneType,
+         "POLARPHPC_MAXIMUM_DETERMINISM overriding %0", (StringRef))
 
 // FIXME: This is used both as a parse error (a literal "super" outside a
 // method) and a type-checker error ("super" in a method of a non-class type).
-ERROR(super_not_in_class_method, NoneType,
+ERROR(super_not_in_class_method,NoneType,
       "'super' cannot be used outside of class members", ())
 
-ERROR(class_func_not_in_class, NoneType,
+ERROR(class_func_not_in_class,NoneType,
       "class methods are only allowed within classes; "
       "use 'static' to declare a %select{static|requirement fulfilled by either a static or class}0 method", (bool))
-ERROR(class_var_not_in_class, NoneType,
+ERROR(class_var_not_in_class,NoneType,
       "class properties are only allowed within classes; "
       "use 'static' to declare a %select{static|requirement fulfilled by either a static or class}0 property", (bool))
+ERROR(class_subscript_not_in_class,NoneType,
+      "class subscripts are only allowed within classes; "
+      "use 'static' to declare a %select{static|requirement fulfilled by either a static or class}0 subscript", (bool))
 
 // FIXME: Used by both the parser and the type-checker.
-ERROR(func_decl_without_brace, PointsToFirstBadToken,
+ERROR(func_decl_without_brace,PointsToFirstBadToken,
       "expected '{' in body of function declaration", ())
 
-NOTE(convert_let_to_var, NoneType,
+NOTE(convert_let_to_var,NoneType,
      "change 'let' to 'var' to make it mutable", ())
 
-NOTE(note_typo_candidate, NoneType,
+NOTE(note_typo_candidate,NoneType,
      "did you mean '%0'?", (StringRef))
 
-NOTE(profile_read_error, NoneType,
+NOTE(profile_read_error,NoneType,
      "failed to load profile data '%0': '%1'", (StringRef, StringRef))
-
-ERROR(generic_signature_not_minimal,NoneType,
-      "generic requirement '%0' is redundant in %1", (StringRef, StringRef))
 
 WARNING(protocol_extension_redundant_requirement,NoneType,
       "requirement of '%1' to '%2' is redundant in an extension of '%0'",
@@ -113,21 +122,32 @@ WARNING(protocol_extension_redundant_requirement,NoneType,
 ERROR(attr_only_on_parameters, NoneType,
       "'%0' may only be used on parameters", (StringRef))
 
-ERROR(function_type_no_parens, NoneType,
+ERROR(function_type_no_parens,NoneType,
       "single argument function types require parentheses", ())
 
-// FIXME: Used by swift-api-digester. Don't want to set up a separate diagnostics
+// Used by -verify-generic-signatures
+ERROR(generic_signature_not_minimal,NoneType,
+      "generic requirement '%0' is redundant in %1", (StringRef, StringRef))
+ERROR(generic_signature_not_valid,NoneType,
+      "generic signature %0 is invalid", (StringRef))
+ERROR(generic_signature_not_equal,NoneType,
+      "generic signature %0 is not equal to new signature %1",
+      (StringRef, StringRef))
+
+// FIXME: Used by polarphp-api-digester. Don't want to set up a separate diagnostics
 // file just for a few errors.
-ERROR(sdk_node_unrecognized_key, NoneType,
+ERROR(sdk_node_unrecognized_key,NoneType,
       "unrecognized key '%0' in SDK node", (StringRef))
-ERROR(sdk_node_unrecognized_node_kind, NoneType,
+ERROR(sdk_node_unrecognized_node_kind,NoneType,
       "unrecognized SDK node kind '%0'", (StringRef))
-ERROR(sdk_node_unrecognized_type_attr_kind, NoneType,
+ERROR(sdk_node_unrecognized_type_attr_kind,NoneType,
       "unrecognized type attribute '%0' in SDK node", (StringRef))
-ERROR(sdk_node_unrecognized_decl_attr_kind, NoneType,
+ERROR(sdk_node_unrecognized_decl_attr_kind,NoneType,
       "unrecognized declaration attribute '%0' in SDK node", (StringRef))
-ERROR(sdk_node_unrecognized_decl_kind, NoneType,
+ERROR(sdk_node_unrecognized_decl_kind,NoneType,
       "unrecognized declaration kind '%0' in SDK node", (StringRef))
+ERROR(sdk_node_unrecognized_accessor_kind,NoneType,
+      "unrecognized accessor kind '%0' in SDK node", (StringRef))
 
 //------------------------------------------------------------------------------
 // MARK: Circular reference diagnostics
@@ -135,11 +155,25 @@ ERROR(sdk_node_unrecognized_decl_kind, NoneType,
 ERROR(circular_reference, NoneType,
       "circular reference", ())
 
-ERROR(redundant_type_alias_define, NoneType,
-      "redundant type alias declaration", ())
-
 NOTE(circular_reference_through, NoneType,
      "through reference here", ())
+
+ERROR(circular_class_inheritance,NoneType,
+      "%0 inherits from itself", (Identifier))
+
+ERROR(circular_enum_inheritance,NoneType,
+      "%0 has a raw type that depends on itself", (Identifier))
+
+ERROR(circular_protocol_def,NoneType,
+      "protocol %0 refines itself", (Identifier))
+
+NOTE(kind_declname_declared_here,NoneType,
+     "%0 %1 declared here", (DescriptiveDeclKind, DeclName))
+
+WARNING(warn_property_wrapper_module_scope,NoneType,
+        "ignoring associated type %0 in favor of module-scoped property "
+        "wrapper %0; please qualify the reference with %1",
+        (DeclName, Identifier))
 
 #ifndef DIAG_NO_UNDEF
 # if defined(DIAG)
@@ -148,4 +182,5 @@ NOTE(circular_reference_through, NoneType,
 # undef NOTE
 # undef WARNING
 # undef ERROR
+# undef FIXIT
 #endif

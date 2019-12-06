@@ -7,16 +7,7 @@
 //
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
-//===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/28.
 //===----------------------------------------------------------------------===//
 //
 // This file defines macros used for macro-metaprogramming with TypeReprs.
@@ -61,7 +52,7 @@ TYPEREPR(ImplicitlyUnwrappedOptional, TypeRepr)
 TYPEREPR(Tuple, TypeRepr)
 TYPEREPR(Composition, TypeRepr)
 TYPEREPR(Metatype, TypeRepr)
-TYPEREPR(Protocol, TypeRepr)
+TYPEREPR(Interface, TypeRepr)
 TYPEREPR(OpaqueReturn, TypeRepr)
 ABSTRACT_TYPEREPR(Specifier, TypeRepr)
   TYPEREPR(InOut, SpecifierTypeRepr)

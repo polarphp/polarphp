@@ -26,33 +26,38 @@
 #ifndef POLARPHP_AST_ASTCONTEXT_H
 #define POLARPHP_AST_ASTCONTEXT_H
 
-#include "llvm/Support/DataTypes.h"
-#include "polarphp/ast/ClangModuleLoader.h"
 #include "polarphp/ast/Evaluator.h"
+#include "polarphp/ast/GenericSignature.h"
 #include "polarphp/ast/Identifier.h"
 #include "polarphp/ast/SearchPathOptions.h"
 #include "polarphp/ast/Type.h"
+#include "polarphp/ast/Types.h"
 #include "polarphp/ast/TypeAlignments.h"
+#include "polarphp/ast/ImportCache.h"
 #include "polarphp/kernel/LangOptions.h"
 #include "polarphp/basic/Malloc.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/DenseMap.h"
-#include "llvm/ADT/MapVector.h"
 #include "llvm/ADT/IntrusiveRefCntPtr.h"
+#include "llvm/ADT/MapVector.h"
 #include "llvm/ADT/PointerIntPair.h"
 #include "llvm/ADT/SetVector.h"
+#include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/ADT/StringMap.h"
 #include "llvm/ADT/TinyPtrVector.h"
 #include "llvm/Support/Allocator.h"
+#include "llvm/Support/DataTypes.h"
 #include <functional>
 #include <memory>
 #include <utility>
 #include <vector>
 
 namespace clang {
+class Type;
 class Decl;
 class MacroInfo;
 class Module;
+class ObjCInterfaceDecl;
 }
 
 namespace polar::syntax {
@@ -71,13 +76,18 @@ using polar::basic::SourceLoc;
 using polar::basic::SourceManager;
 using polar::basic::UnifiedStatsReporter;
 using polar::kernel::LangOptions;
+using polar::kernel::TypeCheckerOptions;
 using polar::basic::aligned_alloc;
+using polar::syntax::SyntaxArena;
+class AbstractFunctionDecl;
 
 class AstContext;
 enum class Associativity : unsigned char;
 class AvailabilityContext;
 class BoundGenericType;
+class ClangModuleLoader;
 class ClangNode;
+class ConcreteDeclRef;
 class ConstructorDecl;
 class Decl;
 class DeclContext;
@@ -88,12 +98,9 @@ class FuncDecl;
 class GenericContext;
 class InFlightDiagnostic;
 class IterableDeclContext;
-class LazyContextm_data;
-class LazyGenericContextm_data;
-class LazyIterableDeclContextm_data;
+class LazyContextData;
+class LazyIterableDeclContextData;
 class LazyMemberLoader;
-class LazyMemberParser;
-class LazyResolver;
 class PatternBindingDecl;
 class PatternBindingInitializer;
 class SourceFile;
@@ -108,79 +115,96 @@ class InheritedNameSet;
 class ModuleDecl;
 class ModuleLoader;
 class NominalTypeDecl;
-class NormalProtocolConformance;
+class NormalInterfaceConformance;
 class OpaqueTypeDecl;
-class InheritedProtocolConformance;
-class SelfProtocolConformance;
-class SpecializedProtocolConformance;
-enum class ProtocolConformanceState;
+class InheritedInterfaceConformance;
+class SelfInterfaceConformance;
+class SpecializedInterfaceConformance;
+enum class InterfaceConformanceState;
 class Pattern;
 enum PointerTypeKind : unsigned;
 class PrecedenceGroupDecl;
 class TupleTypeElt;
 class EnumElementDecl;
-class ProtocolDecl;
+class InterfaceDecl;
 class SubstitutableType;
 class ValueDecl;
 class DiagnosticEngine;
+class TypeChecker;
 class TypeCheckerDebugConsumer;
 struct RawComment;
 class DocComment;
 class PILBoxType;
 class TypeAliasDecl;
 class VarDecl;
+class IndexSubset;
 
 enum class KnownInterfaceKind : uint8_t;
 
+
 /// The arena in which a particular AstContext allocation will go.
-enum class AllocationArena
-{
-   /// The permanent arena, which is tied to the lifetime of
-   /// the AstContext.
-   ///
-   /// All global declarations and types need to be allocated into this arena.
-   /// At present, everything that is not a type involving a type variable is
-   /// allocated in this arena.
-   Permanent,
-   /// The constraint solver's temporary arena, which is tied to the
-   /// lifetime of a particular instance of the constraint solver.
-   ///
-   /// Any type involving a type variable is allocated in this arena.
-   ConstraintSolver
+enum class AllocationArena {
+  /// The permanent arena, which is tied to the lifetime of
+  /// the AstContext.
+  ///
+  /// All global declarations and types need to be allocated into this arena.
+  /// At present, everything that is not a type involving a type variable is
+  /// allocated in this arena.
+  Permanent,
+  /// The constraint solver's temporary arena, which is tied to the
+  /// lifetime of a particular instance of the constraint solver.
+  ///
+  /// Any type involving a type variable is allocated in this arena.
+  ConstraintSolver
 };
+
+/// Lists the set of "known" Foundation entities that are used in the
+/// compiler.
+///
+/// While the names of Foundation types aren't likely to change in
+/// Objective-C, their mapping into Swift can. Therefore, when
+/// referring to names of Foundation entities in Swift, use this enum
+/// and \c AstContext::getSwiftName or \c AstContext::getSwiftId.
+//enum class KnownFoundationEntity {
+//#define FOUNDATION_ENTITY(Name) Name,
+//#include "polarphp/ast/KnownFoundationEntities.def"
+//};
+
+/// Retrieve the Foundation entity kind for the given Objective-C
+/// entity name.
+//Optional<KnownFoundationEntity> getKnownFoundationEntity(StringRef name);
 
 /// Introduces a new constraint checker arena, whose lifetime is
 /// tied to the lifetime of this RAII object.
-class ConstraintCheckerArenaRAII
-{
-   AstContext &m_self;
-   void *m_data;
+class ConstraintCheckerArenaRAII {
+  AstContext &Self;
+  void *Data;
 
 public:
-   /// Introduces a new constraint checker arena, supplanting any
-   /// existing constraint checker arena.
-   ///
-   /// \param self The AstContext into which this constraint checker arena
-   /// will be installed.
-   ///
-   /// \param allocator The allocator used for allocating any data that
-   /// goes into the constraint checker arena.
-   ConstraintCheckerArenaRAII(AstContext &self,
-                              llvm::BumpPtrAllocator &allocator);
+  /// Introduces a new constraint checker arena, supplanting any
+  /// existing constraint checker arena.
+  ///
+  /// \param self The AstContext into which this constraint checker arena
+  /// will be installed.
+  ///
+  /// \param allocator The allocator used for allocating any data that
+  /// goes into the constraint checker arena.
+  ConstraintCheckerArenaRAII(AstContext &self,
+                             llvm::BumpPtrAllocator &allocator);
 
-   ConstraintCheckerArenaRAII(const ConstraintCheckerArenaRAII &) = delete;
-   ConstraintCheckerArenaRAII(ConstraintCheckerArenaRAII &&) = delete;
+  ConstraintCheckerArenaRAII(const ConstraintCheckerArenaRAII &) = delete;
+  ConstraintCheckerArenaRAII(ConstraintCheckerArenaRAII &&) = delete;
 
-   ConstraintCheckerArenaRAII &
-   operator=(const ConstraintCheckerArenaRAII &) = delete;
+  ConstraintCheckerArenaRAII &
+  operator=(const ConstraintCheckerArenaRAII &) = delete;
 
-   ConstraintCheckerArenaRAII &
-   operator=(ConstraintCheckerArenaRAII &&) = delete;
+  ConstraintCheckerArenaRAII &
+  operator=(ConstraintCheckerArenaRAII &&) = delete;
 
-   ~ConstraintCheckerArenaRAII();
+  ~ConstraintCheckerArenaRAII();
 };
 
-class PILLayout; // From PIL
+class PILLayout; // From SIL
 
 /// AstContext - This object creates and owns the AST objects.
 /// However, this class does more than just maintain context within an AST.
@@ -194,661 +218,751 @@ class PILLayout; // From PIL
 /// DispatchQueues. Summary: if you think you need a global or static variable,
 /// you probably need to put it here instead.
 
-class AstContext final
-{
-   AstContext(const AstContext&) = delete;
-   void operator=(const AstContext&) = delete;
+class AstContext final {
+  AstContext(const AstContext&) = delete;
+  void operator=(const AstContext&) = delete;
 
-   AstContext(LangOptions &langOpts, SearchPathOptions &searchPathOpts,
-              SourceManager &sourceMgr, DiagnosticEngine &diags);
+  AstContext(LangOptions &langOpts, TypeCheckerOptions &typeckOpts,
+             SearchPathOptions &SearchPathOpts, SourceManager &SourceMgr,
+             DiagnosticEngine &Diags);
 
 public:
-   // Members that should only be used by AstContext.cpp.
-   struct Implementation;
-   Implementation &getImpl() const;
+  // Members that should only be used by AstContext.cpp.
+  struct Implementation;
+  Implementation &getImpl() const;
 
-   friend ConstraintCheckerArenaRAII;
+  friend ConstraintCheckerArenaRAII;
 
-   void operator delete(void *data) noexcept;
+  void operator delete(void *Data) throw();
 
-   static AstContext *get(LangOptions &langOpts,
-                          SearchPathOptions &searchPathOpts,
-                          SourceManager &sourceMgr,
-                          DiagnosticEngine &diags);
-   ~AstContext();
+  static AstContext *get(LangOptions &langOpts, TypeCheckerOptions &typeckOpts,
+                         SearchPathOptions &SearchPathOpts,
+                         SourceManager &SourceMgr, DiagnosticEngine &Diags);
+  ~AstContext();
 
-   /// Optional table of counters to report, nullptr when not collecting.
-   ///
-   /// This must be initialized early so that allocate() doesn't try to access
-   /// it before being set to null.
-   UnifiedStatsReporter *stats = nullptr;
+  /// Optional table of counters to report, nullptr when not collecting.
+  ///
+  /// This must be initialized early so that Allocate() doesn't try to access
+  /// it before being set to null.
+  UnifiedStatsReporter *Stats = nullptr;
 
-   /// The language options used for translation.
-   LangOptions &langOpts;
+  /// The language options used for translation.
+  LangOptions &LangOpts;
 
-   /// The search path options used by this AST context.
-   SearchPathOptions &searchPathOpts;
+  /// The type checker options.
+  TypeCheckerOptions &TypeCheckerOpts;
 
-   /// The source manager object.
-   SourceManager &sourceMgr;
+  /// The search path options used by this AST context.
+  SearchPathOptions &SearchPathOpts;
 
-   /// diags - The diagnostics engine.
-   DiagnosticEngine &diags;
+  /// The source manager object.
+  SourceManager &SourceMgr;
 
-   /// The request-evaluator that is used to process various requests.
-   Evaluator evaluator;
+  /// Diags - The diagnostics engine.
+  DiagnosticEngine &Diags;
 
-   /// The set of top-level modules we have loaded.
-   /// This map is used for iteration, therefore it's a MapVector and not a
-   /// DenseMap.
-   llvm::MapVector<Identifier, ModuleDecl*> loadedModules;
+  /// The request-evaluator that is used to process various requests.
+  Evaluator evaluator;
 
-   /// The builtin module.
-   ModuleDecl * const theBuiltinModule;
+  /// The set of top-level modules we have loaded.
+  /// This map is used for iteration, therefore it's a MapVector and not a
+  /// DenseMap.
+  llvm::MapVector<Identifier, ModuleDecl*> LoadedModules;
 
-   /// The standard library module.
-   mutable ModuleDecl *theStdlibModule = nullptr;
+  /// The builtin module.
+  ModuleDecl * const TheBuiltinModule;
 
-   /// The name of the standard library module "Polarphp".
-   Identifier stdlibModuleName;
+  /// The standard library module.
+  mutable ModuleDecl *TheStdlibModule = nullptr;
 
-   /// The name of the SwiftShims module "SwiftShims".
-   Identifier SwiftShimsModuleName;
+  /// The name of the standard library module "Swift".
+  Identifier StdlibModuleName;
 
-   // Define the set of known identifiers.
-   //#define IDENTIFIER_WITH_NAME(Name, IdStr) Identifier Id_##Name;
-   //#include "polarphp/ast/KnownIdentifiersDef.h"
+  /// The name of the SwiftShims module "SwiftShims".
+  Identifier SwiftShimsModuleName;
 
-   /// The list of external definitions imported by this context.
-   llvm::SetVector<Decl *> externalDefinitions;
+  // Define the set of known identifiers.
+#define IDENTIFIER_WITH_NAME(Name, IdStr) Identifier Id_##Name;
+#include "polarphp/ast/KnownIdentifiersDef.h"
 
-   /// FIXME: HACK HACK HACK
-   /// This state should be tracked somewhere else.
-   unsigned lastCheckedExternalDefinition = 0;
+  /// A consumer of type checker debug output.
+  std::unique_ptr<TypeCheckerDebugConsumer> TypeCheckerDebug;
 
-   /// A consumer of type checker debug output.
-   std::unique_ptr<TypeCheckerDebugConsumer> typeCheckerDebug;
+  /// Cache for names of canonical GenericTypeParamTypes.
+  mutable llvm::DenseMap<unsigned, Identifier>
+    CanonicalGenericTypeParamTypeNames;
 
-   /// Cache for names of canonical GenericTypeParamTypes.
-   mutable llvm::DenseMap<unsigned, Identifier>
-   canonicalGenericTypeParamTypeNames;
+  /// Cache of remapped types (useful for diagnostics).
+  llvm::StringMap<Type> RemappedTypes;
 
-   /// Cache of remapped types (useful for diagnostics).
-   llvm::StringMap<Type> remappedTypes;
+  /// The # of times we have performed typo correction.
+  unsigned NumTypoCorrections = 0;
+
+  /// The next auto-closure discriminator.  This needs to be preserved
+  /// across invocations of both the parser and the type-checker.
+  unsigned NextAutoClosureDiscriminator = 0;
 
 private:
-   /// The current generation number, which reflects the number of
-   /// times that external modules have been loaded.
-   ///
-   /// Various places in the ast, such as the set of extensions associated with
-   /// a nominal type, keep track of the generation number they saw and will
-   /// automatically update when they are out of date.
-   unsigned m_currentGeneration = 0;
+  /// The current generation number, which reflects the number of
+  /// times that external modules have been loaded.
+  ///
+  /// Various places in the AST, such as the set of extensions associated with
+  /// a nominal type, keep track of the generation number they saw and will
+  /// automatically update when they are out of date.
+  unsigned CurrentGeneration = 0;
 
-   friend class Pattern;
+  friend class Pattern;
 
-   /// Mapping from patterns that store interface types that will be lazily
-   /// resolved to contextual types, to the declaration context in which the
-   /// pattern resides.
-   llvm::DenseMap<const Pattern *, DeclContext *>
-   m_delayedPatternContexts;
+  /// Mapping from patterns that store interface types that will be lazily
+  /// resolved to contextual types, to the declaration context in which the
+  /// pattern resides.
+  llvm::DenseMap<const Pattern *, DeclContext *>
+    DelayedPatternContexts;
 
-   /// Cache of module names that fail the 'canImport' test in this context.
-   llvm::SmallPtrSet<Identifier, 8> m_failedModuleImportNames;
+  /// Cache of module names that fail the 'canImport' test in this context.
+  llvm::SmallPtrSet<Identifier, 8> FailedModuleImportNames;
 
-   /// Retrieve the allocator for the given arena.
-   llvm::BumpPtrAllocator &getAllocator(AllocationArena arena = AllocationArena::Permanent) const;
+  /// Retrieve the allocator for the given arena.
+  llvm::BumpPtrAllocator &
+  getAllocator(AllocationArena arena = AllocationArena::Permanent) const;
 
 public:
-   /// allocate - allocate memory from the AstContext bump pointer.
-   void *allocate(unsigned long bytes, unsigned alignment,
-                  AllocationArena arena = AllocationArena::Permanent) const
-   {
-      if (bytes == 0)
-         return nullptr;
+  /// Allocate - Allocate memory from the AstContext bump pointer.
+  void *Allocate(unsigned long bytes, unsigned alignment,
+                 AllocationArena arena = AllocationArena::Permanent) const {
+    if (bytes == 0)
+      return nullptr;
 
-      if (langOpts.useMalloc) {
-         return aligned_alloc(bytes, alignment);
-      }
+    if (LangOpts.useMalloc)
+      return aligned_alloc(bytes, alignment);
 
-      if (arena == AllocationArena::Permanent && stats) {
-         stats->getFrontendCounters().NumASTBytesAllocated += bytes;
-      }
-      return getAllocator(arena).Allocate(bytes, alignment);
-   }
+    if (arena == AllocationArena::Permanent && Stats)
+      Stats->getFrontendCounters().NumASTBytesAllocated += bytes;
+    return getAllocator(arena).Allocate(bytes, alignment);
+  }
 
-   template <typename T>
-   T *allocate(AllocationArena arena = AllocationArena::Permanent) const
-   {
-      T *res = reinterpret_cast<T *>(allocate(sizeof(T), alignof(T), arena));
-      new (res) T();
-      return res;
-   }
+  template <typename T>
+  T *Allocate(AllocationArena arena = AllocationArena::Permanent) const {
+    T *res = (T *) Allocate(sizeof(T), alignof(T), arena);
+    new (res) T();
+    return res;
+  }
 
-   template <typename T>
-   MutableArrayRef<T> allocateUninitialized(unsigned numElts,
-                                            AllocationArena Arena = AllocationArena::Permanent) const
-   {
-      T *data = reinterpret_cast<T *>(allocate(sizeof(T) * numElts, alignof(T), Arena));
-      return { data, numElts };
-   }
+  template <typename T>
+  MutableArrayRef<T> AllocateUninitialized(unsigned NumElts,
+              AllocationArena Arena = AllocationArena::Permanent) const {
+    T *Data = (T *) Allocate(sizeof(T) * NumElts, alignof(T), Arena);
+    return { Data, NumElts };
+  }
 
-   template <typename T>
-   MutableArrayRef<T> allocate(unsigned numElts,
-                               AllocationArena arena = AllocationArena::Permanent) const
-   {
-      T *res = reinterpret_cast<T *>(allocate(sizeof(T) * numElts, alignof(T), arena));
-      for (unsigned i = 0; i != numElts; ++i) {
-         new (res+i) T();
-      }
-      return {res, numElts};
-   }
+  template <typename T>
+  MutableArrayRef<T> Allocate(unsigned numElts,
+              AllocationArena arena = AllocationArena::Permanent) const {
+    T *res = (T *) Allocate(sizeof(T) * numElts, alignof(T), arena);
+    for (unsigned i = 0; i != numElts; ++i)
+      new (res+i) T();
+    return {res, numElts};
+  }
 
-   /// allocate a copy of the specified object.
-   template <typename T>
-   typename std::remove_reference<T>::type *allocateObjectCopy(T &&t,
-                                                               AllocationArena arena = AllocationArena::Permanent) const
-   {
-      // This function cannot be named allocateCopy because it would always win
-      // overload resolution over the allocateCopy(ArrayRef<T>).
-      using TNoRef = typename std::remove_reference<T>::type;
-      TNoRef *res = reinterpret_cast<TNoRef *>(allocate(sizeof(TNoRef), alignof(TNoRef), arena));
-      new (res) TNoRef(std::forward<T>(t));
-      return res;
-   }
+  /// Allocate a copy of the specified object.
+  template <typename T>
+  typename std::remove_reference<T>::type *AllocateObjectCopy(T &&t,
+              AllocationArena arena = AllocationArena::Permanent) const {
+    // This function cannot be named AllocateCopy because it would always win
+    // overload resolution over the AllocateCopy(ArrayRef<T>).
+    using TNoRef = typename std::remove_reference<T>::type;
+    TNoRef *res = (TNoRef *) Allocate(sizeof(TNoRef), alignof(TNoRef), arena);
+    new (res) TNoRef(std::forward<T>(t));
+    return res;
+  }
 
-   template <typename T, typename It>
-   T *allocateCopy(It start, It end,
-                   AllocationArena arena = AllocationArena::Permanent) const
-   {
-      T *res = reinterpret_cast<T*>(allocate(sizeof(T)*(end-start), alignof(T), arena));
-      for (unsigned i = 0; start != end; ++start, ++i) {
-         new (res+i) T(*start);
-      }
-      return res;
-   }
+  template <typename T, typename It>
+  T *AllocateCopy(It start, It end,
+                  AllocationArena arena = AllocationArena::Permanent) const {
+    T *res = (T*)Allocate(sizeof(T)*(end-start), alignof(T), arena);
+    for (unsigned i = 0; start != end; ++start, ++i)
+      new (res+i) T(*start);
+    return res;
+  }
 
-   template<typename T, size_t N>
-   MutableArrayRef<T> allocateCopy(T (&array)[N],
-                                   AllocationArena arena = AllocationArena::Permanent) const
-   {
-      return MutableArrayRef<T>(allocateCopy<T>(array, array+N, arena), N);
-   }
+  template<typename T, size_t N>
+  MutableArrayRef<T> AllocateCopy(T (&array)[N],
+      AllocationArena arena = AllocationArena::Permanent) const {
+    return MutableArrayRef<T>(AllocateCopy<T>(array, array+N, arena), N);
+  }
 
-   template<typename T>
-   MutableArrayRef<T> allocateCopy(ArrayRef<T> array,
-                                   AllocationArena arena = AllocationArena::Permanent) const
-   {
-      return MutableArrayRef<T>(allocateCopy<T>(array.begin(),array.end(), arena),
-                                array.size());
-   }
+  template<typename T>
+  MutableArrayRef<T> AllocateCopy(ArrayRef<T> array,
+      AllocationArena arena = AllocationArena::Permanent) const {
+    return MutableArrayRef<T>(AllocateCopy<T>(array.begin(),array.end(), arena),
+                              array.size());
+  }
 
 
-   template<typename T>
-   ArrayRef<T> allocateCopy(const SmallVectorImpl<T> &vec,
-                            AllocationArena arena = AllocationArena::Permanent) const
-   {
-      return allocateCopy(ArrayRef<T>(vec), arena);
-   }
+  template<typename T>
+  ArrayRef<T> AllocateCopy(const SmallVectorImpl<T> &vec,
+      AllocationArena arena = AllocationArena::Permanent) const {
+    return AllocateCopy(ArrayRef<T>(vec), arena);
+  }
 
-   template<typename T>
-   MutableArrayRef<T>
-   allocateCopy(SmallVectorImpl<T> &vec,
-                AllocationArena arena = AllocationArena::Permanent) const
-   {
-      return allocateCopy(MutableArrayRef<T>(vec), arena);
-   }
+  template<typename T>
+  MutableArrayRef<T>
+  AllocateCopy(SmallVectorImpl<T> &vec,
+               AllocationArena arena = AllocationArena::Permanent) const {
+    return AllocateCopy(MutableArrayRef<T>(vec), arena);
+  }
 
-   StringRef allocateCopy(StringRef Str,
-                          AllocationArena arena = AllocationArena::Permanent) const
-   {
-      ArrayRef<char> Result =
-            allocateCopy(llvm::makeArrayRef(Str.data(), Str.size()), arena);
-      return StringRef(Result.data(), Result.size());
-   }
+  StringRef AllocateCopy(StringRef Str,
+                    AllocationArena arena = AllocationArena::Permanent) const {
+    ArrayRef<char> Result =
+        AllocateCopy(llvm::makeArrayRef(Str.data(), Str.size()), arena);
+    return StringRef(Result.data(), Result.size());
+  }
 
-   template<typename T, typename Vector, typename Set>
-   MutableArrayRef<T>
-   allocateCopy(llvm::SetVector<T, Vector, Set> setVector,
-                AllocationArena arena = AllocationArena::Permanent) const
-   {
-      return MutableArrayRef<T>(allocateCopy<T>(setVector.begin(),
-                                                setVector.end(),
-                                                arena),
-                                setVector.size());
-   }
+  template<typename T, typename Vector, typename Set>
+  MutableArrayRef<T>
+  AllocateCopy(llvm::SetVector<T, Vector, Set> setVector,
+               AllocationArena arena = AllocationArena::Permanent) const {
+    return MutableArrayRef<T>(AllocateCopy<T>(setVector.begin(),
+                                              setVector.end(),
+                                              arena),
+                              setVector.size());
+  }
 
-   /// Retrive the syntax node memory manager for this context.
-   llvm::IntrusiveRefCntPtr<syntax::SyntaxArena> getSyntaxArena() const;
+  /// Retrive the syntax node memory manager for this context.
+  llvm::IntrusiveRefCntPtr<SyntaxArena> getSyntaxArena() const;
 
-   /// Set a new stats reporter.
-   void setStatsReporter(UnifiedStatsReporter *stats);
-
-   /// Creates a new lazy resolver by passing the AstContext and the other
-   /// given arguments to a newly-allocated instance of \c ResolverType.
-   ///
-   /// \returns true if a new lazy resolver was created, false if there was
-   /// already a lazy resolver registered.
-   template<typename ResolverType, typename ... Args>
-   bool createLazyResolverIfMissing(Args && ...args)
-   {
-      if (getLazyResolver()) {
-         return false;
-      }
-      setLazyResolver(new ResolverType(*this, std::forward<Args>(args)...));
-      return true;
-   }
-
-   /// Remove the lazy resolver, if there is one.
-   ///
-   /// FIXME: We probably don't ever want to do this.
-   void removeLazyResolver()
-   {
-      setLazyResolver(nullptr);
-   }
-
-   /// Retrieve the lazy resolver for this context.
-   LazyResolver *getLazyResolver() const;
+  /// Set a new stats reporter.
+  void setStatsReporter(UnifiedStatsReporter *stats);
 
 private:
-   /// Set the lazy resolver for this context.
-   void setLazyResolver(LazyResolver *resolver);
+  friend class TypeChecker;
 
+  void installGlobalTypeChecker(TypeChecker *TC);
 public:
-   /// Add a lazy parser for resolving members later.
-   void addLazyParser(LazyMemberParser *parser);
+  /// Returns if semantic AST queries are enabled. This generally means module
+  /// loading and name lookup can take place.
+  bool areSemanticQueriesEnabled() const;
 
-   /// Remove a lazy parser.
-   void removeLazyParser(LazyMemberParser *parser);
+  /// Retrieve the global \c TypeChecker instance associated with this context.
+  TypeChecker *getLegacyGlobalTypeChecker() const;
 
-   /// getIdentifier - Return the uniqued and AST-Context-owned version of the
-   /// specified string.
-   Identifier getIdentifier(StringRef Str) const;
+  /// getIdentifier - Return the uniqued and AST-Context-owned version of the
+  /// specified string.
+  Identifier getIdentifier(StringRef Str) const;
 
-   /// Decide how to interpret two precedence groups.
-   Associativity associateInfixOperators(PrecedenceGroupDecl *left,
-                                         PrecedenceGroupDecl *right) const;
+  /// Decide how to interpret two precedence groups.
+  Associativity associateInfixOperators(PrecedenceGroupDecl *left,
+                                        PrecedenceGroupDecl *right) const;
 
-   /// Retrieve the declaration of Polarphp.Error.
-   ProtocolDecl *getErrorDecl() const;
-   CanType getExceptionType() const;
+  /// Retrieve the declaration of Swift.Error.
+  InterfaceDecl *getErrorDecl() const;
+  CanType getExceptionType() const;
 
 #define KNOWN_STDLIB_TYPE_DECL(NAME, DECL_CLASS, NUM_GENERIC_PARAMS) \
-   /** Retrieve the declaration of Polarphp.NAME. */ \
-   DECL_CLASS *get##NAME##Decl() const;
+  /** Retrieve the declaration of Swift.NAME. */ \
+  DECL_CLASS *get##NAME##Decl() const;
 #include "polarphp/ast/KnownStdlibTypesDef.h"
 
-   /// Retrieve the declaration of Polarphp.Optional<T>.Some.
-   EnumElementDecl *getOptionalSomeDecl() const;
+  /// Retrieve the declaration of Swift.Optional<T>.Some.
+  EnumElementDecl *getOptionalSomeDecl() const;
 
-   /// Retrieve the declaration of Polarphp.Optional<T>.None.
-   EnumElementDecl *getOptionalNoneDecl() const;
+  /// Retrieve the declaration of Swift.Optional<T>.None.
+  EnumElementDecl *getOptionalNoneDecl() const;
 
-   /// Retrieve the declaration of the "pointee" property of a pointer type.
-   VarDecl *getPointerPointeePropertyDecl(PointerTypeKind ptrKind) const;
+  /// Retrieve the declaration of the "pointee" property of a pointer type.
+  VarDecl *getPointerPointeePropertyDecl(PointerTypeKind ptrKind) const;
 
-   /// Retrieve the type Polarphp.AnyObject.
-   CanType getAnyObjectType() const;
+  /// Retrieve the type Swift.AnyObject.
+  CanType getAnyObjectType() const;
 
-   /// Retrieve the type Polarphp.Never.
-   CanType getNeverType() const;
+  /// Retrieve the type Swift.Never.
+  CanType getNeverType() const;
 
-   /// Retrieve the declaration of Polarphp.Void.
-   TypeAliasDecl *getVoidDecl() const;
+#define KNOWN_OBJC_TYPE_DECL(MODULE, NAME, DECL_CLASS) \
+  /** Retrieve the declaration of MODULE.NAME. */ \
+  DECL_CLASS *get##NAME##Decl() const; \
+\
+  /** Retrieve the type of MODULE.NAME. */ \
+//  Type get##NAME##Type() const;
+//#include "polarphp/ast/KnownObjCTypes.def"
 
-   /// Get the '+' function on two RangeReplaceableCollection.
-   FuncDecl *getPlusFunctionOnRangeReplaceableCollection() const;
+  // Declare accessors for the known declarations.
+#define FUNC_DECL(Name, Id) \
+  FuncDecl *get##Name() const;
+#include "polarphp/ast/KnownDeclsDef.h"
 
-   /// Get the '+' function on two String.
-   FuncDecl *getPlusFunctionOnString() const;
+  /// Get the '+' function on two RangeReplaceableCollection.
+  FuncDecl *getPlusFunctionOnRangeReplaceableCollection() const;
 
-   /// Check whether the standard library provides all the correct
-   /// intrinsic support for Optional<T>.
-   ///
-   /// If this is true, the four methods above all promise to return
-   /// non-null.
-   bool hasOptionalIntrinsics() const;
+  /// Get the '+' function on two String.
+  FuncDecl *getPlusFunctionOnString() const;
 
-   /// Check whether the standard library provides all the correct
-   /// intrinsic support for UnsafeMutablePointer<T> function arguments.
-   ///
-   /// If this is true, the methods getConvert*ToPointerArgument
-   /// all promise to return non-null.
-   bool hasPointerArgumentIntrinsics() const;
+  /// Check whether the standard library provides all the correct
+  /// intrinsic support for Optional<T>.
+  ///
+  /// If this is true, the four methods above all promise to return
+  /// non-null.
+  bool hasOptionalIntrinsics() const;
 
-   /// Check whether the standard library provides all the correct
-   /// intrinsic support for array literals.
-   ///
-   /// If this is true, the method getAllocateUninitializedArray
-   /// promises to return non-null.
-   bool hasArrayLiteralIntrinsics() const;
+  /// Check whether the standard library provides all the correct
+  /// intrinsic support for UnsafeMutablePointer<T> function arguments.
+  ///
+  /// If this is true, the methods getConvert*ToPointerArgument
+  /// all promise to return non-null.
+  bool hasPointerArgumentIntrinsics() const;
 
-   /// Retrieve the declaration of Polarphp.Bool.init(_builtinBooleanLiteral:)
-   ConstructorDecl *getBoolBuiltinInitDecl() const;
+  /// Check whether the standard library provides all the correct
+  /// intrinsic support for array literals.
+  ///
+  /// If this is true, the method getAllocateUninitializedArray
+  /// promises to return non-null.
+  bool hasArrayLiteralIntrinsics() const;
 
-   /// Retrieve the declaration of Polarphp.==(Int, Int) -> Bool.
-   FuncDecl *getEqualIntDecl() const;
+  /// Retrieve the declaration of Swift.Bool.init(_builtinBooleanLiteral:)
+  ConcreteDeclRef getBoolBuiltinInitDecl() const;
 
-   /// Retrieve the declaration of Polarphp._hashValue<H>(for: H) -> Int.
-   FuncDecl *getHashValueForDecl() const;
+  /// Retrieve the witness for init(_builtinIntegerLiteral:).
+  ConcreteDeclRef getIntBuiltinInitDecl(NominalTypeDecl *intDecl) const;
 
-   /// Retrieve the declaration of Array.append(element:)
-   FuncDecl *getArrayAppendElementDecl() const;
+  /// Retrieve the witness for init(_builtinFloatLiteral:).
+  ConcreteDeclRef getFloatBuiltinInitDecl(NominalTypeDecl *floatDecl) const;
 
-   /// Retrieve the declaration of
-   /// Array.reserveCapacityForAppend(newElementsCount: Int)
-   FuncDecl *getArrayReserveCapacityDecl() const;
+  /// Retrieve the witness for (_builtinStringLiteral:utf8CodeUnitCount:isASCII:).
+  ConcreteDeclRef getStringBuiltinInitDecl(NominalTypeDecl *stringDecl) const;
 
-   /// Retrieve the declaration of Polarphp._unimplementedInitializer.
-   FuncDecl *getUnimplementedInitializerDecl() const;
+  ConcreteDeclRef getBuiltinInitDecl(NominalTypeDecl *decl,
+                                     KnownInterfaceKind builtinInterface,
+                llvm::function_ref<DeclName (AstContext &ctx)> initName) const;
 
-   /// Retrieve the declaration of Polarphp._undefined.
-   FuncDecl *getUndefinedDecl() const;
+  /// Retrieve the declaration of Swift.==(Int, Int) -> Bool.
+  FuncDecl *getEqualIntDecl() const;
 
-   // Retrieve the declaration of Polarphp._stdlib_isOSVersionAtLeast.
-   FuncDecl *getIsOSVersionAtLeastDecl() const;
+  /// Retrieve the declaration of Swift._hashValue<H>(for: H) -> Int.
+  FuncDecl *getHashValueForDecl() const;
 
-   /// Look for the declaration with the given name within the
-   /// Polarphp module.
-   void lookupInSwiftModule(StringRef name,
-                            SmallVectorImpl<ValueDecl *> &results) const;
+  /// Retrieve the declaration of Array.append(element:)
+  FuncDecl *getArrayAppendElementDecl() const;
 
-   /// Retrieve a specific, known protocol.
-   ProtocolDecl *getProtocol(KnownProtocolKind kind) const;
+  /// Retrieve the declaration of
+  /// Array.reserveCapacityForAppend(newElementsCount: Int)
+  FuncDecl *getArrayReserveCapacityDecl() const;
 
-   /// Determine whether the given nominal type is one of the standard
-   /// library or Cocoa framework types that is known to be bridged by another
-   /// module's overlay, for layering or implementation detail reasons.
-   bool isTypeBridgedInExternalModule(NominalTypeDecl *nominal) const;
+  // Retrieve the declaration of Swift._stdlib_isOSVersionAtLeast.
+  FuncDecl *getIsOSVersionAtLeastDecl() const;
 
-   /// Determine whether the given Polarphp type is representable in a
-   /// given foreign language.
-   ForeignRepresentationInfo
-   getForeignRepresentationInfo(NominalTypeDecl *nominal,
-                                ForeignLanguage language,
-                                const DeclContext *dc);
+  /// Look for the declaration with the given name within the
+  /// Swift module.
+  void lookupInSwiftModule(StringRef name,
+                           SmallVectorImpl<ValueDecl *> &results) const;
 
-   /// Add a declaration to a list of declarations that need to be emitted
-   /// as part of the current module or source file, but are otherwise not
-   /// nested within it.
-   void addExternalDecl(Decl *decl);
+  /// Retrieve a specific, known protocol.
+  InterfaceDecl *getInterface(KnownInterfaceKind kind) const;
 
-   /// Add a declaration that was synthesized to a per-source file list if
-   /// if is part of a source file, or the external declarations list if
-   /// it is part of an imported type context.
-   void addSynthesizedDecl(Decl *decl);
+  /// Determine whether the given nominal type is one of the standard
+  /// library or Cocoa framework types that is known to be bridged by another
+  /// module's overlay, for layering or implementation detail reasons.
+  bool isTypeBridgedInExternalModule(NominalTypeDecl *nominal) const;
 
-   /// Add a cleanup function to be called when the AstContext is deallocated.
-   void addCleanup(std::function<void(void)> cleanup);
+  /// True if the given type is an Objective-C class that serves as the bridged
+  /// object type for many Swift value types, meaning that the conversion from
+  /// an object to a value is a conditional cast.
+  bool isObjCClassWithMultipleSwiftBridgedTypes(Type t);
 
-   /// Add a cleanup to run the given object's destructor when the AstContext is
-   /// deallocated.
-   template<typename T>
-   void addDestructorCleanup(T &object)
-   {
-      addCleanup([&object]{ object.~T(); });
-   }
+  /// Get the Objective-C type that a Swift type bridges to, if any.
+  ///
+  /// \param dc The context in which bridging is occurring.
+  /// \param type The Swift for which we are querying bridging behavior.
+  /// \param bridgedValueType The specific value type that is bridged,
+  /// which will usually by the same as \c type.
+  Type getBridgedToObjC(const DeclContext *dc, Type type,
+                        Type *bridgedValueType = nullptr) const;
 
-   /// Get the runtime availability of the opaque types language feature for the target platform.
-   AvailabilityContext getOpaqueTypeAvailability();
+  /// Get the Clang type corresponding to a Swift function type.
+  ///
+  /// \param params The function parameters.
+  /// \param resultTy The Swift result type.
+  /// \param incompleteExtInfo Used to convey escaping and throwing
+  ///                          information, in case it is needed.
+  /// \param trueRep The actual calling convention, which must be C-compatible.
+  ///                The calling convention in \p incompleteExtInfo is ignored.
+  const clang::Type *
+  getClangFunctionType(ArrayRef<AnyFunctionType::Param> params, Type resultTy,
+                       const FunctionType::ExtInfo incompleteExtInfo,
+                       FunctionTypeRepresentation trueRep);
 
-   /// Get the runtime availability of features introduced in the Polarphp 5.1
-   /// compiler for the target platform.
-   AvailabilityContext getSwift51Availability();
+  /// Determine whether the given Swift type is representable in a
+  /// given foreign language.
+  ForeignRepresentationInfo
+  getForeignRepresentationInfo(NominalTypeDecl *nominal,
+                               ForeignLanguage language,
+                               const DeclContext *dc);
 
-   //===--------------------------------------------------------------------===//
-   // Diagnostics Helper functions
-   //===--------------------------------------------------------------------===//
+  /// Add a cleanup function to be called when the AstContext is deallocated.
+  void addCleanup(std::function<void(void)> cleanup);
 
-   bool hadError() const;
+  /// Add a cleanup to run the given object's destructor when the AstContext is
+  /// deallocated.
+  template<typename T>
+  void addDestructorCleanup(T &object) {
+    addCleanup([&object]{ object.~T(); });
+  }
 
-   //===--------------------------------------------------------------------===//
-   // Type manipulation routines.
-   //===--------------------------------------------------------------------===//
+  /// Get the runtime availability of the opaque types language feature for the target platform.
+  AvailabilityContext getOpaqueTypeAvailability();
 
-   // Builtin type and simple types that are used frequently.
-   const CanType TheErrorType;             /// This is the ErrorType singleton.
-   const CanType TheUnresolvedType;        /// This is the UnresolvedType singleton.
-   const CanType TheEmptyTupleType;        /// This is '()', aka Void
-   const CanType TheAnyType;               /// This is 'Any', the empty protocol composition
-   const CanType TheNativeObjectType;      /// Builtin.NativeObject
-   const CanType TheBridgeObjectType;      /// Builtin.BridgeObject
-   const CanType TheUnknownObjectType;     /// Builtin.UnknownObject
-   const CanType TheRawPointerType;        /// Builtin.RawPointer
-   const CanType TheUnsafeValueBufferType; /// Builtin.UnsafeValueBuffer
-   const CanType TheSILTokenType;          /// Builtin.SILToken
-   const CanType TheIntegerLiteralType;    /// Builtin.IntegerLiteralType
+  /// Get the runtime availability of features introduced in the Swift 5.1
+  /// compiler for the target platform.
+  AvailabilityContext getSwift51Availability();
 
-   const CanType TheIEEE32Type;            /// 32-bit IEEE floating point
-   const CanType TheIEEE64Type;            /// 64-bit IEEE floating point
-
-   // Target specific types.
-   const CanType TheIEEE16Type;            /// 16-bit IEEE floating point
-   const CanType TheIEEE80Type;            /// 80-bit IEEE floating point
-   const CanType TheIEEE128Type;           /// 128-bit IEEE floating point
-   const CanType ThePPC128Type;            /// 128-bit PowerPC 2xDouble
-
-   /// Adds a search path to searchPathOpts, unless it is already present.
-   ///
-   /// Does any proper bookkeeping to keep all module loaders up to date as well.
-   void addSearchPath(StringRef searchPath, bool isFramework, bool isSystem);
-
-   /// Adds a module loader to this AST context.
-   ///
-   /// \param loader The new module loader, which will be added after any
-   ///               existing module loaders.
-   /// \param isClang \c true if this module loader is responsible for loading
-   ///                Clang modules, which are special-cased in some parts of the
-   ///                compiler.
-   void addModuleLoader(std::unique_ptr<ModuleLoader> loader,
-                        bool isClang = false);
-
-   /// Load extensions to the given nominal type from the external
-   /// module loaders.
-   ///
-   /// \param nominal The nominal type whose extensions should be loaded.
-   ///
-   /// \param previousGeneration The previous generation number. The AST already
-   /// contains extensions loaded from any generation up to and including this
-   /// one.
-   void loadExtensions(NominalTypeDecl *nominal, unsigned previousGeneration);
+  /// Get the runtime availability of
+  /// swift_getTypeByMangledNameInContextInMetadataState.
+  AvailabilityContext getTypesInAbstractMetadataStateAvailability();
 
 
-   /// Retrieve the Clang module loader for this AstContext.
-   ///
-   /// If there is no Clang module loader, returns a null pointer.
-   /// The loader is owned by the AST context.
-   ClangModuleLoader *getClangModuleLoader() const;
+  //===--------------------------------------------------------------------===//
+  // Diagnostics Helper functions
+  //===--------------------------------------------------------------------===//
 
-   /// Asks every module loader to verify the ASTs it has loaded.
-   ///
-   /// Does nothing in non-asserts (NDEBUG) builds.
-   void verifyAllLoadedModules() const;
+  bool hadError() const;
 
-   /// Check whether the module with a given name can be imported without
-   /// importing it.
-   ///
-   /// Note that even if this check succeeds, errors may still occur if the
-   /// module is loaded in full.
-   bool canImportModule(std::pair<Identifier, SourceLoc> modulePath);
+  //===--------------------------------------------------------------------===//
+  // Type manipulation routines.
+  //===--------------------------------------------------------------------===//
 
-   /// \returns a module with a given name that was already loaded.  If the
-   /// module was not loaded, returns nullptr.
-   ModuleDecl *getLoadedModule(
-         ArrayRef<std::pair<Identifier, SourceLoc>> modulePath) const;
+  // Builtin type and simple types that are used frequently.
+  const CanType TheErrorType;             /// This is the ErrorType singleton.
+  const CanType TheUnresolvedType;        /// This is the UnresolvedType singleton.
+  const CanType TheEmptyTupleType;        /// This is '()', aka Void
+  const CanType TheAnyType;               /// This is 'Any', the empty protocol composition
+  const CanType TheNativeObjectType;      /// Builtin.NativeObject
+  const CanType TheBridgeObjectType;      /// Builtin.BridgeObject
+  const CanType TheRawPointerType;        /// Builtin.RawPointer
+  const CanType TheUnsafeValueBufferType; /// Builtin.UnsafeValueBuffer
+  const CanType TheSILTokenType;          /// Builtin.SILToken
+  const CanType TheIntegerLiteralType;    /// Builtin.IntegerLiteralType
 
-   ModuleDecl *getLoadedModule(Identifier ModuleName) const;
+  const CanType TheIEEE32Type;            /// 32-bit IEEE floating point
+  const CanType TheIEEE64Type;            /// 64-bit IEEE floating point
 
-   /// Attempts to load a module into this AstContext.
-   ///
-   /// If a module by this name has already been loaded, the existing module will
-   /// be returned.
-   ///
-   /// \returns The requested module, or NULL if the module cannot be found.
-   ModuleDecl *getModule(ArrayRef<std::pair<Identifier, SourceLoc>> modulePath);
+  // Target specific types.
+  const CanType TheIEEE16Type;            /// 16-bit IEEE floating point
+  const CanType TheIEEE80Type;            /// 80-bit IEEE floating point
+  const CanType TheIEEE128Type;           /// 128-bit IEEE floating point
+  const CanType ThePPC128Type;            /// 128-bit PowerPC 2xDouble
 
-   ModuleDecl *getModuleByName(StringRef ModuleName);
+  /// Adds a search path to SearchPathOpts, unless it is already present.
+  ///
+  /// Does any proper bookkeeping to keep all module loaders up to date as well.
+  void addSearchPath(StringRef searchPath, bool isFramework, bool isSystem);
 
-   /// Returns the standard library module, or null if the library isn't present.
-   ///
-   /// If \p loadIfAbsent is true, the AstContext will attempt to load the module
-   /// if it hasn't been set yet.
-   ModuleDecl *getStdlibModule(bool loadIfAbsent = false);
+  /// Adds a module loader to this AST context.
+  ///
+  /// \param loader The new module loader, which will be added after any
+  ///               existing module loaders.
+  /// \param isClang \c true if this module loader is responsible for loading
+  ///                Clang modules, which are special-cased in some parts of the
+  ///                compiler.
+  /// \param isDWARF \c true if this module loader can load Clang modules
+  ///                from DWARF.
+  void addModuleLoader(std::unique_ptr<ModuleLoader> loader,
+                       bool isClang = false, bool isDWARF = false);
 
-   ModuleDecl *getStdlibModule() const {
-      return const_cast<AstContext *>(this)->getStdlibModule(false);
-   }
+  /// Load extensions to the given nominal type from the external
+  /// module loaders.
+  ///
+  /// \param nominal The nominal type whose extensions should be loaded.
+  ///
+  /// \param previousGeneration The previous generation number. The AST already
+  /// contains extensions loaded from any generation up to and including this
+  /// one.
+  void loadExtensions(NominalTypeDecl *nominal, unsigned previousGeneration);
 
-   /// Retrieve the current generation number, which reflects the
-   /// number of times a module import has caused mass invalidation of
-   /// lookup tables.
-   ///
-   /// Various places in the AST keep track of the generation numbers at which
-   /// their own information is valid, such as the list of extensions associated
-   /// with a nominal type.
-   unsigned getCurrentGeneration() const { return m_currentGeneration; }
+  /// Load the methods within the given class that produce
+  /// Objective-C class or instance methods with the given selector.
+  ///
+  /// \param classDecl The class in which we are searching for @objc methods.
+  /// The search only considers this class and its extensions; not any
+  /// superclasses.
+  ///
+  /// \param selector The selector to search for.
+  ///
+  /// \param isInstanceMethod Whether we are looking for an instance method
+  /// (vs. a class method).
+  ///
+  /// \param previousGeneration The previous generation with which this
+  /// callback was invoked. The list of methods will already contain all of
+  /// the results from generations up and including \c previousGeneration.
+  ///
+  /// \param methods The list of @objc methods in this class that have this
+  /// selector and are instance/class methods as requested. This list will be
+  /// extended with any methods found in subsequent generations.
+//  void loadObjCMethods(ClassDecl *classDecl,
+//                       ObjCSelector selector,
+//                       bool isInstanceMethod,
+//                       unsigned previousGeneration,
+//                       llvm::TinyPtrVector<AbstractFunctionDecl *> &methods);
 
-   /// Increase the generation number, implying that various lookup
-   /// tables have been significantly altered by the introduction of a new
-   /// module import.
-   ///
-   /// \returns the previous generation number.
-   unsigned bumpGeneration() { return m_currentGeneration++; }
+  /// Retrieve the Clang module loader for this AstContext.
+  ///
+  /// If there is no Clang module loader, returns a null pointer.
+  /// The loader is owned by the AST context.
+  ClangModuleLoader *getClangModuleLoader() const;
 
-   /// Produce a "normal" conformance for a nominal type.
-   NormalProtocolConformance *
-   getConformance(Type conformingType,
-                  ProtocolDecl *protocol,
-                  SourceLoc loc,
-                  DeclContext *dc,
-                  ProtocolConformanceState state);
+  /// Retrieve the DWARF module loader for this AstContext.
+  ///
+  /// If there is no Clang module loader, returns a null pointer.
+  /// The loader is owned by the AST context.
+  ClangModuleLoader *getDWARFModuleLoader() const;
 
-   /// A callback used to produce a diagnostic for an ill-formed protocol
-   /// conformance that was type-checked before we're actually walking the
-   /// conformance itself, along with a bit indicating whether this diagnostic
-   /// produces an error.
-   struct DelayedConformanceDiag
-   {
-      ValueDecl *Requirement;
-      std::function<void()> Callback;
-      bool IsError;
-   };
+  namelookup::ImportCache &getImportCache() const;
 
-   /// Check whether current context has any errors associated with
-   /// ill-formed protocol conformances which haven't been produced yet.
-   bool hasDelayedConformanceErrors() const;
+  /// Asks every module loader to verify the ASTs it has loaded.
+  ///
+  /// Does nothing in non-asserts (NDEBUG) builds.
+  void verifyAllLoadedModules() const;
 
-   /// Add a delayed diagnostic produced while type-checking a
-   /// particular protocol conformance.
-   void addDelayedConformanceDiag(NormalProtocolConformance *conformance,
-                                  DelayedConformanceDiag fn);
+  /// Check whether the module with a given name can be imported without
+  /// importing it.
+  ///
+  /// Note that even if this check succeeds, errors may still occur if the
+  /// module is loaded in full.
+  bool canImportModule(std::pair<Identifier, SourceLoc> ModulePath);
 
-   /// Retrieve the delayed-conformance diagnostic callbacks for the
-   /// given normal protocol conformance.
-   std::vector<DelayedConformanceDiag>
-   takeDelayedConformancediags(NormalProtocolConformance *conformance);
+  /// \returns a module with a given name that was already loaded.  If the
+  /// module was not loaded, returns nullptr.
+  ModuleDecl *getLoadedModule(
+      ArrayRef<std::pair<Identifier, SourceLoc>> ModulePath) const;
 
-   /// Add delayed missing witnesses for the given normal protocol conformance.
-   void addDelayedMissingWitnesses(NormalProtocolConformance *conformance,
-                                   ArrayRef<ValueDecl*> witnesses);
+  ModuleDecl *getLoadedModule(Identifier ModuleName) const;
 
-   /// Retrieve the delayed missing witnesses for the given normal protocol
-   /// conformance.
-   std::vector<ValueDecl*>
-   takeDelayedMissingWitnesses(NormalProtocolConformance *conformance);
+  /// Attempts to load a module into this AstContext.
+  ///
+  /// If a module by this name has already been loaded, the existing module will
+  /// be returned.
+  ///
+  /// \returns The requested module, or NULL if the module cannot be found.
+  ModuleDecl *getModule(ArrayRef<std::pair<Identifier, SourceLoc>> ModulePath);
 
-   /// Produce a specialized conformance, which takes a generic
-   /// conformance and substitutions written in terms of the generic
-   /// conformance's signature.
-   ///
-   /// \param type The type for which we are retrieving the conformance.
-   ///
-   /// \param generic The generic conformance.
-   ///
-   /// \param substitutions The set of substitutions required to produce the
-   /// specialized conformance from the generic conformance.
-   ProtocolConformance *
-   getSpecializedConformance(Type type,
-                             ProtocolConformance *generic,
-                             SubstitutionMap substitutions);
+  ModuleDecl *getModuleByName(StringRef ModuleName);
 
-   /// Produce an inherited conformance, for subclasses of a type
-   /// that already conforms to a protocol.
-   ///
-   /// \param type The type for which we are retrieving the conformance.
-   ///
-   /// \param inherited The inherited conformance.
-   InheritedProtocolConformance *
-   getInheritedConformance(Type type, ProtocolConformance *inherited);
+  /// Returns the standard library module, or null if the library isn't present.
+  ///
+  /// If \p loadIfAbsent is true, the AstContext will attempt to load the module
+  /// if it hasn't been set yet.
+  ModuleDecl *getStdlibModule(bool loadIfAbsent = false);
 
-   //   /// Get the lazy data for the given declaration.
-   //   ///
-   //   /// \param lazyLoader If non-null, the lazy loader to use when creating the
-   //   /// lazy data. The pointer must either be null or be consistent
-   //   /// across all calls for the same \p func.
-   //   LazyContextdata *getOrCreateLazyContextdata(const DeclContext *decl,
-   //                                               LazyMemberLoader *lazyLoader);
+  ModuleDecl *getStdlibModule() const {
+    return const_cast<AstContext *>(this)->getStdlibModule(false);
+  }
 
-   /// Use the lazy parsers associated with the context to populate the members
-   /// of the given decl context.
-   ///
-   /// \param IDC The context whose member decls should be lazily parsed.
-   void parseMembers(IterableDeclContext *IDC);
+  /// Retrieve the current generation number, which reflects the
+  /// number of times a module import has caused mass invalidation of
+  /// lookup tables.
+  ///
+  /// Various places in the AST keep track of the generation numbers at which
+  /// their own information is valid, such as the list of extensions associated
+  /// with a nominal type.
+  unsigned getCurrentGeneration() const { return CurrentGeneration; }
 
-   /// Use the lazy parsers associated with the context to check whether the decl
-   /// context has been parsed.
-   bool hasUnparsedMembers(const IterableDeclContext *IDC) const;
+  /// Increase the generation number, implying that various lookup
+  /// tables have been significantly altered by the introduction of a new
+  /// module import.
+  ///
+  /// \returns the previous generation number.
+  unsigned bumpGeneration() { return CurrentGeneration++; }
 
-   /// Access the side cache for property wrapper backing property types,
-   /// used because TypeChecker::typeCheckBinding() needs somewhere to stash
-   /// the backing property type.
-   Type getSideCachedPropertyWrapperBackingPropertyType(VarDecl *var) const;
-   void setSideCachedPropertyWrapperBackingPropertyType(VarDecl *var,
+  /// Produce a "normal" conformance for a nominal type.
+  NormalInterfaceConformance *
+  getConformance(Type conformingType,
+                 InterfaceDecl *protocol,
+                 SourceLoc loc,
+                 DeclContext *dc,
+                 InterfaceConformanceState state);
+
+  /// Produce a self-conformance for the given protocol.
+  SelfInterfaceConformance *
+  getSelfConformance(InterfaceDecl *protocol);
+
+  /// A callback used to produce a diagnostic for an ill-formed protocol
+  /// conformance that was type-checked before we're actually walking the
+  /// conformance itself, along with a bit indicating whether this diagnostic
+  /// produces an error.
+  struct DelayedConformanceDiag {
+    ValueDecl *Requirement;
+    std::function<void()> Callback;
+    bool IsError;
+  };
+
+  /// Check whether current context has any errors associated with
+  /// ill-formed protocol conformances which haven't been produced yet.
+  bool hasDelayedConformanceErrors() const;
+
+  /// Add a delayed diagnostic produced while type-checking a
+  /// particular protocol conformance.
+  void addDelayedConformanceDiag(NormalInterfaceConformance *conformance,
+                                 DelayedConformanceDiag fn);
+
+  /// Retrieve the delayed-conformance diagnostic callbacks for the
+  /// given normal protocol conformance.
+  std::vector<DelayedConformanceDiag>
+  takeDelayedConformanceDiags(NormalInterfaceConformance *conformance);
+
+  /// Add delayed missing witnesses for the given normal protocol conformance.
+  void addDelayedMissingWitnesses(NormalInterfaceConformance *conformance,
+                                  ArrayRef<ValueDecl*> witnesses);
+
+  /// Retrieve the delayed missing witnesses for the given normal protocol
+  /// conformance.
+  std::vector<ValueDecl*>
+  takeDelayedMissingWitnesses(NormalInterfaceConformance *conformance);
+
+  /// Produce a specialized conformance, which takes a generic
+  /// conformance and substitutions written in terms of the generic
+  /// conformance's signature.
+  ///
+  /// \param type The type for which we are retrieving the conformance.
+  ///
+  /// \param generic The generic conformance.
+  ///
+  /// \param substitutions The set of substitutions required to produce the
+  /// specialized conformance from the generic conformance.
+  InterfaceConformance *
+  getSpecializedConformance(Type type,
+                            InterfaceConformance *generic,
+                            SubstitutionMap substitutions);
+
+  /// Produce an inherited conformance, for subclasses of a type
+  /// that already conforms to a protocol.
+  ///
+  /// \param type The type for which we are retrieving the conformance.
+  ///
+  /// \param inherited The inherited conformance.
+  InheritedInterfaceConformance *
+  getInheritedConformance(Type type, InterfaceConformance *inherited);
+
+  /// Get the lazy data for the given declaration.
+  ///
+  /// \param lazyLoader If non-null, the lazy loader to use when creating the
+  /// lazy data. The pointer must either be null or be consistent
+  /// across all calls for the same \p func.
+  LazyContextData *getOrCreateLazyContextData(const DeclContext *decl,
+                                              LazyMemberLoader *lazyLoader);
+
+  /// Get the lazy iterable context for the given iterable declaration context.
+  ///
+  /// \param lazyLoader If non-null, the lazy loader to use when creating the
+  /// iterable context data. The pointer must either be null or be consistent
+  /// across all calls for the same \p idc.
+  LazyIterableDeclContextData *getOrCreateLazyIterableContextData(
+                                              const IterableDeclContext *idc,
+                                              LazyMemberLoader *lazyLoader);
+
+  /// Access the side cache for property wrapper backing property types,
+  /// used because TypeChecker::typeCheckBinding() needs somewhere to stash
+  /// the backing property type.
+  Type getSideCachedPropertyWrapperBackingPropertyType(VarDecl *var) const;
+  void setSideCachedPropertyWrapperBackingPropertyType(VarDecl *var,
                                                         Type type);
 
-   /// Returns memory usage of this AstContext.
-   size_t getTotalMemory() const;
+  /// Returns memory usage of this AstContext.
+  size_t getTotalMemory() const;
 
-   /// Returns memory used exclusively by constraint solver.
-   size_t getSolverMemory() const;
+  /// Returns memory used exclusively by constraint solver.
+  size_t getSolverMemory() const;
 
-   /// Populate \p names with visible top level module names.
-   /// This guarantees that resulted \p names doesn't have duplicated names.
-   void getVisibleTopLevelModuleNames(SmallVectorImpl<Identifier> &names) const;
+  /// Retrieve the Swift name for the given Foundation entity, where
+  /// "NS" prefix stripping will apply under omit-needless-words.
+//  StringRef getSwiftName(KnownFoundationEntity kind);
 
-public:
+  /// Retrieve the Swift identifier for the given Foundation entity, where
+  /// "NS" prefix stripping will apply under omit-needless-words.
+//  Identifier getSwiftId(KnownFoundationEntity kind) {
+//    return getIdentifier(getSwiftName(kind));
+//  }
 
-   //   /// Whether our effective Polarphp version is at least 'major'.
-   //   ///
-   //   /// This is usually the check you want; for example, when introducing
-   //   /// a new language feature which is only visible in Polarphp 5, you would
-   //   /// check for isSwiftVersionAtLeast(5).
-   //   bool isPolarphpVersionAtLeast(unsigned major, unsigned minor = 0) const {
-   //      return langOpts.isPolarphpVersionAtLeast(major, minor);
-   //   }
+  /// Populate \p names with visible top level module names.
+  /// This guarantees that resulted \p names doesn't have duplicated names.
+  void getVisibleTopLevelModuleNames(SmallVectorImpl<Identifier> &names) const;
 
-   /// Each kind and SourceFile has its own cache for a Type.
-   Type &getDefaultTypeRequestCache(SourceFile *, KnownProtocolKind);
+  /// Whether to perform typo correction given the pre-configured correction limit.
+  /// Increments \c NumTypoCorrections then checks this against the limit in
+  /// the language options.
+  bool shouldPerformTypoCorrection();
 
 private:
-   friend Decl;
-   friend TypeBase;
-   friend ArchetypeType;
-   friend OpaqueTypeDecl;
+  /// Register the given generic signature builder to be used as the canonical
+  /// generic signature builder for the given signature, if we don't already
+  /// have one.
+  void registerGenericSignatureBuilder(GenericSignature sig,
+                                       GenericSignatureBuilder &&builder);
+  friend class GenericSignatureBuilder;
 
-   /// Provide context-level uniquing for SIL lowered type layouts and boxes.
-   friend PILLayout;
-   friend PILBoxType;
+public:
+  /// Retrieve or create the stored generic signature builder for the given
+  /// canonical generic signature and module.
+  GenericSignatureBuilder *getOrCreateGenericSignatureBuilder(
+                                                     CanGenericSignature sig);
+
+  /// Retrieve a generic signature with a single unconstrained type parameter,
+  /// like `<T>`.
+  CanGenericSignature getSingleGenericParameterSignature() const;
+
+  /// Retrieve a generic signature with a single type parameter conforming
+  /// to the given opened archetype.
+  CanGenericSignature getOpenedArchetypeSignature(CanType existential,
+                                                  ModuleDecl *mod);
+
+  GenericSignature getOverrideGenericSignature(const ValueDecl *base,
+                                               const ValueDecl *derived);
+
+  enum class OverrideGenericSignatureReqCheck {
+    /// Base method's generic requirements are satisifed by derived method
+    BaseReqSatisfiedByDerived,
+
+    /// Derived method's generic requirements are satisifed by base method
+    DerivedReqSatisfiedByBase
+  };
+
+  bool overrideGenericSignatureReqsSatisfied(
+      const ValueDecl *base, const ValueDecl *derived,
+      const OverrideGenericSignatureReqCheck direction);
+
+  /// Whether our effective Swift version is at least 'major'.
+  ///
+  /// This is usually the check you want; for example, when introducing
+  /// a new language feature which is only visible in Swift 5, you would
+  /// check for isSwiftVersionAtLeast(5).
+  bool isPolarVersionAtLeast(unsigned major, unsigned minor = 0) const
+  {
+    return LangOpts.isPolarVersionAtLeast(major, minor);
+  }
+
+  /// Check whether it's important to respect access control restrictions
+  /// in current context.
+  bool isAccessControlDisabled() const {
+    return !LangOpts.enableAccessControl;
+  }
+
+  /// Each kind and SourceFile has its own cache for a Type.
+  Type &getDefaultTypeRequestCache(SourceFile *, KnownInterfaceKind);
+
+private:
+  friend Decl;
+  Optional<RawComment> getRawComment(const Decl *D);
+  void setRawComment(const Decl *D, RawComment RC);
+
+  Optional<StringRef> getBriefComment(const Decl *D);
+  void setBriefComment(const Decl *D, StringRef Comment);
+
+  friend TypeBase;
+  friend ArchetypeType;
+  friend OpaqueTypeDecl;
+
+  /// Provide context-level uniquing for SIL lowered type layouts and boxes.
+  friend PILLayout;
+  friend PILBoxType;
 };
-
-
-/// Attach Fix-Its to the given diagnostic that updates the name of the
-/// given declaration to the desired target name.
-///
-/// \returns false if the name could not be fixed.
-bool fix_declaration_name(InFlightDiagnostic &diag, ValueDecl *decl,
-                          DeclName targetName);
-
 
 } // polar::ast
 

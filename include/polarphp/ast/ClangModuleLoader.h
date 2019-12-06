@@ -9,39 +9,47 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/27.
 
 #ifndef POLARPHP_AST_CLANG_MODULE_LOADER_H
 #define POLARPHP_AST_CLANG_MODULE_LOADER_H
 
 #include "polarphp/ast/ModuleLoader.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/AST/ASTContext.h"
+
+namespace clang {
+class AstContext;
+class CompilerInstance;
+class Preprocessor;
+class Sema;
+class TargetInfo;
+} // namespace clang
 
 namespace polar::ast {
 
 class DeclContext;
+class VisibleDeclConsumer;
 
-using llvm::StringRef;
+/// Represents the different namespaces for types in C.
+///
+/// A simplified version of clang::Sema::LookupKind.
+enum class ClangTypeKind {
+   Typedef,
+   ObjCClass = Typedef,
+   /// Structs, enums, and unions.
+   Tag,
+   ObjCInterface,
+};
 
 class ClangModuleLoader : public ModuleLoader
 {
 private:
    virtual void anchor();
+
 protected:
    using ModuleLoader::ModuleLoader;
+
 public:
-   virtual clang::ASTContext &getClangASTContext() const = 0;
+   virtual clang::TargetInfo &getTargetInfo() const = 0;
+   virtual clang::AstContext &getClangAstContext() const = 0;
    virtual clang::Preprocessor &getClangPreprocessor() const = 0;
    virtual clang::Sema &getClangSema() const = 0;
    virtual const clang::CompilerInstance &getClangInstance() const = 0;
@@ -63,12 +71,38 @@ public:
    ///
    /// This routine is used for various hacks that are only permitted within
    /// overlays of imported modules, e.g., Objective-C bridging conformances.
-   virtual bool isInOverlayModuleForImportedModule(
-         const DeclContext *overlayDC,
-         const DeclContext *importedDC) = 0;
+   virtual bool
+   isInOverlayModuleForImportedModule(const DeclContext *overlayDC,
+                                      const DeclContext *importedDC) = 0;
 
+   /// Look for declarations associated with the given name.
+   ///
+   /// \param name The name we're searching for.
+   virtual void lookupValue(DeclName name, VisibleDeclConsumer &consumer) = 0;
+
+   /// Look up a type declaration by its Clang name.
+   ///
+   /// Note that this method does no filtering. If it finds the type in a loaded
+   /// module, it returns it. This is intended for use in reflection / debugging
+   /// contexts where access is not a problem.
+   virtual void
+   lookupTypeDecl(StringRef clangName, ClangTypeKind kind,
+                  llvm::function_ref<void(TypeDecl *)> receiver) = 0;
+
+   /// Look up type a declaration synthesized by the Clang importer itself, using
+   /// a "related entity kind" to determine which type it should be. For example,
+   /// this can be used to find the synthesized error struct for an
+   /// NS_ERROR_ENUM.
+   ///
+   /// Note that this method does no filtering. If it finds the type in a loaded
+   /// module, it returns it. This is intended for use in reflection / debugging
+   /// contexts where access is not a problem.
+   virtual void
+   lookupRelatedEntity(StringRef clangName, ClangTypeKind kind,
+                       StringRef relatedEntityKind,
+                       llvm::function_ref<void(TypeDecl *)> receiver) = 0;
 };
 
-} // polar::ast
+} // namespace polar::ast
 
 #endif // POLARPHP_AST_CLANG_MODULE_LOADER_H

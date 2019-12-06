@@ -9,16 +9,6 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/28.
-//===----------------------------------------------------------------------===//
 //
 // This file defines the TypeRepr and related classes.
 //
@@ -27,18 +17,20 @@
 #ifndef POLARPHP_AST_TYPEREPR_H
 #define POLARPHP_AST_TYPEREPR_H
 
-#include "polarphp/syntax/TokenSyntax.h"
+#include "polarphp/ast/Attr.h"
+#include "polarphp/ast/DeclContext.h"
+#include "polarphp/ast/Identifier.h"
 #include "polarphp/ast/Type.h"
 #include "polarphp/ast/TypeAlignments.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/PointerUnion.h"
 #include "llvm/ADT/STLExtras.h"
+#include "polarphp/basic/Debug.h"
 #include "polarphp/basic/InlineBitfield.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/TrailingObjects.h"
 
 namespace polar::ast {
-
 class AstWalker;
 class DeclContext;
 class GenericEnvironment;
@@ -46,126 +38,99 @@ class IdentTypeRepr;
 class TupleTypeRepr;
 class TypeDecl;
 
-using polar::basic::bitmax;
 using polar::basic::count_bits_used;
+using polar::basic::bitmax;
+using llvm::isa;
+using llvm::cast;
 
-enum class TypeReprKind : std::uint8_t
-{
+enum class TypeReprKind : uint8_t {
 #define TYPEREPR(ID, PARENT) ID,
 #define LAST_TYPEREPR(ID) Last_TypeRepr = ID,
 #include "polarphp/ast/TypeReprNodesDef.h"
 };
-enum : unsigned
-{
-   NumTypeReprKindBits =
-   count_bits_used(static_cast<unsigned>(TypeReprKind::Last_TypeRepr))
-};
+enum : unsigned { NumTypeReprKindBits =
+                  count_bits_used(static_cast<unsigned>(TypeReprKind::Last_TypeRepr)) };
 
 /// Representation of a type as written in source.
-class /*alignas(8)*/ TypeRepr
-{
+class alignas(8) TypeRepr {
    TypeRepr(const TypeRepr&) = delete;
    void operator=(const TypeRepr&) = delete;
 
-protected:
-   union {
-      uint64_t OpaqueBits;
-      POLAR_INLINE_BITFIELD_BASE(
-            TypeRepr, bitmax(NumTypeReprKindBits,8)+1+1,
-            /// The subclass of TypeRepr that this is.
-            Kind : bitmax(NumTypeReprKindBits,8),
+   protected:
+   union { uint64_t OpaqueBits;
 
-            /// Whether this type representation is known to contain an invalid
-            /// type.
-            Invalid : 1,
+           POLAR_INLINE_BITFIELD_BASE(TypeRepr, bitmax(NumTypeReprKindBits,8)+1+1,
+                                      /// The subclass of TypeRepr that this is.
+                                      Kind : bitmax(NumTypeReprKindBits,8),
 
-            /// Whether this type representation had a warning emitted related to it.
-            /// This is a hack related to how we resolve type exprs multiple times in
-            /// generic contexts.
-            Warned : 1
-            );
+                                      /// Whether this type representation is known to contain an invalid
+                                      /// type.
+                                      Invalid : 1,
 
-      POLAR_INLINE_BITFIELD_FULL(
-            TupleTypeRepr, TypeRepr, 1+32,
-            /// Whether this tuple has '...' and its position.
-            HasEllipsis : 1,
-            : NumPadBits,
-            /// The number of elements contained.
-            NumElements : 32
-            );
+                                      /// Whether this type representation had a warning emitted related to it.
+                                      /// This is a hack related to how we resolve type exprs multiple times in
+                                      /// generic contexts.
+                                      Warned : 1
+                                      );
 
-      POLAR_INLINE_BITFIELD_EMPTY(IdentTypeRepr, TypeRepr);
-      POLAR_INLINE_BITFIELD_EMPTY(ComponentIdentTypeRepr, IdentTypeRepr);
+                POLAR_INLINE_BITFIELD_FULL(TupleTypeRepr, TypeRepr, 1+32,
+                                           /// Whether this tuple has '...' and its position.
+                                           HasEllipsis : 1,
+                                           : NumPadBits,
+                                           /// The number of elements contained.
+                                           NumElements : 32
+                                           );
 
-      POLAR_INLINE_BITFIELD_FULL(
-            GenericIdentTypeRepr, ComponentIdentTypeRepr, 32,
-            : NumPadBits,
-            NumGenericArgs : 32
-            );
+                     POLAR_INLINE_BITFIELD_EMPTY(IdentTypeRepr, TypeRepr);
+                          POLAR_INLINE_BITFIELD_EMPTY(ComponentIdentTypeRepr, IdentTypeRepr);
 
-      POLAR_INLINE_BITFIELD_FULL(
-            CompoundIdentTypeRepr, IdentTypeRepr, 32,
-            : NumPadBits,
-            NumComponents : 32
-            );
+                               POLAR_INLINE_BITFIELD_FULL(GenericIdentTypeRepr, ComponentIdentTypeRepr, 32,
+                                                          : NumPadBits,
+                                                          NumGenericArgs : 32
+                                                          );
 
-      POLAR_INLINE_BITFIELD_FULL(
-            CompositionTypeRepr, TypeRepr, 32,
-            : NumPadBits,
-            NumTypes : 32
-            );
+                                    POLAR_INLINE_BITFIELD_FULL(CompoundIdentTypeRepr, IdentTypeRepr, 32,
+                                                               : NumPadBits,
+                                                               NumComponents : 32
+                                                               );
 
-      POLAR_INLINE_BITFIELD_FULL(
-            PILBoxTypeRepr, TypeRepr, 32,
-            NumGenericArgs : NumPadBits,
-            NumFields : 32
-            );
+                                         POLAR_INLINE_BITFIELD_FULL(CompositionTypeRepr, TypeRepr, 32,
+                                                                    : NumPadBits,
+                                                                    NumTypes : 32
+                                                                    );
 
-   } m_bits;
+                                              POLAR_INLINE_BITFIELD_FULL(SILBoxTypeRepr, TypeRepr, 32,
+                                                                         NumGenericArgs : NumPadBits,
+                                                                         NumFields : 32
+                                                                         );
 
-   TypeRepr(TypeReprKind kind)
-   {
-      m_bits.OpaqueBits = 0;
-      m_bits.TypeRepr.Kind = static_cast<unsigned>(kind);
-      m_bits.TypeRepr.Invalid = false;
-      m_bits.TypeRepr.Warned = false;
+         } Bits;
+
+   TypeRepr(TypeReprKind K) {
+      Bits.OpaqueBits = 0;
+      Bits.TypeRepr.Kind = static_cast<unsigned>(K);
+      Bits.TypeRepr.Invalid = false;
+      Bits.TypeRepr.Warned = false;
    }
 
-private:
-   SourceLoc getLocImpl() const
-   {
-      return getStartLoc();
-   }
+   private:
+   SourceLoc getLocImpl() const { return getStartLoc(); }
 
-public:
-   TypeReprKind getKind() const
-   {
-      return static_cast<TypeReprKind>(m_bits.TypeRepr.Kind);
+   public:
+   TypeReprKind getKind() const {
+      return static_cast<TypeReprKind>(Bits.TypeRepr.Kind);
    }
 
    /// Is this type representation known to be invalid?
-   bool isInvalid() const
-   {
-      return m_bits.TypeRepr.Invalid;
-   }
+   bool isInvalid() const { return Bits.TypeRepr.Invalid; }
 
    /// Note that this type representation describes an invalid type.
-   void setInvalid()
-   {
-      m_bits.TypeRepr.Invalid = true;
-   }
+   void setInvalid() { Bits.TypeRepr.Invalid = true; }
 
    /// If a warning is produced about this type repr, keep track of that so we
    /// don't emit another one upon further reanalysis.
-   bool isWarnedAbout() const
-   {
-      return m_bits.TypeRepr.Warned;
-   }
-
-   void setWarned()
-   {
-      m_bits.TypeRepr.Warned = true;
-   }
+   bool isWarnedAbout() const { return Bits.TypeRepr.Warned; }
+   void setWarned() { Bits.TypeRepr.Warned = true; }
 
    /// Get the representative location for pointing at this type.
    SourceLoc getLoc() const;
@@ -177,25 +142,20 @@ public:
    /// Is this type grammatically a type-simple?
    inline bool isSimple() const; // bottom of this file
 
-   static bool classof(const TypeRepr *typeRepr)
-   {
-      return true;
-   }
+   static bool classof(const TypeRepr *T) { return true; }
 
    /// Walk this type representation.
    TypeRepr *walk(AstWalker &walker);
-   TypeRepr *walk(AstWalker &&walker)
-   {
+   TypeRepr *walk(AstWalker &&walker) {
       return walk(walker);
    }
 
    //*** Allocation Routines ************************************************/
 
-   void *operator new(size_t bytes, const AstContext &context,
-                      unsigned alignment = alignof(TypeRepr));
+   void *operator new(size_t bytes, const AstContext &C,
+                      unsigned Alignment = alignof(TypeRepr));
 
-   void *operator new(size_t bytes, void *data)
-   {
+   void *operator new(size_t bytes, void *data) {
       assert(data);
       return data;
    }
@@ -204,9 +164,9 @@ public:
    void *operator new(size_t bytes) = delete;
    void operator delete(void *data) = delete;
 
-   void print(raw_ostream &OS, const PrintOptions &opts = PrintOptions()) const;
-   void print(ASTPrinter &printer, const PrintOptions &opts) const;
-   void dump() const;
+   void print(raw_ostream &OS, const PrintOptions &Opts = PrintOptions()) const;
+   void print(AstPrinter &Printer, const PrintOptions &Opts) const;
+   POLAR_DEBUG_DUMP;
 
    /// Clone the given type representation.
    TypeRepr *clone(const AstContext &ctx) const;
@@ -218,42 +178,24 @@ public:
 /// The client should make sure to emit a diagnostic at the construction time
 /// (in the parser).  All uses of this type should be ignored and not
 /// re-diagnosed.
-class ErrorTypeRepr : public TypeRepr
-{
-   SourceRange m_range;
+class ErrorTypeRepr : public TypeRepr {
+   SourceRange Range;
 
 public:
    ErrorTypeRepr() : TypeRepr(TypeReprKind::Error) {}
-   ErrorTypeRepr(SourceLoc loc)
-      : TypeRepr(TypeReprKind::Error),
-        m_range(loc) {}
-   ErrorTypeRepr(SourceRange range)
-      : TypeRepr(TypeReprKind::Error),
-        m_range(range)
-   {}
+   ErrorTypeRepr(SourceLoc Loc) : TypeRepr(TypeReprKind::Error), Range(Loc) {}
+   ErrorTypeRepr(SourceRange Range)
+      : TypeRepr(TypeReprKind::Error), Range(Range) {}
 
-   static bool classof(const TypeRepr *typeRepr)
-   {
-      return typeRepr->getKind() == TypeReprKind::Error;
+   static bool classof(const TypeRepr *T) {
+      return T->getKind() == TypeReprKind::Error;
    }
-
-   static bool classof(const ErrorTypeRepr *typeRepr)
-   {
-      return true;
-   }
+   static bool classof(const ErrorTypeRepr *T) { return true; }
 
 private:
-   SourceLoc getStartLocImpl() const
-   {
-      return m_range.getStart();
-   }
-
-   SourceLoc getEndLocImpl() const
-   {
-      return m_range.getEnd();
-   }
-
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   SourceLoc getStartLocImpl() const { return Range.start; }
+   SourceLoc getEndLocImpl() const { return Range.end; }
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
@@ -261,8 +203,7 @@ private:
 /// \code
 ///   @convention(thin) Foo
 /// \endcode
-class AttributedTypeRepr : public TypeRepr
-{
+class AttributedTypeRepr : public TypeRepr {
    // FIXME: TypeAttributes isn't a great use of space.
    TypeAttributes Attrs;
    TypeRepr *Ty;
@@ -277,7 +218,7 @@ public:
    TypeRepr *getTypeRepr() const { return Ty; }
 
    void printAttrs(llvm::raw_ostream &OS) const;
-   void printAttrs(ASTPrinter &printer, const PrintOptions &Options) const;
+   void printAttrs(AstPrinter &Printer, const PrintOptions &Options) const;
 
    static bool classof(const TypeRepr *T) {
       return T->getKind() == TypeReprKind::Attributed;
@@ -288,7 +229,7 @@ private:
    SourceLoc getStartLocImpl() const { return Attrs.AtLoc; }
    SourceLoc getEndLocImpl() const { return Ty->getEndLoc(); }
    SourceLoc getLocImpl() const { return Ty->getLoc(); }
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
@@ -367,7 +308,7 @@ public:
    static bool classof(const ComponentIdentTypeRepr *T) { return true; }
 
 protected:
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
 
    SourceLoc getLocImpl() const { return Loc; }
    friend class TypeRepr;
@@ -411,7 +352,7 @@ class GenericIdentTypeRepr final : public ComponentIdentTypeRepr,
                         SourceRange AngleBrackets)
       : ComponentIdentTypeRepr(TypeReprKind::GenericIdent, Loc, Id),
         AngleBrackets(AngleBrackets) {
-      m_bits.GenericIdentTypeRepr.NumGenericArgs = GenericArgs.size();
+      Bits.GenericIdentTypeRepr.NumGenericArgs = GenericArgs.size();
       assert(!GenericArgs.empty());
 #ifndef NDEBUG
       for (auto arg : GenericArgs)
@@ -429,12 +370,12 @@ public:
                                        SourceRange AngleBrackets);
 
    unsigned getNumGenericArgs() const {
-      return m_bits.GenericIdentTypeRepr.NumGenericArgs;
+      return Bits.GenericIdentTypeRepr.NumGenericArgs;
    }
 
    ArrayRef<TypeRepr*> getGenericArgs() const {
       return {getTrailingObjects<TypeRepr*>(),
-               m_bits.GenericIdentTypeRepr.NumGenericArgs};
+               Bits.GenericIdentTypeRepr.NumGenericArgs};
    }
    SourceRange getAngleBrackets() const { return AngleBrackets; }
 
@@ -445,7 +386,7 @@ public:
 
 private:
    SourceLoc getStartLocImpl() const { return getIdLoc(); }
-   SourceLoc getEndLocImpl() const { return AngleBrackets.End; }
+   SourceLoc getEndLocImpl() const { return AngleBrackets.end; }
    friend class TypeRepr;
 };
 
@@ -460,7 +401,7 @@ class CompoundIdentTypeRepr final : public IdentTypeRepr,
 
    CompoundIdentTypeRepr(ArrayRef<ComponentIdentTypeRepr *> Components)
       : IdentTypeRepr(TypeReprKind::CompoundIdent) {
-      m_bits.CompoundIdentTypeRepr.NumComponents = Components.size();
+      Bits.CompoundIdentTypeRepr.NumComponents = Components.size();
       assert(Components.size() > 1 &&
              "should have just used the single ComponentIdentTypeRepr directly");
       std::uninitialized_copy(Components.begin(), Components.end(),
@@ -473,7 +414,7 @@ public:
 
    ArrayRef<ComponentIdentTypeRepr*> getComponents() const {
       return {getTrailingObjects<ComponentIdentTypeRepr*>(),
-               m_bits.CompoundIdentTypeRepr.NumComponents};
+               Bits.CompoundIdentTypeRepr.NumComponents};
    }
 
    static bool classof(const TypeRepr *T) {
@@ -492,7 +433,7 @@ private:
       return getComponents().back()->getLoc();
    }
 
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
@@ -580,7 +521,7 @@ private:
    SourceLoc getEndLocImpl() const { return RetTy->getEndLoc(); }
    SourceLoc getLocImpl() const { return ArrowLoc; }
 
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
@@ -605,9 +546,9 @@ public:
    static bool classof(const ArrayTypeRepr *T) { return true; }
 
 private:
-   SourceLoc getStartLocImpl() const { return Brackets.Start; }
-   SourceLoc getEndLocImpl() const { return Brackets.End; }
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   SourceLoc getStartLocImpl() const { return Brackets.start; }
+   SourceLoc getEndLocImpl() const { return Brackets.end; }
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
@@ -638,9 +579,9 @@ public:
    static bool classof(const DictionaryTypeRepr *T) { return true; }
 
 private:
-   SourceLoc getStartLocImpl() const { return Brackets.Start; }
-   SourceLoc getEndLocImpl() const { return Brackets.End; }
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   SourceLoc getStartLocImpl() const { return Brackets.start; }
+   SourceLoc getEndLocImpl() const { return Brackets.end; }
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
@@ -672,7 +613,7 @@ private:
    SourceLoc getLocImpl() const {
       return QuestionLoc.isValid() ? QuestionLoc : Base->getLoc();
    }
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
@@ -701,7 +642,7 @@ private:
    SourceLoc getStartLocImpl() const { return Base->getStartLoc(); }
    SourceLoc getEndLocImpl() const { return ExclamationLoc; }
    SourceLoc getLocImpl() const { return ExclamationLoc; }
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
@@ -716,7 +657,7 @@ struct TupleTypeReprElement {
    TypeRepr *Type;
    SourceLoc TrailingCommaLoc;
 
-   TupleTypeReprElement() {}
+   TupleTypeReprElement(): Type(nullptr) {}
    TupleTypeReprElement(TypeRepr *Type): Type(Type) {}
 };
 
@@ -735,14 +676,14 @@ class TupleTypeRepr final : public TypeRepr,
    SourceRange Parens;
 
    size_t numTrailingObjects(OverloadToken<TupleTypeReprElement>) const {
-      return m_bits.TupleTypeRepr.NumElements;
+      return Bits.TupleTypeRepr.NumElements;
    }
 
    TupleTypeRepr(ArrayRef<TupleTypeReprElement> Elements,
                  SourceRange Parens, SourceLoc Ellipsis, unsigned EllipsisIdx);
 
 public:
-   unsigned getNumElements() const { return m_bits.TupleTypeRepr.NumElements; }
+   unsigned getNumElements() const { return Bits.TupleTypeRepr.NumElements; }
    bool hasElementNames() const {
       for (auto &Element : getElements()) {
          if (Element.NameLoc.isValid()) {
@@ -754,7 +695,7 @@ public:
 
    ArrayRef<TupleTypeReprElement> getElements() const {
       return { getTrailingObjects<TupleTypeReprElement>(),
-               m_bits.TupleTypeRepr.NumElements };
+               Bits.TupleTypeRepr.NumElements };
    }
 
    void getElementTypes(SmallVectorImpl<TypeRepr *> &Types) const {
@@ -796,7 +737,7 @@ public:
    SourceRange getParens() const { return Parens; }
 
    bool hasEllipsis() const {
-      return m_bits.TupleTypeRepr.HasEllipsis;
+      return Bits.TupleTypeRepr.HasEllipsis;
    }
 
    SourceLoc getEllipsisLoc() const {
@@ -807,12 +748,12 @@ public:
       unsigned getEllipsisIndex() const {
       return hasEllipsis() ?
       getTrailingObjects<SourceLocAndIdx>()[0].second :
-      m_bits.TupleTypeRepr.NumElements;
+      Bits.TupleTypeRepr.NumElements;
    }
 
    void removeEllipsis() {
       if (hasEllipsis()) {
-         m_bits.TupleTypeRepr.HasEllipsis = false;
+         Bits.TupleTypeRepr.HasEllipsis = false;
          getTrailingObjects<SourceLocAndIdx>()[0] = {
             SourceLoc(),
             getNumElements()
@@ -821,7 +762,7 @@ public:
    }
 
    bool isParenType() const {
-      return m_bits.TupleTypeRepr.NumElements == 1 &&
+      return Bits.TupleTypeRepr.NumElements == 1 &&
             getElementNameLoc(0).isInvalid() &&
             !hasEllipsis();
    }
@@ -844,9 +785,9 @@ public:
    static bool classof(const TupleTypeRepr *T) { return true; }
 
 private:
-   SourceLoc getStartLocImpl() const { return Parens.Start; }
-   SourceLoc getEndLocImpl() const { return Parens.End; }
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   SourceLoc getStartLocImpl() const { return Parens.start; }
+   SourceLoc getEndLocImpl() const { return Parens.end; }
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
@@ -865,20 +806,20 @@ class CompositionTypeRepr final : public TypeRepr,
                        SourceRange CompositionRange)
       : TypeRepr(TypeReprKind::Composition), FirstTypeLoc(FirstTypeLoc),
         CompositionRange(CompositionRange) {
-      m_bits.CompositionTypeRepr.NumTypes = Types.size();
+      Bits.CompositionTypeRepr.NumTypes = Types.size();
       std::uninitialized_copy(Types.begin(), Types.end(),
                               getTrailingObjects<TypeRepr*>());
    }
 
 public:
    ArrayRef<TypeRepr *> getTypes() const {
-      return {getTrailingObjects<TypeRepr*>(), m_bits.CompositionTypeRepr.NumTypes};
+      return {getTrailingObjects<TypeRepr*>(), Bits.CompositionTypeRepr.NumTypes};
    }
    SourceLoc getSourceLoc() const { return FirstTypeLoc; }
    SourceRange getCompositionRange() const { return CompositionRange; }
 
    static CompositionTypeRepr *create(const AstContext &C,
-                                      ArrayRef<TypeRepr*> Protocols,
+                                      ArrayRef<TypeRepr*> Interfaces,
                                       SourceLoc FirstTypeLoc,
                                       SourceRange CompositionRange);
 
@@ -894,9 +835,9 @@ public:
 
 private:
    SourceLoc getStartLocImpl() const { return FirstTypeLoc; }
-   SourceLoc getLocImpl() const { return CompositionRange.Start; }
-   SourceLoc getEndLocImpl() const { return CompositionRange.End; }
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   SourceLoc getLocImpl() const { return CompositionRange.start; }
+   SourceLoc getEndLocImpl() const { return CompositionRange.end; }
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
@@ -925,36 +866,36 @@ private:
    SourceLoc getStartLocImpl() const { return Base->getStartLoc(); }
    SourceLoc getEndLocImpl() const { return MetaLoc; }
    SourceLoc getLocImpl() const { return MetaLoc; }
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
 /// A 'protocol' type.
 /// \code
-///   Foo.Protocol
+///   Foo.Interface
 /// \endcode
-class ProtocolTypeRepr : public TypeRepr {
+class InterfaceTypeRepr : public TypeRepr {
    TypeRepr *Base;
-   SourceLoc ProtocolLoc;
+   SourceLoc InterfaceLoc;
 
 public:
-   ProtocolTypeRepr(TypeRepr *Base, SourceLoc ProtocolLoc)
-      : TypeRepr(TypeReprKind::Protocol), Base(Base), ProtocolLoc(ProtocolLoc) {
+   InterfaceTypeRepr(TypeRepr *Base, SourceLoc InterfaceLoc)
+      : TypeRepr(TypeReprKind::Interface), Base(Base), InterfaceLoc(InterfaceLoc) {
    }
 
    TypeRepr *getBase() const { return Base; }
-   SourceLoc getProtocolLoc() const { return ProtocolLoc; }
+   SourceLoc getInterfaceLoc() const { return InterfaceLoc; }
 
    static bool classof(const TypeRepr *T) {
-      return T->getKind() == TypeReprKind::Protocol;
+      return T->getKind() == TypeReprKind::Interface;
    }
-   static bool classof(const ProtocolTypeRepr *T) { return true; }
+   static bool classof(const InterfaceTypeRepr *T) { return true; }
 
 private:
    SourceLoc getStartLocImpl() const { return Base->getStartLoc(); }
-   SourceLoc getEndLocImpl() const { return ProtocolLoc; }
-   SourceLoc getLocImpl() const { return ProtocolLoc; }
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   SourceLoc getEndLocImpl() const { return InterfaceLoc; }
+   SourceLoc getLocImpl() const { return InterfaceLoc; }
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
@@ -980,7 +921,7 @@ public:
 private:
    SourceLoc getStartLocImpl() const { return SpecifierLoc; }
    SourceLoc getEndLocImpl() const { return Base->getEndLoc(); }
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
@@ -1062,7 +1003,7 @@ public:
 private:
    SourceLoc getStartLocImpl() const { return Loc; }
    SourceLoc getEndLocImpl() const { return Loc; }
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
@@ -1115,7 +1056,7 @@ private:
    SourceLoc getStartLocImpl() const { return OpaqueLoc; }
    SourceLoc getEndLocImpl() const { return Constraint->getEndLoc(); }
    SourceLoc getLocImpl() const { return OpaqueLoc; }
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend class TypeRepr;
 };
 
@@ -1134,10 +1075,10 @@ class SILBoxTypeRepr final : public TypeRepr,
    SourceLoc ArgLAngleLoc, ArgRAngleLoc;
 
    size_t numTrailingObjects(OverloadToken<SILBoxTypeReprField>) const {
-      return m_bits.SILBoxTypeRepr.NumFields;
+      return Bits.SILBoxTypeRepr.NumFields;
    }
    size_t numTrailingObjects(OverloadToken<TypeRepr*>) const {
-      return m_bits.SILBoxTypeRepr.NumGenericArgs;
+      return Bits.SILBoxTypeRepr.NumGenericArgs;
    }
 
 public:
@@ -1152,8 +1093,8 @@ public:
         GenericParams(GenericParams), LBraceLoc(LBraceLoc), RBraceLoc(RBraceLoc),
         ArgLAngleLoc(ArgLAngleLoc), ArgRAngleLoc(ArgRAngleLoc)
    {
-      m_bits.SILBoxTypeRepr.NumFields = Fields.size();
-      m_bits.SILBoxTypeRepr.NumGenericArgs = GenericArgs.size();
+      Bits.SILBoxTypeRepr.NumFields = Fields.size();
+      Bits.SILBoxTypeRepr.NumGenericArgs = GenericArgs.size();
 
       std::uninitialized_copy(Fields.begin(), Fields.end(),
                               getTrailingObjects<SILBoxTypeReprField>());
@@ -1176,11 +1117,11 @@ public:
 
    ArrayRef<Field> getFields() const {
       return {getTrailingObjects<Field>(),
-               m_bits.SILBoxTypeRepr.NumFields};
+               Bits.SILBoxTypeRepr.NumFields};
    }
    ArrayRef<TypeRepr *> getGenericArguments() const {
       return {getTrailingObjects<TypeRepr*>(),
-               static_cast<size_t>(m_bits.SILBoxTypeRepr.NumGenericArgs)};
+               static_cast<size_t>(Bits.SILBoxTypeRepr.NumGenericArgs)};
    }
 
    GenericParamList *getGenericParams() const {
@@ -1204,7 +1145,7 @@ private:
    SourceLoc getStartLocImpl() const;
    SourceLoc getEndLocImpl() const;
    SourceLoc getLocImpl() const;
-   void printImpl(ASTPrinter &printer, const PrintOptions &opts) const;
+   void printImpl(AstPrinter &Printer, const PrintOptions &Opts) const;
    friend TypeRepr;
 };
 
@@ -1222,7 +1163,7 @@ inline bool TypeRepr::isSimple() const {
    case TypeReprKind::GenericIdent:
    case TypeReprKind::CompoundIdent:
    case TypeReprKind::Metatype:
-   case TypeReprKind::Protocol:
+   case TypeReprKind::Interface:
    case TypeReprKind::Dictionary:
    case TypeReprKind::Optional:
    case TypeReprKind::ImplicitlyUnwrappedOptional:
@@ -1237,6 +1178,14 @@ inline bool TypeRepr::isSimple() const {
    llvm_unreachable("bad TypeRepr kind");
 }
 
-} // polar::ast
+} // end namespace swift
 
-#endif // POLARPHP_AST_TYPEREPR_H
+namespace llvm {
+static inline raw_ostream &
+operator<<(raw_ostream &OS, polar::ast::TypeRepr *TyR) {
+   TyR->print(OS);
+   return OS;
+}
+} // end namespace llvm
+
+#endif

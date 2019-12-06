@@ -9,20 +9,9 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/27.
 
-#ifndef POLARPHP_AST_CLANG_NODE_H
-#define POLARPHP_AST_CLANG_NODE_H
+#ifndef POLARPHP_AST_CLANGNODE_H
+#define POLARPHP_AST_CLANGNODE_H
 
 #include "llvm/ADT/PointerUnion.h"
 
@@ -33,103 +22,69 @@ class ModuleMacro;
 class Module;
 class SourceLocation;
 class SourceRange;
-} // clang
+}
 
 namespace polar::ast {
+
 namespace internal {
 /// A wrapper to avoid having to import Clang headers. We can't just
 /// forward-declare their PointerLikeTypeTraits because we don't own
 /// the types.
 template <typename T>
-struct ClangNodeBox
-{
+struct ClangNodeBox {
    const T * const value;
 
-   ClangNodeBox()
-      : value{nullptr} {}
-   /*implicit*/ ClangNodeBox(const T *V)
-      : value(V) {}
+   ClangNodeBox() : value{nullptr} {}
+   /*implicit*/ ClangNodeBox(const T *V) : value(V) {}
 
-   explicit operator bool() const
-   {
-      return value;
-   }
+   explicit operator bool() const { return value; }
 };
-} // internal
+}
 
 /// Represents a clang declaration, macro, or module. A macro definition
 /// imported from a module is recorded as the ModuleMacro, and a macro
 /// defined locally is represented by the MacroInfo.
-class ClangNode
-{
+class ClangNode {
    template <typename T>
    using Box = internal::ClangNodeBox<T>;
 
    llvm::PointerUnion4<Box<clang::Decl>, Box<clang::MacroInfo>,
-   Box<clang::ModuleMacro>, Box<clang::Module>> m_ptr;
+   Box<clang::ModuleMacro>, Box<clang::Module>> Ptr;
 
 public:
    ClangNode() = default;
-   ClangNode(const clang::Decl *decl)
-      : m_ptr(decl) {}
+   ClangNode(const clang::Decl *D) : Ptr(D) {}
+   ClangNode(const clang::MacroInfo *MI) : Ptr(MI) {}
+   ClangNode(const clang::ModuleMacro *MM) : Ptr(MM) {}
+   ClangNode(const clang::Module *Mod) : Ptr(Mod) {}
 
-   ClangNode(const clang::MacroInfo *macroInfo)
-      : m_ptr(macroInfo) {}
+   bool isNull() const { return Ptr.isNull(); }
+   explicit operator bool() const { return !isNull(); }
 
-   ClangNode(const clang::ModuleMacro *moduleMacro)
-      : m_ptr(moduleMacro) {}
-
-   ClangNode(const clang::Module *module)
-      : m_ptr(module) {}
-
-   bool isNull() const
-   {
-      return m_ptr.isNull();
+   const clang::Decl *getAsDecl() const {
+      return Ptr.dyn_cast<Box<clang::Decl>>().value;
+   }
+   const clang::MacroInfo *getAsMacroInfo() const {
+      return Ptr.dyn_cast<Box<clang::MacroInfo>>().value;
+   }
+   const clang::ModuleMacro *getAsModuleMacro() const {
+      return Ptr.dyn_cast<Box<clang::ModuleMacro>>().value;
+   }
+   const clang::Module *getAsModule() const {
+      return Ptr.dyn_cast<Box<clang::Module>>().value;
    }
 
-   explicit operator bool() const
-   {
-      return !isNull();
+   const clang::Decl *castAsDecl() const {
+      return Ptr.get<Box<clang::Decl>>().value;
    }
-
-   const clang::Decl *getAsDecl() const
-   {
-      return m_ptr.dyn_cast<Box<clang::Decl>>().value;
+   const clang::MacroInfo *castAsMacroInfo() const {
+      return Ptr.get<Box<clang::MacroInfo>>().value;
    }
-
-   const clang::MacroInfo *getAsMacroInfo() const
-   {
-      return m_ptr.dyn_cast<Box<clang::MacroInfo>>().value;
+   const clang::ModuleMacro *castAsModuleMacro() const {
+      return Ptr.get<Box<clang::ModuleMacro>>().value;
    }
-
-   const clang::ModuleMacro *getAsModuleMacro() const
-   {
-      return m_ptr.dyn_cast<Box<clang::ModuleMacro>>().value;
-   }
-
-   const clang::Module *getAsModule() const
-   {
-      return m_ptr.dyn_cast<Box<clang::Module>>().value;
-   }
-
-   const clang::Decl *castAsDecl() const
-   {
-      return m_ptr.get<Box<clang::Decl>>().value;
-   }
-
-   const clang::MacroInfo *castAsMacroInfo() const
-   {
-      return m_ptr.get<Box<clang::MacroInfo>>().value;
-   }
-
-   const clang::ModuleMacro *castAsModuleMacro() const
-   {
-      return m_ptr.get<Box<clang::ModuleMacro>>().value;
-   }
-
-   const clang::Module *castAsModule() const
-   {
-      return m_ptr.get<Box<clang::Module>>().value;
+   const clang::Module *castAsModule() const {
+      return Ptr.get<Box<clang::Module>>().value;
    }
 
    // Get the MacroInfo for a local definition, one imported from a
@@ -143,19 +98,32 @@ public:
    clang::SourceLocation getLocation() const;
    clang::SourceRange getSourceRange() const;
 
-   void *getOpaqueValue() const
-   {
-      return m_ptr.getOpaqueValue();
-   }
-
-   static inline ClangNode getFromOpaqueValue(void *VP)
-   {
+   void *getOpaqueValue() const { return Ptr.getOpaqueValue(); }
+   static inline ClangNode getFromOpaqueValue(void *VP) {
       ClangNode N;
-      N.m_ptr = decltype(m_ptr)::getFromOpaqueValue(VP);
+      N.Ptr = decltype(Ptr)::getFromOpaqueValue(VP);
       return N;
    }
 };
 
-} // polar::ast
+} // end namespace polar::ast
 
-#endif // POLARPHP_AST_CLANG_NODE_H
+namespace llvm {
+template <typename T>
+struct PointerLikeTypeTraits<polar::ast::internal::ClangNodeBox<T>> {
+   using Box = ::polar::ast::internal::ClangNodeBox<T>;
+
+   static inline void *getAsVoidPointer(Box P) {
+      return const_cast<void *>(static_cast<const void *>(P.value));
+   }
+   static inline Box getFromVoidPointer(const void *P) {
+      return Box{static_cast<const T *>(P)};
+   }
+
+   /// Note: We are relying on Clang nodes to be at least 4-byte aligned.
+   enum { NumLowBitsAvailable = 2 };
+};
+
+} // end namespace llvm
+
+#endif

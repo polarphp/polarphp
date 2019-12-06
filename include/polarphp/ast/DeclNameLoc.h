@@ -7,17 +7,7 @@
 //
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
-//===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/12/01.
 //===----------------------------------------------------------------------===//
 //
 // This file defines the DeclNameLoc class.
@@ -32,26 +22,25 @@
 
 namespace polar::ast {
 
-class AstContext;
 using polar::basic::SourceLoc;
 using polar::basic::SourceRange;
+class AstContext;
 
 /// Source location information for a declaration name (\c DeclName)
 /// written in the source.
-class DeclNameLoc
-{
+class DeclNameLoc {
    /// Source location information.
    ///
-   /// If \c m_numArgumentLabels == 0, this is the SourceLoc for the base name.
+   /// If \c NumArgumentLabels == 0, this is the SourceLoc for the base name.
    /// Otherwise, it points to an array of SourceLocs, which contains:
    /// * The base name location
    /// * The left parentheses location
    /// * The right parentheses location
    /// * The locations of each of the argument labels.
-   const void *m_locationInfo;
+   const void *LocationInfo;
 
    /// The number of argument labels stored in the name.
-   unsigned m_numArgumentLabels;
+   unsigned NumArgumentLabels;
 
    enum {
       BaseNameIndex = 0,
@@ -62,26 +51,21 @@ class DeclNameLoc
 
    /// Retrieve a pointer to either the only source location that was
    /// stored or to the array of source locations that was stored.
-   SourceLoc const * getSourceLocs() const
-   {
-      if (m_numArgumentLabels == 0) {
-         return reinterpret_cast<SourceLoc const *>(&m_locationInfo);
-      }
-      return reinterpret_cast<SourceLoc const *>(m_locationInfo);
+   SourceLoc const * getSourceLocs() const {
+      if (NumArgumentLabels == 0)
+         return reinterpret_cast<SourceLoc const *>(&LocationInfo);
+
+      return reinterpret_cast<SourceLoc const *>(LocationInfo);
    }
 
 public:
    /// Create an invalid declaration name location.
-   DeclNameLoc()
-      : m_locationInfo(nullptr),
-        m_numArgumentLabels(0)
-   {}
+   DeclNameLoc() : LocationInfo(0), NumArgumentLabels(0) { }
 
    /// Create declaration name location information for a base name.
    explicit DeclNameLoc(SourceLoc baseNameLoc)
-      : m_locationInfo(baseNameLoc.getOpaquePointerValue()),
-        m_numArgumentLabels(0)
-   {}
+      : LocationInfo(baseNameLoc.getOpaquePointerValue()),
+        NumArgumentLabels(0) { }
 
    /// Create declaration name location information for a compound
    /// name.
@@ -91,68 +75,50 @@ public:
                SourceLoc rParenLoc);
 
    /// Whether the location information is valid.
-   bool isValid() const
-   {
-      return getBaseNameLoc().isValid();
-   }
+   bool isValid() const { return getBaseNameLoc().isValid(); }
 
    /// Whether the location information is invalid.
-   bool isInvalid() const
-   {
-      return getBaseNameLoc().isInvalid();
-   }
+   bool isInvalid() const { return getBaseNameLoc().isInvalid(); }
 
    /// Whether this was written as a compound name.
-   bool isCompound() const
-   {
-      return m_numArgumentLabels > 0;
-   }
+   bool isCompound() const { return NumArgumentLabels > 0; }
 
    /// Retrieve the location of the base name.
-   SourceLoc getBaseNameLoc() const
-   {
+   SourceLoc getBaseNameLoc() const {
       return getSourceLocs()[BaseNameIndex];
    }
 
    /// Retrieve the location of the left parentheses.
-   SourceLoc getLParenLoc() const
-   {
-      if (m_numArgumentLabels == 0) return SourceLoc();
+   SourceLoc getLParenLoc() const {
+      if (NumArgumentLabels == 0) return SourceLoc();
       return getSourceLocs()[LParenIndex];
    }
 
    /// Retrieve the location of the right parentheses.
-   SourceLoc getRParenLoc() const
-   {
-      if (m_numArgumentLabels == 0) return SourceLoc();
+   SourceLoc getRParenLoc() const {
+      if (NumArgumentLabels == 0) return SourceLoc();
       return getSourceLocs()[RParenIndex];
    }
 
    /// Retrieve the location of an argument label.
-   SourceLoc getArgumentLabelLoc(unsigned index) const
-   {
-      if (index >= m_numArgumentLabels) {
+   SourceLoc getArgumentLabelLoc(unsigned index) const {
+      if (index >= NumArgumentLabels)
          return SourceLoc();
-      }
       return getSourceLocs()[FirstArgumentLabelIndex + index];
    }
 
-   SourceLoc getStartLoc() const
-   {
+   SourceLoc getStartLoc() const {
       return getBaseNameLoc();
    }
 
-   SourceLoc getEndLoc() const
-   {
-      return m_numArgumentLabels == 0 ? getBaseNameLoc() : getRParenLoc();
+   SourceLoc getEndLoc() const {
+      return NumArgumentLabels == 0 ? getBaseNameLoc() : getRParenLoc();
    }
 
    /// Retrieve the complete source range for this declaration name.
-   SourceRange getSourceRange() const
-   {
-      if (m_numArgumentLabels == 0) {
-         return getBaseNameLoc();
-      }
+   SourceRange getSourceRange() const {
+      if (NumArgumentLabels == 0) return getBaseNameLoc();
+
       return SourceRange(getBaseNameLoc(), getRParenLoc());
    }
 };
@@ -160,4 +126,3 @@ public:
 } // polar::ast
 
 #endif // POLARPHP_AST_DECL_NAME_LOC_H
-

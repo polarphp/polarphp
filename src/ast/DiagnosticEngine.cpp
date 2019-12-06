@@ -369,13 +369,13 @@ static void format_selection_argument(StringRef modifierArguments,
 //   else
 //      return false;
 
-//   if (aliasDecl == type->getASTContext().getVoidDecl()) {
+//   if (aliasDecl == type->getAstContext().getVoidDecl()) {
 //      return false;
 //   }
 
 //   // The 'Polarphp.AnyObject' typealias is not 'interesting'.
 //   if (aliasDecl->getName() ==
-//       aliasDecl->getASTContext().getIdentifier("AnyObject") &&
+//       aliasDecl->getAstContext().getIdentifier("AnyObject") &&
 //       (aliasDecl->getParentModule()->isStdlibModule() ||
 //        aliasDecl->getParentModule()->isBuiltinModule())) {
 //      return false;

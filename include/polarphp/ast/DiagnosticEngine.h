@@ -28,10 +28,9 @@
 #ifndef POLARPHP_AST_DIAGNOSTIC_ENGINE_H
 #define POLARPHP_AST_DIAGNOSTIC_ENGINE_H
 
-
-//#include "polarphp/ast/Attr.h"
-//#include "polarphp/ast/TypeLoc.h"
-//#include "polarphp/ast/DeclNameLoc.h"
+#include "polarphp/ast/Attr.h"
+#include "polarphp/ast/TypeLoc.h"
+#include "polarphp/ast/DeclNameLoc.h"
 #include "polarphp/ast/DiagnosticConsumer.h"
 #include "llvm/Support/VersionTuple.h"
 #include "llvm/ADT/DenseMap.h"

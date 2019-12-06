@@ -25,6 +25,7 @@
 
 #include "polarphp/basic/Filesystem.h"
 #include "polarphp/ast/DiagnosticEngine.h"
+#include "polarphp/ast/DiagnosticsCommon.h"
 
 namespace polar::ast {
 

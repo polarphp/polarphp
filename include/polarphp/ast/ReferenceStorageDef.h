@@ -9,16 +9,6 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/27.
-//===----------------------------------------------------------------------===//
 //
 // This file defines non-default reference storage kind macros used for
 // macro-metaprogramming.
@@ -65,6 +55,7 @@
 /// UNCHECKED_REF_STORAGE
 ///   Name##RetainValueInst
 ///   Name##ReleaseValueInst
+///   StrongCopy##Name##ValueInst
 /// LOADABLE_REF_STORAGE
 ///   Ref*ToNameInst
 ///   Name*ToRefInst
@@ -72,7 +63,7 @@
 ///   Load##Name##Inst
 ///   Store##Name##Inst
 /// ALWAYS_OR_SOMETIMES_LOADABLE_CHECKED_REF_STORAGE
-///   Copy##Name##ValueInst
+///   StrongCopy##Name##ValueInst
 ///   StrongRetain##Name##Inst
 ///   Name##RetainInst
 ///   Name##ReleaseInst
@@ -87,7 +78,7 @@
 /// ALWAYS_LOADABLE_CHECKED_REF_STORAGE
 ///   Ref*ToNameInst
 ///   Name*ToRefInst
-///   Copy##Name##ValueInst
+///   StrongCopy##Name##ValueInst
 ///   StrongRetain##Name##Inst
 ///   Name##RetainInst
 ///   Name##ReleaseInst
@@ -96,7 +87,7 @@
 ///   Name*ToRefInst
 ///   Load##Name##Inst
 ///   Store##Name##Inst
-///   Copy##Name##ValueInst
+///   StrongCopy##Name##ValueInst
 ///   StrongRetain##Name##Inst
 ///   Name##RetainInst
 ///   Name##ReleaseInst
@@ -108,6 +99,10 @@
 /// storage type, and SOMETIMES_LOADABLE_CHECKED_REF_STORAGE needs *two*
 /// TypeInfos to be created. One for the loadable scenario, and one for the
 /// address-only scenario.
+///
+/// TODO: We should change Copy##Name##ValueInst to be defined on
+/// LOADABLE_REF_STORAGE. It just will require us to go through, refactor, and
+/// fix up this code.
 
 
 #ifndef REF_STORAGE

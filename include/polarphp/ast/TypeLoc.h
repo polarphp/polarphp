@@ -9,16 +9,7 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/26.
-//===----------------------------------------------------------------------===//
 // This file defines the TypeLoc struct and related structs.
 //
 //===----------------------------------------------------------------------===//
@@ -32,37 +23,30 @@
 
 namespace polar::ast {
 
-class ASTContext;
+class AstContext;
 class TypeRepr;
 
 /// TypeLoc - Provides source location information for a parsed type.
 /// A TypeLoc is stored in AST nodes which use an explicitly written type.
-struct TypeLoc
-{
+struct TypeLoc {
+private:
+   Type Ty;
+   TypeRepr *TyR = nullptr;
+
 public:
    TypeLoc() {}
-   TypeLoc(TypeRepr *typeRepr)
-      : m_typeRepr(typeRepr)
-   {}
-
-   TypeLoc(TypeRepr *typeRepr, Type type)
-      : m_typeRepr(typeRepr)
-   {
-      setType(type);
+   TypeLoc(TypeRepr *TyR) : TyR(TyR) {}
+   TypeLoc(TypeRepr *TyR, Type Ty) : TyR(TyR) {
+      setType(Ty);
    }
 
-   bool wasValidated() const
-   {
-      return !m_type.isNull();
-   }
-
+   bool wasValidated() const { return !Ty.isNull(); }
    bool isError() const;
 
    // FIXME: We generally shouldn't need to build TypeLocs without a location.
-   static TypeLoc withoutLoc(Type type)
-   {
+   static TypeLoc withoutLoc(Type T) {
       TypeLoc result;
-      result.m_type = type;
+      result.Ty = T;
       return result;
    }
 
@@ -72,36 +56,33 @@ public:
    SourceLoc getLoc() const;
    SourceRange getSourceRange() const;
 
-   bool hasLocation() const
-   {
-      return m_typeRepr != nullptr;
+   bool hasLocation() const { return TyR != nullptr; }
+   TypeRepr *getTypeRepr() const { return TyR; }
+   Type getType() const { return Ty; }
+
+   bool isNull() const { return getType().isNull() && TyR == nullptr; }
+
+   void setInvalidType(AstContext &C);
+   void setType(Type Ty);
+
+   TypeLoc clone(AstContext &ctx) const;
+
+   friend llvm::hash_code hash_value(const TypeLoc &owner) {
+      return llvm::hash_combine(owner.Ty.getPointer(), owner.TyR);
    }
 
-   TypeRepr *getTypeRepr() const
-   {
-      return m_typeRepr;
+   friend bool operator==(const TypeLoc &lhs,
+                          const TypeLoc &rhs) {
+      return lhs.Ty.getPointer() == rhs.Ty.getPointer()
+            && lhs.TyR == rhs.TyR;
    }
 
-   Type getType() const
-   {
-      return m_type;
+   friend bool operator!=(const TypeLoc &lhs,
+                          const TypeLoc &rhs) {
+      return !(lhs == rhs);
    }
-
-   bool isNull() const
-   {
-      return getType().isNull() && m_typeRepr == nullptr;
-   }
-
-   void setInvalidType(ASTContext &C);
-   void setType(Type type);
-
-   TypeLoc clone(ASTContext &ctx) const;
-
-private:
-   Type m_type;
-   TypeRepr *m_typeRepr = nullptr;
 };
 
-} // polar::ast
+} // end namespace polar::ast
 
-#endif // POLARPHP_AST_TYPELOC_H
+#endif

@@ -42,7 +42,7 @@ public:
    /// path(s) which should be searched for modules.
    ///
    /// Do not add values to this directly. Instead, use
-   /// \c ASTContext::addSearchPath.
+   /// \c AstContext::addSearchPath.
    std::vector<std::string> importSearchPaths;
 
    /// path(s) to virtual filesystem overlay YAML files.
@@ -72,7 +72,7 @@ public:
    /// path(s) which should be searched for frameworks.
    ///
    /// Do not add values to this directly. Instead, use
-   /// \c ASTContext::addSearchPath.
+   /// \c AstContext::addSearchPath.
    std::vector<FrameworkSearchPath> frameworkSearchPaths;
 
    /// path(s) which should be searched for libraries.

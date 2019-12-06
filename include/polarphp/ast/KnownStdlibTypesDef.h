@@ -25,6 +25,8 @@
 #define KNOWN_STDLIB_TYPE_DECL(NAME, DECL_CLASS, NUM_GENERIC_PARAMS)
 #endif
 
+KNOWN_STDLIB_TYPE_DECL(Void, TypeAliasDecl, 0)
+
 KNOWN_STDLIB_TYPE_DECL(Bool, NominalTypeDecl, 0)
 
 KNOWN_STDLIB_TYPE_DECL(Int,   NominalTypeDecl, 0)
@@ -43,7 +45,10 @@ KNOWN_STDLIB_TYPE_DECL(Float,  NominalTypeDecl, 0)
 KNOWN_STDLIB_TYPE_DECL(Double, NominalTypeDecl, 0)
 KNOWN_STDLIB_TYPE_DECL(Float80, NominalTypeDecl, 0)
 
+KNOWN_STDLIB_TYPE_DECL(_MaxBuiltinFloatType, TypeAliasDecl, 0)
+
 KNOWN_STDLIB_TYPE_DECL(String, NominalTypeDecl, 0)
+KNOWN_STDLIB_TYPE_DECL(StaticString, NominalTypeDecl, 0)
 KNOWN_STDLIB_TYPE_DECL(Substring, NominalTypeDecl, 0)
 KNOWN_STDLIB_TYPE_DECL(Array, NominalTypeDecl, 1)
 KNOWN_STDLIB_TYPE_DECL(Set, NominalTypeDecl, 1)
@@ -51,7 +56,7 @@ KNOWN_STDLIB_TYPE_DECL(Sequence, NominalTypeDecl, 1)
 KNOWN_STDLIB_TYPE_DECL(Dictionary, NominalTypeDecl, 2)
 KNOWN_STDLIB_TYPE_DECL(CollectionDifference, NominalTypeDecl, 1)
 KNOWN_STDLIB_TYPE_DECL(AnyHashable, NominalTypeDecl, 0)
-KNOWN_STDLIB_TYPE_DECL(MutableCollection, ProtocolDecl, 1)
+KNOWN_STDLIB_TYPE_DECL(MutableCollection, InterfaceDecl, 1)
 KNOWN_STDLIB_TYPE_DECL(Hasher, NominalTypeDecl, 0)
 
 KNOWN_STDLIB_TYPE_DECL(AnyKeyPath, NominalTypeDecl, 0)
@@ -71,14 +76,19 @@ KNOWN_STDLIB_TYPE_DECL(UnsafePointer, NominalTypeDecl, 1)
 KNOWN_STDLIB_TYPE_DECL(OpaquePointer, NominalTypeDecl, 0)
 KNOWN_STDLIB_TYPE_DECL(AutoreleasingUnsafeMutablePointer, NominalTypeDecl, 1)
 
+KNOWN_STDLIB_TYPE_DECL(UnsafeBufferPointer, NominalTypeDecl, 1)
+KNOWN_STDLIB_TYPE_DECL(UnsafeMutableBufferPointer, NominalTypeDecl, 1)
+KNOWN_STDLIB_TYPE_DECL(UnsafeRawBufferPointer, NominalTypeDecl, 0)
+KNOWN_STDLIB_TYPE_DECL(UnsafeMutableRawBufferPointer, NominalTypeDecl, 0)
+
 KNOWN_STDLIB_TYPE_DECL(Unmanaged, NominalTypeDecl, 1)
 
 KNOWN_STDLIB_TYPE_DECL(Never, NominalTypeDecl, 0)
 
-KNOWN_STDLIB_TYPE_DECL(Encoder, ProtocolDecl, 1)
-KNOWN_STDLIB_TYPE_DECL(Decoder, ProtocolDecl, 1)
+KNOWN_STDLIB_TYPE_DECL(Encoder, InterfaceDecl, 1)
+KNOWN_STDLIB_TYPE_DECL(Decoder, InterfaceDecl, 1)
 KNOWN_STDLIB_TYPE_DECL(KeyedEncodingContainer, NominalTypeDecl, 1)
 KNOWN_STDLIB_TYPE_DECL(KeyedDecodingContainer, NominalTypeDecl, 1)
-KNOWN_STDLIB_TYPE_DECL(RangeReplaceableCollection, ProtocolDecl, 1)
+KNOWN_STDLIB_TYPE_DECL(RangeReplaceableCollection, InterfaceDecl, 1)
 
 #undef KNOWN_STDLIB_TYPE_DECL

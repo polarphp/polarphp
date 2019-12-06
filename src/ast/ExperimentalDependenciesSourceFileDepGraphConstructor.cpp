@@ -750,8 +750,8 @@ bool emit_reference_dependencies (
    //   // doesn't matter if it fails.
    //   llvm::sys::fs::rename(outputPath, outputPath + "~");
    //   const bool includeIntrafileDeps =
-   //         sourceFile->getASTContext().LangOpts.ExperimentalDependenciesIncludeIntrafileOnes;
-   //   const bool m_hadCompilationError = sourceFile->getASTContext().hadError();
+   //         sourceFile->getAstContext().LangOpts.ExperimentalDependenciesIncludeIntrafileOnes;
+   //   const bool m_hadCompilationError = sourceFile->getAstContext().hadError();
    //   SourceFileDepGraphConstructor gc(sourceFile, depTracker, outputPath,
    //                                    includeIntrafileDeps, m_hadCompilationError);
    //   SourceFileDepGraph m_graph = gc.construct();

@@ -1,4 +1,4 @@
-//===--- KnownProtocols.h - Working with compiler protocols -----*- C++ -*-===//
+//===--- KnownInterfaces.h - Working with compiler protocols -----*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -33,7 +33,7 @@ namespace polar::ast {
 using polar::basic::count_bits_used;
 
 /// The set of known protocols.
-enum class KnownProtocolKind : std::uint8_t
+enum class KnownInterfaceKind : std::uint8_t
 {
 #define INTERFACE_WITH_NAME(Id, Name) Id,
 #include "polarphp/ast/KnownInterfacesDef.h"
@@ -46,18 +46,18 @@ enum : std::uint8_t
    // is parsed as a unary operator.)
 #define INTERFACE_WITH_NAME(Id, Name) +1
    /// The number of known protocols.
-   NumKnownProtocols =
+   NumKnownInterfaces =
 #include "polarphp/ast/KnownInterfacesDef.h"
 };
 
 enum : unsigned
 {
-   NumKnownProtocolKindBits =
-   count_bits_used(static_cast<unsigned>(NumKnownProtocols - 1))
+   NumKnownInterfaceKindBits =
+   count_bits_used(static_cast<unsigned>(NumKnownInterfaces - 1))
 };
 
 /// Retrieve the name of the given known protocol.
-llvm::StringRef get_interface_name(KnownProtocolKind kind);
+llvm::StringRef get_interface_name(KnownInterfaceKind kind);
 
 } // polar::ast
 

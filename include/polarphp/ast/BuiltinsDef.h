@@ -10,19 +10,6 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/04/26.
-//
-//===----------------------------------------------------------------------===//
-//
 // This file defines the database of builtin functions.
 //
 // BUILTIN(Id, Name, Attrs)
@@ -64,30 +51,98 @@ BUILTIN_CAST_OR_BITCAST_OPERATION(SExtOrBitCast,  "sextOrBitCast",  "n")
 #undef BUILTIN_CAST_OR_BITCAST_OPERATION
 
 /// Binary operations have type (T,T) -> T.
+///
+/// We define two different sorts of operations varying when T is static,
+/// specifically:
+///
+/// 1. Overloaded statically typed operations. E.x:
+///
+///       builtin "add_Vec4xInt32"(Vec4xInt32, Vec4xInt32) : Vec4xInt32.
+///
+/// 2. Polymorphic typed operations that are valid only in raw SIL. By the time
+///    diagnostic constant propagation runs, these must have as its operand a
+///    fully specialized type. If the builtin has a type that is not one of its
+///    overloaded types, diagnostic constant propagation will emit a diagnostic
+///    saying the builtin's type has not been fully resolved. Otherwise,
+///    diagnostic constant propagation will transform the builtin to the
+///    relevant static overloaded builtin form. E.x.:
+///
+///       builtin "add"(Self, Self) : Self // *error*
+///
+///         OR
+///
+///       builtin "generic_add"(Vec4xInt32, Vec4xInt32) : Vec4xInt32
+///         ->
+///       builtin "add_Vec4xInt32"(Vec4xInt32, Vec4xInt32) : Vec4xInt32
+///
+/// NOTE: If a polymorphic typed operation is not static by the time guaranteed
+/// constant propagation runs, we emit a diagnostic to inform the user (who is
+/// assumed to be an expert user) to tell them the value was unspecialized. The
+/// typical way this specialization occurs today is via transparent inlining
+/// since the transparent inliner devirtualizes and specializes as it goes. Of
+/// course this means mandatory inlining must /always/ occur before diagnostic
+/// constant propagation.
+///
+/// NOTE: Often times the builtin infrastructure wants to treat all
+/// binary operation builtins generic or not the same way. To ensure
+/// we support all use cases in the compiler, we do not declare the
+/// operations as part of this builtin since often times this macro is
+/// used to generic code. Instead, we stamp this out using the
+/// overloaded_static, polymorphic, and all suffixed operations.
 #ifndef BUILTIN_BINARY_OPERATION
-#define BUILTIN_BINARY_OPERATION(Id, Name, Attrs, Overload) \
-   BUILTIN(Id, Name, Attrs)
+#define BUILTIN_BINARY_OPERATION(Id, Name, Attrs) BUILTIN(Id, Name, Attrs)
 #endif
-BUILTIN_BINARY_OPERATION(Add,     "add",      "n", IntegerOrVector)
-BUILTIN_BINARY_OPERATION(FAdd,    "fadd",     "n", FloatOrVector)
-BUILTIN_BINARY_OPERATION(And,     "and",      "n", IntegerOrVector)
-BUILTIN_BINARY_OPERATION(AShr,    "ashr",     "n", IntegerOrVector)
-BUILTIN_BINARY_OPERATION(LShr,    "lshr",     "n", IntegerOrVector)
-BUILTIN_BINARY_OPERATION(Or,      "or",       "n", IntegerOrVector)
-BUILTIN_BINARY_OPERATION(FDiv,    "fdiv",     "n", FloatOrVector)
-BUILTIN_BINARY_OPERATION(Mul,     "mul",      "n", IntegerOrVector)
-BUILTIN_BINARY_OPERATION(FMul,    "fmul",     "n", FloatOrVector)
-BUILTIN_BINARY_OPERATION(SDiv,    "sdiv",     "n", IntegerOrVector)
-BUILTIN_BINARY_OPERATION(ExactSDiv, "sdiv_exact", "n", IntegerOrVector)
-BUILTIN_BINARY_OPERATION(Shl,     "shl",      "n", IntegerOrVector)
-BUILTIN_BINARY_OPERATION(SRem,    "srem",     "n", IntegerOrVector)
-BUILTIN_BINARY_OPERATION(Sub,     "sub",      "n", IntegerOrVector)
-BUILTIN_BINARY_OPERATION(FSub,    "fsub",     "n", FloatOrVector)
-BUILTIN_BINARY_OPERATION(UDiv,    "udiv",     "n", IntegerOrVector)
-BUILTIN_BINARY_OPERATION(ExactUDiv, "udiv_exact", "n", IntegerOrVector)
-BUILTIN_BINARY_OPERATION(URem,    "urem",     "n", Integer)
-BUILTIN_BINARY_OPERATION(FRem,    "frem",     "n", FloatOrVector)
-BUILTIN_BINARY_OPERATION(Xor,     "xor",      "n", IntegerOrVector)
+
+#ifdef BUILTIN_BINARY_OPERATION_GENERIC_HELPER_STR
+#error "Do not define BUILTIN_BINARY_OPERATION_GENERIC_HELPER_STR before including this .def file"
+#endif
+
+#define BUILTIN_BINARY_OPERATION_GENERIC_HELPER_STR(NAME) #NAME
+
+#ifndef BUILTIN_BINARY_OPERATION_OVERLOADED_STATIC
+#define BUILTIN_BINARY_OPERATION_OVERLOADED_STATIC(Id, Name, Attrs, Overload) \
+  BUILTIN_BINARY_OPERATION(Id, Name, Attrs)
+#endif
+
+#ifndef BUILTIN_BINARY_OPERATION_POLYMORPHIC
+#define BUILTIN_BINARY_OPERATION_POLYMORPHIC(Id, Name, Attrs) \
+  BUILTIN_BINARY_OPERATION(Id, Name, Attrs)
+#endif
+
+// TODO: This needs a better name. We stringify generic_ in *_{OVERLOADED_STATIC,POLYMORPHIC}
+#ifndef BUILTIN_BINARY_OPERATION_ALL
+#define BUILTIN_BINARY_OPERATION_ALL(Id, Name, Attrs, Overload) \
+  BUILTIN_BINARY_OPERATION_OVERLOADED_STATIC(Id, BUILTIN_BINARY_OPERATION_GENERIC_HELPER_STR(Name), Attrs, Overload) \
+  BUILTIN_BINARY_OPERATION_POLYMORPHIC(Generic##Id, BUILTIN_BINARY_OPERATION_GENERIC_HELPER_STR(generic_##Name), Attrs)
+#endif
+
+// NOTE: Here we need our name field to be bare. We stringify them as
+// appropriately in BUILTIN_BINARY_OPERATION_{OVERLOADED_STATIC,POLYMORPHIC}.
+BUILTIN_BINARY_OPERATION_ALL(Add,     add,      "n", IntegerOrVector)
+BUILTIN_BINARY_OPERATION_ALL(FAdd,    fadd,     "n", FloatOrVector)
+BUILTIN_BINARY_OPERATION_ALL(And,     and,      "n", IntegerOrVector)
+BUILTIN_BINARY_OPERATION_ALL(AShr,    ashr,     "n", IntegerOrVector)
+BUILTIN_BINARY_OPERATION_ALL(LShr,    lshr,     "n", IntegerOrVector)
+BUILTIN_BINARY_OPERATION_ALL(Or,      or,       "n", IntegerOrVector)
+BUILTIN_BINARY_OPERATION_ALL(FDiv,    fdiv,     "n", FloatOrVector)
+BUILTIN_BINARY_OPERATION_ALL(Mul,     mul,      "n", IntegerOrVector)
+BUILTIN_BINARY_OPERATION_ALL(FMul,    fmul,     "n", FloatOrVector)
+BUILTIN_BINARY_OPERATION_ALL(SDiv,    sdiv,     "n", IntegerOrVector)
+BUILTIN_BINARY_OPERATION_ALL(ExactSDiv, sdiv_exact, "n", IntegerOrVector)
+BUILTIN_BINARY_OPERATION_ALL(Shl,     shl,      "n", IntegerOrVector)
+BUILTIN_BINARY_OPERATION_ALL(SRem,    srem,     "n", IntegerOrVector)
+BUILTIN_BINARY_OPERATION_ALL(Sub,     sub,      "n", IntegerOrVector)
+BUILTIN_BINARY_OPERATION_ALL(FSub,    fsub,     "n", FloatOrVector)
+BUILTIN_BINARY_OPERATION_ALL(UDiv,    udiv,     "n", IntegerOrVector)
+BUILTIN_BINARY_OPERATION_ALL(ExactUDiv, udiv_exact, "n", IntegerOrVector)
+BUILTIN_BINARY_OPERATION_ALL(URem,    urem,     "n", Integer)
+BUILTIN_BINARY_OPERATION_ALL(FRem,    frem,     "n", FloatOrVector)
+BUILTIN_BINARY_OPERATION_ALL(Xor,     xor,      "n", IntegerOrVector)
+BUILTIN_BINARY_OPERATION_OVERLOADED_STATIC(Expect, "int_expect", "n", Integer)
+#undef BUILTIN_BINARY_OPERATION_ALL
+#undef BUILTIN_BINARY_OPERATION_POLYMORPHIC
+#undef BUILTIN_BINARY_OPERATION_OVERLOADED_STATIC
+#undef BUILTIN_BINARY_OPERATION_GENERIC_HELPER_STR
 #undef BUILTIN_BINARY_OPERATION
 
 /// These builtins are analogous the similarly named llvm intrinsics. The
@@ -96,7 +151,7 @@ BUILTIN_BINARY_OPERATION(Xor,     "xor",      "n", IntegerOrVector)
 /// that they do.
 #ifndef BUILTIN_BINARY_OPERATION_WITH_OVERFLOW
 #define BUILTIN_BINARY_OPERATION_WITH_OVERFLOW(Id, Name, UncheckedID, Attrs, Overload) \
-   BUILTIN(Id, Name, Attrs)
+          BUILTIN(Id, Name, Attrs)
 #endif
 BUILTIN_BINARY_OPERATION_WITH_OVERFLOW(SAddOver,
                                        "sadd_with_overflow", Add, "n", Integer)
@@ -115,7 +170,7 @@ BUILTIN_BINARY_OPERATION_WITH_OVERFLOW(UMulOver,
 /// Unary operations have type (T) -> T.
 #ifndef BUILTIN_UNARY_OPERATION
 #define BUILTIN_UNARY_OPERATION(Id, Name, Attrs, Overload) \
-   BUILTIN(Id, Name, Attrs)
+          BUILTIN(Id, Name, Attrs)
 #endif
 
 // "fneg" is a separate builtin because its LLVM representation is
@@ -136,7 +191,7 @@ BUILTIN_UNARY_OPERATION(AssumeTrue, "assume", "", Integer)
 // and vectors, respectively.
 #ifndef BUILTIN_BINARY_PREDICATE
 #define BUILTIN_BINARY_PREDICATE(Id, Name, Attrs, Overload) \
-   BUILTIN(Id, Name, Attrs)
+          BUILTIN(Id, Name, Attrs)
 #endif
 BUILTIN_BINARY_PREDICATE(ICMP_EQ,  "cmp_eq",   "n", IntegerOrRawPointerOrVector)
 BUILTIN_BINARY_PREDICATE(ICMP_NE,  "cmp_ne",   "n", IntegerOrRawPointerOrVector)
@@ -329,7 +384,8 @@ BUILTIN_SIL_OPERATION(EndUnpairedAccess, "endUnpairedAccess", Special)
 
 /// condfail(Int1) -> ()
 /// Triggers a runtime failure if the condition is true.
-BUILTIN_SIL_OPERATION(CondFail, "condfail", Special)
+/// This builtin is deprecated. Use condfail_message instead.
+BUILTIN_SIL_OPERATION(LegacyCondFail, "condfail", Special)
 
 /// fixLifetime(T) -> ()
 /// Fixes the lifetime of any heap references in a value.
@@ -394,7 +450,7 @@ BUILTIN_SIL_OPERATION(ProjectTailElems, "projectTailElems", Special)
 // These functions accept a single argument of any type.
 #ifndef BUILTIN_RUNTIME_CALL
 #define BUILTIN_RUNTIME_CALL(Id, Name, Attrs) \
-   BUILTIN(Id, Name, Attrs)
+  BUILTIN(Id, Name, Attrs)
 #endif
 
 /// unexpectedError: Error -> ()
@@ -414,8 +470,12 @@ BUILTIN_RUNTIME_CALL(IsOptionalType, "isOptional", "")
 // These have various types.
 #ifndef BUILTIN_MISC_OPERATION
 #define BUILTIN_MISC_OPERATION(Id, Name, Attrs, Overload) \
-   BUILTIN(Id, Name, Attrs)
+          BUILTIN(Id, Name, Attrs)
 #endif
+
+/// condfail_message(Int1, RawPointer) -> ()
+/// Triggers a runtime failure if the condition is true.
+BUILTIN_MISC_OPERATION(CondFailMessage, "condfail_message", "", Special)
 
 /// Sizeof has type T.Type -> Int
 BUILTIN_MISC_OPERATION(Sizeof, "sizeof", "n", Special)
@@ -425,6 +485,14 @@ BUILTIN_MISC_OPERATION(Strideof, "strideof", "n", Special)
 
 /// IsPOD has type T.Type -> Bool
 BUILTIN_MISC_OPERATION(IsPOD, "ispod", "n", Special)
+
+/// IsConcrete has type (T.Type) -> Bool
+///
+/// If the meta type T is concrete, we can always transform this to `true` at
+/// any time in SIL. If it's generic, then we lower it to `false` right before
+/// IRGen in IRGenPrepare. This allows for the optimizer to specialize this at
+/// -O and eliminate conditional code.
+BUILTIN_MISC_OPERATION(IsConcrete, "isConcrete", "n", Special)
 
 /// IsBitwiseTakable has type T.Type -> Bool
 BUILTIN_MISC_OPERATION(IsBitwiseTakable, "isbitwisetakable", "n", Special)
@@ -552,6 +620,9 @@ BUILTIN_MISC_OPERATION(UnsafeGuaranteed, "unsafeGuaranteed", "", Special)
 // unsafeGuaranteedEnd has type (Builtin.Int8) -> ()
 BUILTIN_MISC_OPERATION(UnsafeGuaranteedEnd, "unsafeGuaranteedEnd", "", Special)
 
+// getObjCTypeEncoding has type <T> T.Type -> RawPointer
+BUILTIN_MISC_OPERATION(GetObjCTypeEncoding, "getObjCTypeEncoding", "n", Special)
+
 // Swift3ImplicitObjCEntrypoint has type () -> ()
 BUILTIN_MISC_OPERATION(Swift3ImplicitObjCEntrypoint, "swift3ImplicitObjCEntrypoint", "", Special)
 
@@ -560,6 +631,20 @@ BUILTIN_MISC_OPERATION(WillThrow, "willThrow", "", Special)
 
 /// poundAssert has type (Builtin.Int1, Builtin.RawPointer) -> ().
 BUILTIN_MISC_OPERATION(PoundAssert, "poundAssert", "", Special)
+
+// BUILTIN_MISC_OPERATION_WITH_SILGEN - Miscellaneous operations that are
+// specially emitted during SIL generation.
+#ifndef BUILTIN_MISC_OPERATION_WITH_SILGEN
+#define BUILTIN_MISC_OPERATION_WITH_SILGEN(Id, Name, Attrs, Overload) \
+  BUILTIN_MISC_OPERATION(Id, Name, Attrs, Overload)
+#endif
+
+/// globalStringTablePointer has type String -> Builtin.RawPointer.
+/// It returns an immortal, global string table pointer for strings constructed
+/// from string literals.
+BUILTIN_MISC_OPERATION_WITH_SILGEN(GlobalStringTablePointer, "globalStringTablePointer", "", Special)
+
+#undef BUILTIN_MISC_OPERATION_WITH_SILGEN
 
 #undef BUILTIN_MISC_OPERATION
 
@@ -589,7 +674,7 @@ BUILTIN_TYPE_CHECKER_OPERATION(TriggerFallbackDiagnostic, trigger_fallback_diagn
 // BUILTIN_TYPE_TRAIT_OPERATION - Compile-time type trait operations.
 #ifndef BUILTIN_TYPE_TRAIT_OPERATION
 #define BUILTIN_TYPE_TRAIT_OPERATION(Id, Name) \
-   BUILTIN(Id, #Name, "n")
+  BUILTIN(Id, #Name, "n")
 #endif
 
 /// canBeClass(T.Type) -> Builtin.Int8

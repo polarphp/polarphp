@@ -373,7 +373,7 @@ ERROR(expected_rbrace_class,NoneType,
 ERROR(expected_colon_class, PointsToFirstBadToken,
       "expected ':' to begin inheritance clause",())
 
-// Protocol
+// Interface
 ERROR(generic_arguments_protocol,PointsToFirstBadToken,
       "protocols do not allow generic parameters; use associated types instead",
       ())
@@ -782,7 +782,7 @@ ERROR(protocol_init_argument_init,NoneType,
 ERROR(tuple_type_multiple_labels,NoneType,
       "tuple element cannot have two labels", ())
 
-// Protocol Types
+// Interface Types
 ERROR(expected_rangle_protocol,PointsToFirstBadToken,
       "expected '>' to complete protocol-constrained type", ())
 

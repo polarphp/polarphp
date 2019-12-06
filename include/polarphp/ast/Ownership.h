@@ -8,19 +8,6 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
-//
-//===----------------------------------------------------------------------===//
-//
-// This source file is part of the polarphp.org open source project
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/26.
-//
 //===----------------------------------------------------------------------===//
 //
 // This file defines common structures for working with the different kinds of
@@ -56,13 +43,10 @@ enum class ReferenceOwnership : uint8_t {
 #include "polarphp/ast/ReferenceStorageDef.h"
 };
 
-enum : unsigned {
-   NumReferenceOwnershipBits =
-   count_bits_used(static_cast<unsigned>(ReferenceOwnership::Last_Kind))
-};
+enum : unsigned { NumReferenceOwnershipBits =
+                  count_bits_used(static_cast<unsigned>(ReferenceOwnership::Last_Kind)) };
 
-static inline llvm::StringRef keyword_of(ReferenceOwnership ownership)
-{
+static inline llvm::StringRef keywordOf(ReferenceOwnership ownership) {
    switch (ownership) {
    case ReferenceOwnership::Strong:
       break;
@@ -75,8 +59,7 @@ static inline llvm::StringRef keyword_of(ReferenceOwnership ownership)
    LLVM_BUILTIN_UNREACHABLE;
 }
 
-static inline llvm::StringRef mangling_of(ReferenceOwnership ownership)
-{
+static inline llvm::StringRef manglingOf(ReferenceOwnership ownership) {
    switch (ownership) {
    case ReferenceOwnership::Strong:
       break;
@@ -89,9 +72,8 @@ static inline llvm::StringRef mangling_of(ReferenceOwnership ownership)
    LLVM_BUILTIN_UNREACHABLE;
 }
 
-static inline bool is_less_strong_than(ReferenceOwnership left,
-                                       ReferenceOwnership right)
-{
+static inline bool isLessStrongThan(ReferenceOwnership left,
+                                    ReferenceOwnership right) {
    auto strengthOf = [] (ReferenceOwnership ownership) -> int {
       // A reference can be optimized away if outlived by a stronger reference.
       // NOTES:
@@ -114,20 +96,18 @@ static inline bool is_less_strong_than(ReferenceOwnership left,
    return strengthOf(left) < strengthOf(right);
 }
 
-enum class ReferenceOwnershipOptionality : uint8_t
-{
+enum class ReferenceOwnershipOptionality : uint8_t {
    Disallowed,
    Allowed,
    Required,
+
    Last_Kind = Required
 };
-enum : unsigned {
-   NumOptionalityBits = count_bits_used(static_cast<unsigned>(
-   ReferenceOwnershipOptionality::Last_Kind))
-};
+enum : unsigned { NumOptionalityBits = count_bits_used(static_cast<unsigned>(
+                  ReferenceOwnershipOptionality::Last_Kind)) };
 
-static inline ReferenceOwnershipOptionality optionality_of(ReferenceOwnership ownership)
-{
+static inline ReferenceOwnershipOptionality
+optionalityOf(ReferenceOwnership ownership) {
    switch (ownership) {
    case ReferenceOwnership::Strong:
    case ReferenceOwnership::Unowned:
@@ -143,8 +123,7 @@ static inline ReferenceOwnershipOptionality optionality_of(ReferenceOwnership ow
 llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, ReferenceOwnership RO);
 
 /// Different kinds of value ownership supported by Swift.
-enum class ValueOwnership : uint8_t
-{
+enum class ValueOwnership : uint8_t {
    /// the context-dependent default ownership (sometimes shared,
    /// sometimes owned)
    Default,
@@ -157,12 +136,9 @@ enum class ValueOwnership : uint8_t
 
    Last_Kind = Owned
 };
+enum : unsigned { NumValueOwnershipBits =
+                  count_bits_used(static_cast<unsigned>(ValueOwnership::Last_Kind)) };
 
-enum : unsigned {
-   NumValueOwnershipBits =
-   count_bits_used(static_cast<unsigned>(ValueOwnership::Last_Kind))
-};
-
-} // polar::ast
+} // end namespace polar::ast
 
 #endif // POLARPHP_AST_OWNERSHIP_H

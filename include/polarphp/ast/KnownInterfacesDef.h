@@ -1,4 +1,4 @@
-//===--- KnownProtocols.def - Compiler protocol metaprogramming -*- C++ -*-===//
+//===--- KnownInterfaces.def - Compiler protocol metaprogramming -*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -7,27 +7,19 @@
 //
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
-//===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/27.
 //===----------------------------------------------------------------------===//
 //
 // This file defines macros used for macro-metaprogramming with compiler-known
-// protocols.
+// protocols. Note that this mechanism does not look through an overlay into its
+// underlying module, so it typically cannot find Objective-C protocols.
 //
 //===----------------------------------------------------------------------===//
 
 
 /// \def INTERFACE_WITH_NAME(Id, Name)
 ///
-/// The enumerator value is \c KnownProtocolKind::Id. The protocol represented
+/// The enumerator value is \c KnownInterfaceKind::Id. The protocol represented
 /// is simply named \p Name.
 #ifndef INTERFACE_WITH_NAME
 #define INTERFACE_WITH_NAME(Id, Name)
@@ -67,13 +59,13 @@
     BUILTIN_EXPRESSIBLE_BY_LITERAL_INTERFACE_WITH_NAME(name, "_" #name)
 
 INTERFACE(Sequence)
-INTERFACE(IteratorProtocol)
+INTERFACE(IteratorInterface)
 INTERFACE(RawRepresentable)
 INTERFACE(Equatable)
 INTERFACE(Hashable)
 INTERFACE(Comparable)
 INTERFACE(Error)
-INTERFACE_(ErrorCodeProtocol)
+INTERFACE_(ErrorCodeInterface)
 INTERFACE(OptionSet)
 INTERFACE(CaseIterable)
 INTERFACE(SIMDScalar)
@@ -89,7 +81,9 @@ INTERFACE(Decodable)
 INTERFACE_(ObjectiveCBridgeable)
 INTERFACE_(DestructorSafeContainer)
 
-INTERFACE(StringInterpolationProtocol)
+INTERFACE(StringInterpolationInterface)
+
+INTERFACE(Differentiable)
 
 EXPRESSIBLE_BY_LITERAL_INTERFACE(ExpressibleByArrayLiteral, "Array", false)
 EXPRESSIBLE_BY_LITERAL_INTERFACE(ExpressibleByBooleanLiteral, "BooleanLiteralType", true)

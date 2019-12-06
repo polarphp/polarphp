@@ -9,16 +9,6 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/26.
-//===----------------------------------------------------------------------===//
 //
 // This file defines classes that describe the physical layout of nominal
 // types in PIL, including structs, classes, and boxes. This is distinct from
@@ -32,146 +22,129 @@
 //   type can be modeled in PIL as not having a layout at all, preventing the
 //   inappropriate use of fragile projection and injection operations on the
 //   type.
+//
+//===----------------------------------------------------------------------===//
 
 #ifndef POLARPHP_AST_PIL_LAYOUT_H
 #define POLARPHP_AST_PIL_LAYOUT_H
 
 #include "llvm/ADT/PointerIntPair.h"
-#include "llvm/Support/TrailingObjects.h"
-#include "llvm/ADT/FoldingSet.h"
-#include "llvm/ADT/ArrayRef.h"
+#include "polarphp/ast/GenericSignature.h"
+#include "polarphp/ast/Identifier.h"
+#include "polarphp/ast/Type.h"
 
 namespace polar::ast {
 
-using llvm::ArrayRef;
-
-class GenericSignature;
 class PILType;
-class CanType;
-class CanGenericSignature;
-class AstContext;
 
 /// A field of a PIL aggregate layout.
-class PILField final
-{
-   enum : unsigned {
-      IsMutable = 0x1,
-   };
+class PILField final {
+  enum : unsigned {
+    IsMutable = 0x1,
+  };
 
-   static constexpr const unsigned sm_numFlags = 1;
+  static constexpr const unsigned NumFlags = 1;
 
-   llvm::PointerIntPair<CanType, sm_numFlags, unsigned> m_loweredTypeAndFlags;
+  llvm::PointerIntPair<CanType, NumFlags, unsigned> LoweredTypeAndFlags;
 
-   static unsigned getFlagsValue(bool mutableFlag)
-   {
-      unsigned flags = 0;
-      if (mutableFlag) flags |= IsMutable;
+  static unsigned getFlagsValue(bool Mutable) {
+    unsigned flags = 0;
+    if (Mutable) flags |= IsMutable;
 
-      assert(flags >> sm_numFlags == 0
-             && "more flags than flag bits?!");
-      return flags;
-   }
+    assert(flags >> NumFlags == 0
+           && "more flags than flag bits?!");
+    return flags;
+  }
 
 public:
-   PILField(CanType loweredType, bool mutableFlag)
-      : m_loweredTypeAndFlags(loweredType, getFlagsValue(mutableFlag))
-   {}
+  PILField(CanType LoweredType, bool Mutable)
+    : LoweredTypeAndFlags(LoweredType, getFlagsValue(Mutable))
+  {}
 
-   /// Get the lowered type of the field in the aggregate.
-   ///
-   /// This must be a lowered PIL type. If the containing aggregate is generic,
-   /// then this type specifies the abstraction pattern at which values stored
-   /// in this aggregate should be lowered.
-   CanType getLoweredType() const
-   {
-      return m_loweredTypeAndFlags.getPointer();
-   }
+  /// Get the lowered type of the field in the aggregate.
+  ///
+  /// This must be a lowered PIL type. If the containing aggregate is generic,
+  /// then this type specifies the abstraction pattern at which values stored
+  /// in this aggregate should be lowered.
+  CanType getLoweredType() const { return LoweredTypeAndFlags.getPointer(); }
 
-   PILType getAddressType() const; // In PILType.h
-   PILType getObjectType() const; // In PILType.h
+  PILType getAddressType() const; // In PILType.h
+  PILType getObjectType() const; // In PILType.h
 
-   /// True if this field is mutable inside its aggregate.
-   ///
-   /// This is only effectively a constraint on shared mutable reference types,
-   /// such as classes and boxes. A value type or uniquely-owned immutable
-   /// reference can always be mutated, since doing so is equivalent to
-   /// destroying the old value and emplacing a new value with the modified
-   /// field in the same place.
-   bool isMutable() const
-   {
-      return m_loweredTypeAndFlags.getInt() & IsMutable;
-   }
+  /// True if this field is mutable inside its aggregate.
+  ///
+  /// This is only effectively a constraint on shared mutable reference types,
+  /// such as classes and boxes. A value type or uniquely-owned immutable
+  /// reference can always be mutated, since doing so is equivalent to
+  /// destroying the old value and emplacing a new value with the modified
+  /// field in the same place.
+  bool isMutable() const { return LoweredTypeAndFlags.getInt() & IsMutable; }
 };
 
 /// A layout.
 class PILLayout final : public llvm::FoldingSetNode,
-      private llvm::TrailingObjects<PILLayout, PILField>
+                        private llvm::TrailingObjects<PILLayout, PILField>
 {
-   friend TrailingObjects;
+  friend TrailingObjects;
 
-   enum : unsigned {
-      IsMutable = 0x1,
-   };
+  enum : unsigned {
+    IsMutable = 0x1,
+  };
 
-   static constexpr const unsigned sm_numFlags = 1;
+  static constexpr const unsigned NumFlags = 1;
 
-   static unsigned getFlagsValue(bool mutableFlag)
-   {
-      unsigned flags = 0;
-      if (mutableFlag)
-         flags |= IsMutable;
+  static unsigned getFlagsValue(bool Mutable) {
+    unsigned flags = 0;
+    if (Mutable)
+      flags |= IsMutable;
 
-      assert(flags >> sm_numFlags == 0
-             && "more flags than flag bits?!");
-      return flags;
-   }
+    assert(flags >> NumFlags == 0
+           && "more flags than flag bits?!");
+    return flags;
+  }
 
-   llvm::PointerIntPair<CanGenericSignature, sm_numFlags, unsigned>
-   m_genericSigAndFlags;
+  llvm::PointerIntPair<CanGenericSignature, NumFlags, unsigned>
+    GenericSigAndFlags;
 
-   unsigned m_numFields;
+  unsigned NumFields;
 
-   PILLayout(CanGenericSignature Signature,
-             ArrayRef<PILField> fields);
+  PILLayout(CanGenericSignature Signature,
+            ArrayRef<PILField> Fields);
 
-   PILLayout(const PILLayout &) = delete;
-   PILLayout &operator=(const PILLayout &) = delete;
+  PILLayout(const PILLayout &) = delete;
+  PILLayout &operator=(const PILLayout &) = delete;
 public:
-   /// Get or create a layout.
-   static PILLayout *get(AstContext &context,
-                         CanGenericSignature generics,
-                         ArrayRef<PILField> fields);
+  /// Get or create a layout.
+  static PILLayout *get(AstContext &C,
+                        CanGenericSignature Generics,
+                        ArrayRef<PILField> Fields);
 
-   /// Get the generic signature in which this layout exists.
-   CanGenericSignature getGenericSignature() const
-   {
-      return m_genericSigAndFlags.getPointer();
-   }
+  /// Get the generic signature in which this layout exists.
+  CanGenericSignature getGenericSignature() const {
+    return GenericSigAndFlags.getPointer();
+  }
 
-   /// True if the layout contains any mutable fields.
-   bool isMutable() const
-   {
-      return m_genericSigAndFlags.getInt() & IsMutable;
-   }
+  /// True if the layout contains any mutable fields.
+  bool isMutable() const {
+    return GenericSigAndFlags.getInt() & IsMutable;
+  }
 
-   /// Get the fields inside the layout.
-   ArrayRef<PILField> getFields() const
-   {
-      return llvm::makeArrayRef(getTrailingObjects<PILField>(), m_numFields);
-   }
+  /// Get the fields inside the layout.
+  ArrayRef<PILField> getFields() const {
+    return llvm::makeArrayRef(getTrailingObjects<PILField>(), NumFields);
+  }
 
-   /// Produce a profile of this layout, for use in a folding set.
-   static void profile(llvm::FoldingSetNodeID &id,
-                       CanGenericSignature generics,
-                       ArrayRef<PILField> fields);
+  /// Produce a profile of this layout, for use in a folding set.
+  static void Profile(llvm::FoldingSetNodeID &id,
+                      CanGenericSignature Generics,
+                      ArrayRef<PILField> Fields);
 
-   /// Produce a profile of this locator, for use in a folding set.
-   void profile(llvm::FoldingSetNodeID &id)
-   {
-      profile(id, getGenericSignature(), getFields());
-   }
+  /// Produce a profile of this locator, for use in a folding set.
+  void Profile(llvm::FoldingSetNodeID &id) {
+    Profile(id, getGenericSignature(), getFields());
+  }
 };
 
-} // polar::ast
+} // end namespace polar::ast
 
 #endif // POLARPHP_AST_PIL_LAYOUT_H

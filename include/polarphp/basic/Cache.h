@@ -186,7 +186,7 @@ protected:
 /// can be used directly as a value.
 ///
 /// It is important to provide a proper 'cost' function for the value (via
-/// \c CacheValueCostInfo trait); e.g. the cost for an ASTContext would be the
+/// \c CacheValueCostInfo trait); e.g. the cost for an AstContext would be the
 /// memory usage of the data structures it owns.
 template <typename KeyT, typename ValueT,
           typename KeyInfoT = CacheKeyInfo<KeyT>,

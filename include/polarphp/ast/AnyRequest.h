@@ -29,6 +29,7 @@
 
 #include "polarphp/basic/TypeId.h"
 #include "llvm/ADT/DenseMapInfo.h"
+#include "polarphp/basic/SourceLoc.h"
 #include "llvm/ADT/Hashing.h"
 #include "llvm/ADT/IntrusiveRefCntPtr.h"
 #include <string>
@@ -42,6 +43,12 @@ namespace polar::ast {
 using llvm::hash_code;
 using llvm::hash_value;
 using polar::basic::TypeId;
+using polar::basic::SourceLoc;
+
+class DiagnosticEngine;
+
+using llvm::hash_code;
+using llvm::hash_value;
 
 class DiagnosticEngine;
 
@@ -60,30 +67,26 @@ class DiagnosticEngine;
 ///       void diagnoseCycle(DiagnosticEngine &diags) const;
 ///       void noteCycleStep(DiagnosticEngine &diags) const;
 ///
-class AnyRequest
-{
+class AnyRequest {
    friend llvm::DenseMapInfo<polar::ast::AnyRequest>;
 
-   static hash_code hashForHolder(uint64_t typeId, hash_code requestHash)
-   {
-      return hash_combine(hash_value(typeId), requestHash);
+   static hash_code hashForHolder(uint64_t typeID, hash_code requestHash) {
+      return hash_combine(typeID, requestHash);
    }
 
    /// Abstract base class used to hold the specific request kind.
-   class HolderBase : public llvm::RefCountedBase<HolderBase>
-   {
+   class HolderBase : public llvm::RefCountedBase<HolderBase> {
    public:
       /// The type ID of the request being stored.
-      const uint64_t typeId;
+      const uint64_t typeID;
 
       /// Hash value for the request itself.
       const hash_code hash;
 
    protected:
       /// Initialize base with type ID and hash code.
-      HolderBase(uint64_t typeId, hash_code hash)
-         : typeId(typeId), hash(AnyRequest::hashForHolder(typeId, hash))
-      {}
+      HolderBase(uint64_t typeID, hash_code hash)
+         : typeID(typeID), hash(AnyRequest::hashForHolder(typeID, hash)) { }
 
    public:
       virtual ~HolderBase();
@@ -100,59 +103,58 @@ class AnyRequest
 
       /// Note that this request is part of a cycle.
       virtual void noteCycleStep(DiagnosticEngine &diags) const = 0;
+
+      /// Retrieve the nearest source location to which this request applies.
+      virtual SourceLoc getNearestLoc() const = 0;
    };
 
    /// Holds a value that can be used as a request input/output.
    template<typename Request>
-   class Holder final : public HolderBase
-   {
+   class Holder final : public HolderBase {
    public:
       const Request request;
 
       Holder(const Request &request)
          : HolderBase(TypeId<Request>::value, hash_value(request)),
-           request(request)
-      {}
+           request(request) { }
 
       Holder(Request &&request)
          : HolderBase(TypeId<Request>::value, hash_value(request)),
-           request(std::move(request))
-      {}
+           request(std::move(request)) { }
 
-      virtual ~Holder()
-      {}
+      virtual ~Holder() { }
 
       /// Determine whether this request is equivalent to another.
       ///
-      /// The caller guarantees that the typeIds are the same.
-      virtual bool equals(const HolderBase &other) const override
-      {
-         assert(typeId == other.typeId && "Caller should match typeIds");
+      /// The caller guarantees that the typeIDs are the same.
+      virtual bool equals(const HolderBase &other) const override {
+         assert(typeID == other.typeID && "Caller should match typeIDs");
          return request == static_cast<const Holder<Request> &>(other).request;
       }
 
       /// Display.
-      virtual void display(llvm::raw_ostream &out) const override
-      {
+      virtual void display(llvm::raw_ostream &out) const override {
          simple_display(out, request);
       }
 
       /// Diagnose a cycle detected for this request.
-      virtual void diagnoseCycle(DiagnosticEngine &diags) const override
-      {
+      virtual void diagnoseCycle(DiagnosticEngine &diags) const override {
          request.diagnoseCycle(diags);
       }
 
       /// Note that this request is part of a cycle.
-      virtual void noteCycleStep(DiagnosticEngine &diags) const override
-      {
+      virtual void noteCycleStep(DiagnosticEngine &diags) const override {
          request.noteCycleStep(diags);
+      }
+
+      /// Retrieve the nearest source location to which this request applies.
+      virtual SourceLoc getNearestLoc() const override {
+         return request.getNearestLoc();
       }
    };
 
    /// FIXME: Inefficient. Use the low bits.
-   enum class StorageKind
-   {
+   enum class StorageKind {
       Normal,
       Empty,
       Tombstone,
@@ -161,8 +163,7 @@ class AnyRequest
    /// The data stored in this value.
    llvm::IntrusiveRefCntPtr<HolderBase> stored;
 
-   AnyRequest(StorageKind storageKind) : storageKind(storageKind)
-   {
+   AnyRequest(StorageKind storageKind) : storageKind(storageKind) {
       assert(storageKind != StorageKind::Normal);
    }
 
@@ -171,13 +172,11 @@ public:
    AnyRequest &operator=(const AnyRequest &other) = default;
 
    AnyRequest(AnyRequest &&other)
-      : storageKind(other.storageKind), stored(std::move(other.stored))
-   {
+      : storageKind(other.storageKind), stored(std::move(other.stored)) {
       other.storageKind = StorageKind::Empty;
    }
 
-   AnyRequest &operator=(AnyRequest &&other)
-   {
+   AnyRequest &operator=(AnyRequest &&other) {
       storageKind = other.storageKind;
       stored = std::move(other.stored);
       other.storageKind = StorageKind::Empty;
@@ -197,136 +196,125 @@ public:
                 typename std::remove_reference<T>::type>::type,
              typename = typename std::enable_if<
                 !std::is_same<ValueType, AnyRequest>::value>::type>
-   explicit AnyRequest(T &&value) : storageKind(StorageKind::Normal)
-   {
+   explicit AnyRequest(T &&value) : storageKind(StorageKind::Normal) {
       stored = llvm::IntrusiveRefCntPtr<HolderBase>(
                new Holder<ValueType>(std::forward<T>(value)));
    }
 
    /// Cast to a specific (known) type.
    template<typename Request>
-   const Request &castTo() const
-   {
-      assert(stored->typeId == TypeId<Request>::value && "wrong type in cast");
+   const Request &castTo() const {
+      assert(stored->typeID == TypeId<Request>::value && "wrong type in cast");
       return static_cast<const Holder<Request> *>(stored.get())->request;
    }
 
    /// Try casting to a specific (known) type, returning \c nullptr on
    /// failure.
    template<typename Request>
-   const Request *getAs() const
-   {
-      if (stored->typeId != TypeId<Request>::value) {
+   const Request *getAs() const {
+      if (stored->typeID != TypeId<Request>::value)
          return nullptr;
-      }
+
       return &static_cast<const Holder<Request> *>(stored.get())->request;
    }
 
    /// Diagnose a cycle detected for this request.
-   void diagnoseCycle(DiagnosticEngine &diags) const
-   {
+   void diagnoseCycle(DiagnosticEngine &diags) const {
       stored->diagnoseCycle(diags);
    }
 
    /// Note that this request is part of a cycle.
-   void noteCycleStep(DiagnosticEngine &diags) const
-   {
+   void noteCycleStep(DiagnosticEngine &diags) const {
       stored->noteCycleStep(diags);
    }
 
+   /// Retrieve the nearest source location to which this request applies.
+   SourceLoc getNearestLoc() const {
+      return stored->getNearestLoc();
+   }
+
    /// Compare two instances for equality.
-   friend bool operator==(const AnyRequest &lhs, const AnyRequest &rhs)
-   {
+   friend bool operator==(const AnyRequest &lhs, const AnyRequest &rhs) {
       if (lhs.storageKind != rhs.storageKind) {
          return false;
       }
 
-      if (lhs.storageKind != StorageKind::Normal) {
+      if (lhs.storageKind != StorageKind::Normal)
          return true;
-      }
 
-      if (lhs.stored->typeId != rhs.stored->typeId) {
+      if (lhs.stored->typeID != rhs.stored->typeID)
          return false;
-      }
+
       return lhs.stored->equals(*rhs.stored);
    }
 
-   friend bool operator!=(const AnyRequest &lhs, const AnyRequest &rhs)
-   {
+   friend bool operator!=(const AnyRequest &lhs, const AnyRequest &rhs) {
       return !(lhs == rhs);
    }
 
-   friend hash_code hash_value(const AnyRequest &any)
-   {
-      if (any.storageKind != StorageKind::Normal) {
+   friend hash_code hash_value(const AnyRequest &any) {
+      if (any.storageKind != StorageKind::Normal)
          return 1;
-      }
+
       return any.stored->hash;
    }
 
-   friend void simple_display(llvm::raw_ostream &out, const AnyRequest &any)
-   {
+   friend void simple_display(llvm::raw_ostream &out, const AnyRequest &any) {
       any.stored->display(out);
    }
 
    /// Return the result of calling simple_display as a string.
    std::string getAsString() const;
 
-   static AnyRequest getEmptyKey()
-   {
+   static AnyRequest getEmptyKey() {
       return AnyRequest(StorageKind::Empty);
    }
 
-   static AnyRequest getTombstoneKey()
-   {
+   static AnyRequest getTombstoneKey() {
       return AnyRequest(StorageKind::Tombstone);
    }
 };
 
-} // end namespace swift
+} // polar::ast
 
 namespace llvm {
-template<>
-struct DenseMapInfo<polar::ast::AnyRequest>
-{
-   static inline polar::ast::AnyRequest getEmptyKey()
-   {
-      return polar::ast::AnyRequest::getEmptyKey();
-   }
-   static inline polar::ast::AnyRequest getTombstoneKey()
-   {
-      return polar::ast::AnyRequest::getTombstoneKey();
-   }
 
-   static unsigned getHashValue(const polar::ast::AnyRequest &request)
-   {
+template<>
+struct DenseMapInfo<polar::ast::AnyRequest> {
+   using AnyRequest = polar::ast::AnyRequest;
+   static inline AnyRequest getEmptyKey() {
+      return AnyRequest::getEmptyKey();
+   }
+   static inline AnyRequest getTombstoneKey() {
+      return AnyRequest::getTombstoneKey();
+   }
+   static unsigned getHashValue(const AnyRequest &request) {
       return hash_value(request);
    }
    template <typename Request>
-   static unsigned getHashValue(const Request &request)
-   {
-      return polar::ast::AnyRequest::hashForHolder(polar::ast::TypeId<Request>::value,
-                                                   hash_value(request));
+   static unsigned getHashValue(const Request &request) {
+      return AnyRequest::hashForHolder(polar::ast::TypeId<Request>::value,
+                                       hash_value(request));
    }
-   static bool isEqual(const polar::ast::AnyRequest &lhs,
-                       const polar::ast::AnyRequest &rhs) {
+   static bool isEqual(const AnyRequest &lhs,
+                       const AnyRequest &rhs)
+   {
       return lhs == rhs;
    }
+
    template <typename Request>
    static bool isEqual(const Request &lhs,
-                       const polar::ast::AnyRequest &rhs)
+                       const AnyRequest &rhs)
    {
-      if (rhs == getEmptyKey() || rhs == getTombstoneKey()) {
+      if (rhs == getEmptyKey() || rhs == getTombstoneKey())
          return false;
-      }
       const Request *rhsRequest = rhs.getAs<Request>();
-      if (!rhsRequest) {
+      if (!rhsRequest)
          return false;
-      }
       return lhs == *rhsRequest;
    }
 };
 
-} // polar::ast
+} // llvm
 
 #endif // POLARPHP_AST_ANY_REQUEST_H

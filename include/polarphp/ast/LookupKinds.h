@@ -43,7 +43,7 @@ enum class NLKind
 enum NLOptions : unsigned
 {
    /// Consider declarations within protocols to which the context type conforms.
-   NL_ProtocolMembers = 0x02,
+   NL_InterfaceMembers = 0x02,
 
    /// Remove non-visible declarations from the set of results.
    NL_RemoveNonVisible = 0x04,
@@ -93,7 +93,7 @@ enum NLOptions : unsigned
 
    /// The default set of options used for qualified name lookup.
    ///
-   /// FIXME: Eventually, add NL_ProtocolMembers to this, once all of the
+   /// FIXME: Eventually, add NL_InterfaceMembers to this, once all of the
    /// callers can handle it.
    NL_QualifiedDefault = NL_RemoveNonVisible | NL_RemoveOverridden,
 

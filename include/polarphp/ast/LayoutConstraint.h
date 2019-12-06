@@ -1,4 +1,4 @@
-//===-- LayoutConstraint.h - layout constraints types and APIs --*- context++ -*-===//
+//===-- LayoutConstraint.h - Layout constraints types and APIs --*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -9,523 +9,415 @@
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/27.
-//===----------------------------------------------------------------------===//
 //
 // This file defines types and APIs for layout constraints.
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef POLARPHP_AST_LAYOUT_CONSTRAINT_H
-#define POLARPHP_AST_LAYOUT_CONSTRAINT_H
+#ifndef POLARPHP_LAYOUT_CONSTRAINT_H
+#define POLARPHP_LAYOUT_CONSTRAINT_H
 
 #include "polarphp/ast/TypeAlignments.h"
 #include "polarphp/ast/PrintOptions.h"
+#include "polarphp/basic/Debug.h"
 #include "polarphp/basic/SourceLoc.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/FoldingSet.h"
+#include "llvm/ADT/Hashing.h"
 #include "llvm/ADT/StringRef.h"
 
 namespace polar::ast {
 
 enum class AllocationArena;
 class AstContext;
-class ASTPrinter;
+class AstPrinter;
 using polar::basic::SourceLoc;
 using polar::basic::SourceRange;
 
 /// Describes a layout constraint information.
-enum class LayoutConstraintKind : uint8_t
-{
-   // It is not a known layout constraint.
-   UnknownLayout,
-   // It is a layout constraint representing a trivial type of an unknown size.
-   TrivialOfExactSize,
-   // It is a layout constraint representing a trivial type of an unknown size.
-   TrivialOfAtMostSize,
-   // It is a layout constraint representing a trivial type of an unknown size.
-   Trivial,
-   // It is a layout constraint representing a reference counted class instance.
-   Class,
-   // It is a layout constraint representing a reference counted native class
-   // instance.
-   NativeClass,
-   // It is a layout constraint representing a reference counted object.
-   RefCountedObject,
-   // It is a layout constraint representing a native reference counted object.
-   NativeRefCountedObject,
-   LastLayout = NativeRefCountedObject,
+enum class LayoutConstraintKind : uint8_t {
+  // It is not a known layout constraint.
+  UnknownLayout,
+  // It is a layout constraint representing a trivial type of a known size.
+  TrivialOfExactSize,
+  // It is a layout constraint representing a trivial type of a size known to
+  // be no larger than a given size.
+  TrivialOfAtMostSize,
+  // It is a layout constraint representing a trivial type of an unknown size.
+  Trivial,
+  // It is a layout constraint representing a reference counted class instance.
+  Class,
+  // It is a layout constraint representing a reference counted native class
+  // instance.
+  NativeClass,
+  // It is a layout constraint representing a reference counted object.
+  RefCountedObject,
+  // It is a layout constraint representing a native reference counted object.
+  NativeRefCountedObject,
+  LastLayout = NativeRefCountedObject,
 };
 
 /// This is a class representing the layout constraint.
-class LayoutConstraintInfo : public llvm::FoldingSetNode
-{
-   friend class LayoutConstraint;
-   // m_alignment of the layout in bytes.
-   const unsigned m_alignment : 16;
-   // Size of the layout in bits.
-   const unsigned m_sizeInBits : 24;
-   // kind of the layout.
-   const LayoutConstraintKind m_kind;
+class LayoutConstraintInfo : public llvm::FoldingSetNode {
+  friend class LayoutConstraint;
+  // Alignment of the layout in bytes.
+  const unsigned Alignment : 16;
+  // Size of the layout in bits.
+  const unsigned SizeInBits : 24;
+  // Kind of the layout.
+  const LayoutConstraintKind Kind;
 
-   LayoutConstraintInfo()
-      : m_alignment(0), m_sizeInBits(0),
-        m_kind(LayoutConstraintKind::UnknownLayout)
-   {
-   }
+  LayoutConstraintInfo()
+      : Alignment(0), SizeInBits(0), Kind(LayoutConstraintKind::UnknownLayout) {
+  }
 
-   LayoutConstraintInfo(const LayoutConstraintInfo &layout)
-      : m_alignment(layout.m_alignment),
-        m_sizeInBits(layout.m_sizeInBits),
-        m_kind(layout.m_kind)
-   {
-   }
+  LayoutConstraintInfo(const LayoutConstraintInfo &Layout)
+      : Alignment(Layout.Alignment), SizeInBits(Layout.SizeInBits),
+        Kind(Layout.Kind) {
+  }
 
-   LayoutConstraintInfo(LayoutConstraintKind kind)
-      : m_alignment(0),
-        m_sizeInBits(0),
-        m_kind(kind)
-   {
-      assert(!isKnownSizeTrivial() && "Size in bits should be specified");
-   }
+  LayoutConstraintInfo(LayoutConstraintKind Kind)
+      : Alignment(0), SizeInBits(0), Kind(Kind) {
+    assert(!isKnownSizeTrivial() && "Size in bits should be specified");
+  }
 
-   LayoutConstraintInfo(LayoutConstraintKind kind, unsigned sizeInBits,
-                        unsigned alignment)
-      : m_alignment(alignment),
-        m_sizeInBits(sizeInBits),
-        m_kind(kind)
-   {
-      assert(
-               isTrivial() &&
-               "Size in bits should be specified only for trivial layout constraints");
-   }
-public:
-   LayoutConstraintKind getKind() const
-   {
-      return m_kind;
-   }
+  LayoutConstraintInfo(LayoutConstraintKind Kind, unsigned SizeInBits,
+                       unsigned Alignment)
+      : Alignment(Alignment), SizeInBits(SizeInBits), Kind(Kind) {
+    assert(
+        isTrivial() &&
+        "Size in bits should be specified only for trivial layout constraints");
+  }
+  public:
+  LayoutConstraintKind getKind() const { return Kind; }
 
-   bool isKnownLayout() const
-   {
-      return isKnownLayout(m_kind);
-   }
+  bool isKnownLayout() const {
+    return isKnownLayout(Kind);
+  }
 
-   bool isFixedSizeTrivial() const
-   {
-      return isFixedSizeTrivial(m_kind);
-   }
+  bool isFixedSizeTrivial() const {
+    return isFixedSizeTrivial(Kind);
+  }
 
-   bool isKnownSizeTrivial() const
-   {
-      return isKnownSizeTrivial(m_kind);
-   }
+  bool isKnownSizeTrivial() const {
+    return isKnownSizeTrivial(Kind);
+  }
 
-   bool isAddressOnlyTrivial() const
-   {
-      return isAddressOnlyTrivial(m_kind);
-   }
+  bool isAddressOnlyTrivial() const {
+    return isAddressOnlyTrivial(Kind);
+  }
 
-   bool isTrivial() const
-   {
-      return isTrivial(m_kind);
-   }
+  bool isTrivial() const {
+    return isTrivial(Kind);
+  }
 
-   bool isRefCountedObject() const
-   {
-      return isRefCountedObject(m_kind);
-   }
+  bool isRefCountedObject() const {
+    return isRefCountedObject(Kind);
+  }
 
-   bool isNativeRefCountedObject() const
-   {
-      return isNativeRefCountedObject(m_kind);
-   }
+  bool isNativeRefCountedObject() const {
+    return isNativeRefCountedObject(Kind);
+  }
 
-   bool isClass() const
-   {
-      return isClass(m_kind);
-   }
+  bool isClass() const {
+    return isClass(Kind);
+  }
 
-   bool isNativeClass() const
-   {
-      return isNativeClass(m_kind);
-   }
+  bool isNativeClass() const {
+    return isNativeClass(Kind);
+  }
 
-   bool isRefCounted() const
-   {
-      return isRefCounted(m_kind);
-   }
+  bool isRefCounted() const {
+    return isRefCounted(Kind);
+  }
 
-   bool isNativeRefCounted() const
-   {
-      return isNativeRefCounted(m_kind);
-   }
+  bool isNativeRefCounted() const {
+    return isNativeRefCounted(Kind);
+  }
 
-   unsigned getTrivialSizeInBytes() const
-   {
-      assert(isKnownSizeTrivial());
-      return (m_sizeInBits + 7) / 8;
-   }
+  unsigned getTrivialSizeInBytes() const {
+    assert(isKnownSizeTrivial());
+    return (SizeInBits + 7) / 8;
+  }
 
-   unsigned getMaxTrivialSizeInBytes() const
-   {
-      assert(isKnownSizeTrivial());
-      return (m_sizeInBits + 7) / 8;
-   }
+  unsigned getMaxTrivialSizeInBytes() const {
+    assert(isKnownSizeTrivial());
+    return (SizeInBits + 7) / 8;
+  }
 
-   unsigned getTrivialSizeInBits() const
-   {
-      assert(isKnownSizeTrivial());
-      return m_sizeInBits;
-   }
+  unsigned getTrivialSizeInBits() const {
+    assert(isKnownSizeTrivial());
+    return SizeInBits;
+  }
 
-   unsigned getMaxTrivialSizeInBits() const
-   {
-      assert(isKnownSizeTrivial());
-      return m_sizeInBits;
-   }
+  unsigned getMaxTrivialSizeInBits() const {
+    assert(isKnownSizeTrivial());
+    return SizeInBits;
+  }
 
-   unsigned getAlignmentInBits() const
-   {
-      return m_alignment;
-   }
+  unsigned getAlignmentInBits() const {
+    return Alignment;
+  }
 
-   unsigned getAlignmentInBytes() const
-   {
-      assert(isKnownSizeTrivial());
-      if (m_alignment) {
-         return m_alignment;
-      }
-      // There is no explicitly defined alignment. Try to come up with a
-      // reasonable one.
-      // If the size is a power of 2, use it also for the default alignment.
-      auto sizeInBytes = getTrivialSizeInBytes();
-      if (llvm::isPowerOf2_32(sizeInBytes)) {
-         return sizeInBytes * 8;
-      }
-      // Otherwise assume the alignment of 8 bytes.
-      return 8*8;
-   }
+  unsigned getAlignmentInBytes() const {
+    assert(isKnownSizeTrivial());
+    if (Alignment)
+      return Alignment;
 
-   operator bool() const
-   {
-      return isKnownLayout();
-   }
+    // There is no explicitly defined alignment. Try to come up with a
+    // reasonable one.
 
-   bool operator==(const LayoutConstraintInfo &rhs) const
-   {
-      return getKind() == rhs.getKind() && m_sizeInBits == rhs.m_sizeInBits &&
-            m_alignment == rhs.m_alignment;
-   }
+    // If the size is a power of 2, use it also for the default alignment.
+    auto SizeInBytes = getTrivialSizeInBytes();
+    if (llvm::isPowerOf2_32(SizeInBytes))
+      return SizeInBytes * 8;
 
-   bool operator!=(LayoutConstraintInfo rhs) const
-   {
-      return !(*this == rhs);
-   }
+    // Otherwise assume the alignment of 8 bytes.
+    return 8*8;
+  }
 
-   void print(raw_ostream &OS, const PrintOptions &printOption = PrintOptions()) const;
-   void print(ASTPrinter &printer, const PrintOptions &printOption) const;
+  operator bool() const {
+    return isKnownLayout();
+  }
 
-   /// Return the layout constraint as a string, for use in diagnostics only.
-   std::string getString(const PrintOptions &printOption = PrintOptions()) const;
+  bool operator==(const LayoutConstraintInfo &rhs) const {
+    return getKind() == rhs.getKind() && SizeInBits == rhs.SizeInBits &&
+           Alignment == rhs.Alignment;
+  }
 
-   /// Return the name of this layout constraint.
-   StringRef getName() const;
+  bool operator!=(LayoutConstraintInfo rhs) const { return !(*this == rhs); }
 
-   /// Return the name of a layout constraint with a given kind.
-   static StringRef getName(LayoutConstraintKind kind);
+  void print(raw_ostream &OS, const PrintOptions &PO = PrintOptions()) const;
+  void print(AstPrinter &Printer, const PrintOptions &PO) const;
 
-   static bool isKnownLayout(LayoutConstraintKind kind);
+  /// Return the layout constraint as a string, for use in diagnostics only.
+  std::string getString(const PrintOptions &PO = PrintOptions()) const;
 
-   static bool isFixedSizeTrivial(LayoutConstraintKind kind);
+  /// Return the name of this layout constraint.
+  StringRef getName() const;
 
-   static bool isKnownSizeTrivial(LayoutConstraintKind kind);
+  /// Return the name of a layout constraint with a given kind.
+  static StringRef getName(LayoutConstraintKind Kind);
 
-   static bool isAddressOnlyTrivial(LayoutConstraintKind kind);
+  static bool isKnownLayout(LayoutConstraintKind Kind);
 
-   static bool isTrivial(LayoutConstraintKind kind);
+  static bool isFixedSizeTrivial(LayoutConstraintKind Kind);
 
-   static bool isRefCountedObject(LayoutConstraintKind kind);
+  static bool isKnownSizeTrivial(LayoutConstraintKind Kind);
 
-   static bool isNativeRefCountedObject(LayoutConstraintKind kind);
+  static bool isAddressOnlyTrivial(LayoutConstraintKind Kind);
 
-   static bool isAnyRefCountedObject(LayoutConstraintKind kind);
+  static bool isTrivial(LayoutConstraintKind Kind);
 
-   static bool isClass(LayoutConstraintKind kind);
+  static bool isRefCountedObject(LayoutConstraintKind Kind);
 
-   static bool isNativeClass(LayoutConstraintKind kind);
+  static bool isNativeRefCountedObject(LayoutConstraintKind Kind);
 
-   static bool isRefCounted(LayoutConstraintKind kind);
+  static bool isAnyRefCountedObject(LayoutConstraintKind Kind);
 
-   static bool isNativeRefCounted(LayoutConstraintKind kind);
+  static bool isClass(LayoutConstraintKind Kind);
 
-   /// Uniquing for the LayoutConstraintInfo.
-   void profile(llvm::FoldingSetNodeID &id)
-   {
-      profile(id, m_kind, m_sizeInBits, m_alignment);
-   }
+  static bool isNativeClass(LayoutConstraintKind Kind);
 
-   static void profile(llvm::FoldingSetNodeID &id,
-                       LayoutConstraintKind kind,
-                       unsigned sizeInBits,
-                       unsigned alignment);
-private:
-   // Make vanilla new/delete illegal for LayoutConstraintInfo.
-   void *operator new(size_t bytes) noexcept = delete;
-   void operator delete(void *data) noexcept = delete;
-public:
-   // Only allow allocation of LayoutConstraintInfo using the allocator in
-   // AstContext or by doing a placement new.
-   void *operator new(size_t bytes, const AstContext &ctx,
-                      AllocationArena arena, unsigned alignment = 8);
-   void *operator new(size_t bytes, void *mem) noexcept { return mem; }
+  static bool isRefCounted(LayoutConstraintKind Kind);
 
-   // Representation of the non-parameterized layouts.
-   static LayoutConstraintInfo UnknownLayoutConstraintInfo;
-   static LayoutConstraintInfo RefCountedObjectConstraintInfo;
-   static LayoutConstraintInfo NativeRefCountedObjectConstraintInfo;
-   static LayoutConstraintInfo ClassConstraintInfo;
-   static LayoutConstraintInfo NativeClassConstraintInfo;
-   static LayoutConstraintInfo TrivialConstraintInfo;
+  static bool isNativeRefCounted(LayoutConstraintKind Kind);
+
+  /// Uniquing for the LayoutConstraintInfo.
+  void Profile(llvm::FoldingSetNodeID &ID) {
+    Profile(ID, Kind, SizeInBits, Alignment);
+  }
+
+  static void Profile(llvm::FoldingSetNodeID &ID,
+                      LayoutConstraintKind Kind,
+                      unsigned SizeInBits,
+                      unsigned Alignment);
+  private:
+  // Make vanilla new/delete illegal for LayoutConstraintInfo.
+  void *operator new(size_t Bytes) throw() = delete;
+  void operator delete(void *Data) throw() = delete;
+  public:
+  // Only allow allocation of LayoutConstraintInfo using the allocator in
+  // AstContext or by doing a placement new.
+  void *operator new(size_t bytes, const AstContext &ctx,
+                     AllocationArena arena, unsigned alignment = 8);
+  void *operator new(size_t Bytes, void *Mem) throw() { return Mem; }
+
+  // Representation of the non-parameterized layouts.
+  static LayoutConstraintInfo UnknownLayoutConstraintInfo;
+  static LayoutConstraintInfo RefCountedObjectConstraintInfo;
+  static LayoutConstraintInfo NativeRefCountedObjectConstraintInfo;
+  static LayoutConstraintInfo ClassConstraintInfo;
+  static LayoutConstraintInfo NativeClassConstraintInfo;
+  static LayoutConstraintInfo TrivialConstraintInfo;
 };
 
 /// A wrapper class containing a reference to the actual LayoutConstraintInfo
 /// object.
-class LayoutConstraint
-{
-   LayoutConstraintInfo *m_ptr;
-public:
-   /*implicit*/ LayoutConstraint(LayoutConstraintInfo *ptr = nullptr)
-      : m_ptr(ptr)
-   {}
+class LayoutConstraint {
+  LayoutConstraintInfo *Ptr;
+  public:
+  /*implicit*/ LayoutConstraint(LayoutConstraintInfo *P = 0) : Ptr(P) {}
 
-   static LayoutConstraint getLayoutConstraint(const LayoutConstraint &layout,
-                                               AstContext &context);
+  static LayoutConstraint getLayoutConstraint(const LayoutConstraint &Layout,
+                                              AstContext &C);
 
-   static LayoutConstraint getLayoutConstraint(LayoutConstraintKind kind,
-                                               AstContext &context);
+  static LayoutConstraint getLayoutConstraint(LayoutConstraintKind Kind,
+                                              AstContext &C);
 
-   static LayoutConstraint getLayoutConstraint(LayoutConstraintKind kind);
+  static LayoutConstraint getLayoutConstraint(LayoutConstraintKind Kind);
 
-   static LayoutConstraint getLayoutConstraint(LayoutConstraintKind kind,
-                                               unsigned sizeInBits,
-                                               unsigned alignment,
-                                               AstContext &context);
+  static LayoutConstraint getLayoutConstraint(LayoutConstraintKind Kind,
+                                              unsigned SizeInBits,
+                                              unsigned Alignment,
+                                              AstContext &C);
 
-   static LayoutConstraint getUnknownLayout();
+  static LayoutConstraint getUnknownLayout();
 
-   LayoutConstraintInfo *getPointer() const
-   {
-      return m_ptr;
-   }
+  LayoutConstraintInfo *getPointer() const { return Ptr; }
 
-   bool isNull() const
-   {
-      return m_ptr == nullptr;
-   }
+  bool isNull() const { return Ptr == 0; }
 
-   LayoutConstraintInfo *operator->() const
-   {
-      return m_ptr;
-   }
+  LayoutConstraintInfo *operator->() const { return Ptr; }
 
-   /// Merge these two constraints and return a more specific one
-   /// or fail if they're incompatible and return an unknown constraint.
-   LayoutConstraint merge(LayoutConstraint Other);
+  /// Merge these two constraints and return a more specific one
+  /// or fail if they're incompatible and return an unknown constraint.
+  LayoutConstraint merge(LayoutConstraint Other);
 
-   explicit operator bool() const
-   {
-      return m_ptr != nullptr;
-   }
+  explicit operator bool() const { return Ptr != 0; }
 
-   void dump() const;
-   void dump(raw_ostream &os, unsigned indent = 0) const;
+  POLAR_DEBUG_DUMP;
+  void dump(raw_ostream &os, unsigned indent = 0) const;
 
-   void print(raw_ostream &OS, const PrintOptions &printOption = PrintOptions()) const;
-   void print(ASTPrinter &printer, const PrintOptions &printOption) const;
+  void print(raw_ostream &OS, const PrintOptions &PO = PrintOptions()) const;
+  void print(AstPrinter &Printer, const PrintOptions &PO) const;
 
-   /// Return the layout constraint as a string, for use in diagnostics only.
-   std::string getString(const PrintOptions &printOption = PrintOptions()) const;
+  /// Return the layout constraint as a string, for use in diagnostics only.
+  std::string getString(const PrintOptions &PO = PrintOptions()) const;
 
-   bool operator==(LayoutConstraint rhs) const
-   {
-      if (isNull() && rhs.isNull()) {
-         return true;
-      }
-      return *getPointer() == *rhs.getPointer();
-   }
+  friend llvm::hash_code hash_value(const LayoutConstraint &layout) {
+    return hash_value(layout.getPointer());
+  }
 
-   bool operator!=(LayoutConstraint rhs) const
-   {
-      return !(*this == rhs);
-   }
+  bool operator==(LayoutConstraint rhs) const {
+    if (isNull() && rhs.isNull())
+      return true;
+    return *getPointer() == *rhs.getPointer();
+  }
+
+  bool operator!=(LayoutConstraint rhs) const {
+    return !(*this == rhs);
+  }
 };
 
 // Permit direct uses of isa/cast/dyn_cast on LayoutConstraint.
-template <class X>
-inline bool isa(LayoutConstraint layoutConstraint)
-{
-   return isa<X>(layoutConstraint.getPointer());
+template <class X> inline bool isa(LayoutConstraint LC) {
+  return isa<X>(LC.getPointer());
 }
-
-template <class X>
-inline X cast_or_null(LayoutConstraint layoutConstraint)
-{
-   return cast_or_null<X>(layoutConstraint.getPointer());
+template <class X> inline X cast_or_null(LayoutConstraint LC) {
+  return cast_or_null<X>(LC.getPointer());
 }
-
-template <class X>
-inline X dyn_cast(LayoutConstraint layoutConstraint)
-{
-   return dyn_cast<X>(layoutConstraint.getPointer());
+template <class X> inline X dyn_cast(LayoutConstraint LC) {
+  return dyn_cast<X>(LC.getPointer());
 }
-
-template <class X>
-inline X dyn_cast_or_null(LayoutConstraint layoutConstraint)
-{
-   return dyn_cast_or_null<X>(layoutConstraint.getPointer());
+template <class X> inline X dyn_cast_or_null(LayoutConstraint LC) {
+  return dyn_cast_or_null<X>(LC.getPointer());
 }
 
 /// LayoutConstraintLoc - Provides source location information for a
 /// parsed layout constraint.
-struct LayoutConstraintLoc
-{
+struct LayoutConstraintLoc {
 private:
-   LayoutConstraint m_layout;
-   SourceLoc m_loc;
+  LayoutConstraint Layout;
+  SourceLoc Loc;
 
 public:
-   LayoutConstraintLoc(LayoutConstraint layout, SourceLoc loc)
-      : m_layout(layout),
-        m_loc(loc) {}
+  LayoutConstraintLoc(LayoutConstraint Layout, SourceLoc Loc)
+      : Layout(Layout), Loc(Loc) {}
 
-   bool isError() const;
+  bool isError() const;
 
-   // FIXME: We generally shouldn't need to build LayoutConstraintLoc without
-   // a location.
-   static LayoutConstraintLoc withoutLoc(LayoutConstraint layout)
-   {
-      return LayoutConstraintLoc(layout, SourceLoc());
-   }
+  // FIXME: We generally shouldn't need to build LayoutConstraintLoc without
+  // a location.
+  static LayoutConstraintLoc withoutLoc(LayoutConstraint Layout) {
+    return LayoutConstraintLoc(Layout, SourceLoc());
+  }
 
-   /// Get the representative location of this type, for diagnostic
-   /// purposes.
-   SourceLoc getLoc() const
-   {
-      return m_loc;
-   }
+  /// Get the representative location of this type, for diagnostic
+  /// purposes.
+  SourceLoc getLoc() const { return Loc; }
 
-   SourceRange getSourceRange() const;
+  SourceRange getSourceRange() const;
 
-   bool hasLocation() const
-   {
-      return m_loc.isValid();
-   }
+  bool hasLocation() const { return Loc.isValid(); }
+  LayoutConstraint getLayoutConstraint() const { return Layout; }
 
-   LayoutConstraint getLayoutConstraint() const
-   {
-      return m_layout;
-   }
+  void setLayoutConstraint(LayoutConstraint value) {
+    Layout = value;
+  }
 
-   void setLayoutConstraint(LayoutConstraint value)
-   {
-      m_layout = value;
-   }
+  bool isNull() const { return Layout.isNull(); }
 
-   bool isNull() const
-   {
-      return m_layout.isNull();
-   }
-
-   LayoutConstraintLoc clone(AstContext &ctx) const
-   {
-      return *this;
-   }
+  LayoutConstraintLoc clone(AstContext &ctx) const { return *this; }
 };
 
-/// Checks if id is a name of a layout constraint and returns this
-/// constraint. If id does not match any known layout constraint names,
+/// Checks if ID is a name of a layout constraint and returns this
+/// constraint. If ID does not match any known layout constraint names,
 /// returns UnknownLayout.
-LayoutConstraint getLayoutConstraint(TokenSyntax id, AstContext &ctx);
+LayoutConstraint getLayoutConstraint(Identifier ID, AstContext &Ctx);
 
 } // end namespace swift
 
 LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::LayoutConstraintInfo, polar::ast::TypeAlignInBits)
 
 namespace llvm {
-   static inline raw_ostream &
-         operator<<(raw_ostream &OS, polar::ast::LayoutConstraint layoutConstraint)
-   {
-      layoutConstraint->print(OS);
-      return OS;
-   }
+static inline raw_ostream &
+operator<<(raw_ostream &OS, polar::ast::LayoutConstraint LC) {
+  LC->print(OS);
+  return OS;
+}
 
-   // A LayoutConstraint casts like a LayoutConstraintInfo*.
-   template <>
-   struct simplify_type<const ::polar::ast::LayoutConstraint>
-   {
-      typedef ::polar::ast::LayoutConstraintInfo *SimpleType;
-      static SimpleType getSimplifiedValue(const ::polar::ast::LayoutConstraint &value)
-      {
-         return value.getPointer();
-      }
-   };
+// A LayoutConstraint casts like a LayoutConstraintInfo*.
+template <> struct simplify_type<const ::polar::ast::LayoutConstraint> {
+  typedef ::polar::ast::LayoutConstraintInfo *SimpleType;
+  static SimpleType getSimplifiedValue(const ::polar::ast::LayoutConstraint &Val) {
+    return Val.getPointer();
+  }
+};
 
-   template <>
-   struct simplify_type<::polar::ast::LayoutConstraint>
-         : public simplify_type<const ::polar::ast::LayoutConstraint>
-   {};
+template <>
+struct simplify_type<::polar::ast::LayoutConstraint>
+    : public simplify_type<const ::polar::ast::LayoutConstraint> {};
 
-   // LayoutConstraint hashes just like pointers.
-   template <> struct DenseMapInfo<::polar::ast::LayoutConstraint>
-   {
-      static polar::ast::LayoutConstraint getEmptyKey()
-      {
-         return llvm::DenseMapInfo<polar::ast::LayoutConstraintInfo *>::getEmptyKey();
-      }
+// LayoutConstraint hashes just like pointers.
+template <> struct DenseMapInfo<polar::ast::LayoutConstraint> {
+  static polar::ast::LayoutConstraint getEmptyKey() {
+    return llvm::DenseMapInfo<polar::ast::LayoutConstraintInfo *>::getEmptyKey();
+  }
+  static polar::ast::LayoutConstraint getTombstoneKey() {
+    return llvm::DenseMapInfo<polar::ast::LayoutConstraintInfo *>::getTombstoneKey();
+  }
+  static unsigned getHashValue(polar::ast::LayoutConstraint Val) {
+    return DenseMapInfo<polar::ast::LayoutConstraintInfo *>::getHashValue(
+        Val.getPointer());
+  }
+  static bool isEqual(polar::ast::LayoutConstraint LHS,
+                      polar::ast::LayoutConstraint RHS) {
+    return LHS.getPointer() == RHS.getPointer();
+  }
+};
 
-      static polar::ast::LayoutConstraint getTombstoneKey()
-      {
-         return llvm::DenseMapInfo<polar::ast::LayoutConstraintInfo *>::getTombstoneKey();
-      }
+// A LayoutConstraint is "pointer like".
+template <> struct PointerLikeTypeTraits<polar::ast::LayoutConstraint> {
+public:
+  static inline void *getAsVoidPointer(polar::ast::LayoutConstraint I) {
+    return (void *)I.getPointer();
+  }
+  static inline polar::ast::LayoutConstraint getFromVoidPointer(void *P) {
+    return (polar::ast::LayoutConstraintInfo *)P;
+  }
+  enum { NumLowBitsAvailable = polar::ast::TypeAlignInBits };
+};
+} // end namespace llvm
 
-      static unsigned getHashValue(polar::ast::LayoutConstraint value) {
-         return DenseMapInfo<polar::ast::LayoutConstraintInfo *>::getHashValue(
-                  value.getPointer());
-      }
-
-      static bool isEqual(polar::ast::LayoutConstraint lhs,
-                          polar::ast::LayoutConstraint rhs)
-      {
-         return lhs.getPointer() == rhs.getPointer();
-      }
-   };
-
-   // A LayoutConstraint is "pointer like".
-   template <>
-   struct PointerLikeTypeTraits<polar::ast::LayoutConstraint>
-   {
-   public:
-      static inline void *getAsVoidPointer(polar::ast::LayoutConstraint lc)
-      {
-         return reinterpret_cast<void *>(lc.getPointer());
-      }
-
-      static inline polar::ast::LayoutConstraint getFromVoidPointer(void *ptr)
-      {
-         return reinterpret_cast<polar::ast::LayoutConstraintInfo *>(ptr);
-      }
-
-      enum { NumLowBitsAvailable = polar::ast::TypeAlignInBits };
-   };
-
-} // polar::ast
-
-#endif // POLARPHP_AST_LAYOUT_CONSTRAINT_H
+#endif
