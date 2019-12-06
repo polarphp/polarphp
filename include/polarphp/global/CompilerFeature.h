@@ -557,7 +557,7 @@ inline void deallocate_buffer(void *ptr, size_t size, size_t alignment) {
 #define POLAR_DELETE_OPERATOR_DELETED                                          \
   { llvm_unreachable("Delete operator should not be called."); }
 #else
-#define POLAR_DELETE_OPERATOR_DELETED = delete;
+#define POLAR_DELETE_OPERATOR_DELETED = delete
 #endif
 
 #endif // POLARPHP_GLOBAL_COMPILER_FEATURE_H

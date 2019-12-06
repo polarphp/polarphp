@@ -30,6 +30,7 @@
 #ifndef POLAR_BASIC_SIMPLE_DISPLAY_H
 #define POLAR_BASIC_SIMPLE_DISPLAY_H
 
+#include "llvm/ADT/TinyPtrVector.h"
 #include "llvm/Support/raw_ostream.h"
 #include <tuple>
 #include <type_traits>
@@ -69,49 +70,86 @@ HAS_TRIVIAL_DISPLAY(std::string);
 
 template<typename T>
 typename std::enable_if<HasTrivialDisplay<T>::value>::type
-simple_display(raw_ostream &out, const T &value)
-{
+simple_display(llvm::raw_ostream &out, const T &value) {
    out << value;
 }
 
 template<unsigned I, typename ...Types,
          typename std::enable_if<I == sizeof...(Types)>::type* = nullptr>
-void simple_display_tuple(raw_ostream &out,
+void simple_display_tuple(llvm::raw_ostream &out,
                           const std::tuple<Types...> &value);
 
 template<unsigned I, typename ...Types,
          typename std::enable_if<I < sizeof...(Types)>::type* = nullptr>
-void simple_display_tuple(raw_ostream &out,
-         const std::tuple<Types...> &value)
-{
-   // Start or separator.
-   if (I == 0) {
-      out << "(";
-   } else {
-      out << ", ";
-   }
-   // Current element.
-   simple_display(out, std::get<I>(value));
-   // Print the remaining elements.
-   simple_display_tuple<I+1>(out, value);
+         void simple_display_tuple(llvm::raw_ostream &out,
+         const std::tuple<Types...> &value) {
+         // Start or separator.
+         if (I == 0) out << "(";
+         else out << ", ";
+
+         // Current element.
+         simple_display(out, std::get<I>(value));
+
+         // Print the remaining elements.
+         simple_display_tuple<I+1>(out, value);
 }
 
-template<unsigned I, typename ...Types,
-         typename std::enable_if<I == sizeof...(Types)>::type*>
-void simple_display_tuple(raw_ostream &out,
-                          const std::tuple<Types...> &)
-{
-   // Last element.
-   out << ")";
+         template<unsigned I, typename ...Types,
+                  typename std::enable_if<I == sizeof...(Types)>::type*>
+         void simple_display_tuple(llvm::raw_ostream &out,
+         const std::tuple<Types...> &value) {
+         // Last element.
+         out << ")";
 }
 
-template<typename ...Types>
-void simple_display(raw_ostream &out,
-                    const std::tuple<Types...> &value)
-{
-   simple_display_tuple<0>(out, value);
+         template<typename ...Types>
+         void simple_display(llvm::raw_ostream &out,
+         const std::tuple<Types...> &value) {
+         simple_display_tuple<0>(out, value);
+}
+
+         template<typename T>
+         void simple_display(llvm::raw_ostream &out,
+         const llvm::TinyPtrVector<T> &vector) {
+         out << "{";
+         bool first = true;
+         for (const T &value : vector) {
+         if (first) first = false;
+         else out << ", ";
+
+         simple_display(out, value);
+}
+         out << "}";
+}
+
+         template<typename T>
+         void simple_display(llvm::raw_ostream &out,
+         const llvm::ArrayRef<T> &array) {
+         out << "{";
+         bool first = true;
+         for (const T &value : array) {
+         if (first) first = false;
+         else out << ", ";
+
+         simple_display(out, value);
+}
+         out << "}";
+}
+
+         template<typename T>
+         void simple_display(llvm::raw_ostream &out,
+         const llvm::SmallVectorImpl<T> &vec) {
+         out << "{";
+         bool first = true;
+         for (const T &value : vec) {
+         if (first) first = false;
+         else out << ", ";
+
+         simple_display(out, value);
+}
+         out << "}";
 }
 
 } // polar::basic
 
-#endif // POLAR_BASIC_SIMPLE_DISPLAY_H
+         #endif // POLAR_BASIC_SIMPLE_DISPLAY_H

@@ -105,7 +105,7 @@ LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::TypeVariableType, polar::ast::TypeVariab
 LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::Stmt, polar::ast::StmtAlignInBits)
 LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::BraceStmt, polar::ast::StmtAlignInBits)
 
-LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::AstContext, 2);
+LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::AstContext, 2)
 LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::DeclContext, polar::ast::DeclContextAlignInBits)
 LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::Expr, polar::ast::ExprAlignInBits)
 LLVM_DECLARE_TYPE_ALIGNMENT(polar::ast::AbstractClosureExpr, polar::ast::ExprAlignInBits)

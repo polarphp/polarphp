@@ -42,7 +42,6 @@ namespace polar::ast {
 
 using llvm::hash_code;
 using llvm::hash_value;
-using polar::basic::TypeId;
 using polar::basic::SourceLoc;
 
 class DiagnosticEngine;

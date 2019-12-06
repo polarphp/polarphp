@@ -1,4 +1,4 @@
-//===--- Statistic.h - Helpers for llvm::Statistic --------------*- C++ -*-===//
+//===--- Statistics.def - Statistics Macro Metaprogramming Database -*- C++ -*-===//
 //
 // This source file is part of the Swift.org open source project
 //
@@ -8,17 +8,6 @@
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
-//===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
-//
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/11/26.
 //===----------------------------------------------------------------------===//
 //
 // This file defines the database of always-available statistic counters.
@@ -116,9 +105,6 @@ FRONTEND_STATISTIC(AST, NumLinkLibraries)
 /// Number of top-level modules loaded in the AST context.
 FRONTEND_STATISTIC(AST, NumLoadedModules)
 
-/// Number of external definitions imported into the AST context.
-FRONTEND_STATISTIC(AST, NumImportedExternalDefinitions)
-
 /// Number of Clang entities imported into the AST context.
 FRONTEND_STATISTIC(AST, NumTotalClangImportedEntities)
 
@@ -152,17 +138,63 @@ FRONTEND_STATISTIC(AST, NumPrefixOperators)
 /// Number of precedence groups in the AST context.
 FRONTEND_STATISTIC(AST, NumPrecedenceGroups)
 
-/// Number of conformances used by code processed by this frontend job.
-FRONTEND_STATISTIC(AST, NumUsedConformances)
+/// Number of qualified lookups into a nominal type.
+FRONTEND_STATISTIC(AST, NumLookupQualifiedInNominal)
 
-/// Number of precedence groups in the AST context.
-FRONTEND_STATISTIC(AST, NumStoredPropertiesQueries)
+/// Number of qualified lookups into a module.
+FRONTEND_STATISTIC(AST, NumLookupQualifiedInModule)
+
+/// Number of qualified lookups into AnyObject.
+FRONTEND_STATISTIC(AST, NumLookupQualifiedInAnyObject)
+
+/// Number of lookups into a module and its imports.
+FRONTEND_STATISTIC(AST, NumLookupInModule)
+
+/// Number of local lookups into a module.
+FRONTEND_STATISTIC(AST, NumModuleLookupValue)
+
+/// Number of local lookups into a module's class members, for
+/// AnyObject lookup.
+FRONTEND_STATISTIC(AST, NumModuleLookupClassMember)
+
+/// Number of body scopes for iterable types
+FRONTEND_STATISTIC(AST, NumIterableTypeBodyASTScopes)
+
+/// Number of expansions of body scopes for iterable types
+FRONTEND_STATISTIC(AST, NumIterableTypeBodyASTScopeExpansions)
+
+/// Number of brace statment scopes for iterable types
+FRONTEND_STATISTIC(AST, NumBraceStmtASTScopes)
+
+/// Number of expansions of brace statement scopes for iterable types
+FRONTEND_STATISTIC(AST, NumBraceStmtASTScopeExpansions)
+
+/// Number of ASTScope lookups
+FRONTEND_STATISTIC(AST, NumASTScopeLookups)
+
+/// Number of lookups of the cached import graph for a module or
+/// source file.
+FRONTEND_STATISTIC(AST, ImportSetFoldHit)
+FRONTEND_STATISTIC(AST, ImportSetFoldMiss)
+
+FRONTEND_STATISTIC(AST, ImportSetCacheHit)
+FRONTEND_STATISTIC(AST, ImportSetCacheMiss)
+
+FRONTEND_STATISTIC(AST, ModuleVisibilityCacheHit)
+FRONTEND_STATISTIC(AST, ModuleVisibilityCacheMiss)
+
+FRONTEND_STATISTIC(AST, ModuleShadowCacheHit)
+FRONTEND_STATISTIC(AST, ModuleShadowCacheMiss)
 
 /// Number of full function bodies parsed.
 FRONTEND_STATISTIC(Parse, NumFunctionsParsed)
 
 /// Number of full braced decl list parsed.
 FRONTEND_STATISTIC(Parse, NumIterableDeclContextParsed)
+
+#define POLAR_REQUEST(ZONE, NAME, SIG, CACHE, LocOptions) FRONTEND_STATISTIC(Parse, NAME)
+#include "polarphp/ast/ParseTypeIDZoneDef.h"
+#undef POLAR_REQUEST
 
 /// Number of conformances that were deserialized by this frontend job.
 FRONTEND_STATISTIC(Sema, NumConformancesDeserialized)
@@ -186,18 +218,23 @@ FRONTEND_STATISTIC(Sema, NumLeafScopes)
 /// This is a measure of complexity of the contraction algorithm.
 FRONTEND_STATISTIC(Sema, NumConstraintsConsideredForEdgeContraction)
 
+/// Number of constraint-solving scopes created in the typechecker, while
+/// solving expression type constraints. A rough proxy for "how much work the
+/// expression typechecker did".
+FRONTEND_STATISTIC(Sema, NumCyclicOneWayComponentsCollapsed)
+
 /// Number of declarations that were deserialized. A rough proxy for the amount
 /// of material loaded from other modules.
 FRONTEND_STATISTIC(Sema, NumDeclsDeserialized)
 
-/// Number of declarations validated.
-FRONTEND_STATISTIC(Sema, NumDeclsValidated)
-
 /// Number of declarations type checked.
 FRONTEND_STATISTIC(Sema, NumDeclsTypechecked)
 
-/// Number of declarations finalized.
-FRONTEND_STATISTIC(Sema, NumDeclsFinalized)
+/// Number of synthesized accessors.
+FRONTEND_STATISTIC(Sema, NumAccessorsSynthesized)
+
+/// Number of synthesized accessor bodies.
+FRONTEND_STATISTIC(Sema, NumAccessorBodiesSynthesized)
 
 /// Number of full function bodies typechecked.
 FRONTEND_STATISTIC(Sema, NumFunctionsTypechecked)
@@ -205,12 +242,6 @@ FRONTEND_STATISTIC(Sema, NumFunctionsTypechecked)
 /// Number of generic signature builders constructed. Rough proxy for
 /// amount of work the GSB does analyzing type signatures.
 FRONTEND_STATISTIC(Sema, NumGenericSignatureBuilders)
-
-/// Number of lazy generic environments registered.
-FRONTEND_STATISTIC(Sema, NumLazyGenericEnvironments)
-
-/// Number of lazy generic environments deserialized.
-FRONTEND_STATISTIC(Sema, NumLazyGenericEnvironmentsLoaded)
 
 /// Number of lazy requirement signatures registered.
 FRONTEND_STATISTIC(Sema, NumLazyRequirementSignatures)
@@ -238,6 +269,17 @@ FRONTEND_STATISTIC(Sema, NumTypesValidated)
 
 /// Number of lazy iterable declaration contexts left unloaded.
 FRONTEND_STATISTIC(Sema, NumUnloadedLazyIterableDeclContexts)
+
+/// Number of lookups into a module and its imports.
+
+/// All type check requests go into the Sema area.
+#define POLAR_REQUEST(ZONE, NAME, Sig, Caching, LocOptions) FRONTEND_STATISTIC(Sema, NAME)
+#include "polarphp/ast/AccessTypeIdZoneDef.h"
+#include "polarphp/ast/NameLookupTypeIDZoneDef.h"
+#include "polarphp/ast/TypeCheckerTypeIDZoneDef.h"
+//#include "swift/Sema/IDETypeCheckingRequestIDZone.def"
+//#include "swift/IDE/IDERequestIDZone.def"
+#undef POLAR_REQUEST
 
 /// The next 10 statistics count 5 kinds of PIL entities present
 /// after the PILGen and PILOpt phases. The entities are functions,

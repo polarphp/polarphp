@@ -2349,7 +2349,7 @@ public:
       Bits.PoundDiagnosticDecl.HasBeenEmitted = true;
    }
 
-   SourceLoc getEndLoc() const { return EndLoc; };
+   SourceLoc getEndLoc() const { return EndLoc; }
 
    SourceRange getSourceRange() const {
       return SourceRange(StartLoc, EndLoc);
@@ -7163,9 +7163,9 @@ public:
    static MissingMemberDecl *
    create(AstContext &ctx, DeclContext *DC, DeclName name,
           unsigned numVTableEntries, bool hasStorage) {
-      assert(!numVTableEntries || isa<InterfaceDecl>(DC) || isa<ClassDecl>(DC) &&
+      assert((!numVTableEntries || isa<InterfaceDecl>(DC) || isa<ClassDecl>(DC)) &&
              "Only classes and protocols have vtable/witness table entries");
-      assert(!hasStorage || !isa<InterfaceDecl>(DC) &&
+      assert((!hasStorage || !isa<InterfaceDecl>(DC)) &&
              "Interfaces cannot have missing stored properties");
 
       return new (ctx) MissingMemberDecl(DC, name, numVTableEntries, hasStorage);

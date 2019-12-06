@@ -1344,7 +1344,7 @@ static bool classof(const TypeBase *T) {
    return T->getKind() == TypeKind::BuiltinRawPointer;
 }
 };
-DEFINE_EMPTY_CAN_TYPE_WRAPPER(BuiltinRawPointerType, BuiltinType);
+DEFINE_EMPTY_CAN_TYPE_WRAPPER(BuiltinRawPointerType, BuiltinType)
 
 /// BuiltinNativeObjectType - The builtin opaque object-pointer type.
 /// Useful for keeping an object alive when it is otherwise being
@@ -1358,7 +1358,7 @@ public:
       return T->getKind() == TypeKind::BuiltinNativeObject;
    }
 };
-DEFINE_EMPTY_CAN_TYPE_WRAPPER(BuiltinNativeObjectType, BuiltinType);
+DEFINE_EMPTY_CAN_TYPE_WRAPPER(BuiltinNativeObjectType, BuiltinType)
 
 /// A type that contains an owning reference to a heap object packed with
 /// additional bits. The type uses a bit to discriminate native Swift objects
@@ -1372,7 +1372,7 @@ public:
       return T->getKind() == TypeKind::BuiltinBridgeObject;
    }
 };
-DEFINE_EMPTY_CAN_TYPE_WRAPPER(BuiltinBridgeObjectType, BuiltinType);
+DEFINE_EMPTY_CAN_TYPE_WRAPPER(BuiltinBridgeObjectType, BuiltinType)
 
 /// BuiltinUnsafeValueBufferType - The builtin opaque fixed-size value
 /// buffer type, into which storage for an arbitrary value can be
@@ -1391,7 +1391,7 @@ public:
       return T->getKind() == TypeKind::BuiltinUnsafeValueBuffer;
    }
 };
-DEFINE_EMPTY_CAN_TYPE_WRAPPER(BuiltinUnsafeValueBufferType, BuiltinType);
+DEFINE_EMPTY_CAN_TYPE_WRAPPER(BuiltinUnsafeValueBufferType, BuiltinType)
 
 /// A builtin vector type.
 class BuiltinVectorType : public BuiltinType, public llvm::FoldingSetNode {
@@ -1622,7 +1622,7 @@ static bool classof(const TypeBase *T) {
 
 BuiltinIntegerWidth getWidth() const = delete;
 };
-DEFINE_EMPTY_CAN_TYPE_WRAPPER(BuiltinIntegerLiteralType, AnyBuiltinIntegerType);
+DEFINE_EMPTY_CAN_TYPE_WRAPPER(BuiltinIntegerLiteralType, AnyBuiltinIntegerType)
 
 inline BuiltinIntegerWidth AnyBuiltinIntegerType::getWidth() const {
    if (auto intTy = dyn_cast<BuiltinIntegerType>(this)) {
@@ -2769,7 +2769,7 @@ public:
                      Identifier l = Identifier(),
                      ParameterTypeFlags f = ParameterTypeFlags())
          : Ty(t), Label(l), Flags(f) {
-         assert(!t || !t->is<InOutType>() && "set flags instead");
+         assert((!t || !t->is<InOutType>()) && "set flags instead");
       }
 
    private:
@@ -3827,7 +3827,7 @@ substOpaqueTypesWithUnderlyingTypes(InterfaceConformanceRef ref, Type origType,
                                     TypeExpansionContext context);
 namespace Lowering {
 class TypeConverter;
-};
+}
 
 /// PILFunctionType - The lowered type of a function value, suitable
 /// for use by PIL.
@@ -5119,7 +5119,7 @@ static void Profile(llvm::FoldingSetNodeID &ID,
 
 void Profile(llvm::FoldingSetNodeID &ID) {
    Profile(ID, getDecl(), getSubstitutions());
-};
+}
 
 private:
 OpaqueTypeArchetypeType(OpaqueTypeDecl *OpaqueDecl,

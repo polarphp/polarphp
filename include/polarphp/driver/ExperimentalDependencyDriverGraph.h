@@ -23,7 +23,6 @@
 #ifndef POLARPHP_DRIVER_EXPERIMENTAL_DEPENDENCY_DRIVER_GRAPH_H
 #define POLARPHP_DRIVER_EXPERIMENTAL_DEPENDENCY_DRIVER_GRAPH_H
 
-#include "polarphp/ast/ExperimentalDependencies.h"
 #include "polarphp/basic/LLVM.h"
 #include "polarphp/basic/OptionSet.h"
 #include "polarphp/driver/DependencyGraph.h"

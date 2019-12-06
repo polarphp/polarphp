@@ -1998,7 +1998,7 @@ void simple_display(llvm::raw_ostream &out, FunctionBuilderClosurePreCheck pck);
 
 #define POLAR_TYPEID_ZONE TypeChecker
 #define POLAR_TYPEID_HEADER "polarphp/ast/TypeCheckerTypeIDZoneDef.h"
-#include "polarphp/basic/DefineTypeIDZone.h"
+#include "polarphp/basic/DefineTypeIdZone.h"
 #undef POLAR_TYPEID_ZONE
 #undef POLAR_TYPEID_HEADER
 

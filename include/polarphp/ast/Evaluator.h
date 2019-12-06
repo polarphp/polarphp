@@ -57,9 +57,7 @@ using llvm::None;
 
 using polar::basic::CycleDiagnosticKind;
 using polar::basic::UnifiedStatsReporter;
-using polar::basic::AnyValue;
 using polar::basic::FrontendStatsTracer;
-using polar::basic::Zone;
 
 class DiagnosticEngine;
 class Evaluator;

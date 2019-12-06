@@ -72,6 +72,7 @@ class SerializedTopLevelCodeDecl;
 class StructDecl;
 
 using polar::basic::SourceLoc;
+using llvm::iterator_range;
 
 namespace serialization {
 using DeclID = llvm::PointerEmbeddedInt<unsigned, 31>;
@@ -675,7 +676,7 @@ public:
 
 /// The range of declarations stored within an iterable declaration
 /// context.
-using DeclRange = polar::basic::IteratorRange<DeclIterator>;
+using DeclRange = iterator_range<DeclIterator>;
 
 /// The kind of an \c IterableDeclContext.
 enum class IterableDeclContextKind : uint8_t {

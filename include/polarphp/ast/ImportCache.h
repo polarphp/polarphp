@@ -21,6 +21,7 @@
 #include "polarphp/ast/Module.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/FoldingSet.h"
+#include "polarphp/basic/TupleDenseMapInfo.h"
 
 namespace polar::ast {
 class DeclContext;

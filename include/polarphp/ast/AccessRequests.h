@@ -107,22 +107,22 @@ class DefaultAndMaxAccessLevelRequest :
    void cacheResult(DefaultAndMax value) const;
 };
 
-#define POLARPHP_TYPEID_ZONE AccessControl
-#define POLARPHP_TYPEID_HEADER "polar/ast/AccessTypeIDZoneDef.h"
+#define POLAR_TYPEID_ZONE AccessControl
+#define POLAR_TYPEID_HEADER "polarphp/ast/AccessTypeIdZoneDef.h"
 #include "polarphp/basic/DefineTypeIdZone.h"
-#undef POLARPHP_TYPEID_ZONE
-#undef POLARPHP_TYPEID_HEADER
+#undef POLAR_TYPEID_ZONE
+#undef POLAR_TYPEID_HEADER
 
 // Set up reporting of evaluated requests.
-#define POLARPHP_REQUEST(Zone, RequestType, Sig, Caching, LocOptions)             \
+#define POLAR_REQUEST(Zone, RequestType, Sig, Caching, LocOptions)             \
    template <>                                                                  \
    inline void reportEvaluatedRequest(UnifiedStatsReporter &stats,              \
    const RequestType &request) {             \
    ++stats.getFrontendCounters().RequestType;                                 \
 }
 #include "polarphp/ast/AccessTypeIdZoneDef.h"
-#undef POLARPHP_REQUEST
+#undef POLAR_REQUEST
 
-}
+} // polar::ast
 
 #endif // POLARPHP_AST_ACCESS_REQUESTS_H

@@ -32,7 +32,7 @@ namespace polar::ast {
 
 using polar::basic::UnifiedStatsReporter;
 using polar::basic::FrontendStatsTracer;
-using polar::basic::TypeId;
+using polar::basic::simple_display;
 
 class Evaluator;
 

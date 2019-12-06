@@ -756,6 +756,15 @@ using all_true =
 template <class... Ts>
 using are_all_compound = all_true<std::is_compound<Ts>::value...>;
 
+template <template <typename...> class Template, typename T>
+struct is_instantiation_of : std::false_type {};
+
+template <template <typename...> class Template, typename... Args>
+struct is_instantiation_of<Template, Template<Args...>> : std::true_type {};
+
+template <typename> struct is_tuple: std::false_type {};
+template <typename ...T> struct is_tuple<std::tuple<T...>>: std::true_type {};
+
 } // polar::basic
 
 #endif // POLARPHP_BASIC_STLEXTRAS_H

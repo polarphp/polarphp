@@ -29,8 +29,7 @@
 
 namespace polar::basic {
 template<typename T>
-class OptionalEnum
-{
+class OptionalEnum {
    using underlying_type = typename std::underlying_type<T>::type;
    static_assert(std::is_trivially_copyable<T>::value, "type is not trivial");
    static_assert(std::is_integral<underlying_type>::value,
@@ -40,16 +39,14 @@ public:
    using storage_type = typename std::make_unsigned<underlying_type>::type;
 
 private:
-   storage_type m_storage;
+   storage_type Storage;
 
 public:
    /// Construct an empty instance.
-   OptionalEnum() : m_storage(0)
-   {}
+   OptionalEnum() : Storage(0) { }
 
    /// Construct an empty instance.
-   /*implicit*/ OptionalEnum(llvm::NoneType)
-      : OptionalEnum() {}
+   /*implicit*/ OptionalEnum(llvm::NoneType) : OptionalEnum() {}
 
    /// Construct an instance containing a value of type \c T constructed with
    /// the given argument.
@@ -57,8 +54,7 @@ public:
    /*implicit*/ OptionalEnum(
          U &&value,
          typename std::enable_if<!std::is_integral<U>::value>::type * = {})
-      : m_storage(static_cast<storage_type>(T{std::forward<U>(value)}) + 1)
-   {
+      : Storage(static_cast<storage_type>(T{std::forward<U>(value)}) + 1) {
       assert(hasValue() && "cannot store this value");
    }
 
@@ -69,51 +65,35 @@ public:
    explicit OptionalEnum(
          I rawValue,
          typename std::enable_if<std::is_integral<I>::value>::type * = {})
-      : m_storage(rawValue)
-   {
-      assert(reinterpret_cast<uintptr_t>(rawValue) == static_cast<uintptr_t>(reinterpret_cast<intptr_t>(*this)));
+      : Storage(rawValue) {
+      assert((uintptr_t)rawValue == (uintptr_t)(intptr_t)*this);
    }
 
-   void reset()
-   {
-      m_storage = 0;
+   void reset() {
+      Storage = 0;
    }
 
-   bool hasValue() const
-   {
-      return m_storage != 0;
-   }
+   bool hasValue() const { return Storage != 0; }
+   explicit operator bool() const { return hasValue(); }
 
-   explicit operator bool() const
-   {
-      return hasValue();
-   }
-
-   T getValue() const
-   {
+   T getValue() const {
       assert(hasValue());
-      return static_cast<value_type>(m_storage - 1);
+      return static_cast<value_type>(Storage - 1);
    }
-
-   T operator*()
-   {
-      return getValue();
-   }
+   T operator*() { return getValue(); }
 
    template <typename U>
-   constexpr T getValueOr(U &&value) const
-   {
+   constexpr T getValueOr(U &&value) const {
       return hasValue() ? getValue() : value;
    }
 
    /// Converts the enum to its raw storage value, for interoperation with
    /// PointerIntPair.
-   explicit operator intptr_t() const
-   {
-      assert(m_storage == static_cast<storage_type>(reinterpret_cast<intptr_t>(m_storage)));
-      return reinterpret_cast<intptr_t>(m_storage);
+   explicit operator intptr_t() const {
+      assert(Storage == (storage_type)(intptr_t)Storage);
+      return (intptr_t)Storage;
    }
 };
-} // end namespace swift
+} // end namespace polar::basic
 
 #endif // POLARPHP_BASIC_OPTIONAL_ENUM_H

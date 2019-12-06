@@ -35,7 +35,7 @@
 #include <string>
 #include <vector>
 
-namespace polar::basic {
+namespace polar::ast {
 
 enum class Zone : uint8_t {
    C                       = 0,
@@ -51,6 +51,9 @@ enum class Zone : uint8_t {
    ArithmeticEvaluator     = 255,
 };
 
+static_assert(std::is_same<std::underlying_type<Zone>::type, uint8_t>::value,
+              "underlying type is no longer uint8_t!");
+
 /// Form a unique 64-bit integer value describing the type `T`.
 ///
 /// This template needs to be specialized for every type that can
@@ -61,20 +64,18 @@ struct TypeId;
 
 /// Template whose specializations provide the set of type IDs within a
 /// given zone.
-template<uint8_t Zone>
-struct TypeIdZoneTypes;
+template<Zone Zone> struct TypeIdZoneTypes;
 
 /// Form a type ID given a zone and type value.
-constexpr uint64_t form_type_id(uint8_t zone, uint8_t type)
-{
-   return (uint64_t(zone) << 8) | uint64_t(type);
+constexpr uint64_t formTypeID(uint8_t zone, uint8_t type) {
+  return (uint64_t(zone) << 8) | uint64_t(type);
 }
 
 // Define the C type zone (zone 0).
-#define POLAR_TYPEID_ZONE 0
+#define POLAR_TYPEID_ZONE C
 #define POLAR_TYPEID_HEADER "polarphp/basic/CTypeIdZoneDefs.h"
 #include "polarphp/basic/DefineTypeIdZone.h"
 
-} // polar::basic
+} // polar::ast
 
 #endif // POLARPHP_BASIC_TYPEID_H

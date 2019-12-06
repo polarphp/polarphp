@@ -24,7 +24,6 @@
 
 #include "polarphp/ast/DiagnosticEngine.h"
 #include "polarphp/ast/DiagnosticsDriver.h"
-#include "polarphp/ast/ExperimentalDependencies.h"
 #include "polarphp/driver/internal/CompilationRecord.h"
 #include "polarphp/basic/OutputFileMap.h"
 #include "polarphp/basic/Program.h"

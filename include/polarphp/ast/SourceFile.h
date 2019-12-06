@@ -134,9 +134,9 @@ public:
   /// The list of top-level declarations in the source file.
   std::vector<Decl*> Decls;
 
-  /// A cache of syntax nodes that can be reused when creating the syntax tree
-  /// for this file.
-  SyntaxParsingCache *SyntaxParsingCache = nullptr;
+//  /// A cache of syntax nodes that can be reused when creating the syntax tree
+//  /// for this file.
+//  SyntaxParsingCache *SyntaxParsingCache = nullptr;
 
   /// The list of local type declarations in the source file.
   llvm::SetVector<TypeDecl *> LocalTypeDecls;
@@ -334,7 +334,7 @@ public:
   ///
   /// \param Printer The AST printer used for printing the contents.
   /// \param PO Options controlling the printing process.
-  void print(ASTPrinter &Printer, const PrintOptions &PO);
+  void print(AstPrinter &Printer, const PrintOptions &PO);
   void print(raw_ostream &OS, const PrintOptions &PO);
 
   static bool classof(const FileUnit *file) {

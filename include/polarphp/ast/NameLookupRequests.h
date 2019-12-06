@@ -366,25 +366,25 @@ private:
                                         UnqualifiedLookupDescriptor desc) const;
 };
 
-#define POLARPHP_TYPEID_ZONE NameLookup
-#define POLARPHP_TYPEID_HEADER "polarphp/ast/NameLookupTypeIDZoneDef.h"
-#include "polarphp/basic/DefineTypeIDZone.h"
-#undef POLARPHP_TYPEID_ZONE
-#undef POLARPHP_TYPEID_HEADER
+#define POLAR_TYPEID_ZONE NameLookup
+#define POLAR_TYPEID_HEADER "polarphp/ast/NameLookupTypeIDZoneDef.h"
+#include "polarphp/basic/DefineTypeIdZone.h"
+#undef POLAR_TYPEID_ZONE
+#undef POLAR_TYPEID_HEADER
 
 // Set up reporting of evaluated requests.
 template<typename Request>
 void reportEvaluatedRequest(UnifiedStatsReporter &stats,
                             const Request &request);
 
-#define POLARPHP_REQUEST(Zone, RequestType, Sig, Caching, LocOptions)             \
+#define POLAR_REQUEST(Zone, RequestType, Sig, Caching, LocOptions)             \
   template <>                                                                  \
   inline void reportEvaluatedRequest(UnifiedStatsReporter &stats,              \
                                      const RequestType &request) {             \
     ++stats.getFrontendCounters().RequestType;                                 \
   }
 #include "polarphp/ast/NameLookupTypeIDZoneDef.h"
-#undef POLARPHP_REQUEST
+#undef POLAR_REQUEST
 
 } // end namespace polar::ast
 
