@@ -166,7 +166,7 @@ constexpr unsigned count_bits_used(uint64_t arg)
           arg & 1ull << 3 ? 3 :
           arg & 1ull << 2 ? 2 :
           arg & 1ull << 1 ? 1 : 0
-      ) + 1;
+         ) + 1;
 }
 
 } // polar::basic

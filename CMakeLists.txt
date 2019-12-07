@@ -167,7 +167,7 @@ if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL Linux)
 endif()
 
 if (CMAKE_BUILD_TYPE AND
-      NOT POLAR_BUILD_TYPE MATCHES "^(debug|release|relwithdebinfo|minsizerel)$")
+   NOT POLAR_BUILD_TYPE MATCHES "^(debug|release|relwithdebinfo|minsizerel)$")
    message(FATAL_ERROR "Invalid value for CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 endif()
 

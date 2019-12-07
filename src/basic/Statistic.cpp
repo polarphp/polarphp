@@ -11,7 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "clang/AST/Decl.h"
-#include "clang/Basic/SourceLocation.h"
 #include "clang/Basic/SourceManager.h"
 #include "polarphp/basic/Statistic.h"
 #include "polarphp/basic/Timer.h"
@@ -27,6 +26,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include <chrono>
 #include <limits>
+#include <string>
 
 #ifdef POLAR_OS_UNIX
 #ifdef HAVE_UNISTD_H
@@ -212,8 +212,8 @@ struct DenseMapInfo<NodeKey>
    static bool isEqual(const NodeKey& lhs, const NodeKey& rhs)
    {
       return FirstInfo::isEqual(std::get<0>(lhs), std::get<0>(rhs)) &&
-            SecondInfo::isEqual(std::get<1>(lhs), std::get<1>(rhs)) &&
-            ThirdInfo::isEqual(std::get<2>(lhs), std::get<2>(rhs));
+             SecondInfo::isEqual(std::get<1>(lhs), std::get<1>(rhs)) &&
+             ThirdInfo::isEqual(std::get<2>(lhs), std::get<2>(rhs));
    }
 };
 } // llvm
@@ -275,7 +275,7 @@ class StatsProfiler {
 public:
 
    StatsProfiler()
-      : Curr(&Root)
+   : Curr(&Root)
    {}
    StatsProfiler(StatsProfiler const &Other) = delete;
    StatsProfiler& operator=(const StatsProfiler&) = delete;
@@ -343,7 +343,7 @@ struct UnifiedStatsReporter::StatsProfilers
 #undef FRONTEND_STATISTIC
 
    StatsProfilers()
-      : LastUpdated(llvm::TimeRecord::getCurrentTime())
+   : LastUpdated(llvm::TimeRecord::getCurrentTime())
    {}
 };
 
@@ -359,15 +359,15 @@ UnifiedStatsReporter::UnifiedStatsReporter(StringRef ProgramName,
                                            bool TraceEvents,
                                            bool ProfileEvents,
                                            bool ProfileEntities)
-   : UnifiedStatsReporter(ProgramName,
-                          auxName(ModuleName,
-                                  InputName,
-                                  TripleName,
-                                  OutputType,
-                                  OptType),
-                          Directory,
-                          SM, CSM,
-                          TraceEvents, ProfileEvents, ProfileEntities)
+: UnifiedStatsReporter(ProgramName,
+                       auxName(ModuleName,
+                               InputName,
+                               TripleName,
+                               OutputType,
+                               OptType),
+                       Directory,
+                       SM, CSM,
+                       TraceEvents, ProfileEvents, ProfileEntities)
 {
 }
 
@@ -379,19 +379,19 @@ UnifiedStatsReporter::UnifiedStatsReporter(StringRef ProgramName,
                                            bool TraceEvents,
                                            bool ProfileEvents,
                                            bool ProfileEntities)
-   : currentProcessExitStatusSet(false),
-     currentProcessExitStatus(EXIT_FAILURE),
-     StatsFilename(Directory),
-     TraceFilename(Directory),
-     ProfileDirname(Directory),
-     StartedTime(llvm::TimeRecord::getCurrentTime()),
-     MainThreadID(std::this_thread::get_id()),
-     Timer(std::make_unique<NamedRegionTimer>(AuxName,
-                                              "Building Target",
-                                              ProgramName, "Running Program")),
-     SourceMgr(SM),
-     ClangSourceMgr(CSM),
-     RecursiveTimers(std::make_unique<RecursionSafeTimers>())
+: currentProcessExitStatusSet(false),
+  currentProcessExitStatus(EXIT_FAILURE),
+  StatsFilename(Directory),
+  TraceFilename(Directory),
+  ProfileDirname(Directory),
+  StartedTime(llvm::TimeRecord::getCurrentTime()),
+  MainThreadID(std::this_thread::get_id()),
+  Timer(std::make_unique<NamedRegionTimer>(AuxName,
+                                           "Building Target",
+                                           ProgramName, "Running Program")),
+  SourceMgr(SM),
+  ClangSourceMgr(CSM),
+  RecursiveTimers(std::make_unique<RecursionSafeTimers>())
 {
    path::append(StatsFilename, makeStatsFileName(ProgramName, AuxName));
    path::append(TraceFilename, makeTraceFileName(ProgramName, AuxName));
@@ -512,10 +512,10 @@ UnifiedStatsReporter::printAlwaysOnStatsAndTimers(raw_ostream &OS) {
 }
 
 FrontendStatsTracer::FrontendStatsTracer(
-      UnifiedStatsReporter *Reporter, StringRef EventName, const void *Entity,
-      const UnifiedStatsReporter::TraceFormatter *Formatter)
-   : Reporter(Reporter), SavedTime(), EventName(EventName), Entity(Entity),
-     Formatter(Formatter) {
+UnifiedStatsReporter *Reporter, StringRef EventName, const void *Entity,
+const UnifiedStatsReporter::TraceFormatter *Formatter)
+: Reporter(Reporter), SavedTime(), EventName(EventName), Entity(Entity),
+  Formatter(Formatter) {
    if (Reporter) {
       SavedTime = llvm::TimeRecord::getCurrentTime();
       Reporter->saveAnyFrontendStatsEvents(*this, true);
@@ -537,11 +537,11 @@ FrontendStatsTracer::operator=(FrontendStatsTracer&& other)
 }
 
 FrontendStatsTracer::FrontendStatsTracer(FrontendStatsTracer&& other)
-   : Reporter(other.Reporter),
-     SavedTime(other.SavedTime),
-     EventName(other.EventName),
-     Entity(other.Entity),
-     Formatter(other.Formatter)
+: Reporter(other.Reporter),
+  SavedTime(other.SavedTime),
+  EventName(other.EventName),
+  Entity(other.Entity),
+  Formatter(other.Formatter)
 {
    other.Reporter = nullptr;
 }
@@ -555,7 +555,7 @@ FrontendStatsTracer::~FrontendStatsTracer()
 // Copy any interesting process-wide resource accounting stats to
 // associated fields in the provided AlwaysOnFrontendCounters.
 void updateProcessWideFrontendCounters(
-      UnifiedStatsReporter::AlwaysOnFrontendCounters &C) {
+UnifiedStatsReporter::AlwaysOnFrontendCounters &C) {
 #if defined(HAVE_PROC_PID_RUSAGE) && defined(RUSAGE_INFO_V4)
    struct rusage_info_v4 ru;
    if (0 == proc_pid_rusage(getpid(), RUSAGE_INFO_V4, (rusage_info_t *)&ru)) {
@@ -589,15 +589,15 @@ saveEvent(StringRef StatName,
    int64_t Delta = Curr - Last;
    if (Delta != 0) {
       Events.emplace_back(UnifiedStatsReporter::FrontendStatsEvent{
-                             NowUS, LiveUS, IsEntry, T.EventName, StatName, Delta, Curr,
-                             T.Entity, T.Formatter});
+      NowUS, LiveUS, IsEntry, T.EventName, StatName, Delta, Curr,
+      T.Entity, T.Formatter});
    }
 }
 
 void
 UnifiedStatsReporter::saveAnyFrontendStatsEvents(
-      FrontendStatsTracer const& T,
-      bool IsEntry)
+FrontendStatsTracer const& T,
+bool IsEntry)
 {
    assert(MainThreadID == std::this_thread::get_id());
    // First make a note in the recursion-safe timers; these
@@ -802,23 +802,23 @@ UnifiedStatsReporter::flushTracesAndProfiles() {
 #include "polarphp/basic/StatisticsDef.h"
 #undef FRONTEND_STATISTIC
       }
-         if (EntityProfilers) {
-            auto D = ProfileDirname;
-            EntityProfilers->UserTime.printToFile(D, "Time.User.entities");
-            EntityProfilers->SystemTime.printToFile(D, "Time.System.entities");
-            EntityProfilers->ProcessTime.printToFile(D, "Time.Process.entities");
-            EntityProfilers->WallTime.printToFile(D, "Time.Wall.entities");
+      if (EntityProfilers) {
+         auto D = ProfileDirname;
+         EntityProfilers->UserTime.printToFile(D, "Time.User.entities");
+         EntityProfilers->SystemTime.printToFile(D, "Time.System.entities");
+         EntityProfilers->ProcessTime.printToFile(D, "Time.Process.entities");
+         EntityProfilers->WallTime.printToFile(D, "Time.Wall.entities");
 #define FRONTEND_STATISTIC(TY, NAME)                                    \
    EntityProfilers->NAME.printToFile(ProfileDirname,                 \
 #TY "." #NAME ".entities");
 #include "polarphp/basic/StatisticsDef.h"
 #undef FRONTEND_STATISTIC
-         }
-         }
-         LastTracedFrontendCounters.reset();
-         FrontendStatsEvents.reset();
-         EventProfilers.reset();
-         EntityProfilers.reset();
       }
+   }
+   LastTracedFrontendCounters.reset();
+   FrontendStatsEvents.reset();
+   EventProfilers.reset();
+   EntityProfilers.reset();
+}
 
-   } // namespace polar::basic
+} // namespace polar::basic

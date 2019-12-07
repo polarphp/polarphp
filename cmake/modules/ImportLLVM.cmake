@@ -30,7 +30,8 @@ ExternalProject_Add(llvm-project
    )
 
 find_package(LLVM
-   PATHS ${POLAR_CMAKE_MODULES_DIR}/llvm)
+   PATHS ${POLAR_CMAKE_MODULES_DIR}/llvm
+   NO_DEFAULT_PATH)
 if (LLVM_FOUND)
    message("found LLVM version: ${LLVM_VERSION}")
 else()

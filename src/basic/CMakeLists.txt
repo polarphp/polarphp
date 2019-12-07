@@ -38,4 +38,4 @@ set_target_properties(
    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR};"
    INTERFACE_LINK_LIBRARIES "PolarGlobal;nlohmann_json::nlohmann_json;LLVMSupport;LLVMCore")
 
-add_dependencies(PolarBasic llvm-project)
+add_dependencies(PolarBasic llvm-project clang-project thirdparty_cli11)
