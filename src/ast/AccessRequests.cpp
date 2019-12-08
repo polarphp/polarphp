@@ -52,18 +52,18 @@ AccessLevelRequest::evaluate(Evaluator &evaluator, ValueDecl *D) const {
    if (auto accessor = dyn_cast<AccessorDecl>(D)) {
       AbstractStorageDecl *storage = accessor->getStorage();
       switch (accessor->getAccessorKind()) {
-      case AccessorKind::Get:
-      case AccessorKind::Address:
-      case AccessorKind::Read:
-         return storage->getFormalAccess();
-      case AccessorKind::Set:
-      case AccessorKind::MutableAddress:
-      case AccessorKind::Modify:
-         return storage->getSetterFormalAccess();
-      case AccessorKind::WillSet:
-      case AccessorKind::DidSet:
-         // These are only needed to synthesize the setter.
-         return AccessLevel::Private;
+         case AccessorKind::Get:
+         case AccessorKind::Address:
+         case AccessorKind::Read:
+            return storage->getFormalAccess();
+         case AccessorKind::Set:
+         case AccessorKind::MutableAddress:
+         case AccessorKind::Modify:
+            return storage->getSetterFormalAccess();
+         case AccessorKind::WillSet:
+         case AccessorKind::DidSet:
+            // These are only needed to synthesize the setter.
+            return AccessLevel::Private;
       }
    }
 
@@ -93,36 +93,36 @@ AccessLevelRequest::evaluate(Evaluator &evaluator, ValueDecl *D) const {
    }
 
    switch (DC->getContextKind()) {
-   case DeclContextKind::TopLevelCodeDecl:
-      // Variables declared in a top-level 'guard' statement can be accessed in
-      // later top-level code.
-      return AccessLevel::FilePrivate;
-   case DeclContextKind::AbstractClosureExpr:
-      if (isa<ParamDecl>(D)) {
-         // Closure parameters may need to be accessible to the enclosing
-         // context, for single-expression closures.
+      case DeclContextKind::TopLevelCodeDecl:
+         // Variables declared in a top-level 'guard' statement can be accessed in
+         // later top-level code.
          return AccessLevel::FilePrivate;
-      } else {
+      case DeclContextKind::AbstractClosureExpr:
+         if (isa<ParamDecl>(D)) {
+            // Closure parameters may need to be accessible to the enclosing
+            // context, for single-expression closures.
+            return AccessLevel::FilePrivate;
+         } else {
+            return AccessLevel::Private;
+         }
+      case DeclContextKind::SerializedLocal:
+      case DeclContextKind::Initializer:
+      case DeclContextKind::AbstractFunctionDecl:
+      case DeclContextKind::SubscriptDecl:
+      case DeclContextKind::EnumElementDecl:
          return AccessLevel::Private;
+      case DeclContextKind::Module:
+      case DeclContextKind::FileUnit:
+         return AccessLevel::Internal;
+      case DeclContextKind::GenericTypeDecl: {
+         auto generic = cast<GenericTypeDecl>(DC);
+         AccessLevel access = AccessLevel::Internal;
+         if (isa<InterfaceDecl>(generic))
+            access = std::max(AccessLevel::FilePrivate, generic->getFormalAccess());
+         return access;
       }
-   case DeclContextKind::SerializedLocal:
-   case DeclContextKind::Initializer:
-   case DeclContextKind::AbstractFunctionDecl:
-   case DeclContextKind::SubscriptDecl:
-   case DeclContextKind::EnumElementDecl:
-      return AccessLevel::Private;
-   case DeclContextKind::Module:
-   case DeclContextKind::FileUnit:
-      return AccessLevel::Internal;
-   case DeclContextKind::GenericTypeDecl: {
-      auto generic = cast<GenericTypeDecl>(DC);
-      AccessLevel access = AccessLevel::Internal;
-      if (isa<InterfaceDecl>(generic))
-         access = std::max(AccessLevel::FilePrivate, generic->getFormalAccess());
-      return access;
-   }
-   case DeclContextKind::ExtensionDecl:
-      return cast<ExtensionDecl>(DC)->getDefaultAccessLevel();
+      case DeclContextKind::ExtensionDecl:
+         return cast<ExtensionDecl>(DC)->getDefaultAccessLevel();
    }
    llvm_unreachable("unhandled kind");
 }
@@ -219,7 +219,7 @@ DefaultAndMaxAccessLevelRequest::evaluate(Evaluator &evaluator,
       // Only check the trailing 'where' requirements. Other requirements come
       // from the extended type and have already been checked.
       DirectlyReferencedTypeDecls typeDecls =
-            evaluateOrDefault(Ctx.evaluator, TypeDeclsFromWhereClauseRequest{ED}, {});
+         evaluateOrDefault(Ctx.evaluator, TypeDeclsFromWhereClauseRequest{ED}, {});
 
       Optional<AccessScope> maxScope = AccessScope::getPublic();
 
@@ -315,7 +315,7 @@ DefaultAndMaxAccessLevelRequest::getCachedResult() const {
 
 void
 DefaultAndMaxAccessLevelRequest::cacheResult(
-      std::pair<AccessLevel, AccessLevel> value) const {
+   std::pair<AccessLevel, AccessLevel> value) const {
    auto extensionDecl = std::get<0>(getStorage());
    extensionDecl->setDefaultAndMaxAccessLevelBits(value.first, value.second);
    assert(getCachedResult().getValue().first == value.first);
@@ -324,10 +324,10 @@ DefaultAndMaxAccessLevelRequest::cacheResult(
 
 // Define request evaluation functions for each of the access requests.
 static AbstractRequestFunction *accessRequestFunctions[] = {
-   #define POLAR_REQUEST(Zone, Name, Sig, Caching, LocOptions)         \
+#define POLAR_REQUEST(Zone, Name, Sig, Caching, LocOptions)         \
       reinterpret_cast<AbstractRequestFunction *>(&Name::evaluateRequest),
-   #include "polarphp/ast/AccessTypeIdZoneDef.h"
-   #undef POLAR_REQUEST
+#include "polarphp/ast/AccessTypeIdZoneDef.h"
+#undef POLAR_REQUEST
 };
 
 void registerAccessRequestFunctions(Evaluator &evaluator) {

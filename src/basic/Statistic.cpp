@@ -224,7 +224,7 @@ class StatsProfiler {
    struct Node {
       int64_t SelfCount;
       using Key = std::tuple<StringRef, const void *,
-      const UnifiedStatsReporter::TraceFormatter *>;
+         const UnifiedStatsReporter::TraceFormatter *>;
       Node *Parent;
       DenseMap<Key, std::unique_ptr<Node>> Children;
 
@@ -275,7 +275,7 @@ class StatsProfiler {
 public:
 
    StatsProfiler()
-   : Curr(&Root)
+      : Curr(&Root)
    {}
    StatsProfiler(StatsProfiler const &Other) = delete;
    StatsProfiler& operator=(const StatsProfiler&) = delete;
@@ -311,7 +311,8 @@ public:
                      int64_t Delta,
                      bool IsEntry,
                      const void *Entity=nullptr,
-                     const UnifiedStatsReporter::TraceFormatter *TF=nullptr) {
+                     const UnifiedStatsReporter::TraceFormatter *TF=nullptr)
+   {
       assert(Curr);
       Curr->SelfCount += Delta;
       if (IsEntry) {
@@ -343,7 +344,7 @@ struct UnifiedStatsReporter::StatsProfilers
 #undef FRONTEND_STATISTIC
 
    StatsProfilers()
-   : LastUpdated(llvm::TimeRecord::getCurrentTime())
+      : LastUpdated(llvm::TimeRecord::getCurrentTime())
    {}
 };
 
@@ -359,15 +360,15 @@ UnifiedStatsReporter::UnifiedStatsReporter(StringRef ProgramName,
                                            bool TraceEvents,
                                            bool ProfileEvents,
                                            bool ProfileEntities)
-: UnifiedStatsReporter(ProgramName,
-                       auxName(ModuleName,
-                               InputName,
-                               TripleName,
-                               OutputType,
-                               OptType),
-                       Directory,
-                       SM, CSM,
-                       TraceEvents, ProfileEvents, ProfileEntities)
+   : UnifiedStatsReporter(ProgramName,
+                          auxName(ModuleName,
+                                  InputName,
+                                  TripleName,
+                                  OutputType,
+                                  OptType),
+                          Directory,
+                          SM, CSM,
+                          TraceEvents, ProfileEvents, ProfileEntities)
 {
 }
 
@@ -379,19 +380,19 @@ UnifiedStatsReporter::UnifiedStatsReporter(StringRef ProgramName,
                                            bool TraceEvents,
                                            bool ProfileEvents,
                                            bool ProfileEntities)
-: currentProcessExitStatusSet(false),
-  currentProcessExitStatus(EXIT_FAILURE),
-  StatsFilename(Directory),
-  TraceFilename(Directory),
-  ProfileDirname(Directory),
-  StartedTime(llvm::TimeRecord::getCurrentTime()),
-  MainThreadID(std::this_thread::get_id()),
-  Timer(std::make_unique<NamedRegionTimer>(AuxName,
-                                           "Building Target",
-                                           ProgramName, "Running Program")),
-  SourceMgr(SM),
-  ClangSourceMgr(CSM),
-  RecursiveTimers(std::make_unique<RecursionSafeTimers>())
+   : currentProcessExitStatusSet(false),
+     currentProcessExitStatus(EXIT_FAILURE),
+     StatsFilename(Directory),
+     TraceFilename(Directory),
+     ProfileDirname(Directory),
+     StartedTime(llvm::TimeRecord::getCurrentTime()),
+     MainThreadID(std::this_thread::get_id()),
+     Timer(std::make_unique<NamedRegionTimer>(AuxName,
+                                              "Building Target",
+                                              ProgramName, "Running Program")),
+     SourceMgr(SM),
+     ClangSourceMgr(CSM),
+     RecursiveTimers(std::make_unique<RecursionSafeTimers>())
 {
    path::append(StatsFilename, makeStatsFileName(ProgramName, AuxName));
    path::append(TraceFilename, makeTraceFileName(ProgramName, AuxName));
@@ -408,7 +409,8 @@ UnifiedStatsReporter::UnifiedStatsReporter(StringRef ProgramName,
       EntityProfilers = std::make_unique<StatsProfilers>();
 }
 
-void UnifiedStatsReporter::recordJobMaxRSS(long rss) {
+void UnifiedStatsReporter::recordJobMaxRSS(long rss)
+{
    maxChildRSS = std::max(maxChildRSS, rss);
 }
 
@@ -461,8 +463,8 @@ UnifiedStatsReporter::publishAlwaysOnStatsToLLVM() {
       auto &C = getFrontendCounters();
 #define FRONTEND_STATISTIC(TY, NAME)                            \
    do {                                                        \
-   static Statistic Stat = Statistic(#TY, #NAME, #NAME);  \
-   Stat += (C).NAME;                                         \
+      static Statistic Stat = Statistic(#TY, #NAME, #NAME);  \
+      Stat += (C).NAME;                                         \
    } while (0);
 #include "polarphp/basic/StatisticsDef.h"
 #undef FRONTEND_STATISTIC
@@ -512,10 +514,10 @@ UnifiedStatsReporter::printAlwaysOnStatsAndTimers(raw_ostream &OS) {
 }
 
 FrontendStatsTracer::FrontendStatsTracer(
-UnifiedStatsReporter *Reporter, StringRef EventName, const void *Entity,
-const UnifiedStatsReporter::TraceFormatter *Formatter)
-: Reporter(Reporter), SavedTime(), EventName(EventName), Entity(Entity),
-  Formatter(Formatter) {
+   UnifiedStatsReporter *Reporter, StringRef EventName, const void *Entity,
+   const UnifiedStatsReporter::TraceFormatter *Formatter)
+   : Reporter(Reporter), SavedTime(), EventName(EventName), Entity(Entity),
+     Formatter(Formatter) {
    if (Reporter) {
       SavedTime = llvm::TimeRecord::getCurrentTime();
       Reporter->saveAnyFrontendStatsEvents(*this, true);
@@ -537,11 +539,11 @@ FrontendStatsTracer::operator=(FrontendStatsTracer&& other)
 }
 
 FrontendStatsTracer::FrontendStatsTracer(FrontendStatsTracer&& other)
-: Reporter(other.Reporter),
-  SavedTime(other.SavedTime),
-  EventName(other.EventName),
-  Entity(other.Entity),
-  Formatter(other.Formatter)
+   : Reporter(other.Reporter),
+     SavedTime(other.SavedTime),
+     EventName(other.EventName),
+     Entity(other.Entity),
+     Formatter(other.Formatter)
 {
    other.Reporter = nullptr;
 }
@@ -555,7 +557,7 @@ FrontendStatsTracer::~FrontendStatsTracer()
 // Copy any interesting process-wide resource accounting stats to
 // associated fields in the provided AlwaysOnFrontendCounters.
 void updateProcessWideFrontendCounters(
-UnifiedStatsReporter::AlwaysOnFrontendCounters &C) {
+   UnifiedStatsReporter::AlwaysOnFrontendCounters &C) {
 #if defined(HAVE_PROC_PID_RUSAGE) && defined(RUSAGE_INFO_V4)
    struct rusage_info_v4 ru;
    if (0 == proc_pid_rusage(getpid(), RUSAGE_INFO_V4, (rusage_info_t *)&ru)) {
@@ -589,15 +591,15 @@ saveEvent(StringRef StatName,
    int64_t Delta = Curr - Last;
    if (Delta != 0) {
       Events.emplace_back(UnifiedStatsReporter::FrontendStatsEvent{
-      NowUS, LiveUS, IsEntry, T.EventName, StatName, Delta, Curr,
-      T.Entity, T.Formatter});
+         NowUS, LiveUS, IsEntry, T.EventName, StatName, Delta, Curr,
+         T.Entity, T.Formatter});
    }
 }
 
 void
 UnifiedStatsReporter::saveAnyFrontendStatsEvents(
-FrontendStatsTracer const& T,
-bool IsEntry)
+   FrontendStatsTracer const& T,
+   bool IsEntry)
 {
    assert(MainThreadID == std::this_thread::get_id());
    // First make a note in the recursion-safe timers; these

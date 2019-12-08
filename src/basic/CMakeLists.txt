@@ -29,7 +29,7 @@ else()
    list(APPEND POLARPHP_BASIC_SOURCES ${platformDir}/CacheDefault.cpp)
 endif()
 
-add_library(PolarBasic OBJECT ${POLARPHP_BASIC_SOURCES})
+add_library(PolarBasic OBJECT ${POLARPHP_BASIC_SOURCES} ../ast/Expr.cpp Unicode.cpp UnicodeExtendedGraphemeClusters.cpp)
 target_link_libraries(PolarBasic PolarGlobal nlohmann_json::nlohmann_json LLVMSupport LLVMCore)
 
 set_target_properties(

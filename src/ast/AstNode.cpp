@@ -94,10 +94,10 @@ void AstNode::dump() const {
 }
 
 #define FUNC(T)                                                               \
-   bool AstNode::is##T(T##Kind Kind) const {                                     \
-   if (!is<T*>())                                                              \
-   return false;                                                             \
-   return get<T*>()->getKind() == Kind;                                        \
+   bool AstNode::is##T(T##Kind Kind) const {                                  \
+   if (!is<T*>())                                                             \
+      return false;                                                           \
+   return get<T*>()->getKind() == Kind;                                       \
 }
 FUNC(Stmt)
 FUNC(Expr)

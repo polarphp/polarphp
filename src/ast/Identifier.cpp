@@ -25,188 +25,170 @@
 ////
 ////===----------------------------------------------------------------------===//
 
-//#include "polarphp/ast/Identifier.h"
-//#include "llvm/ADT/StringExtras.h"
-//#include "llvm/Support/raw_ostream.h"
-//#include "llvm/Support/ConvertUTF.h"
-//#include "clang/Basic/CharInfo.h"
+#include "polarphp/ast/Identifier.h"
+#include "llvm/ADT/StringExtras.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/ConvertUTF.h"
+#include "clang/Basic/CharInfo.h"
 
-//namespace polar::ast {
+namespace llvm {
 
-//void *DeclBaseName::sm_subscriptIdentifierData = &DeclBaseName::sm_subscriptIdentifierData;
-//void *DeclBaseName::sm_constructorIdentifierData = &DeclBaseName::sm_constructorIdentifierData;
-//void *DeclBaseName::sm_destructorIdentifierData = &DeclBaseName::sm_destructorIdentifierData;
+using polar::ast::Identifier;
+using polar::ast::DeclBaseName;
+using polar::ast::DeclName;
 
-//} // polar::ast
+raw_ostream &operator<<(raw_ostream &OS, Identifier I) {
+   if (I.get() == nullptr)
+      return OS << "_";
+   return OS << I.get();
+}
 
-//namespace llvm {
+raw_ostream &operator<<(raw_ostream &OS, DeclBaseName D) {
+   return OS << D.userFacingName();
+}
 
-//using polar::ast::Identifier;
-//using polar::ast::DeclName;
-//using polar::ast::DeclBaseName;
+raw_ostream &operator<<(raw_ostream &OS, DeclName I) {
+   if (I.isSimpleName())
+      return OS << I.getBaseName();
 
-//raw_ostream &operator<<(raw_ostream &ostream, Identifier identifier)
-//{
-//   if (identifier.get() == nullptr) {
-//      return ostream << "_";
-//   }
-//   return ostream << identifier.get();
-//}
+   OS << I.getBaseName() << "(";
+   for (auto c : I.getArgumentNames()) {
+      OS << c << ':';
+   }
+   OS << ")";
+   return OS;
+}
+} // llvm
 
-//raw_ostream &operator<<(raw_ostream &ostream, DeclBaseName decl)
-//{
-//   return ostream << decl.userFacingName();
-//}
+namespace polar::ast {
 
-//raw_ostream &operator<<(raw_ostream &ostream, DeclName decl)
-//{
-//   if (decl.isSimpleName()) {
-//      return ostream << decl.getBaseName();
-//   }
-//   ostream << decl.getBaseName() << "(";
-//   for (auto c : decl.getArgumentNames()) {
-//      ostream << c << ':';
-//   }
-//   ostream << ")";
-//   return ostream;
-//}
+using namespace llvm;
 
-//} // llvm
+void simple_display(llvm::raw_ostream &out, DeclName name) {
+   out << "'" << name << "'";
+}
 
-//namespace polar::ast {
+bool Identifier::isOperatorSlow() const {
+   StringRef data = str();
+   auto *s = reinterpret_cast<llvm::UTF8 const *>(data.begin()),
+      *end = reinterpret_cast<llvm::UTF8 const *>(data.end());
+   llvm::UTF32 codePoint;
+   llvm::ConversionResult res =
+      llvm::convertUTF8Sequence(&s, end, &codePoint, llvm::strictConversion);
+   assert(res == llvm::conversionOK && "invalid UTF-8 in identifier?!");
+   (void)res;
+   return !empty() && isOperatorStartCodePoint(codePoint);
+}
 
-//bool Identifier::isOperatorSlow() const
-//{
-//   StringRef data = str();
-//   auto *s = reinterpret_cast<llvm::UTF8 const *>(data.begin()),
-//         *end = reinterpret_cast<llvm::UTF8 const *>(data.end());
-//   llvm::UTF32 codePoint;
-//   llvm::ConversionResult res =
-//         llvm::convertUTF8Sequence(&s, end, &codePoint, llvm::strictConversion);
-//   assert(res == llvm::conversionOK && "invalid UTF-8 in identifier?!");
-//   (void)res;
-//   return !empty() && isOperatorStartCodePoint(codePoint);
-//}
+int Identifier::compare(Identifier other) const {
+   // Handle empty identifiers.
+   if (empty() || other.empty()) {
+      if (empty() != other.empty()) {
+         return other.empty() ? -1 : 1;
+      }
 
-//int Identifier::compare(Identifier other) const
-//{
-//   // Handle empty identifiers.
-//   if (empty() || other.empty()) {
-//      if (empty() != other.empty()) {
-//         return other.empty() ? -1 : 1;
-//      }
-//      return 0;
-//   }
-//   return str().compare(other.str());
-//}
+      return 0;
+   }
 
-//int DeclName::compare(DeclName other) const
-//{
-//   // Compare base names.
-//   if (int result = getBaseName().compare(other.getBaseName())) {
-//      return result;
-//   }
-//   // Compare argument names.
-//   auto argNames = getArgumentNames();
-//   auto otherArgNames = other.getArgumentNames();
-//   for (unsigned i = 0, n = std::min(argNames.size(), otherArgNames.size());
-//        i != n; ++i) {
-//      if (int result = argNames[i].compare(otherArgNames[i])) {
-//         return result;
-//      }
-//   }
+   return str().compare(other.str());
+}
 
-//   if (argNames.size() == otherArgNames.size()) {
-//      return 0;
-//   }
-//   return argNames.size() < otherArgNames.size() ? -1 : 1;
-//}
+int DeclName::compare(DeclName other) const {
+   // Compare base names.
+   if (int result = getBaseName().compare(other.getBaseName()))
+      return result;
 
-//static bool equals(ArrayRef<Identifier> idents, ArrayRef<StringRef> strings)
-//{
-//   if (idents.size() != strings.size()) {
-//      return false;
-//   }
-//   for (size_t i = 0, e = idents.size(); i != e; ++i) {
-//      if (!idents[i].is(strings[i])) {
-//         return false;
-//      }
-//   }
-//   return true;
-//}
+   // Compare argument names.
+   auto argNames = getArgumentNames();
+   auto otherArgNames = other.getArgumentNames();
+   for (unsigned i = 0, n = std::min(argNames.size(), otherArgNames.size());
+        i != n; ++i) {
+      if (int result = argNames[i].compare(otherArgNames[i]))
+         return result;
+   }
 
-//bool DeclName::isCompoundName(DeclBaseName baseName,
-//                              ArrayRef<StringRef> argNames) const
-//{
-//   return (isCompoundName() &&
-//           getBaseName() == baseName &&
-//           equals(getArgumentNames(), argNames));
-//}
+   if (argNames.size() == otherArgNames.size())
+      return 0;
 
-//bool DeclName::isCompoundName(StringRef baseName,
-//                              ArrayRef<StringRef> argNames) const
-//{
-//   return (isCompoundName() &&
-//           getBaseName() == baseName &&
-//           equals(getArgumentNames(), argNames));
-//}
+   return argNames.size() < otherArgNames.size() ? -1 : 1;
+}
 
-//void DeclName::dump() const
-//{
-//   llvm::errs() << *this << "\n";
-//}
+static bool equals(ArrayRef<Identifier> idents, ArrayRef<StringRef> strings) {
+   if (idents.size() != strings.size())
+      return false;
+   for (size_t i = 0, e = idents.size(); i != e; ++i) {
+      if (!idents[i].is(strings[i]))
+         return false;
+   }
+   return true;
+}
 
-//StringRef DeclName::getString(llvm::SmallVectorImpl<char> &scratch,
-//                              bool skipEmptyArgumentNames) const
-//{
-//   {
-//      llvm::raw_svector_ostream out(scratch);
-//      print(out, skipEmptyArgumentNames);
-//   }
+bool DeclName::isCompoundName(DeclBaseName baseName,
+                              ArrayRef<StringRef> argNames) const {
+   return (isCompoundName() &&
+           getBaseName() == baseName &&
+           equals(getArgumentNames(), argNames));
+}
 
-//   return StringRef(scratch.data(), scratch.size());
-//}
+bool DeclName::isCompoundName(StringRef baseName,
+                              ArrayRef<StringRef> argNames) const {
+   return (isCompoundName() &&
+           getBaseName() == baseName &&
+           equals(getArgumentNames(), argNames));
+}
 
-//llvm::raw_ostream &DeclName::print(llvm::raw_ostream &os,
-//                                   bool skipEmptyArgumentNames) const
-//{
-//   // Print the base name.
-//   os << getBaseName();
+void DeclName::dump() const {
+   llvm::errs() << *this << "\n";
+}
 
-//   // If this is a simple name, we're done.
-//   if (isSimpleName()) {
-//      return os;
-//   }
-//   if (skipEmptyArgumentNames) {
-//      // If there is more than one argument yet none of them have names,
-//      // we're done.
-//      if (!getArgumentNames().empty()) {
-//         bool anyNonEmptyNames = false;
-//         for (auto c : getArgumentNames()) {
-//            if (!c.empty()) {
-//               anyNonEmptyNames = true;
-//               break;
-//            }
-//         }
-//         if (!anyNonEmptyNames) {
-//             return os;
-//         }
-//      }
-//   }
+StringRef DeclName::getString(llvm::SmallVectorImpl<char> &scratch,
+                              bool skipEmptyArgumentNames) const {
+   {
+      llvm::raw_svector_ostream out(scratch);
+      print(out, skipEmptyArgumentNames);
+   }
 
-//   // Print the argument names.
-//   os << "(";
-//   for (auto c : getArgumentNames()) {
-//      os << c << ':';
-//   }
-//   os << ")";
-//   return os;
+   return StringRef(scratch.data(), scratch.size());
+}
 
-//}
+llvm::raw_ostream &DeclName::print(llvm::raw_ostream &os,
+                                   bool skipEmptyArgumentNames) const {
+   // Print the base name.
+   os << getBaseName();
 
-//llvm::raw_ostream &DeclName::printPretty(llvm::raw_ostream &os) const
-//{
-//   return print(os, /*skipEmptyArgumentNames=*/!isSpecial());
-//}
+   // If this is a simple name, we're done.
+   if (isSimpleName())
+      return os;
 
-//} // polar::ast
+   if (skipEmptyArgumentNames) {
+      // If there is more than one argument yet none of them have names,
+      // we're done.
+      if (!getArgumentNames().empty()) {
+         bool anyNonEmptyNames = false;
+         for (auto c : getArgumentNames()) {
+            if (!c.empty()) {
+               anyNonEmptyNames = true;
+               break;
+            }
+         }
+
+         if (!anyNonEmptyNames)
+            return os;
+      }
+   }
+
+   // Print the argument names.
+   os << "(";
+   for (auto c : getArgumentNames()) {
+      os << c << ':';
+   }
+   os << ")";
+   return os;
+
+}
+
+llvm::raw_ostream &DeclName::printPretty(llvm::raw_ostream &os) const {
+   return print(os, /*skipEmptyArgumentNames=*/!isSpecial());
+}
+
+} // polar::ast
