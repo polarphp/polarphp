@@ -399,23 +399,7 @@ DECL_ATTR(_implements, Implements,
   NotSerialized |
   ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
   67)
-DECL_ATTR(_objcRuntimeName, ObjCRuntimeName,
-  OnClass |
-  UserInaccessible |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  68)
-SIMPLE_DECL_ATTR(_staticInitializeObjCMetadata, StaticInitializeObjCMetadata,
-  OnClass | LongAttribute | RejectByParser |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  69)
-DECL_ATTR(_restatedObjCConformance, RestatedObjCConformance,
-  OnInterface |
-  LongAttribute | RejectByParser |
-  NotSerialized |
-  ABIStableToAdd | ABIStableToRemove | APIStableToAdd | APIStableToRemove,
-  70)
+
 // NOTE: 71 is unused
 // NOTE: 72 is unused
 DECL_ATTR(_optimize, Optimize,

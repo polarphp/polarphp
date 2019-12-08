@@ -1384,29 +1384,6 @@ public:
    }
 };
 
-/// A limited variant of \c \@objc that's used for classes with generic ancestry.
-class ObjCRuntimeNameAttr : public DeclAttribute {
-   static StringRef getSimpleName(const ObjCAttr &Original) {
-      assert(Original.hasName());
-      return Original.getName()->getSimpleName().str();
-   }
-public:
-   ObjCRuntimeNameAttr(StringRef Name, SourceLoc AtLoc, SourceRange Range,
-                       bool Implicit)
-      : DeclAttribute(DAK_ObjCRuntimeName, AtLoc, Range, Implicit),
-        Name(Name) {}
-
-   explicit ObjCRuntimeNameAttr(const ObjCAttr &Original)
-      : ObjCRuntimeNameAttr(getSimpleName(Original), Original.AtLoc,
-                            Original.Range, Original.isImplicit()) {}
-
-   const StringRef Name;
-
-   static bool classof(const DeclAttribute *DA) {
-      return DA->getKind() == DAK_ObjCRuntimeName;
-   }
-};
-
 ///// Attribute that specifies a protocol conformance that has been restated
 ///// (i.e., is redundant) but should still be emitted in Objective-C metadata.
 //class RestatedObjCConformanceAttr : public DeclAttribute {

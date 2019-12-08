@@ -7,21 +7,11 @@
 //
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
-//===----------------------------------------------------------------------===//
-// This source file is part of the polarphp.org open source project
 //
-// Copyright (c) 2017 - 2019 polarphp software foundation
-// Copyright (c) 2017 - 2019 zzu_softboy <zzu_softboy@163.com>
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://polarphp.org/LICENSE.txt for license information
-// See https://polarphp.org/CONTRIBUTORS.txt for the list of polarphp project authors
-//
-// Created by polarboy on 2019/05/05.
 //===----------------------------------------------------------------------===//
 //
 //  This file defines the AnyValue class, which is used to store an
-//  immutable m_value of any type.
+//  immutable value of any type.
 //
 //===----------------------------------------------------------------------===//
 
@@ -31,174 +21,158 @@
 #include "polarphp/basic/SimpleDisplay.h"
 #include "polarphp/basic/TypeId.h"
 #include "llvm/ADT/PointerUnion.h"  // to define hash_value
+#include "llvm/ADT/TinyPtrVector.h"
+
+namespace llvm {
+  // FIXME: Belongs in LLVM itself
+  template<typename PT1, typename PT2>
+  hash_code hash_value(const llvm::PointerUnion<PT1, PT2> &ptr) {
+    return hash_value(ptr.getOpaqueValue());
+  }
+}
 
 namespace polar::ast {
 
-using llvm::PointerUnion;
-using llvm::hash_code;
-using llvm::raw_ostream;
-
-template<typename PT1, typename PT2>
-hash_code hash_value(const PointerUnion<PT1, PT2> &ptr)
-{
-   return hash_value(ptr.getOpaqueValue());
-}
-
-/// Stores a m_value of any type that satisfies a small set of requirements.
+/// Stores a value of any type that satisfies a small set of requirements.
 ///
-/// Requirements on the values m_stored within an AnyValue:
+/// Requirements on the values stored within an AnyValue:
 ///
 ///   - Copy constructor
 ///   - Equality operator (==)
 ///   - TypeId support (see swift/Basic/TypeId.h)
 ///   - Display support (free function):
-///       void simple_display(raw_ostream &, const T &);
-class AnyValue
-{
-   /// Abstract base class used to hold on to a m_value.
-   class HolderBase
-   {
-   public:
-      /// Type ID number.
-      const uint64_t m_typeId;
+///       void simple_display(llvm::raw_ostream &, const T &);
+class AnyValue {
+  /// Abstract base class used to hold on to a value.
+  class HolderBase {
+  public:
+    /// Type ID number.
+    const uint64_t typeId;
 
-      HolderBase() = delete;
-      HolderBase(const HolderBase &) = delete;
-      HolderBase(HolderBase &&) = delete;
-      HolderBase &operator=(const HolderBase &) = delete;
-      HolderBase &operator=(HolderBase &&) = delete;
+    HolderBase() = delete;
+    HolderBase(const HolderBase &) = delete;
+    HolderBase(HolderBase &&) = delete;
+    HolderBase &operator=(const HolderBase &) = delete;
+    HolderBase &operator=(HolderBase &&) = delete;
 
-      /// Initialize base with type ID.
-      HolderBase(uint64_t typeId)
-         : m_typeId(typeId)
-      {}
+    /// Initialize base with type ID.
+    HolderBase(uint64_t TypeId) : typeId(TypeId) { }
 
-      virtual ~HolderBase();
+    virtual ~HolderBase();
 
-      /// Determine whether this m_value is equivalent to another.
-      ///
-      /// The caller guarantees that the type IDs are the same.
-      virtual bool equals(const HolderBase &other) const = 0;
+    /// Determine whether this value is equivalent to another.
+    ///
+    /// The caller guarantees that the type IDs are the same.
+    virtual bool equals(const HolderBase &other) const = 0;
 
-      /// Display.
-      virtual void display(raw_ostream &out) const = 0;
-   };
+    /// Display.
+    virtual void display(llvm::raw_ostream &out) const = 0;
+  };
 
-   /// Holds a m_value that can be used as a request input/output.
-   template<typename T>
-   class Holder final : public HolderBase
-   {
-   public:
-      const T m_value;
+  /// Holds a value that can be used as a request input/output.
+  template<typename T>
+  class Holder final : public HolderBase {
+  public:
+    const T value;
 
-      Holder(T &&value)
-         : HolderBase(TypeId<T>::m_value),
-           m_value(std::move(value))
-      {}
+    Holder(T &&value)
+      : HolderBase(TypeId<T>::value),
+        value(std::move(value)) { }
 
-      Holder(const T &value)
-         : HolderBase(TypeId<T>::m_value),
-           m_value(value)
-      {}
+    Holder(const T &value) : HolderBase(TypeId<T>::value), value(value) { }
 
-      virtual ~Holder()
-      {}
+    virtual ~Holder() { }
 
-      /// Determine whether this m_value is equivalent to another.
-      ///
-      /// The caller guarantees that the type IDs are the same.
-      virtual bool equals(const HolderBase &other) const override
-      {
-         assert(m_typeId == other.m_typeId && "Caller should match type IDs");
-         return m_value == static_cast<const Holder<T> &>(other).m_value;
-      }
+    /// Determine whether this value is equivalent to another.
+    ///
+    /// The caller guarantees that the type IDs are the same.
+    virtual bool equals(const HolderBase &other) const override {
+      assert(typeId == other.typeId && "Caller should match type IDs");
+      return value == static_cast<const Holder<T> &>(other).value;
+    }
 
-      /// Display.
-      virtual void display(raw_ostream &out) const override
-      {
-         simple_display(out, m_value);
-      }
-   };
+    /// Display.
+    virtual void display(llvm::raw_ostream &out) const override {
+      simple_display(out, value);
+    }
+  };
 
-   /// The data m_stored in this m_value.
-   std::shared_ptr<HolderBase> m_stored;
+  /// The data stored in this value.
+  std::shared_ptr<HolderBase> stored;
 
 public:
-   /// Construct a new instance with the given m_value.
-   template<typename T>
-   AnyValue(T&& value)
-   {
-      using ValueType = typename std::remove_reference<T>::type;
-      m_stored.reset(new Holder<ValueType>(std::forward<T>(value)));
-   }
+  /// Construct a new instance with the given value.
+  template<typename T>
+  AnyValue(T&& value) {
+    using ValueType = typename std::remove_reference<T>::type;
+    stored.reset(new Holder<ValueType>(std::forward<T>(value)));
+  }
 
-   /// Cast to a specific (known) type.
-   template<typename T>
-   const T &castTo() const
-   {
-      assert(m_stored->m_typeId == TypeId<T>::m_value);
-      return static_cast<const Holder<T> *>(m_stored.get())->m_value;
-   }
+  /// Cast to a specific (known) type.
+  template<typename T>
+  const T &castTo() const {
+    assert(stored->typeId == TypeId<T>::value);
+    return static_cast<const Holder<T> *>(stored.get())->value;
+  }
 
-   /// Try casting to a specific (known) type, returning \c nullptr on
-   /// failure.
-   template<typename T>
-   const T *getAs() const
-   {
-      if (m_stored->m_typeId != TypeId<T>::m_value) {
-         return nullptr;
-      }
-      return &static_cast<const Holder<T> *>(m_stored.get())->m_value;
-   }
+  /// Try casting to a specific (known) type, returning \c nullptr on
+  /// failure.
+  template<typename T>
+  const T *getAs() const {
+    if (stored->typeId != TypeId<T>::value)
+      return nullptr;
 
-   /// Compare two instances for equality.
-   friend bool operator==(const AnyValue &lhs, const AnyValue &rhs)
-   {
-      if (lhs.m_stored->m_typeId != rhs.m_stored->m_typeId) {
-         return false;
-      }
-      return lhs.m_stored->equals(*rhs.m_stored);
-   }
+    return &static_cast<const Holder<T> *>(stored.get())->value;
+  }
 
-   friend bool operator!=(const AnyValue &lhs, const AnyValue &rhs)
-   {
-      return !(lhs == rhs);
-   }
+  /// Compare two instances for equality.
+  friend bool operator==(const AnyValue &lhs, const AnyValue &rhs) {
+    if (lhs.stored->typeId != rhs.stored->typeId)
+      return false;
 
-   friend void simple_display(raw_ostream &out, const AnyValue &value)
-   {
-      value.m_stored->display(out);
-   }
+    return lhs.stored->equals(*rhs.stored);
+  }
 
-   /// Return the result of calling simple_display as a string.
-   std::string getAsString() const;
+  friend bool operator!=(const AnyValue &lhs, const AnyValue &rhs) {
+    return !(lhs == rhs);
+  }
+
+  friend void simple_display(llvm::raw_ostream &out, const AnyValue &value) {
+    value.stored->display(out);
+  }
+
+  /// Return the result of calling simple_display as a string.
+  std::string getAsString() const;
 };
 
-} // polar::ast
-
+} // end namespace swift
 
 namespace llvm {
-template<typename T>
-bool operator==(const TinyPtrVector<T> &lhs, const TinyPtrVector<T> &rhs)
-{
-   if (lhs.size() != rhs.size()) {
+  template<typename T>
+  bool operator==(const TinyPtrVector<T> &lhs, const TinyPtrVector<T> &rhs) {
+    if (lhs.size() != rhs.size())
       return false;
-   }
 
-   for (unsigned i = 0, n = lhs.size(); i != n; ++i) {
-      if (lhs[i] != rhs[i]) {
-         return false;
-      }
-   }
+    for (unsigned i = 0, n = lhs.size(); i != n; ++i) {
+      if (lhs[i] != rhs[i])
+        return false;
+    }
 
-   return true;
-}
+    return true;
+  }
 
-template<typename T>
-bool operator!=(const TinyPtrVector<T> &lhs, const TinyPtrVector<T> &rhs)
-{
-   return !(lhs == rhs);
-}
+  template<typename T>
+  bool operator!=(const TinyPtrVector<T> &lhs, const TinyPtrVector<T> &rhs) {
+    return !(lhs == rhs);
+  }
+
+  template<typename T>
+  void simple_display(raw_ostream &out, const Optional<T> &opt) {
+    if (opt) {
+      simple_display(out, *opt);
+    }
+    out << "None";
+  }
 } // end namespace llvm
 
 #endif // POLARPHP_BASIC_ANYVALUE_H
