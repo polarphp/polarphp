@@ -28,6 +28,7 @@ class SourceLoc;
 namespace polar::ast {
 
 using polar::basic::SourceLoc;
+using polar::basic::UUID;
 
 class Decl;
 class DeclContext;

@@ -31,7 +31,7 @@
 #include "llvm/ADT/StringRef.h"
 
 /// forward declare class with namespace
-namespace polar::utils {
+namespace llvm {
 class raw_ostream;
 }
 

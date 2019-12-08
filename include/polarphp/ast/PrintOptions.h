@@ -161,7 +161,7 @@ struct PrintOptions {
    bool CollapseSingleGetterProperty = true;
 
    /// Whether to print the bodies of accessors in protocol context.
-   bool PrintAccessorBodiesInProtocols = false;
+   bool PrintAccessorBodiesInInterfaces = false;
 
    /// Whether to print type definitions.
    bool TypeDefinitions = false;
@@ -236,7 +236,7 @@ struct PrintOptions {
 
    /// Whether to skip underscored stdlib protocols.
    /// Protocols marked with @_show_in_interface are still printed.
-   bool SkipUnderscoredStdlibProtocols = false;
+   bool SkipUnderscoredStdlibInterfaces = false;
 
    /// Whether to skip extensions that don't add protocols or no members.
    bool SkipEmptyExtensionDecls = true;
@@ -331,16 +331,16 @@ struct PrintOptions {
    bool PrintIfConfig = true;
 
    /// Whether we are printing for sil.
-   bool PrintForSIL = false;
+   bool PrintForPIL = false;
 
-   /// Whether we are printing part of SIL body.
-   bool PrintInSILBody = false;
+   /// Whether we are printing part of PIL body.
+   bool PrintInPILBody = false;
 
    /// Whether to use an empty line to separate two members in a single decl.
    bool EmptyLineBetweenMembers = false;
 
    /// Whether to print the extensions from conforming protocols.
-   bool PrintExtensionFromConformingProtocols = false;
+   bool PrintExtensionFromConformingInterfaces = false;
 
    std::shared_ptr<ShouldPrintChecker> CurrentPrintabilityChecker =
       std::make_shared<ShouldPrintChecker>();
@@ -481,7 +481,7 @@ struct PrintOptions {
       result.SkipUnavailable = true;
       result.SkipImplicit = true;
       result.SkipPrivateStdlibDecls = true;
-      result.SkipUnderscoredStdlibProtocols = true;
+      result.SkipUnderscoredStdlibInterfaces = true;
       result.SkipDeinit = true;
       result.ExcludeAttrList.push_back(DAK_DiscardableResult);
       result.EmptyLineBetweenMembers = true;
@@ -541,14 +541,14 @@ struct PrintOptions {
    /// documentation purposes.
    static PrintOptions printDocInterface();
 
-   /// Retrieve the set of options suitable for printing SIL functions.
-   static PrintOptions printSIL() {
+   /// Retrieve the set of options suitable for printing PIL functions.
+   static PrintOptions printPIL() {
       PrintOptions result;
       result.PrintLongAttrsOnSeparateLines = true;
       result.PrintStorageRepresentationAttrs = true;
       result.AbstractAccessors = false;
-      result.PrintForSIL = true;
-      result.PrintInSILBody = true;
+      result.PrintForPIL = true;
+      result.PrintInPILBody = true;
       result.PreferTypeRepr = false;
       result.PrintIfConfig = false;
       result.OpaqueReturnTypePrinting =
@@ -556,8 +556,8 @@ struct PrintOptions {
       return result;
    }
 
-   static PrintOptions printQualifiedSILType() {
-      PrintOptions result = PrintOptions::printSIL();
+   static PrintOptions printQualifiedPILType() {
+      PrintOptions result = PrintOptions::printPIL();
       result.FullyQualifiedTypesIfAmbiguous = true;
       return result;
    }
